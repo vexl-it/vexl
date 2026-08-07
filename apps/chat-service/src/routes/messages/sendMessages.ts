@@ -26,7 +26,10 @@ import {Array, Effect, Option, pipe, type ConfigError} from 'effect'
 import {InboxDbService} from '../../db/InboxDbService'
 import {MessagesDbService} from '../../db/MessagesDbService'
 import {encryptPublicKey, hashPublicKey} from '../../db/domain'
-import {reportMessageSent} from '../../metrics'
+import {
+  reportMessageSent,
+  reportRequestMetricsByMessageType,
+} from '../../metrics'
 import {findAndEnsureReceiverInbox} from '../../utils/findAndEnsureReceiverInbox'
 import {forbiddenMessageTypes} from '../../utils/forbiddenMessageTypes'
 import {withInboxActionRedisLock} from '../../utils/withInboxActionRedisLock'
@@ -74,7 +77,15 @@ const sendMessage = (
     } satisfies SendMessageResponse
   }).pipe(
     withInboxActionRedisLock(message.receiverPublicKey),
-    Effect.zipLeft(reportMessageSent(1, commonMetricAttributes))
+    Effect.zipLeft(
+      Effect.all([
+        reportMessageSent(1, commonMetricAttributes),
+        reportRequestMetricsByMessageType(
+          message.messageType,
+          commonMetricAttributes
+        ),
+      ])
+    )
   ) // TODO lock two inboxes
 
 export const sendMessages = HttpApiBuilder.handler(

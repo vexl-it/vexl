@@ -1,6 +1,7 @@
 // TODO
 
 import {SqlClient, SqlSchema} from '@effect/sql'
+import {type MessageType} from '@vexl-next/domain/src/general/messaging'
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {shouldDisableMetrics} from '@vexl-next/server-utils/src/commonConfigs'
 import {type CommonMetricAttributes} from '@vexl-next/server-utils/src/metrics/commonMetricAttributesFromHeaders'
@@ -76,6 +77,25 @@ export const reportRequestRejected = (
       attributes,
     })
   )
+
+export const reportRequestMetricsByMessageType = (
+  messageType: MessageType,
+  attributes: CommonMetricAttributes
+): Effect.Effect<void, never, MetricsClientService> => {
+  switch (messageType) {
+    case 'REQUEST_MESSAGING':
+      return reportRequestSent(1, attributes)
+    case 'APPROVE_MESSAGING':
+      return reportRequestApproved(1, attributes)
+    case 'DISAPPROVE_MESSAGING':
+      // value 0 mirrors the approveRequest endpoint's disapprove path
+      return reportRequestRejected(0, attributes)
+    case 'CANCEL_REQUEST_MESSAGING':
+      return reportRequestCanceled(1, attributes)
+    default:
+      return Effect.void
+  }
+}
 
 export const reportChatClosed = (
   number: number,

@@ -9,6 +9,7 @@ import {
 } from '@vexl-next/rest-api/src/services/chat/contracts'
 import {ForbiddenMessageTyperror} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
+import {mockedReportMetric} from '@vexl-next/server-utils/src/tests/mockedMetricsClientService'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import dayjs from 'dayjs'
 import {Effect, Schema} from 'effect'
@@ -263,6 +264,7 @@ describe('Send message', () => {
         )
 
         yield* _(setAuthHeaders(user1.authHeaders))
+        mockedReportMetric.mockClear()
         yield* _(
           client.Messages.sendMessage({
             headers: commonHeaders,
@@ -290,6 +292,33 @@ describe('Send message', () => {
             },
           })
         )
+        expect(mockedReportMetric).toHaveBeenCalledWith(
+          expect.objectContaining({name: 'REQUEST_SENT', value: 1})
+        )
+        expect(mockedReportMetric).toHaveBeenCalledWith(
+          expect.objectContaining({name: 'REQUEST_APPROVED', value: 1})
+        )
+        expect(mockedReportMetric).toHaveBeenCalledWith(
+          expect.objectContaining({name: 'REQUEST_REJECTED', value: 0})
+        )
+        expect(mockedReportMetric).toHaveBeenCalledWith(
+          expect.objectContaining({name: 'REQUEST_CANCELED', value: 1})
+        )
+
+        mockedReportMetric.mockClear()
+        yield* _(
+          client.Messages.sendMessage({
+            headers: commonHeaders,
+            payload: {...messageToSend, messageType: 'MESSAGE'},
+          })
+        )
+        expect(mockedReportMetric).toHaveBeenCalledWith(
+          expect.objectContaining({name: 'MESSAGE_SENT'})
+        )
+        expect(mockedReportMetric).not.toHaveBeenCalledWith(
+          expect.objectContaining({name: 'REQUEST_SENT'})
+        )
+
         const response = yield* _(
           client.Messages.sendMessage({
             headers: commonHeaders,

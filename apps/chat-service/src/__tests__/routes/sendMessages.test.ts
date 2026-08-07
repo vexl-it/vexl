@@ -8,6 +8,7 @@ import {
 } from '@vexl-next/rest-api/src/services/chat/contracts'
 import {ForbiddenMessageTyperror} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
+import {mockedReportMetric} from '@vexl-next/server-utils/src/tests/mockedMetricsClientService'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Schema} from 'effect'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
@@ -313,6 +314,7 @@ describe('Send messages', () => {
         const client = yield* _(NodeTestingApp)
 
         yield* _(setAuthHeaders(user2.authHeaders))
+        mockedReportMetric.mockClear()
         yield* _(
           client.Messages.sendMessages({
             headers: commonHeaders,
@@ -399,6 +401,19 @@ describe('Send messages', () => {
               ],
             },
           })
+        )
+
+        expect(mockedReportMetric).toHaveBeenCalledWith(
+          expect.objectContaining({name: 'REQUEST_SENT', value: 1})
+        )
+        expect(mockedReportMetric).toHaveBeenCalledWith(
+          expect.objectContaining({name: 'REQUEST_APPROVED', value: 1})
+        )
+        expect(mockedReportMetric).toHaveBeenCalledWith(
+          expect.objectContaining({name: 'REQUEST_REJECTED', value: 0})
+        )
+        expect(mockedReportMetric).toHaveBeenCalledWith(
+          expect.objectContaining({name: 'REQUEST_CANCELED', value: 1})
         )
 
         const errorResponse5 = yield* _(

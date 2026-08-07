@@ -31,6 +31,7 @@ import add_club_made_inactive_reason from './migrations/0026_add_club_made_inact
 import add_club_member_count_change_table from './migrations/0027_add_club_member_count_change_table'
 import remove_duplicate_users_by_hash_and_add_unique_constraint from './migrations/0028_remove_duplicate_users_by_hash_and_add_unique_constraint'
 import dedupe_notification_tokens from './migrations/0029_dedupe_notification_tokens'
+import add_inactivity_notification_tracking_to_users from './migrations/0030_add_inactivity_notification_tracking_to_users'
 
 const migrations = [
   {
@@ -178,6 +179,11 @@ const migrations = [
     id: 29,
     name: 'dedupe_notification_tokens',
     migrationEffect: dedupe_notification_tokens,
+  },
+  {
+    id: 30,
+    name: 'add_inactivity_notification_tracking_to_users',
+    migrationEffect: add_inactivity_notification_tracking_to_users,
   },
 ] as const
 

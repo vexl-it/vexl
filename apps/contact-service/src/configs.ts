@@ -19,6 +19,14 @@ export const inactivityNotificationAfterDaysConfig = Config.number(
   'INACTIVITY_NOTIFICATION_AFTER_DAYS'
 )
 
+export const inactivityNotificationFollowUpAfterDaysConfig = Config.number(
+  'INACTIVITY_NOTIFICATION_FOLLOW_UP_AFTER_DAYS'
+).pipe(Config.withDefault(7))
+
+export const inactivityNotificationRecurringIntervalDaysConfig = Config.number(
+  'INACTIVITY_NOTIFICATION_RECURRING_INTERVAL_DAYS'
+).pipe(Config.withDefault(30))
+
 export const newContentNotificationAfterConfig = Config.number(
   'NEW_CONTENT_NOTIFICATION_AFTER_DAYS'
 )

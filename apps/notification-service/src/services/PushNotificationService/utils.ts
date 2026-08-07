@@ -311,6 +311,7 @@ export const generatePushNotificationsFromUserInactivityNoticeSendTask = (
       token,
       data: new UserInactivityNotificationData({
         trackingId: Option.some(trackingId),
+        variant: task.variant,
       }).toData(),
     }
 

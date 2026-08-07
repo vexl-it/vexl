@@ -1,6 +1,7 @@
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {StreamOnlyMessageCypher} from '@vexl-next/domain/src/general/messaging'
+import {UserInactivityNotificationVariant} from '@vexl-next/domain/src/general/notifications'
 import {NotificationCypher} from '@vexl-next/domain/src/general/notifications/NotificationCypher.brand'
 import {
   VexlNotificationToken,
@@ -282,11 +283,15 @@ export class UserInactivityNoticeSendTask extends Schema.TaggedClass<UserInactiv
     default: () => createNotificationTrackingId(),
   }),
   minimalClientVersion: Schema.optional(VersionCode),
+  variant: Schema.optionalWith(UserInactivityNotificationVariant, {
+    default: () => 'FIRST',
+  }),
 }) {
   get socketMessage(): UserInactivityNoticeMessage {
     return new UserInactivityNoticeMessage({
       sentAt: this.sentAt,
       trackingId: this.trackingId,
+      variant: this.variant,
     })
   }
 }

@@ -86,11 +86,12 @@ export const ProcessUserNotificationsWorker =
         ),
         Match.tag(
           'UserInactivityNotificationMqEntry',
-          ({token}) =>
+          ({token, variant}) =>
             new UserInactivityNoticeSendTask({
               notificationToken: secret,
               targetToken: token,
               trackingId,
+              variant,
             })
         ),
         Match.tag(

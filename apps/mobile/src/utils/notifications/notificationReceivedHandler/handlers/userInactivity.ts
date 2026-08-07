@@ -7,7 +7,7 @@ import {displayLocalNotification} from '../../displayLocalNotification'
 import {getDefaultChannel} from '../../notificationChannels'
 
 export function handleUserInactivityNotification(
-  _notificationData: UserInactivityNotificationData
+  notificationData: UserInactivityNotificationData
 ): Effect.Effect<void> {
   return Effect.gen(function* () {
     const store = getDefaultStore()
@@ -25,10 +25,20 @@ export function handleUserInactivityNotification(
     yield* Effect.promise(async () => {
       await displayLocalNotification({
         channelId: await getDefaultChannel(),
-        content: {
-          title: t('notifications.INACTIVITY_REMINDER.title'),
-          body: t('notifications.INACTIVITY_REMINDER.body'),
-        },
+        content:
+          notificationData.variant === 'OFFERS_DEACTIVATED'
+            ? {
+                title: t(
+                  'notifications.INACTIVITY_REMINDER_OFFERS_DEACTIVATED.title'
+                ),
+                body: t(
+                  'notifications.INACTIVITY_REMINDER_OFFERS_DEACTIVATED.body'
+                ),
+              }
+            : {
+                title: t('notifications.INACTIVITY_REMINDER.title'),
+                body: t('notifications.INACTIVITY_REMINDER.body'),
+              },
       })
     })
   })

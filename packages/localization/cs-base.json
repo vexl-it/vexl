@@ -676,6 +676,8 @@
   "notifications.BLOCK_CHAT.title": "Byl jsi zablokován!",
   "notifications.BLOCK_CHAT.body": "Někdo tě právě zablokoval.",
   "notifications.INACTIVITY_REMINDER.title": "Dlouho jsme o tobě neslyšeli!",
+  "notifications.INACTIVITY_REMINDER_OFFERS_DEACTIVATED.title": "Dlouho jsme o tobě neslyšeli!",
+  "notifications.INACTIVITY_REMINDER_OFFERS_DEACTIVATED.body": "Od poslední návštěvy aplikace už uběhlo hodně času. Otevři Vexl, aby se tvé nabídky zobrazovaly ostatním!",
   "notifications.preferences.marketing.title": "Marketingové notifikace",
   "notifications.INACTIVITY_REMINDER.body": "Od poslední návštěvy aplikace už uběhlo hodně času. Otevři Vexl, aby tvé nabídky zůstaly aktivní!",
   "notifications.CANCEL_REQUEST_MESSAGING.title": "{{them}} zrušil požadavek na chat",

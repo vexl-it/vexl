@@ -1,0 +1,8 @@
+{
+  "tabBar.map": "地図",
+  "tabBar.marketplace": "マーケット",
+  "tabBar.community": "コミュニティ",
+  "tabBar.chats": "チャット",
+  "linking.wrongLinkFormatReceived": "間違ったリンク形式を受信しました。リンク {{link}} が無効のようです。リンクを確認して、もう一度試してください。",
+  "linking.linkNotSupportedPleaseUpdate": "このリンクはサポートされていません。アプリを最新バージョンに更新してください。"
+}

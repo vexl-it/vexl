@@ -1,0 +1,8 @@
+{
+  "tabBar.map": "Mapa",
+  "tabBar.marketplace": "Rynek",
+  "tabBar.community": "Społeczność",
+  "tabBar.chats": "Czaty",
+  "linking.wrongLinkFormatReceived": "Otrzymano nieprawidłowy format linku. Link {{link}} wydaje się być nieprawidłowy. Sprawdź link i spróbuj ponownie.",
+  "linking.linkNotSupportedPleaseUpdate": "Link nie jest obsługiwany. Proszę zaktualizować aplikację do najnowszej wersji."
+}

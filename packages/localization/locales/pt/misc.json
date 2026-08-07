@@ -1,0 +1,8 @@
+{
+  "tabBar.map": "Mapa",
+  "tabBar.marketplace": "Mercado",
+  "tabBar.community": "Comunidade",
+  "tabBar.chats": "Conversas",
+  "linking.wrongLinkFormatReceived": "O link {{link}} parece ser inválido. Verifica-o e tenta novamente.",
+  "linking.linkNotSupportedPleaseUpdate": "Este link não é suportado. Atualiza a app para a versão mais recente."
+}

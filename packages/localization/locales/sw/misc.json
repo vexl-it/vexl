@@ -1,0 +1,8 @@
+{
+  "tabBar.map": "Ramani",
+  "tabBar.marketplace": "Soko",
+  "tabBar.community": "Jumuiya",
+  "tabBar.chats": "Gumzo",
+  "linking.wrongLinkFormatReceived": "Format ya link si sahihi. Link {{link}} inaonekana kuwa batili. Angalia link na ujaribu tena.",
+  "linking.linkNotSupportedPleaseUpdate": "Link haisaidii. Tafadhali sasisha programu yako kwa toleo jipya."
+}

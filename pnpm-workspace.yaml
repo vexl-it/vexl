@@ -37,6 +37,7 @@ allowBuilds:
   "protobufjs": true
   "react-native-libsodium": true
   "sharp": true
+  tree-sitter-python: false
 
 minimumReleaseAgeExclude:
   - react-native-worklets@0.10.2

@@ -1,0 +1,8 @@
+{
+  "tabBar.map": "Mapa",
+  "tabBar.marketplace": "Tržiště",
+  "tabBar.community": "Komunita",
+  "tabBar.chats": "Chaty",
+  "linking.wrongLinkFormatReceived": "Obdržen nesprávný formát odkazu. Odkaz {{link}} se zdá být neplatný. Zkontroluj odkaz a zkus to znovu.",
+  "linking.linkNotSupportedPleaseUpdate": "Odkaz není podporován. Aktualizuj, prosím, aplikaci na nejnovější verzi."
+}

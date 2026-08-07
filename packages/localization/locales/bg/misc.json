@@ -1,0 +1,8 @@
+{
+  "tabBar.map": "Карта",
+  "tabBar.marketplace": "Пазар",
+  "tabBar.community": "Общност",
+  "tabBar.chats": "Чатове",
+  "linking.wrongLinkFormatReceived": "Получен е грешен формат на връзката. Връзката {{link}} изглежда невалидна. Проверете връзката и опитайте отново.",
+  "linking.linkNotSupportedPleaseUpdate": "Връзката не се поддържа. Моля, актуализирайте приложението си до най-новата версия."
+}

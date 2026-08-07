@@ -22,12 +22,13 @@ import {i18nAtom} from '../utils/localization/I18nProvider'
 
 export function useSetRelativeDateFormatting(): void {
   const i18n = useAtomValue(i18nAtom)
+  const language = i18n.resolvedLanguage ?? 'en'
 
   useEffect(() => {
     // setup dayjs
-    dayjs.locale(i18n.locale === 'dev' ? 'en' : i18n.locale)
+    dayjs.locale(language === 'dev' || language === 'en_dev' ? 'en' : language)
     dayjs.extend(relativeTime)
     dayjs.extend(localizedFormat)
     dayjs.extend(duration)
-  }, [i18n.locale])
+  }, [language])
 }

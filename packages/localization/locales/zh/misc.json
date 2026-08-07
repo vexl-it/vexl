@@ -1,0 +1,8 @@
+{
+  "tabBar.map": "地图",
+  "tabBar.marketplace": "市场",
+  "tabBar.community": "社区",
+  "tabBar.chats": "聊天",
+  "linking.wrongLinkFormatReceived": "收到错误的链接格式。链接 {{link}} 似乎无效。请检查此链接并重试。",
+  "linking.linkNotSupportedPleaseUpdate": "此链接不受支持。请把您的应用程序更新到最新版本。"
+}

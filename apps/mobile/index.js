@@ -10,6 +10,7 @@ import './src/utils/setupCrypto'
 import './src/utils/setupSentry'
 // INITIAL SETUP - KEEP THIS AT THE TOP
 import '@vexl-next/ui/src/config/tamagui.config'
+import 'intl-pluralrules'
 // Order matters
 import './src/components/AppLogsScreen/setupAppLogs'
 // Order matters

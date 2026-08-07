@@ -1,53 +1,55 @@
-import * as translations from '@vexl-next/localization/src/translations'
+import {
+  appLocaleCatalogs,
+  dev,
+  type TranslationKey,
+} from '@vexl-next/localization/src/translations'
+import {map} from 'effect/Record'
 import {getLocales} from 'expo-localization'
-import type {TranslateOptions} from 'i18n-js'
-import {I18n} from 'i18n-js'
-import {atom, useAtomValue} from 'jotai'
-import {enableHiddenFeatures, isStaging} from '../environment'
+import {createInstance, type TOptions} from 'i18next'
+import {atom, getDefaultStore, useAtomValue} from 'jotai'
+import {isStaging} from '../environment'
 import {normalizeFormattingLocale} from './formatting'
 
-const {dev: devTranslation, ...prodTranslations} = translations
+export const supportedTranslations = appLocaleCatalogs
 
-// ⚠️⚠️
-// ⚠️ Warning: Remember to add language support also to useSetRelativeDateFormatting.ts when adding new language ⚠️
-// ⚠️⚠️
-export const supportedTranslations = {
-  en: translations.en,
-  de: translations.de,
-  cs: translations.cs,
-  sk: translations.sk,
-  fr: translations.fr,
-  pl: translations.pl,
-  bg: translations.bg,
-  ja: translations.ja,
-  es: translations.es,
-  it: translations.it,
-  pt: translations.pt,
-  nl: translations.nl,
-  sw: translations.sw,
-  zh: translations.zh,
+export function devAwareLng(language: string): string {
+  return language === 'dev' ? 'en_dev' : language
 }
 
-// SETUP I18n
-export const i18n = new I18n(
-  enableHiddenFeatures
-    ? {'en_dev': devTranslation, ...prodTranslations}
-    : {
-        en_dev: translations.dev,
-        ...supportedTranslations,
-      }
-)
-i18n.locale = isStaging ? 'en_dev' : (getLocales().at(0)?.languageTag ?? 'en')
-i18n.defaultLocale = 'en'
-i18n.enableFallback = true
+type I18nInstance = ReturnType<typeof createInstance>
 
-// Setup provider
+export function createI18nInstance(language: string): I18nInstance {
+  const resources = {
+    ...map(appLocaleCatalogs, (catalog) => ({translation: catalog})),
+    en_dev: {translation: dev},
+  }
+  const instance = createInstance({
+    resources,
+    lng: devAwareLng(language),
+    fallbackLng: 'en',
+    keySeparator: false,
+    nsSeparator: false,
+    returnNull: false,
+    showSupportNotice: false,
+    interpolation: {escapeValue: false},
+  })
+
+  void instance.init()
+  return instance
+}
+
+const initialLanguage = isStaging
+  ? 'en_dev'
+  : (getLocales().at(0)?.languageTag ?? 'en')
+
+export const i18n = createI18nInstance(initialLanguage)
+
 export type TFunction = (
-  key: keyof typeof translations.dev,
-  options?: TranslateOptions
+  key: TranslationKey,
+  options?: TOptions & Record<string, unknown>
 ) => string
 
-interface TranslationContext {
+export interface TranslationContext {
   t: TFunction
   isEnglish: () => boolean
 }
@@ -59,7 +61,10 @@ export const translationAtom = atom((get): TranslationContext => {
   const i18nVal = get(i18nAtom)
   const showDevLabels = get(showDevLabelsAtom)
   return {
-    t: !showDevLabels ? i18nVal.t.bind(i18nVal) : (val) => val,
+    t: !showDevLabels
+      ? (key, options) =>
+          options ? i18nVal.t(key, key, options) : i18nVal.t(key)
+      : (key) => key,
     isEnglish: (): boolean => i18nVal.t('localeName') === 'en',
   }
 })
@@ -69,7 +74,8 @@ export function useTranslation(): TranslationContext {
 }
 
 export function getCurrentLocale(): string {
-  return normalizeFormattingLocale(i18n.locale)
+  const language = getDefaultStore().get(i18nAtom).resolvedLanguage ?? 'en'
+  return normalizeFormattingLocale(language === 'en_dev' ? 'en' : language)
 }
 
 export function getLocaleFromTranslation(t: TFunction): string {

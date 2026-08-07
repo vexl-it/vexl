@@ -9,7 +9,10 @@ import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import {Effect, Option} from 'effect'
 import {MessagesDbService} from '../../db/MessagesDbService'
 import {encryptPublicKey} from '../../db/domain'
-import {reportMessageSent} from '../../metrics'
+import {
+  reportMessageSent,
+  reportRequestMetricsByMessageType,
+} from '../../metrics'
 import {findAndEnsureReceiverAndSenderInbox} from '../../utils/findAndEnsureReceiverAndSenderInbox'
 import {forbiddenMessageTypes} from '../../utils/forbiddenMessageTypes'
 import {withInboxActionRedisLock} from '../../utils/withInboxActionRedisLock'
@@ -63,7 +66,13 @@ export const sendMessage = HttpApiBuilder.handler(
       withInboxActionRedisLock(req.payload.receiverPublicKey),
       withDbTransaction,
       Effect.zipLeft(
-        reportMessageSent(1, commonMetricAttributesFromHeaders(req.headers))
+        Effect.all([
+          reportMessageSent(1, commonMetricAttributesFromHeaders(req.headers)),
+          reportRequestMetricsByMessageType(
+            req.payload.messageType,
+            commonMetricAttributesFromHeaders(req.headers)
+          ),
+        ])
       ),
       makeEndpointEffect
     )

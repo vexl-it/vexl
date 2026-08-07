@@ -30,6 +30,7 @@ import bump_zero_club_report_limits from './migrations/0025_bump_zero_club_repor
 import add_club_made_inactive_reason from './migrations/0026_add_club_made_inactive_reason'
 import add_club_member_count_change_table from './migrations/0027_add_club_member_count_change_table'
 import remove_duplicate_users_by_hash_and_add_unique_constraint from './migrations/0028_remove_duplicate_users_by_hash_and_add_unique_constraint'
+import dedupe_notification_tokens from './migrations/0029_dedupe_notification_tokens'
 
 const migrations = [
   {
@@ -172,6 +173,11 @@ const migrations = [
     id: 28,
     name: 'remove_duplicate_users_by_hash_and_add_unique_constraint',
     migrationEffect: remove_duplicate_users_by_hash_and_add_unique_constraint,
+  },
+  {
+    id: 29,
+    name: 'dedupe_notification_tokens',
+    migrationEffect: dedupe_notification_tokens,
   },
 ] as const
 

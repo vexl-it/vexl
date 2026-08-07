@@ -56,6 +56,8 @@ export const createUser = HttpApiBuilder.handler(
         Effect.gen(function* (_) {
           const userDb = yield* _(UserDbService)
           const numberExists = yield* _(deleteIfExists(security.serverHash))
+          const expoToken = Option.fromNullable(req.payload.expoToken)
+          const vexlNotificationToken = req.payload.vexlNotificationToken
 
           yield* _(
             reportUserLoggedIn({
@@ -70,13 +72,33 @@ export const createUser = HttpApiBuilder.handler(
             })
           )
 
+          if (Option.isSome(expoToken)) {
+            yield* _(
+              userDb.clearExpoTokenHeldByOtherUsers({
+                publicKey: security.publicKey,
+                hash: security.serverHash,
+                token: expoToken.value,
+              })
+            )
+          }
+
+          if (Option.isSome(vexlNotificationToken)) {
+            yield* _(
+              userDb.clearVexlNotificationTokenHeldByOtherUsers({
+                publicKey: security.publicKey,
+                hash: security.serverHash,
+                token: vexlNotificationToken.value,
+              })
+            )
+          }
+
           yield* _(
             userDb.insertUser({
               publicKey: security.publicKey,
               hash: security.serverHash,
-              expoToken: Option.fromNullable(req.payload.expoToken),
+              expoToken,
               firebaseToken: Option.fromNullable(req.payload.firebaseToken),
-              vexlNotificationToken: req.payload.vexlNotificationToken,
+              vexlNotificationToken,
               clientVersion: req.headers.clientVersionOrNone,
               platform: req.headers.clientPlatformOrNone,
               appSource: req.headers.appSourceOrNone,

@@ -138,7 +138,7 @@ export class UserNotificationService extends Context.Tag(
                   Option.fromNullable(r.vexlNotificationToken)
                 )
               )
-            )             
+            )
              */
 
             const allTokens = pipe(

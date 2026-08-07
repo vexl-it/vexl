@@ -373,6 +373,29 @@ export class UserNotificationService extends Context.Tag(
               })
             )
 
+            // Record the sends before enqueueing: a failed enqueue only
+            // delays that user's reminder until the next cadence step,
+            // while enqueueing first and failing to record would re-send
+            // to everyone on every run.
+            if (Array.isNonEmptyReadonlyArray(firstTimeUsers)) {
+              yield* _(
+                userDbService.updateInactivityNotificationSent({
+                  ids: Array.map(firstTimeUsers, (user) => user.id),
+                  sentAt: now.toDate(),
+                  variant: 'FIRST',
+                })
+              )
+            }
+            if (Array.isNonEmptyReadonlyArray(followUpUsers)) {
+              yield* _(
+                userDbService.updateInactivityNotificationSent({
+                  ids: Array.map(followUpUsers, (user) => user.id),
+                  sentAt: now.toDate(),
+                  variant: 'OFFERS_DEACTIVATED',
+                })
+              )
+            }
+
             const toMqEntry =
               (variant: UserInactivityNotificationVariant) =>
               (user: UserToNotifyAboutInactivity) =>
@@ -408,25 +431,6 @@ export class UserNotificationService extends Context.Tag(
                 }
               )
             )
-
-            if (Array.isNonEmptyReadonlyArray(firstTimeUsers)) {
-              yield* _(
-                userDbService.updateInactivityNotificationSent({
-                  ids: Array.map(firstTimeUsers, (user) => user.id),
-                  sentAt: now.toDate(),
-                  variant: 'FIRST',
-                })
-              )
-            }
-            if (Array.isNonEmptyReadonlyArray(followUpUsers)) {
-              yield* _(
-                userDbService.updateInactivityNotificationSent({
-                  ids: Array.map(followUpUsers, (user) => user.id),
-                  sentAt: now.toDate(),
-                  variant: 'OFFERS_DEACTIVATED',
-                })
-              )
-            }
 
             if (Array.isNonEmptyReadonlyArray(firstTimeUsers)) {
               yield* _(

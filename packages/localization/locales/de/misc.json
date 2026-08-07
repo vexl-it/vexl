@@ -1,0 +1,8 @@
+{
+  "tabBar.map": "Karte",
+  "tabBar.marketplace": "Marktplatz",
+  "tabBar.community": "Community",
+  "tabBar.chats": "Chats",
+  "linking.wrongLinkFormatReceived": "Falsches Link-Format erhalten. Link {{link}} scheint ungültig zu sein. Überprüfe den Link und versuche es erneut.",
+  "linking.linkNotSupportedPleaseUpdate": "Link nicht unterstützt. Bitte aktualisiere deine App auf die neueste Version."
+}

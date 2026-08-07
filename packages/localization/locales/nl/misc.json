@@ -1,0 +1,8 @@
+{
+  "tabBar.map": "Kaart",
+  "tabBar.marketplace": "Marktplaats",
+  "tabBar.community": "Community",
+  "tabBar.chats": "Chats",
+  "linking.wrongLinkFormatReceived": "Verkeerd linkformaat ontvangen. Link {{link}} lijkt ongeldig te zijn. Controleer de link en probeer het opnieuw.",
+  "linking.linkNotSupportedPleaseUpdate": "Link wordt niet ondersteund. Update uw app naar de nieuwste versie."
+}

@@ -7,15 +7,16 @@
  *   pnpm --filter @vexl-next/handy-scripts cleanup-unused-translations
  *
  * What it does:
- *   1. Reads all keys from packages/localization/base.json
+ *   1. Reads all keys from packages/localization/locales/en/*.json
  *   2. Searches for usages in apps/mobile/src/**
  *   3. Reports keys that are not found in the codebase
- *   4. Asks for confirmation and removes unused keys from base.json
+ *   4. Asks for confirmation and removes unused keys from their group files
  *
  * Note: Some keys are used dynamically (e.g., `t(`currency.${code}`)`)
  *       The script detects common dynamic patterns and excludes those prefixes.
  */
 
+import {Schema} from 'effect'
 import * as fs from 'fs'
 import * as path from 'path'
 import * as readline from 'readline'
@@ -25,8 +26,18 @@ const currentFilePath = fileURLToPath(import.meta.url)
 const currentDirPath = path.dirname(currentFilePath)
 
 const REPO_ROOT = path.resolve(currentDirPath, '../../..')
-const BASE_JSON_PATH = path.join(REPO_ROOT, 'packages/localization/base.json')
+const EN_LOCALE_PATH = path.join(REPO_ROOT, 'packages/localization/locales/en')
 const MOBILE_SRC_PATH = path.join(REPO_ROOT, 'apps/mobile/src')
+const EXCLUDED_LOCALE_FILES = new Set([
+  'termsOfUse.json',
+  'privacyPolicy.json',
+  'childSafetyAndSexAbusePrevention.json',
+  'infoPlist.json',
+])
+const TranslationCatalog = Schema.Record({
+  key: Schema.String,
+  value: Schema.String,
+})
 
 // Keys that are used dynamically and should be excluded from unused detection
 // These are prefixes - any key starting with these will be considered "potentially used"
@@ -69,12 +80,13 @@ const DYNAMIC_KEY_PREFIXES = [
   'tradeChecklist.options.', // t(`tradeChecklist.options.${item}`)
   'loginFlow.verificationCode.errors.', // t(`loginFlow.verificationCode.errors.${e._tag}`)
   'offer.requestStatus.', // t(`offer.requestStatus.${status}`)
-]
-
-// Additional files/directories to search (besides mobile)
-const ADDITIONAL_SEARCH_PATHS = [
-  path.join(REPO_ROOT, 'apps/dashboard-client/src'),
-  path.join(REPO_ROOT, 'apps/vexl-website/src'),
+  'marketplace.section.',
+  'marketplaceFilter.',
+  'filterOffers.productCategory.',
+  'notes.board.section.',
+  'notifications.preferences.',
+  'appSettings.appearance.',
+  'tabBar.',
 ]
 
 function getAllFiles(dir: string, extensions: string[]): string[] {
@@ -164,41 +176,57 @@ async function askQuestion(question: string): Promise<string> {
   })
 }
 
-function removeKeysFromBaseJson(
-  keysToRemove: string[],
-  baseJson: Record<string, string>
+function removeKeysFromCatalog(
+  keysToRemove: Set<string>,
+  catalog: Record<string, string>
 ): Record<string, string> {
-  const keysSet = new Set(keysToRemove)
-  const newBaseJson: Record<string, string> = {}
+  const newCatalog: Record<string, string> = {}
 
-  for (const [key, value] of Object.entries(baseJson)) {
-    if (!keysSet.has(key)) {
-      newBaseJson[key] = value
+  for (const [key, value] of Object.entries(catalog)) {
+    if (!keysToRemove.has(key)) {
+      newCatalog[key] = value
     }
   }
 
-  return newBaseJson
+  return newCatalog
 }
 
 async function main(): Promise<void> {
   console.log('Finding unused translation keys...\n')
 
-  // Read base.json
-  if (!fs.existsSync(BASE_JSON_PATH)) {
-    console.error(`Error: base.json not found at ${BASE_JSON_PATH}`)
+  if (!fs.existsSync(EN_LOCALE_PATH)) {
+    console.error(`Error: English locale not found at ${EN_LOCALE_PATH}`)
     process.exit(1)
   }
 
-  const baseJson = JSON.parse(readFileContent(BASE_JSON_PATH)) as Record<
-    string,
-    string
-  >
+  const catalogFiles = fs
+    .readdirSync(EN_LOCALE_PATH)
+    .filter(
+      (fileName) =>
+        fileName.endsWith('.json') && !EXCLUDED_LOCALE_FILES.has(fileName)
+    )
+    .sort((a, b) => a.localeCompare(b))
+    .map((fileName) => {
+      const filePath = path.join(EN_LOCALE_PATH, fileName)
+      return {
+        filePath,
+        catalog: Schema.decodeUnknownSync(TranslationCatalog)(
+          JSON.parse(readFileContent(filePath))
+        ),
+      }
+    })
+  const baseJson = Object.assign(
+    {},
+    ...catalogFiles.map(({catalog}) => catalog)
+  )
   const allKeys = Object.keys(baseJson)
 
-  console.log(`Found ${allKeys.length} translation keys in base.json\n`)
+  console.log(
+    `Found ${allKeys.length} translation keys in ${catalogFiles.length} English group files\n`
+  )
 
   // Collect all source files to search
-  const searchPaths = [MOBILE_SRC_PATH, ...ADDITIONAL_SEARCH_PATHS]
+  const searchPaths = [MOBILE_SRC_PATH]
   const extensions = ['.ts', '.tsx', '.js', '.jsx']
   const allFiles: string[] = []
 
@@ -276,23 +304,30 @@ async function main(): Promise<void> {
     // Ask for confirmation to remove keys
     console.log('\n')
     const answer = await askQuestion(
-      `Do you want to remove these ${unusedKeys.length} keys from base.json? (yes/no): `
+      `Do you want to remove these ${unusedKeys.length} keys from their English group files? (yes/no): `
     )
 
     if (answer === 'yes' || answer === 'y') {
-      console.log('\nRemoving unused keys from base.json...')
+      console.log('\nRemoving unused keys from English group files...')
 
-      const newBaseJson = removeKeysFromBaseJson(unusedKeys, baseJson)
-      const newContent = JSON.stringify(newBaseJson, null, 2) + '\n'
-
-      fs.writeFileSync(BASE_JSON_PATH, newContent, 'utf-8')
+      const keysToRemove = new Set(unusedKeys)
+      for (const {filePath, catalog} of catalogFiles) {
+        const newCatalog = removeKeysFromCatalog(keysToRemove, catalog)
+        if (Object.keys(newCatalog).length !== Object.keys(catalog).length) {
+          fs.writeFileSync(
+            filePath,
+            JSON.stringify(newCatalog, null, 2) + '\n',
+            'utf-8'
+          )
+        }
+      }
 
       console.log(
-        `\nSuccessfully removed ${unusedKeys.length} keys from base.json`
+        `\nSuccessfully removed ${unusedKeys.length} keys from English group files`
       )
-      console.log(`New total: ${Object.keys(newBaseJson).length} keys`)
+      console.log(`New total: ${allKeys.length - unusedKeys.length} keys`)
     } else {
-      console.log('\nNo changes made to base.json')
+      console.log('\nNo changes made to English group files')
     }
   } else {
     console.log('\nNo unused keys found!')

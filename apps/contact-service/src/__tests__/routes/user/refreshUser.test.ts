@@ -403,6 +403,9 @@ describe('Refresh user', () => {
               appPlatform: 'ANDROID',
               appSource: 'unknown',
               clientCountryPrefix: 'none',
+              daysInactive: 180,
+              remindersReceived: 0,
+              daysSinceLastReminder: 'none',
             },
           })
         )
@@ -415,6 +418,115 @@ describe('Refresh user', () => {
         )
 
         expect(newUserNotifications.length).toBeGreaterThan(0)
+      })
+    )
+  })
+
+  it('Reports USER_REACTIVATED for a reminded user below the metrics window', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const sql = yield* _(SqlClient.SqlClient)
+        yield* _(sql`
+          UPDATE users
+          SET
+            refreshed_at = CURRENT_DATE - 10,
+            number_of_inactivity_notifications_sent = 2,
+            last_inactivity_notification_sent_at = now() - INTERVAL '3 days'
+          WHERE
+            public_key = ${keys.publicKeyPemBase64}
+        `)
+
+        const authHeaders = yield* _(
+          createDummyAuthHeadersForUser({
+            phoneNumber,
+            publicKey: keys.publicKeyPemBase64,
+          })
+        )
+        const app = yield* _(NodeTestingApp)
+        yield* _(setAuthHeaders(authHeaders))
+
+        const commonAndSecurityHeaders = makeCommonAndSecurityHeaders(
+          () => ({
+            publicKey: authHeaders['public-key'],
+            hash: authHeaders.hash,
+            signature: authHeaders.signature,
+          }),
+          commonHeaders
+        )
+
+        mockedReportMetric.mockClear()
+        yield* _(
+          app.User.refreshUser({
+            payload: {
+              offersAlive: true,
+              vexlNotificationToken: Option.none(),
+            },
+            headers: commonAndSecurityHeaders,
+          })
+        )
+        yield* _(Effect.sleep(200))
+
+        expect(mockedReportMetric).toHaveBeenCalledWith(
+          expect.objectContaining({
+            name: 'USER_REACTIVATED',
+            attributes: expect.objectContaining({
+              daysInactive: 10,
+              remindersReceived: 2,
+              daysSinceLastReminder: 3,
+            }),
+          })
+        )
+      })
+    )
+  })
+
+  it('Does not report USER_REACTIVATED for a recently active user without reminders', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const sql = yield* _(SqlClient.SqlClient)
+        yield* _(sql`
+          UPDATE users
+          SET
+            refreshed_at = CURRENT_DATE - 10,
+            number_of_inactivity_notifications_sent = 0,
+            last_inactivity_notification_sent_at = NULL
+          WHERE
+            public_key = ${keys.publicKeyPemBase64}
+        `)
+
+        const authHeaders = yield* _(
+          createDummyAuthHeadersForUser({
+            phoneNumber,
+            publicKey: keys.publicKeyPemBase64,
+          })
+        )
+        const app = yield* _(NodeTestingApp)
+        yield* _(setAuthHeaders(authHeaders))
+
+        const commonAndSecurityHeaders = makeCommonAndSecurityHeaders(
+          () => ({
+            publicKey: authHeaders['public-key'],
+            hash: authHeaders.hash,
+            signature: authHeaders.signature,
+          }),
+          commonHeaders
+        )
+
+        mockedReportMetric.mockClear()
+        yield* _(
+          app.User.refreshUser({
+            payload: {
+              offersAlive: true,
+              vexlNotificationToken: Option.none(),
+            },
+            headers: commonAndSecurityHeaders,
+          })
+        )
+        yield* _(Effect.sleep(200))
+
+        expect(mockedReportMetric).not.toHaveBeenCalledWith(
+          expect.objectContaining({name: 'USER_REACTIVATED'})
+        )
       })
     )
   })

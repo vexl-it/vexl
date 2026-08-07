@@ -1,5 +1,6 @@
 import {SqlClient} from '@effect/sql'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
+import {mockedReportMetric} from '@vexl-next/server-utils/src/tests/mockedMetricsClientService'
 import {Effect, Option, Schema} from 'effect'
 import {UserDbService} from '../db/UserDbService'
 import {UserNotificationService} from '../services/UserNotificationService'
@@ -119,7 +120,10 @@ describe('Notify users about inactivity', () => {
             )
         `)
 
+        mockedReportMetric.mockClear()
         const enqueued = yield* _(notifyAndGetEnqueued)
+        // metric reports are forked into the background
+        yield* _(Effect.sleep(200))
 
         expect(enqueued).toHaveLength(4)
         expect(variantForToken(enqueued, 'tokenFirst')).toEqual('FIRST')
@@ -166,6 +170,48 @@ describe('Notify users about inactivity', () => {
             )
             .every((row) => row.sentAt !== null)
         ).toBe(true)
+
+        expect(mockedReportMetric).toHaveBeenCalledWith(
+          expect.objectContaining({
+            name: 'INACTIVITY_NOTIFICATION_SENT',
+            value: 1,
+            attributes: {variant: 'FIRST', notificationOrdinal: 1},
+          })
+        )
+        expect(mockedReportMetric).toHaveBeenCalledWith(
+          expect.objectContaining({
+            name: 'INACTIVITY_NOTIFICATION_SENT',
+            value: 2,
+            attributes: {variant: 'OFFERS_DEACTIVATED', notificationOrdinal: 2},
+          })
+        )
+        expect(mockedReportMetric).toHaveBeenCalledWith(
+          expect.objectContaining({
+            name: 'INACTIVITY_NOTIFICATION_SENT',
+            value: 1,
+            attributes: {variant: 'OFFERS_DEACTIVATED', notificationOrdinal: 3},
+          })
+        )
+
+        // Snapshot after the send: pkNoToken has 0 reminders; pkFirst and
+        // pkFollowUpNotDue have 1; pkLongInactive, pkFollowUpDue and
+        // pkRecurringNotDue have 2; pkRecurringDue has 3. pkActive is not
+        // inactive and is excluded.
+        const snapshotByRemindersSent = [
+          {remindersSent: 0, value: 1},
+          {remindersSent: 1, value: 2},
+          {remindersSent: 2, value: 3},
+          {remindersSent: 3, value: 1},
+        ]
+        for (const {remindersSent, value} of snapshotByRemindersSent) {
+          expect(mockedReportMetric).toHaveBeenCalledWith(
+            expect.objectContaining({
+              name: 'COUNT_OF_INACTIVE_USERS_BY_REMINDERS_SENT',
+              value,
+              attributes: {remindersSent},
+            })
+          )
+        }
 
         // Running the job again right away must not send anything new
         const enqueuedSecondRun = yield* _(notifyAndGetEnqueued)

@@ -22,7 +22,16 @@ import {
   UserLoginOnDifferentDeviceNotificationMqEntry,
 } from '@vexl-next/server-utils/src/UserNotificationMq'
 import dayjs from 'dayjs'
-import {Array, Context, Effect, flow, Layer, Option, pipe} from 'effect/index'
+import {
+  Array,
+  Context,
+  Effect,
+  flow,
+  Layer,
+  Option,
+  pipe,
+  Record,
+} from 'effect/index'
 import {
   contactPublicImportCountThresholdConfig,
   inactivityNotificationAfterDaysConfig,
@@ -36,7 +45,11 @@ import {type ClubRecordId} from '../db/ClubsDbService/domain'
 import {UserDbService} from '../db/UserDbService'
 import {NotificationsTokensEquivalence} from '../db/UserDbService/domain'
 import {type UserToNotifyAboutInactivity} from '../db/UserDbService/queries/createFindUsersToNotifyAboutInactivity'
-import {queryAndReportNumberOfInactiveUsers} from '../metrics'
+import {
+  queryAndReportInactiveUsersByRemindersSent,
+  queryAndReportNumberOfInactiveUsers,
+  reportInactivityNotificationsSent,
+} from '../metrics'
 import {type ServerHashedNumber} from '../utils/serverHashContact'
 
 export interface UserNotificationServiceOperations {
@@ -415,8 +428,36 @@ export class UserNotificationService extends Context.Tag(
               )
             }
 
+            if (Array.isNonEmptyReadonlyArray(firstTimeUsers)) {
+              yield* _(
+                reportInactivityNotificationsSent({
+                  count: firstTimeUsers.length,
+                  variant: 'FIRST',
+                  notificationOrdinal: 1,
+                })
+              )
+            }
+            yield* _(
+              followUpUsers,
+              Array.groupBy((user) =>
+                String(
+                  Math.max(user.numberOfInactivityNotificationsSent + 1, 2)
+                )
+              ),
+              Record.toEntries,
+              Array.map(([ordinal, users]) =>
+                reportInactivityNotificationsSent({
+                  count: users.length,
+                  variant: 'OFFERS_DEACTIVATED',
+                  notificationOrdinal: Number(ordinal),
+                })
+              ),
+              Effect.all
+            )
+
             yield* _(Effect.logInfo('Reporting number of inactive users'))
             yield* _(queryAndReportNumberOfInactiveUsers)
+            yield* _(queryAndReportInactiveUsersByRemindersSent)
           }).pipe(
             Effect.tapError((e) =>
               Effect.logError('Error processing user inactivity', e)

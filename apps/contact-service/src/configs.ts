@@ -130,6 +130,11 @@ export const contactActiveWindowDaysConfig = Config.number(
   Config.withDefault(90)
 )
 
+export const contactConsideredAsExpiredForMetricsAfterDaysConfig =
+  Config.number('CONTACT_CONSIDERED_AS_EXPIRED_FOR_METRICS_AFTER_DAYS').pipe(
+    Config.withDefault(30)
+  )
+
 export const contactPublicImportCountThresholdConfig = Config.number(
   'CONTACT_PUBLIC_IMPORT_COUNT_THRESHOLD'
 ).pipe(

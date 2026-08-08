@@ -1,0 +1,9 @@
+{
+  "ios": {
+    "NSCalendarsUsageDescription": "Vexl 需要访问你的日历，以便安排交易见面时间。你的数据会保持私密，只用于协调交易。",
+    "NSCameraUsageDescription": "Vexl 想访问你的相机，用来拍摄头像照片，或扫描二维码，将其他用户添加到你的 Vexl 网络。",
+    "NSContactsUsageDescription": "Vexl 需要访问你的通讯录，才能安全地让你选中的联系人看到你的报价。你选中的联系人电话号码会加密后上传到服务器。",
+    "NSLocationWhenInUseUsageDescription": "Vexl 需要访问你的位置，以便在地图上显示你所在的位置。位置信息绝不会分享给任何人，包括我们自己。",
+    "NSPhotoLibraryUsageDescription": "Vexl 想访问你的照片，以便选择一张作为头像。"
+  }
+}

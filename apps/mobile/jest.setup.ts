@@ -16,7 +16,7 @@ if (typeof globalThis.requestIdleCallback === 'undefined') {
 }
 
 jest.mock('./src/utils/localization/I18nProvider', () => ({
-  useTranslation: () => ({t: (key: any) => key}),
+  useTranslation: () => ({t: (key: string) => key}),
 }))
 
 jest.mock('expo-testflight', () => ({

@@ -1,0 +1,8 @@
+{
+  "tabBar.map": "Map",
+  "tabBar.marketplace": "Marknadsplats",
+  "tabBar.community": "Community",
+  "tabBar.chats": "Chattar",
+  "linking.wrongLinkFormatReceived": "Wrong link format received. Link {{link}} seems to be invalid. Check the link and try again.",
+  "linking.linkNotSupportedPleaseUpdate": "Link not supported. Please update your app to the latest version."
+}

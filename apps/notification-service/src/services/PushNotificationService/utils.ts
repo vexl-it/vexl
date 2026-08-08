@@ -20,7 +20,10 @@ import {
 } from '@vexl-next/domain/src/general/NotificationTrackingId.brand'
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
-import * as translations from '@vexl-next/localization/src/translations'
+import {
+  appLocaleCatalogs,
+  type AppLocale,
+} from '@vexl-next/localization/src/translations'
 import {type PlatformName} from '@vexl-next/rest-api'
 import {type InvalidFcmCypherError} from '@vexl-next/rest-api/src/services/notification/contract'
 import {Data, Effect, Option, Schema} from 'effect'
@@ -94,27 +97,18 @@ export function getNotificationContentByLocale(locale: string): {
   title: string
   body: string
 } {
-  try {
-    const lang: any =
-      // @ts-expect-error this is fine
-      translations[locale] ?? translations.en
+  const catalog = isAppLocale(locale)
+    ? appLocaleCatalogs[locale]
+    : appLocaleCatalogs.en
 
-    if (
-      !lang.messages.fallbackMessage.body ||
-      !lang.messages.fallbackMessage.title
-    )
-      throw new Error('Missing fallback message')
-    return {
-      title: lang.messages.fallbackMessage.title,
-      body: lang.messages.fallbackMessage.body,
-    }
-  } catch (e) {
-    const fallback: any = translations.dev
-    return {
-      title: fallback.messages.fallbackMessage.title,
-      body: fallback.messages.fallbackMessage.body,
-    }
+  return {
+    title: catalog['messages.fallbackMessage.title'],
+    body: catalog['messages.fallbackMessage.body'],
   }
+}
+
+function isAppLocale(locale: string): locale is AppLocale {
+  return locale in appLocaleCatalogs
 }
 
 export const generatePushNotificationsFromNewChatMessageNoticeSendTask = (

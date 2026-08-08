@@ -1,0 +1,8 @@
+{
+  "tabBar.map": "Carte",
+  "tabBar.marketplace": "Marché",
+  "tabBar.community": "Communauté",
+  "tabBar.chats": "Discussions",
+  "linking.wrongLinkFormatReceived": "Mauvais format de lien reçu. Le lien {{link}} semble être invalide. Vérifiez le lien et réessayez.",
+  "linking.linkNotSupportedPleaseUpdate": "Lien non pris en charge. Veuillez mettre à jour votre application vers la dernière version."
+}

@@ -30,7 +30,7 @@ pnpm --filter @vexl-next/mobile-app android ## for android
 
 ## Help us translate the app
 
-See [this guide](docs/how_to_help_transalte.md) for details.
+See [this guide](docs/how_to_help_translate.md) for details.
 
 ## Other
 

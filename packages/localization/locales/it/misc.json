@@ -1,0 +1,8 @@
+{
+  "tabBar.map": "Mappa",
+  "tabBar.marketplace": "Marketplace",
+  "tabBar.community": "Community",
+  "tabBar.chats": "Chat",
+  "linking.wrongLinkFormatReceived": "Formato di collegamento non corretto. Il collegamento {{link}} sembra non valido. Controlla il link e riprova.",
+  "linking.linkNotSupportedPleaseUpdate": "Collegamento non supportato. Aggiorna la tua app all'ultima versione."
+}

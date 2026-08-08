@@ -1,0 +1,9 @@
+{
+  "ios": {
+    "NSCalendarsUsageDescription": "Vexl inahitaji kufikia kalenda yako ili kupanga mikutano ya biashara. Data yako inabaki ya faragha na hutumiwa tu kuratibu biashara.",
+    "NSCameraUsageDescription": "Vexl inataka kufikia kamera yako ili upige picha ya wasifu wako au uchanganue msimbo wa QR ili kuongeza watumiaji wengine kwenye mtandao wako wa Vexl.",
+    "NSContactsUsageDescription": "Vexl inahitaji kufikia waasiliani wako ili waone ofa zako kwa njia salama. Namba za simu za waasiliani unaowachagua zitasimbwa kwa njia fiche na kupakiwa kwenye seva.",
+    "NSLocationWhenInUseUsageDescription": "Vexl inahitaji kufikia eneo lako ili kuonyesha ulipo kwenye ramani. Eneo lako halitashirikiwa na yeyote, hata sisi wenyewe.",
+    "NSPhotoLibraryUsageDescription": "Vexl inataka kufikia picha zako ili uchague picha ya wasifu wako."
+  }
+}

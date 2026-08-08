@@ -1,0 +1,63 @@
+name: "[Translation] sync translations"
+run-name: "Run on commit ${{github.sha}}"
+
+permissions:
+  pull-requests: write
+  contents: write
+
+on:
+  workflow_dispatch:
+  # Nightly run pulls translation edits made in the GT dashboard into a sync PR
+  # even when no English strings changed.
+  schedule:
+    - cron: "0 3 * * *"
+  push:
+    branches:
+      - main
+    paths:
+      - "packages/localization/locales/en/**"
+
+jobs:
+  translate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        with:
+          node-version: 24.x
+          cache: "pnpm"
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Translate locale files
+        working-directory: packages/localization
+        run: pnpm exec gt translate --save-local
+        env:
+          GT_API_KEY: ${{ secrets.GT_API_KEY }}
+          GT_PROJECT_ID: ${{ secrets.GT_PROJECT_ID }}
+
+      - name: Generate translation catalogs
+        working-directory: packages/localization
+        run: pnpm generate
+
+      - name: Create or update translations pull request
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: "chore/translations-sync"
+          base: "main"
+          commit-message: "chore: sync General Translation translations"
+          title: "chore: sync General Translation translations"
+          body: |
+            Updates committed locale files from General Translation and regenerates the translation catalogs.
+
+            This pull request is maintained automatically by the translation workflow.

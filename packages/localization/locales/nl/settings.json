@@ -106,6 +106,8 @@
   "account.network": "Netwerk",
   "account.contactPreferences": "Contactvoorkeuren",
   "account.contactBackup": "Back-up van contacten",
+  "account.contactsCount_one": "{{count}} contact",
+  "account.contactsCount_other": "{{count}} contacten",
   "account.contactsCountFormatted": "{{localizedString}} contacten",
   "account.settings": "Instellingen",
   "account.appSettings": "App-instellingen",

@@ -85,6 +85,8 @@
   "marketplace.section.FAVOURITES": "Favoriten",
   "marketplace.section.BROWSE": "Angebote durchsuchen",
   "marketplace.section.ARCHIVED": "Archiviert",
+  "marketplace.section.ACTIVE": "Aktive Angebote",
+  "marketplace.section.PAUSED": "Pausierte Angebote",
   "marketplace.tryAdjustingFilters": "Versuch, deine Filter anzupassen oder zu löschen.",
   "marketplace.tryAdjustingMapOrClearingFilters": "Versuch, die Karte zu verschieben oder deine Filter anzupassen.",
   "marketplace.fewOffersAfterFiltering": "Wir haben nur wenige Ergebnisse gefunden. Passe deine Filter an, um mehr Optionen zu sehen.",

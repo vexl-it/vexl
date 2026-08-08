@@ -106,6 +106,8 @@
   "account.network": "Mtandao",
   "account.contactPreferences": "Mapendeleo ya mawasiliano",
   "account.contactBackup": "Nakala rudufu ya mawasiliano",
+  "account.contactsCount_one": "Anwani {{count}}",
+  "account.contactsCount_other": "Anwani {{count}}",
   "account.contactsCountFormatted": "anwani {{localizedString}}",
   "account.settings": "Mipangilio",
   "account.appSettings": "Mipangilio ya app",

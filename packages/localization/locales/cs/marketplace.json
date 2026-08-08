@@ -85,6 +85,8 @@
   "marketplace.section.FAVOURITES": "Oblíbené",
   "marketplace.section.BROWSE": "Procházet nabídky",
   "marketplace.section.ARCHIVED": "Archivované",
+  "marketplace.section.ACTIVE": "Aktivní nabídky",
+  "marketplace.section.PAUSED": "Pozastavené nabídky",
   "marketplace.tryAdjustingFilters": "Zkus upravit nebo vymazat filtry.",
   "marketplace.tryAdjustingMapOrClearingFilters": "Zkus posunout mapu nebo upravit filtry.",
   "marketplace.fewOffersAfterFiltering": "Našli jsme jen několik výsledků. Zkus upravit filtry a zobrazit více možností.",

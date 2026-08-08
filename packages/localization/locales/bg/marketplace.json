@@ -85,6 +85,8 @@
   "marketplace.section.FAVOURITES": "Любими",
   "marketplace.section.BROWSE": "Разгледай оферти",
   "marketplace.section.ARCHIVED": "Архивирани",
+  "marketplace.section.ACTIVE": "Активни предложения",
+  "marketplace.section.PAUSED": "Спрени предложения",
   "marketplace.tryAdjustingFilters": "Пробвай да промениш или изчистиш филтрите си.",
   "marketplace.tryAdjustingMapOrClearingFilters": "Пробвай да преместиш картата или да промениш филтрите си.",
   "marketplace.fewOffersAfterFiltering": "Намерихме само няколко резултата. Промени филтрите си, за да видиш повече възможности.",

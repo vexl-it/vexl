@@ -85,6 +85,8 @@
   "marketplace.section.FAVOURITES": "Favorieten",
   "marketplace.section.BROWSE": "Aanbiedingen bekijken",
   "marketplace.section.ARCHIVED": "Gearchiveerd",
+  "marketplace.section.ACTIVE": "Actieve aanbiedingen",
+  "marketplace.section.PAUSED": "Gepauzeerde aanbiedingen",
   "marketplace.tryAdjustingFilters": "Probeer je filters aan te passen of te wissen.",
   "marketplace.tryAdjustingMapOrClearingFilters": "Probeer de kaart te verplaatsen of je filters aan te passen.",
   "marketplace.fewOffersAfterFiltering": "We hebben maar een paar resultaten gevonden. Pas je filters aan om meer opties te zien.",

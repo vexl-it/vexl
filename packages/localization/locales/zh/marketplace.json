@@ -85,6 +85,8 @@
   "marketplace.section.FAVOURITES": "收藏",
   "marketplace.section.BROWSE": "浏览出价",
   "marketplace.section.ARCHIVED": "已归档",
+  "marketplace.section.ACTIVE": "进行中的报价",
+  "marketplace.section.PAUSED": "已暂停的报价",
   "marketplace.tryAdjustingFilters": "试着调整或清除筛选条件。",
   "marketplace.tryAdjustingMapOrClearingFilters": "试着移动地图或调整筛选条件。",
   "marketplace.fewOffersAfterFiltering": "我们只找到少量结果。试试编辑筛选条件，查看更多选项。",

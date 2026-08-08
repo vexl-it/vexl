@@ -85,6 +85,8 @@
   "marketplace.section.FAVOURITES": "Obľúbené",
   "marketplace.section.BROWSE": "Prehliadať ponuky",
   "marketplace.section.ARCHIVED": "Archivované",
+  "marketplace.section.ACTIVE": "Aktívne ponuky",
+  "marketplace.section.PAUSED": "Pozastavené ponuky",
   "marketplace.tryAdjustingFilters": "Skús upraviť alebo vymazať filtre.",
   "marketplace.tryAdjustingMapOrClearingFilters": "Skús posunúť mapu alebo upraviť filtre.",
   "marketplace.fewOffersAfterFiltering": "Našli sme iba pár výsledkov. Uprav filtre a zobraz si viac možností.",

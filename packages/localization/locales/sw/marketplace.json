@@ -85,6 +85,8 @@
   "marketplace.section.FAVOURITES": "Vipendwa",
   "marketplace.section.BROWSE": "Vinjari ofa",
   "marketplace.section.ARCHIVED": "Zilizohifadhiwa",
+  "marketplace.section.ACTIVE": "Ofa zinazotumika",
+  "marketplace.section.PAUSED": "Ofa zilizosimamishwa",
   "marketplace.tryAdjustingFilters": "Jaribu kurekebisha au kufuta vichujio vyako.",
   "marketplace.tryAdjustingMapOrClearingFilters": "Jaribu kusogeza ramani au kurekebisha vichujio vyako.",
   "marketplace.fewOffersAfterFiltering": "Tumepata matokeo machache tu. Jaribu kuhariri vichujio vyako ili uone chaguo zaidi.",

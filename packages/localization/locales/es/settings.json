@@ -106,6 +106,8 @@
   "account.network": "Red",
   "account.contactPreferences": "Preferencias de contacto",
   "account.contactBackup": "Copia de seguridad de contactos",
+  "account.contactsCount_one": "{{count}} contacto",
+  "account.contactsCount_other": "{{count}} contactos",
   "account.contactsCountFormatted": "{{localizedString}} contactos",
   "account.settings": "Ajustes",
   "account.appSettings": "Ajustes de la app",

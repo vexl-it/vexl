@@ -106,6 +106,8 @@
   "account.network": "ネットワーク",
   "account.contactPreferences": "連絡先の設定",
   "account.contactBackup": "連絡先のバックアップ",
+  "account.contactsCount_one": "連絡先 {{count}} 件",
+  "account.contactsCount_other": "連絡先 {{count}} 件",
   "account.contactsCountFormatted": "{{localizedString}}件の連絡先",
   "account.settings": "設定",
   "account.appSettings": "アプリ設定",

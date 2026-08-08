@@ -1,0 +1,9 @@
+{
+  "ios": {
+    "NSCalendarsUsageDescription": "Vexl heeft toegang tot je agenda nodig om handelsafspraken te plannen. Je gegevens blijven privé en worden alleen gebruikt om afspraken voor handel te coördineren.",
+    "NSCameraUsageDescription": "Vexl wil toegang tot je camera om een foto voor je avatar te maken of een QR-code te scannen om andere gebruikers aan je Vexl-netwerk toe te voegen.",
+    "NSContactsUsageDescription": "Vexl heeft toegang tot je contacten nodig om je aanbod veilig aan hen te tonen. De telefoonnummers van de contacten die je selecteert, worden versleuteld en naar de server geüpload.",
+    "NSLocationWhenInUseUsageDescription": "Vexl heeft toegang tot je locatie nodig om je positie op de kaart te tonen. Je locatie wordt nooit met iemand gedeeld, ook niet met ons.",
+    "NSPhotoLibraryUsageDescription": "Vexl wil toegang tot je foto's om een foto voor je avatar te kiezen."
+  }
+}

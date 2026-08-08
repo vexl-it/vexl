@@ -1,0 +1,9 @@
+{
+  "ios": {
+    "NSCalendarsUsageDescription": "Vexl tarvitsee pääsyn kalenteriisi kauppatapaamisten sopimista varten. Tietosi pidetään yksityisinä, ja niitä käytetään vain kauppojen järjestämiseen.",
+    "NSCameraUsageDescription": "Vexl tarvitsee pääsyn kameraasi, jotta voit ottaa kuvan avatariksesi tai skannata QR-koodin lisätäksesi muita käyttäjiä Vexl-verkostoosi.",
+    "NSContactsUsageDescription": "Vexl tarvitsee pääsyn yhteystietoihisi, jotta tarjouksesi näkyvät heille turvallisesti. Valitsemiesi yhteystietojen puhelinnumerot salataan ja lähetetään palvelimelle.",
+    "NSLocationWhenInUseUsageDescription": "Vexl tarvitsee pääsyn sijaintiisi, jotta se voi näyttää sijaintisi kartalla. Sijaintiasi ei koskaan jaeta kenellekään, ei edes meille.",
+    "NSPhotoLibraryUsageDescription": "Vexl tarvitsee pääsyn kuviisi, jotta voit valita kuvan avatariksesi."
+  }
+}

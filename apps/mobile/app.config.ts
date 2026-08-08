@@ -193,9 +193,12 @@ export default {
     'fr': '../../packages/localization/locales/fr/infoPlist.json',
     'it': '../../packages/localization/locales/it/infoPlist.json',
     'ja': '../../packages/localization/locales/ja/infoPlist.json',
+    'nl': '../../packages/localization/locales/nl/infoPlist.json',
     'pl': '../../packages/localization/locales/pl/infoPlist.json',
     'pt': '../../packages/localization/locales/pt/infoPlist.json',
     'sk': '../../packages/localization/locales/sk/infoPlist.json',
+    'sw': '../../packages/localization/locales/sw/infoPlist.json',
+    'zh': '../../packages/localization/locales/zh/infoPlist.json',
   },
   'owner': 'vexlit',
   // Runtime version is a hash of the native project (dependencies, config

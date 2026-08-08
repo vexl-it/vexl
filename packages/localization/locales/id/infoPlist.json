@@ -1,0 +1,9 @@
+{
+  "ios": {
+    "NSCalendarsUsageDescription": "Vexl perlu mengakses kalender kamu untuk menjadwalkan pertemuan transaksi. Data kamu tetap pribadi dan hanya digunakan untuk mengatur transaksi.",
+    "NSCameraUsageDescription": "Vexl ingin mengakses kamera kamu untuk mengambil foto avatar atau memindai kode QR untuk menambahkan pengguna lain ke jaringan Vexl kamu.",
+    "NSContactsUsageDescription": "Vexl perlu mengakses kontak kamu agar penawaranmu bisa dilihat mereka dengan aman. Nomor telepon kontak yang kamu pilih akan dienkripsi dan diunggah ke server.",
+    "NSLocationWhenInUseUsageDescription": "Vexl perlu mengakses lokasi kamu untuk menunjukkan posisimu di peta. Lokasimu tidak akan pernah dibagikan kepada siapa pun, termasuk kami.",
+    "NSPhotoLibraryUsageDescription": "Vexl ingin mengakses foto kamu untuk memilih gambar sebagai avatar."
+  }
+}

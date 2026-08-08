@@ -2,7 +2,7 @@
 
 Vexl translations are machine-translated with [General Translation](https://generaltranslation.com/) and reviewed in its dashboard. English is the source of truth, and translated locale files are committed under `packages/localization/locales/<language>/`.
 
-Community corrections are welcome through [GitHub issues](https://github.com/vexl-it/vexl/issues/new) or pull requests that edit the relevant locale JSON file. Keep dotted keys and `{{variable}}` placeholders unchanged. If you submit a correction directly to a locale file, the same correction must also be made in the General Translation dashboard so a later automated sync does not overwrite it.
+Community corrections are welcome through [GitHub issues](https://github.com/vexl-it/vexl/issues/new) or pull requests that edit the relevant locale JSON file. Keep dotted keys and `{{variable}}` placeholders unchanged. Once a correction is merged, the automated translation workflow uploads it to the General Translation platform so it persists across future syncs.
 
 ## Translators Debug Mode
 

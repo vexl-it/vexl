@@ -85,6 +85,8 @@
   "marketplace.section.FAVOURITES": "お気に入り",
   "marketplace.section.BROWSE": "オファーを見る",
   "marketplace.section.ARCHIVED": "アーカイブ済み",
+  "marketplace.section.ACTIVE": "公開中の売買提案",
+  "marketplace.section.PAUSED": "一時停止中の売買提案",
   "marketplace.tryAdjustingFilters": "フィルターを調整するか、クリアしてみてください。",
   "marketplace.tryAdjustingMapOrClearingFilters": "地図を動かすか、フィルターを調整してみてください。",
   "marketplace.fewOffersAfterFiltering": "検索結果が少ししか見つかりませんでした。フィルターを編集して、ほかの選択肢を表示してみてください。",

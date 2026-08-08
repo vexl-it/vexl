@@ -1,0 +1,9 @@
+{
+  "ios": {
+    "NSCalendarsUsageDescription": "Vexl, alım satım buluşmalarını planlamak için takvimine erişmek istiyor. Verilerin gizli kalır ve yalnızca alım satımları koordine etmek için kullanılır.",
+    "NSCameraUsageDescription": "Vexl, avatarın için fotoğraf çekmek veya diğer kullanıcıları Vexl ağına eklemek üzere QR kodlarını taramak için kamerana erişmek istiyor.",
+    "NSContactsUsageDescription": "Vexl, tekliflerini güvenli bir şekilde onlara göstermek için rehberine erişmek istiyor. Seçtiğin kişilerin telefon numaraları şifrelenerek sunucuya yüklenir.",
+    "NSLocationWhenInUseUsageDescription": "Vexl, haritada konumunu göstermek için konumuna erişmek istiyor. Konumun hiç kimseyle (bizimle bile) asla paylaşılmaz.",
+    "NSPhotoLibraryUsageDescription": "Vexl, avatarın için bir fotoğraf seçmek üzere fotoğraflarına erişmek istiyor."
+  }
+}

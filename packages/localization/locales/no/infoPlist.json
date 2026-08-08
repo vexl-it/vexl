@@ -1,0 +1,9 @@
+{
+  "ios": {
+    "NSCalendarsUsageDescription": "Vexl trenger tilgang til kalenderen din for å avtale møtetidspunkter for handler. Dataene dine forblir private og brukes bare til å koordinere handler.",
+    "NSCameraUsageDescription": "Vexl trenger tilgang til kameraet ditt for å ta et bilde til avataren din eller skanne en QR-kode for å legge andre brukere til i Vexl-nettverket ditt.",
+    "NSContactsUsageDescription": "Vexl trenger tilgang til kontaktene dine for å gjøre tilbudene dine synlige for dem på en trygg måte. Telefonnummerne til kontaktene du velger, krypteres og lastes opp til serveren.",
+    "NSLocationWhenInUseUsageDescription": "Vexl trenger tilgang til posisjonen din for å vise den på kartet. Posisjonen din deles aldri med noen, heller ikke med oss.",
+    "NSPhotoLibraryUsageDescription": "Vexl trenger tilgang til bildene dine for å velge et bilde til avataren din."
+  }
+}

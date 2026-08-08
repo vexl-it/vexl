@@ -57,6 +57,8 @@
   "notifications.DISAPPROVE_CONTACT_REVEAL.body": "Tvá žádost o odhalení telefonního čísla byla zamítnuta.",
   "notifications.NEW_OFFERS_IN_MARKETPLACE.title": "Nové nabídky na marketplace",
   "notifications.NEW_OFFERS_IN_MARKETPLACE.body": "Máš nové nabídky na marketplace.",
+  "notifications.MARKETPLACE_READY.title": "Tvoje Tržiště je připravené",
+  "notifications.MARKETPLACE_READY.body": "Nabídky z tvé sítě čekají. Mrkni na ně.",
   "notifications.NEW_CONTACTS_ON_DEVICE.title": "Nemáš synchronizované všechny kontakty.",
   "notifications.NEW_CONTACTS_ON_DEVICE.body": "V zařízení máš nové kontakty, které jsi ještě nesynchronizoval s Vexlem. Rozšiř svou síť jejich synchronizací.",
   "notifications.UNKNOWN.title": "Nová zpráva",

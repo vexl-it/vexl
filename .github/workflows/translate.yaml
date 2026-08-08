@@ -7,6 +7,10 @@ permissions:
 
 on:
   workflow_dispatch:
+  # Nightly run pulls translation edits made in the GT dashboard into a sync PR
+  # even when no English strings changed.
+  schedule:
+    - cron: "0 3 * * *"
   push:
     branches:
       - main
@@ -36,7 +40,7 @@ jobs:
 
       - name: Translate locale files
         working-directory: packages/localization
-        run: pnpm exec gt translate
+        run: pnpm exec gt translate --save-local
         env:
           GT_API_KEY: ${{ secrets.GT_API_KEY }}
           GT_PROJECT_ID: ${{ secrets.GT_PROJECT_ID }}

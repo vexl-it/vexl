@@ -40,7 +40,7 @@ export const approveRequest = HttpApiBuilder.handler(
       if (req.payload.approve) {
         yield* _(reportRequestApproved(1, commonMetricAttributes))
       } else {
-        yield* _(reportRequestRejected(0, commonMetricAttributes))
+        yield* _(reportRequestRejected(1, commonMetricAttributes))
       }
 
       const encryptedSenderPublicKey = yield* _(

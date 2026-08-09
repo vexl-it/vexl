@@ -88,8 +88,7 @@ export const reportRequestMetricsByMessageType = (
     case 'APPROVE_MESSAGING':
       return reportRequestApproved(1, attributes)
     case 'DISAPPROVE_MESSAGING':
-      // value 0 mirrors the approveRequest endpoint's disapprove path
-      return reportRequestRejected(0, attributes)
+      return reportRequestRejected(1, attributes)
     case 'CANCEL_REQUEST_MESSAGING':
       return reportRequestCanceled(1, attributes)
     default:

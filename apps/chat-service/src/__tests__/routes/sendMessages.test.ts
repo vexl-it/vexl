@@ -410,7 +410,7 @@ describe('Send messages', () => {
           expect.objectContaining({name: 'REQUEST_APPROVED', value: 1})
         )
         expect(mockedReportMetric).toHaveBeenCalledWith(
-          expect.objectContaining({name: 'REQUEST_REJECTED', value: 0})
+          expect.objectContaining({name: 'REQUEST_REJECTED', value: 1})
         )
         expect(mockedReportMetric).toHaveBeenCalledWith(
           expect.objectContaining({name: 'REQUEST_CANCELED', value: 1})

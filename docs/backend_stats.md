@@ -71,7 +71,7 @@ These are referred to as *common* in the tables below.
 | `REQUEST_SENT` | Increment | common | Messaging request is sent (V1 and V2 endpoints). |
 | `REQUEST_CANCELED` | Increment | common | Messaging request is canceled (V1 and V2 endpoints). |
 | `REQUEST_APPROVED` | Increment | common | Messaging request is approved. |
-| `REQUEST_REJECTED` | Increment (value 0) | common | Messaging request is disapproved. ⚠️ Reported with value 0, so it records the event but never increments. |
+| `REQUEST_REJECTED` | Increment | common | Messaging request is disapproved. |
 | `CHAT_CLOSED` | Increment | common | User leaves a chat. |
 | `MESSAGE_FETCHED_AND_REMOVED` | Increment (value = count) | common + `messageAgeSeconds` | Client confirms pulled messages, which deletes them from the inbox. `messageAgeSeconds` is the average age of the removed messages (seconds since the server accepted them); `unknown` for legacy rows without a received timestamp. |
 | `MESSAGE_EXPIRED` | Increment (value = count) | — | Expired-messages cleanup task deletes old undelivered messages. |

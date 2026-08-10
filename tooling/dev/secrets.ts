@@ -48,6 +48,7 @@ export const OPTIONAL_SECRET_KEYS: ReadonlySet<string> = new Set([
   'BTC_PAY_SERVER_WEBHOOK_SECRET',
   'AWS_ACCESS_KEY_ID',
   'AWS_SECRET_ACCESS_KEY',
+  'SENTRY_DSN',
 ])
 
 function parseEnvContent(raw: string): Record<string, string> {

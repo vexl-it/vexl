@@ -84,6 +84,7 @@ const nextConfig = {
     '@vexl-next/rest-api',
     '@vexl-next/domain',
     '@vexl-next/cryptography',
+    '@vexl-next/generic-utils',
   ],
 }
 

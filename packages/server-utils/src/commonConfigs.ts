@@ -125,6 +125,12 @@ export const otlpTraceExporterUrlConfig = Config.option(
 
 export const sentryDsnConfig = Config.option(Config.redacted('SENTRY_DSN'))
 
+/**
+ * Base url of the Grafana instance (e.g. https://grafana.vexl.it). When set,
+ * Sentry events include a link to the trace in Grafana Explore.
+ */
+export const grafanaUrlConfig = Config.option(Config.string('GRAFANA_URL'))
+
 export const metricsConfig = Config.option(
   Config.unwrap({
     prometheusPort: Config.number('PROMETHEUS_PORT'),

@@ -23,7 +23,9 @@ All Effect backend services report errors to Sentry through shared code in
   collapse unrelated issues.
 - Events are tagged with `trace_id`/`span_id` of the span active when the error
   was logged, so a Sentry event can be looked up in the tracing backend
-  (Grafana/Tempo). Sentry itself receives no spans.
+  (Grafana/Tempo). Sentry itself receives no spans. When `GRAFANA_URL` is set,
+  events additionally carry a clickable `grafanaTraceUrl` extra that opens the
+  trace in Grafana Explore.
 
 ## Privacy
 
@@ -46,6 +48,7 @@ not undermine that:
 | `SENTRY_DSN` | Per-service Sentry project DSN. Unset = disabled. |
 | `NODE_ENV` | Used as the Sentry `environment`. |
 | `SERVICE_VERSION` | Used as the Sentry `release` (git sha in CI builds). |
+| `GRAFANA_URL` | Optional base url of Grafana (`https://grafana.vexl.it`). When set, events include a `grafanaTraceUrl` link to the trace. |
 
 There is one Sentry project per service. Production/stage DSNs are injected by
 the deployment manifests in the infrastructure repo. For local testing, set

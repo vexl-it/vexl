@@ -107,6 +107,7 @@ const commonServiceEnv = (
   METRICS_QUEUE_NAME: ctx.cfg.infra.redis.metricsQueueName,
   DISABLE_METRICS: ctx.cfg.common.DISABLE_METRICS,
   OTLP_TRACE_EXPORTER_URL: ctx.cfg.common.OTLP_TRACE_EXPORTER_URL,
+  GRAFANA_URL: httpUrl(ctx, 'grafana'),
   ...ctx.cfg.devCryptoKeys,
   ...(app.needs.db !== undefined ? dbEnv(ctx, app.needs.db) : {}),
 })

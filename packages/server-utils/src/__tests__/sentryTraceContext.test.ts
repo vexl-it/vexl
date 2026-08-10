@@ -1,5 +1,5 @@
 import {Effect, Logger, Option, type FiberRefs} from 'effect'
-import {traceContextFromFiberRefs} from '../sentry'
+import {grafanaTraceUrl, traceContextFromFiberRefs} from '../sentry'
 
 const runWithCapturingLogger = async (
   effect: Effect.Effect<void>
@@ -33,5 +33,16 @@ describe('traceContextFromFiberRefs', () => {
   it('returns none when no span is active', async () => {
     const fiberRefs = await runWithCapturingLogger(Effect.logError('boom'))
     expect(Option.isNone(traceContextFromFiberRefs(fiberRefs))).toBe(true)
+  })
+})
+
+describe('grafanaTraceUrl', () => {
+  it('builds an explore link with the trace id, trimming trailing slashes', () => {
+    const url = grafanaTraceUrl('https://grafana.vexl.it/', 'abc123')
+    expect(url).toEqual(
+      `https://grafana.vexl.it/explore?left=${encodeURIComponent(
+        JSON.stringify({queries: [{query: 'abc123', queryType: 'traceql'}]})
+      )}`
+    )
   })
 })

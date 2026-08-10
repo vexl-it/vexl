@@ -2,12 +2,16 @@ import * as Sentry from '@sentry/node'
 import {scrubSensitiveDataInPlace} from '@vexl-next/generic-utils/src/scrubSensitiveData'
 import {
   Cause,
+  Context,
   Effect,
+  FiberRef,
+  FiberRefs,
   Layer,
   Logger,
   LogLevel,
   Option,
   Redacted,
+  Tracer,
   type ConfigError,
 } from 'effect'
 import {
@@ -20,13 +24,26 @@ const toSentryLevel = (logLevel: LogLevel.LogLevel): Sentry.SeverityLevel =>
   logLevel._tag === 'Fatal' ? 'fatal' : 'error'
 
 /**
+ * Reads the tracing span active in the logging fiber. Used to tag Sentry
+ * events with the OpenTelemetry trace id so an event can be looked up in the
+ * tracing backend (Sentry itself receives no spans).
+ */
+export const traceContextFromFiberRefs = (
+  fiberRefs: FiberRefs.FiberRefs
+): Option.Option<{traceId: string; spanId: string}> =>
+  Context.getOption(
+    FiberRefs.getOrDefault(fiberRefs, FiberRef.currentContext),
+    Tracer.ParentSpan
+  ).pipe(Option.map((span) => ({traceId: span.traceId, spanId: span.spanId})))
+
+/**
  * Forwards every log at Error level and above to Sentry. All backend error
  * funnels (makeEndpointEffect, makeMiddlewareEffect, repeatingTask, MQ
  * consumers, runMainInNode) log unexpected errors, so hooking the logger
  * covers them all without touching individual call sites.
  */
 const sentryCaptureLogger = Logger.make(
-  ({annotations, cause, logLevel, message}) => {
+  ({annotations, cause, context, logLevel, message}) => {
     if (!LogLevel.greaterThanEqual(logLevel, LogLevel.Error)) return
 
     const parts = Array.isArray(message) ? message : [message]
@@ -44,11 +61,25 @@ const sentryCaptureLogger = Logger.make(
     if (causeError !== undefined && causeError !== error)
       extra.cause = causeError
 
+    const trace = traceContextFromFiberRefs(context)
+    const traceTags = Option.isSome(trace)
+      ? {
+          tags: {trace_id: trace.value.traceId, span_id: trace.value.spanId},
+          contexts: {
+            trace: {
+              trace_id: trace.value.traceId,
+              span_id: trace.value.spanId,
+            },
+          },
+        }
+      : {}
+
     const level = toSentryLevel(logLevel)
     if (error !== undefined) {
       Sentry.captureException(error, {
         level,
         extra,
+        ...traceTags,
         // Group by error type + messages instead of stack traces. Effect
         // tagged errors are often constructed in shared helpers, so their
         // stacks would lump unrelated failures into a single issue.
@@ -58,6 +89,7 @@ const sentryCaptureLogger = Logger.make(
       Sentry.captureMessage(title ?? 'Error log without message', {
         level,
         extra,
+        ...traceTags,
       })
     }
   }

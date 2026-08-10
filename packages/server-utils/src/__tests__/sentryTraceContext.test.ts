@@ -1,0 +1,37 @@
+import {Effect, Logger, Option, type FiberRefs} from 'effect'
+import {traceContextFromFiberRefs} from '../sentry'
+
+const runWithCapturingLogger = async (
+  effect: Effect.Effect<void>
+): Promise<FiberRefs.FiberRefs> => {
+  let captured: FiberRefs.FiberRefs | undefined
+  const capturingLogger = Logger.make(({context}) => {
+    captured = context
+  })
+  await Effect.runPromise(
+    effect.pipe(Effect.provide(Logger.add(capturingLogger)))
+  )
+  if (captured === undefined) throw new Error('Logger was not called')
+  return captured
+}
+
+describe('traceContextFromFiberRefs', () => {
+  it('finds the active span of the logging fiber', async () => {
+    const fiberRefs = await runWithCapturingLogger(
+      Effect.logError('boom').pipe(Effect.withSpan('test-span'))
+    )
+
+    const trace = traceContextFromFiberRefs(fiberRefs)
+    expect(Option.isSome(trace)).toBe(true)
+    if (Option.isSome(trace)) {
+      expect(trace.value.traceId).toEqual(expect.any(String))
+      expect(trace.value.traceId.length).toBeGreaterThan(0)
+      expect(trace.value.spanId.length).toBeGreaterThan(0)
+    }
+  })
+
+  it('returns none when no span is active', async () => {
+    const fiberRefs = await runWithCapturingLogger(Effect.logError('boom'))
+    expect(Option.isNone(traceContextFromFiberRefs(fiberRefs))).toBe(true)
+  })
+})

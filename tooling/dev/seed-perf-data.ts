@@ -989,17 +989,9 @@ async function phaseMessages(): Promise<void> {
   for (const failure of failures.slice(0, 5)) {
     const error =
       failure.either._tag === 'Left' ? failure.either.left : undefined
-    const notPermitted =
-      typeof error === 'object' &&
-      error !== null &&
-      '_tag' in error &&
-      error._tag === 'NotPermittedToSendMessageToTargetInboxError'
     console.error(
-      `messages failed for chat of user ${failure.seedChat.userIndex}` +
-        (notPermitted
-          ? ' — the request is NOT approved yet. Approve it in the app and re-run --phase messages.'
-          : ':'),
-      notPermitted ? '' : error
+      `messages failed for chat of user ${failure.seedChat.userIndex}:`,
+      error
     )
   }
   console.log(

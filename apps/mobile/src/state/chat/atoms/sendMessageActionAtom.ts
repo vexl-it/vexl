@@ -72,10 +72,7 @@ export default function sendMessageActionAtom(
         }).pipe(
           Effect.match({
             onFailure(e): ChatMessageWithState {
-              if (
-                e._tag === 'ReceiverInboxDoesNotExistError' ||
-                e._tag === 'NotPermittedToSendMessageToTargetInboxError'
-              ) {
+              if (e._tag === 'ReceiverInboxDoesNotExistError') {
                 return {
                   state: 'received',
                   message: {

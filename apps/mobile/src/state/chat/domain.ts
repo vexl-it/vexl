@@ -23,7 +23,6 @@ import {SenderInboxDoesNotExistError} from '@vexl-next/rest-api/src/services/cha
 import {
   ForbiddenMessageTyperror,
   InboxDoesNotExistError,
-  NotPermittedToSendMessageToTargetInboxError,
 } from '@vexl-next/rest-api/src/services/contact/contracts'
 import {ErrorGeneratingChallenge} from '@vexl-next/rest-api/src/services/utils/addChallengeToRequest2'
 import {HashSet, Schema} from 'effect/index'
@@ -77,7 +76,6 @@ export const SendingErrorMessage = Schema.Struct({
     ErrorSigningChallenge,
     InvalidChallengeError,
     InboxDoesNotExistError,
-    NotPermittedToSendMessageToTargetInboxError,
     JsonStringifyError,
     Schema.Struct({_tag: Schema.String}),
     ReadingFileError,

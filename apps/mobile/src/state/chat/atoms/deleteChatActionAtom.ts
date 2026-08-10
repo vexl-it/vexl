@@ -31,9 +31,7 @@ export default function deleteChatActionAtom(
     | Exclude<
         SendMessageApiErrors,
         {
-          _tag:
-            | 'ReceiverInboxDoesNotExistError'
-            | 'NotPermittedToSendMessageToTargetInboxError'
+          _tag: 'ReceiverInboxDoesNotExistError'
         }
       >
     | ParseResult.ParseError
@@ -77,10 +75,7 @@ export default function deleteChatActionAtom(
           ),
       TE.matchW(
         (e) => {
-          if (
-            e._tag === 'ReceiverInboxDoesNotExistError' ||
-            e._tag === 'NotPermittedToSendMessageToTargetInboxError'
-          ) {
+          if (e._tag === 'ReceiverInboxDoesNotExistError') {
             return E.right(null)
           }
 

@@ -66,8 +66,7 @@ export default function blockChatActionAtom(
           (e) => {
             if (
               e._tag === 'SenderInboxDoesNotExistError' ||
-              e._tag === 'ReceiverInboxDoesNotExistError' ||
-              e._tag === 'NotPermittedToSendMessageToTargetInboxError'
+              e._tag === 'ReceiverInboxDoesNotExistError'
             ) {
               return E.right(null)
             }

@@ -17,33 +17,6 @@ export const NotificationServiceReadyQueryParams = Schema.Struct({
   notificationServiceReady: BooleanFromString,
 })
 
-export class RequestCancelledError extends Schema.TaggedError<RequestCancelledError>(
-  'RequestCancelledError'
-)('RequestCancelledError', {
-  status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
-  code: Schema.optionalWith(Schema.Literal('100106'), {
-    default: () => '100106',
-  }),
-}) {}
-
-export class RequestNotFoundError extends Schema.TaggedError<RequestNotFoundError>(
-  'RequestNotFoundError'
-)('RequestNotFoundError', {
-  status: Schema.optionalWith(Schema.Literal(404), {default: () => 404}),
-  code: Schema.optionalWith(Schema.Literal('100104'), {
-    default: () => '100104',
-  }),
-}) {}
-
-export class RequestNotPendingError extends Schema.TaggedError<RequestNotPendingError>(
-  'RequestNotPendingError'
-)('RequestNotPendingError', {
-  status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
-  code: Schema.optionalWith(Schema.Literal('100153'), {
-    default: () => '100153',
-  }),
-}) {}
-
 export class ReceiverInboxDoesNotExistError extends Schema.TaggedError<ReceiverInboxDoesNotExistError>(
   'ReceiverInboxDoesNotExistError'
 )('ReceiverInboxDoesNotExistError', {
@@ -60,12 +33,6 @@ export class SenderInboxDoesNotExistError extends Schema.TaggedError<SenderInbox
   code: Schema.optionalWith(Schema.Literal('100107'), {
     default: () => '100107',
   }),
-}) {}
-
-export class RequestMessagingNotAllowedError extends Schema.TaggedError<RequestMessagingNotAllowedError>(
-  'RequestMessagingNotAllowedError'
-)('RequestMessagingNotAllowedError', {
-  status: Schema.optionalWith(Schema.Literal(403), {default: () => 403}),
 }) {}
 
 export const ServerMessageWithId = Schema.Struct({

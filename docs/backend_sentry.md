@@ -21,6 +21,9 @@ All Effect backend services report errors to Sentry through shared code in
 - Events are grouped by error name + message + log message (not stack), because
   Effect tagged errors are constructed in shared helpers and stacks would
   collapse unrelated issues.
+- Events are tagged with `trace_id`/`span_id` of the span active when the error
+  was logged, so a Sentry event can be looked up in the tracing backend
+  (Grafana/Tempo). Sentry itself receives no spans.
 
 ## Privacy
 

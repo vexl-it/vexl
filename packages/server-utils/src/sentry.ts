@@ -15,6 +15,7 @@ import {
   type ConfigError,
 } from 'effect'
 import {
+  grafanaUrlConfig,
   nodeEnvConfig,
   sentryDsnConfig,
   serviceVersionConfig,
@@ -36,14 +37,27 @@ export const traceContextFromFiberRefs = (
     Tracer.ParentSpan
   ).pipe(Option.map((span) => ({traceId: span.traceId, spanId: span.spanId})))
 
+/** Deep link into Grafana Explore with a TraceQL query for the given trace. */
+export const grafanaTraceUrl = (
+  grafanaBaseUrl: string,
+  traceId: string
+): string => {
+  const query = encodeURIComponent(
+    JSON.stringify({queries: [{query: traceId, queryType: 'traceql'}]})
+  )
+  return `${grafanaBaseUrl.replace(/\/$/, '')}/explore?left=${query}`
+}
+
 /**
  * Forwards every log at Error level and above to Sentry. All backend error
  * funnels (makeEndpointEffect, makeMiddlewareEffect, repeatingTask, MQ
  * consumers, runMainInNode) log unexpected errors, so hooking the logger
  * covers them all without touching individual call sites.
  */
-const sentryCaptureLogger = Logger.make(
-  ({annotations, cause, context, logLevel, message}) => {
+const makeSentryCaptureLogger = (
+  grafanaUrl: Option.Option<string>
+): Logger.Logger<unknown, void> =>
+  Logger.make(({annotations, cause, context, logLevel, message}) => {
     if (!LogLevel.greaterThanEqual(logLevel, LogLevel.Error)) return
 
     const parts = Array.isArray(message) ? message : [message]
@@ -62,6 +76,11 @@ const sentryCaptureLogger = Logger.make(
       extra.cause = causeError
 
     const trace = traceContextFromFiberRefs(context)
+    if (Option.isSome(trace) && Option.isSome(grafanaUrl))
+      extra.grafanaTraceUrl = grafanaTraceUrl(
+        grafanaUrl.value,
+        trace.value.traceId
+      )
     const traceTags = Option.isSome(trace)
       ? {
           tags: {trace_id: trace.value.traceId, span_id: trace.value.spanId},
@@ -92,8 +111,7 @@ const sentryCaptureLogger = Logger.make(
         ...traceTags,
       })
     }
-  }
-)
+  })
 
 /**
  * Initializes Sentry error reporting when SENTRY_DSN is configured and
@@ -116,6 +134,7 @@ export const sentryLayer: Layer.Layer<never, ConfigError.ConfigError> =
 
       const environment = yield* _(nodeEnvConfig)
       const release = yield* _(serviceVersionConfig)
+      const grafanaUrl = yield* _(grafanaUrlConfig)
 
       yield* _(
         Effect.sync(() => {
@@ -138,7 +157,7 @@ export const sentryLayer: Layer.Layer<never, ConfigError.ConfigError> =
       yield* _(Effect.logInfo('Sentry error reporting enabled', {environment}))
 
       return Layer.merge(
-        Logger.add(sentryCaptureLogger),
+        Logger.add(makeSentryCaptureLogger(grafanaUrl)),
         Layer.scopedDiscard(
           Effect.addFinalizer(() =>
             Effect.promise(async () => {

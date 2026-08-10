@@ -78,11 +78,8 @@ export const createQueryNotesForUserPaginated = Effect.gen(function* (_) {
 
   return flow(
     query,
-    Effect.catchAll((e) =>
-      Effect.zipRight(
-        Effect.logError('Error querying notes for user (paginated)', e),
-        Effect.fail(new UnexpectedServerError({status: 500}))
-      )
+    UnexpectedServerError.wrapErrors(
+      'Error querying notes for user (paginated)'
     )
   )
 })

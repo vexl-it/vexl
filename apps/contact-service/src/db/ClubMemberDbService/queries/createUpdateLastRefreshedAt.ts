@@ -34,11 +34,8 @@ export const CreateUpdateLastRefreshedAt = Effect.gen(function* (_) {
 
   return flow(
     query,
-    Effect.catchAll((e) =>
-      Effect.zipRight(
-        Effect.logError('Error in club member updateLastRefreshedAt query', e),
-        Effect.fail(new UnexpectedServerError({status: 500}))
-      )
+    UnexpectedServerError.wrapErrors(
+      'Error in club member updateLastRefreshedAt query'
     ),
     Effect.withSpan('club member updateLastRefreshedAt query')
   )

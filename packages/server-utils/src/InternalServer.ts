@@ -27,10 +27,15 @@ export const makeInternalServer = <E, R>(
       HttpRouter.catchAll((e) =>
         Effect.gen(function* (_) {
           const request = yield* _(HttpServerRequest.HttpServerRequest)
-          yield* _(Effect.logError('Error on internal server', e, request))
+          yield* _(
+            Effect.logError('Error on internal server', e, {
+              method: request.method,
+              url: request.url,
+            })
+          )
           return yield* _(
             HttpServerResponse.json(
-              {message: 'Internal server errror', error: e},
+              {message: 'Internal server error'},
               {status: 500}
             )
           )

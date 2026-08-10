@@ -18,12 +18,7 @@ export const createDeleteInboxByPublicKey = Effect.gen(function* (_) {
 
   return flow(
     query,
-    Effect.catchAll((e) =>
-      Effect.zipRight(
-        Effect.logError('Error in deleteInboxByPublicKey', e),
-        Effect.fail(new UnexpectedServerError({status: 500}))
-      )
-    ),
+    UnexpectedServerError.wrapErrors('Error in deleteInboxByPublicKey'),
     Effect.withSpan('deleteInboxByPublicKey query')
   )
 })

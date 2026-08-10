@@ -50,12 +50,7 @@ export const encryptPublicKey = (
 
     return yield* _(
       encrypt(publicKey),
-      Effect.catchAll((e) =>
-        Effect.zipRight(
-          Effect.logError('Error while encrypting public key', e),
-          Effect.fail(new UnexpectedServerError({status: 500}))
-        )
-      ),
+      UnexpectedServerError.wrapErrors('Error while encrypting public key'),
       Effect.map(brandPublicKeyEncrypted)
     )
   })
@@ -76,11 +71,6 @@ export const decryptPublicKey = (
       Schema.decode(AesGtmCypher),
       Effect.flatMap(decrypt),
       Effect.flatMap(Schema.decode(PublicKeyPemBase64)),
-      Effect.catchAll((e) =>
-        Effect.zipRight(
-          Effect.logError('Error while decrypting publicKey', e),
-          Effect.fail(new UnexpectedServerError({status: 500}))
-        )
-      )
+      UnexpectedServerError.wrapErrors('Error while decrypting publicKey')
     )
   })

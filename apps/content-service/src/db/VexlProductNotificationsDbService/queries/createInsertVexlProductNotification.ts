@@ -84,10 +84,7 @@ export const createInsertVexlProductNotification = Effect.gen(function* (_) {
           return Effect.fail(new DuplicateVexlProductNotificationUuidError())
         }
 
-        return Effect.zipRight(
-          Effect.logError('Error in insertVexlProductNotification query', e),
-          Effect.fail(new UnexpectedServerError({status: 500, cause: e}))
-        )
+        return Effect.fail(new UnexpectedServerError({status: 500, cause: e}))
       }
     ),
     Effect.withSpan('insertVexlProductNotification query')

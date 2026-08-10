@@ -47,9 +47,10 @@ export class CacheService extends Context.Tag('CacheService')<
               expiresAt: unixMillisecondsFromNow(CACHE_LIFETIME_MILISEC),
             })
             .pipe(
-              Effect.withSpan('saveEventsToRedis', {
-                attributes: {events: data},
-              }),
+              Effect.tapError((e) =>
+                Effect.logWarning('Failed to save events to cache', e)
+              ),
+              Effect.withSpan('saveEventsToRedis'),
               Effect.forkDaemon,
               Effect.ignore
             ),
@@ -59,9 +60,10 @@ export class CacheService extends Context.Tag('CacheService')<
               expiresAt: unixMillisecondsFromNow(CACHE_LIFETIME_MILISEC),
             })
             .pipe(
-              Effect.withSpan('saveBlogsToRedis', {
-                attributes: {blogs: data},
-              }),
+              Effect.tapError((e) =>
+                Effect.logWarning('Failed to save blogs to cache', e)
+              ),
+              Effect.withSpan('saveBlogsToRedis'),
               Effect.forkDaemon,
               Effect.ignore
             ),

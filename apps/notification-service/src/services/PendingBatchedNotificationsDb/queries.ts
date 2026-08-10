@@ -50,11 +50,8 @@ export const createInsertPendingEntries = Effect.gen(function* () {
         }
       ),
       Effect.asVoid,
-      Effect.catchAll((e) =>
-        Effect.zipRight(
-          Effect.logError('Error in insertPendingBatchedNotifications', e),
-          Effect.fail(new UnexpectedServerError({status: 500, cause: e}))
-        )
+      UnexpectedServerError.wrapErrors(
+        'Error in insertPendingBatchedNotifications'
       ),
       Effect.withSpan('insertPendingBatchedNotifications query')
     )
@@ -82,11 +79,8 @@ export const createFindOldestPendingRows = Effect.gen(function* () {
 
   return flow(
     query,
-    Effect.catchAll((e) =>
-      Effect.zipRight(
-        Effect.logError('Error in findOldestPendingBatchedNotifications', e),
-        Effect.fail(new UnexpectedServerError({status: 500, cause: e}))
-      )
+    UnexpectedServerError.wrapErrors(
+      'Error in findOldestPendingBatchedNotifications'
     ),
     Effect.withSpan('findOldestPendingBatchedNotifications query')
   )
@@ -114,11 +108,8 @@ export const createDeletePendingRows = Effect.gen(function* () {
       ids,
       Effect.forEach((id) => resolver.execute(id)),
       Effect.asVoid,
-      Effect.catchAll((e) =>
-        Effect.zipRight(
-          Effect.logError('Error in deletePendingBatchedNotifications', e),
-          Effect.fail(new UnexpectedServerError({status: 500, cause: e}))
-        )
+      UnexpectedServerError.wrapErrors(
+        'Error in deletePendingBatchedNotifications'
       ),
       Effect.withSpan('deletePendingBatchedNotifications query')
     )

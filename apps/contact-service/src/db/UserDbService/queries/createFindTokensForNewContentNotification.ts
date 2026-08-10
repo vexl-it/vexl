@@ -48,14 +48,8 @@ export const createFindTokensForNewContentNotification = Effect.gen(
 
     return flow(
       query,
-      Effect.catchAll((e) =>
-        Effect.zipRight(
-          Effect.logError(
-            'Error in FindFirebaseTokensForNewContentNotification',
-            e
-          ),
-          Effect.fail(new UnexpectedServerError({status: 500}))
-        )
+      UnexpectedServerError.wrapErrors(
+        'Error in FindFirebaseTokensForNewContentNotification'
       ),
       Effect.withSpan('FindFirebaseTokensForNewContentNotification query')
     )

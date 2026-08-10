@@ -32,11 +32,9 @@ const processPendingRow = (
     Effect.matchEffect({
       onFailure: (e) =>
         Effect.zipRight(
-          Effect.logError(
-            'Invalid pending Vexl product notification JSON',
-            e,
-            row
-          ),
+          Effect.logError('Invalid pending Vexl product notification JSON', e, {
+            rowId: row.id,
+          }),
           Effect.succeed(Option.some(row.id))
         ),
       onSuccess: (decoded) =>
@@ -51,7 +49,7 @@ const processPendingRow = (
               Effect.logError(
                 'Failed to enqueue pending Vexl product notification',
                 e,
-                decoded
+                {rowId: row.id}
               ),
               Effect.succeed(Option.none<PendingBatchedNotificationRecordId>())
             )

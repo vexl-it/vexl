@@ -12,8 +12,6 @@ const getBackendUrl = (path: string): string =>
     ? CONTENT_API_INTERNAL_URL
     : CONTACT_API_INTERNAL_URL
 
-const MAX_ERROR_BODY_LOG_LENGTH = 4000
-
 const getRequestId = (request: NextRequest): string =>
   request.headers.get('x-request-id') ??
   request.headers.get('cf-ray') ??
@@ -24,11 +22,6 @@ const getContentLength = (body: BodyInit | null): number | null => {
   if (typeof body === 'string') return body.length
   return null
 }
-
-const truncateForLog = (value: string): string =>
-  value.length > MAX_ERROR_BODY_LOG_LENGTH
-    ? `${value.slice(0, MAX_ERROR_BODY_LOG_LENGTH)}...[truncated]`
-    : value
 
 const ABSOLUTE_URL_SCHEME_REGEX = /^[a-z][a-z0-9+.-]*:/i
 
@@ -126,7 +119,9 @@ async function proxyRequest(request: NextRequest, method: string) {
         durationMs,
       })
     } else {
-      console.error('Backoffice proxy backend error', {
+      const logBackendError =
+        backendResponse.status >= 500 ? console.error : console.warn
+      logBackendError('Backoffice proxy backend error', {
         requestId,
         method,
         path,
@@ -135,7 +130,6 @@ async function proxyRequest(request: NextRequest, method: string) {
         statusText: backendResponse.statusText,
         durationMs,
         responseContentType: backendResponse.headers.get('content-type'),
-        responseBody: truncateForLog(responseData),
       })
     }
 

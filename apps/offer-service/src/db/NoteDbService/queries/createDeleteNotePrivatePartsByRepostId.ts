@@ -23,11 +23,8 @@ export const createDeleteNotePrivatePartsByRepostId = Effect.gen(function* (_) {
   )
   return flow(
     DeleteNotePrivatePartsByRepostId.execute,
-    Effect.catchAll((e) =>
-      Effect.zipRight(
-        Effect.logError('Error deleting note private parts by repost id', e),
-        Effect.fail(new UnexpectedServerError({status: 500}))
-      )
+    UnexpectedServerError.wrapErrors(
+      'Error deleting note private parts by repost id'
     )
   )
 })

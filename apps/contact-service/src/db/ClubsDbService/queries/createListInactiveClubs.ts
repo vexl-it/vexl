@@ -22,12 +22,7 @@ export const createListInactiveClubs = Effect.gen(function* (_) {
 
   return flow(
     query,
-    Effect.catchAll((e) =>
-      Effect.zipRight(
-        Effect.logError('Error in listInactiveClubs query', e),
-        Effect.fail(new UnexpectedServerError({status: 500}))
-      )
-    ),
+    UnexpectedServerError.wrapErrors('Error in listInactiveClubs query'),
     Effect.withSpan('listInactiveClubs query')
   )
 })

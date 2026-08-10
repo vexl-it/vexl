@@ -34,12 +34,7 @@ export const createInsertInbox = Effect.gen(function* (_) {
 
   return flow(
     resolver.execute,
-    Effect.catchAll((e) =>
-      Effect.zipRight(
-        Effect.logError('Error in insertInbox', e),
-        Effect.fail(new UnexpectedServerError({status: 500}))
-      )
-    ),
+    UnexpectedServerError.wrapErrors('Error in insertInbox'),
     Effect.withSpan('insertInbox query')
   )
 })

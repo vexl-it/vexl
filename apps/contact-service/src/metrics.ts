@@ -365,7 +365,7 @@ export const reportGaguesLayer = Layer.effectDiscard(
         )
       ),
       Effect.tapError((e) =>
-        Effect.logError('Error while reporting metrics', e)
+        Effect.logWarning('Error while reporting metrics', e)
       ),
       Effect.flatMap(() => Effect.logInfo('Metrics reported')),
       Effect.flatMap(() => Effect.sleep(60_000)),
@@ -399,7 +399,7 @@ export const queryAndReportNumberOfInactiveUsers = Effect.gen(function* (_) {
       )
     ),
     Effect.tapError((e) =>
-      Effect.logError('Error reporting number of inactive users', e)
+      Effect.logWarning('Error reporting number of inactive users', e)
     ),
     Effect.ignore,
     Effect.withSpan('Query number of inactive users')
@@ -452,7 +452,7 @@ export const queryAndReportInactiveUsersByRemindersSent = Effect.gen(
   }
 ).pipe(
   Effect.tapError((e) =>
-    Effect.logError('Error reporting inactive users by reminders sent', e)
+    Effect.logWarning('Error reporting inactive users by reminders sent', e)
   ),
   Effect.ignore,
   Effect.withSpan('Query inactive users by reminders sent')

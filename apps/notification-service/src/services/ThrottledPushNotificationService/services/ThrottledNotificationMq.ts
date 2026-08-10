@@ -93,14 +93,13 @@ export const processThrottledNotificationsWorker = consumerLayer(({token}) =>
       notificationsWaitingToBeIssuedDb.getAndClearWaitingListForToken(token)
     )
     if (pendingNotifications.length === 0) {
-      yield* _(Effect.log('No pending notifications found for token', {token}))
+      yield* _(Effect.log('No pending notifications found for token'))
       return
     }
 
     yield* _(
       Effect.log('Found pending notifications. Issuing', {
         count: pendingNotifications.length,
-        token,
       })
     )
     yield* _(

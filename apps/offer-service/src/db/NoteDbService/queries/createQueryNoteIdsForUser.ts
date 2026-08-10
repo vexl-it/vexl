@@ -51,11 +51,6 @@ export const createQueryNoteIdsForUser = Effect.gen(function* (_) {
   return flow(
     query,
     Effect.map(Array.map((a) => a.noteId)),
-    Effect.catchAll((e) =>
-      Effect.zipRight(
-        Effect.logError('Error querying note ids for user', e),
-        Effect.fail(new UnexpectedServerError({status: 500}))
-      )
-    )
+    UnexpectedServerError.wrapErrors('Error querying note ids for user')
   )
 })

@@ -34,11 +34,6 @@ export const createDeletePrivatePart = Effect.gen(function* (_) {
   )
   return flow(
     DeletePrivatePart.execute,
-    Effect.catchAll((e) =>
-      Effect.zipRight(
-        Effect.logError('Error deleting private part', e),
-        Effect.fail(new UnexpectedServerError({status: 500}))
-      )
-    )
+    UnexpectedServerError.wrapErrors('Error deleting private part')
   )
 })

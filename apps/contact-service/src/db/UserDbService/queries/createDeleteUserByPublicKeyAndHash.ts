@@ -23,12 +23,7 @@ export const createDeleteUserByPublicKeyAndHash = Effect.gen(function* (_) {
 
   return flow(
     query,
-    Effect.catchAll((e) =>
-      Effect.zipRight(
-        Effect.logError('Error in deleteUserByPublicKeyAndHash', e),
-        Effect.fail(new UnexpectedServerError({status: 500}))
-      )
-    ),
+    UnexpectedServerError.wrapErrors('Error in deleteUserByPublicKeyAndHash'),
     Effect.withSpan('deleteUserByPublicKeyAndHash query')
   )
 })

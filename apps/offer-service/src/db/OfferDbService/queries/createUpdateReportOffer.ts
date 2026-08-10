@@ -26,12 +26,5 @@ export const createUpdateReportOffer = Effect.gen(function* (_) {
         sql`offer_id = ${user.offerId}`,
         offerNotExpired(sql, expirationPeriodDays),
       ])}
-    `.pipe(
-      Effect.catchAll((e) =>
-        Effect.zipRight(
-          Effect.logError('Error updaing report offer', e),
-          Effect.fail(new UnexpectedServerError({status: 500}))
-        )
-      )
-    )
+    `.pipe(UnexpectedServerError.wrapErrors('Error updaing report offer'))
 })

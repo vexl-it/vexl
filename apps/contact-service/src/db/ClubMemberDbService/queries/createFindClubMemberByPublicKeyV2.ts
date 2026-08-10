@@ -29,11 +29,8 @@ export const createFindClubMemeberByPublicKeyV2 = Effect.gen(function* (_) {
 
   return flow(
     query,
-    Effect.catchAll((e) =>
-      Effect.zipRight(
-        Effect.logError('Error in findClubMemeberByPublicKeyV2 query', e),
-        Effect.fail(new UnexpectedServerError({status: 500}))
-      )
+    UnexpectedServerError.wrapErrors(
+      'Error in findClubMemeberByPublicKeyV2 query'
     ),
     Effect.withSpan('findClubMemeberByPublicKeyV2 query')
   )

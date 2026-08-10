@@ -20,12 +20,7 @@ export const createQueryAllLastReportedByService = Effect.gen(function* (_) {
 
   return flow(
     query,
-    Effect.catchAll((e) =>
-      Effect.zipRight(
-        Effect.logError('Error in queryAllLastReportedByService', e),
-        Effect.fail(new UnexpectedServerError({status: 500, cause: e}))
-      )
-    ),
+    UnexpectedServerError.wrapErrors('Error in queryAllLastReportedByService'),
     Effect.withSpan('queryAllLastReportedByService query')
   )
 })

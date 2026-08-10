@@ -55,14 +55,8 @@ export const createFindVexlNotificationTokensOfUsersWhoHaveHashAsSecondLevelCont
 
     return flow(
       query,
-      Effect.catchAll((e) =>
-        Effect.zipRight(
-          Effect.logError(
-            'Error in findVexlNotificationTokensOfUsersWhoHaveHashAsSecondLevelContact',
-            e
-          ),
-          Effect.fail(new UnexpectedServerError({status: 500}))
-        )
+      UnexpectedServerError.wrapErrors(
+        'Error in findVexlNotificationTokensOfUsersWhoHaveHashAsSecondLevelContact'
       ),
       Effect.withSpan(
         'findVexlNotificationTokensOfUsersWhoHaveHashAsSecondLevelContact query'

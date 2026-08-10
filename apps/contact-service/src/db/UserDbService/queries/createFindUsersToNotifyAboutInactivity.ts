@@ -68,11 +68,8 @@ export const createFindUsersToNotifyAboutInactivity = Effect.gen(function* (_) {
 
   return flow(
     query,
-    Effect.catchAll((e) =>
-      Effect.zipRight(
-        Effect.logError('Error in findUsersToNotifyAboutInactivity', e),
-        Effect.fail(new UnexpectedServerError({status: 500}))
-      )
+    UnexpectedServerError.wrapErrors(
+      'Error in findUsersToNotifyAboutInactivity'
     ),
     Effect.withSpan('findUsersToNotifyAboutInactivity query')
   )

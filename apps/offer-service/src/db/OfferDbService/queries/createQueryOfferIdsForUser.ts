@@ -58,11 +58,6 @@ export const createQueryOfferIdsForUser = Effect.gen(function* (_) {
   return flow(
     query,
     Effect.map(Array.map((a) => a.offerId)),
-    Effect.catchAll((e) =>
-      Effect.zipRight(
-        Effect.logError('Error querying offer ids for user', e),
-        Effect.fail(new UnexpectedServerError({status: 500}))
-      )
-    )
+    UnexpectedServerError.wrapErrors('Error querying offer ids for user')
   )
 })

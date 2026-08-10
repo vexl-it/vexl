@@ -39,11 +39,6 @@ export const createDeleteNotePrivatePart = Effect.gen(function* (_) {
   )
   return flow(
     DeleteNotePrivatePart.execute,
-    Effect.catchAll((e) =>
-      Effect.zipRight(
-        Effect.logError('Error deleting note private part', e),
-        Effect.fail(new UnexpectedServerError({status: 500}))
-      )
-    )
+    UnexpectedServerError.wrapErrors('Error deleting note private part')
   )
 })

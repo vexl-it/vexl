@@ -150,7 +150,7 @@ export const callRateLimitingCommand = ({
         Schema.decodeUnknown(Schema.Array(Schema.Number))(raw).pipe(
           Effect.catchAll((e) =>
             Effect.zipRight(
-              Effect.logError(
+              Effect.logWarning(
                 'Got unexpected result from rate limiting Redis command',
                 raw
               ),
@@ -181,7 +181,7 @@ export const callRateLimitingCommand = ({
       ),
       Effect.catchAll((e) =>
         Effect.zipRight(
-          Effect.logError('Failed to return rate limiting response', e),
+          Effect.logWarning('Failed to return rate limiting response', e),
           new UnexpectedServerError({
             cause: e,
             message:

@@ -63,11 +63,8 @@ export const createDeletePulledMessagesMessagesByInboxId = Effect.gen(
           )
         )
       ),
-      Effect.catchAll((e) =>
-        Effect.zipRight(
-          Effect.logError('Error in deletePulledMessagesByInboxId', e),
-          Effect.fail(new UnexpectedServerError({status: 500}))
-        )
+      UnexpectedServerError.wrapErrors(
+        'Error in deletePulledMessagesByInboxId'
       ),
       Effect.withSpan('deletePulledMessagesByInboxId find')
     )

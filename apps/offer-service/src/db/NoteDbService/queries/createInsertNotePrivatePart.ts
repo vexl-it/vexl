@@ -33,11 +33,6 @@ export const createInsertNotePrivatePart = Effect.gen(function* (_) {
 
   return flow(
     InsertNotePrivateParts.execute,
-    Effect.catchAll((e) =>
-      Effect.zipRight(
-        Effect.logError('Error inserting note private part', e),
-        Effect.fail(new UnexpectedServerError({status: 500}))
-      )
-    )
+    UnexpectedServerError.wrapErrors('Error inserting note private part')
   )
 })

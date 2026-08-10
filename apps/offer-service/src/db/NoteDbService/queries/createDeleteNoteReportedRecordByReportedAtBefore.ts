@@ -14,14 +14,8 @@ export const createDeleteNoteReportedRecordByReportedAtBefore = Effect.gen(
             now() - interval '1 DAY' * ${deleteOlderThanDays}
           )::date
       `.pipe(
-        Effect.catchAll((e) =>
-          Effect.zipRight(
-            Effect.logError(
-              'Error deleting note reported record by reported at before',
-              e
-            ),
-            Effect.fail(new UnexpectedServerError({status: 500}))
-          )
+        UnexpectedServerError.wrapErrors(
+          'Error deleting note reported record by reported at before'
         )
       )
   }

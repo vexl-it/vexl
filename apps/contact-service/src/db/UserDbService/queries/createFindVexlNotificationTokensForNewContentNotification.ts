@@ -35,14 +35,8 @@ export const createFindVexlNotificationTokensForNewContentNotification =
 
     return flow(
       query,
-      Effect.catchAll((e) =>
-        Effect.zipRight(
-          Effect.logError(
-            'Error in FindVexlNotificationTokensForNewContentNotification',
-            e
-          ),
-          Effect.fail(new UnexpectedServerError({status: 500}))
-        )
+      UnexpectedServerError.wrapErrors(
+        'Error in FindVexlNotificationTokensForNewContentNotification'
       ),
       Effect.withSpan(
         'FindVexlNotificationTokensForNewContentNotification query'

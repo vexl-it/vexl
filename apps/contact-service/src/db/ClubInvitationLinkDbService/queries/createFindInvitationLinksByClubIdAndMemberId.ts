@@ -33,14 +33,8 @@ export const createFindInvitationLinkByClubIdAndMemberId = Effect.gen(
 
     return flow(
       query,
-      Effect.catchAll((e) =>
-        Effect.zipRight(
-          Effect.logError(
-            'Error in findInvitationLinkByClubIdAndMemberId query',
-            e
-          ),
-          Effect.fail(new UnexpectedServerError({status: 500}))
-        )
+      UnexpectedServerError.wrapErrors(
+        'Error in findInvitationLinkByClubIdAndMemberId query'
       ),
       Effect.withSpan('findInvitationLinkByClubIdAndMemberId query')
     )

@@ -44,11 +44,8 @@ export const createUpdateInactivityNotificationSent = Effect.gen(function* (_) {
       (ids) => query({...params, ids}),
       {discard: true}
     ).pipe(
-      Effect.catchAll((e) =>
-        Effect.zipRight(
-          Effect.logError('Error in updateInactivityNotificationSent', e),
-          Effect.fail(new UnexpectedServerError({status: 500}))
-        )
+      UnexpectedServerError.wrapErrors(
+        'Error in updateInactivityNotificationSent'
       ),
       Effect.withSpan('updateInactivityNotificationSent query')
     )

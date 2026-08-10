@@ -24,12 +24,7 @@ export const createListExpiredClubs = Effect.gen(function* (_) {
 
   return flow(
     query,
-    Effect.catchAll((e) =>
-      Effect.zipRight(
-        Effect.logError('Error in listExpiredClubs query', e),
-        Effect.fail(new UnexpectedServerError({status: 500}))
-      )
-    ),
+    UnexpectedServerError.wrapErrors('Error in listExpiredClubs query'),
     Effect.withSpan('listExpiredClubs query')
   )
 })

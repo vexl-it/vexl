@@ -86,12 +86,7 @@ export const createSaveNotificationTokenSecret = Effect.gen(function* () {
 
   return flow(
     (params: CreateNotificationTokenParams) => query(params),
-    Effect.catchAll((e) =>
-      Effect.zipRight(
-        Effect.logError('Error in saveNotificationTokenSecret', e),
-        Effect.fail(new UnexpectedServerError({status: 500}))
-      )
-    ),
+    UnexpectedServerError.wrapErrors('Error in saveNotificationTokenSecret'),
     Effect.withSpan('saveNotificationTokenSecret query')
   )
 })
@@ -113,12 +108,7 @@ export const createSaveNotificationToken = Effect.gen(function* () {
 
   return flow(
     (params: SaveNotificationTokenParams) => query(params),
-    Effect.catchAll((e) =>
-      Effect.zipRight(
-        Effect.logError('Error in saveNotificationToken', e),
-        Effect.fail(new UnexpectedServerError({status: 500}))
-      )
-    ),
+    UnexpectedServerError.wrapErrors('Error in saveNotificationToken'),
     Effect.withSpan('saveNotificationToken query')
   )
 })
@@ -169,12 +159,7 @@ export const createUpdateClientInfo = Effect.gen(function* () {
 
   return flow(
     (params: UpdateClientInfoParams) => query(params),
-    Effect.catchAll((e) =>
-      Effect.zipRight(
-        Effect.logError('Error in updateClientInfo', e),
-        Effect.fail(new UnexpectedServerError({status: 500}))
-      )
-    ),
+    UnexpectedServerError.wrapErrors('Error in updateClientInfo'),
     Effect.withSpan('updateClientInfo query')
   )
 })
@@ -212,12 +197,7 @@ export const createSelectVexlTokens = Effect.gen(function* () {
         query(params),
         Effect.map((records) => Array.map(records, (record) => record.token))
       ),
-    Effect.catchAll((e) =>
-      Effect.zipRight(
-        Effect.logError('Error in selectVexlTokens', e),
-        Effect.fail(new UnexpectedServerError({status: 500, cause: e}))
-      )
-    ),
+    UnexpectedServerError.wrapErrors('Error in selectVexlTokens'),
     Effect.withSpan('selectVexlTokens query')
   )
 })
@@ -242,12 +222,7 @@ export const createFindSecretByNotificationToken = Effect.gen(function* () {
 
   return flow(
     query,
-    Effect.catchAll((e) =>
-      Effect.zipRight(
-        Effect.logError('Error in findSecretByNotificationToken', e),
-        Effect.fail(new UnexpectedServerError({status: 500}))
-      )
-    ),
+    UnexpectedServerError.wrapErrors('Error in findSecretByNotificationToken'),
     Effect.withSpan('findSecretByNotificationToken query')
   )
 })
@@ -272,12 +247,7 @@ export const createFindAllTokensForSecret = Effect.gen(function* () {
 
   return flow(
     query,
-    Effect.catchAll((e) =>
-      Effect.zipRight(
-        Effect.logError('Error in findAllTokensForSecret', e),
-        Effect.fail(new UnexpectedServerError({status: 500}))
-      )
-    ),
+    UnexpectedServerError.wrapErrors('Error in findAllTokensForSecret'),
     Effect.withSpan('findAllTokensForSecret query')
   )
 })
@@ -301,12 +271,7 @@ export const createFindSecretBySecretValue = Effect.gen(function* () {
 
   return flow(
     query,
-    Effect.catchAll((e) =>
-      Effect.zipRight(
-        Effect.logError('Error in findSecretBySecretValue', e),
-        Effect.fail(new UnexpectedServerError({status: 500}))
-      )
-    ),
+    UnexpectedServerError.wrapErrors('Error in findSecretBySecretValue'),
     Effect.withSpan('findSecretBySecretValue query')
   )
 })
@@ -326,12 +291,7 @@ export const createDeleteNotificationToken = Effect.gen(function* () {
 
   return flow(
     resolver.execute,
-    Effect.catchAll((e) =>
-      Effect.zipRight(
-        Effect.logError('Error in deleteNotificationToken', e),
-        Effect.fail(new UnexpectedServerError({status: 500}))
-      )
-    ),
+    UnexpectedServerError.wrapErrors('Error in deleteNotificationToken'),
     Effect.withSpan('deleteNotificationToken query')
   )
 })
@@ -351,12 +311,7 @@ export const createDeleteNotificationSecret = Effect.gen(function* () {
 
   return flow(
     resolver.execute,
-    Effect.catchAll((e) =>
-      Effect.zipRight(
-        Effect.logError('Error in deleteNotificationSecret', e),
-        Effect.fail(new UnexpectedServerError({status: 500}))
-      )
-    ),
+    UnexpectedServerError.wrapErrors('Error in deleteNotificationSecret'),
     Effect.withSpan('deleteNotificationSecret query')
   )
 })

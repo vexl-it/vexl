@@ -15,7 +15,7 @@ export const hashPhoneNumber = (
     Effect.flatMap((crypto) => crypto.signWithHmac(phoneNumber)),
     Effect.map(Schema.decodeSync(HashedPhoneNumber)),
     Effect.tapError((e) =>
-      Effect.logError(e, 'Error while hasing phone number')
+      Effect.logError('Error while hashing phone number', e)
     )
   )
 export const generateUserAuthData = ({
@@ -40,7 +40,7 @@ export const generateUserAuthData = ({
     const signature = yield* _(
       crypto.signEcdsa(dataToSign),
       Effect.tapError((e) =>
-        Effect.logError(e, 'Error while signing user auth data')
+        Effect.logError('Error while signing user auth data', e)
       )
     )
     return {

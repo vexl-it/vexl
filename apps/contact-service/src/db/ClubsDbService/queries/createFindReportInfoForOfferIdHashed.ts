@@ -23,11 +23,8 @@ export const createFindReportInfoForOfferIdHashed = Effect.gen(function* (_) {
 
   return flow(
     query,
-    Effect.catchAll((e) =>
-      Effect.zipRight(
-        Effect.logError('Error querying info for reported club offer', e),
-        Effect.fail(new UnexpectedServerError({status: 500}))
-      )
+    UnexpectedServerError.wrapErrors(
+      'Error querying info for reported club offer'
     )
   )
 })

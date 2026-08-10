@@ -26,12 +26,7 @@ export const createDeleteClubMemeber = Effect.gen(function* (_) {
 
   return flow(
     query,
-    Effect.catchAll((e) =>
-      Effect.zipRight(
-        Effect.logError('Error in deleteClubMemeber query', e),
-        Effect.fail(new UnexpectedServerError({status: 500}))
-      )
-    ),
+    UnexpectedServerError.wrapErrors('Error in deleteClubMemeber query'),
     Effect.withSpan('deleteClubMemeber query')
   )
 })

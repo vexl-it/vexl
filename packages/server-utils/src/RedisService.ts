@@ -163,24 +163,12 @@ export class RedisService extends Context.Tag('RedisService')<
               Duration.toMillis(duration)
             )
         ).pipe(
-          Effect.zipLeft(
-            Effect.logInfo('Acquired Reids lock', {
-              resources,
-              duration,
-            })
-          ),
-          catchAllDefect((e) =>
-            Effect.zipRight(
-              Effect.logError(
-                'Error while acquiring lock',
-                e,
-                resources,
-                duration
-              ),
+          Effect.zipLeft(Effect.logInfo('Acquired Redis lock', {duration})),
+          catchAllDefect(
+            (e) =>
               new RedisLockError({
                 cause: e,
               })
-            )
           )
         )
 
@@ -188,21 +176,15 @@ export class RedisService extends Context.Tag('RedisService')<
         const now = Date.now()
         if (lock.expiration < now) {
           return Effect.logWarning(
-            `Attempted to release an expired lock. Lock time of ${lock.resources.join()} should be increased`,
-            {
-              resources: lock.expiration,
-              overExpirationMillis: now - lock.expiration,
-            }
+            'Attempted to release an expired lock. Lock time should be increased',
+            {overExpirationMillis: now - lock.expiration}
           )
         }
 
         return Effect.promise(async () => await redlock.release(lock)).pipe(
-          Effect.zipLeft(Effect.logInfo('Released Redis lock', lock.resources)),
+          Effect.zipLeft(Effect.logInfo('Released Redis lock')),
           catchAllDefect((e) =>
-            Effect.zipRight(
-              Effect.logError('Error while releasing lock', e, lock),
-              Effect.void
-            )
+            Effect.logWarning('Error while releasing Redis lock', e)
           )
         )
       }
@@ -216,7 +198,7 @@ export class RedisService extends Context.Tag('RedisService')<
             releaseLockEffect
           ).pipe(
             Effect.withSpan('Redis lock', {
-              attributes: {resources, duration},
+              attributes: {duration},
             })
           )
 
@@ -247,11 +229,11 @@ export class RedisService extends Context.Tag('RedisService')<
         }).pipe(
           Effect.catchAllDefect((e) =>
             Effect.zipRight(
-              Effect.logError('Error while reading reddis', e, key),
+              Effect.logError('Error while reading redis', e),
               Effect.fail(new RedisError({cause: e}))
             )
           ),
-          Effect.withSpan('Redis get', {attributes: {key}})
+          Effect.withSpan('Redis get')
         )
 
       const setString = (
@@ -268,11 +250,11 @@ export class RedisService extends Context.Tag('RedisService')<
         }).pipe(
           Effect.catchAllDefect((e) =>
             Effect.zipRight(
-              Effect.logError('Error while writing to reddis', e, key),
+              Effect.logError('Error while writing to redis', e),
               Effect.fail(new RedisError({cause: e}))
             )
           ),
-          Effect.withSpan('Redis set', {attributes: {key, value, expiresAt}})
+          Effect.withSpan('Redis set', {attributes: {expiresAt}})
         )
       }
 
@@ -293,7 +275,7 @@ export class RedisService extends Context.Tag('RedisService')<
           catch: (e) => new RedisError({cause: e}),
         }).pipe(
           Effect.withSpan('Redis set if not exists', {
-            attributes: {key, value, expiresAt},
+            attributes: {expiresAt},
           })
         )
 
@@ -305,7 +287,7 @@ export class RedisService extends Context.Tag('RedisService')<
               cb(Effect.fail(new RedisError({cause: err})))
             } else cb(Effect.succeed(Effect.void))
           })
-        }).pipe(Effect.withSpan('Redis delete', {attributes: {key}}))
+        }).pipe(Effect.withSpan('Redis delete'))
 
       const insertToSet = (
         key: string,
@@ -329,7 +311,7 @@ export class RedisService extends Context.Tag('RedisService')<
 
         return addToSet.pipe(
           Effect.flatMap(() => setExpiration),
-          Effect.withSpan('Redis insertToSet', {attributes: {key, expiresAt}})
+          Effect.withSpan('Redis insertToSet', {attributes: {expiresAt}})
         )
       }
 
@@ -344,9 +326,7 @@ export class RedisService extends Context.Tag('RedisService')<
           catch: (e) => new RedisError({cause: e}),
         })
 
-        return removeFromSet.pipe(
-          Effect.withSpan('Redis deleteFromSet', {attributes: {key}})
-        )
+        return removeFromSet.pipe(Effect.withSpan('Redis deleteFromSet'))
       }
 
       const decodeListResult = Schema.decodeUnknownOption(
@@ -365,7 +345,7 @@ export class RedisService extends Context.Tag('RedisService')<
               cb(Effect.succeed(res === 1))
             }
           })
-        }).pipe(Effect.withSpan('Redis isInSet', {attributes: {key, value}}))
+        }).pipe(Effect.withSpan('Redis isInSet'))
 
       const getSetMembers = (
         key: string
@@ -394,7 +374,7 @@ export class RedisService extends Context.Tag('RedisService')<
                 : Option.none()
             )
           }),
-          Effect.withSpan('Redis getSetMembers', {attributes: {key}})
+          Effect.withSpan('Redis getSetMembers')
         )
 
       const readAndDeleteSet = (
@@ -436,7 +416,7 @@ export class RedisService extends Context.Tag('RedisService')<
                 )
               }
             })
-        }).pipe(Effect.withSpan('Redis readAndDeleteList', {attributes: {key}}))
+        }).pipe(Effect.withSpan('Redis readAndDeleteList'))
 
       const addIntoSortedSet = (
         key: string,
@@ -449,7 +429,7 @@ export class RedisService extends Context.Tag('RedisService')<
           },
           catch: (e) => new RedisError({cause: e}),
         }).pipe(
-          Effect.withSpan('Redis addIntoSortedSet', {attributes: {key, score}})
+          Effect.withSpan('Redis addIntoSortedSet', {attributes: {score}})
         )
 
       const getSortedSet = (
@@ -462,9 +442,7 @@ export class RedisService extends Context.Tag('RedisService')<
               ? await redisClient.zrange(key, 0, -1)
               : await redisClient.zrevrange(key, 0, -1),
           catch: (e) => new RedisError({cause: e}),
-        }).pipe(
-          Effect.withSpan('Redis getSortedSet', {attributes: {key, order}})
-        )
+        }).pipe(Effect.withSpan('Redis getSortedSet', {attributes: {order}}))
 
       const clearSortedSet = (key: string): Effect.Effect<void, RedisError> =>
         Effect.tryPromise({
@@ -472,7 +450,7 @@ export class RedisService extends Context.Tag('RedisService')<
             await redisClient.del(key)
           },
           catch: (e) => new RedisError({cause: e}),
-        }).pipe(Effect.withSpan('Redis clearSortedSet', {attributes: {key}}))
+        }).pipe(Effect.withSpan('Redis clearSortedSet'))
 
       const getAndDropSortedSet = (
         key: string,
@@ -505,7 +483,7 @@ export class RedisService extends Context.Tag('RedisService')<
           catch: (e) => new RedisError({cause: e}),
         }).pipe(
           Effect.withSpan('Redis getAndDropSortedSet', {
-            attributes: {key, order},
+            attributes: {order},
           })
         )
 

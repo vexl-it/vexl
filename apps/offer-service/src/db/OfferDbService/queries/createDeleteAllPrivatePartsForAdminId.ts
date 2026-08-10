@@ -27,11 +27,6 @@ export const createDeleteAllPrivatePartsForAdminId = Effect.gen(function* (_) {
 
   return flow(
     createDeleteAllPrivatePartsForAdminId.execute,
-    Effect.catchAll((e) =>
-      Effect.zipRight(
-        Effect.logError('Error deleting all private parts', e),
-        Effect.fail(new UnexpectedServerError({status: 500}))
-      )
-    )
+    UnexpectedServerError.wrapErrors('Error deleting all private parts')
   )
 })

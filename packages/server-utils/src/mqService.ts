@@ -192,9 +192,7 @@ export const makeMqService = <A, I, R, TAG extends string>(
   ): Layer.Layer<never, MqServiceError, R | R2 | RedisConnectionService> =>
     Layer.effectDiscard(
       Stream.runForEach(jobsStream, (data) =>
-        Effect.withSpan(consume(data), `Consumer/${queueName}`, {
-          attributes: {data},
-        })
+        Effect.withSpan(consume(data), `Consumer/${queueName}`)
       )
     )
 

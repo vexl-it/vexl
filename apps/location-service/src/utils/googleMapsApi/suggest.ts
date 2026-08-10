@@ -57,7 +57,7 @@ export const querySuggest =
         }),
         Effect.catchAll((e) => {
           return Effect.zipRight(
-            Effect.logError('Error while requesting geocode', e),
+            Effect.logWarning('Error while requesting geocode', e),
             new UnexpectedServerError({
               status: 500 as const,
               message: 'ExternalApi' as const,
@@ -99,7 +99,7 @@ export const querySuggest =
     }).pipe(
       Effect.catchTag('ParseError', (e) =>
         Effect.zipRight(
-          Effect.logError('Unexpected response from google api', e),
+          Effect.logWarning('Unexpected response from google api', e),
           new UnexpectedServerError({
             status: 500 as const,
             message: 'ExternalApi' as const,
@@ -108,7 +108,7 @@ export const querySuggest =
       ),
       Effect.catchAllDefect((defect) => {
         return Effect.zipRight(
-          Effect.logError('Error defect while getting geocode', defect),
+          Effect.logWarning('Error defect while getting geocode', defect),
           new UnexpectedServerError({
             status: 500 as const,
             message: 'ExternalApi' as const,

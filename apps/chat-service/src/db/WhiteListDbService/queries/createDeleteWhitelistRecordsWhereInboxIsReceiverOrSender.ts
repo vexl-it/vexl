@@ -30,14 +30,8 @@ export const createDeleteWhitelistRecordsWhereInboxIsReceiverOrSender =
 
     return flow(
       query,
-      Effect.catchAll((e) =>
-        Effect.zipRight(
-          Effect.logError(
-            'Error in DeleteWhitelistRecordsWhereInboxIsReceiverOrSender',
-            e
-          ),
-          Effect.fail(new UnexpectedServerError({status: 500}))
-        )
+      UnexpectedServerError.wrapErrors(
+        'Error in DeleteWhitelistRecordsWhereInboxIsReceiverOrSender'
       ),
       Effect.withSpan(
         'DeleteWhitelistRecordsWhereInboxIsReceiverOrSender query'

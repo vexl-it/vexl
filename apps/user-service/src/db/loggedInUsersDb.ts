@@ -84,30 +84,15 @@ export class LoggedInUsersDbService extends Context.Tag(
       return {
         insertUser: flow(
           insertUserResolver.execute,
-          Effect.catchAll((e) =>
-            Effect.zipRight(
-              Effect.logError('Error while inserting user', e),
-              Effect.fail(new UnexpectedServerError({status: 500}))
-            )
-          )
+          UnexpectedServerError.wrapErrors('Error while inserting user')
         ),
         updatePublicKeyV2: flow(
           updatePublicKeyV2Query,
-          Effect.catchAll((e) =>
-            Effect.zipRight(
-              Effect.logError('Error updating user public key v2', e),
-              Effect.fail(new UnexpectedServerError({status: 500}))
-            )
-          )
+          UnexpectedServerError.wrapErrors('Error updating user public key v2')
         ),
         deleteUser: flow(
           deleteUserResolver.execute,
-          Effect.catchAll((e) =>
-            Effect.zipRight(
-              Effect.logError('Error deleting inserting user', e),
-              Effect.fail(new UnexpectedServerError({status: 500}))
-            )
-          )
+          UnexpectedServerError.wrapErrors('Error deleting inserting user')
         ),
       }
     })

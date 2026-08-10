@@ -28,12 +28,7 @@ export const createUpdateClubMemberPublicKeyV2 = Effect.gen(function* (_) {
 
   return flow(
     query,
-    Effect.catchAll((e) =>
-      Effect.zipRight(
-        Effect.logError('Error in updateClubMemberPublicKeyV2', e),
-        Effect.fail(new UnexpectedServerError({status: 500}))
-      )
-    ),
+    UnexpectedServerError.wrapErrors('Error in updateClubMemberPublicKeyV2'),
     Effect.withSpan('updateClubMemberPublicKeyV2 query')
   )
 })

@@ -66,7 +66,16 @@ export const TaskWorkerLayer = Layer.effectDiscard(
           (task) =>
             processTask(task).pipe(
               Effect.filterOrFail(identity),
-              Effect.zip(deletePendingFromRedis(task.id)),
+              Effect.zip(
+                deletePendingFromRedis(task.id).pipe(
+                  Effect.tapError((e) =>
+                    Effect.logWarning(
+                      'Failed to delete pending task from redis',
+                      e
+                    )
+                  )
+                )
+              ),
               Effect.ignore
             ),
           {concurrency: 20, bufferSize: 100}

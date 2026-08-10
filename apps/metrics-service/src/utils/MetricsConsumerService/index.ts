@@ -42,13 +42,14 @@ export class MetricsConsumerService extends Context.Tag(
                   await runPromise(
                     messageHandler(job).pipe(
                       Effect.tapError((e) =>
-                        Effect.logError('Error handling message', job, e)
+                        Effect.logError('Error handling message', e, {
+                          jobId: job.id,
+                          jobName: job.name,
+                        })
                       ),
                       Effect.andThen(Effect.log('Message consumed')),
                       Effect.withSpan('Processing message', {
-                        attributes: {
-                          job,
-                        },
+                        attributes: {jobId: job.id},
                       })
                     )
                   )

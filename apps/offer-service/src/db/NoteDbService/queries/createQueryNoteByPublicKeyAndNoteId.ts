@@ -55,11 +55,8 @@ export const createQueryNoteByPublicKeyAndNoteId = Effect.gen(function* (_) {
   return flow(
     query,
     Effect.map(Array.head),
-    Effect.catchAll((e) =>
-      Effect.zipRight(
-        Effect.logError('Error querying note by public key and note id', e),
-        Effect.fail(new UnexpectedServerError({status: 500}))
-      )
+    UnexpectedServerError.wrapErrors(
+      'Error querying note by public key and note id'
     )
   )
 })

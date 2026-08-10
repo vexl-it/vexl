@@ -27,12 +27,7 @@ export const createInsertLastReportedByService = Effect.gen(function* (_) {
 
   return flow(
     query,
-    Effect.catchAll((e) =>
-      Effect.zipRight(
-        Effect.logError('Error in insertLastReportedByService', e),
-        Effect.fail(new UnexpectedServerError({status: 500, cause: e}))
-      )
-    ),
+    UnexpectedServerError.wrapErrors('Error in insertLastReportedByService'),
     Effect.withSpan('insertLastReportedByService query')
   )
 })

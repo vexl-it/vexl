@@ -76,14 +76,18 @@ export class MetricsClientService extends Context.Tag('MetricsClientService')<
           ),
           Effect.tapBoth({
             onFailure: (e) =>
-              Effect.logError('Error while reporting metric', {
+              Effect.logWarning('Error while reporting metric', {
                 error: e,
-                message,
+                metricName: message.name,
               }),
             onSuccess: () =>
-              Effect.logInfo('Reported metric successfully', message),
+              Effect.logInfo('Reported metric successfully', {
+                metricName: message.name,
+              }),
           }),
-          Effect.withSpan('reportMetric', {attributes: {message}})
+          Effect.withSpan('reportMetric', {
+            attributes: {metricName: message.name},
+          })
         )
 
       return {reportMetric}

@@ -22,12 +22,7 @@ export const createUpdateInvalidateExpoToken = Effect.gen(function* (_) {
 
   return flow(
     resolver.execute,
-    Effect.catchAll((e) =>
-      Effect.zipRight(
-        Effect.logError('Error in invalidateExpoToken', e),
-        Effect.fail(new UnexpectedServerError({status: 500}))
-      )
-    ),
+    UnexpectedServerError.wrapErrors('Error in invalidateExpoToken'),
     Effect.withSpan('invalidate expo token query')
   )
 })

@@ -26,11 +26,6 @@ export const createInsertClubOfferReportedInfo = Effect.gen(function* (_) {
 
   return flow(
     query,
-    Effect.catchAll((e) =>
-      Effect.zipRight(
-        Effect.logError('Error inserting club offer reported by', e),
-        Effect.fail(new UnexpectedServerError({status: 500}))
-      )
-    )
+    UnexpectedServerError.wrapErrors('Error inserting club offer reported by')
   )
 })

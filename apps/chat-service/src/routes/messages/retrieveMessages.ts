@@ -46,10 +46,12 @@ export const retrieveMessages = HttpApiBuilder.handler(
                 })
               ),
               // if one message fails, make sure to return the rest to not make the inbox unusable
-              Effect.catchAll(() =>
+              Effect.catchAll((e) =>
                 Effect.zipRight(
-                  Effect.logError(
-                    'Failed to decrypt message sender public key'
+                  Effect.logWarning(
+                    'Failed to decrypt message sender public key',
+                    e,
+                    {messageId: oneMessage.id}
                   ),
                   Effect.succeed(Option.none())
                 )

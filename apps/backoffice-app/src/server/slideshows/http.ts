@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/nextjs'
 import {Effect, Schema, type Either, type ParseResult} from 'effect'
 import {NextResponse, type NextRequest} from 'next/server'
 import {
@@ -49,5 +50,6 @@ export const requireAdmin = async (
 
 export const internalServerError = (error: unknown): NextResponse => {
   console.error('Backoffice slideshow API error:', error)
+  Sentry.captureException(error)
   return NextResponse.json({error: 'Internal server error'}, {status: 500})
 }

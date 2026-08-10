@@ -123,6 +123,8 @@ export const otlpTraceExporterUrlConfig = Config.option(
   Config.string('OTLP_TRACE_EXPORTER_URL')
 )
 
+export const sentryDsnConfig = Config.option(Config.redacted('SENTRY_DSN'))
+
 export const metricsConfig = Config.option(
   Config.unwrap({
     prometheusPort: Config.number('PROMETHEUS_PORT'),

@@ -17,6 +17,7 @@ import {
 } from './commonConfigs'
 import {devToolsLayer} from './devToolsLayer'
 import {makeMemoryDebugLayer} from './makeMemoryDebugLayer'
+import {sentryLayer} from './sentry'
 
 const stringifyCircular = (
   obj: unknown,
@@ -155,6 +156,9 @@ export const runMainInNode = <A, E>(
       Effect.provide(memoryDebugLayer),
       Effect.provide(NodeSdkLive),
       Effect.provide(devToolsLayer(nodeEnvConfig)),
+      Effect.provide(
+        options?.disableErrorReporting === true ? Layer.empty : sentryLayer
+      ),
       Effect.provide(logger),
       Effect.provide(NodeContext.layer)
     ),

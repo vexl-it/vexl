@@ -68,15 +68,17 @@ These are referred to as *common* in the tables below.
 | Metric | Type | Attributes | Reported when |
 | --- | --- | --- | --- |
 | `MESSAGE_SENT` | Increment | common | A message is stored into an inbox — direct message, batch send, messaging request/cancel/approve/disapprove, or leave-chat message. |
-| `REQUEST_SENT` | Increment | common | Messaging request is sent (V1 and V2 endpoints). |
-| `REQUEST_CANCELED` | Increment | common | Messaging request is canceled (V1 and V2 endpoints). |
-| `REQUEST_APPROVED` | Increment | common | Messaging request is approved. |
-| `REQUEST_REJECTED` | Increment | common | Messaging request is disapproved. |
+| `REQUEST_SENT` | Increment | common | Messaging request is sent — from the `sendMessage`/`sendMessages` endpoints when the client-declared `messageType` is `REQUEST_MESSAGING`, and from the legacy V1/V2 handshake compat endpoints. |
+| `REQUEST_CANCELED` | Increment | common | Messaging request is canceled — from `sendMessage`/`sendMessages` (`messageType` `CANCEL_REQUEST_MESSAGING`) and the legacy V1/V2 handshake compat endpoints. |
+| `REQUEST_APPROVED` | Increment | common | Messaging request is approved — from `sendMessage`/`sendMessages` (`messageType` `APPROVE_MESSAGING`) and the legacy V1/V2 handshake compat endpoints. |
+| `REQUEST_REJECTED` | Increment | common | Messaging request is disapproved — from `sendMessage`/`sendMessages` (`messageType` `DISAPPROVE_MESSAGING`) and the legacy V1/V2 handshake compat endpoints. |
 | `CHAT_CLOSED` | Increment | common | User leaves a chat. |
-| `MESSAGE_FETCHED_AND_REMOVED` | Increment (value = count) | common + `messageAgeSeconds` | Client confirms pulled messages, which deletes them from the inbox. `messageAgeSeconds` is the average age of the removed messages (seconds since the server accepted them); `unknown` for legacy rows without a received timestamp. |
+| `MESSAGE_FETCHED_AND_REMOVED` | Increment (value = count) | common + `messageAgeSeconds` | Client confirms pulled messages, which deletes them from the inbox. `messageAgeSeconds` is the average age of the removed messages (seconds since the server accepted them); `unknown` when no messages were pulled (average of an empty set). |
 | `MESSAGE_EXPIRED` | Increment (value = count) | — | Expired-messages cleanup task deletes old undelivered messages. |
 | `TOTAL_INBOXES` | Total | — | Gauge, every 60 s; total inboxes. |
 | `TOTAL_INBOXES_WITH_UNREAD_MESSAGES` | Total | — | Gauge, every 60 s; inboxes that have undelivered messages waiting. |
+
+`REQUEST_SENT`/`REQUEST_CANCELED`/`REQUEST_APPROVED`/`REQUEST_REJECTED` reported from `sendMessage`/`sendMessages` rely on the `messageType` the client declares in the request — the server cannot inspect encrypted message content, so these counts are best-effort and can be spoofed by a malicious client.
 
 ## notification-service
 

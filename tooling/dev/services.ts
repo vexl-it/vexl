@@ -404,6 +404,9 @@ const pickSecrets = (
   return result
 }
 
+/** Secrets injected into every backend service when present in `.env.local`. */
+const commonServiceSecretKeys: readonly string[] = ['SENTRY_DSN']
+
 /**
  * Build the final env for one app: shared backend block (services only) + the
  * app's own extras + declared `.env.local` secrets layered on top (secrets win).
@@ -413,7 +416,13 @@ export const buildFinalEnv = (
   ctx: EnvContext,
   secrets: Secrets
 ): Record<string, string> => {
-  const base = app.kind === 'service' ? commonServiceEnv(ctx, app) : {}
+  const base =
+    app.kind === 'service'
+      ? {
+          ...commonServiceEnv(ctx, app),
+          ...pickSecrets(commonServiceSecretKeys, secrets),
+        }
+      : {}
   return {
     ...base,
     ...app.buildEnv(ctx),

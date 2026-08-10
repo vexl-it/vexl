@@ -54,14 +54,8 @@ export const createFindTokensOfUsersWhoDirectlyImportedHash = Effect.gen(
 
     return flow(
       query,
-      Effect.catchAll((e) =>
-        Effect.zipRight(
-          Effect.logError(
-            'Error in findTokensOfUsersWhoDirectlyImportedHash',
-            e
-          ),
-          Effect.fail(new UnexpectedServerError({status: 500}))
-        )
+      UnexpectedServerError.wrapErrors(
+        'Error in findTokensOfUsersWhoDirectlyImportedHash'
       ),
       Effect.withSpan('findTokensOfUsersWhoDirectlyImportedHash query')
     )

@@ -37,11 +37,6 @@ export const createQueryNoteIdByRepostId = Effect.gen(function* (_) {
     QueryNoteIdByRepostId.execute,
     Effect.map(Array.head),
     Effect.map(Option.map((one) => one.noteId)),
-    Effect.catchAll((e) =>
-      Effect.zipRight(
-        Effect.logError('Error querying note id by repost id', e),
-        Effect.fail(new UnexpectedServerError({status: 500}))
-      )
-    )
+    UnexpectedServerError.wrapErrors('Error querying note id by repost id')
   )
 })

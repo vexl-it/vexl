@@ -18,12 +18,7 @@ export const createDeleteWhitelistRecord = Effect.gen(function* (_) {
 
   return flow(
     query,
-    Effect.catchAll((e) =>
-      Effect.zipRight(
-        Effect.logError('Error in deleteWhitelistRecord', e),
-        Effect.fail(new UnexpectedServerError({status: 500}))
-      )
-    ),
+    UnexpectedServerError.wrapErrors('Error in deleteWhitelistRecord'),
     Effect.withSpan('deleteWhitelistRecord query')
   )
 })

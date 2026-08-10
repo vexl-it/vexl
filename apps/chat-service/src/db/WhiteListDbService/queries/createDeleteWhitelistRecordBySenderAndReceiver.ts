@@ -28,14 +28,8 @@ export const createDeleteWhitelistRecordBySenderAndReceiver = Effect.gen(
 
     return flow(
       query,
-      Effect.catchAll((e) =>
-        Effect.zipRight(
-          Effect.logError(
-            'Error in deleteWhitelistRecordBySenderAndReceiver',
-            e
-          ),
-          Effect.fail(new UnexpectedServerError({status: 500}))
-        )
+      UnexpectedServerError.wrapErrors(
+        'Error in deleteWhitelistRecordBySenderAndReceiver'
       ),
       Effect.withSpan('deleteWhitelistRecordBySenderAndReceiver query')
     )

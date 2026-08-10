@@ -46,12 +46,7 @@ export const createListClubs = Effect.gen(function* (_) {
 
   return flow(
     query,
-    Effect.catchAll((e) =>
-      Effect.zipRight(
-        Effect.logError('Error in listClubs query', e),
-        Effect.fail(new UnexpectedServerError({status: 500}))
-      )
-    ),
+    UnexpectedServerError.wrapErrors('Error in listClubs query'),
     Effect.withSpan('listClubs query')
   )
 })

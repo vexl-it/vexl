@@ -35,14 +35,8 @@ export const createClearVexlNotificationTokenHeldByOtherUsers = Effect.gen(
 
     return flow(
       query,
-      Effect.catchAll((e) =>
-        Effect.zipRight(
-          Effect.logError(
-            'Error in clearVexlNotificationTokenHeldByOtherUsers',
-            e
-          ),
-          Effect.fail(new UnexpectedServerError({status: 500}))
-        )
+      UnexpectedServerError.wrapErrors(
+        'Error in clearVexlNotificationTokenHeldByOtherUsers'
       ),
       Effect.withSpan('clearVexlNotificationTokenHeldByOtherUsers query')
     )

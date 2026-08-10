@@ -47,12 +47,7 @@ export const createUpdateRefreshUser = Effect.gen(function* (_) {
 
   return flow(
     query,
-    Effect.catchAll((e) =>
-      Effect.zipRight(
-        Effect.logError('Error in updateRefreshUser', e),
-        Effect.fail(new UnexpectedServerError({status: 500}))
-      )
-    ),
+    UnexpectedServerError.wrapErrors('Error in updateRefreshUser'),
     Effect.withSpan('updateRefreshUser query')
   )
 })

@@ -116,9 +116,9 @@ export const UpdatesServerLive = Layer.scopedDiscard(
         Stream.debounce('1 second'),
         Stream.tap(() => Effect.log('Syncing new users')),
         Stream.runForEach(() => syncPubKeyToCountryEffect),
-        Effect.catchAll((e) => Effect.log('Error while syncing users', e)),
+        Effect.catchAll((e) => Effect.logError('Error while syncing users', e)),
         Effect.catchAllDefect((e) =>
-          Effect.log('Defect while syncing users', e)
+          Effect.logError('Defect while syncing users', e)
         ),
         Effect.fork
       )

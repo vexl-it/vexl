@@ -22,12 +22,7 @@ export const createFindInboxByPublicKey = Effect.gen(function* (_) {
 
   return flow(
     query,
-    Effect.catchAll((e) =>
-      Effect.zipRight(
-        Effect.logError('Error in findInboxByPublicKey', e),
-        Effect.fail(new UnexpectedServerError({status: 500}))
-      )
-    ),
+    UnexpectedServerError.wrapErrors('Error in findInboxByPublicKey'),
     Effect.withSpan('findInboxByPublicKey query')
   )
 })

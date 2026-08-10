@@ -215,7 +215,7 @@ export const reportMetricsLayer = Layer.effectDiscard(
         Effect.logInfo('Reporting metrics'),
         Effect.all([queryTotalInboxes, queryUnreadInboxes])
       ),
-      Effect.tapError((e) => Effect.logError(`Error reporting metrics`, e)),
+      Effect.tapError((e) => Effect.logWarning(`Error reporting metrics`, e)),
       Effect.tap(() => Effect.logInfo('Metrics reported')),
       Effect.ignore,
       Effect.flatMap(() => Effect.sleep(60_000)),

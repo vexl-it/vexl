@@ -26,14 +26,8 @@ export const createListClubsWithExceededReportsCount = Effect.gen(
 
     return flow(
       query,
-      Effect.catchAll((e) =>
-        Effect.zipRight(
-          Effect.logError(
-            'Error in listClubsWithExceededReportsCount query',
-            e
-          ),
-          Effect.fail(new UnexpectedServerError({status: 500}))
-        )
+      UnexpectedServerError.wrapErrors(
+        'Error in listClubsWithExceededReportsCount query'
       ),
       Effect.withSpan('listClubsWithExceededReportsCount query')
     )

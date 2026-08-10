@@ -33,11 +33,8 @@ export const createFindWhitelistRecordBySenderAndReceiver = Effect.gen(
 
     return flow(
       query,
-      Effect.catchAll((e) =>
-        Effect.zipRight(
-          Effect.logError('Error in findWhitelistRecordBySenderAndReceiver', e),
-          Effect.fail(new UnexpectedServerError({status: 500}))
-        )
+      UnexpectedServerError.wrapErrors(
+        'Error in findWhitelistRecordBySenderAndReceiver'
       ),
       Effect.withSpan('findWhitelistRecordBySenderAndReceiver find')
     )

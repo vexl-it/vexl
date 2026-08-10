@@ -33,14 +33,8 @@ export const createDeleteClubMembersLastActiveBefore = Effect.gen(
 
     return flow(
       query,
-      Effect.catchAll((e) =>
-        Effect.zipRight(
-          Effect.logError(
-            'Error in deleteClubMemebersLastActiveBefore query',
-            e
-          ),
-          Effect.fail(new UnexpectedServerError({status: 500}))
-        )
+      UnexpectedServerError.wrapErrors(
+        'Error in deleteClubMemebersLastActiveBefore query'
       ),
       Effect.withSpan('deleteClubMemebersLastActiveBefore query')
     )

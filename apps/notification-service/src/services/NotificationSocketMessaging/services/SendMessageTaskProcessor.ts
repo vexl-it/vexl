@@ -1,13 +1,4 @@
-import {
-  Array,
-  Context,
-  Effect,
-  flow,
-  identity,
-  Layer,
-  Match,
-  pipe,
-} from 'effect/index'
+import {Array, Context, Effect, flow, identity, Layer, pipe} from 'effect/index'
 import {ThrottledPushNotificationService} from '../../ThrottledPushNotificationService'
 import {type SendMessageTask} from '../domain'
 import {LocalConnectionRegistry} from './LocalConnectionRegistry'
@@ -49,40 +40,19 @@ export class TimeoutProcessor extends Context.Tag('TimeoutProcessor')<
       const {issuePushNotification} = yield* _(ThrottledPushNotificationService)
 
       return (task: SendMessageTask) =>
-        Match.value(task).pipe(
-          Match.tag('NewChatMessageNoticeSendTask', (t) =>
-            pipe(issuePushNotification(t), Effect.ignore)
-          ),
-          Match.tag('NewUserNoticeSendTask', (t) =>
-            pipe(issuePushNotification(t), Effect.ignore)
-          ),
-          Match.tag('NewClubUserNoticeSendTask', (t) =>
-            pipe(issuePushNotification(t), Effect.ignore)
-          ),
-          Match.tag('UserAdmittedToClubNoticeSendTask', (t) =>
-            pipe(issuePushNotification(t), Effect.ignore)
-          ),
-          Match.tag('UserInactivityNoticeSendTask', (t) =>
-            pipe(issuePushNotification(t), Effect.ignore)
-          ),
-          Match.tag('UserLoginOnDifferentDeviceNoticeSendTask', (t) =>
-            pipe(issuePushNotification(t), Effect.ignore)
-          ),
-          Match.tag('ClubFlaggedNoticeSendTask', (t) =>
-            pipe(issuePushNotification(t), Effect.ignore)
-          ),
-          Match.tag('ClubExpiredNoticeSendTask', (t) =>
-            pipe(issuePushNotification(t), Effect.ignore)
-          ),
-          Match.tag('NewContentNoticeSendTask', (t) =>
-            pipe(issuePushNotification(t), Effect.ignore)
-          ),
-          Match.tag('VexlProductNotificationSendTask', (t) =>
-            pipe(issuePushNotification(t), Effect.ignore)
-          ),
-          Match.tag('StreamOnlyChatMessageSendTask', () => Effect.void),
-          Match.exhaustive
-        )
+        task._tag === 'StreamOnlyChatMessageSendTask'
+          ? Effect.void
+          : pipe(
+              issuePushNotification(task),
+              Effect.tapError((e) =>
+                Effect.logError(
+                  'Failed to issue push notification for timed out socket message',
+                  e,
+                  {taskType: task._tag}
+                )
+              ),
+              Effect.ignore
+            )
     })
   )
 }

@@ -56,6 +56,9 @@ export const issueStreamOnlyMessageHandler = HttpApiBuilder.handler(
               minimalClientVersion: req.payload.minimalOtherSideVersion,
             })
           ),
+          Effect.tapError((e) =>
+            Effect.logError('Failed to send stream only chat message', e)
+          ),
           Effect.ignore
         )
         return {}

@@ -64,11 +64,8 @@ export const createQueryOfferByPublicKeyAndOfferId = Effect.gen(function* (_) {
   return flow(
     query,
     Effect.map(Array.head),
-    Effect.catchAll((e) =>
-      Effect.zipRight(
-        Effect.logError('Error querying offer by public key and offer id', e),
-        Effect.fail(new UnexpectedServerError({status: 500}))
-      )
+    UnexpectedServerError.wrapErrors(
+      'Error querying offer by public key and offer id'
     )
   )
 })

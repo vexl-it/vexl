@@ -47,17 +47,12 @@ export const generateChallengeForPublicKey = (
       Effect.flatMap(Schema.decode(UpgradeAuthChallenge))
     )
   }).pipe(
-    Effect.catchAll((e) =>
-      Effect.zipRight(
-        Effect.logError('Error generating challenge for public key', {
-          publicKey,
-          error: e,
-        }),
+    Effect.catchAll(
+      (e) =>
         new UnexpectedServerError({
           message: 'Failed to generate challenge for public key',
           cause: e,
         })
-      )
     )
   )
 

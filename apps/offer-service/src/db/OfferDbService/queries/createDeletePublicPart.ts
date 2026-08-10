@@ -21,11 +21,6 @@ export const createDeletePublicPart = Effect.gen(function* (_) {
   )
   return flow(
     DeletePublicPart.execute,
-    Effect.catchAll((e) =>
-      Effect.zipRight(
-        Effect.logError('Error deleting public part', e),
-        Effect.fail(new UnexpectedServerError({status: 500}))
-      )
-    )
+    UnexpectedServerError.wrapErrors('Error deleting public part')
   )
 })

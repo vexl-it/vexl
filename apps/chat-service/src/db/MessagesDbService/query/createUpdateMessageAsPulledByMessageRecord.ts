@@ -22,11 +22,8 @@ export const createUpdateMessageAsPulledByMessageRecord = Effect.gen(
 
     return flow(
       resolver.execute,
-      Effect.catchAll((e) =>
-        Effect.zipRight(
-          Effect.logError('Error in updateMessageAsPulledByInboxId', e),
-          Effect.fail(new UnexpectedServerError({status: 500}))
-        )
+      UnexpectedServerError.wrapErrors(
+        'Error in updateMessageAsPulledByInboxId'
       ),
       Effect.withSpan('updateMessageAsPulledByInboxId find')
     )

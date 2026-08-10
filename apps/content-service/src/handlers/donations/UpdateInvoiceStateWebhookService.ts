@@ -68,40 +68,19 @@ export class UpdateInvoiceStateWebhookService extends Context.Tag(
             Effect.catchAll(
               (
                 e
-              ): Effect.Effect<
-                never,
-                UnexpectedServerError | NotFoundError
-              > => {
-                if (
-                  e._tag === 'NoSuchElementException' ||
-                  e._tag === 'RedisError'
-                )
-                  return Effect.zipLeft(
-                    Effect.fail(
-                      new NotFoundError({
-                        status: 404,
-                        message:
-                          'Entry not found in redis and failed to fetch from BTC pay server',
-                      })
-                    ),
-                    Effect.logError('Entry not found in redis error', e)
-                  )
-
-                return Effect.zipLeft(
-                  Effect.fail(
-                    new UnexpectedServerError({
+              ): Effect.Effect<never, UnexpectedServerError | NotFoundError> =>
+                e._tag === 'NoSuchElementException'
+                  ? new NotFoundError({
+                      status: 404,
+                      message:
+                        'Entry not found in redis and failed to fetch from BTC pay server',
+                    })
+                  : new UnexpectedServerError({
                       status: 500,
                       message:
                         'Redis error when reading value of invoice state',
                       cause: e,
                     })
-                  ),
-                  Effect.logError(
-                    'Redis error when reading value of invoice state',
-                    e
-                  )
-                )
-              }
             )
           ),
       } satisfies UpdateInvoiceStateWebhookOperations

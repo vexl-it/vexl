@@ -42,14 +42,8 @@ export const createFindVexlNotificationTokensOfUsersWhoDirectlyImportedHash =
 
     return flow(
       query,
-      Effect.catchAll((e) =>
-        Effect.zipRight(
-          Effect.logError(
-            'Error in findVexlNotificationTokensOfUsersWhoDirectlyImportedHash',
-            e
-          ),
-          Effect.fail(new UnexpectedServerError({status: 500}))
-        )
+      UnexpectedServerError.wrapErrors(
+        'Error in findVexlNotificationTokensOfUsersWhoDirectlyImportedHash'
       ),
       Effect.withSpan(
         'findVexlNotificationTokensOfUsersWhoDirectlyImportedHash query'

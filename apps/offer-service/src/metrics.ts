@@ -637,7 +637,7 @@ export const reportMetricsLayer = Layer.effectDiscard(
           queryAndReportTotalOffersFlagged,
         ])
       ),
-      Effect.tapError((e) => Effect.logError(`Error reporting metrics`, e)),
+      Effect.tapError((e) => Effect.logWarning(`Error reporting metrics`, e)),
       Effect.tap(() => Effect.logInfo('Metrics reported')),
       Effect.flatMap(() => Effect.sleep('10 minutes')),
       Effect.forever,

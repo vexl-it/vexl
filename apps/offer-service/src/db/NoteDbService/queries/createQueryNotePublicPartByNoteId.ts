@@ -25,11 +25,8 @@ export const createQueryNotePublicPartByNoteId = Effect.gen(function* (_) {
   return flow(
     query,
     Effect.map(Array.head),
-    Effect.catchAll((e) =>
-      Effect.zipRight(
-        Effect.logError('Error querying note public part by note id', e),
-        Effect.fail(new UnexpectedServerError({status: 500}))
-      )
+    UnexpectedServerError.wrapErrors(
+      'Error querying note public part by note id'
     )
   )
 })

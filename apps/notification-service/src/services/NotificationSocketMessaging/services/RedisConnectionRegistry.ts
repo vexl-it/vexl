@@ -195,10 +195,24 @@ export class RedisConnectionRegistry extends Context.Tag(
           ),
         removeConnection: (connectionId, notificationToken) => {
           return Effect.all([
-            Effect.ignore(
-              deleteConnectionId({connectionId, notificationToken})
+            deleteConnectionId({connectionId, notificationToken}).pipe(
+              Effect.tapError((e) =>
+                Effect.logWarning(
+                  'Failed to delete connection id from redis',
+                  e
+                )
+              ),
+              Effect.ignore
             ),
-            Effect.ignore(deleteConnectionInfo(connectionId)),
+            deleteConnectionInfo(connectionId).pipe(
+              Effect.tapError((e) =>
+                Effect.logWarning(
+                  'Failed to delete connection info from redis',
+                  e
+                )
+              ),
+              Effect.ignore
+            ),
           ])
         },
       }

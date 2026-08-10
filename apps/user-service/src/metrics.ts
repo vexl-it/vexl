@@ -87,7 +87,7 @@ export const reportMetricsLayer = Layer.effectDiscard(
 
     yield* _(
       Effect.zip(Effect.logInfo('Reporting metrics'), queryNumberOfUsers),
-      Effect.tapError((e) => Effect.logError(`Error reporting metrics`, e)),
+      Effect.tapError((e) => Effect.logWarning(`Error reporting metrics`, e)),
       Effect.tap(() => Effect.logInfo('Metrics reported')),
       Effect.flatMap(() => Effect.sleep(60_000)),
       Effect.forever,

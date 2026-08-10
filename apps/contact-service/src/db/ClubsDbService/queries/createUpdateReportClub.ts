@@ -25,12 +25,7 @@ export const createUpdateReportClub = Effect.gen(function* (_) {
 
   return flow(
     query,
-    Effect.catchAll((e) =>
-      Effect.zipRight(
-        Effect.logError('Error updaing report club', e),
-        Effect.fail(new UnexpectedServerError({status: 500}))
-      )
-    ),
+    UnexpectedServerError.wrapErrors('Error updaing report club'),
     Effect.withSpan('updateReportClub query')
   )
 })

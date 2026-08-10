@@ -83,14 +83,8 @@ export const createFindCommonFriendsByOwnerHashAndPublicKeysPaginated =
 
     return flow(
       query,
-      Effect.catchAll((e) =>
-        Effect.zipRight(
-          Effect.logError(
-            'Error in findCommonFriendsByOwnerHashAndPublicKeyPaginated',
-            e
-          ),
-          Effect.fail(new UnexpectedServerError({status: 500}))
-        )
+      UnexpectedServerError.wrapErrors(
+        'Error in findCommonFriendsByOwnerHashAndPublicKeyPaginated'
       ),
       Effect.withSpan('findCommonFriendsByOwnerHashAndPublicKeyPaginated query')
     )

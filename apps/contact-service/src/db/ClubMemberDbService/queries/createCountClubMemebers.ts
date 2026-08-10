@@ -30,12 +30,7 @@ export const createCountClubMemebers = Effect.gen(function* (_) {
   return flow(
     query,
     Effect.map((result) => result.countResult),
-    Effect.catchAll((e) =>
-      Effect.zipRight(
-        Effect.logError('Error in countClubMemebers query', e),
-        Effect.fail(new UnexpectedServerError({status: 500}))
-      )
-    ),
+    UnexpectedServerError.wrapErrors('Error in countClubMemebers query'),
     Effect.withSpan('countClubMemebers query')
   )
 })

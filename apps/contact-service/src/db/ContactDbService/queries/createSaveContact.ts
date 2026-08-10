@@ -26,12 +26,7 @@ export const createInsertContact = Effect.gen(function* (_) {
 
   return flow(
     resolver.execute,
-    Effect.catchAll((e) =>
-      Effect.zipRight(
-        Effect.logError('Error in insertContact', e),
-        Effect.fail(new UnexpectedServerError({status: 500}))
-      )
-    ),
+    UnexpectedServerError.wrapErrors('Error in insertContact'),
     Effect.withSpan('insertContact query')
   )
 })

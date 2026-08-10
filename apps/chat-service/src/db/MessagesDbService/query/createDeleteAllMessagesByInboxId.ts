@@ -18,12 +18,7 @@ export const createDeleteAllMessagesByInboxId = Effect.gen(function* (_) {
 
   return flow(
     query,
-    Effect.catchAll((e) =>
-      Effect.zipRight(
-        Effect.logError('Error in deleteAllMessagesByInboxId', e),
-        Effect.fail(new UnexpectedServerError({status: 500}))
-      )
-    ),
+    UnexpectedServerError.wrapErrors('Error in deleteAllMessagesByInboxId'),
     Effect.withSpan('deleteAllMessagesByInboxId find')
   )
 })

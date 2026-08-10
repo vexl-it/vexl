@@ -1,4 +1,3 @@
-import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {createNotificationTrackingId} from '@vexl-next/domain/src/general/NotificationTrackingId.brand'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {SendingNotificationError} from '@vexl-next/rest-api/src/services/notification/contract'
@@ -35,7 +34,7 @@ export const ProcessUserNotificationsWorker =
       if (!vexlNotificationTokenOrExpoToken) {
         yield* Effect.logWarning(
           'No notification token found in the entry, skipping processing',
-          entry
+          {entryType: entry._tag}
         )
 
         return
@@ -161,14 +160,9 @@ export const ProcessUserNotificationsWorker =
       )
     }).pipe(
       Effect.catchAll((e) =>
-        Effect.zipRight(
-          Effect.logError('Failed to process user notification', e, entry),
-          new UnexpectedServerError({
-            message: 'Failed to issue push notification',
-            cause: e,
-          })
-        )
-      ),
-      Effect.ignore
+        Effect.logError('Failed to process user notification', e, {
+          entryType: entry._tag,
+        })
+      )
     )
   )

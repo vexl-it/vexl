@@ -28,14 +28,8 @@ export const createQueryAllPrivateRecordsByPublicRecordId = Effect.gen(
     )
     return flow(
       QueryOffer.execute,
-      Effect.catchAll((e) =>
-        Effect.zipRight(
-          Effect.logError(
-            'Error quering all private records by public record id',
-            e
-          ),
-          Effect.fail(new UnexpectedServerError({status: 500}))
-        )
+      UnexpectedServerError.wrapErrors(
+        'Error quering all private records by public record id'
       )
     )
   }

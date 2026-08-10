@@ -21,12 +21,5 @@ export const createUpdateReportNote = Effect.gen(function* (_) {
         report = report + 1
       WHERE
         ${sql.and([sql`note_id = ${request.noteId}`, noteNotExpired(sql)])}
-    `.pipe(
-      Effect.catchAll((e) =>
-        Effect.zipRight(
-          Effect.logError('Error updating report note', e),
-          Effect.fail(new UnexpectedServerError({status: 500}))
-        )
-      )
-    )
+    `.pipe(UnexpectedServerError.wrapErrors('Error updating report note'))
 })

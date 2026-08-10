@@ -32,12 +32,7 @@ export const createUpdateSetClubsInactive = Effect.gen(function* (_) {
 
   return flow(
     query,
-    Effect.catchAll((e) =>
-      Effect.zipRight(
-        Effect.logError('Error in updateSetClubsInactive query', e),
-        Effect.fail(new UnexpectedServerError({status: 500}))
-      )
-    ),
+    UnexpectedServerError.wrapErrors('Error in updateSetClubsInactive query'),
     Effect.withSpan('updateSetClubsInactive query')
   )
 })

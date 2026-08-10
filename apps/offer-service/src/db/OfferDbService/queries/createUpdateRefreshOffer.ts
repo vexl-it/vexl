@@ -32,11 +32,6 @@ export const createUpdateRefreshOffer = Effect.gen(function* (_) {
   return flow(
     UpdateRefreshOffer.execute,
     Effect.map((a) => a.offerId),
-    Effect.catchAll((e) =>
-      Effect.zipRight(
-        Effect.logError('Error refreshing offers user', e),
-        Effect.fail(new UnexpectedServerError({status: 500}))
-      )
-    )
+    UnexpectedServerError.wrapErrors('Error refreshing offers user')
   )
 })

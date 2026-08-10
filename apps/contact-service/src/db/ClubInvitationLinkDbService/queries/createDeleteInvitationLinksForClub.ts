@@ -24,11 +24,8 @@ export const createDeleteInvitationLinksForClub = Effect.gen(function* (_) {
 
   return flow(
     query,
-    Effect.catchAll((e) =>
-      Effect.zipRight(
-        Effect.logError('Error in deleteInvitationLinksForClub query', e),
-        Effect.fail(new UnexpectedServerError({status: 500}))
-      )
+    UnexpectedServerError.wrapErrors(
+      'Error in deleteInvitationLinksForClub query'
     ),
     Effect.withSpan('deleteInvitationLinksForClub query')
   )

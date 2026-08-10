@@ -31,11 +31,6 @@ export const createQueryPublicPartByAdminId = Effect.gen(function* (_) {
   return flow(
     QueryPublicPartByAdminId.execute,
     Effect.map(Array.head),
-    Effect.catchAll((e) =>
-      Effect.zipRight(
-        Effect.logError('Error querying offers by admin id', e),
-        Effect.fail(new UnexpectedServerError({status: 500}))
-      )
-    )
+    UnexpectedServerError.wrapErrors('Error querying offers by admin id')
   )
 })

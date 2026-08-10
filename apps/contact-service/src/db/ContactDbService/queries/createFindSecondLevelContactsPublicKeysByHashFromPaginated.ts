@@ -82,14 +82,8 @@ export const createFindSecondLevelContactsPublicKeysByHashFromPaginated =
           userId: e.userId,
         }))
       ),
-      Effect.catchAll((e) =>
-        Effect.zipRight(
-          Effect.logError(
-            'Error in findSecondLevelContactPublicKeysByHashFromPaginated',
-            e
-          ),
-          Effect.fail(new UnexpectedServerError({status: 500}))
-        )
+      UnexpectedServerError.wrapErrors(
+        'Error in findSecondLevelContactPublicKeysByHashFromPaginated'
       ),
       Effect.withSpan(
         'findSecondLevelContactPublicKeysByHashFromPaginated query'

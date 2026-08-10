@@ -49,11 +49,6 @@ export const createInsertPublicPart = Effect.gen(function* (_) {
 
   return flow(
     InsertPublicPart.execute,
-    Effect.catchAll((e) =>
-      Effect.zipRight(
-        Effect.logError('Error inserting offer public part', e),
-        Effect.fail(new UnexpectedServerError({status: 500}))
-      )
-    )
+    UnexpectedServerError.wrapErrors('Error inserting offer public part')
   )
 })

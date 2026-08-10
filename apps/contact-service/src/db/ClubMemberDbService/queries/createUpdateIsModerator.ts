@@ -33,11 +33,8 @@ export const createUpdateIsModerator = Effect.gen(function* (_) {
 
   return flow(
     query,
-    Effect.catchAll((e) =>
-      Effect.zipRight(
-        Effect.logError('Error in clubmember updateIsModerator query', e),
-        Effect.fail(new UnexpectedServerError({status: 500}))
-      )
+    UnexpectedServerError.wrapErrors(
+      'Error in clubmember updateIsModerator query'
     ),
     Effect.withSpan('clubMember updateIsModerator query')
   )

@@ -95,7 +95,9 @@ export class PreludeService extends Context.Tag('PreludeService')<
               )
             )
           ),
-          Effect.tap((result) => Effect.log('Verification created', {result})),
+          Effect.tap((result) =>
+            Effect.log('Verification created', {status: result.status})
+          ),
           Effect.filterOrFail(
             (result) => result.status === 'success',
             (e) => {

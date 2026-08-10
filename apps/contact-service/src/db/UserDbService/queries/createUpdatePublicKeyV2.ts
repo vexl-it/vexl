@@ -30,12 +30,7 @@ export const createUpdatePublicKeyV2 = Effect.gen(function* (_) {
 
   return flow(
     query,
-    Effect.catchAll((e) =>
-      Effect.zipRight(
-        Effect.logError('Error in updatePublicKeyV2', e),
-        Effect.fail(new UnexpectedServerError({status: 500}))
-      )
-    ),
+    UnexpectedServerError.wrapErrors('Error in updatePublicKeyV2'),
     Effect.withSpan('updatePublicKeyV2 query')
   )
 })

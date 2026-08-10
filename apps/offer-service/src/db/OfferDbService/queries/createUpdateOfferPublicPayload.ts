@@ -30,12 +30,5 @@ export const createUpdateOfferPublicPayload = Effect.gen(function* (_) {
         sql`offer_id = ${req.offerId}`,
         sql`admin_id = ${req.adminId}`,
       ])}
-    `.pipe(
-      Effect.catchAll((e) =>
-        Effect.zipRight(
-          Effect.logError('Error updating public payload', e),
-          Effect.fail(new UnexpectedServerError({status: 500}))
-        )
-      )
-    )
+    `.pipe(UnexpectedServerError.wrapErrors('Error updating public payload'))
 })

@@ -201,7 +201,6 @@ export class UserNotificationService extends Context.Tag(
             Effect.withSpan('Notify others about new user', {
               attributes: {
                 hashesLength: Array.length(importedHashes),
-                userHash: ownerHash,
               },
             })
           ),

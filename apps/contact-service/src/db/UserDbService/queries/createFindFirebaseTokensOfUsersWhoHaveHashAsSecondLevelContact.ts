@@ -66,14 +66,8 @@ export const createFindFirebaseTokensOfUsersWhoHaveHashAsSecondLevelContact =
 
     return flow(
       query,
-      Effect.catchAll((e) =>
-        Effect.zipRight(
-          Effect.logError(
-            'Error in findFirebaseTokensOfUsersWhoHaveHashAsSecondLevelContact',
-            e
-          ),
-          Effect.fail(new UnexpectedServerError({status: 500}))
-        )
+      UnexpectedServerError.wrapErrors(
+        'Error in findFirebaseTokensOfUsersWhoHaveHashAsSecondLevelContact'
       ),
       Effect.withSpan(
         'findFirebaseTokensOfUsersWhoHaveHashAsSecondLevelContact query'

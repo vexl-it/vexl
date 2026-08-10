@@ -31,12 +31,7 @@ export const createUpdateExpoToken = Effect.gen(function* (_) {
 
   return flow(
     query,
-    Effect.catchAll((e) =>
-      Effect.zipRight(
-        Effect.logError('Error in updateExpoToken', e),
-        Effect.fail(new UnexpectedServerError({status: 500}))
-      )
-    ),
+    UnexpectedServerError.wrapErrors('Error in updateExpoToken'),
     Effect.withSpan('updateExpoToken query')
   )
 })

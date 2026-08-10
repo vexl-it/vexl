@@ -35,11 +35,6 @@ export const createInsertOfferPrivatePart = Effect.gen(function* (_) {
 
   return flow(
     InsertOfferPrivateParts.execute,
-    Effect.catchAll((e) =>
-      Effect.zipRight(
-        Effect.logError('Error inserting offer private part', e),
-        Effect.fail(new UnexpectedServerError({status: 500}))
-      )
-    )
+    UnexpectedServerError.wrapErrors('Error inserting offer private part')
   )
 })

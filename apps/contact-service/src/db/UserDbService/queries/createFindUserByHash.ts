@@ -23,12 +23,7 @@ export const createFindUserByHash = Effect.gen(function* (_) {
 
   return flow(
     query,
-    Effect.catchAll((e) =>
-      Effect.zipRight(
-        Effect.logError('Error in findUserByHash', e),
-        Effect.fail(new UnexpectedServerError({status: 500}))
-      )
-    ),
+    UnexpectedServerError.wrapErrors('Error in findUserByHash'),
     Effect.withSpan('findUserByHash query')
   )
 })

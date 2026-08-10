@@ -40,11 +40,8 @@ export const createQueryNumberOfClubReportsForUser = Effect.gen(function* (_) {
         Option.getOrElse(() => 0)
       )
     ),
-    Effect.catchAll((e) =>
-      Effect.zipRight(
-        Effect.logError('Error querying number of club reports for user.', e),
-        Effect.fail(new UnexpectedServerError({status: 500}))
-      )
+    UnexpectedServerError.wrapErrors(
+      'Error querying number of club reports for user.'
     )
   )
 })

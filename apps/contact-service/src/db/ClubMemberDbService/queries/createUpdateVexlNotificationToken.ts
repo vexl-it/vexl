@@ -36,14 +36,8 @@ export const createUpdateVexlNotificationToken = Effect.gen(function* (_) {
 
   return flow(
     query,
-    Effect.catchAll((e) =>
-      Effect.zipRight(
-        Effect.logError(
-          'Error in clubmember updateVexlNotificationToken query',
-          e
-        ),
-        Effect.fail(new UnexpectedServerError({status: 500}))
-      )
+    UnexpectedServerError.wrapErrors(
+      'Error in clubmember updateVexlNotificationToken query'
     ),
     Effect.withSpan('clubMember updateVexlNotificationToken query')
   )

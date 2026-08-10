@@ -412,4 +412,195 @@ describe('filterIncomingMessages', () => {
       })
     ).toBe(false)
   })
+
+  it('accepts a cancellation racing our approval when no messages were exchanged yet', () => {
+    const inbox = inboxState(inboxKey, [
+      chatWithMessages({
+        inboxKey,
+        senderPublicKey: senderKey.publicKeyPemBase64,
+        messages: [
+          receivedMessage({
+            messageType: 'REQUEST_MESSAGING',
+            senderPublicKey: senderKey.publicKeyPemBase64,
+          }),
+          sentMessage({messageType: 'APPROVE_MESSAGING', senderKey: inboxKey}),
+        ],
+      }),
+    ])
+    const cancellation = receivedMessage({
+      messageType: 'CANCEL_REQUEST_MESSAGING',
+      senderPublicKey: senderKey.publicKeyPemBase64,
+      time: timestamp(Date.UTC(2026, 0, 2)),
+    })
+    const messageAfterCancellation = receivedMessage({
+      messageType: 'MESSAGE',
+      senderPublicKey: senderKey.publicKeyPemBase64,
+      time: timestamp(Date.UTC(2026, 0, 3)),
+    })
+
+    expect(
+      filterIncomingMessages({
+        inbox,
+        messages: [cancellation, messageAfterCancellation],
+        blockedSenders: [],
+        rerequestLimitDays: 7,
+      })
+    ).toEqual([cancellation])
+  })
+
+  it('rejects a cancellation once regular messages were exchanged in the open chat', () => {
+    const inbox = inboxState(inboxKey, [
+      chatWithMessages({
+        inboxKey,
+        senderPublicKey: senderKey.publicKeyPemBase64,
+        messages: [
+          receivedMessage({
+            messageType: 'REQUEST_MESSAGING',
+            senderPublicKey: senderKey.publicKeyPemBase64,
+          }),
+          sentMessage({messageType: 'APPROVE_MESSAGING', senderKey: inboxKey}),
+          receivedMessage({
+            messageType: 'MESSAGE',
+            senderPublicKey: senderKey.publicKeyPemBase64,
+            time: timestamp(Date.UTC(2026, 0, 2)),
+          }),
+        ],
+      }),
+    ])
+    const cancellation = receivedMessage({
+      messageType: 'CANCEL_REQUEST_MESSAGING',
+      senderPublicKey: senderKey.publicKeyPemBase64,
+      time: timestamp(Date.UTC(2026, 0, 3)),
+    })
+
+    expect(
+      filterIncomingMessages({
+        inbox,
+        messages: [cancellation],
+        blockedSenders: [],
+        rerequestLimitDays: 7,
+      })
+    ).toEqual([])
+  })
+
+  it('rejects an approval after I cancelled my own request', () => {
+    const inbox = inboxState(inboxKey, [
+      chatWithMessages({
+        inboxKey,
+        senderPublicKey: senderKey.publicKeyPemBase64,
+        messages: [
+          sentMessage({messageType: 'REQUEST_MESSAGING', senderKey: inboxKey}),
+          sentMessage({
+            messageType: 'CANCEL_REQUEST_MESSAGING',
+            senderKey: inboxKey,
+          }),
+        ],
+      }),
+    ])
+    const approval = receivedMessage({
+      messageType: 'APPROVE_MESSAGING',
+      senderPublicKey: senderKey.publicKeyPemBase64,
+      time: timestamp(Date.UTC(2026, 0, 2)),
+    })
+    const regularMessage = receivedMessage({
+      messageType: 'MESSAGE',
+      senderPublicKey: senderKey.publicKeyPemBase64,
+      time: timestamp(Date.UTC(2026, 0, 3)),
+    })
+
+    expect(
+      filterIncomingMessages({
+        inbox,
+        messages: [approval, regularMessage],
+        blockedSenders: [],
+        rerequestLimitDays: 7,
+      })
+    ).toEqual([])
+  })
+
+  it.each<ChatMessage['messageType']>(['BLOCK_CHAT', 'INBOX_DELETED'])(
+    'rejects a new request after the chat was closed with %s',
+    (closingMessageType) => {
+      const inbox = inboxState(inboxKey, [
+        chatWithMessages({
+          inboxKey,
+          senderPublicKey: senderKey.publicKeyPemBase64,
+          messages: [
+            sentMessage({
+              messageType: 'REQUEST_MESSAGING',
+              senderKey: inboxKey,
+            }),
+            receivedMessage({
+              messageType: 'APPROVE_MESSAGING',
+              senderPublicKey: senderKey.publicKeyPemBase64,
+            }),
+            receivedMessage({
+              messageType: closingMessageType,
+              senderPublicKey: senderKey.publicKeyPemBase64,
+              time: timestamp(Date.UTC(2026, 0, 2)),
+            }),
+          ],
+        }),
+      ])
+      const newRequest = receivedMessage({
+        messageType: 'REQUEST_MESSAGING',
+        senderPublicKey: senderKey.publicKeyPemBase64,
+        time: timestamp(Date.UTC(2026, 5, 1)),
+      })
+
+      expect(
+        filterIncomingMessages({
+          inbox,
+          messages: [newRequest],
+          blockedSenders: [],
+          rerequestLimitDays: 7,
+        })
+      ).toEqual([])
+    }
+  )
+
+  it('scopes the blocklist to a single inbox', () => {
+    const otherInboxKey = generatePrivateKey()
+    const blockedSender = Schema.decodeSync(BlockedChatSender)({
+      inboxPublicKey: inboxKey.publicKeyPemBase64,
+      blockedSenderPublicKey: senderKey.publicKeyPemBase64,
+    })
+    const request = receivedMessage({
+      messageType: 'REQUEST_MESSAGING',
+      senderPublicKey: senderKey.publicKeyPemBase64,
+    })
+
+    expect(
+      filterIncomingMessages({
+        inbox: inboxState(otherInboxKey),
+        messages: [request],
+        blockedSenders: [blockedSender],
+        rerequestLimitDays: 7,
+      })
+    ).toEqual([request])
+  })
+
+  it('accepts stream-only messages for an open chat', () => {
+    const inbox = inboxState(inboxKey, [
+      chatWithMessages({
+        inboxKey,
+        senderPublicKey: senderKey.publicKeyPemBase64,
+        messages: [
+          sentMessage({messageType: 'REQUEST_MESSAGING', senderKey: inboxKey}),
+          receivedMessage({
+            messageType: 'APPROVE_MESSAGING',
+            senderPublicKey: senderKey.publicKeyPemBase64,
+          }),
+        ],
+      }),
+    ])
+
+    expect(
+      shouldAcceptIncomingStreamOnlyMessage({
+        inbox,
+        senderPublicKey: senderKey.publicKeyPemBase64,
+        blockedSenders: [],
+      })
+    ).toBe(true)
+  })
 })

@@ -21,6 +21,7 @@ interface SenderFilterState {
   readonly senderPublicKey: PublicKeyPemBase64
   readonly chatState: ChatState | undefined
   readonly lastTerminalMessage: ChatMessageWithState | undefined
+  readonly receivedMessageSinceOpen: boolean
 }
 
 const terminalChatStates: readonly ChatState[] = [
@@ -124,11 +125,32 @@ function shouldAcceptForState({
     })
   }
 
+  // Chat is open. A cancellation still wins the approve/cancel handshake race
+  // (the other side cancelled before seeing our approval), but only until
+  // their first regular message - an actively used chat cannot be cancelled.
+  if (messageType === 'CANCEL_REQUEST_MESSAGING') {
+    return !state.receivedMessageSinceOpen
+  }
+
   return (
     messageType !== 'REQUEST_MESSAGING' &&
     messageType !== 'APPROVE_MESSAGING' &&
-    messageType !== 'DISAPPROVE_MESSAGING' &&
-    messageType !== 'CANCEL_REQUEST_MESSAGING'
+    messageType !== 'DISAPPROVE_MESSAGING'
+  )
+}
+
+function hasReceivedMessageSinceOpen(
+  chat: ChatWithMessages | undefined
+): boolean {
+  return pipe(
+    chat?.messages ?? [],
+    Array.findLast(
+      (message) =>
+        message.message.messageType === 'APPROVE_MESSAGING' ||
+        (message.state === 'received' &&
+          message.message.messageType === 'MESSAGE')
+    ),
+    Option.exists((message) => message.message.messageType === 'MESSAGE')
   )
 }
 
@@ -148,6 +170,7 @@ function getInitialSenderState(
     senderPublicKey,
     chatState: chat ? getChatState(chat) : undefined,
     lastTerminalMessage: findLastTerminalMessage(chat),
+    receivedMessageSinceOpen: hasReceivedMessageSinceOpen(chat),
   }
 }
 
@@ -163,7 +186,9 @@ function updateSenderState(
     case 'REQUEST_MESSAGING':
       return {...state, chatState: 'requestedByThem'}
     case 'APPROVE_MESSAGING':
-      return {...state, chatState: 'chatOpen'}
+      return {...state, chatState: 'chatOpen', receivedMessageSinceOpen: false}
+    case 'MESSAGE':
+      return {...state, receivedMessageSinceOpen: true}
     case 'DISAPPROVE_MESSAGING':
       return {
         ...state,

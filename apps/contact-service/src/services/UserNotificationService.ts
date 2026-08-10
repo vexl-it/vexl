@@ -423,7 +423,7 @@ export class UserNotificationService extends Context.Tag(
                   )
                 )
               ),
-              Effect.all,
+              Effect.allWith({concurrency: 'unbounded'}),
               Effect.withSpan(
                 'Enqueue inactivity notifications via VexlNotificationToken',
                 {

@@ -15,11 +15,13 @@ import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {ServerSecurityMiddlewareLive} from '@vexl-next/server-utils/src/serverSecurity'
 import {Layer} from 'effect'
 import {cryptoConfig, healthServerPortConfig} from './configs'
+import DbLayer from './db/layer'
+import {PlacesDbService} from './db/PlacesDbService'
 import {
   getGeocodedCoordinatesHandler,
   getLocationSuggestionHandler,
 } from './handlers'
-import {GoogleMapsService} from './utils/googleMapsApi'
+import {PlacesService} from './places'
 
 const RootApiGroupLive = HttpApiBuilder.group(
   LocationApiSpecification,
@@ -49,8 +51,10 @@ export const HttpServerLive = Layer.mergeAll(
   ApiServerLive,
   healthServerLayer({port: healthServerPortConfig})
 ).pipe(
-  Layer.provide(RateLimitingService.Live),
-  Layer.provide(RedisConnectionService.layer(redisUrl)),
-  Layer.provide(ServerCrypto.layer(cryptoConfig)),
-  Layer.provide(GoogleMapsService.Live)
+  Layer.provideMerge(RateLimitingService.Live),
+  Layer.provideMerge(RedisConnectionService.layer(redisUrl)),
+  Layer.provideMerge(ServerCrypto.layer(cryptoConfig)),
+  Layer.provideMerge(PlacesService.Live),
+  Layer.provideMerge(PlacesDbService.Live),
+  Layer.provideMerge(DbLayer)
 )

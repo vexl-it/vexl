@@ -10,7 +10,7 @@
  * Run: `pnpm dev:backend [options]` — see parseArgs() for flags.
  */
 import {Array, pipe} from 'effect'
-import {spawn, type ChildProcess} from 'node:child_process'
+import {spawn, spawnSync, type ChildProcess} from 'node:child_process'
 import {join} from 'node:path'
 import devConfig from '../../dev.config'
 import * as docker from './docker'
@@ -27,12 +27,15 @@ import {loadRawEnvLocal, loadSecrets, repoRoot, type Secrets} from './secrets'
 import {
   ALL_APPS,
   buildFinalEnv,
+  dbEnv,
   findApp,
   SERVICES,
   WEB_APPS,
   type EnvContext,
   type RunnableApp,
 } from './services'
+
+type PlacesSeedMode = 'auto' | 'fixture' | 'off'
 
 interface CliOptions {
   readonly only: readonly string[]
@@ -42,6 +45,7 @@ interface CliOptions {
   readonly watch: boolean
   readonly freshDb: boolean
   readonly detachInfra: boolean
+  readonly seedPlaces: PlacesSeedMode
 }
 
 function parseArgs(argv: readonly string[]): CliOptions {
@@ -52,6 +56,7 @@ function parseArgs(argv: readonly string[]): CliOptions {
   let watch = false
   let freshDb = false
   let detachInfra = false
+  let seedPlaces: PlacesSeedMode = 'auto'
 
   const splitList = (value: string): string[] =>
     pipe(
@@ -86,6 +91,13 @@ function parseArgs(argv: readonly string[]): CliOptions {
       freshDb = true
     } else if (arg === '--detach-infra') {
       detachInfra = true
+    } else if (arg === '--seed-places') {
+      i += 1
+      const value = nextListValue(i)
+      if (value !== 'auto' && value !== 'fixture' && value !== 'off') {
+        throw new Error(`--seed-places must be auto|fixture|off, got: ${value}`)
+      }
+      seedPlaces = value
     } else if (arg === '--help' || arg === '-h') {
       printHelp()
       process.exit(0)
@@ -96,7 +108,16 @@ function parseArgs(argv: readonly string[]): CliOptions {
     }
   }
 
-  return {only, skip, web, observability, watch, freshDb, detachInfra}
+  return {
+    only,
+    skip,
+    web,
+    observability,
+    watch,
+    freshDb,
+    detachInfra,
+    seedPlaces,
+  }
 }
 
 function printHelp(): void {
@@ -111,6 +132,10 @@ function printHelp(): void {
       '  --watch             hot-reload services via tsx watch (default off)',
       '  --fresh-db          recreate databases from scratch (docker compose down -v)',
       '  --detach-infra      leave docker infra running on exit',
+      '  --seed-places <m>   places DB seeding when empty (default auto: SK+CZ OSM',
+      '                      ingest if osmium is installed, city fixture otherwise;',
+      '                      fixture = fixture only, off = ensure DB/schema only,',
+      '                      no data)',
     ].join('\n')
   )
 }
@@ -309,6 +334,39 @@ function killTree(child: ChildProcess, signal: NodeJS.Signals): void {
   }
 }
 
+// --- places DB seeding -----------------------------------------------------
+
+/**
+ * Runs the idempotent location-service seeder (fast no-op when the places
+ * table already has data). Blocking on purpose: a first-time OSM ingest should
+ * finish before the stack reports ready, so the map works immediately. Even
+ * with mode `off` it must run: it also creates the `location` DB + schema on
+ * Postgres volumes predating them (the compose init script only runs on empty
+ * volumes), without which the service crash-loops.
+ */
+function seedPlacesDb(ctx: EnvContext, mode: PlacesSeedMode): void {
+  console.log(
+    mode === 'off'
+      ? 'Ensuring the places DB exists (location-service)...'
+      : 'Ensuring the places DB is seeded (location-service)...'
+  )
+  const result = spawnSync(
+    join(repoRoot, 'node_modules', '.bin', 'tsx'),
+    ['scripts/seedDevPlaces.ts', '--mode', mode],
+    {
+      cwd: join(repoRoot, 'apps/location-service'),
+      stdio: 'inherit',
+      env: {...process.env, ...dbEnv(ctx, devConfig.dbNames.location)},
+    }
+  )
+  if (result.status !== 0) {
+    console.warn(
+      'Places seeding failed — location search will return no results until ' +
+        'seeded (see apps/location-service/README.md). Continuing.'
+    )
+  }
+}
+
 // --- summary ---------------------------------------------------------------
 
 interface SummaryRow {
@@ -400,6 +458,15 @@ async function main(): Promise<void> {
   console.log('Initializing MinIO bucket...')
   if (!docker.runMinioInit(dockerEnv)) {
     console.warn('MinIO init returned non-zero (bucket may already exist).')
+  }
+
+  if (
+    pipe(
+      apps,
+      Array.some((app) => app.name === 'location-service')
+    )
+  ) {
+    seedPlacesDb(ctx, options.seedPlaces)
   }
 
   const supervised: Supervised[] = []

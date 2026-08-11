@@ -127,6 +127,7 @@ export const dbNames = {
   offer: "offer",
   chat: "chat",
   content: "content",
+  location: "location",
   feedback: "feedback",
   metrics: "metrics",
   notification: "notification",

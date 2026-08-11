@@ -11,9 +11,9 @@ import {TransformRequestManager} from '@maplibre/maplibre-react-native'
 // from every other MapLibre client. Deliberately carries no app name, version,
 // OS or device details - those would only add entropy to fingerprint on.
 //
-// Registered without a `match` so it applies to style, glyph, sprite and tile
-// requests alike, and keeps applying if the backend-served style URLs point at
-// a different provider (see `mapStyleUrlsAtoms.ts`).
+// Registered without a `match` so it applies to glyph, sprite and tile
+// requests alike, and keeps applying if the backend-served styles point at
+// a different provider (see `mapStylesAtoms.ts`).
 //
 // Imported from `index.js` rather than from the map components: on Android the
 // native side installs the interceptor on the UI queue (see

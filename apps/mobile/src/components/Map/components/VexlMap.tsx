@@ -6,7 +6,7 @@ import {useTheme, useVexlTheme} from '@vexl-next/ui'
 import {useAtomValue} from 'jotai'
 import React from 'react'
 import {StyleSheet} from 'react-native'
-import {mapStyleUrlsAtom} from '../state/mapStyleUrlsAtoms'
+import {localizedMapStylesAtom} from '../state/mapStylesAtoms'
 
 const styles = StyleSheet.create({
   map: {
@@ -24,11 +24,11 @@ export default function VexlMap({
   const {resolvedTheme} = useVexlTheme()
   const theme = useTheme()
   const backgroundPrimary = theme.backgroundPrimary.get()
-  const mapStyleUrls = useAtomValue(mapStyleUrlsAtom)
+  const mapStyles = useAtomValue(localizedMapStylesAtom)
 
   return (
     <MapLibreMap
-      mapStyle={mapStyleUrls[resolvedTheme]}
+      mapStyle={mapStyles[resolvedTheme]}
       logo={false}
       compass={false}
       touchPitch={false}

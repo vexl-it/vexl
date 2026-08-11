@@ -47,14 +47,18 @@ export const mockedGetEventsFromRedis = Effect.succeed(Option.some(dummyEvents))
 export const mockedBlogsFromRedis = Effect.succeed(
   Option.some(dummyBlogArticlesResponse)
 )
+export const mockedGetMapStylesFromRedis = Effect.succeed(Option.none())
 export const mockedClearCache = Effect.void
 export const mockedSaveBlogsToCacheForked = jest.fn(() => Effect.void)
 export const mockedSaveEventsToCacheForked = jest.fn(() => Effect.void)
+export const mockedSaveMapStylesToCacheForked = jest.fn(() => Effect.void)
 
 export const mockedCacheService = Layer.succeed(CacheService, {
   getEventsFromRedis: mockedGetEventsFromRedis,
   getBlogsFromRedis: mockedBlogsFromRedis,
+  getMapStylesFromRedis: mockedGetMapStylesFromRedis,
   clearCache: mockedClearCache,
   saveBlogsToCacheForked: mockedSaveBlogsToCacheForked,
   saveEventsToCacheForked: mockedSaveEventsToCacheForked,
+  saveMapStylesToCacheForked: mockedSaveMapStylesToCacheForked,
 })

@@ -1,3 +1,6 @@
 
 # Sentry Config File
 .env.sentry-build-plugin
+
+# OSM/Natural Earth datasets for the places DB (fetched by scripts/refresh-places.sh)
+data/

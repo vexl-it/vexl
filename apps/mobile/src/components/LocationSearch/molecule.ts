@@ -6,7 +6,7 @@ import {atom} from 'jotai'
 import {splitAtom} from 'jotai/utils'
 import {apiAtom} from '../../api'
 import {createEffectAtomWithProgress} from '../../utils/atomUtils/createEffectAtomWithProgress'
-import {getCurrentLocale} from '../../utils/localization/I18nProvider'
+import {appLanguageAtom} from '../../utils/preferences'
 
 export const LocationSessionId = Schema.UUID.pipe(
   Schema.brand('LocationSessionId')
@@ -34,7 +34,7 @@ export const LocationSearchMolecule = molecule(() => {
     effectToRun: (query, get) =>
       get(apiAtom).location.getLocationSuggestions({
         phrase: query,
-        lang: getCurrentLocale(),
+        lang: get(appLanguageAtom),
       }),
   })
 

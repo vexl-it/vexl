@@ -2,6 +2,15 @@
 
 Scripts for running the local dev stack (`dev-backend.ts`, `dev-infra.ts`, `dev-mobile.ts` — wired to `pnpm dev:backend` and friends in the root package.json).
 
+## Places DB seeding
+
+On startup, `dev-backend.ts` seeds location-service's places database if it is empty — otherwise it's a fast no-op, since the Postgres volume persists between runs. An empty DB is seeded with:
+
+- **`osmium` installed:** a real Slovakia + Czechia OpenStreetMap ingest, plus the European capitals. Downloads are cached in `~/.cache/vexl/osm`, so only the very first seed downloads anything (~1 GB).
+- **no `osmium`:** a committed fixture of major SK/CZ cities + European capitals. Instant and offline; map search just has less depth.
+
+Override with `--seed-places <auto|fixture|off>`. Details and standalone usage: [apps/location-service/README.md](../../apps/location-service/README.md).
+
 ## seed-perf-data.ts — simulate a heavy account for performance work
 
 Seeds the **locally running** dev backend with fake users, contacts, offers, and chats around one real (emulator) user, so the app can be profiled against a realistically heavy account. This tooling was built for the investigation documented in [docs/performance_findings_2026_07.md](../../docs/performance_findings_2026_07.md).

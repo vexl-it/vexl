@@ -12,6 +12,7 @@ import {debounce, useTheme} from 'tamagui'
 import {type RootStackParamsList} from '../../navigationTypes'
 import atomKeyExtractor from '../../utils/atomUtils/atomKeyExtractor'
 import {useTranslation} from '../../utils/localization/I18nProvider'
+import {useKeyboardAwareFooterListPadding} from '../../utils/useKeyboardAwareFooterListPadding'
 import {
   LocationSearchMolecule,
   LocationSearchScope,
@@ -42,6 +43,7 @@ function LocationSearchContent({
   const searchResultsAtoms = useAtomValue(searchResultsAtomsAtom)
   const isLoading = useAtomValue(isLoadingAtom)
   const setSearchQuery = useSetAtom(searchQueryAtom)
+  const listPaddingBottom = useKeyboardAwareFooterListPadding()
 
   const setSearchQueryRef = useRef(setSearchQuery)
   setSearchQueryRef.current = setSearchQuery
@@ -108,6 +110,7 @@ function LocationSearchContent({
           data={searchResultsAtoms}
           renderItem={renderItem}
           keyboardShouldPersistTaps="handled"
+          contentContainerStyle={{paddingBottom: listPaddingBottom}}
         />
       )}
     </YStack>

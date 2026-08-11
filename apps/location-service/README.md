@@ -46,6 +46,10 @@ can be re-run independently — e.g. after tweaking the filters, re-run just
 `refresh-places.sh extract ingest` without re-downloading ~85 GB. Regions are
 selectable with `-r` (any Geofabrik path): `-r europe`, `-r europe/slovakia`.
 
+Set `SLACK_ALERT_WEBHOOK_URL` (a Slack incoming-webhook URL) on the cron host
+to get a Slack message whenever any step fails — download, extraction, or
+ingest (including the sanity-gate abort). Leave it unset for dev runs.
+
 The ingest loads into staging tables and swaps them in a single transaction —
 the service keeps serving the old dataset until the new one is complete, and a
 sanity gate refuses to swap in a dataset >30 % smaller than the previous one.

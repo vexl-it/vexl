@@ -19,12 +19,28 @@
 #       or a sub-region like -r europe/slovakia (default: the 8 continents)
 #
 # The ingest stage requires DB_URL, DB_USER and DB_PASSWORD in the environment.
+# Set SLACK_ALERT_WEBHOOK_URL to get a Slack message when any step fails
+# (the cron runs unattended); leave it unset for dev/local runs.
 # Requires: curl, osmium (https://osmcode.org/osmium-tool/), pnpm.
 set -eu
 
 SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
 DATA_DIR="$SCRIPT_DIR/../data"
 REGIONS=""
+
+# set -e makes every failure (bad download, corrupt extract, osmium error,
+# ingest abort) exit non-zero, so one EXIT trap catches them all. CURRENT_STEP
+# tracks what was running so the alert says where it broke.
+CURRENT_STEP="startup"
+on_exit() {
+  status=$?
+  if [ "$status" -ne 0 ] && [ -n "${SLACK_ALERT_WEBHOOK_URL:-}" ]; then
+    curl -sS --max-time 10 -X POST -H 'Content-type: application/json' \
+      --data "{\"text\":\":rotating_light: places dataset refresh failed: $CURRENT_STEP (exit $status)\"}" \
+      "$SLACK_ALERT_WEBHOOK_URL" || true
+  fi
+}
+trap on_exit EXIT
 
 while getopts d:r: opt; do
   case $opt in
@@ -52,6 +68,7 @@ FRESH_MINUTES=${FRESH_MINUTES:-$((20 * 60))}
 
 if has_stage fetch; then
   if [ ! -f "$DATA_DIR/ne_countries.geojson" ]; then
+    CURRENT_STEP="downloading Natural Earth country boundaries"
     echo "=== downloading Natural Earth country boundaries"
     # Download to a temp file and validate before moving into place, so a
     # failed or truncated download is never cached as the real file.
@@ -68,6 +85,7 @@ if has_stage fetch; then
       echo "=== $region: raw extract is fresh, skipping fetch"
       continue
     fi
+    CURRENT_STEP="downloading $region"
     echo "=== $region: downloading"
     # Never resume a partial file (no -C) — Geofabrik rebuilds "latest" daily,
     # and resuming across builds splices a corrupt PBF; each retry re-downloads
@@ -85,9 +103,11 @@ if has_stage extract; then
     s=$(slug "$region")
     raw="$RAW_DIR/$s-latest.osm.pbf"
     if [ ! -f "$raw.ok" ]; then
+      CURRENT_STEP="extracting $region (no validated raw extract)"
       echo "!!! $region: no validated raw extract at $raw — run the fetch stage first" >&2
       exit 1
     fi
+    CURRENT_STEP="extracting $region"
     echo "=== $region: extracting settlements"
     osmium tags-filter "$raw" n/place \
       -o "$FILTERED_DIR/places-$s.osm.pbf" --overwrite
@@ -105,7 +125,13 @@ if has_stage extract; then
 fi
 
 if has_stage ingest; then
-  : "${DB_URL:?ingest stage needs DB_URL}" "${DB_USER:?ingest stage needs DB_USER}" "${DB_PASSWORD:?ingest stage needs DB_PASSWORD}"
+  CURRENT_STEP="ingesting: $REGIONS"
+  # Explicit check instead of ${VAR:?} — a :? failure bypasses the EXIT trap's
+  # status propagation in bash 3.2 (macOS /bin/sh), silently exiting 0
+  if [ -z "${DB_URL:-}" ] || [ -z "${DB_USER:-}" ] || [ -z "${DB_PASSWORD:-}" ]; then
+    echo "!!! ingest stage needs DB_URL, DB_USER and DB_PASSWORD" >&2
+    exit 1
+  fi
   files=""
   for region in $REGIONS; do
     s=$(slug "$region")

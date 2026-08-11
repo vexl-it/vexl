@@ -19,10 +19,8 @@ import {type NativeSyntheticEvent} from 'react-native'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {apiAtom} from '../../../api'
 import {createEffectAtomWithProgress} from '../../../utils/atomUtils/createEffectAtomWithProgress'
-import {
-  getCurrentLocale,
-  useTranslation,
-} from '../../../utils/localization/I18nProvider'
+import {useTranslation} from '../../../utils/localization/I18nProvider'
+import {appLanguageAtom} from '../../../utils/preferences'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import {type MapValue} from '../brands'
 import {type EdgePadding, type LatLng} from '../types'
@@ -57,7 +55,7 @@ function useAtoms({
       effectToRun: (center, get) =>
         get(apiAtom)
           .location.getGeocodedCoordinates({
-            lang: getCurrentLocale(),
+            lang: get(appLanguageAtom),
             latitude: Schema.decodeSync(Latitude)(center.latitude),
             longitude: Schema.decodeSync(Longitude)(center.longitude),
           })

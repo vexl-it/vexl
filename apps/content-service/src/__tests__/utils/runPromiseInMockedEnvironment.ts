@@ -27,9 +27,11 @@ import {UpdateInvoiceStateWebhookService} from '../../handlers/donations/UpdateI
 import {ContentApiLive} from '../../httpServer'
 import {type CacheService} from '../../utils/cache'
 import {type BtcPayServerService} from '../../utils/donations'
+import {type MapStylesService} from '../../utils/mapStyles'
 import {type WebflowCmsService} from '../../utils/webflowCms'
 import {mockedBtcPayServerService} from './mockedBtcPayServerService'
 import {mockedCacheService} from './mockedCacheService'
+import {mockedMapStylesService} from './mockedMapStylesService'
 import {mockedWebflowCmsService} from './mockedWebflowCmsService'
 
 export type MockedContexts =
@@ -41,6 +43,7 @@ export type MockedContexts =
   | UpdateInvoiceStateWebhookService
   | CacheService
   | WebflowCmsService
+  | MapStylesService
   | BtcPayServerService
   | HttpClient
   | TestRequestHeaders
@@ -92,6 +95,7 @@ const context = Layer.empty.pipe(
   Layer.provideMerge(mockedMetricsClientService),
   Layer.provideMerge(mockedBtcPayServerService),
   Layer.provideMerge(mockedCacheService),
+  Layer.provideMerge(mockedMapStylesService),
   Layer.provideMerge(mockedWebflowCmsService),
   Layer.provideMerge(NodeContext.layer)
 )

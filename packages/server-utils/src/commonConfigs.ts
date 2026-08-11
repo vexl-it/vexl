@@ -126,6 +126,15 @@ export const otlpTraceExporterUrlConfig = Config.option(
 export const sentryDsnConfig = Config.option(Config.redacted('SENTRY_DSN'))
 
 /**
+ * Sentry environment label (production/stage/...). Falls back to NODE_ENV,
+ * which cannot distinguish stage from production because stage also runs with
+ * NODE_ENV=production.
+ */
+export const sentryEnvironmentConfig = Config.option(
+  Config.string('SENTRY_ENVIRONMENT')
+)
+
+/**
  * Base url of the Grafana instance (e.g. https://grafana.vexl.it). When set,
  * Sentry events include a link to the trace in Grafana Explore.
  */

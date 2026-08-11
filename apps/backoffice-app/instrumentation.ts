@@ -7,7 +7,7 @@ export async function register() {
   if (process.env.SENTRY_DSN) {
     Sentry.init({
       dsn: process.env.SENTRY_DSN,
-      environment: process.env.NODE_ENV,
+      environment: process.env.SENTRY_ENVIRONMENT ?? process.env.NODE_ENV,
       release: process.env.SERVICE_VERSION,
       sendDefaultPii: false,
       beforeBreadcrumb: () => null,

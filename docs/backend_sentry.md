@@ -46,7 +46,8 @@ not undermine that:
 | Env var | Meaning |
 | --- | --- |
 | `SENTRY_DSN` | Per-service Sentry project DSN. Unset = disabled. |
-| `NODE_ENV` | Used as the Sentry `environment`. |
+| `SENTRY_ENVIRONMENT` | Sentry `environment` label (`production`/`stage`). Set this in deployments — stage also runs with `NODE_ENV=production`, so the fallback cannot tell them apart. |
+| `NODE_ENV` | Fallback for the Sentry `environment` when `SENTRY_ENVIRONMENT` is unset. |
 | `SERVICE_VERSION` | Used as the Sentry `release` (git sha in CI builds). |
 | `GRAFANA_URL` | Optional base url of Grafana (`https://grafana.vexl.it`). When set, events include a `grafanaTraceUrl` link to the trace. |
 

@@ -18,6 +18,7 @@ import {
   grafanaUrlConfig,
   nodeEnvConfig,
   sentryDsnConfig,
+  sentryEnvironmentConfig,
   serviceVersionConfig,
 } from './commonConfigs'
 
@@ -132,7 +133,15 @@ export const sentryLayer: Layer.Layer<never, ConfigError.ConfigError> =
         return Layer.empty
       }
 
-      const environment = yield* _(nodeEnvConfig)
+      const environment = yield* _(
+        sentryEnvironmentConfig,
+        Effect.flatMap(
+          Option.match({
+            onNone: () => nodeEnvConfig,
+            onSome: Effect.succeed,
+          })
+        )
+      )
       const release = yield* _(serviceVersionConfig)
       const grafanaUrl = yield* _(grafanaUrlConfig)
 

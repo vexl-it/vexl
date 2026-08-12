@@ -11,10 +11,9 @@ import {NodeHttpServerLiveWithPortFromEnv} from '@vexl-next/server-utils/src/Nod
 import {RateLimitingService} from '@vexl-next/server-utils/src/RateLimiting'
 import {rateLimitingMiddlewareLayer} from '@vexl-next/server-utils/src/RateLimiting/rateLimitngMiddlewareLayer'
 import {RedisConnectionService} from '@vexl-next/server-utils/src/RedisConnection'
-import {sentryTestErrorMiddleware} from '@vexl-next/server-utils/src/sentryTestErrorMiddleware'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {ServerSecurityMiddlewareLive} from '@vexl-next/server-utils/src/serverSecurity'
-import {flow, Layer} from 'effect'
+import {Layer} from 'effect'
 import {cryptoConfig, healthServerPortConfig} from './configs'
 import DbLayer from './db/layer'
 import {submitFeedbackHandler} from './routes/submitFeedback'
@@ -33,9 +32,7 @@ export const ApiLive = HttpApiBuilder.api(FeedbackApiSpecification).pipe(
   Layer.provide(rateLimitingMiddlewareLayer(FeedbackApiSpecification))
 )
 
-const ApiServerLive = HttpApiBuilder.serve(
-  flow(HttpMiddleware.logger, sentryTestErrorMiddleware)
-).pipe(
+const ApiServerLive = HttpApiBuilder.serve(HttpMiddleware.logger).pipe(
   Layer.provide(HttpApiSwagger.layer()),
   Layer.provide(ApiLive),
   HttpServer.withLogAddress,

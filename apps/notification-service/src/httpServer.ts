@@ -8,7 +8,6 @@ import {healthServerLayer} from '@vexl-next/server-utils/src/HealthServer'
 import {NodeHttpServerLiveWithPortFromEnv} from '@vexl-next/server-utils/src/NodeHttpServerLiveWithPortFromEnv'
 import {RateLimitingService} from '@vexl-next/server-utils/src/RateLimiting'
 import {rateLimitingMiddlewareLayer} from '@vexl-next/server-utils/src/RateLimiting/rateLimitngMiddlewareLayer'
-import {sentryTestErrorRouteLayer} from '@vexl-next/server-utils/src/sentryTestErrorMiddleware'
 
 import {RpcSerialization, RpcServer} from '@effect/rpc/index'
 import {Rpcs} from '@vexl-next/rest-api/src/services/notification/Rpcs'
@@ -98,7 +97,6 @@ const ApiServerLive = HttpLayerRouter.serve(
   Layer.mergeAll(
     NotificationHttpApiLive,
     RpcRouter,
-    sentryTestErrorRouteLayer,
     HttpApiSwagger.layerHttpLayerRouter({
       api: NotificationApiSpecification,
       path: '/docs',

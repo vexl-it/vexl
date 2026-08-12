@@ -8,6 +8,7 @@ import {ChatApiSpecification} from '@vexl-next/rest-api/src/services/chat/specif
 import {healthServerLayer} from '@vexl-next/server-utils/src/HealthServer'
 import {NodeHttpServerLiveWithPortFromEnv} from '@vexl-next/server-utils/src/NodeHttpServerLiveWithPortFromEnv'
 import {rateLimitingMiddlewareLayer} from '@vexl-next/server-utils/src/RateLimiting/rateLimitngMiddlewareLayer'
+import {sentryTestErrorMiddleware} from '@vexl-next/server-utils/src/sentryTestErrorMiddleware'
 
 import {RateLimitingService} from '@vexl-next/server-utils/src/RateLimiting'
 import {RedisConnectionService} from '@vexl-next/server-utils/src/RedisConnection'
@@ -17,7 +18,7 @@ import {MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsC
 import {ServerSecurityMiddlewareLive} from '@vexl-next/server-utils/src/serverSecurity'
 import {createChallenge} from '@vexl-next/server-utils/src/services/challenge/routes/createChalenge'
 import {createChallenges} from '@vexl-next/server-utils/src/services/challenge/routes/createChallenges'
-import {Layer} from 'effect'
+import {flow, Layer} from 'effect'
 import {cryptoConfig, healthServerPortConfig, redisUrl} from './configs'
 import {InboxDbService} from './db/InboxDbService'
 import {MessagesDbService} from './db/MessagesDbService'
@@ -88,7 +89,9 @@ export const ChatApiLive = HttpApiBuilder.api(ChatApiSpecification).pipe(
   Layer.provide(ServerSecurityMiddlewareLive)
 )
 
-export const ApiServerLive = HttpApiBuilder.serve(HttpMiddleware.logger).pipe(
+export const ApiServerLive = HttpApiBuilder.serve(
+  flow(HttpMiddleware.logger, sentryTestErrorMiddleware)
+).pipe(
   Layer.provide(HttpApiSwagger.layer()),
   Layer.provide(ChatApiLive),
   HttpServer.withLogAddress,

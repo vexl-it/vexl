@@ -140,6 +140,15 @@ export const sentryEnvironmentConfig = Config.option(
  */
 export const grafanaUrlConfig = Config.option(Config.string('GRAFANA_URL'))
 
+/**
+ * Uid of the Tempo datasource in Grafana. When set together with GRAFANA_URL,
+ * the trace link in Sentry events opens Grafana Explore with the Tempo
+ * datasource preselected, so the trace query runs on click.
+ */
+export const grafanaTempoDatasourceUidConfig = Config.option(
+  Config.string('GRAFANA_TEMPO_DATASOURCE_UID')
+)
+
 export const metricsConfig = Config.option(
   Config.unwrap({
     prometheusPort: Config.number('PROMETHEUS_PORT'),

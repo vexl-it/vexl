@@ -50,6 +50,7 @@ not undermine that:
 | `NODE_ENV` | Fallback for the Sentry `environment` when `SENTRY_ENVIRONMENT` is unset. |
 | `SERVICE_VERSION` | Used as the Sentry `release` (git sha in CI builds). |
 | `GRAFANA_URL` | Optional base url of Grafana (`https://grafana.vexl.it`). When set, events include a `grafanaTraceUrl` link to the trace. |
+| `GRAFANA_TEMPO_DATASOURCE_UID` | Optional uid of the Tempo datasource in Grafana. When set, the `grafanaTraceUrl` link opens Explore with the Tempo datasource preselected so the trace query runs on click; without it Grafana opens on the default datasource. |
 
 There is one Sentry project per service. Production/stage DSNs are injected by
 the deployment manifests in the infrastructure repo. For local testing, set

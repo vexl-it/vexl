@@ -45,4 +45,18 @@ describe('grafanaTraceUrl', () => {
       )}`
     )
   })
+
+  it('preselects the Tempo datasource when its uid is provided', () => {
+    const url = grafanaTraceUrl('https://grafana.vexl.it', 'abc123', 'tempo-1')
+    expect(url).toMatch(
+      /^https:\/\/grafana\.vexl\.it\/explore\?schemaVersion=1&panes=.*&orgId=1$/
+    )
+    const panes = JSON.parse(new URL(url).searchParams.get('panes') ?? '')
+    expect(panes.sentry.datasource).toBe('tempo-1')
+    expect(panes.sentry.queries[0]).toMatchObject({
+      query: 'abc123',
+      queryType: 'traceql',
+      datasource: {type: 'tempo', uid: 'tempo-1'},
+    })
+  })
 })

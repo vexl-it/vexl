@@ -118,6 +118,19 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        with:
+          node-version: 24.x
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      # Install only the root workspace deps so sentry-cli resolves through the
+      # reviewed lockfile instead of being fetched ad-hoc by npx.
+      - name: Install sentry-cli
+        run: pnpm install --frozen-lockfile --filter vexl-next
+
       - name: Create Sentry release for all backend projects
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
@@ -130,8 +143,8 @@ jobs:
           PROJECTS="-p user-service -p contact-service -p offer-service -p chat-service -p notification-service -p content-service -p feedback-service -p location-service -p btc-exchange-rate-service -p metrics-service -p dashboard-app -p backoffice-app"
           VERSION="${{ github.sha }}"
           SENTRY_ENV="${{ inputs.env == 'prod' && 'production' || inputs.env }}"
-          npx --yes @sentry/cli@3.6.2 releases new $PROJECTS "$VERSION"
-          npx --yes @sentry/cli@3.6.2 releases set-commits --auto "$VERSION" \
+          pnpm exec sentry-cli releases new $PROJECTS "$VERSION"
+          pnpm exec sentry-cli releases set-commits --auto "$VERSION" \
             || echo "::warning::set-commits failed — check that the GitHub repo is linked in Sentry (Settings -> Integrations -> GitHub)"
-          npx --yes @sentry/cli@3.6.2 releases finalize $PROJECTS "$VERSION"
-          npx --yes @sentry/cli@3.6.2 releases deploys "$VERSION" new -e "$SENTRY_ENV" || true
+          pnpm exec sentry-cli releases finalize $PROJECTS "$VERSION"
+          pnpm exec sentry-cli releases deploys "$VERSION" new -e "$SENTRY_ENV" || true

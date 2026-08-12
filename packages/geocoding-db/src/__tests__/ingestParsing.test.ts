@@ -3,8 +3,8 @@ import {
   encodeOsmId,
   geometryCenter,
   parseFeature,
-} from '../../../scripts/ingestParsing'
-import {computeImportance} from '../../places/common'
+} from '../../scripts/ingestParsing'
+import {computeImportance} from '../common'
 
 const RS = '\u001e'
 

@@ -1,9 +1,12 @@
-import {Option} from 'effect'
 import {
-  type PlaceTranslations,
-  type PlaceWithContextRecord,
-} from '../db/PlacesDbService/domain'
-import {SELF_SUFFICIENT_TYPES, viewportLatRadiusDeg} from './common'
+  type GeocodingRecordWithContext,
+  type GeocodingTranslations,
+} from '@vexl-next/geocoding-db/src/GeocodingDbService/domain'
+import {
+  SELF_SUFFICIENT_TYPES,
+  viewportLatRadiusDeg,
+} from '@vexl-next/geocoding-db/src/common'
+import {Option} from 'effect'
 
 /**
  * "cs-CZ" / "CS" / "cs" → "cs". Anything that isn't a two-letter code falls
@@ -16,7 +19,7 @@ export const pickLang = (lang: string): string => {
 
 export const localizedName = (
   name: string,
-  names: PlaceTranslations,
+  names: GeocodingTranslations,
   lang: string
 ): string => names[lang] ?? name
 
@@ -37,7 +40,10 @@ const isSelfSufficientType = (placeType: string): boolean =>
   SELF_SUFFICIENT_TYPES.some((one) => one === placeType)
 
 export const localizedCityContext = (
-  record: Pick<PlaceWithContextRecord, 'placeType' | 'cityName' | 'cityNames'>,
+  record: Pick<
+    GeocodingRecordWithContext,
+    'placeType' | 'cityName' | 'cityNames'
+  >,
   lang: string
 ): Option.Option<string> =>
   isSelfSufficientType(record.placeType)
@@ -45,7 +51,7 @@ export const localizedCityContext = (
     : Option.map(record.cityName, (cityName) =>
         localizedName(
           cityName,
-          Option.getOrElse(record.cityNames, (): PlaceTranslations => ({})),
+          Option.getOrElse(record.cityNames, (): GeocodingTranslations => ({})),
           lang
         )
       )
@@ -56,7 +62,7 @@ export const localizedCityContext = (
  * nor the country (should be rare).
  */
 export const buildSuggestSecondRow = (
-  record: PlaceWithContextRecord,
+  record: GeocodingRecordWithContext,
   lang: string
 ): string => {
   const parts = [
@@ -75,7 +81,7 @@ export const buildSuggestSecondRow = (
  */
 export const buildGeocodeAddress = (
   record: Pick<
-    PlaceWithContextRecord,
+    GeocodingRecordWithContext,
     'placeType' | 'name' | 'names' | 'countryCode' | 'cityName' | 'cityNames'
   >,
   lang: string

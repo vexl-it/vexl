@@ -86,6 +86,7 @@ export const ports = {
 
   // Infra
   postgres: 5432,
+  geocodingPostgres: 5433,
   redis: 6379,
   minioApi: 9000,
   minioConsole: 9001,
@@ -127,13 +128,17 @@ export const dbNames = {
   offer: "offer",
   chat: "chat",
   content: "content",
-  location: "location",
   feedback: "feedback",
   metrics: "metrics",
   notification: "notification",
   // backoffice-app's own db; dashboard-app connects read-only to `contact`.
   backoffice: "backoffice",
 };
+
+// The geocoding (places) DB lives on its OWN Postgres container
+// (geocoding-postgres, port `geocodingPostgres`), not in the shared instance
+// above — created by the container's POSTGRES_DB, no init script involved.
+export const geocodingDbName = "geocoding";
 
 // ---------------------------------------------------------------------------
 // Infra connection defaults (NON-SECRET — local docker only).
@@ -263,6 +268,7 @@ const devConfig = {
   ports,
   healthPorts,
   dbNames,
+  geocodingDbName,
   infra,
   common,
   internalUrls,

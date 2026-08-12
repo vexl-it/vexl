@@ -28,6 +28,27 @@ services:
       retries: 5
       start_period: 15s
 
+  # Standalone Postgres for the geocoding DB — deliberately separate from the
+  # vexl service databases so geocoding traffic and OSM ingests never share
+  # resources with user data (mirrors the prod topology).
+  geocoding-postgres:
+    image: postgres:17
+    container_name: vexl-geocoding-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-root}
+      POSTGRES_DB: geocoding
+    ports:
+      - "${GEOCODING_POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - geocoding_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d geocoding"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
   redis:
     image: redis:6
     container_name: vexl-redis
@@ -119,6 +140,8 @@ services:
 
 volumes:
   postgres_data:
+    driver: local
+  geocoding_postgres_data:
     driver: local
   redis_data:
     driver: local

@@ -2,7 +2,7 @@ import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {Effect, flow, Schema} from 'effect'
-import {PlaceRecord, PlaceTranslations} from '../domain'
+import {GeocodingRecord, GeocodingTranslations} from '../domain'
 
 const NearestPlaceRequest = Schema.Struct({
   latitude: Schema.Number,
@@ -11,16 +11,16 @@ const NearestPlaceRequest = Schema.Struct({
   maxDistanceMeters: Schema.Number,
 })
 
-export class NearestPlaceRecord extends Schema.Class<NearestPlaceRecord>(
-  'NearestPlaceRecord'
+export class NearestGeocodingRecord extends Schema.Class<NearestGeocodingRecord>(
+  'NearestGeocodingRecord'
 )({
-  ...PlaceRecord.fields,
+  ...GeocodingRecord.fields,
   distanceMeters: Schema.Number,
   cityName: Schema.optionalWith(Schema.String, {
     as: 'Option',
     nullable: true,
   }),
-  cityNames: Schema.optionalWith(PlaceTranslations, {
+  cityNames: Schema.optionalWith(GeocodingTranslations, {
     as: 'Option',
     nullable: true,
   }),
@@ -31,7 +31,7 @@ export const createQueryNearestPlace = Effect.gen(function* (_) {
 
   const query = SqlSchema.findOne({
     Request: NearestPlaceRequest,
-    Result: NearestPlaceRecord,
+    Result: NearestGeocodingRecord,
     execute: (params) => sql`
       WITH
         nearest AS (

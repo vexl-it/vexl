@@ -4,12 +4,12 @@ Scripts for running the local dev stack (`dev-backend.ts`, `dev-infra.ts`, `dev-
 
 ## Places DB seeding
 
-On startup, `dev-backend.ts` seeds location-service's places database if it is empty — otherwise it's a fast no-op, since the Postgres volume persists between runs. An empty DB is seeded with:
+On startup, `dev-backend.ts` seeds the standalone geocoding database (its own `geocoding-postgres` container, separate from the vexl service databases) if it is empty — otherwise it's a fast no-op, since the Postgres volume persists between runs. An empty DB is seeded with:
 
-- **`osmium` installed:** a real Slovakia + Czechia OpenStreetMap ingest, plus the European capitals. Downloads are cached in `~/.cache/vexl/osm`, so only the very first seed downloads anything (~1 GB).
+- **`osmium` installed:** a real Czechia OpenStreetMap ingest, plus a fixture of major SK/CZ cities and the European capitals. Downloads are cached in `~/.cache/vexl/osm`, so only the very first seed downloads anything (~800 MB).
 - **no `osmium`:** a committed fixture of major SK/CZ cities + European capitals. Instant and offline; map search just has less depth.
 
-Override with `--seed-places <auto|fixture|off>`. Details and standalone usage: [apps/location-service/README.md](../../apps/location-service/README.md).
+Override with `--seed-places <auto|fixture|off>`. Details and standalone usage: [packages/geocoding-db/README.md](../../packages/geocoding-db/README.md).
 
 ## seed-perf-data.ts — simulate a heavy account for performance work
 

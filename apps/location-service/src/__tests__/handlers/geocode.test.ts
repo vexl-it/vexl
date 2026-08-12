@@ -1,11 +1,11 @@
 import {Latitude, Longitude} from '@vexl-next/domain/src/utility/geoCoordinates'
+import {seedPlacesInDb} from '@vexl-next/geocoding-db/src/tests/seedPlaces'
 import {LocationNotFoundError} from '@vexl-next/rest-api/src/services/location/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {setDummyAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Schema} from 'effect'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../utils/runPromiseInMockedEnvironment'
-import {seedPlacesInDb} from '../utils/seedPlaces'
 
 const coordinates = (
   latitude: number,

@@ -1,13 +1,13 @@
 import {type UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {Context, Effect, Layer, type Option} from 'effect'
-import {type PlaceWithContextRecord} from './domain'
+import {type GeocodingRecordWithContext} from './domain'
 import {
   createQueryNearestPlace,
-  type NearestPlaceRecord,
+  type NearestGeocodingRecord,
 } from './queries/createQueryNearestPlace'
 import {createQuerySuggestPlaces} from './queries/createQuerySuggestPlaces'
 
-export interface PlacesDbOperations {
+export interface GeocodingDbOperations {
   suggestPlaces: (args: {
     normPhrase: string
     simPhrase: string
@@ -15,20 +15,26 @@ export interface PlacesDbOperations {
     usePrefix: boolean
     useTrigram: boolean
     limit: number
-  }) => Effect.Effect<readonly PlaceWithContextRecord[], UnexpectedServerError>
+  }) => Effect.Effect<
+    readonly GeocodingRecordWithContext[],
+    UnexpectedServerError
+  >
   nearestPlace: (args: {
     latitude: number
     longitude: number
     maxDistanceMeters: number
-  }) => Effect.Effect<Option.Option<NearestPlaceRecord>, UnexpectedServerError>
+  }) => Effect.Effect<
+    Option.Option<NearestGeocodingRecord>,
+    UnexpectedServerError
+  >
 }
 
-export class PlacesDbService extends Context.Tag('PlacesDbService')<
-  PlacesDbService,
-  PlacesDbOperations
+export class GeocodingDbService extends Context.Tag('GeocodingDbService')<
+  GeocodingDbService,
+  GeocodingDbOperations
 >() {
   static readonly Live = Layer.effect(
-    PlacesDbService,
+    GeocodingDbService,
     Effect.gen(function* (_) {
       const suggestPlaces = yield* _(createQuerySuggestPlaces)
       const nearestPlace = yield* _(createQueryNearestPlace)

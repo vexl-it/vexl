@@ -19,6 +19,8 @@ export type ServiceKind = 'service' | 'web'
 
 export interface ServiceNeeds {
   readonly db?: string
+  /** The standalone geocoding Postgres (geocoding-postgres container). */
+  readonly geocodingDb?: boolean
   readonly redis: boolean
   readonly s3: boolean
 }
@@ -83,6 +85,12 @@ export const dbEnv = (
   DB_NAME: dbName,
 })
 
+export const geocodingDbEnv = (ctx: EnvContext): Record<string, string> => ({
+  GEOCODING_DB_URL: `postgresql://${ctx.cfg.infra.host}:${ctx.ports.geocodingPostgres}/${ctx.cfg.geocodingDbName}`,
+  GEOCODING_DB_USER: ctx.cfg.infra.postgres.user,
+  GEOCODING_DB_PASSWORD: ctx.cfg.infra.postgres.password,
+})
+
 const s3Env = (ctx: EnvContext): Record<string, string> => ({
   S3_ENDPOINT: httpUrl(ctx, 'minioApi'),
   S3_FORCE_PATH_STYLE: 'true',
@@ -115,6 +123,7 @@ const commonServiceEnv = (
   GRAFANA_TEMPO_DATASOURCE_UID: 'vexl-local-traces',
   ...ctx.cfg.devCryptoKeys,
   ...(app.needs.db !== undefined ? dbEnv(ctx, app.needs.db) : {}),
+  ...(app.needs.geocodingDb === true ? geocodingDbEnv(ctx) : {}),
 })
 
 const tsxService = (entry: string): RunSpec => ({type: 'tsx', entry})
@@ -201,7 +210,7 @@ export const SERVICES: readonly RunnableApp[] = [
     kind: 'service',
     portKey: 'locationService',
     healthPortKey: 'locationService',
-    needs: {db: dbn.location, redis: false, s3: false},
+    needs: {geocodingDb: true, redis: false, s3: false},
     run: tsxService('src/index.ts'),
     buildEnv: () => ({}),
   },

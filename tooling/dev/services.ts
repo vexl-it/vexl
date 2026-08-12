@@ -108,6 +108,8 @@ const commonServiceEnv = (
   DISABLE_METRICS: ctx.cfg.common.DISABLE_METRICS,
   OTLP_TRACE_EXPORTER_URL: ctx.cfg.common.OTLP_TRACE_EXPORTER_URL,
   GRAFANA_URL: httpUrl(ctx, 'grafana'),
+  // Uid from tooling/dev/observability/grafana/provisioning/datasources/tempo.yaml
+  GRAFANA_TEMPO_DATASOURCE_UID: 'vexl-local-traces',
   ...ctx.cfg.devCryptoKeys,
   ...(app.needs.db !== undefined ? dbEnv(ctx, app.needs.db) : {}),
 })

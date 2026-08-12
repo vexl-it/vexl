@@ -15,6 +15,7 @@ import {
   type ConfigError,
 } from 'effect'
 import {
+  grafanaTempoDatasourceUidConfig,
   grafanaUrlConfig,
   nodeEnvConfig,
   sentryDsnConfig,
@@ -38,15 +39,42 @@ export const traceContextFromFiberRefs = (
     Tracer.ParentSpan
   ).pipe(Option.map((span) => ({traceId: span.traceId, spanId: span.spanId})))
 
-/** Deep link into Grafana Explore with a TraceQL query for the given trace. */
+/**
+ * Deep link into Grafana Explore with a TraceQL query for the given trace.
+ * Without the Tempo datasource uid, Grafana opens Explore on the user's
+ * default datasource and the query does not run on click.
+ */
 export const grafanaTraceUrl = (
   grafanaBaseUrl: string,
-  traceId: string
+  traceId: string,
+  tempoDatasourceUid?: string
 ): string => {
-  const query = encodeURIComponent(
-    JSON.stringify({queries: [{query: traceId, queryType: 'traceql'}]})
-  )
-  return `${grafanaBaseUrl.replace(/\/$/, '')}/explore?left=${query}`
+  const baseUrl = grafanaBaseUrl.replace(/\/$/, '')
+  if (tempoDatasourceUid === undefined) {
+    const query = encodeURIComponent(
+      JSON.stringify({queries: [{query: traceId, queryType: 'traceql'}]})
+    )
+    return `${baseUrl}/explore?left=${query}`
+  }
+
+  const pane = {
+    datasource: tempoDatasourceUid,
+    queries: [
+      {
+        refId: 'A',
+        datasource: {type: 'tempo', uid: tempoDatasourceUid},
+        queryType: 'traceql',
+        query: traceId,
+        limit: 20,
+        tableType: 'traces',
+      },
+    ],
+    // Wide range on purpose — the link may be clicked days after the event,
+    // and a trace-id lookup is cheap regardless of range.
+    range: {from: 'now-7d', to: 'now'},
+  }
+  const panes = encodeURIComponent(JSON.stringify({sentry: pane}))
+  return `${baseUrl}/explore?schemaVersion=1&panes=${panes}&orgId=1`
 }
 
 /**
@@ -56,7 +84,8 @@ export const grafanaTraceUrl = (
  * covers them all without touching individual call sites.
  */
 const makeSentryCaptureLogger = (
-  grafanaUrl: Option.Option<string>
+  grafanaUrl: Option.Option<string>,
+  grafanaTempoDatasourceUid: Option.Option<string>
 ): Logger.Logger<unknown, void> =>
   Logger.make(({annotations, cause, context, logLevel, message}) => {
     if (!LogLevel.greaterThanEqual(logLevel, LogLevel.Error)) return
@@ -80,7 +109,8 @@ const makeSentryCaptureLogger = (
     if (Option.isSome(trace) && Option.isSome(grafanaUrl))
       extra.grafanaTraceUrl = grafanaTraceUrl(
         grafanaUrl.value,
-        trace.value.traceId
+        trace.value.traceId,
+        Option.getOrUndefined(grafanaTempoDatasourceUid)
       )
     const traceTags = Option.isSome(trace)
       ? {
@@ -144,6 +174,9 @@ export const sentryLayer: Layer.Layer<never, ConfigError.ConfigError> =
       )
       const release = yield* _(serviceVersionConfig)
       const grafanaUrl = yield* _(grafanaUrlConfig)
+      const grafanaTempoDatasourceUid = yield* _(
+        grafanaTempoDatasourceUidConfig
+      )
 
       yield* _(
         Effect.sync(() => {
@@ -166,7 +199,9 @@ export const sentryLayer: Layer.Layer<never, ConfigError.ConfigError> =
       yield* _(Effect.logInfo('Sentry error reporting enabled', {environment}))
 
       return Layer.merge(
-        Logger.add(makeSentryCaptureLogger(grafanaUrl)),
+        Logger.add(
+          makeSentryCaptureLogger(grafanaUrl, grafanaTempoDatasourceUid)
+        ),
         Layer.scopedDiscard(
           Effect.addFinalizer(() =>
             Effect.promise(async () => {

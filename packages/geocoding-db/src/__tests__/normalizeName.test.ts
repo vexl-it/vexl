@@ -1,4 +1,4 @@
-import {normalizeName} from '../../places/common'
+import {normalizeName} from '../common'
 
 describe('normalizeName', () => {
   it('strips combining diacritics', () => {

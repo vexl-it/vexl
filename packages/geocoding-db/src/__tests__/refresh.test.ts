@@ -1,5 +1,5 @@
 /**
- * Tests for scripts/refresh-places.sh — the cron entrypoint that downloads
+ * Tests for scripts/refresh.sh — the manual refresh entrypoint that downloads
  * OSM extracts, filters them with osmium and hands them to the ingest.
  *
  * The script runs for real; `curl`, `osmium` and `pnpm` are replaced by stub
@@ -14,6 +14,7 @@ import {
   mkdirSync,
   mkdtempSync,
   readFileSync,
+  realpathSync,
   rmSync,
   utimesSync,
   writeFileSync,
@@ -21,10 +22,7 @@ import {
 import {tmpdir} from 'node:os'
 import path from 'node:path'
 
-const SCRIPT_PATH = path.resolve(
-  __dirname,
-  '../../../scripts/refresh-places.sh'
-)
+const SCRIPT_PATH = path.resolve(__dirname, '../../scripts/refresh.sh')
 
 let workDir: string
 let binDir: string
@@ -77,11 +75,14 @@ exit 0
 
 const PNPM_STUB = `#!/bin/sh
 echo "pnpm $*" >> "$STUB_LOG"
+echo "pnpm-env \${GEOCODING_DB_URL:-}" >> "$STUB_LOG"
 exit 0
 `
 
 beforeEach(() => {
-  workDir = mkdtempSync(path.join(tmpdir(), 'refresh-places-test-'))
+  // realpath so assertions match the script's pwd-canonicalized paths
+  // (macOS tmpdir lives behind the /var -> /private/var symlink)
+  workDir = realpathSync(mkdtempSync(path.join(tmpdir(), 'refresh-test-')))
   binDir = path.join(workDir, 'bin')
   dataDir = path.join(workDir, 'data')
   logPath = path.join(workDir, 'invocations.log')
@@ -104,20 +105,32 @@ afterEach(() => {
 
 const runScript = async (
   args: string[],
-  extraEnv: Record<string, string | undefined> = {}
+  extraEnv: Record<string, string | undefined> = {},
+  // /dev/null by default so a developer's real packages/geocoding-db/.env can
+  // never leak into the tests (the script auto-loads it otherwise)
+  configFile = '/dev/null',
+  opts: {cwd?: string; dataDirArg?: string} = {}
 ): Promise<{code: number; stdout: string; stderr: string}> =>
   await new Promise((resolve) => {
     execFile(
       '/bin/sh',
-      [SCRIPT_PATH, '-d', dataDir, ...args],
+      [
+        SCRIPT_PATH,
+        '-c',
+        configFile,
+        '-d',
+        opts.dataDirArg ?? dataDir,
+        ...args,
+      ],
       {
+        cwd: opts.cwd,
         env: {
           PATH: `${binDir}${path.delimiter}${process.env.PATH ?? ''}`,
           STUB_LOG: logPath,
           STUB_DIR: workDir,
-          DB_URL: 'postgresql://localhost:5432/places',
-          DB_USER: 'user',
-          DB_PASSWORD: 'password',
+          GEOCODING_DB_URL: 'postgresql://localhost:5432/geocoding',
+          GEOCODING_DB_USER: 'user',
+          GEOCODING_DB_PASSWORD: 'password',
           ...extraEnv,
         },
       },
@@ -132,7 +145,7 @@ const runScript = async (
 const invocations = (): string[] =>
   readFileSync(logPath, 'utf8').split('\n').filter(Boolean)
 
-describe('refresh-places.sh', () => {
+describe('refresh.sh', () => {
   it('runs all three stages for a region: fetch, extract, ingest', async () => {
     const run = await runScript(['-r', 'europe'])
     expect(run.stderr).toEqual('')
@@ -178,7 +191,7 @@ describe('refresh-places.sh', () => {
 
     // ingest: pnpm receives the countries file and all three filtered files
     const ingest = log.find((one) => one.startsWith('pnpm'))
-    expect(ingest).toContain('ingest:places')
+    expect(ingest).toContain('ingest:geocoding')
     expect(ingest).toContain(`--countries ${dataDir}/ne_countries.geojson`)
     expect(ingest).toContain(`${dataDir}/filtered/places-europe.osm.pbf`)
     expect(ingest).toContain(`${dataDir}/filtered/pois-europe.osm.pbf`)
@@ -329,14 +342,99 @@ describe('refresh-places.sh', () => {
     expect(secondLog.some((one) => one.startsWith('pnpm'))).toBe(true)
   })
 
+  it('rejects an unknown stage before doing any work', async () => {
+    const run = await runScript(['-r', 'europe', 'ingset'])
+    expect(run.code).toEqual(2)
+    expect(run.stderr).toContain('unknown stage: ingset')
+    expect(invocations()).toHaveLength(0)
+
+    // getopts stops at the first positional, so a misplaced option lands in
+    // the stage list and must be rejected the same way
+    const misplaced = await runScript(['fetch', '-r', 'europe'])
+    expect(misplaced.code).toEqual(2)
+    expect(misplaced.stderr).toContain('unknown stage: -r')
+    expect(invocations()).toHaveLength(0)
+  })
+
+  it('resolves a relative -d data dir so the ingest cd cannot break it', async () => {
+    const run = await runScript(['-r', 'europe'], {}, '/dev/null', {
+      cwd: workDir,
+      dataDirArg: 'data',
+    })
+    expect(run.stderr).toEqual('')
+    expect(run.code).toEqual(0)
+
+    // dataDir is workDir/data, so the relative dir must resolve to it and the
+    // ingest must receive absolute paths despite the script's cd
+    const ingest = invocations().find((one) => one.startsWith('pnpm'))
+    expect(ingest).toContain(`--countries ${dataDir}/ne_countries.geojson`)
+    expect(ingest).toContain(`${dataDir}/filtered/places-europe.osm.pbf`)
+    expect(existsSync(path.join(dataDir, 'ne_countries.geojson'))).toBe(true)
+  })
+
   it('requires database credentials for the ingest stage', async () => {
     await runScript(['-r', 'europe', 'fetch', 'extract'])
 
     const run = await runScript(['-r', 'europe', 'ingest'], {
-      DB_URL: undefined,
+      GEOCODING_DB_URL: undefined,
     })
     expect(run.code).not.toEqual(0)
-    expect(run.stderr).toContain('DB_URL')
+    expect(run.stderr).toContain('GEOCODING_DB_URL')
     expect(invocations().some((one) => one.startsWith('pnpm'))).toBe(false)
+  })
+
+  it('loads the access keys from the config file', async () => {
+    const configPath = path.join(workDir, 'refresh.env')
+    writeFileSync(
+      configPath,
+      [
+        'GEOCODING_DB_URL=postgresql://config-host:5433/geocoding',
+        'GEOCODING_DB_USER=config-user',
+        'GEOCODING_DB_PASSWORD=config-password',
+        '',
+      ].join('\n')
+    )
+
+    const run = await runScript(
+      ['-r', 'europe'],
+      {
+        GEOCODING_DB_URL: undefined,
+        GEOCODING_DB_USER: undefined,
+        GEOCODING_DB_PASSWORD: undefined,
+      },
+      configPath
+    )
+    expect(run.stderr).toEqual('')
+    expect(run.code).toEqual(0)
+    expect(invocations()).toContain(
+      'pnpm-env postgresql://config-host:5433/geocoding'
+    )
+  })
+
+  it('lets environment variables override the config file', async () => {
+    const configPath = path.join(workDir, 'refresh.env')
+    writeFileSync(
+      configPath,
+      'GEOCODING_DB_URL=postgresql://config-host:5433/geocoding\n'
+    )
+
+    const run = await runScript(['-r', 'europe'], {}, configPath)
+    expect(run.code).toEqual(0)
+    // The default env from runScript must win over the config file value
+    expect(invocations()).toContain(
+      'pnpm-env postgresql://localhost:5432/geocoding'
+    )
+  })
+
+  it('appends timestamped progress to the log file in the data dir', async () => {
+    const run = await runScript(['-r', 'europe', 'fetch'])
+    expect(run.code).toEqual(0)
+
+    const logContent = readFileSync(path.join(dataDir, 'refresh.log'), 'utf8')
+    expect(logContent).toMatch(
+      /^\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\] === refresh started: stages \[fetch\]/m
+    )
+    expect(logContent).toContain('=== europe: downloading')
+    expect(logContent).toContain('=== done: fetch')
   })
 })

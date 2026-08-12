@@ -1,8 +1,8 @@
+import {seedPlacesInDb} from '@vexl-next/geocoding-db/src/tests/seedPlaces'
 import {setDummyAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect} from 'effect'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../utils/runPromiseInMockedEnvironment'
-import {seedPlacesInDb} from '../utils/seedPlaces'
 
 // The runtime itself is started/disposed globally in jest.afterenv.ts
 beforeAll(async () => {

@@ -27,8 +27,8 @@ import {loadRawEnvLocal, loadSecrets, repoRoot, type Secrets} from './secrets'
 import {
   ALL_APPS,
   buildFinalEnv,
-  dbEnv,
   findApp,
+  geocodingDbEnv,
   SERVICES,
   WEB_APPS,
   type EnvContext,
@@ -132,8 +132,9 @@ function printHelp(): void {
       '  --watch             hot-reload services via tsx watch (default off)',
       '  --fresh-db          recreate databases from scratch (docker compose down -v)',
       '  --detach-infra      leave docker infra running on exit',
-      '  --seed-places <m>   places DB seeding when empty (default auto: SK+CZ OSM',
-      '                      ingest if osmium is installed, city fixture otherwise;',
+      '  --seed-places <m>   places DB seeding, runs only when the table is empty',
+      '                      or after --fresh-db (default auto: CZ OSM ingest if',
+      '                      osmium is installed, city fixture otherwise;',
       '                      fixture = fixture only, off = ensure DB/schema only,',
       '                      no data)',
     ].join('\n')
@@ -193,6 +194,7 @@ async function validatePorts(
 ): Promise<void> {
   const infraPortKeys = [
     'postgres',
+    'geocodingPostgres',
     'redis',
     'minioApi',
     'minioConsole',
@@ -334,35 +336,35 @@ function killTree(child: ChildProcess, signal: NodeJS.Signals): void {
   }
 }
 
-// --- places DB seeding -----------------------------------------------------
+// --- geocoding DB seeding ----------------------------------------------------
 
 /**
- * Runs the idempotent location-service seeder (fast no-op when the places
- * table already has data). Blocking on purpose: a first-time OSM ingest should
+ * Runs the idempotent geocoding-db seeder (fast no-op when the places table
+ * already has data). Blocking on purpose: a first-time OSM ingest should
  * finish before the stack reports ready, so the map works immediately. Even
- * with mode `off` it must run: it also creates the `location` DB + schema on
- * Postgres volumes predating them (the compose init script only runs on empty
- * volumes), without which the service crash-loops.
+ * with mode `off` it must run: it also creates the `geocoding` DB + schema
+ * on geocoding-postgres volumes predating them, without which location-service
+ * crash-loops.
  */
-function seedPlacesDb(ctx: EnvContext, mode: PlacesSeedMode): void {
+function seedGeocodingDb(ctx: EnvContext, mode: PlacesSeedMode): void {
   console.log(
     mode === 'off'
-      ? 'Ensuring the places DB exists (location-service)...'
-      : 'Ensuring the places DB is seeded (location-service)...'
+      ? 'Ensuring the geocoding DB exists (geocoding-db)...'
+      : 'Ensuring the geocoding DB is seeded (geocoding-db)...'
   )
   const result = spawnSync(
     join(repoRoot, 'node_modules', '.bin', 'tsx'),
-    ['scripts/seedDevPlaces.ts', '--mode', mode],
+    ['scripts/seedDev.ts', '--mode', mode],
     {
-      cwd: join(repoRoot, 'apps/location-service'),
+      cwd: join(repoRoot, 'packages/geocoding-db'),
       stdio: 'inherit',
-      env: {...process.env, ...dbEnv(ctx, devConfig.dbNames.location)},
+      env: {...process.env, ...geocodingDbEnv(ctx)},
     }
   )
   if (result.status !== 0) {
     console.warn(
       'Places seeding failed — location search will return no results until ' +
-        'seeded (see apps/location-service/README.md). Continuing.'
+        'seeded (see packages/geocoding-db/README.md). Continuing.'
     )
   }
 }
@@ -466,7 +468,7 @@ async function main(): Promise<void> {
       Array.some((app) => app.name === 'location-service')
     )
   ) {
-    seedPlacesDb(ctx, options.seedPlaces)
+    seedGeocodingDb(ctx, options.seedPlaces)
   }
 
   const supervised: Supervised[] = []

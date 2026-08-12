@@ -1,6 +1,6 @@
 import {PgClient} from '@effect/sql-pg'
 import {Array, Effect, pipe} from 'effect'
-import {computeImportance, normalizeName} from '../../places/common'
+import {computeImportance, normalizeName} from '../common'
 
 interface SeedPlace {
   id: number

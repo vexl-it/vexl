@@ -2,7 +2,7 @@ import * as translations from '@vexl-next/localization/src/translations'
 
 /**
  * Shared vocabulary for the in-house places database. Used by the service
- * queries and by scripts/ingestPlaces.ts, so the ingested data and the
+ * queries and by scripts/ingest.ts, so the ingested data and the
  * search-time normalization can never drift apart.
  */
 

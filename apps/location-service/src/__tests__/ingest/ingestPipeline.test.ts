@@ -1,5 +1,6 @@
 /**
- * End-to-end test of the places ingest pipeline (scripts/ingestPlaces.ts):
+ * End-to-end test of the places ingest pipeline
+ * (packages/geocoding-db/scripts/ingest.ts):
  * geojsonseq parsing → transform → staging inserts → street merging →
  * importance boosting → index build → sanity gate → atomic table swap — and
  * finally the live API serving the ingested dataset.
@@ -11,18 +12,23 @@
  */
 import {PgClient} from '@effect/sql-pg'
 import {Latitude, Longitude} from '@vexl-next/domain/src/utility/geoCoordinates'
+import {computeImportance} from '@vexl-next/geocoding-db/src/common'
 import {setDummyAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Schema} from 'effect'
 import {execFile} from 'node:child_process'
 import {chmodSync, mkdirSync, mkdtempSync, rmSync, writeFileSync} from 'node:fs'
 import {tmpdir} from 'node:os'
 import path from 'node:path'
-import {computeImportance} from '../../places/common'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../utils/runPromiseInMockedEnvironment'
 
 const RS = '\u001e'
-const SERVICE_ROOT = path.resolve(__dirname, '../../..')
+// The ingest pipeline lives in the geocoding-db package — resolve it through
+// the workspace symlink so the test does not depend on the repo layout.
+const GEOCODING_DB_ROOT = path.resolve(
+  __dirname,
+  '../../../node_modules/@vexl-next/geocoding-db'
+)
 
 // ---------------------------------------------------------------------------
 // Fixture builders
@@ -256,13 +262,13 @@ const runIngest = async (
       [
         'exec',
         'tsx',
-        'scripts/ingestPlaces.ts',
+        'scripts/ingest.ts',
         '--countries',
         path.join(workDir, 'ne_countries.geojson'),
         ...pbfPaths,
       ],
       {
-        cwd: SERVICE_ROOT,
+        cwd: GEOCODING_DB_ROOT,
         maxBuffer: 32 * 1024 * 1024,
         env: {
           ...process.env,

@@ -11,8 +11,9 @@ import {RedisConnectionService} from '@vexl-next/server-utils/src/RedisConnectio
 import {RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
+import {sentryTestErrorMiddleware} from '@vexl-next/server-utils/src/sentryTestErrorMiddleware'
 import {ServerSecurityMiddlewareLive} from '@vexl-next/server-utils/src/serverSecurity'
-import {Config, Layer, Option} from 'effect'
+import {Config, flow, Layer, Option} from 'effect'
 import {
   cryptoConfig,
   dashboardNewUserHookConfig,
@@ -87,7 +88,9 @@ export const UserApiLive = HttpApiBuilder.api(UserApiSpecification).pipe(
   Layer.provide(ServerSecurityMiddlewareLive)
 )
 
-export const ApiServerLive = HttpApiBuilder.serve(HttpMiddleware.logger).pipe(
+export const ApiServerLive = HttpApiBuilder.serve(
+  flow(HttpMiddleware.logger, sentryTestErrorMiddleware)
+).pipe(
   Layer.provide(HttpApiSwagger.layer()),
   Layer.provide(UserApiLive),
   HttpServer.withLogAddress,

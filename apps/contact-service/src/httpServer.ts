@@ -11,6 +11,7 @@ import {NodeHttpServerLiveWithPortFromEnv} from '@vexl-next/server-utils/src/Nod
 import {RateLimitingService} from '@vexl-next/server-utils/src/RateLimiting'
 import {rateLimitingMiddlewareLayer} from '@vexl-next/server-utils/src/RateLimiting/rateLimitngMiddlewareLayer'
 import {RedisConnectionService} from '@vexl-next/server-utils/src/RedisConnection'
+import {sentryTestErrorMiddleware} from '@vexl-next/server-utils/src/sentryTestErrorMiddleware'
 
 import {RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
@@ -18,7 +19,7 @@ import {MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsC
 import {ServerSecurityMiddlewareLive} from '@vexl-next/server-utils/src/serverSecurity'
 import {createChallenge} from '@vexl-next/server-utils/src/services/challenge/routes/createChalenge'
 import {createChallenges} from '@vexl-next/server-utils/src/services/challenge/routes/createChallenges'
-import {Config, Layer, Option} from 'effect'
+import {Config, flow, Layer, Option} from 'effect'
 import {CleanReportedClubRecordsWorkerLayer} from './cleanReportedClubRecordsWorker'
 import {
   cryptoConfig,
@@ -158,7 +159,9 @@ export const ContactApiLive = HttpApiBuilder.api(ContactApiSpecification).pipe(
   Layer.provide(ServerSecurityMiddlewareLive)
 )
 
-export const ApiServerLive = HttpApiBuilder.serve(HttpMiddleware.logger).pipe(
+export const ApiServerLive = HttpApiBuilder.serve(
+  flow(HttpMiddleware.logger, sentryTestErrorMiddleware)
+).pipe(
   Layer.provide(HttpApiSwagger.layer()),
   Layer.provide(ContactApiLive),
   HttpServer.withLogAddress,

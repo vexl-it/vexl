@@ -9,7 +9,8 @@ import {NodeHttpServerLiveWithPortFromEnv} from '@vexl-next/server-utils/src/Nod
 import {RateLimitingService} from '@vexl-next/server-utils/src/RateLimiting'
 import {rateLimitingMiddlewareLayer} from '@vexl-next/server-utils/src/RateLimiting/rateLimitngMiddlewareLayer'
 import {RedisService} from '@vexl-next/server-utils/src/RedisService'
-import {Layer} from 'effect/index'
+import {sentryTestErrorMiddleware} from '@vexl-next/server-utils/src/sentryTestErrorMiddleware'
+import {flow, Layer} from 'effect/index'
 import {reportNotificationInteraction} from './routes/reportNotificationInteraction'
 
 const RootApiGroupLive = HttpApiBuilder.group(
@@ -24,7 +25,9 @@ export const MetricsApiLive = HttpApiBuilder.api(MetricsApiSpecification).pipe(
   Layer.provide(rateLimitingMiddlewareLayer(MetricsApiSpecification))
 )
 
-export const ApiServerLive = HttpApiBuilder.serve(HttpMiddleware.logger).pipe(
+export const ApiServerLive = HttpApiBuilder.serve(
+  flow(HttpMiddleware.logger, sentryTestErrorMiddleware)
+).pipe(
   Layer.provide(HttpApiSwagger.layer()),
   Layer.provide(MetricsApiLive),
   Layer.provideMerge(RateLimitingService.Live),

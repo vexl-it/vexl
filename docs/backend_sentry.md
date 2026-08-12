@@ -55,3 +55,11 @@ There is one Sentry project per service. Production/stage DSNs are injected by
 the deployment manifests in the infrastructure repo. For local testing, set
 `SENTRY_DSN` in `.env.local` (see `example.env.local`); it is injected into all
 services, so everything lands in that one project.
+
+## Verifying delivery (TEMPORARY)
+
+Every service exposes `GET /sentry-test-error` on its main API port
+(`sentryTestErrorMiddleware` in server-utils), which logs a test error through
+the real logger-to-Sentry path and returns 500. The endpoint is public and
+unauthenticated — revert the commit that added it once Sentry delivery is
+verified in all environments.

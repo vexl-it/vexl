@@ -13,8 +13,9 @@ import {RateLimitingService} from '@vexl-next/server-utils/src/RateLimiting'
 import {rateLimitingMiddlewareLayer} from '@vexl-next/server-utils/src/RateLimiting/rateLimitngMiddlewareLayer'
 import {RedisConnectionService} from '@vexl-next/server-utils/src/RedisConnection'
 import {RedisService} from '@vexl-next/server-utils/src/RedisService'
+import {sentryTestErrorMiddleware} from '@vexl-next/server-utils/src/sentryTestErrorMiddleware'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
-import {Layer} from 'effect'
+import {flow, Layer} from 'effect'
 import {cryptoConfig, healthServerPortConfig} from './configs'
 import DbLayer from './db/layer'
 import {VexlProductNotificationsDbService} from './db/VexlProductNotificationsDbService'
@@ -82,7 +83,9 @@ export const ContentApiLive = HttpApiBuilder.api(ContentApiSpecification).pipe(
   Layer.provide(rateLimitingMiddlewareLayer(ContentApiSpecification))
 )
 
-export const ApiServerLive = HttpApiBuilder.serve(HttpMiddleware.logger).pipe(
+export const ApiServerLive = HttpApiBuilder.serve(
+  flow(HttpMiddleware.logger, sentryTestErrorMiddleware)
+).pipe(
   Layer.provide(HttpApiSwagger.layer()),
   Layer.provide(ContentApiLive),
   HttpServer.withLogAddress,

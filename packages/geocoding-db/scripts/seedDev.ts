@@ -1,29 +1,29 @@
-/* eslint-disable no-console */
 /**
- * Idempotent dev seeder for the places database. `pnpm dev:backend` runs it
+ * Idempotent dev seeder for the geocoding database. `pnpm dev:backend` runs it
  * before starting the services; it can also be run standalone via
- * `pnpm seed:dev-places` (env from .env).
+ * `pnpm seed:dev-geocoding` (env from .env).
  *
  * Ensures the database and schema exist, then — only when the places table is
  * EMPTY — seeds it:
  *
- *   --mode auto (default)  full OSM ingest of Slovakia + Czechia via
- *                          refresh-places.sh when osmium is installed
- *                          (downloads cached under ~/.cache/vexl/osm, so
- *                          re-seeding after --fresh-db doesn't re-download),
- *                          then tops up with the European-capitals fixture.
+ *   --mode auto (default)  full OSM ingest of Czechia via refresh.sh when
+ *                          osmium is installed (downloads cached under
+ *                          ~/.cache/vexl/osm, so re-seeding after --fresh-db
+ *                          doesn't re-download), then tops up with the
+ *                          SK/CZ-cities + European-capitals fixture.
  *                          Without osmium: fixture only.
  *   --mode fixture         fixture only (no external tools, no downloads).
  *   --mode off             only ensure the database and schema exist — never
  *                          seeds data (the service would otherwise crash-loop
- *                          on Postgres volumes predating the location DB).
+ *                          on Postgres volumes predating the geocoding DB).
  *
  * A non-empty places table means "already seeded" and the script exits without
  * touching it. To re-seed: `pnpm dev:backend --fresh-db`, or truncate first:
- *   docker exec vexl-postgres psql -U postgres -d location \
+ *   docker exec vexl-geocoding-postgres psql -U postgres -d geocoding \
  *     -c 'TRUNCATE places CASCADE'
  *
- * Env: DB_URL, DB_USER, DB_PASSWORD (same as the service).
+ * Env: GEOCODING_DB_URL, GEOCODING_DB_USER, GEOCODING_DB_PASSWORD (same as
+ * the service).
  */
 import {NodeContext} from '@effect/platform-node'
 import {Effect, Layer} from 'effect'
@@ -32,11 +32,11 @@ import {homedir} from 'node:os'
 import {join} from 'node:path'
 import {fileURLToPath} from 'node:url'
 import pg from 'pg'
-import DbLayer from '../src/db/layer'
-import {computeImportance, normalizeName} from '../src/places/common'
+import {computeImportance, normalizeName} from '../src/common'
+import {GeocodingDbLayer} from '../src/layer'
 import {devSeedPlaces} from './devSeedData'
 
-const INGEST_REGIONS = ['europe/slovakia', 'europe/czech-republic']
+const INGEST_REGIONS = ['europe/czech-republic']
 /** Dev doesn't need fresh map data — reuse cached downloads for two weeks. */
 const CACHE_FRESH_MINUTES = 14 * 24 * 60
 
@@ -72,7 +72,7 @@ const parseArgs = (): {mode: SeedMode; dataDir: string} => {
     } else {
       console.error(`Unknown argument: ${args[i]}`)
       console.error(
-        'Usage: seedDevPlaces.ts [--mode auto|fixture|off] [--data-dir <dir>]'
+        'Usage: seedDev.ts [--mode auto|fixture|off] [--data-dir <dir>]'
       )
       process.exit(1)
     }
@@ -85,22 +85,35 @@ const connected = async (client: pg.Client): Promise<pg.Client> => {
   return client
 }
 
+const LOCAL_HOSTNAMES = ['localhost', '127.0.0.1', '::1', '[::1]', '0.0.0.0']
+
+const assertLocalDb = (parsed: URL): void => {
+  if (LOCAL_HOSTNAMES.includes(parsed.hostname)) return
+  console.error(
+    `GEOCODING_DB_URL points at a non-local host ("${parsed.hostname}"). ` +
+      'This dev-only seeder refuses non-local databases — use ' +
+      'scripts/refresh.sh to load a real dataset.'
+  )
+  process.exit(1)
+}
+
 /**
- * Connects to the location database, creating it first if the Postgres volume
- * predates it (the compose init script only runs on empty volumes).
+ * Connects to the geocoding database, creating it first if the Postgres
+ * volume predates it (the compose init script only runs on empty volumes).
  */
 const connectCreatingDb = async (): Promise<pg.Client> => {
-  const dbUrl = process.env.DB_URL
+  const dbUrl = process.env.GEOCODING_DB_URL
   if (dbUrl === undefined) {
-    console.error('DB_URL env var is required')
+    console.error('GEOCODING_DB_URL env var is required')
     process.exit(1)
   }
   const parsed = new URL(dbUrl)
+  assertLocalDb(parsed)
   const config = {
     host: parsed.hostname,
     port: parsed.port !== '' ? Number(parsed.port) : 5432,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
+    user: process.env.GEOCODING_DB_USER,
+    password: process.env.GEOCODING_DB_PASSWORD,
   }
   const database = parsed.pathname.slice(1)
   try {
@@ -120,12 +133,14 @@ const connectCreatingDb = async (): Promise<pg.Client> => {
 }
 
 /**
- * Building the service's DbLayer runs the PgMigrator — the schema is applied
- * (and recorded) exactly as on service boot. Reads the same DB_* env.
+ * Building GeocodingDbLayer runs the PgMigrator — the schema is applied (and
+ * recorded) exactly as on service boot. Reads the same GEOCODING_DB_* env.
  */
 const applyMigrations = async (): Promise<void> => {
   await Effect.runPromise(
-    Effect.scoped(Layer.build(DbLayer.pipe(Layer.provide(NodeContext.layer))))
+    Effect.scoped(
+      Layer.build(GeocodingDbLayer.pipe(Layer.provide(NodeContext.layer)))
+    )
   )
 }
 
@@ -133,12 +148,19 @@ const osmiumAvailable = (): boolean =>
   spawnSync('osmium', ['--version'], {stdio: 'ignore'}).status === 0
 
 const runOsmIngest = (dataDir: string): boolean => {
-  const script = fileURLToPath(new URL('refresh-places.sh', import.meta.url))
+  const script = fileURLToPath(new URL('refresh.sh', import.meta.url))
   const regionArgs = INGEST_REGIONS.flatMap((region) => ['-r', region])
-  const result = spawnSync(script, ['-d', dataDir, ...regionArgs], {
-    stdio: 'inherit',
-    env: {...process.env, FRESH_MINUTES: String(CACHE_FRESH_MINUTES)},
-  })
+  // -c /dev/null: never load the package .env — the operator's copy may hold
+  // prod credentials / the Slack webhook; dev-backend injects GEOCODING_DB_*
+  // via env, which always wins anyway.
+  const result = spawnSync(
+    script,
+    ['-c', '/dev/null', '-d', dataDir, ...regionArgs],
+    {
+      stdio: 'inherit',
+      env: {...process.env, FRESH_MINUTES: String(CACHE_FRESH_MINUTES)},
+    }
+  )
   return result.status === 0
 }
 
@@ -222,7 +244,9 @@ const main = async (): Promise<void> => {
   await applyMigrations()
 
   if (mode === 'off') {
-    console.log('Places DB and schema ensured — seeding skipped (--mode off).')
+    console.log(
+      'Geocoding DB and schema ensured — seeding skipped (--mode off).'
+    )
     await client.end()
     return
   }
@@ -235,7 +259,9 @@ const main = async (): Promise<void> => {
     ).rows[0].count
   )
   if (count > 0) {
-    console.log(`Places DB already seeded (${count} places) — nothing to do.`)
+    console.log(
+      `Geocoding DB already seeded (${count} places) — nothing to do.`
+    )
     await client.end()
     return
   }
@@ -243,10 +269,10 @@ const main = async (): Promise<void> => {
   if (mode === 'auto') {
     if (osmiumAvailable()) {
       console.log(
-        `Places DB is empty — ingesting OSM data for ${INGEST_REGIONS.join(', ')} (cache: ${dataDir}).`
+        `Geocoding DB is empty — ingesting OSM data for ${INGEST_REGIONS.join(', ')} (cache: ${dataDir}).`
       )
       console.log(
-        'First run downloads ~1 GB and takes a few minutes; later re-seeds reuse the cache.'
+        'First run downloads ~800 MB and takes a few minutes; later re-seeds reuse the cache.'
       )
       if (!runOsmIngest(dataDir)) {
         console.warn(
@@ -273,7 +299,7 @@ const main = async (): Promise<void> => {
        ORDER BY count(*) DESC`
     )
   ).rows
-  console.log('Places DB seeded:')
+  console.log('Geocoding DB seeded:')
   for (const row of byType) console.log(`  ${row.placeType}: ${row.count}`)
 
   await client.end()

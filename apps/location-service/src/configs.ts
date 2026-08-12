@@ -1,6 +1,5 @@
 export {
   cryptoConfig,
-  databaseConfig,
   healthServerPortConfig,
   isRunningInTestConfig,
   nodeEnvConfig,

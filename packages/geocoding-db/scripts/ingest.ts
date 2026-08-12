@@ -1,12 +1,11 @@
-/* eslint-disable no-console */
 /**
- * Loads OSM places into the places database. Three kinds of entries:
+ * Loads OSM places into the geocoding database. Three kinds of entries:
  *   - settlements (place=* nodes) — searchable and used for reverse geocoding
  *   - POIs (cafés, restaurants, pubs, parks, attractions, …) — searchable only
  *   - streets (named highway ways, deduplicated to one entry per street name
  *     per ~10 km grid cell, no house numbers) — searchable only
  *
- * Input: PBF files pre-filtered by scripts/refresh-places.sh (places-*, pois-*,
+ * Input: PBF files pre-filtered by scripts/refresh.sh (places-*, pois-*,
  * streets-*; the parser classifies each feature by its tags, so files can be
  * passed in any mix) + a Natural Earth admin-0 countries GeoJSON used to stamp
  * each entry with its ISO country code.
@@ -14,18 +13,19 @@
  * The load is atomic: data goes into `places_ingest` / `place_names_ingest`
  * staging tables which replace the live tables in a single transaction at the
  * end, so the service keeps serving the old dataset until the new one is
- * complete. Deterministic and safe to re-run (weekly cron in production).
+ * complete. Deterministic and safe to re-run (manual refresh, see
+ * scripts/refresh.sh).
  *
  * Usage:
- *   pnpm ingest:places -- --countries <ne_countries.geojson> <*.osm.pbf>...
+ *   pnpm ingest:geocoding -- --countries <ne_countries.geojson> <*.osm.pbf>...
  *
- * Env: DB_URL, DB_USER, DB_PASSWORD (same as the service).
+ * Env: GEOCODING_DB_URL, GEOCODING_DB_USER, GEOCODING_DB_PASSWORD (same as the service).
  */
 import {spawn} from 'node:child_process'
 import {existsSync} from 'node:fs'
 import {readFile} from 'node:fs/promises'
 import pg from 'pg'
-import {computeImportance} from '../src/places/common'
+import {computeImportance} from '../src/common'
 import {
   CountryIndex,
   parseFeature,
@@ -35,6 +35,19 @@ import {
 } from './ingestParsing'
 
 const BATCH_SIZE = 2000
+/** Log running totals roughly every this many ingested rows. */
+const PROGRESS_INTERVAL = 500_000
+
+const timestamp = (): string =>
+  new Date().toISOString().replace('T', ' ').slice(0, 19)
+
+const log = (...args: unknown[]): void => {
+  console.log(`[${timestamp()}]`, ...args)
+}
+
+const logError = (...args: unknown[]): void => {
+  console.error(`[${timestamp()}]`, ...args)
+}
 
 // ---------------------------------------------------------------------------
 // Main
@@ -53,14 +66,14 @@ const parseArgs = (): {countriesPath: string; pbfPaths: string[]} => {
     }
   }
   if (countriesPath === undefined || pbfPaths.length === 0) {
-    console.error(
+    logError(
       'Usage: ingestPlaces.ts --countries <ne_countries.geojson> <*.osm.pbf>...'
     )
     process.exit(1)
   }
   for (const path of [countriesPath, ...pbfPaths]) {
     if (!existsSync(path)) {
-      console.error(`File not found: ${path}`)
+      logError(`File not found: ${path}`)
       process.exit(1)
     }
   }
@@ -68,9 +81,9 @@ const parseArgs = (): {countriesPath: string; pbfPaths: string[]} => {
 }
 
 const connectDb = async (): Promise<pg.Client> => {
-  const dbUrl = process.env.DB_URL
+  const dbUrl = process.env.GEOCODING_DB_URL
   if (dbUrl === undefined) {
-    console.error('DB_URL env var is required')
+    logError('GEOCODING_DB_URL env var is required')
     process.exit(1)
   }
   const parsed = new URL(dbUrl)
@@ -78,8 +91,8 @@ const connectDb = async (): Promise<pg.Client> => {
     host: parsed.hostname,
     port: parsed.port !== '' ? Number(parsed.port) : 5432,
     database: parsed.pathname.slice(1),
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
+    user: process.env.GEOCODING_DB_USER,
+    password: process.env.GEOCODING_DB_PASSWORD,
   })
   await client.connect()
   return client
@@ -117,7 +130,7 @@ const main = async (): Promise<void> => {
   const startedAt = Date.now()
   const {countriesPath, pbfPaths} = parseArgs()
 
-  console.log(`Loading country boundaries from ${countriesPath}`)
+  log(`Loading country boundaries from ${countriesPath}`)
   const countries = new CountryIndex(
     JSON.parse(await readFile(countriesPath, 'utf8'))
   )
@@ -128,7 +141,7 @@ const main = async (): Promise<void> => {
   await client.query(`CREATE EXTENSION IF NOT EXISTS cube`)
   await client.query(`CREATE EXTENSION IF NOT EXISTS earthdistance`)
 
-  console.log('Preparing staging tables')
+  log('Preparing staging tables')
   await client.query(`DROP TABLE IF EXISTS place_names_ingest`)
   await client.query(`DROP TABLE IF EXISTS places_ingest`)
   await client.query(`DROP TABLE IF EXISTS street_segments_ingest`)
@@ -169,6 +182,7 @@ const main = async (): Promise<void> => {
   let totalPlaces = 0
   let totalNames = 0
   let totalSegments = 0
+  let nextProgressAt = PROGRESS_INTERVAL
   let skippedDuplicates = 0
   let geometryUpgrades = 0
   // Numeric ids keep the dedupe map small. Street segments are excluded on
@@ -237,15 +251,32 @@ const main = async (): Promise<void> => {
       totalSegments += segmentBatch.length
       segmentBatch = []
     }
+    // Periodic progress for the multi-hour full-world ingest — per-file logs
+    // alone can leave hours of silence on the big continent extracts.
+    const processed = totalPlaces + totalNames + totalSegments
+    if (processed >= nextProgressAt) {
+      log(
+        `  progress: ${totalPlaces} places, ${totalNames} names, ${totalSegments} street segments`
+      )
+      nextProgressAt = processed + PROGRESS_INTERVAL
+    }
   }
 
   for (const pbfPath of pbfPaths) {
-    console.log(`Ingesting ${pbfPath}`)
+    log(`Ingesting ${pbfPath}`)
     const osmium = spawn(
       'osmium',
-      ['export', pbfPath, '-f', 'geojsonseq', '--add-unique-id=type_id'],
+      [
+        'export',
+        pbfPath,
+        '-f',
+        'geojsonseq',
+        '--add-unique-id=type_id',
+        '--index-type=sparse_file_array',
+      ],
       {stdio: ['ignore', 'pipe', 'inherit']}
     )
+
     const handleLine = async (line: string): Promise<void> => {
       const parsed = parseFeature(line, countries)
       if (parsed === null) return
@@ -313,18 +344,18 @@ const main = async (): Promise<void> => {
 
     const exitCode = await closed
     if (exitCode !== 0) {
-      console.error(`osmium export failed for ${pbfPath} (exit ${exitCode})`)
+      logError(`osmium export failed for ${pbfPath} (exit ${exitCode})`)
       process.exit(1)
     }
     await flush()
-    console.log(
+    log(
       `  running totals: ${totalPlaces} places, ${totalNames} names, ${totalSegments} street segments`
     )
   }
   await flush()
 
   if (totalSegments > 0) {
-    console.log('Merging street segments into street entries')
+    log('Merging street segments into street entries')
     const streetImportance = computeImportance('street', undefined)
     await client.query(
       `
@@ -394,7 +425,7 @@ const main = async (): Promise<void> => {
   // Streets/POIs near a city node rank above their same-named twins in small
   // towns. Capped at 0.5 so they always stay below the 0.55 "important"
   // threshold (and below every settlement of village rank and up).
-  console.log('Boosting streets/POIs near important cities')
+  log('Boosting streets/POIs near important cities')
   await client.query(`
     WITH
       city_cells AS (
@@ -466,7 +497,7 @@ const main = async (): Promise<void> => {
       )
   `)
 
-  console.log('Building indexes')
+  log('Building indexes')
   await client.query(`
     ALTER TABLE place_names_ingest
     ADD CONSTRAINT place_names_ingest_fk FOREIGN KEY (place_id) REFERENCES places_ingest (id) ON DELETE CASCADE
@@ -535,13 +566,13 @@ const main = async (): Promise<void> => {
       )
     : 0
   if (previous > 0 && Number(newCount) < previous * 0.7) {
-    console.error(
+    logError(
       `Sanity check failed: new dataset has ${newCount} places, previous had ${previous}. Aborting swap.`
     )
     process.exit(1)
   }
 
-  console.log('Swapping tables')
+  log('Swapping tables')
   await client.query('BEGIN')
   try {
     await client.query(`DROP TABLE IF EXISTS place_names`)
@@ -600,16 +631,16 @@ const main = async (): Promise<void> => {
         count(*) DESC
     `)
   ).rows
-  console.log(`\nDone in ${Math.round((Date.now() - startedAt) / 1000)}s`)
-  console.log(
+  log(`\nDone in ${Math.round((Date.now() - startedAt) / 1000)}s`)
+  log(
     `${totalPlaces} places, ${totalNames} names, ${totalSegments} street segments, ${skippedDuplicates} duplicates skipped, ${geometryUpgrades} geometry upgrades`
   )
-  for (const row of byType) console.log(`  ${row.placeType}: ${row.count}`)
+  for (const row of byType) log(`  ${row.placeType}: ${row.count}`)
 
   await client.end()
 }
 
 main().catch((e) => {
-  console.error(e)
+  logError(e)
   process.exit(1)
 })

@@ -3,26 +3,26 @@ import * as NodeHttpServer from '@effect/platform-node/NodeHttpServer'
 import {type HttpClient} from '@effect/platform/HttpClient'
 import {HttpApiBuilder} from '@effect/platform/index'
 import {type SqlClient} from '@effect/sql/SqlClient'
+import {GeocodingDbService} from '@vexl-next/geocoding-db/src/GeocodingDbService'
+import {GeocodingDbLayer} from '@vexl-next/geocoding-db/src/layer'
+import {
+  disposeGeocodingTestDatabase,
+  setupGeocodingTestDatabase,
+} from '@vexl-next/geocoding-db/src/tests/testGeocodingDb'
 import {type RateLimitingService} from '@vexl-next/server-utils/src/RateLimiting'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {mockedRateLimitingLayer} from '@vexl-next/server-utils/src/tests/mockedRateLimitingLayer'
 import {TestRequestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
-import {
-  disposeTestDatabase,
-  setupTestDatabase,
-} from '@vexl-next/server-utils/src/tests/testDb'
 import {Console, Effect, Layer, ManagedRuntime, type Scope} from 'effect'
 import {cryptoConfig} from '../../configs'
-import DbLayer from '../../db/layer'
-import {PlacesDbService} from '../../db/PlacesDbService'
+import {GeocodingService} from '../../geocoding'
 import {LocationApiLive} from '../../httpServer'
-import {PlacesService} from '../../places'
 
 export type MockedContexts =
   | ServerCrypto
   | SqlClient
-  | PlacesDbService
-  | PlacesService
+  | GeocodingDbService
+  | GeocodingService
   | HttpClient
   | TestRequestHeaders
   | RateLimitingService
@@ -36,9 +36,9 @@ const context = Layer.empty.pipe(
   Layer.provideMerge(TestServerLive),
   Layer.provideMerge(TestRequestHeaders.Live),
   Layer.provideMerge(mockedRateLimitingLayer),
-  Layer.provideMerge(PlacesService.Live),
-  Layer.provideMerge(PlacesDbService.Live),
-  Layer.provideMerge(DbLayer),
+  Layer.provideMerge(GeocodingService.Live),
+  Layer.provideMerge(GeocodingDbService.Live),
+  Layer.provideMerge(GeocodingDbLayer),
   Layer.provideMerge(ServerCrypto.layer(cryptoConfig)),
   Layer.provideMerge(NodeContext.layer)
 )
@@ -47,7 +47,7 @@ const runtime = ManagedRuntime.make(context)
 let runtimeReady = false
 
 export const startRuntime = async (): Promise<void> => {
-  await Effect.runPromise(setupTestDatabase)
+  await Effect.runPromise(setupGeocodingTestDatabase)
   await runtime.runPromise(Console.log('Initialized the test environment'))
   runtimeReady = true
 }
@@ -58,7 +58,7 @@ export const disposeRuntime = async (): Promise<void> => {
       Console.log('Disposed test environment')
     )
   )
-  await Effect.runPromise(disposeTestDatabase)
+  await Effect.runPromise(disposeGeocodingTestDatabase)
   runtimeReady = false
 }
 

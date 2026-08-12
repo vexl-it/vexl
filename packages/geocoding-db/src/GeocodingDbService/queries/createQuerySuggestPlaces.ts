@@ -2,7 +2,7 @@ import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {Effect, flow, Schema} from 'effect'
-import {PlaceWithContextRecord} from '../domain'
+import {GeocodingRecordWithContext} from '../domain'
 
 const SuggestPlacesRequest = Schema.Struct({
   /** Already normalized (normalizeName) and LIKE-escaped prefix. */
@@ -25,7 +25,7 @@ export const createQuerySuggestPlaces = Effect.gen(function* (_) {
 
   const query = SqlSchema.findAll({
     Request: SuggestPlacesRequest,
-    Result: PlaceWithContextRecord,
+    Result: GeocodingRecordWithContext,
     execute: (params) => sql`
       WITH
         matches AS (

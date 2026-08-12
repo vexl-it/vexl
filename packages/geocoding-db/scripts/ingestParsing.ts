@@ -1,7 +1,7 @@
 /**
  * Pure parsing/transform layer of the places ingest: geojsonseq feature
  * parsing, OSM id encoding and the country point-in-polygon index. No side
- * effects — imported by scripts/ingestPlaces.ts and unit-tested directly.
+ * effects — imported by scripts/ingest.ts and unit-tested directly.
  */
 import {
   computeImportance,
@@ -10,7 +10,7 @@ import {
   SETTLEMENT_TYPE_WEIGHTS,
   STREET_HIGHWAY_TYPES,
   SUPPORTED_LANGS,
-} from '../src/places/common'
+} from '../src/common'
 
 /** ~10 km grid used to merge street segments into one entry per street. */
 export const STREET_GRID_CELLS_PER_DEGREE = 10

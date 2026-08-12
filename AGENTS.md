@@ -28,6 +28,7 @@ When changing any UI / UX in the mobile app or in the ui package you must read @
 - packages/cryptography - shared cryptography utilities for both backend and mobile app
 - packages/generic-utils - shared generic utilities for both backend and mobile app - should not depend on any of the other vexl packages
 - packages/localization - shared localization utilities, types, and similar for both backend and mobile app
+- packages/geocoding-db - standalone geocoding database used by location-service: schema, queries, and the OSM ingest pipeline. Lives on its own Postgres instance (`GEOCODING_DB_*` env, never the shared `DB_URL`) so geocoding never shares resources with vexl user data. The dataset refresh (`pnpm refresh:geocoding`) is run manually from an operator's machine — never add server-side cron/updater infrastructure. Details in packages/geocoding-db/README.md.
 - packages/resources-utils - shared utilities for handling offers, chat, and other "resources" operations
 - packages/rest-api - effect-ts based rest api definitions and client for both backend and mobile app
 - tooling/* - shared tooling for the repo (esling, prettier, etc...)

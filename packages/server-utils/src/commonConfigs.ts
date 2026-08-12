@@ -61,23 +61,33 @@ export const healthServerPortConfig = Config.option(
   Config.number('HEALTH_PORT')
 )
 
-export const databaseConfig = Config.unwrap({
-  url: Config.string('DB_URL'),
-  username: Config.string('DB_USER'),
-  password: Config.redacted('DB_PASSWORD'),
-  // debug: Config.boolean('DB_DEBUG').pipe(Config.withDefault(false)),
-}).pipe(
-  Effect.map((config): PgClient.PgClientConfig => {
-    const parsedUrl = new URL(config.url)
-    return {
-      host: parsedUrl.hostname,
-      port: parsedUrl.port ? Number(parsedUrl.port) : 5432,
-      database: parsedUrl.pathname.slice(1), // Remove leading '/'
-      username: config.username,
-      password: config.password,
-    }
-  })
-)
+export const makeDatabaseConfig = (vars: {
+  url: string
+  username: string
+  password: string
+}): Effect.Effect<PgClient.PgClientConfig, ConfigError.ConfigError> =>
+  Config.unwrap({
+    url: Config.string(vars.url),
+    username: Config.string(vars.username),
+    password: Config.redacted(vars.password),
+  }).pipe(
+    Effect.map((config): PgClient.PgClientConfig => {
+      const parsedUrl = new URL(config.url)
+      return {
+        host: parsedUrl.hostname,
+        port: parsedUrl.port ? Number(parsedUrl.port) : 5432,
+        database: parsedUrl.pathname.slice(1), // Remove leading '/'
+        username: config.username,
+        password: config.password,
+      }
+    })
+  )
+
+export const databaseConfig = makeDatabaseConfig({
+  url: 'DB_URL',
+  username: 'DB_USER',
+  password: 'DB_PASSWORD',
+})
 
 export const secretPublicKey = Config.string('SECRET_PUBLIC_KEY').pipe(
   Config.mapOrFail((v) =>

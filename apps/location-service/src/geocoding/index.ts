@@ -1,4 +1,7 @@
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
+import {GeocodingDbService} from '@vexl-next/geocoding-db/src/GeocodingDbService'
+import {type GeocodingRecordWithContext} from '@vexl-next/geocoding-db/src/GeocodingDbService/domain'
+import {normalizeName} from '@vexl-next/geocoding-db/src/common'
 import {
   GetGeocodedCoordinatesResponse,
   GetLocationSuggestionsResponse,
@@ -7,9 +10,6 @@ import {
   type GetLocationSuggestionsRequest,
 } from '@vexl-next/rest-api/src/services/location/contracts'
 import {Array, Context, Effect, Layer, Option, pipe, Schema} from 'effect'
-import {PlacesDbService} from '../db/PlacesDbService'
-import {type PlaceWithContextRecord} from '../db/PlacesDbService/domain'
-import {normalizeName} from './common'
 import {
   buildGeocodeAddress,
   buildSuggestSecondRow,
@@ -26,12 +26,13 @@ const IMPORTANT_ONLY_THRESHOLD = 0.55
 const GEOCODE_MAX_DISTANCE_METERS = 200_000
 /**
  * Identically-labeled suggestions closer than this are the same place split
- * across ingest dedupe grid cells (~10 km, see scripts/ingestPlaces.ts).
+ * across ingest dedupe grid cells (~10 km, see
+ * packages/geocoding-db/scripts/ingest.ts).
  * Distinct same-named settlements sit far apart and must both stay.
  */
 const DEDUPE_MAX_DELTA_DEG = 0.25
 
-export interface PlacesOperations {
+export interface GeocodingOperations {
   querySuggest: (
     request: GetLocationSuggestionsRequest
   ) => Effect.Effect<GetLocationSuggestionsResponse, UnexpectedServerError>
@@ -63,7 +64,7 @@ const isNearby = (a: SuggestionUserData, b: SuggestionUserData): boolean => {
 }
 
 const suggestionUserData = (
-  record: PlaceWithContextRecord,
+  record: GeocodingRecordWithContext,
   lang: string
 ): SuggestionUserData => ({
   placeId: `osm:${record.id}`,
@@ -74,16 +75,16 @@ const suggestionUserData = (
   viewport: buildViewport(record.latitude, record.longitude, record.placeType),
 })
 
-export class PlacesService extends Context.Tag('PlacesService')<
-  PlacesService,
-  PlacesOperations
+export class GeocodingService extends Context.Tag('GeocodingService')<
+  GeocodingService,
+  GeocodingOperations
 >() {
   static readonly Live = Layer.effect(
-    PlacesService,
+    GeocodingService,
     Effect.gen(function* (_) {
-      const placesDb = yield* _(PlacesDbService)
+      const geocodingDb = yield* _(GeocodingDbService)
 
-      const querySuggest: PlacesOperations['querySuggest'] = (request) =>
+      const querySuggest: GeocodingOperations['querySuggest'] = (request) =>
         Effect.gen(function* (_) {
           const lang = pickLang(request.lang)
           const simPhrase = normalizeName(request.phrase)
@@ -95,7 +96,7 @@ export class PlacesService extends Context.Tag('PlacesService')<
           // match, full prefix match, and only then typo-tolerant trigram
           // matching (bounded to important places by a partial index).
           const importantMatches = yield* _(
-            placesDb.suggestPlaces({
+            geocodingDb.suggestPlaces({
               normPhrase,
               simPhrase,
               minImportance: IMPORTANT_ONLY_THRESHOLD,
@@ -109,7 +110,7 @@ export class PlacesService extends Context.Tag('PlacesService')<
             importantMatches.length >= SUGGEST_LIMIT || simPhrase.length < 3
               ? importantMatches
               : yield* _(
-                  placesDb.suggestPlaces({
+                  geocodingDb.suggestPlaces({
                     normPhrase,
                     simPhrase,
                     minImportance: 0,
@@ -123,7 +124,7 @@ export class PlacesService extends Context.Tag('PlacesService')<
             prefixMatches.length > 0 || simPhrase.length < 4
               ? prefixMatches
               : yield* _(
-                  placesDb.suggestPlaces({
+                  geocodingDb.suggestPlaces({
                     normPhrase,
                     simPhrase,
                     minImportance: 0,
@@ -159,12 +160,12 @@ export class PlacesService extends Context.Tag('PlacesService')<
           )
         })
 
-      const queryGeocode: PlacesOperations['queryGeocode'] = (request) =>
+      const queryGeocode: GeocodingOperations['queryGeocode'] = (request) =>
         Effect.gen(function* (_) {
           const lang = pickLang(request.lang)
 
           const nearest = yield* _(
-            placesDb.nearestPlace({
+            geocodingDb.nearestPlace({
               latitude: request.latitude,
               longitude: request.longitude,
               maxDistanceMeters: GEOCODE_MAX_DISTANCE_METERS,

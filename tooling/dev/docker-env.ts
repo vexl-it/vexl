@@ -6,7 +6,12 @@ export const OBSERVABILITY_SERVICES: readonly string[] = [
   'tempo',
   'grafana',
 ]
-export const INFRA_SERVICES: readonly string[] = ['postgres', 'redis', 'minio']
+export const INFRA_SERVICES: readonly string[] = [
+  'postgres',
+  'geocoding-postgres',
+  'redis',
+  'minio',
+]
 
 export function buildDockerEnv(
   ctx: EnvContext,
@@ -19,6 +24,7 @@ export function buildDockerEnv(
     POSTGRES_PASSWORD: infra.postgres.password,
     POSTGRES_DB: 'postgres',
     POSTGRES_PORT: String(ctx.ports.postgres),
+    GEOCODING_POSTGRES_PORT: String(ctx.ports.geocodingPostgres),
     REDIS_PORT: String(ctx.ports.redis),
     MINIO_ROOT_USER: infra.minio.rootUser,
     MINIO_ROOT_PASSWORD: infra.minio.rootPassword,

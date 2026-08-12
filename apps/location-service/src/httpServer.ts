@@ -4,6 +4,8 @@ import {
   HttpMiddleware,
   HttpServer,
 } from '@effect/platform/index'
+import {GeocodingDbService} from '@vexl-next/geocoding-db/src/GeocodingDbService'
+import {GeocodingDbLayer} from '@vexl-next/geocoding-db/src/layer'
 import {LocationApiSpecification} from '@vexl-next/rest-api/src/services/location/specification'
 import {redisUrl} from '@vexl-next/server-utils/src/commonConfigs'
 import {healthServerLayer} from '@vexl-next/server-utils/src/HealthServer'
@@ -15,13 +17,11 @@ import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {ServerSecurityMiddlewareLive} from '@vexl-next/server-utils/src/serverSecurity'
 import {Layer} from 'effect'
 import {cryptoConfig, healthServerPortConfig} from './configs'
-import DbLayer from './db/layer'
-import {PlacesDbService} from './db/PlacesDbService'
+import {GeocodingService} from './geocoding'
 import {
   getGeocodedCoordinatesHandler,
   getLocationSuggestionHandler,
 } from './handlers'
-import {PlacesService} from './places'
 
 const RootApiGroupLive = HttpApiBuilder.group(
   LocationApiSpecification,
@@ -54,7 +54,7 @@ export const HttpServerLive = Layer.mergeAll(
   Layer.provideMerge(RateLimitingService.Live),
   Layer.provideMerge(RedisConnectionService.layer(redisUrl)),
   Layer.provideMerge(ServerCrypto.layer(cryptoConfig)),
-  Layer.provideMerge(PlacesService.Live),
-  Layer.provideMerge(PlacesDbService.Live),
-  Layer.provideMerge(DbLayer)
+  Layer.provideMerge(GeocodingService.Live),
+  Layer.provideMerge(GeocodingDbService.Live),
+  Layer.provideMerge(GeocodingDbLayer)
 )

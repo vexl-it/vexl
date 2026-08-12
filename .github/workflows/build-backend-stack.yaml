@@ -113,9 +113,10 @@ jobs:
       - backoffice-app
       - dashboard-app
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Create Sentry release for all backend projects
         env:
@@ -129,8 +130,8 @@ jobs:
           PROJECTS="-p user-service -p contact-service -p offer-service -p chat-service -p notification-service -p content-service -p feedback-service -p location-service -p btc-exchange-rate-service -p metrics-service -p dashboard-app -p backoffice-app"
           VERSION="${{ github.sha }}"
           SENTRY_ENV="${{ inputs.env == 'prod' && 'production' || inputs.env }}"
-          npx --yes @sentry/cli@2 releases new $PROJECTS "$VERSION"
-          npx --yes @sentry/cli@2 releases set-commits --auto "$VERSION" \
+          npx --yes @sentry/cli@3.6.2 releases new $PROJECTS "$VERSION"
+          npx --yes @sentry/cli@3.6.2 releases set-commits --auto "$VERSION" \
             || echo "::warning::set-commits failed — check that the GitHub repo is linked in Sentry (Settings -> Integrations -> GitHub)"
-          npx --yes @sentry/cli@2 releases finalize $PROJECTS "$VERSION"
-          npx --yes @sentry/cli@2 releases deploys "$VERSION" new -e "$SENTRY_ENV" || true
+          npx --yes @sentry/cli@3.6.2 releases finalize $PROJECTS "$VERSION"
+          npx --yes @sentry/cli@3.6.2 releases deploys "$VERSION" new -e "$SENTRY_ENV" || true

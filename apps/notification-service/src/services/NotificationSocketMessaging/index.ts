@@ -1,9 +1,10 @@
+import {type UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {type VexlNotificationTokenSecret} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {RedisPubSubService} from '@vexl-next/server-utils/src/RedisPubSubService'
-import {NoSuchElementException} from 'effect/Cause'
 import {Array, Context, Effect, flow, Layer, pipe} from 'effect/index'
 import {
+  NoActiveSocketConnectionsError,
   type ConnectionManagerChannelId,
   type NewChatMessageNoticeSendTask,
   type SendMessageTask,
@@ -20,19 +21,25 @@ export interface NotificationSocketMessagingOperations {
     task: NewChatMessageNoticeSendTask
   ) => Effect.Effect<
     void,
-    NoSuchElementException | SendMessageTasksManagerError
+    | NoActiveSocketConnectionsError
+    | UnexpectedServerError
+    | SendMessageTasksManagerError
   >
   sendStreamOnlyChatMessage: (
     task: StreamOnlyChatMessageSendTask
   ) => Effect.Effect<
     void,
-    NoSuchElementException | SendMessageTasksManagerError
+    | NoActiveSocketConnectionsError
+    | UnexpectedServerError
+    | SendMessageTasksManagerError
   >
   sendNotice: (
     task: SendMessageTask
   ) => Effect.Effect<
     void,
-    NoSuchElementException | SendMessageTasksManagerError
+    | NoActiveSocketConnectionsError
+    | UnexpectedServerError
+    | SendMessageTasksManagerError
   >
 }
 
@@ -50,7 +57,7 @@ export class NotificationSocketMessaging extends Context.Tag(
         minimalClientVersion?: VersionCode
       ): Effect.Effect<
         Array.NonEmptyArray<ConnectionManagerChannelId>,
-        NoSuchElementException
+        NoActiveSocketConnectionsError | UnexpectedServerError
       > =>
         pipe(
           registry.getConnectionsForToken(token),
@@ -65,8 +72,8 @@ export class NotificationSocketMessaging extends Context.Tag(
           ),
           Effect.filterOrFail(Array.isNonEmptyArray),
           Effect.catchTag(
-            'UnexpectedServerError',
-            () => new NoSuchElementException()
+            'NoSuchElementException',
+            () => new NoActiveSocketConnectionsError()
           )
         )
 

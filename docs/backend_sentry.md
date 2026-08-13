@@ -1,8 +1,8 @@
 # Backend Sentry error reporting
 
 All Effect backend services report errors to Sentry through shared code in
-`packages/server-utils`; the backoffice-app (Next.js) has its own setup in
-`apps/backoffice-app/instrumentation.ts`.
+`packages/server-utils`; the Next.js apps (backoffice-app, web-app) have their
+own server-side setup in their `instrumentation.ts`.
 
 ## How it works
 

@@ -120,7 +120,7 @@ jobs:
             echo "::warning::SENTRY_AUTH_TOKEN secret is not set — skipping Sentry release creation; events will still carry the release sha, but without commit metadata."
             exit 0
           fi
-          PROJECTS="-p user-service -p contact-service -p offer-service -p chat-service -p notification-service -p content-service -p feedback-service -p location-service -p btc-exchange-rate-service -p metrics-service -p dashboard-app -p backoffice-app"
+          PROJECTS="-p user-service -p contact-service -p offer-service -p chat-service -p notification-service -p content-service -p feedback-service -p location-service -p btc-exchange-rate-service -p metrics-service -p dashboard-app -p backoffice-app -p web-app"
           VERSION="${{ github.sha }}"
           SENTRY_ENV="${{ inputs.env == 'prod' && 'production' || inputs.env }}"
           pnpm exec sentry-cli releases new $PROJECTS "$VERSION"

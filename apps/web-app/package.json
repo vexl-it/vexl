@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@effect/platform": "^0.93.6",
+    "@sentry/nextjs": "^10.69.0",
     "@vexl-next/cryptography": "0.0.0",
     "@vexl-next/domain": "0.0.0",
     "@vexl-next/generic-utils": "0.0.0",

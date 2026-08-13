@@ -78,6 +78,16 @@ export const grafanaTraceUrl = (
 }
 
 /**
+ * Effect errors carry only their construction site plus fiber-runtime
+ * internals as a JS stack — the logical call path exists as the Effect span
+ * stack instead. `Cause.prettyErrors` rewrites the stack (recursively through
+ * `cause`): internal frames are stripped and span frames are appended, so
+ * Sentry shows a logical async trace.
+ */
+export const prettifyError = (error: Error): Error =>
+  Cause.prettyErrors(Cause.fail(error))[0] ?? error
+
+/**
  * Forwards every log at Error level and above to Sentry. All backend error
  * funnels (makeEndpointEffect, makeMiddlewareEffect, repeatingTask, MQ
  * consumers, runMainInNode) log unexpected errors, so hooking the logger
@@ -126,7 +136,7 @@ const makeSentryCaptureLogger = (
 
     const level = toSentryLevel(logLevel)
     if (error !== undefined) {
-      Sentry.captureException(error, {
+      Sentry.captureException(prettifyError(error), {
         level,
         extra,
         ...traceTags,

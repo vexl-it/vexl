@@ -74,9 +74,10 @@ RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
 
 
 # --- Runner stage -----------------------------------------------------------
-# Slim runtime image: ships only the built dist/, the app's package.json
-# (needed for "type":"module" so Node treats dist/index.js as ESM) and the
-# production node_modules. No source, no tests, no devDependencies.
+# Slim runtime image: ships the built dist/, the app's package.json (needed
+# for "type":"module" so Node treats dist/index.js as ESM), the production
+# node_modules, and the pruned workspace TS sources (a few MB) so error
+# reporting can attach code snippets. No devDependencies.
 FROM node:24-slim as runner
 
 # ARGs do not cross build stages, so re-declare the ones this stage needs.
@@ -94,6 +95,13 @@ COPY --chown=node:node --from=prod-deps /app/node_modules /app/node_modules
 COPY --chown=node:node --from=prod-deps /app/package.json /app/package.json
 COPY --chown=node:node --from=builder /app/apps/${APP}/dist /app/apps/${APP}/dist
 COPY --chown=node:node --from=builder /app/apps/${APP}/package.json /app/apps/${APP}/package.json
+
+# Workspace sources referenced by the bundle's sourcemap: --enable-source-maps
+# rewrites stack frames to these paths and Sentry's contextLines integration
+# reads them from disk to attach code snippets to error events. Copied from the
+# pruner stage, which has no node_modules mixed into the package directories.
+COPY --chown=node:node --from=pruner /app/out/full/packages /app/packages
+COPY --chown=node:node --from=pruner /app/out/full/apps/${APP}/src /app/apps/${APP}/src
 
 WORKDIR /app/apps/${APP}
 

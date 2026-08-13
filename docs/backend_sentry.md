@@ -21,6 +21,17 @@ All Effect backend services report errors to Sentry through shared code in
 - Events are grouped by error name + message + log message (not stack), because
   Effect tagged errors are constructed in shared helpers and stacks would
   collapse unrelated issues.
+- Stack traces: Effect errors only carry their construction site plus
+  fiber-runtime internals as a JS stack, so captured errors are passed through
+  `Cause.prettyErrors` first — it strips Effect-internal frames and appends the
+  enclosing Effect span stack as synthetic `at <spanName> (file:line)` frames.
+  The more `Effect.withSpan` / `Effect.fn` coverage around an operation, the
+  deeper its trace in Sentry.
+- Source maps need no Sentry upload: services run with
+  `node --enable-source-maps`, so frames already point at the original TS
+  files. The runtime image ships the pruned workspace sources (see
+  `Dockerfile`) so the SDK's `contextLines` integration can read them from
+  disk and attach code snippets to events.
 - Events are tagged with `trace_id`/`span_id` of the span active when the error
   was logged, so a Sentry event can be looked up in the tracing backend
   (Grafana/Tempo). Sentry itself receives no spans. When `GRAFANA_URL` is set,

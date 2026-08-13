@@ -1,5 +1,9 @@
 import {Effect, Logger, Option, type FiberRefs} from 'effect'
-import {grafanaTraceUrl, traceContextFromFiberRefs} from '../sentry'
+import {
+  grafanaTraceUrl,
+  prettifyError,
+  traceContextFromFiberRefs,
+} from '../sentry'
 
 const runWithCapturingLogger = async (
   effect: Effect.Effect<void>
@@ -33,6 +37,55 @@ describe('traceContextFromFiberRefs', () => {
   it('returns none when no span is active', async () => {
     const fiberRefs = await runWithCapturingLogger(Effect.logError('boom'))
     expect(Option.isNone(traceContextFromFiberRefs(fiberRefs))).toBe(true)
+  })
+})
+
+describe('prettifyError', () => {
+  class TestError extends Error {
+    constructor(message: string, cause?: Error) {
+      super(message, {cause})
+      this.name = 'TestError'
+    }
+  }
+
+  it('appends span frames and strips effect-internal frames', async () => {
+    const error = await Effect.runPromise(
+      Effect.flip(
+        Effect.fail(new TestError('boom')).pipe(
+          Effect.withSpan('inner-span'),
+          Effect.withSpan('outer-span')
+        )
+      )
+    )
+
+    const pretty = prettifyError(error)
+    expect(pretty.name).toBe('TestError')
+    expect(pretty.message).toBe('boom')
+    expect(pretty.stack).toContain('at inner-span')
+    expect(pretty.stack).toContain('at outer-span')
+    expect(pretty.stack).not.toContain('internal/core')
+  })
+
+  it('prettifies the cause chain', async () => {
+    const error = await Effect.runPromise(
+      Effect.flip(
+        Effect.fail(new TestError('outer', new TestError('inner'))).pipe(
+          Effect.withSpan('some-span')
+        )
+      )
+    )
+
+    const pretty = prettifyError(error)
+    expect(pretty.cause).toBeInstanceOf(Error)
+    if (pretty.cause instanceof Error) {
+      expect(pretty.cause.message).toBe('inner')
+    }
+  })
+
+  it('returns errors without a span unchanged apart from the stack cleanup', () => {
+    const pretty = prettifyError(new TestError('plain'))
+    expect(pretty.name).toBe('TestError')
+    expect(pretty.message).toBe('plain')
   })
 })
 

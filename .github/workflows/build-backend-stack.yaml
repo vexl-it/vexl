@@ -12,10 +12,15 @@ on:
           - prod
           - stage
           - dev
+      create_infra_pr:
+        description: "Open a release PR in the infrastructure repo (prod/stage only)"
+        required: false
+        type: boolean
+        default: true
 
 permissions:
   packages: write
-  contents: write
+  contents: read
   id-token: write
 
 jobs:
@@ -96,6 +101,75 @@ jobs:
     secrets: inherit
     with:
       env: ${{ inputs.env }}
+
+  infra-release-pr:
+    name: Open infrastructure release PR
+    runs-on: ubuntu-latest
+    if: ${{ inputs.create_infra_pr && inputs.env != 'dev' }}
+    needs:
+      - btc-exchange-rate-service
+      - user-service
+      - offer-service
+      - notification-service
+      - metrics-service
+      - location-service
+      - chat-service
+      - feedback-service
+      - content-service
+      - contact-service
+      - web-app
+      - backoffice-app
+      - dashboard-app
+    steps:
+      - name: Checkout infrastructure repository
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          repository: vexl-it/${{ secrets.infrastructure_repository }}
+          token: ${{ secrets.infrastructure_repository_token }}
+
+      # The manifests already hold the right ECR repo per service, so updating
+      # is just rewriting the image tag in every <env>/manifests/*/deployment.yaml
+      # — no per-service list to keep in sync with this repo.
+      - name: Update manifest image tags
+        env:
+          DEPLOY_ENV: ${{ inputs.env }}
+          NEW_TAG: ${{ inputs.env }}-${{ github.sha }}
+        run: |
+          shopt -s nullglob
+          manifests=("$DEPLOY_ENV"/manifests/*/deployment.yaml)
+          if [ "${#manifests[@]}" -eq 0 ]; then
+            echo "::error::no deployment manifests found for env $DEPLOY_ENV"
+            exit 1
+          fi
+          for manifest in "${manifests[@]}"; do
+            yq -i '.spec.template.spec.containers[0].image |= sub(":[^:/]+$"; ":" + strenv(NEW_TAG))' "$manifest"
+            echo "updated $manifest"
+          done
+
+      - name: Create release PR
+        env:
+          GH_TOKEN: ${{ secrets.infrastructure_repository_token }}
+          DEPLOY_ENV: ${{ inputs.env }}
+        run: |
+          if git diff --quiet; then
+            echo "::notice::manifests already point to $GITHUB_SHA — nothing to release"
+            exit 0
+          fi
+          env_name="$DEPLOY_ENV"
+          [ "$env_name" = "prod" ] && env_name="production"
+          short_sha="${GITHUB_SHA::7}"
+          branch="release/${DEPLOY_ENV}-${short_sha}"
+          title="Release backends ${short_sha} to ${env_name}"
+          body="$(printf 'Updates %s manifests to backend images built from vexl-it/vexl-next@%s.\n\nOpened by [Build] backend stack: %s/%s/actions/runs/%s' \
+            "$env_name" "$GITHUB_SHA" "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID")"
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git checkout -b "$branch"
+          git commit -am "$title"
+          git push -f origin "$branch"
+          if ! gh pr view "$branch" --json url -q .url 2>/dev/null; then
+            gh pr create --base master --head "$branch" --title "$title" --body "$body"
+          fi
 
   sentry-release:
     runs-on: ubuntu-latest

@@ -24,102 +24,19 @@ permissions:
   id-token: write
 
 jobs:
-  btc-exchange-rate-service:
-    uses: ./.github/workflows/build-btc-exchange-rate-service.yaml
+  build-images:
+    uses: ./.github/workflows/build-backend-image.yaml
     secrets: inherit
     with:
       env: ${{ inputs.env }}
-
-  user-service:
-    uses: ./.github/workflows/build-user-service.yaml
-    secrets: inherit
-    with:
-      env: ${{ inputs.env }}
-
-  offer-service:
-    uses: ./.github/workflows/build-offer-service.yaml
-    secrets: inherit
-    with:
-      env: ${{ inputs.env }}
-
-  notification-service:
-    uses: ./.github/workflows/build-notification-service.yaml
-    secrets: inherit
-    with:
-      env: ${{ inputs.env }}
-
-  metrics-service:
-    uses: ./.github/workflows/build-metrics-service.yaml
-    secrets: inherit
-    with:
-      env: ${{ inputs.env }}
-
-  location-service:
-    uses: ./.github/workflows/build-location-service.yaml
-    secrets: inherit
-    with:
-      env: ${{ inputs.env }}
-
-  chat-service:
-    uses: ./.github/workflows/build-chat-service.yaml
-    secrets: inherit
-    with:
-      env: ${{ inputs.env }}
-
-  feedback-service:
-    uses: ./.github/workflows/build-feedback-service.yaml
-    secrets: inherit
-    with:
-      env: ${{ inputs.env }}
-
-  content-service:
-    uses: ./.github/workflows/build-content-service.yaml
-    secrets: inherit
-    with:
-      env: ${{ inputs.env }}
-
-  contact-service:
-    uses: ./.github/workflows/build-contact-service.yaml
-    secrets: inherit
-    with:
-      env: ${{ inputs.env }}
-
-  web-app:
-    uses: ./.github/workflows/build-web-app.yaml
-    secrets: inherit
-    with:
-      env: ${{ inputs.env }}
-
-  backoffice-app:
-    uses: ./.github/workflows/build-backoffice-app.yaml
-    secrets: inherit
-    with:
-      env: ${{ inputs.env }}
-
-  dashboard-app:
-    uses: ./.github/workflows/build-dashboard-app.yaml
-    secrets: inherit
-    with:
-      env: ${{ inputs.env }}
+      service: all
 
   infra-release-pr:
     name: Open infrastructure release PR
     runs-on: ubuntu-latest
     if: ${{ inputs.create_infra_pr && inputs.env != 'dev' }}
     needs:
-      - btc-exchange-rate-service
-      - user-service
-      - offer-service
-      - notification-service
-      - metrics-service
-      - location-service
-      - chat-service
-      - feedback-service
-      - content-service
-      - contact-service
-      - web-app
-      - backoffice-app
-      - dashboard-app
+      - build-images
     steps:
       - name: Checkout infrastructure repository
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
@@ -174,18 +91,7 @@ jobs:
   sentry-release:
     runs-on: ubuntu-latest
     needs:
-      - btc-exchange-rate-service
-      - user-service
-      - offer-service
-      - notification-service
-      - metrics-service
-      - location-service
-      - chat-service
-      - feedback-service
-      - content-service
-      - contact-service
-      - backoffice-app
-      - dashboard-app
+      - build-images
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:

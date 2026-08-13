@@ -41,6 +41,15 @@ import {Option, pipe, Schema, String, type Effect} from 'effect/index'
 
 const EXPO_PREFIX = 'expo-'
 
+/**
+ * The target token has no open socket connections (matching the minimal
+ * client version). Expected whenever the recipient is offline — handle it,
+ * don't report it.
+ */
+export class NoActiveSocketConnectionsError extends Schema.TaggedError<NoActiveSocketConnectionsError>(
+  'NoActiveSocketConnectionsError'
+)('NoActiveSocketConnectionsError', {}) {}
+
 export const ClientInfo = Schema.Struct({
   notificationToken: VexlNotificationTokenSecret,
   version: VersionCode,

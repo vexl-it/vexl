@@ -56,6 +56,11 @@ export const issueStreamOnlyMessageHandler = HttpApiBuilder.handler(
               minimalClientVersion: req.payload.minimalOtherSideVersion,
             })
           ),
+          Effect.catchTag('NoActiveSocketConnectionsError', () =>
+            Effect.logDebug(
+              'No active socket connections, skipping stream only chat message'
+            )
+          ),
           Effect.tapError((e) =>
             Effect.logError('Failed to send stream only chat message', e)
           ),

@@ -17,12 +17,15 @@ import {Console, Effect, Layer, ManagedRuntime, type Scope} from 'effect'
 import {cryptoConfig} from '../../configs'
 import {GeocodingService} from '../../geocoding'
 import {LocationApiLive} from '../../httpServer'
+import {type GoogleMapsService} from '../../utils/googleMapsApi'
+import {mockedGoogleMapLayer} from './mockedGoogleMapLayer'
 
 export type MockedContexts =
   | ServerCrypto
   | SqlClient
   | GeocodingDbService
   | GeocodingService
+  | GoogleMapsService
   | HttpClient
   | TestRequestHeaders
   | RateLimitingService
@@ -36,6 +39,7 @@ const context = Layer.empty.pipe(
   Layer.provideMerge(TestServerLive),
   Layer.provideMerge(TestRequestHeaders.Live),
   Layer.provideMerge(mockedRateLimitingLayer),
+  Layer.provideMerge(mockedGoogleMapLayer),
   Layer.provideMerge(GeocodingService.Live),
   Layer.provideMerge(GeocodingDbService.Live),
   Layer.provideMerge(GeocodingDbLayer),

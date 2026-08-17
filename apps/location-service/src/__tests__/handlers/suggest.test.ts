@@ -17,7 +17,7 @@ describe('suggest', () => {
         yield* _(setDummyAuthHeaders)
 
         const response = yield* _(
-          client.getLocationSuggestion({
+          client.getLocationSuggestionV2({
             urlParams: {lang: 'de', phrase: 'Bratis'},
           })
         )
@@ -41,7 +41,7 @@ describe('suggest', () => {
         yield* _(setDummyAuthHeaders)
 
         const response = yield* _(
-          client.getLocationSuggestion({
+          client.getLocationSuggestionV2({
             urlParams: {lang: 'sk-SK', phrase: 'Bratis'},
           })
         )
@@ -62,7 +62,7 @@ describe('suggest', () => {
         yield* _(setDummyAuthHeaders)
 
         const response = yield* _(
-          client.getLocationSuggestion({
+          client.getLocationSuggestionV2({
             urlParams: {lang: 'en', phrase: 'Prague'},
           })
         )
@@ -82,7 +82,7 @@ describe('suggest', () => {
         yield* _(setDummyAuthHeaders)
 
         const response = yield* _(
-          client.getLocationSuggestion({
+          client.getLocationSuggestionV2({
             urlParams: {lang: 'en', phrase: 'obchodna'},
           })
         )
@@ -103,7 +103,7 @@ describe('suggest', () => {
         yield* _(setDummyAuthHeaders)
 
         const response = yield* _(
-          client.getLocationSuggestion({
+          client.getLocationSuggestionV2({
             urlParams: {lang: 'en', phrase: 'springfield'},
           })
         )
@@ -124,7 +124,7 @@ describe('suggest', () => {
         yield* _(setDummyAuthHeaders)
 
         const response = yield* _(
-          client.getLocationSuggestion({
+          client.getLocationSuggestionV2({
             urlParams: {lang: 'en', phrase: 'lodz'},
           })
         )
@@ -144,7 +144,7 @@ describe('suggest', () => {
         yield* _(setDummyAuthHeaders)
 
         const response = yield* _(
-          client.getLocationSuggestion({
+          client.getLocationSuggestionV2({
             urlParams: {lang: '00', phrase: 'Praha'},
           })
         )
@@ -162,7 +162,7 @@ describe('suggest', () => {
         yield* _(setDummyAuthHeaders)
 
         const response = yield* _(
-          client.getLocationSuggestion({
+          client.getLocationSuggestionV2({
             urlParams: {lang: 'en', phrase: 'urban hou'},
           })
         )
@@ -186,7 +186,7 @@ describe('suggest', () => {
         yield* _(setDummyAuthHeaders)
 
         const response = yield* _(
-          client.getLocationSuggestion({
+          client.getLocationSuggestionV2({
             urlParams: {lang: 'en', phrase: 'bratislva'},
           })
         )
@@ -207,7 +207,7 @@ describe('suggest', () => {
         // "ur" would prefix match the seeded café, but phrases shorter than 3
         // characters never leave the important-places fast path
         const withoutMinorPlaces = yield* _(
-          client.getLocationSuggestion({
+          client.getLocationSuggestionV2({
             urlParams: {lang: 'en', phrase: 'ur'},
           })
         )
@@ -215,7 +215,7 @@ describe('suggest', () => {
 
         // A city is important enough to be found by a single character
         const withImportantPlace = yield* _(
-          client.getLocationSuggestion({
+          client.getLocationSuggestionV2({
             urlParams: {lang: 'en', phrase: 'b'},
           })
         )
@@ -233,7 +233,7 @@ describe('suggest', () => {
         yield* _(setDummyAuthHeaders)
 
         const response = yield* _(
-          client.getLocationSuggestion({
+          client.getLocationSuggestionV2({
             urlParams: {lang: 'en', phrase: '   '},
           })
         )
@@ -250,12 +250,12 @@ describe('suggest', () => {
         yield* _(setDummyAuthHeaders)
 
         const city = yield* _(
-          client.getLocationSuggestion({
+          client.getLocationSuggestionV2({
             urlParams: {lang: 'en', phrase: 'Praha'},
           })
         )
         const cafe = yield* _(
-          client.getLocationSuggestion({
+          client.getLocationSuggestionV2({
             urlParams: {lang: 'en', phrase: 'urban hou'},
           })
         )

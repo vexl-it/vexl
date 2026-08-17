@@ -1,7 +1,8 @@
 import React from 'react'
 import {useTheme} from 'tamagui'
 
-import {TextArea, XStack, YStack} from '../primitives'
+import {TextArea, YStack} from '../primitives'
+import {LengthCounter} from './LengthCounter'
 import {TwoToneContentFrame, TwoToneHeaderFrame} from './TwoToneCardFrames'
 import {Typography} from './Typography'
 
@@ -56,19 +57,7 @@ export function LabeledTextArea({
         />
       </TwoToneContentFrame>
       {maxLength !== undefined ? (
-        <XStack
-          alignItems="center"
-          justifyContent="flex-end"
-          height="$7"
-          paddingHorizontal="$3"
-        >
-          <Typography variant="micro" color="$greenForeground">
-            {value.length}
-          </Typography>
-          <Typography variant="micro" color="$foregroundPrimary">
-            {`/${maxLength}`}
-          </Typography>
-        </XStack>
+        <LengthCounter length={value.length} maxLength={maxLength} />
       ) : null}
     </YStack>
   )

@@ -1,12 +1,16 @@
-import {type LocationSuggestion} from '@vexl-next/rest-api/src/services/location/contracts'
+import {
+  GetLocationSuggestionsResponse,
+  type LocationSuggestion,
+} from '@vexl-next/rest-api/src/services/location/contracts'
 import {createScope, molecule, use} from 'bunshi/dist/react'
 import {randomUUID} from 'crypto'
-import {Schema} from 'effect/index'
+import {Effect, Schema} from 'effect/index'
 import {atom} from 'jotai'
 import {splitAtom} from 'jotai/utils'
 import {apiAtom} from '../../api'
 import {createEffectAtomWithProgress} from '../../utils/atomUtils/createEffectAtomWithProgress'
 import {appLanguageAtom} from '../../utils/preferences'
+import {transientRequestRetryPolicy} from '../../utils/transientRequestRetryPolicy'
 
 export const LocationSessionId = Schema.UUID.pipe(
   Schema.brand('LocationSessionId')
@@ -32,10 +36,14 @@ export const LocationSearchMolecule = molecule(() => {
   } = createEffectAtomWithProgress({
     inputAtom: searchQueryInnerAtom,
     effectToRun: (query, get) =>
-      get(apiAtom).location.getLocationSuggestions({
-        phrase: query,
-        lang: get(appLanguageAtom),
-      }),
+      query.trim() === ''
+        ? Effect.succeed(new GetLocationSuggestionsResponse({result: []}))
+        : get(apiAtom)
+            .location.getLocationSuggestions({
+              phrase: query,
+              lang: get(appLanguageAtom),
+            })
+            .pipe(Effect.retry(transientRequestRetryPolicy)),
   })
 
   const searchResultsOrEmptyArrayAtom = atom(

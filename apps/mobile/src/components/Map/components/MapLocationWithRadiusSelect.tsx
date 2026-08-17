@@ -7,6 +7,7 @@ import {
   Latitude,
   Longitude,
   Radius,
+  calculateViewportRadius,
   longitudeDeltaToKilometers,
 } from '@vexl-next/domain/src/utility/geoCoordinates'
 import {
@@ -30,7 +31,7 @@ import {formattingLocaleAtom} from '../../../utils/localization/formattingLocale
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {appLanguageAtom} from '../../../utils/preferences'
 import reportError from '../../../utils/reportError'
-import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
+import {transientRequestRetryPolicy} from '../../../utils/transientRequestRetryPolicy'
 import {type MapValue, type MapValueWithRadius} from '../brands'
 import {mapValueToBounds} from '../utils/mapLibreRegion'
 import {
@@ -46,7 +47,17 @@ type Props = React.ComponentProps<typeof Stack> & {
   bottomChildren?: React.ReactNode
   initialValue: MapValue
   onPick: (place: MapValueWithRadius | null) => void
+  onGeocodingFailed?: (kind: GeocodingFailureKind) => void
+  onCoordinatesChange?: (coordinates: SelectedCoordinates) => void
   onMapGesture?: () => void
+}
+
+export type GeocodingFailureKind = 'notFound' | 'serviceError'
+
+export interface SelectedCoordinates {
+  readonly latitude: Latitude
+  readonly longitude: Longitude
+  readonly radius: Radius
 }
 
 const circleMargin = tokens.space[2].val
@@ -63,8 +74,12 @@ interface SelectedMapState {
 function useAtoms({
   initialSelectedMapState,
   onPick,
+  onGeocodingFailed,
+  onCoordinatesChange,
 }: {
   onPick: (place: MapValueWithRadius | null) => void
+  onGeocodingFailed?: (kind: GeocodingFailureKind) => void
+  onCoordinatesChange?: (coordinates: SelectedCoordinates) => void
   initialSelectedMapState: SelectedMapState
 }) {
   return useMemo(() => {
@@ -73,32 +88,53 @@ function useAtoms({
       resultAtom: getGeocodedRegionAtom,
     } = createEffectAtomWithProgress({
       inputAtom: atom(initialSelectedMapState),
-      effectToRun: (selectedMapState, get) =>
-        get(apiAtom)
-          .location.getGeocodedCoordinates({
-            lang: get(appLanguageAtom),
-            latitude: Schema.decodeSync(Latitude)(
-              selectedMapState.center.latitude
-            ),
-            longitude: Schema.decodeSync(Longitude)(
-              selectedMapState.center.longitude
-            ),
-          })
-          .pipe(
-            Effect.tap((data) => {
-              onPick({
-                ...data,
-                latitude: Schema.decodeSync(Latitude)(
-                  selectedMapState.center.latitude
-                ),
-                longitude: Schema.decodeSync(Longitude)(
-                  selectedMapState.center.longitude
-                ),
-                radius: Schema.decodeSync(Radius)(selectedMapState.radius),
+      effectToRun: (selectedMapState, get) => {
+        const latitude = Schema.decodeSync(Latitude)(
+          selectedMapState.center.latitude
+        )
+        const longitude = Schema.decodeSync(Longitude)(
+          selectedMapState.center.longitude
+        )
+        const radius = Schema.decodeSync(Radius)(selectedMapState.radius)
+
+        return Effect.sync(() => {
+          onPick(null)
+          onCoordinatesChange?.({latitude, longitude, radius})
+        }).pipe(
+          Effect.andThen(
+            get(apiAtom)
+              .location.getGeocodedCoordinates({
+                lang: get(appLanguageAtom),
+                latitude,
+                longitude,
               })
-              return data
-            })
-          ),
+              .pipe(
+                Effect.retry({
+                  schedule: transientRequestRetryPolicy,
+                  while: (error) => error._tag !== 'LocationNotFoundError',
+                }),
+                Effect.tap((data) => {
+                  onPick({
+                    ...data,
+                    latitude,
+                    longitude,
+                    radius,
+                  })
+                }),
+                Effect.tapError((error) =>
+                  Effect.sync(() => {
+                    onPick(null)
+                    onGeocodingFailed?.(
+                      error._tag === 'LocationNotFoundError'
+                        ? 'notFound'
+                        : 'serviceError'
+                    )
+                  })
+                )
+              )
+          )
+        )
+      },
     })
 
     return {
@@ -117,7 +153,7 @@ function useAtoms({
       }),
       getGeocodedRegionAtom,
     }
-  }, [initialSelectedMapState, onPick])
+  }, [initialSelectedMapState, onCoordinatesChange, onGeocodingFailed, onPick])
 }
 
 function PickedLocationText({
@@ -151,8 +187,10 @@ function PickedLocationText({
         {pipe(
           geocodingState.result,
           E.match(
-            (l) =>
-              toCommonErrorMessage(l, t) ?? t('map.location.errors.notFound'),
+            (error) =>
+              error._tag === 'LocationNotFoundError'
+                ? t('map.location.errors.notFound')
+                : t('map.location.errors.serviceError'),
             (data) => data?.address ?? t('map.locationSelect.hint')
           )
         )}
@@ -180,6 +218,8 @@ export default function MapLocationWithRadiusSelect({
   topChildren,
   bottomChildren,
   onMapGesture,
+  onGeocodingFailed,
+  onCoordinatesChange,
   ...restProps
 }: Props): React.ReactElement {
   const safeAreaInsets = useSafeAreaInsets()
@@ -197,11 +237,7 @@ export default function MapLocationWithRadiusSelect({
         latitude: initialValue.latitude,
         longitude: initialValue.longitude,
       },
-      radius:
-        Math.abs(
-          initialValue.viewport.northeast.longitude -
-            initialValue.viewport.southwest.longitude
-        ) / 2,
+      radius: calculateViewportRadius(initialValue.viewport),
     }),
     [initialValue]
   )
@@ -245,6 +281,8 @@ export default function MapLocationWithRadiusSelect({
   const atoms = useAtoms({
     initialSelectedMapState,
     onPick,
+    onGeocodingFailed,
+    onCoordinatesChange,
   })
   const setSelectedMapState = useSetAtom(atoms.selectedMapStateAtom)
   const handleContainerLayout = useCallback((event: LayoutChangeEvent) => {

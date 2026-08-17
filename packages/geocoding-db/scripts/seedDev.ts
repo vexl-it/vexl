@@ -35,6 +35,7 @@ import pg from 'pg'
 import {computeImportance, normalizeName} from '../src/common'
 import {GeocodingDbLayer} from '../src/layer'
 import {devSeedPlaces} from './devSeedData'
+import {normNameRows} from './ingestParsing'
 
 const INGEST_REGIONS = ['europe/czech-republic']
 /** Dev doesn't need fresh map data — reuse cached downloads for two weeks. */
@@ -219,18 +220,17 @@ const insertFixtureRows = async (client: pg.Client): Promise<number> => {
         place.longitude,
       ]
     )
-    const normNames = [
-      ...new Set(
-        [place.name, ...Object.values(place.names)]
-          .map(normalizeName)
-          .filter((one) => one.length > 0)
-      ),
-    ]
-    for (const normName of normNames) {
+    const nameRows = normNameRows(
+      String(id),
+      place.name,
+      place.names,
+      importance
+    )
+    for (const nameRow of nameRows) {
       await client.query(
         `INSERT INTO place_names (place_id, norm_name, importance)
          VALUES ($1, $2, $3)`,
-        [id, normName, importance]
+        [nameRow.place_id, nameRow.norm_name, nameRow.importance]
       )
     }
     inserted++

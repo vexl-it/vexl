@@ -22,6 +22,7 @@
     "@vexl-next/localization": "0.0.0",
     "@vexl-next/rest-api": "0.0.0",
     "@vexl-next/server-utils": "0.0.0",
+    "axios": "^1.15.2",
     "dotenv": "^16.4.5",
     "effect": "^3.20.0"
   },

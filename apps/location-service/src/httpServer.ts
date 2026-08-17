@@ -20,8 +20,11 @@ import {cryptoConfig, healthServerPortConfig} from './configs'
 import {GeocodingService} from './geocoding'
 import {
   getGeocodedCoordinatesHandler,
+  getGeocodedCoordinatesV2Handler,
   getLocationSuggestionHandler,
+  getLocationSuggestionV2Handler,
 } from './handlers'
+import {GoogleMapsService} from './utils/googleMapsApi'
 
 const RootApiGroupLive = HttpApiBuilder.group(
   LocationApiSpecification,
@@ -30,6 +33,8 @@ const RootApiGroupLive = HttpApiBuilder.group(
     h
       .handle('getGeocodedCoordinates', getGeocodedCoordinatesHandler)
       .handle('getLocationSuggestion', getLocationSuggestionHandler)
+      .handle('getGeocodedCoordinatesV2', getGeocodedCoordinatesV2Handler)
+      .handle('getLocationSuggestionV2', getLocationSuggestionV2Handler)
 )
 
 export const LocationApiLive = HttpApiBuilder.api(
@@ -54,6 +59,7 @@ export const HttpServerLive = Layer.mergeAll(
   Layer.provideMerge(RateLimitingService.Live),
   Layer.provideMerge(RedisConnectionService.layer(redisUrl)),
   Layer.provideMerge(ServerCrypto.layer(cryptoConfig)),
+  Layer.provideMerge(GoogleMapsService.Live),
   Layer.provideMerge(GeocodingService.Live),
   Layer.provideMerge(GeocodingDbService.Live),
   Layer.provideMerge(GeocodingDbLayer)

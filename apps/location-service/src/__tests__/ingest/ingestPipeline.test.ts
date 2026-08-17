@@ -499,7 +499,7 @@ describe('places ingest pipeline', () => {
         yield* _(setDummyAuthHeaders)
 
         const suggestion = yield* _(
-          client.getLocationSuggestion({
+          client.getLocationSuggestionV2({
             urlParams: {lang: 'de', phrase: 'Bratis'},
           })
         )
@@ -510,7 +510,7 @@ describe('places ingest pipeline', () => {
         )
 
         const geocoded = yield* _(
-          client.getGeocodedCoordinates({
+          client.getGeocodedCoordinatesV2({
             urlParams: {
               lang: 'en',
               latitude: Schema.decodeSync(Latitude)(48.151),
@@ -575,7 +575,7 @@ describe('places ingest pipeline', () => {
         const client = yield* _(NodeTestingApp)
         yield* _(setDummyAuthHeaders)
         const suggestion = yield* _(
-          client.getLocationSuggestion({
+          client.getLocationSuggestionV2({
             urlParams: {lang: 'en', phrase: 'Nova Brat'},
           })
         )

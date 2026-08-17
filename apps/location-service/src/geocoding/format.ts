@@ -23,18 +23,28 @@ export const localizedName = (
   lang: string
 ): string => names[lang] ?? name
 
+/**
+ * Intl.DisplayNames throws (rather than returning undefined) on a malformed
+ * region subtag, e.g. a bad country_code from a future ingest bug. Falls back
+ * to the raw uppercased code in that case.
+ */
 export const countryDisplayName = (
   countryCode: Option.Option<string>,
   lang: string
 ): Option.Option<string> =>
-  Option.flatMap(countryCode, (code) =>
-    Option.fromNullable(
-      new Intl.DisplayNames([lang, 'en'], {
-        type: 'region',
-        fallback: 'code',
-      }).of(code.toUpperCase())
-    )
-  )
+  Option.map(countryCode, (code) => {
+    const upperCode = code.toUpperCase()
+    try {
+      return (
+        new Intl.DisplayNames([lang, 'en'], {
+          type: 'region',
+          fallback: 'code',
+        }).of(upperCode) ?? upperCode
+      )
+    } catch {
+      return upperCode
+    }
+  })
 
 const isSelfSufficientType = (placeType: string): boolean =>
   SELF_SUFFICIENT_TYPES.some((one) => one === placeType)

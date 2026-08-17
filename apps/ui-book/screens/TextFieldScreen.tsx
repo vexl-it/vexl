@@ -16,6 +16,8 @@ const customIconAtomLight = atom('Vinohradská 123/34 CZ')
 const customIconAtomDark = atom('Vinohradská 123/34 CZ')
 const placeholderAtomLight = atom('')
 const placeholderAtomDark = atom('')
+const maxLengthAtomLight = atom('Praha - CZ')
+const maxLengthAtomDark = atom('Praha - CZ')
 
 function showAlert(message: string): void {
   Alert.alert('Action', message)
@@ -29,6 +31,7 @@ function ThemedColumn({
   textButtonAtom,
   customIconAtom,
   placeholderAtom,
+  maxLengthAtom,
 }: {
   readonly themeVariant: 'light' | 'dark'
   readonly plainAtom: typeof plainAtomLight
@@ -37,6 +40,7 @@ function ThemedColumn({
   readonly textButtonAtom: typeof textButtonAtomLight
   readonly customIconAtom: typeof customIconAtomLight
   readonly placeholderAtom: typeof placeholderAtomLight
+  readonly maxLengthAtom: typeof maxLengthAtomLight
 }): React.JSX.Element {
   return (
     <Theme name={themeVariant}>
@@ -132,6 +136,16 @@ function ThemedColumn({
             showAlert('Trash pressed')
           }}
         />
+
+        <SizableText
+          fontFamily="$body"
+          fontWeight="600"
+          fontSize="$2"
+          color="$foregroundSecondary"
+        >
+          Max length
+        </SizableText>
+        <TextField valueAtom={maxLengthAtom} showClear maxLength={40} />
       </YStack>
     </Theme>
   )
@@ -158,6 +172,7 @@ export function TextFieldScreen(): React.JSX.Element {
           textButtonAtom={textButtonAtomLight}
           customIconAtom={customIconAtomLight}
           placeholderAtom={placeholderAtomLight}
+          maxLengthAtom={maxLengthAtomLight}
         />
         <ThemedColumn
           themeVariant="dark"
@@ -167,6 +182,7 @@ export function TextFieldScreen(): React.JSX.Element {
           textButtonAtom={textButtonAtomDark}
           customIconAtom={customIconAtomDark}
           placeholderAtom={placeholderAtomDark}
+          maxLengthAtom={maxLengthAtomDark}
         />
       </YStack>
     </ScrollView>

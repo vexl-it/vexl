@@ -1,19 +1,28 @@
 import {useNavigation} from '@react-navigation/native'
-import {Button, NavigationBar, Typography} from '@vexl-next/ui'
+import {calculateViewportRadius} from '@vexl-next/domain/src/utility/geoCoordinates'
+import {Button, NavigationBar, TextField, Typography} from '@vexl-next/ui'
 import {ChevronLeft} from '@vexl-next/ui/src/icons'
 import {Stack, XStack, YStack} from '@vexl-next/ui/src/primitives'
 import {useMolecule} from 'bunshi/dist/react'
-import {useAtomValue} from 'jotai'
+import {atom, useAtomValue} from 'jotai'
 import React, {useCallback, useEffect, useState} from 'react'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import {type MapValueWithRadius} from '../Map/brands'
-import MapLocationWithRadiusSelect from '../Map/components/MapLocationWithRadiusSelect'
+import MapLocationWithRadiusSelect, {
+  type GeocodingFailureKind,
+  type SelectedCoordinates,
+} from '../Map/components/MapLocationWithRadiusSelect'
 import PinchZoomHint from '../Map/components/PinchZoomHint'
 import {pragueCenterLocation} from '../Map/utils/pragueCenterLocation'
 import {LocationPickerMolecule} from './molecule'
+import {
+  isManualLocationPlaceId,
+  manualAddressToMapValueWithRadius,
+} from './utils'
 
 const PINCH_HINT_VISIBLE_MS = 3000
+const MANUAL_ADDRESS_MAX_LENGTH = 40
 
 interface Props {
   readonly onConfirm: (pickedLocation: MapValueWithRadius) => void
@@ -24,12 +33,36 @@ export default function LocationRadiusPicker({
 }: Props): React.ReactElement {
   const {t} = useTranslation()
   const navigation = useNavigation()
-  const {selectedMapValueAtom} = useMolecule(LocationPickerMolecule)
+  const {selectedMapValueAtom, isLocationServiceDownAtom} = useMolecule(
+    LocationPickerMolecule
+  )
   const selectedMapValue = useAtomValue(selectedMapValueAtom)
+  const isLocationServiceDown = useAtomValue(isLocationServiceDownAtom)
   const initialValue = selectedMapValue ?? pragueCenterLocation
+  const isEditingManualLocation =
+    selectedMapValue != null &&
+    isManualLocationPlaceId(selectedMapValue.placeId)
+
+  // Both the address and the fallback visibility are local to this picker
+  // session so nothing leaks into the next one. Editing a manually entered
+  // location seeds the input with its address instead of an empty placeholder.
+  const [manualAddressAtom] = useState(() =>
+    atom(isEditingManualLocation ? selectedMapValue.address : '')
+  )
+  const [showManualAddressInput, setShowManualAddressInput] = useState(
+    () => isLocationServiceDown || isEditingManualLocation
+  )
+  const manualAddress = useAtomValue(manualAddressAtom)
+    .replace(/\s+/g, ' ')
+    .trim()
 
   const [pickedLocation, setPickedLocation] =
     useState<MapValueWithRadius | null>(null)
+  const [coordinates, setCoordinates] = useState<SelectedCoordinates>(() => ({
+    latitude: initialValue.latitude,
+    longitude: initialValue.longitude,
+    radius: calculateViewportRadius(initialValue.viewport),
+  }))
   const [isPinchHintMounted, setIsPinchHintMounted] = useState(true)
   const [isPinchHintVisible, setIsPinchHintVisible] = useState(true)
 
@@ -45,12 +78,46 @@ export default function LocationRadiusPicker({
 
   const handlePick = useCallback((location: MapValueWithRadius | null) => {
     setPickedLocation(location)
+    if (location) setShowManualAddressInput(false)
   }, [])
 
+  // A notFound result means the service responded fine, so it does not newly
+  // show the fallback on its own — but it never hides an input that is already
+  // visible (e.g. the user typed an address, then moved the pin somewhere not
+  // in the geocoding DB). A successful geocode still hides it via handlePick.
+  const handleGeocodingFailed = useCallback(
+    (kind: GeocodingFailureKind) => {
+      setShowManualAddressInput(
+        (prev) => prev || kind === 'serviceError' || isEditingManualLocation
+      )
+    },
+    [isEditingManualLocation]
+  )
+
+  const canConfirm =
+    pickedLocation != null || (showManualAddressInput && manualAddress !== '')
+
   const handleConfirm = useCallback(() => {
-    if (!pickedLocation) return
-    onConfirm(pickedLocation)
-  }, [onConfirm, pickedLocation])
+    if (pickedLocation) {
+      onConfirm(pickedLocation)
+      return
+    }
+
+    if (!showManualAddressInput || manualAddress === '') return
+
+    onConfirm(
+      manualAddressToMapValueWithRadius({
+        address: manualAddress,
+        ...coordinates,
+      })
+    )
+  }, [
+    coordinates,
+    manualAddress,
+    onConfirm,
+    pickedLocation,
+    showManualAddressInput,
+  ])
 
   const handleMapGesture = useCallback(() => {
     setIsPinchHintVisible(false)
@@ -92,13 +159,38 @@ export default function LocationRadiusPicker({
         <MapLocationWithRadiusSelect
           initialValue={initialValue}
           onPick={handlePick}
+          onGeocodingFailed={handleGeocodingFailed}
+          onCoordinatesChange={setCoordinates}
           onMapGesture={handleMapGesture}
           bottomChildren={
-            <Stack paddingBottom="$4" paddingHorizontal="$3">
-              <Button variant="primary" size="large" onPress={handleConfirm}>
+            <YStack gap="$3" paddingBottom="$4" paddingHorizontal="$3">
+              {showManualAddressInput ? (
+                <YStack
+                  backgroundColor="$backgroundPrimary"
+                  borderRadius="$6"
+                  padding="$4"
+                  gap="$3"
+                >
+                  <Typography variant="micro" color="$foregroundSecondary">
+                    {t('map.location.manualAddress.description')}
+                  </Typography>
+                  <TextField
+                    valueAtom={manualAddressAtom}
+                    placeholder={t('map.location.manualAddress.placeholder')}
+                    maxLength={MANUAL_ADDRESS_MAX_LENGTH}
+                    showClear
+                  />
+                </YStack>
+              ) : null}
+              <Button
+                variant="primary"
+                size="large"
+                disabled={!canConfirm}
+                onPress={handleConfirm}
+              >
                 {t('common.confirm')}
               </Button>
-            </Stack>
+            </YStack>
           }
         />
         {isPinchHintMounted ? (

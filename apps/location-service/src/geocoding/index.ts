@@ -156,6 +156,15 @@ export class GeocodingService extends Context.Tag('GeocodingService')<
                 Effect.logError('Error decoding suggest response', e),
                 Effect.fail(new UnexpectedServerError({status: 500}))
               )
+            ),
+            Effect.catchAllDefect((defect) =>
+              Effect.zipRight(
+                Effect.logError(
+                  'Defect while building suggest response',
+                  defect
+                ),
+                Effect.fail(new UnexpectedServerError({status: 500}))
+              )
             )
           )
         })
@@ -198,6 +207,15 @@ export class GeocodingService extends Context.Tag('GeocodingService')<
             Effect.catchTag('ParseError', (e) =>
               Effect.zipRight(
                 Effect.logError('Error decoding geocode response', e),
+                Effect.fail(new UnexpectedServerError({status: 500}))
+              )
+            ),
+            Effect.catchAllDefect((defect) =>
+              Effect.zipRight(
+                Effect.logError(
+                  'Defect while building geocode response',
+                  defect
+                ),
                 Effect.fail(new UnexpectedServerError({status: 500}))
               )
             )

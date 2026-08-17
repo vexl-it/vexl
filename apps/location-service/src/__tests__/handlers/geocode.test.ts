@@ -28,7 +28,7 @@ describe('geocode', () => {
         yield* _(setDummyAuthHeaders)
 
         const response = yield* _(
-          client.getGeocodedCoordinates({
+          client.getGeocodedCoordinatesV2({
             urlParams: {lang: 'en', ...coordinates(50.076, 14.438)},
           })
         )
@@ -46,7 +46,7 @@ describe('geocode', () => {
         yield* _(setDummyAuthHeaders)
 
         const response = yield* _(
-          client.getGeocodedCoordinates({
+          client.getGeocodedCoordinatesV2({
             urlParams: {lang: 'en', ...coordinates(50.076, 14.438)},
           })
         )
@@ -66,12 +66,12 @@ describe('geocode', () => {
         yield* _(setDummyAuthHeaders)
 
         const first = yield* _(
-          client.getGeocodedCoordinates({
+          client.getGeocodedCoordinatesV2({
             urlParams: {lang: 'en', ...coordinates(50.0755, 14.4378)},
           })
         )
         const second = yield* _(
-          client.getGeocodedCoordinates({
+          client.getGeocodedCoordinatesV2({
             urlParams: {lang: 'en', ...coordinates(50.0765, 14.4392)},
           })
         )
@@ -90,7 +90,7 @@ describe('geocode', () => {
 
         // Pin dropped right on top of the seeded café and street
         const response = yield* _(
-          client.getGeocodedCoordinates({
+          client.getGeocodedCoordinatesV2({
             urlParams: {lang: 'en', ...coordinates(48.1443, 17.1108)},
           })
         )
@@ -107,7 +107,7 @@ describe('geocode', () => {
         yield* _(setDummyAuthHeaders)
 
         const response = yield* _(
-          client.getGeocodedCoordinates({
+          client.getGeocodedCoordinatesV2({
             urlParams: {lang: 'de', ...coordinates(50.0875, 14.4213)},
           })
         )
@@ -124,7 +124,7 @@ describe('geocode', () => {
         yield* _(setDummyAuthHeaders)
 
         const response = yield* _(
-          client.getGeocodedCoordinates({
+          client.getGeocodedCoordinatesV2({
             urlParams: {lang: 'en', ...coordinates(0, -30)},
           }),
           Effect.either

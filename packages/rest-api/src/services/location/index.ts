@@ -64,11 +64,11 @@ export function api({
 
     return {
       getLocationSuggestions: (query: GetLocationSuggestionsRequest) =>
-        client.getLocationSuggestion({
+        client.getLocationSuggestionV2({
           urlParams: query,
         }),
       getGeocodedCoordinates: (query: GetGeocodedCoordinatesRequest) =>
-        client.getGeocodedCoordinates({
+        client.getGeocodedCoordinatesV2({
           urlParams: query,
         }),
     }

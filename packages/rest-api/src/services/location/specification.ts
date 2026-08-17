@@ -31,9 +31,29 @@ export const GetGeocodedCoordinatesEndpoint = HttpApiEndpoint.get(
   .addError(LocationNotFoundError, {status: 404})
   .annotate(MaxExpectedDailyCall, 50)
 
+export const GetLocationSuggestionV2Endpoint = HttpApiEndpoint.get(
+  'getLocationSuggestionV2',
+  '/api/v2/suggest'
+)
+  .setUrlParams(GetLocationSuggestionsRequest)
+  .addSuccess(GetLocationSuggestionsResponse)
+  .addError(LocationNotFoundError, {status: 404})
+  .annotate(MaxExpectedDailyCall, 50)
+
+export const GetGeocodedCoordinatesV2Endpoint = HttpApiEndpoint.get(
+  'getGeocodedCoordinatesV2',
+  '/api/v2/geocode'
+)
+  .setUrlParams(GetGeocodedCoordinatesRequest)
+  .addSuccess(GetGeocodedCoordinatesResponse)
+  .addError(LocationNotFoundError, {status: 404})
+  .annotate(MaxExpectedDailyCall, 50)
+
 const RootGroup = HttpApiGroup.make('root', {topLevel: true})
   .add(GetLocationSuggestionEndpoint)
   .add(GetGeocodedCoordinatesEndpoint)
+  .add(GetLocationSuggestionV2Endpoint)
+  .add(GetGeocodedCoordinatesV2Endpoint)
 
 export const LocationApiSpecification = HttpApi.make('Location Service')
   .middleware(RateLimitingMiddleware)

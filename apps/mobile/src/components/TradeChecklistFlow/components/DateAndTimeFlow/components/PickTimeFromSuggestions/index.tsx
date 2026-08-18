@@ -10,24 +10,19 @@ import {
   tokens,
   useTheme,
 } from '@vexl-next/ui'
-import {Effect, Schema} from 'effect/index'
-import {useAtomValue, useSetAtom, useStore, type Atom} from 'jotai'
+import {Schema} from 'effect/index'
+import {useAtomValue, useSetAtom, type Atom} from 'jotai'
 import {type DateTime} from 'luxon'
 import React, {useCallback} from 'react'
 import {FlatList, TouchableOpacity} from 'react-native'
 import type {TradeChecklistStackScreenProps} from '../../../../../../navigationTypes'
-import {chatWithMessagesKeys} from '../../../../../../state/tradeChecklist/atoms/fromChatAtoms'
 import atomKeyExtractor from '../../../../../../utils/atomUtils/atomKeyExtractor'
 import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
 import {formatDate} from '../../../../../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../../../../../utils/localization/formattingLocaleAtom'
 import unixMillisecondsToLocaleDateTime from '../../../../../../utils/unixMillisecondsToLocaleDateTime'
-import {loadingOverlayDisplayedAtom} from '../../../../../LoadingOverlayProvider'
-import {
-  saveDateTimePickActionAtom,
-  submitTradeChecklistUpdatesActionAtom,
-} from '../../../../atoms/updatesToBeSentAtom'
-import {useWasOpenFromAgreeOnTradeDetailsScreen} from '../../../../utils'
+import {saveDateTimePickActionAtom} from '../../../../atoms/updatesToBeSentAtom'
+import {useTradeChecklistExitNavigation} from '../../../../useTradeChecklistExitNavigation'
 import {TradeChecklistItemPageLayout} from '../../../TradeChecklistItemPageLayout'
 import {type Item as TimeOptionItem} from '../OptionsList'
 import {useState} from './state'
@@ -106,19 +101,14 @@ function PickTimeFromSuggestions({
 }: Props): React.ReactElement {
   const {t} = useTranslation()
   const theme = useTheme()
-  const store = useStore()
   const locale = useAtomValue(formattingLocaleAtom)
 
-  const shouldSendOnSubmit = !useWasOpenFromAgreeOnTradeDetailsScreen()
+  const tradeChecklistExitNavigation = useTradeChecklistExitNavigation()
   const {selectItem, selectedItem, itemsAtoms} = useState(
     chosenDateTimes,
     pickedOption
   )
-  const showLoadingOverlay = useSetAtom(loadingOverlayDisplayedAtom)
   const saveDateTimePick = useSetAtom(saveDateTimePickActionAtom)
-  const submitTradeChecklistUpdates = useSetAtom(
-    submitTradeChecklistUpdatesActionAtom
-  )
 
   const onItemPress = useCallback(
     (item: DateTime) => {
@@ -136,29 +126,8 @@ function PickTimeFromSuggestions({
       ),
     })
 
-    if (!shouldSendOnSubmit) {
-      navigation.popTo('AgreeOnTradeDetails')
-      return
-    }
-
-    showLoadingOverlay(true)
-    void Effect.runPromise(submitTradeChecklistUpdates())
-      .then((success) => {
-        if (!success) return
-        navigation.popTo('ChatDetail', store.get(chatWithMessagesKeys))
-      })
-      .finally(() => {
-        showLoadingOverlay(false)
-      })
-  }, [
-    navigation,
-    saveDateTimePick,
-    selectedItem,
-    showLoadingOverlay,
-    shouldSendOnSubmit,
-    store,
-    submitTradeChecklistUpdates,
-  ])
+    tradeChecklistExitNavigation()
+  }, [saveDateTimePick, selectedItem, tradeChecklistExitNavigation])
 
   return (
     <TradeChecklistItemPageLayout

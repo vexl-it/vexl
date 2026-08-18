@@ -1,5 +1,4 @@
 import {useNavigation} from '@react-navigation/native'
-import {Effect} from 'effect/index'
 import {useSetAtom, useStore} from 'jotai'
 import {useCallback} from 'react'
 import {type TradeChecklistStackScreenProps} from '../../../../navigationTypes'
@@ -8,7 +7,7 @@ import {
   discardRevealIdentityDraftActionAtom,
   restoreRevealIdentityDraftAfterFailedSubmitActionAtom,
 } from '../../atoms/revealIdentityAtoms'
-import {submitTradeChecklistUpdatesActionAtom} from '../../atoms/updatesToBeSentAtom'
+import {useTradeChecklistExitNavigation} from '../../useTradeChecklistExitNavigation'
 import {useWasOpenFromAgreeOnTradeDetailsScreen} from '../../utils'
 
 export default function useRevealIdentityFlowNavigation(): {
@@ -22,9 +21,6 @@ export default function useRevealIdentityFlowNavigation(): {
   const store = useStore()
   const wasOpenFromAgreeOnTradeDetailsScreen =
     useWasOpenFromAgreeOnTradeDetailsScreen()
-  const submitTradeChecklistUpdates = useSetAtom(
-    submitTradeChecklistUpdatesActionAtom
-  )
   const restoreRevealIdentityDraftAfterFailedSubmit = useSetAtom(
     restoreRevealIdentityDraftAfterFailedSubmitActionAtom
   )
@@ -46,26 +42,9 @@ export default function useRevealIdentityFlowNavigation(): {
     returnToFlowOrigin()
   }, [discardRevealIdentityDraft, returnToFlowOrigin])
 
-  const finishFlowWithPendingUpdates = useCallback(() => {
-    if (wasOpenFromAgreeOnTradeDetailsScreen) {
-      returnToFlowOrigin()
-      return
-    }
-
-    void Effect.runPromise(submitTradeChecklistUpdates()).then((success) => {
-      if (success) {
-        returnToFlowOrigin()
-        return
-      }
-
-      restoreRevealIdentityDraftAfterFailedSubmit()
-    })
-  }, [
-    restoreRevealIdentityDraftAfterFailedSubmit,
-    returnToFlowOrigin,
-    submitTradeChecklistUpdates,
-    wasOpenFromAgreeOnTradeDetailsScreen,
-  ])
+  const finishFlowWithPendingUpdates = useTradeChecklistExitNavigation(
+    restoreRevealIdentityDraftAfterFailedSubmit
+  )
 
   return {closeFlow, finishFlowWithPendingUpdates}
 }

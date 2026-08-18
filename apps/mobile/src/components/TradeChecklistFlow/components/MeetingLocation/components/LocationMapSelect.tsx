@@ -8,24 +8,18 @@ import {
   TextField,
   Typography,
 } from '@vexl-next/ui'
-import {Effect} from 'effect'
 import {LinearGradient} from 'expo-linear-gradient'
-import {atom, useAtom, useSetAtom, useStore} from 'jotai'
+import {atom, useAtom, useSetAtom} from 'jotai'
 import React, {useCallback, useEffect, useMemo, useState} from 'react'
 import Animated, {FadeOut} from 'react-native-reanimated'
 import {Stack, XStack, YStack, useTheme} from 'tamagui'
 import {type TradeChecklistStackScreenProps} from '../../../../../navigationTypes'
-import {chatWithMessagesKeys} from '../../../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
-import {loadingOverlayDisplayedAtom} from '../../../../LoadingOverlayProvider'
 import MapLocationSelect from '../../../../Map/components/MapLocationSelect'
 import {type GeocodingFailureKind} from '../../../../Map/types'
 import {pragueCenterLocation} from '../../../../Map/utils/pragueCenterLocation'
-import {
-  addMeetingLocationActionAtom,
-  submitTradeChecklistUpdatesActionAtom,
-} from '../../../atoms/updatesToBeSentAtom'
-import {useWasOpenFromAgreeOnTradeDetailsScreen} from '../../../utils'
+import {addMeetingLocationActionAtom} from '../../../atoms/updatesToBeSentAtom'
+import {useTradeChecklistExitNavigation} from '../../../useTradeChecklistExitNavigation'
 
 type Props = TradeChecklistStackScreenProps<'LocationMapSelect'>
 
@@ -37,12 +31,7 @@ export default function LocationMapSelect({
 }: Props): React.ReactElement {
   const {t} = useTranslation()
   const theme = useTheme()
-  const showLoadingOverlay = useSetAtom(loadingOverlayDisplayedAtom)
-  const submitTradeChecklistUpdates = useSetAtom(
-    submitTradeChecklistUpdatesActionAtom
-  )
-  const shouldSubmitUpdateOnPick = !useWasOpenFromAgreeOnTradeDetailsScreen()
-  const store = useStore()
+  const tradeChecklistExitNavigation = useTradeChecklistExitNavigation()
   const stageMeetingLocation = useSetAtom(addMeetingLocationActionAtom)
 
   const initialValue =
@@ -96,20 +85,7 @@ export default function LocationMapSelect({
       note: note.trim() || undefined,
     })
 
-    if (!shouldSubmitUpdateOnPick) {
-      navigation.popTo('AgreeOnTradeDetails')
-      return
-    }
-
-    showLoadingOverlay(true)
-    void Effect.runPromise(submitTradeChecklistUpdates())
-      .then((success) => {
-        if (!success) return
-        navigation.popTo('ChatDetail', store.get(chatWithMessagesKeys))
-      })
-      .finally(() => {
-        showLoadingOverlay(false)
-      })
+    tradeChecklistExitNavigation()
   }
 
   return (

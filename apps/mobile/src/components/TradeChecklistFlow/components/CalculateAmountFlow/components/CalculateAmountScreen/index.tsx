@@ -1,22 +1,18 @@
 import {InfoBox} from '@vexl-next/ui'
-import {Effect} from 'effect/index'
-import {useAtomValue, useSetAtom, useStore} from 'jotai'
+import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useEffect, useMemo} from 'react'
 import {type TradeChecklistStackScreenProps} from '../../../../../../navigationTypes'
-import {chatWithMessagesKeys} from '../../../../../../state/tradeChecklist/atoms/fromChatAtoms'
 import calculatePercentageDifference from '../../../../../../utils/calculatePercentageDifference'
 import {dismissKeyboardAndResolveOnLayoutUpdate} from '../../../../../../utils/dismissKeyboardPromise'
 import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
 import {formatDecimal} from '../../../../../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../../../../../utils/localization/formattingLocaleAtom'
-import {loadingOverlayDisplayedAtom} from '../../../../../LoadingOverlayProvider'
 import {
   btcPriceForOfferWithStateAtom,
   tradePriceTypeAtom,
 } from '../../../../../TradeCalculator/atoms'
 import TradeCalculator from '../../../../../TradeCalculator/components/TradeCalculator'
-import {submitTradeChecklistUpdatesActionAtom} from '../../../../atoms/updatesToBeSentAtom'
-import {useWasOpenFromAgreeOnTradeDetailsScreen} from '../../../../utils'
+import {useTradeChecklistExitNavigation} from '../../../../useTradeChecklistExitNavigation'
 import {TradeChecklistItemPageLayout} from '../../../TradeChecklistItemPageLayout'
 import {
   isOtherSideAmountDataNewerThanMineAtom,
@@ -42,16 +38,10 @@ function CalculateAmountScreen({
   const saveButtonDisabled = useAtomValue(saveButtonDisabledAtom)
   const tradePriceType = useAtomValue(tradePriceTypeAtom)
 
-  const store = useStore()
-  const shouldNavigateBackToChatOnSave =
-    !useWasOpenFromAgreeOnTradeDetailsScreen()
+  const tradeChecklistExitNavigation = useTradeChecklistExitNavigation()
   const syncDataWithChatState = useSetAtom(syncDataWithChatStateActionAtom)
   const saveLocalCalculatedAmountDataStateToMainState = useSetAtom(
     saveLocalCalculatedAmountDataStateToMainStateActionAtom
-  )
-  const showLoadingOverlay = useSetAtom(loadingOverlayDisplayedAtom)
-  const submitTradeChecklistUpdates = useSetAtom(
-    submitTradeChecklistUpdatesActionAtom
   )
   const btcPriceForOfferWithState = useAtomValue(btcPriceForOfferWithStateAtom)
 
@@ -69,27 +59,13 @@ function CalculateAmountScreen({
     void dismissKeyboardAndResolveOnLayoutUpdate().then(() => {
       void saveLocalCalculatedAmountDataStateToMainState()().then((success) => {
         if (success) {
-          if (shouldNavigateBackToChatOnSave) {
-            showLoadingOverlay(true)
-            void Effect.runPromise(submitTradeChecklistUpdates()).finally(
-              () => {
-                showLoadingOverlay(false)
-              }
-            )
-            navigation.popTo('ChatDetail', store.get(chatWithMessagesKeys))
-          } else {
-            navigation.popTo('AgreeOnTradeDetails')
-          }
+          tradeChecklistExitNavigation()
         }
       })
     })
   }, [
     saveLocalCalculatedAmountDataStateToMainState,
-    shouldNavigateBackToChatOnSave,
-    showLoadingOverlay,
-    submitTradeChecklistUpdates,
-    navigation,
-    store,
+    tradeChecklistExitNavigation,
   ])
 
   useEffect(() => {

@@ -8,6 +8,7 @@ import {fetchAndStoreMessagesForInboxHandleNotificationsActionAtom} from '../../
 import {useStatusBarStyleForScreen} from '../../../state/statusBarStyleAtom'
 import * as fromChatAtoms from '../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {useAppState} from '../../../utils/useAppState'
+import {clearUpdatesToBeSentActionAtom} from '../../TradeChecklistFlow/atoms/updatesToBeSentAtom'
 import {chatMolecule} from '../atoms'
 import {ChatActionButtons} from './ChatActionButtons'
 import ChatTextInput from './ChatTextInput'
@@ -28,14 +29,15 @@ function MessagesScreen({
   const chatId = useAtomValue(chatIdAtom)
   const inboxKey = useAtomValue(publicKeyPemBase64Atom)
   const setParentChat = useSetAtom(fromChatAtoms.setParentChatActionAtom)
+  const clearUpdatesToBeSent = useSetAtom(clearUpdatesToBeSentActionAtom)
   const fetchAndStoreMessagesForInbox = useSetAtom(
     fetchAndStoreMessagesForInboxHandleNotificationsActionAtom
   )
   // sets parent chat for checklist as user can interact with it directly from chat
   // without going through trade checklist flow
   useEffect(() => {
-    setParentChat({chatId, inboxKey})
-  }, [chatId, inboxKey, setParentChat])
+    if (setParentChat({chatId, inboxKey})) clearUpdatesToBeSent()
+  }, [chatId, clearUpdatesToBeSent, inboxKey, setParentChat])
 
   useAppState(
     useCallback(() => {

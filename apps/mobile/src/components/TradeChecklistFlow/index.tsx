@@ -6,6 +6,7 @@ import {
   type TradeChecklistStackParamsList,
 } from '../../navigationTypes'
 import * as fromChatAtoms from '../../state/tradeChecklist/atoms/fromChatAtoms'
+import {clearUpdatesToBeSentActionAtom} from './atoms/updatesToBeSentAtom'
 import AgreeOnTradeDetailsScreen from './components/AgreeOnTradeDetailsScreen'
 import CalculateAmountScreen from './components/CalculateAmountFlow/components/CalculateAmountScreen'
 import ConfirmAmountScreen from './components/CalculateAmountFlow/components/ConfirmAmountScreen'
@@ -33,10 +34,11 @@ export default function TradeChecklistFlow({
   },
 }: Props): React.ReactElement {
   const setParentChat = useSetAtom(fromChatAtoms.setParentChatActionAtom)
+  const clearUpdatesToBeSent = useSetAtom(clearUpdatesToBeSentActionAtom)
 
   useEffect(() => {
-    setParentChat({chatId, inboxKey})
-  }, [chatId, setParentChat, inboxKey])
+    if (setParentChat({chatId, inboxKey})) clearUpdatesToBeSent()
+  }, [chatId, clearUpdatesToBeSent, setParentChat, inboxKey])
 
   return (
     <>

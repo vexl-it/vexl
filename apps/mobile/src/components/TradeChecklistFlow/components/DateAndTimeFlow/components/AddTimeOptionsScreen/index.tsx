@@ -1,24 +1,14 @@
-import {effectToTask} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {Typography} from '@vexl-next/ui'
 import {Array as ArrayE, Effect, pipe} from 'effect'
-import * as T from 'fp-ts/Task'
-import {useAtomValue, useSetAtom, useStore} from 'jotai'
+import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useEffect} from 'react'
 import {LayoutAnimation, Platform, UIManager} from 'react-native'
 import {Stack, useTheme} from 'tamagui'
-import {type TradeChecklistStackScreenProps} from '../../../../../../navigationTypes'
-import {chatWithMessagesKeys} from '../../../../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
 import {globalDialogAtom} from '../../../../../GlobalDialog'
-import {loadingOverlayDisplayedAtom} from '../../../../../LoadingOverlayProvider'
-import {
-  addDateAndTimeSuggestionsActionAtom,
-  submitTradeChecklistUpdatesActionAtom,
-} from '../../../../atoms/updatesToBeSentAtom'
-import {
-  MINIMUM_AVAILABLE_DAYS_THRESHOLD,
-  useWasOpenFromAgreeOnTradeDetailsScreen,
-} from '../../../../utils'
+import {addDateAndTimeSuggestionsActionAtom} from '../../../../atoms/updatesToBeSentAtom'
+import {useTradeChecklistExitNavigation} from '../../../../useTradeChecklistExitNavigation'
+import {MINIMUM_AVAILABLE_DAYS_THRESHOLD} from '../../../../utils'
 import {TradeChecklistItemPageLayout} from '../../../TradeChecklistItemPageLayout'
 import {
   areAllAvailableDatesTimeSlotsSelectedAtom,
@@ -28,9 +18,7 @@ import {
 } from '../../atoms'
 import TimeOptionsPerDate from './components/TimeOptionsPerDate'
 
-type Props = TradeChecklistStackScreenProps<'AddTimeOptions'>
-
-function AddTimeOptionsScreen({navigation}: Props): React.ReactElement {
+function AddTimeOptionsScreen(): React.ReactElement {
   const {t} = useTranslation()
   const theme = useTheme()
   const isThereAnyOutdatedDateTime = useAtomValue(
@@ -44,17 +32,10 @@ function AddTimeOptionsScreen({navigation}: Props): React.ReactElement {
     areAllAvailableDatesTimeSlotsSelectedAtom
   )
 
-  const showLoadingOverlay = useSetAtom(loadingOverlayDisplayedAtom)
   const addDateAndTimeSuggestions = useSetAtom(
     addDateAndTimeSuggestionsActionAtom
   )
-  const submitTradeChecklistUpdates = useSetAtom(
-    submitTradeChecklistUpdatesActionAtom
-  )
-
-  const store = useStore()
-
-  const shouldSendOnSubmit = !useWasOpenFromAgreeOnTradeDetailsScreen()
+  const tradeChecklistExitNavigation = useTradeChecklistExitNavigation()
   const [expandedDate, setExpandedDate] = React.useState<
     (typeof uniqueAvailableDates)[number] | null
   >(null)
@@ -109,43 +90,16 @@ function AddTimeOptionsScreen({navigation}: Props): React.ReactElement {
       )
     } else {
       addDateAndTimeSuggestions()
-
-      void pipe(
-        shouldSendOnSubmit
-          ? pipe(
-              T.Do,
-              T.map(() => {
-                showLoadingOverlay(true)
-              }),
-              T.chain(() => effectToTask(submitTradeChecklistUpdates())),
-              T.map((val) => {
-                showLoadingOverlay(false)
-                return val
-              })
-            )
-          : T.of(true),
-        T.map((success) => {
-          if (!success) return
-          if (shouldSendOnSubmit) {
-            navigation.popTo('ChatDetail', store.get(chatWithMessagesKeys))
-          } else {
-            navigation.popTo('AgreeOnTradeDetails')
-          }
-        })
-      )()
+      tradeChecklistExitNavigation()
     }
   }, [
     addDateAndTimeSuggestions,
     areAllAvailableDatesTimeSlotsSelected,
     isThereAnyOutdatedDateTime,
-    navigation,
     setInfoModal,
     setNoDateTimeSelected,
-    shouldSendOnSubmit,
-    showLoadingOverlay,
-    store,
-    submitTradeChecklistUpdates,
     t,
+    tradeChecklistExitNavigation,
   ])
 
   return (

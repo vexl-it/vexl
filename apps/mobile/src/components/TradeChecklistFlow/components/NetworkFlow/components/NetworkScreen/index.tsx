@@ -1,13 +1,9 @@
-import {Effect} from 'effect/index'
-import {useSetAtom, useStore} from 'jotai'
+import {useSetAtom} from 'jotai'
 import React, {useCallback, useEffect} from 'react'
 import {YStack} from 'tamagui'
 import {type TradeChecklistStackScreenProps} from '../../../../../../navigationTypes'
-import {chatWithMessagesKeys} from '../../../../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
-import {loadingOverlayDisplayedAtom} from '../../../../../LoadingOverlayProvider'
-import {submitTradeChecklistUpdatesActionAtom} from '../../../../atoms/updatesToBeSentAtom'
-import {useWasOpenFromAgreeOnTradeDetailsScreen} from '../../../../utils'
+import {useTradeChecklistExitNavigation} from '../../../../useTradeChecklistExitNavigation'
 import {TradeChecklistItemPageLayout} from '../../../TradeChecklistItemPageLayout'
 import {
   btcNetworkAtom,
@@ -19,47 +15,21 @@ import NetworkInfo from './components/NetworkInfo'
 type Props = TradeChecklistStackScreenProps<'Network'>
 
 function NetworkScreen({
-  navigation,
   route: {
     params: {networkData},
   },
 }: Props): React.ReactElement {
   const {t} = useTranslation()
-  const store = useStore()
+  const tradeChecklistExitNavigation = useTradeChecklistExitNavigation()
   const saveLocalNetworkStateToMainState = useSetAtom(
     saveLocalNetworkStateToMainStateActionAtom
   )
-  const submitTradeChecklistUpdates = useSetAtom(
-    submitTradeChecklistUpdatesActionAtom
-  )
-  const showLoadingOverlay = useSetAtom(loadingOverlayDisplayedAtom)
   const setBtcNetwork = useSetAtom(btcNetworkAtom)
-  const shouldNavigateBackToChatOnSave =
-    !useWasOpenFromAgreeOnTradeDetailsScreen()
 
   const onFooterButtonPress = useCallback(() => {
     saveLocalNetworkStateToMainState()
-    if (shouldNavigateBackToChatOnSave) {
-      showLoadingOverlay(true)
-      void Effect.runPromise(submitTradeChecklistUpdates())
-        .then((success) => {
-          if (!success) return
-          navigation.popTo('ChatDetail', store.get(chatWithMessagesKeys))
-        })
-        .finally(() => {
-          showLoadingOverlay(false)
-        })
-    } else {
-      navigation.popTo('AgreeOnTradeDetails')
-    }
-  }, [
-    saveLocalNetworkStateToMainState,
-    shouldNavigateBackToChatOnSave,
-    showLoadingOverlay,
-    submitTradeChecklistUpdates,
-    navigation,
-    store,
-  ])
+    tradeChecklistExitNavigation()
+  }, [saveLocalNetworkStateToMainState, tradeChecklistExitNavigation])
 
   useEffect(() => {
     setBtcNetwork(networkData?.btcNetwork ?? 'LIGHTING')

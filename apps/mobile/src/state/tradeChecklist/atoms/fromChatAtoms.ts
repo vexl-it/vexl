@@ -120,12 +120,13 @@ export const setParentChatActionAtom = atom(
     const parentChatAtom = get(parentChatAtomAtom)
     const parentChat = get(parentChatAtom)
 
-    if (parentChat?.chat.id === params.chatId) return // No changes
+    if (parentChat?.chat.id === params.chatId) return false // No changes
 
     const newChatAtom = valueOrDefaultAtom({
       nullableAtom: focusChatWithMessagesAtom(params),
       dummyValue: dummyChatWithMessages,
     })
     set(parentChatAtomAtom, newChatAtom)
+    return true
   }
 )

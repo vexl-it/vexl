@@ -21,11 +21,11 @@
  *
  * Env: GEOCODING_DB_URL, GEOCODING_DB_USER, GEOCODING_DB_PASSWORD (same as the service).
  */
+import {computeImportance} from '@vexl-next/geocoding-db/src/common'
 import {spawn} from 'node:child_process'
 import {existsSync} from 'node:fs'
 import {readFile} from 'node:fs/promises'
 import pg from 'pg'
-import {computeImportance} from '../src/common'
 import {
   CountryIndex,
   parseFeature,

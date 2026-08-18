@@ -1,10 +1,10 @@
+import {computeImportance} from '@vexl-next/geocoding-db/src/common'
 import {
   CountryIndex,
   encodeOsmId,
   geometryCenter,
   parseFeature,
 } from '../../scripts/ingestParsing'
-import {computeImportance} from '../common'
 
 const RS = '\u001e'
 

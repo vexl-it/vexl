@@ -4,7 +4,7 @@
 # them into the geocoding Postgres — see README "Refreshing the dataset".
 #
 # Build from the repo root (the monorepo is the build context):
-#   docker build -f packages/geocoding-db/Dockerfile .
+#   docker build -f tools/location-db-updater/Dockerfile .
 
 # --- Pruner stage -----------------------------------------------------------
 # Same pattern as the root Dockerfile: reduce the monorepo to just this
@@ -18,7 +18,7 @@ WORKDIR /app
 COPY . .
 
 RUN npm install -g turbo@${TURBO_VERSION}
-RUN turbo prune @vexl-next/geocoding-db --docker
+RUN turbo prune @vexl-next/location-db-updater --docker
 
 # --- Runner stage -----------------------------------------------------------
 FROM node:24 AS runner
@@ -49,4 +49,4 @@ VOLUME /data
 # Configuration (GEOCODING_DB_* and SLACK_ALERT_WEBHOOK_URL) comes from the
 # environment (`docker run --env-file`). Any arguments are passed through to
 # refresh.sh (stages, -r regions); with none it refreshes the whole world.
-ENTRYPOINT ["sh", "packages/geocoding-db/scripts/refresh.sh", "-d", "/data"]
+ENTRYPOINT ["sh", "tools/location-db-updater/scripts/refresh.sh", "-d", "/data"]

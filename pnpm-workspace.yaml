@@ -2,6 +2,7 @@ packages:
   - "packages/*"
   - "apps/*"
   - "tooling/*"
+  - "tools/*"
 
 nodeLinker: hoisted
 linkWorkspacePackages: true

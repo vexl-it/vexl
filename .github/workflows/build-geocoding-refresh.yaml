@@ -37,7 +37,7 @@ jobs:
         uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf # v7
         with:
           context: .
-          file: ./packages/geocoding-db/Dockerfile
+          file: ./tools/location-db-updater/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
           provenance: false

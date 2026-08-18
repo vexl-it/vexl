@@ -27,7 +27,7 @@ const GEOCODE_MAX_DISTANCE_METERS = 200_000
 /**
  * Identically-labeled suggestions closer than this are the same place split
  * across ingest dedupe grid cells (~10 km, see
- * packages/geocoding-db/scripts/ingest.ts).
+ * tools/location-db-updater/scripts/ingest.ts).
  * Distinct same-named settlements sit far apart and must both stay.
  */
 const DEDUPE_MAX_DELTA_DEG = 0.25

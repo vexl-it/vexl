@@ -35,7 +35,8 @@ RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
     pnpm install --frozen-lockfile
 
 COPY --from=pruner /app/out/full/ ./
-RUN pnpm --filter @vexl-next/location-db-updater build
+RUN pnpm --config.verify-deps-before-run=false \
+    --filter @vexl-next/location-db-updater build
 
 # --- Production deps stage --------------------------------------------------
 FROM node:24 AS prod-deps

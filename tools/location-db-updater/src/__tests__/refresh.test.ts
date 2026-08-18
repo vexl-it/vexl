@@ -171,6 +171,13 @@ describe('refresh.sh', () => {
         one.includes('https://download.geofabrik.de/europe-latest.osm.pbf')
       )
     ).toHaveLength(1)
+    const downloads = log.filter((one) => one.startsWith('curl'))
+    expect(downloads).toHaveLength(2)
+    for (const download of downloads) {
+      expect(download).toContain('--progress-meter')
+      expect(download).toContain('--location')
+      expect(download).not.toMatch(/(?:^| )-s(?: |$)/)
+    }
     expect(log.some((one) => one.startsWith('osmium fileinfo'))).toBe(true)
     expect(existsSync(path.join(dataDir, 'ne_countries.geojson'))).toBe(true)
     expect(existsSync(path.join(dataDir, 'raw/europe-latest.osm.pbf'))).toBe(

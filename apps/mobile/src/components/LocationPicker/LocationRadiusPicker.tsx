@@ -26,10 +26,12 @@ const MANUAL_ADDRESS_MAX_LENGTH = 40
 
 interface Props {
   readonly onConfirm: (pickedLocation: MapValueWithRadius) => void
+  readonly variant: 'offer' | 'filter'
 }
 
 export default function LocationRadiusPicker({
   onConfirm,
+  variant,
 }: Props): React.ReactElement {
   const {t} = useTranslation()
   const navigation = useNavigation()
@@ -95,7 +97,8 @@ export default function LocationRadiusPicker({
   )
 
   const canConfirm =
-    pickedLocation != null || (showManualAddressInput && manualAddress !== '')
+    pickedLocation != null ||
+    (showManualAddressInput && (variant === 'filter' || manualAddress !== ''))
 
   const handleConfirm = useCallback(() => {
     if (pickedLocation) {
@@ -103,11 +106,23 @@ export default function LocationRadiusPicker({
       return
     }
 
-    if (!showManualAddressInput || manualAddress === '') return
+    if (!showManualAddressInput) return
+
+    const address =
+      manualAddress !== ''
+        ? manualAddress
+        : variant === 'filter'
+          ? t('filterOffers.location.mapAreaLabel', {
+              latitude: coordinates.latitude.toFixed(1),
+              longitude: coordinates.longitude.toFixed(1),
+            })
+          : null
+
+    if (address == null) return
 
     onConfirm(
       manualAddressToMapValueWithRadius({
-        address: manualAddress,
+        address,
         ...coordinates,
       })
     )
@@ -117,6 +132,8 @@ export default function LocationRadiusPicker({
     onConfirm,
     pickedLocation,
     showManualAddressInput,
+    t,
+    variant,
   ])
 
   const handleMapGesture = useCallback(() => {
@@ -150,7 +167,11 @@ export default function LocationRadiusPicker({
             textAlign="center"
             flex={1}
           >
-            {t('offerForm.location.meetingAreaDescription')}
+            {t(
+              variant === 'filter'
+                ? 'filterOffers.location.areaDescription'
+                : 'offerForm.location.meetingAreaDescription'
+            )}
           </Typography>
         </XStack>
       </YStack>
@@ -162,6 +183,11 @@ export default function LocationRadiusPicker({
           onGeocodingFailed={handleGeocodingFailed}
           onCoordinatesChange={setCoordinates}
           onMapGesture={handleMapGesture}
+          serviceErrorMessage={
+            variant === 'filter'
+              ? t('filterOffers.location.serviceError')
+              : undefined
+          }
           bottomChildren={
             <YStack gap="$3" paddingBottom="$4" paddingHorizontal="$3">
               {showManualAddressInput ? (
@@ -172,7 +198,11 @@ export default function LocationRadiusPicker({
                   gap="$3"
                 >
                   <Typography variant="micro" color="$foregroundSecondary">
-                    {t('map.location.manualAddress.description')}
+                    {t(
+                      variant === 'filter'
+                        ? 'filterOffers.location.manualLabelDescription'
+                        : 'map.location.manualAddress.description'
+                    )}
                   </Typography>
                   <TextField
                     valueAtom={manualAddressAtom}

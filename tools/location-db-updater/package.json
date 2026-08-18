@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "build": "node esbuild.config.js",
     "clean": "rimraf .turbo node_modules",
     "lint": "eslint .",
     "format": "prettier --check \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\"",
@@ -24,6 +25,7 @@
     "@effect/sql-pg": "^0.49.7",
     "@types/jest": "^29.4.0",
     "@types/pg": "^8",
+    "@vexl-next/esbuild": "0.0.0",
     "@vexl-next/eslint-config": "0.0.0",
     "@vexl-next/prettier-config": "0.0.0",
     "dotenv": "^16.4.5",

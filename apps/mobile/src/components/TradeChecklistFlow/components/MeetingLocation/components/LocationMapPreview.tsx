@@ -1,19 +1,13 @@
 import {Button, ChevronLeft, IconButton, Typography} from '@vexl-next/ui'
-import {Effect} from 'effect/index'
 import {LinearGradient} from 'expo-linear-gradient'
-import {useSetAtom, useStore} from 'jotai'
+import {useSetAtom} from 'jotai'
 import React from 'react'
 import {Stack, XStack, YStack, useTheme} from 'tamagui'
 import {type TradeChecklistStackScreenProps} from '../../../../../navigationTypes'
-import {chatWithMessagesKeys} from '../../../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
-import {loadingOverlayDisplayedAtom} from '../../../../LoadingOverlayProvider'
 import MapSingleLocationDisplay from '../../../../Map/components/MapSingleLocationDisplay'
-import {
-  addMeetingLocationActionAtom,
-  submitTradeChecklistUpdatesActionAtom,
-} from '../../../atoms/updatesToBeSentAtom'
-import {useWasOpenFromAgreeOnTradeDetailsScreen} from '../../../utils'
+import {addMeetingLocationActionAtom} from '../../../atoms/updatesToBeSentAtom'
+import {useTradeChecklistExitNavigation} from '../../../useTradeChecklistExitNavigation'
 
 type Props = TradeChecklistStackScreenProps<'LocationMapPreview'>
 
@@ -26,33 +20,15 @@ export default function LocationMapPreview({
   },
 }: Props): React.ReactElement {
   const stageLocation = useSetAtom(addMeetingLocationActionAtom)
-  const showLoadingOverlay = useSetAtom(loadingOverlayDisplayedAtom)
+  const tradeChecklistExitNavigation = useTradeChecklistExitNavigation()
   const {t} = useTranslation()
   const theme = useTheme()
-  const submitUpdateOnPick = !useWasOpenFromAgreeOnTradeDetailsScreen()
-  const store = useStore()
   const noteText =
     selectedLocation.note ?? `${t('tradeChecklist.location.addNote')}...`
 
-  const submitTradeChecklistUpdates = useSetAtom(
-    submitTradeChecklistUpdatesActionAtom
-  )
-
   function submit(): void {
     stageLocation(selectedLocation)
-    if (!submitUpdateOnPick) {
-      navigation.popTo('AgreeOnTradeDetails')
-    } else {
-      showLoadingOverlay(true)
-      void Effect.runPromise(submitTradeChecklistUpdates())
-        .then((success) => {
-          if (!success) return
-          navigation.popTo('ChatDetail', store.get(chatWithMessagesKeys))
-        })
-        .finally(() => {
-          showLoadingOverlay(false)
-        })
-    }
+    tradeChecklistExitNavigation()
   }
 
   return (

@@ -1,26 +1,18 @@
 import Clipboard from '@react-native-clipboard/clipboard'
 import {Button, Copy, Typography, XStack, YStack} from '@vexl-next/ui'
-import {Effect} from 'effect/index'
-import {useAtomValue, useSetAtom, useStore} from 'jotai'
+import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback} from 'react'
 import {type TradeChecklistStackScreenProps} from '../../../../../../navigationTypes'
-import {
-  chatWithMessagesKeys,
-  tradeOrOriginOfferCurrencyAtom,
-} from '../../../../../../state/tradeChecklist/atoms/fromChatAtoms'
+import {tradeOrOriginOfferCurrencyAtom} from '../../../../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
 import {currencies} from '../../../../../../utils/localization/currency'
 import {formatInteger} from '../../../../../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../../../../../utils/localization/formattingLocaleAtom'
 import {localizedDecimalNumberActionAtom} from '../../../../../../utils/localization/localizedNumbersAtoms'
-import {loadingOverlayDisplayedAtom} from '../../../../../LoadingOverlayProvider'
 import {toastNotificationAtom} from '../../../../../ToastNotification/atom'
 import {applyFee, btcToSat} from '../../../../../TradeCalculator/helpers'
-import {
-  addAmountActionAtom,
-  submitTradeChecklistUpdatesActionAtom,
-} from '../../../../atoms/updatesToBeSentAtom'
-import {useWasOpenFromAgreeOnTradeDetailsScreen} from '../../../../utils'
+import {addAmountActionAtom} from '../../../../atoms/updatesToBeSentAtom'
+import {useTradeChecklistExitNavigation} from '../../../../useTradeChecklistExitNavigation'
 import {TradeChecklistItemPageLayout} from '../../../TradeChecklistItemPageLayout'
 
 type Props = TradeChecklistStackScreenProps<'ConfirmAmount'>
@@ -32,20 +24,14 @@ function ConfirmAmountScreen({
   },
 }: Props): React.ReactElement {
   const {t} = useTranslation()
-  const store = useStore()
   const currentLocale = useAtomValue(formattingLocaleAtom)
   const tradeOrOriginOfferCurrency = useAtomValue(
     tradeOrOriginOfferCurrencyAtom
   )
   const addAmount = useSetAtom(addAmountActionAtom)
-  const submitTradeChecklistUpdates = useSetAtom(
-    submitTradeChecklistUpdatesActionAtom
-  )
-  const showLoadingOverlay = useSetAtom(loadingOverlayDisplayedAtom)
+  const tradeChecklistExitNavigation = useTradeChecklistExitNavigation()
   const setToastNotification = useSetAtom(toastNotificationAtom)
   const formatDecimalNumber = useSetAtom(localizedDecimalNumberActionAtom)
-  const shouldNavigateBackToChatOnSave =
-    !useWasOpenFromAgreeOnTradeDetailsScreen()
 
   const fiatAmount = applyFee(
     amountData?.fiatAmount ?? 0,
@@ -73,29 +59,8 @@ function ConfirmAmountScreen({
     if (!amountData) return
 
     addAmount(amountData)
-    if (!shouldNavigateBackToChatOnSave) {
-      navigation.popTo('AgreeOnTradeDetails')
-      return
-    }
-
-    showLoadingOverlay(true)
-    void Effect.runPromise(submitTradeChecklistUpdates())
-      .then((success) => {
-        if (!success) return
-        navigation.popTo('ChatDetail', store.get(chatWithMessagesKeys))
-      })
-      .finally(() => {
-        showLoadingOverlay(false)
-      })
-  }, [
-    addAmount,
-    amountData,
-    navigation,
-    shouldNavigateBackToChatOnSave,
-    showLoadingOverlay,
-    store,
-    submitTradeChecklistUpdates,
-  ])
+    tradeChecklistExitNavigation()
+  }, [addAmount, amountData, tradeChecklistExitNavigation])
 
   const onSuggestDifferentAmountPress = useCallback(() => {
     navigation.navigate('CalculateAmount', {

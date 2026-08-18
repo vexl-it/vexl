@@ -58,7 +58,10 @@ docker run --rm --init \
 - Give Docker at least 10 GB of memory — the ingest runs Node with an 8 GB
   heap.
 - Progress is logged with timestamps to the container's stdout (follow with
-  `docker logs -f`) and appended to `refresh.log` in the data volume.
+  `docker logs -f`) and appended to `refresh.log` in the data volume. While a
+  file is downloading, curl also displays its live transfer meter with the
+  percentage and bytes downloaded, total size, estimated time remaining, and
+  average/current speed.
 
 Set `SLACK_ALERT_WEBHOOK_URL` (a Slack incoming-webhook URL, in the same
 `.env`) to get a Slack message when the run completes and whenever any step

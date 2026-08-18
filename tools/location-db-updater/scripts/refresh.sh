@@ -204,8 +204,13 @@ if has_stage ingest; then
   log "=== ingesting: $REGIONS"
   cd "$SCRIPT_DIR/.."
   # shellcheck disable=SC2086 # word-splitting of $files is intended
-  NODE_OPTIONS=--max-old-space-size=8192 \
-    pnpm ingest:geocoding --countries "$DATA_DIR/ne_countries.geojson" $files
+  if [ "${USE_COMPILED_INGEST:-false}" = "true" ]; then
+    NODE_OPTIONS=--max-old-space-size=8192 \
+      node --enable-source-maps dist/ingest.js --countries "$DATA_DIR/ne_countries.geojson" $files
+  else
+    NODE_OPTIONS=--max-old-space-size=8192 \
+      pnpm ingest:geocoding --countries "$DATA_DIR/ne_countries.geojson" $files
+  fi
 fi
 
 log "=== done: $STAGES"

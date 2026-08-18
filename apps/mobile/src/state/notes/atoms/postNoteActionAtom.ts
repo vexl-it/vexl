@@ -80,7 +80,7 @@ export const postNoteActionAtom = atom(
           data: {
             title: t('notes.create.postedToastTitle'),
             bottomText: t('notes.create.postedToastDescription'),
-            indicateProgress: {type: 'success'},
+            indicateProgress: {type: 'hidden'},
           },
           delayMs: SUCCESS_DIALOG_DURATION_MS,
         })

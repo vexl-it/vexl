@@ -10,7 +10,7 @@ import {
   SETTLEMENT_TYPE_WEIGHTS,
   STREET_HIGHWAY_TYPES,
   SUPPORTED_LANGS,
-} from '../src/common'
+} from '@vexl-next/geocoding-db/src/common'
 
 /** ~10 km grid used to merge street segments into one entry per street. */
 export const STREET_GRID_CELLS_PER_DEGREE = 10

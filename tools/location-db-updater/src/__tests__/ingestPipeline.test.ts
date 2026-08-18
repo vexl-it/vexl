@@ -1,33 +1,39 @@
 /**
  * End-to-end test of the places ingest pipeline
- * (packages/geocoding-db/scripts/ingest.ts):
+ * (tools/location-db-updater/scripts/ingest.ts):
  * geojsonseq parsing → transform → staging inserts → street merging →
  * importance boosting → index build → sanity gate → atomic table swap — and
- * finally the live API serving the ingested dataset.
+ * finally the long-lived geocoding query layer reading the replaced tables.
  *
  * The real script runs as a subprocess against the per-test-file Postgres
  * database, with `osmium` stubbed by a shell script that emits a crafted
  * geojsonseq fixture, so the whole pipeline after the osmium boundary is
  * exercised for real.
  */
+import {NodeContext} from '@effect/platform-node'
 import {PgClient} from '@effect/sql-pg'
-import {Latitude, Longitude} from '@vexl-next/domain/src/utility/geoCoordinates'
+import {GeocodingDbService} from '@vexl-next/geocoding-db/src/GeocodingDbService'
 import {computeImportance} from '@vexl-next/geocoding-db/src/common'
-import {setDummyAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
-import {Effect, Schema} from 'effect'
+import {GeocodingDbLayer} from '@vexl-next/geocoding-db/src/layer'
+import {
+  disposeGeocodingTestDatabase,
+  setupGeocodingTestDatabase,
+} from '@vexl-next/geocoding-db/src/tests/testGeocodingDb'
+import {Effect, Layer, ManagedRuntime} from 'effect'
 import {execFile} from 'node:child_process'
 import {chmodSync, mkdirSync, mkdtempSync, rmSync, writeFileSync} from 'node:fs'
 import {tmpdir} from 'node:os'
 import path from 'node:path'
-import {NodeTestingApp} from '../utils/NodeTestingApp'
-import {runPromiseInMockedEnvironment} from '../utils/runPromiseInMockedEnvironment'
 
 const RS = '\u001e'
-// The ingest pipeline lives in the geocoding-db package — resolve it through
-// the workspace symlink so the test does not depend on the repo layout.
-const GEOCODING_DB_ROOT = path.resolve(
-  __dirname,
-  '../../../node_modules/@vexl-next/geocoding-db'
+const LOCATION_DB_UPDATER_ROOT = path.resolve(__dirname, '../..')
+
+const dbRuntime = ManagedRuntime.make(
+  Layer.empty.pipe(
+    Layer.provideMerge(GeocodingDbService.Live),
+    Layer.provideMerge(GeocodingDbLayer),
+    Layer.provideMerge(NodeContext.layer)
+  )
 )
 
 // ---------------------------------------------------------------------------
@@ -268,7 +274,7 @@ const runIngest = async (
         ...pbfPaths,
       ],
       {
-        cwd: GEOCODING_DB_ROOT,
+        cwd: LOCATION_DB_UPDATER_ROOT,
         maxBuffer: 32 * 1024 * 1024,
         env: {
           ...process.env,
@@ -296,7 +302,7 @@ interface PlaceAssertRow {
 
 const queryPlaces = async (where: string): Promise<PlaceAssertRow[]> => {
   let result: readonly PlaceAssertRow[] = []
-  await runPromiseInMockedEnvironment(
+  await dbRuntime.runPromise(
     Effect.gen(function* (_) {
       const sql = yield* _(PgClient.PgClient)
       result = yield* _(
@@ -311,7 +317,7 @@ const queryPlaces = async (where: string): Promise<PlaceAssertRow[]> => {
 
 const querySingle = async <T extends object>(queryText: string): Promise<T> => {
   let result: T | undefined
-  await runPromiseInMockedEnvironment(
+  await dbRuntime.runPromise(
     Effect.gen(function* (_) {
       const sql = yield* _(PgClient.PgClient)
       const rows = yield* _(sql.unsafe<T>(queryText))
@@ -323,6 +329,9 @@ const querySingle = async <T extends object>(queryText: string): Promise<T> => {
 }
 
 beforeAll(async () => {
+  await Effect.runPromise(setupGeocodingTestDatabase)
+  await dbRuntime.runPromise(GeocodingDbService)
+
   workDir = mkdtempSync(path.join(tmpdir(), 'places-ingest-test-'))
   const binDir = path.join(workDir, 'bin')
   const osmiumPath = path.join(binDir, 'osmium')
@@ -332,8 +341,16 @@ beforeAll(async () => {
   chmodSync(osmiumPath, 0o755)
 })
 
-afterAll(() => {
-  rmSync(workDir, {recursive: true, force: true})
+afterAll(async () => {
+  try {
+    await Effect.runPromise(dbRuntime.disposeEffect)
+  } finally {
+    try {
+      await Effect.runPromise(disposeGeocodingTestDatabase)
+    } finally {
+      rmSync(workDir, {recursive: true, force: true})
+    }
+  }
 })
 
 // ---------------------------------------------------------------------------
@@ -492,37 +509,6 @@ describe('places ingest pipeline', () => {
     expect(persistence.kinds).toEqual(['p'])
   })
 
-  it('serves the ingested dataset through the live API', async () => {
-    await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
-        yield* _(setDummyAuthHeaders)
-
-        const suggestion = yield* _(
-          client.getLocationSuggestionV2({
-            urlParams: {lang: 'de', phrase: 'Bratis'},
-          })
-        )
-        expect(suggestion.result).toHaveLength(1)
-        expect(suggestion.result[0].userData.placeId).toEqual('osm:4')
-        expect(suggestion.result[0].userData.suggestFirstRow).toEqual(
-          'Pressburg'
-        )
-
-        const geocoded = yield* _(
-          client.getGeocodedCoordinatesV2({
-            urlParams: {
-              lang: 'en',
-              latitude: Schema.decodeSync(Latitude)(48.151),
-              longitude: Schema.decodeSync(Longitude)(17.105),
-            },
-          })
-        )
-        expect(geocoded.address).toEqual('Bratislava - SK')
-      })
-    )
-  })
-
   it('keeps the live tables when osmium fails mid-ingest', async () => {
     const broken = writePbfFixture('broken', mainFixture('Bratislava'))
     writeFileSync(`${broken}.fail`, '')
@@ -569,21 +555,21 @@ describe('places ingest pipeline', () => {
     )
     expect(total.count).toEqual(EXPECTED_PLACE_COUNT)
 
-    // And the service keeps working across the swap
-    await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
-        yield* _(setDummyAuthHeaders)
-        const suggestion = yield* _(
-          client.getLocationSuggestionV2({
-            urlParams: {lang: 'en', phrase: 'Nova Brat'},
-          })
-        )
-        expect(suggestion.result).toHaveLength(1)
-        expect(suggestion.result[0].userData.suggestFirstRow).toEqual(
-          'Nova Bratislava'
-        )
-      })
+    // The query layer was initialized before the first ingest, so this proves
+    // an existing connection pool keeps working across the table swap.
+    const suggestions = await dbRuntime.runPromise(
+      Effect.flatMap(GeocodingDbService, (service) =>
+        service.suggestPlaces({
+          normPhrase: 'nova brat',
+          simPhrase: 'nova brat',
+          minImportance: 0,
+          usePrefix: true,
+          useTrigram: false,
+          limit: 10,
+        })
+      )
     )
+    expect(suggestions).toHaveLength(1)
+    expect(suggestions[0]?.name).toEqual('Nova Bratislava')
   }, 120_000)
 })

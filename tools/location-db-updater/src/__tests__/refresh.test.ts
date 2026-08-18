@@ -106,7 +106,7 @@ afterEach(() => {
 const runScript = async (
   args: string[],
   extraEnv: Record<string, string | undefined> = {},
-  // /dev/null by default so a developer's real packages/geocoding-db/.env can
+  // /dev/null by default so a developer's real tools/location-db-updater/.env can
   // never leak into the tests (the script auto-loads it otherwise)
   configFile = '/dev/null',
   opts: {cwd?: string; dataDirArg?: string} = {}

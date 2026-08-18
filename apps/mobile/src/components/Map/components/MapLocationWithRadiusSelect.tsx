@@ -52,6 +52,7 @@ type Props = React.ComponentProps<typeof Stack> & {
   onGeocodingFailed?: (kind: GeocodingFailureKind) => void
   onCoordinatesChange?: (coordinates: SelectedCoordinates) => void
   onMapGesture?: () => void
+  readonly serviceErrorMessage?: string
 }
 
 export type GeocodingFailureKind = 'notFound' | 'serviceError'
@@ -161,11 +162,13 @@ function useAtoms({
 function PickedLocationText({
   selectedRegionRadiusAtom,
   geocodedRegionAtom,
+  serviceErrorMessage,
 }: {
   geocodedRegionAtom: ReturnType<typeof useAtoms>['getGeocodedRegionAtom']
   selectedRegionRadiusAtom: ReturnType<
     typeof useAtoms
   >['selectedRegionRadiusAtom']
+  readonly serviceErrorMessage?: string
 }): React.ReactElement {
   const geocodingState = useAtomValue(geocodedRegionAtom)
   const {t} = useTranslation()
@@ -192,7 +195,8 @@ function PickedLocationText({
             (error) =>
               error._tag === 'LocationNotFoundError'
                 ? t('map.location.errors.notFound')
-                : t('map.location.errors.serviceError'),
+                : (serviceErrorMessage ??
+                  t('map.location.errors.serviceError')),
             (data) => data?.address ?? t('map.locationSelect.hint')
           )
         )}
@@ -222,6 +226,7 @@ export default function MapLocationWithRadiusSelect({
   onMapGesture,
   onGeocodingFailed,
   onCoordinatesChange,
+  serviceErrorMessage,
   ...restProps
 }: Props): React.ReactElement {
   const safeAreaInsets = useSafeAreaInsets()
@@ -431,6 +436,7 @@ export default function MapLocationWithRadiusSelect({
             <PickedLocationText
               geocodedRegionAtom={atoms.getGeocodedRegionAtom}
               selectedRegionRadiusAtom={atoms.selectedRegionRadiusAtom}
+              serviceErrorMessage={serviceErrorMessage}
             />
           </Stack>
         </Stack>

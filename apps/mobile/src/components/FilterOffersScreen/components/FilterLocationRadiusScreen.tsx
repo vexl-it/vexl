@@ -34,5 +34,5 @@ export default function FilterLocationRadiusScreen(): React.ReactElement {
     [navigation, resetLocationPicker, setFilterLocation]
   )
 
-  return <LocationRadiusPicker onConfirm={handleConfirm} />
+  return <LocationRadiusPicker variant="filter" onConfirm={handleConfirm} />
 }

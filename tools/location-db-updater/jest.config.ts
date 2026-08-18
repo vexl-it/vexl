@@ -6,8 +6,10 @@ const config: JestConfigWithTsJest = {
 
   testEnvironment: 'node',
   extensionsToTreatAsEsm: ['.ts'],
+  setupFiles: ['<rootDir>/jest.setup.ts'],
+
   testTimeout: 60_000,
-  testMatch: ['**/*.test.ts'],
+  testMatch: ['**/*.test.ts'], // This line ensures only files with .test.ts suffix are run
   // "flat" (pulled in via @vexl-next/localization) ships ESM only, so it must
   // not be excluded from the transform
   transformIgnorePatterns: ['node_modules/(?!flat/)'],

@@ -26,14 +26,17 @@
  * the service).
  */
 import {NodeContext} from '@effect/platform-node'
+import {
+  computeImportance,
+  normalizeName,
+} from '@vexl-next/geocoding-db/src/common'
+import {GeocodingDbLayer} from '@vexl-next/geocoding-db/src/layer'
 import {Effect, Layer} from 'effect'
 import {spawnSync} from 'node:child_process'
 import {homedir} from 'node:os'
 import {join} from 'node:path'
 import {fileURLToPath} from 'node:url'
 import pg from 'pg'
-import {computeImportance, normalizeName} from '../src/common'
-import {GeocodingDbLayer} from '../src/layer'
 import {devSeedPlaces} from './devSeedData'
 import {normNameRows} from './ingestParsing'
 

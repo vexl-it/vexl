@@ -46,6 +46,7 @@ let it run overnight:
 
 ```sh
 docker run --rm --init \
+  --add-host=host.docker.internal:host-gateway \
   --env-file packages/geocoding-db/.env \
   -v vexl-geocoding-refresh:/data \
   ghcr.io/vexl-it/geocoding-refresh:latest

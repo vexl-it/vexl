@@ -8,6 +8,16 @@ import {Context, Effect, Layer, Schema} from 'effect'
 import {darkMapStyleUrlConfig, lightMapStyleUrlConfig} from '../configs'
 
 const MAP_STYLE_FETCH_TIMEOUT_MS = 10_000
+type MapStyleVariant = 'light' | 'dark'
+
+class SanitizedMapStyleError extends Schema.TaggedError<SanitizedMapStyleError>(
+  'SanitizedMapStyleError'
+)('SanitizedMapStyleError', {
+  styleVariant: Schema.Literal('light', 'dark'),
+  errorType: Schema.Literal('AxiosError', 'UnexpectedError', 'ParseError'),
+  message: Schema.String,
+  httpStatus: Schema.optional(Schema.Number),
+}) {}
 
 export class MapStyleFetchError extends Schema.TaggedError<MapStyleFetchError>(
   'MapStyleFetchError'
@@ -36,20 +46,27 @@ const MapStyleShape = Schema.Struct({
 })
 
 const fetchStyleJson = (
-  url: HttpsUrlString
+  url: HttpsUrlString,
+  styleVariant: MapStyleVariant
 ): Effect.Effect<MapStyleJson, MapStyleFetchError | MapStyleValidationError> =>
   Effect.gen(function* (_) {
     const response = yield* _(
       Effect.tryPromise(
         async () => await axios.get(url, {timeout: MAP_STYLE_FETCH_TIMEOUT_MS})
       ),
-      Effect.mapError(
-        (e) =>
-          new MapStyleFetchError({
-            cause: e,
-            message: `Failed to fetch map style from ${url}`,
-          })
-      )
+      Effect.mapError((e) => {
+        const isAxiosError = axios.isAxiosError(e)
+
+        return new MapStyleFetchError({
+          cause: new SanitizedMapStyleError({
+            styleVariant,
+            errorType: isAxiosError ? 'AxiosError' : 'UnexpectedError',
+            message: 'Map style request failed',
+            httpStatus: isAxiosError ? e.response?.status : undefined,
+          }),
+          message: `Failed to fetch ${styleVariant} map style`,
+        })
+      })
     )
     // Validate the shape only — decoding a Struct strips excess properties,
     // so the full original document is what gets stringified.
@@ -59,10 +76,14 @@ const fetchStyleJson = (
         Schema.decode(MapStyleJson)(JSON.stringify(response.data))
       ),
       Effect.mapError(
-        (e) =>
+        () =>
           new MapStyleValidationError({
-            cause: e,
-            message: `Fetched map style from ${url} is not a valid style document`,
+            cause: new SanitizedMapStyleError({
+              styleVariant,
+              errorType: 'ParseError',
+              message: 'Map style response failed validation',
+            }),
+            message: `Fetched ${styleVariant} map style is not a valid style document`,
           })
       )
     )
@@ -82,8 +103,8 @@ export class MapStylesService extends Context.Tag('MapStylesService')<
         fetchMapStyles: () =>
           Effect.all(
             {
-              light: fetchStyleJson(lightUrl),
-              dark: fetchStyleJson(darkUrl),
+              light: fetchStyleJson(lightUrl, 'light'),
+              dark: fetchStyleJson(darkUrl, 'dark'),
             },
             {concurrency: 'unbounded'}
           ),

@@ -1246,6 +1246,8 @@
   "tradeChecklist.network.btcNetworkWillBeSetByReceiver": "Het BTC-netwerk wordt ingesteld door de ontvangende partij",
   "tradeChecklist.network.btcNetworkWasSetByReceiver": "Het BTC-netwerk is ingesteld door de ontvangende partij",
   "tradeChecklist.location.addNote": "Opmerking toevoegen",
+  "tradeChecklist.location.searchUnavailable": "Locatie zoeken werkt momenteel niet. Je kunt je handelspartner in plaats daarvan rechtstreeks in de chat een ontmoetingsplek voorstellen.",
+  "tradeChecklist.location.geocodingUnavailable": "Het adres kon niet worden geladen. Stel in plaats daarvan een ontmoetingsplek voor in de chat.",
   "tradeChecklist.location.note": "Let op:",
   "tradeChecklist.btcAddress.btcAddress": "BTC adres",
   "tradeChecklist.notSupportedByOtherSide.title": "Andere kant gebruikt een oudere versie van Vexl",

@@ -3,6 +3,7 @@ import {
   Button,
   ChevronLeft,
   IconButton,
+  Loader,
   SearchBar,
   TextField,
   Typography,
@@ -10,7 +11,7 @@ import {
 import {Effect} from 'effect'
 import {LinearGradient} from 'expo-linear-gradient'
 import {atom, useAtom, useSetAtom, useStore} from 'jotai'
-import React, {useEffect, useMemo, useState} from 'react'
+import React, {useCallback, useEffect, useMemo, useState} from 'react'
 import Animated, {FadeOut} from 'react-native-reanimated'
 import {Stack, XStack, YStack, useTheme} from 'tamagui'
 import {type TradeChecklistStackScreenProps} from '../../../../../navigationTypes'
@@ -18,6 +19,7 @@ import {chatWithMessagesKeys} from '../../../../../state/tradeChecklist/atoms/fr
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {loadingOverlayDisplayedAtom} from '../../../../LoadingOverlayProvider'
 import MapLocationSelect from '../../../../Map/components/MapLocationSelect'
+import {type GeocodingFailureKind} from '../../../../Map/types'
 import {pragueCenterLocation} from '../../../../Map/utils/pragueCenterLocation'
 import {
   addMeetingLocationActionAtom,
@@ -54,6 +56,17 @@ export default function LocationMapSelect({
       route.params?.selectedLocation ?? null
     )
   const [hasMapMoved, setHasMapMoved] = useState(false)
+  const [geocodingFailure, setGeocodingFailure] =
+    useState<GeocodingFailureKind | null>(null)
+  const [isGeocodingInProgress, setIsGeocodingInProgress] = useState(true)
+
+  const handlePick = useCallback(
+    (place: GetGeocodedCoordinatesResponse | null) => {
+      setPickedValue(place)
+      if (place != null) setGeocodingFailure(null)
+    },
+    []
+  )
 
   useEffect(() => {
     setNote(route.params?.selectedLocation?.note ?? '')
@@ -66,7 +79,14 @@ export default function LocationMapSelect({
   useEffect(() => {
     setPickedValue(route.params?.selectedLocation ?? null)
     setHasMapMoved(false)
+    setGeocodingFailure(null)
   }, [route.params?.selectedLocation, route.params?.initialLocation])
+
+  // A failed re-geocode of a location the user already holds (picked via
+  // search or being edited) must not block saving it — only failures for a
+  // position the user actually moved to matter.
+  const showGeocodingFailure =
+    geocodingFailure != null && (hasMapMoved || pickedValue == null)
 
   function onSubmit(): void {
     if (!pickedValue) return
@@ -96,7 +116,9 @@ export default function LocationMapSelect({
     <MapLocationSelect
       mapPadding={{top: 220, bottom: 220, left: 0, right: 0}}
       initialValue={initialValue}
-      onPick={setPickedValue}
+      onPick={handlePick}
+      onGeocodingFailed={setGeocodingFailure}
+      onGeocodingInProgressChange={setIsGeocodingInProgress}
       onMapMoved={() => {
         setHasMapMoved(true)
       }}
@@ -183,14 +205,24 @@ export default function LocationMapSelect({
             alignSelf="center"
             backgroundColor="$accentHighlightPrimary"
           >
-            <Typography
-              variant="description"
-              color="$backgroundPrimary"
-              textAlign="center"
-              lineHeight="100%"
-            >
-              {pickedValue?.address ?? initialValue.address}
-            </Typography>
+            {isGeocodingInProgress ? (
+              <Loader size="small" color={theme.backgroundPrimary.get()} />
+            ) : (
+              <Typography
+                variant="description"
+                color={
+                  showGeocodingFailure ? '$redForeground' : '$backgroundPrimary'
+                }
+                textAlign="center"
+                lineHeight="100%"
+              >
+                {showGeocodingFailure
+                  ? geocodingFailure === 'serviceError'
+                    ? t('tradeChecklist.location.geocodingUnavailable')
+                    : t('map.location.errors.notFound')
+                  : (pickedValue?.address ?? initialValue.address)}
+              </Typography>
+            )}
           </YStack>
         </YStack>
       }
@@ -211,7 +243,12 @@ export default function LocationMapSelect({
             placeholder={`${t('tradeChecklist.location.addNote')}...`}
             showClear
           />
-          <Button disabled={!pickedValue} onPress={onSubmit}>
+          <Button
+            disabled={
+              !pickedValue || isGeocodingInProgress || showGeocodingFailure
+            }
+            onPress={onSubmit}
+          >
             {t('common.save')}
           </Button>
         </YStack>

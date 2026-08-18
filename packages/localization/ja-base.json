@@ -1246,6 +1246,8 @@
   "tradeChecklist.network.btcNetworkWillBeSetByReceiver": "ビットコインを受け取る人が BTC ネットワークを設定します",
   "tradeChecklist.network.btcNetworkWasSetByReceiver": "ビットコインを受け取る人が BTC ネットワークを設定しました",
   "tradeChecklist.location.addNote": "メモを追加",
+  "tradeChecklist.location.searchUnavailable": "現在、場所の検索は利用できません。代わりに、チャットで取引相手に待ち合わせ場所を直接提案できます。",
+  "tradeChecklist.location.geocodingUnavailable": "住所を読み込めませんでした。代わりにチャットで待ち合わせ場所を提案してください。",
   "tradeChecklist.location.note": "メモ:",
   "tradeChecklist.btcAddress.btcAddress": "BTC アドレス",
   "tradeChecklist.notSupportedByOtherSide.title": "Other side uses older version of Vexl",

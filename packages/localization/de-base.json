@@ -1246,6 +1246,8 @@
   "tradeChecklist.network.btcNetworkWillBeSetByReceiver": "Das BTC-Netzwerk wird von der Empfängerpartei eingestellt",
   "tradeChecklist.network.btcNetworkWasSetByReceiver": "Das BTC-Netzwerk wurde von der Empfängerpartei eingestellt",
   "tradeChecklist.location.addNote": "Notiz hinzufügen",
+  "tradeChecklist.location.searchUnavailable": "Die Standortsuche funktioniert gerade nicht. Du kannst deinem Handelspartner stattdessen direkt im Chat einen Treffpunkt vorschlagen.",
+  "tradeChecklist.location.geocodingUnavailable": "Die Adresse konnte nicht geladen werden. Schlag stattdessen einen Treffpunkt im Chat vor.",
   "tradeChecklist.location.note": "Hinweis:",
   "tradeChecklist.btcAddress.btcAddress": "BTC-Adresse",
   "tradeChecklist.notSupportedByOtherSide.title": "Andere Seite benutzt ältere Version von Vexl",

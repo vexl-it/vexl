@@ -4,34 +4,29 @@ import {
   type GetLocationSuggestionsRequest,
 } from '@vexl-next/rest-api/src/services/location/contracts'
 import axios from 'axios'
-import {Effect, Schema} from 'effect'
+import {Effect, Redacted, Schema} from 'effect'
+import {GoogleCoordinates, GoogleResponseEnvelope} from './common'
+import {unexpectedGoogleMapsError} from './errors'
 
-interface GooglePlacesResponse {
-  results: Array<{
-    formatted_address: string
-    place_id: string
-    geometry: {
-      location: {
-        lat: number
-        lng: number
-      }
-      viewport: {
-        northeast: {
-          lat: number
-          lng: number
-        }
-        southwest: {
-          lat: number
-          lng: number
-        }
-      }
-    }
-    types: string[]
-  }>
-}
+const GooglePlacesResponse = Schema.Struct({
+  status: Schema.Literal('OK'),
+  results: Schema.Array(
+    Schema.Struct({
+      formatted_address: Schema.String,
+      place_id: Schema.String,
+      geometry: Schema.Struct({
+        location: GoogleCoordinates,
+        viewport: Schema.Struct({
+          northeast: GoogleCoordinates,
+          southwest: GoogleCoordinates,
+        }),
+      }),
+    })
+  ),
+})
 
 export const querySuggest =
-  (googlePlacesApikey: string) =>
+  (googlePlacesApiKey: Redacted.Redacted<string>) =>
   ({
     phrase,
     lang,
@@ -40,32 +35,52 @@ export const querySuggest =
     UnexpectedServerError
   > => {
     return Effect.gen(function* (_) {
-      const {
-        data: {results},
-      } = yield* _(
-        Effect.tryPromise(async () => {
-          return await axios.get<GooglePlacesResponse>(
-            'https://maps.googleapis.com/maps/api/geocode/json',
-            {
-              params: {
-                address: phrase,
-                key: googlePlacesApikey,
-                language: lang,
-              },
-            }
-          )
-        }),
-        Effect.catchAll((e) => {
-          return Effect.zipRight(
-            Effect.logError('Error while requesting geocode', e),
-            new UnexpectedServerError({
-              status: 500 as const,
-              message: 'ExternalApi' as const,
-            })
-          )
+      const response = yield* _(
+        Effect.tryPromise({
+          try: async () =>
+            await axios.get<unknown>(
+              'https://maps.googleapis.com/maps/api/geocode/json',
+              {
+                params: {
+                  address: phrase,
+                  key: Redacted.value(googlePlacesApiKey),
+                  language: lang,
+                },
+              }
+            ),
+          catch: (error) =>
+            unexpectedGoogleMapsError({
+              operation: 'suggest',
+              category: 'RequestFailed',
+              error,
+              request: {phrase, lang},
+            }),
         })
       )
 
+      const responseEnvelope = yield* _(
+        Schema.decodeUnknown(GoogleResponseEnvelope)(response.data)
+      )
+      if (responseEnvelope.status === 'ZERO_RESULTS') {
+        return yield* _(
+          Schema.decode(GetLocationSuggestionsResponse)({result: []})
+        )
+      }
+      if (responseEnvelope.status !== 'OK') {
+        return yield* _(
+          unexpectedGoogleMapsError({
+            operation: 'suggest',
+            category: 'ResponseRejected',
+            request: {phrase, lang},
+            response: response.data,
+            responseStatus: responseEnvelope.status,
+          })
+        )
+      }
+
+      const {results} = yield* _(
+        Schema.decodeUnknown(GooglePlacesResponse)(response.data)
+      )
       const resultsRaw = results.map((one) => {
         const [firstRow, ...rest] = one.formatted_address.split(', ')
         const secondRow: string = rest.join(', ')
@@ -97,23 +112,14 @@ export const querySuggest =
         Schema.decode(GetLocationSuggestionsResponse)({result: resultsRaw})
       )
     }).pipe(
-      Effect.catchTag('ParseError', (e) =>
-        Effect.zipRight(
-          Effect.logError('Unexpected response from google api', e),
+      Effect.catchTag(
+        'ParseError',
+        (error) =>
           new UnexpectedServerError({
-            status: 500 as const,
-            message: 'ExternalApi' as const,
+            status: 500,
+            message: 'Google Maps suggest response failed validation',
+            cause: error,
           })
-        )
-      ),
-      Effect.catchAllDefect((defect) => {
-        return Effect.zipRight(
-          Effect.logError('Error defect while getting geocode', defect),
-          new UnexpectedServerError({
-            status: 500 as const,
-            message: 'ExternalApi' as const,
-          })
-        )
-      })
+      )
     )
   }

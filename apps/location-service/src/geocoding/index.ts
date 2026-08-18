@@ -151,23 +151,9 @@ export class GeocodingService extends Context.Tag('GeocodingService')<
                 )
               ),
             }),
-            Effect.catchTag('ParseError', (e) =>
-              Effect.zipRight(
-                Effect.logError('Error decoding suggest response', e),
-                Effect.fail(new UnexpectedServerError({status: 500}))
-              )
-            ),
-            Effect.catchAllDefect((defect) =>
-              Effect.zipRight(
-                Effect.logError(
-                  'Defect while building suggest response',
-                  defect
-                ),
-                Effect.fail(new UnexpectedServerError({status: 500}))
-              )
-            )
+            UnexpectedServerError.wrapErrors('Failed to build suggest response')
           )
-        })
+        }).pipe(Effect.withSpan('querySuggest'))
 
       const queryGeocode: GeocodingOperations['queryGeocode'] = (request) =>
         Effect.gen(function* (_) {
@@ -204,23 +190,9 @@ export class GeocodingService extends Context.Tag('GeocodingService')<
                 place.placeType
               ),
             }),
-            Effect.catchTag('ParseError', (e) =>
-              Effect.zipRight(
-                Effect.logError('Error decoding geocode response', e),
-                Effect.fail(new UnexpectedServerError({status: 500}))
-              )
-            ),
-            Effect.catchAllDefect((defect) =>
-              Effect.zipRight(
-                Effect.logError(
-                  'Defect while building geocode response',
-                  defect
-                ),
-                Effect.fail(new UnexpectedServerError({status: 500}))
-              )
-            )
+            UnexpectedServerError.wrapErrors('Failed to build geocode response')
           )
-        })
+        }).pipe(Effect.withSpan('queryGeocode'))
 
       return {querySuggest, queryGeocode}
     })

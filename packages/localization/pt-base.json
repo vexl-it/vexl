@@ -1246,6 +1246,8 @@
   "tradeChecklist.network.btcNetworkWillBeSetByReceiver": "A pessoa que recebe bitcoin vai definir a rede BTC",
   "tradeChecklist.network.btcNetworkWasSetByReceiver": "A pessoa que recebe bitcoin definiu a rede BTC",
   "tradeChecklist.location.addNote": "Adicionar notas",
+  "tradeChecklist.location.searchUnavailable": "A busca de localização não está funcionando no momento. Você pode sugerir um ponto de encontro ao seu parceiro de negociação diretamente no chat.",
+  "tradeChecklist.location.geocodingUnavailable": "Não foi possível carregar o endereço. Sugira um ponto de encontro no chat.",
   "tradeChecklist.location.note": "Nota:",
   "tradeChecklist.btcAddress.btcAddress": "Endereço BTC",
   "tradeChecklist.notSupportedByOtherSide.title": "Other side uses older version of Vexl",

@@ -1246,6 +1246,8 @@
   "tradeChecklist.network.btcNetworkWillBeSetByReceiver": "BTC sieť nastaví prijímajúca strana",
   "tradeChecklist.network.btcNetworkWasSetByReceiver": "BTC sieť nastavila prijímajúca strana",
   "tradeChecklist.location.addNote": "Pridaj poznámku",
+  "tradeChecklist.location.searchUnavailable": "Vyhľadávanie miest teraz nefunguje. Namiesto toho môžeš navrhnúť miesto stretnutia obchodnému partnerovi priamo v chate.",
+  "tradeChecklist.location.geocodingUnavailable": "Adresu sa nepodarilo načítať. Navrhni miesto stretnutia v chate.",
   "tradeChecklist.location.note": "Poznámka:",
   "tradeChecklist.btcAddress.btcAddress": "BTC adresa",
   "tradeChecklist.notSupportedByOtherSide.title": "Druhá strana používa staršiu verziu Vexl",

@@ -1248,6 +1248,8 @@
   "tradeChecklist.network.btcNetworkWillBeSetByReceiver": "BTC síť bude nastavena přijímající stranou",
   "tradeChecklist.network.btcNetworkWasSetByReceiver": "BTC síť byla nastavena přijímající stranou",
   "tradeChecklist.location.addNote": "Přidat poznámku",
+  "tradeChecklist.location.searchUnavailable": "Vyhledávání míst teď nefunguje. Místo toho můžeš navrhnout místo setkání svému obchodnímu partnerovi přímo v chatu.",
+  "tradeChecklist.location.geocodingUnavailable": "Adresu se nepodařilo načíst. Navrhni místo setkání v chatu.",
   "tradeChecklist.location.note": "Poznámka:",
   "tradeChecklist.btcAddress.btcAddress": "BTC adresa",
   "tradeChecklist.notSupportedByOtherSide.title": "Druhá strana používá starší verzi Vexlu",

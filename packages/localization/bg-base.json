@@ -1246,6 +1246,8 @@
   "tradeChecklist.network.btcNetworkWillBeSetByReceiver": "BTC мрежата ще бъде зададена от приемащата страна",
   "tradeChecklist.network.btcNetworkWasSetByReceiver": "ВТС мрежата е избрана от получаващата страна",
   "tradeChecklist.location.addNote": "Добави бележка",
+  "tradeChecklist.location.searchUnavailable": "Търсенето на местоположение не работи в момента. Вместо това можеш да предложиш място за среща на партньора си директно в чата.",
+  "tradeChecklist.location.geocodingUnavailable": "Адресът не можа да се зареди. Вместо това предложи място за среща в чата.",
   "tradeChecklist.location.note": "Бележка:",
   "tradeChecklist.btcAddress.btcAddress": "BTC адрес",
   "tradeChecklist.notSupportedByOtherSide.title": "Другата страна използав по-стара версия на Vexl",

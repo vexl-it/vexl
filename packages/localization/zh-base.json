@@ -1246,6 +1246,8 @@
   "tradeChecklist.network.btcNetworkWillBeSetByReceiver": "BTC 网络将由接收方设置",
   "tradeChecklist.network.btcNetworkWasSetByReceiver": "接收方已设置了 BTC 网络",
   "tradeChecklist.location.addNote": "添加备注",
+  "tradeChecklist.location.searchUnavailable": "位置搜索目前无法使用。你可以直接在聊天中向交易伙伴建议见面地点。",
+  "tradeChecklist.location.geocodingUnavailable": "无法加载地址。请改在聊天中建议见面地点。",
   "tradeChecklist.location.note": "注意：",
   "tradeChecklist.btcAddress.btcAddress": "比特币地址",
   "tradeChecklist.notSupportedByOtherSide.title": "对方使用着 Vexl 的旧版本",

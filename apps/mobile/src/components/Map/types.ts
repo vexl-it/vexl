@@ -23,6 +23,8 @@ export interface RegionChangeDetails {
   isGesture: boolean
 }
 
+export type GeocodingFailureKind = 'notFound' | 'serviceError'
+
 export interface MapCameraControls {
   fitBounds: (bounds: LngLatBounds, options?: {padding?: EdgePadding}) => void
 }

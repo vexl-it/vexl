@@ -91,11 +91,12 @@ function SearchScreenContent({
   const localSearchText = useAtomValue(localSearchTextAtom)
   const trimmedSearchText = localSearchText.trim()
 
-  const {searchQueryAtom, searchResultsAtomsAtom} = useMolecule(
-    LocationSearchMolecule
-  )
+  const {searchQueryAtom, searchResultsAtomsAtom, isLoadingAtom, errorAtom} =
+    useMolecule(LocationSearchMolecule)
   const setSearchQuery = useSetAtom(searchQueryAtom)
   const searchResultsAtoms = useAtomValue(searchResultsAtomsAtom)
+  const isLoading = useAtomValue(isLoadingAtom)
+  const error = useAtomValue(errorAtom)
 
   useEffect(() => {
     if (trimmedSearchText === '') {
@@ -146,7 +147,27 @@ function SearchScreenContent({
           placeholder={t('offerForm.location.addCityOrDistrict')}
         />
       </YStack>
-      {trimmedSearchText !== '' && searchResultsAtoms.length === 0 ? (
+      {isLoading ? (
+        <YStack px="$5" pt="$8">
+          <Typography
+            variant="description"
+            color="$foregroundSecondary"
+            textAlign="center"
+          >
+            {t('common.loading')}...
+          </Typography>
+        </YStack>
+      ) : error != null ? (
+        <YStack px="$5" pt="$8">
+          <Typography
+            variant="description"
+            color="$foregroundSecondary"
+            textAlign="center"
+          >
+            {t('tradeChecklist.location.searchUnavailable')}
+          </Typography>
+        </YStack>
+      ) : trimmedSearchText !== '' && searchResultsAtoms.length === 0 ? (
         <YStack px="$5" pt="$8">
           <Typography
             variant="description"

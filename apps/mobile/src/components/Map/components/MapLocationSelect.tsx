@@ -21,9 +21,15 @@ import {apiAtom} from '../../../api'
 import {createEffectAtomWithProgress} from '../../../utils/atomUtils/createEffectAtomWithProgress'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {appLanguageAtom} from '../../../utils/preferences'
+import {reportLocationServiceError} from '../../../utils/reportLocationServiceError'
+import {transientRequestRetryPolicy} from '../../../utils/transientRequestRetryPolicy'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import {type MapValue} from '../brands'
-import {type EdgePadding, type LatLng} from '../types'
+import {
+  type EdgePadding,
+  type GeocodingFailureKind,
+  type LatLng,
+} from '../types'
 import {mapValueToBounds} from '../utils/mapLibreRegion'
 import {MapPinAsset} from './MapSvgAssets'
 import VexlMap from './VexlMap'
@@ -37,6 +43,8 @@ type Props = React.ComponentProps<typeof Stack> & {
   initialValue: MapValue
   mapPadding?: EdgePadding
   onPick: (place: MapValue | null) => void
+  readonly onGeocodingFailed?: (kind: GeocodingFailureKind) => void
+  readonly onGeocodingInProgressChange?: (inProgress: boolean) => void
   onMapMoved?: () => void
 }
 
@@ -44,8 +52,10 @@ type Props = React.ComponentProps<typeof Stack> & {
 function useAtoms({
   initialCenter,
   onPick,
+  onGeocodingFailed,
 }: {
   onPick: (place: MapValue | null) => void
+  readonly onGeocodingFailed?: (kind: GeocodingFailureKind) => void
   initialCenter: LatLng
 }) {
   return useMemo(() => {
@@ -62,9 +72,28 @@ function useAtoms({
             longitude: Schema.decodeSync(Longitude)(center.longitude),
           })
           .pipe(
+            Effect.retry({
+              schedule: transientRequestRetryPolicy,
+              while: (error) => error._tag !== 'LocationNotFoundError',
+            }),
             Effect.tap((data) =>
               Effect.sync(() => {
                 onPick(data)
+              })
+            ),
+            Effect.tapError((error) =>
+              Effect.sync(() => {
+                onGeocodingFailed?.(
+                  error._tag === 'LocationNotFoundError'
+                    ? 'notFound'
+                    : 'serviceError'
+                )
+                if (error._tag !== 'LocationNotFoundError') {
+                  reportLocationServiceError(
+                    'Reverse geocoding failed in MapLocationSelect',
+                    error
+                  )
+                }
               })
             )
           ),
@@ -74,7 +103,7 @@ function useAtoms({
       selectedCenterAtom,
       getGeocodedRegionAtom,
     }
-  }, [initialCenter, onPick])
+  }, [initialCenter, onGeocodingFailed, onPick])
 }
 
 type AtomValue<T> = T extends Atom<infer Value> ? Value : never
@@ -115,6 +144,8 @@ function PickedLocationText({
 
 export default function MapLocationSelect({
   onPick,
+  onGeocodingFailed,
+  onGeocodingInProgressChange,
   onMapMoved,
   initialValue,
   topChildren,
@@ -142,6 +173,7 @@ export default function MapLocationSelect({
   const atoms = useAtoms({
     initialCenter,
     onPick,
+    onGeocodingFailed,
   })
   const geocodingState = useAtomValue(atoms.getGeocodedRegionAtom)
   const setCenter = useSetAtom(atoms.selectedCenterAtom)
@@ -149,6 +181,11 @@ export default function MapLocationSelect({
   useEffect(() => {
     setCenter(initialCenter)
   }, [initialCenter, setCenter])
+
+  const isGeocodingInProgress = geocodingState.state !== 'done'
+  useEffect(() => {
+    onGeocodingInProgressChange?.(isGeocodingInProgress)
+  }, [isGeocodingInProgress, onGeocodingInProgressChange])
 
   const handleRegionDidChange = useCallback(
     (event: NativeSyntheticEvent<ViewStateChangeEvent>) => {

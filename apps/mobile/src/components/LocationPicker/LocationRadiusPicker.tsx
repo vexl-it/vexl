@@ -10,10 +10,10 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import {type MapValueWithRadius} from '../Map/brands'
 import MapLocationWithRadiusSelect, {
-  type GeocodingFailureKind,
   type SelectedCoordinates,
 } from '../Map/components/MapLocationWithRadiusSelect'
 import PinchZoomHint from '../Map/components/PinchZoomHint'
+import {type GeocodingFailureKind} from '../Map/types'
 import {pragueCenterLocation} from '../Map/utils/pragueCenterLocation'
 import {LocationPickerMolecule} from './molecule'
 import {

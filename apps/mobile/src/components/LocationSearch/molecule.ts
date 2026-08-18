@@ -10,6 +10,7 @@ import {splitAtom} from 'jotai/utils'
 import {apiAtom} from '../../api'
 import {createEffectAtomWithProgress} from '../../utils/atomUtils/createEffectAtomWithProgress'
 import {appLanguageAtom} from '../../utils/preferences'
+import {reportLocationServiceError} from '../../utils/reportLocationServiceError'
 import {transientRequestRetryPolicy} from '../../utils/transientRequestRetryPolicy'
 
 export const LocationSessionId = Schema.UUID.pipe(
@@ -43,7 +44,17 @@ export const LocationSearchMolecule = molecule(() => {
               phrase: query,
               lang: get(appLanguageAtom),
             })
-            .pipe(Effect.retry(transientRequestRetryPolicy)),
+            .pipe(
+              Effect.retry(transientRequestRetryPolicy),
+              Effect.tapError((error) =>
+                Effect.sync(() => {
+                  reportLocationServiceError(
+                    'Location suggestion search failed',
+                    error
+                  )
+                })
+              )
+            ),
   })
 
   const searchResultsOrEmptyArrayAtom = atom(

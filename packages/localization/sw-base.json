@@ -1246,6 +1246,8 @@
   "tradeChecklist.network.btcNetworkWillBeSetByReceiver": "Mtandao wa BTC utaanzishwa na upande wa kupokea",
   "tradeChecklist.network.btcNetworkWasSetByReceiver": "Mtandao wa BTC ulianzishwa na upande wa kupokea",
   "tradeChecklist.location.addNote": "Ongeza kumbukumbu",
+  "tradeChecklist.location.searchUnavailable": "Utafutaji wa eneo haufanyi kazi kwa sasa. Badala yake, unaweza kumpendekezea mshirika wako wa biashara mahali pa kukutana moja kwa moja kwenye gumzo.",
+  "tradeChecklist.location.geocodingUnavailable": "Imeshindikana kupakia anwani. Pendekeza mahali pa kukutana kwenye gumzo badala yake.",
   "tradeChecklist.location.note": "Kumbuka:",
   "tradeChecklist.btcAddress.btcAddress": "Anwani ya BTC",
   "tradeChecklist.notSupportedByOtherSide.title": "Upande mwingine unatumia toleo la zamani la Vexl",

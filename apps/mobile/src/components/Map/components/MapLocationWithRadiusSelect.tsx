@@ -30,8 +30,10 @@ import {formattingLocaleAtom} from '../../../utils/localization/formattingLocale
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {appLanguageAtom} from '../../../utils/preferences'
 import reportError from '../../../utils/reportError'
+import {reportLocationServiceError} from '../../../utils/reportLocationServiceError'
 import {transientRequestRetryPolicy} from '../../../utils/transientRequestRetryPolicy'
 import {type MapValue, type MapValueWithRadius} from '../brands'
+import {type GeocodingFailureKind} from '../types'
 import {
   getWrappedLongitudeSpan,
   mapValueToBounds,
@@ -54,8 +56,6 @@ type Props = React.ComponentProps<typeof Stack> & {
   onMapGesture?: () => void
   readonly serviceErrorMessage?: string
 }
-
-export type GeocodingFailureKind = 'notFound' | 'serviceError'
 
 export interface SelectedCoordinates {
   readonly latitude: Latitude
@@ -132,6 +132,12 @@ function useAtoms({
                         ? 'notFound'
                         : 'serviceError'
                     )
+                    if (error._tag !== 'LocationNotFoundError') {
+                      reportLocationServiceError(
+                        'Reverse geocoding failed in MapLocationWithRadiusSelect',
+                        error
+                      )
+                    }
                   })
                 )
               )

@@ -30,6 +30,7 @@ export class RedisLockError extends Schema.TaggedError<RedisLockError>(
   'RedisLockError'
 )('RedisLockError', {
   cause: Schema.Unknown,
+  resources: Schema.Array(Schema.String),
 }) {}
 
 export interface RedisOperations {
@@ -155,29 +156,40 @@ export class RedisService extends Context.Tag('RedisService')<
       const acquireLockEffect = (
         resources: string[] | string,
         duration: Duration.DurationInput
-      ): Effect.Effect<Lock, RedisLockError> =>
-        Effect.promise(
+      ): Effect.Effect<Lock, RedisLockError> => {
+        const resourcesArray = Array.isArray(resources)
+          ? resources
+          : [resources]
+
+        return Effect.promise(
           async () =>
-            await redlock.acquire(
-              Array.isArray(resources) ? resources : [resources],
-              Duration.toMillis(duration)
-            )
+            await redlock.acquire(resourcesArray, Duration.toMillis(duration))
         ).pipe(
-          Effect.zipLeft(Effect.logInfo('Acquired Redis lock', {duration})),
+          Effect.zipLeft(
+            Effect.logInfo('Acquired Redis lock', {
+              duration,
+              resources: resourcesArray,
+            })
+          ),
           catchAllDefect(
             (e) =>
               new RedisLockError({
                 cause: e,
+                resources: resourcesArray,
               })
           )
         )
+      }
 
       const releaseLockEffect = (lock: Lock): Effect.Effect<void> => {
         const now = Date.now()
         if (lock.expiration < now) {
           return Effect.logWarning(
             'Attempted to release an expired lock. Lock time should be increased',
-            {overExpirationMillis: now - lock.expiration}
+            {
+              overExpirationMillis: now - lock.expiration,
+              resources: lock.resources,
+            }
           )
         }
 
@@ -198,7 +210,10 @@ export class RedisService extends Context.Tag('RedisService')<
             releaseLockEffect
           ).pipe(
             Effect.withSpan('Redis lock', {
-              attributes: {duration},
+              attributes: {
+                duration,
+                resources: Array.isArray(resources) ? resources : [resources],
+              },
             })
           )
 

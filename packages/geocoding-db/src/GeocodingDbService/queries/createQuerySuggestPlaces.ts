@@ -159,12 +159,7 @@ export const createQuerySuggestPlaces = Effect.gen(function* (_) {
 
   return flow(
     query,
-    Effect.catchAll((e) =>
-      Effect.zipRight(
-        Effect.logError('Error in querySuggestPlaces', e),
-        Effect.fail(new UnexpectedServerError({status: 500}))
-      )
-    ),
+    UnexpectedServerError.wrapErrors('Geocoding DB suggestPlaces query failed'),
     Effect.withSpan('querySuggestPlaces query')
   )
 })

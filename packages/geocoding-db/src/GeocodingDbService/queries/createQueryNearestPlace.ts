@@ -127,12 +127,7 @@ export const createQueryNearestPlace = Effect.gen(function* (_) {
 
   return flow(
     query,
-    Effect.catchAll((e) =>
-      Effect.zipRight(
-        Effect.logError('Error in queryNearestPlace', e),
-        Effect.fail(new UnexpectedServerError({status: 500}))
-      )
-    ),
+    UnexpectedServerError.wrapErrors('Geocoding DB nearestPlace query failed'),
     Effect.withSpan('queryNearestPlace query')
   )
 })

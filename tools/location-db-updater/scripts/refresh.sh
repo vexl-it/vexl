@@ -137,7 +137,9 @@ if has_stage fetch; then
     # failed or truncated download is never cached as the real file.
     ne_tmp="$DATA_DIR/ne_countries.geojson.tmp"
     rm -f "$ne_tmp"
-    curl -sSL --fail --retry 3 -o "$ne_tmp" \
+    # Keep curl's progress meter enabled. It reports percent received, total
+    # and downloaded bytes, time remaining, and average/current speed.
+    curl --progress-meter --location --fail --retry 3 -o "$ne_tmp" \
       "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_10m_admin_0_countries.geojson"
     NE_TMP="$ne_tmp" node -e 'JSON.parse(require("fs").readFileSync(process.env.NE_TMP, "utf8"))'
     mv "$ne_tmp" "$DATA_DIR/ne_countries.geojson"
@@ -154,7 +156,7 @@ if has_stage fetch; then
     # and resuming across builds splices a corrupt PBF; each retry re-downloads
     # from scratch. --speed-limit/--speed-time abort (and retry) a stall.
     rm -f "$raw" "$raw.ok"
-    curl -sL --fail --retry 10 --retry-all-errors --speed-limit 10240 --speed-time 60 \
+    curl --progress-meter --location --fail --retry 10 --retry-all-errors --speed-limit 10240 --speed-time 60 \
       -o "$raw" "https://download.geofabrik.de/$region-latest.osm.pbf"
     osmium fileinfo "$raw" > /dev/null
     touch "$raw.ok"

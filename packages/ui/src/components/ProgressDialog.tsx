@@ -18,7 +18,9 @@ export type ProgressIndication =
   | {type: 'loader'}
   | {type: 'progress'; percentage: number}
   | {type: 'done'}
-  | {type: 'success'}
+  | {type: 'hidden'}
+
+type VisibleProgressIndication = Exclude<ProgressIndication, {type: 'hidden'}>
 
 export interface ProgressDialogProps {
   readonly belowProgressLeft?: string
@@ -53,12 +55,11 @@ const ProgressTrack = styled(XStack, {
 })
 
 function percentageFromIndicateProgress(
-  indicateProgress: ProgressIndication
+  indicateProgress: VisibleProgressIndication
 ): number {
   if (indicateProgress.type === 'intermediate') return 0
   if (indicateProgress.type === 'loader') return 0
   if (indicateProgress.type === 'done') return 100
-  if (indicateProgress.type === 'success') return 100
   return indicateProgress.percentage
 }
 
@@ -136,10 +137,9 @@ function ProgressIndicator({
   belowProgressLeft,
   belowProgressRight,
   indicateProgress,
-}: Pick<
-  ProgressDialogProps,
-  'belowProgressLeft' | 'belowProgressRight' | 'indicateProgress'
->): React.JSX.Element {
+}: Pick<ProgressDialogProps, 'belowProgressLeft' | 'belowProgressRight'> & {
+  readonly indicateProgress: VisibleProgressIndication
+}): React.JSX.Element {
   const theme = useTheme()
   const [trackWidth, setTrackWidth] = useState(0)
   const percentage = percentageFromIndicateProgress(indicateProgress)
@@ -214,7 +214,7 @@ export function ProgressDialog({
       >
         {title}
       </Typography>
-      {indicateProgress.type === 'success' ? null : (
+      {indicateProgress.type === 'hidden' ? null : (
         <ProgressIndicator
           belowProgressLeft={belowProgressLeft}
           belowProgressRight={belowProgressRight}

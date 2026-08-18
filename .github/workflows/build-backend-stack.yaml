@@ -131,4 +131,3 @@ jobs:
 
   geocoding-refresh:
     uses: ./.github/workflows/build-geocoding-refresh.yaml
-    secrets: inherit

@@ -14,7 +14,7 @@ import {Effect, Schema} from 'effect'
 import * as E from 'fp-ts/Either'
 import {pipe} from 'fp-ts/lib/function'
 import {atom, useAtomValue, useSetAtom, type Atom} from 'jotai'
-import React, {useCallback, useMemo} from 'react'
+import React, {useCallback, useEffect, useMemo} from 'react'
 import {type NativeSyntheticEvent} from 'react-native'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {apiAtom} from '../../../api'
@@ -27,6 +27,8 @@ import {type EdgePadding, type LatLng} from '../types'
 import {mapValueToBounds} from '../utils/mapLibreRegion'
 import {MapPinAsset} from './MapSvgAssets'
 import VexlMap from './VexlMap'
+
+const MapCenterSchema = Schema.Tuple(Longitude, Latitude)
 
 type Props = React.ComponentProps<typeof Stack> & {
   topChildren?: React.ReactNode
@@ -144,14 +146,25 @@ export default function MapLocationSelect({
   const geocodingState = useAtomValue(atoms.getGeocodedRegionAtom)
   const setCenter = useSetAtom(atoms.selectedCenterAtom)
 
+  useEffect(() => {
+    setCenter(initialCenter)
+  }, [initialCenter, setCenter])
+
   const handleRegionDidChange = useCallback(
     (event: NativeSyntheticEvent<ViewStateChangeEvent>) => {
       if (!event.nativeEvent.userInteraction) return
 
+      const center = Effect.runSync(
+        Effect.either(
+          Schema.decodeUnknown(MapCenterSchema)(event.nativeEvent.center)
+        )
+      )
+      if (E.isLeft(center)) return
+
       onMapMoved?.()
       setCenter({
-        latitude: event.nativeEvent.center[1],
-        longitude: event.nativeEvent.center[0],
+        latitude: center.right[1],
+        longitude: center.right[0],
       })
     },
     [onMapMoved, setCenter]

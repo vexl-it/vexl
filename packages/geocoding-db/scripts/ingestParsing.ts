@@ -150,6 +150,7 @@ export class CountryIndex {
       }
 
       for (const polygon of geometryPolygons) {
+        if (polygon.length === 0) continue
         const rings: CountryRing[] = polygon.map((ring) => ({
           countryCode,
           ring,

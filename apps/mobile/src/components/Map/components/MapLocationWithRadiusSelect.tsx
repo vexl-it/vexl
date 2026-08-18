@@ -7,7 +7,6 @@ import {
   Latitude,
   Longitude,
   Radius,
-  calculateViewportRadius,
   longitudeDeltaToKilometers,
 } from '@vexl-next/domain/src/utility/geoCoordinates'
 import {
@@ -33,7 +32,10 @@ import {appLanguageAtom} from '../../../utils/preferences'
 import reportError from '../../../utils/reportError'
 import {transientRequestRetryPolicy} from '../../../utils/transientRequestRetryPolicy'
 import {type MapValue, type MapValueWithRadius} from '../brands'
-import {mapValueToBounds} from '../utils/mapLibreRegion'
+import {
+  getWrappedLongitudeSpan,
+  mapValueToBounds,
+} from '../utils/mapLibreRegion'
 import {
   calculateAvailableSelectionFrame,
   calculateLongitudeRadiusDelta,
@@ -237,7 +239,12 @@ export default function MapLocationWithRadiusSelect({
         latitude: initialValue.latitude,
         longitude: initialValue.longitude,
       },
-      radius: calculateViewportRadius(initialValue.viewport),
+      radius: Schema.decodeSync(Radius)(
+        getWrappedLongitudeSpan(
+          initialValue.viewport.southwest.longitude,
+          initialValue.viewport.northeast.longitude
+        ) / 2
+      ),
     }),
     [initialValue]
   )
@@ -301,6 +308,10 @@ export default function MapLocationWithRadiusSelect({
   }, [])
   const handleMapReady = useCallback(() => {
     setIsMapReady(true)
+  }, [])
+  const handleMapLoadFailure = useCallback(() => {
+    setIsMapReady(false)
+    reportError('error', new Error('Map failed to load'))
   }, [])
   const handleRegionDidChange = useCallback(
     (event: NativeSyntheticEvent<ViewStateChangeEvent>) => {
@@ -366,7 +377,7 @@ export default function MapLocationWithRadiusSelect({
         ref={mapRef}
         contentInset={isMapReady ? overlayInsets : undefined}
         onDidFinishLoadingMap={handleMapReady}
-        onDidFailLoadingMap={handleMapReady}
+        onDidFailLoadingMap={handleMapLoadFailure}
         onRegionDidChange={handleRegionDidChange}
       >
         <Camera initialViewState={{bounds: initialBounds}} />

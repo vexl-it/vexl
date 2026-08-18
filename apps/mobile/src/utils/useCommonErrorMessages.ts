@@ -9,6 +9,10 @@ export interface SomeError {
   reason?: unknown
 }
 
+export function isTransportRequestError(error: SomeError | undefined): boolean {
+  return error?._tag === 'RequestError' && error.reason === 'Transport'
+}
+
 export default function useCommonErrorMessages(
   error?: SomeError
 ): string | null {
@@ -27,7 +31,7 @@ export function toCommonErrorMessage(
   // Only transport-level RequestError means the device is offline. Other
   // reasons ('Encode'/'InvalidUrl') are app-side bugs and fall through to the
   // generic fallback, as does ResponseError (server responded).
-  if (error._tag === 'RequestError' && error.reason === 'Transport') {
+  if (isTransportRequestError(error)) {
     return t('common.NetworkError')
   }
 

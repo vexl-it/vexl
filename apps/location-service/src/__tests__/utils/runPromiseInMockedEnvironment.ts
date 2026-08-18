@@ -57,13 +57,19 @@ export const startRuntime = async (): Promise<void> => {
 }
 
 export const disposeRuntime = async (): Promise<void> => {
-  await Effect.runPromise(
-    Effect.andThen(runtime.disposeEffect, () =>
-      Console.log('Disposed test environment')
+  try {
+    await Effect.runPromise(
+      Effect.andThen(runtime.disposeEffect, () =>
+        Console.log('Disposed test environment')
+      )
     )
-  )
-  await Effect.runPromise(disposeGeocodingTestDatabase)
-  runtimeReady = false
+  } finally {
+    try {
+      await Effect.runPromise(disposeGeocodingTestDatabase)
+    } finally {
+      runtimeReady = false
+    }
+  }
 }
 
 export const runPromiseInMockedEnvironment = async (

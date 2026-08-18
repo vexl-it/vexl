@@ -2329,6 +2329,9 @@ importers:
       '@types/pg':
         specifier: ^8
         version: 8.20.0
+      '@vexl-next/esbuild':
+        specifier: 0.0.0
+        version: link:../../tooling/esbuild
       '@vexl-next/eslint-config':
         specifier: 0.0.0
         version: link:../../tooling/eslint

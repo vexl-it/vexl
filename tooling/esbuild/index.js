@@ -19,11 +19,15 @@ const bundleWorkspaceOnly = {
   },
 }
 
+/**
+ * @param {{entryPoints?: string[]}} [options]
+ * @returns {Promise<void>}
+ */
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export default async function build() {
+export default async function build({entryPoints = ['src/index.ts']} = {}) {
   try {
     const result = await esbuild.build({
-      entryPoints: ['src/index.ts'],
+      entryPoints,
       outdir: 'dist',
       bundle: true,
       platform: 'node',

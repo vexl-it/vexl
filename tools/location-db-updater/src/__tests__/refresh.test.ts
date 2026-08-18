@@ -2,7 +2,7 @@
  * Tests for scripts/refresh.sh — the manual refresh entrypoint that downloads
  * OSM extracts, filters them with osmium and hands them to the ingest.
  *
- * The script runs for real; `curl`, `osmium` and `pnpm` are replaced by stub
+ * The script runs for real; its external commands are replaced by stub
  * executables on PATH that record their invocations and produce controllable
  * outputs, so download validation, freshness/resume logic, failure handling
  * and stage orchestration are all covered without network or a database.
@@ -79,6 +79,14 @@ echo "pnpm-env \${GEOCODING_DB_URL:-}" >> "$STUB_LOG"
 exit 0
 `
 
+const NODE_STUB = `#!/bin/sh
+if [ "$1" = "--enable-source-maps" ]; then
+  echo "node $*" >> "$STUB_LOG"
+  exit 0
+fi
+exec "${process.execPath}" "$@"
+`
+
 beforeEach(() => {
   // realpath so assertions match the script's pwd-canonicalized paths
   // (macOS tmpdir lives behind the /var -> /private/var symlink)
@@ -92,6 +100,7 @@ beforeEach(() => {
     ['curl', CURL_STUB],
     ['osmium', OSMIUM_STUB],
     ['pnpm', PNPM_STUB],
+    ['node', NODE_STUB],
   ] as const) {
     const stubPath = path.join(binDir, name)
     writeFileSync(stubPath, content)
@@ -196,6 +205,23 @@ describe('refresh.sh', () => {
     expect(ingest).toContain(`${dataDir}/filtered/places-europe.osm.pbf`)
     expect(ingest).toContain(`${dataDir}/filtered/pois-europe.osm.pbf`)
     expect(ingest).toContain(`${dataDir}/filtered/streets-europe.osm.pbf`)
+  })
+
+  it('runs the compiled ingest in the container configuration', async () => {
+    await runScript(['-r', 'europe', 'fetch'])
+    writeFileSync(logPath, '')
+
+    const run = await runScript(['-r', 'europe', 'extract', 'ingest'], {
+      USE_COMPILED_INGEST: 'true',
+    })
+
+    expect(run.code).toEqual(0)
+    expect(
+      invocations().some((one) =>
+        one.startsWith('node --enable-source-maps dist/ingest.js --countries')
+      )
+    ).toBe(true)
+    expect(invocations().some((one) => one.startsWith('pnpm'))).toBe(false)
   })
 
   it('defaults to the eight continent regions', async () => {

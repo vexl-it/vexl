@@ -4,12 +4,9 @@ Scripts for running the local dev stack (`dev-backend.ts`, `dev-infra.ts`, `dev-
 
 ## Places DB seeding
 
-On startup, `dev-backend.ts` seeds the standalone geocoding database (its own `geocoding-postgres` container, separate from the vexl service databases) if it is empty — otherwise it's a fast no-op, since the Postgres volume persists between runs. An empty DB is seeded with:
+The standalone geocoding database (its own `geocoding-postgres` container, separate from the vexl service databases) is seeded by the Postgres image itself: `docker-compose.dev.yaml` mounts [geocoding-postgres-init/](geocoding-postgres-init/) into `docker-entrypoint-initdb.d`, so the committed Czechia dump (~130k places) is restored automatically when the volume is first created — no downloads, no external tools. `--fresh-db` recreates the volume and thereby re-restores the dump.
 
-- **`osmium` installed:** a real Czechia OpenStreetMap ingest, plus a fixture of major SK/CZ cities and the European capitals. Downloads are cached in `~/.cache/vexl/osm`, so only the very first seed downloads anything (~800 MB).
-- **no `osmium`:** a committed fixture of major SK/CZ cities + European capitals. Instant and offline; map search just has less depth.
-
-Override with `--seed-places <auto|fixture|off>`. Details and standalone usage: [packages/geocoding-db/README.md](../../packages/geocoding-db/README.md).
+On startup, `dev-backend.ts` still runs the idempotent seeder from `tools/location-db-updater`, which ensures the database and schema exist (a fast no-op on top of the dump). On an old volume that predates the dump it does not download anything — it prints a pointer to `--fresh-db`. Override with `--seed-places <auto|fixture|off>` (`fixture` inserts a small committed city fixture into an empty table). Details: [tools/location-db-updater/README.md](../../tools/location-db-updater/README.md).
 
 ## seed-perf-data.ts — simulate a heavy account for performance work
 

@@ -132,11 +132,12 @@ function printHelp(): void {
       '  --watch             hot-reload services via tsx watch (default off)',
       '  --fresh-db          recreate databases from scratch (docker compose down -v)',
       '  --detach-infra      leave docker infra running on exit',
-      '  --seed-places <m>   places DB seeding, runs only when the table is empty',
-      '                      or after --fresh-db (default auto: CZ OSM ingest if',
-      '                      osmium is installed, city fixture otherwise;',
-      '                      fixture = fixture only, off = ensure DB/schema only,',
-      '                      no data)',
+      '  --seed-places <m>   places DB behaviour when the table is empty (the',
+      '                      committed Czechia dump normally restores when the',
+      '                      geocoding volume is first created; default auto:',
+      '                      leave empty and point at --fresh-db, fixture =',
+      '                      insert the small city fixture, off = ensure',
+      '                      DB/schema only)',
     ].join('\n')
   )
 }
@@ -340,9 +341,9 @@ function killTree(child: ChildProcess, signal: NodeJS.Signals): void {
 
 /**
  * Runs the idempotent geocoding-db seeder (fast no-op when the places table
- * already has data). Blocking on purpose: a first-time OSM ingest should
- * finish before the stack reports ready, so the map works immediately. Even
- * with mode `off` it must run: it also creates the `geocoding` DB + schema
+ * already has data — normally the case, since the committed Czechia dump is
+ * restored by the Postgres image when the geocoding volume is first created).
+ * It must run regardless of mode: it also creates the `geocoding` DB + schema
  * on geocoding-postgres volumes predating them, without which location-service
  * crash-loops.
  */

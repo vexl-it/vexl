@@ -41,9 +41,11 @@ run dev seeding and build the image.
 
 ## Local development
 
-`pnpm dev:backend` seeds the geocoding DB automatically via
-`tools/location-db-updater`. See that package's README for seeding modes
-(`--seed-places auto|fixture|off`) and re-seeding.
+In dev the database is seeded from a committed Czechia dump restored by the
+Postgres image when the `geocoding-postgres` volume is first created (see
+`tooling/dev/geocoding-postgres-init/`). See the `tools/location-db-updater`
+README for the seeder modes (`--seed-places auto|fixture|off`) and
+re-seeding.
 
 ## Tests
 

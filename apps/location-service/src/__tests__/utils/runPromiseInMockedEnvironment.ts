@@ -1,49 +1,75 @@
+import * as NodeContext from '@effect/platform-node/NodeContext'
 import * as NodeHttpServer from '@effect/platform-node/NodeHttpServer'
 import {type HttpClient} from '@effect/platform/HttpClient'
 import {HttpApiBuilder} from '@effect/platform/index'
+import {type SqlClient} from '@effect/sql/SqlClient'
+import {GeocodingDbService} from '@vexl-next/geocoding-db/src/GeocodingDbService'
+import {GeocodingDbLayer} from '@vexl-next/geocoding-db/src/layer'
+import {
+  disposeGeocodingTestDatabase,
+  setupGeocodingTestDatabase,
+} from '@vexl-next/geocoding-db/src/tests/testGeocodingDb'
 import {type RateLimitingService} from '@vexl-next/server-utils/src/RateLimiting'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {mockedRateLimitingLayer} from '@vexl-next/server-utils/src/tests/mockedRateLimitingLayer'
 import {TestRequestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Console, Effect, Layer, ManagedRuntime, type Scope} from 'effect'
 import {cryptoConfig} from '../../configs'
+import {GeocodingService} from '../../geocoding'
 import {LocationApiLive} from '../../httpServer'
+import {type GoogleMapsService} from '../../utils/googleMapsApi'
 import {mockedGoogleMapLayer} from './mockedGoogleMapLayer'
 
 export type MockedContexts =
   | ServerCrypto
+  | SqlClient
+  | GeocodingDbService
+  | GeocodingService
+  | GoogleMapsService
   | HttpClient
   | TestRequestHeaders
   | RateLimitingService
-
-const universalContext = Layer.mergeAll(ServerCrypto.layer(cryptoConfig))
 
 const TestServerLive = HttpApiBuilder.serve().pipe(
   Layer.provide(LocationApiLive),
   Layer.provideMerge(NodeHttpServer.layerTest)
 )
+
 const context = Layer.empty.pipe(
   Layer.provideMerge(TestServerLive),
   Layer.provideMerge(TestRequestHeaders.Live),
-  Layer.provideMerge(mockedGoogleMapLayer),
   Layer.provideMerge(mockedRateLimitingLayer),
-  Layer.provideMerge(universalContext)
+  Layer.provideMerge(mockedGoogleMapLayer),
+  Layer.provideMerge(GeocodingService.Live),
+  Layer.provideMerge(GeocodingDbService.Live),
+  Layer.provideMerge(GeocodingDbLayer),
+  Layer.provideMerge(ServerCrypto.layer(cryptoConfig)),
+  Layer.provideMerge(NodeContext.layer)
 )
 
 const runtime = ManagedRuntime.make(context)
 let runtimeReady = false
 
 export const startRuntime = async (): Promise<void> => {
+  await Effect.runPromise(setupGeocodingTestDatabase)
   await runtime.runPromise(Console.log('Initialized the test environment'))
   runtimeReady = true
 }
+
 export const disposeRuntime = async (): Promise<void> => {
-  await Effect.runPromise(
-    Effect.andThen(runtime.disposeEffect, () =>
-      Console.log('Disposed test environment')
+  try {
+    await Effect.runPromise(
+      Effect.andThen(runtime.disposeEffect, () =>
+        Console.log('Disposed test environment')
+      )
     )
-  )
-  runtimeReady = false
+  } finally {
+    try {
+      await Effect.runPromise(disposeGeocodingTestDatabase)
+    } finally {
+      runtimeReady = false
+    }
+  }
 }
 
 export const runPromiseInMockedEnvironment = async (

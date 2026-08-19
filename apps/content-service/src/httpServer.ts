@@ -29,9 +29,11 @@ import {getInvoiceStatusTypeHandler} from './handlers/donations/getInvoiceStatus
 import {updateInvoiceStateWebhook} from './handlers/donations/updateInvoiceStateWebhook'
 import {UpdateInvoiceStateWebhookService} from './handlers/donations/UpdateInvoiceStateWebhookService'
 import {getEventsHandler} from './handlers/events'
+import {getMapStylesHandler} from './handlers/getMapStyles'
 import {newsAndAnonouncementsHandler} from './handlers/getNewsAndAnnonuncements'
 import {CacheService} from './utils/cache'
 import {BtcPayServerService} from './utils/donations'
+import {MapStylesService} from './utils/mapStyles'
 import {WebflowCmsService} from './utils/webflowCms'
 
 const CmsApiGroupLive = HttpApiBuilder.group(
@@ -48,6 +50,12 @@ const NewsAndAnnouncementsApiGroupLive = HttpApiBuilder.group(
   ContentApiSpecification,
   'NewsAndAnnouncements',
   (h) => h.handle('getNewsAndAnnouncements', newsAndAnonouncementsHandler)
+)
+
+const MapApiGroupLive = HttpApiBuilder.group(
+  ContentApiSpecification,
+  'Map',
+  (h) => h.handle('getMapStyles', getMapStylesHandler)
 )
 
 const VexlProductNotificationsApiGroupLive = HttpApiBuilder.group(
@@ -76,6 +84,7 @@ const DonationsApiGroupLive = HttpApiBuilder.group(
 export const ContentApiLive = HttpApiBuilder.api(ContentApiSpecification).pipe(
   Layer.provide(CmsApiGroupLive),
   Layer.provide(NewsAndAnnouncementsApiGroupLive),
+  Layer.provide(MapApiGroupLive),
   Layer.provide(VexlProductNotificationsApiGroupLive),
   Layer.provide(VexlProductNotificationsDbService.Live),
   Layer.provide(DonationsApiGroupLive),
@@ -96,6 +105,7 @@ export const HttpServerLive = Layer.mergeAll(
   Layer.provideMerge(ServerCrypto.layer(cryptoConfig)),
   Layer.provideMerge(RateLimitingService.Live),
   Layer.provideMerge(WebflowCmsService.Live),
+  Layer.provideMerge(MapStylesService.Live),
   Layer.provideMerge(CacheService.Live),
   Layer.provideMerge(DbLayer),
   Layer.provideMerge(UpdateInvoiceStateWebhookService.Live),

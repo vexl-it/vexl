@@ -5,51 +5,48 @@ import {
   type GetGeocodedCoordinatesRequest,
 } from '@vexl-next/rest-api/src/services/location/contracts'
 import axios from 'axios'
-import {Array, Effect, Option, Schema, String, pipe} from 'effect'
+import {Array, Effect, Option, Redacted, Schema, String, pipe} from 'effect'
+import {GoogleCoordinates, GoogleResponseEnvelope} from './common'
+import {unexpectedGoogleMapsError} from './errors'
 
-interface GoogleGeocodeResult {
-  place_id: string
-  formatted_address: string
-  address_components: Array<{
-    long_name: string
-    short_name: string
-    types: string[]
-  }>
-  geometry: {
-    location: {
-      lat: number
-      lng: number
-    }
-    viewport: {
-      northeast: {
-        lat: number
-        lng: number
-      }
-      southwest: {
-        lat: number
-        lng: number
-      }
-    }
-  }
-}
+const GoogleGeocodeResult = Schema.Struct({
+  place_id: Schema.String,
+  formatted_address: Schema.String,
+  address_components: Schema.Array(
+    Schema.Struct({
+      short_name: Schema.String,
+      types: Schema.Array(Schema.String),
+    })
+  ),
+  geometry: Schema.Struct({
+    location: GoogleCoordinates,
+    viewport: Schema.Struct({
+      northeast: GoogleCoordinates,
+      southwest: GoogleCoordinates,
+    }),
+  }),
+})
+type GoogleGeocodeResult = typeof GoogleGeocodeResult.Type
 
-interface GoogleGeocodeResponse {
-  plus_code: {
-    compound_code?: string
-    global_code?: string
-  }
-  results: GoogleGeocodeResult[]
-}
+const GoogleGeocodeResponse = Schema.Struct({
+  status: Schema.Literal('OK'),
+  plus_code: Schema.optional(
+    Schema.Struct({
+      compound_code: Schema.optional(Schema.String),
+    })
+  ),
+  results: Schema.Array(GoogleGeocodeResult),
+})
+type GoogleGeocodeResponse = typeof GoogleGeocodeResponse.Type
 
 // const regionRegex = /(?: region| kraj)/gi
 
 // Just keep this just in case. Might be useful
 const findTypeInAddressComponents = (
   type: string,
-  components: Array<{
-    long_name: string
+  components: ReadonlyArray<{
     short_name: string
-    types: string[]
+    types: readonly string[]
   }>
 ): string | undefined =>
   pipe(
@@ -96,7 +93,7 @@ const getAddress = ({
     )
 
     // 3FF2+M4H Praha, Česko
-    const compoundCode = responseData.plus_code.compound_code
+    const compoundCode = responseData.plus_code?.compound_code
 
     // Praha, Česko
     const cityAndState = compoundCode?.split(' ')?.slice(1)?.join(' ')
@@ -130,11 +127,11 @@ const getAddress = ({
       ? finalAddress
       : firstHit.formatted_address.replace(/^[\d\s]*/, '')
   }).pipe(
-    Effect.catchAllDefect((d) =>
+    Effect.catchAllDefect((defect) =>
       Effect.zipRight(
         Effect.logError(
           'Error while getting address. Falling back to formatted address',
-          d
+          defect
         ),
         Effect.succeed(firstHit.formatted_address.replace(/^[\d\s]*/, ''))
       )
@@ -142,7 +139,7 @@ const getAddress = ({
   )
 
 export const googleGeocode =
-  (apiKey: string) =>
+  (apiKey: Redacted.Redacted<string>) =>
   ({
     latitude,
     longitude,
@@ -153,36 +150,54 @@ export const googleGeocode =
   > => {
     return Effect.gen(function* (_) {
       const response = yield* _(
-        Effect.tryPromise(async () => {
-          return await axios.get<GoogleGeocodeResponse>(
-            'https://maps.googleapis.com/maps/api/geocode/json',
-            {
-              params: {
-                key: apiKey,
-                language: lang,
-                result_type: 'locality|political|street_address',
-                latlng: `${latitude},${longitude}`,
-              },
-            }
-          )
-        }),
-        Effect.catchAll((e) => {
-          return Effect.zipRight(
-            Effect.logWarning('Error while requesting geocode', e),
-            new UnexpectedServerError({
-              message: 'ExternalApi' as const,
-              status: 500,
-            })
-          )
+        Effect.tryPromise({
+          try: async () =>
+            await axios.get<unknown>(
+              'https://maps.googleapis.com/maps/api/geocode/json',
+              {
+                params: {
+                  key: Redacted.value(apiKey),
+                  language: lang,
+                  result_type: 'locality|political|street_address',
+                  latlng: `${latitude},${longitude}`,
+                },
+              }
+            ),
+          catch: (error) =>
+            unexpectedGoogleMapsError({
+              operation: 'geocode',
+              category: 'RequestFailed',
+              error,
+              request: {latitude, longitude, lang},
+            }),
         })
       )
 
-      const firstHit = response.data.results.at(0)
+      const responseEnvelope = yield* _(
+        Schema.decodeUnknown(GoogleResponseEnvelope)(response.data)
+      )
+      if (responseEnvelope.status === 'ZERO_RESULTS') {
+        return yield* _(new LocationNotFoundError({status: 404}))
+      }
+      if (responseEnvelope.status !== 'OK') {
+        return yield* _(
+          unexpectedGoogleMapsError({
+            operation: 'geocode',
+            category: 'ResponseRejected',
+            request: {latitude, longitude, lang},
+            response: response.data,
+            responseStatus: responseEnvelope.status,
+          })
+        )
+      }
+
+      const responseData = yield* _(
+        Schema.decodeUnknown(GoogleGeocodeResponse)(response.data)
+      )
+      const firstHit = responseData.results.at(0)
       if (!firstHit) return yield* _(new LocationNotFoundError({status: 404}))
 
-      const address = yield* _(
-        getAddress({responseData: response.data, firstHit})
-      )
+      const address = yield* _(getAddress({responseData, firstHit}))
 
       return yield* _(
         Schema.decode(GetGeocodedCoordinatesResponse)({
@@ -204,23 +219,14 @@ export const googleGeocode =
         })
       )
     }).pipe(
-      Effect.catchTag('ParseError', (e) =>
-        Effect.zipRight(
-          Effect.logWarning('Unexpected response from google api', e),
+      Effect.catchTag(
+        'ParseError',
+        (error) =>
           new UnexpectedServerError({
             status: 500,
-            message: 'ExternalApi' as const,
+            message: 'Google Maps geocode response failed validation',
+            cause: error,
           })
-        )
-      ),
-      Effect.catchAllDefect((defect) => {
-        return Effect.zipRight(
-          Effect.logWarning('Error defect while getting geocode', defect),
-          new UnexpectedServerError({
-            message: 'ExternalApi' as const,
-            status: 500,
-          })
-        )
-      })
+      )
     )
   }

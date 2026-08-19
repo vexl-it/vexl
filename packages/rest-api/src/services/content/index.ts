@@ -82,6 +82,7 @@ export function api({
         client.NewsAndAnnouncements.getNewsAndAnnouncements({
           headers: commonHeaders,
         }),
+      getMapStyles: () => client.Map.getMapStyles({}),
       createVexlProductNotification: (
         adminToken: string,
         request: CreateVexlProductNotificationRequest

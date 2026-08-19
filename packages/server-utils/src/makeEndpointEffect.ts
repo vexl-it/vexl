@@ -38,12 +38,6 @@ export const makeEndpointEffect = <A, R, I>(
   I
 > =>
   e.pipe(
-    Effect.catchAllDefect((e) =>
-      Effect.zipRight(
-        Effect.logFatal('Critical error on endpoint', e),
-        Effect.fail(UnexpectedServerError.blindError())
-      )
-    ),
     Effect.catchAll(
       (
         e
@@ -89,5 +83,11 @@ export const makeEndpointEffect = <A, R, I>(
           })
         )
       }
+    ),
+    Effect.catchAllDefect((e) =>
+      Effect.zipRight(
+        Effect.logFatal('Critical error on endpoint', e),
+        Effect.fail(UnexpectedServerError.blindError())
+      )
     )
   )

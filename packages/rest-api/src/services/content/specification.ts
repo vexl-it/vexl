@@ -33,6 +33,7 @@ import {
   InvalidContentAdminTokenError,
   InvalidTokenError,
   InvoiceNotFoundError,
+  MapStylesResponse,
   NewsAndAnnouncementsResponse,
   UpdateInvoiceWebhookError,
   VexlProductNotificationResponse,
@@ -77,6 +78,15 @@ export const NewsAndAnonouncementsEndpoint = HttpApiEndpoint.get(
 const NewsAndAnnouncementsApiGroup = HttpApiGroup.make(
   'NewsAndAnnouncements'
 ).add(NewsAndAnonouncementsEndpoint)
+
+export const GetMapStylesEndpoint = HttpApiEndpoint.get(
+  'getMapStyles',
+  '/content/map-styles'
+)
+  .addSuccess(MapStylesResponse)
+  .annotate(MaxExpectedDailyCall, 500)
+
+const MapApiGroup = HttpApiGroup.make('Map').add(GetMapStylesEndpoint)
 
 export const CreateVexlProductNotificationEndpoint = HttpApiEndpoint.post(
   'createVexlProductNotification',
@@ -156,6 +166,7 @@ export const ContentApiSpecification = HttpApi.make('Content API')
   .middleware(RateLimitingMiddleware)
   .add(CmsContentApiGroup)
   .add(NewsAndAnnouncementsApiGroup)
+  .add(MapApiGroup)
   .add(VexlProductNotificationsApiGroup)
   .add(DonationsApiGroup)
   .addError(NotFoundError, {status: 404})

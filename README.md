@@ -10,11 +10,9 @@ Vexl is a mobile app giving its users a simple, accessible and safe way to trade
 
 The app lives in `apps/mobile` directory. All following instructions should be ran in that repository.
 
-To run the app, you need to setup env file. Create `.env` file with following content (make sure to provide google maps api keys as described [here](https://developers.google.com/maps/documentation/javascript/get-api-key)):
+To run the app, you need to setup env file. Create `.env` file with following content (maps need no API key — tiles come from OpenFreeMap):
 
 ```
-ANDROID_MAP_API_KEY=
-IOS_MAP_API_KEY=
 SENTRY_DISABLE_AUTO_UPLOAD=true
 ENV_PRESET=prod
 ```

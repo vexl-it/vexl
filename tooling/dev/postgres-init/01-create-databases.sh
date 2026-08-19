@@ -2,7 +2,8 @@
 # Creates one database per service (spec §5.1). Runs only when the Postgres data
 # volume is empty (first boot). Keep this list in sync with `dbNames` in
 # dev.config.ts: user, contact, offer, chat, content, feedback, metrics,
-# notification, backoffice.
+# notification, backoffice. (The places/geocoding DB lives on its own
+# geocoding-postgres container, not here.)
 set -e
 
 DATABASES="user contact offer chat content feedback metrics notification backoffice"

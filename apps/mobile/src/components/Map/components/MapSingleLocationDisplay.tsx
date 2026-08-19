@@ -1,15 +1,12 @@
-import {Stack, useTheme, useVexlTheme} from '@vexl-next/ui'
+import {Camera, Marker} from '@maplibre/maplibre-react-native'
+import {Stack} from '@vexl-next/ui'
 import React, {useMemo} from 'react'
-import {StyleSheet} from 'react-native'
-import MapView, {
-  Marker,
-  PROVIDER_GOOGLE,
-  type EdgePadding,
-} from 'react-native-maps'
+import {Image} from 'react-native'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {type MapValue} from '../brands'
-import {getMapTheme} from '../utils/mapStyle'
-import mapValueToRegion from '../utils/mapValueToRegion'
+import {type EdgePadding} from '../types'
+import {mapValueToBounds} from '../utils/mapLibreRegion'
+import VexlMap from './VexlMap'
 
 const markerImage = require('../img/pin.png')
 
@@ -22,13 +19,6 @@ type Props = React.ComponentProps<typeof Stack> & {
   interactive?: boolean
 }
 
-const styles = StyleSheet.create({
-  map: {
-    width: '100%',
-    height: '100%',
-  },
-})
-
 export default function MapSingleLocationDisplay({
   topChildren,
   middleChildren,
@@ -39,9 +29,7 @@ export default function MapSingleLocationDisplay({
   ...restProps
 }: Props): React.ReactElement {
   const safeAreaInsets = useSafeAreaInsets()
-  const {resolvedTheme} = useVexlTheme()
-  const theme = useTheme()
-  const backgroundPrimary = theme.backgroundPrimary.get()
+  const bounds = useMemo(() => mapValueToBounds(value), [value])
 
   return (
     <Stack
@@ -49,21 +37,19 @@ export default function MapSingleLocationDisplay({
       {...restProps}
       backgroundColor="$backgroundPrimary"
     >
-      <MapView
-        mapPadding={mapPadding}
-        style={[styles.map, {backgroundColor: backgroundPrimary}]}
-        toolbarEnabled={false}
-        scrollEnabled={interactive}
-        zoomEnabled={interactive}
-        zoomTapEnabled={interactive}
-        rotateEnabled={interactive}
-        pitchEnabled={interactive}
-        provider={PROVIDER_GOOGLE}
-        region={useMemo(() => mapValueToRegion(value), [value])}
-        customMapStyle={getMapTheme(resolvedTheme)}
+      <VexlMap
+        contentInset={mapPadding}
+        dragPan={interactive}
+        touchZoom={interactive}
+        doubleTapZoom={interactive}
+        doubleTapHoldZoom={interactive}
+        touchRotate={interactive}
       >
-        <Marker image={markerImage} coordinate={value} />
-      </MapView>
+        <Camera bounds={bounds} />
+        <Marker anchor="bottom" lngLat={[value.longitude, value.latitude]}>
+          <Image source={markerImage} />
+        </Marker>
+      </VexlMap>
       {middleChildren ? (
         <Stack
           pointerEvents="none"

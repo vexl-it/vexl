@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "types": ["node", "jest"],
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "rootDir": ".",
+    "outDir": "./dist",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "noImplicitAny": true,
+    "skipLibCheck": true,
+    "checkJs": false,
+    "allowJs": true
+  },
+  "lib": ["esnext"]
+}

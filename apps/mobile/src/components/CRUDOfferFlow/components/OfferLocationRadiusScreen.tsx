@@ -136,5 +136,5 @@ export default function OfferLocationRadiusScreen(): React.ReactElement {
     ]
   )
 
-  return <LocationRadiusPicker onConfirm={handleConfirm} />
+  return <LocationRadiusPicker variant="offer" onConfirm={handleConfirm} />
 }

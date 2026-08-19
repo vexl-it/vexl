@@ -10,7 +10,7 @@
  * Run: `pnpm dev:backend [options]` — see parseArgs() for flags.
  */
 import {Array, pipe} from 'effect'
-import {spawn, type ChildProcess} from 'node:child_process'
+import {spawn, spawnSync, type ChildProcess} from 'node:child_process'
 import {join} from 'node:path'
 import devConfig from '../../dev.config'
 import * as docker from './docker'
@@ -28,11 +28,14 @@ import {
   ALL_APPS,
   buildFinalEnv,
   findApp,
+  geocodingDbEnv,
   SERVICES,
   WEB_APPS,
   type EnvContext,
   type RunnableApp,
 } from './services'
+
+type PlacesSeedMode = 'auto' | 'fixture' | 'off'
 
 interface CliOptions {
   readonly only: readonly string[]
@@ -42,6 +45,7 @@ interface CliOptions {
   readonly watch: boolean
   readonly freshDb: boolean
   readonly detachInfra: boolean
+  readonly seedPlaces: PlacesSeedMode
 }
 
 function parseArgs(argv: readonly string[]): CliOptions {
@@ -52,6 +56,7 @@ function parseArgs(argv: readonly string[]): CliOptions {
   let watch = false
   let freshDb = false
   let detachInfra = false
+  let seedPlaces: PlacesSeedMode = 'auto'
 
   const splitList = (value: string): string[] =>
     pipe(
@@ -86,6 +91,13 @@ function parseArgs(argv: readonly string[]): CliOptions {
       freshDb = true
     } else if (arg === '--detach-infra') {
       detachInfra = true
+    } else if (arg === '--seed-places') {
+      i += 1
+      const value = nextListValue(i)
+      if (value !== 'auto' && value !== 'fixture' && value !== 'off') {
+        throw new Error(`--seed-places must be auto|fixture|off, got: ${value}`)
+      }
+      seedPlaces = value
     } else if (arg === '--help' || arg === '-h') {
       printHelp()
       process.exit(0)
@@ -96,7 +108,16 @@ function parseArgs(argv: readonly string[]): CliOptions {
     }
   }
 
-  return {only, skip, web, observability, watch, freshDb, detachInfra}
+  return {
+    only,
+    skip,
+    web,
+    observability,
+    watch,
+    freshDb,
+    detachInfra,
+    seedPlaces,
+  }
 }
 
 function printHelp(): void {
@@ -111,6 +132,12 @@ function printHelp(): void {
       '  --watch             hot-reload services via tsx watch (default off)',
       '  --fresh-db          recreate databases from scratch (docker compose down -v)',
       '  --detach-infra      leave docker infra running on exit',
+      '  --seed-places <m>   places DB behaviour when the table is empty (the',
+      '                      committed Czechia dump normally restores when the',
+      '                      geocoding volume is first created; default auto:',
+      '                      leave empty and point at --fresh-db, fixture =',
+      '                      insert the small city fixture, off = ensure',
+      '                      DB/schema only)',
     ].join('\n')
   )
 }
@@ -168,6 +195,7 @@ async function validatePorts(
 ): Promise<void> {
   const infraPortKeys = [
     'postgres',
+    'geocodingPostgres',
     'redis',
     'minioApi',
     'minioConsole',
@@ -309,6 +337,39 @@ function killTree(child: ChildProcess, signal: NodeJS.Signals): void {
   }
 }
 
+// --- geocoding DB seeding ----------------------------------------------------
+
+/**
+ * Runs the idempotent geocoding-db seeder (fast no-op when the places table
+ * already has data — normally the case, since the committed Czechia dump is
+ * restored by the Postgres image when the geocoding volume is first created).
+ * It must run regardless of mode: it also creates the `geocoding` DB + schema
+ * on geocoding-postgres volumes predating them, without which location-service
+ * crash-loops.
+ */
+function seedGeocodingDb(ctx: EnvContext, mode: PlacesSeedMode): void {
+  console.log(
+    mode === 'off'
+      ? 'Ensuring the geocoding DB exists (geocoding-db)...'
+      : 'Ensuring the geocoding DB is seeded (geocoding-db)...'
+  )
+  const result = spawnSync(
+    join(repoRoot, 'node_modules', '.bin', 'tsx'),
+    ['scripts/seedDev.ts', '--mode', mode],
+    {
+      cwd: join(repoRoot, 'tools/location-db-updater'),
+      stdio: 'inherit',
+      env: {...process.env, ...geocodingDbEnv(ctx)},
+    }
+  )
+  if (result.status !== 0) {
+    console.warn(
+      'Places seeding failed — location search will return no results until ' +
+        'seeded (see tools/location-db-updater/README.md). Continuing.'
+    )
+  }
+}
+
 // --- summary ---------------------------------------------------------------
 
 interface SummaryRow {
@@ -400,6 +461,15 @@ async function main(): Promise<void> {
   console.log('Initializing MinIO bucket...')
   if (!docker.runMinioInit(dockerEnv)) {
     console.warn('MinIO init returned non-zero (bucket may already exist).')
+  }
+
+  if (
+    pipe(
+      apps,
+      Array.some((app) => app.name === 'location-service')
+    )
+  ) {
+    seedGeocodingDb(ctx, options.seedPlaces)
   }
 
   const supervised: Supervised[] = []

@@ -6,8 +6,9 @@ import {styled, useTheme} from 'tamagui'
 import {Checkmark} from '../icons/Checkmark'
 import {XmarkCancelClose} from '../icons/XmarkCancelClose'
 import type {IconProps} from '../icons/types'
-import {Input, Stack, XStack} from '../primitives'
+import {Input, Stack, XStack, YStack} from '../primitives'
 import {Button} from './Button'
+import {LengthCounter} from './LengthCounter'
 
 const TextFieldFrame = styled(XStack, {
   name: 'TextField',
@@ -92,6 +93,7 @@ export interface TextFieldProps extends Omit<
   readonly valueAtom: WritableAtom<string, [SetStateAction<string>], void>
   readonly placeholder?: string
   readonly autoFocus?: boolean
+  readonly maxLength?: number
   readonly backgroundColor?: TextFieldFrameProps['backgroundColor']
   readonly showClear?: boolean
   readonly onCheckmarkPress?: () => void
@@ -105,6 +107,7 @@ export function TextField({
   valueAtom,
   placeholder = 'Input',
   autoFocus,
+  maxLength,
   backgroundColor = '$backgroundSecondary',
   showClear,
   onCheckmarkPress,
@@ -135,7 +138,7 @@ export function TextField({
   const isCompact = buttonLabel != null && onButtonPress != null
   const showBorder = hasCheckmark && isFocused
 
-  return (
+  const field = (
     <TextFieldFrame
       layout={isCompact ? 'compact' : 'standard'}
       backgroundColor={backgroundColor}
@@ -149,6 +152,7 @@ export function TextField({
         placeholderTextColor={theme.foregroundTertiary.get()}
         selectionColor={theme.accentYellowPrimary.get()}
         autoFocus={autoFocus}
+        maxLength={maxLength}
         onFocus={handleFocus}
         onBlur={handleBlur}
       />
@@ -170,5 +174,14 @@ export function TextField({
         </IconPressable>
       ) : null}
     </TextFieldFrame>
+  )
+
+  if (maxLength === undefined) return field
+
+  return (
+    <YStack gap="$2">
+      {field}
+      <LengthCounter length={text.length} maxLength={maxLength} />
+    </YStack>
   )
 }

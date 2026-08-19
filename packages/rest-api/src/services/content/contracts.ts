@@ -144,6 +144,15 @@ export const NewsAndAnnouncementsResponse = Schema.Struct({
 export type NewsAndAnnouncementsResponse =
   typeof NewsAndAnnouncementsResponse.Type
 
+export const MapStyleJson = Schema.String.pipe(Schema.brand('MapStyleJson'))
+export type MapStyleJson = typeof MapStyleJson.Type
+
+export const MapStylesResponse = Schema.Struct({
+  light: MapStyleJson,
+  dark: MapStyleJson,
+})
+export type MapStylesResponse = typeof MapStylesResponse.Type
+
 export class CreateInvoiceError extends Schema.TaggedError<CreateInvoiceError>(
   'CreateInvoiceError'
 )('CreateInvoiceError', {

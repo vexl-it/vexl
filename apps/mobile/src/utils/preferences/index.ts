@@ -1,3 +1,5 @@
+import {getLocales} from 'expo-localization'
+import {atom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {atomWithParsedMmkvStorage} from '../atomUtils/atomWithParsedMmkvStorage'
 import {currencies} from '../localization/currency'
@@ -65,6 +67,15 @@ export const isDeveloperAtom = focusAtom(preferencesAtom, (p) =>
 
 export const currentAppLanguageAtom = focusAtom(preferencesAtom, (o) =>
   o.prop('appLanguage')
+)
+
+/**
+ * The language the app UI is actually rendered in: the in-app language
+ * preference, or the device locale while the user has not picked one.
+ */
+export const appLanguageAtom = atom(
+  (get) =>
+    get(currentAppLanguageAtom) ?? getLocales().at(0)?.languageTag ?? 'en'
 )
 
 export const appThemeModeAtom = focusAtom(preferencesAtom, (o) =>

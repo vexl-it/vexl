@@ -128,3 +128,6 @@ jobs:
             || echo "::warning::set-commits failed — check that the GitHub repo is linked in Sentry (Settings -> Integrations -> GitHub)"
           pnpm exec sentry-cli releases finalize $PROJECTS "$VERSION"
           pnpm exec sentry-cli releases deploys "$VERSION" new -e "$SENTRY_ENV" || true
+
+  geocoding-refresh:
+    uses: ./.github/workflows/build-geocoding-refresh.yaml

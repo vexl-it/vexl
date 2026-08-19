@@ -1,6 +1,12 @@
 import {useNavigation} from '@react-navigation/native'
 import {type LocationSuggestion} from '@vexl-next/rest-api/src/services/location/contracts'
-import {NavigationBar, Screen, SearchBar, Typography} from '@vexl-next/ui'
+import {
+  Button,
+  NavigationBar,
+  Screen,
+  SearchBar,
+  Typography,
+} from '@vexl-next/ui'
 import {ChevronLeft, PinGeolocation} from '@vexl-next/ui/src/icons'
 import {Stack, XStack, YStack} from '@vexl-next/ui/src/primitives'
 import {ScopeProvider, useMolecule} from 'bunshi/dist/react'
@@ -12,6 +18,7 @@ import {debounce, useTheme} from 'tamagui'
 import {type RootStackParamsList} from '../../navigationTypes'
 import atomKeyExtractor from '../../utils/atomUtils/atomKeyExtractor'
 import {useTranslation} from '../../utils/localization/I18nProvider'
+import {useKeyboardAwareFooterListPadding} from '../../utils/useKeyboardAwareFooterListPadding'
 import {
   LocationSearchMolecule,
   LocationSearchScope,
@@ -31,17 +38,25 @@ type Props =
 
 function LocationSearchContent({
   onLocationSelect,
+  onPickOnMap,
 }: {
   readonly onLocationSelect: (locationSuggestion: LocationSuggestion) => void
+  readonly onPickOnMap: () => void
 }): React.JSX.Element {
   const {t} = useTranslation()
-  const {searchQueryAtom, searchResultsAtomsAtom, isLoadingAtom} = useMolecule(
-    LocationSearchMolecule
-  )
+  const {searchQueryAtom, searchResultsAtomsAtom, isLoadingAtom, errorAtom} =
+    useMolecule(LocationSearchMolecule)
 
   const searchResultsAtoms = useAtomValue(searchResultsAtomsAtom)
   const isLoading = useAtomValue(isLoadingAtom)
+  const error = useAtomValue(errorAtom)
+  const currentQuery = useAtomValue(searchQueryAtom)
   const setSearchQuery = useSetAtom(searchQueryAtom)
+  const listPaddingBottom = useKeyboardAwareFooterListPadding()
+
+  const handleRetry = useCallback(() => {
+    setSearchQuery(currentQuery)
+  }, [currentQuery, setSearchQuery])
 
   const setSearchQueryRef = useRef(setSearchQuery)
   setSearchQueryRef.current = setSearchQuery
@@ -92,6 +107,39 @@ function LocationSearchContent({
         >
           {t('common.loading')}...
         </Typography>
+      ) : error != null ? (
+        <YStack
+          alignItems="center"
+          gap="$5"
+          paddingHorizontal="$5"
+          paddingTop="$10"
+        >
+          <Typography
+            variant="paragraph"
+            color="$foregroundSecondary"
+            textAlign="center"
+          >
+            {t('offerForm.location.searchError')}
+          </Typography>
+          <XStack gap="$3" alignSelf="stretch">
+            <Button
+              flex={1}
+              variant="primary"
+              size="medium"
+              onPress={handleRetry}
+            >
+              {t('common.tryAgain')}
+            </Button>
+            <Button
+              flex={1}
+              variant="secondary"
+              size="medium"
+              onPress={onPickOnMap}
+            >
+              {t('offerForm.location.pickOnMap')}
+            </Button>
+          </XStack>
+        </YStack>
       ) : searchResultsAtoms.length === 0 ? (
         <Typography
           variant="paragraph"
@@ -108,6 +156,7 @@ function LocationSearchContent({
           data={searchResultsAtoms}
           renderItem={renderItem}
           keyboardShouldPersistTaps="handled"
+          contentContainerStyle={{paddingBottom: listPaddingBottom}}
         />
       )}
     </YStack>
@@ -155,22 +204,36 @@ function LocationResultItem({
 export default function LocationSearchPicker(props: Props): React.ReactElement {
   const {t} = useTranslation()
   const navigation = useNavigation()
-  const {selectedMapValueAtom} = useMolecule(LocationPickerMolecule)
+  const {selectedMapValueAtom, isLocationServiceDownAtom} = useMolecule(
+    LocationPickerMolecule
+  )
   const setSelectedMapValue = useSetAtom(selectedMapValueAtom)
+  const setIsLocationServiceDown = useSetAtom(isLocationServiceDownAtom)
 
   const [sessionId] = useState(() => newLocationSessionId())
 
+  const navigateToRadius = useCallback(() => {
+    if (props.radiusRouteName === 'OfferLocationRadius') {
+      navigation.navigate('OfferLocationRadius', props.radiusRouteParams)
+    } else {
+      navigation.navigate('FilterLocationRadius')
+    }
+  }, [navigation, props])
+
   const handleLocationSelect = useCallback(
     (locationSuggestion: LocationSuggestion) => {
+      setIsLocationServiceDown(false)
       setSelectedMapValue(locationSuggestionToMapValue(locationSuggestion))
-      if (props.radiusRouteName === 'OfferLocationRadius') {
-        navigation.navigate('OfferLocationRadius', props.radiusRouteParams)
-      } else {
-        navigation.navigate('FilterLocationRadius')
-      }
+      navigateToRadius()
     },
-    [setSelectedMapValue, navigation, props]
+    [navigateToRadius, setIsLocationServiceDown, setSelectedMapValue]
   )
+
+  const handlePickOnMapFallback = useCallback(() => {
+    setSelectedMapValue(null)
+    setIsLocationServiceDown(true)
+    navigateToRadius()
+  }, [navigateToRadius, setIsLocationServiceDown, setSelectedMapValue])
 
   return (
     <ScopeProvider scope={LocationSearchScope} value={sessionId}>
@@ -188,7 +251,10 @@ export default function LocationSearchPicker(props: Props): React.ReactElement {
           />
         }
       >
-        <LocationSearchContent onLocationSelect={handleLocationSelect} />
+        <LocationSearchContent
+          onLocationSelect={handleLocationSelect}
+          onPickOnMap={handlePickOnMapFallback}
+        />
       </Screen>
     </ScopeProvider>
   )

@@ -18,6 +18,10 @@ import './src/utils/notifications/notificationReceivedHandler'
 import './src/utils/setupCryptoImplementation'
 // order matters
 import './src/utils/backgroundTask'
+// Order matters: replaces MapLibre's app-identifying default User-Agent. The
+// native registration is dispatched asynchronously on Android, so it has to be
+// requested at startup rather than when a map first mounts.
+import './src/components/Map/utils/mapRequestUserAgent'
 // INITIAL SETUP DONE
 
 import * as Sentry from '@sentry/react-native'

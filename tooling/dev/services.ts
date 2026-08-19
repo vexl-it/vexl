@@ -19,6 +19,8 @@ export type ServiceKind = 'service' | 'web'
 
 export interface ServiceNeeds {
   readonly db?: string
+  /** The standalone geocoding Postgres (geocoding-postgres container). */
+  readonly geocodingDb?: boolean
   readonly redis: boolean
   readonly s3: boolean
 }
@@ -70,7 +72,10 @@ const serviceNameOf = (name: string): string =>
 const httpUrl = (ctx: EnvContext, portKey: string): string =>
   `http://${ctx.cfg.infra.host}:${ctx.ports[portKey]}`
 
-const dbEnv = (ctx: EnvContext, dbName: string): Record<string, string> => ({
+export const dbEnv = (
+  ctx: EnvContext,
+  dbName: string
+): Record<string, string> => ({
   DB_URL: `postgresql://${ctx.cfg.infra.host}:${ctx.ports.postgres}/${dbName}`,
   DB_USER: ctx.cfg.infra.postgres.user,
   DB_PASSWORD: ctx.cfg.infra.postgres.password,
@@ -78,6 +83,12 @@ const dbEnv = (ctx: EnvContext, dbName: string): Record<string, string> => ({
   DB_HOST: ctx.cfg.infra.host,
   DB_PORT: String(ctx.ports.postgres),
   DB_NAME: dbName,
+})
+
+export const geocodingDbEnv = (ctx: EnvContext): Record<string, string> => ({
+  GEOCODING_DB_URL: `postgresql://${ctx.cfg.infra.host}:${ctx.ports.geocodingPostgres}/${ctx.cfg.geocodingDbName}`,
+  GEOCODING_DB_USER: ctx.cfg.infra.postgres.user,
+  GEOCODING_DB_PASSWORD: ctx.cfg.infra.postgres.password,
 })
 
 const s3Env = (ctx: EnvContext): Record<string, string> => ({
@@ -112,6 +123,7 @@ const commonServiceEnv = (
   GRAFANA_TEMPO_DATASOURCE_UID: 'vexl-local-traces',
   ...ctx.cfg.devCryptoKeys,
   ...(app.needs.db !== undefined ? dbEnv(ctx, app.needs.db) : {}),
+  ...(app.needs.geocodingDb === true ? geocodingDbEnv(ctx) : {}),
 })
 
 const tsxService = (entry: string): RunSpec => ({type: 'tsx', entry})
@@ -198,16 +210,12 @@ export const SERVICES: readonly RunnableApp[] = [
     kind: 'service',
     portKey: 'locationService',
     healthPortKey: 'locationService',
-    needs: {redis: false, s3: false},
+    needs: {geocodingDb: true, redis: false, s3: false},
     run: tsxService('src/index.ts'),
     secretKeys: ['GOOGLE_PLACES_API_KEY'],
-    buildEnv: (ctx) => ({
+    buildEnv: () => ({
       // Optional feature; real key via .env.local enables autocomplete.
       GOOGLE_PLACES_API_KEY: '',
-      BTC_EXCHANGE_RATE_URL_TO_REDIRECT_TO: httpUrl(
-        ctx,
-        'btcExchangeRateService'
-      ),
     }),
   },
   {

@@ -5,14 +5,7 @@ import {setDummyAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTesting
 import {Effect, Schema} from 'effect'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
 import {queryGeocodeMock} from '../utils/mockedGoogleMapLayer'
-import {
-  disposeRuntime,
-  runPromiseInMockedEnvironment,
-  startRuntime,
-} from '../utils/runPromiseInMockedEnvironment'
-
-beforeAll(startRuntime)
-afterAll(disposeRuntime)
+import {runPromiseInMockedEnvironment} from '../utils/runPromiseInMockedEnvironment'
 
 describe('geocode', () => {
   it('Returns proper coordinates', async () => {

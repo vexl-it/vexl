@@ -1,7 +1,6 @@
 import {type OfferId} from '@vexl-next/domain/src/general/offers'
 import {Array, pipe} from 'effect'
 import {atom} from 'jotai'
-import {type EdgePadding} from 'react-native-maps'
 import {locationFilterAtom} from '../../state/marketplace/atoms/filterAtoms'
 import {filteredOffersForMapAtom} from '../../state/marketplace/atoms/filteredOffers'
 import {
@@ -14,14 +13,9 @@ import {
   fitToCoordinatesActionAtom,
 } from '../../state/marketplace/atoms/map/mapViewAtoms'
 import {mapRegionAtom} from '../../state/marketplace/atoms/mapRegionAtom'
+import {type EdgePadding} from '../Map/types'
 import europeRegion from '../Map/utils/europeRegion'
 import {createMapPointsForOffers} from './mapPoints'
-
-export {
-  createMapPointsForOffers,
-  offerHasVisibleMapLocation,
-  type OfferWithMapLocations,
-} from './mapPoints'
 
 export const mapViewSelectedOfferIdAtom = focusedOfferIdAtom
 export const mapViewSelectedOfferAtom = focusedOfferAtom

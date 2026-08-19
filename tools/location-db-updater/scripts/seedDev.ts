@@ -3,16 +3,18 @@
  * before starting the services; it can also be run standalone via
  * `pnpm seed:dev-geocoding` (env from .env).
  *
- * Ensures the database and schema exist, then — only when the places table is
- * EMPTY — seeds it:
+ * The actual dev dataset (a Czechia dump) is restored by the Postgres image
+ * itself from tooling/dev/geocoding-postgres-init when the geocoding-postgres
+ * volume is FIRST created — this script never downloads or ingests anything.
+ * It ensures the database and schema exist (Effect migrations, a no-op on top
+ * of the dump), then:
  *
- *   --mode auto (default)  full OSM ingest of Czechia via refresh.sh when
- *                          osmium is installed (downloads cached under
- *                          ~/.cache/vexl/osm, so re-seeding after --fresh-db
- *                          doesn't re-download), then tops up with the
+ *   --mode auto (default)  if the places table is empty (volume predates the
+ *                          committed dump — the image only restores it on an
+ *                          empty volume), prints how to get the dump loaded
+ *                          and leaves the table alone.
+ *   --mode fixture         if the places table is empty, inserts the committed
  *                          SK/CZ-cities + European-capitals fixture.
- *                          Without osmium: fixture only.
- *   --mode fixture         fixture only (no external tools, no downloads).
  *   --mode off             only ensure the database and schema exist — never
  *                          seeds data (the service would otherwise crash-loop
  *                          on Postgres volumes predating the geocoding DB).
@@ -32,30 +34,15 @@ import {
 } from '@vexl-next/geocoding-db/src/common'
 import {GeocodingDbLayer} from '@vexl-next/geocoding-db/src/layer'
 import {Effect, Layer} from 'effect'
-import {spawnSync} from 'node:child_process'
-import {homedir} from 'node:os'
-import {join} from 'node:path'
-import {fileURLToPath} from 'node:url'
 import pg from 'pg'
 import {devSeedPlaces} from './devSeedData'
 import {normNameRows} from './ingestParsing'
 
-const INGEST_REGIONS = ['europe/czech-republic']
-/** Dev doesn't need fresh map data — reuse cached downloads for two weeks. */
-const CACHE_FRESH_MINUTES = 14 * 24 * 60
-
-const defaultDataDir = join(
-  process.env.XDG_CACHE_HOME ?? join(homedir(), '.cache'),
-  'vexl',
-  'osm'
-)
-
 type SeedMode = 'auto' | 'fixture' | 'off'
 
-const parseArgs = (): {mode: SeedMode; dataDir: string} => {
+const parseArgs = (): {mode: SeedMode} => {
   const args = process.argv.slice(2)
   let mode: SeedMode = 'auto'
-  let dataDir = defaultDataDir
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--mode') {
       const value = args[i + 1]
@@ -65,23 +52,13 @@ const parseArgs = (): {mode: SeedMode; dataDir: string} => {
         process.exit(1)
       }
       mode = value
-    } else if (args[i] === '--data-dir') {
-      const value = args[i + 1]
-      i++
-      if (value === undefined) {
-        console.error('--data-dir needs a value')
-        process.exit(1)
-      }
-      dataDir = value
     } else {
       console.error(`Unknown argument: ${args[i]}`)
-      console.error(
-        'Usage: seedDev.ts [--mode auto|fixture|off] [--data-dir <dir>]'
-      )
+      console.error('Usage: seedDev.ts [--mode auto|fixture|off]')
       process.exit(1)
     }
   }
-  return {mode, dataDir}
+  return {mode}
 }
 
 const connected = async (client: pg.Client): Promise<pg.Client> => {
@@ -148,30 +125,9 @@ const applyMigrations = async (): Promise<void> => {
   )
 }
 
-const osmiumAvailable = (): boolean =>
-  spawnSync('osmium', ['--version'], {stdio: 'ignore'}).status === 0
-
-const runOsmIngest = (dataDir: string): boolean => {
-  const script = fileURLToPath(new URL('refresh.sh', import.meta.url))
-  const regionArgs = INGEST_REGIONS.flatMap((region) => ['-r', region])
-  // -c /dev/null: never load the package .env — the operator's copy may hold
-  // prod credentials / the Slack webhook; dev-backend injects GEOCODING_DB_*
-  // via env, which always wins anyway.
-  const result = spawnSync(
-    script,
-    ['-c', '/dev/null', '-d', dataDir, ...regionArgs],
-    {
-      stdio: 'inherit',
-      env: {...process.env, FRESH_MINUTES: String(CACHE_FRESH_MINUTES)},
-    }
-  )
-  return result.status === 0
-}
-
 /**
  * Inserts the fixture with negative ids (OSM ids are always positive), and
- * skips entries already present as a same-country settlement — so after a real
- * OSM ingest only the capitals outside SK/CZ are added on top.
+ * skips entries already present as a same-country settlement.
  *
  * Runs in a single transaction so an interrupted seed leaves the table in its
  * pre-fixture state (a partial insert would trip the "already seeded" check on
@@ -242,7 +198,7 @@ const insertFixtureRows = async (client: pg.Client): Promise<number> => {
 }
 
 const main = async (): Promise<void> => {
-  const {mode, dataDir} = parseArgs()
+  const {mode} = parseArgs()
   const client = await connectCreatingDb()
   await applyMigrations()
 
@@ -270,40 +226,22 @@ const main = async (): Promise<void> => {
   }
 
   if (mode === 'auto') {
-    if (osmiumAvailable()) {
-      console.log(
-        `Geocoding DB is empty — ingesting OSM data for ${INGEST_REGIONS.join(', ')} (cache: ${dataDir}).`
-      )
-      console.log(
-        'First run downloads ~800 MB and takes a few minutes; later re-seeds reuse the cache.'
-      )
-      if (!runOsmIngest(dataDir)) {
-        console.warn(
-          'OSM ingest failed — falling back to the fixture dataset only.'
-        )
-      }
-    } else {
-      console.warn(
-        'osmium not found (`brew install osmium-tool`) — seeding the fixture dataset only.'
-      )
-    }
+    console.warn(
+      'Geocoding places table is empty. The committed Czechia dump ' +
+        '(tooling/dev/geocoding-postgres-init) is only restored when the ' +
+        'geocoding-postgres volume is first created — this volume predates ' +
+        'it. Run `pnpm dev:backend --fresh-db` to recreate the volume and ' +
+        'get the dump, or `--seed-places fixture` for the small city ' +
+        'fixture. Location search returns no results until then.'
+    )
+    await client.end()
+    return
   }
 
   const inserted = await insertFixture(client)
   console.log(
     `Inserted ${inserted} fixture places (SK/CZ cities + European capitals).`
   )
-
-  const byType = (
-    await client.query<{placeType: string; count: string}>(
-      `SELECT place_type AS "placeType", count(*) AS count
-       FROM places
-       GROUP BY place_type
-       ORDER BY count(*) DESC`
-    )
-  ).rows
-  console.log('Geocoding DB seeded:')
-  for (const row of byType) console.log(`  ${row.placeType}: ${row.count}`)
 
   await client.end()
 }

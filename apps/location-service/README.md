@@ -45,8 +45,9 @@ without them the service crash-loops at startup.
 
 ## Local development
 
-`pnpm dev:backend` starts the dedicated geocoding Postgres container and
-seeds it automatically via `tools/location-db-updater` — see that package's
+`pnpm dev:backend` starts the dedicated geocoding Postgres container, which
+seeds itself from a committed Czechia dump on first volume create (see
+`tooling/dev/geocoding-postgres-init/`) — see the `tools/location-db-updater`
 README for seeding modes (`--seed-places auto|fixture|off`) and re-seeding.
 
 ## Tests

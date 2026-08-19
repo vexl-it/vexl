@@ -42,8 +42,17 @@ services:
       - "${GEOCODING_POSTGRES_PORT:-5433}:5432"
     volumes:
       - geocoding_postgres_data:/var/lib/postgresql/data
+      # Czechia dataset dump, restored automatically on an EMPTY volume only.
+      - ./tooling/dev/geocoding-postgres-init:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d geocoding"]
+      # TCP on purpose: during initdb the temp server only listens on the Unix
+      # socket, so a socket pg_isready would pass while the dump restore is
+      # still running and `up --wait` would return too early.
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -h 127.0.0.1 -U ${POSTGRES_USER:-postgres} -d geocoding",
+        ]
       interval: 5s
       timeout: 5s
       retries: 5

@@ -75,8 +75,7 @@ A run against production is therefore safe from a laptop: an interrupted or
 failed run leaves the live dataset untouched.
 
 The image is just a packaging of `scripts/refresh.sh`; on a machine with
-`curl` + `osmium` installed the script also still runs directly (this is what
-backs dev seeding, so it stays continuously tested):
+`curl` + `osmium` installed the script also still runs directly:
 
 ```sh
 cp .env.example .env   # then fill in the real GEOCODING_DB_* values
@@ -92,42 +91,33 @@ pnpm refresh:geocoding -- -r europe/austria
 
 ## Local development
 
-`pnpm dev:backend` seeds the geocoding DB automatically: before the services
-start it runs `scripts/seedDev.ts`, which creates the `geocoding` database
-and schema if missing and — **only when the places table is empty — loads
-data**. A non-empty table is never touched, so seeding effectively happens in
-exactly two situations: the very first run, and after the user requests a
-fresh database with `--fresh-db` (which recreates the volume, leaving the
-table empty). Every other run is a fast no-op.
+The dev dataset is a committed Czechia dump
+(`tooling/dev/geocoding-postgres-init/`) that the Postgres image restores
+automatically when the `geocoding-postgres` volume is first created —
+`docker-compose.dev.yaml` mounts the directory into
+`docker-entrypoint-initdb.d`. No downloads, no `osmium`, works offline.
+`pnpm dev:backend --fresh-db` recreates the volume and re-restores the dump.
 
-What an empty table gets seeded with:
+Before the services start, `pnpm dev:backend` additionally runs
+`scripts/seedDev.ts`, which creates the `geocoding` database and schema if
+missing (the image init only runs on empty volumes, so old volumes need this
+— the service crash-loops without the database). It never downloads or
+ingests anything; what it does with an **empty** places table depends on the
+mode:
 
-- **`--seed-places auto`** (the default): a full OSM ingest of Czechia via
-  `refresh.sh` when `osmium` is installed (`brew install osmium-tool`),
-  topped up with a fixture of major SK/CZ cities + the European capitals so
-  search and reverse geocoding work across Europe. Downloads (~800 MB) are
-  cached in `~/.cache/vexl/osm`, so re-seeding after `--fresh-db` skips the
-  download and only re-runs the ~minutes-long ingest.
-- **`--seed-places fixture`** (also the automatic fallback when osmium is
-  missing): just the committed fixture — major SK/CZ cities + European
-  capitals (`scripts/devSeedData.ts`). Instant, offline, no tools needed.
-- **`--seed-places off`**: no data — the database and schema are still
-  created if missing (the service crash-loops without them), but nothing is
-  seeded.
+- **`--seed-places auto`** (the default): nothing — an empty table means the
+  volume predates the committed dump, so it prints a pointer to `--fresh-db`
+  and leaves the table alone.
+- **`--seed-places fixture`**: inserts the committed fixture — major SK/CZ
+  cities + European capitals (`scripts/devSeedData.ts`).
+- **`--seed-places off`**: nothing, ever — database and schema only.
 
-The seeder can also run standalone (env from `.env`). It is strictly
-dev-only: it refuses any `GEOCODING_DB_URL` that doesn't point at a local
-host — use `refresh.sh` to load a real dataset.
+A non-empty table is never touched. The seeder can also run standalone (env
+from `.env`); it is strictly dev-only and refuses any `GEOCODING_DB_URL` that
+doesn't point at a local host — use `refresh.sh` to load a real dataset:
 
 ```sh
 pnpm --filter @vexl-next/location-db-updater seed:dev-geocoding
-```
-
-A non-empty table is never touched. To switch an existing DB from fixture to
-real data, truncate first:
-
-```sh
-docker exec vexl-geocoding-postgres psql -U postgres -d geocoding -c 'TRUNCATE places CASCADE'
 ```
 
 ## Tests

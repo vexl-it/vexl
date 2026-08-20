@@ -298,6 +298,26 @@ describe('detectMmkvDataLoss', () => {
     unsubscribe()
   })
 
+  it('keeps MMKV cleared when best-effort diagnostic cleanup fails', async () => {
+    storage._storage.set(
+      'sensitive-test-value',
+      JSON.stringify({value: 'must-be-cleared'})
+    )
+    mockedAsyncStorage.removeItem.mockRejectedValue(
+      new Error('AsyncStorage unavailable')
+    )
+
+    await expect(clearMmkvStorageAndEmptyAtoms()).resolves.toBeUndefined()
+
+    expect(storage._storage.getAllKeys()).toEqual([])
+    expect(mockedAsyncStorage.removeItem).toHaveBeenCalledWith(
+      ASYNC_SENTINEL_KEY
+    )
+    expect(mockedAsyncStorage.removeItem).toHaveBeenCalledWith(
+      CRITICAL_KEYS_PRESENCE_RECORD_KEY
+    )
+  })
+
   it('cancels an in-flight loss check when an intentional clear begins', async () => {
     storage._storage.set('__mmkv_data_exists', '1700000000000')
     let finishSentinelRead: (() => void) | undefined

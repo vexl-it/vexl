@@ -1,5 +1,5 @@
 import {Either, flow, Schema, type ParseResult} from 'effect'
-import {MMKV} from 'react-native-mmkv'
+import {createMMKV, type MMKV} from 'react-native-mmkv'
 import {JsonParseError, JsonStringifyError} from '../fpUtils'
 import {ReadingFromStoreError, ValueNotSet, WritingToStoreError} from './domain'
 
@@ -112,7 +112,11 @@ function createEffectMmkv(storage: MMKV): EffectMmkv {
   }
 }
 
-const mmkv = new MMKV()
+const mmkv = createMMKV({
+  id: 'mmkv.default',
+  recoveryStrategy: 'recover-on-error',
+  compareBeforeSet: true,
+})
 if (__DEV__) {
   // @ts-expect-error for debugging purposes
   window.__mmkv = mmkv

@@ -44,7 +44,7 @@ export function storeLog(logMessage: string): void {
 
 export function clearLogs(): void {
   cachedLogLines = []
-  storage._storage.delete(LOGS_KEY)
+  storage._storage.remove(LOGS_KEY)
 }
 
 export function listenOnAppLogs(

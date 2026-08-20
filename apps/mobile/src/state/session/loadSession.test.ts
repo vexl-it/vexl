@@ -78,31 +78,7 @@ jest.mock('../../utils/reportError', () => {
   }
 })
 
-jest.mock('react-native-mmkv', () => {
-  class MMKV {
-    private readonly data = new Map<string, boolean | number | string>()
-
-    set(key: string, value: boolean | number | string): void {
-      this.data.set(key, value)
-    }
-
-    getString(key: string): string | undefined {
-      const value = this.data.get(key)
-      return typeof value === 'string' ? value : undefined
-    }
-
-    getBoolean(key: string): boolean | undefined {
-      const value = this.data.get(key)
-      return typeof value === 'boolean' ? value : undefined
-    }
-
-    delete(key: string): void {
-      this.data.delete(key)
-    }
-  }
-
-  return {MMKV}
-})
+jest.mock('react-native-mmkv')
 
 jest.mock('../../utils/localization/I18nProvider', () => {
   const {atom: createAtom} = jest.requireActual('jotai')
@@ -317,7 +293,7 @@ describe('loadSession', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     getDefaultStore().set(sessionHolderAtom, {state: 'initial'})
-    storage._storage.delete(
+    storage._storage.remove(
       PERSISTENT_DATA_ABOUT_REACH_AND_IMPORTED_CONTACTS_STORAGE_KEY
     )
     asyncStorageGetItemMock.mockResolvedValue(null)

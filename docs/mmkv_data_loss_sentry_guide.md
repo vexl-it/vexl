@@ -1,200 +1,196 @@
 # Diagnosing MMKV data loss from Sentry logs
 
-This guide explains how to interpret the diagnostic Sentry reports added to
-detect and distinguish two root causes of user data loss (offers, contacts,
-clubs disappearing while the user remains logged in):
+This guide covers the MMKV recovery, durability, and temporary diagnostics used
+by the mobile app. The reports distinguish three failure modes:
 
-1. **Schema decode failures** — a breaking schema change (e.g. removing a
-   `CurrencyCode` literal) causes stored data to fail validation. One bad
-   record can cascade: e.g. one offer with a removed currency code fails the
-   `OfferPublicPart` decode, which fails the entire `offers` array, resetting
-   ALL offers to the empty default.
-2. **Silent MMKV file-level wipe** — MMKV v3 defaults to `OnErrorDiscard`,
-   which silently deletes all data on a CRC checksum mismatch. No Sentry trace
-   is produced by MMKV itself because the wipe happens at the native layer
-   before any JS code runs.
+1. MMKV cannot recover any entries after a CRC or file-length error.
+2. MMKV recovers an incomplete prefix of the file, so some keys disappear.
+3. A stored value remains present but no longer matches its Effect Schema.
 
-The diagnostics are **temporary** — all marked with TODO comments. Remove them
-once the root cause is identified and fixed.
+> **Privacy note:** Reports contain key names and storage metadata, never stored
+> values. Parse reports include only the error tag, raw value length, and whether
+> the raw value is valid JSON. The rejected value and full `ParseError` are not
+> sent. The AsyncStorage presence record also stores key names only.
 
-> **Privacy note:** None of these reports contain user data. Parse errors report
-> only the error tag (e.g. `ParseError`), the MMKV key name, raw value length,
-> and whether the raw value is valid JSON. The full `ParseError` object (which
-> contains rejected values) is intentionally stripped.
+## Recovery and durability model
 
----
+The app uses react-native-mmkv v4 with `recoveryStrategy: 'recover-on-error'`.
+This maps to MMKV's `OnErrorRecover` behavior for CRC and file-length errors.
+Recovery is best effort, not transactional repair. MMKV can greedily retain the
+readable prefix before a damaged region and rewrite that subset as a valid
+store. Keys encoded later in the file can therefore disappear even though MMKV
+opens successfully and still contains other keys. The partial-loss diagnostic
+exists for this case.
+
+This differs from the old v3 behavior that discarded the store on such an
+error. A completely unrecoverable file can still produce an empty store, so the
+total-wipe diagnostic remains useful.
+
+MMKV atom writes are normally coalesced and deferred until an idle callback,
+bounded by a one-second timeout. Background entry points synchronously flush
+all pending atom writes in a `finally` block before returning control to the
+operating system:
+
+- the Expo background fetch task;
+- the background notification handler.
+
+On iOS, chat-notification cancellation is awaited before the task settles. Any
+state it queues is therefore present before the final flush runs. A task failure
+still runs the flush. Pending writes invalidated by an intentional storage clear
+are discarded instead of being flushed.
 
 ## Code locations
 
-| File | What it does |
-| --- | --- |
-| `apps/mobile/src/utils/mmkv/effectMmkv.ts` | Sentinel-based MMKV wipe detection (`detectMmkvDataLoss`) and MMKV file diagnostics (`getMmkvFilesDiagnostics`) |
-| `apps/mobile/src/utils/atomUtils/atomWithParsedMmkvStorage.ts` | Per-key parse error reporting (`getInitialValue`) and startup summary (`scheduleStartupReport`) |
-| `apps/mobile/src/utils/clearMmkvStorageAndEmptyAtoms.ts` | Clears the async sentinel on intentional logout/reset to prevent false positives |
+| File                                                                       | Responsibility                                                                                             |
+| -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `apps/mobile/src/utils/mmkv/effectMmkv.ts`                                 | Creates the v4 MMKV instance with `recover-on-error`                                                       |
+| `apps/mobile/src/utils/mmkv/detectMmkvDataLoss.ts`                         | Detects total and partial loss and gathers MMKV file metadata                                              |
+| `apps/mobile/src/utils/mmkv/criticalMmkvKeys.ts`                           | Defines the critical keys and the key-name-only presence record schema                                     |
+| `apps/mobile/src/utils/mmkv/mmkvDataLossDiagnosticStorage.ts`              | Serializes presence-record updates, startup detection, and intentional clears                              |
+| `apps/mobile/src/utils/atomUtils/atomWithParsedMmkvStorage.ts`             | Reports parse failures, records successful critical-key writes, defers writes, and exposes the final flush |
+| `apps/mobile/src/utils/clearMmkvStorageAndEmptyAtoms.ts`                   | Clears MMKV immediately, resets mounted atoms, and prevents writes from surviving an intentional clear     |
+| `apps/mobile/src/utils/backgroundTask/processBackgroundTask.ts`            | Flushes pending MMKV writes before a background fetch finishes                                             |
+| `apps/mobile/src/utils/notifications/notificationReceivedHandler/index.ts` | Flushes pending MMKV writes before a background notification task finishes                                 |
 
----
+## Critical keys
+
+Partial-loss detection tracks whether these keys were present on the previous
+successful launch or after a successful persist:
+
+- `messagingState`
+- `offers`
+- `storedContacts`
+- `connectionsStateV2`
+- `offer-to-connections`
+- `postLoginFlowProgress1`
+- `storedClubsV2`
+- `fcmCypherToKeyHolder`
+- `vexlTokenToKeyHolder`
+
+The last three include club and notification key-holder maps. Their values are
+not copied to AsyncStorage or Sentry. Only their key names are recorded.
 
 ## Message catalog
 
-### ERROR level
+### Error level
 
-| Message (verbatim) | Source | Emitted when | Extra fields |
-| --- | --- | --- | --- |
-| `MMKV data loss detected: data was previously stored but MMKV is now empty` | `effectMmkv.ts` → `detectMmkvDataLoss` | The MMKV sentinel key is missing but the AsyncStorage sentinel (written on a prior launch) is present — meaning MMKV was populated before but is now empty | `lastPopulatedAt`, `remainingKeyCount`, `appState`, `dataFileExists`, `dataFileSize`, `crcFileExists`, `crcFileSize` |
+| Message                                                                        | Emitted when                                                                                            | Extra fields                                                                                   |
+| ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `MMKV data loss detected: data was previously stored but MMKV is now empty`    | The MMKV sentinel is absent, the AsyncStorage populated sentinel exists, and MMKV has no remaining keys | `lastPopulatedAt`, `remainingKeyCount`, `appState`, data and CRC file existence and sizes      |
+| `MMKV partial data loss detected: critical keys disappeared since last launch` | At least one previously recorded critical key is absent while MMKV is not classified as a total wipe    | `disappearedKeys`, `remainingKeyCount`, `appState`, data and CRC file existence and sizes      |
+| `Error while parsing stored value. Using provided default. Key: <KEY>`         | A critical key exists but its startup value cannot be read or decoded                                   | `key`, `errorTag`, and, when raw text was readable, `rawValueLength` and `rawValueIsValidJson` |
+| `Error while parsing stored mmkv value in onChange function. Key: '<KEY>'`     | A changed critical key cannot be read or decoded                                                        | Same parse metadata as the startup report                                                      |
 
-### WARN level
+### Warning level
 
-| Message (verbatim) | Source | Emitted when | Extra fields |
-| --- | --- | --- | --- |
-| `MMKV atom initialization summary` | `atomWithParsedMmkvStorage.ts` → `scheduleStartupReport` | 5 seconds after the first atom initializes, if any atom had a `valueNotSet` or `parseError` result | `loaded` (key list), `valueNotSet` (key list), `parseError` (key list), `totalKeys` |
-| `Error while parsing stored value. Using provided default. Key: <KEY>` | `atomWithParsedMmkvStorage.ts` → `getInitialValue` | A specific MMKV key exists but fails schema validation at startup | `errorTag`, `rawValueLength`, `rawValueIsValidJson` |
-| `Error while saving value to storage. Key: <KEY>` | `atomWithParsedMmkvStorage.ts` → `toShadowStorageAtom` | Writing a value back to MMKV fails (encode or write error) | `errorTag` |
-| `Error while parsing stored mmkv value in onChange function. Key: '<KEY>'` | `atomWithParsedMmkvStorage.ts` → `onMount` listener | An MMKV value changed (by another atom or external write) and the new value fails schema validation | `errorTag` |
+The two per-key parse messages above are warnings for non-critical keys. The
+following messages are always warnings:
 
----
+| Message                                           | Emitted when                                                                          | Extra fields                                       |
+| ------------------------------------------------- | ------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| `MMKV atom initialization summary`                | Five seconds after atom initialization begins, if at least one atom had a parse error | `loaded`, `valueNotSet`, `parseError`, `totalKeys` |
+| `Error while saving value to storage. Key: <KEY>` | Encoding or writing an atom value fails                                               | `errorTag`                                         |
 
-## How to read the signals
+Keys that were never written are expected. They appear in `valueNotSet` when a
+summary is already being sent, but they do not trigger the summary by
+themselves.
 
-### Scenario A: Silent MMKV wipe (file-level corruption) 🔴
+## Reading the signals
 
-**Signature:**
-- `MMKV data loss detected: data was previously stored but MMKV is now empty`
-  (ERROR) fires.
-- `MMKV atom initialization summary` shows most/all keys as `valueNotSet` —
-  the data is simply gone, not malformed.
-- Per-key `Error while parsing stored value` messages are **absent** (there is
-  nothing to parse — the keys don't exist).
+### Total loss
 
-**Extra fields to check:**
-- `remainingKeyCount: 0` confirms a full wipe.
-- `dataFileExists: false` or `dataFileSize: 0` means the MMKV data file was
-  deleted or truncated — points to OS-level cleanup or MMKV's `OnErrorDiscard`.
-- `dataFileExists: true` with a non-zero `dataFileSize` but
-  `crcFileExists: false` or size mismatch points to a CRC corruption that
-  triggered `OnErrorDiscard`.
-- `appState` tells you whether this happened during a foreground launch
-  (`active`) or a background wake (`background`) — background wakes are more
-  susceptible to resource pressure.
+The total-loss error means the AsyncStorage sentinel says MMKV was previously
+populated, but MMKV now has zero keys and its own sentinel is missing. The atom
+summary may show many `valueNotSet` keys and should not show per-key parse
+errors, because there are no values to parse.
 
-**What this means:**
-MMKV's native layer wiped all data before JS had a chance to read it. This
-explains contact loss (no Sentry decode errors for `storedContacts`) and
-simultaneous loss of offers, clubs, and settings. The user's session survives
-because it is stored in AsyncStorage + SecureStore, not MMKV.
+The file fields are observations made after the native store has opened. A
+missing or empty data file supports deletion or truncation. A present file does
+not prove that all original entries survived, because native recovery may have
+rewritten it before JavaScript gathered the metadata.
 
-### Scenario B: Schema decode failure (breaking schema change) ⚠️
+### Partial native recovery
 
-**Signature:**
-- `MMKV data loss detected` does **NOT** fire (MMKV is intact).
-- `Error while parsing stored value. Using provided default. Key: <KEY>` fires
-  for specific keys (e.g. `offers`, `offersFilter`, `brcPrice`).
-- `MMKV atom initialization summary` shows those keys in the `parseError` list
-  and other keys in `loaded`.
+The partial-loss error lists critical keys that were recorded previously but
+are absent now. This is the expected signal when greedy recovery preserves only
+an earlier valid prefix, although an interrupted write or another selective
+loss can produce the same observation. Use `disappearedKeys` to determine the
+affected domain. In particular, loss of one of the three key-holder maps can
+break club or notification decryption even when contacts or offers remain.
 
-**Extra fields to check:**
-- `errorTag: ParseError` means the JSON is valid but doesn't match the Effect
-  Schema. This is the schema-mismatch case (e.g. a stored offer contains a
-  `CurrencyCode` literal that was removed from the schema).
-- `errorTag: JsonParseError` means the raw MMKV string isn't valid JSON at all —
-  points to data corruption rather than a schema change.
-- `rawValueIsValidJson: true` + `errorTag: ParseError` confirms a schema
-  mismatch.
-- `rawValueIsValidJson: false` means the stored bytes are not JSON — possible
-  partial write or binary corruption.
-- `rawValueLength: 0` means the key exists but is empty — unusual, may indicate
-  a write was interrupted.
+The presence record is updated after a successful detection run, so the same
+disappearance is normally reported once. If reporting throws, it is left
+unstamped and retried next launch.
 
-**Key-specific interpretation:**
-- `offers` in `parseError` → likely a `CurrencyCode` or other enum literal was
-  removed. One invalid offer causes the entire array to fail, losing ALL offers.
-- `storedContacts` in `parseError` → the contact schema changed incompatibly
-  (less likely — the schema has been backward-compatible).
-- `offersFilter` / `brcPrice` / `chatClosedFeedbacksAtom` in `parseError` →
-  smaller-impact settings atoms; still indicates a schema break but doesn't
-  explain contact/club loss.
+### Schema or JSON failure
 
-### Scenario C: Mixed — partial MMKV data present
+A per-key parse report means the key still exists but cannot be decoded:
 
-**Signature:**
-- `MMKV data loss detected` does **NOT** fire (the MMKV sentinel survived).
-- `MMKV atom initialization summary` shows a mix: some keys `loaded`, some
-  `valueNotSet`, some `parseError`.
+- `ParseError` with `rawValueIsValidJson: true` indicates valid JSON that does
+  not match the current Effect Schema.
+- `JsonParseError` with `rawValueIsValidJson: false` indicates malformed JSON,
+  such as a partial or corrupted value.
+- `ReadingFromStoreError` means MMKV threw while reading the key.
 
-**What this means:**
-Some keys were lost or corrupted but not all. Possible causes:
-- A partial MMKV write failure (app killed mid-write).
-- Selective key corruption (less common with MMKV's append-only log).
-- A combination of schema failures (for `parseError` keys) and missing data
-  (for `valueNotSet` keys that should have been populated).
+The atom uses its default after an initial parse failure. For collection atoms,
+one invalid member can cause the whole stored collection to fail validation.
 
-Cross-reference the `totalKeys` field in the summary with what's expected to
-gauge the extent of loss.
+### No diagnostic event
 
-### Scenario D: No diagnostic events at all
+Check the app build first. The AsyncStorage sentinel and critical-key presence
+record need one successful run to establish a baseline. A first run after these
+diagnostics ship cannot detect older loss that happened before the baseline was
+written.
 
-**What this means:**
-If a user reports data loss but there are no MMKV diagnostic events in Sentry:
-- The build may predate these diagnostics — check the `dist` / build number.
-- The sentinel detection only works from the **second launch** after the
-  diagnostic code ships (the first launch writes the initial sentinel).
-- If the user logged out and back in, the intentional clear
-  (`clearMmkvStorageAndEmptyAtoms`) removes the AsyncStorage sentinel, so the
-  next launch won't fire a false positive — but it also won't detect a
-  subsequent real wipe until after one more successful launch writes the
-  sentinel again.
+## Intentional logout or reset
 
----
+`clearMmkvStorageAndEmptyAtoms` performs an intentional clear as one protected
+lifetime:
 
-## `errorTag` reference
+1. Mounted atoms are reset to their defaults.
+2. Pending atom writes are invalidated.
+3. MMKV is cleared immediately, before any asynchronous cleanup.
+4. The populated sentinel and critical-key presence record are removed from
+   AsyncStorage on a best-effort basis.
+5. MMKV is cleared again and writes queued during the clear are invalidated
+   before normal persistence resumes.
 
-These are the `_tag` values from the Effect error types returned by the MMKV
-storage layer:
+The immediate clear is the security boundary. If AsyncStorage diagnostic
+cleanup rejects, the clear still resolves and logout or reset is not blocked;
+sensitive MMKV data remains cleared. An MMKV `clearAll()` failure is different
+and still rejects because the sensitive store may not have been cleared.
 
-| Tag | Meaning |
-| --- | --- |
-| `ParseError` | JSON was valid but failed Effect Schema validation (schema mismatch) |
-| `JsonParseError` | Raw string is not valid JSON |
-| `ReadingFromStoreError` | MMKV `.getString()` threw an exception |
-| `WritingToStoreError` | MMKV `.set()` threw an exception |
-| `ValueNotSet` | Key does not exist in MMKV (only in onChange listener — at startup this is tracked via the summary, not per-key errors) |
-
----
+Failed diagnostic cleanup can leave stale key-name metadata. On the next
+launch, this can cause one false total-loss report if the populated sentinel
+remained, or one false partial-loss report if only the critical-key record
+remained. A successful detection run rewrites the sentinels and presence record
+to the current empty state, so the signal normally self-heals. It never restores
+the cleared MMKV values.
 
 ## Decision tree
 
 ```text
-User reports data loss (offers/contacts/clubs gone, still logged in)
-│
-├─ "MMKV data loss detected" ERROR in Sentry?
-│  ├─ YES → Scenario A: silent MMKV wipe
-│  │  ├─ dataFileExists: false → OS or MMKV deleted the file
-│  │  ├─ dataFileExists: true, crcFile missing/wrong → CRC mismatch → OnErrorDiscard
-│  │  └─ Check appState: "background" → resource pressure / OS kill during write
-│  │
-│  └─ NO → Check "MMKV atom initialization summary"
-│     ├─ parseError keys present, loaded keys present → Scenario B: schema failure
-│     │  └─ Check which keys: offers? contacts? Look at errorTag for cause
-│     ├─ Most keys valueNotSet, no parseError → Data is gone but sentinel survived
-│     │  └─ Partial wipe or sentinel was written after the wipe (Scenario C)
-│     ├─ All keys loaded → Data is present — user's report may be about stale data,
-│     │  not missing data
-│     └─ No summary event at all → Scenario D: diagnostics not yet active
+User reports missing MMKV-backed data
+|
++- Total-loss error?
+|  +- Yes: MMKV is empty; inspect file metadata and appState.
+|  +- No: continue.
+|
++- Partial-loss error?
+|  +- Yes: inspect disappearedKeys for the affected domain.
+|  +- No: continue.
+|
++- Per-key parse error?
+|  +- Yes: inspect errorTag and rawValueIsValidJson.
+|  +- No: confirm the build and whether a baseline existed.
 ```
 
----
+## Temporary diagnostics
 
-## Temporary code — what to remove
+The sentinel, critical-key presence record, startup summary, and related Sentry
+reports are marked with TODOs for eventual removal. Keep these permanent safety
+properties even after the investigation ends:
 
-All diagnostic code is marked with TODO comments. When the root cause is found
-and fixed, remove:
-
-1. `effectMmkv.ts`: `MMKV_SENTINEL_KEY`, `ASYNC_SENTINEL_KEY` (export),
-   `getMmkvFilesDiagnostics`, `detectMmkvDataLoss`, and the call to it.
-2. `atomWithParsedMmkvStorage.ts`: `InitResult` type, `atomInitResults` map,
-   `startupReportScheduled` flag, `scheduleStartupReport` function, and the
-   `atomInitResults.set(...)` / `scheduleStartupReport()` calls inside
-   `getInitialValue`. The per-key `reportError` in `getInitialValue` may be
-   worth keeping permanently (without the `rawValueLength` / `rawValueIsValidJson`
-   extras) as a general parse-error monitor.
-3. `clearMmkvStorageAndEmptyAtoms.ts`: the `ASYNC_SENTINEL_KEY` import and the
-   `AsyncStorage.removeItem(ASYNC_SENTINEL_KEY)` call.
+- v4 `recover-on-error` configuration;
+- background-task final flushes and awaited iOS notification cleanup;
+- write invalidation and immediate MMKV clearing during logout or reset.

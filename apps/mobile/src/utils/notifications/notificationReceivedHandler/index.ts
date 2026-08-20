@@ -2,6 +2,7 @@ import {Effect} from 'effect/index'
 import * as Notifications from 'expo-notifications'
 import * as TaskManager from 'expo-task-manager'
 import {loadSession} from '../../../state/session/loadSession'
+import {flushAllScheduledMmkvWrites} from '../../atomUtils/atomWithParsedMmkvStorage'
 import {reportErrorE} from '../../reportError'
 import {ErrorLoadingSession, type AcceptedNotificationTypes} from './domain'
 import {extractDataFromNotification} from './extractDataFromNotification'
@@ -137,9 +138,13 @@ const processNotification = (
 TaskManager.defineTask<Notifications.NotificationTaskPayload>(
   TASK,
   async ({data}) => {
-    if (!data) return Notifications.BackgroundNotificationTaskResult.NoData
+    try {
+      if (!data) return Notifications.BackgroundNotificationTaskResult.NoData
 
-    return await processNotification({source: 'backgroundTask', data})
+      return await processNotification({source: 'backgroundTask', data})
+    } finally {
+      flushAllScheduledMmkvWrites()
+    }
   }
 )
 

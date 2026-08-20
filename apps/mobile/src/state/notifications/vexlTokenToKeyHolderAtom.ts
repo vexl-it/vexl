@@ -3,9 +3,10 @@ import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications
 import {Schema} from 'effect'
 import {atom} from 'jotai'
 import {atomWithParsedMmkvStorage} from '../../utils/atomUtils/atomWithParsedMmkvStorage'
+import {VEXL_TOKEN_TO_KEY_HOLDER_MMKV_KEY} from '../../utils/mmkv/criticalMmkvKeys'
 
 export const vexlTokenToKeyHolderAtom = atomWithParsedMmkvStorage(
-  'vexlTokenToKeyHolder',
+  VEXL_TOKEN_TO_KEY_HOLDER_MMKV_KEY,
   {data: {}},
   Schema.Struct({
     data: Schema.Record({

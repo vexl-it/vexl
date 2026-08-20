@@ -1,13 +1,26 @@
 import {Schema} from 'effect'
 import {createStore} from 'jotai'
+import {
+  FCM_CYPHER_TO_KEY_HOLDER_MMKV_KEY,
+  STORED_CLUBS_V2_MMKV_KEY,
+  VEXL_TOKEN_TO_KEY_HOLDER_MMKV_KEY,
+} from '../mmkv/criticalMmkvKeys'
 import {storage} from '../mmkv/effectMmkv'
+import {recordCriticalMmkvKeyPersisted} from '../mmkv/mmkvDataLossDiagnosticStorage'
+import reportError from '../reportError'
 import {
   CLEAR_STORAGE_KEY,
   atomWithParsedMmkvStorage,
   atomWithParsedMmkvStorageWithImmediateSaveOption,
+  beginMmkvStorageClear,
   flushAllScheduledMmkvWrites,
   invalidateScheduledMmkvWrites,
 } from './atomWithParsedMmkvStorage'
+
+const mockedReportError = jest.mocked(reportError)
+const mockedRecordCriticalMmkvKeyPersisted = jest.mocked(
+  recordCriticalMmkvKeyPersisted
+)
 
 jest.mock('@react-native-async-storage/async-storage', () => ({
   __esModule: true,
@@ -21,6 +34,10 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
 jest.mock('../reportError', () => ({
   __esModule: true,
   default: jest.fn(),
+}))
+
+jest.mock('../mmkv/mmkvDataLossDiagnosticStorage', () => ({
+  recordCriticalMmkvKeyPersisted: jest.fn(async () => undefined),
 }))
 
 jest.mock('react-native-mmkv')
@@ -55,6 +72,8 @@ function flushIdleCallbacks(): void {
 beforeEach(() => {
   idleCallbackQueue = []
   idleCallbackHandle = 0
+  storage._storage.clearAll()
+  jest.clearAllMocks()
   hadRequestIdleCallback = 'requestIdleCallback' in globalThis
   originalRequestIdleCallback = hadRequestIdleCallback
     ? globalThis.requestIdleCallback
@@ -123,6 +142,90 @@ describe('atomWithParsedMmkvStorage', () => {
     const store = createStore()
 
     expect(store.get(testAtom)).toEqual(defaultValue)
+    expect(mockedReportError).toHaveBeenCalledWith(
+      'warn',
+      expect.objectContaining({
+        _tag: 'StoredValueParseError',
+        message: expect.stringContaining(`Key: ${key}`),
+        key,
+        errorTag: expect.any(String),
+        rawValueLength: 'not json at all'.length,
+        rawValueIsValidJson: false,
+      }),
+      expect.objectContaining({key, errorTag: expect.any(String)})
+    )
+  })
+
+  it.each([
+    'offers',
+    STORED_CLUBS_V2_MMKV_KEY,
+    FCM_CYPHER_TO_KEY_HOLDER_MMKV_KEY,
+    VEXL_TOKEN_TO_KEY_HOLDER_MMKV_KEY,
+  ])(
+    'reports a %s parse failure at error level during initialization',
+    (key) => {
+      storage._storage.set(key, 'not json at all')
+
+      const testAtom = atomWithParsedMmkvStorage(
+        key,
+        defaultValue,
+        TestValueSchema
+      )
+      const store = createStore()
+
+      expect(store.get(testAtom)).toEqual(defaultValue)
+      expect(mockedReportError).toHaveBeenCalledWith(
+        'error',
+        expect.objectContaining({
+          _tag: 'StoredValueParseError',
+          message: expect.stringContaining(`Key: ${key}`),
+          key,
+          errorTag: expect.any(String),
+          rawValueLength: 'not json at all'.length,
+          rawValueIsValidJson: false,
+        }),
+        expect.objectContaining({
+          key,
+          errorTag: expect.any(String),
+          rawValueLength: 'not json at all'.length,
+          rawValueIsValidJson: false,
+        })
+      )
+    }
+  )
+
+  it('reports critical-key parse failures at error level in the onChange listener', () => {
+    const key = 'messagingState'
+    storage._storage.set(key, JSON.stringify({name: 'stored', count: 1}))
+    const testAtom = atomWithParsedMmkvStorage(
+      key,
+      defaultValue,
+      TestValueSchema
+    )
+    const store = createStore()
+    const unsub = store.sub(testAtom, () => {})
+
+    storage._storage.set(key, 'not json at all')
+    flushIdleCallbacks()
+
+    expect(mockedReportError).toHaveBeenCalledWith(
+      'error',
+      expect.objectContaining({
+        _tag: 'StoredValueParseError',
+        message: expect.stringContaining("Key: 'messagingState'"),
+        key,
+        errorTag: expect.any(String),
+        rawValueLength: 'not json at all'.length,
+        rawValueIsValidJson: false,
+      }),
+      expect.objectContaining({
+        key,
+        errorTag: expect.any(String),
+        rawValueLength: 'not json at all'.length,
+        rawValueIsValidJson: false,
+      })
+    )
+    unsub()
   })
 
   it('still reads blobs written by the old format (embedded ___author_id)', () => {
@@ -187,6 +290,75 @@ describe('atomWithParsedMmkvStorage', () => {
       name: 'clean',
       count: 1,
     })
+  })
+
+  it.each([
+    'offers',
+    STORED_CLUBS_V2_MMKV_KEY,
+    FCM_CYPHER_TO_KEY_HOLDER_MMKV_KEY,
+    VEXL_TOKEN_TO_KEY_HOLDER_MMKV_KEY,
+  ])('records a successful deferred persist of %s', (key) => {
+    const testAtom = atomWithParsedMmkvStorage(
+      key,
+      defaultValue,
+      TestValueSchema
+    )
+    const store = createStore()
+
+    store.set(testAtom, {name: 'persisted', count: 1})
+    flushIdleCallbacks()
+
+    expect(mockedRecordCriticalMmkvKeyPersisted).toHaveBeenCalledTimes(1)
+    expect(mockedRecordCriticalMmkvKeyPersisted).toHaveBeenCalledWith(key)
+  })
+
+  it('records a successful immediate persist of a critical key', () => {
+    const key = 'messagingState'
+    const {setAndSaveImmediatelyAtom} =
+      atomWithParsedMmkvStorageWithImmediateSaveOption(
+        key,
+        defaultValue,
+        TestValueSchema
+      )
+    const store = createStore()
+
+    store.set(setAndSaveImmediatelyAtom, {name: 'persisted', count: 1})
+
+    expect(mockedRecordCriticalMmkvKeyPersisted).toHaveBeenCalledTimes(1)
+    expect(mockedRecordCriticalMmkvKeyPersisted).toHaveBeenCalledWith(key)
+  })
+
+  it('does not record successful persists of noncritical keys', () => {
+    const key = 'test-noncritical-persist'
+    const testAtom = atomWithParsedMmkvStorage(
+      key,
+      defaultValue,
+      TestValueSchema
+    )
+    const store = createStore()
+
+    store.set(testAtom, {name: 'persisted', count: 1})
+    flushIdleCallbacks()
+
+    expect(mockedRecordCriticalMmkvKeyPersisted).not.toHaveBeenCalled()
+  })
+
+  it('does not record a failed persist of a critical key', () => {
+    const key = 'offers'
+    const testAtom = atomWithParsedMmkvStorage(
+      key,
+      defaultValue,
+      TestValueSchema
+    )
+    const store = createStore()
+    jest.spyOn(storage._storage, 'set').mockImplementationOnce(() => {
+      throw new Error('write failed')
+    })
+
+    store.set(testAtom, {name: 'not-persisted', count: 1})
+    flushIdleCallbacks()
+
+    expect(mockedRecordCriticalMmkvKeyPersisted).not.toHaveBeenCalled()
   })
 
   it('does not feed its own write back through the change listener', () => {
@@ -473,6 +645,28 @@ describe('atomWithParsedMmkvStorage', () => {
     flushAllScheduledMmkvWrites()
     flushIdleCallbacks()
     expect(setSpy).toHaveBeenCalledTimes(1)
+  })
+
+  it('blocks immediate saves for the full storage-clear lifetime', () => {
+    const key = 'test-immediate-save-during-clear'
+    const {setAndSaveImmediatelyAtom} =
+      atomWithParsedMmkvStorageWithImmediateSaveOption(
+        key,
+        defaultValue,
+        TestValueSchema
+      )
+    const store = createStore()
+    const finishStorageClear = beginMmkvStorageClear()
+
+    store.set(setAndSaveImmediatelyAtom, {name: 'sensitive', count: 1})
+    expect(storage._storage.getString(key)).toBeUndefined()
+
+    finishStorageClear()
+    store.set(setAndSaveImmediatelyAtom, {name: 'after-clear', count: 2})
+    expect(JSON.parse(storage._storage.getString(key) ?? '')).toEqual({
+      name: 'after-clear',
+      count: 2,
+    })
   })
 
   it('flushAllScheduledMmkvWrites persists a pending value without waiting for the idle callback', () => {

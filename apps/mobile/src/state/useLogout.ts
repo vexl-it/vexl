@@ -100,7 +100,7 @@ export const logoutActionAtom = atom(null, async (get, set) => {
     set(sessionAtom, O.none)
 
     // Local storage
-    clearMmkvStorageAndEmptyAtoms()
+    await clearMmkvStorageAndEmptyAtoms()
 
     // files
     await failSilently(deleteAllFiles())
@@ -111,7 +111,7 @@ export const logoutActionAtom = atom(null, async (get, set) => {
     reportError('error', new Error('Critical error while logging out'), {e})
 
     set(sessionAtom, O.none)
-    clearMmkvStorageAndEmptyAtoms()
+    await clearMmkvStorageAndEmptyAtoms()
     await failSilently(Notifications.unregisterForNotificationsAsync())
   } finally {
     set(loadingOverlayDisplayedAtom, false)

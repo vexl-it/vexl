@@ -7,6 +7,7 @@ import {Schema, Struct} from 'effect'
 import {atom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
+import {STORED_CLUBS_V2_MMKV_KEY} from '../../../utils/mmkv/criticalMmkvKeys'
 
 const ClubKeys = Schema.Struct({
   keyPair: KeyPairV2,
@@ -24,7 +25,7 @@ const ClubsToKeyHolderV2 = Schema.Struct({
 export type ClubsToKeyHolderV2 = typeof ClubsToKeyHolderV2.Type
 
 export const clubsKeyHolderStorageAtom = atomWithParsedMmkvStorage(
-  'storedClubsV2',
+  STORED_CLUBS_V2_MMKV_KEY,
   {data: {}, waitingForAdmission: []},
   ClubsToKeyHolderV2
 )

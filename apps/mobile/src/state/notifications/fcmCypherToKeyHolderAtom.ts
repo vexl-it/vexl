@@ -5,10 +5,11 @@ import {type NotificationTokenOrCypher} from '@vexl-next/resources-utils/src/not
 import {Schema} from 'effect/index'
 import {atom} from 'jotai'
 import {atomWithParsedMmkvStorage} from '../../utils/atomUtils/atomWithParsedMmkvStorage'
+import {FCM_CYPHER_TO_KEY_HOLDER_MMKV_KEY} from '../../utils/mmkv/criticalMmkvKeys'
 import {vexlTokenToKeyHolderAtom} from './vexlTokenToKeyHolderAtom'
 
 export const notificationCypherToKeyHolderAtom = atomWithParsedMmkvStorage(
-  'fcmCypherToKeyHolder',
+  FCM_CYPHER_TO_KEY_HOLDER_MMKV_KEY,
   {data: {}},
   Schema.Struct({
     data: Schema.Record({

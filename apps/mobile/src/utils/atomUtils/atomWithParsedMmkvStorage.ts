@@ -5,7 +5,9 @@ import {
   type SetStateAction,
   type WritableAtom,
 } from 'jotai'
+import {isCriticalMmkvKey} from '../mmkv/criticalMmkvKeys'
 import {storage} from '../mmkv/effectMmkv'
+import {recordCriticalMmkvKeyPersisted} from '../mmkv/mmkvDataLossDiagnosticStorage'
 import reportError from '../reportError'
 import runWhenIdleWithTimeout from '../runWhenIdleWithTimeout'
 import getValueFromSetStateActionOfAtom from './getValueFromSetStateActionOfAtom'
@@ -19,6 +21,8 @@ export const CLEAR_STORAGE_KEY = '__clear_storage'
 // resurrected. Shared across all atoms, so it also invalidates pending writes
 // of atoms that are not currently mounted (their change listener never fires).
 let clearGeneration = 0
+let nextStorageClearId = 0
+const activeStorageClears = new Set<number>()
 
 /**
  * Invalidates and discards every MMKV write currently scheduled behind the
@@ -29,6 +33,18 @@ let clearGeneration = 0
 export function invalidateScheduledMmkvWrites(): void {
   clearGeneration += 1
   flushAllScheduledMmkvWrites()
+}
+
+export function beginMmkvStorageClear(): () => void {
+  nextStorageClearId += 1
+  const clearId = nextStorageClearId
+  activeStorageClears.add(clearId)
+  invalidateScheduledMmkvWrites()
+
+  return () => {
+    if (!activeStorageClears.delete(clearId)) return
+    invalidateScheduledMmkvWrites()
+  }
 }
 
 /**
@@ -131,6 +147,36 @@ function isValidJson(raw: string): boolean {
   }
 }
 
+function parseErrorReportLevel(key: string): 'error' | 'warn' {
+  return isCriticalMmkvKey(key) ? 'error' : 'warn'
+}
+
+class StoredValueParseError extends Schema.TaggedError<StoredValueParseError>(
+  'StoredValueParseError'
+)('StoredValueParseError', {
+  message: Schema.String,
+  key: Schema.String,
+  errorTag: Schema.String,
+  rawValueLength: Schema.optional(Schema.Number),
+  rawValueIsValidJson: Schema.optional(Schema.Boolean),
+}) {}
+
+function reportStoredValueParseError(
+  key: string,
+  message: string,
+  errorTag: string,
+  extra?: {
+    rawValueLength?: number
+    rawValueIsValidJson?: boolean
+  }
+): void {
+  reportError(
+    parseErrorReportLevel(key),
+    new StoredValueParseError({message, key, errorTag, ...extra}),
+    {key, errorTag, ...extra}
+  )
+}
+
 function readRawString(key: string): string | undefined {
   try {
     return storage._storage.getString(key) ?? undefined
@@ -158,12 +204,10 @@ function getInitialValue<A>({
           atomInitResults.set(key, 'valueNotSet')
         } else {
           atomInitResults.set(key, 'parseError')
-          reportError(
-            'warn',
-            new Error(
-              `Error while parsing stored value. Using provided default. Key: ${key}`
-            ),
-            {errorTag: l._tag}
+          reportStoredValueParseError(
+            key,
+            `Error while parsing stored value. Using provided default. Key: ${key}`,
+            l._tag
           )
         }
         return {value: defaultValue, raw: undefined}
@@ -174,13 +218,11 @@ function getInitialValue<A>({
           Either.match({
             onLeft: (e): StoredRead<A> => {
               atomInitResults.set(key, 'parseError')
-              reportError(
-                'warn',
-                new Error(
-                  `Error while parsing stored value. Using provided default. Key: ${key}`
-                ),
+              reportStoredValueParseError(
+                key,
+                `Error while parsing stored value. Using provided default. Key: ${key}`,
+                e._tag,
                 {
-                  errorTag: e._tag,
                   rawValueLength: raw.length,
                   rawValueIsValidJson: isValidJson(raw),
                 }
@@ -243,6 +285,11 @@ export function atomWithParsedMmkvStorageWithImmediateSaveOption<
 ): AtomWithParsedMmkvStorageWithImmediateSaveOption<A> {
   const decodeRawValue = Schema.decodeEither(Schema.parseJson(schema))
   const persistValue = storage.saveVerified(key, schema)
+  const recordSuccessfulPersist = (): void => {
+    if (isCriticalMmkvKey(key)) {
+      void recordCriticalMmkvKeyPersisted(key)
+    }
+  }
 
   // True only for the synchronous duration of this atom's own storage.set
   // call. react-native-mmkv dispatches change listeners synchronously from
@@ -265,18 +312,25 @@ export function atomWithParsedMmkvStorageWithImmediateSaveOption<
 
     // Storage was wiped after this write was scheduled — persisting it now
     // would resurrect just-cleared data. Drop it. See `clearGeneration`.
-    if (toPersist.generation !== clearGeneration) return
+    if (
+      toPersist.generation !== clearGeneration ||
+      activeStorageClears.size > 0
+    )
+      return
 
     isPersistingOwnValue = true
     try {
       pipe(
         persistValue(toPersist.value),
-        Either.getOrElse((l) => {
-          reportError(
-            'warn',
-            new Error(`Error while saving value to storage. Key: ${key}`),
-            {errorTag: l._tag}
-          )
+        Either.match({
+          onLeft: (l) => {
+            reportError(
+              'warn',
+              new Error(`Error while saving value to storage. Key: ${key}`),
+              {errorTag: l._tag}
+            )
+          },
+          onRight: recordSuccessfulPersist,
         })
       )
     } finally {
@@ -364,12 +418,16 @@ export function atomWithParsedMmkvStorageWithImmediateSaveOption<
                     setAtom(defaultValue)
                     return
                   }
-                  reportError(
-                    'warn',
-                    new Error(
-                      `Error while parsing stored mmkv value in onChange function. Key: '${key}'`
-                    ),
-                    {errorTag: e._tag}
+                  const raw = readRawString(key)
+                  reportStoredValueParseError(
+                    key,
+                    `Error while parsing stored mmkv value in onChange function. Key: '${key}'`,
+                    e._tag,
+                    {
+                      rawValueLength: raw?.length,
+                      rawValueIsValidJson:
+                        raw !== undefined ? isValidJson(raw) : undefined,
+                    }
                   )
                 },
                 onRight: setAtom,
@@ -397,18 +455,23 @@ export function atomWithParsedMmkvStorageWithImmediateSaveOption<
       pendingWrite = undefined
       scheduledMmkvWriteFlushes.delete(flushPendingWrite)
 
+      if (activeStorageClears.size > 0) return
+
       isPersistingOwnValue = true
       try {
         pipe(
           persistValue(newValue),
-          Either.getOrElse((l) => {
-            reportError(
-              'warn',
-              new Error(
-                `Error while immediately saving value to storage. Key: ${key}`
-              ),
-              {errorTag: l._tag}
-            )
+          Either.match({
+            onLeft: (l) => {
+              reportError(
+                'warn',
+                new Error(
+                  `Error while immediately saving value to storage. Key: ${key}`
+                ),
+                {errorTag: l._tag}
+              )
+            },
+            onRight: recordSuccessfulPersist,
           })
         )
       } finally {

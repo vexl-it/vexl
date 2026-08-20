@@ -38,8 +38,9 @@ export default function Intro1Screen({navigation}: Props): React.ReactElement {
       action={{
         label: t('loginFlow.v2.intro1.action'),
         onPress: () => {
-          clearMmkvStorageAndEmptyAtoms()
-          navigation.navigate('Intro2')
+          void clearMmkvStorageAndEmptyAtoms().then(() => {
+            navigation.navigate('Intro2')
+          })
         },
       }}
       footer={

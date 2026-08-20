@@ -21,13 +21,37 @@ export const CLEAR_STORAGE_KEY = '__clear_storage'
 let clearGeneration = 0
 
 /**
- * Invalidates every MMKV write currently scheduled behind the deferred
- * idle-callback flush. MUST be called before wiping storage on logout so an
- * in-flight write cannot persist — and thereby resurrect — data after the wipe.
- * See `clearMmkvStorageAndEmptyAtoms`.
+ * Invalidates and discards every MMKV write currently scheduled behind the
+ * deferred idle-callback flush. MUST be called before wiping storage on logout
+ * so an in-flight write cannot persist — and thereby resurrect — data after the
+ * wipe. See `clearMmkvStorageAndEmptyAtoms`.
  */
 export function invalidateScheduledMmkvWrites(): void {
   clearGeneration += 1
+  flushAllScheduledMmkvWrites()
+}
+
+/**
+ * Deferred flush callbacks for atoms with pending writes. Background/headless
+ * entry points can return control to the OS before the idle-callback flush runs
+ * (see `runWhenIdleWithTimeout`), so Android WorkManager / iOS may kill the
+ * process while a write is still pending — losing data or corrupting the store
+ * mid-write. `flushAllScheduledMmkvWrites` synchronously drains all pending
+ * writes before those entry points finish.
+ */
+const scheduledMmkvWriteFlushes = new Set<() => void>()
+
+/**
+ * Synchronously flushes every MMKV atom write still waiting behind the
+ * deferred idle-callback flush. Safe to call when nothing is pending; each
+ * registered flush honors the clear-generation guard.
+ */
+export function flushAllScheduledMmkvWrites(): void {
+  for (const flush of scheduledMmkvWriteFlushes) {
+    try {
+      flush()
+    } catch {}
+  }
 }
 
 // TODO: Temporary diagnostic to track atom initialization results on startup.
@@ -234,6 +258,7 @@ export function atomWithParsedMmkvStorageWithImmediateSaveOption<
   let pendingWrite: {value: A; generation: number} | undefined
 
   const flushPendingWrite = (): void => {
+    scheduledMmkvWriteFlushes.delete(flushPendingWrite)
     const toPersist = pendingWrite
     pendingWrite = undefined
     if (toPersist === undefined) return
@@ -281,6 +306,7 @@ export function atomWithParsedMmkvStorageWithImmediateSaveOption<
       const flushAlreadyScheduled = pendingWrite !== undefined
       pendingWrite = {value: newValue, generation: clearGeneration}
       if (!flushAlreadyScheduled) {
+        scheduledMmkvWriteFlushes.add(flushPendingWrite)
         // The timeout bounds how long dirty state can wait under continuous
         // animation/scroll before the idle callback is forced to run.
         runWhenIdleWithTimeout(flushPendingWrite, {timeout: 1000})
@@ -369,6 +395,7 @@ export function atomWithParsedMmkvStorageWithImmediateSaveOption<
       set(coreAtom, newValue)
 
       pendingWrite = undefined
+      scheduledMmkvWriteFlushes.delete(flushPendingWrite)
 
       isPersistingOwnValue = true
       try {

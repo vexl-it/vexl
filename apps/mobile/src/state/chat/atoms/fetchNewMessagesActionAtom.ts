@@ -11,6 +11,7 @@ import retrieveMessages, {
 } from '@vexl-next/resources-utils/src/chat/retrieveMessages'
 import {type ErrorChatMessageRequiresNewerVersion} from '@vexl-next/resources-utils/src/chat/utils/parseChatMessage'
 import {
+  effectToTask,
   effectToTaskEither,
   taskToEffect,
 } from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
@@ -65,24 +66,25 @@ const handleOtherSideUpdatedActionAtom = atom(
       newMessages,
       inbox,
     }: {newMessages: readonly ChatMessageWithState[]; inbox: InboxInState}
-  ) => {
-    const messagesToRespondWithCurrentVersion = newMessages.filter(
-      (one) =>
-        one.message.messageType === 'VERSION_UPDATE' &&
-        one.message.lastReceivedVersion !== version
-    )
-
-    messagesToRespondWithCurrentVersion.forEach(
-      (oneMessageToRespondWithCurrentVersion) => {
+  ) =>
+    pipe(
+      newMessages,
+      Array.filter(
+        (one) =>
+          one.message.messageType === 'VERSION_UPDATE' &&
+          one.message.lastReceivedVersion !== version
+      ),
+      Array.map((oneMessageToRespondWithCurrentVersion) => {
         const chatAtom = focusChatByInboxKeyAndSenderKey({
           inboxKey: inbox.inbox.privateKey.publicKeyPemBase64,
           senderKey:
             oneMessageToRespondWithCurrentVersion.message.senderPublicKey,
         })
-        Effect.runFork(set(sendUpdateNoticeMessageActionAtom, chatAtom))
-      }
+        return set(sendUpdateNoticeMessageActionAtom, chatAtom)
+      }),
+      Effect.allWith({concurrency: 'unbounded'}),
+      Effect.asVoid
     )
-  }
 )
 
 const handleOtherSideReadMessages = atom(
@@ -458,7 +460,7 @@ export const fetchAndStoreMessagesForInboxAtom = atom<
             )
           })
 
-        set(handleOtherSideUpdatedActionAtom, {
+        const handleOtherSideUpdated = set(handleOtherSideUpdatedActionAtom, {
           newMessages,
           inbox: updatedInbox,
         })
@@ -468,12 +470,20 @@ export const fetchAndStoreMessagesForInboxAtom = atom<
           inbox: updatedInbox,
         })
 
-        return pipe(
-          deletePulledMessagesReportLeft({
-            api: api.chat,
-            keyPair: updatedInbox.inbox.privateKey,
-          }),
-          T.map(() => ({updatedInbox, newMessages}))
+        return Effect.all(
+          [
+            handleOtherSideUpdated,
+            taskToEffect(
+              deletePulledMessagesReportLeft({
+                api: api.chat,
+                keyPair: updatedInbox.inbox.privateKey,
+              })
+            ),
+          ],
+          {concurrency: 'unbounded'}
+        ).pipe(
+          Effect.map(() => ({updatedInbox, newMessages})),
+          effectToTask
         )
       }
     )
@@ -514,7 +524,11 @@ export const fetchAndStoreMessagesForInboxHandleNotificationsActionAtom = atom<
         )
       )
 
-      void cancelNewChatNotificationsForTargetTokens(targetTokens)
+      yield* _(
+        Effect.promise(() =>
+          cancelNewChatNotificationsForTargetTokens(targetTokens)
+        )
+      )
     }
 
     const {newMessages, updatedInbox: inbox} = updates
@@ -575,7 +589,7 @@ const fetchMessagesForAllInboxesAtom = atom(null, (get, set) => {
         )
 
         if (Platform.OS === 'ios') {
-          void cancelNewChatNotifications()
+          yield* _(Effect.promise(cancelNewChatNotifications))
         }
 
         measure()

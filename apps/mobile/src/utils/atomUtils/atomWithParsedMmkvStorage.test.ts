@@ -4,6 +4,8 @@ import {storage} from '../mmkv/effectMmkv'
 import {
   CLEAR_STORAGE_KEY,
   atomWithParsedMmkvStorage,
+  atomWithParsedMmkvStorageWithImmediateSaveOption,
+  flushAllScheduledMmkvWrites,
   invalidateScheduledMmkvWrites,
 } from './atomWithParsedMmkvStorage'
 
@@ -370,6 +372,151 @@ describe('atomWithParsedMmkvStorage', () => {
 
     expect(setSpy).not.toHaveBeenCalled()
     expect(storage._storage.getString(key)).toBeUndefined()
+  })
+
+  it('registers the global flush callback only while a write is pending', () => {
+    const key = 'test-pending-flush-registration'
+    const addSpy = jest.spyOn(Set.prototype, 'add')
+    const deleteSpy = jest.spyOn(Set.prototype, 'delete')
+    const testAtom = atomWithParsedMmkvStorage(
+      key,
+      defaultValue,
+      TestValueSchema
+    )
+    const store = createStore()
+
+    expect(addSpy).not.toHaveBeenCalledWith(testAtom.flushNow)
+
+    store.set(testAtom, {name: 'v1', count: 1})
+    expect(addSpy).toHaveBeenCalledWith(testAtom.flushNow)
+
+    addSpy.mockClear()
+    store.set(testAtom, {name: 'v2', count: 2})
+    expect(addSpy).not.toHaveBeenCalledWith(testAtom.flushNow)
+
+    flushIdleCallbacks()
+    expect(deleteSpy).toHaveBeenCalledWith(testAtom.flushNow)
+
+    const iteratorSpy = jest.spyOn(Set.prototype, Symbol.iterator)
+    flushAllScheduledMmkvWrites()
+
+    expect(iteratorSpy).toHaveBeenCalledTimes(1)
+    expect(iteratorSpy.mock.instances[0]).toHaveProperty('size', 0)
+  })
+
+  it('removes a synchronously flushed callback from the global registry', () => {
+    const key = 'test-flush-now-removes-registration'
+    const deleteSpy = jest.spyOn(Set.prototype, 'delete')
+    const testAtom = atomWithParsedMmkvStorage(
+      key,
+      defaultValue,
+      TestValueSchema
+    )
+    const store = createStore()
+
+    store.set(testAtom, {name: 'pending', count: 1})
+    testAtom.flushNow()
+
+    expect(deleteSpy).toHaveBeenCalledWith(testAtom.flushNow)
+
+    const iteratorSpy = jest.spyOn(Set.prototype, Symbol.iterator)
+    flushAllScheduledMmkvWrites()
+
+    expect(iteratorSpy).toHaveBeenCalledTimes(1)
+    expect(iteratorSpy.mock.instances[0]).toHaveProperty('size', 0)
+  })
+
+  it('discards invalidated callbacks immediately', () => {
+    const key = 'test-invalidation-removes-registration'
+    const deleteSpy = jest.spyOn(Set.prototype, 'delete')
+    const testAtom = atomWithParsedMmkvStorage(
+      key,
+      defaultValue,
+      TestValueSchema
+    )
+    const store = createStore()
+
+    store.set(testAtom, {name: 'sensitive', count: 42})
+    invalidateScheduledMmkvWrites()
+
+    expect(deleteSpy).toHaveBeenCalledWith(testAtom.flushNow)
+    expect(storage._storage.getString(key)).toBeUndefined()
+
+    const iteratorSpy = jest.spyOn(Set.prototype, Symbol.iterator)
+    flushAllScheduledMmkvWrites()
+
+    expect(iteratorSpy).toHaveBeenCalledTimes(1)
+    expect(iteratorSpy.mock.instances[0]).toHaveProperty('size', 0)
+  })
+
+  it('immediate save discards the older deferred write and its callback', () => {
+    const key = 'test-immediate-save-removes-registration'
+    const deleteSpy = jest.spyOn(Set.prototype, 'delete')
+    const {atom: testAtom, setAndSaveImmediatelyAtom} =
+      atomWithParsedMmkvStorageWithImmediateSaveOption(
+        key,
+        defaultValue,
+        TestValueSchema
+      )
+    const store = createStore()
+    const setSpy = jest.spyOn(storage._storage, 'set')
+
+    store.set(testAtom, {name: 'deferred', count: 1})
+    store.set(setAndSaveImmediatelyAtom, {name: 'immediate', count: 2})
+
+    expect(deleteSpy).toHaveBeenCalledWith(testAtom.flushNow)
+    expect(JSON.parse(storage._storage.getString(key) ?? '')).toEqual({
+      name: 'immediate',
+      count: 2,
+    })
+
+    flushAllScheduledMmkvWrites()
+    flushIdleCallbacks()
+    expect(setSpy).toHaveBeenCalledTimes(1)
+  })
+
+  it('flushAllScheduledMmkvWrites persists a pending value without waiting for the idle callback', () => {
+    const key = 'test-flush-all-pending'
+    const testAtom = atomWithParsedMmkvStorage(
+      key,
+      defaultValue,
+      TestValueSchema
+    )
+    const store = createStore()
+
+    store.set(testAtom, {name: 'pending', count: 5})
+    expect(storage._storage.getString(key)).toBeUndefined()
+
+    flushAllScheduledMmkvWrites()
+
+    expect(JSON.parse(storage._storage.getString(key) ?? '')).toEqual({
+      name: 'pending',
+      count: 5,
+    })
+  })
+
+  it('flushAllScheduledMmkvWrites does not persist a write invalidated by a storage clear', () => {
+    const key = 'test-flush-all-after-clear'
+    const testAtom = atomWithParsedMmkvStorage(
+      key,
+      defaultValue,
+      TestValueSchema
+    )
+    const store = createStore()
+    const unsub = store.sub(testAtom, () => {})
+
+    store.set(testAtom, {name: 'sensitive', count: 42})
+    expect(storage._storage.getString(key)).toBeUndefined()
+
+    storage._storage.set(CLEAR_STORAGE_KEY, Date.now().toString())
+    invalidateScheduledMmkvWrites()
+    storage._storage.clearAll()
+
+    flushAllScheduledMmkvWrites()
+
+    expect(storage._storage.getString(key)).toBeUndefined()
+    expect(store.get(testAtom)).toEqual(defaultValue)
+    unsub()
   })
 
   it('flushNow does not write a value that was invalidated by a storage clear', () => {

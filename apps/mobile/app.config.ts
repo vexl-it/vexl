@@ -305,6 +305,8 @@ export default {
     './expo-plugins/android-install-release-plugin.js',
     './expo-plugins/android-manifest-nfc-action-plugin.js',
     'expo-font',
+    'expo-sharing',
+    'expo-status-bar',
     'expo-secure-store',
     'expo-camera',
     [

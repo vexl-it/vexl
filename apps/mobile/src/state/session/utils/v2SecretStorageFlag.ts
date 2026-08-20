@@ -12,7 +12,7 @@ export function markV2SecretAsWritten(): void {
 
 export function clearV2SecretWasWrittenFlag(): void {
   try {
-    storage._storage.delete(V2_SECRET_WAS_WRITTEN_STORAGE_KEY)
+    storage._storage.remove(V2_SECRET_WAS_WRITTEN_STORAGE_KEY)
   } catch {
     // This marker is diagnostic only and must not block logout cleanup.
   }

@@ -21,6 +21,8 @@ jest.mock('../reportError', () => ({
   default: jest.fn(),
 }))
 
+jest.mock('react-native-mmkv')
+
 const TestValueSchema = Schema.Struct({
   name: Schema.String,
   count: Schema.Number,
@@ -246,7 +248,7 @@ describe('atomWithParsedMmkvStorage', () => {
     const store = createStore()
     const unsub = store.sub(testAtom, () => {})
 
-    storage._storage.delete(key)
+    storage._storage.remove(key)
     flushIdleCallbacks()
 
     expect(store.get(testAtom)).toEqual(defaultValue)

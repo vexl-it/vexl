@@ -28,7 +28,7 @@ export const refreshNotificationTaskId = registerInAppLoadingTask({
       }
 
       if (newToken) storage._storage.set(NOTIFICATION_TOKEN_CACHE_KEY, newToken)
-      else storage._storage.delete(NOTIFICATION_TOKEN_CACHE_KEY)
+      else storage._storage.remove(NOTIFICATION_TOKEN_CACHE_KEY)
 
       yield* _(
         store

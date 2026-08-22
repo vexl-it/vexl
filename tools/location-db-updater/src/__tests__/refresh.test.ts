@@ -187,19 +187,24 @@ describe('refresh.sh', () => {
       true
     )
 
-    // extract: three osmium tags-filter outputs with the expected filters
+    // extract: four osmium tags-filter outputs with the expected filters
     const filters = log.filter((one) => one.includes('tags-filter'))
-    expect(filters).toHaveLength(3)
+    expect(filters).toHaveLength(4)
     expect(filters[0]).toContain('n/place')
+    expect(filters[1]).toContain('r/admin_level=6,7,8,9,10,11')
+    expect(filters[1]).toContain('r/boundary=cadastral')
     expect(filters[1]).toContain(
+      'wr/place=city,town,municipality,borough,village,suburb,quarter,neighbourhood,hamlet,city_block'
+    )
+    expect(filters[2]).toContain(
       'nwr/amenity=cafe,restaurant,pub,bar,fast_food'
     )
-    expect(filters[1]).toContain('nwr/leisure=park,garden')
-    expect(filters[1]).toContain('nwr/tourism=attraction,museum')
-    expect(filters[2]).toContain(
+    expect(filters[2]).toContain('nwr/leisure=park,garden')
+    expect(filters[2]).toContain('nwr/tourism=attraction,museum')
+    expect(filters[3]).toContain(
       'w/highway=residential,living_street,pedestrian,primary,secondary,tertiary,unclassified'
     )
-    for (const kind of ['places', 'pois', 'streets']) {
+    for (const kind of ['places', 'boundaries', 'pois', 'streets']) {
       expect(
         existsSync(path.join(dataDir, `filtered/${kind}-europe.osm.pbf`))
       ).toBe(true)
@@ -210,6 +215,7 @@ describe('refresh.sh', () => {
     expect(ingest).toContain('ingest:geocoding')
     expect(ingest).toContain(`--countries ${dataDir}/ne_countries.geojson`)
     expect(ingest).toContain(`${dataDir}/filtered/places-europe.osm.pbf`)
+    expect(ingest).toContain(`${dataDir}/filtered/boundaries-europe.osm.pbf`)
     expect(ingest).toContain(`${dataDir}/filtered/pois-europe.osm.pbf`)
     expect(ingest).toContain(`${dataDir}/filtered/streets-europe.osm.pbf`)
   })
@@ -370,7 +376,7 @@ describe('refresh.sh', () => {
       false
     )
     expect(secondLog.filter((one) => one.includes('tags-filter'))).toHaveLength(
-      3
+      4
     )
     expect(secondLog.some((one) => one.startsWith('pnpm'))).toBe(true)
   })

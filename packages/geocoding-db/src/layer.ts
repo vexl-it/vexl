@@ -3,12 +3,18 @@ import {loadMigrationsFromEffect} from '@vexl-next/server-utils/src/loadMigratio
 import {Effect, Layer, String} from 'effect'
 import {geocodingDbConfig} from './config'
 import initialMigration from './migrations/0001_initial'
+import placeBoundariesMigration from './migrations/0002_placeBoundaries'
 
 const migrations = [
   {
     id: 1,
     name: 'initial',
     migrationEffect: initialMigration,
+  },
+  {
+    id: 2,
+    name: 'place boundaries',
+    migrationEffect: placeBoundariesMigration,
   },
 ] as const
 

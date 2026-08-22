@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:16
+        image: postgis/postgis:17-3.5
         env:
           POSTGRES_DB: postgres
           POSTGRES_USER: postgres

@@ -32,7 +32,9 @@ services:
   # vexl service databases so geocoding traffic and OSM ingests never share
   # resources with user data (mirrors the prod topology).
   geocoding-postgres:
-    image: postgres:17
+    build:
+      context: ./tooling/dev/geocoding-postgres
+    image: vexl-geocoding-postgres:dev
     container_name: vexl-geocoding-postgres
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}

@@ -1,14 +1,17 @@
 /**
- * Loads OSM places into the geocoding database. Three kinds of entries:
+ * Loads OSM places into the geocoding database. Four kinds of entries:
  *   - settlements (place=* nodes) — searchable and used for reverse geocoding
+ *   - boundaries (administrative relations, Czech cadastral areas, place=*
+ *     polygons) — simplified + subdivided polygons used for reverse geocoding
+ *     by containment
  *   - POIs (cafés, restaurants, pubs, parks, attractions, …) — searchable only
  *   - streets (named highway ways, deduplicated to one entry per street name
  *     per ~10 km grid cell, no house numbers) — searchable only
  *
- * Input: PBF files pre-filtered by scripts/refresh.sh (places-*, pois-*,
- * streets-*; the parser classifies each feature by its tags, so files can be
- * passed in any mix) + a Natural Earth admin-0 countries GeoJSON used to stamp
- * each entry with its ISO country code.
+ * Input: PBF files pre-filtered by scripts/refresh.sh (places-*, boundaries-*,
+ * pois-*, streets-*; the parser classifies each feature by its tags, so files
+ * can be passed in any mix) + a Natural Earth admin-0 countries GeoJSON used
+ * to stamp entries with an ISO country code.
  *
  * The load is atomic: data goes into `places_ingest` / `place_names_ingest`
  * staging tables which replace the live tables in a single transaction at the
@@ -21,12 +24,16 @@
  *
  * Env: GEOCODING_DB_URL, GEOCODING_DB_USER, GEOCODING_DB_PASSWORD (same as the service).
  */
-import {computeImportance} from '@vexl-next/geocoding-db/src/common'
+import {
+  BOUNDARY_SIMPLIFY_TOLERANCE_DEG,
+  computeImportance,
+} from '@vexl-next/geocoding-db/src/common'
 import {spawn} from 'node:child_process'
 import {existsSync} from 'node:fs'
 import {readFile} from 'node:fs/promises'
 import pg from 'pg'
 import {
+  type BoundaryRow,
   CountryIndex,
   parseFeature,
   type PlaceNameRow,
@@ -35,6 +42,9 @@ import {
 } from './ingestParsing'
 
 const BATCH_SIZE = 2000
+const BOUNDARY_BATCH_SIZE = 100
+/** ST_Subdivide cap — keeps point-in-polygon checks cheap on huge boundaries. */
+const BOUNDARY_MAX_VERTICES = 256
 /** Log running totals roughly every this many ingested rows. */
 const PROGRESS_INTERVAL = 500_000
 
@@ -126,6 +136,112 @@ const insertRows = async <T extends object>(
   }
 }
 
+/**
+ * Geometry goes through ST_MakeValid (OSM polygons are occasionally
+ * self-touching), is simplified to ~10 m and subdivided into small parts, so
+ * containment queries never touch a polygon with thousands of vertices.
+ */
+const insertBoundaryGeometries = async (
+  client: pg.Client,
+  rows: BoundaryRow[]
+): Promise<void> => {
+  const values: unknown[] = [
+    BOUNDARY_SIMPLIFY_TOLERANCE_DEG,
+    BOUNDARY_MAX_VERTICES,
+  ]
+  const tuples = rows.map((row) => {
+    values.push(row.id, row.geometry_json)
+    return `($${values.length - 1}::bigint, $${values.length}::text)`
+  })
+  await client.query(
+    `
+      WITH
+        raw (boundary_id, geometry_json) AS (
+          VALUES
+            ${tuples.join(', ')}
+        ),
+        valid AS (
+          SELECT
+            boundary_id,
+            ST_CollectionExtract(
+              ST_MakeValid(ST_Force2D(ST_SetSRID(ST_GeomFromGeoJSON(geometry_json), 4326))),
+              3
+            ) AS geometry
+          FROM
+            raw
+        ),
+        simplified AS (
+          SELECT
+            boundary_id,
+            ST_CollectionExtract(
+              ST_MakeValid(ST_SimplifyPreserveTopology(geometry, $1::double precision)),
+              3
+            ) AS geometry
+          FROM
+            valid
+        ),
+        parts AS (
+          SELECT
+            boundary_id,
+            (ST_Dump(ST_Subdivide(geometry, $2::integer))).geom::geometry(Polygon, 4326) AS geometry
+          FROM
+            simplified
+          WHERE
+            NOT ST_IsEmpty(geometry)
+        ),
+        numbered AS (
+          SELECT
+            boundary_id,
+            row_number() OVER (
+              PARTITION BY boundary_id
+              ORDER BY
+                ST_XMin(geometry),
+                ST_YMin(geometry),
+                ST_XMax(geometry),
+                ST_YMax(geometry),
+                ST_AsBinary(geometry)
+            )::integer - 1 AS part_index,
+            geometry
+          FROM
+            parts
+        ),
+        inserted AS (
+          INSERT INTO
+            place_boundary_geometries_ingest (
+              boundary_id,
+              part_index,
+              geometry
+            )
+          SELECT
+            boundary_id,
+            part_index,
+            geometry
+          FROM
+            numbered
+          RETURNING
+            boundary_id,
+            geometry
+        )
+      UPDATE place_boundaries_ingest AS boundary
+      SET
+        area_meters = areas.area_meters
+      FROM
+        (
+          SELECT
+            boundary_id,
+            sum(ST_Area(geometry::geography)) AS area_meters
+          FROM
+            inserted
+          GROUP BY
+            boundary_id
+        ) AS areas
+      WHERE
+        boundary.id = areas.boundary_id
+    `,
+    values
+  )
+}
+
 const main = async (): Promise<void> => {
   const startedAt = Date.now()
   const {countriesPath, pbfPaths} = parseArgs()
@@ -140,11 +256,14 @@ const main = async (): Promise<void> => {
   await client.query(`CREATE EXTENSION IF NOT EXISTS pg_trgm`)
   await client.query(`CREATE EXTENSION IF NOT EXISTS cube`)
   await client.query(`CREATE EXTENSION IF NOT EXISTS earthdistance`)
+  await client.query(`CREATE EXTENSION IF NOT EXISTS postgis`)
 
   log('Preparing staging tables')
   await client.query(`DROP TABLE IF EXISTS place_names_ingest`)
   await client.query(`DROP TABLE IF EXISTS places_ingest`)
   await client.query(`DROP TABLE IF EXISTS street_segments_ingest`)
+  await client.query(`DROP TABLE IF EXISTS place_boundary_geometries_ingest`)
+  await client.query(`DROP TABLE IF EXISTS place_boundaries_ingest`)
   await client.query(`
     CREATE UNLOGGED TABLE places_ingest (
       id bigint PRIMARY KEY,
@@ -178,20 +297,44 @@ const main = async (): Promise<void> => {
       grid_lon integer NOT NULL
     )
   `)
+  await client.query(`
+    CREATE UNLOGGED TABLE place_boundaries_ingest (
+      id bigint PRIMARY KEY,
+      name varchar NOT NULL,
+      names jsonb NOT NULL DEFAULT '{}'::jsonb,
+      country_code varchar,
+      boundary_type varchar NOT NULL,
+      admin_level smallint,
+      place_tag varchar,
+      area_meters double precision NOT NULL DEFAULT 0
+    )
+  `)
+  await client.query(`
+    CREATE UNLOGGED TABLE place_boundary_geometries_ingest (
+      boundary_id bigint NOT NULL,
+      part_index integer NOT NULL,
+      geometry geometry(Polygon, 4326) NOT NULL,
+      PRIMARY KEY (boundary_id, part_index),
+      FOREIGN KEY (boundary_id) REFERENCES place_boundaries_ingest (id) ON DELETE CASCADE
+    )
+  `)
 
   let totalPlaces = 0
   let totalNames = 0
   let totalSegments = 0
+  let totalBoundaries = 0
   let nextProgressAt = PROGRESS_INTERVAL
   let skippedDuplicates = 0
   let geometryUpgrades = 0
   // Numeric ids keep the dedupe map small. Street segments are excluded on
   // purpose (tens of millions) — the SQL GROUP BY dedupes them instead.
   const seenGeomRankById = new Map<number, number>()
+  const seenBoundaryIds = new Set<number>()
   const placeBatchById = new Map<number, PlaceRow>()
   let placeBatch: PlaceRow[] = []
   let nameBatch: PlaceNameRow[] = []
   let segmentBatch: StreetSegmentRow[] = []
+  let boundaryBatch: BoundaryRow[] = []
 
   const flush = async (): Promise<void> => {
     if (placeBatch.length > 0) {
@@ -251,12 +394,31 @@ const main = async (): Promise<void> => {
       totalSegments += segmentBatch.length
       segmentBatch = []
     }
+    if (boundaryBatch.length > 0) {
+      await insertRows(
+        client,
+        'place_boundaries_ingest',
+        [
+          'id',
+          'name',
+          'names',
+          'country_code',
+          'boundary_type',
+          'admin_level',
+          'place_tag',
+        ],
+        boundaryBatch
+      )
+      await insertBoundaryGeometries(client, boundaryBatch)
+      totalBoundaries += boundaryBatch.length
+      boundaryBatch = []
+    }
     // Periodic progress for the multi-hour full-world ingest — per-file logs
     // alone can leave hours of silence on the big continent extracts.
-    const processed = totalPlaces + totalNames + totalSegments
+    const processed = totalPlaces + totalNames + totalSegments + totalBoundaries
     if (processed >= nextProgressAt) {
       log(
-        `  progress: ${totalPlaces} places, ${totalNames} names, ${totalSegments} street segments`
+        `  progress: ${totalPlaces} places, ${totalNames} names, ${totalSegments} street segments, ${totalBoundaries} boundaries`
       )
       nextProgressAt = processed + PROGRESS_INTERVAL
     }
@@ -280,6 +442,14 @@ const main = async (): Promise<void> => {
     const handleLine = async (line: string): Promise<void> => {
       const parsed = parseFeature(line, countries)
       if (parsed === null) return
+      if (parsed.kind === 'boundary') {
+        const numericId = Number(parsed.boundary.id)
+        if (seenBoundaryIds.has(numericId)) return
+        seenBoundaryIds.add(numericId)
+        boundaryBatch.push(parsed.boundary)
+        if (boundaryBatch.length >= BOUNDARY_BATCH_SIZE) await flush()
+        return
+      }
       if (parsed.kind === 'street') {
         segmentBatch.push(parsed.segment)
         if (segmentBatch.length >= BATCH_SIZE) await flush()
@@ -349,7 +519,7 @@ const main = async (): Promise<void> => {
     }
     await flush()
     log(
-      `  running totals: ${totalPlaces} places, ${totalNames} names, ${totalSegments} street segments`
+      `  running totals: ${totalPlaces} places, ${totalNames} names, ${totalSegments} street segments, ${totalBoundaries} boundaries`
     )
   }
   await flush()
@@ -421,6 +591,35 @@ const main = async (): Promise<void> => {
 
   // geom_rank only steers the ingest-time area-over-linestring dedupe
   await client.query(`ALTER TABLE places_ingest DROP COLUMN geom_rank`)
+
+  // A boundary whose geometry collapsed to nothing in ST_MakeValid has no
+  // parts and could never match — drop it so counts and sizes stay honest
+  const droppedBoundaries = (
+    await client.query<{count: string}>(`
+      WITH
+        dropped AS (
+          DELETE FROM place_boundaries_ingest AS boundary
+          WHERE
+            NOT EXISTS (
+              SELECT
+                1
+              FROM
+                place_boundary_geometries_ingest AS geometry
+              WHERE
+                geometry.boundary_id = boundary.id
+            )
+          RETURNING
+            boundary.id
+        )
+      SELECT
+        count(*) AS count
+      FROM
+        dropped
+    `)
+  ).rows[0].count
+  totalBoundaries -= Number(droppedBoundaries)
+  if (Number(droppedBoundaries) > 0)
+    log(`Dropped ${droppedBoundaries} boundaries with empty geometry`)
 
   // Streets/POIs near a city node rank above their same-named twins in small
   // towns. Capped at 0.5 so they always stay below the 0.55 "important"
@@ -542,8 +741,13 @@ const main = async (): Promise<void> => {
     WHERE
       importance >= 0.55
   `)
+  await client.query(`
+    CREATE INDEX "place_boundary_geometries_geometry_IX_ingest" ON place_boundary_geometries_ingest USING gist (geometry)
+  `)
   await client.query(`ALTER TABLE places_ingest SET LOGGED`)
   await client.query(`ALTER TABLE place_names_ingest SET LOGGED`)
+  await client.query(`ALTER TABLE place_boundaries_ingest SET LOGGED`)
+  await client.query(`ALTER TABLE place_boundary_geometries_ingest SET LOGGED`)
 
   // Sanity gate: refuse to replace a healthy dataset with a much smaller one
   const placesTableExists = (
@@ -571,14 +775,45 @@ const main = async (): Promise<void> => {
     )
     process.exit(1)
   }
+  const boundariesTableExists = (
+    await client.query<{exists: boolean}>(
+      `SELECT to_regclass('place_boundaries') IS NOT NULL AS exists`
+    )
+  ).rows[0].exists
+  const previousBoundaryCount = boundariesTableExists
+    ? Number(
+        (
+          await client.query<{count: string}>(
+            `SELECT count(*) AS count FROM place_boundaries`
+          )
+        ).rows[0].count
+      )
+    : 0
+  if (
+    previousBoundaryCount > 0 &&
+    totalBoundaries < previousBoundaryCount * 0.7
+  ) {
+    logError(
+      `Sanity check failed: new dataset has ${totalBoundaries} boundaries, previous had ${previousBoundaryCount}. Aborting swap.`
+    )
+    process.exit(1)
+  }
 
   log('Swapping tables')
   await client.query('BEGIN')
   try {
+    await client.query(`DROP TABLE IF EXISTS place_boundary_geometries`)
+    await client.query(`DROP TABLE IF EXISTS place_boundaries`)
     await client.query(`DROP TABLE IF EXISTS place_names`)
     await client.query(`DROP TABLE IF EXISTS places`)
     await client.query(`ALTER TABLE places_ingest RENAME TO places`)
     await client.query(`ALTER TABLE place_names_ingest RENAME TO place_names`)
+    await client.query(
+      `ALTER TABLE place_boundaries_ingest RENAME TO place_boundaries`
+    )
+    await client.query(
+      `ALTER TABLE place_boundary_geometries_ingest RENAME TO place_boundary_geometries`
+    )
     // Constraints (and their backing indexes) keep their staging names on
     // table rename — realign them so re-runs don't leave stale _ingest names
     await client.query(
@@ -586,6 +821,15 @@ const main = async (): Promise<void> => {
     )
     await client.query(
       `ALTER TABLE place_names RENAME CONSTRAINT place_names_ingest_fk TO place_names_fk`
+    )
+    await client.query(
+      `ALTER TABLE place_boundaries RENAME CONSTRAINT place_boundaries_ingest_pkey TO "PK_place_boundaries"`
+    )
+    await client.query(
+      `ALTER TABLE place_boundary_geometries RENAME CONSTRAINT place_boundary_geometries_ingest_pkey TO "PK_place_boundary_geometries"`
+    )
+    await client.query(
+      `ALTER TABLE place_boundary_geometries RENAME CONSTRAINT place_boundary_geometries_ingest_boundary_id_fkey TO place_boundary_geometries_fk`
     )
     await client.query(
       `ALTER INDEX "places_settlement_earth_IX_ingest" RENAME TO "places_settlement_earth_IX"`
@@ -608,6 +852,9 @@ const main = async (): Promise<void> => {
     await client.query(
       `ALTER INDEX "place_names_important_prefix_IX_ingest" RENAME TO "place_names_important_prefix_IX"`
     )
+    await client.query(
+      `ALTER INDEX "place_boundary_geometries_geometry_IX_ingest" RENAME TO "place_boundary_geometries_geometry_IX"`
+    )
     await client.query('COMMIT')
   } catch (error) {
     await client.query('ROLLBACK')
@@ -617,6 +864,8 @@ const main = async (): Promise<void> => {
   // PARALLEL 0 avoids shared-memory limits in constrained containers.
   await client.query(`VACUUM (ANALYZE, PARALLEL 0) places`)
   await client.query(`VACUUM (ANALYZE, PARALLEL 0) place_names`)
+  await client.query(`VACUUM (ANALYZE, PARALLEL 0) place_boundaries`)
+  await client.query(`VACUUM (ANALYZE, PARALLEL 0) place_boundary_geometries`)
 
   const byType = (
     await client.query<{placeType: string; count: string}>(`
@@ -633,7 +882,7 @@ const main = async (): Promise<void> => {
   ).rows
   log(`\nDone in ${Math.round((Date.now() - startedAt) / 1000)}s`)
   log(
-    `${totalPlaces} places, ${totalNames} names, ${totalSegments} street segments, ${skippedDuplicates} duplicates skipped, ${geometryUpgrades} geometry upgrades`
+    `${totalPlaces} places, ${totalNames} names, ${totalSegments} street segments, ${totalBoundaries} boundaries, ${skippedDuplicates} duplicates skipped, ${geometryUpgrades} geometry upgrades`
   )
   for (const row of byType) log(`  ${row.placeType}: ${row.count}`)
 

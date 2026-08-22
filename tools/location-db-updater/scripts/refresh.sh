@@ -15,7 +15,7 @@
 # re-run alone (e.g. tweak filtering, then `refresh.sh extract ingest`).
 #
 #   data/raw/<region>-latest.osm.pbf(.ok)   raw extracts (.ok = validated)
-#   data/filtered/{places,pois,streets}-<region>.osm.pbf
+#   data/filtered/{places,boundaries,pois,streets}-<region>.osm.pbf
 #   data/ne_countries.geojson
 #   data/refresh.log                        progress log, appended per run
 #
@@ -177,6 +177,15 @@ if has_stage extract; then
     log "=== $region: extracting settlements"
     osmium tags-filter "$raw" n/place \
       -o "$FILTERED_DIR/places-$s.osm.pbf" --overwrite
+    log "=== $region: extracting settlement boundaries"
+    # Administrative relations at local levels (6-11; the ingest maps levels to
+    # city/sub-city roles per country), cadastral relations (kept for CZ only
+    # at ingest) and settlement polygons tagged place=* directly.
+    osmium tags-filter "$raw" \
+      r/admin_level=6,7,8,9,10,11 \
+      r/boundary=cadastral \
+      wr/place=city,town,municipality,borough,village,suburb,quarter,neighbourhood,hamlet,city_block \
+      -o "$FILTERED_DIR/boundaries-$s.osm.pbf" --overwrite
     log "=== $region: extracting POIs"
     osmium tags-filter "$raw" \
       nwr/amenity=cafe,restaurant,pub,bar,fast_food \
@@ -201,7 +210,7 @@ if has_stage ingest; then
   files=""
   for region in $REGIONS; do
     s=$(slug "$region")
-    files="$files $FILTERED_DIR/places-$s.osm.pbf $FILTERED_DIR/pois-$s.osm.pbf $FILTERED_DIR/streets-$s.osm.pbf"
+    files="$files $FILTERED_DIR/places-$s.osm.pbf $FILTERED_DIR/boundaries-$s.osm.pbf $FILTERED_DIR/pois-$s.osm.pbf $FILTERED_DIR/streets-$s.osm.pbf"
   done
   log "=== ingesting: $REGIONS"
   cd "$SCRIPT_DIR/.."

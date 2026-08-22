@@ -19,7 +19,7 @@ import {
   disposeGeocodingTestDatabase,
   setupGeocodingTestDatabase,
 } from '@vexl-next/geocoding-db/src/tests/testGeocodingDb'
-import {Effect, Layer, ManagedRuntime} from 'effect'
+import {Effect, Layer, ManagedRuntime, Option} from 'effect'
 import {execFile} from 'node:child_process'
 import {chmodSync, mkdirSync, mkdtempSync, rmSync, writeFileSync} from 'node:fs'
 import {tmpdir} from 'node:os'
@@ -72,6 +72,62 @@ const square = (
   [minLon, minLat],
 ]
 
+const circle = (
+  centerLon: number,
+  centerLat: number,
+  radius: number,
+  vertices: number
+): Array<[number, number]> => {
+  const ring = Array.from({length: vertices}, (unused, index) => {
+    const angle = (index / vertices) * Math.PI * 2
+    return [
+      centerLon + Math.cos(angle) * radius,
+      centerLat + Math.sin(angle) * radius,
+    ] satisfies [number, number]
+  })
+  return [...ring, ring[0]]
+}
+
+const largeBoundaryGeometry = {
+  type: 'Polygon',
+  coordinates: [circle(13.5, 49.5, 0.2, 2200)],
+}
+
+/**
+ * 600 vertices alternating between two radii 0.01° apart — every vertex
+ * survives the ~10 m simplification, so the polygon must be subdivided.
+ */
+const spikyBoundaryGeometry = {
+  type: 'Polygon',
+  coordinates: [
+    (() => {
+      const ring = Array.from({length: 600}, (unused, index) => {
+        const angle = (index / 600) * Math.PI * 2
+        const radius = index % 2 === 0 ? 0.2 : 0.21
+        return [
+          14.0 + Math.cos(angle) * radius,
+          50.5 + Math.sin(angle) * radius,
+        ] satisfies [number, number]
+      })
+      return [...ring, ring[0]]
+    })(),
+  ],
+}
+
+/** Self-intersecting "bow tie" — ST_MakeValid must split it into two triangles. */
+const bowTieBoundaryGeometry = {
+  type: 'Polygon',
+  coordinates: [
+    [
+      [13.0, 49.2],
+      [13.1, 49.3],
+      [13.1, 49.2],
+      [13.0, 49.3],
+      [13.0, 49.2],
+    ],
+  ],
+}
+
 /** Two rectangular countries roughly where Slovakia and Czechia sit. */
 const countriesFixture = JSON.stringify({
   type: 'FeatureCollection',
@@ -121,6 +177,53 @@ const mainFixture = (cityName: string): string[] => [
   node('n2', 14.5, 50.0, {place: 'town', name: 'Mesto'}),
   node('n3', 13.0, 49.5, {place: 'village', name: 'Dedinka'}),
   node('n50', 0, 0, {place: 'town', name: 'Atlantis'}), // open ocean, no country
+
+  // Boundaries: a cadastral area with a hole, a huge near-circle (simplifies
+  // to few vertices), a spiky polygon (must be subdivided), an invalid bow
+  // tie (must be repaired), a place polygon, a county-level relation, and a
+  // cadastral area outside Czechia (dropped)
+  feature(
+    'a201',
+    {
+      type: 'Polygon',
+      coordinates: [
+        square(14.4, 49.9, 14.6, 50.1),
+        square(14.48, 49.98, 14.52, 50.02),
+      ],
+    },
+    {boundary: 'cadastral', name: 'Holešovice'}
+  ),
+  feature('a203', largeBoundaryGeometry, {
+    boundary: 'administrative',
+    admin_level: '8',
+    place: 'municipality',
+    name: 'Large Municipality',
+  }),
+  feature('a205', spikyBoundaryGeometry, {
+    boundary: 'administrative',
+    admin_level: '8',
+    name: 'Spiky Municipality',
+  }),
+  feature('a207', bowTieBoundaryGeometry, {
+    boundary: 'administrative',
+    admin_level: '9',
+    name: 'Bow Tie Borough',
+  }),
+  feature(
+    'a210', // area of closed way 105
+    {type: 'Polygon', coordinates: [square(17.0, 48.0, 17.2, 48.2)]},
+    {place: 'suburb', name: 'Petržalka'}
+  ),
+  feature(
+    'a211',
+    {type: 'Polygon', coordinates: [square(12.5, 49.5, 13.5, 50.5)]},
+    {boundary: 'administrative', admin_level: '6', name: 'Okres'}
+  ),
+  feature(
+    'a213',
+    {type: 'Polygon', coordinates: [square(17.3, 48.3, 17.4, 48.4)]},
+    {boundary: 'cadastral', name: 'Slovak cadastre'}
+  ),
 
   // POIs — one inside the city's ~10 km grid cell, one far from any city
   node('n10', 17.1, 48.15, {amenity: 'cafe', name: 'Corner Cafe'}),
@@ -300,6 +403,19 @@ interface PlaceAssertRow {
   longitude: number
 }
 
+interface BoundaryAssertRow {
+  name: string
+  boundaryType: string
+  adminLevel: number | null
+  placeTag: string | null
+  countryCode: string | null
+  areaMeters: number
+  partCount: number
+  holeCount: number
+  maxVertices: number
+  invalidCount: number
+}
+
 const queryPlaces = async (where: string): Promise<PlaceAssertRow[]> => {
   let result: readonly PlaceAssertRow[] = []
   await dbRuntime.runPromise(
@@ -315,12 +431,49 @@ const queryPlaces = async (where: string): Promise<PlaceAssertRow[]> => {
   return [...result]
 }
 
-const querySingle = async <T extends object>(queryText: string): Promise<T> => {
+const queryBoundaries = async (where: string): Promise<BoundaryAssertRow[]> => {
+  let result: readonly BoundaryAssertRow[] = []
+  await dbRuntime.runPromise(
+    Effect.gen(function* (_) {
+      const sql = yield* _(PgClient.PgClient)
+      result = yield* _(
+        sql.unsafe<BoundaryAssertRow>(`
+          SELECT
+            boundary.name,
+            boundary.boundary_type,
+            boundary.admin_level,
+            boundary.place_tag,
+            boundary.country_code,
+            boundary.area_meters,
+            count(geometry.part_index)::int AS part_count,
+            sum(ST_NumInteriorRings(geometry.geometry))::int AS hole_count,
+            max(ST_NPoints(geometry.geometry))::int AS max_vertices,
+            sum(CASE WHEN ST_IsValid(geometry.geometry) THEN 0 ELSE 1 END)::int AS invalid_count
+          FROM
+            place_boundaries AS boundary
+            JOIN place_boundary_geometries AS geometry ON geometry.boundary_id = boundary.id
+          WHERE
+            ${where}
+          GROUP BY
+            boundary.id
+          ORDER BY
+            boundary.id
+        `)
+      )
+    })
+  )
+  return [...result]
+}
+
+const querySingle = async <T extends object>(
+  queryText: string,
+  params: readonly unknown[] = []
+): Promise<T> => {
   let result: T | undefined
   await dbRuntime.runPromise(
     Effect.gen(function* (_) {
       const sql = yield* _(PgClient.PgClient)
-      const rows = yield* _(sql.unsafe<T>(queryText))
+      const rows = yield* _(sql.unsafe<T>(queryText, params))
       result = rows[0]
     })
   )
@@ -363,7 +516,7 @@ describe('places ingest pipeline', () => {
     const fileB = writePbfFixture('mixed-b', secondFileFixture)
 
     const run = await runIngest([fileA, fileB])
-    expect(run.code).toEqual(0)
+    expect(run).toMatchObject({code: 0, stderr: ''})
 
     const total = await querySingle<{count: number}>(
       'SELECT count(*)::int AS count FROM places'
@@ -392,6 +545,136 @@ describe('places ingest pipeline', () => {
     // The duplicated id from the second file must not override the first row
     expect(await queryPlaces(`name = 'Mesto Duplicate'`)).toHaveLength(0)
     expect(await queryPlaces(`name = 'Mesto'`)).toHaveLength(1)
+  })
+
+  it('stores boundaries with their level, place tag and country code', async () => {
+    const [cadastral] = await queryBoundaries(`boundary.name = 'Holešovice'`)
+    expect(cadastral).toMatchObject({
+      boundaryType: 'cadastral',
+      adminLevel: null,
+      placeTag: null,
+      countryCode: 'cz',
+      partCount: 1,
+      holeCount: 1, // small polygons keep their holes
+    })
+    expect(cadastral.areaMeters).toBeGreaterThan(0)
+
+    const [large] = await queryBoundaries(
+      `boundary.name = 'Large Municipality'`
+    )
+    expect(large).toMatchObject({
+      boundaryType: 'administrative',
+      adminLevel: 8,
+      placeTag: 'municipality',
+      countryCode: 'cz',
+    })
+
+    const [suburb] = await queryBoundaries(`boundary.name = 'Petržalka'`)
+    expect(suburb).toMatchObject({
+      boundaryType: 'place',
+      adminLevel: null,
+      placeTag: 'suburb',
+      countryCode: 'sk',
+    })
+
+    const [county] = await queryBoundaries(`boundary.name = 'Okres'`)
+    expect(county).toMatchObject({
+      boundaryType: 'administrative',
+      adminLevel: 6,
+    })
+
+    // Cadastral areas are a Czech-only extra
+    expect(await queryBoundaries(`boundary.name = 'Slovak cadastre'`)).toEqual(
+      []
+    )
+  })
+
+  it('simplifies, subdivides and repairs boundary geometry', async () => {
+    const all = await queryBoundaries('TRUE')
+    expect(all.length).toBeGreaterThan(0)
+    for (const boundary of all) {
+      expect(boundary.invalidCount).toEqual(0)
+      expect(boundary.maxVertices).toBeLessThanOrEqual(256)
+      expect(boundary.areaMeters).toBeGreaterThan(0)
+    }
+
+    // A 2200-vertex near-circle deviates < 10 m from a much coarser one
+    const [large] = await queryBoundaries(
+      `boundary.name = 'Large Municipality'`
+    )
+    expect(large.partCount).toEqual(1)
+    expect(large.maxVertices).toBeLessThan(200)
+
+    // Spikes survive simplification, so the polygon gets split into parts
+    const [spiky] = await queryBoundaries(
+      `boundary.name = 'Spiky Municipality'`
+    )
+    expect(spiky.partCount).toBeGreaterThan(1)
+
+    // The bow tie became two valid triangles
+    const [bowTie] = await queryBoundaries(`boundary.name = 'Bow Tie Borough'`)
+    expect(bowTie.partCount).toEqual(2)
+
+    for (const [name, geometry] of [
+      ['Large Municipality', largeBoundaryGeometry],
+      ['Spiky Municipality', spikyBoundaryGeometry],
+    ] as const) {
+      const fidelity = await querySingle<{
+        symmetricDifferenceRatio: number
+        coversCenter: boolean
+      }>(
+        `
+          WITH
+            expected AS (
+              SELECT ST_SetSRID(ST_GeomFromGeoJSON($1::text), 4326) AS geometry
+            ),
+            reconstructed AS (
+              SELECT ST_Union(geometry) AS geometry
+              FROM place_boundary_geometries
+              WHERE boundary_id = (
+                SELECT id FROM place_boundaries WHERE name = $2
+              )
+            )
+          SELECT
+            ST_Area(ST_SymDifference(reconstructed.geometry, expected.geometry))
+              / ST_Area(expected.geometry) AS symmetric_difference_ratio,
+            ST_Covers(reconstructed.geometry, ST_Centroid(expected.geometry)) AS covers_center
+          FROM expected CROSS JOIN reconstructed
+        `,
+        [JSON.stringify(geometry), name]
+      )
+      expect(fidelity.symmetricDifferenceRatio).toBeLessThan(0.01)
+      expect(fidelity.coversCenter).toBe(true)
+    }
+  })
+
+  it('reverse geocodes through the ingested boundaries', async () => {
+    const inHolesovice = await dbRuntime.runPromise(
+      Effect.flatMap(GeocodingDbService, (service) =>
+        service.nearestPlace({
+          latitude: 49.95,
+          longitude: 14.45,
+          maxDistanceMeters: 50_000,
+        })
+      )
+    )
+    const place = Option.getOrThrow(inHolesovice)
+    expect(place.name).toEqual('Holešovice')
+    expect(place.placeType).toEqual('suburb')
+    // Nearest town node (Mesto) provides the context — no city polygon covers
+    expect(Option.getOrThrow(place.cityName)).toEqual('Mesto')
+
+    // Inside the hole, the nearest settlement node is the label instead
+    const inHole = await dbRuntime.runPromise(
+      Effect.flatMap(GeocodingDbService, (service) =>
+        service.nearestPlace({
+          latitude: 50.0,
+          longitude: 14.5,
+          maxDistanceMeters: 50_000,
+        })
+      )
+    )
+    expect(Option.getOrThrow(inHole).name).toEqual('Mesto')
   })
 
   it('indexes original and translated names, normalized and deduplicated', async () => {
@@ -474,19 +757,26 @@ describe('places ingest pipeline', () => {
       placesIngest: string | null
       placeNamesIngest: string | null
       streetSegmentsIngest: string | null
+      placeBoundariesIngest: string | null
+      placeBoundaryGeometriesIngest: string | null
     }>(`
       SELECT
         to_regclass('places_ingest') AS places_ingest,
         to_regclass('place_names_ingest') AS place_names_ingest,
-        to_regclass('street_segments_ingest') AS street_segments_ingest
+        to_regclass('street_segments_ingest') AS street_segments_ingest,
+        to_regclass('place_boundaries_ingest') AS place_boundaries_ingest,
+        to_regclass('place_boundary_geometries_ingest') AS place_boundary_geometries_ingest
     `)
     expect(staging.placesIngest).toBeNull()
     expect(staging.placeNamesIngest).toBeNull()
     expect(staging.streetSegmentsIngest).toBeNull()
+    expect(staging.placeBoundariesIngest).toBeNull()
+    expect(staging.placeBoundaryGeometriesIngest).toBeNull()
 
     const indexes = await querySingle<{names: string[]}>(`
       SELECT array_agg(indexname::text ORDER BY indexname) AS names
-      FROM pg_indexes WHERE tablename IN ('places', 'place_names')
+      FROM pg_indexes
+      WHERE tablename IN ('places', 'place_names', 'place_boundary_geometries')
     `)
     expect(indexes.names).toEqual(
       expect.arrayContaining([
@@ -497,6 +787,7 @@ describe('places ingest pipeline', () => {
         'place_names_prefix_IX',
         'place_names_trgm_IX',
         'place_names_important_prefix_IX',
+        'place_boundary_geometries_geometry_IX',
       ])
     )
     for (const name of indexes.names) expect(name).not.toContain('ingest')
@@ -504,7 +795,8 @@ describe('places ingest pipeline', () => {
     // The staging tables were UNLOGGED — the swap must have made them durable
     const persistence = await querySingle<{kinds: string[]}>(`
       SELECT array_agg(DISTINCT relpersistence::text) AS kinds
-      FROM pg_class WHERE relname IN ('places', 'place_names')
+      FROM pg_class
+      WHERE relname IN ('places', 'place_names', 'place_boundaries', 'place_boundary_geometries')
     `)
     expect(persistence.kinds).toEqual(['p'])
   })
@@ -545,7 +837,7 @@ describe('places ingest pipeline', () => {
     const fileB = writePbfFixture('renamed-b', secondFileFixture)
 
     const run = await runIngest([fileA, fileB])
-    expect(run.code).toEqual(0)
+    expect(run).toMatchObject({code: 0, stderr: ''})
 
     expect(await queryPlaces(`name = 'Bratislava'`)).toHaveLength(0)
     expect(await queryPlaces(`name = 'Nova Bratislava'`)).toHaveLength(1)

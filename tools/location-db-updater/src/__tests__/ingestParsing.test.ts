@@ -3,6 +3,7 @@ import {
   CountryIndex,
   encodeOsmId,
   geometryCenter,
+  interiorPoint,
   parseFeature,
 } from '../../scripts/ingestParsing'
 
@@ -196,6 +197,37 @@ describe('geometryCenter', () => {
   })
 })
 
+describe('interiorPoint', () => {
+  it('returns a point inside a convex ring', () => {
+    expect(interiorPoint(square(0, 0, 4, 2))).toEqual([2, 1])
+  })
+
+  it('stays inside an L-shaped ring whose bbox centre lies outside it', () => {
+    // Bottom bar [0.2-1.8]x[0.2-0.6] + left bar [0.2-0.6]x[0.2-1.8]; the bbox
+    // centre (1, 1) is in the notch
+    const lShape: Array<[number, number]> = [
+      [0.2, 0.2],
+      [1.8, 0.2],
+      [1.8, 0.6],
+      [0.6, 0.6],
+      [0.6, 1.8],
+      [0.2, 1.8],
+      [0.2, 0.2],
+    ]
+    expect(interiorPoint(lShape)).toEqual([0.4, 1])
+  })
+
+  it('returns null for a degenerate ring', () => {
+    expect(
+      interiorPoint([
+        [0, 0],
+        [1, 0],
+        [0, 0],
+      ])
+    ).toBeNull()
+  })
+})
+
 describe('parseFeature', () => {
   const featureLine = (feature: object): string => RS + JSON.stringify(feature)
 
@@ -300,6 +332,222 @@ describe('parseFeature', () => {
           },
           properties: {place: 'city', name: 'Way City'},
         }),
+        testIndex
+      )
+    ).toBeNull()
+  })
+
+  const polygonWithHole = [
+    [
+      [0.1, 0.1],
+      [0.9, 0.1],
+      [0.9, 0.9],
+      [0.1, 0.9],
+      [0.1, 0.1],
+    ],
+    [
+      [0.4, 0.4],
+      [0.6, 0.4],
+      [0.6, 0.6],
+      [0.4, 0.6],
+      [0.4, 0.4],
+    ],
+  ]
+
+  const area = (
+    id: string,
+    geometry: {type: string; coordinates: unknown},
+    properties: Record<string, string>
+  ): string => featureLine({id, geometry, properties})
+
+  it('parses a local administrative boundary relation with its level and country', () => {
+    const parsed = parseFeature(
+      area(
+        'a17',
+        {type: 'MultiPolygon', coordinates: [polygonWithHole]},
+        {
+          boundary: 'administrative',
+          admin_level: '9',
+          name: 'Praha 7',
+          'name:de': 'Prag 7',
+        }
+      ),
+      testIndex
+    )
+
+    if (parsed?.kind !== 'boundary') throw new Error('Expected a boundary')
+    expect(parsed.boundary).toEqual({
+      id: String((17 - 1) * 2 + 2),
+      name: 'Praha 7',
+      names: {de: 'Prag 7'},
+      country_code: 'aa',
+      boundary_type: 'administrative',
+      admin_level: 9,
+      place_tag: null,
+      geometry_json: JSON.stringify({
+        type: 'MultiPolygon',
+        coordinates: [polygonWithHole],
+      }),
+    })
+  })
+
+  it('keeps the place tag of an administrative boundary, whatever its level', () => {
+    const parsed = parseFeature(
+      area(
+        'a21',
+        {type: 'Polygon', coordinates: polygonWithHole},
+        {
+          boundary: 'administrative',
+          admin_level: '4',
+          place: 'city',
+          name: 'Berlin',
+        }
+      ),
+      testIndex
+    )
+    if (parsed?.kind !== 'boundary') throw new Error('Expected a boundary')
+    expect(parsed.boundary).toMatchObject({
+      boundary_type: 'administrative',
+      admin_level: 4,
+      place_tag: 'city',
+    })
+  })
+
+  it('parses place=* polygons (closed ways and relations) as boundaries', () => {
+    const fromWay = parseFeature(
+      area(
+        'a30', // area of closed way 15
+        {type: 'Polygon', coordinates: [square(0.2, 0.2, 0.3, 0.3)]},
+        {place: 'suburb', name: 'Letná'}
+      ),
+      testIndex
+    )
+    if (fromWay?.kind !== 'boundary') throw new Error('Expected a boundary')
+    expect(fromWay.boundary).toMatchObject({
+      id: String(15 * 4 + 1),
+      boundary_type: 'place',
+      admin_level: null,
+      place_tag: 'suburb',
+      country_code: 'aa',
+    })
+
+    const fromRelation = parseFeature(
+      area(
+        'a31',
+        {type: 'MultiPolygon', coordinates: [polygonWithHole]},
+        {type: 'multipolygon', place: 'village', name: 'Dedinka'}
+      ),
+      testIndex
+    )
+    if (fromRelation?.kind !== 'boundary')
+      throw new Error('Expected a boundary')
+    expect(fromRelation.boundary.place_tag).toEqual('village')
+  })
+
+  it('looks the country up from a point inside the boundary, not its bbox centre', () => {
+    // L-shape around the AA hole: the bbox centre (1, 1) sits in enclave BB
+    const parsed = parseFeature(
+      area(
+        'a23',
+        {
+          type: 'Polygon',
+          coordinates: [
+            [
+              [0.2, 0.2],
+              [1.8, 0.2],
+              [1.8, 0.6],
+              [0.6, 0.6],
+              [0.6, 1.8],
+              [0.2, 1.8],
+              [0.2, 0.2],
+            ],
+          ],
+        },
+        {boundary: 'administrative', admin_level: '8', name: 'Crescent'}
+      ),
+      testIndex
+    )
+    if (parsed?.kind !== 'boundary') throw new Error('Expected a boundary')
+    expect(parsed.boundary.country_code).toEqual('aa')
+  })
+
+  it('keeps cadastral areas in Czechia only', () => {
+    const czechIndex = new CountryIndex({
+      features: [
+        countryFeature(
+          {ISO_A2_EH: 'CZ'},
+          {type: 'Polygon', coordinates: [square(0, 0, 2, 2)]}
+        ),
+      ],
+    })
+    const properties = {boundary: 'cadastral', name: 'Holešovice'}
+    const geometry = {type: 'Polygon', coordinates: polygonWithHole}
+
+    const czech = parseFeature(area('a15', geometry, properties), czechIndex)
+    if (czech?.kind !== 'boundary') throw new Error('Expected a boundary')
+    expect(czech.boundary).toMatchObject({
+      boundary_type: 'cadastral',
+      admin_level: null,
+      place_tag: null,
+      country_code: 'cz',
+    })
+
+    expect(
+      parseFeature(area('a15', geometry, properties), testIndex)
+    ).toBeNull()
+  })
+
+  it('rejects national levels, non-boundary tags and non-area geometries', () => {
+    const polygon = {type: 'Polygon', coordinates: [square(0, 0, 1, 1)]}
+    const rejected: Array<Record<string, string>> = [
+      {boundary: 'administrative', admin_level: '4', name: 'Region'},
+      {boundary: 'administrative', admin_level: '12', name: 'Too local'},
+      {boundary: 'administrative', name: 'No level'},
+      {boundary: 'administrative', admin_level: '8a', name: 'Bad level'},
+      {boundary: 'political', admin_level: '8', name: 'Constituency'},
+      {place: 'locality', name: 'Not a settlement'},
+    ]
+    for (const properties of rejected) {
+      expect(
+        parseFeature(area('a19', polygon, properties), testIndex)
+      ).toBeNull()
+    }
+    expect(
+      parseFeature(
+        featureLine({
+          id: 'w19',
+          geometry: polygon,
+          properties: {boundary: 'administrative', admin_level: '8', name: 'X'},
+        }),
+        testIndex
+      )
+    ).toBeNull()
+  })
+
+  it('rejects boundaries with unclosed or malformed rings', () => {
+    const unclosed = {
+      type: 'Polygon',
+      coordinates: [
+        [
+          [0, 0],
+          [1, 0],
+          [1, 1],
+        ],
+      ],
+    }
+    const properties = {boundary: 'administrative', admin_level: '8', name: 'X'}
+    expect(
+      parseFeature(area('a19', unclosed, properties), testIndex)
+    ).toBeNull()
+    expect(
+      parseFeature(
+        area('a19', {type: 'Polygon', coordinates: [[['a', 'b']]]}, properties),
+        testIndex
+      )
+    ).toBeNull()
+    expect(
+      parseFeature(
+        area('a19', {type: 'MultiPolygon', coordinates: []}, properties),
         testIndex
       )
     ).toBeNull()

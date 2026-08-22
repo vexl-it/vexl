@@ -34,11 +34,126 @@ export const SETTLEMENT_TYPE_WEIGHTS: Record<string, number> = {
   city_block: 0.2,
 }
 
-/** Place types that provide "…, City" context for sub-city results. */
-export const CITY_CONTEXT_TYPES = ['city', 'town'] as const
+/**
+ * Cities and towns: self-sufficient labels ("Jaroměř") that give everything
+ * below them its "…, City" context.
+ */
+export const CITY_TYPES = ['city', 'town'] as const
 
-/** Place types that don't need extra city context in their display label. */
-export const SELF_SUFFICIENT_TYPES = ['city', 'town', 'municipality'] as const
+/**
+ * The finest city-level unit, but it can be a single village — it labels a
+ * pin when nothing finer covers it and still reads "…, NearestCity".
+ */
+export const MUNICIPALITY_TYPE = 'municipality'
+
+/** Everything below city level: the first part of a "Letná, Praha" label. */
+export const SUB_CITY_TYPES = [
+  'borough',
+  'village',
+  'suburb',
+  'quarter',
+  'neighbourhood',
+  'hamlet',
+  'city_block',
+]
+
+export const isCityType = (placeType: string): boolean =>
+  CITY_TYPES.some((one) => one === placeType)
+
+// ---------------------------------------------------------------------------
+// Boundary polygons (reverse geocoding by containment)
+// ---------------------------------------------------------------------------
+
+/**
+ * Boundary polygons are simplified at ingest to roughly 10 m — the label is a
+ * rough location, and a pin this close to a border is ambiguous anyway. The
+ * match tolerance at query time covers the slivers two independently
+ * simplified neighbours can leave between them.
+ */
+export const BOUNDARY_SIMPLIFY_TOLERANCE_DEG = 0.0001
+export const BOUNDARY_MATCH_TOLERANCE_DEG = 0.0002
+
+/**
+ * What a boundary means for the label: `subCity` boundaries are the first
+ * part of it ("Letná"), `city` boundaries label a pin nothing finer covers
+ * and — when they are a city/town — give the "…, City" context; `ignore`
+ * boundaries are stored only so a country can be re-mapped without a
+ * re-ingest.
+ */
+export type BoundaryRole = 'city' | 'subCity' | 'ignore'
+
+export interface BoundaryClassification {
+  countryCode: string | null
+  boundaryType: string
+  adminLevel: number | null
+  placeTag: string | null
+}
+
+const DEFAULT_ADMIN_LEVEL_ROLES: Record<number, BoundaryRole> = {
+  8: 'city',
+  9: 'subCity',
+  10: 'subCity',
+  11: 'subCity',
+}
+
+/**
+ * Countries whose admin_level semantics deviate from the default (Nominatim's
+ * address-levels are the reference for which ones do). Only list levels that
+ * differ; anything missing falls back to the default table. Roles are
+ * resolved at query time, so fixing a country here needs no re-ingest.
+ */
+const COUNTRY_ADMIN_LEVEL_ROLES: Record<
+  string,
+  Record<number, BoundaryRole>
+> = {
+  // Katastralgemeinden ("Katastralgemeinde Leopoldstadt") sit at level 10;
+  // the Bezirke of Wien and Graz at level 9 are the useful sub-city unit
+  at: {10: 'ignore'},
+  // Nordic municipalities (kommune/kommun) sit at level 7
+  dk: {7: 'city'},
+  no: {7: 'city'},
+  se: {7: 'city'},
+  // concelho / freguesia
+  pt: {7: 'city', 8: 'subCity'},
+}
+
+/**
+ * A place=* tag on the boundary is the most direct statement of what it is
+ * and wins over the administrative level; cadastral boundaries are a Czech
+ * extra (katastrální území — "Holešovice"); everything else maps by country
+ * and admin level.
+ */
+export const boundaryRole = ({
+  countryCode,
+  boundaryType,
+  adminLevel,
+  placeTag,
+}: BoundaryClassification): BoundaryRole => {
+  if (placeTag !== null) {
+    if (isCityType(placeTag) || placeTag === MUNICIPALITY_TYPE) return 'city'
+    if (SUB_CITY_TYPES.includes(placeTag)) return 'subCity'
+  }
+  if (boundaryType === 'cadastral')
+    return countryCode === 'cz' ? 'subCity' : 'ignore'
+  if (adminLevel === null) return 'ignore'
+  return (
+    (countryCode !== null
+      ? COUNTRY_ADMIN_LEVEL_ROLES[countryCode]?.[adminLevel]
+      : undefined) ??
+    DEFAULT_ADMIN_LEVEL_ROLES[adminLevel] ??
+    'ignore'
+  )
+}
+
+/**
+ * Place type reported for a boundary result: the boundary's own place tag
+ * when it has one, otherwise a generic type of its role (drives the viewport
+ * size and whether the label gets "…, City" context).
+ */
+export const boundaryPlaceType = (
+  role: BoundaryRole,
+  placeTag: string | null
+): string => placeTag ?? (role === 'city' ? MUNICIPALITY_TYPE : 'suburb')
 
 /**
  * OSM highway=* values that carry street names people would search for.

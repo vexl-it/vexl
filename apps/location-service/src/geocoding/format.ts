@@ -3,7 +3,7 @@ import {
   type GeocodingTranslations,
 } from '@vexl-next/geocoding-db/src/GeocodingDbService/domain'
 import {
-  SELF_SUFFICIENT_TYPES,
+  isCityType,
   viewportLatRadiusDeg,
 } from '@vexl-next/geocoding-db/src/common'
 import {Option} from 'effect'
@@ -46,9 +46,6 @@ export const countryDisplayName = (
     }
   })
 
-const isSelfSufficientType = (placeType: string): boolean =>
-  SELF_SUFFICIENT_TYPES.some((one) => one === placeType)
-
 export const localizedCityContext = (
   record: Pick<
     GeocodingRecordWithContext,
@@ -56,7 +53,7 @@ export const localizedCityContext = (
   >,
   lang: string
 ): Option.Option<string> =>
-  isSelfSufficientType(record.placeType)
+  isCityType(record.placeType)
     ? Option.none()
     : Option.map(record.cityName, (cityName) =>
         localizedName(

@@ -26,12 +26,15 @@ to that database is the dataset refresh pipeline
   all names incl. streets/POIs, then typo-tolerant trigram matching (important
   places only). Ranked by match quality and importance (settlement type +
   population; settlements always outrank streets/POIs).
-- **Reverse** (`/geocode`): nearest **settlement** (never a street/POI) via
-  cube KNN (`<->`) on a partial gist index, 200 km cutoff. Returns the pin
-  coordinates verbatim and a display address like `Vinohrady, Praha - CZ`
-  (sub-city place + nearest city + country), matching the previous
-  Google-based format.
-- Sub-city results get "…, City" context via a nearest-city lateral join.
+- **Reverse** (`/geocode`): containment first — the most specific boundary
+  polygon covering the pin (PostGIS, roles per country resolved at query
+  time, see `packages/geocoding-db/README.md`), with the covering city
+  boundary or the nearest city/town node as "…, City" context; where no
+  sub-city polygon exists, the nearest sub-city node inside the city; and
+  only then the nearest **settlement** node (never a street/POI) via cube KNN,
+  200 km cutoff. Returns the pin coordinates verbatim and a display address
+  like `Holešovice, Praha - CZ` (sub-city place + city + country), matching
+  the previous Google-based format.
 - Localization is resolved per request `lang`: place names from the stored
   translations, country names via `Intl.DisplayNames` (CLDR, built into Node).
 
@@ -41,7 +44,8 @@ The service requires `GEOCODING_DB_URL` / `GEOCODING_DB_USER` /
 `GEOCODING_DB_PASSWORD` at startup — there is no fallback to the old `DB_URL`
 vars. Rolling out an image built from this change therefore requires the
 dedicated geocoding Postgres and the new env vars to be provisioned first;
-without them the service crash-loops at startup.
+the database server must have PostGIS installed. Without them the service
+crash-loops at startup.
 
 ## Local development
 
@@ -52,6 +56,6 @@ README for seeding modes (`--seed-places auto|fixture|off`) and re-seeding.
 
 ## Tests
 
-`pnpm test` — spins up a throwaway database per run (needs the dev Postgres
-container running; see `.env.test` for connection settings), runs migrations,
-seeds a small fixture dataset, and exercises both endpoints over HTTP.
+`TEST_DB_PORT=5433 pnpm test` — spins up a throwaway database per run against
+the dev PostGIS container, runs migrations, seeds a small fixture dataset, and
+exercises both endpoints over HTTP.

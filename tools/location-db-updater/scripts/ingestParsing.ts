@@ -45,6 +45,17 @@ export interface StreetSegmentRow {
   grid_lon: number
 }
 
+export interface BoundaryRow {
+  id: string
+  name: string
+  names: Record<string, string>
+  country_code: string | null
+  boundary_type: 'administrative' | 'cadastral' | 'place'
+  admin_level: number | null
+  place_tag: string | null
+  geometry_json: string
+}
+
 // ---------------------------------------------------------------------------
 // Country lookup: point-in-polygon against Natural Earth admin-0 countries.
 //
@@ -231,6 +242,108 @@ export class CountryIndex {
 export type ParsedFeature =
   | {kind: 'place'; place: PlaceRow; names: PlaceNameRow[]}
   | {kind: 'street'; segment: StreetSegmentRow}
+  | {kind: 'boundary'; boundary: BoundaryRow}
+
+/**
+ * Administrative levels worth storing: local government (municipalities and
+ * their parts) plus the county-ish levels 6-7 some countries use for
+ * municipalities. National/regional levels are noise for an offer location.
+ */
+const MIN_ADMIN_LEVEL = 6
+const MAX_ADMIN_LEVEL = 11
+
+const parseAdminLevel = (raw: string | undefined): number | null => {
+  if (raw === undefined) return null
+  const level = Number.parseInt(raw, 10)
+  return Number.isInteger(level) && String(level) === raw.trim() ? level : null
+}
+
+const isClosedRing = (ring: Array<[number, number]>): boolean =>
+  ring.length >= 4 &&
+  ring[0][0] === ring[ring.length - 1][0] &&
+  ring[0][1] === ring[ring.length - 1][1]
+
+const isValidPolygon = (value: unknown): boolean =>
+  isPolygonCoordinates(value) && value.length > 0 && value.every(isClosedRing)
+
+/**
+ * Boundary polygons used for reverse geocoding by containment: administrative
+ * relations at local levels, Czech cadastral areas and settlements mapped as
+ * place=* polygons. Osmium emits every assembled area with an `a` id; the
+ * linestring twins of closed ways and unclosed relations are not areas.
+ */
+const parseBoundary = (
+  feature: {
+    id: string
+    geometry: {type: string; coordinates: unknown}
+  },
+  props: Record<string, string>,
+  name: string,
+  encodedId: number,
+  countries: CountryIndex
+): ParsedFeature | null => {
+  if (!feature.id.startsWith('a')) return null
+
+  const placeTag =
+    props.place !== undefined &&
+    SETTLEMENT_TYPE_WEIGHTS[props.place] !== undefined
+      ? props.place
+      : null
+  const boundaryType =
+    props.boundary === 'administrative' || props.boundary === 'cadastral'
+      ? props.boundary
+      : placeTag !== null
+        ? 'place'
+        : null
+  if (boundaryType === null) return null
+
+  const adminLevel =
+    boundaryType === 'administrative'
+      ? parseAdminLevel(props.admin_level)
+      : null
+  // A place-tagged relation is kept whatever its level (Berlin, Wien and
+  // Praha are level 4 cities); untagged ones only at the local levels.
+  if (
+    boundaryType === 'administrative' &&
+    placeTag === null &&
+    (adminLevel === null ||
+      adminLevel < MIN_ADMIN_LEVEL ||
+      adminLevel > MAX_ADMIN_LEVEL)
+  )
+    return null
+
+  const coordinates = feature.geometry.coordinates
+  const validGeometry =
+    (feature.geometry.type === 'Polygon' && isValidPolygon(coordinates)) ||
+    (feature.geometry.type === 'MultiPolygon' &&
+      Array.isArray(coordinates) &&
+      coordinates.length > 0 &&
+      coordinates.every(isValidPolygon))
+  if (!validGeometry) return null
+
+  const center = geometryCenter(feature.geometry)
+  const countryCode =
+    center !== null ? countries.lookup(center[0], center[1]) : null
+  // Cadastral areas are a Czech-only extra (see common.ts#boundaryRole)
+  if (boundaryType === 'cadastral' && countryCode !== 'cz') return null
+
+  return {
+    kind: 'boundary',
+    boundary: {
+      id: String(encodedId),
+      name,
+      names: pickTranslations(props),
+      country_code: countryCode,
+      boundary_type: boundaryType,
+      admin_level: adminLevel,
+      place_tag: placeTag,
+      geometry_json: JSON.stringify({
+        type: feature.geometry.type,
+        coordinates,
+      }),
+    },
+  }
+}
 
 /**
  * OSM ids are only unique per object type (node/way/relation), so the id
@@ -345,6 +458,15 @@ export const parseFeature = (
 
   const encodedId = encodeOsmId(feature.id)
   if (encodedId === null) return null
+
+  const boundary = parseBoundary(
+    {id: feature.id, geometry},
+    props,
+    name,
+    encodedId,
+    countries
+  )
+  if (boundary !== null) return boundary
 
   const center = geometryCenter(geometry)
   if (center === null) return null

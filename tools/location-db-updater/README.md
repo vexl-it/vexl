@@ -10,17 +10,37 @@ updates the data inside it.
 
 ## Data
 
-Three tiers built from OSM, all enriched with the translations the app ships
-languages for (`name:xx` tags) and a country code stamped via Natural Earth
-boundaries:
+Four tiers built from OSM, enriched with the translations the app ships
+languages for (`name:xx` tags). Every entry gets its country code from
+Natural Earth boundaries (boundaries by their centroid):
 
 - settlements (place=\* nodes: city…city_block) — searchable + reverse
   geocoding,
+- boundaries — reverse geocoding by containment, worldwide:
+  `boundary=administrative` relations at admin levels 6–11 (plus any level
+  when the relation carries a settlement `place=*` tag — Berlin, Wien, Praha),
+  settlement polygons tagged `place=*` (ways and relations), and Czech
+  `boundary=cadastral` areas (katastrální území — what gives "Holešovice");
+  cadastral areas elsewhere are dropped,
 - POIs (cafés, restaurants, pubs, bars, fast food, parks, gardens,
   attractions, museums) — searchable only,
 - streets (named street-like highway ways, deduplicated to one entry per
   street name per ~10 km grid cell; **no house numbers by design**) —
   searchable only.
+
+Boundary metadata (`name`, translations, `country_code`, `boundary_type`,
+`admin_level`, `place_tag`) is stored once per boundary; a GiST-indexed
+geometry table holds its polygon parts. Geometry is run through
+`ST_MakeValid`, simplified with `ST_SimplifyPreserveTopology` to ~10 m
+(`BOUNDARY_SIMPLIFY_TOLERANCE_DEG` in `packages/geocoding-db/src/common.ts` —
+the label is a rough location, and a pin 10 m from a border is ambiguous
+anyway) and split with `ST_Subdivide` into parts of at most 256 vertices, so
+point-in-polygon stays cheap on huge boundaries. Measured on Czechia this is
+~3× smaller than exact geometry. Whether a boundary acts as the city or the
+sub-city part of a label is **not** decided at ingest — the query layer maps
+`(country_code, admin_level, place_tag)` to a role, so fixing a country's level
+semantics never needs a re-ingest (see `packages/geocoding-db/README.md`).
+The target Postgres must have PostGIS available.
 
 ## Refreshing the dataset
 
@@ -30,7 +50,7 @@ Docker image, `ghcr.io/vexl-it/geocoding-refresh` — built by the
 backend-stack build. It is meant to be run manually (roughly monthly) from an
 operator's machine with network access to the geocoding Postgres — never as a
 server job. One `docker run` refreshes the whole world: it fetches the raw
-Geofabrik extracts (~85 GB), filters them into the three tiers, and ingests
+Geofabrik extracts (~85 GB), filters them into the four tiers, and ingests
 into Postgres with an atomic swap at the end. Kick it off in the evening and
 let it run overnight:
 
@@ -125,7 +145,7 @@ pnpm --filter @vexl-next/location-db-updater seed:dev-geocoding
 `pnpm test` — pure unit tests for ingest parsing, shell-level tests of
 `refresh.sh` with stubbed `curl`/`osmium`/`pnpm`, and an end-to-end ingest test
 that runs the real script against a throwaway database. The end-to-end test
-needs the dev Postgres running; see `.env.test` for its connection settings.
+needs the dev PostGIS container running (`TEST_DB_PORT=5433 pnpm test`).
 
 ## Building the Docker image
 

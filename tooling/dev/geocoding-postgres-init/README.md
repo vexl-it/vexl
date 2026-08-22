@@ -1,6 +1,6 @@
 # Geocoding Postgres seed dump
 
-`01-geocoding.sql.gz` is a full plain-SQL `pg_dump` (schema + data + extensions +
+`01-geocoding.sql.zst` is a full plain-SQL `pg_dump` (schema + data + extensions +
 indexes) of a local geocoding database. `docker-compose.dev.yaml` mounts this
 directory into `docker-entrypoint-initdb.d/` of the `geocoding-postgres`
 container, so the Postgres image restores the dump automatically when the
@@ -15,11 +15,15 @@ postgres:17).
 
 ## Contents
 
-- Tables `places` (~130k rows) and `place_names` (~140k rows)
-- Extensions: `pg_trgm`, `cube`, `earthdistance`
-- Coverage: Czechia (OSM extract), with a small spillover of places just across
-  the borders (PL, DE, AT, SK)
-- Dumped from PostgreSQL 13.23
+- Tables `places` (~137k rows), `place_names` (~145k rows), and ~22k
+  boundaries (`place_boundaries` + `place_boundary_geometries`: administrative
+  levels 6–11, cadastral areas and place=\* polygons, simplified to ~10 m and
+  subdivided)
+- Extensions: `pg_trgm`, `cube`, `earthdistance`, `postgis`
+- Coverage: Czechia (`osmium extract -s smart` with the Natural Earth border
+  buffered by 3 km from the Geofabrik `europe` extract), with a small
+  spillover of places just across the borders (PL, DE, AT, SK)
+- Dumped from PostgreSQL 17 with PostGIS 3.6
 
 ## Attribution
 
@@ -33,9 +37,10 @@ With a local geocoding database populated (see `tools/location-db-updater`),
 run:
 
 ```bash
-pg_dump -h localhost -p 5432 -U postgres -d location \
+docker exec vexl-geocoding-postgres pg_dump -U postgres -d geocoding \
   --no-owner --no-acl --format=plain \
-  | gzip -9 > tooling/dev/geocoding-postgres-init/01-geocoding.sql.gz
+  | zstd -19 --threads=0 \
+  > tooling/dev/geocoding-postgres-init/01-geocoding.sql.zst
 ```
 
 Do not use `pg_dumpall` and do not add `--create`; the dump must stay free of

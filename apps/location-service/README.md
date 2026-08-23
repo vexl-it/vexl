@@ -13,13 +13,13 @@ connects to it via `GEOCODING_DB_URL` / `GEOCODING_DB_USER` /
 `GEOCODING_DB_PASSWORD` and runs the schema migrations from
 `@vexl-next/geocoding-db` on startup. The only other component that connects
 to that database is the dataset refresh pipeline
-(`tools/location-db-updater/scripts/refresh.sh`).
+(`tooling/location-db-updater/scripts/refresh.sh`).
 
 ## Architecture
 
 - **Data + schema**: `packages/geocoding-db` — see its README for the data
   tiers and the query layer.
-- **Dataset refresh + dev seeding**: `tools/location-db-updater` — see its
+- **Dataset refresh + dev seeding**: `tooling/location-db-updater` — see its
   README for the refresh pipeline and dev seeding.
 - **Search** (`/suggest`): prefix matching on normalized names cascading from
   cheap to expensive — important places first (partial covering index), then
@@ -51,7 +51,7 @@ crash-loops at startup.
 
 `pnpm dev:backend` starts the dedicated geocoding Postgres container, which
 seeds itself from a committed Czechia dump on first volume create (see
-`tooling/dev/geocoding-postgres-init/`) — see the `tools/location-db-updater`
+`tooling/dev/geocoding-postgres-init/`) — see the `tooling/location-db-updater`
 README for seeding modes (`--seed-places auto|fixture|off`) and re-seeding.
 
 ## Tests

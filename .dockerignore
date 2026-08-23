@@ -13,5 +13,5 @@ apps/mobile/ios/
 apps/mobile/android/
 packages/ecdh-platform-native-utils/ios/build
 packages/ecdh-platform-native-utils/android/build
-tools/location-db-updater/data
+tooling/location-db-updater/data
 xcuserdata

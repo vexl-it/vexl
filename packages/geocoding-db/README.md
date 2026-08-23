@@ -4,7 +4,7 @@ Everything that owns the **standalone geocoding database** — an in-house
 geocoding dataset built from OpenStreetMap: the Postgres schema + migrations
 and the query layer used by `location-service`.
 
-The data itself is built and refreshed by `tools/location-db-updater`, which
+The data itself is built and refreshed by `tooling/location-db-updater`, which
 lives next to this package. The database runs on its own Postgres instance
 (container `vexl-geocoding-postgres` in dev, database name `geocoding`),
 fully separated from the vexl service databases. Exactly two things connect to
@@ -12,7 +12,7 @@ it:
 
 - **location-service** — serves `/suggest` and `/geocode` from it and applies
   the schema migrations on startup (via `GeocodingDbLayer`),
-- **the refresh pipeline** (`tools/location-db-updater/scripts/refresh.sh`) —
+- **the refresh pipeline** (`tooling/location-db-updater/scripts/refresh.sh`) —
   replaces the dataset roughly monthly, run **manually from an operator's
   machine** (not a server job) so the heavy download/filter work never
   consumes server resources.
@@ -39,7 +39,7 @@ Natural Earth boundaries:
   searchable only.
 
 The actual ingest pipeline, dev seeder and Docker image build live in
-`tools/location-db-updater` — see its README for how to refresh the dataset,
+`tooling/location-db-updater` — see its README for how to refresh the dataset,
 run dev seeding and build the image.
 
 ## Reverse geocoding
@@ -87,7 +87,7 @@ optional city context; `apps/location-service` formats the label.
 
 In dev the database is seeded from a committed Czechia dump restored by the
 PostGIS-capable Postgres image when the `geocoding-postgres` volume is first created (see
-`tooling/dev/geocoding-postgres-init/`). See the `tools/location-db-updater`
+`tooling/dev/geocoding-postgres-init/`). See the `tooling/location-db-updater`
 README for the seeder modes (`--seed-places auto|fixture|off`) and
 re-seeding.
 
@@ -96,4 +96,4 @@ re-seeding.
 `TEST_DB_PORT=5433 pnpm test` — unit tests (normalization, boundary roles and
 candidate resolution) plus containment integration tests against the dev
 PostGIS container. Ingest and refresh-pipeline tests live in
-`tools/location-db-updater`.
+`tooling/location-db-updater`.

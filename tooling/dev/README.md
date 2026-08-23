@@ -6,7 +6,7 @@ Scripts for running the local dev stack (`dev-backend.ts`, `dev-infra.ts`, `dev-
 
 The standalone geocoding database (its own PostGIS-capable `geocoding-postgres` container, separate from the vexl service databases) seeds itself from the committed Czechia dump: `docker-compose.dev.yaml` mounts [geocoding-postgres-init/](geocoding-postgres-init/) into `docker-entrypoint-initdb.d`, so ~135k places and their reverse-geocoding boundaries restore automatically when the volume is first created — no downloads or external tools. `--fresh-db` recreates the volume and thereby re-restores the dump.
 
-On startup, `dev-backend.ts` still runs the idempotent seeder from `tools/location-db-updater`, which ensures the database and schema exist (a fast no-op on top of the dump). On an old volume that predates the dump it does not download anything — it prints a pointer to `--fresh-db`. Override with `--seed-places <auto|fixture|off>` (`fixture` inserts a small committed city fixture into an empty table). Details: [tools/location-db-updater/README.md](../../tools/location-db-updater/README.md).
+On startup, `dev-backend.ts` still runs the idempotent seeder from `tooling/location-db-updater`, which ensures the database and schema exist (a fast no-op on top of the dump). On an old volume that predates the dump it does not download anything — it prints a pointer to `--fresh-db`. Override with `--seed-places <auto|fixture|off>` (`fixture` inserts a small committed city fixture into an empty table). Details: [tooling/location-db-updater/README.md](../../tooling/location-db-updater/README.md).
 
 ## seed-perf-data.ts — simulate a heavy account for performance work
 

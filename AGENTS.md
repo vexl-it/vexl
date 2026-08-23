@@ -32,7 +32,7 @@ When changing any UI / UX in the mobile app or in the ui package you must read @
 - packages/resources-utils - shared utilities for handling offers, chat, and other "resources" operations
 - packages/rest-api - effect-ts based rest api definitions and client for both backend and mobile app
 - tooling/* - shared tooling for the repo (esling, prettier, etc...)
-- tools/location-db-updater - standalone OSM dataset refresh pipeline and dev seeder for the geocoding database. Builds the `ghcr.io/vexl-it/geocoding-refresh` Docker image. The dataset refresh (`pnpm refresh:geocoding`) is run manually from an operator's machine — never add server-side cron/updater infrastructure. Details in tools/location-db-updater/README.md.
+- tooling/location-db-updater - standalone OSM dataset refresh pipeline and dev seeder for the geocoding database. Builds the `ghcr.io/vexl-it/geocoding-refresh` Docker image. The dataset refresh (`pnpm refresh:geocoding`) is run manually from an operator's machine — never add server-side cron/updater infrastructure. Details in tooling/location-db-updater/README.md.
 
 ## Backend metrics
 

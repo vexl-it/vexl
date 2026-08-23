@@ -4,7 +4,7 @@
 # them into the geocoding Postgres — see README "Refreshing the dataset".
 #
 # Build from the repo root (the monorepo is the build context):
-#   docker build -f tools/location-db-updater/Dockerfile .
+#   docker build -f tooling/location-db-updater/Dockerfile .
 
 # --- Pruner stage -----------------------------------------------------------
 # Same pattern as the root Dockerfile: reduce the monorepo to just this
@@ -68,9 +68,9 @@ WORKDIR /app
 
 COPY --chown=node:node --from=prod-deps /app/node_modules /app/node_modules
 COPY --chown=node:node --from=prod-deps /app/package.json /app/package.json
-COPY --chown=node:node --from=builder /app/tools/location-db-updater/dist /app/tools/location-db-updater/dist
-COPY --chown=node:node --from=builder /app/tools/location-db-updater/package.json /app/tools/location-db-updater/package.json
-COPY --chown=node:node --from=pruner /app/out/full/tools/location-db-updater/scripts/refresh.sh /app/tools/location-db-updater/scripts/refresh.sh
+COPY --chown=node:node --from=builder /app/tooling/location-db-updater/dist /app/tooling/location-db-updater/dist
+COPY --chown=node:node --from=builder /app/tooling/location-db-updater/package.json /app/tooling/location-db-updater/package.json
+COPY --chown=node:node --from=pruner /app/out/full/tooling/location-db-updater/scripts/refresh.sh /app/tooling/location-db-updater/scripts/refresh.sh
 
 RUN mkdir /data && chown node:node /data
 
@@ -83,4 +83,4 @@ USER node
 # Configuration (GEOCODING_DB_* and SLACK_ALERT_WEBHOOK_URL) comes from the
 # environment (`docker run --env-file`). Any arguments are passed through to
 # refresh.sh (stages, -r regions); with none it refreshes the whole world.
-ENTRYPOINT ["sh", "tools/location-db-updater/scripts/refresh.sh", "-d", "/data"]
+ENTRYPOINT ["sh", "tooling/location-db-updater/scripts/refresh.sh", "-d", "/data"]

@@ -1,6 +1,6 @@
 /**
  * End-to-end test of the places ingest pipeline
- * (tools/location-db-updater/scripts/ingest.ts):
+ * (tooling/location-db-updater/scripts/ingest.ts):
  * geojsonseq parsing → transform → staging inserts → street merging →
  * importance boosting → index build → sanity gate → atomic table swap — and
  * finally the long-lived geocoding query layer reading the replaced tables.

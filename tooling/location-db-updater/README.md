@@ -57,7 +57,7 @@ let it run overnight:
 ```sh
 docker run --rm --init \
   --add-host=host.docker.internal:host-gateway \
-  --env-file tools/location-db-updater/.env \
+  --env-file tooling/location-db-updater/.env \
   -v vexl-geocoding-refresh:/data \
   ghcr.io/vexl-it/geocoding-refresh:latest
 ```
@@ -153,5 +153,5 @@ The GitHub Actions workflow `.github/workflows/build-geocoding-refresh.yaml`
 builds and pushes the image. To build locally from the repo root:
 
 ```sh
-docker build -f tools/location-db-updater/Dockerfile .
+docker build -f tooling/location-db-updater/Dockerfile .
 ```

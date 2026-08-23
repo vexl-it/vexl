@@ -33,7 +33,7 @@ The data is derived from [OpenStreetMap](https://www.openstreetmap.org),
 
 ## Regenerating
 
-With a local geocoding database populated (see `tools/location-db-updater`),
+With a local geocoding database populated (see `tooling/location-db-updater`),
 run:
 
 ```bash

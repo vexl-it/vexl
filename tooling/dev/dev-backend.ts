@@ -357,7 +357,7 @@ function seedGeocodingDb(ctx: EnvContext, mode: PlacesSeedMode): void {
     join(repoRoot, 'node_modules', '.bin', 'tsx'),
     ['scripts/seedDev.ts', '--mode', mode],
     {
-      cwd: join(repoRoot, 'tools/location-db-updater'),
+      cwd: join(repoRoot, 'tooling/location-db-updater'),
       stdio: 'inherit',
       env: {...process.env, ...geocodingDbEnv(ctx)},
     }
@@ -365,7 +365,7 @@ function seedGeocodingDb(ctx: EnvContext, mode: PlacesSeedMode): void {
   if (result.status !== 0) {
     console.warn(
       'Places seeding failed — location search will return no results until ' +
-        'seeded (see tools/location-db-updater/README.md). Continuing.'
+        'seeded (see tooling/location-db-updater/README.md). Continuing.'
     )
   }
 }

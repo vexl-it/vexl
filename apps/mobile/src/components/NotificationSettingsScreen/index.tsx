@@ -155,17 +155,6 @@ function NotificationSettingsScreen(): React.ReactElement {
     >
       <YStack flex={1} paddingHorizontal="$3" paddingTop="$4">
         <YStack gap="$5">
-          {pipe(
-            contents,
-            Array.map((one) => (
-              <PreferenceCard
-                key={one.id}
-                atom={one.atom}
-                description={one.description}
-                title={one.title}
-              />
-            ))
-          )}
           {Platform.OS === 'android' ? (
             <PreferenceCard
               atom={backgroundNotificationSocketEnabledAtom}
@@ -186,6 +175,17 @@ function NotificationSettingsScreen(): React.ReactElement {
               {t('notifications.backgroundSocket.fixBatterySettings')}
             </Button>
           ) : null}
+          {pipe(
+            contents,
+            Array.map((one) => (
+              <PreferenceCard
+                key={one.id}
+                atom={one.atom}
+                description={one.description}
+                title={one.title}
+              />
+            ))
+          )}
         </YStack>
       </YStack>
     </Screen>

@@ -1,4 +1,5 @@
 import {
+  Button,
   ChevronLeft,
   NavigationBar,
   Screen,
@@ -8,12 +9,24 @@ import {
   YStack,
 } from '@vexl-next/ui'
 import {Array, Effect, pipe} from 'effect'
-import {atom, type SetStateAction, type WritableAtom} from 'jotai'
+import {
+  atom,
+  type SetStateAction,
+  useAtomValue,
+  useSetAtom,
+  type WritableAtom,
+} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import React, {useMemo} from 'react'
+import {Platform} from 'react-native'
 import {syncVexlNotificationTokensActionAtom} from '../../state/notifications/actions/syncVexlNotificationTokensActionAtom'
 import getValueFromSetStateActionOfAtom from '../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 import {useTranslation} from '../../utils/localization/I18nProvider'
+import {
+  backgroundNotificationSocketEnabledAtom,
+  backgroundNotificationSocketStateAtom,
+  requestBackgroundNotificationBatteryExemptionActionAtom,
+} from '../../utils/notifications/backgroundNotificationSocket'
 import {notificationPreferencesAtom} from '../../utils/preferences'
 import {reportErrorE} from '../../utils/reportError'
 import useSafeGoBack from '../../utils/useSafeGoBack'
@@ -76,6 +89,12 @@ function PreferenceCard({
 function NotificationSettingsScreen(): React.ReactElement {
   const {t} = useTranslation()
   const safeGoBack = useSafeGoBack()
+  const backgroundSocketState = useAtomValue(
+    backgroundNotificationSocketStateAtom
+  )
+  const requestBatteryExemption = useSetAtom(
+    requestBackgroundNotificationBatteryExemptionActionAtom
+  )
   const marketingNotificationPreferenceAtom = useMemo(
     () =>
       atom(
@@ -147,6 +166,26 @@ function NotificationSettingsScreen(): React.ReactElement {
               />
             ))
           )}
+          {Platform.OS === 'android' ? (
+            <PreferenceCard
+              atom={backgroundNotificationSocketEnabledAtom}
+              description={t('notifications.backgroundSocket.body')}
+              title={t('notifications.backgroundSocket.title')}
+            />
+          ) : null}
+          {Platform.OS === 'android' &&
+          backgroundSocketState?.enabled === true &&
+          !backgroundSocketState.batteryExempt ? (
+            <Button
+              variant="secondary"
+              size="large"
+              onPress={() => {
+                void requestBatteryExemption()
+              }}
+            >
+              {t('notifications.backgroundSocket.fixBatterySettings')}
+            </Button>
+          ) : null}
         </YStack>
       </YStack>
     </Screen>

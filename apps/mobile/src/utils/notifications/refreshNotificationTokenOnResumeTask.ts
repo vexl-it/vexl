@@ -21,9 +21,7 @@ export const refreshNotificationTaskId = registerInAppLoadingTask({
       const oldToken = storage._storage.getString(NOTIFICATION_TOKEN_CACHE_KEY)
       const newToken = yield* _(getNotificationTokenE())
       if (oldToken === newToken) {
-        console.log(
-          `Notification token has not changed since the last refresh: ${newToken}`
-        )
+        console.log('Notification token has not changed since the last refresh')
         return
       }
 

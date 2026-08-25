@@ -1646,5 +1646,10 @@
   "marketplace.missingProductCategoriesSuggestion.myOffersDescriptionPlural": "İnsanların filtrelerle bulabilmesi için kategoriye ihtiyaç duyan {{count}} ürün teklifiniz var. Her teklife bir kategori ekleyin ve değişiklikleri yayınlayın.",
   "marketplace.missingProductCategoriesSuggestion.allOffersPrimaryButton": "Tekliflerime git",
   "marketplace.missingProductCategoriesSuggestion.allOffersDescriptionSingular": "Ürün tekliflerinizden birinde kategori eksik. İnsanların filtrelerle bulabilmesi için Tekliflerim'de inceleyin.",
-  "marketplace.missingProductCategoriesSuggestion.allOffersDescriptionPlural": "Ürün tekliflerinizden {{count}} tanesinde kategoriler eksik. İnsanların filtrelerle bulabilmesi için Tekliflerim'de inceleyin."
+  "marketplace.missingProductCategoriesSuggestion.allOffersDescriptionPlural": "Ürün tekliflerinizden {{count}} tanesinde kategoriler eksik. İnsanların filtrelerle bulabilmesi için Tekliflerim'de inceleyin.",
+  "notifications.backgroundSocket.title": "Arka plan bildirimleri",
+  "notifications.backgroundSocket.body": "Vexl kapalıyken doğrudan bir bildirim bağlantısını açık tutun.",
+  "notifications.backgroundSocket.fixBatterySettings": "Pil ayarlarını düzelt",
+  "notifications.backgroundSocket.explanationTitle": "Vexl'i bağlı tutun",
+  "notifications.backgroundSocket.explanationBody": "Telefonunuzda Google hizmetleri yok. Uygulama kapalıyken de mesajların ulaşabilmesi için Vexl kalıcı bir bildirim gösterecek ve pil optimizasyonundan muaf tutulmayı isteyecek."
 }

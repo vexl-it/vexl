@@ -127,6 +127,7 @@ import {
 } from '../../utils/environment'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import {getNotificationTokenE} from '../../utils/notifications'
+import {backgroundNotificationSocketStateAtom} from '../../utils/notifications/backgroundNotificationSocket'
 import {displayLocalNotification} from '../../utils/notifications/displayLocalNotification'
 import {getChannelForMessages} from '../../utils/notifications/notificationChannels'
 import {
@@ -590,6 +591,9 @@ function DebugScreen(): React.ReactElement {
   )
   const resetUserIdentity = useSetAtom(realUserDataAtom)
   const notificationToken = useAtomValue(vexlNotificationTokenAtom)
+  const backgroundNotificationSocketState = useAtomValue(
+    backgroundNotificationSocketStateAtom
+  )
   if (!isDeveloper) {
     const buttonText = !isDeveloper
       ? 'Show translators debug button'
@@ -648,6 +652,10 @@ function DebugScreen(): React.ReactElement {
           <DebugLabel>apiEnv: {JSON.stringify(apiEnv, null, 2)}</DebugLabel>
           <DebugLabel>
             notficationSecretState: {JSON.stringify(notificationToken, null, 2)}
+          </DebugLabel>
+          <DebugLabel>
+            backgroundNotificationSocket:{' '}
+            {JSON.stringify(backgroundNotificationSocketState, null, 2)}
           </DebugLabel>
           <NewCrypto />
           <ActionBenchmarks />

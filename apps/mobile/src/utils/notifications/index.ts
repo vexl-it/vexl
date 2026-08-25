@@ -83,7 +83,9 @@ export function getNotificationTokenE(): Effect.Effect<ExpoNotificationToken | n
         projectId: 'dbcc5b47-6c4a-4faf-a345-e9cd8a680c32',
       })
       if (token.type !== 'expo') {
-        reportError('error', new Error('Token type is not expo'), {token})
+        reportError('error', new Error('Token type is not expo'), {
+          tokenType: token.type,
+        })
         return null
       }
       return Schema.decodeSync(ExpoNotificationToken)(token.data)

@@ -1646,5 +1646,10 @@
   "marketplace.missingProductCategoriesSuggestion.myOffersDescriptionPlural": "لديك {{count}} عروض منتجات تحتاج إلى فئة حتى يتمكن الناس من العثور عليها باستخدام الفلاتر. أضف فئة إلى كل عرض وانشر التغييرات.",
   "marketplace.missingProductCategoriesSuggestion.allOffersPrimaryButton": "انتقل إلى عروضي",
   "marketplace.missingProductCategoriesSuggestion.allOffersDescriptionSingular": "أحد عروض منتجاتك يفتقد إلى فئة. راجعه في عروضي حتى يتمكن الناس من العثور عليه باستخدام الفلاتر.",
-  "marketplace.missingProductCategoriesSuggestion.allOffersDescriptionPlural": "{{count}} من عروض منتجاتك تفتقد إلى فئات. راجعها في عروضي حتى يتمكن الناس من العثور عليها باستخدام الفلاتر."
+  "marketplace.missingProductCategoriesSuggestion.allOffersDescriptionPlural": "{{count}} من عروض منتجاتك تفتقد إلى فئات. راجعها في عروضي حتى يتمكن الناس من العثور عليها باستخدام الفلاتر.",
+  "notifications.backgroundSocket.title": "إشعارات الخلفية",
+  "notifications.backgroundSocket.body": "إبقاء اتصال إشعارات مباشر قيد التشغيل عندما يكون Vexl مغلقًا.",
+  "notifications.backgroundSocket.fixBatterySettings": "إصلاح إعدادات البطارية",
+  "notifications.backgroundSocket.explanationTitle": "إبقاء Vexl متصلًا",
+  "notifications.backgroundSocket.explanationBody": "هاتفك لا يحتوي على خدمات Google. سيعرض Vexl إشعارًا دائمًا ويطلب استثناءه من تحسين البطارية حتى تتمكن الرسائل من الوصول أثناء إغلاق التطبيق."
 }

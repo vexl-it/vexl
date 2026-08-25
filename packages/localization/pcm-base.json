@@ -1646,5 +1646,10 @@
   "marketplace.missingProductCategoriesSuggestion.myOffersDescriptionPlural": "You get {{count}} product offers wey need category make people fit find dem with filters. Put category for each offer and publish di changes.",
   "marketplace.missingProductCategoriesSuggestion.allOffersPrimaryButton": "Go to Wetin I dey sell",
   "marketplace.missingProductCategoriesSuggestion.allOffersDescriptionSingular": "One of your product offers no get category. Check am for Wetin I dey sell make people fit find am with filters.",
-  "marketplace.missingProductCategoriesSuggestion.allOffersDescriptionPlural": "{{count}} of your product offers no get categories. Check dem for Wetin I dey sell make people fit find dem with filters."
+  "marketplace.missingProductCategoriesSuggestion.allOffersDescriptionPlural": "{{count}} of your product offers no get categories. Check dem for Wetin I dey sell make people fit find dem with filters.",
+  "notifications.backgroundSocket.title": "Background notifications",
+  "notifications.backgroundSocket.body": "Keep direct notification connection dey run when Vexl don close.",
+  "notifications.backgroundSocket.fixBatterySettings": "Fix di battery settings",
+  "notifications.backgroundSocket.explanationTitle": "Make Vexl stay connected",
+  "notifications.backgroundSocket.explanationBody": "Your phone no get Google services. Vexl go show notification wey go stay, and e go ask make dem comot am from battery optimisation so messages fit enter when di app don close."
 }

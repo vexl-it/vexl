@@ -163,6 +163,7 @@ export class PushNotificationService extends Context.Tag(
                     d.notificationToSend
                   ),
                   sentAt: unixMillisecondsNow(),
+                  channel: 'push',
                 })
               })
             )
@@ -171,9 +172,7 @@ export class PushNotificationService extends Context.Tag(
               VexlNotificationTokenService,
               vexlNotificationTokenService
             ),
-            Effect.withSpan('sendingPushNotifications', {
-              attributes: {tasks},
-            })
+            Effect.withSpan('sendingPushNotifications')
           ),
       }
     })

@@ -1678,5 +1678,10 @@
   "marketplace.missingProductCategoriesSuggestion.myOffersDescriptionPlural": "Je hebt {{count}} productaanbiedingen zonder categorie. Voeg aan elke aanbieding een categorie toe, zodat mensen ze via filters kunnen vinden, en publiceer de wijzigingen.",
   "marketplace.missingProductCategoriesSuggestion.allOffersPrimaryButton": "Ga naar Mijn aanbiedingen",
   "marketplace.missingProductCategoriesSuggestion.allOffersDescriptionSingular": "Een van je productaanbiedingen heeft geen categorie. Bekijk de aanbieding bij Mijn aanbiedingen, zodat mensen deze via filters kunnen vinden.",
-  "marketplace.missingProductCategoriesSuggestion.allOffersDescriptionPlural": "{{count}} van je productaanbiedingen hebben geen categorie. Bekijk ze bij Mijn aanbiedingen, zodat mensen ze via filters kunnen vinden."
+  "marketplace.missingProductCategoriesSuggestion.allOffersDescriptionPlural": "{{count}} van je productaanbiedingen hebben geen categorie. Bekijk ze bij Mijn aanbiedingen, zodat mensen ze via filters kunnen vinden.",
+  "notifications.backgroundSocket.title": "Achtergrondmeldingen",
+  "notifications.backgroundSocket.body": "Houd een directe meldingsverbinding actief wanneer Vexl gesloten is.",
+  "notifications.backgroundSocket.fixBatterySettings": "Batterij-instellingen aanpassen",
+  "notifications.backgroundSocket.explanationTitle": "Houd Vexl verbonden",
+  "notifications.backgroundSocket.explanationBody": "Je telefoon heeft geen Google-diensten. Vexl toont een permanente melding en vraagt om uitgesloten te worden van batterijoptimalisatie, zodat berichten ook binnenkomen als de app gesloten is."
 }

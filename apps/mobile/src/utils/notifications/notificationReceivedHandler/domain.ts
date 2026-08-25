@@ -15,8 +15,6 @@ export class ErrorParsingNotification extends Schema.TaggedError<ErrorParsingNot
   'ErrorParsingNotification'
 )('ErrorParsingNotification', {
   message: Schema.String,
-  cause: Schema.Unknown,
-  data: Schema.Unknown,
 }) {}
 
 export class ErrorLoadingSession extends Schema.TaggedError<ErrorLoadingSession>(

@@ -12,6 +12,14 @@ import {Context, Effect, Layer, Schema} from 'effect'
 const NOTIFICATION_SENT = 'NOTIFICATION_SENT'
 const NOTIFICATION_PROCESSED = 'NOTIFICATION_PROCESSED'
 
+export const NotificationDeliveryChannel = Schema.Literal(
+  'foreground_socket',
+  'background_socket',
+  'push'
+)
+export type NotificationDeliveryChannel =
+  typeof NotificationDeliveryChannel.Type
+
 const AnalyticsRecord = Schema.Struct({
   sentAt: UnixMilliseconds,
   processedByClientAt: Schema.optionalWith(UnixMilliseconds, {as: 'Option'}),
@@ -27,6 +35,7 @@ export interface NotificationMetricsServiceOperations {
     sentAt: UnixMilliseconds
     systemNotificationSent: boolean
     clientPlatform: PlatformName
+    channel: NotificationDeliveryChannel
   }) => Effect.Effect<void>
 
   reportNotificationProcessed: (args: {
@@ -51,6 +60,7 @@ export class NotificationMetricsService extends Context.Tag(
           clientPlatform,
           systemNotificationSent,
           sentAt,
+          channel,
         }) =>
           reportMetricForked(
             new MetricsMessage({
@@ -63,6 +73,7 @@ export class NotificationMetricsService extends Context.Tag(
                 systemNotificationSent,
                 sentAt,
                 clientPlatform,
+                channel,
               },
             })
           ).pipe(Effect.provideService(MetricsClientService, metricsClient)),

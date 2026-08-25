@@ -1678,5 +1678,10 @@
   "marketplace.missingProductCategoriesSuggestion.myOffersDescriptionPlural": "Kategória chýba v {{count}} z tvojich ponúk produktov. Pridaj ju ku každej ponuke a zverejni zmeny, aby ich ľudia mohli nájsť pomocou filtrov.",
   "marketplace.missingProductCategoriesSuggestion.allOffersPrimaryButton": "Prejsť na Moje ponuky",
   "marketplace.missingProductCategoriesSuggestion.allOffersDescriptionSingular": "Jednej z tvojich ponúk produktov chýba kategória. Skontroluj ponuku v časti Moje ponuky, aby ju ľudia mohli nájsť pomocou filtrov.",
-  "marketplace.missingProductCategoriesSuggestion.allOffersDescriptionPlural": "Kategória chýba v {{count}} z tvojich ponúk produktov. Skontroluj ponuky v časti Moje ponuky, aby ich ľudia mohli nájsť pomocou filtrov."
+  "marketplace.missingProductCategoriesSuggestion.allOffersDescriptionPlural": "Kategória chýba v {{count}} z tvojich ponúk produktov. Skontroluj ponuky v časti Moje ponuky, aby ich ľudia mohli nájsť pomocou filtrov.",
+  "notifications.backgroundSocket.title": "Notifikácie na pozadí",
+  "notifications.backgroundSocket.body": "Udržiavaj priame spojenie pre notifikácie, aj keď je Vexl zatvorený.",
+  "notifications.backgroundSocket.fixBatterySettings": "Opraviť nastavenia batérie",
+  "notifications.backgroundSocket.explanationTitle": "Udrž Vexl pripojený",
+  "notifications.backgroundSocket.explanationBody": "Tvoj telefón nemá služby Google. Vexl zobrazí trvalú notifikáciu a požiada o vyňatie z optimalizácie batérie, aby ti správy chodili, aj keď je aplikácia zatvorená."
 }

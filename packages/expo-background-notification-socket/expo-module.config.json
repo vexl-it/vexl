@@ -1,0 +1,11 @@
+{
+  "platforms": ["apple", "android"],
+  "apple": {
+    "modules": ["ExpoBackgroundNotificationSocketModule"]
+  },
+  "android": {
+    "modules": [
+      "expo.modules.backgroundnotificationsocket.BackgroundNotificationSocketModule"
+    ]
+  }
+}

@@ -1678,5 +1678,10 @@
   "marketplace.missingProductCategoriesSuggestion.myOffersDescriptionPlural": "{{count}}件の商品オファーにカテゴリーが設定されていません。フィルターで見つけてもらえるよう、各オファーにカテゴリーを追加して変更を公開してください。",
   "marketplace.missingProductCategoriesSuggestion.allOffersPrimaryButton": "マイオファーへ",
   "marketplace.missingProductCategoriesSuggestion.allOffersDescriptionSingular": "1件の商品オファーにカテゴリーがありません。フィルターで見つけてもらえるよう、「マイオファー」で確認してください。",
-  "marketplace.missingProductCategoriesSuggestion.allOffersDescriptionPlural": "{{count}}件の商品オファーにカテゴリーがありません。フィルターで見つけてもらえるよう、「マイオファー」で確認してください。"
+  "marketplace.missingProductCategoriesSuggestion.allOffersDescriptionPlural": "{{count}}件の商品オファーにカテゴリーがありません。フィルターで見つけてもらえるよう、「マイオファー」で確認してください。",
+  "notifications.backgroundSocket.title": "バックグラウンド通知",
+  "notifications.backgroundSocket.body": "Vexl を閉じている間も、通知用の直接接続を維持します。",
+  "notifications.backgroundSocket.fixBatterySettings": "バッテリー設定を修正",
+  "notifications.backgroundSocket.explanationTitle": "Vexl の接続を維持",
+  "notifications.backgroundSocket.explanationBody": "お使いの端末には Google サービスがありません。アプリを閉じている間もメッセージを受け取れるよう、Vexl は常駐通知を表示し、バッテリー最適化の対象外にするよう求めます。"
 }

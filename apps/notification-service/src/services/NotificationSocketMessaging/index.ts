@@ -1,11 +1,8 @@
 import {type UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
-import {type VexlNotificationTokenSecret} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
-import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {RedisPubSubService} from '@vexl-next/server-utils/src/RedisPubSubService'
 import {Array, Context, Effect, flow, Layer, pipe} from 'effect/index'
 import {
   NoActiveSocketConnectionsError,
-  type ConnectionManagerChannelId,
   type NewChatMessageNoticeSendTask,
   type SendMessageTask,
   type StreamOnlyChatMessageSendTask,
@@ -15,6 +12,7 @@ import {MyManagerIdProvider} from './services/MyManagerIdProvider'
 import {RedisConnectionRegistry} from './services/RedisConnectionRegistry'
 import {SendMessageTasksManager} from './services/SendMessageTasksManager'
 import {type SendMessageTasksManagerError} from './services/SendMessageTasksManager/domain'
+import {canDeliverTaskToConnection} from './utils'
 
 export interface NotificationSocketMessagingOperations {
   sendNewChatMessageNotice: (
@@ -52,19 +50,20 @@ export class NotificationSocketMessaging extends Context.Tag(
       const registry = yield* _(RedisConnectionRegistry)
       const sendMessageTaskManager = yield* _(SendMessageTasksManager)
 
-      const findManagerIdsForOpenConnections = (
-        token: VexlNotificationTokenSecret,
-        minimalClientVersion?: VersionCode
+      const emitToOpenConnections = (
+        task: SendMessageTask
       ): Effect.Effect<
-        Array.NonEmptyArray<ConnectionManagerChannelId>,
-        NoActiveSocketConnectionsError | UnexpectedServerError
+        void,
+        | NoActiveSocketConnectionsError
+        | UnexpectedServerError
+        | SendMessageTasksManagerError
       > =>
         pipe(
-          registry.getConnectionsForToken(token),
+          registry.getConnectionsForToken(task.notificationToken),
           Effect.map(
             flow(
-              Array.filter(
-                (c) => c.clientInfo.version >= (minimalClientVersion ?? 0)
+              Array.filter((c) =>
+                canDeliverTaskToConnection(task, c.clientInfo)
               ),
               Array.map((c) => c.managerId),
               Array.dedupe
@@ -74,34 +73,16 @@ export class NotificationSocketMessaging extends Context.Tag(
           Effect.catchTag(
             'NoSuchElementException',
             () => new NoActiveSocketConnectionsError()
+          ),
+          Effect.flatMap((managerIds) =>
+            sendMessageTaskManager.emitTask(task, ...managerIds)
           )
         )
 
       return {
-        sendNewChatMessageNotice: (task) =>
-          Effect.flatMap(
-            findManagerIdsForOpenConnections(
-              task.notificationToken,
-              task.minimalClientVersion
-            ),
-            (managerIds) => sendMessageTaskManager.emitTask(task, ...managerIds)
-          ),
-        sendStreamOnlyChatMessage: (task) =>
-          Effect.flatMap(
-            findManagerIdsForOpenConnections(
-              task.notificationToken,
-              task.minimalClientVersion
-            ),
-            (managerIds) => sendMessageTaskManager.emitTask(task, ...managerIds)
-          ),
-        sendNotice: (task) =>
-          Effect.flatMap(
-            findManagerIdsForOpenConnections(
-              task.notificationToken,
-              task.minimalClientVersion
-            ),
-            (managerIds) => sendMessageTaskManager.emitTask(task, ...managerIds)
-          ),
+        sendNewChatMessageNotice: emitToOpenConnections,
+        sendStreamOnlyChatMessage: emitToOpenConnections,
+        sendNotice: emitToOpenConnections,
       }
     })
   ).pipe(

@@ -1646,5 +1646,10 @@
   "marketplace.missingProductCategoriesSuggestion.myOffersDescriptionPlural": "Sinulla on {{count}} tuotetarjousta, jotka tarvitsevat luokan, jotta ihmiset löytävät ne suodattimilla. Lisää luokka jokaiseen tarjoukseen ja julkaise muutokset.",
   "marketplace.missingProductCategoriesSuggestion.allOffersPrimaryButton": "Siirry Omiin tarjouksiin",
   "marketplace.missingProductCategoriesSuggestion.allOffersDescriptionSingular": "Yhdestä tuotetarjouksestasi puuttuu luokka. Tarkista se kohdassa Omat tarjoukset, jotta ihmiset löytävät sen suodattimilla.",
-  "marketplace.missingProductCategoriesSuggestion.allOffersDescriptionPlural": "{{count}} tuotetarjouksestasi puuttuu luokat. Tarkista ne kohdassa Omat tarjoukset, jotta ihmiset löytävät ne suodattimilla."
+  "marketplace.missingProductCategoriesSuggestion.allOffersDescriptionPlural": "{{count}} tuotetarjouksestasi puuttuu luokat. Tarkista ne kohdassa Omat tarjoukset, jotta ihmiset löytävät ne suodattimilla.",
+  "notifications.backgroundSocket.title": "Taustailmoitukset",
+  "notifications.backgroundSocket.body": "Pidä suora ilmoitusyhteys käynnissä, kun Vexl on suljettu.",
+  "notifications.backgroundSocket.fixBatterySettings": "Korjaa akkuasetukset",
+  "notifications.backgroundSocket.explanationTitle": "Pidä Vexl yhteydessä",
+  "notifications.backgroundSocket.explanationBody": "Puhelimessasi ei ole Google-palveluita. Vexl näyttää pysyvän ilmoituksen ja pyytää vapautusta akun optimoinnista, jotta viestit voivat saapua, kun sovellus on suljettu."
 }

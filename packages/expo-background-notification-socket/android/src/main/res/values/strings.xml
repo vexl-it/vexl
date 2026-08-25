@@ -1,5 +1,7 @@
 <resources>
   <string name="vexl_background_notification_channel">Background notifications</string>
   <string name="vexl_background_notification_title">Vexl running in background</string>
-  <string name="vexl_background_notification_body">Listening for notifications</string>
+  <string name="vexl_background_notification_state_connecting">Connecting…</string>
+  <string name="vexl_background_notification_state_connected">Connected</string>
+  <string name="vexl_background_notification_state_reconnecting">Reconnecting…</string>
 </resources>

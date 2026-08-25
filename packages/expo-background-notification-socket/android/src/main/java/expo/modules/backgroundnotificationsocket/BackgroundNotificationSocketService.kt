@@ -136,6 +136,13 @@ class BackgroundNotificationSocketService : Service() {
 
   override fun onBind(intent: Intent?): IBinder? = null
 
+  // Also refreshes the persistent notification, whose text shows the state.
+  private fun setState(state: String) {
+    BackgroundNotificationSocketStatus.state = state
+    val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    notificationManager.notify(NOTIFICATION_ID, foregroundNotification())
+  }
+
   private fun connect() {
     handler.removeCallbacks(reconnectRunnable)
     if (stopped || socket != null) return
@@ -150,7 +157,7 @@ class BackgroundNotificationSocketService : Service() {
       return
     }
 
-    BackgroundNotificationSocketStatus.state = if (reconnectAttempt == 0) "connecting" else "reconnecting"
+    setState(if (reconnectAttempt == 0) "connecting" else "reconnecting")
     val request = Request.Builder().url(toSocketUrl(configuration.apiUrl)).build()
     connectedConfiguration = configuration
     socket = httpClient.newWebSocket(request, listener(configuration))
@@ -162,7 +169,7 @@ class BackgroundNotificationSocketService : Service() {
         Log.i(LOG_TAG, "Background notification socket connected")
         handler.post {
           if (socket != webSocket) return@post
-          BackgroundNotificationSocketStatus.state = "connected"
+          setState("connected")
           webSocket.send(requestFrame(configuration))
           handler.removeCallbacks(pingRunnable)
           handler.postDelayed(pingRunnable, PING_INTERVAL_MS)
@@ -265,7 +272,7 @@ class BackgroundNotificationSocketService : Service() {
     handler.removeCallbacks(reconnectRunnable)
     if (stopped || !BackgroundNotificationConfig.isEnabled(this)) return
 
-    BackgroundNotificationSocketStatus.state = "reconnecting"
+    setState("reconnecting")
     handler.postDelayed(reconnectRunnable, delayMs)
   }
 
@@ -329,10 +336,19 @@ class BackgroundNotificationSocketService : Service() {
   private fun foregroundNotification() = NotificationCompat.Builder(this, CHANNEL_ID)
     .setSmallIcon(notificationIcon())
     .setContentTitle(getString(R.string.vexl_background_notification_title))
-    .setContentText(getString(R.string.vexl_background_notification_body))
+    .setContentText(stateText())
     .setOngoing(true)
+    .setOnlyAlertOnce(true)
     .setPriority(NotificationCompat.PRIORITY_LOW)
     .build()
+
+  private fun stateText(): String = getString(
+    when (BackgroundNotificationSocketStatus.state) {
+      "connected" -> R.string.vexl_background_notification_state_connected
+      "reconnecting" -> R.string.vexl_background_notification_state_reconnecting
+      else -> R.string.vexl_background_notification_state_connecting
+    },
+  )
 
   private fun notificationIcon(): Int {
     val notificationIcon = resources.getIdentifier("notification_icon", "drawable", packageName)

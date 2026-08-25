@@ -20,7 +20,8 @@ When changing any UI / UX in the mobile app or in the ui package you must read @
 - Define custom errors by extending `Schema.TaggedError` (for example `class MyError extends Schema.TaggedError<MyError>(...)`) instead of extending `Error`, to keep error handling consistent across the codebase.
 
 ## packages roles
-- apps/-*service - backend services
+
+- apps/-\*service - backend services
 - apps/mobile - Expo mobile app
 - packages/server-utils - shared utilities for backend services
 - packages/ui - shared UI components and themes for mobile app
@@ -31,8 +32,17 @@ When changing any UI / UX in the mobile app or in the ui package you must read @
 - packages/geocoding-db - standalone geocoding database used by location-service: schema, queries, and migrations. Lives on its own Postgres instance (`GEOCODING_DB_*` env, never the shared `DB_URL`) so geocoding never shares resources with vexl user data. Details in packages/geocoding-db/README.md.
 - packages/resources-utils - shared utilities for handling offers, chat, and other "resources" operations
 - packages/rest-api - effect-ts based rest api definitions and client for both backend and mobile app
-- tooling/* - shared tooling for the repo (esling, prettier, etc...)
+- tooling/\* - shared tooling for the repo (esling, prettier, etc...)
 - tooling/location-db-updater - standalone OSM dataset refresh pipeline and dev seeder for the geocoding database. Builds the `ghcr.io/vexl-it/geocoding-refresh` Docker image. The dataset refresh (`pnpm refresh:geocoding`) is run manually from an operator's machine — never add server-side cron/updater infrastructure. Details in tooling/location-db-updater/README.md.
+
+## Mobile app versioning
+
+The mobile app uses CalVer (since 26.8.0). Both values live in apps/mobile/app.config.ts:
+
+- `VERSION`: `YY.M.PATCH` with unpadded month (e.g. `26.8.0`). Always use this exact format — parts of the codebase compare versions as strings, so a padded/unpadded mix would read as two different versions.
+- `VERSION_CODE`: `YYMMPPPBB` — zero-padded month, 3-digit `PATCH` mirroring `VERSION`, and a 2-digit upload counter (e.g. `260800100` and `260800101` are two TestFlight/store uploads of `26.8.1`). Reset the counter to `00` when `VERSION` changes; bump it for every upload where `VERSION` stays the same.
+
+Both values must only ever increase: stores reject decreases, and clients gate features with `>=` version comparisons (`VersionString` brand).
 
 ## Backend metrics
 
@@ -43,7 +53,9 @@ All backend metrics are documented in docs/backend_stats.md. When you add, remov
 Backend errors are reported to Sentry via a shared logger hook — see docs/backend_sentry.md. Logging at error/fatal level IS the reporting API: use it only for unexpected errors that someone should look at; log expected or user-caused failures at warning or below. Never log tokens, keys, hashes, phone numbers, redis keys/values, or payloads — not even at error level.
 
 ## Verification
+
 IMPORTANT -- Verification steps (do this to verify your code changes. Not all bugs / errors will be caught by CI, but the most obvious ones will):
+
 1. Run `pnpm turbo:typecheck` in the affected workspace. Read the output and fix all errors.
 2. Run `pnpm turbo:format`. If it fails, run `pnpm turbo:format:fix` first, then re-run.
 3. Run `pnpm turbo:lint`. Fix any errors.

@@ -3,8 +3,8 @@ import {getCrypto} from '@vexl-next/cryptography/src/getCrypto'
 import {Schema} from 'effect'
 import {IdNumeric} from '../utility/IdNumeric'
 import {IsoDatetimeString} from '../utility/IsoDatetimeString.brand'
-import {SemverString} from '../utility/SmeverString.brand'
 import {UnixMilliseconds} from '../utility/UnixMilliseconds.brand'
+import {VersionString} from '../utility/VersionString.brand'
 import {HashedPhoneNumber} from './HashedPhoneNumber.brand'
 import {VexlNotificationToken} from './notifications/VexlNotificationToken'
 import {FriendLevel, SymmetricKey} from './offers'
@@ -49,7 +49,7 @@ export const NotePublicPart = Schema.Struct({
   text: Schema.String.pipe(Schema.maxLength(NOTE_TEXT_MAX_LENGTH)),
   allowRepost: Schema.Boolean,
   vexlNotificationToken: Schema.optional(VexlNotificationToken),
-  authorClientVersion: Schema.optional(SemverString),
+  authorClientVersion: Schema.optional(VersionString),
 })
 export type NotePublicPart = typeof NotePublicPart.Type
 

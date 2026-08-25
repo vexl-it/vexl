@@ -9,8 +9,8 @@ import {
   MessageCypher,
   type ChatMessage,
 } from '@vexl-next/domain/src/general/messaging'
-import {SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {VersionString} from '@vexl-next/domain/src/utility/VersionString.brand'
 import {HashSet, Schema} from 'effect'
 import {BlockedChatSender} from '../blockedChatSender'
 import {
@@ -309,7 +309,7 @@ describe('filterIncomingMessages', () => {
           message: Schema.decodeSync(MessageCypher)('cypher'),
           senderPublicKey: senderKey.publicKeyPemBase64,
         },
-        minimalRequiredVersion: Schema.decodeSync(SemverString)('99.0.0'),
+        minimalRequiredVersion: Schema.decodeSync(VersionString)('99.0.0'),
         time,
         senderPublicKey: senderKey.publicKeyPemBase64,
         text: '-',

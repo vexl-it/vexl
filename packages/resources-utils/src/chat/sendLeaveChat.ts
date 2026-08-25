@@ -6,7 +6,7 @@ import {
   type ChatMessage,
   type ServerMessage,
 } from '@vexl-next/domain/src/general/messaging'
-import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
+import {type VersionString} from '@vexl-next/domain/src/utility/VersionString.brand'
 import {type ChatApi} from '@vexl-next/rest-api/src/services/chat'
 import {type NotificationApi} from '@vexl-next/rest-api/src/services/notification'
 import {Effect, type ParseResult} from 'effect'
@@ -37,7 +37,7 @@ export default function sendLeaveChat({
   message: ChatMessage
   senderKeypair: PrivateKeyHolder
   theirNotificationCypher?: NotificationTokenOrCypher | undefined
-  otherSideVersion: SemverString | undefined
+  otherSideVersion: VersionString | undefined
   notificationApi: NotificationApi
 }): Effect.Effect<
   ServerMessage,

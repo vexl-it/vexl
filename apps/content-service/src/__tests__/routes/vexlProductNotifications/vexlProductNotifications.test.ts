@@ -4,8 +4,8 @@ import {
   type VexlProductNotification,
 } from '@vexl-next/domain/src/general/vexlProductNotification'
 import {PLATFORM_IOS} from '@vexl-next/domain/src/utility/PlatformName'
-import {SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
+import {VersionString} from '@vexl-next/domain/src/utility/VersionString.brand'
 import {
   AppSource,
   makeCommonHeaders,
@@ -28,7 +28,7 @@ const ADMIN_TOKEN = 'dev'
 const commonHeaders = makeCommonHeaders({
   platform: PLATFORM_IOS,
   versionCode: Schema.decodeSync(VersionCode)(1),
-  semver: Schema.decodeSync(SemverString)('1.0.0'),
+  semver: Schema.decodeSync(VersionString)('1.0.0'),
   appSource: Schema.decodeSync(AppSource)('test'),
   language: 'en',
   isDeveloper: true,

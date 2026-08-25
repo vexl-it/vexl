@@ -5,8 +5,8 @@ import {
 import {parseUrlWithSearchParams} from '@vexl-next/domain/src/utility/parseUrlWithSearchParams'
 import {
   compare,
-  SemverString,
-} from '@vexl-next/domain/src/utility/SmeverString.brand'
+  VersionString,
+} from '@vexl-next/domain/src/utility/VersionString.brand'
 import {Effect, flow, Option, Schema} from 'effect'
 import {ImportContactFromLinkPayloadE} from '../../state/contacts/domain'
 import {version} from '../environment'
@@ -31,11 +31,11 @@ export class InvalidDeepLinkError extends Schema.TaggedError<InvalidDeepLinkErro
 export class DeepLinkMeantForNewerVersionError extends Schema.TaggedError<DeepLinkMeantForNewerVersionError>(
   'DeepLinkMeantForNewerVersionError'
 )('DeepLinkMeantForNewerVersionError', {
-  minimalVersionRequired: Schema.optional(SemverString),
+  minimalVersionRequired: Schema.optional(VersionString),
 }) {}
 
 const DeeplinkPayloadVersion = Schema.Struct({
-  version: Schema.optionalWith(SemverString, {as: 'Option'}),
+  version: Schema.optionalWith(VersionString, {as: 'Option'}),
 })
 
 const DeepLinkGoldenGlassesWithType = Schema.Struct({

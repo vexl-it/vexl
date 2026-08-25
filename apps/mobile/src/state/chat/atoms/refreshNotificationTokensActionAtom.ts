@@ -4,8 +4,8 @@ import {
   type ChatMessage,
 } from '@vexl-next/domain/src/general/messaging'
 import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
-import {SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {now} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {VersionString} from '@vexl-next/domain/src/utility/VersionString.brand'
 import sendMessage from '@vexl-next/resources-utils/src/chat/sendMessage'
 import {
   effectToTask,
@@ -26,7 +26,7 @@ import focusChatByInboxKeyAndSenderKey from './focusChatByInboxKeyAndSenderKey'
 import {updateMyNotificationTokenInfoInChat} from './generateMyNotificationTokenInfoActionAtom'
 
 const FCM_TOKEN_UPDATE_MESSAGE_MINIMAL_VERSION =
-  Schema.decodeSync(SemverString)('1.13.1')
+  Schema.decodeSync(VersionString)('1.13.1')
 
 function createFcmCypherUpdateMessage(
   senderPublicKey: PublicKeyPemBase64,

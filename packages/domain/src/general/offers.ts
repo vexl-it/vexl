@@ -5,7 +5,7 @@ import {Array, Either, Schema} from 'effect'
 import {IdNumeric} from '../utility/IdNumeric'
 import {IsoDatetimeString} from '../utility/IsoDatetimeString.brand'
 import {JSDateString} from '../utility/JSDateString.brand'
-import {SemverString} from '../utility/SmeverString.brand'
+import {VersionString} from '../utility/VersionString.brand'
 import {Latitude, Longitude, Radius} from '../utility/geoCoordinates'
 import {HashedPhoneNumber} from './HashedPhoneNumber.brand'
 import {ClubUuid} from './clubs'
@@ -205,7 +205,7 @@ export const OfferPublicPart = Schema.Struct({
   ),
   // New dedicated field for vexl notification token
   vexlNotificationToken: Schema.optional(VexlNotificationToken),
-  authorClientVersion: Schema.optional(SemverString),
+  authorClientVersion: Schema.optional(VersionString),
   goldenAvatarType: Schema.optional(GoldenAvatarType),
   byLiquidityProvider: Schema.optional(Schema.Boolean),
 })

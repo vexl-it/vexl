@@ -4,8 +4,8 @@ import {
   type ChatMessage,
 } from '@vexl-next/domain/src/general/messaging'
 import {type TradeChecklistUpdate} from '@vexl-next/domain/src/general/tradeChecklist'
-import {SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {VersionString} from '@vexl-next/domain/src/utility/VersionString.brand'
 import sendMessage, {
   type SendMessageApiErrors,
 } from '@vexl-next/resources-utils/src/chat/sendMessage'
@@ -28,7 +28,7 @@ import processTradeChecklistContactRevealMessageIfAny from '../utils/processTrad
 import processTradeChecklistIdentityRevealMessageIfAny from '../utils/processTradeChecklistIdentityRevealMessageIfAny'
 import {replaceIdentityImageFileUriWithBase64} from '../utils/replaceImageFileUrisWithBase64'
 
-const MINIMAL_REQUIRED_VERSION = Schema.decodeSync(SemverString)('1.25.0')
+const MINIMAL_REQUIRED_VERSION = Schema.decodeSync(VersionString)('1.25.0')
 
 export default function createSubmitChecklistUpdateActionAtom(
   chatWithMessagesAtom: FocusAtomType<ChatWithMessages>

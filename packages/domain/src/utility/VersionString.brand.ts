@@ -5,15 +5,15 @@ import {
 } from 'compare-versions'
 import {Schema} from 'effect'
 
-export const SemverString = Schema.String.pipe(
+export const VersionString = Schema.String.pipe(
   Schema.filter(validate),
-  Schema.brand('SemverString')
+  Schema.brand('VersionString')
 )
 
-export type SemverString = typeof SemverString.Type
+export type VersionString = typeof VersionString.Type
 
 export function compare(
-  a: SemverString
-): (operator: CompareOperator, b: SemverString) => boolean {
+  a: VersionString
+): (operator: CompareOperator, b: VersionString) => boolean {
   return (operator, b) => compareVersions(a, b, operator)
 }

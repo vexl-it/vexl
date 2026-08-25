@@ -4,15 +4,15 @@ import {
   type VexlNotificationToken,
 } from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {
-  SemverString,
+  VersionString,
   compare,
-} from '@vexl-next/domain/src/utility/SmeverString.brand'
+} from '@vexl-next/domain/src/utility/VersionString.brand'
 import {type NotificationApi} from '@vexl-next/rest-api/src/services/notification'
 import {Effect, Schema} from 'effect'
 import reportErrorFromResourcesUtils from '../reportErrorFromResourcesUtils'
 
 const FE_VERSION_SUPPORTING_V2_NOTIFICATIONS =
-  Schema.decodeSync(SemverString)('1.17.0')
+  Schema.decodeSync(VersionString)('1.17.0')
 
 // Union type for notification token - accepts both legacy cypher and new vexl token
 export type NotificationTokenOrCypher =
@@ -20,7 +20,7 @@ export type NotificationTokenOrCypher =
   | VexlNotificationToken
 
 interface NotificationArgs {
-  otherSideVersion?: SemverString | undefined
+  otherSideVersion?: VersionString | undefined
   // todo #2124 - remove cypher option
   notificationCypher?: NotificationTokenOrCypher | undefined
   notificationApi: NotificationApi

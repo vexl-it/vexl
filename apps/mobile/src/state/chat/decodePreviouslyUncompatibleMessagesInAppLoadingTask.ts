@@ -1,5 +1,5 @@
 import {ChatMessagePayload} from '@vexl-next/domain/src/general/messaging'
-import {compare} from '@vexl-next/domain/src/utility/SmeverString.brand'
+import {compare} from '@vexl-next/domain/src/utility/VersionString.brand'
 import {chatMessagePayloadToChatMessage} from '@vexl-next/resources-utils/src/chat/utils/parseChatMessage'
 import {Array, Effect, Option, pipe, Schema} from 'effect'
 import {version} from './../../utils/environment'

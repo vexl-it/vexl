@@ -1,8 +1,8 @@
 import {VexlNotificationTokenSecret} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {createNotificationTrackingId} from '@vexl-next/domain/src/general/NotificationTrackingId.brand'
-import {SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
+import {VersionString} from '@vexl-next/domain/src/utility/VersionString.brand'
 import {
   AppSource,
   makeCommonHeaders,
@@ -19,7 +19,7 @@ process.env.NOTIFICATION_OFFLINE_BUFFER_MAX_COUNT = '3'
 const validHeaders = makeCommonHeaders({
   platform: 'ANDROID',
   versionCode: Schema.decodeSync(VersionCode)(100),
-  semver: Schema.decodeSync(SemverString)('1.0.0'),
+  semver: Schema.decodeSync(VersionString)('1.0.0'),
   appSource: Schema.decodeSync(AppSource)('playStore'),
   language: 'en',
   isDeveloper: false,

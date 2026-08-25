@@ -4,11 +4,11 @@ import {
   type Chat,
   type ChatMessage,
 } from '@vexl-next/domain/src/general/messaging'
-import {
-  SemverString,
-  compare as compareSemver,
-} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {now} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {
+  VersionString,
+  compare as compareSemver,
+} from '@vexl-next/domain/src/utility/VersionString.brand'
 import sendMessage from '@vexl-next/resources-utils/src/chat/sendMessage'
 import {Effect, Schema} from 'effect'
 import {atom, type Atom} from 'jotai'
@@ -18,7 +18,7 @@ import {sendReadReceiptsAtom} from '../../../utils/preferences'
 import reportError from '../../../utils/reportError'
 import {type ChatMessageWithState} from '../domain'
 
-const MINIMAL_REQUIRED_VERSION = Schema.decodeSync(SemverString)('1.39.1')
+const MINIMAL_REQUIRED_VERSION = Schema.decodeSync(VersionString)('1.39.1')
 
 function createMessageReadMessage(
   senderPublicKey: PublicKeyPemBase64

@@ -10,7 +10,7 @@ import {apiAtom} from '../../../api'
 import {versionCode} from '../../../utils/environment'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import {getNotificationTokenE} from '../../../utils/notifications'
-import {backgroundNotificationSocketEnabledAtom} from '../../../utils/notifications/backgroundNotificationSocket'
+import {backgroundNotificationSocketEnabledReadOnlyAtom} from '../../../utils/notifications/backgroundNotificationSocket/state'
 import {notificationPreferencesAtom} from '../../../utils/preferences'
 import {reportErrorE} from '../../../utils/reportError'
 import {vexlNotificationTokenAtom} from '../vexlNotificationTokenAtom'
@@ -36,7 +36,7 @@ export const syncVexlNotificationTokensActionAtom = atom(
       const notificationPreferences = get(notificationPreferencesAtom)
       const vexlNotificationState = get(vexlNotificationTokenAtom)
       const backgroundNotificationSocketEnabled = get(
-        backgroundNotificationSocketEnabledAtom
+        backgroundNotificationSocketEnabledReadOnlyAtom
       )
       const expoNotificationTokenFromDevice =
         (yield* getNotificationTokenE()) || undefined

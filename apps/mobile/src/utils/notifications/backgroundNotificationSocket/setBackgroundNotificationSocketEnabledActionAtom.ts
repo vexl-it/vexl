@@ -3,16 +3,18 @@ import {
   setEnabled,
 } from '@vexl-next/expo-background-notification-socket'
 import {Effect} from 'effect/index'
-import {atom} from 'jotai'
+import {atom, type SetStateAction} from 'jotai'
 import {Platform} from 'react-native'
-import {
-  configureForCurrentSecret,
-  refreshBackgroundNotificationSocketStateActionAtom,
-} from '.'
 import {syncVexlNotificationTokensActionAtom} from '../../../state/notifications/actions/syncVexlNotificationTokensActionAtom'
 import {vexlNotificationTokenAtom} from '../../../state/notifications/vexlNotificationTokenAtom'
+import getValueFromSetStateActionOfAtom from '../../atomUtils/getValueFromSetStateActionOfAtom'
 import reportError from '../../reportError'
 import {requestPermissions} from '../checkAndAskForPermissionsActionAtom'
+import {
+  backgroundNotificationSocketStateAtom,
+  configureForCurrentSecret,
+  refreshBackgroundNotificationSocketStateActionAtom,
+} from './state'
 
 export const setBackgroundNotificationSocketEnabledActionAtom = atom(
   null,
@@ -40,5 +42,15 @@ export const setBackgroundNotificationSocketEnabledActionAtom = atom(
         expoNotificationToken: 'getFromExpo',
       })
     )
+  }
+)
+
+export const backgroundNotificationSocketEnabledAtom = atom(
+  (get) => get(backgroundNotificationSocketStateAtom)?.enabled === true,
+  (get, set, update: SetStateAction<boolean>): void => {
+    const enabled = getValueFromSetStateActionOfAtom(update)(
+      () => get(backgroundNotificationSocketStateAtom)?.enabled === true
+    )
+    void set(setBackgroundNotificationSocketEnabledActionAtom, enabled)
   }
 )

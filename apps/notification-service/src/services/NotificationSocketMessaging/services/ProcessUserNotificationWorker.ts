@@ -148,6 +148,11 @@ export const ProcessUserNotificationsWorker =
         Match.exhaustive
       )
 
+      // Buffered before the socket attempt - a socket "delivery" only means
+      // the message was enqueued for a possibly-dead connection. The entry is
+      // removed when the client reports the notification as processed.
+      yield* _(offlineNotificationBuffer.bufferTaskIfEnabled(task))
+
       yield* _(
         socketMessaging.sendNotice(task),
         Effect.catchAll((e) =>
@@ -156,10 +161,7 @@ export const ProcessUserNotificationsWorker =
               'Unable to send notification via socket, falling back to push notification',
               e
             ),
-            Effect.zipRight(
-              offlineNotificationBuffer.bufferTaskIfEnabled(task),
-              issuePushNotification(task)
-            )
+            issuePushNotification(task)
           )
         )
       )

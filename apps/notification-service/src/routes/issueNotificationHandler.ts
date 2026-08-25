@@ -60,6 +60,11 @@ export const issueNotifcationHandler = HttpApiBuilder.handler(
         trackingId: createNotificationTrackingId(),
       })
 
+      // Buffered before the socket attempt - a socket "delivery" only means
+      // the message was enqueued for a possibly-dead connection. The entry is
+      // removed when the client reports the notification as processed.
+      yield* _(offlineNotificationBuffer.bufferTaskIfEnabled(task))
+
       yield* _(
         Effect.catchAll(
           notificationSocketMessaging.sendNewChatMessageNotice(task),
@@ -71,7 +76,6 @@ export const issueNotifcationHandler = HttpApiBuilder.handler(
                   socketError
                 )
               )
-              yield* _(offlineNotificationBuffer.bufferTaskIfEnabled(task))
               yield* _(
                 issuePushNotification(task),
                 Effect.catchAll(

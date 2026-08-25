@@ -137,6 +137,33 @@ describe('OfflineNotificationBuffer', () => {
     )
   })
 
+  it('Removes a task once its processing is confirmed by trackingId', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const buffer = yield* _(OfflineNotificationBuffer)
+        const secret = yield* _(createSecret(true))
+
+        const processedTask = makeTask(secret, 1000)
+        const unprocessedTask = makeTask(secret, 2000)
+        yield* _(buffer.bufferTaskIfEnabled(processedTask))
+        yield* _(buffer.bufferTaskIfEnabled(unprocessedTask))
+
+        yield* _(
+          buffer.removeBufferedTaskByTrackingId(processedTask.trackingId)
+        )
+        // Unknown trackingId is a no-op
+        yield* _(
+          buffer.removeBufferedTaskByTrackingId(createNotificationTrackingId())
+        )
+
+        const bufferedTasks = yield* _(buffer.getAndClearBufferedTasks(secret))
+        expect(Array.map(bufferedTasks, (one) => one.trackingId)).toEqual([
+          unprocessedTask.trackingId,
+        ])
+      }).pipe(Effect.provide(OfflineNotificationBuffer.Live))
+    )
+  })
+
   it('Ignores tasks for unknown secrets', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {

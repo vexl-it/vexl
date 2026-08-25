@@ -1646,5 +1646,10 @@
   "marketplace.missingProductCategoriesSuggestion.myOffersDescriptionPlural": "{{count}} پیشنهاد محصول دارید که برای پیدا شدن توسط افراد با فیلترها به دسته‌بندی نیاز دارند. به هر پیشنهاد یک دسته‌بندی اضافه کنید و تغییرات را منتشر کنید.",
   "marketplace.missingProductCategoriesSuggestion.allOffersPrimaryButton": "برو به پیشنهادهای من",
   "marketplace.missingProductCategoriesSuggestion.allOffersDescriptionSingular": "یکی از پیشنهادهای محصول شما دسته‌بندی ندارد. آن را در پیشنهادهای من بررسی کنید تا افراد بتوانند با فیلترها آن را پیدا کنند.",
-  "marketplace.missingProductCategoriesSuggestion.allOffersDescriptionPlural": "{{count}} تا از پیشنهادهای محصول شما دسته‌بندی ندارند. آن‌ها را در پیشنهادهای من بررسی کنید تا افراد بتوانند با فیلترها آن‌ها را پیدا کنند."
+  "marketplace.missingProductCategoriesSuggestion.allOffersDescriptionPlural": "{{count}} تا از پیشنهادهای محصول شما دسته‌بندی ندارند. آن‌ها را در پیشنهادهای من بررسی کنید تا افراد بتوانند با فیلترها آن‌ها را پیدا کنند.",
+  "notifications.backgroundSocket.title": "اعلان‌های پس‌زمینه",
+  "notifications.backgroundSocket.body": "وقتی Vexl بسته است، یک اتصال مستقیم اعلان را فعال نگه دارید.",
+  "notifications.backgroundSocket.fixBatterySettings": "اصلاح تنظیمات باتری",
+  "notifications.backgroundSocket.explanationTitle": "Vexl را متصل نگه دارید",
+  "notifications.backgroundSocket.explanationBody": "گوشی شما سرویس‌های Google ندارد. Vexl یک اعلان دائمی نمایش می‌دهد و درخواست می‌کند از بهینه‌سازی باتری مستثنا شود تا پیام‌ها در حالی که برنامه بسته است دریافت شوند."
 }

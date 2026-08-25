@@ -13,7 +13,7 @@ import '@vexl-next/ui/src/config/tamagui.config'
 // Order matters
 import './src/components/AppLogsScreen/setupAppLogs'
 // Order matters
-import './src/utils/notifications/notificationReceivedHandler'
+import {processBackgroundSocketNotification} from './src/utils/notifications/notificationReceivedHandler'
 // Order matters
 import './src/utils/setupCryptoImplementation'
 // order matters
@@ -25,7 +25,9 @@ import './src/components/Map/utils/mapRequestUserAgent'
 // INITIAL SETUP DONE
 
 import * as Sentry from '@sentry/react-native'
+import {BACKGROUND_NOTIFICATION_HEADLESS_TASK} from '@vexl-next/expo-background-notification-socket'
 import {registerRootComponent} from 'expo'
+import {AppRegistry} from 'react-native'
 import App from './src/App'
 import {detectMmkvDataLoss} from './src/utils/mmkv/detectMmkvDataLoss'
 
@@ -45,5 +47,10 @@ if (![].toSorted) {
 
 // TODO: Temporary diagnostic for silent MMKV data wipes. Remove with the sentinel.
 detectMmkvDataLoss()
+
+AppRegistry.registerHeadlessTask(
+  BACKGROUND_NOTIFICATION_HEADLESS_TASK,
+  () => processBackgroundSocketNotification
+)
 
 registerRootComponent(Sentry.wrap(App))

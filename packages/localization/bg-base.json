@@ -1678,5 +1678,10 @@
   "marketplace.missingProductCategoriesSuggestion.myOffersDescriptionPlural": "Имаш {{count}} оферти за продукти без категории. За да могат хората да ги намират чрез филтрите, добави категория към всяка оферта и публикувай промените.",
   "marketplace.missingProductCategoriesSuggestion.allOffersPrimaryButton": "Отвори Моите оферти",
   "marketplace.missingProductCategoriesSuggestion.allOffersDescriptionSingular": "В една от офертите ти за продукти липсва категория. Прегледай я в Моите оферти, за да могат хората да я намират чрез филтрите.",
-  "marketplace.missingProductCategoriesSuggestion.allOffersDescriptionPlural": "В {{count}} от офертите ти за продукти липсват категории. Прегледай ги в Моите оферти, за да могат хората да ги намират чрез филтрите."
+  "marketplace.missingProductCategoriesSuggestion.allOffersDescriptionPlural": "В {{count}} от офертите ти за продукти липсват категории. Прегледай ги в Моите оферти, за да могат хората да ги намират чрез филтрите.",
+  "notifications.backgroundSocket.title": "Известия във фонов режим",
+  "notifications.backgroundSocket.body": "Поддържай директна връзка за известия, докато Vexl е затворен.",
+  "notifications.backgroundSocket.fixBatterySettings": "Поправи настройките на батерията",
+  "notifications.backgroundSocket.explanationTitle": "Дръж Vexl свързан",
+  "notifications.backgroundSocket.explanationBody": "Телефонът ти няма услуги на Google. Vexl ще показва постоянно известие и ще поиска да бъде изключен от оптимизацията на батерията, за да могат съобщенията да пристигат, докато приложението е затворено."
 }

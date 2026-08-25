@@ -1,10 +1,11 @@
-import {Effect} from 'effect/index'
+import {Effect, Option, Schema} from 'effect/index'
 import * as Notifications from 'expo-notifications'
 import * as TaskManager from 'expo-task-manager'
 import {loadSession} from '../../../state/session/loadSession'
 import {flushAllScheduledMmkvWrites} from '../../atomUtils/atomWithParsedMmkvStorage'
 import {reportErrorE} from '../../reportError'
 import {ErrorLoadingSession, type AcceptedNotificationTypes} from './domain'
+import {extractDataFromBackgroundSocketMessage} from './extractDataFromBackgroundSocketMessage'
 import {extractDataFromNotification} from './extractDataFromNotification'
 import {handleAdmitedToClubNetworkNotification} from './handlers/admitedToClubNetwork'
 import {handleClubDeactivatedNotification} from './handlers/clubDeactivated'
@@ -17,6 +18,10 @@ import {handleUserLoginOnDifferentDeviceNotification} from './handlers/userLogin
 import {handleVexlProductNotification} from './handlers/vexlProductNotification'
 
 const TASK = 'notification-background-task-v2'
+
+const BackgroundNotificationHeadlessTaskData = Schema.Struct({
+  message: Schema.String,
+})
 
 // Notifications we present ourselves via displayLocalNotification arrive with a
 // null (non-'push') trigger, whereas genuine remote pushes carry a 'push'
@@ -58,6 +63,10 @@ const processNotification = (
         source: 'backgroundTask'
         data: Notifications.NotificationTaskPayload
       }
+    | {
+        source: 'backgroundSocket'
+        data: string
+      }
 ): Promise<Notifications.BackgroundNotificationTaskResult> =>
   Effect.gen(function* (_) {
     if (input.source === 'listener' && isLocalNotification(input.data)) {
@@ -65,8 +74,17 @@ const processNotification = (
       return Notifications.BackgroundNotificationTaskResult.NoData
     }
 
-    const notificationData = yield* extractDataFromNotification(input)
-    yield* Effect.log('Got notificaiton', input.source, notificationData)
+    const notificationDataOption =
+      input.source === 'backgroundSocket'
+        ? yield* extractDataFromBackgroundSocketMessage(input.data)
+        : Option.some(yield* extractDataFromNotification(input))
+
+    if (Option.isNone(notificationDataOption)) {
+      return Notifications.BackgroundNotificationTaskResult.NoData
+    }
+
+    const notificationData = notificationDataOption.value
+    yield* Effect.log('Got notification', input.source, notificationData._tag)
 
     if (notificationRequiresLoadedSession(notificationData)) {
       const session = yield* loadSession()
@@ -104,21 +122,27 @@ const processNotification = (
   }).pipe(
     Effect.tapError((e) =>
       Effect.zip(
-        Effect.logWarning('Error in notification handler', {input, cause: e}),
+        Effect.logWarning('Error in notification handler', {
+          source: input.source,
+          cause: e,
+        }),
         reportErrorE(
           'error',
           new Error('Error processing notification', {cause: e}),
-          {input, cause: e}
+          {source: input.source, cause: e}
         )
       )
     ),
     Effect.tapDefect((e) =>
       Effect.zip(
-        Effect.logWarning('Error in notification handler', {input, cause: e}),
+        Effect.logWarning('Error in notification handler', {
+          source: input.source,
+          cause: e,
+        }),
         reportErrorE(
           'fatal',
           new Error('DEFECT processing notification', {cause: e}),
-          {input, cause: e}
+          {source: input.source, cause: e}
         )
       )
     ),
@@ -156,3 +180,16 @@ TaskManager.defineTask<Notifications.NotificationTaskPayload>(
 //   })
 
 void Notifications.registerTaskAsync(TASK)
+
+export const processBackgroundSocketNotification = async (
+  input: unknown
+): Promise<void> => {
+  const data = await Effect.runPromise(
+    Schema.decodeUnknown(BackgroundNotificationHeadlessTaskData)(input)
+  )
+  try {
+    await processNotification({source: 'backgroundSocket', data: data.message})
+  } finally {
+    flushAllScheduledMmkvWrites()
+  }
+}

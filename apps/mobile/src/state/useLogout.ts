@@ -9,6 +9,7 @@ import {loadingOverlayDisplayedAtom} from '../components/LoadingOverlayProvider'
 import clearMmkvStorageAndEmptyAtoms from '../utils/clearMmkvStorageAndEmptyAtoms'
 import {deleteAllFiles} from '../utils/fsDirectories'
 import notEmpty from '../utils/notEmpty'
+import {clearBackgroundNotificationSocketActionAtom} from '../utils/notifications/backgroundNotificationSocket'
 import {showDebugNotificationIfEnabled} from '../utils/notifications/showDebugNotificationIfEnabled'
 import reportError from '../utils/reportError'
 import deleteAllInboxesActionAtom from './chat/atoms/deleteAllInboxesActionAtom'
@@ -49,6 +50,11 @@ export const logoutActionAtom = atom(null, async (get, set) => {
   set(clearPersistentDataAboutReachAndImportedContactsActionAtom)
 
   try {
+    // Background notification socket first: stop the service and wipe its
+    // native credentials before user data is destroyed, so no notification
+    // can arrive mid-logout and no native state survives an interrupted one.
+    await failSilently(set(clearBackgroundNotificationSocketActionAtom))
+
     // offer service
     await failSilently(
       Effect.runPromise(
@@ -113,6 +119,7 @@ export const logoutActionAtom = atom(null, async (get, set) => {
     set(sessionAtom, O.none)
     await clearMmkvStorageAndEmptyAtoms()
     await failSilently(Notifications.unregisterForNotificationsAsync())
+    await failSilently(set(clearBackgroundNotificationSocketActionAtom))
   } finally {
     set(loadingOverlayDisplayedAtom, false)
   }

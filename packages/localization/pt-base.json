@@ -1678,5 +1678,10 @@
   "marketplace.missingProductCategoriesSuggestion.myOffersDescriptionPlural": "Tens {{count}} ofertas de produtos que precisam de uma categoria para que as pessoas as possam encontrar com filtros. Adiciona uma categoria a cada oferta e publica as alterações.",
   "marketplace.missingProductCategoriesSuggestion.allOffersPrimaryButton": "Ir para as minhas ofertas",
   "marketplace.missingProductCategoriesSuggestion.allOffersDescriptionSingular": "Uma das tuas ofertas de produtos não tem categoria. Revê-a em «As minhas ofertas» para que as pessoas a possam encontrar com os filtros.",
-  "marketplace.missingProductCategoriesSuggestion.allOffersDescriptionPlural": "{{count}} das tuas ofertas de produtos não têm categorias. Revê-as em «As minhas ofertas» para que as pessoas as possam encontrar com os filtros."
+  "marketplace.missingProductCategoriesSuggestion.allOffersDescriptionPlural": "{{count}} das tuas ofertas de produtos não têm categorias. Revê-as em «As minhas ofertas» para que as pessoas as possam encontrar com os filtros.",
+  "notifications.backgroundSocket.title": "Notificações em segundo plano",
+  "notifications.backgroundSocket.body": "Manter uma ligação direta de notificações ativa quando a Vexl está fechada.",
+  "notifications.backgroundSocket.fixBatterySettings": "Corrigir definições de bateria",
+  "notifications.backgroundSocket.explanationTitle": "Manter a Vexl conectada",
+  "notifications.backgroundSocket.explanationBody": "O teu telemóvel não tem serviços Google. A Vexl vai mostrar uma notificação permanente e pedir para ser excluída da otimização de bateria, para que as mensagens possam chegar enquanto a app está fechada."
 }

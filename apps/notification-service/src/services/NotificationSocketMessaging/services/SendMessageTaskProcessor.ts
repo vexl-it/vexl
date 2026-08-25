@@ -1,6 +1,8 @@
 import {Array, Context, Effect, flow, identity, Layer, pipe} from 'effect/index'
+import {NotificationMetricsService} from '../../../metrics'
 import {ThrottledPushNotificationService} from '../../ThrottledPushNotificationService'
 import {type SendMessageTask} from '../domain'
+import {canDeliverTaskToConnection} from '../utils'
 import {LocalConnectionRegistry} from './LocalConnectionRegistry'
 
 export class TaskProcessor extends Context.Tag('TaskProcessor')<
@@ -11,19 +13,49 @@ export class TaskProcessor extends Context.Tag('TaskProcessor')<
     TaskProcessor,
     Effect.gen(function* (_) {
       const localConnectionRegistry = yield* _(LocalConnectionRegistry)
+      const notificationMetrics = yield* _(NotificationMetricsService)
 
       return (task: SendMessageTask) =>
         pipe(
           localConnectionRegistry.findConnectionForNotificationToken(
             task.notificationToken
           ),
+          Effect.map(
+            Array.filter((connection) =>
+              canDeliverTaskToConnection(task, connection.connectionInfo)
+            )
+          ),
           Effect.flatMap(
             flow(
-              Array.map((connection) => connection.send(task.socketMessage)),
+              Array.map((connection) =>
+                connection.send(task.socketMessage).pipe(
+                  Effect.tap((sent) => {
+                    if (
+                      !sent ||
+                      task._tag === 'StreamOnlyChatMessageSendTask'
+                    ) {
+                      return Effect.void
+                    }
+
+                    return notificationMetrics.reportNotificationSent({
+                      id: task.trackingId,
+                      clientVersion: connection.connectionInfo.version,
+                      sentAt: task.sentAt,
+                      systemNotificationSent: false,
+                      clientPlatform: connection.connectionInfo.platform,
+                      channel:
+                        connection.connectionInfo.connectionKind ===
+                        'foreground'
+                          ? 'foreground_socket'
+                          : 'background_socket',
+                    })
+                  })
+                )
+              ),
               Effect.allWith({concurrency: 'unbounded'})
             )
           ),
-          Effect.map((results) => results.some(identity)),
+          Effect.map(Array.some(identity)),
           Effect.catchTag('NoSuchElementException', () => Effect.succeed(false))
         )
     })

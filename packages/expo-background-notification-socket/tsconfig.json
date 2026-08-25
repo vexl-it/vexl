@@ -1,0 +1,11 @@
+{
+  "extends": "@vexl-next/tsconfig/base.json",
+  "compilerOptions": {
+    "lib": ["ESNext"],
+    "moduleResolution": "node",
+    "noEmit": true,
+    "skipLibCheck": true,
+    "types": ["node"]
+  },
+  "include": ["src", "app.plugin.js"]
+}

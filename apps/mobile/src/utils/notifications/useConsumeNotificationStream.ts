@@ -2,6 +2,7 @@ import {Socket} from '@effect/platform'
 import {RpcClient, RpcSerialization} from '@effect/rpc'
 import {VexlProductNotificationData} from '@vexl-next/domain/src/general/notifications'
 import {type VexlNotificationTokenSecret} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
+import {setForegroundStreamConnected} from '@vexl-next/expo-background-notification-socket'
 import {
   type ClubExpiredNoticeMessage,
   type ClubFlaggedNoticeMessage,
@@ -28,6 +29,7 @@ import {
 import {AndroidNotificationPriority} from 'expo-notifications'
 import {atom, useAtomValue, useSetAtom} from 'jotai'
 import {useCallback} from 'react'
+import {Platform} from 'react-native'
 import {apiAtom, getApiPreset} from '../../api'
 import {addNotificationToCenterActionAtom} from '../../components/NotificationsScreen/state'
 import {fetchAndStoreMessagesForInboxHandleNotificationsActionAtom} from '../../state/chat/atoms/fetchNewMessagesActionAtom'
@@ -416,6 +418,13 @@ const processNewStreamNotificationActionAtom = atom(
     )
 )
 
+// Lets the native background socket know whether the foreground stream has
+// its own server connection, so it can safely drop duplicate deliveries.
+const reportForegroundStreamConnected = (connected: boolean): void => {
+  if (Platform.OS !== 'android') return
+  setForegroundStreamConnected(connected).catch(() => {})
+}
+
 const startListeningToNotificationStreamActionAtom = atom(
   null,
   (get, set, notificationSecret: VexlNotificationTokenSecret) =>
@@ -428,8 +437,18 @@ const startListeningToNotificationStreamActionAtom = atom(
           version: versionCode,
         })
         .pipe(
+          Stream.tap(() =>
+            Effect.sync(() => {
+              reportForegroundStreamConnected(true)
+            })
+          ),
           Stream.runForEach((streamNotification) =>
             set(processNewStreamNotificationActionAtom, streamNotification)
+          ),
+          Effect.ensuring(
+            Effect.sync(() => {
+              reportForegroundStreamConnected(false)
+            })
           ),
           Effect.exit,
           Effect.tap((e) =>

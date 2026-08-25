@@ -40,13 +40,7 @@ export const issueNotifcationHandler = HttpApiBuilder.handler(
         )
       )
 
-      yield* _(
-        Effect.log(
-          'Processing notification',
-          {vexlNotificationToken},
-          'First try to push to socket'
-        )
-      )
+      yield* _(Effect.log('Processing notification through socket'))
 
       const {issuePushNotification} = yield* _(ThrottledPushNotificationService)
 

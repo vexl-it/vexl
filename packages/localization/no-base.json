@@ -1646,5 +1646,10 @@
   "marketplace.missingProductCategoriesSuggestion.myOffersDescriptionPlural": "Du har {{count}} produkttilbud som trenger en kategori for at folk skal kunne finne dem med filtre. Legg til en kategori i hvert tilbud og publiser endringene.",
   "marketplace.missingProductCategoriesSuggestion.allOffersPrimaryButton": "Gå til Mine tilbud",
   "marketplace.missingProductCategoriesSuggestion.allOffersDescriptionSingular": "Ett av produkttilbudene dine mangler en kategori. Gå gjennom det i Mine tilbud, slik at folk kan finne det med filtre.",
-  "marketplace.missingProductCategoriesSuggestion.allOffersDescriptionPlural": "{{count}} av produkttilbudene dine mangler kategorier. Gå gjennom dem i Mine tilbud, slik at folk kan finne dem med filtre."
+  "marketplace.missingProductCategoriesSuggestion.allOffersDescriptionPlural": "{{count}} av produkttilbudene dine mangler kategorier. Gå gjennom dem i Mine tilbud, slik at folk kan finne dem med filtre.",
+  "notifications.backgroundSocket.title": "Bakgrunnsvarsler",
+  "notifications.backgroundSocket.body": "Hold en direkte varslingstilkobling i gang når Vexl er lukket.",
+  "notifications.backgroundSocket.fixBatterySettings": "Fiks batteriinnstillinger",
+  "notifications.backgroundSocket.explanationTitle": "Hold Vexl tilkoblet",
+  "notifications.backgroundSocket.explanationBody": "Telefonen din har ikke Google-tjenester. Vexl vil vise et vedvarende varsel og be om å bli unntatt fra batterioptimalisering, slik at meldinger kan komme frem mens appen er lukket."
 }

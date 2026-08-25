@@ -1,0 +1,32 @@
+{
+  "name": "@vexl-next/expo-background-notification-socket",
+  "version": "0.0.0",
+  "description": "Android background notification socket for Vexl",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "lint": "eslint .",
+    "format": "prettier --check \"**/*.{js,mjs,cjs,ts,json,md}\"",
+    "format:fix": "prettier --write \"**/*.{js,mjs,cjs,ts,json,md}\"",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "effect": "^3.20.0"
+  },
+  "devDependencies": {
+    "@vexl-next/eslint-config": "0.0.0",
+    "@vexl-next/prettier-config": "0.0.0",
+    "@vexl-next/tsconfig": "0.0.0",
+    "eslint": "^9.20.0",
+    "expo": "~57.0.15",
+    "prettier": "^3.3.2",
+    "react-native": "0.86.2",
+    "typescript": "~6.0.3"
+  },
+  "peerDependencies": {
+    "expo": "*",
+    "react-native": "*"
+  },
+  "prettier": "@vexl-next/prettier-config",
+  "private": true
+}

@@ -6,6 +6,10 @@ import {useWindowDimensions} from 'react-native'
 import {type PostLoginFlowStackScreenProps} from '../../../navigationTypes'
 import {completePostLoginFlowScreenActionAtom} from '../../../state/postLoginOnboarding'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
+import {
+  offerBackgroundNotificationSocketActionAtom,
+  setBackgroundNotificationSocketEnabledActionAtom,
+} from '../../../utils/notifications/backgroundNotificationSocket'
 import {requestPermissions} from '../../../utils/notifications/checkAndAskForPermissionsActionAtom'
 import PostLoginFlowScreen, {PostLoginFlowCopy} from './PostLoginFlowScreen'
 
@@ -19,6 +23,12 @@ export default function NotificationSetupScreen({
   const availableWidth = windowWidth - 40
   const graphicScale = Math.min(1, availableWidth / 157)
   const completeScreen = useSetAtom(completePostLoginFlowScreenActionAtom)
+  const offerBackgroundSocket = useSetAtom(
+    offerBackgroundNotificationSocketActionAtom
+  )
+  const setBackgroundSocketEnabled = useSetAtom(
+    setBackgroundNotificationSocketEnabledActionAtom
+  )
 
   const goNext = (): void => {
     completeScreen('notificationSetup')
@@ -32,12 +42,16 @@ export default function NotificationSetupScreen({
         onPress: () => {
           void Effect.runPromise(
             requestPermissions.pipe(Effect.catchAll(() => Effect.void))
-          ).finally(goNext)
+          )
+            .then(offerBackgroundSocket)
+            .finally(goNext)
         },
       }}
       secondaryButton={{
         label: t('postLoginFlow.v2.notificationSetup.skip'),
-        onPress: goNext,
+        onPress: () => {
+          void setBackgroundSocketEnabled(false).finally(goNext)
+        },
       }}
     >
       <YStack alignItems="center" flex={1} justifyContent="center" gap="$9">

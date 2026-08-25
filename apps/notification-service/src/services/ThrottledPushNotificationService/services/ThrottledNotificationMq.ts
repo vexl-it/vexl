@@ -61,9 +61,7 @@ export const processThrottledNotificationsWorker = consumerLayer(({token}) =>
     const throttleTtlMs =
       (yield* _(notificationThrottleTtlMinutesConfig)) * 60 * 1000
 
-    yield* _(
-      Effect.log('Processing throttled notifications for token', {token})
-    )
+    yield* _(Effect.log('Processing throttled notifications'))
     const lastTimeIssued = yield* _(
       lastTimeIssuedForNotificationTokenDb.getLastTimeIssuedForNotificationToken(
         token
@@ -75,8 +73,7 @@ export const processThrottledNotificationsWorker = consumerLayer(({token}) =>
     if (lastTimeIssued + throttleTtlMs > Date.now()) {
       yield* _(
         Effect.log(
-          'Skipping processing throttled notifications for token, still in throttle period',
-          {token}
+          'Skipping processing throttled notifications, still in throttle period'
         )
       )
       return

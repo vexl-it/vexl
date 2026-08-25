@@ -18,10 +18,21 @@ import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.b
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {Schema} from 'effect'
 
+export const NotificationConnectionKind = Schema.Literal(
+  'foreground',
+  'background'
+)
+export type NotificationConnectionKind = typeof NotificationConnectionKind.Type
+
+const connectionKind = Schema.optionalWith(NotificationConnectionKind, {
+  default: () => 'foreground',
+})
+
 export const NotificationsStreamClientInfo = Schema.Struct({
   version: VersionCode,
   notificationToken: VexlNotificationTokenSecret,
   platform: PlatformName,
+  connectionKind,
 })
 
 // todo #2124
@@ -32,6 +43,7 @@ export const NotificationsStreamClientInfoOld = Schema.Struct({
     VexlNotificationTokenSecret
   ),
   platform: PlatformName,
+  connectionKind,
 })
 export type NotificationsStreamClientInfo =
   typeof NotificationsStreamClientInfo.Type

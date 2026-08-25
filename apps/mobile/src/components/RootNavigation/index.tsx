@@ -10,6 +10,7 @@ import {useIsUserLoggedIn} from '../../state/session'
 import useHandleNotificationOpen from '../../state/useHandleNotificationOpen'
 import {useSetupBackgroundTask} from '../../utils/backgroundTask'
 import {useHandleUniversalAndAppLinks} from '../../utils/deepLinks'
+import {useBackgroundNotificationSocket} from '../../utils/notifications/backgroundNotificationSocket'
 import {useHideInnactivityReminderNotificationsOnResume} from '../../utils/notifications/chatNotifications'
 import {useConsumeNotificationStream} from '../../utils/notifications/useConsumeNotificationStream'
 import {showTextDebugButtonAtom} from '../../utils/preferences'
@@ -91,6 +92,7 @@ function LoggedInHookGroup(): null {
   useHideInnactivityReminderNotificationsOnResume()
   useSetupBackgroundTask()
   useConsumeNotificationStream()
+  useBackgroundNotificationSocket()
 
   // navigation
   useHandlePostLoginFlowRedirect()

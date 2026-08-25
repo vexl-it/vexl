@@ -1678,5 +1678,10 @@
   "marketplace.missingProductCategoriesSuggestion.myOffersDescriptionPlural": "您有 {{count}} 条商品报价需要添加类别，其他人才能通过筛选找到它们。请为每条报价添加类别并发布更改。",
   "marketplace.missingProductCategoriesSuggestion.allOffersPrimaryButton": "前往“我的报价”",
   "marketplace.missingProductCategoriesSuggestion.allOffersDescriptionSingular": "您有一条商品报价缺少类别。请前往“我的报价”查看并补充类别，方便其他人通过筛选找到它。",
-  "marketplace.missingProductCategoriesSuggestion.allOffersDescriptionPlural": "您有 {{count}} 条商品报价缺少类别。请前往“我的报价”查看并补充类别，方便其他人通过筛选找到它们。"
+  "marketplace.missingProductCategoriesSuggestion.allOffersDescriptionPlural": "您有 {{count}} 条商品报价缺少类别。请前往“我的报价”查看并补充类别，方便其他人通过筛选找到它们。",
+  "notifications.backgroundSocket.title": "后台通知",
+  "notifications.backgroundSocket.body": "在 Vexl 关闭时保持直接的通知连接。",
+  "notifications.backgroundSocket.fixBatterySettings": "修复电池设置",
+  "notifications.backgroundSocket.explanationTitle": "保持 Vexl 连接",
+  "notifications.backgroundSocket.explanationBody": "您的手机没有 Google 服务。Vexl 将显示一条常驻通知，并请求将其排除在电池优化之外，以便在应用关闭时也能收到消息。"
 }

@@ -1678,5 +1678,10 @@
   "marketplace.missingProductCategoriesSuggestion.myOffersDescriptionPlural": "Una ofa {{count}} za bidhaa zinazohitaji kategoria ili watu waweze kuzipata kwa vichujio. Ongeza kategoria kwenye kila ofa na uchapishe mabadiliko.",
   "marketplace.missingProductCategoriesSuggestion.allOffersPrimaryButton": "Nenda kwenye Ofa zangu",
   "marketplace.missingProductCategoriesSuggestion.allOffersDescriptionSingular": "Moja ya ofa zako za bidhaa haina kategoria. Ikague kwenye Ofa zangu ili watu waweze kuipata kwa vichujio.",
-  "marketplace.missingProductCategoriesSuggestion.allOffersDescriptionPlural": "Ofa {{count}} kati ya ofa zako za bidhaa hazina kategoria. Zikague kwenye Ofa zangu ili watu waweze kuzipata kwa vichujio."
+  "marketplace.missingProductCategoriesSuggestion.allOffersDescriptionPlural": "Ofa {{count}} kati ya ofa zako za bidhaa hazina kategoria. Zikague kwenye Ofa zangu ili watu waweze kuzipata kwa vichujio.",
+  "notifications.backgroundSocket.title": "Arifa za chinichini",
+  "notifications.backgroundSocket.body": "Weka muunganisho wa moja kwa moja wa arifa ukiendelea wakati Vexl imefungwa.",
+  "notifications.backgroundSocket.fixBatterySettings": "Rekebisha mipangilio ya betri",
+  "notifications.backgroundSocket.explanationTitle": "Weka Vexl ikiwa imeunganishwa",
+  "notifications.backgroundSocket.explanationBody": "Simu yako haina huduma za Google. Vexl itaonyesha arifa ya kudumu na kuomba kuondolewa kwenye uboreshaji wa betri ili ujumbe uweze kufika wakati programu imefungwa."
 }

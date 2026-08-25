@@ -67,22 +67,18 @@ export function extractDataFromNotification({
 
       return extractBackgroundTaskData(data)
     },
-    catch: (e) =>
+    catch: () =>
       new ErrorParsingNotification({
         message: 'Error extracting data from notification',
-        cause: e,
-        data,
       }),
   }).pipe(
     Effect.flatMap(Schema.decodeUnknown(AcceptedNotificationTypes)),
     Effect.catchTag(
       'ParseError',
-      (e) =>
+      () =>
         new ErrorParsingNotification({
           message:
             'Error decoding notification data into an accepted notification type',
-          cause: e,
-          data,
         })
     )
   )

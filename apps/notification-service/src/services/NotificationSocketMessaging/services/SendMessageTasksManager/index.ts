@@ -18,6 +18,7 @@ import {
   Schema,
   Stream,
 } from 'effect/index'
+import {type NotificationMetricsService} from '../../../../metrics'
 import {type ThrottledPushNotificationService} from '../../../ThrottledPushNotificationService'
 import {
   type ConnectionManagerChannelId,
@@ -155,6 +156,7 @@ export class SendMessageTasksManager extends Context.Tag(
     | RedisService
     | RedisConnectionService
     | LocalConnectionRegistry
+    | NotificationMetricsService
     | ThrottledPushNotificationService
   > =>
     Layer.scoped(

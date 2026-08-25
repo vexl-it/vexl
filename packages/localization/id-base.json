@@ -1646,5 +1646,10 @@
   "marketplace.missingProductCategoriesSuggestion.myOffersDescriptionPlural": "Anda memiliki {{count}} penawaran produk yang memerlukan kategori agar orang dapat menemukannya menggunakan filter. Tambahkan kategori ke setiap penawaran dan publikasikan perubahan.",
   "marketplace.missingProductCategoriesSuggestion.allOffersPrimaryButton": "Buka Penawaran saya",
   "marketplace.missingProductCategoriesSuggestion.allOffersDescriptionSingular": "Salah satu penawaran produk Anda belum memiliki kategori. Tinjau di Penawaran saya agar orang dapat menemukannya menggunakan filter.",
-  "marketplace.missingProductCategoriesSuggestion.allOffersDescriptionPlural": "{{count}} penawaran produk Anda belum memiliki kategori. Tinjau di Penawaran saya agar orang dapat menemukannya menggunakan filter."
+  "marketplace.missingProductCategoriesSuggestion.allOffersDescriptionPlural": "{{count}} penawaran produk Anda belum memiliki kategori. Tinjau di Penawaran saya agar orang dapat menemukannya menggunakan filter.",
+  "notifications.backgroundSocket.title": "Notifikasi latar belakang",
+  "notifications.backgroundSocket.body": "Jaga koneksi notifikasi langsung tetap berjalan saat Vexl ditutup.",
+  "notifications.backgroundSocket.fixBatterySettings": "Perbaiki pengaturan baterai",
+  "notifications.backgroundSocket.explanationTitle": "Jaga Vexl tetap terhubung",
+  "notifications.backgroundSocket.explanationBody": "Ponsel Anda tidak memiliki layanan Google. Vexl akan menampilkan notifikasi permanen dan meminta dikecualikan dari pengoptimalan baterai agar pesan dapat diterima saat aplikasi ditutup."
 }

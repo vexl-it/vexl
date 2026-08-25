@@ -61,6 +61,7 @@ export const NotificationRpcsHandlers = Rpcs.toLayer(
               notificationToken: vexlNotificationToken,
               platform: connectionInfo.platform,
               version: connectionInfo.version,
+              connectionKind: connectionInfo.connectionKind,
             }
 
             yield* _(
@@ -68,13 +69,17 @@ export const NotificationRpcsHandlers = Rpcs.toLayer(
                 Effect.log(
                   'New notification stream connection established',
                   connectionId,
-                  connectionInfo
+                  connectionInfo.platform,
+                  connectionInfo.version,
+                  connectionInfo.connectionKind
                 ),
                 () =>
                   Effect.log(
                     'Notification stream connection closed',
                     connectionId,
-                    connectionInfo
+                    connectionInfo.platform,
+                    connectionInfo.version,
+                    connectionInfo.connectionKind
                   )
               )
             )
@@ -169,7 +174,7 @@ export const NotificationRpcsHandlers = Rpcs.toLayer(
               Stream.tap((e) =>
                 Either.isRight(e) && e.right._tag === 'DebugMessage'
                   ? Effect.void
-                  : Effect.log('Sending event to client', e, connectionInfo)
+                  : Effect.log('Sending notification stream event')
               ),
               Stream.mapEffect(identity),
               Stream.prepend(Chunk.fromIterable(notificationsWaitingThrottled))
@@ -177,7 +182,11 @@ export const NotificationRpcsHandlers = Rpcs.toLayer(
           })
         ).pipe(
           Stream.withSpan('NotificationStream', {
-            attributes: {...connectionInfo},
+            attributes: {
+              platform: connectionInfo.platform,
+              version: connectionInfo.version,
+              connectionKind: connectionInfo.connectionKind,
+            },
           })
         ),
     }

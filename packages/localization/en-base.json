@@ -1684,5 +1684,10 @@
   "marketplace.missingProductCategoriesSuggestion.myOffersDescriptionPlural": "You have {{count}} product offers that need a category so people can find them with filters. Add a category to each offer and publish the changes.",
   "marketplace.missingProductCategoriesSuggestion.allOffersPrimaryButton": "Go to My offers",
   "marketplace.missingProductCategoriesSuggestion.allOffersDescriptionSingular": "One of your product offers is missing a category. Review it in My offers so people can find it with filters.",
-  "marketplace.missingProductCategoriesSuggestion.allOffersDescriptionPlural": "{{count}} of your product offers are missing categories. Review them in My offers so people can find them with filters."
+  "marketplace.missingProductCategoriesSuggestion.allOffersDescriptionPlural": "{{count}} of your product offers are missing categories. Review them in My offers so people can find them with filters.",
+  "notifications.backgroundSocket.title": "Background notifications",
+  "notifications.backgroundSocket.body": "Keep a direct notification connection running when Vexl is closed.",
+  "notifications.backgroundSocket.fixBatterySettings": "Fix battery settings",
+  "notifications.backgroundSocket.explanationTitle": "Keep Vexl connected",
+  "notifications.backgroundSocket.explanationBody": "Your phone does not have Google services. Vexl will show a persistent notification and ask to be excluded from battery optimisation so messages can arrive while the app is closed."
 }

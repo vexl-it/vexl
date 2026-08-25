@@ -1646,5 +1646,10 @@
   "marketplace.missingProductCategoriesSuggestion.myOffersDescriptionPlural": "У вас є {{count}} пропозицій товарів, яким потрібна категорія, щоб люди могли знайти їх за допомогою фільтрів. Додайте категорію до кожної пропозиції та опублікуйте зміни.",
   "marketplace.missingProductCategoriesSuggestion.allOffersPrimaryButton": "Перейти до Моїх пропозицій",
   "marketplace.missingProductCategoriesSuggestion.allOffersDescriptionSingular": "В одній із ваших пропозицій товарів немає категорії. Перевірте її в розділі Мої пропозиції, щоб люди могли знайти її за допомогою фільтрів.",
-  "marketplace.missingProductCategoriesSuggestion.allOffersDescriptionPlural": "У {{count}} ваших пропозиціях товарів немає категорій. Перевірте їх у розділі Мої пропозиції, щоб люди могли знайти їх за допомогою фільтрів."
+  "marketplace.missingProductCategoriesSuggestion.allOffersDescriptionPlural": "У {{count}} ваших пропозиціях товарів немає категорій. Перевірте їх у розділі Мої пропозиції, щоб люди могли знайти їх за допомогою фільтрів.",
+  "notifications.backgroundSocket.title": "Сповіщення у фоновому режимі",
+  "notifications.backgroundSocket.body": "Підтримувати пряме з'єднання для сповіщень, коли Vexl закрито.",
+  "notifications.backgroundSocket.fixBatterySettings": "Виправити налаштування батареї",
+  "notifications.backgroundSocket.explanationTitle": "Тримайте Vexl на зв'язку",
+  "notifications.backgroundSocket.explanationBody": "На вашому телефоні немає сервісів Google. Vexl показуватиме постійне сповіщення та попросить виключити його з оптимізації батареї, щоб повідомлення надходили, поки застосунок закрито."
 }

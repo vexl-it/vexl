@@ -28,6 +28,7 @@ import {
   NewClubUserNoticeMessage,
   NewContentNoticeMessage,
   NewUserNoticeMessage,
+  NotificationConnectionKind,
   StreamOnlyChatMessage,
   UserAdmittedToClubNoticeMessage,
   UserInactivityNoticeMessage,
@@ -54,6 +55,9 @@ export const ClientInfo = Schema.Struct({
   notificationToken: VexlNotificationTokenSecret,
   version: VersionCode,
   platform: PlatformName,
+  connectionKind: Schema.optionalWith(NotificationConnectionKind, {
+    default: () => 'foreground',
+  }),
 })
 export type ClientInfo = typeof ClientInfo.Type
 

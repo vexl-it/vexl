@@ -430,6 +430,65 @@ describe('UpdateNotificationInfo', () => {
     )
   })
 
+  it('Should save background socket enabled and default it to false when omitted', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const app = yield* _(NodeTestingApp)
+        const db = yield* _(NotificationTokensDb)
+
+        const createResp = yield* _(
+          app.NotificationTokenGroup.CreateNotificationSecret({
+            payload: {
+              expoNotificationToken: validExpoToken,
+            },
+            headers: validHeaders,
+          })
+        )
+
+        const initialRecord = yield* _(
+          db.findSecretBySecretValue(createResp.secret)
+        )
+        expect(Option.isSome(initialRecord)).toBe(true)
+        if (Option.isNone(initialRecord)) return
+        expect(initialRecord.value.backgroundSocketEnabled).toBe(false)
+
+        yield* _(
+          app.NotificationTokenGroup.updateNoficationInfo({
+            payload: {
+              secret: createResp.secret,
+              backgroundSocketEnabled: true,
+            },
+            headers: validHeaders,
+          })
+        )
+
+        const enabledRecord = yield* _(
+          db.findSecretBySecretValue(createResp.secret)
+        )
+        expect(Option.isSome(enabledRecord)).toBe(true)
+        if (Option.isNone(enabledRecord)) return
+        expect(enabledRecord.value.backgroundSocketEnabled).toBe(true)
+
+        // Omitting the field means the client does not use the background socket
+        yield* _(
+          app.NotificationTokenGroup.updateNoficationInfo({
+            payload: {
+              secret: createResp.secret,
+            },
+            headers: validHeaders,
+          })
+        )
+
+        const disabledRecord = yield* _(
+          db.findSecretBySecretValue(createResp.secret)
+        )
+        expect(Option.isSome(disabledRecord)).toBe(true)
+        if (Option.isNone(disabledRecord)) return
+        expect(disabledRecord.value.backgroundSocketEnabled).toBe(false)
+      })
+    )
+  })
+
   it('Should fail with MissingCommonHeadersError when headers are missing', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {

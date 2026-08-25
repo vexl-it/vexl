@@ -39,6 +39,7 @@ export const updateNotificationInfoHandler = HttpApiBuilder.handler(
           clientVersion,
           clientAppSource,
           clientPrefix,
+          backgroundSocketEnabled: payload.backgroundSocketEnabled ?? false,
         })
       })
     )

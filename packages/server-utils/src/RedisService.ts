@@ -133,6 +133,12 @@ export interface RedisOperations {
 
   clearSortedSet: (key: string) => Effect.Effect<void, RedisError>
 
+  /** Keeps only the `maxCount` highest-scored members of a sorted set. */
+  trimSortedSetToNewest: (
+    key: string,
+    maxCount: number
+  ) => Effect.Effect<void, RedisError>
+
   getAndDropSortedSet: <A, I, R>(
     schema: Schema.Schema<A, I, R>
   ) => (
@@ -444,6 +450,21 @@ export class RedisService extends Context.Tag('RedisService')<
           catch: (e) => new RedisError({cause: e}),
         }).pipe(Effect.withSpan('Redis clearSortedSet'))
 
+      const trimSortedSetToNewest = (
+        key: string,
+        maxCount: number
+      ): Effect.Effect<void, RedisError> =>
+        Effect.tryPromise({
+          try: async () => {
+            await redisClient.zremrangebyrank(key, 0, -maxCount - 1)
+          },
+          catch: (e) => new RedisError({cause: e}),
+        }).pipe(
+          Effect.withSpan('Redis trimSortedSetToNewest', {
+            attributes: {maxCount},
+          })
+        )
+
       const getAndDropSortedSet = (
         key: string,
         order: 'asc' | 'desc'
@@ -563,6 +584,7 @@ export class RedisService extends Context.Tag('RedisService')<
             getSortedSet(key, order).pipe(Effect.flatMap(decode))
         },
         clearSortedSet,
+        trimSortedSetToNewest,
         getAndDropSortedSet: (schema) => {
           const decode = Schema.decode(Schema.Array(Schema.parseJson(schema)))
           return (key, order) =>

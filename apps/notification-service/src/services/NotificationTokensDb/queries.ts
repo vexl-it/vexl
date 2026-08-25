@@ -43,6 +43,7 @@ export const UpdateClientInfoParams = Schema.Struct({
   clientAppSource: AppSource,
   clientLanguage: Schema.String,
   clientPrefix: Schema.NullOr(CountryPrefix),
+  backgroundSocketEnabled: Schema.Boolean,
 })
 export type UpdateClientInfoParams = typeof UpdateClientInfoParams.Type
 
@@ -146,6 +147,7 @@ export const createUpdateClientInfo = Effect.gen(function* () {
               clientAppSource: params.clientAppSource,
               clientLanguage: params.clientLanguage,
               clientPrefix: params.clientPrefix,
+              backgroundSocketEnabled: params.backgroundSocketEnabled,
               updatedAt: new Date(),
             })}
             WHERE

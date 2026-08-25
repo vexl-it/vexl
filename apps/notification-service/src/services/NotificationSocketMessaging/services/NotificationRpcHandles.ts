@@ -12,11 +12,16 @@ import {
   Effect,
   Either,
   identity,
+  Order,
+  pipe,
   Queue,
   Schedule,
   Stream,
 } from 'effect/index'
 import {type Scope} from 'effect/Scope'
+import {type SupportedPushNotificationTask} from '../../../domain'
+import {NotificationMetricsService} from '../../../metrics'
+import {OfflineNotificationBuffer} from '../../OfflineNotificationBuffer'
 import {ThrottledPushNotificationService} from '../../ThrottledPushNotificationService'
 import {createTemporaryVexlNotificationTokenSecret} from '../../VexlNotificationTokenService/utils'
 import {
@@ -24,6 +29,7 @@ import {
   newStreamConnectionId,
   type StreamConnectionId,
 } from '../domain'
+import {canDeliverTaskToConnection} from '../utils'
 import {LocalConnectionRegistry} from './LocalConnectionRegistry'
 import {RedisConnectionRegistry} from './RedisConnectionRegistry'
 
@@ -42,6 +48,8 @@ export const NotificationRpcsHandlers = Rpcs.toLayer(
     const throttledPushNotificationService = yield* _(
       ThrottledPushNotificationService
     )
+    const offlineNotificationBuffer = yield* _(OfflineNotificationBuffer)
+    const notificationMetrics = yield* _(NotificationMetricsService)
 
     return {
       listenToNotifications: (connectionInfo) =>
@@ -160,13 +168,76 @@ export const NotificationRpcsHandlers = Rpcs.toLayer(
               throttledPushNotificationService.getPendingNotificationsAndCancelThrottleTimeout(
                 clientInfo.notificationToken
               ),
-              Effect.map(Array.map((one) => one.socketMessage)),
               Effect.catchAll(
                 (a) =>
                   new UnexpectedServerError({
                     message: 'Failed to get pending notifications',
                     cause: a,
                   })
+              )
+            )
+
+            // An open app syncs all its data itself, so a foreground
+            // connection makes the offline buffer moot.
+            const notificationsBufferedWhileOffline = yield* _(
+              clientInfo.connectionKind === 'background'
+                ? offlineNotificationBuffer.getAndClearBufferedTasks(
+                    clientInfo.notificationToken
+                  )
+                : Effect.as(
+                    offlineNotificationBuffer.clearBufferedTasks(
+                      clientInfo.notificationToken
+                    ),
+                    Array.empty<SupportedPushNotificationTask>()
+                  ),
+              Effect.catchAll((e) =>
+                Effect.zipRight(
+                  Effect.logError(
+                    'Failed to read offline notification buffer',
+                    {
+                      errorTag: e._tag,
+                    }
+                  ),
+                  Effect.succeed(Array.empty<SupportedPushNotificationTask>())
+                )
+              )
+            )
+
+            // A task can be both throttle-waitlisted and offline-buffered,
+            // hence the dedupe by task id.
+            const notificationsToReplay = pipe(
+              Array.appendAll(
+                notificationsWaitingThrottled,
+                notificationsBufferedWhileOffline
+              ),
+              Array.dedupeWith((a, b) => a.id === b.id),
+              Array.sortBy(
+                Order.mapInput(
+                  Order.number,
+                  (task: SupportedPushNotificationTask) => task.sentAt
+                )
+              ),
+              Array.filter((task) =>
+                canDeliverTaskToConnection(task, clientInfo)
+              )
+            )
+
+            yield* _(
+              Effect.forEach(
+                notificationsToReplay,
+                (task) =>
+                  notificationMetrics.reportNotificationSent({
+                    id: task.trackingId,
+                    clientVersion: clientInfo.version,
+                    sentAt: task.sentAt,
+                    systemNotificationSent: false,
+                    clientPlatform: clientInfo.platform,
+                    channel:
+                      clientInfo.connectionKind === 'foreground'
+                        ? 'foreground_socket'
+                        : 'background_socket',
+                  }),
+                {discard: true}
               )
             )
 
@@ -177,7 +248,11 @@ export const NotificationRpcsHandlers = Rpcs.toLayer(
                   : Effect.log('Sending notification stream event')
               ),
               Stream.mapEffect(identity),
-              Stream.prepend(Chunk.fromIterable(notificationsWaitingThrottled))
+              Stream.prepend(
+                Chunk.fromIterable(
+                  Array.map(notificationsToReplay, (task) => task.socketMessage)
+                )
+              )
             )
           })
         ).pipe(

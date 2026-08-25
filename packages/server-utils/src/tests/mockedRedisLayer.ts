@@ -189,6 +189,15 @@ export const mockedRedisLayer = Layer.effect(
 
       clearSortedSet: (key) => Ref.update(sortedSetState, HashMap.remove(key)),
 
+      trimSortedSetToNewest: (key, maxCount) =>
+        Ref.update(sortedSetState, (hashMap) =>
+          HashMap.modify(hashMap, key, (v) => ({
+            value: [...v.value]
+              .sort((a, b) => b.score - a.score)
+              .slice(0, maxCount),
+          }))
+        ),
+
       getAndDropSortedSet: (schema) => (key, order) =>
         Ref.get(sortedSetState).pipe(
           Effect.flatMap(HashMap.get(key)),

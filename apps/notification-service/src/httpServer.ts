@@ -41,6 +41,7 @@ import {
   TimeoutWorkerLayer,
 } from './services/NotificationSocketMessaging/services/SendMessageTasksManager'
 import {NotificationTokensDb} from './services/NotificationTokensDb'
+import {OfflineNotificationBuffer} from './services/OfflineNotificationBuffer'
 import {PendingBatchedNotificationsDb} from './services/PendingBatchedNotificationsDb'
 import {PosgressDbLive} from './services/PostgressDb'
 import {ProcessVexlProductNotificationWorker} from './services/ProcessVexlProductNotificationWorker'
@@ -121,6 +122,7 @@ export const HttpServerLive = Layer.mergeAll(
   Layer.provide(ScheduleUserNotificationProducerLayer),
   Layer.provide(NotificationSocketMessaging.Live),
   Layer.provide(ThrottledPushNotificationService.Live),
+  Layer.provide(OfflineNotificationBuffer.Live),
   Layer.provide(VexlNotificationTokenService.Live),
   Layer.provide(NotificationMetricsService.Live),
   Layer.provide(NotificationTokensDb.Live),

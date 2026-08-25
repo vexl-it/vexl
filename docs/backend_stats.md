@@ -84,7 +84,7 @@ These are referred to as *common* in the tables below.
 
 | Metric | Type | Attributes | Reported when |
 | --- | --- | --- | --- |
-| `NOTIFICATION_SENT` | Increment | `trackingId`, `clientVersion`, `clientPlatform`, `systemNotificationSent`, `sentAt`, `channel` (`foreground_socket`/`background_socket`/`push`) | A notification is issued to a device through a socket or push. |
+| `NOTIFICATION_SENT` | Increment | `trackingId`, `clientVersion`, `clientPlatform`, `systemNotificationSent`, `sentAt`, `channel` (`foreground_socket`/`background_socket`/`push`) | A notification is issued to a device through a socket or push. Includes notifications replayed on socket connect (throttle waiting list and the offline buffer for background-socket users). |
 | `NOTIFICATION_PROCESSED` | Increment | common + `trackingId`, `processedAt` | Client reports it processed a received notification. |
 
 ## metrics-service

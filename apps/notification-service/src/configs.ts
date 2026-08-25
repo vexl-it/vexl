@@ -24,3 +24,13 @@ export const vexlProductNotificationBatchSendIntervalMsConfig = Config.number(
 export const vexlProductNotificationBatchSizeConfig = Config.number(
   'VEXL_PRODUCT_NOTIFICATION_BATCH_SIZE'
 ).pipe(Config.withDefault(500))
+
+// The whole buffer expires this many hours after the last buffered
+// notification. -1 disables offline buffering entirely.
+export const notificationOfflineBufferTtlHoursConfig = Config.number(
+  'NOTIFICATION_OFFLINE_BUFFER_TTL_HOURS'
+).pipe(Config.withDefault(24))
+
+export const notificationOfflineBufferMaxCountConfig = Config.number(
+  'NOTIFICATION_OFFLINE_BUFFER_MAX_COUNT'
+).pipe(Config.withDefault(100))

@@ -109,6 +109,7 @@ export class UpdateNotificationInfoRequest extends Schema.Class<UpdateNotificati
   expoNotificationToken: Schema.optional(ExpoNotificationToken),
   systemVexlToken: Schema.optional(VexlNotificationToken),
   marketingVexlToken: Schema.optional(VexlNotificationToken),
+  backgroundSocketEnabled: Schema.optional(Schema.Boolean),
 }) {}
 
 export class GenerateNotificationTokenRequest extends Schema.Class<GenerateNotificationTokenRequest>(

@@ -5,6 +5,7 @@ import {ProcessUserNotificationsConsumerLayer} from '@vexl-next/server-utils/src
 import {Effect, Match} from 'effect/index'
 import {NotificationSocketMessaging} from '..'
 import {type SupportedPushNotificationTask} from '../../../domain'
+import {OfflineNotificationBuffer} from '../../OfflineNotificationBuffer'
 import {ThrottledPushNotificationService} from '../../ThrottledPushNotificationService'
 import {VexlNotificationTokenService} from '../../VexlNotificationTokenService'
 import {
@@ -28,6 +29,7 @@ export const ProcessUserNotificationsWorker =
       const socketMessaging = yield* _(NotificationSocketMessaging)
       const tokenService = yield* _(VexlNotificationTokenService)
       const {issuePushNotification} = yield* _(ThrottledPushNotificationService)
+      const offlineNotificationBuffer = yield* _(OfflineNotificationBuffer)
       const vexlNotificationTokenOrExpoToken =
         entry.token ?? entry.notificationToken
 
@@ -154,7 +156,10 @@ export const ProcessUserNotificationsWorker =
               'Unable to send notification via socket, falling back to push notification',
               e
             ),
-            issuePushNotification(task)
+            Effect.zipRight(
+              offlineNotificationBuffer.bufferTaskIfEnabled(task),
+              issuePushNotification(task)
+            )
           )
         )
       )

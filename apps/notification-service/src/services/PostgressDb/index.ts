@@ -7,6 +7,7 @@ import {addClientPrefix} from './migrations/002_addClientPrefix'
 import {addSystemAndMarketingVexlTokens} from './migrations/003_addSystemAndMarketingVexlTokens'
 import {createPendingBatchedNotifications} from './migrations/004_createPendingBatchedNotifications'
 import {deduplicateExpoNotificationTokens} from './migrations/005_deduplicateExpoNotificationTokens'
+import {addBackgroundSocketEnabled} from './migrations/006_addBackgroundSocketEnabled'
 
 const migrations = [
   {
@@ -33,6 +34,11 @@ const migrations = [
     id: 5,
     name: 'deduplicate_expo_notification_tokens',
     migrationEffect: deduplicateExpoNotificationTokens,
+  },
+  {
+    id: 6,
+    name: 'add_background_socket_enabled',
+    migrationEffect: addBackgroundSocketEnabled,
   },
 ] as const
 

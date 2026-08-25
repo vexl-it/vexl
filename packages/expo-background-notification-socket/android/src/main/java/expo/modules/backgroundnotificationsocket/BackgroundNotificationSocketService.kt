@@ -1,8 +1,10 @@
 package expo.modules.backgroundnotificationsocket
 
 import android.app.ActivityManager
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
@@ -82,12 +84,12 @@ class BackgroundNotificationSocketService : Service() {
   override fun onCreate() {
     super.onCreate()
     stopped = false
-    createNotificationChannel()
+    createNotificationChannel(this)
     try {
       ServiceCompat.startForeground(
         this,
         NOTIFICATION_ID,
-        foregroundNotification(),
+        buildNotification(this),
         ServiceInfo.FOREGROUND_SERVICE_TYPE_REMOTE_MESSAGING,
       )
     } catch (exception: Exception) {
@@ -139,8 +141,7 @@ class BackgroundNotificationSocketService : Service() {
   // Also refreshes the persistent notification, whose text shows the state.
   private fun setState(state: String) {
     BackgroundNotificationSocketStatus.state = state
-    val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-    notificationManager.notify(NOTIFICATION_ID, foregroundNotification())
+    postNotification(this)
   }
 
   private fun connect() {
@@ -320,41 +321,6 @@ class BackgroundNotificationSocketService : Service() {
     return "$socketBase/rpc"
   }
 
-  private fun createNotificationChannel() {
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
-
-    val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-    notificationManager.createNotificationChannel(
-      NotificationChannel(
-        CHANNEL_ID,
-        getString(R.string.vexl_background_notification_channel),
-        NotificationManager.IMPORTANCE_LOW,
-      ),
-    )
-  }
-
-  private fun foregroundNotification() = NotificationCompat.Builder(this, CHANNEL_ID)
-    .setSmallIcon(notificationIcon())
-    .setContentTitle(getString(R.string.vexl_background_notification_title))
-    .setContentText(stateText())
-    .setOngoing(true)
-    .setOnlyAlertOnce(true)
-    .setPriority(NotificationCompat.PRIORITY_LOW)
-    .build()
-
-  private fun stateText(): String = getString(
-    when (BackgroundNotificationSocketStatus.state) {
-      "connected" -> R.string.vexl_background_notification_state_connected
-      "reconnecting" -> R.string.vexl_background_notification_state_reconnecting
-      else -> R.string.vexl_background_notification_state_connecting
-    },
-  )
-
-  private fun notificationIcon(): Int {
-    val notificationIcon = resources.getIdentifier("notification_icon", "drawable", packageName)
-    return if (notificationIcon != 0) notificationIcon else applicationInfo.icon
-  }
-
   companion object {
     private const val LOG_TAG = "VexlBackgroundSocket"
     private const val CHANNEL_ID = "vexl_background_notification_socket"
@@ -388,6 +354,60 @@ class BackgroundNotificationSocketService : Service() {
       if (!BackgroundNotificationConfig.isEnabled(context)) return
       if (BackgroundNotificationConfig.getConfiguration(context) == null) return
       start(context)
+    }
+
+    fun postNotification(context: Context) {
+      val notificationManager =
+        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+      notificationManager.notify(NOTIFICATION_ID, buildNotification(context))
+    }
+
+    private fun createNotificationChannel(context: Context) {
+      if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+
+      val notificationManager =
+        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+      notificationManager.createNotificationChannel(
+        NotificationChannel(
+          CHANNEL_ID,
+          context.getString(R.string.vexl_background_notification_channel),
+          NotificationManager.IMPORTANCE_LOW,
+        ),
+      )
+    }
+
+    private fun buildNotification(context: Context): Notification =
+      NotificationCompat.Builder(context, CHANNEL_ID)
+        .setSmallIcon(notificationIcon(context))
+        .setContentTitle(context.getString(R.string.vexl_background_notification_title))
+        .setContentText(stateText(context))
+        .setOngoing(true)
+        .setOnlyAlertOnce(true)
+        .setPriority(NotificationCompat.PRIORITY_LOW)
+        // Android 14+ lets users swipe foreground service notifications away
+        // without stopping the service; re-post so it stays visible.
+        .setDeleteIntent(
+          PendingIntent.getBroadcast(
+            context,
+            0,
+            Intent(context, BackgroundNotificationDismissReceiver::class.java),
+            PendingIntent.FLAG_IMMUTABLE,
+          ),
+        )
+        .build()
+
+    private fun stateText(context: Context): String = context.getString(
+      when (BackgroundNotificationSocketStatus.state) {
+        "connected" -> R.string.vexl_background_notification_state_connected
+        "reconnecting" -> R.string.vexl_background_notification_state_reconnecting
+        else -> R.string.vexl_background_notification_state_connecting
+      },
+    )
+
+    private fun notificationIcon(context: Context): Int {
+      val notificationIcon =
+        context.resources.getIdentifier("notification_icon", "drawable", context.packageName)
+      return if (notificationIcon != 0) notificationIcon else context.applicationInfo.icon
     }
   }
 }

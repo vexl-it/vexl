@@ -17,6 +17,9 @@
       android:name=".BackgroundNotificationHeadlessTaskService"
       android:exported="false" />
     <receiver
+      android:name=".BackgroundNotificationDismissReceiver"
+      android:exported="false" />
+    <receiver
       android:name=".BackgroundNotificationBootReceiver"
       android:enabled="true"
       android:exported="true">

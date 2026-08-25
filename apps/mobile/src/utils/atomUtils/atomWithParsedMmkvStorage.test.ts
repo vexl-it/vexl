@@ -775,3 +775,83 @@ describe('atomWithParsedMmkvStorage', () => {
     unsub()
   })
 })
+
+describe('own-write detection with asynchronously dispatched change listeners', () => {
+  // react-native-mmkv v4 (Nitro) delivers value-changed notifications
+  // asynchronously (void-returning JS callbacks are bridged as async), so an
+  // own write can no longer be recognized while storage.set is still on the
+  // stack. Own writes must still be skipped - otherwise every persisted write
+  // triggers a re-decode that replaces all object identities in the value.
+  function deferListenerNotifications(): {
+    deliverPendingNotifications: () => void
+  } {
+    const pendingNotifications: Array<() => void> = []
+    const realAddListener = storage._storage.addOnValueChangedListener.bind(
+      storage._storage
+    )
+    jest
+      .spyOn(storage._storage, 'addOnValueChangedListener')
+      .mockImplementation((listener) =>
+        realAddListener((changedKey: string) => {
+          pendingNotifications.push(() => {
+            listener(changedKey)
+          })
+        })
+      )
+
+    return {
+      deliverPendingNotifications: () => {
+        pendingNotifications.splice(0).forEach((deliver) => {
+          deliver()
+        })
+      },
+    }
+  }
+
+  it('does not re-decode the stored value after its own write', () => {
+    const key = 'test-async-own-write'
+    const testAtom = atomWithParsedMmkvStorage(
+      key,
+      defaultValue,
+      TestValueSchema
+    )
+    const store = createStore()
+
+    const {deliverPendingNotifications} = deferListenerNotifications()
+    const unsub = store.sub(testAtom, () => {})
+
+    const written: TestValue = {name: 'written', count: 1}
+    store.set(testAtom, written)
+    flushIdleCallbacks()
+    expect(storage._storage.getString(key)).toBeDefined()
+
+    const valueBeforeNotification = store.get(testAtom)
+    deliverPendingNotifications()
+    flushIdleCallbacks()
+
+    // identity preserved - the change notification for our own write must
+    // not schedule a re-decode
+    expect(store.get(testAtom)).toBe(valueBeforeNotification)
+    unsub()
+  })
+
+  it('still re-decodes on a genuinely foreign write', () => {
+    const key = 'test-async-foreign-write'
+    const testAtom = atomWithParsedMmkvStorage(
+      key,
+      defaultValue,
+      TestValueSchema
+    )
+    const store = createStore()
+
+    const {deliverPendingNotifications} = deferListenerNotifications()
+    const unsub = store.sub(testAtom, () => {})
+
+    storage._storage.set(key, JSON.stringify({name: 'foreign', count: 7}))
+    deliverPendingNotifications()
+    flushIdleCallbacks()
+
+    expect(store.get(testAtom)).toEqual({name: 'foreign', count: 7})
+    unsub()
+  })
+})

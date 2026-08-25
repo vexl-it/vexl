@@ -269,10 +269,10 @@ export interface AtomWithParsedMmkvStorageWithImmediateSaveOption<A> {
  *
  * Note on backward compatibility: older app versions embedded an
  * `___author_id` field into the persisted blob to tell own writes apart from
- * foreign ones. Own writes are now detected with an in-memory flag (see
- * `isPersistingOwnValue` below), so the field is no longer written. Blobs that
- * still contain it decode fine — effect Schema structs ignore excess
- * properties by default.
+ * foreign ones. Own writes are now detected with an in-memory counter of
+ * pending own-write notifications (see `ownWriteNotificationsInFlight`
+ * below), so the field is no longer written. Blobs that still contain it
+ * decode fine — effect Schema structs ignore excess properties by default.
  */
 export function atomWithParsedMmkvStorageWithImmediateSaveOption<
   A,
@@ -291,13 +291,28 @@ export function atomWithParsedMmkvStorageWithImmediateSaveOption<
     }
   }
 
-  // True only for the synchronous duration of this atom's own storage.set
-  // call. react-native-mmkv dispatches change listeners synchronously from
-  // `set()` (see MMKV.set -> onValuesChanged in the library's JS wrapper), so
-  // the mount listener below can use this flag to tell this atom's own writes
-  // apart from foreign ones in O(1), without reading & parsing the stored
-  // blob.
-  let isPersistingOwnValue = false
+  // react-native-mmkv v4 (Nitro) dispatches value-changed listeners
+  // ASYNCHRONOUSLY - a void-returning JS callback is bridged as an async
+  // callback (JSIConverter+Function.hpp: `isAsync = ... || is_void_v<R>`) -
+  // so a flag scoped to the synchronous duration of our own storage.set call
+  // cannot identify own writes anymore. Count them instead: every own
+  // storage.set fires the mount listener exactly once, so the listener
+  // consumes one pending notification and skips the redundant re-decode
+  // (which would rebuild every object in the stored value and break
+  // identity-based caches and merges downstream). Counted only while the
+  // listener is attached and reset on unmount, so a notification that was
+  // never delivered cannot make a later foreign write look like an own one.
+  let ownWriteNotificationsInFlight = 0
+  let changeListenerAttached = false
+
+  const recordOwnWrite = (): void => {
+    if (changeListenerAttached) ownWriteNotificationsInFlight += 1
+  }
+  // For persist failures - the write that was just counted never happened.
+  const revertRecordedOwnWrite = (): void => {
+    if (changeListenerAttached && ownWriteNotificationsInFlight > 0)
+      ownWriteNotificationsInFlight -= 1
+  }
 
   // Value waiting to be persisted by the scheduled deferred flush, together
   // with the `clearGeneration` captured when it was queued. `undefined` means
@@ -318,24 +333,21 @@ export function atomWithParsedMmkvStorageWithImmediateSaveOption<
     )
       return
 
-    isPersistingOwnValue = true
-    try {
-      pipe(
-        persistValue(toPersist.value),
-        Either.match({
-          onLeft: (l) => {
-            reportError(
-              'warn',
-              new Error(`Error while saving value to storage. Key: ${key}`),
-              {errorTag: l._tag}
-            )
-          },
-          onRight: recordSuccessfulPersist,
-        })
-      )
-    } finally {
-      isPersistingOwnValue = false
-    }
+    recordOwnWrite()
+    pipe(
+      persistValue(toPersist.value),
+      Either.match({
+        onLeft: (l) => {
+          revertRecordedOwnWrite()
+          reportError(
+            'warn',
+            new Error(`Error while saving value to storage. Key: ${key}`),
+            {errorTag: l._tag}
+          )
+        },
+        onRight: recordSuccessfulPersist,
+      })
+    )
   }
 
   // Cached module-eval read. Consumed (and freed, so the potentially large
@@ -391,6 +403,7 @@ export function atomWithParsedMmkvStorageWithImmediateSaveOption<
       setAtom(getInitialValue({key, decodeRawValue, defaultValue}).value)
     }
 
+    changeListenerAttached = true
     const listener = storage._storage.addOnValueChangedListener(
       (changedKey) => {
         if (changedKey === CLEAR_STORAGE_KEY) {
@@ -401,9 +414,11 @@ export function atomWithParsedMmkvStorageWithImmediateSaveOption<
 
         if (changedKey !== key) return
 
-        // Own write — the atom already holds this value. Must be checked
-        // synchronously (the listener runs inside our storage.set call).
-        if (isPersistingOwnValue) return
+        // Own write — the atom already holds this value.
+        if (ownWriteNotificationsInFlight > 0) {
+          ownWriteNotificationsInFlight -= 1
+          return
+        }
 
         runWhenIdleWithTimeout(
           () => {
@@ -439,7 +454,11 @@ export function atomWithParsedMmkvStorageWithImmediateSaveOption<
       }
     )
 
-    return listener.remove
+    return () => {
+      listener.remove()
+      changeListenerAttached = false
+      ownWriteNotificationsInFlight = 0
+    }
   }
 
   const flushableAtom = Object.assign(mmkvAtom, {flushNow: flushPendingWrite})
@@ -457,26 +476,23 @@ export function atomWithParsedMmkvStorageWithImmediateSaveOption<
 
       if (activeStorageClears.size > 0) return
 
-      isPersistingOwnValue = true
-      try {
-        pipe(
-          persistValue(newValue),
-          Either.match({
-            onLeft: (l) => {
-              reportError(
-                'warn',
-                new Error(
-                  `Error while immediately saving value to storage. Key: ${key}`
-                ),
-                {errorTag: l._tag}
-              )
-            },
-            onRight: recordSuccessfulPersist,
-          })
-        )
-      } finally {
-        isPersistingOwnValue = false
-      }
+      recordOwnWrite()
+      pipe(
+        persistValue(newValue),
+        Either.match({
+          onLeft: (l) => {
+            revertRecordedOwnWrite()
+            reportError(
+              'warn',
+              new Error(
+                `Error while immediately saving value to storage. Key: ${key}`
+              ),
+              {errorTag: l._tag}
+            )
+          },
+          onRight: recordSuccessfulPersist,
+        })
+      )
     }
   )
 

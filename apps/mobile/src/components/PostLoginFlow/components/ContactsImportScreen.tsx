@@ -9,6 +9,7 @@ import {submitContactsActionAtom} from '../../../state/contacts/atom/submitConta
 import {completePostLoginFlowScreenActionAtom} from '../../../state/postLoginOnboarding'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {showContactsAccessDeniedExplanationActionAtom} from '../atoms/showContactsAccesDeniedExplanationActionAtom'
+import {showNoContactsFoundExplanationActionAtom} from '../atoms/showNoContactsFoundExplanationActionAtom'
 import PostLoginFlowScreen, {PostLoginFlowCopy} from './PostLoginFlowScreen'
 
 type Props = PostLoginFlowStackScreenProps<'ContactsImport'>
@@ -27,6 +28,9 @@ export default function ContactsImportScreen({
   )
   const showContactsAccessDeniedExplanation = useSetAtom(
     showContactsAccessDeniedExplanationActionAtom
+  )
+  const showNoContactsFoundExplanation = useSetAtom(
+    showNoContactsFoundExplanationActionAtom
   )
   const completeScreen = useSetAtom(completePostLoginFlowScreenActionAtom)
 
@@ -59,6 +63,12 @@ export default function ContactsImportScreen({
                 return Effect.runPromise(
                   showContactsAccessDeniedExplanation()
                 ).then(goNext)
+              }
+
+              if (result === 'noContactsSelected') {
+                return Effect.runPromise(showNoContactsFoundExplanation()).then(
+                  goNext
+                )
               }
 
               goNext()

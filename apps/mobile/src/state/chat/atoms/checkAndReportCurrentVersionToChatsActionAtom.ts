@@ -4,8 +4,8 @@ import {
   type Chat,
   type ChatMessage,
 } from '@vexl-next/domain/src/general/messaging'
-import {SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {now} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {VersionString} from '@vexl-next/domain/src/utility/VersionString.brand'
 import {mergeToBoolean} from '@vexl-next/generic-utils/src/effect-helpers/mergeToBoolean'
 import sendMessage from '@vexl-next/resources-utils/src/chat/sendMessage'
 import {Effect, Schema} from 'effect/index'
@@ -22,7 +22,7 @@ function createUpdateNoticeChatMessage({
   senderPublicKey,
   chat,
 }: {
-  version: SemverString
+  version: VersionString
   senderPublicKey: PublicKeyPemBase64
   chat: Chat
 }): ChatMessage {
@@ -30,7 +30,7 @@ function createUpdateNoticeChatMessage({
     uuid: generateChatMessageId(),
     text: `I have updated to ${version}`,
     messageType: 'VERSION_UPDATE',
-    minimalRequiredVersion: Schema.decodeSync(SemverString)('1.13.1'),
+    minimalRequiredVersion: Schema.decodeSync(VersionString)('1.13.1'),
     lastReceivedVersion: chat.otherSideVersion,
     time: now(),
     myVersion: version,

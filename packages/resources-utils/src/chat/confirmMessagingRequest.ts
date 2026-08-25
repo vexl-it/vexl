@@ -8,11 +8,11 @@ import {
   type ChatMessage,
 } from '@vexl-next/domain/src/general/messaging'
 import {isVexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
-import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {
   now,
   type UnixMilliseconds,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {type VersionString} from '@vexl-next/domain/src/utility/VersionString.brand'
 import {type ChatApi} from '@vexl-next/rest-api/src/services/chat'
 import {type NotificationApi} from '@vexl-next/rest-api/src/services/notification'
 import {Effect, type ParseResult} from 'effect'
@@ -32,7 +32,7 @@ function createApproveChatMessage({
   text: string
   senderPublicKey: PublicKeyPemBase64
   approve: boolean
-  myVersion: SemverString
+  myVersion: VersionString
   myNotificationCypher?: NotificationTokenOrCypher
   lastReceivedNotificationCypher?: NotificationTokenOrCypher
 }): ChatMessage {
@@ -81,11 +81,11 @@ export default function confirmMessagingRequest({
   toPublicKey: PublicKeyPemBase64
   api: ChatApi
   approve: boolean
-  myVersion: SemverString
+  myVersion: VersionString
   myNotificationCypher?: NotificationTokenOrCypher
   lastReceivedNotificationCypher?: NotificationTokenOrCypher
   theirNotificationCypher?: NotificationTokenOrCypher | undefined
-  otherSideVersion: SemverString | undefined
+  otherSideVersion: VersionString | undefined
   notificationApi: NotificationApi
 }): Effect.Effect<
   SentConfirmMessagingRequest,

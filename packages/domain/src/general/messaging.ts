@@ -5,10 +5,10 @@ import {
 import {Schema} from 'effect'
 import {Base64String} from '../utility/Base64String.brand'
 import {ExpoNotificationToken} from '../utility/ExpoNotificationToken.brand'
-import {SemverString} from '../utility/SmeverString.brand'
 import {UnixMilliseconds} from '../utility/UnixMilliseconds.brand'
 import {UriString} from '../utility/UriString.brand'
 import {generateUuid} from '../utility/Uuid.brand'
+import {VersionString} from '../utility/VersionString.brand'
 import {DeanonymizedUser} from './DeanonymizedUser'
 import {E164PhoneNumber} from './E164PhoneNumber.brand'
 import {HashedPhoneNumber} from './HashedPhoneNumber.brand'
@@ -79,11 +79,11 @@ export const ChatMessagePayload = Schema.Struct({
   repliedTo: Schema.optional(RepliedToData),
   time: UnixMilliseconds,
   messageType: MessageType,
-  lastReceivedVersion: Schema.optional(SemverString),
-  myVersion: Schema.optional(SemverString),
+  lastReceivedVersion: Schema.optional(VersionString),
+  myVersion: Schema.optional(VersionString),
   goldenAvatarType: Schema.optional(GoldenAvatarType),
   tradeChecklistUpdate: Schema.optional(TradeChecklistUpdate),
-  minimalRequiredVersion: Schema.optional(SemverString),
+  minimalRequiredVersion: Schema.optional(VersionString),
   deanonymizedUser: Schema.optional(
     Schema.Struct({
       name: UserName,
@@ -116,15 +116,15 @@ export function generateChatMessageId(): ChatMessageId {
 export const ChatMessage = Schema.Struct({
   uuid: ChatMessageId,
   text: Schema.String,
-  minimalRequiredVersion: Schema.optional(SemverString),
+  minimalRequiredVersion: Schema.optional(VersionString),
   time: UnixMilliseconds,
-  myVersion: Schema.optional(SemverString),
+  myVersion: Schema.optional(VersionString),
   goldenAvatarType: Schema.optional(GoldenAvatarType),
 
   /**
    * Used only for messages  of type `VERSION_UPDATE`
    */
-  lastReceivedVersion: Schema.optional(SemverString),
+  lastReceivedVersion: Schema.optional(VersionString),
   forceShow: Schema.optional(Schema.Boolean),
 
   image: Schema.optional(UriString),
@@ -223,8 +223,8 @@ export const Chat = Schema.Struct({
     default: () => true,
   }),
   tradeChecklistCalendarEventId: Schema.optional(CalendarEventId),
-  otherSideVersion: Schema.optional(SemverString),
-  lastReportedVersion: Schema.optional(SemverString),
+  otherSideVersion: Schema.optional(VersionString),
+  lastReportedVersion: Schema.optional(VersionString),
   // Accepts both NotificationCypher (legacy) and VexlNotificationToken (new)
   otherSideFcmCypher: Schema.optional(
     Schema.Union(NotificationCypher, VexlNotificationToken)
@@ -253,8 +253,8 @@ export const ChatMessageRequiringNewerVersion = Schema.Struct({
   uuid: ChatMessageId,
   messageType: Schema.Literal('REQUIRES_NEWER_VERSION'),
   serverMessage: ServerMessage,
-  myVersion: Schema.optionalWith(SemverString, {nullable: true}),
-  minimalRequiredVersion: SemverString,
+  myVersion: Schema.optionalWith(VersionString, {nullable: true}),
+  minimalRequiredVersion: VersionString,
   time: UnixMilliseconds,
   senderPublicKey: PublicKeyPemBase64,
   messageParsed: Schema.optional(Schema.Unknown),

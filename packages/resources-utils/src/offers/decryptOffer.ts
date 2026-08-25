@@ -10,8 +10,8 @@ import {
 } from '@vexl-next/domain/src/general/offers'
 import {
   compare,
-  SemverString,
-} from '@vexl-next/domain/src/utility/SmeverString.brand'
+  VersionString,
+} from '@vexl-next/domain/src/utility/VersionString.brand'
 import {BooleanFromString} from '@vexl-next/generic-utils/src/effect-helpers/BooleanFromString'
 import {
   CryptoBoxCypher,
@@ -74,7 +74,7 @@ const OfferPublicPayloadUnion = Schema.Union(
   OfferPublicPart
 )
 
-const firstSupportedSemverString = Schema.decodeSync(SemverString)('1.16.0')
+const firstSupportedVersionString = Schema.decodeSync(VersionString)('1.16.0')
 const ensureOfferFromSupportedClient = (
   offerStrign: string
 ): Effect.Effect<void, NonCompatibleOfferVersionError> =>
@@ -83,12 +83,12 @@ const ensureOfferFromSupportedClient = (
     Schema.decodeUnknown(
       Schema.parseJson(
         Schema.Struct({
-          authorClientVersion: SemverString,
+          authorClientVersion: VersionString,
         })
       )
     ),
     Effect.filterOrFail(({authorClientVersion}) => {
-      return compare(authorClientVersion)('>=', firstSupportedSemverString)
+      return compare(authorClientVersion)('>=', firstSupportedVersionString)
     }),
     Effect.mapError(
       () =>

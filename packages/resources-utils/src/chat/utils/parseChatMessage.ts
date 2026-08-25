@@ -8,14 +8,14 @@ import {
   type ChatMessageRequiringNewerVersion,
 } from '@vexl-next/domain/src/general/messaging'
 import {
-  SemverString,
-  compare as compareSemver,
-} from '@vexl-next/domain/src/utility/SmeverString.brand'
-import {
   UnixMilliseconds,
   unixMillisecondsNow,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
+import {
+  VersionString,
+  compare as compareSemver,
+} from '@vexl-next/domain/src/utility/VersionString.brand'
 import {toError, type BasicError} from '@vexl-next/domain/src/utility/errors'
 import {Either, Option, Schema, flow} from 'effect'
 import * as E from 'fp-ts/Either'
@@ -52,11 +52,11 @@ export interface ErrorChatMessageRequiresNewerVersion {
 }
 
 const ChatMessageRequiringNewerVersionWithDefaults = Schema.Struct({
-  minimalRequiredVersion: SemverString,
+  minimalRequiredVersion: VersionString,
   senderPublicKey: PublicKeyPemBase64,
   messageParsed: Schema.Unknown,
   serverMessage: ServerMessage,
-  myVersion: Schema.optionalWith(SemverString, {nullable: true}),
+  myVersion: Schema.optionalWith(VersionString, {nullable: true}),
   time: UnixMilliseconds.pipe(
     Schema.annotations({
       decodingFallback: () => Either.right(unixMillisecondsNow()),
@@ -78,7 +78,7 @@ function ensureCompatibleVersion({
   appVersion,
   serverMessage,
 }: {
-  appVersion: SemverString
+  appVersion: VersionString
   serverMessage: ServerMessage
 }): (
   payloadJson: unknown
@@ -94,7 +94,7 @@ function ensureCompatibleVersion({
       if (!unsafeMinimalRequiredVersion) return E.right(payloadJson)
 
       const minimalRequiredVersionParsed = pipe(
-        Schema.decodeUnknownOption(SemverString)(unsafeMinimalRequiredVersion)
+        Schema.decodeUnknownOption(VersionString)(unsafeMinimalRequiredVersion)
       )
       if (Option.isNone(minimalRequiredVersionParsed))
         return E.left(
@@ -173,7 +173,7 @@ export function parseChatMessage({
   appVersion,
   serverMessage,
 }: {
-  appVersion: SemverString
+  appVersion: VersionString
   serverMessage: ServerMessage
 }): (
   jsonString: string

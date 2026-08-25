@@ -6,8 +6,8 @@ import {
   type VexlProductNotification,
 } from '@vexl-next/domain/src/general/vexlProductNotification'
 import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
-import {SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
+import {VersionString} from '@vexl-next/domain/src/utility/VersionString.brand'
 import {
   AppSource,
   makeCommonHeaders,
@@ -31,7 +31,7 @@ import {
 const headers = makeCommonHeaders({
   platform: 'ANDROID',
   versionCode: Schema.decodeSync(VersionCode)(100),
-  semver: Schema.decodeSync(SemverString)('1.0.0'),
+  semver: Schema.decodeSync(VersionString)('1.0.0'),
   appSource: Schema.decodeSync(AppSource)('playStore'),
   language: 'en',
   isDeveloper: false,

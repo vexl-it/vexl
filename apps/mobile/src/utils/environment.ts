@@ -2,8 +2,8 @@ import {
   PLATFORM_ANDROID,
   PLATFORM_IOS,
 } from '@vexl-next/domain/src/utility/PlatformName'
-import {SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
+import {VersionString} from '@vexl-next/domain/src/utility/VersionString.brand'
 import {AppSource} from '@vexl-next/rest-api/src/commonHeaders'
 import {Schema} from 'effect'
 import * as Application from 'expo-application'
@@ -17,7 +17,7 @@ export const enableHiddenFeatures =
   Constants.expoConfig?.extra?.enableHiddenFeatures
 
 export const apiPreset = Constants.expoConfig?.extra?.apiPreset ?? 'stageEnv'
-export const version = Schema.decodeSync(SemverString)(
+export const version = Schema.decodeSync(VersionString)(
   Constants.expoConfig?.extra?.semver ?? '0.0.0'
 )
 

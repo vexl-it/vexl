@@ -94,9 +94,9 @@ import {
 } from '@vexl-next/domain/src/general/offers'
 import {Base64String} from '@vexl-next/domain/src/utility/Base64String.brand'
 import {PlatformName} from '@vexl-next/domain/src/utility/PlatformName'
-import {SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {now} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
+import {VersionString} from '@vexl-next/domain/src/utility/VersionString.brand'
 import {
   cryptoBoxSign,
   ecdsaSignE,
@@ -227,7 +227,7 @@ function assertLocalServiceUrls(): void {
   process.exit(1)
 }
 
-const CLIENT_SEMVER = Schema.decodeSync(SemverString)('1.44.0')
+const CLIENT_SEMVER = Schema.decodeSync(VersionString)('1.44.0')
 const CLIENT_VERSION = Schema.decodeSync(VersionCode)(841)
 const PLATFORM = Schema.decodeSync(PlatformName)('ANDROID')
 const APP_SOURCE = Schema.decodeSync(AppSource)('seed-script')

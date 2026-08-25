@@ -1,8 +1,8 @@
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {PlatformName} from '@vexl-next/domain/src/utility/PlatformName'
-import {SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
+import {VersionString} from '@vexl-next/domain/src/utility/VersionString.brand'
 import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/EcdsaSignature.brand'
 import {ENV_PRESETS} from '@vexl-next/rest-api'
 import {AppSource} from '@vexl-next/rest-api/src/commonHeaders'
@@ -16,7 +16,7 @@ export function getEnvPreset() {
 
 export const apiMeta = {
   appSource: Schema.decodeUnknownSync(AppSource)('web-app'),
-  clientSemver: Schema.decodeUnknownSync(SemverString)('0.0.1'),
+  clientSemver: Schema.decodeUnknownSync(VersionString)('0.0.1'),
   clientVersion: Schema.decodeUnknownSync(VersionCode)(0),
   isDeveloper: false,
   language: 'en',

@@ -6,8 +6,8 @@ import {
   ServerMessage,
   generateChatMessageId,
 } from '@vexl-next/domain/src/general/messaging'
-import {SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {now} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {VersionString} from '@vexl-next/domain/src/utility/VersionString.brand'
 import {Either, Schema} from 'effect'
 import * as E from 'fp-ts/Either'
 import {parseChatMessage} from './parseChatMessage'
@@ -19,7 +19,7 @@ it('preserves verified common friends in request messaging payloads', () => {
   const verifiedCommonFriend = Schema.decodeSync(HashedPhoneNumber)(
     'verified-common-friend'
   )
-  const appVersion = Schema.decodeSync(SemverString)('1.0.0')
+  const appVersion = Schema.decodeSync(VersionString)('1.0.0')
 
   const message = Schema.decodeSync(ChatMessage)({
     uuid: generateChatMessageId(),

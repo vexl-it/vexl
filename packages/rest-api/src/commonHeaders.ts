@@ -1,7 +1,7 @@
 import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {PlatformName} from '@vexl-next/domain/src/utility/PlatformName'
-import {SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
+import {VersionString} from '@vexl-next/domain/src/utility/VersionString.brand'
 import {Array, Either, Number, Option, Schema, String} from 'effect'
 import {HEADER_CLIENT_VERSION, HEADER_PLATFORM} from './constants'
 
@@ -23,7 +23,7 @@ export const VexlAppUserAgentHeader = Schema.TaggedStruct(
   {
     platform: PlatformName,
     versionCode: VersionCode,
-    semver: Schema.optionalWith(SemverString, {as: 'Option', nullable: true}),
+    semver: Schema.optionalWith(VersionString, {as: 'Option', nullable: true}),
   }
 )
 export type UserAgentHeader = Schema.Schema.Type<typeof VexlAppUserAgentHeader>
@@ -39,7 +39,7 @@ export type UnknownUserAgentHeader = typeof UnknownUserAgentHeader.Type
 export const VexlAppMetaHeader = Schema.Struct({
   platform: PlatformName,
   versionCode: VersionCode,
-  semver: SemverString,
+  semver: VersionString,
   appSource: AppSource,
   language: Schema.String,
   isDeveloper: Schema.Boolean,
@@ -185,7 +185,7 @@ export class CommonHeaders extends Schema.Class<CommonHeaders>('CommonHeaders')(
     return this[HEADER_CLIENT_VERSION]
   }
 
-  get clientSemverOrNone(): Option.Option<SemverString> {
+  get clientSemverOrNone(): Option.Option<VersionString> {
     if (this['vexl-app-meta']) {
       return Option.some(this['vexl-app-meta'].semver)
     }

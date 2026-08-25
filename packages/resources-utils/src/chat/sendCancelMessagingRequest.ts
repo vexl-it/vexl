@@ -6,11 +6,11 @@ import {
   generateChatMessageId,
   type ChatMessage,
 } from '@vexl-next/domain/src/general/messaging'
-import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {
   now,
   type UnixMilliseconds,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {type VersionString} from '@vexl-next/domain/src/utility/VersionString.brand'
 import {type ChatApi} from '@vexl-next/rest-api/src/services/chat'
 import {type NotificationApi} from '@vexl-next/rest-api/src/services/notification'
 import {Effect, type ParseResult} from 'effect'
@@ -26,7 +26,7 @@ function createCancelRequestChatMessage({
 }: {
   text: string
   senderPublicKey: PublicKeyPemBase64
-  myVersion: SemverString
+  myVersion: VersionString
 }): ChatMessage {
   return {
     uuid: generateChatMessageId(),
@@ -62,9 +62,9 @@ export function sendCancelMessagingRequest({
   fromKeypair: PrivateKeyHolder
   toPublicKey: PublicKeyPemBase64
   api: ChatApi
-  myVersion: SemverString
+  myVersion: VersionString
   theirNotificationCypher?: NotificationTokenOrCypher | undefined
-  otherSideVersion: SemverString | undefined
+  otherSideVersion: VersionString | undefined
   notificationApi: NotificationApi
 }): Effect.Effect<
   SentCancelMessagingRequest,

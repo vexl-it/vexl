@@ -12,11 +12,11 @@ import {
   type FriendLevel,
   type GoldenAvatarType,
 } from '@vexl-next/domain/src/general/offers'
-import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {
   now,
   type UnixMilliseconds,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {type VersionString} from '@vexl-next/domain/src/utility/VersionString.brand'
 import {type ChatApi} from '@vexl-next/rest-api/src/services/chat'
 import {type NotificationApi} from '@vexl-next/rest-api/src/services/notification'
 import {Effect, type ParseResult} from 'effect'
@@ -41,7 +41,7 @@ function createRequestChatMessage({
   myNotificationCypher?: NotificationTokenOrCypher
   lastReceivedNotificationCypher?: NotificationTokenOrCypher
   senderPublicKey: PublicKeyPemBase64
-  myVersion: SemverString
+  myVersion: VersionString
   goldenAvatarType?: GoldenAvatarType
   senderClubsUuids: readonly ClubUuid[]
   commonFriends?: readonly HashedPhoneNumber[]
@@ -95,10 +95,10 @@ export function sendMessagingRequest({
   myNotificationCypher?: NotificationTokenOrCypher
   lastReceivedNotificationCypher?: NotificationTokenOrCypher
   api: ChatApi
-  myVersion: SemverString
+  myVersion: VersionString
   theirNotificationCypher?: NotificationTokenOrCypher | undefined
   notificationApi: NotificationApi
-  otherSideVersion?: SemverString | undefined
+  otherSideVersion?: VersionString | undefined
   goldenAvatarType?: GoldenAvatarType
   forClubsUuids: readonly ClubUuid[]
   commonFriends?: readonly HashedPhoneNumber[]

@@ -1,5 +1,5 @@
 import {type ChatMessageRequiringNewerVersion} from '@vexl-next/domain/src/general/messaging'
-import {compare} from '@vexl-next/domain/src/utility/SmeverString.brand'
+import {compare} from '@vexl-next/domain/src/utility/VersionString.brand'
 import {
   Button,
   InfoCircle,

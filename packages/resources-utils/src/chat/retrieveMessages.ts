@@ -1,7 +1,7 @@
 import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
 import {type ChatMessage} from '@vexl-next/domain/src/general/messaging'
-import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {type UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {type VersionString} from '@vexl-next/domain/src/utility/VersionString.brand'
 import {type ChatApi} from '@vexl-next/rest-api/src/services/chat'
 import {Array, Effect, Either, pipe} from 'effect'
 import {flow} from 'fp-ts/function'
@@ -29,7 +29,7 @@ export default function retrieveMessages({
 }: {
   api: ChatApi
   inboxKeypair: PrivateKeyHolder
-  currentAppVersion: SemverString
+  currentAppVersion: VersionString
 }): Effect.Effect<
   {
     errors: Array<

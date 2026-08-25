@@ -5,7 +5,7 @@ const IS_LOCAL_ENV = ENV_PRESET === 'local'
 const COMMIT_HASH = process.env.EAS_BUILD_GIT_COMMIT_HASH ?? 'local'
 
 // // check if version is valid
-// Schema.decodeSync(SemverString)(VERSION)
+// Schema.decodeSync(VersionString)(VERSION)
 
 const presets = {
   stage: {

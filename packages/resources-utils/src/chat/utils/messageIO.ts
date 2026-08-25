@@ -7,7 +7,7 @@ import {
   type MessageCypher,
   type ServerMessage,
 } from '@vexl-next/domain/src/general/messaging'
-import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
+import {type VersionString} from '@vexl-next/domain/src/utility/VersionString.brand'
 import {type ParseResult} from 'effect/index'
 import * as TE from 'fp-ts/TaskEither'
 import {flow, pipe} from 'fp-ts/function'
@@ -45,7 +45,7 @@ export function messageFromNetwork({
   appVersion,
 }: {
   privateKey: PrivateKeyHolder
-  appVersion: SemverString
+  appVersion: VersionString
 }): (
   serverMessage: ServerMessage
 ) => TE.TaskEither<

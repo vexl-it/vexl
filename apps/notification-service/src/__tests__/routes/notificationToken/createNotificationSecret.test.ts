@@ -1,7 +1,7 @@
 import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
-import {SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
+import {VersionString} from '@vexl-next/domain/src/utility/VersionString.brand'
 import {
   AppSource,
   CommonHeaders,
@@ -13,7 +13,7 @@ import {NodeTestingApp} from '../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../utils/runPromiseInMockedEnvironment'
 
 const validVersionCode = Schema.decodeSync(VersionCode)(100)
-const validSemver = Schema.decodeSync(SemverString)('1.0.0')
+const validSemver = Schema.decodeSync(VersionString)('1.0.0')
 const validAppSource = Schema.decodeSync(AppSource)('playStore')
 const validExpoToken = Schema.decodeSync(ExpoNotificationToken)(
   'ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'

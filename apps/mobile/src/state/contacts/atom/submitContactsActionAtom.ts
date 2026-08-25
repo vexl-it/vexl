@@ -9,6 +9,7 @@ import {apiAtom} from '../../../api'
 import {loadingOverlayDisplayedAtom} from '../../../components/LoadingOverlayProvider'
 import {
   offerProgressModalActionAtoms,
+  waitUntilProgressModalIsFullyHiddenActionAtom,
   type ProgressIndication,
 } from '../../../components/UploadingOfferProgressModal/atoms'
 import {progressSpan} from '../../../components/UploadingOfferProgressModal/progressUtils'
@@ -836,6 +837,10 @@ export const submitContactsActionAtom = atom(
           return 'success'
         },
       }),
+      // Callers show dialogs/alerts right after this effect resolves. A native
+      // dialog presented while the progress modal is still dismissing is
+      // silently dropped on iOS, so do not resolve until it is fully gone.
+      Effect.tap(() => set(waitUntilProgressModalIsFullyHiddenActionAtom)),
       Effect.ensuring(
         Effect.sync(() => {
           if (manageLoadingOverlay) {

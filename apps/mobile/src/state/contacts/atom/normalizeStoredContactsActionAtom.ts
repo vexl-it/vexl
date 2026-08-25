@@ -120,19 +120,41 @@ const normalizeStoredContactsActionAtom = atom(
 
       onProgress({total: toNormalize.length, percentDone: 1})
 
-      // Normalizing spans many animation frames, so the store can be written to
-      // while we work (vcard import, manually added contact, ...). Merge into
-      // the current value instead of overwriting it with our stale snapshot -
-      // contacts added meanwhile stay, removed ones stay removed. Unchanged
-      // contacts keep their object identity for the identity caches downstream.
-      const normalizedByOriginal = new Map(
-        Array.zip(toNormalize, normalizedContacts)
+      // Normalizing spans many animation frames, so the store can be written
+      // to while we work (vcard import, manually added contact, and the MMKV
+      // atom re-decoding the persisted blob on a change notification, which
+      // rebuilds every object). Merge into the current value instead of
+      // overwriting it with our stale snapshot, and key the merge by
+      // rawNumber rather than object identity - the normalization outcome is
+      // derived purely from rawNumber, so it stays valid even for an object
+      // that was replaced meanwhile, while concurrent info/flag changes are
+      // preserved. Contacts that need no normalization keep their object
+      // identity for the identity caches downstream.
+      const normalizedByRawNumber = new Map(
+        pipe(
+          Array.zip(toNormalize, normalizedContacts),
+          Array.map(
+            ([original, normalized]) =>
+              [original.info.rawNumber, normalized] as const
+          )
+        )
       )
       set(storedContactsAtom, (prev) =>
-        Array.map(
-          prev,
-          (contact) => normalizedByOriginal.get(contact) ?? contact
-        )
+        Array.map(prev, (contact) => {
+          if (!needsNormalization(contact)) return contact
+
+          const normalized = normalizedByRawNumber.get(contact.info.rawNumber)
+          if (normalized === undefined) return contact
+
+          return {
+            ...contact,
+            computedValues: normalized.computedValues,
+            flags: {
+              ...contact.flags,
+              invalidNumber: normalized.flags.invalidNumber,
+            },
+          }
+        })
       )
       measure()
     })

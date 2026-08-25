@@ -5,6 +5,7 @@ import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect
 import {commonMetricAttributesFromHeaders} from '@vexl-next/server-utils/src/metrics/commonMetricAttributesFromHeaders'
 import {Effect} from 'effect'
 import {NotificationMetricsService} from '../metrics'
+import {OfflineNotificationBuffer} from '../services/OfflineNotificationBuffer'
 
 export const reportNotificationProcessedHandler = HttpApiBuilder.handler(
   NotificationApiSpecification,
@@ -14,6 +15,16 @@ export const reportNotificationProcessedHandler = HttpApiBuilder.handler(
     makeEndpointEffect(
       Effect.gen(function* (_) {
         const notificationMetrics = yield* _(NotificationMetricsService)
+        const offlineNotificationBuffer = yield* _(OfflineNotificationBuffer)
+
+        // The client processed the notification, so it no longer needs to be
+        // replayed when its background socket reconnects.
+        yield* _(
+          offlineNotificationBuffer.removeBufferedTaskByTrackingId(
+            req.payload.trackingId
+          )
+        )
+
         yield* _(
           notificationMetrics.reportNotificationProcessed({
             id: req.payload.trackingId,

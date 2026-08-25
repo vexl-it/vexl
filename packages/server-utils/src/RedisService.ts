@@ -139,6 +139,13 @@ export interface RedisOperations {
     maxCount: number
   ) => Effect.Effect<void, RedisError>
 
+  removeFromSortedSet: <A, I, R>(
+    schema: Schema.Schema<A, I, R>
+  ) => (
+    key: string,
+    values: NonEmptyArray<A>
+  ) => Effect.Effect<void, ParseResult.ParseError | RedisError, R>
+
   getAndDropSortedSet: <A, I, R>(
     schema: Schema.Schema<A, I, R>
   ) => (
@@ -465,6 +472,17 @@ export class RedisService extends Context.Tag('RedisService')<
           })
         )
 
+      const removeFromSortedSet = (
+        key: string,
+        values: readonly string[]
+      ): Effect.Effect<void, RedisError> =>
+        Effect.tryPromise({
+          try: async () => {
+            await redisClient.zrem(key, ...values)
+          },
+          catch: (e) => new RedisError({cause: e}),
+        }).pipe(Effect.withSpan('Redis removeFromSortedSet'))
+
       const getAndDropSortedSet = (
         key: string,
         order: 'asc' | 'desc'
@@ -585,6 +603,13 @@ export class RedisService extends Context.Tag('RedisService')<
         },
         clearSortedSet,
         trimSortedSetToNewest,
+        removeFromSortedSet: (schema) => {
+          const encode = Schema.encode(Schema.Array(Schema.parseJson(schema)))
+          return (key, values) =>
+            encode(values).pipe(
+              Effect.flatMap((encoded) => removeFromSortedSet(key, encoded))
+            )
+        },
         getAndDropSortedSet: (schema) => {
           const decode = Schema.decode(Schema.Array(Schema.parseJson(schema)))
           return (key, order) =>

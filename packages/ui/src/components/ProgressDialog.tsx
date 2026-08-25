@@ -25,6 +25,7 @@ export interface ProgressDialogProps {
   readonly belowProgressRight?: string
   readonly bottomText?: string
   readonly indicateProgress: ProgressIndication
+  readonly onHidden?: () => void
   readonly title: string
   readonly visible: boolean
 }
@@ -200,11 +201,12 @@ export function ProgressDialog({
   belowProgressRight,
   bottomText,
   indicateProgress,
+  onHidden,
   title,
   visible,
 }: ProgressDialogProps): React.JSX.Element {
   return (
-    <Dialog visible={visible}>
+    <Dialog visible={visible} onHidden={onHidden}>
       <Typography
         variant="heading2"
         fontWeight="700"

@@ -1,10 +1,23 @@
 import {ProgressDialog} from '@vexl-next/ui'
-import {useAtomValue} from 'jotai'
-import React from 'react'
-import {uploadingProgressModalDataAtom} from './atoms'
+import {useAtomValue, useSetAtom} from 'jotai'
+import React, {useCallback, useEffect} from 'react'
+import {
+  progressModalNativeModalUpAtom,
+  uploadingProgressModalDataAtom,
+} from './atoms'
 
 function UploadingOfferProgressModal(): React.JSX.Element {
   const data = useAtomValue(uploadingProgressModalDataAtom)
+  const setNativeModalUp = useSetAtom(progressModalNativeModalUpAtom)
+  const shown = data.mode === 'shown'
+
+  useEffect(() => {
+    if (shown) setNativeModalUp(true)
+  }, [shown, setNativeModalUp])
+
+  const handleHidden = useCallback(() => {
+    setNativeModalUp(false)
+  }, [setNativeModalUp])
 
   if (data.mode === 'hidden') {
     return (
@@ -12,6 +25,7 @@ function UploadingOfferProgressModal(): React.JSX.Element {
         visible={false}
         title=""
         indicateProgress={{type: 'done'}}
+        onHidden={handleHidden}
       />
     )
   }
@@ -24,6 +38,7 @@ function UploadingOfferProgressModal(): React.JSX.Element {
       belowProgressLeft={data.belowProgressLeft}
       belowProgressRight={data.belowProgressRight}
       indicateProgress={data.indicateProgress}
+      onHidden={handleHidden}
     />
   )
 }

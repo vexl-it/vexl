@@ -9,6 +9,8 @@ import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
 import {versionCode} from '../../../utils/environment'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
+import {getNotificationTokenE} from '../../../utils/notifications'
+import {backgroundNotificationSocketEnabledAtom} from '../../../utils/notifications/backgroundNotificationSocket'
 import {notificationPreferencesAtom} from '../../../utils/preferences'
 import {reportErrorE} from '../../../utils/reportError'
 import {vexlNotificationTokenAtom} from '../vexlNotificationTokenAtom'
@@ -23,7 +25,7 @@ export const syncVexlNotificationTokensActionAtom = atom(
     params?: {
       // If not set to a value, don't update it, use the existing one.
       // If set to null, explicitly set it to null (which will remove the expo token from the backend and stop all notifications).
-      expoNotificationToken?: ExpoNotificationToken | null
+      expoNotificationToken?: ExpoNotificationToken | null | 'getFromExpo'
     }
   ) =>
     Effect.gen(function* () {
@@ -33,9 +35,20 @@ export const syncVexlNotificationTokensActionAtom = atom(
 
       const notificationPreferences = get(notificationPreferencesAtom)
       const vexlNotificationState = get(vexlNotificationTokenAtom)
+      const backgroundNotificationSocketEnabled = get(
+        backgroundNotificationSocketEnabledAtom
+      )
+      const expoNotificationTokenFromDevice =
+        (yield* getNotificationTokenE()) || undefined
 
       const secret = vexlNotificationState.secret
       const expoNotificationToken = (() => {
+        // If background notification socket is enabled, we should always remove the expo token
+        if (backgroundNotificationSocketEnabled) return undefined
+
+        if (params?.expoNotificationToken === 'getFromExpo')
+          return expoNotificationTokenFromDevice
+
         // We should remove it
         if (params?.expoNotificationToken === null) return undefined
 
@@ -70,6 +83,7 @@ export const syncVexlNotificationTokensActionAtom = atom(
         expoNotificationToken,
         systemVexlToken,
         marketingVexlToken,
+        backgroundSocketEnabled: backgroundNotificationSocketEnabled,
       })
 
       yield* api.notification.updateNotificationInfo(request)

@@ -42,4 +42,5 @@ export class NotificationSecretRecord extends Schema.Class<NotificationSecretRec
   createdAt: Schema.DateFromSelf,
   updatedAt: Schema.DateFromSelf,
   clientPrefix: Schema.NullOr(CountryPrefix),
+  backgroundSocketEnabled: Schema.Boolean,
 }) {}

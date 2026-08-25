@@ -6,23 +6,22 @@ import {
   isBatteryExempt,
   isGmsAvailable,
   requestBatteryExemption,
-  setEnabled,
   type BackgroundNotificationSocketState,
 } from '@vexl-next/expo-background-notification-socket'
 import {Array, Effect, pipe} from 'effect'
 import {atom, useAtomValue, useSetAtom, type SetStateAction} from 'jotai'
 import {useCallback, useEffect} from 'react'
 import {Platform} from 'react-native'
-import {apiEnv} from '../../api'
-import {globalDialogAtom} from '../../components/GlobalDialog'
-import {vexlNotificationTokenAtom} from '../../state/notifications/vexlNotificationTokenAtom'
-import {postLoginFlowCompletedScreensAtom} from '../../state/postLoginOnboarding'
-import getValueFromSetStateActionOfAtom from '../atomUtils/getValueFromSetStateActionOfAtom'
-import {versionCode} from '../environment'
-import {translationAtom} from '../localization/I18nProvider'
-import reportError from '../reportError'
-import {useAppState} from '../useAppState'
-import {requestPermissions} from './checkAndAskForPermissionsActionAtom'
+import {apiEnv} from '../../../api'
+import {globalDialogAtom} from '../../../components/GlobalDialog'
+import {vexlNotificationTokenAtom} from '../../../state/notifications/vexlNotificationTokenAtom'
+import {postLoginFlowCompletedScreensAtom} from '../../../state/postLoginOnboarding'
+import getValueFromSetStateActionOfAtom from '../../atomUtils/getValueFromSetStateActionOfAtom'
+import {versionCode} from '../../environment'
+import {translationAtom} from '../../localization/I18nProvider'
+import reportError from '../../reportError'
+import {useAppState} from '../../useAppState'
+import {setBackgroundNotificationSocketEnabledActionAtom} from './setBackgroundNotificationSocketEnabledActionAtom'
 
 interface BackgroundNotificationState {
   // null until the user decided whether to use the background socket
@@ -61,7 +60,9 @@ export const refreshBackgroundNotificationSocketStateActionAtom = atom(
   }
 )
 
-const configureForCurrentSecret = async (secret: string): Promise<void> => {
+export const configureForCurrentSecret = async (
+  secret: string
+): Promise<void> => {
   await configure({
     apiUrl: apiEnv.notificationMs,
     notificationSecret: secret,
@@ -83,30 +84,6 @@ export const clearBackgroundNotificationSocketActionAtom = atom(
       )
     }
     set(backgroundNotificationSocketStateAtom, null)
-  }
-)
-
-export const setBackgroundNotificationSocketEnabledActionAtom = atom(
-  null,
-  async (get, set, enabled: boolean): Promise<void> => {
-    if (Platform.OS !== 'android') return
-    try {
-      const secret = get(vexlNotificationTokenAtom).secret
-      if (enabled && secret) {
-        await configureForCurrentSecret(secret)
-      }
-      await setEnabled(enabled)
-      if (enabled) {
-        await Effect.runPromise(requestPermissions.pipe(Effect.ignore))
-        await requestBatteryExemption()
-      }
-    } catch (cause) {
-      reportError(
-        'warn',
-        new Error('Failed to update background notification socket', {cause})
-      )
-    }
-    await set(refreshBackgroundNotificationSocketStateActionAtom)
   }
 )
 

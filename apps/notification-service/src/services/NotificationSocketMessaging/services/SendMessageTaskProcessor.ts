@@ -1,5 +1,6 @@
 import {Array, Context, Effect, flow, identity, Layer, pipe} from 'effect/index'
 import {NotificationMetricsService} from '../../../metrics'
+import {OfflineNotificationBuffer} from '../../OfflineNotificationBuffer'
 import {ThrottledPushNotificationService} from '../../ThrottledPushNotificationService'
 import {type SendMessageTask} from '../domain'
 import {canDeliverTaskToConnection} from '../utils'
@@ -70,12 +71,14 @@ export class TimeoutProcessor extends Context.Tag('TimeoutProcessor')<
     TimeoutProcessor,
     Effect.gen(function* (_) {
       const {issuePushNotification} = yield* _(ThrottledPushNotificationService)
+      const offlineNotificationBuffer = yield* _(OfflineNotificationBuffer)
 
       return (task: SendMessageTask) =>
         task._tag === 'StreamOnlyChatMessageSendTask'
           ? Effect.void
           : pipe(
-              issuePushNotification(task),
+              offlineNotificationBuffer.bufferTaskIfEnabled(task),
+              Effect.zipRight(issuePushNotification(task)),
               Effect.tapError((e) =>
                 Effect.logError(
                   'Failed to issue push notification for timed out socket message',

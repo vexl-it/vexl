@@ -12,6 +12,7 @@ import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect
 import {Effect} from 'effect'
 import {NotificationSocketMessaging} from '../services/NotificationSocketMessaging'
 import {NewChatMessageNoticeSendTask} from '../services/NotificationSocketMessaging/domain'
+import {OfflineNotificationBuffer} from '../services/OfflineNotificationBuffer'
 import {ThrottledPushNotificationService} from '../services/ThrottledPushNotificationService'
 import {VexlNotificationTokenService} from '../services/VexlNotificationTokenService'
 
@@ -43,6 +44,7 @@ export const issueNotifcationHandler = HttpApiBuilder.handler(
       yield* _(Effect.log('Processing notification through socket'))
 
       const {issuePushNotification} = yield* _(ThrottledPushNotificationService)
+      const offlineNotificationBuffer = yield* _(OfflineNotificationBuffer)
 
       const task = new NewChatMessageNoticeSendTask({
         notificationToken: vexlNotificationToken,
@@ -61,22 +63,26 @@ export const issueNotifcationHandler = HttpApiBuilder.handler(
       yield* _(
         Effect.catchAll(
           notificationSocketMessaging.sendNewChatMessageNotice(task),
-          (e) =>
-            Effect.zip(
-              Effect.log(
-                'Unable to send notification via socket, falling back to expo notification',
-                e
-              ),
-              issuePushNotification(task).pipe(
+          (socketError) =>
+            Effect.gen(function* (_) {
+              yield* _(
+                Effect.log(
+                  'Unable to send notification via socket, falling back to expo notification',
+                  socketError
+                )
+              )
+              yield* _(offlineNotificationBuffer.bufferTaskIfEnabled(task))
+              yield* _(
+                issuePushNotification(task),
                 Effect.catchAll(
-                  (e) =>
+                  (pushNotificationError) =>
                     new UnexpectedServerError({
                       message: 'Failed to issue push notification',
-                      cause: e,
+                      cause: pushNotificationError,
                     })
                 )
               )
-            )
+            })
         )
       )
       return new IssueNotificationResponse({success: true})

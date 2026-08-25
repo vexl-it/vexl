@@ -19,6 +19,7 @@ import {
   Stream,
 } from 'effect/index'
 import {type NotificationMetricsService} from '../../../../metrics'
+import {type OfflineNotificationBuffer} from '../../../OfflineNotificationBuffer'
 import {type ThrottledPushNotificationService} from '../../../ThrottledPushNotificationService'
 import {
   type ConnectionManagerChannelId,
@@ -158,6 +159,7 @@ export class SendMessageTasksManager extends Context.Tag(
     | LocalConnectionRegistry
     | NotificationMetricsService
     | ThrottledPushNotificationService
+    | OfflineNotificationBuffer
   > =>
     Layer.scoped(
       SendMessageTasksManager,

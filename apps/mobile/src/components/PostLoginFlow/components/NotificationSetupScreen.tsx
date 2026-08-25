@@ -6,10 +6,8 @@ import {useWindowDimensions} from 'react-native'
 import {type PostLoginFlowStackScreenProps} from '../../../navigationTypes'
 import {completePostLoginFlowScreenActionAtom} from '../../../state/postLoginOnboarding'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
-import {
-  offerBackgroundNotificationSocketActionAtom,
-  setBackgroundNotificationSocketEnabledActionAtom,
-} from '../../../utils/notifications/backgroundNotificationSocket'
+import {offerBackgroundNotificationSocketActionAtom} from '../../../utils/notifications/backgroundNotificationSocket'
+import {setBackgroundNotificationSocketEnabledActionAtom} from '../../../utils/notifications/backgroundNotificationSocket/setBackgroundNotificationSocketEnabledActionAtom'
 import {requestPermissions} from '../../../utils/notifications/checkAndAskForPermissionsActionAtom'
 import PostLoginFlowScreen, {PostLoginFlowCopy} from './PostLoginFlowScreen'
 

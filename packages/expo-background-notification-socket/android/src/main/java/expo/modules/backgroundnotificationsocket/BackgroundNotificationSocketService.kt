@@ -1,6 +1,7 @@
 package expo.modules.backgroundnotificationsocket
 
 import android.app.ActivityManager
+import android.app.AlarmManager
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -16,6 +17,8 @@ import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import android.os.PowerManager
+import android.os.SystemClock
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
@@ -48,6 +51,9 @@ class BackgroundNotificationSocketService : Service() {
   private val connectivityManager by lazy {
     getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
   }
+  private val alarmManager by lazy {
+    getSystemService(Context.ALARM_SERVICE) as AlarmManager
+  }
   private var socket: WebSocket? = null
   private var connectedConfiguration: SocketConfiguration? = null
   private var reconnectAttempt = 0
@@ -57,7 +63,7 @@ class BackgroundNotificationSocketService : Service() {
   private val reconnectRunnable = Runnable { connect() }
   private val pingRunnable = object : Runnable {
     override fun run() {
-      socket?.send(JSONObject().put("_tag", "Ping").toString() + "\n")
+      socket?.send(pingFrame())
       handler.postDelayed(this, PING_INTERVAL_MS)
     }
   }
@@ -101,6 +107,7 @@ class BackgroundNotificationSocketService : Service() {
     }
     connectivityManager.registerDefaultNetworkCallback(networkCallback)
     networkCallbackRegistered = true
+    scheduleWakeAlarm()
   }
 
   override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -116,9 +123,25 @@ class BackgroundNotificationSocketService : Service() {
       return START_NOT_STICKY
     }
 
-    if (socket != null && connectedConfiguration != configuration) {
-      socket?.cancel()
-      socket = null
+    if (intent?.action == ACTION_WAKE) {
+      // Keep the CPU on long enough to detect a dead socket and reconnect.
+      (getSystemService(Context.POWER_SERVICE) as PowerManager)
+        .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "vexl:backgroundSocketWake")
+        .acquire(WAKE_LOCK_TIMEOUT_MS)
+      ensureConnection()
+      scheduleWakeAlarm()
+      return START_STICKY
+    }
+
+    if (socket != null) {
+      if (connectedConfiguration != configuration) {
+        socket?.cancel()
+        socket = null
+        scheduleReconnect(0)
+      }
+      // A healthy socket with an unchanged configuration needs no action;
+      // scheduling a reconnect here would cancel the ping loop for nothing.
+      return START_STICKY
     }
 
     scheduleReconnect(0)
@@ -132,11 +155,56 @@ class BackgroundNotificationSocketService : Service() {
     socket = null
     httpClient.dispatcher.executorService.shutdown()
     if (networkCallbackRegistered) connectivityManager.unregisterNetworkCallback(networkCallback)
+    alarmManager.cancel(wakeAlarmIntent())
     BackgroundNotificationSocketStatus.state = "disabled"
     super.onDestroy()
   }
 
   override fun onBind(intent: Intent?): IBinder? = null
+
+  private fun wakeAlarmIntent(): PendingIntent = PendingIntent.getService(
+    this,
+    0,
+    Intent(this, BackgroundNotificationSocketService::class.java).setAction(ACTION_WAKE),
+    PendingIntent.FLAG_IMMUTABLE,
+  )
+
+  // Handler timers run on uptimeMillis, which stops while the CPU sleeps, so
+  // in Doze the reconnect and ping loops stall. A wake-up alarm periodically
+  // revives the process to detect a dead socket; alarm delivery also grants a
+  // temporary exemption that lets the service resurrect itself if it was
+  // killed. Exact alarms need the user-grantable SCHEDULE_EXACT_ALARM;
+  // without it the inexact variant still fires, just batched.
+  private fun scheduleWakeAlarm() {
+    val triggerAt = SystemClock.elapsedRealtime() + WAKE_ALARM_INTERVAL_MS
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S || alarmManager.canScheduleExactAlarms()) {
+      alarmManager.setExactAndAllowWhileIdle(
+        AlarmManager.ELAPSED_REALTIME_WAKEUP,
+        triggerAt,
+        wakeAlarmIntent(),
+      )
+    } else {
+      alarmManager.setAndAllowWhileIdle(
+        AlarmManager.ELAPSED_REALTIME_WAKEUP,
+        triggerAt,
+        wakeAlarmIntent(),
+      )
+    }
+  }
+
+  private fun ensureConnection() {
+    val socket = socket
+    if (socket == null) {
+      scheduleReconnect(0)
+    } else if (!socket.send(pingFrame())) {
+      // send() returns false on a socket that died without callbacks firing.
+      this.socket = null
+      socket.cancel()
+      scheduleReconnect(0)
+    }
+  }
+
+  private fun pingFrame(): String = JSONObject().put("_tag", "Ping").toString() + "\n"
 
   // Also refreshes the persistent notification, whose text shows the state.
   private fun setState(state: String) {
@@ -331,6 +399,9 @@ class BackgroundNotificationSocketService : Service() {
     private const val MAX_RECONNECT_DELAY_MS = 60_000L
     private const val MAX_BACKOFF_EXPONENT = 6
     private const val BACKOFF_RESET_AFTER_MS = 30_000L
+    private const val ACTION_WAKE = "expo.modules.backgroundnotificationsocket.WAKE"
+    private const val WAKE_ALARM_INTERVAL_MS = 15 * 60_000L
+    private const val WAKE_LOCK_TIMEOUT_MS = 30_000L
 
     fun start(context: Context) {
       try {

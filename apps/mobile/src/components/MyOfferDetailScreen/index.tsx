@@ -39,6 +39,7 @@ import {isOfferExpired} from '../../utils/isOfferExpired'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import {formatInteger} from '../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../utils/localization/formattingLocaleAtom'
+import {getOfferExpirationLabel} from '../../utils/offerAmountDetails'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import numberOfFriendsAtom from '../CRUDOfferFlow/atoms/numberOfFriendsAtom'
 import {offerFormMolecule} from '../CRUDOfferFlow/atoms/offerFormStateAtoms'
@@ -76,6 +77,7 @@ function MyOfferDetailScreen({
     listingTypeAtom,
     offerTitleAtom,
     intendedConnectionLevelAtom,
+    expirationDateAtom,
     selectedClubsUuidsAtom,
   } = useMolecule(offerFormMolecule)
   const setOfferForm = useSetAtom(setOfferFormActionAtom)
@@ -92,6 +94,7 @@ function MyOfferDetailScreen({
   const listingType = useAtomValue(listingTypeAtom)
   const offerTitle = useAtomValue(offerTitleAtom)
   const intendedConnectionLevel = useAtomValue(intendedConnectionLevelAtom)
+  const expirationDate = useAtomValue(expirationDateAtom)
   const selectedClubsUuids = useAtomValue(selectedClubsUuidsAtom)
   const numberOfFriends = useAtomValue(numberOfFriendsAtom)
   const selectedClubNames = useGetAllClubsNamesForIds(selectedClubsUuids)
@@ -153,6 +156,11 @@ function MyOfferDetailScreen({
       localizedString: formatInteger(reach, locale),
     })})`
   })()
+  const expirationLabel = getOfferExpirationLabel({
+    expirationDate,
+    locale,
+    t,
+  })
 
   const clubsHeadline = (() => {
     if (selectedClubNames.length === 0) return t('editOffer.noClubsSelected')
@@ -343,6 +351,7 @@ function MyOfferDetailScreen({
             icon={PeopleUsers}
             overline={t('editOffer.detail.whoCanSeeYourOffer')}
             headline={friendLevelHeadline}
+            subheadline={expirationLabel}
             onPress={() => {
               navigateToEdit('friendLevel')
             }}

@@ -94,15 +94,18 @@ export function offerFormStateFromOffer(
   }
 }
 
-// Fields the form cannot unset (listingType, expirationDate, productCategories)
-// are only written when they hold a value so offers missing them stay
+// Fields the form cannot unset (listingType, productCategories) are only
+// written when they hold a value so offers missing them stay
 // deepEqual-comparable to the merged result.
 export function mergeOfferFormStateIntoPublicPart(
   state: OfferFormState,
   publicPart: OfferPublicPart
 ): OfferPublicPart {
+  const {expirationDate: _expirationDate, ...publicPartWithoutExpirationDate} =
+    publicPart
+
   return {
-    ...publicPart,
+    ...publicPartWithoutExpirationDate,
     currency: state.currency,
     amountBottomLimit: state.amountBottomLimit,
     amountTopLimit: state.amountTopLimit,
@@ -175,7 +178,6 @@ export function copyOfferFieldGroup(
         amountTopLimit: source.amountTopLimit,
         feeAmount: source.feeAmount,
         feeState: source.feeState,
-        expirationDate: source.expirationDate,
       }
     case 'location':
       return {
@@ -199,6 +201,7 @@ export function copyOfferFieldGroup(
       return {
         ...target,
         intendedConnectionLevel: source.intendedConnectionLevel,
+        expirationDate: source.expirationDate,
       }
     case 'clubs':
       return {...target, selectedClubsUuids: source.selectedClubsUuids}

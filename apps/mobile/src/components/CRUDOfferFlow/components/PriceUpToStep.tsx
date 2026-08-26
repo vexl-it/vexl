@@ -10,7 +10,7 @@ import type {IconProps} from '@vexl-next/ui/src/icons/types'
 import {useMolecule} from 'bunshi/dist/react'
 import {Effect} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
-import React, {useMemo, useState} from 'react'
+import React, {useState} from 'react'
 import {XStack, YStack} from 'tamagui'
 import {SATOSHIS_IN_BTC} from '../../../state/currentBtcPriceAtoms'
 import {currencies} from '../../../utils/localization/currency'
@@ -18,11 +18,9 @@ import {formatDecimal} from '../../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../../utils/localization/formattingLocaleAtom'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {parseDecimalInput} from '../../../utils/normalizeDecimalInput'
-import {getOfferAmountDetailsLabel} from '../../../utils/offerAmountDetails'
 import BtcPriceInfo from '../../BtcPriceInfo'
 import {useOpenChangeCurrency} from '../../ChangeCurrency'
 import {offerFormMolecule} from '../atoms/offerFormStateAtoms'
-import PremiumAndExpiration from './PremiumAndExpiration'
 
 function satsToDisplayValue(satsValue: number, btcUnit: BtcUnit): string {
   if (!satsValue) return ''
@@ -84,14 +82,12 @@ function PriceUpToStep({
     calculateFiatValueOnSatsValueChangeActionAtom,
     checkAmountExceedsLimitAndShowDialogActionAtom,
     retryBtcPriceForOfferCurrencyActionAtom,
-    expirationDateAtom,
   } = useMolecule(offerFormMolecule)
 
   const currency = useAtomValue(currencyAtom)
   const btcPriceData = useAtomValue(btcPriceForOfferWithCurrencyAtom)
   const amountBottomLimit = useAtomValue(amountBottomLimitAtom)
   const satsValue = useAtomValue(satsValueAtom)
-  const expirationDate = useAtomValue(expirationDateAtom)
   const pricesLoading = useAtomValue(btcPricesLoadingAtom)
   const pricesReady = useAtomValue(btcPricesReadyAtom)
   const changePriceCurrency = useSetAtom(changePriceCurrencyActionAtom)
@@ -111,16 +107,6 @@ function PriceUpToStep({
   const [btcInputDraft, setBtcInputDraft] = useState<string | undefined>(
     undefined
   )
-  const amountDetailsLabel = useMemo(
-    () =>
-      getOfferAmountDetailsLabel({
-        expirationDate,
-        locale,
-        t,
-      }),
-    [expirationDate, locale, t]
-  )
-
   const currencyCode = currencies[currency].code
 
   if (!active) {
@@ -134,7 +120,6 @@ function PriceUpToStep({
         icon={icon}
         overline={overline ?? t('offerForm.priceUpTo')}
         headline={completedHeadline}
-        subheadline={amountDetailsLabel}
         onPress={onEdit}
       />
     )
@@ -190,12 +175,6 @@ function PriceUpToStep({
           isRefreshing={pricesLoading}
           onRetry={retryBtcPrice}
           showRetry={!pricesReady && !!btcPriceData}
-        />
-
-        <PremiumAndExpiration
-          amountMin={amountBottomLimit}
-          amountMax={amountBottomLimit}
-          showPremium={false}
         />
 
         {pricesLoading ? (

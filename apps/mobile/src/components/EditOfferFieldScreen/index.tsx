@@ -20,6 +20,7 @@ import {offerFormMolecule} from '../CRUDOfferFlow/atoms/offerFormStateAtoms'
 import AmountStep from '../CRUDOfferFlow/components/AmountStep'
 import ClubItem from '../CRUDOfferFlow/components/ClubItem'
 import DescribeStep from '../CRUDOfferFlow/components/DescribeStep'
+import ExpirationOptions from '../CRUDOfferFlow/components/ExpirationOptions'
 import LanguageStep from '../CRUDOfferFlow/components/LanguageStep'
 import LocationStep from '../CRUDOfferFlow/components/LocationStep'
 import NetworkStep from '../CRUDOfferFlow/components/NetworkStep'
@@ -334,6 +335,7 @@ function EditOfferFieldScreen({
                 hideSubtitle
                 intendedConnectionLevelAtom={intendedConnectionLevelAtom}
               />
+              <ExpirationOptions />
               <Button variant="primary" size="large" onPress={handleComplete}>
                 {t('common.save')}
               </Button>

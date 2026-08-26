@@ -14,11 +14,11 @@ import {currencies} from '../../../utils/localization/currency'
 import {formatDecimal} from '../../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../../utils/localization/formattingLocaleAtom'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
-import {getOfferAmountDetailsLabel} from '../../../utils/offerAmountDetails'
+import {getOfferFeeLabel} from '../../../utils/offerAmountDetails'
 import BtcPriceInfo from '../../BtcPriceInfo'
 import {useOpenChangeCurrency} from '../../ChangeCurrency'
 import {offerFormMolecule} from '../atoms/offerFormStateAtoms'
-import PremiumAndExpiration from './PremiumAndExpiration'
+import PremiumOptions from './PremiumOptions'
 
 interface AmountStepProps {
   readonly active: boolean
@@ -49,7 +49,6 @@ function AmountStep({
     amountTopLimitAtom,
     amountBottomLimitAtom,
     feeAmountAtom,
-    expirationDateAtom,
     btcPriceForOfferWithCurrencyAtom,
     changePriceCurrencyActionAtom,
     retryBtcPriceForOfferCurrencyActionAtom,
@@ -63,7 +62,6 @@ function AmountStep({
   const amountMin = useAtomValue(amountBottomLimitAtom)
   const amountMax = useAtomValue(amountTopLimitAtom)
   const feeAmount = useAtomValue(feeAmountAtom)
-  const expirationDate = useAtomValue(expirationDateAtom)
   const maxLimit = useAtomValue(maxAmountForCurrencyAtom)
   const pricesLoading = useAtomValue(btcPricesLoadingAtom)
   const pricesReady = useAtomValue(btcPricesReadyAtom)
@@ -87,13 +85,12 @@ function AmountStep({
 
   const amountDetailsLabel = useMemo(
     () =>
-      getOfferAmountDetailsLabel({
+      getOfferFeeLabel({
         feeAmount,
-        expirationDate,
         locale,
         t,
       }),
-    [expirationDate, feeAmount, locale, t]
+    [feeAmount, locale, t]
   )
 
   if (!active) {
@@ -146,7 +143,7 @@ function AmountStep({
           showRetry={!pricesReady && !!btcPriceData}
         />
 
-        <PremiumAndExpiration amountMin={amountMin} amountMax={amountMax} />
+        <PremiumOptions amountMin={amountMin} amountMax={amountMax} />
 
         <Button
           variant="primary"

@@ -17,6 +17,7 @@ import {type RootStackScreenProps} from '../../navigationTypes'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import {formatInteger} from '../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../utils/localization/formattingLocaleAtom'
+import {getOfferExpirationLabel} from '../../utils/offerAmountDetails'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import {globalDialogAtom} from '../GlobalDialog'
 import FriendLevel from '../OfferForm/components/FriendLevel'
@@ -25,6 +26,7 @@ import {offerFormMolecule} from './atoms/offerFormStateAtoms'
 import AmountStep from './components/AmountStep'
 import ClubsStep from './components/ClubsStep'
 import DescribeStep from './components/DescribeStep'
+import ExpirationOptions from './components/ExpirationOptions'
 import LanguageStep from './components/LanguageStep'
 import ListingTypeStep from './components/ListingTypeStep'
 import LocationStep from './components/LocationStep'
@@ -43,6 +45,7 @@ function CRUDOfferFlow(): React.ReactElement {
   const {
     offerTypeAtom,
     listingTypeAtom,
+    expirationDateAtom,
     initializeValuesForOfferFormActionAtom,
     intendedConnectionLevelAtom,
     resetOfferFormActionAtom,
@@ -50,6 +53,7 @@ function CRUDOfferFlow(): React.ReactElement {
   } = useMolecule(offerFormMolecule)
   const offerType = useAtomValue(offerTypeAtom)
   const listingType = useAtomValue(listingTypeAtom)
+  const expirationDate = useAtomValue(expirationDateAtom)
   const intendedConnectionLevel = useAtomValue(intendedConnectionLevelAtom)
   const numberOfFriends = useAtomValue(numberOfFriendsAtom)
   const showDialog = useSetAtom(globalDialogAtom)
@@ -140,6 +144,11 @@ function CRUDOfferFlow(): React.ReactElement {
     )})`
   })()
   const areFriendLevelCountsLoading = numberOfFriends.state === 'loading'
+  const expirationLabel = getOfferExpirationLabel({
+    expirationDate,
+    locale,
+    t,
+  })
 
   const confirmDiscardNewOffer = useCallback(
     () =>
@@ -360,6 +369,7 @@ function CRUDOfferFlow(): React.ReactElement {
                       state="completed"
                       overline={t('offerForm.whoCanSeeYourOffer')}
                       headline={friendLevelReachLabel}
+                      subheadline={expirationLabel}
                       onPress={() => {
                         setActiveStep('friendLevel')
                       }}
@@ -376,6 +386,7 @@ function CRUDOfferFlow(): React.ReactElement {
                           intendedConnectionLevelAtom
                         }
                       />
+                      <ExpirationOptions />
                       <Button
                         variant="primary"
                         size="large"

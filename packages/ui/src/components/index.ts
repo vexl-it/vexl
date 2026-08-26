@@ -108,6 +108,7 @@ export type {NotificationCardProps} from './NotificationCard'
 export {OfferCard} from './OfferCard'
 export type {
   OfferCardActionButton,
+  OfferCardDetail,
   OfferCardMarkBadge,
   OfferCardProps,
 } from './OfferCard'

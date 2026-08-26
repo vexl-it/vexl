@@ -1,6 +1,7 @@
 import {
   Avatar,
   avatarsSvg,
+  ChatBubbles,
   IconTag,
   OfferCard,
   SizableText,
@@ -67,7 +68,7 @@ function Demos(): React.JSX.Element {
         details={[
           'In cash',
           'Vinohrady 1123',
-          '\u{1F1EC}\u{1F1E7} \u{1F1E8}\u{1F1FF}',
+          {text: 'en, cs', icon: ChatBubbles},
         ]}
       />
 

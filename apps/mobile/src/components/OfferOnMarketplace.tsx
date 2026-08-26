@@ -1,9 +1,11 @@
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {
+  ChatBubbles,
   IconTag,
   OfferCard,
   TextTag,
   type OfferCardActionButton,
+  type OfferCardDetail,
 } from '@vexl-next/ui'
 import {Option} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
@@ -18,10 +20,10 @@ import {useVisibleCommonFriendsForOffer} from '../state/marketplace/hooks/useVis
 import {isProductOfferMissingCategory} from '../state/marketplace/utils/isProductOfferMissingCategory'
 import {getOtherSideFriendLevel} from '../utils/chat/getOtherSideFriendLevel'
 import {isOfferExpired} from '../utils/isOfferExpired'
+import formatSpokenLanguages from '../utils/localization/formatSpokenLanguages'
 import {formatInteger} from '../utils/localization/formatting'
 import {formattingLocaleAtom} from '../utils/localization/formattingLocaleAtom'
 import {useTranslation} from '../utils/localization/I18nProvider'
-import spokenLanguageToFlagEmoji from '../utils/localization/spokenLanguageToFlagEmoji'
 import {getOfferFeeLabel} from '../utils/offerAmountDetails'
 import {
   getAmountLabelActionAtom,
@@ -130,7 +132,7 @@ export default function OfferOnMarketplace({
   )
 
   const details = useMemo(() => {
-    const result: string[] = []
+    const result: OfferCardDetail[] = []
 
     if (!publicPart.listingType || publicPart.listingType === 'BITCOIN') {
       if (publicPart.paymentMethod.includes('CASH')) {
@@ -156,9 +158,10 @@ export default function OfferOnMarketplace({
     if (locationText) result.push(locationText)
 
     if (publicPart.spokenLanguages.length > 0) {
-      result.push(
-        publicPart.spokenLanguages.map(spokenLanguageToFlagEmoji).join(' ')
-      )
+      result.push({
+        text: formatSpokenLanguages(publicPart.spokenLanguages),
+        icon: ChatBubbles,
+      })
     }
 
     return result

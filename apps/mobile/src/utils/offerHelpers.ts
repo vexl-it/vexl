@@ -8,9 +8,9 @@ import {type IconTagVariant, type OfferCardMarkBadge} from '@vexl-next/ui'
 import {Array, pipe} from 'effect'
 import {atom} from 'jotai'
 import {formatFullCurrencyAmount} from './localization/currency'
+import formatSpokenLanguages from './localization/formatSpokenLanguages'
 import {formattingLocaleAtom} from './localization/formattingLocaleAtom'
 import {translationAtom} from './localization/I18nProvider'
-import spokenLanguageToFlagEmoji from './localization/spokenLanguageToFlagEmoji'
 import {getLocationFullDisplayLabels} from './offerLocationLabels'
 import {getUserFacingOfferType} from './offerTypeSemantics'
 
@@ -117,9 +117,5 @@ export function getPaymentMethodLabel(
 }
 
 export function getLanguagesLabel(offer: OneOfferInState): string {
-  return pipe(
-    offer.offerInfo.publicPart.spokenLanguages,
-    Array.map(spokenLanguageToFlagEmoji),
-    (languages) => languages.join(' ')
-  )
+  return formatSpokenLanguages(offer.offerInfo.publicPart.spokenLanguages)
 }

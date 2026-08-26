@@ -5,6 +5,7 @@ import {getTokens, styled, useTheme} from 'tamagui'
 import {ArchiveInbox} from '../icons/ArchiveInbox'
 import {PeopleUsers} from '../icons/PeopleUsers'
 import {StarFilled} from '../icons/StarFilled'
+import {type IconProps} from '../icons/types'
 import {Circle, Stack, XStack, YStack} from '../primitives'
 import {CardButton} from './CardButton'
 import {TextTag, type TextTagVariant} from './TextTag'
@@ -17,6 +18,13 @@ export interface OfferCardActionButton {
 
 export type OfferCardMarkBadge = 'favourite' | 'archived'
 
+export type OfferCardDetail =
+  | string
+  | {
+      readonly text: string
+      readonly icon: React.ComponentType<IconProps>
+    }
+
 export interface OfferCardProps {
   readonly avatar?: React.ReactNode
   readonly markBadge?: OfferCardMarkBadge
@@ -28,7 +36,7 @@ export interface OfferCardProps {
   readonly clubNames?: readonly string[]
   readonly price: string
   readonly description: string
-  readonly details: readonly string[]
+  readonly details: readonly OfferCardDetail[]
   readonly statusLabel?: string
   readonly statusVariant?: TextTagVariant
   readonly onPress?: () => void
@@ -239,21 +247,40 @@ export function OfferCard({
           {description}
         </Typography>
         <XStack gap="$2" alignItems="center">
-          {details.map((detail, index) => (
-            <React.Fragment key={detail}>
-              {index > 0 ? (
-                <Circle size="$2" backgroundColor={secondaryColor} />
-              ) : null}
-              <Typography
-                variant="micro"
-                color="$foregroundSecondary"
-                numberOfLines={1}
-                flex={index === details.length - 1 ? 1 : undefined}
-              >
-                {detail}
-              </Typography>
-            </React.Fragment>
-          ))}
+          {details.map((detail, index) => {
+            const text = typeof detail === 'string' ? detail : detail.text
+            const DetailIcon =
+              typeof detail === 'string' ? undefined : detail.icon
+
+            return (
+              <React.Fragment key={`${text}-${index}`}>
+                {index > 0 ? (
+                  <Circle size="$2" backgroundColor={secondaryColor} />
+                ) : null}
+                <XStack
+                  alignItems="center"
+                  gap="$1"
+                  flex={index === details.length - 1 ? 1 : undefined}
+                  minWidth={0}
+                >
+                  {DetailIcon ? (
+                    <DetailIcon
+                      size={sizeTokens.$4.val}
+                      color={secondaryColor}
+                    />
+                  ) : null}
+                  <Typography
+                    variant="micro"
+                    color="$foregroundSecondary"
+                    numberOfLines={1}
+                    flexShrink={1}
+                  >
+                    {text}
+                  </Typography>
+                </XStack>
+              </React.Fragment>
+            )
+          })}
         </XStack>
         {statusLabel != null ? (
           <TextTag

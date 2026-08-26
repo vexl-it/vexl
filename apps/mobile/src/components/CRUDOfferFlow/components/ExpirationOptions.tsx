@@ -8,6 +8,7 @@ import {Stack, useTheme, YStack} from 'tamagui'
 import {formatDate} from '../../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../../utils/localization/formattingLocaleAtom'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
+import {parseOfferExpirationDate} from '../../../utils/offerAmountDetails'
 import {offerFormMolecule} from '../atoms/offerFormStateAtoms'
 import MoreOptions from './MoreOptions'
 
@@ -38,7 +39,7 @@ function ExpirationOptions(): React.JSX.Element {
           <RowButton
             label={
               expirationDate
-                ? formatDate(new Date(expirationDate), locale, {
+                ? formatDate(parseOfferExpirationDate(expirationDate), locale, {
                     dateStyle: 'full',
                   })
                 : t('offerForm.expiration.selectDate')

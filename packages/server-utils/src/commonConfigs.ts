@@ -79,6 +79,12 @@ export const makeDatabaseConfig = (vars: {
         database: parsedUrl.pathname.slice(1), // Remove leading '/'
         username: config.username,
         password: config.password,
+        // sslmode=require means "encrypt, don't verify the cert" (libpq
+        // semantics) — RDS certs are not in Node's default trust store, so
+        // plain `ssl: true` would be rejected as self-signed.
+        ...(parsedUrl.searchParams.get('sslmode') === 'require'
+          ? {ssl: {rejectUnauthorized: false}}
+          : {}),
       }
     })
   )

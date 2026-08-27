@@ -63,6 +63,13 @@ const SERVICE_URL_MAP: ReadonlyArray<{
 const MOBILE_DIR = join(repoRoot, 'apps', 'mobile')
 const EXPO_BIN = join(repoRoot, 'node_modules', '.bin', 'expo')
 const LAST_PRESET_PATH = join(repoRoot, 'local', '.mobile-last-preset')
+const ANDROID_BUILD_GRADLE_PATH = join(
+  MOBILE_DIR,
+  'android',
+  'app',
+  'build.gradle'
+)
+const ANDROID_RELEASE_SIGNING_ENV = 'VEXL_DEV_MOBILE_ANDROID_RELEASE'
 
 type Platform = 'ios' | 'android'
 type Variant = 'dev' | 'release'
@@ -83,8 +90,6 @@ type BackendTarget =
 interface CliOptions {
   readonly platform: Platform
   readonly device?: string
-  readonly androidSerial?: string
-  readonly androidAvdName?: string
   readonly deviceKind?: DeviceKind
   readonly selectDevice: boolean
   readonly backend: BackendTarget
@@ -231,8 +236,6 @@ function printHelp(): void {
 interface DeviceChoice {
   readonly id: string
   readonly expoName: string
-  readonly androidSerial?: string
-  readonly androidAvdName?: string
   readonly label: string
   readonly kind: DeviceKind
 }
@@ -390,7 +393,6 @@ function findAndroidDevices(): readonly DeviceChoice[] {
       (device): DeviceChoice => ({
         id: device.id,
         expoName: device.model ?? `Device ${device.id}`,
-        androidSerial: device.id,
         label: `[connected] ${device.model ?? device.id} (${device.id})`,
         kind: 'physical',
       })
@@ -413,7 +415,6 @@ function findAndroidDevices(): readonly DeviceChoice[] {
       return {
         id: device.id,
         expoName: avdName ?? device.model ?? device.id,
-        androidSerial: device.id,
         avdName,
         label: `[running emulator] ${avdName ?? device.model ?? device.id} (${device.id})`,
         kind: 'virtual',
@@ -431,7 +432,6 @@ function findAndroidDevices(): readonly DeviceChoice[] {
       (name): DeviceChoice => ({
         id: name,
         expoName: name,
-        androidAvdName: name,
         label: `[emulator] ${name}`,
         kind: 'virtual',
       })
@@ -775,9 +775,6 @@ function printSummary(
   console.log('dev:mobile')
   console.log(`  platform:    ${options.platform}`)
   console.log(`  device:      ${options.device ?? '(default)'}`)
-  if (options.androidSerial !== undefined) {
-    console.log(`  adb serial:  ${options.androidSerial}`)
-  }
   console.log(`  variant:     ${options.variant}`)
   console.log(
     `  backend:     ${describeBackend(options.backend)} → ENV_PRESET=${generated.preset}`
@@ -832,8 +829,6 @@ async function main(): Promise<void> {
       : {
           ...parsedOptions,
           device: selectedDevice.expoName,
-          androidSerial: selectedDevice.androidSerial,
-          androidAvdName: selectedDevice.androidAvdName,
           deviceKind: selectedDevice.kind,
           selectDevice: false,
         }
@@ -845,11 +840,22 @@ async function main(): Promise<void> {
   const lastPreset = readLastPreset()
   const presetChanged =
     lastPreset !== undefined && lastPreset !== generated.preset
+  const needsAndroidReleaseSigningConfig =
+    options.build &&
+    options.platform === 'android' &&
+    options.variant === 'release' &&
+    (!existsSync(ANDROID_BUILD_GRADLE_PATH) ||
+      !readFileSync(ANDROID_BUILD_GRADLE_PATH, 'utf8').includes(
+        ANDROID_RELEASE_SIGNING_ENV
+      ))
   const forcedPrebuildReason = presetChanged
     ? `ENV_PRESET changed ${lastPreset} → ${generated.preset}; forcing prebuild (native config: cleartext/package/entitlements).`
-    : undefined
+    : needsAndroidReleaseSigningConfig
+      ? 'Android release signing config is missing; forcing prebuild.'
+      : undefined
 
-  const willPrebuild = options.prebuild || presetChanged
+  const willPrebuild =
+    options.prebuild || presetChanged || needsAndroidReleaseSigningConfig
   const willBuild = options.build || willPrebuild
 
   const commands: Command[] = []
@@ -881,12 +887,10 @@ async function main(): Promise<void> {
   const env: Record<string, string | undefined> = {
     ...process.env,
     ...generated.vars,
-    // Expo resolves Android's --device by display/AVD name, but the custom
-    // release Gradle installer targets devices through ANDROID_SERIAL.
-    ANDROID_SERIAL: options.androidSerial,
-    // Do not inherit a stale selector from the parent shell. This is only set
-    // for a stopped AVD selected by this picker.
-    VEXL_ANDROID_AVD_NAME: options.androidAvdName,
+    [ANDROID_RELEASE_SIGNING_ENV]:
+      options.platform === 'android' && options.variant === 'release'
+        ? '1'
+        : undefined,
   }
 
   if (willPrebuild) {

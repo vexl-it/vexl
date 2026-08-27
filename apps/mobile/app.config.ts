@@ -302,7 +302,6 @@ export default {
       ? ['./expo-plugins/android-manifest-local-cleartext-plugin.js']
       : []),
     './expo-plugins/android-eas-signing-plugin.js',
-    './expo-plugins/android-install-release-plugin.js',
     './expo-plugins/android-manifest-nfc-action-plugin.js',
     'expo-font',
     'expo-sharing',

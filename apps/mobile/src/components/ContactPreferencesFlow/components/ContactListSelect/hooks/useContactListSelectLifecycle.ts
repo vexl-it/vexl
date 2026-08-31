@@ -30,7 +30,7 @@ export default function useContactListSelectLifecycle(): StoredContactWithComput
 
   useOnFocusAndAppState(
     useCallback(() => {
-      Effect.runFork(importContactsFromPhone())
+      Effect.runFork(importContactsFromPhone({requestPermissions: false}))
     }, [importContactsFromPhone])
   )
 

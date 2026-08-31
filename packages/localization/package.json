@@ -6,7 +6,11 @@
   "scripts": {
     "check:translations": "node scripts/checkTranslations.mjs",
     "clean": "rimraf .turbo node_modules",
+    "diff:en": "node scripts/diffEnKeys.mjs",
     "generate": "node scripts/generateTranslations.mjs",
+    "render:pr-comment": "node scripts/renderPrComment.mjs",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "lint": "eslint .",
     "format": "prettier --check \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\"",
     "format:fix": "prettier --write \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\"",
@@ -17,11 +21,11 @@
     "@vexl-next/prettier-config": "0.0.0",
     "@vexl-next/tsconfig": "0.0.0",
     "eslint": "^9.20.0",
-    "gt": "2.16.0",
     "i18next": "^25.10.10",
     "prettier": "^3.3.2",
     "rimraf": "^4.4.0",
-    "typescript": "~6.0.3"
+    "typescript": "~6.0.3",
+    "vitest": "^3.2.4"
   },
   "prettier": "@vexl-next/prettier-config"
 }

@@ -1,7 +1,7 @@
 import {useNavigation, useRoute} from '@react-navigation/native'
 import {FabButton, PlusAdd, type TabItem} from '@vexl-next/ui'
 import {useAtomValue} from 'jotai'
-import React, {useCallback, useEffect, useMemo, useState} from 'react'
+import React, {useCallback, useLayoutEffect, useMemo, useState} from 'react'
 import {Stack, useTheme} from 'tamagui'
 import {type InsideTabParamsList} from '../../../../navigationTypes'
 import {areThereAnyMyOffersAtom} from '../../../../state/marketplace/atoms/myOffers'
@@ -73,7 +73,7 @@ function MarketplaceScreen(): React.ReactElement {
   const tabs = useTabs()
   const title = tabs.find((tab) => tab.value === activeTab)?.label ?? ''
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (route.params?.initialTab) {
       setActiveTab(route.params.initialTab)
     }

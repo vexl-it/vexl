@@ -6,7 +6,7 @@
   "tradeChecklist.thisDealIsFullyOnline": "Deze deal is volledig online. Wees voorzichtig en overweeg risico's. Vergadering is altijd veiliger.",
   "tradeChecklist.readMoreInFullArticle": "Lees meer in het volledige artikel",
   "tradeChecklist.cannotSendMessages": "Kan geen transactie-checklist update sturen.",
-  "tradeChecklist.cannotSendMessagesDescription": "De andere kant heeft de chat verlaten of hun account verwijderd",
+  "tradeChecklist.cannotSendMessagesDescription": "De andere persoon heeft de chat verlaten of hun account verwijderd",
   "tradeChecklist.tradeOnlyWithPeopleYouKnow": "Handel online alleen met mensen die je kent.",
   "tradeChecklist.alwaysMoneyBeforeBtc": "Altijd geld voor BTC.",
   "tradeChecklist.watchOutForSuspiciousBehaviour": "Pas op voor verdachte handelingen.",
@@ -72,9 +72,11 @@
   "tradeChecklist.network.btcNetworkWasSetByReceiver": "Het BTC-netwerk is ingesteld door de ontvangende partij",
   "tradeChecklist.location.addNote": "Opmerking toevoegen",
   "tradeChecklist.location.note": "Let op:",
+  "tradeChecklist.location.geocodingUnavailable": "Kon het adres niet laden. Stel in plaats daarvan een ontmoetingsplek voor in de chat.",
+  "tradeChecklist.location.searchUnavailable": "Locatie zoeken werkt op dit moment niet. Je kunt de andere persoon in plaats daarvan direct in de chat een ontmoetingsplek voorstellen.",
   "tradeChecklist.btcAddress.btcAddress": "BTC adres",
-  "tradeChecklist.notSupportedByOtherSide.title": "Andere kant gebruikt een oudere versie van Vexl",
-  "tradeChecklist.notSupportedByOtherSide.body": "Andere kant gebruikt oudere versie van Vexl en ondersteunt de functie van de handelschecklist niet.",
+  "tradeChecklist.notSupportedByOtherSide.title": "De andere persoon gebruikt een oudere versie van Vexl",
+  "tradeChecklist.notSupportedByOtherSide.body": "De andere persoon gebruikt een oudere versie van Vexl en ondersteunt de handelschecklist-functie niet.",
   "tradeChecklist.vexlBlogUrl": "https://blog.vexl.it/how-to-do-peer-to-peer-trading-on-vexl-6745f3954ae9",
   "tradeChecklist.vexlMeetingEventTitle": "Vexl vergadering met {{name}}",
   "tradeChecklist.eventAddedSuccess": "Event succesvol toegevoegd",
@@ -94,5 +96,5 @@
   "tradeCalculator.oneBtcEquals": "1 BTC =",
   "tradeCalculator.refreshPrice": "Prijs verversen",
   "tradeCalculator.whatDoesLivePriceMean": "Wat betekent de liveprijs?",
-  "tradeCalculator.yadioLivePriceExplanation": "Vexl bronnen BTC prijzen van Yadio.io, na 10 minuten, ververs deze handmatig voor de hoogste actuele prijs."
+  "tradeCalculator.yadioLivePriceExplanation": "Vexl haalt BTC-prijzen op van Yadio.io en werkt deze elke 10 minuten bij. Je kunt handmatig vernieuwen om de meest recente prijs te krijgen."
 }

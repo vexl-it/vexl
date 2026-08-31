@@ -26,7 +26,7 @@
   "addContactDialog.contactExistsTitle": "連絡先がすでにあります",
   "addContactDialog.contactExistsDescription": "この番号はすでに{{contactName}}として連絡先に入っているよ。\n\n今の情報をそのまま使う？それとも更新する？",
   "addContactDialog.update": "更新",
-  "addContactDialog.addToPhonesContacts": "Add to phone's contacts?",
+  "addContactDialog.addToPhonesContacts": "スマホの連絡先に追加する？",
   "addContactDialog.alsoSaveToYourPhone": "スマホにも保存",
   "addContactDialog.updateInYourPhoneContacts": "スマホの連絡先で更新",
   "addContactDialog.addContactDescription": "{{name}} の連絡先詳細を携帯電話に保存すると、アプリを削除したり携帯電話を変更したりした場合でも、連絡先を簡単に復元して接続を維持できます。",

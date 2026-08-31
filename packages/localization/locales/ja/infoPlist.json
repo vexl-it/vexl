@@ -1,9 +1,9 @@
 {
   "ios": {
-    "NSLocationWhenInUseUsageDescription": "Vexl needs access to you location to show your position on the map. Location will never be share with anyone (even ourselves).",
-    "NSContactsUsageDescription": "Vexl needs access to your contacts to make your offers visible for them in a secure way. Phone number of contacts you select will be encrypted and uploaded to the server.",
-    "NSCameraUsageDescription": "Vexl wants to access your camera in order to take a photo for your avatar or scan QR code to add other users to your Vexl network.",
-    "NSPhotoLibraryUsageDescription": "Vexl wants to access your photos in order to select a picture for your avatar.",
-    "NSCalendarsUsageDescription": "Vexl needs access to your calendar for scheduling trade meetings. Your data is kept private and only used for coordinating trades."
+    "NSLocationWhenInUseUsageDescription": "Vexlは地図上に現在地を表示するために位置情報へのアクセスが必要です。位置情報が誰か（私たち自身を含め）と共有されることは一切ありません。",
+    "NSContactsUsageDescription": "Vexlは連絡先に安全にオファーを表示するために連絡先へのアクセスが必要です。選択した連絡先の電話番号は暗号化されてサーバーにアップロードされます。",
+    "NSCameraUsageDescription": "Vexlはアバター用の写真を撮影したり、QRコードをスキャンして他のユーザーをVexlネットワークに追加するためにカメラへのアクセスが必要です。",
+    "NSPhotoLibraryUsageDescription": "Vexlはアバター用の写真を選択するために写真へのアクセスが必要です。",
+    "NSCalendarsUsageDescription": "Vexlは取引の待ち合わせを予定するためにカレンダーへのアクセスが必要です。データは非公開に保たれ、取引の調整にのみ使用されます。"
   }
 }

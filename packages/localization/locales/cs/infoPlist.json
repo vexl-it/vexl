@@ -1,9 +1,9 @@
 {
   "ios": {
-    "NSLocationWhenInUseUsageDescription": "Vexl needs access to you location to show your position on the map. Location will never be share with anyone (even ourselves).",
-    "NSContactsUsageDescription": "Vexl needs access to your contacts to make your offers visible for them in a secure way. Phone number of contacts you select will be encrypted and uploaded to the server.",
-    "NSCameraUsageDescription": "Vexl wants to access your camera in order to take a photo for your avatar or scan QR code to add other users to your Vexl network.",
-    "NSPhotoLibraryUsageDescription": "Vexl wants to access your photos in order to select a picture for your avatar.",
-    "NSCalendarsUsageDescription": "Vexl needs access to your calendar for scheduling trade meetings. Your data is kept private and only used for coordinating trades."
+    "NSLocationWhenInUseUsageDescription": "Vexl potřebuje přístup k tvé poloze, aby ukázal tvou pozici na mapě. Polohu nikdy s nikým nesdílíme (ani sami se sebou).",
+    "NSContactsUsageDescription": "Vexl potřebuje přístup k tvým kontaktům, aby pro ně bezpečně zpřístupnil tvoje nabídky. Telefonní čísla vybraných kontaktů budou zašifrována a nahrána na server.",
+    "NSCameraUsageDescription": "Vexl potřebuje přístup k fotoaparátu, abys mohl pořídit fotku pro svůj profil nebo naskenovat QR kód pro přidání dalších lidí do své Vexl sítě.",
+    "NSPhotoLibraryUsageDescription": "Vexl potřebuje přístup k fotkám, abys mohl vybrat obrázek pro svůj profil.",
+    "NSCalendarsUsageDescription": "Vexl potřebuje přístup ke kalendáři pro plánování obchodních setkání. Tvoje data zůstávají soukromá a slouží pouze ke koordinaci obchodů."
   }
 }

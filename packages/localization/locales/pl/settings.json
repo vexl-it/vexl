@@ -88,7 +88,7 @@
   "account.actionSteps.postFirstOffer.title": "Opublikuj swoją pierwszą ofertę",
   "account.actionSteps.postFirstOffer.description": "Daj ludziom znać, co masz albo czego szukasz.",
   "account.reachStats.title": "Twój zasięg",
-  "account.reachStats.noVexlaks": "Brak vexlaków",
+  "account.reachStats.noVexlaks": "Brak osób",
   "account.reachStats.reachPeopleCount": "Docierasz do {{localizedString}} osób",
   "account.reachStats.smallPool": "Mała pula",
   "account.reachStats.smallPoolRange": "{{from}} - {{to}}",

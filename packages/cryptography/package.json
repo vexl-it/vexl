@@ -4,7 +4,7 @@
   "type": "module",
   "main": "src/index",
   "scripts": {
-    "test": "jest",
+    "test": "jest --silent",
     "test:watch": "jest --watch",
     "clean": "rimraf .turbo node_modules",
     "lint": "eslint .",

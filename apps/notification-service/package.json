@@ -23,7 +23,7 @@
     "start": "node --enable-source-maps dist/index.js",
     "dev": "tsx -r dotenv/config src/index.ts",
     "dev:watch": "tsx --watch src/index.ts",
-    "test": "jest",
+    "test": "jest --silent",
     "test:watch": "jest --watch"
   },
   "prettier": "@vexl-next/prettier-config",

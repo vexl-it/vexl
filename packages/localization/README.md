@@ -12,7 +12,7 @@ Translation resources and generated typed catalogs shared by the mobile app and 
 There is no third-party translation service. Translations are written by AI agents and live only in git:
 
 - Adding or changing a string: the `adding-translation-key` skill (`.agents/skills/adding-translation-key`) — the same PR that adds English copy carries its translations for all shipped locales.
-- Full parity repair: the user-invoked `translation-audit` skill.
+- Full parity repair: the user-invoked `translation-audit` skill. `translation-audit.json` records the commit up to which English changes have translation parity — the skill diffs against it (via `scripts/diffEnKeys.mjs`) to scope a run to keys added/changed since the last audit, and updates it when a run finishes green.
 - Every PR is gated by the `[Translation] check` workflow, which runs `pnpm check:translations` and posts a review comment with new/changed strings and their translations.
 - Human review: native speakers correct translations via PRs — see `docs/how_to_help_translate.md`. Brand voice rules for translators live in `docs/brand-narrative/translator-brief.md`.
 

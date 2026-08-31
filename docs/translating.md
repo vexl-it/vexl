@@ -16,7 +16,7 @@ Spawn through the current harness's native subagent mechanism, with the model th
 ## Fan-out
 
 - **New or changed keys in a PR** (inline flow): spawn **one** subagent carrying all keys and all target locales — one mind keeps terminology consistent across locales for the same string.
-- **Audit** (full parity repair): spawn one subagent **per locale**, in parallel — each carries only its locale's gap list.
+- **Audit** (parity repair): spawn one subagent **per locale**, in parallel — each carries only its locale's gap list. When the whole scope is a handful of keys, one subagent for all locales (the inline shape) does the job instead.
 
 ## Target locales
 

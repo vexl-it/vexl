@@ -1,0 +1,81 @@
+name: "[Translation] check keys and comment on PR"
+run-name: "Run on commit ${{github.sha}}"
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  check:
+    name: Check translations
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          persist-credentials: false
+
+      - name: Fetch base branch
+        run: git fetch --no-tags --depth=1 origin ${{github.base_ref}}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        with:
+          node-version: 24.x
+          cache: "pnpm"
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run translation checks
+        id: check
+        working-directory: packages/localization
+        run: |
+          node scripts/checkTranslations.mjs --json > /tmp/translation-report.json && code=0 || code=$?
+          echo "exit_code=$code" >> "$GITHUB_OUTPUT"
+
+      - name: Diff English strings against base
+        working-directory: packages/localization
+        run: node scripts/diffEnKeys.mjs --base "origin/${{github.base_ref}}" > /tmp/translation-diff.json
+
+      - name: Render PR comment
+        id: render
+        working-directory: packages/localization
+        run: |
+          node scripts/renderPrComment.mjs --report /tmp/translation-report.json --diff /tmp/translation-diff.json > /tmp/translation-comment.md
+          if [ -s /tmp/translation-comment.md ]; then
+            echo "has_comment=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_comment=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Fork PRs get a read-only token; they are gated by the check itself and
+      # the failing keys are listed in this job's log instead of a comment.
+      - name: Post sticky PR comment
+        if: github.event.pull_request.head.repo.full_name == github.repository && steps.render.outputs.has_comment == 'true'
+        uses: marocchino/sticky-pull-request-comment@5770ad5eb8f42dd2c4f34da00c94c5381e49af88 # v3.0.5
+        with:
+          header: vexl-translation-check
+          path: /tmp/translation-comment.md
+
+      - name: Remove stale PR comment
+        if: github.event.pull_request.head.repo.full_name == github.repository && steps.render.outputs.has_comment == 'false'
+        uses: marocchino/sticky-pull-request-comment@5770ad5eb8f42dd2c4f34da00c94c5381e49af88 # v3.0.5
+        with:
+          header: vexl-translation-check
+          delete: true
+
+      - name: Fail on translation errors
+        if: steps.check.outputs.exit_code != '0'
+        working-directory: packages/localization
+        run: node scripts/checkTranslations.mjs

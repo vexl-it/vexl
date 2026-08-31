@@ -1,24 +1,24 @@
 ---
 name: adding-translation-key
-description: How to add a new user-facing translation key to the Vexl app. Use whenever adding or changing user-facing strings in apps/mobile (any text passed to t(), Typography content, notification copy, etc.).
+description: How to add or change a user-facing string in the Vexl app and translate it into all shipped locales. Use whenever adding or modifying user-facing strings in apps/mobile (any text passed to t(), Typography content, notification copy, etc.).
 ---
 
-# Adding a translation key
+# Adding or changing a translation key
 
-Translations live in `packages/localization/locales/<locale>/<group>.json` — flat JSON with dotted keys (`"offerForm.next": "Next"`), i18next `{{variable}}` interpolation. English is the single source of truth; all other locales are machine-translated in CI by General Translation.
+Translations live in `packages/localization/locales/<locale>/<group>.json` — flat JSON with literal dotted keys (`"offerForm.next": "Next"`), i18next `{{variable}}` interpolation. English is the source of truth for meaning, and agents write every shipped locale themselves: a PR that adds or changes copy carries its own translations, and CI blocks it otherwise.
 
 ## Steps
 
-1. **Add the key + English value to `packages/localization/locales/en/<group>.json` only.**
-   - Pick the file matching the feature area (`offers.json`, `chat.json`, `settings.json`, `marketplace.json`, …). The key's first dot-segment should fit the file's existing key families.
-   - Only create a new group file if the string clearly belongs to a new feature area no existing file covers. New file names must contain no hyphens.
-   - Place the key next to related keys, not at the end of the file.
-2. **Run `pnpm generate` in `packages/localization`.** This regenerates `src/translations.ts`, which makes the key available (and type-checked) at `t()` call sites. Commit the generated file together with the JSON change. CI (`check:translations`) fails if they are out of sync.
-3. **Never run any `gt` CLI command** (`gt translate`, `gt upload`, `gt save-local`, …). Translation into other locales happens automatically in CI after merge (the workflow opens a `chore/translations-sync` PR). Missing translations fall back to English in the meantime — that is expected.
+1. **Write the English copy in `packages/localization/locales/en/<group>.json`.**
+   - New copy must follow the Vexl voice — `docs/brand-narrative/` (start with `voice-and-personality.md` and `terminology-and-glossary.md`).
+   - Reuse an existing key if the exact string already exists for the same meaning (search `locales/en/` first).
+   - Pick the file matching the feature area (`offers.json`, `chat.json`, `settings.json`, …); the key's first dot-segment should fit the file's existing key families. Only create a new group file for a genuinely new feature area, with no hyphens in the name. Place the key next to related keys, not at the end of the file.
+2. **Run `pnpm generate` in `packages/localization`** and commit the regenerated `src/translations.ts` together with the JSON — that makes the key available and type-checked at `t()` call sites.
+3. **Translate.** Spawn one translator subagent covering the new/changed keys across all shipped locales — model, prompt contents, and translator rules are in `docs/translating.md`. A _changed_ English value counts exactly like a new key: the existing translations are now stale, re-translate them.
+4. **Verify.** Run `pnpm check:translations` in `packages/localization`; done means no error names one of your keys.
 
 ## Rules
 
-- Do NOT add the key to non-English locale files — they are machine-generated. Do not hand-edit them when adding keys.
-- Do NOT edit `src/translations.ts` or `src/extraTranslations.ts` by hand; only `pnpm generate` writes them.
-- For countable strings, add i18next plural keys `key_one` and `key_other` (English needs only these two) instead of a bare key, and pass `{count: n}` at the call site. Note in your summary that Czech/Slovak/Polish `_few`/`_many` forms need manual follow-up — General Translation only generates the plural categories present in English.
-- Reuse an existing key if the exact string already exists for the same meaning (search `locales/en/` first) rather than duplicating it.
+- For countable strings, `en` gets `key_one` + `key_other` (never a bare key) with `{count: n}` at the call site; the translator subagent owes each locale its full CLDR plural set (`docs/translating.md`).
+- `src/translations.ts` and `src/extraTranslations.ts` are generated — only `pnpm generate` writes them.
+- The legal document groups (`privacyPolicy`, `termsOfUse`, `childSafetyAndSexAbusePrevention`) are exempt from agent translation. If you change one, say so in your summary — translating legal text is a human decision per locale.

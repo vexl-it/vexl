@@ -1,8 +1,8 @@
 # How to Help Translate and Localize Vexl
 
-Vexl translations are machine-translated with [General Translation](https://generaltranslation.com/) and reviewed in its dashboard. English is the source of truth, and translated locale files are committed under `packages/localization/locales/<language>/`.
+Vexl translations are AI-generated and live directly in this repository — English is the source of truth, and translated locale files are committed under `packages/localization/locales/<language>/`. Corrections from native speakers are the human review this system relies on.
 
-Community corrections are welcome through [GitHub issues](https://github.com/vexl-it/vexl/issues/new) or pull requests that edit the relevant locale JSON file. Keep dotted keys and `{{variable}}` placeholders unchanged. Once a correction is merged, the automated translation workflow uploads it to the General Translation platform so it persists across future syncs.
+To fix a translation, open a pull request editing the relevant locale JSON file (or report it in a [GitHub issue](https://github.com/vexl-it/vexl/issues/new)). Keep the dotted keys and `{{variable}}` placeholders unchanged. Once merged, your correction is permanent — the repository is the only source of translations.
 
 ## Translators Debug Mode
 

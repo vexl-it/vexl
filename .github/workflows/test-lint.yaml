@@ -33,6 +33,3 @@ jobs:
 
       - name: Run lint
         run: pnpm turbo:check-code
-
-      - name: Check translations
-        run: pnpm --filter @vexl-next/localization check:translations

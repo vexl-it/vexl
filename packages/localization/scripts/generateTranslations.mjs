@@ -10,7 +10,7 @@ const localesRoot = path.join(packageRoot, 'locales')
 const defaultOutputRoot = path.join(packageRoot, 'src')
 
 // App locales are bundled; extra locales are committed translations not enabled yet.
-const APP_LOCALES = [
+export const APP_LOCALES = [
   ['en', '🇬🇧'],
   ['cs', '🇨🇿'],
   ['de', '🇩🇪'],
@@ -26,7 +26,7 @@ const APP_LOCALES = [
   ['sw', '🇰🇪'],
   ['zh', '🇨🇳'],
 ]
-const EXTRA_LOCALES = [
+export const EXTRA_LOCALES = [
   ['ar', '🇸🇦'],
   ['fa', '🇮🇷'],
   ['fi', '🇫🇮'],
@@ -40,7 +40,7 @@ const EXTRA_LOCALES = [
 
 const HEADER =
   '// GENERATED FILE — do not edit. Regenerate with `pnpm generate` in packages/localization.'
-const DOC_FILES = [
+export const DOC_FILES = [
   'childSafetyAndSexAbusePrevention',
   'privacyPolicy',
   'termsOfUse',

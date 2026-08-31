@@ -1,8 +1,8 @@
 import {Array, Effect, Schema, pipe} from 'effect'
-import {File, Paths} from 'expo-file-system'
 import {shareAsync} from 'expo-sharing'
 import {atom} from 'jotai'
 import {showErrorAlert} from '../../../components/ErrorAlert'
+import {getContactsBackupFile} from '../../../utils/fsDirectories'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import {contactsToVcardString} from '../../../utils/vCard'
 import {vexlOnlyContactsAtom} from './vexlOnlyContactsAtoms'
@@ -35,19 +35,17 @@ export const exportVexlOnlyContactsActionAtom = atom(
 
     return Effect.tryPromise({
       try: async () => {
-        const backupFile = new File(Paths.cache, 'vexl-contacts-backup.vcf')
-        if (backupFile.info().exists) backupFile.delete()
+        // Android share targets (Gmail, Drive) may read the content:// URI in
+        // the background after the user is already back in Vexl, so the file
+        // is not deleted after sharing. The next export overwrites it and
+        // logout deletes it (deleteAllFiles).
+        const backupFile = getContactsBackupFile()
         backupFile.write(vcardString, {encoding: 'utf8'})
-        try {
-          await shareAsync(backupFile.uri, {
-            mimeType: 'text/vcard',
-            UTI: 'public.vcard',
-            dialogTitle: t('vexlOnlyContacts.exportSheetTitle'),
-          })
-        } finally {
-          // don't leave a plaintext dump of the user's contacts in the cache
-          if (backupFile.info().exists) backupFile.delete()
-        }
+        await shareAsync(backupFile.uri, {
+          mimeType: 'text/vcard',
+          UTI: 'public.vcard',
+          dialogTitle: t('vexlOnlyContacts.exportSheetTitle'),
+        })
       },
       catch: (e) => new ContactsExportError({cause: e}),
     }).pipe(

@@ -69,7 +69,7 @@
   "clubs.addmittedNotificationTitle": "Moderátor tě přidal do klubu {{name}}. Stisknutím zobrazíš více.",
   "clubs.addmittedNotificationText": "Byl jsi přidán do klubu",
   "clubs.youDontModerateAnyClub": "Nemoderuješ žádný klub, do kterého bys mohl přidávat ostatní.",
-  "clubs.admition.scan": "Naskenuj kód druhého uživatele.",
+  "clubs.admition.scan": "Naskenuj kód druhé strany.",
   "clubs.admition.selectClub.title": "Přidat uživatele do klubu",
   "clubs.admition.selectClub.text": "Moderuješ více než jeden klub. Vyber klub, do kterého chceš uživatele přidat.",
   "clubs.admition.title": "Přidat uživatele do {{club}}",

@@ -26,7 +26,7 @@ There is **no special name for a Vexl user.** That's intentional — naming the 
 Refer to people as, depending on context:
 
 - **you / your friends / people you know**
-- **the other person** (the human on the other end of a trade or chat)
+- **the other person** (the human on the other end of a trade or chat). Translation note: Czech and Slovak deliberately render this as **"druhá strana"** — the natural phrasing there. The English ban on "the other side" governs English copy, not those locales; don't flag "druhá strana" in audits.
 - **people in your network**, **friends and friends of friends**
 - **a Vexl user / users** (neutral, when you must be generic)
 

@@ -19,7 +19,7 @@ A structured pass for reviewing existing copy — a single string, a screen, a n
 
 - [ ] **No "Vexlak / Vexlaks / Vexler / vexlers"** unless truly unavoidable. → "people", "users", "the other person", "friends and friends of friends".
 - [ ] **No "counterparty".** → "the other person".
-- [ ] **No "other side / the other side".** → "the other person".
+- [ ] **No "other side / the other side".** → "the other person". (English copy only — Czech/Slovak deliberately use "druhá strana"; don't flag it there.)
 - [ ] **Bitcoin capitalization** correct: "Bitcoin" = network/idea; "bitcoin" = the money/asset; "BTC" = unit next to numbers; "sats" lowercase.
 - [ ] **No institutional verbs** (dispatch, authenticate, provision, facilitate, utilize, leverage).
 - [ ] **No hype/FOMO** ("don't miss out", "act now", "limited time").

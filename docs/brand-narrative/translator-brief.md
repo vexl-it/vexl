@@ -97,7 +97,10 @@ use it everywhere.
 16. **the other person**
     The human on the other end of a trade or chat. Always translate as a warm,
     human phrase — NEVER as the local equivalent of "counterparty", "the other
-    party", or "the other side". This is a hard brand rule.
+    party", or "the other side". This is a hard brand rule. The rule bans what
+    sounds cold in the target language, not literal wordings: where a
+    locale-specific directive names a natural rendering (see cs/sk), that
+    rendering wins over a word-for-word translation.
 
 17. **reveal your identity**
     The user's deliberate, one-way choice to show who they are. Keep the
@@ -214,7 +217,11 @@ use it everywhere.
 **cs (Czech) / sk (Slovak):**
 Tykání throughout. Prefer everyday spoken phrasing over formal written
 Czech/Slovak. "Vexlak" must not appear even though it originated as Czech
-slang — use "uživatel" / "lidé" / "ten druhý" per glossary entry 21.
+slang — use "uživatel" / "lidé" per glossary entry 21. Translate "the other
+person" as **"druhá strana"** — that's the natural phrasing here; "druhý
+člověk" reads stilted. This is a deliberate exception to entry 16's ban on
+"the other side": the ban targets cold brokerage tone, and in Czech/Slovak
+"druhá strana" carries none.
 
 **de (German):**
 "Du" (informal), lowercase "du" per current Duden convention unless the

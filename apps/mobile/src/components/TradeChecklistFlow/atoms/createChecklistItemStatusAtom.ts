@@ -2,11 +2,11 @@ import {type TradeChecklistItemStatus} from '@vexl-next/domain/src/general/trade
 import {deepEqual} from 'fast-equals'
 import {atom, type Atom} from 'jotai'
 import {tradeChecklistDataAtom} from '../../../state/tradeChecklist/atoms/fromChatAtoms'
+import {updatesToBeSentAtom} from '../../../state/tradeChecklist/atoms/updatesToBeSentAtom'
 import * as DateAndTime from '../../../state/tradeChecklist/utils/dateAndTime'
 import getIdentityRevealStatus from '../../../state/tradeChecklist/utils/getIdentityRevealStatus'
 import * as MeetingLocation from '../../../state/tradeChecklist/utils/location'
 import {type TradeChecklistItem} from '../domain'
-import updatesToBeSentAtom from './updatesToBeSentAtom'
 
 export default function createChecklistItemStatusAtom(
   item: TradeChecklistItem

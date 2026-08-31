@@ -6,12 +6,10 @@ import {
   type MeetingLocationData,
   type NetworkData,
   type PickedDateTimeOption,
-  type TradeChecklistUpdate,
 } from '@vexl-next/domain/src/general/tradeChecklist'
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {effectToTask} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {Effect, pipe} from 'effect'
-import {deepEqual} from 'fast-equals'
 import * as T from 'fp-ts/Task'
 import {atom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
@@ -22,28 +20,17 @@ import {
   chatWithMessagesAtom,
   tradeChecklistDataAtom,
 } from '../../../state/tradeChecklist/atoms/fromChatAtoms'
+import {
+  areThereUpdatesToBeSentAtom,
+  clearUpdatesToBeSentActionAtom,
+  updatesToBeSentAtom,
+} from '../../../state/tradeChecklist/atoms/updatesToBeSentAtom'
 import {updateTradeChecklistState} from '../../../state/tradeChecklist/utils'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import reportError from '../../../utils/reportError'
 import {globalDialogAtom} from '../../GlobalDialog'
 import {withLoadingOverlayAtom} from '../../LoadingOverlayProvider'
 import {availableDateTimesAtom} from '../components/DateAndTimeFlow/atoms'
-
-const UPDATES_TO_BE_SENT_INITIAL_STATE = {}
-
-const updatesToBeSentAtom = atom<TradeChecklistUpdate>(
-  UPDATES_TO_BE_SENT_INITIAL_STATE
-)
-export default updatesToBeSentAtom
-
-export const areThereUpdatesToBeSentAtom = atom(
-  (get) =>
-    !deepEqual(get(updatesToBeSentAtom), UPDATES_TO_BE_SENT_INITIAL_STATE)
-)
-
-export const clearUpdatesToBeSentActionAtom = atom(null, (get, set) => {
-  set(updatesToBeSentAtom, UPDATES_TO_BE_SENT_INITIAL_STATE)
-})
 
 export const askAreYouSureAndClearUpdatesToBeSentActionAtom = atom(
   null,

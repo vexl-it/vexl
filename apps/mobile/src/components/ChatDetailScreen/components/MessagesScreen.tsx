@@ -1,14 +1,14 @@
+import {useFocusEffect} from '@react-navigation/native'
 import {type ChatMessageId} from '@vexl-next/domain/src/general/messaging'
 import {Screen, Stack} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {Effect} from 'effect/index'
 import {useAtomValue, useSetAtom} from 'jotai'
-import React, {useCallback, useEffect} from 'react'
+import React, {useCallback} from 'react'
 import {fetchAndStoreMessagesForInboxHandleNotificationsActionAtom} from '../../../state/chat/atoms/fetchNewMessagesActionAtom'
 import {useStatusBarStyleForScreen} from '../../../state/statusBarStyleAtom'
 import * as fromChatAtoms from '../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {useAppState} from '../../../utils/useAppState'
-import {clearUpdatesToBeSentActionAtom} from '../../TradeChecklistFlow/atoms/updatesToBeSentAtom'
 import {chatMolecule} from '../atoms'
 import {ChatActionButtons} from './ChatActionButtons'
 import ChatTextInput from './ChatTextInput'
@@ -29,15 +29,16 @@ function MessagesScreen({
   const chatId = useAtomValue(chatIdAtom)
   const inboxKey = useAtomValue(publicKeyPemBase64Atom)
   const setParentChat = useSetAtom(fromChatAtoms.setParentChatActionAtom)
-  const clearUpdatesToBeSent = useSetAtom(clearUpdatesToBeSentActionAtom)
   const fetchAndStoreMessagesForInbox = useSetAtom(
     fetchAndStoreMessagesForInboxHandleNotificationsActionAtom
   )
   // sets parent chat for checklist as user can interact with it directly from chat
-  // without going through trade checklist flow
-  useEffect(() => {
-    if (setParentChat({chatId, inboxKey})) clearUpdatesToBeSent()
-  }, [chatId, clearUpdatesToBeSent, inboxKey, setParentChat])
+  // without going through trade checklist flow; focus restores it after another chat.
+  useFocusEffect(
+    useCallback(() => {
+      setParentChat({chatId, inboxKey})
+    }, [chatId, inboxKey, setParentChat])
+  )
 
   useAppState(
     useCallback(() => {

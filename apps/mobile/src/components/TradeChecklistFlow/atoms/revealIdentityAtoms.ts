@@ -16,11 +16,12 @@ import {
   chatWithMessagesAtom,
   tradeChecklistDataAtom,
 } from '../../../state/tradeChecklist/atoms/fromChatAtoms'
+import {
+  clearUpdatesToBeSentActionAtom,
+  updatesToBeSentAtom,
+} from '../../../state/tradeChecklist/atoms/updatesToBeSentAtom'
 import getIdentityRevealStatus from '../../../state/tradeChecklist/utils/getIdentityRevealStatus'
 import {revealIdentityFlowTypeFromStatus} from './revealIdentityFlowType'
-import updatesToBeSentAtom, {
-  clearUpdatesToBeSentActionAtom,
-} from './updatesToBeSentAtom'
 
 export const revealIdentityUsernameAtom = atom<string>('')
 export const revealIdentityImageUriAtom = atom<UriString | undefined>(undefined)

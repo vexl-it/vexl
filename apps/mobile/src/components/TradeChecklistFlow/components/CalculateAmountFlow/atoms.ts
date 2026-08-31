@@ -10,6 +10,7 @@ import {
   tradeChecklistAmountDataAtom,
   tradeOrOriginOfferCurrencyAtom,
 } from '../../../../state/tradeChecklist/atoms/fromChatAtoms'
+import {updatesToBeSentAtom} from '../../../../state/tradeChecklist/atoms/updatesToBeSentAtom'
 import {translationAtom} from '../../../../utils/localization/I18nProvider'
 import {computeMaxAmountForCurrency} from '../../../../utils/localization/currency'
 import {formatDecimal} from '../../../../utils/localization/formatting'
@@ -30,9 +31,7 @@ import {
   resolveEffectiveBtcPrice,
   type CalculatorState,
 } from '../../../TradeCalculator/helpers'
-import updatesToBeSentAtom, {
-  addAmountActionAtom,
-} from '../../atoms/updatesToBeSentAtom'
+import {addAmountActionAtom} from '../../atoms/updatesToBeSentAtom'
 
 export {applyFeeOnFeeChangeActionAtom} from '../../../TradeCalculator/atoms'
 

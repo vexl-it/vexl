@@ -100,7 +100,7 @@ function ContactsListEmpty({
               return
             }
 
-            Effect.runFork(importContactsFromPhone())
+            Effect.runFork(importContactsFromPhone({requestPermissions: true}))
           }}
         >
           {t(

@@ -12,6 +12,7 @@ import {dummyChatWithMessages} from '../../chat/domain'
 import {offerForChatOriginAtom} from '../../marketplace/atoms/offersState'
 import {getLatestAmountDataMessage} from '../utils/amount'
 import getIdentityRevealStatus from '../utils/getIdentityRevealStatus'
+import {clearUpdatesToBeSentActionAtom} from './updatesToBeSentAtom'
 
 export const parentChatAtomAtom = atom<FocusAtomType<ChatWithMessages>>(
   atom(dummyChatWithMessages)
@@ -120,13 +121,13 @@ export const setParentChatActionAtom = atom(
     const parentChatAtom = get(parentChatAtomAtom)
     const parentChat = get(parentChatAtom)
 
-    if (parentChat?.chat.id === params.chatId) return false // No changes
+    if (parentChat?.chat.id === params.chatId) return
 
     const newChatAtom = valueOrDefaultAtom({
       nullableAtom: focusChatWithMessagesAtom(params),
       dummyValue: dummyChatWithMessages,
     })
     set(parentChatAtomAtom, newChatAtom)
-    return true
+    set(clearUpdatesToBeSentActionAtom)
   }
 )

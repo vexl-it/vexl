@@ -7,13 +7,10 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {Stack} from 'tamagui'
 import {type TradeChecklistStackScreenProps} from '../../../../navigationTypes'
 import * as fromChatAtoms from '../../../../state/tradeChecklist/atoms/fromChatAtoms'
+import {areThereUpdatesToBeSentAtom} from '../../../../state/tradeChecklist/atoms/updatesToBeSentAtom'
 import {andThenExpectBooleanNoErrors} from '../../../../utils/andThenExpectNoErrors'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
-import {
-  areThereUpdatesToBeSentAtom,
-  askAreYouSureAndClearUpdatesToBeSentActionAtom,
-  submitTradeChecklistUpdatesActionAtom,
-} from '../../atoms/updatesToBeSentAtom'
+import {submitTradeChecklistUpdatesActionAtom} from '../../atoms/updatesToBeSentAtom'
 import OnlineOrInPersonTrade from './components/OnlineOrInPersonTrade'
 
 type Props = TradeChecklistStackScreenProps<'AgreeOnTradeDetails'>
@@ -26,20 +23,13 @@ function AgreeOnTradeDetailsScreen({navigation}: Props): React.ReactElement {
     submitTradeChecklistUpdatesActionAtom
   )
   const store = useStore()
-  const askAreYouSureAndClearUpdatesToBeSent = useSetAtom(
-    askAreYouSureAndClearUpdatesToBeSentActionAtom
-  )
 
   const closeChecklist = useCallback(() => {
-    void askAreYouSureAndClearUpdatesToBeSent()().then((success) => {
-      if (success) {
-        navigation.popTo(
-          'ChatDetail',
-          store.get(fromChatAtoms.chatWithMessagesKeys)
-        )
-      }
-    })
-  }, [askAreYouSureAndClearUpdatesToBeSent, navigation, store])
+    navigation.popTo(
+      'ChatDetail',
+      store.get(fromChatAtoms.chatWithMessagesKeys)
+    )
+  }, [navigation, store])
 
   return (
     <Stack f={1} mt={safeInsets.top} mb={safeInsets.bottom} pt="$4">
@@ -67,12 +57,7 @@ function AgreeOnTradeDetailsScreen({navigation}: Props): React.ReactElement {
             onPress={() => {
               void Effect.runPromise(
                 andThenExpectBooleanNoErrors((success) => {
-                  if (success) {
-                    navigation.popTo(
-                      'ChatDetail',
-                      store.get(fromChatAtoms.chatWithMessagesKeys)
-                    )
-                  }
+                  if (success) closeChecklist()
                 })(submitChangesAndSendMessage())
               )
             }}

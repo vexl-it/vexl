@@ -1,12 +1,15 @@
+import {useFocusEffect} from '@react-navigation/native'
 import {createNativeStackNavigator} from '@react-navigation/native-stack'
-import {useSetAtom} from 'jotai'
-import React, {useEffect} from 'react'
+import {useAtomValue, useSetAtom} from 'jotai'
+import React, {useCallback} from 'react'
 import {
   type RootStackScreenProps,
   type TradeChecklistStackParamsList,
 } from '../../navigationTypes'
 import * as fromChatAtoms from '../../state/tradeChecklist/atoms/fromChatAtoms'
-import {clearUpdatesToBeSentActionAtom} from './atoms/updatesToBeSentAtom'
+import {areThereUpdatesToBeSentAtom} from '../../state/tradeChecklist/atoms/updatesToBeSentAtom'
+import usePreventDiscardChangesWithConfirmation from '../../utils/usePreventDiscardChangesWithConfirmation'
+import {askAreYouSureAndClearUpdatesToBeSentActionAtom} from './atoms/updatesToBeSentAtom'
 import AgreeOnTradeDetailsScreen from './components/AgreeOnTradeDetailsScreen'
 import CalculateAmountScreen from './components/CalculateAmountFlow/components/CalculateAmountScreen'
 import ConfirmAmountScreen from './components/CalculateAmountFlow/components/ConfirmAmountScreen'
@@ -34,11 +37,26 @@ export default function TradeChecklistFlow({
   },
 }: Props): React.ReactElement {
   const setParentChat = useSetAtom(fromChatAtoms.setParentChatActionAtom)
-  const clearUpdatesToBeSent = useSetAtom(clearUpdatesToBeSentActionAtom)
+  const areThereUpdatesToBeSent = useAtomValue(areThereUpdatesToBeSentAtom)
+  const askAreYouSureAndClearUpdatesToBeSent = useSetAtom(
+    askAreYouSureAndClearUpdatesToBeSentActionAtom
+  )
 
-  useEffect(() => {
-    if (setParentChat({chatId, inboxKey})) clearUpdatesToBeSent()
-  }, [chatId, clearUpdatesToBeSent, setParentChat, inboxKey])
+  const confirmLeave = useCallback(
+    async () => await askAreYouSureAndClearUpdatesToBeSent()(),
+    [askAreYouSureAndClearUpdatesToBeSent]
+  )
+
+  usePreventDiscardChangesWithConfirmation({
+    enabled: areThereUpdatesToBeSent,
+    confirmLeave,
+  })
+
+  useFocusEffect(
+    useCallback(() => {
+      setParentChat({chatId, inboxKey})
+    }, [chatId, inboxKey, setParentChat])
+  )
 
   return (
     <>

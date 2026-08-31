@@ -55,15 +55,6 @@ jest.mock('../../../state/tradeChecklist/atoms/fromChatAtoms', () => {
   }
 })
 
-jest.mock('./updatesToBeSentAtom', () => {
-  const {atom: createAtom} = jest.requireActual('jotai')
-
-  return {
-    __esModule: true,
-    default: createAtom({}),
-  }
-})
-
 const requestFlowStatuses: readonly IdentityRevealStatus[] = [
   'notStarted',
   'iAsked',

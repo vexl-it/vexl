@@ -18,7 +18,14 @@ import {
 } from '@vexl-next/ui'
 import {Array, Effect, Option, Order, pipe} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
-import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react'
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import {RefreshControl} from 'react-native'
 import {getTokens} from 'tamagui'
 import {type CommunityTabsScreenProps} from '../../../../../../navigationTypes'
@@ -30,7 +37,6 @@ import {refreshNotesActionAtom} from '../../../../../../state/notes/atoms/refres
 import {showNotesBoardIntroSheetIfNeededActionAtom} from '../../../../../../state/notes/atoms/showNotesBoardIntroSheetIfNeededActionAtom'
 import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
 import {notesBoardEnabledAtom} from '../../../../../../utils/preferences'
-import useScrollToTopOnFocus from '../../../../../../utils/useScrollToTopOnFocus'
 import {NoteCard} from '../../../../../Notes/NoteCard'
 
 type Props = CommunityTabsScreenProps<'Board'>
@@ -144,11 +150,11 @@ function NotesBoard({navigation, route}: Props): React.JSX.Element {
     void Effect.runPromise(showIntroIfNeeded())
   }, [showIntroIfNeeded])
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     scrollToTop()
-  }, [filter, scrollToTop])
+  }, [filter, route.params?.filterSwitchRequestId, scrollToTop])
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (route.params?.initialFilter) {
       setFilter(route.params.initialFilter)
     }
@@ -205,11 +211,6 @@ function NotesBoard({navigation, route}: Props): React.JSX.Element {
       Effect.runFork(refreshNotes())
     }, [refreshNotes])
   )
-
-  useScrollToTopOnFocus({
-    requestId: route.params?.filterSwitchRequestId,
-    scrollToTop,
-  })
 
   const goToCreateNote = useCallback(() => {
     navigation.navigate('CreateNote')

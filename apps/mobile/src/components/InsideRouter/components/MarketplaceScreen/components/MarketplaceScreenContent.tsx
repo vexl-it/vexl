@@ -33,7 +33,6 @@ import {
   runAfterTwoAnimationFrames,
 } from '../../../../../utils/runAfterAnimationFrames'
 import {useAppState} from '../../../../../utils/useAppState'
-import useScrollToTopOnFocus from '../../../../../utils/useScrollToTopOnFocus'
 import MarketplaceLoadingOverlay from '../../../../MarketplaceLoadingOverlay'
 import OffersList from '../../../../OffersList'
 import RetainedScene from '../../../../RetainedScene'
@@ -405,18 +404,9 @@ function MarketplaceScreenContent({
     [scrollY]
   )
 
-  const scrollActiveTabToTop = useCallback(() => {
-    scrollTabToTop(activeTab)
-  }, [activeTab, scrollTabToTop])
-
   useLayoutEffect(() => {
     scrollTabToTop(activeTab)
-  }, [activeTab, scrollTabToTop])
-
-  useScrollToTopOnFocus({
-    requestId: scrollToTopRequestId,
-    scrollToTop: scrollActiveTabToTop,
-  })
+  }, [activeTab, scrollToTopRequestId, scrollTabToTop])
 
   useEffect(() => {
     return runAfterTwoAnimationFrames(() => {

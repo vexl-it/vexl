@@ -4,6 +4,12 @@ Vexl translations are AI-generated and live directly in this repository — Engl
 
 To fix a translation, open a pull request editing the relevant locale JSON file (or report it in a [GitHub issue](https://github.com/vexl-it/vexl/issues/new)). Keep the dotted keys and `{{variable}}` placeholders unchanged. Once merged, your correction is permanent — the repository is the only source of translations.
 
+## Make your fix permanent for future translations
+
+Editing a string fixes it once; teaching the translators fixes it forever. Translations are written by AI agents whose only style memory is `docs/brand-narrative/` (translators read `translator-brief.md`). If your correction reflects a rule — a term that should always be rendered a certain way in your language, phrasing that sounds unnatural — the most valuable PR also updates the brand narrative.
+
+If you use a coding agent (Claude Code, Cursor, Codex, …), just tell it about the wrong and correct translation — the `translation-feedback` skill in this repo walks it through pinning the rule down, writing it into the narrative docs, and fixing the existing strings. Then open a PR with the result. Rule PRs like that help us far more than string fixes alone.
+
 ## Translators Debug Mode
 
 The Vexl app can show the translation key for text on screen, making it easier to identify the right entry in a locale file or describe a correction.

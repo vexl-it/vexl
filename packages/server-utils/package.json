@@ -9,7 +9,7 @@
     "format": "prettier --check \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\"",
     "format:fix": "prettier --write \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\"",
     "typecheck": "tsc --noEmit",
-    "test": "jest"
+    "test": "jest --silent"
   },
   "devDependencies": {
     "@vexl-next/eslint-config": "0.0.0",

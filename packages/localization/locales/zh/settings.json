@@ -88,7 +88,7 @@
   "account.actionSteps.postFirstOffer.title": "发布你的第一个出价",
   "account.actionSteps.postFirstOffer.description": "让大家知道你有什么或想要什么。",
   "account.reachStats.title": "你的触达范围",
-  "account.reachStats.noVexlaks": "没有 vexlaks",
+  "account.reachStats.noVexlaks": "没有人",
   "account.reachStats.reachPeopleCount": "你可以触达 {{localizedString}} 人",
   "account.reachStats.smallPool": "小池子",
   "account.reachStats.smallPoolRange": "{{from}} - {{to}}",

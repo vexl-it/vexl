@@ -72,6 +72,8 @@
   "tradeChecklist.network.btcNetworkWasSetByReceiver": "Le réseau BTC a été défini par le destinataire",
   "tradeChecklist.location.addNote": "Ajouter une remarque",
   "tradeChecklist.location.note": "Note :",
+  "tradeChecklist.location.geocodingUnavailable": "Impossible de charger l'adresse. Propose plutôt un lieu de rencontre dans le chat.",
+  "tradeChecklist.location.searchUnavailable": "La recherche de lieu ne fonctionne pas pour le moment. Tu peux proposer un lieu de rencontre à l'autre personne directement dans le chat.",
   "tradeChecklist.btcAddress.btcAddress": "Adresse BTC",
   "tradeChecklist.notSupportedByOtherSide.title": "L'autre partie utilise une ancienne version de Vexl",
   "tradeChecklist.notSupportedByOtherSide.body": "L’autre partie utilise une version plus ancienne de Vexl et ne prend pas en charge la fonction de checklist de trading.",

@@ -96,7 +96,7 @@
   "common.reply": "Répondre",
   "common.replyTo": "Répondre à",
   "common.copy": "Copier",
-  "common.loading": "Сhargement",
+  "common.loading": "Chargement",
   "common.loadingTasks": "Chargement des tâches ({{count}})",
   "common.processingNotifications": "Traitement des notifications ({{count}})",
   "common.notificationWithType": "Notification ({{type}}) - {{time}}s",

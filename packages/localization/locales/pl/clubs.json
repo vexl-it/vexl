@@ -1,7 +1,7 @@
 {
   "clubs.clubDetail": "Szczegóły klubu",
   "clubs.joinAClub": "Dołącz do klubu",
-  "clubs.joinAClubDescription": "i zacznij handlować z innymi Vexlakami",
+  "clubs.joinAClubDescription": "i zacznij handlować z ludźmi, których znasz",
   "clubs.joinYourFirstClub": "Dołącz do swojego pierwszego klubu",
   "clubs.joinYourFirstClubDescription": "Kluby łączą Cię z większą liczbą osób i ofert. Zeskanuj kod QR albo wpisz kod zaproszenia, żeby dołączyć.",
   "clubs.yourClubs": "Twoje kluby",
@@ -41,6 +41,8 @@
   "clubs.publishOffersToJoinedClub.successTitle": "Oferty opublikowane w klubie",
   "clubs.publishOffersToJoinedClub.successDescription": "Członkowie {{clubName}} mogą teraz zobaczyć wybrane oferty.",
   "clubs.publishOffersToJoinedClub.successCount_one": "Opublikowano {{publishedCount}} ofertę",
+  "clubs.publishOffersToJoinedClub.successCount_few": "Opublikowano {{publishedCount}} oferty",
+  "clubs.publishOffersToJoinedClub.successCount_many": "Opublikowano {{publishedCount}} ofert",
   "clubs.publishOffersToJoinedClub.successCount_other": "Opublikowane oferty: {{publishedCount}}",
   "clubs.publishOffersToJoinedClub.partialErrorTitle": "Nie udało się opublikować części ofert",
   "clubs.publishOffersToJoinedClub.partialErrorDescription": "Nie wszystkie wybrane oferty zostały opublikowane. Możesz teraz ponownie opublikować te, których publikacja się nie powiodła.",

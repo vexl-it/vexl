@@ -22,14 +22,16 @@
   "notes.card.youReposted": "Zdieľal si ďalej",
   "notes.card.reposted": "Zdieľané ďalej",
   "notes.card.commonFriendsCount_one": "{{count}} spoločný priateľ",
-  "notes.card.commonFriendsCount_other": "{{count}} spoločných priateľov",
   "notes.card.commonFriendsCount_few": "{{count}} spoloční priatelia",
+  "notes.card.commonFriendsCount_many": "{{count}} spoločných priateľov",
+  "notes.card.commonFriendsCount_other": "{{count}} spoločných priateľov",
   "notes.expiry.expiresTomorrow": "Platnosť vyprší zajtra",
   "notes.detail.title": "Príspevok",
   "notes.detail.you": "Ty",
   "notes.detail.commonFriendsCount_one": "{{count}} spoločný priateľ",
-  "notes.detail.commonFriendsCount_other": "{{count}} spoločných priateľov",
   "notes.detail.commonFriendsCount_few": "{{count}} spoloční priatelia",
+  "notes.detail.commonFriendsCount_many": "{{count}} spoločných priateľov",
+  "notes.detail.commonFriendsCount_other": "{{count}} spoločných priateľov",
   "notes.detail.noCommonFriendsDescription": "Tento príspevok vidíš preto, že druhá osoba má tvoje telefónne číslo uložené vo svojich kontaktoch. Buď opatrný, nevieme overiť, či sa naozaj poznáte aj v reálnom živote.",
   "notes.detail.deleteNote": "Odstrániť príspevok",
   "notes.detail.repostNote": "Zdieľať príspevok ďalej",
@@ -98,5 +100,5 @@
   "events.linkToEvent": "Odkaz na podujatie",
   "events.contactEmail": "Kontaktný e-mail",
   "events.speakersOptional": "Rečníci (voliteľné)",
-  "events.errorLoadingEvents": "Prípady chybného načítania"
+  "events.errorLoadingEvents": "Chyba pri načítaní udalostí"
 }

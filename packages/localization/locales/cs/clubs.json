@@ -1,7 +1,7 @@
 {
   "clubs.clubDetail": "Detail klubu",
   "clubs.joinAClub": "Přidej se ke klubu",
-  "clubs.joinAClubDescription": "a začni obchodovat s dalšími Vexláky",
+  "clubs.joinAClubDescription": "a začni obchodovat s lidmi, které znáš",
   "clubs.joinYourFirstClub": "Přidej se ke svému prvnímu klubu",
   "clubs.joinYourFirstClubDescription": "Kluby tě propojí s více lidmi a více nabídkami. Přidej se naskenováním QR kódu nebo zadáním pozvánkového kódu.",
   "clubs.yourClubs": "Tvoje kluby",
@@ -41,6 +41,8 @@
   "clubs.publishOffersToJoinedClub.successTitle": "Nabídky zveřejněny v klubu",
   "clubs.publishOffersToJoinedClub.successDescription": "Členové klubu {{clubName}} nyní vidí vybrané nabídky.",
   "clubs.publishOffersToJoinedClub.successCount_one": "Zveřejněna {{publishedCount}} nabídka",
+  "clubs.publishOffersToJoinedClub.successCount_few": "Zveřejněny {{publishedCount}} nabídky",
+  "clubs.publishOffersToJoinedClub.successCount_many": "Zveřejněno {{publishedCount}} nabídek",
   "clubs.publishOffersToJoinedClub.successCount_other": "Zveřejněno {{publishedCount}} nabídek",
   "clubs.publishOffersToJoinedClub.partialErrorTitle": "Některé nabídky se nepodařilo zveřejnit",
   "clubs.publishOffersToJoinedClub.partialErrorDescription": "Některé vybrané nabídky nebyly zveřejněny. Neúspěšné nabídky můžeš zkusit zveřejnit znovu.",

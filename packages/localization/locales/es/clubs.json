@@ -1,7 +1,7 @@
 {
   "clubs.clubDetail": "Detalle del club",
   "clubs.joinAClub": "Únete a un club",
-  "clubs.joinAClubDescription": "y empieza a intercambiar con otros Vexlaks",
+  "clubs.joinAClubDescription": "y empieza a intercambiar con gente que conoces",
   "clubs.joinYourFirstClub": "Únete a tu primer club",
   "clubs.joinYourFirstClubDescription": "Los clubs te conectan con más personas y más ofertas. Escanea un código QR o introduce un código de invitación para unirte.",
   "clubs.yourClubs": "Tus clubs",
@@ -42,6 +42,7 @@
   "clubs.publishOffersToJoinedClub.successDescription": "Los miembros de {{clubName}} ya pueden ver las ofertas seleccionadas.",
   "clubs.publishOffersToJoinedClub.successCount_one": "{{publishedCount}} oferta publicada",
   "clubs.publishOffersToJoinedClub.successCount_other": "{{publishedCount}} ofertas publicadas",
+  "clubs.publishOffersToJoinedClub.successCount_many": "{{publishedCount}} ofertas publicadas",
   "clubs.publishOffersToJoinedClub.partialErrorTitle": "No se han podido publicar algunas ofertas",
   "clubs.publishOffersToJoinedClub.partialErrorDescription": "No se han publicado todas las ofertas seleccionadas. Puedes volver a intentar publicar ahora las que han fallado.",
   "clubs.publishOffersToJoinedClub.retryFailedAction": "Reintentar las fallidas",

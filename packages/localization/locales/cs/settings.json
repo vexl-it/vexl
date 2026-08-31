@@ -36,7 +36,7 @@
   "AppLogs.logs": "Logy",
   "AppLogs.developerModeEnabled": "Teď jsi ve vývojářském režimu!",
   "AppLogs.noLogs": "Žádné logy",
-  "qrScanner.title": "Naskenuj QR kód jiného uživatele.",
+  "qrScanner.title": "Naskenuj QR kód druhé strany.",
   "qrScanner.missingCameraPermissions": "Chybějící oprávnění pro fotoaparát.",
   "qrScanner.grantPermissions": "Získat oprávnění",
   "qrScanner.grantPermissionsInSettings": "Oprávnění nebylo možné získat. Chceš-li naskenovat QR kód, otevři nastavení a povol Vexlu používání fotoaparátu.",

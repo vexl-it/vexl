@@ -32,7 +32,7 @@
   "notes.detail.commonFriendsCount_few": "{{count}} společní známí",
   "notes.detail.commonFriendsCount_many": "{{count}} společných známých",
   "notes.detail.commonFriendsCount_other": "{{count}} společných známých",
-  "notes.detail.noCommonFriendsDescription": "Tento příspěvek vidíš proto, že druhá osoba má tvoje telefonní číslo uložené v kontaktech. Buď opatrný, nedokážeme ověřit, jestli se opravdu znáte i v reálném životě.",
+  "notes.detail.noCommonFriendsDescription": "Tento příspěvek vidíš proto, že druhá strana má tvoje telefonní číslo uložené v kontaktech. Buď opatrný, nedokážeme ověřit, jestli se opravdu znáte i v reálném životě.",
   "notes.detail.deleteNote": "Smazat příspěvek",
   "notes.detail.repostNote": "Sdílet příspěvek dál",
   "notes.detail.undoRepost": "Zrušit další sdílení",

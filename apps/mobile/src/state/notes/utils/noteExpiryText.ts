@@ -1,7 +1,7 @@
 import {type UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {DateTime} from 'luxon'
 import {
-  getLocaleFromTranslation,
+  getCurrentLocale,
   type TFunction,
 } from '../../../utils/localization/I18nProvider'
 import {formatDate, formatInteger} from '../../../utils/localization/formatting'
@@ -22,7 +22,7 @@ export function noteExpiryText(
   const remainingDuration = expirationDateTime.diff(nowDateTime)
   const remainingMinutes = remainingDuration.as('minutes')
 
-  const locale = getLocaleFromTranslation(t)
+  const locale = getCurrentLocale()
 
   if (remainingMinutes <= 0) {
     return t('offerForm.expiration.expiredOn', {

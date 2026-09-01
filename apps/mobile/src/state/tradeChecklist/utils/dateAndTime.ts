@@ -11,6 +11,7 @@ import {
   formatDate,
   formatDateTime,
   formatTime,
+  type FormattingLocale,
 } from '../../../utils/localization/formatting'
 import unixMillisecondsToLocaleDateTime from '../../../utils/unixMillisecondsToLocaleDateTime'
 import {type TradeChecklistInState} from '../domain'
@@ -97,7 +98,7 @@ export function getSuggestions(data: DateAndTimeInState):
 
 export function toStringWithTime(
   unixMilliseconds: UnixMilliseconds,
-  locale: string = getCurrentLocale()
+  locale: FormattingLocale = getCurrentLocale()
 ): string {
   return formatDateTime(
     unixMillisecondsToLocaleDateTime(unixMilliseconds).toMillis(),
@@ -114,7 +115,7 @@ export function toStringWithTime(
 
 export function toStringWithRange(
   suggestion: AvailableDateTimeOption,
-  locale: string = getCurrentLocale()
+  locale: FormattingLocale = getCurrentLocale()
 ): string {
   const from = unixMillisecondsToLocaleDateTime(suggestion.from)
   const to = unixMillisecondsToLocaleDateTime(suggestion.to)

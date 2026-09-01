@@ -10,6 +10,7 @@ import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {
   formatDateTime,
   formatInteger,
+  type FormattingLocale,
 } from '../../../../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../../../../utils/localization/formattingLocaleAtom'
 import createChecklistItemStatusAtom from '../../../atoms/createChecklistItemStatusAtom'
@@ -21,7 +22,7 @@ import mapTradeChecklistItemStatusToUiState from './mapTradeChecklistItemStatusT
 
 function formatChecklistDateTime(
   millis: UnixMilliseconds,
-  locale: string
+  locale: FormattingLocale
 ): string {
   return formatDateTime(millis, locale, {
     dateStyle: 'short',

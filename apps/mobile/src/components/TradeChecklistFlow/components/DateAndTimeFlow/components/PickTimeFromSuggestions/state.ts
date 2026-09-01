@@ -3,7 +3,10 @@ import {atom, useAtomValue, useSetAtom, type Atom} from 'jotai'
 import {splitAtom} from 'jotai/utils'
 import {DateTime} from 'luxon'
 import {useMemo} from 'react'
-import {formatTime} from '../../../../../../utils/localization/formatting'
+import {
+  formatTime,
+  type FormattingLocale,
+} from '../../../../../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../../../../../utils/localization/formattingLocaleAtom'
 import unixMillisecondsToLocaleDateTime from '../../../../../../utils/unixMillisecondsToLocaleDateTime'
 import {
@@ -15,7 +18,7 @@ import type {Item as OptionsListItem} from '../OptionsList'
 function generateHoursList(
   fromOptions: AvailableDateTimeOption[],
   forOption: AvailableDateTimeOption,
-  locale: string
+  locale: FormattingLocale
 ): Array<OptionsListItem<DateTime>> {
   // TODO: remove this logic once all devices update to new checklist DateTime format
   const isOldChecklistDateTimeMessage = checkIsOldDateTimeMessage(fromOptions)

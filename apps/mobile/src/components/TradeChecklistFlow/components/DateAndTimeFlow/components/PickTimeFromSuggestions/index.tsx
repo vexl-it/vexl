@@ -18,7 +18,10 @@ import {FlatList, TouchableOpacity} from 'react-native'
 import type {TradeChecklistStackScreenProps} from '../../../../../../navigationTypes'
 import atomKeyExtractor from '../../../../../../utils/atomUtils/atomKeyExtractor'
 import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
-import {formatDate} from '../../../../../../utils/localization/formatting'
+import {
+  formatDate,
+  type FormattingLocale,
+} from '../../../../../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../../../../../utils/localization/formattingLocaleAtom'
 import unixMillisecondsToLocaleDateTime from '../../../../../../utils/unixMillisecondsToLocaleDateTime'
 import {saveDateTimePickActionAtom} from '../../../../atoms/updatesToBeSentAtom'
@@ -31,7 +34,7 @@ type Props = TradeChecklistStackScreenProps<'PickTimeFromSuggestions'>
 
 function getPickedDateLabel(
   date: AvailableDateTimeOption['date'],
-  locale: string
+  locale: FormattingLocale
 ): string {
   return formatDate(unixMillisecondsToLocaleDateTime(date).toMillis(), locale, {
     weekday: 'long',

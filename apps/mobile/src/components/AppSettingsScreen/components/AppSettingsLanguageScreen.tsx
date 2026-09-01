@@ -15,7 +15,8 @@ import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useState} from 'react'
 import {type AppSettingsStackScreenProps} from '../../../navigationTypes'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
-import {currentAppLanguageAtom} from '../../../utils/preferences'
+import {setAppLanguageActionAtom} from '../../../utils/localization/setAppLanguageActionAtom'
+import {appLanguageFromPreferencesAtom} from '../../../utils/preferences'
 import {useKeyboardAwareFooterListPadding} from '../../../utils/useKeyboardAwareFooterListPadding'
 import {
   appSettingsLanguagesAtom,
@@ -68,13 +69,13 @@ function AppSettingsLanguageScreen({
   navigation,
 }: AppSettingsStackScreenProps<'AppSettingsLanguage'>): React.ReactElement {
   const {t} = useTranslation()
-  const currentAppLanguage = useAtomValue(currentAppLanguageAtom)
+  const appLanguagePreference = useAtomValue(appLanguageFromPreferencesAtom)
   const availableLanguages = useAtomValue(appSettingsLanguagesAtom)
   const languagesToDisplay = useAtomValue(appSettingsLanguagesToDisplayAtom)
-  const setCurrentAppLanguage = useSetAtom(currentAppLanguageAtom)
+  const setAppLanguage = useSetAtom(setAppLanguageActionAtom)
   const setSearchText = useSetAtom(appSettingsLanguageSearchTextAtom)
   const [tempSelection, setTempSelection] = useState<AppSettingsLanguage>(
-    toAppSettingsLanguage(currentAppLanguage, availableLanguages)
+    toAppSettingsLanguage(appLanguagePreference, availableLanguages)
   )
 
   const close = useCallback(() => {
@@ -82,17 +83,16 @@ function AppSettingsLanguageScreen({
   }, [navigation])
 
   const save = useCallback(() => {
-    setCurrentAppLanguage(tempSelection)
-    close()
-  }, [close, setCurrentAppLanguage, tempSelection])
+    setAppLanguage({language: tempSelection, onDone: close})
+  }, [close, setAppLanguage, tempSelection])
 
   useFocusEffect(
     useCallback(() => {
       setSearchText('')
       setTempSelection(
-        toAppSettingsLanguage(currentAppLanguage, availableLanguages)
+        toAppSettingsLanguage(appLanguagePreference, availableLanguages)
       )
-    }, [availableLanguages, currentAppLanguage, setSearchText])
+    }, [availableLanguages, appLanguagePreference, setSearchText])
   )
 
   const renderItem = useCallback(

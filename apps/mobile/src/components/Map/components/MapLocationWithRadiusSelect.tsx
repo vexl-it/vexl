@@ -28,7 +28,7 @@ import {createEffectAtomWithProgress} from '../../../utils/atomUtils/createEffec
 import {formatDecimal} from '../../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../../utils/localization/formattingLocaleAtom'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
-import {appLanguageAtom} from '../../../utils/preferences'
+import {currentAppLanguageAtom} from '../../../utils/preferences'
 import reportError from '../../../utils/reportError'
 import {reportLocationServiceError} from '../../../utils/reportLocationServiceError'
 import {transientRequestRetryPolicy} from '../../../utils/transientRequestRetryPolicy'
@@ -107,7 +107,7 @@ function useAtoms({
           Effect.andThen(
             get(apiAtom)
               .location.getGeocodedCoordinates({
-                lang: get(appLanguageAtom),
+                lang: get(currentAppLanguageAtom),
                 latitude,
                 longitude,
               })

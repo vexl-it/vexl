@@ -1,11 +1,15 @@
 import {DateTime} from 'luxon'
 import {getCurrentLocale} from '../../../utils/localization/I18nProvider'
-import {formatDate, formatTime} from '../../../utils/localization/formatting'
+import {
+  formatDate,
+  formatTime,
+  type FormattingLocale,
+} from '../../../utils/localization/formatting'
 import {setTimezoneOfUser} from '../../../utils/unixMillisecondsToLocaleDateTime'
 
 export default function formatChatTime(
   dateTime: DateTime,
-  locale: string = getCurrentLocale()
+  locale: FormattingLocale = getCurrentLocale()
 ): string {
   const now = DateTime.now()
   const dateTimeWithCorrectLocal = setTimezoneOfUser(dateTime)

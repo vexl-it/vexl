@@ -6,6 +6,7 @@ import {
 import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {Schema} from 'effect'
 import {FiatOrSats} from '../../state/marketplace/domain'
+import {getDeviceLanguage} from '../localization/appLanguage'
 import {currencies} from '../localization/currency'
 import getDefaultSpokenLanguage from '../localization/getDefaultSpokenLanguage'
 
@@ -116,7 +117,7 @@ export const Preferences = Schema.Struct({
   lastUsedOfferSpokenLanguages: Schema.optionalWith(
     Schema.Array(SpokenLanguage),
     {
-      default: getDefaultSpokenLanguage,
+      default: () => getDefaultSpokenLanguage(getDeviceLanguage()),
     }
   ),
 })

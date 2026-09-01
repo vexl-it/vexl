@@ -72,7 +72,7 @@ jest.mock('../../../utils/localization/formatting', () => ({
 
 jest.mock('../../../utils/localization/formattingLocaleAtom', () => {
   const {atom} = jest.requireActual('jotai')
-  return {formattingLocaleAtom: atom('en')}
+  return {formattingLocaleAtom: atom('en-US')}
 })
 
 jest.mock('../../../utils/toE164PhoneNumberWithDefaultCountryCode', () => {

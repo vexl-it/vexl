@@ -3,7 +3,7 @@ import {keys} from '@vexl-next/resources-utils/src/utils/keys'
 import {Button, Picker, Typography, YStack} from '@vexl-next/ui'
 import {useSetAtom} from 'jotai'
 import React, {useState} from 'react'
-import {currentAppLanguageAtom} from '../../../utils/preferences'
+import {setAppLanguageActionAtom} from '../../../utils/localization/setAppLanguageActionAtom'
 
 const translations = keys(allTranslations)
 
@@ -11,7 +11,7 @@ function LanguagePicker(): React.ReactElement {
   const [selectedLanguage, setSelectedLanguage] =
     useState<(typeof translations)[number]>('en')
 
-  const setCurrentAppLanguage = useSetAtom(currentAppLanguageAtom)
+  const setAppLanguage = useSetAtom(setAppLanguageActionAtom)
 
   return (
     <YStack gap="$2">
@@ -28,7 +28,7 @@ function LanguagePicker(): React.ReactElement {
       />
       <Button
         onPress={() => {
-          setCurrentAppLanguage(selectedLanguage)
+          setAppLanguage({language: selectedLanguage})
         }}
         variant="primary"
         size="small"

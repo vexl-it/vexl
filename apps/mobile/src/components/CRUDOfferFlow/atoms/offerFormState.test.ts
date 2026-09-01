@@ -17,6 +17,10 @@ jest.mock('../../../utils/localization/getDefaultSpokenLanguage', () => ({
   __esModule: true,
   default: (): readonly string[] => ['ENG'],
 }))
+jest.mock('../../../utils/preferences', () => {
+  const {atom} = jest.requireActual('jotai')
+  return {currentAppLanguageAtom: atom('en')}
+})
 
 const originalExpirationDate = Schema.decodeSync(JSDateString)('2026-09-01')
 const updatedExpirationDate = Schema.decodeSync(JSDateString)('2026-10-01')

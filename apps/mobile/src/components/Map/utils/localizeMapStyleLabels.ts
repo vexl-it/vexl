@@ -1,3 +1,4 @@
+import {type LanguageCode} from '@vexl-next/domain/src/utility/LanguageCode.brand'
 import {Array, pipe} from 'effect'
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -29,7 +30,7 @@ const PLACE_NAME_TEXT_FIELD_REGEX = /["{]name/
  */
 export function localizeMapStyleLabels(
   styleJson: string,
-  language: string
+  language: LanguageCode
 ): string | null {
   let style: unknown
   try {
@@ -39,10 +40,9 @@ export function localizeMapStyleLabels(
   }
   if (!isRecord(style) || !globalThis.Array.isArray(style.layers)) return null
 
-  const lang = language.toLowerCase().slice(0, 2)
   const localizedNameExpression = [
     'coalesce',
-    ['get', `name:${lang}`],
+    ['get', `name:${language}`],
     ['get', 'name:latin'],
     ['get', 'name'],
   ]

@@ -3,9 +3,13 @@ import {type JSDateString} from '@vexl-next/domain/src/utility/JSDateString.bran
 import {DateTime} from 'luxon'
 import {isOfferExpired} from './isOfferExpired'
 import {type TFunction} from './localization/I18nProvider'
-import {formatDate, formatDecimal} from './localization/formatting'
+import {
+  formatDate,
+  formatDecimal,
+  type FormattingLocale,
+} from './localization/formatting'
 
-function formatFeeAmount(feeAmount: number, locale: string): string {
+function formatFeeAmount(feeAmount: number, locale: FormattingLocale): string {
   return formatDecimal(Math.abs(feeAmount), locale, {
     maximumFractionDigits: 2,
   })
@@ -26,7 +30,7 @@ export function getOfferFeeLabel({
 }: {
   readonly feeAmount: number | undefined
   readonly listingType?: ListingType
-  readonly locale: string
+  readonly locale: FormattingLocale
   readonly t: TFunction
   readonly spaceAroundSign?: boolean
 }): string {
@@ -45,7 +49,7 @@ export function getOfferFeeLabel({
 
 export function formatOfferExpirationDate(
   expirationDate: JSDateString | undefined,
-  locale: string
+  locale: FormattingLocale
 ): string {
   return expirationDate
     ? formatDate(parseOfferExpirationDate(expirationDate), locale, {
@@ -64,7 +68,7 @@ export function getOfferExpirationLabel({
   t,
 }: {
   readonly expirationDate?: JSDateString
-  readonly locale: string
+  readonly locale: FormattingLocale
   readonly t: TFunction
 }): string {
   const formattedExpirationDate = formatOfferExpirationDate(

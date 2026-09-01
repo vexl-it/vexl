@@ -55,7 +55,7 @@ jest.mock('../../../utils/localization/I18nProvider', () => {
   const {atom} = jest.requireActual('jotai')
 
   return {
-    getCurrentLocale: () => 'en',
+    getCurrentLocale: () => 'en-US',
     translationAtom: atom({
       t: (key: string) => key,
       isEnglish: () => true,

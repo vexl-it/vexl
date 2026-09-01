@@ -34,6 +34,7 @@ import {
   formatDate,
   formatInteger,
   formatTime,
+  type FormattingLocale,
 } from '../../../../../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../../../../../utils/localization/formattingLocaleAtom'
 import {blogsStateAtom, loadBlogsActionAtom} from '../BlogScreen/state'
@@ -46,7 +47,7 @@ const BLOGS_LIMIT = 4
 
 type Props = CommunityTabsScreenProps<'Discover'>
 
-function formatEventDate(event: Event, locale: string): string {
+function formatEventDate(event: Event, locale: FormattingLocale): string {
   const startDate = dayjs(event.startDate)
   const formattedStartDate = formatDate(new Date(event.startDate), locale, {
     weekday: 'short',
@@ -178,7 +179,7 @@ function EventItem({
   locale,
 }: {
   readonly event: Event
-  readonly locale: string
+  readonly locale: FormattingLocale
 }): React.JSX.Element {
   return (
     <HorizontalItem>
@@ -227,7 +228,7 @@ function BlogItem({
   locale,
 }: {
   readonly item: BlogArticlePreview
-  readonly locale: string
+  readonly locale: FormattingLocale
 }): React.JSX.Element {
   return (
     <HorizontalItem>

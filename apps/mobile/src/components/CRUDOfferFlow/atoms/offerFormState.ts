@@ -16,9 +16,11 @@ import {
   type SpokenLanguage,
 } from '@vexl-next/domain/src/general/offers'
 import {type JSDateString} from '@vexl-next/domain/src/utility/JSDateString.brand'
+import {getDefaultStore} from 'jotai'
 import getDefaultCurrency from '../../../utils/getDefaultCurrency'
 import {MAX_AMOUNT_EUR} from '../../../utils/localization/currency'
 import getDefaultSpokenLanguage from '../../../utils/localization/getDefaultSpokenLanguage'
+import {currentAppLanguageAtom} from '../../../utils/preferences'
 import {type EditableOfferField} from '../offerSetupSteps'
 
 export interface OfferFormState {
@@ -58,7 +60,9 @@ export function createInitialOfferFormState(): OfferFormState {
     location: [],
     locationState: ['IN_PERSON'],
     productCategories: undefined,
-    spokenLanguages: getDefaultSpokenLanguage(),
+    spokenLanguages: getDefaultSpokenLanguage(
+      getDefaultStore().get(currentAppLanguageAtom)
+    ),
     offerDescription: '',
     satsValue: 0,
     intendedConnectionLevel: 'ALL',

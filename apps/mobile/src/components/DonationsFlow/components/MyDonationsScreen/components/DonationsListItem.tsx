@@ -10,6 +10,7 @@ import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {
   formatDateTime,
   formatInteger,
+  type FormattingLocale,
 } from '../../../../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../../../../utils/localization/formattingLocaleAtom'
 import {localizedPriceActionAtom} from '../../../../../utils/localization/localizedNumbersAtoms'
@@ -51,7 +52,7 @@ function expiresInText({
   t,
 }: {
   readonly expirationTime: number
-  readonly locale: string
+  readonly locale: FormattingLocale
   readonly t: ReturnType<typeof useTranslation>['t']
 }): string | undefined {
   const expirationDateTime = timestampToDateTime(expirationTime)

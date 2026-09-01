@@ -20,7 +20,7 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {apiAtom} from '../../../api'
 import {createEffectAtomWithProgress} from '../../../utils/atomUtils/createEffectAtomWithProgress'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
-import {appLanguageAtom} from '../../../utils/preferences'
+import {currentAppLanguageAtom} from '../../../utils/preferences'
 import {reportLocationServiceError} from '../../../utils/reportLocationServiceError'
 import {transientRequestRetryPolicy} from '../../../utils/transientRequestRetryPolicy'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
@@ -67,7 +67,7 @@ function useAtoms({
       effectToRun: (center, get) =>
         get(apiAtom)
           .location.getGeocodedCoordinates({
-            lang: get(appLanguageAtom),
+            lang: get(currentAppLanguageAtom),
             latitude: Schema.decodeSync(Latitude)(center.latitude),
             longitude: Schema.decodeSync(Longitude)(center.longitude),
           })

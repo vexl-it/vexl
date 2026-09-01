@@ -24,7 +24,7 @@ import {
 } from './filterIncomingMessages'
 
 jest.mock('../../../utils/localization/I18nProvider', () => ({
-  getCurrentLocale: () => 'en',
+  getCurrentLocale: () => 'en-US',
 }))
 
 type ReceivedChatMessage = Extract<ChatMessageWithState, {state: 'received'}>

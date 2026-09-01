@@ -11,6 +11,7 @@ import {
   translationAtom,
   type TFunction,
 } from '../../utils/localization/I18nProvider'
+import {devAppLanguage} from '../../utils/localization/appLanguage'
 import {currencies} from '../../utils/localization/currency'
 import {isDeveloperAtom} from '../../utils/preferences'
 
@@ -18,7 +19,6 @@ export const appSettingsLanguageSearchTextAtom = atom('')
 export const appSettingsCurrencySearchTextAtom = atom('')
 
 const languages = keys(supportedTranslations)
-const appSettingsDevLanguage = 'dev'
 const allCurrencies = Object.values(currencies)
 
 const getNextBooleanValue = (
@@ -41,26 +41,25 @@ const matchesCurrency =
 
 export type AppSettingsLanguage =
   | keyof typeof supportedTranslations
-  | typeof appSettingsDevLanguage
+  | typeof devAppLanguage
 
 export function getAppSettingsLanguageLabel(
   language: AppSettingsLanguage,
   t: TFunction
 ): string {
-  if (language === appSettingsDevLanguage) return 'English DEV'
+  if (language === devAppLanguage) return 'English DEV'
   return t(`settings.items.language.${language}`)
 }
 
 export function getAppSettingsLanguageFlag(
   language: AppSettingsLanguage
 ): string {
-  if (language === appSettingsDevLanguage) return '🇬🇧'
+  if (language === devAppLanguage) return '🇬🇧'
   return supportedTranslations[language].flag
 }
 
 export const appSettingsLanguagesAtom = atom<AppSettingsLanguage[]>((get) => {
-  if (__DEV__ || get(isDeveloperAtom))
-    return [appSettingsDevLanguage, ...languages]
+  if (__DEV__ || get(isDeveloperAtom)) return [devAppLanguage, ...languages]
   return languages
 })
 

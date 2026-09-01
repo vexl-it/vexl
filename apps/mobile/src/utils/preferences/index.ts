@@ -1,7 +1,12 @@
-import {getLocales} from 'expo-localization'
+import {
+  englishLanguageCode,
+  localeToLanguageCode,
+} from '@vexl-next/domain/src/utility/LanguageCode.brand'
+import {Option, pipe} from 'effect'
 import {atom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {atomWithParsedMmkvStorage} from '../atomUtils/atomWithParsedMmkvStorage'
+import {devAppLanguage, getDeviceLanguage} from '../localization/appLanguage'
 import {currencies} from '../localization/currency'
 import getDefaultSpokenLanguage from '../localization/getDefaultSpokenLanguage'
 import {Preferences} from './domain'
@@ -44,7 +49,7 @@ export const preferencesAtom = atomWithParsedMmkvStorage(
     showMarketplaceIntroDialog: true,
     showNotesBoardIntroSheet: true,
     notesBoardEnabled: false,
-    lastUsedOfferSpokenLanguages: getDefaultSpokenLanguage(),
+    lastUsedOfferSpokenLanguages: getDefaultSpokenLanguage(getDeviceLanguage()),
   },
   Preferences
 )
@@ -65,18 +70,25 @@ export const isDeveloperAtom = focusAtom(preferencesAtom, (p) =>
   p.prop('isDeveloper')
 )
 
-export const currentAppLanguageAtom = focusAtom(preferencesAtom, (o) =>
+export const appLanguageFromPreferencesAtom = focusAtom(preferencesAtom, (o) =>
   o.prop('appLanguage')
 )
 
 /**
- * The language the app UI is actually rendered in: the in-app language
- * preference, or the device locale while the user has not picked one.
+ * Effective app language code: the in-app preference (the dev catalog counts
+ * as English), or the device language while the user has not picked one.
  */
-export const appLanguageAtom = atom(
-  (get) =>
-    get(currentAppLanguageAtom) ?? getLocales().at(0)?.languageTag ?? 'en'
-)
+export const currentAppLanguageAtom = atom((get) => {
+  const preference = get(appLanguageFromPreferencesAtom)
+  if (preference === undefined) return getDeviceLanguage()
+  if (preference === devAppLanguage) return englishLanguageCode
+
+  return pipe(
+    preference,
+    localeToLanguageCode,
+    Option.getOrElse(() => englishLanguageCode)
+  )
+})
 
 export const appThemeModeAtom = focusAtom(preferencesAtom, (o) =>
   o.prop('appThemeMode')

@@ -24,7 +24,6 @@ import RootNavigation from './components/RootNavigation'
 import ToastNotification from './components/ToastNotification'
 import UploadingOfferProgressModal from './components/UploadingOfferProgressModal'
 import {UserFeedbackDialog} from './components/UserFeedback/UserFeedbackDialog'
-import {useSetAppLanguageFromStore} from './state/useSetAppLanguageFromStore'
 import {useSetRelativeDateFormatting} from './state/useSetRelativeDateFormatting'
 import ThemeProvider from './utils/ThemeProvider'
 import {useInAppLoadingTasks} from './utils/inAppLoadingTasks/useInAppLoadingTasks'
@@ -40,7 +39,6 @@ function App(): React.ReactElement {
 
   useAppState(setLastTimeAppWasRunningToNow)
 
-  useSetAppLanguageFromStore()
   useSetRelativeDateFormatting()
   useInAppLoadingTasks()
 

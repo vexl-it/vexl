@@ -1,31 +1,37 @@
+import {type LanguageCode} from '@vexl-next/domain/src/utility/LanguageCode.brand'
 import {
   appLocaleCatalogs,
   dev,
   type TranslationKey,
 } from '@vexl-next/localization/src/translations'
 import {map} from 'effect/Record'
-import {getLocales} from 'expo-localization'
 import {createInstance, type TOptions} from 'i18next'
 import {atom, getDefaultStore, useAtomValue} from 'jotai'
 import {isStaging} from '../environment'
-import {normalizeFormattingLocale} from './formatting'
+import {
+  appLanguageFromPreferencesAtom,
+  currentAppLanguageAtom,
+} from '../preferences'
+import {devAppLanguage} from './appLanguage'
+import {type FormattingLocale} from './formatting'
+import {formattingLocaleAtom} from './formattingLocaleAtom'
 
 export const supportedTranslations = appLocaleCatalogs
 
-export function devAwareLng(language: string): string {
-  return language === 'dev' ? 'en_dev' : language
-}
+const devCatalogLanguage = 'en_dev'
 
 type I18nInstance = ReturnType<typeof createInstance>
 
-export function createI18nInstance(language: string): I18nInstance {
+function createI18nInstance(
+  language: LanguageCode | typeof devCatalogLanguage
+): I18nInstance {
   const resources = {
     ...map(appLocaleCatalogs, (catalog) => ({translation: catalog})),
-    en_dev: {translation: dev},
+    [devCatalogLanguage]: {translation: dev},
   }
   const instance = createInstance({
     resources,
-    lng: devAwareLng(language),
+    lng: language,
     fallbackLng: 'en',
     keySeparator: false,
     nsSeparator: false,
@@ -38,12 +44,6 @@ export function createI18nInstance(language: string): I18nInstance {
   return instance
 }
 
-const initialLanguage = isStaging
-  ? 'en_dev'
-  : (getLocales().at(0)?.languageTag ?? 'en')
-
-export const i18n = createI18nInstance(initialLanguage)
-
 export type TFunction = (
   key: TranslationKey,
   options?: TOptions & Record<string, unknown>
@@ -54,7 +54,16 @@ export interface TranslationContext {
   isEnglish: () => boolean
 }
 
-export const i18nAtom = atom(i18n)
+const i18nLanguageAtom = atom((get) => {
+  const preference = get(appLanguageFromPreferencesAtom)
+  const useDevCatalog =
+    preference === devAppLanguage || (preference === undefined && isStaging)
+  return useDevCatalog ? devCatalogLanguage : get(currentAppLanguageAtom)
+})
+
+// Deriving the instance (instead of swapping it from an effect) keeps
+// translations in sync with the language from the very first render.
+export const i18nAtom = atom((get) => createI18nInstance(get(i18nLanguageAtom)))
 export const showDevLabelsAtom = atom(false)
 
 export const translationAtom = atom((get): TranslationContext => {
@@ -73,12 +82,6 @@ export function useTranslation(): TranslationContext {
   return useAtomValue(translationAtom)
 }
 
-export function getCurrentLocale(): string {
-  const language = getDefaultStore().get(i18nAtom).resolvedLanguage ?? 'en'
-  return normalizeFormattingLocale(language === 'en_dev' ? 'en' : language)
-}
-
-export function getLocaleFromTranslation(t: TFunction): string {
-  const locale = t('localeName')
-  return normalizeFormattingLocale(locale === 'localeName' ? undefined : locale)
+export function getCurrentLocale(): FormattingLocale {
+  return getDefaultStore().get(formattingLocaleAtom)
 }

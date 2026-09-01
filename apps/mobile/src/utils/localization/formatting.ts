@@ -1,64 +1,57 @@
-const FALLBACK_FORMATTING_LOCALE = 'en-US'
+import {localeToLanguageCode} from '@vexl-next/domain/src/utility/LanguageCode.brand'
+import {Option, Schema, pipe} from 'effect'
 
-function isSupportedAppLanguageCode(locale: string): boolean {
-  switch (locale) {
-    case 'ar':
-    case 'bg':
-    case 'cs':
-    case 'de':
-    case 'es':
-    case 'fa':
-    case 'fi':
-    case 'fr':
-    case 'id':
-    case 'it':
-    case 'ja':
-    case 'nl':
-    case 'no':
-    case 'pcm':
-    case 'pl':
-    case 'pt':
-    case 'sk':
-    case 'sv':
-    case 'sw':
-    case 'tr':
-    case 'uk':
-    case 'zh':
-      return true
-    default:
-      return false
-  }
-}
+export const FormattingLocale = Schema.String.pipe(
+  Schema.brand('FormattingLocale')
+)
+export type FormattingLocale = Schema.Schema.Type<typeof FormattingLocale>
 
-export function normalizeFormattingLocale(locale: string | undefined): string {
-  const normalizedLocale = locale?.trim().replace(/_/g, '-').toLowerCase()
-  if (!normalizedLocale) return FALLBACK_FORMATTING_LOCALE
+const SupportedFormattingLanguage = Schema.Literal(
+  'ar',
+  'bg',
+  'cs',
+  'de',
+  'es',
+  'fa',
+  'fi',
+  'fr',
+  'id',
+  'it',
+  'ja',
+  'nl',
+  'no',
+  'pcm',
+  'pl',
+  'pt',
+  'sk',
+  'sv',
+  'sw',
+  'tr',
+  'uk',
+  'zh'
+)
 
-  if (
-    normalizedLocale === 'dev' ||
-    normalizedLocale === 'en' ||
-    normalizedLocale === 'en-dev' ||
-    normalizedLocale.startsWith('en-')
-  ) {
-    return FALLBACK_FORMATTING_LOCALE
-  }
+const toFormattingLocale = Schema.decodeSync(FormattingLocale)
+const FALLBACK_FORMATTING_LOCALE = toFormattingLocale('en-US')
 
-  if (isSupportedAppLanguageCode(normalizedLocale)) return normalizedLocale
-
-  const languageCode = normalizedLocale.split('-').at(0)
-  if (languageCode && isSupportedAppLanguageCode(languageCode)) {
-    return languageCode
-  }
-
-  return FALLBACK_FORMATTING_LOCALE
+export function normalizeFormattingLocale(
+  locale: string | undefined
+): FormattingLocale {
+  return pipe(
+    Option.fromNullable(locale),
+    Option.flatMap(localeToLanguageCode),
+    Option.filter(Schema.is(SupportedFormattingLanguage)),
+    Option.map(toFormattingLocale),
+    Option.getOrElse(() => FALLBACK_FORMATTING_LOCALE)
+  )
 }
 
 export function formatDecimal(
   number: number,
-  locale: string | undefined,
+  locale: FormattingLocale,
   options?: Intl.NumberFormatOptions
 ): string {
-  return new Intl.NumberFormat(normalizeFormattingLocale(locale), {
+  return new Intl.NumberFormat(locale, {
     style: 'decimal',
     ...options,
   }).format(number)
@@ -66,7 +59,7 @@ export function formatDecimal(
 
 export function formatInteger(
   number: number,
-  locale: string | undefined
+  locale: FormattingLocale
 ): string {
   return formatDecimal(number, locale, {
     maximumFractionDigits: 0,
@@ -76,10 +69,10 @@ export function formatInteger(
 export function formatCurrency(
   number: number,
   currency: string,
-  locale: string | undefined,
+  locale: FormattingLocale,
   options?: Intl.NumberFormatOptions
 ): string {
-  return new Intl.NumberFormat(normalizeFormattingLocale(locale), {
+  return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency,
     currencyDisplay: 'symbol',
@@ -89,10 +82,10 @@ export function formatCurrency(
 
 export function formatPercent(
   number: number,
-  locale: string | undefined,
+  locale: FormattingLocale,
   options?: Intl.NumberFormatOptions
 ): string {
-  return new Intl.NumberFormat(normalizeFormattingLocale(locale), {
+  return new Intl.NumberFormat(locale, {
     style: 'percent',
     ...options,
   }).format(number)
@@ -130,33 +123,33 @@ function withDateTimeFormatDefaults(
 
 export function formatDate(
   date: Date | number,
-  locale: string | undefined,
+  locale: FormattingLocale,
   options?: Intl.DateTimeFormatOptions
 ): string {
   return new Intl.DateTimeFormat(
-    normalizeFormattingLocale(locale),
+    locale,
     withDateTimeFormatDefaults({dateStyle: 'medium'}, options)
   ).format(date)
 }
 
 export function formatTime(
   date: Date | number,
-  locale: string | undefined,
+  locale: FormattingLocale,
   options?: Intl.DateTimeFormatOptions
 ): string {
   return new Intl.DateTimeFormat(
-    normalizeFormattingLocale(locale),
+    locale,
     withDateTimeFormatDefaults({timeStyle: 'short'}, options)
   ).format(date)
 }
 
 export function formatDateTime(
   date: Date | number,
-  locale: string | undefined,
+  locale: FormattingLocale,
   options?: Intl.DateTimeFormatOptions
 ): string {
   return new Intl.DateTimeFormat(
-    normalizeFormattingLocale(locale),
+    locale,
     withDateTimeFormatDefaults(
       {dateStyle: 'medium', timeStyle: 'short'},
       options

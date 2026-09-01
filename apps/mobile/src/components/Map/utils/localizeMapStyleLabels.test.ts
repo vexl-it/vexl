@@ -1,4 +1,8 @@
+import {LanguageCode} from '@vexl-next/domain/src/utility/LanguageCode.brand'
+import {Schema} from 'effect'
 import {localizeMapStyleLabels} from './localizeMapStyleLabels'
+
+const languageCode = Schema.decodeSync(LanguageCode)
 
 // Mirrors the label expressions OpenFreeMap's positron/dark styles use.
 const style = {
@@ -27,7 +31,10 @@ const style = {
 
 describe('localizeMapStyleLabels', () => {
   it('rewrites place-name labels to prefer the app language', () => {
-    const result = localizeMapStyleLabels(JSON.stringify(style), 'cs')
+    const result = localizeMapStyleLabels(
+      JSON.stringify(style),
+      languageCode('cs')
+    )
     expect(result).not.toBeNull()
     const parsed = JSON.parse(result ?? '')
 
@@ -40,7 +47,10 @@ describe('localizeMapStyleLabels', () => {
   })
 
   it('falls back to name:latin before the raw local name', () => {
-    const result = localizeMapStyleLabels(JSON.stringify(style), 'cs')
+    const result = localizeMapStyleLabels(
+      JSON.stringify(style),
+      languageCode('cs')
+    )
     const parsed = JSON.parse(result ?? '')
 
     const textField = parsed.layers[0].layout['text-field']
@@ -48,15 +58,24 @@ describe('localizeMapStyleLabels', () => {
     expect(textField[3]).toEqual(['get', 'name'])
   })
 
-  it('normalizes region locales to the bare language code', () => {
-    const result = localizeMapStyleLabels(JSON.stringify(style), 'cs-CZ')
+  it('preserves three-letter language codes', () => {
+    const result = localizeMapStyleLabels(
+      JSON.stringify(style),
+      languageCode('pcm')
+    )
     const parsed = JSON.parse(result ?? '')
 
-    expect(parsed.layers[0].layout['text-field'][1]).toEqual(['get', 'name:cs'])
+    expect(parsed.layers[0].layout['text-field'][1]).toEqual([
+      'get',
+      'name:pcm',
+    ])
   })
 
   it('leaves non-name labels and non-symbol layers untouched', () => {
-    const result = localizeMapStyleLabels(JSON.stringify(style), 'cs')
+    const result = localizeMapStyleLabels(
+      JSON.stringify(style),
+      languageCode('cs')
+    )
     const parsed = JSON.parse(result ?? '')
 
     expect(parsed.layers[1]).toEqual(style.layers[1])
@@ -64,7 +83,10 @@ describe('localizeMapStyleLabels', () => {
   })
 
   it('preserves all other style document fields', () => {
-    const result = localizeMapStyleLabels(JSON.stringify(style), 'cs')
+    const result = localizeMapStyleLabels(
+      JSON.stringify(style),
+      languageCode('cs')
+    )
     const parsed = JSON.parse(result ?? '')
 
     expect(parsed.version).toEqual(8)
@@ -72,7 +94,7 @@ describe('localizeMapStyleLabels', () => {
   })
 
   it('returns null for documents that are not a style', () => {
-    expect(localizeMapStyleLabels('not json', 'cs')).toBeNull()
-    expect(localizeMapStyleLabels('{"foo": 1}', 'cs')).toBeNull()
+    expect(localizeMapStyleLabels('not json', languageCode('cs'))).toBeNull()
+    expect(localizeMapStyleLabels('{"foo": 1}', languageCode('cs'))).toBeNull()
   })
 })

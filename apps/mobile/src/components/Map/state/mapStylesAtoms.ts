@@ -3,7 +3,7 @@ import {Effect, Schema} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
-import {appLanguageAtom} from '../../../utils/preferences'
+import {currentAppLanguageAtom} from '../../../utils/preferences'
 import reportError, {ignoreReportErrors} from '../../../utils/reportError'
 import {localizeMapStyleLabels} from '../utils/localizeMapStyleLabels'
 
@@ -44,7 +44,7 @@ export const loadMapStylesActionAtom = atom(null, (get, set) =>
 // Style documents with place-name labels rewritten to the app language.
 export const localizedMapStylesAtom = atom((get) => {
   const styleJsons = get(mapStyleJsonsAtom)
-  const language = get(appLanguageAtom)
+  const language = get(currentAppLanguageAtom)
 
   const localized = (theme: 'light' | 'dark'): string => {
     const styleJson = styleJsons[theme]

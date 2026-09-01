@@ -49,27 +49,37 @@ describe('normalizeFormattingLocale', () => {
 
 describe('formatting helpers', () => {
   it('formats English decimals with en-US separators', () => {
-    expect(formatDecimal(1234567.89, 'en')).toBe('1,234,567.89')
+    expect(formatDecimal(1234567.89, normalizeFormattingLocale('en'))).toBe(
+      '1,234,567.89'
+    )
   })
 
   it('formats Czech decimals with locale separators', () => {
-    const formatted = formatDecimal(1234567.89, 'cs')
+    const formatted = formatDecimal(1234567.89, normalizeFormattingLocale('cs'))
 
     expect(formatted).toMatch(/^1\s234\s567,89$/)
     expect(formatted).not.toBe('1,234,567.89')
   })
 
   it('formats currency with an explicit currency code', () => {
-    expect(formatCurrency(1, 'EUR', 'en')).toBe('€1.00')
+    expect(formatCurrency(1, 'EUR', normalizeFormattingLocale('en'))).toBe(
+      '€1.00'
+    )
   })
 
   it('formats a fixed datetime differently for en-US and Czech', () => {
     const date = new Date('2025-01-02T15:45:00.000Z')
 
     expect(
-      formatDateTime(date, 'en-US', {timeZone: 'UTC', dateStyle: 'medium'})
+      formatDateTime(date, normalizeFormattingLocale('en-US'), {
+        timeZone: 'UTC',
+        dateStyle: 'medium',
+      })
     ).not.toBe(
-      formatDateTime(date, 'cs', {timeZone: 'UTC', dateStyle: 'medium'})
+      formatDateTime(date, normalizeFormattingLocale('cs'), {
+        timeZone: 'UTC',
+        dateStyle: 'medium',
+      })
     )
   })
 
@@ -77,7 +87,7 @@ describe('formatting helpers', () => {
     const date = new Date('2025-01-02T15:45:00.000Z')
 
     expect(() =>
-      formatDate(date, 'en-US', {
+      formatDate(date, normalizeFormattingLocale('en-US'), {
         timeZone: 'UTC',
         weekday: 'long',
         day: 'numeric',
@@ -91,7 +101,7 @@ describe('formatting helpers', () => {
     const date = new Date('2025-01-02T15:45:00.000Z')
 
     expect(() =>
-      formatTime(date, 'en-US', {
+      formatTime(date, normalizeFormattingLocale('en-US'), {
         timeZone: 'UTC',
         hour: 'numeric',
         minute: 'numeric',
@@ -103,7 +113,7 @@ describe('formatting helpers', () => {
     const date = new Date('2025-01-02T15:45:00.000Z')
 
     expect(() =>
-      formatDateTime(date, 'en-US', {
+      formatDateTime(date, normalizeFormattingLocale('en-US'), {
         timeZone: 'UTC',
         weekday: 'short',
         month: 'numeric',

@@ -14,7 +14,10 @@ import React, {useState} from 'react'
 import {XStack, YStack} from 'tamagui'
 import {SATOSHIS_IN_BTC} from '../../../state/currentBtcPriceAtoms'
 import {currencies} from '../../../utils/localization/currency'
-import {formatDecimal} from '../../../utils/localization/formatting'
+import {
+  formatDecimal,
+  type FormattingLocale,
+} from '../../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../../utils/localization/formattingLocaleAtom'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {parseDecimalInput} from '../../../utils/normalizeDecimalInput'
@@ -44,7 +47,7 @@ function displayValueToSatsString(
 function formatFiatAmount(
   amount: number,
   currencyCode: string,
-  locale: string
+  locale: FormattingLocale
 ): string {
   return `${formatDecimal(amount, locale, {maximumFractionDigits: 0})} ${currencyCode}`
 }

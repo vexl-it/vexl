@@ -11,6 +11,7 @@ import {useTranslation} from '../../../../../../../utils/localization/I18nProvid
 import {
   formatDate,
   formatTime,
+  type FormattingLocale,
 } from '../../../../../../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../../../../../../utils/localization/formattingLocaleAtom'
 import {availableDateTimesAtom, uniqueAvailableDatesAtom} from '../../../atoms'
@@ -40,7 +41,7 @@ function isSameDay(
 
 function getDateHeadline(
   date: UnixMilliseconds,
-  locale: string
+  locale: FormattingLocale
 ): {
   weekday: string
   label: string
@@ -55,7 +56,10 @@ function getDateHeadline(
   }
 }
 
-function getSlotLabel(slot: UnixMilliseconds, locale: string): string {
+function getSlotLabel(
+  slot: UnixMilliseconds,
+  locale: FormattingLocale
+): string {
   return formatTime(slot, locale)
 }
 

@@ -9,7 +9,7 @@ import {atom} from 'jotai'
 import {splitAtom} from 'jotai/utils'
 import {apiAtom} from '../../api'
 import {createEffectAtomWithProgress} from '../../utils/atomUtils/createEffectAtomWithProgress'
-import {appLanguageAtom} from '../../utils/preferences'
+import {currentAppLanguageAtom} from '../../utils/preferences'
 import {reportLocationServiceError} from '../../utils/reportLocationServiceError'
 import {transientRequestRetryPolicy} from '../../utils/transientRequestRetryPolicy'
 
@@ -42,7 +42,7 @@ export const LocationSearchMolecule = molecule(() => {
         : get(apiAtom)
             .location.getLocationSuggestions({
               phrase: query,
-              lang: get(appLanguageAtom),
+              lang: get(currentAppLanguageAtom),
             })
             .pipe(
               Effect.retry(transientRequestRetryPolicy),

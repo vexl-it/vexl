@@ -12,6 +12,7 @@ import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {
   formatDate,
   formatTime,
+  type FormattingLocale,
 } from '../../../../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../../../../utils/localization/formattingLocaleAtom'
 import unixMillisecondsToLocaleDateTime from '../../../../../utils/unixMillisecondsToLocaleDateTime'
@@ -22,7 +23,7 @@ import {type Item as OptionItem} from './OptionsList'
 
 function createOptionsFromChosenDays(
   days: AvailableDateTimeOption[],
-  locale: string
+  locale: FormattingLocale
 ): Array<OptionItem<AvailableDateTimeOption>> {
   const uniqueDates: AvailableDateTimeOption[] = []
   // TODO: remove this logic once all devices update to new checklist DateTime format
@@ -65,7 +66,7 @@ type Props = TradeChecklistStackScreenProps<'PickDateFromSuggestions'>
 
 function getDateLabels(
   date: AvailableDateTimeOption['date'],
-  locale: string
+  locale: FormattingLocale
 ): Readonly<{
   weekday: string
   label: string

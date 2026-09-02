@@ -84,6 +84,8 @@
   "vexlOnlyContacts.description": "Te kontakty są zapisane tylko w Vexlu, nie w telefonie — zostały dodane ręcznie albo przywrócone z kopii zapasowej. Wyeksportuj je jako plik kontaktów (.vcf), aby mieć bezpieczną kopię poza aplikacją.",
   "vexlOnlyContacts.exportButton": "Eksportuj kontakty",
   "vexlOnlyContacts.exportSheetTitle": "Utwórz kopię zapasową tych kontaktów",
+  "vexlOnlyContacts.exportSuccessTitle": "Kopia gotowa!",
+  "vexlOnlyContacts.exportSuccessDescription": "Twoje kontakty są zapisane w pliku kopii zapasowej (.vcf). Trzymaj go w bezpiecznym miejscu — możesz je przywrócić w każdej chwili na ekranie Dodaj nowy kontakt.",
   "vexlOnlyContacts.emptyTitle": "Brak kontaktów do zapisania",
   "vexlOnlyContacts.emptyDescription": "Kontakty, które istnieją tylko w Vexlu — dodane ręcznie albo przywrócone z kopii zapasowej — pojawią się tutaj. Masz plik kopii zapasowej (.vcf)? Zaimportuj go na ekranie Dodaj nowy kontakt.",
   "contactPreferences.importVcf.invalidFileTitle": "Nie udało się odczytać pliku",

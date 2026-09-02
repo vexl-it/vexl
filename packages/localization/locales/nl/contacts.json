@@ -84,6 +84,8 @@
   "vexlOnlyContacts.description": "Deze contacten zijn alleen in Vexl opgeslagen, niet op je telefoon — je hebt ze handmatig toegevoegd of hersteld uit een back-up. Exporteer ze als contactbestand (.vcf) om een veilige kopie buiten de app te bewaren.",
   "vexlOnlyContacts.exportButton": "Contacten exporteren",
   "vexlOnlyContacts.exportSheetTitle": "Maak een back-up van deze contacten",
+  "vexlOnlyContacts.exportSuccessTitle": "Back-up klaar!",
+  "vexlOnlyContacts.exportSuccessDescription": "Je contacten zijn opgeslagen in een back-upbestand (.vcf). Bewaar het op een veilige plek — je kunt ze altijd terughalen via het scherm Nieuw contact toevoegen.",
   "vexlOnlyContacts.emptyTitle": "Niets om te back-uppen",
   "vexlOnlyContacts.emptyDescription": "Contacten die alleen in Vexl bestaan — handmatig toegevoegd of hersteld uit een back-up — verschijnen hier. Heb je een back-upbestand (.vcf)? Importeer het via het scherm Nieuw contact toevoegen.",
   "contactPreferences.importVcf.invalidFileTitle": "Kan het bestand niet lezen",

@@ -94,6 +94,140 @@ describe('parseVcardString', () => {
     ])
   })
 
+  it('decodes a quoted-printable UTF-8 formatted name', () => {
+    const result = parseVcardString(
+      'BEGIN:VCARD\r\n' +
+        'VERSION:2.1\r\n' +
+        'FN;CHARSET=UTF-8;ENCODING=QUOTED-PRINTABLE:=C5=A0t=C4=9Bp=C3=A1n\r\n' +
+        'TEL:+420777888999\r\n' +
+        'END:VCARD\r\n'
+    )
+
+    expect(result).toEqual([{name: 'Štěpán', phoneNumbers: ['+420777888999']}])
+  })
+
+  it('recognizes the bare quoted-printable parameter', () => {
+    const result = parseVcardString(
+      'BEGIN:VCARD\n' +
+        'FN;CHARSET=UTF-8;QUOTED-PRINTABLE:=C5=A0t=C4=9Bp=C3=A1n\n' +
+        'TEL:+420777888999\n' +
+        'END:VCARD\n'
+    )
+
+    expect(result).toEqual([{name: 'Štěpán', phoneNumbers: ['+420777888999']}])
+  })
+
+  it('joins and decodes quoted-printable soft line breaks', () => {
+    const result = parseVcardString(
+      'BEGIN:VCARD\r\n' +
+        'FN;ENCODING=QUOTED-PRINTABLE:=C5=A0t=C4=\r\n' +
+        '=9Bp=C3=A1n\r\n' +
+        'TEL:+420777888999\r\n' +
+        'END:VCARD\r\n'
+    )
+
+    expect(result).toEqual([{name: 'Štěpán', phoneNumbers: ['+420777888999']}])
+  })
+
+  it('parses a vCard 2.1 structured quoted-printable name', () => {
+    const result = parseVcardString(
+      'BEGIN:VCARD\r\n' +
+        'VERSION:2.1\r\n' +
+        'N;CHARSET=UTF-8;ENCODING=QUOTED-PRINTABLE:=C4=8Cern=C3=BD;Jan;;;\r\n' +
+        'TEL;CELL:+420777888999\r\n' +
+        'END:VCARD\r\n'
+    )
+
+    expect(result).toEqual([
+      {name: 'Jan Černý', phoneNumbers: ['+420777888999']},
+    ])
+  })
+
+  it('keeps malformed quoted-printable values without throwing', () => {
+    const malformedEscape = parseVcardString(
+      'BEGIN:VCARD\n' +
+        'FN;ENCODING=QUOTED-PRINTABLE:=ZZ\n' +
+        'TEL:+420777888999\n' +
+        'END:VCARD\n'
+    )
+    const invalidUtf8 = parseVcardString(
+      'BEGIN:VCARD\n' +
+        'FN;ENCODING=QUOTED-PRINTABLE:=FF\n' +
+        'TEL:+420111222333\n' +
+        'END:VCARD\n'
+    )
+
+    expect(malformedEscape).toEqual([
+      {name: '=ZZ', phoneNumbers: ['+420777888999']},
+    ])
+    expect(invalidUtf8).toEqual([
+      {name: '=FF', phoneNumbers: ['+420111222333']},
+    ])
+  })
+
+  it('joins a soft-break continuation whose content contains a colon', () => {
+    const result = parseVcardString(
+      'BEGIN:VCARD\n' +
+        'FN;ENCODING=QUOTED-PRINTABLE:John =\n' +
+        'Smith:Jr\n' +
+        'TEL:+420777888999\n' +
+        'END:VCARD\n' +
+        'BEGIN:VCARD\n' +
+        'FN;ENCODING=QUOTED-PRINTABLE:Jane =\n' +
+        'SMITH:JR\n' +
+        'TEL:+420111222333\n' +
+        'END:VCARD\n'
+    )
+
+    expect(result).toEqual([
+      {name: 'John Smith:Jr', phoneNumbers: ['+420777888999']},
+      {name: 'Jane SMITH:JR', phoneNumbers: ['+420111222333']},
+    ])
+  })
+
+  it('stops joining at lowercase property and boundary lines', () => {
+    const result = parseVcardString(
+      'BEGIN:VCARD\n' +
+        'FN;ENCODING=QUOTED-PRINTABLE:Alice=\n' +
+        'tel:+420777888999\n' +
+        'end:vcard\n'
+    )
+
+    expect(result).toEqual([{name: 'Alice=', phoneNumbers: ['+420777888999']}])
+  })
+
+  it('does not consume the TEL property or card boundary after a malformed trailing equals sign', () => {
+    const result = parseVcardString(
+      'BEGIN:VCARD\n' +
+        'FN;ENCODING=QUOTED-PRINTABLE:Test=\n' +
+        'TEL:+420777888999\n' +
+        'END:VCARD\n' +
+        'BEGIN:VCARD\n' +
+        'FN:Second\n' +
+        'TEL:+420111222333\n' +
+        'END:VCARD\n'
+    )
+
+    expect(result).toEqual([
+      {name: 'Test=', phoneNumbers: ['+420777888999']},
+      {name: 'Second', phoneNumbers: ['+420111222333']},
+    ])
+  })
+
+  it('does not decode literal equals signs without a quoted-printable param', () => {
+    const result = parseVcardString(
+      'BEGIN:VCARD\n' +
+        'VERSION:3.0\n' +
+        'FN:Name=C5=A0\n' +
+        'TEL:+420777888999\n' +
+        'END:VCARD\n'
+    )
+
+    expect(result).toEqual([
+      {name: 'Name=C5=A0', phoneNumbers: ['+420777888999']},
+    ])
+  })
+
   it('ignores other vCard properties and cards without name or number', () => {
     const result = parseVcardString(
       'BEGIN:VCARD\n' +

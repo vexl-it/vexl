@@ -12,7 +12,10 @@ import {atomFamily, splitAtom} from 'jotai/utils'
 import {matchSorter, rankings} from 'match-sorter'
 import {Linking} from 'react-native'
 import {addContactToPhoneActionAtom} from '../../../../state/contacts/atom/addContactToPhoneWithUIFeedbackAtom'
-import {CONTACT_IMPORT_PROGRESS_DIALOG_MIN_CONTACTS} from '../../../../state/contacts/atom/contactImportUtils'
+import {
+  CONTACT_IMPORT_PROGRESS_DIALOG_MIN_CONTACTS,
+  CONTACT_NORMALIZATION_CHUNK_SIZE,
+} from '../../../../state/contacts/atom/contactImportUtils'
 import {
   normalizedContactsAtom,
   storedContactsAtom,
@@ -22,6 +25,7 @@ import {submitContactsActionAtom} from '../../../../state/contacts/atom/submitCo
 import {
   StoredContactWithComputedValues,
   type ContactsFilter,
+  type StoredContact,
 } from '../../../../state/contacts/domain'
 import {
   areContactsPermissionsAlreadyGranted,
@@ -30,7 +34,10 @@ import {
 } from '../../../../state/contacts/utils'
 import getValueFromSetStateActionOfAtom from '../../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 import {translationAtom} from '../../../../utils/localization/I18nProvider'
-import {runAfterTwoAnimationFrames} from '../../../../utils/runAfterAnimationFrames'
+import {
+  runAfterTwoAnimationFrames,
+  waitForNextAnimationFrameEffect,
+} from '../../../../utils/runAfterAnimationFrames'
 import toE164PhoneNumberWithDefaultCountryCode from '../../../../utils/toE164PhoneNumberWithDefaultCountryCode'
 import {parseVcardString} from '../../../../utils/vCard'
 import {showErrorAlert} from '../../../ErrorAlert'
@@ -53,6 +60,23 @@ class ContactsImportError extends Schema.TaggedError<ContactsImportError>(
 // Hard caps for untrusted .vcf input
 const MAX_VCF_FILE_SIZE_BYTES = 2 * 1024 * 1024
 const MAX_CONTACTS_PER_VCF_IMPORT = 5000
+
+// Raw numbers included so contacts whose normalization is still pending
+// are matched too (their computedValues are None)
+function collectStoredContactNumbers(
+  contacts: readonly StoredContact[]
+): Set<string> {
+  const numbers = new Set<string>()
+  pipe(
+    contacts,
+    Array.forEach((contact) => {
+      numbers.add(contact.info.rawNumber)
+      if (Option.isSome(contact.computedValues))
+        numbers.add(contact.computedValues.value.normalizedNumber)
+    })
+  )
+  return numbers
+}
 
 const matchSorterKeys = ['info.name', 'info.numberToDisplay']
 const matchSorterThreshold = rankings.CONTAINS
@@ -686,21 +710,47 @@ export const contactSelectMolecule = molecule((_, getScope) => {
           return false
         }
 
-        const existingNormalizedNumbers = new Set(
-          pipe(
-            get(normalizedContactsAtom),
-            Array.map((one) => one.computedValues.normalizedNumber)
+        const entries = pipe(
+          parsedContacts,
+          Array.flatMap(({name, phoneNumbers}) =>
+            pipe(
+              phoneNumbers,
+              Array.map((phoneNumber) => ({name, phoneNumber}))
+            )
           )
+        )
+        const existingContactNumbers = collectStoredContactNumbers(
+          get(storedContactsAtom)
         )
         const seenNumbers = new Set<E164PhoneNumber>()
         let skippedCount = 0
+        let processedEntriesCount = 0
+        let reachedContactLimit = false
         const contactsToImport: Array<{
           name: string
           normalizedNumber: E164PhoneNumber
         }> = []
 
-        for (const parsedContact of parsedContacts) {
-          for (const phoneNumber of parsedContact.phoneNumbers) {
+        for (const entriesChunk of pipe(
+          entries,
+          Array.chunksOf(CONTACT_NORMALIZATION_CHUNK_SIZE)
+        )) {
+          yield* _(waitForNextAnimationFrameEffect())
+          for (const {name, phoneNumber} of entriesChunk) {
+            if (contactsToImport.length >= MAX_CONTACTS_PER_VCF_IMPORT) {
+              skippedCount += entries.length - processedEntriesCount
+              reachedContactLimit = true
+              break
+            }
+            processedEntriesCount++
+
+            // Match on the raw string too - a stored contact pending
+            // normalization is only known by its raw number
+            if (existingContactNumbers.has(phoneNumber)) {
+              skippedCount++
+              continue
+            }
+
             const normalizedNumber =
               toE164PhoneNumberWithDefaultCountryCode(phoneNumber)
             if (Option.isNone(normalizedNumber)) {
@@ -709,19 +759,16 @@ export const contactSelectMolecule = molecule((_, getScope) => {
             }
             if (seenNumbers.has(normalizedNumber.value)) continue
             seenNumbers.add(normalizedNumber.value)
-            if (existingNormalizedNumbers.has(normalizedNumber.value)) {
-              skippedCount++
-              continue
-            }
-            if (contactsToImport.length >= MAX_CONTACTS_PER_VCF_IMPORT) {
+            if (existingContactNumbers.has(normalizedNumber.value)) {
               skippedCount++
               continue
             }
             contactsToImport.push({
-              name: parsedContact.name,
+              name,
               normalizedNumber: normalizedNumber.value,
             })
           }
+          if (reachedContactLimit) break
         }
 
         if (!Array.isNonEmptyArray(contactsToImport)) {
@@ -753,37 +800,62 @@ export const contactSelectMolecule = molecule((_, getScope) => {
         if (!importConfirmed) return false
 
         const newStoredContacts = yield* _(
-          Effect.forEach(contactsToImport, ({name, normalizedNumber}) =>
-            hashPhoneNumberE(normalizedNumber).pipe(
-              Effect.map((hash) =>
-                Schema.decodeSync(StoredContactWithComputedValues)({
-                  info: {
-                    name,
-                    numberToDisplay: normalizedNumber,
-                    rawNumber: normalizedNumber,
-                  },
-                  computedValues: {
-                    hash,
-                    normalizedNumber,
-                  },
-                  // seen: false so restored contacts surface on the "New" tab
-                  // (they get resolved as seen when the list screen unmounts)
-                  flags: {
-                    seen: false,
-                    imported: false,
-                    importedManually: true,
-                    invalidNumber: 'valid',
-                  },
-                })
+          Effect.forEach(
+            Array.chunksOf(contactsToImport, CONTACT_NORMALIZATION_CHUNK_SIZE),
+            (contactsToImportChunk) =>
+              waitForNextAnimationFrameEffect().pipe(
+                Effect.zipRight(
+                  Effect.forEach(
+                    contactsToImportChunk,
+                    ({name, normalizedNumber}) =>
+                      hashPhoneNumberE(normalizedNumber).pipe(
+                        Effect.map((hash) =>
+                          Schema.decodeSync(StoredContactWithComputedValues)({
+                            info: {
+                              name,
+                              numberToDisplay: normalizedNumber,
+                              rawNumber: normalizedNumber,
+                            },
+                            computedValues: {
+                              hash,
+                              normalizedNumber,
+                            },
+                            // seen: false so restored contacts surface on the
+                            // "New" tab (they get resolved as seen when the
+                            // list screen unmounts)
+                            flags: {
+                              seen: false,
+                              imported: false,
+                              importedManually: true,
+                              invalidNumber: 'valid',
+                            },
+                          })
+                        )
+                      )
+                  )
+                )
               )
-            )
+          ),
+          Effect.map(Array.flatten)
+        )
+
+        // The confirmation dialog can stay open indefinitely - drop entries
+        // that another flow (e.g. background contact sync) stored meanwhile
+        const currentContactNumbers = collectStoredContactNumbers(
+          get(storedContactsAtom)
+        )
+        const contactsToStore = pipe(
+          newStoredContacts,
+          Array.filter(
+            (one) =>
+              !currentContactNumbers.has(one.computedValues.normalizedNumber)
           )
         )
 
         set(storedContactsAtom, (prev) => [
           ...prev,
           ...pipe(
-            newStoredContacts,
+            contactsToStore,
             Array.map((one) => ({
               ...one,
               computedValues: Option.some(one.computedValues),
@@ -793,9 +865,9 @@ export const contactSelectMolecule = molecule((_, getScope) => {
         set(selectedNumbersAtom, (selectedNumbers) => {
           const nextSelectedNumbers = new Set(selectedNumbers)
           pipe(
-            contactsToImport,
-            Array.forEach(({normalizedNumber}) => {
-              nextSelectedNumbers.add(normalizedNumber)
+            contactsToStore,
+            Array.forEach((one) => {
+              nextSelectedNumbers.add(one.computedValues.normalizedNumber)
             })
           )
           return nextSelectedNumbers
@@ -805,7 +877,7 @@ export const contactSelectMolecule = molecule((_, getScope) => {
         set(
           toastNotificationAtom,
           t('contactPreferences.importVcf.success', {
-            count: contactsToImport.length,
+            count: contactsToStore.length,
           })
         )
 

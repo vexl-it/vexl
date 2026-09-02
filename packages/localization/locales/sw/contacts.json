@@ -84,6 +84,8 @@
   "vexlOnlyContacts.description": "Mawasiliano haya yamehifadhiwa kwenye Vexl pekee, si kwenye simu yako — uliyaongeza mwenyewe au kuyarejesha kutoka kwenye nakala rudufu. Yahamishe kama faili la mawasiliano (.vcf) ili uwe na nakala salama nje ya programu.",
   "vexlOnlyContacts.exportButton": "Hamisha mawasiliano",
   "vexlOnlyContacts.exportSheetTitle": "Hifadhi nakala ya mawasiliano haya",
+  "vexlOnlyContacts.exportSuccessTitle": "Nakala rudufu imekamilika!",
+  "vexlOnlyContacts.exportSuccessDescription": "Mawasiliano yako yamehifadhiwa kwenye faili la nakala rudufu (.vcf). Lihifadhi mahali salama — unaweza kuyarejesha wakati wowote kupitia skrini ya Ongeza mwasiliani mpya.",
   "vexlOnlyContacts.emptyTitle": "Hakuna cha kuhifadhi",
   "vexlOnlyContacts.emptyDescription": "Mawasiliano yaliyopo kwenye Vexl pekee — yaliyoongezwa mwenyewe au kurejeshwa kutoka kwenye nakala rudufu — yataonekana hapa. Una faili la nakala rudufu (.vcf)? Liingize kupitia skrini ya Ongeza mwasiliani mpya.",
   "contactPreferences.importVcf.invalidFileTitle": "Imeshindikana kusoma faili",

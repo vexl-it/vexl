@@ -84,6 +84,8 @@
   "vexlOnlyContacts.description": "これらの連絡先はVexlにのみ保存されており、スマホには保存されていません。手動で追加したか、バックアップから復元したものです。連絡先ファイル（.vcf）としてエクスポートして、アプリの外に安全なコピーを保管しましょう。",
   "vexlOnlyContacts.exportButton": "連絡先をエクスポート",
   "vexlOnlyContacts.exportSheetTitle": "これらの連絡先をバックアップ",
+  "vexlOnlyContacts.exportSuccessTitle": "バックアップ完了！",
+  "vexlOnlyContacts.exportSuccessDescription": "連絡先をバックアップファイル（.vcf）に保存しました。安全な場所に保管してください。「新しい連絡先を追加」画面からいつでも戻せます。",
   "vexlOnlyContacts.emptyTitle": "バックアップするものがありません",
   "vexlOnlyContacts.emptyDescription": "Vexlにのみ存在する連絡先（手動で追加、またはバックアップから復元したもの）がここに表示されます。バックアップファイル（.vcf）がある場合は、「新しい連絡先を追加」画面からインポートできます。",
   "contactPreferences.importVcf.invalidFileTitle": "ファイルを読み込めませんでした",

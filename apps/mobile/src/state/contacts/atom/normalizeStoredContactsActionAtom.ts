@@ -10,6 +10,7 @@ import sequenceTasksWithAnimationFrames from '../../../utils/sequenceTasksWithAn
 import toE164PhoneNumberWithDefaultCountryCode from '../../../utils/toE164PhoneNumberWithDefaultCountryCode'
 import {type ContactComputedValues, type StoredContact} from '../domain'
 import {hashPhoneNumber} from '../utils'
+import {CONTACT_NORMALIZATION_CHUNK_SIZE} from './contactImportUtils'
 import {storedContactsAtom} from './contactsStore'
 
 function markContactInvalid(contact: StoredContact): StoredContact {
@@ -108,12 +109,15 @@ const normalizeStoredContactsActionAtom = atom(
         pipe(
           toNormalize,
           Array.map(flow(normalizeContact, effectToTask)),
-          sequenceTasksWithAnimationFrames(50, (percentage) => {
-            onProgress({
-              total: toNormalize.length,
-              percentDone: percentage,
-            })
-          }),
+          sequenceTasksWithAnimationFrames(
+            CONTACT_NORMALIZATION_CHUNK_SIZE,
+            (percentage) => {
+              onProgress({
+                total: toNormalize.length,
+                percentDone: percentage,
+              })
+            }
+          ),
           taskToEffect
         )
       )

@@ -84,6 +84,8 @@
   "vexlOnlyContacts.description": "Estes contactos estão guardados apenas no Vexl, não no teu telemóvel — adicionaste-os manualmente ou restauraste-os de um backup. Exporta-os como ficheiro de contactos (.vcf) para teres uma cópia segura fora da app.",
   "vexlOnlyContacts.exportButton": "Exportar contactos",
   "vexlOnlyContacts.exportSheetTitle": "Fazer backup destes contactos",
+  "vexlOnlyContacts.exportSuccessTitle": "Backup feito!",
+  "vexlOnlyContacts.exportSuccessDescription": "Os teus contactos estão guardados num ficheiro de backup (.vcf). Guarda-o num sítio seguro — podes trazê-los de volta a qualquer momento no ecrã Adicionar novo contacto.",
   "vexlOnlyContacts.emptyTitle": "Nada para guardar",
   "vexlOnlyContacts.emptyDescription": "Os contactos que só existem no Vexl — adicionados manualmente ou restaurados de um backup — vão aparecer aqui. Tens um ficheiro de backup (.vcf)? Importa-o no ecrã Adicionar novo contacto.",
   "contactPreferences.importVcf.invalidFileTitle": "Não foi possível ler o ficheiro",

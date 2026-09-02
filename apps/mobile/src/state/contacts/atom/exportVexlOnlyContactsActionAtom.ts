@@ -2,6 +2,7 @@ import {Array, Effect, Schema, pipe} from 'effect'
 import {shareAsync} from 'expo-sharing'
 import {atom} from 'jotai'
 import {showErrorAlert} from '../../../components/ErrorAlert'
+import {askAreYouSureActionAtom} from '../../../components/GlobalDialog'
 import {getContactsBackupFile} from '../../../utils/fsDirectories'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import {contactsToVcardString} from '../../../utils/vCard'
@@ -15,7 +16,7 @@ class ContactsExportError extends Schema.TaggedError<ContactsExportError>(
 
 export const exportVexlOnlyContactsActionAtom = atom(
   null,
-  (get): Effect.Effect<boolean> => {
+  (get, set): Effect.Effect<boolean> => {
     const {t} = get(translationAtom)
     const vexlOnlyContacts = get(vexlOnlyContactsAtom)
 
@@ -49,6 +50,19 @@ export const exportVexlOnlyContactsActionAtom = atom(
       },
       catch: (e) => new ContactsExportError({cause: e}),
     }).pipe(
+      Effect.zipRight(
+        set(askAreYouSureActionAtom, {
+          variant: 'info',
+          steps: [
+            {
+              type: 'StepWithText',
+              title: t('vexlOnlyContacts.exportSuccessTitle'),
+              description: t('vexlOnlyContacts.exportSuccessDescription'),
+              positiveButtonText: t('common.gotIt'),
+            },
+          ],
+        }).pipe(Effect.ignore)
+      ),
       Effect.as(true),
       Effect.catchAll((e) =>
         Effect.sync(() => {

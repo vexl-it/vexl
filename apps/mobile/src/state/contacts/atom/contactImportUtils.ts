@@ -9,6 +9,7 @@ import {
 
 export const CONTACT_IMPORT_BATCH_SIZE = 1000
 export const CONTACT_IMPORT_LOCAL_PROCESSING_CHUNK_SIZE = 500
+export const CONTACT_NORMALIZATION_CHUNK_SIZE = 50
 // UX threshold, intentionally independent of the processing chunk size above —
 // tuning chunk sizes for performance must not change when the dialog appears.
 export const CONTACT_IMPORT_PROGRESS_DIALOG_MIN_CONTACTS = 500

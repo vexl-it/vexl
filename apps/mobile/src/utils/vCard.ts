@@ -68,6 +68,30 @@ function sanitizeParsedName(name: string): string {
     .slice(0, MAX_PARSED_NAME_LENGTH)
 }
 
+// Lines that must terminate a QP soft-break join: card boundaries and
+// well-known vCard properties (optionally with an "item1." group and
+// ;params), matched case-insensitively like the rest of the parser.
+// A whitelist is used because QP continuation content may legitimately
+// contain a colon (e.g. "Smith:Jr") and must not be mistaken for a
+// property line.
+const propertyLinePattern =
+  /^([\w-]+\.)?(BEGIN|END|VERSION|FN|N|TEL|EMAIL|ADR|ORG|TITLE|NOTE|URL|PHOTO|BDAY|X-[\w-]+)(;[^:]*)?:/i
+
+function looksLikePropertyLine(line: string): boolean {
+  return propertyLinePattern.test(line.trim())
+}
+
+function decodeQuotedPrintableValue(value: string): string {
+  try {
+    return decodeURIComponent(
+      value.replace(/%/g, '%25').replace(/=([0-9A-Fa-f]{2})/g, '%$1')
+    )
+  } catch {
+    // malformed QP or invalid UTF-8 - keep the raw value rather than dropping the contact
+    return value
+  }
+}
+
 function splitOnUnescapedSemicolons(value: string): string[] {
   const parts: string[] = []
   let currentPart = ''
@@ -119,7 +143,9 @@ export function parseVcardString(vcardString: string): ParsedVcardContact[] {
     | {formattedName?: string; structuredName?: string; phoneNumbers: string[]}
     | undefined
 
-  for (const line of lines) {
+  for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
+    const line = lines[lineIndex]
+    if (line === undefined) continue
     const upperCasedLine = line.trim().toUpperCase()
     if (upperCasedLine === 'BEGIN:VCARD') {
       currentContact = {phoneNumbers: []}
@@ -144,16 +170,40 @@ export function parseVcardString(vcardString: string): ParsedVcardContact[] {
 
     const colonIndex = line.indexOf(':')
     if (colonIndex <= 0) continue
-    const value = line.slice(colonIndex + 1).trim()
-    if (value === '') continue
+    const propertyAndParams = line.slice(0, colonIndex).split(';')
     // strip params (TEL;TYPE=CELL) and Apple item groups (item1.TEL)
-    const property = line
-      .slice(0, colonIndex)
-      .split(';')[0]
+    const property = propertyAndParams[0]
       ?.split('.')
       .pop()
       ?.trim()
       .toUpperCase()
+    const isQuotedPrintable = pipe(
+      propertyAndParams,
+      Array.drop(1),
+      Array.some((param) => {
+        const normalizedParam = param.trim().toUpperCase()
+        return (
+          normalizedParam === 'ENCODING=QUOTED-PRINTABLE' ||
+          normalizedParam === 'QUOTED-PRINTABLE'
+        )
+      })
+    )
+    let value = line.slice(colonIndex + 1).trim()
+    if (isQuotedPrintable) {
+      while (value.endsWith('=') && lineIndex + 1 < lines.length) {
+        const nextLine = lines[lineIndex + 1]
+        if (nextLine === undefined) break
+        // A malformed trailing "=" (not a real QP soft break) must not eat
+        // the next property or card boundary - stop instead of consuming it.
+        if (looksLikePropertyLine(nextLine)) break
+        lineIndex++
+        value = `${value.slice(0, -1)}${nextLine}`
+      }
+      if (property === 'FN' || property === 'N' || property === 'TEL') {
+        value = decodeQuotedPrintableValue(value)
+      }
+    }
+    if (value === '') continue
 
     if (property === 'FN' && currentContact.formattedName === undefined) {
       currentContact.formattedName = unescapeVcardValue(value)

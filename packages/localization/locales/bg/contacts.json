@@ -84,6 +84,8 @@
   "vexlOnlyContacts.description": "Тези контакти са запазени само във Vexl, не в телефона ти — добавени са ръчно или са възстановени от резервно копие. Експортирай ги като файл с контакти (.vcf), за да имаш сигурно копие извън приложението.",
   "vexlOnlyContacts.exportButton": "Експортирай контактите",
   "vexlOnlyContacts.exportSheetTitle": "Запази резервно копие на тези контакти",
+  "vexlOnlyContacts.exportSuccessTitle": "Резервното копие е готово!",
+  "vexlOnlyContacts.exportSuccessDescription": "Контактите ти са запазени във файл с резервно копие (.vcf). Пази го на сигурно място — можеш да ги върнеш по всяко време от екрана Добавяне на нов контакт.",
   "vexlOnlyContacts.emptyTitle": "Няма нищо за запазване",
   "vexlOnlyContacts.emptyDescription": "Контактите, които съществуват само във Vexl — добавени ръчно или възстановени от резервно копие — ще се показват тук. Имаш файл с резервно копие (.vcf)? Импортирай го от екрана Добавяне на нов контакт.",
   "contactPreferences.importVcf.invalidFileTitle": "Файлът не можа да бъде прочетен",

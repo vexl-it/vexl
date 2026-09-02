@@ -84,6 +84,8 @@
   "vexlOnlyContacts.description": "这些联系人只保存在 Vexl 中，不在你的手机里——它们是你手动添加或从备份恢复的。将它们导出为联系人文件（.vcf），在应用之外保留一份安全副本。",
   "vexlOnlyContacts.exportButton": "导出联系人",
   "vexlOnlyContacts.exportSheetTitle": "备份这些联系人",
+  "vexlOnlyContacts.exportSuccessTitle": "备份完成！",
+  "vexlOnlyContacts.exportSuccessDescription": "你的联系人已存放在备份文件（.vcf）中。请把它保存在安全的地方——随时可以在「添加新联系人」页面恢复它们。",
   "vexlOnlyContacts.emptyTitle": "没有可备份的内容",
   "vexlOnlyContacts.emptyDescription": "只存在于 Vexl 中的联系人——手动添加或从备份恢复的——会显示在这里。有备份文件（.vcf）？可以在「添加新联系人」页面导入。",
   "contactPreferences.importVcf.invalidFileTitle": "无法读取文件",

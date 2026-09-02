@@ -84,6 +84,8 @@
   "vexlOnlyContacts.description": "Tyto kontakty jsou uložené jen ve Vexlu, ne v telefonu — byly přidány ručně nebo obnoveny ze zálohy. Exportuj je jako soubor kontaktů (.vcf), ať máš bezpečnou kopii i mimo aplikaci.",
   "vexlOnlyContacts.exportButton": "Exportovat kontakty",
   "vexlOnlyContacts.exportSheetTitle": "Zálohovat tyto kontakty",
+  "vexlOnlyContacts.exportSuccessTitle": "Záloha hotová!",
+  "vexlOnlyContacts.exportSuccessDescription": "Kontakty jsou uložené v záložním souboru (.vcf). Ulož si ho někam do bezpečí — kdykoli je můžeš vrátit zpátky na obrazovce Přidat nový kontakt.",
   "vexlOnlyContacts.emptyTitle": "Není co zálohovat",
   "vexlOnlyContacts.emptyDescription": "Kontakty, které existují jen ve Vexlu — přidané ručně nebo obnovené ze zálohy — se zobrazí tady. Máš záložní soubor (.vcf)? Naimportuj ho na obrazovce Přidat nový kontakt.",
   "contactPreferences.importVcf.invalidFileTitle": "Soubor se nepodařilo přečíst",

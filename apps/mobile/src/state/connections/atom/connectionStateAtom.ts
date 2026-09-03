@@ -10,7 +10,7 @@ import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {FETCH_CONNECTIONS_PAGE_SIZE} from '@vexl-next/resources-utils/src/offers/utils/fetchContactsForOffer'
 import fetchAllPaginatedData from '@vexl-next/rest-api/src/fetchAllPaginatedData'
 import {type ContactApi} from '@vexl-next/rest-api/src/services/contact'
-import {Array, Effect, HashMap, Option} from 'effect'
+import {Array, Effect, HashMap, Number, Option} from 'effect'
 import {pipe} from 'fp-ts/function'
 import {atom, type Atom} from 'jotai'
 import {apiAtom} from '../../../api'
@@ -24,6 +24,7 @@ import {showDebugNotificationIfEnabled} from '../../../utils/notifications/showD
 import reportError, {reportErrorE} from '../../../utils/reportError'
 import {effectWithEnsuredBenchmark} from '../../ActionBenchmarks'
 import {clubsWithMembersAtom} from '../../clubs/atom/clubsWithMembersAtom'
+import {getClubReach} from '../../clubs/utils'
 import {ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom} from '../../contacts/atom/ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom'
 import {ConnectionsState} from '../domain'
 
@@ -253,11 +254,7 @@ export const fistAndSecondLevelConnectionsReachAtom = atom((get) => {
 })
 
 export const clubsConnectionsReachAtom = atom((get) => {
-  return pipe(
-    get(clubsWithMembersAtom),
-    Array.flatMap((club) => club.members),
-    Array.length
-  )
+  return pipe(get(clubsWithMembersAtom), Array.map(getClubReach), Number.sumAll)
 })
 
 export const reachNumberAtom = atom((get) => {

@@ -22,7 +22,7 @@ import {
   PinGeolocation,
 } from '@vexl-next/ui/src/icons'
 import {useMolecule} from 'bunshi/dist/react'
-import {Effect, Option} from 'effect'
+import {Array, Effect, Number, Option, pipe} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useLayoutEffect, useMemo} from 'react'
 import {BackHandler} from 'react-native'
@@ -33,6 +33,7 @@ import {
   clubsWithMembersAtom,
   useGetAllClubsNamesForIds,
 } from '../../state/clubs/atom/clubsWithMembersAtom'
+import {getClubReach} from '../../state/clubs/utils'
 import {useSingleOffer} from '../../state/marketplace'
 import {isOfferMissingProductCategoryAtom} from '../../state/marketplace/atoms/offersState'
 import {isOfferExpired} from '../../utils/isOfferExpired'
@@ -164,9 +165,12 @@ function MyOfferDetailScreen({
 
   const clubsHeadline = (() => {
     if (selectedClubNames.length === 0) return t('editOffer.noClubsSelected')
-    const reach = allClubsWithMembers
-      .filter((c) => selectedClubsUuids.includes(c.club.uuid))
-      .reduce((sum, c) => sum + c.members.length, 0)
+    const reach = pipe(
+      allClubsWithMembers,
+      Array.filter((c) => selectedClubsUuids.includes(c.club.uuid)),
+      Array.map(getClubReach),
+      Number.sumAll
+    )
     return `${selectedClubNames.join(', ')} (${t(
       'offerForm.friendLevel.reachPeopleInlineFormatted',
       {

@@ -99,3 +99,7 @@ export const fetchClubWithMembersReportApiErrors = ({
       return new FetchingClubError({cause: e})
     })
   )
+
+// Server lists the current user among club members, so they must be excluded from reach
+export const getClubReach = (club: ClubWithMembers): number =>
+  Math.max(0, club.members.length - 1)

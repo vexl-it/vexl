@@ -204,8 +204,6 @@
   "offerForm.friendLevel.noVexlers": "No vexlers",
   "offerForm.friendLevel.noPeople": "Kimse yok",
   "offerForm.friendLevel.reachVexlers": "Reach {{count}} vexlers",
-  "offerForm.friendLevel.reachPeopleInline": "{{count}} kişiye ulaşırsın",
-  "offerForm.friendLevel.reachPeopleInlineFormatted": "{{localizedString}} kişiye ulaşırsın",
   "offerForm.friendLevel.reachPeople": "{{count}} kişiye ulaşırsın",
   "offerForm.friendLevel.reachPeopleFormatted": "{{localizedString}} kişiye ulaşırsın",
   "offerForm.errorCreatingOffer": "Error while creating offer",

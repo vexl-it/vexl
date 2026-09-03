@@ -206,8 +206,6 @@
   "offerForm.friendLevel.noVexlers": "Personne",
   "offerForm.friendLevel.noPeople": "Personne",
   "offerForm.friendLevel.reachVexlers": "Toucher {{count}} personnes",
-  "offerForm.friendLevel.reachPeopleInline": "tu touches {{count}} personnes",
-  "offerForm.friendLevel.reachPeopleInlineFormatted": "tu touches {{localizedString}} personnes",
   "offerForm.friendLevel.reachPeople": "Tu touches {{count}} personnes",
   "offerForm.friendLevel.reachPeopleFormatted": "Tu touches {{localizedString}} personnes",
   "offerForm.errorCreatingOffer": "Erreur lors de la création de l'offre",

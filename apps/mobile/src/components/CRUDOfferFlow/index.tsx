@@ -15,7 +15,6 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {getTokens, Stack, YStack} from 'tamagui'
 import {type RootStackScreenProps} from '../../navigationTypes'
 import {useTranslation} from '../../utils/localization/I18nProvider'
-import {formatInteger} from '../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../utils/localization/formattingLocaleAtom'
 import {getOfferExpirationLabel} from '../../utils/offerAmountDetails'
 import useSafeGoBack from '../../utils/useSafeGoBack'
@@ -35,6 +34,7 @@ import OfferTypeStep from './components/OfferTypeStep'
 import PriceUpToStep from './components/PriceUpToStep'
 import ProductCategoryStep from './components/ProductCategoryStep'
 import {type OfferSetupStep} from './offerSetupSteps'
+import {useFriendLevelLabels} from './useFriendLevelLabels'
 
 function CRUDOfferFlow(): React.ReactElement {
   const {t} = useTranslation()
@@ -54,7 +54,6 @@ function CRUDOfferFlow(): React.ReactElement {
   const offerType = useAtomValue(offerTypeAtom)
   const listingType = useAtomValue(listingTypeAtom)
   const expirationDate = useAtomValue(expirationDateAtom)
-  const intendedConnectionLevel = useAtomValue(intendedConnectionLevelAtom)
   const numberOfFriends = useAtomValue(numberOfFriendsAtom)
   const showDialog = useSetAtom(globalDialogAtom)
   const initializeValuesForOfferForm = useSetAtom(
@@ -117,32 +116,7 @@ function CRUDOfferFlow(): React.ReactElement {
       if (step === activeStep) scrollToActiveStep()
     }
 
-  const friendLevelReachLabel = (() => {
-    const friendLevelLabel =
-      intendedConnectionLevel === 'FIRST'
-        ? t('offerForm.friendLevel.firstDegree')
-        : t('offerForm.friendLevel.secondDegree')
-
-    if (numberOfFriends.state === 'loading') {
-      return `${friendLevelLabel} (${t('common.loading')})`
-    }
-
-    if (numberOfFriends.state === 'error') {
-      return `${friendLevelLabel} (${t('offerForm.friendLevel.noVexlers')})`
-    }
-
-    const reachCount =
-      intendedConnectionLevel === 'FIRST'
-        ? numberOfFriends.firstLevelFriendsCount
-        : numberOfFriends.firstAndSecondLevelFriendsCount
-
-    return `${friendLevelLabel} (${t(
-      'offerForm.friendLevel.reachPeopleInlineFormatted',
-      {
-        localizedString: formatInteger(reachCount, locale),
-      }
-    )})`
-  })()
+  const friendLevelLabels = useFriendLevelLabels()
   const areFriendLevelCountsLoading = numberOfFriends.state === 'loading'
   const expirationLabel = getOfferExpirationLabel({
     expirationDate,
@@ -368,8 +342,11 @@ function CRUDOfferFlow(): React.ReactElement {
                     <EditRow
                       state="completed"
                       overline={t('offerForm.whoCanSeeYourOffer')}
-                      headline={friendLevelReachLabel}
-                      subheadline={expirationLabel}
+                      headline={friendLevelLabels.headline}
+                      subheadline={[
+                        friendLevelLabels.reachLabel,
+                        expirationLabel,
+                      ]}
                       onPress={() => {
                         setActiveStep('friendLevel')
                       }}

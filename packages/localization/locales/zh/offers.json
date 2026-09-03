@@ -206,8 +206,6 @@
   "offerForm.friendLevel.noVexlers": "没有人",
   "offerForm.friendLevel.noPeople": "没有人",
   "offerForm.friendLevel.reachVexlers": "触达 {{count}} 人",
-  "offerForm.friendLevel.reachPeopleInline": "你可以触达 {{count}} 人",
-  "offerForm.friendLevel.reachPeopleInlineFormatted": "你可以触达 {{localizedString}} 人",
   "offerForm.friendLevel.reachPeople": "你可以触达 {{count}} 人",
   "offerForm.friendLevel.reachPeopleFormatted": "你可以触达 {{localizedString}} 人",
   "offerForm.errorCreatingOffer": "创建报价时出错",

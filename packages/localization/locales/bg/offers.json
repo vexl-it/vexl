@@ -206,8 +206,6 @@
   "offerForm.friendLevel.noVexlers": "Няма хора",
   "offerForm.friendLevel.noPeople": "Няма хора",
   "offerForm.friendLevel.reachVexlers": "Достигаш до {{count}} души",
-  "offerForm.friendLevel.reachPeopleInline": "достигаш до {{count}} души",
-  "offerForm.friendLevel.reachPeopleInlineFormatted": "достигаш до {{localizedString}} души",
   "offerForm.friendLevel.reachPeople": "Достигаш до {{count}} души",
   "offerForm.friendLevel.reachPeopleFormatted": "Достигаш до {{localizedString}} души",
   "offerForm.errorCreatingOffer": "Грешка при създаване на оферта",

@@ -206,8 +206,6 @@
   "offerForm.friendLevel.noVexlers": "Hakuna watu",
   "offerForm.friendLevel.noPeople": "Hakuna watu",
   "offerForm.friendLevel.reachVexlers": "Fikia watu {{count}}",
-  "offerForm.friendLevel.reachPeopleInline": "unafikia watu {{count}}",
-  "offerForm.friendLevel.reachPeopleInlineFormatted": "unafikia watu {{localizedString}}",
   "offerForm.friendLevel.reachPeople": "Unafikia watu {{count}}",
   "offerForm.friendLevel.reachPeopleFormatted": "Unafikia watu {{localizedString}}",
   "offerForm.errorCreatingOffer": "Hitilafu wakati wa kuunda ofa",

@@ -204,8 +204,6 @@
   "offerForm.friendLevel.noVexlers": "No vexlers",
   "offerForm.friendLevel.noPeople": "لا يوجد أشخاص",
   "offerForm.friendLevel.reachVexlers": "Reach {{count}} vexlers",
-  "offerForm.friendLevel.reachPeopleInline": "تصل إلى {{count}} أشخاص",
-  "offerForm.friendLevel.reachPeopleInlineFormatted": "تصل إلى {{localizedString}} أشخاص",
   "offerForm.friendLevel.reachPeople": "تصل إلى {{count}} أشخاص",
   "offerForm.friendLevel.reachPeopleFormatted": "تصل إلى {{localizedString}} أشخاص",
   "offerForm.errorCreatingOffer": "Error while creating offer",

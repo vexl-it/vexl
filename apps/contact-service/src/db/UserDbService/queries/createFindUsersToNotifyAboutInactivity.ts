@@ -2,7 +2,6 @@ import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
-import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {Effect, flow, Schema} from 'effect'
 import {UserRecordId} from '../domain'
 
@@ -16,14 +15,7 @@ export type FindUsersToNotifyAboutInactivityParams =
 
 export const UserToNotifyAboutInactivity = Schema.Struct({
   id: UserRecordId,
-  expoToken: Schema.optionalWith(ExpoNotificationToken, {
-    as: 'Option',
-    nullable: true,
-  }),
-  vexlNotificationToken: Schema.optionalWith(VexlNotificationToken, {
-    as: 'Option',
-    nullable: true,
-  }),
+  vexlNotificationToken: VexlNotificationToken,
   refreshedAt: Schema.DateFromSelf,
   numberOfInactivityNotificationsSent: Schema.Number,
 })
@@ -39,7 +31,6 @@ export const createFindUsersToNotifyAboutInactivity = Effect.gen(function* (_) {
     execute: (params) => sql`
       SELECT
         u.id,
-        u.expo_token,
         u.vexl_notification_token,
         u.refreshed_at,
         u.number_of_inactivity_notifications_sent
@@ -48,10 +39,7 @@ export const createFindUsersToNotifyAboutInactivity = Effect.gen(function* (_) {
       WHERE
         u.refreshed_at IS NOT NULL
         AND u.refreshed_at < ${params.firstNotificationBefore}
-        AND (
-          u.expo_token IS NOT NULL
-          OR u.vexl_notification_token IS NOT NULL
-        )
+        AND u.vexl_notification_token IS NOT NULL
         AND (
           u.number_of_inactivity_notifications_sent = 0
           OR (

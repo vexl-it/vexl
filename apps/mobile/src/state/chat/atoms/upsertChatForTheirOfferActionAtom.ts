@@ -22,8 +22,8 @@ import {
 } from '../domain'
 import addMessageToChat from '../utils/addMessageToChat'
 import focusChatForTheirOfferAtom from './focusChatForTheirOfferAtom'
-import {updateMyNotificationTokenInfoInChat} from './generateMyNotificationTokenInfoActionAtom'
 import messagingStateAtom from './messagingStateAtom'
+import {updateMyNotificationTokenInfoInChat} from './updateMyNotificationTokenInfoInChat'
 
 function createNewChat({
   inbox,
@@ -72,9 +72,6 @@ function createNewChat({
       showInfoBar: true,
       showVexlbotInitialMessage: true,
       otherSideVexlToken: offer.offerInfo.publicPart.vexlNotificationToken,
-      otherSideFcmCypher:
-        offer.offerInfo.publicPart.vexlNotificationToken ??
-        offer.offerInfo.publicPart.fcmCypher,
       lastReportedVexlToken: sentVexlToken,
       showVexlbotNotifications: true,
       lastReportedVersion,

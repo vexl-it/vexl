@@ -26,7 +26,6 @@ import {
   effectToTaskEither,
   taskEitherToEffect,
 } from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import {fetchAndEncryptNotificationToken} from '@vexl-next/resources-utils/src/notifications/fetchAndEncryptNotificationToken'
 import {FeedbackFormId} from '@vexl-next/rest-api/src/services/feedback/contracts'
 import {
   ChevronLeft,
@@ -121,7 +120,6 @@ import {
   commitHash,
   enableHiddenFeatures,
   packageName,
-  platform,
   version,
   versionCode,
 } from '../../utils/environment'
@@ -1514,43 +1512,6 @@ function DebugScreen(): React.ReactElement {
             />
           )}
 
-          <Button
-            variant="primary"
-            size="small"
-            text="Create and Copy notification cypher"
-            onPress={() => {
-              Effect.runFork(
-                Effect.gen(function* (_) {
-                  const notificationToken = yield* _(getNotificationTokenE())
-                  if (!notificationToken) {
-                    yield* _(
-                      Effect.sync(() => {
-                        Alert.alert('No notification token')
-                      })
-                    )
-                    return
-                  }
-
-                  const cypher = yield* _(
-                    fetchAndEncryptNotificationToken({
-                      clientPlatform: platform,
-                      clientVersion: versionCode,
-                      expoToken: notificationToken,
-                      notificationApi: store.get(apiAtom).notification,
-                      locale: t('localeName'),
-                    })
-                  )
-
-                  yield* _(
-                    Effect.sync(() => {
-                      Clipboard.setString(cypher)
-                      Alert.alert('Copied')
-                    })
-                  )
-                })
-              )
-            }}
-          />
           <Button
             variant="primary"
             size="small"

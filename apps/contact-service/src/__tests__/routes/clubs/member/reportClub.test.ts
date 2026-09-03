@@ -2,7 +2,6 @@ import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {generateClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {newOfferId} from '@vexl-next/domain/src/general/offers'
-import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {Effect, Option, Schema} from 'effect'
 import {ClubMembersDbService} from '../../../../db/ClubMemberDbService'
@@ -81,7 +80,6 @@ beforeEach(async () => {
           publicKey: clubKeypairForUser.publicKeyPemBase64,
           isModerator: false,
           lastRefreshedAt: new Date(),
-          notificationToken: 'someToken' as ExpoNotificationToken,
           vexlNotificationToken: 'vexl_nt_test' as VexlNotificationToken,
           publicKeyV2: null,
         })
@@ -93,7 +91,6 @@ beforeEach(async () => {
           publicKey: clubKeypairForUser2.publicKeyPemBase64,
           isModerator: false,
           lastRefreshedAt: new Date(),
-          notificationToken: 'someToken' as ExpoNotificationToken,
           vexlNotificationToken: 'vexl_nt_test' as VexlNotificationToken,
           publicKeyV2: null,
         })

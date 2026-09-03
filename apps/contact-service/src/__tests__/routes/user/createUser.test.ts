@@ -7,7 +7,6 @@ import {SqlClient} from '@effect/sql'
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
-import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {hashPhoneNumber} from '@vexl-next/server-utils/src/generateUserAuthData'
 import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
@@ -48,8 +47,6 @@ describe('create user', () => {
         yield* _(
           app.User.createUser({
             payload: {
-              firebaseToken: null,
-              expoToken: Schema.decodeSync(ExpoNotificationToken)('someToken'),
               vexlNotificationToken: Option.some(
                 Schema.decodeSync(VexlNotificationToken)('vexl_nt_test')
               ),
@@ -92,7 +89,10 @@ describe('create user', () => {
             Effect.flatMap(serverHashPhoneNumber)
           )
         )
-        expect(result[0]).toHaveProperty('expoToken', 'someToken')
+        expect(result[0]).toHaveProperty(
+          'vexlNotificationToken',
+          'vexl_nt_test'
+        )
         expect(result[0]).toHaveProperty('clientVersion', 1)
         expect(result[0]).toHaveProperty('appSource', 'googlePlay')
       })
@@ -125,8 +125,6 @@ describe('create user', () => {
         yield* _(
           app.User.createUser({
             payload: {
-              firebaseToken: null,
-              expoToken: Schema.decodeSync(ExpoNotificationToken)('someToken'),
               vexlNotificationToken: Option.some(
                 Schema.decodeSync(VexlNotificationToken)('vexl_nt_test')
               ),
@@ -184,8 +182,6 @@ describe('create user', () => {
         yield* _(
           app.User.createUser({
             payload: {
-              firebaseToken: null,
-              expoToken: Schema.decodeSync(ExpoNotificationToken)('someToken'),
               vexlNotificationToken: Option.some(
                 Schema.decodeSync(VexlNotificationToken)('vexl_nt_test')
               ),
@@ -239,8 +235,6 @@ describe('create user', () => {
         yield* _(
           app.User.createUser({
             payload: {
-              firebaseToken: null,
-              expoToken: Schema.decodeSync(ExpoNotificationToken)('someToken'),
               vexlNotificationToken: Option.some(
                 Schema.decodeSync(VexlNotificationToken)('vexl_nt_session_test')
               ),
@@ -289,8 +283,6 @@ describe('create user', () => {
         yield* _(
           app.User.createUser({
             payload: {
-              firebaseToken: null,
-              expoToken: Schema.decodeSync(ExpoNotificationToken)('someToken'),
               vexlNotificationToken: Option.none(),
               publicKeyV2: Option.none(),
             },

@@ -49,9 +49,9 @@ import {
 import {syncConnectionsActionAtom} from '../../state/connections/atom/connectionStateAtom'
 import {updateAndReencryptAllNotesConnectionsActionAtom} from '../../state/connections/atom/noteToConnectionsAtom'
 import {updateAndReencryptAllOffersConnectionsActionAtom} from '../../state/connections/atom/offerToConnectionsAtom'
-import {getKeyHolderForNotificationTokenOrCypherActionAtom} from '../../state/notifications/fcmCypherToKeyHolderAtom'
 import {reportNewConnectionNotificationForked} from '../../state/notifications/reportNewConnectionNotification'
 import {vexlNotificationTokenAtom} from '../../state/notifications/vexlNotificationTokenAtom'
+import {getKeyHolderForVexlTokenActionAtom} from '../../state/notifications/vexlTokenToKeyHolderAtom'
 import {platform, versionCode} from '../environment'
 import {translationAtom} from '../localization/I18nProvider'
 import {notificationPreferencesAtom} from '../preferences'
@@ -88,17 +88,16 @@ const processNewChatMessageActionAtom = atom(
   null,
   (get, set, message: NewChatMessageNoticeMessage | StreamOnlyChatMessage) =>
     Effect.gen(function* (_) {
-      const cypher = message.targetToken ?? message.targetCypher
-      const inboxForCypher = set(
-        getKeyHolderForNotificationTokenOrCypherActionAtom,
-        cypher
+      const inboxForToken = set(
+        getKeyHolderForVexlTokenActionAtom,
+        message.targetToken
       )
-      if (!inboxForCypher) {
+      if (!inboxForToken) {
         yield* _(
           reportErrorE(
             'warn',
             new Error(
-              'Error decrypting notification from stream - unable to find private key for cypher'
+              'Error decrypting notification from stream - unable to find private key for token'
             )
           )
         )
@@ -111,7 +110,7 @@ const processNewChatMessageActionAtom = atom(
         )
         yield* _(
           set(fetchAndStoreMessagesForInboxHandleNotificationsActionAtom, {
-            key: inboxForCypher.publicKeyPemBase64,
+            key: inboxForToken.publicKeyPemBase64,
           })
         )
       } else if (message._tag === 'StreamOnlyChatMessage') {
@@ -119,14 +118,14 @@ const processNewChatMessageActionAtom = atom(
           get(messagingStateAtom),
           (i) =>
             i.inbox.privateKey.publicKeyPemBase64 ===
-            inboxForCypher.publicKeyPemBase64
+            inboxForToken.publicKeyPemBase64
         )
         if (Option.isNone(inbox)) {
           yield* _(
             reportErrorE(
               'warn',
               new Error(
-                'WTF? Got inbox key from keyHolderForNotificaitonCypherActionAtom but no matching inbox in state'
+                'Got inbox key for notification token but no matching inbox in state'
               )
             )
           )

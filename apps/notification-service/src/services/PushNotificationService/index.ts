@@ -1,19 +1,8 @@
-import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {
-  Array,
-  Context,
-  Data,
-  Effect,
-  identity,
-  Layer,
-  Match,
-  Option,
-  pipe,
-} from 'effect'
+import {Array, Context, Effect, identity, Layer, Match, pipe} from 'effect'
 import {type SupportedPushNotificationTask} from '../../domain'
 import {NotificationMetricsService} from '../../metrics'
-import {VexlNotificationTokenService} from '../VexlNotificationTokenService'
+import {NotificationTokensDb} from '../NotificationTokensDb'
 import {
   ExpoClientService,
   type NotificationToSend,
@@ -31,11 +20,6 @@ import {
   generatePushNotificationsFromUserInactivityNoticeSendTask,
   generatePushNotificationsFromUserLoginOnDifferentDeviceNoticeSendTask,
 } from './utils'
-
-export class NoExpoTokenError extends Data.TaggedError('NoExpoTokenError')<{
-  message: string
-  vexlToken: VexlNotificationToken
-}> {}
 
 const notificationsToArray = (
   notificationToSend: NotificationToSend | readonly NotificationToSend[]
@@ -67,9 +51,7 @@ export class PushNotificationService extends Context.Tag(
     Effect.gen(function* (_) {
       const expoClient = yield* _(ExpoClientService)
       const notificationMetrics = yield* _(NotificationMetricsService)
-      const vexlNotificationTokenService = yield* _(
-        VexlNotificationTokenService
-      )
+      const tokenDb = yield* _(NotificationTokensDb)
 
       return {
         sendNotificationViaExpoNotification: (tasks) =>
@@ -119,15 +101,11 @@ export class PushNotificationService extends Context.Tag(
                   ),
                   Match.exhaustive,
                   // Filter out notifications that do not meet the minimal client version requirement (if any)
-                  Effect.filterOrFail((a) => {
-                    if (!task.minimalClientVersion) return true
-                    if (Option.isNone(a.metadata)) return false
-
-                    return (
-                      a.metadata.value.clientVersion >=
-                      task.minimalClientVersion
-                    )
-                  }),
+                  Effect.filterOrFail(
+                    (a) =>
+                      !task.minimalClientVersion ||
+                      a.metadata.clientVersion >= task.minimalClientVersion
+                  ),
                   Effect.option
                 )
               ),
@@ -152,26 +130,21 @@ export class PushNotificationService extends Context.Tag(
             yield* _(expoClient.sendNotification(notificationsToSend))
 
             yield* _(
-              Effect.forEach(dataToSend, (d) => {
-                if (Option.isNone(d.metadata)) return Effect.void
-
-                return notificationMetrics.reportNotificationSent({
+              Effect.forEach(dataToSend, (d) =>
+                notificationMetrics.reportNotificationSent({
                   id: d.trackingId,
-                  clientPlatform: d.metadata.value.clientPlatform,
-                  clientVersion: d.metadata.value.clientVersion,
+                  clientPlatform: d.metadata.clientPlatform,
+                  clientVersion: d.metadata.clientVersion,
                   systemNotificationSent: systemNotificationSent(
                     d.notificationToSend
                   ),
                   sentAt: unixMillisecondsNow(),
                   channel: 'push',
                 })
-              })
+              )
             )
           }).pipe(
-            Effect.provideService(
-              VexlNotificationTokenService,
-              vexlNotificationTokenService
-            ),
+            Effect.provideService(NotificationTokensDb, tokenDb),
             Effect.withSpan('sendingPushNotifications')
           ),
       }

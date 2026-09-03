@@ -51,16 +51,13 @@ const sendRequestActionAtom = atom(
         sendMessagingRequest({
           text,
           notificationApi: api.notification,
-          theirNotificationCypher: originOffer.offerInfo.publicPart.fcmCypher,
+          theirNotificationToken:
+            originOffer.offerInfo.publicPart.vexlNotificationToken,
           api: api.chat,
           fromKeypair: inbox.privateKey,
           myVersion: version,
           toPublicKey: originOffer.offerInfo.publicPart.offerPublicKey,
-          otherSideVersion:
-            originOffer.offerInfo.publicPart.authorClientVersion,
-          myNotificationCypher: notificationToken,
-          lastReceivedNotificationCypher:
-            originOffer.offerInfo.publicPart.fcmCypher,
+          myVexlToken: notificationToken,
           goldenAvatarType,
           forClubsUuids,
           commonFriends: originOffer.offerInfo.privatePart.commonFriends,

@@ -77,7 +77,6 @@ import {
   RequestClubImageUploadResponse,
   S3ServiceError,
   SetPublicKeyV2Request,
-  UpdateNotificationTokenRequest,
   UserExistsResponse,
   UserIsNotModeratorError,
   UserNotFoundError,
@@ -114,15 +113,15 @@ export const RefreshUserEndpoint = HttpApiEndpoint.post(
   .addError(UserNotFoundError, {status: 404})
   .annotate(MaxExpectedDailyCall, 1)
 
+// No-op kept for clients up to 26.9.0, which call it on resume and report an
+// error on 404. Remove once those clients are gone.
 export const UpdateNotificationTokenEndpoint = HttpApiEndpoint.put(
   'updateNotificationToken',
   '/api/v1/users/notification-token'
 )
   .setHeaders(CommonAndSecurityHeaders)
   .middleware(ServerSecurityMiddleware)
-  .setPayload(UpdateNotificationTokenRequest)
   .addSuccess(NoContentResponse)
-  .addError(UserNotFoundError, {status: 404})
   .annotate(MaxExpectedDailyCall, 1)
 
 export const DeleteUserEndpoint = HttpApiEndpoint.del(

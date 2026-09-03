@@ -64,16 +64,14 @@ export default function createNewChatsFromFirstMessagesActionAtom({
               ? lastMessage.message.myVersion
               : undefined
 
-          const otherSideFcmCypher =
+          const otherSideVexlToken =
             // If i received the message
             lastMessage.state === 'received' ||
             lastMessage.state === 'receivedButRequiresNewerVersion'
-              ? (lastMessage.message.myVexlToken ??
-                lastMessage.message.myFcmCypher)
+              ? lastMessage.message.myVexlToken
               : // If the offer is theirs
                 !inboxOffer?.ownershipInfo?.adminId
-                ? (inboxOffer?.offerInfo.publicPart.vexlNotificationToken ??
-                  inboxOffer?.offerInfo.publicPart.fcmCypher)
+                ? inboxOffer?.offerInfo.publicPart.vexlNotificationToken
                 : undefined
 
           const otherSideClubsids =
@@ -113,7 +111,7 @@ export default function createNewChatsFromFirstMessagesActionAtom({
               showVexlbotNotifications: true,
               otherSideVersion,
               lastReportedVersion,
-              otherSideFcmCypher,
+              otherSideVexlToken,
             },
             tradeChecklist: {
               ...createEmptyTradeChecklistInState(),

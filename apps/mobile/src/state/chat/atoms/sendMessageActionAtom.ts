@@ -54,9 +54,7 @@ export default function sendMessageActionAtom(
               senderKeypair: chat.inbox.privateKey,
               receiverPublicKey: chat.otherSide.publicKey,
               notificationApi: api.notification,
-              theirNotificationCypher:
-                chat.otherSideVexlToken ?? chat.otherSideFcmCypher,
-              otherSideVersion: chat.otherSideVersion,
+              theirNotificationToken: chat.otherSideVexlToken,
             })
           )
 

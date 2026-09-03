@@ -1,13 +1,12 @@
 import {createNotificationTrackingId} from '@vexl-next/domain/src/general/NotificationTrackingId.brand'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
-import {SendingNotificationError} from '@vexl-next/rest-api/src/services/notification/contract'
 import {ProcessUserNotificationsConsumerLayer} from '@vexl-next/server-utils/src/UserNotificationMq'
 import {Effect, Match} from 'effect/index'
 import {NotificationSocketMessaging} from '..'
 import {type SupportedPushNotificationTask} from '../../../domain'
+import {findSecretForNotificationToken} from '../../NotificationTokensDb'
 import {OfflineNotificationBuffer} from '../../OfflineNotificationBuffer'
 import {ThrottledPushNotificationService} from '../../ThrottledPushNotificationService'
-import {VexlNotificationTokenService} from '../../VexlNotificationTokenService'
 import {
   ClubExpiredNoticeSendTask,
   ClubFlaggedNoticeSendTask,
@@ -27,118 +26,87 @@ export const ProcessUserNotificationsWorker =
   ProcessUserNotificationsConsumerLayer((entry) =>
     Effect.gen(function* (_) {
       const socketMessaging = yield* _(NotificationSocketMessaging)
-      const tokenService = yield* _(VexlNotificationTokenService)
       const {issuePushNotification} = yield* _(ThrottledPushNotificationService)
       const offlineNotificationBuffer = yield* _(OfflineNotificationBuffer)
-      const vexlNotificationTokenOrExpoToken =
-        entry.token ?? entry.notificationToken
-
-      if (!vexlNotificationTokenOrExpoToken) {
-        yield* Effect.logWarning(
-          'No notification token found in the entry, skipping processing',
-          {entryType: entry._tag}
-        )
-
-        return
-      }
-
-      const secret = yield* _(
-        tokenService.normalizeToVexlNotificationTokenSecret(
-          vexlNotificationTokenOrExpoToken
-        )
-      ).pipe(
-        Effect.catchTag(
-          'NoSuchElementException',
-          () => new SendingNotificationError({tokenInvalid: true})
-        )
-      )
+      const secret = yield* _(findSecretForNotificationToken(entry.token))
 
       const trackingId = createNotificationTrackingId()
 
       const task: SupportedPushNotificationTask = Match.value(entry).pipe(
         Match.tag(
           'NewUserNotificationMqEntry',
-          ({token}) =>
+          () =>
             new NewUserNoticeSendTask({
               notificationToken: secret,
-              targetToken: token,
               trackingId,
             })
         ),
         Match.tag(
           'NewClubUserNotificationMqEntry',
-          ({token, clubUuid}) =>
+          ({clubUuid}) =>
             new NewClubUserNoticeSendTask({
               notificationToken: secret,
-              targetToken: token,
               trackingId,
               clubUuid,
             })
         ),
         Match.tag(
           'UserAdmittedToClubNotificationMqEntry',
-          ({token, publicKey}) =>
+          ({publicKey}) =>
             new UserAdmittedToClubNoticeSendTask({
               notificationToken: secret,
-              targetToken: token,
               trackingId,
               publicKey,
             })
         ),
         Match.tag(
           'UserInactivityNotificationMqEntry',
-          ({token, variant}) =>
+          ({variant}) =>
             new UserInactivityNoticeSendTask({
               notificationToken: secret,
-              targetToken: token,
               trackingId,
               variant,
             })
         ),
         Match.tag(
           'UserLoginOnDifferentDeviceNotificationMqEntry',
-          ({token}) =>
+          () =>
             new UserLoginOnDifferentDeviceNoticeSendTask({
               notificationToken: secret,
-              targetToken: token,
               trackingId,
             })
         ),
         Match.tag(
           'ClubFlaggedNotificationMqEntry',
-          ({token, clubUuid}) =>
+          ({clubUuid}) =>
             new ClubFlaggedNoticeSendTask({
               notificationToken: secret,
-              targetToken: token,
               trackingId,
               clubUuid,
             })
         ),
         Match.tag(
           'ClubExpiredNotificationMqEntry',
-          ({token, clubUuid}) =>
+          ({clubUuid}) =>
             new ClubExpiredNoticeSendTask({
               notificationToken: secret,
-              targetToken: token,
               trackingId,
               clubUuid,
             })
         ),
         Match.tag(
           'NewContentNotificationMqEntry',
-          ({token}) =>
+          () =>
             new NewContentNoticeSendTask({
               notificationToken: secret,
-              targetToken: token,
               trackingId,
             })
         ),
         Match.tag(
           'VexlProductNotificationMqEntry',
-          ({token, vexlProductNotification}) =>
+          ({vexlProductNotification}) =>
             new VexlProductNotificationSendTask({
               notificationToken: secret,
-              targetToken: token,
               trackingId,
               vexlProductNotification,
               minimalClientVersion:

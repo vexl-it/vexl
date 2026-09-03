@@ -70,8 +70,6 @@ const handleUserCreationActionAtom = atom(
       })
 
       yield* contactApi.createUser({
-        firebaseToken: null,
-        expoToken: null,
         publicKeyV2: Option.none<PublicKeyV2>(),
         vexlNotificationToken: Option.fromNullable(
           session.sessionNotificationToken

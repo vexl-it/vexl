@@ -4,8 +4,6 @@ import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {PublicKeyV2} from '@vexl-next/cryptography/src/KeyHolder/brandsV2'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
-import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
-import {FcmToken} from '@vexl-next/domain/src/utility/FcmToken.brand'
 import {PlatformName} from '@vexl-next/domain/src/utility/PlatformName'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {AppSource} from '@vexl-next/rest-api/src/commonHeaders'
@@ -16,8 +14,6 @@ import {UserRecord} from '../domain'
 export const CreateUserParams = Schema.Struct({
   publicKey: PublicKeyPemBase64,
   hash: ServerHashedNumber,
-  firebaseToken: Schema.optionalWith(FcmToken, {as: 'Option'}),
-  expoToken: Schema.optionalWith(ExpoNotificationToken, {as: 'Option'}),
   vexlNotificationToken: Schema.optionalWith(VexlNotificationToken, {
     as: 'Option',
   }),
@@ -40,8 +36,6 @@ export const createInsertUser = Effect.gen(function* (_) {
         {
           publicKey: params.publicKey,
           hash: params.hash,
-          firebaseToken: params.firebaseToken ?? null,
-          expoToken: params.expoToken ?? null,
           vexlNotificationToken: params.vexlNotificationToken ?? null,
           clientVersion: params.clientVersion ?? null,
           platform: params.platform ?? null,

@@ -62,10 +62,6 @@ import {
   type UpdateLastRefreshedAtParams,
 } from './queries/createUpdateLastRefreshedAt'
 import {
-  createUpdateNotificationToken,
-  type UpdateNotificationTokenParams,
-} from './queries/createUpdateNotificationToken'
-import {
   createUpdateVexlNotificationToken,
   type UpdateVexlNotificationTokenParams,
 } from './queries/createUpdateVexlNotificationToken'
@@ -110,9 +106,6 @@ export interface ClubMembersDbOperations {
   updateLastRefreshedAt: (
     params: UpdateLastRefreshedAtParams
   ) => Effect.Effect<ClubMemberRecord, UnexpectedServerError>
-  updateNotificationToken: (
-    params: UpdateNotificationTokenParams
-  ) => Effect.Effect<ClubMemberRecord, UnexpectedServerError>
   updateVexlNotificationToken: (
     params: UpdateVexlNotificationTokenParams
   ) => Effect.Effect<ClubMemberRecord, UnexpectedServerError>
@@ -155,7 +148,6 @@ export class ClubMembersDbService extends Context.Tag('ClubMembersDbService')<
       )
       const updateIsModerator = yield* _(createUpdateIsModerator)
       const updateLastRefreshedAt = yield* _(CreateUpdateLastRefreshedAt)
-      const updateNotificationToken = yield* _(createUpdateNotificationToken)
       const updateVexlNotificationToken = yield* _(
         createUpdateVexlNotificationToken
       )
@@ -184,7 +176,6 @@ export class ClubMembersDbService extends Context.Tag('ClubMembersDbService')<
         updateIsModerator,
         updateLastRefreshedAt,
         deleteClubMembersLastActiveBefore,
-        updateNotificationToken,
         updateVexlNotificationToken,
         deleteAllClubMembers,
         deleteClubReportedRecordByReportedAtBefore,

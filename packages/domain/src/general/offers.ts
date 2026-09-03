@@ -10,7 +10,6 @@ import {Latitude, Longitude, Radius} from '../utility/geoCoordinates'
 import {HashedPhoneNumber} from './HashedPhoneNumber.brand'
 import {ClubUuid} from './clubs'
 import {CurrencyCode} from './currency.brand'
-import {NotificationCypher} from './notifications/NotificationCypher.brand'
 import {VexlNotificationToken} from './notifications/VexlNotificationToken'
 
 export const Sort = Schema.Literal(
@@ -198,12 +197,6 @@ export const OfferPublicPart = Schema.Struct({
   listingType: Schema.optional(ListingType),
   productCategory: Schema.optional(ProductCategory),
   productCategories: Schema.optional(Schema.Array(ProductCategory)),
-  // Accepts both NotificationCypher (legacy encrypted) and VexlNotificationToken (new system)
-  // For backwards compatibility, vexlNotificationToken is also stored here
-  fcmCypher: Schema.optional(
-    Schema.Union(NotificationCypher, VexlNotificationToken)
-  ),
-  // New dedicated field for vexl notification token
   vexlNotificationToken: Schema.optional(VexlNotificationToken),
   authorClientVersion: Schema.optional(VersionString),
   goldenAvatarType: Schema.optional(GoldenAvatarType),

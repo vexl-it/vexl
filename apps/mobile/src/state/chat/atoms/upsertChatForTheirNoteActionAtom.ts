@@ -18,8 +18,8 @@ import {
 } from '../domain'
 import addMessageToChat from '../utils/addMessageToChat'
 import focusChatForTheirNoteAtom from './focusChatForTheirNoteAtom'
-import {updateMyNotificationTokenInfoInChat} from './generateMyNotificationTokenInfoActionAtom'
 import messagingStateAtom from './messagingStateAtom'
+import {updateMyNotificationTokenInfoInChat} from './updateMyNotificationTokenInfoInChat'
 
 function createNewChat({
   inbox,
@@ -62,7 +62,6 @@ function createNewChat({
       showInfoBar: true,
       showVexlbotInitialMessage: true,
       otherSideVexlToken: note.noteInfo.publicPart.vexlNotificationToken,
-      otherSideFcmCypher: note.noteInfo.publicPart.vexlNotificationToken,
       lastReportedVexlToken: sentVexlToken,
       showVexlbotNotifications: true,
       lastReportedVersion,

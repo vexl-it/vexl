@@ -3,6 +3,11 @@ import {sha256} from '@vexl-next/cryptography/src/operations/sha'
 import {type Chat} from '@vexl-next/domain/src/general/messaging'
 import {ChatNotificationData} from '@vexl-next/domain/src/general/notifications'
 import {
+  androidNotificationGroupData,
+  decodeAndroidNotificationGroupData,
+} from '@vexl-next/expo-android-notification-groups/src'
+import {Option} from 'effect'
+import {
   AndroidNotificationPriority,
   dismissNotificationAsync,
   getPresentedNotificationsAsync,
@@ -10,6 +15,7 @@ import {
 } from 'expo-notifications'
 import {getDefaultStore} from 'jotai'
 import {useCallback} from 'react'
+import {Platform} from 'react-native'
 import {
   type ChatMessageWithState,
   type InboxInState,
@@ -21,6 +27,20 @@ import {useAppState} from '../useAppState'
 import {SystemChatNotificationData} from './SystemNotificationData.brand'
 import {displayLocalNotification} from './displayLocalNotification'
 import {getChannelForMessages} from './notificationChannels'
+
+// All messaging requests share one group; everything else is grouped per
+// conversation (inbox + sender).
+const REQUEST_GROUP_ID = 'request-group-id'
+
+function chatGroupId({
+  inbox,
+  sender,
+}: {
+  inbox: PublicKeyPemBase64
+  sender: PublicKeyPemBase64
+}): string {
+  return sha256(inbox + sender)
+}
 
 async function getNotificationsForChat({
   inbox,
@@ -44,6 +64,22 @@ async function getNotificationsForChat({
       notificationData.inbox === inbox && notificationData.sender === sender
     )
   })
+}
+
+// Android keeps a group summary around after the app cancels its children, so
+// once the group is empty the summary has to be dismissed explicitly.
+async function dismissAndroidGroupSummaryIfEmpty(
+  groupId: string
+): Promise<void> {
+  if (Platform.OS !== 'android') return
+
+  const hasChildren = (await getPresentedNotificationsAsync()).some((one) =>
+    Option.exists(
+      decodeAndroidNotificationGroupData(one.request.content.data),
+      (group) => group.androidGroupId === groupId && !group.androidGroupSummary
+    )
+  )
+  if (!hasChildren) await dismissNotificationAsync(groupId)
 }
 
 export async function showChatNotification({
@@ -84,7 +120,7 @@ export async function showChatNotification({
   }
 
   const {t} = getDefaultStore().get(translationAtom)
-  const data = SystemChatNotificationData.encode(
+  const chatData = SystemChatNotificationData.encode(
     new SystemChatNotificationData({
       inbox: inbox.inbox.privateKey.publicKeyPemBase64,
       sender: newMessage.message.senderPublicKey,
@@ -93,19 +129,16 @@ export async function showChatNotification({
 
   const channelId = await getChannelForMessages()
 
-  // iOS threads notifications in the notification center by `threadIdentifier`.
-  // We group per conversation (inbox + sender) to match the previous notifee
-  // `threadId` behavior; all messaging requests share a single thread.
-  // NOTE: notifee also rendered Android grouped/summary notifications. expo-
-  // notifications has no equivalent, so Android grouping is intentionally not
-  // reproduced here (tracked in https://github.com/vexl-it/vexl/issues/2515).
-  const threadIdentifier =
+  // iOS threads notifications by `threadIdentifier`; Android groups them by
+  // the data keys read by @vexl-next/expo-android-notification-groups.
+  const groupId =
     type === 'REQUEST_MESSAGING'
-      ? 'request-group-id'
-      : sha256(
-          inbox.inbox.privateKey.publicKeyPemBase64 +
-            newMessage.message.senderPublicKey
-        )
+      ? REQUEST_GROUP_ID
+      : chatGroupId({
+          inbox: inbox.inbox.privateKey.publicKeyPemBase64,
+          sender: newMessage.message.senderPublicKey,
+        })
+  const data = {...chatData, ...androidNotificationGroupData({groupId})}
 
   if (type === 'MESSAGE') {
     await displayLocalNotification({
@@ -119,7 +152,7 @@ export async function showChatNotification({
           t(`notifications.${type}.body`, {them: userName ?? ''}),
         data,
         priority: AndroidNotificationPriority.HIGH,
-        threadIdentifier,
+        threadIdentifier: groupId,
       },
     })
   } else {
@@ -138,13 +171,36 @@ export async function showChatNotification({
         body: t(`notifications.${type}.body`, {them: userName ?? ''}),
         data,
         priority: AndroidNotificationPriority.HIGH,
-        threadIdentifier,
+        threadIdentifier: groupId,
       },
     })
   }
+
+  if (Platform.OS !== 'android') return
+
+  const summaryData = androidNotificationGroupData({groupId, isSummary: true})
+  await displayLocalNotification({
+    id: groupId,
+    channelId,
+    content:
+      type === 'REQUEST_MESSAGING'
+        ? {
+            title: t('notifications.groupNotificationRequest.title'),
+            subtitle: t('notifications.groupNotificationRequest.subtitle'),
+            data: summaryData,
+          }
+        : {
+            subtitle: t('notifications.groupNotificationChat.subtitle', {
+              userName: userName ?? '[unknown]',
+            }),
+            data: {...chatData, ...summaryData},
+          },
+  })
 }
 
 export async function hideNotificationsForChat(chat: Chat): Promise<void> {
+  // Includes the conversation's Android group summary, which carries the same
+  // chat data so tapping it opens the chat.
   const notificationsForChat = await getNotificationsForChat({
     inbox: chat.inbox.privateKey.publicKeyPemBase64,
     sender: chat.otherSide.publicKey,
@@ -155,6 +211,8 @@ export async function hideNotificationsForChat(chat: Chat): Promise<void> {
       dismissNotificationAsync(one.request.identifier)
     )
   )
+
+  await dismissAndroidGroupSummaryIfEmpty(REQUEST_GROUP_ID)
 }
 
 export async function hideInactivityReminderNotifications(): Promise<void> {

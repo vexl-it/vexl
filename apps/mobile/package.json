@@ -38,6 +38,7 @@
     "@tamagui/shorthands": "^1.137.0",
     "@vexl-next/cryptography": "0.0.0",
     "@vexl-next/domain": "0.0.0",
+    "@vexl-next/expo-android-notification-groups": "0.0.0",
     "@vexl-next/expo-background-notification-socket": "0.0.0",
     "@vexl-next/fix-brorand-for-expo": "0.0.0",
     "@vexl-next/generic-utils": "0.0.0",

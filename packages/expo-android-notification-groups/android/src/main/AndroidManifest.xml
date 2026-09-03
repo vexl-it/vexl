@@ -1,0 +1,14 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+  <application>
+    <!-- expo-notifications dispatches its events to the highest-priority receiver
+         of this action; its own receiver is registered with priority -1. -->
+    <receiver
+      android:name=".GroupingNotificationsService"
+      android:enabled="true"
+      android:exported="false">
+      <intent-filter android:priority="1">
+        <action android:name="expo.modules.notifications.NOTIFICATION_EVENT" />
+      </intent-filter>
+    </receiver>
+  </application>
+</manifest>

@@ -1,0 +1,20 @@
+plugins {
+  id 'com.android.library'
+  id 'expo-module-gradle-plugin'
+}
+
+group = 'it.vexl'
+version = '0.0.0'
+
+android {
+  namespace 'expo.modules.androidnotificationgroups'
+  defaultConfig {
+    versionCode 1
+    versionName '0.0.0'
+  }
+}
+
+dependencies {
+  implementation expoModule.getExpoDependency('expo-notifications')
+  implementation 'androidx.core:core:1.17.0'
+}

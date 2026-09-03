@@ -11,14 +11,29 @@ import shouldSendTerminationMessageToChat from '../utils/shouldSendTerminationMe
 import allChatsAtom from './allChatsAtom'
 import messagingStateAtom, {inboxesAtom} from './messagingStateAtom'
 
-const deleteAllInboxesActionAtom = atom(null, (get, set) => {
-  const api = get(apiAtom)
-  const inboxes = get(inboxesAtom)
-  const chats = get(allChatsAtom).flat()
+export interface InboxDeletionProgress {
+  step: 'closingChats' | 'deletingOfferInboxes'
+  stepCompleted: number
+  stepTotal: number
+  completed: number
+  total: number
+}
 
-  return pipe(
+const deleteAllInboxesActionAtom = atom(
+  null,
+  (
+    get,
+    set,
+    params?: {
+      onProgress?: (progress: InboxDeletionProgress) => void
+    }
+  ) => {
+    const api = get(apiAtom)
+    const inboxes = get(inboxesAtom)
+    const chats = get(allChatsAtom).flat()
+
     // SEND INBOX DELETED MESSAGES
-    Array.map(chats, (oneChat) => {
+    const chatClosingEffects = Array.map(chats, (oneChat) => {
       if (!shouldSendTerminationMessageToChat(oneChat)) return Effect.void
       return pipe(
         sendMessage({
@@ -40,24 +55,66 @@ const deleteAllInboxesActionAtom = atom(null, (get, set) => {
         }),
         Effect.ignoreLogged
       )
-    }),
+    })
+
     // DELETE INBOXES
-    Array.appendAll(
-      Array.map(inboxes, (oneInbox) =>
+    const inboxDeletionEffects = Array.map(inboxes, (oneInbox) =>
+      pipe(
+        api.chat.deleteInbox({
+          keyPair: oneInbox.privateKey,
+        }),
+        Effect.ignoreLogged
+      )
+    )
+
+    const total = chatClosingEffects.length + inboxDeletionEffects.length
+
+    const withStepProgress = ({
+      effects,
+      step,
+      completedBefore,
+    }: {
+      effects: ReadonlyArray<Effect.Effect<void>>
+      step: InboxDeletionProgress['step']
+      completedBefore: number
+    }): ReadonlyArray<Effect.Effect<void>> =>
+      Array.map(effects, (effect, index) =>
         pipe(
-          api.chat.deleteInbox({
-            keyPair: oneInbox.privateKey,
-          }),
-          Effect.ignoreLogged
+          effect,
+          Effect.tap(() =>
+            Effect.sync(() => {
+              params?.onProgress?.({
+                step,
+                stepCompleted: index + 1,
+                stepTotal: effects.length,
+                completed: completedBefore + index + 1,
+                total,
+              })
+            })
+          )
         )
       )
-    ),
-    Effect.all,
-    Effect.andThen(() => {
-      set(messagingStateAtom, [])
-    }),
-    effectToTaskEither
-  )
-})
+
+    return pipe(
+      withStepProgress({
+        effects: chatClosingEffects,
+        step: 'closingChats',
+        completedBefore: 0,
+      }),
+      Array.appendAll(
+        withStepProgress({
+          effects: inboxDeletionEffects,
+          step: 'deletingOfferInboxes',
+          completedBefore: chatClosingEffects.length,
+        })
+      ),
+      Effect.all,
+      Effect.andThen(() => {
+        set(messagingStateAtom, [])
+      }),
+      effectToTaskEither
+    )
+  }
+)
 
 export default deleteAllInboxesActionAtom

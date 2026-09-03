@@ -114,7 +114,7 @@ export const RefreshUserEndpoint = HttpApiEndpoint.post(
   .annotate(MaxExpectedDailyCall, 1)
 
 // No-op kept for clients up to 26.9.0, which call it on resume and report an
-// error on 404. Remove once those clients are gone.
+// error on 404. TODO https://github.com/vexl-it/vexl/issues/2715
 export const UpdateNotificationTokenEndpoint = HttpApiEndpoint.put(
   'updateNotificationToken',
   '/api/v1/users/notification-token'

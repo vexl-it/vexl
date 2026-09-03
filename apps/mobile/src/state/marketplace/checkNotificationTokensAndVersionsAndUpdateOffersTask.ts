@@ -57,6 +57,8 @@ const updateOfferNotificationTokenActionAtom = atom(
           payloadPublic: {
             ...offer.offerInfo.publicPart,
             vexlNotificationToken,
+            // TODO https://github.com/vexl-it/vexl/issues/2715
+            fcmCypher: vexlNotificationToken,
           },
           intendedClubs: offer.ownershipInfo.intendedClubs,
           symmetricKey: offer.offerInfo.privatePart.symmetricKey,

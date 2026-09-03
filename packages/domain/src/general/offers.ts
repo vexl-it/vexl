@@ -198,6 +198,8 @@ export const OfferPublicPart = Schema.Struct({
   productCategory: Schema.optional(ProductCategory),
   productCategories: Schema.optional(Schema.Array(ProductCategory)),
   vexlNotificationToken: Schema.optional(VexlNotificationToken),
+  // TODO https://github.com/vexl-it/vexl/issues/2715: write-only mirror of vexlNotificationToken read by clients up to 26.9.0
+  fcmCypher: Schema.optional(VexlNotificationToken),
   authorClientVersion: Schema.optional(VersionString),
   goldenAvatarType: Schema.optional(GoldenAvatarType),
   byLiquidityProvider: Schema.optional(Schema.Boolean),

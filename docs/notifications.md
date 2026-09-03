@@ -18,3 +18,7 @@ The channel is offered (and enabled when the user agrees) on devices without Goo
 ## Metrics
 
 `NOTIFICATION_SENT.channel` identifies `foreground_socket`, `background_socket`, or `push`. `NOTIFICATION_PROCESSED` continues to report when the client finishes processing a durable notification.
+
+## Android notification groups
+
+`expo-notifications` cannot render Android grouped notifications (a per-group summary row the individual notifications collapse under). `packages/expo-android-notification-groups` fills that gap: chat notifications put a group id into their `data`, and a `NotificationsService` subclass registered with a higher priority than the one shipped by `expo-notifications` applies the group to the notification Expo built. Chat messages are grouped per conversation and all messaging requests share one group; iOS uses the same id as `threadIdentifier`. The summary is a normal local notification whose identifier is the group id, so it is dismissed together with the conversation's notifications, and the shared request summary is dismissed once no request notification is left.

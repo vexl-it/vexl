@@ -844,6 +844,9 @@ importers:
       '@vexl-next/domain':
         specifier: 0.0.0
         version: link:../../packages/domain
+      '@vexl-next/expo-android-notification-groups':
+        specifier: 0.0.0
+        version: link:../../packages/expo-android-notification-groups
       '@vexl-next/expo-background-notification-socket':
         specifier: 0.0.0
         version: link:../../packages/expo-background-notification-socket
@@ -1731,6 +1734,37 @@ importers:
       rimraf:
         specifier: ^4.4.0
         version: 4.4.1
+      typescript:
+        specifier: ~6.0.3
+        version: 6.0.3
+
+  packages/expo-android-notification-groups:
+    dependencies:
+      effect:
+        specifier: ^3.20.0
+        version: 3.21.4
+    devDependencies:
+      '@vexl-next/eslint-config':
+        specifier: 0.0.0
+        version: link:../../tooling/eslint
+      '@vexl-next/prettier-config':
+        specifier: 0.0.0
+        version: link:../../tooling/prettier
+      '@vexl-next/tsconfig':
+        specifier: 0.0.0
+        version: link:../../tooling/tsconfig
+      eslint:
+        specifier: ^9.20.0
+        version: 9.39.4(jiti@2.7.0)
+      expo:
+        specifier: ~57.0.15
+        version: 57.0.15(@babel/core@7.29.7)(@expo/dom-webview@56.0.5)(react-dom@19.2.3(react@19.2.3))(react-native-web@0.21.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react-native-worklets@0.10.1(@babel/core@7.29.7)(@react-native/metro-config@0.86.2(@babel/core@7.29.7))(react-native@0.86.2(@babel/core@7.29.7)(@react-native/metro-config@0.86.2(@babel/core@7.29.7))(@types/react@19.2.17)(react@19.2.3))(react@19.2.3))(react-native@0.86.2(@babel/core@7.29.7)(@react-native/metro-config@0.86.2(@babel/core@7.29.7))(@types/react@19.2.17)(react@19.2.3))(react@19.2.3)(typescript@6.0.3)
+      prettier:
+        specifier: ^3.3.2
+        version: 3.8.4
+      react-native:
+        specifier: 0.86.2
+        version: 0.86.2(@babel/core@7.29.7)(@react-native/metro-config@0.86.2(@babel/core@7.29.7))(@types/react@19.2.17)(react@19.2.3)
       typescript:
         specifier: ~6.0.3
         version: 6.0.3

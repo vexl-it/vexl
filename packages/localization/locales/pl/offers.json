@@ -206,8 +206,6 @@
   "offerForm.friendLevel.noVexlers": "Brak osób",
   "offerForm.friendLevel.noPeople": "Brak osób",
   "offerForm.friendLevel.reachVexlers": "Docierasz do {{count}} osób",
-  "offerForm.friendLevel.reachPeopleInline": "docierasz do {{count}} osób",
-  "offerForm.friendLevel.reachPeopleInlineFormatted": "docierasz do {{localizedString}} osób",
   "offerForm.friendLevel.reachPeople": "Docierasz do {{count}} osób",
   "offerForm.friendLevel.reachPeopleFormatted": "Docierasz do {{localizedString}} osób",
   "offerForm.errorCreatingOffer": "Błąd podczas tworzenia oferty",

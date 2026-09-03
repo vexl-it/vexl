@@ -204,8 +204,6 @@
   "offerForm.friendLevel.noVexlers": "No vexlers",
   "offerForm.friendLevel.noPeople": "Немає людей",
   "offerForm.friendLevel.reachVexlers": "Reach {{count}} vexlers",
-  "offerForm.friendLevel.reachPeopleInline": "ти охоплюєш {{count}} людей",
-  "offerForm.friendLevel.reachPeopleInlineFormatted": "ти охоплюєш {{localizedString}} людей",
   "offerForm.friendLevel.reachPeople": "Ти охоплюєш {{count}} людей",
   "offerForm.friendLevel.reachPeopleFormatted": "Ти охоплюєш {{localizedString}} людей",
   "offerForm.errorCreatingOffer": "Error while creating offer",

@@ -204,8 +204,6 @@
   "offerForm.friendLevel.noVexlers": "No vexlers",
   "offerForm.friendLevel.noPeople": "Tidak ada orang",
   "offerForm.friendLevel.reachVexlers": "Reach {{count}} vexlers",
-  "offerForm.friendLevel.reachPeopleInline": "kamu menjangkau {{count}} orang",
-  "offerForm.friendLevel.reachPeopleInlineFormatted": "kamu menjangkau {{localizedString}} orang",
   "offerForm.friendLevel.reachPeople": "Kamu menjangkau {{count}} orang",
   "offerForm.friendLevel.reachPeopleFormatted": "Kamu menjangkau {{localizedString}} orang",
   "offerForm.errorCreatingOffer": "Error while creating offer",

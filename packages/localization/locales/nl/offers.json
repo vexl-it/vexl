@@ -206,8 +206,6 @@
   "offerForm.friendLevel.noVexlers": "Geen mensen",
   "offerForm.friendLevel.noPeople": "Geen mensen",
   "offerForm.friendLevel.reachVexlers": "Bereik {{count}} mensen",
-  "offerForm.friendLevel.reachPeopleInline": "je bereikt {{count}} mensen",
-  "offerForm.friendLevel.reachPeopleInlineFormatted": "je bereikt {{localizedString}} mensen",
   "offerForm.friendLevel.reachPeople": "Je bereikt {{count}} mensen",
   "offerForm.friendLevel.reachPeopleFormatted": "Je bereikt {{localizedString}} mensen",
   "offerForm.errorCreatingOffer": "Fout bij het aanmaken aanbieding",

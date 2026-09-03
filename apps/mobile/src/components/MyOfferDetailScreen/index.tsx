@@ -42,7 +42,6 @@ import {formatInteger} from '../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../utils/localization/formattingLocaleAtom'
 import {getOfferExpirationLabel} from '../../utils/offerAmountDetails'
 import useSafeGoBack from '../../utils/useSafeGoBack'
-import numberOfFriendsAtom from '../CRUDOfferFlow/atoms/numberOfFriendsAtom'
 import {offerFormMolecule} from '../CRUDOfferFlow/atoms/offerFormStateAtoms'
 import AmountStep from '../CRUDOfferFlow/components/AmountStep'
 import DescribeStep from '../CRUDOfferFlow/components/DescribeStep'
@@ -52,6 +51,7 @@ import NetworkStep from '../CRUDOfferFlow/components/NetworkStep'
 import PriceUpToStep from '../CRUDOfferFlow/components/PriceUpToStep'
 import ProductCategoryStep from '../CRUDOfferFlow/components/ProductCategoryStep'
 import {type EditableOfferField} from '../CRUDOfferFlow/offerSetupSteps'
+import {useFriendLevelLabels} from '../CRUDOfferFlow/useFriendLevelLabels'
 
 type Props = RootStackScreenProps<'MyOfferDetail'>
 
@@ -77,7 +77,6 @@ function MyOfferDetailScreen({
     showUnpublishedChangesDialogActionAtom,
     listingTypeAtom,
     offerTitleAtom,
-    intendedConnectionLevelAtom,
     expirationDateAtom,
     selectedClubsUuidsAtom,
   } = useMolecule(offerFormMolecule)
@@ -94,10 +93,8 @@ function MyOfferDetailScreen({
   )
   const listingType = useAtomValue(listingTypeAtom)
   const offerTitle = useAtomValue(offerTitleAtom)
-  const intendedConnectionLevel = useAtomValue(intendedConnectionLevelAtom)
   const expirationDate = useAtomValue(expirationDateAtom)
   const selectedClubsUuids = useAtomValue(selectedClubsUuidsAtom)
-  const numberOfFriends = useAtomValue(numberOfFriendsAtom)
   const selectedClubNames = useGetAllClubsNamesForIds(selectedClubsUuids)
   const allClubsWithMembers = useAtomValue(clubsWithMembersAtom)
   const isMissingProductCategory = useAtomValue(
@@ -142,42 +139,20 @@ function MyOfferDetailScreen({
     [navigation, offerId]
   )
 
-  const friendLevelHeadline = (() => {
-    const level = intendedConnectionLevel
-    const base =
-      level === 'FIRST'
-        ? t('offerForm.friendLevel.firstDegree')
-        : t('offerForm.friendLevel.secondDegree')
-    if (numberOfFriends.state !== 'success') return base
-    const reach =
-      level === 'FIRST'
-        ? numberOfFriends.firstLevelFriendsCount
-        : numberOfFriends.firstAndSecondLevelFriendsCount
-    return `${base} (${t('offerForm.friendLevel.reachPeopleInlineFormatted', {
-      localizedString: formatInteger(reach, locale),
-    })})`
-  })()
+  const friendLevelLabels = useFriendLevelLabels()
   const expirationLabel = getOfferExpirationLabel({
     expirationDate,
     locale,
     t,
   })
 
-  const clubsHeadline = (() => {
-    if (selectedClubNames.length === 0) return t('editOffer.noClubsSelected')
-    const reach = pipe(
-      allClubsWithMembers,
-      Array.filter((c) => selectedClubsUuids.includes(c.club.uuid)),
-      Array.map(getClubReach),
-      Number.sumAll
-    )
-    return `${selectedClubNames.join(', ')} (${t(
-      'offerForm.friendLevel.reachPeopleInlineFormatted',
-      {
-        localizedString: formatInteger(reach, locale),
-      }
-    )})`
-  })()
+  const hasSelectedClubs = Array.isNonEmptyArray(selectedClubNames)
+  const clubsReach = pipe(
+    allClubsWithMembers,
+    Array.filter((c) => selectedClubsUuids.includes(c.club.uuid)),
+    Array.map(getClubReach),
+    Number.sumAll
+  )
   if (Option.isNone(offerOption)) {
     return (
       <Screen
@@ -354,8 +329,8 @@ function MyOfferDetailScreen({
             state="completed"
             icon={PeopleUsers}
             overline={t('editOffer.detail.whoCanSeeYourOffer')}
-            headline={friendLevelHeadline}
-            subheadline={expirationLabel}
+            headline={friendLevelLabels.headline}
+            subheadline={[friendLevelLabels.reachLabel, expirationLabel]}
             onPress={() => {
               navigateToEdit('friendLevel')
             }}
@@ -365,7 +340,18 @@ function MyOfferDetailScreen({
               state="completed"
               icon={ConferenceClub}
               overline={t('editOffer.detail.publishToVexlClub')}
-              headline={clubsHeadline}
+              headline={
+                hasSelectedClubs
+                  ? selectedClubNames.join(', ')
+                  : t('editOffer.noClubsSelected')
+              }
+              subheadline={
+                hasSelectedClubs
+                  ? t('offerForm.friendLevel.reachPeopleFormatted', {
+                      localizedString: formatInteger(clubsReach, locale),
+                    })
+                  : undefined
+              }
               onPress={() => {
                 navigateToEdit('clubs')
               }}

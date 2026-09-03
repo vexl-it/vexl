@@ -1,3 +1,4 @@
+import {Array, pipe} from 'effect'
 import React from 'react'
 import {getTokens, styled, useTheme} from 'tamagui'
 
@@ -71,7 +72,7 @@ const OptionalTag = styled(XStack, {
 interface EditRowBaseProps {
   readonly headline: string
   readonly headlineSuffix?: string
-  readonly subheadline?: string
+  readonly subheadline?: string | readonly string[]
   readonly overline?: string
   readonly optionalLabel?: string
   readonly headlineColor?: TypographyProps['color']
@@ -197,6 +198,10 @@ export function EditRow({
     }
   })()
   const showLeadingIcon = isProfile || !isInitial || showInitialIcon
+  const subheadlines = pipe(
+    typeof subheadline === 'string' ? [subheadline] : (subheadline ?? []),
+    Array.filter((line) => line !== '')
+  )
 
   return (
     <EditRowFrame
@@ -211,7 +216,10 @@ export function EditRow({
           <IconBox tone={iconBoxTone}>{leadingIcon}</IconBox>
         )
       ) : null}
-      <YStack flex={1} gap={overline || subheadline ? '$2' : undefined}>
+      <YStack
+        flex={1}
+        gap={overline || subheadlines.length > 0 ? '$2' : undefined}
+      >
         {overline ? (
           <Typography
             variant="micro"
@@ -236,15 +244,16 @@ export function EditRow({
             {headline}
           </Typography>
         )}
-        {subheadline ? (
+        {subheadlines.map((line, i) => (
           <Typography
+            key={i}
             variant="micro"
             color="$foregroundPrimary"
             numberOfLines={1}
           >
-            {subheadline}
+            {line}
           </Typography>
-        ) : null}
+        ))}
       </YStack>
       {optionalLabel ? (
         <OptionalTag>

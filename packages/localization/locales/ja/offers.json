@@ -206,8 +206,6 @@
   "offerForm.friendLevel.noVexlers": "Vexlユーザがいません",
   "offerForm.friendLevel.noPeople": "対象者なし",
   "offerForm.friendLevel.reachVexlers": "{{count}}人に届く",
-  "offerForm.friendLevel.reachPeopleInline": "{{count}}人に届く",
-  "offerForm.friendLevel.reachPeopleInlineFormatted": "{{localizedString}}人に届く",
   "offerForm.friendLevel.reachPeople": "{{count}}人に届く",
   "offerForm.friendLevel.reachPeopleFormatted": "{{localizedString}}人に届く",
   "offerForm.errorCreatingOffer": "オファーの作成中にエラーが発生しました",

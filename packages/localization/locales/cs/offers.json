@@ -206,8 +206,6 @@
   "offerForm.friendLevel.noVexlers": "Žádní lidé",
   "offerForm.friendLevel.noPeople": "Žádní lidé",
   "offerForm.friendLevel.reachVexlers": "Oslovíš {{count}} lidí",
-  "offerForm.friendLevel.reachPeopleInline": "oslovíš {{count}} lidí",
-  "offerForm.friendLevel.reachPeopleInlineFormatted": "oslovíš {{localizedString}} lidí",
   "offerForm.friendLevel.reachPeople": "Oslovíš {{count}} lidí",
   "offerForm.friendLevel.reachPeopleFormatted": "Oslovíš {{localizedString}} lidí",
   "offerForm.errorCreatingOffer": "Chyba při vytváření nabídky",

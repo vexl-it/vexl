@@ -1,5 +1,5 @@
 import {useCallback, useEffect, useMemo, useState} from 'react'
-import {useColorScheme} from 'react-native'
+import {Appearance, useColorScheme} from 'react-native'
 
 export type ThemeMode = 'light' | 'dark' | 'system'
 
@@ -19,6 +19,11 @@ export function useThemeMode(
   useEffect(() => {
     setMode(initialMode)
   }, [initialMode])
+
+  // Keeps native controls (e.g. iOS switch, alerts, keyboard) on the app theme
+  useEffect(() => {
+    Appearance.setColorScheme(mode === 'system' ? 'unspecified' : mode)
+  }, [mode])
 
   const resolvedTheme = useMemo(
     () =>

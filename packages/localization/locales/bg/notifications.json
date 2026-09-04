@@ -74,7 +74,6 @@
   "notifications.CLUB_DEACTIVATED.FLAGGED.body": "Клуб {{name}} е бил деактивиран поради неподходящо съдържание.",
   "notifications.CLUB_DEACTIVATED.OTHER.title": "Клубът е бил деактивиран",
   "notifications.CLUB_DEACTIVATED.OTHER.body": "Клуб {{name}} е бил деактивиран.",
-  "notifications.groupNotificationChat.subtitle": "Имате нови съобщения от {{userName}}",
   "notifications.groupNotificationRequest.subtitle": "Имате нови искания към вашите оферти",
   "notifications.groupNotificationRequest.title": "Нови искания",
   "notifications.createOfferPrompt.title": "Създай нова оферта",

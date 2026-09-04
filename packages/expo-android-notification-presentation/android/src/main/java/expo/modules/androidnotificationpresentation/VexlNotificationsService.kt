@@ -1,10 +1,10 @@
-package expo.modules.androidnotificationgroups
+package expo.modules.androidnotificationpresentation
 
 import android.content.Context
 import expo.modules.notifications.service.NotificationsService
 import expo.modules.notifications.service.interfaces.PresentationDelegate
 
-class GroupingNotificationsService : NotificationsService() {
+class VexlNotificationsService : NotificationsService() {
   override fun getPresentationDelegate(context: Context): PresentationDelegate =
-    GroupingPresentationDelegate(context)
+    VexlPresentationDelegate(context)
 }

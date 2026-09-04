@@ -74,7 +74,6 @@
   "notifications.CLUB_DEACTIVATED.FLAGGED.body": "Klabu {{name}} imezimwa kutokana na maudhui yasiyofaa.",
   "notifications.CLUB_DEACTIVATED.OTHER.title": "Klabu imezimwa",
   "notifications.CLUB_DEACTIVATED.OTHER.body": "Klabu {{name}} imezimwa.",
-  "notifications.groupNotificationChat.subtitle": "Una ujumbe mpya kutoka kwa {{userName}}",
   "notifications.groupNotificationRequest.subtitle": "Una maombi mapya kwa ofa zako",
   "notifications.groupNotificationRequest.title": "Maombi mapya",
   "notifications.createOfferPrompt.title": "Unda ofa yako",

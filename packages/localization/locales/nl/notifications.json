@@ -74,7 +74,6 @@
   "notifications.CLUB_DEACTIVATED.FLAGGED.body": "Club {{name}} is gedeactiveerd vanwege ongepaste inhoud.",
   "notifications.CLUB_DEACTIVATED.OTHER.title": "Club is gedeactiveerd",
   "notifications.CLUB_DEACTIVATED.OTHER.body": "Club {{name}} is gedeactiveerd.",
-  "notifications.groupNotificationChat.subtitle": "Nieuwe berichten van {{userName}}.",
   "notifications.groupNotificationRequest.subtitle": "Je hebt nieuwe aanvragen voor je aanbiedingen",
   "notifications.groupNotificationRequest.title": "Nieuwe aanvragen",
   "notifications.createOfferPrompt.title": "Maak uw aanbieding aan",

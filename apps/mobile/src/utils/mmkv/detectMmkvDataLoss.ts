@@ -117,12 +117,16 @@ async function detectPartialMmkvDataLoss(
 function reportMmkvStorageStartupStatus(status: MmkvStorageStatus): void {
   switch (status._tag) {
     case 'ready':
-      if (status.encryptionKeySource === 'regeneratedAfterKeyLoss') {
+      if (
+        status.encryptionKeySource === 'regeneratedAfterKeyLoss' ||
+        status.encryptionKeySource === 'regeneratedAfterKeyMismatch'
+      ) {
         reportError(
           'warn',
           new Error(
             'MMKV encryption key was missing; unreadable encrypted storage was reset because no session secret exists'
-          )
+          ),
+          {encryptionKeySource: status.encryptionKeySource}
         )
       }
       if (status.migratedPlaintextKeyCount !== undefined) {

@@ -1,3 +1,4 @@
+import {createHash} from 'crypto'
 import * as SecureStore from 'expo-secure-store'
 import {createMMKV, deleteMMKV, existsMMKV} from 'react-native-mmkv'
 import {
@@ -17,14 +18,53 @@ jest.mock('react-native-mmkv')
 jest.mock('expo-secure-store')
 
 const deletedFiles: string[] = []
+let mockUnlinkFails = false
+// Simulated `Documents/mmkv/`: MMKV data/crc files mirror the mmkv mock's
+// registry (so unlinking one removes it from `existsMMKV`), and any other
+// file (the key fingerprint) keeps its written content.
+const mockWrittenFiles = new Map<string, string>()
+// `.crc` twins outlive the data file's registry entry until unlinked themselves.
+const mockOrphanedCrcIds = new Set<string>()
 jest.mock('expo-file-system', () => ({
   Paths: {document: '/mock/documents'},
-  File: jest.fn().mockImplementation((_dir: string, path: string) => ({
-    exists: true,
-    delete: () => {
-      deletedFiles.push(path)
-    },
-  })),
+  File: jest.fn().mockImplementation((_dir: string, path: string) => {
+    const mmkvId = path.replace(/^mmkv\//, '').replace(/\.crc$/, '')
+    const isMmkvFile =
+      /^mmkv\/[^.]+(\.crc)?$|^mmkv\/mmkv\.[a-z]+(\.crc)?$/.test(path)
+    const mmkv = jest.requireMock<{
+      existsMMKV: (id: string) => boolean
+      deleteMMKV: (id: string) => boolean
+    }>('react-native-mmkv')
+    return {
+      get exists(): boolean {
+        if (!isMmkvFile) return mockWrittenFiles.has(path)
+        if (path.endsWith('.crc') && mockOrphanedCrcIds.has(mmkvId)) return true
+        return mmkv.existsMMKV(mmkvId)
+      },
+      textSync: () => {
+        const content = mockWrittenFiles.get(path)
+        if (content === undefined) throw new Error(`no such file ${path}`)
+        return content
+      },
+      create: () => {
+        mockWrittenFiles.set(path, '')
+      },
+      write: (content: string) => {
+        mockWrittenFiles.set(path, content)
+      },
+      delete: () => {
+        if (mockUnlinkFails) throw new Error('unlink failed')
+        deletedFiles.push(path)
+        mockWrittenFiles.delete(path)
+        if (!isMmkvFile) return
+        if (path.endsWith('.crc')) mockOrphanedCrcIds.delete(mmkvId)
+        else {
+          mmkv.deleteMMKV(mmkvId)
+          mockOrphanedCrcIds.add(mmkvId)
+        }
+      },
+    }
+  }),
 }))
 
 // Typed access to the manual mocks' test-only helpers.
@@ -59,8 +99,17 @@ beforeEach(() => {
   mmkvMock.resetMockMmkvFiles()
   secureStoreMock.resetMockSecureStore()
   deletedFiles.length = 0
+  mockUnlinkFails = false
+  mockWrittenFiles.clear()
+  mockOrphanedCrcIds.clear()
   jest.clearAllMocks()
 })
+
+const KEY_FINGERPRINT_FILE = `mmkv/${ENCRYPTED_MMKV_ID}.key-id`
+
+function sha256Hex(value: string): string {
+  return createHash('sha256').update(value).digest('hex')
+}
 
 describe('openEncryptedMmkvStorage', () => {
   it('generates a device-bound key on a fresh install and opens an encrypted store', () => {
@@ -83,6 +132,9 @@ describe('openEncryptedMmkvStorage', () => {
       DEVICE_BOUND_SECURE_STORE_OPTIONS
     )
     expect(existsMMKV(LEGACY_PLAINTEXT_MMKV_ID)).toBe(false)
+    expect(mockWrittenFiles.get(KEY_FINGERPRINT_FILE)).toBe(
+      sha256Hex(key ?? '')
+    )
   })
 
   it('stores the key before the encrypted store is created', () => {
@@ -154,12 +206,11 @@ describe('openEncryptedMmkvStorage', () => {
       )
       expect(opened.store.getBoolean('session:v2SecretWasWritten')).toBe(true)
 
-      const legacy = createMMKV({id: LEGACY_PLAINTEXT_MMKV_ID})
-      expect(legacy.getAllKeys()).toEqual([])
       expect(deletedFiles).toEqual([
         `mmkv/${LEGACY_PLAINTEXT_MMKV_ID}`,
         `mmkv/${LEGACY_PLAINTEXT_MMKV_ID}.crc`,
       ])
+      expect(existsMMKV(LEGACY_PLAINTEXT_MMKV_ID)).toBe(false)
     })
 
     it('keeps the plaintext source intact and fails closed when the import throws', () => {
@@ -226,20 +277,28 @@ describe('openEncryptedMmkvStorage', () => {
         'offers',
         'session:v2SecretWasWritten',
       ])
-      expect(existsMMKV(LEGACY_PLAINTEXT_MMKV_ID)).toBe(true)
-      expect(createMMKV({id: LEGACY_PLAINTEXT_MMKV_ID}).length).toBe(0)
+      expect(existsMMKV(LEGACY_PLAINTEXT_MMKV_ID)).toBe(false)
     })
 
-    it('skips the import on later launches once the plaintext store is empty', () => {
+    it('keeps an emptied plaintext store harmless when unlinking it fails', () => {
       seedLegacyPlaintextStore()
-      openEncryptedMmkvStorage()
-      deletedFiles.length = 0
+      mockUnlinkFails = true
+      const migratingLaunch = openEncryptedMmkvStorage()
+      mockUnlinkFails = false
+
+      expect(migratingLaunch.status).toMatchObject({
+        _tag: 'ready',
+        migratedPlaintextKeyCount: 3,
+      })
+      expect(existsMMKV(LEGACY_PLAINTEXT_MMKV_ID)).toBe(true)
+      expect(createMMKV({id: LEGACY_PLAINTEXT_MMKV_ID}).length).toBe(0)
 
       const laterLaunch = openEncryptedMmkvStorage()
 
       expect(laterLaunch.status).toMatchObject({
         migratedPlaintextKeyCount: 0,
       })
+      expect(existsMMKV(LEGACY_PLAINTEXT_MMKV_ID)).toBe(false)
       expect(laterLaunch.store.getString('offers')).toBe(
         JSON.stringify({offers: ['favourite-mark']})
       )
@@ -322,6 +381,61 @@ describe('openEncryptedMmkvStorage', () => {
         cause: keychainError,
       })
       expect(existsMMKV(ENCRYPTED_MMKV_ID)).toBe(false)
+    })
+
+    it('locks when the stored key does not match the fingerprint of the ciphertext and a session secret exists', () => {
+      const original = openEncryptedMmkvStorage()
+      original.store.set('messagingState', '{"inboxes":[]}')
+      const otherInstallsKey = 'ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ'
+      SecureStore.setItem(MMKV_ENCRYPTION_KEY, otherInstallsKey)
+      SecureStore.setItem(SECRET_TOKEN_KEY_V2, 'session-secret')
+      jest.clearAllMocks()
+
+      const opened = openEncryptedMmkvStorage()
+
+      expect(opened.status).toEqual({_tag: 'locked'})
+      expect(createMMKV).not.toHaveBeenCalled()
+      expect(deleteMMKV).not.toHaveBeenCalled()
+      expect(storedEncryptionKey()).toBe(otherInstallsKey)
+      expect(mockWrittenFiles.get(KEY_FINGERPRINT_FILE)).not.toBe(
+        sha256Hex(otherInstallsKey)
+      )
+    })
+
+    it('discards the ciphertext and re-keys on a key mismatch when no session secret exists', () => {
+      openEncryptedMmkvStorage().store.set('messagingState', '{"inboxes":[]}')
+      const otherInstallsKey = 'ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ'
+      SecureStore.setItem(MMKV_ENCRYPTION_KEY, otherInstallsKey)
+      jest.clearAllMocks()
+
+      const opened = openEncryptedMmkvStorage()
+
+      expect(opened.status).toEqual({
+        _tag: 'ready',
+        encryptionKeySource: 'regeneratedAfterKeyMismatch',
+        migratedPlaintextKeyCount: undefined,
+      })
+      expect(deleteMMKV).toHaveBeenCalledWith(ENCRYPTED_MMKV_ID)
+      expect(opened.store.getString('messagingState')).toBeUndefined()
+      const newKey = storedEncryptionKey()
+      expect(newKey).not.toBe(otherInstallsKey)
+      expect(mockWrittenFiles.get(KEY_FINGERPRINT_FILE)).toBe(
+        sha256Hex(newKey ?? '')
+      )
+    })
+
+    it('trusts the stored key and records its fingerprint when no fingerprint file exists', () => {
+      openEncryptedMmkvStorage().store.set('messagingState', '{"inboxes":[]}')
+      const key = storedEncryptionKey()
+      mockWrittenFiles.delete(KEY_FINGERPRINT_FILE)
+
+      const opened = openEncryptedMmkvStorage()
+
+      expect(opened.status).toMatchObject({encryptionKeySource: 'existing'})
+      expect(opened.store.getString('messagingState')).toBe('{"inboxes":[]}')
+      expect(mockWrittenFiles.get(KEY_FINGERPRINT_FILE)).toBe(
+        sha256Hex(key ?? '')
+      )
     })
 
     it('fails closed when the unreadable ciphertext cannot be deleted', () => {

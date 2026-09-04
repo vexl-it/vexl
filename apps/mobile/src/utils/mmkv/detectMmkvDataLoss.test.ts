@@ -126,7 +126,8 @@ describe('detectMmkvDataLoss', () => {
       expect.objectContaining({
         message:
           'MMKV encryption key was missing; unreadable encrypted storage was reset because no session secret exists',
-      })
+      }),
+      {encryptionKeySource: 'regeneratedAfterKeyLoss'}
     )
   })
 

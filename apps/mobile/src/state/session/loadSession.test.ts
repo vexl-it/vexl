@@ -580,7 +580,7 @@ describe('loadSession', () => {
     expect(secretStoreGetItemAsyncMock).not.toHaveBeenCalled()
   })
 
-  it.each(['locked', 'unavailable'] as const)(
+  it.each<'locked' | 'unavailable'>(['locked', 'unavailable'])(
     'requires blocking recovery without reading or erasing the session when MMKV storage is %s',
     async (status) => {
       jest

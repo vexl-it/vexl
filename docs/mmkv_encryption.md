@@ -14,6 +14,7 @@ SecureStore. Nothing about this touches the backend.
 | Material          | 32 random symbols from a 64-symbol alphabet (192 bits), single-byte UTF-8, AES-256 mode |
 | Accessibility     | `AFTER_FIRST_UNLOCK_THIS_DEVICE_ONLY`, the same as the session secret                   |
 | Lifetime          | Created on the first launch that needs it; never rotated, never deleted by the app      |
+| Fingerprint       | SHA-256 of the key in `Documents/mmkv/mmkv.encrypted.key-id`, next to the ciphertext    |
 | Relation to login | None. The store must work while logged out, so the key is not derived from the session  |
 
 The key is written to SecureStore before the store is ever opened with it, so
@@ -36,10 +37,12 @@ everything below runs in `openEncryptedMmkvStorage()` while
 read key from SecureStore
 |
 +- read throws ............................ unavailable
-+- key present ............................ open mmkv.encrypted with it
-+- key missing
-   +- no mmkv.encrypted file .............. generate + store key, open
-   +- ciphertext exists
++- no mmkv.encrypted file
+|  +- key present ......................... open with it
+|  +- key missing ......................... generate + store key, open
++- ciphertext exists
+   +- key present and matches fingerprint . open with it
+   +- key missing, or does not match
       +- session secret present .......... locked
       +- no session secret ............... delete ciphertext, generate + store key, open
 |
@@ -51,8 +54,13 @@ plaintext mmkv.default present?
 The encrypted store uses its own instance id (`mmkv.encrypted`). The plaintext
 store older versions wrote (`mmkv.default`) is never opened with a key and the
 encrypted one is never opened without its key, so a file is never opened in a
-key state it was not written in. (Opening an MMKV file with the wrong key does
-not fail loudly; with `recover-on-error` it silently starts over empty.)
+key state it was not written in. Opening an MMKV file with the wrong key does
+not fail loudly; with `recover-on-error` it silently starts over empty. That
+is why the key's SHA-256 fingerprint is recorded next to the ciphertext when
+the store is created: a stored key that does not match it (a container and a
+keychain restored from different installs) is handled like a missing key
+instead of being tried. A store without a fingerprint file trusts the key and
+records it.
 
 `compareBeforeSet` is off for the encrypted store: MMKV core refuses to
 combine it with encryption and asserts on it in debug builds.
@@ -82,11 +90,11 @@ ran is not supported: that version would find an empty store.
 
 ## Failure states
 
-| Status        | Meaning                                                                     | Behaviour                                                                                           |
-| ------------- | --------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| `ready`       | Store open and migrated                                                     | Normal operation                                                                                    |
-| `locked`      | Ciphertext exists, key gone from SecureStore, a session secret still exists | Fail closed: `loadSession` returns `MmkvStorageNotReady`, blocking recovery screen, nothing deleted |
-| `unavailable` | SecureStore or MMKV threw, or the migration failed                          | Fail closed the same way; usually transient, cleared by an app restart                              |
+| Status        | Meaning                                                                         | Behaviour                                                                                           |
+| ------------- | ------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `ready`       | Store open and migrated                                                         | Normal operation                                                                                    |
+| `locked`      | Ciphertext exists, its key is gone or mismatched, a session secret still exists | Fail closed: `loadSession` returns `MmkvStorageNotReady`, blocking recovery screen, nothing deleted |
+| `unavailable` | SecureStore or MMKV threw, or the migration failed                              | Fail closed the same way; usually transient, cleared by an app restart                              |
 
 In both failure states `storage` is a volatile in-memory placeholder so
 module-level atom reads do not spam parse errors. `loadSession` refuses to load

@@ -40,6 +40,21 @@ export const clubsWithMembersAtom = atom(
   (get) => get(clubsWithMembersStorageAtom).data
 )
 
+const getClubNamesForIds = (
+  clubsWithMembers: readonly ClubWithMembers[],
+  clubsIds: readonly ClubUuid[]
+): string[] =>
+  pipe(
+    clubsWithMembers,
+    Array.filter((club) => Array.contains(club.club.uuid)(clubsIds)),
+    Array.map((club) => club.club.name)
+  )
+
+export const clubNamesForIdsAtom = (
+  clubsIds: readonly ClubUuid[]
+): Atom<string[]> =>
+  atom((get) => getClubNamesForIds(get(clubsWithMembersAtom), clubsIds))
+
 const clubsWithMembersByNameOrder = pipe(
   Order.string,
   Order.mapInput((clubWithMembers: ClubWithMembers) =>
@@ -198,11 +213,7 @@ export function useGetAllClubsNamesForIds(
   clubsIds: readonly ClubUuid[]
 ): string[] {
   const clubsWithMembers = useAtomValue(clubsWithMembersAtom)
-  return pipe(
-    clubsWithMembers,
-    Array.filter((club) => Array.contains(club.club.uuid)(clubsIds)),
-    Array.map((club) => club.club.name)
-  )
+  return getClubNamesForIds(clubsWithMembers, clubsIds)
 }
 
 export function useGetAllClubsForIds(

@@ -3,6 +3,7 @@ import {Stack, Typography, XStack, YStack} from '@vexl-next/ui'
 import React from 'react'
 import {TouchableOpacity} from 'react-native'
 import {type RootStackScreenProps} from '../../../navigationTypes'
+import {chatDetailRouteParams} from '../../../utils/chat/goToChatDetail'
 import unixMillisecondsToLocaleDateTime from '../../../utils/unixMillisecondsToLocaleDateTime'
 import FromNowComponent from '../../FromNowComponent'
 import UserAvatar from '../../UserAvatar'
@@ -23,10 +24,7 @@ function ChatSearchChatResultItem({
   return (
     <TouchableOpacity
       onPress={() => {
-        navigation.navigate('ChatDetail', {
-          otherSideKey: result.chat.otherSide.publicKey,
-          inboxKey: result.chat.inbox.privateKey.publicKeyPemBase64,
-        })
+        navigation.navigate('ChatDetail', chatDetailRouteParams(result.chat))
       }}
     >
       <XStack py="$4" gap="$4" ai="center">

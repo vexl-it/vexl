@@ -23,7 +23,7 @@ import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useMemo} from 'react'
 import {ScrollView} from 'react-native'
 import {type RootStackScreenProps} from '../../navigationTypes'
-import {chatWithMessagesForOfferAtom} from '../../state/chat/hooks/useChatForOffer'
+import {useChatWithMessagesForOfferAtom} from '../../state/chat/hooks/useChatForOffer'
 import {
   canChatBeRequested,
   getRequestState,
@@ -32,9 +32,10 @@ import {useGetAllClubsForIds} from '../../state/clubs/atom/clubsWithMembersAtom'
 import {useSingleOffer} from '../../state/marketplace'
 import {toggleOfferMarkActionAtom} from '../../state/marketplace/atoms/offerMarkActionAtoms'
 import {useVisibleCommonFriendsForOffer} from '../../state/marketplace/hooks/useVisibleCommonFriendsForOffer'
-import {useTranslation} from '../../utils/localization/I18nProvider'
+import {useNavigateToChatDetail} from '../../utils/chat/goToChatDetail'
 import {formatInteger} from '../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../utils/localization/formattingLocaleAtom'
+import {useTranslation} from '../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import {offerRerequestLimitDaysAtom} from '../../utils/versionService/atoms'
 import CommonFriends from '../CommonFriends'
@@ -264,19 +265,8 @@ function OfferDetailScreen({
     onNone: () => false,
     onSome: (o) => !!o.ownershipInfo,
   })
-  const otherSidePublicKey = Option.match(offer, {
-    onNone: () => undefined,
-    onSome: (o) => o.offerInfo.publicPart.offerPublicKey,
-  })
-
-  const chatForOfferAtom = useMemo(
-    () =>
-      chatWithMessagesForOfferAtom({
-        offerId,
-        isMyOffer,
-        otherSidePublicKey: Option.fromNullable(otherSidePublicKey),
-      }),
-    [isMyOffer, offerId, otherSidePublicKey]
+  const chatForOfferAtom = useChatWithMessagesForOfferAtom(
+    Option.getOrUndefined(offer)
   )
   const chatForOffer = useAtomValue(chatForOfferAtom)
 
@@ -296,13 +286,7 @@ function OfferDetailScreen({
     navigation.navigate('SendMessage', {offerId})
   }, [navigation, offerId])
 
-  const handleOpenChat = useCallback(() => {
-    if (!chatForOffer) return
-    navigation.navigate('ChatDetail', {
-      otherSideKey: chatForOffer.chat.otherSide.publicKey,
-      inboxKey: chatForOffer.chat.inbox.privateKey.publicKeyPemBase64,
-    })
-  }, [chatForOffer, navigation])
+  const handleOpenChat = useNavigateToChatDetail(chatForOffer?.chat)
 
   const footerState: FooterState = useMemo(() => {
     if (canSendRequest) {

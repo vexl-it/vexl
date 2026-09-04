@@ -1,3 +1,4 @@
+import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {
   ClubAdmitionRequest,
   ClubCode,
@@ -17,6 +18,7 @@ import {
   LINK_TYPE_IMPORT_CONTACT_V2,
   LINK_TYPE_JOIN_CLUB,
   LINK_TYPE_LOAD_PR_PREVIEW,
+  LINK_TYPE_OPEN_CHAT,
   LINK_TYPE_REQUEST_CLUB_ADMITION,
   VEXL_LINK_ORIGIN,
 } from './domain'
@@ -93,6 +95,14 @@ export const DeepLinkLoadPrPreview = Schema.Struct({
   channel: PreviewChannel,
 })
 
+// Only generated on-device (Android conversation shortcuts), never shared.
+export const DeepLinkOpenChat = Schema.Struct({
+  ...DeeplinkPayloadVersion.fields,
+  type: Schema.Literal(LINK_TYPE_OPEN_CHAT),
+  inbox: PublicKeyPemBase64,
+  sender: PublicKeyPemBase64,
+})
+
 export const DeepLinkData = parseUrlWithSearchParams(
   Schema.Union(
     DeepLinkGoldenGlasses,
@@ -100,7 +110,8 @@ export const DeepLinkData = parseUrlWithSearchParams(
     DeepLinkImportContact,
     DeepLinkImportContactV2,
     DeepLinkRequestClubAdmition,
-    DeepLinkLoadPrPreview
+    DeepLinkLoadPrPreview,
+    DeepLinkOpenChat
   )
 )
 export type DeepLinkData = typeof DeepLinkData.Type

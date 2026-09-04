@@ -1,3 +1,4 @@
+import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {type ClubAdmitionRequest} from '@vexl-next/domain/src/general/clubs'
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {type RealLifeInfo} from '@vexl-next/domain/src/general/UserNameAndAvatar.brand'
@@ -11,6 +12,7 @@ import {
 } from './domain'
 import {
   DeepLinkImportContactV2,
+  DeepLinkOpenChat,
   DeepLinkRequestClubAdmition,
 } from './parseDeepLink'
 
@@ -47,5 +49,19 @@ export function createClubAdmitionRequestLink(
       version: Option.some(MINIMAL_VERSION_REQUEST_CLUB_ADMITION),
       ...payload,
     },
+  })
+}
+
+export function createOpenChatLink({
+  inbox,
+  sender,
+}: {
+  inbox: PublicKeyPemBase64
+  sender: PublicKeyPemBase64
+}): string {
+  return Schema.encodeSync(parseUrlWithSearchParams(DeepLinkOpenChat))({
+    origin: VEXL_LINK_ORIGIN,
+    pathname: VEXL_LINK_PATHNAME,
+    searchParams: {type: 'open-chat', version: Option.none(), inbox, sender},
   })
 }

@@ -1,8 +1,6 @@
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
-import {sha256} from '@vexl-next/cryptography/src/operations/sha'
 import {type Chat} from '@vexl-next/domain/src/general/messaging'
 import {ChatNotificationData} from '@vexl-next/domain/src/general/notifications'
-import {type SvgStringOrImageUri} from '@vexl-next/domain/src/utility/SvgStringOrImageUri.brand'
 import {
   type AndroidConversationAvatar,
   type AndroidConversationData,
@@ -26,11 +24,13 @@ import {
   type ChatMessageWithState,
   type InboxInState,
 } from '../../state/chat/domain'
+import {createOpenChatLink} from '../deepLinks/createLinks'
 import {translationAtom} from '../localization/I18nProvider'
 import {useAppState} from '../useAppState'
-import {SystemChatNotificationData} from './SystemNotificationData.brand'
+import {conversationId, toAndroidAvatar} from './conversationShortcuts'
 import {displayLocalNotification} from './displayLocalNotification'
 import {getChannelForMessages} from './notificationChannels'
+import {SystemChatNotificationData} from './SystemNotificationData.brand'
 
 // All messaging requests share one Android group / iOS thread; everything else
 // is keyed per conversation (inbox + sender).
@@ -38,16 +38,6 @@ const REQUEST_GROUP_ID = 'request-group-id'
 
 // Android's MessagingStyle retains this many messages.
 const MAX_CONVERSATION_MESSAGES = 25
-
-function conversationId({
-  inbox,
-  sender,
-}: {
-  inbox: PublicKeyPemBase64
-  sender: PublicKeyPemBase64
-}): string {
-  return sha256(inbox + sender)
-}
 
 async function getNotificationsForChat({
   inbox,
@@ -89,14 +79,6 @@ async function dismissAndroidGroupSummaryIfEmpty(
   if (!hasChildren) await dismissNotificationAsync(groupId)
 }
 
-function toAndroidAvatar(
-  image: SvgStringOrImageUri
-): AndroidConversationAvatar {
-  return image.type === 'svgXml'
-    ? {type: 'svgXml', svgXml: image.svgXml.xml}
-    : image
-}
-
 // One notification per conversation that lists its messages. Re-posting with
 // the same id replaces the previous one; earlier messages are read back from
 // its data so no app state is needed.
@@ -105,6 +87,7 @@ async function showAndroidConversationNotification({
   newMessage,
   senderName,
   avatar,
+  url,
   text,
   data,
   channelId,
@@ -113,6 +96,7 @@ async function showAndroidConversationNotification({
   newMessage: ChatMessageWithState
   senderName: string
   avatar?: AndroidConversationAvatar
+  url: string
   text: string
   data: Record<string, unknown>
   channelId: string
@@ -135,6 +119,7 @@ async function showAndroidConversationNotification({
     androidConversation: {
       senderName,
       avatar,
+      url,
       messages: pipe(
         previousMessages,
         Array.append({
@@ -207,6 +192,10 @@ export async function showChatNotification({
       newMessage,
       senderName: userName ?? t('notifications.MESSAGE.title', {them: ''}),
       avatar: otherSide ? toAndroidAvatar(otherSide.image) : undefined,
+      url: createOpenChatLink({
+        inbox: inbox.inbox.privateKey.publicKeyPemBase64,
+        sender: newMessage.message.senderPublicKey,
+      }),
       text:
         newMessage.message.text ??
         t('notifications.MESSAGE.body', {them: userName ?? ''}),

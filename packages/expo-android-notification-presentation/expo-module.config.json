@@ -1,6 +1,8 @@
 {
   "platforms": ["android"],
   "android": {
-    "modules": []
+    "modules": [
+      "expo.modules.androidnotificationpresentation.NotificationPresentationModule"
+    ]
   }
 }

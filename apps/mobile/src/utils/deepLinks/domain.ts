@@ -7,6 +7,7 @@ export const LINK_TYPE_REQUEST_CLUB_ADMITION = 'request-club-admition'
 export const LINK_TYPE_GOLDEN_GLASSES = 'golden-glasses'
 export const LINK_TYPE_JOIN_CLUB = 'join-club'
 export const LINK_TYPE_LOAD_PR_PREVIEW = 'load-pr-preview'
+export const LINK_TYPE_OPEN_CHAT = 'open-chat'
 
 export const MINIMAL_VERSION_IMPORT_CONTACT_V2 =
   Schema.decodeSync(VersionString)('1.30.0')

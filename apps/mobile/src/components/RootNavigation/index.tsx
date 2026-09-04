@@ -12,6 +12,7 @@ import {useSetupBackgroundTask} from '../../utils/backgroundTask'
 import {useHandleUniversalAndAppLinks} from '../../utils/deepLinks'
 import {useBackgroundNotificationSocket} from '../../utils/notifications/backgroundNotificationSocket'
 import {useHideInnactivityReminderNotificationsOnResume} from '../../utils/notifications/chatNotifications'
+import {useSyncConversationShortcuts} from '../../utils/notifications/conversationShortcuts'
 import {useConsumeNotificationStream} from '../../utils/notifications/useConsumeNotificationStream'
 import {showTextDebugButtonAtom} from '../../utils/preferences'
 import AccountScreen from '../AccountScreen'
@@ -90,6 +91,7 @@ function LoggedInHookGroup(): null {
   // Notifications
   useHandleNotificationOpen()
   useHideInnactivityReminderNotificationsOnResume()
+  useSyncConversationShortcuts()
   useSetupBackgroundTask()
   useConsumeNotificationStream()
   useBackgroundNotificationSocket()

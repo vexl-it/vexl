@@ -74,7 +74,6 @@
   "notifications.CLUB_DEACTIVATED.FLAGGED.body": "Klub {{name}} bol zrušený z dôvodu nevhodného obsahu.",
   "notifications.CLUB_DEACTIVATED.OTHER.title": "Klub bol deaktivovaný",
   "notifications.CLUB_DEACTIVATED.OTHER.body": "Klub {{name}} bol deaktivovaný.",
-  "notifications.groupNotificationChat.subtitle": "Máš nové správy od {{userName}}",
   "notifications.groupNotificationRequest.subtitle": "Máš nové požiadavky na svoje ponuky",
   "notifications.groupNotificationRequest.title": "Nové požiadavky",
   "notifications.createOfferPrompt.title": "Vytvor ponuku",

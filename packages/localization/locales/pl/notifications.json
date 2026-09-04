@@ -74,7 +74,6 @@
   "notifications.CLUB_DEACTIVATED.FLAGGED.body": "Klub {{name}} został zdezaktywowany z powodu niestosownych treści.",
   "notifications.CLUB_DEACTIVATED.OTHER.title": "Klub został zdezaktywowany",
   "notifications.CLUB_DEACTIVATED.OTHER.body": "Klub {{name}} został dezaktywowany.",
-  "notifications.groupNotificationChat.subtitle": "Masz nowe wiadomości od {{userName}}",
   "notifications.groupNotificationRequest.subtitle": "Masz nowe żądania na Twoje oferty",
   "notifications.groupNotificationRequest.title": "Nowe żądania",
   "notifications.createOfferPrompt.title": "Utwórz swoją ofertę",

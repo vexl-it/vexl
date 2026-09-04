@@ -2,11 +2,16 @@ import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {sha256} from '@vexl-next/cryptography/src/operations/sha'
 import {type Chat} from '@vexl-next/domain/src/general/messaging'
 import {ChatNotificationData} from '@vexl-next/domain/src/general/notifications'
+import {type SvgStringOrImageUri} from '@vexl-next/domain/src/utility/SvgStringOrImageUri.brand'
 import {
+  type AndroidConversationAvatar,
+  type AndroidConversationData,
+  type AndroidConversationMessage,
   androidNotificationGroupData,
+  decodeAndroidConversationData,
   decodeAndroidNotificationGroupData,
-} from '@vexl-next/expo-android-notification-groups/src'
-import {Option} from 'effect'
+} from '@vexl-next/expo-android-notification-presentation/src'
+import {Array, Option, pipe} from 'effect'
 import {
   AndroidNotificationPriority,
   dismissNotificationAsync,
@@ -16,23 +21,25 @@ import {
 import {getDefaultStore} from 'jotai'
 import {useCallback} from 'react'
 import {Platform} from 'react-native'
+import {getOtherSideData} from '../../state/chat/atoms/selectOtherSideDataAtom'
 import {
   type ChatMessageWithState,
   type InboxInState,
 } from '../../state/chat/domain'
-import {randomSeedFromChat} from '../RandomSeed'
 import {translationAtom} from '../localization/I18nProvider'
-import randomName from '../randomName'
 import {useAppState} from '../useAppState'
 import {SystemChatNotificationData} from './SystemNotificationData.brand'
 import {displayLocalNotification} from './displayLocalNotification'
 import {getChannelForMessages} from './notificationChannels'
 
-// All messaging requests share one group; everything else is grouped per
-// conversation (inbox + sender).
+// All messaging requests share one Android group / iOS thread; everything else
+// is keyed per conversation (inbox + sender).
 const REQUEST_GROUP_ID = 'request-group-id'
 
-function chatGroupId({
+// Android's MessagingStyle retains this many messages.
+const MAX_CONVERSATION_MESSAGES = 25
+
+function conversationId({
   inbox,
   sender,
 }: {
@@ -82,6 +89,76 @@ async function dismissAndroidGroupSummaryIfEmpty(
   if (!hasChildren) await dismissNotificationAsync(groupId)
 }
 
+function toAndroidAvatar(
+  image: SvgStringOrImageUri
+): AndroidConversationAvatar {
+  return image.type === 'svgXml'
+    ? {type: 'svgXml', svgXml: image.svgXml.xml}
+    : image
+}
+
+// One notification per conversation that lists its messages. Re-posting with
+// the same id replaces the previous one; earlier messages are read back from
+// its data so no app state is needed.
+async function showAndroidConversationNotification({
+  id,
+  newMessage,
+  senderName,
+  avatar,
+  text,
+  data,
+  channelId,
+}: {
+  id: string
+  newMessage: ChatMessageWithState
+  senderName: string
+  avatar?: AndroidConversationAvatar
+  text: string
+  data: Record<string, unknown>
+  channelId: string
+}): Promise<void> {
+  const previousMessages = pipe(
+    await getPresentedNotificationsAsync(),
+    Array.findFirst((one) => one.request.identifier === id),
+    Option.flatMap((one) =>
+      decodeAndroidConversationData(one.request.content.data)
+    ),
+    Option.map((one) => one.androidConversation.messages),
+    Option.getOrElse((): readonly AndroidConversationMessage[] => [])
+  )
+  if (
+    Array.some(previousMessages, (one) => one.uuid === newMessage.message.uuid)
+  )
+    return
+
+  const androidConversation: AndroidConversationData = {
+    androidConversation: {
+      senderName,
+      avatar,
+      messages: pipe(
+        previousMessages,
+        Array.append({
+          uuid: newMessage.message.uuid,
+          text,
+          timestamp: newMessage.message.time,
+        }),
+        Array.takeRight(MAX_CONVERSATION_MESSAGES)
+      ),
+    },
+  }
+
+  await displayLocalNotification({
+    id,
+    channelId,
+    content: {
+      title: senderName,
+      body: text,
+      data: {...data, ...androidConversation},
+      priority: AndroidNotificationPriority.HIGH,
+    },
+  })
+}
+
 export async function showChatNotification({
   newMessage,
   inbox,
@@ -89,23 +166,7 @@ export async function showChatNotification({
   newMessage: ChatMessageWithState
   inbox: InboxInState
 }): Promise<void> {
-  if (
-    (await getPresentedNotificationsAsync()).some(
-      (one) => one.request.identifier === newMessage.message.uuid
-    )
-  ) {
-    return
-  }
-
   const type = newMessage.message.messageType
-  const chat = inbox.chats.find(
-    (one) => one.chat.otherSide.publicKey === newMessage.message.senderPublicKey
-  )
-
-  const userName =
-    chat?.chat.otherSide.realLifeInfo?.userName ??
-    (chat ? randomName(randomSeedFromChat(chat.chat)) : undefined)
-
   if (
     type === 'VERSION_UPDATE' ||
     type === 'FCM_CYPHER_UPDATE' ||
@@ -119,6 +180,14 @@ export async function showChatNotification({
     return
   }
 
+  const chat = inbox.chats.find(
+    (one) => one.chat.otherSide.publicKey === newMessage.message.senderPublicKey
+  )
+  // Same name and avatar the chat screen shows: revealed identity if there is
+  // one, otherwise the seeded anonymous ones.
+  const otherSide = chat ? getOtherSideData(chat.chat) : undefined
+  const userName = otherSide?.userName
+
   const {t} = getDefaultStore().get(translationAtom)
   const chatData = SystemChatNotificationData.encode(
     new SystemChatNotificationData({
@@ -126,80 +195,85 @@ export async function showChatNotification({
       sender: newMessage.message.senderPublicKey,
     })
   )
-
   const channelId = await getChannelForMessages()
+  const conversation = conversationId({
+    inbox: inbox.inbox.privateKey.publicKeyPemBase64,
+    sender: newMessage.message.senderPublicKey,
+  })
 
-  // iOS threads notifications by `threadIdentifier`; Android groups them by
-  // the data keys read by @vexl-next/expo-android-notification-groups.
-  const groupId =
-    type === 'REQUEST_MESSAGING'
-      ? REQUEST_GROUP_ID
-      : chatGroupId({
-          inbox: inbox.inbox.privateKey.publicKeyPemBase64,
-          sender: newMessage.message.senderPublicKey,
-        })
-  const data = {...chatData, ...androidNotificationGroupData({groupId})}
-
-  if (type === 'MESSAGE') {
-    await displayLocalNotification({
-      id: newMessage.message.uuid,
+  if (type === 'MESSAGE' && Platform.OS === 'android') {
+    await showAndroidConversationNotification({
+      id: conversation,
+      newMessage,
+      senderName: userName ?? t('notifications.MESSAGE.title', {them: ''}),
+      avatar: otherSide ? toAndroidAvatar(otherSide.image) : undefined,
+      text:
+        newMessage.message.text ??
+        t('notifications.MESSAGE.body', {them: userName ?? ''}),
+      data: chatData,
       channelId,
-      content: {
-        title:
-          userName ?? t(`notifications.${type}.title`, {them: userName ?? ''}),
-        body:
-          newMessage.message.text ??
-          t(`notifications.${type}.body`, {them: userName ?? ''}),
-        data,
-        priority: AndroidNotificationPriority.HIGH,
-        threadIdentifier: groupId,
-      },
     })
-  } else {
-    const notificationTitle =
-      type === 'REQUEST_MESSAGING' && chat?.chat.origin.type === 'myNote'
-        ? t(`notifications.${type}.noteTitle`, {
-            them: userName ?? '',
-          })
-        : t(`notifications.${type}.title`, {them: userName ?? ''})
-
-    await displayLocalNotification({
-      id: newMessage.message.uuid,
-      channelId,
-      content: {
-        title: notificationTitle,
-        body: t(`notifications.${type}.body`, {them: userName ?? ''}),
-        data,
-        priority: AndroidNotificationPriority.HIGH,
-        threadIdentifier: groupId,
-      },
-    })
+    return
   }
 
-  if (Platform.OS !== 'android') return
+  if (
+    (await getPresentedNotificationsAsync()).some(
+      (one) => one.request.identifier === newMessage.message.uuid
+    )
+  ) {
+    return
+  }
 
-  const summaryData = androidNotificationGroupData({groupId, isSummary: true})
+  // iOS threads notifications by `threadIdentifier`; on Android only requests
+  // are grouped, by the data keys read by
+  // @vexl-next/expo-android-notification-presentation.
+  const isRequest = type === 'REQUEST_MESSAGING'
+  const groupId = isRequest ? REQUEST_GROUP_ID : conversation
+  const data = {
+    ...chatData,
+    ...(isRequest ? androidNotificationGroupData({groupId}) : {}),
+  }
+
+  const title =
+    type === 'MESSAGE'
+      ? (userName ?? t('notifications.MESSAGE.title', {them: ''}))
+      : isRequest && chat?.chat.origin.type === 'myNote'
+        ? t('notifications.REQUEST_MESSAGING.noteTitle', {them: userName ?? ''})
+        : t(`notifications.${type}.title`, {them: userName ?? ''})
+  const body =
+    (type === 'MESSAGE' ? newMessage.message.text : undefined) ??
+    t(`notifications.${type}.body`, {them: userName ?? ''})
+
   await displayLocalNotification({
-    id: groupId,
+    id: newMessage.message.uuid,
     channelId,
-    content:
-      type === 'REQUEST_MESSAGING'
-        ? {
-            title: t('notifications.groupNotificationRequest.title'),
-            subtitle: t('notifications.groupNotificationRequest.subtitle'),
-            data: summaryData,
-          }
-        : {
-            subtitle: t('notifications.groupNotificationChat.subtitle', {
-              userName: userName ?? '[unknown]',
-            }),
-            data: {...chatData, ...summaryData},
-          },
+    content: {
+      title,
+      body,
+      data,
+      priority: AndroidNotificationPriority.HIGH,
+      threadIdentifier: groupId,
+    },
+  })
+
+  if (Platform.OS !== 'android' || !isRequest) return
+
+  await displayLocalNotification({
+    id: REQUEST_GROUP_ID,
+    channelId,
+    content: {
+      title: t('notifications.groupNotificationRequest.title'),
+      subtitle: t('notifications.groupNotificationRequest.subtitle'),
+      data: androidNotificationGroupData({
+        groupId: REQUEST_GROUP_ID,
+        isSummary: true,
+      }),
+    },
   })
 }
 
 export async function hideNotificationsForChat(chat: Chat): Promise<void> {
-  // Includes the conversation's Android group summary, which carries the same
+  // Includes the conversation's Android notification, which carries the same
   // chat data so tapping it opens the chat.
   const notificationsForChat = await getNotificationsForChat({
     inbox: chat.inbox.privateKey.publicKeyPemBase64,

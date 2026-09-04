@@ -74,7 +74,6 @@
   "notifications.CLUB_DEACTIVATED.FLAGGED.body": "{{name}} foi removido devido a conteúdo inapropriado.",
   "notifications.CLUB_DEACTIVATED.OTHER.title": "Clube desativado",
   "notifications.CLUB_DEACTIVATED.OTHER.body": "{{name}} já não está ativo.",
-  "notifications.groupNotificationChat.subtitle": "Novas mensagens de {{userName}}.",
   "notifications.groupNotificationRequest.subtitle": "Você tem novos pedidos para as suas ofertas",
   "notifications.groupNotificationRequest.title": "New requests",
   "notifications.createOfferPrompt.title": "Criar a sua oferta",

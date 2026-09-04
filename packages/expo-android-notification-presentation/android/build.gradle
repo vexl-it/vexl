@@ -7,7 +7,7 @@ group = 'it.vexl'
 version = '0.0.0'
 
 android {
-  namespace 'expo.modules.androidnotificationgroups'
+  namespace 'expo.modules.androidnotificationpresentation'
   defaultConfig {
     versionCode 1
     versionName '0.0.0'
@@ -17,4 +17,5 @@ android {
 dependencies {
   implementation expoModule.getExpoDependency('expo-notifications')
   implementation 'androidx.core:core:1.17.0'
+  implementation 'com.caverock:androidsvg-aar:1.4'
 }

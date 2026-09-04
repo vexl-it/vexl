@@ -74,7 +74,6 @@
   "notifications.CLUB_DEACTIVATED.FLAGGED.body": "不適切なコンテンツのため、{{name}} は削除されました。",
   "notifications.CLUB_DEACTIVATED.OTHER.title": "クラブが無効化されました",
   "notifications.CLUB_DEACTIVATED.OTHER.body": "{{name}} は有効でなくなりました。",
-  "notifications.groupNotificationChat.subtitle": "{{userName}} からの新しいメッセージ。",
   "notifications.groupNotificationRequest.subtitle": "オファーに新しい要請があります",
   "notifications.groupNotificationRequest.title": "新規要請",
   "notifications.createOfferPrompt.title": "オファーを作成する",

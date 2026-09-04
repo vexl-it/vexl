@@ -74,7 +74,6 @@
   "notifications.CLUB_DEACTIVATED.FLAGGED.body": "{{name}} 俱乐部因内容不当已被停用。",
   "notifications.CLUB_DEACTIVATED.OTHER.title": "俱乐部已被停用",
   "notifications.CLUB_DEACTIVATED.OTHER.body": "{{name}} 俱乐部已被停用。",
-  "notifications.groupNotificationChat.subtitle": "您有来自 {{userName}} 的新消息",
   "notifications.groupNotificationRequest.subtitle": "您的报价有新的请求",
   "notifications.groupNotificationRequest.title": "新的请求",
   "notifications.createOfferPrompt.title": "创建您的报价",

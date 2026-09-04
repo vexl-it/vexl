@@ -844,9 +844,9 @@ importers:
       '@vexl-next/domain':
         specifier: 0.0.0
         version: link:../../packages/domain
-      '@vexl-next/expo-android-notification-groups':
+      '@vexl-next/expo-android-notification-presentation':
         specifier: 0.0.0
-        version: link:../../packages/expo-android-notification-groups
+        version: link:../../packages/expo-android-notification-presentation
       '@vexl-next/expo-background-notification-socket':
         specifier: 0.0.0
         version: link:../../packages/expo-background-notification-socket
@@ -1738,7 +1738,7 @@ importers:
         specifier: ~6.0.3
         version: 6.0.3
 
-  packages/expo-android-notification-groups:
+  packages/expo-android-notification-presentation:
     dependencies:
       effect:
         specifier: ^3.20.0

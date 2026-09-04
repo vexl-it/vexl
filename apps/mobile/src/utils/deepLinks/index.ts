@@ -9,10 +9,15 @@ import {admitUserToClubActionAtom} from '../../state/clubs/atom/admitUserToClubA
 import {submitCodeToJoinClubActionAtom} from '../../state/clubs/atom/submitCodeToJoinClubActionAtom'
 import {atomWithParsedMmkvStorage} from '../atomUtils/atomWithParsedMmkvStorage'
 import {translationAtom} from '../localization/I18nProvider'
-import {isPassedImportContactsOutsideReact} from '../navigation'
+import {
+  isOnSpecificChat,
+  isPassedImportContactsOutsideReact,
+  navigationRef,
+} from '../navigation'
 import {goldenAvatarTypeAtom} from '../preferences'
 import {loadPreviewChannelWithUiFeedbackActionAtom} from '../prPreview'
 import {reportErrorE} from '../reportError'
+import {LINK_TYPE_OPEN_CHAT} from './domain'
 import {handleGoldenGlassesDeepLinkActionAtom} from './goldenGlassesUrl'
 import {handleImportContactFromDeepLinkActionAtom} from './importContactFromDeeplinkWithUiFeedbackActionAtom'
 import {
@@ -94,6 +99,10 @@ export const handleDeepLinkActionAtom = atom(
           set(loadPreviewChannelWithUiFeedbackActionAtom, linkData.channel),
           mergeToBoolean
         )
+      } else if (linkData.type === 'open-chat') {
+        const keys = {otherSideKey: linkData.sender, inboxKey: linkData.inbox}
+        if (!isOnSpecificChat(keys)) navigationRef.navigate('ChatDetail', keys)
+        return true
       }
 
       return yield* _(
@@ -123,6 +132,12 @@ export const handleDeepLinkActionAtom = atom(
     )
 )
 
+// Chat shortcuts re-open the same link any number of times; the
+// "opened before" guard below is meant for one-shot import links.
+function isOpenChatLink(link: string): boolean {
+  return link.includes(`type=${LINK_TYPE_OPEN_CHAT}`)
+}
+
 export function useHandleUniversalAndAppLinks(): void {
   const store = useStore()
   const handleDeepLink = useSetAtom(handleDeepLinkActionAtom)
@@ -140,6 +155,7 @@ export function useHandleUniversalAndAppLinks(): void {
     void Linking.getInitialURL().then((initialLink) => {
       if (!initialLink) return
       if (
+        !isOpenChatLink(initialLink) &&
         store.get(lastUniversalOrAppLinkStorageAtom)
           .lastUniversalOrAppLinkImported === initialLink
       ) {

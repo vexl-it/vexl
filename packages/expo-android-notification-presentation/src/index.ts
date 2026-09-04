@@ -1,4 +1,5 @@
 import {Schema} from 'effect'
+import {requireNativeModule} from 'expo-modules-core'
 import {Platform} from 'react-native'
 
 // Keys read by android/.../VexlPresentationDelegate.kt.
@@ -41,11 +42,13 @@ export const AndroidConversationAvatar = Schema.Union(
 export type AndroidConversationAvatar = typeof AndroidConversationAvatar.Type
 
 // Renders the notification with Android's MessagingStyle: one notification
-// per conversation listing its messages.
+// per conversation listing its messages. `url` is the deep link the chat's
+// shortcut opens.
 export const AndroidConversationData = Schema.Struct({
   androidConversation: Schema.Struct({
     senderName: Schema.String,
     avatar: Schema.optional(AndroidConversationAvatar),
+    url: Schema.String,
     messages: Schema.Array(AndroidConversationMessage),
   }),
 })
@@ -54,3 +57,28 @@ export type AndroidConversationData = typeof AndroidConversationData.Type
 export const decodeAndroidConversationData = Schema.decodeUnknownOption(
   AndroidConversationData
 )
+
+// Long-lived Android shortcut for a chat: shown on the launcher's app
+// long-press menu and referenced by the chat's notifications.
+export interface ConversationShortcut {
+  readonly id: string
+  readonly name: string
+  readonly url: string
+  readonly avatar?: AndroidConversationAvatar
+}
+
+interface NotificationPresentationNativeModule {
+  readonly setConversationShortcuts: (
+    shortcuts: readonly ConversationShortcut[]
+  ) => Promise<void>
+}
+
+// Replaces the published shortcuts; order is the launcher rank.
+export async function setConversationShortcuts(
+  shortcuts: readonly ConversationShortcut[]
+): Promise<void> {
+  if (Platform.OS !== 'android') return
+  await requireNativeModule<NotificationPresentationNativeModule>(
+    'ExpoAndroidNotificationPresentation'
+  ).setConversationShortcuts(shortcuts)
+}

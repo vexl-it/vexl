@@ -3,6 +3,7 @@ import {Typography, XStack, YStack} from '@vexl-next/ui'
 import React from 'react'
 import {TouchableOpacity} from 'react-native'
 import {type RootStackScreenProps} from '../../../navigationTypes'
+import {chatDetailRouteParams} from '../../../utils/chat/goToChatDetail'
 import unixMillisecondsToLocaleDateTime from '../../../utils/unixMillisecondsToLocaleDateTime'
 import FromNowComponent from '../../FromNowComponent'
 import {type SearchMessageResult} from '../state'
@@ -23,8 +24,7 @@ function ChatSearchMessageResultItem({
     <TouchableOpacity
       onPress={() => {
         navigation.navigate('ChatDetail', {
-          otherSideKey: result.chat.chat.otherSide.publicKey,
-          inboxKey: result.chat.chat.inbox.privateKey.publicKeyPemBase64,
+          ...chatDetailRouteParams(result.chat.chat),
           targetMessageId: result.messageId,
         })
       }}

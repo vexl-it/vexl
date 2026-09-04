@@ -4,21 +4,23 @@ import {
   IconTag,
   OfferCard,
   TextTag,
-  type OfferCardActionButton,
   type OfferCardDetail,
 } from '@vexl-next/ui'
 import {Option} from 'effect'
-import {useAtomValue, useSetAtom} from 'jotai'
+import {atom, useAtomValue, useSetAtom, type Atom} from 'jotai'
 import React, {useMemo} from 'react'
-import {chatWithMessagesForOfferAtom} from '../state/chat/hooks/useChatForOffer'
+import {type ChatWithMessages} from '../state/chat/domain'
+import {useChatWithMessagesForOfferAtom} from '../state/chat/hooks/useChatForOffer'
 import {shouldUseGrayscaleColours} from '../state/chat/utils/offerStates'
 import {
+  clubNamesForIdsAtom,
   smallestClubForIdsAtom,
-  useGetAllClubsNamesForIds,
 } from '../state/clubs/atom/clubsWithMembersAtom'
+import {type ClubWithMembers} from '../state/clubs/domain'
 import {useVisibleCommonFriendsForOffer} from '../state/marketplace/hooks/useVisibleCommonFriendsForOffer'
 import {isProductOfferMissingCategory} from '../state/marketplace/utils/isProductOfferMissingCategory'
 import {getOtherSideFriendLevel} from '../utils/chat/getOtherSideFriendLevel'
+import {useNavigateToChatDetail} from '../utils/chat/goToChatDetail'
 import {isOfferExpired} from '../utils/isOfferExpired'
 import formatSpokenLanguages from '../utils/localization/formatSpokenLanguages'
 import {formatInteger} from '../utils/localization/formatting'
@@ -36,21 +38,23 @@ import {randomSeedFromOfferInfo} from '../utils/RandomSeed'
 import {offerRerequestLimitDaysAtom} from '../utils/versionService/atoms'
 import {AnonymousAvatarOrClubImage} from './AnonymousAvatar'
 
+const noClubNamesAtom = atom<string[]>([])
+const noSmallestClubAtom = atom(Option.none<ClubWithMembers>())
+
 export default function OfferOnMarketplace({
   offer,
   onPress,
-  actionButton,
+  chatForOfferAtom,
 }: {
   offer: OneOfferInState
   onPress?: () => void
-  actionButton?: OfferCardActionButton
+  chatForOfferAtom?: Atom<ChatWithMessages | undefined>
 }): React.ReactElement {
   const {t} = useTranslation()
   const locale = useAtomValue(formattingLocaleAtom)
   const {publicPart, privatePart} = offer.offerInfo
   const {ownershipInfo} = offer
   const isMine = !!ownershipInfo?.adminId
-  const isMyOffer = !!ownershipInfo
   const isExpiredMyOffer = isMine && isOfferExpired(publicPart.expirationDate)
   const rerequestLimitDays = useAtomValue(offerRerequestLimitDaysAtom)
   const getAmountLabel = useSetAtom(getAmountLabelActionAtom)
@@ -58,34 +62,43 @@ export default function OfferOnMarketplace({
 
   const smallestClub = useAtomValue(
     useMemo(
-      () => smallestClubForIdsAtom(privatePart.clubIds ?? []),
-      [privatePart.clubIds]
+      () =>
+        isMine
+          ? noSmallestClubAtom
+          : smallestClubForIdsAtom(privatePart.clubIds ?? []),
+      [isMine, privatePart.clubIds]
     )
   )
 
-  const myClubNames = useGetAllClubsNamesForIds(
-    ownershipInfo?.intendedClubs ?? []
+  const myClubNames = useAtomValue(
+    useMemo(
+      () =>
+        isMine
+          ? clubNamesForIdsAtom(ownershipInfo?.intendedClubs ?? [])
+          : noClubNamesAtom,
+      [isMine, ownershipInfo?.intendedClubs]
+    )
   )
 
   const isOffering = getIsOffering(publicPart.listingType, publicPart.offerType)
   const iconTagVariant = getIconTagVariant(publicPart.listingType)
 
-  const chatForOfferAtom = useMemo(
-    () =>
-      chatWithMessagesForOfferAtom({
-        offerId: offer.offerInfo.offerId,
-        isMyOffer,
-        otherSidePublicKey: Option.some(publicPart.offerPublicKey),
-      }),
-    [isMyOffer, offer.offerInfo.offerId, publicPart.offerPublicKey]
-  )
-  const chatForOffer = useAtomValue(chatForOfferAtom)
+  const fallbackChatForOfferAtom = useChatWithMessagesForOfferAtom(offer)
+  const chatForOfferAtomToUse = chatForOfferAtom ?? fallbackChatForOfferAtom
+  const chatForOffer = useAtomValue(chatForOfferAtomToUse)
   const shouldBeGrayscaled = shouldUseGrayscaleColours({
     chat: chatForOffer,
     isMine,
     offerInfo: offer.offerInfo,
     rerequestLimitDays,
   })
+
+  const navigateToChat = useNavigateToChatDetail(chatForOffer?.chat)
+
+  const goToChatButton =
+    !isMine && !!chatForOffer?.chat && shouldBeGrayscaled
+      ? {label: t('offer.goToChat'), onPress: navigateToChat}
+      : undefined
 
   const name = isMine
     ? t('common.me')
@@ -208,7 +221,7 @@ export default function OfferOnMarketplace({
       details={details}
       statusLabel={statusLabel}
       onPress={onPress}
-      actionButton={actionButton}
+      actionButton={goToChatButton}
     />
   )
 }

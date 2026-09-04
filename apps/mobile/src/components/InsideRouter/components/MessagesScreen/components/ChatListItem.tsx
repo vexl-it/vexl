@@ -20,6 +20,7 @@ import isNoteChatOrigin from '../../../../../state/chat/utils/isNoteChatOrigin'
 import {useOfferForChatOrigin} from '../../../../../state/marketplace'
 import {noteForChatOriginAtom} from '../../../../../state/notes/atoms/notesState'
 import {getOtherSideRealNameOrFriendLevel} from '../../../../../utils/chat/getOtherSideFriendLevel'
+import {chatDetailRouteParams} from '../../../../../utils/chat/goToChatDetail'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {formattingLocaleAtom} from '../../../../../utils/localization/formattingLocaleAtom'
 import unixMillisecondsToLocaleDateTime from '../../../../../utils/unixMillisecondsToLocaleDateTime'
@@ -165,10 +166,7 @@ function ChatListItem({
             isTyping={isTyping}
             tags={tagLabels}
             onPress={() => {
-              navigation.navigate('ChatDetail', {
-                otherSideKey: chatInfo.otherSide.publicKey,
-                inboxKey: chatInfo.inbox.privateKey.publicKeyPemBase64,
-              })
+              navigation.navigate('ChatDetail', chatDetailRouteParams(chatInfo))
             }}
           />
         </Stack>

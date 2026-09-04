@@ -3,7 +3,10 @@ import {
   type PublicKeyPemBase64,
 } from '@vexl-next/cryptography/src/KeyHolder'
 import {type Chat} from '@vexl-next/domain/src/general/messaging'
-import {type OfferId} from '@vexl-next/domain/src/general/offers'
+import {
+  type OfferId,
+  type OneOfferInState,
+} from '@vexl-next/domain/src/general/offers'
 import {Array, Option, pipe} from 'effect/index'
 import {atom, useAtomValue, type Atom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
@@ -169,6 +172,28 @@ export function chatWithMessagesForOfferAtom({
       ) ?? chatIndex.oldStateChatsByPublicKey.get(publicKeyOrUndefined)
     )
   })
+}
+
+const noChatForOfferAtom = atom<ChatWithMessages | undefined>(undefined)
+
+export function useChatWithMessagesForOfferAtom(
+  offer: OneOfferInState | undefined
+): Atom<ChatWithMessages | undefined> {
+  const offerId = offer?.offerInfo.offerId
+  const offerPublicKey = offer?.offerInfo.publicPart.offerPublicKey
+  const isMyOffer = !!offer?.ownershipInfo
+
+  return useMemo(
+    () =>
+      offerId && offerPublicKey
+        ? chatWithMessagesForOfferAtom({
+            offerId,
+            isMyOffer,
+            otherSidePublicKey: Option.some(offerPublicKey),
+          })
+        : noChatForOfferAtom,
+    [offerId, isMyOffer, offerPublicKey]
+  )
 }
 
 export function useChatForOfferExists({

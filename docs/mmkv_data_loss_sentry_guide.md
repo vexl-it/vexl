@@ -14,7 +14,8 @@ by the mobile app. The reports distinguish three failure modes:
 
 ## Recovery and durability model
 
-The app uses react-native-mmkv v4 with `recoveryStrategy: 'recover-on-error'`.
+The app uses react-native-mmkv v4 with `recoveryStrategy: 'recover-on-error'`
+on an encrypted instance (`mmkv.encrypted`, see `mmkv_encryption.md`).
 This maps to MMKV's `OnErrorRecover` behavior for CRC and file-length errors.
 Recovery is best effort, not transactional repair. MMKV can greedily retain the
 readable prefix before a damaged region and rewrite that subset as a valid
@@ -41,16 +42,17 @@ are discarded instead of being flushed.
 
 ## Code locations
 
-| File                                                                       | Responsibility                                                                                             |
-| -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `apps/mobile/src/utils/mmkv/effectMmkv.ts`                                 | Creates the v4 MMKV instance with `recover-on-error`                                                       |
-| `apps/mobile/src/utils/mmkv/detectMmkvDataLoss.ts`                         | Detects total and partial loss and gathers MMKV file metadata                                              |
-| `apps/mobile/src/utils/mmkv/criticalMmkvKeys.ts`                           | Defines the critical keys and the key-name-only presence record schema                                     |
-| `apps/mobile/src/utils/mmkv/mmkvDataLossDiagnosticStorage.ts`              | Serializes presence-record updates, startup detection, and intentional clears                              |
-| `apps/mobile/src/utils/atomUtils/atomWithParsedMmkvStorage.ts`             | Reports parse failures, records successful critical-key writes, defers writes, and exposes the final flush |
-| `apps/mobile/src/utils/clearMmkvStorageAndEmptyAtoms.ts`                   | Clears MMKV immediately, resets mounted atoms, and prevents writes from surviving an intentional clear     |
-| `apps/mobile/src/utils/backgroundTask/processBackgroundTask.ts`            | Flushes pending MMKV writes before a background fetch finishes                                             |
-| `apps/mobile/src/utils/notifications/notificationReceivedHandler/index.ts` | Flushes pending MMKV writes before a background notification task finishes                                 |
+| File                                                                       | Responsibility                                                                                                |
+| -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `apps/mobile/src/utils/mmkv/effectMmkv.ts`                                 | Wraps the opened store and exposes its startup status                                                         |
+| `apps/mobile/src/utils/mmkv/encryptedMmkvStorage.ts`                       | Opens the encrypted v4 instance with `recover-on-error`, migrates the plaintext store; see mmkv_encryption.md |
+| `apps/mobile/src/utils/mmkv/detectMmkvDataLoss.ts`                         | Detects total and partial loss and gathers MMKV file metadata                                                 |
+| `apps/mobile/src/utils/mmkv/criticalMmkvKeys.ts`                           | Defines the critical keys and the key-name-only presence record schema                                        |
+| `apps/mobile/src/utils/mmkv/mmkvDataLossDiagnosticStorage.ts`              | Serializes presence-record updates, startup detection, and intentional clears                                 |
+| `apps/mobile/src/utils/atomUtils/atomWithParsedMmkvStorage.ts`             | Reports parse failures, records successful critical-key writes, defers writes, and exposes the final flush    |
+| `apps/mobile/src/utils/clearMmkvStorageAndEmptyAtoms.ts`                   | Clears MMKV immediately, resets mounted atoms, and prevents writes from surviving an intentional clear        |
+| `apps/mobile/src/utils/backgroundTask/processBackgroundTask.ts`            | Flushes pending MMKV writes before a background fetch finishes                                                |
+| `apps/mobile/src/utils/notifications/notificationReceivedHandler/index.ts` | Flushes pending MMKV writes before a background notification task finishes                                    |
 
 ## Critical keys
 
@@ -74,26 +76,35 @@ not copied to AsyncStorage or Sentry. Only their key names are recorded.
 
 ### Error level
 
-| Message                                                                        | Emitted when                                                                                            | Extra fields                                                                                   |
-| ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| `MMKV data loss detected: data was previously stored but MMKV is now empty`    | The MMKV sentinel is absent, the AsyncStorage populated sentinel exists, and MMKV has no remaining keys | `lastPopulatedAt`, `remainingKeyCount`, `appState`, data and CRC file existence and sizes      |
-| `MMKV partial data loss detected: critical keys disappeared since last launch` | At least one previously recorded critical key is absent while MMKV is not classified as a total wipe    | `disappearedKeys`, `remainingKeyCount`, `appState`, data and CRC file existence and sizes      |
-| `Error while parsing stored value. Using provided default. Key: <KEY>`         | A critical key exists but its startup value cannot be read or decoded                                   | `key`, `errorTag`, and, when raw text was readable, `rawValueLength` and `rawValueIsValidJson` |
-| `Error while parsing stored mmkv value in onChange function. Key: '<KEY>'`     | A changed critical key cannot be read or decoded                                                        | Same parse metadata as the startup report                                                      |
+| Message                                                                           | Emitted when                                                                                              | Extra fields                                                                                   |
+| --------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `MMKV data loss detected: data was previously stored but MMKV is now empty`       | The MMKV sentinel is absent, the AsyncStorage populated sentinel exists, and MMKV has no remaining keys   | `lastPopulatedAt`, `remainingKeyCount`, `appState`, data and CRC file existence and sizes      |
+| `MMKV partial data loss detected: critical keys disappeared since last launch`    | At least one previously recorded critical key is absent while MMKV is not classified as a total wipe      | `disappearedKeys`, `remainingKeyCount`, `appState`, data and CRC file existence and sizes      |
+| `Error while parsing stored value. Using provided default. Key: <KEY>`            | A critical key exists but its startup value cannot be read or decoded                                     | `key`, `errorTag`, and, when raw text was readable, `rawValueLength` and `rawValueIsValidJson` |
+| `Error while parsing stored mmkv value in onChange function. Key: '<KEY>'`        | A changed critical key cannot be read or decoded                                                          | Same parse metadata as the startup report                                                      |
+| `MMKV storage is locked: encryption key is missing while a session secret exists` | The encrypted store's key is gone from SecureStore but a session secret survived (see mmkv_encryption.md) | `appState`, data and CRC file existence and sizes                                              |
+| `MMKV storage is unavailable`                                                     | SecureStore or MMKV threw while opening or migrating the store; the error is attached as `cause`          | `appState`, data and CRC file existence and sizes                                              |
 
 ### Warning level
 
 The two per-key parse messages above are warnings for non-critical keys. The
 following messages are always warnings:
 
-| Message                                           | Emitted when                                                                          | Extra fields                                       |
-| ------------------------------------------------- | ------------------------------------------------------------------------------------- | -------------------------------------------------- |
-| `MMKV atom initialization summary`                | Five seconds after atom initialization begins, if at least one atom had a parse error | `loaded`, `valueNotSet`, `parseError`, `totalKeys` |
-| `Error while saving value to storage. Key: <KEY>` | Encoding or writing an atom value fails                                               | `errorTag`                                         |
+| Message                                                                                                    | Emitted when                                                                          | Extra fields                                       |
+| ---------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| `MMKV atom initialization summary`                                                                         | Five seconds after atom initialization begins, if at least one atom had a parse error | `loaded`, `valueNotSet`, `parseError`, `totalKeys` |
+| `Error while saving value to storage. Key: <KEY>`                                                          | Encoding or writing an atom value fails                                               | `errorTag`                                         |
+| `MMKV encryption key was missing; unreadable encrypted storage was reset because no session secret exists` | Ciphertext without a key was discarded on a launch with no stored session secret      | none                                               |
 
 Keys that were never written are expected. They appear in `valueNotSet` when a
 summary is already being sent, but they do not trigger the summary by
 themselves.
+
+### Info level
+
+`MMKV storage migrated from plaintext to encrypted` is sent once per install
+after the plaintext store was imported, with `migratedPlaintextKeyCount` and
+`encryptionKeySource`.
 
 ## Reading the signals
 
@@ -103,6 +114,12 @@ The total-loss error means the AsyncStorage sentinel says MMKV was previously
 populated, but MMKV now has zero keys and its own sentinel is missing. The atom
 summary may show many `valueNotSet` keys and should not show per-key parse
 errors, because there are no values to parse.
+
+A total-loss report on the same launch as the warning
+`MMKV encryption key was missing; unreadable encrypted storage was reset because no session secret exists`
+is the backup-restore case described in `mmkv_encryption.md`: the ciphertext
+was discarded on purpose because its key did not survive, so this is not a
+silent wipe.
 
 The file fields are observations made after the native store has opened. A
 missing or empty data file supports deletion or truncation. A present file does

@@ -12,8 +12,14 @@ import {
   type SessionV2,
   Session as SessionSchema,
 } from '../../brands/Session.brand'
+import * as effectMmkv from '../../utils/mmkv/effectMmkv'
 import {storage} from '../../utils/mmkv/effectMmkv'
 import reportError from '../../utils/reportError'
+import {
+  DEVICE_BOUND_SECURE_STORE_OPTIONS,
+  SECRET_TOKEN_KEY,
+  SECRET_TOKEN_KEY_V2,
+} from '../../utils/secureStoreKeys'
 import {
   PERSISTENT_DATA_ABOUT_REACH_AND_IMPORTED_CONTACTS_STORAGE_KEY,
   persistentDataAboutReachAndImportedContactsAtom,
@@ -25,12 +31,7 @@ import {
   markV2SecretAsWritten,
   wasV2SecretWritten,
 } from './utils/v2SecretStorageFlag'
-import {
-  SECRET_TOKEN_KEY,
-  SECRET_TOKEN_KEY_V2,
-  SECRET_TOKEN_KEY_V2_OPTIONS,
-  SESSION_KEY,
-} from './utils/writeSessionToStorage'
+import {SESSION_KEY} from './utils/writeSessionToStorage'
 
 const mockPublicKeyV2 = 'V2_PUB_mock-public-key'
 const mockPrivateKeyV2 = 'V2_PRIV_mock-private-key'
@@ -48,6 +49,8 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
 
 jest.mock('expo-secure-store', () => ({
   AFTER_FIRST_UNLOCK_THIS_DEVICE_ONLY: 2,
+  getItem: jest.fn(() => null),
+  setItem: jest.fn(),
   getItemAsync: jest.fn(),
   setItemAsync: jest.fn(),
   deleteItemAsync: jest.fn(),
@@ -525,7 +528,7 @@ describe('loadSession', () => {
     expect(secretStoreSetItemAsyncMock).toHaveBeenCalledWith(
       SECRET_TOKEN_KEY_V2,
       secretToken,
-      SECRET_TOKEN_KEY_V2_OPTIONS
+      DEVICE_BOUND_SECURE_STORE_OPTIONS
     )
     expect(wasV2SecretWritten()).toBe(true)
   })
@@ -554,7 +557,7 @@ describe('loadSession', () => {
     expect(secretStoreSetItemAsyncMock).toHaveBeenCalledWith(
       SECRET_TOKEN_KEY_V2,
       secretToken,
-      SECRET_TOKEN_KEY_V2_OPTIONS
+      DEVICE_BOUND_SECURE_STORE_OPTIONS
     )
     expect(wasV2SecretWritten()).toBe(true)
   })
@@ -576,6 +579,34 @@ describe('loadSession', () => {
     })
     expect(secretStoreGetItemAsyncMock).not.toHaveBeenCalled()
   })
+
+  it.each(['locked', 'unavailable'] as const)(
+    'requires blocking recovery without reading or erasing the session when MMKV storage is %s',
+    async (status) => {
+      jest
+        .spyOn(effectMmkv, 'getMmkvStorageStatus')
+        .mockReturnValue(
+          status === 'locked'
+            ? {_tag: 'locked'}
+            : {_tag: 'unavailable', cause: new Error('keychain unavailable')}
+        )
+
+      const result = await Effect.runPromise(loadSession())
+
+      expect(result).toMatchObject({
+        sessionLoaded: false,
+        blockingRecoveryRequired: true,
+        loadingError: {_tag: 'MmkvStorageNotReady', status},
+      })
+      expect(getDefaultStore().get(sessionHolderAtom)).toEqual({
+        state: 'initial',
+      })
+      expect(asyncStorageGetItemMock).not.toHaveBeenCalled()
+      expect(secretStoreGetItemAsyncMock).not.toHaveBeenCalled()
+      expect(asyncStorageRemoveItemMock).not.toHaveBeenCalled()
+      expect(secretStoreDeleteItemAsyncMock).not.toHaveBeenCalled()
+    }
+  )
 
   it('returns not-loaded result and sets state to loggedOut when secure store read fails', async () => {
     const loadedSession = buildSession(dummySession.version + 3)
@@ -1057,7 +1088,7 @@ describe('loadSession', () => {
     expect(secretStoreSetItemAsyncMock).toHaveBeenCalledWith(
       SECRET_TOKEN_KEY_V2,
       snapshotSavedSecretStorageValue,
-      SECRET_TOKEN_KEY_V2_OPTIONS
+      DEVICE_BOUND_SECURE_STORE_OPTIONS
     )
     expect(wasV2SecretWritten()).toBe(true)
     expect(asyncStorageRemoveItemMock).not.toHaveBeenCalled()

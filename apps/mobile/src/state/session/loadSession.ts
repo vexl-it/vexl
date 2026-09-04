@@ -19,6 +19,7 @@ import {
   versionCode,
 } from '../../utils/environment'
 import {translationAtom} from '../../utils/localization/I18nProvider'
+import {getMmkvStorageStatus} from '../../utils/mmkv/effectMmkv'
 import {showDebugNotificationIfEnabled} from '../../utils/notifications/showDebugNotificationIfEnabled'
 import {isDeveloperAtom} from '../../utils/preferences'
 import {reportErrorE} from '../../utils/reportError'
@@ -41,6 +42,12 @@ export class SessionLoadWaitTimedOut extends Schema.TaggedError<SessionLoadWaitT
   cause: Schema.Unknown,
 }) {}
 
+export class MmkvStorageNotReady extends Schema.TaggedError<MmkvStorageNotReady>(
+  'MmkvStorageNotReady'
+)('MmkvStorageNotReady', {
+  status: Schema.Literal('locked', 'unavailable'),
+}) {}
+
 const ErrorWithTag = Schema.Struct({_tag: Schema.String})
 
 function safeErrorTag(e: unknown): string {
@@ -59,7 +66,10 @@ function logLoadSessionProgress(text: string): void {
 export type SessionStorageError = Effect.Effect.Error<
   ReturnType<typeof readSessionFromStorage>
 >
-export type LoadSessionError = SessionStorageError | SessionLoadWaitTimedOut
+export type LoadSessionError =
+  | SessionStorageError
+  | SessionLoadWaitTimedOut
+  | MmkvStorageNotReady
 
 export type LoadSessionResult =
   | {
@@ -136,6 +146,10 @@ const BLOCKING_RECOVERY_ERROR_TAGS = new Set<string>([
   'CryptoError',
   'ParseError',
   'SessionLoadWaitTimedOut',
+  // The encrypted MMKV store could not be opened. Logging the user in would
+  // route their data into a volatile placeholder, and logging them out would
+  // misreport locked-but-present data as gone.
+  'MmkvStorageNotReady',
 ])
 
 function isBlockingRecoveryError(loadingError: LoadSessionError): boolean {
@@ -340,6 +354,21 @@ export function loadSession(
         `Skipping loadSession. Result: ${sessionState === 'loggedIn'}`
       )
       return Effect.sync(resultFromCurrentSessionState)
+    }
+
+    // Never start a load on a placeholder store: logging in would route user
+    // data into memory, logging out would misreport locked data as gone. The
+    // session state is left untouched so a later launch retries normally.
+    const mmkvStorageStatus = getMmkvStorageStatus()
+    if (mmkvStorageStatus._tag !== 'ready') {
+      logLoadSessionProgress(
+        `MMKV storage is not ready: ${mmkvStorageStatus._tag}`
+      )
+      return Effect.succeed(
+        sessionNotLoadedResult(
+          new MmkvStorageNotReady({status: mmkvStorageStatus._tag})
+        )
+      )
     }
 
     // The load runs on its own root fiber: once started it always runs to

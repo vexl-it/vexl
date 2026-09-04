@@ -29,6 +29,7 @@ import {translationAtom} from '../localization/I18nProvider'
 import {useAppState} from '../useAppState'
 import {conversationId, toAndroidAvatar} from './conversationShortcuts'
 import {displayLocalNotification} from './displayLocalNotification'
+import {getChatNotificationName} from './getChatNotificationName'
 import {getChannelForMessages} from './notificationChannels'
 import {SystemChatNotificationData} from './SystemNotificationData.brand'
 
@@ -168,12 +169,11 @@ export async function showChatNotification({
   const chat = inbox.chats.find(
     (one) => one.chat.otherSide.publicKey === newMessage.message.senderPublicKey
   )
-  // Same name and avatar the chat screen shows: revealed identity if there is
-  // one, otherwise the seeded anonymous ones.
   const otherSide = chat ? getOtherSideData(chat.chat) : undefined
-  const userName = otherSide?.userName
+  const store = getDefaultStore()
+  const userName = chat ? getChatNotificationName(store.get, chat) : undefined
 
-  const {t} = getDefaultStore().get(translationAtom)
+  const {t} = store.get(translationAtom)
   const chatData = SystemChatNotificationData.encode(
     new SystemChatNotificationData({
       inbox: inbox.inbox.privateKey.publicKeyPemBase64,

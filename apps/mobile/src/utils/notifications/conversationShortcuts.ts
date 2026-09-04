@@ -22,6 +22,7 @@ import compareMessages from '../../state/chat/utils/compareMessages'
 import chatShouldBeVisible from '../../state/chat/utils/isChatActive'
 import {createOpenChatLink} from '../deepLinks/createLinks'
 import reportError from '../reportError'
+import {getChatNotificationName} from './getChatNotificationName'
 
 // Launchers show only the first few; the rest still back their notifications.
 const MAX_CONVERSATION_SHORTCUTS = 10
@@ -69,7 +70,7 @@ const conversationShortcutsAtom = selectAtom(
         }
         return {
           id: conversationId(keys),
-          name: otherSide.userName,
+          name: getChatNotificationName(get, chat),
           avatar: toAndroidAvatar(otherSide.image),
           url: createOpenChatLink(keys),
         }

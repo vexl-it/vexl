@@ -28,6 +28,8 @@ export const myOffersAtom = focusAtom(offersAtom, (optic) =>
   )
 )
 
+export const myOffersCountAtom = atom((get) => get(myOffersAtom).length)
+
 export const areThereAnyMyOffersAtom = atom((get) => {
   const myOffers = get(myOffersAtom)
   return myOffers.length > 0
@@ -45,11 +47,6 @@ export const myOffersSortedAtom = atom((get) => {
       : undefined
   )
 })
-
-export const myOffersSortedAtomsAtom = splitAtom(
-  myOffersSortedAtom,
-  (offer) => offer.offerInfo.offerId
-)
 
 interface MyOffersListSection {
   readonly section: MyOffersSection

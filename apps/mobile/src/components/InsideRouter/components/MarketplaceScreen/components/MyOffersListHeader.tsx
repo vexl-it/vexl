@@ -3,7 +3,7 @@ import {useAtom, useAtomValue} from 'jotai'
 import React, {useCallback} from 'react'
 import {Stack, useTheme, XStack} from 'tamagui'
 import {
-  myOffersSortedAtomsAtom,
+  myOffersCountAtom,
   selectedMyOffersSortingOptionAtom,
 } from '../../../../../state/marketplace/atoms/myOffers'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
@@ -16,8 +16,7 @@ function MyOffersListHeader(): React.ReactElement | null {
   const {t} = useTranslation()
   const locale = useAtomValue(formattingLocaleAtom)
   const theme = useTheme()
-  const myOffersSortedAtoms = useAtomValue(myOffersSortedAtomsAtom)
-  const allOffersCount = myOffersSortedAtoms.length
+  const allOffersCount = useAtomValue(myOffersCountAtom)
   const [sortingOption, setSortingOption] = useAtom(
     selectedMyOffersSortingOptionAtom
   )
@@ -33,7 +32,7 @@ function MyOffersListHeader(): React.ReactElement | null {
       ? t('marketplace.sortByOldest')
       : t('marketplace.sortByNewest')
 
-  if (myOffersSortedAtoms.length === 0) {
+  if (allOffersCount === 0) {
     return null
   }
 

@@ -11,10 +11,10 @@ import {
 } from 'expo-notifications'
 import {getDefaultStore} from 'jotai'
 import {Platform} from 'react-native'
-import {getOtherSideData} from '../../state/chat/atoms/selectOtherSideDataAtom'
 import {translationAtom} from '../localization/I18nProvider'
 import {formatDateTime} from '../localization/formatting'
 import {formattingLocaleAtom} from '../localization/formattingLocaleAtom'
+import {getChatNotificationName} from './getChatNotificationName'
 import {getChannelForTradeReminders} from './notificationChannels'
 import {TradeReminderNotificationData} from './tradeReminderNotificationData'
 
@@ -49,8 +49,7 @@ export async function scheduleTradeReminder({
   const store = getDefaultStore()
   const {t} = store.get(translationAtom)
   const locale = store.get(formattingLocaleAtom)
-  const otherSideData = getOtherSideData(chat)
-  const userName = otherSideData.userName
+  const userName = getChatNotificationName(store.get, chat)
 
   // Format the meeting time using the user's locale
   const formattedTime = formatDateTime(meetingTime, locale)

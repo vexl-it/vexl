@@ -1,5 +1,5 @@
 import {Array, Schema, pipe} from 'effect'
-import {type MMKV} from 'react-native-mmkv'
+import {type MmkvStore} from './inMemoryMmkvStore'
 
 export const STORED_CLUBS_V2_MMKV_KEY = 'storedClubsV2'
 export const FCM_CYPHER_TO_KEY_HOLDER_MMKV_KEY = 'fcmCypherToKeyHolder'
@@ -44,7 +44,9 @@ export function isCriticalMmkvKey(key: string): key is CriticalMmkvKey {
   return pipe(CRITICAL_MMKV_KEYS, Array.contains(key))
 }
 
-export function getPresentCriticalMmkvKeys(mmkv: MMKV): CriticalMmkvKey[] {
+export function getPresentCriticalMmkvKeys(
+  mmkv: Pick<MmkvStore, 'getAllKeys'>
+): CriticalMmkvKey[] {
   const allKeys = mmkv.getAllKeys()
   return pipe(
     CRITICAL_MMKV_KEYS,

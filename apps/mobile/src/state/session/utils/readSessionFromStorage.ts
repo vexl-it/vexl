@@ -12,13 +12,13 @@ import {
   type ErrorReadingFromSecureStorage,
   type StoreEmpty,
 } from '../../../utils/fpUtils'
-import {markV2SecretAsWritten, wasV2SecretWritten} from './v2SecretStorageFlag'
 import {
+  DEVICE_BOUND_SECURE_STORE_OPTIONS,
   SECRET_TOKEN_KEY,
   SECRET_TOKEN_KEY_V2,
-  SECRET_TOKEN_KEY_V2_OPTIONS,
-  SESSION_KEY,
-} from './writeSessionToStorage'
+} from '../../../utils/secureStoreKeys'
+import {markV2SecretAsWritten, wasV2SecretWritten} from './v2SecretStorageFlag'
+import {SESSION_KEY} from './writeSessionToStorage'
 
 // The session sits AES-encrypted in AsyncStorage under SESSION_KEY. The
 // secret that decrypts it lives in SecureStore, in one of two slots:
@@ -88,7 +88,7 @@ function writeSecretToV2Slot(secretToken: string): Effect.Effect<void> {
   // working secret. The marker flag is only set once the write succeeded.
   return saveItemToSecretStorage(
     SECRET_TOKEN_KEY_V2,
-    SECRET_TOKEN_KEY_V2_OPTIONS
+    DEVICE_BOUND_SECURE_STORE_OPTIONS
   )(secretToken).pipe(
     Effect.tap(() => Effect.sync(markV2SecretAsWritten)),
     Effect.ignore

@@ -1,10 +1,14 @@
 import {Either, flow, Schema, type ParseResult} from 'effect'
-import {createMMKV, type MMKV} from 'react-native-mmkv'
 import {JsonParseError, JsonStringifyError} from '../fpUtils'
 import {ReadingFromStoreError, ValueNotSet, WritingToStoreError} from './domain'
+import {
+  openEncryptedMmkvStorage,
+  type MmkvStorageStatus,
+} from './encryptedMmkvStorage'
+import {type MmkvStore} from './inMemoryMmkvStore'
 
 export interface EffectMmkv {
-  _storage: MMKV
+  _storage: MmkvStore
   set: (
     key: string
   ) => (value: string) => Either.Either<void, WritingToStoreError>
@@ -43,7 +47,7 @@ export interface EffectMmkv {
   ) => Either.Either<void, WritingToStoreError | ParseResult.ParseError>
 }
 
-function createEffectMmkv(storage: MMKV): EffectMmkv {
+function createEffectMmkv(storage: MmkvStore): EffectMmkv {
   function set(key: string): ReturnType<EffectMmkv['set']> {
     return (value) =>
       Either.try({
@@ -112,13 +116,17 @@ function createEffectMmkv(storage: MMKV): EffectMmkv {
   }
 }
 
-const mmkv = createMMKV({
-  id: 'mmkv.default',
-  recoveryStrategy: 'recover-on-error',
-  compareBeforeSet: true,
-})
+const openedStorage = openEncryptedMmkvStorage()
 if (__DEV__) {
   // @ts-expect-error for debugging purposes
-  window.__mmkv = mmkv
+  window.__mmkv = openedStorage.store
 }
-export const storage = createEffectMmkv(mmkv)
+export const storage = createEffectMmkv(openedStorage.store)
+
+/**
+ * Anything other than `ready` means `storage` is a volatile placeholder. The
+ * session load checks this and blocks the app with the recovery screen.
+ */
+export function getMmkvStorageStatus(): MmkvStorageStatus {
+  return openedStorage.status
+}

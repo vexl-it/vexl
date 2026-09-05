@@ -18,13 +18,13 @@ import {
   makeErrorWithRemovedSensitiveData,
 } from '../../utils/errorSanitization'
 import {replaceAll} from '../../utils/replaceAll'
-import {dummySession} from './dummySesssion'
-import {clearV2SecretWasWrittenFlag} from './utils/v2SecretStorageFlag'
-import writeSessionToStorage, {
+import {
   SECRET_TOKEN_KEY,
   SECRET_TOKEN_KEY_V2,
-  SESSION_KEY,
-} from './utils/writeSessionToStorage'
+} from '../../utils/secureStoreKeys'
+import {dummySession} from './dummySesssion'
+import {clearV2SecretWasWrittenFlag} from './utils/v2SecretStorageFlag'
+import writeSessionToStorage, {SESSION_KEY} from './utils/writeSessionToStorage'
 
 // duplicated code but we can not remove cyclic dependency otherwise
 // --------------

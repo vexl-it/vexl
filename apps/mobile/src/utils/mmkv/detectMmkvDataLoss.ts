@@ -1,6 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import {Array, Either, Schema, pipe} from 'effect'
-import {File, Paths} from 'expo-file-system'
 import {AppState} from 'react-native'
 import reportError from '../reportError'
 import {
@@ -9,7 +8,12 @@ import {
   getPresentCriticalMmkvKeys,
   type CriticalMmkvKey,
 } from './criticalMmkvKeys'
-import {storage} from './effectMmkv'
+import {getMmkvStorageStatus, storage} from './effectMmkv'
+import {
+  ENCRYPTED_MMKV_ID,
+  getMmkvFiles,
+  type MmkvStorageStatus,
+} from './encryptedMmkvStorage'
 import {
   ASYNC_SENTINEL_KEY,
   runMmkvDataLossDiagnosticOperation,
@@ -28,11 +32,7 @@ const decodeCriticalKeysPresenceRecord = Schema.decodeUnknownEither(
 )
 
 function getMmkvFilesDiagnostics(): Record<string, unknown> {
-  const docDir = Paths.document
-  if (!docDir) return {error: 'no document directory'}
-
-  const dataFile = new File(docDir, 'mmkv/mmkv.default')
-  const crcFile = new File(docDir, 'mmkv/mmkv.default.crc')
+  const {dataFile, crcFile} = getMmkvFiles(ENCRYPTED_MMKV_ID)
 
   return {
     dataFileExists: dataFile.exists,
@@ -114,9 +114,59 @@ async function detectPartialMmkvDataLoss(
   await updateCriticalKeysPresenceRecord(currentPresentKeys)
 }
 
+function reportMmkvStorageStartupStatus(status: MmkvStorageStatus): void {
+  switch (status._tag) {
+    case 'ready':
+      if (
+        status.encryptionKeySource === 'regeneratedAfterKeyLoss' ||
+        status.encryptionKeySource === 'regeneratedAfterKeyMismatch'
+      ) {
+        reportError(
+          'warn',
+          new Error(
+            'MMKV encryption key was missing; unreadable encrypted storage was reset because no session secret exists'
+          ),
+          {encryptionKeySource: status.encryptionKeySource}
+        )
+      }
+      if (status.migratedPlaintextKeyCount !== undefined) {
+        reportError(
+          'info',
+          new Error('MMKV storage migrated from plaintext to encrypted'),
+          {
+            migratedPlaintextKeyCount: status.migratedPlaintextKeyCount,
+            encryptionKeySource: status.encryptionKeySource,
+          }
+        )
+      }
+      return
+    case 'locked':
+      reportError(
+        'error',
+        new Error(
+          'MMKV storage is locked: encryption key is missing while a session secret exists'
+        ),
+        {appState: AppState.currentState, ...getMmkvFilesDiagnostics()}
+      )
+      return
+    case 'unavailable':
+      reportError(
+        'error',
+        new Error('MMKV storage is unavailable', {cause: status.cause}),
+        {appState: AppState.currentState, ...getMmkvFilesDiagnostics()}
+      )
+  }
+}
+
 export function detectMmkvDataLoss(): void {
   const mmkvInstance = storage._storage
   try {
+    const storageStatus = getMmkvStorageStatus()
+    reportMmkvStorageStartupStatus(storageStatus)
+    // The placeholder store is empty by design; comparing it with the last
+    // launch's sentinels would report a false total wipe and overwrite them.
+    if (storageStatus._tag !== 'ready') return
+
     const mmkvSentinel = mmkvInstance.getString(MMKV_SENTINEL_KEY)
 
     void runMmkvDataLossDiagnosticOperation(async (isCurrentGeneration) => {

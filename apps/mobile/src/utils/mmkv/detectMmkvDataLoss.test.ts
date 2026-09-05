@@ -15,6 +15,7 @@ import {
   VEXL_TOKEN_TO_KEY_HOLDER_MMKV_KEY,
 } from './criticalMmkvKeys'
 import {detectMmkvDataLoss} from './detectMmkvDataLoss'
+import * as effectMmkv from './effectMmkv'
 import {storage} from './effectMmkv'
 import {
   ASYNC_SENTINEL_KEY,
@@ -57,6 +58,7 @@ async function flushDetection(): Promise<void> {
 
 beforeEach(() => {
   storage._storage.clearAll()
+  jest.restoreAllMocks()
   jest.clearAllMocks()
   mockedAsyncStorage.getItem.mockResolvedValue(null)
   mockedAsyncStorage.setItem.mockResolvedValue(undefined)
@@ -64,6 +66,71 @@ beforeEach(() => {
 })
 
 describe('detectMmkvDataLoss', () => {
+  it('reports a locked store and skips loss detection instead of misreporting the placeholder as a wipe', async () => {
+    jest
+      .spyOn(effectMmkv, 'getMmkvStorageStatus')
+      .mockReturnValue({_tag: 'locked'})
+    mockedAsyncStorage.getItem.mockImplementation(async (key) =>
+      key === ASYNC_SENTINEL_KEY ? '1700000000000' : null
+    )
+
+    detectMmkvDataLoss()
+    await flushDetection()
+
+    expect(mockedReportError).toHaveBeenCalledTimes(1)
+    expect(mockedReportError).toHaveBeenCalledWith(
+      'error',
+      expect.objectContaining({
+        message:
+          'MMKV storage is locked: encryption key is missing while a session secret exists',
+      }),
+      expect.objectContaining({appState: AppState.currentState})
+    )
+    expect(mockedAsyncStorage.setItem).not.toHaveBeenCalled()
+    expect(storage._storage.getAllKeys()).toEqual([])
+  })
+
+  it('reports a completed plaintext migration at info level', async () => {
+    jest.spyOn(effectMmkv, 'getMmkvStorageStatus').mockReturnValue({
+      _tag: 'ready',
+      encryptionKeySource: 'generated',
+      migratedPlaintextKeyCount: 12,
+    })
+
+    detectMmkvDataLoss()
+    await flushDetection()
+
+    expect(mockedReportError).toHaveBeenCalledTimes(1)
+    expect(mockedReportError).toHaveBeenCalledWith(
+      'info',
+      expect.objectContaining({
+        message: 'MMKV storage migrated from plaintext to encrypted',
+      }),
+      {migratedPlaintextKeyCount: 12, encryptionKeySource: 'generated'}
+    )
+  })
+
+  it('warns when unreadable ciphertext was reset after key loss', async () => {
+    jest.spyOn(effectMmkv, 'getMmkvStorageStatus').mockReturnValue({
+      _tag: 'ready',
+      encryptionKeySource: 'regeneratedAfterKeyLoss',
+      migratedPlaintextKeyCount: undefined,
+    })
+
+    detectMmkvDataLoss()
+    await flushDetection()
+
+    expect(mockedReportError).toHaveBeenCalledTimes(1)
+    expect(mockedReportError).toHaveBeenCalledWith(
+      'warn',
+      expect.objectContaining({
+        message:
+          'MMKV encryption key was missing; unreadable encrypted storage was reset because no session secret exists',
+      }),
+      {encryptionKeySource: 'regeneratedAfterKeyLoss'}
+    )
+  })
+
   it('reports partial data loss when a previously present critical key disappears', async () => {
     storage._storage.set('__mmkv_data_exists', '1700000000000')
     storage._storage.set('messagingState', '{}')

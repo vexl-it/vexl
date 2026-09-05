@@ -209,7 +209,7 @@
   "offerForm.friendLevel.reachPeople": "{{count}}人に届く",
   "offerForm.friendLevel.reachPeopleFormatted": "{{localizedString}}人に届く",
   "offerForm.errorCreatingOffer": "オファーの作成中にエラーが発生しました",
-  "offerForm.seemsYouHaveReachNoVexlers": "オファーを暗号化して届けられる相手がまだいないようです。連絡先を追加するか Vexl クラブに参加して、リーチを広げてください。",
+  "offerForm.seemsYouHaveReachNoVexlers": "まだ連絡先をインポートしていません。リーチがゼロだと誰にも見てもらえないため、オファーを公開できません。連絡先をインポートするか Vexl クラブに参加して、誰かに届けましょう。",
   "offerForm.errorSearchingForAvailableLocation": "利用可能な場所を検索中にエラーが発生しました",
   "offerForm.offerEncryption.encryptingYourOffer": "オファーを暗号化しています...",
   "offerForm.offerEncryption.dontShutDownTheApp": "暗号化中にアプリをシャットダウンしないでください。数分かかる場合があります。",

@@ -209,7 +209,7 @@
   "offerForm.friendLevel.reachPeople": "Raggiungi {{count}} persone",
   "offerForm.friendLevel.reachPeopleFormatted": "Raggiungi {{localizedString}} persone",
   "offerForm.errorCreatingOffer": "Errore durante la creazione dell'offerta",
-  "offerForm.seemsYouHaveReachNoVexlers": "Sembra che al momento non ci sia nessuno per cui crittografare la tua offerta. Aggiungi altri contatti o unisciti a un Vexl Club per aumentare la tua portata.",
+  "offerForm.seemsYouHaveReachNoVexlers": "Non hai ancora importato nessun contatto. La tua offerta non può essere pubblicata con una portata pari a zero, perché nessuno la vedrebbe. Importa i contatti o unisciti a un Vexl Club per raggiungere qualcuno.",
   "offerForm.errorSearchingForAvailableLocation": "Errore durante la ricerca delle sedi disponibili",
   "offerForm.offerEncryption.encryptingYourOffer": "Crittografia dell'offerta ...",
   "offerForm.offerEncryption.dontShutDownTheApp": "Non spegnere l'app durante la crittografia. Può richiedere diversi minuti.",

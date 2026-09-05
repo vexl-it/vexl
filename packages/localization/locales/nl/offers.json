@@ -209,7 +209,7 @@
   "offerForm.friendLevel.reachPeople": "Je bereikt {{count}} mensen",
   "offerForm.friendLevel.reachPeopleFormatted": "Je bereikt {{localizedString}} mensen",
   "offerForm.errorCreatingOffer": "Fout bij het aanmaken aanbieding",
-  "offerForm.seemsYouHaveReachNoVexlers": "Het lijkt erop dat er nog niemand is om je aanbod voor te versleutelen. Voeg meer contacten toe of word lid van een Vexl Club om je bereik te vergroten.",
+  "offerForm.seemsYouHaveReachNoVexlers": "Je hebt nog geen contacten geïmporteerd. Je aanbieding kan niet worden gepubliceerd met een bereik van nul, want niemand zou die zien. Importeer contacten of word lid van een Vexl Club om iemand te bereiken.",
   "offerForm.errorSearchingForAvailableLocation": "Fout bij het zoeken naar beschikbare locaties",
   "offerForm.offerEncryption.encryptingYourOffer": "Versleutelen van uw aanbieding ...",
   "offerForm.offerEncryption.dontShutDownTheApp": "Sluit de app niet af tijdens het coderen. Het kan enkele minuten duren.",

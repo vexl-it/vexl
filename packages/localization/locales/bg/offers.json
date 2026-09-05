@@ -209,7 +209,7 @@
   "offerForm.friendLevel.reachPeople": "Достигаш до {{count}} души",
   "offerForm.friendLevel.reachPeopleFormatted": "Достигаш до {{localizedString}} души",
   "offerForm.errorCreatingOffer": "Грешка при създаване на оферта",
-  "offerForm.seemsYouHaveReachNoVexlers": "Изглежда все още няма никой, за когото да криптираш офертата си. Добави още контакти или се присъедини към Vexl клуб, за да увеличиш обхвата си.",
+  "offerForm.seemsYouHaveReachNoVexlers": "Все още не си импортирал никакви контакти. Офертата ти не може да бъде публикувана с нулев обхват, защото никой няма да я види. Импортирай контакти или се присъедини към Vexl клуб, за да достигнеш до някого.",
   "offerForm.errorSearchingForAvailableLocation": "Грешка при търсене на наличните местоположения",
   "offerForm.offerEncryption.encryptingYourOffer": "Вашата оферта се криптира ...",
   "offerForm.offerEncryption.dontShutDownTheApp": "Не затваряйте приложението докато тече криптирането. Може да отнеме няколко минути.",

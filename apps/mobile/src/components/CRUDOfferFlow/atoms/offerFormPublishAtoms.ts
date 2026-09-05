@@ -28,7 +28,10 @@ import {
 import {showErrorAlert} from '../../ErrorAlert'
 import {askAreYouSureActionAtom, globalDialogAtom} from '../../GlobalDialog'
 import {loadingOverlayDisplayedAtom} from '../../LoadingOverlayProvider'
-import {offerProgressModalActionAtoms as progressModal} from '../../UploadingOfferProgressModal/atoms'
+import {
+  offerProgressModalActionAtoms as progressModal,
+  waitUntilProgressModalIsFullyHiddenActionAtom,
+} from '../../UploadingOfferProgressModal/atoms'
 import numberOfFriendsAtom, {
   numberOfFriendsLoadedEffect,
 } from './numberOfFriendsAtom'
@@ -258,9 +261,11 @@ export function createOfferFormPublishAtoms({
 
         return true
       }).pipe(
-        Effect.catchAll((e) => {
+        Effect.tapError(() => {
           set(progressModal.hide)
-
+          return set(waitUntilProgressModalIsFullyHiddenActionAtom)
+        }),
+        Effect.catchAll((e) => {
           if (e._tag === 'NotificationPrompted') return Effect.succeed(false)
 
           if (

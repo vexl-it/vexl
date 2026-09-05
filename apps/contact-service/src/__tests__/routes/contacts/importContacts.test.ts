@@ -289,8 +289,6 @@ describe('Import contacts', () => {
         yield* _(
           app.User.createUser({
             payload: {
-              firebaseToken: null,
-              expoToken: me.notificationToken,
               vexlNotificationToken: me.vexlNotificationToken,
               publicKeyV2: Option.none(),
             },
@@ -363,8 +361,6 @@ describe('Import contacts', () => {
           app.User.createUser({
             headers: commonAndSecurityHeaders,
             payload: {
-              firebaseToken: null,
-              expoToken: me.notificationToken,
               vexlNotificationToken: me.vexlNotificationToken,
               publicKeyV2: Option.none(),
             },
@@ -435,8 +431,6 @@ describe('Import contacts', () => {
           app.User.createUser({
             headers: commonAndSecurityHeaders,
             payload: {
-              firebaseToken: null,
-              expoToken: me.notificationToken,
               vexlNotificationToken: me.vexlNotificationToken,
               publicKeyV2: Option.none(),
             },
@@ -566,8 +560,6 @@ describe('Import contacts', () => {
         yield* _(
           app.User.createUser({
             payload: {
-              firebaseToken: null,
-              expoToken: me.notificationToken,
               vexlNotificationToken: me.vexlNotificationToken,
               publicKeyV2: Option.none(),
             },
@@ -673,8 +665,6 @@ describe('Import contacts', () => {
           app.User.createUser({
             headers: commonAndSecurityHeaders,
             payload: {
-              firebaseToken: null,
-              expoToken: me.notificationToken,
               vexlNotificationToken: me.vexlNotificationToken,
               publicKeyV2: Option.none(),
             },
@@ -883,17 +873,21 @@ describe('Notification', () => {
           yield* _(Effect.sleep(200))
 
           const enqueuedNotifications = yield* _(getEnqueuedNotifications)
-          const notifiedExpoTokens = pipe(
+          const notifiedTokens = pipe(
             enqueuedNotifications,
             Array.filterMap((n) =>
               n.task._tag === 'NewUserNotificationMqEntry'
-                ? Option.fromNullable(n.task.notificationToken)
+                ? Option.some(n.task.token)
                 : Option.none()
             )
           )
 
-          expect(notifiedExpoTokens).toContain(carol.notificationToken)
-          expect(notifiedExpoTokens).not.toContain(bob.notificationToken)
+          expect(notifiedTokens).toContain(
+            Option.getOrThrow(carol.vexlNotificationToken)
+          )
+          expect(notifiedTokens).not.toContain(
+            Option.getOrThrow(bob.vexlNotificationToken)
+          )
         })
       )
     })

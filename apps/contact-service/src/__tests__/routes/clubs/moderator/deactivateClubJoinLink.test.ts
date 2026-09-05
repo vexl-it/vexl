@@ -6,7 +6,6 @@ import {
 } from '@vexl-next/domain/src/general/clubs'
 import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
-import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {
   InvalidChallengeError,
@@ -84,7 +83,6 @@ beforeEach(async () => {
           publicKey: userKey.publicKeyPemBase64,
           isModerator: true,
           lastRefreshedAt: new Date(),
-          notificationToken: 'someToken' as ExpoNotificationToken,
           vexlNotificationToken: 'vexl_nt_test' as VexlNotificationToken,
           publicKeyV2: null,
         })
@@ -128,7 +126,6 @@ describe('Deactivate link', () => {
             headers: testCommonHeaders,
             payload: {
               code,
-              notificationToken: Option.none(),
               vexlNotificationToken: Option.none(),
               contactsImported: false,
               ...(yield* _(generateAndSignChallenge(user1))),
@@ -174,7 +171,6 @@ describe('Deactivate link', () => {
             clubId,
             isModerator: false,
             lastRefreshedAt: new Date(),
-            notificationToken: null,
             vexlNotificationToken: null,
             publicKeyV2: null,
           })

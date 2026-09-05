@@ -1,7 +1,6 @@
 import {Schema} from 'effect'
 import {createStore} from 'jotai'
 import {
-  FCM_CYPHER_TO_KEY_HOLDER_MMKV_KEY,
   STORED_CLUBS_V2_MMKV_KEY,
   VEXL_TOKEN_TO_KEY_HOLDER_MMKV_KEY,
 } from '../mmkv/criticalMmkvKeys'
@@ -159,7 +158,6 @@ describe('atomWithParsedMmkvStorage', () => {
   it.each([
     'offers',
     STORED_CLUBS_V2_MMKV_KEY,
-    FCM_CYPHER_TO_KEY_HOLDER_MMKV_KEY,
     VEXL_TOKEN_TO_KEY_HOLDER_MMKV_KEY,
   ])(
     'reports a %s parse failure at error level during initialization',
@@ -295,7 +293,6 @@ describe('atomWithParsedMmkvStorage', () => {
   it.each([
     'offers',
     STORED_CLUBS_V2_MMKV_KEY,
-    FCM_CYPHER_TO_KEY_HOLDER_MMKV_KEY,
     VEXL_TOKEN_TO_KEY_HOLDER_MMKV_KEY,
   ])('records a successful deferred persist of %s', (key) => {
     const testAtom = atomWithParsedMmkvStorage(

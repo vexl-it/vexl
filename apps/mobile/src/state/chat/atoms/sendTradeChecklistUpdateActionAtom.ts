@@ -85,10 +85,8 @@ export default function createSubmitChecklistUpdateActionAtom(
                 receiverPublicKey: chatWithMessages.chat.otherSide.publicKey,
                 message,
                 notificationApi: api.notification,
-                theirNotificationCypher:
-                  chatWithMessages.chat.otherSideVexlToken ??
-                  chatWithMessages.chat.otherSideFcmCypher,
-                otherSideVersion: chatWithMessages.chat.otherSideVersion,
+                theirNotificationToken:
+                  chatWithMessages.chat.otherSideVexlToken,
               })
             ),
             Effect.map((serverMessage) => ({message, serverMessage}))

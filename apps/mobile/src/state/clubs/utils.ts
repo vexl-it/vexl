@@ -5,7 +5,6 @@ import {
 import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
-import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {type ContactApi} from '@vexl-next/rest-api/src/services/contact'
 import {Effect, HashSet, type Option, Schema} from 'effect'
 import reportError from '../../utils/reportError'
@@ -27,13 +26,11 @@ export const fetchClubWithMembersReportApiErrors = ({
   keyPair,
   oldKeyPair,
   contactApi,
-  notificationToken,
   vexlNotificationToken,
 }: {
   oldKeyPair: PrivateKeyHolder
   keyPair: KeyPairV2
   contactApi: ContactApi
-  notificationToken: Option.Option<ExpoNotificationToken>
   vexlNotificationToken: Option.Option<VexlNotificationToken>
   clubUuid?: ClubUuid
 }): Effect.Effect<
@@ -49,7 +46,6 @@ export const fetchClubWithMembersReportApiErrors = ({
         .getClubInfo({
           keyPair: oldKeyPair,
           keyPairV2: keyPair,
-          notificationToken,
           vexlNotificationToken,
         })
         .pipe(

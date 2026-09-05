@@ -22,7 +22,6 @@ import {
 } from '../../../utils/localization/I18nProvider'
 import {formatInteger} from '../../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../../utils/localization/formattingLocaleAtom'
-import {getNotificationTokenE} from '../../../utils/notifications'
 import reportError from '../../../utils/reportError'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import {myActiveOffersAtom} from '../../marketplace/atoms/myOffers'
@@ -322,11 +321,6 @@ export const submitCodeToJoinClubActionAtom = atom(
     return Effect.gen(function* (_) {
       const newKeypair = yield* _(eitherToEffect(generateKeyPair()))
       const newKeypairV2 = yield* _(generateV2KeyPair())
-      const notificationToken = yield* _(
-        getNotificationTokenE(),
-        Effect.map(Option.fromNullable)
-      )
-
       const club = yield* _(
         api.contact.getClubInfoByAccessCode({
           code,
@@ -383,7 +377,6 @@ export const submitCodeToJoinClubActionAtom = atom(
             keyPair: oldKeyPair,
             code,
             contactsImported: true,
-            notificationToken,
             vexlNotificationToken: Option.some(vexlNotificationToken),
             keyPairV2: newKeypairV2,
           })

@@ -85,9 +85,9 @@ export const createOfferActionAtom = atom<
 
     const publicPayloadWithNotificationToken = {
       ...payloadPublic,
-      // backward compatibility #2124 remove once all clients are updated
-      fcmCypher: vexlNotificationToken,
       vexlNotificationToken,
+      // TODO https://github.com/vexl-it/vexl/issues/2715
+      fcmCypher: vexlNotificationToken,
       ...(session.isLiquidityProvider ? {byLiquidityProvider: true} : {}),
     }
 

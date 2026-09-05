@@ -6,7 +6,6 @@ import {runPromiseInMockedEnvironment} from '../../utils/runPromiseInMockedEnvir
 import {SqlClient} from '@effect/sql'
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
-import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {
@@ -37,10 +36,6 @@ beforeAll(async () => {
       yield* _(
         app.User.createUser({
           payload: {
-            firebaseToken: null,
-            expoToken: Schema.decodeSync(ExpoNotificationToken)(
-              'notificationToken'
-            ),
             vexlNotificationToken: Option.some(
               Schema.decodeSync(VexlNotificationToken)('vexl_nt_test')
             ),
@@ -177,19 +172,16 @@ describe('Check user exist notification', () => {
     )
   })
 
-  it('Should enqueue notification with legacy expoToken when user has no vexlNotificationToken', async () => {
+  it('Does not enqueue notification when user has no vexlNotificationToken', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         yield* _(clearEnqueuedNotifications)
 
         const sql = yield* _(SqlClient.SqlClient)
-
-        // Ensure user has ONLY expoToken (no vexlNotificationToken)
         yield* _(sql`
           UPDATE users
           SET
-            vexl_notification_token = NULL,
-            expo_token = ${'expo_legacy_token' as ExpoNotificationToken}
+            vexl_notification_token = NULL
           WHERE
             public_key = ${keys.publicKeyPemBase64}
         `)
@@ -222,18 +214,7 @@ describe('Check user exist notification', () => {
           (n) => n.task._tag === 'UserLoginOnDifferentDeviceNotificationMqEntry'
         )
 
-        expect(loginNotifications).toHaveLength(1)
-
-        const notification = loginNotifications[0]
-        if (
-          notification?.task._tag ===
-          'UserLoginOnDifferentDeviceNotificationMqEntry'
-        ) {
-          // vexlNotificationToken should be null
-          expect(notification.task.token).toBeNull()
-          // expoToken should be set
-          expect(notification.task.notificationToken).toBe('expo_legacy_token')
-        }
+        expect(loginNotifications).toHaveLength(0)
       })
     )
   })

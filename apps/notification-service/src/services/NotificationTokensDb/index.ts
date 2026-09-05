@@ -3,6 +3,7 @@ import {
   type VexlNotificationToken,
   type VexlNotificationTokenSecret,
 } from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
+import {SendingNotificationError} from '@vexl-next/rest-api/src/services/notification/contract'
 import {Context, Effect, Layer, type Option} from 'effect'
 import {
   type NotificationSecretRecord,
@@ -67,6 +68,23 @@ export interface NotificationTokensDbOperations {
     secret: VexlNotificationTokenSecret
   ) => Effect.Effect<void, UnexpectedServerError>
 }
+
+export const findSecretForNotificationToken = (
+  token: VexlNotificationToken
+): Effect.Effect<
+  VexlNotificationTokenSecret,
+  SendingNotificationError | UnexpectedServerError,
+  NotificationTokensDb
+> =>
+  NotificationTokensDb.pipe(
+    Effect.flatMap((db) => db.findSecretByNotificationToken(token)),
+    Effect.flatten,
+    Effect.map((record) => record.secret),
+    Effect.catchTag(
+      'NoSuchElementException',
+      () => new SendingNotificationError({tokenInvalid: true})
+    )
+  )
 
 export class NotificationTokensDb extends Context.Tag('NotificationTokensDb')<
   NotificationTokensDb,

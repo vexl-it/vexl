@@ -4,7 +4,6 @@ import {
 } from '@vexl-next/cryptography/src/KeyHolder'
 import {Schema} from 'effect'
 import {Base64String} from '../utility/Base64String.brand'
-import {ExpoNotificationToken} from '../utility/ExpoNotificationToken.brand'
 import {UnixMilliseconds} from '../utility/UnixMilliseconds.brand'
 import {UriString} from '../utility/UriString.brand'
 import {generateUuid} from '../utility/Uuid.brand'
@@ -16,7 +15,6 @@ import {UserName} from './UserName.brand'
 import {RealLifeInfo} from './UserNameAndAvatar.brand'
 import {ClubUuid} from './clubs'
 import {NoteId, OneNoteInState} from './notes'
-import {NotificationCypher} from './notifications/NotificationCypher.brand'
 import {VexlNotificationToken} from './notifications/VexlNotificationToken'
 import {FriendLevel, GoldenAvatarType, OfferId, OneOfferInState} from './offers'
 import {TradeChecklistUpdate} from './tradeChecklist'
@@ -92,16 +90,8 @@ export const ChatMessagePayload = Schema.Struct({
       fullPhoneNumber: Schema.optional(E164PhoneNumber),
     })
   ),
-  // Accepts both NotificationCypher (legacy) and VexlNotificationToken (new)
-  myFcmCypher: Schema.optional(
-    Schema.Union(NotificationCypher, VexlNotificationToken)
-  ),
-  lastReceivedFcmCypher: Schema.optional(
-    Schema.Union(NotificationCypher, VexlNotificationToken)
-  ),
-  // New dedicated fields for vexl notification tokens
-  myVexlToken: Schema.optional(VexlNotificationToken),
-  lastReceivedVexlToken: Schema.optional(VexlNotificationToken),
+  // Wire key kept from the cypher era; it carries the vexl notification token.
+  myFcmCypher: Schema.optional(VexlNotificationToken),
   senderClubsUuids: Schema.optional(Schema.Array(ClubUuid)),
   commonFriends: Schema.optional(Schema.Array(HashedPhoneNumber)),
   verifiedCommonFriends: Schema.optional(Schema.Array(HashedPhoneNumber)),
@@ -133,16 +123,7 @@ export const ChatMessage = Schema.Struct({
   deanonymizedUser: Schema.optional(DeanonymizedUser),
   senderPublicKey: PublicKeyPemBase64,
   messageType: MessageType,
-  // Accepts both NotificationCypher (legacy) and VexlNotificationToken (new)
-  myFcmCypher: Schema.optional(
-    Schema.Union(NotificationCypher, VexlNotificationToken)
-  ),
-  lastReceivedFcmCypher: Schema.optional(
-    Schema.Union(NotificationCypher, VexlNotificationToken)
-  ),
-  // New dedicated fields for vexl notification tokens
   myVexlToken: Schema.optional(VexlNotificationToken),
-  lastReceivedVexlToken: Schema.optional(VexlNotificationToken),
   senderClubsUuids: Schema.optional(Schema.Array(ClubUuid)),
   commonFriends: Schema.optional(Schema.Array(HashedPhoneNumber)),
   verifiedCommonFriends: Schema.optional(Schema.Array(HashedPhoneNumber)),
@@ -200,12 +181,6 @@ export const CalendarEventId = Schema.String.pipe(
 )
 export type CalendarEventId = typeof CalendarEventId.Type
 
-export const MyNotificationTokenInfo = Schema.Struct({
-  token: ExpoNotificationToken,
-  cypher: NotificationCypher,
-})
-export type MyNotificationTokenInfo = typeof MyNotificationTokenInfo.Type
-
 export const Chat = Schema.Struct({
   id: ChatId,
   inbox: Inbox,
@@ -225,11 +200,6 @@ export const Chat = Schema.Struct({
   tradeChecklistCalendarEventId: Schema.optional(CalendarEventId),
   otherSideVersion: Schema.optional(VersionString),
   lastReportedVersion: Schema.optional(VersionString),
-  // Accepts both NotificationCypher (legacy) and VexlNotificationToken (new)
-  otherSideFcmCypher: Schema.optional(
-    Schema.Union(NotificationCypher, VexlNotificationToken)
-  ),
-  // New dedicated fields for vexl notification tokens
   otherSideVexlToken: Schema.optional(VexlNotificationToken),
   lastReportedVexlToken: Schema.optional(VexlNotificationToken),
   lastReadByOtherSide: Schema.optional(UnixMilliseconds),
@@ -261,16 +231,7 @@ export const ChatMessageRequiringNewerVersion = Schema.Struct({
   text: Schema.Literal('-'),
   deanonymizedUser: Schema.optional(Schema.Undefined),
   image: Schema.optional(Schema.Undefined),
-  // Accepts both NotificationCypher (legacy) and VexlNotificationToken (new)
-  myFcmCypher: Schema.optional(
-    Schema.Union(NotificationCypher, VexlNotificationToken)
-  ),
-  lastReceivedFcmCypher: Schema.optional(
-    Schema.Union(NotificationCypher, VexlNotificationToken)
-  ),
-  // New dedicated fields for vexl notification tokens
   myVexlToken: Schema.optional(VexlNotificationToken),
-  lastReceivedVexlToken: Schema.optional(VexlNotificationToken),
   commonFriends: Schema.optional(Schema.Array(HashedPhoneNumber)),
   verifiedCommonFriends: Schema.optional(Schema.Array(HashedPhoneNumber)),
   friendLevel: Schema.optional(Schema.Array(FriendLevel)),

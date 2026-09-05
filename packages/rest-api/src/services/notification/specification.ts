@@ -12,11 +12,8 @@ import {
   CreateNotificationSecretResponse,
   GenerateNotificationTokenRequest,
   GenerateNotificationTokenResponse,
-  GetPublicKeyResponse,
   InvalidateNotificationSecretRequest,
   InvalidateNotificationTokenRequest,
-  InvalidFcmCypherError,
-  InvalidNotificationCypherrror,
   IssueNotificationRequest,
   IssueNotificationResponse,
   IssueStreamOnlyMessageRequest,
@@ -32,9 +29,7 @@ export const IssueNotificationEndpoint = HttpApiEndpoint.post(
 )
   .setPayload(IssueNotificationRequest)
   .addSuccess(IssueNotificationResponse)
-  .addError(InvalidFcmCypherError, {status: 400})
   .addError(SendingNotificationError, {status: 400})
-  .addError(InvalidNotificationCypherrror, {status: 400})
   .annotate(MaxExpectedDailyCall, 5000)
 
 export const IssueStreamOnlyMessageEndpoint = HttpApiEndpoint.post(
@@ -55,18 +50,10 @@ export const ReportNotificationProcessedEndpoint = HttpApiEndpoint.post(
   .addSuccess(NoContentResponse)
   .annotate(MaxExpectedDailyCall, 5000)
 
-export const GetNotificationPublicKeyEndpoint = HttpApiEndpoint.get(
-  'getNotificationPublicKey',
-  '/cypher-public-key'
-)
-  .addSuccess(GetPublicKeyResponse)
-  .annotate(MaxExpectedDailyCall, 100)
-
 const RootGroup = HttpApiGroup.make('root', {topLevel: true})
   .add(IssueNotificationEndpoint)
   .add(ReportNotificationProcessedEndpoint)
   .add(IssueStreamOnlyMessageEndpoint)
-  .add(GetNotificationPublicKeyEndpoint)
 
 export const CreateNotificationSecretEndpoint = HttpApiEndpoint.post(
   'CreateNotificationSecret',

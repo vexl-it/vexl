@@ -6,11 +6,7 @@ import {UnixMilliseconds} from '../../utility/UnixMilliseconds.brand'
 import {ClubUuid} from '../clubs'
 import {NotificationTrackingId} from '../NotificationTrackingId.brand'
 import {VexlProductNotification} from '../vexlProductNotification'
-import {NotificationCypher} from './NotificationCypher.brand'
 import {VexlNotificationToken} from './VexlNotificationToken'
-
-export const FcmCypher = Schema.String.pipe(Schema.brand('FcmCypher'))
-export type FcmCypher = typeof FcmCypher.Type
 
 export const ChatNotificationType = Schema.Literal(
   'MESSAGE',
@@ -47,9 +43,7 @@ export class ChatNotificationData extends Schema.Class<ChatNotificationData>(
 export class NewChatMessageNoticeNotificationData extends Schema.TaggedClass<NewChatMessageNoticeNotificationData>(
   'NewChatMessageNoticeNotificationData'
 )('NewChatMessageNoticeNotificationData', {
-  // Todo #2124 remove target cypher and use target token only (remove optional)
-  targetCypher: Schema.optional(NotificationCypher),
-  targetToken: Schema.optional(VexlNotificationToken),
+  targetToken: VexlNotificationToken,
   trackingId: Schema.optionalWith(NotificationTrackingId, {as: 'Option'}),
   sentAt: Schema.compose(Schema.NumberFromString, UnixMilliseconds),
   // Is true if the notification was sent with a system notification

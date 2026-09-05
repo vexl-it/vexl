@@ -33,7 +33,6 @@ import {
   type RefreshUserRequest,
   type ReportClubRequest,
   type SetPublicKeyV2Request,
-  type UpdateNotificationTokenRequest,
 } from './contracts'
 import {ContactApiSpecification} from './specification'
 
@@ -120,14 +119,6 @@ export function api({
       refreshUser: (body: RefreshUserRequest) =>
         withSecurityHeaders((headers) =>
           client.User.refreshUser({payload: body, headers})
-        ),
-      updateNotificationToken: ({
-        body,
-      }: {
-        body: UpdateNotificationTokenRequest
-      }) =>
-        withSecurityHeaders((headers) =>
-          client.User.updateNotificationToken({payload: body, headers})
         ),
       deleteUser: () =>
         withSecurityHeaders((headers) => client.User.deleteUser({headers})),

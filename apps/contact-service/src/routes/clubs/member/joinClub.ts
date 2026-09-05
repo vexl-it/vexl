@@ -89,9 +89,6 @@ export const joinClub = HttpApiBuilder.handler(
               publicKeyV2: Option.getOrNull(req.payload.publicKeyV2),
               isModerator: inviteLink.forAdmin,
               lastRefreshedAt: new Date(),
-              notificationToken: Option.getOrNull(
-                req.payload.notificationToken
-              ),
               vexlNotificationToken: Option.getOrNull(
                 req.payload.vexlNotificationToken
               ),

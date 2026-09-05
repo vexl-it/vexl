@@ -209,7 +209,7 @@
   "offerForm.friendLevel.reachPeople": "你可以触达 {{count}} 人",
   "offerForm.friendLevel.reachPeopleFormatted": "你可以触达 {{localizedString}} 人",
   "offerForm.errorCreatingOffer": "创建报价时出错",
-  "offerForm.seemsYouHaveReachNoVexlers": "看来目前还没有可以为你加密出价的人。添加更多联系人或加入 Vexl 俱乐部以扩大触达范围。",
+  "offerForm.seemsYouHaveReachNoVexlers": "你还没有导入任何联系人。触达人数为零时无法发布出价，因为没有人能看到。导入联系人或加入 Vexl 俱乐部，触达其他人。",
   "offerForm.errorSearchingForAvailableLocation": "搜索可用地点时出错",
   "offerForm.offerEncryption.encryptingYourOffer": "正在加密您的报价……",
   "offerForm.offerEncryption.dontShutDownTheApp": "不要在加密时关闭此应用程序。它可能需要几分钟。",

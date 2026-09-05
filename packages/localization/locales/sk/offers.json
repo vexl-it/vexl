@@ -209,7 +209,7 @@
   "offerForm.friendLevel.reachPeople": "Oslovíš {{count}} ľudí",
   "offerForm.friendLevel.reachPeopleFormatted": "Oslovíš {{localizedString}} ľudí",
   "offerForm.errorCreatingOffer": "Chyba pri vytváraní ponuky",
-  "offerForm.seemsYouHaveReachNoVexlers": "Zdá sa, že zatiaľ nie je nikto, pre koho by si mohol zašifrovať svoju ponuku. Pridaj viac kontaktov alebo sa pridaj do Vexl klubu a zvýš svoj dosah.",
+  "offerForm.seemsYouHaveReachNoVexlers": "Zatiaľ nemáš importované žiadne kontakty. Tvoju ponuku nemožno zverejniť s nulovým dosahom, pretože by ju nikto nevidel. Importuj kontakty alebo sa pridaj do Vexl Clubu, aby si niekoho oslovil.",
   "offerForm.errorSearchingForAvailableLocation": "Chyba pri vyhľadávaní dostupných lokalít",
   "offerForm.offerEncryption.encryptingYourOffer": "Šifrovanie tvojej ponuky ...",
   "offerForm.offerEncryption.dontShutDownTheApp": "Nevypínaj prosím aplikáciu počas šifrovania tvojej ponuky. Môže to trvať niekoľko minút.",

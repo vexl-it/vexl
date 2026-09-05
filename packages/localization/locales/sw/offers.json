@@ -209,7 +209,7 @@
   "offerForm.friendLevel.reachPeople": "Unafikia watu {{count}}",
   "offerForm.friendLevel.reachPeopleFormatted": "Unafikia watu {{localizedString}}",
   "offerForm.errorCreatingOffer": "Hitilafu wakati wa kuunda ofa",
-  "offerForm.seemsYouHaveReachNoVexlers": "Inaonekana bado hakuna mtu wa kufikiwa na ofa yako iliyosimbwa kwa njia fiche. Ongeza anwani zaidi au ujiunge na Klabu ya Vexl ili kuwafikia watu zaidi.",
+  "offerForm.seemsYouHaveReachNoVexlers": "Bado hujaingiza anwani zozote. Ofa yako haiwezi kuchapishwa ikiwa haimfikii mtu yeyote, kwa sababu hakuna atakayeiona. Ingiza anwani au ujiunge na Klabu ya Vexl ili kumfikia mtu.",
   "offerForm.errorSearchingForAvailableLocation": "Hitilafu wakati wa kutafuta maeneo yanayopatikana",
   "offerForm.offerEncryption.encryptingYourOffer": "Inasimba ofa yako...",
   "offerForm.offerEncryption.dontShutDownTheApp": "Usifunge programu wakati wa kusimba. Inaweza kuchukua dakika kadhaa.",

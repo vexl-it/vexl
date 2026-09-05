@@ -209,7 +209,7 @@
   "offerForm.friendLevel.reachPeople": "You reach {{count}} people",
   "offerForm.friendLevel.reachPeopleFormatted": "You reach {{localizedString}} people",
   "offerForm.errorCreatingOffer": "Error while creating offer",
-  "offerForm.seemsYouHaveReachNoVexlers": "It looks like there's no one to encrypt your offer for yet. Add more contacts or join a Vexl Club to grow your reach.",
+  "offerForm.seemsYouHaveReachNoVexlers": "You haven't imported any contacts yet. Your offer can't be published with zero reach because no one would see it. Import contacts or join a Vexl Club to reach someone.",
   "offerForm.errorSearchingForAvailableLocation": "Error while searching for available locations",
   "offerForm.offerEncryption.encryptingYourOffer": "Encrypting your offer ...",
   "offerForm.offerEncryption.dontShutDownTheApp": "Don’t shut down the app while encrypting. It can take several minutes.",

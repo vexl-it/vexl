@@ -1,4 +1,4 @@
-const VERSION_CODE = 260900100
+const VERSION_CODE = 260900101
 const VERSION = '26.9.1'
 const ENV_PRESET = process.env.ENV_PRESET
 const IS_LOCAL_ENV = ENV_PRESET === 'local'
@@ -281,7 +281,7 @@ export default {
           'useFrameworks': 'static',
         },
         'android': {
-          'targetSdkVersion': 35,
+          'targetSdkVersion': 36,
           'packagingOptions': {
             'pickFirst': [
               'lib/x86/libcrypto.so',

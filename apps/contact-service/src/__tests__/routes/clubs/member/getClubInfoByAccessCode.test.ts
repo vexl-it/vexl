@@ -1,4 +1,3 @@
-import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {
   type ClubCode,
@@ -9,7 +8,8 @@ import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {InvalidChallengeError} from '@vexl-next/rest-api/src/challenges/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {addTestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
-import {Effect, Option, Schema} from 'effect'
+import {Effect, Option, pipe, Schema} from 'effect'
+import {SqlClient} from 'effect/unstable/sql'
 import {ClubInvitationLinkDbService} from '../../../../db/ClubInvitationLinkDbService'
 import {ClubsDbService} from '../../../../db/ClubsDbService'
 import {type ClubRecordId} from '../../../../db/ClubsDbService/domain'
@@ -36,27 +36,25 @@ let clubId: ClubRecordId
 
 beforeEach(async () => {
   await runPromiseInMockedEnvironment(
-    Effect.gen(function* (_) {
-      const sql = yield* _(SqlClient.SqlClient)
-      yield* _(sql`DELETE FROM club_invitation_link`)
-      yield* _(sql`DELETE FROM club_member`)
-      yield* _(sql`DELETE FROM club`)
+    Effect.gen(function* () {
+      const sql = yield* SqlClient.SqlClient
+      yield* sql`DELETE FROM club_invitation_link`
+      yield* sql`DELETE FROM club_member`
+      yield* sql`DELETE FROM club`
 
-      const app = yield* _(NodeTestingApp)
-      yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
-      yield* _(
-        app.ClubsAdmin.createClub({
-          headers: {'x-admin-token': ADMIN_TOKEN},
-          payload: {
-            club,
-          },
-        })
-      )
+      const app = yield* NodeTestingApp
+      yield* addTestHeaders({'x-admin-token': ADMIN_TOKEN})
+      yield* app.ClubsAdmin.createClub({
+        headers: {'x-admin-token': ADMIN_TOKEN},
+        payload: {
+          club,
+        },
+      })
 
-      const clubDb = yield* _(ClubsDbService)
-      const clubIdResult = yield* _(
+      const clubDb = yield* ClubsDbService
+      const clubIdResult = yield* pipe(
         clubDb.findClubByUuid({uuid: club.uuid}),
-        Effect.flatten
+        Effect.flatMap(Effect.fromOption)
       )
       clubId = clubIdResult.id
     })
@@ -66,32 +64,28 @@ beforeEach(async () => {
 describe('Get club info by access code', () => {
   it('should return club info by access code', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
 
-        const challengeForUser = yield* _(generateAndSignChallenge(userKey))
+        const challengeForUser = yield* generateAndSignChallenge(userKey)
 
-        const inviteDb = yield* _(ClubInvitationLinkDbService)
+        const inviteDb = yield* ClubInvitationLinkDbService
 
-        const inviteLink = yield* _(
-          inviteDb.insertInvitationLink({
-            clubId,
-            code: '123456' as ClubCode,
-            forAdmin: false,
-            createdByMemberId: null,
-          })
-        )
+        const inviteLink = yield* inviteDb.insertInvitationLink({
+          clubId,
+          code: '123456' as ClubCode,
+          forAdmin: false,
+          createdByMemberId: null,
+        })
 
-        const clubInfo = yield* _(
-          app.ClubsMember.getClubInfoByAccessCode({
-            payload: {
-              publicKey: challengeForUser.publicKey,
-              publicKeyV2: challengeForUser.publicKeyV2,
-              signedChallenge: challengeForUser.signedChallenge,
-              code: inviteLink.code,
-            },
-          })
-        )
+        const clubInfo = yield* app.ClubsMember.getClubInfoByAccessCode({
+          payload: {
+            publicKey: challengeForUser.publicKey,
+            publicKeyV2: challengeForUser.publicKeyV2,
+            signedChallenge: challengeForUser.signedChallenge,
+            code: inviteLink.code,
+          },
+        })
 
         expect(clubInfo).toEqual({club, isModerator: false})
       })
@@ -100,31 +94,29 @@ describe('Get club info by access code', () => {
 
   it('should return club info by access code for moderator', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
 
-        const challengeForUser = yield* _(generateAndSignChallenge(userKey))
+        const challengeForUser = yield* generateAndSignChallenge(userKey)
 
-        yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
-        const inviteLink = yield* _(
-          app.ClubsAdmin.generateClubInviteLinkForAdmin({
+        yield* addTestHeaders({'x-admin-token': ADMIN_TOKEN})
+        const inviteLink = yield* app.ClubsAdmin.generateClubInviteLinkForAdmin(
+          {
             headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               clubUuid: forClubUuid,
             },
-          })
+          }
         )
 
-        const clubInfo = yield* _(
-          app.ClubsMember.getClubInfoByAccessCode({
-            payload: {
-              publicKey: challengeForUser.publicKey,
-              publicKeyV2: challengeForUser.publicKeyV2,
-              signedChallenge: challengeForUser.signedChallenge,
-              code: inviteLink.link.code,
-            },
-          })
-        )
+        const clubInfo = yield* app.ClubsMember.getClubInfoByAccessCode({
+          payload: {
+            publicKey: challengeForUser.publicKey,
+            publicKeyV2: challengeForUser.publicKeyV2,
+            signedChallenge: challengeForUser.signedChallenge,
+            code: inviteLink.link.code,
+          },
+        })
 
         expect(clubInfo).toEqual({club, isModerator: true})
       })
@@ -133,12 +125,12 @@ describe('Get club info by access code', () => {
 
   it('Should return 404 when link not found', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
 
-        const challengeForUser = yield* _(generateAndSignChallenge(userKey))
+        const challengeForUser = yield* generateAndSignChallenge(userKey)
 
-        const errorResponse = yield* _(
+        const errorResponse = yield* pipe(
           app.ClubsMember.getClubInfoByAccessCode({
             payload: {
               publicKey: challengeForUser.publicKey,
@@ -147,7 +139,7 @@ describe('Get club info by access code', () => {
               code: 'badCode' as ClubCode,
             },
           }),
-          Effect.either
+          Effect.result
         )
 
         expectErrorResponse(NotFoundError)(errorResponse)
@@ -157,23 +149,23 @@ describe('Get club info by access code', () => {
 
   it('Should return error when bad challenge', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
 
-        const signedChallenge = yield* _(generateAndSignChallenge(userKey))
+        const signedChallenge = yield* generateAndSignChallenge(userKey)
         const invalidKey = generatePrivateKey()
 
-        yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
-        const inviteLink = yield* _(
-          app.ClubsAdmin.generateClubInviteLinkForAdmin({
+        yield* addTestHeaders({'x-admin-token': ADMIN_TOKEN})
+        const inviteLink = yield* app.ClubsAdmin.generateClubInviteLinkForAdmin(
+          {
             headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               clubUuid: forClubUuid,
             },
-          })
+          }
         )
 
-        const errorResponse = yield* _(
+        const errorResponse = yield* pipe(
           app.ClubsMember.getClubInfoByAccessCode({
             payload: {
               publicKey: invalidKey.publicKeyPemBase64,
@@ -182,7 +174,7 @@ describe('Get club info by access code', () => {
               code: inviteLink.link.code,
             },
           }),
-          Effect.either
+          Effect.result
         )
         expectErrorResponse(InvalidChallengeError)(errorResponse)
       })

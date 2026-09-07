@@ -1,4 +1,4 @@
-import {createScope, molecule} from 'bunshi/dist/react'
+import {createScope, molecule} from 'bunshi/react'
 import {Effect, Schema} from 'effect'
 import {type BarcodeScanningResult, Camera} from 'expo-camera'
 import {atom, type SetStateAction, type WritableAtom} from 'jotai'
@@ -78,17 +78,15 @@ export const accessCodeMolecule = molecule((_, getScope) => {
     null,
     (get, set, barcodeScanningResult: BarcodeScanningResult) => {
       const {t} = get(translationAtom)
-      return Effect.gen(function* (_) {
+      return Effect.gen(function* () {
         const {data: scanResult} = barcodeScanningResult
-        const {searchParams: linkData} = yield* _(parseDeepLink(scanResult))
+        const {searchParams: linkData} = yield* parseDeepLink(scanResult)
 
         if (linkData.type !== LINK_TYPE_JOIN_CLUB) {
-          return yield* _(
-            new InvalidDeepLinkError({
-              cause: new Error('Invalid link type'),
-              originalLink: scanResult,
-            })
-          )
+          return yield* new InvalidDeepLinkError({
+            cause: new Error('Invalid link type'),
+            originalLink: scanResult,
+          })
         }
 
         set(clubToJoinAtom, null)
@@ -102,7 +100,7 @@ export const accessCodeMolecule = molecule((_, getScope) => {
 
         return linkData.code
       }).pipe(
-        Effect.catchAll((e) => {
+        Effect.catch((e) => {
           if (e._tag === 'InvalidDeepLinkError') {
             reportError(
               'warn',
@@ -139,38 +137,34 @@ export const accessCodeMolecule = molecule((_, getScope) => {
     (get, set) => {
       const {t} = get(translationAtom)
 
-      return Effect.gen(function* (_) {
-        const image = yield* _(
-          getImageFromGalleryAndTryToResolveThePermissionsAlongTheWay({
+      return Effect.gen(function* () {
+        const image =
+          yield* getImageFromGalleryAndTryToResolveThePermissionsAlongTheWay({
             aspect: [1, 1],
           })
-        )
 
-        const barcodeScanningResult = yield* _(
-          Effect.tryPromise(
-            async () => await Camera.scanFromURLAsync(image.uri, ['qr'])
-          )
+        const barcodeScanningResult = yield* Effect.tryPromise(
+          async () => await Camera.scanFromURLAsync(image.uri, ['qr'])
         )
 
         if (barcodeScanningResult.length === 0) {
-          return yield* _(
-            Effect.fail(
-              new ScanningQrCodeFromLibraryError({
-                message:
-                  'Error scanning QR code from library, QR code is invalid, file is corrupted or not a QR code',
-              })
-            )
+          return yield* Effect.fail(
+            new ScanningQrCodeFromLibraryError({
+              message:
+                'Error scanning QR code from library, QR code is invalid, file is corrupted or not a QR code',
+            })
           )
         }
 
         if (barcodeScanningResult[0])
-          return yield* _(
-            set(handleCodeScannedActionAtom, barcodeScanningResult[0])
+          return yield* set(
+            handleCodeScannedActionAtom,
+            barcodeScanningResult[0]
           )
 
         return false
       }).pipe(
-        Effect.catchAll((e) => {
+        Effect.catch((e) => {
           if (e._tag === 'ScanningQrCodeFromLibraryError') {
             showErrorAlert({
               title: t('clubs.errorScanningQrCodeFromLibrary'),
@@ -179,7 +173,7 @@ export const accessCodeMolecule = molecule((_, getScope) => {
           }
 
           if (
-            e._tag === 'UnknownException' ||
+            e._tag === 'UnknownError' ||
             (e._tag === 'ImagePickerError' && e.reason !== 'NothingSelected')
           )
             showErrorAlert({

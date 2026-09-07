@@ -1,4 +1,3 @@
-import {HttpApiBuilder} from '@effect/platform/index'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {
   type BlogArticlePreview,
@@ -6,6 +5,7 @@ import {
 } from '@vexl-next/rest-api/src/services/content/contracts'
 import {ContentApiSpecification} from '@vexl-next/rest-api/src/services/content/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {makeHttpApiHandler} from '@vexl-next/server-utils/src/makeHttpApiHandler'
 import {Array, Effect, Option, String} from 'effect'
 import {vexlBlogUrlTemplateConfig} from '../configs'
 import {CacheService} from '../utils/cache'
@@ -33,33 +33,31 @@ const webflowBlogToBlogArticlesResponse = (
       }) satisfies BlogArticlePreview
   )
 
-export const getBlogsHandler = HttpApiBuilder.handler(
+export const getBlogsHandler = makeHttpApiHandler(
   ContentApiSpecification,
   'Cms',
   'getBlogArticles',
   () =>
-    Effect.gen(function* (_) {
-      const cache = yield* _(CacheService)
+    Effect.gen(function* () {
+      const cache = yield* CacheService
 
-      const data = yield* _(cache.getBlogsFromRedis)
+      const data = yield* cache.getBlogsFromRedis
       if (Option.isSome(data)) {
-        yield* _(
-          Effect.logInfo(
-            'Got events cached in redis, not fetching from webflow'
-          )
+        yield* Effect.logInfo(
+          'Got events cached in redis, not fetching from webflow'
         )
         return data.value
       }
 
-      yield* _(Effect.logInfo('No events in redis, fetching from webflow'))
+      yield* Effect.logInfo('No events in redis, fetching from webflow')
 
-      const webflowService = yield* _(WebflowCmsService)
-      const blogs = yield* _(webflowService.fetchBlogs())
+      const webflowService = yield* WebflowCmsService
+      const blogs = yield* webflowService.fetchBlogs()
 
       return {
         articles: webflowBlogToBlogArticlesResponse(
           blogs.items,
-          yield* _(vexlBlogUrlTemplateConfig)
+          yield* vexlBlogUrlTemplateConfig
         ),
       } satisfies BlogsArticlesResponse
     }).pipe(

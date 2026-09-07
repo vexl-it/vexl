@@ -46,7 +46,7 @@ export const initPhoneVerificationAtom = atom(
     const failWithSmsProviderErrorDialog = (
       subtitle: string
     ): Effect.Effect<never, string> =>
-      Effect.zipRight(
+      Effect.andThen(
         set(reportIssueDialogAtom, {
           title: t('loginFlow.phoneNumber.errors.smsProviderEncounteredError'),
           subtitle,
@@ -54,29 +54,27 @@ export const initPhoneVerificationAtom = atom(
         Effect.fail(subtitle)
       )
 
-    return Effect.gen(function* (_) {
+    return Effect.gen(function* () {
       const api = get(apiAtom)
 
-      const loginChallenge = yield* _(api.user.generateLoginChallenge())
-      const signedChallenge = yield* _(
-        signLoginChallenge(loginChallenge.challenge)
+      const loginChallenge = yield* api.user.generateLoginChallenge()
+      const signedChallenge = yield* signLoginChallenge(
+        loginChallenge.challenge
       )
 
       set(updateNumberOfLoginAttemptsActionAtom, phoneNumber)
 
       if (!get(allowLoginAgainAtom))
-        return yield* _(Effect.fail(new TooManyLoginAttemptsError()))
+        return yield* Effect.fail(new TooManyLoginAttemptsError())
 
-      const toReturn = yield* _(
-        api.user.initPhoneVerification({
-          challenge: {
-            challenge: loginChallenge.challenge,
-            clientSignature: signedChallenge,
-            serverSignature: loginChallenge.serverSignature,
-          },
-          phoneNumber,
-        })
-      )
+      const toReturn = yield* api.user.initPhoneVerification({
+        challenge: {
+          challenge: loginChallenge.challenge,
+          clientSignature: signedChallenge,
+          serverSignature: loginChallenge.serverSignature,
+        },
+        phoneNumber,
+      })
 
       return toReturn
     }).pipe(
@@ -119,7 +117,7 @@ export const initPhoneVerificationAtom = atom(
               ],
             }).pipe(
               Effect.map(() => verificationResponse),
-              Effect.catchAll(() =>
+              Effect.catch(() =>
                 failWithSmsProviderErrorDialog(areYouOnVpnMessage)
               )
             )
@@ -167,11 +165,13 @@ export const initPhoneVerificationAtom = atom(
         TooManyLoginAttemptsError: () =>
           Effect.fail(t('loginFlow.phoneNumber.errors.tooManyLoginAttempts')),
       }),
-      Effect.catchAll((e) => {
+      Effect.catch((e) => {
         if (isString(e)) return Effect.fail(e)
 
         // Don't report offline (transport-level RequestError) to Sentry
-        if (!(e._tag === 'RequestError' && e.reason === 'Transport')) {
+        if (
+          !(e._tag === 'HttpClientError' && e.reason._tag === 'TransportError')
+        ) {
           reportError(
             'error',
             new Error('Unexpected error while initializing phone verification'),

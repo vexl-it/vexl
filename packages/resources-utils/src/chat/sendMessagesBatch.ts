@@ -11,7 +11,7 @@ import {
   type MessageInBatch,
   type ServerMessageWithId,
 } from '@vexl-next/rest-api/src/services/chat/contracts'
-import {Array, Effect, pipe, type ParseResult} from 'effect'
+import {Array, Effect, pipe, type Schema} from 'effect'
 import * as A from 'fp-ts/Array'
 import * as O from 'fp-ts/Option'
 import * as TE from 'fp-ts/TaskEither'
@@ -42,7 +42,7 @@ function createMessageInBatch({
   message: ChatMessage
   receiverPublicKey: PublicKeyPemBase64
 }): TE.TaskEither<
-  JsonStringifyError | ParseResult.ParseError | ErrorEncryptingMessage,
+  JsonStringifyError | Schema.SchemaError | ErrorEncryptingMessage,
   MessageInBatch
 > {
   return pipe(
@@ -88,7 +88,7 @@ function createInboxInBatch(
   senderPublicKey: PublicKeyPemBase64
 }) => TE.TaskEither<
   | JsonStringifyError
-  | ParseResult.ParseError
+  | Schema.SchemaError
   | ErrorEncryptingMessage
   | ErrorNoChallengeForPublicKey,
   InboxInBatch
@@ -114,7 +114,7 @@ function createInboxInBatch(
     )
 }
 
-export type ApiErrorSendingMessagesBatch = Effect.Effect.Error<
+export type ApiErrorSendingMessagesBatch = Effect.Error<
   ReturnType<ChatApi['sendMessages']>
 >
 
@@ -128,32 +128,30 @@ export default function sendMessagesBatch({
   readonly ServerMessageWithId[],
   | ErrorGeneratingSignedChallengeBatch
   | JsonStringifyError
-  | ParseResult.ParseError
+  | Schema.SchemaError
   | ErrorEncryptingMessage
   | ErrorNoChallengeForPublicKey
   | ApiErrorSendingMessagesBatch
 > {
-  return Effect.gen(function* (_) {
+  return Effect.gen(function* () {
     const keyPairs = inboxes.map((one) => one.inboxKeypair)
 
-    const signedChallenge = yield* _(
-      taskEitherToEffect(generateSignedChallengeBatch(api)(keyPairs))
+    const signedChallenge = yield* taskEitherToEffect(
+      generateSignedChallengeBatch(api)(keyPairs)
     )
 
-    const toSend = yield* _(
-      pipe(
-        inboxes,
-        Array.map((one) => ({
-          messages: one.messages,
-          senderPublicKey: one.inboxKeypair.publicKeyPemBase64,
-        })),
-        Array.map((one) =>
-          taskEitherToEffect(createInboxInBatch(signedChallenge)(one))
-        ),
-        Effect.all
-      )
+    const toSend = yield* pipe(
+      inboxes,
+      Array.map((one) => ({
+        messages: one.messages,
+        senderPublicKey: one.inboxKeypair.publicKeyPemBase64,
+      })),
+      Array.map((one) =>
+        taskEitherToEffect(createInboxInBatch(signedChallenge)(one))
+      ),
+      Effect.all
     )
 
-    return yield* _(api.sendMessages({data: toSend}))
+    return yield* api.sendMessages({data: toSend})
   })
 }

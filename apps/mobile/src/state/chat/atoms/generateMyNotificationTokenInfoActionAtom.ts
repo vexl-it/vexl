@@ -3,7 +3,7 @@ import {type MyNotificationTokenInfo} from '@vexl-next/domain/src/general/messag
 import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {ecnryptNotificationToken} from '@vexl-next/resources-utils/src/notifications/notificationTokenActions'
-import {Effect, Option} from 'effect/index'
+import {Effect, Option, pipe} from 'effect'
 import {atom} from 'jotai'
 import {platform, versionCode} from '../../../utils/environment'
 import {i18nAtom} from '../../../utils/localization/I18nProvider'
@@ -21,19 +21,19 @@ export const generateMyNotificationTokenInfoActionAtom = atom(
     tokenIfProvided: ExpoNotificationToken | undefined,
     keyHolder: PrivateKeyHolder
   ): Effect.Effect<Option.Option<MyNotificationTokenInfo>> =>
-    Effect.gen(function* (_) {
-      const {notificationToken, serverPublicKey} = yield* _(
+    Effect.gen(function* () {
+      const {notificationToken, serverPublicKey} = yield* Effect.fromOption(
         Option.all({
-          notificationToken: Option.fromNullable(
-            tokenIfProvided ?? (yield* _(getNotificationTokenE()))
+          notificationToken: Option.fromNullishOr(
+            tokenIfProvided ?? (yield* getNotificationTokenE())
           ),
-          serverPublicKey: yield* _(
-            set(getOrFetchNotificationServerPublicKeyActionAtomE)
+          serverPublicKey: yield* set(
+            getOrFetchNotificationServerPublicKeyActionAtomE
           ),
         })
       )
 
-      const encryptedNotificationToken = yield* _(
+      const encryptedNotificationToken = yield* pipe(
         ecnryptNotificationToken({
           serverPublicKey,
           clientPlatform: platform,

@@ -7,13 +7,11 @@ const captureLogs = async (
 ): Promise<readonly string[]> => {
   const levels: string[] = []
   const capturingLogger = Logger.make(({logLevel}) => {
-    levels.push(logLevel.label)
+    levels.push(logLevel.toUpperCase())
   })
 
   await Effect.runPromise(
-    Effect.exit(effect).pipe(
-      Effect.provide(Logger.replace(Logger.defaultLogger, capturingLogger))
-    )
+    Effect.exit(effect).pipe(Effect.provide(Logger.layer([capturingLogger])))
   )
 
   return levels

@@ -1,4 +1,4 @@
-import {molecule} from 'bunshi/dist/react'
+import {molecule} from 'bunshi/react'
 import {atom} from 'jotai'
 import {type MapValue} from '../Map/brands'
 

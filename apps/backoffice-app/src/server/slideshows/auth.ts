@@ -1,4 +1,4 @@
-import {type ConfigError, Effect, Schema} from 'effect'
+import {Effect, Schema, type Config} from 'effect'
 import {type NextRequest} from 'next/server'
 import {createHash, timingSafeEqual} from 'node:crypto'
 import {adminTokenHashConfig} from './config'
@@ -31,25 +31,21 @@ export const validateAdminToken = (
   adminToken: string | null
 ): Effect.Effect<
   boolean,
-  MissingAdminTokenError | InvalidAdminTokenError | ConfigError.ConfigError
+  MissingAdminTokenError | InvalidAdminTokenError | Config.ConfigError
 > =>
-  Effect.gen(function* (_) {
+  Effect.gen(function* () {
     if (!adminToken) {
-      return yield* _(
-        Effect.fail(
-          new MissingAdminTokenError({message: 'Missing admin token'})
-        )
+      return yield* Effect.fail(
+        new MissingAdminTokenError({message: 'Missing admin token'})
       )
     }
 
-    const correctHash = yield* _(adminTokenHashConfig)
+    const correctHash = yield* adminTokenHashConfig
     const computedHash = hashSha256(adminToken)
 
     if (!timingSafeStringEqual(correctHash, computedHash)) {
-      return yield* _(
-        Effect.fail(
-          new InvalidAdminTokenError({message: 'Invalid admin token'})
-        )
+      return yield* Effect.fail(
+        new InvalidAdminTokenError({message: 'Invalid admin token'})
       )
     }
 
@@ -60,5 +56,5 @@ export const validateAdminRequest = (
   request: NextRequest
 ): Effect.Effect<
   boolean,
-  MissingAdminTokenError | InvalidAdminTokenError | ConfigError.ConfigError
+  MissingAdminTokenError | InvalidAdminTokenError | Config.ConfigError
 > => validateAdminToken(request.headers.get('x-admin-token'))

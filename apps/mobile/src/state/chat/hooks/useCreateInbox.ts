@@ -2,7 +2,7 @@ import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
 import {type NoteId} from '@vexl-next/domain/src/general/notes'
 import {type OfferId} from '@vexl-next/domain/src/general/offers'
 import {generateKeyPairE} from '@vexl-next/resources-utils/src/utils/crypto'
-import {Array, Effect, Option} from 'effect/index'
+import {Array, Effect, Option, pipe} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
 import messagingStateAtom from '../atoms/messagingStateAtom'
@@ -18,7 +18,7 @@ export const upsertInboxOnBeAndLocallyActionAtom = atom(
       | {for: 'myNote' | 'noteRequest'; noteId: NoteId}
       | {for: 'userSesssion'; key: PrivateKeyHolder}
   ) =>
-    Effect.gen(function* (_) {
+    Effect.gen(function* () {
       const api = get(apiAtom)
 
       const messagingState = get(messagingStateAtom)
@@ -40,16 +40,14 @@ export const upsertInboxOnBeAndLocallyActionAtom = atom(
       // inbox already exists
       if (Option.isSome(existingInbox)) {
         // Always hit create inbox. The backend wont fail if the inbox exists
-        yield* _(
-          api.chat.createInbox({
-            keyPair: existingInbox.value.inbox.privateKey,
-          })
-        )
+        yield* api.chat.createInbox({
+          keyPair: existingInbox.value.inbox.privateKey,
+        })
         return existingInbox.value
       }
 
-      const inboxKeypair = yield* _(generateKeyPairE())
-      yield* _(
+      const inboxKeypair = yield* generateKeyPairE()
+      yield* pipe(
         api.chat.createInbox({
           keyPair: inboxKeypair,
         }),

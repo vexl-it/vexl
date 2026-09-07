@@ -1,9 +1,3 @@
-import {
-  HttpApiBuilder,
-  HttpApiSwagger,
-  HttpMiddleware,
-  HttpServer,
-} from '@effect/platform/index'
 import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/specification'
 import {DashboardReportsService} from '@vexl-next/server-utils/src/DashboardReportsService'
 import {healthServerLayer} from '@vexl-next/server-utils/src/HealthServer'
@@ -11,6 +5,8 @@ import {NodeHttpServerLiveWithPortFromEnv} from '@vexl-next/server-utils/src/Nod
 import {RateLimitingService} from '@vexl-next/server-utils/src/RateLimiting'
 import {rateLimitingMiddlewareLayer} from '@vexl-next/server-utils/src/RateLimiting/rateLimitngMiddlewareLayer'
 import {RedisConnectionService} from '@vexl-next/server-utils/src/RedisConnection'
+import {HttpRouter} from 'effect/unstable/http'
+import {HttpApiBuilder, HttpApiSwagger} from 'effect/unstable/httpapi'
 
 import {RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
@@ -147,7 +143,9 @@ const ChallengeApiGroupLive = HttpApiBuilder.group(
       .handle('createChallengeBatch', createChallenges)
 )
 
-export const ContactApiLive = HttpApiBuilder.api(ContactApiSpecification).pipe(
+export const ContactApiLive = HttpApiBuilder.layer(
+  ContactApiSpecification
+).pipe(
   Layer.provide(UserApiGroupLive),
   Layer.provide(ContactApiGroupLive),
   Layer.provide(ClubsAdminApiGroupLive),
@@ -158,12 +156,9 @@ export const ContactApiLive = HttpApiBuilder.api(ContactApiSpecification).pipe(
   Layer.provide(ServerSecurityMiddlewareLive)
 )
 
-export const ApiServerLive = HttpApiBuilder.serve(HttpMiddleware.logger).pipe(
-  Layer.provide(HttpApiSwagger.layer()),
-  Layer.provide(ContactApiLive),
-  HttpServer.withLogAddress,
-  Layer.provide(NodeHttpServerLiveWithPortFromEnv)
-)
+export const ApiServerLive = HttpRouter.serve(
+  Layer.mergeAll(ContactApiLive, HttpApiSwagger.layer(ContactApiSpecification))
+).pipe(Layer.provide(NodeHttpServerLiveWithPortFromEnv))
 
 const DbsLive = Layer.mergeAll(
   ContactDbService.Live,

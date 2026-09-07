@@ -1,6 +1,6 @@
 import {type VexlNotificationTokenSecret} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {RedisService} from '@vexl-next/server-utils/src/RedisService'
-import {Effect} from 'effect/index'
+import {Effect} from 'effect'
 
 export const lockOnNotificationToken =
   (token: VexlNotificationTokenSecret) =>

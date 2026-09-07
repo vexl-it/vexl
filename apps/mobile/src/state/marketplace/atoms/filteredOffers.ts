@@ -111,7 +111,7 @@ export const filteredOffersIncludingLocationFilterAtom = atom((get) => {
     offers: filteredOffers,
     locationFilter,
     includeOnlineOffers:
-      !Array.isNonEmptyReadonlyArray(locationFilter ?? []) ||
+      !Array.isReadonlyArrayNonEmpty(locationFilter ?? []) ||
       shouldCombineOnlineOffersWithLocationFilter(filter),
   })
 

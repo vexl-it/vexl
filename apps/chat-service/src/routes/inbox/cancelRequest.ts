@@ -1,8 +1,8 @@
-import {HttpApiBuilder} from '@effect/platform/index'
 import {CurrentSecurity} from '@vexl-next/rest-api/src/apiSecurity'
 import {type CancelApprovalResponse} from '@vexl-next/rest-api/src/services/chat/contracts'
 import {ChatApiSpecification} from '@vexl-next/rest-api/src/services/chat/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {makeHttpApiHandler} from '@vexl-next/server-utils/src/makeHttpApiHandler'
 import {commonMetricAttributesFromHeaders} from '@vexl-next/server-utils/src/metrics/commonMetricAttributesFromHeaders'
 import {validateChallengeInBody} from '@vexl-next/server-utils/src/services/challenge/utils/validateChallengeInBody'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
@@ -14,38 +14,34 @@ import {findAndEnsureReceiverAndSenderInbox} from '../../utils/findAndEnsureRece
 import {withInboxActionRedisLock} from '../../utils/withInboxActionRedisLock'
 import {messageRecordToServerMessage} from '../messages/messageRecordToServerMessage'
 
-export const cancelRequest = HttpApiBuilder.handler(
+export const cancelRequest = makeHttpApiHandler(
   ChatApiSpecification,
   'Inboxes',
   'cancelRequestApproval',
   (req) =>
-    Effect.gen(function* (_) {
+    Effect.gen(function* () {
       const commonMetricAttributes = commonMetricAttributesFromHeaders(
         req.headers
       )
-      const security = yield* _(CurrentSecurity)
+      const security = yield* CurrentSecurity
 
-      const {receiverInbox} = yield* _(
-        findAndEnsureReceiverAndSenderInbox({
-          receiver: req.payload.publicKey,
-          sender: security.publicKey,
-        })
-      )
+      const {receiverInbox} = yield* findAndEnsureReceiverAndSenderInbox({
+        receiver: req.payload.publicKey,
+        sender: security.publicKey,
+      })
 
-      const senderPublicKey = yield* _(encryptPublicKey(security.publicKey))
+      const senderPublicKey = yield* encryptPublicKey(security.publicKey)
 
-      const messagesDb = yield* _(MessagesDbService)
-      const sentMessage = yield* _(
-        messagesDb.insertMessageForInbox({
-          message: req.payload.message,
-          inboxId: receiverInbox.id,
-          senderPublicKey,
-          type: 'CANCEL_REQUEST_MESSAGING',
-        })
-      )
+      const messagesDb = yield* MessagesDbService
+      const sentMessage = yield* messagesDb.insertMessageForInbox({
+        message: req.payload.message,
+        inboxId: receiverInbox.id,
+        senderPublicKey,
+        type: 'CANCEL_REQUEST_MESSAGING',
+      })
 
-      yield* _(reportMessageSent(1, commonMetricAttributes))
-      yield* _(reportRequestCanceled(1, commonMetricAttributes))
+      yield* reportMessageSent(1, commonMetricAttributes)
+      yield* reportRequestCanceled(1, commonMetricAttributes)
 
       return {
         ...messageRecordToServerMessage({
@@ -56,8 +52,8 @@ export const cancelRequest = HttpApiBuilder.handler(
       } satisfies CancelApprovalResponse
     }).pipe(
       withInboxActionRedisLock(
-        Effect.gen(function* (_) {
-          const security = yield* _(CurrentSecurity)
+        Effect.gen(function* () {
+          const security = yield* CurrentSecurity
           return security.publicKey
         }),
         req.payload.publicKey
@@ -67,38 +63,34 @@ export const cancelRequest = HttpApiBuilder.handler(
     )
 )
 
-export const cancelRequestV2 = HttpApiBuilder.handler(
+export const cancelRequestV2 = makeHttpApiHandler(
   ChatApiSpecification,
   'Inboxes',
   'cancelRequestApprovalV2',
   (req) =>
-    Effect.gen(function* (_) {
+    Effect.gen(function* () {
       const commonMetricAttributes = commonMetricAttributesFromHeaders(
         req.headers
       )
-      yield* _(validateChallengeInBody(req.payload))
+      yield* validateChallengeInBody(req.payload)
 
-      const {receiverInbox} = yield* _(
-        findAndEnsureReceiverAndSenderInbox({
-          receiver: req.payload.receiverPublicKey,
-          sender: req.payload.publicKey,
-        })
-      )
+      const {receiverInbox} = yield* findAndEnsureReceiverAndSenderInbox({
+        receiver: req.payload.receiverPublicKey,
+        sender: req.payload.publicKey,
+      })
 
-      const senderPublicKey = yield* _(encryptPublicKey(req.payload.publicKey))
+      const senderPublicKey = yield* encryptPublicKey(req.payload.publicKey)
 
-      const messagesDb = yield* _(MessagesDbService)
-      const sentMessage = yield* _(
-        messagesDb.insertMessageForInbox({
-          message: req.payload.message,
-          inboxId: receiverInbox.id,
-          senderPublicKey,
-          type: 'CANCEL_REQUEST_MESSAGING',
-        })
-      )
+      const messagesDb = yield* MessagesDbService
+      const sentMessage = yield* messagesDb.insertMessageForInbox({
+        message: req.payload.message,
+        inboxId: receiverInbox.id,
+        senderPublicKey,
+        type: 'CANCEL_REQUEST_MESSAGING',
+      })
 
-      yield* _(reportMessageSent(1, commonMetricAttributes))
-      yield* _(reportRequestCanceled(1, commonMetricAttributes))
+      yield* reportMessageSent(1, commonMetricAttributes)
+      yield* reportRequestCanceled(1, commonMetricAttributes)
 
       return {
         ...messageRecordToServerMessage({

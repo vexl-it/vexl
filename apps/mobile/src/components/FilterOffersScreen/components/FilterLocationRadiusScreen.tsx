@@ -1,5 +1,5 @@
 import {StackActions, useNavigation} from '@react-navigation/native'
-import {useMolecule} from 'bunshi/dist/react'
+import {useMolecule} from 'bunshi/react'
 import {useSetAtom} from 'jotai'
 import React, {useCallback} from 'react'
 import LocationRadiusPicker from '../../LocationPicker/LocationRadiusPicker'

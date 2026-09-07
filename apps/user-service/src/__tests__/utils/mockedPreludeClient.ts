@@ -15,7 +15,7 @@ export const checkVerificationMock = jest.fn(
 
 export const mockedPreludeClient = Layer.effect(
   PreludeService,
-  Effect.gen(function* (_) {
+  Effect.gen(function* () {
     return {
       createVerification: createVerificationMock,
       checkVerification: checkVerificationMock,

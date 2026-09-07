@@ -1,4 +1,4 @@
-import {useMolecule} from 'bunshi/dist/react'
+import {useMolecule} from 'bunshi/react'
 import {Effect} from 'effect'
 import {useSetAtom} from 'jotai'
 import {useCallback, useEffect, useRef, useState} from 'react'

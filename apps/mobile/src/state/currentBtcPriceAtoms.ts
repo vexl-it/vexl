@@ -24,9 +24,7 @@ const FETCH_LIMIT = 10 * 60 * 1000 // 10 minutes
 const FETCH_TIMEOUT = 15 * 1000 // 15 seconds
 
 const PriceDataStored = Schema.Struct({
-  data: Schema.partial(
-    Schema.Record({key: CurrencyCode, value: BtcPriceDataWithState})
-  ),
+  data: Schema.Record(CurrencyCode, Schema.optionalKey(BtcPriceDataWithState)),
 })
 type PriceDataStored = typeof PriceDataStored.Type
 

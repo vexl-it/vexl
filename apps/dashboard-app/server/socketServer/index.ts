@@ -24,8 +24,8 @@ import {
 } from './utils'
 
 export const decodeMessageFromClient = pipe(
-  Schema.parseJson(ClientMessage),
-  Schema.decodeUnknown
+  Schema.fromJsonString(ClientMessage),
+  Schema.decodeUnknownEffect
 )
 
 const handleMessagesFromClient =
@@ -50,11 +50,11 @@ const handleMessagesFromClient =
       Effect.catchTag('ReadingDataError', (e) =>
         Effect.logWarning('Unable to read message', e)
       ),
-      Effect.catchTag('ParseError', (e) =>
-        Effect.zipRight(
+      Effect.catchTag('SchemaError', (e) =>
+        Effect.andThen(
           Effect.logWarning('Error parsing message from client', e),
           dataToString(message).pipe(
-            Effect.catchAll(() => Effect.succeed('[unable to read message]')),
+            Effect.catch(() => Effect.succeed('[unable to read message]')),
             Effect.flatMap((decodedMessage) =>
               sendMessage(
                 new ReceivedUnexpectedMessage({
@@ -80,22 +80,20 @@ const handleClientConnection = (
   | DashboardBootstrapState
   | HasingSalt
 > =>
-  Effect.gen(function* (_) {
-    yield* _(Effect.log('New connection'))
+  Effect.gen(function* () {
+    yield* Effect.log('New connection')
 
     const handleMessage = handleMessagesFromClient(
       encodeAndSendMessage(connection)
     )
 
-    yield* _(
-      encodeAndSendMessage(connection)(
-        yield* _(getDashboardBootstrapMessage)
-      ).pipe(
-        Effect.catchAll((error) =>
-          Effect.logWarning(
-            'Unable to send initial dashboard bootstrap message',
-            error
-          )
+    yield* encodeAndSendMessage(connection)(
+      yield* getDashboardBootstrapMessage
+    ).pipe(
+      Effect.catch((error) =>
+        Effect.logWarning(
+          'Unable to send initial dashboard bootstrap message',
+          error
         )
       )
     )
@@ -103,14 +101,17 @@ const handleClientConnection = (
     const processMessages = pipe(
       createMessagesStream(connection),
       Stream.tap(handleMessage),
-      Stream.timeoutFail(() => new TimeoutError(), '60 seconds'),
+      Stream.timeoutOrElse({
+        duration: '60 seconds',
+        orElse: () => Stream.fail(new TimeoutError()),
+      }),
       Stream.runDrain
     )
 
-    yield* _(
+    yield* pipe(
       Effect.raceAll([
-        Effect.either(processMessages),
-        Effect.either(listenAndSendUpdatesToConnections(connection)),
+        Effect.result(processMessages),
+        Effect.result(listenAndSendUpdatesToConnections(connection)),
       ]),
       Effect.flatMap(Effect.fail),
       Effect.tapError((e) =>
@@ -127,6 +128,8 @@ const handleClientConnection = (
 
 export const SocketServerLive = Layer.effectDiscard(
   IncommingConnectionsStreamContext.pipe(
-    Effect.flatMap(Stream.runForEach(flow(handleClientConnection, Effect.fork)))
+    Effect.flatMap(
+      Stream.runForEach(flow(handleClientConnection, Effect.forkChild))
+    )
   )
 ).pipe(Layer.withSpan('SocketServerLive'))

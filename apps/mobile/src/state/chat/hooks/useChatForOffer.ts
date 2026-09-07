@@ -7,7 +7,7 @@ import {
   type OfferId,
   type OneOfferInState,
 } from '@vexl-next/domain/src/general/offers'
-import {Array, Option, pipe} from 'effect/index'
+import {Array, Option, pipe} from 'effect'
 import {atom, useAtomValue, type Atom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {selectAtom} from 'jotai/utils'

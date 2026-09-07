@@ -1,6 +1,6 @@
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {getCrypto} from '@vexl-next/cryptography/src/getCrypto'
-import {Schema} from 'effect'
+import {Effect, Schema} from 'effect'
 import {IdNumeric} from '../utility/IdNumeric'
 import {IsoDatetimeString} from '../utility/IsoDatetimeString.brand'
 import {UnixMilliseconds} from '../utility/UnixMilliseconds.brand'
@@ -9,20 +9,26 @@ import {HashedPhoneNumber} from './HashedPhoneNumber.brand'
 import {VexlNotificationToken} from './notifications/VexlNotificationToken'
 import {FriendLevel, SymmetricKey} from './offers'
 
-export const NoteId = Schema.UUID.pipe(Schema.brand('NoteId'))
+export const NoteId = Schema.String.check(Schema.isUUID()).pipe(
+  Schema.brand('NoteId')
+)
 export type NoteId = typeof NoteId.Type
 
 export const newNoteId = (): NoteId =>
   Schema.decodeSync(NoteId)(getCrypto().randomUUID())
 
-export const NoteAdminId = Schema.UUID.pipe(Schema.brand('NoteAdminId'))
+export const NoteAdminId = Schema.String.check(Schema.isUUID()).pipe(
+  Schema.brand('NoteAdminId')
+)
 export type NoteAdminId = typeof NoteAdminId.Type
 
 export function generateNoteAdminId(): NoteAdminId {
   return Schema.decodeSync(NoteAdminId)(getCrypto().randomUUID())
 }
 
-export const NoteRepostId = Schema.UUID.pipe(Schema.brand('NoteRepostId'))
+export const NoteRepostId = Schema.String.check(Schema.isUUID()).pipe(
+  Schema.brand('NoteRepostId')
+)
 export type NoteRepostId = typeof NoteRepostId.Type
 
 export function generateNoteRepostId(): NoteRepostId {
@@ -38,7 +44,10 @@ export const NotePrivatePart = Schema.Struct({
   commonFriends: Schema.Array(HashedPhoneNumber),
   friendLevel: Schema.Array(FriendLevel),
   symmetricKey: SymmetricKey,
-  viaRepost: Schema.optionalWith(Schema.Boolean, {default: () => false}),
+  viaRepost: Schema.Boolean.pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): false => false)),
+    Schema.withConstructorDefault(Effect.sync((): false => false))
+  ),
   // For admin only
   adminId: Schema.optional(NoteAdminId),
 })
@@ -46,7 +55,9 @@ export type NotePrivatePart = typeof NotePrivatePart.Type
 
 export const NotePublicPart = Schema.Struct({
   notePublicKey: PublicKeyPemBase64,
-  text: Schema.String.pipe(Schema.maxLength(NOTE_TEXT_MAX_LENGTH)),
+  text: Schema.String.pipe(
+    Schema.check(Schema.isMaxLength(NOTE_TEXT_MAX_LENGTH))
+  ),
   allowRepost: Schema.Boolean,
   vexlNotificationToken: Schema.optional(VexlNotificationToken),
   authorClientVersion: Schema.optional(VersionString),
@@ -65,7 +76,10 @@ export const NoteInfo = Schema.Struct({
 export type NoteInfo = typeof NoteInfo.Type
 
 export const NoteFlags = Schema.Struct({
-  reported: Schema.optionalWith(Schema.Boolean, {default: () => false}),
+  reported: Schema.Boolean.pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): false => false)),
+    Schema.withConstructorDefault(Effect.sync((): false => false))
+  ),
 })
 export type NoteFlags = typeof NoteFlags.Type
 

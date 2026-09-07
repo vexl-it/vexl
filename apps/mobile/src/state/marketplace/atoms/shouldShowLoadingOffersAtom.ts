@@ -1,4 +1,4 @@
-import {Option} from 'effect/index'
+import {Option} from 'effect'
 import {atom} from 'jotai'
 import {reachNumberAtom} from '../../connections/atom/connectionStateAtom'
 import {importedContactsCountAtom} from '../../contacts/atom/contactsStore'

@@ -16,12 +16,10 @@ const initialStatus: DashboardBootstrapStatus = {
   message: 'Loading dashboard data',
 }
 
-export class DashboardBootstrapState extends Context.Tag(
-  'DashboardBootstrapState'
-)<
+export class DashboardBootstrapState extends Context.Service<
   DashboardBootstrapState,
   SubscriptionRef.SubscriptionRef<DashboardBootstrapStatus>
->() {
+>()('DashboardBootstrapState') {
   static readonly Live = Layer.effect(
     DashboardBootstrapState,
     SubscriptionRef.make(initialStatus)
@@ -66,7 +64,7 @@ export const isDashboardReady = DashboardBootstrapState.pipe(
 )
 
 export const dashboardBootstrapMessages = DashboardBootstrapState.pipe(
-  Effect.map((state) => state.changes),
+  Effect.map((state) => SubscriptionRef.changes(state)),
   Stream.unwrap,
   Stream.map(toMessage),
   Stream.changes

@@ -1,6 +1,6 @@
 import {type ChatMessageId} from '@vexl-next/domain/src/general/messaging'
 import {Button} from '@vexl-next/ui'
-import {useMolecule} from 'bunshi/dist/react'
+import {useMolecule} from 'bunshi/react'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useMemo} from 'react'
 import {dismissInactivityReminderActionAtom} from '../../../../../state/chat/atoms/dismissInactivityReminderActionAtom'

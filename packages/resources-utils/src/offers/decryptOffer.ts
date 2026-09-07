@@ -18,9 +18,8 @@ import {
   cryptoBoxUnseal,
 } from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {ServerOffer} from '@vexl-next/rest-api/src/services/offer/contracts'
-import {Effect, Either, flow, Schema} from 'effect'
-import {type ParseError} from 'effect/ParseResult'
-import {pipe} from 'fp-ts/function'
+import {Effect, flow, pipe, Result, Schema} from 'effect'
+import {type SchemaError} from 'effect/Schema'
 import {aesGCMIgnoreTagDecrypt, eciesDecryptE} from '../utils/crypto'
 
 export class DecryptingOfferError extends Schema.TaggedError<DecryptingOfferError>(
@@ -46,9 +45,9 @@ function decryptedPayloadsToOffer({
   serverOffer: ServerOffer
   privatePayload: OfferPrivatePart
   publicPayload: OfferPublicPart
-}): Effect.Effect<Either.Either<OfferInfo, ParseError>> {
+}): Effect.Effect<Result.Result<OfferInfo, SchemaError>> {
   return pipe(
-    Schema.decode(OfferInfo)({
+    Schema.decodeEffect(OfferInfo)({
       id: serverOffer.id,
       offerId: serverOffer.offerId,
       privatePart: privatePayload,
@@ -56,7 +55,7 @@ function decryptedPayloadsToOffer({
       createdAt: serverOffer.createdAt,
       modifiedAt: serverOffer.modifiedAt,
     }),
-    Effect.either
+    Effect.result
   )
 }
 
@@ -69,10 +68,10 @@ const OfferPublicPartIncludingLegacyPropsToDecrypt = Schema.Struct({
   locationStateV2: Schema.Array(LocationState),
 })
 
-const OfferPublicPayloadUnion = Schema.Union(
+const OfferPublicPayloadUnion = Schema.Union([
   OfferPublicPartIncludingLegacyPropsToDecrypt,
-  OfferPublicPart
-)
+  OfferPublicPart,
+])
 
 const firstSupportedVersionString = Schema.decodeSync(VersionString)('1.16.0')
 const ensureOfferFromSupportedClient = (
@@ -80,8 +79,8 @@ const ensureOfferFromSupportedClient = (
 ): Effect.Effect<void, NonCompatibleOfferVersionError> =>
   pipe(
     offerStrign,
-    Schema.decodeUnknown(
-      Schema.parseJson(
+    Schema.decodeUnknownEffect(
+      Schema.fromJsonString(
         Schema.Struct({
           authorClientVersion: VersionString,
         })
@@ -112,7 +111,7 @@ export default function decryptOffer(
   DecryptingOfferError | NonCompatibleOfferVersionError
 > {
   return (serverOffer: ServerOffer) => {
-    return Effect.gen(function* (_) {
+    return Effect.gen(function* () {
       const isV1 = Schema.is(PrivatePayloadEncryptedV1)(
         serverOffer.privatePayload
       )
@@ -121,50 +120,48 @@ export default function decryptOffer(
       )
 
       if (!isV1 && !isV2) {
-        return yield* _(
-          Effect.fail(
-            new NonCompatibleOfferVersionError({
-              message: 'Non compatible offer cypher version',
-              cause: new Error('Non compatible offer cypher version'),
-            })
-          )
+        return yield* Effect.fail(
+          new NonCompatibleOfferVersionError({
+            message: 'Non compatible offer cypher version',
+            cause: new Error('Non compatible offer cypher version'),
+          })
         )
       }
 
-      const privatePayload = yield* _(
+      const privatePayload = yield* pipe(
         serverOffer.privatePayload.substring(1),
         isV1
           ? eciesDecryptE(privateKey.privateKeyPemBase64)
           : flow(
-              Schema.decode(CryptoBoxCypher),
+              Schema.decodeEffect(CryptoBoxCypher),
               Effect.flatMap(cryptoBoxUnseal(privateKeyV2))
             ),
         Effect.flatMap(
-          Schema.decodeUnknown(Schema.parseJson(OfferPrivatePart))
+          Schema.decodeUnknownEffect(Schema.fromJsonString(OfferPrivatePart))
         ),
-        Effect.either
+        Effect.result
       )
 
-      if (Either.isLeft(privatePayload)) {
-        return yield* _(
-          Effect.fail(
-            new DecryptingOfferError({
-              message: 'Error while decrypting offer',
-              cause: privatePayload.left,
-              serverOffer,
-            })
-          )
+      if (Result.isFailure(privatePayload)) {
+        return yield* Effect.fail(
+          new DecryptingOfferError({
+            message: 'Error while decrypting offer',
+            cause: privatePayload.failure,
+            serverOffer,
+          })
         )
       }
 
-      const publicPayload = yield* _(
+      const publicPayload = yield* pipe(
         Effect.succeed(serverOffer.publicPayload.substring(1)),
         Effect.flatMap(
-          aesGCMIgnoreTagDecrypt(privatePayload.right.symmetricKey)
+          aesGCMIgnoreTagDecrypt(privatePayload.success.symmetricKey)
         ),
         Effect.tap(ensureOfferFromSupportedClient),
         Effect.flatMap(
-          Schema.decodeUnknown(Schema.parseJson(OfferPublicPayloadUnion))
+          Schema.decodeUnknownEffect(
+            Schema.fromJsonString(OfferPublicPayloadUnion)
+          )
         ),
         Effect.map((offerPublicPart) => {
           if (
@@ -183,42 +180,36 @@ export default function decryptOffer(
 
           return offerPublicPart
         }),
-        Effect.either
+        Effect.result
       )
 
-      if (Either.isLeft(publicPayload)) {
-        return yield* _(
-          Effect.fail(
-            new DecryptingOfferError({
-              message: 'Error while decrypting offer',
-              cause: publicPayload.left,
-              serverOffer,
-            })
-          )
+      if (Result.isFailure(publicPayload)) {
+        return yield* Effect.fail(
+          new DecryptingOfferError({
+            message: 'Error while decrypting offer',
+            cause: publicPayload.failure,
+            serverOffer,
+          })
         )
       }
 
-      const offer = yield* _(
-        decryptedPayloadsToOffer({
-          serverOffer,
-          privatePayload: privatePayload.right,
-          publicPayload: publicPayload.right,
-        })
-      )
+      const offer = yield* decryptedPayloadsToOffer({
+        serverOffer,
+        privatePayload: privatePayload.success,
+        publicPayload: publicPayload.success,
+      })
 
-      if (Either.isLeft(offer)) {
-        return yield* _(
-          Effect.fail(
-            new DecryptingOfferError({
-              message: 'Error while decrypting offer',
-              cause: offer.left,
-              serverOffer,
-            })
-          )
+      if (Result.isFailure(offer)) {
+        return yield* Effect.fail(
+          new DecryptingOfferError({
+            message: 'Error while decrypting offer',
+            cause: offer.failure,
+            serverOffer,
+          })
         )
       }
 
-      return offer.right
+      return offer.success
     })
   }
 }

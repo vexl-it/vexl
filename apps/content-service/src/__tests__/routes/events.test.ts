@@ -1,4 +1,4 @@
-import {Effect, Either} from 'effect'
+import {Effect, pipe, Result} from 'effect'
 import {mockedSaveEventsToCacheForked} from '../utils/mockedCacheService'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../utils/runPromiseInMockedEnvironment'
@@ -10,11 +10,11 @@ describe('events', () => {
 
   it('does not refresh redis cache when events are already cached', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
-        const resp = yield* _(app.Cms.getEvents({}), Effect.either)
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
+        const resp = yield* pipe(app.Cms.getEvents({}), Effect.result)
 
-        expect(Either.isRight(resp)).toBe(true)
+        expect(Result.isSuccess(resp)).toBe(true)
         expect(mockedSaveEventsToCacheForked).not.toHaveBeenCalled()
       })
     )

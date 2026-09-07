@@ -70,10 +70,10 @@ export const createDonationInvoiceRequestActionAtom = atom(
   (get, set, {amount, paymentMethod}: CreateDonationInvoiceParams) => {
     const api = get(apiAtom).content
 
-    return Effect.gen(function* (_) {
+    return Effect.gen(function* () {
       set(loadingOverlayDisplayedAtom, true)
 
-      const resp = yield* _(
+      const resp = yield* pipe(
         api.createInvoice({
           amount,
           currency: 'EUR',
@@ -124,20 +124,19 @@ export const createDonationInvoiceWithUiFeedbackActionAtom: WritableAtom<
   const {t} = get(translationAtom)
 
   return set(createDonationInvoiceRequestActionAtom, params).pipe(
-    Effect.catchAll(() =>
-      Effect.gen(function* (_) {
-        const shouldRetry = yield* _(
-          set(globalDialogAtom, {
-            title: t('donations.createInvoiceError.title'),
-            subtitle: t('donations.createInvoiceError.description'),
-            negativeButtonText: t('common.close'),
-            positiveButtonText: t('common.tryAgain'),
-          })
-        )
+    Effect.catch(() =>
+      Effect.gen(function* () {
+        const shouldRetry = yield* set(globalDialogAtom, {
+          title: t('donations.createInvoiceError.title'),
+          subtitle: t('donations.createInvoiceError.description'),
+          negativeButtonText: t('common.close'),
+          positiveButtonText: t('common.tryAgain'),
+        })
 
         if (shouldRetry)
-          return yield* _(
-            set(createDonationInvoiceWithUiFeedbackActionAtom, params)
+          return yield* set(
+            createDonationInvoiceWithUiFeedbackActionAtom,
+            params
           )
 
         return undefined
@@ -176,19 +175,17 @@ export const updateSingleInvoiceStatusTypeActionAtom = atom(
   ) => {
     const api = get(apiAtom).content
 
-    return Effect.gen(function* (_) {
+    return Effect.gen(function* () {
       const mySingleDonation = singleDonationAtom(invoiceId)
       const status = get(mySingleDonation)?.status
 
       if (status && !DONATION_STATUSES_TO_UPDATE.includes(status))
         return Effect.void
 
-      const {statusType} = yield* _(
-        api.getInvoiceStatusType({
-          invoiceId,
-          storeId,
-        })
-      )
+      const {statusType} = yield* api.getInvoiceStatusType({
+        invoiceId,
+        storeId,
+      })
 
       const myDonationReceivecStatus = statusTypeToStatusMap[statusType]
 
@@ -215,7 +212,7 @@ export const updateSingleInvoiceStatusTypeRepeatingActionAtom = atom(
 export const updateAllNonSettledOrExpiredInvoicesStatusTypesActionAtom = atom(
   null,
   (get, set) =>
-    Effect.gen(function* (_) {
+    Effect.gen(function* () {
       const api = get(apiAtom)
       const myDonations = get(myDonationsAtom)
 
@@ -230,7 +227,7 @@ export const updateAllNonSettledOrExpiredInvoicesStatusTypesActionAtom = atom(
 
       if (invoicesToFetch.length === 0) return Effect.succeed(Effect.void)
 
-      const fetchedStatuses = yield* _(
+      const fetchedStatuses = yield* pipe(
         invoicesToFetch,
         Array.map(({invoiceId, storeId}) =>
           api.content.getInvoiceStatusType({invoiceId, storeId})
@@ -260,9 +257,9 @@ export const updateAllNonSettledOrExpiredInvoicesStatusTypesActionAtom = atom(
 export const myDonationsRefreshingAtom = atom<boolean>(false)
 
 export const refreshMyDonationsActionAtom = atom(null, (get, set) =>
-  Effect.gen(function* (_) {
+  Effect.gen(function* () {
     set(myDonationsRefreshingAtom, true)
-    yield* _(set(updateAllNonSettledOrExpiredInvoicesStatusTypesActionAtom))
+    yield* set(updateAllNonSettledOrExpiredInvoicesStatusTypesActionAtom)
   }).pipe(
     Effect.ensuring(
       Effect.sync(() => {

@@ -2,7 +2,7 @@ import {createNotificationTrackingId} from '@vexl-next/domain/src/general/Notifi
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {SendingNotificationError} from '@vexl-next/rest-api/src/services/notification/contract'
 import {ProcessUserNotificationsConsumerLayer} from '@vexl-next/server-utils/src/UserNotificationMq'
-import {Effect, Match} from 'effect/index'
+import {Effect, Match, pipe} from 'effect'
 import {NotificationSocketMessaging} from '..'
 import {type SupportedPushNotificationTask} from '../../../domain'
 import {OfflineNotificationBuffer} from '../../OfflineNotificationBuffer'
@@ -25,11 +25,11 @@ const MINIMAL_CLIENT_VERSION_FOR_VEXL_PRODUCT_NOTIFICATION =
 
 export const ProcessUserNotificationsWorker =
   ProcessUserNotificationsConsumerLayer((entry) =>
-    Effect.gen(function* (_) {
-      const socketMessaging = yield* _(NotificationSocketMessaging)
-      const tokenService = yield* _(VexlNotificationTokenService)
-      const {issuePushNotification} = yield* _(ThrottledPushNotificationService)
-      const offlineNotificationBuffer = yield* _(OfflineNotificationBuffer)
+    Effect.gen(function* () {
+      const socketMessaging = yield* NotificationSocketMessaging
+      const tokenService = yield* VexlNotificationTokenService
+      const {issuePushNotification} = yield* ThrottledPushNotificationService
+      const offlineNotificationBuffer = yield* OfflineNotificationBuffer
       const vexlNotificationTokenOrExpoToken =
         entry.token ?? entry.notificationToken
 
@@ -42,16 +42,16 @@ export const ProcessUserNotificationsWorker =
         return
       }
 
-      const secret = yield* _(
-        tokenService.normalizeToVexlNotificationTokenSecret(
+      const secret = yield* tokenService
+        .normalizeToVexlNotificationTokenSecret(
           vexlNotificationTokenOrExpoToken
         )
-      ).pipe(
-        Effect.catchTag(
-          'NoSuchElementException',
-          () => new SendingNotificationError({tokenInvalid: true})
+        .pipe(
+          Effect.catchTag(
+            'NoSuchElementError',
+            () => new SendingNotificationError({tokenInvalid: true})
+          )
         )
-      )
 
       const trackingId = createNotificationTrackingId()
 
@@ -151,12 +151,12 @@ export const ProcessUserNotificationsWorker =
       // Buffered before the socket attempt - a socket "delivery" only means
       // the message was enqueued for a possibly-dead connection. The entry is
       // removed when the client reports the notification as processed.
-      yield* _(offlineNotificationBuffer.bufferTaskIfEnabled(task))
+      yield* offlineNotificationBuffer.bufferTaskIfEnabled(task)
 
-      yield* _(
+      yield* pipe(
         socketMessaging.sendNotice(task),
-        Effect.catchAll((e) =>
-          Effect.zipRight(
+        Effect.catch((e) =>
+          Effect.andThen(
             Effect.logWarning(
               'Unable to send notification via socket, falling back to push notification',
               e
@@ -166,7 +166,7 @@ export const ProcessUserNotificationsWorker =
         )
       )
     }).pipe(
-      Effect.catchAll((e) =>
+      Effect.catch((e) =>
         Effect.logError('Failed to process user notification', e, {
           entryType: entry._tag,
         })

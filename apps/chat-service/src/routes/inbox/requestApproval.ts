@@ -1,8 +1,8 @@
-import {HttpApiBuilder} from '@effect/platform/index'
 import {CurrentSecurity} from '@vexl-next/rest-api/src/apiSecurity'
 import {type RequestApprovalResponse} from '@vexl-next/rest-api/src/services/chat/contracts'
 import {ChatApiSpecification} from '@vexl-next/rest-api/src/services/chat/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {makeHttpApiHandler} from '@vexl-next/server-utils/src/makeHttpApiHandler'
 import {commonMetricAttributesFromHeaders} from '@vexl-next/server-utils/src/metrics/commonMetricAttributesFromHeaders'
 import {validateChallengeInBody} from '@vexl-next/server-utils/src/services/challenge/utils/validateChallengeInBody'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
@@ -17,37 +17,33 @@ import {
 } from '../../utils/withInboxActionRedisLock'
 import {messageRecordToServerMessage} from '../messages/messageRecordToServerMessage'
 
-export const requestApproval = HttpApiBuilder.handler(
+export const requestApproval = makeHttpApiHandler(
   ChatApiSpecification,
   'Inboxes',
   'requestApproval',
   (req) =>
-    Effect.gen(function* (_) {
+    Effect.gen(function* () {
       const commonMetricAttributes = commonMetricAttributesFromHeaders(
         req.headers
       )
-      const security = yield* _(CurrentSecurity)
+      const security = yield* CurrentSecurity
 
-      const {receiverInbox} = yield* _(
-        findAndEnsureReceiverAndSenderInbox({
-          receiver: req.payload.publicKey,
-          sender: security.publicKey,
-        })
-      )
+      const {receiverInbox} = yield* findAndEnsureReceiverAndSenderInbox({
+        receiver: req.payload.publicKey,
+        sender: security.publicKey,
+      })
 
-      const encryptedSenderKey = yield* _(encryptPublicKey(security.publicKey))
-      const messagesDb = yield* _(MessagesDbService)
-      const insertedMessage = yield* _(
-        messagesDb.insertMessageForInbox({
-          inboxId: receiverInbox.id,
-          message: req.payload.message,
-          senderPublicKey: encryptedSenderKey,
-          type: 'REQUEST_MESSAGING',
-        })
-      )
+      const encryptedSenderKey = yield* encryptPublicKey(security.publicKey)
+      const messagesDb = yield* MessagesDbService
+      const insertedMessage = yield* messagesDb.insertMessageForInbox({
+        inboxId: receiverInbox.id,
+        message: req.payload.message,
+        senderPublicKey: encryptedSenderKey,
+        type: 'REQUEST_MESSAGING',
+      })
 
-      yield* _(reportMessageSent(1, commonMetricAttributes))
-      yield* _(reportRequestSent(1, commonMetricAttributes))
+      yield* reportMessageSent(1, commonMetricAttributes)
+      yield* reportRequestSent(1, commonMetricAttributes)
 
       return {
         ...messageRecordToServerMessage({
@@ -63,39 +59,33 @@ export const requestApproval = HttpApiBuilder.handler(
     )
 )
 
-export const requestApprovalV2 = HttpApiBuilder.handler(
+export const requestApprovalV2 = makeHttpApiHandler(
   ChatApiSpecification,
   'Inboxes',
   'requestApprovalV2',
   (req) =>
-    Effect.gen(function* (_) {
+    Effect.gen(function* () {
       const commonMetricAttributes = commonMetricAttributesFromHeaders(
         req.headers
       )
-      yield* _(validateChallengeInBody(req.payload))
+      yield* validateChallengeInBody(req.payload)
 
-      const {receiverInbox} = yield* _(
-        findAndEnsureReceiverAndSenderInbox({
-          receiver: req.payload.receiverPublicKey,
-          sender: req.payload.publicKey,
-        })
-      )
+      const {receiverInbox} = yield* findAndEnsureReceiverAndSenderInbox({
+        receiver: req.payload.receiverPublicKey,
+        sender: req.payload.publicKey,
+      })
 
-      const encryptedSenderKey = yield* _(
-        encryptPublicKey(req.payload.publicKey)
-      )
-      const messagesDb = yield* _(MessagesDbService)
-      const insertedMessage = yield* _(
-        messagesDb.insertMessageForInbox({
-          inboxId: receiverInbox.id,
-          message: req.payload.message,
-          senderPublicKey: encryptedSenderKey,
-          type: 'REQUEST_MESSAGING',
-        })
-      )
+      const encryptedSenderKey = yield* encryptPublicKey(req.payload.publicKey)
+      const messagesDb = yield* MessagesDbService
+      const insertedMessage = yield* messagesDb.insertMessageForInbox({
+        inboxId: receiverInbox.id,
+        message: req.payload.message,
+        senderPublicKey: encryptedSenderKey,
+        type: 'REQUEST_MESSAGING',
+      })
 
-      yield* _(reportMessageSent(1, commonMetricAttributes))
-      yield* _(reportRequestSent(1, commonMetricAttributes))
+      yield* reportMessageSent(1, commonMetricAttributes)
+      yield* reportRequestSent(1, commonMetricAttributes)
 
       return {
         ...messageRecordToServerMessage({

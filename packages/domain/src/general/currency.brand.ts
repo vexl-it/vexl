@@ -1,6 +1,6 @@
 import {Schema} from 'effect'
 
-export const CurrencyCode = Schema.Literal(
+export const CurrencyCode = Schema.Literals([
   'AED',
   'ALL',
   'ANG',
@@ -17,7 +17,6 @@ export const CurrencyCode = Schema.Literal(
   'BOB',
   'BRL',
   'BSD',
-  // 'BTC',
   'BWP',
   'BYN',
   'BZD',
@@ -130,15 +129,12 @@ export const CurrencyCode = Schema.Literal(
   'XAG',
   'XAU',
   'XCD',
-  // 'XDR',
   'XOF',
-  // 'XPD',
   'XPF',
-  // 'XPT',
   'ZAR',
   'ZMW',
-  'ZWL'
-)
+  'ZWL',
+])
 export type CurrencyCode = typeof CurrencyCode.Type
 
 export const CurrencyFlag = Schema.String.pipe(Schema.brand('CurrencyFlag'))
@@ -155,7 +151,7 @@ export const CurrencyInfo = Schema.Struct({
   flag: CurrencyFlag,
   name: CurrencyName,
   symbol: CurrencySymbol,
-  position: Schema.Literal('before', 'after'),
+  position: Schema.Literals(['before', 'after']),
   countryCode: Schema.Array(Schema.Number),
 })
 export type CurrencyInfo = typeof CurrencyInfo.Type

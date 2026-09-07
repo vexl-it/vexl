@@ -1,7 +1,7 @@
-import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {Effect, flow, Schema} from 'effect'
+import {SqlSchema} from 'effect/unstable/sql'
 import {ClubRecordId} from '../../ClubsDbService/domain'
 
 export const ListForClubParams = Schema.Struct({
@@ -10,14 +10,14 @@ export const ListForClubParams = Schema.Struct({
 export type ListForClubParams = typeof ListForClubParams.Type
 
 export const ListForClubResult = Schema.Struct({
-  day: Schema.DateFromSelf,
+  day: Schema.Date,
   joinedCount: Schema.Int,
   leftCount: Schema.Int,
 })
 export type ListForClubResult = typeof ListForClubResult.Type
 
-export const createListForClub = Effect.gen(function* (_) {
-  const sql = yield* _(PgClient.PgClient)
+export const createListForClub = Effect.gen(function* () {
+  const sql = yield* PgClient.PgClient
 
   const query = SqlSchema.findAll({
     Request: ListForClubParams,

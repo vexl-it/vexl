@@ -9,7 +9,7 @@ import {
 } from '@vexl-next/domain/src/general/offers'
 import {cryptoBoxSeal} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {type ServerPrivatePart} from '@vexl-next/rest-api/src/services/offer/contracts'
-import {Effect, flow, Schema} from 'effect'
+import {Effect, flow, pipe, Schema} from 'effect'
 import {eciesEncryptE} from '../../utils/crypto'
 import {stringifyE} from '../../utils/parsing'
 import {type OfferPrivatePayloadToEncrypt} from './constructPrivatePayloads'
@@ -19,18 +19,18 @@ export class PrivatePartEncryptionError extends Schema.TaggedError<PrivatePartEn
 )('PrivatePartEncryptionError', {
   cause: Schema.Unknown,
   message: Schema.String,
-  toPublicKey: Schema.Union(PublicKeyPemBase64, PublicKeyV2),
+  toPublicKey: Schema.Union([PublicKeyPemBase64, PublicKeyV2]),
 }) {}
 
 export function encryptPrivatePart(
   privatePart: OfferPrivatePayloadToEncrypt
 ): Effect.Effect<ServerPrivatePart, PrivatePartEncryptionError> {
-  return Effect.gen(function* (_) {
-    const privatePartsStringified = yield* _(
-      stringifyE(privatePart.payloadPrivate)
+  return Effect.gen(function* () {
+    const privatePartsStringified = yield* stringifyE(
+      privatePart.payloadPrivate
     )
 
-    const encrypted = yield* _(
+    const encrypted = yield* pipe(
       privatePartsStringified,
       isPublicKeyV2(privatePart.toPublicKey)
         ? flow(
@@ -38,7 +38,7 @@ export function encryptPrivatePart(
             Effect.map((c) => `${PRIVATE_PAYLOAD_ENCRYPTED_V2_PREFIX}${c}`)
           )
         : eciesEncryptE(privatePart.toPublicKey),
-      Effect.flatMap(Schema.decode(PrivatePayloadEncrypted))
+      Effect.flatMap(Schema.decodeEffect(PrivatePayloadEncrypted))
     )
 
     return {
@@ -46,7 +46,7 @@ export function encryptPrivatePart(
       payloadPrivate: encrypted,
     }
   }).pipe(
-    Effect.catchAll((e) => {
+    Effect.catch((e) => {
       return new PrivatePartEncryptionError({
         toPublicKey: privatePart.toPublicKey,
         message: 'Error encrypting private part',

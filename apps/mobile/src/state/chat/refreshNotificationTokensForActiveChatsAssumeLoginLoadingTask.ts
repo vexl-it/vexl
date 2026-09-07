@@ -1,5 +1,5 @@
 import {taskToEffect} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import {Array, Effect, flow, pipe} from 'effect/index'
+import {Array, Effect, flow, pipe} from 'effect'
 import {registerInAppLoadingTask} from '../../utils/inAppLoadingTasks'
 import {showDebugNotificationIfEnabled} from '../../utils/notifications/showDebugNotificationIfEnabled'
 import {ensureVexlSecretExistsTaskId} from '../notifications/ensureVexlSecretExistsTask'
@@ -22,7 +22,7 @@ export const refreshNotificationTokensForActiveChatsAssumeLoginLoadingTaskId =
     },
     dependsOn: [{id: ensureVexlSecretExistsTaskId}],
     task: (store) =>
-      Effect.gen(function* (_) {
+      Effect.gen(function* () {
         console.info(
           '🔥 Refresh notifications tokens',
           'Checking if notification cyphers needs to be updated'
@@ -40,7 +40,7 @@ export const refreshNotificationTokensForActiveChatsAssumeLoginLoadingTaskId =
           Array.filter(doesOtherSideNeedsToBeNotifiedAboutTokenChange)
         )
 
-        if (!Array.isNonEmptyArray(chatsToUpdate)) {
+        if (!Array.isArrayNonEmpty(chatsToUpdate)) {
           console.info(
             '🔥 Refresh notifications tokens',
             'No chats need to update notification tokens'
@@ -53,12 +53,12 @@ export const refreshNotificationTokensForActiveChatsAssumeLoginLoadingTaskId =
           return
         }
 
-        yield* _(
+        yield* pipe(
           Array.map(
             chatsToUpdate,
             flow(store.set(sendFcmCypherUpdateMessageActionAtom), taskToEffect)
           ),
-          Effect.allWith({concurrency: 'unbounded'})
+          (effects) => Effect.all(effects, {concurrency: 'unbounded'})
         )
       }),
   })

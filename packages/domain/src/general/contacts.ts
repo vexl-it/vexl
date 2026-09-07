@@ -5,10 +5,12 @@ import {
 import {HashMap, Option, Schema} from 'effect'
 import {HashedPhoneNumber} from './HashedPhoneNumber.brand'
 
-export const CommonConnectionsForUsers = Schema.HashMap({
-  key: Schema.Union(PublicKeyPemBase64, PublicKeyV2),
-  value: Schema.Array(HashedPhoneNumber),
-})
+export const CommonConnectionsForUsers = Schema.toCodecJson(
+  Schema.HashMap(
+    Schema.Union([PublicKeyPemBase64, PublicKeyV2]),
+    Schema.Array(HashedPhoneNumber)
+  )
+)
 
 export type CommonConnectionsForUsers = typeof CommonConnectionsForUsers.Type
 

@@ -10,7 +10,7 @@ function markedAtMillis(offer: OneOfferInState): number {
 // isoNow() emits local-offset ISO strings which are not lexicographically
 // chronological across offsets, so compare parsed milliseconds
 const byMarkedAtNewestFirst = Order.mapInput(
-  Order.reverse(Order.number),
+  Order.flip(Order.Number),
   markedAtMillis
 )
 

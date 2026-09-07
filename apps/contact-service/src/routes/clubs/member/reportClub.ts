@@ -1,4 +1,3 @@
-import {HttpApiBuilder} from '@effect/platform/index'
 import {OfferIdHashed} from '@vexl-next/domain/src/general/clubs'
 import {
   NotFoundError,
@@ -9,9 +8,10 @@ import {CurrentSecurity} from '@vexl-next/rest-api/src/apiSecurity'
 import {ReportClubLimitReachedError} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {makeHttpApiHandler} from '@vexl-next/server-utils/src/makeHttpApiHandler'
 import {commonMetricAttributesFromHeaders} from '@vexl-next/server-utils/src/metrics/commonMetricAttributesFromHeaders'
 import {validateChallengeInBody} from '@vexl-next/server-utils/src/services/challenge/utils/validateChallengeInBody'
-import {Effect, Option, Schema} from 'effect'
+import {Effect, Option, pipe, Schema} from 'effect'
 import {clubReportLimistCount} from '../../../configs'
 import {ClubMembersDbService} from '../../../db/ClubMemberDbService'
 import {ClubsDbService} from '../../../db/ClubsDbService'
@@ -19,35 +19,33 @@ import {deactivateAndClearClubs} from '../../../internalServer/routes/deactivate
 import {reportClubDeactivated, reportClubReported} from '../../../metrics'
 import {findClubMemberByPublicKeyV1OrV2} from '../../../utils/findClubMemberByPublicKeyV1OrV2'
 
-export const reportClub = HttpApiBuilder.handler(
+export const reportClub = makeHttpApiHandler(
   ContactApiSpecification,
   'ClubsMember',
   'reportClub',
   (req) =>
-    Effect.gen(function* (_) {
+    Effect.gen(function* () {
       const commonMetricAttributes = commonMetricAttributesFromHeaders(
         req.headers
       )
-      yield* _(validateChallengeInBody(req.payload))
-      const security = yield* _(CurrentSecurity)
+      yield* validateChallengeInBody(req.payload)
+      const security = yield* CurrentSecurity
 
-      const clubsDb = yield* _(ClubsDbService)
-      const membersDb = yield* _(ClubMembersDbService)
-      const reportLimitCount = yield* _(clubReportLimistCount)
+      const clubsDb = yield* ClubsDbService
+      const membersDb = yield* ClubMembersDbService
+      const reportLimitCount = yield* clubReportLimistCount
 
-      const member = yield* _(
-        findClubMemberByPublicKeyV1OrV2(
-          Option.getOrElse(req.payload.publicKeyV2, () => req.payload.publicKey)
-        )
+      const member = yield* findClubMemberByPublicKeyV1OrV2(
+        Option.getOrElse(req.payload.publicKeyV2, () => req.payload.publicKey)
       )
 
-      const club = yield* _(
+      const club = yield* pipe(
         clubsDb.findClubByUuid({
           uuid: req.payload.clubUuid,
         }),
-        Effect.flatten,
+        Effect.flatMap(Effect.fromOption),
         Effect.catchTag(
-          'NoSuchElementException',
+          'NoSuchElementError',
           () =>
             new NotFoundError({
               message: 'Club not found',
@@ -59,18 +57,17 @@ export const reportClub = HttpApiBuilder.handler(
         )
       )
 
-      const numberOfReportsForUser = yield* _(
-        membersDb.queryNumberOfClubReportsForUser(security.publicKey)
-      )
+      const numberOfReportsForUser =
+        yield* membersDb.queryNumberOfClubReportsForUser(security.publicKey)
 
       if (numberOfReportsForUser >= reportLimitCount) {
-        return yield* _(Effect.fail(new ReportClubLimitReachedError()))
+        return yield* Effect.fail(new ReportClubLimitReachedError())
       }
 
-      const offerIdHashed = yield* _(
+      const offerIdHashed = yield* pipe(
         hashSha256(req.payload.offerId),
-        Effect.flatMap(Schema.decode(OfferIdHashed)),
-        Effect.catchAll(
+        Effect.flatMap(Schema.decodeEffect(OfferIdHashed)),
+        Effect.catch(
           (e) =>
             new UnexpectedServerError({
               status: 500,
@@ -80,7 +77,7 @@ export const reportClub = HttpApiBuilder.handler(
         )
       )
 
-      const clubAlreadyReportedByThisOffer = yield* _(
+      const clubAlreadyReportedByThisOffer = yield* pipe(
         clubsDb.findReportInfoForOfferIdHashed(offerIdHashed),
         Effect.map(
           Option.match({
@@ -92,33 +89,29 @@ export const reportClub = HttpApiBuilder.handler(
 
       if (clubAlreadyReportedByThisOffer) return {}
 
-      yield* _(
-        clubsDb.insertClubOfferReportedInfo({
-          offerId: offerIdHashed,
-          clubUuid: club.uuid,
-          reportedAt: new Date(),
-        })
-      )
+      yield* clubsDb.insertClubOfferReportedInfo({
+        offerId: offerIdHashed,
+        clubUuid: club.uuid,
+        reportedAt: new Date(),
+      })
 
-      yield* _(clubsDb.reportClub({clubUuid: club.uuid}))
+      yield* clubsDb.reportClub({clubUuid: club.uuid})
 
-      yield* _(
-        membersDb.insertClubReportedRecord({
-          userPublicKey: security.publicKey,
-          reportedAt: new Date(),
-        })
-      )
+      yield* membersDb.insertClubReportedRecord({
+        userPublicKey: security.publicKey,
+        reportedAt: new Date(),
+      })
 
-      yield* _(reportClubReported(1, commonMetricAttributes))
+      yield* reportClubReported(1, commonMetricAttributes)
 
-      const reportedClub = yield* _(clubsDb.findClubByUuid({uuid: club.uuid}))
+      const reportedClub = yield* clubsDb.findClubByUuid({uuid: club.uuid})
 
       if (
         Option.isSome(reportedClub) &&
         reportedClub.value.report >= club.reportLimit
       ) {
-        yield* _(deactivateAndClearClubs)
-        yield* _(reportClubDeactivated(1, commonMetricAttributes))
+        yield* deactivateAndClearClubs
+        yield* reportClubDeactivated(1, commonMetricAttributes)
       }
 
       return {}

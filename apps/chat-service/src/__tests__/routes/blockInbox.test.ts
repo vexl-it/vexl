@@ -1,4 +1,3 @@
-import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {type MessageCypher} from '@vexl-next/domain/src/general/messaging'
 import {
@@ -8,7 +7,8 @@ import {
 } from '@vexl-next/rest-api/src/services/chat/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
-import {Effect} from 'effect'
+import {Effect, pipe} from 'effect'
+import {SqlClient} from 'effect/unstable/sql'
 import {addChallengeForKey} from '../utils/addChallengeForKey'
 import {
   commonHeaders,
@@ -24,46 +24,40 @@ let user2: MockedUser
 
 beforeEach(async () => {
   await runPromiseInMockedEnvironment(
-    Effect.gen(function* (_) {
-      const sql = yield* _(SqlClient.SqlClient)
-      yield* _(sql`DELETE FROM inbox`)
-      yield* _(sql`DELETE FROM message`)
+    Effect.gen(function* () {
+      const sql = yield* SqlClient.SqlClient
+      yield* sql`DELETE FROM inbox`
+      yield* sql`DELETE FROM message`
 
-      user1 = yield* _(createMockedUser('+420733333330'))
-      user2 = yield* _(createMockedUser('+420733333331'))
-      const client = yield* _(NodeTestingApp)
+      user1 = yield* createMockedUser('+420733333330')
+      user2 = yield* createMockedUser('+420733333331')
+      const client = yield* NodeTestingApp
 
-      yield* _(setAuthHeaders(user1.authHeaders))
+      yield* setAuthHeaders(user1.authHeaders)
 
       const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
         user1.authHeaders
       )
 
-      yield* _(
-        client.Inboxes.requestApproval({
-          payload: {
-            message: 'someMessage' as MessageCypher,
-            publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-          },
-          headers: commonAndSecurityHeaders,
-        })
-      )
+      yield* client.Inboxes.requestApproval({
+        payload: {
+          message: 'someMessage' as MessageCypher,
+          publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
+        },
+        headers: commonAndSecurityHeaders,
+      })
 
-      yield* _(setAuthHeaders(user2.authHeaders))
-      yield* _(
-        client.Inboxes.approveRequest({
-          headers: commonHeaders,
-          payload: yield* _(
-            user2.inbox1.addChallenge({
-              message: 'someMessage2' as MessageCypher,
-              publicKeyToConfirm: user1.mainKeyPair.publicKeyPemBase64,
-              approve: true,
-            })
-          ),
-        })
-      )
+      yield* setAuthHeaders(user2.authHeaders)
+      yield* client.Inboxes.approveRequest({
+        headers: commonHeaders,
+        payload: yield* user2.inbox1.addChallenge({
+          message: 'someMessage2' as MessageCypher,
+          publicKeyToConfirm: user1.mainKeyPair.publicKeyPemBase64,
+          approve: true,
+        }),
+      })
 
-      yield* _(sql`DELETE FROM message`)
+      yield* sql`DELETE FROM message`
     })
   )
 })
@@ -71,58 +65,50 @@ beforeEach(async () => {
 describe('Block inbox', () => {
   it('accepts messages after blocking because filtering is client-side', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
 
-        yield* _(setAuthHeaders(user2.authHeaders))
-        yield* _(
-          client.Inboxes.blockInbox({
-            payload: yield* _(
-              user2.inbox1.addChallenge({
-                publicKeyToBlock: user1.mainKeyPair.publicKeyPemBase64,
-              })
-            ),
-          })
-        )
+        yield* setAuthHeaders(user2.authHeaders)
+        yield* client.Inboxes.blockInbox({
+          payload: yield* user2.inbox1.addChallenge({
+            publicKeyToBlock: user1.mainKeyPair.publicKeyPemBase64,
+          }),
+        })
 
-        yield* _(setAuthHeaders(user1.authHeaders))
-        const response = yield* _(
+        yield* setAuthHeaders(user1.authHeaders)
+        const response = yield* pipe(
           client.Messages.sendMessage({
             headers: commonHeaders,
-            payload: (yield* _(
-              user1.addChallengeForMainInbox({
-                message: 'someMessage' as MessageCypher,
-                messageType: 'MESSAGE' as const,
-                receiverPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-              })
-            )) satisfies SendMessageRequest,
+            payload: (yield* user1.addChallengeForMainInbox({
+              message: 'someMessage' as MessageCypher,
+              messageType: 'MESSAGE' as const,
+              receiverPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
+            })) satisfies SendMessageRequest,
           }),
-          Effect.either
+          Effect.result
         )
 
-        expect(response._tag).toBe('Right')
+        expect(response._tag).toBe('Success')
       })
     )
   })
 
   it('throws an error when receiver inbox does not exist', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
 
-        yield* _(setAuthHeaders(user2.authHeaders))
-        const shouldBeRejectedResponse = yield* _(
+        yield* setAuthHeaders(user2.authHeaders)
+        const shouldBeRejectedResponse = yield* pipe(
           client.Inboxes.blockInbox({
-            payload: yield* _(
-              addChallengeForKey(
-                generatePrivateKey(),
-                user2.authHeaders
-              )({
-                publicKeyToBlock: user1.mainKeyPair.publicKeyPemBase64,
-              })
-            ),
+            payload: yield* addChallengeForKey(
+              generatePrivateKey(),
+              user2.authHeaders
+            )({
+              publicKeyToBlock: user1.mainKeyPair.publicKeyPemBase64,
+            }),
           }),
-          Effect.either
+          Effect.result
         )
 
         expectErrorResponse(ReceiverInboxDoesNotExistError)(
@@ -134,19 +120,17 @@ describe('Block inbox', () => {
 
   it('throws an error when sender inbox does not exist', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
 
-        yield* _(setAuthHeaders(user2.authHeaders))
-        const shouldBeRejectedResponse = yield* _(
+        yield* setAuthHeaders(user2.authHeaders)
+        const shouldBeRejectedResponse = yield* pipe(
           client.Inboxes.blockInbox({
-            payload: yield* _(
-              user2.inbox1.addChallenge({
-                publicKeyToBlock: generatePrivateKey().publicKeyPemBase64,
-              })
-            ),
+            payload: yield* user2.inbox1.addChallenge({
+              publicKeyToBlock: generatePrivateKey().publicKeyPemBase64,
+            }),
           }),
-          Effect.either
+          Effect.result
         )
 
         expectErrorResponse(SenderInboxDoesNotExistError)(

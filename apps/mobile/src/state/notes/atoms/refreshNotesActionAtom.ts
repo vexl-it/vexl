@@ -6,7 +6,7 @@ import {
 import {isoNow} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import decryptNote from '@vexl-next/resources-utils/src/notes/decryptNote'
 import fetchAllPaginatedData from '@vexl-next/rest-api/src/fetchAllPaginatedData'
-import {Array, Effect, Either, Fiber, Option, pipe} from 'effect'
+import {Array, Effect, Fiber, Filter, Option, pipe, Result} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
 import reportError from '../../../utils/reportError'
@@ -26,10 +26,12 @@ const dedupeIncomingNotesByNoteId = (
     notes,
     Array.groupBy((one) => one.noteId),
     (grouped) => Object.values(grouped),
-    Array.filterMap((group) =>
-      pipe(
-        Array.findFirst(group, (one) => !one.privatePart.viaRepost),
-        Option.orElse(() => Array.head(group))
+    Array.filterMap(
+      Filter.fromPredicateOption((group) =>
+        pipe(
+          Array.findFirst(group, (one) => !one.privatePart.viaRepost),
+          Option.orElse(() => Array.head(group))
+        )
       )
     )
   )
@@ -48,47 +50,49 @@ const mergeIncomingNotesToState = ({
       Array.map(incomingNotes, (one) => one.noteId),
       Array.map(storedNotes, (one) => one.noteInfo.noteId)
     ),
-    Array.filterMap((noteId) => {
-      const incomingO = Array.findFirst(
-        incomingNotes,
-        (one) => one.noteId === noteId
-      )
-      const inStateO = Array.findFirst(
-        storedNotes,
-        (one) => one.noteInfo.noteId === noteId
-      )
-
-      // Keep my own notes untouched - they are managed locally.
-      if (
-        inStateO.pipe(
-          Option.flatMapNullable((one) => one.ownershipInfo?.adminId),
-          Option.isSome
+    Array.filterMap(
+      Filter.fromPredicateOption((noteId) => {
+        const incomingO = Array.findFirst(
+          incomingNotes,
+          (one) => one.noteId === noteId
         )
-      ) {
+        const inStateO = Array.findFirst(
+          storedNotes,
+          (one) => one.noteInfo.noteId === noteId
+        )
+
+        // Keep my own notes untouched - they are managed locally.
+        if (
+          inStateO.pipe(
+            Option.flatMapNullishOr((one) => one.ownershipInfo?.adminId),
+            Option.isSome
+          )
+        ) {
+          return inStateO
+        }
+
+        // Preserve local flags / repostInfo across refreshes.
+        if (Option.isSome(inStateO) && Option.isSome(incomingO)) {
+          return Option.some({
+            ...inStateO.value,
+            noteInfo: incomingO.value,
+          } satisfies OneNoteInState)
+        }
+
+        if (Option.isSome(incomingO)) {
+          // The owner's private payload carries the adminId, so ownership can be
+          // restored even without local state (reinstall / another device).
+          const adminId = incomingO.value.privatePart.adminId
+          return Option.some({
+            noteInfo: incomingO.value,
+            flags: {reported: false},
+            ...(adminId ? {ownershipInfo: {adminId}} : {}),
+          } satisfies OneNoteInState)
+        }
+
         return inStateO
-      }
-
-      // Preserve local flags / repostInfo across refreshes.
-      if (Option.isSome(inStateO) && Option.isSome(incomingO)) {
-        return Option.some({
-          ...inStateO.value,
-          noteInfo: incomingO.value,
-        } satisfies OneNoteInState)
-      }
-
-      if (Option.isSome(incomingO)) {
-        // The owner's private payload carries the adminId, so ownership can be
-        // restored even without local state (reinstall / another device).
-        const adminId = incomingO.value.privatePart.adminId
-        return Option.some({
-          noteInfo: incomingO.value,
-          flags: {reported: false},
-          ...(adminId ? {ownershipInfo: {adminId}} : {}),
-        } satisfies OneNoteInState)
-      }
-
-      return inStateO
-    }),
+      })
+    ),
     // Drop removed notes (but never my own - they may still be re-uploaded).
     Array.filter(
       (one) =>
@@ -104,29 +108,27 @@ const mergeIncomingNotesToState = ({
   )
 
 const runRefreshNotesActionAtom = atom(null, (get, set) =>
-  Effect.gen(function* (_) {
+  Effect.gen(function* () {
     const api = get(apiAtom)
     const session = get(sessionDataOrDummyAtom)
     const updateStartedAt = isoNow()
     const storedNotes = get(notesAtom)
 
-    const serverNotes = yield* _(
-      fetchAllPaginatedData({
-        fetchEffectToRun: (nextPageToken) =>
-          api.offer.getNotesForMeModifiedOrCreatedAfterPaginated({
-            nextPageToken: nextPageToken ?? get(notesNextPageParamAtom),
-            limit: NOTES_PAGE_LIMIT,
-          }),
-        storeNextPageToken: (nextPageToken) => {
-          set(notesNextPageParamAtom, nextPageToken)
-        },
-      })
-    )
+    const serverNotes = yield* fetchAllPaginatedData({
+      fetchEffectToRun: (nextPageToken) =>
+        api.offer.getNotesForMeModifiedOrCreatedAfterPaginated({
+          nextPageToken: nextPageToken ?? get(notesNextPageParamAtom),
+          limit: NOTES_PAGE_LIMIT,
+        }),
+      storeNextPageToken: (nextPageToken) => {
+        set(notesNextPageParamAtom, nextPageToken)
+      },
+    })
 
-    const decryptResults = yield* _(
+    const decryptResults = yield* pipe(
       serverNotes,
       Array.map((serverNote) =>
-        Effect.either(
+        Effect.result(
           decryptNote(session.privateKey, session.keyPairV2)(serverNote)
         )
       ),
@@ -135,15 +137,17 @@ const runRefreshNotesActionAtom = atom(null, (get, set) =>
 
     const incomingNotes = pipe(
       decryptResults,
-      Array.filterMap((result) => {
-        if (Either.isRight(result)) return Option.some(result.right)
-        if (result.left._tag === 'DecryptingNoteError') {
-          reportError('error', new Error('Error while decrypting note'), {
-            error: result.left,
-          })
-        }
-        return Option.none()
-      }),
+      Array.filterMap(
+        Filter.fromPredicateOption((result) => {
+          if (Result.isSuccess(result)) return Option.some(result.success)
+          if (result.failure._tag === 'DecryptingNoteError') {
+            reportError('error', new Error('Error while decrypting note'), {
+              error: result.failure,
+            })
+          }
+          return Option.none()
+        })
+      ),
       dedupeIncomingNotesByNoteId
     )
 
@@ -154,13 +158,13 @@ const runRefreshNotesActionAtom = atom(null, (get, set) =>
       Array.map((one) => one.noteInfo.noteId)
     )
 
-    const removedNoteIds = yield* _(
-      Array.isNonEmptyReadonlyArray(knownForeignNoteIds)
+    const removedNoteIds = yield* pipe(
+      Array.isReadonlyArrayNonEmpty(knownForeignNoteIds)
         ? api.offer
             .getRemovedNotes({noteIds: knownForeignNoteIds})
             .pipe(Effect.map((res) => res.noteIds))
         : Effect.succeed<readonly NoteId[]>([]),
-      Effect.catchAll((e) => {
+      Effect.catch((e) => {
         reportError('error', new Error('Error fetching removed notes'), {e})
         return Effect.succeed<readonly NoteId[]>([])
       })
@@ -176,32 +180,30 @@ const runRefreshNotesActionAtom = atom(null, (get, set) =>
       lastUpdatedAt: updateStartedAt,
     }))
   }).pipe(
-    Effect.catchAll((e) => {
+    Effect.catch((e) => {
       reportError('error', new Error('Error refreshing notes'), {e})
       return Effect.void
     })
   )
 )
 
-const inFlightRefreshFiberAtom = atom<Fiber.RuntimeFiber<void> | null>(null)
+const inFlightRefreshFiberAtom = atom<Fiber.Fiber<void> | null>(null)
 
 export const refreshNotesActionAtom = atom(null, (get, set) =>
-  Effect.gen(function* (_) {
+  Effect.gen(function* () {
     const inFlightRefresh = get(inFlightRefreshFiberAtom)
-    if (inFlightRefresh) return yield* _(Fiber.join(inFlightRefresh))
+    if (inFlightRefresh) return yield* Fiber.join(inFlightRefresh)
 
-    const refreshFiber = yield* _(
-      set(runRefreshNotesActionAtom).pipe(
-        Effect.ensuring(
-          Effect.sync(() => {
-            set(inFlightRefreshFiberAtom, null)
-          })
-        ),
-        Effect.forkDaemon
-      )
+    const refreshFiber = yield* set(runRefreshNotesActionAtom).pipe(
+      Effect.ensuring(
+        Effect.sync(() => {
+          set(inFlightRefreshFiberAtom, null)
+        })
+      ),
+      Effect.forkDetach
     )
 
     set(inFlightRefreshFiberAtom, refreshFiber)
-    return yield* _(Fiber.join(refreshFiber))
+    return yield* Fiber.join(refreshFiber)
   })
 )

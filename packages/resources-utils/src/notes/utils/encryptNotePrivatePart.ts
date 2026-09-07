@@ -10,7 +10,7 @@ import {
 } from '@vexl-next/domain/src/general/offers'
 import {cryptoBoxSeal} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {type ServerNotePrivatePart} from '@vexl-next/rest-api/src/services/offer/notesContracts'
-import {Effect, flow, Schema} from 'effect'
+import {Effect, flow, pipe, Schema} from 'effect'
 import {eciesEncryptE} from '../../utils/crypto'
 import {stringifyE} from '../../utils/parsing'
 
@@ -24,18 +24,18 @@ export class NotePrivatePartEncryptionError extends Schema.TaggedError<NotePriva
 )('NotePrivatePartEncryptionError', {
   cause: Schema.Unknown,
   message: Schema.String,
-  toPublicKey: Schema.Union(PublicKeyPemBase64, PublicKeyV2),
+  toPublicKey: Schema.Union([PublicKeyPemBase64, PublicKeyV2]),
 }) {}
 
 export function encryptNotePrivatePart(
   privatePart: NotePrivatePayloadToEncrypt
 ): Effect.Effect<ServerNotePrivatePart, NotePrivatePartEncryptionError> {
-  return Effect.gen(function* (_) {
-    const privatePartsStringified = yield* _(
-      stringifyE(privatePart.payloadPrivate)
+  return Effect.gen(function* () {
+    const privatePartsStringified = yield* stringifyE(
+      privatePart.payloadPrivate
     )
 
-    const encrypted = yield* _(
+    const encrypted = yield* pipe(
       privatePartsStringified,
       isPublicKeyV2(privatePart.toPublicKey)
         ? flow(
@@ -43,7 +43,7 @@ export function encryptNotePrivatePart(
             Effect.map((c) => `${PRIVATE_PAYLOAD_ENCRYPTED_V2_PREFIX}${c}`)
           )
         : eciesEncryptE(privatePart.toPublicKey),
-      Effect.flatMap(Schema.decode(PrivatePayloadEncrypted))
+      Effect.flatMap(Schema.decodeEffect(PrivatePayloadEncrypted))
     )
 
     return {
@@ -51,7 +51,7 @@ export function encryptNotePrivatePart(
       payloadPrivate: encrypted,
     }
   }).pipe(
-    Effect.catchAll(
+    Effect.catch(
       (e) =>
         new NotePrivatePartEncryptionError({
           toPublicKey: privatePart.toPublicKey,

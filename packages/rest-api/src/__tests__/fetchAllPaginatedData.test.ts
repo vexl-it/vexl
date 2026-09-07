@@ -27,7 +27,7 @@ function createMockedFetchEffect({
   limit: number
 }) {
   return (nextPageToken?: string) => {
-    return Effect.gen(function* (_) {
+    return Effect.gen(function* () {
       const startIndex = nextPageToken ? parseInt(nextPageToken, 10) : 0
       const endIndex = Math.min(startIndex + limit, data.length)
       const items = data.slice(startIndex, endIndex)
@@ -192,7 +192,7 @@ describe('Fetch all paginated data tests', () => {
       },
       never
     > => {
-      return Effect.gen(function* (_) {
+      return Effect.gen(function* () {
         const startIndex = nextPageToken ? parseInt(nextPageToken, 10) : 0
         const endIndex = Math.min(startIndex + pageSize, mockData.length)
         const pageData = mockData.slice(startIndex, endIndex)

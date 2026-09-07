@@ -25,29 +25,20 @@ import {
   type EciesGTMECypher,
   type HmacHash,
 } from '@vexl-next/generic-utils/src/effect-helpers/crypto'
-import {
-  Config,
-  Context,
-  Effect,
-  flow,
-  Layer,
-  Schema,
-  type ConfigError,
-  type ParseResult,
-} from 'effect'
+import {Config, Context, Effect, flow, Layer, Schema} from 'effect'
 
 export interface ServerCryptoOperations {
   encryptECIES: <A, I, R>(
-    schema: Schema.Schema<A, I, R>
+    schema: Schema.Codec<A, I, R, R>
   ) => (
     data: A
-  ) => Effect.Effect<EciesGTMECypher, CryptoError | ParseResult.ParseError, R>
+  ) => Effect.Effect<EciesGTMECypher, CryptoError | Schema.SchemaError, R>
 
   decryptECIES: <A, I, R>(
-    schema: Schema.Schema<A, I, R>
+    schema: Schema.Codec<A, I, R, R>
   ) => (
     data: EciesGTMECypher
-  ) => Effect.Effect<A, CryptoError | ParseResult.ParseError, R>
+  ) => Effect.Effect<A, CryptoError | Schema.SchemaError, R>
 
   signWithHmac: (payload: string) => Effect.Effect<HmacHash, CryptoError>
   verifyHmac: (args: {
@@ -62,16 +53,16 @@ export interface ServerCryptoOperations {
   }) => Effect.Effect<boolean, CryptoError>
 
   encryptAES: <A, I, R>(
-    schema: Schema.Schema<A, I, R>
+    schema: Schema.Codec<A, I, R, R>
   ) => (
     data: A
-  ) => Effect.Effect<AesGtmCypher, CryptoError | ParseResult.ParseError, R>
+  ) => Effect.Effect<AesGtmCypher, CryptoError | Schema.SchemaError, R>
 
   decryptAES: <A, I, R>(
-    schema: Schema.Schema<A, I, R>
+    schema: Schema.Codec<A, I, R, R>
   ) => (
     data: AesGtmCypher
-  ) => Effect.Effect<A, CryptoError | ParseResult.ParseError, R>
+  ) => Effect.Effect<A, CryptoError | Schema.SchemaError, R>
 
   cryptoBoxSign: (
     challenge: string
@@ -82,19 +73,19 @@ export interface ServerCryptoOperations {
   ) => Effect.Effect<boolean, CryptoError>
 
   cryptoBoxSeal: <A, I, R>(
-    schema: Schema.Schema<A, I, R>
+    schema: Schema.Codec<A, I, R, R>
   ) => (
     data: A
-  ) => Effect.Effect<CryptoBoxCypher, CryptoError | ParseResult.ParseError, R>
+  ) => Effect.Effect<CryptoBoxCypher, CryptoError | Schema.SchemaError, R>
 
   cryptoBoxUnseal: <A, I, R>(
-    schema: Schema.Schema<A, I, R>
+    schema: Schema.Codec<A, I, R, R>
   ) => (
     data: CryptoBoxCypher
-  ) => Effect.Effect<A, CryptoError | ParseResult.ParseError, R>
+  ) => Effect.Effect<A, CryptoError | Schema.SchemaError, R>
 }
 
-export type CryptoConfig = Config.Config.Wrap<{
+export type CryptoConfig = Config.Wrap<{
   publicKey: PublicKeyPemBase64
   privateKey: PrivateKeyPemBase64
   hmacKey: string
@@ -102,20 +93,20 @@ export type CryptoConfig = Config.Config.Wrap<{
   libsodiumPrivateKey: PrivateKeyV2
 }>
 
-export class ServerCrypto extends Context.Tag('ServerCrypto')<
+export class ServerCrypto extends Context.Service<
   ServerCrypto,
   ServerCryptoOperations
->() {
+>()('ServerCrypto') {
   static readonly layer = (
     cryptoConfig: CryptoConfig
-  ): Layer.Layer<ServerCrypto, ConfigError.ConfigError | CryptoError, never> =>
+  ): Layer.Layer<ServerCrypto, Config.ConfigError | CryptoError, never> =>
     Layer.effect(
       ServerCrypto,
-      Effect.gen(function* (_) {
-        const cryptoConfigUnwraped = yield* _(Config.unwrap(cryptoConfig))
+      Effect.gen(function* () {
+        const cryptoConfigUnwraped = yield* Config.unwrap(cryptoConfig)
 
-        const libsodiumPublicKey = yield* _(
-          derivePubKey(cryptoConfigUnwraped.libsodiumPrivateKey)
+        const libsodiumPublicKey = yield* derivePubKey(
+          cryptoConfigUnwraped.libsodiumPrivateKey
         )
 
         const encryptEciesWithServerKey = eciesGTMEncryptE(
@@ -139,11 +130,15 @@ export class ServerCrypto extends Context.Tag('ServerCrypto')<
 
         return {
           encryptECIES: (schema) => {
-            const encodeJson = Schema.encode(Schema.parseJson(schema))
+            const encodeJson = Schema.encodeEffect(
+              Schema.fromJsonString(schema)
+            )
             return flow(encodeJson, Effect.flatMap(encryptEciesWithServerKey))
           },
           decryptECIES: (schema) => {
-            const decodeJson = Schema.decode(Schema.parseJson(schema))
+            const decodeJson = Schema.decodeEffect(
+              Schema.fromJsonString(schema)
+            )
             return flow(decryptEciesWithServerKey, Effect.flatMap(decodeJson))
           },
           signWithHmac: hmacSignE(cryptoConfigUnwraped.hmacKey),
@@ -153,11 +148,15 @@ export class ServerCrypto extends Context.Tag('ServerCrypto')<
           verifyEcdsa: ecdsaVerifyWithServerKey,
 
           encryptAES: (schema) => {
-            const encodeJson = Schema.encode(Schema.parseJson(schema))
+            const encodeJson = Schema.encodeEffect(
+              Schema.fromJsonString(schema)
+            )
             return flow(encodeJson, Effect.flatMap(encryptAesWithServerKey))
           },
           decryptAES: (schema) => {
-            const decodeJson = Schema.decode(Schema.parseJson(schema))
+            const decodeJson = Schema.decodeEffect(
+              Schema.fromJsonString(schema)
+            )
             return flow(decryptAesWithServiceKey, Effect.flatMap(decodeJson))
           },
           cryptoBoxSign: cryptoBoxSign(
@@ -166,14 +165,18 @@ export class ServerCrypto extends Context.Tag('ServerCrypto')<
           cryptoBoxVerifySignature:
             cryptoBoxVerifySignature(libsodiumPublicKey),
           cryptoBoxSeal: (schema) => {
-            const encodeJson = Schema.encode(Schema.parseJson(schema))
+            const encodeJson = Schema.encodeEffect(
+              Schema.fromJsonString(schema)
+            )
             return flow(
               encodeJson,
               Effect.flatMap(cryptoBoxSeal(libsodiumPublicKey))
             )
           },
           cryptoBoxUnseal: (schema) => {
-            const decodeJson = Schema.decode(Schema.parseJson(schema))
+            const decodeJson = Schema.decodeEffect(
+              Schema.fromJsonString(schema)
+            )
             return flow(
               cryptoBoxUnseal({
                 privateKey: cryptoConfigUnwraped.libsodiumPrivateKey,

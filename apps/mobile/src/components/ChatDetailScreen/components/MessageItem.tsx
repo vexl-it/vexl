@@ -1,5 +1,5 @@
 import {DotTypingIndicator, Rejected, Typography, useTheme} from '@vexl-next/ui'
-import {useMolecule} from 'bunshi/dist/react'
+import {useMolecule} from 'bunshi/react'
 import {useAtomValue, type Atom} from 'jotai'
 import React, {useMemo} from 'react'
 import {Stack, XStack} from 'tamagui'

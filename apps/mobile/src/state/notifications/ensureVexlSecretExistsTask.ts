@@ -28,7 +28,7 @@ export const ensureVexlSecretExistsTaskId = registerInAppLoadingTask({
       const expoToken = yield* getNotificationTokenE()
 
       console.log('Creating vexl notification secret...')
-      yield* Effect.either(
+      yield* Effect.result(
         store
           .set(createVexlSecretActionAtom, {expoNotificationToken: expoToken})
           .pipe(

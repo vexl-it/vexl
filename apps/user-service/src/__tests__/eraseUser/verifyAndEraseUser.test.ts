@@ -9,7 +9,7 @@ import {
   VerificationNotFoundError,
 } from '@vexl-next/rest-api/src/services/user/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
-import {Effect, Either, Schema} from 'effect'
+import {Effect, pipe, Result, Schema} from 'effect'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
 import {
   checkVerificationMock,
@@ -21,53 +21,49 @@ const phoneNumberToTest = Schema.decodeSync(E164PhoneNumber)('+420733333333')
 const validTurnstileToken = Schema.decodeSync(TurnstileToken)(
   'valid-turnstile-token'
 )
-const VerifyCodeErrors = Schema.Union(
+const VerifyCodeErrors = Schema.Union([
   UnableToGenerateChallengeError,
   VerificationNotFoundError,
   InvalidVerificationError,
   InvalidVerificationIdError,
-  UnableToVerifySmsCodeError
-)
+  UnableToVerifySmsCodeError,
+])
 
 beforeEach(() => {
   createVerificationMock.mockClear()
   checkVerificationMock.mockClear()
 })
 
-const initVerification = Effect.gen(function* (_) {
-  const client = yield* _(NodeTestingApp)
-  return yield* _(
-    client.EraseUser.initEraseUser({
-      headers: Schema.decodeSync(CommonHeaders)({
-        'user-agent': 'Vexl/2 (1.0.0) IOS',
-      }),
-      payload: {
-        phoneNumber: phoneNumberToTest,
-        turnstileToken: validTurnstileToken,
-      },
-    })
-  )
+const initVerification = Effect.gen(function* () {
+  const client = yield* NodeTestingApp
+  return yield* client.EraseUser.initEraseUser({
+    headers: Schema.decodeSync(CommonHeaders)({
+      'user-agent': 'Vexl/2 (1.0.0) IOS',
+    }),
+    payload: {
+      phoneNumber: phoneNumberToTest,
+      turnstileToken: validTurnstileToken,
+    },
+  })
 })
 
 describe('Verify and erase user', () => {
   it('Should erase user when verification successfull', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
 
-        const initResponse = yield* _(initVerification)
+        const initResponse = yield* initVerification
 
         expect(initResponse.verificationId).toBeDefined()
 
         checkVerificationMock.mockReturnValueOnce(Effect.succeed('valid'))
-        const checkResponse = yield* _(
-          client.EraseUser.verifyAndEraseuser({
-            payload: {
-              verificationId: initResponse.verificationId,
-              code: '123456',
-            },
-          })
-        )
+        const checkResponse = yield* client.EraseUser.verifyAndEraseuser({
+          payload: {
+            verificationId: initResponse.verificationId,
+            code: '123456',
+          },
+        })
 
         expect(
           checkResponse.shortLivedTokenForErasingUserOnContactService
@@ -78,35 +74,33 @@ describe('Verify and erase user', () => {
 
   it('Should reject replayed erase verification ids', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
 
-        const initResponse = yield* _(initVerification)
+        const initResponse = yield* initVerification
 
         expect(initResponse.verificationId).toBeDefined()
 
         checkVerificationMock.mockReturnValueOnce(Effect.succeed('valid'))
-        const checkResponse = yield* _(
-          client.EraseUser.verifyAndEraseuser({
-            payload: {
-              verificationId: initResponse.verificationId,
-              code: '123456',
-            },
-          })
-        )
+        const checkResponse = yield* client.EraseUser.verifyAndEraseuser({
+          payload: {
+            verificationId: initResponse.verificationId,
+            code: '123456',
+          },
+        })
 
         expect(
           checkResponse.shortLivedTokenForErasingUserOnContactService
         ).toBeDefined()
 
-        const replayResponse = yield* _(
+        const replayResponse = yield* pipe(
           client.EraseUser.verifyAndEraseuser({
             payload: {
               verificationId: initResponse.verificationId,
               code: '123456',
             },
           }),
-          Effect.either
+          Effect.result
         )
 
         expectErrorResponse(VerifyCodeErrors)(replayResponse)
@@ -116,10 +110,10 @@ describe('Verify and erase user', () => {
 
   it('Should atomically reject concurrent replayed erase verification ids', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
 
-        const initResponse = yield* _(initVerification)
+        const initResponse = yield* initVerification
 
         expect(initResponse.verificationId).toBeDefined()
 
@@ -129,18 +123,19 @@ describe('Verify and erase user', () => {
             verificationId: initResponse.verificationId,
             code: '123456',
           },
-        }).pipe(Effect.either)
+        }).pipe(Effect.result)
 
-        const [firstResponse, secondResponse] = yield* _(
-          Effect.all([verifyRequest, verifyRequest], {concurrency: 'unbounded'})
+        const [firstResponse, secondResponse] = yield* Effect.all(
+          [verifyRequest, verifyRequest],
+          {concurrency: 'unbounded'}
         )
 
         const successCount =
-          Number(Either.isRight(firstResponse)) +
-          Number(Either.isRight(secondResponse))
+          Number(Result.isSuccess(firstResponse)) +
+          Number(Result.isSuccess(secondResponse))
         expect(successCount).toBe(1)
 
-        const failedResponse = Either.isLeft(firstResponse)
+        const failedResponse = Result.isFailure(firstResponse)
           ? firstResponse
           : secondResponse
 
@@ -151,9 +146,9 @@ describe('Verify and erase user', () => {
 
   it('Should return error response when verification unsuccessful', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
-        const initResponse = yield* _(initVerification)
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
+        const initResponse = yield* initVerification
 
         expect(initResponse.verificationId).toBeDefined()
 
@@ -166,14 +161,14 @@ describe('Verify and erase user', () => {
             })
           )
         )
-        const checkResponse = yield* _(
+        const checkResponse = yield* pipe(
           client.EraseUser.verifyAndEraseuser({
             payload: {
               verificationId: initResponse.verificationId,
               code: '123456',
             },
           }),
-          Effect.either
+          Effect.result
         )
 
         expectErrorResponse(VerifyCodeErrors)(checkResponse)

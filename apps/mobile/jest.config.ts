@@ -4,7 +4,7 @@ const config: Config.InitialOptions = {
   verbose: true,
   preset: 'jest-expo',
   transformIgnorePatterns: [
-    'node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|@sentry/.*|native-base|react-native-svg|msgpackr)',
+    'node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|@sentry/.*|native-base|react-native-svg|msgpackr|effect|@effect/.*)',
   ],
   setupFilesAfterEnv: ['./jest.setup.ts'],
   moduleDirectories: ['node_modules', 'utils', 'src'],

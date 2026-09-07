@@ -20,7 +20,7 @@ export const exportVexlOnlyContactsActionAtom = atom(
     const {t} = get(translationAtom)
     const vexlOnlyContacts = get(vexlOnlyContactsAtom)
 
-    if (!Array.isNonEmptyArray(vexlOnlyContacts)) {
+    if (!Array.isArrayNonEmpty(vexlOnlyContacts)) {
       return Effect.succeed(false)
     }
 
@@ -50,7 +50,7 @@ export const exportVexlOnlyContactsActionAtom = atom(
       },
       catch: (e) => new ContactsExportError({cause: e}),
     }).pipe(
-      Effect.zipRight(
+      Effect.andThen(
         set(askAreYouSureActionAtom, {
           variant: 'info',
           steps: [
@@ -64,7 +64,7 @@ export const exportVexlOnlyContactsActionAtom = atom(
         }).pipe(Effect.ignore)
       ),
       Effect.as(true),
-      Effect.catchAll((e) =>
+      Effect.catch((e) =>
         Effect.sync(() => {
           showErrorAlert({
             title: t('common.somethingWentWrong'),

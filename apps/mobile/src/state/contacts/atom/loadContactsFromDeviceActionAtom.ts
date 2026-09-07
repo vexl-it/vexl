@@ -7,17 +7,17 @@ import {getContactsAndTryToResolveThePermissionsAlongTheWay} from '../utils'
 import {storedContactsAtom} from './contactsStore'
 import {setDeviceContactsSnapshotFromContactsActionAtom} from './vexlOnlyContactsAtoms'
 
-const contactInfoEquivalence = Schema.equivalence(ContactInfoE)
+const contactInfoEquivalence = Schema.toEquivalence(ContactInfoE)
 
 export const loadingContactsFromDeviceAtom = atom<boolean>(false)
 
 const loadContactsFromDeviceActionAtom = atom(null, (get, set) => {
-  return Effect.gen(function* (_) {
-    const contactsFromDevice = yield* _(
-      getContactsAndTryToResolveThePermissionsAlongTheWay()
-    )
-    yield* _(
-      set(setDeviceContactsSnapshotFromContactsActionAtom, contactsFromDevice)
+  return Effect.gen(function* () {
+    const contactsFromDevice =
+      yield* getContactsAndTryToResolveThePermissionsAlongTheWay()
+    yield* set(
+      setDeviceContactsSnapshotFromContactsActionAtom,
+      contactsFromDevice
     )
 
     // Read the store only after the last await - anything written to it while we
@@ -72,12 +72,12 @@ const loadContactsFromDeviceActionAtom = atom(null, (get, set) => {
 
     // Skip the write entirely when device contacts are unchanged to avoid
     // a full-blob storage rewrite and derived-atom recomputation.
-    if (someContactChanged || Array.isNonEmptyArray(newContactsToStore)) {
+    if (someContactChanged || Array.isArrayNonEmpty(newContactsToStore)) {
       set(storedContactsAtom, [...updatedStoredContacts, ...newContactsToStore])
     }
     return 'success' as const
   }).pipe(
-    Effect.catchAll((e) => {
+    Effect.catch((e) => {
       if (e._tag === 'UnknownContactsError') {
         reportError(
           'error',

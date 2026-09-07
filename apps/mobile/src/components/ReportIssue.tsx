@@ -1,6 +1,6 @@
 import Clipboard from '@react-native-clipboard/clipboard'
 import {FlagReport, Stack, Typography, useTheme, XStack} from '@vexl-next/ui'
-import {Effect} from 'effect/index'
+import {Effect} from 'effect'
 import {atom, useSetAtom} from 'jotai'
 import React from 'react'
 import {TouchableOpacity} from 'react-native'
@@ -31,9 +31,11 @@ export const reportIssueDialogAtom = atom(
         },
       ],
     }).pipe(
-      Effect.tap(() => {
-        set(contactSupportActionAtom)
-      }),
+      Effect.tap(() =>
+        Effect.sync(() => {
+          set(contactSupportActionAtom)
+        })
+      ),
       Effect.ignore
     )
   }

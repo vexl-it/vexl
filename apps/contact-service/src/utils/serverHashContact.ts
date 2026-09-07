@@ -5,13 +5,13 @@ import {
   ServerToClientHashedNumber,
 } from '@vexl-next/domain/src/general/ServerToClientHashedNumber'
 import {pbkdf2} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
-import {type ConfigError, Effect, pipe, Schema, String} from 'effect/index'
+import {Effect, pipe, Schema, String, type Config} from 'effect'
 import {secretSaltForServerContact} from '../configs'
 
 const SERVER_HASH_PREFIX = 'ServerHash:'
 
 export const ServerHashedNumber = Schema.String.pipe(
-  Schema.filter(String.startsWith(SERVER_HASH_PREFIX)),
+  Schema.check(Schema.makeFilter(String.startsWith(SERVER_HASH_PREFIX))),
   Schema.brand('ServerHashedNumber')
 )
 export type ServerHashedNumber = typeof ServerHashedNumber.Type
@@ -20,9 +20,9 @@ export const serverHashPhoneNumber = (
   hashedPhoneNumber: HashedPhoneNumber
 ): Effect.Effect<
   ServerHashedNumber,
-  ConfigError.ConfigError | UnexpectedServerError
+  Config.ConfigError | UnexpectedServerError
 > =>
-  Effect.zipRight(
+  Effect.andThen(
     // If the hashed phone number already starts with the server hash prefix, we should not hash it again
     String.startsWith(SERVER_HASH_PREFIX)(hashedPhoneNumber)
       ? Effect.fail(
@@ -56,7 +56,7 @@ export const hashForClient = (
   serverHashedNumber: ServerHashedNumber
 ): Effect.Effect<
   ServerToClientHashedNumber,
-  ConfigError.ConfigError | UnexpectedServerError
+  Config.ConfigError | UnexpectedServerError
 > =>
   secretSaltForServerContact.pipe(
     Effect.flatMap((salt) =>
@@ -82,11 +82,11 @@ export const hashForClientBatch = (
   serverHashedNumbers: readonly ServerHashedNumber[]
 ): Effect.Effect<
   ServerToClientHashedNumber[],
-  ConfigError.ConfigError | UnexpectedServerError
+  Config.ConfigError | UnexpectedServerError
 > =>
   pipe(
     serverHashedNumbers.map((serverHashedNumber) =>
       hashForClient(serverHashedNumber)
     ),
-    Effect.allWith({concurrency: 'unbounded'})
+    (effects) => Effect.all(effects, {concurrency: 'unbounded'})
   )

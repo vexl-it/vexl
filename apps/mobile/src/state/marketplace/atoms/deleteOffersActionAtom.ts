@@ -10,14 +10,14 @@ import {offersAtom} from './offersState'
 export const deleteOffersActionAtom = atom<
   null,
   [{adminIds: OfferAdminId[]}],
-  Effect.Effect<void, Effect.Effect.Error<ReturnType<OfferApi['deleteOffer']>>>
+  Effect.Effect<void, Effect.Error<ReturnType<OfferApi['deleteOffer']>>>
 >(null, (get, set, params) => {
   const {adminIds: adminIdsToDelete} = params
   const api = get(apiAtom)
   const offers = get(offersAtom)
 
-  return Effect.gen(function* (_) {
-    yield* _(api.offer.deleteOffer({adminIds: adminIdsToDelete}))
+  return Effect.gen(function* () {
+    yield* api.offer.deleteOffer({adminIds: adminIdsToDelete})
 
     // Delete offer to connections
     set(offerToConnectionsAtom, (prev) => ({

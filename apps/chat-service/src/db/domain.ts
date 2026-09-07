@@ -7,7 +7,7 @@ import {
   hashSha256,
 } from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {type ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
-import {Effect, Schema, type ConfigError} from 'effect'
+import {Effect, pipe, Schema, type Config} from 'effect'
 import {easKey} from '../configs'
 
 export const PublicKeyHashed = Schema.String.pipe(
@@ -19,8 +19,8 @@ export const hashPublicKey = (
   publicKey: PublicKeyPemBase64
 ): Effect.Effect<PublicKeyHashed, UnexpectedServerError> =>
   hashSha256(publicKey).pipe(
-    Effect.flatMap(Schema.decode(PublicKeyHashed)),
-    Effect.catchAll(
+    Effect.flatMap(Schema.decodeEffect(PublicKeyHashed)),
+    Effect.catch(
       (e) =>
         new UnexpectedServerError({
           status: 500,
@@ -41,14 +41,14 @@ export const encryptPublicKey = (
   publicKey: PublicKeyPemBase64
 ): Effect.Effect<
   PublicKeyEncrypted,
-  UnexpectedServerError | ConfigError.ConfigError,
+  UnexpectedServerError | Config.ConfigError,
   ServerCrypto
 > =>
-  Effect.gen(function* (_) {
-    const key = yield* _(easKey)
+  Effect.gen(function* () {
+    const key = yield* easKey
     const encrypt = aesEncrpytE(key, true)
 
-    return yield* _(
+    return yield* pipe(
       encrypt(publicKey),
       UnexpectedServerError.wrapErrors('Error while encrypting public key'),
       Effect.map(brandPublicKeyEncrypted)
@@ -59,18 +59,18 @@ export const decryptPublicKey = (
   publicKey: PublicKeyEncrypted
 ): Effect.Effect<
   PublicKeyPemBase64,
-  UnexpectedServerError | ConfigError.ConfigError,
+  UnexpectedServerError | Config.ConfigError,
   ServerCrypto
 > =>
-  Effect.gen(function* (_) {
-    const key = yield* _(easKey)
+  Effect.gen(function* () {
+    const key = yield* easKey
     const decrypt = aesDecrpytE(key)
 
-    return yield* _(
+    return yield* pipe(
       publicKey,
-      Schema.decode(AesGtmCypher),
+      Schema.decodeEffect(AesGtmCypher),
       Effect.flatMap(decrypt),
-      Effect.flatMap(Schema.decode(PublicKeyPemBase64)),
+      Effect.flatMap(Schema.decodeEffect(PublicKeyPemBase64)),
       UnexpectedServerError.wrapErrors('Error while decrypting publicKey')
     )
   })

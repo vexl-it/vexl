@@ -1,4 +1,3 @@
-import {SqlClient} from '@effect/sql'
 import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {
   ImportContactsQuotaReachedError,
@@ -8,7 +7,8 @@ import {RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {mockedReportContactsImported} from '@vexl-next/server-utils/src/tests/mockedDashboardReportsService'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
-import {Array, Effect, LogLevel, Logger, Option, pipe} from 'effect'
+import {Array, Effect, Filter, Option, References, pipe} from 'effect'
+import {SqlClient} from 'effect/unstable/sql'
 import {
   ImportContactsQuotaRecord,
   createQuotaRecordKey,
@@ -34,46 +34,35 @@ let networkTwo: [DummyUser, ...DummyUser[]]
 
 beforeEach(async () => {
   await runPromiseInMockedEnvironment(
-    Effect.gen(function* (_) {
-      const sql = yield* _(SqlClient.SqlClient)
-      yield* _(sql`DELETE FROM user_contact`)
-      yield* _(sql`DELETE FROM users`)
-      networkOne = yield* _(
-        Effect.all([
-          generateKeysAndHasheForNumber('+420733333001'),
-          generateKeysAndHasheForNumber('+420733333002'),
-          generateKeysAndHasheForNumber('+420733333003'),
-          generateKeysAndHasheForNumber('+420733333004'),
-          generateKeysAndHasheForNumber('+420733333005'),
-        ])
+    Effect.gen(function* () {
+      const sql = yield* SqlClient.SqlClient
+      yield* sql`DELETE FROM user_contact`
+      yield* sql`DELETE FROM users`
+      networkOne = yield* Effect.all([
+        generateKeysAndHasheForNumber('+420733333001'),
+        generateKeysAndHasheForNumber('+420733333002'),
+        generateKeysAndHasheForNumber('+420733333003'),
+        generateKeysAndHasheForNumber('+420733333004'),
+        generateKeysAndHasheForNumber('+420733333005'),
+      ])
+
+      yield* Effect.forEach(networkOne, (oneUser) =>
+        createAndImportUsersFromNetwork(oneUser, networkOne)
       )
 
-      yield* _(
-        Effect.forEach(networkOne, (oneUser) =>
-          createAndImportUsersFromNetwork(oneUser, networkOne)
-        )
-      )
+      networkTwo = yield* Effect.all([
+        generateKeysAndHasheForNumber('+420733333101'),
+        generateKeysAndHasheForNumber('+420733333102'),
+        generateKeysAndHasheForNumber('+420733333106'),
+        generateKeysAndHasheForNumber('+420733333107'),
+        generateKeysAndHasheForNumber('+420733333108'),
+      ])
 
-      networkTwo = yield* _(
-        Effect.all([
-          generateKeysAndHasheForNumber('+420733333101'),
-          generateKeysAndHasheForNumber('+420733333102'),
-          generateKeysAndHasheForNumber('+420733333106'),
-          generateKeysAndHasheForNumber('+420733333107'),
-          generateKeysAndHasheForNumber('+420733333108'),
-        ])
+      yield* Effect.forEach(networkTwo, (twoUser) =>
+        createAndImportUsersFromNetwork(twoUser, [...networkTwo, ...networkOne])
       )
-
-      yield* _(
-        Effect.forEach(networkTwo, (twoUser) =>
-          createAndImportUsersFromNetwork(twoUser, [
-            ...networkTwo,
-            ...networkOne,
-          ])
-        )
-      )
-      yield* _(Effect.sleep(200))
-    }).pipe(Logger.withMinimumLogLevel(LogLevel.None))
+      yield* Effect.sleep(200)
+    }).pipe(Effect.provideService(References.MinimumLogLevel, 'None'))
   )
 })
 
@@ -84,45 +73,43 @@ describe('Import contacts', () => {
 
   it('Imports contacts to the database and replaces existing contacts', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
+      Effect.gen(function* () {
         const me = networkOne[0]
         const myNewContacts = networkOne.slice(1, 3)
 
-        const sql = yield* _(SqlClient.SqlClient)
-        const myOldContactsFromDb = yield* _(sql`
+        const sql = yield* SqlClient.SqlClient
+        const myOldContactsFromDb = yield* sql`
           SELECT
             *
           FROM
             user_contact
           WHERE
             hash_from = ${me.serverHashedNumber}
-        `)
+        `
 
         expect(myOldContactsFromDb).toHaveLength(networkOne.length - 1)
 
-        const app = yield* _(NodeTestingApp)
-        yield* _(setAuthHeaders(me.authHeaders))
+        const app = yield* NodeTestingApp
+        yield* setAuthHeaders(me.authHeaders)
         const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
           me.authHeaders
         )
-        yield* _(
-          app.Contact.importContacts({
-            payload: {
-              contacts: Array.map(myNewContacts, (c) => c.hashedNumber),
-              replace: true,
-            },
-            headers: commonAndSecurityHeaders,
-          })
-        )
+        yield* app.Contact.importContacts({
+          payload: {
+            contacts: Array.map(myNewContacts, (c) => c.hashedNumber),
+            replace: true,
+          },
+          headers: commonAndSecurityHeaders,
+        })
 
-        const myContactsFromDb = yield* _(sql`
+        const myContactsFromDb = yield* sql`
           SELECT
             *
           FROM
             user_contact
           WHERE
             hash_from = ${me.serverHashedNumber}
-        `)
+        `
 
         expect(mockedReportContactsImported).toHaveBeenCalledTimes(1)
 
@@ -133,45 +120,43 @@ describe('Import contacts', () => {
 
   it('Imports contacts to the database and does not replace the existing contacts when replace is false', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
+      Effect.gen(function* () {
         const me = networkOne[0]
         const myNewContacts = networkTwo.slice(1, 3)
 
-        const sql = yield* _(SqlClient.SqlClient)
-        const myOldContactsFromDb = yield* _(sql`
+        const sql = yield* SqlClient.SqlClient
+        const myOldContactsFromDb = yield* sql`
           SELECT
             *
           FROM
             user_contact
           WHERE
             hash_from = ${me.serverHashedNumber}
-        `)
+        `
 
         expect(myOldContactsFromDb).toHaveLength(networkOne.length - 1)
 
-        const app = yield* _(NodeTestingApp)
-        yield* _(setAuthHeaders(me.authHeaders))
+        const app = yield* NodeTestingApp
+        yield* setAuthHeaders(me.authHeaders)
         const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
           me.authHeaders
         )
-        yield* _(
-          app.Contact.importContacts({
-            payload: {
-              contacts: Array.map(myNewContacts, (c) => c.hashedNumber),
-              replace: false,
-            },
-            headers: commonAndSecurityHeaders,
-          })
-        )
+        yield* app.Contact.importContacts({
+          payload: {
+            contacts: Array.map(myNewContacts, (c) => c.hashedNumber),
+            replace: false,
+          },
+          headers: commonAndSecurityHeaders,
+        })
 
-        const myContactsFromDb = yield* _(sql`
+        const myContactsFromDb = yield* sql`
           SELECT
             *
           FROM
             user_contact
           WHERE
             hash_from = ${me.serverHashedNumber}
-        `)
+        `
 
         expect(mockedReportContactsImported).toHaveBeenCalledTimes(1)
 
@@ -184,7 +169,7 @@ describe('Import contacts', () => {
 
   it('Filters duplicities and author hash', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
+      Effect.gen(function* () {
         const me = networkOne[0]
         const myNewContacts = [
           ...networkOne.slice(1, 3),
@@ -192,31 +177,29 @@ describe('Import contacts', () => {
           me,
         ]
 
-        const sql = yield* _(SqlClient.SqlClient)
+        const sql = yield* SqlClient.SqlClient
 
-        const app = yield* _(NodeTestingApp)
-        yield* _(setAuthHeaders(me.authHeaders))
+        const app = yield* NodeTestingApp
+        yield* setAuthHeaders(me.authHeaders)
         const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
           me.authHeaders
         )
-        yield* _(
-          app.Contact.importContacts({
-            payload: {
-              contacts: Array.map(myNewContacts, (c) => c.hashedNumber),
-              replace: true,
-            },
-            headers: commonAndSecurityHeaders,
-          })
-        )
+        yield* app.Contact.importContacts({
+          payload: {
+            contacts: Array.map(myNewContacts, (c) => c.hashedNumber),
+            replace: true,
+          },
+          headers: commonAndSecurityHeaders,
+        })
 
-        const myContactsFromDb = yield* _(sql`
+        const myContactsFromDb = yield* sql`
           SELECT
             *
           FROM
             user_contact
           WHERE
             hash_from = ${me.serverHashedNumber}
-        `)
+        `
 
         expect(myContactsFromDb).toHaveLength(2)
       })
@@ -225,80 +208,74 @@ describe('Import contacts', () => {
 
   it('Does not return error when when contact array is empty just empties the imports', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
+      Effect.gen(function* () {
         const me = networkOne[0]
 
-        const app = yield* _(NodeTestingApp)
-        yield* _(setAuthHeaders(me.authHeaders))
+        const app = yield* NodeTestingApp
+        yield* setAuthHeaders(me.authHeaders)
         const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
           me.authHeaders
         )
-        yield* _(
-          app.Contact.importContacts({
-            payload: {contacts: [], replace: true},
-            headers: commonAndSecurityHeaders,
-          })
-        )
+        yield* app.Contact.importContacts({
+          payload: {contacts: [], replace: true},
+          headers: commonAndSecurityHeaders,
+        })
       })
     )
   })
 
   it('Initial import should accept number of contacts lower than quota', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const redis = yield* _(RedisService)
-        const me = yield* _(generateKeysAndHasheForNumber('+420733222222'))
+      Effect.gen(function* () {
+        const redis = yield* RedisService
+        const me = yield* generateKeysAndHasheForNumber('+420733222222')
         const quotaRecordKey = createQuotaRecordKey(me.serverHashedNumber)
 
-        yield* _(redis.set(ImportContactsQuotaRecord)(quotaRecordKey, 0))
+        yield* redis.set(ImportContactsQuotaRecord)(quotaRecordKey, 0)
 
-        const contactsToImport = yield* _(
-          Effect.all([
-            // 0
-            generateKeysAndHasheForNumber('+420733333006'),
-            generateKeysAndHasheForNumber('+420733333007'),
-            generateKeysAndHasheForNumber('+420733333008'),
-            generateKeysAndHasheForNumber('+420733333009'),
-            generateKeysAndHasheForNumber('+420733333010'),
-            generateKeysAndHasheForNumber('+420733333011'),
-            generateKeysAndHasheForNumber('+420733333012'),
-            generateKeysAndHasheForNumber('+420733333013'),
-            generateKeysAndHasheForNumber('+420733333014'),
-            generateKeysAndHasheForNumber('+420733333015'),
-            // 10
-            generateKeysAndHasheForNumber('+420733333016'),
-            generateKeysAndHasheForNumber('+420733333017'),
-            generateKeysAndHasheForNumber('+420733333018'),
-            generateKeysAndHasheForNumber('+420733333019'),
-            generateKeysAndHasheForNumber('+420733333020'),
-            generateKeysAndHasheForNumber('+420733333021'),
-            generateKeysAndHasheForNumber('+420733333022'),
-            generateKeysAndHasheForNumber('+420733333023'),
-            generateKeysAndHasheForNumber('+420733333024'),
-            generateKeysAndHasheForNumber('+420733333025'),
-          ])
-        )
-        const app = yield* _(NodeTestingApp)
+        const contactsToImport = yield* Effect.all([
+          // 0
+          generateKeysAndHasheForNumber('+420733333006'),
+          generateKeysAndHasheForNumber('+420733333007'),
+          generateKeysAndHasheForNumber('+420733333008'),
+          generateKeysAndHasheForNumber('+420733333009'),
+          generateKeysAndHasheForNumber('+420733333010'),
+          generateKeysAndHasheForNumber('+420733333011'),
+          generateKeysAndHasheForNumber('+420733333012'),
+          generateKeysAndHasheForNumber('+420733333013'),
+          generateKeysAndHasheForNumber('+420733333014'),
+          generateKeysAndHasheForNumber('+420733333015'),
+          // 10
+          generateKeysAndHasheForNumber('+420733333016'),
+          generateKeysAndHasheForNumber('+420733333017'),
+          generateKeysAndHasheForNumber('+420733333018'),
+          generateKeysAndHasheForNumber('+420733333019'),
+          generateKeysAndHasheForNumber('+420733333020'),
+          generateKeysAndHasheForNumber('+420733333021'),
+          generateKeysAndHasheForNumber('+420733333022'),
+          generateKeysAndHasheForNumber('+420733333023'),
+          generateKeysAndHasheForNumber('+420733333024'),
+          generateKeysAndHasheForNumber('+420733333025'),
+        ])
+        const app = yield* NodeTestingApp
 
-        yield* _(setAuthHeaders(me.authHeaders))
+        yield* setAuthHeaders(me.authHeaders)
 
         const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
           me.authHeaders
         )
 
-        yield* _(
-          app.User.createUser({
-            payload: {
-              firebaseToken: null,
-              expoToken: me.notificationToken,
-              vexlNotificationToken: me.vexlNotificationToken,
-              publicKeyV2: Option.none(),
-            },
-            headers: commonAndSecurityHeaders,
-          })
-        )
+        yield* app.User.createUser({
+          payload: {
+            firebaseToken: null,
+            expoToken: me.notificationToken,
+            vexlNotificationToken: me.vexlNotificationToken,
+            publicKeyV2: Option.none(),
+          },
+          headers: commonAndSecurityHeaders,
+        })
 
-        const response = yield* _(
+        const response = yield* pipe(
           app.Contact.importContacts({
             payload: {
               contacts: contactsToImport.map((c) => c.hashedNumber),
@@ -306,72 +283,68 @@ describe('Import contacts', () => {
             },
             headers: commonAndSecurityHeaders,
           }),
-          Effect.either
+          Effect.result
         )
 
-        expect(response._tag).toEqual('Right')
+        expect(response._tag).toEqual('Success')
       })
     )
   })
 
   it('Initial import for new user should not accept more contacts than specified in initial import quota', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const redis = yield* _(RedisService)
-        const me = yield* _(generateKeysAndHasheForNumber('+420733111111'))
+      Effect.gen(function* () {
+        const redis = yield* RedisService
+        const me = yield* generateKeysAndHasheForNumber('+420733111111')
         const quotaRecordKey = createQuotaRecordKey(me.serverHashedNumber)
 
-        yield* _(redis.set(ImportContactsQuotaRecord)(quotaRecordKey, 0))
+        yield* redis.set(ImportContactsQuotaRecord)(quotaRecordKey, 0)
 
-        const contactsToImport = yield* _(
-          Effect.all([
-            // 0
-            generateKeysAndHasheForNumber('+420733333006'),
-            generateKeysAndHasheForNumber('+420733333007'),
-            generateKeysAndHasheForNumber('+420733333008'),
-            generateKeysAndHasheForNumber('+420733333009'),
-            generateKeysAndHasheForNumber('+420733333010'),
-            generateKeysAndHasheForNumber('+420733333011'),
-            generateKeysAndHasheForNumber('+420733333012'),
-            generateKeysAndHasheForNumber('+420733333013'),
-            generateKeysAndHasheForNumber('+420733333014'),
-            generateKeysAndHasheForNumber('+420733333015'),
-            // 10
-            generateKeysAndHasheForNumber('+420733333016'),
-            generateKeysAndHasheForNumber('+420733333017'),
-            generateKeysAndHasheForNumber('+420733333018'),
-            generateKeysAndHasheForNumber('+420733333019'),
-            generateKeysAndHasheForNumber('+420733333020'),
-            generateKeysAndHasheForNumber('+420733333021'),
-            generateKeysAndHasheForNumber('+420733333022'),
-            generateKeysAndHasheForNumber('+420733333023'),
-            generateKeysAndHasheForNumber('+420733333024'),
-            generateKeysAndHasheForNumber('+420733333025'),
-            // 20
-            generateKeysAndHasheForNumber('+420733333026'),
-          ])
-        )
-        const app = yield* _(NodeTestingApp)
+        const contactsToImport = yield* Effect.all([
+          // 0
+          generateKeysAndHasheForNumber('+420733333006'),
+          generateKeysAndHasheForNumber('+420733333007'),
+          generateKeysAndHasheForNumber('+420733333008'),
+          generateKeysAndHasheForNumber('+420733333009'),
+          generateKeysAndHasheForNumber('+420733333010'),
+          generateKeysAndHasheForNumber('+420733333011'),
+          generateKeysAndHasheForNumber('+420733333012'),
+          generateKeysAndHasheForNumber('+420733333013'),
+          generateKeysAndHasheForNumber('+420733333014'),
+          generateKeysAndHasheForNumber('+420733333015'),
+          // 10
+          generateKeysAndHasheForNumber('+420733333016'),
+          generateKeysAndHasheForNumber('+420733333017'),
+          generateKeysAndHasheForNumber('+420733333018'),
+          generateKeysAndHasheForNumber('+420733333019'),
+          generateKeysAndHasheForNumber('+420733333020'),
+          generateKeysAndHasheForNumber('+420733333021'),
+          generateKeysAndHasheForNumber('+420733333022'),
+          generateKeysAndHasheForNumber('+420733333023'),
+          generateKeysAndHasheForNumber('+420733333024'),
+          generateKeysAndHasheForNumber('+420733333025'),
+          // 20
+          generateKeysAndHasheForNumber('+420733333026'),
+        ])
+        const app = yield* NodeTestingApp
 
-        yield* _(setAuthHeaders(me.authHeaders))
+        yield* setAuthHeaders(me.authHeaders)
 
         const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
           me.authHeaders
         )
 
-        yield* _(
-          app.User.createUser({
-            headers: commonAndSecurityHeaders,
-            payload: {
-              firebaseToken: null,
-              expoToken: me.notificationToken,
-              vexlNotificationToken: me.vexlNotificationToken,
-              publicKeyV2: Option.none(),
-            },
-          })
-        )
+        yield* app.User.createUser({
+          headers: commonAndSecurityHeaders,
+          payload: {
+            firebaseToken: null,
+            expoToken: me.notificationToken,
+            vexlNotificationToken: me.vexlNotificationToken,
+            publicKeyV2: Option.none(),
+          },
+        })
 
-        const response = yield* _(
+        const response = yield* pipe(
           app.Contact.importContacts({
             payload: {
               contacts: contactsToImport.map((c) => c.hashedNumber),
@@ -379,7 +352,7 @@ describe('Import contacts', () => {
             },
             headers: commonAndSecurityHeaders,
           }),
-          Effect.either
+          Effect.result
         )
 
         expectErrorResponse(InitialImportContactsQuotaReachedError)(response)
@@ -389,75 +362,71 @@ describe('Import contacts', () => {
 
   it('Should be able to add amount of contacts specified in quota after initial import is done', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const redis = yield* _(RedisService)
-        const me = yield* _(generateKeysAndHasheForNumber('+420733333333'))
+      Effect.gen(function* () {
+        const redis = yield* RedisService
+        const me = yield* generateKeysAndHasheForNumber('+420733333333')
         const quotaRecordKey = createQuotaRecordKey(me.serverHashedNumber)
-        const sql = yield* _(SqlClient.SqlClient)
+        const sql = yield* SqlClient.SqlClient
 
-        yield* _(redis.set(ImportContactsQuotaRecord)(quotaRecordKey, 0))
+        yield* redis.set(ImportContactsQuotaRecord)(quotaRecordKey, 0)
 
-        const contactsToImport = yield* _(
-          Effect.all([
-            // 0
-            generateKeysAndHasheForNumber('+420733333006'),
-            generateKeysAndHasheForNumber('+420733333007'),
-            generateKeysAndHasheForNumber('+420733333008'),
-            generateKeysAndHasheForNumber('+420733333009'),
-            generateKeysAndHasheForNumber('+420733333010'),
-            generateKeysAndHasheForNumber('+420733333011'),
-            generateKeysAndHasheForNumber('+420733333012'),
-            generateKeysAndHasheForNumber('+420733333013'),
-            generateKeysAndHasheForNumber('+420733333014'),
-            generateKeysAndHasheForNumber('+420733333015'),
-            // 10
-            generateKeysAndHasheForNumber('+420733333016'),
-            generateKeysAndHasheForNumber('+420733333017'),
-            generateKeysAndHasheForNumber('+420733333018'),
-            generateKeysAndHasheForNumber('+420733333019'),
-            generateKeysAndHasheForNumber('+420733333020'),
-            generateKeysAndHasheForNumber('+420733333021'),
-            generateKeysAndHasheForNumber('+420733333022'),
-            generateKeysAndHasheForNumber('+420733333023'),
-            generateKeysAndHasheForNumber('+420733333024'),
-            generateKeysAndHasheForNumber('+420733333025'),
-          ])
-        )
-        const app = yield* _(NodeTestingApp)
+        const contactsToImport = yield* Effect.all([
+          // 0
+          generateKeysAndHasheForNumber('+420733333006'),
+          generateKeysAndHasheForNumber('+420733333007'),
+          generateKeysAndHasheForNumber('+420733333008'),
+          generateKeysAndHasheForNumber('+420733333009'),
+          generateKeysAndHasheForNumber('+420733333010'),
+          generateKeysAndHasheForNumber('+420733333011'),
+          generateKeysAndHasheForNumber('+420733333012'),
+          generateKeysAndHasheForNumber('+420733333013'),
+          generateKeysAndHasheForNumber('+420733333014'),
+          generateKeysAndHasheForNumber('+420733333015'),
+          // 10
+          generateKeysAndHasheForNumber('+420733333016'),
+          generateKeysAndHasheForNumber('+420733333017'),
+          generateKeysAndHasheForNumber('+420733333018'),
+          generateKeysAndHasheForNumber('+420733333019'),
+          generateKeysAndHasheForNumber('+420733333020'),
+          generateKeysAndHasheForNumber('+420733333021'),
+          generateKeysAndHasheForNumber('+420733333022'),
+          generateKeysAndHasheForNumber('+420733333023'),
+          generateKeysAndHasheForNumber('+420733333024'),
+          generateKeysAndHasheForNumber('+420733333025'),
+        ])
+        const app = yield* NodeTestingApp
 
-        yield* _(setAuthHeaders(me.authHeaders))
+        yield* setAuthHeaders(me.authHeaders)
 
         const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
           me.authHeaders
         )
 
-        yield* _(
-          app.User.createUser({
-            headers: commonAndSecurityHeaders,
-            payload: {
-              firebaseToken: null,
-              expoToken: me.notificationToken,
-              vexlNotificationToken: me.vexlNotificationToken,
-              publicKeyV2: Option.none(),
-            },
-          })
-        )
+        yield* app.User.createUser({
+          headers: commonAndSecurityHeaders,
+          payload: {
+            firebaseToken: null,
+            expoToken: me.notificationToken,
+            vexlNotificationToken: me.vexlNotificationToken,
+            publicKeyV2: Option.none(),
+          },
+        })
 
-        const initialImportDoneDefaultValue = yield* _(sql`
+        const initialImportDoneDefaultValue = yield* sql`
           SELECT
             initial_import_done
           FROM
             users
           WHERE
             public_key = ${me.authHeaders['public-key']}
-        `)
+        `
 
         expect(initialImportDoneDefaultValue[0]).toHaveProperty(
           'initialImportDone',
           false
         )
 
-        const response = yield* _(
+        const response = yield* pipe(
           app.Contact.importContacts({
             payload: {
               contacts: contactsToImport.map((c) => c.hashedNumber),
@@ -465,41 +434,39 @@ describe('Import contacts', () => {
             },
             headers: commonAndSecurityHeaders,
           }),
-          Effect.either
+          Effect.result
         )
 
-        expect(response._tag).toEqual('Right')
+        expect(response._tag).toEqual('Success')
 
-        const updatedImportDoneValue = yield* _(sql`
+        const updatedImportDoneValue = yield* sql`
           SELECT
             initial_import_done
           FROM
             users
           WHERE
             public_key = ${me.authHeaders['public-key']}
-        `)
+        `
 
         expect(updatedImportDoneValue[0]).toHaveProperty(
           'initialImportDone',
           true
         )
 
-        const contactsToImportAfterInitialImport = yield* _(
-          Effect.all([
-            generateKeysAndHasheForNumber('+420733333027'),
-            generateKeysAndHasheForNumber('+420733333028'),
-            generateKeysAndHasheForNumber('+420733333029'),
-            generateKeysAndHasheForNumber('+420733333030'),
-            generateKeysAndHasheForNumber('+420733333031'),
-            generateKeysAndHasheForNumber('+420733333032'),
-            generateKeysAndHasheForNumber('+420733333033'),
-            generateKeysAndHasheForNumber('+420733333034'),
-            generateKeysAndHasheForNumber('+420733333035'),
-            generateKeysAndHasheForNumber('+420733333036'),
-          ])
-        )
+        const contactsToImportAfterInitialImport = yield* Effect.all([
+          generateKeysAndHasheForNumber('+420733333027'),
+          generateKeysAndHasheForNumber('+420733333028'),
+          generateKeysAndHasheForNumber('+420733333029'),
+          generateKeysAndHasheForNumber('+420733333030'),
+          generateKeysAndHasheForNumber('+420733333031'),
+          generateKeysAndHasheForNumber('+420733333032'),
+          generateKeysAndHasheForNumber('+420733333033'),
+          generateKeysAndHasheForNumber('+420733333034'),
+          generateKeysAndHasheForNumber('+420733333035'),
+          generateKeysAndHasheForNumber('+420733333036'),
+        ])
 
-        const successResponse = yield* _(
+        const successResponse = yield* pipe(
           app.Contact.importContacts({
             payload: {
               contacts: contactsToImportAfterInitialImport.map(
@@ -509,23 +476,21 @@ describe('Import contacts', () => {
             },
             headers: commonAndSecurityHeaders,
           }),
-          Effect.either
+          Effect.result
         )
 
-        expect(successResponse._tag).toEqual('Right')
+        expect(successResponse._tag).toEqual('Success')
 
-        const moreContactsToImportThatExceedQuota = yield* _(
-          Effect.all([
-            // 0
-            generateKeysAndHasheForNumber('+420733333037'),
-            generateKeysAndHasheForNumber('+420733333038'),
-            generateKeysAndHasheForNumber('+420733333039'),
-            generateKeysAndHasheForNumber('+420733333040'),
-            generateKeysAndHasheForNumber('+420733333041'),
-          ])
-        )
+        const moreContactsToImportThatExceedQuota = yield* Effect.all([
+          // 0
+          generateKeysAndHasheForNumber('+420733333037'),
+          generateKeysAndHasheForNumber('+420733333038'),
+          generateKeysAndHasheForNumber('+420733333039'),
+          generateKeysAndHasheForNumber('+420733333040'),
+          generateKeysAndHasheForNumber('+420733333041'),
+        ])
 
-        const failedResponse = yield* _(
+        const failedResponse = yield* pipe(
           app.Contact.importContacts({
             payload: {
               contacts: moreContactsToImportThatExceedQuota.map(
@@ -535,7 +500,7 @@ describe('Import contacts', () => {
             },
             headers: commonAndSecurityHeaders,
           }),
-          Effect.either
+          Effect.result
         )
 
         expectErrorResponse(ImportContactsQuotaReachedError)(failedResponse)
@@ -545,37 +510,35 @@ describe('Import contacts', () => {
 
   it('Should not increase limit and meet quota when importing the same phone numbers again', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const redis = yield* _(RedisService)
-        const me = yield* _(generateKeysAndHasheForNumber('+420733444444'))
+      Effect.gen(function* () {
+        const redis = yield* RedisService
+        const me = yield* generateKeysAndHasheForNumber('+420733444444')
         const quotaRecordKey = createQuotaRecordKey(me.serverHashedNumber)
 
-        yield* _(redis.set(ImportContactsQuotaRecord)(quotaRecordKey, 0))
+        yield* redis.set(ImportContactsQuotaRecord)(quotaRecordKey, 0)
 
-        const contactsToImport = yield* _(
-          Effect.all([generateKeysAndHasheForNumber('+420733333006')])
-        )
-        const app = yield* _(NodeTestingApp)
+        const contactsToImport = yield* Effect.all([
+          generateKeysAndHasheForNumber('+420733333006'),
+        ])
+        const app = yield* NodeTestingApp
 
-        yield* _(setAuthHeaders(me.authHeaders))
+        yield* setAuthHeaders(me.authHeaders)
 
         const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
           me.authHeaders
         )
 
-        yield* _(
-          app.User.createUser({
-            payload: {
-              firebaseToken: null,
-              expoToken: me.notificationToken,
-              vexlNotificationToken: me.vexlNotificationToken,
-              publicKeyV2: Option.none(),
-            },
-            headers: commonAndSecurityHeaders,
-          })
-        )
+        yield* app.User.createUser({
+          payload: {
+            firebaseToken: null,
+            expoToken: me.notificationToken,
+            vexlNotificationToken: me.vexlNotificationToken,
+            publicKeyV2: Option.none(),
+          },
+          headers: commonAndSecurityHeaders,
+        })
 
-        const response = yield* _(
+        const response = yield* pipe(
           app.Contact.importContacts({
             payload: {
               contacts: contactsToImport.map((c) => c.hashedNumber),
@@ -583,27 +546,25 @@ describe('Import contacts', () => {
             },
             headers: commonAndSecurityHeaders,
           }),
-          Effect.either
+          Effect.result
         )
 
-        expect(response._tag).toEqual('Right')
+        expect(response._tag).toEqual('Success')
 
-        const contactsToImportAfterInitialImport = yield* _(
-          Effect.all([
-            generateKeysAndHasheForNumber('+420733333027'),
-            generateKeysAndHasheForNumber('+420733333028'),
-            generateKeysAndHasheForNumber('+420733333029'),
-            generateKeysAndHasheForNumber('+420733333030'),
-            generateKeysAndHasheForNumber('+420733333031'),
-            generateKeysAndHasheForNumber('+420733333032'),
-            generateKeysAndHasheForNumber('+420733333033'),
-            generateKeysAndHasheForNumber('+420733333034'),
-            generateKeysAndHasheForNumber('+420733333035'),
-            generateKeysAndHasheForNumber('+420733333036'),
-          ])
-        )
+        const contactsToImportAfterInitialImport = yield* Effect.all([
+          generateKeysAndHasheForNumber('+420733333027'),
+          generateKeysAndHasheForNumber('+420733333028'),
+          generateKeysAndHasheForNumber('+420733333029'),
+          generateKeysAndHasheForNumber('+420733333030'),
+          generateKeysAndHasheForNumber('+420733333031'),
+          generateKeysAndHasheForNumber('+420733333032'),
+          generateKeysAndHasheForNumber('+420733333033'),
+          generateKeysAndHasheForNumber('+420733333034'),
+          generateKeysAndHasheForNumber('+420733333035'),
+          generateKeysAndHasheForNumber('+420733333036'),
+        ])
 
-        const successResponse = yield* _(
+        const successResponse = yield* pipe(
           app.Contact.importContacts({
             payload: {
               contacts: contactsToImportAfterInitialImport.map(
@@ -613,12 +574,12 @@ describe('Import contacts', () => {
             },
             headers: commonAndSecurityHeaders,
           }),
-          Effect.either
+          Effect.result
         )
 
-        expect(successResponse._tag).toEqual('Right')
+        expect(successResponse._tag).toEqual('Success')
 
-        const secondSuccessResponse = yield* _(
+        const secondSuccessResponse = yield* pipe(
           app.Contact.importContacts({
             payload: {
               contacts: contactsToImportAfterInitialImport.map(
@@ -628,68 +589,62 @@ describe('Import contacts', () => {
             },
             headers: commonAndSecurityHeaders,
           }),
-          Effect.either
+          Effect.result
         )
 
-        expect(secondSuccessResponse._tag).toEqual('Right')
+        expect(secondSuccessResponse._tag).toEqual('Success')
       })
     )
   })
 
   it('Should return proper phoneNumberHashesToServerClientHash lookup table', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const redis = yield* _(RedisService)
-        const me = yield* _(generateKeysAndHasheForNumber('+420733111111'))
+      Effect.gen(function* () {
+        const redis = yield* RedisService
+        const me = yield* generateKeysAndHasheForNumber('+420733111111')
         const quotaRecordKey = createQuotaRecordKey(me.serverHashedNumber)
 
-        yield* _(redis.set(ImportContactsQuotaRecord)(quotaRecordKey, 0))
+        yield* redis.set(ImportContactsQuotaRecord)(quotaRecordKey, 0)
 
-        const contactsToImport = yield* _(
-          Effect.all([
-            generateKeysAndHasheForNumber('+420733333006'),
-            generateKeysAndHasheForNumber('+420733333007'),
-            generateKeysAndHasheForNumber('+420733333008'),
-            generateKeysAndHasheForNumber('+420733333009'),
-            generateKeysAndHasheForNumber('+420733333010'),
-            generateKeysAndHasheForNumber('+420733333011'),
-            generateKeysAndHasheForNumber('+420733333012'),
-            generateKeysAndHasheForNumber('+420733333013'),
-            generateKeysAndHasheForNumber('+420733333014'),
-            generateKeysAndHasheForNumber('+420733333015'),
-            generateKeysAndHasheForNumber('+420733333016'),
-            generateKeysAndHasheForNumber('+420733333017'),
-          ])
-        )
-        const app = yield* _(NodeTestingApp)
+        const contactsToImport = yield* Effect.all([
+          generateKeysAndHasheForNumber('+420733333006'),
+          generateKeysAndHasheForNumber('+420733333007'),
+          generateKeysAndHasheForNumber('+420733333008'),
+          generateKeysAndHasheForNumber('+420733333009'),
+          generateKeysAndHasheForNumber('+420733333010'),
+          generateKeysAndHasheForNumber('+420733333011'),
+          generateKeysAndHasheForNumber('+420733333012'),
+          generateKeysAndHasheForNumber('+420733333013'),
+          generateKeysAndHasheForNumber('+420733333014'),
+          generateKeysAndHasheForNumber('+420733333015'),
+          generateKeysAndHasheForNumber('+420733333016'),
+          generateKeysAndHasheForNumber('+420733333017'),
+        ])
+        const app = yield* NodeTestingApp
 
-        yield* _(setAuthHeaders(me.authHeaders))
+        yield* setAuthHeaders(me.authHeaders)
 
         const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
           me.authHeaders
         )
 
-        yield* _(
-          app.User.createUser({
-            headers: commonAndSecurityHeaders,
-            payload: {
-              firebaseToken: null,
-              expoToken: me.notificationToken,
-              vexlNotificationToken: me.vexlNotificationToken,
-              publicKeyV2: Option.none(),
-            },
-          })
-        )
+        yield* app.User.createUser({
+          headers: commonAndSecurityHeaders,
+          payload: {
+            firebaseToken: null,
+            expoToken: me.notificationToken,
+            vexlNotificationToken: me.vexlNotificationToken,
+            publicKeyV2: Option.none(),
+          },
+        })
 
-        const response = yield* _(
-          app.Contact.importContacts({
-            payload: {
-              contacts: contactsToImport.map((c) => c.hashedNumber),
-              replace: true,
-            },
-            headers: commonAndSecurityHeaders,
-          })
-        )
+        const response = yield* app.Contact.importContacts({
+          payload: {
+            contacts: contactsToImport.map((c) => c.hashedNumber),
+            replace: true,
+          },
+          headers: commonAndSecurityHeaders,
+        })
 
         const expectedLookupTable = pipe(
           contactsToImport,
@@ -710,62 +665,60 @@ describe('Import contacts', () => {
 describe('Notification', () => {
   beforeEach(async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        yield* _(Effect.sleep(400))
-        yield* _(clearEnqueuedNotifications)
+      Effect.gen(function* () {
+        yield* Effect.sleep(400)
+        yield* clearEnqueuedNotifications
       })
     )
   })
 
   it('Enqueues notifications for users with vexlNotificationToken when contacts are imported', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        yield* _(clearEnqueuedNotifications)
+      Effect.gen(function* () {
+        yield* clearEnqueuedNotifications
 
         const me = networkOne[0]
-        const sql = yield* _(SqlClient.SqlClient)
+        const sql = yield* SqlClient.SqlClient
 
         // Clear all vexl_notification_tokens first
-        yield* _(sql`
+        yield* sql`
           UPDATE users
           SET
             vexl_notification_token = NULL
-        `)
+        `
 
         // Set vexlNotificationToken for two users from networkOne
         const userWithVexlToken1 = networkOne[1]
         const userWithVexlToken2 = networkOne[2]
 
-        yield* _(sql`
+        yield* sql`
           UPDATE users
           SET
             vexl_notification_token = ${'vexl_nt_net1_user2' as VexlNotificationToken}
           WHERE
             public_key = ${userWithVexlToken1.keys.publicKeyPemBase64}
-        `)
-        yield* _(sql`
+        `
+        yield* sql`
           UPDATE users
           SET
             vexl_notification_token = ${'vexl_nt_net1_user3' as VexlNotificationToken}
           WHERE
             public_key = ${userWithVexlToken2.keys.publicKeyPemBase64}
-        `)
+        `
 
-        const app = yield* _(NodeTestingApp)
-        yield* _(setAuthHeaders(me.authHeaders))
+        const app = yield* NodeTestingApp
+        yield* setAuthHeaders(me.authHeaders)
         const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
           me.authHeaders
         )
 
         // Clear contacts first
-        yield* _(
-          app.Contact.importContacts({
-            payload: {contacts: [], replace: true},
-            headers: commonAndSecurityHeaders,
-          })
-        )
-        yield* _(Effect.sleep(200))
-        yield* _(clearEnqueuedNotifications)
+        yield* app.Contact.importContacts({
+          payload: {contacts: [], replace: true},
+          headers: commonAndSecurityHeaders,
+        })
+        yield* Effect.sleep(200)
+        yield* clearEnqueuedNotifications
 
         // Import contacts to trigger notifications
         const contactsToImport = Array.filter(
@@ -773,20 +726,18 @@ describe('Notification', () => {
           (one) => one.hashedNumber !== me.hashedNumber
         )
 
-        yield* _(
-          app.Contact.importContacts({
-            payload: {
-              contacts: Array.map(contactsToImport, (c) => c.hashedNumber),
-              replace: true,
-            },
-            headers: commonAndSecurityHeaders,
-          })
-        )
+        yield* app.Contact.importContacts({
+          payload: {
+            contacts: Array.map(contactsToImport, (c) => c.hashedNumber),
+            replace: true,
+          },
+          headers: commonAndSecurityHeaders,
+        })
 
-        yield* _(Effect.sleep(200))
+        yield* Effect.sleep(200)
 
         // New MQ path: notifications are enqueued for all users
-        const enqueuedNotifications = yield* _(getEnqueuedNotifications)
+        const enqueuedNotifications = yield* getEnqueuedNotifications
         const newUserNotifications = enqueuedNotifications.filter(
           (n) => n.task._tag === 'NewUserNotificationMqEntry'
         )
@@ -812,7 +763,7 @@ describe('Notification', () => {
         )
 
         // Clean up: remove vexl_notification_tokens
-        yield* _(sql`
+        yield* sql`
           UPDATE users
           SET
             vexl_notification_token = NULL
@@ -821,7 +772,7 @@ describe('Notification', () => {
               ${userWithVexlToken1.keys.publicKeyPemBase64},
               ${userWithVexlToken2.keys.publicKeyPemBase64}
             )
-        `)
+        `
       })
     )
   })
@@ -829,66 +780,58 @@ describe('Notification', () => {
   it('Does not enqueue second level notifications for connections through unregistered public numbers', async () => {
     await withPublicImportCountThreshold(2, async () => {
       await runPromiseInMockedEnvironment(
-        Effect.gen(function* (_) {
-          const alice = yield* _(generateKeysAndHasheForNumber('+420733555001'))
-          const bob = yield* _(generateKeysAndHasheForNumber('+420733555002'))
-          const carol = yield* _(generateKeysAndHasheForNumber('+420733555003'))
-          const extraImporterOne = yield* _(
-            generateKeysAndHasheForNumber('+420733555004')
-          )
-          const extraImporterTwo = yield* _(
-            generateKeysAndHasheForNumber('+420733555005')
-          )
-          const publicNumber = yield* _(
-            generateKeysAndHasheForNumber('+420733555006')
-          )
-          const loggedInPopularContact = yield* _(
-            generateKeysAndHasheForNumber('+420733555007')
-          )
+        Effect.gen(function* () {
+          const alice = yield* generateKeysAndHasheForNumber('+420733555001')
+          const bob = yield* generateKeysAndHasheForNumber('+420733555002')
+          const carol = yield* generateKeysAndHasheForNumber('+420733555003')
+          const extraImporterOne =
+            yield* generateKeysAndHasheForNumber('+420733555004')
+          const extraImporterTwo =
+            yield* generateKeysAndHasheForNumber('+420733555005')
+          const publicNumber =
+            yield* generateKeysAndHasheForNumber('+420733555006')
+          const loggedInPopularContact =
+            yield* generateKeysAndHasheForNumber('+420733555007')
 
-          yield* _(createUserOnNetwork(alice))
-          yield* _(createUserOnNetwork(bob))
-          yield* _(createUserOnNetwork(carol))
-          yield* _(createUserOnNetwork(extraImporterOne))
-          yield* _(createUserOnNetwork(extraImporterTwo))
-          yield* _(createUserOnNetwork(loggedInPopularContact))
+          yield* createUserOnNetwork(alice)
+          yield* createUserOnNetwork(bob)
+          yield* createUserOnNetwork(carol)
+          yield* createUserOnNetwork(extraImporterOne)
+          yield* createUserOnNetwork(extraImporterTwo)
+          yield* createUserOnNetwork(loggedInPopularContact)
 
           // bob is connected to alice only through the unregistered public
           // number, carol only through the popular but registered contact.
           // Both shared contacts end up with 3 importers, above the threshold.
-          yield* _(importUsersFromNetwork(bob, [publicNumber]))
-          yield* _(importUsersFromNetwork(carol, [loggedInPopularContact]))
-          yield* _(
-            importUsersFromNetwork(extraImporterOne, [
-              publicNumber,
-              loggedInPopularContact,
-            ])
-          )
-          yield* _(
-            importUsersFromNetwork(extraImporterTwo, [
-              publicNumber,
-              loggedInPopularContact,
-            ])
-          )
+          yield* importUsersFromNetwork(bob, [publicNumber])
+          yield* importUsersFromNetwork(carol, [loggedInPopularContact])
+          yield* importUsersFromNetwork(extraImporterOne, [
+            publicNumber,
+            loggedInPopularContact,
+          ])
+          yield* importUsersFromNetwork(extraImporterTwo, [
+            publicNumber,
+            loggedInPopularContact,
+          ])
 
-          yield* _(Effect.sleep(200))
-          yield* _(clearEnqueuedNotifications)
+          yield* Effect.sleep(200)
+          yield* clearEnqueuedNotifications
 
-          yield* _(
-            importUsersFromNetwork(alice, [
-              publicNumber,
-              loggedInPopularContact,
-            ])
-          )
-          yield* _(Effect.sleep(200))
+          yield* importUsersFromNetwork(alice, [
+            publicNumber,
+            loggedInPopularContact,
+          ])
+          yield* Effect.sleep(200)
 
-          const enqueuedNotifications = yield* _(getEnqueuedNotifications)
+          const enqueuedNotifications = yield* getEnqueuedNotifications
           const notifiedExpoTokens = pipe(
             enqueuedNotifications,
-            Array.filterMap((n) =>
-              n.task._tag === 'NewUserNotificationMqEntry'
-                ? Option.fromNullable(n.task.notificationToken)
-                : Option.none()
+            Array.filterMap(
+              Filter.fromPredicateOption((n) =>
+                n.task._tag === 'NewUserNotificationMqEntry'
+                  ? Option.fromNullishOr(n.task.notificationToken)
+                  : Option.none()
+              )
             )
           )
 

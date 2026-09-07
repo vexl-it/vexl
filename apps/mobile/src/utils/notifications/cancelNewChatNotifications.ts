@@ -1,7 +1,7 @@
 import {NewChatMessageNoticeNotificationData} from '@vexl-next/domain/src/general/notifications'
 import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
-import {Array, Effect, Option, pipe, Schema} from 'effect'
+import {Array, Effect, Filter, Option, pipe, Schema} from 'effect'
 import {
   dismissNotificationAsync,
   getPresentedNotificationsAsync,
@@ -53,7 +53,7 @@ const decodeChatNoticeBody = (
 ): Option.Option<typeof NewChatMessageNoticeNotificationData.Type> => {
   if (typeof data === 'string') {
     return Schema.decodeOption(
-      Schema.parseJson(NewChatMessageNoticeNotificationData)
+      Schema.fromJsonString(NewChatMessageNoticeNotificationData)
     )(data)
   }
 
@@ -126,11 +126,11 @@ const getSystemNotificationsIdsActionAtom = atom(
   ) => {
     const systemNotificationsIds = Array.filterMap(
       allNotifications,
-      filterNotification
+      Filter.fromPredicateOption(filterNotification)
     )
     const allSystemNotificationsIds = Array.filterMap(
       allNotifications,
-      isPlaceholderNotificationForChat
+      Filter.fromPredicateOption(isPlaceholderNotificationForChat)
     )
     const reportedIds = get(alreadyReportedNotificationsIdsAtom)
     const notReportedIds = Array.difference(systemNotificationsIds, reportedIds)
@@ -164,44 +164,41 @@ async function cancelNewChatNotificationsMatching({
     }
   )
 
-  if (Array.isNonEmptyArray(idsToReport)) {
-    Effect.gen(function* (_) {
-      const notificationsEnabled = yield* _(
+  if (Array.isArrayNonEmpty(idsToReport)) {
+    Effect.gen(function* () {
+      const notificationsEnabled = yield* pipe(
         areNotificationsEnabledE(),
         Effect.option
       )
-      yield* _(
-        metrics
-          .reportNotificationInteraction({
-            count: idsToReport.length,
-            notificationType: 'Chat',
-            type: 'UINotificationReceived',
-            uuid: generateUuid(),
-            ...(Option.isSome(notificationsEnabled)
-              ? {
-                  notificationsEnabled:
-                    notificationsEnabled.value.notifications,
-                  backgroundTaskEnabled:
-                    notificationsEnabled.value.backgroundTasks,
-                }
-              : {}),
-          })
-          .pipe(
-            Effect.timeout(500),
-            Effect.retry({times: 3}),
-            Effect.tapError((e) =>
-              reportErrorE(
-                'warn',
-                new Error(
-                  'Error while sending UI notification received to metrics service'
-                ),
-                {
-                  e,
-                }
-              )
+      yield* metrics
+        .reportNotificationInteraction({
+          count: idsToReport.length,
+          notificationType: 'Chat',
+          type: 'UINotificationReceived',
+          uuid: generateUuid(),
+          ...(Option.isSome(notificationsEnabled)
+            ? {
+                notificationsEnabled: notificationsEnabled.value.notifications,
+                backgroundTaskEnabled:
+                  notificationsEnabled.value.backgroundTasks,
+              }
+            : {}),
+        })
+        .pipe(
+          Effect.timeout(500),
+          Effect.retry({times: 3}),
+          Effect.tapError((e) =>
+            reportErrorE(
+              'warn',
+              new Error(
+                'Error while sending UI notification received to metrics service'
+              ),
+              {
+                e,
+              }
             )
           )
-      )
+        )
     }).pipe(Effect.runFork)
   }
 
@@ -221,7 +218,7 @@ export async function cancelNewChatNotificationsForTargetTokens(
 ): Promise<void> {
   // iOS-only is enforced at the call sites (the only place generic system
   // notifications exist); here we just skip the empty case.
-  if (!Array.isNonEmptyReadonlyArray(targetTokens)) return
+  if (!Array.isReadonlyArrayNonEmpty(targetTokens)) return
 
   await cancelNewChatNotificationsMatching({
     filterNotification:

@@ -6,5 +6,5 @@ export class PingMessage extends Schema.TaggedClass<PingMessage>()(
   {}
 ) {}
 
-export const ClientMessage = Schema.Union(PingMessage, DebugMessage)
+export const ClientMessage = Schema.Union([PingMessage, DebugMessage])
 export type ClientMessage = Schema.Schema.Type<typeof ClientMessage>

@@ -4,7 +4,7 @@ import {
 } from '@vexl-next/domain/src/general/offers'
 import {Button, EditRow, FilterTag} from '@vexl-next/ui'
 import type {IconProps} from '@vexl-next/ui/src/icons/types'
-import {useMolecule} from 'bunshi/dist/react'
+import {useMolecule} from 'bunshi/react'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React from 'react'
 import Animated, {FadeIn, FadeOut} from 'react-native-reanimated'

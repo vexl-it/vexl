@@ -23,13 +23,13 @@ const fetchExchangePrice = (
       return new GetExchangeRateError({reason: 'YadioError', status: 502})
     },
   }).pipe(
-    Effect.flatMap(Schema.decodeUnknown(YadioResponse)),
+    Effect.flatMap(Schema.decodeUnknownEffect(YadioResponse)),
     Effect.map((one) => ({
       BTC: one.BTC,
       lastUpdatedAt: Option.some(unixMillisecondsNow()),
     })),
-    Effect.catchTag('ParseError', (e) =>
-      Effect.zipLeft(
+    Effect.catchTag('SchemaError', (e) =>
+      Effect.tap(
         new GetExchangeRateError({reason: 'YadioError', status: 502}),
         Effect.logError('Error while parsing response from Yadio', e)
       )
@@ -49,11 +49,9 @@ const getExchangeRatePrice =
   (
     request: GetExchangeRateRequest
   ): Effect.Effect<GetExchangeRateResponse, GetExchangeRateError> => {
-    return Effect.gen(function* (_) {
-      return yield* _(
-        cache
-          .get(request.currency)
-          .pipe(Effect.tapErrorCause(() => cache.invalidate(request.currency)))
+    return Effect.gen(function* () {
+      return yield* Cache.get(cache, request.currency).pipe(
+        Effect.tapCause(() => Cache.invalidate(cache, request.currency))
       )
     }).pipe(
       Effect.withSpan('getExchangeRateFromCache', {
@@ -66,20 +64,18 @@ export interface YadioOperations {
   getExchangeRatePrice: ReturnType<typeof getExchangeRatePrice>
 }
 
-export class YadioService extends Context.Tag('YadioService')<
+export class YadioService extends Context.Service<
   YadioService,
   YadioOperations
->() {
+>()('YadioService') {
   static readonly Live = Layer.effect(
     YadioService,
-    Effect.gen(function* (_) {
-      const cache = yield* _(
-        Cache.make({
-          capacity: Number.MAX_SAFE_INTEGER,
-          timeToLive: Duration.minutes(10),
-          lookup: fetchExchangePrice,
-        })
-      )
+    Effect.gen(function* () {
+      const cache = yield* Cache.make({
+        capacity: Number.MAX_SAFE_INTEGER,
+        timeToLive: Duration.minutes(10),
+        lookup: fetchExchangePrice,
+      })
       return {
         getExchangeRatePrice: getExchangeRatePrice(cache),
       }

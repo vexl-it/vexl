@@ -4,6 +4,7 @@ import {
 } from '@vexl-next/cryptography/src/KeyHolder'
 import {NotificationCypher} from '@vexl-next/domain/src/general/notifications/NotificationCypher.brand'
 import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
+import {PlatformName} from '@vexl-next/domain/src/utility/PlatformName'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {
   eciesGTMDecryptE,
@@ -11,24 +12,24 @@ import {
   eciesGTMEncryptE,
   type CryptoError,
 } from '@vexl-next/generic-utils/src/effect-helpers/crypto'
-import {PlatformName} from '@vexl-next/rest-api'
 import {InvalidFcmCypherError} from '@vexl-next/rest-api/src/services/notification/contract'
 import {Effect, Option, pipe, Schema, String} from 'effect'
-import {type ParseError} from 'effect/ParseResult'
+import {type SchemaError} from 'effect/Schema'
 import {type NotificationTokenOrCypher} from './callWithNotificationService'
 
 const EXPO_V2_CYPHER_PREFIX = 'EXPO_V2'
 
-const ExpoV2CypherPayload = Schema.compose(
-  Schema.StringFromBase64,
-  Schema.parseJson(
-    Schema.Struct({
-      locale: Schema.String,
-      notificationTokenEncrypted: EciesGTMECypher,
-      clientVersion: VersionCode,
-      clientPlatform: PlatformName,
-      serverPublicKey: PublicKeyPemBase64,
-    })
+const ExpoV2CypherPayload = Schema.StringFromBase64.pipe(
+  Schema.decodeTo(
+    Schema.fromJsonString(
+      Schema.Struct({
+        locale: Schema.String,
+        notificationTokenEncrypted: EciesGTMECypher,
+        clientVersion: VersionCode,
+        clientPlatform: PlatformName,
+        serverPublicKey: PublicKeyPemBase64,
+      })
+    )
   )
 )
 export type ExpoV2CypherPayload = typeof ExpoV2CypherPayload.Type
@@ -45,11 +46,10 @@ export function ecnryptNotificationToken({
   clientVersion: VersionCode
   clientPlatform: PlatformName
   serverPublicKey: PublicKeyPemBase64
-}): Effect.Effect<NotificationCypher, CryptoError | ParseError> {
-  return Effect.gen(function* (_) {
-    const encryptedToken = yield* _(
-      eciesGTMEncryptE(serverPublicKey)(notificationToken)
-    )
+}): Effect.Effect<NotificationCypher, CryptoError | SchemaError> {
+  return Effect.gen(function* () {
+    const encryptedToken =
+      yield* eciesGTMEncryptE(serverPublicKey)(notificationToken)
 
     const dataToEncode: ExpoV2CypherPayload = {
       locale,
@@ -59,10 +59,10 @@ export function ecnryptNotificationToken({
       serverPublicKey,
     }
 
-    return yield* _(
-      Schema.encode(ExpoV2CypherPayload)(dataToEncode),
+    return yield* pipe(
+      Schema.encodeEffect(ExpoV2CypherPayload)(dataToEncode),
       Effect.map((one) => `${EXPO_V2_CYPHER_PREFIX}.${one}`),
-      Effect.flatMap(Schema.decode(NotificationCypher))
+      Effect.flatMap(Schema.decodeEffect(NotificationCypher))
     )
   })
 }
@@ -102,22 +102,17 @@ export const decryptNotificationToken = ({
   privateKey: PrivateKeyPemBase64
   notificationCypher: NotificationCypher
 }): Effect.Effect<DecodeResult, CryptoError | InvalidFcmCypherError> =>
-  Effect.gen(function* (_) {
-    const parts = yield* _(
-      extractPartsOfNotificationCypher({
-        notificationCypher,
-      }),
-      Effect.catchTag(
-        'NoSuchElementException',
-        () => new InvalidFcmCypherError()
-      )
+  Effect.gen(function* () {
+    const parts = yield* Effect.fromOption(
+      extractPartsOfNotificationCypher({notificationCypher}),
+      () => new InvalidFcmCypherError()
     )
 
     const {data} = parts
-    const decryptedToken = yield* _(
+    const decryptedToken = yield* pipe(
       eciesGTMDecryptE(privateKey)(data.notificationTokenEncrypted),
-      Effect.flatMap(Schema.decode(ExpoNotificationToken)),
-      Effect.catchTag('ParseError', () => new InvalidFcmCypherError())
+      Effect.flatMap(Schema.decodeEffect(ExpoNotificationToken)),
+      Effect.catchTag('SchemaError', () => new InvalidFcmCypherError())
     )
 
     return {

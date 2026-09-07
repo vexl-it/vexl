@@ -13,10 +13,9 @@
     "print-api-call-limits": "tsx src/printApiCallLimits.ts"
   },
   "dependencies": {
-    "@effect/platform": "^0.93.6",
-    "@effect/platform-node": "^0.103.0",
+    "@effect/platform-node": "4.0.0-rc.112",
     "@vexl-next/rest-api": "0.0.0",
-    "effect": "^3.20.0"
+    "effect": "4.0.0-rc.112"
   },
   "devDependencies": {
     "@vexl-next/eslint-config": "0.0.0",

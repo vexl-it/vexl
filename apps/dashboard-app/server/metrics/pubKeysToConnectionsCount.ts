@@ -11,6 +11,7 @@ import {
   Layer,
   Option,
   Order,
+  pipe,
   Schema,
   Stream,
   SubscriptionRef,
@@ -26,15 +27,13 @@ export class CountWithDate extends Schema.Class<CountWithDate>('CountWithDate')(
   }
 ) {}
 
-export class CountriesToConnectionsCountState extends Context.Tag(
-  'CountriesToConnectionsCountState'
-)<
+export class CountriesToConnectionsCountState extends Context.Service<
   CountriesToConnectionsCountState,
   SubscriptionRef.SubscriptionRef<{
     pubKeyToConnectionsCount: HashMap.HashMap<PublicKeyPemBase64, CountWithDate>
     lastIdFetched: Option.Option<ContactConnectionId>
   }>
->() {
+>()('CountriesToConnectionsCountState') {
   static readonly Live = Layer.effect(
     CountriesToConnectionsCountState,
     SubscriptionRef.make({
@@ -51,10 +50,10 @@ export const syncCountriesToConnectionsEffect =
   CountriesToConnectionsCountState.pipe(
     Effect.flatMap(
       SubscriptionRef.updateEffect((value) =>
-        Effect.gen(function* (_) {
+        Effect.gen(function* () {
           const now = unixMillisecondsNow()
-          const maxId = yield* _(queryMaxIdConnections)
-          const delta = yield* _(
+          const maxId = yield* queryMaxIdConnections
+          const delta = yield* pipe(
             queryPubkeysToConnections({maxId, minId: value.lastIdFetched}),
             Effect.map(
               Array.map(
@@ -68,7 +67,7 @@ export const syncCountriesToConnectionsEffect =
             Effect.map(HashMap.fromIterable)
           )
 
-          yield* _(Effect.log(`Got ${HashMap.size(delta)} new connections`))
+          yield* Effect.log(`Got ${HashMap.size(delta)} new connections`)
 
           const updatedState = HashMap.union(
             value.pubKeyToConnectionsCount,
@@ -95,7 +94,7 @@ export const syncCountriesToConnectionsEffect =
 
 export const pubKeysToConnectionsChanges =
   CountriesToConnectionsCountState.pipe(
-    Effect.map((a) => a.changes),
+    Effect.map((a) => SubscriptionRef.changes(a)),
     Stream.unwrap,
     Stream.map((a) => a.pubKeyToConnectionsCount),
     Stream.changes
@@ -109,12 +108,11 @@ export class ConnectionWithDate extends Schema.Class<ConnectionWithDate>(
   count: Schema.Number,
 }) {}
 
-const sortConnectionWithDateDesc: Order.Order<ConnectionWithDate> =
-  Order.reverse(
-    Order.struct({
-      date: Order.number,
-    })
-  )
+const sortConnectionWithDateDesc: Order.Order<ConnectionWithDate> = Order.flip(
+  Order.Struct({
+    date: Order.Number,
+  })
+)
 
 export const connectionsSortedByAddedChanges = pubKeysToConnectionsChanges.pipe(
   Stream.map(HashMap.entries),

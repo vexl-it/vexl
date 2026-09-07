@@ -6,19 +6,18 @@ import {ClubMemberCountChangeDbService} from '../../db/ClubMemberCountChangeDbSe
 import {ClubMembersDbService} from '../../db/ClubMemberDbService'
 import {type ClubRecordId} from '../../db/ClubsDbService/domain'
 
-export const checkForInactiveUsers = Effect.gen(function* (_) {
+export const checkForInactiveUsers = Effect.gen(function* () {
   // Notification not issued since that is handled in ./processUserInactivty. Here we are just kicking out users that are not active for some period of time.
 
-  yield* _(Effect.log('Checking and removing inactive users'))
+  yield* Effect.log('Checking and removing inactive users')
 
-  const clubMemberExpirationAfterDaysOfInactivity = yield* _(
-    clubMemberExpirationAfterDaysOfInactivityConfig
-  )
+  const clubMemberExpirationAfterDaysOfInactivity =
+    yield* clubMemberExpirationAfterDaysOfInactivityConfig
   const lastActiveBefore = dayjs()
     .startOf('day')
     .subtract(clubMemberExpirationAfterDaysOfInactivity)
 
-  const deletedMembers = yield* _(
+  const deletedMembers = yield* pipe(
     ClubMembersDbService,
     Effect.flatMap((clubMembersDb) =>
       clubMembersDb.deleteClubMembersLastActiveBefore({
@@ -41,8 +40,8 @@ export const checkForInactiveUsers = Effect.gen(function* (_) {
     ),
     HashMap.toEntries
   )
-  const memberCountChangesDb = yield* _(ClubMemberCountChangeDbService)
-  yield* _(
+  const memberCountChangesDb = yield* ClubMemberCountChangeDbService
+  yield* pipe(
     deletedCountByClub,
     Array.map(([clubId, count]) =>
       memberCountChangesDb.incrementLeft({clubId, count})

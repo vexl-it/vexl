@@ -1,16 +1,17 @@
-import {SqlClient, SqlSchema} from '@effect/sql'
 import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {
   type OfferId,
   type OfferType,
 } from '@vexl-next/domain/src/general/offers'
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
+import {NumberFromString} from '@vexl-next/generic-utils/src/effect-helpers/NumberFromString'
 import {shouldDisableMetrics} from '@vexl-next/server-utils/src/commonConfigs'
 import {type CommonMetricAttributes} from '@vexl-next/server-utils/src/metrics/commonMetricAttributesFromHeaders'
 import {MetricsMessage} from '@vexl-next/server-utils/src/metrics/domain'
 import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {reportMetricForked} from '@vexl-next/server-utils/src/metrics/reportMetricForked'
 import {Array, Effect, Layer, Option, pipe, Schema} from 'effect'
+import {SqlClient, SqlSchema} from 'effect/unstable/sql'
 import {expirationPeriodDaysConfig, offerReportFilterConfig} from './configs'
 
 const OFFER_PUBLIC_PART_DELETED = 'OFFER_PUBLIC_PART_DELETED' as const
@@ -274,7 +275,7 @@ export const reportTotalOffersFlaggedAcrossAll = ({
   )
 
 const OffersStatsQueryResult = Schema.Struct({
-  countryPrefix: Schema.Union(CountryPrefix, Schema.Null),
+  countryPrefix: Schema.Union([CountryPrefix, Schema.Null]),
   buy: Schema.Int,
   sell: Schema.Int,
 })
@@ -342,65 +343,61 @@ const queryOffersStats = SqlClient.SqlClient.pipe(
   )
 )
 
-const queryExpiredOffersStats = Effect.gen(function* (_) {
-  const sql = yield* _(SqlClient.SqlClient)
-  const expirationPeriodDays = yield* _(expirationPeriodDaysConfig)
+const queryExpiredOffersStats = Effect.gen(function* () {
+  const sql = yield* SqlClient.SqlClient
+  const expirationPeriodDays = yield* expirationPeriodDaysConfig
 
-  const result = yield* _(
-    SqlSchema.findAll({
-      Request: Schema.Null,
-      Result: OffersStatsQueryResult,
-      execute: () => sql`
-        SELECT
-          country_prefix,
-          COUNT(
-            CASE
-              WHEN offer_public.offer_type = 'BUY' THEN 1
-            END
-          )::int AS buy,
-          COUNT(
-            CASE
-              WHEN offer_public.offer_type = 'SELL' THEN 1
-            END
-          )::int AS sell
-        FROM
-          offer_public
-        WHERE
-          refreshed_at < now() - interval '1 day' * ${expirationPeriodDays}
-        GROUP BY
-          country_prefix;
-      `,
-    })(null)
-  )
+  const result = yield* SqlSchema.findAll({
+    Request: Schema.Null,
+    Result: OffersStatsQueryResult,
+    execute: () => sql`
+      SELECT
+        country_prefix,
+        COUNT(
+          CASE
+            WHEN offer_public.offer_type = 'BUY' THEN 1
+          END
+        )::int AS buy,
+        COUNT(
+          CASE
+            WHEN offer_public.offer_type = 'SELL' THEN 1
+          END
+        )::int AS sell
+      FROM
+        offer_public
+      WHERE
+        refreshed_at < now() - interval '1 day' * ${expirationPeriodDays}
+      GROUP BY
+        country_prefix;
+    `,
+  })(null)
   return result
 })
 
 const QueryTotalOffersFlagged = Schema.Struct({
-  flagged: Schema.NumberFromString,
+  flagged: NumberFromString,
 })
 
-const queryTotalOffersFlagged = Effect.gen(function* (_) {
-  const sql = yield* _(SqlClient.SqlClient)
-  const offerReportFilter = yield* _(offerReportFilterConfig)
-  const expirationPeriodDays = yield* _(expirationPeriodDaysConfig)
+const queryTotalOffersFlagged = Effect.gen(function* () {
+  const sql = yield* SqlClient.SqlClient
+  const offerReportFilter = yield* offerReportFilterConfig
+  const expirationPeriodDays = yield* expirationPeriodDaysConfig
 
-  const result = yield* _(
-    SqlSchema.findOne({
-      Request: Schema.Null,
-      Result: QueryTotalOffersFlagged,
-      execute: () => sql`
-        SELECT
-          COUNT(*) AS flagged
-        FROM
-          offer_public
-        WHERE
-          report >= ${offerReportFilter}
-          AND refreshed_at >= (
-            now() - interval '1 DAY' * ${expirationPeriodDays}
-          )::date
-      `,
-    })(null)
-  )
+  const result = yield* SqlSchema.findOneOption({
+    Request: Schema.Null,
+    Result: QueryTotalOffersFlagged,
+    execute: () => sql`
+      SELECT
+        COUNT(*) AS flagged
+      FROM
+        offer_public
+      WHERE
+        report >= ${offerReportFilter}
+        AND refreshed_at >= (
+          now() - interval '1 DAY' * ${expirationPeriodDays}
+        )::date
+    `,
+  })(null)
   return pipe(
     result,
     Option.map((one) => one.flagged),
@@ -413,94 +410,90 @@ const OfferVisibilityPerCountryQueryResult = Schema.Struct({
   value: Schema.Number,
 })
 
-const queryMeanOfferVisibilityPerCountry = Effect.gen(function* (_) {
-  const sql = yield* _(SqlClient.SqlClient)
+const queryMeanOfferVisibilityPerCountry = Effect.gen(function* () {
+  const sql = yield* SqlClient.SqlClient
 
-  const expirationPeriodDays = yield* _(expirationPeriodDaysConfig)
-  const offerReportFilter = yield* _(offerReportFilterConfig)
+  const expirationPeriodDays = yield* expirationPeriodDaysConfig
+  const offerReportFilter = yield* offerReportFilterConfig
 
-  const result = yield* _(
-    SqlSchema.findAll({
-      Request: Schema.Null,
-      Result: OfferVisibilityPerCountryQueryResult,
-      execute: () => sql`
-        SELECT
-          country_prefix,
-          round(AVG(offer_count))::Integer AS value
-        FROM
-          (
-            SELECT
-              op.country_prefix,
-              COUNT(op.offer_id) AS offer_count
-            FROM
-              offer_private
-              LEFT JOIN offer_public op ON offer_private.offer_id = op.id
-            WHERE
-              op.country_prefix IS NOT NULL
-              AND op.refreshed_at >= (
-                now() - interval '1 DAY' * ${expirationPeriodDays}
-              )::date
-              AND op.report < ${offerReportFilter}
-            GROUP BY
-              op.offer_id,
-              op.country_prefix
-          ) subquery
-        GROUP BY
-          country_prefix
-      `,
-    })(null)
-  )
+  const result = yield* SqlSchema.findAll({
+    Request: Schema.Null,
+    Result: OfferVisibilityPerCountryQueryResult,
+    execute: () => sql`
+      SELECT
+        country_prefix,
+        round(AVG(offer_count))::Integer AS value
+      FROM
+        (
+          SELECT
+            op.country_prefix,
+            COUNT(op.offer_id) AS offer_count
+          FROM
+            offer_private
+            LEFT JOIN offer_public op ON offer_private.offer_id = op.id
+          WHERE
+            op.country_prefix IS NOT NULL
+            AND op.refreshed_at >= (
+              now() - interval '1 DAY' * ${expirationPeriodDays}
+            )::date
+            AND op.report < ${offerReportFilter}
+          GROUP BY
+            op.offer_id,
+            op.country_prefix
+        ) subquery
+      GROUP BY
+        country_prefix
+    `,
+  })(null)
   return result
 })
 
-const queryMedianOfferVisibilityPerCountry = Effect.gen(function* (_) {
-  const sql = yield* _(SqlClient.SqlClient)
+const queryMedianOfferVisibilityPerCountry = Effect.gen(function* () {
+  const sql = yield* SqlClient.SqlClient
 
-  const expirationPeriodDays = yield* _(expirationPeriodDaysConfig)
-  const offerReportFilter = yield* _(offerReportFilterConfig)
+  const expirationPeriodDays = yield* expirationPeriodDaysConfig
+  const offerReportFilter = yield* offerReportFilterConfig
 
-  const result = yield* _(
-    SqlSchema.findAll({
-      Request: Schema.Null,
-      Result: OfferVisibilityPerCountryQueryResult,
-      execute: () => sql`
-        SELECT
-          country_prefix,
-          round(
-            PERCENTILE_CONT(0.5) WITHIN GROUP (
-              ORDER BY
-                offer_count
-            )
-          )::Integer AS value
-        FROM
-          (
-            SELECT
-              op.country_prefix,
-              COUNT(op.offer_id) AS offer_count
-            FROM
-              public.offer_private
-              LEFT JOIN offer_public op ON offer_private.offer_id = op.id
-            WHERE
-              op.country_prefix IS NOT NULL
-              AND op.refreshed_at >= (
-                now() - interval '1 DAY' * ${expirationPeriodDays}
-              )::date
-              AND op.report < ${offerReportFilter}
-            GROUP BY
-              op.offer_id,
-              op.country_prefix
-          ) subquery
-        GROUP BY
-          country_prefix
-      `,
-    })(null)
-  )
+  const result = yield* SqlSchema.findAll({
+    Request: Schema.Null,
+    Result: OfferVisibilityPerCountryQueryResult,
+    execute: () => sql`
+      SELECT
+        country_prefix,
+        round(
+          PERCENTILE_CONT(0.5) WITHIN GROUP (
+            ORDER BY
+              offer_count
+          )
+        )::Integer AS value
+      FROM
+        (
+          SELECT
+            op.country_prefix,
+            COUNT(op.offer_id) AS offer_count
+          FROM
+            public.offer_private
+            LEFT JOIN offer_public op ON offer_private.offer_id = op.id
+          WHERE
+            op.country_prefix IS NOT NULL
+            AND op.refreshed_at >= (
+              now() - interval '1 DAY' * ${expirationPeriodDays}
+            )::date
+            AND op.report < ${offerReportFilter}
+          GROUP BY
+            op.offer_id,
+            op.country_prefix
+        ) subquery
+      GROUP BY
+        country_prefix
+    `,
+  })(null)
   return result
 })
 
 export const reportMetricsLayer = Layer.effectDiscard(
-  Effect.gen(function* (_) {
-    if (yield* _(shouldDisableMetrics)) {
+  Effect.gen(function* () {
+    if (yield* shouldDisableMetrics) {
       return
     }
 
@@ -627,7 +620,7 @@ export const reportMetricsLayer = Layer.effectDiscard(
       Effect.withSpan('queryAndReportTotalOffersFlagged')
     )
 
-    yield* _(
+    yield* pipe(
       Effect.zip(
         Effect.logInfo('Reporting metrics'),
         Effect.all([
@@ -642,7 +635,7 @@ export const reportMetricsLayer = Layer.effectDiscard(
       Effect.flatMap(() => Effect.sleep('10 minutes')),
       Effect.forever,
       Effect.withSpan('Report metrics'),
-      Effect.fork
+      Effect.forkChild
     )
   })
 )

@@ -10,7 +10,7 @@ export const devAppLanguage = 'dev'
 
 export function getDeviceLanguage(): LanguageCode {
   return pipe(
-    Option.fromNullable(getLocales().at(0)?.languageCode),
+    Option.fromNullishOr(getLocales().at(0)?.languageCode),
     Option.flatMap(localeToLanguageCode),
     Option.getOrElse(() => englishLanguageCode)
   )

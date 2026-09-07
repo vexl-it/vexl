@@ -208,7 +208,7 @@ function ChatTagsScreen({route}: Props): React.ReactElement {
       }
       footer={
         <Button
-          disabled={!Array.isNonEmptyReadonlyArray(tags)}
+          disabled={!Array.isReadonlyArrayNonEmpty(tags)}
           onPress={() => {
             saveTagsForChat({chatId, tagIds: selectedTagIds})
             safeGoBack()
@@ -218,7 +218,7 @@ function ChatTagsScreen({route}: Props): React.ReactElement {
         </Button>
       }
     >
-      {Array.isNonEmptyReadonlyArray(tags) ? (
+      {Array.isReadonlyArrayNonEmpty(tags) ? (
         <YStack>
           {pipe(
             tags,

@@ -1,39 +1,39 @@
-import {HttpApiBuilder} from '@effect/platform/index'
 import {ChatApiSpecification} from '@vexl-next/rest-api/src/services/chat/specification'
 import {InboxDoesNotExistError} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {makeHttpApiHandler} from '@vexl-next/server-utils/src/makeHttpApiHandler'
 import {validateChallengeInBody} from '@vexl-next/server-utils/src/services/challenge/utils/validateChallengeInBody'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
-import {Effect} from 'effect'
+import {Effect, pipe} from 'effect'
 import {InboxDbService} from '../../db/InboxDbService'
 import {MessagesDbService} from '../../db/MessagesDbService'
 import {hashPublicKey} from '../../db/domain'
 import {withInboxActionRedisLock} from '../../utils/withInboxActionRedisLock'
 
-export const deleteInbox = HttpApiBuilder.handler(
+export const deleteInbox = makeHttpApiHandler(
   ChatApiSpecification,
   'Inboxes',
   'deleteInbox',
   (req) =>
-    Effect.gen(function* (_) {
-      yield* _(validateChallengeInBody(req.payload))
+    Effect.gen(function* () {
+      yield* validateChallengeInBody(req.payload)
 
-      const hashedPublicKey = yield* _(hashPublicKey(req.payload.publicKey))
+      const hashedPublicKey = yield* hashPublicKey(req.payload.publicKey)
 
-      const inboxService = yield* _(InboxDbService)
-      const inbox = yield* _(
+      const inboxService = yield* InboxDbService
+      const inbox = yield* pipe(
         inboxService.findInboxByPublicKey(hashedPublicKey),
-        Effect.flatten,
+        Effect.flatMap(Effect.fromOption),
         Effect.catchTag(
-          'NoSuchElementException',
+          'NoSuchElementError',
           () => new InboxDoesNotExistError()
         )
       )
 
-      const messagesDb = yield* _(MessagesDbService)
-      yield* _(messagesDb.deleteAllMessagesByInboxId(inbox.id))
+      const messagesDb = yield* MessagesDbService
+      yield* messagesDb.deleteAllMessagesByInboxId(inbox.id)
 
-      yield* _(inboxService.deleteInboxByPublicKey(hashedPublicKey))
+      yield* inboxService.deleteInboxByPublicKey(hashedPublicKey)
 
       return {}
     }).pipe(

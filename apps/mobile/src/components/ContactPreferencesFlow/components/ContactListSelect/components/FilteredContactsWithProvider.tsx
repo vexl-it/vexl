@@ -1,5 +1,5 @@
 import {Stack} from '@vexl-next/ui'
-import {useMolecule} from 'bunshi/dist/react'
+import {useMolecule} from 'bunshi/react'
 import {useAtomValue, useSetAtom, type Atom} from 'jotai'
 import React, {useEffect, useState} from 'react'
 import {type StoredContactWithComputedValues} from '../../../../../state/contacts/domain'

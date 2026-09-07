@@ -140,7 +140,7 @@ const publishSelectedOffersToJoinedClubActionAtom = atom(
       )
     )
 
-    if (!Array.isNonEmptyReadonlyArray(offersAvailableToPublish)) {
+    if (!Array.isReadonlyArrayNonEmpty(offersAvailableToPublish)) {
       return set(globalDialogAtom, {
         title: t('clubs.clubJoinedSuccessfully'),
         subtitle: getJoinedClubSuccessSubtitle({isModerator, t}),
@@ -150,23 +150,21 @@ const publishSelectedOffersToJoinedClubActionAtom = atom(
 
     const selectedOfferAdminIdsAtom = atom<readonly OfferAdminId[]>([])
     const publishButtonDisabledAtom = atom(
-      (get) => !Array.isNonEmptyReadonlyArray(get(selectedOfferAdminIdsAtom))
+      (get) => !Array.isReadonlyArrayNonEmpty(get(selectedOfferAdminIdsAtom))
     )
 
-    return Effect.gen(function* (_) {
-      const confirmed = yield* _(
-        set(globalDialogAtom, {
-          title: t('clubs.publishOffersToJoinedClub.title', {clubName}),
-          subtitle: getJoinedClubSuccessSubtitle({isModerator, t}),
-          children: React.createElement(SelectOffersToPublishToClubComponent, {
-            offers: offersAvailableToPublish,
-            selectedOfferAdminIdsAtom,
-          }),
-          negativeButtonText: t('common.notNow'),
-          positiveButtonText: t('clubs.publishOffersToJoinedClub.action'),
-          positiveButtonDisabledAtom: publishButtonDisabledAtom,
-        })
-      )
+    return Effect.gen(function* () {
+      const confirmed = yield* set(globalDialogAtom, {
+        title: t('clubs.publishOffersToJoinedClub.title', {clubName}),
+        subtitle: getJoinedClubSuccessSubtitle({isModerator, t}),
+        children: React.createElement(SelectOffersToPublishToClubComponent, {
+          offers: offersAvailableToPublish,
+          selectedOfferAdminIdsAtom,
+        }),
+        negativeButtonText: t('common.notNow'),
+        positiveButtonText: t('clubs.publishOffersToJoinedClub.action'),
+        positiveButtonDisabledAtom: publishButtonDisabledAtom,
+      })
 
       if (!confirmed) return
 
@@ -178,14 +176,14 @@ const publishSelectedOffersToJoinedClubActionAtom = atom(
         )
       )
 
-      if (!Array.isNonEmptyReadonlyArray(selectedOffers)) return
+      if (!Array.isReadonlyArrayNonEmpty(selectedOffers)) return
 
       const publishOffers = (
         offersToPublish: readonly MyOfferInState[]
       ): Effect.Effect<void> => {
-        if (!Array.isNonEmptyReadonlyArray(offersToPublish)) return Effect.void
+        if (!Array.isReadonlyArrayNonEmpty(offersToPublish)) return Effect.void
 
-        return Effect.gen(function* (_) {
+        return Effect.gen(function* () {
           const totalToProcess = Array.length(offersToPublish)
           const formattedTotalToProcess = formatInteger(totalToProcess, locale)
 
@@ -204,101 +202,88 @@ const publishSelectedOffersToJoinedClubActionAtom = atom(
             indicateProgress: {type: 'intermediate'},
           })
 
-          const publishResults = yield* _(
-            Effect.forEach(
-              offersToPublish,
-              (offer, index) =>
-                set(updateOfferActionAtom, {
-                  payloadPublic: offer.offerInfo.publicPart,
-                  symmetricKey: offer.offerInfo.privatePart.symmetricKey,
-                  adminId: offer.ownershipInfo.adminId,
-                  intendedConnectionLevel:
-                    offer.ownershipInfo.intendedConnectionLevel,
-                  intendedClubs: appendClubUuidToIntendedClubs(offer, clubUuid),
-                  updatePrivateParts: true,
-                  updateLocalStateAfterPrivateParts: true,
-                  onProgress: (progress) => {
-                    set(offerProgressModalActionAtoms.showStep, {
-                      progress,
-                      textData: {
-                        title: t(
-                          'clubs.publishOffersToJoinedClub.progressTitle'
-                        ),
-                        bottomText: t(
-                          'offerForm.offerEncryption.dontCloseTheAppCanTakeAWhile'
-                        ),
-                        belowProgressLeft: t(
-                          'clubs.publishOffersToJoinedClub.progressStatus',
-                          {
-                            processingIndex: formatInteger(index + 1, locale),
-                            totalToProcess: formattedTotalToProcess,
-                          }
-                        ),
-                      },
-                    })
-                  },
-                }).pipe(
-                  Effect.as(publishOfferSuccess(offer)),
-                  Effect.catchAll(() =>
-                    Effect.succeed(publishOfferFailure(offer))
-                  )
-                ),
-              {concurrency: 1}
-            )
+          const publishResults = yield* Effect.forEach(
+            offersToPublish,
+            (offer, index) =>
+              set(updateOfferActionAtom, {
+                payloadPublic: offer.offerInfo.publicPart,
+                symmetricKey: offer.offerInfo.privatePart.symmetricKey,
+                adminId: offer.ownershipInfo.adminId,
+                intendedConnectionLevel:
+                  offer.ownershipInfo.intendedConnectionLevel,
+                intendedClubs: appendClubUuidToIntendedClubs(offer, clubUuid),
+                updatePrivateParts: true,
+                updateLocalStateAfterPrivateParts: true,
+                onProgress: (progress) => {
+                  set(offerProgressModalActionAtoms.showStep, {
+                    progress,
+                    textData: {
+                      title: t('clubs.publishOffersToJoinedClub.progressTitle'),
+                      bottomText: t(
+                        'offerForm.offerEncryption.dontCloseTheAppCanTakeAWhile'
+                      ),
+                      belowProgressLeft: t(
+                        'clubs.publishOffersToJoinedClub.progressStatus',
+                        {
+                          processingIndex: formatInteger(index + 1, locale),
+                          totalToProcess: formattedTotalToProcess,
+                        }
+                      ),
+                    },
+                  })
+                },
+              }).pipe(
+                Effect.as(publishOfferSuccess(offer)),
+                Effect.catch(() => Effect.succeed(publishOfferFailure(offer)))
+              ),
+            {concurrency: 1}
           )
 
           const failedOffers = getFailedOffers(publishResults)
 
-          if (Array.isNonEmptyReadonlyArray(failedOffers)) {
+          if (Array.isReadonlyArrayNonEmpty(failedOffers)) {
             set(offerProgressModalActionAtoms.hide)
 
-            const retryFailedOffers = yield* _(
-              set(globalDialogAtom, {
-                title: t('clubs.publishOffersToJoinedClub.partialErrorTitle'),
-                subtitle: t(
-                  'clubs.publishOffersToJoinedClub.partialErrorDescription'
-                ),
-                negativeButtonText: t('common.notNow'),
-                positiveButtonText: t(
-                  'clubs.publishOffersToJoinedClub.retryFailedAction'
-                ),
-              })
-            )
+            const retryFailedOffers = yield* set(globalDialogAtom, {
+              title: t('clubs.publishOffersToJoinedClub.partialErrorTitle'),
+              subtitle: t(
+                'clubs.publishOffersToJoinedClub.partialErrorDescription'
+              ),
+              negativeButtonText: t('common.notNow'),
+              positiveButtonText: t(
+                'clubs.publishOffersToJoinedClub.retryFailedAction'
+              ),
+            })
 
             if (retryFailedOffers) {
-              yield* _(publishOffers(failedOffers))
+              yield* publishOffers(failedOffers)
             }
 
             return
           }
 
-          yield* _(
-            set(offerProgressModalActionAtoms.hideDeffered, {
-              data: {
-                title: t('clubs.publishOffersToJoinedClub.successTitle'),
-                bottomText: t(
-                  'clubs.publishOffersToJoinedClub.successDescription',
-                  {
-                    clubName,
-                  }
-                ),
-                belowProgressLeft: t(
-                  getPublishedOffersCountKey(totalToProcess),
-                  {
-                    publishedCount: formattedTotalToProcess,
-                  }
-                ),
-                indicateProgress: {type: 'done'},
-              },
-              delayMs: 2000,
-            })
-          )
+          yield* set(offerProgressModalActionAtoms.hideDeffered, {
+            data: {
+              title: t('clubs.publishOffersToJoinedClub.successTitle'),
+              bottomText: t(
+                'clubs.publishOffersToJoinedClub.successDescription',
+                {
+                  clubName,
+                }
+              ),
+              belowProgressLeft: t(getPublishedOffersCountKey(totalToProcess), {
+                publishedCount: formattedTotalToProcess,
+              }),
+              indicateProgress: {type: 'done'},
+            },
+            delayMs: 2000,
+          })
         })
       }
 
-      yield* _(publishOffers(selectedOffers))
+      yield* publishOffers(selectedOffers)
     }).pipe(
-      Effect.catchAll((error) =>
+      Effect.catch((error) =>
         Effect.sync(() => {
           set(offerProgressModalActionAtoms.hide)
           showErrorAlert({
@@ -319,40 +304,36 @@ export const submitCodeToJoinClubActionAtom = atom(
     const api = get(apiAtom)
     const code = getCodeFromInput(input)
 
-    return Effect.gen(function* (_) {
-      const newKeypair = yield* _(eitherToEffect(generateKeyPair()))
-      const newKeypairV2 = yield* _(generateV2KeyPair())
-      const notificationToken = yield* _(
+    return Effect.gen(function* () {
+      const newKeypair = yield* eitherToEffect(generateKeyPair())
+      const newKeypairV2 = yield* generateV2KeyPair()
+      const notificationToken = yield* pipe(
         getNotificationTokenE(),
-        Effect.map(Option.fromNullable)
+        Effect.map(Option.fromNullishOr)
       )
 
-      const club = yield* _(
-        api.contact.getClubInfoByAccessCode({
-          code,
-          keyPair: newKeypair,
-          keyPairV2: newKeypairV2,
-        })
-      )
+      const club = yield* api.contact.getClubInfoByAccessCode({
+        code,
+        keyPair: newKeypair,
+        keyPairV2: newKeypairV2,
+      })
 
       if (typeof input === 'string' || !input.skipConfirmation) {
-        const confirmed = yield* _(
-          set(globalDialogAtom, {
-            title: t('clubs.wannaStepInsideOfClub', {
+        const confirmed = yield* set(globalDialogAtom, {
+          title: t('clubs.wannaStepInsideOfClub', {
+            clubName: club.club.name,
+          }),
+          subtitle: t(
+            club.isModerator
+              ? 'clubs.joiningClubGivesYouAccessAsModerator'
+              : 'clubs.joiningClubGivesYouAccess',
+            {
               clubName: club.club.name,
-            }),
-            subtitle: t(
-              club.isModerator
-                ? 'clubs.joiningClubGivesYouAccessAsModerator'
-                : 'clubs.joiningClubGivesYouAccess',
-              {
-                clubName: club.club.name,
-              }
-            ),
-            negativeButtonText: t('common.cancel'),
-            positiveButtonText: t('common.continue'),
-          })
-        )
+            }
+          ),
+          negativeButtonText: t('common.cancel'),
+          positiveButtonText: t('common.continue'),
+        })
 
         if (!confirmed) return false
       }
@@ -367,7 +348,7 @@ export const submitCodeToJoinClubActionAtom = atom(
       }
 
       if (myStoredClubs[club.club.uuid]) {
-        yield* _(Effect.fail(new MemberAlreadyInClubError()))
+        yield* Effect.fail(new MemberAlreadyInClubError())
       }
 
       set(clubsToKeyHolderAtom, (prevState) => ({
@@ -375,42 +356,36 @@ export const submitCodeToJoinClubActionAtom = atom(
         [club.club.uuid]: clubKeys,
       }))
 
-      const vexlNotificationToken = yield* _(set(generateVexlTokenActionAtom))
+      const vexlNotificationToken = yield* set(generateVexlTokenActionAtom)
 
-      const {clubInfoForUser} = yield* _(
-        api.contact
-          .joinClub({
-            keyPair: oldKeyPair,
-            code,
-            contactsImported: true,
-            notificationToken,
-            vexlNotificationToken: Option.some(vexlNotificationToken),
-            keyPairV2: newKeypairV2,
-          })
-          .pipe(
-            Effect.tapError(() =>
-              Effect.sync(() => {
-                set(clubsToKeyHolderAtom, Struct.omit(club.club.uuid))
-              })
-            )
-          )
-      )
-
-      yield* _(
-        set(syncSingleClubHandleStateWhenNotFoundActionAtom, {
-          clubUuid: clubInfoForUser.club.uuid,
+      const {clubInfoForUser} = yield* api.contact
+        .joinClub({
+          keyPair: oldKeyPair,
+          code,
+          contactsImported: true,
+          notificationToken,
+          vexlNotificationToken: Option.some(vexlNotificationToken),
+          keyPairV2: newKeypairV2,
         })
-      )
+        .pipe(
+          Effect.tapError(() =>
+            Effect.sync(() => {
+              set(clubsToKeyHolderAtom, Struct.omit([club.club.uuid]))
+            })
+          )
+        )
+
+      yield* set(syncSingleClubHandleStateWhenNotFoundActionAtom, {
+        clubUuid: clubInfoForUser.club.uuid,
+      })
 
       set(loadingOverlayDisplayedAtom, false)
 
-      yield* _(
-        set(publishSelectedOffersToJoinedClubActionAtom, {
-          clubName: clubInfoForUser.club.name,
-          clubUuid: clubInfoForUser.club.uuid,
-          isModerator: club.isModerator,
-        })
-      )
+      yield* set(publishSelectedOffersToJoinedClubActionAtom, {
+        clubName: clubInfoForUser.club.name,
+        clubUuid: clubInfoForUser.club.uuid,
+        isModerator: club.isModerator,
+      })
 
       return true
     }).pipe(
@@ -419,7 +394,7 @@ export const submitCodeToJoinClubActionAtom = atom(
           set(loadingOverlayDisplayedAtom, false)
         })
       ),
-      Effect.catchAll((e) => {
+      Effect.catch((e) => {
         const onCodeNotFound =
           typeof input === 'string' ? undefined : input.onCodeNotFound
 
@@ -450,7 +425,7 @@ export const submitCodeToJoinClubActionAtom = atom(
               ? t('clubs.youAreAlreadyMemberOfThisClub')
               : t('clubs.joiningUnsucessful')
 
-          return Effect.zipRight(
+          return Effect.andThen(
             set(globalDialogAtom, {
               title,
               subtitle: description,
@@ -464,8 +439,9 @@ export const submitCodeToJoinClubActionAtom = atom(
         // RequestError (offline) is excluded on purpose - not reported to Sentry
         if (
           e._tag === 'InvalidChallengeError' ||
-          e._tag === 'HttpApiDecodeError' ||
-          e._tag === 'ResponseError' ||
+          e._tag === 'SchemaError' ||
+          (e._tag === 'HttpClientError' &&
+            e.reason._tag !== 'TransportError') ||
           e._tag === 'UnexpectedServerError' ||
           e._tag === 'CryptoError'
         ) {
@@ -492,29 +468,25 @@ export const validateCodeToJoinClubActionAtom = atom(
     const {t} = get(translationAtom)
     const api = get(apiAtom)
 
-    return Effect.gen(function* (_) {
-      const newKeypair = yield* _(eitherToEffect(generateKeyPair()))
-      const newKeypairV2 = yield* _(generateV2KeyPair())
+    return Effect.gen(function* () {
+      const newKeypair = yield* eitherToEffect(generateKeyPair())
+      const newKeypairV2 = yield* generateV2KeyPair()
 
-      const club = yield* _(
-        api.contact.getClubInfoByAccessCode({
-          code: input.code,
-          keyPair: newKeypair,
-          keyPairV2: newKeypairV2,
+      const club = yield* api.contact.getClubInfoByAccessCode({
+        code: input.code,
+        keyPair: newKeypair,
+        keyPairV2: newKeypairV2,
+      })
+      yield* Effect.sync(() => {
+        set(clubToJoinAtom, {
+          club: club.club,
+          isModerator: club.isModerator,
         })
-      )
-      yield* _(
-        Effect.sync(() => {
-          set(clubToJoinAtom, {
-            club: club.club,
-            isModerator: club.isModerator,
-          })
-        })
-      )
+      })
 
       return true
     }).pipe(
-      Effect.catchAll((e) => {
+      Effect.catch((e) => {
         if (e._tag === 'NotFoundError') {
           return Effect.sync(() => {
             input.onCodeNotFound?.()
@@ -525,8 +497,9 @@ export const validateCodeToJoinClubActionAtom = atom(
         // RequestError (offline) is excluded on purpose - not reported to Sentry
         if (
           e._tag === 'InvalidChallengeError' ||
-          e._tag === 'HttpApiDecodeError' ||
-          e._tag === 'ResponseError' ||
+          e._tag === 'SchemaError' ||
+          (e._tag === 'HttpClientError' &&
+            e.reason._tag !== 'TransportError') ||
           e._tag === 'UnexpectedServerError' ||
           e._tag === 'CryptoError'
         ) {

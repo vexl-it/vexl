@@ -5,7 +5,7 @@ import {
   unixMillisecondsNow,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
-import {Array, Effect, Option, pipe, Schema} from 'effect/index'
+import {Array, Effect, Option, pipe, Schema} from 'effect'
 import {atom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {apiAtom} from '../../../api'
@@ -40,7 +40,7 @@ export const reportMessagesReceivedActionAtom = atom(
     messagesIds: ChatMessageId[],
     areVisibleMessages: boolean
   ): Effect.Effect<void> => {
-    return Effect.gen(function* (_) {
+    return Effect.gen(function* () {
       if (messagesIds.length === 0) return
       const reportedMessages = get(reportedMessagesAtom)
       const firstTimeSeenIds = Array.difference(
@@ -71,40 +71,38 @@ export const reportMessagesReceivedActionAtom = atom(
       )
 
       if (firstTimeSeenIds.length > 0) {
-        const notificationsEnabled = yield* _(
+        const notificationsEnabled = yield* pipe(
           areNotificationsEnabledE(),
           Effect.option
         )
-        yield* _(
-          get(apiAtom)
-            .metrics.reportNotificationInteraction({
-              count: firstTimeSeenIds.length,
-              type: 'ChatMessageReceived',
-              notificationType: 'Chat',
-              isVisible: areVisibleMessages,
-              ...(Option.isSome(notificationsEnabled)
-                ? {
-                    notificationsEnabled:
-                      notificationsEnabled.value.notifications,
-                    backgroundTaskEnabled:
-                      notificationsEnabled.value.backgroundTasks,
-                  }
-                : {}),
-              uuid: generateUuid(),
-            })
-            .pipe(
-              Effect.tapError((e) =>
-                reportErrorE(
-                  'warn',
-                  new Error('Error while reporting chatMessageReceived', {
-                    cause: e,
-                  })
-                )
-              ),
-              Effect.ignore,
-              Effect.forkDaemon
-            )
-        )
+        yield* get(apiAtom)
+          .metrics.reportNotificationInteraction({
+            count: firstTimeSeenIds.length,
+            type: 'ChatMessageReceived',
+            notificationType: 'Chat',
+            isVisible: areVisibleMessages,
+            ...(Option.isSome(notificationsEnabled)
+              ? {
+                  notificationsEnabled:
+                    notificationsEnabled.value.notifications,
+                  backgroundTaskEnabled:
+                    notificationsEnabled.value.backgroundTasks,
+                }
+              : {}),
+            uuid: generateUuid(),
+          })
+          .pipe(
+            Effect.tapError((e) =>
+              reportErrorE(
+                'warn',
+                new Error('Error while reporting chatMessageReceived', {
+                  cause: e,
+                })
+              )
+            ),
+            Effect.ignore,
+            Effect.forkDetach
+          )
       }
     })
   }

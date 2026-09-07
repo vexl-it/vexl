@@ -4,13 +4,13 @@ import {type Base64String} from '@vexl-next/domain/src/utility/Base64String.bran
 import decryptOffer from '@vexl-next/resources-utils/src/offers/decryptOffer'
 import fetchAllPaginatedData from '@vexl-next/rest-api/src/fetchAllPaginatedData'
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
-import {Array, Effect, flow, Record, Schema} from 'effect'
+import {Array, Effect, flow, pipe, Record, Schema} from 'effect'
 import {atom} from 'jotai'
 import {type ClubKeys} from '../../../../clubs/atom/clubsToKeyHolderV2Atom'
 import {clubOffersNextPageParamAtom} from '../../offersState'
 
 const OFFERS_PAGE_LIMIT = 30
-export type ApiErrorFetchingClubsOffers = Effect.Effect.Error<
+export type ApiErrorFetchingClubsOffers = Effect.Error<
   ReturnType<OfferApi['getClubOffersForMeModifiedOrCreatedAfterPaginated']>
 >
 
@@ -54,26 +54,21 @@ export const getNewClubsOffersAndDecryptPaginatedActionAtom = atom(
       lastPrivatePartIdBase64?: Base64String
     }
   ) => {
-    return Effect.gen(function* (_) {
-      const allClubOffersForMe = yield* _(
-        fetchAllPaginatedData({
-          fetchEffectToRun: (nextPageToken) =>
-            offersApi.getClubOffersForMeModifiedOrCreatedAfterPaginated({
-              nextPageToken: nextPageToken ?? lastPrivatePartIdBase64,
-              limit: OFFERS_PAGE_LIMIT,
-              keyPair: keyPair.oldKeyPair,
-              keyPairV2: keyPair.keyPair,
-            }),
-          storeNextPageToken: (nextPageToken) => {
-            set(
-              clubOffersNextPageParamAtom,
-              Record.set(clubUuid, nextPageToken)
-            )
-          },
-        })
-      )
+    return Effect.gen(function* () {
+      const allClubOffersForMe = yield* fetchAllPaginatedData({
+        fetchEffectToRun: (nextPageToken) =>
+          offersApi.getClubOffersForMeModifiedOrCreatedAfterPaginated({
+            nextPageToken: nextPageToken ?? lastPrivatePartIdBase64,
+            limit: OFFERS_PAGE_LIMIT,
+            keyPair: keyPair.oldKeyPair,
+            keyPairV2: keyPair.keyPair,
+          }),
+        storeNextPageToken: (nextPageToken) => {
+          set(clubOffersNextPageParamAtom, Record.set(clubUuid, nextPageToken))
+        },
+      })
 
-      return yield* _(
+      return yield* pipe(
         allClubOffersForMe,
         Array.map(
           flow(
@@ -89,7 +84,7 @@ export const getNewClubsOffersAndDecryptPaginatedActionAtom = atom(
             )
           )
         ),
-        Array.map(Effect.either),
+        Array.map(Effect.result),
         Effect.all
       )
     })

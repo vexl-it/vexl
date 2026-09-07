@@ -1,4 +1,4 @@
-import {useMolecule} from 'bunshi/dist/react'
+import {useMolecule} from 'bunshi/react'
 import {pipe} from 'effect'
 import {map} from 'effect/Array'
 import {useAtomValue, useSetAtom} from 'jotai'

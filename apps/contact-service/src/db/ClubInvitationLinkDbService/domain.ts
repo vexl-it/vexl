@@ -3,7 +3,7 @@ import {Schema} from 'effect'
 import {ClubMemberRecordId} from '../ClubMemberDbService/domain'
 import {ClubRecordId} from '../ClubsDbService/domain'
 
-export const ClubInvitationLinkRecordId = Schema.BigInt.pipe(
+export const ClubInvitationLinkRecordId = Schema.BigIntFromString.pipe(
   Schema.brand('ClubInvitationLinkRecordId')
 )
 export class ClubInvitationLinkRecord extends Schema.Class<ClubInvitationLinkRecord>(

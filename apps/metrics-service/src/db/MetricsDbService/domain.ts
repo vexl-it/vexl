@@ -1,7 +1,9 @@
 import {Uuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {Schema} from 'effect'
 
-export const MetricRecordId = Schema.BigInt.pipe(Schema.brand('MetricRecordId'))
+export const MetricRecordId = Schema.BigIntFromString.pipe(
+  Schema.brand('MetricRecordId')
+)
 export type MetricRecordId = typeof MetricRecordId.Type
 
 export class MetricRecord extends Schema.Class<MetricRecord>('MetricRecord')({
@@ -9,14 +11,14 @@ export class MetricRecord extends Schema.Class<MetricRecord>('MetricRecord')({
   uuid: Uuid,
   name: Schema.String,
   value: Schema.Int,
-  timestamp: Schema.DateFromSelf,
-  type: Schema.Literal('Increment', 'Total'),
+  timestamp: Schema.Date,
+  type: Schema.Literals(['Increment', 'Total']),
   attributes: Schema.optional(
-    Schema.parseJson(
-      Schema.Record({
-        key: Schema.String,
-        value: Schema.Union(Schema.String, Schema.Number, Schema.Boolean),
-      })
+    Schema.fromJsonString(
+      Schema.Record(
+        Schema.String,
+        Schema.Union([Schema.String, Schema.Number, Schema.Boolean])
+      )
     )
   ),
 }) {}
@@ -24,13 +26,13 @@ export class MetricRecord extends Schema.Class<MetricRecord>('MetricRecord')({
 export class DeadMetricRecord extends Schema.Class<DeadMetricRecord>(
   'DeadMetricRecord'
 )({
-  id: Schema.BigInt,
-  data: Schema.parseJson(Schema.Unknown),
+  id: Schema.BigIntFromString,
+  data: Schema.fromJsonString(Schema.Unknown),
   message: Schema.String,
-  accepted_at: Schema.DateFromSelf,
+  accepted_at: Schema.Date,
 }) {}
 
-export const LastReportedByServiceId = Schema.BigInt.pipe(
+export const LastReportedByServiceId = Schema.BigIntFromString.pipe(
   Schema.brand('LastReportedByServiceId')
 )
 export type LastReportedByServiceId = typeof LastReportedByServiceId.Type
@@ -38,6 +40,6 @@ export class LastReportedByServiceRecord extends Schema.Class<LastReportedByServ
   'LastReportedByService'
 )({
   id: LastReportedByServiceId,
-  lastEventAt: Schema.DateFromSelf,
+  lastEventAt: Schema.Date,
   serviceName: Schema.String,
 }) {}

@@ -17,7 +17,7 @@ import {
   XmarkCancelClose,
   YStack,
 } from '@vexl-next/ui'
-import {useMolecule} from 'bunshi/dist/react'
+import {useMolecule} from 'bunshi/react'
 import {Effect} from 'effect'
 import {useAtom, useAtomValue, useSetAtom} from 'jotai'
 import React, {useMemo} from 'react'

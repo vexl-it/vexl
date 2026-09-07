@@ -1,16 +1,16 @@
-import {HttpApiBuilder} from '@effect/platform/index'
 import {MetricsApiSpecification} from '@vexl-next/rest-api/src/services/metrics/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {makeHttpApiHandler} from '@vexl-next/server-utils/src/makeHttpApiHandler'
 import {commonMetricAttributesFromHeaders} from '@vexl-next/server-utils/src/metrics/commonMetricAttributesFromHeaders'
-import {Effect, Option} from 'effect/index'
+import {Effect, Option} from 'effect'
 import {MetricsDbService} from '../db/MetricsDbService'
 
-export const reportNotificationInteraction = HttpApiBuilder.handler(
+export const reportNotificationInteraction = makeHttpApiHandler(
   MetricsApiSpecification,
   'root',
   'reportNotificationInteraction',
-  ({headers, urlParams: query}) =>
-    Effect.gen(function* (_) {
+  ({headers, query}) =>
+    Effect.gen(function* () {
       const dataToSave = {
         ...commonMetricAttributesFromHeaders(headers),
         clientVersion: Option.getOrElse(
@@ -36,17 +36,15 @@ export const reportNotificationInteraction = HttpApiBuilder.handler(
 
       const eventName = `NOTIFICATION_INTERACTION_${query.notificationType}_${query.type}`
 
-      const metricsDb = yield* _(MetricsDbService)
-      yield* _(
-        metricsDb.insertMetricRecord({
-          name: eventName,
-          timestamp: new Date(),
-          type: 'Increment',
-          uuid: query.uuid,
-          value: query.count,
-          attributes: dataToSave,
-        })
-      )
+      const metricsDb = yield* MetricsDbService
+      yield* metricsDb.insertMetricRecord({
+        name: eventName,
+        timestamp: new Date(),
+        type: 'Increment',
+        uuid: query.uuid,
+        value: query.count,
+        attributes: dataToSave,
+      })
 
       return {}
     }).pipe(makeEndpointEffect)

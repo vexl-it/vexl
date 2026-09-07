@@ -159,7 +159,7 @@ function selectApps(options: CliOptions): readonly RunnableApp[] {
       names,
       Array.filter((name) => findApp(name) === undefined)
     )
-    if (Array.isNonEmptyReadonlyArray(unknown)) {
+    if (Array.isReadonlyArrayNonEmpty(unknown)) {
       throw new Error(
         `Unknown app name in ${optionName}: ${unknown.join(', ')}. Known apps: ${pipe(
           ALL_APPS,
@@ -172,7 +172,7 @@ function selectApps(options: CliOptions): readonly RunnableApp[] {
   validateNames(options.only, '--only')
   validateNames(options.skip, '--skip')
 
-  const candidates = Array.isNonEmptyReadonlyArray(options.only)
+  const candidates = Array.isReadonlyArrayNonEmpty(options.only)
     ? pipe(
         ALL_APPS,
         Array.filter((app) => includesApp(options.only, app))
@@ -239,7 +239,7 @@ async function validatePorts(
   ]
 
   const duplicates = findDuplicatePorts(assignments)
-  if (Array.isNonEmptyReadonlyArray(duplicates)) {
+  if (Array.isReadonlyArrayNonEmpty(duplicates)) {
     for (const {port, labels} of duplicates) {
       console.error(
         `Port ${port} is assigned to multiple: ${labels.join(', ')}`
@@ -256,7 +256,7 @@ async function validatePorts(
   for (const {label, port} of hostPorts) {
     if (!(await isPortFree(port))) inUse.push(`${label} -> ${port}`)
   }
-  if (Array.isNonEmptyArray(inUse)) {
+  if (Array.isArrayNonEmpty(inUse)) {
     throw new Error(
       `These host ports are already in use:\n  ${inUse.join('\n  ')}\nStop the other process or override the port in .env.local.`
     )
@@ -421,7 +421,7 @@ async function main(): Promise<void> {
   }
 
   const apps = selectApps(options)
-  if (!Array.isNonEmptyReadonlyArray(apps)) {
+  if (!Array.isReadonlyArrayNonEmpty(apps)) {
     console.error('No apps selected. Check --only/--skip.')
     process.exit(1)
   }

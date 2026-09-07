@@ -1,4 +1,4 @@
-import {Effect, Exit} from 'effect/index'
+import {Effect, Exit} from 'effect'
 import {validateBullMqJobOptions} from '../mqService'
 
 describe('validateBullMqJobOptions', () => {

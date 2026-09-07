@@ -1,8 +1,9 @@
-import type {HttpServerRequest} from '@effect/platform/index'
 import type {
   BtcPayServerWebhookHeader,
   BtcPayWebhookShaSignature,
 } from '@vexl-next/rest-api/src/btcPayServerWebhookHeader'
+import {Effect, Option, pipe, Schema} from 'effect'
+import type {HttpServerRequest} from 'effect/unstable/http'
 
 import type {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {
@@ -14,7 +15,6 @@ import {
   UpdateInvoiceWebhookError,
 } from '@vexl-next/rest-api/src/services/content/contracts'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
-import {Effect, Option, Schema} from 'effect'
 import * as crypto from 'node:crypto'
 import {btcPayServerWebhookSecretConfig} from '../../configs'
 import {UpdateInvoiceStateWebhookService} from './UpdateInvoiceStateWebhookService'
@@ -43,7 +43,7 @@ function isBtcPayServerSignatureValid({
       crypto.timingSafeEqual(digest, checksum)
     )
   }).pipe(
-    Effect.catchAllDefect((e) =>
+    Effect.catchDefect((e) =>
       Effect.fail(
         new UnexpectedServerError({
           cause: e,
@@ -68,8 +68,8 @@ export const updateInvoiceStateWebhook = ({
   | UnexpectedServerError,
   UpdateInvoiceStateWebhookService
 > =>
-  Effect.gen(function* (_) {
-    const rawBody = yield* _(
+  Effect.gen(function* () {
+    const rawBody = yield* pipe(
       request.text,
       Effect.mapError(
         (e) =>
@@ -80,76 +80,65 @@ export const updateInvoiceStateWebhook = ({
           })
       )
     )
-    const body: unknown = yield* _(
-      Effect.try({
-        try: () => JSON.parse(rawBody),
-        catch: (e) =>
-          new UpdateInvoiceWebhookError({
-            cause: e,
-            status: 400,
-            message: 'Invalid webhook JSON error',
-          }),
-      })
-    )
+    const body: unknown = yield* Effect.try({
+      try: () => JSON.parse(rawBody),
+      catch: (e) =>
+        new UpdateInvoiceWebhookError({
+          cause: e,
+          status: 400,
+          message: 'Invalid webhook JSON error',
+        }),
+    })
 
-    const updateInvoiceStateWebhookService = yield* _(
-      UpdateInvoiceStateWebhookService
-    )
-    const btcPayServerWebhookSecret = yield* _(btcPayServerWebhookSecretConfig)
+    const updateInvoiceStateWebhookService =
+      yield* UpdateInvoiceStateWebhookService
+    const btcPayServerWebhookSecret = yield* btcPayServerWebhookSecretConfig
 
     const {btcPayWebhookSignatureOrNone} = headers
 
     if (Option.isNone(btcPayWebhookSignatureOrNone)) {
-      return yield* _(
-        Effect.fail(
-          new UnauthorizedError({
-            status: 401,
-            message: 'Secret received from btc pay server is missing',
-            cause: new Error('Secret received from btc pay server is missing'),
-          })
-        )
+      return yield* Effect.fail(
+        new UnauthorizedError({
+          status: 401,
+          message: 'Secret received from btc pay server is missing',
+          cause: new Error('Secret received from btc pay server is missing'),
+        })
       )
     }
 
-    const signatureValid = yield* _(
-      isBtcPayServerSignatureValid({
-        rawBody,
-        btcPayServerWebhookSecret,
-        btcPayWebhookSignature: btcPayWebhookSignatureOrNone.value,
-      })
-    )
+    const signatureValid = yield* isBtcPayServerSignatureValid({
+      rawBody,
+      btcPayServerWebhookSecret,
+      btcPayWebhookSignature: btcPayWebhookSignatureOrNone.value,
+    })
 
     if (!signatureValid) {
-      return yield* _(
-        Effect.fail(
-          new UnauthorizedError({
-            status: 401,
-            message: 'Invalid secret received from btc pay server',
-            cause: new Error('Invalid secret received from btc pay server'),
-          })
-        )
+      return yield* Effect.fail(
+        new UnauthorizedError({
+          status: 401,
+          message: 'Invalid secret received from btc pay server',
+          cause: new Error('Invalid secret received from btc pay server'),
+        })
       )
     }
 
-    const webhookPayload = yield* _(
-      Schema.decodeUnknown(UpdateInvoiceStatusWebhookRequest)(body).pipe(
-        Effect.mapError(
-          (e) =>
-            new UpdateInvoiceWebhookError({
-              cause: e,
-              status: 400,
-              message: 'Invalid webhook payload error',
-            })
-        )
+    const webhookPayload = yield* Schema.decodeUnknownEffect(
+      UpdateInvoiceStatusWebhookRequest
+    )(body).pipe(
+      Effect.mapError(
+        (e) =>
+          new UpdateInvoiceWebhookError({
+            cause: e,
+            status: 400,
+            message: 'Invalid webhook payload error',
+          })
       )
     )
 
-    yield* _(
-      updateInvoiceStateWebhookService.createOrUpdateInvoiceState({
-        invoiceId: webhookPayload.invoiceId,
-        type: webhookPayload.type,
-      })
-    )
+    yield* updateInvoiceStateWebhookService.createOrUpdateInvoiceState({
+      invoiceId: webhookPayload.invoiceId,
+      type: webhookPayload.type,
+    })
 
     return {}
   }).pipe(Effect.withSpan('updateInvoiceStateWebhook'), makeEndpointEffect)

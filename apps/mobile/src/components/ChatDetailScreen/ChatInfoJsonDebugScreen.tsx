@@ -7,7 +7,7 @@ import {
   Typography,
   YStack,
 } from '@vexl-next/ui'
-import {ScopeProvider, useMolecule} from 'bunshi/dist/react'
+import {ScopeProvider, useMolecule} from 'bunshi/react'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useMemo} from 'react'
 import {Text as RNText, ScrollView} from 'react-native'

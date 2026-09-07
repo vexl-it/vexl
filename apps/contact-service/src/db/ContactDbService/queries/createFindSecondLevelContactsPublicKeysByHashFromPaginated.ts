@@ -1,9 +1,10 @@
-import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {PublicKeyV2} from '@vexl-next/cryptography/src/KeyHolder/brandsV2'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
-import {Array, Effect, flow, Schema} from 'effect'
+import {NumberFromString} from '@vexl-next/generic-utils/src/effect-helpers/NumberFromString'
+import {Array, Effect, flow, Option, Schema} from 'effect'
+import {SqlSchema} from 'effect/unstable/sql'
 import {ServerHashedNumber} from '../../../utils/serverHashContact'
 import {createIsAllowedSharedContactHashFragment} from '../../utils/createIsAllowedSharedContactHashFragment'
 
@@ -21,18 +22,17 @@ export type FindSecondLevelContactsPublicKeysByHashFromPaginatedParams =
 export const FindSecondLevelContactsPublicKeysByHashFromPaginatedResult =
   Schema.Struct({
     publicKey: PublicKeyPemBase64,
-    publicKeyV2: Schema.optionalWith(PublicKeyV2, {
-      as: 'Option',
-      nullable: true,
-    }),
-    userId: Schema.NumberFromString,
+    publicKeyV2: Schema.OptionFromOptionalNullOr(PublicKeyV2).pipe(
+      Schema.withConstructorDefault(Effect.succeed(Option.none()))
+    ),
+    userId: NumberFromString,
   })
 export type FindSecondLevelContactsPublicKeysByHashFromPaginatedResult =
   typeof FindSecondLevelContactsPublicKeysByHashFromPaginatedResult.Type
 
 export const createFindSecondLevelContactsPublicKeysByHashFromPaginated =
-  Effect.gen(function* (_) {
-    const sql = yield* _(PgClient.PgClient)
+  Effect.gen(function* () {
+    const sql = yield* PgClient.PgClient
 
     const query = SqlSchema.findAll({
       Request: FindSecondLevelContactsPublicKeysByHashFromPaginatedParams,

@@ -28,7 +28,7 @@ export const refreshVexlTokenMetadataTaskId = registerInAppLoadingTask({
 
       const expoToken = yield* getNotificationTokenE()
 
-      yield* Effect.either(
+      yield* Effect.result(
         store
           .set(syncVexlNotificationTokensActionAtom, {
             expoNotificationToken: expoToken,

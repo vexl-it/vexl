@@ -1,4 +1,3 @@
-import {HttpApi} from '@effect/platform/index'
 import {MaxExpectedDailyCall} from '@vexl-next/rest-api/src/MaxExpectedDailyCountAnnotation'
 import {BtcExchangeRateApiSpecification} from '@vexl-next/rest-api/src/services/btcExchangeRate/specification'
 import {ChatApiSpecification} from '@vexl-next/rest-api/src/services/chat/specification'
@@ -10,21 +9,41 @@ import {MetricsApiSpecification} from '@vexl-next/rest-api/src/services/metrics/
 import {NotificationApiSpecification} from '@vexl-next/rest-api/src/services/notification/specification'
 import {OfferApiSpecification} from '@vexl-next/rest-api/src/services/offer/specification'
 import {UserApiSpecification} from '@vexl-next/rest-api/src/services/user/specification'
-import {Context, Effect, Option, Schema} from 'effect/index'
+import {Context, Effect, Option, Schema} from 'effect'
 import {toEntries} from 'effect/Record'
+import {
+  HttpApi,
+  type HttpApiEndpoint,
+  type HttpApiGroup,
+} from 'effect/unstable/httpapi'
 
-type Apis = Record<string, HttpApi.HttpApi<any, any, any, any>>
-const apis: Apis = {
-  btcEchangeRate: BtcExchangeRateApiSpecification,
-  contact: ContactApiSpecification,
-  content: ContentApiSpecification,
-  feedback: FeedbackApiSpecification,
-  chat: ChatApiSpecification,
-  location: LocationApiSpecification,
-  metrics: MetricsApiSpecification,
-  notification: NotificationApiSpecification,
-  offer: OfferApiSpecification,
-  user: UserApiSpecification,
+const getEndpoints = <
+  Id extends string,
+  Groups extends HttpApiGroup.Constraint,
+>(
+  api: HttpApi.HttpApi<Id, Groups>
+): HttpApiEndpoint.Top[] => {
+  const endpoints: HttpApiEndpoint.Top[] = []
+  HttpApi.reflect(api, {
+    onGroup: () => {},
+    onEndpoint: ({endpoint}) => {
+      endpoints.push(endpoint)
+    },
+  })
+  return endpoints
+}
+
+const apis = {
+  btcEchangeRate: getEndpoints(BtcExchangeRateApiSpecification),
+  contact: getEndpoints(ContactApiSpecification),
+  content: getEndpoints(ContentApiSpecification),
+  feedback: getEndpoints(FeedbackApiSpecification),
+  chat: getEndpoints(ChatApiSpecification),
+  location: getEndpoints(LocationApiSpecification),
+  metrics: getEndpoints(MetricsApiSpecification),
+  notification: getEndpoints(NotificationApiSpecification),
+  offer: getEndpoints(OfferApiSpecification),
+  user: getEndpoints(UserApiSpecification),
 }
 
 const Row = Schema.Struct({
@@ -35,49 +54,40 @@ const Row = Schema.Struct({
 })
 type Row = typeof Row.Type
 
-const extractMaxSpecifiedDailyCountsFromApis = Effect.gen(function* (_) {
+const extractMaxSpecifiedDailyCountsFromApis = Effect.gen(function* () {
   const resultsRows: Row[] = []
   const specifiedEndpoints: string[] = []
   const notSpecifiedEndpoints: string[] = []
 
   const entries = toEntries(apis)
-  for (const [serviceName, apiSpecification] of entries) {
-    HttpApi.reflect(apiSpecification, {
-      onGroup: () => {
-        // nothig
-      },
-      onEndpoint: ({endpoint}) => {
-        const url = endpoint.path
-        const method = endpoint.method
-        const maxExpectedDailyCount = Context.getOption(
-          endpoint.annotations,
-          MaxExpectedDailyCall
-        )
+  for (const [serviceName, endpoints] of entries) {
+    for (const endpoint of endpoints) {
+      const url = endpoint.path
+      const method = endpoint.method
+      const maxExpectedDailyCount = Context.getOption(
+        endpoint.annotations,
+        MaxExpectedDailyCall
+      )
 
-        if (Option.isSome(maxExpectedDailyCount)) {
-          resultsRows.push({
-            service: serviceName,
-            method,
-            url,
-            maxExpectedDailyCount: maxExpectedDailyCount.value,
-          })
-          specifiedEndpoints.push(`${serviceName} ${method} ${url}`)
-        } else {
-          notSpecifiedEndpoints.push(`${serviceName} ${method} ${url}`)
-        }
-      },
-    })
+      if (Option.isSome(maxExpectedDailyCount)) {
+        resultsRows.push({
+          service: serviceName,
+          method,
+          url,
+          maxExpectedDailyCount: maxExpectedDailyCount.value,
+        })
+        specifiedEndpoints.push(`${serviceName} ${method} ${url}`)
+      } else {
+        notSpecifiedEndpoints.push(`${serviceName} ${method} ${url}`)
+      }
+    }
   }
 
-  yield* _(
-    Effect.logDebug(
-      `Got MaxExpectedDailyCounts for ${specifiedEndpoints.length} endpoints`
-    )
+  yield* Effect.logDebug(
+    `Got MaxExpectedDailyCounts for ${specifiedEndpoints.length} endpoints`
   )
-  yield* _(
-    Effect.logDebug(
-      `Missing MaxSpecifiedDailyCounts for ${notSpecifiedEndpoints.length} endpoints`
-    )
+  yield* Effect.logDebug(
+    `Missing MaxSpecifiedDailyCounts for ${notSpecifiedEndpoints.length} endpoints`
   )
 
   return {resultsRows, specifiedEndpoints, notSpecifiedEndpoints}
@@ -85,7 +95,7 @@ const extractMaxSpecifiedDailyCountsFromApis = Effect.gen(function* (_) {
 
 export const getResultsJson = extractMaxSpecifiedDailyCountsFromApis.pipe(
   Effect.map(({resultsRows}) => resultsRows),
-  Effect.flatMap(Schema.encode(Schema.parseJson(Schema.Array(Row)))),
+  Effect.flatMap(Schema.encodeEffect(Schema.fromJsonString(Schema.Array(Row)))),
   Effect.flatMap(Effect.log)
 )
 
@@ -105,26 +115,20 @@ export const getResultsCsv = extractMaxSpecifiedDailyCountsFromApis.pipe(
 export const checkForMissingAnnotations =
   extractMaxSpecifiedDailyCountsFromApis.pipe(
     Effect.flatMap(({notSpecifiedEndpoints, specifiedEndpoints}) =>
-      Effect.gen(function* (_) {
+      Effect.gen(function* () {
         if (notSpecifiedEndpoints.length === 0) {
-          yield* _(
-            Effect.log(
-              `Specified all ${specifiedEndpoints.length} endpoints. All good!`
-            )
+          yield* Effect.log(
+            `Specified all ${specifiedEndpoints.length} endpoints. All good!`
           )
           return
         }
 
-        yield* _(
-          Effect.logError(
-            'The following endpoints are missing MaxExpectedDailyCall annotations:',
-            notSpecifiedEndpoints
-          )
+        yield* Effect.logError(
+          'The following endpoints are missing MaxExpectedDailyCall annotations:',
+          notSpecifiedEndpoints
         )
-        yield* _(
-          Effect.die(
-            'Some endpoints are missing MaxExpectedDailyCall annotations'
-          )
+        yield* Effect.die(
+          'Some endpoints are missing MaxExpectedDailyCall annotations'
         )
       })
     )

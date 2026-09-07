@@ -12,7 +12,7 @@ import {
   XmarkCancelClose,
   YStack,
 } from '@vexl-next/ui'
-import {useMolecule} from 'bunshi/dist/react'
+import {useMolecule} from 'bunshi/react'
 import {useAtom, useAtomValue, useSetAtom} from 'jotai'
 import truncate from 'just-truncate'
 import React, {useCallback, useEffect, useRef, useState} from 'react'

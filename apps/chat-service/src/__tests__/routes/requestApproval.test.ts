@@ -1,4 +1,3 @@
-import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {MessageCypher} from '@vexl-next/domain/src/general/messaging'
@@ -10,7 +9,8 @@ import {
 import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
-import {Effect, Schema} from 'effect'
+import {Effect, pipe, Schema} from 'effect'
+import {SqlClient} from 'effect/unstable/sql'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
 import {
   createMockedUser,
@@ -24,13 +24,13 @@ let user2: MockedUser
 
 beforeEach(async () => {
   await runPromiseInMockedEnvironment(
-    Effect.gen(function* (_) {
-      const sql = yield* _(SqlClient.SqlClient)
-      yield* _(sql`DELETE FROM inbox`)
-      yield* _(sql`DELETE FROM message`)
+    Effect.gen(function* () {
+      const sql = yield* SqlClient.SqlClient
+      yield* sql`DELETE FROM inbox`
+      yield* sql`DELETE FROM message`
 
-      user1 = yield* _(createMockedUser('+420733333330'))
-      user2 = yield* _(createMockedUser('+420733333331'))
+      user1 = yield* createMockedUser('+420733333330')
+      user2 = yield* createMockedUser('+420733333331')
     })
   )
 })
@@ -38,39 +38,33 @@ beforeEach(async () => {
 describe('Request approval', () => {
   it('delivers repeated request messages to the receiver', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
-        yield* _(setAuthHeaders(user1.authHeaders))
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
+        yield* setAuthHeaders(user1.authHeaders)
 
         const headers = makeTestCommonAndSecurityHeaders(user1.authHeaders)
-        yield* _(
-          client.Inboxes.requestApproval({
-            payload: {
-              message: Schema.decodeSync(MessageCypher)('request message 1'),
-              publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-            },
-            headers,
-          })
-        )
-        yield* _(
-          client.Inboxes.requestApproval({
-            payload: {
-              message: Schema.decodeSync(MessageCypher)('request message 2'),
-              publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-            },
-            headers,
-          })
-        )
+        yield* client.Inboxes.requestApproval({
+          payload: {
+            message: Schema.decodeSync(MessageCypher)('request message 1'),
+            publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
+          },
+          headers,
+        })
+        yield* client.Inboxes.requestApproval({
+          payload: {
+            message: Schema.decodeSync(MessageCypher)('request message 2'),
+            publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
+          },
+          headers,
+        })
 
-        yield* _(setAuthHeaders(user2.authHeaders))
-        const messages = yield* _(
-          client.Messages.retrieveMessages({
-            payload: yield* _(user2.inbox1.addChallenge({})),
-            headers: Schema.decodeSync(CommonHeaders)({
-              'user-agent': 'Vexl/2 (1.0.0) IOS',
-            }),
-          })
-        )
+        yield* setAuthHeaders(user2.authHeaders)
+        const messages = yield* client.Messages.retrieveMessages({
+          payload: yield* user2.inbox1.addChallenge({}),
+          headers: Schema.decodeSync(CommonHeaders)({
+            'user-agent': 'Vexl/2 (1.0.0) IOS',
+          }),
+        })
 
         expect(messages.messages).toHaveLength(2)
         expect(messages.messages[0].message).toBe('request message 1')
@@ -81,11 +75,11 @@ describe('Request approval', () => {
 
   it('returns an error when the receiver inbox does not exist', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
-        yield* _(setAuthHeaders(user1.authHeaders))
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
+        yield* setAuthHeaders(user1.authHeaders)
 
-        const response = yield* _(
+        const response = yield* pipe(
           client.Inboxes.requestApproval({
             payload: {
               message: Schema.decodeSync(MessageCypher)('request message'),
@@ -93,7 +87,7 @@ describe('Request approval', () => {
             },
             headers: makeTestCommonAndSecurityHeaders(user1.authHeaders),
           }),
-          Effect.either
+          Effect.result
         )
 
         expectErrorResponse(ReceiverInboxDoesNotExistError)(response)
@@ -103,17 +97,15 @@ describe('Request approval', () => {
 
   it('returns an error when the sender inbox does not exist', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
-        const dummyAuthHeaders = yield* _(
-          createDummyAuthHeadersForUser({
-            phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333332'),
-            publicKey: generatePrivateKey().publicKeyPemBase64,
-          })
-        )
-        yield* _(setAuthHeaders(dummyAuthHeaders))
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
+        const dummyAuthHeaders = yield* createDummyAuthHeadersForUser({
+          phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333332'),
+          publicKey: generatePrivateKey().publicKeyPemBase64,
+        })
+        yield* setAuthHeaders(dummyAuthHeaders)
 
-        const response = yield* _(
+        const response = yield* pipe(
           client.Inboxes.requestApproval({
             payload: {
               message: Schema.decodeSync(MessageCypher)('request message'),
@@ -121,7 +113,7 @@ describe('Request approval', () => {
             },
             headers: makeTestCommonAndSecurityHeaders(dummyAuthHeaders),
           }),
-          Effect.either
+          Effect.result
         )
 
         expectErrorResponse(SenderInboxDoesNotExistError)(response)

@@ -21,7 +21,7 @@ import {
   PeopleUsers,
   PinGeolocation,
 } from '@vexl-next/ui/src/icons'
-import {useMolecule} from 'bunshi/dist/react'
+import {useMolecule} from 'bunshi/react'
 import {Array, Effect, Number, Option, pipe} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useLayoutEffect, useMemo} from 'react'
@@ -108,9 +108,11 @@ function MyOfferDetailScreen({
   const handleBackPress = useCallback((): void => {
     if (hasUnsavedChanges) {
       void Effect.runPromise(
-        Effect.andThen(showUnpublishedChangesDialog(), (success) => {
-          if (success) safeGoBack()
-        })
+        Effect.andThen(showUnpublishedChangesDialog(), (success) =>
+          Effect.sync(() => {
+            if (success) safeGoBack()
+          })
+        )
       )
     } else {
       safeGoBack()
@@ -146,7 +148,7 @@ function MyOfferDetailScreen({
     t,
   })
 
-  const hasSelectedClubs = Array.isNonEmptyArray(selectedClubNames)
+  const hasSelectedClubs = Array.isArrayNonEmpty(selectedClubNames)
   const clubsReach = pipe(
     allClubsWithMembers,
     Array.filter((c) => selectedClubsUuids.includes(c.club.uuid)),
@@ -227,9 +229,11 @@ function MyOfferDetailScreen({
               variant: 'destructive',
               onPress: () => {
                 void Effect.runPromise(
-                  Effect.andThen(deleteOfferWithConfirmation(), (success) => {
-                    if (success) safeGoBack()
-                  })
+                  Effect.andThen(deleteOfferWithConfirmation(), (success) =>
+                    Effect.sync(() => {
+                      if (success) safeGoBack()
+                    })
+                  )
                 )
               },
             },
@@ -363,9 +367,11 @@ function MyOfferDetailScreen({
               size="medium"
               onPress={() => {
                 void Effect.runPromise(
-                  Effect.andThen(publishChanges(), (success) => {
-                    if (success) safeGoBack()
-                  })
+                  Effect.andThen(publishChanges(), (success) =>
+                    Effect.sync(() => {
+                      if (success) safeGoBack()
+                    })
+                  )
                 )
               }}
             >

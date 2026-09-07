@@ -8,7 +8,7 @@ import {
 } from '@vexl-next/rest-api/src/services/user/contracts'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
-import {Effect, Schema} from 'effect'
+import {Effect, pipe, Schema} from 'effect'
 import {VerificationIdPayload} from '../../routes/eraseUser/utils'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
 import {
@@ -34,19 +34,17 @@ const invalidTurnstileToken = Schema.decodeSync(TurnstileToken)(
 describe('Initialize erase user', () => {
   it('Issues sms code when requested', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
-        const data = yield* _(
-          client.EraseUser.initEraseUser({
-            headers: Schema.decodeSync(CommonHeaders)({
-              'user-agent': 'Vexl/2 (1.0.0) IOS',
-            }),
-            payload: {
-              phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333333'),
-              turnstileToken: validTurnstileToken,
-            },
-          })
-        )
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
+        const data = yield* client.EraseUser.initEraseUser({
+          headers: Schema.decodeSync(CommonHeaders)({
+            'user-agent': 'Vexl/2 (1.0.0) IOS',
+          }),
+          payload: {
+            phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333333'),
+            turnstileToken: validTurnstileToken,
+          },
+        })
 
         expect(verifyTurnstileTokenMock).toHaveBeenCalledWith({
           expectedAction: 'delete-account-init',
@@ -57,11 +55,9 @@ describe('Initialize erase user', () => {
           expect.anything()
         )
         expect(data.verificationId).toBeDefined()
-        const crypto = yield* _(ServerCrypto)
-        const tokenPayload = yield* _(
-          crypto.decryptAES(VerificationIdPayload)(
-            Schema.decodeSync(AesGtmCypher)(data.verificationId)
-          )
+        const crypto = yield* ServerCrypto
+        const tokenPayload = yield* crypto.decryptAES(VerificationIdPayload)(
+          Schema.decodeSync(AesGtmCypher)(data.verificationId)
         )
         expect(tokenPayload.phoneNumber).toEqual('+420733333333')
         expect(tokenPayload.expiresAt).toBeDefined()
@@ -71,8 +67,8 @@ describe('Initialize erase user', () => {
 
   it('Properly report error when twilio call fails', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
 
         createVerificationMock.mockReturnValue(
           Effect.fail(
@@ -83,7 +79,7 @@ describe('Initialize erase user', () => {
           )
         )
 
-        const result = yield* _(
+        const result = yield* pipe(
           client.EraseUser.initEraseUser({
             headers: Schema.decodeSync(CommonHeaders)({
               'user-agent': 'Vexl/2 (1.0.0) IOS',
@@ -93,7 +89,7 @@ describe('Initialize erase user', () => {
               turnstileToken: validTurnstileToken,
             },
           }),
-          Effect.either
+          Effect.result
         )
 
         expectErrorResponse(UnableToSendVerificationSmsError)(result)
@@ -103,8 +99,8 @@ describe('Initialize erase user', () => {
 
   it('Rejects request when turnstile verification fails', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
 
         verifyTurnstileTokenMock.mockReturnValueOnce(
           Effect.fail(
@@ -115,7 +111,7 @@ describe('Initialize erase user', () => {
           )
         )
 
-        const result = yield* _(
+        const result = yield* pipe(
           client.EraseUser.initEraseUser({
             headers: Schema.decodeSync(CommonHeaders)({
               'user-agent': 'Vexl/2 (1.0.0) IOS',
@@ -125,7 +121,7 @@ describe('Initialize erase user', () => {
               turnstileToken: invalidTurnstileToken,
             },
           }),
-          Effect.either
+          Effect.result
         )
 
         expect(createVerificationMock).not.toHaveBeenCalled()

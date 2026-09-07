@@ -10,6 +10,7 @@ import {
   Schedule,
   Schema,
   Stream,
+  flow,
   pipe,
 } from 'effect'
 import {atom} from 'jotai'
@@ -21,7 +22,7 @@ import {
 import {createAndConnectSocket} from './utils/socket'
 
 export const countriesConnectionOrder: Order.Order<ConnectionsCountByCountry> =
-  Order.reverse(Order.struct({'count': Order.number}))
+  Order.flip(Order.Struct({'count': Order.Number}))
 
 export const totalNumberOfUsersAtom = atom<Option.Option<number>>(Option.none())
 
@@ -154,12 +155,12 @@ export const listenForChangesActionAtom = atom(null, (get, set) => {
     ),
     Stream.unwrap,
     Stream.runForEach(processSpecificMessage),
-    Effect.tapBoth({
-      onSuccess: () => Effect.log('Socket closed.'),
-      onFailure: (e) => Effect.logError('Error while reading socket', e),
-    }),
+    flow(
+      Effect.tapError((e) => Effect.logError('Error while reading socket', e)),
+      Effect.tap(() => Effect.log('Socket closed.'))
+    ),
     Effect.scoped,
-    Effect.zipLeft(
+    Effect.tap(
       Effect.all([
         Effect.log('Retrying socket connection'),
         Effect.sync(() => {
@@ -168,7 +169,7 @@ export const listenForChangesActionAtom = atom(null, (get, set) => {
       ])
     ),
     Effect.ignore,
-    Effect.repeat(Schedule.spaced('1 second')), // Retry on whatever happens
+    Effect.repeat(Schedule.spaced('1 second')),
     Effect.runFork
   )
 

@@ -70,23 +70,21 @@ export function api({
   osVersion?: string
   prefix?: CountryPrefix
 }) {
-  return Effect.gen(function* (_) {
-    const client = yield* _(
-      createClientInstance({
-        api: OfferApiSpecification,
-        platform,
-        clientVersion,
-        clientSemver,
-        language,
-        isDeveloper,
-        appSource,
-        url,
-        loggingFunction,
-        deviceModel,
-        osVersion,
-        prefix,
-      })
-    )
+  return Effect.gen(function* () {
+    const client = yield* createClientInstance({
+      api: OfferApiSpecification,
+      platform,
+      clientVersion,
+      clientSemver,
+      language,
+      isDeveloper,
+      appSource,
+      url,
+      loggingFunction,
+      deviceModel,
+      osVersion,
+      prefix,
+    })
 
     const commonHeaders = makeCommonHeaders({
       appSource,
@@ -95,9 +93,9 @@ export function api({
       platform,
       isDeveloper,
       language,
-      deviceModel: Option.fromNullable(deviceModel),
-      osVersion: Option.fromNullable(osVersion),
-      prefix: Option.fromNullable(prefix),
+      deviceModel: Option.fromNullishOr(deviceModel),
+      osVersion: Option.fromNullishOr(osVersion),
+      prefix: Option.fromNullishOr(prefix),
     })
 
     // Security headers are built lazily inside each request effect (not once
@@ -119,7 +117,7 @@ export function api({
       ) =>
         withSecurityHeaders((headers) =>
           client.getOffersForMeModifiedOrCreatedAfterPaginated({
-            urlParams: req,
+            query: req,
             headers,
           })
         ),
@@ -140,7 +138,7 @@ export function api({
       refreshOffer: (body: RefreshOfferRequest) =>
         client.refreshOffer({payload: body}),
       deleteOffer: (req: DeleteOfferRequest) =>
-        client.deleteOffer({urlParams: req, headers: commonHeaders}),
+        client.deleteOffer({query: req, headers: commonHeaders}),
       updateOffer: (body: UpdateOfferRequest) =>
         withSecurityHeaders((headers) =>
           client.updateOffer({payload: body, headers})
@@ -183,7 +181,7 @@ export function api({
       ) =>
         withSecurityHeaders((headers) =>
           client.Notes.getNotesForMeModifiedOrCreatedAfterPaginated({
-            urlParams: req,
+            query: req,
             headers,
           })
         ),
@@ -192,7 +190,7 @@ export function api({
           client.Notes.createNewNote({payload: body, headers})
         ),
       deleteNote: (req: DeleteNoteRequest) =>
-        client.Notes.deleteNote({urlParams: req}),
+        client.Notes.deleteNote({query: req}),
       createNotePrivatePart: (body: CreateNotePrivatePartRequest) =>
         client.Notes.createNotePrivatePart({payload: body}),
       deleteNotePrivatePart: (req: DeleteNotePrivatePartRequest) =>
@@ -206,7 +204,7 @@ export function api({
           client.Notes.repostNote({payload: body, headers})
         ),
       undoRepostNote: (req: UndoRepostNoteRequest) =>
-        client.Notes.undoRepostNote({urlParams: req}),
+        client.Notes.undoRepostNote({query: req}),
       getRemovedNotes: (body: RemovedNoteIdsRequest) =>
         withSecurityHeaders((headers) =>
           client.Notes.getRemovedNotes({payload: body, headers})
@@ -224,4 +222,4 @@ export function api({
   })
 }
 
-export type OfferApi = Effect.Effect.Success<ReturnType<typeof api>>
+export type OfferApi = Effect.Success<ReturnType<typeof api>>

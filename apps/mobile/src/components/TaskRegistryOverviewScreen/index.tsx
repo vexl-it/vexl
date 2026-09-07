@@ -229,7 +229,7 @@ function TaskRegistrySection(): React.ReactElement {
         Task Registry ({tasks.length} total)
       </Typography>
 
-      {Array.isNonEmptyArray(pendingTasks) && (
+      {Array.isArrayNonEmpty(pendingTasks) && (
         <YStack gap="$1">
           <Typography
             variant="descriptionBold"
@@ -241,7 +241,7 @@ function TaskRegistrySection(): React.ReactElement {
         </YStack>
       )}
 
-      {Array.isNonEmptyArray(failedTasks) && (
+      {Array.isArrayNonEmpty(failedTasks) && (
         <YStack gap="$1">
           <Typography variant="descriptionBold" color="$redForeground">
             Failed ({failedTasks.length})
@@ -250,7 +250,7 @@ function TaskRegistrySection(): React.ReactElement {
         </YStack>
       )}
 
-      {Array.isNonEmptyArray(completedTasks) && (
+      {Array.isArrayNonEmpty(completedTasks) && (
         <YStack gap="$1">
           <Typography variant="descriptionBold" color="$greenForeground">
             Completed ({completedTasks.length})
@@ -259,7 +259,7 @@ function TaskRegistrySection(): React.ReactElement {
         </YStack>
       )}
 
-      {Array.isNonEmptyArray(notStartedTasks) && (
+      {Array.isArrayNonEmpty(notStartedTasks) && (
         <YStack gap="$1">
           <Typography variant="descriptionBold" color="$foregroundSecondary">
             Not Started ({notStartedTasks.length})
@@ -289,7 +289,7 @@ function NotificationProcessingSection(): React.ReactElement {
         Notification Processing ({notifications.length} total)
       </Typography>
 
-      {Array.isNonEmptyArray(inProgress) && (
+      {Array.isArrayNonEmpty(inProgress) && (
         <YStack gap="$1">
           <Typography
             variant="descriptionBold"
@@ -313,7 +313,7 @@ function NotificationProcessingSection(): React.ReactElement {
         </YStack>
       )}
 
-      {Array.isNonEmptyArray(completed) && (
+      {Array.isArrayNonEmpty(completed) && (
         <YStack gap="$1">
           <Typography variant="descriptionBold" color="$greenForeground">
             Completed ({completed.length})

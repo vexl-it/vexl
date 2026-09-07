@@ -1,8 +1,8 @@
-import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {ClubMadeInactiveReason} from '@vexl-next/domain/src/general/clubs'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {Effect, flow, Schema} from 'effect'
+import {SqlSchema} from 'effect/unstable/sql'
 import {ClubDbRecord, ClubRecordId} from '../domain'
 
 export const UpdateSetClubsInactiveParams = Schema.Struct({
@@ -12,10 +12,10 @@ export const UpdateSetClubsInactiveParams = Schema.Struct({
 export type UpdateSetClubsInactiveParams =
   typeof UpdateSetClubsInactiveParams.Type
 
-export const createUpdateSetClubsInactive = Effect.gen(function* (_) {
-  const sql = yield* _(PgClient.PgClient)
+export const createUpdateSetClubsInactive = Effect.gen(function* () {
+  const sql = yield* PgClient.PgClient
 
-  const query = SqlSchema.single({
+  const query = SqlSchema.findOne({
     Request: UpdateSetClubsInactiveParams,
     Result: ClubDbRecord,
     execute: (params) => sql`

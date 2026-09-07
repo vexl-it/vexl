@@ -1,34 +1,34 @@
-import {HttpApiBuilder} from '@effect/platform/index'
 import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {HEADER_ADMIN_TOKEN} from '@vexl-next/rest-api/src/constants'
 import {type GenerateInviteLinkForAdminResponse} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
-import {Effect} from 'effect'
+import {makeHttpApiHandler} from '@vexl-next/server-utils/src/makeHttpApiHandler'
+import {Effect, pipe} from 'effect'
 import {ClubInvitationLinkDbService} from '../../../db/ClubInvitationLinkDbService'
 import {ClubsDbService} from '../../../db/ClubsDbService'
 import {createFullLink} from '../utils/createFullLink'
 import {generateRandomInviteCode} from '../utils/generateRandomInviteCode'
 import {validateAdminToken} from '../utils/validateAdminToken'
 
-export const generateClubInviteLink = HttpApiBuilder.handler(
+export const generateClubInviteLink = makeHttpApiHandler(
   ContactApiSpecification,
   'ClubsAdmin',
   'generateClubInviteLinkForAdmin',
   (req) =>
-    Effect.gen(function* (_) {
-      yield* _(validateAdminToken(req.headers[HEADER_ADMIN_TOKEN]))
+    Effect.gen(function* () {
+      yield* validateAdminToken(req.headers[HEADER_ADMIN_TOKEN])
 
-      const clubsDb = yield* _(ClubsDbService)
-      const invitationDb = yield* _(ClubInvitationLinkDbService)
+      const clubsDb = yield* ClubsDbService
+      const invitationDb = yield* ClubInvitationLinkDbService
 
-      const club = yield* _(
+      const club = yield* pipe(
         clubsDb.findClubByUuid({uuid: req.payload.clubUuid}),
-        Effect.flatten,
-        Effect.catchTag('NoSuchElementException', (e) => new NotFoundError())
+        Effect.flatMap(Effect.fromOption),
+        Effect.catchTag('NoSuchElementError', (e) => new NotFoundError())
       )
 
-      const generatedLink = yield* _(
+      const generatedLink = yield* pipe(
         generateRandomInviteCode,
         Effect.flatMap((code) =>
           invitationDb.insertInvitationLink({
@@ -44,14 +44,14 @@ export const generateClubInviteLink = HttpApiBuilder.handler(
             e
           )
         ),
-        Effect.retry({times: 3}) // retry if code is not unique
+        Effect.retry({times: 3})
       )
 
       return {
         clubUuid: club.uuid,
         link: {
           code: generatedLink.code,
-          fullLink: yield* _(createFullLink(generatedLink.code)),
+          fullLink: yield* createFullLink(generatedLink.code),
         },
       } satisfies GenerateInviteLinkForAdminResponse
     }).pipe(makeEndpointEffect)

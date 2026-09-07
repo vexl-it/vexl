@@ -39,9 +39,9 @@ const rowToSlideshow = (row: SlideshowRow): TvSlideshow =>
 const firstSlideshow = (rows: readonly SlideshowRow[]): TvSlideshow | null =>
   pipe(rows, Array.head, Option.map(rowToSlideshow), Option.getOrNull)
 
-export const listSlideshows = Effect.gen(function* (_) {
-  const sql = yield* _(PgClient.PgClient)
-  const rows = yield* _(sql<SlideshowRow>`
+export const listSlideshows = Effect.gen(function* () {
+  const sql = yield* PgClient.PgClient
+  const rows = yield* sql<SlideshowRow>`
     SELECT
       uuid::text,
       public_token,
@@ -56,7 +56,7 @@ export const listSlideshows = Effect.gen(function* (_) {
     ORDER BY
       updated_at DESC,
       created_at DESC
-  `)
+  `
 
   return pipe(rows, Array.map(rowToSlideshow))
 })
@@ -64,9 +64,9 @@ export const listSlideshows = Effect.gen(function* (_) {
 export const findSlideshowByUuid = (
   uuid: string
 ): Effect.Effect<TvSlideshow | null, unknown, PgClient.PgClient> =>
-  Effect.gen(function* (_) {
-    const sql = yield* _(PgClient.PgClient)
-    const rows = yield* _(sql<SlideshowRow>`
+  Effect.gen(function* () {
+    const sql = yield* PgClient.PgClient
+    const rows = yield* sql<SlideshowRow>`
       SELECT
         uuid::text,
         public_token,
@@ -82,7 +82,7 @@ export const findSlideshowByUuid = (
         uuid = ${uuid}
       LIMIT
         1
-    `)
+    `
 
     return firstSlideshow(rows)
   })
@@ -90,9 +90,9 @@ export const findSlideshowByUuid = (
 export const findEnabledSlideshowByPublicIdentifier = (
   publicIdentifier: string
 ): Effect.Effect<TvSlideshow | null, unknown, PgClient.PgClient> =>
-  Effect.gen(function* (_) {
-    const sql = yield* _(PgClient.PgClient)
-    const rows = yield* _(sql<SlideshowRow>`
+  Effect.gen(function* () {
+    const sql = yield* PgClient.PgClient
+    const rows = yield* sql<SlideshowRow>`
       SELECT
         uuid::text,
         public_token,
@@ -112,7 +112,7 @@ export const findEnabledSlideshowByPublicIdentifier = (
         AND is_enabled = TRUE
       LIMIT
         1
-    `)
+    `
 
     return firstSlideshow(rows)
   })
@@ -121,9 +121,9 @@ export const isPublicSlugAvailable = (
   publicSlug: string,
   exceptUuid: string | null
 ): Effect.Effect<boolean, unknown, PgClient.PgClient> =>
-  Effect.gen(function* (_) {
-    const sql = yield* _(PgClient.PgClient)
-    const rows = yield* _(sql<{readonly uuid: string}>`
+  Effect.gen(function* () {
+    const sql = yield* PgClient.PgClient
+    const rows = yield* sql<{readonly uuid: string}>`
       SELECT
         uuid::text
       FROM
@@ -136,20 +136,20 @@ export const isPublicSlugAvailable = (
         )
       LIMIT
         1
-    `)
+    `
 
-    return !Array.isNonEmptyReadonlyArray(rows)
+    return !Array.isReadonlyArrayNonEmpty(rows)
   })
 
 export const createSlideshow = (
   input: CreateSlideshowRequest
 ): Effect.Effect<TvSlideshow, unknown, PgClient.PgClient> =>
-  Effect.gen(function* (_) {
-    const sql = yield* _(PgClient.PgClient)
+  Effect.gen(function* () {
+    const sql = yield* PgClient.PgClient
     const uuid = input.uuid ?? randomUUID()
     const publicToken = generatePublicToken()
     const slides = decodeSlides(input.slides)
-    const rows = yield* _(sql<SlideshowRow>`
+    const rows = yield* sql<SlideshowRow>`
       INSERT INTO
         backoffice_tv_slideshows (
           uuid,
@@ -177,7 +177,7 @@ export const createSlideshow = (
         is_enabled,
         created_at,
         updated_at
-    `)
+    `
 
     return pipe(rows, Array.head, Option.map(rowToSlideshow), Option.getOrThrow)
   })
@@ -186,10 +186,10 @@ export const updateSlideshow = (
   uuid: string,
   input: UpdateSlideshowRequest
 ): Effect.Effect<TvSlideshow | null, unknown, PgClient.PgClient> =>
-  Effect.gen(function* (_) {
-    const sql = yield* _(PgClient.PgClient)
+  Effect.gen(function* () {
+    const sql = yield* PgClient.PgClient
     const slides = decodeSlides(input.slides)
-    const rows = yield* _(sql<SlideshowRow>`
+    const rows = yield* sql<SlideshowRow>`
       UPDATE backoffice_tv_slideshows
       SET
         public_slug = ${input.publicSlug},
@@ -208,7 +208,7 @@ export const updateSlideshow = (
         is_enabled,
         created_at,
         updated_at
-    `)
+    `
 
     return firstSlideshow(rows)
   })
@@ -216,43 +216,41 @@ export const updateSlideshow = (
 export const deleteSlideshow = (
   uuid: string
 ): Effect.Effect<boolean, unknown, PgClient.PgClient> =>
-  Effect.gen(function* (_) {
-    const sql = yield* _(PgClient.PgClient)
-    const rows = yield* _(sql<{readonly uuid: string}>`
+  Effect.gen(function* () {
+    const sql = yield* PgClient.PgClient
+    const rows = yield* sql<{readonly uuid: string}>`
       DELETE FROM backoffice_tv_slideshows
       WHERE
         uuid = ${uuid}
       RETURNING
         uuid::text
-    `)
+    `
 
-    return Array.isNonEmptyReadonlyArray(rows)
+    return Array.isReadonlyArrayNonEmpty(rows)
   })
 
 export const duplicateSlideshow = (
   uuid: string
 ): Effect.Effect<TvSlideshow | null, unknown, PgClient.PgClient> =>
-  Effect.gen(function* (_) {
-    const original = yield* _(findSlideshowByUuid(uuid))
+  Effect.gen(function* () {
+    const original = yield* findSlideshowByUuid(uuid)
 
     if (!original) return null
 
-    return yield* _(
-      createSlideshow({
-        uuid: randomUUID(),
-        name: `${original.name} copy`,
-        slides: original.slides,
-        isEnabled: false,
-      })
-    )
+    return yield* createSlideshow({
+      uuid: randomUUID(),
+      name: `${original.name} copy`,
+      slides: original.slides,
+      isEnabled: false,
+    })
   })
 
 export const regenerateSlideshowToken = (
   uuid: string
 ): Effect.Effect<TvSlideshow | null, unknown, PgClient.PgClient> =>
-  Effect.gen(function* (_) {
-    const sql = yield* _(PgClient.PgClient)
-    const rows = yield* _(sql<SlideshowRow>`
+  Effect.gen(function* () {
+    const sql = yield* PgClient.PgClient
+    const rows = yield* sql<SlideshowRow>`
       UPDATE backoffice_tv_slideshows
       SET
         public_token = ${generatePublicToken()},
@@ -268,7 +266,7 @@ export const regenerateSlideshowToken = (
         is_enabled,
         created_at,
         updated_at
-    `)
+    `
 
     return firstSlideshow(rows)
   })

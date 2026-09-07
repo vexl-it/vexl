@@ -9,6 +9,7 @@ import {
   Radius,
   longitudeDeltaToKilometers,
 } from '@vexl-next/domain/src/utility/geoCoordinates'
+import {resultToEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {
   KeyboardStickyView,
   Stack,
@@ -116,14 +117,16 @@ function useAtoms({
                   schedule: transientRequestRetryPolicy,
                   while: (error) => error._tag !== 'LocationNotFoundError',
                 }),
-                Effect.tap((data) => {
-                  onPick({
-                    ...data,
-                    latitude,
-                    longitude,
-                    radius,
+                Effect.tap((data) =>
+                  Effect.sync(() => {
+                    onPick({
+                      ...data,
+                      latitude,
+                      longitude,
+                      radius,
+                    })
                   })
-                }),
+                ),
                 Effect.tapError((error) =>
                   Effect.sync(() => {
                     onPick(null)
@@ -190,13 +193,13 @@ function PickedLocationText({
         variant="micro"
         textAlign="center"
         color={
-          E.isLeft(geocodingState.result)
+          E.isLeft(resultToEither(geocodingState.result))
             ? '$redForeground'
             : '$foregroundPrimary'
         }
       >
         {pipe(
-          geocodingState.result,
+          resultToEither(geocodingState.result),
           E.match(
             (error) =>
               error._tag === 'LocationNotFoundError'
@@ -211,7 +214,7 @@ function PickedLocationText({
         variant="micro"
         textAlign="center"
         color={
-          E.isLeft(geocodingState.result)
+          E.isLeft(resultToEither(geocodingState.result))
             ? '$redForeground'
             : '$foregroundPrimary'
         }

@@ -1,13 +1,9 @@
-import {
-  HttpApiBuilder,
-  HttpApiSwagger,
-  HttpMiddleware,
-  HttpServer,
-} from '@effect/platform/index'
 import {ChatApiSpecification} from '@vexl-next/rest-api/src/services/chat/specification'
 import {healthServerLayer} from '@vexl-next/server-utils/src/HealthServer'
 import {NodeHttpServerLiveWithPortFromEnv} from '@vexl-next/server-utils/src/NodeHttpServerLiveWithPortFromEnv'
 import {rateLimitingMiddlewareLayer} from '@vexl-next/server-utils/src/RateLimiting/rateLimitngMiddlewareLayer'
+import {HttpRouter} from 'effect/unstable/http'
+import {HttpApiBuilder, HttpApiSwagger} from 'effect/unstable/httpapi'
 
 import {RateLimitingService} from '@vexl-next/server-utils/src/RateLimiting'
 import {RedisConnectionService} from '@vexl-next/server-utils/src/RedisConnection'
@@ -79,7 +75,7 @@ const MessagesApiGroupLive = HttpApiBuilder.group(
       .handle('sendMessages', sendMessages)
 )
 
-export const ChatApiLive = HttpApiBuilder.api(ChatApiSpecification).pipe(
+export const ChatApiLive = HttpApiBuilder.layer(ChatApiSpecification).pipe(
   Layer.provide(ChallengeApiGroupLive),
   Layer.provide(InboxesApiGroupLive),
   Layer.provide(MessagesApiGroupLive),
@@ -87,12 +83,9 @@ export const ChatApiLive = HttpApiBuilder.api(ChatApiSpecification).pipe(
   Layer.provide(ServerSecurityMiddlewareLive)
 )
 
-export const ApiServerLive = HttpApiBuilder.serve(HttpMiddleware.logger).pipe(
-  Layer.provide(HttpApiSwagger.layer()),
-  Layer.provide(ChatApiLive),
-  HttpServer.withLogAddress,
-  Layer.provide(NodeHttpServerLiveWithPortFromEnv)
-)
+export const ApiServerLive = HttpRouter.serve(
+  Layer.mergeAll(ChatApiLive, HttpApiSwagger.layer(ChatApiSpecification))
+).pipe(Layer.provide(NodeHttpServerLiveWithPortFromEnv))
 
 export const HttpServerLive = Layer.mergeAll(
   ApiServerLive,

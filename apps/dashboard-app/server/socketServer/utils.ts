@@ -1,11 +1,11 @@
-import {Chunk, Data, Effect, Option, Stream} from 'effect'
+import {Data, Effect, Queue, Stream} from 'effect'
 import {WebSocketServer, type RawData, type WebSocket} from 'ws'
 import {socketServerPortConfig} from '../configs'
 
 export const silentCloseServer = (
   ws: WebSocketServer
 ): Effect.Effect<void, never, never> =>
-  Effect.async((cb) => {
+  Effect.callback((cb) => {
     ws.clients.forEach((client) => {
       client.close()
     })
@@ -29,27 +29,34 @@ export class ServerSocketError extends Data.TaggedError('ServerSocketError')<{
 export function createConnectionsStream(
   wss: WebSocketServer
 ): Stream.Stream<WebSocket, ServerSocketError, never> {
-  return Stream.async<WebSocket, ServerSocketError>((emit) => {
-    wss.on('connection', (ws: WebSocket) => {
-      void emit(Effect.succeed(Chunk.of(ws)))
-    })
-    wss.on('error', (err) => {
-      void emit(
-        Effect.zipLeft(
-          Effect.fail(Option.some(new ServerSocketError({originalError: err}))),
-          Effect.logWarning('Websocket failed', err)
-        )
-      )
-    })
-    wss.on('close', (ws: WebSocket) => {
-      void emit(
-        Effect.zipLeft(
-          Effect.fail(Option.none()),
-          Effect.log('Websocket closed')
-        )
-      )
-    })
-  })
+  return Stream.callback<WebSocket, ServerSocketError>(
+    (queue) =>
+      Effect.acquireRelease(
+        Effect.sync(() => {
+          const connection = (socket: WebSocket): void => {
+            Effect.runFork(Queue.offer(queue, socket))
+          }
+          const error = (originalError: Error): void => {
+            Effect.runFork(
+              Queue.fail(queue, new ServerSocketError({originalError}))
+            )
+          }
+          const close = (): void => {
+            Queue.endUnsafe(queue)
+          }
+          wss.on('connection', connection)
+          wss.on('error', error)
+          wss.on('close', close)
+          return () => {
+            wss.off('connection', connection)
+            wss.off('error', error)
+            wss.off('close', close)
+          }
+        }),
+        (cleanup) => Effect.sync(cleanup)
+      ),
+    {bufferSize: 16}
+  )
 }
 
 export class ReadingDataError extends Data.TaggedError('ReadingDataError')<{
@@ -83,21 +90,34 @@ export class MessageStreamError extends Data.TaggedError('MessageStreamError')<{
 export function createMessagesStream(
   ws: WebSocket
 ): Stream.Stream<RawData, MessageStreamError | ReadingDataError> {
-  return Stream.async((emit) => {
-    ws.on('message', (data) => {
-      void emit(Effect.succeed(Chunk.of(data)))
-    })
-
-    ws.on('error', (err) => {
-      void emit(
-        Effect.fail(Option.some(new MessageStreamError({originalError: err})))
-      )
-    })
-
-    ws.on('close', () => {
-      void emit(Effect.fail(Option.none()))
-    })
-  })
+  return Stream.callback<RawData, MessageStreamError>(
+    (queue) =>
+      Effect.acquireRelease(
+        Effect.sync(() => {
+          const message = (data: RawData): void => {
+            Effect.runFork(Queue.offer(queue, data))
+          }
+          const error = (originalError: Error): void => {
+            Effect.runFork(
+              Queue.fail(queue, new MessageStreamError({originalError}))
+            )
+          }
+          const close = (): void => {
+            Queue.endUnsafe(queue)
+          }
+          ws.on('message', message)
+          ws.on('error', error)
+          ws.on('close', close)
+          return () => {
+            ws.off('message', message)
+            ws.off('error', error)
+            ws.off('close', close)
+          }
+        }),
+        (cleanup) => Effect.sync(cleanup)
+      ),
+    {bufferSize: 16}
+  )
 }
 
 export class SendingMessageError extends Data.Error<{
@@ -108,7 +128,7 @@ export function sendMessageToSocket(
   socket: WebSocket
 ): (message: string) => Effect.Effect<void, SendingMessageError> {
   return (message) =>
-    Effect.async((emit) => {
+    Effect.callback((emit) => {
       socket.send(message, (err) => {
         if (err) {
           emit(Effect.fail(new SendingMessageError({originalError: err})))

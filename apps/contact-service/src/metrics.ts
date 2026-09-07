@@ -1,15 +1,16 @@
-import {SqlClient, SqlSchema} from '@effect/sql'
 import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {type NotificationTrackingId} from '@vexl-next/domain/src/general/NotificationTrackingId.brand'
 import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {type UserInactivityNotificationVariant} from '@vexl-next/domain/src/general/notifications'
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
+import {NumberFromString} from '@vexl-next/generic-utils/src/effect-helpers/NumberFromString'
 import {shouldDisableMetrics} from '@vexl-next/server-utils/src/commonConfigs'
 import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {type CommonMetricAttributes} from '@vexl-next/server-utils/src/metrics/commonMetricAttributesFromHeaders'
 import {MetricsMessage} from '@vexl-next/server-utils/src/metrics/domain'
 import {reportMetricForked} from '@vexl-next/server-utils/src/metrics/reportMetricForked'
 import {Array, Effect, Layer, pipe, Schema} from 'effect'
+import {SqlClient, SqlSchema} from 'effect/unstable/sql'
 import {
   activeUserWindowDaysConfig,
   inactivityNotificationAfterDaysConfig,
@@ -282,11 +283,11 @@ export const reportUserJoinedClubAndImportedContacts = ({
   )
 
 export const reportGaguesLayer = Layer.effectDiscard(
-  Effect.gen(function* (_) {
-    if (yield* _(shouldDisableMetrics)) {
+  Effect.gen(function* () {
+    if (yield* shouldDisableMetrics) {
       return
     }
-    const sql = yield* _(SqlClient.SqlClient)
+    const sql = yield* SqlClient.SqlClient
 
     const queryNumberOfUniqueUsersEffect = sql`
       SELECT
@@ -303,7 +304,7 @@ export const reportGaguesLayer = Layer.effectDiscard(
     `.pipe(
       Effect.map((one) => Number(one[0].count)),
       Effect.flatMap((v) =>
-        Effect.zipRight(
+        Effect.andThen(
           Effect.logInfo(`Reporting number of unique users: ${v}`),
           reportCountOfUniqueUsers(v)
         )
@@ -326,7 +327,7 @@ export const reportGaguesLayer = Layer.effectDiscard(
     `.pipe(
       Effect.map((one) => Number(one[0].count)),
       Effect.flatMap((v) =>
-        Effect.zipRight(
+        Effect.andThen(
           Effect.logInfo(`Reporting number of unique contacts: ${v}`),
           reportCountOfUniqueContacts(v)
         )
@@ -342,7 +343,7 @@ export const reportGaguesLayer = Layer.effectDiscard(
     `.pipe(
       Effect.map((one) => Number(one[0].count)),
       Effect.flatMap((v) =>
-        Effect.zipRight(
+        Effect.andThen(
           Effect.logInfo(`Reporting number of connections: ${v}`),
           reportCountOfConnections(v)
         )
@@ -350,9 +351,9 @@ export const reportGaguesLayer = Layer.effectDiscard(
       Effect.withSpan('Query number of connections')
     )
 
-    yield* _(Effect.logInfo('Starting to report metrics'))
+    yield* Effect.logInfo('Starting to report metrics')
 
-    yield* _(
+    yield* pipe(
       Effect.zip(
         Effect.logInfo('Reporting metrics'),
         Effect.all(
@@ -371,17 +372,16 @@ export const reportGaguesLayer = Layer.effectDiscard(
       Effect.flatMap(() => Effect.sleep(60_000)),
       Effect.forever,
       Effect.withSpan('Report gauges'),
-      Effect.fork
+      Effect.forkChild
     )
   })
 )
 
-export const queryAndReportNumberOfInactiveUsers = Effect.gen(function* (_) {
-  const inactivityNotificationAfterDays = yield* _(
-    inactivityNotificationAfterDaysConfig
-  )
-  const sql = yield* _(SqlClient.SqlClient)
-  yield* _(
+export const queryAndReportNumberOfInactiveUsers = Effect.gen(function* () {
+  const inactivityNotificationAfterDays =
+    yield* inactivityNotificationAfterDaysConfig
+  const sql = yield* SqlClient.SqlClient
+  yield* pipe(
     sql`
       SELECT
         count(*)
@@ -393,7 +393,7 @@ export const queryAndReportNumberOfInactiveUsers = Effect.gen(function* (_) {
     `,
     Effect.map((one) => Number(one[0].count)),
     Effect.flatMap((v) =>
-      Effect.zipRight(
+      Effect.andThen(
         Effect.logInfo(`Reporting number of inactive users: ${v}`),
         reportCountOfInactiveUsers(v)
       )
@@ -407,38 +407,35 @@ export const queryAndReportNumberOfInactiveUsers = Effect.gen(function* (_) {
 })
 
 const InactiveUsersByRemindersSentQueryResult = Schema.Struct({
-  count: Schema.NumberFromString,
+  count: NumberFromString,
   remindersSent: Schema.Number,
 })
 
 export const queryAndReportInactiveUsersByRemindersSent = Effect.gen(
-  function* (_) {
-    const inactivityNotificationAfterDays = yield* _(
-      inactivityNotificationAfterDaysConfig
-    )
-    const sql = yield* _(SqlClient.SqlClient)
+  function* () {
+    const inactivityNotificationAfterDays =
+      yield* inactivityNotificationAfterDaysConfig
+    const sql = yield* SqlClient.SqlClient
 
-    const inactiveUsersByRemindersSent = yield* _(
-      SqlSchema.findAll({
-        Request: Schema.Null,
-        Result: InactiveUsersByRemindersSentQueryResult,
-        execute: () => sql`
-          SELECT
-            count(*) AS "count",
-            number_of_inactivity_notifications_sent AS "remindersSent"
-          FROM
-            users
-          WHERE
-            refreshed_at IS NULL
-            OR refreshed_at < now() - interval '1 day' * ${inactivityNotificationAfterDays}
-          GROUP BY
-            number_of_inactivity_notifications_sent
-        `,
-      })(null)
-    )
+    const inactiveUsersByRemindersSent = yield* SqlSchema.findAll({
+      Request: Schema.Null,
+      Result: InactiveUsersByRemindersSentQueryResult,
+      execute: () => sql`
+        SELECT
+          count(*) AS "count",
+          number_of_inactivity_notifications_sent AS "remindersSent"
+        FROM
+          users
+        WHERE
+          refreshed_at IS NULL
+          OR refreshed_at < now() - interval '1 day' * ${inactivityNotificationAfterDays}
+        GROUP BY
+          number_of_inactivity_notifications_sent
+      `,
+    })(null)
 
     const snapshotTimestamp = new Date()
-    yield* _(
+    yield* pipe(
       inactiveUsersByRemindersSent,
       Array.map(({count, remindersSent}) =>
         reportCountOfInactiveUsersByRemindersSent({
@@ -459,31 +456,29 @@ export const queryAndReportInactiveUsersByRemindersSent = Effect.gen(
 )
 
 const ActiveUsersByCountryQueryResult = Schema.Struct({
-  count: Schema.NumberFromString,
-  countryPrefix: Schema.Union(CountryPrefix, Schema.Null),
+  count: NumberFromString,
+  countryPrefix: Schema.Union([CountryPrefix, Schema.Null]),
 })
 
-export const queryAndReportNumberOfActiveUsers = Effect.gen(function* (_) {
-  const activeUserWindowDays = yield* _(activeUserWindowDaysConfig)
-  const sql = yield* _(SqlClient.SqlClient)
+export const queryAndReportNumberOfActiveUsers = Effect.gen(function* () {
+  const activeUserWindowDays = yield* activeUserWindowDaysConfig
+  const sql = yield* SqlClient.SqlClient
 
-  const activeUsersByCountry = yield* _(
-    SqlSchema.findAll({
-      Request: Schema.Null,
-      Result: ActiveUsersByCountryQueryResult,
-      execute: () => sql`
-        SELECT
-          count(*) AS "count",
-          country_prefix AS "countryPrefix"
-        FROM
-          users
-        WHERE
-          refreshed_at >= now() - interval '1 day' * ${activeUserWindowDays}
-        GROUP BY
-          country_prefix
-      `,
-    })(null)
-  )
+  const activeUsersByCountry = yield* SqlSchema.findAll({
+    Request: Schema.Null,
+    Result: ActiveUsersByCountryQueryResult,
+    execute: () => sql`
+      SELECT
+        count(*) AS "count",
+        country_prefix AS "countryPrefix"
+      FROM
+        users
+      WHERE
+        refreshed_at >= now() - interval '1 day' * ${activeUserWindowDays}
+      GROUP BY
+        country_prefix
+    `,
+  })(null)
 
   const totalActiveUsers = pipe(
     activeUsersByCountry,
@@ -504,9 +499,9 @@ export const queryAndReportNumberOfActiveUsers = Effect.gen(function* (_) {
     Array.prepend(reportCountOfActiveUsers(totalActiveUsers, snapshotTimestamp))
   )
 
-  yield* _(
+  yield* pipe(
     Effect.all(reportEffects, {concurrency: 'unbounded'}),
-    Effect.zipLeft(
+    Effect.tap(
       Effect.logInfo(`Reported ${totalActiveUsers} active users by country`)
     ),
     Effect.withSpan('Query number of active users')

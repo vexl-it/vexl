@@ -1,6 +1,5 @@
 import {type FilterBarItem} from '@vexl-next/ui'
-import {Array, Either, Record, Schema, pipe} from 'effect'
-import {type ReadonlyArray} from 'effect/Array'
+import {Array, Record, Result, Schema, pipe} from 'effect'
 import {atom, type Atom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
@@ -50,8 +49,8 @@ const offersFilterDefaultStorageValue: OffersFilterStorage = {
 function readOffersFilterInitialStorageValue(): OffersFilterStorage {
   return pipe(
     storage.getVerified(OFFERS_FILTER_STORAGE_KEY, OffersFilterStorage),
-    Either.match({
-      onLeft: (currentStorageError) => {
+    Result.match({
+      onFailure: (currentStorageError) => {
         if (currentStorageError._tag !== 'ValueNotSet') {
           reportError(
             'warn',
@@ -68,8 +67,8 @@ function readOffersFilterInitialStorageValue(): OffersFilterStorage {
             LEGACY_OFFERS_FILTER_STORAGE_KEY,
             OffersFilterStorage
           ),
-          Either.match({
-            onLeft: (legacyStorageError) => {
+          Result.match({
+            onFailure: (legacyStorageError) => {
               if (legacyStorageError._tag !== 'ValueNotSet') {
                 reportError(
                   'warn',
@@ -82,13 +81,13 @@ function readOffersFilterInitialStorageValue(): OffersFilterStorage {
 
               return offersFilterDefaultStorageValue
             },
-            onRight: (legacyStorageValue) => {
+            onSuccess: (legacyStorageValue) => {
               pipe(
                 storage.saveVerified(
                   OFFERS_FILTER_STORAGE_KEY,
                   OffersFilterStorage
                 )(legacyStorageValue),
-                Either.mapLeft((saveStorageError) => {
+                Result.mapError((saveStorageError) => {
                   reportError(
                     'warn',
                     new Error(
@@ -104,7 +103,7 @@ function readOffersFilterInitialStorageValue(): OffersFilterStorage {
           })
         )
       },
-      onRight: (currentStorageValue) => currentStorageValue,
+      onSuccess: (currentStorageValue) => currentStorageValue,
     })
   )
 }
@@ -191,7 +190,7 @@ function isOffersFilterActive({
         : undefined,
       amountBottomLimit,
       amountTopLimit,
-      singlePrice: Array.isNonEmptyArray(
+      singlePrice: Array.isArrayNonEmpty(
         Array.intersection(Array.fromIterable(filterBarOptions), [
           'BUY_PRODUCT',
           'SELL_PRODUCT',

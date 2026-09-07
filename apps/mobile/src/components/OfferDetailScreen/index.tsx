@@ -333,9 +333,11 @@ function OfferDetailScreen({
   const handleReportPress = useCallback(() => {
     if (Option.isNone(offer)) return
     void Effect.runPromise(
-      Effect.andThen(reportOffer(offer.value), (success) => {
-        if (success) safeGoBack()
-      })
+      Effect.andThen(reportOffer(offer.value), (success) =>
+        Effect.sync(() => {
+          if (success) safeGoBack()
+        })
+      )
     )
   }, [reportOffer, offer, safeGoBack])
 

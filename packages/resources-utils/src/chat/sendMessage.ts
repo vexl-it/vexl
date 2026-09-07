@@ -9,7 +9,7 @@ import {
 import {type VersionString} from '@vexl-next/domain/src/utility/VersionString.brand'
 import {type ChatApi} from '@vexl-next/rest-api/src/services/chat'
 import {type NotificationApi} from '@vexl-next/rest-api/src/services/notification'
-import {Effect, type ParseResult} from 'effect'
+import {Effect, type Schema} from 'effect'
 import {taskEitherToEffect} from '../effect-helpers/TaskEitherConverter'
 import {
   callWithNotificationService,
@@ -55,7 +55,7 @@ const sendSystemNotification = (
   return true
 }
 
-export type SendMessageApiErrors = Effect.Effect.Error<
+export type SendMessageApiErrors = Effect.Error<
   ReturnType<ChatApi['sendMessage']>
 >
 
@@ -80,43 +80,39 @@ export default function sendMessage({
   | ErrorEncryptingMessage
   | SendMessageApiErrors
   | JsonStringifyError
-  | ParseResult.ParseError
+  | Schema.SchemaError
 > {
-  return Effect.gen(function* (_) {
+  return Effect.gen(function* () {
     // INACTIVITY_REMINDER is local-only and must never be sent. The guard also
     // narrows `message.messageType` to the sendable types below.
     if (message.messageType === 'INACTIVITY_REMINDER') {
-      return yield* _(
-        Effect.die(
-          new Error(
-            'INACTIVITY_REMINDER is a local-only message and must never be sent'
-          )
+      return yield* Effect.die(
+        new Error(
+          'INACTIVITY_REMINDER is a local-only message and must never be sent'
         )
       )
     }
 
-    const encryptedMessage = yield* _(
-      taskEitherToEffect(messageToNetwork(receiverPublicKey)(message))
+    const encryptedMessage = yield* taskEitherToEffect(
+      messageToNetwork(receiverPublicKey)(message)
     )
-    const encryptedPreview = yield* _(
-      taskEitherToEffect(messagePreviewToNetwork(receiverPublicKey)(message))
+    const encryptedPreview = yield* taskEitherToEffect(
+      messagePreviewToNetwork(receiverPublicKey)(message)
     )
 
-    const serverMessage = yield* _(
-      callWithNotificationService(api.sendMessage, {
-        message: encryptedMessage,
-        messagePreview: encryptedPreview,
-        messageType: message.messageType,
-        receiverPublicKey,
-        senderPublicKey: senderKeypair.publicKeyPemBase64,
-        keyPair: senderKeypair,
-      })({
-        notificationCypher: theirNotificationCypher,
-        otherSideVersion,
-        notificationApi,
-        sendSystemNotification: sendSystemNotification(message.messageType),
-      })
-    )
+    const serverMessage = yield* callWithNotificationService(api.sendMessage, {
+      message: encryptedMessage,
+      messagePreview: encryptedPreview,
+      messageType: message.messageType,
+      receiverPublicKey,
+      senderPublicKey: senderKeypair.publicKeyPemBase64,
+      keyPair: senderKeypair,
+    })({
+      notificationCypher: theirNotificationCypher,
+      otherSideVersion,
+      notificationApi,
+      sendSystemNotification: sendSystemNotification(message.messageType),
+    })
 
     return {
       message: encryptedMessage,

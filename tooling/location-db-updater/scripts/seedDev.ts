@@ -27,7 +27,7 @@
  * Env: GEOCODING_DB_URL, GEOCODING_DB_USER, GEOCODING_DB_PASSWORD (same as
  * the service).
  */
-import {NodeContext} from '@effect/platform-node'
+import {NodeServices} from '@effect/platform-node'
 import {
   computeImportance,
   normalizeName,
@@ -120,7 +120,7 @@ const connectCreatingDb = async (): Promise<pg.Client> => {
 const applyMigrations = async (): Promise<void> => {
   await Effect.runPromise(
     Effect.scoped(
-      Layer.build(GeocodingDbLayer.pipe(Layer.provide(NodeContext.layer)))
+      Layer.build(GeocodingDbLayer.pipe(Layer.provide(NodeServices.layer)))
     )
   )
 }

@@ -12,7 +12,7 @@ import {
 import {type UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
 import {type ServerPrivatePart} from '@vexl-next/rest-api/src/services/offer/contracts'
-import {Array, Effect, Either, pipe, Record, Schema} from 'effect'
+import {Array, Effect, pipe, Record, Result, Schema} from 'effect'
 import {type ReadonlyRecord} from 'effect/Record'
 import reportErrorFromResourcesUtils from '../reportErrorFromResourcesUtils'
 import {deduplicate, subtractArrays} from '../utils/array'
@@ -78,7 +78,7 @@ export class TimeLimitReachedError extends Schema.TaggedError<TimeLimitReachedEr
 )('TimeLimitReachedError', {
   cause: Schema.Unknown,
   message: Schema.String,
-  toPublicKey: Schema.Union(PublicKeyPemBase64Schema, PublicKeyV2),
+  toPublicKey: Schema.Union([PublicKeyPemBase64Schema, PublicKeyV2]),
 }) {}
 
 function checkAndReportRemovingClubConnectionThatIsAlsoFromSocualNetwork({
@@ -119,7 +119,7 @@ function checkAndReportRemovingClubConnectionThatIsAlsoFromSocualNetwork({
 interface UploadPrivatePartsBatchResult {
   succeeded: ServerPrivatePart[]
   failed: Array<{
-    error: Effect.Effect.Error<ReturnType<OfferApi['createPrivatePart']>>
+    error: Effect.Error<ReturnType<OfferApi['createPrivatePart']>>
     privatePart: ServerPrivatePart
   }>
 }
@@ -141,7 +141,7 @@ function uploadPrivatePartsBatch({
           offerPrivateList: oneChunk,
         })
         .pipe(
-          Effect.either,
+          Effect.result,
           Effect.tapError((e) =>
             Effect.sync(() => {
               console.warn('Error uploading private parts from update')
@@ -155,7 +155,7 @@ function uploadPrivatePartsBatch({
           Effect.map((result) => ({chunk: oneChunk, result}))
         )
     ),
-    Effect.allWith({concurrency: 'unbounded'}),
+    (effects) => Effect.all(effects, {concurrency: 'unbounded'}),
     Effect.map(
       Array.reduce(
         {
@@ -163,14 +163,14 @@ function uploadPrivatePartsBatch({
           failed: [],
         } as UploadPrivatePartsBatchResult,
         (acc, {chunk, result}) => {
-          if (Either.isLeft(result))
+          if (Result.isFailure(result))
             return {
               ...acc,
               failed: [
                 ...acc.failed,
                 ...Array.map(chunk, (one) => ({
                   privatePart: one,
-                  error: result.left,
+                  error: result.failure,
                 })),
               ],
             }
@@ -230,10 +230,10 @@ export default function updatePrivateParts({
     }
   },
   | PrivatePayloadsConstructionError
-  | Effect.Effect.Error<ReturnType<OfferApi['createPrivatePart']>>
-  | Effect.Effect.Error<ReturnType<OfferApi['deletePrivatePart']>>
+  | Effect.Error<ReturnType<OfferApi['createPrivatePart']>>
+  | Effect.Error<ReturnType<OfferApi['deletePrivatePart']>>
 > {
-  return Effect.gen(function* (_) {
+  return Effect.gen(function* () {
     const removedFirstSecondLevelConnections = subtractArrays(
       deduplicate([
         ...currentConnections.firstLevel,
@@ -310,25 +310,23 @@ export default function updatePrivateParts({
 
     if (onProgress) onProgress({type: 'CONSTRUCTING_PRIVATE_PAYLOADS'})
 
-    const privatePayloads = yield* _(
-      constructPrivatePayloads({
-        connectionsInfo: {
-          firstDegreeConnections: newFirstLevelConnections,
-          secondDegreeConnections: newSecondLevelConnections ?? [],
-          commonFriends,
-          verifiedFriends,
-          clubsConnections: newClubsConnections,
-        },
-        symmetricKey,
-      })
-    )
+    const privatePayloads = yield* constructPrivatePayloads({
+      connectionsInfo: {
+        firstDegreeConnections: newFirstLevelConnections,
+        secondDegreeConnections: newSecondLevelConnections ?? [],
+        commonFriends,
+        verifiedFriends,
+        clubsConnections: newClubsConnections,
+      },
+      symmetricKey,
+    })
 
-    const encryptionResult = yield* _(
+    const encryptionResult = yield* pipe(
       privatePayloads,
       Array.map((payload, i) => {
         return pipe(
           Effect.succeed(payload),
-          Effect.zipLeft(
+          Effect.tap(
             Effect.sync(() => {
               if (onProgress)
                 onProgress({
@@ -351,28 +349,28 @@ export default function updatePrivateParts({
             return Effect.succeed(payload)
           }),
           Effect.flatMap(encryptPrivatePart),
-          Effect.either
+          Effect.result
         )
       }),
       Effect.all,
       Effect.map((result) => ({
-        timeLimitReachedErrors: Array.getLefts(result).filter(
+        timeLimitReachedErrors: Array.getFailures(result).filter(
           (left) => left._tag === 'TimeLimitReachedError'
         ),
-        encryptionErrors: Array.getLefts(result).filter(
+        encryptionErrors: Array.getFailures(result).filter(
           (left) => left._tag === 'PrivatePartEncryptionError'
         ),
-        privateParts: Array.getRights(result),
+        privateParts: Array.getSuccesses(result),
       }))
     )
 
     if (onProgress) onProgress({type: 'SENDING_OFFER_TO_NETWORK'})
     let uploadErrors: Array<{
       toPublicKey: PublicKeyPemBase64 | PublicKeyV2
-      error: Effect.Effect.Error<ReturnType<OfferApi['createPrivatePart']>>
+      error: Effect.Error<ReturnType<OfferApi['createPrivatePart']>>
     }> = []
     if (encryptionResult.privateParts.length > 0) {
-      uploadErrors = yield* _(
+      uploadErrors = yield* pipe(
         uploadPrivatePartsBatch({
           offerApi: api,
           adminId,
@@ -388,12 +386,10 @@ export default function updatePrivateParts({
     }
 
     if (removedConnections.length > 0) {
-      yield* _(
-        api.deletePrivatePart({
-          adminIds: [adminId],
-          publicKeys: removedConnections,
-        })
-      )
+      yield* api.deletePrivatePart({
+        adminIds: [adminId],
+        publicKeys: removedConnections,
+      })
     }
     if (onProgress) onProgress({type: 'DONE'})
 

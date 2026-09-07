@@ -63,7 +63,7 @@ export default function VexlOnlyContactsScreen(): React.ReactElement {
         />
       }
     >
-      {Array.isNonEmptyArray(vexlOnlyContacts) ? (
+      {Array.isArrayNonEmpty(vexlOnlyContacts) ? (
         <Stack f={1} gap="$3">
           <Typography variant="description" color="$foregroundSecondary">
             {t('vexlOnlyContacts.description')}

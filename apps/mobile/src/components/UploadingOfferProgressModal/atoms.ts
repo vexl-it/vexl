@@ -44,7 +44,7 @@ export const progressModalNativeModalUpAtom = atom(false)
 export const waitUntilProgressModalIsFullyHiddenActionAtom = atom(
   null,
   (): Effect.Effect<void> =>
-    Effect.async((resume: (effect: Effect.Effect<void>) => void) => {
+    Effect.callback((resume: (effect: Effect.Effect<void>) => void) => {
       const store = getDefaultStore()
       if (!store.get(progressModalNativeModalUpAtom)) {
         resume(Effect.void)
@@ -61,7 +61,7 @@ export const waitUntilProgressModalIsFullyHiddenActionAtom = atom(
       // The hide animation takes ~300ms - a missed signal must never
       // deadlock the caller.
       Effect.timeout('3 seconds'),
-      Effect.catchAll(() => Effect.void),
+      Effect.catch(() => Effect.void),
       Effect.andThen(waitForNextAnimationFrameEffect()),
       Effect.andThen(waitForNextAnimationFrameEffect())
     )
@@ -90,9 +90,11 @@ export const offerProgressModalActionAtoms = {
 
       return pipe(
         Effect.sleep(delayMs),
-        Effect.tap(() => {
-          set(dataAtom, {mode: 'hidden'})
-        })
+        Effect.tap(() =>
+          Effect.sync(() => {
+            set(dataAtom, {mode: 'hidden'})
+          })
+        )
       )
     }
   ),

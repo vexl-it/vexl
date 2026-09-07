@@ -17,7 +17,7 @@
  * Dry run (no expo launched): `DEV_MOBILE_DRY_RUN=1 tsx tooling/dev/dev-mobile.ts ...`
  * prints the resolved env + the command(s) it WOULD run and exits 0.
  */
-import {Array, Option, pipe, Schema} from 'effect'
+import {Array, Filter, Option, pipe, Schema} from 'effect'
 import {spawn, spawnSync} from 'node:child_process'
 import {existsSync, mkdirSync, readFileSync, writeFileSync} from 'node:fs'
 import {networkInterfaces} from 'node:os'
@@ -251,17 +251,17 @@ const IosPhysicalDevices = Schema.Array(
 )
 
 const IosSimulators = Schema.Struct({
-  devices: Schema.Record({
-    key: Schema.String,
-    value: Schema.Array(
+  devices: Schema.Record(
+    Schema.String,
+    Schema.Array(
       Schema.Struct({
         name: Schema.String,
         udid: Schema.String,
         state: Schema.String,
         isAvailable: Schema.optional(Schema.Boolean),
       })
-    ),
-  }),
+    )
+  ),
 })
 
 function commandOutput(
@@ -283,7 +283,7 @@ function findIosDevices(): readonly DeviceChoice[] {
     physicalOutput === undefined
       ? []
       : pipe(
-          Schema.decodeUnknownOption(Schema.parseJson(IosPhysicalDevices))(
+          Schema.decodeUnknownOption(Schema.fromJsonString(IosPhysicalDevices))(
             physicalOutput
           ),
           Option.match({
@@ -318,7 +318,7 @@ function findIosDevices(): readonly DeviceChoice[] {
     simulatorOutput === undefined
       ? []
       : pipe(
-          Schema.decodeUnknownSync(Schema.parseJson(IosSimulators))(
+          Schema.decodeUnknownSync(Schema.fromJsonString(IosSimulators))(
             simulatorOutput
           ).devices,
           (devices) =>
@@ -379,12 +379,14 @@ function findAndroidDevices(): readonly DeviceChoice[] {
   const adbDevices = pipe(
     adbOutput.split('\n'),
     Array.drop(1),
-    Array.filterMap((line) => {
-      const id = /^(\S+)\s+device\b/.exec(line.trim())?.[1]
-      if (id === undefined) return Option.none()
-      const model = /\bmodel:(\S+)/.exec(line)?.[1]
-      return Option.some({id, model})
-    })
+    Array.filterMap(
+      Filter.fromPredicateOption((line) => {
+        const id = /^(\S+)\s+device\b/.exec(line.trim())?.[1]
+        if (id === undefined) return Option.none()
+        const model = /\bmodel:(\S+)/.exec(line)?.[1]
+        return Option.some({id, model})
+      })
+    )
   )
   const connected = pipe(
     adbDevices,
@@ -423,7 +425,11 @@ function findAndroidDevices(): readonly DeviceChoice[] {
   )
   const runningAvdNames = pipe(
     running,
-    Array.filterMap((device) => Option.fromNullable(device.avdName))
+    Array.filterMap(
+      Filter.fromPredicateOption((device) =>
+        Option.fromNullishOr(device.avdName)
+      )
+    )
   )
   const stopped = pipe(
     (commandOutput(emulator, ['-list-avds']) ?? '').split('\n'),
@@ -450,7 +456,7 @@ async function chooseDevice(platform: Platform): Promise<DeviceChoice> {
       `Could not read ${platform} devices: ${error instanceof Error ? error.message : String(error)}`
     )
   }
-  if (!Array.isNonEmptyReadonlyArray(choices)) {
+  if (!Array.isReadonlyArrayNonEmpty(choices)) {
     throw new Error(`No ${platform} devices or emulators found.`)
   }
   if (!process.stdin.isTTY || !process.stdout.isTTY) {
@@ -552,7 +558,7 @@ function detectLanIp(): string {
     )
   )
 
-  if (!Array.isNonEmptyReadonlyArray(candidates)) {
+  if (!Array.isReadonlyArrayNonEmpty(candidates)) {
     throw new Error(
       'Could not auto-detect a LAN IPv4 address. Pass --host <ip> explicitly.'
     )
@@ -794,7 +800,7 @@ function printSummary(
     console.log(`  NOTE:        ${forcedPrebuildReason}`)
   }
 
-  if (Array.isNonEmptyReadonlyArray(generated.serviceUrls)) {
+  if (Array.isReadonlyArrayNonEmpty(generated.serviceUrls)) {
     console.log('  service URLs:')
     for (const [envVar, url] of generated.serviceUrls) {
       console.log(`    ${envVar}=${url}`)
@@ -877,7 +883,7 @@ async function main(): Promise<void> {
     for (const [key, value] of Object.entries(generated.vars)) {
       console.log(`  ${key}=${value}`)
     }
-    if (!Array.isNonEmptyReadonlyArray(generated.serviceUrls)) {
+    if (!Array.isReadonlyArrayNonEmpty(generated.serviceUrls)) {
       console.log('  (no EXPO_PUBLIC_LOCAL_* vars — stage uses committed URLs)')
     }
     console.log('\nNot launching expo (dry run). Exiting 0.')

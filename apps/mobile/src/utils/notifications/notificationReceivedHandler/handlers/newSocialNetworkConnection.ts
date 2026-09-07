@@ -1,5 +1,5 @@
 import {type NewSocialNetworkConnectionNotificationData} from '@vexl-next/domain/src/general/notifications'
-import {Effect} from 'effect/index'
+import {Effect} from 'effect'
 import {getDefaultStore} from 'jotai'
 import {apiAtom} from '../../../../api'
 import {syncConnectionsActionAtom} from '../../../../state/connections/atom/connectionStateAtom'

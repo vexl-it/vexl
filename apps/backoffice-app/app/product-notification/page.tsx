@@ -67,7 +67,7 @@ export default function ProductNotificationPage() {
       const result = await runEffect(
         client.getVexlProductNotifications({
           headers: makeBackofficeCommonHeaders(),
-          urlParams: {newerThan: new Date(0)},
+          query: {newerThan: new Date(0)},
         })
       )
       setNotifications(Array.reverse(result.vexlProductNotifications))

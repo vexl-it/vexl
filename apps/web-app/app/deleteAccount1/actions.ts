@@ -2,19 +2,19 @@
 
 import {decodeFormData} from '@/src/server/formData'
 import {type ErrorFormState} from '@/src/shared/formState'
-import {Effect, Either, Schema} from 'effect'
+import {Effect, Result, Schema} from 'effect'
 import {isRedirectError} from 'next/dist/client/components/redirect-error'
 import {redirect} from 'next/navigation'
 
 const deleteAccount1FormSchema = Schema.Struct({
   phoneNumber: Schema.String,
-  turnstileToken: Schema.optionalWith(Schema.String, {
-    default: () => '',
-  }),
+  turnstileToken: Schema.String.pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): '' => '')),
+    Schema.withConstructorDefault(Effect.sync((): '' => ''))
+  ),
 })
 
 async function handleResponseError(error: {
-  _tag: 'ResponseError'
   response: {
     headers: Record<string, string>
     status: number
@@ -22,7 +22,7 @@ async function handleResponseError(error: {
   }
 }): Promise<ErrorFormState> {
   const body = await Effect.runPromise(
-    Effect.catchAll(error.response.text, () => Effect.succeed(''))
+    Effect.catch(error.response.text, () => Effect.succeed(''))
   )
 
   console.error('submitDeleteAccount1 response error', {
@@ -64,12 +64,12 @@ export async function submitDeleteAccount1(
         import('@vexl-next/rest-api/src/services/user/contracts'),
       ])
     const phoneNumber = Effect.runSync(
-      Schema.decodeUnknown(E164PhoneNumber)(rawPhoneNumber)
+      Schema.decodeUnknownEffect(E164PhoneNumber)(rawPhoneNumber)
     )
     const decodedTurnstileToken =
-      Schema.decodeEither(TurnstileToken)(turnstileToken)
+      Schema.decodeResult(TurnstileToken)(turnstileToken)
 
-    if (Either.isLeft(decodedTurnstileToken)) {
+    if (Result.isFailure(decodedTurnstileToken)) {
       return {
         error: 'Human verification failed. Please try again.',
       }
@@ -77,57 +77,60 @@ export async function submitDeleteAccount1(
 
     const userApi = await createUserPublicApi()
     const result = await Effect.runPromise(
-      Effect.either(
+      Effect.result(
         userApi.initEraseUser({
           phoneNumber,
-          turnstileToken: decodedTurnstileToken.right,
+          turnstileToken: decodedTurnstileToken.success,
         })
       )
     )
 
-    if (Either.isLeft(result)) {
+    if (Result.isFailure(result)) {
       if (
-        result.left._tag === 'UnableToSendVerificationSmsError' &&
-        result.left.reason === 'InvalidPhoneNumber'
+        result.failure._tag === 'UnableToSendVerificationSmsError' &&
+        result.failure.reason === 'InvalidPhoneNumber'
       ) {
         return {
           error: 'Invalid phone number.',
         }
       }
 
-      if (result.left._tag === 'PreviousCodeNotExpiredError') {
+      if (result.failure._tag === 'PreviousCodeNotExpiredError') {
         return {
           error: 'A code was already sent recently. Please wait a bit.',
         }
       }
 
-      if (result.left._tag === 'TurnstileVerificationError') {
+      if (result.failure._tag === 'TurnstileVerificationError') {
         return {
           error: 'Human verification failed. Please try again.',
         }
       }
 
       if (
-        result.left._tag === 'UnableToSendVerificationSmsError' &&
-        result.left.reason === 'MaxAttemptsReached'
+        result.failure._tag === 'UnableToSendVerificationSmsError' &&
+        result.failure.reason === 'MaxAttemptsReached'
       ) {
         return {
           error: 'Too many attempts. Please try again later.',
         }
       }
 
-      if (result.left._tag === 'UnableToSendVerificationSmsError') {
+      if (result.failure._tag === 'UnableToSendVerificationSmsError') {
         return {
           error:
             'Unable to send SMS verification. Disable VPN/proxy and try again.',
         }
       }
 
-      if (result.left._tag === 'ResponseError') {
-        return await handleResponseError(result.left)
+      if (
+        result.failure._tag === 'HttpClientError' &&
+        'response' in result.failure.reason
+      ) {
+        return await handleResponseError(result.failure.reason)
       }
 
-      console.error('submitDeleteAccount1 failed', result.left)
+      console.error('submitDeleteAccount1 failed', result.failure)
 
       return {
         error: 'Unknown error.',
@@ -135,7 +138,7 @@ export async function submitDeleteAccount1(
     }
 
     redirect(
-      `/deleteAccount2/${encodeURIComponent(String(result.right.verificationId))}`
+      `/deleteAccount2/${encodeURIComponent(String(result.success.verificationId))}`
     )
   } catch (error) {
     if (isRedirectError(error)) {

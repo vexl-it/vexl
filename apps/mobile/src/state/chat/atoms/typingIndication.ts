@@ -9,7 +9,7 @@ import {
   type UnixMilliseconds,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {encryptStreamOnlyChatMessagePayload} from '@vexl-next/resources-utils/src/chat/streamOnlyChatMessagePayload'
-import {Console, Effect, HashMap, Option} from 'effect/index'
+import {Console, Effect, HashMap, Option} from 'effect'
 import {atom, useStore, type Atom} from 'jotai'
 import {useEffect} from 'react'
 import {apiAtom} from '../../../api'
@@ -66,30 +66,26 @@ export const createSendTypingIndicationForChatAtom = (
   atom((get) => {
     const api = get(apiAtom)
     return (typing: boolean) =>
-      Effect.gen(function* (_) {
-        const encryptedMessage = yield* _(
-          encryptStreamOnlyChatMessagePayload(
-            new TypingMessage({
-              typing,
-              myPublicKey: chat.inbox.privateKey.publicKeyPemBase64,
-            }),
-            chat.otherSide.publicKey
-          )
+      Effect.gen(function* () {
+        const encryptedMessage = yield* encryptStreamOnlyChatMessagePayload(
+          new TypingMessage({
+            typing,
+            myPublicKey: chat.inbox.privateKey.publicKeyPemBase64,
+          }),
+          chat.otherSide.publicKey
         )
 
         if (!chat.otherSideVexlToken && !chat.otherSideFcmCypher) {
           return
         }
 
-        yield* _(
-          api.notification.issueStreamOnlyMessage({
-            message: encryptedMessage,
-            notificationCypher: chat.otherSideVexlToken
-              ? undefined
-              : chat.otherSideFcmCypher,
-            notificationToken: chat.otherSideVexlToken,
-          })
-        )
+        yield* api.notification.issueStreamOnlyMessage({
+          message: encryptedMessage,
+          notificationCypher: chat.otherSideVexlToken
+            ? undefined
+            : chat.otherSideFcmCypher,
+          notificationToken: chat.otherSideVexlToken,
+        })
       }).pipe(
         Effect.tapError((e) =>
           Console.warn('Error sending typing indication', e)

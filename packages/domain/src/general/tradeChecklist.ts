@@ -1,4 +1,5 @@
-import {Either, Schema} from 'effect/index'
+import {withDecodingFallback} from '@vexl-next/generic-utils/src/effect-helpers/withDecodingFallback'
+import {Schema} from 'effect'
 import {BtcAddress} from '../utility/BtcAddress.brand'
 import {Latitude, Longitude} from '../utility/geoCoordinates'
 import {UnixMilliseconds} from '../utility/UnixMilliseconds.brand'
@@ -10,32 +11,14 @@ import {E164PhoneNumber} from './E164PhoneNumber.brand'
 import {BtcNetwork, LocationPlaceId} from './offers'
 import {UserName} from './UserName.brand'
 
-export const TradeChecklistItemStatus = Schema.Literal(
-  /**
-   * Ready to be sent to the other side
-   */
+export const TradeChecklistItemStatus = Schema.Literals([
   'readyToSend',
-  /**
-   * Waiting for response from the other side
-   */
   'pending',
-  /**
-   * Other side accepted the item
-   */
   'accepted',
-  /**
-   * Other side suggestion is in conflict with yours
-   */
   'warning',
-  /**
-   * Other side declined reveal identity or phone number
-   */
   'declined',
-  /**
-   * Initial state
-   */
-  'initial'
-)
+  'initial',
+])
 export type TradeChecklistItemStatus = typeof TradeChecklistItemStatus.Type
 
 export const TradeChecklistStateItemStateE = Schema.Struct({
@@ -62,11 +45,11 @@ export const NetworkData = Schema.Struct({
 })
 export type NetworkData = typeof NetworkData.Type
 
-export const RevealStatus = Schema.Literal(
+export const RevealStatus = Schema.Literals([
   'REQUEST_REVEAL',
   'APPROVE_REVEAL',
-  'DISAPPROVE_REVEAL'
-)
+  'DISAPPROVE_REVEAL',
+])
 export type RevealStatus = typeof RevealStatus.Type
 
 export const IdentityReveal = Schema.Struct({
@@ -84,10 +67,15 @@ export const ContactReveal = Schema.Struct({
 })
 export type ContactReveal = typeof ContactReveal.Type
 
-export const TradePriceType = Schema.Literal('live', 'custom', 'frozen', 'your')
+export const TradePriceType = Schema.Literals([
+  'live',
+  'custom',
+  'frozen',
+  'your',
+])
 export type TradePriceType = typeof TradePriceType.Type
 
-export const BtcOrSat = Schema.Literal('BTC', 'SAT')
+export const BtcOrSat = Schema.Literals(['BTC', 'SAT'])
 export type BtcOrSat = typeof BtcOrSat.Type
 
 export const AmountData = Schema.Struct({
@@ -139,11 +127,8 @@ export const ContactRevealChatMessage = Schema.Struct({
 export type ContactRevealChatMessage = typeof ContactRevealChatMessage.Type
 
 export const MeetingLocationData = Schema.Struct({
-  placeId: LocationPlaceId.pipe(
-    Schema.annotations({
-      decodingFallback: () =>
-        Either.right(Schema.decodeSync(LocationPlaceId)(generateUuid())),
-    })
+  placeId: withDecodingFallback(LocationPlaceId, () =>
+    Schema.decodeSync(LocationPlaceId)(generateUuid())
   ),
   address: Schema.String,
   latitude: Latitude,

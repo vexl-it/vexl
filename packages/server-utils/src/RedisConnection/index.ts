@@ -1,12 +1,4 @@
-import {
-  type Config,
-  type ConfigError,
-  Context,
-  Effect,
-  Layer,
-  Metric,
-  Stream,
-} from 'effect'
+import {type Config, Context, Effect, Layer, Metric, pipe, Stream} from 'effect'
 import type IORedis from 'ioredis'
 import {createRedisAndConnect} from './createRedisAndConnect'
 import {type SettingUpRedisConnectionError} from './domain'
@@ -17,29 +9,30 @@ const RedisConnectionStateGauge = Metric.gauge('redis_connection_state', {
   description: 'Redis connection state. 1 = connected, 0 = disconnected',
 })
 
-export class RedisConnectionService extends Context.Tag(
-  'RedisConnectionService'
-)<RedisConnectionService, IORedis>() {
+export class RedisConnectionService extends Context.Service<
+  RedisConnectionService,
+  IORedis
+>()('RedisConnectionService') {
   static readonly layer = (
     redisUrlConfig: Config.Config<string>
   ): Layer.Layer<
     RedisConnectionService,
-    SettingUpRedisConnectionError | ConfigError.ConfigError
+    SettingUpRedisConnectionError | Config.ConfigError
   > =>
-    Layer.scoped(
+    Layer.effect(
       RedisConnectionService,
-      Effect.gen(function* (_) {
-        const redisUrl = yield* _(redisUrlConfig)
-        const redisConnection = yield* _(
+      Effect.gen(function* () {
+        const redisUrl = yield* redisUrlConfig
+        const redisConnection = yield* pipe(
           parseUrl(redisUrl),
           Effect.flatMap(createRedisAndConnect)
         )
 
-        yield* _(
+        yield* pipe(
           redisConnectionChanges(redisConnection),
           Stream.runForEach((state) =>
             Effect.zip(
-              Metric.set(
+              Metric.update(
                 RedisConnectionStateGauge,
                 state.event === 'ready' ? 1 : 0
               ),

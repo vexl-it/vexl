@@ -6,7 +6,7 @@ import {
 } from '@vexl-next/domain/src/general/messaging'
 import {IdNumeric} from '@vexl-next/domain/src/utility/IdNumeric'
 import {BooleanFromString} from '@vexl-next/generic-utils/src/effect-helpers/BooleanFromString'
-import {Schema} from 'effect'
+import {Effect, Schema} from 'effect'
 import {
   RequestBaseWithChallenge,
   SignedChallenge,
@@ -20,19 +20,27 @@ export const NotificationServiceReadyQueryParams = Schema.Struct({
 export class ReceiverInboxDoesNotExistError extends Schema.TaggedError<ReceiverInboxDoesNotExistError>(
   'ReceiverInboxDoesNotExistError'
 )('ReceiverInboxDoesNotExistError', {
-  status: Schema.optionalWith(Schema.Literal(404), {default: () => 404}),
-  code: Schema.optionalWith(Schema.Literal('100101'), {
-    default: () => '100101',
-  }),
+  status: Schema.Literal(404).pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): 404 => 404)),
+    Schema.withConstructorDefault(Effect.sync((): 404 => 404))
+  ),
+  code: Schema.Literal('100101').pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): '100101' => '100101')),
+    Schema.withConstructorDefault(Effect.sync((): '100101' => '100101'))
+  ),
 }) {}
 
 export class SenderInboxDoesNotExistError extends Schema.TaggedError<SenderInboxDoesNotExistError>(
   'SenderInboxDoesNotExistError'
 )('SenderInboxDoesNotExistError', {
-  status: Schema.optionalWith(Schema.Literal(404), {default: () => 404}),
-  code: Schema.optionalWith(Schema.Literal('100107'), {
-    default: () => '100107',
-  }),
+  status: Schema.Literal(404).pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): 404 => 404)),
+    Schema.withConstructorDefault(Effect.sync((): 404 => 404))
+  ),
+  code: Schema.Literal('100107').pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): '100107' => '100107')),
+    Schema.withConstructorDefault(Effect.sync((): '100107' => '100107'))
+  ),
 }) {}
 
 export const ServerMessageWithId = Schema.Struct({

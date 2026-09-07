@@ -1,4 +1,4 @@
-import {Effect, type Either} from 'effect'
+import {Effect, type Result} from 'effect'
 import {useSetAtom, type WritableAtom} from 'jotai'
 import {useCallback} from 'react'
 
@@ -16,11 +16,11 @@ export function useAtomActionRunFork<A, P extends unknown[]>(
 
 export function useAtomActionRunPromise<A, I, P extends unknown[]>(
   atom: WritableAtom<unknown, P, Effect.Effect<A, I>>
-): (...args: P) => Promise<Either.Either<A, I>> {
+): (...args: P) => Promise<Result.Result<A, I>> {
   const set = useSetAtom(atom)
   return useCallback(
     async (...args) => {
-      return await Effect.runPromise(set(...args).pipe(Effect.either))
+      return await Effect.runPromise(set(...args).pipe(Effect.result))
     },
     [set]
   )

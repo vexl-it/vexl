@@ -13,7 +13,7 @@ import {
 import {type VersionString} from '@vexl-next/domain/src/utility/VersionString.brand'
 import {type ChatApi} from '@vexl-next/rest-api/src/services/chat'
 import {type NotificationApi} from '@vexl-next/rest-api/src/services/notification'
-import {Effect, type ParseResult} from 'effect'
+import {Effect, type Schema} from 'effect'
 import {type NotificationTokenOrCypher} from '../notifications/callWithNotificationService'
 import {type JsonStringifyError} from '../utils/parsing'
 import sendMessage, {type SendMessageApiErrors} from './sendMessage'
@@ -70,27 +70,25 @@ export function sendCancelMessagingRequest({
   SentCancelMessagingRequest,
   | ApiErrorRequestMessaging
   | JsonStringifyError
-  | ParseResult.ParseError
+  | Schema.SchemaError
   | ErrorEncryptingMessage
 > {
-  return Effect.gen(function* (_) {
+  return Effect.gen(function* () {
     const cancelRequestMessage = createCancelRequestChatMessage({
       text,
       myVersion,
       senderPublicKey: fromKeypair.publicKeyPemBase64,
     })
 
-    const serverMessage = yield* _(
-      sendMessage({
-        api,
-        receiverPublicKey: toPublicKey,
-        message: cancelRequestMessage,
-        senderKeypair: fromKeypair,
-        theirNotificationCypher,
-        otherSideVersion,
-        notificationApi,
-      })
-    )
+    const serverMessage = yield* sendMessage({
+      api,
+      receiverPublicKey: toPublicKey,
+      message: cancelRequestMessage,
+      senderKeypair: fromKeypair,
+      theirNotificationCypher,
+      otherSideVersion,
+      notificationApi,
+    })
 
     return {
       message: cancelRequestMessage,

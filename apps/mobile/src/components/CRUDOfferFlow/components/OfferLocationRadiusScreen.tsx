@@ -8,7 +8,7 @@ import {
   type LocationPlaceId,
   type OfferLocation,
 } from '@vexl-next/domain/src/general/offers'
-import {useMolecule} from 'bunshi/dist/react'
+import {useMolecule} from 'bunshi/react'
 import {Array, Option, pipe} from 'effect'
 import {useSetAtom} from 'jotai'
 import React, {useCallback} from 'react'

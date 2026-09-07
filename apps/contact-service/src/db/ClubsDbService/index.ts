@@ -104,34 +104,31 @@ export interface ClubsDbOperations {
   ) => Effect.Effect<void, UnexpectedServerError>
 }
 
-export class ClubsDbService extends Context.Tag('ClubsDbService')<
+export class ClubsDbService extends Context.Service<
   ClubsDbService,
   ClubsDbOperations
->() {
+>()('ClubsDbService') {
   static readonly Live = Layer.effect(
     ClubsDbService,
-    Effect.gen(function* (_) {
-      const deleteClub = yield* _(createDeleteClub)
-      const findClub = yield* _(createFindClub)
-      const findClubAdminByUuid = yield* _(createFindClubAdminByUuid)
-      const findClubByUuid = yield* _(createFindClubByUuid)
-      const insertClub = yield* _(createInsertClub)
-      const insertClubOfferReportedInfo = yield* _(
-        createInsertClubOfferReportedInfo
-      )
-      const updateClub = yield* _(createUpdateClub)
-      const updateSetClubsInactive = yield* _(createUpdateSetClubsInactive)
-      const updateReactivateClub = yield* _(createUpdateReactivateClub)
-      const listClubs = yield* _(createListClubs)
-      const listExpiredClubs = yield* _(createListExpiredClubs)
-      const listClubsWithExceededReportsCount = yield* _(
-        createListClubsWithExceededReportsCount
-      )
-      const listInactiveClubs = yield* _(createListInactiveClubs)
-      const findReportInfoForOfferIdHashed = yield* _(
-        createFindReportInfoForOfferIdHashed
-      )
-      const reportClub = yield* _(createUpdateReportClub)
+    Effect.gen(function* () {
+      const deleteClub = yield* createDeleteClub
+      const findClub = yield* createFindClub
+      const findClubAdminByUuid = yield* createFindClubAdminByUuid
+      const findClubByUuid = yield* createFindClubByUuid
+      const insertClub = yield* createInsertClub
+      const insertClubOfferReportedInfo =
+        yield* createInsertClubOfferReportedInfo
+      const updateClub = yield* createUpdateClub
+      const updateSetClubsInactive = yield* createUpdateSetClubsInactive
+      const updateReactivateClub = yield* createUpdateReactivateClub
+      const listClubs = yield* createListClubs
+      const listExpiredClubs = yield* createListExpiredClubs
+      const listClubsWithExceededReportsCount =
+        yield* createListClubsWithExceededReportsCount
+      const listInactiveClubs = yield* createListInactiveClubs
+      const findReportInfoForOfferIdHashed =
+        yield* createFindReportInfoForOfferIdHashed
+      const reportClub = yield* createUpdateReportClub
 
       return {
         deleteClub,

@@ -1,11 +1,11 @@
-import {SqlClient, SqlSchema} from '@effect/sql'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {Effect, flow} from 'effect'
+import {SqlClient, SqlSchema} from 'effect/unstable/sql'
 import {InboxRecordId} from '../../InboxDbService/domain'
 import {MessageRecord} from '../domain'
 
-export const createFindMessagesByInboxId = Effect.gen(function* (_) {
-  const sql = yield* _(SqlClient.SqlClient)
+export const createFindMessagesByInboxId = Effect.gen(function* () {
+  const sql = yield* SqlClient.SqlClient
 
   const query = SqlSchema.findAll({
     Request: InboxRecordId,

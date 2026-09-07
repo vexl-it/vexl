@@ -20,7 +20,7 @@ import {
   ecdsaVerifyE,
   generateChallenge,
 } from '@vexl-next/generic-utils/src/effect-helpers/crypto'
-import {Effect, Schema} from 'effect/index'
+import {Effect, pipe, Schema} from 'effect'
 import {ServerCrypto} from './ServerCrypto'
 
 // 30sec
@@ -36,31 +36,29 @@ export const generateAndSignLoginChallenge = (
   UnexpectedServerError,
   ServerCrypto
 > =>
-  Effect.gen(function* (_) {
-    const serverCrypto = yield* _(ServerCrypto)
+  Effect.gen(function* () {
+    const serverCrypto = yield* ServerCrypto
 
     const keyPair = generatePrivateKey()
-    const challenge = yield* _(generateChallenge())
+    const challenge = yield* generateChallenge()
     const validUntil = unixMillisecondsFromNow(CHALLENGE_VALIDITY_MILLIS)
 
-    const encodedChallenge = yield* _(
-      encodeLoginChallengeRequestPayload({
-        privateKey: keyPair.privateKeyPemBase64,
-        challenge,
-        validUntil,
-      })
-    )
+    const encodedChallenge = yield* encodeLoginChallengeRequestPayload({
+      privateKey: keyPair.privateKeyPemBase64,
+      challenge,
+      validUntil,
+    })
 
-    const serverSignature = yield* _(
+    const serverSignature = yield* pipe(
       serverCrypto.signEcdsa(encodedChallenge),
-      Effect.flatMap(Schema.decode(LoginChallengeServerSignature))
+      Effect.flatMap(Schema.decodeEffect(LoginChallengeServerSignature))
     )
     return {
       encodedChallenge,
       serverSignature,
     }
   }).pipe(
-    Effect.catchAll(
+    Effect.catch(
       (e) =>
         new UnexpectedServerError({
           cause: e,
@@ -79,50 +77,39 @@ export const verifyLoginChallenge = ({
   serverSignature: LoginChallengeServerSignature
   clientSignature: LoginChallengeClientSignature
 }): Effect.Effect<true, InvalidLoginSignatureError, ServerCrypto> =>
-  Effect.gen(function* (_) {
-    const serverCrypto = yield* _(ServerCrypto)
+  Effect.gen(function* () {
+    const serverCrypto = yield* ServerCrypto
 
-    const serverSignatureValid = yield* _(
-      serverCrypto.verifyEcdsa({
-        data: encodedChallenge,
-        signature: Schema.decodeSync(EcdsaSignature)(serverSignature),
-      })
-    )
+    const serverSignatureValid = yield* serverCrypto.verifyEcdsa({
+      data: encodedChallenge,
+      signature: Schema.decodeSync(EcdsaSignature)(serverSignature),
+    })
 
     if (!serverSignatureValid) {
-      return yield* _(
-        Effect.fail(new InvalidLoginSignatureError({status: 400}))
-      )
+      return yield* Effect.fail(new InvalidLoginSignatureError({status: 400}))
     }
 
-    const decodedChallengePayload = yield* _(
-      decodeLoginChallengeRequestPayload(encodedChallenge)
-    )
+    const decodedChallengePayload =
+      yield* decodeLoginChallengeRequestPayload(encodedChallenge)
     if (unixMillisecondsNow() > decodedChallengePayload.validUntil) {
-      return yield* _(
-        Effect.fail(new InvalidLoginSignatureError({status: 400}))
-      )
+      return yield* Effect.fail(new InvalidLoginSignatureError({status: 400}))
     }
 
     const {publicKeyPemBase64: publicKey} = importKeyPair(
       decodedChallengePayload.privateKey
     )
-    const clientSignatureValid = yield* _(
-      ecdsaVerifyE(publicKey)({
-        data: decodedChallengePayload.challenge,
-        signature: Schema.decodeSync(EcdsaSignature)(clientSignature),
-      })
-    )
+    const clientSignatureValid = yield* ecdsaVerifyE(publicKey)({
+      data: decodedChallengePayload.challenge,
+      signature: Schema.decodeSync(EcdsaSignature)(clientSignature),
+    })
     if (!clientSignatureValid) {
-      return yield* _(
-        Effect.fail(new InvalidLoginSignatureError({status: 400}))
-      )
+      return yield* Effect.fail(new InvalidLoginSignatureError({status: 400}))
     }
 
     return true as const
   }).pipe(
     Effect.catchTags({
-      'ParseError': () =>
+      'SchemaError': () =>
         new InvalidLoginSignatureError({
           status: 400,
         }),

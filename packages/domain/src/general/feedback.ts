@@ -1,16 +1,18 @@
-import {Schema} from 'effect'
+import {Effect, Schema} from 'effect'
 import {generateUuid} from '../utility/Uuid.brand'
 
 export const POSITIVE_STAR_RATING_THRESHOLD = 4
 
-export const FeedbackFormId = Schema.UUID.pipe(Schema.brand('FeedbackFormId'))
+export const FeedbackFormId = Schema.String.check(Schema.isUUID()).pipe(
+  Schema.brand('FeedbackFormId')
+)
 export type FeedbackFormId = typeof FeedbackFormId.Type
 
 export function generateFeedbackFormId(): FeedbackFormId {
   return Schema.decodeSync(FeedbackFormId)(generateUuid())
 }
 
-export const ObjectionType = Schema.Literal(
+export const ObjectionType = Schema.Literals([
   'APP',
   'PROCESS',
   'RESPONDING_TIME',
@@ -20,8 +22,8 @@ export const ObjectionType = Schema.Literal(
   'DID_NOT_SHOW_UP',
   'I_MET_NEW_FRIEND',
   'DEAL_WAS_SMOOTH',
-  'IT_WAS_FAST'
-)
+  'IT_WAS_FAST',
+])
 export type ObjectionType = typeof ObjectionType.Type
 
 export const objectionTypeNegativeOptions: ObjectionType[] = [
@@ -43,15 +45,15 @@ export const objectionTypePositiveOptions: ObjectionType[] = [
   'IT_WAS_FAST',
 ]
 
-export const FeedbackType = Schema.Literal('CHAT_RATING', 'OFFER_RATING')
+export const FeedbackType = Schema.Literals(['CHAT_RATING', 'OFFER_RATING'])
 export type FeedbackType = typeof FeedbackType.Type
 
-export const FeedbackPage = Schema.Literal(
+export const FeedbackPage = Schema.Literals([
   'CHAT_RATING',
   'OFFER_RATING',
   'OBJECTIONS',
-  'TEXT_COMMENT'
-)
+  'TEXT_COMMENT',
+])
 export type FeedbackPage = typeof FeedbackPage.Type
 
 export const Feedback = Schema.Struct({
@@ -61,6 +63,9 @@ export const Feedback = Schema.Struct({
   stars: Schema.Number,
   objections: Schema.Array(ObjectionType),
   textComment: Schema.String,
-  finished: Schema.optionalWith(Schema.Boolean, {default: () => false}),
+  finished: Schema.Boolean.pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): false => false)),
+    Schema.withConstructorDefault(Effect.sync((): false => false))
+  ),
 })
 export type Feedback = typeof Feedback.Type

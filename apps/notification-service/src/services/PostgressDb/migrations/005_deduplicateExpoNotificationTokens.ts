@@ -1,10 +1,10 @@
-import {SqlClient} from '@effect/sql'
 import {Effect} from 'effect'
+import {SqlClient} from 'effect/unstable/sql'
 
-export const deduplicateExpoNotificationTokens = Effect.gen(function* (_) {
-  const sql = yield* _(SqlClient.SqlClient)
+export const deduplicateExpoNotificationTokens = Effect.gen(function* () {
+  const sql = yield* SqlClient.SqlClient
 
-  yield* _(sql`
+  yield* sql`
     WITH
       ranked_notification_token_secrets AS (
         SELECT
@@ -29,11 +29,11 @@ export const deduplicateExpoNotificationTokens = Effect.gen(function* (_) {
     WHERE
       nts.id = ranked.id
       AND ranked.duplicate_rank > 1
-  `)
+  `
 
-  yield* _(sql`
+  yield* sql`
     CREATE UNIQUE INDEX IF NOT EXISTS idx_notification_secrets_expo_token_unique ON notification_token_secrets (expo_notification_token)
     WHERE
       expo_notification_token IS NOT NULL
-  `)
+  `
 })

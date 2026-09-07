@@ -4,7 +4,7 @@ import {
   type UnixMilliseconds,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import {Effect} from 'effect'
+import {Effect, pipe} from 'effect'
 import {PermissionStatus} from 'expo'
 import {getPermissionsAsync, requestPermissionsAsync} from 'expo-notifications'
 import {atom, getDefaultStore, type Getter, type Setter} from 'jotai'
@@ -22,9 +22,11 @@ const notificationSettings = Effect.promise(() => getPermissionsAsync())
 export const requestPermissions = Effect.promise(() =>
   requestPermissionsAsync()
 ).pipe(
-  Effect.tap((e) => {
-    getDefaultStore().set(areNotificationsEnabledAtom, e.granted)
-  }),
+  Effect.tap((e) =>
+    Effect.sync(() => {
+      getDefaultStore().set(areNotificationsEnabledAtom, e.granted)
+    })
+  ),
   Effect.filterOrFail(
     (e) => e.granted,
     () => ({_tag: 'UserDeclined'}) as const
@@ -52,17 +54,17 @@ const openSettings = Effect.sync(() => {
 const checkNotificationPermissionsAndAskIfPossibleActionAtom = atom(
   null,
   (get, set, {force}: {force: boolean} = {force: false}) =>
-    Effect.gen(function* (_) {
-      const {status} = yield* _(notificationSettings)
+    Effect.gen(function* () {
+      const {status} = yield* notificationSettings
 
       if (status === PermissionStatus.GRANTED) {
         return 'granted' as const
       }
 
-      if (!force && !(yield* _(shouldAskForNotifications(get)))) {
+      if (!force && !(yield* shouldAskForNotifications(get))) {
         return 'not-asked' as const
       }
-      yield* _(setAskedForNotificationsNow(set))
+      yield* setAskedForNotificationsNow(set)
 
       const {t} = get(translationAtom)
 
@@ -110,11 +112,11 @@ const checkNotificationPermissionsAndAskIfPossibleActionAtom = atom(
         status === PermissionStatus.UNDETERMINED ||
         status === PermissionStatus.DENIED
       ) {
-        return yield* _(
+        return yield* pipe(
           showDialog,
           Effect.flatMap(() => requestPermissions),
           Effect.catchTag('UserDeclined', () =>
-            Effect.zipRight(
+            Effect.andThen(
               Effect.sync(() => {
                 Alert.alert(
                   t('notificationPrompt.errorAlert.title'),
@@ -139,7 +141,7 @@ const checkNotificationPermissionsAndAskIfPossibleActionAtom = atom(
               set(toastNotificationAtom, t('notificationPrompt.successMessage'))
             })
           ),
-          Effect.zipRight(Effect.succeed('asked' as const))
+          Effect.andThen(Effect.succeed('asked' as const))
         )
       }
     }).pipe(
@@ -149,9 +151,7 @@ const checkNotificationPermissionsAndAskIfPossibleActionAtom = atom(
         }
         return Effect.void
       }),
-      Effect.catchAll(() =>
-        Effect.fail({_tag: 'NotificationPrompted'} as const)
-      )
+      Effect.catch(() => Effect.fail({_tag: 'NotificationPrompted'} as const))
     )
 )
 export const checkNotificationPermissionsAndAskIfPossibleTEActionAtom = atom(

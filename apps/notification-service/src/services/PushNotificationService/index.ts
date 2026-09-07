@@ -5,6 +5,7 @@ import {
   Context,
   Data,
   Effect,
+  Filter,
   identity,
   Layer,
   Match,
@@ -59,22 +60,21 @@ export interface PushNotificationServiceOperations {
   ) => Effect.Effect<void, ExpoSdkError>
 }
 
-export class PushNotificationService extends Context.Tag(
-  'PushNotificationService'
-)<PushNotificationService, PushNotificationServiceOperations>() {
+export class PushNotificationService extends Context.Service<
+  PushNotificationService,
+  PushNotificationServiceOperations
+>()('PushNotificationService') {
   static Live = Layer.effect(
     PushNotificationService,
-    Effect.gen(function* (_) {
-      const expoClient = yield* _(ExpoClientService)
-      const notificationMetrics = yield* _(NotificationMetricsService)
-      const vexlNotificationTokenService = yield* _(
-        VexlNotificationTokenService
-      )
+    Effect.gen(function* () {
+      const expoClient = yield* ExpoClientService
+      const notificationMetrics = yield* NotificationMetricsService
+      const vexlNotificationTokenService = yield* VexlNotificationTokenService
 
       return {
         sendNotificationViaExpoNotification: (tasks) =>
-          Effect.gen(function* (_) {
-            const dataToSend = yield* _(
+          Effect.gen(function* () {
+            const dataToSend = yield* pipe(
               Array.map(tasks, (task) =>
                 Match.value(task).pipe(
                   Match.tag(
@@ -132,7 +132,7 @@ export class PushNotificationService extends Context.Tag(
                 )
               ),
               Effect.all,
-              Effect.map(Array.filterMap(identity))
+              Effect.map(Array.filterMap(Filter.fromPredicateOption(identity)))
             )
 
             const notificationsToSend = pipe(
@@ -144,29 +144,27 @@ export class PushNotificationService extends Context.Tag(
               )
             )
 
-            if (Array.isEmptyArray(notificationsToSend)) {
+            if (Array.isArrayEmpty(notificationsToSend)) {
               return
             }
 
             // TODO check if notifications were delivered successfully and deactivate tokens
-            yield* _(expoClient.sendNotification(notificationsToSend))
+            yield* expoClient.sendNotification(notificationsToSend)
 
-            yield* _(
-              Effect.forEach(dataToSend, (d) => {
-                if (Option.isNone(d.metadata)) return Effect.void
+            yield* Effect.forEach(dataToSend, (d) => {
+              if (Option.isNone(d.metadata)) return Effect.void
 
-                return notificationMetrics.reportNotificationSent({
-                  id: d.trackingId,
-                  clientPlatform: d.metadata.value.clientPlatform,
-                  clientVersion: d.metadata.value.clientVersion,
-                  systemNotificationSent: systemNotificationSent(
-                    d.notificationToSend
-                  ),
-                  sentAt: unixMillisecondsNow(),
-                  channel: 'push',
-                })
+              return notificationMetrics.reportNotificationSent({
+                id: d.trackingId,
+                clientPlatform: d.metadata.value.clientPlatform,
+                clientVersion: d.metadata.value.clientVersion,
+                systemNotificationSent: systemNotificationSent(
+                  d.notificationToSend
+                ),
+                sentAt: unixMillisecondsNow(),
+                channel: 'push',
               })
-            )
+            })
           }).pipe(
             Effect.provideService(
               VexlNotificationTokenService,

@@ -2,8 +2,8 @@ import {PgClient} from '@effect/sql-pg'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {Effect} from 'effect'
 
-export const createDeleteExpiredNotes = Effect.gen(function* (_) {
-  const sql = yield* _(PgClient.PgClient)
+export const createDeleteExpiredNotes = Effect.gen(function* () {
+  const sql = yield* PgClient.PgClient
 
   return () =>
     sql`

@@ -5,13 +5,15 @@ import {Queue, Worker, type Job, type JobsOptions} from 'bullmq'
 import {
   Context,
   Effect,
+  Filter,
   flow,
   identity,
   Layer,
   pipe,
   Schema,
   Stream,
-} from 'effect/index'
+} from 'effect'
+import {offer} from 'effect/Queue'
 import {SendMessageTask} from '../../domain'
 import {SendMessageTasksManagerError} from './domain'
 
@@ -62,7 +64,7 @@ const createQueue = pipe(
         )
     )
   ),
-  Effect.zipLeft(Effect.log('Pending tasks queue created')),
+  Effect.tap(Effect.log('Pending tasks queue created')),
   Effect.map(
     (queue) => (task: SendMessageTask, options?: JobsOptions) =>
       pipe(
@@ -77,7 +79,7 @@ const createQueue = pipe(
         Effect.flatMap(() =>
           pipe(
             task,
-            Schema.encode(SendMessageTask),
+            Schema.encodeEffect(SendMessageTask),
             SendMessageTasksManagerError.wrapErrors(
               'Error while encoding pending task data'
             )
@@ -97,31 +99,31 @@ const createQueue = pipe(
   )
 )
 
-export class EnqueuePendingTask extends Context.Tag('EnqueuePendingTask')<
+export class EnqueuePendingTask extends Context.Service<
   EnqueuePendingTask,
   (
     task: SendMessageTask,
     options?: JobsOptions
   ) => Effect.Effect<Job, SendMessageTasksManagerError>
->() {
-  static Live = Layer.scoped(EnqueuePendingTask, createQueue)
+>()('EnqueuePendingTask') {
+  static Live = Layer.effect(EnqueuePendingTask, createQueue)
 }
 
 const createJobStream = Effect.map(RedisConnectionService, (connection) =>
-  Stream.asyncScoped<
+  Stream.callback<
     unknown,
     SendMessageTasksManagerError,
     RedisConnectionService
-  >((emit) =>
-    Effect.gen(function* (_) {
-      const prefix =
-        yield* RedisNamespacePrefixConfigFailWithSendMessageTasksManagerError
+  >(
+    (messages) =>
+      Effect.gen(function* () {
+        const prefix =
+          yield* RedisNamespacePrefixConfigFailWithSendMessageTasksManagerError
 
-      const processJob = async (job: Job<unknown, void>): Promise<void> => {
-        await emit.single(job.data)
-      }
-      yield* _(
-        Effect.acquireRelease(
+        const processJob = async (job: Job<unknown, void>): Promise<void> => {
+          await Effect.runPromise(offer(messages, job.data))
+        }
+        yield* Effect.acquireRelease(
           Effect.try({
             try: () =>
               new Worker(PENDING_TASKS_QUEUE_NAME, processJob, {
@@ -139,29 +141,30 @@ const createJobStream = Effect.map(RedisConnectionService, (connection) =>
               await worker.close()
             })
         )
-      )
-    })
+      }),
+    {bufferSize: 16}
   ).pipe(
     Stream.mapEffect(
       flow(
-        Schema.decodeUnknown(SendMessageTask),
+        (message: unknown) =>
+          Schema.decodeUnknownEffect(SendMessageTask)(message),
         Effect.tapError((e) =>
           Effect.log('Pending task worker received invalid job data')
         ),
         Effect.option
       )
     ),
-    Stream.filterMap(identity)
+    Stream.filterMap(Filter.fromPredicateOption(identity))
   )
 )
 
-export class TimeoutJobsStream extends Context.Tag('TimeoutJobsStream')<
+export class TimeoutJobsStream extends Context.Service<
   TimeoutJobsStream,
   Stream.Stream<
     SendMessageTask,
     SendMessageTasksManagerError,
     RedisConnectionService
   >
->() {
+>()('TimeoutJobsStream') {
   static Live = Layer.effect(TimeoutJobsStream, createJobStream)
 }

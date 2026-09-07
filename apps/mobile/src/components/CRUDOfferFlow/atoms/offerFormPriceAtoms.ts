@@ -141,9 +141,10 @@ export function createOfferFormPriceAtoms({
       set(currencyAtom, currencyCode)
 
       void Effect.runPromise(
-        Effect.gen(function* (_) {
-          const currentResult = yield* _(
-            refreshBtcPriceWithEurEffect(set, currencyCode)
+        Effect.gen(function* () {
+          const currentResult = yield* refreshBtcPriceWithEurEffect(
+            set,
+            currencyCode
           )
           if (get(currencyAtom) !== currencyCode) return
           // Realign the top limit to the fresh cap once the new currency's
@@ -156,7 +157,7 @@ export function createOfferFormPriceAtoms({
               String(get(satsValueAtom))
             )
           } else {
-            yield* _(set(showExchangeRateRequestTimedOutDialogActionAtom))
+            yield* set(showExchangeRateRequestTimedOutDialogActionAtom)
           }
         })
       )
@@ -165,17 +166,15 @@ export function createOfferFormPriceAtoms({
 
   const retryBtcPriceForOfferCurrencyActionAtom = atom(null, (get, set) => {
     void Effect.runPromise(
-      Effect.gen(function* (_) {
+      Effect.gen(function* () {
         const currency = get(currencyAtom)
 
-        const currentResult = yield* _(
-          refreshBtcPriceWithEurEffect(set, currency)
-        )
+        const currentResult = yield* refreshBtcPriceWithEurEffect(set, currency)
         if (get(currencyAtom) !== currency) return
 
         set(amountTopLimitAtom, get(maxAmountForCurrencyAtom))
         if (!currentResult) {
-          yield* _(set(showExchangeRateRequestTimedOutDialogActionAtom))
+          yield* set(showExchangeRateRequestTimedOutDialogActionAtom)
 
           return
         }
@@ -193,8 +192,8 @@ export function createOfferFormPriceAtoms({
     (get, set): Effect.Effect<void> => {
       const currency = get(currencyAtom)
 
-      return Effect.gen(function* (_) {
-        yield* _(refreshBtcPriceWithEurEffect(set, currency))
+      return Effect.gen(function* () {
+        yield* refreshBtcPriceWithEurEffect(set, currency)
         set(amountTopLimitAtom, get(maxAmountForCurrencyAtom))
       })
     }

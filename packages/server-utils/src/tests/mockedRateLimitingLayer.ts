@@ -1,16 +1,10 @@
 import {unixMillisecondsFromNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {
-  Effect,
-  Layer,
-  MutableHashMap,
-  MutableHashSet,
-  Option,
-} from 'effect/index'
+import {Effect, Layer, MutableHashMap, MutableHashSet, Option} from 'effect'
 import {RateLimitingService} from '../RateLimiting'
 
 export const mockedRateLimitingLayer = Layer.effect(
   RateLimitingService,
-  Effect.gen(function* (_) {
+  Effect.gen(function* () {
     const whitelistedIps = MutableHashSet.empty<string>()
     const rateLimitState = MutableHashMap.empty<string, number>()
 

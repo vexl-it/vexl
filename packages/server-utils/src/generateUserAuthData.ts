@@ -5,7 +5,7 @@ import {
   type CryptoError,
   type EcdsaSignature,
 } from '@vexl-next/generic-utils/src/effect-helpers/crypto'
-import {Effect, Schema} from 'effect'
+import {Effect, pipe, Schema} from 'effect'
 import {ServerCrypto} from './ServerCrypto'
 
 export const hashPhoneNumber = (
@@ -32,12 +32,12 @@ export const generateUserAuthData = ({
   CryptoError,
   ServerCrypto
 > =>
-  Effect.gen(function* (_) {
+  Effect.gen(function* () {
     const dataToSign = `${publicKey}${phoneNumberHashed}`
 
-    const crypto = yield* _(ServerCrypto)
+    const crypto = yield* ServerCrypto
 
-    const signature = yield* _(
+    const signature = yield* pipe(
       crypto.signEcdsa(dataToSign),
       Effect.tapError((e) =>
         Effect.logError('Error while signing user auth data', e)

@@ -1,6 +1,7 @@
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {Effect, flow, Schema} from 'effect'
+import {NumberFromString} from '@vexl-next/generic-utils/src/effect-helpers/NumberFromString'
+import {Effect, flow, pipe, Schema} from 'effect'
 import {type ConnectingIp} from '../../getConnectingIp'
 import {RedisConnectionService} from '../../RedisConnection'
 import {RATE_LIMIT_WINDOW_MS} from '../constants'
@@ -76,8 +77,8 @@ const redisNow = RedisConnectionService.pipe(
   ),
   Effect.flatMap(
     flow(
-      Schema.decodeUnknown(
-        Schema.Tuple(Schema.NumberFromString, Schema.NumberFromString)
+      Schema.decodeUnknownEffect(
+        Schema.Tuple([NumberFromString, NumberFromString])
       ),
       Effect.mapError(
         (e) =>
@@ -91,7 +92,7 @@ const redisNow = RedisConnectionService.pipe(
   Effect.map(([sec, usec]) => sec * 1000 + usec / 1000)
 )
 
-const RateLimitResponse = Schema.Union(
+const RateLimitResponse = Schema.Union([
   Schema.Struct({
     allowed: Schema.Literal(true),
     currentCallCount: Schema.Number,
@@ -101,8 +102,8 @@ const RateLimitResponse = Schema.Union(
     currentCallCount: Schema.Number,
     retryAfterMs: Schema.Number,
     rateLimitResetAtMs: UnixMilliseconds,
-  })
-)
+  }),
+])
 export type RateLimitResponse = typeof RateLimitResponse.Type
 
 export const callRateLimitingCommand = ({
@@ -122,14 +123,14 @@ export const callRateLimitingCommand = ({
   UnexpectedServerError,
   RedisConnectionService
 > =>
-  Effect.gen(function* (_) {
-    const redis = yield* _(RedisConnectionService)
+  Effect.gen(function* () {
+    const redis = yield* RedisConnectionService
     const key = `${serviceName}:rl:ip:${route}:${ip}`
-    const now = yield* _(redisNow)
+    const now = yield* redisNow
     const windowMs = RATE_LIMIT_WINDOW_MS
     const ttlSeconds = Math.ceil(windowMs / 1000)
 
-    const [allowed, callCount, retryAfterMs, rateLimitResetAtMs] = yield* _(
+    const [allowed, callCount, retryAfterMs, rateLimitResetAtMs] = yield* pipe(
       Effect.tryPromise({
         try: async () => {
           return await ((await (redis as any)[REDIS_COMMAND_NAME](
@@ -147,9 +148,9 @@ export const callRateLimitingCommand = ({
           }),
       }),
       Effect.flatMap((raw) =>
-        Schema.decodeUnknown(Schema.Array(Schema.Number))(raw).pipe(
-          Effect.catchAll((e) =>
-            Effect.zipRight(
+        Schema.decodeUnknownEffect(Schema.Array(Schema.Number))(raw).pipe(
+          Effect.catch((e) =>
+            Effect.andThen(
               Effect.logWarning(
                 'Got unexpected result from rate limiting Redis command',
                 raw
@@ -165,8 +166,8 @@ export const callRateLimitingCommand = ({
       )
     )
 
-    return yield* _(
-      Schema.decodeUnknown(RateLimitResponse)(
+    return yield* pipe(
+      Schema.decodeUnknownEffect(RateLimitResponse)(
         allowed === 0
           ? {
               allowed: false,
@@ -179,8 +180,8 @@ export const callRateLimitingCommand = ({
               currentCallCount: callCount,
             }
       ),
-      Effect.catchAll((e) =>
-        Effect.zipRight(
+      Effect.catch((e) =>
+        Effect.andThen(
           Effect.logWarning('Failed to return rate limiting response', e),
           new UnexpectedServerError({
             cause: e,

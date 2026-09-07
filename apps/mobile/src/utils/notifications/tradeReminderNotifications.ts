@@ -3,7 +3,7 @@ import {
   type UnixMilliseconds,
   unixMillisecondsNow,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {Duration} from 'effect/index'
+import {Duration} from 'effect'
 import {
   cancelScheduledNotificationAsync,
   SchedulableTriggerInputTypes,
@@ -18,7 +18,7 @@ import {getChatNotificationName} from './getChatNotificationName'
 import {getChannelForTradeReminders} from './notificationChannels'
 import {TradeReminderNotificationData} from './tradeReminderNotificationData'
 
-export const TRADE_REMINDER_TIME_BEFORE_MEETING = Duration.decode(
+export const TRADE_REMINDER_TIME_BEFORE_MEETING = Duration.fromInputUnsafe(
   '40 minutes'
 ).pipe(Duration.toMillis)
 

@@ -1,42 +1,43 @@
 import {
   Context,
   Effect,
+  Filter,
   flow,
   identity,
   Layer,
   pipe,
   Schema,
   Stream,
-} from 'effect/index'
-import {type ParseError} from 'effect/ParseResult'
+} from 'effect'
+import {offer} from 'effect/Queue'
+import {type SchemaError} from 'effect/Schema'
 import {RedisConnectionService} from './RedisConnection'
 import {duplicateRedisAndConnect} from './RedisConnection/duplicateRedisAndConnect'
 import {RedisError} from './RedisService'
 
 export interface RedisPubSubServiceOperations {
   publish: <A, I, R>(
-    messageSchema: Schema.Schema<A, I, R>
+    messageSchema: Schema.Codec<A, I, R, R>
   ) => (
     channel: string,
     message: A
-  ) => Effect.Effect<void, RedisError | ParseError, R>
+  ) => Effect.Effect<void, RedisError | SchemaError, R>
 
   subscribe: <A, I, R>(
-    messageSchema: Schema.Schema<A, I, R>
+    messageSchema: Schema.Codec<A, I, R, R>
   ) => (channel: string) => Stream.Stream<A, RedisError, R>
 }
 
-export class RedisPubSubService extends Context.Tag('RedisPubSubService')<
+export class RedisPubSubService extends Context.Service<
   RedisPubSubService,
   RedisPubSubServiceOperations
->() {
-  static Live = Layer.scoped(
+>()('RedisPubSubService') {
+  static Live = Layer.effect(
     RedisPubSubService,
-    Effect.gen(function* (_) {
-      const redisConnection = yield* _(RedisConnectionService)
-      const subscriberConnection = yield* _(
-        duplicateRedisAndConnect(redisConnection)
-      )
+    Effect.gen(function* () {
+      const redisConnection = yield* RedisConnectionService
+      const subscriberConnection =
+        yield* duplicateRedisAndConnect(redisConnection)
 
       const publish = (
         channel: string,
@@ -48,25 +49,23 @@ export class RedisPubSubService extends Context.Tag('RedisPubSubService')<
         }).pipe(Effect.asVoid)
 
       const subscribe = (channel: string): Stream.Stream<string, RedisError> =>
-        Stream.asyncScoped<string, RedisError>((emit) =>
-          Effect.gen(function* (_) {
-            const onMessage = (ch: string, message: string): void => {
-              if (channel === ch) {
-                void emit.single(message)
+        Stream.callback<string, RedisError>(
+          (messages) =>
+            Effect.gen(function* () {
+              const onMessage = (ch: string, message: string): void => {
+                if (channel === ch) {
+                  void Effect.runPromise(offer(messages, message))
+                }
               }
-            }
 
-            subscriberConnection.on('message', onMessage)
-            yield* _(
-              Effect.addFinalizer(() =>
+              subscriberConnection.on('message', onMessage)
+              yield* Effect.addFinalizer(() =>
                 Effect.sync(() => {
                   subscriberConnection.off('message', onMessage)
                 })
               )
-            )
 
-            yield* _(
-              Effect.acquireRelease(
+              yield* Effect.acquireRelease(
                 Effect.tryPromise({
                   try: async () =>
                     await subscriberConnection.subscribe(channel),
@@ -77,26 +76,26 @@ export class RedisPubSubService extends Context.Tag('RedisPubSubService')<
                     void subscriberConnection.unsubscribe(channel)
                   })
               )
-            )
-          })
+            }),
+          {bufferSize: 16}
         )
 
       return {
-        publish: <A, I, R>(schema: Schema.Schema<A, I, R>) => {
-          const encode = Schema.encode(Schema.parseJson(schema))
+        publish: <A, I, R>(schema: Schema.Codec<A, I, R, R>) => {
+          const encode = Schema.encodeEffect(Schema.fromJsonString(schema))
           return (channel: string, message: A) =>
             Effect.flatMap(encode(message), (encoded) =>
               publish(channel, encoded)
             )
         },
         subscribe: (schema) => {
-          const decode = Schema.decode(Schema.parseJson(schema))
+          const decode = Schema.decodeEffect(Schema.fromJsonString(schema))
           return (channel) =>
             pipe(
               subscribe(channel),
               Stream.mapEffect(
                 flow(
-                  decode,
+                  (message: string) => decode(message),
                   Effect.tapError((e) =>
                     Effect.logWarning(
                       'Failed to decode message on redis pubSub',
@@ -109,7 +108,7 @@ export class RedisPubSubService extends Context.Tag('RedisPubSubService')<
                   Effect.option
                 )
               ),
-              Stream.filterMap(identity)
+              Stream.filterMap(Filter.fromPredicateOption(identity))
             )
         },
       } satisfies RedisPubSubServiceOperations

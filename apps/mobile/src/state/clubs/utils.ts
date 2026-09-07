@@ -14,7 +14,7 @@ import {type ClubWithMembers} from './domain'
 export class ClubNotFoundError extends Schema.TaggedError<ClubNotFoundError>(
   'ClubNotFoundError'
 )('ClubNotFoundError', {
-  cause: Schema.Union(NotFoundError),
+  cause: Schema.Union([NotFoundError]),
 }) {}
 
 export class FetchingClubError extends Schema.TaggedError<FetchingClubError>(
@@ -41,31 +41,27 @@ export const fetchClubWithMembersReportApiErrors = ({
   ClubNotFoundError | FetchingClubError,
   never
 > =>
-  Effect.gen(function* (_) {
+  Effect.gen(function* () {
     // Get V2 public key for this club if available
 
-    const clubInfo = yield* _(
-      contactApi
-        .getClubInfo({
-          keyPair: oldKeyPair,
-          keyPairV2: keyPair,
-          notificationToken,
-          vexlNotificationToken,
-        })
-        .pipe(
-          Effect.catchTag('NotFoundError', (e) => {
-            return Effect.fail({_tag: 'clubDoesNotExist', e})
-          })
-        )
-    )
-
-    const clubMembers = yield* _(
-      contactApi.getClubContacts({
-        clubUuid: clubInfo.clubInfoForUser.club.uuid,
+    const clubInfo = yield* contactApi
+      .getClubInfo({
         keyPair: oldKeyPair,
         keyPairV2: keyPair,
+        notificationToken,
+        vexlNotificationToken,
       })
-    )
+      .pipe(
+        Effect.catchTag('NotFoundError', (e) => {
+          return Effect.fail({_tag: 'clubDoesNotExist', e})
+        })
+      )
+
+    const clubMembers = yield* contactApi.getClubContacts({
+      clubUuid: clubInfo.clubInfoForUser.club.uuid,
+      keyPair: oldKeyPair,
+      keyPairV2: keyPair,
+    })
 
     return {
       club: clubInfo.clubInfoForUser.club,

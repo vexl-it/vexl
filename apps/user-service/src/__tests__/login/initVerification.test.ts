@@ -12,7 +12,7 @@ import {
 } from '@vexl-next/rest-api/src/services/user/contracts'
 import {generateAndSignLoginChallenge} from '@vexl-next/server-utils/src/loginChallengeServerOperations'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
-import {Effect, Schema} from 'effect'
+import {Effect, pipe, Schema} from 'effect'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
 import {generateAndSignChallenge} from '../utils/loginChalenge'
 import {
@@ -50,22 +50,20 @@ const smsProviderErrorReasons: ReadonlyArray<
 describe('Initialize verification', () => {
   it('Issues sms code when requested', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
 
-        const challenge = yield* _(generateAndSignChallenge)
+        const challenge = yield* generateAndSignChallenge
 
-        const data = yield* _(
-          client.Login.initVerification({
-            headers: Schema.decodeSync(CommonHeaders)({
-              'user-agent': 'Vexl/2 (1.0.0) IOS',
-            }),
-            payload: {
-              challenge,
-              phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333333'),
-            },
-          })
-        )
+        const data = yield* client.Login.initVerification({
+          headers: Schema.decodeSync(CommonHeaders)({
+            'user-agent': 'Vexl/2 (1.0.0) IOS',
+          }),
+          payload: {
+            challenge,
+            phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333333'),
+          },
+        })
 
         expect(createVerificationMock).toHaveBeenCalledWith(
           '+420733333333',
@@ -80,12 +78,12 @@ describe('Initialize verification', () => {
 
   it('fails when called with unsupported version', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
 
-        const challenge = yield* _(generateAndSignChallenge)
+        const challenge = yield* generateAndSignChallenge
 
-        const data = yield* _(
+        const data = yield* pipe(
           client.Login.initVerification({
             headers: Schema.decodeSync(CommonHeaders)({
               'user-agent': 'Vexl/1 (1.0.0) IOS',
@@ -95,7 +93,7 @@ describe('Initialize verification', () => {
               phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333333'),
             },
           }),
-          Effect.either
+          Effect.result
         )
 
         expectErrorResponse(UnsupportedVersionToLoginError)(data)
@@ -105,12 +103,12 @@ describe('Initialize verification', () => {
 
   it('fails when called with bad client signature', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
 
-        const challenge = yield* _(generateAndSignChallenge)
+        const challenge = yield* generateAndSignChallenge
 
-        const data = yield* _(
+        const data = yield* pipe(
           client.Login.initVerification({
             headers: Schema.decodeSync(CommonHeaders)({
               'user-agent': 'Vexl/2 (1.0.0) IOS',
@@ -123,7 +121,7 @@ describe('Initialize verification', () => {
               phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333333'),
             },
           }),
-          Effect.either
+          Effect.result
         )
 
         expectErrorResponse(InvalidLoginSignatureError)(data)
@@ -133,12 +131,12 @@ describe('Initialize verification', () => {
 
   it('fails when called with bad server signature', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
 
-        const challenge = yield* _(generateAndSignChallenge)
+        const challenge = yield* generateAndSignChallenge
 
-        const data = yield* _(
+        const data = yield* pipe(
           client.Login.initVerification({
             headers: Schema.decodeSync(CommonHeaders)({
               'user-agent': 'Vexl/2 (1.0.0) IOS',
@@ -151,7 +149,7 @@ describe('Initialize verification', () => {
               phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333333'),
             },
           }),
-          Effect.either
+          Effect.result
         )
 
         expectErrorResponse(InvalidLoginSignatureError)(data)
@@ -161,15 +159,15 @@ describe('Initialize verification', () => {
 
   it('fails when called with expired server challenge', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
 
-        const challenge = yield* _(generateAndSignLoginChallenge(-2))
-        const clientSignature = yield* _(
-          signLoginChallenge(challenge.encodedChallenge)
+        const challenge = yield* generateAndSignLoginChallenge(-2)
+        const clientSignature = yield* signLoginChallenge(
+          challenge.encodedChallenge
         )
 
-        const data = yield* _(
+        const data = yield* pipe(
           client.Login.initVerification({
             headers: Schema.decodeSync(CommonHeaders)({
               'user-agent': 'Vexl/2 (1.0.0) IOS',
@@ -183,7 +181,7 @@ describe('Initialize verification', () => {
               phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333333'),
             },
           }),
-          Effect.either
+          Effect.result
         )
 
         expectErrorResponse(InvalidLoginSignatureError)(data)
@@ -193,21 +191,19 @@ describe('Initialize verification', () => {
 
   it('Does not call twilio when verifying dummy number', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
-        const challenge = yield* _(generateAndSignChallenge)
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
+        const challenge = yield* generateAndSignChallenge
 
-        const data = yield* _(
-          client.Login.initVerification({
-            headers: Schema.decodeSync(CommonHeaders)({
-              'user-agent': 'Vexl/2 (1.0.0) IOS',
-            }),
-            payload: {
-              challenge,
-              phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333331'),
-            },
-          })
-        )
+        const data = yield* client.Login.initVerification({
+          headers: Schema.decodeSync(CommonHeaders)({
+            'user-agent': 'Vexl/2 (1.0.0) IOS',
+          }),
+          payload: {
+            challenge,
+            phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333331'),
+          },
+        })
 
         expect(createVerificationMock).not.toHaveBeenCalled()
         expect(data.verificationId).toBeDefined()
@@ -220,9 +216,9 @@ describe('Initialize verification', () => {
     'does not return verification data for %s provider errors',
     async (reason) => {
       await runPromiseInMockedEnvironment(
-        Effect.gen(function* (_) {
-          const client = yield* _(NodeTestingApp)
-          const challenge = yield* _(generateAndSignChallenge)
+        Effect.gen(function* () {
+          const client = yield* NodeTestingApp
+          const challenge = yield* generateAndSignChallenge
 
           createVerificationMock.mockReturnValue(
             Effect.fail(
@@ -233,7 +229,7 @@ describe('Initialize verification', () => {
             )
           )
 
-          const result = yield* _(
+          const result = yield* pipe(
             client.Login.initVerification({
               headers: Schema.decodeSync(CommonHeaders)({
                 'user-agent': 'Vexl/2 (1.0.0) IOS',
@@ -244,16 +240,17 @@ describe('Initialize verification', () => {
                   Schema.decodeSync(E164PhoneNumber)('+420733333333'),
               },
             }),
-            Effect.either
+            Effect.result
           )
 
           expectErrorResponse(UnableToSendVerificationSmsError)(result)
 
-          if (result._tag !== 'Left') return
-          if (!Schema.is(UnableToSendVerificationSmsError)(result.left)) return
+          if (result._tag !== 'Failure') return
+          if (!Schema.is(UnableToSendVerificationSmsError)(result.failure))
+            return
 
-          expect(result.left.verificationId).toBeUndefined()
-          expect(result.left.expirationAt).toBeUndefined()
+          expect(result.failure.verificationId).toBeUndefined()
+          expect(result.failure.expirationAt).toBeUndefined()
         })
       )
     }

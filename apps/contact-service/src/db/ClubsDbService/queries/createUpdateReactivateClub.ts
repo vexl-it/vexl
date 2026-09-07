@@ -1,8 +1,8 @@
-import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {Effect, flow, Schema} from 'effect'
+import {SqlSchema} from 'effect/unstable/sql'
 import {ClubDbRecord} from '../domain'
 
 export const UpdateReactivateClubParams = Schema.Struct({
@@ -10,10 +10,10 @@ export const UpdateReactivateClubParams = Schema.Struct({
 })
 export type UpdateReactivateClubParams = typeof UpdateReactivateClubParams.Type
 
-export const createUpdateReactivateClub = Effect.gen(function* (_) {
-  const sql = yield* _(PgClient.PgClient)
+export const createUpdateReactivateClub = Effect.gen(function* () {
+  const sql = yield* PgClient.PgClient
 
-  const query = SqlSchema.single({
+  const query = SqlSchema.findOne({
     Request: UpdateReactivateClubParams,
     Result: ClubDbRecord,
     execute: ({clubUuid}) => sql`

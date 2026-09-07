@@ -65,23 +65,21 @@ export function api({
   loggingFunction?: LoggingFunction | null
   prefix?: CountryPrefix
 }) {
-  return Effect.gen(function* (_) {
-    const client = yield* _(
-      createClientInstance({
-        api: ContactApiSpecification,
-        platform,
-        clientVersion,
-        language,
-        appSource,
-        clientSemver,
-        isDeveloper,
-        url,
-        loggingFunction,
-        deviceModel,
-        osVersion,
-        prefix,
-      })
-    )
+  return Effect.gen(function* () {
+    const client = yield* createClientInstance({
+      api: ContactApiSpecification,
+      platform,
+      clientVersion,
+      language,
+      appSource,
+      clientSemver,
+      isDeveloper,
+      url,
+      loggingFunction,
+      deviceModel,
+      osVersion,
+      prefix,
+    })
 
     const addChallenge = addChallengeToRequest2(
       client.Challenges.createChallenge
@@ -94,9 +92,9 @@ export function api({
       platform,
       isDeveloper,
       language,
-      deviceModel: Option.fromNullable(deviceModel),
-      osVersion: Option.fromNullable(osVersion),
-      prefix: Option.fromNullable(prefix),
+      deviceModel: Option.fromNullishOr(deviceModel),
+      osVersion: Option.fromNullishOr(osVersion),
+      prefix: Option.fromNullishOr(prefix),
     })
 
     // Security headers are built lazily inside each request effect (not once
@@ -111,7 +109,7 @@ export function api({
     return {
       checkUserExists: (query: CheckUserExistsRequest) =>
         withSecurityHeaders((headers) =>
-          client.User.checkUserExists({urlParams: query, headers})
+          client.User.checkUserExists({query, headers})
         ),
       createUser: (body: CreateUserRequest) =>
         withSecurityHeaders((headers) =>
@@ -139,7 +137,7 @@ export function api({
         withSecurityHeaders((headers) =>
           client.Contact.fetchMyContactsPaginated({
             headers,
-            urlParams: query,
+            query,
           })
         ),
       fetchCommonConnectionsPaginated: (
@@ -263,4 +261,4 @@ export function api({
   })
 }
 
-export type ContactApi = Effect.Effect.Success<ReturnType<typeof api>>
+export type ContactApi = Effect.Success<ReturnType<typeof api>>

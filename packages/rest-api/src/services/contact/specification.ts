@@ -1,10 +1,12 @@
-import {HttpApi, HttpApiEndpoint, HttpApiGroup} from '@effect/platform/index'
-import {
-  InvalidNextPageTokenError,
-  NotFoundError,
-  UnexpectedServerError,
-} from '@vexl-next/domain/src/general/commonErrors'
+import {InvalidNextPageTokenError} from '@vexl-next/domain/src/general/commonErrors'
 import {BadShortLivedTokenForErasingUserOnContactServiceError} from '@vexl-next/domain/src/general/ShortLivedTokenForErasingUserOnContactService'
+import {Schema} from 'effect'
+import {
+  HttpApi,
+  HttpApiEndpoint,
+  HttpApiGroup,
+  HttpApiSchema,
+} from 'effect/unstable/httpapi'
 import {AdminTokenHeaders} from '../../adminTokenHeaders'
 import {
   CommonAndSecurityHeaders,
@@ -16,6 +18,7 @@ import {
   PublicKeyV2MissingError,
 } from '../../challenges/contracts'
 import {ChallengeApiGroup} from '../../challenges/specification'
+import {commonApiErrors} from '../../commonApiErrors'
 import {CommonHeaders} from '../../commonHeaders'
 import {MaxExpectedDailyCall} from '../../MaxExpectedDailyCountAnnotation'
 import {NoContentResponse} from '../../NoContentResponse.brand'
@@ -85,298 +88,440 @@ import {
 
 export const CheckUserExistsEndpoint = HttpApiEndpoint.post(
   'checkUserExists',
-  '/api/v1/users/check-exists'
+  '/api/v1/users/check-exists',
+  {
+    disableCodecs: true,
+    headers: CommonAndSecurityHeaders,
+    query: CheckUserExistsRequest.fields,
+    error: Schema.Union([...commonApiErrors]),
+    success: UserExistsResponse,
+  }
 )
-  .setHeaders(CommonAndSecurityHeaders)
   .middleware(ServerSecurityMiddleware)
-  .setUrlParams(CheckUserExistsRequest)
-  .addSuccess(UserExistsResponse)
   .annotate(MaxExpectedDailyCall, 1)
 
 export const CreateUserEndpoint = HttpApiEndpoint.post(
   'createUser',
-  '/api/v1/users'
+  '/api/v1/users',
+  {
+    disableCodecs: true,
+    headers: CommonAndSecurityHeaders,
+    payload: CreateUserRequest,
+    error: Schema.Union([...commonApiErrors]),
+    success: NoContentResponse.pipe(HttpApiSchema.status(201)),
+  }
 )
-  .setHeaders(CommonAndSecurityHeaders)
   .middleware(ServerSecurityMiddleware)
-  .setPayload(CreateUserRequest)
-  .addSuccess(NoContentResponse, {status: 201})
   .annotate(MaxExpectedDailyCall, 1)
 
 export const RefreshUserEndpoint = HttpApiEndpoint.post(
   'refreshUser',
-  '/api/v1/users/refresh'
+  '/api/v1/users/refresh',
+  {
+    disableCodecs: true,
+    headers: CommonAndSecurityHeaders,
+    payload: RefreshUserRequest,
+    error: Schema.Union([
+      ...commonApiErrors,
+      UserNotFoundError.pipe(HttpApiSchema.status(404)),
+    ]),
+    success: NoContentResponse,
+  }
 )
-  .setHeaders(CommonAndSecurityHeaders)
   .middleware(ServerSecurityMiddleware)
-  .setPayload(RefreshUserRequest)
-  .addSuccess(NoContentResponse)
-  .addError(UserNotFoundError, {status: 404})
   .annotate(MaxExpectedDailyCall, 1)
 
 export const UpdateNotificationTokenEndpoint = HttpApiEndpoint.put(
   'updateNotificationToken',
-  '/api/v1/users/notification-token'
+  '/api/v1/users/notification-token',
+  {
+    disableCodecs: true,
+    headers: CommonAndSecurityHeaders,
+    payload: UpdateNotificationTokenRequest,
+    error: Schema.Union([
+      ...commonApiErrors,
+      UserNotFoundError.pipe(HttpApiSchema.status(404)),
+    ]),
+    success: NoContentResponse,
+  }
 )
-  .setHeaders(CommonAndSecurityHeaders)
   .middleware(ServerSecurityMiddleware)
-  .setPayload(UpdateNotificationTokenRequest)
-  .addSuccess(NoContentResponse)
-  .addError(UserNotFoundError, {status: 404})
   .annotate(MaxExpectedDailyCall, 1)
 
-export const DeleteUserEndpoint = HttpApiEndpoint.del(
+export const DeleteUserEndpoint = HttpApiEndpoint.delete(
   'deleteUser',
-  '/api/v1/users/me'
+  '/api/v1/users/me',
+  {
+    disableCodecs: true,
+    headers: CommonAndSecurityHeaders,
+    error: Schema.Union([...commonApiErrors]),
+    success: NoContentResponse,
+  }
 )
-  .setHeaders(CommonAndSecurityHeaders)
   .middleware(ServerSecurityMiddleware)
-  .addSuccess(NoContentResponse)
   .annotate(MaxExpectedDailyCall, 1)
 
-export const EraseUserFromNetworkEndpoint = HttpApiEndpoint.del(
+export const EraseUserFromNetworkEndpoint = HttpApiEndpoint.delete(
   'eraseUserFromNetwork',
-  '/api/v1/users/erase'
-)
-  .setPayload(EraseUserFromNetworkRequest)
-  .addSuccess(EraseUserFromNetworkResponse)
-  .addError(BadShortLivedTokenForErasingUserOnContactServiceError, {
-    status: 400,
-  })
-  .annotate(MaxExpectedDailyCall, 1)
+  '/api/v1/users/erase',
+  {
+    disableCodecs: true,
+    payload: EraseUserFromNetworkRequest,
+    error: Schema.Union([
+      ...commonApiErrors,
+      BadShortLivedTokenForErasingUserOnContactServiceError.pipe(
+        HttpApiSchema.status(
+          {
+            status: 400,
+          }.status
+        )
+      ),
+    ]),
+    success: EraseUserFromNetworkResponse,
+  }
+).annotate(MaxExpectedDailyCall, 1)
 
 export const ImportContactsEndpoint = HttpApiEndpoint.post(
   'importContacts',
-  '/api/v1/contacts/import/replace'
+  '/api/v1/contacts/import/replace',
+  {
+    disableCodecs: true,
+    headers: CommonAndSecurityHeaders,
+    payload: ImportContactsRequest,
+    error: Schema.Union([
+      ...commonApiErrors,
+      InitialImportContactsQuotaReachedError.pipe(HttpApiSchema.status(429)),
+      ImportContactsQuotaReachedError.pipe(HttpApiSchema.status(429)),
+    ]),
+    success: ImportContactsResponse,
+  }
 )
-  .setHeaders(CommonAndSecurityHeaders)
   .middleware(ServerSecurityMiddleware)
-  .setPayload(ImportContactsRequest)
-  .addSuccess(ImportContactsResponse)
-  .addError(InitialImportContactsQuotaReachedError, {status: 429})
-  .addError(ImportContactsQuotaReachedError, {status: 429})
   .annotate(MaxExpectedDailyCall, 100)
 
 export const FetchMyContactsPaginatedEndpoint = HttpApiEndpoint.get(
   'fetchMyContactsPaginated',
-  '/api/v1/contacts/me/paginated'
+  '/api/v1/contacts/me/paginated',
+  {
+    disableCodecs: true,
+    headers: CommonAndSecurityHeaders,
+    query: FetchMyContactsPaginatedRequest.fields,
+    error: Schema.Union([
+      ...commonApiErrors,
+      InvalidNextPageTokenError.pipe(HttpApiSchema.status(400)),
+    ]),
+    success: FetchMyContactsPaginatedResponse,
+  }
 )
-  .setHeaders(CommonAndSecurityHeaders)
   .middleware(ServerSecurityMiddleware)
-  .setUrlParams(FetchMyContactsPaginatedRequest)
-  .addSuccess(FetchMyContactsPaginatedResponse)
-  .addError(InvalidNextPageTokenError, {status: 400})
   .annotate(MaxExpectedDailyCall, 500)
 
 export const FetchCommonConnectionsPaginatedEndpoint = HttpApiEndpoint.post(
   'fetchCommonConnectionsPaginated',
-  '/api/v1/contacts/common/paginated'
+  '/api/v1/contacts/common/paginated',
+  {
+    disableCodecs: true,
+    headers: CommonAndSecurityHeaders,
+    payload: FetchCommonConnectionsPaginatedRequest,
+    error: Schema.Union([
+      ...commonApiErrors,
+      InvalidNextPageTokenError.pipe(HttpApiSchema.status(400)),
+    ]),
+    success: FetchCommonConnectionsPaginatedResponse,
+  }
 )
-  .setHeaders(CommonAndSecurityHeaders)
   .middleware(ServerSecurityMiddleware)
-  .setPayload(FetchCommonConnectionsPaginatedRequest)
-  .addSuccess(FetchCommonConnectionsPaginatedResponse)
-  .addError(InvalidNextPageTokenError, {status: 400})
   .annotate(MaxExpectedDailyCall, 500)
 
 export const ConvertPhoneNumberHashesToServerHashesEndpoint =
   HttpApiEndpoint.post(
     'convertPhoneNumberHashesToServerHashes',
-    '/api/v1/contacts/convert-to-server-hashes'
-  )
-    .setPayload(ConvertPhoneNumberHashesToServerHashesRequest)
-    .addSuccess(ConvertPhoneNumberHashesToServerHashesResponse)
-    .annotate(MaxExpectedDailyCall, 100)
+    '/api/v1/contacts/convert-to-server-hashes',
+    {
+      disableCodecs: true,
+      payload: ConvertPhoneNumberHashesToServerHashesRequest,
+      error: Schema.Union([...commonApiErrors]),
+      success: ConvertPhoneNumberHashesToServerHashesResponse,
+    }
+  ).annotate(MaxExpectedDailyCall, 100)
 
 export const CreateClubEndpoint = HttpApiEndpoint.post(
   'createClub',
-  '/api/v1/clubs/admin'
-)
-  .setHeaders(AdminTokenHeaders)
-  .setPayload(CreateClubRequest)
-  .addSuccess(CreateClubResponse)
-  .addError(ClubAlreadyExistsError, {status: 400})
-  .addError(InvalidAdminTokenError, {status: 401})
-  .annotate(MaxExpectedDailyCall, 100)
+  '/api/v1/clubs/admin',
+  {
+    disableCodecs: true,
+    headers: AdminTokenHeaders,
+    payload: CreateClubRequest,
+    error: Schema.Union([
+      ...commonApiErrors,
+      ClubAlreadyExistsError.pipe(HttpApiSchema.status(400)),
+      InvalidAdminTokenError.pipe(HttpApiSchema.status(401)),
+    ]),
+    success: CreateClubResponse,
+  }
+).annotate(MaxExpectedDailyCall, 100)
 
 export const ModfiyClubEndpoint = HttpApiEndpoint.put(
   'modifyClub',
-  '/api/v1/clubs/admin'
-)
-  .setHeaders(AdminTokenHeaders)
-  .setPayload(ModifyClubRequest)
-  .addSuccess(ModifyClubResponse)
-  .addError(InvalidAdminTokenError, {status: 401})
-  .annotate(MaxExpectedDailyCall, 100)
+  '/api/v1/clubs/admin',
+  {
+    disableCodecs: true,
+    headers: AdminTokenHeaders,
+    payload: ModifyClubRequest,
+    error: Schema.Union([
+      ...commonApiErrors,
+      InvalidAdminTokenError.pipe(HttpApiSchema.status(401)),
+    ]),
+    success: ModifyClubResponse,
+  }
+).annotate(MaxExpectedDailyCall, 100)
 
 export const GenerateClubInviteLinkForAdminEndpoint = HttpApiEndpoint.put(
   'generateClubInviteLinkForAdmin',
-  '/api/v1/clubs/admin/generate-admin-link'
-)
-  .setHeaders(AdminTokenHeaders)
-  .setPayload(GenerateInviteLinkForAdminRequest)
-  .addSuccess(GenerateInviteLinkForAdminResponse)
-  .addError(InvalidAdminTokenError, {status: 401})
-  .annotate(MaxExpectedDailyCall, 10000)
+  '/api/v1/clubs/admin/generate-admin-link',
+  {
+    disableCodecs: true,
+    headers: AdminTokenHeaders,
+    payload: GenerateInviteLinkForAdminRequest,
+    error: Schema.Union([
+      ...commonApiErrors,
+      InvalidAdminTokenError.pipe(HttpApiSchema.status(401)),
+    ]),
+    success: GenerateInviteLinkForAdminResponse,
+  }
+).annotate(MaxExpectedDailyCall, 10000)
 
 export const ListClubsEndpoint = HttpApiEndpoint.get(
   'listClubs',
-  '/api/v1/clubs/admin'
-)
-  .setHeaders(AdminTokenHeaders)
-  .addSuccess(ListClubsResponse)
-  .addError(InvalidAdminTokenError, {status: 401})
-  .annotate(MaxExpectedDailyCall, 100)
+  '/api/v1/clubs/admin',
+  {
+    disableCodecs: true,
+    headers: AdminTokenHeaders,
+    error: Schema.Union([
+      ...commonApiErrors,
+      InvalidAdminTokenError.pipe(HttpApiSchema.status(401)),
+    ]),
+    success: ListClubsResponse,
+  }
+).annotate(MaxExpectedDailyCall, 100)
 
 export const GetClubStatsEndpoint = HttpApiEndpoint.get(
   'getClubStats',
-  '/api/v1/clubs/admin/stats'
-)
-  .setHeaders(AdminTokenHeaders)
-  .setUrlParams(GetClubStatsRequest)
-  .addSuccess(GetClubStatsResponse)
-  .addError(InvalidAdminTokenError, {status: 401})
-  .addError(NotFoundError, {status: 404})
-  .annotate(MaxExpectedDailyCall, 100)
+  '/api/v1/clubs/admin/stats',
+  {
+    disableCodecs: true,
+    headers: AdminTokenHeaders,
+    query: GetClubStatsRequest.fields,
+    error: Schema.Union([
+      ...commonApiErrors,
+      InvalidAdminTokenError.pipe(HttpApiSchema.status(401)),
+    ]),
+    success: GetClubStatsResponse,
+  }
+).annotate(MaxExpectedDailyCall, 100)
 
 export const ReactivateClubEndpoint = HttpApiEndpoint.put(
   'reactivateClub',
-  '/api/v1/clubs/admin/reactivate'
-)
-  .setHeaders(AdminTokenHeaders)
-  .setPayload(ReactivateClubRequest)
-  .addSuccess(ReactivateClubResponse)
-  .addError(InvalidAdminTokenError, {status: 401})
-  .addError(ClubCannotBeReactivatedError, {status: 400})
-  .addError(NotFoundError, {status: 404})
-  .annotate(MaxExpectedDailyCall, 100)
+  '/api/v1/clubs/admin/reactivate',
+  {
+    disableCodecs: true,
+    headers: AdminTokenHeaders,
+    payload: ReactivateClubRequest,
+    error: Schema.Union([
+      ...commonApiErrors,
+      InvalidAdminTokenError.pipe(HttpApiSchema.status(401)),
+      ClubCannotBeReactivatedError.pipe(HttpApiSchema.status(400)),
+    ]),
+    success: ReactivateClubResponse,
+  }
+).annotate(MaxExpectedDailyCall, 100)
 
 export const RequestClubImageUploadEndpoint = HttpApiEndpoint.post(
   'requestClubImageUpload',
-  '/api/v1/clubs/admin/request-image-upload'
-)
-  .setHeaders(AdminTokenHeaders)
-  .setPayload(RequestClubImageUploadRequest)
-  .addSuccess(RequestClubImageUploadResponse)
-  .addError(InvalidAdminTokenError, {status: 401})
-  .addError(S3ServiceError, {status: 502})
-  .annotate(MaxExpectedDailyCall, 1000)
+  '/api/v1/clubs/admin/request-image-upload',
+  {
+    disableCodecs: true,
+    headers: AdminTokenHeaders,
+    payload: RequestClubImageUploadRequest,
+    error: Schema.Union([
+      ...commonApiErrors,
+      InvalidAdminTokenError.pipe(HttpApiSchema.status(401)),
+      S3ServiceError.pipe(HttpApiSchema.status(502)),
+    ]),
+    success: RequestClubImageUploadResponse,
+  }
+).annotate(MaxExpectedDailyCall, 1000)
 
 export const GetClubInfoEndpoint = HttpApiEndpoint.post(
   'getClubInfo',
-  '/api/v1/clubs/member/get-info'
-)
-  .setPayload(GetClubInfoRequest)
-  .addSuccess(GetClubInfoResponse)
-  .addError(InvalidChallengeError, {status: 401})
-  .annotate(MaxExpectedDailyCall, 500)
+  '/api/v1/clubs/member/get-info',
+  {
+    disableCodecs: true,
+    payload: GetClubInfoRequest,
+    error: Schema.Union([
+      ...commonApiErrors,
+      InvalidChallengeError.pipe(HttpApiSchema.status(401)),
+    ]),
+    success: GetClubInfoResponse,
+  }
+).annotate(MaxExpectedDailyCall, 500)
 
 export const JoinClubEndpoint = HttpApiEndpoint.post(
   'joinClub',
-  '/api/v1/clubs/member/join-club'
-)
-  .setHeaders(CommonHeaders)
-  .setPayload(JoinClubRequest)
-  .addSuccess(JoinClubResponse)
-  .addError(MemberAlreadyInClubError, {status: 400})
-  .addError(InvalidChallengeError, {status: 401})
-  .addError(ClubUserLimitExceededError, {status: 429})
-  .annotate(MaxExpectedDailyCall, 10)
+  '/api/v1/clubs/member/join-club',
+  {
+    disableCodecs: true,
+    headers: CommonHeaders,
+    payload: JoinClubRequest,
+    error: Schema.Union([
+      ...commonApiErrors,
+      MemberAlreadyInClubError.pipe(HttpApiSchema.status(400)),
+      InvalidChallengeError.pipe(HttpApiSchema.status(401)),
+      ClubUserLimitExceededError.pipe(HttpApiSchema.status(429)),
+    ]),
+    success: JoinClubResponse,
+  }
+).annotate(MaxExpectedDailyCall, 10)
 
 export const LeaveClubEndpoint = HttpApiEndpoint.post(
   'leaveClub',
-  '/api/v1/clubs/member/leave-club'
-)
-  .setPayload(LeaveClubRequest)
-  .addSuccess(NoContentResponse)
-  .addError(InvalidChallengeError, {status: 401})
-  .annotate(MaxExpectedDailyCall, 10)
+  '/api/v1/clubs/member/leave-club',
+  {
+    disableCodecs: true,
+    payload: LeaveClubRequest,
+    error: Schema.Union([
+      ...commonApiErrors,
+      InvalidChallengeError.pipe(HttpApiSchema.status(401)),
+    ]),
+    success: NoContentResponse,
+  }
+).annotate(MaxExpectedDailyCall, 10)
 
 export const GenerateClubJoinLinkEndpoint = HttpApiEndpoint.post(
   'generateClubJoinLink',
-  '/api/v1/clubs/moderator/generate-join-link'
-)
-  .setPayload(GenerateClubJoinLinkRequest)
-  .addSuccess(GenerateClubJoinLinkResponse)
-  .addError(InvalidChallengeError, {status: 401})
-  .addError(UserIsNotModeratorError, {status: 403})
-  .annotate(MaxExpectedDailyCall, 10)
+  '/api/v1/clubs/moderator/generate-join-link',
+  {
+    disableCodecs: true,
+    payload: GenerateClubJoinLinkRequest,
+    error: Schema.Union([
+      ...commonApiErrors,
+      InvalidChallengeError.pipe(HttpApiSchema.status(401)),
+      UserIsNotModeratorError.pipe(HttpApiSchema.status(403)),
+    ]),
+    success: GenerateClubJoinLinkResponse,
+  }
+).annotate(MaxExpectedDailyCall, 10)
 
-export const DeactivateClubJoinLinkEndpoint = HttpApiEndpoint.del(
+export const DeactivateClubJoinLinkEndpoint = HttpApiEndpoint.delete(
   'deactivateClubJoinLink',
-  '/api/v1/clubs/moderator/deactivate-join-link'
-)
-  .setPayload(DeactivateClubJoinLinkRequest)
-  .addSuccess(DeactivateClubJoinLinkResponse)
-  .addError(InviteCodeNotFoundError, {status: 400})
-  .addError(InvalidChallengeError, {status: 401})
-  .addError(UserIsNotModeratorError, {status: 403})
-  .annotate(MaxExpectedDailyCall, 10)
+  '/api/v1/clubs/moderator/deactivate-join-link',
+  {
+    disableCodecs: true,
+    payload: DeactivateClubJoinLinkRequest,
+    error: Schema.Union([
+      ...commonApiErrors,
+      InviteCodeNotFoundError.pipe(HttpApiSchema.status(400)),
+      InvalidChallengeError.pipe(HttpApiSchema.status(401)),
+      UserIsNotModeratorError.pipe(HttpApiSchema.status(403)),
+    ]),
+    success: DeactivateClubJoinLinkResponse,
+  }
+).annotate(MaxExpectedDailyCall, 10)
 
 export const AddUserToTheClubEndpint = HttpApiEndpoint.post(
   'addUserToTheClub',
-  '/api/v1/clubs/moderator/add-user-to-club'
-)
-  .setPayload(AddUserToTheClubRequest)
-  .addSuccess(AddUserToTheClubResponse)
-  .addError(MemberAlreadyInClubError, {status: 400})
-  .addError(InvalidChallengeError, {status: 401})
-  .addError(UserIsNotModeratorError, {status: 403})
-  .addError(ClubUserLimitExceededError, {status: 429})
-  .annotate(MaxExpectedDailyCall, 1000)
+  '/api/v1/clubs/moderator/add-user-to-club',
+  {
+    disableCodecs: true,
+    payload: AddUserToTheClubRequest,
+    error: Schema.Union([
+      ...commonApiErrors,
+      MemberAlreadyInClubError.pipe(HttpApiSchema.status(400)),
+      InvalidChallengeError.pipe(HttpApiSchema.status(401)),
+      UserIsNotModeratorError.pipe(HttpApiSchema.status(403)),
+      ClubUserLimitExceededError.pipe(HttpApiSchema.status(429)),
+    ]),
+    success: AddUserToTheClubResponse,
+  }
+).annotate(MaxExpectedDailyCall, 1000)
 
 export const ListClubLinksEndpoint = HttpApiEndpoint.post(
   'listClubLinks',
-  '/api/v1/clubs/moderator/list-links'
-)
-  .setPayload(ListClubLinksRequest)
-  .addSuccess(ListClubLinksResponse)
-  .addError(InvalidChallengeError, {status: 401})
-  .addError(UserIsNotModeratorError, {status: 403})
-  .annotate(MaxExpectedDailyCall, 100)
+  '/api/v1/clubs/moderator/list-links',
+  {
+    disableCodecs: true,
+    payload: ListClubLinksRequest,
+    error: Schema.Union([
+      ...commonApiErrors,
+      InvalidChallengeError.pipe(HttpApiSchema.status(401)),
+      UserIsNotModeratorError.pipe(HttpApiSchema.status(403)),
+    ]),
+    success: ListClubLinksResponse,
+  }
+).annotate(MaxExpectedDailyCall, 100)
 
 export const SetPublicKeyV2Endpoint = HttpApiEndpoint.put(
   'setPublicKeyV2',
-  '/api/v1/clubs/member/set-public-key-v2'
-)
-  .setHeaders(CommonHeaders)
-  .setPayload(SetPublicKeyV2Request)
-  .addError(InvalidChallengeError, {status: 401})
-  .addError(PublicKeyV2MissingError, {status: 400})
-  .addError(KeyAlreadySetError, {status: 400})
-  .addError(NotFoundError, {status: 404})
-  .addSuccess(NoContentResponse)
-  .annotate(MaxExpectedDailyCall, 1000)
+  '/api/v1/clubs/member/set-public-key-v2',
+  {
+    disableCodecs: true,
+    headers: CommonHeaders,
+    payload: SetPublicKeyV2Request,
+    error: Schema.Union([
+      ...commonApiErrors,
+      InvalidChallengeError.pipe(HttpApiSchema.status(401)),
+      PublicKeyV2MissingError.pipe(HttpApiSchema.status(400)),
+      KeyAlreadySetError.pipe(HttpApiSchema.status(400)),
+    ]),
+    success: NoContentResponse,
+  }
+).annotate(MaxExpectedDailyCall, 1000)
 
 export const GetClubContactsEndpoint = HttpApiEndpoint.post(
   'getClubContacts',
-  '/api/v1/clubs/member/get-contacts'
-)
-  .setHeaders(CommonHeaders)
-  .setPayload(GetClubContactsRequest)
-  .addSuccess(GetClubContactsResponse)
-  .addError(InvalidChallengeError, {status: 401})
-  .annotate(MaxExpectedDailyCall, 500)
+  '/api/v1/clubs/member/get-contacts',
+  {
+    disableCodecs: true,
+    headers: CommonHeaders,
+    payload: GetClubContactsRequest,
+    error: Schema.Union([
+      ...commonApiErrors,
+      InvalidChallengeError.pipe(HttpApiSchema.status(401)),
+    ]),
+    success: GetClubContactsResponse,
+  }
+).annotate(MaxExpectedDailyCall, 500)
 
 export const GetClubInfoByAccessCodeEndpoint = HttpApiEndpoint.post(
   'getClubInfoByAccessCode',
-  '/api/v1/clubs/member/get-info-by-access-code'
-)
-  .setPayload(GetClubInfoByAccessCodeRequest)
-  .addSuccess(GetClubInfoByAccessCodeResponse)
-  .addError(InvalidChallengeError, {status: 401})
-  .annotate(MaxExpectedDailyCall, 100)
+  '/api/v1/clubs/member/get-info-by-access-code',
+  {
+    disableCodecs: true,
+    payload: GetClubInfoByAccessCodeRequest,
+    error: Schema.Union([
+      ...commonApiErrors,
+      InvalidChallengeError.pipe(HttpApiSchema.status(401)),
+    ]),
+    success: GetClubInfoByAccessCodeResponse,
+  }
+).annotate(MaxExpectedDailyCall, 100)
 
 export const ReportClubEndpoint = HttpApiEndpoint.post(
   'reportClub',
-  '/api/v1/clubs/member/report-club'
+  '/api/v1/clubs/member/report-club',
+  {
+    disableCodecs: true,
+    headers: CommonAndSecurityHeaders,
+    payload: ReportClubRequest,
+    error: Schema.Union([
+      ...commonApiErrors,
+      InvalidChallengeError.pipe(HttpApiSchema.status(401)),
+      ReportClubLimitReachedError.pipe(HttpApiSchema.status(429)),
+    ]),
+    success: ReportClubResponse,
+  }
 )
-  .setHeaders(CommonAndSecurityHeaders)
   .middleware(ServerSecurityMiddleware)
-  .setPayload(ReportClubRequest)
-  .addSuccess(ReportClubResponse)
-  .addError(InvalidChallengeError, {status: 401})
-  .addError(ReportClubLimitReachedError, {status: 429})
   .annotate(MaxExpectedDailyCall, 10)
 
 const UserApiGroup = HttpApiGroup.make('User')
@@ -418,12 +563,10 @@ const ClubsModeratorApiGroup = HttpApiGroup.make('ClubsModerator')
   .add(ListClubLinksEndpoint)
 
 export const ContactApiSpecification = HttpApi.make('Contact API')
-  .middleware(RateLimitingMiddleware)
   .add(UserApiGroup)
   .add(ContactApiGroup)
   .add(ClubsAdminApiGroup)
   .add(ClubsMemberApiGroup)
   .add(ClubsModeratorApiGroup)
   .add(ChallengeApiGroup)
-  .addError(NotFoundError, {status: 404})
-  .addError(UnexpectedServerError, {status: 500})
+  .middleware(RateLimitingMiddleware)

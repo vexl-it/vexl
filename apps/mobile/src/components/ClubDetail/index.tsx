@@ -93,40 +93,32 @@ function ClubDetail({
                 showChevron={false}
                 onPress={() => {
                   Effect.runFork(
-                    Effect.gen(function* (_) {
-                      const confirmed = yield* _(
-                        showDialog({
-                          title: t('clubs.areYouSureYouWantToLeave'),
-                          subtitle: t('clubs.leavingWarning'),
-                          positiveButtonText: t('common.yesLeave'),
-                          positiveButtonVariant: 'destructive',
-                          negativeButtonText: t('common.cancel'),
-                        })
-                      )
+                    Effect.gen(function* () {
+                      const confirmed = yield* showDialog({
+                        title: t('clubs.areYouSureYouWantToLeave'),
+                        subtitle: t('clubs.leavingWarning'),
+                        positiveButtonText: t('common.yesLeave'),
+                        positiveButtonVariant: 'destructive',
+                        negativeButtonText: t('common.cancel'),
+                      })
 
                       if (!confirmed) return
 
-                      yield* _(
-                        Effect.sync(() => {
-                          loadingOverlay.show()
-                        })
-                      )
-                      yield* _(
-                        leaveClub(clubUuid).pipe(
-                          Effect.ensuring(
-                            Effect.sync(() => {
-                              loadingOverlay.hide()
-                            })
-                          )
+                      yield* Effect.sync(() => {
+                        loadingOverlay.show()
+                      })
+                      yield* leaveClub(clubUuid).pipe(
+                        Effect.ensuring(
+                          Effect.sync(() => {
+                            loadingOverlay.hide()
+                          })
                         )
                       )
-                      yield* _(
-                        Effect.sync(() => {
-                          navigation.goBack()
-                        })
-                      )
+                      yield* Effect.sync(() => {
+                        navigation.goBack()
+                      })
                     }).pipe(
-                      Effect.catchAll((e) =>
+                      Effect.catch((e) =>
                         Effect.sync(() => {
                           loadingOverlay.hide()
                           showErrorAlert({

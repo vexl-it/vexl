@@ -3,7 +3,7 @@ import {
   VexlNotificationTokenSecret,
 } from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
-import {Option, Schema} from 'effect/index'
+import {Option, Schema} from 'effect'
 
 export const createTemporaryVexlNotificationTokenSecret = (
   expoToken: ExpoNotificationToken

@@ -23,18 +23,17 @@ export interface VexlProductNotificationsDbOperations {
   ) => Effect.Effect<readonly VexlProductNotification[], UnexpectedServerError>
 }
 
-export class VexlProductNotificationsDbService extends Context.Tag(
-  'VexlProductNotificationsDbService'
-)<VexlProductNotificationsDbService, VexlProductNotificationsDbOperations>() {
+export class VexlProductNotificationsDbService extends Context.Service<
+  VexlProductNotificationsDbService,
+  VexlProductNotificationsDbOperations
+>()('VexlProductNotificationsDbService') {
   static readonly Live = Layer.effect(
     VexlProductNotificationsDbService,
-    Effect.gen(function* (_) {
-      const insertVexlProductNotification = yield* _(
-        createInsertVexlProductNotification
-      )
-      const queryVexlProductNotifications = yield* _(
-        createQueryVexlProductNotifications
-      )
+    Effect.gen(function* () {
+      const insertVexlProductNotification =
+        yield* createInsertVexlProductNotification
+      const queryVexlProductNotifications =
+        yield* createQueryVexlProductNotifications
 
       return {
         insertVexlProductNotification,

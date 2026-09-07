@@ -5,7 +5,7 @@ import {
   type UnableToVerifySmsCodeError,
   type VerificationNotFoundError,
 } from '@vexl-next/rest-api/src/services/user/contracts'
-import {Effect, type ConfigError} from 'effect/index'
+import {Effect, type Config} from 'effect'
 import {PreludeService} from './prelude'
 import {type SmsVerificationSid} from './SmsVerificationSid.brand'
 
@@ -14,7 +14,7 @@ export const createVerification = (
   requestHeaders: CommonHeaders
 ): Effect.Effect<
   SmsVerificationSid,
-  UnableToSendVerificationSmsError | ConfigError.ConfigError,
+  UnableToSendVerificationSmsError | Config.ConfigError,
   PreludeService
 > =>
   PreludeService.pipe(
@@ -28,9 +28,7 @@ export const checkVerification = (args: {
   code: string
 }): Effect.Effect<
   'valid',
-  | UnableToVerifySmsCodeError
-  | VerificationNotFoundError
-  | ConfigError.ConfigError,
+  UnableToVerifySmsCodeError | VerificationNotFoundError | Config.ConfigError,
   PreludeService
 > =>
   PreludeService.pipe(

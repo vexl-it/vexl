@@ -19,8 +19,6 @@
   },
   "dependencies": {
     "@bam.tech/react-native-image-resizer": "^3.0.5",
-    "@effect/platform": "^0.93.6",
-    "@effect/rpc": "^0.72.2",
     "@likashefqet/react-native-image-zoom": "^4.3.0",
     "@maplibre/maplibre-react-native": "11.3.6",
     "@react-native-async-storage/async-storage": "2.2.0",
@@ -52,7 +50,7 @@
     "bunshi": "^2.1.5",
     "crypto-browserify": "^3.12.1",
     "dayjs": "^1.11.11",
-    "effect": "^3.20.0",
+    "effect": "4.0.0-rc.112",
     "entities": "~2.0.0",
     "expo": "~57.0.15",
     "expo-application": "~57.0.2",

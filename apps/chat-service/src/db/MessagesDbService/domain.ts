@@ -6,7 +6,7 @@ import {Schema} from 'effect'
 import {InboxRecordId} from '../InboxDbService/domain'
 import {PublicKeyEncrypted} from '../domain'
 
-export const MessageRecordId = Schema.BigInt.pipe(
+export const MessageRecordId = Schema.BigIntFromString.pipe(
   Schema.brand('MessageRecordId')
 )
 export type MessageRecordId = Schema.Schema.Type<typeof MessageRecordId>
@@ -19,7 +19,7 @@ export class MessageRecord extends Schema.Class<MessageRecord>('MessageRecord')(
     pulled: Schema.Boolean,
     type: MessageType, // TODO brand
     inboxId: InboxRecordId,
-    expiresAt: Schema.DateFromSelf,
-    receivedByServerAt: Schema.DateFromSelf,
+    expiresAt: Schema.Date,
+    receivedByServerAt: Schema.Date,
   }
 ) {}

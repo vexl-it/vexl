@@ -11,7 +11,7 @@ import {
   type SymmetricKey,
 } from '@vexl-next/domain/src/general/offers'
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
-import {Effect} from 'effect'
+import {Effect, pipe} from 'effect'
 import decryptOffer, {
   type DecryptingOfferError,
   type NonCompatibleOfferVersionError,
@@ -22,7 +22,7 @@ import encryptOfferPublicPayload, {
 } from './utils/encryptOfferPublicPayload'
 import {type PrivatePartEncryptionError} from './utils/encryptPrivatePart'
 
-export type ApiErrorUpdatingOffer = Effect.Effect.Error<
+export type ApiErrorUpdatingOffer = Effect.Error<
   ReturnType<OfferApi['updateOffer']>
 >
 export default function updateOffer({
@@ -48,31 +48,27 @@ export default function updateOffer({
   | ApiErrorUpdatingOffer
   | PublicPartEncryptionError
   | PrivatePartEncryptionError
-  | Effect.Effect.Error<ReturnType<OfferApi['createPrivatePart']>>
+  | Effect.Error<ReturnType<OfferApi['createPrivatePart']>>
   | DecryptingOfferError
   | NonCompatibleOfferVersionError
 > {
-  return Effect.gen(function* (_) {
-    const encryptedPayload = yield* _(
-      encryptOfferPublicPayload({
-        offerPublicPart: publicPayload,
-        symmetricKey,
-      })
-    )
+  return Effect.gen(function* () {
+    const encryptedPayload = yield* encryptOfferPublicPayload({
+      offerPublicPart: publicPayload,
+      symmetricKey,
+    })
 
-    yield* _(
-      updateOwnerPrivatePayload({
-        api: offerApi,
-        ownerCredentials: ownerKeypair,
-        ownerKeyPairV2,
-        symmetricKey,
-        adminId,
-        intendedConnectionLevel,
-        intendedClubs,
-      })
-    )
+    yield* updateOwnerPrivatePayload({
+      api: offerApi,
+      ownerCredentials: ownerKeypair,
+      ownerKeyPairV2,
+      symmetricKey,
+      adminId,
+      intendedConnectionLevel,
+      intendedClubs,
+    })
 
-    const updatedOffer = yield* _(
+    const updatedOffer = yield* pipe(
       offerApi.updateOffer({
         adminId,
         payloadPublic: encryptedPayload,

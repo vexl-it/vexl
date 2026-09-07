@@ -1,13 +1,14 @@
-import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
+import {NumberFromString} from '@vexl-next/generic-utils/src/effect-helpers/NumberFromString'
 import {PlatformName} from '@vexl-next/rest-api'
 import {Effect, flow, Schema} from 'effect'
+import {SqlSchema} from 'effect/unstable/sql'
 import {NotificationTokens} from '../../UserDbService/domain'
 
 const FindNotificationTokensByFiltersArgs = Schema.Struct({
-  versionFromIncluded: Schema.NullOr(Schema.NumberFromString),
-  versionToIncluded: Schema.NullOr(Schema.NumberFromString),
+  versionFromIncluded: Schema.NullOr(NumberFromString),
+  versionToIncluded: Schema.NullOr(NumberFromString),
   platform: Schema.Array(PlatformName),
 })
 export type FindNotificationTokensByFiltersArgs =
@@ -17,8 +18,8 @@ const FindNotificationTokensByFiltersResult = NotificationTokens
 export type FindNotificationTokensByFiltersResult =
   typeof FindNotificationTokensByFiltersResult.Type
 
-export const createFindNotificationTokensByFilter = Effect.gen(function* (_) {
-  const sql = yield* _(PgClient.PgClient)
+export const createFindNotificationTokensByFilter = Effect.gen(function* () {
+  const sql = yield* PgClient.PgClient
 
   const query = SqlSchema.findAll({
     Request: FindNotificationTokensByFiltersArgs,

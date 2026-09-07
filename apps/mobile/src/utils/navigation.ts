@@ -1,6 +1,6 @@
 import {createNavigationContainerRef} from '@react-navigation/native'
 import {ChatId} from '@vexl-next/domain/src/general/messaging'
-import {Option, Schema} from 'effect/index'
+import {Option, Schema} from 'effect'
 import {deepEqual} from 'fast-equals'
 import {pipe} from 'fp-ts/function'
 import {AppState} from 'react-native'
@@ -93,7 +93,7 @@ export function getChatIdOfChatOnCurrentScreenIfAny(
 ): Option.Option<ChatId> {
   return pipe(
     getActiveRoute(state).params?.chatId,
-    Option.fromNullable,
+    Option.fromNullishOr,
     Schema.decodeUnknownOption(ChatId)
   )
 }

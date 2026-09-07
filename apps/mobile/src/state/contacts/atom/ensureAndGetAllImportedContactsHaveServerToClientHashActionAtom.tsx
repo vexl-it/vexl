@@ -1,13 +1,13 @@
 import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {type ServerToClientHashedNumber} from '@vexl-next/domain/src/general/ServerToClientHashedNumber'
-import {Array, Effect, HashMap, Option, pipe} from 'effect/index'
+import {Array, Effect, Filter, HashMap, Option, pipe} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
 import {importedContactsAtom, storedContactsAtom} from './contactsStore'
 
 export const ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom =
   atom(null, (get, set) =>
-    Effect.gen(function* (_) {
+    Effect.gen(function* () {
       console.log(
         'ensureAllImportedContactsHaveServerToClientHashActionAtom',
         'Checking imported contacts for missing serverToClientHash'
@@ -20,7 +20,7 @@ export const ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom =
         )
       )
 
-      if (Array.isNonEmptyArray(importedContactsWithoutServerToClientHash)) {
+      if (Array.isArrayNonEmpty(importedContactsWithoutServerToClientHash)) {
         console.log(
           'ensureAllImportedContactsHaveServerToClientHashActionAtom',
           'Found contacts to update:',
@@ -32,7 +32,7 @@ export const ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom =
           'ensureAllImportedContactsHaveServerToClientHashActionAtom',
           'Fetching serverToClientHashes for contacts'
         )
-        const fetchedContactsHashMap = yield* _(
+        const fetchedContactsHashMap = yield* pipe(
           Array.map(
             importedContactsWithoutServerToClientHash,
             (c) => c.computedValues.hash
@@ -53,7 +53,7 @@ export const ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom =
                 )
               )
           ),
-          Effect.allWith({concurrency: 'unbounded'}),
+          (effects) => Effect.all(effects, {concurrency: 'unbounded'}),
           Effect.map(Array.flatten),
           Effect.map(
             HashMap.fromIterable<HashedPhoneNumber, ServerToClientHashedNumber>
@@ -93,11 +93,13 @@ export const ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom =
 
       return pipe(
         get(importedContactsAtom),
-        Array.filterMap((contact) =>
-          contact.serverHashToClient.pipe(
-            Option.map(
-              (serverHashToClient) =>
-                [serverHashToClient, contact.computedValues.hash] as const
+        Array.filterMap(
+          Filter.fromPredicateOption((contact) =>
+            contact.serverHashToClient.pipe(
+              Option.map(
+                (serverHashToClient) =>
+                  [serverHashToClient, contact.computedValues.hash] as const
+              )
             )
           )
         ),

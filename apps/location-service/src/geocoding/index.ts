@@ -75,17 +75,17 @@ const suggestionUserData = (
   viewport: buildViewport(record.latitude, record.longitude, record.placeType),
 })
 
-export class GeocodingService extends Context.Tag('GeocodingService')<
+export class GeocodingService extends Context.Service<
   GeocodingService,
   GeocodingOperations
->() {
+>()('GeocodingService') {
   static readonly Live = Layer.effect(
     GeocodingService,
-    Effect.gen(function* (_) {
-      const geocodingDb = yield* _(GeocodingDbService)
+    Effect.gen(function* () {
+      const geocodingDb = yield* GeocodingDbService
 
       const querySuggest: GeocodingOperations['querySuggest'] = (request) =>
-        Effect.gen(function* (_) {
+        Effect.gen(function* () {
           const lang = pickLang(request.lang)
           const simPhrase = normalizeName(request.phrase)
           if (simPhrase.length === 0)
@@ -95,47 +95,41 @@ export class GeocodingService extends Context.Tag('GeocodingService')<
           // Cascade from cheapest to most expensive: important-places prefix
           // match, full prefix match, and only then typo-tolerant trigram
           // matching (bounded to important places by a partial index).
-          const importantMatches = yield* _(
-            geocodingDb.suggestPlaces({
-              normPhrase,
-              simPhrase,
-              minImportance: IMPORTANT_ONLY_THRESHOLD,
-              usePrefix: true,
-              useTrigram: false,
-              limit: SUGGEST_LIMIT,
-            })
-          )
+          const importantMatches = yield* geocodingDb.suggestPlaces({
+            normPhrase,
+            simPhrase,
+            minImportance: IMPORTANT_ONLY_THRESHOLD,
+            usePrefix: true,
+            useTrigram: false,
+            limit: SUGGEST_LIMIT,
+          })
 
           const prefixMatches =
             importantMatches.length >= SUGGEST_LIMIT || simPhrase.length < 3
               ? importantMatches
-              : yield* _(
-                  geocodingDb.suggestPlaces({
-                    normPhrase,
-                    simPhrase,
-                    minImportance: 0,
-                    usePrefix: true,
-                    useTrigram: false,
-                    limit: SUGGEST_LIMIT,
-                  })
-                )
+              : yield* geocodingDb.suggestPlaces({
+                  normPhrase,
+                  simPhrase,
+                  minImportance: 0,
+                  usePrefix: true,
+                  useTrigram: false,
+                  limit: SUGGEST_LIMIT,
+                })
 
           const matches =
             prefixMatches.length > 0 || simPhrase.length < 4
               ? prefixMatches
-              : yield* _(
-                  geocodingDb.suggestPlaces({
-                    normPhrase,
-                    simPhrase,
-                    minImportance: 0,
-                    usePrefix: false,
-                    useTrigram: true,
-                    limit: SUGGEST_LIMIT,
-                  })
-                )
+              : yield* geocodingDb.suggestPlaces({
+                  normPhrase,
+                  simPhrase,
+                  minImportance: 0,
+                  usePrefix: false,
+                  useTrigram: true,
+                  limit: SUGGEST_LIMIT,
+                })
 
-          return yield* _(
-            Schema.decodeUnknown(GetLocationSuggestionsResponse)({
+          return yield* pipe(
+            Schema.decodeUnknownEffect(GetLocationSuggestionsResponse)({
               result: pipe(
                 matches,
                 Array.map((one) => ({userData: suggestionUserData(one, lang)})),
@@ -156,25 +150,21 @@ export class GeocodingService extends Context.Tag('GeocodingService')<
         }).pipe(Effect.withSpan('querySuggest'))
 
       const queryGeocode: GeocodingOperations['queryGeocode'] = (request) =>
-        Effect.gen(function* (_) {
+        Effect.gen(function* () {
           const lang = pickLang(request.lang)
 
-          const nearest = yield* _(
-            geocodingDb.nearestPlace({
-              latitude: request.latitude,
-              longitude: request.longitude,
-              maxDistanceMeters: GEOCODE_MAX_DISTANCE_METERS,
-            })
-          )
+          const nearest = yield* geocodingDb.nearestPlace({
+            latitude: request.latitude,
+            longitude: request.longitude,
+            maxDistanceMeters: GEOCODE_MAX_DISTANCE_METERS,
+          })
 
           if (Option.isNone(nearest))
-            return yield* _(
-              Effect.fail(new LocationNotFoundError({status: 404}))
-            )
+            return yield* Effect.fail(new LocationNotFoundError({status: 404}))
           const place = nearest.value
 
-          return yield* _(
-            Schema.decodeUnknown(GetGeocodedCoordinatesResponse)({
+          return yield* pipe(
+            Schema.decodeUnknownEffect(GetGeocodedCoordinatesResponse)({
               // placeId carries the pin coordinates so two different pins in
               // the same settlement stay distinct entries on the client.
               placeId: `osm:${place.id}@${request.latitude.toFixed(4)},${request.longitude.toFixed(4)}`,

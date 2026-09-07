@@ -59,17 +59,18 @@ export interface OfflineNotificationBufferOperations {
   ) => Effect.Effect<void, RedisError>
 }
 
-export class OfflineNotificationBuffer extends Context.Tag(
-  'OfflineNotificationBuffer'
-)<OfflineNotificationBuffer, OfflineNotificationBufferOperations>() {
+export class OfflineNotificationBuffer extends Context.Service<
+  OfflineNotificationBuffer,
+  OfflineNotificationBufferOperations
+>()('OfflineNotificationBuffer') {
   static readonly Live = Layer.effect(
     OfflineNotificationBuffer,
-    Effect.gen(function* (_) {
-      const redis = yield* _(RedisService)
-      const notificationTokensDb = yield* _(NotificationTokensDb)
+    Effect.gen(function* () {
+      const redis = yield* RedisService
+      const notificationTokensDb = yield* NotificationTokensDb
 
-      const ttlHours = yield* _(notificationOfflineBufferTtlHoursConfig)
-      const maxCount = yield* _(notificationOfflineBufferMaxCountConfig)
+      const ttlHours = yield* notificationOfflineBufferTtlHoursConfig
+      const maxCount = yield* notificationOfflineBufferMaxCountConfig
       const bufferingEnabled = ttlHours !== -1
       const ttlMs = ttlHours * 60 * 60 * 1000
 
@@ -91,19 +92,19 @@ export class OfflineNotificationBuffer extends Context.Tag(
       ): Effect.Effect<void, RedisError> => {
         const key = createRedisKey(task.notificationToken)
         return addToSortedSet(key, task, task.sentAt).pipe(
-          Effect.zipRight(redis.trimSortedSetToNewest(key, maxCount)),
-          Effect.zipRight(
+          Effect.andThen(redis.trimSortedSetToNewest(key, maxCount)),
+          Effect.andThen(
             redis.setExpiresAt(key, unixMillisecondsFromNow(ttlMs))
           ),
-          Effect.zipRight(
+          Effect.andThen(
             setTrackingSecret(
               createTrackingKey(task.trackingId),
               task.notificationToken,
               {expiresAt: unixMillisecondsFromNow(ttlMs)}
             )
           ),
-          Effect.catchTag('NoSuchElementException', () => Effect.void),
-          Effect.catchTag('ParseError', (e) =>
+          Effect.catchTag('NoSuchElementError', () => Effect.void),
+          Effect.catchTag('SchemaError', (e) =>
             Effect.fail(new RedisError({cause: e}))
           )
         )
@@ -127,7 +128,7 @@ export class OfflineNotificationBuffer extends Context.Tag(
                   ),
                   // Do not log the error itself - it may contain the
                   // notification secret (redis key / task payload).
-                  Effect.catchAll((e) =>
+                  Effect.catch((e) =>
                     Effect.logError(
                       'Failed to buffer undelivered notification',
                       {errorTag: e._tag, taskType: task._tag}
@@ -144,16 +145,16 @@ export class OfflineNotificationBuffer extends Context.Tag(
                   Array.filter((task) => task.trackingId === trackingId)
                 ),
                 Effect.flatMap((tasks) =>
-                  Array.isNonEmptyReadonlyArray(tasks)
+                  Array.isReadonlyArrayNonEmpty(tasks)
                     ? removeFromSortedSet(key, Array.copy(tasks))
                     : Effect.void
                 ),
-                Effect.zipRight(redis.delete(createTrackingKey(trackingId)))
+                Effect.andThen(redis.delete(createTrackingKey(trackingId)))
               )
             }),
             // No tracking record means nothing was buffered for this id
-            Effect.catchTag('NoSuchElementException', () => Effect.void),
-            Effect.catchAll((e) =>
+            Effect.catchTag('NoSuchElementError', () => Effect.void),
+            Effect.catch((e) =>
               Effect.logWarning(
                 'Failed to remove processed notification from offline buffer',
                 {errorTag: e._tag}
@@ -163,7 +164,7 @@ export class OfflineNotificationBuffer extends Context.Tag(
 
         getAndClearBufferedTasks: (secret) =>
           getAndDropSortedSet(createRedisKey(secret), 'asc').pipe(
-            Effect.catchTag('ParseError', (e) =>
+            Effect.catchTag('SchemaError', (e) =>
               Effect.fail(new RedisError({cause: e}))
             )
           ),

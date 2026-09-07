@@ -4,7 +4,7 @@ import {
   POSITIVE_STAR_RATING_THRESHOLD,
 } from '@vexl-next/domain/src/general/feedback'
 import {XStack} from '@vexl-next/ui'
-import {useMolecule} from 'bunshi/dist/react'
+import {useMolecule} from 'bunshi/react'
 import {Array, pipe} from 'effect'
 import {useAtomValue} from 'jotai'
 import React from 'react'

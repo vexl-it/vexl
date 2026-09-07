@@ -1,4 +1,4 @@
-import {useMolecule} from 'bunshi/dist/react'
+import {useMolecule} from 'bunshi/react'
 import {useSetAtom} from 'jotai'
 import React, {useCallback} from 'react'
 import {type ICountry} from 'react-native-country-select'

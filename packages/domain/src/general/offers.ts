@@ -1,7 +1,9 @@
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {getCrypto} from '@vexl-next/cryptography/src/getCrypto'
+import {NumberFromString} from '@vexl-next/generic-utils/src/effect-helpers/NumberFromString'
 import {orElseSchema} from '@vexl-next/generic-utils/src/effect-helpers/orElseSchema'
-import {Array, Either, Schema} from 'effect'
+import {withDecodingFallback} from '@vexl-next/generic-utils/src/effect-helpers/withDecodingFallback'
+import {Effect, Schema, SchemaTransformation} from 'effect'
 import {IdNumeric} from '../utility/IdNumeric'
 import {IsoDatetimeString} from '../utility/IsoDatetimeString.brand'
 import {JSDateString} from '../utility/JSDateString.brand'
@@ -13,15 +15,15 @@ import {CurrencyCode} from './currency.brand'
 import {NotificationCypher} from './notifications/NotificationCypher.brand'
 import {VexlNotificationToken} from './notifications/VexlNotificationToken'
 
-export const Sort = Schema.Literal(
+export const Sort = Schema.Literals([
   'LOWEST_FEE_FIRST',
   'HIGHEST_FEE',
   'NEWEST_OFFER',
   'OLDEST_OFFER',
   'LOWEST_AMOUNT',
   'HIGHEST_AMOUNT',
-  'MOST_CONNECTIONS'
-)
+  'MOST_CONNECTIONS',
+])
 export type Sort = typeof Sort.Type
 
 export const OfferId = Schema.String.pipe(Schema.brand('OfferId'))
@@ -37,31 +39,31 @@ export function generateAdminId(): OfferAdminId {
   return Schema.decodeSync(OfferAdminId)(getCrypto().randomUUID())
 }
 
-export const LocationState = Schema.Literal('ONLINE', 'IN_PERSON')
+export const LocationState = Schema.Literals(['ONLINE', 'IN_PERSON'])
 export type LocationState = typeof LocationState.Type
 
-export const PaymentMethod = Schema.Literal('CASH', 'REVOLUT', 'BANK')
+export const PaymentMethod = Schema.Literals(['CASH', 'REVOLUT', 'BANK'])
 export type PaymentMethod = typeof PaymentMethod.Type
 
-export const FeeState = Schema.Literal('WITHOUT_FEE', 'WITH_FEE')
+export const FeeState = Schema.Literals(['WITHOUT_FEE', 'WITH_FEE'])
 export type FeeState = typeof FeeState.Type
 
-export const BtcNetwork = Schema.Literal('LIGHTING', 'ON_CHAIN')
+export const BtcNetwork = Schema.Literals(['LIGHTING', 'ON_CHAIN'])
 export type BtcNetwork = typeof BtcNetwork.Type
 
-export const OfferType = Schema.Literal('BUY', 'SELL')
+export const OfferType = Schema.Literals(['BUY', 'SELL'])
 export type OfferType = typeof OfferType.Type
 
-export const ListingType = Schema.Literal('BITCOIN', 'PRODUCT', 'OTHER')
+export const ListingType = Schema.Literals(['BITCOIN', 'PRODUCT', 'OTHER'])
 export type ListingType = typeof ListingType.Type
 
-export const ProductCategory = Schema.Literal(
+export const ProductCategory = Schema.Literals([
   'PRECIOUS_METALS',
   'PRODUCE',
   'ELECTRONICS',
   'ASSETS',
-  'OTHERS'
-)
+  'OTHERS',
+])
 export type ProductCategory = typeof ProductCategory.Type
 
 export const productCategoryOptions: ProductCategory[] = [
@@ -72,10 +74,10 @@ export const productCategoryOptions: ProductCategory[] = [
   'OTHERS',
 ]
 
-export const DeliveryMethod = Schema.Literal('PICKUP', 'DELIVERY')
+export const DeliveryMethod = Schema.Literals(['PICKUP', 'DELIVERY'])
 export type DeliveryMethod = typeof DeliveryMethod.Type
 
-export const SpokenLanguage = Schema.Literal(
+export const SpokenLanguage = Schema.Literals([
   'ENG',
   'DEU',
   'CZE',
@@ -85,23 +87,23 @@ export const SpokenLanguage = Schema.Literal(
   'ITA',
   'ESP',
   'BG',
-  'FAS' // Persian
-).pipe(orElseSchema('ENG' as const))
+  'FAS',
+]).pipe(orElseSchema('ENG' as const))
 export type SpokenLanguage = typeof SpokenLanguage.Type
 
-export const FriendLevel = Schema.Literal(
+export const FriendLevel = Schema.Literals([
   'FIRST_DEGREE',
   'SECOND_DEGREE',
   'CLUB',
-  'NOT_SPECIFIED' // TODO remove this but make sure to not break parsing in newer versions
-)
+  'NOT_SPECIFIED',
+])
 export type FriendLevel = typeof FriendLevel.Type
 
-export const ActivePriceState = Schema.Literal(
+export const ActivePriceState = Schema.Literals([
   'NONE',
   'PRICE_IS_BELOW',
-  'PRICE_IS_ABOVE'
-)
+  'PRICE_IS_ABOVE',
+])
 export type ActivePriceState = typeof ActivePriceState.Type
 
 export const LocationPlaceId = Schema.String.pipe(
@@ -119,47 +121,52 @@ export const OfferLocation = Schema.Struct({
 })
 export type OfferLocation = typeof OfferLocation.Type
 
-export const LocationStateToArray = Schema.transform(
-  Schema.Union(LocationState, Schema.Array(LocationState)),
+export const LocationStateToArray = Schema.Union([
+  LocationState,
   Schema.Array(LocationState),
-  {
-    strict: false,
-    encode: (v) => v,
-    decode: (oldValue) => {
-      if (Array.isArray(oldValue)) {
-        return oldValue
-      }
-      return [oldValue]
-    },
-  }
+]).pipe(
+  Schema.decodeTo(
+    Schema.Array(LocationState),
+    SchemaTransformation.transform<
+      readonly LocationState[],
+      LocationState | readonly LocationState[]
+    >({
+      encode: (v) => v,
+      decode: (oldValue) => {
+        return typeof oldValue === 'string' ? [oldValue] : oldValue
+      },
+    })
+  )
 )
 export type LocationStateToArray = typeof LocationStateToArray.Type
 
 export const SymmetricKey = Schema.String.pipe(Schema.brand('SymmetricKey'))
 export type SymmetricKey = typeof SymmetricKey.Type
 
-export const IntendedConnectionLevel = Schema.Literal('FIRST', 'ALL')
+export const IntendedConnectionLevel = Schema.Literals(['FIRST', 'ALL'])
 export type IntendedConnectionLevel = typeof IntendedConnectionLevel.Type
 
 export const GoldenAvatarType = Schema.Literal('BACKGROUND_AND_GLASSES')
 export type GoldenAvatarType = typeof GoldenAvatarType.Type
 
-export const PrivatePartRecordId = Schema.NumberFromString.pipe(
+export const PrivatePartRecordId = NumberFromString.pipe(
   Schema.brand('PrivatePartRecordId'),
-  Schema.greaterThanOrEqualTo(0)
+  Schema.check(Schema.isGreaterThanOrEqualTo(0))
 )
 export type PrivatePartRecordId = typeof PrivatePartRecordId.Type
 
 export const OfferPrivatePart = Schema.Struct({
   commonFriends: Schema.Array(HashedPhoneNumber),
-  verifiedCommonFriends: Schema.optionalWith(Schema.Array(HashedPhoneNumber), {
-    default: () => [],
-  }),
+  verifiedCommonFriends: Schema.Array(HashedPhoneNumber).pipe(
+    Schema.withDecodingDefaultType(Effect.sync(() => [])),
+    Schema.withConstructorDefault(Effect.sync(() => []))
+  ),
   friendLevel: Schema.Array(FriendLevel),
   symmetricKey: SymmetricKey,
-  clubIds: Schema.optionalWith(Schema.Array(ClubUuid), {
-    default: () => [],
-  }),
+  clubIds: Schema.Array(ClubUuid).pipe(
+    Schema.withDecodingDefaultType(Effect.sync(() => [])),
+    Schema.withConstructorDefault(Effect.sync(() => []))
+  ),
   // For admin only
   adminId: Schema.optional(OfferAdminId),
   intendedConnectionLevel: Schema.optional(IntendedConnectionLevel),
@@ -167,21 +174,17 @@ export const OfferPrivatePart = Schema.Struct({
 })
 export type OfferPrivatePart = typeof OfferPrivatePart.Type
 
-const CoalesecedNumber = Schema.Union(Schema.Number, Schema.NumberFromString)
+const CoalesecedNumber = Schema.Union([Schema.Number, NumberFromString])
 
 export const OfferPublicPart = Schema.Struct({
   offerPublicKey: PublicKeyPemBase64,
-  location: Schema.Array(OfferLocation).pipe(
-    Schema.annotations({decodingFallback: () => Either.right([])})
-  ),
+  location: withDecodingFallback(Schema.Array(OfferLocation), () => []),
   offerDescription: Schema.String,
   amountBottomLimit: CoalesecedNumber,
   amountTopLimit: CoalesecedNumber,
   feeState: FeeState,
   feeAmount: CoalesecedNumber,
-  locationState: LocationStateToArray.pipe(
-    Schema.annotations({decodingFallback: () => Either.right([])})
-  ),
+  locationState: withDecodingFallback(LocationStateToArray, () => []),
   paymentMethod: Schema.Array(PaymentMethod),
   btcNetwork: Schema.Array(BtcNetwork),
   currency: CurrencyCode,
@@ -201,7 +204,7 @@ export const OfferPublicPart = Schema.Struct({
   // Accepts both NotificationCypher (legacy encrypted) and VexlNotificationToken (new system)
   // For backwards compatibility, vexlNotificationToken is also stored here
   fcmCypher: Schema.optional(
-    Schema.Union(NotificationCypher, VexlNotificationToken)
+    Schema.Union([NotificationCypher, VexlNotificationToken])
   ),
   // New dedicated field for vexl notification token
   vexlNotificationToken: Schema.optional(VexlNotificationToken),
@@ -234,10 +237,10 @@ export const OfferInfo = Schema.Struct({
 })
 export type OfferInfo = typeof OfferInfo.Type
 
-export const ConnectionLevel = Schema.Literal('FIRST', 'SECOND', 'ALL')
+export const ConnectionLevel = Schema.Literals(['FIRST', 'SECOND', 'ALL'])
 export type ConnectionLevel = typeof ConnectionLevel.Type
 
-export const OfferMarkType = Schema.Literal('FAVOURITE', 'ARCHIVED')
+export const OfferMarkType = Schema.Literals(['FAVOURITE', 'ARCHIVED'])
 export type OfferMarkType = typeof OfferMarkType.Type
 
 export const OfferMark = Schema.Struct({
@@ -247,7 +250,10 @@ export const OfferMark = Schema.Struct({
 export type OfferMark = typeof OfferMark.Type
 
 export const OfferFlags = Schema.Struct({
-  reported: Schema.optionalWith(Schema.Boolean, {default: () => false}),
+  reported: Schema.Boolean.pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): false => false)),
+    Schema.withConstructorDefault(Effect.sync((): false => false))
+  ),
   mark: Schema.optional(OfferMark),
 })
 export type OfferFlags = typeof OfferFlags.Type
@@ -256,21 +262,25 @@ export const PRIVATE_PAYLOAD_ENCRYPTED_V1_PREFIX = '0'
 export const PRIVATE_PAYLOAD_ENCRYPTED_V2_PREFIX = '1'
 
 export const PrivatePayloadEncryptedV1 = Schema.String.pipe(
-  Schema.filter((s) => s.startsWith(PRIVATE_PAYLOAD_ENCRYPTED_V1_PREFIX)),
+  Schema.check(
+    Schema.makeFilter((s) => s.startsWith(PRIVATE_PAYLOAD_ENCRYPTED_V1_PREFIX))
+  ),
   Schema.brand('PrivatePayloadEncryptedV1')
 )
 export type PrivatePayloadEncryptedV1 = typeof PrivatePayloadEncryptedV1.Type
 
 export const PrivatePayloadEncryptedV2 = Schema.String.pipe(
-  Schema.filter((s) => s.startsWith(PRIVATE_PAYLOAD_ENCRYPTED_V2_PREFIX)),
+  Schema.check(
+    Schema.makeFilter((s) => s.startsWith(PRIVATE_PAYLOAD_ENCRYPTED_V2_PREFIX))
+  ),
   Schema.brand('PrivatePayloadEncryptedV2')
 )
 export type PrivatePayloadEncryptedV2 = typeof PrivatePayloadEncryptedV2.Type
 
-export const PrivatePayloadEncrypted = Schema.Union(
+export const PrivatePayloadEncrypted = Schema.Union([
   PrivatePayloadEncryptedV1,
-  PrivatePayloadEncryptedV2
-)
+  PrivatePayloadEncryptedV2,
+])
 export type PrivatePayloadEncrypted = typeof PrivatePayloadEncrypted.Type
 
 export const PublicPayloadEncrypted = Schema.String.pipe(
@@ -281,9 +291,10 @@ export type PublicPayloadEncrypted = typeof PublicPayloadEncrypted.Type
 export const OwnershipInfo = Schema.Struct({
   adminId: OfferAdminId,
   intendedConnectionLevel: IntendedConnectionLevel,
-  intendedClubs: Schema.optionalWith(Schema.Array(ClubUuid), {
-    default: () => [],
-  }),
+  intendedClubs: Schema.Array(ClubUuid).pipe(
+    Schema.withDecodingDefaultType(Effect.sync(() => [])),
+    Schema.withConstructorDefault(Effect.sync(() => []))
+  ),
 })
 export type OwnershipInfo = typeof OwnershipInfo.Type
 

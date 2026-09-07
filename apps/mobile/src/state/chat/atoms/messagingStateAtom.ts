@@ -1,5 +1,6 @@
 import {VersionString} from '@vexl-next/domain/src/utility/VersionString.brand'
-import {Schema} from 'effect/index'
+import {optionalNullable} from '@vexl-next/generic-utils/src/effect-helpers/optionalNullable'
+import {Schema} from 'effect'
 import {focusAtom} from 'jotai-optics'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
 import {MessagingState} from '../domain'
@@ -9,7 +10,7 @@ export const messagingStateAtomStorageAtom = atomWithParsedMmkvStorage(
   {messagingState: [], lastDecodedSemver: undefined},
   Schema.Struct({
     messagingState: MessagingState.pipe(Schema.mutable),
-    lastDecodedSemver: Schema.optionalWith(VersionString, {nullable: true}),
+    lastDecodedSemver: optionalNullable(VersionString),
   })
 )
 

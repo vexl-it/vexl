@@ -1,5 +1,5 @@
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
-import {Array, Option, pipe} from 'effect'
+import {Array, Filter, Option, pipe} from 'effect'
 import type {
   StoredContact,
   StoredContactWithComputedValues,
@@ -21,16 +21,18 @@ export function findContactWithNumber(
 ): Option.Option<StoredContactWithComputedValues> {
   return pipe(
     contacts,
-    Array.filterMap((contact) =>
-      pipe(
-        contact.computedValues,
-        Option.filter(
-          (computedValues) => computedValues.normalizedNumber === number
-        ),
-        Option.map((computedValues) => ({
-          ...contact,
-          computedValues,
-        }))
+    Array.filterMap(
+      Filter.fromPredicateOption((contact) =>
+        pipe(
+          contact.computedValues,
+          Option.filter(
+            (computedValues) => computedValues.normalizedNumber === number
+          ),
+          Option.map((computedValues) => ({
+            ...contact,
+            computedValues,
+          }))
+        )
       )
     ),
     Array.head

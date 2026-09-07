@@ -1,5 +1,5 @@
 import {Queue} from 'bullmq'
-import {Context, Effect, Layer} from 'effect'
+import {Context, Effect, flow, Layer} from 'effect'
 import {metricsQueueNameConfig} from '../commonConfigs'
 import {RedisConnectionService} from '../RedisConnection'
 import {
@@ -14,42 +14,38 @@ export interface MetricsClientOperations {
   ) => Effect.Effect<void, ReportingMetricsError>
 }
 
-export class MetricsClientService extends Context.Tag('MetricsClientService')<
+export class MetricsClientService extends Context.Service<
   MetricsClientService,
   MetricsClientOperations
->() {
-  static readonly Live = Layer.scoped(
+>()('MetricsClientService') {
+  static readonly Live = Layer.effect(
     MetricsClientService,
-    Effect.gen(function* (_) {
-      const redisConnection = yield* _(RedisConnectionService)
-      const queueName = yield* _(metricsQueueNameConfig)
+    Effect.gen(function* () {
+      const redisConnection = yield* RedisConnectionService
+      const queueName = yield* metricsQueueNameConfig
 
-      const queue = yield* _(
-        Effect.try({
-          try: () =>
-            new Queue(queueName, {
-              defaultJobOptions: {
-                removeOnComplete: true,
-              },
-              connection: redisConnection,
-            }),
-          catch: (error) =>
-            new CreatingMetricsClientError({
-              message: 'Error creating queue',
-              cause: error,
-            }),
-        })
-      )
+      const queue = yield* Effect.try({
+        try: () =>
+          new Queue(queueName, {
+            defaultJobOptions: {
+              removeOnComplete: true,
+            },
+            connection: redisConnection,
+          }),
+        catch: (error) =>
+          new CreatingMetricsClientError({
+            message: 'Error creating queue',
+            cause: error,
+          }),
+      })
 
       const shutdownSilentlyEffect = Effect.promise(async () => {
         await queue.close()
       }).pipe(Effect.ignore)
-      yield* _(
-        Effect.addFinalizer(() =>
-          Effect.zip(
-            shutdownSilentlyEffect,
-            Effect.logInfo('Closing down client queue instance')
-          )
+      yield* Effect.addFinalizer(() =>
+        Effect.zip(
+          shutdownSilentlyEffect,
+          Effect.logInfo('Closing down client queue instance')
         )
       )
 
@@ -57,7 +53,7 @@ export class MetricsClientService extends Context.Tag('MetricsClientService')<
         message: MetricsMessage
       ): Effect.Effect<void, ReportingMetricsError> =>
         message.jobData.pipe(
-          Effect.catchAll(
+          Effect.catch(
             (error) =>
               new ReportingMetricsError({
                 cause: error,
@@ -74,17 +70,19 @@ export class MetricsClientService extends Context.Tag('MetricsClientService')<
                 }),
             })
           ),
-          Effect.tapBoth({
-            onFailure: (e) =>
+          flow(
+            Effect.tapError((e) =>
               Effect.logWarning('Error while reporting metric', {
                 error: e,
                 metricName: message.name,
-              }),
-            onSuccess: () =>
+              })
+            ),
+            Effect.tap(() =>
               Effect.logInfo('Reported metric successfully', {
                 metricName: message.name,
-              }),
-          }),
+              })
+            )
+          ),
           Effect.withSpan('reportMetric', {
             attributes: {metricName: message.name},
           })

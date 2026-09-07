@@ -37,9 +37,9 @@ export interface ResolvedBoundaries {
  * a borough inside a city resolves to the cadastral area.
  */
 const bySpecificity = Order.combineAll<BoundaryCandidate>([
-  Order.mapInput(Order.number, (one) => one.distanceDeg),
-  Order.mapInput(Order.number, (one) => one.areaMeters),
-  Order.mapInput(Order.bigint, (one) => one.id),
+  Order.mapInput(Order.Number, (one) => one.distanceDeg),
+  Order.mapInput(Order.Number, (one) => one.areaMeters),
+  Order.mapInput(Order.BigInt, (one) => one.id),
 ])
 
 const mostSpecificWithRole = (
@@ -61,12 +61,12 @@ const countryOfLargestCovering = (
     Array.filter((one) => one.distanceDeg === 0 && one.countryCode !== null),
     Array.sort(
       Order.mapInput(
-        Order.reverse(Order.number),
+        Order.flip(Order.Number),
         (one: BoundaryCandidate) => one.areaMeters
       )
     ),
     Array.head,
-    Option.flatMap((one) => Option.fromNullable(one.countryCode))
+    Option.flatMap((one) => Option.fromNullishOr(one.countryCode))
   )
 
 export const resolveBoundaryCandidates = (

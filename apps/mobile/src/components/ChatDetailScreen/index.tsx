@@ -1,5 +1,5 @@
 import {Button, Screen, Stack, Typography} from '@vexl-next/ui'
-import {ScopeProvider} from 'bunshi/dist/react'
+import {ScopeProvider} from 'bunshi/react'
 import {useAtomValue, useStore} from 'jotai'
 import React, {useCallback, useMemo} from 'react'
 import {type RootStackScreenProps} from '../../navigationTypes'

@@ -83,7 +83,7 @@ export const offersToSeeInMarketplaceAtom = atom((get) => {
 
       return (
         // Offers that has at least one visible common contact or are first degree
-        (Array.isNonEmptyReadonlyArray(visibleCommonFriends.commonFriends) ||
+        (Array.isReadonlyArrayNonEmpty(visibleCommonFriends.commonFriends) ||
           pipe(
             oneOffer.offerInfo.privatePart.friendLevel,
             Array.some((one) => one === 'FIRST_DEGREE')
@@ -103,7 +103,7 @@ export const offersToSeeInMarketplaceAtom = atom((get) => {
             oneOffer.offerInfo.publicPart.locationState,
             Array.some((one) => one === 'IN_PERSON')
           ) &&
-            Array.isNonEmptyReadonlyArray(
+            Array.isReadonlyArrayNonEmpty(
               oneOffer.offerInfo.publicPart.location
             )))
       )

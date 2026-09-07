@@ -207,16 +207,14 @@ function EventsScreen(): React.JSX.Element {
 
   const handleContactPress = useCallback(() => {
     void Effect.runPromise(
-      Effect.gen(function* (_) {
-        const confirmed = yield* _(
-          showDialog({
-            title: t('events.contactUs'),
-            subtitle: t('events.contactUsSubtitle'),
-            positiveButtonText: t('account.openMailApp'),
-            negativeButtonText: t('common.close'),
-            children: <MarketingEmailDialogContent />,
-          })
-        )
+      Effect.gen(function* () {
+        const confirmed = yield* showDialog({
+          title: t('events.contactUs'),
+          subtitle: t('events.contactUsSubtitle'),
+          positiveButtonText: t('account.openMailApp'),
+          negativeButtonText: t('common.close'),
+          children: <MarketingEmailDialogContent />,
+        })
 
         if (confirmed) {
           createEvent()
@@ -243,7 +241,7 @@ function EventsScreen(): React.JSX.Element {
       )
     )
 
-    const pastItems: readonly EventListItem[] = Array.isNonEmptyReadonlyArray(
+    const pastItems: readonly EventListItem[] = Array.isReadonlyArrayNonEmpty(
       pastEvents
     )
       ? pipe(

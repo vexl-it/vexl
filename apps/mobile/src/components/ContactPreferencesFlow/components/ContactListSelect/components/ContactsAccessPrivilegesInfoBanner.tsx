@@ -1,5 +1,5 @@
 import {Banner} from '@vexl-next/ui'
-import {useMolecule} from 'bunshi/dist/react'
+import {useMolecule} from 'bunshi/react'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {Linking, Platform} from 'react-native'
 import {Stack, type StackProps} from 'tamagui'

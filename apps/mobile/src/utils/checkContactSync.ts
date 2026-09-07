@@ -1,5 +1,5 @@
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
-import {Option, Schema} from 'effect/index'
+import {Option, Schema} from 'effect'
 import {getPermissionsAsync} from 'expo-contacts'
 import {getDefaultStore} from 'jotai'
 import {difference} from 'set-operations'

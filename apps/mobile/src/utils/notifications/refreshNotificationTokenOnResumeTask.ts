@@ -1,8 +1,8 @@
+import {Effect, pipe} from 'effect'
 import {apiAtom} from '../../api'
 import {storage} from '../mmkv/effectMmkv'
 import {reportErrorE} from '../reportError'
 
-import {Effect} from 'effect/index'
 import {
   InAppLoadingTaskError,
   registerInAppLoadingTask,
@@ -17,9 +17,9 @@ export const refreshNotificationTaskId = registerInAppLoadingTask({
     runOn: 'resume',
   },
   task: (store) =>
-    Effect.gen(function* (_) {
+    Effect.gen(function* () {
       const oldToken = storage._storage.getString(NOTIFICATION_TOKEN_CACHE_KEY)
-      const newToken = yield* _(getNotificationTokenE())
+      const newToken = yield* getNotificationTokenE()
       if (oldToken === newToken) {
         console.log('Notification token has not changed since the last refresh')
         return
@@ -28,7 +28,7 @@ export const refreshNotificationTaskId = registerInAppLoadingTask({
       if (newToken) storage._storage.set(NOTIFICATION_TOKEN_CACHE_KEY, newToken)
       else storage._storage.remove(NOTIFICATION_TOKEN_CACHE_KEY)
 
-      yield* _(
+      yield* pipe(
         store
           .get(apiAtom)
           .contact.updateNotificationToken({body: {expoToken: newToken}}),

@@ -1,9 +1,3 @@
-import {
-  HttpApiBuilder,
-  HttpApiSwagger,
-  HttpMiddleware,
-  HttpServer,
-} from '@effect/platform/index'
 import {OfferApiSpecification} from '@vexl-next/rest-api/src/services/offer/specification'
 import {healthServerLayer} from '@vexl-next/server-utils/src/HealthServer'
 import {NodeHttpServerLiveWithPortFromEnv} from '@vexl-next/server-utils/src/NodeHttpServerLiveWithPortFromEnv'
@@ -17,6 +11,8 @@ import {ServerSecurityMiddlewareLive} from '@vexl-next/server-utils/src/serverSe
 import {createChallenge} from '@vexl-next/server-utils/src/services/challenge/routes/createChalenge'
 import {createChallenges} from '@vexl-next/server-utils/src/services/challenge/routes/createChallenges'
 import {Layer} from 'effect'
+import {HttpRouter} from 'effect/unstable/http'
+import {HttpApiBuilder, HttpApiSwagger} from 'effect/unstable/httpapi'
 import {CleanupWorkersLayer} from './cleanupWorkers'
 import {cryptoConfig, healthServerPortConfig, redisUrl} from './configs'
 import {NoteDbService} from './db/NoteDbService'
@@ -97,7 +93,7 @@ const NotesApiGroupLive = HttpApiBuilder.group(
       .handle('reportNote', reportNote)
 )
 
-export const OfferApiLive = HttpApiBuilder.api(OfferApiSpecification).pipe(
+export const OfferApiLive = HttpApiBuilder.layer(OfferApiSpecification).pipe(
   Layer.provide(RootGroupLive),
   Layer.provide(ChallengeApiGroupLive),
   Layer.provide(NotesApiGroupLive),
@@ -105,12 +101,9 @@ export const OfferApiLive = HttpApiBuilder.api(OfferApiSpecification).pipe(
   Layer.provide(ServerSecurityMiddlewareLive)
 )
 
-export const ApiServerLive = HttpApiBuilder.serve(HttpMiddleware.logger).pipe(
-  Layer.provide(HttpApiSwagger.layer()),
-  Layer.provide(OfferApiLive),
-  HttpServer.withLogAddress,
-  Layer.provide(NodeHttpServerLiveWithPortFromEnv)
-)
+export const ApiServerLive = HttpRouter.serve(
+  Layer.mergeAll(OfferApiLive, HttpApiSwagger.layer(OfferApiSpecification))
+).pipe(Layer.provide(NodeHttpServerLiveWithPortFromEnv))
 
 export const HttpServerLive = Layer.empty.pipe(
   Layer.provideMerge(ApiServerLive),

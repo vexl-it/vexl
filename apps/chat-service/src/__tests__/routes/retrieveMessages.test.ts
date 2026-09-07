@@ -1,7 +1,6 @@
-import {Effect, Schema} from 'effect'
+import {Effect, pipe, Schema} from 'effect'
 import {runPromiseInMockedEnvironment} from '../utils/runPromiseInMockedEnvironment'
 
-import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {type MessageCypher} from '@vexl-next/domain/src/general/messaging'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
@@ -9,6 +8,7 @@ import {type SendMessageRequest} from '@vexl-next/rest-api/src/services/chat/con
 import {InboxDoesNotExistError} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
+import {SqlClient} from 'effect/unstable/sql'
 import {hashPublicKey} from '../../db/domain'
 import {addChallengeForKey} from '../utils/addChallengeForKey'
 import {
@@ -24,40 +24,34 @@ let user2: MockedUser
 
 beforeAll(async () => {
   await runPromiseInMockedEnvironment(
-    Effect.gen(function* (_) {
-      user1 = yield* _(createMockedUser('+420733333330'))
-      user2 = yield* _(createMockedUser('+420733333331'))
-      const client = yield* _(NodeTestingApp)
+    Effect.gen(function* () {
+      user1 = yield* createMockedUser('+420733333330')
+      user2 = yield* createMockedUser('+420733333331')
+      const client = yield* NodeTestingApp
 
-      yield* _(setAuthHeaders(user1.authHeaders))
+      yield* setAuthHeaders(user1.authHeaders)
 
       const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
         user1.authHeaders
       )
 
-      yield* _(
-        client.Inboxes.requestApproval({
-          payload: {
-            message: 'cancelMessage' as MessageCypher,
-            publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-          },
-          headers: commonAndSecurityHeaders,
-        })
-      )
+      yield* client.Inboxes.requestApproval({
+        payload: {
+          message: 'cancelMessage' as MessageCypher,
+          publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
+        },
+        headers: commonAndSecurityHeaders,
+      })
 
-      yield* _(setAuthHeaders(user2.authHeaders))
-      yield* _(
-        client.Inboxes.approveRequest({
-          headers: commonHeaders,
-          payload: yield* _(
-            user2.inbox1.addChallenge({
-              message: 'someMessage2' as MessageCypher,
-              publicKeyToConfirm: user1.mainKeyPair.publicKeyPemBase64,
-              approve: true,
-            })
-          ),
-        })
-      )
+      yield* setAuthHeaders(user2.authHeaders)
+      yield* client.Inboxes.approveRequest({
+        headers: commonHeaders,
+        payload: yield* user2.inbox1.addChallenge({
+          message: 'someMessage2' as MessageCypher,
+          publicKeyToConfirm: user1.mainKeyPair.publicKeyPemBase64,
+          approve: true,
+        }),
+      })
     })
   )
 })
@@ -65,34 +59,28 @@ beforeAll(async () => {
 describe('Retrieve messages', () => {
   it('Correctly receives messages in inbox', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
 
-        const messageToSend = (yield* _(
-          user2.inbox1.addChallenge({
-            message: 'someMessage3' as MessageCypher,
-            messageType: 'MESSAGE' as const,
-            receiverPublicKey: user1.mainKeyPair.publicKeyPemBase64,
-          })
-        )) satisfies SendMessageRequest
+        const messageToSend = (yield* user2.inbox1.addChallenge({
+          message: 'someMessage3' as MessageCypher,
+          messageType: 'MESSAGE' as const,
+          receiverPublicKey: user1.mainKeyPair.publicKeyPemBase64,
+        })) satisfies SendMessageRequest
 
-        yield* _(setAuthHeaders(user2.authHeaders))
-        yield* _(
-          client.Messages.sendMessage({
-            headers: commonHeaders,
-            payload: messageToSend,
-          })
-        )
+        yield* setAuthHeaders(user2.authHeaders)
+        yield* client.Messages.sendMessage({
+          headers: commonHeaders,
+          payload: messageToSend,
+        })
 
-        yield* _(setAuthHeaders(user1.authHeaders))
-        const messagesForUser1 = yield* _(
-          client.Messages.retrieveMessages({
-            payload: yield* _(user1.addChallengeForMainInbox({})),
-            headers: Schema.decodeSync(CommonHeaders)({
-              'user-agent': 'Vexl/1 (1.0.0) ANDROID',
-            }),
-          })
-        )
+        yield* setAuthHeaders(user1.authHeaders)
+        const messagesForUser1 = yield* client.Messages.retrieveMessages({
+          payload: yield* user1.addChallengeForMainInbox({}),
+          headers: Schema.decodeSync(CommonHeaders)({
+            'user-agent': 'Vexl/1 (1.0.0) ANDROID',
+          }),
+        })
         expect(messagesForUser1.messages.map((one) => one.message)).toEqual([
           'someMessage2',
           'someMessage3',
@@ -108,47 +96,41 @@ describe('Retrieve messages', () => {
 
   it('Correctly updates inbox metadata', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
 
-        const messageToSend = (yield* _(
-          user2.inbox1.addChallenge({
-            message: 'someMessage3' as MessageCypher,
-            messageType: 'MESSAGE' as const,
-            receiverPublicKey: user1.mainKeyPair.publicKeyPemBase64,
-          })
-        )) satisfies SendMessageRequest
+        const messageToSend = (yield* user2.inbox1.addChallenge({
+          message: 'someMessage3' as MessageCypher,
+          messageType: 'MESSAGE' as const,
+          receiverPublicKey: user1.mainKeyPair.publicKeyPemBase64,
+        })) satisfies SendMessageRequest
 
-        yield* _(setAuthHeaders(user2.authHeaders))
-        yield* _(
-          client.Messages.sendMessage({
-            headers: commonHeaders,
-            payload: messageToSend,
-          })
+        yield* setAuthHeaders(user2.authHeaders)
+        yield* client.Messages.sendMessage({
+          headers: commonHeaders,
+          payload: messageToSend,
+        })
+
+        yield* setAuthHeaders(user1.authHeaders)
+        yield* client.Messages.retrieveMessages({
+          payload: yield* user1.addChallengeForMainInbox({}),
+          headers: Schema.decodeSync(CommonHeaders)({
+            'user-agent': 'Vexl/2 (1.0.0) IOS',
+          }),
+        })
+
+        const inboxHash = yield* hashPublicKey(
+          user1.mainKeyPair.publicKeyPemBase64
         )
-
-        yield* _(setAuthHeaders(user1.authHeaders))
-        yield* _(
-          client.Messages.retrieveMessages({
-            payload: yield* _(user1.addChallengeForMainInbox({})),
-            headers: Schema.decodeSync(CommonHeaders)({
-              'user-agent': 'Vexl/2 (1.0.0) IOS',
-            }),
-          })
-        )
-
-        const inboxHash = yield* _(
-          hashPublicKey(user1.mainKeyPair.publicKeyPemBase64)
-        )
-        const sql = yield* _(SqlClient.SqlClient)
-        const data = yield* _(sql`
+        const sql = yield* SqlClient.SqlClient
+        const data = yield* sql`
           SELECT
             *
           FROM
             inbox
           WHERE
             public_key = ${inboxHash}
-        `)
+        `
         expect(data[0].platform).toBe('IOS')
         expect(data[0].clientVersion).toBe(2)
       })
@@ -157,20 +139,21 @@ describe('Retrieve messages', () => {
 
   it('Retruns an error when inbox does not exist', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
-        yield* _(setAuthHeaders(user1.authHeaders))
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
+        yield* setAuthHeaders(user1.authHeaders)
 
-        const errorResponse = yield* _(
+        const errorResponse = yield* pipe(
           client.Messages.retrieveMessages({
-            payload: yield* _(
-              addChallengeForKey(generatePrivateKey(), user1.authHeaders)({})
-            ),
+            payload: yield* addChallengeForKey(
+              generatePrivateKey(),
+              user1.authHeaders
+            )({}),
             headers: Schema.decodeSync(CommonHeaders)({
               'user-agent': 'Vexl/1 (1.0.0) ANDROID',
             }),
           }),
-          Effect.either
+          Effect.result
         )
 
         expectErrorResponse(InboxDoesNotExistError)(errorResponse)

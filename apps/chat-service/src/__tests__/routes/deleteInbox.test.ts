@@ -1,10 +1,10 @@
-import {SqlClient} from '@effect/sql'
 import {type MessageCypher} from '@vexl-next/domain/src/general/messaging'
 import {type SendMessageRequest} from '@vexl-next/rest-api/src/services/chat/contracts'
 import {InboxDoesNotExistError} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
-import {Effect} from 'effect'
+import {Effect, pipe} from 'effect'
+import {SqlClient} from 'effect/unstable/sql'
 import {hashPublicKey} from '../../db/domain'
 import {
   commonHeaders,
@@ -20,62 +20,52 @@ let user2: MockedUser
 
 beforeEach(async () => {
   await runPromiseInMockedEnvironment(
-    Effect.gen(function* (_) {
+    Effect.gen(function* () {
       // Clear database before each to start fresh
-      const sql = yield* _(SqlClient.SqlClient)
-      yield* _(sql`DELETE FROM inbox`)
-      yield* _(sql`DELETE FROM message`)
+      const sql = yield* SqlClient.SqlClient
+      yield* sql`DELETE FROM inbox`
+      yield* sql`DELETE FROM message`
 
-      user1 = yield* _(createMockedUser('+420733333330'))
-      user2 = yield* _(createMockedUser('+420733333331'))
-      const client = yield* _(NodeTestingApp)
+      user1 = yield* createMockedUser('+420733333330')
+      user2 = yield* createMockedUser('+420733333331')
+      const client = yield* NodeTestingApp
 
-      yield* _(setAuthHeaders(user1.authHeaders))
+      yield* setAuthHeaders(user1.authHeaders)
 
       const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
         user1.authHeaders
       )
 
-      yield* _(
-        client.Inboxes.requestApproval({
-          payload: {
-            message: 'cancelMessage' as MessageCypher,
-            publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-          },
-          headers: commonAndSecurityHeaders,
-        })
-      )
+      yield* client.Inboxes.requestApproval({
+        payload: {
+          message: 'cancelMessage' as MessageCypher,
+          publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
+        },
+        headers: commonAndSecurityHeaders,
+      })
 
       // will send message user1 -> user2
-      yield* _(setAuthHeaders(user2.authHeaders))
-      yield* _(
-        client.Inboxes.approveRequest({
-          headers: commonHeaders,
-          payload: yield* _(
-            user2.inbox1.addChallenge({
-              message: 'someMessage2' as MessageCypher,
-              publicKeyToConfirm: user1.mainKeyPair.publicKeyPemBase64,
-              approve: true,
-            })
-          ),
-        })
-      )
+      yield* setAuthHeaders(user2.authHeaders)
+      yield* client.Inboxes.approveRequest({
+        headers: commonHeaders,
+        payload: yield* user2.inbox1.addChallenge({
+          message: 'someMessage2' as MessageCypher,
+          publicKeyToConfirm: user1.mainKeyPair.publicKeyPemBase64,
+          approve: true,
+        }),
+      })
 
       // Will send message user2 -> user1
-      const messageToSend = (yield* _(
-        user2.inbox1.addChallenge({
-          message: 'cancelMessage' as MessageCypher,
-          messageType: 'MESSAGE' as const,
-          receiverPublicKey: user1.mainKeyPair.publicKeyPemBase64,
-        })
-      )) satisfies SendMessageRequest
+      const messageToSend = (yield* user2.inbox1.addChallenge({
+        message: 'cancelMessage' as MessageCypher,
+        messageType: 'MESSAGE' as const,
+        receiverPublicKey: user1.mainKeyPair.publicKeyPemBase64,
+      })) satisfies SendMessageRequest
 
-      yield* _(
-        client.Messages.sendMessage({
-          headers: commonHeaders,
-          payload: messageToSend,
-        })
-      )
+      yield* client.Messages.sendMessage({
+        headers: commonHeaders,
+        payload: messageToSend,
+      })
     })
   )
 })
@@ -83,54 +73,52 @@ beforeEach(async () => {
 describe('deleteInbox', () => {
   it('deletes existing inbox and removes all messages and connections receiving by thtat inbox', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
-        const sql = yield* _(SqlClient.SqlClient)
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
+        const sql = yield* SqlClient.SqlClient
 
-        const [{id}] = yield* _(sql`
+        const [{id}] = yield* sql`
           SELECT
             id
           FROM
             inbox
           WHERE
-            public_key = ${yield* _(
-            hashPublicKey(user2.inbox1.keyPair.publicKeyPemBase64)
+            public_key = ${yield* hashPublicKey(
+            user2.inbox1.keyPair.publicKeyPemBase64
           )}
-        `)
+        `
 
-        yield* _(setAuthHeaders(user2.authHeaders))
-        yield* _(
-          client.Inboxes.deleteInbox({
-            payload: yield* _(user2.inbox1.addChallenge({})),
-          })
-        )
+        yield* setAuthHeaders(user2.authHeaders)
+        yield* client.Inboxes.deleteInbox({
+          payload: yield* user2.inbox1.addChallenge({}),
+        })
 
         expect(id).not.toBeUndefined()
 
-        const deletedInbox = yield* _(sql`
+        const deletedInbox = yield* sql`
           SELECT
             *
           FROM
             inbox
           WHERE
             id = ${id}
-        `)
+        `
         expect(deletedInbox).toHaveLength(0)
 
-        const messagesForInbox = yield* _(sql`
+        const messagesForInbox = yield* sql`
           SELECT
             *
           FROM
             message
           WHERE
             inbox_id = ${id}
-        `)
-        const allMessages = yield* _(sql`
+        `
+        const allMessages = yield* sql`
           SELECT
             *
           FROM
             message
-        `)
+        `
         expect(messagesForInbox).toHaveLength(0)
         expect(allMessages).not.toHaveLength(0)
       })
@@ -139,21 +127,19 @@ describe('deleteInbox', () => {
 
   it('Throws an error when inbox is already removed', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
 
-        yield* _(setAuthHeaders(user2.authHeaders))
-        yield* _(
-          client.Inboxes.deleteInbox({
-            payload: yield* _(user2.inbox1.addChallenge({})),
-          })
-        )
+        yield* setAuthHeaders(user2.authHeaders)
+        yield* client.Inboxes.deleteInbox({
+          payload: yield* user2.inbox1.addChallenge({}),
+        })
 
-        const failResponse = yield* _(
+        const failResponse = yield* pipe(
           client.Inboxes.deleteInbox({
-            payload: yield* _(user2.inbox1.addChallenge({})),
+            payload: yield* user2.inbox1.addChallenge({}),
           }),
-          Effect.either
+          Effect.result
         )
 
         expectErrorResponse(InboxDoesNotExistError)(failResponse)

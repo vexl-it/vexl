@@ -1,15 +1,17 @@
-import {HttpApi, HttpApiEndpoint, HttpApiGroup} from '@effect/platform/index'
-import {
-  NotFoundError,
-  UnauthorizedError,
-  UnexpectedServerError,
-} from '@vexl-next/domain/src/general/commonErrors'
+import {UnauthorizedError} from '@vexl-next/domain/src/general/commonErrors'
 import {Schema} from 'effect'
+import {
+  HttpApi,
+  HttpApiEndpoint,
+  HttpApiGroup,
+  HttpApiSchema,
+} from 'effect/unstable/httpapi'
 import {
   AdminTokenHeaders,
   ClearCacheTokenHeaders,
 } from '../../adminTokenHeaders'
 import {BtcPayServerWebhookHeader} from '../../btcPayServerWebhookHeader'
+import {commonApiErrors} from '../../commonApiErrors'
 import {CommonHeaders} from '../../commonHeaders'
 import {MaxExpectedDailyCall} from '../../MaxExpectedDailyCountAnnotation'
 import {NoContentResponse} from '../../NoContentResponse.brand'
@@ -41,26 +43,34 @@ import {
 
 export const GetEventsEndpoint = HttpApiEndpoint.get(
   'getEvents',
-  '/content/events'
-)
-  .addSuccess(EventsResponse)
-  .annotate(MaxExpectedDailyCall, 100)
+  '/content/events',
+  {
+    disableCodecs: true,
+    error: Schema.Union([...commonApiErrors]),
+    success: EventsResponse,
+  }
+).annotate(MaxExpectedDailyCall, 100)
 
 export const ClearEventsCacheEndpoint = HttpApiEndpoint.post(
   'clearCache',
-  '/content/clear-cache'
-)
-  .setHeaders(ClearCacheTokenHeaders)
-  .addError(InvalidTokenError)
-  .addSuccess(NoContentResponse)
-  .annotate(MaxExpectedDailyCall, 10)
+  '/content/clear-cache',
+  {
+    disableCodecs: true,
+    headers: ClearCacheTokenHeaders,
+    error: Schema.Union([...commonApiErrors, InvalidTokenError]),
+    success: NoContentResponse,
+  }
+).annotate(MaxExpectedDailyCall, 10)
 
 export const GetBlogArticlesEndpoint = HttpApiEndpoint.get(
   'getBlogArticles',
-  '/content/blogs'
-)
-  .addSuccess(BlogsArticlesResponse)
-  .annotate(MaxExpectedDailyCall, 100)
+  '/content/blogs',
+  {
+    disableCodecs: true,
+    error: Schema.Union([...commonApiErrors]),
+    success: BlogsArticlesResponse,
+  }
+).annotate(MaxExpectedDailyCall, 100)
 
 const CmsContentApiGroup = HttpApiGroup.make('Cms')
   .add(GetEventsEndpoint)
@@ -69,11 +79,14 @@ const CmsContentApiGroup = HttpApiGroup.make('Cms')
 
 export const NewsAndAnonouncementsEndpoint = HttpApiEndpoint.get(
   'getNewsAndAnnouncements',
-  '/content/news-and-announcements'
-)
-  .setHeaders(CommonHeaders)
-  .addSuccess(NewsAndAnnouncementsResponse)
-  .annotate(MaxExpectedDailyCall, 500)
+  '/content/news-and-announcements',
+  {
+    disableCodecs: true,
+    headers: CommonHeaders,
+    error: Schema.Union([...commonApiErrors]),
+    success: NewsAndAnnouncementsResponse,
+  }
+).annotate(MaxExpectedDailyCall, 500)
 
 const NewsAndAnnouncementsApiGroup = HttpApiGroup.make(
   'NewsAndAnnouncements'
@@ -81,32 +94,43 @@ const NewsAndAnnouncementsApiGroup = HttpApiGroup.make(
 
 export const GetMapStylesEndpoint = HttpApiEndpoint.get(
   'getMapStyles',
-  '/content/map-styles'
-)
-  .addSuccess(MapStylesResponse)
-  .annotate(MaxExpectedDailyCall, 500)
+  '/content/map-styles',
+  {
+    disableCodecs: true,
+    error: Schema.Union([...commonApiErrors]),
+    success: MapStylesResponse,
+  }
+).annotate(MaxExpectedDailyCall, 500)
 
 const MapApiGroup = HttpApiGroup.make('Map').add(GetMapStylesEndpoint)
 
 export const CreateVexlProductNotificationEndpoint = HttpApiEndpoint.post(
   'createVexlProductNotification',
-  '/content/vexl-product-notifications/admin'
-)
-  .setHeaders(AdminTokenHeaders)
-  .setPayload(CreateVexlProductNotificationRequest)
-  .addSuccess(VexlProductNotificationResponse)
-  .addError(InvalidContentAdminTokenError, {status: 401})
-  .addError(DuplicateVexlProductNotificationUuidError, {status: 400})
-  .annotate(MaxExpectedDailyCall, 100)
+  '/content/vexl-product-notifications/admin',
+  {
+    disableCodecs: true,
+    headers: AdminTokenHeaders,
+    payload: CreateVexlProductNotificationRequest,
+    error: Schema.Union([
+      ...commonApiErrors,
+      InvalidContentAdminTokenError.pipe(HttpApiSchema.status(401)),
+      DuplicateVexlProductNotificationUuidError.pipe(HttpApiSchema.status(400)),
+    ]),
+    success: VexlProductNotificationResponse,
+  }
+).annotate(MaxExpectedDailyCall, 100)
 
 export const GetVexlProductNotificationsEndpoint = HttpApiEndpoint.get(
   'getVexlProductNotifications',
-  '/content/vexl-product-notifications'
-)
-  .setHeaders(CommonHeaders)
-  .setUrlParams(GetVexlProductNotificationsRequest)
-  .addSuccess(GetVexlProductNotificationsResponse)
-  .annotate(MaxExpectedDailyCall, 10000)
+  '/content/vexl-product-notifications',
+  {
+    disableCodecs: true,
+    headers: CommonHeaders,
+    query: GetVexlProductNotificationsRequest.fields,
+    error: Schema.Union([...commonApiErrors]),
+    success: GetVexlProductNotificationsResponse,
+  }
+).annotate(MaxExpectedDailyCall, 10000)
 
 const VexlProductNotificationsApiGroup = HttpApiGroup.make(
   'VexlProductNotifications'
@@ -116,45 +140,65 @@ const VexlProductNotificationsApiGroup = HttpApiGroup.make(
 
 export const CreateInvoiceEndpoint = HttpApiEndpoint.post(
   'createInvoice',
-  '/content/createInvoice'
-)
-  .setPayload(CreateInvoiceRequest)
-  .addSuccess(CreateInvoiceResponse)
-  .addError(CreateInvoiceError, {status: 400})
-  .addError(InvoiceNotFoundError, {status: 400})
-  .addError(GetInvoicePaymentMethodsGeneralError, {status: 502})
-  .annotate(MaxExpectedDailyCall, 10)
+  '/content/createInvoice',
+  {
+    disableCodecs: true,
+    payload: CreateInvoiceRequest,
+    error: Schema.Union([
+      ...commonApiErrors,
+      CreateInvoiceError.pipe(HttpApiSchema.status(400)),
+      InvoiceNotFoundError.pipe(HttpApiSchema.status(400)),
+      GetInvoicePaymentMethodsGeneralError.pipe(HttpApiSchema.status(502)),
+    ]),
+    success: CreateInvoiceResponse,
+  }
+).annotate(MaxExpectedDailyCall, 10)
 
 export const GetInvoiceEndpoint = HttpApiEndpoint.get(
   'getInvoice',
-  '/content/getInvoice'
-)
-  .setUrlParams(GetInvoiceRequest)
-  .addSuccess(GetInvoiceResponse)
-  .addError(InvoiceNotFoundError, {status: 400})
-  .addError(GetInvoiceGeneralError, {status: 502})
-  .annotate(MaxExpectedDailyCall, 50)
+  '/content/getInvoice',
+  {
+    disableCodecs: true,
+    query: GetInvoiceRequest.fields,
+    error: Schema.Union([
+      ...commonApiErrors,
+      InvoiceNotFoundError.pipe(HttpApiSchema.status(400)),
+      GetInvoiceGeneralError.pipe(HttpApiSchema.status(502)),
+    ]),
+    success: GetInvoiceResponse,
+  }
+).annotate(MaxExpectedDailyCall, 50)
 
 export const GetInvoiceStatusTypeEndpoint = HttpApiEndpoint.get(
   'getInvoiceStatusType',
-  '/content/getInvoiceStatusType'
-)
-  .setUrlParams(GetInvoiceStatusTypeRequest)
-  .addSuccess(GetInvoiceStatusTypeResponse)
-  .addError(InvoiceNotFoundError, {status: 400})
-  .addError(GetInvoiceGeneralError, {status: 502})
-  .annotate(MaxExpectedDailyCall, 50)
+  '/content/getInvoiceStatusType',
+  {
+    disableCodecs: true,
+    query: GetInvoiceStatusTypeRequest.fields,
+    error: Schema.Union([
+      ...commonApiErrors,
+      InvoiceNotFoundError.pipe(HttpApiSchema.status(400)),
+      GetInvoiceGeneralError.pipe(HttpApiSchema.status(502)),
+    ]),
+    success: GetInvoiceStatusTypeResponse,
+  }
+).annotate(MaxExpectedDailyCall, 50)
 
 export const UpdateInvoiceStateWebhookEndpoint = HttpApiEndpoint.post(
   'updateInvoiceStateWebhook',
-  '/content/invoice/btcpay-webhook'
-)
-  .setHeaders(BtcPayServerWebhookHeader)
-  .setPayload(Schema.Unknown)
-  .addSuccess(NoContentResponse)
-  .addError(UnauthorizedError, {status: 401})
-  .addError(UpdateInvoiceWebhookError, {status: 400})
-  .annotate(MaxExpectedDailyCall, 1000)
+  '/content/invoice/btcpay-webhook',
+  {
+    disableCodecs: true,
+    headers: BtcPayServerWebhookHeader,
+    payload: Schema.Unknown,
+    error: Schema.Union([
+      ...commonApiErrors,
+      UnauthorizedError.pipe(HttpApiSchema.status(401)),
+      UpdateInvoiceWebhookError.pipe(HttpApiSchema.status(400)),
+    ]),
+    success: NoContentResponse,
+  }
+).annotate(MaxExpectedDailyCall, 1000)
 
 const DonationsApiGroup = HttpApiGroup.make('Donations')
   .add(CreateInvoiceEndpoint)
@@ -163,11 +207,9 @@ const DonationsApiGroup = HttpApiGroup.make('Donations')
   .add(GetInvoiceStatusTypeEndpoint)
 
 export const ContentApiSpecification = HttpApi.make('Content API')
-  .middleware(RateLimitingMiddleware)
   .add(CmsContentApiGroup)
   .add(NewsAndAnnouncementsApiGroup)
   .add(MapApiGroup)
   .add(VexlProductNotificationsApiGroup)
   .add(DonationsApiGroup)
-  .addError(NotFoundError, {status: 404})
-  .addError(UnexpectedServerError, {status: 500})
+  .middleware(RateLimitingMiddleware)

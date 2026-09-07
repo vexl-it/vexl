@@ -1,4 +1,3 @@
-import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
@@ -17,7 +16,8 @@ import {
 import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
-import {Effect, Schema} from 'effect'
+import {Effect, Schema, pipe} from 'effect'
+import {SqlClient} from 'effect/unstable/sql'
 import {makeTestCommonAndSecurityHeaders} from '../utils/createMockedUser'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../utils/runPromiseInMockedEnvironment'
@@ -32,8 +32,8 @@ let commonAndSecurityHeaders: ReturnType<
 
 beforeAll(async () => {
   await runPromiseInMockedEnvironment(
-    Effect.gen(function* (_) {
-      const client = yield* _(NodeTestingApp)
+    Effect.gen(function* () {
+      const client = yield* NodeTestingApp
 
       const request1: CreateNewOfferRequest = {
         adminId: generateAdminId(),
@@ -58,24 +58,20 @@ beforeAll(async () => {
         offerId: newOfferId(),
       }
 
-      const authHeaders = yield* _(
-        createDummyAuthHeadersForUser({
-          phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333333'),
-          publicKey: me.publicKeyPemBase64,
-        })
-      )
+      const authHeaders = yield* createDummyAuthHeadersForUser({
+        phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333333'),
+        publicKey: me.publicKeyPemBase64,
+      })
 
-      yield* _(setAuthHeaders(authHeaders))
+      yield* setAuthHeaders(authHeaders)
 
       commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(authHeaders)
 
       offer1 = {
-        ...(yield* _(
-          client.createNewOffer({
-            payload: request1,
-            headers: commonAndSecurityHeaders,
-          })
-        )),
+        ...(yield* client.createNewOffer({
+          payload: request1,
+          headers: commonAndSecurityHeaders,
+        })),
         adminId: request1.adminId,
       }
     })
@@ -85,41 +81,34 @@ beforeAll(async () => {
 describe('Create private part', () => {
   it('Creates private part', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
         const payloadPrivate = Schema.decodeSync(PrivatePayloadEncrypted)(
           '0addedPrivatePayload'
         )
         const userPublicKey = generatePrivateKey().publicKeyPemBase64
 
-        yield* _(
-          setAuthHeaders(
-            yield* _(
-              createDummyAuthHeadersForUser({
-                phoneNumber:
-                  Schema.decodeSync(E164PhoneNumber)('+420733333333'),
-                publicKey: me.publicKeyPemBase64,
-              })
-            )
-          )
-        )
-
-        yield* _(
-          client.createPrivatePart({
-            payload: {
-              adminId: offer1.adminId,
-              offerPrivateList: [
-                {
-                  payloadPrivate,
-                  userPublicKey,
-                },
-              ],
-            },
+        yield* setAuthHeaders(
+          yield* createDummyAuthHeadersForUser({
+            phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333333'),
+            publicKey: me.publicKeyPemBase64,
           })
         )
 
-        const sql = yield* _(SqlClient.SqlClient)
-        const privatePartInDb = yield* _(sql`
+        yield* client.createPrivatePart({
+          payload: {
+            adminId: offer1.adminId,
+            offerPrivateList: [
+              {
+                payloadPrivate,
+                userPublicKey,
+              },
+            ],
+          },
+        })
+
+        const sql = yield* SqlClient.SqlClient
+        const privatePartInDb = yield* sql`
           SELECT
             *
           FROM
@@ -127,7 +116,7 @@ describe('Create private part', () => {
           WHERE
             user_public_key = ${userPublicKey}
             AND payload_private = ${payloadPrivate}
-        `)
+        `
 
         expect(privatePartInDb.at(0)).toBeTruthy()
       })
@@ -136,26 +125,21 @@ describe('Create private part', () => {
 
   it('Returns proper error when trying to create with duplicates', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
         const payloadPrivate = Schema.decodeSync(PrivatePayloadEncrypted)(
           '0addedPrivatePayload'
         )
         const userPublicKey = generatePrivateKey().publicKeyPemBase64
 
-        yield* _(
-          setAuthHeaders(
-            yield* _(
-              createDummyAuthHeadersForUser({
-                phoneNumber:
-                  Schema.decodeSync(E164PhoneNumber)('+420733333333'),
-                publicKey: me.publicKeyPemBase64,
-              })
-            )
-          )
+        yield* setAuthHeaders(
+          yield* createDummyAuthHeadersForUser({
+            phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333333'),
+            publicKey: me.publicKeyPemBase64,
+          })
         )
 
-        const result = yield* _(
+        const result = yield* pipe(
           client.createPrivatePart({
             payload: {
               adminId: offer1.adminId,
@@ -171,7 +155,7 @@ describe('Create private part', () => {
               ],
             },
           }),
-          Effect.either
+          Effect.result
         )
 
         expectErrorResponse(DuplicatedPublicKeyError)(result)
@@ -181,40 +165,33 @@ describe('Create private part', () => {
 
   it('Removes old private part', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
         const payloadPrivate = Schema.decodeSync(PrivatePayloadEncrypted)(
           '0addedPrivatePayload'
         )
 
-        yield* _(
-          setAuthHeaders(
-            yield* _(
-              createDummyAuthHeadersForUser({
-                phoneNumber:
-                  Schema.decodeSync(E164PhoneNumber)('+420733333333'),
-                publicKey: me.publicKeyPemBase64,
-              })
-            )
-          )
-        )
-
-        yield* _(
-          client.createPrivatePart({
-            payload: {
-              adminId: offer1.adminId,
-              offerPrivateList: [
-                {
-                  payloadPrivate,
-                  userPublicKey: user1.publicKeyPemBase64,
-                },
-              ],
-            },
+        yield* setAuthHeaders(
+          yield* createDummyAuthHeadersForUser({
+            phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333333'),
+            publicKey: me.publicKeyPemBase64,
           })
         )
 
-        const sql = yield* _(SqlClient.SqlClient)
-        const privatePartInDb = yield* _(sql`
+        yield* client.createPrivatePart({
+          payload: {
+            adminId: offer1.adminId,
+            offerPrivateList: [
+              {
+                payloadPrivate,
+                userPublicKey: user1.publicKeyPemBase64,
+              },
+            ],
+          },
+        })
+
+        const sql = yield* SqlClient.SqlClient
+        const privatePartInDb = yield* sql`
           SELECT
             *
           FROM
@@ -222,7 +199,7 @@ describe('Create private part', () => {
           WHERE
             user_public_key = ${user1.publicKeyPemBase64}
             AND payload_private = ${payloadPrivate}
-        `)
+        `
 
         expect(privatePartInDb.at(0)).toBeTruthy()
       })
@@ -231,25 +208,20 @@ describe('Create private part', () => {
 
   it('Does fail with not found when trying to add private part to offer that does not exist', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
         const payloadPrivate = Schema.decodeSync(PrivatePayloadEncrypted)(
           '0addedPrivatePayload'
         )
 
-        yield* _(
-          setAuthHeaders(
-            yield* _(
-              createDummyAuthHeadersForUser({
-                phoneNumber:
-                  Schema.decodeSync(E164PhoneNumber)('+420733333333'),
-                publicKey: me.publicKeyPemBase64,
-              })
-            )
-          )
+        yield* setAuthHeaders(
+          yield* createDummyAuthHeadersForUser({
+            phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333333'),
+            publicKey: me.publicKeyPemBase64,
+          })
         )
 
-        const result = yield* _(
+        const result = yield* pipe(
           client.createPrivatePart({
             payload: {
               adminId: generateAdminId(),
@@ -261,12 +233,12 @@ describe('Create private part', () => {
               ],
             },
           }),
-          Effect.either
+          Effect.result
         )
 
-        expect(result._tag).toBe('Left')
-        if (result._tag === 'Left') {
-          expect(result.left).toHaveProperty('status', 404)
+        expect(result._tag).toBe('Failure')
+        if (result._tag === 'Failure') {
+          expect(result.failure).toHaveProperty('status', 404)
         }
       })
     )
@@ -276,33 +248,26 @@ describe('Create private part', () => {
 describe('Delete private part', () => {
   it('Deletes private part', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
 
-        yield* _(
-          setAuthHeaders(
-            yield* _(
-              createDummyAuthHeadersForUser({
-                phoneNumber:
-                  Schema.decodeSync(E164PhoneNumber)('+420733333333'),
-                publicKey: me.publicKeyPemBase64,
-              })
-            )
-          )
-        )
-
-        yield* _(
-          client.deletePrivatePart({
-            payload: {
-              adminIds: [offer1.adminId],
-              publicKeys: [user1.publicKeyPemBase64],
-            },
-            headers: commonAndSecurityHeaders,
+        yield* setAuthHeaders(
+          yield* createDummyAuthHeadersForUser({
+            phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333333'),
+            publicKey: me.publicKeyPemBase64,
           })
         )
 
-        const sql = yield* _(SqlClient.SqlClient)
-        const result = yield* _(sql`
+        yield* client.deletePrivatePart({
+          payload: {
+            adminIds: [offer1.adminId],
+            publicKeys: [user1.publicKeyPemBase64],
+          },
+          headers: commonAndSecurityHeaders,
+        })
+
+        const sql = yield* SqlClient.SqlClient
+        const result = yield* sql`
           SELECT
             *
           FROM
@@ -310,7 +275,7 @@ describe('Delete private part', () => {
           WHERE
             user_public_key = ${user1.publicKeyPemBase64}
             AND payload_private = 'offer1payloadPrivate'
-        `)
+        `
         expect(result.at(0)).toBeFalsy()
       })
     )
@@ -318,22 +283,20 @@ describe('Delete private part', () => {
 
   it('Can not delete private part for me', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
 
-        const authHeaders = yield* _(
-          createDummyAuthHeadersForUser({
-            phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333333'),
-            publicKey: me.publicKeyPemBase64,
-          })
-        )
+        const authHeaders = yield* createDummyAuthHeadersForUser({
+          phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333333'),
+          publicKey: me.publicKeyPemBase64,
+        })
 
-        yield* _(setAuthHeaders(authHeaders))
+        yield* setAuthHeaders(authHeaders)
 
         const commonAndSecurityHeaders =
           makeTestCommonAndSecurityHeaders(authHeaders)
 
-        const response = yield* _(
+        const response = yield* pipe(
           client.deletePrivatePart({
             payload: {
               adminIds: [offer1.adminId],
@@ -341,7 +304,7 @@ describe('Delete private part', () => {
             },
             headers: commonAndSecurityHeaders,
           }),
-          Effect.either
+          Effect.result
         )
 
         expectErrorResponse(CanNotDeletePrivatePartOfAuthor)(response)

@@ -16,7 +16,7 @@ import {
   CryptoBoxSignature,
 } from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/EcdsaSignature.brand'
-import {Schema} from 'effect'
+import {Effect, Option, Schema} from 'effect'
 import {VexlAuthHeader} from '../../VexlAuthHeader'
 export interface InvalidPhoneNumber {
   _tag: 'InvalidPhoneNumber'
@@ -65,8 +65,8 @@ const CompletedLoginChallenge = Schema.Struct({
 })
 
 export const VerificationId = Schema.Number.pipe(
-  Schema.int(),
-  Schema.greaterThanOrEqualTo(0),
+  Schema.check(Schema.isInt()),
+  Schema.check(Schema.isGreaterThanOrEqualTo(0)),
   Schema.brand('VerificationId')
 )
 export type VerificationId = Schema.Schema.Type<typeof VerificationId>
@@ -75,7 +75,7 @@ export class InvalidVerificationIdError extends Schema.TaggedError<InvalidVerifi
   'InvalidVerificationIdError'
 )('InvalidVerificationIdError', {
   status: Schema.Literal(400),
-  reason: Schema.Literal('Expired', 'InvalidFormat', 'InvalidCypher'),
+  reason: Schema.Literals(['Expired', 'InvalidFormat', 'InvalidCypher']),
 }) {}
 
 export class PreviousCodeNotExpiredError extends Schema.TaggedError<PreviousCodeNotExpiredError>(
@@ -87,7 +87,7 @@ export class PreviousCodeNotExpiredError extends Schema.TaggedError<PreviousCode
 }) {}
 
 export const PhoneNumberVerificationId = Schema.Int.pipe(
-  Schema.greaterThan(0),
+  Schema.check(Schema.isGreaterThan(0)),
   Schema.brand('PhoneNumberVerificationId')
 )
 export type PhoneNumberVerificationId = typeof PhoneNumberVerificationId.Type
@@ -95,7 +95,7 @@ export type PhoneNumberVerificationId = typeof PhoneNumberVerificationId.Type
 export class UnableToSendVerificationSmsError extends Schema.TaggedError<UnableToSendVerificationSmsError>(
   'UnableToSendVerificationSmsError'
 )('UnableToSendVerificationSmsError', {
-  reason: Schema.Literal(
+  reason: Schema.Literals([
     'InvalidPhoneNumber',
     'CarrierError',
     'UnsupportedCarrier',
@@ -104,8 +104,8 @@ export class UnableToSendVerificationSmsError extends Schema.TaggedError<UnableT
     'AntiFraudBlockGeo',
     'MaxAttemptsReached',
     'NumberDoesNotSupportSms',
-    'Other'
-  ),
+    'Other',
+  ]),
   status: Schema.Literal(400),
   verificationId: Schema.optional(PhoneNumberVerificationId),
   expirationAt: Schema.optional(IsoDatetimeString),
@@ -115,19 +115,24 @@ export class UnableToVerifySmsCodeError extends Schema.TaggedError<UnableToVerif
   'UnableToVerifySmsCodeError'
 )('UnableToVerifySmsCodeError', {
   code: Schema.Literal('100104'), // deprecated
-  reason: Schema.Literal('MaxAttemptsReached', 'BadCode', 'Expired', 'Other'),
+  reason: Schema.Literals([
+    'MaxAttemptsReached',
+    'BadCode',
+    'Expired',
+    'Other',
+  ]),
   status: Schema.Literal(400),
 }) {}
 
 export class TurnstileVerificationError extends Schema.TaggedError<TurnstileVerificationError>(
   'TurnstileVerificationError'
 )('TurnstileVerificationError', {
-  reason: Schema.Literal(
+  reason: Schema.Literals([
     'MissingToken',
     'InvalidToken',
     'HostnameMismatch',
-    'ActionMismatch'
-  ),
+    'ActionMismatch',
+  ]),
   status: Schema.Literal(400),
 }) {}
 
@@ -175,9 +180,10 @@ export class InitPhoneVerificationRequest extends Schema.Class<InitPhoneVerifica
 export class NumberDoesNotMatchOldHashError extends Schema.TaggedError<NumberDoesNotMatchOldHashError>(
   'NumberDoesNotMatchOldHashError'
 )('NumberDoesNotMatchOldHashError', {
-  status: Schema.optionalWith(Schema.Literal(400), {
-    default: () => 400 as const,
-  }),
+  status: Schema.Literal(400).pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): 400 => 400)),
+    Schema.withConstructorDefault(Effect.sync((): 400 => 400))
+  ),
 }) {}
 
 export class UnsupportedVersionToLoginError extends Schema.TaggedError<UnsupportedVersionToLoginError>(
@@ -198,7 +204,7 @@ export class VerifyPhoneNumberRequest extends Schema.Class<VerifyPhoneNumberRequ
   'VerifyPhoneNumberRequest'
 )({
   id: PhoneNumberVerificationId,
-  code: Schema.String.pipe(Schema.length(6)),
+  code: Schema.String.pipe(Schema.check(Schema.isLengthBetween(6, 6))),
   userPublicKey: PublicKeyPemBase64,
 }) {}
 
@@ -249,14 +255,15 @@ export type VerifyChallengeInput = typeof VerifyChallengeInput.Type
 
 export const GetVersionServiceInfoResponse = Schema.Struct({
   requestForceUpdate: Schema.Boolean,
-  offerRerequestLimitDays: Schema.Int.pipe(Schema.greaterThanOrEqualTo(0)),
-  maintenanceUntil: Schema.optionalWith(
+  offerRerequestLimitDays: Schema.Int.pipe(
+    Schema.check(Schema.isGreaterThanOrEqualTo(0))
+  ),
+  maintenanceUntil: Schema.OptionFromOptional(
     Schema.Struct({
       start: UnixMilliseconds,
       end: UnixMilliseconds,
-    }),
-    {as: 'Option'}
-  ),
+    })
+  ).pipe(Schema.withConstructorDefault(Effect.succeed(Option.none()))),
 })
 
 export const EraseUserVerificationId = Schema.String.pipe(
@@ -268,7 +275,7 @@ export const DELETE_ACCOUNT_INIT_TURNSTILE_ACTION =
   'delete-account-init' as const
 
 export const TurnstileToken = Schema.NonEmptyString.pipe(
-  Schema.maxLength(2048),
+  Schema.check(Schema.isMaxLength(2048)),
   Schema.brand('TurnstileToken')
 )
 export type TurnstileToken = typeof TurnstileToken.Type
@@ -286,7 +293,7 @@ export type InitEraseUserResponse = typeof InitEraseUserResponse.Type
 
 export const VerifyAndEraseUserRequest = Schema.Struct({
   verificationId: EraseUserVerificationId,
-  code: Schema.String.pipe(Schema.length(6)),
+  code: Schema.String.pipe(Schema.check(Schema.isLengthBetween(6, 6))),
 })
 export type VerifyAndEraseUserRequest = typeof VerifyAndEraseUserRequest.Type
 

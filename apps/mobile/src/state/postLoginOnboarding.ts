@@ -12,11 +12,11 @@ import {importedContactsCountAtom} from './contacts/atom/contactsStore'
 import {notificationsEnabledAtom} from './notifications/areNotificationsEnabledAtom'
 import {sessionDataOrDummyAtom} from './session'
 
-const PostLoginFlowCompletedScreen = Schema.Literal(
+const PostLoginFlowCompletedScreen = Schema.Literals([
   'contactsImport',
   'notificationSetup',
-  'usageInfo'
-)
+  'usageInfo',
+])
 
 export type PostLoginFlowCompletedScreen =
   typeof PostLoginFlowCompletedScreen.Type

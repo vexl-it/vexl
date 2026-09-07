@@ -8,10 +8,10 @@ export default function extractOwnerInfoFromOwnerPrivatePayload(
   privatePart: OfferPrivatePart
 ): Option.Option<OwnershipInfo> {
   return Option.all({
-    intendedConnectionLevel: Option.fromNullable(
+    intendedConnectionLevel: Option.fromNullishOr(
       privatePart.intendedConnectionLevel
     ),
-    adminId: Option.fromNullable(privatePart.adminId),
+    adminId: Option.fromNullishOr(privatePart.adminId),
     intendedClubs: Option.some(privatePart.intendedClubs ?? []),
   })
 }

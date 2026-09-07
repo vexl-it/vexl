@@ -1,5 +1,5 @@
 import {parsePhoneNumber} from 'awesome-phonenumber'
-import {Array, Option, pipe, Record} from 'effect/index'
+import {Array, Option, pipe, Record} from 'effect'
 import {atom} from 'jotai'
 import {currencies} from '../utils/localization/currency'
 import {defaultCurrencyAtom} from '../utils/preferences'

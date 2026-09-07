@@ -4,7 +4,7 @@ import {
 } from '@vexl-next/cryptography/src/KeyHolder'
 import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
-import {Array, Effect, Either, Option, pipe, Record} from 'effect'
+import {Array, Effect, Filter, Option, pipe, Record, Result} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
 import {getNotificationTokenWithTimeoutE} from '../../../utils/notifications'
@@ -63,42 +63,40 @@ const fetchClubWithMembersHandleStateIfNotFoundActionAtom = atom(
       vexlNotificationToken: Option.Option<VexlNotificationToken>
     }
   ) =>
-    Effect.gen(function* (_) {
+    Effect.gen(function* () {
       // Time-limited so a hanging push-token fetch can never stall the club
       // refresh (same treatment as in syncConnectionsActionAtom).
-      const notificationToken = yield* _(getNotificationTokenWithTimeoutE())
+      const notificationToken = yield* getNotificationTokenWithTimeoutE()
       const api = get(apiAtom)
       const clubAlreadyInStateStats = get(
         clubsWithMembersStorageAtom
       ).data.find((c) => c.club.uuid === clubUuid)?.stats
 
-      return yield* _(
-        fetchClubWithMembersReportApiErrors({
-          contactApi: api.contact,
-          oldKeyPair,
-          keyPair,
-          notificationToken,
-          vexlNotificationToken,
-          clubUuid,
-        }).pipe(
-          Effect.tapError((e) => Effect.fail(e)),
-          Effect.tapErrorTag('ClubNotFoundError', (e) => {
-            set(processClubDeletedActionAtom, {clubUuid})
-            return set(updateOffersWhenUserIsNoLongerInClubActionAtom, {
-              clubUuid,
-            }).pipe(
-              ignoreReportErrors(
-                'warn',
-                'Error processing club after removed from BE'
-              )
+      return yield* fetchClubWithMembersReportApiErrors({
+        contactApi: api.contact,
+        oldKeyPair,
+        keyPair,
+        notificationToken,
+        vexlNotificationToken,
+        clubUuid,
+      }).pipe(
+        Effect.tapError((e) => Effect.fail(e)),
+        Effect.tapErrorTag('ClubNotFoundError', (e) => {
+          set(processClubDeletedActionAtom, {clubUuid})
+          return set(updateOffersWhenUserIsNoLongerInClubActionAtom, {
+            clubUuid,
+          }).pipe(
+            ignoreReportErrors(
+              'warn',
+              'Error processing club after removed from BE'
             )
-          }),
-          Effect.mapError((e) => ({clubUuid, ...e})),
-          Effect.map((clubWithMembers) =>
-            clubAlreadyInStateStats
-              ? {...clubWithMembers, stats: clubAlreadyInStateStats}
-              : clubWithMembers
           )
+        }),
+        Effect.mapError((e) => ({clubUuid, ...e})),
+        Effect.map((clubWithMembers) =>
+          clubAlreadyInStateStats
+            ? {...clubWithMembers, stats: clubAlreadyInStateStats}
+            : clubWithMembers
         )
       )
     })
@@ -115,25 +113,25 @@ export const syncSingleClubHandleStateWhenNotFoundActionAtom = atom(
       clubUuid: ClubUuid
     }
   ) =>
-    Effect.gen(function* (_) {
-      const {oldKeyPair, keyPair} = yield* _(
+    Effect.gen(function* () {
+      const {oldKeyPair, keyPair} = yield* Effect.fromOption(
         Record.get(get(clubsToKeyHolderAtom), clubUuid)
       )
 
       set(clubsWithMembersLoadingStateAtom, {state: 'loading'})
 
-      const clubE = yield* _(
+      const clubE = yield* pipe(
         set(fetchClubWithMembersHandleStateIfNotFoundActionAtom, {
           clubUuid,
           oldKeyPair,
           keyPair,
           vexlNotificationToken: Option.none(),
         }),
-        Effect.either
+        Effect.result
       )
 
-      if (Either.isLeft(clubE)) {
-        return yield* _(Effect.fail(clubE.left))
+      if (Result.isFailure(clubE)) {
+        return yield* Effect.fail(clubE.failure)
       }
 
       set(clubsWithMembersStorageAtom, (prev) => ({
@@ -144,8 +142,8 @@ export const syncSingleClubHandleStateWhenNotFoundActionAtom = atom(
           Array.map((o) => [o.club.uuid, o] as const),
           Record.fromEntries,
           Record.set(clubUuid, {
-            ...clubE.right,
-            vexlNotificationToken: clubE.right.vexlNotificationToken,
+            ...clubE.success,
+            vexlNotificationToken: clubE.success.vexlNotificationToken,
           }),
           Record.values
         ),
@@ -153,7 +151,7 @@ export const syncSingleClubHandleStateWhenNotFoundActionAtom = atom(
 
       set(clubsWithMembersLoadingStateAtom, {state: 'success'})
 
-      return clubE.right
+      return clubE.success
     })
 )
 
@@ -166,44 +164,40 @@ export const syncAllClubsHandleStateWhenNotFoundActionAtom = atom(
       updateOnlyUuids,
     }: {updateOnlyUuids?: readonly [ClubUuid, ...ClubUuid[]]} = {}
   ) =>
-    Effect.gen(function* (_) {
+    Effect.gen(function* () {
       console.info('🦋 Refreshing clubs connections state')
       const clubsToKeyHolder = get(clubsToKeyHolderAtom)
 
       set(clubsWithMembersLoadingStateAtom, {state: 'loading'})
 
-      const fetchedClubs = yield* _(
+      const fetchedClubs = yield* pipe(
         clubsToKeyHolder,
         Record.toEntries,
         Array.map(([clubUuid, {keyPair, oldKeyPair}]) => {
-          return Effect.gen(function* (_) {
+          return Effect.gen(function* () {
             // If we are updating only specific clubs, skip the one that is not in the list
             if (updateOnlyUuids && !Array.contains(updateOnlyUuids, clubUuid))
-              return yield* _(
-                Effect.fail({
-                  _tag: 'ClubNotFetchedAsInstructed' as const,
-                  clubUuid,
-                })
-              )
+              return yield* Effect.fail({
+                _tag: 'ClubNotFetchedAsInstructed' as const,
+                clubUuid,
+              })
 
             const existingClub = pipe(
               get(clubsWithMembersStorageAtom).data,
               Array.findFirst((c) => c.club.uuid === clubUuid)
             )
 
-            const vexlNotificationToken = yield* _(
-              pipe(
-                existingClub,
-                Option.flatMap((c) => c.vexlNotificationToken),
-                Option.match({
-                  onSome: (token) => Effect.succeed(Option.some(token)),
-                  onNone: () =>
-                    set(generateVexlTokenActionAtom).pipe(
-                      Effect.map(Option.some),
-                      Effect.catchAll(() => Effect.succeed(Option.none()))
-                    ),
-                })
-              )
+            const vexlNotificationToken = yield* pipe(
+              existingClub,
+              Option.flatMap((c) => c.vexlNotificationToken),
+              Option.match({
+                onSome: (token) => Effect.succeed(Option.some(token)),
+                onNone: () =>
+                  set(generateVexlTokenActionAtom).pipe(
+                    Effect.map(Option.some),
+                    Effect.catch(() => Effect.succeed(Option.none()))
+                  ),
+              })
             )
 
             if (Option.isSome(existingClub)) {
@@ -213,15 +207,16 @@ export const syncAllClubsHandleStateWhenNotFoundActionAtom = atom(
               })
             }
 
-            return yield* _(
-              set(fetchClubWithMembersHandleStateIfNotFoundActionAtom, {
+            return yield* set(
+              fetchClubWithMembersHandleStateIfNotFoundActionAtom,
+              {
                 clubUuid,
                 keyPair,
                 oldKeyPair,
                 vexlNotificationToken,
-              })
+              }
             )
-          }).pipe(Effect.either)
+          }).pipe(Effect.result)
         }),
         Effect.all
       )
@@ -231,20 +226,22 @@ export const syncAllClubsHandleStateWhenNotFoundActionAtom = atom(
         state: 'loaded',
         data: pipe(
           fetchedClubs,
-          Array.filterMap((fetchedClubE) => {
-            return Either.match(fetchedClubE, {
-              onLeft: (e) => {
-                // Remove the club from the key holder state if it was not found
-                if (e._tag === 'ClubNotFoundError') return Option.none()
+          Array.filterMap(
+            Filter.fromPredicateOption((fetchedClubE) => {
+              return Result.match(fetchedClubE, {
+                onFailure: (e) => {
+                  // Remove the club from the key holder state if it was not found
+                  if (e._tag === 'ClubNotFoundError') return Option.none()
 
-                return Array.findFirst(
-                  prev.data,
-                  (oldClub) => oldClub.club.uuid === e.clubUuid
-                )
-              },
-              onRight: Option.some,
+                  return Array.findFirst(
+                    prev.data,
+                    (oldClub) => oldClub.club.uuid === e.clubUuid
+                  )
+                },
+                onSuccess: Option.some,
+              })
             })
-          })
+          )
         ),
       }))
 

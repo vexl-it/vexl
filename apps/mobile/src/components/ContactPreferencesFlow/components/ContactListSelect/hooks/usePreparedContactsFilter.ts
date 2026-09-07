@@ -1,4 +1,4 @@
-import {useMolecule} from 'bunshi/dist/react'
+import {useMolecule} from 'bunshi/react'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {useCallback, useEffect, useRef} from 'react'
 import {type ContactsFilter} from '../../../../../state/contacts/domain'

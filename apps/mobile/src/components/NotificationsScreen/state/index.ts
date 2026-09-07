@@ -2,7 +2,7 @@ import {
   fromDate,
   unixMillisecondsNow,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {Array, Match, Option, pipe} from 'effect/index'
+import {Array, Match, Option, pipe} from 'effect'
 import {atom} from 'jotai'
 import {notificationPreferencesAtom} from '../../../utils/preferences'
 import {refreshNotificationBadgeCountActionAtom} from '../../BadgeCountManager'

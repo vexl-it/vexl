@@ -57,7 +57,7 @@ export const newOffersNotificationBackgroundTask = async (): Promise<void> => {
     Array.map((offer) => offer.offerInfo.offerId)
   )
   if (marketplaceReadyFlowIsActive) {
-    if (!Array.isNonEmptyArray(currentOfferIds)) {
+    if (!Array.isArrayNonEmpty(currentOfferIds)) {
       console.log('Marketplace is still empty')
       return
     }
@@ -77,7 +77,7 @@ export const newOffersNotificationBackgroundTask = async (): Promise<void> => {
     currentOfferIds,
     newOffersPreferences.lastSeenOffers
   )
-  if (!Array.isNonEmptyArray(newOfferIds)) {
+  if (!Array.isArrayNonEmpty(newOfferIds)) {
     console.log('No new offers to notify about')
     return
   }

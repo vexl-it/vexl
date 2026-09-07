@@ -32,19 +32,17 @@ export const decodePaginatedNoteNextPageToken = ({
 }: {
   nextPageToken: string | undefined
 }): Effect.Effect<PaginatedNoteNextPageToken, InvalidNextPageTokenError> =>
-  Effect.gen(function* (_) {
+  Effect.gen(function* () {
     if (!nextPageToken) {
       return defaultPaginatedNoteNextPageToken
     }
 
-    return yield* _(
-      base64UrlStringToDecoded({
-        base64UrlString: nextPageToken,
-        decodeSchema: PaginatedNoteNextPageToken,
-      })
-    )
+    return yield* base64UrlStringToDecoded({
+      base64UrlString: nextPageToken,
+      decodeSchema: PaginatedNoteNextPageToken,
+    })
   }).pipe(
-    Effect.catchTag('ParseError', (cause) =>
+    Effect.catchTag('SchemaError', (cause) =>
       Effect.fail(
         new InvalidNextPageTokenError({
           cause,
@@ -65,7 +63,7 @@ export const encodePaginatedNoteNextPageToken = ({
     },
     schema: PaginatedNoteNextPageToken,
   }).pipe(
-    Effect.catchTag('ParseError', (cause) =>
+    Effect.catchTag('SchemaError', (cause) =>
       Effect.fail(
         new InvalidNextPageTokenError({
           cause,

@@ -276,7 +276,9 @@ export function filterIncomingMessages({
         senderStates: Option.match(existingStateIndex, {
           onNone: () => [...accumulator.senderStates, nextState],
           onSome: (index) =>
-            Array.replace(accumulator.senderStates, index, nextState),
+            Array.replace(accumulator.senderStates, index, nextState).pipe(
+              Option.getOrElse(() => accumulator.senderStates)
+            ),
         }),
       }
     }

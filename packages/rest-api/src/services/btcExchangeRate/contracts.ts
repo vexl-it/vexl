@@ -1,18 +1,23 @@
 import {CurrencyCode} from '@vexl-next/domain/src/general/currency.brand'
 import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {Schema} from 'effect'
+import {Effect, Option, Schema, SchemaTransformation} from 'effect'
 
 export class GetExchangeRateRequest extends Schema.Class<GetExchangeRateRequest>(
   'GetExchangeRateRequest'
 )({
-  currency: Schema.Uppercase.pipe((a) => Schema.compose(a, CurrencyCode)),
+  currency: Schema.String.pipe(
+    Schema.decodeTo(Schema.String, SchemaTransformation.toUpperCase()),
+    Schema.decodeTo(CurrencyCode)
+  ),
 }) {}
 
 export class GetExchangeRateResponse extends Schema.Class<GetExchangeRateResponse>(
   'GetExchangeRateResponse'
 )({
   BTC: Schema.Number,
-  lastUpdatedAt: Schema.optionalWith(UnixMilliseconds, {as: 'Option'}),
+  lastUpdatedAt: Schema.OptionFromOptional(UnixMilliseconds).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
 }) {}
 
 export class GetExchangeRateError extends Schema.TaggedError<GetExchangeRateError>(

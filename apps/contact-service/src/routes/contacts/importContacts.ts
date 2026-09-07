@@ -1,8 +1,8 @@
-import {HttpApiBuilder} from '@effect/platform/index'
 import {CurrentSecurity} from '@vexl-next/rest-api/src/apiSecurity'
 import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/specification'
 import {DashboardReportsService} from '@vexl-next/server-utils/src/DashboardReportsService'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {makeHttpApiHandler} from '@vexl-next/server-utils/src/makeHttpApiHandler'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import {Array, Effect, flow, pipe} from 'effect'
 import {ContactDbService} from '../../db/ContactDbService'
@@ -15,7 +15,7 @@ import {withUserActionRedisLock} from '../../utils/withUserActionRedisLock'
 import {ImportContactsQuotaService} from './importContactsQuotaService'
 import {notifyOthersAboutNewUserForked} from './utils/notifyOthersAboutNewUser'
 
-export const importContacts = HttpApiBuilder.handler(
+export const importContacts = makeHttpApiHandler(
   ContactApiSpecification,
   'Contact',
   'importContacts',
@@ -23,15 +23,13 @@ export const importContacts = HttpApiBuilder.handler(
     CurrentSecurity.pipe(
       Effect.bind('userServerHash', (s) => serverHashPhoneNumber(s.hash)),
       Effect.flatMap((security) =>
-        Effect.gen(function* (_) {
-          const contactDb = yield* _(ContactDbService)
-          const importContactsQuotaService = yield* _(
-            ImportContactsQuotaService
-          )
+        Effect.gen(function* () {
+          const contactDb = yield* ContactDbService
+          const importContactsQuotaService = yield* ImportContactsQuotaService
 
           const userServerHash = security.userServerHash
 
-          const contactsBefore = yield* _(
+          const contactsBefore = yield* pipe(
             contactDb.findContactsByHashFrom(userServerHash),
             Effect.map(
               Array.map((contact) => ({
@@ -41,13 +39,10 @@ export const importContacts = HttpApiBuilder.handler(
             )
           )
 
-          const contactsReceived = yield* _(
+          const contactsReceived = yield* pipe(
             req.payload.contacts,
-            // Do not allow importing myself
             Array.filter((a) => a !== security.hash),
-            // Do not allow importing duplicates
             Array.dedupe,
-            // convert to server-hashed contacts
             Array.map(
               flow(
                 serverHashPhoneNumber,
@@ -57,7 +52,7 @@ export const importContacts = HttpApiBuilder.handler(
                 }))
               )
             ),
-            Effect.allWith({concurrency: 'unbounded'})
+            (effects) => Effect.all(effects, {concurrency: 'unbounded'})
           )
 
           const newContacts = Array.differenceWith<{
@@ -73,28 +68,22 @@ export const importContacts = HttpApiBuilder.handler(
             : newContacts
 
           if (req.payload.replace)
-            yield* _(contactDb.deleteContactsByHashFrom(userServerHash))
+            yield* contactDb.deleteContactsByHashFrom(userServerHash)
 
-          yield* _(
-            Effect.forEach(contactsToInsert, contactDb.insertContact, {
-              batching: true,
-            })
-          )
+          yield* Effect.forEach(contactsToInsert, contactDb.insertContact, {})
 
-          yield* _(Effect.log('New contacts. Notifying', newContacts))
+          yield* Effect.log('New contacts. Notifying', newContacts)
 
-          yield* _(
-            importContactsQuotaService.checkAndIncrementImportContactsQuota(
-              userServerHash
-            )(newContacts.length)
-          )
+          yield* importContactsQuotaService.checkAndIncrementImportContactsQuota(
+            userServerHash
+          )(newContacts.length)
 
-          yield* _(
+          yield* pipe(
             DashboardReportsService,
             Effect.flatMap((service) => service.reportContactsImported())
           )
 
-          const phoneNumberHashesToServerToClientHash = yield* _(
+          const phoneNumberHashesToServerToClientHash = yield* pipe(
             req.payload.contacts,
             Array.map((hashedNumber) =>
               pipe(
@@ -106,7 +95,7 @@ export const importContacts = HttpApiBuilder.handler(
                 }))
               )
             ),
-            Effect.allWith({concurrency: 'unbounded'})
+            (effects) => Effect.all(effects, {concurrency: 'unbounded'})
           )
 
           return {

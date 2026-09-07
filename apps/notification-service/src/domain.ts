@@ -1,4 +1,4 @@
-import {Schema} from 'effect/index'
+import {Schema} from 'effect'
 import {
   ClubExpiredNoticeSendTask,
   ClubFlaggedNoticeSendTask,
@@ -13,7 +13,7 @@ import {
 } from './services/NotificationSocketMessaging/domain'
 
 // TODO later we can handle more notifications not just chat :)
-export const SupportedPushNotificationTask = Schema.Union(
+export const SupportedPushNotificationTask = Schema.Union([
   NewChatMessageNoticeSendTask,
   NewUserNoticeSendTask,
   NewClubUserNoticeSendTask,
@@ -23,7 +23,7 @@ export const SupportedPushNotificationTask = Schema.Union(
   ClubFlaggedNoticeSendTask,
   ClubExpiredNoticeSendTask,
   NewContentNoticeSendTask,
-  VexlProductNotificationSendTask
-)
+  VexlProductNotificationSendTask,
+])
 export type SupportedPushNotificationTask =
   typeof SupportedPushNotificationTask.Type

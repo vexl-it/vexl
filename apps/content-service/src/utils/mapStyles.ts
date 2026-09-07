@@ -4,7 +4,7 @@ import {
   type MapStylesResponse,
 } from '@vexl-next/rest-api/src/services/content/contracts'
 import axios from 'axios'
-import {Context, Effect, Layer, Schema} from 'effect'
+import {Context, Effect, Layer, pipe, Schema} from 'effect'
 import {darkMapStyleUrlConfig, lightMapStyleUrlConfig} from '../configs'
 
 const MAP_STYLE_FETCH_TIMEOUT_MS = 10_000
@@ -13,8 +13,8 @@ type MapStyleVariant = 'light' | 'dark'
 class SanitizedMapStyleError extends Schema.TaggedError<SanitizedMapStyleError>(
   'SanitizedMapStyleError'
 )('SanitizedMapStyleError', {
-  styleVariant: Schema.Literal('light', 'dark'),
-  errorType: Schema.Literal('AxiosError', 'UnexpectedError', 'ParseError'),
+  styleVariant: Schema.Literals(['light', 'dark']),
+  errorType: Schema.Literals(['AxiosError', 'UnexpectedError', 'SchemaError']),
   message: Schema.String,
   httpStatus: Schema.optional(Schema.Number),
 }) {}
@@ -49,8 +49,8 @@ const fetchStyleJson = (
   url: HttpsUrlString,
   styleVariant: MapStyleVariant
 ): Effect.Effect<MapStyleJson, MapStyleFetchError | MapStyleValidationError> =>
-  Effect.gen(function* (_) {
-    const response = yield* _(
+  Effect.gen(function* () {
+    const response = yield* pipe(
       Effect.tryPromise(
         async () => await axios.get(url, {timeout: MAP_STYLE_FETCH_TIMEOUT_MS})
       ),
@@ -70,17 +70,17 @@ const fetchStyleJson = (
     )
     // Validate the shape only — decoding a Struct strips excess properties,
     // so the full original document is what gets stringified.
-    return yield* _(
-      Schema.decodeUnknown(MapStyleShape)(response.data),
-      Effect.zipRight(
-        Schema.decode(MapStyleJson)(JSON.stringify(response.data))
+    return yield* pipe(
+      Schema.decodeUnknownEffect(MapStyleShape)(response.data),
+      Effect.andThen(
+        Schema.decodeEffect(MapStyleJson)(JSON.stringify(response.data))
       ),
       Effect.mapError(
         () =>
           new MapStyleValidationError({
             cause: new SanitizedMapStyleError({
               styleVariant,
-              errorType: 'ParseError',
+              errorType: 'SchemaError',
               message: 'Map style response failed validation',
             }),
             message: `Fetched ${styleVariant} map style is not a valid style document`,
@@ -89,15 +89,15 @@ const fetchStyleJson = (
     )
   })
 
-export class MapStylesService extends Context.Tag('MapStylesService')<
+export class MapStylesService extends Context.Service<
   MapStylesService,
   MapStylesOperations
->() {
+>()('MapStylesService') {
   static readonly Live = Layer.effect(
     MapStylesService,
-    Effect.gen(function* (_) {
-      const lightUrl = yield* _(lightMapStyleUrlConfig)
-      const darkUrl = yield* _(darkMapStyleUrlConfig)
+    Effect.gen(function* () {
+      const lightUrl = yield* lightMapStyleUrlConfig
+      const darkUrl = yield* darkMapStyleUrlConfig
 
       return {
         fetchMapStyles: () =>

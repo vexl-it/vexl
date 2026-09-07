@@ -7,7 +7,7 @@ import {
   type BtcUnit,
 } from '@vexl-next/ui'
 import type {IconProps} from '@vexl-next/ui/src/icons/types'
-import {useMolecule} from 'bunshi/dist/react'
+import {useMolecule} from 'bunshi/react'
 import {Effect} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useState} from 'react'
@@ -195,8 +195,8 @@ function PriceUpToStep({
           disabled={nextDisabled}
           onPress={() => {
             void Effect.runPromise(
-              Effect.gen(function* (_) {
-                const ok = yield* _(checkAmountExceedsLimit())
+              Effect.gen(function* () {
+                const ok = yield* checkAmountExceedsLimit()
                 if (ok) onComplete()
               })
             )

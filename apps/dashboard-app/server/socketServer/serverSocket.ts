@@ -6,13 +6,11 @@ import {
   type ServerSocketError,
 } from './utils'
 
-export class IncommingConnectionsStreamContext extends Context.Tag(
-  'IncommingConnectionsStreamContext'
-)<
+export class IncommingConnectionsStreamContext extends Context.Service<
   IncommingConnectionsStreamContext,
   Stream.Stream<WebSocket, ServerSocketError, never>
->() {
-  static readonly Live = Layer.scoped(
+>()('IncommingConnectionsStreamContext') {
+  static readonly Live = Layer.effect(
     IncommingConnectionsStreamContext,
     createWebSocketServer.pipe(Effect.map(createConnectionsStream))
   )

@@ -1,4 +1,4 @@
-import {Either, flow, Schema, type ParseResult} from 'effect'
+import {flow, Result, Schema} from 'effect'
 import {createMMKV, type MMKV} from 'react-native-mmkv'
 import {JsonParseError, JsonStringifyError} from '../fpUtils'
 import {ReadingFromStoreError, ValueNotSet, WritingToStoreError} from './domain'
@@ -7,46 +7,46 @@ export interface EffectMmkv {
   _storage: MMKV
   set: (
     key: string
-  ) => (value: string) => Either.Either<void, WritingToStoreError>
+  ) => (value: string) => Result.Result<void, WritingToStoreError>
   get: (
     key: string
-  ) => Either.Either<string, ReadingFromStoreError | ValueNotSet>
+  ) => Result.Result<string, ReadingFromStoreError | ValueNotSet>
 
   setJSON: (
     key: string
   ) => (
     value: unknown
-  ) => Either.Either<void, JsonStringifyError | WritingToStoreError>
+  ) => Result.Result<void, JsonStringifyError | WritingToStoreError>
   getJSON: (
     key: string
-  ) => Either.Either<
+  ) => Result.Result<
     unknown,
     JsonParseError | ValueNotSet | ReadingFromStoreError
   >
   getVerified: <A, I>(
     key: string,
-    schema: Schema.Schema<A, I, never>
-  ) => Either.Either<
+    schema: Schema.Codec<A, I, never, never>
+  ) => Result.Result<
     A,
     | WritingToStoreError
     | JsonParseError
     | ValueNotSet
     | ReadingFromStoreError
-    | ParseResult.ParseError
+    | Schema.SchemaError
   >
 
   saveVerified: <A, I>(
     key: string,
-    schema: Schema.Schema<A, I, never>
+    schema: Schema.Codec<A, I, never, never>
   ) => (
     value: A
-  ) => Either.Either<void, WritingToStoreError | ParseResult.ParseError>
+  ) => Result.Result<void, WritingToStoreError | Schema.SchemaError>
 }
 
 function createEffectMmkv(storage: MMKV): EffectMmkv {
   function set(key: string): ReturnType<EffectMmkv['set']> {
     return (value) =>
-      Either.try({
+      Result.try({
         try: () => {
           storage.set(key, value)
         },
@@ -55,11 +55,11 @@ function createEffectMmkv(storage: MMKV): EffectMmkv {
   }
 
   function get(key: string): ReturnType<EffectMmkv['get']> {
-    return Either.try({
+    return Result.try({
       try: () => storage.getString(key),
       catch: (e) => new ReadingFromStoreError({cause: e}),
     }).pipe(
-      Either.filterOrLeft(
+      Result.filterOrFail(
         (x) => x !== null && x !== undefined,
         () => new ValueNotSet()
       )
@@ -67,37 +67,39 @@ function createEffectMmkv(storage: MMKV): EffectMmkv {
   }
 
   const toJson = flow(
-    Schema.encodeEither(Schema.parseJson(Schema.Unknown)),
-    Either.mapLeft((cause) => new JsonStringifyError({cause}))
+    Schema.encodeResult(Schema.fromJsonString(Schema.Unknown)),
+    Result.mapError((cause) => new JsonStringifyError({cause}))
   )
   function setJSON(key: string): ReturnType<EffectMmkv['setJSON']> {
-    return (value) => toJson(value).pipe(Either.flatMap(set(key)))
+    return (value) => toJson(value).pipe(Result.flatMap(set(key)))
   }
 
   const fromJson = flow(
-    Schema.decodeEither(Schema.parseJson(Schema.Unknown)),
-    Either.mapLeft((cause) => new JsonParseError({cause}))
+    Schema.decodeResult(Schema.fromJsonString(Schema.Unknown)),
+    Result.mapError((cause) => new JsonParseError({cause}))
   )
   function getJSON(key: string): ReturnType<EffectMmkv['getJSON']> {
-    return get(key).pipe(Either.flatMap(fromJson))
+    return get(key).pipe(Result.flatMap(fromJson))
   }
 
   const getVerified = <A>(
     key: string,
-    schema: Schema.Schema<A, any, never>
-  ): Either.Either<
+    schema: Schema.Codec<A, any, never, never>
+  ): Result.Result<
     A,
-    ValueNotSet | ReadingFromStoreError | ParseResult.ParseError
+    ValueNotSet | ReadingFromStoreError | Schema.SchemaError
   > =>
-    get(key).pipe(Either.flatMap(Schema.decodeEither(Schema.parseJson(schema))))
+    get(key).pipe(
+      Result.flatMap(Schema.decodeResult(Schema.fromJsonString(schema)))
+    )
 
   const saveVerified =
-    <A, I>(key: string, schema: Schema.Schema<A, I, never>) =>
+    <A, I>(key: string, schema: Schema.Codec<A, I, never, never>) =>
     (
       value: A
-    ): Either.Either<void, WritingToStoreError | ParseResult.ParseError> => {
-      return Schema.encodeEither(Schema.parseJson(schema))(value).pipe(
-        Either.flatMap(set(key))
+    ): Result.Result<void, WritingToStoreError | Schema.SchemaError> => {
+      return Schema.encodeResult(Schema.fromJsonString(schema))(value).pipe(
+        Result.flatMap(set(key))
       )
     }
 

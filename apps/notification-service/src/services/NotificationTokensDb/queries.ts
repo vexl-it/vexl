@@ -1,4 +1,3 @@
-import {SqlClient, SqlResolver, SqlSchema} from '@effect/sql'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {
@@ -10,6 +9,7 @@ import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {PlatformName} from '@vexl-next/rest-api'
 import {AppSource} from '@vexl-next/rest-api/src/commonHeaders'
 import {Array, Effect, flow, pipe, Schema} from 'effect'
+import {SqlClient, SqlResolver, SqlSchema} from 'effect/unstable/sql'
 import {NotificationSecretRecord, NotificationTokenRecord} from './domain'
 
 const CreateNotificationTokenParams = Schema.Struct({
@@ -20,15 +20,15 @@ const CreateNotificationTokenParams = Schema.Struct({
   clientAppSource: AppSource,
   clientLanguage: Schema.String,
   clientPrefix: Schema.NullOr(CountryPrefix),
-  createdAt: Schema.DateFromSelf,
-  updatedAt: Schema.DateFromSelf,
+  createdAt: Schema.Date,
+  updatedAt: Schema.Date,
 })
 export type CreateNotificationTokenParams =
   typeof CreateNotificationTokenParams.Type
 
 const SaveNotificationTokenParams = Schema.Struct({
   token: VexlNotificationToken,
-  secretId: Schema.BigInt,
+  secretId: Schema.BigIntFromString,
 })
 export type SaveNotificationTokenParams =
   typeof SaveNotificationTokenParams.Type
@@ -47,7 +47,7 @@ export const UpdateClientInfoParams = Schema.Struct({
 })
 export type UpdateClientInfoParams = typeof UpdateClientInfoParams.Type
 
-export const SelectVexlTokensParams = Schema.Literal('general', 'marketing')
+export const SelectVexlTokensParams = Schema.Literals(['general', 'marketing'])
 export type SelectVexlTokensParams = typeof SelectVexlTokensParams.Type
 
 const SelectedVexlTokenRecord = Schema.Struct({
@@ -58,29 +58,29 @@ const SelectedVexlTokenRecord = Schema.Struct({
 export const createSaveNotificationTokenSecret = Effect.gen(function* () {
   const sql = yield* SqlClient.SqlClient
 
-  const query = SqlSchema.single({
+  const query = SqlSchema.findOne({
     Request: CreateNotificationTokenParams,
     Result: NotificationSecretRecord,
     execute: (params) =>
       sql.withTransaction(
-        Effect.gen(function* (_) {
+        Effect.gen(function* () {
           // Remove all existing references to the expo notification token to ensure it's only associated with one secret at a time.
           if (params.expoNotificationToken !== null) {
-            yield* _(sql`
+            yield* sql`
               UPDATE notification_token_secrets
               SET
                 expo_notification_token = NULL
               WHERE
                 expo_notification_token = ${params.expoNotificationToken}
-            `)
+            `
           }
 
-          return yield* _(sql`
+          return yield* sql`
             INSERT INTO
               notification_token_secrets ${sql.insert(params)}
             RETURNING
               *
-          `)
+          `
         })
       ),
   })
@@ -96,7 +96,7 @@ export const createSaveNotificationTokenSecret = Effect.gen(function* () {
 export const createSaveNotificationToken = Effect.gen(function* () {
   const sql = yield* SqlClient.SqlClient
 
-  const query = SqlSchema.single({
+  const query = SqlSchema.findOne({
     Request: SaveNotificationTokenParams,
     Result: NotificationTokenRecord,
     execute: (params) => sql`
@@ -118,24 +118,24 @@ export const createSaveNotificationToken = Effect.gen(function* () {
 export const createUpdateClientInfo = Effect.gen(function* () {
   const sql = yield* SqlClient.SqlClient
 
-  const query = SqlSchema.single({
+  const query = SqlSchema.findOne({
     Request: UpdateClientInfoParams,
     Result: NotificationSecretRecord,
     execute: (params) =>
       sql.withTransaction(
-        Effect.gen(function* (_) {
+        Effect.gen(function* () {
           if (params.expoNotificationToken !== null) {
-            yield* _(sql`
+            yield* sql`
               UPDATE notification_token_secrets
               SET
                 expo_notification_token = NULL
               WHERE
                 expo_notification_token = ${params.expoNotificationToken}
                 AND secret <> ${params.secretToken}
-            `)
+            `
           }
 
-          return yield* _(sql`
+          return yield* sql`
             UPDATE notification_token_secrets
             SET
               ${sql.update({
@@ -154,7 +154,7 @@ export const createUpdateClientInfo = Effect.gen(function* () {
               secret = ${params.secretToken}
             RETURNING
               *
-          `)
+          `
         })
       ),
   })
@@ -208,7 +208,7 @@ export const createSelectVexlTokens = Effect.gen(function* () {
 export const createFindSecretByNotificationToken = Effect.gen(function* () {
   const sql = yield* SqlClient.SqlClient
 
-  const query = SqlSchema.findOne({
+  const query = SqlSchema.findOneOption({
     Request: VexlNotificationToken,
     Result: NotificationSecretRecord,
     execute: (token) => sql`
@@ -258,7 +258,7 @@ export const createFindAllTokensForSecret = Effect.gen(function* () {
 export const createFindSecretBySecretValue = Effect.gen(function* () {
   const sql = yield* SqlClient.SqlClient
 
-  const query = SqlSchema.findOne({
+  const query = SqlSchema.findOneOption({
     Request: VexlNotificationTokenSecret,
     Result: NotificationSecretRecord,
     execute: (secret) => sql`
@@ -282,7 +282,7 @@ export const createFindSecretBySecretValue = Effect.gen(function* () {
 export const createDeleteNotificationToken = Effect.gen(function* () {
   const sql = yield* SqlClient.SqlClient
 
-  const resolver = yield* SqlResolver.void('deleteNotificationToken', {
+  const resolver = SqlResolver.void({
     Request: VexlNotificationToken,
     execute: (params) => sql`
       DELETE FROM notification_tokens
@@ -292,7 +292,7 @@ export const createDeleteNotificationToken = Effect.gen(function* () {
   })
 
   return flow(
-    resolver.execute,
+    SqlResolver.request(resolver),
     UnexpectedServerError.wrapErrors('Error in deleteNotificationToken'),
     Effect.withSpan('deleteNotificationToken query')
   )
@@ -302,7 +302,7 @@ export const createDeleteNotificationToken = Effect.gen(function* () {
 export const createDeleteNotificationSecret = Effect.gen(function* () {
   const sql = yield* SqlClient.SqlClient
 
-  const resolver = yield* SqlResolver.void('deleteNotificationSecret', {
+  const resolver = SqlResolver.void({
     Request: VexlNotificationTokenSecret,
     execute: (params) => sql`
       DELETE FROM notification_token_secrets
@@ -312,7 +312,7 @@ export const createDeleteNotificationSecret = Effect.gen(function* () {
   })
 
   return flow(
-    resolver.execute,
+    SqlResolver.request(resolver),
     UnexpectedServerError.wrapErrors('Error in deleteNotificationSecret'),
     Effect.withSpan('deleteNotificationSecret query')
   )

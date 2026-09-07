@@ -1723,7 +1723,7 @@ console.log(
   pipe(
     Array.map(countries, (info) => info.name.length),
     (array) =>
-      Array.isNonEmptyArray(array) ? Array.max(array, Order.number) : 0
+      Array.isArrayNonEmpty(array) ? Array.max(array, Order.Number) : 0
   )
 )
 

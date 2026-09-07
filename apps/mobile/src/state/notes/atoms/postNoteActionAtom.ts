@@ -1,5 +1,5 @@
 import {type NavigationProp} from '@react-navigation/native'
-import {Effect, Either} from 'effect'
+import {Effect, pipe, Result} from 'effect'
 import {atom} from 'jotai'
 import {showErrorAlert} from '../../../components/ErrorAlert'
 import {offerProgressModalActionAtoms} from '../../../components/UploadingOfferProgressModal/atoms'
@@ -37,8 +37,8 @@ export const postNoteActionAtom = atom(
   ): Effect.Effect<boolean> => {
     const {t} = get(translationAtom)
 
-    return Effect.gen(function* (_) {
-      yield* _(Effect.promise(dismissKeyboardAndResolveOnLayoutUpdate))
+    return Effect.gen(function* () {
+      yield* Effect.promise(dismissKeyboardAndResolveOnLayoutUpdate)
 
       set(offerProgressModalActionAtoms.show, {
         title: t('notes.create.encryptingYourNote'),
@@ -46,7 +46,7 @@ export const postNoteActionAtom = atom(
         indicateProgress: {type: 'intermediate'},
       })
 
-      const result = yield* _(
+      const result = yield* pipe(
         set(createNoteActionAtom, {
           text,
           allowRepost,
@@ -63,14 +63,14 @@ export const postNoteActionAtom = atom(
             })
           },
         }),
-        Effect.either
+        Effect.result
       )
 
-      if (Either.isLeft(result)) {
+      if (Result.isFailure(result)) {
         set(offerProgressModalActionAtoms.hide)
         showErrorAlert({
           title: t('common.somethingWentWrong'),
-          error: result.left,
+          error: result.failure,
         })
         return false
       }
@@ -89,7 +89,7 @@ export const postNoteActionAtom = atom(
       navigateToBoard(navigation, 'mine')
       return true
     }).pipe(
-      Effect.catchAllDefect((defect) => {
+      Effect.catchDefect((defect) => {
         set(offerProgressModalActionAtoms.hide)
         showErrorAlert({
           title: t('common.somethingWentWrong'),

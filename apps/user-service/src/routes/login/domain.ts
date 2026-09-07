@@ -19,7 +19,7 @@ export const ChallengeVerificationState = Schema.Struct({
 
 export type ChallengeVerificationState = typeof ChallengeVerificationState.Type
 
-export const PhoneVerificationState = Schema.Union(
+export const PhoneVerificationState = Schema.Union([
   Schema.Struct({
     id: PhoneNumberVerificationId,
     type: Schema.Literal('twilioSmsVerification'),
@@ -35,7 +35,7 @@ export const PhoneVerificationState = Schema.Union(
     phoneNumber: HashedPhoneNumber,
     countryPrefix: CountryPrefix,
     expiresAt: UnixMilliseconds,
-  })
-)
+  }),
+])
 
 export type PhoneVerificationState = typeof PhoneVerificationState.Type

@@ -1,63 +1,57 @@
-import {HttpApiBuilder} from '@effect/platform/index'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {HEADER_ADMIN_TOKEN} from '@vexl-next/rest-api/src/constants'
 import {ContentApiSpecification} from '@vexl-next/rest-api/src/services/content/specification'
 import {EnqueueVexlProductNotification} from '@vexl-next/server-utils/src/ContentServiceVexlProductNotificationMq'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {makeHttpApiHandler} from '@vexl-next/server-utils/src/makeHttpApiHandler'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
-import {Effect} from 'effect'
+import {Effect, pipe} from 'effect'
 import {VexlProductNotificationsDbService} from '../../db/VexlProductNotificationsDbService'
 import {validateAdminToken} from './validateAdminToken'
 
-export const createVexlProductNotificationHandler = HttpApiBuilder.handler(
+export const createVexlProductNotificationHandler = makeHttpApiHandler(
   ContentApiSpecification,
   'VexlProductNotifications',
   'createVexlProductNotification',
   (req) =>
-    Effect.gen(function* (_) {
-      yield* _(validateAdminToken(req.headers[HEADER_ADMIN_TOKEN]))
+    Effect.gen(function* () {
+      yield* validateAdminToken(req.headers[HEADER_ADMIN_TOKEN])
 
-      const db = yield* _(VexlProductNotificationsDbService)
-      const enqueueVexlProductNotification = yield* _(
-        EnqueueVexlProductNotification
-      )
+      const db = yield* VexlProductNotificationsDbService
+      const enqueueVexlProductNotification =
+        yield* EnqueueVexlProductNotification
       const normalizedVexlProductNotification = {
         ...req.payload.vexlProductNotification,
         issuePushNotification: req.payload.issuePushNotification,
       }
-      const vexlProductNotification = yield* _(
-        Effect.gen(function* (_) {
-          const inserted = yield* _(
-            db.insertVexlProductNotification({
-              vexlProductNotification: normalizedVexlProductNotification,
-            })
-          )
+      const vexlProductNotification = yield* Effect.gen(function* () {
+        const inserted = yield* db.insertVexlProductNotification({
+          vexlProductNotification: normalizedVexlProductNotification,
+        })
 
-          if (req.payload.issuePushNotification) {
-            yield* _(
-              enqueueVexlProductNotification(inserted),
-              Effect.catchAll((e) =>
-                Effect.zipRight(
-                  Effect.logError(
-                    'Failed to enqueue Vexl product notification',
-                    e
-                  ),
-                  Effect.fail(
-                    new UnexpectedServerError({
-                      status: 500,
-                      cause: e,
-                      message:
-                        'Failed to enqueue Vexl product notification push',
-                    })
-                  )
+        if (req.payload.issuePushNotification) {
+          yield* pipe(
+            enqueueVexlProductNotification(inserted),
+            Effect.catch((e) =>
+              Effect.andThen(
+                Effect.logError(
+                  'Failed to enqueue Vexl product notification',
+                  e
+                ),
+                Effect.fail(
+                  new UnexpectedServerError({
+                    status: 500,
+                    cause: e,
+                    message: 'Failed to enqueue Vexl product notification push',
+                  })
                 )
               )
             )
-          }
+          )
+        }
 
-          return inserted
-        }).pipe(withDbTransaction)
-      )
+        return inserted
+      }).pipe(withDbTransaction)
 
       return {vexlProductNotification}
     }).pipe(

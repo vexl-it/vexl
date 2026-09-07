@@ -1,4 +1,3 @@
-import {HttpApiBuilder} from '@effect/platform/index'
 import {
   NotFoundError,
   UnexpectedServerError,
@@ -10,6 +9,7 @@ import {
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {NotificationApiSpecification} from '@vexl-next/rest-api/src/services/notification/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {makeHttpApiHandler} from '@vexl-next/server-utils/src/makeHttpApiHandler'
 import {Effect, Schema} from 'effect'
 import {NotificationTokensDb} from '../../services/NotificationTokensDb'
 
@@ -18,10 +18,10 @@ const generateVexlNotificationToken = (): Effect.Effect<
   UnexpectedServerError,
   never
 > =>
-  Schema.decode(VexlNotificationToken)(
+  Schema.decodeEffect(VexlNotificationToken)(
     `${VEXL_TOKEN_PREFIX}${generateUuid()}`
   ).pipe(
-    Effect.catchAll(() =>
+    Effect.catch(() =>
       Effect.fail(
         new UnexpectedServerError({
           status: 500,
@@ -31,13 +31,13 @@ const generateVexlNotificationToken = (): Effect.Effect<
     )
   )
 
-export const generateNotificationTokenHandler = HttpApiBuilder.handler(
+export const generateNotificationTokenHandler = makeHttpApiHandler(
   NotificationApiSpecification,
   'NotificationTokenGroup',
   'generateNotificationToken',
   (req) =>
     makeEndpointEffect(
-      Effect.gen(function* (_) {
+      Effect.gen(function* () {
         const {payload} = req
 
         const db = yield* NotificationTokensDb
@@ -46,11 +46,12 @@ export const generateNotificationTokenHandler = HttpApiBuilder.handler(
           payload.secret
         )
 
-        const secretRecord = yield* secretRecordOption.pipe(
-          Effect.catchAll(() => Effect.fail(new NotFoundError({status: 404})))
+        const secretRecord = yield* Effect.fromOption(
+          secretRecordOption,
+          () => new NotFoundError({status: 404})
         )
 
-        const token = yield* _(generateVexlNotificationToken())
+        const token = yield* generateVexlNotificationToken()
 
         yield* db.saveNotificationToken({
           token,

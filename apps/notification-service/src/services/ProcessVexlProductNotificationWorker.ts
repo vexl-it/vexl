@@ -5,30 +5,22 @@ import {PendingBatchedNotificationsDb} from './PendingBatchedNotificationsDb'
 
 export const ProcessVexlProductNotificationWorker =
   ProcessVexlProductNotificationConsumerLayer((vexlProductNotification) =>
-    Effect.gen(function* (_) {
-      const pendingBatchedNotificationsDb = yield* _(
-        PendingBatchedNotificationsDb
+    Effect.gen(function* () {
+      const pendingBatchedNotificationsDb = yield* PendingBatchedNotificationsDb
+      const notificationTokensDb = yield* NotificationTokensDb
+      const tokens = yield* notificationTokensDb.selectVexlTokens(
+        vexlProductNotification.type === 'MARKETING' ? 'marketing' : 'general'
       )
-      const notificationTokensDb = yield* _(NotificationTokensDb)
-      const tokens = yield* _(
-        notificationTokensDb.selectVexlTokens(
-          vexlProductNotification.type === 'MARKETING' ? 'marketing' : 'general'
-        )
-      )
-      yield* _(
-        Effect.logInfo('Selected Vexl tokens for product notification', {
-          count: tokens.length,
-          type: vexlProductNotification.type,
-        })
-      )
-      yield* _(
-        pendingBatchedNotificationsDb.insertPendingForVexlProductNotification(
-          vexlProductNotification,
-          tokens
-        )
+      yield* Effect.logInfo('Selected Vexl tokens for product notification', {
+        count: tokens.length,
+        type: vexlProductNotification.type,
+      })
+      yield* pendingBatchedNotificationsDb.insertPendingForVexlProductNotification(
+        vexlProductNotification,
+        tokens
       )
     }).pipe(
-      Effect.catchAll((e) =>
+      Effect.catch((e) =>
         Effect.logError(
           'Failed to process Vexl product notification MQ entry',
           e

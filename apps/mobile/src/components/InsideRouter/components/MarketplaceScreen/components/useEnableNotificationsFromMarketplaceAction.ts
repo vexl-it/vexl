@@ -1,4 +1,4 @@
-import {Effect, Option} from 'effect'
+import {Effect, Option, pipe} from 'effect'
 import {PermissionStatus} from 'expo'
 import {getPermissionsAsync} from 'expo-notifications'
 import {useSetAtom} from 'jotai'
@@ -23,7 +23,7 @@ function areNotificationsEnabled(
 const getNotificationSettingsOrUndefined = Effect.tryPromise({
   try: async () => await getPermissionsAsync(),
   catch: () => undefined,
-}).pipe(Effect.catchAll(() => Effect.succeed(undefined)))
+}).pipe(Effect.catch(() => Effect.succeed(undefined)))
 
 export default function useEnableNotificationsFromMarketplaceAction(): () => void {
   const checkAndAskForNotificationPermissions = useSetAtom(
@@ -38,24 +38,24 @@ export default function useEnableNotificationsFromMarketplaceAction(): () => voi
 
   return useCallback(() => {
     Effect.runFork(
-      Effect.gen(function* (_) {
-        const settings = yield* _(getNotificationSettingsOrUndefined)
+      Effect.gen(function* () {
+        const settings = yield* getNotificationSettingsOrUndefined
 
         if (settings?.status === PermissionStatus.DENIED) {
           openNotificationSettings()
-          const status = yield* _(checkAreNotificationsEnabled())
+          const status = yield* checkAreNotificationsEnabled()
           if (areNotificationsEnabled(status)) {
             dismissEnableNotificationsSuggestion()
           }
           return
         }
 
-        yield* _(
+        yield* pipe(
           checkAndAskForNotificationPermissions({force: true}),
-          Effect.catchAll(() => Effect.void)
+          Effect.catch(() => Effect.void)
         )
 
-        const status = yield* _(checkAreNotificationsEnabled())
+        const status = yield* checkAreNotificationsEnabled()
 
         if (areNotificationsEnabled(status)) {
           dismissEnableNotificationsSuggestion()

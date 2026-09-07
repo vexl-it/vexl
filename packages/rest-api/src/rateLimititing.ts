@@ -1,14 +1,13 @@
-import {HttpApiMiddleware} from '@effect/platform/index'
 import {
   RateLimitedError,
   UnexpectedServerError,
 } from '@vexl-next/domain/src/general/commonErrors'
-import {Schema} from 'effect/index'
+import {Schema} from 'effect'
+import {HttpApiMiddleware} from 'effect/unstable/httpapi'
 
-export class RateLimitingMiddleware extends HttpApiMiddleware.Tag<RateLimitingMiddleware>()(
+export class RateLimitingMiddleware extends HttpApiMiddleware.Service<RateLimitingMiddleware>()(
   'RateLimitingMiddleware',
   {
-    optional: false,
-    failure: Schema.Union(RateLimitedError, UnexpectedServerError),
+    error: Schema.Union([RateLimitedError, UnexpectedServerError]),
   }
 ) {}

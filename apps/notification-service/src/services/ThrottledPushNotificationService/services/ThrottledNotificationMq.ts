@@ -8,7 +8,7 @@ import {
   type UnixMilliseconds,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {makeMqService} from '@vexl-next/server-utils/src/mqService'
-import {Data, Effect, Schema} from 'effect/index'
+import {Data, Effect, pipe, Schema} from 'effect'
 import {notificationThrottleTtlMinutesConfig} from '../../../configs'
 import {PushNotificationService} from '../../PushNotificationService'
 import {lockOnNotificationToken} from '../utils'
@@ -46,67 +46,58 @@ export type EnqueueProcessNotificationsContext =
   typeof EnqueueProcessNotificationsContext
 
 export const processThrottledNotificationsWorker = consumerLayer(({token}) =>
-  Effect.gen(function* (_) {
+  Effect.gen(function* () {
     // Check if notification was issued
     // Get pending notifications for the token and erase throttle timeout
     // send notifications
 
-    const pushNotificationService = yield* _(PushNotificationService)
-    const lastTimeIssuedForNotificationTokenDb = yield* _(
-      LastTimeIssuedForNotificationTokenDb
-    )
-    const notificationsWaitingToBeIssuedDb = yield* _(
-      NotificationWaitingToBeIssuedForNotificationToken
-    )
+    const pushNotificationService = yield* PushNotificationService
+    const lastTimeIssuedForNotificationTokenDb =
+      yield* LastTimeIssuedForNotificationTokenDb
+    const notificationsWaitingToBeIssuedDb =
+      yield* NotificationWaitingToBeIssuedForNotificationToken
     const throttleTtlMs =
-      (yield* _(notificationThrottleTtlMinutesConfig)) * 60 * 1000
+      (yield* notificationThrottleTtlMinutesConfig) * 60 * 1000
 
-    yield* _(Effect.log('Processing throttled notifications'))
-    const lastTimeIssued = yield* _(
+    yield* Effect.log('Processing throttled notifications')
+    const lastTimeIssued = yield* pipe(
       lastTimeIssuedForNotificationTokenDb.getLastTimeIssuedForNotificationToken(
         token
       ),
-      Effect.catchTag('NoSuchElementException', () =>
+      Effect.catchTag('NoSuchElementError', () =>
         Effect.succeed(UnixMilliseconds0)
       )
     )
     if (lastTimeIssued + throttleTtlMs > Date.now()) {
-      yield* _(
-        Effect.log(
-          'Skipping processing throttled notifications, still in throttle period'
-        )
+      yield* Effect.log(
+        'Skipping processing throttled notifications, still in throttle period'
       )
       return
     }
 
-    yield* _(
-      lastTimeIssuedForNotificationTokenDb.setLastTimeIssuedForNotificationToken(
-        token,
-        unixMillisecondsNow()
-      )
+    yield* lastTimeIssuedForNotificationTokenDb.setLastTimeIssuedForNotificationToken(
+      token,
+      unixMillisecondsNow()
     )
 
-    const pendingNotifications = yield* _(
-      notificationsWaitingToBeIssuedDb.getAndClearWaitingListForToken(token)
-    )
+    const pendingNotifications =
+      yield* notificationsWaitingToBeIssuedDb.getAndClearWaitingListForToken(
+        token
+      )
     if (pendingNotifications.length === 0) {
-      yield* _(Effect.log('No pending notifications found for token'))
+      yield* Effect.log('No pending notifications found for token')
       return
     }
 
-    yield* _(
-      Effect.log('Found pending notifications. Issuing', {
-        count: pendingNotifications.length,
-      })
-    )
-    yield* _(
-      pushNotificationService.sendNotificationViaExpoNotification(
-        pendingNotifications
-      )
+    yield* Effect.log('Found pending notifications. Issuing', {
+      count: pendingNotifications.length,
+    })
+    yield* pushNotificationService.sendNotificationViaExpoNotification(
+      pendingNotifications
     )
   }).pipe(
     lockOnNotificationToken(token),
-    Effect.catchAll((e) => {
+    Effect.catch((e) => {
       return Effect.logError('Failed to process throttled notifications', e)
     })
   )

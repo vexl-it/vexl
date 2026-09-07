@@ -4,9 +4,9 @@ import {contactDatabaseConfig} from '../configs'
 
 export interface PgContactClient extends PgClient {}
 export const PgContactClient =
-  Context.GenericTag<PgContactClient>('PgContactClient')
+  Context.Service<PgContactClient>('PgContactClient')
 
-export const PgContactLive = Layer.scopedContext(
+export const PgContactLive = Layer.effectContext(
   contactDatabaseConfig.pipe(
     Effect.flatMap(makePgClient),
     Effect.map((client) => Context.make(PgContactClient, client))

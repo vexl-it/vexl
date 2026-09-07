@@ -1,8 +1,8 @@
-import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {Effect, flow, Schema} from 'effect'
+import {SqlSchema} from 'effect/unstable/sql'
 import {ClubMemberRecord} from '../domain'
 
 export const FindClubMemberByPublicKeyParams = Schema.Struct({
@@ -11,10 +11,10 @@ export const FindClubMemberByPublicKeyParams = Schema.Struct({
 export type FindClubMemberByPublicKeyParams =
   typeof FindClubMemberByPublicKeyParams.Type
 
-export const createFindClubMemeberByPublicKey = Effect.gen(function* (_) {
-  const sql = yield* _(PgClient.PgClient)
+export const createFindClubMemeberByPublicKey = Effect.gen(function* () {
+  const sql = yield* PgClient.PgClient
 
-  const query = SqlSchema.findOne({
+  const query = SqlSchema.findOneOption({
     Request: FindClubMemberByPublicKeyParams,
     Result: ClubMemberRecord,
     execute: (params) => sql`

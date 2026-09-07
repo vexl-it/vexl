@@ -1,6 +1,6 @@
-import {SqlClient} from '@effect/sql'
 import {mockedReportMetric} from '@vexl-next/server-utils/src/tests/mockedMetricsClientService'
 import {Effect} from 'effect'
+import {SqlClient} from 'effect/unstable/sql'
 import {
   queryAndReportNumberOfActiveUsers,
   queryAndReportNumberOfInactiveUsers,
@@ -10,13 +10,13 @@ import {runPromiseInMockedEnvironment} from './utils/runPromiseInMockedEnvironme
 describe('Active and inactive user gauges', () => {
   it('Reports counts of active and inactive users', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const sql = yield* _(SqlClient.SqlClient)
-        yield* _(sql`DELETE FROM user_contact`)
-        yield* _(sql`DELETE FROM users`)
+      Effect.gen(function* () {
+        const sql = yield* SqlClient.SqlClient
+        yield* sql`DELETE FROM user_contact`
+        yield* sql`DELETE FROM users`
         // Active window is 30 days (default), inactivity threshold is 2 days
         // (.env.test). pk1 and pk2 are active; pk2, pk3 and pk4 are inactive.
-        yield* _(sql`
+        yield* sql`
           INSERT INTO
             users (public_key, hash, refreshed_at, country_prefix)
           VALUES
@@ -24,13 +24,13 @@ describe('Active and inactive user gauges', () => {
             ('pk2', 'h2', CURRENT_DATE - 10, 420),
             ('pk3', 'h3', CURRENT_DATE - 40, 421),
             ('pk4', 'h4', NULL, NULL)
-        `)
+        `
 
         mockedReportMetric.mockClear()
-        yield* _(queryAndReportNumberOfActiveUsers)
-        yield* _(queryAndReportNumberOfInactiveUsers)
+        yield* queryAndReportNumberOfActiveUsers
+        yield* queryAndReportNumberOfInactiveUsers
         // reports are forked into the background
-        yield* _(Effect.sleep(200))
+        yield* Effect.sleep(200)
 
         expect(mockedReportMetric).toHaveBeenCalledWith(
           expect.objectContaining({

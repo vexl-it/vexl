@@ -21,8 +21,11 @@ import {
 } from 'node:fs'
 import {tmpdir} from 'node:os'
 import path from 'node:path'
+import {fileURLToPath} from 'node:url'
 
-const SCRIPT_PATH = path.resolve(__dirname, '../../scripts/refresh.sh')
+const SCRIPT_PATH = fileURLToPath(
+  new URL('../../scripts/refresh.sh', import.meta.url)
+)
 
 let workDir: string
 let binDir: string

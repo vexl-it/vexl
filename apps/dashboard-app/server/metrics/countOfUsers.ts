@@ -1,10 +1,10 @@
 import {Context, Effect, Layer, Sink, Stream, SubscriptionRef} from 'effect'
 import {queryNumberOfUsers} from '../db/queryCountOfUsers'
 
-export class CountOfUsersState extends Context.Tag('CountOfUsersState')<
+export class CountOfUsersState extends Context.Service<
   CountOfUsersState,
   SubscriptionRef.SubscriptionRef<{count: number}>
->() {
+>()('CountOfUsersState') {
   static readonly Live = Layer.effect(
     CountOfUsersState,
     SubscriptionRef.make({count: 0})
@@ -22,7 +22,7 @@ export const syncCountOfUsersEffect = CountOfUsersState.pipe(
 )
 
 export const countOfUsersChanges = CountOfUsersState.pipe(
-  Effect.map((a) => a.changes),
+  Effect.map((a) => SubscriptionRef.changes(a)),
   Stream.unwrap,
   Stream.map((v) => v.count),
   Stream.changes

@@ -12,8 +12,8 @@ import {
   AesGtmCypher,
   type CryptoError,
 } from '@vexl-next/generic-utils/src/effect-helpers/crypto'
-import {Effect, Schema} from 'effect/index'
-import {type ParseError} from 'effect/ParseResult'
+import {Effect, pipe, Schema} from 'effect'
+import {type SchemaError} from 'effect/Schema'
 import {ServerCrypto} from './ServerCrypto'
 
 const SHORT_LIVED_TOKEN_EXPIRES_AFTER_MILIS = 1000 * 60 * 5 // 5 mins
@@ -22,22 +22,22 @@ export const createShortLivedTokenForErasingUser = (
   phoneNumberHash: HashedPhoneNumber
 ): Effect.Effect<
   ShortLivedTokenForErasingUserOnContactService,
-  ParseError | CryptoError,
+  SchemaError | CryptoError,
   ServerCrypto
 > =>
-  Effect.gen(function* (_) {
+  Effect.gen(function* () {
     const expiresAt = unixMillisecondsFromNow(
       SHORT_LIVED_TOKEN_EXPIRES_AFTER_MILIS
     )
 
-    const crypto = yield* _(ServerCrypto)
-    return yield* _(
+    const crypto = yield* ServerCrypto
+    return yield* pipe(
       crypto.encryptAES(ShortLivedTokenForErasingUserOnContactServicePayload)({
         phoneNumberHash,
         expiresAt,
       }),
       Effect.flatMap(
-        Schema.decode(ShortLivedTokenForErasingUserOnContactService)
+        Schema.decodeEffect(ShortLivedTokenForErasingUserOnContactService)
       )
     )
   })
@@ -49,14 +49,14 @@ export const verifyAndDecodeShortLivedTokenForErasingUser = (
   BadShortLivedTokenForErasingUserOnContactServiceError,
   ServerCrypto
 > =>
-  Effect.gen(function* (_) {
-    const crypto = yield* _(ServerCrypto)
-    const decryptedToken = yield* _(
-      Schema.decode(AesGtmCypher)(token),
+  Effect.gen(function* () {
+    const crypto = yield* ServerCrypto
+    const decryptedToken = yield* pipe(
+      Schema.decodeEffect(AesGtmCypher)(token),
       Effect.flatMap(
         crypto.decryptAES(ShortLivedTokenForErasingUserOnContactServicePayload)
       ),
-      Effect.catchAll(() =>
+      Effect.catch(() =>
         Effect.fail(
           new BadShortLivedTokenForErasingUserOnContactServiceError({
             reason: 'CryptoError',
@@ -67,12 +67,10 @@ export const verifyAndDecodeShortLivedTokenForErasingUser = (
     )
 
     if (decryptedToken.expiresAt < unixMillisecondsNow()) {
-      return yield* _(
-        new BadShortLivedTokenForErasingUserOnContactServiceError({
-          reason: 'Expired',
-          status: 400,
-        })
-      )
+      return yield* new BadShortLivedTokenForErasingUserOnContactServiceError({
+        reason: 'Expired',
+        status: 400,
+      })
     }
 
     return decryptedToken

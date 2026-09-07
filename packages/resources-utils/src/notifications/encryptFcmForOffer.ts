@@ -8,7 +8,7 @@ import {pipe} from 'fp-ts/lib/function'
 import {effectToTaskEither} from '../effect-helpers/TaskEitherConverter'
 import {eciesEncrypt, type CryptoError} from '../utils/crypto'
 
-export type ApiErrorFetchNotificationToken = Effect.Effect.Error<
+export type ApiErrorFetchNotificationToken = Effect.Error<
   ReturnType<NotificationApi['getNotificationPublicKey']>
 >
 

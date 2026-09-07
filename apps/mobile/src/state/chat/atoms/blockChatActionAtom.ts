@@ -9,7 +9,7 @@ import sendMessage, {
 import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/src/chat/utils/chatCrypto'
 import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {type JsonStringifyError} from '@vexl-next/resources-utils/src/utils/parsing'
-import {type ParseResult} from 'effect/index'
+import {type Schema} from 'effect'
 import * as E from 'fp-ts/Either'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
@@ -26,7 +26,7 @@ type BlockChatError =
   | SendMessageApiErrors
   | ErrorEncryptingMessage
   | JsonStringifyError
-  | ParseResult.ParseError
+  | Schema.SchemaError
 
 export default function blockChatActionAtom(
   chatWithMessagesAtom: FocusAtomType<ChatWithMessages>

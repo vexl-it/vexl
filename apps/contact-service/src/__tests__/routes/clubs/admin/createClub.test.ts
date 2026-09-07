@@ -1,4 +1,3 @@
-import {SqlClient} from '@effect/sql'
 import {generateClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {
@@ -7,7 +6,8 @@ import {
 } from '@vexl-next/rest-api/src/services/contact/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {addTestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
-import {Effect, Either, Option, Schema} from 'effect'
+import {Effect, Option, pipe, Result, Schema} from 'effect'
+import {SqlClient} from 'effect/unstable/sql'
 import {NodeTestingApp} from '../../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../../utils/runPromiseInMockedEnvironment'
 
@@ -17,19 +17,19 @@ const SOME_URL = Schema.decodeSync(UriString)('https://some.url')
 describe('Create club', () => {
   beforeEach(async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const sql = yield* _(SqlClient.SqlClient)
-        yield* _(sql`DELETE FROM club_invitation_link`)
-        yield* _(sql`DELETE FROM club_member`)
-        yield* _(sql`DELETE FROM club`)
+      Effect.gen(function* () {
+        const sql = yield* SqlClient.SqlClient
+        yield* sql`DELETE FROM club_invitation_link`
+        yield* sql`DELETE FROM club_member`
+        yield* sql`DELETE FROM club`
       })
     )
   })
 
   it('Should return 403 when bad admin token', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
 
         const clubData = {
           clubImageUrl: SOME_URL,
@@ -40,14 +40,14 @@ describe('Create club', () => {
           validUntil: new Date(),
           reportLimit: 10,
         }
-        const errorResponse = yield* _(
+        const errorResponse = yield* pipe(
           app.ClubsAdmin.createClub({
             headers: {'x-admin-token': 'aha'},
             payload: {
               club: clubData,
             },
           }),
-          Effect.either
+          Effect.result
         )
 
         expectErrorResponse(InvalidAdminTokenError)(errorResponse)
@@ -57,8 +57,8 @@ describe('Create club', () => {
 
   it('Should not accept legacy admin token URL params', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
 
         const clubData = {
           clubImageUrl: SOME_URL,
@@ -69,7 +69,7 @@ describe('Create club', () => {
           validUntil: new Date(),
           reportLimit: 10,
         }
-        const errorResponse = yield* _(
+        const errorResponse = yield* pipe(
           app.ClubsAdmin.createClub({
             // @ts-expect-error Legacy URL admin-token transport is unsupported.
             urlParams: {
@@ -79,18 +79,18 @@ describe('Create club', () => {
               club: clubData,
             },
           }),
-          Effect.either
+          Effect.result
         )
 
-        expect(Either.isLeft(errorResponse)).toBe(true)
+        expect(Result.isFailure(errorResponse)).toBe(true)
       })
     )
   })
 
   it('Should create a club in db', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
 
         const clubData = {
           clubImageUrl: SOME_URL,
@@ -102,24 +102,20 @@ describe('Create club', () => {
           reportLimit: 10,
         }
 
-        yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
-        const createdClub = yield* _(
-          app.ClubsAdmin.createClub({
-            headers: {'x-admin-token': ADMIN_TOKEN},
-            payload: {
-              club: clubData,
-            },
-          })
-        )
+        yield* addTestHeaders({'x-admin-token': ADMIN_TOKEN})
+        const createdClub = yield* app.ClubsAdmin.createClub({
+          headers: {'x-admin-token': ADMIN_TOKEN},
+          payload: {
+            club: clubData,
+          },
+        })
 
         expect(createdClub.clubInfo).toMatchObject(clubData)
 
-        yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
-        const clubsInDb = yield* _(
-          app.ClubsAdmin.listClubs({
-            headers: {'x-admin-token': ADMIN_TOKEN},
-          })
-        )
+        yield* addTestHeaders({'x-admin-token': ADMIN_TOKEN})
+        const clubsInDb = yield* app.ClubsAdmin.listClubs({
+          headers: {'x-admin-token': ADMIN_TOKEN},
+        })
 
         expect(clubsInDb.clubs).toHaveLength(1)
         expect(clubsInDb.clubs[0]).toMatchObject(clubData)
@@ -129,8 +125,8 @@ describe('Create club', () => {
 
   it('Should retrun 404 if club already exists', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
 
         const clubData = {
           clubImageUrl: SOME_URL,
@@ -142,24 +138,22 @@ describe('Create club', () => {
           reportLimit: 10,
         }
 
-        yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
-        yield* _(
-          app.ClubsAdmin.createClub({
-            headers: {'x-admin-token': ADMIN_TOKEN},
-            payload: {
-              club: clubData,
-            },
-          })
-        )
+        yield* addTestHeaders({'x-admin-token': ADMIN_TOKEN})
+        yield* app.ClubsAdmin.createClub({
+          headers: {'x-admin-token': ADMIN_TOKEN},
+          payload: {
+            club: clubData,
+          },
+        })
 
-        const errorResponse = yield* _(
+        const errorResponse = yield* pipe(
           app.ClubsAdmin.createClub({
             headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               club: clubData,
             },
           }),
-          Effect.either
+          Effect.result
         )
 
         expectErrorResponse(ClubAlreadyExistsError)(errorResponse)

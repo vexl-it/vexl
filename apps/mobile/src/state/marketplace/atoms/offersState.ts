@@ -8,7 +8,7 @@ import {
   type OneOfferInState,
 } from '@vexl-next/domain/src/general/offers'
 import {MINIMAL_DATE} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
-import {Array, Record} from 'effect'
+import {Array, Filter, Record} from 'effect'
 import {pipe} from 'fp-ts/lib/function'
 import {atom, type Atom, type WritableAtom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
@@ -36,7 +36,7 @@ export const offersAtom = focusAtom(offersStateAtom, (optic) =>
 )
 
 export const areThereAnyStoredOffersAtom = atom((get) =>
-  Array.isNonEmptyReadonlyArray(get(offersAtom))
+  Array.isReadonlyArrayNonEmpty(get(offersAtom))
 )
 
 export const offersIdsAtom = focusAtom(offersAtom, (optic) =>
@@ -131,8 +131,10 @@ export const updateOrFilterOffersFromDeletedClubsActionAtom = atom(
   (get, set, deletedClubs: Array.NonEmptyArray<ClubUuid>) => {
     set(
       offersAtom,
-      Array.filterMap((offer) =>
-        offerWithoutSourceOrNone(offer, deletedClubs, false)
+      Array.filterMap(
+        Filter.fromPredicateOption((offer) =>
+          offerWithoutSourceOrNone(offer, deletedClubs, false)
+        )
       )
     )
   }

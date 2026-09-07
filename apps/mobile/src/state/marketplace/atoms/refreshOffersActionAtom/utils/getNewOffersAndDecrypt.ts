@@ -8,7 +8,7 @@ import {type Base64String} from '@vexl-next/domain/src/utility/Base64String.bran
 import decryptOffer from '@vexl-next/resources-utils/src/offers/decryptOffer'
 import fetchAllPaginatedData from '@vexl-next/rest-api/src/fetchAllPaginatedData'
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
-import {Array, Effect, flow} from 'effect'
+import {Array, Effect, flow, pipe} from 'effect'
 import {atom} from 'jotai'
 import {NotOfferFromContactNetworkError} from '../../../domain'
 import {contactOffersNextPageParamAtom} from '../../offersState'
@@ -25,7 +25,7 @@ const validateOfferIsFromContactNetwork = (offerInfo: OfferInfo): boolean => {
   return (
     friendLevel.length > 0 &&
     Array.difference(friendLevel, allowedFriendLevels).length === 0 &&
-    Array.isEmptyReadonlyArray(clubIds)
+    Array.isReadonlyArrayEmpty(clubIds)
   )
 }
 
@@ -55,21 +55,19 @@ export const getNewContactNetworkOffersAndDecryptPaginatedActionAtom = atom(
       lastPrivatePartIdBase64?: Base64String
     }
   ) => {
-    return Effect.gen(function* (_) {
-      const allOffers = yield* _(
-        fetchAllPaginatedData({
-          fetchEffectToRun: (nextPageToken) =>
-            offersApi.getOffersForMeModifiedOrCreatedAfterPaginated({
-              nextPageToken: nextPageToken ?? lastPrivatePartIdBase64,
-              limit: OFFERS_PAGE_LIMIT,
-            }),
-          storeNextPageToken: (nextPageToken) => {
-            set(contactOffersNextPageParamAtom, nextPageToken)
-          },
-        })
-      )
+    return Effect.gen(function* () {
+      const allOffers = yield* fetchAllPaginatedData({
+        fetchEffectToRun: (nextPageToken) =>
+          offersApi.getOffersForMeModifiedOrCreatedAfterPaginated({
+            nextPageToken: nextPageToken ?? lastPrivatePartIdBase64,
+            limit: OFFERS_PAGE_LIMIT,
+          }),
+        storeNextPageToken: (nextPageToken) => {
+          set(contactOffersNextPageParamAtom, nextPageToken)
+        },
+      })
 
-      return yield* _(
+      return yield* pipe(
         allOffers,
         Array.map(
           flow(
@@ -80,7 +78,7 @@ export const getNewContactNetworkOffersAndDecryptPaginatedActionAtom = atom(
             )
           )
         ),
-        Array.map(Effect.either),
+        Array.map(Effect.result),
         Effect.all
       )
     })

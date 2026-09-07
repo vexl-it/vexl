@@ -1,6 +1,6 @@
 import {type OneNoteInState} from '@vexl-next/domain/src/general/notes'
 import {sendMessagingRequest} from '@vexl-next/resources-utils/src/chat/sendMessagingRequest'
-import {Effect} from 'effect'
+import {Effect, pipe} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
 import {showErrorAlert} from '../../../components/ErrorAlert'
@@ -18,43 +18,39 @@ import upsertChatForTheirNoteActionAtom from './upsertChatForTheirNoteActionAtom
 const sendRequestForNoteActionAtom = atom(
   null,
   (get, set, {text, note}: {text: string; note: OneNoteInState}) =>
-    Effect.gen(function* (_) {
+    Effect.gen(function* () {
       const api = get(apiAtom)
       const goldenAvatarType = get(goldenAvatarTypeAtom)
 
-      const {inbox} = yield* _(
-        set(upsertInboxOnBeAndLocallyActionAtom, {
-          for: 'noteRequest',
-          noteId: note.noteInfo.noteId,
-        })
-      )
-      const notificationToken = yield* _(
-        set(generateAndRegisterVexlTokenActionAtom, {
+      const {inbox} = yield* set(upsertInboxOnBeAndLocallyActionAtom, {
+        for: 'noteRequest',
+        noteId: note.noteInfo.noteId,
+      })
+      const notificationToken = yield* set(
+        generateAndRegisterVexlTokenActionAtom,
+        {
           keyHolder: inbox.privateKey,
-        })
+        }
       )
 
-      const sentMessage = yield* _(
-        sendMessagingRequest({
-          text,
-          notificationApi: api.notification,
-          theirNotificationCypher:
-            note.noteInfo.publicPart.vexlNotificationToken,
-          api: api.chat,
-          fromKeypair: inbox.privateKey,
-          myVersion: version,
-          toPublicKey: note.noteInfo.publicPart.notePublicKey,
-          otherSideVersion: note.noteInfo.publicPart.authorClientVersion,
-          myNotificationCypher: notificationToken,
-          lastReceivedNotificationCypher:
-            note.noteInfo.publicPart.vexlNotificationToken,
-          goldenAvatarType,
-          forClubsUuids: [],
-          commonFriends: note.noteInfo.privatePart.commonFriends,
-          verifiedCommonFriends: [],
-          friendLevel: note.noteInfo.privatePart.friendLevel,
-        })
-      )
+      const sentMessage = yield* sendMessagingRequest({
+        text,
+        notificationApi: api.notification,
+        theirNotificationCypher: note.noteInfo.publicPart.vexlNotificationToken,
+        api: api.chat,
+        fromKeypair: inbox.privateKey,
+        myVersion: version,
+        toPublicKey: note.noteInfo.publicPart.notePublicKey,
+        otherSideVersion: note.noteInfo.publicPart.authorClientVersion,
+        myNotificationCypher: notificationToken,
+        lastReceivedNotificationCypher:
+          note.noteInfo.publicPart.vexlNotificationToken,
+        goldenAvatarType,
+        forClubsUuids: [],
+        commonFriends: note.noteInfo.privatePart.commonFriends,
+        verifiedCommonFriends: [],
+        friendLevel: note.noteInfo.privatePart.friendLevel,
+      })
 
       return set(upsertChatForTheirNoteActionAtom, {
         inbox: {privateKey: inbox.privateKey},
@@ -72,11 +68,11 @@ const sendRequestForNoteActionAtom = atom(
 export const sendRequestForNoteHandleUIActionAtom = atom(
   null,
   (get, set, {text, note}: {text: string; note: OneNoteInState}) =>
-    Effect.gen(function* (_) {
+    Effect.gen(function* () {
       const {t} = get(translationAtom)
-      yield* _(set(checkNotificationPermissionsAndAskIfPossibleActionAtom))
+      yield* set(checkNotificationPermissionsAndAskIfPossibleActionAtom)
 
-      return yield* _(
+      return yield* pipe(
         set(sendRequestForNoteActionAtom, {text, note}),
         Effect.tapError((e) =>
           Effect.sync(() => {

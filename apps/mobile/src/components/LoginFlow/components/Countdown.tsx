@@ -1,5 +1,5 @@
 import {Typography} from '@vexl-next/ui'
-import type Luxon from 'luxon'
+import type * as Luxon from 'luxon'
 import React, {useEffect, useState} from 'react'
 
 type TypographyProps = React.ComponentProps<typeof Typography>

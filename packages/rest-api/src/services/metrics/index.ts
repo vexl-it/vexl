@@ -2,7 +2,7 @@ import {type CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.br
 import {type PlatformName} from '@vexl-next/domain/src/utility/PlatformName'
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {type VersionString} from '@vexl-next/domain/src/utility/VersionString.brand'
-import {Effect, Option} from 'effect/index'
+import {Effect, Option} from 'effect'
 import {createClientInstance} from '../../client'
 import {makeCommonHeaders, type AppSource} from '../../commonHeaders'
 import {type ServiceUrl} from '../../ServiceUrl.brand'
@@ -41,23 +41,21 @@ export function api({
   loggingFunction?: LoggingFunction | null
   prefix?: CountryPrefix
 }) {
-  return Effect.gen(function* (_) {
-    const client = yield* _(
-      createClientInstance({
-        api: MetricsApiSpecification,
-        platform,
-        clientVersion,
-        language,
-        isDeveloper,
-        appSource,
-        clientSemver,
-        url,
-        loggingFunction,
-        deviceModel,
-        osVersion,
-        prefix,
-      })
-    )
+  return Effect.gen(function* () {
+    const client = yield* createClientInstance({
+      api: MetricsApiSpecification,
+      platform,
+      clientVersion,
+      language,
+      isDeveloper,
+      appSource,
+      clientSemver,
+      url,
+      loggingFunction,
+      deviceModel,
+      osVersion,
+      prefix,
+    })
 
     const commonHeaders = makeCommonHeaders({
       appSource,
@@ -66,9 +64,9 @@ export function api({
       platform,
       isDeveloper,
       language,
-      deviceModel: Option.fromNullable(deviceModel),
-      osVersion: Option.fromNullable(osVersion),
-      prefix: Option.fromNullable(prefix),
+      deviceModel: Option.fromNullishOr(deviceModel),
+      osVersion: Option.fromNullishOr(osVersion),
+      prefix: Option.fromNullishOr(prefix),
     })
 
     return {
@@ -76,11 +74,11 @@ export function api({
         request: ReportNotificationInteractionRequest
       ) =>
         client.reportNotificationInteraction({
-          urlParams: request,
+          query: request,
           headers: commonHeaders,
         }),
     }
   })
 }
 
-export type MetricsApi = Effect.Effect.Success<ReturnType<typeof api>>
+export type MetricsApi = Effect.Success<ReturnType<typeof api>>

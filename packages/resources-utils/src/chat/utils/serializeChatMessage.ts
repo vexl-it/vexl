@@ -3,7 +3,7 @@ import {
   type ChatMessage,
 } from '@vexl-next/domain/src/general/messaging'
 import {Base64String} from '@vexl-next/domain/src/utility/Base64String.brand'
-import {Either, Option, Schema, type ParseResult} from 'effect/index'
+import {Option, Result, Schema} from 'effect'
 import {pipe} from 'fp-ts/lib/function'
 import {stringifyToJson, type JsonStringifyError} from '../../utils/parsing'
 
@@ -40,7 +40,7 @@ function deanonymizedUserToPayload(
 
 export default function serializeChatMessage(
   message: ChatMessage
-): Either.Either<string, JsonStringifyError | ParseResult.ParseError> {
+): Result.Result<string, JsonStringifyError | Schema.SchemaError> {
   return pipe(
     {
       time: message.time,
@@ -62,7 +62,7 @@ export default function serializeChatMessage(
       verifiedCommonFriends: message.verifiedCommonFriends,
       friendLevel: message.friendLevel,
     } satisfies ChatMessagePayload,
-    Schema.decodeUnknownEither(ChatMessagePayload),
-    Either.flatMap(stringifyToJson)
+    Schema.decodeUnknownResult(ChatMessagePayload),
+    Result.flatMap(stringifyToJson)
   )
 }

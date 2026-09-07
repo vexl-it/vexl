@@ -1,5 +1,5 @@
 import {Latitude, Longitude} from '@vexl-next/domain/src/utility/geoCoordinates'
-import {Schema} from 'effect/index'
+import {Schema} from 'effect'
 
 const europeRegion = {
   latitude: Schema.decodeSync(Latitude)(54.526), // Central latitude of Europe

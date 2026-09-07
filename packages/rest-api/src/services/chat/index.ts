@@ -64,23 +64,21 @@ export function api({
   loggingFunction?: LoggingFunction | null
   prefix?: CountryPrefix
 }) {
-  return Effect.gen(function* (_) {
-    const client = yield* _(
-      createClientInstance({
-        api: ChatApiSpecification,
-        platform,
-        clientVersion,
-        clientSemver,
-        language,
-        isDeveloper,
-        appSource,
-        url,
-        loggingFunction,
-        deviceModel,
-        osVersion,
-        prefix,
-      })
-    )
+  return Effect.gen(function* () {
+    const client = yield* createClientInstance({
+      api: ChatApiSpecification,
+      platform,
+      clientVersion,
+      clientSemver,
+      language,
+      isDeveloper,
+      appSource,
+      url,
+      loggingFunction,
+      deviceModel,
+      osVersion,
+      prefix,
+    })
 
     const commonHeaders = makeCommonHeaders({
       appSource,
@@ -89,9 +87,9 @@ export function api({
       platform,
       isDeveloper,
       language,
-      deviceModel: Option.fromNullable(deviceModel),
-      osVersion: Option.fromNullable(osVersion),
-      prefix: Option.fromNullable(prefix),
+      deviceModel: Option.fromNullishOr(deviceModel),
+      osVersion: Option.fromNullishOr(osVersion),
+      prefix: Option.fromNullishOr(prefix),
     })
 
     // Security headers are built lazily inside each request effect (not once
@@ -256,4 +254,4 @@ export function api({
   })
 }
 
-export type ChatApi = Effect.Effect.Success<ReturnType<typeof api>>
+export type ChatApi = Effect.Success<ReturnType<typeof api>>

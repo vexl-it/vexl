@@ -4,7 +4,7 @@ import {
   type withRedisLock,
   withRedisLockFromEffect,
 } from '@vexl-next/server-utils/src/RedisService'
-import {Effect} from 'effect/index'
+import {Effect} from 'effect'
 
 export const withReportClubOfferRedisLock = <A, E, R, R2>({
   publicKeyE,

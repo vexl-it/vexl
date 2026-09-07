@@ -190,7 +190,7 @@ function useCommonFriendsListData({
 
   return useMemo((): readonly ListItem[] => {
     const clubItems = pipe(clubs, Array.map(createClubListItem))
-    const clubSection = Array.isNonEmptyArray(clubItems)
+    const clubSection = Array.isArrayNonEmpty(clubItems)
       ? Array.appendAll(
           [createSectionListItem(t('commonFriends.clubs'))],
           clubItems
@@ -223,13 +223,13 @@ function useCommonFriendsListData({
       Array.map(createFriendListItem)
     )
 
-    const verifiedSection = Array.isNonEmptyArray(verifiedItems)
+    const verifiedSection = Array.isArrayNonEmpty(verifiedItems)
       ? Array.appendAll(
           [createSectionListItem(t('commonFriends.verifiedFriends'))],
           verifiedItems
         )
       : []
-    const commonSection = Array.isNonEmptyArray(commonItems)
+    const commonSection = Array.isArrayNonEmpty(commonItems)
       ? Array.appendAll(
           [createSectionListItem(t('commonFriends.commonFriends'))],
           commonItems

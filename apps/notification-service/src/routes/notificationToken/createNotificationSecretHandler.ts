@@ -1,4 +1,3 @@
-import {HttpApiBuilder} from '@effect/platform/index'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {
   VEXL_NOTIFICATION_TOKEN_SECRET_PREFIX,
@@ -8,17 +7,18 @@ import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {MissingCommonHeadersError} from '@vexl-next/rest-api/src/services/notification/contract'
 import {NotificationApiSpecification} from '@vexl-next/rest-api/src/services/notification/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
-import {Effect, Option, Schema} from 'effect'
+import {makeHttpApiHandler} from '@vexl-next/server-utils/src/makeHttpApiHandler'
+import {Effect, Option, pipe, Schema} from 'effect'
 import {NotificationTokensDb} from '../../services/NotificationTokensDb'
 
 const generateSecret = (): Effect.Effect<
   VexlNotificationTokenSecret,
   UnexpectedServerError
 > =>
-  Schema.decode(VexlNotificationTokenSecret)(
+  Schema.decodeEffect(VexlNotificationTokenSecret)(
     `${VEXL_NOTIFICATION_TOKEN_SECRET_PREFIX}${generateUuid()}`
   ).pipe(
-    Effect.catchAll(() =>
+    Effect.catch(() =>
       Effect.fail(
         new UnexpectedServerError({
           status: 500,
@@ -28,23 +28,25 @@ const generateSecret = (): Effect.Effect<
     )
   )
 
-export const createNotificationSecretHandler = HttpApiBuilder.handler(
+export const createNotificationSecretHandler = makeHttpApiHandler(
   NotificationApiSpecification,
   'NotificationTokenGroup',
   'CreateNotificationSecret',
   (req) =>
     makeEndpointEffect(
-      Effect.gen(function* (_) {
+      Effect.gen(function* () {
         const {payload, headers} = req
 
         const {clientPlatform, clientVersion, clientAppSource, clientLanguage} =
-          yield* _(
-            Option.all({
-              clientPlatform: headers.clientPlatformOrNone,
-              clientVersion: headers.clientVersionOrNone,
-              clientAppSource: headers.appSourceOrNone,
-              clientLanguage: headers.language,
-            }),
+          yield* pipe(
+            Effect.fromOption(
+              Option.all({
+                clientPlatform: headers.clientPlatformOrNone,
+                clientVersion: headers.clientVersionOrNone,
+                clientAppSource: headers.appSourceOrNone,
+                clientLanguage: headers.language,
+              })
+            ),
             Effect.mapError(() => new MissingCommonHeadersError())
           )
 
@@ -52,7 +54,7 @@ export const createNotificationSecretHandler = HttpApiBuilder.handler(
 
         const db = yield* NotificationTokensDb
 
-        const secret = yield* _(generateSecret())
+        const secret = yield* generateSecret()
 
         const now = new Date()
         yield* db.saveNotificationTokenSecret({

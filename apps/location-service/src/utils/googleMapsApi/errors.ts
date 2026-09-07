@@ -15,17 +15,17 @@ type GoogleMapsResponseErrorCode =
 export class GoogleMapsError extends Schema.TaggedError<GoogleMapsError>(
   'GoogleMapsError'
 )('GoogleMapsError', {
-  operation: Schema.Literal('geocode', 'suggest'),
-  category: Schema.Literal('RequestFailed', 'ResponseRejected'),
+  operation: Schema.Literals(['geocode', 'suggest']),
+  category: Schema.Literals(['RequestFailed', 'ResponseRejected']),
   httpStatus: Schema.optional(Schema.Number),
   responseErrorCode: Schema.optional(
-    Schema.Literal(
+    Schema.Literals([
       'OVER_DAILY_LIMIT',
       'OVER_QUERY_LIMIT',
       'REQUEST_DENIED',
       'INVALID_REQUEST',
-      'UNKNOWN_ERROR'
-    )
+      'UNKNOWN_ERROR',
+    ])
   ),
   request: Schema.Unknown,
   response: Schema.optional(Schema.Unknown),

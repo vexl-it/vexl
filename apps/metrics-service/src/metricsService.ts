@@ -1,6 +1,6 @@
 import {healthServerLayer} from '@vexl-next/server-utils/src/HealthServer'
 import {RedisConnectionService} from '@vexl-next/server-utils/src/RedisConnection'
-import {Layer, pipe} from 'effect/index'
+import {Layer, pipe} from 'effect'
 import {healthServerPortConfig, redisUrl} from './configs'
 import DbLayer from './db/layer'
 import {MetricsDbService} from './db/MetricsDbService'

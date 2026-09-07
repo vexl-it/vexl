@@ -1,21 +1,12 @@
 import {type UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {Array, Context, Duration, Effect, Layer, Option, Schema} from 'effect'
 import {
-  Array,
-  Context,
-  Duration,
-  Effect,
-  Layer,
-  Option,
-  Schema,
-  type ParseResult,
-} from 'effect'
-import {
-  isNonEmptyReadonlyArray,
+  isReadonlyArrayNonEmpty,
   type NonEmptyArray,
   type NonEmptyReadonlyArray,
 } from 'effect/Array'
-import {NoSuchElementException} from 'effect/Cause'
-import {catchAllDefect} from 'effect/Effect'
+import {NoSuchElementError} from 'effect/Cause'
+import {catchDefect} from 'effect/Effect'
 import Redlock, {type Lock} from 'redlock'
 import {RedisConnectionService} from './RedisConnection'
 
@@ -34,102 +25,98 @@ export class RedisLockError extends Schema.TaggedError<RedisLockError>(
 
 export interface RedisOperations {
   get: <A, I, R>(
-    schema: Schema.Schema<A, I, R>
+    schema: Schema.Codec<A, I, R, R>
   ) => (
     key: string
-  ) => Effect.Effect<
-    A,
-    ParseResult.ParseError | RedisError | NoSuchElementException,
-    R
-  >
+  ) => Effect.Effect<A, Schema.SchemaError | RedisError | NoSuchElementError, R>
 
   set: <A, I, R>(
-    schema: Schema.Schema<A, I, R>
+    schema: Schema.Codec<A, I, R, R>
   ) => (
     key: string,
     value: A,
     opts?: {expiresAt?: UnixMilliseconds}
-  ) => Effect.Effect<void, ParseResult.ParseError | RedisError, R>
+  ) => Effect.Effect<void, Schema.SchemaError | RedisError, R>
 
   setIfNotExists: <A, I, R>(
-    schema: Schema.Schema<A, I, R>
+    schema: Schema.Codec<A, I, R, R>
   ) => (
     key: string,
     value: A,
     opts?: {expiresAt?: UnixMilliseconds}
-  ) => Effect.Effect<boolean, ParseResult.ParseError | RedisError, R>
+  ) => Effect.Effect<boolean, Schema.SchemaError | RedisError, R>
 
   insertToSet: <A, I, R>(
-    schema: Schema.Schema<A, I, R>
+    schema: Schema.Codec<A, I, R, R>
   ) => (
     key: string,
     values: NonEmptyArray<A>,
     opts?: {expiresAt?: UnixMilliseconds}
-  ) => Effect.Effect<void, ParseResult.ParseError | RedisError, R>
+  ) => Effect.Effect<void, Schema.SchemaError | RedisError, R>
 
   deleteFromSet: <A, I, R>(
-    schema: Schema.Schema<A, I, R>
+    schema: Schema.Codec<A, I, R, R>
   ) => (
     key: string,
     values: NonEmptyArray<A>
-  ) => Effect.Effect<void, ParseResult.ParseError | RedisError, R>
+  ) => Effect.Effect<void, Schema.SchemaError | RedisError, R>
 
   readAndDeleteSet: <A, I, R>(
-    schema: Schema.Schema<A, I, R>
+    schema: Schema.Codec<A, I, R, R>
   ) => (
     key: string
   ) => Effect.Effect<
     readonly A[],
-    ParseResult.ParseError | RedisError | NoSuchElementException,
+    Schema.SchemaError | RedisError | NoSuchElementError,
     R
   >
 
   getSet: <A, I, R>(
-    schema: Schema.Schema<A, I, R>
+    schema: Schema.Codec<A, I, R, R>
   ) => (
     key: string
   ) => Effect.Effect<
     readonly [A, ...A[]],
-    ParseResult.ParseError | RedisError | NoSuchElementException,
+    Schema.SchemaError | RedisError | NoSuchElementError,
     R
   >
 
   setExpiresAt: (
     key: string,
     expiresAt: UnixMilliseconds
-  ) => Effect.Effect<void, RedisError | NoSuchElementException>
+  ) => Effect.Effect<void, RedisError | NoSuchElementError>
 
   exists: (key: string) => Effect.Effect<boolean, RedisError>
 
   isInSet: <A, I, R>(
-    schema: Schema.Schema<A, I, R>
+    schema: Schema.Codec<A, I, R, R>
   ) => (
     key: string,
     value: A
-  ) => Effect.Effect<boolean, ParseResult.ParseError | RedisError, R>
+  ) => Effect.Effect<boolean, Schema.SchemaError | RedisError, R>
 
   delete: (key: string) => Effect.Effect<void, RedisError, never>
   withLock: <A, E, R>(
     program: Effect.Effect<A, E, R>
   ) => (
     resources: string[] | string,
-    duration?: Duration.DurationInput
+    duration?: Duration.Input
   ) => Effect.Effect<A, E | RedisLockError, R>
 
   addIntoSortedSet: <A, I, R>(
-    schema: Schema.Schema<A, I, R>
+    schema: Schema.Codec<A, I, R, R>
   ) => (
     key: string,
     value: A,
     score: number
-  ) => Effect.Effect<void, ParseResult.ParseError | RedisError, R>
+  ) => Effect.Effect<void, Schema.SchemaError | RedisError, R>
 
   getSortedSet: <A, I, R>(
-    schema: Schema.Schema<A, I, R>
+    schema: Schema.Codec<A, I, R, R>
   ) => (
     key: string,
     order: 'asc' | 'desc'
-  ) => Effect.Effect<readonly A[], ParseResult.ParseError | RedisError, R>
+  ) => Effect.Effect<readonly A[], Schema.SchemaError | RedisError, R>
 
   clearSortedSet: (key: string) => Effect.Effect<void, RedisError>
 
@@ -140,34 +127,34 @@ export interface RedisOperations {
   ) => Effect.Effect<void, RedisError>
 
   removeFromSortedSet: <A, I, R>(
-    schema: Schema.Schema<A, I, R>
+    schema: Schema.Codec<A, I, R, R>
   ) => (
     key: string,
     values: NonEmptyArray<A>
-  ) => Effect.Effect<void, ParseResult.ParseError | RedisError, R>
+  ) => Effect.Effect<void, Schema.SchemaError | RedisError, R>
 
   getAndDropSortedSet: <A, I, R>(
-    schema: Schema.Schema<A, I, R>
+    schema: Schema.Codec<A, I, R, R>
   ) => (
     key: string,
     order: 'asc' | 'desc'
-  ) => Effect.Effect<readonly A[], ParseResult.ParseError | RedisError, R>
+  ) => Effect.Effect<readonly A[], Schema.SchemaError | RedisError, R>
 }
 
-export class RedisService extends Context.Tag('RedisService')<
+export class RedisService extends Context.Service<
   RedisService,
   RedisOperations
->() {
+>()('RedisService') {
   static readonly Live = Layer.effect(
     RedisService,
-    Effect.gen(function* (_) {
-      const redisClient = yield* _(RedisConnectionService)
+    Effect.gen(function* () {
+      const redisClient = yield* RedisConnectionService
 
-      const redlock = yield* _(Effect.sync(() => new Redlock([redisClient])))
+      const redlock = yield* Effect.sync(() => new Redlock([redisClient]))
 
       const acquireLockEffect = (
         resources: string[] | string,
-        duration: Duration.DurationInput
+        duration: Duration.Input
       ): Effect.Effect<Lock, RedisLockError> => {
         return Effect.promise(
           async () =>
@@ -176,8 +163,8 @@ export class RedisService extends Context.Tag('RedisService')<
               Duration.toMillis(duration)
             )
         ).pipe(
-          Effect.zipLeft(Effect.logInfo('Acquired Redis lock', {duration})),
-          catchAllDefect((e) => new RedisLockError({cause: e}))
+          Effect.tap(Effect.logInfo('Acquired Redis lock', {duration})),
+          catchDefect((e) => new RedisLockError({cause: e}))
         )
       }
 
@@ -191,8 +178,8 @@ export class RedisService extends Context.Tag('RedisService')<
         }
 
         return Effect.promise(async () => await redlock.release(lock)).pipe(
-          Effect.zipLeft(Effect.logInfo('Released Redis lock')),
-          catchAllDefect((e) =>
+          Effect.tap(Effect.logInfo('Released Redis lock')),
+          catchDefect((e) =>
             Effect.logWarning('Error while releasing Redis lock', e)
           )
         )
@@ -217,23 +204,23 @@ export class RedisService extends Context.Tag('RedisService')<
         }).pipe(
           Effect.filterOrFail(
             (result) => result === 1,
-            () => new NoSuchElementException()
+            () => new NoSuchElementError()
           ),
           Effect.asVoid
         )
 
       const getString = (
         key: string
-      ): Effect.Effect<string, RedisError | NoSuchElementException> =>
-        Effect.async<string, RedisError | NoSuchElementException>((cb) => {
+      ): Effect.Effect<string, RedisError | NoSuchElementError> =>
+        Effect.callback<string, RedisError | NoSuchElementError>((cb) => {
           void redisClient.get(key, (err, res) => {
             if (err) cb(Effect.fail(new RedisError({cause: err})))
-            else if (!res) cb(Effect.fail(new NoSuchElementException()))
+            else if (!res) cb(Effect.fail(new NoSuchElementError()))
             else cb(Effect.succeed(res))
           })
         }).pipe(
-          Effect.catchAllDefect((e) =>
-            Effect.zipRight(
+          Effect.catchDefect((e) =>
+            Effect.andThen(
               Effect.logError('Error while reading redis', e),
               Effect.fail(new RedisError({cause: e}))
             )
@@ -247,14 +234,14 @@ export class RedisService extends Context.Tag('RedisService')<
         expiresAt?: UnixMilliseconds
       ): Effect.Effect<void, RedisError> => {
         // eslint-disable-next-line @typescript-eslint/no-invalid-void-type
-        return Effect.async<void, RedisError>((cb) => {
+        return Effect.callback<void, RedisError>((cb) => {
           void redisClient.set(key, value, 'PXAT', expiresAt ?? -1, (err) => {
             if (err) cb(Effect.fail(new RedisError({cause: err})))
             else cb(Effect.succeed(Effect.void))
           })
         }).pipe(
-          Effect.catchAllDefect((e) =>
-            Effect.zipRight(
+          Effect.catchDefect((e) =>
+            Effect.andThen(
               Effect.logError('Error while writing to redis', e),
               Effect.fail(new RedisError({cause: e}))
             )
@@ -286,7 +273,7 @@ export class RedisService extends Context.Tag('RedisService')<
 
       const deleteKey = (key: string): Effect.Effect<void, RedisError> =>
         // eslint-disable-next-line @typescript-eslint/no-invalid-void-type
-        Effect.async<void, RedisError>((cb) => {
+        Effect.callback<void, RedisError>((cb) => {
           void redisClient.del(key, (err) => {
             if (err) {
               cb(Effect.fail(new RedisError({cause: err})))
@@ -342,7 +329,7 @@ export class RedisService extends Context.Tag('RedisService')<
         key: string,
         value: string
       ): Effect.Effect<boolean, RedisError> =>
-        Effect.async<boolean, RedisError>((cb) => {
+        Effect.callback<boolean, RedisError>((cb) => {
           void redisClient.sismember(key, value, (err, res) => {
             if (err) {
               cb(Effect.fail(new RedisError({cause: err})))
@@ -374,7 +361,7 @@ export class RedisService extends Context.Tag('RedisService')<
             }
 
             return Effect.succeed(
-              listData.value && isNonEmptyReadonlyArray(listData.value)
+              listData.value && isReadonlyArrayNonEmpty(listData.value)
                 ? Option.some(listData.value)
                 : Option.none()
             )
@@ -385,7 +372,7 @@ export class RedisService extends Context.Tag('RedisService')<
       const readAndDeleteSet = (
         key: string
       ): Effect.Effect<Option.Option<readonly string[]>, RedisError> =>
-        Effect.async<Option.Option<readonly string[]>, RedisError>((cb) => {
+        Effect.callback<Option.Option<readonly string[]>, RedisError>((cb) => {
           void redisClient
             .multi()
             .smembers(key)
@@ -520,12 +507,12 @@ export class RedisService extends Context.Tag('RedisService')<
 
       const toReturn: RedisOperations = {
         get: (schema) => {
-          const decode = Schema.decode(Schema.parseJson(schema))
+          const decode = Schema.decodeEffect(Schema.fromJsonString(schema))
 
           return (key) => getString(key).pipe(Effect.flatMap(decode))
         },
         set: (schema) => {
-          const encode = Schema.encode(Schema.parseJson(schema))
+          const encode = Schema.encodeEffect(Schema.fromJsonString(schema))
 
           return (key, value, opts) =>
             encode(value).pipe(
@@ -535,7 +522,7 @@ export class RedisService extends Context.Tag('RedisService')<
             )
         },
         setIfNotExists: (schema) => {
-          const encode = Schema.encode(Schema.parseJson(schema))
+          const encode = Schema.encodeEffect(Schema.fromJsonString(schema))
 
           return (key, value, opts) =>
             encode(value).pipe(
@@ -551,14 +538,16 @@ export class RedisService extends Context.Tag('RedisService')<
             catch: (e) => new RedisError({cause: e}),
           }),
         isInSet: (schema) => {
-          const encode = Schema.encode(Schema.parseJson(schema))
+          const encode = Schema.encodeEffect(Schema.fromJsonString(schema))
           return (key, value) =>
             encode(value).pipe(
               Effect.flatMap((encoded) => isInSet(key, encoded))
             )
         },
         insertToSet: (schema) => {
-          const encode = Schema.encode(Schema.Array(Schema.parseJson(schema)))
+          const encode = Schema.encodeEffect(
+            Schema.Array(Schema.fromJsonString(schema))
+          )
           return (key, values, opts) =>
             encode(values).pipe(
               Effect.flatMap((encoded) =>
@@ -567,51 +556,66 @@ export class RedisService extends Context.Tag('RedisService')<
             )
         },
         deleteFromSet: (schema) => {
-          const encode = Schema.encode(Schema.Array(Schema.parseJson(schema)))
+          const encode = Schema.encodeEffect(
+            Schema.Array(Schema.fromJsonString(schema))
+          )
           return (key, values) =>
             encode(values).pipe(
               Effect.flatMap((encoded) => deleteFromSet(key, encoded))
             )
         },
         readAndDeleteSet: (schema) => {
-          const decode = Schema.decode(Schema.Array(Schema.parseJson(schema)))
+          const decode = Schema.decodeEffect(
+            Schema.Array(Schema.fromJsonString(schema))
+          )
           return (key) =>
-            readAndDeleteSet(key).pipe(Effect.flatten, Effect.flatMap(decode))
+            readAndDeleteSet(key).pipe(
+              Effect.flatMap(Effect.fromOption),
+              Effect.flatMap(decode)
+            )
         },
         getSet: (schema) => {
-          const decode = Schema.decode(Schema.Array(Schema.parseJson(schema)))
+          const decode = Schema.decodeEffect(
+            Schema.Array(Schema.fromJsonString(schema))
+          )
           return (key) =>
             getSetMembers(key).pipe(
-              Effect.flatten,
+              Effect.flatMap(Effect.fromOption),
               Effect.flatMap(decode),
-              Effect.filterOrFail(Array.isNonEmptyReadonlyArray)
+              Effect.filterOrFail(Array.isReadonlyArrayNonEmpty)
             )
         },
         delete: deleteKey,
         withLock,
         addIntoSortedSet: (schema) => {
-          const encode = Schema.encode(Schema.parseJson(schema))
+          const encode = Schema.encodeEffect(Schema.fromJsonString(schema))
           return (key, value, score) =>
             encode(value).pipe(
               Effect.flatMap((encoded) => addIntoSortedSet(key, encoded, score))
             )
         },
         getSortedSet: (schema) => {
-          const decode = Schema.decode(Schema.Array(Schema.parseJson(schema)))
+          const decode = Schema.decodeEffect(
+            Schema.Array(Schema.fromJsonString(schema))
+          )
           return (key, order) =>
             getSortedSet(key, order).pipe(Effect.flatMap(decode))
         },
         clearSortedSet,
         trimSortedSetToNewest,
         removeFromSortedSet: (schema) => {
-          const encode = Schema.encode(Schema.Array(Schema.parseJson(schema)))
+          const encode = Schema.encodeEffect(
+            Schema.Array(Schema.fromJsonString(schema))
+          )
           return (key, values) =>
             encode(values).pipe(
               Effect.flatMap((encoded) => removeFromSortedSet(key, encoded))
             )
         },
         getAndDropSortedSet: (schema) => {
-          const decode = Schema.decode(Schema.Array(Schema.parseJson(schema)))
+          const decode = Schema.decodeEffect(
+            Schema.Array(Schema.fromJsonString(schema))
+          )
           return (key, order) =>
             getAndDropSortedSet(key, order).pipe(Effect.flatMap(decode))
         },
@@ -624,7 +628,7 @@ export class RedisService extends Context.Tag('RedisService')<
 
 export const withRedisLock: <A, E, R>(
   resources: string[] | string,
-  duration?: Duration.DurationInput
+  duration?: Duration.Input
 ) => (
   program: Effect.Effect<A, E, R>
 ) => Effect.Effect<A, E | RedisLockError, R | RedisService> =
@@ -635,15 +639,13 @@ export const withRedisLock: <A, E, R>(
 
 export const withRedisLockFromEffect: <A, E, R, R2>(
   resources: Effect.Effect<string[] | string, never, R2>,
-  duration?: Duration.DurationInput
+  duration?: Duration.Input
 ) => (
   program: Effect.Effect<A, E, R>
 ) => Effect.Effect<A, E | RedisLockError, R | RedisService | R2> =
   (resources, duration) => (program) =>
-    Effect.gen(function* (_) {
-      const redisService = yield* _(RedisService)
-      const resolvedResources = yield* _(resources)
-      return yield* _(
-        redisService.withLock(program)(resolvedResources, duration)
-      )
+    Effect.gen(function* () {
+      const redisService = yield* RedisService
+      const resolvedResources = yield* resources
+      return yield* redisService.withLock(program)(resolvedResources, duration)
     })

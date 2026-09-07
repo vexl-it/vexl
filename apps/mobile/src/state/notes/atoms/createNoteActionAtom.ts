@@ -36,7 +36,7 @@ export const createNoteActionAtom = atom(
       onProgress?: (status: OfferEncryptionProgress) => void
     }
   ) =>
-    Effect.gen(function* (_) {
+    Effect.gen(function* () {
       const api = get(apiAtom)
       const session = get(sessionDataOrDummyAtom)
 
@@ -44,43 +44,43 @@ export const createNoteActionAtom = atom(
 
       // The note keypair is the note's chat inbox. Its public key is what
       // responders encrypt chat requests to.
-      const {inbox} = yield* _(
-        set(upsertInboxOnBeAndLocallyActionAtom, {for: 'myNote', noteId})
-      )
+      const {inbox} = yield* set(upsertInboxOnBeAndLocallyActionAtom, {
+        for: 'myNote',
+        noteId,
+      })
 
-      const vexlNotificationToken = yield* _(
-        set(generateAndRegisterVexlTokenActionAtom, {
+      const vexlNotificationToken = yield* set(
+        generateAndRegisterVexlTokenActionAtom,
+        {
           keyHolder: inbox.privateKey,
-        })
+        }
       )
 
-      const serverToClientHashesToHashedPhoneNumbersMap = yield* _(
-        set(ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom)
+      const serverToClientHashesToHashedPhoneNumbersMap = yield* set(
+        ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom
       )
 
       const expiresAt = Schema.decodeSync(UnixMilliseconds)(
         Date.now() + expiresAfterDays * MILLISECONDS_IN_DAY
       )
 
-      const createNoteResult = yield* _(
-        createNewNoteForMyContacts({
-          offerApi: api.offer,
-          contactApi: api.contact,
-          noteId,
-          expiresAt,
-          publicPart: {
-            notePublicKey: inbox.privateKey.publicKeyPemBase64,
-            text,
-            allowRepost,
-            vexlNotificationToken,
-            authorClientVersion: version,
-          },
-          ownerKeyPair: session.privateKey,
-          ownerKeyPairV2: session.keyPairV2,
-          serverToClientHashesToHashedPhoneNumbersMap,
-          onProgress,
-        })
-      )
+      const createNoteResult = yield* createNewNoteForMyContacts({
+        offerApi: api.offer,
+        contactApi: api.contact,
+        noteId,
+        expiresAt,
+        publicPart: {
+          notePublicKey: inbox.privateKey.publicKeyPemBase64,
+          text,
+          allowRepost,
+          vexlNotificationToken,
+          authorClientVersion: version,
+        },
+        ownerKeyPair: session.privateKey,
+        ownerKeyPairV2: session.keyPairV2,
+        serverToClientHashesToHashedPhoneNumbersMap,
+        onProgress,
+      })
 
       if (createNoteResult.encryptionErrors.length > 0) {
         reportError('error', new Error('Error while encrypting note'), {

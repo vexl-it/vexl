@@ -33,16 +33,17 @@ export interface ClubMemberCountChangeDbOperations {
   ) => Effect.Effect<readonly ListForClubResult[], UnexpectedServerError>
 }
 
-export class ClubMemberCountChangeDbService extends Context.Tag(
-  'ClubMemberCountChangeDbService'
-)<ClubMemberCountChangeDbService, ClubMemberCountChangeDbOperations>() {
+export class ClubMemberCountChangeDbService extends Context.Service<
+  ClubMemberCountChangeDbService,
+  ClubMemberCountChangeDbOperations
+>()('ClubMemberCountChangeDbService') {
   static readonly Live = Layer.effect(
     ClubMemberCountChangeDbService,
-    Effect.gen(function* (_) {
-      const incrementJoined = yield* _(createIncrementJoined)
-      const incrementLeft = yield* _(createIncrementLeft)
-      const deleteForClub = yield* _(createDeleteForClub)
-      const listForClub = yield* _(createListForClub)
+    Effect.gen(function* () {
+      const incrementJoined = yield* createIncrementJoined
+      const incrementLeft = yield* createIncrementLeft
+      const deleteForClub = yield* createDeleteForClub
+      const listForClub = yield* createListForClub
 
       return {
         incrementJoined,

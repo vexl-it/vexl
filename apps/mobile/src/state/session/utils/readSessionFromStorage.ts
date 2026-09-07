@@ -2,7 +2,7 @@ import {
   aesCTRDecrypt,
   type CryptoError,
 } from '@vexl-next/generic-utils/src/effect-helpers/crypto'
-import {Effect, Option, Schema, type ParseResult} from 'effect/index'
+import {Effect, Option, Schema} from 'effect'
 import {Session} from '../../../brands/Session.brand'
 import {
   getItemFromAsyncStorage,
@@ -77,9 +77,9 @@ function readLegacySecret(): Effect.Effect<
 function decryptAndDecodeSession(
   encryptedSessionJson: string,
   secretToken: string
-): Effect.Effect<Session, CryptoError | ParseResult.ParseError> {
+): Effect.Effect<Session, CryptoError | Schema.SchemaError> {
   return aesCTRDecrypt(secretToken)(encryptedSessionJson).pipe(
-    Effect.flatMap(Schema.decode(Schema.parseJson(Session)))
+    Effect.flatMap(Schema.decodeEffect(Schema.fromJsonString(Session)))
   )
 }
 
@@ -102,7 +102,7 @@ function decryptWithLegacySecretAndMigrateToV2(
   | StoredSessionSecretUnavailable
   | ErrorReadingFromSecureStorage
   | CryptoError
-  | ParseResult.ParseError
+  | Schema.SchemaError
 > {
   return Effect.gen(function* () {
     const legacySecret = yield* readLegacySecret()
@@ -123,7 +123,7 @@ export function readSessionFromStorage(): Effect.Effect<
   | ErrorReadingFromSecureStorage
   | ErrorReadingFromAsyncStorage
   | CryptoError
-  | ParseResult.ParseError
+  | Schema.SchemaError
 > {
   return Effect.gen(function* () {
     const encryptedSessionJson = yield* getItemFromAsyncStorage(SESSION_KEY)
@@ -139,13 +139,13 @@ export function readSessionFromStorage(): Effect.Effect<
       encryptedSessionJson,
       v2Secret.value
     ).pipe(
-      Effect.catchAll((v2DecryptError) =>
+      Effect.catch((v2DecryptError) =>
         // The V2 slot holds a secret that can't decrypt the session - a stale
         // copy (e.g. from an interrupted past write). Rescue with the legacy
         // secret, overwriting the stale copy on success; if the rescue fails
         // too, surface the V2 attempt's error.
         decryptWithLegacySecretAndMigrateToV2(encryptedSessionJson).pipe(
-          Effect.catchAll(() => Effect.fail(v2DecryptError))
+          Effect.catch(() => Effect.fail(v2DecryptError))
         )
       )
     )

@@ -1,4 +1,4 @@
-import {Effect} from 'effect'
+import {Effect, pipe} from 'effect'
 import {atom} from 'jotai'
 import {globalDialogAtom} from '../../../components/GlobalDialog'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
@@ -22,8 +22,8 @@ export const showNotesBoardIntroSheetIfNeededActionAtom = atom(
 
     set(showNotesBoardIntroSheetAtom, false)
 
-    return Effect.gen(function* (_) {
-      yield* _(
+    return Effect.gen(function* () {
+      yield* pipe(
         set(globalDialogAtom, {
           title: t('notes.board.introTitle'),
           subtitle: t('notes.board.introDescription'),

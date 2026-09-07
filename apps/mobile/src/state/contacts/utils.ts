@@ -95,14 +95,14 @@ const DEVICE_CONTACTS_MAPPING_CHUNK_SIZE = 500
 function mapContactsFromSystemToDomainChunked(
   contacts: readonly unknown[]
 ): Effect.Effect<DeviceContactsMappingResult> {
-  return Effect.gen(function* (_) {
+  return Effect.gen(function* () {
     const mappedContacts: ContactInfo[] = []
     let malformedContactsCount = 0
     let malformedPhoneNumbersCount = 0
 
     const chunks = chunksOf(contacts, DEVICE_CONTACTS_MAPPING_CHUNK_SIZE)
     for (const [i, chunk] of chunks.entries()) {
-      if (i > 0) yield* _(waitForNextAnimationFrameEffect())
+      if (i > 0) yield* waitForNextAnimationFrameEffect()
 
       const chunkResult = mapContactsFromSystemToDomain(chunk)
       mappedContacts.push(...chunkResult.contacts)
@@ -122,30 +122,27 @@ export function getContactsAndTryToResolveThePermissionsAlongTheWay(): Effect.Ef
   ContactInfo[],
   ContactsPermissionsNotGrantedError | UnknownContactsError
 > {
-  return Effect.gen(function* (_) {
-    const contactsPermissionsGranted = yield* _(areContactsPermissionsGranted())
+  return Effect.gen(function* () {
+    const contactsPermissionsGranted = yield* areContactsPermissionsGranted()
 
     if (!contactsPermissionsGranted) {
-      return yield* _(Effect.fail(new ContactsPermissionsNotGrantedError()))
+      return yield* Effect.fail(new ContactsPermissionsNotGrantedError())
     }
 
     const measureAsyncCall = startMeasure(
       'Async call to get contacts - should not block'
     )
 
-    const contacts = yield* _(
-      Effect.tryPromise({
-        try: async () => await getDeviceContactsFromSystem(),
-        catch: (e) => new UnknownContactsError({cause: e}),
-      })
-    )
+    const contacts = yield* Effect.tryPromise({
+      try: async () => await getDeviceContactsFromSystem(),
+      catch: (e) => new UnknownContactsError({cause: e}),
+    })
 
     measureAsyncCall()
 
     const measure = startMeasure('Mapping contacts from system to our domain')
-    const mappingResult: DeviceContactsMappingResult = yield* _(
-      mapContactsFromSystemToDomainChunked(contacts)
-    )
+    const mappingResult: DeviceContactsMappingResult =
+      yield* mapContactsFromSystemToDomainChunked(contacts)
 
     if (
       mappingResult.malformedContactsCount > 0 ||

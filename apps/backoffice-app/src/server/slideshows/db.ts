@@ -18,7 +18,7 @@ const SqlLive = backofficeDatabaseConfig.pipe(
       transformResultNames: String.snakeToCamel,
     })
   ),
-  Layer.unwrapEffect
+  Layer.unwrap
 )
 
 export const runDb = <A, E>(

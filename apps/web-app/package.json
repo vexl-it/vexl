@@ -14,7 +14,6 @@
     "format:fix": "prettier --write \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json,css}\""
   },
   "dependencies": {
-    "@effect/platform": "^0.93.6",
     "@sentry/nextjs": "^10.69.0",
     "@vexl-next/cryptography": "0.0.0",
     "@vexl-next/domain": "0.0.0",
@@ -23,7 +22,7 @@
     "browserify-zlib": "^0.2.0",
     "buffer": "^6.0.3",
     "crypto-browserify": "^3.12.1",
-    "effect": "^3.20.0",
+    "effect": "4.0.0-rc.112",
     "next": "^16.2.11",
     "process": "^0.11.10",
     "react": "19.2.3",

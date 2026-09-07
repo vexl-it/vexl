@@ -19,7 +19,7 @@ import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificat
 import {FcmToken} from '@vexl-next/domain/src/utility/FcmToken.brand'
 import {BooleanFromString} from '@vexl-next/generic-utils/src/effect-helpers/BooleanFromString'
 import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/EcdsaSignature.brand'
-import {Schema} from 'effect'
+import {Effect, Option, Schema} from 'effect'
 import {RequestBaseWithChallenge} from '../../challenges/contracts'
 import {NoContentResponse} from '../../NoContentResponse.brand'
 import {
@@ -32,32 +32,45 @@ import {
 export class InboxDoesNotExistError extends Schema.TaggedError<InboxDoesNotExistError>(
   'InboxDoesNotExist'
 )('InboxDoesNotExist', {
-  status: Schema.optionalWith(Schema.Literal(404), {default: () => 404}),
-  code: Schema.optionalWith(Schema.Literal('100101'), {
-    default: () => '100101',
-  }),
+  status: Schema.Literal(404).pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): 404 => 404)),
+    Schema.withConstructorDefault(Effect.sync((): 404 => 404))
+  ),
+  code: Schema.Literal('100101').pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): '100101' => '100101')),
+    Schema.withConstructorDefault(Effect.sync((): '100101' => '100101'))
+  ),
 }) {}
 
 export class ForbiddenMessageTyperror extends Schema.TaggedError<ForbiddenMessageTyperror>(
   'ForbiddenMessageTyperror'
 )('ForbiddenMessageTyperror', {
-  status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
+  status: Schema.Literal(400).pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): 400 => 400)),
+    Schema.withConstructorDefault(Effect.sync((): 400 => 400))
+  ),
 }) {}
 
 export class InitialImportContactsQuotaReachedError extends Schema.TaggedError<InitialImportContactsQuotaReachedError>(
   'InitialImportContactsQuotaReachedError'
 )('InitialImportContactsQuotaReachedError', {
-  status: Schema.optionalWith(Schema.Literal(429), {default: () => 429}),
+  status: Schema.Literal(429).pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): 429 => 429)),
+    Schema.withConstructorDefault(Effect.sync((): 429 => 429))
+  ),
 }) {}
 
 export class ImportContactsQuotaReachedError extends Schema.TaggedError<ImportContactsQuotaReachedError>(
   'ImportContactsQuotaReachedError'
 )('ImportContactsQuotaReachedError', {
-  status: Schema.optionalWith(Schema.Literal(429), {default: () => 429}),
+  status: Schema.Literal(429).pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): 429 => 429)),
+    Schema.withConstructorDefault(Effect.sync((): 429 => 429))
+  ),
 }) {}
 
 const CommonConnectionsForUserFromApi = Schema.Struct({
-  publicKey: Schema.Union(PublicKeyPemBase64, PublicKeyV2),
+  publicKey: Schema.Union([PublicKeyPemBase64, PublicKeyV2]),
   common: Schema.Struct({
     hashes: Schema.Array(ServerToClientHashedNumber),
     verifiedHashes: Schema.Array(ServerToClientHashedNumber),
@@ -67,34 +80,38 @@ const CommonConnectionsForUserFromApi = Schema.Struct({
 export class UserNotFoundError extends Schema.TaggedError<UserNotFoundError>(
   'UserNotFoundError'
 )('UserNotFoundError', {
-  status: Schema.optionalWith(Schema.Literal(404), {default: () => 404}),
-  code: Schema.optionalWith(Schema.Literal('100101'), {
-    default: () => '100101',
-  }),
+  status: Schema.Literal(404).pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): 404 => 404)),
+    Schema.withConstructorDefault(Effect.sync((): 404 => 404))
+  ),
+  code: Schema.Literal('100101').pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): '100101' => '100101')),
+    Schema.withConstructorDefault(Effect.sync((): '100101' => '100101'))
+  ),
 }) {}
 
 export const CreateUserRequest = Schema.Struct({
-  vexlNotificationToken: Schema.optionalWith(VexlNotificationToken, {
-    as: 'Option',
-    nullable: true,
-  }),
+  vexlNotificationToken: Schema.OptionFromOptionalNullOr(
+    VexlNotificationToken
+  ).pipe(Schema.withConstructorDefault(Effect.succeed(Option.none()))),
   // todo #2124 remove after all clients are migrated to vexl notification tokens
   firebaseToken: Schema.NullOr(FcmToken),
-  expoToken: Schema.optionalWith(Schema.NullOr(ExpoNotificationToken), {
-    default: () => null,
-  }),
+  expoToken: Schema.NullOr(ExpoNotificationToken).pipe(
+    Schema.withDecodingDefaultType(Effect.sync(() => null)),
+    Schema.withConstructorDefault(Effect.sync(() => null))
+  ),
   // V2 public key for cryptobox - optional for backward compatibility
-  publicKeyV2: Schema.optionalWith(PublicKeyV2, {
-    as: 'Option',
-  }),
+  publicKeyV2: Schema.OptionFromOptional(PublicKeyV2).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
 })
 export type CreateUserRequest = Schema.Schema.Type<typeof CreateUserRequest>
 
 export const RefreshUserRequest = Schema.Struct({
   offersAlive: Schema.Boolean,
-  vexlNotificationToken: Schema.optionalWith(VexlNotificationToken, {
-    as: 'Option',
-  }),
+  vexlNotificationToken: Schema.OptionFromOptional(VexlNotificationToken).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
 })
 export type RefreshUserRequest = Schema.Schema.Type<typeof RefreshUserRequest>
 
@@ -106,7 +123,10 @@ export type UpdateNotificationTokenRequest =
 
 export const ImportContactsRequest = Schema.Struct({
   contacts: Schema.Array(HashedPhoneNumber),
-  replace: Schema.optionalWith(Schema.Boolean, {default: () => true}),
+  replace: Schema.Boolean.pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): true => true)),
+    Schema.withConstructorDefault(Effect.sync((): true => true))
+  ),
 })
 export type ImportContactsRequest = typeof ImportContactsRequest.Type
 
@@ -134,7 +154,9 @@ export const FetchMyContactsResponse = Schema.Struct({
   items: Schema.Array(
     Schema.Struct({
       publicKey: PublicKeyPemBase64,
-      publicKeyV2: Schema.optionalWith(PublicKeyV2, {as: 'Option'}),
+      publicKeyV2: Schema.OptionFromOptional(PublicKeyV2).pipe(
+        Schema.withConstructorDefault(Effect.succeed(Option.none()))
+      ),
     })
   ),
 })
@@ -142,21 +164,21 @@ export type FetchMyContactsResponse = typeof FetchMyContactsResponse.Type
 
 export const FetchMyContactsPaginatedRequest = Schema.Struct({
   ...PageRequestMeta.fields,
-  level: ConnectionLevel.pipe(Schema.pickLiteral('FIRST', 'SECOND')),
+  level: ConnectionLevel.pick(['FIRST', 'SECOND']),
 })
 
 export type FetchMyContactsPaginatedRequest =
   typeof FetchMyContactsPaginatedRequest.Type
 
 export const FetchMyContactsPaginatedResponse = createPageResponse(
-  Schema.Union(PublicKeyPemBase64, PublicKeyV2)
+  Schema.Union([PublicKeyPemBase64, PublicKeyV2])
 )
 export type FetchMyContactsPaginatedResponse =
   typeof FetchMyContactsPaginatedResponse.Type
 
 export const FetchCommonConnectionsPaginatedRequest = Schema.Struct({
   ...PageRequestMeta.fields,
-  publicKeys: Schema.Array(Schema.Union(PublicKeyPemBase64, PublicKeyV2)),
+  publicKeys: Schema.Array(Schema.Union([PublicKeyPemBase64, PublicKeyV2])),
 })
 export type FetchCommonConnectionsPaginatedRequest =
   typeof FetchCommonConnectionsPaginatedRequest.Type
@@ -190,29 +212,41 @@ export const HashWithSignature = Schema.Struct({
 export class ClubAlreadyExistsError extends Schema.TaggedError<ClubAlreadyExistsError>(
   'ClubAlreadyExistsError'
 )('ClubAlreadyExistsError', {
-  status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
+  status: Schema.Literal(400).pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): 400 => 400)),
+    Schema.withConstructorDefault(Effect.sync((): 400 => 400))
+  ),
 }) {}
 
 export class ClubCannotBeReactivatedError extends Schema.TaggedError<ClubCannotBeReactivatedError>(
   'ClubCannotBeReactivatedError'
 )('ClubCannotBeReactivatedError', {
-  status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
-  reactivationBlockedReason: Schema.Literal(
-    'PAST_VALIDITY',
-    'REPORT_LIMIT_REACHED'
+  status: Schema.Literal(400).pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): 400 => 400)),
+    Schema.withConstructorDefault(Effect.sync((): 400 => 400))
   ),
+  reactivationBlockedReason: Schema.Literals([
+    'PAST_VALIDITY',
+    'REPORT_LIMIT_REACHED',
+  ]),
 }) {}
 
 export class InvalidAdminTokenError extends Schema.TaggedError<InvalidAdminTokenError>(
   'InvalidAdminToken'
 )('InvalidAdminToken', {
-  status: Schema.optionalWith(Schema.Literal(401), {default: () => 401}),
+  status: Schema.Literal(401).pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): 401 => 401)),
+    Schema.withConstructorDefault(Effect.sync((): 401 => 401))
+  ),
 }) {}
 
 export class ClubUserLimitExceededError extends Schema.TaggedError<ClubUserLimitExceededError>(
   'ClubUserLimitExceededError'
 )('ClubUserLimitExceededError', {
-  status: Schema.optionalWith(Schema.Literal(429), {default: () => 429}),
+  status: Schema.Literal(429).pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): 429 => 429)),
+    Schema.withConstructorDefault(Effect.sync((): 429 => 429))
+  ),
 }) {}
 
 export const CreateClubRequest = Schema.Struct({
@@ -283,11 +317,14 @@ export type ReactivateClubResponse = typeof ReactivateClubResponse.Type
 export class S3ServiceError extends Schema.TaggedError<S3ServiceError>(
   'S3ServiceError'
 )('S3ServiceError', {
-  status: Schema.optionalWith(Schema.Literal(502), {default: () => 502}),
+  status: Schema.Literal(502).pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): 502 => 502)),
+    Schema.withConstructorDefault(Effect.sync((): 502 => 502))
+  ),
   message: Schema.optional(Schema.String),
 }) {}
 
-export const ImageExtension = Schema.Literal('png', 'jpg', 'jpeg')
+export const ImageExtension = Schema.Literals(['png', 'jpg', 'jpeg'])
 export type ImageExtension = Schema.Schema.Type<typeof ImageExtension>
 
 export const RequestClubImageUploadRequest = Schema.Struct({
@@ -308,22 +345,25 @@ export type RequestClubImageUploadResponse =
 export class MemberAlreadyInClubError extends Schema.TaggedError<MemberAlreadyInClubError>(
   'MemberAlreadyInClubError'
 )('MemberAlreadyInClubError', {
-  status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
+  status: Schema.Literal(400).pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): 400 => 400)),
+    Schema.withConstructorDefault(Effect.sync((): 400 => 400))
+  ),
 }) {}
 
 export const GetClubInfoRequest = Schema.Struct({
   ...RequestBaseWithChallenge.fields,
   // #2124 - remove notificationToken when fully migrated to VexlNotificationToken
-  notificationToken: Schema.optionalWith(ExpoNotificationToken, {
-    as: 'Option',
-  }),
-  vexlNotificationToken: Schema.optionalWith(VexlNotificationToken, {
-    as: 'Option',
-  }),
+  notificationToken: Schema.OptionFromOptional(ExpoNotificationToken).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
+  vexlNotificationToken: Schema.OptionFromOptional(VexlNotificationToken).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
   // Club-specific V2 public key - updates on each fetch
-  publicKeyV2: Schema.optionalWith(PublicKeyV2, {
-    as: 'Option',
-  }),
+  publicKeyV2: Schema.OptionFromOptional(PublicKeyV2).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
 })
 
 export type GetClubInfoRequest = typeof GetClubInfoRequest.Type
@@ -336,17 +376,17 @@ export const JoinClubRequest = Schema.Struct({
   ...RequestBaseWithChallenge.fields,
   code: ClubCode,
   // #2124 - remove notificationToken when fully migrated to VexlNotificationToken
-  notificationToken: Schema.optionalWith(ExpoNotificationToken, {
-    as: 'Option',
-  }),
-  vexlNotificationToken: Schema.optionalWith(VexlNotificationToken, {
-    as: 'Option',
-  }),
+  notificationToken: Schema.OptionFromOptional(ExpoNotificationToken).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
+  vexlNotificationToken: Schema.OptionFromOptional(VexlNotificationToken).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
   contactsImported: Schema.Boolean,
   // Club-specific V2 public key
-  publicKeyV2: Schema.optionalWith(PublicKeyV2, {
-    as: 'Option',
-  }),
+  publicKeyV2: Schema.OptionFromOptional(PublicKeyV2).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
 })
 export type JoinClubRequest = typeof JoinClubRequest.Type
 
@@ -364,7 +404,10 @@ export type LeaveClubRequest = typeof LeaveClubRequest.Type
 export class UserIsNotModeratorError extends Schema.TaggedError<UserIsNotModeratorError>(
   'UserIsNotModeratorError'
 )('UserIsNotModeratorError', {
-  status: Schema.optionalWith(Schema.Literal(403), {default: () => 403}),
+  status: Schema.Literal(403).pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): 403 => 403)),
+    Schema.withConstructorDefault(Effect.sync((): 403 => 403))
+  ),
 }) {}
 
 export const GenerateClubJoinLinkRequest = Schema.Struct({
@@ -385,7 +428,10 @@ export type GenerateClubJoinLinkResponse =
 export class InviteCodeNotFoundError extends Schema.TaggedError<InviteCodeNotFoundError>(
   'InviteCodeNotFoundError'
 )('InviteCodeNotFoundError', {
-  status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
+  status: Schema.Literal(400).pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): 400 => 400)),
+    Schema.withConstructorDefault(Effect.sync((): 400 => 400))
+  ),
 }) {}
 
 export const DeactivateClubJoinLinkRequest = Schema.Struct({
@@ -442,7 +488,7 @@ export type GetClubContactsRequest = typeof GetClubContactsRequest.Type
 
 export const GetClubContactsResponse = Schema.Struct({
   clubUuid: ClubUuid,
-  items: Schema.Array(Schema.Union(PublicKeyPemBase64, PublicKeyV2)),
+  items: Schema.Array(Schema.Union([PublicKeyPemBase64, PublicKeyV2])),
 })
 
 export type GetClubContactsResponse = typeof GetClubContactsResponse.Type
@@ -463,7 +509,10 @@ export const GetClubInfoByAccessCodeResponse = Schema.Struct({
 export class ReportClubLimitReachedError extends Schema.TaggedError<ReportClubLimitReachedError>(
   'ReportClubLimitReachedError'
 )('ReportClubLimitReachedError', {
-  status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
+  status: Schema.Literal(400).pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): 400 => 400)),
+    Schema.withConstructorDefault(Effect.sync((): 400 => 400))
+  ),
 }) {}
 
 export const ReportClubRequest = Schema.Struct({

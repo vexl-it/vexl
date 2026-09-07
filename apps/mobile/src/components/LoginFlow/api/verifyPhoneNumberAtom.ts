@@ -12,7 +12,7 @@ export const verifyPhoneNumberAtom = atom(
     const {t} = get(translationAtom)
 
     return userApi.verifyPhoneNumber(inputRequest).pipe(
-      Effect.catchAll((e) => {
+      Effect.catch((e) => {
         if (e._tag === 'VerificationNotFoundError')
           return Effect.fail(
             t('loginFlow.verificationCode.errors.verificationNotFound')
@@ -26,7 +26,7 @@ export const verifyPhoneNumberAtom = atom(
             t('loginFlow.verificationCode.errors.challengeCouldNotBeGenerated')
           )
 
-        if (e._tag === 'HttpApiDecodeError') {
+        if (e._tag === 'SchemaError') {
           reportError(
             'error',
             new Error('Unexpected api response while verifying phone number'),

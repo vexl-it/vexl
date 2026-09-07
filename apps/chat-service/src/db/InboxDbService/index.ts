@@ -31,17 +31,17 @@ export interface InboxDbOperations {
   ) => Effect.Effect<void, UnexpectedServerError>
 }
 
-export class InboxDbService extends Context.Tag('InboxDbService')<
+export class InboxDbService extends Context.Service<
   InboxDbService,
   InboxDbOperations
->() {
+>()('InboxDbService') {
   static readonly Live = Layer.effect(
     InboxDbService,
-    Effect.gen(function* (_) {
-      const deleteInboxByPublicKey = yield* _(createDeleteInboxByPublicKey)
-      const findInboxByPublicKey = yield* _(createFindInboxByPublicKey)
-      const insertInbox = yield* _(createInsertInbox)
-      const updateInboxMetadata = yield* _(createUpdateInboxMetadata)
+    Effect.gen(function* () {
+      const deleteInboxByPublicKey = yield* createDeleteInboxByPublicKey
+      const findInboxByPublicKey = yield* createFindInboxByPublicKey
+      const insertInbox = yield* createInsertInbox
+      const updateInboxMetadata = yield* createUpdateInboxMetadata
 
       return {
         deleteInboxByPublicKey,

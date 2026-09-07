@@ -3,7 +3,7 @@ import {
   PrivateKeyHolder,
 } from '@vexl-next/cryptography/src/KeyHolder'
 import {ClubUuid} from '@vexl-next/domain/src/general/clubs'
-import {Schema, Struct} from 'effect'
+import {Effect, Schema, Struct} from 'effect'
 import {atom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
@@ -16,10 +16,11 @@ const ClubKeys = Schema.Struct({
 export type ClubKeys = typeof ClubKeys.Type
 
 const ClubsToKeyHolderV2 = Schema.Struct({
-  data: Schema.Record({key: ClubUuid, value: ClubKeys}),
-  waitingForAdmission: Schema.optionalWith(Schema.Array(ClubKeys), {
-    default: () => [],
-  }),
+  data: Schema.Record(ClubUuid, ClubKeys),
+  waitingForAdmission: Schema.Array(ClubKeys).pipe(
+    Schema.withDecodingDefaultType(Effect.sync(() => [])),
+    Schema.withConstructorDefault(Effect.sync(() => []))
+  ),
 })
 
 export type ClubsToKeyHolderV2 = typeof ClubsToKeyHolderV2.Type
@@ -49,6 +50,6 @@ export const addKeyToWaitingForAdmissionActionAtom = atom(
 export const removeClubFromKeyHolderStateActionAtom = atom(
   null,
   (get, set, clubUuid: ClubUuid) => {
-    set(clubsToKeyHolderAtom, Struct.omit(clubUuid))
+    set(clubsToKeyHolderAtom, Struct.omit([clubUuid]))
   }
 )

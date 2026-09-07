@@ -7,7 +7,7 @@ import {
   TagLabel,
   Typography,
 } from '@vexl-next/ui'
-import {Option, pipe, Array as ReadonlyArray} from 'effect'
+import {Filter, Option, pipe, Array as ReadonlyArray} from 'effect'
 import {atom, type Atom, useAtom, useAtomValue} from 'jotai'
 import {selectAtom, splitAtom} from 'jotai/utils'
 import React from 'react'
@@ -38,11 +38,11 @@ import ChatListItem, {type ChatListData} from './ChatListItem'
 const ReanimatedFlashList: React.ComponentType<any> =
   Animated.createAnimatedComponent(FlashList)
 
-const tagLabelsEquivalence = ReadonlyArray.getEquivalence<string>(
+const tagLabelsEquivalence = ReadonlyArray.makeEquivalence<string>(
   (left, right) => left === right
 )
 
-const chatsListDataEquivalence = ReadonlyArray.getEquivalence<ChatListData>(
+const chatsListDataEquivalence = ReadonlyArray.makeEquivalence<ChatListData>(
   (a, b) =>
     a.chat === b.chat &&
     a.lastMessage === b.lastMessage &&
@@ -70,12 +70,14 @@ const chatsListDataSourceAtom = atom((get): ChatListData[] => {
         selectedTagIds,
       })
     ),
-    ReadonlyArray.filterMap((chat) =>
-      Option.map(ReadonlyArray.last(chat.messages), (lastMessage) => ({
-        chat,
-        lastMessage,
-        tagLabels: tagLabelsForChat(tagState, chat.chat.id),
-      }))
+    ReadonlyArray.filterMap(
+      Filter.fromPredicateOption((chat) =>
+        Option.map(ReadonlyArray.last(chat.messages), (lastMessage) => ({
+          chat,
+          lastMessage,
+          tagLabels: tagLabelsForChat(tagState, chat.chat.id),
+        }))
+      )
     ),
     ReadonlyArray.sort<ChatListData>((a, b) =>
       compareMessages(b.lastMessage, a.lastMessage)
@@ -187,7 +189,7 @@ function ChatsList(): React.ReactElement | null {
   const listHeaderComponent = (
     <InsideScreenListHeader>
       {elementAtoms.length > 0 ||
-      ReadonlyArray.isNonEmptyReadonlyArray(filterableTags) ? (
+      ReadonlyArray.isReadonlyArrayNonEmpty(filterableTags) ? (
         <Stack marginHorizontal="$5" marginBottom="$6">
           <SearchBar
             placeholder={t('messages.search.placeholder')}
@@ -198,7 +200,7 @@ function ChatsList(): React.ReactElement | null {
           />
         </Stack>
       ) : null}
-      {ReadonlyArray.isNonEmptyReadonlyArray(filterableTags) ? (
+      {ReadonlyArray.isReadonlyArrayNonEmpty(filterableTags) ? (
         <Stack marginBottom="$6">
           <FilterBar
             items={filterItems}

@@ -23,9 +23,7 @@ export const sendExpoPushNotification = (
         message: 'Error sending expo push notification',
       }),
   }).pipe(
-    Effect.zipLeft(
-      Effect.logInfo('sent expo notification', {count: args.length})
-    ),
+    Effect.tap(Effect.logInfo('sent expo notification', {count: args.length})),
     Effect.withSpan('sendExpoPushNotification', {
       attributes: {count: args.length},
     })

@@ -1,9 +1,9 @@
-import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {PublicKeyV2} from '@vexl-next/cryptography'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
-import {Effect, flow, Schema} from 'effect'
+import {Effect, flow, Option, Schema} from 'effect'
+import {SqlSchema} from 'effect/unstable/sql'
 import {offerReportFilterConfig} from '../../../configs'
 import {NoteChangeCounter, NotePrivatePartRecordId} from '../domain'
 import {
@@ -15,7 +15,9 @@ import {
 
 export const QueryNotesPaginatedRequest = Schema.Struct({
   userPublicKey: PublicKeyPemBase64,
-  userPublicKeyV2: Schema.optionalWith(PublicKeyV2, {as: 'Option'}),
+  userPublicKeyV2: Schema.OptionFromOptional(PublicKeyV2).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
   lastNoteChangeCounter: NoteChangeCounter,
   lastPrivatePartId: NotePrivatePartRecordId,
   limit: Schema.Int,
@@ -24,9 +26,9 @@ export type QueryNotesPaginatedRequest = Schema.Schema.Type<
   typeof QueryNotesPaginatedRequest
 >
 
-export const createQueryNotesForUserPaginated = Effect.gen(function* (_) {
-  const sql = yield* _(PgClient.PgClient)
-  const noteReportFilter = yield* _(offerReportFilterConfig)
+export const createQueryNotesForUserPaginated = Effect.gen(function* () {
+  const sql = yield* PgClient.PgClient
+  const noteReportFilter = yield* offerReportFilterConfig
 
   const query = SqlSchema.findAll({
     Request: QueryNotesPaginatedRequest,

@@ -1,12 +1,16 @@
-import {HttpApiEndpoint, HttpApiGroup, OpenApi} from '@effect/platform/index'
+import {InvalidNextPageTokenError} from '@vexl-next/domain/src/general/commonErrors'
+import {Schema} from 'effect'
 import {
-  InvalidNextPageTokenError,
-  NotFoundError,
-} from '@vexl-next/domain/src/general/commonErrors'
+  HttpApiEndpoint,
+  HttpApiGroup,
+  HttpApiSchema,
+  OpenApi,
+} from 'effect/unstable/httpapi'
 import {
   CommonAndSecurityHeaders,
   ServerSecurityMiddleware,
 } from '../../apiSecurity'
+import {commonApiErrors} from '../../commonApiErrors'
 import {MaxExpectedDailyCall} from '../../MaxExpectedDailyCountAnnotation'
 import {
   CanNotDeletePrivatePartOfAuthor,
@@ -40,124 +44,175 @@ import {
 
 export const CreateNewNoteEndpoint = HttpApiEndpoint.post(
   'createNewNote',
-  '/api/v1/notes'
+  '/api/v1/notes',
+  {
+    disableCodecs: true,
+    headers: CommonAndSecurityHeaders,
+    payload: CreateNewNoteRequest,
+    error: Schema.Union([
+      ...commonApiErrors,
+      MissingOwnerPrivatePartError.pipe(HttpApiSchema.status(400)),
+      DuplicatedPublicKeyError.pipe(HttpApiSchema.status(400)),
+      InvalidNoteExpirationError.pipe(HttpApiSchema.status(400)),
+    ]),
+    success: CreateNewNoteResponse,
+  }
 )
   .annotate(OpenApi.Summary, 'Create note')
-  .setHeaders(CommonAndSecurityHeaders)
   .middleware(ServerSecurityMiddleware)
-  .setPayload(CreateNewNoteRequest)
-  .addSuccess(CreateNewNoteResponse)
-  .addError(MissingOwnerPrivatePartError, {status: 400})
-  .addError(DuplicatedPublicKeyError, {status: 400})
-  .addError(InvalidNoteExpirationError, {status: 400})
   .annotate(MaxExpectedDailyCall, 50)
 
 export const CreateNotePrivatePartEndpoint = HttpApiEndpoint.post(
   'createNotePrivatePart',
-  '/api/v1/notes/private-part'
+  '/api/v1/notes/private-part',
+  {
+    disableCodecs: true,
+    payload: CreateNotePrivatePartRequest,
+    error: Schema.Union([
+      ...commonApiErrors,
+      DuplicatedPublicKeyError.pipe(HttpApiSchema.status(400)),
+    ]),
+    success: CreateNotePrivatePartResponse,
+  }
 )
   .annotate(OpenApi.Summary, 'Create note private part')
-  .setPayload(CreateNotePrivatePartRequest)
-  .addSuccess(CreateNotePrivatePartResponse)
-  .addError(DuplicatedPublicKeyError, {status: 400})
   .annotate(MaxExpectedDailyCall, 100)
 
-export const DeleteNotePrivatePartEndpoint = HttpApiEndpoint.del(
+export const DeleteNotePrivatePartEndpoint = HttpApiEndpoint.delete(
   'deleteNotePrivatePart',
-  '/api/v1/notes/private-part'
+  '/api/v1/notes/private-part',
+  {
+    disableCodecs: true,
+    headers: CommonAndSecurityHeaders,
+    payload: DeleteNotePrivatePartRequest,
+    error: Schema.Union([
+      ...commonApiErrors,
+      CanNotDeletePrivatePartOfAuthor.pipe(HttpApiSchema.status(400)),
+    ]),
+    success: DeleteNotePrivatePartResponse,
+  }
 )
   .annotate(OpenApi.Summary, 'Delete note private part')
   .annotate(
     OpenApi.Description,
     'Removes direct (non repost) private parts of the given public keys. When note for one of adminIds is not found, no error is returned'
   )
-  .setHeaders(CommonAndSecurityHeaders)
   .middleware(ServerSecurityMiddleware)
-  .setPayload(DeleteNotePrivatePartRequest)
-  .addSuccess(DeleteNotePrivatePartResponse)
-  .addError(CanNotDeletePrivatePartOfAuthor, {status: 400})
   .annotate(MaxExpectedDailyCall, 100)
 
 export const CreateRepostNotePrivatePartEndpoint = HttpApiEndpoint.post(
   'createRepostNotePrivatePart',
-  '/api/v1/notes/repost/private-part'
+  '/api/v1/notes/repost/private-part',
+  {
+    disableCodecs: true,
+    payload: CreateRepostNotePrivatePartRequest,
+    error: Schema.Union([
+      ...commonApiErrors,
+      DuplicatedPublicKeyError.pipe(HttpApiSchema.status(400)),
+    ]),
+    success: CreateRepostNotePrivatePartResponse,
+  }
 )
   .annotate(OpenApi.Summary, 'Create repost note private part')
-  .setPayload(CreateRepostNotePrivatePartRequest)
-  .addSuccess(CreateRepostNotePrivatePartResponse)
-  .addError(DuplicatedPublicKeyError, {status: 400})
-  .addError(NotFoundError, {status: 404})
   .annotate(MaxExpectedDailyCall, 100)
 
-export const DeleteNoteEndpoint = HttpApiEndpoint.del(
+export const DeleteNoteEndpoint = HttpApiEndpoint.delete(
   'deleteNote',
-  '/api/v1/notes'
+  '/api/v1/notes',
+  {
+    disableCodecs: true,
+    query: DeleteNoteRequest.fields,
+    error: Schema.Union([...commonApiErrors]),
+    success: DeleteNoteResponse,
+  }
 )
   .annotate(OpenApi.Summary, 'Delete note')
-  .setUrlParams(DeleteNoteRequest)
-  .addSuccess(DeleteNoteResponse)
   .annotate(MaxExpectedDailyCall, 50)
 
 export const RepostNoteEndpoint = HttpApiEndpoint.post(
   'repostNote',
-  '/api/v1/notes/repost'
+  '/api/v1/notes/repost',
+  {
+    disableCodecs: true,
+    headers: CommonAndSecurityHeaders,
+    payload: RepostNoteRequest,
+    error: Schema.Union([
+      ...commonApiErrors,
+      DuplicatedPublicKeyError.pipe(HttpApiSchema.status(400)),
+    ]),
+    success: RepostNoteResponse,
+  }
 )
   .annotate(OpenApi.Summary, 'Repost note')
-  .setHeaders(CommonAndSecurityHeaders)
   .middleware(ServerSecurityMiddleware)
-  .setPayload(RepostNoteRequest)
-  .addSuccess(RepostNoteResponse)
-  .addError(NotFoundError, {status: 404})
-  .addError(DuplicatedPublicKeyError, {status: 400})
   .annotate(MaxExpectedDailyCall, 50)
 
-export const UndoRepostNoteEndpoint = HttpApiEndpoint.del(
+export const UndoRepostNoteEndpoint = HttpApiEndpoint.delete(
   'undoRepostNote',
-  '/api/v1/notes/repost'
+  '/api/v1/notes/repost',
+  {
+    disableCodecs: true,
+    query: UndoRepostNoteRequest.fields,
+    error: Schema.Union([...commonApiErrors]),
+    success: UndoRepostNoteResponse,
+  }
 )
   .annotate(OpenApi.Summary, 'Undo repost note')
-  .setUrlParams(UndoRepostNoteRequest)
-  .addSuccess(UndoRepostNoteResponse)
   .annotate(MaxExpectedDailyCall, 50)
 
 export const GetNotesForMeModifiedOrCreatedAfterPaginatedEndpoint =
   HttpApiEndpoint.get(
     'getNotesForMeModifiedOrCreatedAfterPaginated',
-    '/api/v1/notes/me/modified/paginated'
+    '/api/v1/notes/me/modified/paginated',
+    {
+      disableCodecs: true,
+      headers: CommonAndSecurityHeaders,
+      query: GetNotesForMeCreatedOrModifiedAfterPaginatedRequest.fields,
+      error: Schema.Union([
+        ...commonApiErrors,
+        InvalidNextPageTokenError.pipe(HttpApiSchema.status(400)),
+      ]),
+      success: GetNotesForMeCreatedOrModifiedAfterPaginatedResponse,
+    }
   )
     .annotate(
       OpenApi.Summary,
       'Get notes for me modified or created after (paginated)'
     )
-    .setHeaders(CommonAndSecurityHeaders)
     .middleware(ServerSecurityMiddleware)
-    .setUrlParams(GetNotesForMeCreatedOrModifiedAfterPaginatedRequest)
-    .addSuccess(GetNotesForMeCreatedOrModifiedAfterPaginatedResponse)
-    .addError(InvalidNextPageTokenError, {status: 400})
     .annotate(MaxExpectedDailyCall, 600)
 
 export const GetRemovedNotesEndpoint = HttpApiEndpoint.post(
   'getRemovedNotes',
-  '/api/v1/notes/not-exist'
+  '/api/v1/notes/not-exist',
+  {
+    disableCodecs: true,
+    headers: CommonAndSecurityHeaders,
+    payload: RemovedNoteIdsRequest,
+    error: Schema.Union([...commonApiErrors]),
+    success: RemovedNoteIdsResponse,
+  }
 )
   .annotate(OpenApi.Summary, 'Get removed notes')
-  .setHeaders(CommonAndSecurityHeaders)
   .middleware(ServerSecurityMiddleware)
-  .setPayload(RemovedNoteIdsRequest)
-  .addSuccess(RemovedNoteIdsResponse)
   .annotate(MaxExpectedDailyCall, 100)
 
 export const ReportNoteEndpoint = HttpApiEndpoint.post(
   'reportNote',
-  '/api/v1/notes/report'
+  '/api/v1/notes/report',
+  {
+    disableCodecs: true,
+    headers: CommonAndSecurityHeaders,
+    payload: ReportNoteRequest,
+    error: Schema.Union([
+      ...commonApiErrors,
+      ReportNoteLimitReachedError.pipe(HttpApiSchema.status(429)),
+    ]),
+    success: ReportNoteResponse,
+  }
 )
   .annotate(OpenApi.Summary, 'Report note')
-  .setHeaders(CommonAndSecurityHeaders)
   .middleware(ServerSecurityMiddleware)
-  .setPayload(ReportNoteRequest)
-  .addSuccess(ReportNoteResponse)
-  .addError(ReportNoteLimitReachedError, {status: 429})
-  .addError(NotFoundError, {status: 404})
   .annotate(MaxExpectedDailyCall, 10)
 
 export const NotesApiGroup = HttpApiGroup.make('Notes')

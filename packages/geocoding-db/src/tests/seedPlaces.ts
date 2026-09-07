@@ -109,14 +109,14 @@ export const seedPlaces: readonly SeedPlace[] = [
   },
 ]
 
-export const seedPlacesInDb = Effect.gen(function* (_) {
-  const sql = yield* _(PgClient.PgClient)
+export const seedPlacesInDb = Effect.gen(function* () {
+  const sql = yield* PgClient.PgClient
 
-  yield* _(sql`DELETE FROM places`)
+  yield* sql`DELETE FROM places`
 
   for (const place of seedPlaces) {
     const importance = computeImportance(place.placeType, place.population)
-    yield* _(sql`
+    yield* sql`
       INSERT INTO
         places ${sql.insert({
         id: place.id,
@@ -129,7 +129,7 @@ export const seedPlacesInDb = Effect.gen(function* (_) {
         latitude: place.latitude,
         longitude: place.longitude,
       })}
-    `)
+    `
 
     const normNames = pipe(
       [place.name, ...Object.values(place.names)],
@@ -137,14 +137,14 @@ export const seedPlacesInDb = Effect.gen(function* (_) {
       Array.dedupe
     )
     for (const normName of normNames) {
-      yield* _(sql`
+      yield* sql`
         INSERT INTO
           place_names ${sql.insert({
           placeId: place.id,
           normName,
           importance,
         })}
-      `)
+      `
     }
   }
 })

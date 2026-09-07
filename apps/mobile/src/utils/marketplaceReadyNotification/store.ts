@@ -3,10 +3,10 @@ import {atom} from 'jotai'
 import {filteredOffersIncludingLocationFilterAtom} from '../../state/marketplace/atoms/filteredOffers'
 import {atomWithParsedMmkvStorageWithImmediateSaveOption} from '../atomUtils/atomWithParsedMmkvStorage'
 
-const MarketplaceReadyNotificationStateSchema = Schema.Literal(
+const MarketplaceReadyNotificationStateSchema = Schema.Literals([
   'waitingForFirstOffer',
-  'completed'
-)
+  'completed',
+])
 
 const MarketplaceReadyNotificationStoreSchema = Schema.Struct({
   notificationState: MarketplaceReadyNotificationStateSchema,
@@ -51,7 +51,7 @@ export const markMarketplaceReadyNotificationFlowAsCompletedIfOffersAreVisibleAc
     if (
       get(marketplaceReadyNotificationStore).notificationState ===
         'completed' ||
-      !Array.isNonEmptyReadonlyArray(
+      !Array.isReadonlyArrayNonEmpty(
         get(filteredOffersIncludingLocationFilterAtom)
       )
     )

@@ -43,7 +43,7 @@ export type ErrorEncryptingPublicPart = BasicError<'ErrorEncryptingPublicPart'>
 
 const OfferPublicPartIncludingLegacyPropsToEncrypt = Schema.Struct({
   ...OfferPublicPart.fields,
-  active: Schema.Literal('true', 'false'),
+  active: Schema.Literals(['true', 'false']),
   location: Schema.Array(Schema.String),
   locationV2: Schema.Array(OfferLocation),
   locationState: Schema.String,
@@ -91,13 +91,15 @@ export default function encryptOfferPublicPayload({
       } satisfies OfferPublicPartIncludingLegacyPropsToEncrypt
     }),
     Effect.flatMap(
-      Schema.encode(
-        Schema.parseJson(OfferPublicPartIncludingLegacyPropsToEncrypt)
+      Schema.encodeEffect(
+        Schema.fromJsonString(OfferPublicPartIncludingLegacyPropsToEncrypt)
       )
     ),
     Effect.flatMap(aesGCMIgnoreTagEncrypt(symmetricKey)),
     Effect.map((encrypted) => `0${encrypted}`),
-    Effect.map(flow(Schema.decode(PublicPayloadEncrypted), Effect.runSync)),
+    Effect.map(
+      flow(Schema.decodeEffect(PublicPayloadEncrypted), Effect.runSync)
+    ),
     Effect.mapError(
       (e) => new PublicPartEncryptionError({message: e.message, cause: e.cause})
     )

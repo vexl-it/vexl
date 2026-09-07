@@ -1,9 +1,9 @@
-import {HttpApiBuilder} from '@effect/platform/index'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {unixMillisecondsFromNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {DELETE_ACCOUNT_INIT_TURNSTILE_ACTION} from '@vexl-next/rest-api/src/services/user/contracts'
 import {UserApiSpecification} from '@vexl-next/rest-api/src/services/user/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {makeHttpApiHandler} from '@vexl-next/server-utils/src/makeHttpApiHandler'
 import {Effect, Option} from 'effect'
 import {loginCodeDummyForAll} from '../../../configs'
 import {createVerification} from '../../../utils/smsVerificationUtils'
@@ -11,34 +11,29 @@ import {TurnstileService} from '../../../utils/turnstile'
 import {VERIFICATION_EXPIRES_AFTER_MILIS} from '../../login/constants'
 import {createVerificationId, dummySid} from '../utils'
 
-export const initEraseUserEndpoint = HttpApiBuilder.handler(
+export const initEraseUserEndpoint = makeHttpApiHandler(
   UserApiSpecification,
   'EraseUser',
   'initEraseUser',
   (req) =>
-    Effect.gen(function* (_) {
-      const dummyCodeForAll = yield* _(loginCodeDummyForAll)
-      const turnstileService = yield* _(TurnstileService)
+    Effect.gen(function* () {
+      const dummyCodeForAll = yield* loginCodeDummyForAll
+      const turnstileService = yield* TurnstileService
 
-      yield* _(
-        turnstileService.verifyToken({
-          expectedAction: DELETE_ACCOUNT_INIT_TURNSTILE_ACTION,
-          token: req.payload.turnstileToken,
-        })
-      )
+      yield* turnstileService.verifyToken({
+        expectedAction: DELETE_ACCOUNT_INIT_TURNSTILE_ACTION,
+        token: req.payload.turnstileToken,
+      })
 
       let sid
       if (Option.isSome(dummyCodeForAll)) sid = dummySid
-      else
-        sid = yield* _(createVerification(req.payload.phoneNumber, req.headers))
+      else sid = yield* createVerification(req.payload.phoneNumber, req.headers)
 
-      const verificationId = yield* _(
-        createVerificationId({
-          phoneNumber: req.payload.phoneNumber,
-          verificationId: sid,
-          expiresAt: unixMillisecondsFromNow(VERIFICATION_EXPIRES_AFTER_MILIS),
-        })
-      )
+      const verificationId = yield* createVerificationId({
+        phoneNumber: req.payload.phoneNumber,
+        verificationId: sid,
+        expiresAt: unixMillisecondsFromNow(VERIFICATION_EXPIRES_AFTER_MILIS),
+      })
       return {verificationId}
     }).pipe(
       Effect.withSpan('initEraseUserEndpoint'),
@@ -49,7 +44,7 @@ export const initEraseUserEndpoint = HttpApiBuilder.handler(
             status: 500,
             message: 'crypto error',
           }),
-        ParseError: (error) =>
+        SchemaError: (error) =>
           new UnexpectedServerError({
             cause: error,
             status: 500,

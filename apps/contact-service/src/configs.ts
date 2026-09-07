@@ -1,4 +1,4 @@
-import {Config} from 'effect'
+import {Config, Schema} from 'effect'
 
 export {
   cryptoConfig,
@@ -119,29 +119,27 @@ export const appVersionSupportingV2KeysConfig = Config.number(
   'APP_VERSION_SUPPORTING_V2_KEYS'
 )
 
-export const contactActiveWindowDaysConfig = Config.number(
+export const contactActiveWindowDaysConfig = Config.schema(
+  Schema.Number.check(
+    Schema.makeFilter((d) => d > 0 || d === -1, {
+      message:
+        'contactActiveWindowDaysConfig must be greater than 0 or equal to -1 (if you do not want to use this feature)',
+    })
+  ),
   'CONTACT_ACTIVE_WINDOW_DAYS'
-).pipe(
-  Config.validate({
-    validation: (d) => d > 0 || d === -1,
-    message:
-      'contactActiveWindowDaysConfig must be greater than 0 or equal to -1 (if you do not want to use this feature)',
-  }),
-  Config.withDefault(90)
-)
+).pipe(Config.withDefault(90))
 
 export const contactConsideredAsExpiredForMetricsAfterDaysConfig =
   Config.number('CONTACT_CONSIDERED_AS_EXPIRED_FOR_METRICS_AFTER_DAYS').pipe(
     Config.withDefault(30)
   )
 
-export const contactPublicImportCountThresholdConfig = Config.number(
+export const contactPublicImportCountThresholdConfig = Config.schema(
+  Schema.Number.check(
+    Schema.makeFilter((d) => Number.isInteger(d) && (d > 0 || d === -1), {
+      message:
+        'contactPublicImportCountThresholdConfig must be a positive integer or -1 (if you do not want to use this feature)',
+    })
+  ),
   'CONTACT_PUBLIC_IMPORT_COUNT_THRESHOLD'
-).pipe(
-  Config.validate({
-    validation: (d) => Number.isInteger(d) && (d > 0 || d === -1),
-    message:
-      'contactPublicImportCountThresholdConfig must be a positive integer or -1 (if you do not want to use this feature)',
-  }),
-  Config.withDefault(-1)
-)
+).pipe(Config.withDefault(-1))

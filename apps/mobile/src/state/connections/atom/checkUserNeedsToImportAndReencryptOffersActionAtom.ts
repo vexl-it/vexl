@@ -1,4 +1,4 @@
-import {Effect} from 'effect/index'
+import {Effect} from 'effect'
 import {atom} from 'jotai'
 import {askAreYouSureActionAtom} from '../../../components/GlobalDialog'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
@@ -11,40 +11,34 @@ import {persistentDataAboutReachAndImportedContactsAtom} from './reachNumberWith
 const THRESHOLD_REACH_NUMBER = 50
 
 const showUnexpectedReachDropDialogActionAtom = atom(null, (get, set) => {
-  return Effect.gen(function* (_) {
+  return Effect.gen(function* () {
     const {t} = get(translationAtom)
-    yield* _(
-      Effect.sync(() => {
-        reportError('warn', new Error('Unexpected reach drop dialog shown'))
-      })
-    )
+    yield* Effect.sync(() => {
+      reportError('warn', new Error('Unexpected reach drop dialog shown'))
+    })
 
-    const shouldReimportContacts = yield* _(
-      set(askAreYouSureActionAtom, {
-        steps: [
-          {
-            type: 'StepWithText',
-            title: t('unexpectedReachDrop.title'),
-            description: t('unexpectedReachDrop.reimportDescription'),
-            negativeButtonText: t('common.cancel'),
-            positiveButtonText: t('unexpectedReachDrop.reimportActionTitle'),
-          },
-        ],
-        variant: 'danger',
-      }).pipe(
-        Effect.as(true),
-        Effect.catchAll(() => Effect.succeed(false))
-      )
+    const shouldReimportContacts = yield* set(askAreYouSureActionAtom, {
+      steps: [
+        {
+          type: 'StepWithText',
+          title: t('unexpectedReachDrop.title'),
+          description: t('unexpectedReachDrop.reimportDescription'),
+          negativeButtonText: t('common.cancel'),
+          positiveButtonText: t('unexpectedReachDrop.reimportActionTitle'),
+        },
+      ],
+      variant: 'danger',
+    }).pipe(
+      Effect.as(true),
+      Effect.catch(() => Effect.succeed(false))
     )
 
     if (!shouldReimportContacts) return
 
-    yield* _(
-      set(submitContactsActionAtom, {
-        normalizeAndImportAll: true,
-        showOfferReencryptionDialog: true,
-      })
-    )
+    yield* set(submitContactsActionAtom, {
+      normalizeAndImportAll: true,
+      showOfferReencryptionDialog: true,
+    })
   })
 })
 
@@ -56,7 +50,7 @@ const showUnexpectedReachDropDialogActionAtom = atom(null, (get, set) => {
 export const checkUserNeedsToImportContactsAndReencryptOffersActionAtom = atom(
   null,
   (get, set) => {
-    return Effect.gen(function* (_) {
+    return Effect.gen(function* () {
       const firstAndSecondLevelConnectionsReach = get(
         fistAndSecondLevelConnectionsReachAtom
       )
@@ -69,7 +63,7 @@ export const checkUserNeedsToImportContactsAndReencryptOffersActionAtom = atom(
           THRESHOLD_REACH_NUMBER &&
         persistentDataAboutReachAndImportedContacts.numberOfImportedContacts > 0
       ) {
-        yield* _(set(showUnexpectedReachDropDialogActionAtom))
+        yield* set(showUnexpectedReachDropDialogActionAtom)
       }
     }).pipe(
       effectWithEnsuredBenchmark(

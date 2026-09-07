@@ -9,8 +9,8 @@ import {
   effectToTaskEither,
   taskEitherToEffect,
 } from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import {createScope, molecule} from 'bunshi/dist/react'
-import {Array, Effect, Either, HashSet, Option, pipe} from 'effect'
+import {createScope, molecule} from 'bunshi/react'
+import {Array, Effect, HashSet, Option, pipe, Result} from 'effect'
 import * as E from 'fp-ts/Either'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
@@ -111,7 +111,7 @@ function areMessagesListItemsEquivalent(
   return prev.type === next.type
 }
 
-const referenceArrayEquivalence = Array.getEquivalence(
+const referenceArrayEquivalence = Array.makeEquivalence(
   (a: MessagesListItem, b: MessagesListItem) => a === b
 )
 
@@ -393,14 +393,14 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     const commonFriendsForMyOffer = pipe(
       requestMessage,
       Option.flatMap((message) =>
-        Option.fromNullable(message.message.commonFriends)
+        Option.fromNullishOr(message.message.commonFriends)
       ),
       Option.getOrElse(() => [])
     )
     const verifiedCommonFriendsForMyOffer = pipe(
       requestMessage,
       Option.flatMap((message) =>
-        Option.fromNullable(message.message.verifiedCommonFriends)
+        Option.fromNullishOr(message.message.verifiedCommonFriends)
       ),
       Option.getOrElse(() => [])
     )
@@ -443,7 +443,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     const verifiedCommonFriendsForMyOffer = pipe(
       get(requestMessageAtom),
       Option.flatMap((message) =>
-        Option.fromNullable(message.message.verifiedCommonFriends)
+        Option.fromNullishOr(message.message.verifiedCommonFriends)
       ),
       Option.getOrElse(() => [])
     )
@@ -493,42 +493,36 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     ) => {
       const {t} = get(translationAtom)
 
-      return Effect.gen(function* (_) {
+      return Effect.gen(function* () {
         const chatWithMessages = get(chatWithMessagesAtom)
         const deniedMessaging = get(focusWasDeniedAtom(chatWithMessagesAtom))
         const feedbackSubmitted = chatWithMessages.feedbackSubmitted
 
         if (!skipAsk) {
-          const confirmedDelete = yield* _(
-            set(globalDialogAtom, {
-              title: t('messages.deleteChatQuestion'),
-              subtitle: t('messages.deleteChatExplanation1'),
-              negativeButtonText: t('common.back'),
-              positiveButtonText: t('common.yesDelete'),
-              positiveButtonVariant: 'destructive',
-            })
-          )
+          const confirmedDelete = yield* set(globalDialogAtom, {
+            title: t('messages.deleteChatQuestion'),
+            subtitle: t('messages.deleteChatExplanation1'),
+            negativeButtonText: t('common.back'),
+            positiveButtonText: t('common.yesDelete'),
+            positiveButtonVariant: 'destructive',
+          })
 
           if (!confirmedDelete) return false
 
-          const confirmedDeleteAgain = yield* _(
-            set(globalDialogAtom, {
-              title: t('common.youSure'),
-              subtitle: t('messages.deleteChatExplanation2'),
-              negativeButtonText: t('common.nope'),
-              positiveButtonText: t('messages.deleteChat'),
-              positiveButtonVariant: 'destructive',
-            })
-          )
+          const confirmedDeleteAgain = yield* set(globalDialogAtom, {
+            title: t('common.youSure'),
+            subtitle: t('messages.deleteChatExplanation2'),
+            negativeButtonText: t('common.nope'),
+            positiveButtonText: t('messages.deleteChat'),
+            positiveButtonVariant: 'destructive',
+          })
 
           if (!confirmedDeleteAgain) return false
         }
 
         set(loadingOverlayDisplayedAtom, true)
 
-        yield* _(
-          taskEitherToEffect(set(deleteChatAtom, {text: 'deleting chat'}))
-        )
+        yield* taskEitherToEffect(set(deleteChatAtom, {text: 'deleting chat'}))
 
         set(loadingOverlayDisplayedAtom, false)
 
@@ -556,7 +550,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
 
         return true
       }).pipe(
-        Effect.catchAll((e) => {
+        Effect.catch((e) => {
           set(loadingOverlayDisplayedAtom, false)
 
           showErrorAlert({
@@ -1048,10 +1042,10 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     (get, set, {approve, message}: {approve: boolean; message: string}) => {
       const {t} = get(translationAtom)
 
-      return Effect.gen(function* (_) {
+      return Effect.gen(function* () {
         set(loadingOverlayDisplayedAtom, true)
 
-        const result = yield* _(
+        const result = yield* pipe(
           taskEitherToEffect(
             set(acceptMessagingRequestAtom, {
               approve,
@@ -1064,31 +1058,27 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
                     : ApprovalStatusMessage.disapproved,
             })
           ),
-          Effect.either
+          Effect.result
         )
 
         set(loadingOverlayDisplayedAtom, false)
 
-        if (Either.isLeft(result)) {
-          if (result.left._tag === 'SenderInboxDoesNotExistError') {
-            const shouldDeleteChat = yield* _(
-              set(globalDialogAtom, {
-                title: t('common.somethingWentWrong'),
-                subtitle: t('offer.requestWasCancelledOrAccountDeleted'),
-                positiveButtonText: t('common.yesDelete'),
-                negativeButtonText: t('common.back'),
-              })
-            )
+        if (Result.isFailure(result)) {
+          if (result.failure._tag === 'SenderInboxDoesNotExistError') {
+            const shouldDeleteChat = yield* set(globalDialogAtom, {
+              title: t('common.somethingWentWrong'),
+              subtitle: t('offer.requestWasCancelledOrAccountDeleted'),
+              positiveButtonText: t('common.yesDelete'),
+              negativeButtonText: t('common.back'),
+            })
 
             if (!shouldDeleteChat) return false
 
-            yield* _(
-              set(deleteChatWithUiFeedbackAtom, {
-                skipAsk: true,
-                skipDonation: true,
-                skipFeedback: true,
-              })
-            )
+            yield* set(deleteChatWithUiFeedbackAtom, {
+              skipAsk: true,
+              skipDonation: true,
+              skipFeedback: true,
+            })
 
             if (navigationRef.isReady()) {
               navigationRef.reset({
@@ -1107,15 +1097,15 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
             return true
           }
 
-          if (result.left._tag === 'ReceiverInboxDoesNotExistError') {
+          if (result.failure._tag === 'ReceiverInboxDoesNotExistError') {
             Alert.alert(t('offer.otherSideAccountDeleted'))
           } else {
             showErrorAlert({
               title:
-                toCommonErrorMessage(result.left, t) ??
+                toCommonErrorMessage(result.failure, t) ??
                 t('common.somethingWentWrong'),
               description: t('common.somethingWentWrongDescription'),
-              error: result.left,
+              error: result.failure,
             })
           }
 

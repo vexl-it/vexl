@@ -6,7 +6,7 @@ import {
   type ConversationShortcut,
   setConversationShortcuts,
 } from '@vexl-next/expo-android-notification-presentation/src'
-import {Array, Option, pipe} from 'effect'
+import {Array, Filter, Option, pipe} from 'effect'
 import {deepEqual} from 'fast-equals'
 import {atom, useAtomValue} from 'jotai'
 import {selectAtom} from 'jotai/utils'
@@ -52,11 +52,13 @@ const conversationShortcutsAtom = selectAtom(
       get(messagingStateAtom),
       Array.flatMap((inbox) => inbox.chats),
       Array.filter(chatShouldBeVisible),
-      Array.filterMap((chat) =>
-        Option.map(Array.last(chat.messages), (lastMessage) => ({
-          chat,
-          lastMessage,
-        }))
+      Array.filterMap(
+        Filter.fromPredicateOption((chat) =>
+          Option.map(Array.last(chat.messages), (lastMessage) => ({
+            chat,
+            lastMessage,
+          }))
+        )
       ),
       Array.sort<{chat: ChatWithMessages; lastMessage: ChatMessageWithState}>(
         (a, b) => compareMessages(b.lastMessage, a.lastMessage)

@@ -6,7 +6,7 @@ import {
   type TurnstileToken,
   TurnstileVerificationError,
 } from '@vexl-next/rest-api/src/services/user/contracts'
-import {Context, Effect, Layer, Option, Schema} from 'effect/index'
+import {Context, Effect, Layer, Option, Schema} from 'effect'
 import {
   turnstileExpectedHostnameConfig,
   turnstileSecretKeyConfig,
@@ -80,15 +80,15 @@ const verifyResponse = ({
   return Effect.void
 }
 
-export class TurnstileService extends Context.Tag('TurnstileService')<
+export class TurnstileService extends Context.Service<
   TurnstileService,
   TurnstileOperations
->() {
+>()('TurnstileService') {
   static readonly Live = Layer.effect(
     TurnstileService,
-    Effect.gen(function* (_) {
-      const turnstileSecretKey = yield* _(turnstileSecretKeyConfig)
-      const expectedHostname = yield* _(turnstileExpectedHostnameConfig)
+    Effect.gen(function* () {
+      const turnstileSecretKey = yield* turnstileSecretKeyConfig
+      const expectedHostname = yield* turnstileExpectedHostnameConfig
 
       const verifyToken: TurnstileOperations['verifyToken'] = ({
         expectedAction,
@@ -132,7 +132,9 @@ export class TurnstileService extends Context.Tag('TurnstileService')<
             ),
         }).pipe(
           Effect.flatMap((response) =>
-            Schema.decodeUnknown(TurnstileVerificationResponse)(response).pipe(
+            Schema.decodeUnknownEffect(TurnstileVerificationResponse)(
+              response
+            ).pipe(
               Effect.mapError((error) =>
                 makeUnexpectedServerError(
                   'Invalid Turnstile verification response',

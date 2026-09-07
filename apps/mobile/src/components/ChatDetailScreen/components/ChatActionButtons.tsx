@@ -1,8 +1,8 @@
 import {useNavigation} from '@react-navigation/native'
 import {Button, InfoBox, XStack, YStack} from '@vexl-next/ui'
-import {useMolecule} from 'bunshi/dist/react'
+import {useMolecule} from 'bunshi/react'
+import {Effect} from 'effect'
 import {pipe} from 'effect/Function'
-import {Effect} from 'effect/index'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {type RootStackScreenProps} from '../../../navigationTypes'
 import isNoteChatOrigin from '../../../state/chat/utils/isNoteChatOrigin'
@@ -68,7 +68,7 @@ function ActionsToRender(): React.ReactElement {
         onPress={() => {
           void pipe(
             deleteChat({skipAsk: true, skipDonation: true, skipFeedback: true}),
-            Effect.zipLeft(
+            Effect.tap(
               Effect.sync(() => {
                 safeGoBack()
               })
@@ -96,7 +96,7 @@ function ActionsToRender(): React.ReactElement {
                 skipDonation: true,
                 skipFeedback: true,
               }),
-              Effect.zipLeft(
+              Effect.tap(
                 Effect.sync(() => {
                   safeGoBack()
                 })
@@ -142,7 +142,7 @@ function ActionsToRender(): React.ReactElement {
             deleteChat({
               skipAsk: true,
             }),
-            Effect.zipLeft(
+            Effect.tap(
               Effect.sync(() => {
                 safeGoBack()
               })
@@ -170,7 +170,7 @@ function ActionsToRender(): React.ReactElement {
                 skipDonation: true,
                 skipFeedback: true,
               }),
-              Effect.zipLeft(
+              Effect.tap(
                 Effect.sync(() => {
                   safeGoBack()
                 })

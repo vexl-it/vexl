@@ -1,5 +1,5 @@
-import {Effect, Schema} from 'effect/index'
-import {isRecord} from 'effect/Predicate'
+import {Effect, Schema} from 'effect'
+import {isObject} from 'effect/Predicate'
 import type {Notification, NotificationTaskPayload} from 'expo-notifications'
 import {AcceptedNotificationTypes, ErrorParsingNotification} from './domain'
 
@@ -12,7 +12,7 @@ function parseDataString(
   try {
     const data: unknown = JSON.parse(dataString)
 
-    if (isRecord(data)) return data
+    if (isObject(data)) return data
 
     return undefined
   } catch {
@@ -40,7 +40,7 @@ function extractBackgroundTaskData(
   const remoteNotification =
     data.data[IOS_REMOTE_NOTIFICATION_LAUNCH_OPTIONS_KEY]
 
-  if (isRecord(remoteNotification) && isRecord(remoteNotification.body)) {
+  if (isObject(remoteNotification) && isObject(remoteNotification.body)) {
     return dataStringOrNotificationData(remoteNotification.body)
   }
 
@@ -72,9 +72,9 @@ export function extractDataFromNotification({
         message: 'Error extracting data from notification',
       }),
   }).pipe(
-    Effect.flatMap(Schema.decodeUnknown(AcceptedNotificationTypes)),
+    Effect.flatMap(Schema.decodeUnknownEffect(AcceptedNotificationTypes)),
     Effect.catchTag(
-      'ParseError',
+      'SchemaError',
       () =>
         new ErrorParsingNotification({
           message:

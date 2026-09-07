@@ -18,11 +18,11 @@ if (databasesAssignment === null) {
   )
 }
 
-const configured = pipe(allDatabaseNames(), Array.sort(Order.string))
+const configured = pipe(allDatabaseNames(), Array.sort(Order.String))
 const scripted = pipe(
   databasesAssignment[1].split(' '),
   Array.filter((databaseName) => databaseName.length > 0),
-  Array.sort(Order.string)
+  Array.sort(Order.String)
 )
 
 if (configured.join('\n') !== scripted.join('\n')) {

@@ -1,6 +1,6 @@
-import {Schema} from 'effect/index'
+import {Schema} from 'effect'
 
-export const Curve = Schema.Literal('secp256k1', 'secp224r1').pipe(
+export const Curve = Schema.Literals(['secp256k1', 'secp224r1']).pipe(
   Schema.brand('Curve')
 )
 export type Curve = typeof Curve.Type

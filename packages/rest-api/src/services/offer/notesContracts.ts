@@ -12,7 +12,7 @@ import {
 import {IdNumeric} from '@vexl-next/domain/src/utility/IdNumeric'
 import {IsoDatetimeString} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {Schema} from 'effect'
+import {Effect, Schema} from 'effect'
 import {NoContentResponse} from '../../NoContentResponse.brand'
 import {createPageResponse, PageRequestMeta} from '../../Pagination.brand'
 import {CommaSeparatedDedupedStrings} from '../../utils'
@@ -20,7 +20,10 @@ import {CommaSeparatedDedupedStrings} from '../../utils'
 export class ReportNoteLimitReachedError extends Schema.TaggedError<ReportNoteLimitReachedError>(
   'ReportNoteLimitReachedError'
 )('ReportNoteLimitReachedError', {
-  status: Schema.optionalWith(Schema.Literal(429), {default: () => 429}),
+  status: Schema.Literal(429).pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): 429 => 429)),
+    Schema.withConstructorDefault(Effect.sync((): 429 => 429))
+  ),
 }) {}
 
 export class InvalidNoteExpirationError extends Schema.TaggedError<InvalidNoteExpirationError>(
@@ -41,7 +44,7 @@ export const ServerNote = Schema.Struct({
 export type ServerNote = typeof ServerNote.Type
 
 export const ServerNotePrivatePart = Schema.Struct({
-  userPublicKey: Schema.Union(PublicKeyPemBase64, PublicKeyV2),
+  userPublicKey: Schema.Union([PublicKeyPemBase64, PublicKeyV2]),
   payloadPrivate: PrivatePayloadEncrypted,
 })
 export type ServerNotePrivatePart = typeof ServerNotePrivatePart.Type
@@ -71,7 +74,7 @@ export type CreateNotePrivatePartResponse =
 
 export const DeleteNotePrivatePartRequest = Schema.Struct({
   adminIds: Schema.Array(NoteAdminId),
-  publicKeys: Schema.Array(Schema.Union(PublicKeyPemBase64, PublicKeyV2)),
+  publicKeys: Schema.Array(Schema.Union([PublicKeyPemBase64, PublicKeyV2])),
 })
 export type DeleteNotePrivatePartRequest =
   typeof DeleteNotePrivatePartRequest.Type
@@ -92,7 +95,7 @@ export type CreateRepostNotePrivatePartResponse =
 
 export const DeleteNoteRequest = Schema.Struct({
   adminIds: CommaSeparatedDedupedStrings.pipe(
-    Schema.compose(Schema.Array(NoteAdminId))
+    Schema.decodeTo(Schema.Array(NoteAdminId))
   ),
 })
 export type DeleteNoteRequest = typeof DeleteNoteRequest.Type
@@ -112,7 +115,7 @@ export type RepostNoteResponse = typeof RepostNoteResponse.Type
 
 export const UndoRepostNoteRequest = Schema.Struct({
   repostIds: CommaSeparatedDedupedStrings.pipe(
-    Schema.compose(Schema.Array(NoteRepostId))
+    Schema.decodeTo(Schema.Array(NoteRepostId))
   ),
 })
 export type UndoRepostNoteRequest = typeof UndoRepostNoteRequest.Type

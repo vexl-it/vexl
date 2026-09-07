@@ -1,12 +1,12 @@
-import {SqlClient, SqlSchema} from '@effect/sql'
 import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
+import {NumberFromString} from '@vexl-next/generic-utils/src/effect-helpers/NumberFromString'
 import {shouldDisableMetrics} from '@vexl-next/server-utils/src/commonConfigs'
 import {MetricsMessage} from '@vexl-next/server-utils/src/metrics/domain'
 import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {reportMetricForked} from '@vexl-next/server-utils/src/metrics/reportMetricForked'
 import {Array, Effect, Layer, pipe, Schema} from 'effect'
-import {type ReadonlyArray} from 'effect/Array'
+import {SqlClient, SqlSchema} from 'effect/unstable/sql'
 
 const NUMBER_OF_USERS = 'NUMBER_OF_USERS_BY_COUNTRY' as const
 const NUMBER_OF_USERS_ALL_COUNTRIES = 'NUMBER_OF_USERS' as const
@@ -17,8 +17,8 @@ export const reportTotalNumberOfUsers = (
     countryPrefix?: CountryPrefix | null
   }>
 ): Effect.Effect<void, never, MetricsClientService> =>
-  Effect.gen(function* (_) {
-    yield* _(
+  Effect.gen(function* () {
+    yield* pipe(
       dataToReport,
       Array.map((data) =>
         reportMetricForked(
@@ -40,31 +40,29 @@ export const reportTotalNumberOfUsers = (
       Array.map((data) => data.count),
       Array.reduce(0, (acc, v) => acc + v)
     )
-    yield* _(
-      reportMetricForked(
-        new MetricsMessage({
-          uuid: generateUuid(),
-          timestamp: new Date(),
-          name: NUMBER_OF_USERS_ALL_COUNTRIES,
-          value: totalNumberOfUsers,
-          type: 'Total',
-        })
-      )
+    yield* reportMetricForked(
+      new MetricsMessage({
+        uuid: generateUuid(),
+        timestamp: new Date(),
+        name: NUMBER_OF_USERS_ALL_COUNTRIES,
+        value: totalNumberOfUsers,
+        type: 'Total',
+      })
     )
   })
 
 export const reportMetricsLayer = Layer.effectDiscard(
-  Effect.gen(function* (_) {
-    if (yield* _(shouldDisableMetrics)) {
+  Effect.gen(function* () {
+    if (yield* shouldDisableMetrics) {
       return
     }
-    const sql = yield* _(SqlClient.SqlClient)
+    const sql = yield* SqlClient.SqlClient
 
     const queryNumberOfUsers = SqlSchema.findAll({
       Request: Schema.Null,
       Result: Schema.Struct({
-        count: Schema.NumberFromString,
-        countryPrefix: Schema.Union(CountryPrefix, Schema.Null),
+        count: NumberFromString,
+        countryPrefix: Schema.Union([CountryPrefix, Schema.Null]),
       }),
       execute: () => sql`
         SELECT
@@ -77,7 +75,7 @@ export const reportMetricsLayer = Layer.effectDiscard(
       `,
     })(null).pipe(
       Effect.flatMap((v) =>
-        Effect.zipRight(
+        Effect.andThen(
           Effect.logInfo(`Reporting number of logged users`, v),
           reportTotalNumberOfUsers(v)
         )
@@ -85,14 +83,14 @@ export const reportMetricsLayer = Layer.effectDiscard(
       Effect.withSpan('Query number of users')
     )
 
-    yield* _(
+    yield* pipe(
       Effect.zip(Effect.logInfo('Reporting metrics'), queryNumberOfUsers),
       Effect.tapError((e) => Effect.logWarning(`Error reporting metrics`, e)),
       Effect.tap(() => Effect.logInfo('Metrics reported')),
       Effect.flatMap(() => Effect.sleep(60_000)),
       Effect.forever,
       Effect.withSpan('Report metrics'),
-      Effect.fork
+      Effect.forkChild
     )
   })
 )

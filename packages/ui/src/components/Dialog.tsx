@@ -219,7 +219,7 @@ export function createDialogAtom(): DialogAtom {
         return Effect.succeed(false)
       }
 
-      return Effect.async<boolean>((resolve) => {
+      return Effect.callback<boolean>((resolve) => {
         let result: boolean | undefined
         let resolved = false
 

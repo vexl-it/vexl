@@ -1,7 +1,6 @@
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {sendMessagingRequest} from '@vexl-next/resources-utils/src/chat/sendMessagingRequest'
-import {Array, Effect, Record} from 'effect'
-import {pipe} from 'fp-ts/function'
+import {Array, Effect, pipe, Record} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
 import {showErrorAlert} from '../../../components/ErrorAlert'
@@ -24,7 +23,7 @@ const sendRequestActionAtom = atom(
     set,
     {text, originOffer}: {text: string; originOffer: OneOfferInState}
   ) =>
-    Effect.gen(function* (_) {
+    Effect.gen(function* () {
       const api = get(apiAtom)
       const goldenAvatarType = get(goldenAvatarTypeAtom)
       const clubsToKeyHolder = get(clubsToKeyHolderAtom)
@@ -35,40 +34,36 @@ const sendRequestActionAtom = atom(
         )
       )
 
-      const {inbox} = yield* _(
-        set(upsertInboxOnBeAndLocallyActionAtom, {
-          for: 'offerRequest',
-          offerId: originOffer.offerInfo.offerId,
-        })
-      )
-      const notificationToken = yield* _(
-        set(generateAndRegisterVexlTokenActionAtom, {
+      const {inbox} = yield* set(upsertInboxOnBeAndLocallyActionAtom, {
+        for: 'offerRequest',
+        offerId: originOffer.offerInfo.offerId,
+      })
+      const notificationToken = yield* set(
+        generateAndRegisterVexlTokenActionAtom,
+        {
           keyHolder: inbox.privateKey,
-        })
+        }
       )
 
-      const sentMessage = yield* _(
-        sendMessagingRequest({
-          text,
-          notificationApi: api.notification,
-          theirNotificationCypher: originOffer.offerInfo.publicPart.fcmCypher,
-          api: api.chat,
-          fromKeypair: inbox.privateKey,
-          myVersion: version,
-          toPublicKey: originOffer.offerInfo.publicPart.offerPublicKey,
-          otherSideVersion:
-            originOffer.offerInfo.publicPart.authorClientVersion,
-          myNotificationCypher: notificationToken,
-          lastReceivedNotificationCypher:
-            originOffer.offerInfo.publicPart.fcmCypher,
-          goldenAvatarType,
-          forClubsUuids,
-          commonFriends: originOffer.offerInfo.privatePart.commonFriends,
-          verifiedCommonFriends:
-            originOffer.offerInfo.privatePart.verifiedCommonFriends,
-          friendLevel: originOffer.offerInfo.privatePart.friendLevel,
-        })
-      )
+      const sentMessage = yield* sendMessagingRequest({
+        text,
+        notificationApi: api.notification,
+        theirNotificationCypher: originOffer.offerInfo.publicPart.fcmCypher,
+        api: api.chat,
+        fromKeypair: inbox.privateKey,
+        myVersion: version,
+        toPublicKey: originOffer.offerInfo.publicPart.offerPublicKey,
+        otherSideVersion: originOffer.offerInfo.publicPart.authorClientVersion,
+        myNotificationCypher: notificationToken,
+        lastReceivedNotificationCypher:
+          originOffer.offerInfo.publicPart.fcmCypher,
+        goldenAvatarType,
+        forClubsUuids,
+        commonFriends: originOffer.offerInfo.privatePart.commonFriends,
+        verifiedCommonFriends:
+          originOffer.offerInfo.privatePart.verifiedCommonFriends,
+        friendLevel: originOffer.offerInfo.privatePart.friendLevel,
+      })
 
       return set(upsertChatForTheirOfferActionAtom, {
         inbox: {privateKey: inbox.privateKey},
@@ -90,13 +85,12 @@ export const sendRequestHandleUIActionAtom = atom(
     set,
     {text, originOffer}: {text: string; originOffer: OneOfferInState}
   ) =>
-    Effect.gen(function* (_) {
+    Effect.gen(function* () {
       const {t} = get(translationAtom)
-      yield* _(set(checkNotificationPermissionsAndAskIfPossibleActionAtom))
+      yield* set(checkNotificationPermissionsAndAskIfPossibleActionAtom)
 
-      return yield* _(
+      return yield* pipe(
         set(sendRequestActionAtom, {text, originOffer}),
-        // TODO handle errors
         Effect.tapError((e) =>
           Effect.sync(() => {
             if (e._tag === 'ApiErrorCreatingInbox') {

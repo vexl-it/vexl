@@ -34,52 +34,48 @@ export const querySuggest =
     GetLocationSuggestionsResponse,
     UnexpectedServerError
   > => {
-    return Effect.gen(function* (_) {
-      const response = yield* _(
-        Effect.tryPromise({
-          try: async () =>
-            await axios.get<unknown>(
-              'https://maps.googleapis.com/maps/api/geocode/json',
-              {
-                params: {
-                  address: phrase,
-                  key: Redacted.value(googlePlacesApiKey),
-                  language: lang,
-                },
-              }
-            ),
-          catch: (error) =>
-            unexpectedGoogleMapsError({
-              operation: 'suggest',
-              category: 'RequestFailed',
-              error,
-              request: {phrase, lang},
-            }),
-        })
-      )
-
-      const responseEnvelope = yield* _(
-        Schema.decodeUnknown(GoogleResponseEnvelope)(response.data)
-      )
-      if (responseEnvelope.status === 'ZERO_RESULTS') {
-        return yield* _(
-          Schema.decode(GetLocationSuggestionsResponse)({result: []})
-        )
-      }
-      if (responseEnvelope.status !== 'OK') {
-        return yield* _(
+    return Effect.gen(function* () {
+      const response = yield* Effect.tryPromise({
+        try: async () =>
+          await axios.get<unknown>(
+            'https://maps.googleapis.com/maps/api/geocode/json',
+            {
+              params: {
+                address: phrase,
+                key: Redacted.value(googlePlacesApiKey),
+                language: lang,
+              },
+            }
+          ),
+        catch: (error) =>
           unexpectedGoogleMapsError({
             operation: 'suggest',
-            category: 'ResponseRejected',
+            category: 'RequestFailed',
+            error,
             request: {phrase, lang},
-            response: response.data,
-            responseStatus: responseEnvelope.status,
-          })
-        )
+          }),
+      })
+
+      const responseEnvelope = yield* Schema.decodeUnknownEffect(
+        GoogleResponseEnvelope
+      )(response.data)
+      if (responseEnvelope.status === 'ZERO_RESULTS') {
+        return yield* Schema.decodeEffect(GetLocationSuggestionsResponse)({
+          result: [],
+        })
+      }
+      if (responseEnvelope.status !== 'OK') {
+        return yield* unexpectedGoogleMapsError({
+          operation: 'suggest',
+          category: 'ResponseRejected',
+          request: {phrase, lang},
+          response: response.data,
+          responseStatus: responseEnvelope.status,
+        })
       }
 
-      const {results} = yield* _(
-        Schema.decodeUnknown(GooglePlacesResponse)(response.data)
+      const {results} = yield* Schema.decodeUnknownEffect(GooglePlacesResponse)(
+        response.data
       )
       const resultsRaw = results.map((one) => {
         const [firstRow, ...rest] = one.formatted_address.split(', ')
@@ -108,12 +104,12 @@ export const querySuggest =
         }
       })
 
-      return yield* _(
-        Schema.decode(GetLocationSuggestionsResponse)({result: resultsRaw})
-      )
+      return yield* Schema.decodeEffect(GetLocationSuggestionsResponse)({
+        result: resultsRaw,
+      })
     }).pipe(
       Effect.catchTag(
-        'ParseError',
+        'SchemaError',
         (error) =>
           new UnexpectedServerError({
             status: 500,

@@ -1,7 +1,7 @@
-import {HttpApiBuilder} from '@effect/platform/index'
 import {type ApproveRequestResponse} from '@vexl-next/rest-api/src/services/chat/contracts'
 import {ChatApiSpecification} from '@vexl-next/rest-api/src/services/chat/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {makeHttpApiHandler} from '@vexl-next/server-utils/src/makeHttpApiHandler'
 import {commonMetricAttributesFromHeaders} from '@vexl-next/server-utils/src/metrics/commonMetricAttributesFromHeaders'
 import {validateChallengeInBody} from '@vexl-next/server-utils/src/services/challenge/utils/validateChallengeInBody'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
@@ -17,46 +17,42 @@ import {findAndEnsureReceiverAndSenderInbox} from '../../utils/findAndEnsureRece
 import {withInboxActionRedisLock} from '../../utils/withInboxActionRedisLock'
 import {messageRecordToServerMessage} from '../messages/messageRecordToServerMessage'
 
-export const approveRequest = HttpApiBuilder.handler(
+export const approveRequest = makeHttpApiHandler(
   ChatApiSpecification,
   'Inboxes',
   'approveRequest',
   (req) =>
-    Effect.gen(function* (_) {
+    Effect.gen(function* () {
       const commonMetricAttributes = commonMetricAttributesFromHeaders(
         req.headers
       )
-      yield* _(validateChallengeInBody(req.payload))
+      yield* validateChallengeInBody(req.payload)
 
       // from the point of view of the one that sent the request
-      const {senderInbox} = yield* _(
-        findAndEnsureReceiverAndSenderInbox({
-          receiver: req.payload.publicKey,
-          sender: req.payload.publicKeyToConfirm,
-        })
-      )
+      const {senderInbox} = yield* findAndEnsureReceiverAndSenderInbox({
+        receiver: req.payload.publicKey,
+        sender: req.payload.publicKeyToConfirm,
+      })
 
-      const messagesDb = yield* _(MessagesDbService)
+      const messagesDb = yield* MessagesDbService
       if (req.payload.approve) {
-        yield* _(reportRequestApproved(1, commonMetricAttributes))
+        yield* reportRequestApproved(1, commonMetricAttributes)
       } else {
-        yield* _(reportRequestRejected(1, commonMetricAttributes))
+        yield* reportRequestRejected(1, commonMetricAttributes)
       }
 
-      const encryptedSenderPublicKey = yield* _(
-        encryptPublicKey(req.payload.publicKey)
+      const encryptedSenderPublicKey = yield* encryptPublicKey(
+        req.payload.publicKey
       )
 
-      const sentMessage = yield* _(
-        messagesDb.insertMessageForInbox({
-          inboxId: senderInbox.id,
-          senderPublicKey: encryptedSenderPublicKey,
-          message: req.payload.message,
-          type: req.payload.approve
-            ? 'APPROVE_MESSAGING'
-            : 'DISAPPROVE_MESSAGING',
-        })
-      )
+      const sentMessage = yield* messagesDb.insertMessageForInbox({
+        inboxId: senderInbox.id,
+        senderPublicKey: encryptedSenderPublicKey,
+        message: req.payload.message,
+        type: req.payload.approve
+          ? 'APPROVE_MESSAGING'
+          : 'DISAPPROVE_MESSAGING',
+      })
 
       return {
         ...messageRecordToServerMessage({
@@ -71,7 +67,7 @@ export const approveRequest = HttpApiBuilder.handler(
         req.payload.publicKeyToConfirm
       ),
       withDbTransaction,
-      Effect.zipLeft(
+      Effect.tap(
         reportMessageSent(1, commonMetricAttributesFromHeaders(req.headers))
       ),
       makeEndpointEffect

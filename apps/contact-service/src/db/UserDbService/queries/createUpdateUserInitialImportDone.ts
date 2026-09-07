@@ -1,7 +1,7 @@
-import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {Effect, flow, Schema} from 'effect'
+import {SqlSchema} from 'effect/unstable/sql'
 import {ServerHashedNumber} from '../../../utils/serverHashContact'
 
 export const UpdateUserInitialImportDoneParams = Schema.Struct({
@@ -11,8 +11,8 @@ export const UpdateUserInitialImportDoneParams = Schema.Struct({
 export type UpdateUserInitialImportDoneParams =
   typeof UpdateUserInitialImportDoneParams.Type
 
-export const createUpdateUserInitialImportDone = Effect.gen(function* (_) {
-  const sql = yield* _(PgClient.PgClient)
+export const createUpdateUserInitialImportDone = Effect.gen(function* () {
+  const sql = yield* PgClient.PgClient
 
   const query = SqlSchema.void({
     Request: UpdateUserInitialImportDoneParams,

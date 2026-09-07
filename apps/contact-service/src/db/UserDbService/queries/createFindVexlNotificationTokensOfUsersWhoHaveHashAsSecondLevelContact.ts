@@ -1,8 +1,8 @@
-import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {Effect, flow, Schema} from 'effect'
+import {SqlSchema} from 'effect/unstable/sql'
 import {ServerHashedNumber} from '../../../utils/serverHashContact'
 import {createIsInAllowedSharedContactHashesFragment} from '../../utils/createIsAllowedSharedContactHashFragment'
 
@@ -23,8 +23,8 @@ export type FindVexlNotificationTokensOfUsersWhoHaveHashAsSecondLevelContactResu
   typeof FindVexlNotificationTokensOfUsersWhoHaveHashAsSecondLevelContactResult.Type
 
 export const createFindVexlNotificationTokensOfUsersWhoHaveHashAsSecondLevelContact =
-  Effect.gen(function* (_) {
-    const sql = yield* _(PgClient.PgClient)
+  Effect.gen(function* () {
+    const sql = yield* PgClient.PgClient
 
     const query = SqlSchema.findAll({
       Request:

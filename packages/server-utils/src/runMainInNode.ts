@@ -1,11 +1,11 @@
 import * as NodeSdk from '@effect/opentelemetry/NodeSdk'
-import * as NodeContext from '@effect/platform-node/NodeContext'
 import * as NodeRuntime from '@effect/platform-node/NodeRuntime'
-import {type Teardown} from '@effect/platform/Runtime'
+import * as NodeServices from '@effect/platform-node/NodeServices'
 import {PrometheusExporter} from '@opentelemetry/exporter-prometheus'
 import {OTLPTraceExporter} from '@opentelemetry/exporter-trace-otlp-http'
 import {BatchSpanProcessor} from '@opentelemetry/sdk-trace-base'
-import {Effect, Layer, Logger} from 'effect'
+import {Effect, Layer, Logger, pipe} from 'effect'
+import {type Teardown} from 'effect/Runtime'
 import {
   memoryDebugIntervalMsConfig,
   metricsConfig,
@@ -45,40 +45,36 @@ const stringifyCircular = (
 }
 
 const jsonLoggerThatHandlesUnserializableValues = Logger.map(
-  Logger.structuredLogger,
+  Logger.formatStructured,
   stringifyCircular
 )
 
 const logger = useJsonLogsConfig.pipe(
   Effect.map((useJson) =>
-    Logger.replace(
-      Logger.defaultLogger,
+    Logger.layer([
       useJson
-        ? jsonLoggerThatHandlesUnserializableValues.pipe(
-            Logger.withSpanAnnotations,
-            Logger.withConsoleLog
-          )
-        : Logger.prettyLogger()
-    )
+        ? jsonLoggerThatHandlesUnserializableValues.pipe(Logger.withConsoleLog)
+        : Logger.consolePretty(),
+    ])
   ),
-  Layer.unwrapEffect
+  Layer.unwrap
 )
 
 const memoryDebugLayer = memoryDebugIntervalMsConfig.pipe(
-  Effect.flatten,
+  Effect.flatMap(Effect.fromOption),
   Effect.map((interval) => makeMemoryDebugLayer(interval)),
-  Effect.catchTag('NoSuchElementException', () => Effect.succeed(Layer.empty)),
-  Layer.unwrapEffect
+  Effect.catchTag('NoSuchElementError', () => Effect.succeed(Layer.empty)),
+  Layer.unwrap
 )
 
-const NodeSdkLive = Effect.gen(function* (_) {
-  const serviceName = yield* _(serviceNameConfig)
-  const serviceVersion = yield* _(serviceVersionConfig)
+const NodeSdkLive = Effect.gen(function* () {
+  const serviceName = yield* serviceNameConfig
+  const serviceVersion = yield* serviceVersionConfig
 
-  yield* _(Effect.logInfo('Configuring service', {serviceName, serviceVersion}))
+  yield* Effect.logInfo('Configuring service', {serviceName, serviceVersion})
 
-  const spanProcessor = yield* _(
-    Effect.flatten(otlpTraceExporterUrlConfig),
+  const spanProcessor = yield* pipe(
+    otlpTraceExporterUrlConfig.pipe(Effect.flatMap(Effect.fromOption)),
     Effect.tap((metricsConfiguration) =>
       Effect.logInfo('Configuring span processor', metricsConfiguration)
     ),
@@ -90,16 +86,16 @@ const NodeSdkLive = Effect.gen(function* (_) {
           })
         )
     ),
-    Effect.catchTag('NoSuchElementException', (e) =>
-      Effect.zipRight(
+    Effect.catchTag('NoSuchElementError', (e) =>
+      Effect.andThen(
         Effect.log('Spans are disabled because they are not configured.'),
         Effect.succeed(undefined)
       )
     )
   )
 
-  const metricsReader = yield* _(
-    Effect.flatten(metricsConfig),
+  const metricsReader = yield* pipe(
+    metricsConfig.pipe(Effect.flatMap(Effect.fromOption)),
     Effect.tap((metricsConfiguration) =>
       Effect.logInfo('Configuring metrics', metricsConfiguration)
     ),
@@ -110,8 +106,8 @@ const NodeSdkLive = Effect.gen(function* (_) {
           endpoint: prometheusEndpoint,
         })
     ),
-    Effect.catchTag('NoSuchElementException', (e) =>
-      Effect.zipRight(
+    Effect.catchTag('NoSuchElementError', (e) =>
+      Effect.andThen(
         Effect.log(
           'Prometheus metrics are disabled because they are not configured.'
         ),
@@ -125,12 +121,12 @@ const NodeSdkLive = Effect.gen(function* (_) {
     spanProcessor,
     metricReader: metricsReader,
   }))
-}).pipe(Layer.unwrapEffect)
+}).pipe(Layer.unwrap)
 
 export const runMainInNode = <A, E>(
   effectOrLayer:
-    | Effect.Effect<A, E, NodeContext.NodeContext>
-    | Layer.Layer<A, E, NodeContext.NodeContext>,
+    | Effect.Effect<A, E, NodeServices.NodeServices>
+    | Layer.Layer<A, E, NodeServices.NodeServices>,
   options?: {
     readonly disableErrorReporting?: boolean | undefined
     readonly teardown?: Teardown | undefined
@@ -141,15 +137,15 @@ export const runMainInNode = <A, E>(
       ? effectOrLayer
       : Layer.launch(effectOrLayer)
     ).pipe(
-      Effect.catchAll((error) =>
-        Effect.zipRight(
+      Effect.catch((error) =>
+        Effect.andThen(
           Effect.sync(() => {
             console.error('App fatal error:', error)
           }),
           Effect.logFatal('Error', error)
         )
       ),
-      Effect.catchAllDefect((error) => {
+      Effect.catchDefect((error) => {
         console.error('Fatal defect:', error)
         return Effect.logError('Defect', error)
       }),
@@ -160,8 +156,8 @@ export const runMainInNode = <A, E>(
         options?.disableErrorReporting === true ? Layer.empty : sentryLayer
       ),
       Effect.provide(logger),
-      Effect.provide(NodeContext.layer)
+      Effect.provide(NodeServices.layer)
     ),
-    {disablePrettyLogger: true}
+    {teardown: options?.teardown}
   )
 }

@@ -29,15 +29,15 @@ export interface GeocodingDbOperations {
   >
 }
 
-export class GeocodingDbService extends Context.Tag('GeocodingDbService')<
+export class GeocodingDbService extends Context.Service<
   GeocodingDbService,
   GeocodingDbOperations
->() {
+>()('GeocodingDbService') {
   static readonly Live = Layer.effect(
     GeocodingDbService,
-    Effect.gen(function* (_) {
-      const suggestPlaces = yield* _(createQuerySuggestPlaces)
-      const nearestPlace = yield* _(createQueryNearestPlace)
+    Effect.gen(function* () {
+      const suggestPlaces = yield* createQuerySuggestPlaces
+      const nearestPlace = yield* createQueryNearestPlace
 
       return {suggestPlaces, nearestPlace}
     })

@@ -1,35 +1,35 @@
-import {HttpApiBuilder} from '@effect/platform/index'
 import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {makeHttpApiHandler} from '@vexl-next/server-utils/src/makeHttpApiHandler'
 import {validateChallengeInBody} from '@vexl-next/server-utils/src/services/challenge/utils/validateChallengeInBody'
-import {Effect, Option} from 'effect'
+import {Effect, Option, pipe} from 'effect'
 import {ClubMembersDbService} from '../../../db/ClubMemberDbService'
 import {ClubsDbService} from '../../../db/ClubsDbService'
 import {findClubMemberByPublicKeyV1OrV2} from '../../../utils/findClubMemberByPublicKeyV1OrV2'
 import {toCompatiblePublicKeyArray} from '../../../utils/toCompatiblePublicKeyArray'
 
-export const getClubContacts = HttpApiBuilder.handler(
+export const getClubContacts = makeHttpApiHandler(
   ContactApiSpecification,
   'ClubsMember',
   'getClubContacts',
   (req) =>
-    Effect.gen(function* (_) {
-      yield* _(validateChallengeInBody(req.payload))
+    Effect.gen(function* () {
+      yield* validateChallengeInBody(req.payload)
 
-      const clubsDb = yield* _(ClubsDbService)
-      const clubMembersDb = yield* _(ClubMembersDbService)
+      const clubsDb = yield* ClubsDbService
+      const clubMembersDb = yield* ClubMembersDbService
 
-      const club = yield* _(
+      const club = yield* pipe(
         clubsDb.findClubByUuid({uuid: req.payload.clubUuid}),
-        Effect.flatten,
+        Effect.flatMap(Effect.fromOption),
         Effect.catchTag(
-          'NoSuchElementException',
+          'NoSuchElementError',
           () => new NotFoundError({message: 'Club not found'})
         )
       )
 
-      yield* _(
+      yield* pipe(
         findClubMemberByPublicKeyV1OrV2(
           Option.getOrElse(req.payload.publicKeyV2, () => req.payload.publicKey)
         ),
@@ -39,9 +39,9 @@ export const getClubContacts = HttpApiBuilder.handler(
         )
       )
 
-      const clubContacts = yield* _(
-        clubMembersDb.queryAllClubMembers({id: club.id})
-      )
+      const clubContacts = yield* clubMembersDb.queryAllClubMembers({
+        id: club.id,
+      })
 
       return {
         clubUuid: req.payload.clubUuid,

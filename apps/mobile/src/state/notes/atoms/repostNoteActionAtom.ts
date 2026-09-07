@@ -30,13 +30,13 @@ export const repostNoteActionAtom = atom<
     | NoteRepostNotAllowedError
   >
 >(null, (get, set, {noteId}) => {
-  return Effect.gen(function* (_) {
+  return Effect.gen(function* () {
     const api = get(apiAtom)
     const session = get(sessionDataOrDummyAtom)
     const note = get(singleNoteAtom(noteId))
 
     if (!note) {
-      return yield* _(Effect.fail(new NoteNotFoundError({noteId})))
+      return yield* Effect.fail(new NoteNotFoundError({noteId}))
     }
 
     // Reposting is only ever one level deep - a note received via someone
@@ -45,24 +45,22 @@ export const repostNoteActionAtom = atom<
       !note.noteInfo.publicPart.allowRepost ||
       note.noteInfo.privatePart.viaRepost
     ) {
-      return yield* _(Effect.fail(new NoteRepostNotAllowedError({noteId})))
+      return yield* Effect.fail(new NoteRepostNotAllowedError({noteId}))
     }
 
-    const serverToClientHashesToHashedPhoneNumbersMap = yield* _(
-      set(ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom)
+    const serverToClientHashesToHashedPhoneNumbersMap = yield* set(
+      ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom
     )
 
-    const {repostInfo, encryptionErrors, connections} = yield* _(
-      repostNote({
-        offerApi: api.offer,
-        contactApi: api.contact,
-        noteId,
-        symmetricKey: note.noteInfo.privatePart.symmetricKey,
-        ownerKeyPair: session.privateKey,
-        ownerKeyPairV2: session.keyPairV2,
-        serverToClientHashesToHashedPhoneNumbersMap,
-      })
-    )
+    const {repostInfo, encryptionErrors, connections} = yield* repostNote({
+      offerApi: api.offer,
+      contactApi: api.contact,
+      noteId,
+      symmetricKey: note.noteInfo.privatePart.symmetricKey,
+      ownerKeyPair: session.privateKey,
+      ownerKeyPairV2: session.keyPairV2,
+      serverToClientHashesToHashedPhoneNumbersMap,
+    })
 
     if (encryptionErrors.length > 0) {
       reportError('error', new Error('Error while encrypting note repost'), {
@@ -93,19 +91,18 @@ export const undoRepostNoteActionAtom = atom<
   [{noteId: NoteId}],
   Effect.Effect<
     void,
-    | Effect.Effect.Error<ReturnType<OfferApi['undoRepostNote']>>
-    | NoteNotFoundError
+    Effect.Error<ReturnType<OfferApi['undoRepostNote']>> | NoteNotFoundError
   >
 >(null, (get, set, {noteId}) => {
-  return Effect.gen(function* (_) {
+  return Effect.gen(function* () {
     const api = get(apiAtom)
     const note = get(singleNoteAtom(noteId))
 
     if (!note?.repostInfo) {
-      return yield* _(Effect.fail(new NoteNotFoundError({noteId})))
+      return yield* Effect.fail(new NoteNotFoundError({noteId}))
     }
 
-    yield* _(api.offer.undoRepostNote({repostIds: [note.repostInfo.repostId]}))
+    yield* api.offer.undoRepostNote({repostIds: [note.repostInfo.repostId]})
 
     set(deleteRepostToConnectionsActionAtom, [note.repostInfo.repostId])
 

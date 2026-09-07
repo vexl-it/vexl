@@ -128,47 +128,38 @@ export interface ClubMembersDbOperations {
   ) => Effect.Effect<void, UnexpectedServerError>
 }
 
-export class ClubMembersDbService extends Context.Tag('ClubMembersDbService')<
+export class ClubMembersDbService extends Context.Service<
   ClubMembersDbService,
   ClubMembersDbOperations
->() {
+>()('ClubMembersDbService') {
   static readonly Live = Layer.effect(
     ClubMembersDbService,
-    Effect.gen(function* (_) {
-      const countClubMembers = yield* _(createCountClubMemebers)
-      const deleteClubMember = yield* _(createDeleteClubMemeber)
-      const deleteClubMemberByPublicKeyV2 = yield* _(
-        createDeleteClubMemeberByPublicKeyV2
-      )
-      const findClubMember = yield* _(createFindClubMemeber)
-      const findClubMemberByPublicKey = yield* _(
-        createFindClubMemeberByPublicKey
-      )
-      const findClubMemberByPublicKeyV2 = yield* _(
-        createFindClubMemeberByPublicKeyV2
-      )
-      const insertClubMember = yield* _(createInsertClubMember)
-      const insertClubReportedRecord = yield* _(createInsertClubReportedRecord)
-      const queryAllClubMembers = yield* _(createQueryAllClubMembers)
-      const queryNumberOfClubReportsForUser = yield* _(
-        createQueryNumberOfClubReportsForUser
-      )
-      const updateIsModerator = yield* _(createUpdateIsModerator)
-      const updateLastRefreshedAt = yield* _(CreateUpdateLastRefreshedAt)
-      const updateNotificationToken = yield* _(createUpdateNotificationToken)
-      const updateVexlNotificationToken = yield* _(
-        createUpdateVexlNotificationToken
-      )
-      const deleteAllClubMembers = yield* _(createDeleteAllClubMemebers)
-      const deleteClubMembersLastActiveBefore = yield* _(
-        createDeleteClubMembersLastActiveBefore
-      )
-      const deleteClubReportedRecordByReportedAtBefore = yield* _(
-        createDeleteClubReportedRecordByReportedAtBefore
-      )
-      const updateClubMemberPublicKeyV2 = yield* _(
-        createUpdateClubMemberPublicKeyV2
-      )
+    Effect.gen(function* () {
+      const countClubMembers = yield* createCountClubMemebers
+      const deleteClubMember = yield* createDeleteClubMemeber
+      const deleteClubMemberByPublicKeyV2 =
+        yield* createDeleteClubMemeberByPublicKeyV2
+      const findClubMember = yield* createFindClubMemeber
+      const findClubMemberByPublicKey = yield* createFindClubMemeberByPublicKey
+      const findClubMemberByPublicKeyV2 =
+        yield* createFindClubMemeberByPublicKeyV2
+      const insertClubMember = yield* createInsertClubMember
+      const insertClubReportedRecord = yield* createInsertClubReportedRecord
+      const queryAllClubMembers = yield* createQueryAllClubMembers
+      const queryNumberOfClubReportsForUser =
+        yield* createQueryNumberOfClubReportsForUser
+      const updateIsModerator = yield* createUpdateIsModerator
+      const updateLastRefreshedAt = yield* CreateUpdateLastRefreshedAt
+      const updateNotificationToken = yield* createUpdateNotificationToken
+      const updateVexlNotificationToken =
+        yield* createUpdateVexlNotificationToken
+      const deleteAllClubMembers = yield* createDeleteAllClubMemebers
+      const deleteClubMembersLastActiveBefore =
+        yield* createDeleteClubMembersLastActiveBefore
+      const deleteClubReportedRecordByReportedAtBefore =
+        yield* createDeleteClubReportedRecordByReportedAtBefore
+      const updateClubMemberPublicKeyV2 =
+        yield* createUpdateClubMemberPublicKeyV2
 
       return {
         countClubMembers,

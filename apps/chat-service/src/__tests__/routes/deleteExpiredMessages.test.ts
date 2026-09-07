@@ -1,9 +1,9 @@
-import {SqlClient} from '@effect/sql'
 import {type MessageCypher} from '@vexl-next/domain/src/general/messaging'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {type SendMessageRequest} from '@vexl-next/rest-api/src/services/chat/contracts'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Schema} from 'effect'
+import {SqlClient} from 'effect/unstable/sql'
 import {clearExpiredMessagesTask} from '../../expiredMessagesCleanupWorker'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
 import {
@@ -19,43 +19,37 @@ let user2: MockedUser
 
 beforeAll(async () => {
   await runPromiseInMockedEnvironment(
-    Effect.gen(function* (_) {
-      user1 = yield* _(createMockedUser('+420733333330'))
-      user2 = yield* _(createMockedUser('+420733333331'))
-      const client = yield* _(NodeTestingApp)
+    Effect.gen(function* () {
+      user1 = yield* createMockedUser('+420733333330')
+      user2 = yield* createMockedUser('+420733333331')
+      const client = yield* NodeTestingApp
 
-      yield* _(setAuthHeaders(user1.authHeaders))
+      yield* setAuthHeaders(user1.authHeaders)
 
       const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
         user1.authHeaders
       )
 
-      yield* _(
-        client.Inboxes.requestApproval({
-          payload: {
-            message: 'cancelMessage' as MessageCypher,
-            publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-          },
-          headers: commonAndSecurityHeaders,
-        })
-      )
+      yield* client.Inboxes.requestApproval({
+        payload: {
+          message: 'cancelMessage' as MessageCypher,
+          publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
+        },
+        headers: commonAndSecurityHeaders,
+      })
 
-      yield* _(setAuthHeaders(user2.authHeaders))
-      yield* _(
-        client.Inboxes.approveRequest({
-          headers: commonHeaders,
-          payload: yield* _(
-            user2.inbox1.addChallenge({
-              message: 'someMessage2' as MessageCypher,
-              publicKeyToConfirm: user1.mainKeyPair.publicKeyPemBase64,
-              approve: true,
-            })
-          ),
-        })
-      )
+      yield* setAuthHeaders(user2.authHeaders)
+      yield* client.Inboxes.approveRequest({
+        headers: commonHeaders,
+        payload: yield* user2.inbox1.addChallenge({
+          message: 'someMessage2' as MessageCypher,
+          publicKeyToConfirm: user1.mainKeyPair.publicKeyPemBase64,
+          approve: true,
+        }),
+      })
 
-      const sql = yield* _(SqlClient.SqlClient)
-      yield* _(sql`DELETE FROM message`)
+      const sql = yield* SqlClient.SqlClient
+      yield* sql`DELETE FROM message`
     })
   )
 })
@@ -63,74 +57,62 @@ beforeAll(async () => {
 describe('clear expired messages', () => {
   it('Deletes only expired messages', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
 
-        const messageToSend = (yield* _(
-          user1.addChallengeForMainInbox({
-            message: 'someMessageToBeDeleted' as MessageCypher,
-            messageType: 'MESSAGE' as const,
-            receiverPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-          })
-        )) satisfies SendMessageRequest
+        const messageToSend = (yield* user1.addChallengeForMainInbox({
+          message: 'someMessageToBeDeleted' as MessageCypher,
+          messageType: 'MESSAGE' as const,
+          receiverPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
+        })) satisfies SendMessageRequest
 
-        const messageToSend2 = (yield* _(
-          user1.addChallengeForMainInbox({
-            message: 'someMessageToNotBeDeleted' as MessageCypher,
-            messageType: 'MESSAGE' as const,
-            receiverPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-          })
-        )) satisfies SendMessageRequest
+        const messageToSend2 = (yield* user1.addChallengeForMainInbox({
+          message: 'someMessageToNotBeDeleted' as MessageCypher,
+          messageType: 'MESSAGE' as const,
+          receiverPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
+        })) satisfies SendMessageRequest
 
-        yield* _(setAuthHeaders(user1.authHeaders))
-        yield* _(
-          client.Messages.sendMessage({
-            headers: commonHeaders,
-            payload: messageToSend,
-          })
-        )
+        yield* setAuthHeaders(user1.authHeaders)
+        yield* client.Messages.sendMessage({
+          headers: commonHeaders,
+          payload: messageToSend,
+        })
 
-        yield* _(
-          client.Messages.sendMessage({
-            headers: commonHeaders,
-            payload: messageToSend2,
-          })
-        )
+        yield* client.Messages.sendMessage({
+          headers: commonHeaders,
+          payload: messageToSend2,
+        })
 
-        const sql = yield* _(SqlClient.SqlClient)
-        yield* _(sql`
+        const sql = yield* SqlClient.SqlClient
+        yield* sql`
           UPDATE message
           SET
             expires_at = now()::date
           WHERE
             message = 'someMessageToBeDeleted'
-        `)
+        `
 
-        yield* _(clearExpiredMessagesTask)
+        yield* clearExpiredMessagesTask
 
-        yield* _(setAuthHeaders(user2.authHeaders))
-        const messagesReceived = yield* _(
-          client.Messages.retrieveMessages({
-            payload: yield* _(user2.inbox1.addChallenge({})),
-            headers: Schema.decodeSync(CommonHeaders)({
-              'user-agent': 'Vexl/2 (1.0.0) IOS',
-            }),
-          })
-        )
+        yield* setAuthHeaders(user2.authHeaders)
+        const messagesReceived = yield* client.Messages.retrieveMessages({
+          payload: yield* user2.inbox1.addChallenge({}),
+          headers: Schema.decodeSync(CommonHeaders)({
+            'user-agent': 'Vexl/2 (1.0.0) IOS',
+          }),
+        })
 
         expect(messagesReceived.messages.length).toBe(1)
         expect(messagesReceived.messages[0].message).toBe(
           'someMessageToNotBeDeleted'
         )
 
-        const messagesReceived2 = yield* _(
-          client.Messages.retrieveMessages({
-            payload: yield* _(user2.inbox2.addChallenge({})),
-            headers: Schema.decodeSync(CommonHeaders)({
-              'user-agent': 'Vexl/2 (1.0.0) IOS',
-            }),
-          })
-        )
+        const messagesReceived2 = yield* client.Messages.retrieveMessages({
+          payload: yield* user2.inbox2.addChallenge({}),
+          headers: Schema.decodeSync(CommonHeaders)({
+            'user-agent': 'Vexl/2 (1.0.0) IOS',
+          }),
+        })
 
         expect(messagesReceived2.messages.length).toBe(0)
       })

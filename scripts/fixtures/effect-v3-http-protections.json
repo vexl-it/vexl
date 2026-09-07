@@ -1,0 +1,866 @@
+[
+  {
+    "service": "btcExchangeRate",
+    "group": "root",
+    "endpoint": "getExchangeRate",
+    "method": "GET",
+    "path": "/btc-rate",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "chat",
+    "group": "Inboxes",
+    "endpoint": "updateInbox",
+    "method": "PUT",
+    "path": "/api/v1/inboxes",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "chat",
+    "group": "Inboxes",
+    "endpoint": "createInbox",
+    "method": "POST",
+    "path": "/api/v1/inboxes",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "chat",
+    "group": "Inboxes",
+    "endpoint": "deleteInbox",
+    "method": "DELETE",
+    "path": "/api/v1/inboxes",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "chat",
+    "group": "Inboxes",
+    "endpoint": "blockInbox",
+    "method": "PUT",
+    "path": "/api/v1/inboxes/block",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "chat",
+    "group": "Inboxes",
+    "endpoint": "requestApproval",
+    "method": "POST",
+    "path": "/api/v1/inboxes/approval/request",
+    "middleware": ["RateLimitingMiddleware", "ServerSecurityMiddleware"]
+  },
+  {
+    "service": "chat",
+    "group": "Inboxes",
+    "endpoint": "requestApprovalV2",
+    "method": "POST",
+    "path": "/api/v2/inboxes/approval/request",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "chat",
+    "group": "Inboxes",
+    "endpoint": "cancelRequestApproval",
+    "method": "POST",
+    "path": "/api/v1/inboxes/approval/cancel",
+    "middleware": ["RateLimitingMiddleware", "ServerSecurityMiddleware"]
+  },
+  {
+    "service": "chat",
+    "group": "Inboxes",
+    "endpoint": "cancelRequestApprovalV2",
+    "method": "POST",
+    "path": "/api/v2/inboxes/approval/cancel",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "chat",
+    "group": "Inboxes",
+    "endpoint": "approveRequest",
+    "method": "POST",
+    "path": "/api/v1/inboxes/approval/confirm",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "chat",
+    "group": "Inboxes",
+    "endpoint": "deleteInboxes",
+    "method": "DELETE",
+    "path": "/api/v1/inboxes/batch",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "chat",
+    "group": "Inboxes",
+    "endpoint": "leaveChat",
+    "method": "POST",
+    "path": "/api/v1/inboxes/leave-chat",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "chat",
+    "group": "Inboxes",
+    "endpoint": "deletePulledMessages",
+    "method": "DELETE",
+    "path": "/api/v1/inboxes/messages",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "chat",
+    "group": "Messages",
+    "endpoint": "retrieveMessages",
+    "method": "PUT",
+    "path": "/api/v1/inboxes/messages",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "chat",
+    "group": "Messages",
+    "endpoint": "sendMessage",
+    "method": "POST",
+    "path": "/api/v1/inboxes/messages",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "chat",
+    "group": "Messages",
+    "endpoint": "sendMessages",
+    "method": "POST",
+    "path": "/api/v1/inboxes/messages/batch",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "chat",
+    "group": "Challenges",
+    "endpoint": "createChallenge",
+    "method": "POST",
+    "path": "/api/v1/challenges",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "chat",
+    "group": "Challenges",
+    "endpoint": "createChallengeBatch",
+    "method": "POST",
+    "path": "/api/v1/challenges/batch",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "contact",
+    "group": "User",
+    "endpoint": "checkUserExists",
+    "method": "POST",
+    "path": "/api/v1/users/check-exists",
+    "middleware": ["RateLimitingMiddleware", "ServerSecurityMiddleware"]
+  },
+  {
+    "service": "contact",
+    "group": "User",
+    "endpoint": "createUser",
+    "method": "POST",
+    "path": "/api/v1/users",
+    "middleware": ["RateLimitingMiddleware", "ServerSecurityMiddleware"]
+  },
+  {
+    "service": "contact",
+    "group": "User",
+    "endpoint": "refreshUser",
+    "method": "POST",
+    "path": "/api/v1/users/refresh",
+    "middleware": ["RateLimitingMiddleware", "ServerSecurityMiddleware"]
+  },
+  {
+    "service": "contact",
+    "group": "User",
+    "endpoint": "updateNotificationToken",
+    "method": "PUT",
+    "path": "/api/v1/users/notification-token",
+    "middleware": ["RateLimitingMiddleware", "ServerSecurityMiddleware"]
+  },
+  {
+    "service": "contact",
+    "group": "User",
+    "endpoint": "deleteUser",
+    "method": "DELETE",
+    "path": "/api/v1/users/me",
+    "middleware": ["RateLimitingMiddleware", "ServerSecurityMiddleware"]
+  },
+  {
+    "service": "contact",
+    "group": "User",
+    "endpoint": "eraseUserFromNetwork",
+    "method": "DELETE",
+    "path": "/api/v1/users/erase",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "contact",
+    "group": "Contact",
+    "endpoint": "importContacts",
+    "method": "POST",
+    "path": "/api/v1/contacts/import/replace",
+    "middleware": ["RateLimitingMiddleware", "ServerSecurityMiddleware"]
+  },
+  {
+    "service": "contact",
+    "group": "Contact",
+    "endpoint": "convertPhoneNumberHashesToServerHashes",
+    "method": "POST",
+    "path": "/api/v1/contacts/convert-to-server-hashes",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "contact",
+    "group": "Contact",
+    "endpoint": "fetchMyContactsPaginated",
+    "method": "GET",
+    "path": "/api/v1/contacts/me/paginated",
+    "middleware": ["RateLimitingMiddleware", "ServerSecurityMiddleware"]
+  },
+  {
+    "service": "contact",
+    "group": "Contact",
+    "endpoint": "fetchCommonConnectionsPaginated",
+    "method": "POST",
+    "path": "/api/v1/contacts/common/paginated",
+    "middleware": ["RateLimitingMiddleware", "ServerSecurityMiddleware"]
+  },
+  {
+    "service": "contact",
+    "group": "ClubsAdmin",
+    "endpoint": "createClub",
+    "method": "POST",
+    "path": "/api/v1/clubs/admin",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "contact",
+    "group": "ClubsAdmin",
+    "endpoint": "modifyClub",
+    "method": "PUT",
+    "path": "/api/v1/clubs/admin",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "contact",
+    "group": "ClubsAdmin",
+    "endpoint": "generateClubInviteLinkForAdmin",
+    "method": "PUT",
+    "path": "/api/v1/clubs/admin/generate-admin-link",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "contact",
+    "group": "ClubsAdmin",
+    "endpoint": "listClubs",
+    "method": "GET",
+    "path": "/api/v1/clubs/admin",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "contact",
+    "group": "ClubsAdmin",
+    "endpoint": "getClubStats",
+    "method": "GET",
+    "path": "/api/v1/clubs/admin/stats",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "contact",
+    "group": "ClubsAdmin",
+    "endpoint": "reactivateClub",
+    "method": "PUT",
+    "path": "/api/v1/clubs/admin/reactivate",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "contact",
+    "group": "ClubsAdmin",
+    "endpoint": "requestClubImageUpload",
+    "method": "POST",
+    "path": "/api/v1/clubs/admin/request-image-upload",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "contact",
+    "group": "ClubsMember",
+    "endpoint": "getClubInfo",
+    "method": "POST",
+    "path": "/api/v1/clubs/member/get-info",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "contact",
+    "group": "ClubsMember",
+    "endpoint": "joinClub",
+    "method": "POST",
+    "path": "/api/v1/clubs/member/join-club",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "contact",
+    "group": "ClubsMember",
+    "endpoint": "leaveClub",
+    "method": "POST",
+    "path": "/api/v1/clubs/member/leave-club",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "contact",
+    "group": "ClubsMember",
+    "endpoint": "getClubContacts",
+    "method": "POST",
+    "path": "/api/v1/clubs/member/get-contacts",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "contact",
+    "group": "ClubsMember",
+    "endpoint": "getClubInfoByAccessCode",
+    "method": "POST",
+    "path": "/api/v1/clubs/member/get-info-by-access-code",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "contact",
+    "group": "ClubsMember",
+    "endpoint": "reportClub",
+    "method": "POST",
+    "path": "/api/v1/clubs/member/report-club",
+    "middleware": ["RateLimitingMiddleware", "ServerSecurityMiddleware"]
+  },
+  {
+    "service": "contact",
+    "group": "ClubsMember",
+    "endpoint": "setPublicKeyV2",
+    "method": "PUT",
+    "path": "/api/v1/clubs/member/set-public-key-v2",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "contact",
+    "group": "ClubsModerator",
+    "endpoint": "generateClubJoinLink",
+    "method": "POST",
+    "path": "/api/v1/clubs/moderator/generate-join-link",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "contact",
+    "group": "ClubsModerator",
+    "endpoint": "deactivateClubJoinLink",
+    "method": "DELETE",
+    "path": "/api/v1/clubs/moderator/deactivate-join-link",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "contact",
+    "group": "ClubsModerator",
+    "endpoint": "addUserToTheClub",
+    "method": "POST",
+    "path": "/api/v1/clubs/moderator/add-user-to-club",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "contact",
+    "group": "ClubsModerator",
+    "endpoint": "listClubLinks",
+    "method": "POST",
+    "path": "/api/v1/clubs/moderator/list-links",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "contact",
+    "group": "Challenges",
+    "endpoint": "createChallenge",
+    "method": "POST",
+    "path": "/api/v1/challenges",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "contact",
+    "group": "Challenges",
+    "endpoint": "createChallengeBatch",
+    "method": "POST",
+    "path": "/api/v1/challenges/batch",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "content",
+    "group": "Cms",
+    "endpoint": "getEvents",
+    "method": "GET",
+    "path": "/content/events",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "content",
+    "group": "Cms",
+    "endpoint": "clearCache",
+    "method": "POST",
+    "path": "/content/clear-cache",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "content",
+    "group": "Cms",
+    "endpoint": "getBlogArticles",
+    "method": "GET",
+    "path": "/content/blogs",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "content",
+    "group": "NewsAndAnnouncements",
+    "endpoint": "getNewsAndAnnouncements",
+    "method": "GET",
+    "path": "/content/news-and-announcements",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "content",
+    "group": "Map",
+    "endpoint": "getMapStyles",
+    "method": "GET",
+    "path": "/content/map-styles",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "content",
+    "group": "VexlProductNotifications",
+    "endpoint": "createVexlProductNotification",
+    "method": "POST",
+    "path": "/content/vexl-product-notifications/admin",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "content",
+    "group": "VexlProductNotifications",
+    "endpoint": "getVexlProductNotifications",
+    "method": "GET",
+    "path": "/content/vexl-product-notifications",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "content",
+    "group": "Donations",
+    "endpoint": "createInvoice",
+    "method": "POST",
+    "path": "/content/createInvoice",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "content",
+    "group": "Donations",
+    "endpoint": "getInvoice",
+    "method": "GET",
+    "path": "/content/getInvoice",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "content",
+    "group": "Donations",
+    "endpoint": "updateInvoiceStateWebhook",
+    "method": "POST",
+    "path": "/content/invoice/btcpay-webhook",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "content",
+    "group": "Donations",
+    "endpoint": "getInvoiceStatusType",
+    "method": "GET",
+    "path": "/content/getInvoiceStatusType",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "feedback",
+    "group": "root",
+    "endpoint": "submitFeedback",
+    "method": "POST",
+    "path": "/api/v1/feedback/submit",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "location",
+    "group": "root",
+    "endpoint": "getLocationSuggestion",
+    "method": "GET",
+    "path": "/suggest",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "location",
+    "group": "root",
+    "endpoint": "getGeocodedCoordinates",
+    "method": "GET",
+    "path": "/geocode",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "location",
+    "group": "root",
+    "endpoint": "getLocationSuggestionV2",
+    "method": "GET",
+    "path": "/api/v2/suggest",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "location",
+    "group": "root",
+    "endpoint": "getGeocodedCoordinatesV2",
+    "method": "GET",
+    "path": "/api/v2/geocode",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "metrics",
+    "group": "root",
+    "endpoint": "reportNotificationInteraction",
+    "method": "GET",
+    "path": "/report/notification-interaction",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "notification",
+    "group": "root",
+    "endpoint": "issueNotification",
+    "method": "POST",
+    "path": "/issue-notification",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "notification",
+    "group": "root",
+    "endpoint": "reportNotificationProcessed",
+    "method": "POST",
+    "path": "/report-notification",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "notification",
+    "group": "root",
+    "endpoint": "issueStreamOnlyMessage",
+    "method": "POST",
+    "path": "/issue-stream-only-message",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "notification",
+    "group": "root",
+    "endpoint": "getNotificationPublicKey",
+    "method": "GET",
+    "path": "/cypher-public-key",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "notification",
+    "group": "NotificationTokenGroup",
+    "endpoint": "CreateNotificationSecret",
+    "method": "POST",
+    "path": "/token/create-secret",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "notification",
+    "group": "NotificationTokenGroup",
+    "endpoint": "updateNoficationInfo",
+    "method": "PUT",
+    "path": "/token/update",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "notification",
+    "group": "NotificationTokenGroup",
+    "endpoint": "generateNotificationToken",
+    "method": "POST",
+    "path": "/token/generate",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "notification",
+    "group": "NotificationTokenGroup",
+    "endpoint": "invalidateNotificationToken",
+    "method": "DELETE",
+    "path": "/token/invalidate",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "notification",
+    "group": "NotificationTokenGroup",
+    "endpoint": "invalidateNotificationSecret",
+    "method": "DELETE",
+    "path": "/token/invalidate/secret",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "offer",
+    "group": "root",
+    "endpoint": "getOffersForMeModifiedOrCreatedAfterPaginated",
+    "method": "GET",
+    "path": "/api/v2/offers/me/modified/paginated",
+    "middleware": ["RateLimitingMiddleware", "ServerSecurityMiddleware"]
+  },
+  {
+    "service": "offer",
+    "group": "root",
+    "endpoint": "getClubOffersForMeModifiedOrCreatedAfterPaginated",
+    "method": "POST",
+    "path": "/api/v2/clubOffers/me/modified/paginated",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "offer",
+    "group": "root",
+    "endpoint": "createNewOffer",
+    "method": "POST",
+    "path": "/api/v2/offers",
+    "middleware": ["RateLimitingMiddleware", "ServerSecurityMiddleware"]
+  },
+  {
+    "service": "offer",
+    "group": "root",
+    "endpoint": "refreshOffer",
+    "method": "POST",
+    "path": "/api/v2/offers/refresh",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "offer",
+    "group": "root",
+    "endpoint": "deleteOffer",
+    "method": "DELETE",
+    "path": "/api/v1/offers",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "offer",
+    "group": "root",
+    "endpoint": "updateOffer",
+    "method": "PUT",
+    "path": "/api/v2/offers",
+    "middleware": ["RateLimitingMiddleware", "ServerSecurityMiddleware"]
+  },
+  {
+    "service": "offer",
+    "group": "root",
+    "endpoint": "createPrivatePart",
+    "method": "POST",
+    "path": "/api/v2/offers/private-part",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "offer",
+    "group": "root",
+    "endpoint": "deletePrivatePart",
+    "method": "DELETE",
+    "path": "/api/v1/offers/private-part",
+    "middleware": ["RateLimitingMiddleware", "ServerSecurityMiddleware"]
+  },
+  {
+    "service": "offer",
+    "group": "root",
+    "endpoint": "getRemovedOffers",
+    "method": "POST",
+    "path": "/api/v1/offers/not-exist",
+    "middleware": ["RateLimitingMiddleware", "ServerSecurityMiddleware"]
+  },
+  {
+    "service": "offer",
+    "group": "root",
+    "endpoint": "getRemovedClubOffers",
+    "method": "POST",
+    "path": "/api/v1/clubOffers/not-exist",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "offer",
+    "group": "root",
+    "endpoint": "reportOffer",
+    "method": "POST",
+    "path": "/api/v1/offers/report",
+    "middleware": ["RateLimitingMiddleware", "ServerSecurityMiddleware"]
+  },
+  {
+    "service": "offer",
+    "group": "root",
+    "endpoint": "reportClubOffer",
+    "method": "POST",
+    "path": "/api/v1/clubOffers/report",
+    "middleware": ["RateLimitingMiddleware", "ServerSecurityMiddleware"]
+  },
+  {
+    "service": "offer",
+    "group": "Challenges",
+    "endpoint": "createChallenge",
+    "method": "POST",
+    "path": "/api/v1/challenges",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "offer",
+    "group": "Challenges",
+    "endpoint": "createChallengeBatch",
+    "method": "POST",
+    "path": "/api/v1/challenges/batch",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "offer",
+    "group": "Notes",
+    "endpoint": "createNewNote",
+    "method": "POST",
+    "path": "/api/v1/notes",
+    "middleware": ["RateLimitingMiddleware", "ServerSecurityMiddleware"]
+  },
+  {
+    "service": "offer",
+    "group": "Notes",
+    "endpoint": "createNotePrivatePart",
+    "method": "POST",
+    "path": "/api/v1/notes/private-part",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "offer",
+    "group": "Notes",
+    "endpoint": "deleteNotePrivatePart",
+    "method": "DELETE",
+    "path": "/api/v1/notes/private-part",
+    "middleware": ["RateLimitingMiddleware", "ServerSecurityMiddleware"]
+  },
+  {
+    "service": "offer",
+    "group": "Notes",
+    "endpoint": "createRepostNotePrivatePart",
+    "method": "POST",
+    "path": "/api/v1/notes/repost/private-part",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "offer",
+    "group": "Notes",
+    "endpoint": "deleteNote",
+    "method": "DELETE",
+    "path": "/api/v1/notes",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "offer",
+    "group": "Notes",
+    "endpoint": "repostNote",
+    "method": "POST",
+    "path": "/api/v1/notes/repost",
+    "middleware": ["RateLimitingMiddleware", "ServerSecurityMiddleware"]
+  },
+  {
+    "service": "offer",
+    "group": "Notes",
+    "endpoint": "undoRepostNote",
+    "method": "DELETE",
+    "path": "/api/v1/notes/repost",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "offer",
+    "group": "Notes",
+    "endpoint": "getNotesForMeModifiedOrCreatedAfterPaginated",
+    "method": "GET",
+    "path": "/api/v1/notes/me/modified/paginated",
+    "middleware": ["RateLimitingMiddleware", "ServerSecurityMiddleware"]
+  },
+  {
+    "service": "offer",
+    "group": "Notes",
+    "endpoint": "getRemovedNotes",
+    "method": "POST",
+    "path": "/api/v1/notes/not-exist",
+    "middleware": ["RateLimitingMiddleware", "ServerSecurityMiddleware"]
+  },
+  {
+    "service": "offer",
+    "group": "Notes",
+    "endpoint": "reportNote",
+    "method": "POST",
+    "path": "/api/v1/notes/report",
+    "middleware": ["RateLimitingMiddleware", "ServerSecurityMiddleware"]
+  },
+  {
+    "service": "user",
+    "group": "Login",
+    "endpoint": "initVerification",
+    "method": "POST",
+    "path": "/api/v1/user/confirmation/phone",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "user",
+    "group": "Login",
+    "endpoint": "verifyCode",
+    "method": "POST",
+    "path": "/api/v1/user/confirmation/code",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "user",
+    "group": "Login",
+    "endpoint": "verifyChallenge",
+    "method": "POST",
+    "path": "/api/v1/user/confirmation/challenge",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "user",
+    "group": "EraseUser",
+    "endpoint": "initEraseUser",
+    "method": "POST",
+    "path": "/api/v1/user/erase/init",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "user",
+    "group": "EraseUser",
+    "endpoint": "verifyAndEraseuser",
+    "method": "DELETE",
+    "path": "/api/v1/user/erase/verify",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "user",
+    "group": "UpgradeAuth",
+    "endpoint": "initUpgradeAuth",
+    "method": "POST",
+    "path": "/api/v1/upgrade-auth/init",
+    "middleware": ["RateLimitingMiddleware", "ServerSecurityMiddleware"]
+  },
+  {
+    "service": "user",
+    "group": "UpgradeAuth",
+    "endpoint": "submitUpgradeAuth",
+    "method": "POST",
+    "path": "/api/v1/upgrade-auth/submit",
+    "middleware": ["RateLimitingMiddleware", "ServerSecurityMiddleware"]
+  },
+  {
+    "service": "user",
+    "group": "root",
+    "endpoint": "logoutUser",
+    "method": "DELETE",
+    "path": "/api/v1/user/me",
+    "middleware": ["RateLimitingMiddleware", "ServerSecurityMiddleware"]
+  },
+  {
+    "service": "user",
+    "group": "root",
+    "endpoint": "getVersionServiceInfo",
+    "method": "GET",
+    "path": "/api/v1/version-service-info",
+    "middleware": ["RateLimitingMiddleware"]
+  },
+  {
+    "service": "user",
+    "group": "root",
+    "endpoint": "generateLoginChallenge",
+    "method": "GET",
+    "path": "/api/v1/generate-login-challenge",
+    "middleware": ["RateLimitingMiddleware"]
+  }
+]

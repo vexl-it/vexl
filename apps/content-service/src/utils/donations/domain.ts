@@ -1,5 +1,5 @@
 import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {Schema} from 'effect'
+import {Effect, Schema} from 'effect'
 
 // Vexl will use only few of the fields, if other are needed,
 // check the BTCPayServer Greenfield API docs
@@ -17,26 +17,31 @@ export const CreateInvoiceRequest = Schema.Struct({
   ),
   checkout: Schema.optional(
     Schema.Struct({
-      speedPolicy: Schema.Literal(
+      speedPolicy: Schema.Literals([
         'HighSpeed',
         'MediumSpeed',
         'LowMediumSpeed',
-        'LowSpeed'
+        'LowSpeed',
+      ]),
+      paymentMethods: Schema.Array(
+        Schema.Literals(['BTC-LN', 'BTC-CHAIN', 'BTC-LNURL'])
+      ).pipe(
+        Schema.withDecodingDefaultType(Effect.sync(() => [])),
+        Schema.withConstructorDefault(Effect.sync(() => []))
       ),
-      paymentMethods: Schema.optionalWith(
-        Schema.Array(Schema.Literal('BTC-LN', 'BTC-CHAIN', 'BTC-LNURL')),
-        {
-          default: () => [],
-        }
-      ),
-      defaultPaymentMethod: Schema.Literal('BTC-LN', 'BTC-CHAIN', 'BTC-LNURL'),
+      defaultPaymentMethod: Schema.Literals([
+        'BTC-LN',
+        'BTC-CHAIN',
+        'BTC-LNURL',
+      ]),
       lazyPaymentMethods: Schema.NullOr(Schema.String),
       expirationMinutes: Schema.Int,
       monitoringMinutes: Schema.Int,
       redirectUrl: Schema.NullOr(Schema.String),
-      redirectAutomatically: Schema.optionalWith(Schema.Boolean, {
-        default: () => false,
-      }),
+      redirectAutomatically: Schema.Boolean.pipe(
+        Schema.withDecodingDefaultType(Effect.sync((): false => false)),
+        Schema.withConstructorDefault(Effect.sync((): false => false))
+      ),
       // BTCPayServer Greenfield API allows this to be null, but we use it as a string
       defaultLanguage: Schema.NullOr(Schema.String),
     })
@@ -44,8 +49,14 @@ export const CreateInvoiceRequest = Schema.Struct({
   receipt: Schema.optional(
     Schema.Struct({
       enabled: Schema.Boolean,
-      showQr: Schema.optionalWith(Schema.Boolean, {default: () => false}),
-      showPayments: Schema.optionalWith(Schema.Boolean, {default: () => false}),
+      showQr: Schema.Boolean.pipe(
+        Schema.withDecodingDefaultType(Effect.sync((): false => false)),
+        Schema.withConstructorDefault(Effect.sync((): false => false))
+      ),
+      showPayments: Schema.Boolean.pipe(
+        Schema.withDecodingDefaultType(Effect.sync((): false => false)),
+        Schema.withConstructorDefault(Effect.sync((): false => false))
+      ),
     })
   ),
   additionalSearchTerms: Schema.optional(Schema.Array(Schema.String)),
@@ -64,7 +75,7 @@ export const InvoiceResponseInternal = Schema.Struct({
   createdTime: UnixMilliseconds,
   expirationTime: UnixMilliseconds,
   monitoringExpiration: UnixMilliseconds,
-  status: Schema.Literal(
+  status: Schema.Literals([
     'New',
     'Expired',
     'Paid',
@@ -72,8 +83,8 @@ export const InvoiceResponseInternal = Schema.Struct({
     'Confirmed',
     'Processing',
     'Invalid',
-    'Settled'
-  ),
+    'Settled',
+  ]),
   additionalStatus: Schema.String,
   availableStatusesForManualMarking: Schema.Array(Schema.String),
   archived: Schema.Boolean,
@@ -88,34 +99,45 @@ export const InvoiceResponseInternal = Schema.Struct({
   ),
   checkout: Schema.optional(
     Schema.Struct({
-      speedPolicy: Schema.Literal(
+      speedPolicy: Schema.Literals([
         'HighSpeed',
         'MediumSpeed',
         'LowMediumSpeed',
-        'LowSpeed'
+        'LowSpeed',
+      ]),
+      paymentMethods: Schema.Array(
+        Schema.Literals(['BTC-LN', 'BTC-CHAIN', 'BTC-LNURL'])
+      ).pipe(
+        Schema.withDecodingDefaultType(Effect.sync(() => [])),
+        Schema.withConstructorDefault(Effect.sync(() => []))
       ),
-      paymentMethods: Schema.optionalWith(
-        Schema.Array(Schema.Literal('BTC-LN', 'BTC-CHAIN', 'BTC-LNURL')),
-        {
-          default: () => [],
-        }
-      ),
-      defaultPaymentMethod: Schema.Literal('BTC-LN', 'BTC-CHAIN', 'BTC-LNURL'),
+      defaultPaymentMethod: Schema.Literals([
+        'BTC-LN',
+        'BTC-CHAIN',
+        'BTC-LNURL',
+      ]),
       lazyPaymentMethods: Schema.NullOr(Schema.String),
       expirationMinutes: Schema.Int,
       monitoringMinutes: Schema.Int,
       redirectUrl: Schema.NullOr(Schema.String),
-      redirectAutomatically: Schema.optionalWith(Schema.Boolean, {
-        default: () => false,
-      }),
+      redirectAutomatically: Schema.Boolean.pipe(
+        Schema.withDecodingDefaultType(Effect.sync((): false => false)),
+        Schema.withConstructorDefault(Effect.sync((): false => false))
+      ),
       defaultLanguage: Schema.NullOr(Schema.String),
     })
   ),
   receipt: Schema.optional(
     Schema.Struct({
       enabled: Schema.Boolean,
-      showQr: Schema.optionalWith(Schema.Boolean, {default: () => false}),
-      showPayments: Schema.optionalWith(Schema.Boolean, {default: () => false}),
+      showQr: Schema.Boolean.pipe(
+        Schema.withDecodingDefaultType(Effect.sync((): false => false)),
+        Schema.withConstructorDefault(Effect.sync((): false => false))
+      ),
+      showPayments: Schema.Boolean.pipe(
+        Schema.withDecodingDefaultType(Effect.sync((): false => false)),
+        Schema.withConstructorDefault(Effect.sync((): false => false))
+      ),
     })
   ),
 })
@@ -146,7 +168,7 @@ export const InvoicePaymentMethodsResponseInternal = Schema.Array(
     amount: Schema.String,
     paymentMethodFee: Schema.String,
     payments: Schema.Array(Schema.String),
-    paymentMethodId: Schema.Literal('BTC-LN', 'BTC-CHAIN', 'BTC-LNURL'),
+    paymentMethodId: Schema.Literals(['BTC-LN', 'BTC-CHAIN', 'BTC-LNURL']),
     additionalData: Schema.Struct({
       paymentHash: Schema.String,
       preimage: Schema.String,

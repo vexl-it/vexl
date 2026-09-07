@@ -55,7 +55,7 @@ export const refocusMapActionAtom = atom(
       set(mapRegionAtom, null)
       set(resetLocationFilterActionAtom)
       const borderPoints = getFilteredOffersBorderPoints(get)
-      if (Array.isNonEmptyReadonlyArray(borderPoints)) {
+      if (Array.isReadonlyArrayNonEmpty(borderPoints)) {
         set(fitToCoordinatesActionAtom, {coordinates: borderPoints})
         return
       }
@@ -68,7 +68,7 @@ export const refocusMapActionAtom = atom(
     }
 
     const locationFilter = get(locationFilterAtom)
-    if (locationFilter && Array.isNonEmptyReadonlyArray(locationFilter)) {
+    if (locationFilter && Array.isReadonlyArrayNonEmpty(locationFilter)) {
       const oneLocation: OfferLocation | undefined = locationFilter[0]
 
       if (locationFilter.length === 1 && oneLocation) {
@@ -92,7 +92,7 @@ export const refocusMapActionAtom = atom(
     }
 
     const borderPoints = getFilteredOffersBorderPoints(get)
-    if (Array.isNonEmptyReadonlyArray(borderPoints)) {
+    if (Array.isReadonlyArrayNonEmpty(borderPoints)) {
       set(fitToCoordinatesActionAtom, {coordinates: borderPoints})
       return
     }

@@ -1,4 +1,3 @@
-import {type HttpClient} from '@effect/platform'
 import {
   generatePrivateKey,
   type PrivateKeyHolder,
@@ -16,6 +15,7 @@ import {
   TestRequestHeaders,
 } from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Schema} from 'effect'
+import {type HttpClient} from 'effect/unstable/http'
 import {NodeTestingApp} from './NodeTestingApp'
 import {addChallengeForKey} from './addChallengeForKey'
 
@@ -72,26 +72,24 @@ export const createMockedInbox = (authHeaders: {
   CreatingUserError,
   HttpClient.HttpClient | TestRequestHeaders
 > =>
-  Effect.gen(function* (_) {
+  Effect.gen(function* () {
     const keyPair = generatePrivateKey()
     const addChallenge = addChallengeForKey(keyPair, authHeaders)
-    const payload = yield* _(addChallenge({}))
+    const payload = yield* addChallenge({})
 
-    const client = yield* _(NodeTestingApp)
-    const previousAuthHeaders = yield* _(TestRequestHeaders.getHeaders)
-    yield* _(setAuthHeaders(authHeaders))
+    const client = yield* NodeTestingApp
+    const previousAuthHeaders = yield* TestRequestHeaders.getHeaders
+    yield* setAuthHeaders(authHeaders)
 
     const commonAndSecurityHeaders =
       makeTestCommonAndSecurityHeaders(authHeaders)
 
-    yield* _(
-      client.Inboxes.createInbox({
-        payload,
-        headers: commonAndSecurityHeaders,
-      })
-    )
+    yield* client.Inboxes.createInbox({
+      payload,
+      headers: commonAndSecurityHeaders,
+    })
 
-    yield* _(TestRequestHeaders.setHeaders(previousAuthHeaders))
+    yield* TestRequestHeaders.setHeaders(previousAuthHeaders)
     return {keyPair, addChallenge}
   }).pipe(
     Effect.mapError(
@@ -110,43 +108,39 @@ export const createMockedUser = (
   CreatingUserError,
   HttpClient.HttpClient | TestRequestHeaders | ServerCrypto
 > =>
-  Effect.gen(function* (_) {
-    const initHeaders = yield* _(TestRequestHeaders.getHeaders)
+  Effect.gen(function* () {
+    const initHeaders = yield* TestRequestHeaders.getHeaders
     const mainKeyPair = generatePrivateKey()
     const number = Schema.decodeSync(E164PhoneNumber)(numberRaw)
 
-    const authHeaders = yield* _(
-      createDummyAuthHeadersForUser({
-        phoneNumber: number,
-        publicKey: mainKeyPair.publicKeyPemBase64,
-      })
-    )
+    const authHeaders = yield* createDummyAuthHeadersForUser({
+      phoneNumber: number,
+      publicKey: mainKeyPair.publicKeyPemBase64,
+    })
 
     const addChallengeForMainInbox = addChallengeForKey(
       mainKeyPair,
       authHeaders
     )
 
-    const client = yield* _(NodeTestingApp)
+    const client = yield* NodeTestingApp
 
-    const challengeForInbox = yield* _(addChallengeForMainInbox({}))
-    yield* _(setAuthHeaders(authHeaders))
+    const challengeForInbox = yield* addChallengeForMainInbox({})
+    yield* setAuthHeaders(authHeaders)
 
     const commonAndSecurityHeaders =
       makeTestCommonAndSecurityHeaders(authHeaders)
 
-    yield* _(
-      client.Inboxes.createInbox({
-        payload: challengeForInbox,
-        headers: commonAndSecurityHeaders,
-      })
-    )
+    yield* client.Inboxes.createInbox({
+      payload: challengeForInbox,
+      headers: commonAndSecurityHeaders,
+    })
 
-    const inbox1 = yield* _(createMockedInbox(authHeaders))
-    const inbox2 = yield* _(createMockedInbox(authHeaders))
-    const inbox3 = yield* _(createMockedInbox(authHeaders))
+    const inbox1 = yield* createMockedInbox(authHeaders)
+    const inbox2 = yield* createMockedInbox(authHeaders)
+    const inbox3 = yield* createMockedInbox(authHeaders)
 
-    yield* _(TestRequestHeaders.setHeaders(initHeaders))
+    yield* TestRequestHeaders.setHeaders(initHeaders)
 
     return {
       mainKeyPair,

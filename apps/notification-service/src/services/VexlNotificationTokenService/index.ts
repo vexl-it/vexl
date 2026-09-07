@@ -16,8 +16,8 @@ import {
   extractPartsOfNotificationCypher,
 } from '@vexl-next/resources-utils/src/notifications/notificationTokenActions'
 import {type PlatformName} from '@vexl-next/rest-api'
-import {NoSuchElementException} from 'effect/Cause'
-import {Context, Effect, Layer} from 'effect/index'
+import {Context, Effect, Layer, pipe} from 'effect'
+import {NoSuchElementError} from 'effect/Cause'
 import {fcmTokenPrivateKeyConfig} from '../../configs'
 import {NotificationTokensDb} from '../NotificationTokensDb'
 import {
@@ -30,7 +30,7 @@ export interface VexlNotificationTokenServiceOperations {
     vexlTokenOrCypher: VexlNotificationTokenSecret | NotificationCypher
   ) => Effect.Effect<
     ExpoNotificationToken,
-    NoSuchElementException | UnexpectedServerError
+    NoSuchElementError | UnexpectedServerError
   >
 
   normalizeToVexlNotificationTokenSecret: (
@@ -40,7 +40,7 @@ export interface VexlNotificationTokenServiceOperations {
       | ExpoNotificationToken
   ) => Effect.Effect<
     VexlNotificationTokenSecret,
-    NoSuchElementException | UnexpectedServerError,
+    NoSuchElementError | UnexpectedServerError,
     never
   >
 
@@ -55,27 +55,28 @@ export interface VexlNotificationTokenServiceOperations {
       clientVersion: VersionCode
       clientPlatform: PlatformName
     },
-    NoSuchElementException | UnexpectedServerError,
+    NoSuchElementError | UnexpectedServerError,
     never
   >
 }
 
-export class VexlNotificationTokenService extends Context.Tag(
-  'VexlNotificationTokenService'
-)<VexlNotificationTokenService, VexlNotificationTokenServiceOperations>() {
+export class VexlNotificationTokenService extends Context.Service<
+  VexlNotificationTokenService,
+  VexlNotificationTokenServiceOperations
+>()('VexlNotificationTokenService') {
   static Live = Layer.effect(
     VexlNotificationTokenService,
-    Effect.gen(function* (_) {
-      const privateKey = yield* _(fcmTokenPrivateKeyConfig)
-      const tokenDb = yield* _(NotificationTokensDb)
+    Effect.gen(function* () {
+      const privateKey = yield* fcmTokenPrivateKeyConfig
+      const tokenDb = yield* NotificationTokensDb
 
       return {
         normalizeToVexlNotificationTokenSecret: (tokenOrCypher) =>
-          Effect.gen(function* (_) {
+          Effect.gen(function* () {
             if (isVexlNotificationToken(tokenOrCypher)) {
-              return yield* _(
+              return yield* pipe(
                 tokenDb.findSecretByNotificationToken(tokenOrCypher),
-                Effect.flatten,
+                Effect.flatMap(Effect.fromOption),
                 Effect.map((one) => one.secret)
               )
             }
@@ -84,7 +85,7 @@ export class VexlNotificationTokenService extends Context.Tag(
               return createTemporaryVexlNotificationTokenSecret(tokenOrCypher)
             }
 
-            return yield* _(
+            return yield* pipe(
               decryptNotificationToken({
                 notificationCypher: tokenOrCypher,
                 privateKey,
@@ -92,15 +93,15 @@ export class VexlNotificationTokenService extends Context.Tag(
               Effect.map((r) =>
                 createTemporaryVexlNotificationTokenSecret(r.expoToken)
               ),
-              Effect.catchAll((e) => new NoSuchElementException())
+              Effect.catch((e) => new NoSuchElementError())
             )
           }),
         getMetadata: (tokenOrCypher) =>
-          Effect.gen(function* (_) {
+          Effect.gen(function* () {
             if (isVexlNotificationTokenSecret(tokenOrCypher)) {
-              const data = yield* _(
+              const data = yield* pipe(
                 tokenDb.findSecretBySecretValue(tokenOrCypher),
-                Effect.flatten
+                Effect.flatMap(Effect.fromOption)
               )
               return {
                 locale: data.clientLanguage,
@@ -110,9 +111,9 @@ export class VexlNotificationTokenService extends Context.Tag(
             }
 
             if (isVexlNotificationToken(tokenOrCypher)) {
-              const data = yield* _(
+              const data = yield* pipe(
                 tokenDb.findSecretByNotificationToken(tokenOrCypher),
-                Effect.flatten
+                Effect.flatMap(Effect.fromOption)
               )
               return {
                 locale: data.clientLanguage,
@@ -121,7 +122,7 @@ export class VexlNotificationTokenService extends Context.Tag(
               }
             }
 
-            const parts = yield* _(
+            const parts = yield* Effect.fromOption(
               extractPartsOfNotificationCypher({
                 notificationCypher: tokenOrCypher,
               })
@@ -134,28 +135,30 @@ export class VexlNotificationTokenService extends Context.Tag(
             }
           }),
         getExpoToken: (vexlTokenOrCypher) =>
-          Effect.gen(function* (_) {
+          Effect.gen(function* () {
             if (isVexlNotificationTokenSecret(vexlTokenOrCypher)) {
-              return yield* _(
-                getExpoTokenFromTemporaryVexlNotificationToken(
-                  vexlTokenOrCypher
+              return yield* pipe(
+                Effect.fromOption(
+                  getExpoTokenFromTemporaryVexlNotificationToken(
+                    vexlTokenOrCypher
+                  )
                 ),
-                Effect.catchTag('NoSuchElementException', () =>
+                Effect.catchTag('NoSuchElementError', () =>
                   tokenDb.findSecretBySecretValue(vexlTokenOrCypher).pipe(
-                    Effect.flatten,
+                    Effect.flatMap(Effect.fromOption),
                     Effect.flatMap((r) =>
-                      Effect.fromNullable(r.expoNotificationToken)
+                      Effect.fromNullishOr(r.expoNotificationToken)
                     )
                   )
                 )
               )
             } else {
-              return yield* _(
+              return yield* pipe(
                 decryptNotificationToken({
                   notificationCypher: vexlTokenOrCypher,
                   privateKey,
                 }).pipe(
-                  Effect.catchAll(
+                  Effect.catch(
                     (e) =>
                       new UnexpectedServerError({
                         message: 'Failed to decrypt notification token',

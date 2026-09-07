@@ -1,50 +1,56 @@
 import {Schema} from 'effect'
 
 const HttpsUrl = Schema.String.pipe(
-  Schema.filter((url) => {
-    try {
-      return new URL(url).protocol === 'https:'
-    } catch {
-      return false
-    }
-  })
+  Schema.check(
+    Schema.makeFilter((url) => {
+      try {
+        return new URL(url).protocol === 'https:'
+      } catch {
+        return false
+      }
+    })
+  )
 )
 
 const AssetUrl = Schema.String.pipe(
-  Schema.filter((url) => {
-    try {
-      const protocol = new URL(url).protocol
-      return protocol === 'https:' || protocol === 'http:'
-    } catch {
-      return false
-    }
-  })
+  Schema.check(
+    Schema.makeFilter((url) => {
+      try {
+        const protocol = new URL(url).protocol
+        return protocol === 'https:' || protocol === 'http:'
+      } catch {
+        return false
+      }
+    })
+  )
 )
 
 export const SlideDurationSeconds = Schema.Int.pipe(
-  Schema.greaterThanOrEqualTo(1),
-  Schema.lessThanOrEqualTo(24 * 60 * 60)
+  Schema.check(Schema.isGreaterThanOrEqualTo(1)),
+  Schema.check(Schema.isLessThanOrEqualTo(24 * 60 * 60))
 )
 
 export const PublicSlug = Schema.NonEmptyString.pipe(
-  Schema.filter((slug) => /^[a-z0-9][a-z0-9-]{1,30}[a-z0-9]$/.test(slug))
+  Schema.check(
+    Schema.makeFilter((slug) => /^[a-z0-9][a-z0-9-]{1,30}[a-z0-9]$/.test(slug))
+  )
 )
 export type PublicSlug = typeof PublicSlug.Type
 
-export const OptionalPublicSlug = Schema.Union(PublicSlug, Schema.Null)
+export const OptionalPublicSlug = Schema.Union([PublicSlug, Schema.Null])
 export type OptionalPublicSlug = typeof OptionalPublicSlug.Type
 
 export const ImageSlide = Schema.Struct({
-  uuid: Schema.UUID,
+  uuid: Schema.String.check(Schema.isUUID()),
   type: Schema.Literal('image'),
   url: AssetUrl,
   s3Key: Schema.NonEmptyString,
-  fit: Schema.Literal('cover', 'contain'),
+  fit: Schema.Literals(['cover', 'contain']),
   durationSeconds: SlideDurationSeconds,
 })
 
 export const VideoSlide = Schema.Struct({
-  uuid: Schema.UUID,
+  uuid: Schema.String.check(Schema.isUUID()),
   type: Schema.Literal('video'),
   url: AssetUrl,
   s3Key: Schema.NonEmptyString,
@@ -52,20 +58,24 @@ export const VideoSlide = Schema.Struct({
 })
 
 export const WebsiteSlide = Schema.Struct({
-  uuid: Schema.UUID,
+  uuid: Schema.String.check(Schema.isUUID()),
   type: Schema.Literal('website'),
   url: HttpsUrl,
   durationSeconds: SlideDurationSeconds,
 })
 
-export const SlideshowSlide = Schema.Union(ImageSlide, VideoSlide, WebsiteSlide)
+export const SlideshowSlide = Schema.Union([
+  ImageSlide,
+  VideoSlide,
+  WebsiteSlide,
+])
 export type SlideshowSlide = typeof SlideshowSlide.Type
 
 export const SlideshowSlides = Schema.Array(SlideshowSlide)
 export type SlideshowSlides = typeof SlideshowSlides.Type
 
 export const TvSlideshow = Schema.Struct({
-  uuid: Schema.UUID,
+  uuid: Schema.String.check(Schema.isUUID()),
   publicToken: Schema.NonEmptyString,
   publicSlug: OptionalPublicSlug,
   name: Schema.NonEmptyString,
@@ -77,7 +87,7 @@ export const TvSlideshow = Schema.Struct({
 export type TvSlideshow = typeof TvSlideshow.Type
 
 export const CreateSlideshowRequest = Schema.Struct({
-  uuid: Schema.optional(Schema.UUID),
+  uuid: Schema.optional(Schema.String.check(Schema.isUUID())),
   publicSlug: Schema.optional(OptionalPublicSlug),
   name: Schema.NonEmptyString,
   slides: SlideshowSlides,
@@ -103,18 +113,18 @@ export const SlideshowResponse = Schema.Struct({
 })
 export type SlideshowResponse = typeof SlideshowResponse.Type
 
-export const FileExtension = Schema.Literal(
+export const FileExtension = Schema.Literals([
   'png',
   'jpg',
   'jpeg',
   'webp',
   'mp4',
-  'webm'
-)
+  'webm',
+])
 export type FileExtension = typeof FileExtension.Type
 
 export const RequestUploadRequest = Schema.Struct({
-  slideshowUuid: Schema.UUID,
+  slideshowUuid: Schema.String.check(Schema.isUUID()),
   fileExtension: FileExtension,
 })
 export type RequestUploadRequest = typeof RequestUploadRequest.Type

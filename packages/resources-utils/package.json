@@ -9,7 +9,7 @@
     "format": "prettier --check \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\"",
     "format:fix": "prettier --write \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\"",
     "typecheck": "tsc --noEmit",
-    "test": "jest --silent"
+    "test": "node --experimental-vm-modules ../../node_modules/jest/bin/jest.js --silent"
   },
   "devDependencies": {
     "@vexl-next/eslint-config": "0.0.0",
@@ -23,12 +23,11 @@
     "typescript": "~6.0.3"
   },
   "dependencies": {
-    "@effect/platform": "^0.93.6",
     "@vexl-next/cryptography": "0.0.0",
     "@vexl-next/domain": "0.0.0",
     "@vexl-next/generic-utils": "0.0.0",
     "@vexl-next/rest-api": "0.0.0",
-    "effect": "^3.20.0",
+    "effect": "4.0.0-rc.112",
     "fp-ts": "^2.13.1",
     "just-truncate": "^2.2.0"
   },

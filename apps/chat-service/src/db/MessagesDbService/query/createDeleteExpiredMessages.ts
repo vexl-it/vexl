@@ -1,15 +1,16 @@
-import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
+import {NumberFromString} from '@vexl-next/generic-utils/src/effect-helpers/NumberFromString'
 import {Effect, flow, Option, pipe, Schema} from 'effect'
+import {SqlSchema} from 'effect/unstable/sql'
 
-export const createDeleteExpiredMessages = Effect.gen(function* (_) {
-  const sql = yield* _(PgClient.PgClient)
+export const createDeleteExpiredMessages = Effect.gen(function* () {
+  const sql = yield* PgClient.PgClient
 
-  const query = SqlSchema.findOne({
+  const query = SqlSchema.findOneOption({
     Request: Schema.Null,
     Result: Schema.Struct({
-      count: Schema.NumberFromString,
+      count: NumberFromString,
     }),
     execute: () => sql`
       WITH

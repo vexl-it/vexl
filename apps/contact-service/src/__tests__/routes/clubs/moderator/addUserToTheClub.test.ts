@@ -1,4 +1,3 @@
-import {SqlClient} from '@effect/sql'
 import {
   PublicKeyV2,
   generatePrivateKey,
@@ -19,7 +18,8 @@ import {
 } from '@vexl-next/rest-api/src/services/contact/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {addTestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
-import {Effect, Option, Schema} from 'effect'
+import {Effect, Option, Schema, pipe} from 'effect'
+import {SqlClient} from 'effect/unstable/sql'
 import {ClubMembersDbService} from '../../../../db/ClubMemberDbService'
 import {ClubsDbService} from '../../../../db/ClubsDbService'
 import {type ClubRecordId} from '../../../../db/ClubsDbService/domain'
@@ -55,43 +55,39 @@ let clubId: ClubRecordId
 
 beforeEach(async () => {
   await runPromiseInMockedEnvironment(
-    Effect.gen(function* (_) {
-      const sql = yield* _(SqlClient.SqlClient)
-      yield* _(sql`DELETE FROM club_invitation_link`)
-      yield* _(sql`DELETE FROM club_member`)
-      yield* _(sql`DELETE FROM club_member_count_change`)
-      yield* _(sql`DELETE FROM club`)
+    Effect.gen(function* () {
+      const sql = yield* SqlClient.SqlClient
+      yield* sql`DELETE FROM club_invitation_link`
+      yield* sql`DELETE FROM club_member`
+      yield* sql`DELETE FROM club_member_count_change`
+      yield* sql`DELETE FROM club`
 
-      const app = yield* _(NodeTestingApp)
-      yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
-      yield* _(
-        app.ClubsAdmin.createClub({
-          headers: {'x-admin-token': ADMIN_TOKEN},
-          payload: {
-            club,
-          },
-        })
-      )
+      const app = yield* NodeTestingApp
+      yield* addTestHeaders({'x-admin-token': ADMIN_TOKEN})
+      yield* app.ClubsAdmin.createClub({
+        headers: {'x-admin-token': ADMIN_TOKEN},
+        payload: {
+          club,
+        },
+      })
 
-      const clubsDb = yield* _(ClubsDbService)
-      const createdClub = yield* _(
+      const clubsDb = yield* ClubsDbService
+      const createdClub = yield* pipe(
         clubsDb.findClubByUuid({uuid: club.uuid}),
-        Effect.flatten
+        Effect.flatMap(Effect.fromOption)
       )
       clubId = createdClub.id
 
-      const clubDb = yield* _(ClubMembersDbService)
-      yield* _(
-        clubDb.insertClubMember({
-          clubId,
-          publicKey: userKey.publicKeyPemBase64,
-          isModerator: true,
-          lastRefreshedAt: new Date(),
-          notificationToken: 'someToken' as ExpoNotificationToken,
-          vexlNotificationToken: 'vexl_nt_test' as VexlNotificationToken,
-          publicKeyV2: null,
-        })
-      )
+      const clubDb = yield* ClubMembersDbService
+      yield* clubDb.insertClubMember({
+        clubId,
+        publicKey: userKey.publicKeyPemBase64,
+        isModerator: true,
+        lastRefreshedAt: new Date(),
+        notificationToken: 'someToken' as ExpoNotificationToken,
+        vexlNotificationToken: 'vexl_nt_test' as VexlNotificationToken,
+        publicKeyV2: null,
+      })
     })
   )
 })
@@ -99,46 +95,42 @@ beforeEach(async () => {
 describe('Add user to the club', () => {
   it('Adds user to the club', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
-        const addResponse = yield* _(
-          app.ClubsModerator.addUserToTheClub({
-            payload: {
-              adminitionRequest: {
-                langCode: 'en',
-                notificationToken: Option.none(),
-                vexlNotificationToken: Option.none(),
-                publicKey: user1.publicKeyPemBase64,
-                publicKeyV2: toPublicKeyV2(user1.publicKeyPemBase64),
-              },
-              clubUuid: club.uuid,
-              ...(yield* _(generateAndSignChallenge(userKey))),
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
+        const addResponse = yield* app.ClubsModerator.addUserToTheClub({
+          payload: {
+            adminitionRequest: {
+              langCode: 'en',
+              notificationToken: Option.none(),
+              vexlNotificationToken: Option.none(),
+              publicKey: user1.publicKeyPemBase64,
+              publicKeyV2: toPublicKeyV2(user1.publicKeyPemBase64),
             },
-          })
-        )
+            clubUuid: club.uuid,
+            ...(yield* generateAndSignChallenge(userKey)),
+          },
+        })
 
         expect(addResponse.newCount).toEqual(2)
 
-        const clubInfo = yield* _(
-          app.ClubsMember.getClubInfo({
-            payload: {
-              ...(yield* _(generateAndSignChallenge(user1))),
-              notificationToken: Option.none(),
-              vexlNotificationToken: Option.none(),
-              publicKeyV2: Option.none(),
-            },
-          })
-        )
+        const clubInfo = yield* app.ClubsMember.getClubInfo({
+          payload: {
+            ...(yield* generateAndSignChallenge(user1)),
+            notificationToken: Option.none(),
+            vexlNotificationToken: Option.none(),
+            publicKeyV2: Option.none(),
+          },
+        })
         expect(clubInfo.clubInfoForUser).toEqual({
           club,
           isModerator: false,
           vexlNotificationToken: Option.none(),
         })
 
-        yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
-        const clubs = yield* _(
-          app.ClubsAdmin.listClubs({headers: {'x-admin-token': ADMIN_TOKEN}})
-        )
+        yield* addTestHeaders({'x-admin-token': ADMIN_TOKEN})
+        const clubs = yield* app.ClubsAdmin.listClubs({
+          headers: {'x-admin-token': ADMIN_TOKEN},
+        })
         expect(clubs.clubs).toEqual([
           expect.objectContaining({
             uuid: club.uuid,
@@ -153,41 +145,37 @@ describe('Add user to the club', () => {
 
   it('Fails with limit exceeded when adding user to the club that is full', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
-        yield* _(
-          app.ClubsModerator.addUserToTheClub({
-            payload: {
-              adminitionRequest: {
-                langCode: 'en',
-                notificationToken: Option.none(),
-                vexlNotificationToken: Option.none(),
-                publicKey: user1.publicKeyPemBase64,
-                publicKeyV2: toPublicKeyV2(user1.publicKeyPemBase64),
-              },
-              clubUuid: club.uuid,
-              ...(yield* _(generateAndSignChallenge(userKey))),
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
+        yield* app.ClubsModerator.addUserToTheClub({
+          payload: {
+            adminitionRequest: {
+              langCode: 'en',
+              notificationToken: Option.none(),
+              vexlNotificationToken: Option.none(),
+              publicKey: user1.publicKeyPemBase64,
+              publicKeyV2: toPublicKeyV2(user1.publicKeyPemBase64),
             },
-          })
-        )
+            clubUuid: club.uuid,
+            ...(yield* generateAndSignChallenge(userKey)),
+          },
+        })
 
-        yield* _(
-          app.ClubsModerator.addUserToTheClub({
-            payload: {
-              adminitionRequest: {
-                langCode: 'en',
-                notificationToken: Option.none(),
-                vexlNotificationToken: Option.none(),
-                publicKey: user2.publicKeyPemBase64,
-                publicKeyV2: toPublicKeyV2(user2.publicKeyPemBase64),
-              },
-              clubUuid: club.uuid,
-              ...(yield* _(generateAndSignChallenge(userKey))),
+        yield* app.ClubsModerator.addUserToTheClub({
+          payload: {
+            adminitionRequest: {
+              langCode: 'en',
+              notificationToken: Option.none(),
+              vexlNotificationToken: Option.none(),
+              publicKey: user2.publicKeyPemBase64,
+              publicKeyV2: toPublicKeyV2(user2.publicKeyPemBase64),
             },
-          })
-        )
+            clubUuid: club.uuid,
+            ...(yield* generateAndSignChallenge(userKey)),
+          },
+        })
 
-        const failedResponse = yield* _(
+        const failedResponse = yield* pipe(
           app.ClubsModerator.addUserToTheClub({
             payload: {
               adminitionRequest: {
@@ -198,10 +186,10 @@ describe('Add user to the club', () => {
                 publicKeyV2: toPublicKeyV2(user3.publicKeyPemBase64),
               },
               clubUuid: club.uuid,
-              ...(yield* _(generateAndSignChallenge(userKey))),
+              ...(yield* generateAndSignChallenge(userKey)),
             },
           }),
-          Effect.either
+          Effect.result
         )
 
         expectErrorResponse(ClubUserLimitExceededError)(failedResponse)
@@ -211,25 +199,23 @@ describe('Add user to the club', () => {
 
   it('Fails with memer already in club when adding user to the club that is already in club', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
-        yield* _(
-          app.ClubsModerator.addUserToTheClub({
-            payload: {
-              adminitionRequest: {
-                langCode: 'en',
-                notificationToken: Option.none(),
-                vexlNotificationToken: Option.none(),
-                publicKey: user1.publicKeyPemBase64,
-                publicKeyV2: toPublicKeyV2(user1.publicKeyPemBase64),
-              },
-              clubUuid: club.uuid,
-              ...(yield* _(generateAndSignChallenge(userKey))),
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
+        yield* app.ClubsModerator.addUserToTheClub({
+          payload: {
+            adminitionRequest: {
+              langCode: 'en',
+              notificationToken: Option.none(),
+              vexlNotificationToken: Option.none(),
+              publicKey: user1.publicKeyPemBase64,
+              publicKeyV2: toPublicKeyV2(user1.publicKeyPemBase64),
             },
-          })
-        )
+            clubUuid: club.uuid,
+            ...(yield* generateAndSignChallenge(userKey)),
+          },
+        })
 
-        const failedResponse = yield* _(
+        const failedResponse = yield* pipe(
           app.ClubsModerator.addUserToTheClub({
             payload: {
               adminitionRequest: {
@@ -240,10 +226,10 @@ describe('Add user to the club', () => {
                 publicKeyV2: toPublicKeyV2(user1.publicKeyPemBase64),
               },
               clubUuid: club.uuid,
-              ...(yield* _(generateAndSignChallenge(userKey))),
+              ...(yield* generateAndSignChallenge(userKey)),
             },
           }),
-          Effect.either
+          Effect.result
         )
 
         expectErrorResponse(MemberAlreadyInClubError)(failedResponse)
@@ -253,24 +239,22 @@ describe('Add user to the club', () => {
 
   it('Fails with UserIsNotModeratorError when member is not a moderator', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
 
-        const memberDb = yield* _(ClubMembersDbService)
+        const memberDb = yield* ClubMembersDbService
         const nonModeratorMember = generatePrivateKey()
-        yield* _(
-          memberDb.insertClubMember({
-            publicKey: nonModeratorMember.publicKeyPemBase64,
-            clubId,
-            isModerator: false,
-            lastRefreshedAt: new Date(),
-            notificationToken: null,
-            vexlNotificationToken: null,
-            publicKeyV2: null,
-          })
-        )
+        yield* memberDb.insertClubMember({
+          publicKey: nonModeratorMember.publicKeyPemBase64,
+          clubId,
+          isModerator: false,
+          lastRefreshedAt: new Date(),
+          notificationToken: null,
+          vexlNotificationToken: null,
+          publicKeyV2: null,
+        })
 
-        const errorResponse = yield* _(
+        const errorResponse = yield* pipe(
           app.ClubsModerator.addUserToTheClub({
             payload: {
               adminitionRequest: {
@@ -281,10 +265,10 @@ describe('Add user to the club', () => {
                 publicKeyV2: toPublicKeyV2(user1.publicKeyPemBase64),
               },
               clubUuid: club.uuid,
-              ...(yield* _(generateAndSignChallenge(nonModeratorMember))),
+              ...(yield* generateAndSignChallenge(nonModeratorMember)),
             },
           }),
-          Effect.either
+          Effect.result
         )
 
         expectErrorResponse(UserIsNotModeratorError)(errorResponse)
@@ -294,12 +278,12 @@ describe('Add user to the club', () => {
 
   it('Fails with 404 when member is not found', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
 
         const nonModeratorMember = generatePrivateKey()
 
-        const errorResponse = yield* _(
+        const errorResponse = yield* pipe(
           app.ClubsModerator.addUserToTheClub({
             payload: {
               adminitionRequest: {
@@ -310,10 +294,10 @@ describe('Add user to the club', () => {
                 publicKeyV2: toPublicKeyV2(user1.publicKeyPemBase64),
               },
               clubUuid: club.uuid,
-              ...(yield* _(generateAndSignChallenge(nonModeratorMember))),
+              ...(yield* generateAndSignChallenge(nonModeratorMember)),
             },
           }),
-          Effect.either
+          Effect.result
         )
 
         expectErrorResponse(NotFoundError)(errorResponse)
@@ -323,10 +307,10 @@ describe('Add user to the club', () => {
 
   it('Fails with 404 when club is not found', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
 
-        const errorResponse = yield* _(
+        const errorResponse = yield* pipe(
           app.ClubsModerator.addUserToTheClub({
             payload: {
               adminitionRequest: {
@@ -337,10 +321,10 @@ describe('Add user to the club', () => {
                 publicKeyV2: toPublicKeyV2(user1.publicKeyPemBase64),
               },
               clubUuid: generateClubUuid(),
-              ...(yield* _(generateAndSignChallenge(userKey))),
+              ...(yield* generateAndSignChallenge(userKey)),
             },
           }),
-          Effect.either
+          Effect.result
         )
 
         expectErrorResponse(NotFoundError)(errorResponse)
@@ -350,12 +334,12 @@ describe('Add user to the club', () => {
 
   it('Fails with Invalid challenge', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
 
-        const challenge = yield* _(generateAndSignChallenge(userKey))
+        const challenge = yield* generateAndSignChallenge(userKey)
 
-        const errorResponse = yield* _(
+        const errorResponse = yield* pipe(
           app.ClubsModerator.addUserToTheClub({
             payload: {
               adminitionRequest: {
@@ -374,7 +358,7 @@ describe('Add user to the club', () => {
               },
             },
           }),
-          Effect.either
+          Effect.result
         )
 
         expectErrorResponse(InvalidChallengeError)(errorResponse)
@@ -384,83 +368,73 @@ describe('Add user to the club', () => {
 
   it('Enqueues VexlNotificationToken notifications for club members when user is added', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        yield* _(clearEnqueuedNotifications)
+      Effect.gen(function* () {
+        yield* clearEnqueuedNotifications
 
-        const clubDb = yield* _(ClubsDbService)
-        yield* _(
-          clubDb.updateClub({
-            id: clubId,
-            data: {
-              madeInactiveAt: Option.none(),
-              madeInactiveReason: Option.none(),
-              report: 0,
-              ...club,
-              membersCountLimit: 100,
-            },
-          })
-        )
+        const clubDb = yield* ClubsDbService
+        yield* clubDb.updateClub({
+          id: clubId,
+          data: {
+            madeInactiveAt: Option.none(),
+            madeInactiveReason: Option.none(),
+            report: 0,
+            ...club,
+            membersCountLimit: 100,
+          },
+        })
 
-        const membersDb = yield* _(ClubMembersDbService)
-        yield* _(
-          membersDb.insertClubMember({
-            clubId,
-            publicKey: user1.publicKeyPemBase64,
-            notificationToken: null,
-            vexlNotificationToken:
-              'vexl_nt_member1_token' as VexlNotificationToken,
-            isModerator: false,
-            lastRefreshedAt: new Date(),
-            publicKeyV2: null,
-          })
-        )
-        yield* _(
-          membersDb.insertClubMember({
-            clubId,
-            publicKey: user2.publicKeyPemBase64,
-            notificationToken: '2someToken2' as ExpoNotificationToken,
-            vexlNotificationToken: null,
-            isModerator: false,
-            lastRefreshedAt: new Date(),
-            publicKeyV2: null,
-          })
-        )
+        const membersDb = yield* ClubMembersDbService
+        yield* membersDb.insertClubMember({
+          clubId,
+          publicKey: user1.publicKeyPemBase64,
+          notificationToken: null,
+          vexlNotificationToken:
+            'vexl_nt_member1_token' as VexlNotificationToken,
+          isModerator: false,
+          lastRefreshedAt: new Date(),
+          publicKeyV2: null,
+        })
+        yield* membersDb.insertClubMember({
+          clubId,
+          publicKey: user2.publicKeyPemBase64,
+          notificationToken: '2someToken2' as ExpoNotificationToken,
+          vexlNotificationToken: null,
+          isModerator: false,
+          lastRefreshedAt: new Date(),
+          publicKeyV2: null,
+        })
 
-        yield* _(
-          membersDb.insertClubMember({
-            clubId,
-            publicKey: user3.publicKeyPemBase64,
-            notificationToken: null,
-            vexlNotificationToken:
-              'vexl_nt_member2_token' as VexlNotificationToken,
-            isModerator: false,
-            lastRefreshedAt: new Date(),
-            publicKeyV2: null,
-          })
-        )
+        yield* membersDb.insertClubMember({
+          clubId,
+          publicKey: user3.publicKeyPemBase64,
+          notificationToken: null,
+          vexlNotificationToken:
+            'vexl_nt_member2_token' as VexlNotificationToken,
+          isModerator: false,
+          lastRefreshedAt: new Date(),
+          publicKeyV2: null,
+        })
 
         const user4 = generatePrivateKey()
-        const app = yield* _(NodeTestingApp)
+        const app = yield* NodeTestingApp
 
-        yield* _(
-          app.ClubsModerator.addUserToTheClub({
-            payload: {
-              adminitionRequest: {
-                langCode: 'en',
-                notificationToken: Option.none(),
-                vexlNotificationToken: Option.none(),
-                publicKey: user4.publicKeyPemBase64,
-                publicKeyV2: toPublicKeyV2(user4.publicKeyPemBase64),
-              },
-              clubUuid: club.uuid,
-              ...(yield* _(generateAndSignChallenge(userKey))),
+        yield* app.ClubsModerator.addUserToTheClub({
+          payload: {
+            adminitionRequest: {
+              langCode: 'en',
+              notificationToken: Option.none(),
+              vexlNotificationToken: Option.none(),
+              publicKey: user4.publicKeyPemBase64,
+              publicKeyV2: toPublicKeyV2(user4.publicKeyPemBase64),
             },
-          })
-        )
+            clubUuid: club.uuid,
+            ...(yield* generateAndSignChallenge(userKey)),
+          },
+        })
 
-        yield* _(Effect.sleep('100 millis'))
+        yield* Effect.sleep('100 millis')
 
-        const enqueuedNotifications = yield* _(getEnqueuedNotifications)
+        const enqueuedNotifications = yield* getEnqueuedNotifications
         const clubNotifications = enqueuedNotifications.filter(
           (n) => n.task._tag === 'NewClubUserNotificationMqEntry'
         )
@@ -501,31 +475,29 @@ describe('Add user to the club', () => {
 
   it('Enqueues admission notification for added user with vexlNotificationToken', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        yield* _(clearEnqueuedNotifications)
+      Effect.gen(function* () {
+        yield* clearEnqueuedNotifications
 
-        const app = yield* _(NodeTestingApp)
-        yield* _(
-          app.ClubsModerator.addUserToTheClub({
-            payload: {
-              adminitionRequest: {
-                langCode: 'en',
-                notificationToken: Option.none(),
-                vexlNotificationToken: Option.some(
-                  'vexl_nt_admitted_user' as VexlNotificationToken
-                ),
-                publicKey: user1.publicKeyPemBase64,
-                publicKeyV2: toPublicKeyV2(user1.publicKeyPemBase64),
-              },
-              clubUuid: club.uuid,
-              ...(yield* _(generateAndSignChallenge(userKey))),
+        const app = yield* NodeTestingApp
+        yield* app.ClubsModerator.addUserToTheClub({
+          payload: {
+            adminitionRequest: {
+              langCode: 'en',
+              notificationToken: Option.none(),
+              vexlNotificationToken: Option.some(
+                'vexl_nt_admitted_user' as VexlNotificationToken
+              ),
+              publicKey: user1.publicKeyPemBase64,
+              publicKeyV2: toPublicKeyV2(user1.publicKeyPemBase64),
             },
-          })
-        )
+            clubUuid: club.uuid,
+            ...(yield* generateAndSignChallenge(userKey)),
+          },
+        })
 
-        yield* _(Effect.sleep('100 millis'))
+        yield* Effect.sleep('100 millis')
 
-        const enqueuedNotifications = yield* _(getEnqueuedNotifications)
+        const enqueuedNotifications = yield* getEnqueuedNotifications
         const admissionNotifications = enqueuedNotifications.filter(
           (n) => n.task._tag === 'UserAdmittedToClubNotificationMqEntry'
         )
@@ -548,75 +520,67 @@ describe('Add user to the club', () => {
 
   it('Routes notifications correctly when members have mixed token types', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        yield* _(clearEnqueuedNotifications)
+      Effect.gen(function* () {
+        yield* clearEnqueuedNotifications
 
-        const clubDb = yield* _(ClubsDbService)
-        yield* _(
-          clubDb.updateClub({
-            id: clubId,
-            data: {
-              madeInactiveAt: Option.none(),
-              madeInactiveReason: Option.none(),
-              report: 0,
-              ...club,
-              membersCountLimit: 100,
-            },
-          })
-        )
+        const clubDb = yield* ClubsDbService
+        yield* clubDb.updateClub({
+          id: clubId,
+          data: {
+            madeInactiveAt: Option.none(),
+            madeInactiveReason: Option.none(),
+            report: 0,
+            ...club,
+            membersCountLimit: 100,
+          },
+        })
 
-        const membersDb = yield* _(ClubMembersDbService)
+        const membersDb = yield* ClubMembersDbService
 
         // Member with ONLY expo token (no vexl token - won't receive notification via new path)
-        yield* _(
-          membersDb.insertClubMember({
-            clubId,
-            publicKey: user1.publicKeyPemBase64,
-            notificationToken: 'expo_only_token' as ExpoNotificationToken,
-            vexlNotificationToken: null,
-            isModerator: false,
-            lastRefreshedAt: new Date(),
-            publicKeyV2: null,
-          })
-        )
+        yield* membersDb.insertClubMember({
+          clubId,
+          publicKey: user1.publicKeyPemBase64,
+          notificationToken: 'expo_only_token' as ExpoNotificationToken,
+          vexlNotificationToken: null,
+          isModerator: false,
+          lastRefreshedAt: new Date(),
+          publicKeyV2: null,
+        })
 
         // Member with BOTH expo and vexl token (new path only)
-        yield* _(
-          membersDb.insertClubMember({
-            clubId,
-            publicKey: user2.publicKeyPemBase64,
-            notificationToken: 'expo_token_2' as ExpoNotificationToken,
-            vexlNotificationToken:
-              'vexl_nt_member2_token' as VexlNotificationToken,
-            isModerator: false,
-            lastRefreshedAt: new Date(),
-            publicKeyV2: null,
-          })
-        )
+        yield* membersDb.insertClubMember({
+          clubId,
+          publicKey: user2.publicKeyPemBase64,
+          notificationToken: 'expo_token_2' as ExpoNotificationToken,
+          vexlNotificationToken:
+            'vexl_nt_member2_token' as VexlNotificationToken,
+          isModerator: false,
+          lastRefreshedAt: new Date(),
+          publicKeyV2: null,
+        })
 
         const user4 = generatePrivateKey()
-        const app = yield* _(NodeTestingApp)
+        const app = yield* NodeTestingApp
 
-        yield* _(
-          app.ClubsModerator.addUserToTheClub({
-            payload: {
-              adminitionRequest: {
-                langCode: 'en',
-                notificationToken: Option.none(),
-                vexlNotificationToken: Option.none(),
-                publicKey: user4.publicKeyPemBase64,
-                publicKeyV2: toPublicKeyV2(user4.publicKeyPemBase64),
-              },
-              clubUuid: club.uuid,
-              ...(yield* _(generateAndSignChallenge(userKey))),
+        yield* app.ClubsModerator.addUserToTheClub({
+          payload: {
+            adminitionRequest: {
+              langCode: 'en',
+              notificationToken: Option.none(),
+              vexlNotificationToken: Option.none(),
+              publicKey: user4.publicKeyPemBase64,
+              publicKeyV2: toPublicKeyV2(user4.publicKeyPemBase64),
             },
-          })
-        )
+            clubUuid: club.uuid,
+            ...(yield* generateAndSignChallenge(userKey)),
+          },
+        })
 
-        yield* _(Effect.sleep('100 millis'))
+        yield* Effect.sleep('100 millis')
 
         // Notifications are sent to all members, filter for those with vexlNotificationToken
-        const enqueuedNotifications = yield* _(getEnqueuedNotifications)
+        const enqueuedNotifications = yield* getEnqueuedNotifications
         const clubNotifications = enqueuedNotifications.filter(
           (n) => n.task._tag === 'NewClubUserNotificationMqEntry'
         )

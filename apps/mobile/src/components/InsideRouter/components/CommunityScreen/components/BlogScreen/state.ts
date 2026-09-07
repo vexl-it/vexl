@@ -1,5 +1,5 @@
 import {type BlogsArticlesResponse} from '@vexl-next/rest-api/src/services/content/contracts'
-import {Effect, Option} from 'effect'
+import {Effect, Option, pipe} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../../../../api'
 
@@ -14,7 +14,7 @@ export const blogsStateAtom = atom<{
 })
 
 export const loadBlogsActionAtom = atom(null, async (get, set) => {
-  await Effect.gen(function* (_) {
+  await Effect.gen(function* () {
     const api = get(apiAtom)
     set(blogsStateAtom, (prev) => ({
       ...prev,
@@ -22,7 +22,7 @@ export const loadBlogsActionAtom = atom(null, async (get, set) => {
       error: Option.none(),
     }))
 
-    yield* _(
+    yield* pipe(
       api.content.getBlogArticles(),
       Effect.match({
         onFailure: (e) => {

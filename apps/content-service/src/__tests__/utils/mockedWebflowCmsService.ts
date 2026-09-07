@@ -1,3 +1,4 @@
+import {jest} from '@jest/globals'
 import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {
   type BlogId,

@@ -9,7 +9,7 @@ import {
 } from '@vexl-next/ui'
 import {ChevronLeft, PinGeolocation} from '@vexl-next/ui/src/icons'
 import {Stack, XStack, YStack} from '@vexl-next/ui/src/primitives'
-import {ScopeProvider, useMolecule} from 'bunshi/dist/react'
+import {ScopeProvider, useMolecule} from 'bunshi/react'
 import type {Atom} from 'jotai'
 import {atom, useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useMemo, useRef, useState} from 'react'

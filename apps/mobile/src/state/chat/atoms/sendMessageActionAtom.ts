@@ -42,31 +42,27 @@ export default function sendMessageActionAtom(
     // Timeout prevents message sending from starving during continuous interactions.
     runWhenIdleWithTimeout(
       () => {
-        Effect.gen(function* (_) {
-          const m = yield* _(
-            taskToEffect(replaceImageFileUrisWithBase64(message))
-          )
+        Effect.gen(function* () {
+          const m = yield* taskToEffect(replaceImageFileUrisWithBase64(message))
 
-          const serverMessage = yield* _(
-            sendMessage({
-              message: m,
-              api: api.chat,
-              senderKeypair: chat.inbox.privateKey,
-              receiverPublicKey: chat.otherSide.publicKey,
-              notificationApi: api.notification,
-              theirNotificationCypher:
-                chat.otherSideVexlToken ?? chat.otherSideFcmCypher,
-              otherSideVersion: chat.otherSideVersion,
-            })
-          )
+          const serverMessage = yield* sendMessage({
+            message: m,
+            api: api.chat,
+            senderKeypair: chat.inbox.privateKey,
+            receiverPublicKey: chat.otherSide.publicKey,
+            notificationApi: api.notification,
+            theirNotificationCypher:
+              chat.otherSideVexlToken ?? chat.otherSideFcmCypher,
+            otherSideVersion: chat.otherSideVersion,
+          })
 
           if (
             numberOfMessagesInChat >
             DONATION_PROMPT_CHAT_MESSAGES_THRESHOLD_COUNT
           )
-            yield* _(
-              set(showDonationPromptGiveLoveActionAtom, {skipTimeCheck: false})
-            )
+            yield* set(showDonationPromptGiveLoveActionAtom, {
+              skipTimeCheck: false,
+            })
 
           return serverMessage
         }).pipe(

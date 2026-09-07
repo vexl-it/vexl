@@ -153,7 +153,7 @@ export default function OfferPropertiesCard({
     t,
   ])
 
-  if (!Array.isNonEmptyArray(rows)) return null
+  if (!Array.isArrayNonEmpty(rows)) return null
 
   const content = pipe(
     rows,

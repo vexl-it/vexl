@@ -1,6 +1,6 @@
 import {decryptStreamOnlyChatMessageCypher} from '@vexl-next/resources-utils/src/chat/streamOnlyChatMessagePayload'
 import {type StreamOnlyChatMessage} from '@vexl-next/rest-api/src/services/notification/Rpcs'
-import {Array, Effect, Option, pipe} from 'effect/index'
+import {Array, Effect, Option, pipe} from 'effect'
 import {atom} from 'jotai'
 import reportError from '../../../utils/reportError'
 import {type InboxInState} from '../domain'
@@ -15,12 +15,10 @@ export const processStreamOnlyNotificationActionAtom = atom(
     set,
     {message, inbox}: {message: StreamOnlyChatMessage; inbox: InboxInState}
   ) =>
-    Effect.gen(function* (_) {
-      const payload = yield* _(
-        decryptStreamOnlyChatMessageCypher(
-          message.message,
-          inbox.inbox.privateKey.privateKeyPemBase64
-        )
+    Effect.gen(function* () {
+      const payload = yield* decryptStreamOnlyChatMessageCypher(
+        message.message,
+        inbox.inbox.privateKey.privateKeyPemBase64
       )
 
       if (payload._tag === 'TypingMessage') {

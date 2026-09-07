@@ -7,7 +7,7 @@ import {
   type ServerMessage,
 } from '@vexl-next/domain/src/general/messaging'
 import {toError, type BasicError} from '@vexl-next/domain/src/utility/errors'
-import {Schema} from 'effect/index'
+import {Schema} from 'effect'
 import * as TE from 'fp-ts/TaskEither'
 import {flow, pipe} from 'fp-ts/function'
 import {eciesDecrypt, eciesEncrypt} from '../../utils/crypto'

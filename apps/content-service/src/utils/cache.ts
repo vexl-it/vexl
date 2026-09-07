@@ -27,14 +27,14 @@ export interface CacheOperations {
   clearCache: Effect.Effect<void, RedisError>
 }
 
-export class CacheService extends Context.Tag('CacheService')<
+export class CacheService extends Context.Service<
   CacheService,
   CacheOperations
->() {
+>()('CacheService') {
   static readonly Live = Layer.effect(
     CacheService,
-    Effect.gen(function* (_) {
-      const redisService = yield* _(RedisService)
+    Effect.gen(function* () {
+      const redisService = yield* RedisService
 
       const getEventsFromRedis = redisService
         .get(EventsResponse)(EVENTS_REDIS_KEY)
@@ -59,7 +59,7 @@ export class CacheService extends Context.Tag('CacheService')<
                 Effect.logWarning('Failed to save events to cache', e)
               ),
               Effect.withSpan('saveEventsToRedis'),
-              Effect.forkDaemon,
+              Effect.forkDetach,
               Effect.ignore
             ),
         saveBlogsToCacheForked: (data) =>
@@ -72,7 +72,7 @@ export class CacheService extends Context.Tag('CacheService')<
                 Effect.logWarning('Failed to save blogs to cache', e)
               ),
               Effect.withSpan('saveBlogsToRedis'),
-              Effect.forkDaemon,
+              Effect.forkDetach,
               Effect.ignore
             ),
         saveMapStylesToCacheForked: (data) =>
@@ -82,7 +82,7 @@ export class CacheService extends Context.Tag('CacheService')<
             })
             .pipe(
               Effect.withSpan('saveMapStylesToRedis'),
-              Effect.forkDaemon,
+              Effect.forkDetach,
               Effect.ignore
             ),
         getEventsFromRedis,

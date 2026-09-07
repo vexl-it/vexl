@@ -19,7 +19,7 @@ export const decodePreviouslyUncompatibleMessagesInAppLoadingTaskId =
       runOn: 'start',
     },
     task: (store) =>
-      Effect.gen(function* (_) {
+      Effect.gen(function* () {
         if (store.get(lastDecodedSemverAtom) === version) return
 
         const inboxes = pipe(

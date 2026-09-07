@@ -1,13 +1,13 @@
-import {Array, Effect, flow, Layer, Metric} from 'effect/index'
+import {Array, Effect, flow, Layer, Metric, pipe} from 'effect'
 import {MetricsDbService} from '../db/MetricsDbService'
 
 export const reportLastReportedMetricsGaugeLive = Layer.effectDiscard(
-  Effect.gen(function* (_) {
-    yield* _(Effect.log('Reporting last reported metrics gauge'))
+  Effect.gen(function* () {
+    yield* Effect.log('Reporting last reported metrics gauge')
 
-    const metricsDb = yield* _(MetricsDbService)
+    const metricsDb = yield* MetricsDbService
 
-    return yield* _(
+    return yield* pipe(
       metricsDb.queryAllLastReportedByService(),
       Effect.flatMap(
         flow(
@@ -18,7 +18,7 @@ export const reportLastReportedMetricsGaugeLive = Layer.effectDiscard(
                 description: `Last reported metrics time for service ${oneService.serviceName}`,
               }
             )
-            return gauge(Effect.succeed(oneService.lastEventAt.getTime())).pipe(
+            return Metric.update(gauge, oneService.lastEventAt.getTime()).pipe(
               Effect.tap(() =>
                 Effect.logInfo(
                   `Reporting last reported metrics for service`,
@@ -34,13 +34,13 @@ export const reportLastReportedMetricsGaugeLive = Layer.effectDiscard(
               Effect.ignore
             )
           }),
-          Effect.allWith({concurrency: 'unbounded'})
+          (effects) => Effect.all(effects, {concurrency: 'unbounded'})
         )
       ),
       Effect.flatMap(() => Effect.sleep('5 minutes')),
       Effect.forever,
       Effect.withSpan('Report last reported metrics gauge'),
-      Effect.fork
+      Effect.forkChild
     )
   })
 )

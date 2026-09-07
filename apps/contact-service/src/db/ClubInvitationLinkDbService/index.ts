@@ -50,24 +50,21 @@ export interface ClubInvitationLinkDbOperations {
   ) => Effect.Effect<ClubInvitationLinkRecord, UnexpectedServerError>
 }
 
-export class ClubInvitationLinkDbService extends Context.Tag(
-  'ClubInvitationLinkDbService'
-)<ClubInvitationLinkDbService, ClubInvitationLinkDbOperations>() {
+export class ClubInvitationLinkDbService extends Context.Service<
+  ClubInvitationLinkDbService,
+  ClubInvitationLinkDbOperations
+>()('ClubInvitationLinkDbService') {
   static readonly Live = Layer.effect(
     ClubInvitationLinkDbService,
-    Effect.gen(function* (_) {
-      const deleteInvitationLink = yield* _(createDeleteInvitationLink)
-      const deleteInvitationLinksForClub = yield* _(
-        createDeleteInvitationLinksForClub
-      )
-      const findInvitationLinkByCode = yield* _(createFindInvitationLinkByCode)
-      const findInvitationLinkByClubIdAndMemberId = yield* _(
-        createFindInvitationLinkByClubIdAndMemberId
-      )
-      const findInvitationLinkByClubId = yield* _(
-        createFindInvitationLinkByClubId
-      )
-      const insertInvitationLink = yield* _(createInsertInvitationLink)
+    Effect.gen(function* () {
+      const deleteInvitationLink = yield* createDeleteInvitationLink
+      const deleteInvitationLinksForClub =
+        yield* createDeleteInvitationLinksForClub
+      const findInvitationLinkByCode = yield* createFindInvitationLinkByCode
+      const findInvitationLinkByClubIdAndMemberId =
+        yield* createFindInvitationLinkByClubIdAndMemberId
+      const findInvitationLinkByClubId = yield* createFindInvitationLinkByClubId
+      const insertInvitationLink = yield* createInsertInvitationLink
 
       return {
         deleteInvitationLink,

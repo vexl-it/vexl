@@ -1,9 +1,8 @@
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
-import {Effect, Option, Schema} from 'effect'
+import {Effect, Option, pipe, Schema} from 'effect'
 import {NodeTestingApp} from '../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../utils/runPromiseInMockedEnvironment'
 
-import {SqlClient} from '@effect/sql'
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
@@ -15,6 +14,7 @@ import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/c
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {mockedReportMetric} from '@vexl-next/server-utils/src/tests/mockedMetricsClientService'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
+import {SqlClient} from 'effect/unstable/sql'
 import {
   clearEnqueuedNotifications,
   getEnqueuedNotifications,
@@ -29,16 +29,14 @@ const commonHeaders = Schema.decodeSync(CommonHeaders)({
 
 beforeAll(async () => {
   await runPromiseInMockedEnvironment(
-    Effect.gen(function* (_) {
-      const app = yield* _(NodeTestingApp)
+    Effect.gen(function* () {
+      const app = yield* NodeTestingApp
 
-      const authHeaders = yield* _(
-        createDummyAuthHeadersForUser({
-          phoneNumber,
-          publicKey: keys.publicKeyPemBase64,
-        })
-      )
-      yield* _(setAuthHeaders(authHeaders))
+      const authHeaders = yield* createDummyAuthHeadersForUser({
+        phoneNumber,
+        publicKey: keys.publicKeyPemBase64,
+      })
+      yield* setAuthHeaders(authHeaders)
 
       const commonAndSecurityHeaders = makeCommonAndSecurityHeaders(
         () => ({
@@ -49,29 +47,27 @@ beforeAll(async () => {
         commonHeaders
       )
 
-      yield* _(
-        app.User.createUser({
-          payload: {
-            firebaseToken: null,
-            expoToken: Schema.decodeSync(ExpoNotificationToken)('someToken'),
-            vexlNotificationToken: Option.some(
-              Schema.decodeSync(VexlNotificationToken)('vexl_nt_test')
-            ),
-            publicKeyV2: Option.none(),
-          },
-          headers: commonAndSecurityHeaders,
-        })
-      )
+      yield* app.User.createUser({
+        payload: {
+          firebaseToken: null,
+          expoToken: Schema.decodeSync(ExpoNotificationToken)('someToken'),
+          vexlNotificationToken: Option.some(
+            Schema.decodeSync(VexlNotificationToken)('vexl_nt_test')
+          ),
+          publicKeyV2: Option.none(),
+        },
+        headers: commonAndSecurityHeaders,
+      })
     })
   )
 })
 describe('Refresh user', () => {
   it('Refreshses user in database (refreshedAt clientVersion, and countryPrefix)', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
+      Effect.gen(function* () {
         mockedReportMetric.mockClear()
-        const sql = yield* _(SqlClient.SqlClient)
-        yield* _(sql`
+        const sql = yield* SqlClient.SqlClient
+        yield* sql`
           UPDATE users
           SET
             refreshed_at = CURRENT_DATE - 180,
@@ -79,15 +75,13 @@ describe('Refresh user', () => {
             country_prefix = NULL
           WHERE
             public_key = ${keys.publicKeyPemBase64}
-        `)
-        const authHeaders = yield* _(
-          createDummyAuthHeadersForUser({
-            phoneNumber,
-            publicKey: keys.publicKeyPemBase64,
-          })
-        )
-        const app = yield* _(NodeTestingApp)
-        yield* _(setAuthHeaders(authHeaders))
+        `
+        const authHeaders = yield* createDummyAuthHeadersForUser({
+          phoneNumber,
+          publicKey: keys.publicKeyPemBase64,
+        })
+        const app = yield* NodeTestingApp
+        yield* setAuthHeaders(authHeaders)
 
         const testCommonHeaders = Schema.decodeSync(CommonHeaders)({
           'user-agent': 'Vexl/2 (1.0.0) ANDROID',
@@ -104,24 +98,22 @@ describe('Refresh user', () => {
           testCommonHeaders
         )
 
-        yield* _(
-          app.User.refreshUser({
-            payload: {
-              offersAlive: true,
-              vexlNotificationToken: Option.none(),
-            },
-            headers: commonAndSecurityHeaders,
-          })
-        )
+        yield* app.User.refreshUser({
+          payload: {
+            offersAlive: true,
+            vexlNotificationToken: Option.none(),
+          },
+          headers: commonAndSecurityHeaders,
+        })
 
-        const userInDb = yield* _(sql`
+        const userInDb = yield* sql`
           SELECT
             *
           FROM
             users
           WHERE
             public_key = ${keys.publicKeyPemBase64}
-        `)
+        `
         expect(userInDb[0]).toHaveProperty('clientVersion', 2)
         expect(userInDb[0]).toHaveProperty('refreshedAt', expect.any(Date))
         expect(userInDb[0]).toHaveProperty('appSource', 'Some test123')
@@ -143,15 +135,13 @@ describe('Refresh user', () => {
   })
   it('Updates vexlNotificationToken when provided', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const authHeaders = yield* _(
-          createDummyAuthHeadersForUser({
-            phoneNumber,
-            publicKey: keys.publicKeyPemBase64,
-          })
-        )
-        const app = yield* _(NodeTestingApp)
-        yield* _(setAuthHeaders(authHeaders))
+      Effect.gen(function* () {
+        const authHeaders = yield* createDummyAuthHeadersForUser({
+          phoneNumber,
+          publicKey: keys.publicKeyPemBase64,
+        })
+        const app = yield* NodeTestingApp
+        yield* setAuthHeaders(authHeaders)
 
         const commonAndSecurityHeaders = makeCommonAndSecurityHeaders(
           () => ({
@@ -162,27 +152,25 @@ describe('Refresh user', () => {
           commonHeaders
         )
 
-        yield* _(
-          app.User.refreshUser({
-            payload: {
-              offersAlive: true,
-              vexlNotificationToken: Option.some(
-                'vexl_nt_refreshed' as VexlNotificationToken
-              ),
-            },
-            headers: commonAndSecurityHeaders,
-          })
-        )
+        yield* app.User.refreshUser({
+          payload: {
+            offersAlive: true,
+            vexlNotificationToken: Option.some(
+              'vexl_nt_refreshed' as VexlNotificationToken
+            ),
+          },
+          headers: commonAndSecurityHeaders,
+        })
 
-        const sql = yield* _(SqlClient.SqlClient)
-        const userInDb = yield* _(sql`
+        const sql = yield* SqlClient.SqlClient
+        const userInDb = yield* sql`
           SELECT
             *
           FROM
             users
           WHERE
             public_key = ${keys.publicKeyPemBase64}
-        `)
+        `
         expect(userInDb[0]).toHaveProperty(
           'vexlNotificationToken',
           'vexl_nt_refreshed'
@@ -193,26 +181,24 @@ describe('Refresh user', () => {
 
   it('Sets vexlNotificationToken to null when not provided', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const sql = yield* _(SqlClient.SqlClient)
+      Effect.gen(function* () {
+        const sql = yield* SqlClient.SqlClient
 
         // First set a token directly in DB
-        yield* _(sql`
+        yield* sql`
           UPDATE users
           SET
             vexl_notification_token = 'vexl_nt_existing'
           WHERE
             public_key = ${keys.publicKeyPemBase64}
-        `)
+        `
 
-        const authHeaders = yield* _(
-          createDummyAuthHeadersForUser({
-            phoneNumber,
-            publicKey: keys.publicKeyPemBase64,
-          })
-        )
-        const app = yield* _(NodeTestingApp)
-        yield* _(setAuthHeaders(authHeaders))
+        const authHeaders = yield* createDummyAuthHeadersForUser({
+          phoneNumber,
+          publicKey: keys.publicKeyPemBase64,
+        })
+        const app = yield* NodeTestingApp
+        yield* setAuthHeaders(authHeaders)
 
         const commonAndSecurityHeaders = makeCommonAndSecurityHeaders(
           () => ({
@@ -223,24 +209,22 @@ describe('Refresh user', () => {
           commonHeaders
         )
 
-        yield* _(
-          app.User.refreshUser({
-            payload: {
-              offersAlive: true,
-              vexlNotificationToken: Option.none(),
-            },
-            headers: commonAndSecurityHeaders,
-          })
-        )
+        yield* app.User.refreshUser({
+          payload: {
+            offersAlive: true,
+            vexlNotificationToken: Option.none(),
+          },
+          headers: commonAndSecurityHeaders,
+        })
 
-        const userInDb = yield* _(sql`
+        const userInDb = yield* sql`
           SELECT
             *
           FROM
             users
           WHERE
             public_key = ${keys.publicKeyPemBase64}
-        `)
+        `
         expect(userInDb[0]).toHaveProperty('vexlNotificationToken', null)
       })
     )
@@ -248,15 +232,13 @@ describe('Refresh user', () => {
 
   it('Returns userNotFound error when user does not exists', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const authHeaders = yield* _(
-          createDummyAuthHeadersForUser({
-            phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333334'),
-            publicKey: generatePrivateKey().publicKeyPemBase64,
-          })
-        )
-        const app = yield* _(NodeTestingApp)
-        yield* _(setAuthHeaders(authHeaders))
+      Effect.gen(function* () {
+        const authHeaders = yield* createDummyAuthHeadersForUser({
+          phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333334'),
+          publicKey: generatePrivateKey().publicKeyPemBase64,
+        })
+        const app = yield* NodeTestingApp
+        yield* setAuthHeaders(authHeaders)
 
         const testCommonHeaders = Schema.decodeSync(CommonHeaders)({
           'user-agent': 'Vexl/2 (1.0.0) ANDROID',
@@ -271,7 +253,7 @@ describe('Refresh user', () => {
           testCommonHeaders
         )
 
-        const result = yield* _(
+        const result = yield* pipe(
           app.User.refreshUser({
             payload: {
               offersAlive: true,
@@ -279,7 +261,7 @@ describe('Refresh user', () => {
             },
             headers: commonAndSecurityHeaders,
           }),
-          Effect.either
+          Effect.result
         )
         expectErrorResponse(UserNotFoundError)(result)
       })
@@ -288,25 +270,21 @@ describe('Refresh user', () => {
 
   it('Notifies contacts when user transitions from inactive to active', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const sql = yield* _(SqlClient.SqlClient)
-        const app = yield* _(NodeTestingApp)
-        const firstUserAuthHeaders = yield* _(
-          createDummyAuthHeadersForUser({
-            phoneNumber,
-            publicKey: keys.publicKeyPemBase64,
-          })
-        )
+      Effect.gen(function* () {
+        const sql = yield* SqlClient.SqlClient
+        const app = yield* NodeTestingApp
+        const firstUserAuthHeaders = yield* createDummyAuthHeadersForUser({
+          phoneNumber,
+          publicKey: keys.publicKeyPemBase64,
+        })
 
         const secondUserKeys = generatePrivateKey()
         const secondUserPhoneNumber =
           Schema.decodeSync(E164PhoneNumber)('+420733333335')
-        const secondUserAuthHeaders = yield* _(
-          createDummyAuthHeadersForUser({
-            phoneNumber: secondUserPhoneNumber,
-            publicKey: secondUserKeys.publicKeyPemBase64,
-          })
-        )
+        const secondUserAuthHeaders = yield* createDummyAuthHeadersForUser({
+          phoneNumber: secondUserPhoneNumber,
+          publicKey: secondUserKeys.publicKeyPemBase64,
+        })
 
         const secondUserHeaders = makeCommonAndSecurityHeaders(
           () => ({
@@ -317,28 +295,24 @@ describe('Refresh user', () => {
           commonHeaders
         )
 
-        yield* _(setAuthHeaders(secondUserAuthHeaders))
-        yield* _(
-          app.User.createUser({
-            payload: {
-              firebaseToken: null,
-              expoToken: null,
-              vexlNotificationToken: Option.some(
-                Schema.decodeSync(VexlNotificationToken)(
-                  'vexl_nt_refresh_contact'
-                )
-              ),
-              publicKeyV2: Option.none(),
-            },
-            headers: secondUserHeaders,
-          })
-        )
+        yield* setAuthHeaders(secondUserAuthHeaders)
+        yield* app.User.createUser({
+          payload: {
+            firebaseToken: null,
+            expoToken: null,
+            vexlNotificationToken: Option.some(
+              Schema.decodeSync(VexlNotificationToken)(
+                'vexl_nt_refresh_contact'
+              )
+            ),
+            publicKeyV2: Option.none(),
+          },
+          headers: secondUserHeaders,
+        })
 
-        const firstUserHashedPhoneNumber = yield* _(
-          hashPhoneNumber(phoneNumber)
-        )
-        const secondUserHashedPhoneNumber = yield* _(
-          hashPhoneNumber(secondUserPhoneNumber)
+        const firstUserHashedPhoneNumber = yield* hashPhoneNumber(phoneNumber)
+        const secondUserHashedPhoneNumber = yield* hashPhoneNumber(
+          secondUserPhoneNumber
         )
 
         const firstUserHeaders = makeCommonAndSecurityHeaders(
@@ -350,49 +324,43 @@ describe('Refresh user', () => {
           commonHeaders
         )
 
-        yield* _(setAuthHeaders(firstUserAuthHeaders))
-        yield* _(
-          app.Contact.importContacts({
-            payload: {
-              contacts: [secondUserHashedPhoneNumber],
-              replace: true,
-            },
-            headers: firstUserHeaders,
-          })
-        )
+        yield* setAuthHeaders(firstUserAuthHeaders)
+        yield* app.Contact.importContacts({
+          payload: {
+            contacts: [secondUserHashedPhoneNumber],
+            replace: true,
+          },
+          headers: firstUserHeaders,
+        })
 
-        yield* _(setAuthHeaders(secondUserAuthHeaders))
-        yield* _(
-          app.Contact.importContacts({
-            payload: {
-              contacts: [firstUserHashedPhoneNumber],
-              replace: true,
-            },
-            headers: secondUserHeaders,
-          })
-        )
+        yield* setAuthHeaders(secondUserAuthHeaders)
+        yield* app.Contact.importContacts({
+          payload: {
+            contacts: [firstUserHashedPhoneNumber],
+            replace: true,
+          },
+          headers: secondUserHeaders,
+        })
 
-        yield* _(sql`
+        yield* sql`
           UPDATE users
           SET
             refreshed_at = CURRENT_DATE - 180
           WHERE
             public_key = ${keys.publicKeyPemBase64}
-        `)
+        `
 
-        yield* _(clearEnqueuedNotifications)
+        yield* clearEnqueuedNotifications
         mockedReportMetric.mockClear()
-        yield* _(setAuthHeaders(firstUserAuthHeaders))
-        yield* _(
-          app.User.refreshUser({
-            payload: {
-              offersAlive: true,
-              vexlNotificationToken: Option.none(),
-            },
-            headers: firstUserHeaders,
-          })
-        )
-        yield* _(Effect.sleep(200))
+        yield* setAuthHeaders(firstUserAuthHeaders)
+        yield* app.User.refreshUser({
+          payload: {
+            offersAlive: true,
+            vexlNotificationToken: Option.none(),
+          },
+          headers: firstUserHeaders,
+        })
+        yield* Effect.sleep(200)
 
         expect(mockedReportMetric).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -410,7 +378,7 @@ describe('Refresh user', () => {
           })
         )
 
-        const notifications = yield* _(getEnqueuedNotifications)
+        const notifications = yield* getEnqueuedNotifications
         const newUserNotifications = notifications.filter(
           (one) =>
             one.task._tag === 'NewUserNotificationMqEntry' &&
@@ -424,9 +392,9 @@ describe('Refresh user', () => {
 
   it('Reports USER_REACTIVATED for a reminded user below the metrics window', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const sql = yield* _(SqlClient.SqlClient)
-        yield* _(sql`
+      Effect.gen(function* () {
+        const sql = yield* SqlClient.SqlClient
+        yield* sql`
           UPDATE users
           SET
             refreshed_at = CURRENT_DATE - 10,
@@ -434,16 +402,14 @@ describe('Refresh user', () => {
             last_inactivity_notification_sent_at = now() - INTERVAL '3 days'
           WHERE
             public_key = ${keys.publicKeyPemBase64}
-        `)
+        `
 
-        const authHeaders = yield* _(
-          createDummyAuthHeadersForUser({
-            phoneNumber,
-            publicKey: keys.publicKeyPemBase64,
-          })
-        )
-        const app = yield* _(NodeTestingApp)
-        yield* _(setAuthHeaders(authHeaders))
+        const authHeaders = yield* createDummyAuthHeadersForUser({
+          phoneNumber,
+          publicKey: keys.publicKeyPemBase64,
+        })
+        const app = yield* NodeTestingApp
+        yield* setAuthHeaders(authHeaders)
 
         const commonAndSecurityHeaders = makeCommonAndSecurityHeaders(
           () => ({
@@ -455,16 +421,14 @@ describe('Refresh user', () => {
         )
 
         mockedReportMetric.mockClear()
-        yield* _(
-          app.User.refreshUser({
-            payload: {
-              offersAlive: true,
-              vexlNotificationToken: Option.none(),
-            },
-            headers: commonAndSecurityHeaders,
-          })
-        )
-        yield* _(Effect.sleep(200))
+        yield* app.User.refreshUser({
+          payload: {
+            offersAlive: true,
+            vexlNotificationToken: Option.none(),
+          },
+          headers: commonAndSecurityHeaders,
+        })
+        yield* Effect.sleep(200)
 
         expect(mockedReportMetric).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -482,9 +446,9 @@ describe('Refresh user', () => {
 
   it('Does not report USER_REACTIVATED for a recently active user without reminders', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const sql = yield* _(SqlClient.SqlClient)
-        yield* _(sql`
+      Effect.gen(function* () {
+        const sql = yield* SqlClient.SqlClient
+        yield* sql`
           UPDATE users
           SET
             refreshed_at = CURRENT_DATE - 10,
@@ -492,16 +456,14 @@ describe('Refresh user', () => {
             last_inactivity_notification_sent_at = NULL
           WHERE
             public_key = ${keys.publicKeyPemBase64}
-        `)
+        `
 
-        const authHeaders = yield* _(
-          createDummyAuthHeadersForUser({
-            phoneNumber,
-            publicKey: keys.publicKeyPemBase64,
-          })
-        )
-        const app = yield* _(NodeTestingApp)
-        yield* _(setAuthHeaders(authHeaders))
+        const authHeaders = yield* createDummyAuthHeadersForUser({
+          phoneNumber,
+          publicKey: keys.publicKeyPemBase64,
+        })
+        const app = yield* NodeTestingApp
+        yield* setAuthHeaders(authHeaders)
 
         const commonAndSecurityHeaders = makeCommonAndSecurityHeaders(
           () => ({
@@ -513,16 +475,14 @@ describe('Refresh user', () => {
         )
 
         mockedReportMetric.mockClear()
-        yield* _(
-          app.User.refreshUser({
-            payload: {
-              offersAlive: true,
-              vexlNotificationToken: Option.none(),
-            },
-            headers: commonAndSecurityHeaders,
-          })
-        )
-        yield* _(Effect.sleep(200))
+        yield* app.User.refreshUser({
+          payload: {
+            offersAlive: true,
+            vexlNotificationToken: Option.none(),
+          },
+          headers: commonAndSecurityHeaders,
+        })
+        yield* Effect.sleep(200)
 
         expect(mockedReportMetric).not.toHaveBeenCalledWith(
           expect.objectContaining({name: 'USER_REACTIVATED'})

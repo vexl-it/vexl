@@ -1,8 +1,8 @@
-import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {PublicKeyV2} from '@vexl-next/cryptography/src/KeyHolder/brandsV2'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {Effect, flow, Schema} from 'effect'
+import {SqlSchema} from 'effect/unstable/sql'
 import {ClubMemberRecordId} from '../domain'
 
 export const UpdateClubMemberPublicKeyV2Params = Schema.Struct({
@@ -12,8 +12,8 @@ export const UpdateClubMemberPublicKeyV2Params = Schema.Struct({
 export type UpdateClubMemberPublicKeyV2Params =
   typeof UpdateClubMemberPublicKeyV2Params.Type
 
-export const createUpdateClubMemberPublicKeyV2 = Effect.gen(function* (_) {
-  const sql = yield* _(PgClient.PgClient)
+export const createUpdateClubMemberPublicKeyV2 = Effect.gen(function* () {
+  const sql = yield* PgClient.PgClient
 
   const query = SqlSchema.void({
     Request: UpdateClubMemberPublicKeyV2Params,

@@ -1,7 +1,7 @@
 import {PgClient, PgMigrator} from '@effect/sql-pg'
 import {databaseConfig} from '@vexl-next/server-utils/src/commonConfigs'
 import {loadMigrationsFromEffect} from '@vexl-next/server-utils/src/loadMigrationsFromEffect'
-import {Effect, Layer, String} from 'effect/index'
+import {Effect, Layer, String} from 'effect'
 import {createNotificationTokens} from './migrations/001_createNotificationTokens'
 import {addClientPrefix} from './migrations/002_addClientPrefix'
 import {addSystemAndMarketingVexlTokens} from './migrations/003_addSystemAndMarketingVexlTokens'
@@ -50,7 +50,7 @@ const SqlLive = databaseConfig.pipe(
       transformResultNames: String.snakeToCamel,
     })
   ),
-  Layer.unwrapEffect
+  Layer.unwrap
 )
 
 const MigratorLive = PgMigrator.layer({

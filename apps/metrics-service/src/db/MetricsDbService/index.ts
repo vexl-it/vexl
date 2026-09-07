@@ -34,21 +34,19 @@ export interface MetricsDbOperations {
   >
 }
 
-export class MetricsDbService extends Context.Tag('MetricsDbService')<
+export class MetricsDbService extends Context.Service<
   MetricsDbService,
   MetricsDbOperations
->() {
+>()('MetricsDbService') {
   static readonly Live = Layer.effect(
     MetricsDbService,
-    Effect.gen(function* (_) {
-      const insertMetricRecord = yield* _(createInsertMetricRecord)
-      const insertDeadMetricRecord = yield* _(createInsertDeadMetricRecord)
-      const insertLastReportedByService = yield* _(
-        createInsertLastReportedByService
-      )
-      const queryAllLastReportedByService = yield* _(
-        createQueryAllLastReportedByService
-      )
+    Effect.gen(function* () {
+      const insertMetricRecord = yield* createInsertMetricRecord
+      const insertDeadMetricRecord = yield* createInsertDeadMetricRecord
+      const insertLastReportedByService =
+        yield* createInsertLastReportedByService
+      const queryAllLastReportedByService =
+        yield* createQueryAllLastReportedByService
       return {
         insertMetricRecord,
         insertDeadMetricRecord,

@@ -1,14 +1,11 @@
-import {Schema} from 'effect'
+import {Effect, Option, Schema} from 'effect'
 
-export const GeocodingRecordId = Schema.BigInt.pipe(
+export const GeocodingRecordId = Schema.BigIntFromString.pipe(
   Schema.brand('GeocodingRecordId')
 )
 export type GeocodingRecordId = typeof GeocodingRecordId.Type
 
-export const GeocodingTranslations = Schema.Record({
-  key: Schema.String,
-  value: Schema.String,
-})
+export const GeocodingTranslations = Schema.Record(Schema.String, Schema.String)
 export type GeocodingTranslations = typeof GeocodingTranslations.Type
 
 export class GeocodingRecord extends Schema.Class<GeocodingRecord>(
@@ -18,14 +15,12 @@ export class GeocodingRecord extends Schema.Class<GeocodingRecord>(
   placeType: Schema.String,
   name: Schema.String,
   names: GeocodingTranslations,
-  countryCode: Schema.optionalWith(Schema.String, {
-    as: 'Option',
-    nullable: true,
-  }),
-  population: Schema.optionalWith(Schema.BigInt, {
-    as: 'Option',
-    nullable: true,
-  }),
+  countryCode: Schema.OptionFromOptionalNullOr(Schema.String).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
+  population: Schema.OptionFromOptionalNullOr(Schema.BigIntFromString).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
   importance: Schema.Number,
   latitude: Schema.Number,
   longitude: Schema.Number,
@@ -40,12 +35,10 @@ export class GeocodingRecordWithContext extends Schema.Class<GeocodingRecordWith
   'GeocodingRecordWithContext'
 )({
   ...GeocodingRecord.fields,
-  cityName: Schema.optionalWith(Schema.String, {
-    as: 'Option',
-    nullable: true,
-  }),
-  cityNames: Schema.optionalWith(GeocodingTranslations, {
-    as: 'Option',
-    nullable: true,
-  }),
+  cityName: Schema.OptionFromOptionalNullOr(Schema.String).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
+  cityNames: Schema.OptionFromOptionalNullOr(GeocodingTranslations).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
 }) {}

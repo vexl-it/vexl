@@ -1,4 +1,4 @@
-import {Schema} from 'effect/index'
+import {Schema} from 'effect'
 import * as crypto from 'node:crypto'
 import {PrivateKeyPemBase64, generatePrivateKey} from '../KeyHolder'
 import {normalizeCurveName} from '../KeyHolder/Curve.brand'

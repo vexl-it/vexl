@@ -33,37 +33,33 @@ beforeEach(() => {
 describe('verify challenge', () => {
   it('Should throw an error when signature is not valid', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
+      Effect.gen(function* () {
         createVerificationMock.mockReturnValueOnce(
           Effect.succeed(Schema.decodeSync(SmsVerificationSid)('123456'))
         )
-        const client = yield* _(NodeTestingApp)
-        const initResponse = yield* _(
-          client.Login.initVerification({
-            headers: Schema.decodeSync(CommonHeaders)({
-              'user-agent': 'Vexl/2 (1.0.0) IOS',
-            }),
-            payload: {
-              challenge: yield* _(generateAndSignChallenge),
-              phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333333'),
-            },
-          })
-        )
+        const client = yield* NodeTestingApp
+        const initResponse = yield* client.Login.initVerification({
+          headers: Schema.decodeSync(CommonHeaders)({
+            'user-agent': 'Vexl/2 (1.0.0) IOS',
+          }),
+          payload: {
+            challenge: yield* generateAndSignChallenge,
+            phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333333'),
+          },
+        })
 
         expect(initResponse.verificationId).toBeDefined()
         expect(initResponse.expirationAt).toBeDefined()
 
         checkVerificationMock.mockReturnValueOnce(Effect.succeed('valid'))
         const keypair = generatePrivateKey()
-        const checkResponse = yield* _(
-          client.Login.verifyCode({
-            payload: {
-              userPublicKey: keypair.publicKeyPemBase64,
-              id: initResponse.verificationId,
-              code: '123456',
-            },
-          })
-        )
+        const checkResponse = yield* client.Login.verifyCode({
+          payload: {
+            userPublicKey: keypair.publicKeyPemBase64,
+            id: initResponse.verificationId,
+            code: '123456',
+          },
+        })
 
         expect(checkResponse.challenge).toBeDefined()
 
@@ -75,19 +71,19 @@ describe('verify challenge', () => {
           Schema.decodeSync(EcdsaSignature)
         )
 
-        const verifyChallenge = yield* _(
+        const verifyChallenge = yield* pipe(
           client.Login.verifyChallenge({
             payload: {
               userPublicKey: keypair.publicKeyPemBase64,
               signature: signedChallenge,
             },
           }),
-          Effect.either
+          Effect.result
         )
 
         expectErrorResponse(InvalidSignatureError)(verifyChallenge)
 
-        const usersDb = yield* _(LoggedInUsersDbService)
+        const usersDb = yield* LoggedInUsersDbService
 
         expect(usersDb.insertUser).not.toHaveBeenCalled()
         expect(mockedReportNewUserCreated).not.toHaveBeenCalled()

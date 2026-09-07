@@ -1,4 +1,3 @@
-import {type HttpClient} from '@effect/platform'
 import {
   type PrivateKeyHolder,
   type PublicKeyPemBase64,
@@ -14,6 +13,7 @@ import {
   TestRequestHeaders,
 } from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Option, Schema} from 'effect'
+import {type HttpClient} from 'effect/unstable/http'
 import {NodeTestingApp} from './NodeTestingApp'
 
 export class AddingChallengeError extends Schema.TaggedError<AddingChallengeError>(
@@ -42,27 +42,23 @@ export const addChallengeForKey =
     AddingChallengeError,
     HttpClient.HttpClient | TestRequestHeaders
   > =>
-    Effect.gen(function* (_) {
-      const client = yield* _(NodeTestingApp)
-      const initHeaders = yield* _(TestRequestHeaders.getHeaders)
+    Effect.gen(function* () {
+      const client = yield* NodeTestingApp
+      const initHeaders = yield* TestRequestHeaders.getHeaders
 
-      yield* _(setAuthHeaders(authHeaders))
-      const challenge = yield* _(
-        client.Challenges.createChallenge({
-          payload: {
-            publicKey: key.publicKeyPemBase64,
-            publicKeyV2: Option.none(),
-          },
-        })
+      yield* setAuthHeaders(authHeaders)
+      const challenge = yield* client.Challenges.createChallenge({
+        payload: {
+          publicKey: key.publicKeyPemBase64,
+          publicKeyV2: Option.none(),
+        },
+      })
+
+      const signedChallenge = yield* ecdsaSignE(key.privateKeyPemBase64)(
+        simulateInvalidChallenge ? 'bad' : challenge.challenge
       )
 
-      const signedChallenge = yield* _(
-        ecdsaSignE(key.privateKeyPemBase64)(
-          simulateInvalidChallenge ? 'bad' : challenge.challenge
-        )
-      )
-
-      yield* _(TestRequestHeaders.setHeaders(initHeaders))
+      yield* TestRequestHeaders.setHeaders(initHeaders)
       return {
         ...request,
         publicKey: key.publicKeyPemBase64,

@@ -1,4 +1,4 @@
-import {Effect, Either, Option} from 'effect'
+import {Effect, Option, Result} from 'effect'
 import {parseDeepLink} from './parseDeepLink'
 
 describe('parseDeepLink', () => {
@@ -36,31 +36,31 @@ describe('parseDeepLink', () => {
       'rejects channel %s',
       (channel) => {
         const result = Effect.runSync(
-          Effect.either(
+          Effect.result(
             parseDeepLink(
               `stagingapp.vexl.it://link/?type=load-pr-preview&channel=${channel}`
             )
           )
         )
 
-        expect(Either.isLeft(result)).toBe(true)
-        if (Either.isLeft(result))
-          expect(result.left._tag).toEqual('InvalidDeepLinkError')
+        expect(Result.isFailure(result)).toBe(true)
+        if (Result.isFailure(result))
+          expect(result.failure._tag).toEqual('InvalidDeepLinkError')
       }
     )
 
     it('fails when the link is meant for a newer app version', () => {
       const result = Effect.runSync(
-        Effect.either(
+        Effect.result(
           parseDeepLink(
             'stagingapp.vexl.it://link/?type=load-pr-preview&channel=pr-123&version=999.0.0'
           )
         )
       )
 
-      expect(Either.isLeft(result)).toBe(true)
-      if (Either.isLeft(result))
-        expect(result.left._tag).toEqual('DeepLinkMeantForNewerVersionError')
+      expect(Result.isFailure(result)).toBe(true)
+      if (Result.isFailure(result))
+        expect(result.failure._tag).toEqual('DeepLinkMeantForNewerVersionError')
     })
   })
 })

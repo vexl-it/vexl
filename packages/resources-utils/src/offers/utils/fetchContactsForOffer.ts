@@ -13,7 +13,7 @@ import {type IntendedConnectionLevel} from '@vexl-next/domain/src/general/offers
 import {type ServerToClientHashedNumber} from '@vexl-next/domain/src/general/ServerToClientHashedNumber'
 import fetchAllPaginatedData from '@vexl-next/rest-api/src/fetchAllPaginatedData'
 import {type ContactApi} from '@vexl-next/rest-api/src/services/contact'
-import {Array, Effect, HashMap, pipe, Record} from 'effect'
+import {Array, Effect, Filter, HashMap, pipe, Record} from 'effect'
 
 export const FETCH_CONNECTIONS_PAGE_SIZE = 500
 
@@ -28,7 +28,7 @@ export interface ConnectionsInfoForOffer {
   >
 }
 
-export type ApiErrorFetchingContactsForOffer = Effect.Effect.Error<
+export type ApiErrorFetchingContactsForOffer = Effect.Error<
   ReturnType<
     ContactApi['fetchMyContactsPaginated' | 'fetchCommonConnectionsPaginated']
   >
@@ -51,45 +51,39 @@ export default function fetchContactsForOffer({
     {keyPair: KeyPairV2; oldKeyPair: PrivateKeyHolder}
   >
 }): Effect.Effect<ConnectionsInfoForOffer, ApiErrorFetchingContactsForOffer> {
-  return Effect.gen(function* (_) {
-    const firstDegreeConnections = yield* _(
-      fetchAllPaginatedData({
-        fetchEffectToRun: (nextPageToken) =>
-          contactApi.fetchMyContactsPaginated({
-            level: 'FIRST',
-            limit: FETCH_CONNECTIONS_PAGE_SIZE,
-            nextPageToken,
-          }),
-      })
-    )
+  return Effect.gen(function* () {
+    const firstDegreeConnections = yield* fetchAllPaginatedData({
+      fetchEffectToRun: (nextPageToken) =>
+        contactApi.fetchMyContactsPaginated({
+          level: 'FIRST',
+          limit: FETCH_CONNECTIONS_PAGE_SIZE,
+          nextPageToken,
+        }),
+    })
 
     const secondDegreeConnections =
       intendedConnectionLevel === 'FIRST'
         ? []
-        : yield* _(
-            fetchAllPaginatedData({
-              fetchEffectToRun: (nextPageToken) =>
-                contactApi.fetchMyContactsPaginated({
-                  level: 'SECOND',
-                  limit: FETCH_CONNECTIONS_PAGE_SIZE,
-                  nextPageToken,
-                }),
-            })
-          )
+        : yield* fetchAllPaginatedData({
+            fetchEffectToRun: (nextPageToken) =>
+              contactApi.fetchMyContactsPaginated({
+                level: 'SECOND',
+                limit: FETCH_CONNECTIONS_PAGE_SIZE,
+                nextPageToken,
+              }),
+          })
 
-    const commonConnectionsData = yield* _(
-      fetchAllPaginatedData({
-        fetchEffectToRun: (nextPageToken) =>
-          contactApi.fetchCommonConnectionsPaginated({
-            publicKeys: pipe(
-              [...firstDegreeConnections, ...secondDegreeConnections],
-              Array.dedupe
-            ),
-            nextPageToken,
-            limit: FETCH_CONNECTIONS_PAGE_SIZE,
-          }),
-      })
-    )
+    const commonConnectionsData = yield* fetchAllPaginatedData({
+      fetchEffectToRun: (nextPageToken) =>
+        contactApi.fetchCommonConnectionsPaginated({
+          publicKeys: pipe(
+            [...firstDegreeConnections, ...secondDegreeConnections],
+            Array.dedupe
+          ),
+          nextPageToken,
+          limit: FETCH_CONNECTIONS_PAGE_SIZE,
+        }),
+    })
 
     const commonFriends = pipe(
       commonConnectionsData,
@@ -97,8 +91,11 @@ export default function fetchContactsForOffer({
         (one) =>
           [
             one.publicKey,
-            Array.filterMap(one.common.hashes, (hash) =>
-              HashMap.get(serverToClientHashesToHashedPhoneNumbersMap, hash)
+            Array.filterMap(
+              one.common.hashes,
+              Filter.fromPredicateOption((hash) =>
+                HashMap.get(serverToClientHashesToHashedPhoneNumbersMap, hash)
+              )
             ),
           ] as const
       ),
@@ -111,32 +108,33 @@ export default function fetchContactsForOffer({
         (one) =>
           [
             one.publicKey,
-            Array.filterMap(one.common.verifiedHashes, (hash) =>
-              HashMap.get(serverToClientHashesToHashedPhoneNumbersMap, hash)
+            Array.filterMap(
+              one.common.verifiedHashes,
+              Filter.fromPredicateOption((hash) =>
+                HashMap.get(serverToClientHashesToHashedPhoneNumbersMap, hash)
+              )
             ),
           ] as const
       ),
       HashMap.fromIterable
     )
 
-    const clubsConnections = yield* _(
-      pipe(
-        intendedClubs,
-        Record.toEntries,
-        Array.map(([clubUuid, keyPair]) =>
-          contactApi
-            .getClubContacts({
-              clubUuid,
-              keyPair: keyPair.oldKeyPair,
-              keyPairV2: keyPair.keyPair,
-            })
-            .pipe(Effect.option)
-        ),
-        Effect.all,
-        Effect.map(Array.getSomes),
-        Effect.map(Array.map((one) => [one.clubUuid, one.items] as const)),
-        Effect.map(Record.fromEntries)
-      )
+    const clubsConnections = yield* pipe(
+      intendedClubs,
+      Record.toEntries,
+      Array.map(([clubUuid, keyPair]) =>
+        contactApi
+          .getClubContacts({
+            clubUuid,
+            keyPair: keyPair.oldKeyPair,
+            keyPairV2: keyPair.keyPair,
+          })
+          .pipe(Effect.option)
+      ),
+      Effect.all,
+      Effect.map(Array.getSomes),
+      Effect.map(Array.map((one) => [one.clubUuid, one.items] as const)),
+      Effect.map(Record.fromEntries)
     )
 
     return {

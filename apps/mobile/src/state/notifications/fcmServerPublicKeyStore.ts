@@ -5,7 +5,7 @@ import {
   unixMillisecondsNow,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {effectToTask} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import {Effect, Option, Schema} from 'effect/index'
+import {Effect, Option, pipe, Schema} from 'effect'
 import type * as TO from 'fp-ts/TaskOption'
 import {atom} from 'jotai'
 import {apiAtom} from '../../api'
@@ -21,7 +21,9 @@ export const notificationServerKeyStorageAtom = atomWithParsedMmkvStorage(
     lastRefresh: UnixMilliseconds0,
   },
   Schema.Struct({
-    publicKey: Schema.optionalWith(PublicKeyPemBase64, {as: 'Option'}),
+    publicKey: Schema.OptionFromOptional(PublicKeyPemBase64).pipe(
+      Schema.withConstructorDefault(Effect.succeed(Option.none()))
+    ),
     lastRefresh: UnixMilliseconds,
   })
 )
@@ -29,7 +31,7 @@ export const notificationServerKeyStorageAtom = atomWithParsedMmkvStorage(
 export const getOrFetchNotificationServerPublicKeyActionAtomE = atom(
   null,
   (get, set): Effect.Effect<Option.Option<PublicKeyPemBase64>> =>
-    Effect.gen(function* (_) {
+    Effect.gen(function* () {
       const {publicKey, lastRefresh} = get(notificationServerKeyStorageAtom)
       // If cache is valid return it
       if (
@@ -40,7 +42,7 @@ export const getOrFetchNotificationServerPublicKeyActionAtomE = atom(
       }
 
       // Otherwise fetch a new one
-      return yield* _(
+      return yield* pipe(
         get(apiAtom).notification.getNotificationPublicKey(),
         Effect.match({
           // On failure just return the last one (if any) without updating the cache

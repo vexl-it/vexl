@@ -1,4 +1,4 @@
-import {Schema} from 'effect/index'
+import {Schema} from 'effect'
 
 export const Width = Schema.Number.pipe(Schema.brand('WidthDimension'))
 export type Width = typeof Width.Type

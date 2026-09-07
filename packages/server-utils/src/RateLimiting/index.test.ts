@@ -1,17 +1,16 @@
+import * as NodeHttpServer from '@effect/platform-node/NodeHttpServer'
+import {RateLimitedError} from '@vexl-next/domain/src/general/commonErrors'
+import {MaxExpectedDailyCall} from '@vexl-next/rest-api/src/MaxExpectedDailyCountAnnotation'
+import {RateLimitingMiddleware} from '@vexl-next/rest-api/src/rateLimititing'
+import {Effect, Layer, pipe, Result} from 'effect'
+import {HttpClient, HttpClientRequest, HttpRouter} from 'effect/unstable/http'
 import {
   HttpApi,
   HttpApiBuilder,
   HttpApiClient,
   HttpApiEndpoint,
   HttpApiGroup,
-  HttpClient,
-  HttpClientRequest,
-} from '@effect/platform'
-import * as NodeHttpServer from '@effect/platform-node/NodeHttpServer'
-import {RateLimitedError} from '@vexl-next/domain/src/general/commonErrors'
-import {MaxExpectedDailyCall} from '@vexl-next/rest-api/src/MaxExpectedDailyCountAnnotation'
-import {RateLimitingMiddleware} from '@vexl-next/rest-api/src/rateLimititing'
-import {Effect, Either, Layer} from 'effect/index'
+} from 'effect/unstable/httpapi'
 import {RateLimitingService} from '.'
 import {rateLimitPerIpMultiplierConfig} from '../commonConfigs'
 import {expectErrorResponse} from '../tests/expectErrorResponse'
@@ -31,7 +30,7 @@ const TestApiSpecification = HttpApi.make('Test API')
   .add(TestGroup)
   .middleware(RateLimitingMiddleware)
 
-const ApiLive = HttpApiBuilder.api(TestApiSpecification).pipe(
+const ApiLive = HttpApiBuilder.layer(TestApiSpecification).pipe(
   Layer.provide(
     HttpApiBuilder.group(TestApiSpecification, 'testGroup', (h) =>
       h.handle('testEndpoint', () => Effect.void)
@@ -40,8 +39,7 @@ const ApiLive = HttpApiBuilder.api(TestApiSpecification).pipe(
   Layer.provide(rateLimitingMiddlewareLayer(TestApiSpecification))
 )
 
-const TestServerLive = HttpApiBuilder.serve().pipe(
-  Layer.provide(ApiLive),
+const TestServerLive = HttpRouter.serve(ApiLive).pipe(
   Layer.provideMerge(NodeHttpServer.layerTest)
 )
 const Client = HttpApiClient.make(TestApiSpecification, {
@@ -58,17 +56,17 @@ const runPromiseInMocked = async (
       Effect.provide(
         TestServerLive.pipe(Layer.provideMerge(mockedRateLimitingLayer))
       ),
-      Effect.either
+      Effect.result
     )
   )
-  expect(Either.right(result))
+  expect(Result.isSuccess(result)).toBe(true)
 }
 
 beforeEach(async () => {
   await runPromiseInMocked(
-    Effect.gen(function* (_) {
-      const rateLimiting = yield* _(RateLimitingService)
-      yield* _(rateLimiting.clearRateLimitState)
+    Effect.gen(function* () {
+      const rateLimiting = yield* RateLimitingService
+      yield* rateLimiting.clearRateLimitState
     })
   )
 })
@@ -83,35 +81,33 @@ describe('Rate Limiting Middleware', () => {
 
   it('allows requests under the rate limit', async () => {
     await runPromiseInMocked(
-      Effect.gen(function* (_) {
-        yield* _(Effect.log(yield* _(rateLimitPerIpMultiplierConfig)))
+      Effect.gen(function* () {
+        yield* Effect.log(yield* rateLimitPerIpMultiplierConfig)
 
-        const client = yield* _(Client)
-        const result = yield* _(client.testEndpoint(), Effect.either)
-        expect(Either.isRight(result))
+        const client = yield* Client
+        const result = yield* pipe(client.testEndpoint(), Effect.result)
+        expect(Result.isSuccess(result)).toBe(true)
       })
     )
   })
 
   it('Blocks requests over the rate limit', async () => {
     await runPromiseInMocked(
-      Effect.gen(function* (_) {
-        yield* _(Effect.log(yield* _(rateLimitPerIpMultiplierConfig)))
+      Effect.gen(function* () {
+        yield* Effect.log(yield* rateLimitPerIpMultiplierConfig)
 
-        const client = yield* _(Client)
-        const callTestEither = Effect.either(client.testEndpoint())
-        const results = yield* _(
-          Effect.all([
-            callTestEither,
-            callTestEither,
-            callTestEither,
-            callTestEither, // Should fail
-          ])
-        )
+        const client = yield* Client
+        const callTestEither = Effect.result(client.testEndpoint())
+        const results = yield* Effect.all([
+          callTestEither,
+          callTestEither,
+          callTestEither,
+          callTestEither, // Should fail
+        ])
 
-        expect(Either.isRight(results[0]))
-        expect(Either.isRight(results[1]))
-        expect(Either.isRight(results[2]))
+        expect(Result.isSuccess(results[0])).toBe(true)
+        expect(Result.isSuccess(results[1])).toBe(true)
+        expect(Result.isSuccess(results[2])).toBe(true)
         expectErrorResponse(RateLimitedError)(results[3])
       })
     )

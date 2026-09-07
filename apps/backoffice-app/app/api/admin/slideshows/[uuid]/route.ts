@@ -15,7 +15,7 @@ import {
   updateSlideshow,
 } from '@/src/server/slideshows/repository'
 import {UpdateSlideshowRequest} from '@/src/services/slideshows/domain'
-import {Either, Schema} from 'effect'
+import {Result, Schema} from 'effect'
 import {type NextRequest} from 'next/server'
 
 export const runtime = 'nodejs'
@@ -27,7 +27,7 @@ interface RouteContext {
 }
 
 const decodeUuid = (uuid: string) =>
-  Schema.decodeUnknownEither(Schema.UUID)(uuid)
+  Schema.decodeUnknownResult(Schema.String.check(Schema.isUUID()))(uuid)
 
 export async function GET(request: NextRequest, context: RouteContext) {
   try {
@@ -36,9 +36,10 @@ export async function GET(request: NextRequest, context: RouteContext) {
 
     const {uuid} = await context.params
     const decodedUuid = decodeUuid(uuid)
-    if (Either.isLeft(decodedUuid)) return badRequest(decodedUuid.left.message)
+    if (Result.isFailure(decodedUuid))
+      return badRequest(decodedUuid.failure.message)
 
-    const slideshow = await runDb(findSlideshowByUuid(decodedUuid.right))
+    const slideshow = await runDb(findSlideshowByUuid(decodedUuid.success))
     if (!slideshow) return notFound('Slideshow not found')
 
     return jsonOk({slideshow})
@@ -54,21 +55,22 @@ export async function PUT(request: NextRequest, context: RouteContext) {
 
     const {uuid} = await context.params
     const decodedUuid = decodeUuid(uuid)
-    if (Either.isLeft(decodedUuid)) return badRequest(decodedUuid.left.message)
+    if (Result.isFailure(decodedUuid))
+      return badRequest(decodedUuid.failure.message)
 
     const decoded = await decodeJsonBody(request, UpdateSlideshowRequest)
-    if (Either.isLeft(decoded)) return badRequest(decoded.left.message)
+    if (Result.isFailure(decoded)) return badRequest(decoded.failure.message)
 
-    if (decoded.right.publicSlug) {
+    if (decoded.success.publicSlug) {
       const publicSlugAvailable = await runDb(
-        isPublicSlugAvailable(decoded.right.publicSlug, decodedUuid.right)
+        isPublicSlugAvailable(decoded.success.publicSlug, decodedUuid.success)
       )
       if (!publicSlugAvailable) return badRequest('Public slug is already used')
     }
 
     try {
       const slideshow = await runDb(
-        updateSlideshow(decodedUuid.right, decoded.right)
+        updateSlideshow(decodedUuid.success, decoded.success)
       )
       if (!slideshow) return notFound('Slideshow not found')
 
@@ -92,9 +94,10 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
 
     const {uuid} = await context.params
     const decodedUuid = decodeUuid(uuid)
-    if (Either.isLeft(decodedUuid)) return badRequest(decodedUuid.left.message)
+    if (Result.isFailure(decodedUuid))
+      return badRequest(decodedUuid.failure.message)
 
-    const deleted = await runDb(deleteSlideshow(decodedUuid.right))
+    const deleted = await runDb(deleteSlideshow(decodedUuid.success))
     if (!deleted) return notFound('Slideshow not found')
 
     return noContent()

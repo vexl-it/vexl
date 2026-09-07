@@ -33,8 +33,8 @@ export const generateVexlTokenActionAtom = atom(null, (get, set) => {
 export const generateAndRegisterVexlTokenActionAtom = atom(
   null,
   (get, set, {keyHolder}: {keyHolder: PrivateKeyHolder}) => {
-    return Effect.gen(function* (_) {
-      const vexlToken = yield* _(set(generateVexlTokenActionAtom))
+    return Effect.gen(function* () {
+      const vexlToken = yield* set(generateVexlTokenActionAtom)
 
       set(registerVexlTokenActionAtom, {
         vexlToken,

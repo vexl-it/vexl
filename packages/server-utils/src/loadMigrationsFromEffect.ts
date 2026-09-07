@@ -1,6 +1,6 @@
-import {type SqlClient, type SqlError} from '@effect/sql'
-import {type Loader, type ResolvedMigration} from '@effect/sql/Migrator'
 import {Array, Effect, Order, pipe} from 'effect'
+import {type SqlClient, type SqlError} from 'effect/unstable/sql'
+import {type Loader, type ResolvedMigration} from 'effect/unstable/sql/Migrator'
 
 export const loadMigrationsFromEffect = (
   migrations: ReadonlyArray<{
@@ -20,6 +20,6 @@ export const loadMigrationsFromEffect = (
         ({name, id, migrationEffect}) =>
           [id, name, Effect.succeed<any>({default: migrationEffect})] as const
       ),
-      Array.sortWith((a) => a[0], Order.number)
+      Array.sortWith((a) => a[0], Order.Number)
     )
   )

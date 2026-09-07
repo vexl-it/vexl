@@ -1,5 +1,5 @@
-import {SqlClient} from '@effect/sql'
 import {Effect, Schema} from 'effect'
+import {SqlClient} from 'effect/unstable/sql'
 
 export class TransactionError extends Schema.TaggedError<TransactionError>(
   'TransactionError'
@@ -14,7 +14,7 @@ export const withDbTransaction = <R, E, A>(
     c
       .withTransaction(
         effect.pipe(
-          Effect.catchAll((e) => Effect.fail({_tag: 'InnerError' as const, e}))
+          Effect.catch((e) => Effect.fail({_tag: 'InnerError' as const, e}))
         )
       )
       .pipe(

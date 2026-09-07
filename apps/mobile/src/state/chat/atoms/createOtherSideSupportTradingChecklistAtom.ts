@@ -3,7 +3,7 @@ import {
   compare,
   VersionString,
 } from '@vexl-next/domain/src/utility/VersionString.brand'
-import {Schema} from 'effect/index'
+import {Schema} from 'effect'
 import {atom, type Atom} from 'jotai'
 
 const MINIMAL_VERSION_FOR_TRADING_CHECKLIST =

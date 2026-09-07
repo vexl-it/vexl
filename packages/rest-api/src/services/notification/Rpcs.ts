@@ -1,5 +1,5 @@
+import {Effect, Schema} from 'effect'
 // Rcps.ts
-import {Rpc, RpcGroup} from '@effect/rpc'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
@@ -16,17 +16,18 @@ import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificat
 import {PlatformName} from '@vexl-next/domain/src/utility/PlatformName'
 import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
-import {Schema} from 'effect'
+import {Rpc, RpcGroup} from 'effect/unstable/rpc'
 
-export const NotificationConnectionKind = Schema.Literal(
+export const NotificationConnectionKind = Schema.Literals([
   'foreground',
-  'background'
-)
+  'background',
+])
 export type NotificationConnectionKind = typeof NotificationConnectionKind.Type
 
-const connectionKind = Schema.optionalWith(NotificationConnectionKind, {
-  default: () => 'foreground',
-})
+const connectionKind = NotificationConnectionKind.pipe(
+  Schema.withDecodingDefaultType(Effect.sync((): 'foreground' => 'foreground')),
+  Schema.withConstructorDefault(Effect.sync((): 'foreground' => 'foreground'))
+)
 
 export const NotificationsStreamClientInfo = Schema.Struct({
   version: VersionCode,
@@ -38,10 +39,10 @@ export const NotificationsStreamClientInfo = Schema.Struct({
 // todo #2124
 export const NotificationsStreamClientInfoOld = Schema.Struct({
   version: VersionCode,
-  notificationToken: Schema.Union(
+  notificationToken: Schema.Union([
     ExpoNotificationToken,
-    VexlNotificationTokenSecret
-  ),
+    VexlNotificationTokenSecret,
+  ]),
   platform: PlatformName,
   connectionKind,
 })
@@ -54,7 +55,7 @@ export class NewChatMessageNoticeMessage extends Schema.TaggedClass<NewChatMessa
   sentAt: UnixMilliseconds,
   // TODO remove #2124
   targetCypher: Schema.optional(
-    Schema.Union(NotificationCypher, VexlNotificationToken)
+    Schema.Union([NotificationCypher, VexlNotificationToken])
   ),
   // TODO remove optional #2124
   targetToken: Schema.optional(VexlNotificationToken),
@@ -69,7 +70,7 @@ export class StreamOnlyChatMessage extends Schema.TaggedClass<StreamOnlyChatMess
   message: StreamOnlyMessageCypher,
   // TODO remove #2124
   targetCypher: Schema.optional(
-    Schema.Union(NotificationCypher, VexlNotificationToken)
+    Schema.Union([NotificationCypher, VexlNotificationToken])
   ),
   // TODO remove nullOr #2124
   targetToken: Schema.optional(VexlNotificationToken),
@@ -104,9 +105,10 @@ export class UserInactivityNoticeMessage extends Schema.TaggedClass<UserInactivi
   sentAt: UnixMilliseconds,
   trackingId: NotificationTrackingId,
   // Optional so messages sent by older backends still decode
-  variant: Schema.optionalWith(UserInactivityNotificationVariant, {
-    default: () => 'FIRST',
-  }),
+  variant: UserInactivityNotificationVariant.pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): 'FIRST' => 'FIRST')),
+    Schema.withConstructorDefault(Effect.sync((): 'FIRST' => 'FIRST'))
+  ),
 }) {}
 
 export class UserLoginOnDifferentDeviceNoticeMessage extends Schema.TaggedClass<UserLoginOnDifferentDeviceNoticeMessage>(
@@ -153,7 +155,7 @@ export class DebugMessage extends Schema.TaggedClass<DebugMessage>(
   text: Schema.optional(Schema.String),
 }) {}
 
-export const NotificationStreamMessage = Schema.Union(
+export const NotificationStreamMessage = Schema.Union([
   NewChatMessageNoticeMessage,
   NewUserNoticeMessage,
   StreamOnlyChatMessage,
@@ -165,18 +167,18 @@ export const NotificationStreamMessage = Schema.Union(
   ClubExpiredNoticeMessage,
   NewContentNoticeMessage,
   DebugMessage,
-  VexlProductNotificationMessage
-)
+  VexlProductNotificationMessage,
+])
 export type NotificationStreamMessage = typeof NotificationStreamMessage.Type
 
 export class KickedOutDueToAnotherConnectionToTheSameTokenError extends Schema.TaggedError<KickedOutDueToAnotherConnectionToTheSameTokenError>(
   'KickedOutDueToAnotherConnectionToTheSameTokenError'
 )('KickedOutDueToAnotherConnectionToTheSameTokenError', {}) {}
 
-export const NotificationStreamError = Schema.Union(
+export const NotificationStreamError = Schema.Union([
   KickedOutDueToAnotherConnectionToTheSameTokenError,
-  UnexpectedServerError
-)
+  UnexpectedServerError,
+])
 export type NotificationStreamError = typeof NotificationStreamError.Type
 
 export class Rpcs extends RpcGroup.make(

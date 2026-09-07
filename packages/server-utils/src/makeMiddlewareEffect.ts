@@ -1,14 +1,14 @@
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
-import {Effect, Schema} from 'effect/index'
+import {Effect, Schema} from 'effect'
 
 export const makeMiddlewareEffect =
-  <A, I, R, R2 extends Schema.Schema.Any>(errorsToLetThrough: R2) =>
+  <A, I, R, R2 extends Schema.Constraint>(errorsToLetThrough: R2) =>
   (
     e: Effect.Effect<A, R, I>
   ): Effect.Effect<A, UnexpectedServerError | Schema.Schema.Type<R2>, I> =>
     e.pipe(
-      Effect.catchAllDefect((e) =>
-        Effect.zipRight(
+      Effect.catchDefect((e) =>
+        Effect.andThen(
           Effect.logFatal('Critical error in middleware', e),
           Effect.fail(UnexpectedServerError.blindError())
         )

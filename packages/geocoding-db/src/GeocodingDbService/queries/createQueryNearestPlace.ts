@@ -1,7 +1,7 @@
-import {type SqlError, SqlSchema, type Statement} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
-import {Effect, Option, type ParseResult, Schema} from 'effect'
+import {Effect, Option, Schema} from 'effect'
+import {type SqlError, SqlSchema, type Statement} from 'effect/unstable/sql'
 import {
   BOUNDARY_MATCH_TOLERANCE_DEG,
   boundaryPlaceType,
@@ -50,14 +50,12 @@ export class NearestGeocodingRecord extends Schema.Class<NearestGeocodingRecord>
 )({
   ...GeocodingRecord.fields,
   distanceMeters: Schema.Number,
-  cityName: Schema.optionalWith(Schema.String, {
-    as: 'Option',
-    nullable: true,
-  }),
-  cityNames: Schema.optionalWith(GeocodingTranslations, {
-    as: 'Option',
-    nullable: true,
-  }),
+  cityName: Schema.OptionFromOptionalNullOr(Schema.String).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
+  cityNames: Schema.OptionFromOptionalNullOr(GeocodingTranslations).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
 }) {}
 
 class NearestSettlement extends Schema.Class<NearestSettlement>(
@@ -70,14 +68,13 @@ class NearestSettlement extends Schema.Class<NearestSettlement>(
 class CityContext extends Schema.Class<CityContext>('CityContext')({
   name: Schema.String,
   names: GeocodingTranslations,
-  countryCode: Schema.optionalWith(Schema.String, {
-    as: 'Option',
-    nullable: true,
-  }),
+  countryCode: Schema.OptionFromOptionalNullOr(Schema.String).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
 }) {}
 
-export const createQueryNearestPlace = Effect.gen(function* (_) {
-  const sql = yield* _(PgClient.PgClient)
+export const createQueryNearestPlace = Effect.gen(function* () {
+  const sql = yield* PgClient.PgClient
 
   const queryPoint = (
     latitude: number,
@@ -130,7 +127,7 @@ export const createQueryNearestPlace = Effect.gen(function* (_) {
    * importance and distance, preferring the label's own country (an Austrian
    * village next to Bratislava keeps an Austrian town).
    */
-  const queryCityContext = SqlSchema.findOne({
+  const queryCityContext = SqlSchema.findOneOption({
     Request: Schema.Struct({
       latitude: Schema.Number,
       longitude: Schema.Number,
@@ -182,7 +179,7 @@ export const createQueryNearestPlace = Effect.gen(function* (_) {
     `,
   })
 
-  const queryNearestSubCityNodeInBoundary = SqlSchema.findOne({
+  const queryNearestSubCityNodeInBoundary = SqlSchema.findOneOption({
     Request: Schema.Struct({
       boundaryId: GeocodingRecordId,
       latitude: Schema.Number,
@@ -239,7 +236,7 @@ export const createQueryNearestPlace = Effect.gen(function* (_) {
     `,
   })
 
-  const queryNearestSettlement = SqlSchema.findOne({
+  const queryNearestSettlement = SqlSchema.findOneOption({
     Request: NearestPlaceRequest,
     Result: NearestSettlement,
     execute: (params) => sql`
@@ -303,7 +300,7 @@ export const createQueryNearestPlace = Effect.gen(function* (_) {
       name: boundary.name,
       names: boundary.names,
       countryCode: Option.orElse(countryCode, () =>
-        Option.fromNullable(boundary.countryCode)
+        Option.fromNullishOr(boundary.countryCode)
       ),
       population: Option.none(),
       importance: computeImportance(placeType, undefined),
@@ -317,7 +314,7 @@ export const createQueryNearestPlace = Effect.gen(function* (_) {
     new CityContext({
       name: boundary.name,
       names: boundary.names,
-      countryCode: Option.fromNullable(boundary.countryCode),
+      countryCode: Option.fromNullishOr(boundary.countryCode),
     })
 
   /**
@@ -329,7 +326,7 @@ export const createQueryNearestPlace = Effect.gen(function* (_) {
     label: NearestSettlement
   ): Effect.Effect<
     Option.Option<CityContext>,
-    SqlError.SqlError | ParseResult.ParseError
+    SqlError.SqlError | Schema.SchemaError
   > =>
     Option.isSome(city) &&
     isCityType(boundaryPlaceType('city', city.value.placeTag))
@@ -346,10 +343,10 @@ export const createQueryNearestPlace = Effect.gen(function* (_) {
     Option.Option<NearestGeocodingRecord>,
     UnexpectedServerError
   > =>
-    Effect.gen(function* (_) {
+    Effect.gen(function* () {
       const {latitude, longitude} = params
       const {subCity, city, countryCode} = resolveBoundaryCandidates(
-        yield* _(queryBoundaryCandidates({latitude, longitude}))
+        yield* queryBoundaryCandidates({latitude, longitude})
       )
 
       if (Option.isSome(subCity)) {
@@ -361,18 +358,16 @@ export const createQueryNearestPlace = Effect.gen(function* (_) {
           longitude
         )
         return Option.some(
-          withContext(label, yield* _(contextInside(city, label)))
+          withContext(label, yield* contextInside(city, label))
         )
       }
 
       if (Option.isSome(city)) {
-        const node = yield* _(
-          queryNearestSubCityNodeInBoundary({
-            boundaryId: city.value.id,
-            latitude,
-            longitude,
-          })
-        )
+        const node = yield* queryNearestSubCityNodeInBoundary({
+          boundaryId: city.value.id,
+          latitude,
+          longitude,
+        })
         if (Option.isSome(node)) {
           const label = new NearestSettlement({
             ...node.value,
@@ -382,7 +377,7 @@ export const createQueryNearestPlace = Effect.gen(function* (_) {
             ),
           })
           return Option.some(
-            withContext(label, yield* _(contextInside(city, label)))
+            withContext(label, yield* contextInside(city, label))
           )
         }
         const label = boundaryAsSettlement(
@@ -397,19 +392,19 @@ export const createQueryNearestPlace = Effect.gen(function* (_) {
             label,
             isCityType(label.placeType)
               ? Option.none()
-              : yield* _(contextInside(Option.none(), label))
+              : yield* contextInside(Option.none(), label)
           )
         )
       }
 
-      const nearest = yield* _(queryNearestSettlement(params))
+      const nearest = yield* queryNearestSettlement(params)
       if (Option.isNone(nearest)) return Option.none()
       return Option.some(
         withContext(
           nearest.value,
           isCityType(nearest.value.placeType)
             ? Option.none()
-            : yield* _(contextInside(Option.none(), nearest.value))
+            : yield* contextInside(Option.none(), nearest.value)
         )
       )
     }).pipe(

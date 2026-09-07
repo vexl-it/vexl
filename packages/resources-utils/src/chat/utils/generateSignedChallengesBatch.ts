@@ -26,7 +26,7 @@ function selectKeyPair(
 
 export type ErrorGeneratingSignedChallengeBatch =
   BasicError<'ErrorGeneratingSignedChallengeBatch'>
-export type ApiErrorsGeneratingChallengeBatch = Effect.Effect.Error<
+export type ApiErrorsGeneratingChallengeBatch = Effect.Error<
   ReturnType<ChatApi['createChallengeBatch']>
 >
 

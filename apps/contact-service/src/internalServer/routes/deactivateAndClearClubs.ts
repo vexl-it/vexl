@@ -27,37 +27,37 @@ const removeClubCompletely = (
   | ClubMembersDbService
   | ClubMemberCountChangeDbService
 > =>
-  Effect.gen(function* (_) {
-    const clubsDb = yield* _(ClubsDbService)
-    const linkDb = yield* _(ClubInvitationLinkDbService)
-    const membersDb = yield* _(ClubMembersDbService)
-    const memberCountChangesDb = yield* _(ClubMemberCountChangeDbService)
+  Effect.gen(function* () {
+    const clubsDb = yield* ClubsDbService
+    const linkDb = yield* ClubInvitationLinkDbService
+    const membersDb = yield* ClubMembersDbService
+    const memberCountChangesDb = yield* ClubMemberCountChangeDbService
 
-    yield* _(Effect.log('Removing club', club.id))
+    yield* Effect.log('Removing club', club.id)
 
-    yield* _(Effect.log('Removing invitation links'))
-    yield* _(linkDb.deleteInvitationLinksForClub({clubId: club.id}))
+    yield* Effect.log('Removing invitation links')
+    yield* linkDb.deleteInvitationLinksForClub({clubId: club.id})
 
-    yield* _(Effect.log('Removing club members'))
-    yield* _(membersDb.deleteAllClubMembers({clubId: club.id}))
+    yield* Effect.log('Removing club members')
+    yield* membersDb.deleteAllClubMembers({clubId: club.id})
 
-    yield* _(Effect.log('Removing club member count changes'))
-    yield* _(memberCountChangesDb.deleteForClub({clubId: club.id}))
+    yield* Effect.log('Removing club member count changes')
+    yield* memberCountChangesDb.deleteForClub({clubId: club.id})
 
-    yield* _(Effect.log('Removing club'))
-    yield* _(clubsDb.deleteClub({id: club.id}))
+    yield* Effect.log('Removing club')
+    yield* clubsDb.deleteClub({id: club.id})
 
-    yield* _(Effect.log('Club removed', club))
+    yield* Effect.log('Club removed', club)
   }).pipe(
     Effect.withSpan('removeClubCompletely', {attributes: {id: club.id, club}})
   )
 
-const deactivateClubsAndSendNotifications = Effect.gen(function* (_) {
-  const clubsDb = yield* _(ClubsDbService)
-  const userNotificationService = yield* _(UserNotificationService)
+const deactivateClubsAndSendNotifications = Effect.gen(function* () {
+  const clubsDb = yield* ClubsDbService
+  const userNotificationService = yield* UserNotificationService
 
-  const expiredClubs = yield* _(findExpiredClubs)
-  const flaggedClubs = yield* _(findFlaggedClubs)
+  const expiredClubs = yield* findExpiredClubs
+  const flaggedClubs = yield* findFlaggedClubs
   const flaggedClubsToDeactivate = pipe(
     flaggedClubs,
     Array.filter(
@@ -81,27 +81,23 @@ const deactivateClubsAndSendNotifications = Effect.gen(function* (_) {
     Array.appendAll(flaggedClubIds)
   )
 
-  yield* _(Effect.log('Deactivating clubs', idsOfClubsToDeactivate))
+  yield* Effect.log('Deactivating clubs', idsOfClubsToDeactivate)
 
-  if (Array.isNonEmptyArray(expiredClubIds)) {
-    yield* _(
-      clubsDb.updateSetClubsInactive({
-        id: expiredClubIds,
-        reason: 'EXPIRED',
-      })
-    )
+  if (Array.isArrayNonEmpty(expiredClubIds)) {
+    yield* clubsDb.updateSetClubsInactive({
+      id: expiredClubIds,
+      reason: 'EXPIRED',
+    })
   }
 
-  if (Array.isNonEmptyArray(flaggedClubIds)) {
-    yield* _(
-      clubsDb.updateSetClubsInactive({
-        id: flaggedClubIds,
-        reason: 'FLAGGED',
-      })
-    )
+  if (Array.isArrayNonEmpty(flaggedClubIds)) {
+    yield* clubsDb.updateSetClubsInactive({
+      id: flaggedClubIds,
+      reason: 'FLAGGED',
+    })
   }
 
-  yield* _(
+  yield* pipe(
     expiredClubs,
     Array.map((expiredClub) =>
       userNotificationService.notifyUsersAboutExpiredClub(
@@ -112,7 +108,7 @@ const deactivateClubsAndSendNotifications = Effect.gen(function* (_) {
     Effect.all
   )
 
-  yield* _(
+  yield* pipe(
     flaggedClubs,
     Array.map((flaggedClub) =>
       userNotificationService.notifyUsersAboutFlaggedClub(
@@ -124,11 +120,11 @@ const deactivateClubsAndSendNotifications = Effect.gen(function* (_) {
   )
 }).pipe(Effect.withSpan('deactivateClubsAndSendNotifications'))
 
-const clearDeactivatedClubs = Effect.gen(function* (_) {
-  const clubsDb = yield* _(ClubsDbService)
+const clearDeactivatedClubs = Effect.gen(function* () {
+  const clubsDb = yield* ClubsDbService
 
-  const removeAfterDays = yield* _(clubRemoveAfterMarkedAsDeletedDaysConfig)
-  const deactivatedClubs = yield* _(clubsDb.listInactiveClubs())
+  const removeAfterDays = yield* clubRemoveAfterMarkedAsDeletedDaysConfig
+  const deactivatedClubs = yield* clubsDb.listInactiveClubs()
 
   const removeBeforeDate = dayjs()
     .startOf('day')
@@ -144,11 +140,11 @@ const clearDeactivatedClubs = Effect.gen(function* (_) {
     )
   )
 
-  yield* _(Effect.log('Removing clubs', clubsToRemove))
-  yield* _(clubsToRemove, Array.map(removeClubCompletely), Effect.all)
+  yield* Effect.log('Removing clubs', clubsToRemove)
+  yield* pipe(clubsToRemove, Array.map(removeClubCompletely), Effect.all)
 }).pipe(Effect.withSpan('clearDeactivatedClubs'))
 
-export const deactivateAndClearClubs = Effect.gen(function* (_) {
-  yield* _(deactivateClubsAndSendNotifications)
-  yield* _(clearDeactivatedClubs)
+export const deactivateAndClearClubs = Effect.gen(function* () {
+  yield* deactivateClubsAndSendNotifications
+  yield* clearDeactivatedClubs
 }).pipe(Effect.withSpan('deactivateAndClearClubs'))

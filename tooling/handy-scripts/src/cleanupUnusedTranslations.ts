@@ -34,10 +34,7 @@ const EXCLUDED_LOCALE_FILES = new Set([
   'childSafetyAndSexAbusePrevention.json',
   'infoPlist.json',
 ])
-const TranslationCatalog = Schema.Record({
-  key: Schema.String,
-  value: Schema.String,
-})
+const TranslationCatalog = Schema.Record(Schema.String, Schema.String)
 
 // Keys that are used dynamically and should be excluded from unused detection
 // These are prefixes - any key starting with these will be considered "potentially used"

@@ -3,7 +3,7 @@ import {KeyHolder, aes} from '@vexl-next/cryptography'
 import {KeyPairV2 as KeyPairV2Schema} from '@vexl-next/cryptography/src/KeyHolder/brandsV2'
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {VexlAuthHeader} from '@vexl-next/rest-api/src/VexlAuthHeader'
-import {Effect, Schema} from 'effect/index'
+import {Effect, Schema} from 'effect'
 import * as SecretStore from 'expo-secure-store'
 import {getDefaultStore} from 'jotai'
 import {sessionHolderAtom} from '.'
@@ -69,7 +69,7 @@ jest.mock('expo-notifications', () => ({
 }))
 
 jest.mock('../../utils/reportError', () => {
-  const {Effect} = jest.requireActual('effect/index')
+  const {Effect} = jest.requireActual('effect')
 
   return {
     __esModule: true,
@@ -108,7 +108,7 @@ jest.mock('../../utils/localization/I18nProvider', () => {
 })
 
 jest.mock('@vexl-next/cryptography/src/operations/cryptobox', () => {
-  const {Schema} = jest.requireActual('effect/index')
+  const {Schema} = jest.requireActual('effect')
   const {KeyPairV2} = jest.requireActual(
     '@vexl-next/cryptography/src/KeyHolder/brandsV2'
   )
@@ -126,7 +126,7 @@ jest.mock('@vexl-next/cryptography/src/operations/cryptobox', () => {
 })
 
 jest.mock('@vexl-next/rest-api/src', () => {
-  const {Effect, Schema} = jest.requireActual('effect/index')
+  const {Effect, Schema} = jest.requireActual('effect')
   const actualRestApi = jest.requireActual('@vexl-next/rest-api/src')
   const {VexlAuthHeader} = jest.requireActual(
     '@vexl-next/rest-api/src/VexlAuthHeader'
@@ -265,7 +265,7 @@ function encryptSessionForStorage(session: Session): {
   readonly secretToken: string
 } {
   const secretToken = `token-${session.version}`
-  const sessionJson = Schema.encodeSync(Schema.parseJson(SessionSchema))(
+  const sessionJson = Schema.encodeSync(Schema.fromJsonString(SessionSchema))(
     session
   )
   const encryptedSession = aes.aesCTREncrypt({
@@ -654,7 +654,7 @@ describe('loadSession', () => {
       sessionLoaded: false,
       blockingRecoveryRequired: true,
       loadingError: {
-        _tag: 'ParseError',
+        _tag: 'SchemaError',
       },
     })
     expect(reportErrorMock).not.toHaveBeenCalled()

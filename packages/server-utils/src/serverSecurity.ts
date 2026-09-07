@@ -1,4 +1,3 @@
-import {HttpServerRequest} from '@effect/platform'
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {UnauthorizedError} from '@vexl-next/domain/src/general/commonErrors'
@@ -9,19 +8,21 @@ import {
 } from '@vexl-next/rest-api/src/VexlAuthHeader'
 import {
   type AuthenticatedUserInfo,
+  CurrentSecurity,
   SecurityHeaders,
   ServerSecurityMiddleware,
 } from '@vexl-next/rest-api/src/apiSecurity'
-import {Effect, Layer, Option, Schema} from 'effect/index'
+import {Effect, Layer, Option, pipe, Schema} from 'effect'
+import {HttpServerRequest} from 'effect/unstable/http'
 import {ServerCrypto} from './ServerCrypto'
 import {makeMiddlewareEffect} from './makeMiddlewareEffect'
 
 export const verifyVexlAuthHeader = (
   vexlAuthHeader: VexlAuthHeader
 ): Effect.Effect<VexlAuthHeader, UnauthorizedError, ServerCrypto> =>
-  Effect.gen(function* (_) {
-    const userDataEncoded = yield* _(
-      Schema.encode(UserDataShape)(vexlAuthHeader.data),
+  Effect.gen(function* () {
+    const userDataEncoded = yield* pipe(
+      Schema.encodeEffect(UserDataShape)(vexlAuthHeader.data),
       Effect.mapError(
         (e) =>
           new UnauthorizedError({
@@ -32,8 +33,8 @@ export const verifyVexlAuthHeader = (
     )
     const signature = vexlAuthHeader.signature
 
-    const crypto = yield* _(ServerCrypto)
-    const isValid = yield* _(
+    const crypto = yield* ServerCrypto
+    const isValid = yield* pipe(
       crypto.cryptoBoxVerifySignature(userDataEncoded, signature),
       Effect.mapError(
         (e) =>
@@ -45,13 +46,11 @@ export const verifyVexlAuthHeader = (
     )
 
     if (!isValid) {
-      return yield* _(
-        Effect.fail(
-          new UnauthorizedError({
-            cause: new Error('Invalid VexlAuth header'),
-            status: 401,
-          })
-        )
+      return yield* Effect.fail(
+        new UnauthorizedError({
+          cause: new Error('Invalid VexlAuth header'),
+          status: 401,
+        })
       )
     }
 
@@ -75,14 +74,14 @@ export const verifyOldAuthHeaders = ({
   UnauthorizedError,
   ServerCrypto
 > =>
-  Effect.gen(function* (_) {
+  Effect.gen(function* () {
     const challenge = `${publicKey}${hash}`
 
-    const crypto = yield* _(ServerCrypto)
-    const valid = yield* _(
+    const crypto = yield* ServerCrypto
+    const valid = yield* pipe(
       crypto.verifyEcdsa({data: challenge, signature}),
-      Effect.catchAll((error) =>
-        Effect.zipRight(
+      Effect.catch((error) =>
+        Effect.andThen(
           Effect.logWarning('Error while checking security', error),
           Effect.fail(
             new UnauthorizedError({
@@ -95,14 +94,12 @@ export const verifyOldAuthHeaders = ({
     )
 
     if (!valid) {
-      yield* _(Effect.log('Invalid ecdsa signature in security headers'))
-      return yield* _(
-        Effect.fail(
-          new UnauthorizedError({
-            cause: new Error('Invalid auth headers'),
-            status: 401,
-          })
-        )
+      yield* Effect.log('Invalid ecdsa signature in security headers')
+      return yield* Effect.fail(
+        new UnauthorizedError({
+          cause: new Error('Invalid auth headers'),
+          status: 401,
+        })
       )
     }
     return {publicKey, hash, signature}
@@ -119,7 +116,7 @@ export const verifyUserSecurity = ({
   publicKey: PublicKeyPemBase64
   vexlAuthHeader?: VexlAuthHeader
 }): Effect.Effect<AuthenticatedUserInfo, UnauthorizedError, ServerCrypto> =>
-  Effect.gen(function* (_) {
+  Effect.gen(function* () {
     yield* verifyOldAuthHeaders({
       publicKey,
       hash,
@@ -135,22 +132,18 @@ export const verifyUserSecurity = ({
     }
 
     if (hash !== vexlAuthHeader.data.hash) {
-      yield* _(
-        Effect.log(
-          'Hash in VexlAuth header does not match hash in security headers'
-        )
+      yield* Effect.log(
+        'Hash in VexlAuth header does not match hash in security headers'
       )
-      return yield* _(
-        Effect.fail(
-          new UnauthorizedError({
-            cause: new Error('Invalid auth headers'),
-            status: 401,
-          })
-        )
+      return yield* Effect.fail(
+        new UnauthorizedError({
+          cause: new Error('Invalid auth headers'),
+          status: 401,
+        })
       )
     }
 
-    yield* _(verifyVexlAuthHeader(vexlAuthHeader))
+    yield* verifyVexlAuthHeader(vexlAuthHeader)
 
     return {
       hash,
@@ -161,29 +154,33 @@ export const verifyUserSecurity = ({
 
 export const ServerSecurityMiddlewareLive = Layer.effect(
   ServerSecurityMiddleware,
-  Effect.gen(function* (_) {
-    const crypto = yield* _(ServerCrypto)
-    return Effect.gen(function* (_) {
-      const securityHeaders = yield* _(
-        HttpServerRequest.schemaHeaders(SecurityHeaders),
-        Effect.mapError(
-          () =>
-            new UnauthorizedError({
-              cause: new Error('Missing required headers'),
-              status: 401,
-            })
+  Effect.gen(function* () {
+    const crypto = yield* ServerCrypto
+    return (httpEffect) =>
+      Effect.gen(function* () {
+        const securityHeaders = yield* pipe(
+          HttpServerRequest.schemaHeaders(SecurityHeaders),
+          Effect.mapError(
+            () =>
+              new UnauthorizedError({
+                cause: new Error('Missing required headers'),
+                status: 401,
+              })
+          )
+        )
+
+        return yield* verifyUserSecurity({
+          hash: securityHeaders.hash,
+          publicKey: securityHeaders['public-key'],
+          signature: securityHeaders.signature,
+          vexlAuthHeader: securityHeaders.authorization,
+        })
+      }).pipe(
+        Effect.provideService(ServerCrypto, crypto),
+        makeMiddlewareEffect(UnauthorizedError),
+        Effect.flatMap((security) =>
+          Effect.provideService(httpEffect, CurrentSecurity, security)
         )
       )
-
-      return yield* verifyUserSecurity({
-        hash: securityHeaders.hash,
-        publicKey: securityHeaders['public-key'],
-        signature: securityHeaders.signature,
-        vexlAuthHeader: securityHeaders.authorization,
-      })
-    }).pipe(
-      Effect.provideService(ServerCrypto, crypto),
-      makeMiddlewareEffect(UnauthorizedError)
-    )
   })
 )

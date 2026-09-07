@@ -1,4 +1,4 @@
-import {Array, Effect, HashSet, Option, pipe} from 'effect/index'
+import {Array, Effect, Filter, HashSet, Option, pipe} from 'effect'
 import {useAtomValue, useStore} from 'jotai'
 import {useCallback, useEffect, useRef} from 'react'
 import {userLoggedInAtom} from '../../state/session'
@@ -36,20 +36,22 @@ export const useInAppLoadingTasks = (): void => {
 
     const startTasks = pipe(
       Array.fromIterable(taskRegistry),
-      Array.filterMap(([taskId, task]) => {
-        // Filter by trigger type
-        if (task.requirements.runOn !== 'start') return Option.none()
+      Array.filterMap(
+        Filter.fromPredicateOption(([taskId, task]) => {
+          // Filter by trigger type
+          if (task.requirements.runOn !== 'start') return Option.none()
 
-        // Filter by login requirement
-        if (task.requirements.requiresUserLoggedIn && !isLoggedIn)
-          return Option.none()
+          // Filter by login requirement
+          if (task.requirements.requiresUserLoggedIn && !isLoggedIn)
+            return Option.none()
 
-        // Skip if already requested
-        if (HashSet.has(requestedStartTaskIds.current, taskId))
-          return Option.none()
+          // Skip if already requested
+          if (HashSet.has(requestedStartTaskIds.current, taskId))
+            return Option.none()
 
-        return Option.some(taskId)
-      })
+          return Option.some(taskId)
+        })
+      )
     )
 
     if (startTasks.length > 0) {
@@ -75,16 +77,18 @@ export const useInAppLoadingTasks = (): void => {
         const taskRegistry = store.get(taskRegistryAtom)
         const resumeTasks = pipe(
           Array.fromIterable(taskRegistry),
-          Array.filterMap(([taskId, task]) => {
-            // Filter by trigger type
-            if (task.requirements.runOn !== 'resume') return Option.none()
+          Array.filterMap(
+            Filter.fromPredicateOption(([taskId, task]) => {
+              // Filter by trigger type
+              if (task.requirements.runOn !== 'resume') return Option.none()
 
-            // Filter by login requirement
-            if (task.requirements.requiresUserLoggedIn && !isLoggedIn)
-              return Option.none()
+              // Filter by login requirement
+              if (task.requirements.requiresUserLoggedIn && !isLoggedIn)
+                return Option.none()
 
-            return Option.some(taskId)
-          })
+              return Option.some(taskId)
+            })
+          )
         )
 
         if (resumeTasks.length > 0) {

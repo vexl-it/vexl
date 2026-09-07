@@ -6,7 +6,7 @@ import {type ServiceUrl} from '../../ServiceUrl.brand'
 import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand'
 import {type LoggingFunction} from '../../utils'
 
-import {Effect, Option} from 'effect/index'
+import {Effect, Option} from 'effect'
 import {makeRequestWithCommonAndSecurityHeaders} from '../../apiSecurity'
 import {createClientInstance} from '../../client'
 import {makeCommonHeaders, type AppSource} from '../../commonHeaders'
@@ -51,23 +51,21 @@ export function api({
   osVersion,
   prefix,
 }: UserApiProps) {
-  return Effect.gen(function* (_) {
-    const client = yield* _(
-      createClientInstance({
-        api: UserApiSpecification,
-        platform,
-        clientVersion,
-        clientSemver,
-        url,
-        isDeveloper,
-        language,
-        appSource,
-        loggingFunction,
-        deviceModel,
-        osVersion,
-        prefix,
-      })
-    )
+  return Effect.gen(function* () {
+    const client = yield* createClientInstance({
+      api: UserApiSpecification,
+      platform,
+      clientVersion,
+      clientSemver,
+      url,
+      isDeveloper,
+      language,
+      appSource,
+      loggingFunction,
+      deviceModel,
+      osVersion,
+      prefix,
+    })
 
     const commonHeaders = makeCommonHeaders({
       appSource,
@@ -76,9 +74,9 @@ export function api({
       platform,
       isDeveloper,
       language,
-      deviceModel: Option.fromNullable(deviceModel),
-      osVersion: Option.fromNullable(osVersion),
-      prefix: Option.fromNullable(prefix),
+      deviceModel: Option.fromNullishOr(deviceModel),
+      osVersion: Option.fromNullishOr(osVersion),
+      prefix: Option.fromNullishOr(prefix),
     })
 
     // Security headers are built lazily inside each request effect (not once
@@ -128,4 +126,4 @@ export function api({
   })
 }
 
-export type UserApi = Effect.Effect.Success<ReturnType<typeof api>>
+export type UserApi = Effect.Success<ReturnType<typeof api>>

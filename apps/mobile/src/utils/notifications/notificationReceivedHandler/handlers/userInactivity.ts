@@ -1,5 +1,5 @@
 import {type UserInactivityNotificationData} from '@vexl-next/domain/src/general/notifications'
-import {Effect} from 'effect/index'
+import {Effect} from 'effect'
 import {getDefaultStore} from 'jotai'
 import {translationAtom} from '../../../localization/I18nProvider'
 import {notificationPreferencesAtom} from '../../../preferences'

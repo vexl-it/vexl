@@ -2,7 +2,7 @@ import {type CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.br
 import {type PlatformName} from '@vexl-next/domain/src/utility/PlatformName'
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {type VersionString} from '@vexl-next/domain/src/utility/VersionString.brand'
-import {Effect, Option} from 'effect/index'
+import {Effect, Option} from 'effect'
 import {createClientInstance} from '../../client'
 import {makeCommonHeaders, type AppSource} from '../../commonHeaders'
 import {type ServiceUrl} from '../../ServiceUrl.brand'
@@ -48,23 +48,21 @@ export function api({
   osVersion?: string
   prefix?: CountryPrefix
 }) {
-  return Effect.gen(function* (_) {
-    const client = yield* _(
-      createClientInstance({
-        api: NotificationApiSpecification,
-        platform,
-        clientVersion,
-        isDeveloper,
-        clientSemver,
-        language,
-        appSource,
-        url,
-        loggingFunction,
-        deviceModel,
-        osVersion,
-        prefix,
-      })
-    )
+  return Effect.gen(function* () {
+    const client = yield* createClientInstance({
+      api: NotificationApiSpecification,
+      platform,
+      clientVersion,
+      isDeveloper,
+      clientSemver,
+      language,
+      appSource,
+      url,
+      loggingFunction,
+      deviceModel,
+      osVersion,
+      prefix,
+    })
     const headers = makeCommonHeaders({
       appSource,
       versionCode: clientVersion,
@@ -72,9 +70,9 @@ export function api({
       platform,
       isDeveloper,
       language,
-      deviceModel: Option.fromNullable(deviceModel),
-      osVersion: Option.fromNullable(osVersion),
-      prefix: Option.fromNullable(prefix),
+      deviceModel: Option.fromNullishOr(deviceModel),
+      osVersion: Option.fromNullishOr(osVersion),
+      prefix: Option.fromNullishOr(prefix),
     })
 
     return {
@@ -109,4 +107,4 @@ export function api({
   })
 }
 
-export type NotificationApi = Effect.Effect.Success<ReturnType<typeof api>>
+export type NotificationApi = Effect.Success<ReturnType<typeof api>>

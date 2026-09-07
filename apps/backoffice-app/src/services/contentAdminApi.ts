@@ -1,4 +1,3 @@
-import {FetchHttpClient, HttpApiClient} from '@effect/platform'
 import {PlatformName} from '@vexl-next/domain/src/utility/PlatformName'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {VersionString} from '@vexl-next/domain/src/utility/VersionString.brand'
@@ -8,6 +7,8 @@ import {
 } from '@vexl-next/rest-api/src/commonHeaders'
 import {ContentApiSpecification} from '@vexl-next/rest-api/src/services/content/specification'
 import {Effect, Option, Schema} from 'effect'
+import {FetchHttpClient} from 'effect/unstable/http'
+import {HttpApiClient} from 'effect/unstable/httpapi'
 
 export const makeContentAdminClient = (baseUrl = '/api/proxy') =>
   HttpApiClient.make(ContentApiSpecification, {

@@ -68,10 +68,10 @@ export interface NotificationTokensDbOperations {
   ) => Effect.Effect<void, UnexpectedServerError>
 }
 
-export class NotificationTokensDb extends Context.Tag('NotificationTokensDb')<
+export class NotificationTokensDb extends Context.Service<
   NotificationTokensDb,
   NotificationTokensDbOperations
->() {
+>()('NotificationTokensDb') {
   static readonly Live = Layer.effect(
     NotificationTokensDb,
     Effect.gen(function* () {

@@ -1,3 +1,4 @@
+import {jest} from '@jest/globals'
 import {
   GetGeocodedCoordinatesRequest,
   GetLocationSuggestionsRequest,
@@ -42,7 +43,7 @@ describe('Google Maps error reporting', () => {
     const result = await Effect.runPromise(
       querySuggest(Redacted.make(apiKey))(
         new GetLocationSuggestionsRequest({lang: 'en', phrase})
-      ).pipe(Effect.either)
+      ).pipe(Effect.result)
     )
     const serializedFailure = JSON.stringify(result)
 
@@ -61,7 +62,7 @@ describe('Google Maps error reporting', () => {
       longitude,
     })
     const result = await Effect.runPromise(
-      googleGeocode(Redacted.make(apiKey))(request).pipe(Effect.either)
+      googleGeocode(Redacted.make(apiKey))(request).pipe(Effect.result)
     )
     const serializedFailure = JSON.stringify(result)
 
@@ -84,7 +85,7 @@ describe('Google Maps error reporting', () => {
     const result = await Effect.runPromise(
       querySuggest(Redacted.make(apiKey))(
         new GetLocationSuggestionsRequest({lang: 'en', phrase})
-      ).pipe(Effect.either)
+      ).pipe(Effect.result)
     )
     const serializedFailure = JSON.stringify(result)
 
@@ -117,11 +118,12 @@ describe('Google Maps error reporting', () => {
     const result = await Effect.runPromise(
       querySuggest(Redacted.make(apiKey))(
         new GetLocationSuggestionsRequest({lang: 'en', phrase})
-      ).pipe(Effect.either)
+      ).pipe(Effect.result)
     )
     const serializedFailure = JSON.stringify(result)
 
-    expect(serializedFailure).toContain('ParseError')
-    expect(serializedFailure).toContain('actual 200')
+    expect(serializedFailure).toContain('SchemaError')
+    expect(serializedFailure).toContain('less than or equal to 90')
+    expect(serializedFailure).toContain('latitude')
   })
 })

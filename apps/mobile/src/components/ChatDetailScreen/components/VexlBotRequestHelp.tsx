@@ -1,6 +1,6 @@
 import {useNavigation} from '@react-navigation/native'
 import {Button, Checklist, XStack} from '@vexl-next/ui'
-import {useMolecule} from 'bunshi/dist/react'
+import {useMolecule} from 'bunshi/react'
 import {useAtomValue} from 'jotai'
 import {useCallback} from 'react'
 import {type RootStackScreenProps} from '../../../navigationTypes'

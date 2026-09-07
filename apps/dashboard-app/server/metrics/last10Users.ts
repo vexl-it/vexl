@@ -1,4 +1,4 @@
-import {Chunk, Effect, HashMap, Option, Sink, Stream, pipe} from 'effect'
+import {Effect, Filter, HashMap, Option, Sink, Stream, pipe} from 'effect'
 import {UserWithConnections} from '../../common/ServerMessage'
 import {secureHash} from '../utils/hashPubKey'
 import {pubKeyToCountryPrefixChanges} from './pubKeyToCountry'
@@ -10,14 +10,16 @@ export const last10usersChanges = Stream.zipLatest(
 ).pipe(
   Stream.mapEffect(([users, connections]) =>
     Stream.fromIterable(connections).pipe(
-      Stream.filterMap((connection) =>
-        HashMap.get(users, connection.publicKey).pipe(
-          Option.map((countryPrefix) => ({
-            pubKey: connection.publicKey,
-            connectionsCount: connection.count,
-            countryPrefix,
-            receivedAt: connection.date,
-          }))
+      Stream.filterMap(
+        Filter.fromPredicateOption((connection) =>
+          HashMap.get(users, connection.publicKey).pipe(
+            Option.map((countryPrefix) => ({
+              pubKey: connection.publicKey,
+              connectionsCount: connection.count,
+              countryPrefix,
+              receivedAt: connection.date,
+            }))
+          )
         )
       ),
       Stream.mapEffect((user) =>
@@ -29,10 +31,9 @@ export const last10usersChanges = Stream.zipLatest(
           Effect.option
         )
       ),
-      Stream.filterMap((a) => a),
+      Stream.filterMap(Filter.fromPredicateOption((a) => a)),
       Stream.take(10),
-      Stream.runCollect,
-      Effect.map(Chunk.toArray)
+      Stream.runCollect
     )
   ),
   Stream.changes

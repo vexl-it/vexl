@@ -8,6 +8,6 @@ export function isProductOfferMissingCategory(offer: OneOfferInState): boolean {
   return (
     listingType === 'PRODUCT' &&
     productCategory === undefined &&
-    !pipe(productCategories ?? [], Array.fromIterable, Array.isNonEmptyArray)
+    !pipe(productCategories ?? [], Array.fromIterable, Array.isArrayNonEmpty)
   )
 }

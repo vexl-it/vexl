@@ -11,7 +11,7 @@ import {
   More,
 } from '@vexl-next/ui/src/icons'
 import type {IconProps} from '@vexl-next/ui/src/icons/types'
-import {useMolecule} from 'bunshi/dist/react'
+import {useMolecule} from 'bunshi/react'
 import {Array, Option, pipe} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React from 'react'
@@ -61,7 +61,7 @@ function ProductCategoryStep({
   const selectProductCategory = useSetAtom(selectProductCategoryActionAtom)
 
   const selectedCategoryOption = pipe(
-    Option.fromNullable(productCategories),
+    Option.fromNullishOr(productCategories),
     Option.flatMap(Array.head)
   )
   const hasSelection = Option.isSome(selectedCategoryOption)

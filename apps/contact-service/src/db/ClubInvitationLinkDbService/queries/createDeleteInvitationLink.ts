@@ -1,7 +1,7 @@
-import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {Effect, flow, Schema} from 'effect'
+import {SqlSchema} from 'effect/unstable/sql'
 import {ClubInvitationLinkRecordId} from '../domain'
 
 export const DeleteClubInvivationLinkParams = Schema.Struct({
@@ -10,8 +10,8 @@ export const DeleteClubInvivationLinkParams = Schema.Struct({
 export type DeleteClubInvivationLinkParams =
   typeof DeleteClubInvivationLinkParams.Type
 
-export const createDeleteInvitationLink = Effect.gen(function* (_) {
-  const sql = yield* _(PgClient.PgClient)
+export const createDeleteInvitationLink = Effect.gen(function* () {
+  const sql = yield* PgClient.PgClient
 
   const query = SqlSchema.void({
     Request: DeleteClubInvivationLinkParams,

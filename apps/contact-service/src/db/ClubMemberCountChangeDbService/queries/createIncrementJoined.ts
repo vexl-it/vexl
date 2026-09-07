@@ -1,7 +1,7 @@
-import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {Effect, flow, Schema} from 'effect'
+import {SqlSchema} from 'effect/unstable/sql'
 import {ClubRecordId} from '../../ClubsDbService/domain'
 
 export const IncrementJoinedParams = Schema.Struct({
@@ -10,8 +10,8 @@ export const IncrementJoinedParams = Schema.Struct({
 })
 export type IncrementJoinedParams = typeof IncrementJoinedParams.Type
 
-export const createIncrementJoined = Effect.gen(function* (_) {
-  const sql = yield* _(PgClient.PgClient)
+export const createIncrementJoined = Effect.gen(function* () {
+  const sql = yield* PgClient.PgClient
 
   const query = SqlSchema.void({
     Request: IncrementJoinedParams,

@@ -1,4 +1,4 @@
-import {Effect, Either} from 'effect/index'
+import {Effect, Result} from 'effect'
 import {
   InAppLoadingTaskError,
   registerInAppLoadingTask,
@@ -18,7 +18,7 @@ export const ensureSessionNotificationTokenExistsTask =
       runOn: 'resume',
     },
     task: (store) =>
-      Effect.gen(function* (_) {
+      Effect.gen(function* () {
         const vexlNotificationState = store.get(vexlNotificationTokenAtom)
 
         if (!vexlNotificationState.secret) {
@@ -28,31 +28,29 @@ export const ensureSessionNotificationTokenExistsTask =
           return
         }
 
-        const sessionNotificationToken = yield* _(
-          Effect.either(
-            store.set(generateVexlTokenActionAtom).pipe(
-              Effect.tapError((e) =>
-                reportErrorE(
-                  'error',
-                  new Error('Error creating session notification token'),
-                  {e}
-                )
-              ),
-              Effect.mapError(
-                (e) =>
-                  new InAppLoadingTaskError({
-                    message: 'Failed to create session notification token',
-                    cause: e,
-                  })
+        const sessionNotificationToken = yield* Effect.result(
+          store.set(generateVexlTokenActionAtom).pipe(
+            Effect.tapError((e) =>
+              reportErrorE(
+                'error',
+                new Error('Error creating session notification token'),
+                {e}
               )
+            ),
+            Effect.mapError(
+              (e) =>
+                new InAppLoadingTaskError({
+                  message: 'Failed to create session notification token',
+                  cause: e,
+                })
             )
           )
         )
 
-        if (Either.isRight(sessionNotificationToken)) {
+        if (Result.isSuccess(sessionNotificationToken)) {
           store.set(
             sessionNotificationTokenAtom,
-            sessionNotificationToken.right
+            sessionNotificationToken.success
           )
         }
 

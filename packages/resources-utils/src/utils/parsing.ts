@@ -1,5 +1,5 @@
 import {toError, type BasicError} from '@vexl-next/domain/src/utility/errors'
-import {Effect, Either, Schema} from 'effect'
+import {Effect, Result, Schema} from 'effect'
 import * as E from 'fp-ts/Either'
 
 export type JsonParseError = BasicError<'JsonParseError'>
@@ -16,8 +16,8 @@ export class JsonStringifyError extends Schema.TaggedError<JsonStringifyError>(
 
 export function stringifyToJson(
   data: unknown
-): Either.Either<string, JsonStringifyError> {
-  return Either.try({
+): Result.Result<string, JsonStringifyError> {
+  return Result.try({
     try: () => JSON.stringify(data),
     catch: (e) => new JsonStringifyError({cause: e}),
   })

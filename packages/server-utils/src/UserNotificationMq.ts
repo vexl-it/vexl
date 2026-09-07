@@ -5,7 +5,7 @@ import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications
 import {VexlProductNotification} from '@vexl-next/domain/src/general/vexlProductNotification'
 import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {type UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {Data, type Effect, Schema} from 'effect/index'
+import {Data, Effect, Schema} from 'effect'
 import {makeMqService} from './mqService'
 
 export class ProcessNewUserNotificationsError extends Data.TaggedError(
@@ -59,9 +59,10 @@ export class UserInactivityNotificationMqEntry extends Schema.TaggedClass<UserIn
   // todo #2142: remove nullability after moving to vexlNotificationToken
   token: Schema.NullOr(VexlNotificationToken),
   // Optional so entries enqueued before this field existed still decode
-  variant: Schema.optionalWith(UserInactivityNotificationVariant, {
-    default: () => 'FIRST',
-  }),
+  variant: UserInactivityNotificationVariant.pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): 'FIRST' => 'FIRST')),
+    Schema.withConstructorDefault(Effect.sync((): 'FIRST' => 'FIRST'))
+  ),
 }) {}
 
 export class UserLoginOnDifferentDeviceNotificationMqEntry extends Schema.TaggedClass<UserLoginOnDifferentDeviceNotificationMqEntry>(
@@ -112,7 +113,7 @@ export class VexlProductNotificationMqEntry extends Schema.TaggedClass<VexlProdu
   vexlProductNotification: VexlProductNotification,
 }) {}
 
-export const UserNotificationMqEntry = Schema.Union(
+export const UserNotificationMqEntry = Schema.Union([
   NewUserNotificationMqEntry,
   NewClubUserNotificationMqEntry,
   UserAdmittedToClubNotificationMqEntry,
@@ -121,8 +122,8 @@ export const UserNotificationMqEntry = Schema.Union(
   ClubFlaggedNotificationMqEntry,
   ClubExpiredNotificationMqEntry,
   NewContentNotificationMqEntry,
-  VexlProductNotificationMqEntry
-)
+  VexlProductNotificationMqEntry,
+])
 
 const {EnqueueTask, EnqueueTaskContext, producerLayer, consumerLayer} =
   makeMqService(

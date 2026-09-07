@@ -1,4 +1,3 @@
-import {SqlClient} from '@effect/sql'
 import {generateClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {InvalidAdminTokenError} from '@vexl-next/rest-api/src/services/contact/contracts'
@@ -8,6 +7,7 @@ import {
   clearTestAuthHeaders,
 } from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Array, Effect, Option, pipe, Schema, String} from 'effect'
+import {SqlClient} from 'effect/unstable/sql'
 import {ClubsDbService} from '../../../../db/ClubsDbService'
 import {NodeTestingApp} from '../../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../../utils/runPromiseInMockedEnvironment'
@@ -48,53 +48,47 @@ const clubsToSave = [
 describe('List clubs', () => {
   beforeEach(async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const sql = yield* _(SqlClient.SqlClient)
-        yield* _(sql`DELETE FROM club_invitation_link`)
-        yield* _(sql`DELETE FROM club_member`)
-        yield* _(sql`DELETE FROM club_member_count_change`)
-        yield* _(sql`DELETE FROM club`)
+      Effect.gen(function* () {
+        const sql = yield* SqlClient.SqlClient
+        yield* sql`DELETE FROM club_invitation_link`
+        yield* sql`DELETE FROM club_member`
+        yield* sql`DELETE FROM club_member_count_change`
+        yield* sql`DELETE FROM club`
 
-        const app = yield* _(NodeTestingApp)
-        yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
-        yield* _(
-          app.ClubsAdmin.createClub({
-            headers: {'x-admin-token': ADMIN_TOKEN},
-            payload: {
-              club: clubsToSave[0],
-            },
-          })
-        )
-        yield* _(
-          app.ClubsAdmin.createClub({
-            headers: {'x-admin-token': ADMIN_TOKEN},
-            payload: {
-              club: clubsToSave[1],
-            },
-          })
-        )
-        yield* _(
-          app.ClubsAdmin.createClub({
-            headers: {'x-admin-token': ADMIN_TOKEN},
-            payload: {
-              club: clubsToSave[2],
-            },
-          })
-        )
-        yield* _(clearTestAuthHeaders)
+        const app = yield* NodeTestingApp
+        yield* addTestHeaders({'x-admin-token': ADMIN_TOKEN})
+        yield* app.ClubsAdmin.createClub({
+          headers: {'x-admin-token': ADMIN_TOKEN},
+          payload: {
+            club: clubsToSave[0],
+          },
+        })
+        yield* app.ClubsAdmin.createClub({
+          headers: {'x-admin-token': ADMIN_TOKEN},
+          payload: {
+            club: clubsToSave[1],
+          },
+        })
+        yield* app.ClubsAdmin.createClub({
+          headers: {'x-admin-token': ADMIN_TOKEN},
+          payload: {
+            club: clubsToSave[2],
+          },
+        })
+        yield* clearTestAuthHeaders
       })
     )
   })
 
   it('Should return 403 when bad admin token', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
-        const errorResponse = yield* _(
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
+        const errorResponse = yield* pipe(
           app.ClubsAdmin.listClubs({
             headers: {'x-admin-token': 'aha'},
           }),
-          Effect.either
+          Effect.result
         )
 
         expectErrorResponse(InvalidAdminTokenError)(errorResponse)
@@ -104,10 +98,10 @@ describe('List clubs', () => {
 
   it('Should return all clubs in db', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
-        yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
-        const clubs = yield* _(
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
+        yield* addTestHeaders({'x-admin-token': ADMIN_TOKEN})
+        const clubs = yield* pipe(
           app.ClubsAdmin.listClubs({headers: {'x-admin-token': ADMIN_TOKEN}}),
           Effect.map((o) => o.clubs)
         )
@@ -145,15 +139,15 @@ describe('List clubs', () => {
 
   it('Excludes member changes older than 30 days', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
-        const clubsDb = yield* _(ClubsDbService)
-        const clubInDb = yield* _(
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
+        const clubsDb = yield* ClubsDbService
+        const clubInDb = yield* pipe(
           clubsDb.findClubByUuid({uuid: clubsToSave[0].uuid}),
-          Effect.flatten
+          Effect.flatMap(Effect.fromOption)
         )
-        const sql = yield* _(SqlClient.SqlClient)
-        yield* _(sql`
+        const sql = yield* SqlClient.SqlClient
+        yield* sql`
           INSERT INTO
             club_member_count_change (club_id, DAY, joined_count, left_count)
           VALUES
@@ -169,13 +163,13 @@ describe('List clubs', () => {
               7,
               8
             )
-        `)
+        `
 
-        yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
-        const result = yield* _(
-          app.ClubsAdmin.listClubs({headers: {'x-admin-token': ADMIN_TOKEN}})
-        )
-        const clubInfo = yield* _(
+        yield* addTestHeaders({'x-admin-token': ADMIN_TOKEN})
+        const result = yield* app.ClubsAdmin.listClubs({
+          headers: {'x-admin-token': ADMIN_TOKEN},
+        })
+        const clubInfo = yield* Effect.fromOption(
           pipe(
             result.clubs,
             Array.findFirst((club) => club.uuid === clubsToSave[0].uuid)

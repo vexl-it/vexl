@@ -1,7 +1,7 @@
-import {SqlClient, SqlResolver, SqlSchema} from '@effect/sql'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {UserNotificationMqEntry} from '@vexl-next/server-utils/src/UserNotificationMq'
 import {Effect, flow, pipe, RequestResolver, Schema} from 'effect'
+import {SqlClient, SqlResolver, SqlSchema} from 'effect/unstable/sql'
 import {
   PendingBatchedNotificationRecordId,
   RawPendingBatchedNotificationDbRecord,
@@ -10,7 +10,7 @@ import {
 const INSERT_PENDING_ENTRIES_BATCH_SIZE = 500
 
 const InsertPendingNotificationParams = Schema.Struct({
-  notificationData: Schema.parseJson(UserNotificationMqEntry),
+  notificationData: Schema.fromJsonString(UserNotificationMqEntry),
 })
 
 const BatchSize = Schema.Number
@@ -18,23 +18,19 @@ const BatchSize = Schema.Number
 export const createInsertPendingEntries = Effect.gen(function* () {
   const sql = yield* SqlClient.SqlClient
 
-  const insertPendingNotificationResolver = yield* SqlResolver.void(
-    'insertPendingBatchedNotifications',
-    {
-      Request: InsertPendingNotificationParams,
-      execute: (params) => sql`
-        INSERT INTO
-          pending_batched_notifications ${sql.insert(params)}
-      `,
-    }
-  )
-  const insertPendingNotification =
-    insertPendingNotificationResolver.makeExecute(
-      RequestResolver.batchN(
-        insertPendingNotificationResolver,
-        INSERT_PENDING_ENTRIES_BATCH_SIZE
-      )
+  const insertPendingNotificationResolver = SqlResolver.void({
+    Request: InsertPendingNotificationParams,
+    execute: (params) => sql`
+      INSERT INTO
+        pending_batched_notifications ${sql.insert(params)}
+    `,
+  })
+  const insertPendingNotification = SqlResolver.request(
+    RequestResolver.batchN(
+      insertPendingNotificationResolver,
+      INSERT_PENDING_ENTRIES_BATCH_SIZE
     )
+  )
 
   return (
     entries: ReadonlyArray<typeof UserNotificationMqEntry.Type>
@@ -44,7 +40,6 @@ export const createInsertPendingEntries = Effect.gen(function* () {
       Effect.forEach(
         (entry) => insertPendingNotification({notificationData: entry}),
         {
-          batching: true,
           concurrency: 'unbounded',
           discard: true,
         }
@@ -89,24 +84,21 @@ export const createFindOldestPendingRows = Effect.gen(function* () {
 export const createDeletePendingRows = Effect.gen(function* () {
   const sql = yield* SqlClient.SqlClient
 
-  const resolver = yield* SqlResolver.void(
-    'deletePendingBatchedNotifications',
-    {
-      Request: PendingBatchedNotificationRecordId,
-      execute: (ids) => sql`
-        DELETE FROM pending_batched_notifications
-        WHERE
-          ${sql.in('id', ids)}
-      `,
-    }
-  )
+  const resolver = SqlResolver.void({
+    Request: PendingBatchedNotificationRecordId,
+    execute: (ids) => sql`
+      DELETE FROM pending_batched_notifications
+      WHERE
+        ${sql.in('id', ids)}
+    `,
+  })
 
   return (
     ids: readonly PendingBatchedNotificationRecordId[]
   ): Effect.Effect<void, UnexpectedServerError> =>
     pipe(
       ids,
-      Effect.forEach((id) => resolver.execute(id)),
+      Effect.forEach((id) => SqlResolver.request(resolver)(id)),
       Effect.asVoid,
       UnexpectedServerError.wrapErrors(
         'Error in deletePendingBatchedNotifications'

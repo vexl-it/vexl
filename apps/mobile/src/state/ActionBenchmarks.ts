@@ -2,7 +2,7 @@ import {
   UnixMilliseconds,
   unixMillisecondsNow,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {Array, Effect, Option, Record, Schema} from 'effect/index'
+import {Array, Effect, Option, Record, Schema} from 'effect'
 import {pipe} from 'fp-ts/lib/function'
 import {atom, getDefaultStore} from 'jotai'
 import {focusAtom} from 'jotai-optics'
@@ -15,10 +15,7 @@ const BenchmarkRecord = Schema.Struct({
 })
 const BenchmarkStorage = Schema.Struct({
   enabled: Schema.Boolean,
-  benchmarks: Schema.Record({
-    key: Schema.String,
-    value: Schema.Array(BenchmarkRecord),
-  }),
+  benchmarks: Schema.Record(Schema.String, Schema.Array(BenchmarkRecord)),
 })
 
 const storageAtom = atomWithParsedMmkvStorage(
@@ -86,16 +83,14 @@ export const startBenchmark = (name: string): ((d?: string) => void) => {
 export const effectWithEnsuredBenchmark =
   <A, E, R>(name: string, description?: string) =>
   (e: Effect.Effect<A, E, R>) =>
-    Effect.gen(function* (_) {
+    Effect.gen(function* () {
       const endBenchmark = startBenchmark(name)
 
-      const result = yield* _(
-        Effect.ensuring(
-          e,
-          Effect.sync(() => {
-            endBenchmark(description)
-          })
-        )
+      const result = yield* Effect.ensuring(
+        e,
+        Effect.sync(() => {
+          endBenchmark(description)
+        })
       )
       return result
     })

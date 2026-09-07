@@ -8,7 +8,7 @@ import {
   compare,
   VersionString,
 } from '@vexl-next/domain/src/utility/VersionString.brand'
-import {Effect, flow, Option, Schema} from 'effect'
+import {Effect, flow, Option, Schema, SchemaTransformation} from 'effect'
 import {ImportContactFromLinkPayloadE} from '../../state/contacts/domain'
 import {version} from '../environment'
 import {PreviewChannel} from '../prPreview/domain'
@@ -37,7 +37,9 @@ export class DeepLinkMeantForNewerVersionError extends Schema.TaggedError<DeepLi
 }) {}
 
 const DeeplinkPayloadVersion = Schema.Struct({
-  version: Schema.optionalWith(VersionString, {as: 'Option'}),
+  version: Schema.OptionFromOptional(VersionString).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
 })
 
 const DeepLinkGoldenGlassesWithType = Schema.Struct({
@@ -45,23 +47,35 @@ const DeepLinkGoldenGlassesWithType = Schema.Struct({
   type: Schema.Literal(LINK_TYPE_GOLDEN_GLASSES),
 })
 
-const DeepLinkGoldenGlassesWithLinkBackwardCompatible = Schema.transform(
-  Schema.Struct({
-    ...DeeplinkPayloadVersion.fields,
-    link: Schema.Literal(LINK_TYPE_GOLDEN_GLASSES),
-  }),
-  DeepLinkGoldenGlassesWithType,
-  {
-    encode: (i, a) => ({...a, link: a.type}),
-    decode: (i, a) => ({...a, type: a.link}),
-    strict: true,
-  }
+const DeepLinkGoldenGlassesWithLinkBackwardCompatible = Schema.Struct({
+  ...DeeplinkPayloadVersion.fields,
+  link: Schema.Literal(LINK_TYPE_GOLDEN_GLASSES),
+}).pipe(
+  Schema.decodeTo(
+    Schema.toType(DeepLinkGoldenGlassesWithType),
+    SchemaTransformation.transform<
+      typeof DeepLinkGoldenGlassesWithType.Type,
+      typeof DeeplinkPayloadVersion.Type & {
+        link: typeof LINK_TYPE_GOLDEN_GLASSES
+      }
+    >({
+      encode: (value: typeof DeepLinkGoldenGlassesWithType.Type) => ({
+        ...value,
+        link: value.type,
+      }),
+      decode: (
+        value: typeof DeeplinkPayloadVersion.Type & {
+          link: typeof LINK_TYPE_GOLDEN_GLASSES
+        }
+      ) => ({...value, type: value.link}),
+    })
+  )
 )
 
-export const DeepLinkGoldenGlasses = Schema.Union(
+export const DeepLinkGoldenGlasses = Schema.Union([
   DeepLinkGoldenGlassesWithType,
-  DeepLinkGoldenGlassesWithLinkBackwardCompatible
-)
+  DeepLinkGoldenGlassesWithLinkBackwardCompatible,
+])
 
 export const DeepLinkClubJoin = Schema.Struct({
   ...DeeplinkPayloadVersion.fields,
@@ -72,7 +86,7 @@ export const DeepLinkClubJoin = Schema.Struct({
 export const DeepLinkImportContact = Schema.Struct({
   ...DeeplinkPayloadVersion.fields,
   type: Schema.Literal(LINK_TYPE_IMPORT_CONTACT),
-  data: Schema.parseJson(ImportContactFromLinkPayloadE),
+  data: Schema.fromJsonString(ImportContactFromLinkPayloadE),
 })
 
 export const DeepLinkImportContactV2 = Schema.Struct({
@@ -104,20 +118,20 @@ export const DeepLinkOpenChat = Schema.Struct({
 })
 
 export const DeepLinkData = parseUrlWithSearchParams(
-  Schema.Union(
+  Schema.Union([
     DeepLinkGoldenGlasses,
     DeepLinkClubJoin,
     DeepLinkImportContact,
     DeepLinkImportContactV2,
     DeepLinkRequestClubAdmition,
     DeepLinkLoadPrPreview,
-    DeepLinkOpenChat
-  )
+    DeepLinkOpenChat,
+  ])
 )
 export type DeepLinkData = typeof DeepLinkData.Type
 
 const validateLinkVersion = flow(
-  Schema.decode(parseUrlWithSearchParams(DeeplinkPayloadVersion)),
+  Schema.decodeEffect(parseUrlWithSearchParams(DeeplinkPayloadVersion)),
   Effect.filterOrFail(
     (versionLink) => {
       if (Option.isNone(versionLink.searchParams.version)) {
@@ -148,12 +162,12 @@ export const parseDeepLink = (
 > => {
   const normalizedLink = normalizeAppLink(link)
 
-  return Effect.zipRight(
+  return Effect.andThen(
     validateLinkVersion(normalizedLink),
-    Schema.decode(DeepLinkData)(normalizedLink)
+    Schema.decodeEffect(DeepLinkData)(normalizedLink)
   ).pipe(
     Effect.catchTag(
-      'ParseError',
+      'SchemaError',
       (e) => new InvalidDeepLinkError({cause: e, originalLink: link})
     )
   )

@@ -1,7 +1,7 @@
 import {UserName} from '@vexl-next/domain/src/general/UserName.brand'
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
-import {Array, Option, Schema, pipe} from 'effect/index'
+import {Array, Option, Schema, pipe} from 'effect'
 import {atom} from 'jotai'
 import {type ChatMessageWithState} from '../../../state/chat/domain'
 import anonymizePhoneNumber from '../../../state/chat/utils/anonymizePhoneNumber'

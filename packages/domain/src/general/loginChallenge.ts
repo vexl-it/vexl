@@ -1,16 +1,17 @@
 import {PrivateKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
-import {Effect, flow, Schema} from 'effect/index'
-import {type ParseError} from 'effect/ParseResult'
+import {Effect, flow, Schema} from 'effect'
+import {type SchemaError} from 'effect/Schema'
 import {UnixMilliseconds} from '../utility/UnixMilliseconds.brand'
 
-export const LoginChallengeRequestPayload = Schema.compose(
-  Schema.StringFromBase64,
-  Schema.parseJson(
-    Schema.Struct({
-      privateKey: PrivateKeyPemBase64,
-      challenge: Schema.String,
-      validUntil: UnixMilliseconds,
-    })
+export const LoginChallengeRequestPayload = Schema.StringFromBase64.pipe(
+  Schema.decodeTo(
+    Schema.fromJsonString(
+      Schema.Struct({
+        privateKey: PrivateKeyPemBase64,
+        challenge: Schema.String,
+        validUntil: UnixMilliseconds,
+      })
+    )
   )
 )
 
@@ -42,11 +43,10 @@ export type LoginChallengeRequestEncoded =
   typeof LoginChallengeRequestEncoded.Type
 
 export const encodeLoginChallengeRequestPayload = flow(
-  Schema.encode(LoginChallengeRequestPayload),
-  Effect.flatMap(Schema.decode(LoginChallengeRequestEncoded))
+  Schema.encodeEffect(LoginChallengeRequestPayload),
+  Effect.flatMap(Schema.decodeEffect(LoginChallengeRequestEncoded))
 )
 export const decodeLoginChallengeRequestPayload: (
   encoded: LoginChallengeRequestEncoded
-) => Effect.Effect<LoginChallengeRequestPayload, ParseError> = Schema.decode(
-  LoginChallengeRequestPayload
-)
+) => Effect.Effect<LoginChallengeRequestPayload, SchemaError> =
+  Schema.decodeEffect(LoginChallengeRequestPayload)

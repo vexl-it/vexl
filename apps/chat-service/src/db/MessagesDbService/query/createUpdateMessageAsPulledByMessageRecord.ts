@@ -1,27 +1,25 @@
-import {SqlClient, SqlResolver} from '@effect/sql'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {Effect, flow} from 'effect'
+import {SqlClient, SqlResolver} from 'effect/unstable/sql'
 import {MessageRecordId} from '../domain'
 
 export const createUpdateMessageAsPulledByMessageRecord = Effect.gen(
-  function* (_) {
-    const sql = yield* _(SqlClient.SqlClient)
+  function* () {
+    const sql = yield* SqlClient.SqlClient
 
-    const resolver = yield* _(
-      SqlResolver.void('updateMessageAsPulledByInboxId', {
-        Request: MessageRecordId,
-        execute: (params) => sql`
-          UPDATE message
-          SET
-            pulled = TRUE
-          WHERE
-            ${sql.in('id', params)}
-        `,
-      })
-    )
+    const resolver = SqlResolver.void({
+      Request: MessageRecordId,
+      execute: (params) => sql`
+        UPDATE message
+        SET
+          pulled = TRUE
+        WHERE
+          ${sql.in('id', params)}
+      `,
+    })
 
     return flow(
-      resolver.execute,
+      SqlResolver.request(resolver),
       UnexpectedServerError.wrapErrors(
         'Error in updateMessageAsPulledByInboxId'
       ),

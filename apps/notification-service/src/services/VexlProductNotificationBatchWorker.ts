@@ -1,6 +1,6 @@
 import {makeRepeatingTaskLayer} from '@vexl-next/server-utils/src/repeatingTask'
 import {EnqueueUserNotification} from '@vexl-next/server-utils/src/UserNotificationMq'
-import {Array, Effect, Option, pipe, Schema} from 'effect'
+import {Array, Effect, Filter, Option, pipe, Schema} from 'effect'
 import {
   vexlProductNotificationBatchSendIntervalMsConfig,
   vexlProductNotificationBatchSizeConfig,
@@ -28,10 +28,10 @@ const processPendingRow = (
   EnqueueUserNotificationContext
 > =>
   pipe(
-    Schema.decode(PendingBatchedNotificationDbRecord)(row),
+    Schema.decodeEffect(PendingBatchedNotificationDbRecord)(row),
     Effect.matchEffect({
       onFailure: (e) =>
-        Effect.zipRight(
+        Effect.andThen(
           Effect.logError('Invalid pending Vexl product notification JSON', e, {
             rowId: row.id,
           }),
@@ -44,8 +44,8 @@ const processPendingRow = (
             enqueue(decoded.notificationData, {delay: 0})
           ),
           Effect.as(Option.some(row.id)),
-          Effect.catchAll((e) =>
-            Effect.zipRight(
+          Effect.catch((e) =>
+            Effect.andThen(
               Effect.logError(
                 'Failed to enqueue pending Vexl product notification',
                 e,
@@ -58,26 +58,27 @@ const processPendingRow = (
     })
   )
 
-export const issueNotificationBatch = Effect.gen(function* (_) {
-  const db = yield* _(PendingBatchedNotificationsDb)
-  const batchSize = yield* _(vexlProductNotificationBatchSizeConfig)
-  const rows = yield* _(db.findOldestPendingRows(batchSize))
+export const issueNotificationBatch = Effect.gen(function* () {
+  const db = yield* PendingBatchedNotificationsDb
+  const batchSize = yield* vexlProductNotificationBatchSizeConfig
+  const rows = yield* db.findOldestPendingRows(batchSize)
 
-  yield* _(
-    Effect.log('Issuing notifications batch', {count: Array.length(rows)})
-  )
-  const idsToDelete = yield* _(
-    pipe(
-      rows,
-      Effect.forEach(processPendingRow),
-      Effect.map((ids) => Array.filterMap(ids, (id) => id))
+  yield* Effect.log('Issuing notifications batch', {count: Array.length(rows)})
+  const idsToDelete = yield* pipe(
+    rows,
+    Effect.forEach(processPendingRow),
+    Effect.map((ids) =>
+      Array.filterMap(
+        ids,
+        Filter.fromPredicateOption((id) => id)
+      )
     )
   )
 
-  yield* _(Effect.log('Notifications issued', {count: Array.length(rows)}))
-  yield* _(db.deletePendingRows(idsToDelete))
+  yield* Effect.log('Notifications issued', {count: Array.length(rows)})
+  yield* db.deletePendingRows(idsToDelete)
 }).pipe(
-  Effect.catchAll((e) =>
+  Effect.catch((e) =>
     Effect.logError('Failed to issue Vexl product notification batch', e)
   ),
   Effect.withSpan('issueNotificationBatch')

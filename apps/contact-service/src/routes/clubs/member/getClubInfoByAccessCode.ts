@@ -1,33 +1,33 @@
-import {HttpApiBuilder} from '@effect/platform/index'
 import {
   NotFoundError,
   UnexpectedServerError,
 } from '@vexl-next/domain/src/general/commonErrors'
 import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {makeHttpApiHandler} from '@vexl-next/server-utils/src/makeHttpApiHandler'
 import {validateChallengeInBody} from '@vexl-next/server-utils/src/services/challenge/utils/validateChallengeInBody'
-import {Effect} from 'effect'
+import {Effect, pipe} from 'effect'
 import {ClubInvitationLinkDbService} from '../../../db/ClubInvitationLinkDbService'
 import {ClubsDbService} from '../../../db/ClubsDbService'
 
-export const getClubInfoByAccessCode = HttpApiBuilder.handler(
+export const getClubInfoByAccessCode = makeHttpApiHandler(
   ContactApiSpecification,
   'ClubsMember',
   'getClubInfoByAccessCode',
   (req) =>
-    Effect.gen(function* (_) {
-      yield* _(validateChallengeInBody(req.payload))
+    Effect.gen(function* () {
+      yield* validateChallengeInBody(req.payload)
 
-      const clubsDb = yield* _(ClubsDbService)
-      const clubInvitationLinkDb = yield* _(ClubInvitationLinkDbService)
+      const clubsDb = yield* ClubsDbService
+      const clubInvitationLinkDb = yield* ClubInvitationLinkDbService
 
-      const inviteLink = yield* _(
+      const inviteLink = yield* pipe(
         clubInvitationLinkDb.findInvitationLinkByCode({
           code: req.payload.code,
         }),
-        Effect.flatten,
+        Effect.flatMap(Effect.fromOption),
         Effect.catchTag(
-          'NoSuchElementException',
+          'NoSuchElementError',
           () =>
             new NotFoundError({
               message: 'Invitation link not found error',
@@ -35,13 +35,13 @@ export const getClubInfoByAccessCode = HttpApiBuilder.handler(
         )
       )
 
-      const club = yield* _(
+      const club = yield* pipe(
         clubsDb.findClub({
           id: inviteLink.clubId,
         }),
-        Effect.flatten,
+        Effect.flatMap(Effect.fromOption),
         Effect.catchTag(
-          'NoSuchElementException',
+          'NoSuchElementError',
           () =>
             new UnexpectedServerError({
               status: 500,

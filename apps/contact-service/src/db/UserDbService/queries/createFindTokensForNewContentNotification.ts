@@ -1,28 +1,27 @@
-import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
-import {Effect, flow, Schema} from 'effect'
+import {Effect, flow, Option, Schema} from 'effect'
+import {SqlSchema} from 'effect/unstable/sql'
 import {NotificationTokens} from '../domain'
 
 export const FindFirebaseTokensForNewContentNotificationResults = Schema.Struct(
   {
     ...NotificationTokens.fields,
-    vexlNotificationToken: Schema.optionalWith(VexlNotificationToken, {
-      as: 'Option',
-      nullable: true,
-    }),
+    vexlNotificationToken: Schema.OptionFromOptionalNullOr(
+      VexlNotificationToken
+    ).pipe(Schema.withConstructorDefault(Effect.succeed(Option.none()))),
   }
 )
 export type FindFirebaseTokensForNewContentNotificationResults =
   typeof FindFirebaseTokensForNewContentNotificationResults.Type
 
 export const createFindTokensForNewContentNotification = Effect.gen(
-  function* (_) {
-    const sql = yield* _(PgClient.PgClient)
+  function* () {
+    const sql = yield* PgClient.PgClient
 
     const query = SqlSchema.findAll({
-      Request: Schema.DateFromSelf,
+      Request: Schema.Date,
       Result: FindFirebaseTokensForNewContentNotificationResults,
       execute: (params) => sql`
         SELECT

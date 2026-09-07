@@ -1,10 +1,10 @@
-import {HttpApiBuilder} from '@effect/platform/index'
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {isPublicKeyV2} from '@vexl-next/cryptography/src/KeyHolder/brandsV2'
 import {CurrentSecurity} from '@vexl-next/rest-api/src/apiSecurity'
 import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/specification'
 import createPaginatedResponse from '@vexl-next/server-utils/src/createPaginatedResponse'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {makeHttpApiHandler} from '@vexl-next/server-utils/src/makeHttpApiHandler'
 import {Array, Effect, Option, pipe, Schema} from 'effect'
 import {
   appVersionSupportingV2KeysConfig,
@@ -23,20 +23,19 @@ export const FetchCommonConnectionsNextPageToken = Schema.Struct({
   lastUserContactId: Schema.Int,
 })
 
-export const fetchCommonConnectionsPaginated = HttpApiBuilder.handler(
+export const fetchCommonConnectionsPaginated = makeHttpApiHandler(
   ContactApiSpecification,
   'Contact',
   'fetchCommonConnectionsPaginated',
   (req) =>
-    Effect.gen(function* (_) {
-      const security = yield* _(
+    Effect.gen(function* () {
+      const security = yield* pipe(
         CurrentSecurity,
         Effect.bind('serverHash', (s) => serverHashPhoneNumber(s.hash))
       )
-      const contactDb = yield* _(ContactDbService)
-      const publicImportCountThreshold = yield* _(
-        contactPublicImportCountThresholdConfig
-      )
+      const contactDb = yield* ContactDbService
+      const publicImportCountThreshold =
+        yield* contactPublicImportCountThresholdConfig
       const pubKeysToLookFor = pipe(
         req.payload.publicKeys,
         Array.dedupe,
@@ -54,30 +53,26 @@ export const fetchCommonConnectionsPaginated = HttpApiBuilder.handler(
       )
       const pubKeysV2 = Array.filter(pubKeysToLookFor, (a) => isPublicKeyV2(a))
 
-      const toReturn = yield* _(
-        createPaginatedResponse({
-          nextPageTokenSchema: FetchCommonConnectionsNextPageToken,
-          nextPageToken: req.payload.nextPageToken,
-          defaultNextPageToken: {
-            lastUserContactId: DEFAULT_LAST_USER_CONTACT_ID,
-          },
-          limit: req.payload.limit,
-          createNextPageToken: (
-            lastItem: FindCommonFriendsPaginatedResult
-          ) => ({
-            lastUserContactId: lastItem.userContactId,
+      const toReturn = yield* createPaginatedResponse({
+        nextPageTokenSchema: FetchCommonConnectionsNextPageToken,
+        nextPageToken: req.payload.nextPageToken,
+        defaultNextPageToken: {
+          lastUserContactId: DEFAULT_LAST_USER_CONTACT_ID,
+        },
+        limit: req.payload.limit,
+        createNextPageToken: (lastItem: FindCommonFriendsPaginatedResult) => ({
+          lastUserContactId: lastItem.userContactId,
+        }),
+        dbEffectToRun: ({limit, decodedNextPageToken}) =>
+          contactDb.findCommonFriendsPaginated({
+            ownerHash: security.serverHash,
+            publicKeys: pubKeysV1,
+            publicKeysV2: pubKeysV2,
+            limit,
+            userContactId: decodedNextPageToken?.lastUserContactId,
+            publicImportCountThreshold,
           }),
-          dbEffectToRun: ({limit, decodedNextPageToken}) =>
-            contactDb.findCommonFriendsPaginated({
-              ownerHash: security.serverHash,
-              publicKeys: pubKeysV1,
-              publicKeysV2: pubKeysV2,
-              limit,
-              userContactId: decodedNextPageToken?.lastUserContactId,
-              publicImportCountThreshold,
-            }),
-        })
-      )
+      })
 
       const minimalVersionSupportingV2keys =
         yield* appVersionSupportingV2KeysConfig
@@ -88,7 +83,7 @@ export const fetchCommonConnectionsPaginated = HttpApiBuilder.handler(
       const clientSupportsV2Keys =
         clientVersion >= minimalVersionSupportingV2keys
 
-      const commonFriendsWithClientHash = yield* _(
+      const commonFriendsWithClientHash = yield* pipe(
         toReturn.items,
         Array.map((oneContact) =>
           pipe(
@@ -104,7 +99,7 @@ export const fetchCommonConnectionsPaginated = HttpApiBuilder.handler(
             }))
           )
         ),
-        Effect.allWith({concurrency: 'unbounded'})
+        (effects) => Effect.all(effects, {concurrency: 'unbounded'})
       )
 
       return {

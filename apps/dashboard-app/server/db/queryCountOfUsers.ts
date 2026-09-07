@@ -1,18 +1,19 @@
-import {type SqlError} from '@effect/sql/SqlError'
+import {NumberFromString} from '@vexl-next/generic-utils/src/effect-helpers/NumberFromString'
 import {Effect, Schema} from 'effect'
-import {type ParseError} from 'effect/ParseResult'
+import {type SchemaError} from 'effect/Schema'
+import {type SqlError} from 'effect/unstable/sql/SqlError'
 import {PgContactClient} from './layer'
 
-const decodeNumberOfUsersResult = Schema.decodeUnknown(
+const decodeNumberOfUsersResult = Schema.decodeUnknownEffect(
   Schema.NonEmptyArray(
     Schema.Struct({
-      count: Schema.compose(Schema.NumberFromString, Schema.Number),
+      count: NumberFromString.pipe(Schema.decodeTo(Schema.Number)),
     })
   )
 )
 export const queryNumberOfUsers: Effect.Effect<
   number,
-  SqlError | ParseError,
+  SqlError | SchemaError,
   PgContactClient
 > = PgContactClient.pipe(
   Effect.flatMap(

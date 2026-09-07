@@ -2,7 +2,7 @@ import {
   PrivateKeyHolder,
   PublicKeyPemBase64,
 } from '@vexl-next/cryptography/src/KeyHolder'
-import {Schema} from 'effect'
+import {Effect, Option, Predicate, Schema, SchemaGetter} from 'effect'
 import {Base64String} from '../utility/Base64String.brand'
 import {ExpoNotificationToken} from '../utility/ExpoNotificationToken.brand'
 import {UnixMilliseconds} from '../utility/UnixMilliseconds.brand'
@@ -21,7 +21,7 @@ import {VexlNotificationToken} from './notifications/VexlNotificationToken'
 import {FriendLevel, GoldenAvatarType, OfferId, OneOfferInState} from './offers'
 import {TradeChecklistUpdate} from './tradeChecklist'
 
-export const MessageType = Schema.Literal(
+export const MessageType = Schema.Literals([
   'MESSAGE',
   'REQUEST_REVEAL',
   'APPROVE_REVEAL',
@@ -41,10 +41,8 @@ export const MessageType = Schema.Literal(
   'VERSION_UPDATE',
   'FCM_CYPHER_UPDATE',
   'MESSAGE_READ',
-  // Local-only nudge to clean up an inactive chat. MUST NEVER be sent to the
-  // server or the other side.
-  'INACTIVITY_REMINDER'
-)
+  'INACTIVITY_REMINDER',
+])
 export type MessageType = typeof MessageType.Type
 
 export const ChatUserIdentity = Schema.Struct({
@@ -55,19 +53,21 @@ export const ChatUserIdentity = Schema.Struct({
 })
 export type ChatUserIdentity = typeof ChatUserIdentity.Type
 
-export const ChatMessageId = Schema.UUID.pipe(Schema.brand('ChatMessageId'))
+export const ChatMessageId = Schema.String.check(Schema.isUUID()).pipe(
+  Schema.brand('ChatMessageId')
+)
 export type ChatMessageId = typeof ChatMessageId.Type
 
 export const RepliedToData = Schema.Struct({
   text: Schema.String,
-  messageAuthor: Schema.Literal('me', 'them'),
+  messageAuthor: Schema.Literals(['me', 'them']),
   image: Schema.optional(UriString),
 })
 export type RepliedToData = typeof RepliedToData.Type
 
 export const RepliedToDataPayload = Schema.Struct({
   text: Schema.String,
-  messageAuthor: Schema.Literal('me', 'them'),
+  messageAuthor: Schema.Literals(['me', 'them']),
   image: Base64String,
 })
 export type RepliedToDataPayload = typeof RepliedToDataPayload.Type
@@ -94,10 +94,10 @@ export const ChatMessagePayload = Schema.Struct({
   ),
   // Accepts both NotificationCypher (legacy) and VexlNotificationToken (new)
   myFcmCypher: Schema.optional(
-    Schema.Union(NotificationCypher, VexlNotificationToken)
+    Schema.Union([NotificationCypher, VexlNotificationToken])
   ),
   lastReceivedFcmCypher: Schema.optional(
-    Schema.Union(NotificationCypher, VexlNotificationToken)
+    Schema.Union([NotificationCypher, VexlNotificationToken])
   ),
   // New dedicated fields for vexl notification tokens
   myVexlToken: Schema.optional(VexlNotificationToken),
@@ -135,10 +135,10 @@ export const ChatMessage = Schema.Struct({
   messageType: MessageType,
   // Accepts both NotificationCypher (legacy) and VexlNotificationToken (new)
   myFcmCypher: Schema.optional(
-    Schema.Union(NotificationCypher, VexlNotificationToken)
+    Schema.Union([NotificationCypher, VexlNotificationToken])
   ),
   lastReceivedFcmCypher: Schema.optional(
-    Schema.Union(NotificationCypher, VexlNotificationToken)
+    Schema.Union([NotificationCypher, VexlNotificationToken])
   ),
   // New dedicated fields for vexl notification tokens
   myVexlToken: Schema.optional(VexlNotificationToken),
@@ -163,7 +163,7 @@ export const Inbox = Schema.Struct({
 })
 export type Inbox = typeof Inbox.Type
 
-export const ChatOrigin = Schema.Union(
+export const ChatOrigin = Schema.Union([
   Schema.Struct({
     type: Schema.Literal('myOffer'),
     offerId: OfferId,
@@ -184,8 +184,8 @@ export const ChatOrigin = Schema.Union(
     noteId: NoteId,
     note: Schema.optional(OneNoteInState),
   }),
-  Schema.Struct({type: Schema.Literal('unknown')})
-)
+  Schema.Struct({type: Schema.Literal('unknown')}),
+])
 export type ChatOrigin = typeof ChatOrigin.Type
 
 export const ChatId = Schema.String.pipe(Schema.brand('ChatId'))
@@ -211,23 +211,39 @@ export const Chat = Schema.Struct({
   inbox: Inbox,
   origin: ChatOrigin,
   otherSide: ChatUserIdentity,
-  isUnread: Schema.optionalWith(Schema.Boolean, {default: () => true}),
-  lastMessageReadByOtherSideAt: Schema.optionalWith(UnixMilliseconds, {
-    nullable: true,
-  }),
-  showInfoBar: Schema.optionalWith(Schema.Boolean, {default: () => true}),
-  showVexlbotNotifications: Schema.optionalWith(Schema.Boolean, {
-    default: () => true,
-  }),
-  showVexlbotInitialMessage: Schema.optionalWith(Schema.Boolean, {
-    default: () => true,
-  }),
+  isUnread: Schema.Boolean.pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): true => true)),
+    Schema.withConstructorDefault(Effect.sync((): true => true))
+  ),
+  lastMessageReadByOtherSideAt: Schema.optional(
+    Schema.NullOr(UnixMilliseconds)
+  ).pipe(
+    Schema.decodeTo(Schema.optional(Schema.toType(UnixMilliseconds)), {
+      decode: SchemaGetter.transformOptional<
+        UnixMilliseconds | undefined,
+        UnixMilliseconds | null | undefined
+      >((value) => Option.filter(value, Predicate.isNotNull)),
+      encode: SchemaGetter.passthrough(),
+    })
+  ),
+  showInfoBar: Schema.Boolean.pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): true => true)),
+    Schema.withConstructorDefault(Effect.sync((): true => true))
+  ),
+  showVexlbotNotifications: Schema.Boolean.pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): true => true)),
+    Schema.withConstructorDefault(Effect.sync((): true => true))
+  ),
+  showVexlbotInitialMessage: Schema.Boolean.pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): true => true)),
+    Schema.withConstructorDefault(Effect.sync((): true => true))
+  ),
   tradeChecklistCalendarEventId: Schema.optional(CalendarEventId),
   otherSideVersion: Schema.optional(VersionString),
   lastReportedVersion: Schema.optional(VersionString),
   // Accepts both NotificationCypher (legacy) and VexlNotificationToken (new)
   otherSideFcmCypher: Schema.optional(
-    Schema.Union(NotificationCypher, VexlNotificationToken)
+    Schema.Union([NotificationCypher, VexlNotificationToken])
   ),
   // New dedicated fields for vexl notification tokens
   otherSideVexlToken: Schema.optional(VexlNotificationToken),
@@ -253,7 +269,15 @@ export const ChatMessageRequiringNewerVersion = Schema.Struct({
   uuid: ChatMessageId,
   messageType: Schema.Literal('REQUIRES_NEWER_VERSION'),
   serverMessage: ServerMessage,
-  myVersion: Schema.optionalWith(VersionString, {nullable: true}),
+  myVersion: Schema.optional(Schema.NullOr(VersionString)).pipe(
+    Schema.decodeTo(Schema.optional(Schema.toType(VersionString)), {
+      decode: SchemaGetter.transformOptional<
+        VersionString | undefined,
+        VersionString | null | undefined
+      >((value) => Option.filter(value, Predicate.isNotNull)),
+      encode: SchemaGetter.passthrough(),
+    })
+  ),
   minimalRequiredVersion: VersionString,
   time: UnixMilliseconds,
   senderPublicKey: PublicKeyPemBase64,
@@ -263,10 +287,10 @@ export const ChatMessageRequiringNewerVersion = Schema.Struct({
   image: Schema.optional(Schema.Undefined),
   // Accepts both NotificationCypher (legacy) and VexlNotificationToken (new)
   myFcmCypher: Schema.optional(
-    Schema.Union(NotificationCypher, VexlNotificationToken)
+    Schema.Union([NotificationCypher, VexlNotificationToken])
   ),
   lastReceivedFcmCypher: Schema.optional(
-    Schema.Union(NotificationCypher, VexlNotificationToken)
+    Schema.Union([NotificationCypher, VexlNotificationToken])
   ),
   // New dedicated fields for vexl notification tokens
   myVexlToken: Schema.optional(VexlNotificationToken),
@@ -287,7 +311,7 @@ export class TypingMessage extends Schema.TaggedClass<TypingMessage>(
   myPublicKey: PublicKeyPemBase64,
 }) {}
 
-export const StreamOnlyChatMessagePayload = Schema.Union(TypingMessage)
+export const StreamOnlyChatMessagePayload = Schema.Union([TypingMessage])
 export type StreamOnlyChatMessagePayload =
   typeof StreamOnlyChatMessagePayload.Type
 

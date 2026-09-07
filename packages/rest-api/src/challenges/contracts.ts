@@ -8,7 +8,7 @@ import {
   CryptoBoxSignature,
 } from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/EcdsaSignature.brand'
-import {Schema} from 'effect/index'
+import {Effect, Option, Schema} from 'effect'
 
 export const Challenge = CryptoBoxCypher.pipe(Schema.brand('Challenge'))
 export type Challenge = Schema.Schema.Type<typeof Challenge>
@@ -16,16 +16,17 @@ export type Challenge = Schema.Schema.Type<typeof Challenge>
 export const SignedChallenge = Schema.Struct({
   challenge: Challenge,
   signature: EcdsaSignature,
-  signatureV2: Schema.optionalWith(CryptoBoxSignature, {
-    nullable: true,
-    as: 'Option',
-  }),
+  signatureV2: Schema.OptionFromOptionalNullOr(CryptoBoxSignature).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
 })
 export type SignedChallenge = Schema.Schema.Type<typeof SignedChallenge>
 
 export const RequestBaseWithChallenge = Schema.Struct({
   publicKey: PublicKeyPemBase64,
-  publicKeyV2: Schema.optionalWith(PublicKeyV2, {nullable: true, as: 'Option'}),
+  publicKeyV2: Schema.OptionFromOptionalNullOr(PublicKeyV2).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
   signedChallenge: SignedChallenge,
 })
 export type RequestBaseWithChallenge = typeof RequestBaseWithChallenge.Type
@@ -33,7 +34,10 @@ export type RequestBaseWithChallenge = typeof RequestBaseWithChallenge.Type
 export class InvalidChallengeError extends Schema.TaggedError<InvalidChallengeError>(
   'InvalidChallengeError'
 )('InvalidChallengeError', {
-  status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
+  status: Schema.Literal(400).pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): 400 => 400)),
+    Schema.withConstructorDefault(Effect.sync((): 400 => 400))
+  ),
 }) {}
 
 export class PublicKeyV2MissingError extends Schema.TaggedError<PublicKeyV2MissingError>(
@@ -47,12 +51,17 @@ export class KeyAlreadySetError extends Schema.TaggedError<KeyAlreadySetError>(
 export class ErrorSigningChallenge extends Schema.TaggedError<ErrorSigningChallenge>(
   'ErrorSigningChallenge'
 )('ErrorSigningChallenge', {
-  status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
+  status: Schema.Literal(400).pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): 400 => 400)),
+    Schema.withConstructorDefault(Effect.sync((): 400 => 400))
+  ),
 }) {}
 
 export const CreateChallengeRequest = Schema.Struct({
   publicKey: PublicKeyPemBase64,
-  publicKeyV2: Schema.optionalWith(PublicKeyV2, {nullable: true, as: 'Option'}),
+  publicKeyV2: Schema.OptionFromOptionalNullOr(PublicKeyV2).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
 })
 export type CreateChallengeRequest = typeof CreateChallengeRequest.Type
 

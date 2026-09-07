@@ -1,6 +1,6 @@
 import {Button, EditRow, Typography} from '@vexl-next/ui'
 import type {IconProps} from '@vexl-next/ui/src/icons/types'
-import {useMolecule} from 'bunshi/dist/react'
+import {useMolecule} from 'bunshi/react'
 import {useAtom} from 'jotai'
 import React from 'react'
 import Animated, {FadeIn, FadeOut} from 'react-native-reanimated'

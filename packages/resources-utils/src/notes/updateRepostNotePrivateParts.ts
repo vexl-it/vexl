@@ -7,7 +7,7 @@ import {type SymmetricKey} from '@vexl-next/domain/src/general/offers'
 import {type UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
 import {type ServerNotePrivatePart} from '@vexl-next/rest-api/src/services/offer/notesContracts'
-import {Array, Effect, Either, pipe} from 'effect'
+import {Array, Effect, Result, pipe} from 'effect'
 import {type OfferEncryptionProgress} from '../offers/OfferEncryptionProgress'
 import {PRIVATE_PARTS_BATCH_SIZE} from '../offers/privatePartsUploadBatchSize'
 import {TimeLimitReachedError} from '../offers/updatePrivateParts'
@@ -19,7 +19,7 @@ import {
   type NotePrivatePayloadToEncrypt,
 } from './utils/encryptNotePrivatePart'
 
-type CreateRepostNotePrivatePartError = Effect.Effect.Error<
+type CreateRepostNotePrivatePartError = Effect.Error<
   ReturnType<OfferApi['createRepostNotePrivatePart']>
 >
 
@@ -68,11 +68,11 @@ function uploadRepostNotePrivatePartsBatch({
               )
             })
           ),
-          Effect.either,
+          Effect.result,
           Effect.map((result) => ({chunk: oneChunk, result}))
         )
     ),
-    Effect.allWith({concurrency: 'unbounded'}),
+    (effects) => Effect.all(effects, {concurrency: 'unbounded'}),
     Effect.map(
       Array.reduce(
         emptyResult,
@@ -80,14 +80,14 @@ function uploadRepostNotePrivatePartsBatch({
           acc: UploadRepostNotePrivatePartsBatchResult,
           {chunk, result}
         ): UploadRepostNotePrivatePartsBatchResult => {
-          if (Either.isLeft(result))
+          if (Result.isFailure(result))
             return {
               ...acc,
               failed: [
                 ...acc.failed,
                 ...Array.map(chunk, (one) => ({
                   privatePart: one,
-                  error: result.left,
+                  error: result.failure,
                 })),
               ],
             }
@@ -145,7 +145,7 @@ export default function updateRepostNotePrivateParts({
   // expired). Callers should drop their local tracking record.
   repostNotFoundOnServer: boolean
 }> {
-  return Effect.gen(function* (_) {
+  return Effect.gen(function* () {
     const removedConnections = subtractArrays(
       deduplicate([
         ...currentConnections.firstLevel,
@@ -185,12 +185,12 @@ export default function updateRepostNotePrivateParts({
       )
     )
 
-    const encryptionResult = yield* _(
+    const encryptionResult = yield* pipe(
       privatePayloads,
       Array.map((payload, i) =>
         pipe(
           Effect.succeed(payload),
-          Effect.zipLeft(
+          Effect.tap(
             Effect.sync(() => {
               if (onProgress)
                 onProgress({
@@ -213,18 +213,18 @@ export default function updateRepostNotePrivateParts({
             return Effect.succeed(payload)
           }),
           Effect.flatMap(encryptNotePrivatePart),
-          Effect.either
+          Effect.result
         )
       ),
       Effect.all,
       Effect.map((result) => ({
-        timeLimitReachedErrors: Array.getLefts(result).filter(
+        timeLimitReachedErrors: Array.getFailures(result).filter(
           (left) => left._tag === 'TimeLimitReachedError'
         ),
-        encryptionErrors: Array.getLefts(result).filter(
+        encryptionErrors: Array.getFailures(result).filter(
           (left) => left._tag === 'NotePrivatePartEncryptionError'
         ),
-        privateParts: Array.getRights(result),
+        privateParts: Array.getSuccesses(result),
       }))
     )
 
@@ -235,7 +235,7 @@ export default function updateRepostNotePrivateParts({
       error: CreateRepostNotePrivatePartError
     }> = []
     if (encryptionResult.privateParts.length > 0) {
-      uploadErrors = yield* _(
+      uploadErrors = yield* pipe(
         uploadRepostNotePrivatePartsBatch({
           offerApi: api,
           repostId,

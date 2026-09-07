@@ -1,5 +1,5 @@
 import {type SvgStringOrImageUri} from '@vexl-next/domain/src/utility/SvgStringOrImageUri.brand'
-import {Array, Effect, Option} from 'effect'
+import {Array, Effect, Option, pipe} from 'effect'
 import {atom} from 'jotai'
 import {Alert} from 'react-native'
 import {apiAtom} from '../../../api'
@@ -43,19 +43,17 @@ const editExistingContactActionAtom: ActionAtomType<
   ) => {
     const {t} = get(translationAtom)
 
-    return Effect.gen(function* (_) {
+    return Effect.gen(function* () {
       const importedContacts = get(importedContactsAtom)
 
-      const {contactName} = yield* _(
-        set(showUpsertContactDialogAtom, {
-          type: 'edit',
-          contactName: existingContact.info.name,
-          existingContactName: existingContact.existingContactName,
-          contactNumber: existingContact.computedValues.normalizedNumber,
-          phoneContactId: existingContact.info.nonUniqueContactId,
-          profileImage: existingContact.avatar,
-        })
-      )
+      const {contactName} = yield* set(showUpsertContactDialogAtom, {
+        type: 'edit',
+        contactName: existingContact.info.name,
+        existingContactName: existingContact.existingContactName,
+        contactNumber: existingContact.computedValues.normalizedNumber,
+        phoneContactId: existingContact.info.nonUniqueContactId,
+        profileImage: existingContact.avatar,
+      })
 
       set(
         storedContactsAtom,
@@ -70,11 +68,9 @@ const editExistingContactActionAtom: ActionAtomType<
         )
       )
 
-      yield* _(
-        set(globalDialogAtom, {
-          title: t('addContactDialog.changesSaved'),
-        })
-      )
+      yield* set(globalDialogAtom, {
+        title: t('addContactDialog.changesSaved'),
+      })
       return true
     }).pipe(
       Effect.match({
@@ -102,17 +98,15 @@ const editExistingContactActionAtom: ActionAtomType<
 const importContactActionAtom = atom(
   null,
   (get, set, newContact: StoredContactWithComputedValues) => {
-    return Effect.gen(function* (_) {
+    return Effect.gen(function* () {
       const contactApi = get(apiAtom).contact
 
       set(loadingOverlayDisplayedAtom, true)
 
-      const response = yield* _(
-        contactApi.importContacts({
-          contacts: [newContact.computedValues.hash],
-          replace: false,
-        })
-      )
+      const response = yield* contactApi.importContacts({
+        contacts: [newContact.computedValues.hash],
+        replace: false,
+      })
       const contactServerHash = Array.findFirst(
         response.phoneNumberHashesToServerToClientHash,
         (one) => one.hashedNumber === newContact.computedValues.hash
@@ -156,26 +150,25 @@ const createContactWithUiFeedbackActionAtom: ActionAtomType<
   ) => {
     const {t} = get(translationAtom)
 
-    return Effect.gen(function* (_) {
-      const {contactName: customName, saveToPhone} = yield* _(
-        set(showUpsertContactDialogAtom, {
+    return Effect.gen(function* () {
+      const {contactName: customName, saveToPhone} = yield* set(
+        showUpsertContactDialogAtom,
+        {
           type: 'create',
           contactNumber: newContact.computedValues.normalizedNumber,
           contactName: newContact.info.name,
           phoneContactId: newContact.info.nonUniqueContactId,
           profileImage: newContact.avatar,
-        })
+        }
       )
 
-      const importedContact = yield* _(
-        set(importContactActionAtom, {
-          ...newContact,
-          info: {...newContact.info, name: customName},
-        })
-      )
+      const importedContact = yield* set(importContactActionAtom, {
+        ...newContact,
+        info: {...newContact.info, name: customName},
+      })
 
       const addContactToPhoneSuccess = saveToPhone
-        ? yield* _(
+        ? yield* pipe(
             areContactsPermissionsGranted(),
             Effect.flatMap((contactsPermissionsGranted) =>
               contactsPermissionsGranted
@@ -196,20 +189,18 @@ const createContactWithUiFeedbackActionAtom: ActionAtomType<
           )
         : false
 
-      yield* _(
-        set(globalDialogAtom, {
-          title: t('addContactDialog.contactAdded'),
-          subtitle: t(
-            addContactToPhoneSuccess
-              ? 'addContactDialog.youHaveAddedContactToVexlAndPhoneContacts'
-              : 'addContactDialog.youHaveAddedContactToVexlContacts',
-            {
-              contactName: customName,
-            }
-          ),
-          positiveButtonText: t('common.niceWithExclamationMark'),
-        })
-      )
+      yield* set(globalDialogAtom, {
+        title: t('addContactDialog.contactAdded'),
+        subtitle: t(
+          addContactToPhoneSuccess
+            ? 'addContactDialog.youHaveAddedContactToVexlAndPhoneContacts'
+            : 'addContactDialog.youHaveAddedContactToVexlContacts',
+          {
+            contactName: customName,
+          }
+        ),
+        positiveButtonText: t('common.niceWithExclamationMark'),
+      })
       return true
     }).pipe(
       Effect.match({

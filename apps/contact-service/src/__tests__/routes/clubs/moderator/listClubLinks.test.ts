@@ -1,4 +1,3 @@
-import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {generateClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
@@ -13,7 +12,8 @@ import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {UserIsNotModeratorError} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {addTestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
-import {Array, Effect, Option, Order, Schema} from 'effect'
+import {Array, Effect, Option, Order, pipe, Schema} from 'effect'
+import {SqlClient} from 'effect/unstable/sql'
 import {ClubMembersDbService} from '../../../../db/ClubMemberDbService'
 import {ClubsDbService} from '../../../../db/ClubsDbService'
 import {type ClubRecordId} from '../../../../db/ClubsDbService/domain'
@@ -43,78 +43,68 @@ let clubId: ClubRecordId
 
 beforeEach(async () => {
   await runPromiseInMockedEnvironment(
-    Effect.gen(function* (_) {
-      const sql = yield* _(SqlClient.SqlClient)
-      yield* _(sql`DELETE FROM club_invitation_link`)
-      yield* _(sql`DELETE FROM club_member`)
-      yield* _(sql`DELETE FROM club`)
+    Effect.gen(function* () {
+      const sql = yield* SqlClient.SqlClient
+      yield* sql`DELETE FROM club_invitation_link`
+      yield* sql`DELETE FROM club_member`
+      yield* sql`DELETE FROM club`
 
-      const app = yield* _(NodeTestingApp)
-      yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
-      yield* _(
-        app.ClubsAdmin.createClub({
-          headers: {'x-admin-token': ADMIN_TOKEN},
-          payload: {
-            club,
-          },
-        })
-      )
+      const app = yield* NodeTestingApp
+      yield* addTestHeaders({'x-admin-token': ADMIN_TOKEN})
+      yield* app.ClubsAdmin.createClub({
+        headers: {'x-admin-token': ADMIN_TOKEN},
+        payload: {
+          club,
+        },
+      })
 
-      const clubsDb = yield* _(ClubsDbService)
-      const createdClub = yield* _(
+      const clubsDb = yield* ClubsDbService
+      const createdClub = yield* pipe(
         clubsDb.findClubByUuid({uuid: club.uuid}),
-        Effect.flatten
+        Effect.flatMap(Effect.fromOption)
       )
       clubId = createdClub.id
 
-      const clubDb = yield* _(ClubMembersDbService)
-      yield* _(
-        clubDb.insertClubMember({
-          clubId,
-          publicKey: userKey.publicKeyPemBase64,
-          isModerator: true,
-          lastRefreshedAt: new Date(),
-          notificationToken: 'someToken' as ExpoNotificationToken,
-          vexlNotificationToken: 'vexl_nt_test' as VexlNotificationToken,
-          publicKeyV2: null,
-        })
-      )
+      const clubDb = yield* ClubMembersDbService
+      yield* clubDb.insertClubMember({
+        clubId,
+        publicKey: userKey.publicKeyPemBase64,
+        isModerator: true,
+        lastRefreshedAt: new Date(),
+        notificationToken: 'someToken' as ExpoNotificationToken,
+        vexlNotificationToken: 'vexl_nt_test' as VexlNotificationToken,
+        publicKeyV2: null,
+      })
     })
   )
 })
 
-const sortLinks = Array.sortBy(Order.string)
+const sortLinks = Array.sortBy(Order.String)
 
 describe('List club links', () => {
   it('Should return club links', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
-        const link1 = yield* _(
-          app.ClubsModerator.generateClubJoinLink({
-            payload: {
-              ...(yield* _(generateAndSignChallenge(userKey))),
-              clubUuid: club.uuid,
-            },
-          })
-        )
-        const link2 = yield* _(
-          app.ClubsModerator.generateClubJoinLink({
-            payload: {
-              ...(yield* _(generateAndSignChallenge(userKey))),
-              clubUuid: club.uuid,
-            },
-          })
-        )
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
+        const link1 = yield* app.ClubsModerator.generateClubJoinLink({
+          payload: {
+            ...(yield* generateAndSignChallenge(userKey)),
+            clubUuid: club.uuid,
+          },
+        })
+        const link2 = yield* app.ClubsModerator.generateClubJoinLink({
+          payload: {
+            ...(yield* generateAndSignChallenge(userKey)),
+            clubUuid: club.uuid,
+          },
+        })
 
-        const linksListResponse = yield* _(
-          app.ClubsModerator.listClubLinks({
-            payload: {
-              ...(yield* _(generateAndSignChallenge(userKey))),
-              clubUuid: club.uuid,
-            },
-          })
-        )
+        const linksListResponse = yield* app.ClubsModerator.listClubLinks({
+          payload: {
+            ...(yield* generateAndSignChallenge(userKey)),
+            clubUuid: club.uuid,
+          },
+        })
 
         expect(linksListResponse.clubUuid).toEqual(club.uuid)
         const receivedCodes = sortLinks(
@@ -141,31 +131,29 @@ describe('List club links', () => {
 
   it('Fails with UserIsNotModeratorError when member is not a moderator', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
 
-        const memberDb = yield* _(ClubMembersDbService)
+        const memberDb = yield* ClubMembersDbService
         const nonModeratorMember = generatePrivateKey()
-        yield* _(
-          memberDb.insertClubMember({
-            publicKey: nonModeratorMember.publicKeyPemBase64,
-            clubId,
-            isModerator: false,
-            lastRefreshedAt: new Date(),
-            notificationToken: null,
-            vexlNotificationToken: null,
-            publicKeyV2: null,
-          })
-        )
+        yield* memberDb.insertClubMember({
+          publicKey: nonModeratorMember.publicKeyPemBase64,
+          clubId,
+          isModerator: false,
+          lastRefreshedAt: new Date(),
+          notificationToken: null,
+          vexlNotificationToken: null,
+          publicKeyV2: null,
+        })
 
-        const errorResponse = yield* _(
+        const errorResponse = yield* pipe(
           app.ClubsModerator.listClubLinks({
             payload: {
-              ...(yield* _(generateAndSignChallenge(nonModeratorMember))),
+              ...(yield* generateAndSignChallenge(nonModeratorMember)),
               clubUuid: club.uuid,
             },
           }),
-          Effect.either
+          Effect.result
         )
 
         expectErrorResponse(UserIsNotModeratorError)(errorResponse)
@@ -175,19 +163,19 @@ describe('List club links', () => {
 
   it('Fails with 404 when member is not found', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
 
         const nonModeratorMember = generatePrivateKey()
 
-        const errorResponse = yield* _(
+        const errorResponse = yield* pipe(
           app.ClubsModerator.listClubLinks({
             payload: {
-              ...(yield* _(generateAndSignChallenge(nonModeratorMember))),
+              ...(yield* generateAndSignChallenge(nonModeratorMember)),
               clubUuid: club.uuid,
             },
           }),
-          Effect.either
+          Effect.result
         )
 
         expectErrorResponse(NotFoundError)(errorResponse)
@@ -197,17 +185,17 @@ describe('List club links', () => {
 
   it('Fails with 404 when club is not found', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
 
-        const errorResponse = yield* _(
+        const errorResponse = yield* pipe(
           app.ClubsModerator.listClubLinks({
             payload: {
-              ...(yield* _(generateAndSignChallenge(userKey))),
+              ...(yield* generateAndSignChallenge(userKey)),
               clubUuid: generateClubUuid(),
             },
           }),
-          Effect.either
+          Effect.result
         )
 
         expectErrorResponse(NotFoundError)(errorResponse)
@@ -217,12 +205,12 @@ describe('List club links', () => {
 
   it('Fails with Invalid challenge when club is not found', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
 
-        const challenge = yield* _(generateAndSignChallenge(userKey))
+        const challenge = yield* generateAndSignChallenge(userKey)
 
-        const errorResponse = yield* _(
+        const errorResponse = yield* pipe(
           app.ClubsModerator.listClubLinks({
             payload: {
               ...challenge,
@@ -234,7 +222,7 @@ describe('List club links', () => {
               clubUuid: club.uuid,
             },
           }),
-          Effect.either
+          Effect.result
         )
 
         expectErrorResponse(InvalidChallengeError)(errorResponse)
@@ -244,8 +232,8 @@ describe('List club links', () => {
 
   it('Fails with 404 when user is in different club', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
 
         const user2 = generatePrivateKey()
         const club2 = {
@@ -257,46 +245,41 @@ describe('List club links', () => {
           validUntil: new Date(),
           reportLimit: 10,
         }
-        yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
-        yield* _(
-          app.ClubsAdmin.createClub({
-            headers: {'x-admin-token': ADMIN_TOKEN},
-            payload: {
-              club: club2,
-            },
-          })
-        )
-        const adminInviteCodeForClub2 = yield* _(
-          app.ClubsAdmin.generateClubInviteLinkForAdmin({
+        yield* addTestHeaders({'x-admin-token': ADMIN_TOKEN})
+        yield* app.ClubsAdmin.createClub({
+          headers: {'x-admin-token': ADMIN_TOKEN},
+          payload: {
+            club: club2,
+          },
+        })
+        const adminInviteCodeForClub2 =
+          yield* app.ClubsAdmin.generateClubInviteLinkForAdmin({
             headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               clubUuid: club2.uuid,
             },
           })
-        )
 
-        yield* _(
-          app.ClubsMember.joinClub({
-            headers: testCommonHeaders,
-            payload: {
-              code: adminInviteCodeForClub2.link.code,
-              ...(yield* _(generateAndSignChallenge(user2))),
-              contactsImported: false,
-              notificationToken: Option.none(),
-              vexlNotificationToken: Option.none(),
-              publicKeyV2: Option.none(),
-            },
-          })
-        )
+        yield* app.ClubsMember.joinClub({
+          headers: testCommonHeaders,
+          payload: {
+            code: adminInviteCodeForClub2.link.code,
+            ...(yield* generateAndSignChallenge(user2)),
+            contactsImported: false,
+            notificationToken: Option.none(),
+            vexlNotificationToken: Option.none(),
+            publicKeyV2: Option.none(),
+          },
+        })
 
-        const errorResponse = yield* _(
+        const errorResponse = yield* pipe(
           app.ClubsModerator.listClubLinks({
             payload: {
-              ...(yield* _(generateAndSignChallenge(user2))),
+              ...(yield* generateAndSignChallenge(user2)),
               clubUuid: club.uuid,
             },
           }),
-          Effect.either
+          Effect.result
         )
 
         expectErrorResponse(NotFoundError)(errorResponse)

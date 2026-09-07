@@ -9,23 +9,21 @@ import {askAreYouSureActionAtom} from '../GlobalDialog'
 export const showClaimConfirmationDialogActionAtom = atom(null, (get, set) => {
   const {t} = get(translationAtom)
 
-  return Effect.gen(function* (_) {
-    yield* _(
-      set(askAreYouSureActionAtom, {
-        variant: 'info',
-        steps: [
-          {
-            type: 'StepWithText',
-            title: t('donationConfirmation.importantNotice'),
-            description: t(
-              'donationConfirmation.toGenerateTheDonationConfirmation'
-            ),
-            positiveButtonText: t('common.continue'),
-            negativeButtonText: t('common.cancel'),
-          },
-        ],
-      })
-    )
+  return Effect.gen(function* () {
+    yield* set(askAreYouSureActionAtom, {
+      variant: 'info',
+      steps: [
+        {
+          type: 'StepWithText',
+          title: t('donationConfirmation.importantNotice'),
+          description: t(
+            'donationConfirmation.toGenerateTheDonationConfirmation'
+          ),
+          positiveButtonText: t('common.continue'),
+          negativeButtonText: t('common.cancel'),
+        },
+      ],
+    })
 
     const emailBody = encodeURIComponent(
       `${t('donationConfirmation.IWouldLikeToRequestAConfirmation')}\n\n

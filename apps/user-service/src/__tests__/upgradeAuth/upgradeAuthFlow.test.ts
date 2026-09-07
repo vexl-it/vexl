@@ -6,7 +6,7 @@ import {UpgradeAuthInvalidSignatureError} from '@vexl-next/rest-api/src/services
 import {verifyVexlAuthHeader} from '@vexl-next/server-utils/src/serverSecurity'
 import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
-import {Effect, Schema} from 'effect'
+import {Effect, pipe, Schema} from 'effect'
 import {makeTestCommonAndSecurityHeaders} from '../utils/createTestCommonAndSecurityHeaders'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../utils/runPromiseInMockedEnvironment'
@@ -19,91 +19,81 @@ const expectUpgradeAuthError = expectErrorResponse(
 describe('upgrade auth flow', () => {
   it('should return signed vexl auth header for valid challenge response', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
         const oldKeyPair = generatePrivateKey()
-        const authHeaders = yield* _(
-          createDummyAuthHeadersForUser({
-            phoneNumber,
-            publicKey: oldKeyPair.publicKeyPemBase64,
-          })
-        )
+        const authHeaders = yield* createDummyAuthHeadersForUser({
+          phoneNumber,
+          publicKey: oldKeyPair.publicKeyPemBase64,
+        })
         const headers = makeTestCommonAndSecurityHeaders(authHeaders)
-        const v2KeyPair = yield* _(
-          Effect.promise(async () => await cryptobox.generateKeyPair())
+        const v2KeyPair = yield* Effect.promise(
+          async () => await cryptobox.generateKeyPair()
         )
 
-        const initResponse = yield* _(
-          client.UpgradeAuth.initUpgradeAuth({
-            headers,
-            payload: {
-              publicKeyV2: v2KeyPair.publicKey,
-            },
-          })
-        )
+        const initResponse = yield* client.UpgradeAuth.initUpgradeAuth({
+          headers,
+          payload: {
+            publicKeyV2: v2KeyPair.publicKey,
+          },
+        })
         expect(initResponse.challenge).toBeDefined()
 
-        const signature = yield* _(
-          cryptoBoxSign(v2KeyPair.privateKey)(initResponse.challenge)
+        const signature = yield* cryptoBoxSign(v2KeyPair.privateKey)(
+          initResponse.challenge
         )
 
-        const submitResponse = yield* _(
-          client.UpgradeAuth.submitUpgradeAuth({
-            headers,
-            payload: {
-              publicKeyV2: v2KeyPair.publicKey,
-              challenge: initResponse.challenge,
-              signature,
-            },
-          })
-        )
+        const submitResponse = yield* client.UpgradeAuth.submitUpgradeAuth({
+          headers,
+          payload: {
+            publicKeyV2: v2KeyPair.publicKey,
+            challenge: initResponse.challenge,
+            signature,
+          },
+        })
 
         expect(submitResponse.vexlAuthHeader.data.hash).toBe(authHeaders.hash)
         expect(submitResponse.vexlAuthHeader.data.pk).toBe(v2KeyPair.publicKey)
         expect(
-          (yield* _(
+          (yield* pipe(
             verifyVexlAuthHeader(submitResponse.vexlAuthHeader),
-            Effect.either
+            Effect.result
           ))._tag
-        ).toBe('Right')
+        ).toBe('Success')
       })
     )
   })
 
   it('should fail when challenge response is signed by a different key', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
         const oldKeyPair = generatePrivateKey()
-        const authHeaders = yield* _(
-          createDummyAuthHeadersForUser({
-            phoneNumber,
-            publicKey: oldKeyPair.publicKeyPemBase64,
-          })
-        )
+        const authHeaders = yield* createDummyAuthHeadersForUser({
+          phoneNumber,
+          publicKey: oldKeyPair.publicKeyPemBase64,
+        })
         const headers = makeTestCommonAndSecurityHeaders(authHeaders)
 
-        const v2KeyPair = yield* _(
-          Effect.promise(async () => await cryptobox.generateKeyPair())
+        const v2KeyPair = yield* Effect.promise(
+          async () => await cryptobox.generateKeyPair()
         )
-        const wrongSignerKeyPair = yield* _(
-          Effect.promise(async () => await cryptobox.generateKeyPair())
-        )
-
-        const initResponse = yield* _(
-          client.UpgradeAuth.initUpgradeAuth({
-            headers,
-            payload: {
-              publicKeyV2: v2KeyPair.publicKey,
-            },
-          })
+        const wrongSignerKeyPair = yield* Effect.promise(
+          async () => await cryptobox.generateKeyPair()
         )
 
-        const wrongSignature = yield* _(
-          cryptoBoxSign(wrongSignerKeyPair.privateKey)(initResponse.challenge)
-        )
+        const initResponse = yield* client.UpgradeAuth.initUpgradeAuth({
+          headers,
+          payload: {
+            publicKeyV2: v2KeyPair.publicKey,
+          },
+        })
 
-        const submitResponse = yield* _(
+        const wrongSignature = yield* cryptoBoxSign(
+          wrongSignerKeyPair.privateKey
+        )(initResponse.challenge)
+
+        const submitResponse = yield* pipe(
           client.UpgradeAuth.submitUpgradeAuth({
             headers,
             payload: {
@@ -112,7 +102,7 @@ describe('upgrade auth flow', () => {
               signature: wrongSignature,
             },
           }),
-          Effect.either
+          Effect.result
         )
 
         expectUpgradeAuthError(submitResponse)
@@ -122,37 +112,33 @@ describe('upgrade auth flow', () => {
 
   it('should fail when challenge was created for a different public key', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
         const oldKeyPair = generatePrivateKey()
-        const authHeaders = yield* _(
-          createDummyAuthHeadersForUser({
-            phoneNumber,
-            publicKey: oldKeyPair.publicKeyPemBase64,
-          })
-        )
+        const authHeaders = yield* createDummyAuthHeadersForUser({
+          phoneNumber,
+          publicKey: oldKeyPair.publicKeyPemBase64,
+        })
         const headers = makeTestCommonAndSecurityHeaders(authHeaders)
-        const v2KeyPair = yield* _(
-          Effect.promise(async () => await cryptobox.generateKeyPair())
+        const v2KeyPair = yield* Effect.promise(
+          async () => await cryptobox.generateKeyPair()
         )
-        const otherV2KeyPair = yield* _(
-          Effect.promise(async () => await cryptobox.generateKeyPair())
-        )
-
-        const initResponse = yield* _(
-          client.UpgradeAuth.initUpgradeAuth({
-            headers,
-            payload: {
-              publicKeyV2: otherV2KeyPair.publicKey,
-            },
-          })
+        const otherV2KeyPair = yield* Effect.promise(
+          async () => await cryptobox.generateKeyPair()
         )
 
-        const signature = yield* _(
-          cryptoBoxSign(v2KeyPair.privateKey)(initResponse.challenge)
+        const initResponse = yield* client.UpgradeAuth.initUpgradeAuth({
+          headers,
+          payload: {
+            publicKeyV2: otherV2KeyPair.publicKey,
+          },
+        })
+
+        const signature = yield* cryptoBoxSign(v2KeyPair.privateKey)(
+          initResponse.challenge
         )
 
-        const submitResponse = yield* _(
+        const submitResponse = yield* pipe(
           client.UpgradeAuth.submitUpgradeAuth({
             headers,
             payload: {
@@ -161,7 +147,7 @@ describe('upgrade auth flow', () => {
               signature,
             },
           }),
-          Effect.either
+          Effect.result
         )
 
         expectUpgradeAuthError(submitResponse)

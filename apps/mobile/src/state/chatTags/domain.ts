@@ -4,12 +4,14 @@ import {Array, Option, pipe, Schema} from 'effect'
 
 export const CHAT_TAG_NAME_MAX_LENGTH = 30
 
-export const ChatTagId = Schema.UUID.pipe(Schema.brand('ChatTagId'))
+export const ChatTagId = Schema.String.check(Schema.isUUID()).pipe(
+  Schema.brand('ChatTagId')
+)
 export type ChatTagId = typeof ChatTagId.Type
 
 export const ChatTagName = Schema.Trim.pipe(
-  Schema.minLength(1),
-  Schema.maxLength(CHAT_TAG_NAME_MAX_LENGTH),
+  Schema.check(Schema.isMinLength(1)),
+  Schema.check(Schema.isMaxLength(CHAT_TAG_NAME_MAX_LENGTH)),
   Schema.brand('ChatTagName')
 )
 export type ChatTagName = typeof ChatTagName.Type
@@ -108,7 +110,7 @@ export function deleteChatTag(
           Array.filter((assignedTagId) => assignedTagId !== tagId)
         ),
       })),
-      Array.filter((assignment) => Array.isNonEmptyArray(assignment.tagIds))
+      Array.filter((assignment) => Array.isArrayNonEmpty(assignment.tagIds))
     ),
   }
 }
@@ -146,7 +148,7 @@ export function setTagsForChat({
 
   return {
     ...state,
-    assignments: Array.isNonEmptyArray(validTagIds)
+    assignments: Array.isArrayNonEmpty(validTagIds)
       ? Array.append(assignmentsWithoutChat, {chatId, tagIds: validTagIds})
       : assignmentsWithoutChat,
   }

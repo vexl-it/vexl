@@ -1,5 +1,5 @@
 import {newOfferId, type OfferId} from '@vexl-next/domain/src/general/offers'
-import {Array, Effect, Option, pipe} from 'effect'
+import {Array, Effect, Filter, Option, pipe} from 'effect'
 import {atom, type Atom, type PrimitiveAtom, type WritableAtom} from 'jotai'
 import {symmetricDifference} from 'set-operations'
 import {upsertInboxOnBeAndLocallyActionAtom} from '../../../state/chat/hooks/useCreateInbox'
@@ -103,10 +103,12 @@ export function createOfferFormPublishAtoms({
     const offerEncryptedAlsoForClubs = Array.length(selectedClubsUuids) > 0
     const clubsMembersCount = pipe(
       get(clubsWithMembersAtom),
-      Array.filterMap((club) =>
-        Array.contains(club.club.uuid)(selectedClubsUuids)
-          ? Option.some(club.members)
-          : Option.none()
+      Array.filterMap(
+        Filter.fromPredicateOption((club) =>
+          Array.contains(club.club.uuid)(selectedClubsUuids)
+            ? Option.some(club.members)
+            : Option.none()
+        )
       ),
       Array.flatten,
       Array.length
@@ -178,8 +180,8 @@ export function createOfferFormPublishAtoms({
       const {t} = get(translationAtom)
       const importedContactsCount = get(importedContactsCountAtom)
 
-      return Effect.gen(function* (_) {
-        const valid = yield* _(set(validateOfferFormAndShowDialogActionAtom))
+      return Effect.gen(function* () {
+        const valid = yield* set(validateOfferFormAndShowDialogActionAtom)
         if (!valid) return false
 
         const form = get(workingFormAtom)
@@ -187,7 +189,7 @@ export function createOfferFormPublishAtoms({
 
         const belowProgressLeft = get(modifyOfferLoaderTitleAtom)
 
-        yield* _(set(checkNotificationPermissionsAndAskIfPossibleActionAtom))
+        yield* set(checkNotificationPermissionsAndAskIfPossibleActionAtom)
 
         set(progressModal.show, {
           title: t('offerForm.offerEncryption.encryptingYourOffer'),
@@ -199,14 +201,12 @@ export function createOfferFormPublishAtoms({
         })
 
         const offerId = newOfferId()
-        const {inbox} = yield* _(
-          set(upsertInboxOnBeAndLocallyActionAtom, {
-            for: 'myOffer',
-            offerId,
-          })
-        )
+        const {inbox} = yield* set(upsertInboxOnBeAndLocallyActionAtom, {
+          for: 'myOffer',
+          offerId,
+        })
 
-        yield* _(numberOfFriendsLoadedEffect)
+        yield* numberOfFriendsLoadedEffect
 
         const payloadPublic = formatOfferPublicPart(
           offerFormStateToNewOfferPublicPart({
@@ -215,47 +215,43 @@ export function createOfferFormPublishAtoms({
           })
         )
 
-        yield* _(
-          set(createOfferFromCompleteDataActionAtom, {
-            offerId,
-            payloadPublic: {
-              ...payloadPublic,
-              authorClientVersion: version,
-              goldenAvatarType,
-            },
+        yield* set(createOfferFromCompleteDataActionAtom, {
+          offerId,
+          payloadPublic: {
+            ...payloadPublic,
+            authorClientVersion: version,
+            goldenAvatarType,
+          },
 
-            intendedConnectionLevel: form.intendedConnectionLevel,
-            intendedClubs: [...form.selectedClubsUuids],
-            onProgress: (progress) => {
-              set(progressModal.showStep, {
-                progress,
-                textData: {
-                  title: t('offerForm.offerEncryption.encryptingYourOffer'),
-                  belowProgressLeft: belowProgressLeft.loadingText,
-                  bottomText: t(
-                    'offerForm.offerEncryption.dontCloseTheAppCanTakeAWhile'
-                  ),
-                },
-              })
-            },
-            offerKey: inbox.privateKey,
-          })
-        )
+          intendedConnectionLevel: form.intendedConnectionLevel,
+          intendedClubs: [...form.selectedClubsUuids],
+          onProgress: (progress) => {
+            set(progressModal.showStep, {
+              progress,
+              textData: {
+                title: t('offerForm.offerEncryption.encryptingYourOffer'),
+                belowProgressLeft: belowProgressLeft.loadingText,
+                bottomText: t(
+                  'offerForm.offerEncryption.dontCloseTheAppCanTakeAWhile'
+                ),
+              },
+            })
+          },
+          offerKey: inbox.privateKey,
+        })
 
-        yield* _(
-          set(progressModal.hideDeffered, {
-            data: {
-              title: t('offerForm.offerEncryption.doneOfferPoster'),
-              bottomText: t(
-                'offerForm.offerEncryption.yourFriendsAndFriendsOfFriends'
-              ),
-              belowProgressLeft: belowProgressLeft.doneText,
-              belowProgressRight: t('progressBar.DONE'),
-              indicateProgress: {type: 'progress', percentage: 100},
-            },
-            delayMs: 3000,
-          })
-        )
+        yield* set(progressModal.hideDeffered, {
+          data: {
+            title: t('offerForm.offerEncryption.doneOfferPoster'),
+            bottomText: t(
+              'offerForm.offerEncryption.yourFriendsAndFriendsOfFriends'
+            ),
+            belowProgressLeft: belowProgressLeft.doneText,
+            belowProgressRight: t('progressBar.DONE'),
+            indicateProgress: {type: 'progress', percentage: 100},
+          },
+          delayMs: 3000,
+        })
 
         set(lastUsedOfferSpokenLanguagesAtom, [...form.spokenLanguages])
 
@@ -265,14 +261,14 @@ export function createOfferFormPublishAtoms({
           set(progressModal.hide)
           return set(waitUntilProgressModalIsFullyHiddenActionAtom)
         }),
-        Effect.catchAll((e) => {
+        Effect.catch((e) => {
           if (e._tag === 'NotificationPrompted') return Effect.succeed(false)
 
           if (
             e._tag === 'PrivatePayloadsConstructionError' &&
             importedContactsCount === 0
           ) {
-            return Effect.zipRight(
+            return Effect.andThen(
               set(askAreYouSureActionAtom, {
                 variant: 'danger',
                 steps: [
@@ -289,7 +285,7 @@ export function createOfferFormPublishAtoms({
           }
 
           if (e._tag === 'PrivatePayloadsConstructionError') {
-            return Effect.zipRight(
+            return Effect.andThen(
               set(askAreYouSureActionAtom, {
                 variant: 'danger',
                 steps: [
@@ -358,17 +354,15 @@ export function createOfferFormPublishAtoms({
   const editOfferActionAtom = atom(null, (get, set) => {
     const {t} = get(translationAtom)
 
-    const mainEffect = Effect.gen(function* (_) {
+    const mainEffect = Effect.gen(function* () {
       const offer = get(singleOfferAtom(get(editedOfferIdAtom)))
       const committed = get(committedFormAtom)
 
       // this should never happen as we are setting the form from existing offer
       if (!offer?.ownershipInfo) {
-        return yield* _(
-          Effect.fail({
-            _tag: 'NotFoundError' as const,
-          } satisfies SomeError)
-        )
+        return yield* Effect.fail({
+          _tag: 'NotFoundError' as const,
+        } satisfies SomeError)
       }
 
       const targetRecipientsHasChanged =
@@ -388,48 +382,44 @@ export function createOfferFormPublishAtoms({
         indicateProgress: {type: 'intermediate'},
       })
 
-      yield* _(numberOfFriendsLoadedEffect)
+      yield* numberOfFriendsLoadedEffect
       const payloadPublic = formatOfferPublicPart(
         mergeOfferFormStateIntoPublicPart(committed, offer.offerInfo.publicPart)
       )
 
-      yield* _(
-        set(updateOfferActionAtom, {
-          payloadPublic: {
-            ...payloadPublic,
-            active: true,
-          },
-          adminId: offer.ownershipInfo.adminId,
-          symmetricKey: offer.offerInfo.privatePart.symmetricKey,
-          intendedConnectionLevel: committed.intendedConnectionLevel,
-          intendedClubs: [...committed.selectedClubsUuids],
-          updatePrivateParts: targetRecipientsHasChanged,
-          onProgress: (progress) => {
-            set(progressModal.showStep, {
-              progress,
-              textData: {
-                title: t('offerForm.offerEncryption.encryptingYourOffer'),
-                belowProgressLeft: belowProgressLeft.loadingText,
-                bottomText: t(
-                  'offerForm.offerEncryption.dontCloseTheAppCanTakeAWhile'
-                ),
-              },
-            })
-          },
-        })
-      )
+      yield* set(updateOfferActionAtom, {
+        payloadPublic: {
+          ...payloadPublic,
+          active: true,
+        },
+        adminId: offer.ownershipInfo.adminId,
+        symmetricKey: offer.offerInfo.privatePart.symmetricKey,
+        intendedConnectionLevel: committed.intendedConnectionLevel,
+        intendedClubs: [...committed.selectedClubsUuids],
+        updatePrivateParts: targetRecipientsHasChanged,
+        onProgress: (progress) => {
+          set(progressModal.showStep, {
+            progress,
+            textData: {
+              title: t('offerForm.offerEncryption.encryptingYourOffer'),
+              belowProgressLeft: belowProgressLeft.loadingText,
+              bottomText: t(
+                'offerForm.offerEncryption.dontCloseTheAppCanTakeAWhile'
+              ),
+            },
+          })
+        },
+      })
 
-      yield* _(
-        set(progressModal.hideDeffered, {
-          data: {
-            title: t('editOffer.offerEditSuccess'),
-            bottomText: t('editOffer.youCanCheckYourOffer'),
-            belowProgressLeft: belowProgressLeft.doneText,
-            indicateProgress: {type: 'done'},
-          },
-          delayMs: 2000,
-        })
-      )
+      yield* set(progressModal.hideDeffered, {
+        data: {
+          title: t('editOffer.offerEditSuccess'),
+          bottomText: t('editOffer.youCanCheckYourOffer'),
+          belowProgressLeft: belowProgressLeft.doneText,
+          indicateProgress: {type: 'done'},
+        },
+        delayMs: 2000,
+      })
     }).pipe(
       Effect.match({
         onSuccess: () => true,
@@ -447,17 +437,17 @@ export function createOfferFormPublishAtoms({
       })
     )
 
-    return Effect.gen(function* (_) {
-      const valid = yield* _(set(validateOfferFormAndShowDialogActionAtom))
+    return Effect.gen(function* () {
+      const valid = yield* set(validateOfferFormAndShowDialogActionAtom)
       if (!valid) return false
-      return yield* _(mainEffect)
+      return yield* mainEffect
     })
   })
 
   const toggleOfferActiveAtom = atom(null, (get, set) => {
     const {t} = get(translationAtom)
 
-    return Effect.gen(function* (_) {
+    return Effect.gen(function* () {
       const offer = get(singleOfferAtom(get(editedOfferIdAtom)))
       if (!offer?.ownershipInfo) return false
 
@@ -475,38 +465,34 @@ export function createOfferFormPublishAtoms({
         indicateProgress: {type: 'intermediate'},
       })
 
-      yield* _(
-        set(updateOfferActionAtom, {
-          payloadPublic: {
-            ...offer.offerInfo.publicPart,
-            active: targetValue,
-          },
-          adminId: offer.ownershipInfo.adminId,
-          symmetricKey: offer.offerInfo.privatePart.symmetricKey,
-          intendedConnectionLevel: offer.ownershipInfo.intendedConnectionLevel,
-          intendedClubs: offer.ownershipInfo.intendedClubs,
-          ...(offer.offerInfo.privatePart.intendedClubs && {
-            intendedClubs: [...offer.offerInfo.privatePart.intendedClubs],
-          }),
-          updatePrivateParts: false,
-        })
-      )
+      yield* set(updateOfferActionAtom, {
+        payloadPublic: {
+          ...offer.offerInfo.publicPart,
+          active: targetValue,
+        },
+        adminId: offer.ownershipInfo.adminId,
+        symmetricKey: offer.offerInfo.privatePart.symmetricKey,
+        intendedConnectionLevel: offer.ownershipInfo.intendedConnectionLevel,
+        intendedClubs: offer.ownershipInfo.intendedClubs,
+        ...(offer.offerInfo.privatePart.intendedClubs && {
+          intendedClubs: [...offer.offerInfo.privatePart.intendedClubs],
+        }),
+        updatePrivateParts: false,
+      })
 
-      yield* _(
-        set(progressModal.hideDeffered, {
-          data: {
-            title: !targetValue
-              ? t('editOffer.pausingOfferSuccess')
-              : t('editOffer.offerEditSuccess'),
-            bottomText: t('editOffer.youCanCheckYourOffer'),
-            belowProgressLeft: targetValue
-              ? belowProgressLeft.doneText
-              : t('editOffer.offerEditSuccess'),
-            indicateProgress: {type: 'done'},
-          },
-          delayMs: 1500,
-        })
-      )
+      yield* set(progressModal.hideDeffered, {
+        data: {
+          title: !targetValue
+            ? t('editOffer.pausingOfferSuccess')
+            : t('editOffer.offerEditSuccess'),
+          bottomText: t('editOffer.youCanCheckYourOffer'),
+          belowProgressLeft: targetValue
+            ? belowProgressLeft.doneText
+            : t('editOffer.offerEditSuccess'),
+          indicateProgress: {type: 'done'},
+        },
+        delayMs: 1500,
+      })
 
       return true
     }).pipe(
@@ -531,19 +517,17 @@ export function createOfferFormPublishAtoms({
   const pauseOrResumeOfferActionAtom = atom(null, (get, set) => {
     const {t} = get(translationAtom)
 
-    return Effect.gen(function* (_) {
+    return Effect.gen(function* () {
       if (get(offerActiveAtom)) {
-        const confirmed = yield* _(
-          set(globalDialogAtom, {
-            title: t('editOffer.pauseOfferTitle'),
-            subtitle: t('editOffer.pauseOfferDescription'),
-            positiveButtonText: t('editOffer.yesPause'),
-            negativeButtonText: t('common.cancel'),
-          })
-        )
+        const confirmed = yield* set(globalDialogAtom, {
+          title: t('editOffer.pauseOfferTitle'),
+          subtitle: t('editOffer.pauseOfferDescription'),
+          positiveButtonText: t('editOffer.yesPause'),
+          negativeButtonText: t('common.cancel'),
+        })
         if (!confirmed) return false
       }
-      return yield* _(set(toggleOfferActiveAtom))
+      return yield* set(toggleOfferActiveAtom)
     })
   })
 
@@ -551,31 +535,27 @@ export function createOfferFormPublishAtoms({
     const {t} = get(translationAtom)
     const offer = get(singleOfferAtom(get(editedOfferIdAtom)))
 
-    return Effect.gen(function* (_) {
-      const confirmed = yield* _(
-        set(globalDialogAtom, {
-          title: t('editOffer.deleteOffer'),
-          subtitle: t('editOffer.deleteOfferDescriptionShort'),
-          positiveButtonText: t('common.yesDelete'),
-          positiveButtonVariant: 'destructive',
-          negativeButtonText: t('common.cancel'),
-        })
-      )
+    return Effect.gen(function* () {
+      const confirmed = yield* set(globalDialogAtom, {
+        title: t('editOffer.deleteOffer'),
+        subtitle: t('editOffer.deleteOfferDescriptionShort'),
+        positiveButtonText: t('common.yesDelete'),
+        positiveButtonVariant: 'destructive',
+        negativeButtonText: t('common.cancel'),
+      })
       if (!confirmed) return false
 
       set(loadingOverlayDisplayedAtom, true)
 
-      yield* _(
-        set(deleteOffersActionAtom, {
-          adminIds: [offer?.ownershipInfo?.adminId].filter(notEmpty),
-        })
-      )
+      yield* set(deleteOffersActionAtom, {
+        adminIds: [offer?.ownershipInfo?.adminId].filter(notEmpty),
+      })
 
       set(loadingOverlayDisplayedAtom, false)
 
       return true
     }).pipe(
-      Effect.catchAll((e) => {
+      Effect.catch((e) => {
         set(loadingOverlayDisplayedAtom, false)
         showErrorAlert({
           title:
@@ -593,23 +573,21 @@ export function createOfferFormPublishAtoms({
     (get, set): Effect.Effect<boolean> => {
       const {t} = get(translationAtom)
 
-      return Effect.gen(function* (_) {
-        const confirmed = yield* _(
-          set(globalDialogAtom, {
-            title: t('editOffer.unpublishedChangesTitle'),
-            subtitle: t('editOffer.unpublishedChangesDescription'),
-            positiveButtonText: t('editOffer.publish'),
-            negativeButtonText: t('editOffer.discard'),
-            disableClose: true,
-          })
-        )
+      return Effect.gen(function* () {
+        const confirmed = yield* set(globalDialogAtom, {
+          title: t('editOffer.unpublishedChangesTitle'),
+          subtitle: t('editOffer.unpublishedChangesDescription'),
+          positiveButtonText: t('editOffer.publish'),
+          negativeButtonText: t('editOffer.discard'),
+          disableClose: true,
+        })
 
         if (!confirmed) {
           set(discardChangesActionAtom)
           return true
         }
 
-        return yield* _(set(editOfferActionAtom))
+        return yield* set(editOfferActionAtom)
       })
     }
   )

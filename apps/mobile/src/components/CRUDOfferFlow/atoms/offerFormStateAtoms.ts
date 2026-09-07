@@ -1,5 +1,5 @@
 import {type OfferId} from '@vexl-next/domain/src/general/offers'
-import {molecule} from 'bunshi/dist/react'
+import {molecule} from 'bunshi/react'
 import {atom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {translationAtom} from '../../../utils/localization/I18nProvider'

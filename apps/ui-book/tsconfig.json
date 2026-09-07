@@ -5,7 +5,7 @@
   "compilerOptions": {
     "jsx": "react-jsx",
     "lib": ["DOM", "ESNext"],
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "noEmit": true,
     "resolveJsonModule": true,
     "target": "ESNext",

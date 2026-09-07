@@ -8,7 +8,7 @@ import {Context, Duration, Effect, Layer} from 'effect'
 import {SupportedPushNotificationTask} from '../../../domain'
 
 const KEY_PREFIX = 'notification-service:waiting-notifications:'
-const TTL_MS = Duration.toMillis(Duration.decode('1 day'))
+const TTL_MS = Duration.toMillis(Duration.fromInputUnsafe('1 day'))
 
 const createRedisKey = (token: VexlNotificationTokenSecret): string =>
   `${KEY_PREFIX}${token}`
@@ -23,16 +23,14 @@ export interface NotificationWaitingToBeIssuedForNotificationTokenOperations {
   ) => Effect.Effect<readonly SupportedPushNotificationTask[], RedisError>
 }
 
-export class NotificationWaitingToBeIssuedForNotificationToken extends Context.Tag(
-  'NotificationWaitingToBeIssuedForNotificationToken'
-)<
+export class NotificationWaitingToBeIssuedForNotificationToken extends Context.Service<
   NotificationWaitingToBeIssuedForNotificationToken,
   NotificationWaitingToBeIssuedForNotificationTokenOperations
->() {
+>()('NotificationWaitingToBeIssuedForNotificationToken') {
   static readonly Live = Layer.effect(
     NotificationWaitingToBeIssuedForNotificationToken,
-    Effect.gen(function* (_) {
-      const redis = yield* _(RedisService)
+    Effect.gen(function* () {
+      const redis = yield* RedisService
 
       const addToSortedSet = redis.addIntoSortedSet(
         SupportedPushNotificationTask
@@ -48,9 +46,9 @@ export class NotificationWaitingToBeIssuedForNotificationToken extends Context.T
             Effect.tap(() =>
               redis.setExpiresAt(key, unixMillisecondsFromNow(TTL_MS))
             ),
-            Effect.catchTag('NoSuchElementException', () => Effect.void),
-            Effect.catchTag('ParseError', (e) =>
-              Effect.zipRight(
+            Effect.catchTag('NoSuchElementError', () => Effect.void),
+            Effect.catchTag('SchemaError', (e) =>
+              Effect.andThen(
                 Effect.logError('Error adding notification to waiting list', e),
                 Effect.fail(new RedisError({cause: e}))
               )
@@ -61,8 +59,8 @@ export class NotificationWaitingToBeIssuedForNotificationToken extends Context.T
         getAndClearWaitingListForToken: (notificationToken) => {
           const key = createRedisKey(notificationToken)
           return getAndDropSortedSet(key, 'asc').pipe(
-            Effect.catchTag('ParseError', (e) =>
-              Effect.zipRight(
+            Effect.catchTag('SchemaError', (e) =>
+              Effect.andThen(
                 Effect.logError(
                   'Error getting waiting notifications for token',
                   e

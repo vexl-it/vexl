@@ -1,4 +1,4 @@
-import {Effect, Option, Schema} from 'effect/index'
+import {Effect, Option, Schema} from 'effect'
 import * as Notifications from 'expo-notifications'
 import * as TaskManager from 'expo-task-manager'
 import {loadSession} from '../../../state/session/loadSession'
@@ -68,7 +68,7 @@ const processNotification = (
         data: string
       }
 ): Promise<Notifications.BackgroundNotificationTaskResult> =>
-  Effect.gen(function* (_) {
+  Effect.gen(function* () {
     if (input.source === 'listener' && isLocalNotification(input.data)) {
       yield* Effect.log('Ignoring locally-presented notification in listener')
       return Notifications.BackgroundNotificationTaskResult.NoData
@@ -146,7 +146,7 @@ const processNotification = (
         )
       )
     ),
-    Effect.catchAll(() =>
+    Effect.catch(() =>
       Effect.succeed(Notifications.BackgroundNotificationTaskResult.Failed)
     ),
     Effect.runPromise
@@ -185,7 +185,7 @@ export const processBackgroundSocketNotification = async (
   input: unknown
 ): Promise<void> => {
   const data = await Effect.runPromise(
-    Schema.decodeUnknown(BackgroundNotificationHeadlessTaskData)(input)
+    Schema.decodeUnknownEffect(BackgroundNotificationHeadlessTaskData)(input)
   )
   try {
     await processNotification({source: 'backgroundSocket', data: data.message})

@@ -1,4 +1,4 @@
-import {Array, Option, Schema, pipe} from 'effect'
+import {Array, Filter, Option, Schema, pipe} from 'effect'
 import {
   NonUniqueContactIdE,
   type ContactInfo,
@@ -56,7 +56,9 @@ function trimmedNonBlankStringFromUnknown(
 function contactNameFromParts(contact: DeviceContact): Option.Option<string> {
   const nameFromParts = pipe(
     [contact.firstName, contact.lastName],
-    Array.filterMap(trimmedNonBlankStringFromUnknown),
+    Array.filterMap(
+      Filter.fromPredicateOption(trimmedNonBlankStringFromUnknown)
+    ),
     Array.join(' ')
   )
 
@@ -106,7 +108,7 @@ function mapDevicePhoneNumber(
 
 function mapDeviceContact(contact: DeviceContact): DeviceContactsMappingResult {
   return pipe(
-    Option.fromNullable(contact.phoneNumbers),
+    Option.fromNullishOr(contact.phoneNumbers),
     Option.getOrElse(() => emptyPhoneNumbers),
     Array.reduce(emptyMappingResult, (result, phoneNumber) => {
       const contactInfo = mapDevicePhoneNumber(contact, phoneNumber)

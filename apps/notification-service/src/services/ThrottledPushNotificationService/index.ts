@@ -9,8 +9,8 @@ import {
   type RedisError,
   type RedisLockError,
 } from '@vexl-next/server-utils/src/RedisService'
-import {Array, Context, Effect, Layer} from 'effect/index'
-import {type ParseError} from 'effect/ParseResult'
+import {Array, Context, Effect, Layer, pipe} from 'effect'
+import {type SchemaError} from 'effect/Schema'
 import {notificationThrottleTtlMinutesConfig} from '../../configs'
 import {type SupportedPushNotificationTask} from '../../domain'
 import {PushNotificationService} from '../PushNotificationService'
@@ -29,7 +29,7 @@ export interface ThrottledPushNotificationServiceOperations {
     task: SupportedPushNotificationTask
   ) => Effect.Effect<
     void,
-    MqServiceError | ExpoSdkError | ParseError | RedisError | RedisLockError
+    MqServiceError | ExpoSdkError | SchemaError | RedisError | RedisLockError
   >
   getPendingNotificationsAndCancelThrottleTimeout: (
     token: VexlNotificationTokenSecret
@@ -39,39 +39,35 @@ export interface ThrottledPushNotificationServiceOperations {
   >
 }
 
-export class ThrottledPushNotificationService extends Context.Tag(
-  'ThrottledPushNotificationService'
-)<
+export class ThrottledPushNotificationService extends Context.Service<
   ThrottledPushNotificationService,
   ThrottledPushNotificationServiceOperations
->() {
+>()('ThrottledPushNotificationService') {
   static Live = Layer.effect(
     ThrottledPushNotificationService,
-    Effect.gen(function* (_) {
-      const pushNotificationService = yield* _(PushNotificationService)
-      const lastTimeIssuedForNotificationTokenDb = yield* _(
-        LastTimeIssuedForNotificationTokenDb
-      )
-      const notificationWaitingToBeIssuedForNotificationTokenDb = yield* _(
-        NotificationWaitingToBeIssuedForNotificationToken
-      )
+    Effect.gen(function* () {
+      const pushNotificationService = yield* PushNotificationService
+      const lastTimeIssuedForNotificationTokenDb =
+        yield* LastTimeIssuedForNotificationTokenDb
+      const notificationWaitingToBeIssuedForNotificationTokenDb =
+        yield* NotificationWaitingToBeIssuedForNotificationToken
 
-      const redisService = yield* _(RedisService)
+      const redisService = yield* RedisService
 
-      const throttleTtlMinutes = yield* _(notificationThrottleTtlMinutesConfig)
+      const throttleTtlMinutes = yield* notificationThrottleTtlMinutesConfig
       const throttleEnabled = throttleTtlMinutes !== -1
       const throttleTtlMs = throttleTtlMinutes * 60 * 1000
 
-      const scheduleThrottleSend = yield* _(EnqueueProcessNotifications)
+      const scheduleThrottleSend = yield* EnqueueProcessNotifications
 
       return {
         issuePushNotification: (task: SupportedPushNotificationTask) =>
-          Effect.gen(function* (_) {
-            const lastTimeIssued = yield* _(
+          Effect.gen(function* () {
+            const lastTimeIssued = yield* pipe(
               lastTimeIssuedForNotificationTokenDb.getLastTimeIssuedForNotificationToken(
                 task.notificationToken
               ),
-              Effect.catchTag('NoSuchElementException', () =>
+              Effect.catchTag('NoSuchElementError', () =>
                 Effect.succeed(UnixMilliseconds0)
               )
             )
@@ -81,13 +77,11 @@ export class ThrottledPushNotificationService extends Context.Tag(
               // Notification was issued recently, so we throttle it
               lastTimeIssued + throttleTtlMs > Date.now()
             ) {
-              yield* _(
-                notificationWaitingToBeIssuedForNotificationTokenDb.addNotificationToWaitingList(
-                  task
-                )
+              yield* notificationWaitingToBeIssuedForNotificationTokenDb.addNotificationToWaitingList(
+                task
               )
             } else {
-              yield* _(
+              yield* pipe(
                 notificationWaitingToBeIssuedForNotificationTokenDb.getAndClearWaitingListForToken(
                   task.notificationToken
                 ),
@@ -95,7 +89,7 @@ export class ThrottledPushNotificationService extends Context.Tag(
                 Effect.flatMap(
                   pushNotificationService.sendNotificationViaExpoNotification
                 ),
-                Effect.zipLeft(
+                Effect.tap(
                   lastTimeIssuedForNotificationTokenDb.setLastTimeIssuedForNotificationToken(
                     task.notificationToken,
                     unixMillisecondsNow()
@@ -105,16 +99,14 @@ export class ThrottledPushNotificationService extends Context.Tag(
             }
 
             if (throttleEnabled) {
-              yield* _(
-                scheduleThrottleSend(
-                  {token: task.notificationToken},
-                  {
-                    delay: throttleTtlMs,
-                    jobId: processThrottledNotificationsJobId(
-                      task.notificationToken
-                    ),
-                  }
-                )
+              yield* scheduleThrottleSend(
+                {token: task.notificationToken},
+                {
+                  delay: throttleTtlMs,
+                  jobId: processThrottledNotificationsJobId(
+                    task.notificationToken
+                  ),
+                }
               )
             }
           }).pipe(
@@ -124,16 +116,12 @@ export class ThrottledPushNotificationService extends Context.Tag(
         getPendingNotificationsAndCancelThrottleTimeout: (
           token: VexlNotificationTokenSecret
         ) =>
-          Effect.gen(function* (_) {
-            yield* _(
-              lastTimeIssuedForNotificationTokenDb.deleteLastTimeIssuedForNotificationToken(
-                token
-              )
+          Effect.gen(function* () {
+            yield* lastTimeIssuedForNotificationTokenDb.deleteLastTimeIssuedForNotificationToken(
+              token
             )
-            return yield* _(
-              notificationWaitingToBeIssuedForNotificationTokenDb.getAndClearWaitingListForToken(
-                token
-              )
+            return yield* notificationWaitingToBeIssuedForNotificationTokenDb.getAndClearWaitingListForToken(
+              token
             )
           }).pipe(
             lockOnNotificationToken(token),

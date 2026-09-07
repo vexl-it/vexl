@@ -5,7 +5,7 @@ import {createUserPublicApi} from '@/src/server/userApi'
 import {type PrintSessionFormState} from '@/src/shared/formState'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/EcdsaSignature.brand'
-import {Effect, Either, Schema} from 'effect'
+import {Effect, Result, Schema} from 'effect'
 
 const printSessionFormSchema = Schema.Struct({
   signature: EcdsaSignature,
@@ -20,7 +20,7 @@ export async function submitPrintSession(
     const {pubKey, signature} = decodeFormData(printSessionFormSchema, formData)
     const userApi = await createUserPublicApi()
     const verificationResult = await Effect.runPromise(
-      Effect.either(
+      Effect.result(
         userApi.verifyChallenge({
           signature,
           userPublicKey: pubKey,
@@ -28,15 +28,15 @@ export async function submitPrintSession(
       )
     )
 
-    if (Either.isLeft(verificationResult)) {
-      if (verificationResult.left._tag === 'InvalidVerificationError') {
+    if (Result.isFailure(verificationResult)) {
+      if (verificationResult.failure._tag === 'InvalidVerificationError') {
         return {
           error: 'Verification expired. Please start over.',
           session: null,
         }
       }
 
-      console.error('submitPrintSession failed', verificationResult.left)
+      console.error('submitPrintSession failed', verificationResult.failure)
 
       return {
         error: 'Unnexpected error happended. Please try again or start over.',
@@ -47,9 +47,9 @@ export async function submitPrintSession(
     return {
       error: null,
       session: {
-        hash: verificationResult.right.hash,
+        hash: verificationResult.success.hash,
         publicKey: pubKey,
-        signature: verificationResult.right.signature,
+        signature: verificationResult.success.signature,
       },
     }
   } catch (error) {

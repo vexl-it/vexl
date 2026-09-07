@@ -1,8 +1,5 @@
-import * as NodeContext from '@effect/platform-node/NodeContext'
 import * as NodeHttpServer from '@effect/platform-node/NodeHttpServer'
-import {type HttpClient} from '@effect/platform/HttpClient'
-import {HttpApiBuilder} from '@effect/platform/index'
-import {type SqlClient} from '@effect/sql/SqlClient'
+import * as NodeServices from '@effect/platform-node/NodeServices'
 import {type VexlProductNotification} from '@vexl-next/domain/src/general/vexlProductNotification'
 import {EnqueueVexlProductNotification} from '@vexl-next/server-utils/src/ContentServiceVexlProductNotificationMq'
 import {type RateLimitingService} from '@vexl-next/server-utils/src/RateLimiting'
@@ -14,12 +11,16 @@ import {mockedMetricsClientService} from '@vexl-next/server-utils/src/tests/mock
 import {mockedRateLimitingLayer} from '@vexl-next/server-utils/src/tests/mockedRateLimitingLayer'
 import {mockedRedisLayer} from '@vexl-next/server-utils/src/tests/mockedRedisLayer'
 import {TestRequestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
+import {testConfigProviderLayer} from '@vexl-next/server-utils/src/tests/testConfigProvider'
 import {
   disposeTestDatabase,
   setupTestDatabase,
 } from '@vexl-next/server-utils/src/tests/testDb'
 import {type Job} from 'bullmq'
 import {Console, Effect, Layer, ManagedRuntime, type Scope} from 'effect'
+import {HttpRouter} from 'effect/unstable/http'
+import {type HttpClient} from 'effect/unstable/http/HttpClient'
+import {type SqlClient} from 'effect/unstable/sql/SqlClient'
 import {cryptoConfig} from '../../configs'
 import {VexlProductNotificationsDbService} from '../../db/VexlProductNotificationsDbService'
 import DbLayer from '../../db/layer'
@@ -78,8 +79,7 @@ const mockedEnqueueVexlProductNotificationLayer = Layer.succeed(
   }
 )
 
-const TestServerLive = HttpApiBuilder.serve().pipe(
-  Layer.provide(ContentApiLive),
+const TestServerLive = HttpRouter.serve(ContentApiLive).pipe(
   Layer.provideMerge(NodeHttpServer.layerTest)
 )
 const context = Layer.empty.pipe(
@@ -97,10 +97,12 @@ const context = Layer.empty.pipe(
   Layer.provideMerge(mockedCacheService),
   Layer.provideMerge(mockedMapStylesService),
   Layer.provideMerge(mockedWebflowCmsService),
-  Layer.provideMerge(NodeContext.layer)
+  Layer.provideMerge(NodeServices.layer)
 )
 
-const runtime = ManagedRuntime.make(context)
+const runtime = ManagedRuntime.make(
+  context.pipe(Layer.provideMerge(testConfigProviderLayer))
+)
 let runtimeReady = false
 
 export const startRuntime = async (): Promise<void> => {
@@ -126,8 +128,8 @@ export const runPromiseInMockedEnvironment = async (
   await runtime.runPromise(
     effectToRun.pipe(
       Effect.scoped,
-      Effect.catchAll((e) => {
-        return Effect.zipRight(
+      Effect.catch((e) => {
+        return Effect.andThen(
           Effect.logError('Error in test', e),
           Effect.fail(e)
         )

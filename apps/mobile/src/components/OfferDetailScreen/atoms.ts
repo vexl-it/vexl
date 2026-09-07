@@ -2,7 +2,7 @@ import {
   type OfferInfo,
   type OneOfferInState,
 } from '@vexl-next/domain/src/general/offers'
-import {Array, Effect, Either, Option, Record} from 'effect'
+import {Array, Effect, Filter, Option, pipe, Record, Result} from 'effect'
 import {atom} from 'jotai'
 import {Alert} from 'react-native'
 import {apiAtom} from '../../api'
@@ -20,7 +20,7 @@ export const showCommonFriendsExplanationActionAtom = atom(
   (get, set, offerInfo: OfferInfo) => {
     const {t} = get(translationAtom)
 
-    return Effect.gen(function* (_) {
+    return Effect.gen(function* () {
       const modalContent = (() => {
         if (offerInfo.privatePart.friendLevel.includes('FIRST_DEGREE')) {
           if (offerInfo.privatePart.commonFriends.length === 0) {
@@ -47,7 +47,7 @@ export const showCommonFriendsExplanationActionAtom = atom(
         }
       })()
 
-      return yield* _(
+      return yield* pipe(
         set(askAreYouSureActionAtom, {
           steps: [{...modalContent, type: 'StepWithText'}],
           variant: 'info',
@@ -85,16 +85,14 @@ export const reportOfferActionAtom = atom(
   (get, set, offer: OneOfferInState) => {
     const {t} = get(translationAtom)
 
-    return Effect.gen(function* (_) {
-      const confirmed = yield* _(
-        set(globalDialogAtom, {
-          title: t('offer.report.areYouSureTitle'),
-          subtitle: t('offer.report.areYouSureText'),
-          positiveButtonText: t('offer.report.yes'),
-          positiveButtonVariant: 'destructive',
-          negativeButtonText: t('common.cancel'),
-        })
-      )
+    return Effect.gen(function* () {
+      const confirmed = yield* set(globalDialogAtom, {
+        title: t('offer.report.areYouSureTitle'),
+        subtitle: t('offer.report.areYouSureText'),
+        positiveButtonText: t('offer.report.yes'),
+        positiveButtonVariant: 'destructive',
+        negativeButtonText: t('common.cancel'),
+      })
 
       if (!confirmed) return false
 
@@ -109,7 +107,7 @@ export const reportOfferActionAtom = atom(
       set(loadingOverlayDisplayedAtom, true)
 
       if (isClubOffer) {
-        yield* _(
+        yield* pipe(
           Record.toEntries(get(clubsToKeyHolderAtom)),
           Array.findFirst(
             ([clubUuid]) =>
@@ -123,37 +121,38 @@ export const reportOfferActionAtom = atom(
               keyPairV2: keyPair.keyPair,
             })
           ),
+          Effect.fromOption,
           Effect.flatten
         )
       } else {
-        yield* _(
-          api.offer.reportOffer({
-            offerId: offer.offerInfo.offerId,
-          })
-        )
+        yield* api.offer.reportOffer({
+          offerId: offer.offerInfo.offerId,
+        })
       }
 
       if (isClubOffer) {
-        yield* _(
+        yield* pipe(
           offer.offerInfo.privatePart.clubIds,
-          Array.filterMap((clubUuid) =>
-            Record.get(get(clubsToKeyHolderAtom), clubUuid).pipe(
-              Option.map((keyPair) =>
-                api.contact
-                  .reportClub({
-                    clubUuid,
-                    offerId: offer.offerInfo.offerId,
-                    keyPair: keyPair.oldKeyPair,
-                    keyPairV2: keyPair.keyPair,
-                  })
-                  .pipe(Effect.either)
+          Array.filterMap(
+            Filter.fromPredicateOption((clubUuid) =>
+              Record.get(get(clubsToKeyHolderAtom), clubUuid).pipe(
+                Option.map((keyPair) =>
+                  api.contact
+                    .reportClub({
+                      clubUuid,
+                      offerId: offer.offerInfo.offerId,
+                      keyPair: keyPair.oldKeyPair,
+                      keyPairV2: keyPair.keyPair,
+                    })
+                    .pipe(Effect.result)
+                )
               )
             )
           ),
           Effect.all,
           Effect.map(
             Array.map(
-              Either.mapLeft((left) => {
+              Result.mapError((left) => {
                 if (left._tag !== 'ReportClubLimitReachedError') {
                   reportError(
                     'error',
@@ -170,25 +169,24 @@ export const reportOfferActionAtom = atom(
       set(reportedFlagAtom, true)
       set(loadingOverlayDisplayedAtom, false)
 
-      yield* _(
-        set(globalDialogAtom, {
-          title: t('offer.report.thankYou'),
-          subtitle: t('offer.report.inappropriateContentWasReported'),
-          positiveButtonText: t('common.continue'),
-        })
-      )
+      yield* set(globalDialogAtom, {
+        title: t('offer.report.thankYou'),
+        subtitle: t('offer.report.inappropriateContentWasReported'),
+        positiveButtonText: t('common.continue'),
+      })
 
       return true
     }).pipe(
-      Effect.catchAll((e) => {
+      Effect.catch((e) => {
         set(loadingOverlayDisplayedAtom, false)
 
         // RequestError (offline) is excluded on purpose - not reported to Sentry
         if (
           e._tag === 'NotFoundError' ||
           e._tag === 'UnauthorizedError' ||
-          e._tag === 'HttpApiDecodeError' ||
-          e._tag === 'ResponseError' ||
+          e._tag === 'SchemaError' ||
+          (e._tag === 'HttpClientError' &&
+            e.reason._tag !== 'TransportError') ||
           e._tag === 'UnexpectedServerError'
         ) {
           reportError('error', new Error('Error while reporting offer'), {

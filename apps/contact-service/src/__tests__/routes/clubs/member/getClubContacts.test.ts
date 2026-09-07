@@ -1,4 +1,3 @@
-import {SqlClient} from '@effect/sql'
 import {generateClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
@@ -8,7 +7,8 @@ import {InvalidChallengeError} from '@vexl-next/rest-api/src/challenges/contract
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {addTestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
-import {Effect, Option, Schema} from 'effect'
+import {Effect, Option, pipe, Schema} from 'effect'
+import {SqlClient} from 'effect/unstable/sql'
 import {
   createMockedUser,
   type MockedUser,
@@ -29,124 +29,114 @@ const commonHeaders = Schema.decodeSync(CommonHeaders)({
 describe('Get club contacts', () => {
   beforeEach(async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const sql = yield* _(SqlClient.SqlClient)
+      Effect.gen(function* () {
+        const sql = yield* SqlClient.SqlClient
 
-        user1 = yield* _(createMockedUser('+420733333331'))
-        user2 = yield* _(createMockedUser('+420733333332'))
+        user1 = yield* createMockedUser('+420733333331')
+        user2 = yield* createMockedUser('+420733333332')
 
-        yield* _(sql`DELETE FROM club_invitation_link`)
-        yield* _(sql`DELETE FROM club_member`)
-        yield* _(sql`DELETE FROM club`)
+        yield* sql`DELETE FROM club_invitation_link`
+        yield* sql`DELETE FROM club_member`
+        yield* sql`DELETE FROM club`
       })
     )
   })
 
   it('Should return club members for users that are in the same club', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
         const forClubUuid = generateClubUuid()
 
-        yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
-        yield* _(
-          app.ClubsAdmin.createClub({
-            headers: {'x-admin-token': ADMIN_TOKEN},
-            payload: {
-              club: {
-                clubImageUrl: SOME_URL,
-                name: 'someName',
-                description: Option.some('someDescription'),
-                membersCountLimit: 100,
-                uuid: forClubUuid,
-                validUntil: CLUB_VALID_UNTIL,
-                reportLimit: 10,
-              },
+        yield* addTestHeaders({'x-admin-token': ADMIN_TOKEN})
+        yield* app.ClubsAdmin.createClub({
+          headers: {'x-admin-token': ADMIN_TOKEN},
+          payload: {
+            club: {
+              clubImageUrl: SOME_URL,
+              name: 'someName',
+              description: Option.some('someDescription'),
+              membersCountLimit: 100,
+              uuid: forClubUuid,
+              validUntil: CLUB_VALID_UNTIL,
+              reportLimit: 10,
             },
-          })
+          },
+        })
+
+        const challengeForUser1 = yield* generateAndSignChallenge(
+          user1.mainKeyPair
         )
 
-        const challengeForUser1 = yield* _(
-          generateAndSignChallenge(user1.mainKeyPair)
+        const challengeForUser2 = yield* generateAndSignChallenge(
+          user2.mainKeyPair
         )
 
-        const challengeForUser2 = yield* _(
-          generateAndSignChallenge(user2.mainKeyPair)
-        )
-
-        const inviteLink1 = yield* _(
-          app.ClubsAdmin.generateClubInviteLinkForAdmin({
+        const inviteLink1 =
+          yield* app.ClubsAdmin.generateClubInviteLinkForAdmin({
             headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               clubUuid: forClubUuid,
             },
           })
-        )
 
         // user1 joins the club
-        yield* _(
-          app.ClubsMember.joinClub({
-            headers: commonHeaders,
-            payload: {
-              code: inviteLink1.link.code,
-              contactsImported: false,
-              signedChallenge: challengeForUser1.signedChallenge,
-              publicKey: challengeForUser1.publicKey,
-              notificationToken: Option.some(
-                'someToken' as ExpoNotificationToken
-              ),
-              vexlNotificationToken: Option.some(
-                'vexl_nt_test' as VexlNotificationToken
-              ),
-              publicKeyV2: Option.none(),
-            },
-          })
-        )
+        yield* app.ClubsMember.joinClub({
+          headers: commonHeaders,
+          payload: {
+            code: inviteLink1.link.code,
+            contactsImported: false,
+            signedChallenge: challengeForUser1.signedChallenge,
+            publicKey: challengeForUser1.publicKey,
+            notificationToken: Option.some(
+              'someToken' as ExpoNotificationToken
+            ),
+            vexlNotificationToken: Option.some(
+              'vexl_nt_test' as VexlNotificationToken
+            ),
+            publicKeyV2: Option.none(),
+          },
+        })
 
-        const inviteLink2 = yield* _(
-          app.ClubsAdmin.generateClubInviteLinkForAdmin({
+        const inviteLink2 =
+          yield* app.ClubsAdmin.generateClubInviteLinkForAdmin({
             headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               clubUuid: forClubUuid,
             },
           })
-        )
 
         // user2 joins the club
-        yield* _(
-          app.ClubsMember.joinClub({
-            headers: commonHeaders,
-            payload: {
-              code: inviteLink2.link.code,
-              contactsImported: false,
-              signedChallenge: challengeForUser2.signedChallenge,
-              publicKey: challengeForUser2.publicKey,
-              notificationToken: Option.some(
-                'someToken' as ExpoNotificationToken
-              ),
-              vexlNotificationToken: Option.some(
-                'vexl_nt_test' as VexlNotificationToken
-              ),
-              publicKeyV2: Option.none(),
-            },
-          })
+        yield* app.ClubsMember.joinClub({
+          headers: commonHeaders,
+          payload: {
+            code: inviteLink2.link.code,
+            contactsImported: false,
+            signedChallenge: challengeForUser2.signedChallenge,
+            publicKey: challengeForUser2.publicKey,
+            notificationToken: Option.some(
+              'someToken' as ExpoNotificationToken
+            ),
+            vexlNotificationToken: Option.some(
+              'vexl_nt_test' as VexlNotificationToken
+            ),
+            publicKeyV2: Option.none(),
+          },
+        })
+
+        const secondChallengeForUser1 = yield* generateAndSignChallenge(
+          user1.mainKeyPair
         )
 
-        const secondChallengeForUser1 = yield* _(
-          generateAndSignChallenge(user1.mainKeyPair)
-        )
-
-        const clubMembers = yield* _(
-          app.ClubsMember.getClubContacts({
-            headers: commonHeaders,
-            payload: {
-              clubUuid: forClubUuid,
-              publicKey: secondChallengeForUser1.publicKey,
-              publicKeyV2: secondChallengeForUser1.publicKeyV2,
-              signedChallenge: secondChallengeForUser1.signedChallenge,
-            },
-          })
-        )
+        const clubMembers = yield* app.ClubsMember.getClubContacts({
+          headers: commonHeaders,
+          payload: {
+            clubUuid: forClubUuid,
+            publicKey: secondChallengeForUser1.publicKey,
+            publicKeyV2: secondChallengeForUser1.publicKeyV2,
+            signedChallenge: secondChallengeForUser1.signedChallenge,
+          },
+        })
 
         expect(clubMembers.items).toHaveLength(2)
         expect(clubMembers.clubUuid).toEqual(forClubUuid)
@@ -163,64 +153,60 @@ describe('Get club contacts', () => {
 
   it('Should return error for invalid challenge', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
         const forClubUuid = generateClubUuid()
 
-        yield* _(
-          app.ClubsAdmin.createClub({
-            payload: {
-              club: {
-                clubImageUrl: SOME_URL,
-                name: 'someName',
-                description: Option.some('someDescription'),
-                membersCountLimit: 100,
-                uuid: forClubUuid,
-                validUntil: CLUB_VALID_UNTIL,
-                reportLimit: 10,
-              },
+        yield* app.ClubsAdmin.createClub({
+          payload: {
+            club: {
+              clubImageUrl: SOME_URL,
+              name: 'someName',
+              description: Option.some('someDescription'),
+              membersCountLimit: 100,
+              uuid: forClubUuid,
+              validUntil: CLUB_VALID_UNTIL,
+              reportLimit: 10,
             },
-            headers: {'x-admin-token': ADMIN_TOKEN},
-          })
+          },
+          headers: {'x-admin-token': ADMIN_TOKEN},
+        })
+
+        const challengeForUser = yield* generateAndSignChallenge(
+          user1.mainKeyPair
         )
 
-        const challengeForUser = yield* _(
-          generateAndSignChallenge(user1.mainKeyPair)
-        )
-
-        const inviteLink = yield* _(
-          app.ClubsAdmin.generateClubInviteLinkForAdmin({
+        const inviteLink = yield* app.ClubsAdmin.generateClubInviteLinkForAdmin(
+          {
             payload: {
               clubUuid: forClubUuid,
             },
             headers: {'x-admin-token': ADMIN_TOKEN},
-          })
+          }
         )
 
-        yield* _(
-          app.ClubsMember.joinClub({
-            headers: commonHeaders,
-            payload: {
-              code: inviteLink.link.code,
-              contactsImported: false,
-              signedChallenge: challengeForUser.signedChallenge,
-              publicKey: challengeForUser.publicKey,
-              notificationToken: Option.some(
-                'someToken' as ExpoNotificationToken
-              ),
-              vexlNotificationToken: Option.some(
-                'vexl_nt_test' as VexlNotificationToken
-              ),
-              publicKeyV2: Option.none(),
-            },
-          })
+        yield* app.ClubsMember.joinClub({
+          headers: commonHeaders,
+          payload: {
+            code: inviteLink.link.code,
+            contactsImported: false,
+            signedChallenge: challengeForUser.signedChallenge,
+            publicKey: challengeForUser.publicKey,
+            notificationToken: Option.some(
+              'someToken' as ExpoNotificationToken
+            ),
+            vexlNotificationToken: Option.some(
+              'vexl_nt_test' as VexlNotificationToken
+            ),
+            publicKeyV2: Option.none(),
+          },
+        })
+
+        const secondChallengeForUser = yield* generateAndSignChallenge(
+          user2.mainKeyPair
         )
 
-        const secondChallengeForUser = yield* _(
-          generateAndSignChallenge(user2.mainKeyPair)
-        )
-
-        const errorResponse = yield* _(
+        const errorResponse = yield* pipe(
           app.ClubsMember.getClubContacts({
             headers: commonHeaders,
             payload: {
@@ -230,7 +216,7 @@ describe('Get club contacts', () => {
               signedChallenge: secondChallengeForUser.signedChallenge,
             },
           }),
-          Effect.either
+          Effect.result
         )
 
         expectErrorResponse(InvalidChallengeError)(errorResponse)
@@ -240,116 +226,106 @@ describe('Get club contacts', () => {
 
   it('Should return error 400 if user want to see members of a club he is not part of', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
         const forClubUuid1 = generateClubUuid()
         const forClubUuid2 = generateClubUuid()
 
-        yield* _(
-          app.ClubsAdmin.createClub({
-            payload: {
-              club: {
-                clubImageUrl: SOME_URL,
-                name: 'someName',
-                description: Option.some('someDescription'),
-                membersCountLimit: 100,
-                uuid: forClubUuid1,
-                validUntil: CLUB_VALID_UNTIL,
-                reportLimit: 10,
-              },
+        yield* app.ClubsAdmin.createClub({
+          payload: {
+            club: {
+              clubImageUrl: SOME_URL,
+              name: 'someName',
+              description: Option.some('someDescription'),
+              membersCountLimit: 100,
+              uuid: forClubUuid1,
+              validUntil: CLUB_VALID_UNTIL,
+              reportLimit: 10,
             },
-            headers: {'x-admin-token': ADMIN_TOKEN},
-          })
+          },
+          headers: {'x-admin-token': ADMIN_TOKEN},
+        })
+
+        const challengeForUser1 = yield* generateAndSignChallenge(
+          user1.mainKeyPair
         )
 
-        const challengeForUser1 = yield* _(
-          generateAndSignChallenge(user1.mainKeyPair)
-        )
-
-        const inviteLink1 = yield* _(
-          app.ClubsAdmin.generateClubInviteLinkForAdmin({
+        const inviteLink1 =
+          yield* app.ClubsAdmin.generateClubInviteLinkForAdmin({
             payload: {
               clubUuid: forClubUuid1,
             },
             headers: {'x-admin-token': ADMIN_TOKEN},
           })
-        )
 
         // user1 joins the first club
-        yield* _(
-          app.ClubsMember.joinClub({
-            headers: commonHeaders,
-            payload: {
-              code: inviteLink1.link.code,
-              contactsImported: false,
-              signedChallenge: challengeForUser1.signedChallenge,
-              publicKey: challengeForUser1.publicKey,
-              notificationToken: Option.some(
-                'someToken' as ExpoNotificationToken
-              ),
-              vexlNotificationToken: Option.some(
-                'vexl_nt_test' as VexlNotificationToken
-              ),
-              publicKeyV2: Option.none(),
+        yield* app.ClubsMember.joinClub({
+          headers: commonHeaders,
+          payload: {
+            code: inviteLink1.link.code,
+            contactsImported: false,
+            signedChallenge: challengeForUser1.signedChallenge,
+            publicKey: challengeForUser1.publicKey,
+            notificationToken: Option.some(
+              'someToken' as ExpoNotificationToken
+            ),
+            vexlNotificationToken: Option.some(
+              'vexl_nt_test' as VexlNotificationToken
+            ),
+            publicKeyV2: Option.none(),
+          },
+        })
+
+        yield* app.ClubsAdmin.createClub({
+          payload: {
+            club: {
+              clubImageUrl: SOME_URL,
+              name: 'someName',
+              description: Option.some('someDescription'),
+              membersCountLimit: 100,
+              uuid: forClubUuid2,
+              validUntil: CLUB_VALID_UNTIL,
+              reportLimit: 10,
             },
-          })
+          },
+          headers: {'x-admin-token': ADMIN_TOKEN},
+        })
+
+        const challengeForUser2 = yield* generateAndSignChallenge(
+          user2.mainKeyPair
         )
 
-        yield* _(
-          app.ClubsAdmin.createClub({
-            payload: {
-              club: {
-                clubImageUrl: SOME_URL,
-                name: 'someName',
-                description: Option.some('someDescription'),
-                membersCountLimit: 100,
-                uuid: forClubUuid2,
-                validUntil: CLUB_VALID_UNTIL,
-                reportLimit: 10,
-              },
-            },
-            headers: {'x-admin-token': ADMIN_TOKEN},
-          })
-        )
-
-        const challengeForUser2 = yield* _(
-          generateAndSignChallenge(user2.mainKeyPair)
-        )
-
-        const inviteLink2 = yield* _(
-          app.ClubsAdmin.generateClubInviteLinkForAdmin({
+        const inviteLink2 =
+          yield* app.ClubsAdmin.generateClubInviteLinkForAdmin({
             payload: {
               clubUuid: forClubUuid2,
             },
             headers: {'x-admin-token': ADMIN_TOKEN},
           })
-        )
 
         // user2 joins the second club
-        yield* _(
-          app.ClubsMember.joinClub({
-            headers: commonHeaders,
-            payload: {
-              code: inviteLink2.link.code,
-              contactsImported: false,
-              signedChallenge: challengeForUser2.signedChallenge,
-              publicKey: challengeForUser2.publicKey,
-              notificationToken: Option.some(
-                'someToken' as ExpoNotificationToken
-              ),
-              vexlNotificationToken: Option.some(
-                'vexl_nt_test' as VexlNotificationToken
-              ),
-              publicKeyV2: Option.none(),
-            },
-          })
+        yield* app.ClubsMember.joinClub({
+          headers: commonHeaders,
+          payload: {
+            code: inviteLink2.link.code,
+            contactsImported: false,
+            signedChallenge: challengeForUser2.signedChallenge,
+            publicKey: challengeForUser2.publicKey,
+            notificationToken: Option.some(
+              'someToken' as ExpoNotificationToken
+            ),
+            vexlNotificationToken: Option.some(
+              'vexl_nt_test' as VexlNotificationToken
+            ),
+            publicKeyV2: Option.none(),
+          },
+        })
+
+        const secondChallengeForUser2 = yield* generateAndSignChallenge(
+          user2.mainKeyPair
         )
 
-        const secondChallengeForUser2 = yield* _(
-          generateAndSignChallenge(user2.mainKeyPair)
-        )
-
-        const errorResponse = yield* _(
+        const errorResponse = yield* pipe(
           app.ClubsMember.getClubContacts({
             headers: commonHeaders,
             payload: {
@@ -359,7 +335,7 @@ describe('Get club contacts', () => {
               signedChallenge: secondChallengeForUser2.signedChallenge,
             },
           }),
-          Effect.either
+          Effect.result
         )
         expectErrorResponse(NotFoundError)(errorResponse)
       })
@@ -368,66 +344,62 @@ describe('Get club contacts', () => {
 
   it('Should return error 404 for requesting users of non existing club', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
         const forClubUuid = generateClubUuid()
         const notExistingClubUuid = generateClubUuid()
 
-        yield* _(
-          app.ClubsAdmin.createClub({
-            payload: {
-              club: {
-                clubImageUrl: SOME_URL,
-                name: 'someName',
-                description: Option.some('someDescription'),
-                membersCountLimit: 100,
-                uuid: forClubUuid,
-                validUntil: CLUB_VALID_UNTIL,
-                reportLimit: 10,
-              },
+        yield* app.ClubsAdmin.createClub({
+          payload: {
+            club: {
+              clubImageUrl: SOME_URL,
+              name: 'someName',
+              description: Option.some('someDescription'),
+              membersCountLimit: 100,
+              uuid: forClubUuid,
+              validUntil: CLUB_VALID_UNTIL,
+              reportLimit: 10,
             },
-            headers: {'x-admin-token': ADMIN_TOKEN},
-          })
+          },
+          headers: {'x-admin-token': ADMIN_TOKEN},
+        })
+
+        const challengeForUser1 = yield* generateAndSignChallenge(
+          user1.mainKeyPair
         )
 
-        const challengeForUser1 = yield* _(
-          generateAndSignChallenge(user1.mainKeyPair)
-        )
-
-        const inviteLink = yield* _(
-          app.ClubsAdmin.generateClubInviteLinkForAdmin({
+        const inviteLink = yield* app.ClubsAdmin.generateClubInviteLinkForAdmin(
+          {
             payload: {
               clubUuid: forClubUuid,
             },
             headers: {'x-admin-token': ADMIN_TOKEN},
-          })
+          }
         )
 
         // user1 joins the club
-        yield* _(
-          app.ClubsMember.joinClub({
-            headers: commonHeaders,
-            payload: {
-              code: inviteLink.link.code,
-              contactsImported: false,
-              signedChallenge: challengeForUser1.signedChallenge,
-              publicKey: challengeForUser1.publicKey,
-              notificationToken: Option.some(
-                'someToken' as ExpoNotificationToken
-              ),
-              vexlNotificationToken: Option.some(
-                'vexl_nt_test' as VexlNotificationToken
-              ),
-              publicKeyV2: Option.none(),
-            },
-          })
+        yield* app.ClubsMember.joinClub({
+          headers: commonHeaders,
+          payload: {
+            code: inviteLink.link.code,
+            contactsImported: false,
+            signedChallenge: challengeForUser1.signedChallenge,
+            publicKey: challengeForUser1.publicKey,
+            notificationToken: Option.some(
+              'someToken' as ExpoNotificationToken
+            ),
+            vexlNotificationToken: Option.some(
+              'vexl_nt_test' as VexlNotificationToken
+            ),
+            publicKeyV2: Option.none(),
+          },
+        })
+
+        const challengeForUser2 = yield* generateAndSignChallenge(
+          user1.mainKeyPair
         )
 
-        const challengeForUser2 = yield* _(
-          generateAndSignChallenge(user1.mainKeyPair)
-        )
-
-        const errorResponse = yield* _(
+        const errorResponse = yield* pipe(
           app.ClubsMember.getClubContacts({
             headers: commonHeaders,
             payload: {
@@ -437,7 +409,7 @@ describe('Get club contacts', () => {
               signedChallenge: challengeForUser2.signedChallenge,
             },
           }),
-          Effect.either
+          Effect.result
         )
 
         expectErrorResponse(NotFoundError)(errorResponse)
@@ -447,65 +419,61 @@ describe('Get club contacts', () => {
 
   it('Should return error 404 for non existing club member requesting other club members', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
         const forClubUuid = generateClubUuid()
 
-        yield* _(
-          app.ClubsAdmin.createClub({
-            payload: {
-              club: {
-                clubImageUrl: SOME_URL,
-                name: 'someName',
-                description: Option.some('someDescription'),
-                membersCountLimit: 100,
-                uuid: forClubUuid,
-                validUntil: CLUB_VALID_UNTIL,
-                reportLimit: 10,
-              },
+        yield* app.ClubsAdmin.createClub({
+          payload: {
+            club: {
+              clubImageUrl: SOME_URL,
+              name: 'someName',
+              description: Option.some('someDescription'),
+              membersCountLimit: 100,
+              uuid: forClubUuid,
+              validUntil: CLUB_VALID_UNTIL,
+              reportLimit: 10,
             },
-            headers: {'x-admin-token': ADMIN_TOKEN},
-          })
-        )
+          },
+          headers: {'x-admin-token': ADMIN_TOKEN},
+        })
 
-        const inviteLink = yield* _(
-          app.ClubsAdmin.generateClubInviteLinkForAdmin({
+        const inviteLink = yield* app.ClubsAdmin.generateClubInviteLinkForAdmin(
+          {
             payload: {
               clubUuid: forClubUuid,
             },
             headers: {'x-admin-token': ADMIN_TOKEN},
-          })
+          }
         )
 
-        const challengeForUser1 = yield* _(
-          generateAndSignChallenge(user1.mainKeyPair)
+        const challengeForUser1 = yield* generateAndSignChallenge(
+          user1.mainKeyPair
         )
 
         // user1 joins the club
-        yield* _(
-          app.ClubsMember.joinClub({
-            headers: commonHeaders,
-            payload: {
-              code: inviteLink.link.code,
-              contactsImported: false,
-              signedChallenge: challengeForUser1.signedChallenge,
-              publicKey: challengeForUser1.publicKey,
-              notificationToken: Option.some(
-                'someToken' as ExpoNotificationToken
-              ),
-              vexlNotificationToken: Option.some(
-                'vexl_nt_test' as VexlNotificationToken
-              ),
-              publicKeyV2: Option.none(),
-            },
-          })
+        yield* app.ClubsMember.joinClub({
+          headers: commonHeaders,
+          payload: {
+            code: inviteLink.link.code,
+            contactsImported: false,
+            signedChallenge: challengeForUser1.signedChallenge,
+            publicKey: challengeForUser1.publicKey,
+            notificationToken: Option.some(
+              'someToken' as ExpoNotificationToken
+            ),
+            vexlNotificationToken: Option.some(
+              'vexl_nt_test' as VexlNotificationToken
+            ),
+            publicKeyV2: Option.none(),
+          },
+        })
+
+        const challengeForUser2 = yield* generateAndSignChallenge(
+          user2.mainKeyPair
         )
 
-        const challengeForUser2 = yield* _(
-          generateAndSignChallenge(user2.mainKeyPair)
-        )
-
-        const errorResponse = yield* _(
+        const errorResponse = yield* pipe(
           app.ClubsMember.getClubContacts({
             headers: commonHeaders,
             payload: {
@@ -515,7 +483,7 @@ describe('Get club contacts', () => {
               signedChallenge: challengeForUser2.signedChallenge,
             },
           }),
-          Effect.either
+          Effect.result
         )
         expectErrorResponse(NotFoundError)(errorResponse)
       })

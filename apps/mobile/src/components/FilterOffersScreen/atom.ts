@@ -303,8 +303,8 @@ export const updateCurrencyLimitsAtom = atom<
     // after a currency switch the slider stays pinned at the prior cap number
     // (e.g. 10 000 EUR becoming 10 000 HUF when HUF's cap is ~4 000 000).
     void Effect.runPromise(
-      Effect.gen(function* (_) {
-        yield* _(refreshBtcPriceWithEurEffect(set, currency))
+      Effect.gen(function* () {
+        yield* refreshBtcPriceWithEurEffect(set, currency)
         if (get(currencyAtom) === currency) {
           set(amountTopLimitAtom, get(maxAmountForFilterCurrencyAtom))
         }
@@ -438,7 +438,7 @@ export const setClubsInFilterActionAtom = atom(
     const clubsWithMembers = get(clubsWithMembersAtom)
 
     if (filterClubsUuids) {
-      if (!Array.isNonEmptyReadonlyArray(clubsWithMembers)) {
+      if (!Array.isReadonlyArrayNonEmpty(clubsWithMembers)) {
         set(clubsUuidsFilterAtom, filterClubsUuids)
         return
       }
@@ -604,7 +604,7 @@ function getFilteredOffersPreviewCount({
       offers: filteredOffers,
       locationFilter: draftFilter.location,
       includeOnlineOffers:
-        !Array.isNonEmptyReadonlyArray(draftFilter.location ?? []) ||
+        !Array.isReadonlyArrayNonEmpty(draftFilter.location ?? []) ||
         shouldCombineOnlineOffersWithLocationFilter(draftFilter),
     }),
     visibleSection: draftFilter.visibleSection,

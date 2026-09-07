@@ -1,35 +1,33 @@
-import {HttpApiBuilder} from '@effect/platform/index'
 import {isVexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {SendingNotificationError} from '@vexl-next/rest-api/src/services/notification/contract'
 import {NotificationApiSpecification} from '@vexl-next/rest-api/src/services/notification/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
-import {Effect} from 'effect'
+import {makeHttpApiHandler} from '@vexl-next/server-utils/src/makeHttpApiHandler'
+import {Effect, pipe} from 'effect'
 import {NotificationSocketMessaging} from '../services/NotificationSocketMessaging'
 import {StreamOnlyChatMessageSendTask} from '../services/NotificationSocketMessaging/domain'
 import {VexlNotificationTokenService} from '../services/VexlNotificationTokenService'
 
-export const issueStreamOnlyMessageHandler = HttpApiBuilder.handler(
+export const issueStreamOnlyMessageHandler = makeHttpApiHandler(
   NotificationApiSpecification,
   'root',
   'issueStreamOnlyMessage',
   (req) =>
     makeEndpointEffect(
-      Effect.gen(function* (_) {
+      Effect.gen(function* () {
         const tokenOrCypher =
           req.payload.notificationCypher ?? req.payload.notificationToken
         if (!tokenOrCypher)
-          return yield* _(new SendingNotificationError({tokenInvalid: true}))
+          return yield* new SendingNotificationError({tokenInvalid: true})
 
-        const vexlNotificationTokenService = yield* _(
-          VexlNotificationTokenService
-        )
+        const vexlNotificationTokenService = yield* VexlNotificationTokenService
 
-        const vexlNotificationToken = yield* _(
+        const vexlNotificationToken = yield* pipe(
           vexlNotificationTokenService.normalizeToVexlNotificationTokenSecret(
             tokenOrCypher
           ),
           Effect.catchTag(
-            'NoSuchElementException',
+            'NoSuchElementError',
             (e) => new SendingNotificationError({tokenInvalid: true})
           )
         )
@@ -40,9 +38,9 @@ export const issueStreamOnlyMessageHandler = HttpApiBuilder.handler(
         //   )
         // )
 
-        const socketMessaging = yield* _(NotificationSocketMessaging)
+        const socketMessaging = yield* NotificationSocketMessaging
 
-        yield* _(
+        yield* pipe(
           socketMessaging.sendStreamOnlyChatMessage(
             new StreamOnlyChatMessageSendTask({
               notificationToken: vexlNotificationToken,

@@ -1,6 +1,7 @@
+import {NumberFromString} from '@vexl-next/generic-utils/src/effect-helpers/NumberFromString'
+import {Effect, flow, Layer, Option, pipe, Schema} from 'effect'
 // TODO
 
-import {SqlClient, SqlSchema} from '@effect/sql'
 import {type MessageType} from '@vexl-next/domain/src/general/messaging'
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {shouldDisableMetrics} from '@vexl-next/server-utils/src/commonConfigs'
@@ -8,7 +9,7 @@ import {type CommonMetricAttributes} from '@vexl-next/server-utils/src/metrics/c
 import {MetricsMessage} from '@vexl-next/server-utils/src/metrics/domain'
 import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {reportMetricForked} from '@vexl-next/server-utils/src/metrics/reportMetricForked'
-import {Effect, flow, Layer, Option, Schema} from 'effect'
+import {SqlClient, SqlSchema} from 'effect/unstable/sql'
 
 const MESSAGE_SENT = 'MESSAGE_SENT'
 const MESSAGE_FETCHED_AND_REMOVED = 'MESSAGE_FETCHED_AND_REMOVED'
@@ -176,15 +177,15 @@ const reportTotalInboxes = (
   )
 
 export const reportMetricsLayer = Layer.effectDiscard(
-  Effect.gen(function* (_) {
-    if (yield* _(shouldDisableMetrics)) {
+  Effect.gen(function* () {
+    if (yield* shouldDisableMetrics) {
       return
     }
-    const sql = yield* _(SqlClient.SqlClient)
+    const sql = yield* SqlClient.SqlClient
 
-    const queryTotalInboxes = SqlSchema.findOne({
+    const queryTotalInboxes = SqlSchema.findOneOption({
       Request: Schema.Null,
-      Result: Schema.Struct({count: Schema.NumberFromString}),
+      Result: Schema.Struct({count: NumberFromString}),
       execute: () => sql`
         SELECT
           count(*) AS COUNT
@@ -201,9 +202,9 @@ export const reportMetricsLayer = Layer.effectDiscard(
       Effect.flatMap(reportTotalInboxes)
     )
 
-    const queryUnreadInboxes = SqlSchema.findOne({
+    const queryUnreadInboxes = SqlSchema.findOneOption({
       Request: Schema.Null,
-      Result: Schema.Struct({count: Schema.NumberFromString}),
+      Result: Schema.Struct({count: NumberFromString}),
       execute: () => sql`
         SELECT
           count(*) AS COUNT
@@ -229,7 +230,7 @@ export const reportMetricsLayer = Layer.effectDiscard(
       Effect.flatMap(reportInboxesWithUnreadMessages)
     )
 
-    yield* _(
+    yield* pipe(
       Effect.zip(
         Effect.logInfo('Reporting metrics'),
         Effect.all([queryTotalInboxes, queryUnreadInboxes])
@@ -240,7 +241,7 @@ export const reportMetricsLayer = Layer.effectDiscard(
       Effect.flatMap(() => Effect.sleep(60_000)),
       Effect.forever,
       Effect.withSpan('Report metrics'),
-      Effect.fork
+      Effect.forkChild
     )
   })
 )

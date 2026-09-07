@@ -26,7 +26,7 @@ export const sendOfferToNetworkBatchPrivateParts = ({
     offerId: OfferId
   }
 }): ReturnType<OfferApi['createNewOffer']> =>
-  Effect.gen(function* (_) {
+  Effect.gen(function* () {
     const privatePartsBatches = Array.chunksOf(
       offerData.offerPrivateList,
       PRIVATE_PARTS_BATCH_SIZE
@@ -34,39 +34,35 @@ export const sendOfferToNetworkBatchPrivateParts = ({
 
     const [firstBatch, ...restOfBatches] = privatePartsBatches
 
-    const createRequest = yield* _(
-      offerApi.createNewOffer({
-        offerPrivateList: [offerData.ownerPrivatePayload, ...firstBatch],
-        countryPrefix: offerData.countryPrefix,
-        payloadPublic: offerData.payloadPublic,
-        offerType: offerData.offerType,
-        adminId: offerData.adminId,
-        offerId: offerData.offerId,
-      })
-    )
+    const createRequest = yield* offerApi.createNewOffer({
+      offerPrivateList: [offerData.ownerPrivatePayload, ...firstBatch],
+      countryPrefix: offerData.countryPrefix,
+      payloadPublic: offerData.payloadPublic,
+      offerType: offerData.offerType,
+      adminId: offerData.adminId,
+      offerId: offerData.offerId,
+    })
 
-    yield* _(
-      pipe(
-        restOfBatches ?? [],
-        Array.map((privateParts) =>
-          offerApi.createPrivatePart({
-            offerPrivateList: privateParts,
-            adminId: offerData.adminId,
-          })
-        ),
-        Effect.all,
-        Effect.tapError(() =>
-          offerApi
-            .deleteOffer({adminIds: [offerData.adminId]})
-            .pipe(
-              Effect.ignore,
-              Effect.zipLeft(
-                Effect.log(
-                  'Error while creating offer. Cleaning up any already created private parts.'
-                )
+    yield* pipe(
+      restOfBatches ?? [],
+      Array.map((privateParts) =>
+        offerApi.createPrivatePart({
+          offerPrivateList: privateParts,
+          adminId: offerData.adminId,
+        })
+      ),
+      Effect.all,
+      Effect.tapError(() =>
+        offerApi
+          .deleteOffer({adminIds: [offerData.adminId]})
+          .pipe(
+            Effect.ignore,
+            Effect.tap(
+              Effect.log(
+                'Error while creating offer. Cleaning up any already created private parts.'
               )
             )
-        )
+          )
       )
     )
 

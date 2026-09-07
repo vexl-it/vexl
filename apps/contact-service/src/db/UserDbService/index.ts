@@ -189,73 +189,55 @@ export interface UserDbOperations {
   ) => Effect.Effect<void, UnexpectedServerError>
 }
 
-export class UserDbService extends Context.Tag('UserDbService')<
+export class UserDbService extends Context.Service<
   UserDbService,
   UserDbOperations
->() {
+>()('UserDbService') {
   static readonly Live = Layer.effect(
     UserDbService,
-    Effect.gen(function* (_) {
-      const clearExpoTokenHeldByOtherUsers = yield* _(
-        createClearExpoTokenHeldByOtherUsers
-      )
-      const clearVexlNotificationTokenHeldByOtherUsers = yield* _(
-        createClearVexlNotificationTokenHeldByOtherUsers
-      )
-      const insertUser = yield* _(createInsertUser)
-      const findUserByHash = yield* _(createFindUserByHash)
-      const findUserByPublicKeyAndHash = yield* _(
-        createFindUserbyPublicKeyAndHash
-      )
-      const deleteUserByPublicKeyAndHash = yield* _(
-        createDeleteUserByPublicKeyAndHash
-      )
-      const updateRefreshUser = yield* _(createUpdateRefreshUser)
-      const updateExpoToken = yield* _(createUpdateExpoToken)
-      const updateInvalidateFirebaseToken = yield* _(
-        createUpdateInvalidateFirebaseToken
-      )
-      const updateInvalidateExpoToken = yield* _(
-        createUpdateInvalidateExpoToken
-      )
+    Effect.gen(function* () {
+      const clearExpoTokenHeldByOtherUsers =
+        yield* createClearExpoTokenHeldByOtherUsers
+      const clearVexlNotificationTokenHeldByOtherUsers =
+        yield* createClearVexlNotificationTokenHeldByOtherUsers
+      const insertUser = yield* createInsertUser
+      const findUserByHash = yield* createFindUserByHash
+      const findUserByPublicKeyAndHash = yield* createFindUserbyPublicKeyAndHash
+      const deleteUserByPublicKeyAndHash =
+        yield* createDeleteUserByPublicKeyAndHash
+      const updateRefreshUser = yield* createUpdateRefreshUser
+      const updateExpoToken = yield* createUpdateExpoToken
+      const updateInvalidateFirebaseToken =
+        yield* createUpdateInvalidateFirebaseToken
+      const updateInvalidateExpoToken = yield* createUpdateInvalidateExpoToken
 
-      const findFirebaseTokensOfUsersWhoDirectlyImportedHash = yield* _(
-        createFindTokensOfUsersWhoDirectlyImportedHash
-      )
-      const findFirebaseTokensOfUsersWhoHaveHAshAsSecondLevelContact = yield* _(
-        createFindFirebaseTokensOfUsersWhoHaveHashAsSecondLevelContact
-      )
+      const findFirebaseTokensOfUsersWhoDirectlyImportedHash =
+        yield* createFindTokensOfUsersWhoDirectlyImportedHash
+      const findFirebaseTokensOfUsersWhoHaveHAshAsSecondLevelContact =
+        yield* createFindFirebaseTokensOfUsersWhoHaveHashAsSecondLevelContact
 
-      const findVexlNotificationTokensOfUsersWhoDirectlyImportedHash = yield* _(
-        createFindVexlNotificationTokensOfUsersWhoDirectlyImportedHash
-      )
+      const findVexlNotificationTokensOfUsersWhoDirectlyImportedHash =
+        yield* createFindVexlNotificationTokensOfUsersWhoDirectlyImportedHash
       const findVexlNotificationTokensOfUsersWhoHaveHashAsSecondLevelContact =
-        yield* _(
-          createFindVexlNotificationTokensOfUsersWhoHaveHashAsSecondLevelContact
-        )
+        yield* createFindVexlNotificationTokensOfUsersWhoHaveHashAsSecondLevelContact
 
-      const findUsersToNotifyAboutInactivity = yield* _(
-        createFindUsersToNotifyAboutInactivity
-      )
+      const findUsersToNotifyAboutInactivity =
+        yield* createFindUsersToNotifyAboutInactivity
 
-      const updateInactivityNotificationSent = yield* _(
-        createUpdateInactivityNotificationSent
-      )
+      const updateInactivityNotificationSent =
+        yield* createUpdateInactivityNotificationSent
 
-      const findFirebaseTokensForNewContentNotification = yield* _(
-        createFindTokensForNewContentNotification
-      )
+      const findFirebaseTokensForNewContentNotification =
+        yield* createFindTokensForNewContentNotification
 
-      const findVexlNotificationTokensForNewContentNotification = yield* _(
-        createFindVexlNotificationTokensForNewContentNotification
-      )
+      const findVexlNotificationTokensForNewContentNotification =
+        yield* createFindVexlNotificationTokensForNewContentNotification
 
-      const updateUserInitialImportDone = yield* _(
-        createUpdateUserInitialImportDone
-      )
+      const updateUserInitialImportDone =
+        yield* createUpdateUserInitialImportDone
 
-      const updateAppSourceForUser = yield* _(createUpdateAppSourceForUser)
-      const updatePublicKeyV2 = yield* _(createUpdatePublicKeyV2)
+      const updateAppSourceForUser = yield* createUpdateAppSourceForUser
+      const updatePublicKeyV2 = yield* createUpdatePublicKeyV2
 
       return {
         clearExpoTokenHeldByOtherUsers,

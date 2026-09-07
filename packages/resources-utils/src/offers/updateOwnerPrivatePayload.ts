@@ -36,7 +36,7 @@ export default function updateOwnerPrivatePayload({
 }): Effect.Effect<
   OfferPrivatePayloadToEncrypt,
   | PrivatePartEncryptionError
-  | Effect.Effect.Error<ReturnType<OfferApi['createPrivatePart']>>
+  | Effect.Error<ReturnType<OfferApi['createPrivatePart']>>
 > {
   const privatePayload = constructPrivatePayloadForOwner({
     ownerCredentials,
@@ -55,6 +55,6 @@ export default function updateOwnerPrivatePayload({
         offerPrivateList: [payload],
       })
     ),
-    Effect.zipRight(Effect.succeed(privatePayload))
+    Effect.andThen(Effect.succeed(privatePayload))
   )
 }

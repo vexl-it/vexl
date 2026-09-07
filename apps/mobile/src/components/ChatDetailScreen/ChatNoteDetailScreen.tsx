@@ -1,4 +1,4 @@
-import {ScopeProvider} from 'bunshi/dist/react'
+import {ScopeProvider} from 'bunshi/react'
 import {useAtomValue} from 'jotai'
 import React, {useMemo} from 'react'
 import {type RootStackScreenProps} from '../../navigationTypes'

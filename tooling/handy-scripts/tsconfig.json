@@ -4,7 +4,7 @@
     "types": ["node"],
     "target": "ESNext",
     "module": "ESNext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "rootDir": ".",
     "outDir": "./dist",
     "esModuleInterop": true,

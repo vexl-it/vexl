@@ -1,4 +1,4 @@
-import {Effect} from 'effect/index'
+import {Effect} from 'effect'
 import {registerInAppLoadingTask} from '../../../utils/inAppLoadingTasks'
 import {loadMapStylesActionAtom} from './mapStylesAtoms'
 
@@ -9,7 +9,7 @@ export const loadMapStylesInAppLoadingTask = registerInAppLoadingTask({
     runOn: 'resume',
   },
   task: (store) =>
-    Effect.gen(function* (_) {
-      yield* _(store.set(loadMapStylesActionAtom))
+    Effect.gen(function* () {
+      yield* store.set(loadMapStylesActionAtom)
     }),
 })

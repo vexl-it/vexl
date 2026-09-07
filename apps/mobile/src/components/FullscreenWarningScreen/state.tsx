@@ -22,7 +22,7 @@ const withoutVexlBotNews = (
 export const fullScreenWarningDataAtom = atom(
   (get): Option.Option<FullScreenWarning> => {
     const state = get(newsAndAnnouncementsAtom)
-    return Option.fromNullable(state?.fullScreenWarning).pipe(Option.flatten)
+    return Option.fromNullishOr(state?.fullScreenWarning).pipe(Option.flatten)
   }
 )
 

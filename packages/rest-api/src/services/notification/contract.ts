@@ -8,7 +8,7 @@ import {
 import {NotificationTrackingId} from '@vexl-next/domain/src/general/NotificationTrackingId.brand'
 import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
-import {Schema} from 'effect'
+import {Effect, Schema} from 'effect'
 
 export class MissingCommonHeadersError extends Schema.TaggedError<MissingCommonHeadersError>(
   'MissingCommonHeadersError'
@@ -25,16 +25,17 @@ export class IssueNotificationRequest extends Schema.Class<IssueNotificationRequ
 )({
   // todo: #2124 remove this
   notificationCypher: Schema.optional(
-    Schema.Union(NotificationCypher, VexlNotificationToken)
+    Schema.Union([NotificationCypher, VexlNotificationToken])
   ),
   // todo: #2124 remove nullOr and temporary tokens
   notificationToken: Schema.optional(VexlNotificationToken),
   /**
    * Wether to send a system notification indicating there is a new chat notification.
    */
-  sendNewChatMessageNotification: Schema.optionalWith(Schema.Boolean, {
-    default: () => true,
-  }),
+  sendNewChatMessageNotification: Schema.Boolean.pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): true => true)),
+    Schema.withConstructorDefault(Effect.sync((): true => true))
+  ),
 }) {}
 
 export class ReportNotificationProcessedRequest extends Schema.Class<ReportNotificationProcessedRequest>(
@@ -54,7 +55,7 @@ export class IssueStreamOnlyMessageRequest extends Schema.Class<IssueStreamOnlyM
 )({
   // todo: #2124 remove this
   notificationCypher: Schema.optional(
-    Schema.Union(NotificationCypher, VexlNotificationToken)
+    Schema.Union([NotificationCypher, VexlNotificationToken])
   ),
   // todo: #2124 remove nullOr and temporary tokens
   notificationToken: Schema.optional(VexlNotificationToken),
@@ -65,18 +66,20 @@ export class IssueStreamOnlyMessageRequest extends Schema.Class<IssueStreamOnlyM
 export class InvalidFcmCypherError extends Schema.TaggedError<InvalidFcmCypherError>()(
   'InvalidFcmCypherError',
   {
-    status: Schema.optionalWith(Schema.Literal(400), {
-      default: () => 400 as const,
-    }),
+    status: Schema.Literal(400).pipe(
+      Schema.withDecodingDefaultType(Effect.sync((): 400 => 400)),
+      Schema.withConstructorDefault(Effect.sync((): 400 => 400))
+    ),
   }
 ) {}
 
 export class InvalidNotificationCypherrror extends Schema.TaggedError<InvalidNotificationCypherrror>()(
   'InvalidNotificationCypherrror',
   {
-    status: Schema.optionalWith(Schema.Literal(400), {
-      default: () => 400 as const,
-    }),
+    status: Schema.Literal(400).pipe(
+      Schema.withDecodingDefaultType(Effect.sync((): 400 => 400)),
+      Schema.withConstructorDefault(Effect.sync((): 400 => 400))
+    ),
   }
 ) {}
 
@@ -84,9 +87,10 @@ export class SendingNotificationError extends Schema.TaggedError<SendingNotifica
   'SendingNotificationError',
   {
     tokenInvalid: Schema.Boolean,
-    status: Schema.optionalWith(Schema.Literal(400), {
-      default: () => 400 as const,
-    }),
+    status: Schema.Literal(400).pipe(
+      Schema.withDecodingDefaultType(Effect.sync((): 400 => 400)),
+      Schema.withConstructorDefault(Effect.sync((): 400 => 400))
+    ),
   }
 ) {}
 

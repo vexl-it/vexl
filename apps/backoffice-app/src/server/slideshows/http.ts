@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/nextjs'
-import {Effect, Schema, type Either, type ParseResult} from 'effect'
+import {Effect, Schema, type Result} from 'effect'
 import {NextResponse, type NextRequest} from 'next/server'
 import {
   InvalidAdminTokenError,
@@ -19,31 +19,29 @@ export const notFound = (message: string): NextResponse =>
 export const noContent = (): NextResponse =>
   new NextResponse(null, {status: 204})
 
-export const decodeJsonBody = async <S extends Schema.Schema.AnyNoContext>(
+export const decodeJsonBody = async <S extends Schema.Decoder<unknown>>(
   request: NextRequest,
   schema: S
-): Promise<Either.Either<Schema.Schema.Type<S>, ParseResult.ParseError>> => {
+): Promise<Result.Result<S['Type'], Schema.SchemaError>> => {
   const body = await request.json()
-  return Schema.decodeUnknownEither(schema)(body)
+  return Schema.decodeUnknownResult(schema)(body)
 }
 
 export const requireAdmin = async (
   request: NextRequest
 ): Promise<NextResponse | null> => {
   const result = await Effect.runPromise(
-    Effect.either(validateAdminRequest(request))
+    Effect.result(validateAdminRequest(request))
   )
 
-  if (result._tag === 'Right') return null
+  if (result._tag === 'Success') return null
 
   if (
-    result.left instanceof MissingAdminTokenError ||
-    result.left instanceof InvalidAdminTokenError
+    result.failure instanceof MissingAdminTokenError ||
+    result.failure instanceof InvalidAdminTokenError
   ) {
-    return NextResponse.json({error: result.left.message}, {status: 401})
+    return NextResponse.json({error: result.failure.message}, {status: 401})
   }
-
-  if (result.left instanceof Error) throw result.left
 
   throw new Error('Failed to validate admin token')
 }

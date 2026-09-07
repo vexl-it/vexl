@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import {captureException} from '@sentry/react-native'
-import {Effect} from 'effect/index'
+import {Effect} from 'effect'
 import * as SecretStorage from 'expo-secure-store'
 import * as O from 'fp-ts/Option'
 import {
@@ -128,7 +128,7 @@ export const sessionAtom: WritableAtom<
     set(sessionHolderAtom, {state: 'loggedIn', session: nextValue.value})
     Effect.runFork(
       writeSessionToStorage(nextValue.value).pipe(
-        Effect.catchAll((error) =>
+        Effect.catch((error) =>
           Effect.sync(() => {
             reportError(
               new Error('‼️ Error while writing user data to secure storage.'),

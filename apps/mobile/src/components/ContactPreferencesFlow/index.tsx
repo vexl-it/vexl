@@ -1,5 +1,5 @@
 import {createNativeStackNavigator} from '@react-navigation/native-stack'
-import {ScopeProvider} from 'bunshi/dist/react'
+import {ScopeProvider} from 'bunshi/react'
 import React, {useCallback, useMemo, useState} from 'react'
 import {
   type ContactPreferencesStackParamsList,

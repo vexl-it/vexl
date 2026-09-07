@@ -241,7 +241,7 @@ function OffersList({
     if (
       !isMountedRef.current ||
       activeListChangeRef.current !== null ||
-      !Array.isNonEmptyReadonlyArray(pendingListChangesRef.current)
+      !Array.isReadonlyArrayNonEmpty(pendingListChangesRef.current)
     ) {
       return
     }

@@ -22,6 +22,14 @@ config.resolver.unstable_enablePackageExports = false
 // config.resolver.disableHierarchicalLookup = true
 
 config.resolver.resolveRequest = (context, moduleName, platform) => {
+  if (moduleName === 'effect' || moduleName.startsWith('effect/')) {
+    return context.resolveRequest(
+      {...context, unstable_enablePackageExports: true},
+      moduleName,
+      platform
+    )
+  }
+
   // Alias libsodium-wrappers to react-native-libsodium for shared packages
   if (moduleName === 'libsodium-wrappers') {
     return context.resolveRequest(context, 'react-native-libsodium', platform)

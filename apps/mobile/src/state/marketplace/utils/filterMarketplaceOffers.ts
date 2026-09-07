@@ -44,7 +44,7 @@ export function shouldCombineOnlineOffersWithLocationFilter(
   filter: Pick<OffersFilter, 'location' | 'locationState'>
 ): boolean {
   return (
-    Array.isNonEmptyReadonlyArray(filter.location ?? []) &&
+    Array.isReadonlyArrayNonEmpty(filter.location ?? []) &&
     (filter.locationState?.includes('ONLINE') ?? false)
   )
 }
@@ -95,7 +95,7 @@ function offerMatchesProductCategoryFilter({
     Array.fromIterable
   )
 
-  if (!Array.isNonEmptyArray(selectedProductCategories)) return true
+  if (!Array.isArrayNonEmpty(selectedProductCategories)) return true
   if (offer.offerInfo.publicPart.listingType !== 'PRODUCT') return true
 
   const {productCategory, productCategories: offerProductCategories} =
@@ -106,7 +106,7 @@ function offerMatchesProductCategoryFilter({
   )
 
   return (
-    Array.isNonEmptyArray(categories) &&
+    Array.isArrayNonEmpty(categories) &&
     pipe(
       categories,
       Array.some((productCategory) =>
@@ -265,7 +265,7 @@ export function filterMarketplaceOffers({
       if (
         filter.clubsUuids &&
         offer.offerInfo.privatePart.clubIds.length > 0 &&
-        !Array.isNonEmptyArray(
+        !Array.isArrayNonEmpty(
           Array.intersection(
             offer.offerInfo.privatePart.clubIds,
             filter.clubsUuids
@@ -333,7 +333,7 @@ export function filterOffersByCircularLocation({
   locationFilter: readonly OfferLocation[] | undefined
   includeOnlineOffers?: boolean
 }): OneOfferInState[] {
-  if (!Array.isNonEmptyReadonlyArray(locationFilter ?? [])) {
+  if (!Array.isReadonlyArrayNonEmpty(locationFilter ?? [])) {
     if (includeOnlineOffers) return offers
 
     return pipe(
@@ -373,7 +373,7 @@ export function filterOffersByPinViewport({
   return pipe(
     offers,
     Array.filter((offer) => {
-      if (!Array.isNonEmptyReadonlyArray(locationFilter ?? [])) {
+      if (!Array.isReadonlyArrayNonEmpty(locationFilter ?? [])) {
         return isOfferPinInsideViewPort(viewport, offer)
       }
 

@@ -1,4 +1,4 @@
-import {Array, Effect} from 'effect/index'
+import {Array, Effect, pipe} from 'effect'
 import {version} from '../../utils/environment'
 import {registerInAppLoadingTask} from '../../utils/inAppLoadingTasks'
 import allChatsAtom from './atoms/allChatsAtom'
@@ -14,7 +14,7 @@ export const checkAndReportCurrentVersionToChatsInAppLoadingTaskId =
       runOn: 'start',
     },
     task: (store) =>
-      Effect.gen(function* (_) {
+      Effect.gen(function* () {
         const chatsToSendUpdateInto = store
           .get(allChatsAtom)
           .flat()
@@ -30,7 +30,7 @@ export const checkAndReportCurrentVersionToChatsInAppLoadingTaskId =
           `Sending version update into ${chatsToSendUpdateInto.length} chats`
         )
 
-        yield* _(
+        yield* pipe(
           chatsToSendUpdateInto,
           Array.map((chat) =>
             store.set(
@@ -41,7 +41,7 @@ export const checkAndReportCurrentVersionToChatsInAppLoadingTaskId =
               })
             )
           ),
-          Effect.allWith({concurrency: 'unbounded'})
+          (effects) => Effect.all(effects, {concurrency: 'unbounded'})
         )
       }),
   })

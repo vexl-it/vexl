@@ -1,5 +1,5 @@
 import {VexlNotificationTokenSecret} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
-import {Schema} from 'effect/index'
+import {Schema} from 'effect'
 import {processThrottledNotificationsJobId} from '../services/ThrottledPushNotificationService/services/ThrottledNotificationJobId'
 
 describe('processThrottledNotificationsJobId', () => {

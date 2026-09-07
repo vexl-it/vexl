@@ -1,5 +1,5 @@
 import {SearchBar} from '@vexl-next/ui'
-import {useMolecule} from 'bunshi/dist/react'
+import {useMolecule} from 'bunshi/react'
 import {atom, useSetAtom, useStore} from 'jotai'
 import React, {useEffect, useMemo, useRef} from 'react'
 import {debounce} from 'tamagui'

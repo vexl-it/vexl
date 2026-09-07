@@ -1,9 +1,3 @@
-import {
-  HttpApiBuilder,
-  HttpApiSwagger,
-  HttpMiddleware,
-  HttpServer,
-} from '@effect/platform/index'
 import {GeocodingDbService} from '@vexl-next/geocoding-db/src/GeocodingDbService'
 import {GeocodingDbLayer} from '@vexl-next/geocoding-db/src/layer'
 import {LocationApiSpecification} from '@vexl-next/rest-api/src/services/location/specification'
@@ -16,6 +10,8 @@ import {RedisConnectionService} from '@vexl-next/server-utils/src/RedisConnectio
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {ServerSecurityMiddlewareLive} from '@vexl-next/server-utils/src/serverSecurity'
 import {Layer} from 'effect'
+import {HttpRouter} from 'effect/unstable/http'
+import {HttpApiBuilder, HttpApiSwagger} from 'effect/unstable/httpapi'
 import {cryptoConfig, healthServerPortConfig} from './configs'
 import {GeocodingService} from './geocoding'
 import {
@@ -37,7 +33,7 @@ const RootApiGroupLive = HttpApiBuilder.group(
       .handle('getLocationSuggestionV2', getLocationSuggestionV2Handler)
 )
 
-export const LocationApiLive = HttpApiBuilder.api(
+export const LocationApiLive = HttpApiBuilder.layer(
   LocationApiSpecification
 ).pipe(
   Layer.provide(RootApiGroupLive),
@@ -45,12 +41,12 @@ export const LocationApiLive = HttpApiBuilder.api(
   Layer.provide(ServerSecurityMiddlewareLive)
 )
 
-const ApiServerLive = HttpApiBuilder.serve(HttpMiddleware.logger).pipe(
-  Layer.provide(HttpApiSwagger.layer()),
-  Layer.provide(LocationApiLive),
-  HttpServer.withLogAddress,
-  Layer.provide(NodeHttpServerLiveWithPortFromEnv)
-)
+const ApiServerLive = HttpRouter.serve(
+  Layer.mergeAll(
+    LocationApiLive,
+    HttpApiSwagger.layer(LocationApiSpecification)
+  )
+).pipe(Layer.provide(NodeHttpServerLiveWithPortFromEnv))
 
 export const HttpServerLive = Layer.mergeAll(
   ApiServerLive,

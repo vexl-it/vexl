@@ -1,13 +1,13 @@
 import {Schema} from 'effect'
 import {requireNativeModule} from 'expo-modules-core'
 
-export const BackgroundNotificationSocketState = Schema.Literal(
+export const BackgroundNotificationSocketState = Schema.Literals([
   'disabled',
   'waiting_for_configuration',
   'connecting',
   'connected',
-  'reconnecting'
-)
+  'reconnecting',
+])
 export type BackgroundNotificationSocketState =
   typeof BackgroundNotificationSocketState.Type
 

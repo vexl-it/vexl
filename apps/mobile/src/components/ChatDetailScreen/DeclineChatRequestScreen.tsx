@@ -9,7 +9,7 @@ import {
   XStack,
   YStack,
 } from '@vexl-next/ui'
-import {ScopeProvider, useMolecule} from 'bunshi/dist/react'
+import {ScopeProvider, useMolecule} from 'bunshi/react'
 import {Effect} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react'

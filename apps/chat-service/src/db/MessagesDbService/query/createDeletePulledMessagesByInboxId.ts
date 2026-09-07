@@ -1,7 +1,8 @@
-import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
+import {NumberFromString} from '@vexl-next/generic-utils/src/effect-helpers/NumberFromString'
 import {Effect, flow, Option, Schema} from 'effect'
+import {SqlSchema} from 'effect/unstable/sql'
 import {InboxRecordId} from '../../InboxDbService/domain'
 
 export interface DeletedPulledMessagesSummary {
@@ -10,12 +11,12 @@ export interface DeletedPulledMessagesSummary {
 }
 
 export const createDeletePulledMessagesMessagesByInboxId = Effect.gen(
-  function* (_) {
-    const sql = yield* _(PgClient.PgClient)
+  function* () {
+    const sql = yield* PgClient.PgClient
 
-    const query = SqlSchema.findOne({
+    const query = SqlSchema.findOneOption({
       Result: Schema.Struct({
-        count: Schema.NumberFromString,
+        count: NumberFromString,
         avgAgeSeconds: Schema.NullOr(Schema.Number),
       }),
       Request: InboxRecordId,
@@ -52,7 +53,7 @@ export const createDeletePulledMessagesMessagesByInboxId = Effect.gen(
           Option.map(
             (r): DeletedPulledMessagesSummary => ({
               count: r.count,
-              avgMessageAgeSeconds: Option.fromNullable(r.avgAgeSeconds),
+              avgMessageAgeSeconds: Option.fromNullishOr(r.avgAgeSeconds),
             })
           ),
           Option.getOrElse(

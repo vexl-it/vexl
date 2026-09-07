@@ -1,7 +1,7 @@
-import {SqlClient, SqlSchema} from '@effect/sql'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {MessageType} from '@vexl-next/domain/src/general/messaging'
 import {Effect, Schema, flow} from 'effect'
+import {SqlClient, SqlSchema} from 'effect/unstable/sql'
 import {
   messageExpirationLowerLimitDaysConfig,
   messageExpirationUpperLimitDaysConfig,
@@ -27,13 +27,13 @@ const generateExpiresAt = (lowerLimit: number, upperLimit: number): Date => {
   return new Date(Date.now() + toExpireAfterDays * 24 * 60 * 60 * 1000)
 }
 
-export const createInsertMessageForInbox = Effect.gen(function* (_) {
-  const sql = yield* _(SqlClient.SqlClient)
+export const createInsertMessageForInbox = Effect.gen(function* () {
+  const sql = yield* SqlClient.SqlClient
 
-  const lowerExpirationLimit = yield* _(messageExpirationLowerLimitDaysConfig)
-  const upperExpirationLimit = yield* _(messageExpirationUpperLimitDaysConfig)
+  const lowerExpirationLimit = yield* messageExpirationLowerLimitDaysConfig
+  const upperExpirationLimit = yield* messageExpirationUpperLimitDaysConfig
 
-  const query = SqlSchema.findOne({
+  const query = SqlSchema.findOneOption({
     Request: InsertMessageForInboxParams,
     Result: MessageRecord,
     execute: (params) => sql`
@@ -53,7 +53,7 @@ export const createInsertMessageForInbox = Effect.gen(function* (_) {
 
   return flow(
     query,
-    Effect.flatten,
+    Effect.flatMap(Effect.fromOption),
     UnexpectedServerError.wrapErrors('Error in insertMessage'),
     Effect.withSpan('insertMessage query')
   )

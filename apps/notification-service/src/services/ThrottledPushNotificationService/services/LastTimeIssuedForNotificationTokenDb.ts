@@ -8,10 +8,10 @@ import {
   RedisService,
 } from '@vexl-next/server-utils/src/RedisService'
 import {Context, Duration, Effect, Layer} from 'effect'
-import {type NoSuchElementException} from 'effect/Cause'
+import {type NoSuchElementError} from 'effect/Cause'
 
 const KEY_PREFIX = 'notification-service:last-issued:'
-const TTL_MS = Duration.toMillis(Duration.decode('1 day'))
+const TTL_MS = Duration.toMillis(Duration.fromInputUnsafe('1 day'))
 
 const createRedisKey = (token: VexlNotificationTokenSecret): string =>
   `${KEY_PREFIX}${token}`
@@ -19,7 +19,7 @@ const createRedisKey = (token: VexlNotificationTokenSecret): string =>
 export interface LastTimeIssuedForNotificationTokenDbOperations {
   getLastTimeIssuedForNotificationToken: (
     token: VexlNotificationTokenSecret
-  ) => Effect.Effect<UnixMilliseconds, RedisError | NoSuchElementException>
+  ) => Effect.Effect<UnixMilliseconds, RedisError | NoSuchElementError>
   deleteLastTimeIssuedForNotificationToken: (
     token: VexlNotificationTokenSecret
   ) => Effect.Effect<void, RedisError>
@@ -29,16 +29,14 @@ export interface LastTimeIssuedForNotificationTokenDbOperations {
   ) => Effect.Effect<void, RedisError>
 }
 
-export class LastTimeIssuedForNotificationTokenDb extends Context.Tag(
-  'LastTimeIssuedForNotificationTokenDb'
-)<
+export class LastTimeIssuedForNotificationTokenDb extends Context.Service<
   LastTimeIssuedForNotificationTokenDb,
   LastTimeIssuedForNotificationTokenDbOperations
->() {
+>()('LastTimeIssuedForNotificationTokenDb') {
   static readonly Live = Layer.effect(
     LastTimeIssuedForNotificationTokenDb,
-    Effect.gen(function* (_) {
-      const redis = yield* _(RedisService)
+    Effect.gen(function* () {
+      const redis = yield* RedisService
 
       const getValue = redis.get(UnixMilliseconds)
       const setValue = redis.set(UnixMilliseconds)
@@ -48,8 +46,8 @@ export class LastTimeIssuedForNotificationTokenDb extends Context.Tag(
           const key = createRedisKey(token)
 
           return getValue(key).pipe(
-            Effect.catchTag('ParseError', (e) =>
-              Effect.zipRight(
+            Effect.catchTag('SchemaError', (e) =>
+              Effect.andThen(
                 Effect.logError('Error parsing last issued time', e),
                 Effect.fail(new RedisError({cause: e}))
               )
@@ -63,8 +61,8 @@ export class LastTimeIssuedForNotificationTokenDb extends Context.Tag(
           return setValue(key, time, {
             expiresAt: unixMillisecondsFromNow(TTL_MS),
           }).pipe(
-            Effect.catchTag('ParseError', (e) =>
-              Effect.zipRight(
+            Effect.catchTag('SchemaError', (e) =>
+              Effect.andThen(
                 Effect.logError('Error setting last issued time', e),
                 Effect.fail(new RedisError({cause: e}))
               )

@@ -1,5 +1,5 @@
 import {useNavigation} from '@react-navigation/native'
-import {useMolecule} from 'bunshi/dist/react'
+import {useMolecule} from 'bunshi/react'
 import {useAtomValue} from 'jotai'
 import React from 'react'
 import * as amount from '../../../../../state/tradeChecklist/utils/amount'

@@ -27,7 +27,7 @@ interface LoadAndNormalizeContactsFromDeviceInFlightRun {
 }
 
 function effectFromExit<A, E>(exit: Exit.Exit<A, E>): Effect.Effect<A, E> {
-  return Exit.matchEffect(exit, {
+  return Exit.match(exit, {
     onFailure: Effect.failCause,
     onSuccess: Effect.succeed,
   })
@@ -75,29 +75,27 @@ const loadAndNormalizeContactsFromDeviceActionAtom = atom(
         contactsLoaded: false,
       }
 
-      const effect = Effect.gen(function* (_) {
+      const effect = Effect.gen(function* () {
         set(loadingContactsFromDeviceAtom, true)
 
-        yield* _(set(loadContactsFromDeviceActionAtom))
+        yield* set(loadContactsFromDeviceActionAtom)
         run.contactsLoaded = true
         for (const listener of run.listeners) {
           if (listener.onContactsLoaded) safelyNotify(listener.onContactsLoaded)
         }
 
-        yield* _(
-          set(normalizeStoredContactsActionAtom, {
-            onProgress: (progress) => {
-              for (const listener of run.listeners) {
-                if (listener.onNormalizationProgress) {
-                  const {onNormalizationProgress} = listener
-                  safelyNotify(() => {
-                    onNormalizationProgress(progress)
-                  })
-                }
+        yield* set(normalizeStoredContactsActionAtom, {
+          onProgress: (progress) => {
+            for (const listener of run.listeners) {
+              if (listener.onNormalizationProgress) {
+                const {onNormalizationProgress} = listener
+                safelyNotify(() => {
+                  onNormalizationProgress(progress)
+                })
               }
-            },
-          })
-        )
+            }
+          },
+        })
 
         return true
       }).pipe(

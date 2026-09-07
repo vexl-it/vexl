@@ -1,9 +1,10 @@
 import 'dotenv/config'
+import {Effect, Fiber, Layer, pipe} from 'effect'
 //
-import {DevTools, Reactivity} from '@effect/experimental'
 import {healthServerLayer} from '@vexl-next/server-utils/src/HealthServer'
 import {runMainInNode} from '@vexl-next/server-utils/src/runMainInNode'
-import {Effect, Fiber, Layer} from 'effect'
+import {DevTools} from 'effect/unstable/devtools'
+import {Reactivity} from 'effect/unstable/reactivity'
 import {
   dummyDataConfig,
   healthServerPortConfig,
@@ -33,47 +34,46 @@ import {HasingSalt} from './utils/hashPubKey'
 
 const HealthServerLive = healthServerLayer({port: healthServerPortConfig})
 
-const program = Effect.gen(function* (_) {
-  yield* _(setDashboardBootstrappingMessage('Starting dashboard servers'))
+const program = Effect.gen(function* () {
+  yield* setDashboardBootstrappingMessage('Starting dashboard servers')
 
-  const dummyData = yield* _(dummyDataConfig)
+  const dummyData = yield* dummyDataConfig
 
-  const staticServerFiber = yield* _(
-    Layer.launch(StaticServerLive).pipe(Effect.either, Effect.fork)
+  const staticServerFiber = yield* Layer.launch(StaticServerLive).pipe(
+    Effect.result,
+    Effect.forkChild
   )
-  const updatesServerFiber = yield* _(
-    Layer.launch(UpdatesServerLive).pipe(Effect.either, Effect.fork)
+  const updatesServerFiber = yield* Layer.launch(UpdatesServerLive).pipe(
+    Effect.result,
+    Effect.forkChild
   )
-  const socketServerFiber = yield* _(
-    Layer.launch(dummyData ? DebugSocketServerLive : SocketServerLive).pipe(
-      Effect.either,
-      Effect.fork
-    )
-  )
-  const healthServerFiber = yield* _(
-    Layer.launch(HealthServerLive).pipe(Effect.either, Effect.fork)
+  const socketServerFiber = yield* Layer.launch(
+    dummyData ? DebugSocketServerLive : SocketServerLive
+  ).pipe(Effect.result, Effect.forkChild)
+  const healthServerFiber = yield* Layer.launch(HealthServerLive).pipe(
+    Effect.result,
+    Effect.forkChild
   )
 
-  yield* _(Effect.logInfo('Quering everyhting'))
+  yield* Effect.logInfo('Quering everyhting')
 
-  yield* _(setDashboardBootstrappingMessage('Loading user country data'))
-  yield* _(syncPubKeyToCountryEffect)
-  yield* _(setDashboardBootstrappingMessage('Loading connection summary'))
-  yield* _(syncCountriesToConnectionsEffect)
-  yield* _(setDashboardBootstrappingMessage('Loading total users'))
-  yield* _(syncCountOfUsersEffect)
-  yield* _(setDashboardReady)
+  yield* setDashboardBootstrappingMessage('Loading user country data')
+  yield* syncPubKeyToCountryEffect
+  yield* setDashboardBootstrappingMessage('Loading connection summary')
+  yield* syncCountriesToConnectionsEffect
+  yield* setDashboardBootstrappingMessage('Loading total users')
+  yield* syncCountOfUsersEffect
+  yield* setDashboardReady
 
-  yield* _(Effect.logInfo('Initial query done'))
+  yield* Effect.logInfo('Initial query done')
 
-  yield* _(
+  yield* pipe(
     Effect.raceAll([
       Fiber.join(staticServerFiber),
       Fiber.join(updatesServerFiber),
       Fiber.join(socketServerFiber),
       Fiber.join(healthServerFiber),
     ]),
-    // When one of these processes ends, we want to fail the whole program
     Effect.flatMap(Effect.fail)
   )
 }).pipe(
@@ -90,7 +90,7 @@ const program = Effect.gen(function* (_) {
         Effect.map((isRunningInDev) =>
           isRunningInDev ? DevTools.layer() : Layer.empty
         ),
-        Layer.unwrapEffect
+        Layer.unwrap
       )
     )
   ),

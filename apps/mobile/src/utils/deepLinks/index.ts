@@ -1,5 +1,5 @@
 import {mergeToBoolean} from '@vexl-next/generic-utils/src/effect-helpers/mergeToBoolean'
-import {Array, Effect, Schema} from 'effect'
+import {Array, Effect, pipe, Schema} from 'effect'
 import * as Linking from 'expo-linking'
 import {atom, useSetAtom, useStore} from 'jotai'
 import {useCallback, useEffect} from 'react'
@@ -56,46 +56,44 @@ export const handleDeepLinkActionAtom = atom(
     boolean,
     InvalidDeepLinkError | DeepLinkMeantForNewerVersionError
   > =>
-    Effect.gen(function* (_) {
-      const {searchParams: linkData} = yield* _(parseDeepLink(url))
+    Effect.gen(function* () {
+      const {searchParams: linkData} = yield* parseDeepLink(url)
 
       if (
         acceptOnlySpecificTypes &&
         !Array.contains(acceptOnlySpecificTypes, linkData.type)
       )
-        return yield* _(
-          new InvalidDeepLinkError({
-            cause: new Error('Invalid link type'),
-            originalLink: url,
-          })
-        )
+        return yield* new InvalidDeepLinkError({
+          cause: new Error('Invalid link type'),
+          originalLink: url,
+        })
 
       if (linkData.type === 'golden-glasses') {
         if (get(goldenAvatarTypeAtom)) return true
-        return yield* _(
+        return yield* pipe(
           set(handleGoldenGlassesDeepLinkActionAtom),
           mergeToBoolean
         )
       } else if (linkData.type === 'import-contact') {
-        return yield* _(
+        return yield* pipe(
           set(handleImportContactFromDeepLinkActionAtom, linkData.data),
           mergeToBoolean
         )
       } else if (linkData.type === 'import-contact-v2') {
-        return yield* _(
+        return yield* pipe(
           set(handleImportContactFromDeepLinkActionAtom, linkData),
           mergeToBoolean
         )
       } else if (linkData.type === 'join-club') {
-        return yield* _(
+        return yield* pipe(
           set(submitCodeToJoinClubActionAtom, linkData.code),
           mergeToBoolean
         )
       } else if (linkData.type === 'request-club-admition') {
-        yield* _(set(admitUserToClubActionAtom, linkData), mergeToBoolean)
+        yield* pipe(set(admitUserToClubActionAtom, linkData), mergeToBoolean)
         return true
       } else if (linkData.type === 'load-pr-preview') {
-        return yield* _(
+        return yield* pipe(
           set(loadPreviewChannelWithUiFeedbackActionAtom, linkData.channel),
           mergeToBoolean
         )
@@ -105,12 +103,10 @@ export const handleDeepLinkActionAtom = atom(
         return true
       }
 
-      return yield* _(
-        new InvalidDeepLinkError({
-          cause: new Error('Invalid link type'),
-          originalLink: url,
-        })
-      )
+      return yield* new InvalidDeepLinkError({
+        cause: new Error('Invalid link type'),
+        originalLink: url,
+      })
     }).pipe(
       Effect.tapError((e) => {
         const {t} = get(translationAtom)
@@ -165,11 +161,13 @@ export function useHandleUniversalAndAppLinks(): void {
 
       Effect.runFork(
         handleDeepLink(initialLink).pipe(
-          Effect.andThen(() => {
-            store.set(lastUniversalOrAppLinkStorageAtom, {
-              lastUniversalOrAppLinkImported: initialLink,
+          Effect.andThen(() =>
+            Effect.sync(() => {
+              store.set(lastUniversalOrAppLinkStorageAtom, {
+                lastUniversalOrAppLinkImported: initialLink,
+              })
             })
-          })
+          )
         )
       )
     })

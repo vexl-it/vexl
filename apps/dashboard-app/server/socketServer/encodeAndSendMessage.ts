@@ -4,8 +4,8 @@ import {ServerMessage} from '../../common/ServerMessage'
 import {SendingMessageError, sendMessageToSocket} from './utils'
 
 const encodeMessageForClient = pipe(
-  Schema.parseJson(ServerMessage),
-  Schema.encode
+  Schema.fromJsonString(ServerMessage),
+  Schema.encodeEffect
 )
 
 const encodeAndSendMessage =
@@ -32,7 +32,7 @@ const encodeAndSendMessage =
           )
         )
       ),
-      Effect.catchTag('ParseError', (e) =>
+      Effect.catchTag('SchemaError', (e) =>
         Effect.fail(new SendingMessageError({originalError: e}))
       ),
       Effect.withSpan('encodeAndSendMessage', {attributes: {tag: message._tag}})

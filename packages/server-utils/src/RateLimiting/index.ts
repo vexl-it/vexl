@@ -1,5 +1,5 @@
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
-import {Context, Effect, Layer} from 'effect/index'
+import {Context, Effect, Layer} from 'effect'
 import {RedisConnectionService} from '../RedisConnection'
 import {serviceNameConfig} from '../commonConfigs'
 import {type ConnectingIp} from '../getConnectingIp'
@@ -28,54 +28,50 @@ export interface RateLimitingOperations {
   ) => Effect.Effect<void, UnexpectedServerError>
 }
 
-export class RateLimitingService extends Context.Tag('RateLimitingService')<
+export class RateLimitingService extends Context.Service<
   RateLimitingService,
   RateLimitingOperations
->() {
+>()('RateLimitingService') {
   static readonly Live = Layer.effect(
     RateLimitingService,
-    Effect.gen(function* (_) {
-      const redis = yield* _(RedisConnectionService)
-      const serviceName = yield* _(serviceNameConfig)
+    Effect.gen(function* () {
+      const redis = yield* RedisConnectionService
+      const serviceName = yield* serviceNameConfig
 
       // First ensure rate limiting command
-      yield* _(ensureRateLimitingCommand)
+      yield* ensureRateLimitingCommand
 
-      const clearRateLimitState = Effect.gen(function* (_) {
+      const clearRateLimitState = Effect.gen(function* () {
         let cursor = '0'
 
         do {
-          const [newCursor, keys] = yield* _(
-            Effect.tryPromise({
-              try: async () =>
-                await redis.scan(
-                  cursor,
-                  'MATCH',
-                  `${serviceName}:rl:ip:*`,
-                  'COUNT',
-                  1000
-                ),
-              catch: (e) =>
-                new UnexpectedServerError({
-                  cause: e,
-                  message:
-                    'Error while scanning Redis keys for rate limiting cleanup',
-                }),
-            })
-          )
+          const [newCursor, keys] = yield* Effect.tryPromise({
+            try: async () =>
+              await redis.scan(
+                cursor,
+                'MATCH',
+                `${serviceName}:rl:ip:*`,
+                'COUNT',
+                1000
+              ),
+            catch: (e) =>
+              new UnexpectedServerError({
+                cause: e,
+                message:
+                  'Error while scanning Redis keys for rate limiting cleanup',
+              }),
+          })
           cursor = newCursor
 
-          yield* _(
-            Effect.tryPromise({
-              try: async () => await redis.del(...keys),
-              catch: (e) =>
-                new UnexpectedServerError({
-                  cause: e,
-                  message:
-                    'Error while deleting Redis keys for rate limiting cleanup',
-                }),
-            })
-          )
+          yield* Effect.tryPromise({
+            try: async () => await redis.del(...keys),
+            catch: (e) =>
+              new UnexpectedServerError({
+                cause: e,
+                message:
+                  'Error while deleting Redis keys for rate limiting cleanup',
+              }),
+          })
         } while (cursor !== '0')
       })
 

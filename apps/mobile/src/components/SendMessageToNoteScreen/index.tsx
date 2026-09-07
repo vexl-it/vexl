@@ -75,17 +75,18 @@ export default function SendMessageToNoteScreen({
     if (!trimmedText || !currentNote || alreadyResponded) return
 
     void Effect.runPromise(
-      Effect.gen(function* (_) {
-        const chat = yield* _(
-          submitRequest({text: trimmedText, note: currentNote})
-        )
+      Effect.gen(function* () {
+        const chat = yield* submitRequest({
+          text: trimmedText,
+          note: currentNote,
+        })
 
         openChatDetailReplacingFlow({
           otherSideKey: chat.otherSide.publicKey,
           inboxKey: chat.inbox.privateKey.publicKeyPemBase64,
         })
       }).pipe(
-        Effect.catchAll((e) => {
+        Effect.catch((e) => {
           if (e._tag === 'ReceiverInboxDoesNotExistError') {
             Alert.alert(t('common.error'), t('notes.detail.noteNotFound'), [
               {text: t('common.close')},

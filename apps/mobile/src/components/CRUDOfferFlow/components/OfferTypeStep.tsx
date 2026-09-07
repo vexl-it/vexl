@@ -5,7 +5,7 @@ import {
 import {EditRow, RowButton} from '@vexl-next/ui'
 import {ArrowLeft, ArrowRight} from '@vexl-next/ui/src/icons'
 import type {IconProps} from '@vexl-next/ui/src/icons/types'
-import {useMolecule} from 'bunshi/dist/react'
+import {useMolecule} from 'bunshi/react'
 import {Array, pipe} from 'effect'
 import {useAtom, useAtomValue} from 'jotai'
 import React, {useCallback} from 'react'

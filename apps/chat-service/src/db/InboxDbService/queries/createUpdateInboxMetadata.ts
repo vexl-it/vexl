@@ -1,20 +1,24 @@
-import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {PlatformName} from '@vexl-next/domain/src/utility/PlatformName'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
-import {Effect, flow, Schema} from 'effect'
+import {Effect, flow, Option, Schema} from 'effect'
+import {SqlSchema} from 'effect/unstable/sql'
 import {InboxRecordId} from '../domain'
 
 const UpdateInboxMetadataParams = Schema.Struct({
   id: InboxRecordId,
-  platform: Schema.optionalWith(PlatformName, {as: 'Option'}),
-  clientVersion: Schema.optionalWith(VersionCode, {as: 'Option'}),
+  platform: Schema.OptionFromOptional(PlatformName).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
+  clientVersion: Schema.OptionFromOptional(VersionCode).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
 })
 export type UpdateInboxMetadataParams = typeof UpdateInboxMetadataParams.Type
 
-export const createUpdateInboxMetadata = Effect.gen(function* (_) {
-  const sql = yield* _(PgClient.PgClient)
+export const createUpdateInboxMetadata = Effect.gen(function* () {
+  const sql = yield* PgClient.PgClient
 
   const query = SqlSchema.void({
     Request: UpdateInboxMetadataParams,

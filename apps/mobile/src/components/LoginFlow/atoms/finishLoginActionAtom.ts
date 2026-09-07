@@ -1,4 +1,3 @@
-import {FetchHttpClient} from '@effect/platform/index'
 import {type KeyHolder} from '@vexl-next/cryptography/src'
 import {type PublicKeyV2} from '@vexl-next/cryptography/src/KeyHolder/brandsV2'
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
@@ -8,7 +7,8 @@ import {
 } from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {contact, user} from '@vexl-next/rest-api/src'
 import {type VerifyPhoneNumberResponse} from '@vexl-next/rest-api/src/services/user/contracts'
-import {Effect, Match, Option, Schema} from 'effect'
+import {Effect, Option, pipe, Schema} from 'effect'
+import {FetchHttpClient} from 'effect/unstable/http'
 import * as O from 'fp-ts/Option'
 import {atom} from 'jotai'
 import {apiAtom, apiEnv, platform} from '../../../api'
@@ -73,7 +73,7 @@ const handleUserCreationActionAtom = atom(
         firebaseToken: null,
         expoToken: null,
         publicKeyV2: Option.none<PublicKeyV2>(),
-        vexlNotificationToken: Option.fromNullable(
+        vexlNotificationToken: Option.fromNullishOr(
           session.sessionNotificationToken
         ),
       })
@@ -126,7 +126,7 @@ const deleteUserAndResetFlowActionAtom = atom(
           })
           return Effect.fail(e)
         }),
-        Effect.andThen(resetNavigationToIntroScreen)
+        Effect.map(resetNavigationToIntroScreen)
       )
   }
 )
@@ -134,7 +134,7 @@ const deleteUserAndResetFlowActionAtom = atom(
 const handleSecretTokenAndSessionTokenCreationActionAtom = atom(
   null,
   (get, set) =>
-    Effect.gen(function* (_) {
+    Effect.gen(function* () {
       if (get(vexlNotificationTokenAtom).secret) {
         console.log(
           'Vexl notification secret already exists, this should not happen, lets remove it first'
@@ -149,13 +149,13 @@ const handleSecretTokenAndSessionTokenCreationActionAtom = atom(
       }
 
       console.log('Vexl notification secret does not exist, creating...')
-      const expoToken = yield* _(getNotificationTokenE())
+      const expoToken = yield* getNotificationTokenE()
 
-      yield* _(
+      yield* pipe(
         set(createVexlSecretActionAtom, {
           expoNotificationToken: expoToken,
         }),
-        Effect.either
+        Effect.result
       )
 
       console.log('Vexl notification secret created successfully')
@@ -164,7 +164,7 @@ const handleSecretTokenAndSessionTokenCreationActionAtom = atom(
         expoNotificationToken: expoToken,
       })
 
-      const sessionNotificationToken = yield* _(
+      const sessionNotificationToken = yield* pipe(
         set(generateVexlTokenActionAtom),
         Effect.option
       )
@@ -191,22 +191,18 @@ export const finishLoginActionAtom = atom(
     const {t} = get(translationAtom)
     const api = get(apiAtom)
 
-    return Effect.gen(function* (_) {
-      const signature = yield* _(
-        ecdsaSignE(privateKey.privateKeyPemBase64)(
-          verifyPhoneNumberResponse.challenge
-        )
+    return Effect.gen(function* () {
+      const signature = yield* ecdsaSignE(privateKey.privateKeyPemBase64)(
+        verifyPhoneNumberResponse.challenge
       )
 
-      const verifiedChallengeResponse = yield* _(
-        api.user.verifyChallenge({
-          userPublicKey: privateKey.publicKeyPemBase64,
-          signature: Schema.decodeSync(EcdsaSignature)(signature),
-        })
-      )
+      const verifiedChallengeResponse = yield* api.user.verifyChallenge({
+        userPublicKey: privateKey.publicKeyPemBase64,
+        signature: Schema.decodeSync(EcdsaSignature)(signature),
+      })
 
-      const sessionNotificationToken = yield* _(
-        set(handleSecretTokenAndSessionTokenCreationActionAtom)
+      const sessionNotificationToken = yield* set(
+        handleSecretTokenAndSessionTokenCreationActionAtom
       )
 
       const session = yield* upgradeSession({
@@ -224,187 +220,169 @@ export const finishLoginActionAtom = atom(
         ),
       })
 
-      const contactApi = yield* _(
-        contact.api({
-          platform,
-          clientVersion: versionCode,
-          clientSemver: version,
-          url: apiEnv.contactMs,
-          getUserSessionCredentials: () => session.sessionCredentials,
-          isDeveloper: get(isDeveloperAtom),
-          language: get(translationAtom).t('localeName'),
-          appSource,
-        })
-      )
+      const contactApi = yield* contact.api({
+        platform,
+        clientVersion: versionCode,
+        clientSemver: version,
+        url: apiEnv.contactMs,
+        getUserSessionCredentials: () => session.sessionCredentials,
+        isDeveloper: get(isDeveloperAtom),
+        language: get(translationAtom).t('localeName'),
+        appSource,
+      })
 
-      const userExists = yield* _(
-        contactApi.checkUserExists({
-          notifyExistingUserAboutLogin: true,
-        })
-      )
+      const userExists = yield* contactApi.checkUserExists({
+        notifyExistingUserAboutLogin: true,
+      })
 
       if (userExists.exists) {
-        const confirmed = yield* _(
-          set(globalDialogAtom, {
-            title: t('loginFlow.userAlreadyExists'),
-            subtitle: t('loginFlow.phoneNumberPreviouslyRegistered'),
-            negativeButtonText: t('common.cancel'),
-            positiveButtonText: t('common.continue'),
-          })
-        )
+        const confirmed = yield* set(globalDialogAtom, {
+          title: t('loginFlow.userAlreadyExists'),
+          subtitle: t('loginFlow.phoneNumberPreviouslyRegistered'),
+          negativeButtonText: t('common.cancel'),
+          positiveButtonText: t('common.continue'),
+        })
 
         if (confirmed) {
-          yield* _(
-            set(handleUserCreationActionAtom, {
-              session,
-            })
-          )
-        } else {
-          yield* _(
-            set(deleteUserAndResetFlowActionAtom, {
-              session,
-            })
-          )
-        }
-      } else {
-        yield* _(
-          set(handleUserCreationActionAtom, {
+          yield* set(handleUserCreationActionAtom, {
             session,
           })
-        )
+        } else {
+          yield* set(deleteUserAndResetFlowActionAtom, {
+            session,
+          })
+        }
+      } else {
+        yield* set(handleUserCreationActionAtom, {
+          session,
+        })
       }
 
       set(defaultCurrencyBaseOnCountryCodeActionAtom)
     }).pipe(
       Effect.provide(FetchHttpClient.layer),
       Effect.as(true),
-      Effect.catchAll((e) => {
-        const a: (arg: typeof e) => Effect.Effect<void> = Match.type<
-          typeof e
-        >().pipe(
-          Match.tag(
-            'VerificationNotFoundError',
-            (e): Effect.Effect<void> =>
-              Effect.sync(() => {
-                reportError('error', new Error('Verification not found'), {e})
-                showErrorAlert({
-                  title: t(
-                    'loginFlow.verificationCode.errors.verificationNotFound'
-                  ),
-                  error: e,
-                })
+      Effect.catch((e) => {
+        const a: (arg: typeof e) => Effect.Effect<void> = (error) => {
+          if (error._tag === 'VerificationNotFoundError') {
+            const e = error
+            return Effect.sync(() => {
+              reportError('error', new Error('Verification not found'), {e})
+              showErrorAlert({
+                title: t(
+                  'loginFlow.verificationCode.errors.verificationNotFound'
+                ),
+                error: e,
               })
-          ),
-          Match.tag(
-            'UnableToGenerateSignatureError',
-            (e): Effect.Effect<void> =>
-              Effect.sync(() => {
-                reportError(
-                  'error',
-                  new Error('Unable to generate signature'),
-                  {
-                    e,
-                  }
-                )
-                showErrorAlert({
-                  title: t(
-                    'loginFlow.verificationCode.errors.challengeCouldNotBeGenerated'
-                  ),
-                })
+            })
+          }
+          if (error._tag === 'UnableToGenerateSignatureError') {
+            const e = error
+            return Effect.sync(() => {
+              reportError('error', new Error('Unable to generate signature'), {
+                e,
               })
-          ),
-          Match.tag(
-            'InvalidSignatureError',
-            (e): Effect.Effect<void> =>
-              Effect.sync(() => {
-                reportError(
-                  'error',
-                  new Error(
-                    'Public key or hash invalid while verifying challenge'
-                  ),
-                  {e}
-                )
-                showErrorAlert({
-                  title: t(
-                    'loginFlow.verificationCode.errors.challengeCouldNotBeGenerated'
-                  ),
-                })
+              showErrorAlert({
+                title: t(
+                  'loginFlow.verificationCode.errors.challengeCouldNotBeGenerated'
+                ),
               })
-          ),
-          Match.tag(
-            'InvalidVerificationError',
-            (e): Effect.Effect<void> =>
-              Effect.sync(() => {
-                reportError('error', new Error('Invalid verification error.'), {
-                  e,
-                })
-                showErrorAlert({
-                  title: t(
-                    'loginFlow.verificationCode.errors.verificationExpired'
-                  ),
-                })
+            })
+          }
+          if (error._tag === 'InvalidSignatureError') {
+            const e = error
+            return Effect.sync(() => {
+              reportError(
+                'error',
+                new Error(
+                  'Public key or hash invalid while verifying challenge'
+                ),
+                {e}
+              )
+              showErrorAlert({
+                title: t(
+                  'loginFlow.verificationCode.errors.challengeCouldNotBeGenerated'
+                ),
               })
-          ),
-          Match.tag(
-            'CryptoError',
-            (e): Effect.Effect<void> =>
-              Effect.sync(() => {
-                reportError('error', new Error('Crypto error.'), {
-                  e,
-                })
-                showErrorAlert({
-                  title: t('common.cryptoError'),
-                })
+            })
+          }
+          if (error._tag === 'InvalidVerificationError') {
+            const e = error
+            return Effect.sync(() => {
+              reportError('error', new Error('Invalid verification error.'), {
+                e,
               })
-          ),
-          Match.when(
-            // Offline - don't report to Sentry. Other RequestError reasons and
-            // ResponseError fall through to the generic handler below.
-            {_tag: 'RequestError', reason: 'Transport'},
-            (e): Effect.Effect<void> => {
-              return Effect.sync(() => {
-                showErrorAlert({
-                  title: t(`common.NetworkError`),
-                  error: e,
-                })
+              showErrorAlert({
+                title: t(
+                  'loginFlow.verificationCode.errors.verificationExpired'
+                ),
               })
-            }
-          ),
-          Match.tag(
-            'UnexpectedServerError',
-            'NotFoundError',
-            'UnauthorizedError',
-            'HttpApiDecodeError',
-            'ParseError',
-            (e): Effect.Effect<void> =>
-              Effect.sync(() => {
-                reportError('error', new Error(e._tag), {e})
-                showErrorAlert({
-                  title: t(`common.${e._tag}`),
-                  error: e,
-                })
+            })
+          }
+          if (error._tag === 'CryptoError') {
+            const e = error
+            return Effect.sync(() => {
+              reportError('error', new Error('Crypto error.'), {
+                e,
               })
-          ),
-          Match.orElse(
-            (e): Effect.Effect<void> =>
-              Effect.sync(() => {
-                reportError(
-                  'error',
-                  new Error('Unknown client error', {cause: e}),
-                  {e}
-                )
-                showErrorAlert({
-                  title: t(`common.UnknownClientError`),
-                  error: e,
-                })
+              showErrorAlert({
+                title: t('common.cryptoError'),
               })
-          )
-        )
+            })
+          }
+          if (
+            error._tag === 'HttpClientError' &&
+            error.reason._tag === 'TransportError'
+          ) {
+            const e = error
+            return Effect.sync(() => {
+              showErrorAlert({
+                title: t(`common.NetworkError`),
+                error: e,
+              })
+            })
+          }
+          if (
+            error._tag === 'UnexpectedServerError' ||
+            error._tag === 'NotFoundError' ||
+            error._tag === 'UnauthorizedError' ||
+            error._tag === 'SchemaError'
+          ) {
+            const e = error
+            return Effect.sync(() => {
+              reportError('error', new Error(e._tag), {e})
+              showErrorAlert({
+                title: t(
+                  e._tag === 'SchemaError'
+                    ? 'common.ParseError'
+                    : `common.${e._tag}`
+                ),
+                error: e,
+              })
+            })
+          }
+          {
+            const e = error
+            return Effect.sync(() => {
+              reportError(
+                'error',
+                new Error('Unknown client error', {cause: e}),
+                {e}
+              )
+              showErrorAlert({
+                title: t(`common.UnknownClientError`),
+                error: e,
+              })
+            })
+          }
+        }
 
         return a(e).pipe(
-          Effect.andThen(() => {
-            resetNavigationToIntroScreen()
-          }),
+          Effect.andThen(() =>
+            Effect.sync(() => {
+              resetNavigationToIntroScreen()
+            })
+          ),
           Effect.as(false)
         )
       })

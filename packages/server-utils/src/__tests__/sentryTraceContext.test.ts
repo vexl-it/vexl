@@ -1,31 +1,33 @@
-import {Effect, Logger, Option, type FiberRefs} from 'effect'
+import {Cause, Effect, Exit, Logger, Option, type Context} from 'effect'
 import {
   grafanaTraceUrl,
   prettifyError,
-  traceContextFromFiberRefs,
+  traceContextFromContext,
 } from '../sentry'
 
 const runWithCapturingLogger = async (
   effect: Effect.Effect<void>
-): Promise<FiberRefs.FiberRefs> => {
-  let captured: FiberRefs.FiberRefs | undefined
-  const capturingLogger = Logger.make(({context}) => {
-    captured = context
+): Promise<Context.Context<never>> => {
+  let captured: Context.Context<never> | undefined
+  const capturingLogger = Logger.make(({fiber}) => {
+    captured = fiber.context
   })
   await Effect.runPromise(
-    effect.pipe(Effect.provide(Logger.add(capturingLogger)))
+    effect.pipe(
+      Effect.provide(Logger.layer([capturingLogger], {mergeWithExisting: true}))
+    )
   )
   if (captured === undefined) throw new Error('Logger was not called')
   return captured
 }
 
-describe('traceContextFromFiberRefs', () => {
+describe('traceContextFromContext', () => {
   it('finds the active span of the logging fiber', async () => {
     const fiberRefs = await runWithCapturingLogger(
       Effect.logError('boom').pipe(Effect.withSpan('test-span'))
     )
 
-    const trace = traceContextFromFiberRefs(fiberRefs)
+    const trace = traceContextFromContext(fiberRefs)
     expect(Option.isSome(trace)).toBe(true)
     if (Option.isSome(trace)) {
       expect(trace.value.traceId).toEqual(expect.any(String))
@@ -36,7 +38,7 @@ describe('traceContextFromFiberRefs', () => {
 
   it('returns none when no span is active', async () => {
     const fiberRefs = await runWithCapturingLogger(Effect.logError('boom'))
-    expect(Option.isNone(traceContextFromFiberRefs(fiberRefs))).toBe(true)
+    expect(Option.isNone(traceContextFromContext(fiberRefs))).toBe(true)
   })
 })
 
@@ -49,16 +51,18 @@ describe('prettifyError', () => {
   }
 
   it('appends span frames and strips effect-internal frames', async () => {
-    const error = await Effect.runPromise(
-      Effect.flip(
-        Effect.fail(new TestError('boom')).pipe(
-          Effect.withSpan('inner-span'),
-          Effect.withSpan('outer-span')
-        )
+    const exit = await Effect.runPromiseExit(
+      Effect.fail(new TestError('boom')).pipe(
+        Effect.withSpan('inner-span'),
+        Effect.withSpan('outer-span')
       )
     )
-
-    const pretty = prettifyError(error)
+    expect(Exit.isFailure(exit)).toBe(true)
+    if (!Exit.isFailure(exit)) return
+    const error = Cause.squash(exit.cause)
+    expect(error).toBeInstanceOf(Error)
+    if (!(error instanceof Error)) return
+    const pretty = prettifyError(error, exit.cause)
     expect(pretty.name).toBe('TestError')
     expect(pretty.message).toBe('boom')
     expect(pretty.stack).toContain('at inner-span')

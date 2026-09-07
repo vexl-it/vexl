@@ -26,7 +26,7 @@ export const GeocodingDbSqlLive = geocodingDbConfig.pipe(
       transformResultNames: String.snakeToCamel,
     })
   ),
-  Layer.unwrapEffect
+  Layer.unwrap
 )
 
 const MigratorLive = PgMigrator.layer({

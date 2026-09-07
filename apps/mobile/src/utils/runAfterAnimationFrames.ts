@@ -44,7 +44,7 @@ export function waitForNextAnimationFramePromise(): Promise<void> {
 }
 
 export function waitForNextAnimationFrameEffect(): Effect.Effect<void> {
-  return Effect.async((resolve) => {
+  return Effect.callback((resolve) => {
     const cancelAnimationFrame = runAfterAnimationFrame(() => {
       resolve(Effect.void)
     })

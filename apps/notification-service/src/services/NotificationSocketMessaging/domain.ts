@@ -38,7 +38,7 @@ import {
   type NotificationStreamError,
   type NotificationStreamMessage,
 } from '@vexl-next/rest-api/src/services/notification/Rpcs'
-import {Option, pipe, Schema, String, type Effect} from 'effect/index'
+import {Effect, Option, pipe, Schema, String} from 'effect'
 
 const EXPO_PREFIX = 'expo-'
 
@@ -55,9 +55,12 @@ export const ClientInfo = Schema.Struct({
   notificationToken: VexlNotificationTokenSecret,
   version: VersionCode,
   platform: PlatformName,
-  connectionKind: Schema.optionalWith(NotificationConnectionKind, {
-    default: () => 'foreground',
-  }),
+  connectionKind: NotificationConnectionKind.pipe(
+    Schema.withDecodingDefaultType(
+      Effect.sync((): 'foreground' => 'foreground')
+    ),
+    Schema.withConstructorDefault(Effect.sync((): 'foreground' => 'foreground'))
+  ),
 })
 export type ClientInfo = typeof ClientInfo.Type
 
@@ -117,23 +120,30 @@ export type SendMessageTaskId = typeof SendMessageTaskId.Type
 export class NewChatMessageNoticeSendTask extends Schema.TaggedClass<NewChatMessageNoticeSendTask>(
   'NewChatMessageNoticeSendTask'
 )('NewChatMessageNoticeSendTask', {
-  id: Schema.optionalWith(SendMessageTaskId, {
-    default: () => newSendMessageTaskId(),
-  }),
+  id: SendMessageTaskId.pipe(
+    Schema.withDecodingDefaultType(Effect.sync(() => newSendMessageTaskId())),
+    Schema.withConstructorDefault(Effect.sync(() => newSendMessageTaskId()))
+  ),
   notificationToken: VexlNotificationTokenSecret,
   // todo #2124 - remove this since notification cypher is not used anymore
   targetCypher: Schema.optional(
-    Schema.Union(NotificationCypher, VexlNotificationToken)
+    Schema.Union([NotificationCypher, VexlNotificationToken])
   ),
   // todo #2124 - Remove nullOr
   targetToken: Schema.optional(VexlNotificationToken),
   sendNewChatMessageNotification: Schema.Boolean,
-  sentAt: Schema.optionalWith(UnixMilliseconds, {
-    default: () => unixMillisecondsNow(),
-  }),
-  trackingId: Schema.optionalWith(NotificationTrackingId, {
-    default: () => createNotificationTrackingId(),
-  }),
+  sentAt: UnixMilliseconds.pipe(
+    Schema.withDecodingDefaultType(Effect.sync(() => unixMillisecondsNow())),
+    Schema.withConstructorDefault(Effect.sync(() => unixMillisecondsNow()))
+  ),
+  trackingId: NotificationTrackingId.pipe(
+    Schema.withDecodingDefaultType(
+      Effect.sync(() => createNotificationTrackingId())
+    ),
+    Schema.withConstructorDefault(
+      Effect.sync(() => createNotificationTrackingId())
+    )
+  ),
   minimalClientVersion: Schema.optional(VersionCode),
 }) {
   get socketMessage(): NewChatMessageNoticeMessage {
@@ -152,23 +162,30 @@ export class NewChatMessageNoticeSendTask extends Schema.TaggedClass<NewChatMess
 export class StreamOnlyChatMessageSendTask extends Schema.TaggedClass<StreamOnlyChatMessageSendTask>(
   'StreamOnlyChatMessageSendTask'
 )('StreamOnlyChatMessageSendTask', {
-  id: Schema.optionalWith(SendMessageTaskId, {
-    default: () => newSendMessageTaskId(),
-  }),
+  id: SendMessageTaskId.pipe(
+    Schema.withDecodingDefaultType(Effect.sync(() => newSendMessageTaskId())),
+    Schema.withConstructorDefault(Effect.sync(() => newSendMessageTaskId()))
+  ),
   notificationToken: VexlNotificationTokenSecret,
   // todo #2124 - Remove
   targetCypher: Schema.optional(
-    Schema.Union(NotificationCypher, VexlNotificationToken)
+    Schema.Union([NotificationCypher, VexlNotificationToken])
   ),
   // todo #2124 - Remove nullOr
   targetToken: Schema.optional(VexlNotificationToken),
   message: StreamOnlyMessageCypher,
-  sentAt: Schema.optionalWith(UnixMilliseconds, {
-    default: () => unixMillisecondsNow(),
-  }),
-  trackingId: Schema.optionalWith(NotificationTrackingId, {
-    default: () => createNotificationTrackingId(),
-  }),
+  sentAt: UnixMilliseconds.pipe(
+    Schema.withDecodingDefaultType(Effect.sync(() => unixMillisecondsNow())),
+    Schema.withConstructorDefault(Effect.sync(() => unixMillisecondsNow()))
+  ),
+  trackingId: NotificationTrackingId.pipe(
+    Schema.withDecodingDefaultType(
+      Effect.sync(() => createNotificationTrackingId())
+    ),
+    Schema.withConstructorDefault(
+      Effect.sync(() => createNotificationTrackingId())
+    )
+  ),
   minimalClientVersion: Schema.optional(VersionCode),
 }) {
   get socketMessage(): StreamOnlyChatMessage {
@@ -188,22 +205,29 @@ export class StreamOnlyChatMessageSendTask extends Schema.TaggedClass<StreamOnly
 export class NewUserNoticeSendTask extends Schema.TaggedClass<NewUserNoticeSendTask>(
   'NewUserNoticeSendTask'
 )('NewUserNoticeSendTask', {
-  id: Schema.optionalWith(SendMessageTaskId, {
-    default: () => newSendMessageTaskId(),
-  }),
+  id: SendMessageTaskId.pipe(
+    Schema.withDecodingDefaultType(Effect.sync(() => newSendMessageTaskId())),
+    Schema.withConstructorDefault(Effect.sync(() => newSendMessageTaskId()))
+  ),
   notificationToken: VexlNotificationTokenSecret,
   // todo #2124 - Remove
   targetCypher: Schema.optional(
-    Schema.Union(NotificationCypher, VexlNotificationToken)
+    Schema.Union([NotificationCypher, VexlNotificationToken])
   ),
   // todo #2124 - Remove nullOr
   targetToken: Schema.NullOr(VexlNotificationToken),
-  sentAt: Schema.optionalWith(UnixMilliseconds, {
-    default: () => unixMillisecondsNow(),
-  }),
-  trackingId: Schema.optionalWith(NotificationTrackingId, {
-    default: () => createNotificationTrackingId(),
-  }),
+  sentAt: UnixMilliseconds.pipe(
+    Schema.withDecodingDefaultType(Effect.sync(() => unixMillisecondsNow())),
+    Schema.withConstructorDefault(Effect.sync(() => unixMillisecondsNow()))
+  ),
+  trackingId: NotificationTrackingId.pipe(
+    Schema.withDecodingDefaultType(
+      Effect.sync(() => createNotificationTrackingId())
+    ),
+    Schema.withConstructorDefault(
+      Effect.sync(() => createNotificationTrackingId())
+    )
+  ),
   minimalClientVersion: Schema.optional(VersionCode),
 }) {
   get socketMessage(): NewUserNoticeMessage {
@@ -217,22 +241,29 @@ export class NewUserNoticeSendTask extends Schema.TaggedClass<NewUserNoticeSendT
 export class NewClubUserNoticeSendTask extends Schema.TaggedClass<NewClubUserNoticeSendTask>(
   'NewClubUserNoticeSendTask'
 )('NewClubUserNoticeSendTask', {
-  id: Schema.optionalWith(SendMessageTaskId, {
-    default: () => newSendMessageTaskId(),
-  }),
+  id: SendMessageTaskId.pipe(
+    Schema.withDecodingDefaultType(Effect.sync(() => newSendMessageTaskId())),
+    Schema.withConstructorDefault(Effect.sync(() => newSendMessageTaskId()))
+  ),
   notificationToken: VexlNotificationTokenSecret,
   // todo #2124 - Remove
   targetCypher: Schema.optional(
-    Schema.Union(NotificationCypher, VexlNotificationToken)
+    Schema.Union([NotificationCypher, VexlNotificationToken])
   ),
   // todo #2124 - Remove nullOr
   targetToken: Schema.NullOr(VexlNotificationToken),
-  sentAt: Schema.optionalWith(UnixMilliseconds, {
-    default: () => unixMillisecondsNow(),
-  }),
-  trackingId: Schema.optionalWith(NotificationTrackingId, {
-    default: () => createNotificationTrackingId(),
-  }),
+  sentAt: UnixMilliseconds.pipe(
+    Schema.withDecodingDefaultType(Effect.sync(() => unixMillisecondsNow())),
+    Schema.withConstructorDefault(Effect.sync(() => unixMillisecondsNow()))
+  ),
+  trackingId: NotificationTrackingId.pipe(
+    Schema.withDecodingDefaultType(
+      Effect.sync(() => createNotificationTrackingId())
+    ),
+    Schema.withConstructorDefault(
+      Effect.sync(() => createNotificationTrackingId())
+    )
+  ),
   minimalClientVersion: Schema.optional(VersionCode),
   clubUuid: ClubUuid,
 }) {
@@ -248,22 +279,29 @@ export class NewClubUserNoticeSendTask extends Schema.TaggedClass<NewClubUserNot
 export class UserAdmittedToClubNoticeSendTask extends Schema.TaggedClass<UserAdmittedToClubNoticeSendTask>(
   'UserAdmittedToClubNoticeSendTask'
 )('UserAdmittedToClubNoticeSendTask', {
-  id: Schema.optionalWith(SendMessageTaskId, {
-    default: () => newSendMessageTaskId(),
-  }),
+  id: SendMessageTaskId.pipe(
+    Schema.withDecodingDefaultType(Effect.sync(() => newSendMessageTaskId())),
+    Schema.withConstructorDefault(Effect.sync(() => newSendMessageTaskId()))
+  ),
   notificationToken: VexlNotificationTokenSecret,
   // todo #2124 - Remove
   targetCypher: Schema.optional(
-    Schema.Union(NotificationCypher, VexlNotificationToken)
+    Schema.Union([NotificationCypher, VexlNotificationToken])
   ),
   // todo #2124 - Remove nullOr
   targetToken: Schema.NullOr(VexlNotificationToken),
-  sentAt: Schema.optionalWith(UnixMilliseconds, {
-    default: () => unixMillisecondsNow(),
-  }),
-  trackingId: Schema.optionalWith(NotificationTrackingId, {
-    default: () => createNotificationTrackingId(),
-  }),
+  sentAt: UnixMilliseconds.pipe(
+    Schema.withDecodingDefaultType(Effect.sync(() => unixMillisecondsNow())),
+    Schema.withConstructorDefault(Effect.sync(() => unixMillisecondsNow()))
+  ),
+  trackingId: NotificationTrackingId.pipe(
+    Schema.withDecodingDefaultType(
+      Effect.sync(() => createNotificationTrackingId())
+    ),
+    Schema.withConstructorDefault(
+      Effect.sync(() => createNotificationTrackingId())
+    )
+  ),
   minimalClientVersion: Schema.optional(VersionCode),
   publicKey: PublicKeyPemBase64,
 }) {
@@ -279,26 +317,34 @@ export class UserAdmittedToClubNoticeSendTask extends Schema.TaggedClass<UserAdm
 export class UserInactivityNoticeSendTask extends Schema.TaggedClass<UserInactivityNoticeSendTask>(
   'UserInactivityNoticeSendTask'
 )('UserInactivityNoticeSendTask', {
-  id: Schema.optionalWith(SendMessageTaskId, {
-    default: () => newSendMessageTaskId(),
-  }),
+  id: SendMessageTaskId.pipe(
+    Schema.withDecodingDefaultType(Effect.sync(() => newSendMessageTaskId())),
+    Schema.withConstructorDefault(Effect.sync(() => newSendMessageTaskId()))
+  ),
   notificationToken: VexlNotificationTokenSecret,
   // todo #2124 - Remove
   targetCypher: Schema.optional(
-    Schema.Union(NotificationCypher, VexlNotificationToken)
+    Schema.Union([NotificationCypher, VexlNotificationToken])
   ),
   // todo #2124 - Remove nullOr
   targetToken: Schema.NullOr(VexlNotificationToken),
-  sentAt: Schema.optionalWith(UnixMilliseconds, {
-    default: () => unixMillisecondsNow(),
-  }),
-  trackingId: Schema.optionalWith(NotificationTrackingId, {
-    default: () => createNotificationTrackingId(),
-  }),
+  sentAt: UnixMilliseconds.pipe(
+    Schema.withDecodingDefaultType(Effect.sync(() => unixMillisecondsNow())),
+    Schema.withConstructorDefault(Effect.sync(() => unixMillisecondsNow()))
+  ),
+  trackingId: NotificationTrackingId.pipe(
+    Schema.withDecodingDefaultType(
+      Effect.sync(() => createNotificationTrackingId())
+    ),
+    Schema.withConstructorDefault(
+      Effect.sync(() => createNotificationTrackingId())
+    )
+  ),
   minimalClientVersion: Schema.optional(VersionCode),
-  variant: Schema.optionalWith(UserInactivityNotificationVariant, {
-    default: () => 'FIRST',
-  }),
+  variant: UserInactivityNotificationVariant.pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): 'FIRST' => 'FIRST')),
+    Schema.withConstructorDefault(Effect.sync((): 'FIRST' => 'FIRST'))
+  ),
 }) {
   get socketMessage(): UserInactivityNoticeMessage {
     return new UserInactivityNoticeMessage({
@@ -312,22 +358,29 @@ export class UserInactivityNoticeSendTask extends Schema.TaggedClass<UserInactiv
 export class UserLoginOnDifferentDeviceNoticeSendTask extends Schema.TaggedClass<UserLoginOnDifferentDeviceNoticeSendTask>(
   'UserLoginOnDifferentDeviceNoticeSendTask'
 )('UserLoginOnDifferentDeviceNoticeSendTask', {
-  id: Schema.optionalWith(SendMessageTaskId, {
-    default: () => newSendMessageTaskId(),
-  }),
+  id: SendMessageTaskId.pipe(
+    Schema.withDecodingDefaultType(Effect.sync(() => newSendMessageTaskId())),
+    Schema.withConstructorDefault(Effect.sync(() => newSendMessageTaskId()))
+  ),
   notificationToken: VexlNotificationTokenSecret,
   // todo #2124 - Remove
   targetCypher: Schema.optional(
-    Schema.Union(NotificationCypher, VexlNotificationToken)
+    Schema.Union([NotificationCypher, VexlNotificationToken])
   ),
   // todo #2124 - Remove nullOr
   targetToken: Schema.NullOr(VexlNotificationToken),
-  sentAt: Schema.optionalWith(UnixMilliseconds, {
-    default: () => unixMillisecondsNow(),
-  }),
-  trackingId: Schema.optionalWith(NotificationTrackingId, {
-    default: () => createNotificationTrackingId(),
-  }),
+  sentAt: UnixMilliseconds.pipe(
+    Schema.withDecodingDefaultType(Effect.sync(() => unixMillisecondsNow())),
+    Schema.withConstructorDefault(Effect.sync(() => unixMillisecondsNow()))
+  ),
+  trackingId: NotificationTrackingId.pipe(
+    Schema.withDecodingDefaultType(
+      Effect.sync(() => createNotificationTrackingId())
+    ),
+    Schema.withConstructorDefault(
+      Effect.sync(() => createNotificationTrackingId())
+    )
+  ),
   minimalClientVersion: Schema.optional(VersionCode),
 }) {
   get socketMessage(): UserLoginOnDifferentDeviceNoticeMessage {
@@ -341,22 +394,29 @@ export class UserLoginOnDifferentDeviceNoticeSendTask extends Schema.TaggedClass
 export class ClubFlaggedNoticeSendTask extends Schema.TaggedClass<ClubFlaggedNoticeSendTask>(
   'ClubFlaggedNoticeSendTask'
 )('ClubFlaggedNoticeSendTask', {
-  id: Schema.optionalWith(SendMessageTaskId, {
-    default: () => newSendMessageTaskId(),
-  }),
+  id: SendMessageTaskId.pipe(
+    Schema.withDecodingDefaultType(Effect.sync(() => newSendMessageTaskId())),
+    Schema.withConstructorDefault(Effect.sync(() => newSendMessageTaskId()))
+  ),
   notificationToken: VexlNotificationTokenSecret,
   // todo #2124 - Remove
   targetCypher: Schema.optional(
-    Schema.Union(NotificationCypher, VexlNotificationToken)
+    Schema.Union([NotificationCypher, VexlNotificationToken])
   ),
   // todo #2124 - Remove nullOr
   targetToken: Schema.NullOr(VexlNotificationToken),
-  sentAt: Schema.optionalWith(UnixMilliseconds, {
-    default: () => unixMillisecondsNow(),
-  }),
-  trackingId: Schema.optionalWith(NotificationTrackingId, {
-    default: () => createNotificationTrackingId(),
-  }),
+  sentAt: UnixMilliseconds.pipe(
+    Schema.withDecodingDefaultType(Effect.sync(() => unixMillisecondsNow())),
+    Schema.withConstructorDefault(Effect.sync(() => unixMillisecondsNow()))
+  ),
+  trackingId: NotificationTrackingId.pipe(
+    Schema.withDecodingDefaultType(
+      Effect.sync(() => createNotificationTrackingId())
+    ),
+    Schema.withConstructorDefault(
+      Effect.sync(() => createNotificationTrackingId())
+    )
+  ),
   minimalClientVersion: Schema.optional(VersionCode),
   clubUuid: ClubUuid,
 }) {
@@ -372,22 +432,29 @@ export class ClubFlaggedNoticeSendTask extends Schema.TaggedClass<ClubFlaggedNot
 export class ClubExpiredNoticeSendTask extends Schema.TaggedClass<ClubExpiredNoticeSendTask>(
   'ClubExpiredNoticeSendTask'
 )('ClubExpiredNoticeSendTask', {
-  id: Schema.optionalWith(SendMessageTaskId, {
-    default: () => newSendMessageTaskId(),
-  }),
+  id: SendMessageTaskId.pipe(
+    Schema.withDecodingDefaultType(Effect.sync(() => newSendMessageTaskId())),
+    Schema.withConstructorDefault(Effect.sync(() => newSendMessageTaskId()))
+  ),
   notificationToken: VexlNotificationTokenSecret,
   // todo #2124 - Remove
   targetCypher: Schema.optional(
-    Schema.Union(NotificationCypher, VexlNotificationToken)
+    Schema.Union([NotificationCypher, VexlNotificationToken])
   ),
   // todo #2124 - Remove nullOr
   targetToken: Schema.NullOr(VexlNotificationToken),
-  sentAt: Schema.optionalWith(UnixMilliseconds, {
-    default: () => unixMillisecondsNow(),
-  }),
-  trackingId: Schema.optionalWith(NotificationTrackingId, {
-    default: () => createNotificationTrackingId(),
-  }),
+  sentAt: UnixMilliseconds.pipe(
+    Schema.withDecodingDefaultType(Effect.sync(() => unixMillisecondsNow())),
+    Schema.withConstructorDefault(Effect.sync(() => unixMillisecondsNow()))
+  ),
+  trackingId: NotificationTrackingId.pipe(
+    Schema.withDecodingDefaultType(
+      Effect.sync(() => createNotificationTrackingId())
+    ),
+    Schema.withConstructorDefault(
+      Effect.sync(() => createNotificationTrackingId())
+    )
+  ),
   minimalClientVersion: Schema.optional(VersionCode),
   clubUuid: ClubUuid,
 }) {
@@ -403,22 +470,29 @@ export class ClubExpiredNoticeSendTask extends Schema.TaggedClass<ClubExpiredNot
 export class NewContentNoticeSendTask extends Schema.TaggedClass<NewContentNoticeSendTask>(
   'NewContentNoticeSendTask'
 )('NewContentNoticeSendTask', {
-  id: Schema.optionalWith(SendMessageTaskId, {
-    default: () => newSendMessageTaskId(),
-  }),
+  id: SendMessageTaskId.pipe(
+    Schema.withDecodingDefaultType(Effect.sync(() => newSendMessageTaskId())),
+    Schema.withConstructorDefault(Effect.sync(() => newSendMessageTaskId()))
+  ),
   notificationToken: VexlNotificationTokenSecret,
   // todo #2124 - Remove
   targetCypher: Schema.optional(
-    Schema.Union(NotificationCypher, VexlNotificationToken)
+    Schema.Union([NotificationCypher, VexlNotificationToken])
   ),
   // todo #2124 - Remove nullOr
   targetToken: Schema.NullOr(VexlNotificationToken),
-  sentAt: Schema.optionalWith(UnixMilliseconds, {
-    default: () => unixMillisecondsNow(),
-  }),
-  trackingId: Schema.optionalWith(NotificationTrackingId, {
-    default: () => createNotificationTrackingId(),
-  }),
+  sentAt: UnixMilliseconds.pipe(
+    Schema.withDecodingDefaultType(Effect.sync(() => unixMillisecondsNow())),
+    Schema.withConstructorDefault(Effect.sync(() => unixMillisecondsNow()))
+  ),
+  trackingId: NotificationTrackingId.pipe(
+    Schema.withDecodingDefaultType(
+      Effect.sync(() => createNotificationTrackingId())
+    ),
+    Schema.withConstructorDefault(
+      Effect.sync(() => createNotificationTrackingId())
+    )
+  ),
   minimalClientVersion: Schema.optional(VersionCode),
 }) {
   get socketMessage(): NewContentNoticeMessage {
@@ -432,22 +506,29 @@ export class NewContentNoticeSendTask extends Schema.TaggedClass<NewContentNotic
 export class VexlProductNotificationSendTask extends Schema.TaggedClass<VexlProductNotificationSendTask>(
   'VexlProductNotificationSendTask'
 )('VexlProductNotificationSendTask', {
-  id: Schema.optionalWith(SendMessageTaskId, {
-    default: () => newSendMessageTaskId(),
-  }),
+  id: SendMessageTaskId.pipe(
+    Schema.withDecodingDefaultType(Effect.sync(() => newSendMessageTaskId())),
+    Schema.withConstructorDefault(Effect.sync(() => newSendMessageTaskId()))
+  ),
   notificationToken: VexlNotificationTokenSecret,
   // todo #2124 - Remove
   targetCypher: Schema.optional(
-    Schema.Union(NotificationCypher, VexlNotificationToken)
+    Schema.Union([NotificationCypher, VexlNotificationToken])
   ),
   // todo #2124 - Remove nullOr
   targetToken: Schema.NullOr(VexlNotificationToken),
-  sentAt: Schema.optionalWith(UnixMilliseconds, {
-    default: () => unixMillisecondsNow(),
-  }),
-  trackingId: Schema.optionalWith(NotificationTrackingId, {
-    default: () => createNotificationTrackingId(),
-  }),
+  sentAt: UnixMilliseconds.pipe(
+    Schema.withDecodingDefaultType(Effect.sync(() => unixMillisecondsNow())),
+    Schema.withConstructorDefault(Effect.sync(() => unixMillisecondsNow()))
+  ),
+  trackingId: NotificationTrackingId.pipe(
+    Schema.withDecodingDefaultType(
+      Effect.sync(() => createNotificationTrackingId())
+    ),
+    Schema.withConstructorDefault(
+      Effect.sync(() => createNotificationTrackingId())
+    )
+  ),
   vexlProductNotification: VexlProductNotification,
   minimalClientVersion: Schema.optional(VersionCode),
 }) {
@@ -460,7 +541,7 @@ export class VexlProductNotificationSendTask extends Schema.TaggedClass<VexlProd
   }
 }
 
-export const SendMessageTask = Schema.Union(
+export const SendMessageTask = Schema.Union([
   NewChatMessageNoticeSendTask,
   NewUserNoticeSendTask,
   StreamOnlyChatMessageSendTask,
@@ -471,6 +552,6 @@ export const SendMessageTask = Schema.Union(
   ClubFlaggedNoticeSendTask,
   ClubExpiredNoticeSendTask,
   NewContentNoticeSendTask,
-  VexlProductNotificationSendTask
-)
+  VexlProductNotificationSendTask,
+])
 export type SendMessageTask = typeof SendMessageTask.Type

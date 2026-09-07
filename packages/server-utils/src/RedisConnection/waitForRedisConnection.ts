@@ -1,12 +1,12 @@
-import {type TimeoutException} from 'effect/Cause'
-import {Effect, type Duration} from 'effect/index'
+import {Effect, type Duration} from 'effect'
+import {type TimeoutError} from 'effect/Cause'
 import type IORedis from 'ioredis'
 import {RedisError} from '../RedisService'
 
 export const waitForRedisConnection =
-  (timeout: Duration.DurationInput) =>
-  (redis: IORedis): Effect.Effect<IORedis, RedisError | TimeoutException> =>
-    Effect.async<IORedis, RedisError>((cb) => {
+  (timeout: Duration.Input) =>
+  (redis: IORedis): Effect.Effect<IORedis, RedisError | TimeoutError> =>
+    Effect.callback<IORedis, RedisError>((cb) => {
       const cleanup = (): void => {
         redis.off('error', onError)
         redis.off('ready', onReady)
@@ -37,7 +37,7 @@ export const waitForRedisConnection =
       })
     }).pipe(
       Effect.timeout(timeout),
-      Effect.tapErrorTag('TimeoutException', (e) =>
+      Effect.tapErrorTag('TimeoutError', (e) =>
         Effect.sync(() => {
           redis.disconnect(false)
         })

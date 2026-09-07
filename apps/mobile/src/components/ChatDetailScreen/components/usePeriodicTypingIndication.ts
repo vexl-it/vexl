@@ -1,6 +1,6 @@
 import {useIsFocused} from '@react-navigation/native'
 import {TYPING_INDICATION_TIMEOUT_MS} from '@vexl-next/domain/src/general/messaging'
-import {useMolecule} from 'bunshi/dist/react'
+import {useMolecule} from 'bunshi/react'
 import {useAtomValue} from 'jotai'
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react'
 import {AppState} from 'react-native'

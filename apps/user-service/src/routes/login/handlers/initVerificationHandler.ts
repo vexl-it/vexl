@@ -1,4 +1,3 @@
-import {HttpApiBuilder} from '@effect/platform/index'
 import {countryPrefixFromNumber} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {fromMilliseconds} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
@@ -14,7 +13,8 @@ import {UserApiSpecification} from '@vexl-next/rest-api/src/services/user/specif
 import {hashPhoneNumber} from '@vexl-next/server-utils/src/generateUserAuthData'
 import {verifyLoginChallenge} from '@vexl-next/server-utils/src/loginChallengeServerOperations'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
-import {type ConfigError, Effect, Option, pipe, Schema, String} from 'effect'
+import {makeHttpApiHandler} from '@vexl-next/server-utils/src/makeHttpApiHandler'
+import {Effect, Option, pipe, Schema, String, type Config} from 'effect'
 import {
   loginCodeDummies,
   loginCodeDummyForAll,
@@ -57,26 +57,22 @@ const checkClientVersion = (
   clientVersion: Option.Option<VersionCode>
 ): Effect.Effect<
   void,
-  | UnsupportedVersionToLoginError
-  | ConfigError.ConfigError
-  | UnexpectedServerError
+  UnsupportedVersionToLoginError | Config.ConfigError | UnexpectedServerError
 > =>
-  Effect.gen(function* (_) {
-    const lowestSupportedVersion = yield* _(lowestSupportVersionToLoginConfig)
+  Effect.gen(function* () {
+    const lowestSupportedVersion = yield* lowestSupportVersionToLoginConfig
     if (
       Option.isNone(clientVersion) ||
       clientVersion.value < lowestSupportedVersion
     ) {
-      return yield* _(
-        new UnsupportedVersionToLoginError({
-          lowestRequiredVersion: lowestSupportedVersion,
-          status: 400,
-        })
-      )
+      return yield* new UnsupportedVersionToLoginError({
+        lowestRequiredVersion: lowestSupportedVersion,
+        status: 400,
+      })
     }
   }).pipe(
     Effect.catchTag(
-      'ParseError',
+      'SchemaError',
       (e) =>
         new UnexpectedServerError({
           status: 500,
@@ -86,21 +82,19 @@ const checkClientVersion = (
     )
   )
 
-export const initVerificationHandler = HttpApiBuilder.handler(
+export const initVerificationHandler = makeHttpApiHandler(
   UserApiSpecification,
   'Login',
   'initVerification',
   (req) =>
-    Effect.gen(function* (_) {
-      yield* _(checkClientVersion(req.headers.clientVersionOrNone))
+    Effect.gen(function* () {
+      yield* checkClientVersion(req.headers.clientVersionOrNone)
 
-      yield* _(
-        verifyLoginChallenge({
-          clientSignature: req.payload.challenge.clientSignature,
-          serverSignature: req.payload.challenge.serverSignature,
-          encodedChallenge: req.payload.challenge.challenge,
-        })
-      )
+      yield* verifyLoginChallenge({
+        clientSignature: req.payload.challenge.clientSignature,
+        serverSignature: req.payload.challenge.serverSignature,
+        encodedChallenge: req.payload.challenge.challenge,
+      })
 
       if (
         pipe(
@@ -109,19 +103,17 @@ export const initVerificationHandler = HttpApiBuilder.handler(
           String.toLowerCase
         ) === 'mainline'
       )
-        return yield* _(
-          new UnableToSendVerificationSmsError({
-            reason: 'AntiFraudBlock',
-            status: 400,
-          })
-        )
+        return yield* new UnableToSendVerificationSmsError({
+          reason: 'AntiFraudBlock',
+          status: 400,
+        })
 
-      const loginDbService = yield* _(VerificationStateDbService)
+      const loginDbService = yield* VerificationStateDbService
       const expirationAt = unixMillisecondsFromNow(
         VERIFICATION_EXPIRES_AFTER_MILIS
       )
 
-      const phoneNumberHashed = yield* _(
+      const phoneNumberHashed = yield* pipe(
         hashPhoneNumber(req.payload.phoneNumber),
         Effect.catchTag(
           'CryptoError',
@@ -133,7 +125,7 @@ export const initVerificationHandler = HttpApiBuilder.handler(
         )
       )
 
-      const countryPrefix = yield* _(
+      const countryPrefix = yield* pipe(
         countryPrefixFromNumber(req.payload.phoneNumber),
         Effect.catchTag(
           'UnknownCountryPrefix',
@@ -145,7 +137,7 @@ export const initVerificationHandler = HttpApiBuilder.handler(
         )
       )
 
-      const dummyCodeForAll = yield* _(loginCodeDummyForAll)
+      const dummyCodeForAll = yield* loginCodeDummyForAll
 
       if (Option.isSome(dummyCodeForAll)) {
         const verificationState = makeStaticCodeVerificationState({
@@ -156,7 +148,7 @@ export const initVerificationHandler = HttpApiBuilder.handler(
           code: dummyCodeForAll.value,
         })
 
-        yield* _(loginDbService.storePhoneVerificationState(verificationState))
+        yield* loginDbService.storePhoneVerificationState(verificationState)
 
         return new InitPhoneVerificationResponse({
           expirationAt: fromMilliseconds(expirationAt),
@@ -164,7 +156,7 @@ export const initVerificationHandler = HttpApiBuilder.handler(
         })
       }
 
-      const dummyNumbers = yield* _(loginCodeDummies)
+      const dummyNumbers = yield* loginCodeDummies
 
       if (
         Option.isSome(dummyNumbers) &&
@@ -178,7 +170,7 @@ export const initVerificationHandler = HttpApiBuilder.handler(
           code: dummyNumbers.value.code,
         })
 
-        yield* _(loginDbService.storePhoneVerificationState(verificationState))
+        yield* loginDbService.storePhoneVerificationState(verificationState)
         return new InitPhoneVerificationResponse({
           expirationAt: fromMilliseconds(expirationAt),
           verificationId: verificationState.id,
@@ -192,15 +184,16 @@ export const initVerificationHandler = HttpApiBuilder.handler(
         countryPrefix,
       }
 
-      const sid = yield* _(
-        createVerification(req.payload.phoneNumber, req.headers)
+      const sid = yield* createVerification(
+        req.payload.phoneNumber,
+        req.headers
       )
       const verificationState = makeTwilioSmsVerificationState({
         ...verificationStateBase,
         sid,
       })
 
-      yield* _(loginDbService.storePhoneVerificationState(verificationState))
+      yield* loginDbService.storePhoneVerificationState(verificationState)
 
       return new InitPhoneVerificationResponse({
         expirationAt: fromMilliseconds(expirationAt),

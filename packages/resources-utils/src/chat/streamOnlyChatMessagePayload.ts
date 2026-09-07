@@ -7,31 +7,31 @@ import {
   StreamOnlyMessageCypher,
 } from '@vexl-next/domain/src/general/messaging'
 import {type CryptoError} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
-import {Effect, pipe, Schema} from 'effect/index'
-import {type ParseError} from 'effect/ParseResult'
+import {Effect, pipe, Schema} from 'effect'
+import {type SchemaError} from 'effect/Schema'
 import {eciesDecryptE, eciesEncryptE} from '../utils/crypto'
 
-const StreamOnlyChatMessagePayloadParsedJson = Schema.parseJson(
+const StreamOnlyChatMessagePayloadParsedJson = Schema.fromJsonString(
   StreamOnlyChatMessagePayload
 )
 
 export const encryptStreamOnlyChatMessagePayload = (
   payload: StreamOnlyChatMessagePayload,
   encryptWith: PublicKeyPemBase64
-): Effect.Effect<StreamOnlyMessageCypher, ParseError | CryptoError> =>
+): Effect.Effect<StreamOnlyMessageCypher, SchemaError | CryptoError> =>
   pipe(
     payload,
-    Schema.encode(StreamOnlyChatMessagePayloadParsedJson),
+    Schema.encodeEffect(StreamOnlyChatMessagePayloadParsedJson),
     Effect.flatMap(eciesEncryptE(encryptWith)),
-    Effect.flatMap(Schema.decode(StreamOnlyMessageCypher))
+    Effect.flatMap(Schema.decodeEffect(StreamOnlyMessageCypher))
   )
 
 export const decryptStreamOnlyChatMessageCypher = (
   cypher: StreamOnlyMessageCypher,
   decryptWith: PrivateKeyPemBase64
-): Effect.Effect<StreamOnlyChatMessagePayload, ParseError | CryptoError> =>
+): Effect.Effect<StreamOnlyChatMessagePayload, SchemaError | CryptoError> =>
   pipe(
     cypher,
     eciesDecryptE(decryptWith),
-    Effect.flatMap(Schema.decode(StreamOnlyChatMessagePayloadParsedJson))
+    Effect.flatMap(Schema.decodeEffect(StreamOnlyChatMessagePayloadParsedJson))
   )

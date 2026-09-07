@@ -21,7 +21,8 @@
       "outputs": ["node_modules/.cache/tsbuildinfo.json"]
     },
     "test": {
-      "dependsOn": ["^topo"]
+      "dependsOn": ["^topo"],
+      "env": ["TEST_DB_*", "TEST_REDIS_URL", "REDIS_URL"]
     },
     "clean": {
       "cache": false

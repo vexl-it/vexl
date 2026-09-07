@@ -4,7 +4,10 @@ import {UnixMilliseconds} from '../utility/UnixMilliseconds.brand'
 export class NotFoundError extends Schema.TaggedError<NotFoundError>(
   'NotFoundError'
 )('NotFoundError', {
-  status: Schema.optionalWith(Schema.Literal(404), {default: () => 404}),
+  status: Schema.Literal(404).pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): 404 => 404)),
+    Schema.withConstructorDefault(Effect.sync((): 404 => 404))
+  ),
   message: Schema.optional(Schema.String),
 }) {}
 
@@ -14,15 +17,19 @@ export class NotFoundError extends Schema.TaggedError<NotFoundError>(
 export class InternalServerError extends Schema.TaggedError<InternalServerError>(
   'InternalServerError'
 )('InternalServerError', {
-  cause: Schema.Literal('ExternalApi', 'Unknown', 'BodyError').pipe(
-    Schema.optionalWith({default: () => 'Unknown' as const})
+  cause: Schema.Literals(['ExternalApi', 'Unknown', 'BodyError']).pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): 'Unknown' => 'Unknown')),
+    Schema.withConstructorDefault(Effect.sync((): 'Unknown' => 'Unknown'))
   ),
 }) {}
 
 export class UnexpectedServerError extends Schema.TaggedError<UnexpectedServerError>(
   'UnexpectedServerError'
 )('UnexpectedServerError', {
-  status: Schema.optionalWith(Schema.Literal(500), {default: () => 500}),
+  status: Schema.Literal(500).pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): 500 => 500)),
+    Schema.withConstructorDefault(Effect.sync((): 500 => 500))
+  ),
   cause: Schema.optional(Schema.Unknown),
   message: Schema.optional(Schema.String),
 }) {
@@ -38,7 +45,7 @@ export class UnexpectedServerError extends Schema.TaggedError<UnexpectedServerEr
   ): (<A, I, R>(
     effect: Effect.Effect<A, I, R>
   ) => Effect.Effect<A, UnexpectedServerError, R>) =>
-    Effect.catchAll(
+    Effect.catch(
       (e) =>
         new UnexpectedServerError({
           cause: e,
@@ -52,9 +59,14 @@ export class UnauthorizedError extends Schema.TaggedError<UnauthorizedError>(
 )('UnauthorizedError', {
   cause: Schema.Unknown,
   status: Schema.Literal(401),
-  message: Schema.optionalWith(Schema.String, {
-    default: () => 'Unauthorized error',
-  }),
+  message: Schema.String.pipe(
+    Schema.withDecodingDefaultType(
+      Effect.sync((): 'Unauthorized error' => 'Unauthorized error')
+    ),
+    Schema.withConstructorDefault(
+      Effect.sync((): 'Unauthorized error' => 'Unauthorized error')
+    )
+  ),
 }) {}
 
 export class RateLimitedError extends Schema.TaggedError<RateLimitedError>(
@@ -62,13 +74,19 @@ export class RateLimitedError extends Schema.TaggedError<RateLimitedError>(
 )('RateLimitedError', {
   retryAfterMs: Schema.Number,
   rateLimitResetAtMs: UnixMilliseconds,
-  status: Schema.optionalWith(Schema.Literal(429), {default: () => 429}),
+  status: Schema.Literal(429).pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): 429 => 429)),
+    Schema.withConstructorDefault(Effect.sync((): 429 => 429))
+  ),
 }) {}
 
 export class InvalidNextPageTokenError extends Schema.TaggedError<InvalidNextPageTokenError>(
   'InvalidNextPageTokenError'
 )('InvalidNextPageTokenError', {
   cause: Schema.Unknown,
-  status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
+  status: Schema.Literal(400).pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): 400 => 400)),
+    Schema.withConstructorDefault(Effect.sync((): 400 => 400))
+  ),
   message: Schema.optional(Schema.String),
 }) {}

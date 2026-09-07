@@ -23,17 +23,13 @@
     "start": "node --enable-source-maps dist/index.js",
     "dev": "tsx -r dotenv/config src/index.ts",
     "dev:watch": "tsx --watch src/index.ts",
-    "test": "jest --silent",
-    "test:watch": "jest --watch"
+    "test": "node --experimental-vm-modules ../../node_modules/jest/bin/jest.js --silent",
+    "test:watch": "node --experimental-vm-modules ../../node_modules/jest/bin/jest.js --watch"
   },
   "prettier": "@vexl-next/prettier-config",
   "dependencies": {
-    "@effect/experimental": "^0.57.11",
-    "@effect/platform": "^0.93.6",
-    "@effect/platform-node": "^0.103.0",
-    "@effect/rpc": "^0.72.2",
-    "@effect/sql": "^0.48.6",
-    "@effect/sql-pg": "^0.49.7",
+    "@effect/platform-node": "4.0.0-rc.112",
+    "@effect/sql-pg": "4.0.0-rc.112",
     "@vexl-next/cryptography": "0.0.0",
     "@vexl-next/domain": "0.0.0",
     "@vexl-next/esbuild": "0.0.0",
@@ -43,7 +39,7 @@
     "@vexl-next/server-utils": "0.0.0",
     "bullmq": "^5.52.1",
     "dotenv": "^16.4.5",
-    "effect": "^3.20.0",
+    "effect": "4.0.0-rc.112",
     "expo-server-sdk": "^5.0.0",
     "ioredis": "^5.4.1"
   }

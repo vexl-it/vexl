@@ -1,4 +1,4 @@
-import {Cause, Effect, Exit, Option, Schema} from 'effect'
+import {Cause, Effect, Exit, Result, Schema} from 'effect'
 import {makeRequestWithCommonAndSecurityHeaders} from './apiSecurity'
 import {CommonHeaders} from './commonHeaders'
 
@@ -29,17 +29,16 @@ describe('makeRequestWithCommonAndSecurityHeaders', () => {
 
     const exit = Effect.runSyncExit(
       withSecurityHeaders(() => Effect.void).pipe(
-        // Typed error handling must NOT swallow the tripwire.
-        Effect.catchAll(() => Effect.void)
+        Effect.catch(() => Effect.void)
       )
     )
 
     expect(Exit.isFailure(exit)).toBe(true)
     if (Exit.isFailure(exit)) {
-      const defect = Cause.dieOption(exit.cause)
-      expect(Option.isSome(defect)).toBe(true)
-      if (Option.isSome(defect)) {
-        expect(defect.value).toBeInstanceOf(TestSessionNotReadyError)
+      const defect = Cause.findDefect(exit.cause)
+      expect(Result.isSuccess(defect)).toBe(true)
+      if (Result.isSuccess(defect)) {
+        expect(defect.success).toBeInstanceOf(TestSessionNotReadyError)
       }
     }
   })

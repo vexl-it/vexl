@@ -1,3 +1,4 @@
+import {testConfigProviderLayer} from '@vexl-next/server-utils/src/tests/testConfigProvider'
 /**
  * End-to-end test of the places ingest pipeline
  * (tooling/location-db-updater/scripts/ingest.ts):
@@ -10,7 +11,7 @@
  * geojsonseq fixture, so the whole pipeline after the osmium boundary is
  * exercised for real.
  */
-import {NodeContext} from '@effect/platform-node'
+import {NodeServices} from '@effect/platform-node'
 import {PgClient} from '@effect/sql-pg'
 import {GeocodingDbService} from '@vexl-next/geocoding-db/src/GeocodingDbService'
 import {computeImportance} from '@vexl-next/geocoding-db/src/common'
@@ -24,15 +25,19 @@ import {execFile} from 'node:child_process'
 import {chmodSync, mkdirSync, mkdtempSync, rmSync, writeFileSync} from 'node:fs'
 import {tmpdir} from 'node:os'
 import path from 'node:path'
+import {fileURLToPath} from 'node:url'
 
 const RS = '\u001e'
-const LOCATION_DB_UPDATER_ROOT = path.resolve(__dirname, '../..')
+const LOCATION_DB_UPDATER_ROOT = fileURLToPath(
+  new URL('../..', import.meta.url)
+)
 
 const dbRuntime = ManagedRuntime.make(
   Layer.empty.pipe(
     Layer.provideMerge(GeocodingDbService.Live),
     Layer.provideMerge(GeocodingDbLayer),
-    Layer.provideMerge(NodeContext.layer)
+    Layer.provideMerge(NodeServices.layer),
+    Layer.provide(testConfigProviderLayer)
   )
 )
 
@@ -419,12 +424,10 @@ interface BoundaryAssertRow {
 const queryPlaces = async (where: string): Promise<PlaceAssertRow[]> => {
   let result: readonly PlaceAssertRow[] = []
   await dbRuntime.runPromise(
-    Effect.gen(function* (_) {
-      const sql = yield* _(PgClient.PgClient)
-      result = yield* _(
-        sql.unsafe<PlaceAssertRow>(
-          `SELECT place_type, name, names, country_code, population, importance, latitude, longitude FROM places WHERE ${where} ORDER BY id`
-        )
+    Effect.gen(function* () {
+      const sql = yield* PgClient.PgClient
+      result = yield* sql.unsafe<PlaceAssertRow>(
+        `SELECT place_type, name, names, country_code, population, importance, latitude, longitude FROM places WHERE ${where} ORDER BY id`
       )
     })
   )
@@ -434,10 +437,9 @@ const queryPlaces = async (where: string): Promise<PlaceAssertRow[]> => {
 const queryBoundaries = async (where: string): Promise<BoundaryAssertRow[]> => {
   let result: readonly BoundaryAssertRow[] = []
   await dbRuntime.runPromise(
-    Effect.gen(function* (_) {
-      const sql = yield* _(PgClient.PgClient)
-      result = yield* _(
-        sql.unsafe<BoundaryAssertRow>(`
+    Effect.gen(function* () {
+      const sql = yield* PgClient.PgClient
+      result = yield* sql.unsafe<BoundaryAssertRow>(`
           SELECT
             boundary.name,
             boundary.boundary_type,
@@ -459,7 +461,6 @@ const queryBoundaries = async (where: string): Promise<BoundaryAssertRow[]> => {
           ORDER BY
             boundary.id
         `)
-      )
     })
   )
   return [...result]
@@ -471,9 +472,9 @@ const querySingle = async <T extends object>(
 ): Promise<T> => {
   let result: T | undefined
   await dbRuntime.runPromise(
-    Effect.gen(function* (_) {
-      const sql = yield* _(PgClient.PgClient)
-      const rows = yield* _(sql.unsafe<T>(queryText, params))
+    Effect.gen(function* () {
+      const sql = yield* PgClient.PgClient
+      const rows = yield* sql.unsafe<T>(queryText, params)
       result = rows[0]
     })
   )

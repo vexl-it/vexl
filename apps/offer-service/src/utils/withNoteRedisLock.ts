@@ -9,7 +9,7 @@ import {
   type RedisService,
 } from '@vexl-next/server-utils/src/RedisService'
 import {type ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
-import {Array, Effect, pipe, type ConfigError} from 'effect'
+import {Array, Effect, pipe, type Config} from 'effect'
 import {hashNoteAdminId, hashNoteRepostId} from './hashNoteIds'
 
 export const withNoteAdminActionRedisLock =
@@ -19,7 +19,7 @@ export const withNoteAdminActionRedisLock =
     fnc: Effect.Effect<A, E, R>
   ) => Effect.Effect<
     A,
-    E | UnexpectedServerError | ConfigError.ConfigError | RedisLockError,
+    E | UnexpectedServerError | Config.ConfigError | RedisLockError,
     R | ServerCrypto | RedisService
   >) =>
   (fnc) =>
@@ -48,7 +48,7 @@ export const withNoteRepostActionRedisLock =
     fnc: Effect.Effect<A, E, R>
   ) => Effect.Effect<
     A,
-    E | UnexpectedServerError | ConfigError.ConfigError | RedisLockError,
+    E | UnexpectedServerError | Config.ConfigError | RedisLockError,
     R | ServerCrypto | RedisService
   >) =>
   (fnc) =>

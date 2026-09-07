@@ -1,39 +1,37 @@
-import {HttpApiBuilder} from '@effect/platform/index'
 import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {HEADER_ADMIN_TOKEN} from '@vexl-next/rest-api/src/constants'
 import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
-import {Effect} from 'effect'
+import {makeHttpApiHandler} from '@vexl-next/server-utils/src/makeHttpApiHandler'
+import {Effect, pipe} from 'effect'
 import {ClubsDbService} from '../../../db/ClubsDbService'
 import {validateAdminToken} from '../utils/validateAdminToken'
 
-export const modifyClub = HttpApiBuilder.handler(
+export const modifyClub = makeHttpApiHandler(
   ContactApiSpecification,
   'ClubsAdmin',
   'modifyClub',
   (req) =>
-    Effect.gen(function* (_) {
-      yield* _(validateAdminToken(req.headers[HEADER_ADMIN_TOKEN]))
+    Effect.gen(function* () {
+      yield* validateAdminToken(req.headers[HEADER_ADMIN_TOKEN])
 
-      const clubsDb = yield* _(ClubsDbService)
+      const clubsDb = yield* ClubsDbService
 
-      const existingClub = yield* _(
+      const existingClub = yield* pipe(
         clubsDb.findClubByUuid({uuid: req.payload.clubInfo.uuid}),
-        Effect.flatten,
-        Effect.catchTag('NoSuchElementException', (e) => new NotFoundError())
+        Effect.flatMap(Effect.fromOption),
+        Effect.catchTag('NoSuchElementError', (e) => new NotFoundError())
       )
 
-      const modifiedClub = yield* _(
-        clubsDb.updateClub({
-          id: existingClub.id,
-          data: {
-            ...req.payload.clubInfo,
-            madeInactiveAt: existingClub.madeInactiveAt,
-            madeInactiveReason: existingClub.madeInactiveReason,
-            report: existingClub.report,
-          },
-        })
-      )
+      const modifiedClub = yield* clubsDb.updateClub({
+        id: existingClub.id,
+        data: {
+          ...req.payload.clubInfo,
+          madeInactiveAt: existingClub.madeInactiveAt,
+          madeInactiveReason: existingClub.madeInactiveReason,
+          report: existingClub.report,
+        },
+      })
       return {
         clubInfo: modifiedClub,
       }

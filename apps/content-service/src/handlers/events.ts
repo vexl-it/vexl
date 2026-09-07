@@ -1,4 +1,3 @@
-import {HttpApiBuilder} from '@effect/platform/index'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {
   type Event,
@@ -7,6 +6,7 @@ import {
 } from '@vexl-next/rest-api/src/services/content/contracts'
 import {ContentApiSpecification} from '@vexl-next/rest-api/src/services/content/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {makeHttpApiHandler} from '@vexl-next/server-utils/src/makeHttpApiHandler'
 import {Effect, Option, Schema} from 'effect'
 import {CacheService} from '../utils/cache'
 import {WebflowCmsService} from '../utils/webflowCms'
@@ -52,29 +52,27 @@ const webflowEventsToResponse = ({
   )
 }
 
-export const getEventsHandler = HttpApiBuilder.handler(
+export const getEventsHandler = makeHttpApiHandler(
   ContentApiSpecification,
   'Cms',
   'getEvents',
   () =>
-    Effect.gen(function* (_) {
-      const cache = yield* _(CacheService)
+    Effect.gen(function* () {
+      const cache = yield* CacheService
 
-      const data = yield* _(cache.getEventsFromRedis)
+      const data = yield* cache.getEventsFromRedis
       if (Option.isSome(data)) {
-        yield* _(
-          Effect.logInfo(
-            'Got events cached in redis, not fetching from webflow'
-          )
+        yield* Effect.logInfo(
+          'Got events cached in redis, not fetching from webflow'
         )
         return data.value
       }
 
-      yield* _(Effect.logInfo('No events in redis, fetching from webflow'))
+      yield* Effect.logInfo('No events in redis, fetching from webflow')
 
-      const webflowService = yield* _(WebflowCmsService)
-      const events = yield* _(webflowService.fetchEvents())
-      const speakers = yield* _(webflowService.fetchSpeakers())
+      const webflowService = yield* WebflowCmsService
+      const events = yield* webflowService.fetchEvents()
+      const speakers = yield* webflowService.fetchSpeakers()
 
       const response = {
         events: webflowEventsToResponse({
@@ -83,11 +81,11 @@ export const getEventsHandler = HttpApiBuilder.handler(
         }),
       } satisfies EventsResponse
 
-      yield* _(cache.saveEventsToCacheForked(response))
+      yield* cache.saveEventsToCacheForked(response)
 
       return response
     }).pipe(
-      Effect.catchAll(
+      Effect.catch(
         (e) =>
           new UnexpectedServerError({
             cause: e,

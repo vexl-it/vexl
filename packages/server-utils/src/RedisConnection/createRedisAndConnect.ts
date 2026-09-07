@@ -27,7 +27,7 @@ export const createRedisAndConnect = (
       Effect.flatMap(
         flow(
           waitForRedisConnection('10 seconds'),
-          Effect.catchAll(
+          Effect.catch(
             (e) =>
               new SettingUpRedisConnectionError({
                 message:

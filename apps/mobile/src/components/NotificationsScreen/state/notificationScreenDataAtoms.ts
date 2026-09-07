@@ -1,4 +1,4 @@
-import {Array, Order, pipe, Schema} from 'effect/index'
+import {Array, Order, pipe, Schema} from 'effect'
 import {atom, type SetStateAction} from 'jotai'
 import {splitAtom} from 'jotai/utils'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
@@ -23,7 +23,7 @@ export const notificationScreenData = atom(
       ),
       // dedupeById
       Array.dedupeWith((a, b) => a.id === b.id),
-      Array.sortWith((a) => a.date, Order.reverse(Order.number))
+      Array.sortWith((a) => a.date, Order.flip(Order.Number))
     )
     set(notificationScreenDataStorageAtom, (o) => ({
       ...o,

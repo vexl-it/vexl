@@ -1,5 +1,5 @@
 import {useNavigation} from '@react-navigation/native'
-import {useMolecule} from 'bunshi/dist/react'
+import {useMolecule} from 'bunshi/react'
 import {useSetAtom, useStore} from 'jotai'
 import {useCallback} from 'react'
 import {type RootStackScreenProps} from '../../../navigationTypes'

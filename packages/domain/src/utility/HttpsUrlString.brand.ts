@@ -10,7 +10,7 @@ function isValidHttpsUrl(url: string): boolean {
 }
 
 export const HttpsUrlString = Schema.String.pipe(
-  Schema.filter(isValidHttpsUrl),
+  Schema.check(Schema.makeFilter(isValidHttpsUrl)),
   Schema.brand('HttpsUrlString')
 )
 export type HttpsUrlString = typeof HttpsUrlString.Type

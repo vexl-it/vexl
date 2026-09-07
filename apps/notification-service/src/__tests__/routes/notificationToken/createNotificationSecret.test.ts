@@ -7,7 +7,7 @@ import {
   CommonHeaders,
   makeCommonHeaders,
 } from '@vexl-next/rest-api/src/commonHeaders'
-import {Effect, Option, Schema} from 'effect'
+import {Effect, Option, pipe, Schema} from 'effect'
 import {NotificationTokensDb} from '../../../services/NotificationTokensDb'
 import {NodeTestingApp} from '../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../utils/runPromiseInMockedEnvironment'
@@ -51,22 +51,22 @@ const validHeadersWithPrefix = makeCommonHeaders({
 describe('CreateNotificationSecret', () => {
   it('Should create notification secret with valid payload and headers', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
 
-        const resp = yield* _(
+        const resp = yield* pipe(
           app.NotificationTokenGroup.CreateNotificationSecret({
             payload: {
               expoNotificationToken: validExpoToken,
             },
             headers: validHeaders,
           }),
-          Effect.either
+          Effect.result
         )
 
-        expect(resp._tag).toEqual('Right')
-        if (resp._tag === 'Right') {
-          expect(resp.right.secret).toBeDefined()
+        expect(resp._tag).toEqual('Success')
+        if (resp._tag === 'Success') {
+          expect(resp.success.secret).toBeDefined()
         }
       })
     )
@@ -74,26 +74,26 @@ describe('CreateNotificationSecret', () => {
 
   it('Should create notification secret with client prefix and verify it is saved', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
-        const db = yield* _(NotificationTokensDb)
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
+        const db = yield* NotificationTokensDb
 
-        const resp = yield* _(
+        const resp = yield* pipe(
           app.NotificationTokenGroup.CreateNotificationSecret({
             payload: {
               expoNotificationToken: validExpoToken,
             },
             headers: validHeadersWithPrefix,
           }),
-          Effect.either
+          Effect.result
         )
 
-        expect(resp._tag).toEqual('Right')
-        if (resp._tag !== 'Right') return
+        expect(resp._tag).toEqual('Success')
+        if (resp._tag !== 'Success') return
 
         // Verify the prefix was saved correctly
-        const savedRecord = yield* _(
-          db.findSecretBySecretValue(resp.right.secret)
+        const savedRecord = yield* db.findSecretBySecretValue(
+          resp.success.secret
         )
 
         expect(Option.isSome(savedRecord)).toBe(true)
@@ -106,33 +106,29 @@ describe('CreateNotificationSecret', () => {
 
   it('Should keep a duplicate expo token only on the newest secret', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
-        const db = yield* _(NotificationTokensDb)
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
+        const db = yield* NotificationTokensDb
 
-        const firstResp = yield* _(
-          app.NotificationTokenGroup.CreateNotificationSecret({
+        const firstResp =
+          yield* app.NotificationTokenGroup.CreateNotificationSecret({
             payload: {
               expoNotificationToken: duplicateExpoToken,
             },
             headers: validHeaders,
           })
-        )
 
-        const secondResp = yield* _(
-          app.NotificationTokenGroup.CreateNotificationSecret({
+        const secondResp =
+          yield* app.NotificationTokenGroup.CreateNotificationSecret({
             payload: {
               expoNotificationToken: duplicateExpoToken,
             },
             headers: validHeaders,
           })
-        )
 
-        const firstRecord = yield* _(
-          db.findSecretBySecretValue(firstResp.secret)
-        )
-        const secondRecord = yield* _(
-          db.findSecretBySecretValue(secondResp.secret)
+        const firstRecord = yield* db.findSecretBySecretValue(firstResp.secret)
+        const secondRecord = yield* db.findSecretBySecretValue(
+          secondResp.secret
         )
 
         expect(Option.isSome(firstRecord)).toBe(true)
@@ -149,8 +145,8 @@ describe('CreateNotificationSecret', () => {
 
   it('Should fail with MissingCommonHeadersError when headers are missing', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
 
         // Create headers with UnknownUserAgentHeader (no vexl-app-meta)
         const headersWithoutVexlMeta = new CommonHeaders({
@@ -163,17 +159,17 @@ describe('CreateNotificationSecret', () => {
           'client-version': Option.none(),
         })
 
-        const resp = yield* _(
+        const resp = yield* pipe(
           app.NotificationTokenGroup.CreateNotificationSecret({
             payload: {
               expoNotificationToken: validExpoToken,
             },
             headers: headersWithoutVexlMeta,
           }),
-          Effect.either
+          Effect.result
         )
 
-        expect(resp._tag).toEqual('Left')
+        expect(resp._tag).toEqual('Failure')
       })
     )
   })

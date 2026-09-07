@@ -1,4 +1,4 @@
-import {Schema} from 'effect/index'
+import {Schema} from 'effect'
 import {generatePrivateKey} from '../KeyHolder'
 import {PublicKeyPemBase64} from '../KeyHolder/brands'
 import {stripVersion} from '../versionWrapper'

@@ -135,42 +135,34 @@ export interface OfferDbOperations {
   ) => Effect.Effect<void, UnexpectedServerError>
 }
 
-export class OfferDbService extends Context.Tag('OfferDbService')<
+export class OfferDbService extends Context.Service<
   OfferDbService,
   OfferDbOperations
->() {
+>()('OfferDbService') {
   static readonly Live = Layer.effect(
     OfferDbService,
-    Effect.gen(function* (_) {
+    Effect.gen(function* () {
       return {
-        queryOffersForUserPaginated: yield* _(
-          createQueryOffersForUserPaginated
-        ),
-        queryOfferByPublicKeyAndOfferId: yield* _(
-          createQueryOfferByPublicKeyAndOfferId
-        ),
-        queryOffersIds: yield* _(createQueryOfferIdsForUser),
-        queryNumberOfReportsForUser: yield* _(
-          createQueryNumberOfReportsForUser
-        ),
-        queryPublicPartByAdminId: yield* _(createQueryPublicPartByAdminId),
-        queryAllPrivateRecordsByPublicRecordId: yield* _(
-          createQueryAllPrivateRecordsByPublicRecordId
-        ),
-        insertPublicPart: yield* _(createInsertPublicPart),
-        insertOfferPrivatePart: yield* _(createInsertOfferPrivatePart),
-        insertOfferReportedRecord: yield* _(createInsertOfferReportedRecord),
-        updateReportOffer: yield* _(createUpdateReportOffer),
-        updateRefreshOffer: yield* _(createUpdateRefreshOffer),
-        updateOfferPublicPayload: yield* _(createUpdateOfferPublicPayload),
-        deletePublicPart: yield* _(createDeletePublicPart),
-        deletePrivatePart: yield* _(createDeletePrivatePart),
-        deleteAllPrivatePartsForAdminId: yield* _(
-          createDeleteAllPrivatePartsForAdminId
-        ),
-        deleteOfferReportedRecordByReportedAtBefore: yield* _(
-          createDeleteOfferReportedRecordByReportedAtBefore
-        ),
+        queryOffersForUserPaginated: yield* createQueryOffersForUserPaginated,
+        queryOfferByPublicKeyAndOfferId:
+          yield* createQueryOfferByPublicKeyAndOfferId,
+        queryOffersIds: yield* createQueryOfferIdsForUser,
+        queryNumberOfReportsForUser: yield* createQueryNumberOfReportsForUser,
+        queryPublicPartByAdminId: yield* createQueryPublicPartByAdminId,
+        queryAllPrivateRecordsByPublicRecordId:
+          yield* createQueryAllPrivateRecordsByPublicRecordId,
+        insertPublicPart: yield* createInsertPublicPart,
+        insertOfferPrivatePart: yield* createInsertOfferPrivatePart,
+        insertOfferReportedRecord: yield* createInsertOfferReportedRecord,
+        updateReportOffer: yield* createUpdateReportOffer,
+        updateRefreshOffer: yield* createUpdateRefreshOffer,
+        updateOfferPublicPayload: yield* createUpdateOfferPublicPayload,
+        deletePublicPart: yield* createDeletePublicPart,
+        deletePrivatePart: yield* createDeletePrivatePart,
+        deleteAllPrivatePartsForAdminId:
+          yield* createDeleteAllPrivatePartsForAdminId,
+        deleteOfferReportedRecordByReportedAtBefore:
+          yield* createDeleteOfferReportedRecordByReportedAtBefore,
       }
     })
   )

@@ -1,4 +1,3 @@
-import {HttpApiBuilder} from '@effect/platform/index'
 import {
   NotFoundError,
   UnexpectedServerError,
@@ -6,10 +5,11 @@ import {
 import {MemberAlreadyInClubError} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {makeHttpApiHandler} from '@vexl-next/server-utils/src/makeHttpApiHandler'
 import {commonMetricAttributesFromHeaders} from '@vexl-next/server-utils/src/metrics/commonMetricAttributesFromHeaders'
 import {validateChallengeInBody} from '@vexl-next/server-utils/src/services/challenge/utils/validateChallengeInBody'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
-import {Effect, Option} from 'effect'
+import {Effect, Option, pipe} from 'effect'
 import {ClubInvitationLinkDbService} from '../../../db/ClubInvitationLinkDbService'
 import {ClubMemberCountChangeDbService} from '../../../db/ClubMemberCountChangeDbService'
 import {ClubMembersDbService} from '../../../db/ClubMemberDbService'
@@ -20,27 +20,27 @@ import {findClubMemberByPublicKeyV1OrV2} from '../../../utils/findClubMemberByPu
 import {withClubJoiningActionRedisLock} from '../../../utils/withClubJoiningActionRedisLock'
 import {clubHasCapacityForAnotherUser} from '../utils/clubHasCapacityForAnotherUser'
 
-export const joinClub = HttpApiBuilder.handler(
+export const joinClub = makeHttpApiHandler(
   ContactApiSpecification,
   'ClubsMember',
   'joinClub',
   (req) =>
-    Effect.gen(function* (_) {
-      yield* _(validateChallengeInBody(req.payload))
+    Effect.gen(function* () {
+      yield* validateChallengeInBody(req.payload)
 
-      const clubsDb = yield* _(ClubsDbService)
-      const membersDb = yield* _(ClubMembersDbService)
-      const memberCountChangesDb = yield* _(ClubMemberCountChangeDbService)
-      const linksDb = yield* _(ClubInvitationLinkDbService)
-      const userNotificationService = yield* _(UserNotificationService)
+      const clubsDb = yield* ClubsDbService
+      const membersDb = yield* ClubMembersDbService
+      const memberCountChangesDb = yield* ClubMemberCountChangeDbService
+      const linksDb = yield* ClubInvitationLinkDbService
+      const userNotificationService = yield* UserNotificationService
 
-      const inviteLink = yield* _(
+      const inviteLink = yield* pipe(
         linksDb.findInvitationLinkByCode({
           code: req.payload.code,
         }),
-        Effect.flatten,
+        Effect.flatMap(Effect.fromOption),
         Effect.catchTag(
-          'NoSuchElementException',
+          'NoSuchElementError',
           () =>
             new NotFoundError({
               message: 'Invitation link not found error',
@@ -48,13 +48,13 @@ export const joinClub = HttpApiBuilder.handler(
         )
       )
 
-      const club = yield* _(
+      const club = yield* pipe(
         clubsDb.findClub({
           id: inviteLink.clubId,
         }),
-        Effect.flatten,
+        Effect.flatMap(Effect.fromOption),
         Effect.catchTag(
-          'NoSuchElementException',
+          'NoSuchElementError',
           () =>
             new UnexpectedServerError({
               status: 500,
@@ -65,10 +65,10 @@ export const joinClub = HttpApiBuilder.handler(
         )
       )
 
-      return yield* _(
-        Effect.gen(function* (_) {
-          yield* _(clubHasCapacityForAnotherUser(club))
-          yield* _(
+      return yield* pipe(
+        Effect.gen(function* () {
+          yield* clubHasCapacityForAnotherUser(club)
+          yield* pipe(
             findClubMemberByPublicKeyV1OrV2(
               Option.getOrElse(
                 req.payload.publicKeyV2,
@@ -82,61 +82,52 @@ export const joinClub = HttpApiBuilder.handler(
             )
           )
 
-          const member = yield* _(
-            membersDb.insertClubMember({
-              clubId: club.id,
-              publicKey: req.payload.publicKey,
-              publicKeyV2: Option.getOrNull(req.payload.publicKeyV2),
-              isModerator: inviteLink.forAdmin,
-              lastRefreshedAt: new Date(),
-              notificationToken: Option.getOrNull(
-                req.payload.notificationToken
-              ),
-              vexlNotificationToken: Option.getOrNull(
-                req.payload.vexlNotificationToken
-              ),
-            })
-          )
+          const member = yield* membersDb.insertClubMember({
+            clubId: club.id,
+            publicKey: req.payload.publicKey,
+            publicKeyV2: Option.getOrNull(req.payload.publicKeyV2),
+            isModerator: inviteLink.forAdmin,
+            lastRefreshedAt: new Date(),
+            notificationToken: Option.getOrNull(req.payload.notificationToken),
+            vexlNotificationToken: Option.getOrNull(
+              req.payload.vexlNotificationToken
+            ),
+          })
 
-          yield* _(
-            memberCountChangesDb.incrementJoined({clubId: club.id, count: 1})
-          )
+          yield* memberCountChangesDb.incrementJoined({
+            clubId: club.id,
+            count: 1,
+          })
 
           if (inviteLink.forAdmin) {
-            yield* _(Effect.log('Deleting used invitation link'))
-            yield* _(
-              linksDb.deleteInvitationLink({
-                id: inviteLink.id,
-              })
-            )
+            yield* Effect.log('Deleting used invitation link')
+            yield* linksDb.deleteInvitationLink({
+              id: inviteLink.id,
+            })
           }
 
-          yield* _(
-            userNotificationService.notifyOthersAboutNewClubUser(
-              club.uuid,
-              Option.getOrElse(
-                req.payload.publicKeyV2,
-                () => req.payload.publicKey
-              )
+          yield* userNotificationService.notifyOthersAboutNewClubUser(
+            club.uuid,
+            Option.getOrElse(
+              req.payload.publicKeyV2,
+              () => req.payload.publicKey
             )
           )
 
-          yield* _(
-            reportUserJoinedClubAndImportedContacts({
-              clubUUid: club.uuid,
-              contactsImported: req.payload.contactsImported,
-              value: 1,
-              commonMetricAttributes: commonMetricAttributesFromHeaders(
-                req.headers
-              ),
-            })
-          )
+          yield* reportUserJoinedClubAndImportedContacts({
+            clubUUid: club.uuid,
+            contactsImported: req.payload.contactsImported,
+            value: 1,
+            commonMetricAttributes: commonMetricAttributesFromHeaders(
+              req.headers
+            ),
+          })
 
           return {
             clubInfoForUser: {
               club,
               isModerator: member.isModerator,
-              vexlNotificationToken: Option.fromNullable(
+              vexlNotificationToken: Option.fromNullishOr(
                 member.vexlNotificationToken
               ),
             },

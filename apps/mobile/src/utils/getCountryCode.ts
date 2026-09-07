@@ -1,7 +1,7 @@
 import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {parsePhoneNumber} from 'awesome-phonenumber'
-import {Option, Schema} from 'effect/index'
+import {Option, Schema} from 'effect'
 import reportError from './reportError'
 
 const INVALID_COUNTRY_CODE = Schema.decodeSync(CountryPrefix)(-1)

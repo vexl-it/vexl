@@ -1,6 +1,7 @@
-import {FetchHttpClient, HttpApiClient} from '@effect/platform'
 import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/specification'
 import {Effect} from 'effect'
+import {FetchHttpClient} from 'effect/unstable/http'
+import {HttpApiClient} from 'effect/unstable/httpapi'
 
 // Derive the typed client from the ContactApiSpecification
 // Base URL points to the Next.js API proxy route

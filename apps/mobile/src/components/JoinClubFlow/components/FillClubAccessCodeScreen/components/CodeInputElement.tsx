@@ -1,5 +1,5 @@
 import {Stack, Typography} from '@vexl-next/ui'
-import {useMolecule} from 'bunshi/dist/react'
+import {useMolecule} from 'bunshi/react'
 import {type PrimitiveAtom, useAtomValue} from 'jotai'
 import React from 'react'
 import {accessCodeMolecule} from '../../../atoms'

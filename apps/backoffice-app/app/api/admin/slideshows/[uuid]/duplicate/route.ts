@@ -7,7 +7,7 @@ import {
   requireAdmin,
 } from '@/src/server/slideshows/http'
 import {duplicateSlideshow} from '@/src/server/slideshows/repository'
-import {Either, Schema} from 'effect'
+import {Result, Schema} from 'effect'
 import {type NextRequest} from 'next/server'
 
 export const runtime = 'nodejs'
@@ -24,10 +24,13 @@ export async function POST(request: NextRequest, context: RouteContext) {
     if (authError) return authError
 
     const {uuid} = await context.params
-    const decodedUuid = Schema.decodeUnknownEither(Schema.UUID)(uuid)
-    if (Either.isLeft(decodedUuid)) return badRequest(decodedUuid.left.message)
+    const decodedUuid = Schema.decodeUnknownResult(
+      Schema.String.check(Schema.isUUID())
+    )(uuid)
+    if (Result.isFailure(decodedUuid))
+      return badRequest(decodedUuid.failure.message)
 
-    const slideshow = await runDb(duplicateSlideshow(decodedUuid.right))
+    const slideshow = await runDb(duplicateSlideshow(decodedUuid.success))
     if (!slideshow) return notFound('Slideshow not found')
 
     return jsonOk({slideshow}, 201)

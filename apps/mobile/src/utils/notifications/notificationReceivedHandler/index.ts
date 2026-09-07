@@ -86,11 +86,14 @@ const processNotification = (
     const notificationData = notificationDataOption.value
     yield* Effect.log('Got notification', input.source, notificationData._tag)
 
-    if (notificationRequiresLoadedSession(notificationData)) {
-      const session = yield* loadSession()
-      if (!session.sessionLoaded)
-        return yield* Effect.fail(new ErrorLoadingSession())
-    }
+    // Loading the session also binds the user's encrypted storage, which the
+    // handlers below write to.
+    const session = yield* loadSession()
+    if (
+      !session.sessionLoaded &&
+      notificationRequiresLoadedSession(notificationData)
+    )
+      return yield* Effect.fail(new ErrorLoadingSession())
 
     if (notificationData._tag === 'NewChatMessageNoticeNotificationData') {
       yield* handleNewChatMessageNoticeNotification(notificationData)

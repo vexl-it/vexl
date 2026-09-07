@@ -19,6 +19,8 @@ import {
   versionCode,
 } from '../../utils/environment'
 import {translationAtom} from '../../utils/localization/I18nProvider'
+import {detectMmkvDataLoss} from '../../utils/mmkv/detectMmkvDataLoss'
+import {bindUserMmkvStorage} from '../../utils/mmkv/userMmkvStorage'
 import {showDebugNotificationIfEnabled} from '../../utils/notifications/showDebugNotificationIfEnabled'
 import {isDeveloperAtom} from '../../utils/preferences'
 import {reportErrorE} from '../../utils/reportError'
@@ -262,6 +264,11 @@ function performSessionLoad(): Effect.Effect<LoadSessionResult> {
 
       return sessionNotLoadedResult(loadingError)
     }
+
+    // Atoms read user data only once the encrypted store is bound, so this
+    // must precede the V1 -> V2 upgrade and the logged-in state.
+    bindUserMmkvStorage(readSessionResult.right)
+    detectMmkvDataLoss()
 
     const session = yield* ensureV2SessionIfNotCreateAndWrite(
       readSessionResult.right

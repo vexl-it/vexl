@@ -80,6 +80,12 @@ jest.mock('../../utils/reportError', () => {
 
 jest.mock('react-native-mmkv')
 
+// Runs after the user store is bound and reads AsyncStorage on its own; the
+// tests below count storage calls of the session load itself.
+jest.mock('../../utils/mmkv/detectMmkvDataLoss', () => ({
+  detectMmkvDataLoss: jest.fn(),
+}))
+
 jest.mock('../../utils/localization/I18nProvider', () => {
   const {atom: createAtom} = jest.requireActual('jotai')
 

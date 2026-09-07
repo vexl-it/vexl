@@ -5,13 +5,13 @@ import {
 import {Option, pipe} from 'effect'
 import {atom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
-import {atomWithParsedMmkvStorage} from '../atomUtils/atomWithParsedMmkvStorage'
+import {atomWithParsedPlaintextMmkvStorage} from '../atomUtils/atomWithParsedMmkvStorage'
 import {devAppLanguage, getDeviceLanguage} from '../localization/appLanguage'
 import {currencies} from '../localization/currency'
 import getDefaultSpokenLanguage from '../localization/getDefaultSpokenLanguage'
 import {Preferences} from './domain'
 
-export const preferencesAtom = atomWithParsedMmkvStorage(
+export const preferencesAtom = atomWithParsedPlaintextMmkvStorage(
   'preferences',
   {
     disableOfferRerequestLimit: false,

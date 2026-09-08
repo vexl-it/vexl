@@ -40,6 +40,7 @@
     "@vexl-next/domain": "0.0.0",
     "@vexl-next/expo-android-notification-presentation": "0.0.0",
     "@vexl-next/expo-background-notification-socket": "0.0.0",
+    "@vexl-next/expo-ios-backup-exclusion": "0.0.0",
     "@vexl-next/fix-brorand-for-expo": "0.0.0",
     "@vexl-next/generic-utils": "0.0.0",
     "@vexl-next/localization": "0.0.0",

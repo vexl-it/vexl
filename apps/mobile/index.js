@@ -8,6 +8,8 @@ import './src/utils/notifications/displayLocalNotification'
 import './src/utils/setupCrypto'
 
 import './src/utils/setupSentry'
+// Order matters: runs before MMKV creates its directory on first use.
+import './src/utils/setupBackupExclusion'
 // INITIAL SETUP - KEEP THIS AT THE TOP
 import '@vexl-next/ui/src/config/tamagui.config'
 import 'intl-pluralrules'

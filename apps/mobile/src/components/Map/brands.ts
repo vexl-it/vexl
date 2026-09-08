@@ -1,4 +1,7 @@
-import {type LocationPlaceId} from '@vexl-next/domain/src/general/offers'
+import {
+  type LocalizedAddresses,
+  type LocationPlaceId,
+} from '@vexl-next/domain/src/general/offers'
 import {
   type Latitude,
   type Longitude,
@@ -20,6 +23,7 @@ type Address = string
 export type MapValue = {
   placeId: LocationPlaceId
   address: Address
+  localizedAddresses?: LocalizedAddresses
   viewport: Viewport
 } & LatLong
 

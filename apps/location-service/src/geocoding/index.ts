@@ -12,6 +12,8 @@ import {
 import {Array, Context, Effect, Layer, Option, pipe, Schema} from 'effect'
 import {
   buildGeocodeAddress,
+  buildLocalizedGeocodeAddresses,
+  buildLocalizedSuggestAddresses,
   buildSuggestSecondRow,
   buildViewport,
   escapeLikePattern,
@@ -20,6 +22,17 @@ import {
 } from './format'
 
 const SUGGEST_LIMIT = 8
+/**
+ * Amplification guard: every requested language multiplies rendering work per
+ * suggestion row. Must stay above the number of shipped app locales, or
+ * clients get silently truncated maps — guarded by a test in
+ * __tests__/geocoding/format.test.ts. Bump it when the app approaches the cap.
+ */
+export const MAX_LOCALIZED_LANGS = 20
+const getEffectiveLocalizedLangs = (
+  langs: readonly string[] | undefined
+): readonly string[] =>
+  pipe(langs ?? [], Array.dedupe, Array.take(MAX_LOCALIZED_LANGS))
 /** Search only "important" places (partial index) before the full search. */
 const IMPORTANT_ONLY_THRESHOLD = 0.55
 /** Pins farther than this from any settlement resolve to "not found". */
@@ -48,6 +61,7 @@ interface SuggestionUserData {
   placeId: string
   suggestFirstRow: string
   suggestSecondRow: string
+  localizedAddresses?: Record<string, string>
   latitude: number
   longitude: number
   viewport: ReturnType<typeof buildViewport>
@@ -65,11 +79,15 @@ const isNearby = (a: SuggestionUserData, b: SuggestionUserData): boolean => {
 
 const suggestionUserData = (
   record: GeocodingRecordWithContext,
-  lang: string
+  lang: string,
+  langs: readonly string[]
 ): SuggestionUserData => ({
   placeId: `osm:${record.id}`,
   suggestFirstRow: localizedName(record.name, record.names, lang),
   suggestSecondRow: buildSuggestSecondRow(record, lang),
+  ...(Array.isNonEmptyReadonlyArray(langs)
+    ? {localizedAddresses: buildLocalizedSuggestAddresses(record, langs)}
+    : {}),
   latitude: record.latitude,
   longitude: record.longitude,
   viewport: buildViewport(record.latitude, record.longitude, record.placeType),
@@ -87,6 +105,7 @@ export class GeocodingService extends Context.Tag('GeocodingService')<
       const querySuggest: GeocodingOperations['querySuggest'] = (request) =>
         Effect.gen(function* (_) {
           const lang = pickLang(request.lang)
+          const langs = getEffectiveLocalizedLangs(request.langs)
           const simPhrase = normalizeName(request.phrase)
           if (simPhrase.length === 0)
             return new GetLocationSuggestionsResponse({result: []})
@@ -138,7 +157,9 @@ export class GeocodingService extends Context.Tag('GeocodingService')<
             Schema.decodeUnknown(GetLocationSuggestionsResponse)({
               result: pipe(
                 matches,
-                Array.map((one) => ({userData: suggestionUserData(one, lang)})),
+                Array.map((one) => ({
+                  userData: suggestionUserData(one, lang, langs),
+                })),
                 // A long street can span two dedupe grid cells — drop entries
                 // that would render identically AND sit next to each other, so
                 // distinct same-named settlements each keep their entry
@@ -158,6 +179,7 @@ export class GeocodingService extends Context.Tag('GeocodingService')<
       const queryGeocode: GeocodingOperations['queryGeocode'] = (request) =>
         Effect.gen(function* (_) {
           const lang = pickLang(request.lang)
+          const langs = getEffectiveLocalizedLangs(request.langs)
 
           const nearest = yield* _(
             geocodingDb.nearestPlace({
@@ -179,6 +201,14 @@ export class GeocodingService extends Context.Tag('GeocodingService')<
               // the same settlement stay distinct entries on the client.
               placeId: `osm:${place.id}@${request.latitude.toFixed(4)},${request.longitude.toFixed(4)}`,
               address: buildGeocodeAddress(place, lang),
+              ...(Array.isNonEmptyReadonlyArray(langs)
+                ? {
+                    localizedAddresses: buildLocalizedGeocodeAddresses(
+                      place,
+                      langs
+                    ),
+                  }
+                : {}),
               // The pin position is the location the user chose — returning it
               // verbatim (instead of the settlement center) keeps meeting
               // location picks exact.

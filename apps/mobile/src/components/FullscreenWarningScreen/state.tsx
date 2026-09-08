@@ -7,7 +7,7 @@ import {Array, Effect, Option, Schema} from 'effect'
 import {pipe} from 'fp-ts/lib/function'
 import {atom} from 'jotai'
 import {apiAtom} from '../../api'
-import {atomWithParsedMmkvStorage} from '../../utils/atomUtils/atomWithParsedMmkvStorage'
+import {atomWithParsedPlaintextMmkvStorage} from '../../utils/atomUtils/atomWithParsedMmkvStorage'
 import {ignoreReportErrors} from '../../utils/reportError'
 
 const newsAndAnnouncementsAtom = atom<NewsAndAnnouncementsResponse | null>()
@@ -26,7 +26,7 @@ export const fullScreenWarningDataAtom = atom(
   }
 )
 
-const cancelledIdsMmkv = atomWithParsedMmkvStorage(
+const cancelledIdsMmkv = atomWithParsedPlaintextMmkvStorage(
   'cancelledIds',
   {ids: []},
   Schema.Struct({

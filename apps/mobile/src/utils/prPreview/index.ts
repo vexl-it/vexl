@@ -5,7 +5,7 @@ import {Alert} from 'react-native'
 import {showErrorAlert} from '../../components/ErrorAlert'
 import {globalDialogAtom} from '../../components/GlobalDialog'
 import {loadingOverlayDisplayedAtom} from '../../components/LoadingOverlayProvider'
-import {atomWithParsedMmkvStorage} from '../atomUtils/atomWithParsedMmkvStorage'
+import {atomWithParsedPlaintextMmkvStorage} from '../atomUtils/atomWithParsedMmkvStorage'
 import {enableHiddenFeatures} from '../environment'
 import {reportErrorE} from '../reportError'
 import {PreviewChannel, PreviewError} from './domain'
@@ -22,7 +22,7 @@ import {PreviewChannel, PreviewError} from './domain'
 // expo-updates has no getter for the active header override (Updates.channel
 // reflects it only after a reload), so the app tracks the active preview
 // channel itself for display and clearing.
-export const previewChannelStorageAtom = atomWithParsedMmkvStorage(
+export const previewChannelStorageAtom = atomWithParsedPlaintextMmkvStorage(
   'previewChannel',
   {activeChannel: null},
   Schema.Struct({activeChannel: Schema.NullOr(PreviewChannel)})

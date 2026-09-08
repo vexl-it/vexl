@@ -7,7 +7,7 @@ import {Array, Schema} from 'effect/index'
 import {atom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {DateTime} from 'luxon'
-import {atomWithParsedMmkvStorage} from '../utils/atomUtils/atomWithParsedMmkvStorage'
+import {atomWithParsedPlaintextMmkvStorage} from '../utils/atomUtils/atomWithParsedMmkvStorage'
 
 const CAN_LOGIN_AGAIN_AFTER_MILLIS = 1000 * 60 // 1 day
 
@@ -19,7 +19,7 @@ const LoginAttemptsDataStored = Schema.Struct({
 })
 type LoginAttemptsDataStored = typeof LoginAttemptsDataStored.Type
 
-const loginAttemptsPhoneNumbersMmkvAtom = atomWithParsedMmkvStorage(
+const loginAttemptsPhoneNumbersMmkvAtom = atomWithParsedPlaintextMmkvStorage(
   'numberOfLoginAttempts',
   {data: {phoneNumbers: [], timestamp: UnixMilliseconds0}},
   LoginAttemptsDataStored

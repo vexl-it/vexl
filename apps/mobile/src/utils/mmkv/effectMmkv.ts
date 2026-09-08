@@ -1,10 +1,12 @@
 import {Either, flow, Schema, type ParseResult} from 'effect'
-import {createMMKV, type MMKV} from 'react-native-mmkv'
+import {createMMKV} from 'react-native-mmkv'
 import {JsonParseError, JsonStringifyError} from '../fpUtils'
 import {ReadingFromStoreError, ValueNotSet, WritingToStoreError} from './domain'
+import {type MmkvStore} from './mmkvStore'
+import {SessionBoundMmkvStore} from './sessionBoundMmkvStore'
 
 export interface EffectMmkv {
-  _storage: MMKV
+  _storage: MmkvStore
   set: (
     key: string
   ) => (value: string) => Either.Either<void, WritingToStoreError>
@@ -43,7 +45,7 @@ export interface EffectMmkv {
   ) => Either.Either<void, WritingToStoreError | ParseResult.ParseError>
 }
 
-function createEffectMmkv(storage: MMKV): EffectMmkv {
+function createEffectMmkv(storage: MmkvStore): EffectMmkv {
   function set(key: string): ReturnType<EffectMmkv['set']> {
     return (value) =>
       Either.try({
@@ -112,13 +114,28 @@ function createEffectMmkv(storage: MMKV): EffectMmkv {
   }
 }
 
-const mmkv = createMMKV({
-  id: 'mmkv.default',
-  recoveryStrategy: 'recover-on-error',
-  compareBeforeSet: true,
-})
+export const USER_MMKV_ID = 'mmkv.user'
+
+/**
+ * Readable before anyone is logged in. Only keys listed in `PlaintextMmkvKey`
+ * (see `userMmkvStorage.ts`) may live here.
+ */
+export const plaintextStorage = createEffectMmkv(
+  createMMKV({
+    id: 'mmkv.default',
+    recoveryStrategy: 'recover-on-error',
+    compareBeforeSet: true,
+  })
+)
+
+/**
+ * Bound to the logged-in user's AES-256 encrypted MMKV instance by
+ * `bindUserMmkvStorage` (see `userMmkvStorage.ts`). Before that it is a
+ * volatile placeholder.
+ */
+export const userMmkvStore = new SessionBoundMmkvStore()
 if (__DEV__) {
   // @ts-expect-error for debugging purposes
-  window.__mmkv = mmkv
+  window.__mmkv = userMmkvStore
 }
-export const storage = createEffectMmkv(mmkv)
+export const storage = createEffectMmkv(userMmkvStore)

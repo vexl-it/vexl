@@ -6,8 +6,9 @@ import {
   type WritableAtom,
 } from 'jotai'
 import {isCriticalMmkvKey} from '../mmkv/criticalMmkvKeys'
-import {storage} from '../mmkv/effectMmkv'
+import {plaintextStorage, storage, type EffectMmkv} from '../mmkv/effectMmkv'
 import {recordCriticalMmkvKeyPersisted} from '../mmkv/mmkvDataLossDiagnosticStorage'
+import {type PlaintextMmkvKey} from '../mmkv/userMmkvStorage'
 import reportError from '../reportError'
 import runWhenIdleWithTimeout from '../runWhenIdleWithTimeout'
 import getValueFromSetStateActionOfAtom from './getValueFromSetStateActionOfAtom'
@@ -177,19 +178,24 @@ function reportStoredValueParseError(
   )
 }
 
-function readRawString(key: string): string | undefined {
+function readRawString(
+  effectMmkv: EffectMmkv,
+  key: string
+): string | undefined {
   try {
-    return storage._storage.getString(key) ?? undefined
+    return effectMmkv._storage.getString(key) ?? undefined
   } catch {
     return undefined
   }
 }
 
 function getInitialValue<A>({
+  effectMmkv,
   key,
   decodeRawValue,
   defaultValue,
 }: {
+  effectMmkv: EffectMmkv
   key: string
   decodeRawValue: (raw: string) => Either.Either<A, ParseResult.ParseError>
   defaultValue: A
@@ -197,7 +203,7 @@ function getInitialValue<A>({
   scheduleStartupReport()
 
   return pipe(
-    storage.get(key),
+    effectMmkv.get(key),
     Either.match({
       onLeft: (l): StoredRead<A> => {
         if (l._tag === 'ValueNotSet') {
@@ -274,17 +280,15 @@ export interface AtomWithParsedMmkvStorageWithImmediateSaveOption<A> {
  * below), so the field is no longer written. Blobs that still contain it
  * decode fine — effect Schema structs ignore excess properties by default.
  */
-export function atomWithParsedMmkvStorageWithImmediateSaveOption<
-  A,
-  I extends object,
->(
+function createPersistedAtom<A, I extends object>(
+  effectMmkv: EffectMmkv,
   key: string,
   defaultValue: A,
   schema: Schema.Schema<A, I, never>,
   debugLabel?: string
 ): AtomWithParsedMmkvStorageWithImmediateSaveOption<A> {
   const decodeRawValue = Schema.decodeEither(Schema.parseJson(schema))
-  const persistValue = storage.saveVerified(key, schema)
+  const persistValue = effectMmkv.saveVerified(key, schema)
   const recordSuccessfulPersist = (): void => {
     if (isCriticalMmkvKey(key)) {
       void recordCriticalMmkvKeyPersisted(key)
@@ -354,6 +358,7 @@ export function atomWithParsedMmkvStorageWithImmediateSaveOption<
   // raw string can be GCed) on first mount to avoid decoding the same blob
   // twice on startup.
   let initialRead: StoredRead<A> | undefined = getInitialValue({
+    effectMmkv,
     key,
     decodeRawValue,
     defaultValue,
@@ -398,13 +403,15 @@ export function atomWithParsedMmkvStorageWithImmediateSaveOption<
 
     if (
       cachedInitialRead === undefined ||
-      readRawString(key) !== cachedInitialRead.raw
+      readRawString(effectMmkv, key) !== cachedInitialRead.raw
     ) {
-      setAtom(getInitialValue({key, decodeRawValue, defaultValue}).value)
+      setAtom(
+        getInitialValue({effectMmkv, key, decodeRawValue, defaultValue}).value
+      )
     }
 
     changeListenerAttached = true
-    const listener = storage._storage.addOnValueChangedListener(
+    const listener = effectMmkv._storage.addOnValueChangedListener(
       (changedKey) => {
         if (changedKey === CLEAR_STORAGE_KEY) {
           console.info(`Setting MMKV atom with key '${key}' to default value`)
@@ -423,7 +430,7 @@ export function atomWithParsedMmkvStorageWithImmediateSaveOption<
         runWhenIdleWithTimeout(
           () => {
             pipe(
-              storage.getVerified(key, schema),
+              effectMmkv.getVerified(key, schema),
               Either.match({
                 onLeft: (e) => {
                   if (e._tag === 'ValueNotSet') {
@@ -433,7 +440,7 @@ export function atomWithParsedMmkvStorageWithImmediateSaveOption<
                     setAtom(defaultValue)
                     return
                   }
-                  const raw = readRawString(key)
+                  const raw = readRawString(effectMmkv, key)
                   reportStoredValueParseError(
                     key,
                     `Error while parsing stored mmkv value in onChange function. Key: '${key}'`,
@@ -502,18 +509,41 @@ export function atomWithParsedMmkvStorageWithImmediateSaveOption<
   return {atom: flushableAtom, setAndSaveImmediatelyAtom}
 }
 
+export function atomWithParsedMmkvStorageWithImmediateSaveOption<
+  A,
+  I extends object,
+>(
+  key: string,
+  defaultValue: A,
+  schema: Schema.Schema<A, I, never>,
+  debugLabel?: string
+): AtomWithParsedMmkvStorageWithImmediateSaveOption<A> {
+  return createPersistedAtom(storage, key, defaultValue, schema, debugLabel)
+}
+
+/** Persisted in the logged-in user's encrypted store. */
 export function atomWithParsedMmkvStorage<A, I extends object>(
   key: string,
   defaultValue: A,
   schema: Schema.Schema<A, I, never>,
   debugLabel?: string
 ): FlushablePrimitiveAtom<A> {
-  const storageAtom = atomWithParsedMmkvStorageWithImmediateSaveOption(
+  return createPersistedAtom(storage, key, defaultValue, schema, debugLabel)
+    .atom
+}
+
+/** Persisted in the plaintext store that is readable before login. */
+export function atomWithParsedPlaintextMmkvStorage<A, I extends object>(
+  key: PlaintextMmkvKey,
+  defaultValue: A,
+  schema: Schema.Schema<A, I, never>,
+  debugLabel?: string
+): FlushablePrimitiveAtom<A> {
+  return createPersistedAtom(
+    plaintextStorage,
     key,
     defaultValue,
     schema,
     debugLabel
-  )
-
-  return storageAtom.atom
+  ).atom
 }

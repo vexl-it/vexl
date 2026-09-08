@@ -30,7 +30,6 @@ import {BACKGROUND_NOTIFICATION_HEADLESS_TASK} from '@vexl-next/expo-background-
 import {registerRootComponent} from 'expo'
 import {AppRegistry} from 'react-native'
 import App from './src/App'
-import {detectMmkvDataLoss} from './src/utils/mmkv/detectMmkvDataLoss'
 
 // polyfill Array.at() function
 if (![].at) {
@@ -45,9 +44,6 @@ if (![].toSorted) {
     return [...this].sort(...arg)
   }
 }
-
-// TODO: Temporary diagnostic for silent MMKV data wipes. Remove with the sentinel.
-detectMmkvDataLoss()
 
 AppRegistry.registerHeadlessTask(
   BACKGROUND_NOTIFICATION_HEADLESS_TASK,

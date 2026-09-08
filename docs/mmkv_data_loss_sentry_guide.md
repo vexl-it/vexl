@@ -43,7 +43,8 @@ are discarded instead of being flushed.
 
 | File                                                                       | Responsibility                                                                                             |
 | -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `apps/mobile/src/utils/mmkv/effectMmkv.ts`                                 | Creates the v4 MMKV instance with `recover-on-error`                                                       |
+| `apps/mobile/src/utils/mmkv/effectMmkv.ts`                                 | Creates the plaintext instance and the session-bound user store                                            |
+| `apps/mobile/src/utils/mmkv/userMmkvStorage.ts`                            | Opens the encrypted user instance with `recover-on-error` on session load; see `mmkv_encryption.md`       |
 | `apps/mobile/src/utils/mmkv/detectMmkvDataLoss.ts`                         | Detects total and partial loss and gathers MMKV file metadata                                              |
 | `apps/mobile/src/utils/mmkv/criticalMmkvKeys.ts`                           | Defines the critical keys and the key-name-only presence record schema                                     |
 | `apps/mobile/src/utils/mmkv/mmkvDataLossDiagnosticStorage.ts`              | Serializes presence-record updates, startup detection, and intentional clears                              |

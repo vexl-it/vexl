@@ -7,7 +7,7 @@ import {Alert} from 'react-native'
 import {showErrorAlert} from '../../components/ErrorAlert'
 import {admitUserToClubActionAtom} from '../../state/clubs/atom/admitUserToClubActionAtom'
 import {submitCodeToJoinClubActionAtom} from '../../state/clubs/atom/submitCodeToJoinClubActionAtom'
-import {atomWithParsedMmkvStorage} from '../atomUtils/atomWithParsedMmkvStorage'
+import {atomWithParsedPlaintextMmkvStorage} from '../atomUtils/atomWithParsedMmkvStorage'
 import {translationAtom} from '../localization/I18nProvider'
 import {
   isOnSpecificChat,
@@ -27,17 +27,20 @@ import {
   parseDeepLink,
 } from './parseDeepLink'
 
-export const lastInitialLinkStorageAtom = atomWithParsedMmkvStorage(
+export const lastInitialLinkStorageAtom = atomWithParsedPlaintextMmkvStorage(
   'lastInitialLink',
   {lastLinkImported: null},
   Schema.Struct({lastLinkImported: Schema.NullOr(Schema.String)})
 )
 
-export const lastUniversalOrAppLinkStorageAtom = atomWithParsedMmkvStorage(
-  'lastUniversalOrAppLink',
-  {lastUniversalOrAppLinkImported: null},
-  Schema.Struct({lastUniversalOrAppLinkImported: Schema.NullOr(Schema.String)})
-)
+export const lastUniversalOrAppLinkStorageAtom =
+  atomWithParsedPlaintextMmkvStorage(
+    'lastUniversalOrAppLink',
+    {lastUniversalOrAppLinkImported: null},
+    Schema.Struct({
+      lastUniversalOrAppLinkImported: Schema.NullOr(Schema.String),
+    })
+  )
 
 export class InvalidDeepLinkTypeError extends Schema.TaggedError<InvalidDeepLinkTypeError>(
   'InvalidDeepLinkTypeError'

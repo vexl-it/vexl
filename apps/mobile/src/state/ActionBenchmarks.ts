@@ -6,7 +6,7 @@ import {Array, Effect, Option, Record, Schema} from 'effect/index'
 import {pipe} from 'fp-ts/lib/function'
 import {atom, getDefaultStore} from 'jotai'
 import {focusAtom} from 'jotai-optics'
-import {atomWithParsedMmkvStorage} from '../utils/atomUtils/atomWithParsedMmkvStorage'
+import {atomWithParsedPlaintextMmkvStorage} from '../utils/atomUtils/atomWithParsedMmkvStorage'
 
 const BenchmarkRecord = Schema.Struct({
   startedAt: UnixMilliseconds,
@@ -21,7 +21,7 @@ const BenchmarkStorage = Schema.Struct({
   }),
 })
 
-const storageAtom = atomWithParsedMmkvStorage(
+const storageAtom = atomWithParsedPlaintextMmkvStorage(
   'actionsBenchmarks',
   {benchmarks: {}, enabled: false},
   BenchmarkStorage

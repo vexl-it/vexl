@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import {Array, Either, Schema, pipe} from 'effect'
+import {Array, Either, pipe, Schema} from 'effect'
 import {File, Paths} from 'expo-file-system'
 import {AppState} from 'react-native'
 import reportError from '../reportError'
@@ -9,7 +9,7 @@ import {
   getPresentCriticalMmkvKeys,
   type CriticalMmkvKey,
 } from './criticalMmkvKeys'
-import {storage} from './effectMmkv'
+import {storage, USER_MMKV_ID} from './effectMmkv'
 import {
   ASYNC_SENTINEL_KEY,
   runMmkvDataLossDiagnosticOperation,
@@ -31,8 +31,8 @@ function getMmkvFilesDiagnostics(): Record<string, unknown> {
   const docDir = Paths.document
   if (!docDir) return {error: 'no document directory'}
 
-  const dataFile = new File(docDir, 'mmkv/mmkv.default')
-  const crcFile = new File(docDir, 'mmkv/mmkv.default.crc')
+  const dataFile = new File(docDir, `mmkv/${USER_MMKV_ID}`)
+  const crcFile = new File(docDir, `mmkv/${USER_MMKV_ID}.crc`)
 
   return {
     dataFileExists: dataFile.exists,

@@ -17,6 +17,10 @@ import {
   makeErrorJsonWithRemovedSensitiveData,
   makeErrorWithRemovedSensitiveData,
 } from '../../utils/errorSanitization'
+import {
+  bindUserMmkvStorage,
+  deleteUserMmkvStorage,
+} from '../../utils/mmkv/userMmkvStorage'
 import {replaceAll} from '../../utils/replaceAll'
 import {dummySession} from './dummySesssion'
 import {clearV2SecretWasWrittenFlag} from './utils/v2SecretStorageFlag'
@@ -117,6 +121,7 @@ export const sessionAtom: WritableAtom<
       void SecretStorage.deleteItemAsync(SECRET_TOKEN_KEY)
       void SecretStorage.deleteItemAsync(SECRET_TOKEN_KEY_V2)
       clearV2SecretWasWrittenFlag()
+      deleteUserMmkvStorage()
 
       set(sessionHolderAtom, {state: 'loggedOut'})
       return
@@ -125,6 +130,7 @@ export const sessionAtom: WritableAtom<
     console.info('🔑 Logging in user')
     // TODO we should show UI indication that we are saving the session and also show error if it fails
 
+    bindUserMmkvStorage(nextValue.value)
     set(sessionHolderAtom, {state: 'loggedIn', session: nextValue.value})
     Effect.runFork(
       writeSessionToStorage(nextValue.value).pipe(

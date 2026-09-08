@@ -2,7 +2,7 @@ import {
   type KeyPairV2,
   type PrivateKeyHolder,
 } from '@vexl-next/cryptography/src/KeyHolder'
-import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
+import {type ContactHash} from '@vexl-next/domain/src/general/ContactHash.brand'
 import {
   generateNoteAdminId,
   newNoteId,
@@ -60,7 +60,7 @@ export default function createNewNoteForMyContacts({
   ownerKeyPair,
   ownerKeyPairV2,
   expiresAt,
-  serverToClientHashesToHashedPhoneNumbersMap,
+  serverToClientHashesToContactHashesMap,
   noteId: existingNoteId,
   adminId: existingAdminId,
   onProgress,
@@ -71,9 +71,9 @@ export default function createNewNoteForMyContacts({
   ownerKeyPair: PrivateKeyHolder
   ownerKeyPairV2: KeyPairV2
   expiresAt: UnixMilliseconds
-  serverToClientHashesToHashedPhoneNumbersMap: HashMap.HashMap<
+  serverToClientHashesToContactHashesMap: HashMap.HashMap<
     ServerToClientHashedNumber,
-    HashedPhoneNumber
+    ContactHash
   >
   noteId?: NoteId
   adminId?: NoteAdminId
@@ -105,7 +105,7 @@ export default function createNewNoteForMyContacts({
         contactApi,
         intendedConnectionLevel: 'ALL',
         intendedClubs: {},
-        serverToClientHashesToHashedPhoneNumbersMap,
+        serverToClientHashesToContactHashesMap,
       })
     )
 

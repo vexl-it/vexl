@@ -7,9 +7,8 @@ import {atom} from 'jotai'
 import reportError from '../../../utils/reportError'
 import {startMeasure} from '../../../utils/reportTime'
 import sequenceTasksWithAnimationFrames from '../../../utils/sequenceTasksWithAnimationFrames'
-import toE164PhoneNumberWithDefaultCountryCode from '../../../utils/toE164PhoneNumberWithDefaultCountryCode'
 import {type ContactComputedValues, type StoredContact} from '../domain'
-import {hashPhoneNumber} from '../utils'
+import {hashContact, normalizeContactValue} from '../utils'
 import {CONTACT_NORMALIZATION_CHUNK_SIZE} from './contactImportUtils'
 import {storedContactsAtom} from './contactsStore'
 
@@ -41,23 +40,24 @@ function normalizeContact(
   contact: StoredContact
 ): Effect.Effect<StoredContact> {
   return Effect.sync(() => {
-    const E164PhoneNumber = toE164PhoneNumberWithDefaultCountryCode(
-      contact.info.rawNumber
+    const normalizedValue = normalizeContactValue(
+      contact.info.kind,
+      contact.info.rawValue
     )
-    if (Option.isNone(E164PhoneNumber)) {
+    if (Option.isNone(normalizedValue)) {
       return markContactInvalid(contact)
     }
 
-    const hash = hashPhoneNumber(E164PhoneNumber.value)
+    const hash = hashContact(normalizedValue.value)
     if (hash._tag === 'Left') {
-      reportError('warn', new Error('Error while hashing phone number'), {
+      reportError('warn', new Error('Error while hashing contact'), {
         left: hash.left,
       })
       return contact
     }
 
     return markContactValid(contact, {
-      normalizedNumber: E164PhoneNumber.value,
+      normalizedValue: normalizedValue.value,
       hash: hash.right,
     })
   }).pipe(
@@ -129,17 +129,17 @@ const normalizeStoredContactsActionAtom = atom(
       // atom re-decoding the persisted blob on a change notification, which
       // rebuilds every object). Merge into the current value instead of
       // overwriting it with our stale snapshot, and key the merge by
-      // rawNumber rather than object identity - the normalization outcome is
-      // derived purely from rawNumber, so it stays valid even for an object
+      // rawValue rather than object identity - the normalization outcome is
+      // derived purely from rawValue, so it stays valid even for an object
       // that was replaced meanwhile, while concurrent info/flag changes are
       // preserved. Contacts that need no normalization keep their object
       // identity for the identity caches downstream.
-      const normalizedByRawNumber = new Map(
+      const normalizedByRawValue = new Map(
         pipe(
           Array.zip(toNormalize, normalizedContacts),
           Array.map(
             ([original, normalized]) =>
-              [original.info.rawNumber, normalized] as const
+              [original.info.rawValue, normalized] as const
           )
         )
       )
@@ -147,7 +147,7 @@ const normalizeStoredContactsActionAtom = atom(
         Array.map(prev, (contact) => {
           if (!needsNormalization(contact)) return contact
 
-          const normalized = normalizedByRawNumber.get(contact.info.rawNumber)
+          const normalized = normalizedByRawValue.get(contact.info.rawValue)
           if (normalized === undefined) return contact
 
           return {

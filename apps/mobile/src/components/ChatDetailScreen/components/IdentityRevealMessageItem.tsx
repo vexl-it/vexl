@@ -11,7 +11,7 @@ import {
   userDataRealOrAnonymizedAtom,
   userPhoneNumberAtom,
 } from '../../../state/session/userDataAtoms'
-import {getInternationalPhoneNumber} from '../../../utils/getInternationalPhoneNumber'
+import {getInternationalPhoneNumber} from '../../../utils/formatContactValue'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import resolveLocalUri from '../../../utils/resolveLocalUri'
 import {

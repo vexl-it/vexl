@@ -1,5 +1,4 @@
-import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
-import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
+import {type ContactHash} from '@vexl-next/domain/src/general/ContactHash.brand'
 import {type ServerToClientHashedNumber} from '@vexl-next/domain/src/general/ServerToClientHashedNumber'
 import {IsoDatetimeString} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import {Array, Effect, HashMap, HashSet, Ref, Schema, pipe} from 'effect'
@@ -34,7 +33,10 @@ import {
 } from '../../connections/atom/reachNumberWithoutClubsConnectionsMmkvAtom'
 import {areThereAnyMyOffersAtom} from '../../marketplace/atoms/myOffers'
 import {areThereAnyMyNotesAtom} from '../../notes/atoms/notesState'
-import {type StoredContactWithComputedValues} from '../domain'
+import {
+  type NormalizedContactValue,
+  type StoredContactWithComputedValues,
+} from '../domain'
 import {
   CONTACT_IMPORT_BATCH_SIZE,
   CONTACT_IMPORT_LOCAL_PROCESSING_CHUNK_SIZE,
@@ -56,7 +58,7 @@ type ContactsImportSource =
     }
   | {
       readonly normalizeAndImportAll: false
-      readonly numbersToImport: E164PhoneNumber[]
+      readonly valuesToImport: NormalizedContactValue[]
     }
 
 type SubmitContactsActionParams = {
@@ -66,10 +68,7 @@ type SubmitContactsActionParams = {
 } & ContactsImportSource
 
 type SubmitContactsResult =
-  | 'success'
-  | 'noContactsSelected'
-  | 'permissionsNotGranted'
-  | 'otherError'
+  'success' | 'noContactsSelected' | 'permissionsNotGranted' | 'otherError'
 
 interface ContactsImportUpdatePlan {
   readonly doIncrementalUpdate: boolean
@@ -77,9 +76,9 @@ interface ContactsImportUpdatePlan {
 }
 
 interface ImportedContactsToServer {
-  readonly importedNumbers: HashSet.HashSet<E164PhoneNumber>
-  readonly hashedNumbersToServerClientHash: HashMap.HashMap<
-    HashedPhoneNumber,
+  readonly importedValues: HashSet.HashSet<NormalizedContactValue>
+  readonly hashesToServerClientHash: HashMap.HashMap<
+    ContactHash,
     ServerToClientHashedNumber
   >
 }
@@ -282,18 +281,18 @@ const determineContactsImportUpdatePlanActionAtom = atom(
       const needsFullContactsReplaceAfterContactEdit = get(
         needsFullContactsReplaceAfterContactEditAtom
       )
-      const numbersToImport = !contactsImportSource.normalizeAndImportAll
-        ? contactsImportSource.numbersToImport
+      const valuesToImport = !contactsImportSource.normalizeAndImportAll
+        ? contactsImportSource.valuesToImport
         : pipe(
             allContacts,
-            Array.map((one) => one.computedValues.normalizedNumber)
+            Array.map((one) => one.computedValues.normalizedValue)
           )
-      const numbersToImportSet = HashSet.fromIterable(numbersToImport)
-      const contactsToCheckTotal = allContacts.length + numbersToImport.length
+      const valuesToImportSet = HashSet.fromIterable(valuesToImport)
+      const contactsToCheckTotal = allContacts.length + valuesToImport.length
 
       let checkedContactsCount = 0
-      const allContactsByNumber = new Map<
-        E164PhoneNumber,
+      const allContactsByValue = new Map<
+        NormalizedContactValue,
         StoredContactWithComputedValues
       >()
       let someContactsShouldBeRemovedFromImport = false
@@ -313,8 +312,8 @@ const determineContactsImportUpdatePlanActionAtom = atom(
         pipe(
           contactsChunk,
           Array.forEach((contact) => {
-            allContactsByNumber.set(
-              contact.computedValues.normalizedNumber,
+            allContactsByValue.set(
+              contact.computedValues.normalizedValue,
               contact
             )
           })
@@ -325,8 +324,8 @@ const determineContactsImportUpdatePlanActionAtom = atom(
             (one) =>
               one.flags.imported &&
               !HashSet.has(
-                numbersToImportSet,
-                one.computedValues.normalizedNumber
+                valuesToImportSet,
+                one.computedValues.normalizedValue
               )
           )
         )
@@ -344,18 +343,18 @@ const determineContactsImportUpdatePlanActionAtom = atom(
         )
       }
 
-      for (const numbersToImportChunk of pipe(
-        numbersToImport,
+      for (const valuesToImportChunk of pipe(
+        valuesToImport,
         Array.chunksOf(CONTACT_IMPORT_LOCAL_PROCESSING_CHUNK_SIZE)
       )) {
         pipe(
-          numbersToImportChunk,
-          Array.forEach((numberToImport) => {
-            const contact = allContactsByNumber.get(numberToImport)
+          valuesToImportChunk,
+          Array.forEach((valueToImport) => {
+            const contact = allContactsByValue.get(valueToImport)
             if (contact !== undefined) contactsToImport.push(contact)
           })
         )
-        checkedContactsCount += numbersToImportChunk.length
+        checkedContactsCount += valuesToImportChunk.length
         set(showContactImportCountProgressActionAtom, {
           enabled: showContactImportProgressDialog,
           title: t('contacts.importProgress.titleCheckingContacts'),
@@ -385,8 +384,8 @@ const updateStoredContactsAfterImportActionAtom = atom(
     set,
     {
       doIncrementalUpdate,
-      hashedNumbersToServerClientHash,
-      importedNumbers,
+      hashesToServerClientHash,
+      importedValues,
       showContactImportProgressDialog,
     }: ImportedContactsToServer &
       Pick<ContactsImportUpdatePlan, 'doIncrementalUpdate'> & {
@@ -413,8 +412,8 @@ const updateStoredContactsAfterImportActionAtom = atom(
           updateStoredContactImportState({
             contact,
             doIncrementalUpdate,
-            hashedNumbersToServerClientHash,
-            importedNumbers,
+            hashesToServerClientHash,
+            importedValues,
           })
         )
       )
@@ -439,11 +438,11 @@ const importContactsAndUpdateStoredContactsActionAtom = atom(
     const {t} = get(translationAtom)
 
     return Effect.gen(function* (_) {
-      const importedNumbersSoFarRef = yield* _(
-        Ref.make(HashSet.empty<E164PhoneNumber>())
+      const importedValuesSoFarRef = yield* _(
+        Ref.make(HashSet.empty<NormalizedContactValue>())
       )
-      const hashedPhoneNumberToServerToClientHashRef = yield* _(
-        Ref.make(HashMap.empty<HashedPhoneNumber, ServerToClientHashedNumber>())
+      const hashToServerToClientHashRef = yield* _(
+        Ref.make(HashMap.empty<ContactHash, ServerToClientHashedNumber>())
       )
       const totalContactsToImport = newContactsToImport.length
 
@@ -487,32 +486,28 @@ const importContactsAndUpdateStoredContactsActionAtom = atom(
                 })
                 .pipe(
                   Effect.tap((response) =>
-                    Ref.update(
-                      hashedPhoneNumberToServerToClientHashRef,
-                      (ref) =>
-                        pipe(
-                          response.phoneNumberHashesToServerToClientHash,
-                          Array.reduce(
-                            HashMap.empty<
-                              HashedPhoneNumber,
-                              ServerToClientHashedNumber
-                            >(),
-                            (map, {hashedNumber, serverToClientHash}) =>
-                              HashMap.set(map, hashedNumber, serverToClientHash)
-                          ),
-                          (addition) => HashMap.union(addition, ref)
-                        )
+                    Ref.update(hashToServerToClientHashRef, (ref) =>
+                      pipe(
+                        response.phoneNumberHashesToServerToClientHash,
+                        Array.reduce(
+                          HashMap.empty<
+                            ContactHash,
+                            ServerToClientHashedNumber
+                          >(),
+                          (map, {hashedNumber, serverToClientHash}) =>
+                            HashMap.set(map, hashedNumber, serverToClientHash)
+                        ),
+                        (addition) => HashMap.union(addition, ref)
+                      )
                     )
                   ),
                   Effect.zipLeft(
                     Ref.update(
-                      importedNumbersSoFarRef,
+                      importedValuesSoFarRef,
                       HashSet.union(
                         pipe(
                           chunkToImport,
-                          Array.map(
-                            (one) => one.computedValues.normalizedNumber
-                          )
+                          Array.map((one) => one.computedValues.normalizedValue)
                         )
                       )
                     )
@@ -536,10 +531,8 @@ const importContactsAndUpdateStoredContactsActionAtom = atom(
           ),
           Effect.ensuring(
             Effect.all({
-              importedNumbers: Ref.get(importedNumbersSoFarRef),
-              hashedNumbersToServerClientHash: Ref.get(
-                hashedPhoneNumberToServerToClientHashRef
-              ),
+              importedValues: Ref.get(importedValuesSoFarRef),
+              hashesToServerClientHash: Ref.get(hashToServerToClientHashRef),
             }).pipe(
               Effect.flatMap((importedContactsData) =>
                 set(updateStoredContactsAfterImportActionAtom, {

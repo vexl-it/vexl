@@ -8,8 +8,8 @@ import {Array, Effect, flow, pipe} from 'effect'
 import {ContactDbService} from '../../db/ContactDbService'
 import {
   hashForClient,
+  serverHashContact,
   type ServerHashedNumber,
-  serverHashPhoneNumber,
 } from '../../utils/serverHashContact'
 import {withUserActionRedisLock} from '../../utils/withUserActionRedisLock'
 import {ImportContactsQuotaService} from './importContactsQuotaService'
@@ -21,7 +21,7 @@ export const importContacts = HttpApiBuilder.handler(
   'importContacts',
   (req) =>
     CurrentSecurity.pipe(
-      Effect.bind('userServerHash', (s) => serverHashPhoneNumber(s.hash)),
+      Effect.bind('userServerHash', (s) => serverHashContact(s.hash)),
       Effect.flatMap((security) =>
         Effect.gen(function* (_) {
           const contactDb = yield* _(ContactDbService)
@@ -50,7 +50,7 @@ export const importContacts = HttpApiBuilder.handler(
             // convert to server-hashed contacts
             Array.map(
               flow(
-                serverHashPhoneNumber,
+                serverHashContact,
                 Effect.map((contact) => ({
                   hashFrom: userServerHash,
                   hashTo: contact,
@@ -98,7 +98,7 @@ export const importContacts = HttpApiBuilder.handler(
             req.payload.contacts,
             Array.map((hashedNumber) =>
               pipe(
-                serverHashPhoneNumber(hashedNumber),
+                serverHashContact(hashedNumber),
                 Effect.flatMap(hashForClient),
                 Effect.map((serverToClientHash) => ({
                   hashedNumber,

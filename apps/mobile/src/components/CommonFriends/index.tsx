@@ -1,5 +1,5 @@
 import {useNavigation} from '@react-navigation/native'
-import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
+import {type ContactHash} from '@vexl-next/domain/src/general/ContactHash.brand'
 import {type ClubInfo} from '@vexl-next/domain/src/general/clubs'
 import {
   CommonFriends as CommonFriendsUI,
@@ -21,8 +21,8 @@ import {formattingLocaleAtom} from '../../utils/localization/formattingLocaleAto
 import {showVerifiedContactsAtom} from '../../utils/preferences'
 
 interface Props {
-  commonConnectionsHashes: readonly HashedPhoneNumber[]
-  verifiedConnectionsHashes?: readonly HashedPhoneNumber[]
+  commonConnectionsHashes: readonly ContactHash[]
+  verifiedConnectionsHashes?: readonly ContactHash[]
   otherSideClubs: ClubInfo[]
   // Optional override for the card label. Falls back to the offer wording.
   label?: string
@@ -92,7 +92,6 @@ function CommonFriends({
     useNavigation<RootStackScreenProps<'CommonFriends'>['navigation']>()
   const store = useStore()
   const showVerifiedContacts = useAtomValue(showVerifiedContactsAtom)
-  const commonFriendsCount = commonConnectionsHashes.length
   const clubsCount = otherSideClubs.length
 
   const commonFriendsClubs: readonly CommonFriendsClub[] = useMemo(
@@ -113,12 +112,13 @@ function CommonFriends({
       store.get(createImportedContactsForHashesAtom(commonConnectionsHashes)),
     [commonConnectionsHashes, store]
   )
+  const commonFriendsCount = commonFriends.length
 
   const verifiedHashesSet = useMemo(
     () =>
       showVerifiedContacts
         ? new Set(verifiedConnectionsHashes ?? [])
-        : new Set<HashedPhoneNumber>(),
+        : new Set<ContactHash>(),
     [showVerifiedContacts, verifiedConnectionsHashes]
   )
 

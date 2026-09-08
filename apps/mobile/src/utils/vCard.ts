@@ -2,7 +2,8 @@ import {Array, pipe} from 'effect'
 
 export interface VcardContact {
   readonly name: string
-  readonly phoneNumber: string
+  readonly phoneNumbers: readonly string[]
+  readonly emails: readonly string[]
 }
 
 // Escaping per RFC 2426 (vCard 3.0) - backslash, comma, semicolon, newlines
@@ -14,7 +15,7 @@ function escapeVcardValue(value: string): string {
     .replace(/\r?\n/g, '\\n')
 }
 
-function contactToVcard({name, phoneNumber}: VcardContact): string {
+function contactToVcard({name, phoneNumbers, emails}: VcardContact): string {
   const escapedName = escapeVcardValue(name.trim())
 
   return [
@@ -22,7 +23,8 @@ function contactToVcard({name, phoneNumber}: VcardContact): string {
     'VERSION:3.0',
     `N:;${escapedName};;;`,
     `FN:${escapedName}`,
-    `TEL;TYPE=CELL:${phoneNumber}`,
+    ...Array.map(phoneNumbers, (phoneNumber) => `TEL;TYPE=CELL:${phoneNumber}`),
+    ...Array.map(emails, (email) => `EMAIL:${escapeVcardValue(email)}`),
     'END:VCARD',
   ].join('\r\n')
 }
@@ -41,6 +43,7 @@ export function contactsToVcardString(
 export interface ParsedVcardContact {
   readonly name: string
   readonly phoneNumbers: readonly string[]
+  readonly emails: readonly string[]
 }
 
 const MAX_PARSED_NAME_LENGTH = 128
@@ -131,8 +134,8 @@ function structuredNameToDisplayName(value: string): string {
 
 /**
  * Minimal vCard (RFC 2426 / 6350) parser for restoring contact backups.
- * Only FN/N and TEL are read - all other properties (PHOTO, NOTE, URL, ...)
- * are intentionally ignored since the input file is untrusted.
+ * Only FN/N, TEL and EMAIL are read - all other properties (PHOTO, NOTE,
+ * URL, ...) are intentionally ignored since the input file is untrusted.
  */
 export function parseVcardString(vcardString: string): ParsedVcardContact[] {
   // Line unfolding - a line break followed by space/tab continues the line
@@ -140,7 +143,12 @@ export function parseVcardString(vcardString: string): ParsedVcardContact[] {
 
   const parsedContacts: ParsedVcardContact[] = []
   let currentContact:
-    | {formattedName?: string; structuredName?: string; phoneNumbers: string[]}
+    | {
+        formattedName?: string
+        structuredName?: string
+        phoneNumbers: string[]
+        emails: string[]
+      }
     | undefined
 
   for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
@@ -148,7 +156,7 @@ export function parseVcardString(vcardString: string): ParsedVcardContact[] {
     if (line === undefined) continue
     const upperCasedLine = line.trim().toUpperCase()
     if (upperCasedLine === 'BEGIN:VCARD') {
-      currentContact = {phoneNumbers: []}
+      currentContact = {phoneNumbers: [], emails: []}
       continue
     }
     if (upperCasedLine === 'END:VCARD') {
@@ -156,10 +164,15 @@ export function parseVcardString(vcardString: string): ParsedVcardContact[] {
         const name = sanitizeParsedName(
           currentContact.formattedName ?? currentContact.structuredName ?? ''
         )
-        if (name !== '' && currentContact.phoneNumbers.length > 0) {
+        if (
+          name !== '' &&
+          (currentContact.phoneNumbers.length > 0 ||
+            currentContact.emails.length > 0)
+        ) {
           parsedContacts.push({
             name,
             phoneNumbers: currentContact.phoneNumbers,
+            emails: currentContact.emails,
           })
         }
       }
@@ -199,7 +212,12 @@ export function parseVcardString(vcardString: string): ParsedVcardContact[] {
         lineIndex++
         value = `${value.slice(0, -1)}${nextLine}`
       }
-      if (property === 'FN' || property === 'N' || property === 'TEL') {
+      if (
+        property === 'FN' ||
+        property === 'N' ||
+        property === 'TEL' ||
+        property === 'EMAIL'
+      ) {
         value = decodeQuotedPrintableValue(value)
       }
     }
@@ -214,6 +232,8 @@ export function parseVcardString(vcardString: string): ParsedVcardContact[] {
       currentContact.structuredName = structuredNameToDisplayName(value)
     } else if (property === 'TEL') {
       currentContact.phoneNumbers.push(unescapeVcardValue(value))
+    } else if (property === 'EMAIL') {
+      currentContact.emails.push(unescapeVcardValue(value))
     }
   }
 

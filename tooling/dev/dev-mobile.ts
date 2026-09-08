@@ -297,14 +297,12 @@ function findIosDevices(): readonly DeviceChoice[] {
               (device.platform === undefined ||
                 device.platform.includes('iphoneos'))
           ),
-          Array.map(
-            (device): DeviceChoice => ({
-              id: device.identifier,
-              expoName: device.identifier,
-              label: `[connected] ${device.name} (${device.identifier})`,
-              kind: 'physical',
-            })
-          )
+          Array.map((device): DeviceChoice => ({
+            id: device.identifier,
+            expoName: device.identifier,
+            label: `[connected] ${device.name} (${device.identifier})`,
+            kind: 'physical',
+          }))
         )
 
   const simulatorOutput = commandOutput('xcrun', [
@@ -334,26 +332,22 @@ function findIosDevices(): readonly DeviceChoice[] {
   const running = pipe(
     simulators,
     Array.filter((device) => device.state === 'Booted'),
-    Array.map(
-      (device): DeviceChoice => ({
-        id: device.udid,
-        expoName: device.udid,
-        label: `[running simulator] ${device.name} (${device.udid})`,
-        kind: 'virtual',
-      })
-    )
+    Array.map((device): DeviceChoice => ({
+      id: device.udid,
+      expoName: device.udid,
+      label: `[running simulator] ${device.name} (${device.udid})`,
+      kind: 'virtual',
+    }))
   )
   const stopped = pipe(
     simulators,
     Array.filter((device) => device.state !== 'Booted'),
-    Array.map(
-      (device): DeviceChoice => ({
-        id: device.udid,
-        expoName: device.udid,
-        label: `[simulator] ${device.name} (${device.udid})`,
-        kind: 'virtual',
-      })
-    )
+    Array.map((device): DeviceChoice => ({
+      id: device.udid,
+      expoName: device.udid,
+      label: `[simulator] ${device.name} (${device.udid})`,
+      kind: 'virtual',
+    }))
   )
 
   return [...physical, ...running, ...stopped]
@@ -389,14 +383,12 @@ function findAndroidDevices(): readonly DeviceChoice[] {
   const connected = pipe(
     adbDevices,
     Array.filter((device) => !device.id.startsWith('emulator-')),
-    Array.map(
-      (device): DeviceChoice => ({
-        id: device.id,
-        expoName: device.model ?? `Device ${device.id}`,
-        label: `[connected] ${device.model ?? device.id} (${device.id})`,
-        kind: 'physical',
-      })
-    )
+    Array.map((device): DeviceChoice => ({
+      id: device.id,
+      expoName: device.model ?? `Device ${device.id}`,
+      label: `[connected] ${device.model ?? device.id} (${device.id})`,
+      kind: 'physical',
+    }))
   )
   interface RunningAndroidDevice extends DeviceChoice {
     readonly avdName?: string
@@ -428,14 +420,12 @@ function findAndroidDevices(): readonly DeviceChoice[] {
   const stopped = pipe(
     (commandOutput(emulator, ['-list-avds']) ?? '').split('\n'),
     Array.filter((name) => name.length > 0 && !runningAvdNames.includes(name)),
-    Array.map(
-      (name): DeviceChoice => ({
-        id: name,
-        expoName: name,
-        label: `[emulator] ${name}`,
-        kind: 'virtual',
-      })
-    )
+    Array.map((name): DeviceChoice => ({
+      id: name,
+      expoName: name,
+      label: `[emulator] ${name}`,
+      kind: 'virtual',
+    }))
   )
 
   return [...connected, ...running, ...stopped]

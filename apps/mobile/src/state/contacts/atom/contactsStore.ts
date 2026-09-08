@@ -1,11 +1,14 @@
-import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {IsoDatetimeString} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import {Array, Option, pipe, Schema} from 'effect'
-import {atom} from 'jotai'
+import {atom, type Atom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {atomFamily} from 'jotai/utils'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
-import {StoredContact, type StoredContactWithComputedValues} from '../domain'
+import {
+  StoredContact,
+  type NormalizedContactValue,
+  type StoredContactWithComputedValues,
+} from '../domain'
 
 export const contactsStoreAtom = atomWithParsedMmkvStorage(
   'storedContacts',
@@ -31,12 +34,12 @@ export const needsFullContactsReplaceAfterContactEditAtom = focusAtom(
   (o) => o.prop('needsFullContactsReplaceAfterContactEdit')
 )
 
-export const newPhoneContactsToReviewRawNumbersAtom = atom((get) =>
+export const newContactsToReviewRawValuesAtom = atom((get) =>
   pipe(
     get(storedContactsAtom),
-    Array.reduce(new Set<string>(), (rawNumbers, contact) => {
-      if (!contact.flags.seen) rawNumbers.add(contact.info.rawNumber)
-      return rawNumbers
+    Array.reduce(new Set<string>(), (rawValues, contact) => {
+      if (!contact.flags.seen) rawValues.add(contact.info.rawValue)
+      return rawValues
     }),
     Array.fromIterable
   )
@@ -87,15 +90,15 @@ export const normalizedContactsAtom = atom(
   (get): StoredContactWithComputedValues[] => {
     // Set-keyed dedupe (keeps the first occurrence, same as dedupeWith)
     // to avoid O(n²) pairwise comparisons on large contact lists.
-    const seenNormalizedNumbers = new Set<string>()
+    const seenNormalizedValues = new Set<string>()
     return pipe(
       get(storedContactsAtom),
       Array.filterMap((contact) =>
         contact.computedValues.pipe(
           Option.filter((computedValues) => {
-            if (seenNormalizedNumbers.has(computedValues.normalizedNumber))
+            if (seenNormalizedValues.has(computedValues.normalizedValue))
               return false
-            seenNormalizedNumbers.add(computedValues.normalizedNumber)
+            seenNormalizedValues.add(computedValues.normalizedValue)
             return true
           }),
           Option.map((computedValues) => {
@@ -112,20 +115,48 @@ export const normalizedContactsAtom = atom(
   }
 )
 
-export const contactByNormalizedNumberAtom = atomFamily(
-  (contactNumber: E164PhoneNumber | undefined) =>
+export const contactByNormalizedValueAtom = atomFamily(
+  (normalizedValue: NormalizedContactValue | undefined) =>
     atom((get) => {
-      if (contactNumber === undefined) return undefined
+      if (normalizedValue === undefined) return undefined
 
       return pipe(
         get(normalizedContactsAtom),
         Array.findFirst(
-          (contact) => contact.computedValues.normalizedNumber === contactNumber
+          (contact) =>
+            contact.computedValues.normalizedValue === normalizedValue
         ),
         Option.getOrUndefined
       )
     })
 )
+
+/**
+ * Manually added contacts get a generated id so that the phone and email rows
+ * of one person stay paired (edit form, common friends dedup, vCard export).
+ */
+export function createPairedContactAtom(
+  contact: StoredContactWithComputedValues | undefined
+): Atom<StoredContactWithComputedValues | undefined> {
+  return atom((get) => {
+    if (contact === undefined || Option.isNone(contact.info.nonUniqueContactId))
+      return undefined
+
+    const contactId = contact.info.nonUniqueContactId.value
+    const siblings = pipe(
+      get(normalizedContactsAtom),
+      Array.filter(
+        (one) =>
+          one.info.kind !== contact.info.kind &&
+          Option.contains(one.info.nonUniqueContactId, contactId)
+      )
+    )
+
+    // A device contact with several values of the other kind has no single
+    // counterpart to edit
+    return siblings.length === 1 ? siblings[0] : undefined
+  })
+}
 
 export const importedContactsHashesAtom = atom((get) => {
   return pipe(

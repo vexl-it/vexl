@@ -4,7 +4,7 @@ import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Array, Effect, pipe, Schema} from 'effect/index'
 import {
   hashForClient,
-  serverHashPhoneNumber,
+  serverHashContact,
 } from '../../../utils/serverHashContact'
 import {NodeTestingApp} from '../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../utils/runPromiseInMockedEnvironment'
@@ -30,7 +30,7 @@ it('Converts phone number hashes to server hashes', async () => {
         Array.map((number) =>
           pipe(
             number,
-            serverHashPhoneNumber,
+            serverHashContact,
             Effect.flatMap(hashForClient),
             Effect.map((serverToClientHash) => ({
               hashedNumber: number,

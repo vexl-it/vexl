@@ -5,7 +5,7 @@ import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect
 import {Effect, Option} from 'effect'
 import {UserDbService} from '../../db/UserDbService'
 import {UserNotificationService} from '../../services/UserNotificationService'
-import {serverHashPhoneNumber} from '../../utils/serverHashContact'
+import {serverHashContact} from '../../utils/serverHashContact'
 
 export const checkUserExists = HttpApiBuilder.handler(
   ContactApiSpecification,
@@ -15,7 +15,7 @@ export const checkUserExists = HttpApiBuilder.handler(
     Effect.gen(function* (_) {
       const security = yield* _(
         CurrentSecurity,
-        Effect.bind('serverHash', (s) => serverHashPhoneNumber(s.hash))
+        Effect.bind('serverHash', (s) => serverHashContact(s.hash))
       )
       const userDb = yield* _(UserDbService)
       const userNotificationService = yield* _(UserNotificationService)

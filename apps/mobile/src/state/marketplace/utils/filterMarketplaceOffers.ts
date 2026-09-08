@@ -1,4 +1,4 @@
-import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
+import {type ContactHash} from '@vexl-next/domain/src/general/ContactHash.brand'
 import {
   type OfferLocation,
   type OfferType,
@@ -308,7 +308,7 @@ export function filterOffersByTextSearch({
   offers: OneOfferInState[]
   text: string | undefined
   importedContacts: StoredContactWithComputedValues[]
-  importedContactsHashes: readonly HashedPhoneNumber[]
+  importedContactsHashes: readonly ContactHash[]
 }): OneOfferInState[] {
   if (!text) return offers
 

@@ -4,7 +4,7 @@
  * import -> update imported flags -> persist - with only device IO, network
  * and UI mocked.
  */
-import {Effect} from 'effect'
+import {Effect, Option} from 'effect'
 import {createStore} from 'jotai'
 
 jest.mock('react-native-mmkv')
@@ -41,7 +41,7 @@ jest.mock('expo-contacts', () => ({
   })),
 }))
 
-const mockDeviceContactsState = {count: 42}
+const mockDeviceContactsState = {count: 42, withEmails: false}
 
 jest.mock('../getDeviceContactsFromSystem', () => ({
   getDeviceContactsFromSystem: jest.fn(async () =>
@@ -53,6 +53,9 @@ jest.mock('../getDeviceContactsFromSystem', () => ({
       phoneNumbers: [
         {label: 'mobile', number: `+420601${String(100 + i).padStart(6, '0')}`},
       ],
+      emails: mockDeviceContactsState.withEmails
+        ? [{label: 'home', address: `First${i}.Last${i}@Example.com`}]
+        : [],
     }))
   ),
 }))
@@ -236,8 +239,34 @@ describe('Onboarding contact import (fresh device)', () => {
     storage._storage.clearAll()
   })
 
+  it('imports emails as their own rows next to phone numbers', async () => {
+    mockDeviceContactsState.count = 10
+    mockDeviceContactsState.withEmails = true
+    mockImportContacts.mockClear()
+    const store = createStore()
+
+    const result = await Effect.runPromise(
+      store.set(submitContactsActionAtom, onboardingSubmitParams)
+    )
+
+    expect(result).toEqual('success')
+    expect(store.get(importedContactsCountAtom)).toEqual(20)
+    const storedContacts = store.get(storedContactsAtom)
+    const emailRows = storedContacts.filter(
+      (contact) => contact.info.kind === 'email'
+    )
+    expect(emailRows).toHaveLength(10)
+    expect(
+      emailRows.map((contact) =>
+        Option.map(contact.computedValues, (one) => one.normalizedValue)
+      )
+    ).toContainEqual(Option.some('first0.last0@example.com'))
+    expect(mockImportContacts.mock.calls[0]?.[0].contacts).toHaveLength(20)
+  })
+
   it('imports all device contacts, marks them imported and persists them', async () => {
     mockDeviceContactsState.count = 42
+    mockDeviceContactsState.withEmails = false
     const store = createStore()
 
     const result = await Effect.runPromise(

@@ -6,8 +6,8 @@ import {
   type ClubKeyNotFoundInInnerStateError,
   type ClubUuid,
 } from '@vexl-next/domain/src/general/clubs'
+import {type ContactHash} from '@vexl-next/domain/src/general/ContactHash.brand'
 import {type CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
-import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {
   generateAdminId,
   type IntendedConnectionLevel,
@@ -64,7 +64,7 @@ export default function createNewOfferForMyContacts({
   onProgress,
   intendedClubs,
   offerId,
-  serverToClientHashesToHashedPhoneNumbersMap,
+  serverToClientHashesToContactHashesMap,
   adminId: existingAdminId,
 }: {
   offerApi: OfferApi
@@ -80,9 +80,9 @@ export default function createNewOfferForMyContacts({
   >
   onProgress?: (status: OfferEncryptionProgress) => void
   offerId: OfferId
-  serverToClientHashesToHashedPhoneNumbersMap: HashMap.HashMap<
+  serverToClientHashesToContactHashesMap: HashMap.HashMap<
     ServerToClientHashedNumber,
-    HashedPhoneNumber
+    ContactHash
   >
   adminId?: OfferAdminId
 }): Effect.Effect<
@@ -117,7 +117,7 @@ export default function createNewOfferForMyContacts({
         ownerCredentials: ownerKeyPair,
         ownerKeyPairV2,
         intendedClubs,
-        serverToClientHashesToHashedPhoneNumbersMap,
+        serverToClientHashesToContactHashesMap,
         onProgress,
         adminId,
       })

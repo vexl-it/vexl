@@ -8,9 +8,12 @@ import {
 import {useMolecule} from 'bunshi/dist/react'
 import {Effect} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
-import React, {useCallback, useEffect} from 'react'
+import React, {useCallback, useEffect, useMemo} from 'react'
 import {type ContactPreferencesStackScreenProps} from '../../navigationTypes'
-import {contactByNormalizedNumberAtom} from '../../state/contacts/atom/contactsStore'
+import {
+  contactByNormalizedValueAtom,
+  createPairedContactAtom,
+} from '../../state/contacts/atom/contactsStore'
 import {dismissKeyboardAndResolveOnLayoutUpdate} from '../../utils/dismissKeyboardPromise'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../utils/useSafeGoBack'
@@ -33,17 +36,20 @@ export default function AddNewContactScreen({
   const resetContactsFilterFromRoute = useSetAtom(
     resetContactsFilterFromRouteActionAtom
   )
-  const editContactNumber = params?.editContactNumber
+  const editContactValue = params?.editContactValue
   const contactToEditFromStore = useAtomValue(
-    contactByNormalizedNumberAtom(editContactNumber)
+    contactByNormalizedValueAtom(editContactValue)
   )
   const [contactToEdit, setContactToEdit] = React.useState(
     contactToEditFromStore
   )
+  const pairedContact = useAtomValue(
+    useMemo(() => createPairedContactAtom(contactToEdit), [contactToEdit])
+  )
   const isEditingContact = contactToEdit !== undefined
 
   useEffect(() => {
-    if (editContactNumber === undefined) {
+    if (editContactValue === undefined) {
       setContactToEdit(undefined)
       return
     }
@@ -51,7 +57,7 @@ export default function AddNewContactScreen({
     if (contactToEditFromStore !== undefined) {
       setContactToEdit(contactToEditFromStore)
     }
-  }, [contactToEditFromStore, editContactNumber])
+  }, [contactToEditFromStore, editContactValue])
 
   const handleImportFromFile = useCallback(() => {
     Effect.runFork(
@@ -99,7 +105,11 @@ export default function AddNewContactScreen({
       noHorizontalPadding
     >
       <Stack flex={1}>
-        <AddNewContactForm contactToEdit={contactToEdit} onClose={safeGoBack} />
+        <AddNewContactForm
+          contactToEdit={contactToEdit}
+          pairedContact={pairedContact}
+          onClose={safeGoBack}
+        />
       </Stack>
     </Screen>
   )

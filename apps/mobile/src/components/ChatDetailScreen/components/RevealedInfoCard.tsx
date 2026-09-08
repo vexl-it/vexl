@@ -16,7 +16,7 @@ import {TouchableOpacity} from 'react-native'
 import {SvgXml} from 'react-native-svg'
 import {useTheme} from 'tamagui'
 import {addContactWithUiFeedbackActionAtom} from '../../../state/contacts/atom/addContactWithUiFeedbackAtom'
-import {hashPhoneNumberE} from '../../../state/contacts/utils'
+import {hashContactE} from '../../../state/contacts/utils'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {reportErrorE} from '../../../utils/reportError'
 import resolveLocalUri from '../../../utils/resolveLocalUri'
@@ -117,21 +117,21 @@ function AddToContactsButton({
         const normalizedNumber = yield* _(
           Schema.decodeUnknown(E164PhoneNumber)(fullPhoneNumber)
         )
-        const hash = yield* _(hashPhoneNumberE(normalizedNumber))
+        const hash = yield* _(hashContactE(normalizedNumber))
 
         return yield* _(
           addRevealedContact({
             avatar: userImage,
             info: {
+              kind: 'phone',
               name: userName,
-              numberToDisplay: fullPhoneNumber,
-              rawNumber: fullPhoneNumber,
+              rawValue: fullPhoneNumber,
               label: Option.none(),
               nonUniqueContactId: Option.none(),
             },
             computedValues: {
               hash,
-              normalizedNumber,
+              normalizedValue: normalizedNumber,
             },
           })
         )

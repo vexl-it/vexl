@@ -1,4 +1,3 @@
-import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {createScope, molecule} from 'bunshi/dist/react'
 import {Array, Effect, Option, Schema, pipe} from 'effect'
 import {
@@ -23,14 +22,20 @@ import {
 import loadAndNormalizeContactsFromDeviceActionAtom from '../../../../state/contacts/atom/loadAndNormalizeContactsFromDeviceActionAtom'
 import {submitContactsActionAtom} from '../../../../state/contacts/atom/submitContactsActionAtom'
 import {
-  StoredContactWithComputedValues,
+  generateManualContactId,
+  toStoredContact,
+  type ContactKind,
   type ContactsFilter,
+  type NonUniqueContactId,
+  type NormalizedContactValue,
   type StoredContact,
+  type StoredContactWithComputedValues,
 } from '../../../../state/contacts/domain'
+import {createManualContact} from '../../../../state/contacts/manualContact'
 import {
   areContactsPermissionsAlreadyGranted,
   areContactsPermissionsGranted,
-  hashPhoneNumberE,
+  normalizeContactValue,
 } from '../../../../state/contacts/utils'
 import getValueFromSetStateActionOfAtom from '../../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 import {translationAtom} from '../../../../utils/localization/I18nProvider'
@@ -38,7 +43,6 @@ import {
   runAfterTwoAnimationFrames,
   waitForNextAnimationFrameEffect,
 } from '../../../../utils/runAfterAnimationFrames'
-import toE164PhoneNumberWithDefaultCountryCode from '../../../../utils/toE164PhoneNumberWithDefaultCountryCode'
 import {parseVcardString} from '../../../../utils/vCard'
 import {showErrorAlert} from '../../../ErrorAlert'
 import {globalDialogAtom} from '../../../GlobalDialog'
@@ -61,24 +65,24 @@ class ContactsImportError extends Schema.TaggedError<ContactsImportError>(
 const MAX_VCF_FILE_SIZE_BYTES = 2 * 1024 * 1024
 const MAX_CONTACTS_PER_VCF_IMPORT = 5000
 
-// Raw numbers included so contacts whose normalization is still pending
+// Raw values included so contacts whose normalization is still pending
 // are matched too (their computedValues are None)
-function collectStoredContactNumbers(
+function collectStoredContactValues(
   contacts: readonly StoredContact[]
 ): Set<string> {
-  const numbers = new Set<string>()
+  const values = new Set<string>()
   pipe(
     contacts,
     Array.forEach((contact) => {
-      numbers.add(contact.info.rawNumber)
+      values.add(contact.info.rawValue)
       if (Option.isSome(contact.computedValues))
-        numbers.add(contact.computedValues.value.normalizedNumber)
+        values.add(contact.computedValues.value.normalizedValue)
     })
   )
-  return numbers
+  return values
 }
 
-const matchSorterKeys = ['info.name', 'info.numberToDisplay']
+const matchSorterKeys = ['info.name', 'info.rawValue']
 const matchSorterThreshold = rankings.CONTAINS
 
 interface ContactsQuery {
@@ -271,25 +275,25 @@ export const contactSelectMolecule = molecule((_, getScope) => {
 
   const displayContactsCountAtom = atom((get) => !!get(searchTextAtom))
 
-  const defaultSelectedNumbersAtom = atom(
+  const defaultSelectedValuesAtom = atom(
     (get) =>
       new Set(
         pipe(
           get(normalizedContactsAtom),
           Array.filter(isContactDefaultSelected),
-          Array.map((one) => one.computedValues.normalizedNumber)
+          Array.map((one) => one.computedValues.normalizedValue)
         )
       )
   )
-  const selectedNumbersStateAtom = atom<Set<E164PhoneNumber> | undefined>(
+  const selectedValuesStateAtom = atom<Set<NormalizedContactValue> | undefined>(
     undefined
   )
-  const selectedNumbersAtom = atom(
-    (get) => get(selectedNumbersStateAtom) ?? get(defaultSelectedNumbersAtom),
-    (get, set, value: SetStateAction<Set<E164PhoneNumber>>): void => {
+  const selectedValuesAtom = atom(
+    (get) => get(selectedValuesStateAtom) ?? get(defaultSelectedValuesAtom),
+    (get, set, value: SetStateAction<Set<NormalizedContactValue>>): void => {
       set(
-        selectedNumbersStateAtom,
-        getValueFromSetStateActionOfAtom(value)(() => get(selectedNumbersAtom))
+        selectedValuesStateAtom,
+        getValueFromSetStateActionOfAtom(value)(() => get(selectedValuesAtom))
       )
     }
   )
@@ -298,49 +302,49 @@ export const contactSelectMolecule = molecule((_, getScope) => {
   // shared by the submit action and the screen (to suppress its overlay).
   const shouldShowContactImportProgressDialogAtom = atom(
     (get) =>
-      get(selectedNumbersAtom).size >=
+      get(selectedValuesAtom).size >=
         CONTACT_IMPORT_PROGRESS_DIALOG_MIN_CONTACTS ||
       get(normalizedContactsAtom).length >=
         CONTACT_IMPORT_PROGRESS_DIALOG_MIN_CONTACTS
   )
-  const knownContactNumbersAtom = atom(new Set<E164PhoneNumber>())
+  const knownContactValuesAtom = atom(new Set<NormalizedContactValue>())
   const syncDefaultSelectedContactsActionAtom = atom(null, (get, set) => {
-    if (get(selectedNumbersStateAtom) === undefined) {
-      set(selectedNumbersStateAtom, get(defaultSelectedNumbersAtom))
+    if (get(selectedValuesStateAtom) === undefined) {
+      set(selectedValuesStateAtom, get(defaultSelectedValuesAtom))
     }
 
     const latestNormalizedContacts = get(normalizedContactsAtom)
-    const knownContactNumbers = get(knownContactNumbersAtom)
-    const currentContactNumbers = new Set(
+    const knownContactValues = get(knownContactValuesAtom)
+    const currentContactValues = new Set(
       pipe(
         latestNormalizedContacts,
-        Array.map((one) => one.computedValues.normalizedNumber)
+        Array.map((one) => one.computedValues.normalizedValue)
       )
     )
-    const newDefaultSelectedNumbers = pipe(
+    const newDefaultSelectedValues = pipe(
       latestNormalizedContacts,
       Array.filter(
         (one) =>
           isContactDefaultSelected(one) &&
-          !knownContactNumbers.has(one.computedValues.normalizedNumber)
+          !knownContactValues.has(one.computedValues.normalizedValue)
       ),
-      Array.map((one) => one.computedValues.normalizedNumber)
+      Array.map((one) => one.computedValues.normalizedValue)
     )
 
-    if (newDefaultSelectedNumbers.length > 0) {
-      set(selectedNumbersAtom, (selectedNumbers) => {
-        const nextSelectedNumbers = new Set(selectedNumbers)
+    if (newDefaultSelectedValues.length > 0) {
+      set(selectedValuesAtom, (selectedValues) => {
+        const nextSelectedValues = new Set(selectedValues)
         pipe(
-          newDefaultSelectedNumbers,
-          Array.forEach((number) => {
-            nextSelectedNumbers.add(number)
+          newDefaultSelectedValues,
+          Array.forEach((value) => {
+            nextSelectedValues.add(value)
           })
         )
-        return nextSelectedNumbers
+        return nextSelectedValues
       })
     }
 
-    set(knownContactNumbersAtom, currentContactNumbers)
+    set(knownContactValuesAtom, currentContactValues)
   })
   const areThereAnyContactsToDisplayForSelectedTabAtom = atom((get) => {
     const contactsToDisplay = get(_contactsToDisplayAtom)
@@ -348,19 +352,19 @@ export const contactSelectMolecule = molecule((_, getScope) => {
     return contactsToDisplay.length !== 0
   })
   const areThereAnySelectedContactsAtom = atom(
-    (get) => get(selectedNumbersAtom).size > 0
+    (get) => get(selectedValuesAtom).size > 0
   )
 
   const areAllContactsToDisplaySelectedAtom = atom((get) => {
     const contactsToDisplay = get(_contactsToDisplayAtom)
-    const selectedNumbers = get(selectedNumbersAtom)
+    const selectedValues = get(selectedValuesAtom)
 
     return (
       Array.isNonEmptyArray(contactsToDisplay) &&
       pipe(
         contactsToDisplay,
         Array.every((contact) =>
-          selectedNumbers.has(contact.computedValues.normalizedNumber)
+          selectedValues.has(contact.computedValues.normalizedValue)
         )
       )
     )
@@ -375,14 +379,14 @@ export const contactSelectMolecule = molecule((_, getScope) => {
     set(isBulkSelectionPreparingAtom, true)
 
     let cancelScheduledWork = runAfterTwoAnimationFrames(() => {
-      set(selectedNumbersAtom, (value) => {
-        const newValue = new Set<E164PhoneNumber>(value)
+      set(selectedValuesAtom, (value) => {
+        const newValue = new Set<NormalizedContactValue>(value)
         pipe(
           contactsToDisplay,
           Array.forEach((contact) => {
-            const number = contact.computedValues.normalizedNumber
-            if (shouldSelectAll) newValue.add(number)
-            else newValue.delete(number)
+            const value = contact.computedValues.normalizedValue
+            if (shouldSelectAll) newValue.add(value)
+            else newValue.delete(value)
           })
         )
 
@@ -400,18 +404,18 @@ export const contactSelectMolecule = molecule((_, getScope) => {
     }
   })
 
-  const selectContactAtom = atomFamily((contactNumber: E164PhoneNumber) =>
+  const selectContactAtom = atomFamily((contactValue: NormalizedContactValue) =>
     atom(
-      (get) => get(selectedNumbersAtom).has(contactNumber),
+      (get) => get(selectedValuesAtom).has(contactValue),
       (get, set, isSelected: SetStateAction<boolean>) => {
         const selected = getValueFromSetStateActionOfAtom(isSelected)(() =>
-          get(selectedNumbersAtom).has(contactNumber)
+          get(selectedValuesAtom).has(contactValue)
         )
 
-        set(selectedNumbersAtom, (value) => {
+        set(selectedValuesAtom, (value) => {
           const newValue = new Set(value)
-          if (selected) newValue.add(contactNumber)
-          else newValue.delete(contactNumber)
+          if (selected) newValue.add(contactValue)
+          else newValue.delete(contactValue)
           return newValue
         })
       }
@@ -422,7 +426,7 @@ export const contactSelectMolecule = molecule((_, getScope) => {
     null,
     (get, set): Effect.Effect<boolean> => {
       const {t} = get(translationAtom)
-      const selectedNumbers = Array.fromIterable(get(selectedNumbersAtom))
+      const selectedValues = Array.fromIterable(get(selectedValuesAtom))
       const showContactImportProgressDialog = get(
         shouldShowContactImportProgressDialogAtom
       )
@@ -430,9 +434,9 @@ export const contactSelectMolecule = molecule((_, getScope) => {
       return Effect.gen(function* (_) {
         const result = yield* _(
           set(submitContactsActionAtom, {
-            numbersToImport: selectedNumbers,
+            valuesToImport: selectedValues,
             normalizeAndImportAll: false,
-            showOfferReencryptionDialog: selectedNumbers.length > 0,
+            showOfferReencryptionDialog: selectedValues.length > 0,
             manageLoadingOverlay: false,
             showContactImportProgressDialog,
           })
@@ -488,30 +492,54 @@ export const contactSelectMolecule = molecule((_, getScope) => {
       params: {
         readonly contactName: string
         readonly phoneNumber: string
+        readonly email: string
         readonly saveToPhone: boolean
       }
     ): Effect.Effect<boolean> => {
       const {t} = get(translationAtom)
-      const normalizedNumber = toE164PhoneNumberWithDefaultCountryCode(
-        params.phoneNumber
-      )
       const contactName = params.contactName.trim()
+      const phoneNumber =
+        params.phoneNumber.trim().length > 0
+          ? normalizeContactValue('phone', params.phoneNumber)
+          : Option.none()
+      const email =
+        params.email.trim().length > 0
+          ? normalizeContactValue('email', params.email)
+          : Option.none()
+      const someInputInvalid =
+        (params.phoneNumber.trim().length > 0 && Option.isNone(phoneNumber)) ||
+        (params.email.trim().length > 0 && Option.isNone(email))
+      const valuesToAdd = pipe(
+        [
+          Option.map(phoneNumber, (normalizedValue) => ({
+            kind: 'phone' as const,
+            normalizedValue,
+          })),
+          Option.map(email, (normalizedValue) => ({
+            kind: 'email' as const,
+            normalizedValue,
+          })),
+        ],
+        Array.getSomes
+      )
 
-      if (Option.isNone(normalizedNumber) || contactName.length === 0) {
+      if (
+        contactName.length === 0 ||
+        someInputInvalid ||
+        !Array.isNonEmptyArray(valuesToAdd)
+      ) {
         return Effect.succeed(false)
       }
 
-      const existingContactWithNumber = pipe(
-        get(storedContactsAtom),
-        Array.findFirst(
-          (contact) =>
-            Option.isSome(contact.computedValues) &&
-            contact.computedValues.value.normalizedNumber ===
-              normalizedNumber.value
-        )
+      const storedContactValues = collectStoredContactValues(
+        get(storedContactsAtom)
+      )
+      const someValueAlreadyStored = pipe(
+        valuesToAdd,
+        Array.some((one) => storedContactValues.has(one.normalizedValue))
       )
 
-      if (Option.isSome(existingContactWithNumber)) {
+      if (someValueAlreadyStored) {
         return pipe(
           set(globalDialogAtom, {
             title: t('addContactDialog.contactAlreadyAddedTitle'),
@@ -523,26 +551,18 @@ export const contactSelectMolecule = molecule((_, getScope) => {
       }
 
       return Effect.gen(function* (_) {
-        const hash = yield* _(hashPhoneNumberE(normalizedNumber.value))
-        const manualContact = Schema.decodeSync(
-          StoredContactWithComputedValues
-        )({
-          info: {
-            name: contactName,
-            numberToDisplay: normalizedNumber.value,
-            rawNumber: normalizedNumber.value,
-          },
-          computedValues: {
-            hash,
-            normalizedNumber: normalizedNumber.value,
-          },
-          flags: {
-            seen: true,
-            imported: false,
-            importedManually: true,
-            invalidNumber: 'valid',
-          },
-        })
+        const contactId = generateManualContactId()
+        const manualContacts = yield* _(
+          Effect.forEach(valuesToAdd, ({kind, normalizedValue}) =>
+            createManualContact({
+              kind,
+              name: contactName,
+              normalizedValue,
+              contactId,
+              seen: true,
+            })
+          )
+        )
 
         const contactsPermissionsGranted = params.saveToPhone
           ? yield* _(areContactsPermissionsGranted())
@@ -553,7 +573,8 @@ export const contactSelectMolecule = molecule((_, getScope) => {
             ? yield* _(
                 set(addContactToPhoneActionAtom, {
                   customName: contactName,
-                  number: normalizedNumber.value,
+                  phoneNumber: Option.getOrUndefined(phoneNumber),
+                  email: Option.getOrUndefined(email),
                 }),
                 Effect.catchTag('ErrorAddingContactToPhoneContacts', () =>
                   pipe(
@@ -581,24 +602,18 @@ export const contactSelectMolecule = molecule((_, getScope) => {
         }
 
         set(storedContactsAtom, (prev) => [
-          ...pipe(
-            prev,
-            Array.filter(
-              (contact) =>
-                Option.isNone(contact.computedValues) ||
-                contact.computedValues.value.normalizedNumber !==
-                  manualContact.computedValues.normalizedNumber
-            )
-          ),
-          {
-            ...manualContact,
-            computedValues: Option.some(manualContact.computedValues),
-          },
+          ...prev,
+          ...Array.map(manualContacts, toStoredContact),
         ])
-        set(selectedNumbersAtom, (selectedNumbers) => {
-          const nextSelectedNumbers = new Set(selectedNumbers)
-          nextSelectedNumbers.add(normalizedNumber.value)
-          return nextSelectedNumbers
+        set(selectedValuesAtom, (selectedValues) => {
+          const nextSelectedValues = new Set(selectedValues)
+          pipe(
+            manualContacts,
+            Array.forEach((one) => {
+              nextSelectedValues.add(one.computedValues.normalizedValue)
+            })
+          )
+          return nextSelectedValues
         })
 
         set(searchTextAtom, '')
@@ -710,25 +725,35 @@ export const contactSelectMolecule = molecule((_, getScope) => {
           return false
         }
 
+        // Values of one card share a contact id so they stay paired
         const entries = pipe(
           parsedContacts,
-          Array.flatMap(({name, phoneNumbers}) =>
-            pipe(
-              phoneNumbers,
-              Array.map((phoneNumber) => ({name, phoneNumber}))
-            )
-          )
+          Array.flatMap(({name, phoneNumbers, emails}) => {
+            const contactId = generateManualContactId()
+            const toEntry = (kind: ContactKind) => (rawValue: string) => ({
+              name,
+              contactId,
+              kind,
+              rawValue,
+            })
+            return [
+              ...Array.map(phoneNumbers, toEntry('phone')),
+              ...Array.map(emails, toEntry('email')),
+            ]
+          })
         )
-        const existingContactNumbers = collectStoredContactNumbers(
+        const existingContactValues = collectStoredContactValues(
           get(storedContactsAtom)
         )
-        const seenNumbers = new Set<E164PhoneNumber>()
+        const seenValues = new Set<NormalizedContactValue>()
         let skippedCount = 0
         let processedEntriesCount = 0
         let reachedContactLimit = false
         const contactsToImport: Array<{
           name: string
-          normalizedNumber: E164PhoneNumber
+          contactId: NonUniqueContactId
+          kind: ContactKind
+          normalizedValue: NormalizedContactValue
         }> = []
 
         for (const entriesChunk of pipe(
@@ -736,7 +761,7 @@ export const contactSelectMolecule = molecule((_, getScope) => {
           Array.chunksOf(CONTACT_NORMALIZATION_CHUNK_SIZE)
         )) {
           yield* _(waitForNextAnimationFrameEffect())
-          for (const {name, phoneNumber} of entriesChunk) {
+          for (const {name, contactId, kind, rawValue} of entriesChunk) {
             if (contactsToImport.length >= MAX_CONTACTS_PER_VCF_IMPORT) {
               skippedCount += entries.length - processedEntriesCount
               reachedContactLimit = true
@@ -745,27 +770,28 @@ export const contactSelectMolecule = molecule((_, getScope) => {
             processedEntriesCount++
 
             // Match on the raw string too - a stored contact pending
-            // normalization is only known by its raw number
-            if (existingContactNumbers.has(phoneNumber)) {
+            // normalization is only known by its raw value
+            if (existingContactValues.has(rawValue)) {
               skippedCount++
               continue
             }
 
-            const normalizedNumber =
-              toE164PhoneNumberWithDefaultCountryCode(phoneNumber)
-            if (Option.isNone(normalizedNumber)) {
+            const normalizedValue = normalizeContactValue(kind, rawValue)
+            if (Option.isNone(normalizedValue)) {
               skippedCount++
               continue
             }
-            if (seenNumbers.has(normalizedNumber.value)) continue
-            seenNumbers.add(normalizedNumber.value)
-            if (existingContactNumbers.has(normalizedNumber.value)) {
+            if (seenValues.has(normalizedValue.value)) continue
+            seenValues.add(normalizedValue.value)
+            if (existingContactValues.has(normalizedValue.value)) {
               skippedCount++
               continue
             }
             contactsToImport.push({
               name,
-              normalizedNumber: normalizedNumber.value,
+              contactId,
+              kind,
+              normalizedValue: normalizedValue.value,
             })
           }
           if (reachedContactLimit) break
@@ -805,33 +831,11 @@ export const contactSelectMolecule = molecule((_, getScope) => {
             (contactsToImportChunk) =>
               waitForNextAnimationFrameEffect().pipe(
                 Effect.zipRight(
-                  Effect.forEach(
-                    contactsToImportChunk,
-                    ({name, normalizedNumber}) =>
-                      hashPhoneNumberE(normalizedNumber).pipe(
-                        Effect.map((hash) =>
-                          Schema.decodeSync(StoredContactWithComputedValues)({
-                            info: {
-                              name,
-                              numberToDisplay: normalizedNumber,
-                              rawNumber: normalizedNumber,
-                            },
-                            computedValues: {
-                              hash,
-                              normalizedNumber,
-                            },
-                            // seen: false so restored contacts surface on the
-                            // "New" tab (they get resolved as seen when the
-                            // list screen unmounts)
-                            flags: {
-                              seen: false,
-                              imported: false,
-                              importedManually: true,
-                              invalidNumber: 'valid',
-                            },
-                          })
-                        )
-                      )
+                  Effect.forEach(contactsToImportChunk, (contactToImport) =>
+                    // seen: false so restored contacts surface on the "New"
+                    // tab (they get resolved as seen when the list screen
+                    // unmounts)
+                    createManualContact({...contactToImport, seen: false})
                   )
                 )
               )
@@ -841,36 +845,30 @@ export const contactSelectMolecule = molecule((_, getScope) => {
 
         // The confirmation dialog can stay open indefinitely - drop entries
         // that another flow (e.g. background contact sync) stored meanwhile
-        const currentContactNumbers = collectStoredContactNumbers(
+        const currentContactValues = collectStoredContactValues(
           get(storedContactsAtom)
         )
         const contactsToStore = pipe(
           newStoredContacts,
           Array.filter(
             (one) =>
-              !currentContactNumbers.has(one.computedValues.normalizedNumber)
+              !currentContactValues.has(one.computedValues.normalizedValue)
           )
         )
 
         set(storedContactsAtom, (prev) => [
           ...prev,
-          ...pipe(
-            contactsToStore,
-            Array.map((one) => ({
-              ...one,
-              computedValues: Option.some(one.computedValues),
-            }))
-          ),
+          ...Array.map(contactsToStore, toStoredContact),
         ])
-        set(selectedNumbersAtom, (selectedNumbers) => {
-          const nextSelectedNumbers = new Set(selectedNumbers)
+        set(selectedValuesAtom, (selectedValues) => {
+          const nextSelectedValues = new Set(selectedValues)
           pipe(
             contactsToStore,
             Array.forEach((one) => {
-              nextSelectedNumbers.add(one.computedValues.normalizedNumber)
+              nextSelectedValues.add(one.computedValues.normalizedValue)
             })
           )
-          return nextSelectedNumbers
+          return nextSelectedValues
         })
         reloadContacts()
 
@@ -897,7 +895,7 @@ export const contactSelectMolecule = molecule((_, getScope) => {
 
   const updateContactActionAtom = createUpdateContactActionAtom({
     reloadContacts,
-    selectedNumbersAtom,
+    selectedValuesAtom,
   })
 
   return {
@@ -917,7 +915,7 @@ export const contactSelectMolecule = molecule((_, getScope) => {
     contactsFilterAtom,
     areThereAnyContactsToDisplayForSelectedTabAtom,
     areThereAnySelectedContactsAtom,
-    selectedNumbersAtom,
+    selectedValuesAtom,
     shouldShowContactImportProgressDialogAtom,
     syncDefaultSelectedContactsActionAtom,
     submitAllSelectedContactsActionAtom,

@@ -92,7 +92,7 @@ import offerToConnectionsAtom, {
 import {storedContactsAtom} from '../../state/contacts/atom/contactsStore'
 import {submitContactsActionAtom} from '../../state/contacts/atom/submitContactsActionAtom'
 import {StoredContact} from '../../state/contacts/domain'
-import {hashPhoneNumber} from '../../state/contacts/utils'
+import {hashContact} from '../../state/contacts/utils'
 import {btcPriceDataAtom} from '../../state/currentBtcPriceAtoms'
 import {createOfferActionAtom} from '../../state/marketplace/atoms/createOfferActionAtom'
 import {myOffersAtom} from '../../state/marketplace/atoms/myOffers'
@@ -787,24 +787,24 @@ function DebugScreen(): React.ReactElement {
                   )
 
                   const existingRawNumbers = new Set(
-                    store.get(storedContactsAtom).map((c) => c.info.rawNumber)
+                    store.get(storedContactsAtom).map((c) => c.info.rawValue)
                   )
                   const newStoredContacts = effectPipe(
                     numbersToImport,
                     Array.filter((number) => !existingRawNumbers.has(number)),
                     Array.filterMap((number): Option.Option<StoredContact> => {
-                      const hash = hashPhoneNumber(number)
+                      const hash = hashContact(number)
                       if (hash._tag !== 'Right') return Option.none()
                       return Option.some({
                         info: {
+                          kind: 'phone',
                           name: `Seed user ${number.slice(-3)}`,
                           label: Option.none(),
                           nonUniqueContactId: Option.none(),
-                          numberToDisplay: number,
-                          rawNumber: number,
+                          rawValue: number,
                         },
                         computedValues: Option.some({
-                          normalizedNumber: number,
+                          normalizedValue: number,
                           hash: hash.right,
                         }),
                         serverHashToClient: Option.none(),
@@ -826,7 +826,7 @@ function DebugScreen(): React.ReactElement {
                     store
                       .set(submitContactsActionAtom, {
                         normalizeAndImportAll: false,
-                        numbersToImport,
+                        valuesToImport: numbersToImport,
                         showOfferReencryptionDialog: false,
                         showContactImportProgressDialog: true,
                       })

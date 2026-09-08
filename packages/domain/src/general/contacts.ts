@@ -3,18 +3,18 @@ import {
   PublicKeyV2,
 } from '@vexl-next/cryptography/src/KeyHolder'
 import {HashMap, Option, Schema} from 'effect'
-import {HashedPhoneNumber} from './HashedPhoneNumber.brand'
+import {ContactHash} from './ContactHash.brand'
 
 export const CommonConnectionsForUsers = Schema.HashMap({
   key: Schema.Union(PublicKeyPemBase64, PublicKeyV2),
-  value: Schema.Array(HashedPhoneNumber),
+  value: Schema.Array(ContactHash),
 })
 
 export type CommonConnectionsForUsers = typeof CommonConnectionsForUsers.Type
 
 export const CommonConnectionsForUser = Schema.Struct({
   publicKey: PublicKeyPemBase64,
-  hashes: Schema.Array(HashedPhoneNumber),
+  hashes: Schema.Array(ContactHash),
 })
 export type CommonConnectionsForUser = typeof CommonConnectionsForUser.Type
 

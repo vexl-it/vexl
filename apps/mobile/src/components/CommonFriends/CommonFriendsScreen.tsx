@@ -1,5 +1,5 @@
 import {FlashList} from '@shopify/flash-list'
-import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
+import {type ContactHash} from '@vexl-next/domain/src/general/ContactHash.brand'
 import {
   EditRow,
   Image,
@@ -9,7 +9,6 @@ import {
   UserImagePlaceholder,
   XmarkCancelClose,
 } from '@vexl-next/ui'
-import {parsePhoneNumber} from 'awesome-phonenumber'
 import {Array, pipe} from 'effect'
 import {useAtomValue, useStore} from 'jotai'
 import React, {memo, useCallback, useMemo} from 'react'
@@ -21,6 +20,7 @@ import {
 } from '../../navigationTypes'
 import createImportedContactsForHashesAtom from '../../state/contacts/atom/createImportedContactsForHashesAtom'
 import {type StoredContactWithComputedValues} from '../../state/contacts/domain'
+import {formatContactValue} from '../../utils/formatContactValue'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import {showVerifiedContactsAtom} from '../../utils/preferences'
 import useSafeGoBack from '../../utils/useSafeGoBack'
@@ -31,15 +31,11 @@ function FriendListItem({
 }: {
   readonly friend: StoredContactWithComputedValues
 }): React.ReactElement {
-  const internationalNumber = parsePhoneNumber(
-    friend.computedValues.normalizedNumber
-  ).number?.international
-
   return (
     <EditRow
       state="profile"
       headline={friend.info.name}
-      overline={internationalNumber ?? friend.computedValues.normalizedNumber}
+      overline={formatContactValue(friend)}
       showEditButton={false}
       avatar={{
         children: (
@@ -167,8 +163,8 @@ function useCommonFriendsListData({
   verifiedHashes,
   clubs,
 }: {
-  readonly contactsHashes: readonly HashedPhoneNumber[]
-  readonly verifiedHashes?: readonly HashedPhoneNumber[]
+  readonly contactsHashes: readonly ContactHash[]
+  readonly verifiedHashes?: readonly ContactHash[]
   readonly clubs: readonly CommonFriendsClub[]
 }): readonly ListItem[] {
   const {t} = useTranslation()
@@ -184,7 +180,7 @@ function useCommonFriendsListData({
     () =>
       showVerifiedContacts
         ? new Set(verifiedHashes ?? [])
-        : new Set<HashedPhoneNumber>(),
+        : new Set<ContactHash>(),
     [showVerifiedContacts, verifiedHashes]
   )
 

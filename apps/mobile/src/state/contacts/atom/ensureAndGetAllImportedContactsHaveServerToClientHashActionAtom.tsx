@@ -1,4 +1,4 @@
-import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
+import {type ContactHash} from '@vexl-next/domain/src/general/ContactHash.brand'
 import {type ServerToClientHashedNumber} from '@vexl-next/domain/src/general/ServerToClientHashedNumber'
 import {Array, Effect, HashMap, Option, pipe} from 'effect/index'
 import {atom} from 'jotai'
@@ -56,7 +56,7 @@ export const ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom =
           Effect.allWith({concurrency: 'unbounded'}),
           Effect.map(Array.flatten),
           Effect.map(
-            HashMap.fromIterable<HashedPhoneNumber, ServerToClientHashedNumber>
+            HashMap.fromIterable<ContactHash, ServerToClientHashedNumber>
           )
         )
 

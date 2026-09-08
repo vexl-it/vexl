@@ -54,7 +54,7 @@ export const createNoteActionAtom = atom(
         })
       )
 
-      const serverToClientHashesToHashedPhoneNumbersMap = yield* _(
+      const serverToClientHashesToContactHashesMap = yield* _(
         set(ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom)
       )
 
@@ -77,7 +77,7 @@ export const createNoteActionAtom = atom(
           },
           ownerKeyPair: session.privateKey,
           ownerKeyPairV2: session.keyPairV2,
-          serverToClientHashesToHashedPhoneNumbersMap,
+          serverToClientHashesToContactHashesMap,
           onProgress,
         })
       )

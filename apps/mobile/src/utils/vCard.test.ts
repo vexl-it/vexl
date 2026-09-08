@@ -3,8 +3,8 @@ import {contactsToVcardString, parseVcardString} from './vCard'
 describe('contactsToVcardString', () => {
   it('generates one vCard 3.0 entry per contact', () => {
     const result = contactsToVcardString([
-      {name: 'Satoshi', phoneNumber: '+420777888999'},
-      {name: 'Hal', phoneNumber: '+15551234567'},
+      {name: 'Satoshi', phoneNumbers: ['+420777888999'], emails: []},
+      {name: 'Hal', phoneNumbers: ['+15551234567'], emails: []},
     ])
 
     expect(result).toBe(
@@ -23,9 +23,41 @@ describe('contactsToVcardString', () => {
     )
   })
 
+  it('writes every phone number and email of a contact into one card', () => {
+    const result = contactsToVcardString([
+      {
+        name: 'Satoshi',
+        phoneNumbers: ['+420777888999', '+420111222333'],
+        emails: ['satoshi@example.com'],
+      },
+      {name: 'Hal', phoneNumbers: [], emails: ['hal@example.com']},
+    ])
+
+    expect(result).toBe(
+      'BEGIN:VCARD\r\n' +
+        'VERSION:3.0\r\n' +
+        'N:;Satoshi;;;\r\n' +
+        'FN:Satoshi\r\n' +
+        'TEL;TYPE=CELL:+420777888999\r\n' +
+        'TEL;TYPE=CELL:+420111222333\r\n' +
+        'EMAIL:satoshi@example.com\r\n' +
+        'END:VCARD\r\n' +
+        'BEGIN:VCARD\r\n' +
+        'VERSION:3.0\r\n' +
+        'N:;Hal;;;\r\n' +
+        'FN:Hal\r\n' +
+        'EMAIL:hal@example.com\r\n' +
+        'END:VCARD\r\n'
+    )
+  })
+
   it('escapes special characters in names', () => {
     const result = contactsToVcardString([
-      {name: 'Doe; John, \\backslash\nnewline', phoneNumber: '+420777888999'},
+      {
+        name: 'Doe; John, \\backslash\nnewline',
+        phoneNumbers: ['+420777888999'],
+        emails: [],
+      },
     ])
 
     expect(result).toContain('FN:Doe\\; John\\, \\\\backslash\\nnewline')
@@ -34,7 +66,7 @@ describe('contactsToVcardString', () => {
 
   it('trims contact names', () => {
     const result = contactsToVcardString([
-      {name: '  Satoshi  ', phoneNumber: '+420777888999'},
+      {name: '  Satoshi  ', phoneNumbers: ['+420777888999'], emails: []},
     ])
 
     expect(result).toContain('FN:Satoshi\r\n')
@@ -44,13 +76,21 @@ describe('contactsToVcardString', () => {
 describe('parseVcardString', () => {
   it('round-trips what contactsToVcardString exports', () => {
     const exported = contactsToVcardString([
-      {name: 'Satoshi', phoneNumber: '+420777888999'},
-      {name: 'Doe; John, Jr.', phoneNumber: '+15551234567'},
+      {
+        name: 'Satoshi',
+        phoneNumbers: ['+420777888999'],
+        emails: ['satoshi@example.com'],
+      },
+      {name: 'Doe; John, Jr.', phoneNumbers: ['+15551234567'], emails: []},
     ])
 
     expect(parseVcardString(exported)).toEqual([
-      {name: 'Satoshi', phoneNumbers: ['+420777888999']},
-      {name: 'Doe; John, Jr.', phoneNumbers: ['+15551234567']},
+      {
+        name: 'Satoshi',
+        phoneNumbers: ['+420777888999'],
+        emails: ['satoshi@example.com'],
+      },
+      {name: 'Doe; John, Jr.', phoneNumbers: ['+15551234567'], emails: []},
     ])
   })
 
@@ -65,7 +105,11 @@ describe('parseVcardString', () => {
     )
 
     expect(result).toEqual([
-      {name: 'Satoshi', phoneNumbers: ['+420777888999', '+420111222333']},
+      {
+        name: 'Satoshi',
+        phoneNumbers: ['+420777888999', '+420111222333'],
+        emails: [],
+      },
     ])
   })
 
@@ -75,7 +119,11 @@ describe('parseVcardString', () => {
     )
 
     expect(result).toEqual([
-      {name: 'Dr. Satoshi Nakamoto', phoneNumbers: ['+420777888999']},
+      {
+        name: 'Dr. Satoshi Nakamoto',
+        phoneNumbers: ['+420777888999'],
+        emails: [],
+      },
     ])
   })
 
@@ -90,7 +138,7 @@ describe('parseVcardString', () => {
     )
 
     expect(result).toEqual([
-      {name: 'SatoshiNakamoto', phoneNumbers: ['+420777888999']},
+      {name: 'SatoshiNakamoto', phoneNumbers: ['+420777888999'], emails: []},
     ])
   })
 
@@ -103,7 +151,9 @@ describe('parseVcardString', () => {
         'END:VCARD\r\n'
     )
 
-    expect(result).toEqual([{name: 'Štěpán', phoneNumbers: ['+420777888999']}])
+    expect(result).toEqual([
+      {name: 'Štěpán', phoneNumbers: ['+420777888999'], emails: []},
+    ])
   })
 
   it('recognizes the bare quoted-printable parameter', () => {
@@ -114,7 +164,9 @@ describe('parseVcardString', () => {
         'END:VCARD\n'
     )
 
-    expect(result).toEqual([{name: 'Štěpán', phoneNumbers: ['+420777888999']}])
+    expect(result).toEqual([
+      {name: 'Štěpán', phoneNumbers: ['+420777888999'], emails: []},
+    ])
   })
 
   it('joins and decodes quoted-printable soft line breaks', () => {
@@ -126,7 +178,9 @@ describe('parseVcardString', () => {
         'END:VCARD\r\n'
     )
 
-    expect(result).toEqual([{name: 'Štěpán', phoneNumbers: ['+420777888999']}])
+    expect(result).toEqual([
+      {name: 'Štěpán', phoneNumbers: ['+420777888999'], emails: []},
+    ])
   })
 
   it('parses a vCard 2.1 structured quoted-printable name', () => {
@@ -139,7 +193,7 @@ describe('parseVcardString', () => {
     )
 
     expect(result).toEqual([
-      {name: 'Jan Černý', phoneNumbers: ['+420777888999']},
+      {name: 'Jan Černý', phoneNumbers: ['+420777888999'], emails: []},
     ])
   })
 
@@ -158,10 +212,10 @@ describe('parseVcardString', () => {
     )
 
     expect(malformedEscape).toEqual([
-      {name: '=ZZ', phoneNumbers: ['+420777888999']},
+      {name: '=ZZ', phoneNumbers: ['+420777888999'], emails: []},
     ])
     expect(invalidUtf8).toEqual([
-      {name: '=FF', phoneNumbers: ['+420111222333']},
+      {name: '=FF', phoneNumbers: ['+420111222333'], emails: []},
     ])
   })
 
@@ -180,8 +234,8 @@ describe('parseVcardString', () => {
     )
 
     expect(result).toEqual([
-      {name: 'John Smith:Jr', phoneNumbers: ['+420777888999']},
-      {name: 'Jane SMITH:JR', phoneNumbers: ['+420111222333']},
+      {name: 'John Smith:Jr', phoneNumbers: ['+420777888999'], emails: []},
+      {name: 'Jane SMITH:JR', phoneNumbers: ['+420111222333'], emails: []},
     ])
   })
 
@@ -193,7 +247,9 @@ describe('parseVcardString', () => {
         'end:vcard\n'
     )
 
-    expect(result).toEqual([{name: 'Alice=', phoneNumbers: ['+420777888999']}])
+    expect(result).toEqual([
+      {name: 'Alice=', phoneNumbers: ['+420777888999'], emails: []},
+    ])
   })
 
   it('does not consume the TEL property or card boundary after a malformed trailing equals sign', () => {
@@ -209,8 +265,8 @@ describe('parseVcardString', () => {
     )
 
     expect(result).toEqual([
-      {name: 'Test=', phoneNumbers: ['+420777888999']},
-      {name: 'Second', phoneNumbers: ['+420111222333']},
+      {name: 'Test=', phoneNumbers: ['+420777888999'], emails: []},
+      {name: 'Second', phoneNumbers: ['+420111222333'], emails: []},
     ])
   })
 
@@ -224,11 +280,11 @@ describe('parseVcardString', () => {
     )
 
     expect(result).toEqual([
-      {name: 'Name=C5=A0', phoneNumbers: ['+420777888999']},
+      {name: 'Name=C5=A0', phoneNumbers: ['+420777888999'], emails: []},
     ])
   })
 
-  it('ignores other vCard properties and cards without name or number', () => {
+  it('ignores other vCard properties and cards without name or contact details', () => {
     const result = parseVcardString(
       'BEGIN:VCARD\n' +
         'FN:Has photo\n' +
@@ -241,11 +297,20 @@ describe('parseVcardString', () => {
         'END:VCARD\n' +
         'BEGIN:VCARD\n' +
         'TEL:+420111222333\n' +
+        'END:VCARD\n' +
+        'BEGIN:VCARD\n' +
+        'FN:Email only\n' +
+        'item1.EMAIL;TYPE=INTERNET:Email.Only@Example.com\n' +
         'END:VCARD\n'
     )
 
     expect(result).toEqual([
-      {name: 'Has photo', phoneNumbers: ['+420777888999']},
+      {name: 'Has photo', phoneNumbers: ['+420777888999'], emails: []},
+      {
+        name: 'Email only',
+        phoneNumbers: [],
+        emails: ['Email.Only@Example.com'],
+      },
     ])
   })
 

@@ -1,8 +1,8 @@
-import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
-import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
+import {type ContactHash} from '@vexl-next/domain/src/general/ContactHash.brand'
 import {type ServerToClientHashedNumber} from '@vexl-next/domain/src/general/ServerToClientHashedNumber'
 import {Array, HashMap, HashSet, Option, pipe} from 'effect'
 import {
+  type NormalizedContactValue,
   type StoredContact,
   type StoredContactWithComputedValues,
 } from '../domain'
@@ -55,16 +55,16 @@ export function determineContactsImportUpdatePlan({
 export function updateStoredContactImportState({
   contact,
   doIncrementalUpdate,
-  hashedNumbersToServerClientHash,
-  importedNumbers,
+  hashesToServerClientHash,
+  importedValues,
 }: {
   readonly contact: StoredContact
   readonly doIncrementalUpdate: boolean
-  readonly hashedNumbersToServerClientHash: HashMap.HashMap<
-    HashedPhoneNumber,
+  readonly hashesToServerClientHash: HashMap.HashMap<
+    ContactHash,
     ServerToClientHashedNumber
   >
-  readonly importedNumbers: HashSet.HashSet<E164PhoneNumber>
+  readonly importedValues: HashSet.HashSet<NormalizedContactValue>
 }): StoredContact {
   if (Option.isNone(contact.computedValues)) {
     return {
@@ -75,11 +75,11 @@ export function updateStoredContactImportState({
 
   const computedValues = contact.computedValues.value
 
-  if (HashSet.has(importedNumbers, computedValues.normalizedNumber)) {
+  if (HashSet.has(importedValues, computedValues.normalizedValue)) {
     return {
       ...contact,
       serverHashToClient: HashMap.get(
-        hashedNumbersToServerClientHash,
+        hashesToServerClientHash,
         computedValues.hash
       ),
       flags: {...contact.flags, imported: true},

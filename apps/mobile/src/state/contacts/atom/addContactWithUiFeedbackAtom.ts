@@ -51,7 +51,7 @@ const editExistingContactActionAtom: ActionAtomType<
           type: 'edit',
           contactName: existingContact.info.name,
           existingContactName: existingContact.existingContactName,
-          contactNumber: existingContact.computedValues.normalizedNumber,
+          contactNumber: existingContact.computedValues.normalizedValue,
           phoneContactId: existingContact.info.nonUniqueContactId,
           profileImage: existingContact.avatar,
         })
@@ -123,8 +123,8 @@ const importContactActionAtom = atom(
           prev,
           (contact) =>
             Option.isSome(contact.computedValues) &&
-            contact.computedValues.value.normalizedNumber !==
-              newContact.computedValues.normalizedNumber
+            contact.computedValues.value.normalizedValue !==
+              newContact.computedValues.normalizedValue
         ),
         {
           ...newContact,
@@ -160,7 +160,7 @@ const createContactWithUiFeedbackActionAtom: ActionAtomType<
       const {contactName: customName, saveToPhone} = yield* _(
         set(showUpsertContactDialogAtom, {
           type: 'create',
-          contactNumber: newContact.computedValues.normalizedNumber,
+          contactNumber: newContact.computedValues.normalizedValue,
           contactName: newContact.info.name,
           phoneContactId: newContact.info.nonUniqueContactId,
           profileImage: newContact.avatar,
@@ -181,7 +181,7 @@ const createContactWithUiFeedbackActionAtom: ActionAtomType<
               contactsPermissionsGranted
                 ? set(addContactToPhoneActionAtom, {
                     customName,
-                    number: importedContact.computedValues.normalizedNumber,
+                    phoneNumber: importedContact.computedValues.normalizedValue,
                   })
                 : Effect.succeed(false)
             ),
@@ -268,8 +268,8 @@ export const addContactWithUiFeedbackActionAtom: ActionAtomType<
     const existingContact = Array.findFirst(
       importedContacts,
       (importedContact) =>
-        importedContact.computedValues.normalizedNumber ===
-        newContact.computedValues.normalizedNumber
+        importedContact.computedValues.normalizedValue ===
+        newContact.computedValues.normalizedValue
     )
 
     return Option.isSome(existingContact)

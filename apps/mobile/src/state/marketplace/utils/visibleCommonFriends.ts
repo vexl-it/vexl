@@ -1,28 +1,26 @@
-import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
+import {type ContactHash} from '@vexl-next/domain/src/general/ContactHash.brand'
 import {type NoteInfo} from '@vexl-next/domain/src/general/notes'
 import {type OfferInfo} from '@vexl-next/domain/src/general/offers'
 import {Array, pipe} from 'effect'
 
 export interface VisibleCommonFriends {
-  readonly commonFriends: readonly HashedPhoneNumber[]
-  readonly verifiedCommonFriends: readonly HashedPhoneNumber[]
+  readonly commonFriends: readonly ContactHash[]
+  readonly verifiedCommonFriends: readonly ContactHash[]
 }
 
 // Builds the imported-contacts-hashes lookup Set once per hashes-array
 // identity (i.e. once per contacts change) instead of scanning the array with
 // Equal.equals for every friend of every offer.
 const hashesSetForArrayCache = new WeakMap<
-  readonly HashedPhoneNumber[],
-  ReadonlySet<HashedPhoneNumber>
+  readonly ContactHash[],
+  ReadonlySet<ContactHash>
 >()
 
-function toHashesSet(
-  hashes: readonly HashedPhoneNumber[]
-): ReadonlySet<HashedPhoneNumber> {
+function toHashesSet(hashes: readonly ContactHash[]): ReadonlySet<ContactHash> {
   const cachedSet = hashesSetForArrayCache.get(hashes)
   if (cachedSet !== undefined) return cachedSet
 
-  const hashesSet: ReadonlySet<HashedPhoneNumber> = new Set(hashes)
+  const hashesSet: ReadonlySet<ContactHash> = new Set(hashes)
   hashesSetForArrayCache.set(hashes, hashesSet)
   return hashesSet
 }
@@ -32,9 +30,9 @@ export function deriveVisibleCommonFriendsFromHashes({
   verifiedCommonFriends = [],
   importedContactsHashes,
 }: {
-  readonly commonFriends: readonly HashedPhoneNumber[]
-  readonly verifiedCommonFriends?: readonly HashedPhoneNumber[]
-  readonly importedContactsHashes: readonly HashedPhoneNumber[]
+  readonly commonFriends: readonly ContactHash[]
+  readonly verifiedCommonFriends?: readonly ContactHash[]
+  readonly importedContactsHashes: readonly ContactHash[]
 }): VisibleCommonFriends {
   const importedContactsHashesSet = toHashesSet(importedContactsHashes)
 
@@ -58,16 +56,13 @@ export function deriveVisibleCommonFriendsFromHashes({
 function memoizePerEntityAndContacts<Entity extends object, Result>(
   derive: (
     entity: Entity,
-    importedContactsHashes: readonly HashedPhoneNumber[]
+    importedContactsHashes: readonly ContactHash[]
   ) => Result
-): (
-  entity: Entity,
-  importedContactsHashes: readonly HashedPhoneNumber[]
-) => Result {
+): (entity: Entity, importedContactsHashes: readonly ContactHash[]) => Result {
   const cache = new WeakMap<
     Entity,
     {
-      importedContactsHashesSet: ReadonlySet<HashedPhoneNumber>
+      importedContactsHashesSet: ReadonlySet<ContactHash>
       result: Result
     }
   >()
@@ -98,7 +93,7 @@ export function deriveVisibleCommonFriendsForOffer({
   importedContactsHashes,
 }: {
   readonly offerInfo: OfferInfo
-  readonly importedContactsHashes: readonly HashedPhoneNumber[]
+  readonly importedContactsHashes: readonly ContactHash[]
 }): VisibleCommonFriends {
   return memoizedVisibleCommonFriendsForOffer(offerInfo, importedContactsHashes)
 }
@@ -115,8 +110,8 @@ export function deriveVisibleCommonFriendsForNote({
   importedContactsHashes,
 }: {
   readonly noteInfo: NoteInfo
-  readonly importedContactsHashes: readonly HashedPhoneNumber[]
-}): readonly HashedPhoneNumber[] {
+  readonly importedContactsHashes: readonly ContactHash[]
+}): readonly ContactHash[] {
   return memoizedVisibleCommonFriendsForNote(noteInfo, importedContactsHashes)
 }
 
@@ -125,9 +120,9 @@ export function deriveVisibleCommonFriendsForChat({
   verifiedCommonFriends,
   importedContactsHashes,
 }: {
-  readonly commonFriends: readonly HashedPhoneNumber[] | undefined
-  readonly verifiedCommonFriends: readonly HashedPhoneNumber[] | undefined
-  readonly importedContactsHashes: readonly HashedPhoneNumber[]
+  readonly commonFriends: readonly ContactHash[] | undefined
+  readonly verifiedCommonFriends: readonly ContactHash[] | undefined
+  readonly importedContactsHashes: readonly ContactHash[]
 }): VisibleCommonFriends {
   return deriveVisibleCommonFriendsFromHashes({
     commonFriends: commonFriends ?? [],

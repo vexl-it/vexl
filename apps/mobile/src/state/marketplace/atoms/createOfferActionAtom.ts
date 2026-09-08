@@ -91,7 +91,7 @@ export const createOfferActionAtom = atom<
       ...(session.isLiquidityProvider ? {byLiquidityProvider: true} : {}),
     }
 
-    const serverToClientHashesToHashedPhoneNumbersMap = yield* _(
+    const serverToClientHashesToContactHashesMap = yield* _(
       set(ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom)
     )
 
@@ -101,7 +101,7 @@ export const createOfferActionAtom = atom<
         offerId: params.offerId,
         publicPart: publicPayloadWithNotificationToken,
         countryPrefix: getCountryPrefix(session.phoneNumber),
-        serverToClientHashesToHashedPhoneNumbersMap,
+        serverToClientHashesToContactHashesMap,
         contactApi: api.contact,
         intendedConnectionLevel,
         ownerKeyPair: session.privateKey,

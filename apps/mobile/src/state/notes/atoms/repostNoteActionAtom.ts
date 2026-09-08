@@ -48,7 +48,7 @@ export const repostNoteActionAtom = atom<
       return yield* _(Effect.fail(new NoteRepostNotAllowedError({noteId})))
     }
 
-    const serverToClientHashesToHashedPhoneNumbersMap = yield* _(
+    const serverToClientHashesToContactHashesMap = yield* _(
       set(ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom)
     )
 
@@ -60,7 +60,7 @@ export const repostNoteActionAtom = atom<
         symmetricKey: note.noteInfo.privatePart.symmetricKey,
         ownerKeyPair: session.privateKey,
         ownerKeyPairV2: session.keyPairV2,
-        serverToClientHashesToHashedPhoneNumbersMap,
+        serverToClientHashesToContactHashesMap,
       })
     )
 

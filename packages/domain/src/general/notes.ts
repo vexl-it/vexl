@@ -5,7 +5,7 @@ import {IdNumeric} from '../utility/IdNumeric'
 import {IsoDatetimeString} from '../utility/IsoDatetimeString.brand'
 import {UnixMilliseconds} from '../utility/UnixMilliseconds.brand'
 import {VersionString} from '../utility/VersionString.brand'
-import {HashedPhoneNumber} from './HashedPhoneNumber.brand'
+import {ContactHash} from './ContactHash.brand'
 import {VexlNotificationToken} from './notifications/VexlNotificationToken'
 import {FriendLevel, SymmetricKey} from './offers'
 
@@ -35,7 +35,7 @@ export const NoteExpiresAfterDaysOptions = [7, 3, 1] as const
 export const NOTE_MAX_EXPIRATION_DAYS = 7
 
 export const NotePrivatePart = Schema.Struct({
-  commonFriends: Schema.Array(HashedPhoneNumber),
+  commonFriends: Schema.Array(ContactHash),
   friendLevel: Schema.Array(FriendLevel),
   symmetricKey: SymmetricKey,
   viaRepost: Schema.optionalWith(Schema.Boolean, {default: () => false}),

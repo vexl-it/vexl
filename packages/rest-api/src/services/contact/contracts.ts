@@ -10,6 +10,7 @@ import {
   ClubLinkInfo,
   ClubUuid,
 } from '@vexl-next/domain/src/general/clubs'
+import {ContactHash} from '@vexl-next/domain/src/general/ContactHash.brand'
 import {HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {ConnectionLevel, OfferId} from '@vexl-next/domain/src/general/offers'
@@ -105,7 +106,7 @@ export type UpdateNotificationTokenRequest =
   typeof UpdateNotificationTokenRequest.Type
 
 export const ImportContactsRequest = Schema.Struct({
-  contacts: Schema.Array(HashedPhoneNumber),
+  contacts: Schema.Array(ContactHash),
   replace: Schema.optionalWith(Schema.Boolean, {default: () => true}),
 })
 export type ImportContactsRequest = typeof ImportContactsRequest.Type
@@ -114,7 +115,7 @@ export const ImportContactsResponse = Schema.Struct({
   imported: Schema.Boolean,
   phoneNumberHashesToServerToClientHash: Schema.Array(
     Schema.Struct({
-      hashedNumber: HashedPhoneNumber,
+      hashedNumber: ContactHash,
       serverToClientHash: ServerToClientHashedNumber,
     })
   ),
@@ -488,7 +489,7 @@ export type EraseUserFromNetworkResponse =
   typeof EraseUserFromNetworkResponse.Type
 
 export const ConvertPhoneNumberHashesToServerHashesRequest = Schema.Struct({
-  hashedPhoneNumbers: Schema.Array(HashedPhoneNumber),
+  hashedPhoneNumbers: Schema.Array(ContactHash),
 })
 export type ConvertPhoneNumberHashesToServerHashesRequest =
   typeof ConvertPhoneNumberHashesToServerHashesRequest.Type
@@ -496,7 +497,7 @@ export type ConvertPhoneNumberHashesToServerHashesRequest =
 export const ConvertPhoneNumberHashesToServerHashesResponse = Schema.Struct({
   result: Schema.Array(
     Schema.Struct({
-      hashedNumber: HashedPhoneNumber,
+      hashedNumber: ContactHash,
       serverToClientHash: ServerToClientHashedNumber,
     })
   ),

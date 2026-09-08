@@ -11,7 +11,7 @@ import {ContactDbService} from '../../db/ContactDbService'
 import {UserDbService} from '../../db/UserDbService'
 import {reportUserLoggedIn} from '../../metrics'
 import {
-  serverHashPhoneNumber,
+  serverHashContact,
   type ServerHashedNumber,
 } from '../../utils/serverHashContact'
 import {withUserActionRedisLock} from '../../utils/withUserActionRedisLock'
@@ -51,7 +51,7 @@ export const createUser = HttpApiBuilder.handler(
   'createUser',
   (req) =>
     CurrentSecurity.pipe(
-      Effect.bind('serverHash', (s) => serverHashPhoneNumber(s.hash)),
+      Effect.bind('serverHash', (s) => serverHashContact(s.hash)),
       Effect.flatMap((security) =>
         Effect.gen(function* (_) {
           const userDb = yield* _(UserDbService)

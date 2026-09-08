@@ -11,7 +11,7 @@ import {TouchableOpacity} from 'react-native'
 import {Stack, useTheme, XStack} from 'tamagui'
 import {type TradeChecklistStackScreenProps} from '../../../../navigationTypes'
 import {sessionDataOrDummyAtom} from '../../../../state/session'
-import {getInternationalPhoneNumber} from '../../../../utils/getInternationalPhoneNumber'
+import {getInternationalPhoneNumber} from '../../../../utils/formatContactValue'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import UserAvatar from '../../../UserAvatar'
 import {

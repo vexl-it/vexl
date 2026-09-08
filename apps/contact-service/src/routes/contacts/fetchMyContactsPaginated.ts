@@ -11,7 +11,7 @@ import {
 import {ContactDbService} from '../../db/ContactDbService'
 import {type FindFirstLevelContactsPublicKeysByHashFromPaginatedResult} from '../../db/ContactDbService/queries/createFindFirstLevelContactsPublicKeysByHashFromPaginated'
 import {UserDbService} from '../../db/UserDbService'
-import {serverHashPhoneNumber} from '../../utils/serverHashContact'
+import {serverHashContact} from '../../utils/serverHashContact'
 import {toCompatiblePublicKeyArray} from '../../utils/toCompatiblePublicKeyArray'
 
 const DEFAULT_LAST_USER_ID = 0
@@ -30,7 +30,7 @@ export const fetchMyContactsPaginated = HttpApiBuilder.handler(
     Effect.gen(function* (_) {
       const security = yield* _(
         CurrentSecurity,
-        Effect.bind('serverHash', (s) => serverHashPhoneNumber(s.hash))
+        Effect.bind('serverHash', (s) => serverHashContact(s.hash))
       )
       const contactDb = yield* _(ContactDbService)
       const contactActiveWindowDays = yield* _(contactActiveWindowDaysConfig)

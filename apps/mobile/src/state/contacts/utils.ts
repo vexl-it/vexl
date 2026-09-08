@@ -1,12 +1,16 @@
+import {ContactHash} from '@vexl-next/domain/src/general/ContactHash.brand'
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
-import {HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
+import {
+  toNormalizedEmail,
+  type NormalizedEmail,
+} from '@vexl-next/domain/src/general/NormalizedEmail.brand'
 import {type BasicError} from '@vexl-next/domain/src/utility/errors'
 import {
   hmacSignE,
   type CryptoError,
 } from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {hmacSign} from '@vexl-next/resources-utils/src/utils/crypto'
-import {Effect, Schema} from 'effect'
+import {Effect, Schema, type Option} from 'effect'
 import {chunksOf} from 'effect/Array'
 import {getPermissionsAsync, requestPermissionsAsync} from 'expo-contacts'
 import {map, type Either} from 'fp-ts/Either'
@@ -15,11 +19,16 @@ import {hmacPassword} from '../../utils/environment'
 import reportError from '../../utils/reportError'
 import {startMeasure} from '../../utils/reportTime'
 import {waitForNextAnimationFrameEffect} from '../../utils/runAfterAnimationFrames'
+import toE164PhoneNumberWithDefaultCountryCode from '../../utils/toE164PhoneNumberWithDefaultCountryCode'
 import {
   mapContactsFromSystemToDomain,
   type DeviceContactsMappingResult,
 } from './contactMapping'
-import {type ContactInfo} from './domain'
+import {
+  type ContactInfo,
+  type ContactKind,
+  type NormalizedContactValue,
+} from './domain'
 import {getDeviceContactsFromSystem} from './getDeviceContactsFromSystem'
 
 export class ContactsPermissionsNotGrantedError extends Schema.TaggedError<ContactsPermissionsNotGrantedError>(
@@ -32,22 +41,43 @@ export class UnknownContactsError extends Schema.TaggedError<UnknownContactsErro
   cause: Schema.Unknown,
 }) {}
 
-export function hashPhoneNumber(
-  normalizedPhoneNumber: E164PhoneNumber
-): Either<BasicError<'CryptoError'>, HashedPhoneNumber> {
+export function hashContact(
+  normalizedValue: NormalizedContactValue
+): Either<BasicError<'CryptoError'>, ContactHash> {
   return pipe(
-    normalizedPhoneNumber,
+    normalizedValue,
     hmacSign(hmacPassword),
-    map(Schema.decodeSync(HashedPhoneNumber))
+    map(Schema.decodeSync(ContactHash))
   )
 }
 
-export function hashPhoneNumberE(
-  normalizedPhoneNumber: E164PhoneNumber
-): Effect.Effect<HashedPhoneNumber, CryptoError> {
-  return hmacSignE(hmacPassword)(normalizedPhoneNumber).pipe(
-    Effect.map(Schema.decodeSync(HashedPhoneNumber))
+export function hashContactE(
+  normalizedValue: NormalizedContactValue
+): Effect.Effect<ContactHash, CryptoError> {
+  return hmacSignE(hmacPassword)(normalizedValue).pipe(
+    Effect.map(Schema.decodeSync(ContactHash))
   )
+}
+
+export function normalizeContactValue(
+  kind: 'phone',
+  rawValue: string
+): Option.Option<E164PhoneNumber>
+export function normalizeContactValue(
+  kind: 'email',
+  rawValue: string
+): Option.Option<NormalizedEmail>
+export function normalizeContactValue(
+  kind: ContactKind,
+  rawValue: string
+): Option.Option<NormalizedContactValue>
+export function normalizeContactValue(
+  kind: ContactKind,
+  rawValue: string
+): Option.Option<NormalizedContactValue> {
+  return kind === 'phone'
+    ? toE164PhoneNumberWithDefaultCountryCode(rawValue)
+    : toNormalizedEmail(rawValue)
 }
 
 export function areContactsPermissionsGranted(): Effect.Effect<
@@ -99,6 +129,7 @@ function mapContactsFromSystemToDomainChunked(
     const mappedContacts: ContactInfo[] = []
     let malformedContactsCount = 0
     let malformedPhoneNumbersCount = 0
+    let malformedEmailsCount = 0
 
     const chunks = chunksOf(contacts, DEVICE_CONTACTS_MAPPING_CHUNK_SIZE)
     for (const [i, chunk] of chunks.entries()) {
@@ -108,12 +139,14 @@ function mapContactsFromSystemToDomainChunked(
       mappedContacts.push(...chunkResult.contacts)
       malformedContactsCount += chunkResult.malformedContactsCount
       malformedPhoneNumbersCount += chunkResult.malformedPhoneNumbersCount
+      malformedEmailsCount += chunkResult.malformedEmailsCount
     }
 
     return {
       contacts: mappedContacts,
       malformedContactsCount,
       malformedPhoneNumbersCount,
+      malformedEmailsCount,
     }
   })
 }
@@ -149,11 +182,13 @@ export function getContactsAndTryToResolveThePermissionsAlongTheWay(): Effect.Ef
 
     if (
       mappingResult.malformedContactsCount > 0 ||
-      mappingResult.malformedPhoneNumbersCount > 0
+      mappingResult.malformedPhoneNumbersCount > 0 ||
+      mappingResult.malformedEmailsCount > 0
     ) {
       reportError('warn', new Error('Skipped malformed contacts from device'), {
         malformedContactsCount: mappingResult.malformedContactsCount,
         malformedPhoneNumbersCount: mappingResult.malformedPhoneNumbersCount,
+        malformedEmailsCount: mappingResult.malformedEmailsCount,
       })
     }
 

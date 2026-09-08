@@ -10,7 +10,7 @@ import {addTestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Array, Effect, Option, pipe, Schema} from 'effect'
 import {
   hashForClient,
-  serverHashPhoneNumber,
+  serverHashContact,
 } from '../../../utils/serverHashContact'
 import {NodeTestingApp} from '../../utils/NodeTestingApp'
 
@@ -48,7 +48,7 @@ export const generateKeysAndHasheForNumber = (numberRaw: string) =>
       })
     )
 
-    const serverHashedNumber = yield* _(serverHashPhoneNumber(hashedNumber))
+    const serverHashedNumber = yield* _(serverHashContact(hashedNumber))
     const serverHashedNumberForClient = yield* _(
       hashForClient(serverHashedNumber)
     )

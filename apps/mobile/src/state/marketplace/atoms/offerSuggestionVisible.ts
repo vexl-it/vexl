@@ -10,7 +10,7 @@ import {
   showImportContactsInMarketplaceSuggestionAtom,
 } from '../../../utils/preferences'
 import {reachNumberAtom} from '../../connections/atom/connectionStateAtom'
-import {newPhoneContactsToReviewRawNumbersAtom} from '../../contacts/atom/contactsStore'
+import {newContactsToReviewRawValuesAtom} from '../../contacts/atom/contactsStore'
 import {notificationsEnabledAtom} from '../../notifications/areNotificationsEnabledAtom'
 import {REACH_NUMBER_THRESHOLD} from '../domain'
 import {filteredOffersIncludingLocationFilterAtomsAtom} from './filteredOffers'
@@ -74,17 +74,15 @@ export const shouldShowImportContactsInMarketplaceSuggestionAtom = atom(
 
 export const shouldShowImportNewContactsInMarketplaceSuggestionAtom = atom(
   (get) => {
-    const newPhoneContactsRawNumbers = get(
-      newPhoneContactsToReviewRawNumbersAtom
-    )
+    const newContactsRawValues = get(newContactsToReviewRawValuesAtom)
     const dismissedRawNumbers = get(
       importNewContactsSuggestionDismissedStorageAtom
     ).dismissedRawNumbers
 
-    const hasUndismissedNewPhoneContacts = pipe(
-      newPhoneContactsRawNumbers,
+    const hasUndismissedNewContacts = pipe(
+      newContactsRawValues,
       Array.findFirst(
-        (rawNumber) => !pipe(dismissedRawNumbers, Array.contains(rawNumber))
+        (rawValue) => !pipe(dismissedRawNumbers, Array.contains(rawValue))
       ),
       Option.isSome
     )
@@ -92,7 +90,7 @@ export const shouldShowImportNewContactsInMarketplaceSuggestionAtom = atom(
     return (
       Array.isNonEmptyArray(
         get(filteredOffersIncludingLocationFilterAtomsAtom)
-      ) && hasUndismissedNewPhoneContacts
+      ) && hasUndismissedNewContacts
     )
   }
 )
@@ -200,13 +198,11 @@ export const dismissImportContactsInMarketplaceSuggestionActionAtom = atom(
 export const dismissImportNewContactsInMarketplaceSuggestionActionAtom = atom(
   null,
   (get, set) => {
-    const newPhoneContactsRawNumbers = get(
-      newPhoneContactsToReviewRawNumbersAtom
-    )
+    const newContactsRawValues = get(newContactsToReviewRawValuesAtom)
 
     set(importNewContactsSuggestionDismissedStorageAtom, (old) => ({
       dismissedRawNumbers: pipe(
-        [...old.dismissedRawNumbers, ...newPhoneContactsRawNumbers],
+        [...old.dismissedRawNumbers, ...newContactsRawValues],
         Array.dedupe
       ),
     }))

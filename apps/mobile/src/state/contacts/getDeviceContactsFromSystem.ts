@@ -4,15 +4,17 @@ import {Contact, ContactField, type PartialContactDetails} from 'expo-contacts'
 /**
  * Fields requested from the device for each contact when importing/syncing.
  * These are intentionally the ONLY fields read from the address book and they
- * map 1:1 to what {@link mapContactsFromSystemToDomain} consumes. Do NOT widen
- * this list - reading more contact data than necessary would violate Vexl's
- * data-minimization principle.
+ * map 1:1 to what {@link mapContactsFromSystemToDomain} consumes: names, phone
+ * numbers and emails, the two kinds of contact that enter the network. Do NOT
+ * widen this list - reading more contact data than necessary would violate
+ * Vexl's data-minimization principle.
  */
 const DEVICE_CONTACT_FIELDS = [
   ContactField.GIVEN_NAME,
   ContactField.FAMILY_NAME,
   ContactField.FULL_NAME,
   ContactField.PHONES,
+  ContactField.EMAILS,
 ] as const
 
 interface LegacyDeviceContact {
@@ -21,6 +23,7 @@ interface LegacyDeviceContact {
   lastName: string | null
   name: string | null
   phoneNumbers: ReadonlyArray<{label?: string; number?: string}>
+  emails: ReadonlyArray<{label?: string; address?: string}>
 }
 
 /**
@@ -38,6 +41,7 @@ function toLegacyDeviceContact(
     lastName: contact.familyName,
     name: contact.fullName,
     phoneNumbers: contact.phones,
+    emails: contact.emails,
   }
 }
 

@@ -2,7 +2,7 @@ import {
   type KeyPairV2,
   type PrivateKeyHolder,
 } from '@vexl-next/cryptography/src/KeyHolder'
-import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
+import {type ContactHash} from '@vexl-next/domain/src/general/ContactHash.brand'
 import {type ServerToClientHashedNumber} from '@vexl-next/domain/src/general/ServerToClientHashedNumber'
 import {
   type ClubKeyNotFoundInInnerStateError,
@@ -40,7 +40,7 @@ export function fetchInfoAndGeneratePrivatePayloads({
   ownerCredentials,
   ownerKeyPairV2,
   intendedClubs,
-  serverToClientHashesToHashedPhoneNumbersMap,
+  serverToClientHashesToContactHashesMap,
   onProgress,
 }: {
   contactApi: ContactApi
@@ -49,9 +49,9 @@ export function fetchInfoAndGeneratePrivatePayloads({
   ownerCredentials: PrivateKeyHolder
   ownerKeyPairV2: KeyPairV2
   adminId: OfferAdminId
-  serverToClientHashesToHashedPhoneNumbersMap: HashMap.HashMap<
+  serverToClientHashesToContactHashesMap: HashMap.HashMap<
     ServerToClientHashedNumber,
-    HashedPhoneNumber
+    ContactHash
   >
   intendedClubs: Record<
     ClubUuid,
@@ -74,7 +74,7 @@ export function fetchInfoAndGeneratePrivatePayloads({
 
     const connectionsInfo = yield* _(
       fetchContactsForOffer({
-        serverToClientHashesToHashedPhoneNumbersMap,
+        serverToClientHashesToContactHashesMap,
         contactApi,
         intendedConnectionLevel,
         intendedClubs,

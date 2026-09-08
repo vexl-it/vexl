@@ -7,7 +7,7 @@ import {IsoDatetimeString} from '../utility/IsoDatetimeString.brand'
 import {JSDateString} from '../utility/JSDateString.brand'
 import {VersionString} from '../utility/VersionString.brand'
 import {Latitude, Longitude, Radius} from '../utility/geoCoordinates'
-import {HashedPhoneNumber} from './HashedPhoneNumber.brand'
+import {ContactHash} from './ContactHash.brand'
 import {ClubUuid} from './clubs'
 import {CurrencyCode} from './currency.brand'
 import {NotificationCypher} from './notifications/NotificationCypher.brand'
@@ -151,8 +151,8 @@ export const PrivatePartRecordId = Schema.NumberFromString.pipe(
 export type PrivatePartRecordId = typeof PrivatePartRecordId.Type
 
 export const OfferPrivatePart = Schema.Struct({
-  commonFriends: Schema.Array(HashedPhoneNumber),
-  verifiedCommonFriends: Schema.optionalWith(Schema.Array(HashedPhoneNumber), {
+  commonFriends: Schema.Array(ContactHash),
+  verifiedCommonFriends: Schema.optionalWith(Schema.Array(ContactHash), {
     default: () => [],
   }),
   friendLevel: Schema.Array(FriendLevel),

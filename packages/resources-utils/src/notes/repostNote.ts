@@ -4,7 +4,7 @@ import {
   type PublicKeyPemBase64,
   type PublicKeyV2,
 } from '@vexl-next/cryptography/src/KeyHolder'
-import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
+import {type ContactHash} from '@vexl-next/domain/src/general/ContactHash.brand'
 import {
   generateNoteRepostId,
   type NoteId,
@@ -48,7 +48,7 @@ export default function repostNote({
   symmetricKey,
   ownerKeyPair,
   ownerKeyPairV2,
-  serverToClientHashesToHashedPhoneNumbersMap,
+  serverToClientHashesToContactHashesMap,
 }: {
   offerApi: OfferApi
   contactApi: ContactApi
@@ -56,9 +56,9 @@ export default function repostNote({
   symmetricKey: SymmetricKey
   ownerKeyPair: PrivateKeyHolder
   ownerKeyPairV2: KeyPairV2
-  serverToClientHashesToHashedPhoneNumbersMap: HashMap.HashMap<
+  serverToClientHashesToContactHashesMap: HashMap.HashMap<
     ServerToClientHashedNumber,
-    HashedPhoneNumber
+    ContactHash
   >
 }): Effect.Effect<
   RepostNoteResult,
@@ -74,7 +74,7 @@ export default function repostNote({
         contactApi,
         intendedConnectionLevel: 'ALL',
         intendedClubs: {},
-        serverToClientHashesToHashedPhoneNumbersMap,
+        serverToClientHashesToContactHashesMap,
       })
     )
 

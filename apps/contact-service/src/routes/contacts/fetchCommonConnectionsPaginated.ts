@@ -14,7 +14,7 @@ import {ContactDbService} from '../../db/ContactDbService'
 import {type FindCommonFriendsPaginatedResult} from '../../db/ContactDbService/queries/createFindCommonFriendsByOwnerHashAndPublicKeysPaginated'
 import {
   hashForClientBatch,
-  serverHashPhoneNumber,
+  serverHashContact,
 } from '../../utils/serverHashContact'
 
 const DEFAULT_LAST_USER_CONTACT_ID = 0
@@ -31,7 +31,7 @@ export const fetchCommonConnectionsPaginated = HttpApiBuilder.handler(
     Effect.gen(function* (_) {
       const security = yield* _(
         CurrentSecurity,
-        Effect.bind('serverHash', (s) => serverHashPhoneNumber(s.hash))
+        Effect.bind('serverHash', (s) => serverHashContact(s.hash))
       )
       const contactDb = yield* _(ContactDbService)
       const publicImportCountThreshold = yield* _(

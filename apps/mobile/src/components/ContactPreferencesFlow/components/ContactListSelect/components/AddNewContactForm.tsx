@@ -1,5 +1,4 @@
 import {useNavigation} from '@react-navigation/native'
-import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {
   Button,
   CellPhoneMobileDevice,
@@ -16,13 +15,17 @@ import {
 } from '@vexl-next/ui'
 import {parsePhoneNumber} from 'awesome-phonenumber'
 import {useMolecule} from 'bunshi/dist/react'
-import {Effect, Option} from 'effect'
+import {Array, Effect, Option, pipe} from 'effect'
 import {atom, useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useEffect, useRef, useState} from 'react'
 import {Platform, type LayoutChangeEvent} from 'react-native'
 import {getCountryByCca2} from 'react-native-country-select'
 import {type ContactPreferencesStackScreenProps} from '../../../../../navigationTypes'
-import {type StoredContactWithComputedValues} from '../../../../../state/contacts/domain'
+import {
+  type ContactKind,
+  type StoredContactWithComputedValues,
+} from '../../../../../state/contacts/domain'
+import {normalizeContactValue} from '../../../../../state/contacts/utils'
 import {userPhoneNumberAtom} from '../../../../../state/session/userDataAtoms'
 import {
   dismissKeyboardAndResolveOnLayoutUpdate,
@@ -30,7 +33,6 @@ import {
 } from '../../../../../utils/dismissKeyboardPromise'
 import getCountryCode from '../../../../../utils/getCountryCode'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
-import toE164PhoneNumberWithDefaultCountryCode from '../../../../../utils/toE164PhoneNumberWithDefaultCountryCode'
 import usePreventDiscardChangesWithConfirmation from '../../../../../utils/usePreventDiscardChangesWithConfirmation'
 import {globalDialogAtom} from '../../../../GlobalDialog'
 import PreparingContactsOverlay from '../../PreparingContactsOverlay'
@@ -38,14 +40,27 @@ import {contactSelectMolecule} from '../atom'
 
 interface Props {
   readonly contactToEdit?: StoredContactWithComputedValues | undefined
+  readonly pairedContact?: StoredContactWithComputedValues | undefined
   readonly onClose: () => void
 }
 
-function getInitialContactPhoneNumber(
-  contactNumber: E164PhoneNumber | undefined
-): string {
-  if (contactNumber === undefined) return ''
+function rowOfKind(
+  kind: ContactKind,
+  rows: ReadonlyArray<StoredContactWithComputedValues | undefined>
+): StoredContactWithComputedValues | undefined {
+  return pipe(
+    rows,
+    Array.findFirst((row) => row?.info.kind === kind),
+    Option.getOrUndefined
+  )
+}
 
+function getInitialContactPhoneNumber(
+  phoneRow: StoredContactWithComputedValues | undefined
+): string {
+  if (phoneRow === undefined) return ''
+
+  const contactNumber = phoneRow.computedValues.normalizedValue
   return parsePhoneNumber(contactNumber).number?.significant ?? contactNumber
 }
 
@@ -57,13 +72,22 @@ function phoneNumberWithCallingCode({
   readonly phoneNumber: string
 }): string {
   const trimmedPhoneNumber = phoneNumber.trim()
+  if (trimmedPhoneNumber.length === 0) return ''
   return trimmedPhoneNumber.startsWith('+')
     ? trimmedPhoneNumber
     : `${callingCode}${trimmedPhoneNumber}`
 }
 
+function isValueInputValid(kind: ContactKind, input: string): boolean {
+  return (
+    input.trim().length === 0 ||
+    Option.isSome(normalizeContactValue(kind, input))
+  )
+}
+
 export default function AddNewContactForm({
   contactToEdit,
+  pairedContact,
   onClose,
 }: Props): React.ReactElement {
   const {t} = useTranslation()
@@ -91,19 +115,20 @@ export default function AddNewContactForm({
     useNavigation<
       ContactPreferencesStackScreenProps<'AddNewContact'>['navigation']
     >()
-  const initialPhoneNumber = getInitialContactPhoneNumber(
-    contactToEdit?.computedValues.normalizedNumber
-  )
+  const phoneRow = rowOfKind('phone', [contactToEdit, pairedContact])
+  const emailRow = rowOfKind('email', [contactToEdit, pairedContact])
+  const initialPhoneNumber = getInitialContactPhoneNumber(phoneRow)
+  const initialEmail = emailRow?.computedValues.normalizedValue ?? ''
   const initialContactName = contactToEdit?.info.name ?? ''
   const initialSelectedCountryCode =
-    contactToEdit === undefined
+    phoneRow === undefined
       ? undefined
-      : parsePhoneNumber(contactToEdit.computedValues.normalizedNumber)
-          .regionCode
+      : parsePhoneNumber(phoneRow.computedValues.normalizedValue).regionCode
   const footerHeightRef = useRef(0)
   const [footerHeight, setFooterHeight] = useState(0)
   const phoneNumberInputRef = useRef<React.ComponentRef<typeof Input>>(null)
   const [phoneNumber, setPhoneNumber] = useState(initialPhoneNumber)
+  const [email, setEmail] = useState(initialEmail)
   const [contactName, setContactName] = useState(initialContactName)
   const [isSavingContact, setIsSavingContact] = useState(false)
   const [saveToPhoneAtom] = useState(() => atom(true))
@@ -113,23 +138,27 @@ export default function AddNewContactForm({
     callingCode,
     phoneNumber,
   })
-  const normalizedPhoneNumber =
-    toE164PhoneNumberWithDefaultCountryCode(rawPhoneNumber)
-  const isPhoneNumberValid = Option.isSome(normalizedPhoneNumber)
+  const isPhoneNumberValid = isValueInputValid('phone', rawPhoneNumber)
+  const isEmailValid = isValueInputValid('email', email)
+  const hasSomeValue = rawPhoneNumber.length > 0 || email.trim().length > 0
   const isSubmitDisabled =
-    isSavingContact || contactName.trim().length === 0 || !isPhoneNumberValid
+    isSavingContact ||
+    contactName.trim().length === 0 ||
+    !hasSomeValue ||
+    !isPhoneNumberValid ||
+    !isEmailValid
   const isEditingContact = contactToEdit !== undefined
   const hasUnsavedChanges =
     contactName !== initialContactName ||
     phoneNumber !== initialPhoneNumber ||
+    email !== initialEmail ||
     selectedCountryCode !== initialSelectedCountryCode ||
     (!isEditingContact && !saveToPhone)
-  const shouldShowPhoneNumberError =
-    phoneNumber.trim().length > 0 && !isPhoneNumberValid
 
   useEffect(() => {
     setContactName(initialContactName)
     setPhoneNumber(initialPhoneNumber)
+    setEmail(initialEmail)
     setIsSavingContact(false)
     setSaveToPhone(true)
     setSelectedCountryCode(initialSelectedCountryCode)
@@ -139,6 +168,7 @@ export default function AddNewContactForm({
     }
   }, [
     initialContactName,
+    initialEmail,
     initialPhoneNumber,
     initialSelectedCountryCode,
     setSaveToPhone,
@@ -170,12 +200,22 @@ export default function AddNewContactForm({
       return t('addContactDialog.contactNameRequired')
     }
 
-    if (Option.isNone(normalizedPhoneNumber)) {
+    if (!isPhoneNumberValid) {
       return t('contactPreferences.addContactManually.invalidPhoneNumber')
     }
 
+    if (!isEmailValid) {
+      return t('contactPreferences.addContactManually.invalidEmail')
+    }
+
+    if (!hasSomeValue) {
+      return t(
+        'contactPreferences.addContactManually.phoneNumberOrEmailRequired'
+      )
+    }
+
     return undefined
-  }, [contactName, normalizedPhoneNumber, t])
+  }, [contactName, hasSomeValue, isEmailValid, isPhoneNumberValid, t])
 
   const saveContactForm = useCallback(async (): Promise<boolean> => {
     const error = validationError()
@@ -191,8 +231,6 @@ export default function AddNewContactForm({
       return false
     }
 
-    if (Option.isNone(normalizedPhoneNumber)) return false
-
     setIsSavingContact(true)
     try {
       await dismissKeyboardAndResolveOnLayoutUpdate()
@@ -201,13 +239,16 @@ export default function AddNewContactForm({
         contactToEdit === undefined
           ? addNewContact({
               contactName,
-              phoneNumber: normalizedPhoneNumber.value,
+              phoneNumber: rawPhoneNumber,
+              email,
               saveToPhone,
             })
           : updateContact({
               contact: contactToEdit,
+              pairedContact,
               contactName,
-              phoneNumber: normalizedPhoneNumber.value,
+              phoneNumber: rawPhoneNumber,
+              email,
             })
       )
     } finally {
@@ -217,7 +258,9 @@ export default function AddNewContactForm({
     addNewContact,
     contactName,
     contactToEdit,
-    normalizedPhoneNumber,
+    email,
+    pairedContact,
+    rawPhoneNumber,
     saveToPhone,
     showGlobalDialog,
     t,
@@ -226,13 +269,13 @@ export default function AddNewContactForm({
   ])
 
   const confirmLeave = useCallback(async (): Promise<boolean> => {
-    if (Option.isNone(normalizedPhoneNumber)) {
+    const error = validationError()
+
+    if (error !== undefined) {
       return await Effect.runPromise(
         showGlobalDialog({
           title: t('addContactDialog.contactCannotBeSavedTitle'),
-          subtitle: t(
-            'contactPreferences.addContactManually.invalidPhoneNumber'
-          ),
+          subtitle: error,
           positiveButtonText: t('common.discard'),
           negativeButtonText: t('common.close'),
           disableClose: true,
@@ -253,7 +296,7 @@ export default function AddNewContactForm({
     if (!shouldSave) return true
 
     return await saveContactForm()
-  }, [normalizedPhoneNumber, saveContactForm, showGlobalDialog, t])
+  }, [saveContactForm, showGlobalDialog, t, validationError])
 
   const {leaveWithoutConfirmation} = usePreventDiscardChangesWithConfirmation({
     enabled: hasUnsavedChanges,
@@ -324,13 +367,49 @@ export default function AddNewContactForm({
                 />
               </XStack>
             </XStack>
-            {shouldShowPhoneNumberError ? (
+            {!isPhoneNumberValid ? (
               <Typography
                 color="$redForeground"
                 paddingHorizontal="$1"
                 variant="micro"
               >
                 {t('contactPreferences.addContactManually.invalidPhoneNumber')}
+              </Typography>
+            ) : null}
+          </YStack>
+          <YStack gap="$2">
+            <XStack
+              alignItems="center"
+              backgroundColor="$backgroundSecondary"
+              borderRadius="$5"
+              height="$11"
+              paddingHorizontal="$5"
+            >
+              <Input
+                unstyled
+                autoCapitalize="none"
+                autoComplete="email"
+                autoCorrect={false}
+                color="$foregroundPrimary"
+                flex={1}
+                fontFamily="$body"
+                fontSize="$4"
+                fontWeight="500"
+                keyboardType="email-address"
+                onChangeText={setEmail}
+                placeholder={t('contactPreferences.addContactManually.email')}
+                placeholderTextColor={theme.foregroundTertiary.get()}
+                selectionColor={theme.accentYellowPrimary.get()}
+                value={email}
+              />
+            </XStack>
+            {!isEmailValid ? (
+              <Typography
+                color="$redForeground"
+                paddingHorizontal="$1"
+                variant="micro"
+              >
+                {t('contactPreferences.addContactManually.invalidEmail')}
               </Typography>
             ) : null}
           </YStack>

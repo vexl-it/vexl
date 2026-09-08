@@ -31,7 +31,7 @@ function renderItem({
 }
 
 function keyExtractor(item: StoredContactWithComputedValues): string {
-  return item.computedValues.normalizedNumber
+  return item.computedValues.normalizedValue
 }
 
 function ItemSeparatorComponent(): React.ReactElement {

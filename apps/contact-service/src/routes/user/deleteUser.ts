@@ -6,7 +6,7 @@ import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import {Effect} from 'effect'
 import {ContactDbService} from '../../db/ContactDbService'
 import {UserDbService} from '../../db/UserDbService'
-import {serverHashPhoneNumber} from '../../utils/serverHashContact'
+import {serverHashContact} from '../../utils/serverHashContact'
 import {withUserActionRedisLock} from '../../utils/withUserActionRedisLock'
 
 export const deleteUser = HttpApiBuilder.handler(
@@ -15,7 +15,7 @@ export const deleteUser = HttpApiBuilder.handler(
   'deleteUser',
   (req) =>
     CurrentSecurity.pipe(
-      Effect.bind('serverHash', (s) => serverHashPhoneNumber(s.hash)),
+      Effect.bind('serverHash', (s) => serverHashContact(s.hash)),
       Effect.flatMap((security) =>
         Effect.gen(function* (_) {
           const userDb = yield* _(UserDbService)

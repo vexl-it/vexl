@@ -14,7 +14,7 @@ import {
 import {ContactDbService} from '../../db/ContactDbService'
 import {UserDbService} from '../../db/UserDbService'
 import {reportUserReactivated, reportUserRefresh} from '../../metrics'
-import {serverHashPhoneNumber} from '../../utils/serverHashContact'
+import {serverHashContact} from '../../utils/serverHashContact'
 import {withUserActionRedisLock} from '../../utils/withUserActionRedisLock'
 import {notifyOthersAboutNewUserForked} from '../contacts/utils/notifyOthersAboutNewUser'
 
@@ -40,7 +40,7 @@ export const refreshUser = HttpApiBuilder.handler(
   'refreshUser',
   (req) =>
     CurrentSecurity.pipe(
-      Effect.bind('serverHash', (s) => serverHashPhoneNumber(s.hash)),
+      Effect.bind('serverHash', (s) => serverHashContact(s.hash)),
       Effect.flatMap((security) =>
         Effect.gen(function* (_) {
           const commonMetricAttributes = commonMetricAttributesFromHeaders(

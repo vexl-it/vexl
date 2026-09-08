@@ -14,7 +14,7 @@ import React from 'react'
 import {getTokens} from 'tamagui'
 import {type ContactPreferencesStackScreenProps} from '../../../../../navigationTypes'
 import {type StoredContactWithComputedValues} from '../../../../../state/contacts/domain'
-import {getInternationalPhoneNumber} from '../../../../../utils/getInternationalPhoneNumber'
+import {formatContactValue} from '../../../../../utils/formatContactValue'
 import ContactPictureImage from '../../../../ContactPictureImage'
 import {contactSelectMolecule} from '../atom'
 import IsSelectedSwitch from './IsSelectedSwitch'
@@ -35,9 +35,9 @@ function ContactItem({contactAtom}: Props): React.ReactElement {
   const avatarSize = tokens.size.$9.val
   const {
     info: {nonUniqueContactId, name},
-    computedValues: {normalizedNumber},
+    computedValues: {normalizedValue},
   } = contact
-  const isSelected = useAtomValue(selectContactAtom(normalizedNumber))
+  const isSelected = useAtomValue(selectContactAtom(normalizedValue))
   const contactTextColor = isSelected
     ? '$foregroundPrimary'
     : '$foregroundTertiary'
@@ -80,12 +80,12 @@ function ContactItem({contactAtom}: Props): React.ReactElement {
           {name}
         </Typography>
         <Typography
-          testID="@contactItem/normalizedNumber"
+          testID="@contactItem/normalizedValue"
           variant="micro"
           color={contactNumberColor}
           numberOfLines={1}
         >
-          {getInternationalPhoneNumber(normalizedNumber)}
+          {formatContactValue(contact)}
         </Typography>
       </Stack>
       <XStack gap="$2" ai="center">
@@ -94,13 +94,13 @@ function ContactItem({contactAtom}: Props): React.ReactElement {
           backgroundColor="$backgroundTertiary"
           onPress={() => {
             navigation.navigate('AddNewContact', {
-              editContactNumber: normalizedNumber,
+              editContactValue: normalizedValue,
             })
           }}
         >
           <PencilWriteEdit size={24} color={theme.foregroundPrimary.get()} />
         </IconButton>
-        <IsSelectedSwitch contactNumber={normalizedNumber} />
+        <IsSelectedSwitch contactValue={normalizedValue} />
       </XStack>
     </XStack>
   )

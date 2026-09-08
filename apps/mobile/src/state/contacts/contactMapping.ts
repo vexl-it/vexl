@@ -2,6 +2,7 @@ import {Array, Option, Schema, pipe} from 'effect'
 import {
   NonUniqueContactIdE,
   type ContactInfo,
+  type ContactKind,
   type NonUniqueContactId,
 } from './domain'
 
@@ -9,7 +10,11 @@ const DevicePhoneNumber = Schema.Struct({
   label: Schema.optional(Schema.Unknown),
   number: Schema.optional(Schema.Unknown),
 })
-type DevicePhoneNumber = typeof DevicePhoneNumber.Type
+
+const DeviceEmail = Schema.Struct({
+  label: Schema.optional(Schema.Unknown),
+  address: Schema.optional(Schema.Unknown),
+})
 
 const DeviceContact = Schema.Struct({
   firstName: Schema.optional(Schema.Unknown),
@@ -17,6 +22,7 @@ const DeviceContact = Schema.Struct({
   lastName: Schema.optional(Schema.Unknown),
   name: Schema.optional(Schema.Unknown),
   phoneNumbers: Schema.optional(Schema.NullishOr(Schema.Array(Schema.Unknown))),
+  emails: Schema.optional(Schema.NullishOr(Schema.Array(Schema.Unknown))),
 })
 type DeviceContact = typeof DeviceContact.Type
 
@@ -24,18 +30,20 @@ export interface DeviceContactsMappingResult {
   readonly contacts: ContactInfo[]
   readonly malformedContactsCount: number
   readonly malformedPhoneNumbersCount: number
+  readonly malformedEmailsCount: number
 }
 
 const decodeDeviceContact = Schema.decodeUnknownOption(DeviceContact)
 const decodeDevicePhoneNumber = Schema.decodeUnknownOption(DevicePhoneNumber)
+const decodeDeviceEmail = Schema.decodeUnknownOption(DeviceEmail)
 const decodeString = Schema.decodeUnknownOption(Schema.String)
 
 const emptyMappingResult: DeviceContactsMappingResult = {
   contacts: [],
   malformedContactsCount: 0,
   malformedPhoneNumbersCount: 0,
+  malformedEmailsCount: 0,
 }
-const emptyPhoneNumbers: readonly unknown[] = []
 
 function nonBlankStringFromUnknown(value: unknown): Option.Option<string> {
   return pipe(
@@ -63,11 +71,11 @@ function contactNameFromParts(contact: DeviceContact): Option.Option<string> {
   return nameFromParts.length === 0 ? Option.none() : Option.some(nameFromParts)
 }
 
-function contactName(contact: DeviceContact, rawNumber: string): string {
+function contactName(contact: DeviceContact, rawValue: string): string {
   return pipe(
     trimmedNonBlankStringFromUnknown(contact.name),
     Option.orElse(() => contactNameFromParts(contact)),
-    Option.getOrElse(() => rawNumber)
+    Option.getOrElse(() => rawValue)
   )
 }
 
@@ -80,50 +88,85 @@ function nonUniqueContactId(
   )
 }
 
-function mapDevicePhoneNumber(
+interface DeviceContactValue {
+  readonly label: unknown
+  readonly value: unknown
+}
+
+function decodeDeviceValue(
+  kind: ContactKind,
+  value: unknown
+): Option.Option<DeviceContactValue> {
+  return kind === 'phone'
+    ? pipe(
+        decodeDevicePhoneNumber(value),
+        Option.map((phone) => ({label: phone.label, value: phone.number}))
+      )
+    : pipe(
+        decodeDeviceEmail(value),
+        Option.map((email) => ({label: email.label, value: email.address}))
+      )
+}
+
+function mapDeviceValue(
   contact: DeviceContact,
-  phoneNumber: unknown
+  kind: ContactKind,
+  value: unknown
 ): Option.Option<ContactInfo> {
   return pipe(
-    decodeDevicePhoneNumber(phoneNumber),
-    Option.flatMap((decodedPhoneNumber: DevicePhoneNumber) => {
-      const rawNumber = trimmedNonBlankStringFromUnknown(
-        decodedPhoneNumber.number
+    decodeDeviceValue(kind, value),
+    Option.flatMap((decodedValue) =>
+      pipe(
+        trimmedNonBlankStringFromUnknown(decodedValue.value),
+        Option.map((rawValue) => ({
+          kind,
+          label: decodeString(decodedValue.label),
+          name: contactName(contact, rawValue),
+          nonUniqueContactId: nonUniqueContactId(contact),
+          rawValue,
+        }))
       )
+    )
+  )
+}
 
-      if (Option.isNone(rawNumber)) return Option.none()
-
-      return Option.some({
-        label: decodeString(decodedPhoneNumber.label),
-        name: contactName(contact, rawNumber.value),
-        nonUniqueContactId: nonUniqueContactId(contact),
-        numberToDisplay: rawNumber.value,
-        rawNumber: rawNumber.value,
-      })
-    })
+function mapDeviceValues(
+  contact: DeviceContact,
+  kind: ContactKind,
+  values: readonly unknown[] | null | undefined
+): {readonly contacts: ContactInfo[]; readonly malformedCount: number} {
+  return pipe(
+    values ?? [],
+    Array.reduce(
+      {contacts: Array.empty<ContactInfo>(), malformedCount: 0},
+      (result, value) =>
+        pipe(
+          mapDeviceValue(contact, kind, value),
+          Option.match({
+            onNone: () => ({
+              ...result,
+              malformedCount: result.malformedCount + 1,
+            }),
+            onSome: (contactInfo) => ({
+              ...result,
+              contacts: [...result.contacts, contactInfo],
+            }),
+          })
+        )
+    )
   )
 }
 
 function mapDeviceContact(contact: DeviceContact): DeviceContactsMappingResult {
-  return pipe(
-    Option.fromNullable(contact.phoneNumbers),
-    Option.getOrElse(() => emptyPhoneNumbers),
-    Array.reduce(emptyMappingResult, (result, phoneNumber) => {
-      const contactInfo = mapDevicePhoneNumber(contact, phoneNumber)
+  const phones = mapDeviceValues(contact, 'phone', contact.phoneNumbers)
+  const emails = mapDeviceValues(contact, 'email', contact.emails)
 
-      if (Option.isNone(contactInfo)) {
-        return {
-          ...result,
-          malformedPhoneNumbersCount: result.malformedPhoneNumbersCount + 1,
-        }
-      }
-
-      return {
-        ...result,
-        contacts: [...result.contacts, contactInfo.value],
-      }
-    })
-  )
+  return {
+    contacts: [...phones.contacts, ...emails.contacts],
+    malformedContactsCount: 0,
+    malformedPhoneNumbersCount: phones.malformedCount,
+    malformedEmailsCount: emails.malformedCount,
+  }
 }
 
 function mapUnknownContact(contact: unknown): DeviceContactsMappingResult {
@@ -139,6 +182,16 @@ function mapUnknownContact(contact: unknown): DeviceContactsMappingResult {
   return mapDeviceContact(decodedContact.value)
 }
 
+function sumOf(
+  results: readonly DeviceContactsMappingResult[],
+  count: (result: DeviceContactsMappingResult) => number
+): number {
+  return pipe(
+    results,
+    Array.reduce(0, (sum, result) => sum + count(result))
+  )
+}
+
 export function mapContactsFromSystemToDomain(
   contacts: readonly unknown[]
 ): DeviceContactsMappingResult {
@@ -149,13 +202,17 @@ export function mapContactsFromSystemToDomain(
       mappingResults,
       Array.flatMap((result) => result.contacts)
     ),
-    malformedContactsCount: pipe(
+    malformedContactsCount: sumOf(
       mappingResults,
-      Array.reduce(0, (sum, result) => sum + result.malformedContactsCount)
+      (result) => result.malformedContactsCount
     ),
-    malformedPhoneNumbersCount: pipe(
+    malformedPhoneNumbersCount: sumOf(
       mappingResults,
-      Array.reduce(0, (sum, result) => sum + result.malformedPhoneNumbersCount)
+      (result) => result.malformedPhoneNumbersCount
+    ),
+    malformedEmailsCount: sumOf(
+      mappingResults,
+      (result) => result.malformedEmailsCount
     ),
   }
 }

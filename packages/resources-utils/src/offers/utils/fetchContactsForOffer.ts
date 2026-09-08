@@ -7,8 +7,8 @@ import {
   type PublicKeyV2,
 } from '@vexl-next/cryptography/src/KeyHolder/brandsV2'
 import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
+import {type ContactHash} from '@vexl-next/domain/src/general/ContactHash.brand'
 import {type CommonConnectionsForUsers} from '@vexl-next/domain/src/general/contacts'
-import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {type IntendedConnectionLevel} from '@vexl-next/domain/src/general/offers'
 import {type ServerToClientHashedNumber} from '@vexl-next/domain/src/general/ServerToClientHashedNumber'
 import fetchAllPaginatedData from '@vexl-next/rest-api/src/fetchAllPaginatedData'
@@ -38,13 +38,13 @@ export default function fetchContactsForOffer({
   contactApi,
   intendedConnectionLevel,
   intendedClubs,
-  serverToClientHashesToHashedPhoneNumbersMap,
+  serverToClientHashesToContactHashesMap,
 }: {
   contactApi: ContactApi
   intendedConnectionLevel: IntendedConnectionLevel
-  serverToClientHashesToHashedPhoneNumbersMap: HashMap.HashMap<
+  serverToClientHashesToContactHashesMap: HashMap.HashMap<
     ServerToClientHashedNumber,
-    HashedPhoneNumber
+    ContactHash
   >
   intendedClubs: Record<
     ClubUuid,
@@ -98,7 +98,7 @@ export default function fetchContactsForOffer({
           [
             one.publicKey,
             Array.filterMap(one.common.hashes, (hash) =>
-              HashMap.get(serverToClientHashesToHashedPhoneNumbersMap, hash)
+              HashMap.get(serverToClientHashesToContactHashesMap, hash)
             ),
           ] as const
       ),
@@ -112,7 +112,7 @@ export default function fetchContactsForOffer({
           [
             one.publicKey,
             Array.filterMap(one.common.verifiedHashes, (hash) =>
-              HashMap.get(serverToClientHashesToHashedPhoneNumbersMap, hash)
+              HashMap.get(serverToClientHashesToContactHashesMap, hash)
             ),
           ] as const
       ),

@@ -1,5 +1,5 @@
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
-import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
+import {type ContactHash} from '@vexl-next/domain/src/general/ContactHash.brand'
 import {
   SERVER_TO_CLIENT_HASHED_NUMBER_PREFIX,
   ServerToClientHashedNumber,
@@ -16,25 +16,25 @@ export const ServerHashedNumber = Schema.String.pipe(
 )
 export type ServerHashedNumber = typeof ServerHashedNumber.Type
 
-export const serverHashPhoneNumber = (
-  hashedPhoneNumber: HashedPhoneNumber
+export const serverHashContact = (
+  contactHash: ContactHash
 ): Effect.Effect<
   ServerHashedNumber,
   ConfigError.ConfigError | UnexpectedServerError
 > =>
   Effect.zipRight(
-    // If the hashed phone number already starts with the server hash prefix, we should not hash it again
-    String.startsWith(SERVER_HASH_PREFIX)(hashedPhoneNumber)
+    // If the contact hash already starts with the server hash prefix, we should not hash it again
+    String.startsWith(SERVER_HASH_PREFIX)(contactHash)
       ? Effect.fail(
           new UnexpectedServerError({
-            message: `Hashed phone number is already a server hashed contact ${hashedPhoneNumber}`,
+            message: `Contact hash is already a server hashed contact ${contactHash}`,
           })
         )
       : Effect.void,
     secretSaltForServerContact.pipe(
       Effect.flatMap((salt) =>
         pbkdf2({
-          password: hashedPhoneNumber,
+          password: contactHash,
           salt,
           iterations: 100,
         })
@@ -45,7 +45,7 @@ export const serverHashPhoneNumber = (
         'CryptoError',
         (e) =>
           new UnexpectedServerError({
-            message: `Error server-hashing phone number: ${e.message}`,
+            message: `Error server-hashing contact: ${e.message}`,
             cause: e,
           })
       )

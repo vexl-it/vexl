@@ -97,7 +97,7 @@ const reencryptOneOfferActionAtom = atom(
         Record.fromEntries
       )
 
-      const serverToClientHashesToHashedPhoneNumbersMap = yield* _(
+      const serverToClientHashesToContactHashesMap = yield* _(
         set(ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom)
       )
 
@@ -107,7 +107,7 @@ const reencryptOneOfferActionAtom = atom(
           contactApi: api.contact,
           publicPart: offer.offerInfo.publicPart,
           countryPrefix: getCountryPrefix(session.phoneNumber),
-          serverToClientHashesToHashedPhoneNumbersMap,
+          serverToClientHashesToContactHashesMap,
           intendedConnectionLevel:
             intendedConnectionLevel ??
             offer.ownershipInfo.intendedConnectionLevel,

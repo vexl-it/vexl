@@ -1,6 +1,6 @@
 import {Contact} from 'expo-contacts'
 import {Platform} from 'react-native'
-import {type NonUniqueContactId} from './domain'
+import {isManualContactId, type NonUniqueContactId} from './domain'
 
 // expo-contacts returns a raw filesystem path on iOS (no file:// scheme). For
 // contacts synced from legacy sources the contact id — and thus the cached
@@ -15,6 +15,8 @@ function toFileUri(path: string): string {
 export async function getContactImageUri(
   contactId: NonUniqueContactId
 ): Promise<string | null> {
+  if (isManualContactId(contactId)) return null
+
   const uri = await new Contact(contactId).getThumbnail()
   if (!uri) return null
 

@@ -6,7 +6,7 @@ import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import {Effect, Option} from 'effect'
 import {UserDbService} from '../../db/UserDbService'
-import {serverHashPhoneNumber} from '../../utils/serverHashContact'
+import {serverHashContact} from '../../utils/serverHashContact'
 
 export const updateNotificationToken = HttpApiBuilder.handler(
   ContactApiSpecification,
@@ -16,7 +16,7 @@ export const updateNotificationToken = HttpApiBuilder.handler(
     Effect.gen(function* (_) {
       const security = yield* _(
         CurrentSecurity,
-        Effect.bind('serverHash', (s) => serverHashPhoneNumber(s.hash))
+        Effect.bind('serverHash', (s) => serverHashContact(s.hash))
       )
       const userDb = yield* _(UserDbService)
       yield* _(

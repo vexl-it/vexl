@@ -5,7 +5,7 @@ import {verifyAndDecodeShortLivedTokenForErasingUser} from '@vexl-next/server-ut
 import {Effect} from 'effect'
 import {ContactDbService} from '../../db/ContactDbService'
 import {UserDbService} from '../../db/UserDbService'
-import {serverHashPhoneNumber} from '../../utils/serverHashContact'
+import {serverHashContact} from '../../utils/serverHashContact'
 
 export const eraseUserFromNetwork = HttpApiBuilder.handler(
   ContactApiSpecification,
@@ -16,7 +16,7 @@ export const eraseUserFromNetwork = HttpApiBuilder.handler(
       const {phoneNumberHash} = yield* _(
         verifyAndDecodeShortLivedTokenForErasingUser(req.payload.token)
       )
-      const serverHash = yield* _(serverHashPhoneNumber(phoneNumberHash))
+      const serverHash = yield* _(serverHashContact(phoneNumberHash))
 
       const userDb = yield* _(UserDbService)
       const contactDb = yield* _(ContactDbService)

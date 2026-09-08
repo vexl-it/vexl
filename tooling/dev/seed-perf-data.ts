@@ -677,7 +677,7 @@ async function phaseOffers(): Promise<void> {
             intendedConnectionLevel: 'ALL',
             intendedClubs: {},
             offerId: newOfferId(),
-            serverToClientHashesToHashedPhoneNumbersMap: HashMap.empty(),
+            serverToClientHashesToContactHashesMap: HashMap.empty(),
           })
         )
         created.push({

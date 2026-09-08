@@ -24,16 +24,16 @@ const loadContactsFromDeviceActionAtom = atom(null, (get, set) => {
     // were suspended must not be overwritten by a stale snapshot.
     const storedContacts = get(storedContactsAtom)
 
-    const contactsFromDeviceByRawNumber = new Map<string, ContactInfo>(
-      Array.map(contactsFromDevice, (c) => [c.rawNumber, c])
+    const contactsFromDeviceByRawValue = new Map<string, ContactInfo>(
+      Array.map(contactsFromDevice, (c) => [c.rawValue, c])
     )
 
     // Preserve object identity for unchanged contacts so derived atoms
     // and the persisted storage blob don't churn on every resume.
     let someContactChanged = false
     const updatedStoredContacts = Array.map(storedContacts, (storedContact) => {
-      const infoFromDevice = contactsFromDeviceByRawNumber.get(
-        storedContact.info.rawNumber
+      const infoFromDevice = contactsFromDeviceByRawValue.get(
+        storedContact.info.rawValue
       )
       if (
         infoFromDevice === undefined ||
@@ -45,14 +45,14 @@ const loadContactsFromDeviceActionAtom = atom(null, (get, set) => {
       return {...storedContact, info: infoFromDevice} satisfies StoredContact
     })
 
-    const storedContactsRawNumbers = new Set(
-      Array.map(storedContacts, (c) => c.info.rawNumber)
+    const storedContactsRawValues = new Set(
+      Array.map(storedContacts, (c) => c.info.rawValue)
     )
     const newContactsToStore = pipe(
       contactsFromDevice,
       Array.filter(
         (contactFromDevice) =>
-          !storedContactsRawNumbers.has(contactFromDevice.rawNumber)
+          !storedContactsRawValues.has(contactFromDevice.rawValue)
       ),
       Array.map(
         (newContact) =>

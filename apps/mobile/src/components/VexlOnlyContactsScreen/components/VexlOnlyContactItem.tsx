@@ -2,7 +2,7 @@ import {Stack, Typography, UserImagePlaceholder, XStack} from '@vexl-next/ui'
 import React from 'react'
 import {getTokens} from 'tamagui'
 import {type StoredContactWithComputedValues} from '../../../state/contacts/domain'
-import {getInternationalPhoneNumber} from '../../../utils/getInternationalPhoneNumber'
+import {formatContactValue} from '../../../utils/formatContactValue'
 import ContactPictureImage from '../../ContactPictureImage'
 
 function VexlOnlyContactItem({
@@ -13,7 +13,6 @@ function VexlOnlyContactItem({
   const avatarSize = getTokens().size.$9.val
   const {
     info: {nonUniqueContactId, name},
-    computedValues: {normalizedNumber},
   } = contact
 
   return (
@@ -48,7 +47,7 @@ function VexlOnlyContactItem({
           color="$foregroundSecondary"
           numberOfLines={1}
         >
-          {getInternationalPhoneNumber(normalizedNumber)}
+          {formatContactValue(contact)}
         </Typography>
       </Stack>
     </XStack>

@@ -3,7 +3,7 @@ import {
   type PublicKeyPemBase64,
 } from '@vexl-next/cryptography/src/KeyHolder'
 import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
-import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
+import {type ContactHash} from '@vexl-next/domain/src/general/ContactHash.brand'
 import {
   generateChatMessageId,
   type ChatMessage,
@@ -44,8 +44,8 @@ function createRequestChatMessage({
   myVersion: VersionString
   goldenAvatarType?: GoldenAvatarType
   senderClubsUuids: readonly ClubUuid[]
-  commonFriends?: readonly HashedPhoneNumber[]
-  verifiedCommonFriends?: readonly HashedPhoneNumber[]
+  commonFriends?: readonly ContactHash[]
+  verifiedCommonFriends?: readonly ContactHash[]
   friendLevel?: readonly FriendLevel[]
 }): ChatMessage {
   return {
@@ -101,8 +101,8 @@ export function sendMessagingRequest({
   otherSideVersion?: VersionString | undefined
   goldenAvatarType?: GoldenAvatarType
   forClubsUuids: readonly ClubUuid[]
-  commonFriends?: readonly HashedPhoneNumber[]
-  verifiedCommonFriends?: readonly HashedPhoneNumber[]
+  commonFriends?: readonly ContactHash[]
+  verifiedCommonFriends?: readonly ContactHash[]
   friendLevel?: readonly FriendLevel[]
 }): Effect.Effect<
   SentMessagingRequest,

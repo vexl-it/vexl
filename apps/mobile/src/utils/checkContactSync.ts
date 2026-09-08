@@ -1,11 +1,11 @@
-import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
-import {Option, Schema} from 'effect/index'
+import {Array, pipe} from 'effect/index'
 import {getPermissionsAsync} from 'expo-contacts'
 import {getDefaultStore} from 'jotai'
 import {difference} from 'set-operations'
 import {importedContactsAtom} from '../state/contacts/atom/contactsStore'
+import {mapContactsFromSystemToDomain} from '../state/contacts/contactMapping'
 import {getDeviceContactsFromSystem} from '../state/contacts/getDeviceContactsFromSystem'
-import notEmpty from './notEmpty'
+import {normalizeContactValue} from '../state/contacts/utils'
 
 export default async function checkContactSync(
   store: ReturnType<typeof getDefaultStore> = getDefaultStore()
@@ -15,27 +15,17 @@ export default async function checkContactSync(
     return 'noPermissions'
   }
 
-  const deviceContacts = await getDeviceContactsFromSystem()
-  const deviceContactsNumbers = deviceContacts
-    .map((one) =>
-      one.phoneNumbers?.map((one) => {
-        const parseResult = Schema.decodeUnknownOption(E164PhoneNumber)(
-          one.number
-        )
-        if (Option.isSome(parseResult)) {
-          return parseResult.value
-        }
-        return undefined
-      })
-    )
-    .flat()
-    .filter(notEmpty)
+  const deviceContactsValues = pipe(
+    mapContactsFromSystemToDomain(await getDeviceContactsFromSystem()).contacts,
+    Array.filterMap((one) => normalizeContactValue(one.kind, one.rawValue))
+  )
 
-  const storedContactsNumbers = store
-    .get(importedContactsAtom)
-    .map((one) => one.computedValues.normalizedNumber)
+  const storedContactsValues = pipe(
+    store.get(importedContactsAtom),
+    Array.map((one) => one.computedValues.normalizedValue)
+  )
 
-  const newContacts = difference(deviceContactsNumbers, storedContactsNumbers)
+  const newContacts = difference(deviceContactsValues, storedContactsValues)
   if (newContacts.length > 0) {
     return 'notAllContactsImported'
   }

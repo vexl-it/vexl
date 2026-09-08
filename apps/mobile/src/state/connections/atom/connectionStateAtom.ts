@@ -158,7 +158,7 @@ export const syncConnectionsActionAtom = atom(
         )
       }
 
-      const serverToClientHashesToHashedPhoneNumbersMap = yield* _(
+      const serverToClientHashesToContactHashesMap = yield* _(
         set(ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom)
       )
 
@@ -180,7 +180,7 @@ export const syncConnectionsActionAtom = atom(
             [
               one.publicKey,
               Array.filterMap(one.common.hashes, (hash) =>
-                HashMap.get(serverToClientHashesToHashedPhoneNumbersMap, hash)
+                HashMap.get(serverToClientHashesToContactHashesMap, hash)
               ),
             ] as const
         ),
@@ -194,7 +194,7 @@ export const syncConnectionsActionAtom = atom(
             [
               one.publicKey,
               Array.filterMap(one.common.verifiedHashes, (hash) =>
-                HashMap.get(serverToClientHashesToHashedPhoneNumbersMap, hash)
+                HashMap.get(serverToClientHashesToContactHashesMap, hash)
               ),
             ] as const
         ),

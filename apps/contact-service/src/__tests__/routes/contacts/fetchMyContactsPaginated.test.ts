@@ -1,5 +1,6 @@
 import {SqlClient} from '@effect/sql/SqlClient'
 import {InvalidNextPageTokenError} from '@vexl-next/domain/src/general/commonErrors'
+import {HashedEmail} from '@vexl-next/domain/src/general/HashedEmail.brand'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
@@ -201,6 +202,45 @@ describe('Fetch my contacts paginated', () => {
             Array.join(',')
           )
         )
+      })
+    )
+  })
+
+  it('Connects users at second level through a shared email hash', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const app = yield* _(NodeTestingApp)
+        const sharedEmailHash = Schema.decodeSync(HashedEmail)(
+          'hashed:alice@example.com'
+        )
+        const [me, stranger] = yield* _(
+          Effect.all([
+            generateKeysAndHasheForNumber('+420733333901'),
+            generateKeysAndHasheForNumber('+420733333902'),
+          ])
+        )
+
+        // Neither has the other's phone number, both saved the same email
+        for (const user of [me, stranger]) {
+          yield* _(createUserOnNetwork(user))
+          yield* _(setAuthHeaders(user.authHeaders))
+          yield* _(
+            app.Contact.importContacts({
+              headers: makeTestCommonAndSecurityHeaders(user.authHeaders),
+              payload: {contacts: [sharedEmailHash], replace: true},
+            })
+          )
+        }
+
+        yield* _(setAuthHeaders(me.authHeaders))
+        const response = yield* _(
+          app.Contact.fetchMyContactsPaginated({
+            headers: makeTestCommonAndSecurityHeaders(me.authHeaders),
+            urlParams: {level: 'SECOND' as const, limit: 20},
+          })
+        )
+
+        expect(response.items).toEqual([stranger.keys.publicKeyPemBase64])
       })
     )
   })

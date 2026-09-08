@@ -13,7 +13,7 @@ import {hashPhoneNumber} from '@vexl-next/server-utils/src/generateUserAuthData'
 import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
 import {mockedReportMetric} from '@vexl-next/server-utils/src/tests/mockedMetricsClientService'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
-import {serverHashPhoneNumber} from '../../../utils/serverHashContact'
+import {serverHashContact} from '../../../utils/serverHashContact'
 import {makeTestCommonAndSecurityHeaders} from '../contacts/utils'
 
 describe('create user', () => {
@@ -89,7 +89,7 @@ describe('create user', () => {
           'hash',
           yield* _(
             hashPhoneNumber(phoneNumber),
-            Effect.flatMap(serverHashPhoneNumber)
+            Effect.flatMap(serverHashContact)
           )
         )
         expect(result[0]).toHaveProperty('expoToken', 'someToken')
@@ -106,9 +106,7 @@ describe('create user', () => {
         const keys = generatePrivateKey()
         const phoneNumber = Schema.decodeSync(E164PhoneNumber)('+420733333333')
         const phoneNumberHash = yield* _(hashPhoneNumber(phoneNumber))
-        const serverHashedNumber = yield* _(
-          serverHashPhoneNumber(phoneNumberHash)
-        )
+        const serverHashedNumber = yield* _(serverHashContact(phoneNumberHash))
         const sql = yield* _(SqlClient.SqlClient)
 
         const authHeaders = yield* _(
@@ -156,14 +154,12 @@ describe('create user', () => {
         `)
         expect(inDb[0]).toHaveProperty(
           'hashFrom',
-          yield* _(serverHashPhoneNumber(phoneNumberHash))
+          yield* _(serverHashContact(phoneNumberHash))
         )
         expect(inDb[0]).toHaveProperty(
           'hashTo',
           yield* _(
-            serverHashPhoneNumber(
-              Schema.decodeSync(HashedPhoneNumber)('someHash')
-            )
+            serverHashContact(Schema.decodeSync(HashedPhoneNumber)('someHash'))
           )
         )
 

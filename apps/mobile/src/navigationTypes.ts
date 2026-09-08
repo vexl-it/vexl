@@ -6,8 +6,8 @@ import {
 import {type NativeStackScreenProps} from '@react-navigation/native-stack'
 import {type KeyHolder} from '@vexl-next/cryptography'
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
+import {type ContactHash} from '@vexl-next/domain/src/general/ContactHash.brand'
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
-import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {type UserName} from '@vexl-next/domain/src/general/UserName.brand'
 import {type RealLifeInfo} from '@vexl-next/domain/src/general/UserNameAndAvatar.brand'
 import {type ClubCode, type ClubUuid} from '@vexl-next/domain/src/general/clubs'
@@ -36,7 +36,10 @@ import {type EditableOfferField} from './components/CRUDOfferFlow/offerSetupStep
 import {type FaqType} from './components/FaqScreen/useContent'
 import {type TabType} from './components/TosScreen/useContent'
 import {type ChatIds} from './state/chat/domain'
-import {type ContactsFilter} from './state/contacts/domain'
+import {
+  type ContactsFilter,
+  type NormalizedContactValue,
+} from './state/contacts/domain'
 
 export interface CommonFriendsClub {
   readonly uuid: ClubUuid
@@ -129,8 +132,8 @@ export type RootStackParamsList = {
   ChatTags: {chatId: ChatId}
 
   CommonFriends: {
-    readonly contactsHashes: readonly HashedPhoneNumber[]
-    readonly verifiedHashes?: readonly HashedPhoneNumber[]
+    readonly contactsHashes: readonly ContactHash[]
+    readonly verifiedHashes?: readonly ContactHash[]
     readonly clubs: readonly CommonFriendsClub[]
   }
 
@@ -192,8 +195,7 @@ export type CommunityParamsList = {
   Events: undefined
   Clubs: undefined
   Board:
-    | {initialFilter?: 'all' | 'mine'; filterSwitchRequestId?: string}
-    | undefined
+    {initialFilter?: 'all' | 'mine'; filterSwitchRequestId?: string} | undefined
   Blog: undefined
 }
 
@@ -253,7 +255,7 @@ export type ContactPreferencesStackParamsList = {
   ContactPreferencesList: {filter?: ContactsFilter | undefined} | undefined
   AddNewContact:
     | {
-        readonly editContactNumber?: E164PhoneNumber | undefined
+        readonly editContactValue?: NormalizedContactValue | undefined
       }
     | undefined
   AddNewContactCountryPicker: undefined

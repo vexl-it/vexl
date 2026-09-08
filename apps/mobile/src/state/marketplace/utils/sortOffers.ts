@@ -1,4 +1,4 @@
-import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
+import {type ContactHash} from '@vexl-next/domain/src/general/ContactHash.brand'
 import {
   type OneOfferInState,
   type Sort,
@@ -8,7 +8,7 @@ import {deriveVisibleCommonFriendsForOffer} from './visibleCommonFriends'
 export default function sortOffers<T extends OneOfferInState>(
   offers: readonly T[],
   sort: Sort,
-  importedContactsHashes?: readonly HashedPhoneNumber[]
+  importedContactsHashes?: readonly ContactHash[]
 ): T[] {
   const toReturn = [...offers]
   const commonFriendsCounts =

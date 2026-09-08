@@ -9,9 +9,9 @@ import {UnixMilliseconds} from '../utility/UnixMilliseconds.brand'
 import {UriString} from '../utility/UriString.brand'
 import {generateUuid} from '../utility/Uuid.brand'
 import {VersionString} from '../utility/VersionString.brand'
+import {ContactHash} from './ContactHash.brand'
 import {DeanonymizedUser} from './DeanonymizedUser'
 import {E164PhoneNumber} from './E164PhoneNumber.brand'
-import {HashedPhoneNumber} from './HashedPhoneNumber.brand'
 import {UserName} from './UserName.brand'
 import {RealLifeInfo} from './UserNameAndAvatar.brand'
 import {ClubUuid} from './clubs'
@@ -103,8 +103,8 @@ export const ChatMessagePayload = Schema.Struct({
   myVexlToken: Schema.optional(VexlNotificationToken),
   lastReceivedVexlToken: Schema.optional(VexlNotificationToken),
   senderClubsUuids: Schema.optional(Schema.Array(ClubUuid)),
-  commonFriends: Schema.optional(Schema.Array(HashedPhoneNumber)),
-  verifiedCommonFriends: Schema.optional(Schema.Array(HashedPhoneNumber)),
+  commonFriends: Schema.optional(Schema.Array(ContactHash)),
+  verifiedCommonFriends: Schema.optional(Schema.Array(ContactHash)),
   friendLevel: Schema.optional(Schema.Array(FriendLevel)),
 })
 export type ChatMessagePayload = typeof ChatMessagePayload.Type
@@ -144,8 +144,8 @@ export const ChatMessage = Schema.Struct({
   myVexlToken: Schema.optional(VexlNotificationToken),
   lastReceivedVexlToken: Schema.optional(VexlNotificationToken),
   senderClubsUuids: Schema.optional(Schema.Array(ClubUuid)),
-  commonFriends: Schema.optional(Schema.Array(HashedPhoneNumber)),
-  verifiedCommonFriends: Schema.optional(Schema.Array(HashedPhoneNumber)),
+  commonFriends: Schema.optional(Schema.Array(ContactHash)),
+  verifiedCommonFriends: Schema.optional(Schema.Array(ContactHash)),
   friendLevel: Schema.optional(Schema.Array(FriendLevel)),
 })
 export type ChatMessage = typeof ChatMessage.Type
@@ -271,8 +271,8 @@ export const ChatMessageRequiringNewerVersion = Schema.Struct({
   // New dedicated fields for vexl notification tokens
   myVexlToken: Schema.optional(VexlNotificationToken),
   lastReceivedVexlToken: Schema.optional(VexlNotificationToken),
-  commonFriends: Schema.optional(Schema.Array(HashedPhoneNumber)),
-  verifiedCommonFriends: Schema.optional(Schema.Array(HashedPhoneNumber)),
+  commonFriends: Schema.optional(Schema.Array(ContactHash)),
+  verifiedCommonFriends: Schema.optional(Schema.Array(ContactHash)),
   friendLevel: Schema.optional(Schema.Array(FriendLevel)),
 })
 export type ChatMessageRequiringNewerVersion =

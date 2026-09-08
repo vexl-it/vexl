@@ -4,7 +4,7 @@ import {atom} from 'jotai'
 import React from 'react'
 import {UpsertContactDialogContactRow} from '../../../../../state/contacts/atom/showUpsertContactDialogAtom'
 import {type StoredContactWithComputedValues} from '../../../../../state/contacts/domain'
-import {getInternationalPhoneNumber} from '../../../../../utils/getInternationalPhoneNumber'
+import {formatContactValue} from '../../../../../utils/formatContactValue'
 import {translationAtom} from '../../../../../utils/localization/I18nProvider'
 import {globalDialogAtom} from '../../../../GlobalDialog'
 
@@ -22,9 +22,7 @@ function ContactExistsDialogBody({
       </Typography>
       <UpsertContactDialogContactRow
         contactName={contact.info.name}
-        contactNumber={getInternationalPhoneNumber(
-          contact.computedValues.normalizedNumber
-        )}
+        contactNumber={formatContactValue(contact)}
         phoneContactId={contact.info.nonUniqueContactId}
       />
     </YStack>

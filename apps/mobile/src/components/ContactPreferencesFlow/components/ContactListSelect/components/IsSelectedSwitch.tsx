@@ -1,19 +1,19 @@
-import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {Switch} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue} from 'jotai'
 import React from 'react'
+import {type NormalizedContactValue} from '../../../../../state/contacts/domain'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {contactSelectMolecule} from '../atom'
 
 function IsSelectedSwitch({
-  contactNumber,
+  contactValue,
 }: {
-  readonly contactNumber: E164PhoneNumber
+  readonly contactValue: NormalizedContactValue
 }): React.ReactElement {
   const {t} = useTranslation()
   const {selectContactAtom} = useMolecule(contactSelectMolecule)
-  const isSelected = useAtomValue(selectContactAtom(contactNumber))
+  const isSelected = useAtomValue(selectContactAtom(contactValue))
   const accessibilityLabel = t(
     isSelected
       ? 'postLoginFlow.contactsList.deactivateContact'
@@ -24,7 +24,7 @@ function IsSelectedSwitch({
     <Switch
       testID="@contactItem/select"
       accessibilityLabel={accessibilityLabel}
-      valueAtom={selectContactAtom(contactNumber)}
+      valueAtom={selectContactAtom(contactValue)}
     />
   )
 }

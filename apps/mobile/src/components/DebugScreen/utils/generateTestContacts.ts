@@ -78,7 +78,6 @@ export function generateTestContacts(): string {
         "nonUniqueContactId": "${i.toString()}",
         "name": "${randomName()}",
         "label": "mobile",
-        "numberToDisplay": "${numberToDisplay}",
         "rawNumber": "${numberToDisplay}"
       },
       "flags": {

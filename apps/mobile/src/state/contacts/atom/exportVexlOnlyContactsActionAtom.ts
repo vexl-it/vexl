@@ -1,11 +1,12 @@
-import {Array, Effect, Schema, pipe} from 'effect'
+import {Array, Effect, Option, Record, Schema, pipe} from 'effect'
 import {shareAsync} from 'expo-sharing'
 import {atom} from 'jotai'
 import {showErrorAlert} from '../../../components/ErrorAlert'
 import {askAreYouSureActionAtom} from '../../../components/GlobalDialog'
 import {getContactsBackupFile} from '../../../utils/fsDirectories'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
-import {contactsToVcardString} from '../../../utils/vCard'
+import {contactsToVcardString, type VcardContact} from '../../../utils/vCard'
+import {type StoredContactWithComputedValues} from '../domain'
 import {vexlOnlyContactsAtom} from './vexlOnlyContactsAtoms'
 
 class ContactsExportError extends Schema.TaggedError<ContactsExportError>(
@@ -13,6 +14,41 @@ class ContactsExportError extends Schema.TaggedError<ContactsExportError>(
 )('ContactsExportError', {
   cause: Schema.Unknown,
 }) {}
+
+// Rows of one person (shared contact id) become one card with every
+// phone number and email; rows without an id get a card each
+function groupIntoVcardContacts(
+  contacts: readonly StoredContactWithComputedValues[]
+): VcardContact[] {
+  return pipe(
+    contacts,
+    Array.groupBy((contact) =>
+      pipe(
+        contact.info.nonUniqueContactId,
+        Option.getOrElse(() => contact.computedValues.normalizedValue)
+      )
+    ),
+    Record.values,
+    Array.filterMap((rows) =>
+      pipe(
+        Array.head(rows),
+        Option.map((first) => ({
+          name: first.info.name,
+          phoneNumbers: pipe(
+            rows,
+            Array.filter((row) => row.info.kind === 'phone'),
+            Array.map((row) => row.computedValues.normalizedValue)
+          ),
+          emails: pipe(
+            rows,
+            Array.filter((row) => row.info.kind === 'email'),
+            Array.map((row) => row.computedValues.normalizedValue)
+          ),
+        }))
+      )
+    )
+  )
+}
 
 export const exportVexlOnlyContactsActionAtom = atom(
   null,
@@ -25,13 +61,7 @@ export const exportVexlOnlyContactsActionAtom = atom(
     }
 
     const vcardString = contactsToVcardString(
-      pipe(
-        vexlOnlyContacts,
-        Array.map((one) => ({
-          name: one.info.name,
-          phoneNumber: one.computedValues.normalizedNumber,
-        }))
-      )
+      groupIntoVcardContacts(vexlOnlyContacts)
     )
 
     return Effect.tryPromise({

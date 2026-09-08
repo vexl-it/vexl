@@ -1,4 +1,3 @@
-import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {type SvgStringOrImageUri} from '@vexl-next/domain/src/utility/SvgStringOrImageUri.brand'
 import {toBasicError} from '@vexl-next/domain/src/utility/errors'
 import {
@@ -34,7 +33,7 @@ type ShowUpsertContactDialogParams =
   | {
       type: 'create'
       contactName?: string
-      contactNumber: E164PhoneNumber
+      contactNumber: string
       phoneContactId?: Option.Option<NonUniqueContactId>
       profileImage?: SvgStringOrImageUri
     }
@@ -42,12 +41,12 @@ type ShowUpsertContactDialogParams =
       type: 'edit'
       contactName: string
       existingContactName: string
-      contactNumber: E164PhoneNumber
+      contactNumber: string
       phoneContactId?: Option.Option<NonUniqueContactId>
       profileImage?: SvgStringOrImageUri
     }
 
-function safeParsePhoneNumber(contactNumber: E164PhoneNumber): string {
+function safeParsePhoneNumber(contactNumber: string): string {
   try {
     return parsePhoneNumber(contactNumber).number?.international ?? ''
   } catch (err) {

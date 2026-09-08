@@ -1,4 +1,8 @@
-import {LocationPlaceId} from '@vexl-next/domain/src/general/offers'
+import {
+  LocalizedAddresses,
+  LocationPlaceId,
+} from '@vexl-next/domain/src/general/offers'
+import {LanguageCodes} from '@vexl-next/domain/src/utility/LanguageCode.brand'
 import {Latitude, Longitude} from '@vexl-next/domain/src/utility/geoCoordinates'
 import {Schema} from 'effect'
 
@@ -12,12 +16,14 @@ export class GetLocationSuggestionsRequest extends Schema.Class<GetLocationSugge
   // ),
   phrase: Schema.String,
   lang: Schema.String.pipe(Schema.minLength(2)),
+  langs: Schema.optional(LanguageCodes),
 }) {}
 
 export class LocationData extends Schema.Class<LocationData>('LocationData')({
   placeId: LocationPlaceId,
   suggestFirstRow: Schema.String,
   suggestSecondRow: Schema.String,
+  localizedAddresses: Schema.optional(LocalizedAddresses),
   latitude: Latitude,
   longitude: Longitude,
   viewport: Schema.Struct({
@@ -50,6 +56,7 @@ export class GetGeocodedCoordinatesRequest extends Schema.Class<GetGeocodedCoord
   latitude: Schema.NumberFromString.pipe(Schema.compose(Latitude)),
   longitude: Schema.NumberFromString.pipe(Schema.compose(Longitude)),
   lang: Schema.String.pipe(Schema.minLength(2)),
+  langs: Schema.optional(LanguageCodes),
 }) {}
 
 export class GetGeocodedCoordinatesResponse extends Schema.Class<GetGeocodedCoordinatesResponse>(
@@ -57,6 +64,7 @@ export class GetGeocodedCoordinatesResponse extends Schema.Class<GetGeocodedCoor
 )({
   placeId: LocationPlaceId,
   address: Schema.String,
+  localizedAddresses: Schema.optional(LocalizedAddresses),
   latitude: Latitude,
   longitude: Longitude,
   viewport: Schema.Struct({

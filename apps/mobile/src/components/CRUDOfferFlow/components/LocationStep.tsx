@@ -24,6 +24,7 @@ import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {formatDecimal} from '../../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../../utils/localization/formattingLocaleAtom'
 import {getLocationFullDisplayLabel} from '../../../utils/offerLocationLabels'
+import {currentAppLanguageAtom} from '../../../utils/preferences'
 import {globalDialogAtom} from '../../GlobalDialog'
 import {LocationPickerMolecule} from '../../LocationPicker/molecule'
 import {offerLocationToMapValueWithRadius} from '../../LocationPicker/utils'
@@ -81,6 +82,7 @@ function LocationStep({
   const theme = useTheme()
   const navigation = useNavigation()
   const locale = useAtomValue(formattingLocaleAtom)
+  const appLanguage = useAtomValue(currentAppLanguageAtom)
   const {
     listingTypeAtom,
     locationStateAtom,
@@ -112,7 +114,7 @@ function LocationStep({
     const radiusKm =
       Math.round(longitudeDeltaToKilometers(loc.radius, loc.latitude) * 10) / 10
 
-    return `${getLocationFullDisplayLabel(loc)}, ${t(
+    return `${getLocationFullDisplayLabel(loc, appLanguage)}, ${t(
       'map.locationSelect.radius',
       {
         radius: formatDecimal(radiusKm, locale),

@@ -16,7 +16,6 @@ import useSafeGoBack from '../../utils/useSafeGoBack'
 import {showErrorAlert} from '../ErrorAlert'
 import {loadingOverlayDisplayedAtom} from '../LoadingOverlayProvider'
 import {appLogsEmptyAtom, appLogsEnabledAtom} from './atoms'
-import DebugInfo from './components/DebugInfo'
 import LogsList from './components/LogsList'
 import saveLogsToDirectoryAndShare from './utils/saveLogsToDirectory'
 import {clearLogs} from './utils/storage'
@@ -96,8 +95,6 @@ function AppLogsScreen(): React.ReactElement {
       }
     >
       <Stack flex={1} gap="$5">
-        <DebugInfo />
-
         <XStack
           alignItems="center"
           backgroundColor="$backgroundTertiary"

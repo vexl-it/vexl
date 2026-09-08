@@ -6,6 +6,7 @@ import {
   type ProductCategory,
 } from '@vexl-next/domain/src/general/offers'
 import {type Viewport} from '@vexl-next/domain/src/utility/geoCoordinates'
+import {type LanguageCode} from '@vexl-next/domain/src/utility/LanguageCode.brand'
 import {Array, pipe} from 'effect'
 import {getUserFacingOfferType} from '../../../utils/offerTypeSemantics'
 import {type StoredContactWithComputedValues} from '../../contacts/domain'
@@ -304,11 +305,13 @@ export function filterOffersByTextSearch({
   text,
   importedContacts,
   importedContactsHashes,
+  appLanguage,
 }: {
   offers: OneOfferInState[]
   text: string | undefined
   importedContacts: StoredContactWithComputedValues[]
   importedContactsHashes: readonly HashedPhoneNumber[]
+  appLanguage: LanguageCode
 }): OneOfferInState[] {
   if (!text) return offers
 
@@ -317,6 +320,7 @@ export function filterOffersByTextSearch({
     offers,
     importedContacts,
     importedContactsHashes,
+    appLanguage,
   })
 }
 

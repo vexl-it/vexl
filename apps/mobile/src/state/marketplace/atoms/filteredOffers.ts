@@ -2,6 +2,7 @@ import {Latitude, Longitude} from '@vexl-next/domain/src/utility/geoCoordinates'
 import {Array, Schema} from 'effect'
 import {atom} from 'jotai'
 import {splitAtom} from 'jotai/utils'
+import {currentAppLanguageAtom} from '../../../utils/preferences'
 import {
   importedContactsAtom,
   importedContactsHashesAtom,
@@ -45,6 +46,7 @@ export const filteredOffersIgnoreLocationAtom = atom((get) => {
     offers: filtered,
     importedContacts: get(importedContactsAtom),
     importedContactsHashes: get(importedContactsHashesAtom),
+    appLanguage: get(currentAppLanguageAtom),
   })
   const sort = filter.sort ?? 'NEWEST_OFFER'
 

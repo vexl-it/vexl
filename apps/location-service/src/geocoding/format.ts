@@ -6,7 +6,7 @@ import {
   isCityType,
   viewportLatRadiusDeg,
 } from '@vexl-next/geocoding-db/src/common'
-import {Option} from 'effect'
+import {Array, Option, pipe} from 'effect'
 
 /**
  * "cs-CZ" / "CS" / "cs" → "cs". Anything that isn't a two-letter code falls
@@ -23,6 +23,35 @@ export const localizedName = (
   lang: string
 ): string => names[lang] ?? name
 
+// Constructing Intl.DisplayNames is expensive and the localized address
+// builders need one per requested language for every suggestion row.
+// Bound caller-selected locales with LRU eviction. Runtime locale data does
+// not change during the process lifetime, so entries need no TTL.
+const MAX_DISPLAY_NAMES = 64
+const displayNamesByLang = new Map<string, Intl.DisplayNames>()
+
+const regionDisplayNames = (lang: string): Intl.DisplayNames => {
+  const cached = displayNamesByLang.get(lang)
+  if (cached !== undefined) {
+    displayNamesByLang.delete(lang)
+    displayNamesByLang.set(lang, cached)
+    return cached
+  }
+
+  const displayNames = new Intl.DisplayNames([lang, 'en'], {
+    type: 'region',
+    fallback: 'code',
+  })
+
+  if (displayNamesByLang.size >= MAX_DISPLAY_NAMES) {
+    const oldestKey = displayNamesByLang.keys().next().value
+    if (oldestKey !== undefined) displayNamesByLang.delete(oldestKey)
+  }
+
+  displayNamesByLang.set(lang, displayNames)
+  return displayNames
+}
+
 /**
  * Intl.DisplayNames throws (rather than returning undefined) on a malformed
  * region subtag, e.g. a bad country_code from a future ingest bug. Falls back
@@ -35,12 +64,7 @@ export const countryDisplayName = (
   Option.map(countryCode, (code) => {
     const upperCode = code.toUpperCase()
     try {
-      return (
-        new Intl.DisplayNames([lang, 'en'], {
-          type: 'region',
-          fallback: 'code',
-        }).of(upperCode) ?? upperCode
-      )
+      return regionDisplayNames(lang).of(upperCode) ?? upperCode
     } catch {
       return upperCode
     }
@@ -82,6 +106,28 @@ export const buildSuggestSecondRow = (
     : localizedName(record.name, record.names, lang)
 }
 
+const buildLocalizedAddresses = (
+  langs: readonly string[],
+  buildAddress: (lang: string) => string
+): Record<string, string> =>
+  Object.fromEntries(
+    pipe(
+      langs,
+      Array.map((lang): [string, string] => [lang, buildAddress(lang)])
+    )
+  )
+
+/** Mirrors how the mobile client joins suggestFirstRow + suggestSecondRow. */
+export const buildLocalizedSuggestAddresses = (
+  record: GeocodingRecordWithContext,
+  langs: readonly string[]
+): Record<string, string> =>
+  buildLocalizedAddresses(
+    langs,
+    (lang) =>
+      `${localizedName(record.name, record.names, lang)}, ${buildSuggestSecondRow(record, lang)}`
+  )
+
 /**
  * Reverse-geocode address, matching the shape the app displayed with Google:
  * "Vinohrady, Praha - CZ" for sub-city places, "Bratislava - SK" for cities.
@@ -105,6 +151,15 @@ export const buildGeocodeAddress = (
     onSome: (code) => `${namePart} - ${code.toUpperCase()}`,
   })
 }
+
+export const buildLocalizedGeocodeAddresses = (
+  record: Pick<
+    GeocodingRecordWithContext,
+    'placeType' | 'name' | 'names' | 'countryCode' | 'cityName' | 'cityNames'
+  >,
+  langs: readonly string[]
+): Record<string, string> =>
+  buildLocalizedAddresses(langs, (lang) => buildGeocodeAddress(record, lang))
 
 export const buildViewport = (
   latitude: number,

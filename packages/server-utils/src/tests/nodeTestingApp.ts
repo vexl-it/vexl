@@ -1,12 +1,3 @@
-import {type Client} from '@effect/platform/HttpApiClient'
-import {
-  HttpApiClient,
-  HttpClient,
-  HttpClientRequest,
-  type HttpApi,
-  type HttpApiGroup,
-  type HttpApiMiddleware,
-} from '@effect/platform/index'
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
@@ -14,19 +5,25 @@ import {
   type CryptoError,
   type EcdsaSignature,
 } from '@vexl-next/generic-utils/src/effect-helpers/crypto'
-import {Context, Effect, flow, Layer, Ref} from 'effect/index'
+import {Context, Effect, flow, Layer, Ref} from 'effect'
 import {type ReadonlyRecord} from 'effect/Record'
-import {type Simplify} from 'effect/Types'
+import {HttpClient, HttpClientRequest} from 'effect/unstable/http'
+import {
+  HttpApiClient,
+  type HttpApi,
+  type HttpApiGroup,
+} from 'effect/unstable/httpapi'
+import {type Client} from 'effect/unstable/httpapi/HttpApiClient'
 import {type ServerCrypto} from '../ServerCrypto'
 import {
   createDummyAuthHeaders,
   createDummyAuthHeadersForUser,
 } from './createDummyAuthHeaders'
 
-export class TestRequestHeaders extends Context.Tag('TestRequestHeaders')<
+export class TestRequestHeaders extends Context.Service<
   TestRequestHeaders,
   Ref.Ref<ReadonlyRecord<string, string>>
->() {
+>()('TestRequestHeaders') {
   static Live = Layer.effect(
     TestRequestHeaders,
     Ref.make({}) // Initialize with an empty record
@@ -44,38 +41,32 @@ export class TestRequestHeaders extends Context.Tag('TestRequestHeaders')<
 
 export const createNodeTestingApp = <
   ApiId extends string,
-  Groups extends HttpApiGroup.HttpApiGroup.Any,
-  ApiError,
-  ApiR,
+  Groups extends HttpApiGroup.Constraint,
 >(
-  api: HttpApi.HttpApi<ApiId, Groups, ApiError, ApiR>
+  api: HttpApi.HttpApi<ApiId, Groups>
 ): Effect.Effect<
-  Simplify<Client<Groups, ApiError, never>>,
+  Client<Groups>,
   never,
-  | HttpApiMiddleware.HttpApiMiddleware.Without<
-      ApiR | HttpApiGroup.HttpApiGroup.ClientContext<Groups>
-    >
+  | HttpApiGroup.MiddlewareClient<Groups>
   | HttpClient.HttpClient
   | TestRequestHeaders
 > =>
-  Effect.gen(function* (_) {
-    const testRequestHeadersRef = yield* _(TestRequestHeaders)
+  Effect.gen(function* () {
+    const testRequestHeadersRef = yield* TestRequestHeaders
 
-    return yield* _(
-      HttpApiClient.make(api, {
-        transformClient: flow(
-          HttpClient.mapRequestEffect((r) =>
-            Effect.gen(function* (_) {
-              const testHeaders = yield* _(Ref.get(testRequestHeadersRef))
-              return HttpClientRequest.setHeaders({
-                ...r.headers,
-                ...testHeaders,
-              })(r)
-            })
-          )
-        ),
-      })
-    )
+    return yield* HttpApiClient.make(api, {
+      transformClient: flow(
+        HttpClient.mapRequestEffect((r) =>
+          Effect.gen(function* () {
+            const testHeaders = yield* Ref.get(testRequestHeadersRef)
+            return HttpClientRequest.setHeaders({
+              ...r.headers,
+              ...testHeaders,
+            })(r)
+          })
+        )
+      ),
+    })
   })
 
 export const setAuthHeaders = (headers: {

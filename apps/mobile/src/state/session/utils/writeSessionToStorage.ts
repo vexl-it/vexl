@@ -1,5 +1,5 @@
 import {aesCTREncrypt} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
-import {Effect, Schema} from 'effect/index'
+import {Effect, Schema} from 'effect'
 import * as SecretStore from 'expo-secure-store'
 import {Session} from '../../../brands/Session.brand'
 import {
@@ -29,23 +29,21 @@ export class SessionWriteError extends Schema.TaggedError<SessionWriteError>(
 export default function writeSessionToStorage(
   session: Session
 ): Effect.Effect<void, SessionWriteError> {
-  return Effect.gen(function* (_) {
-    const sessionJson = yield* _(
-      Schema.encode(Schema.parseJson(Session))(session)
-    )
+  return Effect.gen(function* () {
+    const sessionJson = yield* Schema.encodeEffect(
+      Schema.fromJsonString(Session)
+    )(session)
 
-    const encryptedSessionJson = yield* _(
-      aesCTREncrypt(session.privateKey.privateKeyPemBase64)(sessionJson)
-    )
+    const encryptedSessionJson = yield* aesCTREncrypt(
+      session.privateKey.privateKeyPemBase64
+    )(sessionJson)
 
-    yield* _(saveItemToAsyncStorage(SESSION_KEY)(encryptedSessionJson))
-    yield* _(
-      saveItemToSecretStorage(
-        SECRET_TOKEN_KEY_V2,
-        SECRET_TOKEN_KEY_V2_OPTIONS
-      )(session.privateKey.privateKeyPemBase64)
-    )
-    yield* _(Effect.sync(markV2SecretAsWritten))
+    yield* saveItemToAsyncStorage(SESSION_KEY)(encryptedSessionJson)
+    yield* saveItemToSecretStorage(
+      SECRET_TOKEN_KEY_V2,
+      SECRET_TOKEN_KEY_V2_OPTIONS
+    )(session.privateKey.privateKeyPemBase64)
+    yield* Effect.sync(markV2SecretAsWritten)
   }).pipe(
     Effect.mapError(
       () =>

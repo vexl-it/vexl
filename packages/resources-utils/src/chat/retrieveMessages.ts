@@ -3,7 +3,7 @@ import {type ChatMessage} from '@vexl-next/domain/src/general/messaging'
 import {type UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {type VersionString} from '@vexl-next/domain/src/utility/VersionString.brand'
 import {type ChatApi} from '@vexl-next/rest-api/src/services/chat'
-import {Array, Effect, Either, pipe} from 'effect'
+import {Array, Effect, pipe} from 'effect'
 import {flow} from 'fp-ts/function'
 import {taskEitherToEffect} from '../effect-helpers/TaskEitherConverter'
 import {type ErrorDecryptingMessage} from './utils/chatCrypto'
@@ -13,7 +13,7 @@ import {
   type ErrorParsingChatMessage,
 } from './utils/parseChatMessage'
 
-export type ApiErrorRetrievingMessages = Effect.Effect.Error<
+export type ApiErrorRetrievingMessages = Effect.Error<
   ReturnType<ChatApi['retrieveMessages']>
 >
 
@@ -58,13 +58,13 @@ export default function retrieveMessages({
             }))
           )
         ),
-        Array.map(Effect.either),
+        Array.map(Effect.result),
         // Messages are decrypted independently — bounded concurrency instead
         // of processing them strictly one by one.
-        Effect.allWith({concurrency: 6}),
+        (effects) => Effect.all(effects, {concurrency: 6}),
         Effect.map((eithers) => ({
-          errors: pipe(Array.filterMap(eithers, Either.getLeft)),
-          messages: pipe(Array.filterMap(eithers, Either.getRight)),
+          errors: pipe(Array.getFailures(eithers)),
+          messages: pipe(Array.getSuccesses(eithers)),
         }))
       )
     )

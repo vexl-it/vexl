@@ -4,7 +4,7 @@ import {
   type OneOfferInState,
 } from '@vexl-next/domain/src/general/offers'
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
-import {Array, Effect, Option, pipe, Record} from 'effect'
+import {Array, Effect, Filter, Option, pipe, Record} from 'effect'
 import reportError from '../../../../../utils/reportError'
 import {type ClubKeys} from '../../../../clubs/atom/clubsToKeyHolderV2Atom'
 
@@ -42,27 +42,29 @@ export const getRemovedOffersIds = ({
   const clubOffersIds = pipe(
     storedClubs,
     Record.toEntries,
-    Array.filterMap(([clubUuid, clubKey]) => {
-      const offersIds = pipe(
-        Array.filter(
-          storedOffers,
-          (oneOffer) =>
-            !oneOffer.ownershipInfo?.adminId && // Not my offers
-            Array.contains(oneOffer.offerInfo.privatePart.clubIds, clubUuid)
-        ),
-        Array.map((o) => o.offerInfo.offerId)
-      )
-      if (Array.isNonEmptyArray(offersIds))
-        return Option.some({clubUuid, offersIds, clubKey})
-      return Option.none()
-    })
+    Array.filterMap(
+      Filter.fromPredicateOption(([clubUuid, clubKey]) => {
+        const offersIds = pipe(
+          Array.filter(
+            storedOffers,
+            (oneOffer) =>
+              !oneOffer.ownershipInfo?.adminId && // Not my offers
+              Array.contains(oneOffer.offerInfo.privatePart.clubIds, clubUuid)
+          ),
+          Array.map((o) => o.offerInfo.offerId)
+        )
+        if (Array.isArrayNonEmpty(offersIds))
+          return Option.some({clubUuid, offersIds, clubKey})
+        return Option.none()
+      })
+    )
   )
 
   // Each check is turned into an Option: None marks a swallowed failure so the
   // overall `succeeded` flag can tell an empty-because-successful result apart
   // from an empty-because-failed one.
   const removedContactOffers = pipe(
-    Array.isNonEmptyArray(savedContactOffersIds)
+    Array.isArrayNonEmpty(savedContactOffersIds)
       ? offersApi
           .getRemovedOffers({offerIds: savedContactOffersIds})
           .pipe(Effect.map((one) => one.offerIds))

@@ -32,7 +32,7 @@ const SqlLive = databaseConfig.pipe(
       transformResultNames: String.snakeToCamel,
     })
   ),
-  Layer.unwrapEffect
+  Layer.unwrap
 )
 const MigratorLive = PgMigrator.layer({
   loader: loadMigrationsFromEffect(migrations),

@@ -4,16 +4,14 @@ import {
 } from '@vexl-next/domain/src/general/clubs'
 import {type ContactApi} from '@vexl-next/rest-api/src/services/contact'
 import {type ListClubLinksResponse} from '@vexl-next/rest-api/src/services/contact/contracts'
-import {Data, Effect, Option} from 'effect'
+import {Data, Effect, flow, Option} from 'effect'
 import {pipe} from 'fp-ts/lib/function'
 import {atom, useAtomValue, useSetAtom} from 'jotai'
 import {useEffect} from 'react'
 import {apiAtom} from '../../api'
 import {clubsToKeyHolderAtom} from '../../state/clubs/atom/clubsToKeyHolderV2Atom'
 
-type ListLinksError = Effect.Effect.Error<
-  ReturnType<ContactApi['listClubLinks']>
->
+type ListLinksError = Effect.Error<ReturnType<ContactApi['listClubLinks']>>
 
 class ClubKeypairMissingError extends Data.TaggedError(
   'ClubKeypairMissingError'
@@ -51,8 +49,8 @@ export const fetchClubLinksActionAtom = atom(
       set(fetchedClubLinksAtom, {state: 'loading'})
 
     return pipe(
-      Option.fromNullable(clubUuidKeyPair),
-      Effect.catchAll(() => Effect.fail(new ClubKeypairMissingError())),
+      Effect.fromOption(Option.fromNullishOr(clubUuidKeyPair)),
+      Effect.catch(() => Effect.fail(new ClubKeypairMissingError())),
       Effect.flatMap((keyPair) =>
         contact.listClubLinks({
           clubUuid,
@@ -60,22 +58,24 @@ export const fetchClubLinksActionAtom = atom(
           keyPairV2: keyPair.keyPair,
         })
       ),
-      Effect.tapBoth({
-        onFailure: (error) =>
+      flow(
+        Effect.tapError((error) =>
           Effect.sync(() => {
             set(fetchedClubLinksAtom, {
               state: 'error',
               error,
             })
-          }),
-        onSuccess: (data) =>
+          })
+        ),
+        Effect.tap((data) =>
           Effect.sync(() => {
             set(fetchedClubLinksAtom, {
               state: 'done',
               data,
             })
-          }),
-      })
+          })
+        )
+      )
     )
   }
 )
@@ -135,6 +135,6 @@ export function useClubInviteLink(
   }, [fetchLinks, clubUuid])
 
   return state.state === 'done'
-    ? Option.fromNullable(state.data.links[0])
+    ? Option.fromNullishOr(state.data.links[0])
     : Option.none()
 }

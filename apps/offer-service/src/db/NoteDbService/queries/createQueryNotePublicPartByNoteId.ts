@@ -1,13 +1,13 @@
-import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {NoteId} from '@vexl-next/domain/src/general/notes'
 import {Array, Effect, flow} from 'effect'
+import {SqlSchema} from 'effect/unstable/sql'
 import {NotePublicPartRecord} from '../domain'
 import {noteNotExpired} from '../utils'
 
-export const createQueryNotePublicPartByNoteId = Effect.gen(function* (_) {
-  const sql = yield* _(PgClient.PgClient)
+export const createQueryNotePublicPartByNoteId = Effect.gen(function* () {
+  const sql = yield* PgClient.PgClient
 
   const query = SqlSchema.findAll({
     Request: NoteId,

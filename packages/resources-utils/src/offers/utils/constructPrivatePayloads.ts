@@ -29,7 +29,7 @@ export class PrivatePayloadsConstructionError extends Schema.TaggedError<Private
 }) {}
 
 export const OfferPrivatePayloadToEncrypt = Schema.Struct({
-  toPublicKey: Schema.Union(PublicKeyPemBase64Schema, PublicKeyV2Schema),
+  toPublicKey: Schema.Union([PublicKeyPemBase64Schema, PublicKeyV2Schema]),
   payloadPrivate: OfferPrivatePart,
 })
 export type OfferPrivatePayloadToEncrypt =

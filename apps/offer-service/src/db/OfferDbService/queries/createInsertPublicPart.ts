@@ -1,4 +1,3 @@
-import {SqlResolver} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
@@ -9,6 +8,7 @@ import {
   PublicPayloadEncrypted,
 } from '@vexl-next/domain/src/general/offers'
 import {Array, Effect, flow, Schema} from 'effect'
+import {SqlResolver} from 'effect/unstable/sql'
 import {OfferAdminIdHashed, PublicPartRecord} from '../domain'
 
 export const InsertPublicPartRequest = Schema.Struct({
@@ -20,35 +20,33 @@ export const InsertPublicPartRequest = Schema.Struct({
 })
 export type InsertPublicPartRequest = typeof InsertPublicPartRequest.Type
 
-export const createInsertPublicPart = Effect.gen(function* (_) {
-  const sql = yield* _(PgClient.PgClient)
+export const createInsertPublicPart = Effect.gen(function* () {
+  const sql = yield* PgClient.PgClient
 
-  const InsertPublicPart = yield* _(
-    SqlResolver.ordered('InsertPublicPart', {
-      Request: InsertPublicPartRequest,
-      Result: PublicPartRecord,
-      execute: (requests) => {
-        const requestsWithAutoValues = Array.map(requests, (oneRequest) => ({
-          ...oneRequest,
-          adminId: oneRequest.adminId,
-          offerId: oneRequest.offerId ?? newOfferId(),
-          createdAt: new Date(),
-          modifiedAt: new Date(),
-          report: 0,
-          refreshedAt: new Date(),
-        }))
-        return sql`
-          INSERT INTO
-            offer_public ${sql.insert(requestsWithAutoValues)}
-          RETURNING
-            *
-        `
-      },
-    })
-  )
+  const InsertPublicPart = SqlResolver.ordered({
+    Request: InsertPublicPartRequest,
+    Result: PublicPartRecord,
+    execute: (requests) => {
+      const requestsWithAutoValues = Array.map(requests, (oneRequest) => ({
+        ...oneRequest,
+        adminId: oneRequest.adminId,
+        offerId: oneRequest.offerId ?? newOfferId(),
+        createdAt: new Date(),
+        modifiedAt: new Date(),
+        report: 0,
+        refreshedAt: new Date(),
+      }))
+      return sql`
+        INSERT INTO
+          offer_public ${sql.insert(requestsWithAutoValues)}
+        RETURNING
+          *
+      `
+    },
+  })
 
   return flow(
-    InsertPublicPart.execute,
+    SqlResolver.request(InsertPublicPart),
     UnexpectedServerError.wrapErrors('Error inserting offer public part')
   )
 })

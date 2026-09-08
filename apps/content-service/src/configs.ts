@@ -44,9 +44,9 @@ export const appInMaintenanceModeConfig = Config.boolean(
   'APP_IN_MAINTENANCE_MODE'
 ).pipe(Config.withDefault(false))
 
-export const lightMapStyleUrlConfig = Schema.Config(
-  'LIGHT_MAP_STYLE_URL',
-  HttpsUrlString
+export const lightMapStyleUrlConfig = Config.schema(
+  HttpsUrlString,
+  'LIGHT_MAP_STYLE_URL'
 ).pipe(
   Config.withDefault(
     Schema.decodeSync(HttpsUrlString)(
@@ -55,9 +55,9 @@ export const lightMapStyleUrlConfig = Schema.Config(
   )
 )
 
-export const darkMapStyleUrlConfig = Schema.Config(
-  'DARK_MAP_STYLE_URL',
-  HttpsUrlString
+export const darkMapStyleUrlConfig = Config.schema(
+  HttpsUrlString,
+  'DARK_MAP_STYLE_URL'
 ).pipe(
   Config.withDefault(
     Schema.decodeSync(HttpsUrlString)(

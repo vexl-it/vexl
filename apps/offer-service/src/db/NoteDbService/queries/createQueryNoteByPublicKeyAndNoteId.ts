@@ -1,10 +1,10 @@
-import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {PublicKeyV2} from '@vexl-next/cryptography'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {NoteId} from '@vexl-next/domain/src/general/notes'
-import {Array, Effect, flow, Schema} from 'effect'
+import {Array, Effect, flow, Option, Schema} from 'effect'
+import {SqlSchema} from 'effect/unstable/sql'
 import {offerReportFilterConfig} from '../../../configs'
 import {
   noteNotExpired,
@@ -15,16 +15,18 @@ import {
 
 export const QueryNoteByPublicKeyAndNoteIdRequest = Schema.Struct({
   userPublicKey: PublicKeyPemBase64,
-  userPublicKeyV2: Schema.optionalWith(PublicKeyV2, {as: 'Option'}),
+  userPublicKeyV2: Schema.OptionFromOptional(PublicKeyV2).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
   id: NoteId,
   skipValidation: Schema.optional(Schema.Boolean),
 })
 export type QueryNoteByPublicKeyAndNoteIdRequest =
   typeof QueryNoteByPublicKeyAndNoteIdRequest.Type
 
-export const createQueryNoteByPublicKeyAndNoteId = Effect.gen(function* (_) {
-  const sql = yield* _(PgClient.PgClient)
-  const noteReportFilter = yield* _(offerReportFilterConfig)
+export const createQueryNoteByPublicKeyAndNoteId = Effect.gen(function* () {
+  const sql = yield* PgClient.PgClient
+  const noteReportFilter = yield* offerReportFilterConfig
 
   const query = SqlSchema.findAll({
     Request: QueryNoteByPublicKeyAndNoteIdRequest,

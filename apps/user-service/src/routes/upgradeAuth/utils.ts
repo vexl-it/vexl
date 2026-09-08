@@ -20,7 +20,7 @@ import {
   type VexlAuthHeader,
 } from '@vexl-next/rest-api/src/VexlAuthHeader'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
-import {Effect, Schema} from 'effect/index'
+import {Effect, pipe, Schema} from 'effect'
 
 const CHALLENGE_VALID_FOR_MILIS = 10 * 1000 * 60 // 10 minutes
 
@@ -34,20 +34,20 @@ type ChallengePayload = typeof ChallengePayloadSchema.Type
 export const generateChallengeForPublicKey = (
   publicKey: PublicKeyV2
 ): Effect.Effect<UpgradeAuthChallenge, UnexpectedServerError, ServerCrypto> =>
-  Effect.gen(function* (_) {
-    const crypto = yield* _(ServerCrypto)
+  Effect.gen(function* () {
+    const crypto = yield* ServerCrypto
 
     const challengePayload: ChallengePayload = {
       forPublicKey: publicKey,
       validUntil: unixMillisecondsFromNow(CHALLENGE_VALID_FOR_MILIS),
     }
 
-    return yield* _(
+    return yield* pipe(
       crypto.cryptoBoxSeal(ChallengePayloadSchema)(challengePayload),
-      Effect.flatMap(Schema.decode(UpgradeAuthChallenge))
+      Effect.flatMap(Schema.decodeEffect(UpgradeAuthChallenge))
     )
   }).pipe(
-    Effect.catchAll(
+    Effect.catch(
       (e) =>
         new UnexpectedServerError({
           message: 'Failed to generate challenge for public key',
@@ -65,10 +65,10 @@ export const verifyChallengeResponse = (
   UnexpectedServerError | UpgradeAuthInvalidSignatureError,
   ServerCrypto
 > =>
-  Effect.gen(function* (_) {
-    const crypto = yield* _(ServerCrypto)
+  Effect.gen(function* () {
+    const crypto = yield* ServerCrypto
 
-    const decodedChallenge = yield* _(
+    const decodedChallenge = yield* pipe(
       crypto.cryptoBoxUnseal(ChallengePayloadSchema)(challenge),
       Effect.mapError(
         (e) =>
@@ -89,8 +89,9 @@ export const verifyChallengeResponse = (
       })
     }
 
-    const isValidSignature = yield* _(
-      cryptoBoxVerifySignature(forPublicKey)(challenge, signature)
+    const isValidSignature = yield* cryptoBoxVerifySignature(forPublicKey)(
+      challenge,
+      signature
     )
     if (!isValidSignature) {
       return yield* new UpgradeAuthInvalidSignatureError({
@@ -116,15 +117,15 @@ export const createVexlAuthHeader = ({
   hash: HashedPhoneNumber
   publicKeyV2: PublicKeyV2
 }): Effect.Effect<VexlAuthHeader, UnexpectedServerError, ServerCrypto> =>
-  Effect.gen(function* (_) {
-    const crypto = yield* _(ServerCrypto)
+  Effect.gen(function* () {
+    const crypto = yield* ServerCrypto
     const data = {
       hash,
       pk: publicKeyV2,
     }
 
-    const encodedData = yield* _(
-      Schema.encode(UserDataShape)(data),
+    const encodedData = yield* pipe(
+      Schema.encodeEffect(UserDataShape)(data),
       Effect.mapError(
         (e) =>
           new UnexpectedServerError({
@@ -134,7 +135,7 @@ export const createVexlAuthHeader = ({
       )
     )
 
-    const signature = yield* _(
+    const signature = yield* pipe(
       crypto.cryptoBoxSign(encodedData),
       Effect.catchTag(
         'CryptoError',

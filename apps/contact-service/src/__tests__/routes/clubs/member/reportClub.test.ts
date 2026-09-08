@@ -1,10 +1,10 @@
-import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {generateClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {newOfferId} from '@vexl-next/domain/src/general/offers'
 import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
-import {Effect, Option, Schema} from 'effect'
+import {Effect, Option, Schema, pipe} from 'effect'
+import {SqlClient} from 'effect/unstable/sql'
 import {ClubMembersDbService} from '../../../../db/ClubMemberDbService'
 import {ClubsDbService} from '../../../../db/ClubsDbService'
 
@@ -47,57 +47,51 @@ const offerId = newOfferId()
 
 beforeEach(async () => {
   await runPromiseInMockedEnvironment(
-    Effect.gen(function* (_) {
-      user = yield* _(createMockedUser('+420733333330'))
-      user2 = yield* _(createMockedUser('+420733333331'))
+    Effect.gen(function* () {
+      user = yield* createMockedUser('+420733333330')
+      user2 = yield* createMockedUser('+420733333331')
 
-      const sql = yield* _(SqlClient.SqlClient)
-      yield* _(sql`DELETE FROM club_reported_record`)
-      yield* _(sql`DELETE FROM club_member`)
-      yield* _(sql`DELETE FROM club`)
-      yield* _(sql`DELETE FROM club_offer_reported_info`)
+      const sql = yield* SqlClient.SqlClient
+      yield* sql`DELETE FROM club_reported_record`
+      yield* sql`DELETE FROM club_member`
+      yield* sql`DELETE FROM club`
+      yield* sql`DELETE FROM club_offer_reported_info`
 
-      const app = yield* _(NodeTestingApp)
-      yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
-      yield* _(
-        app.ClubsAdmin.createClub({
-          headers: {'x-admin-token': ADMIN_TOKEN},
-          payload: {
-            club,
-          },
-        })
-      )
+      const app = yield* NodeTestingApp
+      yield* addTestHeaders({'x-admin-token': ADMIN_TOKEN})
+      yield* app.ClubsAdmin.createClub({
+        headers: {'x-admin-token': ADMIN_TOKEN},
+        payload: {
+          club,
+        },
+      })
 
-      const clubsDb = yield* _(ClubsDbService)
-      const {id: clubId} = yield* _(
+      const clubsDb = yield* ClubsDbService
+      const {id: clubId} = yield* pipe(
         clubsDb.findClubByUuid({uuid: club.uuid}),
-        Effect.flatten
+        Effect.flatMap(Effect.fromOption)
       )
 
-      const clubDb = yield* _(ClubMembersDbService)
-      yield* _(
-        clubDb.insertClubMember({
-          clubId,
-          publicKey: clubKeypairForUser.publicKeyPemBase64,
-          isModerator: false,
-          lastRefreshedAt: new Date(),
-          notificationToken: 'someToken' as ExpoNotificationToken,
-          vexlNotificationToken: 'vexl_nt_test' as VexlNotificationToken,
-          publicKeyV2: null,
-        })
-      )
+      const clubDb = yield* ClubMembersDbService
+      yield* clubDb.insertClubMember({
+        clubId,
+        publicKey: clubKeypairForUser.publicKeyPemBase64,
+        isModerator: false,
+        lastRefreshedAt: new Date(),
+        notificationToken: 'someToken' as ExpoNotificationToken,
+        vexlNotificationToken: 'vexl_nt_test' as VexlNotificationToken,
+        publicKeyV2: null,
+      })
 
-      yield* _(
-        clubDb.insertClubMember({
-          clubId,
-          publicKey: clubKeypairForUser2.publicKeyPemBase64,
-          isModerator: false,
-          lastRefreshedAt: new Date(),
-          notificationToken: 'someToken' as ExpoNotificationToken,
-          vexlNotificationToken: 'vexl_nt_test' as VexlNotificationToken,
-          publicKeyV2: null,
-        })
-      )
+      yield* clubDb.insertClubMember({
+        clubId,
+        publicKey: clubKeypairForUser2.publicKeyPemBase64,
+        isModerator: false,
+        lastRefreshedAt: new Date(),
+        notificationToken: 'someToken' as ExpoNotificationToken,
+        vexlNotificationToken: 'vexl_nt_test' as VexlNotificationToken,
+        publicKeyV2: null,
+      })
     })
   )
 })
@@ -105,47 +99,45 @@ beforeEach(async () => {
 describe('Report club', () => {
   it('Should report club for user who is member', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
-        const challenge = yield* _(generateAndSignChallenge(clubKeypairForUser))
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
+        const challenge = yield* generateAndSignChallenge(clubKeypairForUser)
 
-        yield* _(addTestHeaders(user.authHeaders))
+        yield* addTestHeaders(user.authHeaders)
         const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
           user.authHeaders
         )
-        yield* _(
-          app.ClubsMember.reportClub({
-            payload: {
-              ...challenge,
-              offerId,
-              clubUuid: club.uuid,
-            },
-            headers: commonAndSecurityHeaders,
-          })
-        )
+        yield* app.ClubsMember.reportClub({
+          payload: {
+            ...challenge,
+            offerId,
+            clubUuid: club.uuid,
+          },
+          headers: commonAndSecurityHeaders,
+        })
 
-        const offerIdHashed = yield* _(hashSha256(offerId))
+        const offerIdHashed = yield* hashSha256(offerId)
 
-        const sql = yield* _(SqlClient.SqlClient)
+        const sql = yield* SqlClient.SqlClient
 
-        const clubOfferReportedInfo = yield* _(sql`
+        const clubOfferReportedInfo = yield* sql`
           SELECT
             offer_id
           FROM
             club_offer_reported_info
           WHERE
             offer_id = ${offerIdHashed}
-        `)
+        `
         expect(clubOfferReportedInfo.at(0)).toBeDefined()
 
-        const reportedInDb = yield* _(sql`
+        const reportedInDb = yield* sql`
           SELECT
             report
           FROM
             club
           WHERE
             UUID = ${club.uuid}
-        `)
+        `
 
         expect(reportedInDb.at(0)).toHaveProperty('report', 1)
       })
@@ -154,48 +146,42 @@ describe('Report club', () => {
 
   it('Should deactivate club after report count limit is exceeded', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
-        const challengeForUser = yield* _(
-          generateAndSignChallenge(clubKeypairForUser)
-        )
-        const challengeForUser2 = yield* _(
-          generateAndSignChallenge(clubKeypairForUser2)
-        )
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
+        const challengeForUser =
+          yield* generateAndSignChallenge(clubKeypairForUser)
+        const challengeForUser2 =
+          yield* generateAndSignChallenge(clubKeypairForUser2)
 
-        yield* _(addTestHeaders(user.authHeaders))
+        yield* addTestHeaders(user.authHeaders)
         const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
           user.authHeaders
         )
-        yield* _(
-          app.ClubsMember.reportClub({
-            payload: {
-              ...challengeForUser,
-              offerId,
-              clubUuid: club.uuid,
-            },
-            headers: commonAndSecurityHeaders,
-          })
-        )
+        yield* app.ClubsMember.reportClub({
+          payload: {
+            ...challengeForUser,
+            offerId,
+            clubUuid: club.uuid,
+          },
+          headers: commonAndSecurityHeaders,
+        })
 
-        yield* _(addTestHeaders(user2.authHeaders))
+        yield* addTestHeaders(user2.authHeaders)
         const commonAndSecurityHeaders2 = makeTestCommonAndSecurityHeaders(
           user2.authHeaders
         )
-        yield* _(
-          app.ClubsMember.reportClub({
-            payload: {
-              ...challengeForUser2,
-              offerId: newOfferId(),
-              clubUuid: club.uuid,
-            },
-            headers: commonAndSecurityHeaders2,
-          })
-        )
+        yield* app.ClubsMember.reportClub({
+          payload: {
+            ...challengeForUser2,
+            offerId: newOfferId(),
+            clubUuid: club.uuid,
+          },
+          headers: commonAndSecurityHeaders2,
+        })
 
-        const sql = yield* _(SqlClient.SqlClient)
+        const sql = yield* SqlClient.SqlClient
 
-        const inactiveClubInDb = yield* _(sql`
+        const inactiveClubInDb = yield* sql`
           SELECT
             *
           FROM
@@ -203,7 +189,7 @@ describe('Report club', () => {
           WHERE
             UUID = ${club.uuid}
             AND made_inactive_at IS NOT NULL
-        `)
+        `
 
         expect(inactiveClubInDb.at(0)).toBeDefined()
         expect(inactiveClubInDb.at(0)).toHaveProperty(
@@ -216,54 +202,51 @@ describe('Report club', () => {
 
   it('Should not allow to report club twice for the same offer id and should NOT fail', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
-        const challenge = yield* _(generateAndSignChallenge(clubKeypairForUser))
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
+        const challenge = yield* generateAndSignChallenge(clubKeypairForUser)
 
-        yield* _(addTestHeaders(user.authHeaders))
+        yield* addTestHeaders(user.authHeaders)
         const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
           user.authHeaders
         )
-        yield* _(
-          app.ClubsMember.reportClub({
-            payload: {
-              ...challenge,
-              offerId,
-              clubUuid: club.uuid,
-            },
-            headers: commonAndSecurityHeaders,
-          })
-        )
+        yield* app.ClubsMember.reportClub({
+          payload: {
+            ...challenge,
+            offerId,
+            clubUuid: club.uuid,
+          },
+          headers: commonAndSecurityHeaders,
+        })
 
-        const sql = yield* _(SqlClient.SqlClient)
+        const sql = yield* SqlClient.SqlClient
 
-        const offerIdHashed = yield* _(hashSha256(offerId))
+        const offerIdHashed = yield* hashSha256(offerId)
 
-        const clubOfferReportedInfo = yield* _(sql`
+        const clubOfferReportedInfo = yield* sql`
           SELECT
             offer_id
           FROM
             club_offer_reported_info
           WHERE
             offer_id = ${offerIdHashed}
-        `)
+        `
         expect(clubOfferReportedInfo.at(0)).toBeDefined()
 
-        const reportedInDb = yield* _(sql`
+        const reportedInDb = yield* sql`
           SELECT
             report
           FROM
             club
           WHERE
             UUID = ${club.uuid}
-        `)
+        `
         expect(reportedInDb.at(0)).toHaveProperty('report', 1)
 
-        const secondChallenge = yield* _(
-          generateAndSignChallenge(clubKeypairForUser)
-        )
+        const secondChallenge =
+          yield* generateAndSignChallenge(clubKeypairForUser)
 
-        const response = yield* _(
+        const response = yield* pipe(
           app.ClubsMember.reportClub({
             payload: {
               ...secondChallenge,
@@ -272,22 +255,22 @@ describe('Report club', () => {
             },
             headers: commonAndSecurityHeaders,
           }),
-          Effect.either
+          Effect.result
         )
 
-        expect(response._tag).toBe('Right')
-        if (response._tag === 'Right') {
-          expect(response.right).toEqual({})
+        expect(response._tag).toBe('Success')
+        if (response._tag === 'Success') {
+          expect(response.success).toEqual({})
         }
 
-        const reportedInDbAfterSecondAttempt = yield* _(sql`
+        const reportedInDbAfterSecondAttempt = yield* sql`
           SELECT
             report
           FROM
             club
           WHERE
             UUID = ${club.uuid}
-        `)
+        `
         expect(reportedInDbAfterSecondAttempt.at(0)).toHaveProperty('report', 1)
       })
     )
@@ -295,71 +278,62 @@ describe('Report club', () => {
 
   it('Should not allow to report club for the same user more than configured limit value', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
-        const challenge = yield* _(generateAndSignChallenge(clubKeypairForUser))
-        const sql = yield* _(SqlClient.SqlClient)
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
+        const challenge = yield* generateAndSignChallenge(clubKeypairForUser)
+        const sql = yield* SqlClient.SqlClient
 
-        yield* _(sql`
+        yield* sql`
           UPDATE club
           SET
             report_limit = 10
           WHERE
             UUID = ${club.uuid}
-        `)
+        `
 
-        yield* _(addTestHeaders(user.authHeaders))
+        yield* addTestHeaders(user.authHeaders)
         const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
           user.authHeaders
         )
-        yield* _(
-          app.ClubsMember.reportClub({
-            payload: {
-              ...challenge,
-              offerId,
-              clubUuid: club.uuid,
-            },
-            headers: commonAndSecurityHeaders,
-          })
-        )
+        yield* app.ClubsMember.reportClub({
+          payload: {
+            ...challenge,
+            offerId,
+            clubUuid: club.uuid,
+          },
+          headers: commonAndSecurityHeaders,
+        })
 
-        const secondChallenge = yield* _(
-          generateAndSignChallenge(clubKeypairForUser)
-        )
+        const secondChallenge =
+          yield* generateAndSignChallenge(clubKeypairForUser)
 
-        yield* _(addTestHeaders(user.authHeaders))
-        yield* _(
-          app.ClubsMember.reportClub({
-            payload: {
-              ...secondChallenge,
-              offerId: newOfferId(),
-              clubUuid: club.uuid,
-            },
-            headers: commonAndSecurityHeaders,
-          })
-        )
+        yield* addTestHeaders(user.authHeaders)
+        yield* app.ClubsMember.reportClub({
+          payload: {
+            ...secondChallenge,
+            offerId: newOfferId(),
+            clubUuid: club.uuid,
+          },
+          headers: commonAndSecurityHeaders,
+        })
 
-        const thirdChallenge = yield* _(
-          generateAndSignChallenge(clubKeypairForUser)
-        )
+        const thirdChallenge =
+          yield* generateAndSignChallenge(clubKeypairForUser)
 
-        yield* _(
-          app.ClubsMember.reportClub({
-            payload: {
-              ...thirdChallenge,
-              offerId: newOfferId(),
-              clubUuid: club.uuid,
-            },
-            headers: commonAndSecurityHeaders,
-          })
-        )
+        yield* app.ClubsMember.reportClub({
+          payload: {
+            ...thirdChallenge,
+            offerId: newOfferId(),
+            clubUuid: club.uuid,
+          },
+          headers: commonAndSecurityHeaders,
+        })
 
-        const fourthChallenge = yield* _(
-          generateAndSignChallenge(clubKeypairForUser)
-        )
+        const fourthChallenge =
+          yield* generateAndSignChallenge(clubKeypairForUser)
 
-        yield* _(addTestHeaders(user.authHeaders))
-        const errorResponse = yield* _(
+        yield* addTestHeaders(user.authHeaders)
+        const errorResponse = yield* pipe(
           app.ClubsMember.reportClub({
             payload: {
               ...fourthChallenge,
@@ -368,7 +342,7 @@ describe('Report club', () => {
             },
             headers: commonAndSecurityHeaders,
           }),
-          Effect.either
+          Effect.result
         )
 
         expectErrorResponse(ReportClubLimitReachedError)(errorResponse)
@@ -378,16 +352,16 @@ describe('Report club', () => {
 
   it('Should return 404 when club not found', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
 
-        const challenge = yield* _(generateAndSignChallenge(clubKeypairForUser))
+        const challenge = yield* generateAndSignChallenge(clubKeypairForUser)
 
-        yield* _(addTestHeaders(user.authHeaders))
+        yield* addTestHeaders(user.authHeaders)
         const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
           user.authHeaders
         )
-        const errorResponse = yield* _(
+        const errorResponse = yield* pipe(
           app.ClubsMember.reportClub({
             payload: {
               ...challenge,
@@ -395,9 +369,9 @@ describe('Report club', () => {
               clubUuid: generateClubUuid(),
             },
             headers: commonAndSecurityHeaders,
-            withResponse: true,
+            responseMode: 'decoded-and-response',
           }),
-          Effect.either
+          Effect.result
         )
 
         expectErrorResponse(NotFoundError)(errorResponse)
@@ -407,16 +381,16 @@ describe('Report club', () => {
 
   it('Should return 404 when user not found', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
 
-        const challenge = yield* _(generateAndSignChallenge(clubKeypairForUser))
+        const challenge = yield* generateAndSignChallenge(clubKeypairForUser)
 
-        yield* _(addTestHeaders(user.authHeaders))
+        yield* addTestHeaders(user.authHeaders)
         const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
           user.authHeaders
         )
-        const errorResponse = yield* _(
+        const errorResponse = yield* pipe(
           app.ClubsMember.reportClub({
             payload: {
               ...challenge,
@@ -426,7 +400,7 @@ describe('Report club', () => {
             },
             headers: commonAndSecurityHeaders,
           }),
-          Effect.either
+          Effect.result
         )
 
         expectErrorResponse(InvalidChallengeError)(errorResponse)

@@ -1,6 +1,6 @@
 import {type PgClient} from '@effect/sql-pg'
-import {type Fragment} from '@effect/sql/Statement'
-import {Schema} from 'effect'
+import {Schema, SchemaTransformation} from 'effect'
+import {type Fragment} from 'effect/unstable/sql/Statement'
 import {NoteParts, NotePartsWithNoteForUserUpdateCounter} from './domain'
 
 export const noteSelect = (sql: PgClient.PgClient): Fragment => sql`
@@ -22,8 +22,8 @@ export const NoteSelectRecord = Schema.Struct({
   'notePublic.adminId': Schema.String,
   'notePublic.noteId': Schema.String,
   'notePublic.payloadPublic': Schema.String,
-  'notePublic.expiresAt': Schema.DateFromSelf,
-  'notePublic.createdAt': Schema.DateFromSelf,
+  'notePublic.expiresAt': Schema.Date,
+  'notePublic.createdAt': Schema.Date,
   'notePublic.report': Schema.Int,
   'notePrivate.id': Schema.String,
   'notePrivate.noteId': Schema.String,
@@ -31,55 +31,10 @@ export const NoteSelectRecord = Schema.Struct({
   'notePrivate.payloadPrivate': Schema.String,
 })
 
-export const NoteSelectToNoteParts = Schema.transform(
-  NoteSelectRecord,
-  NoteParts,
-  {
-    strict: true,
-    decode: (v) => ({
-      privatePart: {
-        id: v['notePrivate.id'],
-        noteId: v['notePrivate.noteId'],
-        userPublicKey: v['notePrivate.userPublicKey'],
-        payloadPrivate: v['notePrivate.payloadPrivate'],
-      },
-      publicPart: {
-        id: v['notePublic.id'],
-        adminId: v['notePublic.adminId'],
-        noteId: v['notePublic.noteId'],
-        payloadPublic: v['notePublic.payloadPublic'],
-        expiresAt: v['notePublic.expiresAt'],
-        createdAt: v['notePublic.createdAt'],
-        report: v['notePublic.report'],
-      },
-    }),
-    encode: (v) => ({
-      'notePrivate.id': v.privatePart.id,
-      'notePrivate.noteId': v.privatePart.noteId,
-      'notePrivate.userPublicKey': v.privatePart.userPublicKey,
-      'notePrivate.payloadPrivate': v.privatePart.payloadPrivate,
-      'notePublic.id': v.publicPart.id,
-      'notePublic.adminId': v.publicPart.adminId,
-      'notePublic.noteId': v.publicPart.noteId,
-      'notePublic.payloadPublic': v.publicPart.payloadPublic,
-      'notePublic.expiresAt': v.publicPart.expiresAt,
-      'notePublic.createdAt': v.publicPart.createdAt,
-      'notePublic.report': v.publicPart.report,
-    }),
-  }
-)
-
-export const NoteSelectWithNoteForUserUpdateCounterRecord = Schema.Struct({
-  ...NoteSelectRecord.fields,
-  noteForUserUpdateCounter: Schema.String,
-})
-
-export const NoteSelectWithNoteForUserUpdateCounterToNoteParts =
-  Schema.transform(
-    NoteSelectWithNoteForUserUpdateCounterRecord,
-    NotePartsWithNoteForUserUpdateCounter,
-    {
-      strict: true,
+export const NoteSelectToNoteParts = NoteSelectRecord.pipe(
+  Schema.decodeTo(
+    NoteParts,
+    SchemaTransformation.transform({
       decode: (v) => ({
         privatePart: {
           id: v['notePrivate.id'],
@@ -96,7 +51,6 @@ export const NoteSelectWithNoteForUserUpdateCounterToNoteParts =
           createdAt: v['notePublic.createdAt'],
           report: v['notePublic.report'],
         },
-        noteForUserUpdateCounter: v.noteForUserUpdateCounter,
       }),
       encode: (v) => ({
         'notePrivate.id': v.privatePart.id,
@@ -110,9 +64,55 @@ export const NoteSelectWithNoteForUserUpdateCounterToNoteParts =
         'notePublic.expiresAt': v.publicPart.expiresAt,
         'notePublic.createdAt': v.publicPart.createdAt,
         'notePublic.report': v.publicPart.report,
-        noteForUserUpdateCounter: v.noteForUserUpdateCounter,
       }),
-    }
+    })
+  )
+)
+
+export const NoteSelectWithNoteForUserUpdateCounterRecord = Schema.Struct({
+  ...NoteSelectRecord.fields,
+  noteForUserUpdateCounter: Schema.String,
+})
+
+export const NoteSelectWithNoteForUserUpdateCounterToNoteParts =
+  NoteSelectWithNoteForUserUpdateCounterRecord.pipe(
+    Schema.decodeTo(
+      NotePartsWithNoteForUserUpdateCounter,
+      SchemaTransformation.transform({
+        decode: (v) => ({
+          privatePart: {
+            id: v['notePrivate.id'],
+            noteId: v['notePrivate.noteId'],
+            userPublicKey: v['notePrivate.userPublicKey'],
+            payloadPrivate: v['notePrivate.payloadPrivate'],
+          },
+          publicPart: {
+            id: v['notePublic.id'],
+            adminId: v['notePublic.adminId'],
+            noteId: v['notePublic.noteId'],
+            payloadPublic: v['notePublic.payloadPublic'],
+            expiresAt: v['notePublic.expiresAt'],
+            createdAt: v['notePublic.createdAt'],
+            report: v['notePublic.report'],
+          },
+          noteForUserUpdateCounter: v.noteForUserUpdateCounter,
+        }),
+        encode: (v) => ({
+          'notePrivate.id': v.privatePart.id,
+          'notePrivate.noteId': v.privatePart.noteId,
+          'notePrivate.userPublicKey': v.privatePart.userPublicKey,
+          'notePrivate.payloadPrivate': v.privatePart.payloadPrivate,
+          'notePublic.id': v.publicPart.id,
+          'notePublic.adminId': v.publicPart.adminId,
+          'notePublic.noteId': v.publicPart.noteId,
+          'notePublic.payloadPublic': v.publicPart.payloadPublic,
+          'notePublic.expiresAt': v.publicPart.expiresAt,
+          'notePublic.createdAt': v.publicPart.createdAt,
+          'notePublic.report': v.publicPart.report,
+          noteForUserUpdateCounter: v.noteForUserUpdateCounter,
+        }),
+      })
+    )
   )
 
 export const noteNotExpired = (sql: PgClient.PgClient): Fragment => sql`

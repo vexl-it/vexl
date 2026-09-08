@@ -7,22 +7,24 @@ import {type CommonMetricAttributes} from '@vexl-next/server-utils/src/metrics/c
 import {MetricsMessage} from '@vexl-next/server-utils/src/metrics/domain'
 import {MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {reportMetricForked} from '@vexl-next/server-utils/src/metrics/reportMetricForked'
-import {Context, Effect, Layer, Schema} from 'effect'
+import {Context, Effect, Layer, Option, Schema} from 'effect'
 
 const NOTIFICATION_SENT = 'NOTIFICATION_SENT'
 const NOTIFICATION_PROCESSED = 'NOTIFICATION_PROCESSED'
 
-export const NotificationDeliveryChannel = Schema.Literal(
+export const NotificationDeliveryChannel = Schema.Literals([
   'foreground_socket',
   'background_socket',
-  'push'
-)
+  'push',
+])
 export type NotificationDeliveryChannel =
   typeof NotificationDeliveryChannel.Type
 
 const AnalyticsRecord = Schema.Struct({
   sentAt: UnixMilliseconds,
-  processedByClientAt: Schema.optionalWith(UnixMilliseconds, {as: 'Option'}),
+  processedByClientAt: Schema.OptionFromOptional(UnixMilliseconds).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
   clientVersion: VersionCode,
   clientPlatform: PlatformName,
 })
@@ -45,13 +47,14 @@ export interface NotificationMetricsServiceOperations {
   }) => Effect.Effect<void>
 }
 
-export class NotificationMetricsService extends Context.Tag(
-  'NotificationMetricsService'
-)<NotificationMetricsService, NotificationMetricsServiceOperations>() {
+export class NotificationMetricsService extends Context.Service<
+  NotificationMetricsService,
+  NotificationMetricsServiceOperations
+>()('NotificationMetricsService') {
   static readonly Live = Layer.effect(
     NotificationMetricsService,
-    Effect.gen(function* (_) {
-      const metricsClient = yield* _(MetricsClientService)
+    Effect.gen(function* () {
+      const metricsClient = yield* MetricsClientService
 
       return {
         reportNotificationSent: ({

@@ -4,7 +4,7 @@ import {Array, Effect, Schema} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
 
-const NumberOfFriendsAtomState = Schema.Union(
+const NumberOfFriendsAtomState = Schema.Union([
   Schema.Struct({
     state: Schema.Literal('loading'),
   }),
@@ -16,8 +16,8 @@ const NumberOfFriendsAtomState = Schema.Union(
   Schema.Struct({
     state: Schema.Literal('error'),
     error: Schema.Unknown,
-  })
-)
+  }),
+])
 
 export type NumberOfFriendsAtomState = typeof NumberOfFriendsAtomState.Type
 
@@ -38,28 +38,24 @@ const numberOfFriendsAtom = atom(
   (get, set) => {
     const api = get(apiAtom)
 
-    return Effect.gen(function* (_) {
-      const firstLevelConnections = yield* _(
-        fetchAllPaginatedData({
-          fetchEffectToRun: (nextPageToken) =>
-            api.contact.fetchMyContactsPaginated({
-              level: 'FIRST',
-              limit: FETCH_CONNECTIONS_PAGE_SIZE,
-              nextPageToken,
-            }),
-        })
-      )
+    return Effect.gen(function* () {
+      const firstLevelConnections = yield* fetchAllPaginatedData({
+        fetchEffectToRun: (nextPageToken) =>
+          api.contact.fetchMyContactsPaginated({
+            level: 'FIRST',
+            limit: FETCH_CONNECTIONS_PAGE_SIZE,
+            nextPageToken,
+          }),
+      })
 
-      const secondLevelConnections = yield* _(
-        fetchAllPaginatedData({
-          fetchEffectToRun: (nextPageToken) =>
-            api.contact.fetchMyContactsPaginated({
-              level: 'SECOND',
-              limit: FETCH_CONNECTIONS_PAGE_SIZE,
-              nextPageToken,
-            }),
-        })
-      )
+      const secondLevelConnections = yield* fetchAllPaginatedData({
+        fetchEffectToRun: (nextPageToken) =>
+          api.contact.fetchMyContactsPaginated({
+            level: 'SECOND',
+            limit: FETCH_CONNECTIONS_PAGE_SIZE,
+            nextPageToken,
+          }),
+      })
 
       const firstAndSecondLevelFriendsDeduped = Array.dedupe([
         ...firstLevelConnections,
@@ -74,15 +70,17 @@ const numberOfFriendsAtom = atom(
       })
     })
       .pipe(
-        Effect.catchAll((error) => {
+        Effect.catch((error) => {
           set(numberOfFriendsStorageAtom, {state: 'error', error})
           return Effect.void
         })
       )
       .pipe(
-        Effect.tap(() => {
-          resolveNumberOfFriends?.(true)
-        })
+        Effect.tap(() =>
+          Effect.sync(() => {
+            resolveNumberOfFriends?.(true)
+          })
+        )
       )
   }
 )

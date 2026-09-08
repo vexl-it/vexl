@@ -15,9 +15,9 @@ describe('map styles', () => {
 
   it('serves the fetched style documents and caches them', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
-        const resp = yield* _(app.Map.getMapStyles({}))
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
+        const resp = yield* app.Map.getMapStyles({})
 
         expect(resp).toEqual(dummyMapStyles)
         expect(mockedFetchMapStyles).toHaveBeenCalledTimes(1)

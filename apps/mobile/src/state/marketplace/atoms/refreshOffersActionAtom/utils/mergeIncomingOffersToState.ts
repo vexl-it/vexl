@@ -5,7 +5,7 @@ import {
   type OneOfferInState,
 } from '@vexl-next/domain/src/general/offers'
 import extractOwnerInfoFromOwnerPrivatePayload from '@vexl-next/resources-utils/src/offers/extractOwnerInfoFromOwnerPrivatePayload'
-import {Array, Option, pipe} from 'effect'
+import {Array, Filter, Option, pipe} from 'effect'
 import {offerWithoutSourceOrNone} from '../../../utils/offerWithoutSourceOrNone'
 
 // Process offers that have adminId in private part but do not have ownershipInfo.
@@ -71,15 +71,15 @@ export const mergeIncomingOffersToState = ({
     const removedFromContacts = removedContactsOfferIds.has(
       offer.offerInfo.offerId
     )
-    if (Array.isEmptyArray(removedFromClubs) && !removedFromContacts) {
+    if (Array.isArrayEmpty(removedFromClubs) && !removedFromContacts) {
       // Nothing was removed, but keep normalizing degenerate offers (no
       // friend level left, or CLUB friend level with no clubs) the same way
       // the removal path does, so they do not survive in state forever.
       const {clubIds, friendLevel} = offer.offerInfo.privatePart
       const isNormalized =
-        Array.isNonEmptyReadonlyArray(friendLevel) &&
+        Array.isReadonlyArrayNonEmpty(friendLevel) &&
         (!Array.contains(friendLevel, 'CLUB') ||
-          Array.isNonEmptyReadonlyArray(clubIds))
+          Array.isReadonlyArrayNonEmpty(clubIds))
       if (isNormalized) return Option.some(offer)
     }
     return offerWithoutSourceOrNone(
@@ -89,38 +89,45 @@ export const mergeIncomingOffersToState = ({
     )
   }
 
-  const mergedStoredOffers = Array.filterMap(storedOffers, (storedOffer) => {
-    // Do not update or remove offers that are owned by current user.
-    // They can be re-uploaded.
-    if (storedOffer.ownershipInfo?.adminId) return Option.some(storedOffer)
+  const mergedStoredOffers = Array.filterMap(
+    storedOffers,
+    Filter.fromPredicateOption((storedOffer) => {
+      // Do not update or remove offers that are owned by current user.
+      // They can be re-uploaded.
+      if (storedOffer.ownershipInfo?.adminId) return Option.some(storedOffer)
 
-    const incomingOffer = incomingOffersById.get(storedOffer.offerInfo.offerId)
-    const updatedOffer =
-      incomingOffer !== undefined
-        ? ({
-            ...storedOffer,
-            offerInfo: incomingOffer,
-          } satisfies OneOfferInState)
-        : storedOffer
+      const incomingOffer = incomingOffersById.get(
+        storedOffer.offerInfo.offerId
+      )
+      const updatedOffer =
+        incomingOffer !== undefined
+          ? ({
+              ...storedOffer,
+              offerInfo: incomingOffer,
+            } satisfies OneOfferInState)
+          : storedOffer
 
-    return pipe(
-      withoutRemovedSourcesOrNone(updatedOffer),
-      Option.flatMap(addOwnershipInfoFromPrivatePayloadIfMissing)
-    )
-  })
+      return pipe(
+        withoutRemovedSourcesOrNone(updatedOffer),
+        Option.flatMap(addOwnershipInfoFromPrivatePayloadIfMissing)
+      )
+    })
+  )
 
   const newOffers = pipe(
     incomingOffers,
     Array.filter((one) => !storedOffersIds.has(one.offerId)),
-    Array.filterMap((offerInfo) =>
-      pipe(
-        withoutRemovedSourcesOrNone({
-          offerInfo,
-          flags: {
-            reported: false,
-          },
-        } satisfies OneOfferInState),
-        Option.flatMap(addOwnershipInfoFromPrivatePayloadIfMissing)
+    Array.filterMap(
+      Filter.fromPredicateOption((offerInfo) =>
+        pipe(
+          withoutRemovedSourcesOrNone({
+            offerInfo,
+            flags: {
+              reported: false,
+            },
+          } satisfies OneOfferInState),
+          Option.flatMap(addOwnershipInfoFromPrivatePayloadIfMissing)
+        )
       )
     )
   )
@@ -128,7 +135,7 @@ export const mergeIncomingOffersToState = ({
   // No-op refresh: keep the original array reference so nothing downstream
   // invalidates and the persisted store is not rewritten.
   if (
-    Array.isEmptyArray(newOffers) &&
+    Array.isArrayEmpty(newOffers) &&
     mergedStoredOffers.length === storedOffers.length &&
     Array.every(mergedStoredOffers, (one, i) => one === storedOffers[i])
   )

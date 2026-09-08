@@ -1,6 +1,6 @@
 import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {type OfferId} from '@vexl-next/domain/src/general/offers'
-import {Array, Effect, Record, pipe} from 'effect'
+import {Array, Effect, Filter, Record, pipe} from 'effect'
 import {atom} from 'jotai'
 import {AppState} from 'react-native'
 import {apiAtom} from '../../../../api'
@@ -38,7 +38,7 @@ const NO_REMOVED_OFFERS: {
 export const refreshOffersActionAtom = atom(
   null,
   (get, set, options?: {readonly forceRemovedOffersReconciliation?: boolean}) =>
-    Effect.gen(function* (_) {
+    Effect.gen(function* () {
       const api = get(apiAtom)
       const session = get(sessionDataOrDummyAtom)
       const myStoredClubs = get(clubsToKeyHolderAtom)
@@ -51,18 +51,19 @@ export const refreshOffersActionAtom = atom(
 
       console.log('🦋 Refreshing offers')
 
-      const {clubs: newClubsOffers, contact: newContactOffers} = yield* _(
-        set(fetchOffersReportErrorsActionAtom, {
+      const {clubs: newClubsOffers, contact: newContactOffers} = yield* set(
+        fetchOffersReportErrorsActionAtom,
+        {
           offersApi: api.offer,
           contactNetworkKeyPair: session.privateKey,
           contactNetworkKeyPairV2: session.keyPairV2,
           clubs: myStoredClubs,
-        })
+        }
       )
 
       // With no new club offers the update is a no-op that would only rewrite
       // the persisted clubs state, so skip it entirely.
-      if (Array.isNonEmptyReadonlyArray(newClubsOffers))
+      if (Array.isReadonlyArrayNonEmpty(newClubsOffers))
         set(updateOffersIdsForClubStateActionAtom, {newOffers: newClubsOffers})
 
       // A user-initiated refresh (pull-to-refresh) bypasses the throttle so
@@ -73,8 +74,8 @@ export const refreshOffersActionAtom = atom(
         Date.now() - get(lastRemovedOffersReconciliationAtAtom) >=
           REMOVED_OFFERS_RECONCILIATION_INTERVAL_MS
 
-      const {removedClubsOfferIdsToClubUuid, removedContactOfferIds} = yield* _(
-        shouldReconcileRemovedOffers
+      const {removedClubsOfferIdsToClubUuid, removedContactOfferIds} =
+        yield* shouldReconcileRemovedOffers
           ? getRemovedOffersIds({
               offersApi: api.offer,
               storedOffers,
@@ -91,13 +92,12 @@ export const refreshOffersActionAtom = atom(
               )
             )
           : Effect.succeed(NO_REMOVED_OFFERS)
-      )
 
       const incomingOffers = pipe(
         [...newContactOffers, ...newClubsOffers],
         Array.groupBy((one) => one.offerId),
         Record.values,
-        Array.filterMap(combineIncomingOffers)
+        Array.filterMap(Filter.fromPredicateOption(combineIncomingOffers))
       )
 
       // Read fresh state right before merging to ensure no offers
@@ -120,8 +120,8 @@ export const refreshOffersActionAtom = atom(
       }
       set(anyMarketplaceSuggestionDismissedInThisSessionAtom, false)
 
-      yield* _(
-        set(ensureMyOffersHaveOwnershipInfoUploadedInPrivatepayloadForOwner)
+      yield* set(
+        ensureMyOffersHaveOwnershipInfoUploadedInPrivatepayloadForOwner
       )
 
       if (AppState.currentState === 'active') {
@@ -135,13 +135,13 @@ export const refreshOffersActionAtom = atom(
         `Incoming offers: ${incomingOffers.length}. Removed offers: ${removedClubsOfferIdsToClubUuid.length + removedContactOfferIds.length}`
       )
     }).pipe(
-      Effect.catchAll((e) => {
+      Effect.catch((e) => {
         reportError('error', new Error('Error fetching offers'), {e})
         set(loadingStateAtom, {state: 'error', error: e})
 
         return Effect.void
       }),
-      Effect.zipLeft(
+      Effect.tap(
         Effect.sync(() => {
           set(loadingStateAtom, {state: 'success'})
         })

@@ -10,14 +10,14 @@ import {
 } from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {UpgradeAuthChallenge} from '@vexl-next/rest-api/src/services/user/contracts'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
-import {Effect, Schema} from 'effect'
+import {Effect, pipe, Schema} from 'effect'
 import {cryptoConfig} from '../../configs'
 import {generateChallengeForPublicKey, verifyChallengeResponse} from './utils'
 
 const decodeCypher = Schema.decodeSync(CryptoBoxCypher)
 const decodeSignature = Schema.decodeSync(CryptoBoxSignature)
 
-const ChallengePayload = Schema.parseJson(
+const ChallengePayload = Schema.fromJsonString(
   Schema.Struct({
     forPublicKey: PublicKeyV2,
     validUntil: UnixMilliseconds,
@@ -38,10 +38,10 @@ const runWithServerCrypto = async <A, E>(
 describe('upgradeAuth utils', () => {
   it('generates challenge for public key', async () => {
     await runWithServerCrypto(
-      Effect.gen(function* (_) {
-        const keyPair = yield* _(generateKeyPair())
-        const challenge = yield* _(
-          generateChallengeForPublicKey(keyPair.publicKey)
+      Effect.gen(function* () {
+        const keyPair = yield* generateKeyPair()
+        const challenge = yield* generateChallengeForPublicKey(
+          keyPair.publicKey
         )
 
         expect(challenge.startsWith('CBCiph-')).toBe(true)
@@ -51,20 +51,20 @@ describe('upgradeAuth utils', () => {
 
   it('rejects malformed challenge payload', async () => {
     await runWithServerCrypto(
-      Effect.gen(function* (_) {
-        const keyPair = yield* _(generateKeyPair())
+      Effect.gen(function* () {
+        const keyPair = yield* generateKeyPair()
         const challenge = decodeCypher('CBCiph-not-a-valid-encrypted-payload')
         const signature = decodeSignature('CBSig-random-signature')
 
-        const result = yield* _(
+        const result = yield* pipe(
           verifyChallengeResponse(keyPair.publicKey, challenge, signature),
-          Effect.either
+          Effect.result
         )
 
-        expect(result._tag).toBe('Left')
-        if (result._tag === 'Left') {
-          expect(result.left._tag).toBe('UpgradeAuthInvalidSignatureError')
-          expect(result.left.message).toBe('Invalid challenge')
+        expect(result._tag).toBe('Failure')
+        if (result._tag === 'Failure') {
+          expect(result.failure._tag).toBe('UpgradeAuthInvalidSignatureError')
+          expect(result.failure.message).toBe('Invalid challenge')
         }
       })
     )
@@ -72,30 +72,30 @@ describe('upgradeAuth utils', () => {
 
   it('rejects challenge created for different public key', async () => {
     await runWithServerCrypto(
-      Effect.gen(function* (_) {
-        const firstKeyPair = yield* _(generateKeyPair())
-        const secondKeyPair = yield* _(generateKeyPair())
+      Effect.gen(function* () {
+        const firstKeyPair = yield* generateKeyPair()
+        const secondKeyPair = yield* generateKeyPair()
 
-        const challenge = yield* _(
-          generateChallengeForPublicKey(firstKeyPair.publicKey)
+        const challenge = yield* generateChallengeForPublicKey(
+          firstKeyPair.publicKey
         )
-        const signature = yield* _(
-          cryptoBoxSign(secondKeyPair.privateKey)(challenge)
+        const signature = yield* cryptoBoxSign(secondKeyPair.privateKey)(
+          challenge
         )
 
-        const result = yield* _(
+        const result = yield* pipe(
           verifyChallengeResponse(
             secondKeyPair.publicKey,
             challenge,
             signature
           ),
-          Effect.either
+          Effect.result
         )
 
-        expect(result._tag).toBe('Left')
-        if (result._tag === 'Left') {
-          expect(result.left._tag).toBe('UpgradeAuthInvalidSignatureError')
-          expect(result.left.message).toBe('Invalid challenge')
+        expect(result._tag).toBe('Failure')
+        if (result._tag === 'Failure') {
+          expect(result.failure._tag).toBe('UpgradeAuthInvalidSignatureError')
+          expect(result.failure.message).toBe('Invalid challenge')
         }
       })
     )
@@ -103,35 +103,35 @@ describe('upgradeAuth utils', () => {
 
   it('rejects expired challenge', async () => {
     await runWithServerCrypto(
-      Effect.gen(function* (_) {
-        const keyPair = yield* _(generateKeyPair())
-        const crypto = yield* _(ServerCrypto)
+      Effect.gen(function* () {
+        const keyPair = yield* generateKeyPair()
+        const crypto = yield* ServerCrypto
 
-        const expiredChallenge = yield* _(
+        const expiredChallenge = yield* pipe(
           crypto.cryptoBoxSeal(ChallengePayload)({
             forPublicKey: keyPair.publicKey,
             validUntil: unixMillisecondsFromNow(-1000),
           }),
-          Effect.flatMap(Schema.decode(UpgradeAuthChallenge))
+          Effect.flatMap(Schema.decodeEffect(UpgradeAuthChallenge))
         )
 
-        const signature = yield* _(
-          cryptoBoxSign(keyPair.privateKey)(expiredChallenge)
+        const signature = yield* cryptoBoxSign(keyPair.privateKey)(
+          expiredChallenge
         )
 
-        const result = yield* _(
+        const result = yield* pipe(
           verifyChallengeResponse(
             keyPair.publicKey,
             expiredChallenge,
             signature
           ),
-          Effect.either
+          Effect.result
         )
 
-        expect(result._tag).toBe('Left')
-        if (result._tag === 'Left') {
-          expect(result.left._tag).toBe('UpgradeAuthInvalidSignatureError')
-          expect(result.left.message).toBe('Invalid challenge')
+        expect(result._tag).toBe('Failure')
+        if (result._tag === 'Failure') {
+          expect(result.failure._tag).toBe('UpgradeAuthInvalidSignatureError')
+          expect(result.failure.message).toBe('Invalid challenge')
         }
       })
     )
@@ -139,26 +139,26 @@ describe('upgradeAuth utils', () => {
 
   it('rejects invalid signature for a valid challenge', async () => {
     await runWithServerCrypto(
-      Effect.gen(function* (_) {
-        const keyPair = yield* _(generateKeyPair())
-        const differentKeyPair = yield* _(generateKeyPair())
+      Effect.gen(function* () {
+        const keyPair = yield* generateKeyPair()
+        const differentKeyPair = yield* generateKeyPair()
 
-        const challenge = yield* _(
-          generateChallengeForPublicKey(keyPair.publicKey)
+        const challenge = yield* generateChallengeForPublicKey(
+          keyPair.publicKey
         )
-        const wrongSignature = yield* _(
-          cryptoBoxSign(differentKeyPair.privateKey)(challenge)
-        )
+        const wrongSignature = yield* cryptoBoxSign(
+          differentKeyPair.privateKey
+        )(challenge)
 
-        const result = yield* _(
+        const result = yield* pipe(
           verifyChallengeResponse(keyPair.publicKey, challenge, wrongSignature),
-          Effect.either
+          Effect.result
         )
 
-        expect(result._tag).toBe('Left')
-        if (result._tag === 'Left') {
-          expect(result.left._tag).toBe('UpgradeAuthInvalidSignatureError')
-          expect(result.left.message).toBe('Invalid signature')
+        expect(result._tag).toBe('Failure')
+        if (result._tag === 'Failure') {
+          expect(result.failure._tag).toBe('UpgradeAuthInvalidSignatureError')
+          expect(result.failure.message).toBe('Invalid signature')
         }
       })
     )
@@ -166,19 +166,19 @@ describe('upgradeAuth utils', () => {
 
   it('verifies valid challenge response', async () => {
     await runWithServerCrypto(
-      Effect.gen(function* (_) {
-        const keyPair = yield* _(generateKeyPair())
-        const challenge = yield* _(
-          generateChallengeForPublicKey(keyPair.publicKey)
+      Effect.gen(function* () {
+        const keyPair = yield* generateKeyPair()
+        const challenge = yield* generateChallengeForPublicKey(
+          keyPair.publicKey
         )
-        const signature = yield* _(cryptoBoxSign(keyPair.privateKey)(challenge))
+        const signature = yield* cryptoBoxSign(keyPair.privateKey)(challenge)
 
-        const result = yield* _(
+        const result = yield* pipe(
           verifyChallengeResponse(keyPair.publicKey, challenge, signature),
-          Effect.either
+          Effect.result
         )
 
-        expect(result._tag).toBe('Right')
+        expect(result._tag).toBe('Success')
       })
     )
   })

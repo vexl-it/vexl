@@ -1,30 +1,33 @@
 import {type ClubInfo, type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {type Chat} from '@vexl-next/domain/src/general/messaging'
 import {type OfferInfo} from '@vexl-next/domain/src/general/offers'
-import {Array, HashSet, Option, Order, pipe, Schema} from 'effect'
+import {Array, Effect, HashSet, Option, Order, pipe, Schema} from 'effect'
 import {type Atom, atom, useAtomValue} from 'jotai'
 import {splitAtom} from 'jotai/utils'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
 import {myOffersAtom} from '../../marketplace/atoms/myOffers'
 import {ClubWithMembers} from '../domain'
 
-const ClubsLoadingState = Schema.Union(
+const ClubsLoadingState = Schema.Union([
   Schema.Struct({
-    state: Schema.Literal('initial', 'loading', 'success'),
+    state: Schema.Literals(['initial', 'loading', 'success']),
   }),
   Schema.Struct({
     state: Schema.Literal('error'),
     // can be used to hold error state in future
     error: Schema.Unknown,
-  })
-)
+  }),
+])
 
 type ClubsLoadingState = typeof ClubsLoadingState.Type
 
 export class UserClubKeypairMissingError extends Schema.TaggedError<UserClubKeypairMissingError>(
   'UserClubKeypairMissingError'
 )('UserClubKeypairMissingError', {
-  status: Schema.optionalWith(Schema.Literal(404), {default: () => 404}),
+  status: Schema.Literal(404).pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): 404 => 404)),
+    Schema.withConstructorDefault(Effect.sync((): 404 => 404))
+  ),
   message: Schema.String,
 }) {}
 
@@ -56,13 +59,13 @@ export const clubNamesForIdsAtom = (
   atom((get) => getClubNamesForIds(get(clubsWithMembersAtom), clubsIds))
 
 const clubsWithMembersByNameOrder = pipe(
-  Order.string,
+  Order.String,
   Order.mapInput((clubWithMembers: ClubWithMembers) =>
     clubWithMembers.club.name.toLocaleLowerCase()
   ),
   Order.combine(
     pipe(
-      Order.string,
+      Order.String,
       Order.mapInput(
         (clubWithMembers: ClubWithMembers) => clubWithMembers.club.uuid
       )
@@ -105,7 +108,7 @@ export const singleClubAtom = (
   clubUuid: ClubUuid
 ): Atom<Option.Option<ClubWithMembers>> =>
   atom((get) =>
-    Option.fromNullable(get(clubsWithMembersByUuidAtom).get(clubUuid))
+    Option.fromNullishOr(get(clubsWithMembersByUuidAtom).get(clubUuid))
   )
 
 export const upsertClubWithMembersActionAtom = atom(

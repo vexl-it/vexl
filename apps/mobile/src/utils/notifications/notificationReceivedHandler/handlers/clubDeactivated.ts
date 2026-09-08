@@ -1,5 +1,5 @@
 import {type ClubDeactivatedNotificationData} from '@vexl-next/domain/src/general/notifications'
-import {Effect, Option, Record} from 'effect/index'
+import {Effect, Option, Record} from 'effect'
 import {getDefaultStore} from 'jotai'
 import {addNotificationToCenterActionAtom} from '../../../../components/NotificationsScreen/state'
 import {clubsToKeyHolderAtom} from '../../../../state/clubs/atom/clubsToKeyHolderV2Atom'
@@ -29,11 +29,11 @@ export function handleClubDeactivatedNotification(
         clubUuid: notificationData.clubUuid,
       })
       .pipe(
-        Effect.catchAll((e) => {
+        Effect.catch((e) => {
           if (
             e._tag === 'ClubNotFoundError' ||
             e._tag === 'FetchingClubError' ||
-            e._tag === 'NoSuchElementException'
+            e._tag === 'NoSuchElementError'
           )
             return Effect.void
 

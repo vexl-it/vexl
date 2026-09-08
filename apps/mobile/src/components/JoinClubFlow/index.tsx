@@ -1,5 +1,5 @@
 import {createNativeStackNavigator} from '@react-navigation/native-stack'
-import {ScopeProvider} from 'bunshi/dist/react'
+import {ScopeProvider} from 'bunshi/react'
 import {atom} from 'jotai'
 import React from 'react'
 import {type JoinClubFlowParamsList} from '../../navigationTypes'

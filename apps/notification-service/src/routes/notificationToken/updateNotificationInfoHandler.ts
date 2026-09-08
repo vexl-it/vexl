@@ -1,27 +1,29 @@
-import {HttpApiBuilder} from '@effect/platform/index'
 import {MissingCommonHeadersError} from '@vexl-next/rest-api/src/services/notification/contract'
 import {NotificationApiSpecification} from '@vexl-next/rest-api/src/services/notification/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
-import {Effect, Option} from 'effect'
+import {makeHttpApiHandler} from '@vexl-next/server-utils/src/makeHttpApiHandler'
+import {Effect, Option, pipe} from 'effect'
 import {NotificationTokensDb} from '../../services/NotificationTokensDb'
 
-export const updateNotificationInfoHandler = HttpApiBuilder.handler(
+export const updateNotificationInfoHandler = makeHttpApiHandler(
   NotificationApiSpecification,
   'NotificationTokenGroup',
   'updateNoficationInfo',
   (req) =>
     makeEndpointEffect(
-      Effect.gen(function* (_) {
+      Effect.gen(function* () {
         const {payload, headers} = req
 
         const {clientPlatform, clientVersion, clientAppSource, language} =
-          yield* _(
-            Option.all({
-              clientPlatform: headers.clientPlatformOrNone,
-              clientVersion: headers.clientVersionOrNone,
-              clientAppSource: headers.appSourceOrNone,
-              language: headers.language,
-            }),
+          yield* pipe(
+            Effect.fromOption(
+              Option.all({
+                clientPlatform: headers.clientPlatformOrNone,
+                clientVersion: headers.clientVersionOrNone,
+                clientAppSource: headers.appSourceOrNone,
+                language: headers.language,
+              })
+            ),
             Effect.mapError(() => new MissingCommonHeadersError())
           )
 

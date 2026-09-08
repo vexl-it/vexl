@@ -24,7 +24,7 @@ export function offerHasVisibleMapLocation(
     pipe(
       offer.offerInfo.publicPart.locationState,
       Array.some((state) => state === 'IN_PERSON')
-    ) && Array.isNonEmptyReadonlyArray(offer.offerInfo.publicPart.location)
+    ) && Array.isReadonlyArrayNonEmpty(offer.offerInfo.publicPart.location)
   )
 }
 

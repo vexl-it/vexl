@@ -1,28 +1,32 @@
-import {ParseResult, Schema} from 'effect'
+import {Effect, Schema, SchemaIssue, SchemaTransformation} from 'effect'
 
 const ValidUrlOriginString = Schema.String.pipe(
-  Schema.filter((toTest, _, ast) => {
-    try {
-      const url = new URL(toTest)
-      return url.origin === toTest || url.origin === toTest.replace(/\/$/, '')
-        ? true
-        : new ParseResult.Type(ast, toTest, 'Is not valid origin value')
-    } catch (e: any) {
-      return new ParseResult.Type(ast, toTest, e.message)
-    }
-  })
+  Schema.check(
+    Schema.makeFilter((toTest) => {
+      try {
+        const url = new URL(toTest)
+        return url.origin === toTest || url.origin === toTest.replace(/\/$/, '')
+          ? true
+          : 'Is not valid origin value'
+      } catch (error) {
+        return error instanceof Error ? error.message : 'Invalid URL'
+      }
+    })
+  )
 )
 
 const ValidUrlString = Schema.String.pipe(
-  Schema.filter((toTest, _, ast) => {
-    try {
-      // eslint-disable-next-line no-new
-      new URL(toTest)
-      return true
-    } catch (e: any) {
-      return new ParseResult.Type(ast, toTest, e.message)
-    }
-  })
+  Schema.check(
+    Schema.makeFilter((toTest) => {
+      try {
+        // eslint-disable-next-line no-new
+        new URL(toTest)
+        return true
+      } catch (error) {
+        return error instanceof Error ? error.message : 'Invalid URL'
+      }
+    })
+  )
 )
 function parseUrl(stringUrl: string): {
   origin: string
@@ -53,39 +57,45 @@ function stringifyUrl(data: {
 const ParsedUrlShape = Schema.Struct({
   origin: ValidUrlOriginString,
   pathname: Schema.String,
-  searchParams: Schema.Record({key: Schema.String, value: Schema.String}),
+  searchParams: Schema.Record(Schema.String, Schema.String),
 })
 
-const ParsedUrl = Schema.transformOrFail(ValidUrlString, ParsedUrlShape, {
-  strict: true,
-  decode: (s, _, ast) =>
-    ParseResult.try({
-      try: () => parseUrl(s),
-      catch: (e: any) => new ParseResult.Type(ast, s, e.message),
-    }),
-  encode: (url, _, ast) =>
-    ParseResult.try({
-      try: () => stringifyUrl(url),
-      catch: (e: any) => new ParseResult.Type(ast, url, e.message),
-    }),
-})
+const ParsedUrl = ValidUrlString.pipe(
+  Schema.decodeTo(
+    ParsedUrlShape,
+    SchemaTransformation.transformOrFail({
+      decode: (value: string) =>
+        Effect.try({
+          try: () => parseUrl(value),
+          catch: () => new SchemaIssue.InvalidValue({message: 'Invalid URL'}),
+        }),
+      encode: (value: typeof ParsedUrlShape.Type) =>
+        Effect.try({
+          try: () => stringifyUrl(value),
+          catch: () => new SchemaIssue.InvalidValue({message: 'Invalid URL'}),
+        }),
+    })
+  )
+)
 
 export const parseUrlWithSearchParams = <
   A,
   I extends Record<string, string>,
   R,
 >(
-  paramsShape: Schema.Schema<A, I, R>
-): Schema.Schema<
+  paramsShape: Schema.Codec<A, I, R, R>
+): Schema.Codec<
   {
     readonly origin: string
     readonly pathname: string
     readonly searchParams: A
   },
   string,
+  R,
   R
 > =>
-  Schema.compose(
-    ParsedUrl,
-    Schema.Struct({...ParsedUrlShape.fields, searchParams: paramsShape})
+  ParsedUrl.pipe(
+    Schema.decodeTo(
+      Schema.Struct({...ParsedUrlShape.fields, searchParams: paramsShape})
+    )
   )

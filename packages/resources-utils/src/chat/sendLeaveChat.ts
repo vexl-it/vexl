@@ -9,7 +9,7 @@ import {
 import {type VersionString} from '@vexl-next/domain/src/utility/VersionString.brand'
 import {type ChatApi} from '@vexl-next/rest-api/src/services/chat'
 import {type NotificationApi} from '@vexl-next/rest-api/src/services/notification'
-import {Effect, type ParseResult} from 'effect'
+import {Effect, type Schema} from 'effect'
 import {taskEitherToEffect} from '../effect-helpers/TaskEitherConverter'
 import {
   callWithNotificationService,
@@ -19,7 +19,7 @@ import {type JsonStringifyError} from '../utils/parsing'
 import {type ErrorEncryptingMessage} from './utils/chatCrypto'
 import {messageToNetwork} from './utils/messageIO'
 
-export type SendMessageApiErrors = Effect.Effect.Error<
+export type SendMessageApiErrors = Effect.Error<
   ReturnType<ChatApi['sendMessage']>
 >
 
@@ -41,29 +41,27 @@ export default function sendLeaveChat({
   notificationApi: NotificationApi
 }): Effect.Effect<
   ServerMessage,
-  | ParseResult.ParseError
+  | Schema.SchemaError
   | JsonStringifyError
   | ErrorEncryptingMessage
   | SendMessageApiErrors
 > {
-  return Effect.gen(function* (_) {
-    const encryptedMessage = yield* _(
-      taskEitherToEffect(messageToNetwork(receiverPublicKey)(message))
+  return Effect.gen(function* () {
+    const encryptedMessage = yield* taskEitherToEffect(
+      messageToNetwork(receiverPublicKey)(message)
     )
 
-    const serverMessage = yield* _(
-      callWithNotificationService(api.leaveChat, {
-        message: encryptedMessage,
-        receiverPublicKey,
-        senderPublicKey: senderKeypair.publicKeyPemBase64,
-        keyPair: senderKeypair,
-      })({
-        notificationApi,
-        notificationCypher: theirNotificationCypher,
-        otherSideVersion,
-        sendSystemNotification: true,
-      })
-    )
+    const serverMessage = yield* callWithNotificationService(api.leaveChat, {
+      message: encryptedMessage,
+      receiverPublicKey,
+      senderPublicKey: senderKeypair.publicKeyPemBase64,
+      keyPair: senderKeypair,
+    })({
+      notificationApi,
+      notificationCypher: theirNotificationCypher,
+      otherSideVersion,
+      sendSystemNotification: true,
+    })
 
     return {
       message: encryptedMessage,

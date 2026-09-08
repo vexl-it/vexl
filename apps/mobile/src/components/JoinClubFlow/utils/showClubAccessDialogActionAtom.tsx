@@ -1,7 +1,7 @@
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {generateV2KeyPair} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {Stack} from '@vexl-next/ui'
-import {Effect, Option} from 'effect'
+import {Effect, Option, pipe} from 'effect'
 import {atom} from 'jotai'
 import {Share} from 'react-native'
 import {addKeyToWaitingForAdmissionActionAtom} from '../../../state/clubs/atom/clubsToKeyHolderV2Atom'
@@ -18,16 +18,16 @@ import {SharableQrCode} from '../../SharableQrCode'
 export const showClubAccessDialogActionAtom = atom(null, (get, set) => {
   const {t} = get(translationAtom)
 
-  return Effect.gen(function* (_) {
-    const notificationToken = yield* _(
+  return Effect.gen(function* () {
+    const notificationToken = yield* pipe(
       getNotificationTokenE(),
-      Effect.map(Option.fromNullable)
+      Effect.map(Option.fromNullishOr)
     )
     const privateKey = generatePrivateKey()
     const privateKeyV2 = yield* generateV2KeyPair()
     const langCode = t('localeName')
 
-    const vexlNotificationToken = yield* _(set(generateVexlTokenActionAtom))
+    const vexlNotificationToken = yield* set(generateVexlTokenActionAtom)
 
     const link = createClubAdmitionRequestLink({
       langCode,
@@ -37,23 +37,21 @@ export const showClubAccessDialogActionAtom = atom(null, (get, set) => {
       publicKeyV2: privateKeyV2.publicKey,
     })
 
-    const confirmed = yield* _(
-      set(globalDialogAtom, {
-        title: t('clubs.requestClubAccess'),
-        subtitle: t('clubs.requestClubAccessInfo'),
-        positiveButtonText: t('common.share'),
-        negativeButtonText: t('common.close'),
-        children: (
-          <Stack alignItems="center" paddingVertical="$4">
-            <SharableQrCode
-              size={300}
-              value={link}
-              logo={require('../../images/app_logo.png')}
-            />
-          </Stack>
-        ),
-      })
-    )
+    const confirmed = yield* set(globalDialogAtom, {
+      title: t('clubs.requestClubAccess'),
+      subtitle: t('clubs.requestClubAccessInfo'),
+      positiveButtonText: t('common.share'),
+      negativeButtonText: t('common.close'),
+      children: (
+        <Stack alignItems="center" paddingVertical="$4">
+          <SharableQrCode
+            size={300}
+            value={link}
+            logo={require('../../images/app_logo.png')}
+          />
+        </Stack>
+      ),
+    })
 
     if (!confirmed) return
 
@@ -62,13 +60,11 @@ export const showClubAccessDialogActionAtom = atom(null, (get, set) => {
       oldKeyPair: privateKey,
     })
 
-    yield* _(
-      Effect.promise(async () => {
-        await Share.share({message: link})
-      })
-    )
+    yield* Effect.promise(async () => {
+      await Share.share({message: link})
+    })
   }).pipe(
-    Effect.catchAll((e) => {
+    Effect.catch((e) => {
       reportError('error', new Error('Error while requesting club access'), {e})
 
       showErrorAlert({

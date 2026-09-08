@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import {Array, Either, Schema, pipe} from 'effect'
+import {Array, Result, Schema, pipe} from 'effect'
 import {File, Paths} from 'expo-file-system'
 import {AppState} from 'react-native'
 import reportError from '../reportError'
@@ -23,8 +23,8 @@ import {
 // create a require cycle back to effectMmkv).
 const MMKV_SENTINEL_KEY = '__mmkv_data_exists'
 
-const decodeCriticalKeysPresenceRecord = Schema.decodeUnknownEither(
-  Schema.parseJson(CriticalKeysPresenceRecordSchema)
+const decodeCriticalKeysPresenceRecord = Schema.decodeUnknownResult(
+  Schema.fromJsonString(CriticalKeysPresenceRecordSchema)
 )
 
 function getMmkvFilesDiagnostics(): Record<string, unknown> {
@@ -80,9 +80,9 @@ async function detectPartialMmkvDataLoss(
   if (previousRecordRaw !== null) {
     const disappearedKeys = pipe(
       decodeCriticalKeysPresenceRecord(previousRecordRaw),
-      Either.match({
-        onLeft: (): CriticalMmkvKey[] => [],
-        onRight: (previousRecord) =>
+      Result.match({
+        onFailure: (): CriticalMmkvKey[] => [],
+        onSuccess: (previousRecord) =>
           detectDisappearedCriticalKeys({
             previousPresentKeys: previousRecord.presentKeys,
             currentPresentKeys,
@@ -90,7 +90,7 @@ async function detectPartialMmkvDataLoss(
       })
     )
 
-    if (Array.isNonEmptyArray(disappearedKeys) && !skipReport) {
+    if (Array.isArrayNonEmpty(disappearedKeys) && !skipReport) {
       try {
         reportError(
           'error',

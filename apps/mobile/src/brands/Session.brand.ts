@@ -7,32 +7,36 @@ import {
   UserSessionCredentials,
   UserSessionCredentialsV2,
 } from '@vexl-next/rest-api/src/UserSessionCredentials.brand'
-import {Schema} from 'effect'
+import {Effect, Schema} from 'effect'
 
 export const SessionV2 = Schema.Struct({
-  version: Schema.Int.pipe(Schema.greaterThanOrEqualTo(0)),
+  version: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
   realUserData: Schema.optional(UserNameAndUriAvatar),
   phoneNumber: E164PhoneNumber,
   sessionCredentials: UserSessionCredentialsV2,
   sessionNotificationToken: Schema.optional(VexlNotificationToken),
   privateKey: KeyHolder.PrivateKeyHolder,
   keyPairV2: KeyPairV2,
-  isLiquidityProvider: Schema.optionalWith(Schema.Boolean, {
-    default: () => false,
-  }),
+  isLiquidityProvider: Schema.Boolean.pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): false => false)),
+    Schema.withConstructorDefault(Effect.sync((): false => false))
+  ),
 })
 export type SessionV2 = typeof SessionV2.Type
 
 export const isSessionV2 = Schema.is(SessionV2)
 
 export const SessionV1 = Schema.Struct({
-  version: Schema.Int.pipe(Schema.greaterThanOrEqualTo(0)),
+  version: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
   realUserData: Schema.optional(UserNameAndUriAvatar),
   phoneNumber: E164PhoneNumber,
   sessionCredentials: UserSessionCredentials,
   sessionNotificationToken: Schema.optional(VexlNotificationToken),
   privateKey: KeyHolder.PrivateKeyHolder,
-  keyPairV2: Schema.optionalWith(Schema.Undefined, {default: () => undefined}),
+  keyPairV2: Schema.Undefined.pipe(
+    Schema.withDecodingDefaultType(Effect.sync(() => undefined)),
+    Schema.withConstructorDefault(Effect.sync(() => undefined))
+  ),
 })
 export type SessionV1 = typeof SessionV1.Type
 export const isSessionV1 = Schema.is(SessionV1)
@@ -51,5 +55,5 @@ export const sanityCheckSessionV2 = (session: SessionV2): boolean => {
   )
 }
 
-export const Session = Schema.Union(SessionV2, SessionV1)
+export const Session = Schema.Union([SessionV2, SessionV1])
 export type Session = typeof Session.Type

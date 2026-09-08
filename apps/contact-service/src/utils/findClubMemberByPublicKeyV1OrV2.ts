@@ -7,7 +7,7 @@ import {
   NotFoundError,
   type UnexpectedServerError,
 } from '@vexl-next/domain/src/general/commonErrors'
-import {Effect} from 'effect/index'
+import {Effect} from 'effect'
 import {ClubMembersDbService} from '../db/ClubMemberDbService'
 import {type ClubMemberRecord} from '../db/ClubMemberDbService/domain'
 
@@ -18,19 +18,19 @@ export const findClubMemberByPublicKeyV1OrV2 = (
   UnexpectedServerError | NotFoundError,
   ClubMembersDbService
 > =>
-  Effect.gen(function* (_) {
-    const clubMembersDb = yield* _(ClubMembersDbService)
+  Effect.gen(function* () {
+    const clubMembersDb = yield* ClubMembersDbService
     if (isPublicKeyV2(publicKey)) {
-      return yield* _(
-        clubMembersDb.findClubMemberByPublicKeyV2({publicKeyV2: publicKey})
-      )
+      return yield* clubMembersDb.findClubMemberByPublicKeyV2({
+        publicKeyV2: publicKey,
+      })
     } else {
-      return yield* _(clubMembersDb.findClubMemberByPublicKey({publicKey}))
+      return yield* clubMembersDb.findClubMemberByPublicKey({publicKey})
     }
   }).pipe(
-    Effect.flatten,
+    Effect.flatMap(Effect.fromOption),
     Effect.catchTag(
-      'NoSuchElementException',
+      'NoSuchElementError',
       () => new NotFoundError({message: 'Club member not found'})
     )
   )

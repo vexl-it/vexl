@@ -11,10 +11,9 @@
     "cleanup-unused-translations": "tsx src/cleanupUnusedTranslations.ts"
   },
   "dependencies": {
-    "@effect/platform": "^0.93.6",
-    "@effect/platform-node": "^0.103.0",
+    "@effect/platform-node": "4.0.0-rc.112",
     "@vexl-next/cryptography": "0.0.0",
-    "effect": "^3.20.0",
+    "effect": "4.0.0-rc.112",
     "qrcode": "^1.5.3"
   },
   "devDependencies": {

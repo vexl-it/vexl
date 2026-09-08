@@ -1,11 +1,11 @@
 import {
+  RequestUploadResponse,
   type FileExtension,
   type RequestUploadRequest,
-  RequestUploadResponse,
 } from '@/src/services/slideshows/domain'
 import {PutObjectCommand, S3Client} from '@aws-sdk/client-s3'
 import {getSignedUrl} from '@aws-sdk/s3-request-presigner'
-import {type ConfigError, Effect, Schema} from 'effect'
+import {Effect, Schema, type Config} from 'effect'
 import {randomUUID} from 'node:crypto'
 import {slideshowS3Config} from './config'
 
@@ -39,11 +39,11 @@ export const createSlideshowUpload = (
   input: RequestUploadRequest
 ): Effect.Effect<
   RequestUploadResponse,
-  S3UploadRequestError | ConfigError.ConfigError
+  S3UploadRequestError | Config.ConfigError
 > =>
-  Effect.gen(function* (_) {
+  Effect.gen(function* () {
     const {region, bucketName, resourcesBaseUrl, endpoint, forcePathStyle} =
-      yield* _(slideshowS3Config)
+      yield* slideshowS3Config
     const s3Client = new S3Client({
       region,
       endpoint: endpoint.length > 0 ? endpoint : undefined,
@@ -59,16 +59,14 @@ export const createSlideshowUpload = (
       ContentType: contentType,
     })
 
-    const presignedUrl = yield* _(
-      Effect.tryPromise({
-        try: () => getSignedUrl(s3Client, command, {expiresIn}),
-        catch: (error) =>
-          new S3UploadRequestError({
-            cause: error,
-            message: 'Failed to generate presigned upload URL',
-          }),
-      })
-    )
+    const presignedUrl = yield* Effect.tryPromise({
+      try: () => getSignedUrl(s3Client, command, {expiresIn}),
+      catch: (error) =>
+        new S3UploadRequestError({
+          cause: error,
+          message: 'Failed to generate presigned upload URL',
+        }),
+    })
 
     return Schema.decodeUnknownSync(RequestUploadResponse)({
       presignedUrl,

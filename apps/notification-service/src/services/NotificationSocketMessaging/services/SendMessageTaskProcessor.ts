@@ -1,19 +1,19 @@
-import {Array, Context, Effect, flow, identity, Layer, pipe} from 'effect/index'
+import {Array, Context, Effect, flow, identity, Layer, pipe} from 'effect'
 import {NotificationMetricsService} from '../../../metrics'
 import {ThrottledPushNotificationService} from '../../ThrottledPushNotificationService'
 import {type SendMessageTask} from '../domain'
 import {canDeliverTaskToConnection} from '../utils'
 import {LocalConnectionRegistry} from './LocalConnectionRegistry'
 
-export class TaskProcessor extends Context.Tag('TaskProcessor')<
+export class TaskProcessor extends Context.Service<
   TaskProcessor,
   (task: SendMessageTask) => Effect.Effect<boolean>
->() {
+>()('TaskProcessor') {
   static Live = Layer.effect(
     TaskProcessor,
-    Effect.gen(function* (_) {
-      const localConnectionRegistry = yield* _(LocalConnectionRegistry)
-      const notificationMetrics = yield* _(NotificationMetricsService)
+    Effect.gen(function* () {
+      const localConnectionRegistry = yield* LocalConnectionRegistry
+      const notificationMetrics = yield* NotificationMetricsService
 
       return (task: SendMessageTask) =>
         pipe(
@@ -52,24 +52,24 @@ export class TaskProcessor extends Context.Tag('TaskProcessor')<
                   })
                 )
               ),
-              Effect.allWith({concurrency: 'unbounded'})
+              (effects) => Effect.all(effects, {concurrency: 'unbounded'})
             )
           ),
           Effect.map(Array.some(identity)),
-          Effect.catchTag('NoSuchElementException', () => Effect.succeed(false))
+          Effect.catchTag('NoSuchElementError', () => Effect.succeed(false))
         )
     })
   )
 }
 
-export class TimeoutProcessor extends Context.Tag('TimeoutProcessor')<
+export class TimeoutProcessor extends Context.Service<
   TimeoutProcessor,
   (task: SendMessageTask) => Effect.Effect<void>
->() {
+>()('TimeoutProcessor') {
   static Live = Layer.effect(
     TimeoutProcessor,
-    Effect.gen(function* (_) {
-      const {issuePushNotification} = yield* _(ThrottledPushNotificationService)
+    Effect.gen(function* () {
+      const {issuePushNotification} = yield* ThrottledPushNotificationService
 
       return (task: SendMessageTask) =>
         task._tag === 'StreamOnlyChatMessageSendTask'

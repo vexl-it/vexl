@@ -10,7 +10,7 @@ export function resultFromFeedback(feedback: Feedback): UserFeedbackResult {
 
   if (
     feedback.stars !== 0 ||
-    Array.isNonEmptyReadonlyArray(feedback.objections) ||
+    Array.isReadonlyArrayNonEmpty(feedback.objections) ||
     feedback.textComment.trim() !== ''
   ) {
     return {completed: 'partial'}

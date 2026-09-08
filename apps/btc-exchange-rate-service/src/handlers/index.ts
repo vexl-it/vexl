@@ -1,22 +1,20 @@
-import {HttpApiBuilder} from '@effect/platform/index'
 import {BtcExchangeRateApiSpecification} from '@vexl-next/rest-api/src/services/btcExchangeRate/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {makeHttpApiHandler} from '@vexl-next/server-utils/src/makeHttpApiHandler'
 import {Effect} from 'effect'
 import {YadioService} from '../utils/yadio'
 
-export const getExchangeRateHandler = HttpApiBuilder.handler(
+export const getExchangeRateHandler = makeHttpApiHandler(
   BtcExchangeRateApiSpecification,
   'root',
   'getExchangeRate',
-  ({request, urlParams}) =>
-    Effect.gen(function* (_) {
-      const yadio = yield* _(YadioService)
-      return yield* _(
-        yadio.getExchangeRatePrice({currency: urlParams.currency})
-      )
+  ({request, query}) =>
+    Effect.gen(function* () {
+      const yadio = yield* YadioService
+      return yield* yadio.getExchangeRatePrice({currency: query.currency})
     }).pipe(
       Effect.withSpan('getExchangeRateHandler', {
-        attributes: {currency: urlParams.currency},
+        attributes: {currency: query.currency},
       }),
       makeEndpointEffect
     )

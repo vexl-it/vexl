@@ -18,13 +18,14 @@ import {
   MINIMAL_DATE,
 } from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import {type BasicError} from '@vexl-next/domain/src/utility/errors'
+import {withNullishDefault} from '@vexl-next/generic-utils/src/effect-helpers/optionalNullable'
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
-import {type Effect, Schema} from 'effect'
+import {Effect, Schema} from 'effect'
 import {fastDeepEqualRemoveUndefineds} from '../../utils/fastDeepEqualRemoveUndefineds'
 
 export const REACH_NUMBER_THRESHOLD = 150
 
-export type ApiErrorFetchingOffers = Effect.Effect.Error<
+export type ApiErrorFetchingOffers = Effect.Error<
   ReturnType<OfferApi['getOffersForMeModifiedOrCreatedAfterPaginated']>
 >
 
@@ -42,13 +43,14 @@ export class NotOfferFromContactNetworkError extends Schema.TaggedError<NotOffer
 
 export const OffersState = Schema.Struct({
   // changedName to force clients to refetch all offers after update of the offers location shape
-  lastUpdatedAt2: Schema.optionalWith(IsoDatetimeString, {
-    default: () => MINIMAL_DATE,
-  }),
+  lastUpdatedAt2: IsoDatetimeString.pipe(
+    Schema.withDecodingDefaultType(Effect.sync(() => MINIMAL_DATE)),
+    Schema.withConstructorDefault(Effect.sync(() => MINIMAL_DATE))
+  ),
   contactOffersNextPageParam: Schema.optional(Base64String),
-  clubOffersNextPageParam: Schema.optionalWith(
-    Schema.Record({key: ClubUuid, value: Base64String}),
-    {default: () => ({})}
+  clubOffersNextPageParam: Schema.Record(ClubUuid, Base64String).pipe(
+    Schema.withDecodingDefaultType(Effect.sync(() => ({}))),
+    Schema.withConstructorDefault(Effect.sync(() => ({})))
   ),
   offers: Schema.Array(OneOfferInState).pipe(Schema.mutable),
 })
@@ -64,7 +66,7 @@ export interface SuccessLoadingState {
 
 export interface ErrorLoadingState {
   state: 'error'
-  error: Effect.Effect.Error<
+  error: Effect.Error<
     | ReturnType<OfferApi['getOffersForMeModifiedOrCreatedAfterPaginated']>
     | ReturnType<OfferApi['getClubOffersForMeModifiedOrCreatedAfterPaginated']>
   >
@@ -80,46 +82,49 @@ export type LoadingState =
   | ErrorLoadingState
   | InProgressLoadingState
 
-export const MarketplaceFilterBarOption = Schema.Literal(
+export const MarketplaceFilterBarOption = Schema.Literals([
   'BUY_BTC',
   'SELL_BTC',
   'BUY_PRODUCT',
   'SELL_PRODUCT',
   'PROVIDE_SERVICE',
-  'HIRE_SERVICE'
-)
+  'HIRE_SERVICE',
+])
 export type MarketplaceFilterBarOption = typeof MarketplaceFilterBarOption.Type
 
-export const MarketplaceVisibleSection = Schema.Literal(
+export const MarketplaceVisibleSection = Schema.Literals([
   'ALL',
   'ONLY_FAVOURITES',
-  'ONLY_ARCHIVED'
-)
+  'ONLY_ARCHIVED',
+])
 export type MarketplaceVisibleSection = typeof MarketplaceVisibleSection.Type
 
 export const OffersFilter = Schema.Struct({
   sort: Schema.optional(Sort),
-  visibleSection: Schema.optionalWith(MarketplaceVisibleSection, {
-    default: () => 'ALL',
-  }),
+  visibleSection: MarketplaceVisibleSection.pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): 'ALL' => 'ALL')),
+    Schema.withConstructorDefault(Effect.sync((): 'ALL' => 'ALL'))
+  ),
   currency: Schema.optional(CurrencyCode),
   location: Schema.optional(Schema.Array(OfferLocation)),
   locationState: Schema.optional(Schema.Array(LocationState)),
   paymentMethod: Schema.optional(Schema.Array(PaymentMethod)),
   btcNetwork: Schema.optional(Schema.Array(BtcNetwork)),
   friendLevel: Schema.optional(Schema.Array(FriendLevel)),
-  filterBarOptions: Schema.optionalWith(
-    Schema.ReadonlySet(MarketplaceFilterBarOption),
-    {default: () => new Set(), nullable: true}
+  filterBarOptions: withNullishDefault(
+    Schema.toCodecJson(Schema.ReadonlySet(MarketplaceFilterBarOption)),
+    () => new Set()
   ),
   singlePrice: Schema.optional(Schema.Number),
   singlePriceCurrency: Schema.optional(CurrencyCode),
   amountBottomLimit: Schema.optional(Schema.Number),
   amountTopLimit: Schema.optional(Schema.Number),
-  spokenLanguages: Schema.optionalWith(
-    Schema.Array(SpokenLanguage).pipe(Schema.mutable),
-    {default: () => []}
-  ),
+  spokenLanguages: Schema.Array(SpokenLanguage)
+    .pipe(Schema.mutable)
+    .pipe(
+      Schema.withDecodingDefaultType(Effect.sync(() => [])),
+      Schema.withConstructorDefault(Effect.sync(() => []))
+    ),
   text: Schema.optional(Schema.String),
   clubsUuids: Schema.optional(Schema.Array(ClubUuid)),
   productCategories: Schema.optional(Schema.Array(ProductCategory)),
@@ -129,5 +134,5 @@ export type OffersFilter = typeof OffersFilter.Type
 export const OffersFilterEquals = (a: OffersFilter, b: OffersFilter): boolean =>
   fastDeepEqualRemoveUndefineds(a, b)
 
-export const FiatOrSats = Schema.Literal('FIAT', 'SATS')
+export const FiatOrSats = Schema.Literals(['FIAT', 'SATS'])
 export type FiatOrSats = typeof FiatOrSats.Type

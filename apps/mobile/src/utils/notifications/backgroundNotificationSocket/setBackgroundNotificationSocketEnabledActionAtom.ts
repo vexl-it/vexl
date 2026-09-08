@@ -2,7 +2,7 @@ import {
   requestBatteryExemption,
   setEnabled,
 } from '@vexl-next/expo-background-notification-socket'
-import {Effect} from 'effect/index'
+import {Effect} from 'effect'
 import {atom, type SetStateAction} from 'jotai'
 import {Platform} from 'react-native'
 import {syncVexlNotificationTokensActionAtom} from '../../../state/notifications/actions/syncVexlNotificationTokensActionAtom'

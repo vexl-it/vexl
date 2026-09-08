@@ -9,7 +9,7 @@ import {
   Typography,
   XmarkCancelClose,
 } from '@vexl-next/ui'
-import {Option, Schema} from 'effect/index'
+import {Option, Schema} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback} from 'react'
 import {Stack} from 'tamagui'

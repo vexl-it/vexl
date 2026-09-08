@@ -11,7 +11,7 @@ export interface EnqueuedNotification {
 }
 
 // Ref to store enqueued notifications for test assertions
-export const enqueuedNotificationsRef = Ref.unsafeMake<EnqueuedNotification[]>(
+export const enqueuedNotificationsRef = Ref.makeUnsafe<EnqueuedNotification[]>(
   []
 )
 

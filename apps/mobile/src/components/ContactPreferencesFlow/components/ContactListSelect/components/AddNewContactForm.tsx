@@ -15,7 +15,7 @@ import {
   useTheme,
 } from '@vexl-next/ui'
 import {parsePhoneNumber} from 'awesome-phonenumber'
-import {useMolecule} from 'bunshi/dist/react'
+import {useMolecule} from 'bunshi/react'
 import {Effect, Option} from 'effect'
 import {atom, useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useEffect, useRef, useState} from 'react'

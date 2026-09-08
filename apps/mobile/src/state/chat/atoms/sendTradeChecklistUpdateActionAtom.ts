@@ -12,8 +12,8 @@ import sendMessage, {
 import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/src/chat/utils/chatCrypto'
 import {taskToEffect} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {type JsonStringifyError} from '@vexl-next/resources-utils/src/utils/parsing'
-import {Array, Effect, Schema, type ParseResult} from 'effect/index'
-import {flow, pipe} from 'fp-ts/function'
+import {Array, Effect, pipe, Schema} from 'effect'
+import {flow} from 'fp-ts/function'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
 import {type ActionAtomType} from '../../../utils/atomUtils/ActionAtomType'
@@ -39,7 +39,7 @@ export default function createSubmitChecklistUpdateActionAtom(
     | SendMessageApiErrors
     | ErrorEncryptingMessage
     | JsonStringifyError
-    | ParseResult.ParseError
+    | Schema.SchemaError
   >
 > {
   return atom(null, (get, set, update: TradeChecklistUpdate) => {
@@ -47,13 +47,13 @@ export default function createSubmitChecklistUpdateActionAtom(
     const chatWithMessages = get(chatWithMessagesAtom)
     const tradeChecklistData = get(tradeChecklistDataAtom)
 
-    return Effect.gen(function* (_) {
+    return Effect.gen(function* () {
       const updateKeys = Object.keys(update) as Array<
         keyof TradeChecklistUpdate
       >
 
-      const identityRevealChatMessageOrUndefined = yield* _(
-        taskToEffect(replaceIdentityImageFileUriWithBase64(update.identity))
+      const identityRevealChatMessageOrUndefined = yield* taskToEffect(
+        replaceIdentityImageFileUriWithBase64(update.identity)
       )
 
       const toSend: ChatMessage[] = updateKeys.map((key) => ({
@@ -74,7 +74,7 @@ export default function createSubmitChecklistUpdateActionAtom(
         minimalRequiredVersion: MINIMAL_REQUIRED_VERSION,
       }))
 
-      const sentMessages = yield* _(
+      const sentMessages = yield* pipe(
         Array.map(toSend, (message) =>
           pipe(
             Effect.Do,
@@ -94,7 +94,7 @@ export default function createSubmitChecklistUpdateActionAtom(
             Effect.map((serverMessage) => ({message, serverMessage}))
           )
         ),
-        Effect.allWith({concurrency: 'unbounded'})
+        (effects) => Effect.all(effects, {concurrency: 'unbounded'})
       )
 
       const successMessages: ChatMessageWithState[] = Array.map(

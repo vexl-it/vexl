@@ -8,7 +8,7 @@ import {
   type ObjectionType,
 } from '@vexl-next/domain/src/general/feedback'
 import {FeedbackFormId} from '@vexl-next/rest-api/src/services/feedback/contracts'
-import {createScope, molecule} from 'bunshi/dist/react'
+import {createScope, molecule} from 'bunshi/react'
 import {Array, Effect, Schema} from 'effect'
 import {atom, type SetStateAction, type WritableAtom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
@@ -106,14 +106,14 @@ export const feedbackMolecule = molecule((getMolecule, getScope) => {
           type: type === 'CHAT_RATING' ? 'trade' : 'create',
           ...(stars !== 0 && {stars}),
           ...(!isOfferCreationFeedback &&
-            Array.isNonEmptyReadonlyArray(objections) && {
+            Array.isReadonlyArrayNonEmpty(objections) && {
               objections: objections?.join(','),
             }),
           ...(!isOfferCreationFeedback &&
             textComment.trim() !== '' && {textComment}),
         })
         .pipe(
-          Effect.catchAll((e) =>
+          Effect.catch((e) =>
             Effect.sync(() => {
               reportError('error', new Error('Error sending feedback'), {e})
             })
@@ -125,10 +125,10 @@ export const feedbackMolecule = molecule((getMolecule, getScope) => {
   const submitOfferCreationFeedbackHandleUIActionAtom = atom(
     null,
     (get, set) => {
-      return Effect.gen(function* (_) {
+      return Effect.gen(function* () {
         set(feedbackFlowFinishedAtom, true)
 
-        yield* _(set(submitFeedbackActionAtom, true))
+        yield* set(submitFeedbackActionAtom, true)
       })
     }
   )
@@ -137,8 +137,8 @@ export const feedbackMolecule = molecule((getMolecule, getScope) => {
     const {stars, objections} = get(feedbackAtom)
     const currentPage = get(currentFeedbackPageAtom)
 
-    return Effect.gen(function* (_) {
-      yield* _(set(submitFeedbackActionAtom, false))
+    return Effect.gen(function* () {
+      yield* set(submitFeedbackActionAtom, false)
 
       if (currentPage === 'TEXT_COMMENT') {
         set(feedbackFlowFinishedAtom, true)

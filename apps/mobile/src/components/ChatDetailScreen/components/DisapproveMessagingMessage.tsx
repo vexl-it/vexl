@@ -1,5 +1,5 @@
 import {Typography} from '@vexl-next/ui'
-import {useMolecule} from 'bunshi/dist/react'
+import {useMolecule} from 'bunshi/react'
 import {useAtomValue, type Atom} from 'jotai'
 import {YStack} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'

@@ -1,9 +1,9 @@
-import {SqlClient, SqlResolver, SqlSchema} from '@effect/sql'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {PublicKeyV2} from '@vexl-next/cryptography/src/KeyHolder/brandsV2'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {Context, Effect, flow, Layer, Schema} from 'effect'
+import {SqlClient, SqlResolver, SqlSchema} from 'effect/unstable/sql'
 
 const UserRecordId = Schema.String.pipe(Schema.brand('UserRecordId'))
 export type UserRecordId = Schema.Schema.Type<typeof UserRecordId>
@@ -37,38 +37,35 @@ export interface LoggedInUsersDbOperations {
   ) => Effect.Effect<void, UnexpectedServerError>
 }
 
-export class LoggedInUsersDbService extends Context.Tag(
-  'LoggedInUsersDbService'
-)<LoggedInUsersDbService, LoggedInUsersDbOperations>() {
+export class LoggedInUsersDbService extends Context.Service<
+  LoggedInUsersDbService,
+  LoggedInUsersDbOperations
+>()('LoggedInUsersDbService') {
   static readonly Live = Layer.effect(
     LoggedInUsersDbService,
-    Effect.gen(function* (_) {
-      const sql = yield* _(SqlClient.SqlClient)
+    Effect.gen(function* () {
+      const sql = yield* SqlClient.SqlClient
 
-      const insertUserResolver = yield* _(
-        SqlResolver.void('insertUser', {
-          Request: UserInsert,
-          execute: (requests) => {
-            return sql`
-              INSERT INTO
-                users ${sql.insert(requests)}
-            `
-          },
-        })
-      )
+      const insertUserResolver = SqlResolver.void({
+        Request: UserInsert,
+        execute: (requests) => {
+          return sql`
+            INSERT INTO
+              users ${sql.insert(requests)}
+          `
+        },
+      })
 
-      const deleteUserResolver = yield* _(
-        SqlResolver.void('deleteUser', {
-          Request: PublicKeyPemBase64,
-          execute: (requests) => {
-            return sql`
-              DELETE FROM users
-              WHERE
-                ${sql.in('public_key', requests)}
-            `
-          },
-        })
-      )
+      const deleteUserResolver = SqlResolver.void({
+        Request: PublicKeyPemBase64,
+        execute: (requests) => {
+          return sql`
+            DELETE FROM users
+            WHERE
+              ${sql.in('public_key', requests)}
+          `
+        },
+      })
 
       const updatePublicKeyV2Query = SqlSchema.void({
         Request: UpdatePublicKeyV2Input,
@@ -83,7 +80,7 @@ export class LoggedInUsersDbService extends Context.Tag(
 
       return {
         insertUser: flow(
-          insertUserResolver.execute,
+          SqlResolver.request(insertUserResolver),
           UnexpectedServerError.wrapErrors('Error while inserting user')
         ),
         updatePublicKeyV2: flow(
@@ -91,7 +88,7 @@ export class LoggedInUsersDbService extends Context.Tag(
           UnexpectedServerError.wrapErrors('Error updating user public key v2')
         ),
         deleteUser: flow(
-          deleteUserResolver.execute,
+          SqlResolver.request(deleteUserResolver),
           UnexpectedServerError.wrapErrors('Error deleting inserting user')
         ),
       }

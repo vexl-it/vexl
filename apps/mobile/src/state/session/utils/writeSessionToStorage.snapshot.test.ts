@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import {KeyHolder} from '@vexl-next/cryptography'
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
-import {Effect, Either, Schema} from 'effect/index'
+import {Effect, Result, Schema} from 'effect'
 import * as SecretStore from 'expo-secure-store'
 import {
   type Session,
@@ -59,10 +59,10 @@ describe('writeSessionToStorage snapshot', () => {
 
   it('saves exact values into async and secret storage', async () => {
     const taskResult = await Effect.runPromise(
-      writeSessionToStorage(deterministicSession).pipe(Effect.either)
+      writeSessionToStorage(deterministicSession).pipe(Effect.result)
     )
 
-    expect(Either.isRight(taskResult)).toBe(true)
+    expect(Result.isSuccess(taskResult)).toBe(true)
     expect(asyncStorageSetItemMock).toHaveBeenCalledTimes(1)
     expect(secretStoreSetItemAsyncMock).toHaveBeenCalledTimes(1)
     expect(wasV2SecretWritten()).toBe(true)

@@ -1,6 +1,6 @@
 import {type UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {RedisPubSubService} from '@vexl-next/server-utils/src/RedisPubSubService'
-import {Array, Context, Effect, flow, Layer, pipe} from 'effect/index'
+import {Array, Context, Effect, flow, Layer, pipe} from 'effect'
 import {
   NoActiveSocketConnectionsError,
   type NewChatMessageNoticeSendTask,
@@ -41,14 +41,15 @@ export interface NotificationSocketMessagingOperations {
   >
 }
 
-export class NotificationSocketMessaging extends Context.Tag(
-  'NotificationSocketMessaging'
-)<NotificationSocketMessaging, NotificationSocketMessagingOperations>() {
+export class NotificationSocketMessaging extends Context.Service<
+  NotificationSocketMessaging,
+  NotificationSocketMessagingOperations
+>()('NotificationSocketMessaging') {
   static Live = Layer.effect(
     NotificationSocketMessaging,
-    Effect.gen(function* (_) {
-      const registry = yield* _(RedisConnectionRegistry)
-      const sendMessageTaskManager = yield* _(SendMessageTasksManager)
+    Effect.gen(function* () {
+      const registry = yield* RedisConnectionRegistry
+      const sendMessageTaskManager = yield* SendMessageTasksManager
 
       const emitToOpenConnections = (
         task: SendMessageTask
@@ -69,9 +70,9 @@ export class NotificationSocketMessaging extends Context.Tag(
               Array.dedupe
             )
           ),
-          Effect.filterOrFail(Array.isNonEmptyArray),
+          Effect.filterOrFail(Array.isArrayNonEmpty),
           Effect.catchTag(
-            'NoSuchElementException',
+            'NoSuchElementError',
             () => new NoActiveSocketConnectionsError()
           ),
           Effect.flatMap((managerIds) =>

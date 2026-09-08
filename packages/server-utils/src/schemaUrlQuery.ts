@@ -1,7 +1,7 @@
-import {HttpServerRequest} from '@effect/platform'
 import {Effect, Schema} from 'effect'
-import {type ParseError} from 'effect/ParseResult'
+import {type SchemaError} from 'effect/Schema'
 import {type ParseOptions} from 'effect/SchemaAST'
+import {HttpServerRequest} from 'effect/unstable/http'
 
 export class UrlParamsError extends Schema.TaggedError<UrlParamsError>(
   'UrlParamsError'
@@ -12,14 +12,14 @@ export const schemaUrlSearchParams = <
   I extends Readonly<Record<string, string>>,
   A,
 >(
-  schema: Schema.Schema<A, I, R>,
+  schema: Schema.Codec<A, I, R, R>,
   options?: ParseOptions | undefined
 ): Effect.Effect<
   A,
-  ParseError | UrlParamsError,
+  SchemaError | UrlParamsError,
   R | HttpServerRequest.HttpServerRequest
 > => {
-  const parse = Schema.decodeUnknown(schema, options)
+  const parse = Schema.decodeUnknownEffect(schema, options)
   return HttpServerRequest.HttpServerRequest.pipe(
     Effect.flatMap((req) =>
       Effect.try({

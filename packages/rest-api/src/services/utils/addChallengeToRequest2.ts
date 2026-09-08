@@ -1,5 +1,3 @@
-import {type HttpApiDecodeError} from '@effect/platform/HttpApiError'
-import {type HttpClientError} from '@effect/platform/index'
 import {
   type KeyPairV2,
   type PrivateKeyHolder,
@@ -17,7 +15,9 @@ import {
   type CryptoError,
 } from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {Effect, Option, Schema} from 'effect'
-import {type ParseError} from 'effect/ParseResult'
+import {type SchemaError} from 'effect/Schema'
+import {type HttpClientError} from 'effect/unstable/http'
+import {type HttpApiSchemaError} from 'effect/unstable/httpapi/HttpApiError'
 import {
   type CreateChallengeRequest,
   type CreateChallengeResponse,
@@ -43,8 +43,8 @@ type CreateChallengeCall = (request: {
   readonly payload: CreateChallengeRequest
 }) => Effect.Effect<
   CreateChallengeResponse,
-  | HttpApiDecodeError
-  | ParseError
+  | HttpApiSchemaError
+  | SchemaError
   | RateLimitedError
   | NotFoundError
   | UnexpectedServerError
@@ -85,32 +85,30 @@ export function addChallengeToRequest2(
   ErrorGeneratingChallenge | ErrorSigningChallenge | CryptoError
 > {
   return ({keyPair, keyPairV2, ...data}) =>
-    Effect.gen(function* (_) {
+    Effect.gen(function* () {
       const publicKey = keyPair.publicKeyPemBase64
       const publicKeyV2 = keyPairV2?.publicKey
 
-      const challenge = yield* _(
-        generateChallenge2(createChallengeCall)(
-          publicKey,
-          Option.fromNullable(publicKeyV2)
-        )
+      const challenge = yield* generateChallenge2(createChallengeCall)(
+        publicKey,
+        Option.fromNullishOr(publicKeyV2)
       )
-      const signature = yield* _(
-        ecdsaSignE(keyPair.privateKeyPemBase64)(challenge)
+      const signature = yield* ecdsaSignE(keyPair.privateKeyPemBase64)(
+        challenge
       )
 
       const signatureV2 = keyPairV2
-        ? yield* _(cryptoBoxSign(keyPairV2.privateKey)(challenge))
+        ? yield* cryptoBoxSign(keyPairV2.privateKey)(challenge)
         : undefined
 
       return {
         ...data,
         publicKey,
-        publicKeyV2: Option.fromNullable(publicKeyV2),
+        publicKeyV2: Option.fromNullishOr(publicKeyV2),
         signedChallenge: {
           challenge,
           signature,
-          signatureV2: Option.fromNullable(signatureV2),
+          signatureV2: Option.fromNullishOr(signatureV2),
         },
       }
     })

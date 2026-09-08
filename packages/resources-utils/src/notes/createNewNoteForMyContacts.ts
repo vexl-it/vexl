@@ -16,7 +16,7 @@ import {type ServerToClientHashedNumber} from '@vexl-next/domain/src/general/Ser
 import {type UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {type ContactApi} from '@vexl-next/rest-api/src/services/contact'
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
-import {Array, Effect, Either, type HashMap, pipe} from 'effect'
+import {Array, Effect, pipe, type HashMap} from 'effect'
 import {type OfferEncryptionProgress} from '../offers/OfferEncryptionProgress'
 import fetchContactsForOffer, {
   type ApiErrorFetchingContactsForOffer,
@@ -41,7 +41,7 @@ import encryptNotePublicPayload, {
 } from './utils/encryptNotePublicPayload'
 import {sendNoteToNetworkBatchPrivateParts} from './utils/sendNoteToNetworkBatchPrivateParts'
 
-export type ApiErrorWhileCreatingNote = Effect.Effect.Error<
+export type ApiErrorWhileCreatingNote = Effect.Error<
   ReturnType<OfferApi['createNewNote']>
 >
 
@@ -89,46 +89,44 @@ export default function createNewNoteForMyContacts({
   | DecryptingNoteError
   | NonCompatibleNoteVersionError
 > {
-  return Effect.gen(function* (_) {
+  return Effect.gen(function* () {
     const noteId = existingNoteId ?? newNoteId()
     const adminId = existingAdminId ?? generateNoteAdminId()
-    const symmetricKey = yield* _(generateSymmetricKey())
+    const symmetricKey = yield* generateSymmetricKey()
 
     if (onProgress) onProgress({type: 'CONSTRUCTING_PUBLIC_PAYLOAD'})
-    const encryptedPublic = yield* _(
-      encryptNotePublicPayload({notePublicPart: publicPart, symmetricKey})
-    )
+    const encryptedPublic = yield* encryptNotePublicPayload({
+      notePublicPart: publicPart,
+      symmetricKey,
+    })
 
     if (onProgress) onProgress({type: 'FETCHING_CONTACTS'})
-    const connectionsInfo = yield* _(
-      fetchContactsForOffer({
-        contactApi,
-        intendedConnectionLevel: 'ALL',
-        intendedClubs: {},
-        serverToClientHashesToHashedPhoneNumbersMap,
-      })
-    )
+    const connectionsInfo = yield* fetchContactsForOffer({
+      contactApi,
+      intendedConnectionLevel: 'ALL',
+      intendedClubs: {},
+      serverToClientHashesToHashedPhoneNumbersMap,
+    })
 
     if (onProgress) onProgress({type: 'CONSTRUCTING_PRIVATE_PAYLOADS'})
-    const privatePayloads = yield* _(
-      constructNotePrivatePayloads({connectionsInfo, symmetricKey})
-    )
+    const privatePayloads = yield* constructNotePrivatePayloads({
+      connectionsInfo,
+      symmetricKey,
+    })
 
     // Owner's own private part carries the adminId (delete capability).
-    const ownerPrivatePayload = yield* _(
-      encryptNotePrivatePart({
-        toPublicKey: ownerKeyPairV2.publicKey,
-        payloadPrivate: {
-          commonFriends: [],
-          friendLevel: [],
-          symmetricKey,
-          viaRepost: false,
-          adminId,
-        },
-      })
-    )
+    const ownerPrivatePayload = yield* encryptNotePrivatePart({
+      toPublicKey: ownerKeyPairV2.publicKey,
+      payloadPrivate: {
+        commonFriends: [],
+        friendLevel: [],
+        symmetricKey,
+        viaRepost: false,
+        adminId,
+      },
+    })
 
-    const encryptionResult = yield* _(
+    const encryptionResult = yield* pipe(
       privatePayloads,
       Array.map((one, i) =>
         pipe(
@@ -140,20 +138,17 @@ export default function createNewNoteForMyContacts({
                 totalToEncrypt: privatePayloads.length,
               })
           }),
-          Effect.zipRight(Effect.either(encryptNotePrivatePart(one)))
+          Effect.andThen(Effect.result(encryptNotePrivatePart(one)))
         )
       ),
       Effect.all
     )
 
-    const encryptionErrors = pipe(
-      encryptionResult,
-      Array.filterMap(Either.getLeft)
-    )
+    const encryptionErrors = pipe(encryptionResult, Array.getFailures)
 
     const notePrivateList = pipe(
       encryptionResult,
-      Array.filterMap(Either.getRight),
+      Array.getSuccesses,
       Array.dedupeWith((one, two) => one.userPublicKey === two.userPublicKey),
       Array.filter(
         (one) =>
@@ -163,23 +158,22 @@ export default function createNewNoteForMyContacts({
     )
 
     if (onProgress) onProgress({type: 'SENDING_OFFER_TO_NETWORK'})
-    const createResponse = yield* _(
-      sendNoteToNetworkBatchPrivateParts({
-        offerApi,
-        noteData: {
-          ownerPrivatePayload,
-          notePrivateList,
-          payloadPublic: encryptedPublic,
-          adminId,
-          noteId,
-          expiresAt,
-        },
-      })
-    )
+    const createResponse = yield* sendNoteToNetworkBatchPrivateParts({
+      offerApi,
+      noteData: {
+        ownerPrivatePayload,
+        notePrivateList,
+        payloadPublic: encryptedPublic,
+        adminId,
+        noteId,
+        expiresAt,
+      },
+    })
 
-    const noteInfo = yield* _(
-      decryptNote(ownerKeyPair, ownerKeyPairV2)(createResponse)
-    )
+    const noteInfo = yield* decryptNote(
+      ownerKeyPair,
+      ownerKeyPairV2
+    )(createResponse)
 
     if (onProgress) onProgress({type: 'DONE'})
 

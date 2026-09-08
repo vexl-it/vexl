@@ -1,5 +1,6 @@
-import * as NodeContext from '@effect/platform-node/NodeContext'
+import * as NodeServices from '@effect/platform-node/NodeServices'
 import {PgClient} from '@effect/sql-pg'
+import {testConfigProviderLayer} from '@vexl-next/server-utils/src/tests/testConfigProvider'
 import {Effect, Layer, ManagedRuntime, Option} from 'effect'
 import {GeocodingDbService} from '../GeocodingDbService'
 import {type NearestGeocodingRecord} from '../GeocodingDbService/queries/createQueryNearestPlace'
@@ -18,7 +19,8 @@ process.env.TEST_DB_PREFIX ??= 'geocoding_db_test_'
 const runtime = ManagedRuntime.make(
   GeocodingDbService.Live.pipe(
     Layer.provideMerge(GeocodingDbLayer),
-    Layer.provideMerge(NodeContext.layer)
+    Layer.provideMerge(NodeServices.layer),
+    Layer.provide(testConfigProviderLayer)
   )
 )
 
@@ -49,10 +51,10 @@ const runtime = ManagedRuntime.make(
  *   Border village node at (52.3, 14.5): Foreign city (de, 5M, 0.1 km) vs
  *     Home town (cz, 3 km) — the label's own country wins
  */
-const seedFixtures = Effect.gen(function* (_) {
-  const sql = yield* _(PgClient.PgClient)
+const seedFixtures = Effect.gen(function* () {
+  const sql = yield* PgClient.PgClient
 
-  yield* _(sql`
+  yield* sql`
     INSERT INTO
       places (
         id,
@@ -410,7 +412,7 @@ const seedFixtures = Effect.gen(function* (_) {
         0,
         ST_MakeEnvelope (13.15, 49.15, 13.19, 49.19, 4326)
       );
-  `)
+  `
 })
 
 const nearest = async (

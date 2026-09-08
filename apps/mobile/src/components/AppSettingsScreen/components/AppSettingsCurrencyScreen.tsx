@@ -110,7 +110,7 @@ function AppSettingsCurrencyScreen({
         placeholder={t('common.search')}
         marginBottom="$4"
       />
-      {Array.isNonEmptyArray(currenciesToDisplay) ? (
+      {Array.isArrayNonEmpty(currenciesToDisplay) ? (
         <CurrencyList
           currenciesToDisplay={currenciesToDisplay}
           renderItem={renderItem}

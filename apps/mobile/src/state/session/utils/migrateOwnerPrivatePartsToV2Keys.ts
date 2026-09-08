@@ -1,7 +1,7 @@
 import {type MyOfferInState} from '@vexl-next/domain/src/general/offers'
 import updateOwnerPrivatePayload from '@vexl-next/resources-utils/src/offers/updateOwnerPrivatePayload'
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
-import {Array, Effect} from 'effect/index'
+import {Array, Effect} from 'effect'
 import {getDefaultStore} from 'jotai'
 import {type SessionV2} from '../../../brands/Session.brand'
 import {ignoreReportErrors} from '../../../utils/reportError'
@@ -16,7 +16,7 @@ const updateOffer = ({
   offerApi: OfferApi
   session: SessionV2
 }): Effect.Effect<void> =>
-  Effect.gen(function* (_) {
+  Effect.gen(function* () {
     // Upload new private payload with V2 keys
     yield* updateOwnerPrivatePayload({
       api: offerApi,
@@ -47,7 +47,7 @@ export const migrateOwnerPrivatePartsToV2Keys = ({
   session: SessionV2
   offerApi: OfferApi
 }): Effect.Effect<void> =>
-  Effect.gen(function* (_) {
+  Effect.gen(function* () {
     const myOffers = getDefaultStore().get(myOffersAtom)
     yield* Effect.all(
       Array.map(myOffers, (offer) => updateOffer({offer, offerApi, session}))

@@ -1,6 +1,6 @@
-import {SqlClient} from '@effect/sql'
 import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
-import {Effect, Schema} from 'effect'
+import {Effect, pipe, Schema} from 'effect'
+import {SqlClient} from 'effect/unstable/sql'
 import {deduplicateExpoNotificationTokens} from '../services/PostgressDb/migrations/005_deduplicateExpoNotificationTokens'
 import {runPromiseInMockedEnvironment} from './utils/runPromiseInMockedEnvironment'
 
@@ -19,13 +19,13 @@ const IndexExistsRow = Schema.Struct({
 describe('deduplicateExpoNotificationTokens migration', () => {
   it('keeps the latest duplicate by updated_at and id without changing vexl tokens', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const sql = yield* _(SqlClient.SqlClient)
+      Effect.gen(function* () {
+        const sql = yield* SqlClient.SqlClient
 
-        yield* _(sql`
+        yield* sql`
           DROP INDEX IF EXISTS idx_notification_secrets_expo_token_unique
-        `)
-        yield* _(sql`
+        `
+        yield* sql`
           DELETE FROM notification_token_secrets
           WHERE
             secret IN (
@@ -33,8 +33,8 @@ describe('deduplicateExpoNotificationTokens migration', () => {
               'vexl_nts_migration_dedupe_newer_time',
               'vexl_nts_migration_dedupe_newer_id'
             )
-        `)
-        yield* _(sql`
+        `
+        yield* sql`
           INSERT INTO
             notification_token_secrets (
               id,
@@ -89,11 +89,11 @@ describe('deduplicateExpoNotificationTokens migration', () => {
               'vexl_nt_migration_newer_id_system',
               'vexl_nt_migration_newer_id_marketing'
             )
-        `)
+        `
 
-        yield* _(deduplicateExpoNotificationTokens)
+        yield* deduplicateExpoNotificationTokens
 
-        const rows = yield* _(
+        const rows = yield* pipe(
           sql`
             SELECT
               secret,
@@ -112,7 +112,7 @@ describe('deduplicateExpoNotificationTokens migration', () => {
             ORDER BY
               secret
           `,
-          Effect.flatMap(Schema.decodeUnknown(Schema.Array(MigrationRow)))
+          Effect.flatMap(Schema.decodeUnknownEffect(Schema.Array(MigrationRow)))
         )
 
         expect(rows).toEqual([
@@ -139,12 +139,14 @@ describe('deduplicateExpoNotificationTokens migration', () => {
           },
         ])
 
-        const indexRows = yield* _(
+        const indexRows = yield* pipe(
           sql`
             SELECT
               to_regclass('idx_notification_secrets_expo_token_unique') IS NOT NULL AS index_exists
           `,
-          Effect.flatMap(Schema.decodeUnknown(Schema.Array(IndexExistsRow)))
+          Effect.flatMap(
+            Schema.decodeUnknownEffect(Schema.Array(IndexExistsRow))
+          )
         )
 
         expect(indexRows).toEqual([{indexExists: true}])

@@ -1,6 +1,6 @@
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {type CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
-import {Effect, HashMap, Option, Stream, pipe} from 'effect'
+import {Effect, HashMap, Option, Stream, SubscriptionRef, pipe} from 'effect'
 import {pubKeyToCountryPrefixChanges} from './pubKeyToCountry'
 import {CountriesToConnectionsCountState} from './pubKeysToConnectionsCount'
 
@@ -32,7 +32,7 @@ function countByCountries(
 
 export const countriesToConnectionsCountChanges =
   CountriesToConnectionsCountState.pipe(
-    Effect.map((a) => a.changes),
+    Effect.map((a) => SubscriptionRef.changes(a)),
     Stream.unwrap,
     Stream.map((a) => a.pubKeyToConnectionsCount),
     Stream.changes,

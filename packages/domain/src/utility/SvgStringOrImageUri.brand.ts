@@ -2,7 +2,7 @@ import {Schema} from 'effect'
 import {SvgString} from './SvgString.brand'
 import {UriString} from './UriString.brand'
 
-export const SvgStringOrImageUri = Schema.Union(
+export const SvgStringOrImageUri = Schema.Union([
   Schema.Struct({
     type: Schema.Literal('imageUri'),
     imageUri: UriString,
@@ -10,8 +10,8 @@ export const SvgStringOrImageUri = Schema.Union(
   Schema.Struct({
     type: Schema.Literal('svgXml'),
     svgXml: SvgString,
-  })
-)
+  }),
+])
 export type SvgStringOrImageUri = typeof SvgStringOrImageUri.Type
 
 export function fromImageUri(imageUri: UriString): SvgStringOrImageUri {

@@ -1,22 +1,22 @@
-import {HttpApiBuilder} from '@effect/platform/index'
 import {CurrentSecurity} from '@vexl-next/rest-api/src/apiSecurity'
 import {CanNotDeletePrivatePartOfAuthor} from '@vexl-next/rest-api/src/services/offer/contracts'
 import {OfferApiSpecification} from '@vexl-next/rest-api/src/services/offer/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {makeHttpApiHandler} from '@vexl-next/server-utils/src/makeHttpApiHandler'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import {Array, Effect, Option, flow, pipe} from 'effect'
 import {OfferDbService} from '../db/OfferDbService'
 import {hashAdminId} from '../utils/hashAdminId'
 import {withOfferAdminActionRedisLock} from '../utils/withOfferAdminRedisLock'
 
-export const deletePrivatePart = HttpApiBuilder.handler(
+export const deletePrivatePart = makeHttpApiHandler(
   OfferApiSpecification,
   'root',
   'deletePrivatePart',
   (req) =>
-    Effect.gen(function* (_) {
-      const security = yield* _(CurrentSecurity)
-      const offerDbService = yield* _(OfferDbService)
+    Effect.gen(function* () {
+      const security = yield* CurrentSecurity
+      const offerDbService = yield* OfferDbService
 
       if (
         Array.contains(req.payload.publicKeys, security.publicKey) ||
@@ -25,26 +25,23 @@ export const deletePrivatePart = HttpApiBuilder.handler(
           Option.getOrElse(security.publicKeyV2, () => 'none')
         )
       ) {
-        return yield* _(
-          Effect.fail(
-            new CanNotDeletePrivatePartOfAuthor({
-              status: 400,
-            })
-          )
+        return yield* Effect.fail(
+          new CanNotDeletePrivatePartOfAuthor({
+            status: 400,
+          })
         )
       }
 
-      const hashedAdminIds = yield* _(
-        Effect.forEach(req.payload.adminIds, hashAdminId)
+      const hashedAdminIds = yield* Effect.forEach(
+        req.payload.adminIds,
+        hashAdminId
       )
 
-      const offers = yield* _(
+      const offers = yield* pipe(
         Effect.forEach(
           hashedAdminIds,
           offerDbService.queryPublicPartByAdminId,
-          {
-            batching: true,
-          }
+          {}
         ),
         Effect.map(
           flow(
@@ -64,10 +61,10 @@ export const deletePrivatePart = HttpApiBuilder.handler(
         Array.flatten
       )
 
-      yield* _(
-        Effect.forEach(combinationsToDelete, offerDbService.deletePrivatePart, {
-          batching: true,
-        })
+      yield* Effect.forEach(
+        combinationsToDelete,
+        offerDbService.deletePrivatePart,
+        {}
       )
       return {}
     }).pipe(

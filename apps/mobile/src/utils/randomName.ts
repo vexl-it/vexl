@@ -1,5 +1,5 @@
 import {UserName} from '@vexl-next/domain/src/general/UserName.brand'
-import {Schema} from 'effect/index'
+import {Schema} from 'effect'
 import seed from 'seed-random'
 import {type RandomSeed} from './RandomSeed'
 

@@ -6,7 +6,7 @@ export const FeedbackFormId = Schema.NonEmptyString.pipe(
 )
 export type FeedbackFormId = Schema.Schema.Type<typeof FeedbackFormId>
 
-export const FeedbackType = Schema.Literal('create', 'trade')
+export const FeedbackType = Schema.Literals(['create', 'trade'])
 export type FeedbackType = Schema.Schema.Type<typeof FeedbackType>
 
 export class SubmitFeedbackRequest extends Schema.Class<SubmitFeedbackRequest>(
@@ -15,7 +15,10 @@ export class SubmitFeedbackRequest extends Schema.Class<SubmitFeedbackRequest>(
   formId: FeedbackFormId,
   type: FeedbackType,
   stars: Schema.optional(
-    Schema.Int.pipe(Schema.lessThanOrEqualTo(5), Schema.greaterThanOrEqualTo(0))
+    Schema.Int.pipe(
+      Schema.check(Schema.isLessThanOrEqualTo(5)),
+      Schema.check(Schema.isGreaterThanOrEqualTo(0))
+    )
   ),
   objections: Schema.optional(Schema.String),
   textComment: Schema.optional(Schema.String),

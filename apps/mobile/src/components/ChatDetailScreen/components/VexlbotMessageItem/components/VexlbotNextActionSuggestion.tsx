@@ -1,4 +1,4 @@
-import {useMolecule} from 'bunshi/dist/react'
+import {useMolecule} from 'bunshi/react'
 import {useAtomValue} from 'jotai'
 import React from 'react'
 import {amountSettled} from '../../../../../state/tradeChecklist/utils/amount'

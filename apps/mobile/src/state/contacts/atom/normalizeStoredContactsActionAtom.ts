@@ -61,7 +61,7 @@ function normalizeContact(
       hash: hash.right,
     })
   }).pipe(
-    Effect.catchAllDefect(() => {
+    Effect.catchDefect(() => {
       reportError('warn', new Error('Error while normalizing contact'))
       return Effect.succeed(markContactInvalid(contact))
     })
@@ -93,33 +93,31 @@ const normalizeStoredContactsActionAtom = atom(
       onProgress: () => {},
     }
   ): Effect.Effect<void> =>
-    Effect.gen(function* (_) {
+    Effect.gen(function* () {
       const toNormalize = pipe(
         get(storedContactsAtom),
         Array.filter(needsNormalization)
       )
 
-      if (!Array.isNonEmptyArray(toNormalize)) return
+      if (!Array.isArrayNonEmpty(toNormalize)) return
 
       const measure = startMeasure('Normalizing contacts')
 
       onProgress({total: toNormalize.length, percentDone: 0})
 
-      const normalizedContacts = yield* _(
-        pipe(
-          toNormalize,
-          Array.map(flow(normalizeContact, effectToTask)),
-          sequenceTasksWithAnimationFrames(
-            CONTACT_NORMALIZATION_CHUNK_SIZE,
-            (percentage) => {
-              onProgress({
-                total: toNormalize.length,
-                percentDone: percentage,
-              })
-            }
-          ),
-          taskToEffect
-        )
+      const normalizedContacts = yield* pipe(
+        toNormalize,
+        Array.map(flow(normalizeContact, effectToTask)),
+        sequenceTasksWithAnimationFrames(
+          CONTACT_NORMALIZATION_CHUNK_SIZE,
+          (percentage) => {
+            onProgress({
+              total: toNormalize.length,
+              percentDone: percentage,
+            })
+          }
+        ),
+        taskToEffect
       )
 
       onProgress({total: toNormalize.length, percentDone: 1})

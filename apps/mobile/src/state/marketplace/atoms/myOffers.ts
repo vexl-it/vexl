@@ -61,7 +61,7 @@ const sectionedMyOffersAtom = atom((get): MyOffersListSection[] => {
     Array.filter((offer) => !offer.offerInfo.publicPart.active)
   )
 
-  if (!Array.isNonEmptyArray(pausedOffers)) {
+  if (!Array.isArrayNonEmpty(pausedOffers)) {
     return [{section: 'ACTIVE', showHeader: false, offers: myOffers}]
   }
 
@@ -75,7 +75,7 @@ const sectionedMyOffersAtom = atom((get): MyOffersListSection[] => {
       {section: 'ACTIVE', showHeader: true, offers: activeOffers},
       {section: 'PAUSED', showHeader: true, offers: pausedOffers},
     ] satisfies MyOffersListSection[],
-    Array.filter((one) => Array.isNonEmptyArray(one.offers))
+    Array.filter((one) => Array.isArrayNonEmpty(one.offers))
   )
 })
 
@@ -149,7 +149,7 @@ export const postedFirstOfferAtom = focusAtom(
 export const hasPostedFirstOfferActionStepAtom = atom((get) => {
   return (
     get(postedFirstOfferAtom) ||
-    pipe(get(myActiveOffersAtom), Array.isNonEmptyArray)
+    pipe(get(myActiveOffersAtom), Array.isArrayNonEmpty)
   )
 })
 
@@ -170,25 +170,23 @@ export const updateMyOfferPrivatePayloadActionAtom = atom(
       intendedClubs: ClubUuid[]
     }
   ) =>
-    Effect.gen(function* (_) {
-      const offerToUpdate = yield* _(
+    Effect.gen(function* () {
+      const offerToUpdate = yield* Effect.fromOption(
         Array.findFirst(
           get(myOffersAtom),
           (offer) => offer.ownershipInfo.adminId === adminId
         )
       )
 
-      const {payloadPrivate} = yield* _(
-        updateOwnerPrivatePayload({
-          adminId: offerToUpdate.ownershipInfo.adminId,
-          symmetricKey: offerToUpdate.offerInfo.privatePart.symmetricKey,
-          ownerCredentials: get(sessionDataOrDummyAtom).privateKey,
-          ownerKeyPairV2: get(sessionDataOrDummyAtom).keyPairV2,
-          intendedConnectionLevel,
-          intendedClubs,
-          api: get(apiAtom).offer,
-        })
-      )
+      const {payloadPrivate} = yield* updateOwnerPrivatePayload({
+        adminId: offerToUpdate.ownershipInfo.adminId,
+        symmetricKey: offerToUpdate.offerInfo.privatePart.symmetricKey,
+        ownerCredentials: get(sessionDataOrDummyAtom).privateKey,
+        ownerKeyPairV2: get(sessionDataOrDummyAtom).keyPairV2,
+        intendedConnectionLevel,
+        intendedClubs,
+        api: get(apiAtom).offer,
+      })
 
       const updatedOffer = {
         ...offerToUpdate,

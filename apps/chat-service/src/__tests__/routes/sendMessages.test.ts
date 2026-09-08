@@ -1,4 +1,3 @@
-import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {type MessageCypher} from '@vexl-next/domain/src/general/messaging'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
@@ -10,7 +9,8 @@ import {ForbiddenMessageTyperror} from '@vexl-next/rest-api/src/services/contact
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {mockedReportMetric} from '@vexl-next/server-utils/src/tests/mockedMetricsClientService'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
-import {Effect, Schema} from 'effect'
+import {Effect, pipe, Schema} from 'effect'
+import {SqlClient} from 'effect/unstable/sql'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
 import {addChallengeForKey} from '../utils/addChallengeForKey'
 import {
@@ -26,15 +26,15 @@ let user3: MockedUser
 
 beforeEach(async () => {
   await runPromiseInMockedEnvironment(
-    Effect.gen(function* (_) {
+    Effect.gen(function* () {
       // Clear database before each to start fresh
-      const sql = yield* _(SqlClient.SqlClient)
-      yield* _(sql`DELETE FROM inbox`)
-      yield* _(sql`DELETE FROM message`)
+      const sql = yield* SqlClient.SqlClient
+      yield* sql`DELETE FROM inbox`
+      yield* sql`DELETE FROM message`
 
-      user1 = yield* _(createMockedUser('+420733333330'))
-      user2 = yield* _(createMockedUser('+420733333331'))
-      user3 = yield* _(createMockedUser('+420733333332'))
+      user1 = yield* createMockedUser('+420733333330')
+      user2 = yield* createMockedUser('+420733333331')
+      user3 = yield* createMockedUser('+420733333332')
     })
   )
 })
@@ -42,75 +42,69 @@ beforeEach(async () => {
 describe('Send messages', () => {
   it('Sends messages to multiple inboxes', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
 
         const messagesToSend = [
-          yield* _(
-            user2.inbox1.addChallenge({
-              senderPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-              messages: [
-                {
-                  receiverPublicKey: user1.mainKeyPair.publicKeyPemBase64,
-                  message: '1fromUser2inbox1' as MessageCypher,
-                  messageType: 'MESSAGE' as const,
-                },
-                {
-                  receiverPublicKey: user3.mainKeyPair.publicKeyPemBase64,
-                  message: '2fromUser2inbox1' as MessageCypher,
-                  messageType: 'MESSAGE' as const,
-                },
-              ],
-            })
-          ),
-          yield* _(
-            user2.inbox2.addChallenge({
-              senderPublicKey: user2.inbox2.keyPair.publicKeyPemBase64,
-              messages: [
-                {
-                  receiverPublicKey: user1.mainKeyPair.publicKeyPemBase64,
-                  message: '3fromUser2inbox2' as MessageCypher,
-                  messageType: 'MESSAGE' as const,
-                },
-                {
-                  receiverPublicKey: user3.mainKeyPair.publicKeyPemBase64,
-                  message: '4fromUser2inbox2' as MessageCypher,
-                  messageType: 'MESSAGE' as const,
-                },
-              ],
-            })
-          ),
+          yield* user2.inbox1.addChallenge({
+            senderPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
+            messages: [
+              {
+                receiverPublicKey: user1.mainKeyPair.publicKeyPemBase64,
+                message: '1fromUser2inbox1' as MessageCypher,
+                messageType: 'MESSAGE' as const,
+              },
+              {
+                receiverPublicKey: user3.mainKeyPair.publicKeyPemBase64,
+                message: '2fromUser2inbox1' as MessageCypher,
+                messageType: 'MESSAGE' as const,
+              },
+            ],
+          }),
+          yield* user2.inbox2.addChallenge({
+            senderPublicKey: user2.inbox2.keyPair.publicKeyPemBase64,
+            messages: [
+              {
+                receiverPublicKey: user1.mainKeyPair.publicKeyPemBase64,
+                message: '3fromUser2inbox2' as MessageCypher,
+                messageType: 'MESSAGE' as const,
+              },
+              {
+                receiverPublicKey: user3.mainKeyPair.publicKeyPemBase64,
+                message: '4fromUser2inbox2' as MessageCypher,
+                messageType: 'MESSAGE' as const,
+              },
+            ],
+          }),
         ]
 
-        yield* _(setAuthHeaders(user2.authHeaders))
-        yield* _(
-          client.Messages.sendMessages({
-            headers: commonHeaders,
-            payload: {data: messagesToSend},
-          })
-        )
+        yield* setAuthHeaders(user2.authHeaders)
+        yield* client.Messages.sendMessages({
+          headers: commonHeaders,
+          payload: {data: messagesToSend},
+        })
 
-        yield* _(setAuthHeaders(user1.authHeaders))
-        const messagesReceivedByUser1 = yield* _(
-          client.Messages.retrieveMessages({
-            payload: yield* _(user1.addChallengeForMainInbox({})),
+        yield* setAuthHeaders(user1.authHeaders)
+        const messagesReceivedByUser1 = yield* client.Messages.retrieveMessages(
+          {
+            payload: yield* user1.addChallengeForMainInbox({}),
             headers: Schema.decodeSync(CommonHeaders)({
               'user-agent': 'Vexl/2 (1.0.0) IOS',
             }),
-          })
+          }
         )
         expect(
           messagesReceivedByUser1.messages.map((one) => one.message)
         ).toEqual(['1fromUser2inbox1', '3fromUser2inbox2'])
 
-        yield* _(setAuthHeaders(user3.authHeaders))
-        const messagesReceivedByUser3 = yield* _(
-          client.Messages.retrieveMessages({
-            payload: yield* _(user3.addChallengeForMainInbox({})),
+        yield* setAuthHeaders(user3.authHeaders)
+        const messagesReceivedByUser3 = yield* client.Messages.retrieveMessages(
+          {
+            payload: yield* user3.addChallengeForMainInbox({}),
             headers: Schema.decodeSync(CommonHeaders)({
               'user-agent': 'Vexl/2 (1.0.0) IOS',
             }),
-          })
+          }
         )
 
         expect(
@@ -122,78 +116,74 @@ describe('Send messages', () => {
 
   it('Throws correct error when Receiver inbox does not exist', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
 
         const messagesToSend = [
-          yield* _(
-            user2.inbox1.addChallenge({
-              senderPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-              messages: [
-                {
-                  receiverPublicKey: user1.mainKeyPair.publicKeyPemBase64,
-                  message: '1fromUser2inbox1' as MessageCypher,
-                  messageType: 'MESSAGE' as const,
-                },
-                {
-                  receiverPublicKey: user3.mainKeyPair.publicKeyPemBase64,
-                  message: '2fromUser2inbox1' as MessageCypher,
-                  messageType: 'MESSAGE' as const,
-                },
-              ],
-            })
-          ),
-          yield* _(
-            user2.inbox2.addChallenge({
-              senderPublicKey: user2.inbox2.keyPair.publicKeyPemBase64,
-              messages: [
-                {
-                  receiverPublicKey: generatePrivateKey().publicKeyPemBase64,
-                  message: '3fromUser2inbox2' as MessageCypher,
-                  messageType: 'MESSAGE' as const,
-                },
-                {
-                  receiverPublicKey: user3.mainKeyPair.publicKeyPemBase64,
-                  message: '4fromUser2inbox2' as MessageCypher,
-                  messageType: 'MESSAGE' as const,
-                },
-              ],
-            })
-          ),
+          yield* user2.inbox1.addChallenge({
+            senderPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
+            messages: [
+              {
+                receiverPublicKey: user1.mainKeyPair.publicKeyPemBase64,
+                message: '1fromUser2inbox1' as MessageCypher,
+                messageType: 'MESSAGE' as const,
+              },
+              {
+                receiverPublicKey: user3.mainKeyPair.publicKeyPemBase64,
+                message: '2fromUser2inbox1' as MessageCypher,
+                messageType: 'MESSAGE' as const,
+              },
+            ],
+          }),
+          yield* user2.inbox2.addChallenge({
+            senderPublicKey: user2.inbox2.keyPair.publicKeyPemBase64,
+            messages: [
+              {
+                receiverPublicKey: generatePrivateKey().publicKeyPemBase64,
+                message: '3fromUser2inbox2' as MessageCypher,
+                messageType: 'MESSAGE' as const,
+              },
+              {
+                receiverPublicKey: user3.mainKeyPair.publicKeyPemBase64,
+                message: '4fromUser2inbox2' as MessageCypher,
+                messageType: 'MESSAGE' as const,
+              },
+            ],
+          }),
         ]
 
-        yield* _(setAuthHeaders(user2.authHeaders))
-        const errorResponse = yield* _(
+        yield* setAuthHeaders(user2.authHeaders)
+        const errorResponse = yield* pipe(
           client.Messages.sendMessages({
             headers: commonHeaders,
             payload: {data: messagesToSend},
           }),
-          Effect.either
+          Effect.result
         )
 
         expectErrorResponse(ReceiverInboxDoesNotExistError)(errorResponse)
 
-        yield* _(setAuthHeaders(user1.authHeaders))
-        const messagesReceivedByUser1 = yield* _(
-          client.Messages.retrieveMessages({
-            payload: yield* _(user1.addChallengeForMainInbox({})),
+        yield* setAuthHeaders(user1.authHeaders)
+        const messagesReceivedByUser1 = yield* client.Messages.retrieveMessages(
+          {
+            payload: yield* user1.addChallengeForMainInbox({}),
             headers: Schema.decodeSync(CommonHeaders)({
               'user-agent': 'Vexl/2 (1.0.0) IOS',
             }),
-          })
+          }
         )
         expect(
           messagesReceivedByUser1.messages.map((one) => one.message)
         ).toEqual([])
 
-        yield* _(setAuthHeaders(user3.authHeaders))
-        const messagesReceivedByUser3 = yield* _(
-          client.Messages.retrieveMessages({
-            payload: yield* _(user3.addChallengeForMainInbox({})),
+        yield* setAuthHeaders(user3.authHeaders)
+        const messagesReceivedByUser3 = yield* client.Messages.retrieveMessages(
+          {
+            payload: yield* user3.addChallengeForMainInbox({}),
             headers: Schema.decodeSync(CommonHeaders)({
               'user-agent': 'Vexl/2 (1.0.0) IOS',
             }),
-          })
+          }
         )
 
         expect(
@@ -205,100 +195,94 @@ describe('Send messages', () => {
 
   it('Throws correct error when sender inbox does not exist', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
 
         const nonExistingPrivKey = generatePrivateKey()
         const messagesToSend = [
-          yield* _(
-            user2.inbox1.addChallenge({
-              senderPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-              messages: [
-                {
-                  receiverPublicKey: user1.mainKeyPair.publicKeyPemBase64,
-                  message: '1fromUser2inbox1' as MessageCypher,
-                  messageType: 'MESSAGE' as const,
-                },
-                {
-                  receiverPublicKey: user3.mainKeyPair.publicKeyPemBase64,
-                  message: '2fromUser2inbox1' as MessageCypher,
-                  messageType: 'MESSAGE' as const,
-                },
-              ],
-            })
-          ),
-          yield* _(
-            user2.inbox2.addChallenge({
-              senderPublicKey: user2.inbox2.keyPair.publicKeyPemBase64,
-              messages: [
-                {
-                  receiverPublicKey: user1.mainKeyPair.publicKeyPemBase64,
-                  message: '3fromUser2inbox2' as MessageCypher,
-                  messageType: 'MESSAGE' as const,
-                },
-                {
-                  receiverPublicKey: user3.mainKeyPair.publicKeyPemBase64,
-                  message: '4fromUser2inbox2' as MessageCypher,
-                  messageType: 'MESSAGE' as const,
-                },
-              ],
-            })
-          ),
-          yield* _(
-            addChallengeForKey(
-              nonExistingPrivKey,
-              user2.authHeaders
-            )({
-              senderPublicKey: nonExistingPrivKey.publicKeyPemBase64,
-              messages: [
-                {
-                  receiverPublicKey: user1.mainKeyPair.publicKeyPemBase64,
-                  message: '3fromUser2inbox2' as MessageCypher,
-                  messageType: 'MESSAGE' as const,
-                },
-                {
-                  receiverPublicKey: user3.mainKeyPair.publicKeyPemBase64,
-                  message: '4fromUser2inbox2' as MessageCypher,
-                  messageType: 'MESSAGE' as const,
-                },
-              ],
-            })
-          ),
+          yield* user2.inbox1.addChallenge({
+            senderPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
+            messages: [
+              {
+                receiverPublicKey: user1.mainKeyPair.publicKeyPemBase64,
+                message: '1fromUser2inbox1' as MessageCypher,
+                messageType: 'MESSAGE' as const,
+              },
+              {
+                receiverPublicKey: user3.mainKeyPair.publicKeyPemBase64,
+                message: '2fromUser2inbox1' as MessageCypher,
+                messageType: 'MESSAGE' as const,
+              },
+            ],
+          }),
+          yield* user2.inbox2.addChallenge({
+            senderPublicKey: user2.inbox2.keyPair.publicKeyPemBase64,
+            messages: [
+              {
+                receiverPublicKey: user1.mainKeyPair.publicKeyPemBase64,
+                message: '3fromUser2inbox2' as MessageCypher,
+                messageType: 'MESSAGE' as const,
+              },
+              {
+                receiverPublicKey: user3.mainKeyPair.publicKeyPemBase64,
+                message: '4fromUser2inbox2' as MessageCypher,
+                messageType: 'MESSAGE' as const,
+              },
+            ],
+          }),
+          yield* addChallengeForKey(
+            nonExistingPrivKey,
+            user2.authHeaders
+          )({
+            senderPublicKey: nonExistingPrivKey.publicKeyPemBase64,
+            messages: [
+              {
+                receiverPublicKey: user1.mainKeyPair.publicKeyPemBase64,
+                message: '3fromUser2inbox2' as MessageCypher,
+                messageType: 'MESSAGE' as const,
+              },
+              {
+                receiverPublicKey: user3.mainKeyPair.publicKeyPemBase64,
+                message: '4fromUser2inbox2' as MessageCypher,
+                messageType: 'MESSAGE' as const,
+              },
+            ],
+          }),
         ]
 
-        yield* _(setAuthHeaders(user2.authHeaders))
-        const errorResponse = yield* _(
+        yield* setAuthHeaders(user2.authHeaders)
+        const errorResponse = yield* pipe(
           client.Messages.sendMessages({
             headers: commonHeaders,
             payload: {data: messagesToSend},
           }),
-          Effect.either
+          Effect.result
         )
 
         expectErrorResponse(SenderInboxDoesNotExistError)(errorResponse)
 
-        yield* _(setAuthHeaders(user1.authHeaders))
-        const messagesReceivedByUser1 = yield* _(
-          client.Messages.retrieveMessages({
-            payload: yield* _(user1.addChallengeForMainInbox({})),
+        yield* setAuthHeaders(user1.authHeaders)
+        const messagesReceivedByUser1 = yield* client.Messages.retrieveMessages(
+          {
+            payload: yield* user1.addChallengeForMainInbox({}),
             headers: Schema.decodeSync(CommonHeaders)({
               'user-agent': 'Vexl/2 (1.0.0) IOS',
             }),
-          })
+          }
         )
         expect(
           messagesReceivedByUser1.messages.map((one) => one.message)
         ).toEqual([])
 
-        yield* _(setAuthHeaders(user3.authHeaders))
+        yield* setAuthHeaders(user3.authHeaders)
 
-        const messagesReceivedByUser3 = yield* _(
-          client.Messages.retrieveMessages({
-            payload: yield* _(user3.addChallengeForMainInbox({})),
+        const messagesReceivedByUser3 = yield* client.Messages.retrieveMessages(
+          {
+            payload: yield* user3.addChallengeForMainInbox({}),
             headers: Schema.decodeSync(CommonHeaders)({
               'user-agent': 'Vexl/2 (1.0.0) IOS',
             }),
-          })
+          }
         )
 
         expect(
@@ -310,98 +294,82 @@ describe('Send messages', () => {
 
   it('allows handshake message types and rejects local-only messages', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
 
-        yield* _(setAuthHeaders(user2.authHeaders))
+        yield* setAuthHeaders(user2.authHeaders)
         mockedReportMetric.mockClear()
-        yield* _(
-          client.Messages.sendMessages({
-            headers: commonHeaders,
-            payload: {
-              data: [
-                yield* _(
-                  user2.inbox1.addChallenge({
-                    senderPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-                    messages: [
-                      {
-                        receiverPublicKey: user1.mainKeyPair.publicKeyPemBase64,
-                        message: '1fromUser2inbox1' as MessageCypher,
-                        messageType: 'REQUEST_MESSAGING' as const,
-                      },
-                    ],
-                  })
-                ),
-              ],
-            },
-          })
-        )
+        yield* client.Messages.sendMessages({
+          headers: commonHeaders,
+          payload: {
+            data: [
+              yield* user2.inbox1.addChallenge({
+                senderPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
+                messages: [
+                  {
+                    receiverPublicKey: user1.mainKeyPair.publicKeyPemBase64,
+                    message: '1fromUser2inbox1' as MessageCypher,
+                    messageType: 'REQUEST_MESSAGING' as const,
+                  },
+                ],
+              }),
+            ],
+          },
+        })
 
-        yield* _(
-          client.Messages.sendMessages({
-            headers: commonHeaders,
-            payload: {
-              data: [
-                yield* _(
-                  user2.inbox1.addChallenge({
-                    senderPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-                    messages: [
-                      {
-                        receiverPublicKey: user1.mainKeyPair.publicKeyPemBase64,
-                        message: '1fromUser2inbox1' as MessageCypher,
-                        messageType: 'APPROVE_MESSAGING' as const,
-                      },
-                    ],
-                  })
-                ),
-              ],
-            },
-          })
-        )
+        yield* client.Messages.sendMessages({
+          headers: commonHeaders,
+          payload: {
+            data: [
+              yield* user2.inbox1.addChallenge({
+                senderPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
+                messages: [
+                  {
+                    receiverPublicKey: user1.mainKeyPair.publicKeyPemBase64,
+                    message: '1fromUser2inbox1' as MessageCypher,
+                    messageType: 'APPROVE_MESSAGING' as const,
+                  },
+                ],
+              }),
+            ],
+          },
+        })
 
-        yield* _(
-          client.Messages.sendMessages({
-            headers: commonHeaders,
-            payload: {
-              data: [
-                yield* _(
-                  user2.inbox1.addChallenge({
-                    senderPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-                    messages: [
-                      {
-                        receiverPublicKey: user1.mainKeyPair.publicKeyPemBase64,
-                        message: '1fromUser2inbox1' as MessageCypher,
-                        messageType: 'DISAPPROVE_MESSAGING' as const,
-                      },
-                    ],
-                  })
-                ),
-              ],
-            },
-          })
-        )
+        yield* client.Messages.sendMessages({
+          headers: commonHeaders,
+          payload: {
+            data: [
+              yield* user2.inbox1.addChallenge({
+                senderPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
+                messages: [
+                  {
+                    receiverPublicKey: user1.mainKeyPair.publicKeyPemBase64,
+                    message: '1fromUser2inbox1' as MessageCypher,
+                    messageType: 'DISAPPROVE_MESSAGING' as const,
+                  },
+                ],
+              }),
+            ],
+          },
+        })
 
-        yield* _(
-          client.Messages.sendMessages({
-            headers: commonHeaders,
-            payload: {
-              data: [
-                yield* _(
-                  user2.inbox1.addChallenge({
-                    senderPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-                    messages: [
-                      {
-                        receiverPublicKey: user1.mainKeyPair.publicKeyPemBase64,
-                        message: '1fromUser2inbox1' as MessageCypher,
-                        messageType: 'CANCEL_REQUEST_MESSAGING' as const,
-                      },
-                    ],
-                  })
-                ),
-              ],
-            },
-          })
-        )
+        yield* client.Messages.sendMessages({
+          headers: commonHeaders,
+          payload: {
+            data: [
+              yield* user2.inbox1.addChallenge({
+                senderPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
+                messages: [
+                  {
+                    receiverPublicKey: user1.mainKeyPair.publicKeyPemBase64,
+                    message: '1fromUser2inbox1' as MessageCypher,
+                    messageType: 'CANCEL_REQUEST_MESSAGING' as const,
+                  },
+                ],
+              }),
+            ],
+          },
+        })
 
         expect(mockedReportMetric).toHaveBeenCalledWith(
           expect.objectContaining({name: 'REQUEST_SENT', value: 1})
@@ -416,27 +384,25 @@ describe('Send messages', () => {
           expect.objectContaining({name: 'REQUEST_CANCELED', value: 1})
         )
 
-        const errorResponse5 = yield* _(
+        const errorResponse5 = yield* pipe(
           client.Messages.sendMessages({
             headers: commonHeaders,
             payload: {
               data: [
-                yield* _(
-                  user2.inbox1.addChallenge({
-                    senderPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-                    messages: [
-                      {
-                        receiverPublicKey: user1.mainKeyPair.publicKeyPemBase64,
-                        message: '1fromUser2inbox1' as MessageCypher,
-                        messageType: 'INACTIVITY_REMINDER' as const,
-                      },
-                    ],
-                  })
-                ),
+                yield* user2.inbox1.addChallenge({
+                  senderPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
+                  messages: [
+                    {
+                      receiverPublicKey: user1.mainKeyPair.publicKeyPemBase64,
+                      message: '1fromUser2inbox1' as MessageCypher,
+                      messageType: 'INACTIVITY_REMINDER' as const,
+                    },
+                  ],
+                }),
               ],
             },
           }),
-          Effect.either
+          Effect.result
         )
         expectErrorResponse(ForbiddenMessageTyperror)(errorResponse5)
       })

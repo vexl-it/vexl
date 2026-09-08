@@ -2,7 +2,7 @@ import {type CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.br
 import {type PlatformName} from '@vexl-next/domain/src/utility/PlatformName'
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {type VersionString} from '@vexl-next/domain/src/utility/VersionString.brand'
-import {Effect} from 'effect/index'
+import {Effect} from 'effect'
 import {createClientInstance} from '../../client'
 import {type AppSource} from '../../commonHeaders'
 import {type ServiceUrl} from '../../ServiceUrl.brand'
@@ -44,35 +44,33 @@ export function api({
   loggingFunction?: LoggingFunction | null
   prefix?: CountryPrefix
 }) {
-  return Effect.gen(function* (_) {
-    const client = yield* _(
-      createClientInstance({
-        api: LocationApiSpecification,
-        platform,
-        clientVersion,
-        language,
-        isDeveloper,
-        appSource,
-        clientSemver,
-        url,
-        loggingFunction,
-        deviceModel,
-        osVersion,
-        prefix,
-      })
-    )
+  return Effect.gen(function* () {
+    const client = yield* createClientInstance({
+      api: LocationApiSpecification,
+      platform,
+      clientVersion,
+      language,
+      isDeveloper,
+      appSource,
+      clientSemver,
+      url,
+      loggingFunction,
+      deviceModel,
+      osVersion,
+      prefix,
+    })
 
     return {
       getLocationSuggestions: (query: GetLocationSuggestionsRequest) =>
         client.getLocationSuggestionV2({
-          urlParams: query,
+          query,
         }),
       getGeocodedCoordinates: (query: GetGeocodedCoordinatesRequest) =>
         client.getGeocodedCoordinatesV2({
-          urlParams: query,
+          query,
         }),
     }
   })
 }
 
-export type LocationApi = Effect.Effect.Success<ReturnType<typeof api>>
+export type LocationApi = Effect.Success<ReturnType<typeof api>>

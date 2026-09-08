@@ -12,7 +12,7 @@ import {
   listSlideshows,
 } from '@/src/server/slideshows/repository'
 import {CreateSlideshowRequest} from '@/src/services/slideshows/domain'
-import {Either} from 'effect'
+import {Result} from 'effect'
 import {type NextRequest} from 'next/server'
 
 export const runtime = 'nodejs'
@@ -36,17 +36,17 @@ export async function POST(request: NextRequest) {
     if (authError) return authError
 
     const decoded = await decodeJsonBody(request, CreateSlideshowRequest)
-    if (Either.isLeft(decoded)) return badRequest(decoded.left.message)
+    if (Result.isFailure(decoded)) return badRequest(decoded.failure.message)
 
-    if (decoded.right.publicSlug) {
+    if (decoded.success.publicSlug) {
       const publicSlugAvailable = await runDb(
-        isPublicSlugAvailable(decoded.right.publicSlug, null)
+        isPublicSlugAvailable(decoded.success.publicSlug, null)
       )
       if (!publicSlugAvailable) return badRequest('Public slug is already used')
     }
 
     try {
-      const slideshow = await runDb(createSlideshow(decoded.right))
+      const slideshow = await runDb(createSlideshow(decoded.success))
       return jsonOk({slideshow}, 201)
     } catch (error) {
       if (isDuplicatePublicSlugError(error)) {

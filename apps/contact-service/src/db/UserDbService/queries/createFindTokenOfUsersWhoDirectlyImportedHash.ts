@@ -1,9 +1,9 @@
-import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
-import {Effect, flow, Schema} from 'effect'
+import {Effect, flow, Option, Schema} from 'effect'
+import {SqlSchema} from 'effect/unstable/sql'
 import {ServerHashedNumber} from '../../../utils/serverHashContact'
 import {NotificationTokens} from '../domain'
 
@@ -16,18 +16,17 @@ export type FindTokensOfUsersWhoDirectlyImportedHashParams =
 
 export const FindTokensOfUsersWhoDirectlyImportedHashResult = Schema.Struct({
   ...NotificationTokens.fields,
-  vexlNotificationToken: Schema.optionalWith(VexlNotificationToken, {
-    as: 'Option',
-    nullable: true,
-  }),
+  vexlNotificationToken: Schema.OptionFromOptionalNullOr(
+    VexlNotificationToken
+  ).pipe(Schema.withConstructorDefault(Effect.succeed(Option.none()))),
   clientVersion: Schema.NullOr(VersionCode),
 })
 export type FindTokensOfUsersWhoDirectlyImportedHashResult =
   typeof FindTokensOfUsersWhoDirectlyImportedHashResult.Type
 
 export const createFindTokensOfUsersWhoDirectlyImportedHash = Effect.gen(
-  function* (_) {
-    const sql = yield* _(PgClient.PgClient)
+  function* () {
+    const sql = yield* PgClient.PgClient
 
     const query = SqlSchema.findAll({
       Request: FindTokensOfUsersWhoDirectlyImportedHashParams,

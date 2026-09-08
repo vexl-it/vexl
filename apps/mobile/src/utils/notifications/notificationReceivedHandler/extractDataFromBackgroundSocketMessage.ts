@@ -107,10 +107,10 @@ export const extractDataFromBackgroundSocketMessage = (
         message: 'Error parsing background socket notification JSON',
       }),
   }).pipe(
-    Effect.flatMap(Schema.decodeUnknown(NotificationStreamMessage)),
+    Effect.flatMap(Schema.decodeUnknownEffect(NotificationStreamMessage)),
     Effect.map(toNotificationData),
     Effect.catchTag(
-      'ParseError',
+      'SchemaError',
       () =>
         new ErrorParsingNotification({
           message: 'Error decoding background socket notification',

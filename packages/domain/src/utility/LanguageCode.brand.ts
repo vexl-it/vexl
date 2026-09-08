@@ -1,7 +1,7 @@
 import {Schema, type Option} from 'effect'
 
 export const LanguageCode = Schema.String.pipe(
-  Schema.pattern(/^[a-z]{2,3}$/),
+  Schema.check(Schema.isPattern(/^[a-z]{2,3}$/)),
   Schema.brand('LanguageCode')
 )
 export type LanguageCode = Schema.Schema.Type<typeof LanguageCode>

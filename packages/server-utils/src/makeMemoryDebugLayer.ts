@@ -1,15 +1,13 @@
 import {Effect, Layer} from 'effect'
-import {type DurationInput} from 'effect/Duration'
+import {type Input} from 'effect/Duration'
 
 const formatMemoryUsage = (data: number): string =>
   `${Math.round((data / 1024 / 1024) * 100) / 100} MB`
 
-export const makeMemoryDebugLayer = (
-  logInterval: DurationInput
-): Layer.Layer<never> =>
+export const makeMemoryDebugLayer = (logInterval: Input): Layer.Layer<never> =>
   Layer.effectDiscard(
-    Effect.gen(function* (_) {
-      const memoryData = yield* _(Effect.sync(() => process.memoryUsage()))
+    Effect.gen(function* () {
+      const memoryData = yield* Effect.sync(() => process.memoryUsage())
 
       const memoryUsage = {
         rss: `${formatMemoryUsage(memoryData.rss)} -> Resident Set Size - total memory allocated for the process execution`,
@@ -18,10 +16,10 @@ export const makeMemoryDebugLayer = (
         external: `${formatMemoryUsage(memoryData.external)} -> V8 external memory`,
       }
 
-      yield* _(Effect.logInfo('Memory usage', memoryUsage))
+      yield* Effect.logInfo('Memory usage', memoryUsage)
     }).pipe(
-      Effect.zipLeft(Effect.sleep(logInterval)),
+      Effect.tap(Effect.sleep(logInterval)),
       Effect.forever,
-      Effect.fork
+      Effect.forkChild
     )
   )

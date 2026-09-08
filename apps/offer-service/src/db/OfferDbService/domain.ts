@@ -8,6 +8,7 @@ import {
   PrivatePayloadEncrypted,
   PublicPayloadEncrypted,
 } from '@vexl-next/domain/src/general/offers'
+import {NumberFromString} from '@vexl-next/generic-utils/src/effect-helpers/NumberFromString'
 import {Schema} from 'effect'
 
 export const OfferAdminIdHashed = Schema.String.pipe(
@@ -15,15 +16,13 @@ export const OfferAdminIdHashed = Schema.String.pipe(
 )
 export type OfferAdminIdHashed = Schema.Schema.Type<typeof OfferAdminIdHashed>
 
-export const PublicPartId = Schema.NumberFromString.pipe(
-  Schema.brand('PublicPartId')
-)
+export const PublicPartId = NumberFromString.pipe(Schema.brand('PublicPartId'))
 
 export type PublicPartId = Schema.Schema.Type<typeof PublicPartId>
 
-export const OfferChangeCounter = Schema.NumberFromString.pipe(
+export const OfferChangeCounter = NumberFromString.pipe(
   Schema.brand('OfferChangeCounter'),
-  Schema.greaterThanOrEqualTo(0)
+  Schema.check(Schema.isGreaterThanOrEqualTo(0))
 )
 
 export type OfferChangeCounter = Schema.Schema.Type<typeof OfferChangeCounter>
@@ -34,12 +33,12 @@ export class PublicPartRecord extends Schema.Class<PublicPartRecord>(
   id: PublicPartId,
   adminId: OfferAdminIdHashed,
   offerId: OfferId,
-  createdAt: Schema.DateFromSelf,
-  modifiedAt: Schema.DateFromSelf,
+  createdAt: Schema.Date,
+  modifiedAt: Schema.Date,
   offerType: OfferType,
-  report: Schema.Int.pipe(Schema.greaterThanOrEqualTo(0)),
+  report: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
   payloadPublic: PublicPayloadEncrypted,
-  refreshedAt: Schema.DateFromSelf,
+  refreshedAt: Schema.Date,
   countryPrefix: CountryPrefix,
 }) {}
 
@@ -47,7 +46,7 @@ export class PrivatePartRecord extends Schema.Class<PrivatePartRecord>(
   'PrivatePartRecord'
 )({
   id: PrivatePartRecordId,
-  userPublicKey: Schema.Union(PublicKeyPemBase64, PublicKeyV2),
+  userPublicKey: Schema.Union([PublicKeyPemBase64, PublicKeyV2]),
   offerId: PublicPartId,
   payloadPrivate: PrivatePayloadEncrypted,
 }) {}

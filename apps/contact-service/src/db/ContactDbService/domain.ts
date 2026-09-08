@@ -1,7 +1,7 @@
 import {Schema} from 'effect'
 import {ServerHashedNumber} from '../../utils/serverHashContact'
 
-export const ContactRecordId = Schema.BigInt.pipe(
+export const ContactRecordId = Schema.BigIntFromString.pipe(
   Schema.brand('ContactRecordId')
 )
 export type ContactRecordId = Schema.Schema.Type<typeof ContactRecordId>

@@ -11,8 +11,8 @@ export const UpdateReportNoteRequest = Schema.Struct({
 })
 export type UpdateReportNoteRequest = typeof UpdateReportNoteRequest.Type
 
-export const createUpdateReportNote = Effect.gen(function* (_) {
-  const sql = yield* _(PgClient.PgClient)
+export const createUpdateReportNote = Effect.gen(function* () {
+  const sql = yield* PgClient.PgClient
 
   return (request: UpdateReportNoteRequest) =>
     sql`

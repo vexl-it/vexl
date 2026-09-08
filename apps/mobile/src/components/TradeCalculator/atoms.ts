@@ -4,7 +4,7 @@ import {
   type TradePriceType,
 } from '@vexl-next/domain/src/general/tradeChecklist'
 import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import {Effect, Schema} from 'effect/index'
+import {Effect, Schema} from 'effect'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'

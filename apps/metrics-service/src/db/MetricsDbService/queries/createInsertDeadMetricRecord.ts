@@ -1,18 +1,18 @@
-import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {Effect, flow, Schema} from 'effect'
+import {SqlSchema} from 'effect/unstable/sql'
 
 export const InsertDeadMetricsParams = Schema.Struct({
-  data: Schema.parseJson(Schema.Unknown),
+  data: Schema.fromJsonString(Schema.Unknown),
   message: Schema.String,
-  accepted_at: Schema.DateFromSelf,
+  accepted_at: Schema.Date,
 })
 
 export type InsertDeadMetricsParams = typeof InsertDeadMetricsParams.Type
 
-export const createInsertDeadMetricRecord = Effect.gen(function* (_) {
-  const sql = yield* _(PgClient.PgClient)
+export const createInsertDeadMetricRecord = Effect.gen(function* () {
+  const sql = yield* PgClient.PgClient
 
   const query = SqlSchema.void({
     Request: InsertDeadMetricsParams,

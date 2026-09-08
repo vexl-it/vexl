@@ -5,7 +5,7 @@ import {
   InitialImportContactsQuotaReachedError,
 } from '@vexl-next/rest-api/src/services/contact/contracts'
 import {RedisService} from '@vexl-next/server-utils/src/RedisService'
-import {Context, Effect, Layer, Schema} from 'effect'
+import {Context, Effect, Layer, pipe, Schema} from 'effect'
 import {DateTime} from 'luxon'
 import {
   disableImportContactsQuotaConfig,
@@ -17,7 +17,7 @@ import {UserDbService} from '../../db/UserDbService'
 import {type ServerHashedNumber} from '../../utils/serverHashContact'
 
 export const ImportContactsQuotaRecord = Schema.Int.pipe(
-  Schema.greaterThanOrEqualTo(0)
+  Schema.check(Schema.isGreaterThanOrEqualTo(0))
 )
 
 export const createQuotaRecordKey = (
@@ -37,21 +37,20 @@ export interface ImportContactsQuotaOperations {
   >
 }
 
-export class ImportContactsQuotaService extends Context.Tag(
-  'ImportContactsQuotaService'
-)<ImportContactsQuotaService, ImportContactsQuotaOperations>() {
+export class ImportContactsQuotaService extends Context.Service<
+  ImportContactsQuotaService,
+  ImportContactsQuotaOperations
+>()('ImportContactsQuotaService') {
   static readonly Live = Layer.effect(
     ImportContactsQuotaService,
-    Effect.gen(function* (_) {
-      const redis = yield* _(RedisService)
-      const userDb = yield* _(UserDbService)
+    Effect.gen(function* () {
+      const redis = yield* RedisService
+      const userDb = yield* UserDbService
 
-      const quotaDisabled = yield* _(disableImportContactsQuotaConfig)
+      const quotaDisabled = yield* disableImportContactsQuotaConfig
       if (quotaDisabled) {
-        yield* _(
-          Effect.logWarning(
-            'Import contacts quota is DISABLED (DISABLE_IMPORT_CONTACTS_QUOTA=true)'
-          )
+        yield* Effect.logWarning(
+          'Import contacts quota is DISABLED (DISABLE_IMPORT_CONTACTS_QUOTA=true)'
         )
         return {
           checkAndIncrementImportContactsQuota: () => () => Effect.void,
@@ -60,28 +59,24 @@ export class ImportContactsQuotaService extends Context.Tag(
 
       return {
         checkAndIncrementImportContactsQuota:
-          (hashedPhoneNumber) => (numberOfNewImportedContacts) =>
-            Effect.gen(function* (_) {
+          (hashedPhoneNumber: ServerHashedNumber) =>
+          (numberOfNewImportedContacts: number) =>
+            Effect.gen(function* () {
               const quotaRecordKey = createQuotaRecordKey(hashedPhoneNumber)
-              const user = yield* _(
+              const user = yield* pipe(
                 userDb.findUserByHash(hashedPhoneNumber),
-                Effect.flatten
+                Effect.flatMap(Effect.fromOption)
               )
 
-              const importContactsCountQuota = yield* _(
-                importContactsCountQuotaConfig
-              )
-              const importContactsResetAfterDaysQuota = yield* _(
-                importContactsResetAfterDaysQuotaConfig
-              )
-              const initialImportContactsCountQuota = yield* _(
-                initialImportContactsCountQuotaConfig
-              )
-              const alreadyImportedContactsCount = yield* _(
+              const importContactsCountQuota =
+                yield* importContactsCountQuotaConfig
+              const importContactsResetAfterDaysQuota =
+                yield* importContactsResetAfterDaysQuotaConfig
+              const initialImportContactsCountQuota =
+                yield* initialImportContactsCountQuotaConfig
+              const alreadyImportedContactsCount = yield* pipe(
                 redis.get(ImportContactsQuotaRecord)(quotaRecordKey),
-                Effect.catchTag('NoSuchElementException', () =>
-                  Effect.succeed(0)
-                )
+                Effect.catchTag('NoSuchElementError', () => Effect.succeed(0))
               )
               const contactsCountToReachQuota =
                 importContactsCountQuota - alreadyImportedContactsCount
@@ -90,9 +85,7 @@ export class ImportContactsQuotaService extends Context.Tag(
                 user.initialImportDone &&
                 numberOfNewImportedContacts > contactsCountToReachQuota
               ) {
-                return yield* _(
-                  Effect.fail(new ImportContactsQuotaReachedError())
-                )
+                return yield* Effect.fail(new ImportContactsQuotaReachedError())
               }
 
               const newImportedContactsCount =
@@ -107,18 +100,16 @@ export class ImportContactsQuotaService extends Context.Tag(
               )
 
               if (!user.initialImportDone) {
-                yield* _(
-                  userDb.updateUserInitialImportDone({
-                    hash: hashedPhoneNumber,
-                    initialImportDone: true,
-                  })
-                )
+                yield* userDb.updateUserInitialImportDone({
+                  hash: hashedPhoneNumber,
+                  initialImportDone: true,
+                })
 
                 if (
                   numberOfNewImportedContacts > initialImportContactsCountQuota
                 ) {
-                  return yield* _(
-                    Effect.fail(new InitialImportContactsQuotaReachedError())
+                  return yield* Effect.fail(
+                    new InitialImportContactsQuotaReachedError()
                   )
                 }
               }
@@ -127,15 +118,13 @@ export class ImportContactsQuotaService extends Context.Tag(
                 ? newImportedContactsCount
                 : 0
 
-              return yield* _(
-                redis.set(ImportContactsQuotaRecord)(
-                  quotaRecordKey,
-                  contactsCountToStore,
-                  {expiresAt}
-                )
+              return yield* redis.set(ImportContactsQuotaRecord)(
+                quotaRecordKey,
+                contactsCountToStore,
+                {expiresAt}
               )
             }).pipe(
-              Effect.catchAll(
+              Effect.catch(
                 (
                   e
                 ): Effect.Effect<
@@ -151,7 +140,7 @@ export class ImportContactsQuotaService extends Context.Tag(
                     return Effect.fail(e)
                   }
 
-                  return Effect.zipLeft(
+                  return Effect.tap(
                     Effect.fail(
                       new UnexpectedServerError({status: 500, cause: e})
                     ),

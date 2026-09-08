@@ -7,7 +7,7 @@ import {
 } from '@/src/server/slideshows/http'
 import {createSlideshowUpload} from '@/src/server/slideshows/s3'
 import {RequestUploadRequest} from '@/src/services/slideshows/domain'
-import {Effect, Either} from 'effect'
+import {Effect, Result} from 'effect'
 import {type NextRequest} from 'next/server'
 
 export const runtime = 'nodejs'
@@ -18,9 +18,11 @@ export async function POST(request: NextRequest) {
     if (authError) return authError
 
     const decoded = await decodeJsonBody(request, RequestUploadRequest)
-    if (Either.isLeft(decoded)) return badRequest(decoded.left.message)
+    if (Result.isFailure(decoded)) return badRequest(decoded.failure.message)
 
-    const upload = await Effect.runPromise(createSlideshowUpload(decoded.right))
+    const upload = await Effect.runPromise(
+      createSlideshowUpload(decoded.success)
+    )
 
     return jsonOk(upload)
   } catch (error) {

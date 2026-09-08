@@ -42,9 +42,10 @@ export interface PendingBatchedNotificationsDbOperations {
   ) => Effect.Effect<void, UnexpectedServerError>
 }
 
-export class PendingBatchedNotificationsDb extends Context.Tag(
-  'PendingBatchedNotificationsDb'
-)<PendingBatchedNotificationsDb, PendingBatchedNotificationsDbOperations>() {
+export class PendingBatchedNotificationsDb extends Context.Service<
+  PendingBatchedNotificationsDb,
+  PendingBatchedNotificationsDbOperations
+>()('PendingBatchedNotificationsDb') {
   static readonly Live = Layer.effect(
     PendingBatchedNotificationsDb,
     Effect.gen(function* () {

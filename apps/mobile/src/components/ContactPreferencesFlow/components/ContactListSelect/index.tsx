@@ -8,7 +8,7 @@ import {
   XStack,
   type TabItem,
 } from '@vexl-next/ui'
-import {useMolecule} from 'bunshi/dist/react'
+import {useMolecule} from 'bunshi/react'
 import {Array} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useMemo} from 'react'
@@ -103,7 +103,7 @@ function ContactsListSelect({
   })
 
   const shouldShowEmptyContactsState =
-    !Array.isNonEmptyArray(normalizedContacts) && addContactRequestId === 0
+    !Array.isArrayNonEmpty(normalizedContacts) && addContactRequestId === 0
 
   const contactsFilterItems = useMemo(
     (): ReadonlyArray<TabItem<ContactsFilter>> => [

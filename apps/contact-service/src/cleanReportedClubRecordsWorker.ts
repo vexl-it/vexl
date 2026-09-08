@@ -12,13 +12,11 @@ export const CleanReportedClubRecordsWorkerLayer = makeRepeatingTaskLayer({
   intervalMs: cleanReportedClubRecordsIntervalMsConfig,
   lockResource: 'contactService:cleanReportedClubRecords',
   lockDuration: '5 minutes',
-  task: Effect.gen(function* (_) {
-    const db = yield* _(ClubMembersDbService)
-    const clubReportLimitIntervalDays = yield* _(
-      clubReportLimitIntervalDaysConfig
-    )
-    yield* _(
-      db.deleteClubReportedRecordByReportedAtBefore(clubReportLimitIntervalDays)
+  task: Effect.gen(function* () {
+    const db = yield* ClubMembersDbService
+    const clubReportLimitIntervalDays = yield* clubReportLimitIntervalDaysConfig
+    yield* db.deleteClubReportedRecordByReportedAtBefore(
+      clubReportLimitIntervalDays
     )
   }),
 })

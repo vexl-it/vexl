@@ -1,7 +1,7 @@
-import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {Effect, flow, Schema} from 'effect'
+import {SqlSchema} from 'effect/unstable/sql'
 import {ClubDbRecord, ClubRecordId} from '../domain'
 
 export const FindClubParams = Schema.Struct({
@@ -9,10 +9,10 @@ export const FindClubParams = Schema.Struct({
 })
 export type FindClubParams = typeof FindClubParams.Type
 
-export const createFindClub = Effect.gen(function* (_) {
-  const sql = yield* _(PgClient.PgClient)
+export const createFindClub = Effect.gen(function* () {
+  const sql = yield* PgClient.PgClient
 
-  const query = SqlSchema.findOne({
+  const query = SqlSchema.findOneOption({
     Request: FindClubParams,
     Result: ClubDbRecord,
     execute: (params) => sql`

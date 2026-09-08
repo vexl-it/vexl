@@ -88,7 +88,7 @@ export default function EditClubPage() {
           const statsResult = await runEffect(
             client.getClubStats({
               headers: {'x-admin-token': adminToken},
-              urlParams: {clubUuid: club.uuid},
+              query: {clubUuid: club.uuid},
             })
           )
           setStats(statsResult)

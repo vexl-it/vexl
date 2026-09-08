@@ -7,7 +7,7 @@ import {
   SearchBar,
   Typography,
 } from '@vexl-next/ui'
-import {ScopeProvider, useMolecule} from 'bunshi/dist/react'
+import {ScopeProvider, useMolecule} from 'bunshi/react'
 import {type Atom, atom, useAtomValue, useSetAtom} from 'jotai'
 import React, {useEffect, useMemo} from 'react'
 import {FlatList, TouchableOpacity} from 'react-native'

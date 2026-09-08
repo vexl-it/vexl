@@ -64,7 +64,7 @@ const toNoteItem = (note: OneNoteInState): BoardListItem => ({
 
 // Newest first - notes carry an incrementing numeric id used for ordering.
 const byNewestFirst = Order.mapInput(
-  Order.reverse(Order.number),
+  Order.flip(Order.Number),
   (note: OneNoteInState) => note.noteInfo.id
 )
 
@@ -179,7 +179,7 @@ function NotesBoard({navigation, route}: Props): React.JSX.Element {
       Array.filter((note) => note.noteInfo.expiresAt <= now)
     )
 
-    if (!Array.isNonEmptyArray(expiredNotes))
+    if (!Array.isArrayNonEmpty(expiredNotes))
       return Array.map(sorted, toNoteItem)
 
     const activeNotes = pipe(
@@ -188,7 +188,7 @@ function NotesBoard({navigation, route}: Props): React.JSX.Element {
     )
 
     return [
-      ...(Array.isNonEmptyArray(activeNotes)
+      ...(Array.isArrayNonEmpty(activeNotes)
         ? [
             {type: 'sectionHeader', section: 'ACTIVE'} satisfies BoardListItem,
             ...Array.map(activeNotes, toNoteItem),
@@ -278,7 +278,7 @@ function NotesBoard({navigation, route}: Props): React.JSX.Element {
       <FlashList
         ref={listRef}
         contentContainerStyle={
-          Array.isEmptyReadonlyArray(listItems)
+          Array.isReadonlyArrayEmpty(listItems)
             ? emptyContentContainerStyle
             : listContentContainerStyle
         }

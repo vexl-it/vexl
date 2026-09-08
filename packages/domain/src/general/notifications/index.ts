@@ -1,7 +1,8 @@
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
+import {BooleanFromString} from '@vexl-next/generic-utils/src/effect-helpers/BooleanFromString'
+import {NumberFromString} from '@vexl-next/generic-utils/src/effect-helpers/NumberFromString'
 import {orElseSchema} from '@vexl-next/generic-utils/src/effect-helpers/orElseSchema'
-import {Schema} from 'effect'
-import {BooleanFromString} from 'effect/Schema'
+import {Effect, Option, Schema} from 'effect'
 import {UnixMilliseconds} from '../../utility/UnixMilliseconds.brand'
 import {ClubUuid} from '../clubs'
 import {NotificationTrackingId} from '../NotificationTrackingId.brand'
@@ -12,7 +13,7 @@ import {VexlNotificationToken} from './VexlNotificationToken'
 export const FcmCypher = Schema.String.pipe(Schema.brand('FcmCypher'))
 export type FcmCypher = typeof FcmCypher.Type
 
-export const ChatNotificationType = Schema.Literal(
+export const ChatNotificationType = Schema.Literals([
   'MESSAGE',
   'REQUEST_REVEAL',
   'APPROVE_REVEAL',
@@ -29,13 +30,15 @@ export const ChatNotificationType = Schema.Literal(
   'VERSION_UPDATE',
   'FCM_CYPHER_UPDATE',
   'MESSAGE_READ',
-  'UNKNOWN'
-)
+  'UNKNOWN',
+])
 
 export class ChatNotificationData extends Schema.Class<ChatNotificationData>(
   'NotificationData'
 )({
-  trackingId: Schema.optionalWith(NotificationTrackingId, {as: 'Option'}),
+  trackingId: Schema.OptionFromOptional(NotificationTrackingId).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
   type: ChatNotificationType.pipe(orElseSchema('UNKNOWN')),
   inbox: PublicKeyPemBase64,
   sender: PublicKeyPemBase64,
@@ -50,8 +53,10 @@ export class NewChatMessageNoticeNotificationData extends Schema.TaggedClass<New
   // Todo #2124 remove target cypher and use target token only (remove optional)
   targetCypher: Schema.optional(NotificationCypher),
   targetToken: Schema.optional(VexlNotificationToken),
-  trackingId: Schema.optionalWith(NotificationTrackingId, {as: 'Option'}),
-  sentAt: Schema.compose(Schema.NumberFromString, UnixMilliseconds),
+  trackingId: Schema.OptionFromOptional(NotificationTrackingId).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
+  sentAt: NumberFromString.pipe(Schema.decodeTo(UnixMilliseconds)),
   // Is true if the notification was sent with a system notification
   // (i.e. a notification that shows up in the system tray)
   // This will be false for foreground notifications that do not show up in the system tray
@@ -60,9 +65,9 @@ export class NewChatMessageNoticeNotificationData extends Schema.TaggedClass<New
   // wether there was also a system notification sent along with the chat notification
   // Will be true for both background and foreground notifications if there was a
   // system notification sent
-  systemNotificationSent: Schema.optionalWith(Schema.BooleanFromString, {
-    as: 'Option',
-  }),
+  systemNotificationSent: Schema.OptionFromOptional(BooleanFromString).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
 }) {
   static parseUnkownOption = Schema.decodeUnknownOption(
     NewChatMessageNoticeNotificationData
@@ -72,8 +77,10 @@ export class NewChatMessageNoticeNotificationData extends Schema.TaggedClass<New
 export class NewClubConnectionNotificationData extends Schema.TaggedClass<NewClubConnectionNotificationData>(
   'NewClubConnectionNotificationData'
 )('NewClubConnectionNotificationData', {
-  clubUuids: Schema.parseJson(Schema.NonEmptyArray(ClubUuid)),
-  trackingId: Schema.optionalWith(NotificationTrackingId, {as: 'Option'}),
+  clubUuids: Schema.fromJsonString(Schema.NonEmptyArray(ClubUuid)),
+  trackingId: Schema.OptionFromOptional(NotificationTrackingId).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
 }) {
   toData = (): typeof NewClubConnectionNotificationData.Encoded =>
     Schema.encodeSync(NewClubConnectionNotificationData)(this)
@@ -83,8 +90,10 @@ export class NewSocialNetworkConnectionNotificationData extends Schema.TaggedCla
   'NewSocialNetworkConnectionNotificationData'
 )('NewSocialNetworkConnectionNotificationData', {
   type: Schema.Literal('NEW_APP_USER'), // backward compatibility
-  trackingId: Schema.optionalWith(NotificationTrackingId, {as: 'Option'}),
-  sentAt: Schema.compose(Schema.NumberFromString, UnixMilliseconds),
+  trackingId: Schema.OptionFromOptional(NotificationTrackingId).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
+  sentAt: NumberFromString.pipe(Schema.decodeTo(UnixMilliseconds)),
 }) {
   toData = (): typeof NewSocialNetworkConnectionNotificationData.Encoded =>
     Schema.encodeSync(NewSocialNetworkConnectionNotificationData)(this)
@@ -94,27 +103,32 @@ export class AdmitedToClubNetworkNotificationData extends Schema.TaggedClass<Adm
   'AdmitedToClubNetworkNotificationData'
 )('AdmitedToClubNetworkNotificationData', {
   publicKey: PublicKeyPemBase64,
-  trackingId: Schema.optionalWith(NotificationTrackingId, {as: 'Option'}),
+  trackingId: Schema.OptionFromOptional(NotificationTrackingId).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
 }) {
   toData = (): typeof AdmitedToClubNetworkNotificationData.Encoded =>
     Schema.encodeSync(AdmitedToClubNetworkNotificationData)(this)
 }
 
-export const UserInactivityNotificationVariant = Schema.Literal(
+export const UserInactivityNotificationVariant = Schema.Literals([
   'FIRST',
-  'OFFERS_DEACTIVATED'
-)
+  'OFFERS_DEACTIVATED',
+])
 export type UserInactivityNotificationVariant =
   typeof UserInactivityNotificationVariant.Type
 
 export class UserInactivityNotificationData extends Schema.TaggedClass<UserInactivityNotificationData>(
   'UserInactivityNotificationData'
 )('UserInactivityNotificationData', {
-  trackingId: Schema.optionalWith(NotificationTrackingId, {as: 'Option'}),
+  trackingId: Schema.OptionFromOptional(NotificationTrackingId).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
   // Optional so notifications sent by older backends still decode
-  variant: Schema.optionalWith(UserInactivityNotificationVariant, {
-    default: () => 'FIRST',
-  }),
+  variant: UserInactivityNotificationVariant.pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): 'FIRST' => 'FIRST')),
+    Schema.withConstructorDefault(Effect.sync((): 'FIRST' => 'FIRST'))
+  ),
 }) {
   toData = (): typeof UserInactivityNotificationData.Encoded =>
     Schema.encodeSync(UserInactivityNotificationData)(this)
@@ -123,7 +137,9 @@ export class UserInactivityNotificationData extends Schema.TaggedClass<UserInact
 export class UserLoginOnDifferentDeviceNotificationData extends Schema.TaggedClass<UserLoginOnDifferentDeviceNotificationData>(
   'UserLoginOnDifferentDeviceNotificationData'
 )('UserLoginOnDifferentDeviceNotificationData', {
-  trackingId: Schema.optionalWith(NotificationTrackingId, {as: 'Option'}),
+  trackingId: Schema.OptionFromOptional(NotificationTrackingId).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
 }) {
   toData = (): typeof UserLoginOnDifferentDeviceNotificationData.Encoded =>
     Schema.encodeSync(UserLoginOnDifferentDeviceNotificationData)(this)
@@ -132,7 +148,9 @@ export class UserLoginOnDifferentDeviceNotificationData extends Schema.TaggedCla
 export class NewContentNotificationData extends Schema.TaggedClass<NewContentNotificationData>(
   'NewContentNotificationData'
 )('NewContentNotificationData', {
-  trackingId: Schema.optionalWith(NotificationTrackingId, {as: 'Option'}),
+  trackingId: Schema.OptionFromOptional(NotificationTrackingId).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
 }) {
   toData = (): typeof NewContentNotificationData.Encoded =>
     Schema.encodeSync(NewContentNotificationData)(this)
@@ -142,8 +160,10 @@ export class ClubDeactivatedNotificationData extends Schema.TaggedClass<ClubDeac
   'ClubDeactivatedNotificationData'
 )('ClubDeactivatedNotificationData', {
   clubUuid: ClubUuid,
-  reason: Schema.Literal('EXPIRED', 'FLAGGED', 'OTHER'),
-  trackingId: Schema.optionalWith(NotificationTrackingId, {as: 'Option'}),
+  reason: Schema.Literals(['EXPIRED', 'FLAGGED', 'OTHER']),
+  trackingId: Schema.OptionFromOptional(NotificationTrackingId).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
 }) {
   toData = (): typeof ClubDeactivatedNotificationData.Encoded =>
     Schema.encodeSync(ClubDeactivatedNotificationData)(this)
@@ -153,7 +173,9 @@ export class OpenBrowserLinkNotificationData extends Schema.TaggedClass<OpenBrow
   'OpenBrowserLinkNotificationData'
 )('OpenBrowserLinkNotificationData', {
   url: Schema.String,
-  trackingId: Schema.optionalWith(NotificationTrackingId, {as: 'Option'}),
+  trackingId: Schema.OptionFromOptional(NotificationTrackingId).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
 }) {
   toData = (): typeof OpenBrowserLinkNotificationData.Encoded =>
     Schema.encodeSync(OpenBrowserLinkNotificationData)(this)
@@ -163,8 +185,10 @@ export class VexlProductNotificationData extends Schema.TaggedClass<VexlProductN
   'VexlProductNotificationData'
 )('VexlProductNotificationData', {
   ...VexlProductNotification.fields,
-  issuePushNotification: Schema.BooleanFromString,
-  trackingId: Schema.optionalWith(NotificationTrackingId, {as: 'Option'}),
+  issuePushNotification: BooleanFromString,
+  trackingId: Schema.OptionFromOptional(NotificationTrackingId).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
 }) {
   toData = (): typeof VexlProductNotificationData.Encoded =>
     Schema.encodeSync(VexlProductNotificationData)(this)
@@ -173,7 +197,7 @@ export class VexlProductNotificationData extends Schema.TaggedClass<VexlProductN
 export class DebugDummyNotificationData extends Schema.TaggedClass<DebugDummyNotificationData>(
   'DebugDummyNotificationData'
 )('DebugDummyNotificationData', {
-  acknowleadgeOnReceive: Schema.BooleanFromString,
+  acknowleadgeOnReceive: BooleanFromString,
 }) {
   toData = (): typeof DebugDummyNotificationData.Encoded =>
     Schema.encodeSync(DebugDummyNotificationData)(this)

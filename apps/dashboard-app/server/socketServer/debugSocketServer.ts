@@ -13,7 +13,7 @@ import {
   SubscriptionRef,
   pipe,
 } from 'effect'
-import {type ParseError} from 'effect/ParseResult'
+import {type SchemaError} from 'effect/Schema'
 import {WebSocket} from 'ws'
 import {
   ConnectionsCountByCountry,
@@ -31,34 +31,35 @@ const dummyPrefixes = [
   420, 421, 1, 238, 49, 30, 33, 7, 41, 380, 355, 244, 36, 62, 60, 40,
 ]
 
-const generateRandomUser = Effect.gen(function* (_) {
-  const pubKey = yield* _(
-    Effect.sync(() => generatePrivateKey().publicKeyPemBase64)
+const generateRandomUser = Effect.gen(function* () {
+  const pubKey = yield* Effect.sync(
+    () => generatePrivateKey().publicKeyPemBase64
   )
 
-  const connections = yield* _(Random.nextIntBetween(50, 2000))
+  const connections = yield* Random.nextIntBetween(50, 2000)
 
-  const randomPrefixIndex = yield* _(
-    Random.nextIntBetween(0, dummyPrefixes.length)
+  const randomPrefixIndex = yield* Random.nextIntBetween(
+    0,
+    dummyPrefixes.length
   )
-  const countryPrefix = yield* _(
-    Schema.decode(CountryPrefix)(dummyPrefixes[randomPrefixIndex])
+  const countryPrefix = yield* Schema.decodeEffect(CountryPrefix)(
+    dummyPrefixes[randomPrefixIndex]
   )
   const receivedAt = unixMillisecondsNow()
 
   return new UserWithConnections({
-    pubKey: yield* _(secureHash(pubKey)),
+    pubKey: yield* secureHash(pubKey),
     connectionsCount: connections,
     countryPrefix,
     receivedAt,
   })
 })
 
-const generateDummyCountriesScore = Effect.gen(function* (_) {
-  const decodePrexies = Schema.decode(Schema.Array(CountryPrefix))
-  const prefixes = yield* _(decodePrexies(dummyPrefixes))
-  const scores = yield* _(
-    Effect.all(prefixes.map(() => Random.nextIntBetween(5000, 500_000)))
+const generateDummyCountriesScore = Effect.gen(function* () {
+  const decodePrexies = Schema.decodeEffect(Schema.Array(CountryPrefix))
+  const prefixes = yield* decodePrexies(dummyPrefixes)
+  const scores = yield* Effect.all(
+    prefixes.map(() => Random.nextIntBetween(5000, 500_000))
   )
 
   return Array.zip(prefixes, scores)
@@ -66,46 +67,44 @@ const generateDummyCountriesScore = Effect.gen(function* (_) {
 
 const handleConnection = (
   c: WebSocket
-): Effect.Effect<void, ParseError, HasingSalt> =>
-  Effect.gen(function* (_) {
-    const usersRef = yield* _(
+): Effect.Effect<void, SchemaError, HasingSalt> =>
+  Effect.gen(function* () {
+    const usersRef = yield* pipe(
       [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
       Array.map(() => generateRandomUser),
       Effect.all,
       Effect.flatMap(SubscriptionRef.make<UserWithConnections[]>)
     )
 
-    const countriesScoreRef = yield* _(
-      SubscriptionRef.make<ConnectionsCountByCountry[]>(
-        (yield* _(generateDummyCountriesScore)).map(
-          ([code, count]) =>
-            new ConnectionsCountByCountry({countryCode: code, count})
-        )
+    const countriesScoreRef = yield* SubscriptionRef.make<
+      ConnectionsCountByCountry[]
+    >(
+      (yield* generateDummyCountriesScore).map(
+        ([code, count]) =>
+          new ConnectionsCountByCountry({countryCode: code, count})
       )
     )
 
-    const totalCountRef = yield* _(SubscriptionRef.make(0))
+    const totalCountRef = yield* SubscriptionRef.make(0)
 
     const sendMessage = encodeAndSendMessage(c)
 
-    yield* _(
-      sendMessage(
-        new DashboardBootstrappingMessage({
-          status: 'ready',
-          message: 'Dashboard data ready',
-        })
-      ).pipe(
-        Effect.catchAll((error) =>
-          Effect.logWarning(
-            'Unable to send initial dashboard bootstrap message',
-            error
-          )
+    yield* sendMessage(
+      new DashboardBootstrappingMessage({
+        status: 'ready',
+        message: 'Dashboard data ready',
+      })
+    ).pipe(
+      Effect.catch((error) =>
+        Effect.logWarning(
+          'Unable to send initial dashboard bootstrap message',
+          error
         )
       )
     )
 
     const reportUsersChangeEffect = pipe(
-      usersRef.changes,
+      SubscriptionRef.changes(usersRef),
       Stream.runForEach((v) =>
         sendMessage(new NewUserWithConnectionsMessage({userWithConnections: v}))
       ),
@@ -113,7 +112,7 @@ const handleConnection = (
     )
 
     const reportCountriesChangeEffect = pipe(
-      countriesScoreRef.changes,
+      SubscriptionRef.changes(countriesScoreRef),
       Stream.runForEach((v) =>
         sendMessage(
           new ConnectionsCountByCountryListMessage({
@@ -126,7 +125,7 @@ const handleConnection = (
     )
 
     const reportNumberEffect = pipe(
-      totalCountRef.changes,
+      SubscriptionRef.changes(totalCountRef),
       Stream.runForEach((v) =>
         sendMessage(
           new TotalUsersCountMessage({
@@ -149,17 +148,21 @@ const handleConnection = (
     const incrementCountriesEffect = SubscriptionRef.updateEffect(
       countriesScoreRef,
       (countries) =>
-        Effect.gen(function* (_) {
-          const elementToUpdate = yield* _(
-            Random.nextIntBetween(0, countries.length)
+        Effect.gen(function* () {
+          const elementToUpdate = yield* Random.nextIntBetween(
+            0,
+            countries.length
           )
 
-          const toAdd = yield* _(Random.nextIntBetween(50_000, 300_000))
+          const toAdd = yield* Random.nextIntBetween(50_000, 300_000)
 
-          return Array.modify(
-            countries,
-            elementToUpdate,
-            (v) => new ConnectionsCountByCountry({...v, count: v.count + toAdd})
+          return Array.map(countries, (value, index) =>
+            index === elementToUpdate
+              ? new ConnectionsCountByCountry({
+                  ...value,
+                  count: value.count + toAdd,
+                })
+              : value
           )
         })
     ).pipe(Effect.repeat(Schedule.spaced('5 second')))
@@ -169,7 +172,7 @@ const handleConnection = (
       (users) => Random.nextIntBetween(1, 10).pipe(Effect.map((v) => v + users))
     ).pipe(Effect.repeat(Schedule.spaced('5 seconds')))
 
-    const connectionCloseEffect = Effect.async((callback) => {
+    const connectionCloseEffect = Effect.callback((callback) => {
       c.onclose = () => {
         callback(Effect.void)
       }
@@ -178,7 +181,7 @@ const handleConnection = (
       }
     })
 
-    yield* _(Effect.log('Got connection, running dummy updates'))
+    yield* Effect.log('Got connection, running dummy updates')
     const parallerEffects = [
       reportUsersChangeEffect,
       reportCountriesChangeEffect,
@@ -189,21 +192,21 @@ const handleConnection = (
       incrementUsersCountEffect,
     ]
 
-    yield* _(Effect.raceAll(parallerEffects))
-    yield* _(Effect.log('Connection closed'))
+    yield* Effect.raceAll(parallerEffects)
+    yield* Effect.log('Connection closed')
   })
 
-export const DebugSocketServerLive = Layer.scopedDiscard(
+export const DebugSocketServerLive = Layer.effectDiscard(
   IncommingConnectionsStreamContext.pipe(
-    Effect.zipLeft(Effect.log('Listening for connections')),
+    Effect.tap(Effect.log('Listening for connections')),
     Effect.flatMap(
       Stream.runForEach((connection) =>
         pipe(
-          Effect.zipRight(
+          Effect.andThen(
             Effect.log(`Got connection`),
             handleConnection(connection)
           ),
-          Effect.fork
+          Effect.forkChild
         )
       )
     )

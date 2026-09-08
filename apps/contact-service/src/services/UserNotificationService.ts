@@ -1,4 +1,3 @@
-import {type SqlClient} from '@effect/sql/SqlClient'
 import {
   type PublicKeyPemBase64,
   type PublicKeyV2,
@@ -26,12 +25,14 @@ import {
   Array,
   Context,
   Effect,
+  Filter,
   flow,
   Layer,
   Option,
   pipe,
   Record,
-} from 'effect/index'
+} from 'effect'
+import {type SqlClient} from 'effect/unstable/sql/SqlClient'
 import {
   contactPublicImportCountThresholdConfig,
   inactivityNotificationAfterDaysConfig,
@@ -84,33 +85,34 @@ export interface UserNotificationServiceOperations {
   notifyUsersAboutNewContent: () => Effect.Effect<void, UnexpectedServerError>
 }
 
-export class UserNotificationService extends Context.Tag(
-  'UserNotificationService'
-)<UserNotificationService, UserNotificationServiceOperations>() {
+export class UserNotificationService extends Context.Service<
+  UserNotificationService,
+  UserNotificationServiceOperations
+>()('UserNotificationService') {
   static Layer = Layer.effect(
     UserNotificationService,
-    Effect.gen(function* (_) {
-      const userDbService = yield* _(UserDbService)
-      const enqueueUserNotification = yield* _(EnqueueUserNotification)
-      const clubMemberDb = yield* _(ClubMembersDbService)
-      const clubsDb = yield* _(ClubsDbService)
+    Effect.gen(function* () {
+      const userDbService = yield* UserDbService
+      const enqueueUserNotification = yield* EnqueueUserNotification
+      const clubMemberDb = yield* ClubMembersDbService
+      const clubsDb = yield* ClubsDbService
 
       return {
         notifyOthersAboutNewUser: (
           importedHashes: readonly ServerHashedNumber[],
           ownerHash: ServerHashedNumber
         ) =>
-          Effect.gen(function* (_) {
-            const publicImportCountThreshold = yield* _(
-              contactPublicImportCountThresholdConfig
-            )
+          Effect.gen(function* () {
+            const publicImportCountThreshold =
+              yield* contactPublicImportCountThresholdConfig
             // todo #2142 - remove after moving to vexlNotificationToken
-            const firstLevelTokens = yield* _(
-              userDbService.findFirebaseTokensOfUsersWhoDirectlyImportedHash({
-                importedHashes,
-                userHash: ownerHash,
-              })
-            )
+            const firstLevelTokens =
+              yield* userDbService.findFirebaseTokensOfUsersWhoDirectlyImportedHash(
+                {
+                  importedHashes,
+                  userHash: ownerHash,
+                }
+              )
 
             // todo #2142 - uncomment and use this after moving to vexlNotificationToken
             /**
@@ -130,15 +132,14 @@ export class UserNotificationService extends Context.Tag(
              */
 
             // todo #2142 - remove after moving to vexlNotificationToken
-            const secondLevelTokens = yield* _(
-              userDbService.findFirebaseTokensOfUsersWhoHaveHAshAsSecondLevelContact(
+            const secondLevelTokens =
+              yield* userDbService.findFirebaseTokensOfUsersWhoHaveHAshAsSecondLevelContact(
                 {
                   importedHashes,
                   ownerHash,
                   publicImportCountThreshold,
                 }
               )
-            )
 
             // todo #2142 - uncomment and use this after moving to vexlNotificationToken
             /**
@@ -164,7 +165,7 @@ export class UserNotificationService extends Context.Tag(
               Array.dedupeWith(NotificationsTokensEquivalence)
             )
 
-            yield* _(
+            yield* pipe(
               allTokens,
               Array.filter(
                 (entry) =>
@@ -180,7 +181,7 @@ export class UserNotificationService extends Context.Tag(
                     }),
                     {delay: 0}
                   ),
-                  Effect.catchAll((e) =>
+                  Effect.catch((e) =>
                     Effect.logWarning(
                       'Failed to enqueue new user notification',
                       e
@@ -188,7 +189,7 @@ export class UserNotificationService extends Context.Tag(
                   )
                 )
               ),
-              Effect.allWith({concurrency: 'unbounded'}),
+              (effects) => Effect.all(effects, {concurrency: 'unbounded'}),
               Effect.withSpan(
                 'Enqueue new user notifications via VexlNotificationToken'
               )
@@ -197,7 +198,7 @@ export class UserNotificationService extends Context.Tag(
             Effect.tapError((e) =>
               Effect.logError('Error notifying others about new user', e)
             ),
-            Effect.catchAll(() => Effect.void),
+            Effect.catch(() => Effect.void),
             Effect.withSpan('Notify others about new user', {
               attributes: {
                 hashesLength: Array.length(importedHashes),
@@ -208,12 +209,12 @@ export class UserNotificationService extends Context.Tag(
           clubUuid: ClubUuid,
           triggeringUser: PublicKeyPemBase64 | PublicKeyV2
         ) =>
-          Effect.gen(function* (_) {
-            const club = yield* _(
+          Effect.gen(function* () {
+            const club = yield* pipe(
               clubsDb.findClubByUuid({uuid: clubUuid}),
-              Effect.flatten,
+              Effect.flatMap(Effect.fromOption),
               Effect.catchTag(
-                'NoSuchElementException',
+                'NoSuchElementError',
                 (e) =>
                   new UnexpectedServerError({
                     status: 500,
@@ -223,11 +224,9 @@ export class UserNotificationService extends Context.Tag(
               )
             )
 
-            const members = yield* _(
-              clubMemberDb.queryAllClubMembers({
-                id: club.id,
-              })
-            )
+            const members = yield* clubMemberDb.queryAllClubMembers({
+              id: club.id,
+            })
 
             const notificationsRecords = pipe(
               members,
@@ -251,14 +250,14 @@ export class UserNotificationService extends Context.Tag(
               )
             )
 
-            if (!Array.isNonEmptyArray(notificationsRecords)) return
+            if (!Array.isArrayNonEmpty(notificationsRecords)) return
 
-            yield* _(
+            yield* pipe(
               notificationsRecords,
               Array.map((record) =>
                 pipe(
                   enqueueUserNotification(record, {delay: 0}),
-                  Effect.catchAll((e) =>
+                  Effect.catch((e) =>
                     Effect.logWarning(
                       'Failed to enqueue new club user notification',
                       e
@@ -273,12 +272,12 @@ export class UserNotificationService extends Context.Tag(
             )
           }),
         notifyUserAboutClubAddmission: (publicKey: PublicKeyPemBase64) =>
-          Effect.gen(function* (_) {
-            const member = yield* _(
+          Effect.gen(function* () {
+            const member = yield* pipe(
               clubMemberDb.findClubMemberByPublicKey({publicKey}),
-              Effect.flatten,
+              Effect.flatMap(Effect.fromOption),
               Effect.catchTag(
-                'NoSuchElementException',
+                'NoSuchElementError',
                 (e) =>
                   new UnexpectedServerError({
                     status: 500,
@@ -292,16 +291,14 @@ export class UserNotificationService extends Context.Tag(
               member.notificationToken === null &&
               member.vexlNotificationToken === null
             ) {
-              yield* _(
-                Effect.logWarning(
-                  'No notification token found for user admitted to club, skipping notification',
-                  {publicKey}
-                )
+              yield* Effect.logWarning(
+                'No notification token found for user admitted to club, skipping notification',
+                {publicKey}
               )
               return
             }
 
-            yield* _(
+            yield* pipe(
               enqueueUserNotification(
                 new UserAdmittedToClubNotificationMqEntry({
                   token: member.vexlNotificationToken,
@@ -310,7 +307,7 @@ export class UserNotificationService extends Context.Tag(
                 }),
                 {delay: 0}
               ),
-              Effect.catchAll((e) =>
+              Effect.catch((e) =>
                 Effect.logWarning(
                   'Failed to enqueue new club user notification',
                   e
@@ -319,20 +316,17 @@ export class UserNotificationService extends Context.Tag(
             )
           }),
         notifyUsersAboutInactivity: () =>
-          Effect.gen(function* (_) {
-            const inactivityNotificationAfterDays = yield* _(
-              inactivityNotificationAfterDaysConfig
-            )
-            const followUpAfterDays = yield* _(
-              inactivityNotificationFollowUpAfterDaysConfig
-            )
-            const recurringIntervalDays = yield* _(
-              inactivityNotificationRecurringIntervalDaysConfig
-            )
+          Effect.gen(function* () {
+            const inactivityNotificationAfterDays =
+              yield* inactivityNotificationAfterDaysConfig
+            const followUpAfterDays =
+              yield* inactivityNotificationFollowUpAfterDaysConfig
+            const recurringIntervalDays =
+              yield* inactivityNotificationRecurringIntervalDaysConfig
 
             const now = dayjs()
-            const usersToNotify = yield* _(
-              userDbService.findUsersToNotifyAboutInactivity({
+            const usersToNotify =
+              yield* userDbService.findUsersToNotifyAboutInactivity({
                 firstNotificationBefore: now
                   .subtract(inactivityNotificationAfterDays, 'day')
                   .toDate(),
@@ -343,7 +337,6 @@ export class UserNotificationService extends Context.Tag(
                   .subtract(recurringIntervalDays, 'day')
                   .toDate(),
               })
-            )
 
             // Users inactive for longer than the first-notification window
             // get the follow-up wording right away - their offers are no
@@ -355,44 +348,40 @@ export class UserNotificationService extends Context.Tag(
             const [followUpUsers, firstTimeUsers] = pipe(
               usersToNotify,
               Array.partition(
-                (user) =>
-                  user.numberOfInactivityNotificationsSent === 0 &&
-                  dayjs(user.refreshedAt).isAfter(firstWordingCutoff)
+                Filter.fromPredicate(
+                  (user) =>
+                    user.numberOfInactivityNotificationsSent === 0 &&
+                    dayjs(user.refreshedAt).isAfter(firstWordingCutoff)
+                )
               )
             )
 
-            if (Array.isEmptyReadonlyArray(usersToNotify)) {
-              yield* _(Effect.log('No inactive users to notify'))
+            if (Array.isReadonlyArrayEmpty(usersToNotify)) {
+              yield* Effect.log('No inactive users to notify')
             }
 
-            yield* _(
-              Effect.log('Notifying inactive users', {
-                firstNotificationCount: firstTimeUsers.length,
-                followUpNotificationCount: followUpUsers.length,
-              })
-            )
+            yield* Effect.log('Notifying inactive users', {
+              firstNotificationCount: firstTimeUsers.length,
+              followUpNotificationCount: followUpUsers.length,
+            })
 
             // Record the sends before enqueueing: a failed enqueue only
             // delays that user's reminder until the next cadence step,
             // while enqueueing first and failing to record would re-send
             // to everyone on every run.
-            if (Array.isNonEmptyReadonlyArray(firstTimeUsers)) {
-              yield* _(
-                userDbService.updateInactivityNotificationSent({
-                  ids: Array.map(firstTimeUsers, (user) => user.id),
-                  sentAt: now.toDate(),
-                  variant: 'FIRST',
-                })
-              )
+            if (Array.isReadonlyArrayNonEmpty(firstTimeUsers)) {
+              yield* userDbService.updateInactivityNotificationSent({
+                ids: Array.map(firstTimeUsers, (user) => user.id),
+                sentAt: now.toDate(),
+                variant: 'FIRST',
+              })
             }
-            if (Array.isNonEmptyReadonlyArray(followUpUsers)) {
-              yield* _(
-                userDbService.updateInactivityNotificationSent({
-                  ids: Array.map(followUpUsers, (user) => user.id),
-                  sentAt: now.toDate(),
-                  variant: 'OFFERS_DEACTIVATED',
-                })
-              )
+            if (Array.isReadonlyArrayNonEmpty(followUpUsers)) {
+              yield* userDbService.updateInactivityNotificationSent({
+                ids: Array.map(followUpUsers, (user) => user.id),
+                sentAt: now.toDate(),
+                variant: 'OFFERS_DEACTIVATED',
+              })
             }
 
             const toMqEntry =
@@ -404,7 +393,7 @@ export class UserNotificationService extends Context.Tag(
                   variant,
                 })
 
-            yield* _(
+            yield* pipe(
               pipe(
                 Array.map(firstTimeUsers, toMqEntry('FIRST')),
                 Array.appendAll(
@@ -414,7 +403,7 @@ export class UserNotificationService extends Context.Tag(
               Array.map((one) =>
                 pipe(
                   enqueueUserNotification(one, {delay: 0}),
-                  Effect.catchAll((e) =>
+                  Effect.catch((e) =>
                     Effect.logWarning(
                       'Failed to enqueue inactivity notification',
                       e
@@ -431,16 +420,14 @@ export class UserNotificationService extends Context.Tag(
               )
             )
 
-            if (Array.isNonEmptyReadonlyArray(firstTimeUsers)) {
-              yield* _(
-                reportInactivityNotificationsSent({
-                  count: firstTimeUsers.length,
-                  variant: 'FIRST',
-                  notificationOrdinal: 1,
-                })
-              )
+            if (Array.isReadonlyArrayNonEmpty(firstTimeUsers)) {
+              yield* reportInactivityNotificationsSent({
+                count: firstTimeUsers.length,
+                variant: 'FIRST',
+                notificationOrdinal: 1,
+              })
             }
-            yield* _(
+            yield* pipe(
               followUpUsers,
               Array.groupBy((user) =>
                 String(
@@ -458,9 +445,9 @@ export class UserNotificationService extends Context.Tag(
               Effect.all
             )
 
-            yield* _(Effect.logInfo('Reporting number of inactive users'))
-            yield* _(queryAndReportNumberOfInactiveUsers)
-            yield* _(queryAndReportInactiveUsersByRemindersSent)
+            yield* Effect.logInfo('Reporting number of inactive users')
+            yield* queryAndReportNumberOfInactiveUsers
+            yield* queryAndReportInactiveUsersByRemindersSent
           }).pipe(
             Effect.tapError((e) =>
               Effect.logError('Error processing user inactivity', e)
@@ -477,8 +464,8 @@ export class UserNotificationService extends Context.Tag(
             Effect.withSpan('ProcessUserInactivity')
           ),
         notifyUsersAboutFlaggedClub: (id: ClubRecordId, clubUuid: ClubUuid) =>
-          Effect.gen(function* (_) {
-            const flaggedClubNotifications = yield* _(
+          Effect.gen(function* () {
+            const flaggedClubNotifications = yield* pipe(
               clubMemberDb.queryAllClubMembers({id}),
               Effect.map(
                 Array.filter(
@@ -501,12 +488,12 @@ export class UserNotificationService extends Context.Tag(
               )
             )
 
-            yield* _(
+            yield* pipe(
               flaggedClubNotifications,
               Array.map((one) =>
                 pipe(
                   enqueueUserNotification(one, {delay: 0}),
-                  Effect.catchAll((e) =>
+                  Effect.catch((e) =>
                     Effect.logWarning(
                       'Failed to enqueue flagged club notification',
                       e
@@ -524,8 +511,8 @@ export class UserNotificationService extends Context.Tag(
             )
           }),
         notifyUsersAboutExpiredClub: (id: ClubRecordId, clubUuid: ClubUuid) =>
-          Effect.gen(function* (_) {
-            const expiredClubNotifications = yield* _(
+          Effect.gen(function* () {
+            const expiredClubNotifications = yield* pipe(
               clubMemberDb.queryAllClubMembers({id}),
               Effect.map(
                 flow(
@@ -546,12 +533,12 @@ export class UserNotificationService extends Context.Tag(
               )
             )
 
-            yield* _(
+            yield* pipe(
               expiredClubNotifications,
               Array.map((one) =>
                 pipe(
                   enqueueUserNotification(one, {delay: 0}),
-                  Effect.catchAll((e) =>
+                  Effect.catch((e) =>
                     Effect.logWarning(
                       'Failed to enqueue expired club notification',
                       e
@@ -572,17 +559,15 @@ export class UserNotificationService extends Context.Tag(
           token: VexlNotificationToken | null,
           notificationToken: ExpoNotificationToken | null
         ) =>
-          Effect.gen(function* (_) {
+          Effect.gen(function* () {
             if (token === null && notificationToken === null) {
-              yield* _(
-                Effect.logWarning(
-                  'No notification token found for user login on different device, skipping notification'
-                )
+              yield* Effect.logWarning(
+                'No notification token found for user login on different device, skipping notification'
               )
               return
             }
 
-            yield* _(
+            yield* pipe(
               enqueueUserNotification(
                 new UserLoginOnDifferentDeviceNotificationMqEntry({
                   token,
@@ -590,7 +575,7 @@ export class UserNotificationService extends Context.Tag(
                 }),
                 {delay: 0}
               ),
-              Effect.catchAll((e) =>
+              Effect.catch((e) =>
                 Effect.logWarning(
                   'Failed to enqueue login on different device notification',
                   e
@@ -599,17 +584,16 @@ export class UserNotificationService extends Context.Tag(
             )
           }),
         notifyUsersAboutNewContent: () =>
-          Effect.gen(function* (_) {
+          Effect.gen(function* () {
             const notifyBeforeDate = dayjs()
-              .subtract(yield* _(newContentNotificationAfterConfig), 'day')
+              .subtract(yield* newContentNotificationAfterConfig, 'day')
               .toDate()
 
             // todo #2142 - remove after moving to vexlNotificationToken
-            const tokensToNofify = yield* _(
-              userDbService.findFirebaseTokensForNewContentNotification(
+            const tokensToNofify =
+              yield* userDbService.findFirebaseTokensForNewContentNotification(
                 notifyBeforeDate
               )
-            )
 
             // todo #2142 - use this after moving to vexlNotificationToken
             /**
@@ -620,7 +604,7 @@ export class UserNotificationService extends Context.Tag(
             )
              */
 
-            yield* _(
+            yield* pipe(
               tokensToNofify,
               Array.filter(
                 (entry) =>
@@ -636,7 +620,7 @@ export class UserNotificationService extends Context.Tag(
                     }),
                     {delay: 0}
                   ),
-                  Effect.catchAll((e) =>
+                  Effect.catch((e) =>
                     Effect.logWarning(
                       'Failed to enqueue new content notification',
                       e
@@ -650,12 +634,10 @@ export class UserNotificationService extends Context.Tag(
               )
             )
 
-            yield* _(
-              Effect.log('Sent new content notification', {
-                VexlNotificationToken: tokensToNofify.length,
-                total: tokensToNofify.length,
-              })
-            )
+            yield* Effect.log('Sent new content notification', {
+              VexlNotificationToken: tokensToNofify.length,
+              total: tokensToNofify.length,
+            })
           }).pipe(
             Effect.tapError((e) =>
               Effect.logError('Error processing new content notification', e)

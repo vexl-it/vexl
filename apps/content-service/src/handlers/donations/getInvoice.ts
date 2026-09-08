@@ -1,4 +1,3 @@
-import {HttpApiBuilder} from '@effect/platform/index'
 import {
   InvoiceId,
   StoreId,
@@ -6,23 +5,22 @@ import {
 } from '@vexl-next/rest-api/src/services/content/contracts'
 import {ContentApiSpecification} from '@vexl-next/rest-api/src/services/content/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {makeHttpApiHandler} from '@vexl-next/server-utils/src/makeHttpApiHandler'
 import {Effect, Schema} from 'effect'
 import {BtcPayServerService} from '../../utils/donations'
 
-export const getInvoiceHandler = HttpApiBuilder.handler(
+export const getInvoiceHandler = makeHttpApiHandler(
   ContentApiSpecification,
   'Donations',
   'getInvoice',
   (req) =>
-    Effect.gen(function* (_) {
-      const btcPayServerService = yield* _(BtcPayServerService)
+    Effect.gen(function* () {
+      const btcPayServerService = yield* BtcPayServerService
 
-      const invoiceData = yield* _(
-        btcPayServerService.getInvoice({
-          invoiceId: req.urlParams.invoiceId,
-          storeId: req.urlParams.storeId,
-        })
-      )
+      const invoiceData = yield* btcPayServerService.getInvoice({
+        invoiceId: req.query.invoiceId,
+        storeId: req.query.storeId,
+      })
 
       return {
         invoiceId: Schema.decodeSync(InvoiceId)(invoiceData.id),

@@ -42,22 +42,20 @@ export const showContactExistsDialogAtom = atom(
   ): Effect.Effect<boolean> => {
     const {t} = get(translationAtom)
 
-    return Effect.gen(function* (_) {
-      const confirmed = yield* _(
-        set(globalDialogAtom, {
-          title: t('addContactDialog.contactExistsTitle'),
-          negativeButtonText: t('addContactDialog.keepCurrent'),
-          positiveButtonText: t('addContactDialog.update'),
-          children: (
-            <ContactExistsDialogBody
-              contact={params.existingContact}
-              description={t('addContactDialog.contactExistsDescription', {
-                contactName: params.existingContact.info.name,
-              })}
-            />
-          ),
-        })
-      )
+    return Effect.gen(function* () {
+      const confirmed = yield* set(globalDialogAtom, {
+        title: t('addContactDialog.contactExistsTitle'),
+        negativeButtonText: t('addContactDialog.keepCurrent'),
+        positiveButtonText: t('addContactDialog.update'),
+        children: (
+          <ContactExistsDialogBody
+            contact={params.existingContact}
+            description={t('addContactDialog.contactExistsDescription', {
+              contactName: params.existingContact.info.name,
+            })}
+          />
+        ),
+      })
 
       return confirmed
     })

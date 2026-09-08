@@ -1,7 +1,10 @@
 import {UnauthorizedError} from '@vexl-next/domain/src/general/commonErrors'
-import {BtcPayWebhookShaSignature} from '@vexl-next/rest-api/src/btcPayServerWebhookHeader'
+import {
+  BtcPayServerWebhookHeader,
+  BtcPayWebhookShaSignature,
+} from '@vexl-next/rest-api/src/btcPayServerWebhookHeader'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
-import {Effect, Option, Schema} from 'effect'
+import {Effect, pipe, Schema} from 'effect'
 import * as crypto from 'node:crypto'
 import {btcPayServerWebhookSecretConfig} from '../../../configs'
 import {NodeTestingApp} from '../../utils/NodeTestingApp'
@@ -10,17 +13,13 @@ import {runPromiseInMockedEnvironment} from '../../utils/runPromiseInMockedEnvir
 describe('Update invoice status type webhook', () => {
   it('Should update invoice status type in redis correctly', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
-        const btcPayServerWebhookSecret = yield* _(
-          btcPayServerWebhookSecretConfig
-        )
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
+        const btcPayServerWebhookSecret = yield* btcPayServerWebhookSecretConfig
 
-        const createInvoiceResp = yield* _(
-          app.Donations.createInvoice({
-            payload: {amount: 1, currency: 'EUR', paymentMethod: 'BTC-LN'},
-          })
-        )
+        const createInvoiceResp = yield* app.Donations.createInvoice({
+          payload: {amount: 1, currency: 'EUR', paymentMethod: 'BTC-LN'},
+        })
 
         const body = {
           deliveryId: 'TsXk94uV6nqoN955SY6vTu',
@@ -46,30 +45,21 @@ describe('Update invoice status type webhook', () => {
             .update(JSON.stringify(body))
             .digest('hex')
 
-        yield* _(
-          app.Donations.updateInvoiceStateWebhook({
-            headers: {
-              btcPayWebhookSignatureOrNone: Option.some(
-                Schema.decodeSync(BtcPayWebhookShaSignature)(
-                  btcPayServerSignature
-                )
-              ),
-              'btcpay-sig': Schema.decodeSync(BtcPayWebhookShaSignature)(
-                btcPayServerSignature
-              ),
-            },
-            payload: body,
-          })
-        )
+        yield* app.Donations.updateInvoiceStateWebhook({
+          headers: new BtcPayServerWebhookHeader({
+            'btcpay-sig': Schema.decodeSync(BtcPayWebhookShaSignature)(
+              btcPayServerSignature
+            ),
+          }),
+          payload: body,
+        })
 
-        const resp = yield* _(
-          app.Donations.getInvoiceStatusType({
-            urlParams: {
-              invoiceId: createInvoiceResp.invoiceId,
-              storeId: createInvoiceResp.storeId,
-            },
-          })
-        )
+        const resp = yield* app.Donations.getInvoiceStatusType({
+          query: {
+            invoiceId: createInvoiceResp.invoiceId,
+            storeId: createInvoiceResp.storeId,
+          },
+        })
 
         expect(resp.invoiceId).toEqual(body.invoiceId)
         expect(resp.statusType).toEqual(body.type)
@@ -79,17 +69,13 @@ describe('Update invoice status type webhook', () => {
 
   it('Should fail for invalid btc pay server signature', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
-        const btcPayServerWebhookSecret = yield* _(
-          btcPayServerWebhookSecretConfig
-        )
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
+        const btcPayServerWebhookSecret = yield* btcPayServerWebhookSecretConfig
 
-        const createInvoiceResp = yield* _(
-          app.Donations.createInvoice({
-            payload: {amount: 1, currency: 'EUR', paymentMethod: 'BTC-LN'},
-          })
-        )
+        const createInvoiceResp = yield* app.Donations.createInvoice({
+          payload: {amount: 1, currency: 'EUR', paymentMethod: 'BTC-LN'},
+        })
 
         const body = {
           deliveryId: 'TsXk94uV6nqoN955SY6vTu',
@@ -115,21 +101,16 @@ describe('Update invoice status type webhook', () => {
             .update(JSON.stringify({...body, isRedelivery: true}))
             .digest('hex')
 
-        const resp = yield* _(
+        const resp = yield* pipe(
           app.Donations.updateInvoiceStateWebhook({
-            headers: {
-              btcPayWebhookSignatureOrNone: Option.some(
-                Schema.decodeSync(BtcPayWebhookShaSignature)(
-                  btcPayServerSignature
-                )
-              ),
+            headers: new BtcPayServerWebhookHeader({
               'btcpay-sig': Schema.decodeSync(BtcPayWebhookShaSignature)(
                 btcPayServerSignature
               ),
-            },
+            }),
             payload: body,
           }),
-          Effect.either
+          Effect.result
         )
 
         expectErrorResponse(UnauthorizedError)(resp)

@@ -61,7 +61,7 @@ export const toggleOfferMarkActionAtom = atom(
         )
       )
 
-    return Effect.gen(function* (_) {
+    return Effect.gen(function* () {
       const offerAtExecution = getCurrentOffer()
       if (offerAtExecution === undefined) return false
 
@@ -72,27 +72,25 @@ export const toggleOfferMarkActionAtom = atom(
         confirmCrossTransition
 
       if (needsConfirmation) {
-        const confirmed = yield* _(
-          set(
-            globalDialogAtom,
-            target === 'ARCHIVED'
-              ? {
-                  title: t('offer.archive.confirmFromFavoritesTitle'),
-                  subtitle: t('offer.archive.confirmFromFavoritesDescription'),
-                  positiveButtonText: t(
-                    'offer.archive.confirmFromFavoritesAction'
-                  ),
-                  negativeButtonText: t('common.cancel'),
-                }
-              : {
-                  title: t('offer.favorite.confirmFromArchivedTitle'),
-                  subtitle: t('offer.favorite.confirmFromArchivedDescription'),
-                  positiveButtonText: t(
-                    'offer.favorite.confirmFromArchivedAction'
-                  ),
-                  negativeButtonText: t('common.cancel'),
-                }
-          )
+        const confirmed = yield* set(
+          globalDialogAtom,
+          target === 'ARCHIVED'
+            ? {
+                title: t('offer.archive.confirmFromFavoritesTitle'),
+                subtitle: t('offer.archive.confirmFromFavoritesDescription'),
+                positiveButtonText: t(
+                  'offer.archive.confirmFromFavoritesAction'
+                ),
+                negativeButtonText: t('common.cancel'),
+              }
+            : {
+                title: t('offer.favorite.confirmFromArchivedTitle'),
+                subtitle: t('offer.favorite.confirmFromArchivedDescription'),
+                positiveButtonText: t(
+                  'offer.favorite.confirmFromArchivedAction'
+                ),
+                negativeButtonText: t('common.cancel'),
+              }
         )
 
         if (!confirmed) return false

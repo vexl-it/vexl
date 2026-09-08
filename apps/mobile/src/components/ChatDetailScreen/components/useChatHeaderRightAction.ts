@@ -1,6 +1,6 @@
 import {useNavigation} from '@react-navigation/native'
 import {Checklist, EyeShut, type NavigationBarAction} from '@vexl-next/ui'
-import {useMolecule} from 'bunshi/dist/react'
+import {useMolecule} from 'bunshi/react'
 import {useAtomValue} from 'jotai'
 import {type RootStackScreenProps} from '../../../navigationTypes'
 import isNoteChatOrigin from '../../../state/chat/utils/isNoteChatOrigin'

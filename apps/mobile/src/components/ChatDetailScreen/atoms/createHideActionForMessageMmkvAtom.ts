@@ -1,5 +1,5 @@
 import {type ChatMessageId} from '@vexl-next/domain/src/general/messaging'
-import {Schema} from 'effect/index'
+import {Schema} from 'effect'
 import {atom, useAtom, type PrimitiveAtom, type SetStateAction} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {useCallback, useMemo} from 'react'

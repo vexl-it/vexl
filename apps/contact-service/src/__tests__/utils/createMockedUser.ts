@@ -25,16 +25,14 @@ export interface MockedUser {
 export const createMockedUser = (
   numberRaw: string
 ): Effect.Effect<MockedUser, CryptoError, ServerCrypto> =>
-  Effect.gen(function* (_) {
+  Effect.gen(function* () {
     const mainKeyPair = generatePrivateKey()
     const phoneNumber = Schema.decodeSync(E164PhoneNumber)(numberRaw)
 
-    const authHeaders = yield* _(
-      createDummyAuthHeadersForUser({
-        phoneNumber,
-        publicKey: mainKeyPair.publicKeyPemBase64,
-      })
-    )
+    const authHeaders = yield* createDummyAuthHeadersForUser({
+      phoneNumber,
+      publicKey: mainKeyPair.publicKeyPemBase64,
+    })
 
     return {
       mainKeyPair,

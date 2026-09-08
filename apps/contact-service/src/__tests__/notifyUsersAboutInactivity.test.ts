@@ -1,7 +1,7 @@
-import {SqlClient} from '@effect/sql'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {mockedReportMetric} from '@vexl-next/server-utils/src/tests/mockedMetricsClientService'
 import {Effect, Option, Schema} from 'effect'
+import {SqlClient} from 'effect/unstable/sql'
 import {UserDbService} from '../db/UserDbService'
 import {UserNotificationService} from '../services/UserNotificationService'
 import {ServerHashedNumber} from '../utils/serverHashContact'
@@ -12,11 +12,11 @@ import {
 } from './utils/mockEnqueueUserNotification'
 import {runPromiseInMockedEnvironment} from './utils/runPromiseInMockedEnvironment'
 
-const notifyAndGetEnqueued = Effect.gen(function* (_) {
-  yield* _(clearEnqueuedNotifications)
-  const userNotificationService = yield* _(UserNotificationService)
-  yield* _(userNotificationService.notifyUsersAboutInactivity())
-  return yield* _(getEnqueuedNotifications)
+const notifyAndGetEnqueued = Effect.gen(function* () {
+  yield* clearEnqueuedNotifications
+  const userNotificationService = yield* UserNotificationService
+  yield* userNotificationService.notifyUsersAboutInactivity()
+  return yield* getEnqueuedNotifications
 })
 
 const variantForToken = (
@@ -39,11 +39,11 @@ describe('Notify users about inactivity', () => {
   // therefore 2-9 days of inactivity.
   it('Sends the right wording on the right cadence and records sends', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const sql = yield* _(SqlClient.SqlClient)
-        yield* _(sql`DELETE FROM user_contact`)
-        yield* _(sql`DELETE FROM users`)
-        yield* _(sql`
+      Effect.gen(function* () {
+        const sql = yield* SqlClient.SqlClient
+        yield* sql`DELETE FROM user_contact`
+        yield* sql`DELETE FROM users`
+        yield* sql`
           INSERT INTO
             users (
               public_key,
@@ -118,12 +118,12 @@ describe('Notify users about inactivity', () => {
               0,
               NULL
             )
-        `)
+        `
 
         mockedReportMetric.mockClear()
-        const enqueued = yield* _(notifyAndGetEnqueued)
+        const enqueued = yield* notifyAndGetEnqueued
         // metric reports are forked into the background
-        yield* _(Effect.sleep(200))
+        yield* Effect.sleep(200)
 
         expect(enqueued).toHaveLength(4)
         expect(variantForToken(enqueued, 'tokenFirst')).toEqual('FIRST')
@@ -137,14 +137,14 @@ describe('Notify users about inactivity', () => {
           'OFFERS_DEACTIVATED'
         )
 
-        const counts = yield* _(sql`
+        const counts = yield* sql`
           SELECT
             public_key,
             number_of_inactivity_notifications_sent AS count,
             last_inactivity_notification_sent_at AS sent_at
           FROM
             users
-        `)
+        `
         const countByKey = Object.fromEntries(
           counts.map((row) => [row.publicKey, row.count])
         )
@@ -214,7 +214,7 @@ describe('Notify users about inactivity', () => {
         }
 
         // Running the job again right away must not send anything new
-        const enqueuedSecondRun = yield* _(notifyAndGetEnqueued)
+        const enqueuedSecondRun = yield* notifyAndGetEnqueued
         expect(enqueuedSecondRun).toHaveLength(0)
       })
     )
@@ -222,11 +222,11 @@ describe('Notify users about inactivity', () => {
 
   it('Resets the send history when the user refreshes', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const sql = yield* _(SqlClient.SqlClient)
-        yield* _(sql`DELETE FROM user_contact`)
-        yield* _(sql`DELETE FROM users`)
-        yield* _(sql`
+      Effect.gen(function* () {
+        const sql = yield* SqlClient.SqlClient
+        yield* sql`DELETE FROM user_contact`
+        yield* sql`DELETE FROM users`
+        yield* sql`
           INSERT INTO
             users (
               public_key,
@@ -245,23 +245,21 @@ describe('Notify users about inactivity', () => {
               3,
               now() - INTERVAL '40 days'
             )
-        `)
+        `
 
-        const userDb = yield* _(UserDbService)
-        yield* _(
-          userDb.updateRefreshUser({
-            publicKey: Schema.decodeSync(PublicKeyPemBase64)('pkComesBack'),
-            hash: Schema.decodeSync(ServerHashedNumber)('ServerHash:h1'),
-            clientVersion: Option.none(),
-            countryPrefix: Option.none(),
-            appSource: Option.none(),
-            vexlNotificationToken: Option.none(),
-            refreshedAt: new Date(),
-            publicKeyV2: Option.none(),
-          })
-        )
+        const userDb = yield* UserDbService
+        yield* userDb.updateRefreshUser({
+          publicKey: Schema.decodeSync(PublicKeyPemBase64)('pkComesBack'),
+          hash: Schema.decodeSync(ServerHashedNumber)('ServerHash:h1'),
+          clientVersion: Option.none(),
+          countryPrefix: Option.none(),
+          appSource: Option.none(),
+          vexlNotificationToken: Option.none(),
+          refreshedAt: new Date(),
+          publicKeyV2: Option.none(),
+        })
 
-        const [user] = yield* _(sql`
+        const [user] = yield* sql`
           SELECT
             number_of_inactivity_notifications_sent AS count,
             last_inactivity_notification_sent_at AS sent_at
@@ -269,11 +267,11 @@ describe('Notify users about inactivity', () => {
             users
           WHERE
             public_key = 'pkComesBack'
-        `)
+        `
         expect(user.count).toEqual(0)
         expect(user.sentAt).toBeNull()
 
-        const enqueued = yield* _(notifyAndGetEnqueued)
+        const enqueued = yield* notifyAndGetEnqueued
         expect(enqueued).toHaveLength(0)
       })
     )

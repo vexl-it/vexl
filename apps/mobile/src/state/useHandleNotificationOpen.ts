@@ -4,7 +4,7 @@ import {
   OpenBrowserLinkNotificationData,
   VexlProductNotificationData,
 } from '@vexl-next/domain/src/general/notifications'
-import {Effect, Either, Option, Schema} from 'effect'
+import {Effect, Option, Result, Schema} from 'effect'
 import * as Notifications from 'expo-notifications'
 import {atom, useSetAtom} from 'jotai'
 import {useCallback, useEffect} from 'react'
@@ -29,7 +29,7 @@ const lastHandledExpoNotificationDateAtom = atom<number | undefined>(undefined)
 const reactOnNotificationOpenAtom = atom(
   null,
   (get, set, response: Notifications.NotificationResponse) =>
-    Effect.gen(function* (_) {
+    Effect.gen(function* () {
       const notificationDate = response.notification.date
 
       // Prevent re-navigation on app resume.
@@ -50,11 +50,11 @@ const reactOnNotificationOpenAtom = atom(
       }
 
       const knownNotificationDataO = Schema.decodeUnknownOption(
-        Schema.Union(
+        Schema.Union([
           OpenBrowserLinkNotificationData,
           ClubAdmissionInternalNotificationData,
-          TradeReminderNotificationData
-        )
+          TradeReminderNotificationData,
+        ])
       )(data)
 
       if (
@@ -107,9 +107,9 @@ const reactOnNotificationOpenAtom = atom(
       } else if (data?.type === NEW_CONTACTS_TO_SYNC) {
         navigationRef.navigate('ContactPreferences', {})
       } else if (data?.inbox && data?.sender) {
-        Schema.decodeUnknownEither(ChatNotificationData)(data).pipe(
-          Either.match({
-            onLeft: (l) => {
+        Schema.decodeUnknownResult(ChatNotificationData)(data).pipe(
+          Result.match({
+            onFailure: (l) => {
               reportError(
                 'error',
                 new Error('Error while opening chat from notification'),
@@ -121,7 +121,7 @@ const reactOnNotificationOpenAtom = atom(
                 navigationRef.navigate('InsideTabs', {screen: 'Messages'})
               }
             },
-            onRight: (payload) => {
+            onSuccess: (payload) => {
               const keys = {
                 otherSideKey: payload.sender,
                 inboxKey: payload.inbox,

@@ -1,8 +1,8 @@
-import {HttpApiBuilder} from '@effect/platform/index'
 import {Uuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {type NewsAndAnnouncementsResponse} from '@vexl-next/rest-api/src/services/content/contracts'
 import {ContentApiSpecification} from '@vexl-next/rest-api/src/services/content/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {makeHttpApiHandler} from '@vexl-next/server-utils/src/makeHttpApiHandler'
 import {Effect, Option, Schema} from 'effect'
 import {
   appInMaintenanceModeConfig,
@@ -73,12 +73,12 @@ import {
 //   } satisfies FullScreenWarning),
 // } satisfies NewsAndAnnouncementsResponse
 
-export const newsAndAnonouncementsHandler = HttpApiBuilder.handler(
+export const newsAndAnonouncementsHandler = makeHttpApiHandler(
   ContentApiSpecification,
   'NewsAndAnnouncements',
   'getNewsAndAnnouncements',
   ({headers}) =>
-    Effect.gen(function* (_) {
+    Effect.gen(function* () {
       // const vexlBotNewsForBlog1: VexlBotNews = {
       //   id: Schema.decodeSync(Uuid)('085f7bbe-f142-4e71-8b80-eb9b9107ddef'),
       //   type: 'info',
@@ -143,7 +143,7 @@ export const newsAndAnonouncementsHandler = HttpApiBuilder.handler(
       //   cancelable: true,
       // }
 
-      const appInMaintenanceMode = yield* _(appInMaintenanceModeConfig)
+      const appInMaintenanceMode = yield* appInMaintenanceModeConfig
       if (appInMaintenanceMode) {
         return {
           fullScreenWarning: Option.some({
@@ -160,9 +160,8 @@ export const newsAndAnonouncementsHandler = HttpApiBuilder.handler(
         } satisfies NewsAndAnnouncementsResponse
       }
 
-      const forceUpdateForVersionAndLower = yield* _(
-        forceUpdateForVersionAndLowerConfig
-      )
+      const forceUpdateForVersionAndLower =
+        yield* forceUpdateForVersionAndLowerConfig
       if (
         !Option.isSome(headers.clientVersionOrNone) ||
         headers.clientVersionOrNone.value <= forceUpdateForVersionAndLower

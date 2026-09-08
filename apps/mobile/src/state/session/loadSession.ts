@@ -1,6 +1,6 @@
-import {FetchHttpClient} from '@effect/platform/index'
 import {contact, offer} from '@vexl-next/rest-api'
-import {Cause, Data, Effect, Either, Option, Schema} from 'effect/index'
+import {Cause, Data, Effect, Option, Result, Schema} from 'effect'
+import {FetchHttpClient} from 'effect/unstable/http'
 import {getDefaultStore} from 'jotai'
 import {sessionHolderAtom} from '.'
 import {apiEnv} from '../../api'
@@ -56,7 +56,7 @@ function logLoadSessionProgress(text: string): void {
   })
 }
 
-export type SessionStorageError = Effect.Effect.Error<
+export type SessionStorageError = Effect.Error<
   ReturnType<typeof readSessionFromStorage>
 >
 export type LoadSessionError = SessionStorageError | SessionLoadWaitTimedOut
@@ -134,7 +134,7 @@ const BLOCKING_RECOVERY_ERROR_TAGS = new Set<string>([
   // CryptoError / ParseError are deliberately blocking: never auto-logout on
   // possibly-misclassified corruption.
   'CryptoError',
-  'ParseError',
+  'SchemaError',
   'SessionLoadWaitTimedOut',
 ])
 
@@ -152,8 +152,8 @@ function joinInFlightLoad(
 
     const loadSessionResult = yield* Effect.promise(() => loadPromise).pipe(
       Effect.timeout(JOIN_IN_FLIGHT_LOAD_TIMEOUT_MILLIS),
-      Effect.catchTag('TimeoutException', (e) =>
-        Effect.zipRight(
+      Effect.catchTag('TimeoutError', (e) =>
+        Effect.andThen(
           reportErrorE(
             'warn',
             new Error('Waiting for session load to finish timed out', {
@@ -209,7 +209,7 @@ const ensureV2SessionIfNotCreateAndWrite = (
 
     yield* contactApi
       .refreshUser({
-        vexlNotificationToken: Option.fromNullable(
+        vexlNotificationToken: Option.fromNullishOr(
           upgradedSession.sessionNotificationToken
         ),
         offersAlive: true,
@@ -243,11 +243,11 @@ function performSessionLoad(): Effect.Effect<LoadSessionResult> {
           )
         })
       ),
-      Effect.either
+      Effect.result
     )
 
-    if (Either.isLeft(readSessionResult)) {
-      const loadingError = readSessionResult.left
+    if (Result.isFailure(readSessionResult)) {
+      const loadingError = readSessionResult.failure
 
       // We don't have a session. User is logged out.
       // NOTE: data is NOT erased here - this only flips the in-memory atom.
@@ -264,7 +264,7 @@ function performSessionLoad(): Effect.Effect<LoadSessionResult> {
     }
 
     const session = yield* ensureV2SessionIfNotCreateAndWrite(
-      readSessionResult.right
+      readSessionResult.success
     )
 
     if (!sanityCheckSessionV2(session)) {
@@ -286,11 +286,8 @@ function performSessionLoad(): Effect.Effect<LoadSessionResult> {
 
     return sessionLoadedResult()
   }).pipe(
-    // catchAllCause (not catchAll) so even a defect finalizes the state and
-    // yields a result: the atom can never be left stuck in 'loading' and the
-    // in-flight promise always resolves for joined callers.
-    Effect.catchAllCause((cause) =>
-      Effect.zipRight(
+    Effect.catchCause((cause) =>
+      Effect.andThen(
         reportErrorE(
           'error',
           // Deliberately only the error tag - never the error itself, which

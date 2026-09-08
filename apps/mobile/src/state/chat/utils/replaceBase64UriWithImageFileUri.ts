@@ -5,12 +5,15 @@ import {
   toBasicError,
   type BasicError,
 } from '@vexl-next/domain/src/utility/errors'
-import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
+import {
+  effectToTaskEither,
+  resultToEither,
+} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {
   hashMD5,
   type CryptoError,
 } from '@vexl-next/resources-utils/src/utils/crypto'
-import {Effect, Option, Schema, type Either} from 'effect'
+import {Effect, Option, Schema, type Result} from 'effect'
 import {Directory, File, Paths} from 'expo-file-system'
 import * as E from 'fp-ts/Either'
 import * as T from 'fp-ts/Task'
@@ -88,7 +91,7 @@ function writeAsStringE({
 }: {
   content: string
   path: string
-}): Effect.Effect<Either.Either<true, WritingFileErrorE>> {
+}): Effect.Effect<Result.Result<true, WritingFileErrorE>> {
   return Effect.try({
     try: () => {
       const fileToWrite = new File(path)
@@ -102,7 +105,7 @@ function writeAsStringE({
         cause: e,
         message: 'Error while writing to file',
       }),
-  }).pipe(Effect.either)
+  }).pipe(Effect.result)
 }
 
 export type GettingImageSizeError = BasicError<'GettingImageSizeError'>
@@ -134,7 +137,9 @@ function saveBase64ImageToStorage(
     E.bindW('filePath', ({directoryPath, fileName}) => {
       return pipe(
         E.right(Paths.join(directoryPath, fileName)),
-        E.chainW(Schema.decodeUnknownEither(UriString)),
+        E.chainW((input) =>
+          resultToEither(Schema.decodeUnknownResult(UriString)(input))
+        ),
         E.mapLeft(toBasicError('BadFileName'))
       )
     }),

@@ -1,4 +1,4 @@
-import {Effect, Either, Schema} from 'effect'
+import {Effect, pipe, Result, Schema} from 'effect'
 import * as Updates from 'expo-updates'
 import {atom} from 'jotai'
 import {Alert} from 'react-native'
@@ -60,23 +60,21 @@ const reloadApp = Effect.tryPromise({
 export const loadPreviewChannelActionAtom = atom(
   null,
   (get, set, channel: PreviewChannel): Effect.Effect<void, PreviewError> =>
-    Effect.gen(function* (_) {
+    Effect.gen(function* () {
       if (!isPreviewSupported)
-        return yield* _(
-          new PreviewError({
-            cause: undefined,
-            reason: 'notAvailableInThisBuild',
-          })
-        )
+        return yield* new PreviewError({
+          cause: undefined,
+          reason: 'notAvailableInThisBuild',
+        })
 
       const previousChannel = get(previewChannelStorageAtom).activeChannel
       const restorePreviousOverride = overrideUpdateChannel(
         previousChannel
       ).pipe(Effect.ignore)
 
-      yield* _(overrideUpdateChannel(channel))
+      yield* overrideUpdateChannel(channel)
 
-      const result = yield* _(
+      const result = yield* pipe(
         fetchUpdate,
         Effect.tapError(() => restorePreviousOverride)
       )
@@ -86,43 +84,40 @@ export const loadPreviewChannelActionAtom = atom(
         // download is fine, not an error.
         if (previousChannel === channel) return
 
-        yield* _(restorePreviousOverride)
-        return yield* _(
-          new PreviewError({cause: undefined, reason: 'updateNotFound'})
-        )
+        yield* restorePreviousOverride
+        return yield* new PreviewError({
+          cause: undefined,
+          reason: 'updateNotFound',
+        })
       }
 
       set(previewChannelStorageAtom, {activeChannel: channel})
-      yield* _(reloadApp)
+      yield* reloadApp
     })
 )
 
 export const loadPreviewChannelWithUiFeedbackActionAtom = atom(
   null,
   (get, set, channel: PreviewChannel): Effect.Effect<void, PreviewError> =>
-    Effect.gen(function* (_) {
+    Effect.gen(function* () {
       if (!isPreviewSupported)
         // Fail without UI: a prod build scanning/tapping a preview link
         // should do nothing.
-        return yield* _(
-          new PreviewError({
-            cause: undefined,
-            reason: 'notAvailableInThisBuild',
-          })
-        )
-
-      const confirmed = yield* _(
-        set(globalDialogAtom, {
-          title: 'Load preview bundle?',
-          subtitle: `Downloads the JS bundle from update channel "${channel}" and restarts the app. To return to the staging channel, open the debug screen and tap "Clear preview".`,
-          negativeButtonText: 'Cancel',
-          positiveButtonText: 'Load & restart',
+        return yield* new PreviewError({
+          cause: undefined,
+          reason: 'notAvailableInThisBuild',
         })
-      )
+
+      const confirmed = yield* set(globalDialogAtom, {
+        title: 'Load preview bundle?',
+        subtitle: `Downloads the JS bundle from update channel "${channel}" and restarts the app. To return to the staging channel, open the debug screen and tap "Clear preview".`,
+        negativeButtonText: 'Cancel',
+        positiveButtonText: 'Load & restart',
+      })
       if (!confirmed) return
 
       set(loadingOverlayDisplayedAtom, true)
-      yield* _(set(loadPreviewChannelActionAtom, channel))
+      yield* set(loadPreviewChannelActionAtom, channel)
     }).pipe(
       Effect.ensuring(
         // The success path reloads the app, but every failure path must
@@ -157,24 +152,24 @@ export const loadPreviewChannelWithUiFeedbackActionAtom = atom(
 export const clearPreviewChannelActionAtom = atom(
   null,
   (get, set): Effect.Effect<void, PreviewError> =>
-    Effect.gen(function* (_) {
+    Effect.gen(function* () {
       set(loadingOverlayDisplayedAtom, true)
 
-      yield* _(overrideUpdateChannel(null))
+      yield* overrideUpdateChannel(null)
       set(previewChannelStorageAtom, {activeChannel: null})
 
       // Not cosmetic: fetching refreshes the local update database against
       // the staging channel so the launcher stops selecting the previously
       // downloaded preview bundle on the next start.
-      const fetchResult = yield* _(fetchUpdate, Effect.either)
-      if (Either.isLeft(fetchResult)) {
+      const fetchResult = yield* pipe(fetchUpdate, Effect.result)
+      if (Result.isFailure(fetchResult)) {
         Alert.alert(
           'Update server not reachable',
           'The channel override was cleared, but the preview bundle may keep running until the app can fetch the staging channel again.'
         )
       }
 
-      yield* _(reloadApp)
+      yield* reloadApp
     }).pipe(
       Effect.ensuring(
         Effect.sync(() => {

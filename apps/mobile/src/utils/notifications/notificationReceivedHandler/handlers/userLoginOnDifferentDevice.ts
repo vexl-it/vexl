@@ -1,5 +1,5 @@
 import {type UserLoginOnDifferentDeviceNotificationData} from '@vexl-next/domain/src/general/notifications'
-import {Effect} from 'effect/index'
+import {Effect} from 'effect'
 import {AndroidNotificationPriority} from 'expo-notifications'
 import {getDefaultStore} from 'jotai'
 import {translationAtom} from '../../../localization/I18nProvider'

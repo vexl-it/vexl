@@ -8,7 +8,7 @@ import {
   XStack,
   YStack,
 } from '@vexl-next/ui'
-import {Effect, Option} from 'effect/index'
+import {Effect, Option} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useEffect, useRef, useState} from 'react'
 import {AppState} from 'react-native'

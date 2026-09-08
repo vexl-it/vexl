@@ -1,6 +1,6 @@
 import {UserName} from '@vexl-next/domain/src/general/UserName.brand'
 import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
-import {Option, Schema} from 'effect/index'
+import {Option, Schema} from 'effect'
 import {atom} from 'jotai'
 import {
   invalidUsernameUIFeedbackAtom,

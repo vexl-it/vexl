@@ -48,80 +48,68 @@ const createVexlAuthHeader = ({
   hash: DummyUser['authHeaders']['hash']
   publicKeyV2: PublicKeyV2KeyPair['publicKey']
 }): Effect.Effect<typeof VexlAuthHeader.Type, unknown, ServerCrypto> =>
-  Effect.gen(function* (_) {
-    const crypto = yield* _(ServerCrypto)
-    const encodedData = yield* _(
-      Schema.encode(UserDataShape)({
-        hash,
-        pk: publicKeyV2,
-      })
-    )
+  Effect.gen(function* () {
+    const crypto = yield* ServerCrypto
+    const encodedData = yield* Schema.encodeEffect(UserDataShape)({
+      hash,
+      pk: publicKeyV2,
+    })
 
-    const signature = yield* _(crypto.cryptoBoxSign(encodedData))
-    return yield* _(
-      Schema.decode(VexlAuthHeader)(`VexlAuth ${encodedData}.${signature}`)
+    const signature = yield* crypto.cryptoBoxSign(encodedData)
+    return yield* Schema.decodeEffect(VexlAuthHeader)(
+      `VexlAuth ${encodedData}.${signature}`
     )
   })
 
 beforeAll(async () => {
   await runPromiseInMockedEnvironment(
-    Effect.gen(function* (_) {
-      const app = yield* _(NodeTestingApp)
-      networkOne = yield* _(
-        Effect.all([
-          generateKeysAndHasheForNumber('+420733333001'),
-          generateKeysAndHasheForNumber('+420733333002'),
-          generateKeysAndHasheForNumber('+420733333003'),
-          generateKeysAndHasheForNumber('+420733333004'),
-          generateKeysAndHasheForNumber('+420733333005'),
-        ])
+    Effect.gen(function* () {
+      const app = yield* NodeTestingApp
+      networkOne = yield* Effect.all([
+        generateKeysAndHasheForNumber('+420733333001'),
+        generateKeysAndHasheForNumber('+420733333002'),
+        generateKeysAndHasheForNumber('+420733333003'),
+        generateKeysAndHasheForNumber('+420733333004'),
+        generateKeysAndHasheForNumber('+420733333005'),
+      ])
+
+      yield* Effect.forEach(networkOne, (oneUser) =>
+        createAndImportUsersFromNetwork(oneUser, networkOne)
       )
 
-      yield* _(
-        Effect.forEach(networkOne, (oneUser) =>
-          createAndImportUsersFromNetwork(oneUser, networkOne)
-        )
-      )
+      yield* Effect.forEach(networkOne, (oneUser) =>
+        Effect.gen(function* () {
+          const publicKeyV2 = yield* Effect.promise(
+            async () => await generateKeyPair()
+          )
+          networkOnePublicKeyV2ByPublicKey.set(
+            oneUser.keys.publicKeyPemBase64,
+            publicKeyV2
+          )
 
-      yield* _(
-        Effect.forEach(networkOne, (oneUser) =>
-          Effect.gen(function* (_) {
-            const publicKeyV2 = yield* _(
-              Effect.promise(async () => await generateKeyPair())
-            )
-            networkOnePublicKeyV2ByPublicKey.set(
-              oneUser.keys.publicKeyPemBase64,
-              publicKeyV2
-            )
-
-            yield* _(setAuthHeaders(oneUser.authHeaders))
-            const authorization = yield* _(
-              createVexlAuthHeader({
-                hash: oneUser.authHeaders.hash,
-                publicKeyV2: publicKeyV2.publicKey,
-              })
-            )
-            const commonAndSecurityHeaders = makeCommonAndSecurityHeaders(
-              () => ({
-                publicKey: oneUser.authHeaders['public-key'],
-                hash: oneUser.authHeaders.hash,
-                signature: oneUser.authHeaders.signature,
-                vexlAuthHeader: authorization,
-              }),
-              commonHeaders
-            )
-
-            yield* _(
-              app.User.refreshUser({
-                payload: {
-                  offersAlive: true,
-                  vexlNotificationToken: Option.none(),
-                },
-                headers: commonAndSecurityHeaders,
-              })
-            )
+          yield* setAuthHeaders(oneUser.authHeaders)
+          const authorization = yield* createVexlAuthHeader({
+            hash: oneUser.authHeaders.hash,
+            publicKeyV2: publicKeyV2.publicKey,
           })
-        )
+          const commonAndSecurityHeaders = makeCommonAndSecurityHeaders(
+            () => ({
+              publicKey: oneUser.authHeaders['public-key'],
+              hash: oneUser.authHeaders.hash,
+              signature: oneUser.authHeaders.signature,
+              vexlAuthHeader: authorization,
+            }),
+            commonHeaders
+          )
+
+          yield* app.User.refreshUser({
+            payload: {
+              offersAlive: true,
+              vexlNotificationToken: Option.none(),
+            },
+            headers: commonAndSecurityHeaders,
+          })
+        })
       )
     })
   )
@@ -130,8 +118,8 @@ beforeAll(async () => {
 describe('Common connections paginated', () => {
   it('Fetches common connections for array of friends (paginated)', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
 
         const me = networkOne[0]
         const userContacts = Array.filter(
@@ -139,28 +127,26 @@ describe('Common connections paginated', () => {
           (u) => u.keys.publicKeyPemBase64 !== me.keys.publicKeyPemBase64
         )
 
-        yield* _(setAuthHeaders(me.authHeaders))
+        yield* setAuthHeaders(me.authHeaders)
         const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
           me.authHeaders
         )
 
-        const connections = yield* _(
-          app.Contact.fetchCommonConnectionsPaginated({
-            payload: {
-              publicKeys: Array.map(
-                userContacts,
-                (one) => one.keys.publicKeyPemBase64
-              ),
-              limit: 20,
-            },
-            headers: commonAndSecurityHeaders,
-          })
-        )
+        const connections = yield* app.Contact.fetchCommonConnectionsPaginated({
+          payload: {
+            publicKeys: Array.map(
+              userContacts,
+              (one) => one.keys.publicKeyPemBase64
+            ),
+            limit: 20,
+          },
+          headers: commonAndSecurityHeaders,
+        })
 
         const resultKeys = pipe(
           connections.items,
           Array.map((c) => c.publicKey),
-          Array.sort(Order.string),
+          Array.sort(Order.String),
           Array.join(', ')
         )
 
@@ -168,7 +154,7 @@ describe('Common connections paginated', () => {
           pipe(
             userContacts,
             Array.map((o) => o.keys.publicKeyPemBase64),
-            Array.sort(Order.string),
+            Array.sort(Order.String),
             Array.join(', ')
           )
         )
@@ -179,12 +165,12 @@ describe('Common connections paginated', () => {
             userContacts,
             Array.filter((o) => o.keys.publicKeyPemBase64 !== publicKey),
             Array.map((o) => o.serverHashedNumberForClient),
-            Array.sort(Order.string),
+            Array.sort(Order.String),
             Array.join(',')
           )
 
           expect(
-            pipe(common.hashes, Array.sort(Order.string), Array.join(','))
+            pipe(common.hashes, Array.sort(Order.String), Array.join(','))
           ).toEqual(otherFriendsHashes)
         }
       })
@@ -194,56 +180,49 @@ describe('Common connections paginated', () => {
   it('Filters unregistered public common friends but keeps popular logged in contacts', async () => {
     await withPublicImportCountThreshold(2, async () => {
       await runPromiseInMockedEnvironment(
-        Effect.gen(function* (_) {
-          const app = yield* _(NodeTestingApp)
+        Effect.gen(function* () {
+          const app = yield* NodeTestingApp
 
-          const alice = yield* _(generateKeysAndHasheForNumber('+420733777001'))
-          const bob = yield* _(generateKeysAndHasheForNumber('+420733777002'))
-          const extraImporter = yield* _(
-            generateKeysAndHasheForNumber('+420733777003')
-          )
-          const publicNumber = yield* _(
-            generateKeysAndHasheForNumber('+420733777004')
-          )
-          const loggedInPopularContact = yield* _(
-            generateKeysAndHasheForNumber('+420733777005')
-          )
+          const alice = yield* generateKeysAndHasheForNumber('+420733777001')
+          const bob = yield* generateKeysAndHasheForNumber('+420733777002')
+          const extraImporter =
+            yield* generateKeysAndHasheForNumber('+420733777003')
+          const publicNumber =
+            yield* generateKeysAndHasheForNumber('+420733777004')
+          const loggedInPopularContact =
+            yield* generateKeysAndHasheForNumber('+420733777005')
 
-          yield* _(createUserOnNetwork(alice))
-          yield* _(createUserOnNetwork(bob))
-          yield* _(createUserOnNetwork(extraImporter))
-          yield* _(createUserOnNetwork(loggedInPopularContact))
+          yield* createUserOnNetwork(alice)
+          yield* createUserOnNetwork(bob)
+          yield* createUserOnNetwork(extraImporter)
+          yield* createUserOnNetwork(loggedInPopularContact)
 
-          yield* _(
-            importUsersFromNetwork(alice, [
-              publicNumber,
-              loggedInPopularContact,
-            ])
-          )
-          yield* _(
-            importUsersFromNetwork(bob, [publicNumber, loggedInPopularContact])
-          )
-          yield* _(
-            importUsersFromNetwork(extraImporter, [
-              publicNumber,
-              loggedInPopularContact,
-            ])
-          )
+          yield* importUsersFromNetwork(alice, [
+            publicNumber,
+            loggedInPopularContact,
+          ])
+          yield* importUsersFromNetwork(bob, [
+            publicNumber,
+            loggedInPopularContact,
+          ])
+          yield* importUsersFromNetwork(extraImporter, [
+            publicNumber,
+            loggedInPopularContact,
+          ])
 
-          yield* _(setAuthHeaders(alice.authHeaders))
+          yield* setAuthHeaders(alice.authHeaders)
           const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
             alice.authHeaders
           )
 
-          const connections = yield* _(
-            app.Contact.fetchCommonConnectionsPaginated({
+          const connections =
+            yield* app.Contact.fetchCommonConnectionsPaginated({
               payload: {
                 publicKeys: [bob.keys.publicKeyPemBase64],
                 limit: 20,
               },
               headers: commonAndSecurityHeaders,
             })
-          )
 
           expect(connections.items).toHaveLength(1)
           const bobResult = connections.items[0]
@@ -261,31 +240,29 @@ describe('Common connections paginated', () => {
 
   it('Returns correct pagination metadata', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
         const me = networkOne[0]
         const userContacts = Array.filter(
           networkOne,
           (u) => u.keys.publicKeyPemBase64 !== me.keys.publicKeyPemBase64
         )
 
-        yield* _(setAuthHeaders(me.authHeaders))
+        yield* setAuthHeaders(me.authHeaders)
         const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
           me.authHeaders
         )
 
-        const connections = yield* _(
-          app.Contact.fetchCommonConnectionsPaginated({
-            payload: {
-              publicKeys: Array.map(
-                userContacts,
-                (one) => one.keys.publicKeyPemBase64
-              ),
-              limit: 2,
-            },
-            headers: commonAndSecurityHeaders,
-          })
-        )
+        const connections = yield* app.Contact.fetchCommonConnectionsPaginated({
+          payload: {
+            publicKeys: Array.map(
+              userContacts,
+              (one) => one.keys.publicKeyPemBase64
+            ),
+            limit: 2,
+          },
+          headers: commonAndSecurityHeaders,
+        })
 
         expect(connections.limit).toBe(2)
         expect(connections.items.length).toBeLessThanOrEqual(2)
@@ -303,8 +280,8 @@ describe('Common connections paginated', () => {
 
   it('Fetches common connections for array of friends by publicKeyV2', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
 
         const me = networkOne[0]
         const userContacts = Array.filter(
@@ -312,28 +289,26 @@ describe('Common connections paginated', () => {
           (u) => u.keys.publicKeyPemBase64 !== me.keys.publicKeyPemBase64
         )
 
-        yield* _(setAuthHeaders(me.authHeaders))
+        yield* setAuthHeaders(me.authHeaders)
         const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
           me.authHeaders
         )
 
-        const connections = yield* _(
-          app.Contact.fetchCommonConnectionsPaginated({
-            payload: {
-              publicKeys: Array.map(
-                userContacts,
-                (one) => getPublicKeyV2ForUser(one).publicKey
-              ),
-              limit: 20,
-            },
-            headers: commonAndSecurityHeaders,
-          })
-        )
+        const connections = yield* app.Contact.fetchCommonConnectionsPaginated({
+          payload: {
+            publicKeys: Array.map(
+              userContacts,
+              (one) => getPublicKeyV2ForUser(one).publicKey
+            ),
+            limit: 20,
+          },
+          headers: commonAndSecurityHeaders,
+        })
 
         const resultKeys = pipe(
           connections.items,
           Array.map((c) => c.publicKey),
-          Array.sort(Order.string),
+          Array.sort(Order.String),
           Array.join(', ')
         )
 
@@ -341,7 +316,7 @@ describe('Common connections paginated', () => {
           pipe(
             userContacts,
             Array.map((o) => o.keys.publicKeyPemBase64),
-            Array.sort(Order.string),
+            Array.sort(Order.String),
             Array.join(', ')
           )
         )
@@ -351,12 +326,12 @@ describe('Common connections paginated', () => {
             userContacts,
             Array.filter((o) => o.keys.publicKeyPemBase64 !== publicKey),
             Array.map((o) => o.serverHashedNumberForClient),
-            Array.sort(Order.string),
+            Array.sort(Order.String),
             Array.join(',')
           )
 
           expect(
-            pipe(common.hashes, Array.sort(Order.string), Array.join(','))
+            pipe(common.hashes, Array.sort(Order.String), Array.join(','))
           ).toEqual(otherFriendsHashes)
         }
       })
@@ -365,8 +340,8 @@ describe('Common connections paginated', () => {
 
   it('Ignores requester publicKeyV2 in payload when caller provides VexlAuth header', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
         const me = networkOne[0]
         const mePublicKeyV2 = getPublicKeyV2ForUser(me)
         const userContacts = Array.filter(
@@ -374,13 +349,11 @@ describe('Common connections paginated', () => {
           (u) => u.keys.publicKeyPemBase64 !== me.keys.publicKeyPemBase64
         )
 
-        yield* _(setAuthHeaders(me.authHeaders))
-        const authorization = yield* _(
-          createVexlAuthHeader({
-            hash: me.authHeaders.hash,
-            publicKeyV2: mePublicKeyV2.publicKey,
-          })
-        )
+        yield* setAuthHeaders(me.authHeaders)
+        const authorization = yield* createVexlAuthHeader({
+          hash: me.authHeaders.hash,
+          publicKeyV2: mePublicKeyV2.publicKey,
+        })
 
         const commonAndSecurityHeaders = makeCommonAndSecurityHeaders(
           () => ({
@@ -392,26 +365,24 @@ describe('Common connections paginated', () => {
           commonHeaders
         )
 
-        const connections = yield* _(
-          app.Contact.fetchCommonConnectionsPaginated({
-            payload: {
-              publicKeys: [
-                ...Array.map(
-                  userContacts,
-                  (one) => getPublicKeyV2ForUser(one).publicKey
-                ),
-                mePublicKeyV2.publicKey,
-              ],
-              limit: 20,
-            },
-            headers: commonAndSecurityHeaders,
-          })
-        )
+        const connections = yield* app.Contact.fetchCommonConnectionsPaginated({
+          payload: {
+            publicKeys: [
+              ...Array.map(
+                userContacts,
+                (one) => getPublicKeyV2ForUser(one).publicKey
+              ),
+              mePublicKeyV2.publicKey,
+            ],
+            limit: 20,
+          },
+          headers: commonAndSecurityHeaders,
+        })
 
         const meIsInResults = pipe(
           connections.items,
           Array.filter((item) => item.publicKey === me.keys.publicKeyPemBase64),
-          Array.isNonEmptyArray
+          Array.isArrayNonEmpty
         )
 
         expect(meIsInResults).toBe(false)
@@ -419,14 +390,14 @@ describe('Common connections paginated', () => {
           pipe(
             connections.items,
             Array.map((item) => item.publicKey),
-            Array.sort(Order.string),
+            Array.sort(Order.String),
             Array.join(', ')
           )
         ).toBe(
           pipe(
             userContacts,
             Array.map((o) => o.keys.publicKeyPemBase64),
-            Array.sort(Order.string),
+            Array.sort(Order.String),
             Array.join(', ')
           )
         )
@@ -436,37 +407,35 @@ describe('Common connections paginated', () => {
 
   it('Handles pagination with nextPageToken correctly', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
         const me = networkOne[0]
         const userContacts = Array.filter(
           networkOne,
           (u) => u.keys.publicKeyPemBase64 !== me.keys.publicKeyPemBase64
         )
 
-        yield* _(setAuthHeaders(me.authHeaders))
+        yield* setAuthHeaders(me.authHeaders)
         const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
           me.authHeaders
         )
 
         const LIMIT_PER_PAGE = 2
 
-        const firstPage = yield* _(
-          app.Contact.fetchCommonConnectionsPaginated({
-            payload: {
-              publicKeys: Array.map(
-                userContacts,
-                (one) => one.keys.publicKeyPemBase64
-              ),
-              limit: LIMIT_PER_PAGE,
-            },
-            headers: commonAndSecurityHeaders,
-          })
-        )
+        const firstPage = yield* app.Contact.fetchCommonConnectionsPaginated({
+          payload: {
+            publicKeys: Array.map(
+              userContacts,
+              (one) => one.keys.publicKeyPemBase64
+            ),
+            limit: LIMIT_PER_PAGE,
+          },
+          headers: commonAndSecurityHeaders,
+        })
 
         if (firstPage.hasNext && firstPage.nextPageToken) {
-          const secondPage = yield* _(
-            app.Contact.fetchCommonConnectionsPaginated({
+          const secondPage = yield* app.Contact.fetchCommonConnectionsPaginated(
+            {
               payload: {
                 publicKeys: Array.map(
                   userContacts,
@@ -476,7 +445,7 @@ describe('Common connections paginated', () => {
                 nextPageToken: firstPage.nextPageToken,
               },
               headers: commonAndSecurityHeaders,
-            })
+            }
           )
 
           // No duplicates between pages
@@ -499,7 +468,7 @@ describe('Common connections paginated', () => {
           const resultKeys = pipe(
             resultConnections,
             Array.map((c) => c.publicKey),
-            Array.sort(Order.string),
+            Array.sort(Order.String),
             Array.join(', ')
           )
 
@@ -507,7 +476,7 @@ describe('Common connections paginated', () => {
             pipe(
               userContacts,
               Array.map((o) => o.keys.publicKeyPemBase64),
-              Array.sort(Order.string),
+              Array.sort(Order.String),
               Array.join(', ')
             )
           )
@@ -518,12 +487,12 @@ describe('Common connections paginated', () => {
               userContacts,
               Array.filter((o) => o.keys.publicKeyPemBase64 !== publicKey),
               Array.map((o) => o.serverHashedNumberForClient),
-              Array.sort(Order.string),
+              Array.sort(Order.String),
               Array.join(',')
             )
 
             expect(
-              pipe(common.hashes, Array.sort(Order.string), Array.join(','))
+              pipe(common.hashes, Array.sort(Order.String), Array.join(','))
             ).toEqual(otherFriendsHashes)
           }
         }
@@ -533,24 +502,22 @@ describe('Common connections paginated', () => {
 
   it('Returns empty array when no common connections exist', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
         const me = networkOne[0]
 
-        yield* _(setAuthHeaders(me.authHeaders))
+        yield* setAuthHeaders(me.authHeaders)
         const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
           me.authHeaders
         )
 
-        const connections = yield* _(
-          app.Contact.fetchCommonConnectionsPaginated({
-            payload: {
-              publicKeys: [generatePrivateKey().publicKeyPemBase64],
-              limit: 20,
-            },
-            headers: commonAndSecurityHeaders,
-          })
-        )
+        const connections = yield* app.Contact.fetchCommonConnectionsPaginated({
+          payload: {
+            publicKeys: [generatePrivateKey().publicKeyPemBase64],
+            limit: 20,
+          },
+          headers: commonAndSecurityHeaders,
+        })
 
         expect(connections.items).toEqual([])
         expect(connections.hasNext).toBe(false)
@@ -562,20 +529,20 @@ describe('Common connections paginated', () => {
 
   it('Handles invalid nextPageToken', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
         const me = networkOne[0]
         const userContacts = Array.filter(
           networkOne,
           (u) => u.keys.publicKeyPemBase64 !== me.keys.publicKeyPemBase64
         )
 
-        yield* _(setAuthHeaders(me.authHeaders))
+        yield* setAuthHeaders(me.authHeaders)
         const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
           me.authHeaders
         )
 
-        const response = yield* _(
+        const response = yield* pipe(
           app.Contact.fetchCommonConnectionsPaginated({
             payload: {
               publicKeys: Array.map(
@@ -587,7 +554,7 @@ describe('Common connections paginated', () => {
             },
             headers: commonAndSecurityHeaders,
           }),
-          Effect.either
+          Effect.result
         )
 
         expectErrorResponse(InvalidNextPageTokenError)(response)
@@ -597,15 +564,15 @@ describe('Common connections paginated', () => {
 
   it('Returns consistent results across multiple calls with same parameters', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
         const me = networkOne[0]
         const userContacts = Array.filter(
           networkOne,
           (u) => u.keys.publicKeyPemBase64 !== me.keys.publicKeyPemBase64
         )
 
-        yield* _(setAuthHeaders(me.authHeaders))
+        yield* setAuthHeaders(me.authHeaders)
         const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
           me.authHeaders
         )
@@ -618,18 +585,16 @@ describe('Common connections paginated', () => {
           limit: 20,
         }
 
-        const [firstCall, secondCall] = yield* _(
-          Effect.all([
-            app.Contact.fetchCommonConnectionsPaginated({
-              payload,
-              headers: commonAndSecurityHeaders,
-            }),
-            app.Contact.fetchCommonConnectionsPaginated({
-              payload,
-              headers: commonAndSecurityHeaders,
-            }),
-          ])
-        )
+        const [firstCall, secondCall] = yield* Effect.all([
+          app.Contact.fetchCommonConnectionsPaginated({
+            payload,
+            headers: commonAndSecurityHeaders,
+          }),
+          app.Contact.fetchCommonConnectionsPaginated({
+            payload,
+            headers: commonAndSecurityHeaders,
+          }),
+        ])
 
         expect(firstCall.items).toEqual(secondCall.items)
         expect(firstCall.hasNext).toBe(secondCall.hasNext)
@@ -640,8 +605,8 @@ describe('Common connections paginated', () => {
 
   it('verifiedHashes equals hashes when all contacts are bidirectional', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
 
         const me = networkOne[0]
         const userContacts = Array.filter(
@@ -649,33 +614,31 @@ describe('Common connections paginated', () => {
           (u) => u.keys.publicKeyPemBase64 !== me.keys.publicKeyPemBase64
         )
 
-        yield* _(setAuthHeaders(me.authHeaders))
+        yield* setAuthHeaders(me.authHeaders)
         const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
           me.authHeaders
         )
 
-        const connections = yield* _(
-          app.Contact.fetchCommonConnectionsPaginated({
-            payload: {
-              publicKeys: Array.map(
-                userContacts,
-                (one) => one.keys.publicKeyPemBase64
-              ),
-              limit: 20,
-            },
-            headers: commonAndSecurityHeaders,
-          })
-        )
+        const connections = yield* app.Contact.fetchCommonConnectionsPaginated({
+          payload: {
+            publicKeys: Array.map(
+              userContacts,
+              (one) => one.keys.publicKeyPemBase64
+            ),
+            limit: 20,
+          },
+          headers: commonAndSecurityHeaders,
+        })
 
         for (const {common} of connections.items) {
           expect(
             pipe(
               common.verifiedHashes,
-              Array.sort(Order.string),
+              Array.sort(Order.String),
               Array.join(',')
             )
           ).toEqual(
-            pipe(common.hashes, Array.sort(Order.string), Array.join(','))
+            pipe(common.hashes, Array.sort(Order.String), Array.join(','))
           )
         }
       })
@@ -684,8 +647,8 @@ describe('Common connections paginated', () => {
 
   it('verifiedHashes excludes common contacts that did not import both sides', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
 
         // Create an asymmetric network:
         // alice, bob, charlie where:
@@ -698,36 +661,34 @@ describe('Common connections paginated', () => {
         //   common.verifiedHashes should NOT include charlie
         //     because charlie did not import bob (charlie → bob is missing)
 
-        const alice = yield* _(generateKeysAndHasheForNumber('+420733444001'))
-        const bob = yield* _(generateKeysAndHasheForNumber('+420733444002'))
-        const charlie = yield* _(generateKeysAndHasheForNumber('+420733444003'))
+        const alice = yield* generateKeysAndHasheForNumber('+420733444001')
+        const bob = yield* generateKeysAndHasheForNumber('+420733444002')
+        const charlie = yield* generateKeysAndHasheForNumber('+420733444003')
 
         // Create all users
-        yield* _(createUserOnNetwork(alice))
-        yield* _(createUserOnNetwork(bob))
-        yield* _(createUserOnNetwork(charlie))
+        yield* createUserOnNetwork(alice)
+        yield* createUserOnNetwork(bob)
+        yield* createUserOnNetwork(charlie)
 
         // alice imports bob and charlie
-        yield* _(importUsersFromNetwork(alice, [bob, charlie]))
+        yield* importUsersFromNetwork(alice, [bob, charlie])
         // bob imports alice and charlie
-        yield* _(importUsersFromNetwork(bob, [alice, charlie]))
+        yield* importUsersFromNetwork(bob, [alice, charlie])
         // charlie imports alice only
-        yield* _(importUsersFromNetwork(charlie, [alice]))
+        yield* importUsersFromNetwork(charlie, [alice])
 
-        yield* _(setAuthHeaders(alice.authHeaders))
+        yield* setAuthHeaders(alice.authHeaders)
         const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
           alice.authHeaders
         )
 
-        const connections = yield* _(
-          app.Contact.fetchCommonConnectionsPaginated({
-            payload: {
-              publicKeys: [bob.keys.publicKeyPemBase64],
-              limit: 20,
-            },
-            headers: commonAndSecurityHeaders,
-          })
-        )
+        const connections = yield* app.Contact.fetchCommonConnectionsPaginated({
+          payload: {
+            publicKeys: [bob.keys.publicKeyPemBase64],
+            limit: 20,
+          },
+          headers: commonAndSecurityHeaders,
+        })
 
         expect(connections.items.length).toBe(1)
         const bobResult = connections.items[0]
@@ -749,8 +710,8 @@ describe('Common connections paginated', () => {
 
   it('verifiedHashes includes only contacts that imported both sides', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
 
         // Network:
         // alice, bob, charlie, dave where:
@@ -764,35 +725,33 @@ describe('Common connections paginated', () => {
         //   verifiedHashes: charlie only (charlie imported both alice and bob)
         //   dave is NOT verified (dave did not import bob)
 
-        const alice = yield* _(generateKeysAndHasheForNumber('+420733555001'))
-        const bob = yield* _(generateKeysAndHasheForNumber('+420733555002'))
-        const charlie = yield* _(generateKeysAndHasheForNumber('+420733555003'))
-        const dave = yield* _(generateKeysAndHasheForNumber('+420733555004'))
+        const alice = yield* generateKeysAndHasheForNumber('+420733555001')
+        const bob = yield* generateKeysAndHasheForNumber('+420733555002')
+        const charlie = yield* generateKeysAndHasheForNumber('+420733555003')
+        const dave = yield* generateKeysAndHasheForNumber('+420733555004')
 
-        yield* _(createUserOnNetwork(alice))
-        yield* _(createUserOnNetwork(bob))
-        yield* _(createUserOnNetwork(charlie))
-        yield* _(createUserOnNetwork(dave))
+        yield* createUserOnNetwork(alice)
+        yield* createUserOnNetwork(bob)
+        yield* createUserOnNetwork(charlie)
+        yield* createUserOnNetwork(dave)
 
-        yield* _(importUsersFromNetwork(alice, [bob, charlie, dave]))
-        yield* _(importUsersFromNetwork(bob, [alice, charlie, dave]))
-        yield* _(importUsersFromNetwork(charlie, [alice, bob]))
-        yield* _(importUsersFromNetwork(dave, [alice]))
+        yield* importUsersFromNetwork(alice, [bob, charlie, dave])
+        yield* importUsersFromNetwork(bob, [alice, charlie, dave])
+        yield* importUsersFromNetwork(charlie, [alice, bob])
+        yield* importUsersFromNetwork(dave, [alice])
 
-        yield* _(setAuthHeaders(alice.authHeaders))
+        yield* setAuthHeaders(alice.authHeaders)
         const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
           alice.authHeaders
         )
 
-        const connections = yield* _(
-          app.Contact.fetchCommonConnectionsPaginated({
-            payload: {
-              publicKeys: [bob.keys.publicKeyPemBase64],
-              limit: 20,
-            },
-            headers: commonAndSecurityHeaders,
-          })
-        )
+        const connections = yield* app.Contact.fetchCommonConnectionsPaginated({
+          payload: {
+            publicKeys: [bob.keys.publicKeyPemBase64],
+            limit: 20,
+          },
+          headers: commonAndSecurityHeaders,
+        })
 
         expect(connections.items.length).toBe(1)
         const bobResult = connections.items[0]
@@ -800,14 +759,14 @@ describe('Common connections paginated', () => {
         // Both charlie and dave should be in hashes
         const sortedHashes = pipe(
           bobResult.common.hashes,
-          Array.sort(Order.string)
+          Array.sort(Order.String)
         )
         const expectedHashes = pipe(
           [
             charlie.serverHashedNumberForClient,
             dave.serverHashedNumberForClient,
           ],
-          Array.sort(Order.string)
+          Array.sort(Order.String)
         )
         expect(sortedHashes).toEqual(expectedHashes)
 
@@ -821,31 +780,29 @@ describe('Common connections paginated', () => {
 
   it('Handles edge case with limit 0', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
         const me = networkOne[0]
         const userContacts = Array.filter(
           networkOne,
           (u) => u.keys.publicKeyPemBase64 !== me.keys.publicKeyPemBase64
         )
 
-        yield* _(setAuthHeaders(me.authHeaders))
+        yield* setAuthHeaders(me.authHeaders)
         const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
           me.authHeaders
         )
 
-        const connections = yield* _(
-          app.Contact.fetchCommonConnectionsPaginated({
-            payload: {
-              publicKeys: Array.map(
-                userContacts,
-                (one) => one.keys.publicKeyPemBase64
-              ),
-              limit: 0,
-            },
-            headers: commonAndSecurityHeaders,
-          })
-        )
+        const connections = yield* app.Contact.fetchCommonConnectionsPaginated({
+          payload: {
+            publicKeys: Array.map(
+              userContacts,
+              (one) => one.keys.publicKeyPemBase64
+            ),
+            limit: 0,
+          },
+          headers: commonAndSecurityHeaders,
+        })
 
         expect(connections.items).toEqual([])
         expect(connections.limit).toBe(0)

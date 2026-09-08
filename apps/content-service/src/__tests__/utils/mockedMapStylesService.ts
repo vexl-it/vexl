@@ -1,3 +1,4 @@
+import {jest} from '@jest/globals'
 import {MapStyleJson} from '@vexl-next/rest-api/src/services/content/contracts'
 import {Effect, Layer, Schema} from 'effect'
 import {MapStylesService} from '../../utils/mapStyles'

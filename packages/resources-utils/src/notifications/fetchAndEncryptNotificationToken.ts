@@ -1,5 +1,3 @@
-import {type HttpApiDecodeError} from '@effect/platform/HttpApiError'
-import {type HttpClientError} from '@effect/platform/index'
 import {
   type NotFoundError,
   type RateLimitedError,
@@ -12,7 +10,9 @@ import {type CryptoError} from '@vexl-next/generic-utils/src/effect-helpers/cryp
 import {type PlatformName} from '@vexl-next/rest-api'
 import {type NotificationApi} from '@vexl-next/rest-api/src/services/notification'
 import {Effect} from 'effect'
-import {type ParseError} from 'effect/ParseResult'
+import {type SchemaError} from 'effect/Schema'
+import {type HttpClientError} from 'effect/unstable/http'
+import {type HttpApiSchemaError} from 'effect/unstable/httpapi/HttpApiError'
 import {ecnryptNotificationToken} from './notificationTokenActions'
 
 export function fetchAndEncryptNotificationToken({
@@ -29,25 +29,23 @@ export function fetchAndEncryptNotificationToken({
   locale: string
 }): Effect.Effect<
   NotificationCypher,
-  | HttpApiDecodeError
+  | HttpApiSchemaError
   | NotFoundError
   | UnexpectedServerError
   | RateLimitedError
   | HttpClientError.HttpClientError
-  | ParseError
+  | SchemaError
   | CryptoError,
   never
 > {
-  return Effect.gen(function* (_) {
-    const {publicKey} = yield* _(notificationApi.getNotificationPublicKey())
-    return yield* _(
-      ecnryptNotificationToken({
-        serverPublicKey: publicKey,
-        clientPlatform,
-        clientVersion,
-        notificationToken: expoToken,
-        locale,
-      })
-    )
+  return Effect.gen(function* () {
+    const {publicKey} = yield* notificationApi.getNotificationPublicKey()
+    return yield* ecnryptNotificationToken({
+      serverPublicKey: publicKey,
+      clientPlatform,
+      clientVersion,
+      notificationToken: expoToken,
+      locale,
+    })
   })
 }

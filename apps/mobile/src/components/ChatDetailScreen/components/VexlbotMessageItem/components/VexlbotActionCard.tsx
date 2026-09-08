@@ -11,7 +11,7 @@ import {
   XStack,
   YStack,
 } from '@vexl-next/ui'
-import {useMolecule} from 'bunshi/dist/react'
+import {useMolecule} from 'bunshi/react'
 import {atom, useAtom} from 'jotai'
 import React, {useMemo} from 'react'
 import {TouchableOpacity} from 'react-native'

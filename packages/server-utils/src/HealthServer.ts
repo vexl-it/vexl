@@ -1,13 +1,12 @@
-import {
-  HttpRouter,
-  HttpServer,
-  HttpServerResponse,
-  type HttpServerError,
-} from '@effect/platform'
 import * as NodeHttpServer from '@effect/platform-node/NodeHttpServer'
 import {PgClient} from '@effect/sql-pg'
 import {Config, Effect, Layer, Option} from 'effect'
-import {type ConfigError} from 'effect/ConfigError'
+import {type ConfigError} from 'effect/Config'
+import {
+  HttpRouter,
+  HttpServerResponse,
+  type HttpServerError,
+} from 'effect/unstable/http'
 import {createServer} from 'http'
 import {RedisConnectionService} from './RedisConnection'
 
@@ -16,13 +15,13 @@ export type ReadinessCheckEffect<C = never> = Effect.Effect<boolean, never, C>
 export const isReadisConnectionReady: ReadinessCheckEffect<RedisConnectionService> =
   RedisConnectionService.pipe(
     Effect.flatMap((redis) =>
-      Effect.zipRight(
+      Effect.andThen(
         Effect.log('Checking redis status', redis.status),
         Effect.sync(() => redis.status === 'ready')
       )
     ),
-    Effect.catchAllCause((c) =>
-      Effect.zipRight(
+    Effect.catchCause((c) =>
+      Effect.andThen(
         Effect.log('Error while checking redis connection status', c),
         Effect.succeed(false)
       )
@@ -38,7 +37,7 @@ export const isDatbaseConnectionReady: ReadinessCheckEffect<PgClient.PgClient> =
       `
     ),
     Effect.flatMap((rows) =>
-      Effect.zipRight(
+      Effect.andThen(
         Effect.log('Checking database status', {
           rows,
           success: rows[0]?.one === 1,
@@ -46,8 +45,8 @@ export const isDatbaseConnectionReady: ReadinessCheckEffect<PgClient.PgClient> =
         Effect.sync(() => rows[0]?.one === 1)
       )
     ),
-    Effect.catchAllCause((c) =>
-      Effect.zipRight(
+    Effect.catchCause((c) =>
+      Effect.andThen(
         Effect.log('Error while checking database connection status', c),
         Effect.succeed(false)
       )
@@ -65,12 +64,10 @@ export function healthServerLayer<C = never>({
 }: {
   port: number | Config.Config<Option.Option<number>>
 }): Layer.Layer<never, HttpServerError.ServeError | ConfigError, C> {
-  return Effect.gen(function* (_) {
-    const portOption = yield* _(
-      Config.isConfig(portConfig)
-        ? portConfig
-        : Config.succeed(Option.some(portConfig))
-    )
+  return Effect.gen(function* () {
+    const portOption = yield* Config.isConfig(portConfig)
+      ? portConfig
+      : Config.succeed(Option.some(portConfig))
 
     if (Option.isNone(portOption))
       return Layer.tap(Layer.empty, () =>
@@ -82,15 +79,13 @@ export function healthServerLayer<C = never>({
       port,
     })
 
-    const HealthHttpLive = HttpRouter.empty.pipe(
-      HttpRouter.get(
-        '*',
-        Effect.succeed(HttpServerResponse.text('ok', {status: 200}))
-      )
+    const HealthHttpLive = HttpRouter.add(
+      'GET',
+      '*',
+      HttpServerResponse.text('ok', {status: 200})
     )
 
-    const HealthAppLive = HealthHttpLive.pipe(
-      HttpServer.serve(),
+    const HealthAppLive = HttpRouter.serve(HealthHttpLive).pipe(
       Layer.provide(HealtServerLive),
       Layer.tap(() => Effect.log(`Health server running on port ${port}`)),
       Layer.provide(
@@ -99,5 +94,5 @@ export function healthServerLayer<C = never>({
     )
 
     return HealthAppLive
-  }).pipe(Layer.unwrapEffect)
+  }).pipe(Layer.unwrap)
 }

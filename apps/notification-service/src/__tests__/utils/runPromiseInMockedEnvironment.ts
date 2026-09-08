@@ -1,8 +1,5 @@
-import * as NodeContext from '@effect/platform-node/NodeContext'
 import * as NodeHttpServer from '@effect/platform-node/NodeHttpServer'
-import {type HttpClient} from '@effect/platform/HttpClient'
-import {HttpApiBuilder} from '@effect/platform/index'
-import {type SqlClient} from '@effect/sql/SqlClient'
+import * as NodeServices from '@effect/platform-node/NodeServices'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {
   GetPublicKeyResponse,
@@ -18,6 +15,7 @@ import {
   type UserNotificationMqEntry,
 } from '@vexl-next/server-utils/src/UserNotificationMq'
 import {cryptoConfig} from '@vexl-next/server-utils/src/commonConfigs'
+import {makeHttpApiHandler} from '@vexl-next/server-utils/src/makeHttpApiHandler'
 import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {MqServiceError} from '@vexl-next/server-utils/src/mqService'
 import {ServerSecurityMiddlewareLive} from '@vexl-next/server-utils/src/serverSecurity'
@@ -25,12 +23,17 @@ import {mockedMetricsClientService} from '@vexl-next/server-utils/src/tests/mock
 import {mockedRateLimitingLayer} from '@vexl-next/server-utils/src/tests/mockedRateLimitingLayer'
 import {mockedRedisLayer} from '@vexl-next/server-utils/src/tests/mockedRedisLayer'
 import {TestRequestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
+import {testConfigProviderLayer} from '@vexl-next/server-utils/src/tests/testConfigProvider'
 import {
   disposeTestDatabase,
   setupTestDatabase,
 } from '@vexl-next/server-utils/src/tests/testDb'
 import {type Job} from 'bullmq'
 import {Console, Effect, Layer, ManagedRuntime, Schema} from 'effect'
+import {HttpRouter} from 'effect/unstable/http'
+import {type HttpClient} from 'effect/unstable/http/HttpClient'
+import {HttpApiBuilder} from 'effect/unstable/httpapi'
+import {type SqlClient} from 'effect/unstable/sql/SqlClient'
 import {createNotificationSecretHandler} from '../../routes/notificationToken/createNotificationSecretHandler'
 import {generateNotificationTokenHandler} from '../../routes/notificationToken/generateNotificationTokenHandler'
 import {invalidateNotificationSecretHandler} from '../../routes/notificationToken/invalidateNotificationSecretHandler'
@@ -67,28 +70,28 @@ const testPublicKey = Schema.decodeSync(PublicKeyPemBase64)(
 )
 
 // Stub handlers for root group endpoints (not tested, just satisfy type requirements)
-const stubIssueNotificationHandler = HttpApiBuilder.handler(
+const stubIssueNotificationHandler = makeHttpApiHandler(
   NotificationApiSpecification,
   'root',
   'issueNotification',
   () => Effect.succeed(new IssueNotificationResponse({success: true}))
 )
 
-const stubGetNotificationPublicKeyHandler = HttpApiBuilder.handler(
+const stubGetNotificationPublicKeyHandler = makeHttpApiHandler(
   NotificationApiSpecification,
   'root',
   'getNotificationPublicKey',
   () => Effect.succeed(GetPublicKeyResponse.make({publicKey: testPublicKey}))
 )
 
-const stubReportNotificationProcessedHandler = HttpApiBuilder.handler(
+const stubReportNotificationProcessedHandler = makeHttpApiHandler(
   NotificationApiSpecification,
   'root',
   'reportNotificationProcessed',
   () => Effect.void
 )
 
-const stubIssueStreamOnlyMessageHandler = HttpApiBuilder.handler(
+const stubIssueStreamOnlyMessageHandler = makeHttpApiHandler(
   NotificationApiSpecification,
   'root',
   'issueStreamOnlyMessage',
@@ -126,7 +129,7 @@ const NotificationTokenGroupLive = HttpApiBuilder.group(
       )
 )
 
-const TestNotificationApiLive = HttpApiBuilder.api(
+const TestNotificationApiLive = HttpApiBuilder.layer(
   NotificationApiSpecification
 ).pipe(
   Layer.provide(RootGroupLiveStub),
@@ -137,8 +140,7 @@ const TestNotificationApiLive = HttpApiBuilder.api(
 
 const universalContext = Layer.mergeAll(ServerCrypto.layer(cryptoConfig))
 
-const TestServerLive = HttpApiBuilder.serve().pipe(
-  Layer.provide(TestNotificationApiLive),
+const TestServerLive = HttpRouter.serve(TestNotificationApiLive).pipe(
   Layer.provideMerge(NodeHttpServer.layerTest)
 )
 
@@ -182,10 +184,12 @@ const context = Layer.empty.pipe(
   Layer.provideMerge(mockServiceLayers),
   Layer.provideMerge(VexlNotificationTokenService.Live),
   Layer.provideMerge(dbServiceLayers),
-  Layer.provideMerge(NodeContext.layer)
+  Layer.provideMerge(NodeServices.layer)
 )
 
-const runtime = ManagedRuntime.make(context)
+const runtime = ManagedRuntime.make(
+  context.pipe(Layer.provideMerge(testConfigProviderLayer))
+)
 let runtimeReady = false
 
 export const startRuntime = async (): Promise<void> => {
@@ -211,8 +215,8 @@ export const runPromiseInMockedEnvironment = async (
   await runtime.runPromise(
     effectToRun.pipe(
       Effect.scoped,
-      Effect.catchAll((e) => {
-        return Effect.zipRight(
+      Effect.catch((e) => {
+        return Effect.andThen(
           Effect.logError('Error in test', e),
           Effect.fail(e)
         )

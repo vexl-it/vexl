@@ -1,9 +1,8 @@
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
-import {Effect, Option, Schema} from 'effect'
+import {Effect, Option, pipe, Schema} from 'effect'
 import {NodeTestingApp} from '../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../utils/runPromiseInMockedEnvironment'
 
-import {SqlClient} from '@effect/sql'
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
@@ -13,25 +12,24 @@ import {hashPhoneNumber} from '@vexl-next/server-utils/src/generateUserAuthData'
 import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
 import {mockedReportMetric} from '@vexl-next/server-utils/src/tests/mockedMetricsClientService'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
+import {SqlClient} from 'effect/unstable/sql'
 import {serverHashPhoneNumber} from '../../../utils/serverHashContact'
 import {makeTestCommonAndSecurityHeaders} from '../contacts/utils'
 
 describe('create user', () => {
   it('Should create a user in db', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
 
         const keys = generatePrivateKey()
         const phoneNumber = Schema.decodeSync(E164PhoneNumber)('+420733333333')
 
-        const authHeaders = yield* _(
-          createDummyAuthHeadersForUser({
-            phoneNumber,
-            publicKey: keys.publicKeyPemBase64,
-          })
-        )
-        yield* _(setAuthHeaders(authHeaders))
+        const authHeaders = yield* createDummyAuthHeadersForUser({
+          phoneNumber,
+          publicKey: keys.publicKeyPemBase64,
+        })
+        yield* setAuthHeaders(authHeaders)
 
         const testCommonHeaders = Schema.decodeSync(CommonHeaders)({
           'user-agent': 'Vexl/1 (1.0.0) ANDROID',
@@ -45,19 +43,17 @@ describe('create user', () => {
         )
 
         mockedReportMetric.mockClear()
-        yield* _(
-          app.User.createUser({
-            payload: {
-              firebaseToken: null,
-              expoToken: Schema.decodeSync(ExpoNotificationToken)('someToken'),
-              vexlNotificationToken: Option.some(
-                Schema.decodeSync(VexlNotificationToken)('vexl_nt_test')
-              ),
-              publicKeyV2: Option.none(),
-            },
-            headers: commonAndSecurityHeaders,
-          })
-        )
+        yield* app.User.createUser({
+          payload: {
+            firebaseToken: null,
+            expoToken: Schema.decodeSync(ExpoNotificationToken)('someToken'),
+            vexlNotificationToken: Option.some(
+              Schema.decodeSync(VexlNotificationToken)('vexl_nt_test')
+            ),
+            publicKeyV2: Option.none(),
+          },
+          headers: commonAndSecurityHeaders,
+        })
 
         expect(mockedReportMetric).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -74,20 +70,20 @@ describe('create user', () => {
           })
         )
 
-        const sql = yield* _(SqlClient.SqlClient)
-        const result = yield* _(sql`
+        const sql = yield* SqlClient.SqlClient
+        const result = yield* sql`
           SELECT
             *
           FROM
             users
           WHERE
             public_key = ${keys.publicKeyPemBase64}
-        `)
+        `
         expect(result[0]).toHaveProperty('platform', 'ANDROID')
         expect(result[0]).toHaveProperty('publicKey', keys.publicKeyPemBase64)
         expect(result[0]).toHaveProperty(
           'hash',
-          yield* _(
+          yield* pipe(
             hashPhoneNumber(phoneNumber),
             Effect.flatMap(serverHashPhoneNumber)
           )
@@ -100,100 +96,86 @@ describe('create user', () => {
   })
   it('Should remove existing user and its contacts from db', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
 
         const keys = generatePrivateKey()
         const phoneNumber = Schema.decodeSync(E164PhoneNumber)('+420733333333')
-        const phoneNumberHash = yield* _(hashPhoneNumber(phoneNumber))
-        const serverHashedNumber = yield* _(
-          serverHashPhoneNumber(phoneNumberHash)
-        )
-        const sql = yield* _(SqlClient.SqlClient)
+        const phoneNumberHash = yield* hashPhoneNumber(phoneNumber)
+        const serverHashedNumber = yield* serverHashPhoneNumber(phoneNumberHash)
+        const sql = yield* SqlClient.SqlClient
 
-        const authHeaders = yield* _(
-          createDummyAuthHeadersForUser({
-            phoneNumber,
-            publicKey: keys.publicKeyPemBase64,
-          })
-        )
-        yield* _(setAuthHeaders(authHeaders))
+        const authHeaders = yield* createDummyAuthHeadersForUser({
+          phoneNumber,
+          publicKey: keys.publicKeyPemBase64,
+        })
+        yield* setAuthHeaders(authHeaders)
 
         const commonAndSecurityHeaders =
           makeTestCommonAndSecurityHeaders(authHeaders)
 
-        yield* _(
-          app.User.createUser({
-            payload: {
-              firebaseToken: null,
-              expoToken: Schema.decodeSync(ExpoNotificationToken)('someToken'),
-              vexlNotificationToken: Option.some(
-                Schema.decodeSync(VexlNotificationToken)('vexl_nt_test')
-              ),
-              publicKeyV2: Option.none(),
-            },
-            headers: commonAndSecurityHeaders,
-          })
-        )
+        yield* app.User.createUser({
+          payload: {
+            firebaseToken: null,
+            expoToken: Schema.decodeSync(ExpoNotificationToken)('someToken'),
+            vexlNotificationToken: Option.some(
+              Schema.decodeSync(VexlNotificationToken)('vexl_nt_test')
+            ),
+            publicKeyV2: Option.none(),
+          },
+          headers: commonAndSecurityHeaders,
+        })
 
-        yield* _(
-          app.Contact.importContacts({
-            payload: {
-              contacts: [Schema.decodeSync(HashedPhoneNumber)('someHash')],
-              replace: true,
-            },
-            headers: commonAndSecurityHeaders,
-          })
-        )
+        yield* app.Contact.importContacts({
+          payload: {
+            contacts: [Schema.decodeSync(HashedPhoneNumber)('someHash')],
+            replace: true,
+          },
+          headers: commonAndSecurityHeaders,
+        })
 
-        const inDb = yield* _(sql`
+        const inDb = yield* sql`
           SELECT
             *
           FROM
             user_contact
           WHERE
             hash_from = ${serverHashedNumber}
-        `)
+        `
         expect(inDb[0]).toHaveProperty(
           'hashFrom',
-          yield* _(serverHashPhoneNumber(phoneNumberHash))
+          yield* serverHashPhoneNumber(phoneNumberHash)
         )
         expect(inDb[0]).toHaveProperty(
           'hashTo',
-          yield* _(
-            serverHashPhoneNumber(
-              Schema.decodeSync(HashedPhoneNumber)('someHash')
-            )
+          yield* serverHashPhoneNumber(
+            Schema.decodeSync(HashedPhoneNumber)('someHash')
           )
         )
 
         const keys2 = generatePrivateKey()
 
-        const authHeaders2 = yield* _(
-          createDummyAuthHeadersForUser({
-            phoneNumber,
-            publicKey: keys2.publicKeyPemBase64,
-          })
-        )
-        yield* _(setAuthHeaders(authHeaders2))
+        const authHeaders2 = yield* createDummyAuthHeadersForUser({
+          phoneNumber,
+          publicKey: keys2.publicKeyPemBase64,
+        })
+        yield* setAuthHeaders(authHeaders2)
 
         const commonAndSecurityHeaders2 =
           makeTestCommonAndSecurityHeaders(authHeaders2)
 
         mockedReportMetric.mockClear()
-        yield* _(
-          app.User.createUser({
-            payload: {
-              firebaseToken: null,
-              expoToken: Schema.decodeSync(ExpoNotificationToken)('someToken'),
-              vexlNotificationToken: Option.some(
-                Schema.decodeSync(VexlNotificationToken)('vexl_nt_test')
-              ),
-              publicKeyV2: Option.none(),
-            },
-            headers: commonAndSecurityHeaders2,
-          })
-        )
+        yield* app.User.createUser({
+          payload: {
+            firebaseToken: null,
+            expoToken: Schema.decodeSync(ExpoNotificationToken)('someToken'),
+            vexlNotificationToken: Option.some(
+              Schema.decodeSync(VexlNotificationToken)('vexl_nt_test')
+            ),
+            publicKeyV2: Option.none(),
+          },
+          headers: commonAndSecurityHeaders2,
+        })
 
         expect(mockedReportMetric).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -204,14 +186,14 @@ describe('create user', () => {
           })
         )
 
-        const result = yield* _(sql`
+        const result = yield* sql`
           SELECT
             *
           FROM
             user_contact
           WHERE
             hash_from = ${serverHashedNumber}
-        `)
+        `
         expect(result).toHaveLength(0)
       })
     )
@@ -219,46 +201,42 @@ describe('create user', () => {
 
   it('Should store vexlNotificationToken when provided', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
 
         const keys = generatePrivateKey()
         const phoneNumber = Schema.decodeSync(E164PhoneNumber)('+420733333335')
 
-        const authHeaders = yield* _(
-          createDummyAuthHeadersForUser({
-            phoneNumber,
-            publicKey: keys.publicKeyPemBase64,
-          })
-        )
-        yield* _(setAuthHeaders(authHeaders))
+        const authHeaders = yield* createDummyAuthHeadersForUser({
+          phoneNumber,
+          publicKey: keys.publicKeyPemBase64,
+        })
+        yield* setAuthHeaders(authHeaders)
 
         const commonAndSecurityHeaders =
           makeTestCommonAndSecurityHeaders(authHeaders)
 
-        yield* _(
-          app.User.createUser({
-            payload: {
-              firebaseToken: null,
-              expoToken: Schema.decodeSync(ExpoNotificationToken)('someToken'),
-              vexlNotificationToken: Option.some(
-                Schema.decodeSync(VexlNotificationToken)('vexl_nt_session_test')
-              ),
-              publicKeyV2: Option.none(),
-            },
-            headers: commonAndSecurityHeaders,
-          })
-        )
+        yield* app.User.createUser({
+          payload: {
+            firebaseToken: null,
+            expoToken: Schema.decodeSync(ExpoNotificationToken)('someToken'),
+            vexlNotificationToken: Option.some(
+              Schema.decodeSync(VexlNotificationToken)('vexl_nt_session_test')
+            ),
+            publicKeyV2: Option.none(),
+          },
+          headers: commonAndSecurityHeaders,
+        })
 
-        const sql = yield* _(SqlClient.SqlClient)
-        const result = yield* _(sql`
+        const sql = yield* SqlClient.SqlClient
+        const result = yield* sql`
           SELECT
             *
           FROM
             users
           WHERE
             public_key = ${keys.publicKeyPemBase64}
-        `)
+        `
         expect(result[0]).toHaveProperty(
           'vexlNotificationToken',
           'vexl_nt_session_test'
@@ -269,44 +247,40 @@ describe('create user', () => {
 
   it('Should store null vexlNotificationToken when not provided', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
 
         const keys = generatePrivateKey()
         const phoneNumber = Schema.decodeSync(E164PhoneNumber)('+420733333336')
 
-        const authHeaders = yield* _(
-          createDummyAuthHeadersForUser({
-            phoneNumber,
-            publicKey: keys.publicKeyPemBase64,
-          })
-        )
-        yield* _(setAuthHeaders(authHeaders))
+        const authHeaders = yield* createDummyAuthHeadersForUser({
+          phoneNumber,
+          publicKey: keys.publicKeyPemBase64,
+        })
+        yield* setAuthHeaders(authHeaders)
 
         const commonAndSecurityHeaders =
           makeTestCommonAndSecurityHeaders(authHeaders)
 
-        yield* _(
-          app.User.createUser({
-            payload: {
-              firebaseToken: null,
-              expoToken: Schema.decodeSync(ExpoNotificationToken)('someToken'),
-              vexlNotificationToken: Option.none(),
-              publicKeyV2: Option.none(),
-            },
-            headers: commonAndSecurityHeaders,
-          })
-        )
+        yield* app.User.createUser({
+          payload: {
+            firebaseToken: null,
+            expoToken: Schema.decodeSync(ExpoNotificationToken)('someToken'),
+            vexlNotificationToken: Option.none(),
+            publicKeyV2: Option.none(),
+          },
+          headers: commonAndSecurityHeaders,
+        })
 
-        const sql = yield* _(SqlClient.SqlClient)
-        const result = yield* _(sql`
+        const sql = yield* SqlClient.SqlClient
+        const result = yield* sql`
           SELECT
             *
           FROM
             users
           WHERE
             public_key = ${keys.publicKeyPemBase64}
-        `)
+        `
         expect(result[0]).toHaveProperty('vexlNotificationToken', null)
       })
     )

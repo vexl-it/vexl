@@ -72,15 +72,13 @@ function SetDonationScreen({navigation}: Props): React.ReactElement {
 
   const handleConfirm = (): void => {
     Effect.runFork(
-      Effect.gen(function* (_) {
-        const invoiceId = yield* _(createDonationInvoice())
+      Effect.gen(function* () {
+        const invoiceId = yield* createDonationInvoice()
 
         if (invoiceId) {
-          yield* _(
-            Effect.sync(() => {
-              navigation.replace('DonationDetails', {invoiceId})
-            })
-          )
+          yield* Effect.sync(() => {
+            navigation.replace('DonationDetails', {invoiceId})
+          })
         }
       })
     )

@@ -23,7 +23,7 @@ export const sendNoteToNetworkBatchPrivateParts = ({
     expiresAt: UnixMilliseconds
   }
 }): ReturnType<OfferApi['createNewNote']> =>
-  Effect.gen(function* (_) {
+  Effect.gen(function* () {
     const privatePartsBatches = Array.chunksOf(
       noteData.notePrivateList,
       PRIVATE_PARTS_BATCH_SIZE
@@ -31,38 +31,34 @@ export const sendNoteToNetworkBatchPrivateParts = ({
 
     const [firstBatch, ...restOfBatches] = privatePartsBatches
 
-    const createRequest = yield* _(
-      offerApi.createNewNote({
-        noteId: noteData.noteId,
-        adminId: noteData.adminId,
-        payloadPublic: noteData.payloadPublic,
-        expiresAt: noteData.expiresAt,
-        notePrivateList: [noteData.ownerPrivatePayload, ...(firstBatch ?? [])],
-      })
-    )
+    const createRequest = yield* offerApi.createNewNote({
+      noteId: noteData.noteId,
+      adminId: noteData.adminId,
+      payloadPublic: noteData.payloadPublic,
+      expiresAt: noteData.expiresAt,
+      notePrivateList: [noteData.ownerPrivatePayload, ...(firstBatch ?? [])],
+    })
 
-    yield* _(
-      pipe(
-        restOfBatches ?? [],
-        Array.map((notePrivateList) =>
-          offerApi.createNotePrivatePart({
-            notePrivateList,
-            adminId: noteData.adminId,
-          })
-        ),
-        Effect.all,
-        Effect.tapError(() =>
-          offerApi
-            .deleteNote({adminIds: [noteData.adminId]})
-            .pipe(
-              Effect.ignore,
-              Effect.zipLeft(
-                Effect.log(
-                  'Error while creating note. Cleaning up any already created private parts.'
-                )
+    yield* pipe(
+      restOfBatches ?? [],
+      Array.map((notePrivateList) =>
+        offerApi.createNotePrivatePart({
+          notePrivateList,
+          adminId: noteData.adminId,
+        })
+      ),
+      Effect.all,
+      Effect.tapError(() =>
+        offerApi
+          .deleteNote({adminIds: [noteData.adminId]})
+          .pipe(
+            Effect.ignore,
+            Effect.tap(
+              Effect.log(
+                'Error while creating note. Cleaning up any already created private parts.'
               )
             )
-        )
+          )
       )
     )
 

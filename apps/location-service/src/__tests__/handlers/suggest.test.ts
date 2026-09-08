@@ -12,15 +12,13 @@ beforeAll(async () => {
 describe('suggest', () => {
   it('finds a city by prefix and localizes both rows', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
-        yield* _(setDummyAuthHeaders)
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
+        yield* setDummyAuthHeaders
 
-        const response = yield* _(
-          client.getLocationSuggestionV2({
-            urlParams: {lang: 'de', phrase: 'Bratis'},
-          })
-        )
+        const response = yield* client.getLocationSuggestionV2({
+          query: {lang: 'de', phrase: 'Bratis'},
+        })
 
         expect(response.result).toHaveLength(1)
         const {userData} = response.result[0]
@@ -36,15 +34,13 @@ describe('suggest', () => {
 
   it('accepts a regional lang tag and falls back to the local name', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
-        yield* _(setDummyAuthHeaders)
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
+        yield* setDummyAuthHeaders
 
-        const response = yield* _(
-          client.getLocationSuggestionV2({
-            urlParams: {lang: 'sk-SK', phrase: 'Bratis'},
-          })
-        )
+        const response = yield* client.getLocationSuggestionV2({
+          query: {lang: 'sk-SK', phrase: 'Bratis'},
+        })
 
         expect(response.result).toHaveLength(1)
         // No sk translation is seeded, so the OSM name is used as is
@@ -57,15 +53,13 @@ describe('suggest', () => {
 
   it('finds a city by its translated name', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
-        yield* _(setDummyAuthHeaders)
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
+        yield* setDummyAuthHeaders
 
-        const response = yield* _(
-          client.getLocationSuggestionV2({
-            urlParams: {lang: 'en', phrase: 'Prague'},
-          })
-        )
+        const response = yield* client.getLocationSuggestionV2({
+          query: {lang: 'en', phrase: 'Prague'},
+        })
 
         expect(response.result).toHaveLength(1)
         expect(response.result[0].userData.placeId).toEqual('osm:2')
@@ -77,15 +71,13 @@ describe('suggest', () => {
 
   it('matches names without diacritics and adds city context to a street', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
-        yield* _(setDummyAuthHeaders)
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
+        yield* setDummyAuthHeaders
 
-        const response = yield* _(
-          client.getLocationSuggestionV2({
-            urlParams: {lang: 'en', phrase: 'obchodna'},
-          })
-        )
+        const response = yield* client.getLocationSuggestionV2({
+          query: {lang: 'en', phrase: 'obchodna'},
+        })
 
         expect(response.result).toHaveLength(1)
         expect(response.result[0].userData.suggestFirstRow).toEqual('Obchodná')
@@ -98,15 +90,13 @@ describe('suggest', () => {
 
   it('keeps distinct same-named towns as separate suggestions', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
-        yield* _(setDummyAuthHeaders)
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
+        yield* setDummyAuthHeaders
 
-        const response = yield* _(
-          client.getLocationSuggestionV2({
-            urlParams: {lang: 'en', phrase: 'springfield'},
-          })
-        )
+        const response = yield* client.getLocationSuggestionV2({
+          query: {lang: 'en', phrase: 'springfield'},
+        })
 
         // Both towns render identically ("Springfield" / "United States") but
         // sit far apart, so the dedupe must not collapse them
@@ -119,15 +109,13 @@ describe('suggest', () => {
 
   it('matches letters without a decomposed ascii form ("lodz" finds "Łódź")', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
-        yield* _(setDummyAuthHeaders)
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
+        yield* setDummyAuthHeaders
 
-        const response = yield* _(
-          client.getLocationSuggestionV2({
-            urlParams: {lang: 'en', phrase: 'lodz'},
-          })
-        )
+        const response = yield* client.getLocationSuggestionV2({
+          query: {lang: 'en', phrase: 'lodz'},
+        })
 
         expect(response.result).toHaveLength(1)
         expect(response.result[0].userData.placeId).toEqual('osm:9')
@@ -139,15 +127,13 @@ describe('suggest', () => {
 
   it('falls back to English for a lang that is not a valid locale tag', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
-        yield* _(setDummyAuthHeaders)
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
+        yield* setDummyAuthHeaders
 
-        const response = yield* _(
-          client.getLocationSuggestionV2({
-            urlParams: {lang: '00', phrase: 'Praha'},
-          })
-        )
+        const response = yield* client.getLocationSuggestionV2({
+          query: {lang: '00', phrase: 'Praha'},
+        })
 
         expect(response.result).toHaveLength(1)
         expect(response.result[0].userData.suggestSecondRow).toEqual('Czechia')
@@ -157,15 +143,13 @@ describe('suggest', () => {
 
   it('finds a POI and adds city context', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
-        yield* _(setDummyAuthHeaders)
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
+        yield* setDummyAuthHeaders
 
-        const response = yield* _(
-          client.getLocationSuggestionV2({
-            urlParams: {lang: 'en', phrase: 'urban hou'},
-          })
-        )
+        const response = yield* client.getLocationSuggestionV2({
+          query: {lang: 'en', phrase: 'urban hou'},
+        })
 
         expect(response.result).toHaveLength(1)
         expect(response.result[0].userData.placeId).toEqual('osm:5')
@@ -181,15 +165,13 @@ describe('suggest', () => {
 
   it('tolerates a typo in an important place name', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
-        yield* _(setDummyAuthHeaders)
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
+        yield* setDummyAuthHeaders
 
-        const response = yield* _(
-          client.getLocationSuggestionV2({
-            urlParams: {lang: 'en', phrase: 'bratislva'},
-          })
-        )
+        const response = yield* client.getLocationSuggestionV2({
+          query: {lang: 'en', phrase: 'bratislva'},
+        })
 
         expect(response.result.map((one) => one.userData.placeId)).toContain(
           'osm:1'
@@ -200,25 +182,21 @@ describe('suggest', () => {
 
   it('searches only important places for very short phrases', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
-        yield* _(setDummyAuthHeaders)
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
+        yield* setDummyAuthHeaders
 
         // "ur" would prefix match the seeded café, but phrases shorter than 3
         // characters never leave the important-places fast path
-        const withoutMinorPlaces = yield* _(
-          client.getLocationSuggestionV2({
-            urlParams: {lang: 'en', phrase: 'ur'},
-          })
-        )
+        const withoutMinorPlaces = yield* client.getLocationSuggestionV2({
+          query: {lang: 'en', phrase: 'ur'},
+        })
         expect(withoutMinorPlaces.result).toHaveLength(0)
 
         // A city is important enough to be found by a single character
-        const withImportantPlace = yield* _(
-          client.getLocationSuggestionV2({
-            urlParams: {lang: 'en', phrase: 'b'},
-          })
-        )
+        const withImportantPlace = yield* client.getLocationSuggestionV2({
+          query: {lang: 'en', phrase: 'b'},
+        })
         expect(
           withImportantPlace.result.map((one) => one.userData.placeId)
         ).toEqual(['osm:1'])
@@ -228,15 +206,13 @@ describe('suggest', () => {
 
   it('returns an empty result for a blank phrase', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
-        yield* _(setDummyAuthHeaders)
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
+        yield* setDummyAuthHeaders
 
-        const response = yield* _(
-          client.getLocationSuggestionV2({
-            urlParams: {lang: 'en', phrase: '   '},
-          })
-        )
+        const response = yield* client.getLocationSuggestionV2({
+          query: {lang: 'en', phrase: '   '},
+        })
 
         expect(response.result).toHaveLength(0)
       })
@@ -245,20 +221,16 @@ describe('suggest', () => {
 
   it('zooms wider for a city than for a café', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
-        yield* _(setDummyAuthHeaders)
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
+        yield* setDummyAuthHeaders
 
-        const city = yield* _(
-          client.getLocationSuggestionV2({
-            urlParams: {lang: 'en', phrase: 'Praha'},
-          })
-        )
-        const cafe = yield* _(
-          client.getLocationSuggestionV2({
-            urlParams: {lang: 'en', phrase: 'urban hou'},
-          })
-        )
+        const city = yield* client.getLocationSuggestionV2({
+          query: {lang: 'en', phrase: 'Praha'},
+        })
+        const cafe = yield* client.getLocationSuggestionV2({
+          query: {lang: 'en', phrase: 'urban hou'},
+        })
 
         const heightOf = (viewport: {
           northeast: {latitude: number}

@@ -1,31 +1,25 @@
-import {Effect, HashMap, Layer, Option, Ref, Schema} from 'effect'
-import {isNonEmptyReadonlyArray} from 'effect/Array'
-import {NoSuchElementException} from 'effect/Cause'
+import {Effect, flow, HashMap, Layer, Option, Ref, Schema} from 'effect'
+import {isReadonlyArrayNonEmpty} from 'effect/Array'
+import {NoSuchElementError} from 'effect/Cause'
 import {RedisService, type RedisOperations} from '../RedisService'
 
 export const mockedRedisLayer = Layer.effect(
   RedisService,
-  Effect.gen(function* (_) {
-    const state = yield* _(
-      Ref.make<HashMap.HashMap<string, {expiration: number; value: string}>>(
-        HashMap.empty()
-      )
-    )
+  Effect.gen(function* () {
+    const state = yield* Ref.make<
+      HashMap.HashMap<string, {expiration: number; value: string}>
+    >(HashMap.empty())
 
-    const listState = yield* _(
-      Ref.make<HashMap.HashMap<string, {value: readonly string[]}>>(
-        HashMap.empty()
-      )
-    )
+    const listState = yield* Ref.make<
+      HashMap.HashMap<string, {value: readonly string[]}>
+    >(HashMap.empty())
 
-    const sortedSetState = yield* _(
-      Ref.make<
-        HashMap.HashMap<
-          string,
-          {value: ReadonlyArray<{item: string; score: number}>}
-        >
-      >(HashMap.empty())
-    )
+    const sortedSetState = yield* Ref.make<
+      HashMap.HashMap<
+        string,
+        {value: ReadonlyArray<{item: string; score: number}>}
+      >
+    >(HashMap.empty())
 
     const valueExists = (
       hm: HashMap.HashMap<string, {expiration: number; value: string}>,
@@ -53,17 +47,17 @@ export const mockedRedisLayer = Layer.effect(
         ),
       get: (schema) => (key: string) =>
         Ref.get(state).pipe(
-          Effect.flatMap(HashMap.get(key)),
+          Effect.flatMap(flow(HashMap.get(key), Effect.fromOption)),
           Effect.filterOrFail(
             (val) => val.expiration === -1 || val.expiration > Date.now(),
-            () => new NoSuchElementException()
+            () => new NoSuchElementError()
           ),
           Effect.flatMap((v) =>
-            Schema.decode(Schema.parseJson(schema))(v.value)
+            Schema.decodeEffect(Schema.fromJsonString(schema))(v.value)
           )
         ),
       set: (schema) => (key: string, value: any, opts) =>
-        Schema.encode(Schema.parseJson(schema))(value).pipe(
+        Schema.encodeEffect(Schema.fromJsonString(schema))(value).pipe(
           Effect.flatMap((encoded) =>
             Ref.update(
               state,
@@ -75,7 +69,7 @@ export const mockedRedisLayer = Layer.effect(
           )
         ),
       setIfNotExists: (schema) => (key: string, value: any, opts) =>
-        Schema.encode(Schema.parseJson(schema))(value).pipe(
+        Schema.encodeEffect(Schema.fromJsonString(schema))(value).pipe(
           Effect.flatMap((encoded) =>
             Ref.modify(state, (hm) =>
               valueExists(hm, key)
@@ -92,17 +86,19 @@ export const mockedRedisLayer = Layer.effect(
         ),
 
       isInSet: (schema) => (key, value) =>
-        Schema.encode(Schema.parseJson(schema))(value).pipe(
+        Schema.encodeEffect(Schema.fromJsonString(schema))(value).pipe(
           Effect.flatMap((encoded) =>
             Ref.get(listState).pipe(
-              Effect.flatMap(HashMap.get(key)),
+              Effect.flatMap(flow(HashMap.get(key), Effect.fromOption)),
               Effect.map((one) => one.value.includes(encoded))
             )
           ),
-          Effect.catchTag('NoSuchElementException', () => Effect.succeed(false))
+          Effect.catchTag('NoSuchElementError', () => Effect.succeed(false))
         ),
       insertToSet: (schema) => (key, values, opts) =>
-        Schema.encode(Schema.Array(Schema.parseJson(schema)))(values).pipe(
+        Schema.encodeEffect(Schema.Array(Schema.fromJsonString(schema)))(
+          values
+        ).pipe(
           Effect.flatMap((encoded) =>
             Ref.update(listState, (hashMap) =>
               HashMap.has(hashMap, key)
@@ -131,7 +127,9 @@ export const mockedRedisLayer = Layer.effect(
         ),
 
       deleteFromSet: (schema) => (key, values) =>
-        Schema.encode(Schema.Array(Schema.parseJson(schema)))(values).pipe(
+        Schema.encodeEffect(Schema.Array(Schema.fromJsonString(schema)))(
+          values
+        ).pipe(
           Effect.flatMap((encoded) =>
             Ref.update(listState, (hashMap) =>
               HashMap.has(hashMap, key)
@@ -146,22 +144,26 @@ export const mockedRedisLayer = Layer.effect(
       readAndDeleteSet: (schema) => (key) =>
         Ref.get(listState).pipe(
           Effect.tap((a) => Effect.log('Got values', a)),
-          Effect.flatMap(HashMap.get(key)),
+          Effect.flatMap(flow(HashMap.get(key), Effect.fromOption)),
           Effect.map((one) => one.value),
-          Effect.flatMap(Schema.decode(Schema.Array(Schema.parseJson(schema)))),
-          Effect.zipLeft(Ref.update(listState, HashMap.remove(key)))
+          Effect.flatMap(
+            Schema.decodeEffect(Schema.Array(Schema.fromJsonString(schema)))
+          ),
+          Effect.tap(Ref.update(listState, HashMap.remove(key)))
         ),
 
       getSet: (schema) => (key) =>
         Ref.get(listState).pipe(
-          Effect.flatMap(HashMap.get(key)),
+          Effect.flatMap(flow(HashMap.get(key), Effect.fromOption)),
           Effect.map((one) => one.value),
-          Effect.flatMap(Schema.decode(Schema.Array(Schema.parseJson(schema)))),
-          Effect.filterOrFail(isNonEmptyReadonlyArray)
+          Effect.flatMap(
+            Schema.decodeEffect(Schema.Array(Schema.fromJsonString(schema)))
+          ),
+          Effect.filterOrFail(isReadonlyArrayNonEmpty)
         ),
 
       addIntoSortedSet: (schema) => (key, value, score) =>
-        Schema.encode(Schema.parseJson(schema))(value).pipe(
+        Schema.encodeEffect(Schema.fromJsonString(schema))(value).pipe(
           Effect.flatMap((encoded) =>
             Ref.update(sortedSetState, (hashMap) =>
               HashMap.has(hashMap, key)
@@ -175,7 +177,7 @@ export const mockedRedisLayer = Layer.effect(
 
       getSortedSet: (schema) => (key, order) =>
         Ref.get(sortedSetState).pipe(
-          Effect.flatMap(HashMap.get(key)),
+          Effect.flatMap(flow(HashMap.get(key), Effect.fromOption)),
           Effect.map((one) =>
             [...one.value]
               .sort((a, b) =>
@@ -183,14 +185,18 @@ export const mockedRedisLayer = Layer.effect(
               )
               .map((v) => v.item)
           ),
-          Effect.flatMap(Schema.decode(Schema.Array(Schema.parseJson(schema)))),
-          Effect.catchTag('NoSuchElementException', () => Effect.succeed([]))
+          Effect.flatMap(
+            Schema.decodeEffect(Schema.Array(Schema.fromJsonString(schema)))
+          ),
+          Effect.catchTag('NoSuchElementError', () => Effect.succeed([]))
         ),
 
       clearSortedSet: (key) => Ref.update(sortedSetState, HashMap.remove(key)),
 
       removeFromSortedSet: (schema) => (key, values) =>
-        Schema.encode(Schema.Array(Schema.parseJson(schema)))(values).pipe(
+        Schema.encodeEffect(Schema.Array(Schema.fromJsonString(schema)))(
+          values
+        ).pipe(
           Effect.flatMap((encoded) =>
             Ref.update(sortedSetState, (hashMap) =>
               HashMap.has(hashMap, key)
@@ -215,7 +221,7 @@ export const mockedRedisLayer = Layer.effect(
 
       getAndDropSortedSet: (schema) => (key, order) =>
         Ref.get(sortedSetState).pipe(
-          Effect.flatMap(HashMap.get(key)),
+          Effect.flatMap(flow(HashMap.get(key), Effect.fromOption)),
           Effect.map((one) =>
             [...one.value]
               .sort((a, b) =>
@@ -223,9 +229,11 @@ export const mockedRedisLayer = Layer.effect(
               )
               .map((v) => v.item)
           ),
-          Effect.flatMap(Schema.decode(Schema.Array(Schema.parseJson(schema)))),
-          Effect.zipLeft(Ref.update(sortedSetState, HashMap.remove(key))),
-          Effect.catchTag('NoSuchElementException', () => Effect.succeed([]))
+          Effect.flatMap(
+            Schema.decodeEffect(Schema.Array(Schema.fromJsonString(schema)))
+          ),
+          Effect.tap(Ref.update(sortedSetState, HashMap.remove(key))),
+          Effect.catchTag('NoSuchElementError', () => Effect.succeed([]))
         ),
 
       withLock: (effect) => () => effect,

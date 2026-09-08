@@ -13,7 +13,7 @@ import {
 import {useFocusEffect} from '@react-navigation/native'
 import {Latitude, Longitude} from '@vexl-next/domain/src/utility/geoCoordinates'
 import {tokens, useTheme, useVexlTheme} from '@vexl-next/ui'
-import {Array, Option, pipe, Schema} from 'effect'
+import {Array, Filter, Option, pipe, Schema} from 'effect'
 import {useAtomValue, useSetAtom, type Atom, type WritableAtom} from 'jotai'
 import React, {useCallback, useMemo, useRef} from 'react'
 import {StyleSheet, type NativeSyntheticEvent} from 'react-native'
@@ -197,7 +197,7 @@ const PointFeatureSchema = Schema.Struct({
 
 const ClusterLeafSchema = Schema.Struct({
   geometry: Schema.Struct({
-    coordinates: Schema.Tuple(Longitude, Latitude),
+    coordinates: Schema.Tuple([Longitude, Latitude]),
   }),
 })
 
@@ -206,13 +206,15 @@ function getClusterLeavesCoordinates(
 ): readonly PinCoordinate[] {
   return pipe(
     leaves,
-    Array.filterMap((leaf) =>
-      pipe(
-        Schema.decodeUnknownOption(ClusterLeafSchema)(leaf),
-        Option.map(({geometry: {coordinates}}) => ({
-          longitude: coordinates[0],
-          latitude: coordinates[1],
-        }))
+    Array.filterMap(
+      Filter.fromPredicateOption((leaf) =>
+        pipe(
+          Schema.decodeUnknownOption(ClusterLeafSchema)(leaf),
+          Option.map(({geometry: {coordinates}}) => ({
+            longitude: coordinates[0],
+            latitude: coordinates[1],
+          }))
+        )
       )
     )
   )
@@ -248,8 +250,10 @@ export default function MapDisplayMultiplePoints<T>({
     const focusedPointIds = idsToFocus ?? []
     const [clusteredPoints, focusedPoints] = pipe(
       points,
-      Array.partition((point) =>
-        pipe(focusedPointIds, Array.contains(point.id))
+      Array.partition(
+        Filter.fromPredicate((point) =>
+          pipe(focusedPointIds, Array.contains(point.id))
+        )
       )
     )
 

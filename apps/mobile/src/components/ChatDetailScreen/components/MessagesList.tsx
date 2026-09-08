@@ -1,7 +1,7 @@
 import {FlashList, type FlashListRef} from '@shopify/flash-list'
 import {type ChatMessageId} from '@vexl-next/domain/src/general/messaging'
 import {tokens, useScreenFooterHeight} from '@vexl-next/ui'
-import {useMolecule} from 'bunshi/dist/react'
+import {useMolecule} from 'bunshi/react'
 import {useAtomValue, useSetAtom, useStore, type Atom} from 'jotai'
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react'
 import {

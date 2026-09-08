@@ -5,21 +5,19 @@ import {
   GetLocationSuggestionsRequest,
   type GetLocationSuggestionsResponse,
 } from '@vexl-next/rest-api/src/services/location/contracts'
-import {Cause, Effect, Either, Exit, Layer, Schema} from 'effect'
+import {Cause, Effect, Exit, Layer, Result, Schema} from 'effect'
 import {GeocodingService} from '../../geocoding'
 
 const querySuggest = (
   geocodingDbLayer: Layer.Layer<GeocodingDbService>
 ): Effect.Effect<GetLocationSuggestionsResponse, UnexpectedServerError> =>
-  Effect.gen(function* (_) {
-    const geocoding = yield* _(GeocodingService)
-    return yield* _(
-      geocoding.querySuggest(
-        new GetLocationSuggestionsRequest({
-          phrase: 'private search phrase',
-          lang: 'en',
-        })
-      )
+  Effect.gen(function* () {
+    const geocoding = yield* GeocodingService
+    return yield* geocoding.querySuggest(
+      new GetLocationSuggestionsRequest({
+        phrase: 'private search phrase',
+        lang: 'en',
+      })
     )
   }).pipe(
     Effect.provide(GeocodingService.Live),
@@ -47,15 +45,16 @@ describe('geocoding reporting', () => {
     })
 
     const result = await Effect.runPromise(
-      querySuggest(geocodingDbLayer).pipe(Effect.either)
+      querySuggest(geocodingDbLayer).pipe(Effect.result)
     )
 
-    expect(Either.isLeft(result)).toBe(true)
-    if (Either.isRight(result)) return
+    expect(Result.isFailure(result)).toBe(true)
+    if (Result.isSuccess(result)) return
 
-    expect(Schema.is(UnexpectedServerError)(result.left)).toBe(true)
-    expect(JSON.stringify(result.left.cause)).toContain('ParseError')
-    expect(String(result.left.cause)).toContain('actual 200')
+    expect(Schema.is(UnexpectedServerError)(result.failure)).toBe(true)
+    expect(JSON.stringify(result.failure.cause)).toContain('SchemaError')
+    expect(String(result.failure.cause)).toContain('less than or equal to 90')
+    expect(String(result.failure.cause)).toContain('latitude')
   })
 
   it('preserves defects for inspection', async () => {

@@ -5,7 +5,7 @@ import {
 import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {type MyOfferInState} from '@vexl-next/domain/src/general/offers'
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
-import {Array, Effect, Option, pipe} from 'effect'
+import {Array, Effect, Filter, Option, pipe} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
 import {ignoreReportErrors} from '../../../utils/reportError'
@@ -52,7 +52,7 @@ export const updateOffersWhenUserIsNoLongerInClubActionAtom = atom(
       clubUuid: ClubUuid
     }
   ) => {
-    return Effect.gen(function* (_) {
+    return Effect.gen(function* () {
       const offerApi = get(apiAtom).offer
       const offerConnectionsToDeleteFromServer = set(
         deleteClubForAllConnectionsActionAtom,
@@ -63,26 +63,33 @@ export const updateOffersWhenUserIsNoLongerInClubActionAtom = atom(
         get(myOffersAtom),
         Array.map(Option.some),
         Array.filterMap(
-          Option.filter((oneOffer) =>
-            Array.contains(oneOffer.ownershipInfo.intendedClubs ?? [], clubUuid)
+          Filter.fromPredicateOption(
+            Option.filter((oneOffer) =>
+              Array.contains(
+                oneOffer.ownershipInfo.intendedClubs ?? [],
+                clubUuid
+              )
+            )
           )
         ),
-        Array.filterMap((oneOfferForClub) =>
-          Array.findFirst(
-            offerConnectionsToDeleteFromServer,
-            (oneConnectionRecord) =>
-              oneConnectionRecord.adminId ===
-              oneOfferForClub.ownershipInfo.adminId
-          ).pipe(
-            Option.map(({connections}) => ({
-              connections,
-              offer: oneOfferForClub,
-            }))
+        Array.filterMap(
+          Filter.fromPredicateOption((oneOfferForClub) =>
+            Array.findFirst(
+              offerConnectionsToDeleteFromServer,
+              (oneConnectionRecord) =>
+                oneConnectionRecord.adminId ===
+                oneOfferForClub.ownershipInfo.adminId
+            ).pipe(
+              Option.map(({connections}) => ({
+                connections,
+                offer: oneOfferForClub,
+              }))
+            )
           )
         )
       )
 
-      yield* _(
+      yield* pipe(
         deletePrivatePartsForOffers(myOffersWithConnectionsForClub, offerApi),
         ignoreReportErrors(
           'warn',
@@ -90,7 +97,7 @@ export const updateOffersWhenUserIsNoLongerInClubActionAtom = atom(
         )
       )
 
-      yield* _(
+      yield* pipe(
         myOffersWithConnectionsForClub,
         Array.map(({offer}) =>
           set(updateMyOfferPrivatePayloadActionAtom, {

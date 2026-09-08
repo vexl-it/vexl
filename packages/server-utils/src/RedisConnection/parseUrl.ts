@@ -1,3 +1,4 @@
+import {NumberFromString} from '@vexl-next/generic-utils/src/effect-helpers/NumberFromString'
 import {Effect, Schema} from 'effect'
 import {SettingUpRedisConnectionError} from './domain'
 
@@ -6,7 +7,10 @@ const ParsedUrl = Schema.Struct({
   username: Schema.optional(Schema.String),
   password: Schema.optional(Schema.String),
   hostname: Schema.optional(Schema.String),
-  port: Schema.optionalWith(Schema.NumberFromString, {default: () => 6379}),
+  port: NumberFromString.pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): 6379 => 6379)),
+    Schema.withConstructorDefault(Effect.sync((): 6379 => 6379))
+  ),
 })
 export type ParsedUrl = typeof ParsedUrl.Type
 

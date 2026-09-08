@@ -1,9 +1,3 @@
-import {
-  HttpApiBuilder,
-  HttpApiSwagger,
-  HttpMiddleware,
-  HttpServer,
-} from '@effect/platform/index'
 import {UserApiSpecification} from '@vexl-next/rest-api/src/services/user/specification'
 import {healthServerLayer} from '@vexl-next/server-utils/src/HealthServer'
 import {NodeHttpServerLiveWithPortFromEnv} from '@vexl-next/server-utils/src/NodeHttpServerLiveWithPortFromEnv'
@@ -13,6 +7,8 @@ import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {ServerSecurityMiddlewareLive} from '@vexl-next/server-utils/src/serverSecurity'
 import {Config, Layer, Option} from 'effect'
+import {HttpRouter} from 'effect/unstable/http'
+import {HttpApiBuilder, HttpApiSwagger} from 'effect/unstable/httpapi'
 import {
   cryptoConfig,
   dashboardNewUserHookConfig,
@@ -78,7 +74,7 @@ const UpgradeAuthApiGroupLive = HttpApiBuilder.group(
       .handle('submitUpgradeAuth', submitUpgradeAuthHandler)
 )
 
-export const UserApiLive = HttpApiBuilder.api(UserApiSpecification).pipe(
+export const UserApiLive = HttpApiBuilder.layer(UserApiSpecification).pipe(
   Layer.provide(LoginApiGroupLive),
   Layer.provide(EraseUserApiGroupLive),
   Layer.provide(UpgradeAuthApiGroupLive),
@@ -87,12 +83,9 @@ export const UserApiLive = HttpApiBuilder.api(UserApiSpecification).pipe(
   Layer.provide(ServerSecurityMiddlewareLive)
 )
 
-export const ApiServerLive = HttpApiBuilder.serve(HttpMiddleware.logger).pipe(
-  Layer.provide(HttpApiSwagger.layer()),
-  Layer.provide(UserApiLive),
-  HttpServer.withLogAddress,
-  Layer.provide(NodeHttpServerLiveWithPortFromEnv)
-)
+export const ApiServerLive = HttpRouter.serve(
+  Layer.mergeAll(UserApiLive, HttpApiSwagger.layer(UserApiSpecification))
+).pipe(Layer.provide(NodeHttpServerLiveWithPortFromEnv))
 
 export const HttpServerLive = Layer.mergeAll(
   ApiServerLive,

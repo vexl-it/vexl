@@ -1,5 +1,5 @@
 import {vexlFonts} from '@vexl-next/ui'
-import {Effect} from 'effect/index'
+import {Effect} from 'effect'
 import {useFonts} from 'expo-font'
 import * as SplashScreen from 'expo-splash-screen'
 import React, {useCallback, useEffect, useState} from 'react'
@@ -72,7 +72,7 @@ function loadSessionForSplashScreen(): Effect.Effect<LoadSessionResult> {
       if (!shouldRetryAfterDelay(firstLoadResult))
         return Effect.succeed(firstLoadResult)
 
-      return Effect.zipRight(
+      return Effect.andThen(
         reportErrorE(
           'info',
           new Error(
@@ -81,7 +81,7 @@ function loadSessionForSplashScreen(): Effect.Effect<LoadSessionResult> {
         ),
         Effect.sleep(SESSION_LOAD_RETRY_DELAY_MS)
       ).pipe(
-        Effect.zipRight(loadSessionOnceForSplashScreen()),
+        Effect.andThen(loadSessionOnceForSplashScreen()),
         Effect.tap((secondLoadResult) =>
           secondLoadResult.sessionLoaded
             ? reportErrorE('info', new Error('Session login attempt succeeded'))

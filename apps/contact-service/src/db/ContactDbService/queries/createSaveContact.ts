@@ -1,6 +1,6 @@
-import {SqlClient, SqlResolver} from '@effect/sql'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {Effect, flow, Schema} from 'effect'
+import {SqlClient, SqlResolver} from 'effect/unstable/sql'
 import {ServerHashedNumber} from '../../../utils/serverHashContact'
 
 const InsertContactParams = Schema.Struct({
@@ -9,23 +9,21 @@ const InsertContactParams = Schema.Struct({
 })
 export type InsertContactParams = Schema.Schema.Type<typeof InsertContactParams>
 
-export const createInsertContact = Effect.gen(function* (_) {
-  const sql = yield* _(SqlClient.SqlClient)
+export const createInsertContact = Effect.gen(function* () {
+  const sql = yield* SqlClient.SqlClient
 
-  const resolver = yield* _(
-    SqlResolver.void('insertContact', {
-      Request: InsertContactParams,
-      execute: (params) => sql`
-        INSERT INTO
-          user_contact ${sql.insert(params)}
-        RETURNING
-          *
-      `,
-    })
-  )
+  const resolver = SqlResolver.void({
+    Request: InsertContactParams,
+    execute: (params) => sql`
+      INSERT INTO
+        user_contact ${sql.insert(params)}
+      RETURNING
+        *
+    `,
+  })
 
   return flow(
-    resolver.execute,
+    SqlResolver.request(resolver),
     UnexpectedServerError.wrapErrors('Error in insertContact'),
     Effect.withSpan('insertContact query')
   )

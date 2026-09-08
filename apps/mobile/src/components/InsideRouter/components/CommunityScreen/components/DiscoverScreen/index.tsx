@@ -265,7 +265,7 @@ function DiscoverScreen({navigation}: Props): React.JSX.Element {
             articles,
             Array.sortWith(
               (article) => article.publishedOn,
-              Order.reverse(Order.Date)
+              Order.flip(Order.Date)
             ),
             Array.take(BLOGS_LIMIT)
           ),
@@ -304,7 +304,7 @@ function DiscoverScreen({navigation}: Props): React.JSX.Element {
       contentContainerStyle={{paddingBottom: 24}}
     >
       <YStack f={1} paddingHorizontal="$5" paddingTop="$6" gap="$6">
-        {Array.isNonEmptyReadonlyArray(upcomingEvents) ? (
+        {Array.isReadonlyArrayNonEmpty(upcomingEvents) ? (
           <YStack gap="$4">
             <SectionTitle
               icon={<Calendar color={iconColor} size={24} />}
@@ -367,7 +367,7 @@ function DiscoverScreen({navigation}: Props): React.JSX.Element {
           )}
         </YStack>
 
-        {Array.isNonEmptyReadonlyArray(latestBlogs) ? (
+        {Array.isReadonlyArrayNonEmpty(latestBlogs) ? (
           <YStack gap="$4">
             <SectionTitle
               icon={<PencilWriteEdit color={iconColor} size={24} />}

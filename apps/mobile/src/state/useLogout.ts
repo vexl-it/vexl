@@ -1,5 +1,5 @@
 import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import {Array, Effect, Option, pipe, Record} from 'effect'
+import {Array, Effect, Filter, Option, pipe, Record} from 'effect'
 import * as Notifications from 'expo-notifications'
 import * as O from 'fp-ts/Option'
 import {atom, useSetAtom} from 'jotai'
@@ -112,16 +112,18 @@ export const logoutActionAtom = atom(null, async (get, set) => {
     await failSilently(
       pipe(
         get(clubsWithMembersAtom),
-        Array.filterMap((club) =>
-          Record.get(get(clubsToKeyHolderAtom), club.club.uuid).pipe(
-            Option.map((clubKeys) =>
-              get(apiAtom)
-                .contact.leaveClub({
-                  clubUuid: club.club.uuid,
-                  keyPair: clubKeys.oldKeyPair,
-                  keyPairV2: clubKeys.keyPair,
-                })
-                .pipe(Effect.ignore)
+        Array.filterMap(
+          Filter.fromPredicateOption((club) =>
+            Record.get(get(clubsToKeyHolderAtom), club.club.uuid).pipe(
+              Option.map((clubKeys) =>
+                get(apiAtom)
+                  .contact.leaveClub({
+                    clubUuid: club.club.uuid,
+                    keyPair: clubKeys.oldKeyPair,
+                    keyPairV2: clubKeys.keyPair,
+                  })
+                  .pipe(Effect.ignore)
+              )
             )
           )
         ),

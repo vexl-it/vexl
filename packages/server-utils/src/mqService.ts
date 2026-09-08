@@ -3,14 +3,15 @@ import {
   Context,
   Data,
   Effect,
+  Filter,
   flow,
   identity,
   Layer,
   pipe,
   Schema,
   Stream,
-  type ParseResult,
-} from 'effect/index'
+} from 'effect'
+import {offer} from 'effect/Queue'
 import {RedisConnectionService} from './RedisConnection'
 import {RedisNamespacePrefixConfig} from './commonConfigs'
 
@@ -35,23 +36,23 @@ export const validateBullMqJobOptions = <E>(
 export type EnqueueTask<A, R> = (
   task: A,
   options?: JobsOptions
-) => Effect.Effect<Job, MqServiceError | ParseResult.ParseError, R>
+) => Effect.Effect<Job, MqServiceError | Schema.SchemaError, R>
 
 type ConsumeJob<A, R> = (payload: A) => Effect.Effect<void, never, R>
 
 export type MqProducerContext<
-  MqService extends {EnqueueTask: Context.Tag<any, any>},
-> = Context.Tag.Identifier<MqService['EnqueueTask']>
+  MqService extends {EnqueueTask: Context.Key<unknown, unknown>},
+> = Context.Service.Identifier<MqService['EnqueueTask']>
 
 export type MqProducerService<
-  MqService extends {EnqueueTask: Context.Tag<any, any>},
-> = Context.Tag.Service<MqService['EnqueueTask']>
+  MqService extends {EnqueueTask: Context.Key<unknown, unknown>},
+> = Context.Service.Shape<MqService['EnqueueTask']>
 
 export const makeMqService = <A, I, R, TAG extends string>(
   queueName: TAG,
-  JobPayloadSchema: Schema.Schema<A, I, R>
+  JobPayloadSchema: Schema.Codec<A, I, R, R>
 ): {
-  EnqueueTask: Context.Tag<`mqService/${TAG}`, EnqueueTask<A, R>>
+  EnqueueTask: Context.Service<`mqService/${TAG}`, EnqueueTask<A, R>>
   EnqueueTaskContext: `mqService/${TAG}`
   producerLayer: Layer.Layer<
     `mqService/${TAG}`,
@@ -107,9 +108,9 @@ export const makeMqService = <A, I, R, TAG extends string>(
     )
   )
 
-  const EnqueueTaskTag = Context.GenericTag<typeof tag, EnqueueTask<A, R>>(tag)
+  const EnqueueTaskTag = Context.Service<typeof tag, EnqueueTask<A, R>>(tag)
 
-  const producerLayer = Layer.scoped(
+  const producerLayer = Layer.effect(
     EnqueueTaskTag,
     pipe(
       queue,
@@ -124,7 +125,9 @@ export const makeMqService = <A, I, R, TAG extends string>(
                   message: `Invalid BullMQ jobId for ${queueName} queue: custom job IDs cannot contain "${forbiddenCharacter}"`,
                 })
             ),
-            Effect.flatMap(() => pipe(task, Schema.encode(JobPayloadSchema))),
+            Effect.flatMap(() =>
+              pipe(task, Schema.encodeEffect(JobPayloadSchema))
+            ),
             Effect.flatMap((data) =>
               Effect.tryPromise({
                 try: async () => await queue.add(queueName, data, options),
@@ -140,19 +143,19 @@ export const makeMqService = <A, I, R, TAG extends string>(
     )
   )
 
-  const jobsStream = Stream.asyncScoped<
+  const jobsStream = Stream.callback<
     unknown,
     MqServiceError,
     RedisConnectionService
-  >((emit) =>
-    Effect.gen(function* (_) {
-      const connection = yield* _(RedisConnectionService)
-      const prefix = yield* RedisNamespacePrefixConfigFailWithMqError
-      const processJob = async (job: Job<unknown, void>): Promise<void> => {
-        await emit.single(job.data)
-      }
-      yield* _(
-        Effect.acquireRelease(
+  >(
+    (messages) =>
+      Effect.gen(function* () {
+        const connection = yield* RedisConnectionService
+        const prefix = yield* RedisNamespacePrefixConfigFailWithMqError
+        const processJob = async (job: Job<unknown, void>): Promise<void> => {
+          await Effect.runPromise(offer(messages, job.data))
+        }
+        yield* Effect.acquireRelease(
           Effect.try({
             try: () =>
               new Worker(queueName, processJob, {
@@ -170,12 +173,13 @@ export const makeMqService = <A, I, R, TAG extends string>(
               await worker.close()
             })
         )
-      )
-    })
+      }),
+    {bufferSize: 16}
   ).pipe(
     Stream.mapEffect(
       flow(
-        Schema.decodeUnknown(JobPayloadSchema),
+        (message: unknown) =>
+          Schema.decodeUnknownEffect(JobPayloadSchema)(message),
         Effect.tapError((e) =>
           Effect.logWarning(
             `${queueName} task worker received invalid job data`
@@ -184,7 +188,7 @@ export const makeMqService = <A, I, R, TAG extends string>(
         Effect.option
       )
     ),
-    Stream.filterMap(identity)
+    Stream.filterMap(Filter.fromPredicateOption(identity))
   )
 
   const consumerLayer = <R2>(

@@ -8,7 +8,7 @@ import {
 } from '@vexl-next/resources-utils/src/chat/sendCancelMessagingRequest'
 import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/src/chat/utils/chatCrypto'
 import {type JsonStringifyError} from '@vexl-next/resources-utils/src/utils/parsing'
-import {Effect, type ParseResult} from 'effect'
+import {Effect, type Schema} from 'effect'
 import {atom} from 'jotai'
 import {Alert} from 'react-native'
 import {apiAtom} from '../../../api'
@@ -37,7 +37,7 @@ const cancelRequestActionAtomHandleUI = atom(
     | ApiErrorRequestMessaging
     | UserDeclinedError
     | JsonStringifyError
-    | ParseResult.ParseError
+    | Schema.SchemaError
     | ErrorEncryptingMessage
   > => {
     const chatWithMessages = get(chatAtom)
@@ -58,35 +58,31 @@ const cancelRequestActionAtomHandleUI = atom(
       new Error('Declined')
     )
 
-    return Effect.gen(function* (_) {
-      const confirmed = yield* _(
-        set(globalDialogAtom, {
-          title: t('messages.cancelRequestDialog.title'),
-          subtitle: t('messages.cancelRequestDialog.description'),
-          negativeButtonText: t('common.back'),
-          positiveButtonText: t('messages.cancelRequestDialog.yes'),
-          positiveButtonVariant: 'destructive',
-        })
-      )
+    return Effect.gen(function* () {
+      const confirmed = yield* set(globalDialogAtom, {
+        title: t('messages.cancelRequestDialog.title'),
+        subtitle: t('messages.cancelRequestDialog.description'),
+        negativeButtonText: t('common.back'),
+        positiveButtonText: t('messages.cancelRequestDialog.yes'),
+        positiveButtonVariant: 'destructive',
+      })
 
       if (!confirmed) {
-        return yield* _(Effect.fail(userDeclinedError))
+        return yield* Effect.fail(userDeclinedError)
       }
 
       set(loadingOverlayDisplayedAtom, true)
 
-      const sentMessage = yield* _(
-        sendCancelMessagingRequest({
-          api: api.chat,
-          text,
-          fromKeypair: chat.inbox.privateKey,
-          toPublicKey: chat.otherSide.publicKey,
-          myVersion: version,
-          theirNotificationCypher: offer?.fcmCypher,
-          notificationApi: api.notification,
-          otherSideVersion: offer?.authorClientVersion,
-        })
-      )
+      const sentMessage = yield* sendCancelMessagingRequest({
+        api: api.chat,
+        text,
+        fromKeypair: chat.inbox.privateKey,
+        toPublicKey: chat.otherSide.publicKey,
+        myVersion: version,
+        theirNotificationCypher: offer?.fcmCypher,
+        notificationApi: api.notification,
+        otherSideVersion: offer?.authorClientVersion,
+      })
 
       const successMessage: ChatMessageWithState = {
         message: sentMessage.message,

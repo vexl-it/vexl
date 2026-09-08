@@ -1,6 +1,6 @@
 import {CalendarEventId} from '@vexl-next/domain/src/general/messaging'
 import {tokens} from '@vexl-next/ui'
-import {Array, Option, pipe, Schema} from 'effect/index'
+import {Array, Option, pipe, Schema} from 'effect'
 import {
   CalendarAccessLevel,
   createCalendarAsync,

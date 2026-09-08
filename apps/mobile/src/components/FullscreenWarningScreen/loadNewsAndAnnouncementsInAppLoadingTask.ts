@@ -1,4 +1,4 @@
-import {Effect} from 'effect/index'
+import {Effect} from 'effect'
 import {registerInAppLoadingTask} from '../../utils/inAppLoadingTasks'
 import {loadNewsAndAnnouncementsActionAtom} from './state'
 
@@ -10,7 +10,7 @@ export const loadNewsAndAnnouncementsInAppLoadingTask =
       runOn: 'resume',
     },
     task: (store) =>
-      Effect.gen(function* (_) {
-        yield* _(store.set(loadNewsAndAnnouncementsActionAtom))
+      Effect.gen(function* () {
+        yield* store.set(loadNewsAndAnnouncementsActionAtom)
       }),
   })

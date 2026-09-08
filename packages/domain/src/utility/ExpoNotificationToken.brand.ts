@@ -11,8 +11,8 @@ export const isExpoNotificationToken = (
 ): token is ExpoNotificationToken =>
   String.isString(token) && String.startsWith('ExponentPushToken')(token)
 
-export const ExpoOrFcmNotificationToken = Schema.Union(
+export const ExpoOrFcmNotificationToken = Schema.Union([
   ExpoNotificationToken,
-  FcmToken
-)
+  FcmToken,
+])
 export type ExpoOrFcmNotificationToken = typeof ExpoOrFcmNotificationToken.Type

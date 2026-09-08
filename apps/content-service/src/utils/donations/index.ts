@@ -259,16 +259,16 @@ function getInvoicePaymentMethodsInternal({
   )
 }
 
-export class BtcPayServerService extends Context.Tag('BtcPayServerService')<
+export class BtcPayServerService extends Context.Service<
   BtcPayServerService,
   BtcPayServerOperations
->() {
+>()('BtcPayServerService') {
   static readonly Live = Layer.effect(
     BtcPayServerService,
-    Effect.gen(function* (_) {
-      const btcPayServerUrl = yield* _(btcPayServerUrlConfig)
-      const btcPayServerApiKey = yield* _(btcPayServerApiKeyConfig)
-      const btcPayServerStoreId = yield* _(btcPayServerStoreIdConfig)
+    Effect.gen(function* () {
+      const btcPayServerUrl = yield* btcPayServerUrlConfig
+      const btcPayServerApiKey = yield* btcPayServerApiKeyConfig
+      const btcPayServerStoreId = yield* btcPayServerStoreIdConfig
 
       const toReturn = {
         createInvoice: ({

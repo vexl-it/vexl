@@ -1,8 +1,8 @@
+import {getOrElse} from 'effect/Result'
 import {
   AndroidImportance,
   setNotificationChannelAsync,
 } from 'expo-notifications'
-import {getOrElse} from 'fp-ts/Either'
 import {pipe} from 'fp-ts/lib/function'
 import {storage} from '../mmkv/effectMmkv'
 import {displayLocalNotification} from './displayLocalNotification'

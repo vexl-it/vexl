@@ -15,12 +15,12 @@ export type SelectedImage = typeof SelectedImage.Type
 export class ImagePickerError extends Schema.TaggedError<ImagePickerError>(
   'ImagePickerError'
 )('ImagePickerError', {
-  reason: Schema.Literal(
+  reason: Schema.Literals([
     'PermissionsNotGranted',
     'UnknownError',
     'NothingSelected',
-    'FileError'
-  ),
+    'FileError',
+  ]),
   error: Schema.optional(Schema.Unknown),
 }) {}
 
@@ -118,7 +118,7 @@ export function getImageFromGalleryAndTryToResolveThePermissionsAlongTheWay({
       })
     )
   }).pipe(
-    Effect.catchTag('UnknownException', (e) =>
+    Effect.catchTag('UnknownError', (e) =>
       Effect.fail(
         new ImagePickerError({
           reason: 'UnknownError',
@@ -184,7 +184,7 @@ export function getImageFromCameraAndTryToResolveThePermissionsAlongTheWay({
       })
     )
   }).pipe(
-    Effect.catchTag('UnknownException', (e) =>
+    Effect.catchTag('UnknownError', (e) =>
       Effect.fail(
         new ImagePickerError({
           reason: 'UnknownError',
@@ -203,20 +203,17 @@ export function getImageFromCameraResolvePermissionsAndMoveItToInternalDirectory
   saveTo: 'cache' | 'documents'
   aspect?: [number, number] | undefined
 }): Effect.Effect<SelectedImage, ImagePickerError> {
-  return Effect.gen(function* (_) {
-    const selectedImage = yield* _(
-      getImageFromCameraAndTryToResolveThePermissionsAlongTheWay({
+  return Effect.gen(function* () {
+    const selectedImage =
+      yield* getImageFromCameraAndTryToResolveThePermissionsAlongTheWay({
         aspect,
       })
-    )
 
-    const path = yield* _(
-      moveImageToInternalDirectory({
-        imagePath: Schema.decodeSync(UriString)(selectedImage.uri),
-        mode: saveTo,
-        directory: PROFILE_PICTURE_DIRECTORY,
-      })
-    )
+    const path = yield* moveImageToInternalDirectory({
+      imagePath: Schema.decodeSync(UriString)(selectedImage.uri),
+      mode: saveTo,
+      directory: PROFILE_PICTURE_DIRECTORY,
+    })
 
     return {
       ...selectedImage,
@@ -232,20 +229,17 @@ export function getImageFromGalleryResolvePermissionsAndMoveItToInternalDirector
   saveTo: 'cache' | 'documents'
   aspect?: [number, number] | undefined
 }): Effect.Effect<SelectedImage, ImagePickerError> {
-  return Effect.gen(function* (_) {
-    const selectedImage = yield* _(
-      getImageFromGalleryAndTryToResolveThePermissionsAlongTheWay({
+  return Effect.gen(function* () {
+    const selectedImage =
+      yield* getImageFromGalleryAndTryToResolveThePermissionsAlongTheWay({
         aspect,
       })
-    )
 
-    const path = yield* _(
-      moveImageToInternalDirectory({
-        imagePath: Schema.decodeSync(UriString)(selectedImage.uri),
-        mode: saveTo,
-        directory: PROFILE_PICTURE_DIRECTORY,
-      })
-    )
+    const path = yield* moveImageToInternalDirectory({
+      imagePath: Schema.decodeSync(UriString)(selectedImage.uri),
+      mode: saveTo,
+      directory: PROFILE_PICTURE_DIRECTORY,
+    })
 
     return {
       ...selectedImage,

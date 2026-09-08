@@ -1,6 +1,6 @@
-import {HttpApi} from '@effect/platform/index'
 import {MaxExpectedDailyCall} from '@vexl-next/rest-api/src/MaxExpectedDailyCountAnnotation'
-import {Context, MutableHashMap, Option} from 'effect/index'
+import {Context, MutableHashMap, Option} from 'effect'
+import {HttpApi, type HttpApiGroup} from 'effect/unstable/httpapi'
 
 export const normalizePath = (path: string): string => {
   // Remove query string and fragment
@@ -28,8 +28,11 @@ type RouteToKeyResult =
   | {_tag: 'noRouteFound'}
   | {_tag: 'noLimitSpecified'}
 
-export const buildRateLimitingLimitsForEndpoints = (
-  spec: HttpApi.HttpApi<any, any, any, any>,
+export const buildRateLimitingLimitsForEndpoints = <
+  Id extends string,
+  Groups extends HttpApiGroup.Constraint,
+>(
+  spec: HttpApi.HttpApi<Id, Groups>,
   rateLimitPerIpMultiplier: number
 ): {
   getEndpointLimit: (method: string, url: string) => RouteToKeyResult

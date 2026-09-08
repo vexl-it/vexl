@@ -1,4 +1,3 @@
-import {HttpApiBuilder} from '@effect/platform/index'
 import {
   CreateInvoiceError,
   InvoiceId,
@@ -8,35 +7,32 @@ import {
 } from '@vexl-next/rest-api/src/services/content/contracts'
 import {ContentApiSpecification} from '@vexl-next/rest-api/src/services/content/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {makeHttpApiHandler} from '@vexl-next/server-utils/src/makeHttpApiHandler'
 import {Array, Effect, Option, Schema} from 'effect'
 import {BtcPayServerService} from '../../utils/donations'
 import {UpdateInvoiceStateWebhookService} from './UpdateInvoiceStateWebhookService'
 
-export const createInvoiceHandler = HttpApiBuilder.handler(
+export const createInvoiceHandler = makeHttpApiHandler(
   ContentApiSpecification,
   'Donations',
   'createInvoice',
   (req) =>
-    Effect.gen(function* (_) {
-      const btcPayServerService = yield* _(BtcPayServerService)
-      const updateInvoiceStateWebhookService = yield* _(
-        UpdateInvoiceStateWebhookService
-      )
+    Effect.gen(function* () {
+      const btcPayServerService = yield* BtcPayServerService
+      const updateInvoiceStateWebhookService =
+        yield* UpdateInvoiceStateWebhookService
 
-      const createInvoiceResponse = yield* _(
-        btcPayServerService.createInvoice({
-          amount: req.payload.amount,
-          currency: req.payload.currency,
-          paymentMethod: req.payload.paymentMethod,
-        })
-      )
+      const createInvoiceResponse = yield* btcPayServerService.createInvoice({
+        amount: req.payload.amount,
+        currency: req.payload.currency,
+        paymentMethod: req.payload.paymentMethod,
+      })
 
-      const paymentMethods = yield* _(
-        btcPayServerService.getInvoicePaymentMethods({
+      const paymentMethods =
+        yield* btcPayServerService.getInvoicePaymentMethods({
           invoiceId: createInvoiceResponse.id,
           storeId: createInvoiceResponse.storeId,
         })
-      )
 
       const paymentMethod = Array.findFirst(
         paymentMethods,
@@ -44,23 +40,19 @@ export const createInvoiceHandler = HttpApiBuilder.handler(
       )
 
       if (Option.isNone(paymentMethod))
-        return yield* _(
-          Effect.fail(
-            new CreateInvoiceError({
-              cause: new Error(
-                `No ${req.payload.paymentMethod} payment method found`
-              ),
-              message: `No ${req.payload.paymentMethod} payment method found`,
-            })
-          )
+        return yield* Effect.fail(
+          new CreateInvoiceError({
+            cause: new Error(
+              `No ${req.payload.paymentMethod} payment method found`
+            ),
+            message: `No ${req.payload.paymentMethod} payment method found`,
+          })
         )
 
-      yield* _(
-        updateInvoiceStateWebhookService.createOrUpdateInvoiceState({
-          invoiceId: Schema.decodeSync(InvoiceId)(createInvoiceResponse.id),
-          type: 'InvoiceCreated',
-        })
-      )
+      yield* updateInvoiceStateWebhookService.createOrUpdateInvoiceState({
+        invoiceId: Schema.decodeSync(InvoiceId)(createInvoiceResponse.id),
+        type: 'InvoiceCreated',
+      })
 
       const toReturn = {
         invoiceId: Schema.decodeSync(InvoiceId)(createInvoiceResponse.id),

@@ -35,29 +35,27 @@ export const decodePaginatedOfferNextPageToken = ({
 }: {
   nextPageToken: string | undefined
 }): Effect.Effect<PaginatedOfferNextPageToken, InvalidNextPageTokenError> =>
-  Effect.gen(function* (_) {
+  Effect.gen(function* () {
     if (!nextPageToken) {
       return defaultPaginatedOfferNextPageToken
     }
 
-    return yield* _(
-      base64UrlStringToDecoded({
-        base64UrlString: nextPageToken,
-        decodeSchema: PaginatedOfferNextPageToken,
-      }).pipe(
-        Effect.catchTag('ParseError', (newTokenError) =>
-          base64UrlStringToDecoded({
-            base64UrlString: nextPageToken,
-            decodeSchema: LegacyPaginatedOfferNextPageToken,
-          }).pipe(
-            Effect.as(defaultPaginatedOfferNextPageToken),
-            Effect.catchTag('ParseError', () => Effect.fail(newTokenError))
-          )
+    return yield* base64UrlStringToDecoded({
+      base64UrlString: nextPageToken,
+      decodeSchema: PaginatedOfferNextPageToken,
+    }).pipe(
+      Effect.catchTag('SchemaError', (newTokenError) =>
+        base64UrlStringToDecoded({
+          base64UrlString: nextPageToken,
+          decodeSchema: LegacyPaginatedOfferNextPageToken,
+        }).pipe(
+          Effect.as(defaultPaginatedOfferNextPageToken),
+          Effect.catchTag('SchemaError', () => Effect.fail(newTokenError))
         )
       )
     )
   }).pipe(
-    Effect.catchTag('ParseError', (cause) =>
+    Effect.catchTag('SchemaError', (cause) =>
       Effect.fail(
         new InvalidNextPageTokenError({
           cause,
@@ -78,7 +76,7 @@ export const encodePaginatedOfferNextPageToken = ({
     },
     schema: PaginatedOfferNextPageToken,
   }).pipe(
-    Effect.catchTag('ParseError', (cause) =>
+    Effect.catchTag('SchemaError', (cause) =>
       Effect.fail(
         new InvalidNextPageTokenError({
           cause,

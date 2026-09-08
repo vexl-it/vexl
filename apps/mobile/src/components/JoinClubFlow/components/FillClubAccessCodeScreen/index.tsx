@@ -9,7 +9,7 @@ import {
   XStack,
   YStack,
 } from '@vexl-next/ui'
-import {useMolecule} from 'bunshi/dist/react'
+import {useMolecule} from 'bunshi/react'
 import {Array, Effect, pipe, Schema} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useEffect, useRef, useState} from 'react'
@@ -93,19 +93,17 @@ function FillClubAccessCodeScreen({
       setIsCodeInvalid(false)
 
       void Effect.runPromise(
-        Effect.gen(function* (_) {
-          const clubCode = yield* _(Schema.decode(ClubCode)(code))
-          const success = yield* _(
-            validateCodeToJoinClub({
-              code: clubCode,
-              onCodeNotFound: () => {
-                setIsCodeInvalid(true)
-              },
-            })
-          )
+        Effect.gen(function* () {
+          const clubCode = yield* Schema.decodeEffect(ClubCode)(code)
+          const success = yield* validateCodeToJoinClub({
+            code: clubCode,
+            onCodeNotFound: () => {
+              setIsCodeInvalid(true)
+            },
+          })
 
           if (success) {
-            yield* _(Effect.promise(dismissKeyboardAndResolveOnLayoutUpdate))
+            yield* Effect.promise(dismissKeyboardAndResolveOnLayoutUpdate)
             navigation.navigate('MakingSureScreen', {code: clubCode})
           }
         })

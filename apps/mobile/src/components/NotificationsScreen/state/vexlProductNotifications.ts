@@ -1,5 +1,5 @@
 import {VexlProductNotificationUuid} from '@vexl-next/domain/src/general/vexlProductNotification'
-import {Array, Effect, Option, Schema} from 'effect/index'
+import {Array, Effect, Option, pipe, Schema} from 'effect'
 import {atom} from 'jotai'
 import {addNotificationToCenterActionAtom} from '.'
 import {apiAtom} from '../../../api'
@@ -7,9 +7,9 @@ import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsed
 import reportError from '../../../utils/reportError'
 
 const VexlProductNotificationsCursorRecord = Schema.Struct({
-  lastFetchedId: Schema.optionalWith(VexlProductNotificationUuid, {
-    as: 'Option',
-  }),
+  lastFetchedId: Schema.OptionFromOptional(VexlProductNotificationUuid).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
   // This should be set to a date from which on we want to fetch notifications.
   // This will automatically be set when user first uses notifications and should not be chagned,
   // but it should be used  when calling getVexlProductNotifications endpoint to make sure we fetch all notifications that were created
@@ -18,9 +18,10 @@ const VexlProductNotificationsCursorRecord = Schema.Struct({
   // If we omit this, all historic notificaitons will be fetched, we don't want that. We want to fetch
   // only notifications that were created since the user first used notifications, and we consider that date
   // to be the date when cursor was created for the first time, so we set it to current date when it's not provided.
-  activeSince: Schema.optionalWith(Schema.DateFromString, {
-    default: () => new Date(),
-  }),
+  activeSince: Schema.DateFromString.pipe(
+    Schema.withDecodingDefaultType(Effect.sync(() => new Date())),
+    Schema.withConstructorDefault(Effect.sync(() => new Date()))
+  ),
 })
 
 type VexlProductNotificationsCursorRecord =
@@ -65,7 +66,7 @@ export const vexlProductNotificationsLoadingErrorAtom = atom((get) => {
 })
 
 export const fetchVexlProductNotificationsActionAtom = atom(null, (get, set) =>
-  Effect.gen(function* (_) {
+  Effect.gen(function* () {
     if (get(vexlProductNotificationsFetchStateAtom).state === 'loading') return
 
     const contentApi = get(apiAtom).content
@@ -73,7 +74,7 @@ export const fetchVexlProductNotificationsActionAtom = atom(null, (get, set) =>
 
     set(vexlProductNotificationsFetchStateAtom, {state: 'loading'})
 
-    const response = yield* _(
+    const response = yield* pipe(
       contentApi.getVexlProductNotifications({
         newerThan: cursor.activeSince,
         lastVexlProductNotificationUuidFetched: Option.getOrUndefined(
@@ -99,12 +100,12 @@ export const fetchVexlProductNotificationsActionAtom = atom(null, (get, set) =>
 
     if (Option.isNone(response)) return
     const fetchedNotifications = response.value.vexlProductNotifications
-    if (!Array.isNonEmptyReadonlyArray(fetchedNotifications)) {
+    if (!Array.isReadonlyArrayNonEmpty(fetchedNotifications)) {
       set(vexlProductNotificationsFetchStateAtom, {state: 'loaded'})
       return
     }
 
-    yield* _(
+    yield* pipe(
       fetchedNotifications,
       Array.map((productNotification) =>
         Effect.sync(() => {

@@ -172,7 +172,7 @@ export const addMeetingLocationActionAtom = atom(
 
 export const submitTradeChecklistUpdatesActionAtom = atom(null, (get, set) => {
   const {t} = get(translationAtom)
-  return Effect.gen(function* (_) {
+  return Effect.gen(function* () {
     const submitTradeChecklistUpdateAtom =
       createSubmitChecklistUpdateActionAtom(chatWithMessagesAtom)
 
@@ -190,7 +190,7 @@ export const submitTradeChecklistUpdatesActionAtom = atom(null, (get, set) => {
 
     if (Object.keys(get(updatesToBeSentAtom)).length === 0) return true // No updates to be sent
 
-    yield* _(
+    yield* pipe(
       set(submitTradeChecklistUpdateAtom, get(updatesToBeSentAtom)),
       set(withLoadingOverlayAtom)
     )
@@ -199,7 +199,7 @@ export const submitTradeChecklistUpdatesActionAtom = atom(null, (get, set) => {
 
     return true
   }).pipe(
-    Effect.catchAll((e) => {
+    Effect.catch((e) => {
       reportError(
         'error',
         new Error('Error submitting trade checklist update'),
@@ -213,9 +213,11 @@ export const submitTradeChecklistUpdatesActionAtom = atom(null, (get, set) => {
         positiveButtonVariant: 'destructive',
         negativeButtonText: t('common.close'),
       }).pipe(
-        Effect.tap((shouldCopyError) => {
-          if (shouldCopyError) Clipboard.setString(JSON.stringify(e, null, 2))
-        }),
+        Effect.tap((shouldCopyError) =>
+          Effect.sync(() => {
+            if (shouldCopyError) Clipboard.setString(JSON.stringify(e, null, 2))
+          })
+        ),
         Effect.as(false)
       )
     })

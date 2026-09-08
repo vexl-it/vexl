@@ -3,7 +3,7 @@ import {
   UnixMilliseconds,
   UnixMilliseconds0,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {Array, Schema} from 'effect/index'
+import {Array, Schema} from 'effect'
 import {atom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {DateTime} from 'luxon'

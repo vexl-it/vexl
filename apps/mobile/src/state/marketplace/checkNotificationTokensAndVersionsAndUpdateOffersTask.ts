@@ -39,35 +39,34 @@ const doesOfferNeedUpdateVersion = atom(
 const updateOfferNotificationTokenActionAtom = atom(
   null,
   (get, set, offer: MyOfferInState) =>
-    Effect.gen(function* (_) {
+    Effect.gen(function* () {
       const offerKey = offer.offerInfo.publicPart.offerPublicKey
-      const offerKeyHolder = yield* _(
+      const offerKeyHolder = yield* Effect.fromOption(
         Array.findFirst(
           get(inboxesAtom),
           (one) => one.privateKey.publicKeyPemBase64 === offerKey
         )
       )
-      const vexlNotificationToken = yield* _(
-        set(generateAndRegisterVexlTokenActionAtom, {
+      const vexlNotificationToken = yield* set(
+        generateAndRegisterVexlTokenActionAtom,
+        {
           keyHolder: offerKeyHolder.privateKey,
-        })
+        }
       )
 
-      return yield* _(
-        set(updateOfferActionAtom, {
-          payloadPublic: {
-            ...offer.offerInfo.publicPart,
-            vexlNotificationToken,
-            // backward compatibility #2124 remove once all clients are updated
-            fcmCypher: vexlNotificationToken,
-          },
-          intendedClubs: offer.ownershipInfo.intendedClubs,
-          symmetricKey: offer.offerInfo.privatePart.symmetricKey,
-          adminId: offer.ownershipInfo.adminId,
-          intendedConnectionLevel: offer.ownershipInfo.intendedConnectionLevel,
-          updatePrivateParts: false,
-        })
-      )
+      return yield* set(updateOfferActionAtom, {
+        payloadPublic: {
+          ...offer.offerInfo.publicPart,
+          vexlNotificationToken,
+          // backward compatibility #2124 remove once all clients are updated
+          fcmCypher: vexlNotificationToken,
+        },
+        intendedClubs: offer.ownershipInfo.intendedClubs,
+        symmetricKey: offer.offerInfo.privatePart.symmetricKey,
+        adminId: offer.ownershipInfo.adminId,
+        intendedConnectionLevel: offer.ownershipInfo.intendedConnectionLevel,
+        updatePrivateParts: false,
+      })
     }).pipe(
       Effect.tapError((e) =>
         reportErrorE(
@@ -81,20 +80,18 @@ const updateOfferNotificationTokenActionAtom = atom(
 )
 
 const updateOfferVersion = atom(null, (get, set, offer: MyOfferInState) =>
-  Effect.gen(function* (_) {
-    return yield* _(
-      set(updateOfferActionAtom, {
-        payloadPublic: {
-          authorClientVersion: version,
-          ...offer.offerInfo.publicPart,
-        },
-        intendedClubs: offer.ownershipInfo.intendedClubs,
-        symmetricKey: offer.offerInfo.privatePart.symmetricKey,
-        adminId: offer.ownershipInfo.adminId,
-        intendedConnectionLevel: offer.ownershipInfo.intendedConnectionLevel,
-        updatePrivateParts: false,
-      })
-    )
+  Effect.gen(function* () {
+    return yield* set(updateOfferActionAtom, {
+      payloadPublic: {
+        authorClientVersion: version,
+        ...offer.offerInfo.publicPart,
+      },
+      intendedClubs: offer.ownershipInfo.intendedClubs,
+      symmetricKey: offer.offerInfo.privatePart.symmetricKey,
+      adminId: offer.ownershipInfo.adminId,
+      intendedConnectionLevel: offer.ownershipInfo.intendedConnectionLevel,
+      updatePrivateParts: false,
+    })
   }).pipe(
     Effect.tapError((e) =>
       reportErrorE('error', new Error('Error while updating offer version'), {
@@ -120,7 +117,7 @@ export const checkNotificationTokensAndVersionsAndUpdateOffersTaskId =
       {id: refreshOffersAndEnsureInboxesTaskId},
     ],
     task: (store) =>
-      Effect.gen(function* (_) {
+      Effect.gen(function* () {
         void showDebugNotificationIfEnabled({
           title: 'refreshing notification tokens offers',
           subtitle: 'checkNotificationTokensAndRefreshOffersActionAtom',
@@ -134,16 +131,15 @@ export const checkNotificationTokensAndVersionsAndUpdateOffersTaskId =
         console.log(
           `Refreshing notification tokens for ${offersToUpdateNotificationToken.length} offers`
         )
-        const offerUpdatesNotification = yield* _(
-          pipe(
-            offersToUpdateNotificationToken,
-            Array.map((offer) =>
-              store.set(updateOfferNotificationTokenActionAtom, offer)
-            ),
-            Effect.allWith({
+        const offerUpdatesNotification = yield* pipe(
+          offersToUpdateNotificationToken,
+          Array.map((offer) =>
+            store.set(updateOfferNotificationTokenActionAtom, offer)
+          ),
+          (effects) =>
+            Effect.all(effects, {
               concurrency: 'unbounded',
             })
-          )
         )
 
         const successNotificationCount =
@@ -162,14 +158,13 @@ export const checkNotificationTokensAndVersionsAndUpdateOffersTaskId =
         console.log(
           `Refreshing versions for ${offersToUpdateVersion.length} offers`
         )
-        const offerUpdatesVersion = yield* _(
-          pipe(
-            offersToUpdateVersion,
-            Array.map((offer) => store.set(updateOfferVersion, offer)),
-            Effect.allWith({
+        const offerUpdatesVersion = yield* pipe(
+          offersToUpdateVersion,
+          Array.map((offer) => store.set(updateOfferVersion, offer)),
+          (effects) =>
+            Effect.all(effects, {
               concurrency: 'unbounded',
             })
-          )
         )
 
         const successVersionCount = offerUpdatesVersion.filter(Boolean).length

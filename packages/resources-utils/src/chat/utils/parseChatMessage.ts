@@ -17,7 +17,9 @@ import {
   compare as compareSemver,
 } from '@vexl-next/domain/src/utility/VersionString.brand'
 import {toError, type BasicError} from '@vexl-next/domain/src/utility/errors'
-import {Either, Option, Schema, flow} from 'effect'
+import {optionalNullable} from '@vexl-next/generic-utils/src/effect-helpers/optionalNullable'
+import {withDecodingFallback} from '@vexl-next/generic-utils/src/effect-helpers/withDecodingFallback'
+import {Option, Schema, flow} from 'effect'
 import * as E from 'fp-ts/Either'
 import {pipe} from 'fp-ts/lib/function'
 import {effectToEither} from '../../effect-helpers/TaskEitherConverter'
@@ -56,22 +58,10 @@ const ChatMessageRequiringNewerVersionWithDefaults = Schema.Struct({
   senderPublicKey: PublicKeyPemBase64,
   messageParsed: Schema.Unknown,
   serverMessage: ServerMessage,
-  myVersion: Schema.optionalWith(VersionString, {nullable: true}),
-  time: UnixMilliseconds.pipe(
-    Schema.annotations({
-      decodingFallback: () => Either.right(unixMillisecondsNow()),
-    })
-  ),
-  uuid: ChatMessageId.pipe(
-    Schema.annotations({
-      decodingFallback: () => Either.right(generateChatMessageId()),
-    })
-  ),
-  text: Schema.Literal('-').pipe(
-    Schema.annotations({
-      decodingFallback: () => Either.right('-'),
-    })
-  ),
+  myVersion: optionalNullable(VersionString),
+  time: withDecodingFallback(UnixMilliseconds, () => unixMillisecondsNow()),
+  uuid: withDecodingFallback(ChatMessageId, () => generateChatMessageId()),
+  text: withDecodingFallback(Schema.Literal('-'), (): '-' => '-'),
 })
 
 function ensureCompatibleVersion({
@@ -186,7 +176,9 @@ export function parseChatMessage({
       E.right(jsonString),
       E.chainW(parseJson),
       E.chainFirstW(ensureCompatibleVersion({appVersion, serverMessage})),
-      E.chainW(flow(Schema.decodeUnknown(ChatMessagePayload), effectToEither)),
+      E.chainW(
+        flow(Schema.decodeUnknownEffect(ChatMessagePayload), effectToEither)
+      ),
       E.map(setImageForBackwardCompatibility),
       E.map(chatMessagePayloadToChatMessage(serverMessage.senderPublicKey)),
       E.mapLeft((error) => {

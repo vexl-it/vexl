@@ -12,8 +12,16 @@ import {
 import {type OfferEncryptionProgress} from '@vexl-next/resources-utils/src/offers/OfferEncryptionProgress'
 import updatePrivateParts from '@vexl-next/resources-utils/src/offers/updatePrivateParts'
 import {subtractArrays} from '@vexl-next/resources-utils/src/utils/array'
-import {Array, Effect, Option, Record, Schema, Struct} from 'effect'
-import {pipe} from 'fp-ts/function'
+import {
+  Array,
+  Effect,
+  Filter,
+  Option,
+  pipe,
+  Record,
+  Schema,
+  Struct,
+} from 'effect'
 import {atom, type SetStateAction, type WritableAtom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {splitAtom} from 'jotai/utils'
@@ -66,14 +74,17 @@ export const deleteClubForAllConnectionsActionAtom = atom(
     const offerToConnections = get(offerToConnectionsAtom).offerToConnections
     const offerToClubConnections = pipe(
       offerToConnections,
-      Array.filterMap((one) => {
-        return Option.all({
-          connections: Record.get(one.connections.clubs, clubUuidToDelete).pipe(
-            Option.filter(Array.isNonEmptyReadonlyArray)
-          ),
-          adminId: Option.some(one.adminId),
+      Array.filterMap(
+        Filter.fromPredicateOption((one) => {
+          return Option.all({
+            connections: Record.get(
+              one.connections.clubs,
+              clubUuidToDelete
+            ).pipe(Option.filter(Array.isReadonlyArrayNonEmpty)),
+            adminId: Option.some(one.adminId),
+          })
         })
-      })
+      )
     )
 
     set(offerToConnectionsAtom, (old) => ({
@@ -82,7 +93,7 @@ export const deleteClubForAllConnectionsActionAtom = atom(
         ...one,
         connections: {
           ...one.connections,
-          clubs: Struct.omit(one.connections.clubs, clubUuidToDelete),
+          clubs: Struct.omit(one.connections.clubs, [clubUuidToDelete]),
         },
       })),
     }))
@@ -128,7 +139,7 @@ export const createSingleOfferToConnectionsAtom = (
             prevState.offerToConnections,
             prevConnectionIndexO.value,
             newValue
-          ),
+          ).pipe(Option.getOrElse(() => prevState.offerToConnections)),
         }
       })
     }
@@ -154,7 +165,11 @@ export const deleteOrphanRecordsActionAtom = atom(null, (get, set) => {
   const adminIds = new Set(
     pipe(
       get(offersStateAtom).offers,
-      Array.filterMap((one) => Option.fromNullable(one.ownershipInfo?.adminId))
+      Array.filterMap(
+        Filter.fromPredicateOption((one) =>
+          Option.fromNullishOr(one.ownershipInfo?.adminId)
+        )
+      )
     )
   )
   set(offerToConnectionsAtom, (old) => ({
@@ -167,11 +182,13 @@ export const deleteOrphanRecordsActionAtom = atom(null, (get, set) => {
 export const ensureConnectionsForEveryOffer = atom(null, (get, set) => {
   const adminIdsWithSimmetricKey = pipe(
     get(offersStateAtom).offers,
-    Array.filterMap((one) =>
-      Option.all({
-        adminId: Option.fromNullable(one.ownershipInfo?.adminId),
-        simmetricKey: Option.some(one.offerInfo.privatePart.symmetricKey),
-      })
+    Array.filterMap(
+      Filter.fromPredicateOption((one) =>
+        Option.all({
+          adminId: Option.fromNullishOr(one.ownershipInfo?.adminId),
+          simmetricKey: Option.some(one.offerInfo.privatePart.symmetricKey),
+        })
+      )
     )
   )
 
@@ -273,13 +290,15 @@ const computeSingleOfferConnectionUpdateActionAtom = atom(
       onProgress,
     }: UpdateSingleOfferConnectionParams
   ) =>
-    Effect.gen(function* (_) {
+    Effect.gen(function* () {
       const offerApi = get(apiAtom).offer
 
       const connectionState = get(connectionStateAtom)
       const oneOfferConnectionsAtom =
         createSingleOfferToConnectionsAtom(adminId)
-      const oneOfferConnections = yield* _(get(oneOfferConnectionsAtom))
+      const oneOfferConnections = yield* Effect.fromOption(
+        get(oneOfferConnectionsAtom)
+      )
 
       const offer = get(singleOfferByAdminIdAtom(adminId))
 
@@ -305,9 +324,9 @@ const computeSingleOfferConnectionUpdateActionAtom = atom(
         !!stopProcessingAfter &&
         unixMillisecondsNow() > stopProcessingAfter
       ) {
-        return yield* _(
-          Effect.fail({_tag: 'SkippedBecauseTimeLimitReached' as const})
-        )
+        return yield* Effect.fail({
+          _tag: 'SkippedBecauseTimeLimitReached' as const,
+        })
       }
 
       const endOneOfferUpdateMeasure = startMeasure(
@@ -318,7 +337,7 @@ const computeSingleOfferConnectionUpdateActionAtom = atom(
         newConnections,
         timeLimitReachedErrors,
         removedConnections,
-      } = yield* _(
+      } = yield* pipe(
         updatePrivateParts({
           currentConnections: oneOfferConnections.connections,
           targetConnections: {
@@ -425,7 +444,7 @@ export const updateAndReencryptAllOffersConnectionsActionAtom = atom(
       readonly success: boolean
     }>
   > =>
-    Effect.gen(function* (_) {
+    Effect.gen(function* () {
       const stopProcessingAfter: UnixMilliseconds | undefined = isInBackground
         ? Schema.decodeSync(UnixMilliseconds)(
             unixMillisecondsNow() + BACKGROUND_TIME_LIMIT_MS
@@ -476,7 +495,7 @@ export const updateAndReencryptAllOffersConnectionsActionAtom = atom(
         pendingConnectionUpdates.clear()
       }
 
-      return yield* _(
+      return yield* pipe(
         offerToConnectionsAtoms,
         Array.map((oneOfferAtom, i) => {
           const adminId = get(oneOfferAtom).adminId
@@ -502,7 +521,7 @@ export const updateAndReencryptAllOffersConnectionsActionAtom = atom(
                 persistPendingConnectionUpdates()
               return {adminId, success: true}
             }),
-            Effect.catchAll((e) =>
+            Effect.catch((e) =>
               Effect.sync(() => {
                 if (e._tag === 'SkippedBecauseTimeLimitReached') {
                   reportError(

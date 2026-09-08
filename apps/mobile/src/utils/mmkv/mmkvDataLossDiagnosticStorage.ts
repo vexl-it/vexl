@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import {Array, Either, Schema, pipe} from 'effect'
+import {Array, Result, Schema, pipe} from 'effect'
 import {
   CRITICAL_KEYS_PRESENCE_RECORD_KEY,
   CriticalKeysPresenceRecordSchema,
@@ -8,8 +8,8 @@ import {
 
 export const ASYNC_SENTINEL_KEY = '__mmkv_was_populated'
 
-const decodeCriticalKeysPresenceRecord = Schema.decodeUnknownEither(
-  Schema.parseJson(CriticalKeysPresenceRecordSchema)
+const decodeCriticalKeysPresenceRecord = Schema.decodeUnknownResult(
+  Schema.fromJsonString(CriticalKeysPresenceRecordSchema)
 )
 
 let pendingDiagnosticOperation: Promise<void> = Promise.resolve()
@@ -50,9 +50,9 @@ export function recordCriticalMmkvKeyPersisted(key: string): Promise<void> {
         ? []
         : pipe(
             decodeCriticalKeysPresenceRecord(previousRecordRaw),
-            Either.match({
-              onLeft: () => [],
-              onRight: (record) => record.presentKeys,
+            Result.match({
+              onFailure: () => [],
+              onSuccess: (record) => record.presentKeys,
             })
           )
 

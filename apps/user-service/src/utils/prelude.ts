@@ -6,7 +6,7 @@ import {
   UnableToVerifySmsCodeError,
   type VerificationNotFoundError,
 } from '@vexl-next/rest-api/src/services/user/contracts'
-import {Context, Effect, Layer, Option, pipe, Schema} from 'effect/index'
+import {Context, Effect, Layer, Option, pipe, Schema} from 'effect'
 import {preludeApiTokenConfig} from '../configs'
 import {SmsVerificationSid} from './SmsVerificationSid.brand'
 
@@ -33,14 +33,14 @@ const checkHeadersIncludeAllAntispamFields = (
   Option.isSome(headers.deviceModelOrNone) &&
   Option.isSome(headers.osVersionOrNone)
 
-export class PreludeService extends Context.Tag('PreludeService')<
+export class PreludeService extends Context.Service<
   PreludeService,
   PreludeOperations
->() {
+>()('PreludeService') {
   static readonly Live = Layer.effect(
     PreludeService,
-    Effect.gen(function* (_) {
-      const preludeApiToken = yield* _(preludeApiTokenConfig)
+    Effect.gen(function* () {
+      const preludeApiToken = yield* preludeApiTokenConfig
       const preludeClient = new Prelude({apiToken: preludeApiToken})
 
       const createVerification: PreludeOperations['createVerification'] = (
@@ -57,7 +57,7 @@ export class PreludeService extends Context.Tag('PreludeService')<
                 status: 400,
               })
           ),
-          Effect.zipRight(
+          Effect.andThen(
             Effect.tryPromise({
               try: async () =>
                 await preludeClient.verification.create({
@@ -117,7 +117,7 @@ export class PreludeService extends Context.Tag('PreludeService')<
               })
             }
           ),
-          Effect.zipRight(
+          Effect.andThen(
             Effect.succeed(Schema.decodeSync(SmsVerificationSid)(phoneNumber))
           ),
           Effect.withSpan('createPreludeVerification', {

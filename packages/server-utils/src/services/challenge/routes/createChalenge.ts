@@ -1,20 +1,20 @@
-import {HttpApiBuilder} from '@effect/platform/index'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {unixMillisecondsFromNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {ChallengeApiSpecification} from '@vexl-next/rest-api/src/challenges/specification'
-import {Effect} from 'effect'
+import {Effect, pipe} from 'effect'
 import {challengeExpirationMinutesConfig} from '../../../commonConfigs'
 import {makeEndpointEffect} from '../../../makeEndpointEffect'
+import {makeHttpApiHandler} from '../../../makeHttpApiHandler'
 import {type ChallengePayload} from '../utils/challengePayload'
 import {sealChallenge} from '../utils/sealChallenge'
 
-export const createChallenge = HttpApiBuilder.handler(
+export const createChallenge = makeHttpApiHandler(
   ChallengeApiSpecification,
   'Challenges',
   'createChallenge',
   ({payload}) =>
-    Effect.gen(function* (_) {
-      const expirationMinutes = yield* _(challengeExpirationMinutesConfig)
+    Effect.gen(function* () {
+      const expirationMinutes = yield* challengeExpirationMinutesConfig
       const expiration = unixMillisecondsFromNow(expirationMinutes * 60 * 1000)
 
       const challengePayload: ChallengePayload = {
@@ -23,7 +23,7 @@ export const createChallenge = HttpApiBuilder.handler(
         expiresAt: expiration,
       }
 
-      const sealedChallenge = yield* _(
+      const sealedChallenge = yield* pipe(
         sealChallenge(challengePayload),
         Effect.mapError(
           (e) =>

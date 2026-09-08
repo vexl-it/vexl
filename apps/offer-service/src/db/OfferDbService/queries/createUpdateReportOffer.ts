@@ -12,9 +12,9 @@ export const UpdateReportOfferRequest = Schema.Struct({
 })
 export type UpdateReportOfferRequest = typeof UpdateReportOfferRequest.Type
 
-export const createUpdateReportOffer = Effect.gen(function* (_) {
-  const sql = yield* _(PgClient.PgClient)
-  const expirationPeriodDays = yield* _(expirationPeriodDaysConfig)
+export const createUpdateReportOffer = Effect.gen(function* () {
+  const sql = yield* PgClient.PgClient
+  const expirationPeriodDays = yield* expirationPeriodDaysConfig
 
   return (user: UpdateReportOfferRequest) =>
     sql`

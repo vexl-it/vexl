@@ -8,8 +8,7 @@ import {
 } from '@vexl-next/domain/src/general/offers'
 import {type OfferEncryptionProgress} from '@vexl-next/resources-utils/src/offers/OfferEncryptionProgress'
 import createNewOfferForMyContacts from '@vexl-next/resources-utils/src/offers/createNewOfferForMyContacts'
-import {Array, Effect, Option, Record, Schema} from 'effect'
-import {pipe} from 'fp-ts/lib/function'
+import {Array, Effect, Filter, Option, pipe, Record, Schema} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
@@ -78,7 +77,7 @@ const reencryptOneOfferActionAtom = atom(
       onProgress: (p: OfferEncryptionProgress) => void
     }
   ) => {
-    return Effect.gen(function* (_) {
+    return Effect.gen(function* () {
       const api = get(apiAtom)
       const session = get(sessionDataOrDummyAtom)
       const offerAtom = singleOfferAtom(offer.offerInfo.offerId)
@@ -88,20 +87,22 @@ const reencryptOneOfferActionAtom = atom(
 
       const intendedClubsRecord = pipe(
         clubsUuids,
-        Array.filterMap((clubUuid) =>
-          pipe(
-            Record.get(clubsInfo, clubUuid),
-            Option.map((club) => [clubUuid, club] as const)
+        Array.filterMap(
+          Filter.fromPredicateOption((clubUuid) =>
+            pipe(
+              Record.get(clubsInfo, clubUuid),
+              Option.map((club) => [clubUuid, club] as const)
+            )
           )
         ),
         Record.fromEntries
       )
 
-      const serverToClientHashesToHashedPhoneNumbersMap = yield* _(
-        set(ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom)
+      const serverToClientHashesToHashedPhoneNumbersMap = yield* set(
+        ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom
       )
 
-      return yield* _(
+      return yield* pipe(
         createNewOfferForMyContacts({
           offerApi: api.offer,
           contactApi: api.contact,
@@ -180,7 +181,7 @@ export const reencryptSingleOfferMissingOnServerWhenEditingActionAtom = atom(
       onProgress?: (a: OfferEncryptionProgress) => void
     }
   ) => {
-    return Effect.gen(function* (_) {
+    return Effect.gen(function* () {
       const offer = get(singleOfferByAdminIdAtom(adminId))
 
       if (!offer?.ownershipInfo || !offer?.offerInfo) {
@@ -191,7 +192,7 @@ export const reencryptSingleOfferMissingOnServerWhenEditingActionAtom = atom(
             adminId,
           }
         )
-        return yield* _(Effect.fail(new Error('Offer not found')))
+        return yield* Effect.fail(new Error('Offer not found'))
       }
 
       const myOfferInState: MyOfferInState = {
@@ -203,17 +204,15 @@ export const reencryptSingleOfferMissingOnServerWhenEditingActionAtom = atom(
         },
       }
 
-      return yield* _(
-        set(reencryptOneOfferActionAtom, {
-          adminId: myOfferInState.ownershipInfo.adminId,
-          offer: myOfferInState,
-          intendedConnectionLevel,
-          intendedClubs,
-          onProgress: (progress) => {
-            if (onProgress) onProgress(progress)
-          },
-        })
-      )
+      return yield* set(reencryptOneOfferActionAtom, {
+        adminId: myOfferInState.ownershipInfo.adminId,
+        offer: myOfferInState,
+        intendedConnectionLevel,
+        intendedClubs,
+        onProgress: (progress) => {
+          if (onProgress) onProgress(progress)
+        },
+      })
     })
   }
 )
@@ -250,19 +249,19 @@ export const reencryptOffersMissingOnServerActionAtom = atom(
                 })
             },
           }),
-          Effect.either
+          Effect.result
         )
       ),
       Effect.all,
       Effect.map((results) => {
-        const errors = Array.getLefts(results)
+        const errors = Array.getFailures(results)
         if (errors.length > 0)
           reportError('error', new Error('Error while reencrypting offers'), {
             errors,
           })
 
         return {
-          reuploaded: Array.getRights(results),
+          reuploaded: Array.getSuccesses(results),
           errors,
         }
       })

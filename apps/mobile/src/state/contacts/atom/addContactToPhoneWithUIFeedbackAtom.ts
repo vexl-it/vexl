@@ -40,7 +40,7 @@ function phoneNumberMatches({
   number: E164PhoneNumber
 }): boolean {
   return pipe(
-    Option.fromNullable(phoneNumber.number),
+    Option.fromNullishOr(phoneNumber.number),
     Option.flatMap((rawNumber) =>
       toE164PhoneNumberWithDefaultCountryCode(rawNumber)
     ),
@@ -91,11 +91,11 @@ function addPhoneContactIfMissing({
   contact: CreateContactRecord
   number: E164PhoneNumber
 }): Effect.Effect<void, ErrorAddingContactToPhoneContacts> {
-  return Effect.gen(function* (_) {
-    const existingContact = yield* _(findPhoneContactByNumber({number}))
+  return Effect.gen(function* () {
+    const existingContact = yield* findPhoneContactByNumber({number})
 
     if (Option.isNone(existingContact)) {
-      yield* _(addContactsToPhoneContacts({contact}))
+      yield* addContactsToPhoneContacts({contact})
     }
   })
 }
@@ -152,38 +152,36 @@ export const addContactToPhoneWithUIFeedbackActionAtom = atom(
   ) => {
     const {t} = get(translationAtom)
 
-    return Effect.gen(function* (_) {
-      const dialogActionResult = yield* _(
-        set(askAreYouSureActionAtom, {
-          steps: [
-            {
-              type: 'StepWithText',
-              title: t('addContactDialog.addToPhonesContacts'),
-              description: t('addContactDialog.addContactDescription', {
-                name: customName,
-              }),
-              positiveButtonText: t('common.yes'),
-              negativeButtonText: t('common.skip'),
+    return Effect.gen(function* () {
+      const dialogActionResult = yield* set(askAreYouSureActionAtom, {
+        steps: [
+          {
+            type: 'StepWithText',
+            title: t('addContactDialog.addToPhonesContacts'),
+            description: t('addContactDialog.addContactDescription', {
+              name: customName,
+            }),
+            positiveButtonText: t('common.yes'),
+            negativeButtonText: t('common.skip'),
+          },
+          {
+            type: 'StepWithInput',
+            title: t('addContactDialog.addContact'),
+            description: t('addContactDialog.wouldYouLikeToChangeTheName', {
+              name: customName,
+            }),
+            subtitle: number,
+            positiveButtonText: t('common.save'),
+            defaultValue: customName,
+            textInputProps: {
+              autoCorrect: false,
+              placeholder: customName,
+              icon: userSvg,
             },
-            {
-              type: 'StepWithInput',
-              title: t('addContactDialog.addContact'),
-              description: t('addContactDialog.wouldYouLikeToChangeTheName', {
-                name: customName,
-              }),
-              subtitle: number,
-              positiveButtonText: t('common.save'),
-              defaultValue: customName,
-              textInputProps: {
-                autoCorrect: false,
-                placeholder: customName,
-                icon: userSvg,
-              },
-            },
-          ],
-          variant: 'info',
-        })
-      )
+          },
+        ],
+        variant: 'info',
+      })
 
       const resolvedName =
         dialogActionResult[1]?.type === 'inputResult'
@@ -191,7 +189,7 @@ export const addContactToPhoneWithUIFeedbackActionAtom = atom(
           : customName
       const contact = createContactPayload({customName: resolvedName, number})
 
-      yield* _(addPhoneContactIfMissing({contact, number}))
+      yield* addPhoneContactIfMissing({contact, number})
 
       return true
     })
@@ -205,9 +203,9 @@ export const addContactToPhoneActionAtom = atom(
     _set,
     {customName, number}: {customName: string; number: E164PhoneNumber}
   ) => {
-    return Effect.gen(function* (_) {
+    return Effect.gen(function* () {
       const contact = createContactPayload({customName, number})
-      yield* _(addPhoneContactIfMissing({contact, number}))
+      yield* addPhoneContactIfMissing({contact, number})
 
       return true
     })

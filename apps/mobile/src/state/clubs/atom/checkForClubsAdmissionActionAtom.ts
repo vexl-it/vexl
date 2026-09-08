@@ -1,4 +1,4 @@
-import {Array, Effect, Option, Record} from 'effect'
+import {Array, Effect, Option, pipe, Record} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
 import {addNotificationToCenterActionAtom} from '../../../components/NotificationsScreen/state'
@@ -17,34 +17,33 @@ import {
 import {upsertClubWithMembersActionAtom} from './clubsWithMembersAtom'
 
 export const checkForClubsAdmissionActionAtom = atom(null, (get, set) => {
-  return Effect.gen(function* (_) {
+  return Effect.gen(function* () {
     const api = get(apiAtom)
 
     const keysWaitingForAdmission = get(keysWaitingForAdmissionAtom)
     // Time-limited so a hanging push-token fetch can never stall the
     // admission check (same treatment as in syncConnectionsActionAtom).
-    const notificationToken = yield* _(getNotificationTokenWithTimeoutE())
+    const notificationToken = yield* getNotificationTokenWithTimeoutE()
 
-    yield* _(
+    yield* pipe(
       keysWaitingForAdmission,
       Array.map((key) =>
-        Effect.gen(function* (_) {
-          const vexlNotificationToken = yield* _(
-            set(generateVexlTokenActionAtom).pipe(
-              Effect.map(Option.some),
-              Effect.catchAll(() => Effect.succeed(Option.none()))
-            )
+        Effect.gen(function* () {
+          const vexlNotificationToken = yield* set(
+            generateVexlTokenActionAtom
+          ).pipe(
+            Effect.map(Option.some),
+            Effect.catch(() => Effect.succeed(Option.none()))
           )
 
-          const clubWithMembers: ClubWithMembers = yield* _(
-            fetchClubWithMembersReportApiErrors({
+          const clubWithMembers: ClubWithMembers =
+            yield* fetchClubWithMembersReportApiErrors({
               oldKeyPair: key.oldKeyPair,
               keyPair: key.keyPair,
               contactApi: api.contact,
               notificationToken,
               vexlNotificationToken,
             })
-          )
 
           if (
             Record.has(
@@ -57,7 +56,7 @@ export const checkForClubsAdmissionActionAtom = atom(null, (get, set) => {
             )
 
             // Leaving club
-            yield* _(
+            yield* pipe(
               api.contact.leaveClub({
                 keyPair: key.oldKeyPair,
                 keyPairV2: key.keyPair,
@@ -91,11 +90,9 @@ export const checkForClubsAdmissionActionAtom = atom(null, (get, set) => {
 
           set(upsertClubWithMembersActionAtom, clubWithMembers)
 
-          yield* _(
-            showInternalNotificationForClubAdmission(
-              get(translationAtom).t,
-              clubWithMembers.club
-            )
+          yield* showInternalNotificationForClubAdmission(
+            get(translationAtom).t,
+            clubWithMembers.club
           )
           set(addNotificationToCenterActionAtom, {
             _tag: 'ClubAdmissionNotificationData',

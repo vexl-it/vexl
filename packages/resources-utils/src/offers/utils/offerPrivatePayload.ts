@@ -15,9 +15,8 @@ import {
 } from '@vexl-next/domain/src/general/offers'
 import {type ContactApi} from '@vexl-next/rest-api/src/services/contact'
 import {type ServerPrivatePart} from '@vexl-next/rest-api/src/services/offer/contracts'
-import {Array, Effect, Either, type HashMap, Record} from 'effect'
+import {Array, Effect, pipe, Record, type HashMap} from 'effect'
 import {type NonEmptyArray} from 'effect/Array'
-import {pipe} from 'fp-ts/function'
 import {type OfferEncryptionProgress} from '../OfferEncryptionProgress'
 import {constructAndEncryptPrivatePayloadForOwner} from '../constructPrivatePayloadForOwner'
 import constructPrivatePayloads, {
@@ -69,29 +68,25 @@ export function fetchInfoAndGeneratePrivatePayloads({
   | PrivatePayloadsConstructionError
   | ClubKeyNotFoundInInnerStateError
 > {
-  return Effect.gen(function* (_) {
+  return Effect.gen(function* () {
     if (onProgress) onProgress({type: 'FETCHING_CONTACTS'})
 
-    const connectionsInfo = yield* _(
-      fetchContactsForOffer({
-        serverToClientHashesToHashedPhoneNumbersMap,
-        contactApi,
-        intendedConnectionLevel,
-        intendedClubs,
-      })
-    )
+    const connectionsInfo = yield* fetchContactsForOffer({
+      serverToClientHashesToHashedPhoneNumbersMap,
+      contactApi,
+      intendedConnectionLevel,
+      intendedClubs,
+    })
 
     if (onProgress) onProgress({type: 'CONSTRUCTING_PRIVATE_PAYLOADS'})
 
-    const privatePayloads = yield* _(
-      constructPrivatePayloads({
-        connectionsInfo,
-        symmetricKey,
-      })
-    )
+    const privatePayloads = yield* constructPrivatePayloads({
+      connectionsInfo,
+      symmetricKey,
+    })
 
-    const encryptedPrivatePayloadForOwner = yield* _(
-      constructAndEncryptPrivatePayloadForOwner({
+    const encryptedPrivatePayloadForOwner =
+      yield* constructAndEncryptPrivatePayloadForOwner({
         ownerCredentials,
         ownerKeyPairV2,
         symmetricKey,
@@ -107,48 +102,47 @@ export function fetchInfoAndGeneratePrivatePayloads({
             })
         )
       )
-    )
 
-    const encryptionResult = yield* _(
+    const encryptionResult = yield* pipe(
       privatePayloads,
       Array.map((one, i) =>
         pipe(
           Effect.Do,
-          Effect.tap(() => {
-            if (onProgress) {
-              onProgress({
-                type: 'ENCRYPTING_PRIVATE_PAYLOADS',
-                currentlyProcessingIndex: i,
-                totalToEncrypt: privatePayloads.length,
-              })
-            }
-          }),
+          Effect.tap(() =>
+            Effect.sync(() => {
+              if (onProgress) {
+                onProgress({
+                  type: 'ENCRYPTING_PRIVATE_PAYLOADS',
+                  currentlyProcessingIndex: i,
+                  totalToEncrypt: privatePayloads.length,
+                })
+              }
+            })
+          ),
           Effect.flatMap(() => encryptPrivatePart(one)),
-          Effect.either
+          Effect.result
         )
       ),
       Effect.all
     )
 
-    const errors = pipe(encryptionResult, Array.filterMap(Either.getLeft))
+    const errors = pipe(encryptionResult, Array.getFailures)
 
     const encryptedPrivateParts = pipe(
       encryptionResult,
-      Array.filterMap(Either.getRight),
+      Array.getSuccesses,
       Array.dedupeWith((one, two) => one.userPublicKey === two.userPublicKey),
       Array.filter(
         (one) => one.userPublicKey !== ownerCredentials.publicKeyPemBase64
       )
     )
 
-    if (!Array.isNonEmptyArray(encryptedPrivateParts)) {
-      return yield* _(
-        Effect.fail(
-          new PrivatePayloadsConstructionError({
-            message: 'No private part was encrypted',
-            cause: new Error('No private part was encrypted'),
-          })
-        )
+    if (!Array.isArrayNonEmpty(encryptedPrivateParts)) {
+      return yield* Effect.fail(
+        new PrivatePayloadsConstructionError({
+          message: 'No private part was encrypted',
+          cause: new Error('No private part was encrypted'),
+        })
       )
     }
 

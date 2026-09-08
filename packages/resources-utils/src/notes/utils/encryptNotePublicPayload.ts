@@ -23,10 +23,12 @@ export default function encryptNotePublicPayload({
 }): Effect.Effect<PublicPayloadEncrypted, NotePublicPartEncryptionError> {
   return pipe(
     Effect.succeed(notePublicPart),
-    Effect.flatMap(Schema.encode(Schema.parseJson(NotePublicPart))),
+    Effect.flatMap(Schema.encodeEffect(Schema.fromJsonString(NotePublicPart))),
     Effect.flatMap(aesGCMIgnoreTagEncrypt(symmetricKey)),
     Effect.map((encrypted) => `0${encrypted}`),
-    Effect.map(flow(Schema.decode(PublicPayloadEncrypted), Effect.runSync)),
+    Effect.map(
+      flow(Schema.decodeEffect(PublicPayloadEncrypted), Effect.runSync)
+    ),
     Effect.mapError(
       (e) =>
         new NotePublicPartEncryptionError({

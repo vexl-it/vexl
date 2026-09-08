@@ -4,25 +4,16 @@ import {
   PrivateKeyPemBase64,
   PublicKeyPemBase64,
 } from '@vexl-next/cryptography/src/KeyHolder/brands'
-import {Config, ConfigError, Effect, Either, Option, Schema} from 'effect'
+import {Config, Effect, Option, pipe, Schema} from 'effect'
 
-export const nodeEnvConfig = Config.string('NODE_ENV').pipe(
-  Config.withDefault('production'),
-  Config.validate({
-    message: "NODE_ENV must be one of 'development', or 'production' or 'test'",
-    validation: (x): x is 'production' | 'development' | 'test' =>
-      x === 'development' || x === 'production' || x === 'test',
-  })
-)
+export const nodeEnvConfig = Config.schema(
+  Schema.Literals(['production', 'development', 'test']),
+  'NODE_ENV'
+).pipe(Config.withDefault('production'))
 
-export const RedisNamespacePrefixConfig = Config.string(
+export const RedisNamespacePrefixConfig = Config.schema(
+  Schema.String.check(Schema.isPattern(/^[a-zA-Z0-9_]+$/)),
   'REDIS_NAMESPACE_PREFIX'
-).pipe(
-  Config.validate({
-    message:
-      'REDIS_NAMESPACE_PREFIX must only contain letters, numbers, and underscores',
-    validation: (x) => /^[a-zA-Z0-9_]+$/.test(x),
-  })
 )
 
 export const isRunningInDevelopmentConfig = nodeEnvConfig.pipe(
@@ -42,10 +33,10 @@ export const isRunningInProductionConfig = nodeEnvConfig.pipe(
  * behavior. Lets the dev stack get Grafana-friendly JSON logs without flipping
  * NODE_ENV (which would also enable rate limiting, disable dev tools, etc.).
  */
-export const logFormatConfig = Config.literal(
-  'json',
-  'pretty'
-)('LOG_FORMAT').pipe(Config.option)
+export const logFormatConfig = Config.literals(
+  ['json', 'pretty'],
+  'LOG_FORMAT'
+).pipe(Config.option)
 
 export const useJsonLogsConfig = Effect.map(
   Effect.all([isRunningInProductionConfig, logFormatConfig]),
@@ -65,7 +56,7 @@ export const makeDatabaseConfig = (vars: {
   url: string
   username: string
   password: string
-}): Effect.Effect<PgClient.PgClientConfig, ConfigError.ConfigError> =>
+}): Effect.Effect<PgClient.PgClientConfig, Config.ConfigError> =>
   Config.unwrap({
     url: Config.string(vars.url),
     username: Config.string(vars.username),
@@ -95,31 +86,22 @@ export const databaseConfig = makeDatabaseConfig({
   password: 'DB_PASSWORD',
 })
 
-export const secretPublicKey = Config.string('SECRET_PUBLIC_KEY').pipe(
-  Config.mapOrFail((v) =>
-    Either.mapLeft(Schema.decodeEither(PublicKeyPemBase64)(v), (e) =>
-      ConfigError.InvalidData(['SECRET_PUBLIC_KEY'], e.message)
-    )
-  )
+export const secretPublicKey = Config.schema(
+  PublicKeyPemBase64,
+  'SECRET_PUBLIC_KEY'
 )
 
-export const secretPrivateKey = Config.string('SECRET_PRIVATE_KEY').pipe(
-  Config.mapOrFail((v) =>
-    Either.mapLeft(Schema.decodeEither(PrivateKeyPemBase64)(v), (e) =>
-      ConfigError.InvalidData(['SECRET_PRIVATE_KEY'], e.message)
-    )
-  )
+export const secretPrivateKey = Config.schema(
+  PrivateKeyPemBase64,
+  'SECRET_PRIVATE_KEY'
 )
 
 export const hmacKey = Config.string('SECRET_HMAC_KEY')
 export const easKey = Config.string('SECRET_EAS_KEY')
 
-export const libsodiumPrivateKey = Config.string('LIBSODIUM_PRIVATE_KEY').pipe(
-  Config.mapOrFail((v) =>
-    Either.mapLeft(Schema.decodeEither(PrivateKeyV2)(v), (e) =>
-      ConfigError.InvalidData(['LIBSODIUM_PRIVATE_KEY'], e.message)
-    )
-  )
+export const libsodiumPrivateKey = Config.schema(
+  PrivateKeyV2,
+  'LIBSODIUM_PRIVATE_KEY'
 )
 
 export const cryptoConfig = {
@@ -190,24 +172,22 @@ export const disableMetricsInDevelopmentConfig = Config.option(
   Config.boolean('DISABLE_METRICS')
 )
 
-export const shouldDisableMetrics = Effect.gen(function* (_) {
-  const isRunningInDevelopment = yield* _(isRunningInDevelopmentConfig)
-  const disableMetrics = yield* _(
+export const shouldDisableMetrics = Effect.gen(function* () {
+  const isRunningInDevelopment = yield* isRunningInDevelopmentConfig
+  const disableMetrics = yield* pipe(
     disableMetricsInDevelopmentConfig,
     Effect.map(Option.getOrElse(() => false))
   )
 
   if (disableMetrics && !isRunningInDevelopment) {
-    yield* _(
-      Effect.logWarning(
-        'Trying to disable metrics when NOT in development mode. To prevent accidents, metrics will NOT be disabled.'
-      )
+    yield* Effect.logWarning(
+      'Trying to disable metrics when NOT in development mode. To prevent accidents, metrics will NOT be disabled.'
     )
     return false
   }
 
   const disable = isRunningInDevelopment && disableMetrics
-  if (disable) yield* _(Effect.log('Disabling metrics in development mode'))
+  if (disable) yield* Effect.log('Disabling metrics in development mode')
   return disable
 })
 
@@ -221,16 +201,14 @@ export const rateLimitPerIpMultiplierConfig = Config.number(
 
 export const keepAliveTimeoutMsConfig = Config.number(
   'KEEP_ALIVE_TIMEOUT_MS'
-).pipe(
-  Config.withDefault(20000) // 20 seconds
-)
+).pipe(Config.withDefault(20000))
 
 export const headersTimeoutMsConfig = Config.number('HEADERS_TIMEOUT_MS').pipe(
-  Config.withDefault(25000) // 25 seconds
+  Config.withDefault(25000)
 )
 
 export const requestTimeoutMsConfig = Config.number('REQUEST_TIMEOUT_MS').pipe(
-  Config.withDefault(40000) // 40 seconds
+  Config.withDefault(40000)
 )
 
 export const challengeExpirationMinutesConfig = Config.number(

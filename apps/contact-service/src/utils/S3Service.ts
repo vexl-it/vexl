@@ -23,51 +23,46 @@ export interface S3Operations {
   >
 }
 
-export class S3Service extends Context.Tag('S3Service')<
-  S3Service,
-  S3Operations
->() {
+export class S3Service extends Context.Service<S3Service, S3Operations>()(
+  'S3Service'
+) {
   static readonly Live = Layer.effect(
     S3Service,
-    Effect.gen(function* (_) {
-      const {region, bucketName, endpoint, forcePathStyle} = yield* _(s3Config)
+    Effect.gen(function* () {
+      const {region, bucketName, endpoint, forcePathStyle} = yield* s3Config
       // Create S3 client. When S3_ENDPOINT is set (e.g. MinIO in local dev) we
       // target it with path-style addressing; otherwise the AWS SDK default
       // endpoint is used. Credentials come from the standard AWS_* env vars.
-      const s3Client = yield* _(
-        Effect.sync(() => {
-          return new S3Client({
-            region,
-            endpoint: endpoint.length > 0 ? endpoint : undefined,
-            forcePathStyle,
-          })
+      const s3Client = yield* Effect.sync(() => {
+        return new S3Client({
+          region,
+          endpoint: endpoint.length > 0 ? endpoint : undefined,
+          forcePathStyle,
         })
-      )
+      })
 
       const generatePresignedUploadUrl: S3Operations['generatePresignedUploadUrl'] =
         (params) => {
           const {key, contentType, expiresIn = 900} = params // Default 15 minutes
 
-          return Effect.gen(function* (_) {
+          return Effect.gen(function* () {
             const command = new PutObjectCommand({
               Bucket: bucketName,
               Key: key,
               ContentType: contentType,
             })
 
-            const presignedUrl: string = yield* _(
-              Effect.tryPromise({
-                try: async () =>
-                  await getSignedUrl(s3Client, command, {
-                    expiresIn,
-                  }),
-                catch: (error) =>
-                  new S3Error({
-                    cause: error,
-                    message: 'Failed to generate presigned URL',
-                  }),
-              })
-            )
+            const presignedUrl: string = yield* Effect.tryPromise({
+              try: async () =>
+                await getSignedUrl(s3Client, command, {
+                  expiresIn,
+                }),
+              catch: (error) =>
+                new S3Error({
+                  cause: error,
+                  message: 'Failed to generate presigned URL',
+                }),
+            })
 
             return {
               presignedUrl,

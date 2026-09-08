@@ -7,7 +7,7 @@ import {
   XStack,
   YStack,
 } from '@vexl-next/ui'
-import {useMolecule} from 'bunshi/dist/react'
+import {useMolecule} from 'bunshi/react'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useMemo} from 'react'
 import {type GestureResponderEvent} from 'react-native'

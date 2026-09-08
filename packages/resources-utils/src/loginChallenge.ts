@@ -7,19 +7,18 @@ import {
   type CryptoError,
   ecdsaSignE,
 } from '@vexl-next/generic-utils/src/effect-helpers/crypto'
-import {Effect, Schema} from 'effect/index'
-import {type ParseError} from 'effect/ParseResult'
+import {Effect, Schema} from 'effect'
+import {type SchemaError} from 'effect/Schema'
 
 export const signLoginChallenge = (
   encodedChallenge: LoginChallengeRequestEncoded
-): Effect.Effect<LoginChallengeClientSignature, ParseError | CryptoError> =>
-  Effect.gen(function* (_) {
-    const decodedChallenge = yield* _(
-      decodeLoginChallengeRequestPayload(encodedChallenge)
-    )
-    const signature = yield* _(
-      ecdsaSignE(decodedChallenge.privateKey)(decodedChallenge.challenge)
+): Effect.Effect<LoginChallengeClientSignature, SchemaError | CryptoError> =>
+  Effect.gen(function* () {
+    const decodedChallenge =
+      yield* decodeLoginChallengeRequestPayload(encodedChallenge)
+    const signature = yield* ecdsaSignE(decodedChallenge.privateKey)(
+      decodedChallenge.challenge
     )
 
-    return yield* _(Schema.decode(LoginChallengeClientSignature)(signature))
+    return yield* Schema.decodeEffect(LoginChallengeClientSignature)(signature)
   })

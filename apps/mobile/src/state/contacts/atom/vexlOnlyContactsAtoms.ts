@@ -1,5 +1,5 @@
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
-import {Array, Effect, Option, pipe} from 'effect'
+import {Array, Effect, Filter, Option, pipe} from 'effect'
 import {getPermissionsAsync} from 'expo-contacts'
 import {atom} from 'jotai'
 import {type ContactInfo, type StoredContactWithComputedValues} from '../domain'
@@ -39,7 +39,7 @@ export const setDeviceContactsSnapshotFromContactsActionAtom = atom(
     }).pipe(
       Effect.map((permissions) => permissions.accessPrivileges !== 'limited'),
       // if we can't tell, assume full access - the safer default for display
-      Effect.catchAll(() => Effect.succeed(true)),
+      Effect.catch(() => Effect.succeed(true)),
       Effect.map((isComplete) => {
         set(deviceContactsSnapshotAtom, {
           rawNumbers: new Set(
@@ -52,21 +52,21 @@ export const setDeviceContactsSnapshotFromContactsActionAtom = atom(
 )
 
 export const refreshDeviceContactsSnapshotActionAtom = atom(null, (get, set) =>
-  Effect.gen(function* (_) {
-    const permissionsGranted = yield* _(areContactsPermissionsAlreadyGranted())
+  Effect.gen(function* () {
+    const permissionsGranted = yield* areContactsPermissionsAlreadyGranted()
     if (!permissionsGranted) {
       set(deviceContactsSnapshotAtom, undefined)
       return
     }
 
-    const contactsFromDevice = yield* _(
-      getContactsAndTryToResolveThePermissionsAlongTheWay()
-    )
-    yield* _(
-      set(setDeviceContactsSnapshotFromContactsActionAtom, contactsFromDevice)
+    const contactsFromDevice =
+      yield* getContactsAndTryToResolveThePermissionsAlongTheWay()
+    yield* set(
+      setDeviceContactsSnapshotFromContactsActionAtom,
+      contactsFromDevice
     )
   }).pipe(
-    Effect.catchAll(() =>
+    Effect.catch(() =>
       Effect.sync(() => {
         set(deviceContactsSnapshotAtom, undefined)
       })
@@ -96,9 +96,11 @@ export const normalizedNumbersOnDeviceAtom = atom(
           Array.filter((contact) =>
             deviceContactsSnapshot.rawNumbers.has(contact.info.rawNumber)
           ),
-          Array.filterMap((contact) =>
-            contact.computedValues.pipe(
-              Option.map((computedValues) => computedValues.normalizedNumber)
+          Array.filterMap(
+            Filter.fromPredicateOption((contact) =>
+              contact.computedValues.pipe(
+                Option.map((computedValues) => computedValues.normalizedNumber)
+              )
             )
           )
         )

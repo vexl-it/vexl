@@ -16,11 +16,20 @@ import {
   taskToEffect,
 } from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {type ChatApi} from '@vexl-next/rest-api/src/services/chat'
-import {Array, Effect, Fiber, Option, Record, Schema} from 'effect/index'
+import {
+  Array,
+  Effect,
+  Fiber,
+  Filter,
+  Option,
+  pipe,
+  Record,
+  Schema,
+} from 'effect'
 import * as A from 'fp-ts/Array'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
-import {flow, pipe} from 'fp-ts/function'
+import {flow} from 'fp-ts/function'
 import {group} from 'group-items'
 import {atom, type SetStateAction, type WritableAtom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
@@ -82,7 +91,7 @@ const handleOtherSideUpdatedActionAtom = atom(
         })
         return set(sendUpdateNoticeMessageActionAtom, chatAtom)
       }),
-      Effect.allWith({concurrency: 'unbounded'}),
+      (effects) => Effect.all(effects, {concurrency: 'unbounded'}),
       Effect.asVoid
     )
 )
@@ -105,7 +114,7 @@ const handleOtherSideReadMessages = atom(
       ),
       Array.groupBy((one) => one.message.senderPublicKey),
       Record.values,
-      Array.filterMap(Array.last)
+      Array.filterMap(Filter.fromPredicateOption(Array.last))
     )
 
     messageReadMessages.forEach((messageReadMessage) => {
@@ -503,8 +512,8 @@ export const fetchAndStoreMessagesForInboxHandleNotificationsActionAtom = atom<
     | undefined
   >
 >(null, (get, set, {key}) =>
-  Effect.gen(function* (_) {
-    const updates = yield* _(
+  Effect.gen(function* () {
+    const updates = yield* pipe(
       set(fetchAndStoreMessagesForInboxAtom, {
         key,
       }),
@@ -517,17 +526,17 @@ export const fetchAndStoreMessagesForInboxHandleNotificationsActionAtom = atom<
       const targetTokens = pipe(
         get(vexlTokenToKeyHolderAtom).data,
         Record.toEntries,
-        Array.filterMap(([targetToken, keyHolder]) =>
-          keyHolder.publicKeyPemBase64 === key
-            ? Schema.decodeOption(VexlNotificationToken)(targetToken)
-            : Option.none()
+        Array.filterMap(
+          Filter.fromPredicateOption(([targetToken, keyHolder]) =>
+            keyHolder.publicKeyPemBase64 === key
+              ? Schema.decodeOption(VexlNotificationToken)(targetToken)
+              : Option.none()
+          )
         )
       )
 
-      yield* _(
-        Effect.promise(() =>
-          cancelNewChatNotificationsForTargetTokens(targetTokens)
-        )
+      yield* Effect.promise(() =>
+        cancelNewChatNotificationsForTargetTokens(targetTokens)
       )
     }
 
@@ -561,13 +570,13 @@ export const fetchAndStoreMessagesForInboxHandleNotificationsActionAtom = atom<
 // for users without push notifications, for whom the resume sweep is the only
 // way new messages surface — a throttle would drop it and hide messages that
 // arrived during a brief background.
-const inFlightFetchFiberAtom = atom<Fiber.RuntimeFiber<'done'> | null>(null)
+const inFlightFetchFiberAtom = atom<Fiber.Fiber<'done'> | null>(null)
 const FETCH_INBOX_CONCURRENCY = 6
 
 const fetchMessagesForAllInboxesAtom = atom(null, (get, set) => {
-  return Effect.gen(function* (_) {
+  return Effect.gen(function* () {
     const inFlightFetch = get(inFlightFetchFiberAtom)
-    if (inFlightFetch) return yield* _(Fiber.join(inFlightFetch))
+    if (inFlightFetch) return yield* Fiber.join(inFlightFetch)
 
     const measure = startMeasure('Fetch inboxes')
     console.log('Refreshing all inboxes')
@@ -575,37 +584,36 @@ const fetchMessagesForAllInboxesAtom = atom(null, (get, set) => {
     // Fork as a daemon so a single sweep runs to completion (and clears the
     // in-flight marker) even if the trigger that started it is interrupted,
     // while every joiner still awaits the same real fetch.
-    const fiber = yield* _(
-      Effect.gen(function* (_) {
-        yield* _(
-          get(messagingStateAtom),
-          Array.map((inbox) =>
-            set(fetchAndStoreMessagesForInboxHandleNotificationsActionAtom, {
-              key: inbox.inbox.privateKey.publicKeyPemBase64,
-            }).pipe(Effect.either)
-          ),
-          Effect.allWith({concurrency: FETCH_INBOX_CONCURRENCY}),
-          effectWithEnsuredBenchmark('Fetch all inboxes')
-        )
-
-        if (Platform.OS === 'ios') {
-          yield* _(Effect.promise(cancelNewChatNotifications))
-        }
-
-        measure()
-        return 'done' as const
-      }).pipe(
-        Effect.ensuring(
-          Effect.sync(() => {
-            set(inFlightFetchFiberAtom, null)
-          })
+    const fiber = yield* Effect.gen(function* () {
+      yield* pipe(
+        get(messagingStateAtom),
+        Array.map((inbox) =>
+          set(fetchAndStoreMessagesForInboxHandleNotificationsActionAtom, {
+            key: inbox.inbox.privateKey.publicKeyPemBase64,
+          }).pipe(Effect.result)
         ),
-        Effect.forkDaemon
+        (effects) =>
+          Effect.all(effects, {concurrency: FETCH_INBOX_CONCURRENCY}),
+        effectWithEnsuredBenchmark('Fetch all inboxes')
       )
+
+      if (Platform.OS === 'ios') {
+        yield* Effect.promise(cancelNewChatNotifications)
+      }
+
+      measure()
+      return 'done' as const
+    }).pipe(
+      Effect.ensuring(
+        Effect.sync(() => {
+          set(inFlightFetchFiberAtom, null)
+        })
+      ),
+      Effect.forkDetach
     )
 
     set(inFlightFetchFiberAtom, fiber)
-    return yield* _(Fiber.join(fiber))
+    return yield* Fiber.join(fiber)
   })
 })
 

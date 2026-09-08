@@ -5,6 +5,7 @@ import {
   PrivatePayloadEncrypted,
   PublicPayloadEncrypted,
 } from '@vexl-next/domain/src/general/offers'
+import {NumberFromString} from '@vexl-next/generic-utils/src/effect-helpers/NumberFromString'
 import {Schema} from 'effect'
 
 export const NoteAdminIdHashed = Schema.String.pipe(
@@ -17,22 +18,22 @@ export const NoteRepostIdHashed = Schema.String.pipe(
 )
 export type NoteRepostIdHashed = Schema.Schema.Type<typeof NoteRepostIdHashed>
 
-export const NotePublicPartId = Schema.NumberFromString.pipe(
+export const NotePublicPartId = NumberFromString.pipe(
   Schema.brand('NotePublicPartId')
 )
 export type NotePublicPartId = Schema.Schema.Type<typeof NotePublicPartId>
 
-export const NotePrivatePartRecordId = Schema.NumberFromString.pipe(
+export const NotePrivatePartRecordId = NumberFromString.pipe(
   Schema.brand('NotePrivatePartRecordId'),
-  Schema.greaterThanOrEqualTo(0)
+  Schema.check(Schema.isGreaterThanOrEqualTo(0))
 )
 export type NotePrivatePartRecordId = Schema.Schema.Type<
   typeof NotePrivatePartRecordId
 >
 
-export const NoteChangeCounter = Schema.NumberFromString.pipe(
+export const NoteChangeCounter = NumberFromString.pipe(
   Schema.brand('NoteChangeCounter'),
-  Schema.greaterThanOrEqualTo(0)
+  Schema.check(Schema.isGreaterThanOrEqualTo(0))
 )
 export type NoteChangeCounter = Schema.Schema.Type<typeof NoteChangeCounter>
 
@@ -43,16 +44,16 @@ export class NotePublicPartRecord extends Schema.Class<NotePublicPartRecord>(
   adminId: NoteAdminIdHashed,
   noteId: NoteId,
   payloadPublic: PublicPayloadEncrypted,
-  expiresAt: Schema.DateFromSelf,
-  createdAt: Schema.DateFromSelf,
-  report: Schema.Int.pipe(Schema.greaterThanOrEqualTo(0)),
+  expiresAt: Schema.Date,
+  createdAt: Schema.Date,
+  report: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
 }) {}
 
 export class NotePrivatePartRecord extends Schema.Class<NotePrivatePartRecord>(
   'NotePrivatePartRecord'
 )({
   id: NotePrivatePartRecordId,
-  userPublicKey: Schema.Union(PublicKeyPemBase64, PublicKeyV2),
+  userPublicKey: Schema.Union([PublicKeyPemBase64, PublicKeyV2]),
   noteId: NotePublicPartId,
   payloadPrivate: PrivatePayloadEncrypted,
 }) {}

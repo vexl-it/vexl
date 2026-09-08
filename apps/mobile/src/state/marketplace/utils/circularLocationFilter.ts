@@ -57,7 +57,7 @@ export function isLocationInsideCircularLocationFilter({
   locationFilter: readonly OfferLocation[] | undefined
 }): boolean {
   const selectedLocationFilter = locationFilter ?? []
-  if (!Array.isNonEmptyReadonlyArray(selectedLocationFilter)) return true
+  if (!Array.isReadonlyArrayNonEmpty(selectedLocationFilter)) return true
 
   return pipe(
     selectedLocationFilter,
@@ -75,7 +75,7 @@ export function filterLocationsByCircularLocationFilter({
   locationFilter: readonly OfferLocation[] | undefined
 }): OfferLocation[] {
   const selectedLocationFilter = locationFilter ?? []
-  if (!Array.isNonEmptyReadonlyArray(selectedLocationFilter))
+  if (!Array.isReadonlyArrayNonEmpty(selectedLocationFilter))
     return [...locations]
 
   return pipe(
@@ -97,9 +97,9 @@ export function isAnyLocationInsideCircularLocationFilter({
   locationFilter: readonly OfferLocation[] | undefined
 }): boolean {
   const selectedLocationFilter = locationFilter ?? []
-  if (!Array.isNonEmptyReadonlyArray(selectedLocationFilter)) return true
+  if (!Array.isReadonlyArrayNonEmpty(selectedLocationFilter)) return true
 
-  return Array.isNonEmptyArray(
+  return Array.isArrayNonEmpty(
     filterLocationsByCircularLocationFilter({
       locations,
       locationFilter: selectedLocationFilter,

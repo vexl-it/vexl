@@ -39,26 +39,22 @@ export interface MessagesDbOperations {
   ) => Effect.Effect<void, UnexpectedServerError>
 }
 
-export class MessagesDbService extends Context.Tag('MessagesDbService')<
+export class MessagesDbService extends Context.Service<
   MessagesDbService,
   MessagesDbOperations
->() {
+>()('MessagesDbService') {
   static readonly Live = Layer.effect(
     MessagesDbService,
-    Effect.gen(function* (_) {
-      const deleteAllMessagesByInboxId = yield* _(
-        createDeleteAllMessagesByInboxId
-      )
-      const deleteExpiredMessages = yield* _(createDeleteExpiredMessages)
-      const deletePulledMessagesByInboxId = yield* _(
-        createDeletePulledMessagesMessagesByInboxId
-      )
-      const findMessagesByInboxId = yield* _(createFindMessagesByInboxId)
-      const updateMessageAsPulledByMessageRecord = yield* _(
-        createUpdateMessageAsPulledByMessageRecord
-      )
+    Effect.gen(function* () {
+      const deleteAllMessagesByInboxId = yield* createDeleteAllMessagesByInboxId
+      const deleteExpiredMessages = yield* createDeleteExpiredMessages
+      const deletePulledMessagesByInboxId =
+        yield* createDeletePulledMessagesMessagesByInboxId
+      const findMessagesByInboxId = yield* createFindMessagesByInboxId
+      const updateMessageAsPulledByMessageRecord =
+        yield* createUpdateMessageAsPulledByMessageRecord
 
-      const insertMessageForInbox = yield* _(createInsertMessageForInbox)
+      const insertMessageForInbox = yield* createInsertMessageForInbox
 
       return {
         deleteAllMessagesByInboxId,

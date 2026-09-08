@@ -1,7 +1,7 @@
-import {Schema} from 'effect/index'
+import {Schema} from 'effect'
 
 export const PathString = Schema.String.pipe(
-  Schema.minLength(1),
+  Schema.check(Schema.isMinLength(1)),
   Schema.brand('PathString')
 )
 export type PathString = typeof PathString.Type

@@ -1,6 +1,6 @@
 import {UserName} from '@vexl-next/domain/src/general/UserName.brand'
 import {TextField, Typography, XmarkCancelClose} from '@vexl-next/ui'
-import {Option, Schema} from 'effect/index'
+import {Option, Schema} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useEffect} from 'react'
 import {Stack} from 'tamagui'

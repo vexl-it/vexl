@@ -3,7 +3,7 @@ import {calculateViewportRadius} from '@vexl-next/domain/src/utility/geoCoordina
 import {Button, NavigationBar, TextField, Typography} from '@vexl-next/ui'
 import {ChevronLeft} from '@vexl-next/ui/src/icons'
 import {Stack, XStack, YStack} from '@vexl-next/ui/src/primitives'
-import {useMolecule} from 'bunshi/dist/react'
+import {useMolecule} from 'bunshi/react'
 import {atom, useAtomValue} from 'jotai'
 import React, {useCallback, useEffect, useState} from 'react'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'

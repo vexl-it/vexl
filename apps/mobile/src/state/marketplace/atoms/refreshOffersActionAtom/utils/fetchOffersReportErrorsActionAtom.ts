@@ -9,7 +9,7 @@ import {
   type NonCompatibleOfferVersionError,
 } from '@vexl-next/resources-utils/src/offers/decryptOffer'
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
-import {Array, Effect, Either, Option, pipe, Record} from 'effect'
+import {Array, Effect, Option, pipe, Record, Result} from 'effect'
 import {atom} from 'jotai'
 import reportError from '../../../../../utils/reportError'
 import {type ClubKeys} from '../../../../clubs/atom/clubsToKeyHolderV2Atom'
@@ -24,7 +24,7 @@ import {
 } from './getNewClubsOffersAndDecrypt'
 import {getNewContactNetworkOffersAndDecryptPaginatedActionAtom} from './getNewOffersAndDecrypt'
 
-type DecryptedOfferResult = Either.Either<
+type DecryptedOfferResult = Result.Result<
   OfferInfo,
   | DecryptingOfferError
   | NonCompatibleOfferVersionError
@@ -35,9 +35,10 @@ type DecryptedOfferResult = Either.Either<
 const getOfferOrNoneReportError = (
   decryptedOffer: DecryptedOfferResult
 ): Option.Option<OfferInfo> => {
-  if (Either.isRight(decryptedOffer)) return Option.some(decryptedOffer.right)
+  if (Result.isSuccess(decryptedOffer))
+    return Option.some(decryptedOffer.success)
 
-  const error = decryptedOffer.left
+  const error = decryptedOffer.failure
   if (error._tag === 'DecryptingOfferError') {
     reportError('error', new Error('Error while decrypting offers'), {
       error,

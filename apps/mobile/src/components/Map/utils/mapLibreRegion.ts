@@ -72,7 +72,7 @@ export function coordinatesToBounds(
   )
   const coordinatesByLongitude = pipe(
     coordinates,
-    Array.sortWith(({longitude}) => longitude, Order.number)
+    Array.sortWith(({longitude}) => longitude, Order.Number)
   )
   const {start, end} = pipe(
     Array.zip(

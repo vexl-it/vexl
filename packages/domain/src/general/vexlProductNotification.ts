@@ -1,8 +1,8 @@
 import {Schema} from 'effect'
 
-export const VexlProductNotificationUuid = Schema.UUID.pipe(
-  Schema.brand('VexlProductNotificationUuid')
-)
+export const VexlProductNotificationUuid = Schema.String.check(
+  Schema.isUUID()
+).pipe(Schema.brand('VexlProductNotificationUuid'))
 export type VexlProductNotificationUuid =
   typeof VexlProductNotificationUuid.Type
 
@@ -14,6 +14,6 @@ export const VexlProductNotification = Schema.Struct({
   date: Schema.DateFromString,
   actionLink: Schema.optional(Schema.String),
   actionText: Schema.optional(Schema.String),
-  type: Schema.Literal('MARKETING', 'GENERAL'),
+  type: Schema.Literals(['MARKETING', 'GENERAL']),
 })
 export type VexlProductNotification = typeof VexlProductNotification.Type

@@ -1,4 +1,3 @@
-import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {PublicKeyV2} from '@vexl-next/cryptography/src/KeyHolder/brandsV2'
@@ -6,25 +5,34 @@ import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
-import {Effect, flow, Schema} from 'effect'
+import {Effect, flow, Option, Schema} from 'effect'
+import {SqlSchema} from 'effect/unstable/sql'
 import {ServerHashedNumber} from '../../../utils/serverHashContact'
 
 export const UpdateRefreshUserParams = Schema.Struct({
   publicKey: PublicKeyPemBase64,
   hash: ServerHashedNumber,
-  clientVersion: Schema.optionalWith(VersionCode, {as: 'Option'}),
-  countryPrefix: Schema.optionalWith(CountryPrefix, {as: 'Option'}),
-  appSource: Schema.optionalWith(Schema.String, {as: 'Option'}),
-  vexlNotificationToken: Schema.optionalWith(VexlNotificationToken, {
-    as: 'Option',
-  }),
-  refreshedAt: Schema.Date,
-  publicKeyV2: Schema.optionalWith(PublicKeyV2, {as: 'Option'}),
+  clientVersion: Schema.OptionFromOptional(VersionCode).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
+  countryPrefix: Schema.OptionFromOptional(CountryPrefix).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
+  appSource: Schema.OptionFromOptional(Schema.String).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
+  vexlNotificationToken: Schema.OptionFromOptional(VexlNotificationToken).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
+  refreshedAt: Schema.DateFromString,
+  publicKeyV2: Schema.OptionFromOptional(PublicKeyV2).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
 })
 export type UpdateRefreshUserParams = typeof UpdateRefreshUserParams.Type
 
-export const createUpdateRefreshUser = Effect.gen(function* (_) {
-  const sql = yield* _(PgClient.PgClient)
+export const createUpdateRefreshUser = Effect.gen(function* () {
+  const sql = yield* PgClient.PgClient
 
   const query = SqlSchema.void({
     Request: UpdateRefreshUserParams,

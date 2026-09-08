@@ -1,35 +1,35 @@
 import {
-  HttpServerResponse,
-  type HttpBody,
-  type HttpServerError,
-} from '@effect/platform'
-import {
   type InternalServerError,
   type NotFoundError,
 } from '@vexl-next/domain/src/general/commonErrors'
 import {Effect} from 'effect'
-import {type ParseError} from 'effect/ParseResult'
+import {type SchemaError} from 'effect/Schema'
+import {
+  HttpServerResponse,
+  type HttpBody,
+  type HttpServerError,
+} from 'effect/unstable/http'
 import {type UrlParamsError} from './schemaUrlQuery'
 
 type ErrorsToCatch =
   | HttpBody.HttpBodyError
-  | ParseError
+  | SchemaError
   | HttpServerError.RequestError
   | InternalServerError
   | NotFoundError
   | UrlParamsError
   | HttpServerError.RouteNotFound
 
-const handleCommonErrorsRouter = Effect.catchAll((e: ErrorsToCatch) => {
+const handleCommonErrorsRouter = Effect.catch((e: ErrorsToCatch) => {
   if (e._tag === 'RouteNotFound') {
     return HttpServerResponse.json({message: 'Not found'}, {status: 404})
   }
 
-  if (e._tag === 'ParseError') {
+  if (e._tag === 'SchemaError') {
     return HttpServerResponse.json({message: e.message}, {status: 400})
   }
 
-  if (e._tag === 'RequestError' || e._tag === 'UrlParamsError') {
+  if (e._tag === 'RequestParseError' || e._tag === 'UrlParamsError') {
     return HttpServerResponse.json({message: e.message, status: 400})
   }
 
@@ -56,7 +56,9 @@ const handleCommonErrorsRouter = Effect.catchAll((e: ErrorsToCatch) => {
   }
 
   // Should never happen. Why does typescript require this? Inspect it! e is `never` here :/
-  return HttpServerResponse.text('Unknown internal server error', {status: 500})
+  return Effect.succeed(
+    HttpServerResponse.text('Unknown internal server error', {status: 500})
+  )
 })
 
 export default handleCommonErrorsRouter

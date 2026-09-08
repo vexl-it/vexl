@@ -3,7 +3,7 @@ import {
   UnixMilliseconds0,
   unixMillisecondsNow,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import * as E from 'fp-ts/Either'
+import {Result} from 'effect'
 import {pipe} from 'fp-ts/function'
 import {storage} from './mmkv/effectMmkv'
 
@@ -17,6 +17,6 @@ export function setLastTimeAppWasRunningToNow(): void {
 export function getLastTimeAppWasRunning(): UnixMilliseconds {
   return pipe(
     storage.getVerified(LAST_TIME_APP_WAS_RUNNING_KEY, UnixMilliseconds),
-    E.getOrElse(() => UnixMilliseconds0)
+    Result.getOrElse(() => UnixMilliseconds0)
   )
 }

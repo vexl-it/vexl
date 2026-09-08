@@ -1,6 +1,6 @@
 import {SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
 import {type SvgStringOrImageUri} from '@vexl-next/domain/src/utility/SvgStringOrImageUri.brand'
-import {Option, Schema} from 'effect/index'
+import {Option, Schema} from 'effect'
 import React from 'react'
 import {
   Image as RNImage,

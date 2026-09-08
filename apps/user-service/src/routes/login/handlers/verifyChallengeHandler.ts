@@ -1,4 +1,3 @@
-import {HttpApiBuilder} from '@effect/platform/index'
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {type CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {type UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
@@ -16,7 +15,8 @@ import {UserApiSpecification} from '@vexl-next/rest-api/src/services/user/specif
 import {DashboardReportsService} from '@vexl-next/server-utils/src/DashboardReportsService'
 import {generateUserAuthData} from '@vexl-next/server-utils/src/generateUserAuthData'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
-import {Effect} from 'effect'
+import {makeHttpApiHandler} from '@vexl-next/server-utils/src/makeHttpApiHandler'
+import {Effect, pipe} from 'effect'
 import {LoggedInUsersDbService} from '../../../db/loggedInUsersDb'
 import {VerificationStateDbService} from '../db/verificationStateDb'
 
@@ -48,23 +48,26 @@ const verifySignature = (
     )
   )
 
-export const verifyChallengeHandler = HttpApiBuilder.handler(
+export const verifyChallengeHandler = makeHttpApiHandler(
   UserApiSpecification,
   'Login',
   'verifyChallenge',
   (req) =>
-    Effect.gen(function* (_) {
-      const loginDb = yield* _(VerificationStateDbService)
-      const verificationState = yield* _(
-        loginDb.retrieveChallengeVerificationState(req.payload.userPublicKey)
-      )
+    Effect.gen(function* () {
+      const loginDb = yield* VerificationStateDbService
+      const verificationState =
+        yield* loginDb.retrieveChallengeVerificationState(
+          req.payload.userPublicKey
+        )
 
       const {signature, userPublicKey} = req.payload
-      yield* _(
-        verifySignature(signature, userPublicKey, verificationState.challenge)
+      yield* verifySignature(
+        signature,
+        userPublicKey,
+        verificationState.challenge
       )
 
-      const authData = yield* _(
+      const authData = yield* pipe(
         generateUserAuthData({
           phoneNumberHashed: verificationState.phoneNumber,
           publicKey: userPublicKey,
@@ -76,16 +79,14 @@ export const verifyChallengeHandler = HttpApiBuilder.handler(
         )
       )
 
-      yield* _(insertUserIntoDb(userPublicKey, verificationState.countryPrefix))
-      yield* _(
+      yield* insertUserIntoDb(userPublicKey, verificationState.countryPrefix)
+      yield* pipe(
         DashboardReportsService,
         Effect.flatMap((dashboardReportsService) =>
           dashboardReportsService.reportNewUserCreated()
         )
       )
-      yield* _(
-        loginDb.deleteChallengeVerificationState(req.payload.userPublicKey)
-      )
+      yield* loginDb.deleteChallengeVerificationState(req.payload.userPublicKey)
 
       return new VerifyChallengeResponse({
         ...authData,

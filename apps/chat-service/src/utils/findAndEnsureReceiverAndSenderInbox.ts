@@ -4,7 +4,7 @@ import {
   ReceiverInboxDoesNotExistError,
   SenderInboxDoesNotExistError,
 } from '@vexl-next/rest-api/src/services/chat/contracts'
-import {Effect} from 'effect'
+import {Effect, pipe} from 'effect'
 import {InboxDbService} from '../db/InboxDbService'
 import {type InboxRecord} from '../db/InboxDbService/domain'
 import {hashPublicKey} from '../db/domain'
@@ -22,24 +22,24 @@ export const findAndEnsureReceiverAndSenderInbox = ({
   | UnexpectedServerError,
   InboxDbService
 > =>
-  Effect.gen(function* (_) {
-    const receiverPubKeyHash = yield* _(hashPublicKey(receiver))
-    const senderPubKeyHash = yield* _(hashPublicKey(sender))
+  Effect.gen(function* () {
+    const receiverPubKeyHash = yield* hashPublicKey(receiver)
+    const senderPubKeyHash = yield* hashPublicKey(sender)
 
-    const inboxService = yield* _(InboxDbService)
-    const senderInbox = yield* _(
+    const inboxService = yield* InboxDbService
+    const senderInbox = yield* pipe(
       inboxService.findInboxByPublicKey(senderPubKeyHash),
-      Effect.flatten,
+      Effect.flatMap(Effect.fromOption),
       Effect.catchTag(
-        'NoSuchElementException',
+        'NoSuchElementError',
         () => new SenderInboxDoesNotExistError()
       )
     )
-    const receiverInbox = yield* _(
+    const receiverInbox = yield* pipe(
       inboxService.findInboxByPublicKey(receiverPubKeyHash),
-      Effect.flatten,
+      Effect.flatMap(Effect.fromOption),
       Effect.catchTag(
-        'NoSuchElementException',
+        'NoSuchElementError',
         () => new ReceiverInboxDoesNotExistError()
       )
     )

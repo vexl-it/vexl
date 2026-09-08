@@ -1,5 +1,5 @@
 import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
-import {Effect, Option, Record, Schema} from 'effect'
+import {Effect, Option, pipe, Record, Schema} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
 import {ignoreReportErrors} from '../../../utils/reportError'
@@ -26,21 +26,19 @@ export class ClubKeyNotFoundInInnerStateError extends Schema.TaggedError<ClubKey
 export const leaveClubActionAtom = atom(
   null,
   (get, set, clubUuid: ClubUuid) => {
-    return Effect.gen(function* (_) {
+    return Effect.gen(function* () {
       const clubKeyPair = Record.get(get(clubsToKeyHolderAtom), clubUuid)
       const {contact} = get(apiAtom)
 
       if (Option.isSome(clubKeyPair)) {
-        yield* _(
-          contact.leaveClub({
-            clubUuid,
-            keyPair: clubKeyPair.value.oldKeyPair,
-            keyPairV2: clubKeyPair.value.keyPair,
-          })
-        )
+        yield* contact.leaveClub({
+          clubUuid,
+          keyPair: clubKeyPair.value.oldKeyPair,
+          keyPairV2: clubKeyPair.value.keyPair,
+        })
       }
 
-      yield* _(
+      yield* pipe(
         set(updateOffersWhenUserIsNoLongerInClubActionAtom, {clubUuid}),
         ignoreReportErrors(
           'warn',

@@ -47,7 +47,7 @@ export const sendMessageReadActionAtom = atom(
       lastMessageAtom: Atom<ChatMessageWithState | undefined>
     }
   ): Effect.Effect<void, unknown, never> => {
-    return Effect.gen(function* (_) {
+    return Effect.gen(function* () {
       const sendReadReceipts = get(sendReadReceiptsAtom)
       if (!sendReadReceipts) {
         return
@@ -69,20 +69,18 @@ export const sendMessageReadActionAtom = atom(
       )
         return Effect.void
 
-      yield* _(
-        sendMessage({
-          api: get(apiAtom).chat,
-          senderKeypair: chat.inbox.privateKey,
-          receiverPublicKey: chat.otherSide.publicKey,
-          message: messageToSend,
-          notificationApi: get(apiAtom).notification,
-          theirNotificationCypher:
-            chat.otherSideVexlToken ?? chat.otherSideFcmCypher,
-          otherSideVersion: chat.otherSideVersion,
-        })
-      )
+      yield* sendMessage({
+        api: get(apiAtom).chat,
+        senderKeypair: chat.inbox.privateKey,
+        receiverPublicKey: chat.otherSide.publicKey,
+        message: messageToSend,
+        notificationApi: get(apiAtom).notification,
+        theirNotificationCypher:
+          chat.otherSideVexlToken ?? chat.otherSideFcmCypher,
+        otherSideVersion: chat.otherSideVersion,
+      })
     }).pipe(
-      Effect.catchAll((e) => {
+      Effect.catch((e) => {
         reportError('warn', new Error('Error while sending MESSAGE_READ'), {e})
         return Effect.void
       })

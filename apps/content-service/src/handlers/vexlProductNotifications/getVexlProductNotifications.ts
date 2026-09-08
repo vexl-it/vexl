@@ -1,18 +1,18 @@
-import {HttpApiBuilder} from '@effect/platform/index'
 import {ContentApiSpecification} from '@vexl-next/rest-api/src/services/content/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {makeHttpApiHandler} from '@vexl-next/server-utils/src/makeHttpApiHandler'
 import {Effect} from 'effect'
 import {VexlProductNotificationsDbService} from '../../db/VexlProductNotificationsDbService'
 
-export const getVexlProductNotificationsHandler = HttpApiBuilder.handler(
+export const getVexlProductNotificationsHandler = makeHttpApiHandler(
   ContentApiSpecification,
   'VexlProductNotifications',
   'getVexlProductNotifications',
   (req) =>
-    Effect.gen(function* (_) {
-      const db = yield* _(VexlProductNotificationsDbService)
-      const vexlProductNotifications = yield* _(
-        db.queryVexlProductNotifications(req.urlParams)
+    Effect.gen(function* () {
+      const db = yield* VexlProductNotificationsDbService
+      const vexlProductNotifications = yield* db.queryVexlProductNotifications(
+        req.query
       )
 
       return {vexlProductNotifications}

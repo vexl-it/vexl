@@ -8,14 +8,14 @@ export interface GoogleMapsOperations {
   querySuggest: ReturnType<typeof querySuggest>
 }
 
-export class GoogleMapsService extends Context.Tag('GoogleMapsService')<
+export class GoogleMapsService extends Context.Service<
   GoogleMapsService,
   GoogleMapsOperations
->() {
+>()('GoogleMapsService') {
   static readonly Live = Layer.effect(
     GoogleMapsService,
-    Effect.gen(function* (_) {
-      const apiKey = yield* _(googlePlacesApiKeyConfig)
+    Effect.gen(function* () {
+      const apiKey = yield* googlePlacesApiKeyConfig
 
       return {
         queryGeocode: googleGeocode(apiKey),

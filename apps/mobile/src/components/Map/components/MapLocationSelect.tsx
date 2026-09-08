@@ -3,6 +3,7 @@ import {
   type ViewStateChangeEvent,
 } from '@maplibre/maplibre-react-native'
 import {Latitude, Longitude} from '@vexl-next/domain/src/utility/geoCoordinates'
+import {resultToEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {
   KeyboardStickyView,
   Stack,
@@ -10,7 +11,7 @@ import {
   YStack,
   useTheme,
 } from '@vexl-next/ui'
-import {Effect, Schema} from 'effect'
+import {Effect, Result, Schema} from 'effect'
 import * as E from 'fp-ts/Either'
 import {pipe} from 'fp-ts/lib/function'
 import {atom, useAtomValue, useSetAtom, type Atom} from 'jotai'
@@ -34,7 +35,7 @@ import {mapValueToBounds} from '../utils/mapLibreRegion'
 import {MapPinAsset} from './MapSvgAssets'
 import VexlMap from './VexlMap'
 
-const MapCenterSchema = Schema.Tuple(Longitude, Latitude)
+const MapCenterSchema = Schema.Tuple([Longitude, Latitude])
 
 type Props = React.ComponentProps<typeof Stack> & {
   topChildren?: React.ReactNode
@@ -124,11 +125,11 @@ function PickedLocationText({
       </Typography>
     )
 
-  const color = E.isLeft(geocodingState.result)
+  const color = E.isLeft(resultToEither(geocodingState.result))
     ? '$redForeground'
     : '$foregroundPrimary'
   const text = pipe(
-    geocodingState.result,
+    resultToEither(geocodingState.result),
     E.match(
       (l) => toCommonErrorMessage(l, t) ?? t('map.location.errors.notFound'),
       (data) => data?.address ?? t('map.locationSelect.hint')
@@ -192,16 +193,16 @@ export default function MapLocationSelect({
       if (!event.nativeEvent.userInteraction) return
 
       const center = Effect.runSync(
-        Effect.either(
-          Schema.decodeUnknown(MapCenterSchema)(event.nativeEvent.center)
+        Effect.result(
+          Schema.decodeUnknownEffect(MapCenterSchema)(event.nativeEvent.center)
         )
       )
-      if (E.isLeft(center)) return
+      if (Result.isFailure(center)) return
 
       onMapMoved?.()
       setCenter({
-        latitude: center.right[1],
-        longitude: center.right[0],
+        latitude: center.success[1],
+        longitude: center.success[0],
       })
     },
     [onMapMoved, setCenter]

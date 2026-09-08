@@ -9,8 +9,8 @@ function containsOnlyPhoneNumberInputCharacters(value: string): boolean {
 }
 
 export const E164PhoneNumber = Schema.String.pipe(
-  Schema.filter((v) => e164PhoneNumberRegex.test(v)),
-  Schema.filter((v) => parsePhoneNumber(v).valid),
+  Schema.check(Schema.makeFilter((v) => e164PhoneNumberRegex.test(v))),
+  Schema.check(Schema.makeFilter((v) => parsePhoneNumber(v).valid)),
   Schema.brand('E164PhoneNumber')
 )
 export type E164PhoneNumber = Schema.Schema.Type<typeof E164PhoneNumber>

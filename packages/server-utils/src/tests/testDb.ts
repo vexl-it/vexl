@@ -1,6 +1,6 @@
 import {PgClient} from '@effect/sql-pg'
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
-import {Config, Console, Effect, Layer, Option, Redacted} from 'effect'
+import {Config, Console, Effect, Layer, Option, pipe, Redacted} from 'effect'
 
 const testDbConfig = Config.unwrap({
   host: Config.withDefault(Config.string('TEST_DB_HOST'), 'localhost'),
@@ -26,7 +26,7 @@ const testServicePgClient = testDbConfig.pipe(
       // debug: config.debug,
     })
   ),
-  Layer.unwrapEffect,
+  Layer.unwrap,
   Layer.tapError((e) =>
     Effect.flatMap(testDbConfig, (config) =>
       Effect.logInfo('Failed to connect the test database', config, e)
@@ -42,23 +42,23 @@ const testServicePgClient = testDbConfig.pipe(
 // so there are no race conditions here
 let tableName: string
 
-export const setupTestDatabase = Effect.gen(function* (_) {
-  const testDb = yield* _(testDbConfig)
+export const setupTestDatabase = Effect.gen(function* () {
+  const testDb = yield* testDbConfig
 
   if (Option.isSome(testDb.forceName)) {
-    yield* _(Console.log(`Using the database ${testDb.forceName.value}`))
+    yield* Console.log(`Using the database ${testDb.forceName.value}`)
     process.env.DB_URL = `postgresql://${testDb.host}:${testDb.port}/${testDb.forceName.value}`
     process.env.DB_USER = testDb.username
     process.env.DB_PASSWORD = Redacted.value(testDb.password)
     return
   }
 
-  const tablePrefix = yield* _(Config.string('TEST_DB_PREFIX'))
+  const tablePrefix = yield* Config.string('TEST_DB_PREFIX')
   tableName = `${tablePrefix}${generateUuid().replaceAll('-', '')}`
-  const sql = yield* _(PgClient.PgClient)
+  const sql = yield* PgClient.PgClient
 
-  yield* _(Console.log(`Creating the database ${tableName}`))
-  yield* _(
+  yield* Console.log(`Creating the database ${tableName}`)
+  yield* pipe(
     sql`CREATE DATABASE ${sql.literal(tableName)};`,
     Effect.tapError((e) => Console.log(e))
   )
@@ -68,11 +68,11 @@ export const setupTestDatabase = Effect.gen(function* (_) {
   process.env.DB_PASSWORD = Redacted.value(testDb.password)
 }).pipe(Effect.provide(testServicePgClient))
 
-export const disposeTestDatabase = Effect.gen(function* (_) {
-  if (yield* _(keepDbConfig)) {
+export const disposeTestDatabase = Effect.gen(function* () {
+  if (yield* keepDbConfig) {
     return
   }
 
-  const sql = yield* _(PgClient.PgClient)
-  yield* _(sql`DROP DATABASE ${sql.literal(tableName)};`)
+  const sql = yield* PgClient.PgClient
+  yield* sql`DROP DATABASE ${sql.literal(tableName)};`
 }).pipe(Effect.provide(testServicePgClient))

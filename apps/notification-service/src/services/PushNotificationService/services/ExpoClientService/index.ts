@@ -16,14 +16,14 @@ interface ExpoClientOperations {
   ) => Effect.Effect<void, ExpoSdkError>
 }
 
-export class ExpoClientService extends Context.Tag('ExpoClientService')<
+export class ExpoClientService extends Context.Service<
   ExpoClientService,
   ExpoClientOperations
->() {
+>()('ExpoClientService') {
   static readonly Live = Layer.effect(
     ExpoClientService,
-    Effect.gen(function* (_) {
-      const expoToken = yield* _(expoAccessToken)
+    Effect.gen(function* () {
+      const expoToken = yield* expoAccessToken
       const expo = new Expo({accessToken: expoToken})
 
       const sendNotification: ExpoClientOperations['sendNotification'] = (

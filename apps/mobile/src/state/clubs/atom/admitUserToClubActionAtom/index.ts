@@ -27,60 +27,54 @@ const clubsIModerateAtom = atom((get) =>
 export const admitUserToClubActionAtom = atom(
   null,
   (get, set, link: DeepLinkRequestClubAdmition) =>
-    Effect.gen(function* (_) {
+    Effect.gen(function* () {
       const {t} = get(translationAtom)
 
       const clubsIModerate = get(clubsIModerateAtom)
-      if (!Array.isNonEmptyArray(clubsIModerate)) {
+      if (!Array.isArrayNonEmpty(clubsIModerate)) {
         Alert.alert(t('clubs.youDontModerateAnyClub'))
-        return yield* _(Effect.fail(new NoClubsToModerateError()))
+        return yield* Effect.fail(new NoClubsToModerateError())
       }
 
       const selectedClubAtom = atom(Array.headNonEmpty(clubsIModerate))
 
       if (clubsIModerate.length > 1) {
-        const confirmed = yield* _(
-          set(globalDialogAtom, {
-            title: t('clubs.admition.selectClub.title'),
-            subtitle: t('clubs.admition.selectClub.text'),
-            children: React.createElement(SelectClubComponent, {
-              clubs: clubsIModerate,
-              selectedClubAtom,
-              showHeader: false,
-            }),
-            positiveButtonText: t('common.next'),
-          })
-        )
+        const confirmed = yield* set(globalDialogAtom, {
+          title: t('clubs.admition.selectClub.title'),
+          subtitle: t('clubs.admition.selectClub.text'),
+          children: React.createElement(SelectClubComponent, {
+            clubs: clubsIModerate,
+            selectedClubAtom,
+            showHeader: false,
+          }),
+          positiveButtonText: t('common.next'),
+        })
 
-        if (!confirmed)
-          return yield* _(Effect.fail({_tag: 'UserDeclinedError'}))
+        if (!confirmed) return yield* Effect.fail({_tag: 'UserDeclinedError'})
       }
 
       const selectedClub = get(selectedClubAtom)
 
-      const confirmed = yield* _(
-        set(globalDialogAtom, {
-          title: t('clubs.admition.title', {
-            club: selectedClub.club.name,
-          }),
-          subtitle: t('clubs.admition.text', {
-            club: selectedClub.club.name,
-          }),
-          positiveButtonText: t('common.next'),
-          negativeButtonText: t('common.cancel'),
-        })
-      )
+      const confirmed = yield* set(globalDialogAtom, {
+        title: t('clubs.admition.title', {
+          club: selectedClub.club.name,
+        }),
+        subtitle: t('clubs.admition.text', {
+          club: selectedClub.club.name,
+        }),
+        positiveButtonText: t('common.next'),
+        negativeButtonText: t('common.cancel'),
+      })
 
-      if (!confirmed) return yield* _(Effect.fail({_tag: 'UserDeclinedError'}))
+      if (!confirmed) return yield* Effect.fail({_tag: 'UserDeclinedError'})
 
-      const clubKey = yield* _(
-        get(clubsToKeyHolderAtom),
-        Record.get(selectedClub.club.uuid)
+      const clubKey = yield* Effect.fromOption(
+        pipe(get(clubsToKeyHolderAtom), Record.get(selectedClub.club.uuid))
       )
 
       const api = get(apiAtom)
       set(loadingOverlayDisplayedAtom, true)
-      yield* _(
+      yield* pipe(
         api.contact.addUserToTheClub({
           adminitionRequest: {
             langCode: link.langCode,
@@ -98,7 +92,7 @@ export const admitUserToClubActionAtom = atom(
             set(loadingOverlayDisplayedAtom, false)
           })
         ),
-        Effect.zipLeft(
+        Effect.tap(
           Effect.ignore(
             set(syncSingleClubHandleStateWhenNotFoundActionAtom, {
               clubUuid: selectedClub.club.uuid,

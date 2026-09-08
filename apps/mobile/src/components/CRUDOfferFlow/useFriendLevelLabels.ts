@@ -1,4 +1,4 @@
-import {useMolecule} from 'bunshi/dist/react'
+import {useMolecule} from 'bunshi/react'
 import {useAtomValue} from 'jotai'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import {formatInteger} from '../../utils/localization/formatting'

@@ -6,7 +6,7 @@ import {
   Typography,
 } from '@vexl-next/ui'
 import type {IconProps} from '@vexl-next/ui/src/icons/types'
-import {useMolecule} from 'bunshi/dist/react'
+import {useMolecule} from 'bunshi/react'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useMemo} from 'react'
 import {Stack, XStack, YStack} from 'tamagui'

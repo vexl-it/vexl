@@ -35,10 +35,10 @@ export type AndroidConversationMessage = typeof AndroidConversationMessage.Type
 
 // Sender avatar: inline SVG markup rasterized natively, or a file / content /
 // data URI the notification service can open.
-export const AndroidConversationAvatar = Schema.Union(
+export const AndroidConversationAvatar = Schema.Union([
   Schema.Struct({type: Schema.Literal('svgXml'), svgXml: Schema.String}),
-  Schema.Struct({type: Schema.Literal('imageUri'), imageUri: Schema.String})
-)
+  Schema.Struct({type: Schema.Literal('imageUri'), imageUri: Schema.String}),
+])
 export type AndroidConversationAvatar = typeof AndroidConversationAvatar.Type
 
 // Renders the notification with Android's MessagingStyle: one notification

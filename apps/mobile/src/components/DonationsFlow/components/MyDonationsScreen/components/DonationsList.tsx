@@ -33,7 +33,7 @@ function DonationsList({onDonatePress}: Props): React.ReactElement {
   const myDonationsRefreshing = useAtomValue(myDonationsRefreshingAtom)
   const refreshMyDonations = useSetAtom(refreshMyDonationsActionAtom)
 
-  if (!Array.isNonEmptyArray(myDonationsSorted)) {
+  if (!Array.isArrayNonEmpty(myDonationsSorted)) {
     return <EmptyListPlaceholder onDonatePress={onDonatePress} />
   }
 

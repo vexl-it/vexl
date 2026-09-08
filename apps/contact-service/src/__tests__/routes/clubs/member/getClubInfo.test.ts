@@ -1,4 +1,3 @@
-import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {generateClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
@@ -8,7 +7,8 @@ import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {InvalidChallengeError} from '@vexl-next/rest-api/src/challenges/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {addTestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
-import {Effect, Option, Schema} from 'effect'
+import {Effect, Option, pipe, Schema} from 'effect'
+import {SqlClient} from 'effect/unstable/sql'
 import {ClubMembersDbService} from '../../../../db/ClubMemberDbService'
 import {ClubsDbService} from '../../../../db/ClubsDbService'
 import {generateAndSignChallenge} from '../../../utils/generateAndSignChallenge'
@@ -32,41 +32,37 @@ const club = {
 
 beforeEach(async () => {
   await runPromiseInMockedEnvironment(
-    Effect.gen(function* (_) {
-      const sql = yield* _(SqlClient.SqlClient)
-      yield* _(sql`DELETE FROM club_invitation_link`)
-      yield* _(sql`DELETE FROM club_member`)
-      yield* _(sql`DELETE FROM club`)
+    Effect.gen(function* () {
+      const sql = yield* SqlClient.SqlClient
+      yield* sql`DELETE FROM club_invitation_link`
+      yield* sql`DELETE FROM club_member`
+      yield* sql`DELETE FROM club`
 
-      const app = yield* _(NodeTestingApp)
-      yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
-      yield* _(
-        app.ClubsAdmin.createClub({
-          headers: {'x-admin-token': ADMIN_TOKEN},
-          payload: {
-            club,
-          },
-        })
-      )
+      const app = yield* NodeTestingApp
+      yield* addTestHeaders({'x-admin-token': ADMIN_TOKEN})
+      yield* app.ClubsAdmin.createClub({
+        headers: {'x-admin-token': ADMIN_TOKEN},
+        payload: {
+          club,
+        },
+      })
 
-      const clubsDb = yield* _(ClubsDbService)
-      const {id: clubId} = yield* _(
+      const clubsDb = yield* ClubsDbService
+      const {id: clubId} = yield* pipe(
         clubsDb.findClubByUuid({uuid: club.uuid}),
-        Effect.flatten
+        Effect.flatMap(Effect.fromOption)
       )
 
-      const clubDb = yield* _(ClubMembersDbService)
-      yield* _(
-        clubDb.insertClubMember({
-          clubId,
-          publicKey: userKey.publicKeyPemBase64,
-          isModerator: false,
-          lastRefreshedAt: new Date(),
-          notificationToken: 'someToken' as ExpoNotificationToken,
-          vexlNotificationToken: 'vexl_nt_test' as VexlNotificationToken,
-          publicKeyV2: null,
-        })
-      )
+      const clubDb = yield* ClubMembersDbService
+      yield* clubDb.insertClubMember({
+        clubId,
+        publicKey: userKey.publicKeyPemBase64,
+        isModerator: false,
+        lastRefreshedAt: new Date(),
+        notificationToken: 'someToken' as ExpoNotificationToken,
+        vexlNotificationToken: 'vexl_nt_test' as VexlNotificationToken,
+        publicKeyV2: null,
+      })
     })
   )
 })
@@ -74,21 +70,19 @@ beforeEach(async () => {
 describe('Get club info', () => {
   it('Should return club info', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
 
-        const result = yield* _(
-          app.ClubsMember.getClubInfo({
-            payload: {
-              ...(yield* _(generateAndSignChallenge(userKey))),
-              notificationToken: Option.some(
-                'someToken' as ExpoNotificationToken
-              ),
-              vexlNotificationToken: Option.none(),
-              publicKeyV2: Option.none(),
-            },
-          })
-        )
+        const result = yield* app.ClubsMember.getClubInfo({
+          payload: {
+            ...(yield* generateAndSignChallenge(userKey)),
+            notificationToken: Option.some(
+              'someToken' as ExpoNotificationToken
+            ),
+            vexlNotificationToken: Option.none(),
+            publicKeyV2: Option.none(),
+          },
+        })
 
         expect(result.clubInfoForUser).toEqual({
           club,
@@ -103,23 +97,21 @@ describe('Get club info', () => {
 
   it('Correctly updates notification token', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
 
-        yield* _(
-          app.ClubsMember.getClubInfo({
-            payload: {
-              ...(yield* _(generateAndSignChallenge(userKey))),
-              notificationToken: Option.some(
-                'someToken2' as ExpoNotificationToken
-              ),
-              vexlNotificationToken: Option.none(),
-              publicKeyV2: Option.none(),
-            },
-          })
-        )
+        yield* app.ClubsMember.getClubInfo({
+          payload: {
+            ...(yield* generateAndSignChallenge(userKey)),
+            notificationToken: Option.some(
+              'someToken2' as ExpoNotificationToken
+            ),
+            vexlNotificationToken: Option.none(),
+            publicKeyV2: Option.none(),
+          },
+        })
 
-        const data = yield* _(
+        const data = yield* pipe(
           SqlClient.SqlClient,
           Effect.flatMap(
             (sql) => sql`
@@ -139,24 +131,22 @@ describe('Get club info', () => {
 
   it('Correctly updates vexl notification token', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
 
-        yield* _(
-          app.ClubsMember.getClubInfo({
-            payload: {
-              ...(yield* _(generateAndSignChallenge(userKey))),
-              notificationToken: Option.some(
-                'someToken' as ExpoNotificationToken
-              ),
-              vexlNotificationToken: Option.some(
-                'vexl_nt_updated' as VexlNotificationToken
-              ),
-            },
-          })
-        )
+        yield* app.ClubsMember.getClubInfo({
+          payload: {
+            ...(yield* generateAndSignChallenge(userKey)),
+            notificationToken: Option.some(
+              'someToken' as ExpoNotificationToken
+            ),
+            vexlNotificationToken: Option.some(
+              'vexl_nt_updated' as VexlNotificationToken
+            ),
+          },
+        })
 
-        const data = yield* _(
+        const data = yield* pipe(
           SqlClient.SqlClient,
           Effect.flatMap(
             (sql) => sql`
@@ -176,22 +166,20 @@ describe('Get club info', () => {
 
   it('Does not clear vexl notification token when Option.none() is provided', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
 
-        yield* _(
-          app.ClubsMember.getClubInfo({
-            payload: {
-              ...(yield* _(generateAndSignChallenge(userKey))),
-              notificationToken: Option.some(
-                'someToken' as ExpoNotificationToken
-              ),
-              vexlNotificationToken: Option.none(),
-            },
-          })
-        )
+        yield* app.ClubsMember.getClubInfo({
+          payload: {
+            ...(yield* generateAndSignChallenge(userKey)),
+            notificationToken: Option.some(
+              'someToken' as ExpoNotificationToken
+            ),
+            vexlNotificationToken: Option.none(),
+          },
+        })
 
-        const data = yield* _(
+        const data = yield* pipe(
           SqlClient.SqlClient,
           Effect.flatMap(
             (sql) => sql`
@@ -212,22 +200,22 @@ describe('Get club info', () => {
 
   it('Should return 404 when club is inactive', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
-        const sql = yield* _(SqlClient.SqlClient)
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
+        const sql = yield* SqlClient.SqlClient
 
-        yield* _(sql`
+        yield* sql`
           UPDATE club
           SET
             made_inactive_at = (now() - interval '1 DAY')::date
           WHERE
             UUID = ${club.uuid}
-        `)
+        `
 
-        const errorResponse = yield* _(
+        const errorResponse = yield* pipe(
           app.ClubsMember.getClubInfo({
             payload: {
-              ...(yield* _(generateAndSignChallenge(userKey))),
+              ...(yield* generateAndSignChallenge(userKey)),
               notificationToken: Option.some(
                 'someToken' as ExpoNotificationToken
               ),
@@ -235,7 +223,7 @@ describe('Get club info', () => {
               publicKeyV2: Option.none(),
             },
           }),
-          Effect.either
+          Effect.result
         )
 
         expectErrorResponse(NotFoundError)(errorResponse)
@@ -245,13 +233,13 @@ describe('Get club info', () => {
 
   it('Should return 404 when club not found', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
 
-        const errorResponse = yield* _(
+        const errorResponse = yield* pipe(
           app.ClubsMember.getClubInfo({
             payload: {
-              ...(yield* _(generateAndSignChallenge(generatePrivateKey()))),
+              ...(yield* generateAndSignChallenge(generatePrivateKey())),
               notificationToken: Option.some(
                 'someToken2' as ExpoNotificationToken
               ),
@@ -259,7 +247,7 @@ describe('Get club info', () => {
               publicKeyV2: Option.none(),
             },
           }),
-          Effect.either
+          Effect.result
         )
         expectErrorResponse(NotFoundError)(errorResponse)
       })
@@ -268,29 +256,27 @@ describe('Get club info', () => {
 
   it('Should return club info when user is admin', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const sql = yield* _(SqlClient.SqlClient)
-        yield* _(sql`
+      Effect.gen(function* () {
+        const sql = yield* SqlClient.SqlClient
+        yield* sql`
           UPDATE club_member
           SET
             is_moderator = TRUE
           WHERE
             notification_token = 'someToken'
-        `)
-        const app = yield* _(NodeTestingApp)
+        `
+        const app = yield* NodeTestingApp
 
-        const result = yield* _(
-          app.ClubsMember.getClubInfo({
-            payload: {
-              ...(yield* _(generateAndSignChallenge(userKey))),
-              notificationToken: Option.some(
-                'someToken' as ExpoNotificationToken
-              ),
-              vexlNotificationToken: Option.none(),
-              publicKeyV2: Option.none(),
-            },
-          })
-        )
+        const result = yield* app.ClubsMember.getClubInfo({
+          payload: {
+            ...(yield* generateAndSignChallenge(userKey)),
+            notificationToken: Option.some(
+              'someToken' as ExpoNotificationToken
+            ),
+            vexlNotificationToken: Option.none(),
+            publicKeyV2: Option.none(),
+          },
+        })
 
         expect(result.clubInfoForUser).toEqual({
           club,
@@ -305,12 +291,12 @@ describe('Get club info', () => {
 
   it('Should return error when bad challenge', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
 
-        const signedChallenge = yield* _(generateAndSignChallenge(userKey))
+        const signedChallenge = yield* generateAndSignChallenge(userKey)
         const invalidKey = generatePrivateKey()
-        const errorResponse = yield* _(
+        const errorResponse = yield* pipe(
           app.ClubsMember.getClubInfo({
             payload: {
               publicKey: invalidKey.publicKeyPemBase64,
@@ -322,7 +308,7 @@ describe('Get club info', () => {
               publicKeyV2: Option.none(),
             },
           }),
-          Effect.either
+          Effect.result
         )
         expectErrorResponse(InvalidChallengeError)(errorResponse)
       })

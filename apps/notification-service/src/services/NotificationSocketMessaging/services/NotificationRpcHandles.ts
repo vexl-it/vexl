@@ -10,14 +10,13 @@ import {
   Array,
   Chunk,
   Effect,
-  Either,
-  identity,
   Order,
   pipe,
   Queue,
+  Result,
   Schedule,
   Stream,
-} from 'effect/index'
+} from 'effect'
 import {type Scope} from 'effect/Scope'
 import {type SupportedPushNotificationTask} from '../../../domain'
 import {NotificationMetricsService} from '../../../metrics'
@@ -42,19 +41,18 @@ const keepAliveAsLongAsScopeInRedisRegistry = (
   ).pipe(Effect.schedule(Schedule.spaced('1 minute')), Effect.forkScoped)
 
 export const NotificationRpcsHandlers = Rpcs.toLayer(
-  Effect.gen(function* (_) {
-    const localRegistry = yield* _(LocalConnectionRegistry)
-    const redisRegistry = yield* _(RedisConnectionRegistry)
-    const throttledPushNotificationService = yield* _(
-      ThrottledPushNotificationService
-    )
-    const offlineNotificationBuffer = yield* _(OfflineNotificationBuffer)
-    const notificationMetrics = yield* _(NotificationMetricsService)
+  Effect.gen(function* () {
+    const localRegistry = yield* LocalConnectionRegistry
+    const redisRegistry = yield* RedisConnectionRegistry
+    const throttledPushNotificationService =
+      yield* ThrottledPushNotificationService
+    const offlineNotificationBuffer = yield* OfflineNotificationBuffer
+    const notificationMetrics = yield* NotificationMetricsService
 
     return {
       listenToNotifications: (connectionInfo) =>
-        Stream.unwrapScoped(
-          Effect.gen(function* (_) {
+        Stream.unwrap(
+          Effect.gen(function* () {
             // TODO #2124 - use token from info directly
             const vexlNotificationToken = isVexlNotificationTokenSecret(
               connectionInfo.notificationToken
@@ -72,49 +70,45 @@ export const NotificationRpcsHandlers = Rpcs.toLayer(
               connectionKind: connectionInfo.connectionKind,
             }
 
-            yield* _(
-              Effect.acquireRelease(
+            yield* Effect.acquireRelease(
+              Effect.log(
+                'New notification stream connection established',
+                connectionId,
+                connectionInfo.platform,
+                connectionInfo.version,
+                connectionInfo.connectionKind
+              ),
+              () =>
                 Effect.log(
-                  'New notification stream connection established',
+                  'Notification stream connection closed',
                   connectionId,
                   connectionInfo.platform,
                   connectionInfo.version,
                   connectionInfo.connectionKind
-                ),
-                () =>
-                  Effect.log(
-                    'Notification stream connection closed',
-                    connectionId,
-                    connectionInfo.platform,
-                    connectionInfo.version,
-                    connectionInfo.connectionKind
-                  )
-              )
+                )
             )
 
-            const queue = yield* _(
-              Effect.acquireRelease(
-                Queue.sliding<
-                  Either.Either<
-                    NotificationStreamMessage,
-                    NotificationStreamError
-                  >
-                >(42),
-                Queue.shutdown
-              )
+            const queue = yield* Effect.acquireRelease(
+              Queue.sliding<
+                Result.Result<
+                  NotificationStreamMessage,
+                  NotificationStreamError
+                >
+              >(42),
+              Queue.shutdown
             )
 
             const send = (
               message: NotificationStreamMessage
             ): Effect.Effect<boolean> =>
-              Queue.offer(queue, Either.right(message))
+              Queue.offer(queue, Result.succeed(message))
 
             const kickOut = (
               error?: NotificationStreamError
             ): Effect.Effect<boolean> =>
               Queue.offer(
                 queue,
-                Either.left(
+                Result.fail(
                   error ??
                     new UnexpectedServerError({
                       cause: 'kicked out',
@@ -124,51 +118,46 @@ export const NotificationRpcsHandlers = Rpcs.toLayer(
               )
 
             // Register connection in both local and redis registries
-            yield* _(
-              Effect.acquireRelease(
-                localRegistry.registerConnection(
-                  {
-                    connectionInfo: {
-                      ...connectionInfo,
-                      notificationToken: vexlNotificationToken,
-                    },
-                    send,
-                    kickOut,
+            yield* Effect.acquireRelease(
+              localRegistry.registerConnection(
+                {
+                  connectionInfo: {
+                    ...connectionInfo,
+                    notificationToken: vexlNotificationToken,
                   },
-                  connectionId
-                ),
-                () => localRegistry.removeConnection(connectionId)
-              )
+                  send,
+                  kickOut,
+                },
+                connectionId
+              ),
+              () => localRegistry.removeConnection(connectionId)
             )
-            yield* _(
-              Effect.acquireRelease(
-                redisRegistry.registerConnection(connectionId, clientInfo),
-                () =>
-                  redisRegistry.removeConnection(
-                    connectionId,
-                    clientInfo.notificationToken
-                  )
-              )
+            yield* Effect.acquireRelease(
+              redisRegistry.registerConnection(connectionId, clientInfo),
+              () =>
+                redisRegistry.removeConnection(
+                  connectionId,
+                  clientInfo.notificationToken
+                )
             )
 
             // Keep the connection alive in redis registry
-            yield* _(
-              keepAliveAsLongAsScopeInRedisRegistry(connectionId, clientInfo)
+            yield* keepAliveAsLongAsScopeInRedisRegistry(
+              connectionId,
+              clientInfo
             )
 
             // Heartbeat to prevent connection from timing out.
-            yield* _(
-              send(new DebugMessage({})).pipe(
-                Effect.schedule(Schedule.spaced('30 seconds')),
-                Effect.forkScoped
-              )
+            yield* send(new DebugMessage({})).pipe(
+              Effect.schedule(Schedule.spaced('30 seconds')),
+              Effect.forkScoped
             )
 
-            const notificationsWaitingThrottled = yield* _(
+            const notificationsWaitingThrottled = yield* pipe(
               throttledPushNotificationService.getPendingNotificationsAndCancelThrottleTimeout(
                 clientInfo.notificationToken
               ),
-              Effect.catchAll(
+              Effect.catch(
                 (a) =>
                   new UnexpectedServerError({
                     message: 'Failed to get pending notifications',
@@ -179,7 +168,7 @@ export const NotificationRpcsHandlers = Rpcs.toLayer(
 
             // An open app syncs all its data itself, so a foreground
             // connection makes the offline buffer moot.
-            const notificationsBufferedWhileOffline = yield* _(
+            const notificationsBufferedWhileOffline = yield* pipe(
               clientInfo.connectionKind === 'background'
                 ? offlineNotificationBuffer.getAndClearBufferedTasks(
                     clientInfo.notificationToken
@@ -190,8 +179,8 @@ export const NotificationRpcsHandlers = Rpcs.toLayer(
                     ),
                     Array.empty<SupportedPushNotificationTask>()
                   ),
-              Effect.catchAll((e) =>
-                Effect.zipRight(
+              Effect.catch((e) =>
+                Effect.andThen(
                   Effect.logError(
                     'Failed to read offline notification buffer',
                     {
@@ -213,7 +202,7 @@ export const NotificationRpcsHandlers = Rpcs.toLayer(
               Array.dedupeWith((a, b) => a.id === b.id),
               Array.sortBy(
                 Order.mapInput(
-                  Order.number,
+                  Order.Number,
                   (task: SupportedPushNotificationTask) => task.sentAt
                 )
               ),
@@ -222,32 +211,30 @@ export const NotificationRpcsHandlers = Rpcs.toLayer(
               )
             )
 
-            yield* _(
-              Effect.forEach(
-                notificationsToReplay,
-                (task) =>
-                  notificationMetrics.reportNotificationSent({
-                    id: task.trackingId,
-                    clientVersion: clientInfo.version,
-                    sentAt: task.sentAt,
-                    systemNotificationSent: false,
-                    clientPlatform: clientInfo.platform,
-                    channel:
-                      clientInfo.connectionKind === 'foreground'
-                        ? 'foreground_socket'
-                        : 'background_socket',
-                  }),
-                {discard: true}
-              )
+            yield* Effect.forEach(
+              notificationsToReplay,
+              (task) =>
+                notificationMetrics.reportNotificationSent({
+                  id: task.trackingId,
+                  clientVersion: clientInfo.version,
+                  sentAt: task.sentAt,
+                  systemNotificationSent: false,
+                  clientPlatform: clientInfo.platform,
+                  channel:
+                    clientInfo.connectionKind === 'foreground'
+                      ? 'foreground_socket'
+                      : 'background_socket',
+                }),
+              {discard: true}
             )
 
             return Stream.fromQueue(queue).pipe(
               Stream.tap((e) =>
-                Either.isRight(e) && e.right._tag === 'DebugMessage'
+                Result.isSuccess(e) && e.success._tag === 'DebugMessage'
                   ? Effect.void
                   : Effect.log('Sending notification stream event')
               ),
-              Stream.mapEffect(identity),
+              Stream.mapEffect(Effect.fromResult),
               Stream.prepend(
                 Chunk.fromIterable(
                   Array.map(notificationsToReplay, (task) => task.socketMessage)

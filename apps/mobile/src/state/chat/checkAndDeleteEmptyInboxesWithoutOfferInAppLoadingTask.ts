@@ -1,4 +1,4 @@
-import {Array, Effect, Either, Schema} from 'effect'
+import {Array, Effect, Result, Schema} from 'effect'
 import {pipe} from 'fp-ts/lib/function'
 import {apiAtom} from '../../api'
 import {registerInAppLoadingTask} from '../../utils/inAppLoadingTasks'
@@ -41,7 +41,7 @@ export const checkAndDeleteEmptyInboxesWithoutOfferInAppLoadingTaskId =
       {id: fetchMessagesForAllInboxesInAppLoadingTaskId, onlyIfSucceeds: true},
     ],
     task: (store) =>
-      Effect.gen(function* (_) {
+      Effect.gen(function* () {
         const api = store.get(apiAtom)
         const myOffersIds = store
           .get(myOffersAtom)
@@ -60,7 +60,7 @@ export const checkAndDeleteEmptyInboxesWithoutOfferInAppLoadingTaskId =
         // future one clean up once the two agree. A genuinely empty offers
         // store (blob absent, or decoding to an empty list) is not suspicious,
         // so cleanup still runs for hydrated accounts that have no own offers.
-        const inMemoryOffersEmpty = Array.isEmptyArray(store.get(offersAtom))
+        const inMemoryOffersEmpty = Array.isArrayEmpty(store.get(offersAtom))
         const anyInboxBelongsToOffer = pipe(
           store.get(messagingStateAtom),
           Array.some((one) => !!one.inbox.offerId)
@@ -68,10 +68,10 @@ export const checkAndDeleteEmptyInboxesWithoutOfferInAppLoadingTaskId =
         if (inMemoryOffersEmpty && anyInboxBelongsToOffer) {
           const persistedOffersNonEmpty = pipe(
             storage.getVerified(OFFERS_STORAGE_KEY, PersistedOffersProbe),
-            Either.map((persisted) =>
-              Array.isNonEmptyReadonlyArray(persisted.offers)
+            Result.map((persisted) =>
+              Array.isReadonlyArrayNonEmpty(persisted.offers)
             ),
-            Either.getOrElse(() => false)
+            Result.getOrElse(() => false)
           )
           if (persistedOffersNonEmpty) {
             reportError(
@@ -112,7 +112,7 @@ export const checkAndDeleteEmptyInboxesWithoutOfferInAppLoadingTaskId =
                 api.chat.deleteInbox({
                   keyPair: one.inbox.privateKey,
                 }),
-                Effect.catchAll((e) => {
+                Effect.catch((e) => {
                   reportError(
                     'warn',
                     new Error(

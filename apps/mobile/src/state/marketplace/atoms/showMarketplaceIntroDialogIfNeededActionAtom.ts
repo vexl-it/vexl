@@ -1,5 +1,5 @@
 import {MarketplaceIntroDialogContent} from '@vexl-next/ui'
-import {Effect} from 'effect'
+import {Effect, pipe} from 'effect'
 import {atom} from 'jotai'
 import React from 'react'
 import {globalDialogAtom} from '../../../components/GlobalDialog'
@@ -24,8 +24,8 @@ export const showMarketplaceIntroDialogIfNeededActionAtom = atom(
 
     set(showMarketplaceIntroDialogAtom, false)
 
-    return Effect.gen(function* (_) {
-      yield* _(
+    return Effect.gen(function* () {
+      yield* pipe(
         set(globalDialogAtom, {
           title: t('marketplace.introDialog.title'),
           positiveButtonText: t('common.gotIt'),

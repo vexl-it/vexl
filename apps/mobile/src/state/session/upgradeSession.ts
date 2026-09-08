@@ -1,4 +1,3 @@
-import {FetchHttpClient} from '@effect/platform/index'
 import {type KeyPairV2} from '@vexl-next/cryptography/src/KeyHolder'
 import {
   cryptoBoxSign,
@@ -6,7 +5,8 @@ import {
 } from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {user} from '@vexl-next/rest-api/src'
 import {type VexlAuthHeader} from '@vexl-next/rest-api/src/VexlAuthHeader'
-import {Effect, Schema} from 'effect'
+import {Effect, pipe, Schema} from 'effect'
+import {FetchHttpClient} from 'effect/unstable/http'
 import {getDefaultStore} from 'jotai'
 import {apiEnv, platform} from '../../api'
 import {type SessionV1, type SessionV2} from '../../brands/Session.brand'
@@ -31,10 +31,10 @@ function fetchVexlAuthHeaderFromServer(
   session: SessionV1,
   keysV2: KeyPairV2
 ): Effect.Effect<VexlAuthHeader, UpgradeSessionError> {
-  return Effect.gen(function* (_) {
+  return Effect.gen(function* () {
     const store = getDefaultStore()
 
-    const userApi = yield* _(
+    const userApi = yield* pipe(
       user.api({
         platform,
         clientVersion: versionCode,
@@ -56,7 +56,7 @@ function fetchVexlAuthHeaderFromServer(
       )
     )
 
-    const initResponse = yield* _(
+    const initResponse = yield* pipe(
       userApi.initUpgradeAuth({publicKeyV2: keysV2.publicKey}),
       Effect.mapError(
         (e) =>
@@ -67,7 +67,7 @@ function fetchVexlAuthHeaderFromServer(
       )
     )
 
-    const signature = yield* _(
+    const signature = yield* pipe(
       cryptoBoxSign(keysV2.privateKey)(initResponse.challenge),
       Effect.mapError(
         (e) =>
@@ -78,7 +78,7 @@ function fetchVexlAuthHeaderFromServer(
       )
     )
 
-    const submitResponse = yield* _(
+    const submitResponse = yield* pipe(
       userApi.submitUpgradeAuth({
         publicKeyV2: keysV2.publicKey,
         challenge: initResponse.challenge,
@@ -100,8 +100,8 @@ function fetchVexlAuthHeaderFromServer(
 export const upgradeSession = (
   session: SessionV1
 ): Effect.Effect<SessionV2, UpgradeSessionError> =>
-  Effect.gen(function* (_) {
-    const v2Keys = yield* _(
+  Effect.gen(function* () {
+    const v2Keys = yield* pipe(
       generateV2KeyPair(),
       Effect.mapError(
         (e) =>
@@ -112,9 +112,7 @@ export const upgradeSession = (
       )
     )
 
-    const vexlAuthHeader = yield* _(
-      fetchVexlAuthHeaderFromServer(session, v2Keys)
-    )
+    const vexlAuthHeader = yield* fetchVexlAuthHeaderFromServer(session, v2Keys)
 
     return {
       ...session,

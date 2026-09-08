@@ -1,4 +1,4 @@
-import {Array, Either, Schema, pipe, type ParseResult} from 'effect'
+import {Array, Result, Schema, pipe} from 'effect'
 import {
   atom,
   type PrimitiveAtom,
@@ -96,7 +96,7 @@ function scheduleStartupReport(): void {
       // Only report parse errors. Keys that were simply never written
       // (`valueNotSet`) are expected on every startup, so reporting them
       // unconditionally would fire the summary on every single app start.
-      if (Array.isNonEmptyArray(parseErrorKeys)) {
+      if (Array.isArrayNonEmpty(parseErrorKeys)) {
         reportError('warn', new Error('MMKV atom initialization summary'), {
           loaded: loadedKeys,
           valueNotSet: valueNotSetKeys,
@@ -191,15 +191,15 @@ function getInitialValue<A>({
   defaultValue,
 }: {
   key: string
-  decodeRawValue: (raw: string) => Either.Either<A, ParseResult.ParseError>
+  decodeRawValue: (raw: string) => Result.Result<A, Schema.SchemaError>
   defaultValue: A
 }): StoredRead<A> {
   scheduleStartupReport()
 
   return pipe(
     storage.get(key),
-    Either.match({
-      onLeft: (l): StoredRead<A> => {
+    Result.match({
+      onFailure: (l): StoredRead<A> => {
         if (l._tag === 'ValueNotSet') {
           atomInitResults.set(key, 'valueNotSet')
         } else {
@@ -212,11 +212,11 @@ function getInitialValue<A>({
         }
         return {value: defaultValue, raw: undefined}
       },
-      onRight: (raw): StoredRead<A> =>
+      onSuccess: (raw): StoredRead<A> =>
         pipe(
           decodeRawValue(raw),
-          Either.match({
-            onLeft: (e): StoredRead<A> => {
+          Result.match({
+            onFailure: (e): StoredRead<A> => {
               atomInitResults.set(key, 'parseError')
               reportStoredValueParseError(
                 key,
@@ -229,7 +229,7 @@ function getInitialValue<A>({
               )
               return {value: defaultValue, raw}
             },
-            onRight: (value): StoredRead<A> => {
+            onSuccess: (value): StoredRead<A> => {
               atomInitResults.set(key, 'loaded')
               return {value, raw}
             },
@@ -280,10 +280,10 @@ export function atomWithParsedMmkvStorageWithImmediateSaveOption<
 >(
   key: string,
   defaultValue: A,
-  schema: Schema.Schema<A, I, never>,
+  schema: Schema.Codec<A, I, never, never>,
   debugLabel?: string
 ): AtomWithParsedMmkvStorageWithImmediateSaveOption<A> {
-  const decodeRawValue = Schema.decodeEither(Schema.parseJson(schema))
+  const decodeRawValue = Schema.decodeResult(Schema.fromJsonString(schema))
   const persistValue = storage.saveVerified(key, schema)
   const recordSuccessfulPersist = (): void => {
     if (isCriticalMmkvKey(key)) {
@@ -336,8 +336,8 @@ export function atomWithParsedMmkvStorageWithImmediateSaveOption<
     recordOwnWrite()
     pipe(
       persistValue(toPersist.value),
-      Either.match({
-        onLeft: (l) => {
+      Result.match({
+        onFailure: (l) => {
           revertRecordedOwnWrite()
           reportError(
             'warn',
@@ -345,7 +345,7 @@ export function atomWithParsedMmkvStorageWithImmediateSaveOption<
             {errorTag: l._tag}
           )
         },
-        onRight: recordSuccessfulPersist,
+        onSuccess: recordSuccessfulPersist,
       })
     )
   }
@@ -424,8 +424,8 @@ export function atomWithParsedMmkvStorageWithImmediateSaveOption<
           () => {
             pipe(
               storage.getVerified(key, schema),
-              Either.match({
-                onLeft: (e) => {
+              Result.match({
+                onFailure: (e) => {
                   if (e._tag === 'ValueNotSet') {
                     console.info(
                       `MMKV value for key '${key}' was deleted. Setting atom to default value`
@@ -445,7 +445,7 @@ export function atomWithParsedMmkvStorageWithImmediateSaveOption<
                     }
                   )
                 },
-                onRight: setAtom,
+                onSuccess: setAtom,
               })
             )
           },
@@ -479,8 +479,8 @@ export function atomWithParsedMmkvStorageWithImmediateSaveOption<
       recordOwnWrite()
       pipe(
         persistValue(newValue),
-        Either.match({
-          onLeft: (l) => {
+        Result.match({
+          onFailure: (l) => {
             revertRecordedOwnWrite()
             reportError(
               'warn',
@@ -490,7 +490,7 @@ export function atomWithParsedMmkvStorageWithImmediateSaveOption<
               {errorTag: l._tag}
             )
           },
-          onRight: recordSuccessfulPersist,
+          onSuccess: recordSuccessfulPersist,
         })
       )
     }
@@ -505,7 +505,7 @@ export function atomWithParsedMmkvStorageWithImmediateSaveOption<
 export function atomWithParsedMmkvStorage<A, I extends object>(
   key: string,
   defaultValue: A,
-  schema: Schema.Schema<A, I, never>,
+  schema: Schema.Codec<A, I, never, never>,
   debugLabel?: string
 ): FlushablePrimitiveAtom<A> {
   const storageAtom = atomWithParsedMmkvStorageWithImmediateSaveOption(

@@ -8,7 +8,7 @@ import {
   YStack,
 } from '@vexl-next/ui'
 import {Effect, pipe} from 'effect'
-import {isNonEmptyArray} from 'effect/Array'
+import {isArrayNonEmpty} from 'effect/Array'
 import {type Atom, useAtomValue, useSetAtom} from 'jotai'
 import React from 'react'
 import {FlatList, RefreshControl} from 'react-native'
@@ -171,7 +171,7 @@ export function ClubsList({
         />
       }
       ListFooterComponent={
-        isNonEmptyArray(clubsAtoms) ? <ClubsReachFooter /> : null
+        isArrayNonEmpty(clubsAtoms) ? <ClubsReachFooter /> : null
       }
     />
   )

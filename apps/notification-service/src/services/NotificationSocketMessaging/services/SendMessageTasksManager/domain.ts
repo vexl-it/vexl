@@ -1,4 +1,4 @@
-import {Data, Effect} from 'effect/index'
+import {Data, Effect} from 'effect'
 
 export class SendMessageTasksManagerError extends Data.TaggedError(
   'SendMessageTasksManagerError'
@@ -8,7 +8,7 @@ export class SendMessageTasksManagerError extends Data.TaggedError(
   ): (<A, I, R>(
     effect: Effect.Effect<A, I, R>
   ) => Effect.Effect<A, SendMessageTasksManagerError, R>) =>
-    Effect.catchAll(
+    Effect.catch(
       (e) =>
         new SendMessageTasksManagerError({
           cause: e,

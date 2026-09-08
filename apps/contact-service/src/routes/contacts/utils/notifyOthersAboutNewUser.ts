@@ -9,17 +9,15 @@ export const notifyOthersAboutNewUserForked = ({
   importedHashes: readonly ServerHashedNumber[]
   ownerHash: ServerHashedNumber
 }): Effect.Effect<void, never, UserNotificationService> =>
-  Effect.gen(function* (_) {
-    const userNotificationService = yield* _(UserNotificationService)
+  Effect.gen(function* () {
+    const userNotificationService = yield* UserNotificationService
 
-    yield* _(
-      userNotificationService.notifyOthersAboutNewUser(
-        importedHashes,
-        ownerHash
-      )
+    yield* userNotificationService.notifyOthersAboutNewUser(
+      importedHashes,
+      ownerHash
     )
 
-    yield* _(Effect.logInfo('Notified others about new user'))
+    yield* Effect.logInfo('Notified others about new user')
   }).pipe(
     Effect.withSpan('Notify others about new user', {
       attributes: {
@@ -27,6 +25,6 @@ export const notifyOthersAboutNewUserForked = ({
         userHash: ownerHash,
       },
     }),
-    Effect.forkDaemon,
+    Effect.forkDetach,
     Effect.ignore
   )

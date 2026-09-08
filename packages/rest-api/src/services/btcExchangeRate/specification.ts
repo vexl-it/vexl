@@ -1,8 +1,11 @@
-import {HttpApi, HttpApiEndpoint, HttpApiGroup} from '@effect/platform/index'
+import {Schema} from 'effect'
 import {
-  NotFoundError,
-  UnexpectedServerError,
-} from '@vexl-next/domain/src/general/commonErrors'
+  HttpApi,
+  HttpApiEndpoint,
+  HttpApiGroup,
+  HttpApiSchema,
+} from 'effect/unstable/httpapi'
+import {commonApiErrors} from '../../commonApiErrors'
 import {MaxExpectedDailyCall} from '../../MaxExpectedDailyCountAnnotation'
 import {RateLimitingMiddleware} from '../../rateLimititing'
 import {
@@ -13,12 +16,17 @@ import {
 
 export const GetExchangeRateEndpoint = HttpApiEndpoint.get(
   'getExchangeRate',
-  '/btc-rate'
-)
-  .setUrlParams(GetExchangeRateRequest)
-  .addSuccess(GetExchangeRateResponse)
-  .addError(GetExchangeRateError, {status: 502})
-  .annotate(MaxExpectedDailyCall, 500)
+  '/btc-rate',
+  {
+    disableCodecs: true,
+    query: GetExchangeRateRequest.fields,
+    error: Schema.Union([
+      ...commonApiErrors,
+      GetExchangeRateError.pipe(HttpApiSchema.status(502)),
+    ]),
+    success: Schema.Struct(GetExchangeRateResponse.fields),
+  }
+).annotate(MaxExpectedDailyCall, 500)
 
 const RootGroup = HttpApiGroup.make('root', {topLevel: true}).add(
   GetExchangeRateEndpoint
@@ -27,7 +35,6 @@ const RootGroup = HttpApiGroup.make('root', {topLevel: true}).add(
 export const BtcExchangeRateApiSpecification = HttpApi.make(
   'Btc exchange rate service'
 )
-  .middleware(RateLimitingMiddleware)
   .add(RootGroup)
-  .addError(NotFoundError)
-  .addError(UnexpectedServerError)
+
+  .middleware(RateLimitingMiddleware)

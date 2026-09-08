@@ -1,19 +1,19 @@
-import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {Effect, flow, Schema} from 'effect'
+import {SqlSchema} from 'effect/unstable/sql'
 
 export const InsertOfferReportedRecordParams = Schema.Struct({
   userPublicKey: PublicKeyPemBase64,
-  reportedAt: Schema.DateFromSelf,
+  reportedAt: Schema.Date,
 })
 
 export type InsertOfferReportedRecordParams =
   typeof InsertOfferReportedRecordParams.Type
 
-export const createInsertOfferReportedRecord = Effect.gen(function* (_) {
-  const sql = yield* _(PgClient.PgClient)
+export const createInsertOfferReportedRecord = Effect.gen(function* () {
+  const sql = yield* PgClient.PgClient
 
   const query = SqlSchema.void({
     Request: InsertOfferReportedRecordParams,

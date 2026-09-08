@@ -1,8 +1,8 @@
-import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {objectCopyAndOmit} from '@vexl-next/generic-utils/src/objectCopyAndOmit'
 import {Effect, flow, Schema} from 'effect'
+import {SqlSchema} from 'effect/unstable/sql'
 import {ClubInvitationLinkRecord} from '../domain'
 
 export const InsertClubInvitationLinkParams = Schema.Struct({
@@ -11,10 +11,10 @@ export const InsertClubInvitationLinkParams = Schema.Struct({
 export type InsertClubInvitationLinkParams =
   typeof InsertClubInvitationLinkParams.Type
 
-export const createInsertInvitationLink = Effect.gen(function* (_) {
-  const sql = yield* _(PgClient.PgClient)
+export const createInsertInvitationLink = Effect.gen(function* () {
+  const sql = yield* PgClient.PgClient
 
-  const query = SqlSchema.single({
+  const query = SqlSchema.findOne({
     Request: InsertClubInvitationLinkParams,
     Result: ClubInvitationLinkRecord,
     execute: (params) => sql`

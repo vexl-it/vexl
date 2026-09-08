@@ -1,5 +1,5 @@
 import {GetVersionServiceInfoResponse} from '@vexl-next/rest-api/src/services/user/contracts'
-import {Option} from 'effect/index'
+import {Option} from 'effect'
 
 export const VersionServiceState = GetVersionServiceInfoResponse
 export type VersionServiceState = typeof VersionServiceState.Type

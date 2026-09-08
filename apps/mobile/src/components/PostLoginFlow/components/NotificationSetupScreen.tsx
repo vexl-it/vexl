@@ -39,7 +39,7 @@ export default function NotificationSetupScreen({
         label: t('postLoginFlow.v2.notificationSetup.action'),
         onPress: () => {
           void Effect.runPromise(
-            requestPermissions.pipe(Effect.catchAll(() => Effect.void))
+            requestPermissions.pipe(Effect.catch(() => Effect.void))
           )
             .then(offerBackgroundSocket)
             .finally(goNext)

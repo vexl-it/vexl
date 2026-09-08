@@ -1,4 +1,4 @@
-import {Effect, Option, Schema} from 'effect/index'
+import {Effect, Option, Schema} from 'effect'
 import * as BackgroundTask from 'expo-background-task'
 import * as TaskManager from 'expo-task-manager'
 import {useSetAtom} from 'jotai'
@@ -36,7 +36,7 @@ export const setupBackgroundTask = async (): Promise<void> => {
       await TaskManager.isTaskRegisteredAsync(BACKGROUND_TASK)
 
     if (isRegistered) {
-      const registeredInterval = Option.flatMapNullable(
+      const registeredInterval = Option.flatMapNullishOr(
         Schema.decodeUnknownOption(RegisteredTaskOptions)(
           await TaskManager.getTaskOptionsAsync(BACKGROUND_TASK)
         ),

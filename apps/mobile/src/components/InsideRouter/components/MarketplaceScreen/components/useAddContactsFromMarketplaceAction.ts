@@ -19,7 +19,7 @@ export default function useAddContactsFromMarketplaceAction(): () => void {
   return useCallback(() => {
     void Effect.runPromise(
       areContactsPermissionsGranted().pipe(
-        Effect.catchAll(() => Effect.succeed(false))
+        Effect.catch(() => Effect.succeed(false))
       )
     ).then((permissionsGranted) => {
       if (!permissionsGranted) {
@@ -31,7 +31,7 @@ export default function useAddContactsFromMarketplaceAction(): () => void {
 
       void Effect.runPromise(
         loadAndNormalizeContactsFromDevice().pipe(
-          Effect.catchAll(() => Effect.succeed(false))
+          Effect.catch(() => Effect.succeed(false))
         )
       ).finally(() => {
         navigation.navigate('ContactPreferences', {filter: 'new'})

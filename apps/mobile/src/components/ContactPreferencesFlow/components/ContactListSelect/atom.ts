@@ -1,5 +1,5 @@
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
-import {createScope, molecule} from 'bunshi/dist/react'
+import {createScope, molecule} from 'bunshi/react'
 import {Array, Effect, Option, Schema, pipe} from 'effect'
 import {
   getPermissionsAsync,
@@ -356,7 +356,7 @@ export const contactSelectMolecule = molecule((_, getScope) => {
     const selectedNumbers = get(selectedNumbersAtom)
 
     return (
-      Array.isNonEmptyArray(contactsToDisplay) &&
+      Array.isArrayNonEmpty(contactsToDisplay) &&
       pipe(
         contactsToDisplay,
         Array.every((contact) =>
@@ -427,16 +427,14 @@ export const contactSelectMolecule = molecule((_, getScope) => {
         shouldShowContactImportProgressDialogAtom
       )
 
-      return Effect.gen(function* (_) {
-        const result = yield* _(
-          set(submitContactsActionAtom, {
-            numbersToImport: selectedNumbers,
-            normalizeAndImportAll: false,
-            showOfferReencryptionDialog: selectedNumbers.length > 0,
-            manageLoadingOverlay: false,
-            showContactImportProgressDialog,
-          })
-        )
+      return Effect.gen(function* () {
+        const result = yield* set(submitContactsActionAtom, {
+          numbersToImport: selectedNumbers,
+          normalizeAndImportAll: false,
+          showOfferReencryptionDialog: selectedNumbers.length > 0,
+          manageLoadingOverlay: false,
+          showContactImportProgressDialog,
+        })
 
         if (result === 'success') {
           set(toastNotificationAtom, t('contacts.contactsSubmitted'))
@@ -460,22 +458,21 @@ export const contactSelectMolecule = molecule((_, getScope) => {
         readonly requestPermissions: boolean
       }
     ): Effect.Effect<boolean> =>
-      Effect.gen(function* (_) {
+      Effect.gen(function* () {
         if (!params.requestPermissions) {
-          const permissionsAlreadyGranted = yield* _(
-            areContactsPermissionsAlreadyGranted()
-          )
+          const permissionsAlreadyGranted =
+            yield* areContactsPermissionsAlreadyGranted()
           if (!permissionsAlreadyGranted) return false
         }
 
-        return yield* _(set(loadAndNormalizeContactsFromDeviceActionAtom))
+        return yield* set(loadAndNormalizeContactsFromDeviceActionAtom)
       }).pipe(
         Effect.tap((contactsLoaded) =>
           Effect.sync(() => {
             if (contactsLoaded) reloadContacts()
           })
         ),
-        Effect.catchAll(() => Effect.succeed(false)),
+        Effect.catch(() => Effect.succeed(false)),
         Effect.ensuring(set(checkContactsAccessPrivilegesActionAtom))
       )
   )
@@ -522,8 +519,8 @@ export const contactSelectMolecule = molecule((_, getScope) => {
         )
       }
 
-      return Effect.gen(function* (_) {
-        const hash = yield* _(hashPhoneNumberE(normalizedNumber.value))
+      return Effect.gen(function* () {
+        const hash = yield* hashPhoneNumberE(normalizedNumber.value)
         const manualContact = Schema.decodeSync(
           StoredContactWithComputedValues
         )({
@@ -545,12 +542,12 @@ export const contactSelectMolecule = molecule((_, getScope) => {
         })
 
         const contactsPermissionsGranted = params.saveToPhone
-          ? yield* _(areContactsPermissionsGranted())
+          ? yield* areContactsPermissionsGranted()
           : false
 
         const addContactToPhoneSuccess =
           params.saveToPhone && contactsPermissionsGranted
-            ? yield* _(
+            ? yield* pipe(
                 set(addContactToPhoneActionAtom, {
                   customName: contactName,
                   number: normalizedNumber.value,
@@ -605,34 +602,28 @@ export const contactSelectMolecule = molecule((_, getScope) => {
         reloadContacts()
 
         if (params.saveToPhone && !contactsPermissionsGranted) {
-          const shouldOpenSettings = yield* _(
-            set(globalDialogAtom, {
-              title: t('addContactDialog.contactAddedToVexlOnlyTitle'),
-              subtitle: t('addContactDialog.contactAddedToVexlOnlyDescription'),
-              positiveButtonText: t('common.openSettings'),
-              negativeButtonText: t('common.close'),
-            })
-          )
+          const shouldOpenSettings = yield* set(globalDialogAtom, {
+            title: t('addContactDialog.contactAddedToVexlOnlyTitle'),
+            subtitle: t('addContactDialog.contactAddedToVexlOnlyDescription'),
+            positiveButtonText: t('common.openSettings'),
+            negativeButtonText: t('common.close'),
+          })
 
           if (shouldOpenSettings) {
-            yield* _(
-              Effect.sync(() => {
-                void Linking.openSettings()
-              })
-            )
+            yield* Effect.sync(() => {
+              void Linking.openSettings()
+            })
           }
         } else {
-          yield* _(
-            set(globalDialogAtom, {
-              title: t('addContactDialog.contactAddedSuccessTitle'),
-              subtitle: t('addContactDialog.youCanEditThisContactAnytime'),
-            })
-          )
+          yield* set(globalDialogAtom, {
+            title: t('addContactDialog.contactAddedSuccessTitle'),
+            subtitle: t('addContactDialog.youCanEditThisContactAnytime'),
+          })
         }
 
         return true
       }).pipe(
-        Effect.catchAll((e) => {
+        Effect.catch((e) => {
           showErrorAlert({
             title: t('common.somethingWentWrong'),
             error: e,
@@ -649,64 +640,54 @@ export const contactSelectMolecule = molecule((_, getScope) => {
     (get, set): Effect.Effect<boolean> => {
       const {t} = get(translationAtom)
 
-      return Effect.gen(function* (_) {
-        const pickerResult = yield* _(
-          Effect.tryPromise({
-            try: async () =>
-              await getDocumentAsync({
-                type: ['text/vcard', 'text/x-vcard'],
-                copyToCacheDirectory: true,
-                multiple: false,
-              }),
-            catch: (e) => new ContactsImportError({cause: e}),
-          })
-        )
+      return Effect.gen(function* () {
+        const pickerResult = yield* Effect.tryPromise({
+          try: async () =>
+            await getDocumentAsync({
+              type: ['text/vcard', 'text/x-vcard'],
+              copyToCacheDirectory: true,
+              multiple: false,
+            }),
+          catch: (e) => new ContactsImportError({cause: e}),
+        })
 
         if (pickerResult.canceled) return false
         const pickedAsset = pickerResult.assets[0]
         if (pickedAsset === undefined) return false
 
-        const vcardString = yield* _(
-          Effect.tryPromise({
-            try: async () => {
-              const pickedFile = new File(pickedAsset.uri)
-              try {
-                if (pickedFile.size > MAX_VCF_FILE_SIZE_BYTES) return undefined
-                return await pickedFile.text()
-              } finally {
-                // remove the cache copy created by the document picker
-                if (pickedFile.info().exists) pickedFile.delete()
-              }
-            },
-            catch: (e) => new ContactsImportError({cause: e}),
-          })
-        )
+        const vcardString = yield* Effect.tryPromise({
+          try: async () => {
+            const pickedFile = new File(pickedAsset.uri)
+            try {
+              if (pickedFile.size > MAX_VCF_FILE_SIZE_BYTES) return undefined
+              return await pickedFile.text()
+            } finally {
+              // remove the cache copy created by the document picker
+              if (pickedFile.info().exists) pickedFile.delete()
+            }
+          },
+          catch: (e) => new ContactsImportError({cause: e}),
+        })
 
         if (vcardString === undefined) {
-          yield* _(
-            set(globalDialogAtom, {
-              title: t('contactPreferences.importVcf.invalidFileTitle'),
-              subtitle: t(
-                'contactPreferences.importVcf.fileTooLargeDescription'
-              ),
-              positiveButtonText: t('common.close'),
-            })
-          )
+          yield* set(globalDialogAtom, {
+            title: t('contactPreferences.importVcf.invalidFileTitle'),
+            subtitle: t('contactPreferences.importVcf.fileTooLargeDescription'),
+            positiveButtonText: t('common.close'),
+          })
           return false
         }
 
         const parsedContacts = parseVcardString(vcardString)
 
-        if (!Array.isNonEmptyArray(parsedContacts)) {
-          yield* _(
-            set(globalDialogAtom, {
-              title: t('contactPreferences.importVcf.noContactsFoundTitle'),
-              subtitle: t(
-                'contactPreferences.importVcf.noContactsFoundDescription'
-              ),
-              positiveButtonText: t('common.close'),
-            })
-          )
+        if (!Array.isArrayNonEmpty(parsedContacts)) {
+          yield* set(globalDialogAtom, {
+            title: t('contactPreferences.importVcf.noContactsFoundTitle'),
+            subtitle: t(
+              'contactPreferences.importVcf.noContactsFoundDescription'
+            ),
+            positiveButtonText: t('common.close'),
+          })
           return false
         }
 
@@ -735,7 +716,7 @@ export const contactSelectMolecule = molecule((_, getScope) => {
           entries,
           Array.chunksOf(CONTACT_NORMALIZATION_CHUNK_SIZE)
         )) {
-          yield* _(waitForNextAnimationFrameEffect())
+          yield* waitForNextAnimationFrameEffect()
           for (const {name, phoneNumber} of entriesChunk) {
             if (contactsToImport.length >= MAX_CONTACTS_PER_VCF_IMPORT) {
               skippedCount += entries.length - processedEntriesCount
@@ -771,40 +752,36 @@ export const contactSelectMolecule = molecule((_, getScope) => {
           if (reachedContactLimit) break
         }
 
-        if (!Array.isNonEmptyArray(contactsToImport)) {
-          yield* _(
-            set(globalDialogAtom, {
-              title: t('contactPreferences.importVcf.nothingNewTitle'),
-              subtitle: t('contactPreferences.importVcf.nothingNewDescription'),
-              positiveButtonText: t('common.close'),
-            })
-          )
+        if (!Array.isArrayNonEmpty(contactsToImport)) {
+          yield* set(globalDialogAtom, {
+            title: t('contactPreferences.importVcf.nothingNewTitle'),
+            subtitle: t('contactPreferences.importVcf.nothingNewDescription'),
+            positiveButtonText: t('common.close'),
+          })
           return false
         }
 
-        const importConfirmed = yield* _(
-          set(globalDialogAtom, {
-            title: t('contactPreferences.importVcf.confirmTitle', {
-              count: contactsToImport.length,
-            }),
-            subtitle:
-              skippedCount > 0
-                ? t('contactPreferences.importVcf.confirmDescriptionSkipped', {
-                    count: skippedCount,
-                  })
-                : t('contactPreferences.importVcf.confirmDescription'),
-            positiveButtonText: t('contactPreferences.importVcf.confirmButton'),
-            negativeButtonText: t('common.cancel'),
-          })
-        )
+        const importConfirmed = yield* set(globalDialogAtom, {
+          title: t('contactPreferences.importVcf.confirmTitle', {
+            count: contactsToImport.length,
+          }),
+          subtitle:
+            skippedCount > 0
+              ? t('contactPreferences.importVcf.confirmDescriptionSkipped', {
+                  count: skippedCount,
+                })
+              : t('contactPreferences.importVcf.confirmDescription'),
+          positiveButtonText: t('contactPreferences.importVcf.confirmButton'),
+          negativeButtonText: t('common.cancel'),
+        })
         if (!importConfirmed) return false
 
-        const newStoredContacts = yield* _(
+        const newStoredContacts = yield* pipe(
           Effect.forEach(
             Array.chunksOf(contactsToImport, CONTACT_NORMALIZATION_CHUNK_SIZE),
             (contactsToImportChunk) =>
               waitForNextAnimationFrameEffect().pipe(
-                Effect.zipRight(
+                Effect.andThen(
                   Effect.forEach(
                     contactsToImportChunk,
                     ({name, normalizedNumber}) =>
@@ -883,7 +860,7 @@ export const contactSelectMolecule = molecule((_, getScope) => {
 
         return true
       }).pipe(
-        Effect.catchAll((e) => {
+        Effect.catch((e) => {
           showErrorAlert({
             title: t('common.somethingWentWrong'),
             error: e,

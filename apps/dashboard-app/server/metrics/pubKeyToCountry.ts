@@ -12,7 +12,6 @@ import {
   Layer,
   Option,
   Order,
-  SortedSet,
   Stream,
   SubscriptionRef,
   pipe,
@@ -23,27 +22,27 @@ import {
   type UserRow,
 } from '../db/queryPubkeyToCountryPrefix'
 
-const sortIdsDesc: Order.Order<UserRow> = Order.struct({
-  id: Order.reverse(Order.number),
+const sortIdsDesc: Order.Order<UserRow> = Order.Struct({
+  id: Order.flip(Order.Number),
 })
 
 export type UserRowWithDateReceived = UserRow & {receivedAt: UnixMilliseconds}
 
-export class PubKeyToCountryPrefixState extends Context.Tag(
-  'PubKeyToCountryPrefix'
-)<
+const initialUsers: readonly UserRowWithDateReceived[] = []
+
+export class PubKeyToCountryPrefixState extends Context.Service<
   PubKeyToCountryPrefixState,
   SubscriptionRef.SubscriptionRef<{
     pubKeyToCountryPrefix: HashMap.HashMap<PublicKeyPemBase64, CountryPrefix>
-    usersSortedByAdded: SortedSet.SortedSet<UserRowWithDateReceived>
+    usersSortedByAdded: readonly UserRowWithDateReceived[]
     lastIdFetched: Option.Option<PubKeyToCountryPrefixId>
   }>
->() {
+>()('PubKeyToCountryPrefix') {
   static readonly Live = Layer.effect(
     PubKeyToCountryPrefixState,
     SubscriptionRef.make({
       pubKeyToCountryPrefix: HashMap.empty<PublicKeyPemBase64, CountryPrefix>(),
-      usersSortedByAdded: SortedSet.empty<UserRowWithDateReceived>(sortIdsDesc),
+      usersSortedByAdded: initialUsers,
       lastIdFetched: Option.none<PubKeyToCountryPrefixId>(),
     })
   )
@@ -52,12 +51,12 @@ export class PubKeyToCountryPrefixState extends Context.Tag(
 export const syncPubKeyToCountryEffect = PubKeyToCountryPrefixState.pipe(
   Effect.flatMap(
     SubscriptionRef.modifyEffect((value) =>
-      Effect.gen(function* (_) {
-        const newDataSinceLastFetch = yield* _(
-          queryPubkeyToCountryPrefix(value.lastIdFetched)
+      Effect.gen(function* () {
+        const newDataSinceLastFetch = yield* queryPubkeyToCountryPrefix(
+          value.lastIdFetched
         )
 
-        yield* _(Effect.log(`Got ${newDataSinceLastFetch.length} new users`))
+        yield* Effect.log(`Got ${newDataSinceLastFetch.length} new users`)
 
         const lastIdFetched = pipe(
           Array.last(newDataSinceLastFetch),
@@ -72,16 +71,27 @@ export const syncPubKeyToCountryEffect = PubKeyToCountryPrefixState.pipe(
           HashMap.union(value.pubKeyToCountryPrefix)
         )
 
-        const usersSortedByAdded = value.usersSortedByAdded.pipe(
-          SortedSet.union(
-            SortedSet.fromIterable(
-              newDataSinceLastFetch.map((v) => ({
-                ...v,
-                receivedAt: unixMillisecondsNow(),
-              })),
-              sortIdsDesc
+        const usersSortedByAdded = pipe(
+          newDataSinceLastFetch,
+          Array.map((user): [UserRow['id'], UserRowWithDateReceived] => [
+            user.id,
+            {...user, receivedAt: unixMillisecondsNow()},
+          ]),
+          HashMap.fromIterable,
+          HashMap.union(
+            HashMap.fromIterable(
+              Array.map(
+                value.usersSortedByAdded,
+                (user): [UserRow['id'], UserRowWithDateReceived] => [
+                  user.id,
+                  user,
+                ]
+              )
             )
-          )
+          ),
+          HashMap.values,
+          Array.fromIterable,
+          Array.sort(sortIdsDesc)
         )
 
         return [
@@ -107,14 +117,14 @@ export const syncPubKeyToCountryEffect = PubKeyToCountryPrefixState.pipe(
 )
 
 export const pubKeyToCountryPrefixChanges = PubKeyToCountryPrefixState.pipe(
-  Effect.map((v) => v.changes),
+  Effect.map((v) => SubscriptionRef.changes(v)),
   Stream.unwrap,
   Stream.map((v) => v.pubKeyToCountryPrefix),
   Stream.changes
 )
 
 export const usersSortedByAddedChanges = PubKeyToCountryPrefixState.pipe(
-  Effect.map((v) => v.changes),
+  Effect.map((v) => SubscriptionRef.changes(v)),
   Stream.unwrap,
   Stream.map((v) => v.usersSortedByAdded),
   Stream.changes

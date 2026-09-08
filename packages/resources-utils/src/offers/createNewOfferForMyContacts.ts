@@ -41,7 +41,7 @@ import generateSymmetricKey, {
 import {fetchInfoAndGeneratePrivatePayloads} from './utils/offerPrivatePayload'
 import {sendOfferToNetworkBatchPrivateParts} from './utils/sendOfferToNetworkBatchPrivateParts'
 
-export type ApiErrorWhileCreatingOffer = Effect.Effect.Error<
+export type ApiErrorWhileCreatingOffer = Effect.Error<
   ReturnType<OfferApi['createNewOffer']>
 >
 
@@ -96,37 +96,33 @@ export default function createNewOfferForMyContacts({
   | NonCompatibleOfferVersionError
   | ClubKeyNotFoundInInnerStateError
 > {
-  return Effect.gen(function* (_) {
+  return Effect.gen(function* () {
     const adminId = existingAdminId ?? generateAdminId()
-    const symmetricKey = yield* _(generateSymmetricKey())
+    const symmetricKey = yield* generateSymmetricKey()
 
     if (onProgress) onProgress({type: 'CONSTRUCTING_PUBLIC_PAYLOAD'})
 
-    const encryptedPublic = yield* _(
-      encryptOfferPublicPayload({
-        offerPublicPart: publicPart,
-        symmetricKey,
-      })
-    )
+    const encryptedPublic = yield* encryptOfferPublicPayload({
+      offerPublicPart: publicPart,
+      symmetricKey,
+    })
 
-    const privatePayloads = yield* _(
-      fetchInfoAndGeneratePrivatePayloads({
-        symmetricKey,
-        intendedConnectionLevel,
-        contactApi,
-        ownerCredentials: ownerKeyPair,
-        ownerKeyPairV2,
-        intendedClubs,
-        serverToClientHashesToHashedPhoneNumbersMap,
-        onProgress,
-        adminId,
-      })
-    )
+    const privatePayloads = yield* fetchInfoAndGeneratePrivatePayloads({
+      symmetricKey,
+      intendedConnectionLevel,
+      contactApi,
+      ownerCredentials: ownerKeyPair,
+      ownerKeyPairV2,
+      intendedClubs,
+      serverToClientHashesToHashedPhoneNumbersMap,
+      onProgress,
+      adminId,
+    })
 
     if (onProgress) onProgress({type: 'SENDING_OFFER_TO_NETWORK'})
 
-    const sendOfferToNetworkResponse = yield* _(
-      sendOfferToNetworkBatchPrivateParts({
+    const sendOfferToNetworkResponse =
+      yield* sendOfferToNetworkBatchPrivateParts({
         offerApi,
         offerData: {
           ownerPrivatePayload: privatePayloads.ownerPrivatePayload,
@@ -138,11 +134,11 @@ export default function createNewOfferForMyContacts({
           offerId,
         },
       })
-    )
 
-    const offerInfo = yield* _(
-      decryptOffer(ownerKeyPair, ownerKeyPairV2)(sendOfferToNetworkResponse)
-    )
+    const offerInfo = yield* decryptOffer(
+      ownerKeyPair,
+      ownerKeyPairV2
+    )(sendOfferToNetworkResponse)
 
     if (onProgress) onProgress({type: 'DONE'})
 

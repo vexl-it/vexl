@@ -1,5 +1,5 @@
 import {Button, XStack} from '@vexl-next/ui'
-import {useMolecule} from 'bunshi/dist/react'
+import {useMolecule} from 'bunshi/react'
 import {Effect} from 'effect'
 import {useAtom, useAtomValue, useSetAtom, useStore} from 'jotai'
 import React, {useEffect} from 'react'

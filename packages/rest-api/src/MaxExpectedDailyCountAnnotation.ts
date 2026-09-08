@@ -1,6 +1,6 @@
-import {Context} from 'effect/index'
+import {Context} from 'effect'
 
-export class MaxExpectedDailyCall extends Context.Tag('MaxExpectedDailyCall')<
+export class MaxExpectedDailyCall extends Context.Service<
   MaxExpectedDailyCall,
   number
->() {}
+>()('MaxExpectedDailyCall') {}

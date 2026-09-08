@@ -3,7 +3,7 @@ import {
   type FeedbackType,
 } from '@vexl-next/domain/src/general/feedback'
 import {Dialog} from '@vexl-next/ui'
-import {ScopeProvider} from 'bunshi/dist/react'
+import {ScopeProvider} from 'bunshi/react'
 import {Effect} from 'effect'
 import {atom, useAtomValue, type SetStateAction, type WritableAtom} from 'jotai'
 import React, {useCallback, useRef} from 'react'
@@ -38,7 +38,7 @@ export const showUserFeedbackDialogAtom: WritableAtom<
     existing.onResult(resultFromFeedback(get(existing.feedbackAtom)))
   }
 
-  return Effect.async<UserFeedbackResult>((resolve) => {
+  return Effect.callback<UserFeedbackResult>((resolve) => {
     const feedbackAtom = atom<Feedback>(
       generateInitialFeedback(config.feedbackType)
     )

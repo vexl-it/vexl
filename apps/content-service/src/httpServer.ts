@@ -1,9 +1,3 @@
-import {
-  HttpApiBuilder,
-  HttpApiSwagger,
-  HttpMiddleware,
-  HttpServer,
-} from '@effect/platform/index'
 import {ContentApiSpecification} from '@vexl-next/rest-api/src/services/content/specification'
 import {redisUrl} from '@vexl-next/server-utils/src/commonConfigs'
 import {VexlProductNotificationProducerLayer} from '@vexl-next/server-utils/src/ContentServiceVexlProductNotificationMq'
@@ -15,6 +9,8 @@ import {RedisConnectionService} from '@vexl-next/server-utils/src/RedisConnectio
 import {RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {Layer} from 'effect'
+import {HttpRouter} from 'effect/unstable/http'
+import {HttpApiBuilder, HttpApiSwagger} from 'effect/unstable/httpapi'
 import {cryptoConfig, healthServerPortConfig} from './configs'
 import DbLayer from './db/layer'
 import {VexlProductNotificationsDbService} from './db/VexlProductNotificationsDbService'
@@ -81,22 +77,20 @@ const DonationsApiGroupLive = HttpApiBuilder.group(
       .handle('getInvoiceStatusType', getInvoiceStatusTypeHandler)
 )
 
-export const ContentApiLive = HttpApiBuilder.api(ContentApiSpecification).pipe(
+export const ContentApiLive = HttpApiBuilder.layer(
+  ContentApiSpecification
+).pipe(
   Layer.provide(CmsApiGroupLive),
   Layer.provide(NewsAndAnnouncementsApiGroupLive),
   Layer.provide(MapApiGroupLive),
   Layer.provide(VexlProductNotificationsApiGroupLive),
-  Layer.provide(VexlProductNotificationsDbService.Live),
   Layer.provide(DonationsApiGroupLive),
   Layer.provide(rateLimitingMiddlewareLayer(ContentApiSpecification))
 )
 
-export const ApiServerLive = HttpApiBuilder.serve(HttpMiddleware.logger).pipe(
-  Layer.provide(HttpApiSwagger.layer()),
-  Layer.provide(ContentApiLive),
-  HttpServer.withLogAddress,
-  Layer.provide(NodeHttpServerLiveWithPortFromEnv)
-)
+export const ApiServerLive = HttpRouter.serve(
+  Layer.mergeAll(ContentApiLive, HttpApiSwagger.layer(ContentApiSpecification))
+).pipe(Layer.provide(NodeHttpServerLiveWithPortFromEnv))
 
 export const HttpServerLive = Layer.mergeAll(
   ApiServerLive,
@@ -107,6 +101,7 @@ export const HttpServerLive = Layer.mergeAll(
   Layer.provideMerge(WebflowCmsService.Live),
   Layer.provideMerge(MapStylesService.Live),
   Layer.provideMerge(CacheService.Live),
+  Layer.provideMerge(VexlProductNotificationsDbService.Live),
   Layer.provideMerge(DbLayer),
   Layer.provideMerge(UpdateInvoiceStateWebhookService.Live),
   Layer.provideMerge(VexlProductNotificationProducerLayer),

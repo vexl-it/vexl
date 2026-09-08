@@ -5,7 +5,7 @@ export const STORED_CLUBS_V2_MMKV_KEY = 'storedClubsV2'
 export const FCM_CYPHER_TO_KEY_HOLDER_MMKV_KEY = 'fcmCypherToKeyHolder'
 export const VEXL_TOKEN_TO_KEY_HOLDER_MMKV_KEY = 'vexlTokenToKeyHolder'
 
-export const CriticalMmkvKeySchema = Schema.Literal(
+export const CriticalMmkvKeySchema = Schema.Literals([
   'messagingState',
   'offers',
   'storedContacts',
@@ -14,8 +14,8 @@ export const CriticalMmkvKeySchema = Schema.Literal(
   'postLoginFlowProgress1',
   STORED_CLUBS_V2_MMKV_KEY,
   FCM_CYPHER_TO_KEY_HOLDER_MMKV_KEY,
-  VEXL_TOKEN_TO_KEY_HOLDER_MMKV_KEY
-)
+  VEXL_TOKEN_TO_KEY_HOLDER_MMKV_KEY,
+])
 
 export type CriticalMmkvKey = typeof CriticalMmkvKeySchema.Type
 

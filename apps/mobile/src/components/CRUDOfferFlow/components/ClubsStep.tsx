@@ -1,7 +1,7 @@
 import {useNavigation} from '@react-navigation/native'
 import {Button, EditRow} from '@vexl-next/ui'
 import {YStack} from '@vexl-next/ui/src/primitives'
-import {useMolecule} from 'bunshi/dist/react'
+import {useMolecule} from 'bunshi/react'
 import {Effect} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React from 'react'

@@ -13,33 +13,29 @@ export const getVexlProductNotificationId = (uuid: string): string =>
 export const processVexlProductNotificationActionAtom = atom(
   null,
   (get, set, data: VexlProductNotificationData) =>
-    Effect.gen(function* (_) {
+    Effect.gen(function* () {
       const uuid = data.uuid
 
       if (Array.contains(get(handledVexlProductNotificationUuidsAtom), uuid)) {
-        yield* _(
-          Effect.log(
-            `Skipping already handled Vexl product notification ${uuid}`
-          )
+        yield* Effect.log(
+          `Skipping already handled Vexl product notification ${uuid}`
         )
         return
       }
 
       set(handledVexlProductNotificationUuidsAtom, Array.prepend(uuid))
 
-      yield* _(
-        Effect.promise(async () => {
-          await displayLocalNotification({
-            id: getVexlProductNotificationId(uuid),
-            channelId: await getDefaultChannel(),
-            content: {
-              title: data.title,
-              body: data.description,
-              data: data.toData(),
-            },
-          })
+      yield* Effect.promise(async () => {
+        await displayLocalNotification({
+          id: getVexlProductNotificationId(uuid),
+          channelId: await getDefaultChannel(),
+          content: {
+            title: data.title,
+            body: data.description,
+            data: data.toData(),
+          },
         })
-      )
+      })
 
       set(addNotificationToCenterActionAtom, {
         _tag: 'VexlProductNotificationData',

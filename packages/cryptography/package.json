@@ -4,8 +4,8 @@
   "type": "module",
   "main": "src/index",
   "scripts": {
-    "test": "jest --silent",
-    "test:watch": "jest --watch",
+    "test": "node --experimental-vm-modules ../../node_modules/jest/bin/jest.js --silent",
+    "test:watch": "node --experimental-vm-modules ../../node_modules/jest/bin/jest.js --watch",
     "clean": "rimraf .turbo node_modules",
     "lint": "eslint .",
     "format": "prettier --check \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\"",
@@ -16,7 +16,7 @@
     "@craftzdog/react-native-buffer": "^6.0.5",
     "@noble/hashes": "^1.8.0",
     "asn1.js": "^5.4.1",
-    "effect": "^3.20.0",
+    "effect": "4.0.0-rc.112",
     "libsodium-wrappers": "^0.8.0",
     "react-native-get-random-values": "^1.8.0"
   },

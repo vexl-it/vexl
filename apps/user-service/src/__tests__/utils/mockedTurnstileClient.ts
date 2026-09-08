@@ -8,7 +8,7 @@ export const verifyTurnstileTokenMock = jest.fn(
 
 export const mockedTurnstileClient = Layer.effect(
   TurnstileService,
-  Effect.gen(function* (_) {
+  Effect.gen(function* () {
     return {
       verifyToken: verifyTurnstileTokenMock,
     }

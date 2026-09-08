@@ -1,6 +1,9 @@
 import {PathString} from '@vexl-next/domain/src/utility/PathString.brand'
 import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
-import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
+import {
+  effectToTaskEither,
+  resultToEither,
+} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {Effect, Option, Schema} from 'effect'
 import * as FileSystem from 'expo-file-system'
 import * as E from 'fp-ts/Either'
@@ -55,7 +58,9 @@ function filenameOrLeft(
   return pipe(
     splitPath.at(-1),
     E.right,
-    E.chainW(Schema.decodeUnknownEither(PathString)),
+    E.chainW((input) =>
+      resultToEither(Schema.decodeUnknownResult(PathString)(input))
+    ),
     E.mapLeft((e) => ({_tag: 'fileSystemError', error: e}))
   )
 }
@@ -72,13 +77,15 @@ export function copyFileToNewPath({
     E.map((documentDirectory) =>
       FileSystem.Paths.join(documentDirectory, localDirectoryFilePath)
     ),
-    E.chainW(Schema.decodeUnknownEither(UriString)),
+    E.chainW((input) =>
+      resultToEither(Schema.decodeUnknownResult(UriString)(input))
+    ),
     TE.fromEither,
     TE.chainW((fullPathToNewFile) =>
       effectToTaskEither(copyFileE({from: sourceUri, to: fullPathToNewFile}))
     ),
     TE.mapLeft((e) => {
-      if (e._tag === 'ParseError') {
+      if (e._tag === 'SchemaError') {
         return {
           _tag: 'fileSystemError',
           error: e.cause,
@@ -99,13 +106,15 @@ export function copyFileLocalDirectoryAndKeepName({
   return pipe(
     filenameOrLeft(sourceUri),
     E.map((fileName) => urlJoin(targetFolder, fileName)),
-    E.chainW(Schema.decodeUnknownEither(PathString)),
+    E.chainW((input) =>
+      resultToEither(Schema.decodeUnknownResult(PathString)(input))
+    ),
     TE.fromEither,
     TE.chainW((fullPathToNewFile) =>
       copyFileToNewPath({sourceUri, localDirectoryFilePath: fullPathToNewFile})
     ),
     TE.mapLeft((e) => {
-      if (e._tag === 'ParseError') {
+      if (e._tag === 'SchemaError') {
         return {
           _tag: 'fileSystemError',
           error: e.cause,

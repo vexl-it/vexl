@@ -97,7 +97,7 @@ export const syncVexlNotificationTokensActionAtom = atom(
             })
           )
           .pipe(
-            Effect.catchAll((e) =>
+            Effect.catch((e) =>
               reportErrorE(
                 'warn',
                 new Error('Error invalidating old marketing vexl token'),

@@ -1,6 +1,6 @@
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {Switch} from '@vexl-next/ui'
-import {useMolecule} from 'bunshi/dist/react'
+import {useMolecule} from 'bunshi/react'
 import {useAtomValue} from 'jotai'
 import React from 'react'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'

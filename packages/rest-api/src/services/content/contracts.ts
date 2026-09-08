@@ -6,12 +6,16 @@ import {HttpsUrlString} from '@vexl-next/domain/src/utility/HttpsUrlString.brand
 import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {Uuid} from '@vexl-next/domain/src/utility/Uuid.brand'
-import {Schema} from 'effect'
+import {Effect, Option, Schema} from 'effect'
 
 export const Speaker = Schema.Struct({
   name: Schema.String,
-  linkToSocials: Schema.optionalWith(Schema.String, {as: 'Option'}),
-  imageUrl: Schema.optionalWith(Schema.String, {as: 'Option'}),
+  linkToSocials: Schema.OptionFromOptional(Schema.String).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
+  imageUrl: Schema.OptionFromOptional(Schema.String).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
 })
 export type Speaker = typeof Speaker.Type
 
@@ -20,13 +24,18 @@ export type EventId = typeof EventId.Type
 
 export const Event = Schema.Struct({
   id: EventId,
-  startDate: Schema.Date,
-  endDate: Schema.optionalWith(Schema.Date, {as: 'Option'}),
+  startDate: Schema.DateFromString,
+  endDate: Schema.OptionFromOptional(Schema.DateFromString).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
   link: Schema.String,
   name: Schema.String,
   venue: Schema.String,
   speakers: Schema.Array(Speaker),
-  goldenGlasses: Schema.optionalWith(Schema.Boolean, {default: () => false}),
+  goldenGlasses: Schema.Boolean.pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): false => false)),
+    Schema.withConstructorDefault(Effect.sync((): false => false))
+  ),
 })
 export type Event = typeof Event.Type
 
@@ -45,8 +54,12 @@ export const BlogArticlePreview = Schema.Struct({
   id: BlogId,
   title: Schema.String,
   slug: BlogSlug,
-  teaserText: Schema.optionalWith(Schema.String, {as: 'Option'}),
-  mainImage: Schema.optionalWith(UriString, {as: 'Option'}),
+  teaserText: Schema.OptionFromOptional(Schema.String).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
+  mainImage: Schema.OptionFromOptional(UriString).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
   link: Schema.String,
   publishedOn: Schema.DateFromString,
 })
@@ -60,19 +73,28 @@ export type BlogsArticlesResponse = typeof BlogsArticlesResponse.Type
 export class InvalidTokenError extends Schema.TaggedError<InvalidTokenError>(
   'InvalidTokenError'
 )('InvalidTokenError', {
-  status: Schema.optionalWith(Schema.Literal(401), {default: () => 401}),
+  status: Schema.Literal(401).pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): 401 => 401)),
+    Schema.withConstructorDefault(Effect.sync((): 401 => 401))
+  ),
 }) {}
 
 export class InvalidContentAdminTokenError extends Schema.TaggedError<InvalidContentAdminTokenError>(
   'InvalidContentAdminTokenError'
 )('InvalidContentAdminTokenError', {
-  status: Schema.optionalWith(Schema.Literal(401), {default: () => 401}),
+  status: Schema.Literal(401).pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): 401 => 401)),
+    Schema.withConstructorDefault(Effect.sync((): 401 => 401))
+  ),
 }) {}
 
 export class DuplicateVexlProductNotificationUuidError extends Schema.TaggedError<DuplicateVexlProductNotificationUuidError>(
   'DuplicateVexlProductNotificationUuidError'
 )('DuplicateVexlProductNotificationUuidError', {
-  status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
+  status: Schema.Literal(400).pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): 400 => 400)),
+    Schema.withConstructorDefault(Effect.sync((): 400 => 400))
+  ),
 }) {}
 
 export const CreateVexlProductNotificationRequest = Schema.Struct({
@@ -106,40 +128,49 @@ export type GetVexlProductNotificationsResponse =
 export const VexlBotNews = Schema.Struct({
   id: Uuid,
   content: Schema.String,
-  type: Schema.Literal('info', 'warning'),
+  type: Schema.Literals(['info', 'warning']),
   action: Schema.Struct({
     text: Schema.String,
     url: HttpsUrlString,
-  }).pipe(Schema.optionalWith({as: 'Option'})),
+  }).pipe((schema) =>
+    Schema.OptionFromOptional(schema).pipe(
+      Schema.withConstructorDefault(Effect.succeed(Option.none()))
+    )
+  ),
   cancelForever: Schema.Boolean,
-  bubbleOrigin: Schema.optionalWith(
+  bubbleOrigin: Schema.OptionFromOptional(
     Schema.Struct({
       title: Schema.String,
       subtitle: Schema.String,
-    }),
-    {as: 'Option'}
-  ),
+    })
+  ).pipe(Schema.withConstructorDefault(Effect.succeed(Option.none()))),
   cancelable: Schema.Boolean,
 })
 export type VexlBotNews = typeof VexlBotNews.Type
 
 export const FullScreenWarning = Schema.Struct({
   id: Uuid,
-  type: Schema.Literal('RED', 'YELLOW', 'GREEN'),
+  type: Schema.Literals(['RED', 'YELLOW', 'GREEN']),
   title: Schema.String,
   description: Schema.String,
   cancelForever: Schema.Boolean,
   action: Schema.Struct({
     text: Schema.String,
     url: HttpsUrlString,
-  }).pipe(Schema.optionalWith({as: 'Option'})),
+  }).pipe((schema) =>
+    Schema.OptionFromOptional(schema).pipe(
+      Schema.withConstructorDefault(Effect.succeed(Option.none()))
+    )
+  ),
   cancelable: Schema.Boolean,
 })
 export type FullScreenWarning = typeof FullScreenWarning.Type
 
 export const NewsAndAnnouncementsResponse = Schema.Struct({
   vexlBotNews: Schema.Array(VexlBotNews),
-  fullScreenWarning: Schema.optionalWith(FullScreenWarning, {as: 'Option'}),
+  fullScreenWarning: Schema.OptionFromOptional(FullScreenWarning).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
 })
 export type NewsAndAnnouncementsResponse =
   typeof NewsAndAnnouncementsResponse.Type
@@ -158,9 +189,10 @@ export class CreateInvoiceError extends Schema.TaggedError<CreateInvoiceError>(
 )('CreateInvoiceError', {
   cause: Schema.Unknown,
   message: Schema.String,
-  status: Schema.optionalWith(Schema.Literal(400), {
-    default: () => 400,
-  }),
+  status: Schema.Literal(400).pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): 400 => 400)),
+    Schema.withConstructorDefault(Effect.sync((): 400 => 400))
+  ),
 }) {}
 
 export class InvoiceNotFoundError extends Schema.TaggedError<InvoiceNotFoundError>(
@@ -195,11 +227,11 @@ export class GetInvoicePaymentMethodsGeneralError extends Schema.TaggedError<Get
   status: Schema.Literal(502),
 }) {}
 
-export const InvoicePaymentMethod = Schema.Literal(
+export const InvoicePaymentMethod = Schema.Literals([
   'BTC-CHAIN',
   'BTC-LN',
-  'BTC-LNURL'
-)
+  'BTC-LNURL',
+])
 export type InvoicePaymentMethod = typeof InvoicePaymentMethod.Type
 export const CreateInvoiceRequest = Schema.Struct({
   amount: Schema.Number,
@@ -217,7 +249,7 @@ export type StoreId = typeof StoreId.Type
 export const PaymentLink = Schema.String.pipe(Schema.brand('PaymentLink'))
 export type PaymentLink = typeof PaymentLink.Type
 
-export const InvoiceStatus = Schema.Literal(
+export const InvoiceStatus = Schema.Literals([
   'New',
   'Expired',
   'Paid',
@@ -225,8 +257,8 @@ export const InvoiceStatus = Schema.Literal(
   'Confirmed',
   'Processing',
   'Invalid',
-  'Settled'
-)
+  'Settled',
+])
 export type InvoiceStatus = typeof InvoiceStatus.Type
 
 export const CreateInvoiceResponse = Schema.Struct({
@@ -257,15 +289,15 @@ export const GetInvoiceResponse = Schema.Struct({
 })
 export type GetInvoiceResponse = typeof GetInvoiceResponse.Type
 
-export const InvoiceStatusType = Schema.Literal(
+export const InvoiceStatusType = Schema.Literals([
   'InvoiceCreated',
   'InvoiceReceivedPayment',
   'InvoicePaymentSettled',
   'InvoiceProcessing',
   'InvoiceExpired',
   'InvoiceSettled',
-  'InvoiceInvalid'
-)
+  'InvoiceInvalid',
+])
 export type InvoiceStatusType = typeof InvoiceStatusType.Type
 
 // states of success invoice
@@ -293,35 +325,37 @@ export const statusToStatusTypeMap: Record<InvoiceStatus, InvoiceStatusType> = {
 }
 
 export const UpdateInvoiceStatusWebhookRequest = Schema.Struct({
-  deliveryId: Schema.optionalWith(Schema.String, {
-    as: 'Option',
-  }),
-  webhookId: Schema.optionalWith(Schema.String, {
-    as: 'Option',
-  }),
-  originalDeliveryId: Schema.optionalWith(Schema.String, {
-    as: 'Option',
-  }),
-  isRedelivery: Schema.optionalWith(Schema.Boolean, {
-    default: () => true,
-  }),
+  deliveryId: Schema.OptionFromOptional(Schema.String).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
+  webhookId: Schema.OptionFromOptional(Schema.String).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
+  originalDeliveryId: Schema.OptionFromOptional(Schema.String).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
+  isRedelivery: Schema.Boolean.pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): true => true)),
+    Schema.withConstructorDefault(Effect.sync((): true => true))
+  ),
   type: InvoiceStatusType,
   timestamp: UnixMilliseconds,
-  partiallyPaid: Schema.optionalWith(Schema.Boolean, {
-    default: () => false,
-  }),
+  partiallyPaid: Schema.Boolean.pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): false => false)),
+    Schema.withConstructorDefault(Effect.sync((): false => false))
+  ),
   storeId: StoreId,
   invoiceId: InvoiceId,
   metadata: Schema.Struct({
-    orderId: Schema.optionalWith(Schema.String, {
-      as: 'Option',
-    }),
-    itemDesc: Schema.optionalWith(Schema.String, {
-      as: 'Option',
-    }),
-    orderUrl: Schema.optionalWith(Schema.String, {
-      as: 'Option',
-    }),
+    orderId: Schema.OptionFromOptional(Schema.String).pipe(
+      Schema.withConstructorDefault(Effect.succeed(Option.none()))
+    ),
+    itemDesc: Schema.OptionFromOptional(Schema.String).pipe(
+      Schema.withConstructorDefault(Effect.succeed(Option.none()))
+    ),
+    orderUrl: Schema.OptionFromOptional(Schema.String).pipe(
+      Schema.withConstructorDefault(Effect.succeed(Option.none()))
+    ),
   }),
 })
 export type UpdateInvoiceStatusWebhookRequest =

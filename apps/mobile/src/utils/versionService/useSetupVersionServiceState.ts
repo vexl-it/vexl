@@ -15,10 +15,12 @@ export default function useSetupVersionServiceState(): void {
         if (state !== 'active') return
         console.log('Fetching version service info')
         void api.user.getVersionServiceInfo().pipe(
-          Effect.andThen((info) => {
-            setVersionServiceState(info)
-            console.log('Version service info fetched', JSON.stringify(info))
-          }),
+          Effect.andThen((info) =>
+            Effect.sync(() => {
+              setVersionServiceState(info)
+              console.log('Version service info fetched', JSON.stringify(info))
+            })
+          ),
           Effect.mapError((e) => {
             console.log('Error while fetching version service info')
             reportError(

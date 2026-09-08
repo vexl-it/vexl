@@ -1,11 +1,12 @@
 import * as NodeHttpServer from '@effect/platform-node/NodeHttpServer'
-import {type HttpClient} from '@effect/platform/HttpClient'
-import {HttpApiBuilder} from '@effect/platform/index'
 import {type RateLimitingService} from '@vexl-next/server-utils/src/RateLimiting'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {mockedRateLimitingLayer} from '@vexl-next/server-utils/src/tests/mockedRateLimitingLayer'
 import {TestRequestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
+import {testConfigProviderLayer} from '@vexl-next/server-utils/src/tests/testConfigProvider'
 import {Console, Effect, Layer, ManagedRuntime, type Scope} from 'effect'
+import {HttpRouter} from 'effect/unstable/http'
+import {type HttpClient} from 'effect/unstable/http/HttpClient'
 import {cryptoConfig} from '../../configs'
 import {ApiLive} from '../../httpServer'
 import {type YadioService} from '../../utils/yadio'
@@ -20,8 +21,7 @@ export type MockedContexts =
 
 const universalContext = Layer.mergeAll(ServerCrypto.layer(cryptoConfig))
 
-const TestServerLive = HttpApiBuilder.serve().pipe(
-  Layer.provide(ApiLive),
+const TestServerLive = HttpRouter.serve(ApiLive).pipe(
   Layer.provideMerge(NodeHttpServer.layerTest)
 )
 const context = Layer.empty.pipe(
@@ -32,7 +32,9 @@ const context = Layer.empty.pipe(
   Layer.provideMerge(mockedRateLimitingLayer)
 )
 
-const runtime = ManagedRuntime.make(context)
+const runtime = ManagedRuntime.make(
+  context.pipe(Layer.provideMerge(testConfigProviderLayer))
+)
 let runtimeReady = false
 
 export const startRuntime = async (): Promise<void> => {
@@ -56,8 +58,8 @@ export const runPromiseInMockedEnvironment = async (
   await runtime.runPromise(
     effectToRun.pipe(
       Effect.scoped,
-      Effect.catchAll((e) => {
-        return Effect.zipRight(
+      Effect.catch((e) => {
+        return Effect.andThen(
           Effect.logError('Error in test', e),
           Effect.fail(e)
         )

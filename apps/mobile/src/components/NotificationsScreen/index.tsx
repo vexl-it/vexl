@@ -1,6 +1,6 @@
 import {useFocusEffect} from '@react-navigation/native'
 import {ChevronLeft, NavigationBar, Screen} from '@vexl-next/ui'
-import {Effect} from 'effect/index'
+import {Effect} from 'effect'
 import {useSetAtom} from 'jotai'
 import React, {useCallback} from 'react'
 import {useTranslation} from '../../utils/localization/I18nProvider'

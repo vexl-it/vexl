@@ -12,14 +12,14 @@ import {
   InvalidVerificationIdError,
 } from '@vexl-next/rest-api/src/services/user/contracts'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
-import {type ParseError} from 'effect/ParseResult'
-import {type ConfigError, Effect, Schema} from 'effect/index'
+import {Effect, pipe, Schema, type Config} from 'effect'
+import {type SchemaError} from 'effect/Schema'
 import {SmsVerificationSid} from '../../utils/SmsVerificationSid.brand'
 
 const VERIFICATION_EXPIRES_AFTER_MILIS = 1000 * 60 * 5 // 5 mins
 export const dummySid = Schema.decodeSync(SmsVerificationSid)('dummy')
 
-export const VerificationIdPayload = Schema.parseJson(
+export const VerificationIdPayload = Schema.fromJsonString(
   Schema.Struct({
     phoneNumber: E164PhoneNumber,
     verificationId: SmsVerificationSid,
@@ -33,11 +33,11 @@ export const createVerificationId = ({
   verificationId,
 }: VerificationIdPayload): Effect.Effect<
   EraseUserVerificationId,
-  ConfigError.ConfigError | ParseError | CryptoError,
+  Config.ConfigError | SchemaError | CryptoError,
   ServerCrypto
 > =>
-  Effect.gen(function* (_) {
-    const crypto = yield* _(ServerCrypto)
+  Effect.gen(function* () {
+    const crypto = yield* ServerCrypto
 
     const dataToEncrypt = {
       phoneNumber,
@@ -45,9 +45,9 @@ export const createVerificationId = ({
       expiresAt: unixMillisecondsFromNow(VERIFICATION_EXPIRES_AFTER_MILIS),
     }
 
-    return yield* _(
+    return yield* pipe(
       crypto.encryptAES(VerificationIdPayload)(dataToEncrypt),
-      Effect.flatMap(Schema.decode(EraseUserVerificationId))
+      Effect.flatMap(Schema.decodeEffect(EraseUserVerificationId))
     )
   })
 
@@ -55,13 +55,13 @@ export const validateAndDecodeVerificationId = (
   verificationId: EraseUserVerificationId
 ): Effect.Effect<
   VerificationIdPayload,
-  InvalidVerificationIdError | ConfigError.ConfigError,
+  InvalidVerificationIdError | Config.ConfigError,
   ServerCrypto
 > =>
-  Effect.gen(function* (_) {
-    const crypto = yield* _(ServerCrypto)
-    const decrypted = yield* _(
-      Schema.decode(AesGtmCypher)(verificationId),
+  Effect.gen(function* () {
+    const crypto = yield* ServerCrypto
+    const decrypted = yield* pipe(
+      Schema.decodeEffect(AesGtmCypher)(verificationId),
       Effect.flatMap(crypto.decryptAES(VerificationIdPayload)),
       Effect.catchTags({
         CryptoError: () =>
@@ -69,7 +69,7 @@ export const validateAndDecodeVerificationId = (
             status: 400,
             reason: 'InvalidCypher',
           }),
-        ParseError: () =>
+        SchemaError: () =>
           new InvalidVerificationIdError({
             status: 400,
             reason: 'InvalidFormat',
@@ -78,12 +78,10 @@ export const validateAndDecodeVerificationId = (
     )
 
     if (unixMillisecondsFromNow(0) > decrypted.expiresAt) {
-      return yield* _(
-        new InvalidVerificationIdError({
-          status: 400,
-          reason: 'Expired',
-        })
-      )
+      return yield* new InvalidVerificationIdError({
+        status: 400,
+        reason: 'Expired',
+      })
     }
     return decrypted
   })

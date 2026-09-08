@@ -1,4 +1,4 @@
-import {Schema} from 'effect/index'
+import {Schema} from 'effect'
 import {UnixMilliseconds} from '../utility/UnixMilliseconds.brand'
 import {HashedPhoneNumber} from './HashedPhoneNumber.brand'
 
@@ -9,7 +9,7 @@ export type ShortLivedTokenForErasingUserOnContactService =
   typeof ShortLivedTokenForErasingUserOnContactService.Type
 
 export const ShortLivedTokenForErasingUserOnContactServicePayload =
-  Schema.parseJson(
+  Schema.fromJsonString(
     Schema.Struct({
       phoneNumberHash: HashedPhoneNumber,
       expiresAt: UnixMilliseconds,
@@ -21,6 +21,6 @@ export type ShortLivedTokenForErasingUserOnContactServicePayload =
 export class BadShortLivedTokenForErasingUserOnContactServiceError extends Schema.TaggedError<BadShortLivedTokenForErasingUserOnContactServiceError>(
   'BadShortLivedTokenForErasingUserOnContactService'
 )('BadShortLivedTokenForErasingUserOnContactService', {
-  reason: Schema.Literal('CryptoError', 'Expired'),
+  reason: Schema.Literals(['CryptoError', 'Expired']),
   status: Schema.Literal(400),
 }) {}

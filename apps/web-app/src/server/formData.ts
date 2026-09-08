@@ -6,10 +6,10 @@ export class ErrorParsingFormData extends Schema.TaggedError<ErrorParsingFormDat
   cause: Schema.Unknown,
 }) {}
 
-export function decodeFormData<SchemaType extends Schema.Schema.AnyNoContext>(
+export function decodeFormData<SchemaType extends Schema.Decoder<unknown>>(
   schema: SchemaType,
   formData: FormData
-): Schema.Schema.Type<SchemaType> {
+): SchemaType['Type'] {
   try {
     return Schema.decodeUnknownSync(schema)(Object.fromEntries(formData))
   } catch (cause) {

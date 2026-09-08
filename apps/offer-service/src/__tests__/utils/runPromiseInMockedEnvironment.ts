@@ -1,8 +1,5 @@
-import * as NodeContext from '@effect/platform-node/NodeContext'
 import * as NodeHttpServer from '@effect/platform-node/NodeHttpServer'
-import {type HttpClient} from '@effect/platform/HttpClient'
-import {HttpApiBuilder} from '@effect/platform/index'
-import {type SqlClient} from '@effect/sql/SqlClient'
+import * as NodeServices from '@effect/platform-node/NodeServices'
 import {type RateLimitingService} from '@vexl-next/server-utils/src/RateLimiting'
 import {type RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
@@ -11,11 +8,15 @@ import {mockedMetricsClientService} from '@vexl-next/server-utils/src/tests/mock
 import {mockedRateLimitingLayer} from '@vexl-next/server-utils/src/tests/mockedRateLimitingLayer'
 import {mockedRedisLayer} from '@vexl-next/server-utils/src/tests/mockedRedisLayer'
 import {TestRequestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
+import {testConfigProviderLayer} from '@vexl-next/server-utils/src/tests/testConfigProvider'
 import {
   disposeTestDatabase,
   setupTestDatabase,
 } from '@vexl-next/server-utils/src/tests/testDb'
 import {Console, Effect, Layer, ManagedRuntime, type Scope} from 'effect'
+import {HttpRouter} from 'effect/unstable/http'
+import {type HttpClient} from 'effect/unstable/http/HttpClient'
+import {type SqlClient} from 'effect/unstable/sql/SqlClient'
 import {cryptoConfig} from '../../configs'
 import {NoteDbService} from '../../db/NoteDbService'
 import {OfferDbService} from '../../db/OfferDbService'
@@ -37,8 +38,7 @@ const universalContext = Layer.mergeAll(
   mockedRedisLayer,
   ServerCrypto.layer(cryptoConfig)
 )
-const TestServerLive = HttpApiBuilder.serve().pipe(
-  Layer.provide(OfferApiLive),
+const TestServerLive = HttpRouter.serve(OfferApiLive).pipe(
   Layer.provideMerge(NodeHttpServer.layerTest)
 )
 const context = Layer.empty.pipe(
@@ -50,10 +50,12 @@ const context = Layer.empty.pipe(
   Layer.provideMerge(mockedRateLimitingLayer),
   Layer.provideMerge(mockedMetricsClientService),
   Layer.provideMerge(DbLayer),
-  Layer.provideMerge(NodeContext.layer)
+  Layer.provideMerge(NodeServices.layer)
 )
 
-const runtime = ManagedRuntime.make(context)
+const runtime = ManagedRuntime.make(
+  context.pipe(Layer.provideMerge(testConfigProviderLayer))
+)
 let runtimeReady = false
 
 export const startRuntime = async (): Promise<void> => {
@@ -79,8 +81,8 @@ export const runPromiseInMockedEnvironment = async (
   await runtime.runPromise(
     effectToRun.pipe(
       Effect.scoped,
-      Effect.catchAll((e) => {
-        return Effect.zipRight(
+      Effect.catch((e) => {
+        return Effect.andThen(
           Effect.logError('Error in test', e),
           Effect.fail(e)
         )

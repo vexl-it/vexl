@@ -8,8 +8,8 @@ import {
   XStack,
   YStack,
 } from '@vexl-next/ui'
-import {useMolecule} from 'bunshi/dist/react'
-import {Effect} from 'effect/index'
+import {useMolecule} from 'bunshi/react'
+import {Effect} from 'effect'
 import {useAtomValue, useSetAtom, useStore} from 'jotai'
 import React, {useCallback} from 'react'
 import {type RootStackScreenProps} from '../../../navigationTypes'

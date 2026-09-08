@@ -1,6 +1,6 @@
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {IsoDatetimeString} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
-import {Array, Option, pipe, Schema} from 'effect'
+import {Array, Effect, Filter, Option, pipe, Schema} from 'effect'
 import {atom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {atomFamily} from 'jotai/utils'
@@ -13,11 +13,9 @@ export const contactsStoreAtom = atomWithParsedMmkvStorage(
   Schema.Struct({
     contacts: Schema.Array(StoredContact).pipe(Schema.mutable),
     lastImport: Schema.optional(IsoDatetimeString),
-    needsFullContactsReplaceAfterContactEdit: Schema.optionalWith(
-      Schema.Boolean,
-      {
-        default: () => false,
-      }
+    needsFullContactsReplaceAfterContactEdit: Schema.Boolean.pipe(
+      Schema.withDecodingDefaultType(Effect.sync((): false => false)),
+      Schema.withConstructorDefault(Effect.sync((): false => false))
     ),
   })
 )
@@ -46,9 +44,11 @@ export const importedContactsAtom = atom((get) =>
   pipe(
     get(storedContactsAtom),
     Array.filter((contact) => contact.flags.imported),
-    Array.filterMap((contact) =>
-      contact.computedValues.pipe(
-        Option.map((computedValues) => ({...contact, computedValues}))
+    Array.filterMap(
+      Filter.fromPredicateOption((contact) =>
+        contact.computedValues.pipe(
+          Option.map((computedValues) => ({...contact, computedValues}))
+        )
       )
     )
   )
@@ -90,22 +90,25 @@ export const normalizedContactsAtom = atom(
     const seenNormalizedNumbers = new Set<string>()
     return pipe(
       get(storedContactsAtom),
-      Array.filterMap((contact) =>
-        contact.computedValues.pipe(
-          Option.filter((computedValues) => {
-            if (seenNormalizedNumbers.has(computedValues.normalizedNumber))
-              return false
-            seenNormalizedNumbers.add(computedValues.normalizedNumber)
-            return true
-          }),
-          Option.map((computedValues) => {
-            const cachedContact = normalizedContactByStoredContact.get(contact)
-            if (cachedContact !== undefined) return cachedContact
+      Array.filterMap(
+        Filter.fromPredicateOption((contact) =>
+          contact.computedValues.pipe(
+            Option.filter((computedValues) => {
+              if (seenNormalizedNumbers.has(computedValues.normalizedNumber))
+                return false
+              seenNormalizedNumbers.add(computedValues.normalizedNumber)
+              return true
+            }),
+            Option.map((computedValues) => {
+              const cachedContact =
+                normalizedContactByStoredContact.get(contact)
+              if (cachedContact !== undefined) return cachedContact
 
-            const normalizedContact = {...contact, computedValues}
-            normalizedContactByStoredContact.set(contact, normalizedContact)
-            return normalizedContact
-          })
+              const normalizedContact = {...contact, computedValues}
+              normalizedContactByStoredContact.set(contact, normalizedContact)
+              return normalizedContact
+            })
+          )
         )
       )
     )

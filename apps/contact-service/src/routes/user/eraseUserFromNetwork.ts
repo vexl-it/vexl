@@ -1,37 +1,36 @@
-import {HttpApiBuilder} from '@effect/platform/index'
 import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {makeHttpApiHandler} from '@vexl-next/server-utils/src/makeHttpApiHandler'
 import {verifyAndDecodeShortLivedTokenForErasingUser} from '@vexl-next/server-utils/src/shortLivedTokenForErasingUserUtils'
-import {Effect} from 'effect'
+import {Effect, pipe} from 'effect'
 import {ContactDbService} from '../../db/ContactDbService'
 import {UserDbService} from '../../db/UserDbService'
 import {serverHashPhoneNumber} from '../../utils/serverHashContact'
 
-export const eraseUserFromNetwork = HttpApiBuilder.handler(
+export const eraseUserFromNetwork = makeHttpApiHandler(
   ContactApiSpecification,
   'User',
   'eraseUserFromNetwork',
   (req) =>
-    Effect.gen(function* (_) {
-      const {phoneNumberHash} = yield* _(
-        verifyAndDecodeShortLivedTokenForErasingUser(req.payload.token)
-      )
-      const serverHash = yield* _(serverHashPhoneNumber(phoneNumberHash))
+    Effect.gen(function* () {
+      const {phoneNumberHash} =
+        yield* verifyAndDecodeShortLivedTokenForErasingUser(req.payload.token)
+      const serverHash = yield* serverHashPhoneNumber(phoneNumberHash)
 
-      const userDb = yield* _(UserDbService)
-      const contactDb = yield* _(ContactDbService)
+      const userDb = yield* UserDbService
+      const contactDb = yield* ContactDbService
 
-      yield* _(contactDb.deleteContactsByHashFrom(serverHash))
-      yield* _(
+      yield* contactDb.deleteContactsByHashFrom(serverHash)
+      yield* pipe(
         userDb.findUserByHash(serverHash),
-        Effect.flatten,
+        Effect.flatMap(Effect.fromOption),
         Effect.flatMap((user) =>
           userDb.deleteUserByPublicKeyAndHash({
             hash: serverHash,
             publicKey: user.publicKey,
           })
         ),
-        Effect.catchTag('NoSuchElementException', (e) => Effect.void)
+        Effect.catchTag('NoSuchElementError', (e) => Effect.void)
       )
 
       return {erased: 'ok' as const}

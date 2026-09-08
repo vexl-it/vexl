@@ -4,15 +4,15 @@ import {
   Cause,
   Context,
   Effect,
-  FiberRef,
-  FiberRefs,
   Layer,
   Logger,
-  LogLevel,
   Option,
+  pipe,
   Redacted,
+  References,
   Tracer,
-  type ConfigError,
+  type Config,
+  type LogLevel,
 } from 'effect'
 import {
   grafanaTempoDatasourceUidConfig,
@@ -24,20 +24,19 @@ import {
 } from './commonConfigs'
 
 const toSentryLevel = (logLevel: LogLevel.LogLevel): Sentry.SeverityLevel =>
-  logLevel._tag === 'Fatal' ? 'fatal' : 'error'
+  logLevel === 'Fatal' ? 'fatal' : 'error'
 
 /**
  * Reads the tracing span active in the logging fiber. Used to tag Sentry
  * events with the OpenTelemetry trace id so an event can be looked up in the
  * tracing backend (Sentry itself receives no spans).
  */
-export const traceContextFromFiberRefs = (
-  fiberRefs: FiberRefs.FiberRefs
+export const traceContextFromContext = (
+  context: Context.Context<never>
 ): Option.Option<{traceId: string; spanId: string}> =>
-  Context.getOption(
-    FiberRefs.getOrDefault(fiberRefs, FiberRef.currentContext),
-    Tracer.ParentSpan
-  ).pipe(Option.map((span) => ({traceId: span.traceId, spanId: span.spanId})))
+  Context.getOption(context, Tracer.ParentSpan).pipe(
+    Option.map((span) => ({traceId: span.traceId, spanId: span.spanId}))
+  )
 
 /**
  * Deep link into Grafana Explore with a TraceQL query for the given trace.
@@ -84,8 +83,10 @@ export const grafanaTraceUrl = (
  * `cause`): internal frames are stripped and span frames are appended, so
  * Sentry shows a logical async trace.
  */
-export const prettifyError = (error: Error): Error =>
-  Cause.prettyErrors(Cause.fail(error))[0] ?? error
+export const prettifyError = (
+  error: Error,
+  cause?: Cause.Cause<unknown>
+): Error => Cause.prettyErrors(cause ?? Cause.fail(error))[0] ?? error
 
 /**
  * Forwards every log at Error level and above to Sentry. All backend error
@@ -97,12 +98,13 @@ const makeSentryCaptureLogger = (
   grafanaUrl: Option.Option<string>,
   grafanaTempoDatasourceUid: Option.Option<string>
 ): Logger.Logger<unknown, void> =>
-  Logger.make(({annotations, cause, context, logLevel, message}) => {
-    if (!LogLevel.greaterThanEqual(logLevel, LogLevel.Error)) return
+  Logger.make(({cause, fiber, logLevel, message}) => {
+    if (logLevel !== 'Error' && logLevel !== 'Fatal') return
 
     const parts = Array.isArray(message) ? message : [message]
     const title = parts.find((part): part is string => typeof part === 'string')
-    const causeError = Cause.isEmpty(cause) ? undefined : Cause.squash(cause)
+    const causeError =
+      cause.reasons.length === 0 ? undefined : Cause.squash(cause)
     const error = [causeError, ...parts].find(
       (part): part is Error => part instanceof Error
     )
@@ -110,12 +112,12 @@ const makeSentryCaptureLogger = (
     const extra: Record<string, unknown> = {
       logMessage: title,
       details: parts.filter((part) => part !== title && part !== error),
-      annotations: Object.fromEntries(annotations),
+      annotations: fiber.getRef(References.CurrentLogAnnotations),
     }
     if (causeError !== undefined && causeError !== error)
       extra.cause = causeError
 
-    const trace = traceContextFromFiberRefs(context)
+    const trace = traceContextFromContext(fiber.context)
     if (Option.isSome(trace) && Option.isSome(grafanaUrl))
       extra.grafanaTraceUrl = grafanaTraceUrl(
         grafanaUrl.value,
@@ -136,15 +138,18 @@ const makeSentryCaptureLogger = (
 
     const level = toSentryLevel(logLevel)
     if (error !== undefined) {
-      Sentry.captureException(prettifyError(error), {
-        level,
-        extra,
-        ...traceTags,
-        // Group by error type + messages instead of stack traces. Effect
-        // tagged errors are often constructed in shared helpers, so their
-        // stacks would lump unrelated failures into a single issue.
-        fingerprint: [error.name, error.message, title ?? ''],
-      })
+      Sentry.captureException(
+        prettifyError(error, error === causeError ? cause : undefined),
+        {
+          level,
+          extra,
+          ...traceTags,
+          // Group by error type + messages instead of stack traces. Effect
+          // tagged errors are often constructed in shared helpers, so their
+          // stacks would lump unrelated failures into a single issue.
+          fingerprint: [error.name, error.message, title ?? ''],
+        }
+      )
     } else {
       Sentry.captureMessage(title ?? 'Error log without message', {
         level,
@@ -160,65 +165,59 @@ const makeSentryCaptureLogger = (
  * Tracing stays on the existing OpenTelemetry setup; Sentry only receives
  * errors, with breadcrumbs dropped and events scrubbed of sensitive data.
  */
-export const sentryLayer: Layer.Layer<never, ConfigError.ConfigError> =
-  Layer.unwrapEffect(
-    Effect.gen(function* (_) {
-      const dsn = yield* _(sentryDsnConfig)
-      if (Option.isNone(dsn)) {
-        yield* _(
-          Effect.log(
-            'Sentry error reporting is disabled because SENTRY_DSN is not configured.'
-          )
-        )
-        return Layer.empty
-      }
-
-      const environment = yield* _(
-        sentryEnvironmentConfig,
-        Effect.flatMap(
-          Option.match({
-            onNone: () => nodeEnvConfig,
-            onSome: Effect.succeed,
-          })
-        )
+export const sentryLayer: Layer.Layer<never, Config.ConfigError> = Layer.unwrap(
+  Effect.gen(function* () {
+    const dsn = yield* sentryDsnConfig
+    if (Option.isNone(dsn)) {
+      yield* Effect.log(
+        'Sentry error reporting is disabled because SENTRY_DSN is not configured.'
       )
-      const release = yield* _(serviceVersionConfig)
-      const grafanaUrl = yield* _(grafanaUrlConfig)
-      const grafanaTempoDatasourceUid = yield* _(
-        grafanaTempoDatasourceUidConfig
-      )
+      return Layer.empty
+    }
 
-      yield* _(
-        Effect.sync(() => {
-          Sentry.init({
-            dsn: Redacted.value(dsn.value),
-            environment,
-            release,
-            // The app runs its own OpenTelemetry NodeSdk for tracing; without
-            // this flag Sentry would register a competing tracer provider.
-            skipOpenTelemetrySetup: true,
-            sendDefaultPii: false,
-            beforeBreadcrumb: () => null,
-            beforeSend: (event) => {
-              scrubSensitiveDataInPlace(event)
-              return event
-            },
-          })
+    const environment = yield* pipe(
+      sentryEnvironmentConfig,
+      Effect.flatMap(
+        Option.match({
+          onNone: () => nodeEnvConfig,
+          onSome: Effect.succeed,
         })
       )
-      yield* _(Effect.logInfo('Sentry error reporting enabled', {environment}))
+    )
+    const release = yield* serviceVersionConfig
+    const grafanaUrl = yield* grafanaUrlConfig
+    const grafanaTempoDatasourceUid = yield* grafanaTempoDatasourceUidConfig
 
-      return Layer.merge(
-        Logger.add(
-          makeSentryCaptureLogger(grafanaUrl, grafanaTempoDatasourceUid)
-        ),
-        Layer.scopedDiscard(
-          Effect.addFinalizer(() =>
-            Effect.promise(async () => {
-              await Sentry.close(2000)
-            }).pipe(Effect.ignore)
-          )
+    yield* Effect.sync(() => {
+      Sentry.init({
+        dsn: Redacted.value(dsn.value),
+        environment,
+        release,
+        // The app runs its own OpenTelemetry NodeSdk for tracing; without
+        // this flag Sentry would register a competing tracer provider.
+        skipOpenTelemetrySetup: true,
+        sendDefaultPii: false,
+        beforeBreadcrumb: () => null,
+        beforeSend: (event) => {
+          scrubSensitiveDataInPlace(event)
+          return event
+        },
+      })
+    })
+    yield* Effect.logInfo('Sentry error reporting enabled', {environment})
+
+    return Layer.merge(
+      Logger.layer(
+        [makeSentryCaptureLogger(grafanaUrl, grafanaTempoDatasourceUid)],
+        {mergeWithExisting: true}
+      ),
+      Layer.effectDiscard(
+        Effect.addFinalizer(() =>
+          Effect.promise(async () => {
+            await Sentry.close(2000)
+          }).pipe(Effect.ignore)
         )
       )
-    })
-  )
+    )
+  })
+)

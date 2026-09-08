@@ -4,19 +4,18 @@ import {
 } from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
-import {Schema} from 'effect'
+import {Effect, Schema} from 'effect'
 import {atomWithParsedMmkvStorage} from '../../utils/atomUtils/atomWithParsedMmkvStorage'
 
 const VexlNotificationSecretState = Schema.Struct({
   secret: Schema.NullOr(VexlNotificationTokenSecret),
-  systemVexlToken: Schema.optionalWith(Schema.NullOr(VexlNotificationToken), {
-    default: () => null,
-  }),
-  marketingVexlToken: Schema.optionalWith(
-    Schema.NullOr(VexlNotificationToken),
-    {
-      default: () => null,
-    }
+  systemVexlToken: Schema.NullOr(VexlNotificationToken).pipe(
+    Schema.withDecodingDefaultType(Effect.sync(() => null)),
+    Schema.withConstructorDefault(Effect.sync(() => null))
+  ),
+  marketingVexlToken: Schema.NullOr(VexlNotificationToken).pipe(
+    Schema.withDecodingDefaultType(Effect.sync(() => null)),
+    Schema.withConstructorDefault(Effect.sync(() => null))
   ),
   lastUpdatedMetadata: Schema.NullOr(
     Schema.Struct({

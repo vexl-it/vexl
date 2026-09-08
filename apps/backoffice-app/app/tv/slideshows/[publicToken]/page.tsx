@@ -110,14 +110,14 @@ export default function TvSlideshowPage() {
   }, [loadSlideshow])
 
   const currentSlide = useMemo(() => {
-    if (!slideshow || !Array.isNonEmptyReadonlyArray(slideshow.slides)) {
+    if (!slideshow || !Array.isReadonlyArrayNonEmpty(slideshow.slides)) {
       return null
     }
     return slideshow.slides[currentIndex] ?? slideshow.slides[0]
   }, [currentIndex, slideshow])
 
   const activeIndex = useMemo(() => {
-    if (!slideshow || !Array.isNonEmptyReadonlyArray(slideshow.slides)) {
+    if (!slideshow || !Array.isReadonlyArrayNonEmpty(slideshow.slides)) {
       return null
     }
 

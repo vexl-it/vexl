@@ -3,8 +3,8 @@ import {Schema} from 'effect'
 import {DateTime} from 'luxon'
 
 export const UnixMilliseconds = Schema.Number.pipe(
-  Schema.int(),
-  Schema.greaterThanOrEqualTo(0),
+  Schema.check(Schema.isInt()),
+  Schema.check(Schema.isGreaterThanOrEqualTo(0)),
   Schema.brand('UnixMilliseconds')
 )
 export type UnixMilliseconds = Schema.Schema.Type<typeof UnixMilliseconds>

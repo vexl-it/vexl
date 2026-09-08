@@ -7,71 +7,71 @@ import {FcmToken} from '@vexl-next/domain/src/utility/FcmToken.brand'
 import {PlatformName} from '@vexl-next/domain/src/utility/PlatformName'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {AppSource} from '@vexl-next/rest-api/src/commonHeaders'
-import {Schema} from 'effect'
+import {Effect, Option, Schema} from 'effect'
 import {ServerHashedNumber} from '../../utils/serverHashContact'
 
-export const UserRecordId = Schema.BigInt.pipe(Schema.brand('UserRecordId'))
+export const UserRecordId = Schema.BigIntFromString.pipe(
+  Schema.brand('UserRecordId')
+)
 export type UserRecordId = typeof UserRecordId.Type
 
 export class UserRecord extends Schema.Class<UserRecord>('UserRecord')({
   id: UserRecordId,
   publicKey: PublicKeyPemBase64,
   // V2 public key for cryptobox - nullable for backward compatibility
-  publicKeyV2: Schema.optionalWith(PublicKeyV2, {
-    as: 'Option',
-    nullable: true,
-  }),
+  publicKeyV2: Schema.OptionFromOptionalNullOr(PublicKeyV2).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
   hash: ServerHashedNumber,
-  clientVersion: Schema.optionalWith(VersionCode, {
-    as: 'Option',
-    nullable: true,
-  }),
-  firebaseToken: Schema.optionalWith(FcmToken, {as: 'Option', nullable: true}),
-  expoToken: Schema.optionalWith(ExpoNotificationToken, {
-    as: 'Option',
-    nullable: true,
-  }),
-  vexlNotificationToken: Schema.optionalWith(VexlNotificationToken, {
-    as: 'Option',
-    nullable: true,
-  }),
-  refreshedAt: Schema.DateFromSelf,
-  platform: Schema.optionalWith(PlatformName, {as: 'Option', nullable: true}),
-  lastNewContentNotificaionSentAt: Schema.optionalWith(VersionCode, {
-    as: 'Option',
-    nullable: true,
-  }),
-  initialImportDone: Schema.optionalWith(Schema.Boolean, {
-    default: () => false,
-  }),
-  countryPrefix: Schema.optionalWith(CountryPrefix, {
-    as: 'Option',
-    nullable: true,
-  }),
-  appSource: Schema.optionalWith(AppSource, {
-    as: 'Option',
-    nullable: true,
-  }),
-  lastInactivityNotificationSentAt: Schema.optionalWith(Schema.DateFromSelf, {
-    as: 'Option',
-    nullable: true,
-  }),
-  numberOfInactivityNotificationsSent: Schema.optionalWith(Schema.Number, {
-    default: () => 0,
-  }),
+  clientVersion: Schema.OptionFromOptionalNullOr(VersionCode).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
+  firebaseToken: Schema.OptionFromOptionalNullOr(FcmToken).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
+  expoToken: Schema.OptionFromOptionalNullOr(ExpoNotificationToken).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
+  vexlNotificationToken: Schema.OptionFromOptionalNullOr(
+    VexlNotificationToken
+  ).pipe(Schema.withConstructorDefault(Effect.succeed(Option.none()))),
+  refreshedAt: Schema.Date,
+  platform: Schema.OptionFromOptionalNullOr(PlatformName).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
+  lastNewContentNotificaionSentAt: Schema.OptionFromOptionalNullOr(
+    VersionCode
+  ).pipe(Schema.withConstructorDefault(Effect.succeed(Option.none()))),
+  initialImportDone: Schema.Boolean.pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): false => false)),
+    Schema.withConstructorDefault(Effect.sync((): false => false))
+  ),
+  countryPrefix: Schema.OptionFromOptionalNullOr(CountryPrefix).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
+  appSource: Schema.OptionFromOptionalNullOr(AppSource).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
+  lastInactivityNotificationSentAt: Schema.OptionFromOptionalNullOr(
+    Schema.Date
+  ).pipe(Schema.withConstructorDefault(Effect.succeed(Option.none()))),
+  numberOfInactivityNotificationsSent: Schema.Number.pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): 0 => 0)),
+    Schema.withConstructorDefault(Effect.sync((): 0 => 0))
+  ),
 }) {}
 
 export const NotificationTokens = Schema.Struct({
-  firebaseToken: Schema.optionalWith(FcmToken, {as: 'Option', nullable: true}),
-  expoToken: Schema.optionalWith(ExpoNotificationToken, {
-    as: 'Option',
-    nullable: true,
-  }),
-  vexlNotificationToken: Schema.optionalWith(VexlNotificationToken, {
-    as: 'Option',
-    nullable: true,
-  }),
+  firebaseToken: Schema.OptionFromOptionalNullOr(FcmToken).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
+  expoToken: Schema.OptionFromOptionalNullOr(ExpoNotificationToken).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
+  vexlNotificationToken: Schema.OptionFromOptionalNullOr(
+    VexlNotificationToken
+  ).pipe(Schema.withConstructorDefault(Effect.succeed(Option.none()))),
 })
 export type NotificationTokens = typeof NotificationTokens.Type
 export const NotificationsTokensEquivalence =
-  Schema.equivalence(NotificationTokens)
+  Schema.toEquivalence(NotificationTokens)

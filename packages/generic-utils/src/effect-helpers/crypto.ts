@@ -43,23 +43,27 @@ export class CryptoError extends Schema.TaggedError<CryptoError>('CryptoError')(
 ) {}
 
 export const EciesGTMECypher = Schema.String.pipe(
-  Schema.nonEmptyString(),
-  Schema.filter((v) => v.startsWith(ECIES_GTM_CYPHER_PREFIX)),
+  Schema.check(Schema.isNonEmpty()),
+  Schema.check(Schema.makeFilter((v) => v.startsWith(ECIES_GTM_CYPHER_PREFIX))),
   Schema.brand('EciesGTMECypher')
 )
 export type EciesGTMECypher = typeof EciesGTMECypher.Type
 
 export const CryptoBoxCypher = Schema.String.pipe(
-  Schema.nonEmptyString(),
-  Schema.filter((v) => v.startsWith(CRYPTO_BOX_CYPHER_PREFIX)),
+  Schema.check(Schema.isNonEmpty()),
+  Schema.check(
+    Schema.makeFilter((v) => v.startsWith(CRYPTO_BOX_CYPHER_PREFIX))
+  ),
   Schema.brand('CryptoBoxCypher')
 )
 
 export type CryptoBoxCypher = typeof CryptoBoxCypher.Type
 
 export const CryptoBoxSignature = Schema.String.pipe(
-  Schema.nonEmptyString(),
-  Schema.filter((v) => v.startsWith(CRYPTO_BOX_SIGNATURE_PREFIX)),
+  Schema.check(Schema.isNonEmpty()),
+  Schema.check(
+    Schema.makeFilter((v) => v.startsWith(CRYPTO_BOX_SIGNATURE_PREFIX))
+  ),
   Schema.brand('CryptoBoxSignature')
 )
 export type CryptoBoxSignature = typeof CryptoBoxSignature.Type
@@ -69,8 +73,8 @@ export const eciesGTMEncryptE =
   (data: string): Effect.Effect<EciesGTMECypher, CryptoError> =>
     Effect.promise(async () => await eciesGTMEncrypt({publicKey, data})).pipe(
       Effect.map((cypher) => `${ECIES_GTM_CYPHER_PREFIX}${cypher}`),
-      Effect.flatMap(Schema.decode(EciesGTMECypher)),
-      Effect.catchAllDefect((e) =>
+      Effect.flatMap(Schema.decodeEffect(EciesGTMECypher)),
+      Effect.catchDefect((e) =>
         Effect.fail(
           new CryptoError({
             message: 'Error while encrypting data with Ecies-gtm',
@@ -78,7 +82,7 @@ export const eciesGTMEncryptE =
           })
         )
       ),
-      Effect.catchTag('ParseError', (e) =>
+      Effect.catchTag('SchemaError', (e) =>
         Effect.fail(
           new CryptoError({
             message:
@@ -99,7 +103,7 @@ export const eciesGTMDecryptE =
           privateKey,
         })
     ).pipe(
-      Effect.catchAllDefect(
+      Effect.catchDefect(
         (e) =>
           new CryptoError({
             message: 'Unable to decode EciesGTM cypher',
@@ -122,12 +126,12 @@ export const ecdsaSignE =
   (privateKey: PrivateKeyPemBase64) =>
   (challenge: string): Effect.Effect<EcdsaSignature, CryptoError> =>
     Effect.sync(() => ecdsaSign({privateKey, challenge})).pipe(
-      Effect.flatMap(Schema.decode(EcdsaSignature)),
-      Effect.catchAllDefect(
+      Effect.flatMap(Schema.decodeEffect(EcdsaSignature)),
+      Effect.catchDefect(
         (e) =>
           new CryptoError({message: 'Error while signing challenge', error: e})
       ),
-      Effect.catchTag('ParseError', (e) =>
+      Effect.catchTag('SchemaError', (e) =>
         Effect.fail(
           new CryptoError({
             message:
@@ -150,7 +154,7 @@ export const ecdsaVerifyE =
     Effect.sync(() =>
       ecdsaVerify({pubKey: publicKey, challenge: data, signature})
     ).pipe(
-      Effect.catchAllDefect(
+      Effect.catchDefect(
         (e) =>
           new CryptoError({message: 'Unable to verify signature', error: e})
       )
@@ -163,15 +167,15 @@ export const hmacSignE =
   (key: string) =>
   (data: string): Effect.Effect<HmacHash, CryptoError> => {
     return Effect.sync(() => hmac.hmacSign({password: key, data})).pipe(
-      Effect.flatMap(Schema.decode(HmacHash)),
-      Effect.catchAllDefect(
+      Effect.flatMap(Schema.decodeEffect(HmacHash)),
+      Effect.catchDefect(
         (e) =>
           new CryptoError({
             message: 'Error while hashing data with HMAC',
             error: e,
           })
       ),
-      Effect.catchTag('ParseError', (e) =>
+      Effect.catchTag('SchemaError', (e) =>
         Effect.fail(
           new CryptoError({
             message:
@@ -195,7 +199,7 @@ export const hmacVerifyE =
     return Effect.sync(() =>
       hmac.hmacVerify({password: key, data, signature})
     ).pipe(
-      Effect.catchAllDefect(
+      Effect.catchDefect(
         (e) =>
           new CryptoError({
             message: 'Unable to verify HMAC hash',
@@ -206,7 +210,7 @@ export const hmacVerifyE =
   }
 
 export const AesGtmCypher = Schema.String.pipe(
-  Schema.nonEmptyString(),
+  Schema.check(Schema.isNonEmpty()),
   Schema.brand('AesGtmCypher')
 )
 export type AesGtmCypher = Schema.Schema.Type<typeof AesGtmCypher>
@@ -218,15 +222,15 @@ export const aesEncrpytE =
       (legacy ? aesGCMIgnoreTagEncrypt : aesGCMEncrypt)({data, password})
     ).pipe(
       Effect.map((cypher) => `${legacy ? '' : AES_GCM_CYPHER_PREFIX}${cypher}`),
-      Effect.flatMap(Schema.decode(AesGtmCypher)),
-      Effect.catchAllDefect(
+      Effect.flatMap(Schema.decodeEffect(AesGtmCypher)),
+      Effect.catchDefect(
         (e) =>
           new CryptoError({
             message: 'Unable to encrypt AES GCM cypher',
             error: e,
           })
       ),
-      Effect.catchTag('ParseError', (e) =>
+      Effect.catchTag('SchemaError', (e) =>
         Effect.fail(
           new CryptoError({
             message: `Error while encrypting data with aes-gcm. Unable to normalize the cypher, legacy: ${legacy}`,
@@ -247,7 +251,7 @@ export const aesDecrpytE =
         password,
       })
     }).pipe(
-      Effect.catchAllDefect(
+      Effect.catchDefect(
         (e) =>
           new CryptoError({
             message: `Unable to encrypt AES GCM cypher, cypher: ${cypher}`,
@@ -286,7 +290,7 @@ export const aesCTREncrypt =
         password,
       })
     ).pipe(
-      Effect.catchAllDefect((e) =>
+      Effect.catchDefect((e) =>
         Effect.fail(
           new CryptoError({
             message: 'Error aes ctr encrypt',
@@ -298,7 +302,7 @@ export const aesCTREncrypt =
 
 export const hashSha256 = (data: string): Effect.Effect<string, CryptoError> =>
   Effect.sync(() => sha256(data)).pipe(
-    Effect.catchAllDefect(
+    Effect.catchDefect(
       (e) =>
         new CryptoError({
           message: `Unable to hash data with sha256, data: ${data}`,

@@ -10,7 +10,7 @@ import {
   Typography,
   useTheme,
 } from '@vexl-next/ui'
-import {Effect, Either} from 'effect'
+import {Effect} from 'effect'
 import {atom, useAtom, type Atom, type WritableAtom} from 'jotai'
 import React from 'react'
 import {ImageUniversal, type ImageUniversalProps} from './Image'
@@ -250,14 +250,14 @@ export const askGlobalDialogActionAtom: WritableAtom<
   [ConfirmDialogState],
   Effect.Effect<GlobalDialogStepResult[], UserDeclinedError>
 > = atom(null, (get, set, state) => {
-  return Effect.async((resolve) => {
+  return Effect.callback((resolve) => {
     const results = state.steps.map(createInitialStepResult)
 
     const runStep = (stepIndex: number): void => {
       const step = state.steps[stepIndex]
 
       if (step == null) {
-        resolve(Either.right(results))
+        resolve(Effect.succeed(results))
         return
       }
 
@@ -278,7 +278,7 @@ export const askGlobalDialogActionAtom: WritableAtom<
         }).pipe(
           Effect.match({
             onFailure: () => {
-              resolve(Either.left(toUserDeclinedError()))
+              resolve(Effect.fail(toUserDeclinedError()))
             },
             onSuccess: (confirmed) => {
               if (!confirmed) {
@@ -290,7 +290,7 @@ export const askGlobalDialogActionAtom: WritableAtom<
                   return
                 }
 
-                resolve(Either.left(toUserDeclinedError()))
+                resolve(Effect.fail(toUserDeclinedError()))
                 return
               }
 
@@ -302,7 +302,7 @@ export const askGlobalDialogActionAtom: WritableAtom<
               }
 
               if (state.makeSureOnDeny || stepIndex >= state.steps.length - 1) {
-                resolve(Either.right(results))
+                resolve(Effect.succeed(results))
                 return
               }
 

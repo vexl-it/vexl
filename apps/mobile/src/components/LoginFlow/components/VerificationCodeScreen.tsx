@@ -139,27 +139,23 @@ export default function VerificationCodeScreen({
       setSubmitInProgress(true)
       loadingOverlay.show()
       void Effect.runPromise(
-        Effect.gen(function* (_) {
+        Effect.gen(function* () {
           const privateKey = KeyHolder.generatePrivateKey()
-          const verifyPhoneNumberResponse = yield* _(
-            verifyPhoneNumber({
-              code,
-              id: currentInitPhoneVerificationResponse.verificationId,
-              userPublicKey: privateKey.publicKeyPemBase64,
-            })
-          )
+          const verifyPhoneNumberResponse = yield* verifyPhoneNumber({
+            code,
+            id: currentInitPhoneVerificationResponse.verificationId,
+            userPublicKey: privateKey.publicKeyPemBase64,
+          })
 
-          yield* _(Effect.promise(dismissKeyboardAndResolveOnLayoutUpdate))
+          yield* Effect.promise(dismissKeyboardAndResolveOnLayoutUpdate)
 
-          yield* _(
-            finishLogin({
-              verifyPhoneNumberResponse,
-              privateKey,
-              phoneNumber,
-            })
-          )
+          yield* finishLogin({
+            verifyPhoneNumberResponse,
+            privateKey,
+            phoneNumber,
+          })
         }).pipe(
-          Effect.catchAll((errorMessage) =>
+          Effect.catch((errorMessage) =>
             Effect.sync(() => {
               setErrorMessage(errorMessage)
             })

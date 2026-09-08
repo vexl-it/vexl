@@ -4,13 +4,13 @@ import {
   SpokenLanguage,
 } from '@vexl-next/domain/src/general/offers'
 import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {Schema} from 'effect'
+import {Effect, Schema} from 'effect'
 import {FiatOrSats} from '../../state/marketplace/domain'
 import {getDeviceLanguage} from '../localization/appLanguage'
 import {currencies} from '../localization/currency'
 import getDefaultSpokenLanguage from '../localization/getDefaultSpokenLanguage'
 
-export const AppThemeMode = Schema.Literal('light', 'dark', 'system')
+export const AppThemeMode = Schema.Literals(['light', 'dark', 'system'])
 
 const NotificationPreferences = Schema.Struct({
   offer: Schema.Boolean,
@@ -23,102 +23,117 @@ const NotificationPreferences = Schema.Struct({
 })
 
 export const Preferences = Schema.Struct({
-  disableOfferRerequestLimit: Schema.optionalWith(Schema.Boolean, {
-    default: () => false,
-  }),
-  allowSendingImages: Schema.optionalWith(Schema.Boolean, {
-    default: () => false,
-  }),
+  disableOfferRerequestLimit: Schema.Boolean.pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): false => false)),
+    Schema.withConstructorDefault(Effect.sync((): false => false))
+  ),
+  allowSendingImages: Schema.Boolean.pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): false => false)),
+    Schema.withConstructorDefault(Effect.sync((): false => false))
+  ),
   notificationPreferences: NotificationPreferences,
-  showOfferDetail: Schema.optionalWith(Schema.Boolean, {
-    default: () => false,
-  }),
-  enableNewOffersNotificationDevMode: Schema.optionalWith(Schema.Boolean, {
-    default: () => false,
-  }),
-  showFriendLevelBanner: Schema.optionalWith(Schema.Boolean, {
-    default: () => false,
-  }),
-  showTextDebugButton: Schema.optionalWith(Schema.Boolean, {
-    default: () => false,
-  }),
-  disableScreenshots: Schema.optionalWith(Schema.Boolean, {
-    default: () => false,
-  }),
-  isDeveloper: Schema.optionalWith(Schema.Boolean, {
-    default: () => false,
-  }),
+  showOfferDetail: Schema.Boolean.pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): false => false)),
+    Schema.withConstructorDefault(Effect.sync((): false => false))
+  ),
+  enableNewOffersNotificationDevMode: Schema.Boolean.pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): false => false)),
+    Schema.withConstructorDefault(Effect.sync((): false => false))
+  ),
+  showFriendLevelBanner: Schema.Boolean.pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): false => false)),
+    Schema.withConstructorDefault(Effect.sync((): false => false))
+  ),
+  showTextDebugButton: Schema.Boolean.pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): false => false)),
+    Schema.withConstructorDefault(Effect.sync((): false => false))
+  ),
+  disableScreenshots: Schema.Boolean.pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): false => false)),
+    Schema.withConstructorDefault(Effect.sync((): false => false))
+  ),
+  isDeveloper: Schema.Boolean.pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): false => false)),
+    Schema.withConstructorDefault(Effect.sync((): false => false))
+  ),
   appLanguage: Schema.optional(Schema.String),
-  appThemeMode: Schema.optionalWith(AppThemeMode, {
-    default: () => 'system',
-  }),
-  marketplaceFiatOrSatsCurrency: Schema.optionalWith(FiatOrSats, {
-    default: () => 'FIAT',
-  }),
+  appThemeMode: AppThemeMode.pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): 'system' => 'system')),
+    Schema.withConstructorDefault(Effect.sync((): 'system' => 'system'))
+  ),
+  marketplaceFiatOrSatsCurrency: FiatOrSats.pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): 'FIAT' => 'FIAT')),
+    Schema.withConstructorDefault(Effect.sync((): 'FIAT' => 'FIAT'))
+  ),
   goldenAvatarType: Schema.optional(GoldenAvatarType),
-  showVexlSearchForCooSuggestion: Schema.optionalWith(Schema.Boolean, {
-    default: () => true,
-  }),
-  showSuggestReencryptOffersMissingOnServer: Schema.optionalWith(
-    Schema.Boolean,
-    {
-      default: () => false,
-    }
+  showVexlSearchForCooSuggestion: Schema.Boolean.pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): true => true)),
+    Schema.withConstructorDefault(Effect.sync((): true => true))
+  ),
+  showSuggestReencryptOffersMissingOnServer: Schema.Boolean.pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): false => false)),
+    Schema.withConstructorDefault(Effect.sync((): false => false))
   ),
   lastDisplayOfDonationPromptTimestamp: Schema.optional(UnixMilliseconds),
-  showTosSummaryForAlreadyLoggedInUser: Schema.optionalWith(Schema.Boolean, {
-    default: () => true,
-  }),
-  showCheckUpdatedPrivacyPolicySuggestion: Schema.optionalWith(Schema.Boolean, {
-    default: () => true,
-  }),
-  defaultCurrency: Schema.optionalWith(CurrencyCode, {
-    default: () => currencies.USD.code,
-  }),
-  runTasksInParallel: Schema.optionalWith(Schema.Boolean, {
-    default: () => true,
-  }),
-  sendReadReceipts: Schema.optionalWith(Schema.Boolean, {
-    default: () => true,
-  }),
-  showVerifiedContacts: Schema.optionalWith(Schema.Boolean, {
-    default: () => false,
-  }),
-  showCreateOfferInMarketplaceSuggestion: Schema.optionalWith(Schema.Boolean, {
-    default: () => true,
-  }),
-  showImportContactsInMarketplaceSuggestion: Schema.optionalWith(
-    Schema.Boolean,
-    {
-      default: () => true,
-    }
+  showTosSummaryForAlreadyLoggedInUser: Schema.Boolean.pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): true => true)),
+    Schema.withConstructorDefault(Effect.sync((): true => true))
   ),
-  showEnableNotificationsInMarketplaceSuggestion: Schema.optionalWith(
-    Schema.Boolean,
-    {
-      default: () => true,
-    }
+  showCheckUpdatedPrivacyPolicySuggestion: Schema.Boolean.pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): true => true)),
+    Schema.withConstructorDefault(Effect.sync((): true => true))
   ),
-  showEnableBackgroundRefreshInMarketplaceSuggestion: Schema.optionalWith(
-    Schema.Boolean,
-    {
-      default: () => true,
-    }
+  defaultCurrency: CurrencyCode.pipe(
+    Schema.withDecodingDefaultType(Effect.sync(() => currencies.USD.code)),
+    Schema.withConstructorDefault(Effect.sync(() => currencies.USD.code))
   ),
-  showMarketplaceIntroDialog: Schema.optionalWith(Schema.Boolean, {
-    default: () => true,
-  }),
-  showNotesBoardIntroSheet: Schema.optionalWith(Schema.Boolean, {
-    default: () => true,
-  }),
-  notesBoardEnabled: Schema.optionalWith(Schema.Boolean, {
-    default: () => false,
-  }),
-  lastUsedOfferSpokenLanguages: Schema.optionalWith(
-    Schema.Array(SpokenLanguage),
-    {
-      default: () => getDefaultSpokenLanguage(getDeviceLanguage()),
-    }
+  runTasksInParallel: Schema.Boolean.pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): true => true)),
+    Schema.withConstructorDefault(Effect.sync((): true => true))
+  ),
+  sendReadReceipts: Schema.Boolean.pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): true => true)),
+    Schema.withConstructorDefault(Effect.sync((): true => true))
+  ),
+  showVerifiedContacts: Schema.Boolean.pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): false => false)),
+    Schema.withConstructorDefault(Effect.sync((): false => false))
+  ),
+  showCreateOfferInMarketplaceSuggestion: Schema.Boolean.pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): true => true)),
+    Schema.withConstructorDefault(Effect.sync((): true => true))
+  ),
+  showImportContactsInMarketplaceSuggestion: Schema.Boolean.pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): true => true)),
+    Schema.withConstructorDefault(Effect.sync((): true => true))
+  ),
+  showEnableNotificationsInMarketplaceSuggestion: Schema.Boolean.pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): true => true)),
+    Schema.withConstructorDefault(Effect.sync((): true => true))
+  ),
+  showEnableBackgroundRefreshInMarketplaceSuggestion: Schema.Boolean.pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): true => true)),
+    Schema.withConstructorDefault(Effect.sync((): true => true))
+  ),
+  showMarketplaceIntroDialog: Schema.Boolean.pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): true => true)),
+    Schema.withConstructorDefault(Effect.sync((): true => true))
+  ),
+  showNotesBoardIntroSheet: Schema.Boolean.pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): true => true)),
+    Schema.withConstructorDefault(Effect.sync((): true => true))
+  ),
+  notesBoardEnabled: Schema.Boolean.pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): false => false)),
+    Schema.withConstructorDefault(Effect.sync((): false => false))
+  ),
+  lastUsedOfferSpokenLanguages: Schema.Array(SpokenLanguage).pipe(
+    Schema.withDecodingDefaultType(
+      Effect.sync(() => getDefaultSpokenLanguage(getDeviceLanguage()))
+    ),
+    Schema.withConstructorDefault(
+      Effect.sync(() => getDefaultSpokenLanguage(getDeviceLanguage()))
+    )
   ),
 })
 

@@ -1,60 +1,50 @@
+import * as NodeHttpServer from '@effect/platform-node/NodeHttpServer'
+import {Effect, Layer, Option, type Config} from 'effect'
 import {
-  HttpMiddleware,
   HttpRouter,
-  HttpServer,
   HttpServerRequest,
   HttpServerResponse,
-} from '@effect/platform'
-import * as NodeHttpServer from '@effect/platform-node/NodeHttpServer'
-import {type ServeError} from '@effect/platform/HttpServerError'
-import {Effect, Layer, type Config, type ConfigError, type Option} from 'effect'
+} from 'effect/unstable/http'
 import {createServer} from 'http'
 
-export const makeInternalServer = <E, R>(
-  Router: HttpRouter.HttpRouter<E, R>,
+export const makeInternalServer = <A, E, R>(
+  routes: Layer.Layer<A, E, R>,
   args: {
     port: Config.Config<Option.Option<number>>
   }
-): Layer.Layer<never, ConfigError.ConfigError | ServeError, R> =>
-  Effect.gen(function* (_) {
-    const port = yield* _(args.port, Effect.flatten)
-
-    const InternalServerLive = NodeHttpServer.layer(() => createServer(), {
-      port,
-    })
-
-    return Router.pipe(
-      HttpRouter.catchAll((e) =>
-        Effect.gen(function* (_) {
-          const request = yield* _(HttpServerRequest.HttpServerRequest)
-          yield* _(
-            Effect.logError('Error on internal server', e, {
-              method: request.method,
-              url: request.url,
-            })
-          )
-          return yield* _(
-            HttpServerResponse.json(
-              {message: 'Internal server error'},
-              {status: 500}
-            )
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type -- Preserve the router's inferred request service requirements.
+) =>
+  Effect.gen(function* () {
+    const port = yield* args.port
+    if (Option.isNone(port)) {
+      yield* Effect.logInfo(
+        'Internal server not running. No port for internal server specified.'
+      )
+      return Layer.empty
+    }
+    return HttpRouter.serve(routes, {
+      middleware: Effect.catch((error) =>
+        Effect.gen(function* () {
+          const request = yield* HttpServerRequest.HttpServerRequest
+          yield* Effect.logError('Error on internal server', error, {
+            method: request.method,
+            url: request.url,
+          })
+          return yield* HttpServerResponse.json(
+            {message: 'Internal server error'},
+            {status: 500}
           )
         })
       ),
-      HttpMiddleware.logger,
-      HttpServer.serve(),
-      Layer.provide(InternalServerLive),
-      Layer.tap(() => Effect.logInfo(`Internal server running on ${port}`)),
-      Layer.provide(Layer.span('Internal server', {attributes: {port}}))
-    )
-  }).pipe(
-    Effect.catchTag('NoSuchElementException', () =>
-      Effect.zipRight(
-        Effect.logInfo(
-          'Internal server not running. No port for internal server specified.'
-        ),
-        Effect.succeed(Layer.empty)
+    }).pipe(
+      Layer.provide(
+        NodeHttpServer.layer(() => createServer(), {port: port.value})
+      ),
+      Layer.tap(() =>
+        Effect.logInfo(`Internal server running on ${port.value}`)
+      ),
+      Layer.provide(
+        Layer.span('Internal server', {attributes: {port: port.value}})
       )
-    ),
-    Layer.unwrapEffect
-  )
+    )
+  }).pipe(Layer.unwrap)

@@ -22,7 +22,7 @@ import {type PrivatePayloadsConstructionError} from '@vexl-next/resources-utils/
 import {type PublicPartEncryptionError} from '@vexl-next/resources-utils/src/offers/utils/encryptOfferPublicPayload'
 import {type ApiErrorFetchingContactsForOffer} from '@vexl-next/resources-utils/src/offers/utils/fetchContactsForOffer'
 import {type SymmetricKeyGenerationError} from '@vexl-next/resources-utils/src/offers/utils/generateSymmetricKey'
-import {Array, Effect, Option, Record, pipe} from 'effect'
+import {Array, Effect, Filter, Option, Record, pipe} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
 import getCountryPrefix from '../../../utils/getCountryCode'
@@ -62,7 +62,7 @@ export const createOfferActionAtom = atom<
     | ClubKeyNotFoundInInnerStateError
   >
 >(null, (get, set, params) => {
-  return Effect.gen(function* (_) {
+  return Effect.gen(function* () {
     const api = get(apiAtom)
     const clubsInfo = get(clubsToKeyHolderAtom)
     const session = get(sessionDataOrDummyAtom)
@@ -70,17 +70,20 @@ export const createOfferActionAtom = atom<
       params
     const intendedClubsRecord = pipe(
       intendedClubs ?? [],
-      Array.filterMap((clubUuid) =>
-        pipe(
-          Record.get(clubsInfo, clubUuid),
-          Option.map((club) => [clubUuid, club] as const)
+      Array.filterMap(
+        Filter.fromPredicateOption((clubUuid) =>
+          pipe(
+            Record.get(clubsInfo, clubUuid),
+            Option.map((club) => [clubUuid, club] as const)
+          )
         )
       ),
       Record.fromEntries
     )
 
-    const vexlNotificationToken = yield* _(
-      set(generateAndRegisterVexlTokenActionAtom, {keyHolder: params.offerKey})
+    const vexlNotificationToken = yield* set(
+      generateAndRegisterVexlTokenActionAtom,
+      {keyHolder: params.offerKey}
     )
 
     const publicPayloadWithNotificationToken = {
@@ -91,25 +94,23 @@ export const createOfferActionAtom = atom<
       ...(session.isLiquidityProvider ? {byLiquidityProvider: true} : {}),
     }
 
-    const serverToClientHashesToHashedPhoneNumbersMap = yield* _(
-      set(ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom)
+    const serverToClientHashesToHashedPhoneNumbersMap = yield* set(
+      ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom
     )
 
-    const createOfferResult = yield* _(
-      createNewOfferForMyContacts({
-        offerApi: api.offer,
-        offerId: params.offerId,
-        publicPart: publicPayloadWithNotificationToken,
-        countryPrefix: getCountryPrefix(session.phoneNumber),
-        serverToClientHashesToHashedPhoneNumbersMap,
-        contactApi: api.contact,
-        intendedConnectionLevel,
-        ownerKeyPair: session.privateKey,
-        ownerKeyPairV2: session.keyPairV2,
-        intendedClubs: intendedClubsRecord,
-        onProgress,
-      })
-    )
+    const createOfferResult = yield* createNewOfferForMyContacts({
+      offerApi: api.offer,
+      offerId: params.offerId,
+      publicPart: publicPayloadWithNotificationToken,
+      countryPrefix: getCountryPrefix(session.phoneNumber),
+      serverToClientHashesToHashedPhoneNumbersMap,
+      contactApi: api.contact,
+      intendedConnectionLevel,
+      ownerKeyPair: session.privateKey,
+      ownerKeyPairV2: session.keyPairV2,
+      intendedClubs: intendedClubsRecord,
+      onProgress,
+    })
 
     if (createOfferResult.encryptionErrors.length > 0) {
       reportError('error', new Error('Error while encrypting offer'), {

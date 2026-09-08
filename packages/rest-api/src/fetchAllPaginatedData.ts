@@ -1,4 +1,4 @@
-import {Effect} from 'effect/index'
+import {Effect} from 'effect'
 
 function fetchAllPaginatedData<R, E>({
   fetchEffectToRun,
@@ -15,13 +15,13 @@ function fetchAllPaginatedData<R, E>({
   >
   storeNextPageToken?: (nextPageToken: string) => void
 }): Effect.Effect<R[], E> {
-  return Effect.gen(function* (_) {
+  return Effect.gen(function* () {
     const allData: R[] = []
     let hasMore = true
     let nextPageToken: string | undefined
 
     while (hasMore) {
-      const response = yield* _(fetchEffectToRun(nextPageToken))
+      const response = yield* fetchEffectToRun(nextPageToken)
 
       allData.push(...response.items)
       hasMore = response.hasNext

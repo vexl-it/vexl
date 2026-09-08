@@ -1,37 +1,35 @@
-import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
-import {Effect, flow, Schema} from 'effect'
+import {Effect, flow, Option, Schema} from 'effect'
+import {SqlSchema} from 'effect/unstable/sql'
 import {UserRecordId} from '../domain'
 
 export const FindUsersToNotifyAboutInactivityParams = Schema.Struct({
-  firstNotificationBefore: Schema.DateFromSelf,
-  followUpDueBefore: Schema.DateFromSelf,
-  recurringDueBefore: Schema.DateFromSelf,
+  firstNotificationBefore: Schema.Date,
+  followUpDueBefore: Schema.Date,
+  recurringDueBefore: Schema.Date,
 })
 export type FindUsersToNotifyAboutInactivityParams =
   typeof FindUsersToNotifyAboutInactivityParams.Type
 
 export const UserToNotifyAboutInactivity = Schema.Struct({
   id: UserRecordId,
-  expoToken: Schema.optionalWith(ExpoNotificationToken, {
-    as: 'Option',
-    nullable: true,
-  }),
-  vexlNotificationToken: Schema.optionalWith(VexlNotificationToken, {
-    as: 'Option',
-    nullable: true,
-  }),
-  refreshedAt: Schema.DateFromSelf,
+  expoToken: Schema.OptionFromOptionalNullOr(ExpoNotificationToken).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
+  vexlNotificationToken: Schema.OptionFromOptionalNullOr(
+    VexlNotificationToken
+  ).pipe(Schema.withConstructorDefault(Effect.succeed(Option.none()))),
+  refreshedAt: Schema.Date,
   numberOfInactivityNotificationsSent: Schema.Number,
 })
 export type UserToNotifyAboutInactivity =
   typeof UserToNotifyAboutInactivity.Type
 
-export const createFindUsersToNotifyAboutInactivity = Effect.gen(function* (_) {
-  const sql = yield* _(PgClient.PgClient)
+export const createFindUsersToNotifyAboutInactivity = Effect.gen(function* () {
+  const sql = yield* PgClient.PgClient
 
   const query = SqlSchema.findAll({
     Request: FindUsersToNotifyAboutInactivityParams,

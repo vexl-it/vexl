@@ -5,9 +5,9 @@ import {
   RedisService,
   type RedisError,
 } from '@vexl-next/server-utils/src/RedisService'
-import {Array, Context, Effect, flow, identity, Layer} from 'effect'
-import {type NoSuchElementException} from 'effect/Cause'
-import {type ParseError} from 'effect/ParseResult'
+import {Array, Context, Effect, Filter, flow, identity, Layer} from 'effect'
+import {type NoSuchElementError} from 'effect/Cause'
+import {type SchemaError} from 'effect/Schema'
 import {
   ConnectionRedisRecord,
   StreamConnectionId,
@@ -43,7 +43,7 @@ interface RedisConnectionRegistryOperations {
     notificationToken: VexlNotificationTokenSecret
   ) => Effect.Effect<
     Array.NonEmptyArray<ConnectionRedisRecord>,
-    NoSuchElementException | UnexpectedServerError
+    NoSuchElementError | UnexpectedServerError
   >
   removeConnection: (
     connectionId: StreamConnectionId,
@@ -51,18 +51,19 @@ interface RedisConnectionRegistryOperations {
   ) => Effect.Effect<void>
 }
 
-export class RedisConnectionRegistry extends Context.Tag(
-  'RedisConnectionRegistry'
-)<RedisConnectionRegistry, RedisConnectionRegistryOperations>() {
+export class RedisConnectionRegistry extends Context.Service<
+  RedisConnectionRegistry,
+  RedisConnectionRegistryOperations
+>()('RedisConnectionRegistry') {
   static readonly Live = Layer.effect(
     RedisConnectionRegistry,
-    Effect.gen(function* (_) {
-      const redis = yield* _(RedisService)
-      const myManagerId = yield* _(MyManagerIdProvider)
+    Effect.gen(function* () {
+      const redis = yield* RedisService
+      const myManagerId = yield* MyManagerIdProvider
 
       const storeConnectionInfo = (
         redisConnection: ConnectionRedisRecord
-      ): Effect.Effect<void, ParseError | RedisError, never> =>
+      ): Effect.Effect<void, SchemaError | RedisError, never> =>
         redis.set(ConnectionRedisRecord)(
           createConnectionIdToClientInfoKey(redisConnection.connectionId),
           redisConnection,
@@ -72,7 +73,7 @@ export class RedisConnectionRegistry extends Context.Tag(
         connectionId: StreamConnectionId
       ): Effect.Effect<
         ConnectionRedisRecord,
-        ParseError | RedisError | NoSuchElementException
+        SchemaError | RedisError | NoSuchElementError
       > =>
         redis.get(ConnectionRedisRecord)(
           createConnectionIdToClientInfoKey(connectionId)
@@ -89,7 +90,7 @@ export class RedisConnectionRegistry extends Context.Tag(
       }: {
         notificationToken: VexlNotificationTokenSecret
         connectionId: StreamConnectionId
-      }): Effect.Effect<void, ParseError | RedisError, never> =>
+      }): Effect.Effect<void, SchemaError | RedisError, never> =>
         redis.insertToSet(StreamConnectionId)(
           createTokenToConnectionIdKey(notificationToken),
           [connectionId],
@@ -100,7 +101,7 @@ export class RedisConnectionRegistry extends Context.Tag(
         notificationToken: VexlNotificationTokenSecret
       ): Effect.Effect<
         readonly [StreamConnectionId, ...StreamConnectionId[]],
-        ParseError | RedisError | NoSuchElementException
+        SchemaError | RedisError | NoSuchElementError
       > =>
         redis.getSet(StreamConnectionId)(
           createTokenToConnectionIdKey(notificationToken)
@@ -112,7 +113,7 @@ export class RedisConnectionRegistry extends Context.Tag(
       }: {
         notificationToken: VexlNotificationTokenSecret
         connectionId: StreamConnectionId
-      }): Effect.Effect<void, ParseError | RedisError, never> =>
+      }): Effect.Effect<void, SchemaError | RedisError, never> =>
         redis.deleteFromSet(StreamConnectionId)(
           createTokenToConnectionIdKey(notificationToken),
           [connectionId]
@@ -133,8 +134,8 @@ export class RedisConnectionRegistry extends Context.Tag(
             }),
             storeConnectionInfo(record),
           ]).pipe(
-            Effect.catchAll((e) =>
-              Effect.zipRight(
+            Effect.catch((e) =>
+              Effect.andThen(
                 Effect.logError('Error while registering connection', e),
                 Effect.fail(new UnexpectedServerError({status: 500}))
               )
@@ -160,9 +161,9 @@ export class RedisConnectionRegistry extends Context.Tag(
             ),
           ]).pipe(
             Effect.catchTags({
-              NoSuchElementException: () => Effect.void,
+              NoSuchElementError: () => Effect.void,
               RedisError: (e) =>
-                Effect.zipRight(
+                Effect.andThen(
                   Effect.logError('Error while keeping connection alive', e),
                   Effect.fail(new UnexpectedServerError({status: 500}))
                 ),
@@ -176,18 +177,20 @@ export class RedisConnectionRegistry extends Context.Tag(
               flow(
                 Array.map(flow(getConnectionInfo, Effect.option)),
                 Effect.all,
-                Effect.map(Array.filterMap(identity))
+                Effect.map(
+                  Array.filterMap(Filter.fromPredicateOption(identity))
+                )
               )
             ),
-            Effect.filterOrFail(Array.isNonEmptyArray),
+            Effect.filterOrFail(Array.isArrayNonEmpty),
             Effect.catchTags({
-              ParseError: (e) =>
-                Effect.zipRight(
+              SchemaError: (e) =>
+                Effect.andThen(
                   Effect.logError('Error while parsing connection record', e),
                   Effect.fail(new UnexpectedServerError({status: 500}))
                 ),
               RedisError: (e) =>
-                Effect.zipRight(
+                Effect.andThen(
                   Effect.logError('Error while getting connection', e),
                   Effect.fail(new UnexpectedServerError({status: 500}))
                 ),

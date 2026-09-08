@@ -10,12 +10,12 @@ import {notesAtom} from './notesState'
 export const deleteNoteActionAtom = atom<
   null,
   [{adminIds: readonly NoteAdminId[]}],
-  Effect.Effect<void, Effect.Effect.Error<ReturnType<OfferApi['deleteNote']>>>
+  Effect.Effect<void, Effect.Error<ReturnType<OfferApi['deleteNote']>>>
 >(null, (get, set, {adminIds}) => {
   const api = get(apiAtom)
 
-  return Effect.gen(function* (_) {
-    yield* _(api.offer.deleteNote({adminIds}))
+  return Effect.gen(function* () {
+    yield* api.offer.deleteNote({adminIds})
 
     // The note keypair inbox is cleaned up lazily by
     // checkAndDeleteEmptyInboxesWithoutOfferInAppLoadingTask once the note is

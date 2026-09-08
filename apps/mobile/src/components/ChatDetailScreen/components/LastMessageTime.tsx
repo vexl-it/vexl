@@ -1,5 +1,5 @@
 import {Typography} from '@vexl-next/ui'
-import {useMolecule} from 'bunshi/dist/react'
+import {useMolecule} from 'bunshi/react'
 import {useAtomValue} from 'jotai'
 import {DateTime} from 'luxon'
 import {type ChatMessageWithState} from '../../../state/chat/domain'

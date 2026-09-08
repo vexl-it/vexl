@@ -1,6 +1,6 @@
 import {type ObjectionType} from '@vexl-next/domain/src/general/feedback'
 import {Stack, Typography} from '@vexl-next/ui'
-import {useMolecule} from 'bunshi/dist/react'
+import {useMolecule} from 'bunshi/react'
 import {useAtom} from 'jotai'
 import React, {useMemo} from 'react'
 import {useTranslation} from '../../../utils/localization/I18nProvider'

@@ -2,7 +2,7 @@
   "extends": "@vexl-next/tsconfig/base.json",
   "compilerOptions": {
     "lib": ["ESNext"],
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "noEmit": true,
     "skipLibCheck": true,
     "types": ["node"]

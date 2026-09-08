@@ -28,7 +28,7 @@ const sortUpcomingEvents = Array.sortWith(
 
 const sortPastEvents = Array.sortWith(
   (event: Event) => event.startDate,
-  Order.reverse(Order.Date)
+  Order.flip(Order.Date)
 )
 
 export const eventsStateAtom = atom<EventsState>({
@@ -38,7 +38,7 @@ export const eventsStateAtom = atom<EventsState>({
 })
 
 export const loadEventsActionAtom = atom(null, async (get, set) => {
-  await Effect.gen(function* (_) {
+  await Effect.gen(function* () {
     const api = get(apiAtom)
 
     set(eventsStateAtom, (prev) => ({
@@ -47,7 +47,7 @@ export const loadEventsActionAtom = atom(null, async (get, set) => {
       error: Option.none(),
     }))
 
-    yield* _(
+    yield* pipe(
       api.content.getEvents(),
       Effect.match({
         onFailure: (e) => {

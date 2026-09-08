@@ -1,9 +1,3 @@
-import {
-  HttpApiBuilder,
-  HttpApiSwagger,
-  HttpMiddleware,
-  HttpServer,
-} from '@effect/platform/index'
 import {BtcExchangeRateApiSpecification} from '@vexl-next/rest-api/src/services/btcExchangeRate/specification'
 import {redisUrl} from '@vexl-next/server-utils/src/commonConfigs'
 import {healthServerLayer} from '@vexl-next/server-utils/src/HealthServer'
@@ -14,6 +8,8 @@ import {RedisConnectionService} from '@vexl-next/server-utils/src/RedisConnectio
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {ServerSecurityMiddlewareLive} from '@vexl-next/server-utils/src/serverSecurity'
 import {Layer} from 'effect'
+import {HttpRouter} from 'effect/unstable/http'
+import {HttpApiBuilder, HttpApiSwagger} from 'effect/unstable/httpapi'
 import {cryptoConfig, healthServerPortConfig} from './configs'
 import {getExchangeRateHandler} from './handlers'
 import {YadioService} from './utils/yadio'
@@ -24,18 +20,17 @@ const RootLive = HttpApiBuilder.group(
   (h) => h.handle('getExchangeRate', getExchangeRateHandler)
 )
 
-export const ApiLive = HttpApiBuilder.api(BtcExchangeRateApiSpecification).pipe(
+export const ApiLive = HttpApiBuilder.layer(
+  BtcExchangeRateApiSpecification
+).pipe(
   Layer.provide(RootLive),
   Layer.provide(rateLimitingMiddlewareLayer(BtcExchangeRateApiSpecification)),
   Layer.provide(ServerSecurityMiddlewareLive)
 )
 
-const ApiServerLive = HttpApiBuilder.serve(HttpMiddleware.logger).pipe(
-  Layer.provide(HttpApiSwagger.layer()),
-  Layer.provide(ApiLive),
-  HttpServer.withLogAddress,
-  Layer.provide(NodeHttpServerLiveWithPortFromEnv)
-)
+const ApiServerLive = HttpRouter.serve(
+  Layer.mergeAll(ApiLive, HttpApiSwagger.layer(BtcExchangeRateApiSpecification))
+).pipe(Layer.provide(NodeHttpServerLiveWithPortFromEnv))
 
 export const MainLive = Layer.mergeAll(
   ApiServerLive,

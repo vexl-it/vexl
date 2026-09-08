@@ -24,7 +24,7 @@ const sectionedMarketplaceOffersAtom = atom(
     )
 
     const hasMarkedOffers =
-      Array.isNonEmptyArray(favourites) || Array.isNonEmptyArray(archived)
+      Array.isArrayNonEmpty(favourites) || Array.isArrayNonEmpty(archived)
 
     const sections: MarketplaceOffersSection[] =
       visibleSection === 'ONLY_FAVOURITES'
@@ -41,7 +41,7 @@ const sectionedMarketplaceOffersAtom = atom(
 
     return pipe(
       sections,
-      Array.filter((one) => Array.isNonEmptyReadonlyArray(one.offers))
+      Array.filter((one) => Array.isReadonlyArrayNonEmpty(one.offers))
     )
   }
 )

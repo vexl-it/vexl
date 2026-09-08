@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@vexl-next/cryptography": "0.0.0",
-    "effect": "^3.20.0",
+    "effect": "4.0.0-rc.112",
     "fp-ts": "^2.13.1"
   },
   "prettier": "@vexl-next/prettier-config"

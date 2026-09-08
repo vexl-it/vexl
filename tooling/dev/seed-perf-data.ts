@@ -1,3 +1,4 @@
+import {Array, Effect, Filter, HashMap, Option, pipe, Schema} from 'effect'
 /**
  * seed-perf-data.ts — seeds the LOCALLY RUNNING vexl backend with fake users
  * that simulate "other people on the network" around one real (emulator) user,
@@ -64,7 +65,6 @@
  * To wipe everything and start over: restart the backend with a fresh db
  * (`pnpm dev:backend --fresh-db`) and delete the seed json files.
  */
-import {FetchHttpClient} from '@effect/platform'
 import {
   generatePrivateKey,
   importPrivateKey,
@@ -116,7 +116,7 @@ import {type ServerOffer} from '@vexl-next/rest-api/src/services/offer/contracts
 import {ServiceUrl} from '@vexl-next/rest-api/src/ServiceUrl.brand'
 import {type UserSessionCredentials} from '@vexl-next/rest-api/src/UserSessionCredentials.brand'
 import {UserDataShape} from '@vexl-next/rest-api/src/VexlAuthHeader'
-import {Array, Effect, HashMap, Option, pipe, Schema} from 'effect'
+import {FetchHttpClient} from 'effect/unstable/http'
 import {execFileSync} from 'node:child_process'
 import {existsSync, mkdirSync, readFileSync, writeFileSync} from 'node:fs'
 import {tmpdir} from 'node:os'
@@ -188,20 +188,22 @@ function assertLocalServiceUrls(): void {
 
   const nonLocal = pipe(
     services,
-    Array.filterMap(({name, url}) => {
-      let host: string
-      try {
-        host = new URL(url).hostname
-      } catch {
-        return Option.some(`${name} (${url}) is not a valid URL`)
-      }
-      return isLocalHost(host)
-        ? Option.none()
-        : Option.some(`${name} points at non-local host "${host}" (${url})`)
-    })
+    Array.filterMap(
+      Filter.fromPredicateOption(({name, url}) => {
+        let host: string
+        try {
+          host = new URL(url).hostname
+        } catch {
+          return Option.some(`${name} (${url}) is not a valid URL`)
+        }
+        return isLocalHost(host)
+          ? Option.none()
+          : Option.some(`${name} points at non-local host "${host}" (${url})`)
+      })
+    )
   )
 
-  if (!Array.isNonEmptyArray(nonLocal)) return
+  if (!Array.isArrayNonEmpty(nonLocal)) return
 
   if (process.env[REMOTE_OVERRIDE_ENV] === '1') {
     console.warn(
@@ -271,7 +273,10 @@ const SeedChat = Schema.Struct({
   offerId: OfferId,
   offerPublicKey: PublicKeyPemBase64,
   requestedAt: Schema.Number,
-  messagesSent: Schema.optionalWith(Schema.Number, {default: () => 0}),
+  messagesSent: Schema.Number.pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): 0 => 0)),
+    Schema.withConstructorDefault(Effect.sync((): 0 => 0))
+  ),
 })
 type SeedChat = typeof SeedChat.Type
 
@@ -301,7 +306,7 @@ interface SeedState {
 function loadSeedState(): SeedState | undefined {
   if (!existsSync(SEED_USERS_FILE)) return undefined
   const raw = readFileSync(SEED_USERS_FILE, 'utf8')
-  const decoded = Schema.decodeUnknownSync(Schema.parseJson(SeedFile))(raw)
+  const decoded = Schema.decodeUnknownSync(Schema.fromJsonString(SeedFile))(raw)
   return {
     targetPhone: decoded.targetPhone,
     users: [...decoded.users],
@@ -346,15 +351,15 @@ const makeCredentials = (
   keyPair: PrivateKeyHolder,
   keyPairV2: KeyPairV2
 ): Effect.Effect<UserSessionCredentials, unknown> =>
-  Effect.gen(function* (_) {
-    const hash = yield* _(hashPhoneNumber(phone))
-    const signature = yield* _(
-      ecdsaSignE(DEV_SERVER_PRIVATE_KEY)(`${keyPair.publicKeyPemBase64}${hash}`)
+  Effect.gen(function* () {
+    const hash = yield* hashPhoneNumber(phone)
+    const signature = yield* ecdsaSignE(DEV_SERVER_PRIVATE_KEY)(
+      `${keyPair.publicKeyPemBase64}${hash}`
     )
     const userData = {pk: keyPairV2.publicKey, hash}
-    const userDataEncoded = yield* _(Schema.encode(UserDataShape)(userData))
-    const vexlAuthSignature = yield* _(
-      cryptoBoxSign(DEV_LIBSODIUM_PRIVATE_KEY)(userDataEncoded)
+    const userDataEncoded = yield* Schema.encodeEffect(UserDataShape)(userData)
+    const vexlAuthSignature = yield* cryptoBoxSign(DEV_LIBSODIUM_PRIVATE_KEY)(
+      userDataEncoded
     )
     return {
       publicKey: keyPair.publicKeyPemBase64,
@@ -380,11 +385,11 @@ function makeApis(credentials: UserSessionCredentials): Apis {
     appSource: APP_SOURCE,
     getUserSessionCredentials: () => credentials,
   }
-  return Effect.gen(function* (_) {
+  return Effect.gen(function* () {
     return {
-      contact: yield* _(contact.api({...common, url: CONTACT_URL})),
-      offer: yield* _(offer.api({...common, url: OFFER_URL})),
-      chat: yield* _(chat.api({...common, url: CHAT_URL})),
+      contact: yield* contact.api({...common, url: CONTACT_URL}),
+      offer: yield* offer.api({...common, url: OFFER_URL}),
+      chat: yield* chat.api({...common, url: CHAT_URL}),
     }
   }).pipe(Effect.provide(FetchHttpClient.layer), Effect.runSync)
 }
@@ -395,10 +400,12 @@ const userKeyPair = (user: SeedUser): PrivateKeyHolder =>
 const apisForUser = (
   user: SeedUser
 ): Effect.Effect<{apis: Apis; keyPair: PrivateKeyHolder}, unknown> =>
-  Effect.gen(function* (_) {
+  Effect.gen(function* () {
     const keyPair = userKeyPair(user)
-    const credentials = yield* _(
-      makeCredentials(user.phone, keyPair, user.keyPairV2)
+    const credentials = yield* makeCredentials(
+      user.phone,
+      keyPair,
+      user.keyPairV2
     )
     return {apis: makeApis(credentials), keyPair}
   })
@@ -515,22 +522,22 @@ async function phaseRegister(targetPhone: E164PhoneNumber): Promise<void> {
   const stateForClosure = state
 
   const registerOne = (user: SeedUser): Effect.Effect<void, unknown> =>
-    Effect.gen(function* (_) {
-      const {apis} = yield* _(apisForUser(user))
-      yield* _(
-        apis.contact.createUser({
-          vexlNotificationToken: Option.none(),
-          firebaseToken: null,
-          expoToken: null,
-          publicKeyV2: Option.none(),
-        })
+    Effect.gen(function* () {
+      const {apis} = yield* apisForUser(user)
+      yield* apis.contact.createUser({
+        vexlNotificationToken: Option.none(),
+        firebaseToken: null,
+        expoToken: null,
+        publicKeyV2: Option.none(),
+      })
+      const contactHashes = yield* Effect.forEach(
+        contactsForUser(user, stateForClosure),
+        hashPhoneNumber
       )
-      const contactHashes = yield* _(
-        Effect.forEach(contactsForUser(user, stateForClosure), hashPhoneNumber)
-      )
-      yield* _(
-        apis.contact.importContacts({contacts: contactHashes, replace: true})
-      )
+      yield* apis.contact.importContacts({
+        contacts: contactHashes,
+        replace: true,
+      })
       progress()
     })
 
@@ -539,18 +546,18 @@ async function phaseRegister(targetPhone: E164PhoneNumber): Promise<void> {
       state.users,
       (user) =>
         registerOne(user).pipe(
-          Effect.either,
+          Effect.result,
           Effect.map((either) => ({user, either}))
         ),
       {concurrency: CONCURRENCY}
     )
   )
 
-  const failures = results.filter((r) => r.either._tag === 'Left')
+  const failures = results.filter((r) => r.either._tag === 'Failure')
   for (const failure of failures.slice(0, 5)) {
     console.error(
       `register failed for user ${failure.user.index}:`,
-      failure.either._tag === 'Left' ? failure.either.left : undefined
+      failure.either._tag === 'Failure' ? failure.either.failure : undefined
     )
   }
   console.log(
@@ -652,8 +659,8 @@ async function phaseOffers(): Promise<void> {
   const createOffersForUser = (
     user: SeedUser
   ): Effect.Effect<SeedOffer[], unknown> =>
-    Effect.gen(function* (_) {
-      const {apis, keyPair} = yield* _(apisForUser(user))
+    Effect.gen(function* () {
+      const {apis, keyPair} = yield* apisForUser(user)
       const created: SeedOffer[] = []
       const alreadyHave = offersByCreator.get(user.index) ?? 0
       for (let k = alreadyHave; k < OFFERS_PER_USER; k++) {
@@ -661,25 +668,23 @@ async function phaseOffers(): Promise<void> {
         const offerKey = generatePrivateKey()
 
         // Give the offer a real inbox on chat-service, like the app does
-        yield* _(apis.chat.createInbox({keyPair: offerKey}))
+        yield* apis.chat.createInbox({keyPair: offerKey})
 
-        const result = yield* _(
-          createNewOfferForMyContacts({
-            offerApi: apis.offer,
-            contactApi: apis.contact,
-            publicPart: buildOfferPublicPart({
-              globalIndex,
-              offerPublicKey: offerKey.publicKeyPemBase64,
-            }),
-            ownerKeyPair: keyPair,
-            ownerKeyPairV2: user.keyPairV2,
-            countryPrefix: COUNTRY_PREFIX,
-            intendedConnectionLevel: 'ALL',
-            intendedClubs: {},
-            offerId: newOfferId(),
-            serverToClientHashesToHashedPhoneNumbersMap: HashMap.empty(),
-          })
-        )
+        const result = yield* createNewOfferForMyContacts({
+          offerApi: apis.offer,
+          contactApi: apis.contact,
+          publicPart: buildOfferPublicPart({
+            globalIndex,
+            offerPublicKey: offerKey.publicKeyPemBase64,
+          }),
+          ownerKeyPair: keyPair,
+          ownerKeyPairV2: user.keyPairV2,
+          countryPrefix: COUNTRY_PREFIX,
+          intendedConnectionLevel: 'ALL',
+          intendedClubs: {},
+          offerId: newOfferId(),
+          serverToClientHashesToHashedPhoneNumbersMap: HashMap.empty(),
+        })
         created.push({
           offerId: result.offerInfo.offerId,
           adminId: result.adminId,
@@ -696,12 +701,12 @@ async function phaseOffers(): Promise<void> {
       usersToProcess,
       (user) =>
         createOffersForUser(user).pipe(
-          Effect.either,
+          Effect.result,
           Effect.map((either) => ({user, either})),
           Effect.tap(({either}) =>
             Effect.sync(() => {
-              if (either._tag === 'Right') {
-                state.offers.push(...either.right)
+              if (either._tag === 'Success') {
+                state.offers.push(...either.success)
                 processedSinceSave += 1
                 if (processedSinceSave >= 20) {
                   processedSinceSave = 0
@@ -716,11 +721,11 @@ async function phaseOffers(): Promise<void> {
   )
   saveSeedState(state)
 
-  const failures = results.filter((r) => r.either._tag === 'Left')
+  const failures = results.filter((r) => r.either._tag === 'Failure')
   for (const failure of failures.slice(0, 5)) {
     console.error(
       `offers failed for user ${failure.user.index}:`,
-      failure.either._tag === 'Left' ? failure.either.left : undefined
+      failure.either._tag === 'Failure' ? failure.either.failure : undefined
     )
   }
   console.log(
@@ -780,53 +785,51 @@ async function phaseChats(): Promise<void> {
     user: SeedUser,
     orderIndex: number
   ): Effect.Effect<SeedChat, unknown> =>
-    Effect.gen(function* (_) {
-      const {apis, keyPair} = yield* _(apisForUser(user))
+    Effect.gen(function* () {
+      const {apis, keyPair} = yield* apisForUser(user)
 
-      const allOffers = yield* _(fetchAllOffersForMe(apis))
+      const allOffers = yield* fetchAllOffersForMe(apis)
       const candidates = allOffers.filter((o) => !seedOfferIds.has(o.offerId))
       if (candidates.length === 0) {
-        return yield* _(
-          Effect.fail(
-            new Error(
-              `Fake user ${user.index} sees no offers created by the target. ` +
-                'Did the emulator user import the fake numbers AND create own offers in the app?'
-            )
+        return yield* Effect.fail(
+          new Error(
+            `Fake user ${user.index} sees no offers created by the target. ` +
+              'Did the emulator user import the fake numbers AND create own offers in the app?'
           )
         )
       }
 
-      const decryptedEithers = yield* _(
-        Effect.forEach(
-          candidates,
-          (c) => decryptOffer(keyPair, user.keyPairV2)(c).pipe(Effect.either),
-          {concurrency: 5}
-        )
+      const decryptedEithers = yield* Effect.forEach(
+        candidates,
+        (c) => decryptOffer(keyPair, user.keyPairV2)(c).pipe(Effect.result),
+        {concurrency: 5}
       )
       const targetOffers = pipe(
         decryptedEithers,
-        Array.filterMap((either) =>
-          either._tag === 'Right' ? Option.some(either.right) : Option.none()
+        Array.filterMap(
+          Filter.fromPredicateOption((either) =>
+            either._tag === 'Success'
+              ? Option.some(either.success)
+              : Option.none()
+          )
         )
       )
-      if (!Array.isNonEmptyArray(targetOffers)) {
-        return yield* _(
-          Effect.fail(
-            new Error(
-              `Fake user ${user.index} could not decrypt any target offer.`
-            )
+      if (!Array.isArrayNonEmpty(targetOffers)) {
+        return yield* Effect.fail(
+          new Error(
+            `Fake user ${user.index} could not decrypt any target offer.`
           )
         )
       }
 
       const pickedOffer = targetOffers[orderIndex % targetOffers.length]
       if (pickedOffer === undefined) {
-        return yield* _(Effect.fail(new Error('No offer picked')))
+        return yield* Effect.fail(new Error('No offer picked'))
       }
       const receiverPublicKey = pickedOffer.publicPart.offerPublicKey
 
       // The sender needs their own inbox for the request handshake
-      yield* _(apis.chat.createInbox({keyPair}))
+      yield* apis.chat.createInbox({keyPair})
 
       const requestMessage: ChatMessage = {
         uuid: generateChatMessageId(),
@@ -837,16 +840,14 @@ async function phaseChats(): Promise<void> {
         myVersion: CLIENT_SEMVER,
         senderPublicKey: keyPair.publicKeyPemBase64,
       }
-      const cypher = yield* _(
-        taskEitherToEffect(messageToNetwork(receiverPublicKey)(requestMessage))
+      const cypher = yield* taskEitherToEffect(
+        messageToNetwork(receiverPublicKey)(requestMessage)
       )
-      yield* _(
-        apis.chat.requestApprovalV2({
-          keyPair,
-          receiverPublicKey,
-          message: cypher,
-        })
-      )
+      yield* apis.chat.requestApprovalV2({
+        keyPair,
+        receiverPublicKey,
+        message: cypher,
+      })
       progress()
       return {
         userIndex: user.index,
@@ -862,7 +863,7 @@ async function phaseChats(): Promise<void> {
       senders,
       (user, orderIndex) =>
         sendRequestForUser(user, orderIndex).pipe(
-          Effect.either,
+          Effect.result,
           Effect.map((either) => ({user, either}))
         ),
       {concurrency: Math.min(CONCURRENCY, 5)}
@@ -870,15 +871,16 @@ async function phaseChats(): Promise<void> {
   )
 
   for (const result of results) {
-    if (result.either._tag === 'Right') state.chats.push(result.either.right)
+    if (result.either._tag === 'Success')
+      state.chats.push(result.either.success)
   }
   saveSeedState(state)
 
-  const failures = results.filter((r) => r.either._tag === 'Left')
+  const failures = results.filter((r) => r.either._tag === 'Failure')
   for (const failure of failures.slice(0, 5)) {
     console.error(
       `chat request failed for user ${failure.user.index}:`,
-      failure.either._tag === 'Left' ? failure.either.left : undefined
+      failure.either._tag === 'Failure' ? failure.either.failure : undefined
     )
   }
   console.log(
@@ -931,14 +933,14 @@ async function phaseMessages(): Promise<void> {
   const sendMessagesForChat = (
     seedChat: MutableSeedChat
   ): Effect.Effect<void, unknown> =>
-    Effect.gen(function* (_) {
+    Effect.gen(function* () {
       const user = state.users.find((u) => u.index === seedChat.userIndex)
       if (user === undefined) {
-        return yield* _(
-          Effect.fail(new Error(`No seed user ${seedChat.userIndex}`))
+        return yield* Effect.fail(
+          new Error(`No seed user ${seedChat.userIndex}`)
         )
       }
-      const {apis, keyPair} = yield* _(apisForUser(user))
+      const {apis, keyPair} = yield* apisForUser(user)
 
       for (let m = seedChat.messagesSent; m < MSGS_PER_CHAT; m++) {
         const message: ChatMessage = {
@@ -951,23 +953,19 @@ async function phaseMessages(): Promise<void> {
           myVersion: CLIENT_SEMVER,
           senderPublicKey: keyPair.publicKeyPemBase64,
         }
-        const cypher = yield* _(
-          taskEitherToEffect(messageToNetwork(seedChat.offerPublicKey)(message))
+        const cypher = yield* taskEitherToEffect(
+          messageToNetwork(seedChat.offerPublicKey)(message)
         )
-        yield* _(
-          apis.chat.sendMessage({
-            keyPair,
-            senderPublicKey: keyPair.publicKeyPemBase64,
-            receiverPublicKey: seedChat.offerPublicKey,
-            message: cypher,
-            messageType: 'MESSAGE',
-          })
-        )
-        yield* _(
-          Effect.sync(() => {
-            recordMessageSent(seedChat, m + 1)
-          })
-        )
+        yield* apis.chat.sendMessage({
+          keyPair,
+          senderPublicKey: keyPair.publicKeyPemBase64,
+          receiverPublicKey: seedChat.offerPublicKey,
+          message: cypher,
+          messageType: 'MESSAGE',
+        })
+        yield* Effect.sync(() => {
+          recordMessageSent(seedChat, m + 1)
+        })
       }
       progress()
     })
@@ -977,7 +975,7 @@ async function phaseMessages(): Promise<void> {
       chatsToProcess,
       (seedChat) =>
         sendMessagesForChat(seedChat).pipe(
-          Effect.either,
+          Effect.result,
           Effect.map((either) => ({seedChat, either}))
         ),
       {concurrency: Math.min(CONCURRENCY, 5)}
@@ -985,10 +983,10 @@ async function phaseMessages(): Promise<void> {
   )
   saveSeedState(state)
 
-  const failures = results.filter((r) => r.either._tag === 'Left')
+  const failures = results.filter((r) => r.either._tag === 'Failure')
   for (const failure of failures.slice(0, 5)) {
     const error =
-      failure.either._tag === 'Left' ? failure.either.left : undefined
+      failure.either._tag === 'Failure' ? failure.either.failure : undefined
     console.error(
       `messages failed for chat of user ${failure.seedChat.userIndex}:`,
       error
@@ -1016,50 +1014,44 @@ async function phaseVerify(): Promise<void> {
       state.users[Math.floor(state.users.length / 2)],
       state.users[state.users.length - 1],
     ],
-    Array.filterMap(Option.fromNullable),
+    Array.filterMap(Filter.fromPredicateOption(Option.fromNullishOr)),
     Array.dedupeWith((a, b) => a.index === b.index)
   )
 
   const verifyUser = (user: SeedUser): Effect.Effect<void, unknown> =>
-    Effect.gen(function* (_) {
-      const {apis, keyPair} = yield* _(apisForUser(user))
-      const first = yield* _(
-        fetchAllPaginatedData({
-          fetchEffectToRun: (nextPageToken) =>
-            apis.contact.fetchMyContactsPaginated({
-              level: 'FIRST',
-              limit: 500,
-              nextPageToken:
-                nextPageToken === undefined
-                  ? undefined
-                  : Schema.decodeSync(Base64String)(nextPageToken),
-            }),
-        })
-      )
-      const second = yield* _(
-        fetchAllPaginatedData({
-          fetchEffectToRun: (nextPageToken) =>
-            apis.contact.fetchMyContactsPaginated({
-              level: 'SECOND',
-              limit: 500,
-              nextPageToken:
-                nextPageToken === undefined
-                  ? undefined
-                  : Schema.decodeSync(Base64String)(nextPageToken),
-            }),
-        })
-      )
-      const offersForMe = yield* _(fetchAllOffersForMe(apis))
+    Effect.gen(function* () {
+      const {apis, keyPair} = yield* apisForUser(user)
+      const first = yield* fetchAllPaginatedData({
+        fetchEffectToRun: (nextPageToken) =>
+          apis.contact.fetchMyContactsPaginated({
+            level: 'FIRST',
+            limit: 500,
+            nextPageToken:
+              nextPageToken === undefined
+                ? undefined
+                : Schema.decodeSync(Base64String)(nextPageToken),
+          }),
+      })
+      const second = yield* fetchAllPaginatedData({
+        fetchEffectToRun: (nextPageToken) =>
+          apis.contact.fetchMyContactsPaginated({
+            level: 'SECOND',
+            limit: 500,
+            nextPageToken:
+              nextPageToken === undefined
+                ? undefined
+                : Schema.decodeSync(Base64String)(nextPageToken),
+          }),
+      })
+      const offersForMe = yield* fetchAllOffersForMe(apis)
       const fromTarget = offersForMe.filter((o) => !seedOfferIds.has(o.offerId))
       let decryptedOk = 0
       if (offersForMe.length > 0) {
         const sample = offersForMe.slice(0, 3)
-        const decrypted = yield* _(
-          Effect.forEach(sample, (o) =>
-            decryptOffer(keyPair, user.keyPairV2)(o).pipe(Effect.either)
-          )
+        const decrypted = yield* Effect.forEach(sample, (o) =>
+          decryptOffer(keyPair, user.keyPairV2)(o).pipe(Effect.result)
         )
-        decryptedOk = decrypted.filter((d) => d._tag === 'Right').length
+        decryptedOk = decrypted.filter((d) => d._tag === 'Success').length
       }
       console.log(
         `user ${user.index} (${user.phone}, ${
@@ -1071,9 +1063,9 @@ async function phaseVerify(): Promise<void> {
     })
 
   for (const user of sampleUsers) {
-    const result = await Effect.runPromise(verifyUser(user).pipe(Effect.either))
-    if (result._tag === 'Left') {
-      console.error(`verify failed for user ${user.index}:`, result.left)
+    const result = await Effect.runPromise(verifyUser(user).pipe(Effect.result))
+    if (result._tag === 'Failure') {
+      console.error(`verify failed for user ${user.index}:`, result.failure)
       process.exitCode = 1
     }
   }
@@ -1301,7 +1293,7 @@ async function phaseAndroidContacts(): Promise<void> {
   let fakeDirectContacts: DeviceContact[] = []
   if (existsSync(SEED_NUMBERS_FILE)) {
     const fakeNumbers = Schema.decodeUnknownSync(
-      Schema.parseJson(
+      Schema.fromJsonString(
         Schema.Struct({numbersToImportInApp: Schema.Array(E164PhoneNumber)})
       )
     )(readFileSync(SEED_NUMBERS_FILE, 'utf8'))

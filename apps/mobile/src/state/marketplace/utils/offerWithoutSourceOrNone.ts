@@ -15,7 +15,7 @@ export function offerWithoutSourceOrNone(
     removedFromClubs
   )
   const friendLevelsToRemove: FriendLevel[] = [
-    ...(Array.isEmptyArray(remainingClubIds) ? ['CLUB' as const] : []),
+    ...(Array.isArrayEmpty(remainingClubIds) ? ['CLUB' as const] : []),
     ...(removedFromContacts
       ? ['FIRST_DEGREE' as const, 'SECOND_DEGREE' as const]
       : []),
@@ -25,7 +25,7 @@ export function offerWithoutSourceOrNone(
     friendLevelsToRemove
   )
 
-  if (Array.isEmptyArray(remainingFriendLevels) && !offer.ownershipInfo)
+  if (Array.isArrayEmpty(remainingFriendLevels) && !offer.ownershipInfo)
     return Option.none()
 
   return Option.some({

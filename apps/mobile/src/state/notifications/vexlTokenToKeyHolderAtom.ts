@@ -9,10 +9,7 @@ export const vexlTokenToKeyHolderAtom = atomWithParsedMmkvStorage(
   VEXL_TOKEN_TO_KEY_HOLDER_MMKV_KEY,
   {data: {}},
   Schema.Struct({
-    data: Schema.Record({
-      key: VexlNotificationToken,
-      value: PrivateKeyHolder,
-    }),
+    data: Schema.Record(VexlNotificationToken, PrivateKeyHolder),
   })
 )
 

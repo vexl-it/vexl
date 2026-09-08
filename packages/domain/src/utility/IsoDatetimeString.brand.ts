@@ -3,7 +3,11 @@ import {DateTime} from 'luxon'
 import {type UnixMilliseconds} from './UnixMilliseconds.brand'
 
 export const IsoDatetimeString = Schema.String.pipe(
-  Schema.filter((isoString) => DateTime.fromISO(String(isoString)).isValid),
+  Schema.check(
+    Schema.makeFilter(
+      (isoString) => DateTime.fromISO(String(isoString)).isValid
+    )
+  ),
   Schema.brand('IsoDatetimeString')
 )
 export type IsoDatetimeString = Schema.Schema.Type<typeof IsoDatetimeString>

@@ -26,14 +26,14 @@ const Done = Schema.Struct({
   type: Schema.Literal('DONE'),
 })
 
-export const OfferEncryptionProgress = Schema.Union(
+export const OfferEncryptionProgress = Schema.Union([
   EncryptingPrivatePayloads,
   FetchingContacts,
   ConstructingPrivatePayloads,
   ConstructingPublicPayload,
   SendingOfferToNetwork,
-  Done
-)
+  Done,
+])
 
 export type OfferEncryptionProgress = Schema.Schema.Type<
   typeof OfferEncryptionProgress

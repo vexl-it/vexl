@@ -1,7 +1,7 @@
 import {useNavigation, usePreventRemove} from '@react-navigation/native'
 import {Button, EditRow, Loader, NavigationBar, Screen} from '@vexl-next/ui'
 import {XmarkCancelClose} from '@vexl-next/ui/src/icons'
-import {useMolecule} from 'bunshi/dist/react'
+import {useMolecule} from 'bunshi/react'
 import {Effect} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react'
@@ -126,16 +126,14 @@ function CRUDOfferFlow(): React.ReactElement {
 
   const confirmDiscardNewOffer = useCallback(
     () =>
-      Effect.gen(function* (_) {
-        return yield* _(
-          showDialog({
-            title: t('offerForm.discardNewOffer'),
-            subtitle: t('offerForm.discardNewOfferDescription'),
-            positiveButtonText: t('common.discard'),
-            positiveButtonVariant: 'destructive',
-            negativeButtonText: t('common.goBack'),
-          })
-        )
+      Effect.gen(function* () {
+        return yield* showDialog({
+          title: t('offerForm.discardNewOffer'),
+          subtitle: t('offerForm.discardNewOfferDescription'),
+          positiveButtonText: t('common.discard'),
+          positiveButtonVariant: 'destructive',
+          negativeButtonText: t('common.goBack'),
+        })
       }),
     [showDialog, t]
   )

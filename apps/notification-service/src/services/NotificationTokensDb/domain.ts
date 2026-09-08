@@ -7,14 +7,14 @@ import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificat
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {PlatformName} from '@vexl-next/rest-api'
 import {AppSource} from '@vexl-next/rest-api/src/commonHeaders'
-import {Schema} from 'effect/index'
+import {Schema} from 'effect'
 
-export const NotificationTokenRecordId = Schema.BigInt.pipe(
+export const NotificationTokenRecordId = Schema.BigIntFromString.pipe(
   Schema.brand('NotificationTokenRecordId')
 )
 export type NotificationTokenRecordId = typeof NotificationTokenRecordId.Type
 
-export const NotificationSecretRecordId = Schema.BigInt.pipe(
+export const NotificationSecretRecordId = Schema.BigIntFromString.pipe(
   Schema.brand('NotificationSecretRecordId')
 )
 export type NotificationSecretRecordId = typeof NotificationSecretRecordId.Type
@@ -39,8 +39,8 @@ export class NotificationSecretRecord extends Schema.Class<NotificationSecretRec
   clientVersion: VersionCode,
   clientAppSource: AppSource,
   clientLanguage: Schema.String,
-  createdAt: Schema.DateFromSelf,
-  updatedAt: Schema.DateFromSelf,
+  createdAt: Schema.Date,
+  updatedAt: Schema.Date,
   clientPrefix: Schema.NullOr(CountryPrefix),
   backgroundSocketEnabled: Schema.Boolean,
 }) {}

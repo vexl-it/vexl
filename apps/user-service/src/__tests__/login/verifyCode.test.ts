@@ -9,7 +9,7 @@ import {
   VerificationNotFoundError,
 } from '@vexl-next/rest-api/src/services/user/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
-import {Effect, Schema} from 'effect'
+import {Effect, pipe, Schema} from 'effect'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
 import {generateAndSignChallenge} from '../utils/loginChalenge'
 import {
@@ -32,42 +32,38 @@ beforeEach(() => {
   checkVerificationMock.mockClear()
 })
 
-const initVerification = Effect.gen(function* (_) {
-  const client = yield* _(NodeTestingApp)
-  return yield* _(
-    client.Login.initVerification({
-      headers: Schema.decodeSync(CommonHeaders)({
-        'user-agent': 'Vexl/2 (1.0.0) IOS',
-      }),
-      payload: {
-        challenge: yield* _(generateAndSignChallenge),
-        phoneNumber: phoneNumberToTest,
-      },
-    })
-  )
+const initVerification = Effect.gen(function* () {
+  const client = yield* NodeTestingApp
+  return yield* client.Login.initVerification({
+    headers: Schema.decodeSync(CommonHeaders)({
+      'user-agent': 'Vexl/2 (1.0.0) IOS',
+    }),
+    payload: {
+      challenge: yield* generateAndSignChallenge,
+      phoneNumber: phoneNumberToTest,
+    },
+  })
 })
 
 describe('Verify code', () => {
   it('Should return success response when verification is successfull', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
-        const initResponse = yield* _(initVerification)
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
+        const initResponse = yield* initVerification
 
         expect(initResponse.verificationId).toBeDefined()
         expect(initResponse.expirationAt).toBeDefined()
 
         checkVerificationMock.mockReturnValueOnce(Effect.succeed('valid'))
         const keypair = generatePrivateKey()
-        const checkResponse = yield* _(
-          client.Login.verifyCode({
-            payload: {
-              userPublicKey: keypair.publicKeyPemBase64,
-              id: initResponse.verificationId,
-              code: '123456',
-            },
-          })
-        )
+        const checkResponse = yield* client.Login.verifyCode({
+          payload: {
+            userPublicKey: keypair.publicKeyPemBase64,
+            id: initResponse.verificationId,
+            code: '123456',
+          },
+        })
 
         expect(checkResponse.challenge).toBeDefined()
       })
@@ -76,28 +72,26 @@ describe('Verify code', () => {
 
   it('Should reject replayed verification ids', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
-        const initResponse = yield* _(initVerification)
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
+        const initResponse = yield* initVerification
 
         expect(initResponse.verificationId).toBeDefined()
         expect(initResponse.expirationAt).toBeDefined()
 
         checkVerificationMock.mockReturnValueOnce(Effect.succeed('valid'))
         const keypair = generatePrivateKey()
-        const checkResponse = yield* _(
-          client.Login.verifyCode({
-            payload: {
-              userPublicKey: keypair.publicKeyPemBase64,
-              id: initResponse.verificationId,
-              code: '123456',
-            },
-          })
-        )
+        const checkResponse = yield* client.Login.verifyCode({
+          payload: {
+            userPublicKey: keypair.publicKeyPemBase64,
+            id: initResponse.verificationId,
+            code: '123456',
+          },
+        })
 
         expect(checkResponse.challenge).toBeDefined()
 
-        const replayResponse = yield* _(
+        const replayResponse = yield* pipe(
           client.Login.verifyCode({
             payload: {
               userPublicKey: keypair.publicKeyPemBase64,
@@ -105,16 +99,16 @@ describe('Verify code', () => {
               code: '123456',
             },
           }),
-          Effect.either
+          Effect.result
         )
 
-        const VerifyCodeErrors = Schema.Union(
+        const VerifyCodeErrors = Schema.Union([
           UnableToGenerateChallengeError,
           VerificationNotFoundError,
           InvalidVerificationError,
           InvalidVerificationIdError,
-          UnableToVerifySmsCodeError
-        )
+          UnableToVerifySmsCodeError,
+        ])
 
         expectErrorResponse(VerifyCodeErrors)(replayResponse)
       })
@@ -123,9 +117,9 @@ describe('Verify code', () => {
 
   it('Should return error response when verification unsuccessful', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
-        const initResponse = yield* _(initVerification)
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
+        const initResponse = yield* initVerification
 
         expect(initResponse.verificationId).toBeDefined()
         expect(initResponse.expirationAt).toBeDefined()
@@ -140,7 +134,7 @@ describe('Verify code', () => {
           )
         )
         const keypair = generatePrivateKey()
-        const checkResponse = yield* _(
+        const checkResponse = yield* pipe(
           client.Login.verifyCode({
             payload: {
               userPublicKey: keypair.publicKeyPemBase64,
@@ -148,16 +142,16 @@ describe('Verify code', () => {
               code: '123456',
             },
           }),
-          Effect.either
+          Effect.result
         )
 
-        const VerifyCodeErrors = Schema.Union(
+        const VerifyCodeErrors = Schema.Union([
           UnableToGenerateChallengeError,
           VerificationNotFoundError,
           InvalidVerificationError,
           InvalidVerificationIdError,
-          UnableToVerifySmsCodeError
-        )
+          UnableToVerifySmsCodeError,
+        ])
 
         expectErrorResponse(VerifyCodeErrors)(checkResponse)
       })

@@ -30,7 +30,7 @@ export default function filterOffersByText({
 
   for (const contact of importedContacts) {
     const contactsForHash = pipe(
-      Option.fromNullable(contactsByHash.get(contact.computedValues.hash)),
+      Option.fromNullishOr(contactsByHash.get(contact.computedValues.hash)),
       Option.getOrElse((): StoredContactWithComputedValues[] => [])
     )
     contactsByHash.set(contact.computedValues.hash, [
@@ -56,7 +56,7 @@ export default function filterOffersByText({
             visibleCommonFriends.commonFriends,
             Array.flatMap((hash) =>
               pipe(
-                Option.fromNullable(contactsByHash.get(hash)),
+                Option.fromNullishOr(contactsByHash.get(hash)),
                 Option.getOrElse((): StoredContactWithComputedValues[] => [])
               )
             ),

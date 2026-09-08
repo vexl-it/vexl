@@ -1,6 +1,6 @@
-import {SqlClient} from '@effect/sql'
 import {clearTestAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect} from 'effect'
+import {SqlClient} from 'effect/unstable/sql'
 import {
   disposeRuntime,
   runPromiseInMockedEnvironment,
@@ -13,10 +13,10 @@ beforeAll(async () => {
 
 beforeEach(async () => {
   await runPromiseInMockedEnvironment(
-    Effect.gen(function* (_) {
-      yield* _(clearTestAuthHeaders)
-      const sql = yield* _(SqlClient.SqlClient)
-      yield* _(sql`DELETE FROM club_member_count_change`)
+    Effect.gen(function* () {
+      yield* clearTestAuthHeaders
+      const sql = yield* SqlClient.SqlClient
+      yield* sql`DELETE FROM club_member_count_change`
     })
   )
 })

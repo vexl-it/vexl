@@ -1,6 +1,6 @@
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
-import {Config, ConfigError, Effect, Either, Schema, String} from 'effect'
+import {Config, Effect, Schema, String} from 'effect'
 
 export {
   cryptoConfig,
@@ -22,10 +22,8 @@ export const loginCodeDummies = Config.option(
     numbers: Config.string('LOGIN_CODE_DUMMY_NUMBERS').pipe(
       Config.map(String.split(',')),
       Config.mapOrFail((v) =>
-        Either.mapLeft(
-          Schema.decodeEither(Schema.Array(E164PhoneNumber))(v),
-          (e) =>
-            ConfigError.InvalidData(['LOGIN_CODE_DUMMY_NUMBERS'], e.message)
+        Schema.decodeEffect(Schema.Array(E164PhoneNumber))(v).pipe(
+          Effect.mapError((error) => new Config.ConfigError(error))
         )
       )
     ),
@@ -58,26 +56,16 @@ export const turnstileExpectedHostnameConfig = Config.option(
   Config.string('TURNSTILE_EXPECTED_HOSTNAME')
 )
 
-export const verificationProviderConfig = Config.string(
+export const verificationProviderConfig = Config.schema(
+  Schema.Literals(['twilio', 'prelude']),
   'VERIFICATION_PROVIDER'
-).pipe(
-  Config.validate({
-    message:
-      'Invalid verification provider. Should be one of "twilio" or "prelude"',
-    validation: (v) => v === 'twilio' || v === 'prelude',
-  })
 )
 
 export const lowestSupportVersionToLoginConfig = Config.number(
   'LOWEST_SUPPORT_VERSION_TO_LOGIN'
-).pipe(Config.withDefault(0), Effect.flatMap(Schema.decode(VersionCode)))
+).pipe(Config.withDefault(0), Effect.flatMap(Schema.decodeEffect(VersionCode)))
 
-export const rerequestLimitDaysConfig = Config.number(
+export const rerequestLimitDaysConfig = Config.schema(
+  Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
   'REREQUEST_LIMIT_DAYS'
-).pipe(
-  Config.withDefault(1),
-  Config.validate({
-    message: 'REREQUEST_LIMIT_DAYS must be a positive integer or 0',
-    validation: (v) => Number.isInteger(v) && v >= 0,
-  })
-)
+).pipe(Config.withDefault(1))

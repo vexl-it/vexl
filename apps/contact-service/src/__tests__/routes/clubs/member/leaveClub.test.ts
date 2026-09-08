@@ -1,4 +1,3 @@
-import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {generateClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
@@ -8,7 +7,8 @@ import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {InvalidChallengeError} from '@vexl-next/rest-api/src/challenges/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {addTestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
-import {Effect, Option, Schema} from 'effect'
+import {Effect, Option, pipe, Schema} from 'effect'
+import {SqlClient} from 'effect/unstable/sql'
 import {ClubMembersDbService} from '../../../../db/ClubMemberDbService'
 import {ClubsDbService} from '../../../../db/ClubsDbService'
 import {generateAndSignChallenge} from '../../../utils/generateAndSignChallenge'
@@ -32,42 +32,38 @@ const club = {
 
 beforeEach(async () => {
   await runPromiseInMockedEnvironment(
-    Effect.gen(function* (_) {
-      const sql = yield* _(SqlClient.SqlClient)
-      yield* _(sql`DELETE FROM club_invitation_link`)
-      yield* _(sql`DELETE FROM club_member`)
-      yield* _(sql`DELETE FROM club_member_count_change`)
-      yield* _(sql`DELETE FROM club`)
+    Effect.gen(function* () {
+      const sql = yield* SqlClient.SqlClient
+      yield* sql`DELETE FROM club_invitation_link`
+      yield* sql`DELETE FROM club_member`
+      yield* sql`DELETE FROM club_member_count_change`
+      yield* sql`DELETE FROM club`
 
-      const app = yield* _(NodeTestingApp)
-      yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
-      yield* _(
-        app.ClubsAdmin.createClub({
-          headers: {'x-admin-token': ADMIN_TOKEN},
-          payload: {
-            club,
-          },
-        })
-      )
+      const app = yield* NodeTestingApp
+      yield* addTestHeaders({'x-admin-token': ADMIN_TOKEN})
+      yield* app.ClubsAdmin.createClub({
+        headers: {'x-admin-token': ADMIN_TOKEN},
+        payload: {
+          club,
+        },
+      })
 
-      const clubsDb = yield* _(ClubsDbService)
-      const {id: clubId} = yield* _(
+      const clubsDb = yield* ClubsDbService
+      const {id: clubId} = yield* pipe(
         clubsDb.findClubByUuid({uuid: club.uuid}),
-        Effect.flatten
+        Effect.flatMap(Effect.fromOption)
       )
 
-      const clubDb = yield* _(ClubMembersDbService)
-      yield* _(
-        clubDb.insertClubMember({
-          clubId,
-          publicKey: userKey.publicKeyPemBase64,
-          isModerator: false,
-          lastRefreshedAt: new Date(),
-          notificationToken: 'someToken' as ExpoNotificationToken,
-          vexlNotificationToken: 'vexl_nt_test' as VexlNotificationToken,
-          publicKeyV2: null,
-        })
-      )
+      const clubDb = yield* ClubMembersDbService
+      yield* clubDb.insertClubMember({
+        clubId,
+        publicKey: userKey.publicKeyPemBase64,
+        isModerator: false,
+        lastRefreshedAt: new Date(),
+        notificationToken: 'someToken' as ExpoNotificationToken,
+        vexlNotificationToken: 'vexl_nt_test' as VexlNotificationToken,
+        publicKeyV2: null,
+      })
     })
   )
 })
@@ -75,21 +71,19 @@ beforeEach(async () => {
 describe('Leave club', () => {
   it('Member sucessfully leaves the club', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
-        yield* _(
-          app.ClubsMember.leaveClub({
-            payload: {
-              ...(yield* _(generateAndSignChallenge(userKey))),
-              clubUuid: club.uuid,
-            },
-          })
-        )
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
+        yield* app.ClubsMember.leaveClub({
+          payload: {
+            ...(yield* generateAndSignChallenge(userKey)),
+            clubUuid: club.uuid,
+          },
+        })
 
-        const errorResponse = yield* _(
+        const errorResponse = yield* pipe(
           app.ClubsMember.getClubInfo({
             payload: {
-              ...(yield* _(generateAndSignChallenge(userKey))),
+              ...(yield* generateAndSignChallenge(userKey)),
               notificationToken: Option.some(
                 'someToken' as ExpoNotificationToken
               ),
@@ -99,15 +93,15 @@ describe('Leave club', () => {
               publicKeyV2: Option.none(),
             },
           }),
-          Effect.either
+          Effect.result
         )
 
         expectErrorResponse(NotFoundError)(errorResponse)
 
-        yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
-        const clubs = yield* _(
-          app.ClubsAdmin.listClubs({headers: {'x-admin-token': ADMIN_TOKEN}})
-        )
+        yield* addTestHeaders({'x-admin-token': ADMIN_TOKEN})
+        const clubs = yield* app.ClubsAdmin.listClubs({
+          headers: {'x-admin-token': ADMIN_TOKEN},
+        })
         expect(clubs.clubs).toEqual([
           expect.objectContaining({
             uuid: club.uuid,
@@ -121,13 +115,13 @@ describe('Leave club', () => {
   })
   it('Returns error when invalid challenge', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
 
-        const signedChallenge = yield* _(generateAndSignChallenge(userKey))
+        const signedChallenge = yield* generateAndSignChallenge(userKey)
         const invalidKey = generatePrivateKey()
 
-        const errorResponse = yield* _(
+        const errorResponse = yield* pipe(
           app.ClubsMember.leaveClub({
             payload: {
               publicKey: invalidKey.publicKeyPemBase64,
@@ -136,7 +130,7 @@ describe('Leave club', () => {
               clubUuid: club.uuid,
             },
           }),
-          Effect.either
+          Effect.result
         )
         expectErrorResponse(InvalidChallengeError)(errorResponse)
       })
@@ -144,16 +138,16 @@ describe('Leave club', () => {
   })
   it('Returns error when club not found', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
-        const errorResponse = yield* _(
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
+        const errorResponse = yield* pipe(
           app.ClubsMember.leaveClub({
             payload: {
-              ...(yield* _(generateAndSignChallenge(userKey))),
+              ...(yield* generateAndSignChallenge(userKey)),
               clubUuid: generateClubUuid(),
             },
           }),
-          Effect.either
+          Effect.result
         )
         expectErrorResponse(NotFoundError)(errorResponse)
       })
@@ -161,16 +155,16 @@ describe('Leave club', () => {
   })
   it('Returns error when member not found', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
-        const errorResponse = yield* _(
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
+        const errorResponse = yield* pipe(
           app.ClubsMember.leaveClub({
             payload: {
-              ...(yield* _(generateAndSignChallenge(generatePrivateKey()))),
+              ...(yield* generateAndSignChallenge(generatePrivateKey())),
               clubUuid: club.uuid,
             },
           }),
-          Effect.either
+          Effect.result
         )
         expectErrorResponse(NotFoundError)(errorResponse)
       })

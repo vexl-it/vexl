@@ -157,7 +157,7 @@ export function ChatMessageItem({
           </XStack>
           <TimeText>{time}</TimeText>
         </XStack>
-        {Array.isNonEmptyArray(visibleTags) ? (
+        {Array.isArrayNonEmpty(visibleTags) ? (
           <XStack alignItems="center" gap="$3" overflow="hidden">
             {pipe(
               visibleTags,

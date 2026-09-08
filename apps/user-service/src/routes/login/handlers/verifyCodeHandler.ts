@@ -1,44 +1,40 @@
-import {HttpApiBuilder} from '@effect/platform/index'
 import {
   UnableToVerifySmsCodeError,
   VerifyPhoneNumberResponse,
 } from '@vexl-next/rest-api/src/services/user/contracts'
 import {UserApiSpecification} from '@vexl-next/rest-api/src/services/user/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {makeHttpApiHandler} from '@vexl-next/server-utils/src/makeHttpApiHandler'
 import {Effect} from 'effect'
 import {checkVerification} from '../../../utils/smsVerificationUtils'
 import {VerificationStateDbService} from '../db/verificationStateDb'
 import {type ChallengeVerificationState} from '../domain'
 import {generateVerificationChallenge} from '../utils/generateVerificationChallenge'
 
-export const verifyCodeHandler = HttpApiBuilder.handler(
+export const verifyCodeHandler = makeHttpApiHandler(
   UserApiSpecification,
   'Login',
   'verifyCode',
   (req) =>
-    Effect.gen(function* (_) {
-      const loginDb = yield* _(VerificationStateDbService)
-      const loginData = yield* _(
-        loginDb.retrievePhoneVerificationState(req.payload.id)
+    Effect.gen(function* () {
+      const loginDb = yield* VerificationStateDbService
+      const loginData = yield* loginDb.retrievePhoneVerificationState(
+        req.payload.id
       )
 
       if (
         loginData.type === 'staticCodeVerification' &&
         loginData.code !== req.payload.code
       ) {
-        return yield* _(
-          Effect.fail(
-            new UnableToVerifySmsCodeError({
-              reason: 'BadCode',
-              status: 400,
-              code: '100104',
-            })
-          )
+        return yield* Effect.fail(
+          new UnableToVerifySmsCodeError({
+            reason: 'BadCode',
+            status: 400,
+            code: '100104',
+          })
         )
       } else if (loginData.type === 'twilioSmsVerification') {
-        yield* _(
-          checkVerification({sid: loginData.sid, code: req.payload.code})
-        )
+        yield* checkVerification({sid: loginData.sid, code: req.payload.code})
       }
 
       const verificationState = {
@@ -46,11 +42,11 @@ export const verifyCodeHandler = HttpApiBuilder.handler(
         phoneNumber: loginData.phoneNumber,
         expiresAt: loginData.expiresAt,
         countryPrefix: loginData.countryPrefix,
-        challenge: yield* _(generateVerificationChallenge()),
+        challenge: yield* generateVerificationChallenge(),
       } satisfies ChallengeVerificationState
 
-      yield* _(loginDb.storeChallengeVerificationState(verificationState))
-      yield* _(loginDb.deletePhoneVerificationState(req.payload.id))
+      yield* loginDb.storeChallengeVerificationState(verificationState)
+      yield* loginDb.deletePhoneVerificationState(req.payload.id)
 
       return new VerifyPhoneNumberResponse({
         challenge: verificationState.challenge,

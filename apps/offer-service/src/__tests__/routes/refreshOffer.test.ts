@@ -1,4 +1,3 @@
-import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
@@ -15,6 +14,7 @@ import {
 import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Schema} from 'effect'
+import {SqlClient} from 'effect/unstable/sql'
 import {makeTestCommonAndSecurityHeaders} from '../utils/createMockedUser'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../utils/runPromiseInMockedEnvironment'
@@ -29,8 +29,8 @@ let commonAndSecurityHeaders: ReturnType<
 
 beforeAll(async () => {
   await runPromiseInMockedEnvironment(
-    Effect.gen(function* (_) {
-      const client = yield* _(NodeTestingApp)
+    Effect.gen(function* () {
+      const client = yield* NodeTestingApp
 
       const request1: CreateNewOfferRequest = {
         adminId: generateAdminId(),
@@ -55,24 +55,20 @@ beforeAll(async () => {
         offerId: newOfferId(),
       }
 
-      const authHeaders = yield* _(
-        createDummyAuthHeadersForUser({
-          phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333333'),
-          publicKey: me.publicKeyPemBase64,
-        })
-      )
+      const authHeaders = yield* createDummyAuthHeadersForUser({
+        phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333333'),
+        publicKey: me.publicKeyPemBase64,
+      })
 
-      yield* _(setAuthHeaders(authHeaders))
+      yield* setAuthHeaders(authHeaders)
 
       commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(authHeaders)
 
       offer1 = {
-        ...(yield* _(
-          client.createNewOffer({
-            payload: request1,
-            headers: commonAndSecurityHeaders,
-          })
-        )),
+        ...(yield* client.createNewOffer({
+          payload: request1,
+          headers: commonAndSecurityHeaders,
+        })),
         adminId: request1.adminId,
       }
     })
@@ -82,47 +78,40 @@ beforeAll(async () => {
 describe('Refresh offer', () => {
   it('Refreshes offer', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const sql = yield* _(SqlClient.SqlClient)
-        yield* _(sql`
+      Effect.gen(function* () {
+        const sql = yield* SqlClient.SqlClient
+        yield* sql`
           UPDATE offer_public
           SET
             refreshed_at = now() - interval '1 day'
           WHERE
             id = ${offer1.id}
-        `)
-        const offerBeforeRefresh = yield* _(sql`
+        `
+        const offerBeforeRefresh = yield* sql`
           SELECT
             *
           FROM
             offer_public
           WHERE
             offer_id = ${offer1.offerId}
-        `)
+        `
 
-        const client = yield* _(NodeTestingApp)
+        const client = yield* NodeTestingApp
 
-        yield* _(
-          setAuthHeaders(
-            yield* _(
-              createDummyAuthHeadersForUser({
-                phoneNumber:
-                  Schema.decodeSync(E164PhoneNumber)('+420733333333'),
-                publicKey: me.publicKeyPemBase64,
-              })
-            )
-          )
-        )
-
-        yield* _(
-          client.refreshOffer({
-            payload: {
-              adminIds: [offer1.adminId],
-            },
+        yield* setAuthHeaders(
+          yield* createDummyAuthHeadersForUser({
+            phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333333'),
+            publicKey: me.publicKeyPemBase64,
           })
         )
 
-        const refreshsedOffers = yield* _(sql`
+        yield* client.refreshOffer({
+          payload: {
+            adminIds: [offer1.adminId],
+          },
+        })
+
+        const refreshsedOffers = yield* sql`
           SELECT
             *
           FROM
@@ -130,7 +119,7 @@ describe('Refresh offer', () => {
           WHERE
             offer_id = ${offer1.offerId}
             AND refreshed_at = now()::date
-        `)
+        `
         expect(refreshsedOffers.length).toBe(1)
         expect(Number(refreshsedOffers.at(0)?.updateCounter)).toBe(
           Number(offerBeforeRefresh.at(0)?.updateCounter)
@@ -141,28 +130,21 @@ describe('Refresh offer', () => {
 
   it('Result with empty array when refreshing non existing offers', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
 
-        yield* _(
-          setAuthHeaders(
-            yield* _(
-              createDummyAuthHeadersForUser({
-                phoneNumber:
-                  Schema.decodeSync(E164PhoneNumber)('+420733333333'),
-                publicKey: me.publicKeyPemBase64,
-              })
-            )
-          )
-        )
-
-        const result = yield* _(
-          client.refreshOffer({
-            payload: {
-              adminIds: [generateAdminId(), generateAdminId()],
-            },
+        yield* setAuthHeaders(
+          yield* createDummyAuthHeadersForUser({
+            phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333333'),
+            publicKey: me.publicKeyPemBase64,
           })
         )
+
+        const result = yield* client.refreshOffer({
+          payload: {
+            adminIds: [generateAdminId(), generateAdminId()],
+          },
+        })
 
         expect(result).toEqual([])
       })

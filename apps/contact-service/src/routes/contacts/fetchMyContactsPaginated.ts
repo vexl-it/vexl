@@ -1,8 +1,8 @@
-import {HttpApiBuilder} from '@effect/platform/index'
 import {CurrentSecurity} from '@vexl-next/rest-api/src/apiSecurity'
 import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/specification'
 import createPaginatedResponse from '@vexl-next/server-utils/src/createPaginatedResponse'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {makeHttpApiHandler} from '@vexl-next/server-utils/src/makeHttpApiHandler'
 import {Array, Effect, Option, pipe, Schema} from 'effect'
 import {
   contactActiveWindowDaysConfig,
@@ -22,23 +22,22 @@ export const FetchMyContactsNextPageToken = Schema.Struct({
 type FetchMyContactsNextPageToken = typeof FetchMyContactsNextPageToken.Type
 
 // TODO create V2
-export const fetchMyContactsPaginated = HttpApiBuilder.handler(
+export const fetchMyContactsPaginated = makeHttpApiHandler(
   ContactApiSpecification,
   'Contact',
   'fetchMyContactsPaginated',
   (req) =>
-    Effect.gen(function* (_) {
-      const security = yield* _(
+    Effect.gen(function* () {
+      const security = yield* pipe(
         CurrentSecurity,
         Effect.bind('serverHash', (s) => serverHashPhoneNumber(s.hash))
       )
-      const contactDb = yield* _(ContactDbService)
-      const contactActiveWindowDays = yield* _(contactActiveWindowDaysConfig)
-      const publicImportCountThreshold = yield* _(
-        contactPublicImportCountThresholdConfig
-      )
+      const contactDb = yield* ContactDbService
+      const contactActiveWindowDays = yield* contactActiveWindowDaysConfig
+      const publicImportCountThreshold =
+        yield* contactPublicImportCountThresholdConfig
 
-      yield* _(
+      yield* pipe(
         UserDbService,
         Effect.flatMap((userDb) =>
           userDb.updateAppSourceForUser({
@@ -49,21 +48,21 @@ export const fetchMyContactsPaginated = HttpApiBuilder.handler(
         )
       )
 
-      const toReturn = yield* _(
+      const toReturn = yield* pipe(
         createPaginatedResponse({
           nextPageTokenSchema: FetchMyContactsNextPageToken,
-          nextPageToken: req.urlParams.nextPageToken,
+          nextPageToken: req.query.nextPageToken,
           defaultNextPageToken: {
             userId: DEFAULT_LAST_USER_ID,
           },
-          limit: req.urlParams.limit,
+          limit: req.query.limit,
           createNextPageToken: (
             lastItem: FindFirstLevelContactsPublicKeysByHashFromPaginatedResult
           ) => ({
             userId: lastItem.userId,
           }),
           dbEffectToRun: ({limit, decodedNextPageToken}) =>
-            req.urlParams.level === 'FIRST'
+            req.query.level === 'FIRST'
               ? contactDb.findFirstLevelContactsPublicKeysByHashFromPaginated({
                   hashFrom: security.serverHash,
                   limit,
@@ -103,7 +102,7 @@ export const fetchMyContactsPaginated = HttpApiBuilder.handler(
       }
     }).pipe(
       Effect.withSpan('Fetch my contacts paginated', {
-        attributes: {level: req.urlParams.level},
+        attributes: {level: req.query.level},
       }),
       makeEndpointEffect
     )

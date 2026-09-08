@@ -41,19 +41,17 @@ export function callWithNotificationService<
     otherSideVersion,
     sendSystemNotification,
   }) => {
-    return Effect.gen(function* (_) {
+    return Effect.gen(function* () {
       // Do not try to issue notification if there is no fcmCypher or the other side does not support V2 notifications
       if (
         !notificationCypher ||
         !otherSideVersion ||
         compare(otherSideVersion)('<', FE_VERSION_SUPPORTING_V2_NOTIFICATIONS)
       ) {
-        return yield* _(f({...(fArgs as T), notificationServiceReady: false}))
+        return yield* f({...(fArgs as T), notificationServiceReady: false})
       }
 
-      const result = yield* _(
-        f({...(fArgs as T), notificationServiceReady: true})
-      )
+      const result = yield* f({...(fArgs as T), notificationServiceReady: true})
       if (result.notificationHandled) {
         return result
       }
@@ -62,24 +60,24 @@ export function callWithNotificationService<
         ? notificationCypher
         : undefined
 
-      yield* _(
-        notificationApi.issueNotification({
+      yield* notificationApi
+        .issueNotification({
           notificationCypher: notificationToken
             ? undefined
             : notificationCypher,
           notificationToken,
           sendNewChatMessageNotification: sendSystemNotification,
         })
-      ).pipe(
-        Effect.catchAll((e) => {
-          reportErrorFromResourcesUtils(
-            'warn',
-            new Error('Error issuing notificiation'),
-            {e}
-          )
-          return Effect.succeed(result)
-        })
-      )
+        .pipe(
+          Effect.catch((e) => {
+            reportErrorFromResourcesUtils(
+              'warn',
+              new Error('Error issuing notificiation'),
+              {e}
+            )
+            return Effect.succeed(result)
+          })
+        )
 
       return result
     })

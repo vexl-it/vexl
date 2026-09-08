@@ -13,7 +13,7 @@ import {
   cryptoBoxUnseal,
 } from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {ServerNote} from '@vexl-next/rest-api/src/services/offer/notesContracts'
-import {Effect, Either, flow, Schema} from 'effect'
+import {Effect, flow, pipe, Result, Schema} from 'effect'
 import {aesGCMIgnoreTagDecrypt, eciesDecryptE} from '../utils/crypto'
 
 export class DecryptingNoteError extends Schema.TaggedError<DecryptingNoteError>(
@@ -41,7 +41,7 @@ export default function decryptNote(
   DecryptingNoteError | NonCompatibleNoteVersionError
 > {
   return (serverNote: ServerNote) =>
-    Effect.gen(function* (_) {
+    Effect.gen(function* () {
       const isV1 = Schema.is(PrivatePayloadEncryptedV1)(
         serverNote.privatePayload
       )
@@ -50,86 +50,82 @@ export default function decryptNote(
       )
 
       if (!isV1 && !isV2) {
-        return yield* _(
-          Effect.fail(
-            new NonCompatibleNoteVersionError({
-              message: 'Non compatible note cypher version',
-              cause: new Error('Non compatible note cypher version'),
-            })
-          )
+        return yield* Effect.fail(
+          new NonCompatibleNoteVersionError({
+            message: 'Non compatible note cypher version',
+            cause: new Error('Non compatible note cypher version'),
+          })
         )
       }
 
-      const privatePayload = yield* _(
+      const privatePayload = yield* pipe(
         serverNote.privatePayload.substring(1),
         isV1
           ? eciesDecryptE(privateKey.privateKeyPemBase64)
           : flow(
-              Schema.decode(CryptoBoxCypher),
+              Schema.decodeEffect(CryptoBoxCypher),
               Effect.flatMap(cryptoBoxUnseal(privateKeyV2))
             ),
-        Effect.flatMap(Schema.decodeUnknown(Schema.parseJson(NotePrivatePart))),
-        Effect.either
+        Effect.flatMap(
+          Schema.decodeUnknownEffect(Schema.fromJsonString(NotePrivatePart))
+        ),
+        Effect.result
       )
 
-      if (Either.isLeft(privatePayload)) {
-        return yield* _(
-          Effect.fail(
-            new DecryptingNoteError({
-              message: 'Error while decrypting note private payload',
-              cause: privatePayload.left,
-              serverNote,
-            })
-          )
+      if (Result.isFailure(privatePayload)) {
+        return yield* Effect.fail(
+          new DecryptingNoteError({
+            message: 'Error while decrypting note private payload',
+            cause: privatePayload.failure,
+            serverNote,
+          })
         )
       }
 
-      const publicPayload = yield* _(
+      const publicPayload = yield* pipe(
         Effect.succeed(serverNote.publicPayload.substring(1)),
         Effect.flatMap(
-          aesGCMIgnoreTagDecrypt(privatePayload.right.symmetricKey)
+          aesGCMIgnoreTagDecrypt(privatePayload.success.symmetricKey)
         ),
-        Effect.flatMap(Schema.decodeUnknown(Schema.parseJson(NotePublicPart))),
-        Effect.either
+        Effect.flatMap(
+          Schema.decodeUnknownEffect(Schema.fromJsonString(NotePublicPart))
+        ),
+        Effect.result
       )
 
-      if (Either.isLeft(publicPayload)) {
-        return yield* _(
-          Effect.fail(
-            new DecryptingNoteError({
-              message: 'Error while decrypting note public payload',
-              cause: publicPayload.left,
-              serverNote,
-            })
-          )
+      if (Result.isFailure(publicPayload)) {
+        return yield* Effect.fail(
+          new DecryptingNoteError({
+            message: 'Error while decrypting note public payload',
+            cause: publicPayload.failure,
+            serverNote,
+          })
         )
       }
 
-      const note = yield* _(
-        Schema.decode(NoteInfo)({
+      const note = yield* pipe(
+        Schema.decodeEffect(NoteInfo)({
           id: serverNote.id,
           noteId: serverNote.noteId,
-          privatePart: privatePayload.right,
-          publicPart: publicPayload.right,
+          privatePart: privatePayload.success,
+          publicPart: publicPayload.success,
           expiresAt: serverNote.expiresAt,
           createdAt: serverNote.createdAt,
           modifiedAt: serverNote.modifiedAt,
         }),
-        Effect.either
+        Effect.result
       )
 
-      if (Either.isLeft(note)) {
-        return yield* _(
-          Effect.fail(
-            new DecryptingNoteError({
-              message: 'Error while assembling note info',
-              cause: note.left,
-              serverNote,
-            })
-          )
+      if (Result.isFailure(note)) {
+        return yield* Effect.fail(
+          new DecryptingNoteError({
+            message: 'Error while assembling note info',
+            cause: note.failure,
+            serverNote,
+          })
         )
       }
 
-      return note.right
+      return note.success
     })
 }

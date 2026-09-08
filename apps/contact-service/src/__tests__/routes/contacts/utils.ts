@@ -37,21 +37,17 @@ export const makeTestCommonAndSecurityHeaders = (
 }
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const generateKeysAndHasheForNumber = (numberRaw: string) =>
-  Effect.gen(function* (_) {
-    const number = yield* _(Schema.decode(E164PhoneNumber)(numberRaw))
-    const hashedNumber = yield* _(hashPhoneNumber(number))
+  Effect.gen(function* () {
+    const number = yield* Schema.decodeEffect(E164PhoneNumber)(numberRaw)
+    const hashedNumber = yield* hashPhoneNumber(number)
     const keys = generatePrivateKey()
-    const authHeaders = yield* _(
-      createDummyAuthHeadersForUser({
-        phoneNumber: number,
-        publicKey: keys.publicKeyPemBase64,
-      })
-    )
+    const authHeaders = yield* createDummyAuthHeadersForUser({
+      phoneNumber: number,
+      publicKey: keys.publicKeyPemBase64,
+    })
 
-    const serverHashedNumber = yield* _(serverHashPhoneNumber(hashedNumber))
-    const serverHashedNumberForClient = yield* _(
-      hashForClient(serverHashedNumber)
-    )
+    const serverHashedNumber = yield* serverHashPhoneNumber(hashedNumber)
+    const serverHashedNumberForClient = yield* hashForClient(serverHashedNumber)
 
     return {
       phoneNumber: number,
@@ -69,7 +65,7 @@ export const generateKeysAndHasheForNumber = (numberRaw: string) =>
     }
   })
 
-export type DummyUser = Effect.Effect.Success<
+export type DummyUser = Effect.Success<
   ReturnType<typeof generateKeysAndHasheForNumber>
 >
 
@@ -97,65 +93,59 @@ export const createAndImportUsersFromNetwork = (
   users: DummyUser[]
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 ) =>
-  Effect.gen(function* (_) {
-    const app = yield* _(NodeTestingApp)
-    yield* _(addTestHeaders(user.authHeaders))
+  Effect.gen(function* () {
+    const app = yield* NodeTestingApp
+    yield* addTestHeaders(user.authHeaders)
 
     const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
       user.authHeaders
     )
 
-    yield* _(
-      app.User.createUser({
-        payload: {
-          expoToken: user.notificationToken,
-          firebaseToken: null,
-          vexlNotificationToken: user.vexlNotificationToken,
-          publicKeyV2: Option.none(),
-        },
-        headers: commonAndSecurityHeaders,
-      })
-    )
+    yield* app.User.createUser({
+      payload: {
+        expoToken: user.notificationToken,
+        firebaseToken: null,
+        vexlNotificationToken: user.vexlNotificationToken,
+        publicKeyV2: Option.none(),
+      },
+      headers: commonAndSecurityHeaders,
+    })
 
-    yield* _(addTestHeaders(user.authHeaders))
-    yield* _(
-      app.Contact.importContacts({
-        payload: {
-          contacts: pipe(
-            users,
-            Array.map((u) => u.hashedNumber),
-            Array.filter((h) => h !== user.hashedNumber)
-          ),
-          replace: true,
-        },
-        headers: commonAndSecurityHeaders,
-      })
-    )
+    yield* addTestHeaders(user.authHeaders)
+    yield* app.Contact.importContacts({
+      payload: {
+        contacts: pipe(
+          users,
+          Array.map((u) => u.hashedNumber),
+          Array.filter((h) => h !== user.hashedNumber)
+        ),
+        replace: true,
+      },
+      headers: commonAndSecurityHeaders,
+    })
   })
 
 export const createUserOnNetwork = (
   user: DummyUser
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 ) =>
-  Effect.gen(function* (_) {
-    const app = yield* _(NodeTestingApp)
-    yield* _(addTestHeaders(user.authHeaders))
+  Effect.gen(function* () {
+    const app = yield* NodeTestingApp
+    yield* addTestHeaders(user.authHeaders)
 
     const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
       user.authHeaders
     )
 
-    yield* _(
-      app.User.createUser({
-        payload: {
-          expoToken: user.notificationToken,
-          firebaseToken: null,
-          vexlNotificationToken: user.vexlNotificationToken,
-          publicKeyV2: Option.none(),
-        },
-        headers: commonAndSecurityHeaders,
-      })
-    )
+    yield* app.User.createUser({
+      payload: {
+        expoToken: user.notificationToken,
+        firebaseToken: null,
+        vexlNotificationToken: user.vexlNotificationToken,
+        publicKeyV2: Option.none(),
+      },
+      headers: commonAndSecurityHeaders,
+    })
   })
 
 export const importUsersFromNetwork = (
@@ -163,24 +153,22 @@ export const importUsersFromNetwork = (
   users: DummyUser[]
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 ) =>
-  Effect.gen(function* (_) {
-    const app = yield* _(NodeTestingApp)
+  Effect.gen(function* () {
+    const app = yield* NodeTestingApp
 
-    yield* _(addTestHeaders(user.authHeaders))
+    yield* addTestHeaders(user.authHeaders)
     const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
       user.authHeaders
     )
-    yield* _(
-      app.Contact.importContacts({
-        payload: {
-          contacts: pipe(
-            users,
-            Array.map((u) => u.hashedNumber),
-            Array.filter((h) => h !== user.hashedNumber)
-          ),
-          replace: true,
-        },
-        headers: commonAndSecurityHeaders,
-      })
-    )
+    yield* app.Contact.importContacts({
+      payload: {
+        contacts: pipe(
+          users,
+          Array.map((u) => u.hashedNumber),
+          Array.filter((h) => h !== user.hashedNumber)
+        ),
+        replace: true,
+      },
+      headers: commonAndSecurityHeaders,
+    })
   })

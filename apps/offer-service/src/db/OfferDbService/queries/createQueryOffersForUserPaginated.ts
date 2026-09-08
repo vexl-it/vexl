@@ -1,10 +1,10 @@
-import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {PublicKeyV2} from '@vexl-next/cryptography'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {PrivatePartRecordId} from '@vexl-next/domain/src/general/offers'
-import {Effect, flow, Schema} from 'effect'
+import {Effect, flow, Option, Schema} from 'effect'
+import {SqlSchema} from 'effect/unstable/sql'
 import {
   expirationPeriodDaysConfig,
   offerReportFilterConfig,
@@ -19,7 +19,9 @@ import {
 
 export const QueryOffersPaginatedRequest = Schema.Struct({
   userPublicKey: PublicKeyPemBase64,
-  userPublicKeyV2: Schema.optionalWith(PublicKeyV2, {as: 'Option'}),
+  userPublicKeyV2: Schema.OptionFromOptional(PublicKeyV2).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
   lastOfferChangeCounter: OfferChangeCounter,
   lastPrivatePartId: PrivatePartRecordId,
   limit: Schema.Int,
@@ -28,10 +30,10 @@ export type QueryOffersPaginatedRequest = Schema.Schema.Type<
   typeof QueryOffersPaginatedRequest
 >
 
-export const createQueryOffersForUserPaginated = Effect.gen(function* (_) {
-  const sql = yield* _(PgClient.PgClient)
-  const expirationPeriodDays = yield* _(expirationPeriodDaysConfig)
-  const offerReportFilter = yield* _(offerReportFilterConfig)
+export const createQueryOffersForUserPaginated = Effect.gen(function* () {
+  const sql = yield* PgClient.PgClient
+  const expirationPeriodDays = yield* expirationPeriodDaysConfig
+  const offerReportFilter = yield* offerReportFilterConfig
 
   const query = SqlSchema.findAll({
     Request: QueryOffersPaginatedRequest,

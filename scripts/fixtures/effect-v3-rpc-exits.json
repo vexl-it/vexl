@@ -1,0 +1,137 @@
+[
+  {
+    "name": "success",
+    "message": {
+      "_tag": "Exit",
+      "requestId": "1",
+      "exit": {
+        "_tag": "Success"
+      }
+    }
+  },
+  {
+    "name": "failure",
+    "message": {
+      "_tag": "Exit",
+      "requestId": "1",
+      "exit": {
+        "_tag": "Failure",
+        "cause": {
+          "_tag": "Fail",
+          "error": "expected failure"
+        }
+      }
+    }
+  },
+  {
+    "name": "defect",
+    "message": {
+      "_tag": "Exit",
+      "requestId": "1",
+      "exit": {
+        "_tag": "Failure",
+        "cause": {
+          "_tag": "Die",
+          "defect": {
+            "name": "Error",
+            "message": "fixture defect"
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "interrupt",
+    "message": {
+      "_tag": "Exit",
+      "requestId": "1",
+      "exit": {
+        "_tag": "Failure",
+        "cause": {
+          "_tag": "Interrupt",
+          "fiberId": {
+            "_tag": "Runtime",
+            "id": 12,
+            "startTimeMillis": 0
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "interruptNone",
+    "message": {
+      "_tag": "Exit",
+      "requestId": "1",
+      "exit": {
+        "_tag": "Failure",
+        "cause": {
+          "_tag": "Interrupt",
+          "fiberId": {
+            "_tag": "None"
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "interruptComposite",
+    "message": {
+      "_tag": "Exit",
+      "requestId": "1",
+      "exit": {
+        "_tag": "Failure",
+        "cause": {
+          "_tag": "Interrupt",
+          "fiberId": {
+            "_tag": "Composite",
+            "left": {
+              "_tag": "Runtime",
+              "id": 12,
+              "startTimeMillis": 0
+            },
+            "right": {
+              "_tag": "Runtime",
+              "id": 13,
+              "startTimeMillis": 0
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "empty",
+    "message": {
+      "_tag": "Exit",
+      "requestId": "1",
+      "exit": {
+        "_tag": "Failure",
+        "cause": {
+          "_tag": "Empty"
+        }
+      }
+    }
+  },
+  {
+    "name": "combined",
+    "message": {
+      "_tag": "Exit",
+      "requestId": "1",
+      "exit": {
+        "_tag": "Failure",
+        "cause": {
+          "_tag": "Parallel",
+          "left": {
+            "_tag": "Fail",
+            "error": "first"
+          },
+          "right": {
+            "_tag": "Fail",
+            "error": "second"
+          }
+        }
+      }
+    }
+  }
+]

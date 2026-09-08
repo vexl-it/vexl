@@ -2,6 +2,7 @@ import {
   type PrivateKeyHolder,
   type PublicKeyPemBase64,
 } from '@vexl-next/cryptography/src/KeyHolder'
+import {type Schema} from 'effect'
 
 import {
   generateChatMessageId,
@@ -15,7 +16,7 @@ import {
 import {type VersionString} from '@vexl-next/domain/src/utility/VersionString.brand'
 import {type ChatApi} from '@vexl-next/rest-api/src/services/chat'
 import {type NotificationApi} from '@vexl-next/rest-api/src/services/notification'
-import {Effect, type ParseResult} from 'effect'
+import {Effect} from 'effect'
 import {type NotificationTokenOrCypher} from '../notifications/callWithNotificationService'
 import {type JsonStringifyError} from '../utils/parsing'
 import sendMessage, {type SendMessageApiErrors} from './sendMessage'
@@ -91,10 +92,10 @@ export default function confirmMessagingRequest({
   SentConfirmMessagingRequest,
   | ApiConfirmMessagingRequest
   | JsonStringifyError
-  | ParseResult.ParseError
+  | Schema.SchemaError
   | ErrorEncryptingMessage
 > {
-  return Effect.gen(function* (_) {
+  return Effect.gen(function* () {
     const approvedMessage = createApproveChatMessage({
       text,
       myVersion,
@@ -104,17 +105,15 @@ export default function confirmMessagingRequest({
       lastReceivedNotificationCypher,
     })
 
-    const serverMessage = yield* _(
-      sendMessage({
-        api,
-        receiverPublicKey: toPublicKey,
-        message: approvedMessage,
-        senderKeypair: fromKeypair,
-        theirNotificationCypher,
-        otherSideVersion,
-        notificationApi,
-      })
-    )
+    const serverMessage = yield* sendMessage({
+      api,
+      receiverPublicKey: toPublicKey,
+      message: approvedMessage,
+      senderKeypair: fromKeypair,
+      theirNotificationCypher,
+      otherSideVersion,
+      notificationApi,
+    })
 
     return {
       message: approvedMessage,

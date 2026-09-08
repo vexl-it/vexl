@@ -65,8 +65,8 @@ function SendMessageScreen({
     if (!text.trim() || Option.isNone(offer)) return
 
     void Effect.runPromise(
-      Effect.gen(function* (_) {
-        const chat = yield* _(submitRequest({text, originOffer: offer.value}))
+      Effect.gen(function* () {
+        const chat = yield* submitRequest({text, originOffer: offer.value})
 
         if (mode === 'rerequest') {
           safeGoBack()
@@ -78,7 +78,7 @@ function SendMessageScreen({
           inboxKey: chat.inbox.privateKey.publicKeyPemBase64,
         })
       }).pipe(
-        Effect.catchAll((e) => {
+        Effect.catch((e) => {
           if (e._tag === 'ReceiverInboxDoesNotExistError') {
             Alert.alert(t('common.error'), t('offer.offerNotFound'), [
               {text: t('common.close')},

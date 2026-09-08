@@ -1,4 +1,4 @@
-import {Effect, Either, Fiber} from 'effect'
+import {Effect, type Fiber, Result} from 'effect'
 import {
   atom,
   type Atom,
@@ -14,7 +14,7 @@ export type EffectAtomProgress<A, E> =
   | {state: 'loading'}
   | {
       state: 'done'
-      result: Either.Either<A, E>
+      result: Result.Result<A, E>
     }
 
 export function createEffectAtomWithProgress<I, A, E>({
@@ -40,16 +40,18 @@ export function createEffectAtomWithProgress<I, A, E>({
       set(inputAtom, input)
 
       const runningFiber = get(runningFiberAtom)
-      if (runningFiber) Effect.runFork(Fiber.interruptFork(runningFiber))
+      if (runningFiber) runningFiber.interruptUnsafe()
 
       set(resultAtom, {state: 'loading'})
 
       const newFiber = Effect.runFork(
         effectToRun(input, get).pipe(
-          Effect.either,
-          Effect.andThen((result) => {
-            set(resultAtom, {state: 'done', result})
-          })
+          Effect.result,
+          Effect.andThen((result) =>
+            Effect.sync(() => {
+              set(resultAtom, {state: 'done', result})
+            })
+          )
         )
       )
 
@@ -62,16 +64,16 @@ export function createEffectAtomWithProgress<I, A, E>({
   const errorAtom = atom((get) => {
     const result = get(resultAtom)
 
-    if (result.state === 'done' && Either.isLeft(result.result)) {
-      return result.result.left
+    if (result.state === 'done' && Result.isFailure(result.result)) {
+      return result.result.failure
     }
     return null
   })
   const successAtom = atom((get) => {
     const result = get(resultAtom)
 
-    if (result.state === 'done' && Either.isRight(result.result)) {
-      return result.result.right
+    if (result.state === 'done' && Result.isSuccess(result.result)) {
+      return result.result.success
     }
     return null
   })

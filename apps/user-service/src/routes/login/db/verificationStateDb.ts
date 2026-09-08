@@ -41,13 +41,14 @@ interface VerificationStateDbOperations {
   ) => Effect.Effect<void, UnexpectedServerError>
 }
 
-export class VerificationStateDbService extends Context.Tag(
-  'VerificationStateDbService'
-)<VerificationStateDbService, VerificationStateDbOperations>() {
+export class VerificationStateDbService extends Context.Service<
+  VerificationStateDbService,
+  VerificationStateDbOperations
+>()('VerificationStateDbService') {
   static readonly Live = Layer.effect(
     VerificationStateDbService,
-    Effect.gen(function* (_) {
-      const redis = yield* _(RedisService)
+    Effect.gen(function* () {
+      const redis = yield* RedisService
       const storeVerificationState = redis.set(PhoneVerificationState)
       const getPhoneVerificationState = redis.get(PhoneVerificationState)
 
@@ -65,8 +66,8 @@ export class VerificationStateDbService extends Context.Tag(
               ),
             }
           ).pipe(
-            Effect.catchAll((e) =>
-              Effect.zipLeft(
+            Effect.catch((e) =>
+              Effect.tap(
                 Effect.logError(
                   'Error while storing phone verification state',
                   e
@@ -80,9 +81,9 @@ export class VerificationStateDbService extends Context.Tag(
             `${PHONE_VERIFICATION_STATE_PREFIX}${id}`
           ).pipe(
             Effect.catchTags({
-              ParseError: () =>
+              SchemaError: () =>
                 Effect.fail(new UnexpectedServerError({status: 500})),
-              NoSuchElementException: () =>
+              NoSuchElementError: () =>
                 Effect.fail(
                   new VerificationNotFoundError({status: 404, code: '100104'})
                 ),
@@ -100,8 +101,8 @@ export class VerificationStateDbService extends Context.Tag(
               ),
             }
           ).pipe(
-            Effect.catchAll((e) =>
-              Effect.zipRight(
+            Effect.catch((e) =>
+              Effect.andThen(
                 Effect.logError(
                   'Error while storing phone verification state',
                   e
@@ -113,9 +114,9 @@ export class VerificationStateDbService extends Context.Tag(
         retrieveChallengeVerificationState: (id) =>
           getChallengeState(`${CHALLENGE_VERIFICATION_STATE_PREFIX}${id}`).pipe(
             Effect.catchTags({
-              ParseError: () =>
+              SchemaError: () =>
                 Effect.fail(new UnexpectedServerError({status: 500})),
-              NoSuchElementException: () =>
+              NoSuchElementError: () =>
                 Effect.fail(
                   new VerificationNotFoundError({status: 404, code: '100104'})
                 ),
@@ -125,8 +126,8 @@ export class VerificationStateDbService extends Context.Tag(
           ),
         deleteChallengeVerificationState: (id) =>
           redis.delete(`${CHALLENGE_VERIFICATION_STATE_PREFIX}${id}`).pipe(
-            Effect.catchAll((e) => {
-              return Effect.zipRight(
+            Effect.catch((e) => {
+              return Effect.andThen(
                 Effect.logError(
                   'Error while storing phone verification state',
                   e
@@ -137,8 +138,8 @@ export class VerificationStateDbService extends Context.Tag(
           ),
         deletePhoneVerificationState: (id) =>
           redis.delete(`${PHONE_VERIFICATION_STATE_PREFIX}${id}`).pipe(
-            Effect.catchAll((e) => {
-              return Effect.zipLeft(
+            Effect.catch((e) => {
+              return Effect.tap(
                 Effect.logError(
                   'Error while storing phone verification state',
                   e

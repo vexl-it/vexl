@@ -157,16 +157,14 @@ export function useContent(): AccountMenus {
             icon: Help,
             onPress: () => {
               void Effect.runPromise(
-                Effect.gen(function* (_) {
-                  const confirmed = yield* _(
-                    showDialog({
-                      title: t('account.contactUs'),
-                      subtitle: t('account.contactUsSubtitle'),
-                      positiveButtonText: t('account.openMailApp'),
-                      negativeButtonText: t('common.close'),
-                      children: <ContactUsDialogContent />,
-                    })
-                  )
+                Effect.gen(function* () {
+                  const confirmed = yield* showDialog({
+                    title: t('account.contactUs'),
+                    subtitle: t('account.contactUsSubtitle'),
+                    positiveButtonText: t('account.openMailApp'),
+                    negativeButtonText: t('common.close'),
+                    children: <ContactUsDialogContent />,
+                  })
 
                   if (confirmed) {
                     contactSupport()
@@ -199,24 +197,22 @@ export function useContent(): AccountMenus {
               )
 
               void Effect.runPromise(
-                Effect.gen(function* (_) {
-                  const confirmed = yield* _(
-                    showDialog({
-                      title: t('account.deleteAccountConfirmation.title'),
-                      positiveButtonText: t('account.deleteAccount'),
-                      positiveButtonVariant: 'destructive',
-                      negativeButtonText: t('common.cancel'),
-                      positiveButtonDisabledAtom,
-                      children: (
-                        <DeleteAccountConfirmationDialogContent
-                          confirmationAtom={confirmationAtom}
-                        />
-                      ),
-                    })
-                  )
+                Effect.gen(function* () {
+                  const confirmed = yield* showDialog({
+                    title: t('account.deleteAccountConfirmation.title'),
+                    positiveButtonText: t('account.deleteAccount'),
+                    positiveButtonVariant: 'destructive',
+                    negativeButtonText: t('common.cancel'),
+                    positiveButtonDisabledAtom,
+                    children: (
+                      <DeleteAccountConfirmationDialogContent
+                        confirmationAtom={confirmationAtom}
+                      />
+                    ),
+                  })
 
                   if (confirmed) {
-                    yield* _(Effect.promise(logout))
+                    yield* Effect.promise(logout)
                   }
                 })
               )

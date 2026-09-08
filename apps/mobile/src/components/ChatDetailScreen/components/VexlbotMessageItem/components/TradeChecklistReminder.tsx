@@ -7,7 +7,7 @@ import {
   XStack,
   useTheme,
 } from '@vexl-next/ui'
-import {useMolecule} from 'bunshi/dist/react'
+import {useMolecule} from 'bunshi/react'
 import {useAtom, useAtomValue} from 'jotai'
 import React, {useState} from 'react'
 import {TouchableOpacity} from 'react-native'

@@ -23,17 +23,15 @@ const reportedRecordsCleanupLayer = makeRepeatingTaskLayer({
   intervalMs: cleanReportedRecordsIntervalMsConfig,
   lockResource: 'offerService:cleanReportedRecords',
   lockDuration: '5 minutes',
-  task: Effect.gen(function* (_) {
-    const offerDb = yield* _(OfferDbService)
-    const noteDb = yield* _(NoteDbService)
-    const reportLimitIntervalDays = yield* _(reportLimitIntervalDaysConfig)
-    yield* _(
-      offerDb.deleteOfferReportedRecordByReportedAtBefore(
-        reportLimitIntervalDays
-      )
+  task: Effect.gen(function* () {
+    const offerDb = yield* OfferDbService
+    const noteDb = yield* NoteDbService
+    const reportLimitIntervalDays = yield* reportLimitIntervalDaysConfig
+    yield* offerDb.deleteOfferReportedRecordByReportedAtBefore(
+      reportLimitIntervalDays
     )
-    yield* _(
-      noteDb.deleteNoteReportedRecordByReportedAtBefore(reportLimitIntervalDays)
+    yield* noteDb.deleteNoteReportedRecordByReportedAtBefore(
+      reportLimitIntervalDays
     )
   }),
 })

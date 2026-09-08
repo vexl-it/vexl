@@ -8,7 +8,7 @@ import {now} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {VersionString} from '@vexl-next/domain/src/utility/VersionString.brand'
 import {mergeToBoolean} from '@vexl-next/generic-utils/src/effect-helpers/mergeToBoolean'
 import sendMessage from '@vexl-next/resources-utils/src/chat/sendMessage'
-import {Effect, Schema} from 'effect/index'
+import {Effect, Schema} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
 import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
@@ -41,7 +41,7 @@ function createUpdateNoticeChatMessage({
 export const sendUpdateNoticeMessageActionAtom = atom(
   null,
   (get, set, chatAtom: FocusAtomType<ChatWithMessages | undefined>) =>
-    Effect.gen(function* (_) {
+    Effect.gen(function* () {
       const chat = get(chatAtom)
       if (!chat) return
 
@@ -52,18 +52,16 @@ export const sendUpdateNoticeMessageActionAtom = atom(
       })
 
       const api = get(apiAtom)
-      const serverMessage = yield* _(
-        sendMessage({
-          api: api.chat,
-          senderKeypair: chat.chat.inbox.privateKey,
-          receiverPublicKey: chat.chat.otherSide.publicKey,
-          message: messageToSend,
-          notificationApi: api.notification,
-          theirNotificationCypher:
-            chat.chat.otherSideVexlToken ?? chat.chat.otherSideFcmCypher,
-          otherSideVersion: chat.chat.otherSideVersion,
-        })
-      )
+      const serverMessage = yield* sendMessage({
+        api: api.chat,
+        senderKeypair: chat.chat.inbox.privateKey,
+        receiverPublicKey: chat.chat.otherSide.publicKey,
+        message: messageToSend,
+        notificationApi: api.notification,
+        theirNotificationCypher:
+          chat.chat.otherSideVexlToken ?? chat.chat.otherSideFcmCypher,
+        otherSideVersion: chat.chat.otherSideVersion,
+      })
       set(
         chatAtom,
         addMessageToChat({

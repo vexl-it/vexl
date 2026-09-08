@@ -25,20 +25,18 @@ const showDonationPromptGiveLoveActionAtom = atom(
       Schema.decodeSync(UnixMilliseconds)(DateTime.now().toMillis())
     )
 
-    return Effect.gen(function* (_) {
-      yield* _(
-        set(askAreYouSureActionAtom, {
-          variant: 'info',
-          steps: [
-            {
-              type: 'StepWithChildren',
-              MainSectionComponent: DonationPrompt,
-              positiveButtonText: t('donationPrompt.donate'),
-              negativeButtonText: t('common.close'),
-            },
-          ],
-        })
-      )
+    return Effect.gen(function* () {
+      yield* set(askAreYouSureActionAtom, {
+        variant: 'info',
+        steps: [
+          {
+            type: 'StepWithChildren',
+            MainSectionComponent: DonationPrompt,
+            positiveButtonText: t('donationPrompt.donate'),
+            negativeButtonText: t('common.close'),
+          },
+        ],
+      })
 
       if (navigationRef.isReady()) {
         navigationRef.navigate('DonationsFlow', {screen: 'SetDonation'})

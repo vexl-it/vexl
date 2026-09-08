@@ -1,8 +1,8 @@
-import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {UserInactivityNotificationVariant} from '@vexl-next/domain/src/general/notifications'
 import {Array, Effect, Schema} from 'effect'
+import {SqlSchema} from 'effect/unstable/sql'
 import {UserRecordId} from '../domain'
 
 // Keeps each UPDATE well under the ~65k bind-parameter limit of the
@@ -12,14 +12,14 @@ const IDS_PER_QUERY = 5000
 
 export const UpdateInactivityNotificationSentParams = Schema.Struct({
   ids: Schema.Array(UserRecordId),
-  sentAt: Schema.DateFromSelf,
+  sentAt: Schema.Date,
   variant: UserInactivityNotificationVariant,
 })
 export type UpdateInactivityNotificationSentParams =
   typeof UpdateInactivityNotificationSentParams.Type
 
-export const createUpdateInactivityNotificationSent = Effect.gen(function* (_) {
-  const sql = yield* _(PgClient.PgClient)
+export const createUpdateInactivityNotificationSent = Effect.gen(function* () {
+  const sql = yield* PgClient.PgClient
 
   const query = SqlSchema.void({
     Request: UpdateInactivityNotificationSentParams,

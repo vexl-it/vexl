@@ -1,4 +1,3 @@
-import {FetchHttpClient} from '@effect/platform/index'
 import {countryPrefixFromNumber} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {
   ENV_PRESETS,
@@ -18,6 +17,7 @@ import {
 import {ServiceUrl} from '@vexl-next/rest-api/src/ServiceUrl.brand'
 import {type UserSessionCredentials} from '@vexl-next/rest-api/src/UserSessionCredentials.brand'
 import {Effect, Option, Schema} from 'effect'
+import {FetchHttpClient} from 'effect/unstable/http'
 import {atom, getDefaultStore} from 'jotai'
 import {Platform} from 'react-native'
 import {sessionHolderAtom} from '../state/session'
@@ -152,7 +152,7 @@ function getUserSessionCredentials(): UserSessionCredentials {
 }
 
 export const apiAtom = atom((get) =>
-  Effect.gen(function* (_) {
+  Effect.gen(function* () {
     const {t} = get(translationAtom)
     const language = t('localeName')
     const isDeveloper = get(isDeveloperAtom)
@@ -160,160 +160,138 @@ export const apiAtom = atom((get) =>
     const sessionHolder = get(sessionHolderAtom)
     const prefix =
       sessionHolder.state === 'loggedIn'
-        ? yield* _(
-            countryPrefixFromNumber(sessionHolder.session.phoneNumber).pipe(
-              Effect.option
-            )
-          )
+        ? yield* countryPrefixFromNumber(
+            sessionHolder.session.phoneNumber
+          ).pipe(Effect.option)
         : Option.none()
 
     return {
-      contact: yield* _(
-        contact.api({
-          language,
-          appSource,
-          platform,
-          clientVersion: versionCode,
-          clientSemver: version,
-          url: apiEnv.contactMs,
-          isDeveloper,
-          getUserSessionCredentials,
-          prefix: Option.getOrUndefined(prefix),
-        })
-      ),
-      offer: yield* _(
-        offer.api({
-          language,
-          appSource,
-          platform,
-          clientSemver: version,
-          clientVersion: versionCode,
-          url: apiEnv.offerMs,
-          isDeveloper,
-          deviceModel,
-          osVersion,
-          getUserSessionCredentials,
-          prefix: Option.getOrUndefined(prefix),
-        })
-      ),
-      chat: yield* _(
-        chat.api({
-          language,
-          appSource,
-          platform,
-          clientVersion: versionCode,
-          clientSemver: version,
-          url: apiEnv.chatMs,
-          deviceModel,
-          osVersion,
-          isDeveloper,
-          getUserSessionCredentials,
-          prefix: Option.getOrUndefined(prefix),
-        })
-      ),
-      user: yield* _(
-        user.api({
-          language,
-          appSource,
-          platform,
-          clientVersion: versionCode,
-          clientSemver: version,
-          deviceModel,
-          osVersion,
-          url: apiEnv.userMs,
-          isDeveloper,
-          getUserSessionCredentials,
-          prefix: Option.getOrUndefined(prefix),
-        })
-      ),
-      location: yield* _(
-        location.api({
-          language,
-          appSource,
-          platform,
-          clientVersion: versionCode,
-          clientSemver: version,
-          deviceModel,
-          osVersion,
-          url: apiEnv.locationMs,
-          isDeveloper,
-          getUserSessionCredentials,
-          prefix: Option.getOrUndefined(prefix),
-        })
-      ),
-      notification: yield* _(
-        notification.api({
-          language,
-          appSource,
-          platform,
-          clientVersion: versionCode,
-          clientSemver: version,
-          isDeveloper,
-          deviceModel,
-          osVersion,
-          url: apiEnv.notificationMs,
-          getUserSessionCredentials,
-          prefix: Option.getOrUndefined(prefix),
-        })
-      ),
-      btcExchangeRate: yield* _(
-        btcExchangeRate.api({
-          language,
-          appSource,
-          platform,
-          clientVersion: versionCode,
-          clientSemver: version,
-          url: apiEnv.btcExchangeRateMs,
-          isDeveloper,
-          deviceModel,
-          osVersion,
-          getUserSessionCredentials,
-          prefix: Option.getOrUndefined(prefix),
-        })
-      ),
-      feedback: yield* _(
-        feedback.api({
-          language,
-          appSource,
-          platform,
-          clientVersion: versionCode,
-          clientSemver: version,
-          url: apiEnv.feedbackMs,
-          isDeveloper,
-          getUserSessionCredentials,
-          prefix: Option.getOrUndefined(prefix),
-        })
-      ),
-      content: yield* _(
-        content.api({
-          language,
-          appSource,
-          platform,
-          clientVersion: versionCode,
-          clientSemver: version,
-          deviceModel,
-          osVersion,
-          url: apiEnv.contentMs,
-          isDeveloper,
-          getUserSessionCredentials,
-          prefix: Option.getOrUndefined(prefix),
-        })
-      ),
-      metrics: yield* _(
-        metrics.api({
-          language,
-          appSource,
-          platform,
-          clientVersion: versionCode,
-          clientSemver: version,
-          deviceModel,
-          osVersion,
-          url: apiEnv.metrics,
-          isDeveloper,
-          getUserSessionCredentials,
-          prefix: Option.getOrUndefined(prefix),
-        })
-      ),
+      contact: yield* contact.api({
+        language,
+        appSource,
+        platform,
+        clientVersion: versionCode,
+        clientSemver: version,
+        url: apiEnv.contactMs,
+        isDeveloper,
+        getUserSessionCredentials,
+        prefix: Option.getOrUndefined(prefix),
+      }),
+      offer: yield* offer.api({
+        language,
+        appSource,
+        platform,
+        clientSemver: version,
+        clientVersion: versionCode,
+        url: apiEnv.offerMs,
+        isDeveloper,
+        deviceModel,
+        osVersion,
+        getUserSessionCredentials,
+        prefix: Option.getOrUndefined(prefix),
+      }),
+      chat: yield* chat.api({
+        language,
+        appSource,
+        platform,
+        clientVersion: versionCode,
+        clientSemver: version,
+        url: apiEnv.chatMs,
+        deviceModel,
+        osVersion,
+        isDeveloper,
+        getUserSessionCredentials,
+        prefix: Option.getOrUndefined(prefix),
+      }),
+      user: yield* user.api({
+        language,
+        appSource,
+        platform,
+        clientVersion: versionCode,
+        clientSemver: version,
+        deviceModel,
+        osVersion,
+        url: apiEnv.userMs,
+        isDeveloper,
+        getUserSessionCredentials,
+        prefix: Option.getOrUndefined(prefix),
+      }),
+      location: yield* location.api({
+        language,
+        appSource,
+        platform,
+        clientVersion: versionCode,
+        clientSemver: version,
+        deviceModel,
+        osVersion,
+        url: apiEnv.locationMs,
+        isDeveloper,
+        getUserSessionCredentials,
+        prefix: Option.getOrUndefined(prefix),
+      }),
+      notification: yield* notification.api({
+        language,
+        appSource,
+        platform,
+        clientVersion: versionCode,
+        clientSemver: version,
+        isDeveloper,
+        deviceModel,
+        osVersion,
+        url: apiEnv.notificationMs,
+        getUserSessionCredentials,
+        prefix: Option.getOrUndefined(prefix),
+      }),
+      btcExchangeRate: yield* btcExchangeRate.api({
+        language,
+        appSource,
+        platform,
+        clientVersion: versionCode,
+        clientSemver: version,
+        url: apiEnv.btcExchangeRateMs,
+        isDeveloper,
+        deviceModel,
+        osVersion,
+        getUserSessionCredentials,
+        prefix: Option.getOrUndefined(prefix),
+      }),
+      feedback: yield* feedback.api({
+        language,
+        appSource,
+        platform,
+        clientVersion: versionCode,
+        clientSemver: version,
+        url: apiEnv.feedbackMs,
+        isDeveloper,
+        getUserSessionCredentials,
+        prefix: Option.getOrUndefined(prefix),
+      }),
+      content: yield* content.api({
+        language,
+        appSource,
+        platform,
+        clientVersion: versionCode,
+        clientSemver: version,
+        deviceModel,
+        osVersion,
+        url: apiEnv.contentMs,
+        isDeveloper,
+        getUserSessionCredentials,
+        prefix: Option.getOrUndefined(prefix),
+      }),
+      metrics: yield* metrics.api({
+        language,
+        appSource,
+        platform,
+        clientVersion: versionCode,
+        clientSemver: version,
+        deviceModel,
+        osVersion,
+        url: apiEnv.metrics,
+        isDeveloper,
+        getUserSessionCredentials,
+        prefix: Option.getOrUndefined(prefix),
+      }),
     }
   }).pipe(Effect.provide(FetchHttpClient.layer), Effect.runSync)
 )

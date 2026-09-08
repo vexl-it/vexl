@@ -25,7 +25,7 @@ import {
   InboxDoesNotExistError,
 } from '@vexl-next/rest-api/src/services/contact/contracts'
 import {ErrorGeneratingChallenge} from '@vexl-next/rest-api/src/services/utils/addChallengeToRequest2'
-import {HashSet, Schema} from 'effect/index'
+import {Effect, HashSet, Schema} from 'effect'
 import {
   createEmptyTradeChecklistInState,
   TradeChecklistInState,
@@ -70,7 +70,7 @@ export const SendingErrorMessage = Schema.Struct({
   state: Schema.Literal('sendingError'),
   message: ChatMessage,
   receivedByServerAt: Schema.optional(UnixMilliseconds),
-  error: Schema.Union(
+  error: Schema.Union([
     ErrorEncryptingMessage,
     ErrorGeneratingChallenge,
     ErrorSigningChallenge,
@@ -81,17 +81,17 @@ export const SendingErrorMessage = Schema.Struct({
     ReadingFileError,
     SenderInboxDoesNotExistError,
     ForbiddenMessageTyperror,
-    CryptoError
-  ),
+    CryptoError,
+  ]),
 })
 
-export const ChatMessageWithState = Schema.Union(
+export const ChatMessageWithState = Schema.Union([
   ReceivedMessage,
   ReceivedButRequiresNewerVersionMessage,
   SendingMessage,
   SentMessage,
-  SendingErrorMessage
-)
+  SendingErrorMessage,
+])
 export type ChatMessageWithState = typeof ChatMessageWithState.Type
 
 // Used for messages that are grouped to another messages...
@@ -104,26 +104,42 @@ export type ChatTransientMessageId = typeof ChatTransientMessageId.Type
 export const ChatWithMessages = Schema.Struct({
   chat: Chat,
   messages: Schema.Array(ChatMessageWithState).pipe(Schema.mutable),
-  hiddenMessagesIds: Schema.HashSet(
-    Schema.Union(ChatMessageId, ChatTransientMessageId)
+  hiddenMessagesIds: Schema.toCodecJson(
+    Schema.HashSet(Schema.Union([ChatMessageId, ChatTransientMessageId]))
   ).pipe(
-    Schema.optionalWith({
-      default: () => HashSet.empty<ChatMessageId | ChatTransientMessageId>(),
-    })
+    Schema.withDecodingDefaultType(
+      Effect.sync(() => HashSet.empty<ChatMessageId | ChatTransientMessageId>())
+    ),
+    Schema.withConstructorDefault(
+      Effect.sync(() => HashSet.empty<ChatMessageId | ChatTransientMessageId>())
+    )
   ),
-  tradeChecklist: Schema.optionalWith(TradeChecklistInState, {
-    default: () => ({
-      dateAndTime: {},
-      location: {},
-      amount: {},
-      network: {},
-      identity: {},
-      contact: {},
-    }),
-  }),
-  feedbackSubmitted: Schema.optionalWith(Schema.Boolean, {
-    default: () => false,
-  }),
+  tradeChecklist: TradeChecklistInState.pipe(
+    Schema.withDecodingDefaultType(
+      Effect.sync(() => ({
+        dateAndTime: {},
+        location: {},
+        amount: {},
+        network: {},
+        identity: {},
+        contact: {},
+      }))
+    ),
+    Schema.withConstructorDefault(
+      Effect.sync(() => ({
+        dateAndTime: {},
+        location: {},
+        amount: {},
+        network: {},
+        identity: {},
+        contact: {},
+      }))
+    )
+  ),
+  feedbackSubmitted: Schema.Boolean.pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): false => false)),
+    Schema.withConstructorDefault(Effect.sync((): false => false))
+  ),
 })
 export type ChatWithMessages = typeof ChatWithMessages.Type
 
@@ -142,15 +158,15 @@ export const ChatIds = Schema.Struct({
 })
 export type ChatIds = typeof ChatIds.Type
 
-export const RequestState = Schema.Literal(
+export const RequestState = Schema.Literals([
   'initial',
   'requested',
   'denied',
   'cancelled',
   'accepted',
   'deleted',
-  'otherSideLeft'
-)
+  'otherSideLeft',
+])
 export type RequestState = typeof RequestState.Type
 
 export const dummyChatWithMessages: ChatWithMessages = {

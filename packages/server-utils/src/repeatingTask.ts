@@ -1,5 +1,5 @@
 import {Queue, Worker} from 'bullmq'
-import {type Duration, Effect, Layer, Runtime} from 'effect'
+import {type Duration, Effect, Layer} from 'effect'
 import {RedisNamespacePrefixConfig} from './commonConfigs'
 import {RedisConnectionService} from './RedisConnection'
 import {type RedisService, withRedisLock} from './RedisService'
@@ -33,7 +33,7 @@ export const makeRepeatingTaskLayer = <E1, R1, E2, R2>({
   queueName: string
   jobName: string
   lockResource: string
-  lockDuration: Duration.DurationInput
+  lockDuration: Duration.Input
   task: Effect.Effect<void, E2, R2>
 } & (
   | {
@@ -50,9 +50,7 @@ export const makeRepeatingTaskLayer = <E1, R1, E2, R2>({
   R1 | R2 | RedisConnectionService | RedisService
 > => {
   const taskWithLock = task.pipe(
-    Effect.catchAll((e) =>
-      Effect.logError(`Repeating task ${jobName} failed`, e)
-    ),
+    Effect.catch((e) => Effect.logError(`Repeating task ${jobName} failed`, e)),
     withRedisLock(lockResource, lockDuration),
     Effect.catchTag('RedisLockError', () =>
       Effect.logInfo(
@@ -63,96 +61,90 @@ export const makeRepeatingTaskLayer = <E1, R1, E2, R2>({
     // catches above. Without this they would reject into BullMQ's processor
     // and vanish as a removed failed job — log them and let the scheduler
     // fire the next tick.
-    Effect.catchAllDefect((defect) =>
+    Effect.catchDefect((defect) =>
       Effect.logError(`Repeating task ${jobName} died with a defect`, defect)
     ),
     Effect.withSpan(`RepeatingTask/${jobName}`)
   )
 
-  return Layer.scopedDiscard(
-    Effect.gen(function* (_) {
-      const redisConnection = yield* _(RedisConnectionService)
-      const prefix = yield* _(RedisNamespacePrefixConfig)
+  return Layer.effectDiscard(
+    Effect.gen(function* () {
+      const redisConnection = yield* RedisConnectionService
+      const prefix = yield* RedisNamespacePrefixConfig
       const repeatOptions =
         intervalMs !== undefined
-          ? {every: yield* _(intervalMs)}
-          : {pattern: yield* _(cronPattern)}
+          ? {every: yield* intervalMs}
+          : {pattern: yield* cronPattern}
 
-      const queue = yield* _(
-        Effect.acquireRelease(
-          Effect.try({
-            try: () =>
-              new Queue(queueName, {
-                connection: redisConnection,
-                prefix,
-                defaultJobOptions: {
-                  removeOnComplete: true,
-                  removeOnFail: true,
-                },
-              }),
-            catch: (e) => e,
-          }),
-          (queue) =>
-            Effect.promise(async () => {
-              await queue.close()
-            })
-        )
-      )
-
-      yield* _(
-        Effect.tryPromise({
-          try: async () =>
-            await queue.upsertJobScheduler(jobName, repeatOptions, {
-              name: jobName,
-              data: {},
-              opts: {removeOnComplete: true, removeOnFail: true},
+      const queue = yield* Effect.acquireRelease(
+        Effect.try({
+          try: () =>
+            new Queue(queueName, {
+              connection: redisConnection,
+              prefix,
+              defaultJobOptions: {
+                removeOnComplete: true,
+                removeOnFail: true,
+              },
             }),
           catch: (e) => e,
-        })
+        }),
+        (queue) =>
+          Effect.promise(async () => {
+            await queue.close()
+          })
       )
+
+      yield* Effect.tryPromise({
+        try: async () =>
+          await queue.upsertJobScheduler(jobName, repeatOptions, {
+            name: jobName,
+            data: {},
+            opts: {removeOnComplete: true, removeOnFail: true},
+          }),
+        catch: (e) => e,
+      })
 
       // The worker callback runs each tick's task through the captured
       // runtime. This keeps the layer build finite — it completes once the
       // worker is registered — instead of blocking on an infinite stream,
       // which would stall every layer depending on this one (e.g. the HTTP
       // server never binding its port).
-      const runtime = yield* _(Effect.runtime<R2 | RedisService>())
+      const services = yield* Effect.context<R2 | RedisService>()
 
-      yield* _(
-        Effect.acquireRelease(
-          Effect.try({
-            try: () => {
-              const worker = new Worker(
-                queueName,
-                async () => {
-                  await Runtime.runPromise(runtime)(taskWithLock)
-                },
-                {
-                  connection: redisConnection,
-                  prefix,
-                  concurrency: 1,
-                }
-              )
-              // BullMQ emits 'error' for connection-level problems. An
-              // EventEmitter 'error' event with no listener crashes the
-              // process, so a Redis blip must be logged, not fatal.
-              worker.on('error', (error) => {
-                Runtime.runSync(runtime)(
-                  Effect.logError(
-                    `Worker for repeating task ${jobName} emitted an error`,
-                    error
-                  )
+      yield* Effect.acquireRelease(
+        Effect.try({
+          try: () => {
+            const worker = new Worker(
+              queueName,
+              async () => {
+                await Effect.runPromiseWith(services)(taskWithLock)
+              },
+              {
+                connection: redisConnection,
+                prefix,
+                concurrency: 1,
+              }
+            )
+            // BullMQ emits 'error' for connection-level problems. An
+            // EventEmitter 'error' event with no listener crashes the
+            // process, so a Redis blip must be logged, not fatal.
+            worker.on('error', (error) => {
+              Effect.runSyncWith(services)(
+                Effect.logError(
+                  `Worker for repeating task ${jobName} emitted an error`,
+                  error
                 )
-              })
-              return worker
-            },
-            catch: (e) => e,
-          }),
-          (worker) =>
-            Effect.promise(async () => {
-              await worker.close()
+              )
             })
-        )
+            return worker
+          },
+          catch: (e) => e,
+        }),
+        (worker) =>
+          Effect.promise(async () => {
+            await worker.close()
+          })
       )
     }).pipe(
       // Setup failures (Redis connection, config, Queue/Worker creation,

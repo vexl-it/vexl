@@ -54,12 +54,12 @@ export const updateOfferActionAtom = atom<
     | PublicPartEncryptionError
     | DecryptingOfferError
     | PrivatePartEncryptionError
-    | Effect.Effect.Error<ReturnType<OfferApi['createPrivatePart']>>
+    | Effect.Error<ReturnType<OfferApi['createPrivatePart']>>
     | NonCompatibleOfferVersionError
     | ErrorReencryptingOfferInUpdate
   >
 >(null, (get, set, params) => {
-  return Effect.gen(function* (_) {
+  return Effect.gen(function* () {
     const api = get(apiAtom)
     const session = get(sessionDataOrDummyAtom)
     const {
@@ -73,31 +73,27 @@ export const updateOfferActionAtom = atom<
     if (params.onProgress)
       params.onProgress({type: 'CONSTRUCTING_PUBLIC_PAYLOAD'})
 
-    const offerInfo = yield* _(
-      updateOffer({
-        offerApi: api.offer,
-        adminId,
-        publicPayload: payloadPublic,
-        symmetricKey,
-        intendedConnectionLevel,
-        intendedClubs: intendedClubs ?? [],
-        ownerKeypair: session.privateKey,
-        ownerKeyPairV2: session.keyPairV2,
-      }).pipe(
-        Effect.catchTag('NotFoundError', () =>
-          pipe(
-            set(reencryptSingleOfferMissingOnServerWhenEditingActionAtom, {
-              adminId,
-              publicPayload: payloadPublic,
-              intendedConnectionLevel,
-              intendedClubs,
-              onProgress: params.onProgress,
-            }),
-            Effect.map((result) => result.offerInfo),
-            Effect.mapError(
-              (e) => new ErrorReencryptingOfferInUpdate({cause: e})
-            )
-          )
+    const offerInfo = yield* updateOffer({
+      offerApi: api.offer,
+      adminId,
+      publicPayload: payloadPublic,
+      symmetricKey,
+      intendedConnectionLevel,
+      intendedClubs: intendedClubs ?? [],
+      ownerKeypair: session.privateKey,
+      ownerKeyPairV2: session.keyPairV2,
+    }).pipe(
+      Effect.catchTag('NotFoundError', () =>
+        pipe(
+          set(reencryptSingleOfferMissingOnServerWhenEditingActionAtom, {
+            adminId,
+            publicPayload: payloadPublic,
+            intendedConnectionLevel,
+            intendedClubs,
+            onProgress: params.onProgress,
+          }),
+          Effect.map((result) => result.offerInfo),
+          Effect.mapError((e) => new ErrorReencryptingOfferInUpdate({cause: e}))
         )
       )
     )
@@ -131,14 +127,14 @@ export const updateOfferActionAtom = atom<
       params.updatePrivateParts && params.updateLocalStateAfterPrivateParts
 
     if (!shouldUpdateLocalStateAfterPrivateParts) {
-      yield* _(updateLocalState)
+      yield* updateLocalState
     }
 
     if (params.updatePrivateParts) {
-      yield* _(set(syncAllClubsHandleStateWhenNotFoundActionAtom))
-      yield* _(set(syncConnectionsActionAtom))
+      yield* set(syncAllClubsHandleStateWhenNotFoundActionAtom)
+      yield* set(syncConnectionsActionAtom)
 
-      yield* _(
+      yield* pipe(
         set(updateAndReencryptSingleOfferConnectionActionAtom, {
           adminId,
           intendedClubs,
@@ -150,7 +146,7 @@ export const updateOfferActionAtom = atom<
     }
 
     if (shouldUpdateLocalStateAfterPrivateParts) {
-      yield* _(updateLocalState)
+      yield* updateLocalState
     }
 
     return createdOffer

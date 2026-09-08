@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
@@ -19,7 +18,8 @@ import {
 import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
-import {Effect, Schema} from 'effect'
+import {Effect, Schema, pipe} from 'effect'
+import {SqlClient} from 'effect/unstable/sql'
 import {makeTestCommonAndSecurityHeaders} from '../utils/createMockedUser'
 import {makeTestCommonAndSecurityHeadersWithPublicKeyV2} from '../utils/makeTestCommonAndSecurityHeadersWithPublicKeyV2'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
@@ -35,8 +35,8 @@ let commonAndSecurityHeaders: ReturnType<
 
 beforeAll(async () => {
   await runPromiseInMockedEnvironment(
-    Effect.gen(function* (_) {
-      const client = yield* _(NodeTestingApp)
+    Effect.gen(function* () {
+      const client = yield* NodeTestingApp
 
       const request1: CreateNewOfferRequest = {
         adminId: generateAdminId(),
@@ -62,24 +62,20 @@ beforeAll(async () => {
         offerId: newOfferId(),
       }
 
-      const authHeaders = yield* _(
-        createDummyAuthHeadersForUser({
-          phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333333'),
-          publicKey: me.publicKeyPemBase64,
-        })
-      )
+      const authHeaders = yield* createDummyAuthHeadersForUser({
+        phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333333'),
+        publicKey: me.publicKeyPemBase64,
+      })
 
-      yield* _(setAuthHeaders(authHeaders))
+      yield* setAuthHeaders(authHeaders)
 
       commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(authHeaders)
 
       offer1 = {
-        ...(yield* _(
-          client.createNewOffer({
-            payload: request1,
-            headers: commonAndSecurityHeaders,
-          })
-        )),
+        ...(yield* client.createNewOffer({
+          payload: request1,
+          headers: commonAndSecurityHeaders,
+        })),
         adminId: request1.adminId,
       }
     })
@@ -89,52 +85,48 @@ beforeAll(async () => {
 describe('Update offer', () => {
   it('Updates offer when updating with only public part', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
 
-        const authHeaders = yield* _(
-          createDummyAuthHeadersForUser({
-            phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333333'),
-            publicKey: me.publicKeyPemBase64,
-          })
-        )
+        const authHeaders = yield* createDummyAuthHeadersForUser({
+          phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333333'),
+          publicKey: me.publicKeyPemBase64,
+        })
 
-        yield* _(setAuthHeaders(authHeaders))
+        yield* setAuthHeaders(authHeaders)
 
         const commonAndSecurityHeaders =
           makeTestCommonAndSecurityHeaders(authHeaders)
 
-        const sql = yield* _(SqlClient.SqlClient)
-        const initialOfferPublicPayload = yield* _(sql`
+        const sql = yield* SqlClient.SqlClient
+        const initialOfferPublicPayload = yield* sql`
           SELECT
             *
           FROM
             offer_public
           WHERE
             offer_id = ${offer1.offerId}
-        `)
+        `
 
-        yield* _(
-          client.updateOffer({
-            payload: {
-              adminId: offer1.adminId,
-              payloadPublic: Schema.decodeUnknownSync(PublicPayloadEncrypted)(
-                'newPayloadPublic'
-              ),
-              offerPrivateList: [],
-            },
-            headers: commonAndSecurityHeaders,
-          })
-        )
+        yield* client.updateOffer({
+          payload: {
+            adminId: offer1.adminId,
+            payloadPublic: Schema.decodeUnknownSync(PublicPayloadEncrypted)(
+              'newPayloadPublic'
+            ),
+            offerPrivateList: [],
+          },
+          headers: commonAndSecurityHeaders,
+        })
 
-        const updatedOfferPublicPayload = yield* _(sql`
+        const updatedOfferPublicPayload = yield* sql`
           SELECT
             *
           FROM
             offer_public
           WHERE
             offer_id = ${offer1.offerId}
-        `)
+        `
         expect(updatedOfferPublicPayload.at(0)).toHaveProperty(
           'payloadPublic',
           'newPayloadPublic'
@@ -149,62 +141,58 @@ describe('Update offer', () => {
   })
   it('Updates offer when updating with public and private parts', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
 
-        const authHeaders = yield* _(
-          createDummyAuthHeadersForUser({
-            phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333333'),
-            publicKey: me.publicKeyPemBase64,
-          })
-        )
+        const authHeaders = yield* createDummyAuthHeadersForUser({
+          phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333333'),
+          publicKey: me.publicKeyPemBase64,
+        })
 
-        yield* _(setAuthHeaders(authHeaders))
+        yield* setAuthHeaders(authHeaders)
 
         const commonAndSecurityHeaders =
           makeTestCommonAndSecurityHeaders(authHeaders)
 
-        yield* _(
-          client.updateOffer({
-            payload: {
-              adminId: offer1.adminId,
-              payloadPublic: Schema.decodeUnknownSync(PublicPayloadEncrypted)(
-                'newPayloadPublic2'
-              ),
-              offerPrivateList: [
-                {
-                  userPublicKey: user1.publicKeyPemBase64,
-                  payloadPrivate: Schema.decodeUnknownSync(
-                    PrivatePayloadEncrypted
-                  )('0newPayloadPrivate2'),
-                },
-                {
-                  userPublicKey: me.publicKeyPemBase64,
-                  payloadPrivate: Schema.decodeUnknownSync(
-                    PrivatePayloadEncrypted
-                  )('0newPayloadPrivate2ForMe'),
-                },
-              ],
-            },
-            headers: commonAndSecurityHeaders,
-          })
-        )
+        yield* client.updateOffer({
+          payload: {
+            adminId: offer1.adminId,
+            payloadPublic: Schema.decodeUnknownSync(PublicPayloadEncrypted)(
+              'newPayloadPublic2'
+            ),
+            offerPrivateList: [
+              {
+                userPublicKey: user1.publicKeyPemBase64,
+                payloadPrivate: Schema.decodeUnknownSync(
+                  PrivatePayloadEncrypted
+                )('0newPayloadPrivate2'),
+              },
+              {
+                userPublicKey: me.publicKeyPemBase64,
+                payloadPrivate: Schema.decodeUnknownSync(
+                  PrivatePayloadEncrypted
+                )('0newPayloadPrivate2ForMe'),
+              },
+            ],
+          },
+          headers: commonAndSecurityHeaders,
+        })
 
-        const sql = yield* _(SqlClient.SqlClient)
-        const updatedOfferPublicPayload = yield* _(sql`
+        const sql = yield* SqlClient.SqlClient
+        const updatedOfferPublicPayload = yield* sql`
           SELECT
             *
           FROM
             offer_public
           WHERE
             offer_id = ${offer1.offerId}
-        `)
+        `
         expect(updatedOfferPublicPayload.at(0)).toHaveProperty(
           'payloadPublic',
           'newPayloadPublic2'
         )
 
-        const updatedOfferPrivatePayload = yield* _(sql`
+        const updatedOfferPrivatePayload = yield* sql`
           SELECT
             *
           FROM
@@ -212,7 +200,7 @@ describe('Update offer', () => {
           WHERE
             offer_id = ${updatedOfferPublicPayload.at(0)!.id}
             AND user_public_key = ${user1.publicKeyPemBase64}
-        `)
+        `
 
         expect(updatedOfferPrivatePayload.at(0)).toHaveProperty(
           'payloadPrivate',
@@ -223,22 +211,20 @@ describe('Update offer', () => {
   })
   it('Fails when updating without owners private part', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
 
-        const authHeaders = yield* _(
-          createDummyAuthHeadersForUser({
-            phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333333'),
-            publicKey: me.publicKeyPemBase64,
-          })
-        )
+        const authHeaders = yield* createDummyAuthHeadersForUser({
+          phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333333'),
+          publicKey: me.publicKeyPemBase64,
+        })
 
-        yield* _(setAuthHeaders(authHeaders))
+        yield* setAuthHeaders(authHeaders)
 
         const commonAndSecurityHeaders =
           makeTestCommonAndSecurityHeaders(authHeaders)
 
-        const response = yield* _(
+        const response = yield* pipe(
           client.updateOffer({
             payload: {
               adminId: offer1.adminId,
@@ -256,7 +242,7 @@ describe('Update offer', () => {
             },
             headers: commonAndSecurityHeaders,
           }),
-          Effect.either
+          Effect.result
         )
 
         expectErrorResponse(MissingOwnerPrivatePartError)(response)
@@ -265,22 +251,20 @@ describe('Update offer', () => {
   })
   it('Fails when updating with duplicated public key', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
 
-        const authHeaders = yield* _(
-          createDummyAuthHeadersForUser({
-            phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333333'),
-            publicKey: me.publicKeyPemBase64,
-          })
-        )
+        const authHeaders = yield* createDummyAuthHeadersForUser({
+          phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333333'),
+          publicKey: me.publicKeyPemBase64,
+        })
 
-        yield* _(setAuthHeaders(authHeaders))
+        yield* setAuthHeaders(authHeaders)
 
         const commonAndSecurityHeaders =
           makeTestCommonAndSecurityHeaders(authHeaders)
 
-        const response = yield* _(
+        const response = yield* pipe(
           client.updateOffer({
             payload: {
               adminId: offer1.adminId,
@@ -310,7 +294,7 @@ describe('Update offer', () => {
             },
             headers: commonAndSecurityHeaders,
           }),
-          Effect.either
+          Effect.result
         )
 
         expectErrorResponse(DuplicatedPublicKeyError)(response)
@@ -319,22 +303,20 @@ describe('Update offer', () => {
   })
   it('return 404 when offer not found', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
 
-        const authHeaders = yield* _(
-          createDummyAuthHeadersForUser({
-            phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333333'),
-            publicKey: me.publicKeyPemBase64,
-          })
-        )
+        const authHeaders = yield* createDummyAuthHeadersForUser({
+          phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333333'),
+          publicKey: me.publicKeyPemBase64,
+        })
 
-        yield* _(setAuthHeaders(authHeaders))
+        yield* setAuthHeaders(authHeaders)
 
         const commonAndSecurityHeaders =
           makeTestCommonAndSecurityHeaders(authHeaders)
 
-        const data = yield* _(
+        const data = yield* pipe(
           client.updateOffer({
             payload: {
               adminId: generateAdminId(),
@@ -358,12 +340,12 @@ describe('Update offer', () => {
             },
             headers: commonAndSecurityHeaders,
           }),
-          Effect.either
+          Effect.result
         )
 
-        expect(data._tag).toBe('Left')
-        if (data._tag === 'Left') {
-          expect(data.left).toHaveProperty('status', 404)
+        expect(data._tag).toBe('Failure')
+        if (data._tag === 'Failure') {
+          expect(data.failure).toHaveProperty('status', 404)
         }
       })
     )
@@ -371,32 +353,30 @@ describe('Update offer', () => {
 
   it('Does not fail when updating expired or flagged offer', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
-        const sql = yield* _(SqlClient.SqlClient)
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
+        const sql = yield* SqlClient.SqlClient
 
-        yield* _(sql`
+        yield* sql`
           UPDATE offer_public
           SET
             refreshed_at = NOW() - INTERVAL '8 days',
             report = 3
           WHERE
             offer_id = ${offer1.offerId}
-        `)
+        `
 
-        const authHeaders = yield* _(
-          createDummyAuthHeadersForUser({
-            phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333333'),
-            publicKey: me.publicKeyPemBase64,
-          })
-        )
+        const authHeaders = yield* createDummyAuthHeadersForUser({
+          phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333333'),
+          publicKey: me.publicKeyPemBase64,
+        })
 
-        yield* _(setAuthHeaders(authHeaders))
+        yield* setAuthHeaders(authHeaders)
 
         const commonAndSecurityHeaders =
           makeTestCommonAndSecurityHeaders(authHeaders)
 
-        const result = yield* _(
+        const result = yield* pipe(
           client.updateOffer({
             payload: {
               adminId: offer1.adminId,
@@ -407,31 +387,31 @@ describe('Update offer', () => {
             },
             headers: commonAndSecurityHeaders,
           }),
-          Effect.either
+          Effect.result
         )
 
-        yield* _(sql`
+        yield* sql`
           UPDATE offer_public
           SET
             refreshed_at = NOW(),
             report = 0
           WHERE
             offer_id = ${offer1.offerId}
-        `)
+        `
 
-        expect(result._tag).toBe('Right')
+        expect(result._tag).toBe('Success')
       })
     )
   })
 
   it('Updates offer when visibility is through public key v2', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
-        const sql = yield* _(SqlClient.SqlClient)
-        const publicKeyV2 = yield* _(generateV2KeyPair())
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
+        const sql = yield* SqlClient.SqlClient
+        const publicKeyV2 = yield* generateV2KeyPair()
 
-        yield* _(sql`
+        yield* sql`
           UPDATE offer_private
           SET
             user_public_key = ${publicKeyV2.publicKey}
@@ -446,35 +426,30 @@ describe('Update offer', () => {
                 offer_public.offer_id = ${offer1.offerId}
                 AND offer_private.user_public_key = ${me.publicKeyPemBase64}
             );
-        `)
+        `
 
-        const authHeaders = yield* _(
-          createDummyAuthHeadersForUser({
-            phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333333'),
-            publicKey: me.publicKeyPemBase64,
-          })
-        )
-        yield* _(setAuthHeaders(authHeaders))
+        const authHeaders = yield* createDummyAuthHeadersForUser({
+          phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333333'),
+          publicKey: me.publicKeyPemBase64,
+        })
+        yield* setAuthHeaders(authHeaders)
 
-        const commonAndSecurityHeadersWithPublicKeyV2 = yield* _(
-          makeTestCommonAndSecurityHeadersWithPublicKeyV2({
+        const commonAndSecurityHeadersWithPublicKeyV2 =
+          yield* makeTestCommonAndSecurityHeadersWithPublicKeyV2({
             authHeaders,
             publicKeyV2: publicKeyV2.publicKey,
           })
-        )
 
-        const response = yield* _(
-          client.updateOffer({
-            payload: {
-              adminId: offer1.adminId,
-              payloadPublic: Schema.decodeUnknownSync(PublicPayloadEncrypted)(
-                'newPayloadPublicFromV2'
-              ),
-              offerPrivateList: [],
-            },
-            headers: commonAndSecurityHeadersWithPublicKeyV2,
-          })
-        )
+        const response = yield* client.updateOffer({
+          payload: {
+            adminId: offer1.adminId,
+            payloadPublic: Schema.decodeUnknownSync(PublicPayloadEncrypted)(
+              'newPayloadPublicFromV2'
+            ),
+            offerPrivateList: [],
+          },
+          headers: commonAndSecurityHeadersWithPublicKeyV2,
+        })
 
         expect(response.publicPayload).toEqual('newPayloadPublicFromV2')
       })

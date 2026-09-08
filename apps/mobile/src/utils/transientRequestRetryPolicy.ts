@@ -1,6 +1,6 @@
 import {Schedule} from 'effect'
 
-export const transientRequestRetryPolicy = Schedule.exponential(500).pipe(
-  Schedule.jittered,
-  Schedule.intersect(Schedule.recurs(3))
-)
+export const transientRequestRetryPolicy = Schedule.max([
+  Schedule.exponential(500).pipe(Schedule.jittered),
+  Schedule.recurs(3),
+])

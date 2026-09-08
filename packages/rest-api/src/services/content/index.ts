@@ -2,7 +2,7 @@ import {type CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.br
 import {type PlatformName} from '@vexl-next/domain/src/utility/PlatformName'
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {type VersionString} from '@vexl-next/domain/src/utility/VersionString.brand'
-import {Effect, Option} from 'effect/index'
+import {Effect, Option} from 'effect'
 import {type ServiceUrl} from '../../ServiceUrl.brand'
 import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand'
 import {createClientInstance} from '../../client'
@@ -45,23 +45,21 @@ export function api({
   loggingFunction?: LoggingFunction | null
   prefix?: CountryPrefix
 }) {
-  return Effect.gen(function* (_) {
-    const client = yield* _(
-      createClientInstance({
-        api: ContentApiSpecification,
-        platform,
-        clientVersion,
-        clientSemver,
-        language,
-        appSource,
-        isDeveloper,
-        url,
-        loggingFunction,
-        deviceModel,
-        osVersion,
-        prefix,
-      })
-    )
+  return Effect.gen(function* () {
+    const client = yield* createClientInstance({
+      api: ContentApiSpecification,
+      platform,
+      clientVersion,
+      clientSemver,
+      language,
+      appSource,
+      isDeveloper,
+      url,
+      loggingFunction,
+      deviceModel,
+      osVersion,
+      prefix,
+    })
 
     const commonHeaders = makeCommonHeaders({
       appSource,
@@ -70,9 +68,9 @@ export function api({
       platform,
       isDeveloper,
       language,
-      deviceModel: Option.fromNullable(deviceModel),
-      osVersion: Option.fromNullable(osVersion),
-      prefix: Option.fromNullable(prefix),
+      deviceModel: Option.fromNullishOr(deviceModel),
+      osVersion: Option.fromNullishOr(osVersion),
+      prefix: Option.fromNullishOr(prefix),
     })
 
     return {
@@ -95,7 +93,7 @@ export function api({
         request: GetVexlProductNotificationsRequest
       ) =>
         client.VexlProductNotifications.getVexlProductNotifications({
-          urlParams: request,
+          query: request,
           headers: commonHeaders,
         }),
       createInvoice: (createInvoiceRequest: CreateInvoiceRequest) =>
@@ -104,14 +102,14 @@ export function api({
         }),
       getInvoice: (getInvoiceRequest: GetInvoiceRequest) =>
         client.Donations.getInvoice({
-          urlParams: getInvoiceRequest,
+          query: getInvoiceRequest,
         }),
       getInvoiceStatusType: (query: GetInvoiceStatusTypeRequest) =>
         client.Donations.getInvoiceStatusType({
-          urlParams: query,
+          query,
         }),
     }
   })
 }
 
-export type ContentApi = Effect.Effect.Success<ReturnType<typeof api>>
+export type ContentApi = Effect.Success<ReturnType<typeof api>>

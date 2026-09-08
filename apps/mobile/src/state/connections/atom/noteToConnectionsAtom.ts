@@ -10,8 +10,7 @@ import updateNotePrivateParts from '@vexl-next/resources-utils/src/notes/updateN
 import updateRepostNotePrivateParts from '@vexl-next/resources-utils/src/notes/updateRepostNotePrivateParts'
 import {type OfferEncryptionProgress} from '@vexl-next/resources-utils/src/offers/OfferEncryptionProgress'
 import {subtractArrays} from '@vexl-next/resources-utils/src/utils/array'
-import {Array, Effect, Option, Schema} from 'effect'
-import {pipe} from 'fp-ts/function'
+import {Array, Effect, Option, pipe, Schema} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
@@ -159,7 +158,7 @@ export const updateAndReencryptAllNotesConnectionsActionAtom = atom(
       | {readonly repostId: NoteRepostId; readonly success: boolean}
     >
   > =>
-    Effect.gen(function* (_) {
+    Effect.gen(function* () {
       const stopProcessingAfter: UnixMilliseconds | undefined = isInBackground
         ? Schema.decodeSync(UnixMilliseconds)(
             unixMillisecondsNow() + BACKGROUND_TIME_LIMIT_MS
@@ -265,7 +264,7 @@ export const updateAndReencryptAllNotesConnectionsActionAtom = atom(
                 return {adminId: oneNoteConnections.adminId, success: true}
               }
             ),
-            Effect.catchAll((e) =>
+            Effect.catch((e) =>
               Effect.sync(() => {
                 reportError(
                   'warn',
@@ -380,7 +379,7 @@ export const updateAndReencryptAllNotesConnectionsActionAtom = atom(
         Effect.all
       )
 
-      return yield* _(
+      return yield* pipe(
         Effect.zipWith(
           processMyNotes,
           processReposts,

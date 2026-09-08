@@ -1,9 +1,10 @@
 import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
+import {withNullishDefault} from '@vexl-next/generic-utils/src/effect-helpers/optionalNullable'
 import {
   BlogId,
   BlogSlug,
 } from '@vexl-next/rest-api/src/services/content/contracts'
-import {Schema} from 'effect'
+import {Effect, Option, Schema} from 'effect'
 
 export const WebflowEventItem = Schema.Struct({
   id: Schema.String,
@@ -16,21 +17,14 @@ export const WebflowEventItem = Schema.Struct({
   fieldData: Schema.Struct({
     'start-date-time': Schema.DateFromString,
     'event-link': Schema.String,
-    'end-date-time': Schema.optionalWith(Schema.DateFromString, {
-      nullable: true,
-      as: 'Option',
-    }),
+    'end-date-time': Schema.OptionFromOptionalNullOr(
+      Schema.DateFromString
+    ).pipe(Schema.withConstructorDefault(Effect.succeed(Option.none()))),
     name: Schema.String,
     venue: Schema.String,
-    'event-speakers': Schema.optionalWith(Schema.Array(Schema.String), {
-      nullable: true,
-      default: () => [],
-    }),
+    'event-speakers': withNullishDefault(Schema.Array(Schema.String), () => []),
     slug: Schema.String,
-    'golden-glasses': Schema.optionalWith(Schema.Boolean, {
-      nullable: true,
-      default: () => false,
-    }),
+    'golden-glasses': withNullishDefault(Schema.Boolean, () => false),
   }),
 })
 export type WebflowEventItem = typeof WebflowEventItem.Type
@@ -44,18 +38,16 @@ export const WebflowSpeakerItem = Schema.Struct({
   isArchived: Schema.Boolean,
   isDraft: Schema.Boolean,
   fieldData: Schema.Struct({
-    'link-to-socials': Schema.optionalWith(Schema.String, {
-      nullable: true,
-      as: 'Option',
-    }),
+    'link-to-socials': Schema.OptionFromOptionalNullOr(Schema.String).pipe(
+      Schema.withConstructorDefault(Effect.succeed(Option.none()))
+    ),
     name: Schema.String,
     slug: Schema.String,
-    'event-speaker-image': Schema.optionalWith(
+    'event-speaker-image': Schema.OptionFromOptionalNullOr(
       Schema.Struct({
         url: Schema.String,
-      }),
-      {nullable: true, as: 'Option'}
-    ),
+      })
+    ).pipe(Schema.withConstructorDefault(Effect.succeed(Option.none()))),
   }),
 })
 
@@ -70,19 +62,17 @@ export const WebflowBlogItem = Schema.Struct({
   isArchived: Schema.Boolean,
   isDraft: Schema.Boolean,
   fieldData: Schema.Struct({
-    'teaser-text': Schema.optionalWith(Schema.String, {
-      nullable: true,
-      as: 'Option',
-    }),
+    'teaser-text': Schema.OptionFromOptionalNullOr(Schema.String).pipe(
+      Schema.withConstructorDefault(Effect.succeed(Option.none()))
+    ),
     'rich-text': Schema.String,
     name: Schema.String,
     slug: BlogSlug,
-    'main-image': Schema.optionalWith(
+    'main-image': Schema.OptionFromOptionalNullOr(
       Schema.Struct({
         url: UriString,
-      }),
-      {nullable: true, as: 'Option'}
-    ),
+      })
+    ).pipe(Schema.withConstructorDefault(Effect.succeed(Option.none()))),
   }),
 })
 

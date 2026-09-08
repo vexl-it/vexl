@@ -1,8 +1,11 @@
-import {HttpApi, HttpApiEndpoint, HttpApiGroup} from '@effect/platform/index'
+import {Schema} from 'effect'
 import {
-  NotFoundError,
-  UnexpectedServerError,
-} from '@vexl-next/domain/src/general/commonErrors'
+  HttpApi,
+  HttpApiEndpoint,
+  HttpApiGroup,
+  HttpApiSchema,
+} from 'effect/unstable/httpapi'
+import {commonApiErrors} from '../../commonApiErrors'
 import {CommonHeaders} from '../../commonHeaders'
 import {MaxExpectedDailyCall} from '../../MaxExpectedDailyCountAnnotation'
 import {NoContentResponse} from '../../NoContentResponse.brand'
@@ -28,39 +31,52 @@ import {
 
 export const IssueNotificationEndpoint = HttpApiEndpoint.post(
   'issueNotification',
-  '/issue-notification'
-)
-  .setPayload(IssueNotificationRequest)
-  .addSuccess(IssueNotificationResponse)
-  .addError(InvalidFcmCypherError, {status: 400})
-  .addError(SendingNotificationError, {status: 400})
-  .addError(InvalidNotificationCypherrror, {status: 400})
-  .annotate(MaxExpectedDailyCall, 5000)
+  '/issue-notification',
+  {
+    disableCodecs: true,
+    payload: Schema.Struct(IssueNotificationRequest.fields),
+    error: Schema.Union([
+      ...commonApiErrors,
+      InvalidFcmCypherError.pipe(HttpApiSchema.status(400)),
+      SendingNotificationError.pipe(HttpApiSchema.status(400)),
+      InvalidNotificationCypherrror.pipe(HttpApiSchema.status(400)),
+    ]),
+    success: Schema.Struct(IssueNotificationResponse.fields),
+  }
+).annotate(MaxExpectedDailyCall, 5000)
 
 export const IssueStreamOnlyMessageEndpoint = HttpApiEndpoint.post(
   'issueStreamOnlyMessage',
-  '/issue-stream-only-message'
-)
-  .setPayload(IssueStreamOnlyMessageRequest)
-  .addError(SendingNotificationError)
-  .addSuccess(NoContentResponse)
-  .annotate(MaxExpectedDailyCall, 500_000)
+  '/issue-stream-only-message',
+  {
+    disableCodecs: true,
+    payload: Schema.Struct(IssueStreamOnlyMessageRequest.fields),
+    error: Schema.Union([...commonApiErrors, SendingNotificationError]),
+    success: NoContentResponse,
+  }
+).annotate(MaxExpectedDailyCall, 500_000)
 
 export const ReportNotificationProcessedEndpoint = HttpApiEndpoint.post(
   'reportNotificationProcessed',
-  '/report-notification'
-)
-  .setHeaders(CommonHeaders)
-  .setPayload(ReportNotificationProcessedRequest)
-  .addSuccess(NoContentResponse)
-  .annotate(MaxExpectedDailyCall, 5000)
+  '/report-notification',
+  {
+    disableCodecs: true,
+    headers: CommonHeaders,
+    payload: Schema.Struct(ReportNotificationProcessedRequest.fields),
+    error: Schema.Union([...commonApiErrors]),
+    success: NoContentResponse,
+  }
+).annotate(MaxExpectedDailyCall, 5000)
 
 export const GetNotificationPublicKeyEndpoint = HttpApiEndpoint.get(
   'getNotificationPublicKey',
-  '/cypher-public-key'
-)
-  .addSuccess(GetPublicKeyResponse)
-  .annotate(MaxExpectedDailyCall, 100)
+  '/cypher-public-key',
+  {
+    disableCodecs: true,
+    error: Schema.Union([...commonApiErrors]),
+    success: GetPublicKeyResponse,
+  }
+).annotate(MaxExpectedDailyCall, 100)
 
 const RootGroup = HttpApiGroup.make('root', {topLevel: true})
   .add(IssueNotificationEndpoint)
@@ -70,44 +86,63 @@ const RootGroup = HttpApiGroup.make('root', {topLevel: true})
 
 export const CreateNotificationSecretEndpoint = HttpApiEndpoint.post(
   'CreateNotificationSecret',
-  '/token/create-secret'
-)
-  .setPayload(CreateNotificationSecretRequest)
-  .setHeaders(CommonHeaders)
-  .annotate(MaxExpectedDailyCall, 10)
-  .addSuccess(CreateNotificationSecretResponse)
-  .addError(MissingCommonHeadersError, {status: 400})
+  '/token/create-secret',
+  {
+    disableCodecs: true,
+    payload: Schema.Struct(CreateNotificationSecretRequest.fields),
+    headers: CommonHeaders,
+    error: Schema.Union([
+      ...commonApiErrors,
+      MissingCommonHeadersError.pipe(HttpApiSchema.status(400)),
+    ]),
+    success: Schema.Struct(CreateNotificationSecretResponse.fields),
+  }
+).annotate(MaxExpectedDailyCall, 10)
 
 export const UpdateNotificationInfoEndpont = HttpApiEndpoint.put(
   'updateNoficationInfo',
-  '/token/update'
-)
-  .setPayload(UpdateNotificationInfoRequest)
-  .setHeaders(CommonHeaders)
-  .addError(MissingCommonHeadersError, {status: 400})
-  .annotate(MaxExpectedDailyCall, 100)
+  '/token/update',
+  {
+    disableCodecs: true,
+    payload: Schema.Struct(UpdateNotificationInfoRequest.fields),
+    headers: CommonHeaders,
+    error: Schema.Union([
+      ...commonApiErrors,
+      MissingCommonHeadersError.pipe(HttpApiSchema.status(400)),
+    ]),
+  }
+).annotate(MaxExpectedDailyCall, 100)
 
 export const GenerateNotificationTokenEndpoint = HttpApiEndpoint.post(
   'generateNotificationToken',
-  '/token/generate'
-)
-  .setPayload(GenerateNotificationTokenRequest)
-  .addSuccess(GenerateNotificationTokenResponse)
-  .annotate(MaxExpectedDailyCall, 1_000)
+  '/token/generate',
+  {
+    disableCodecs: true,
+    payload: Schema.Struct(GenerateNotificationTokenRequest.fields),
+    error: Schema.Union([...commonApiErrors]),
+    success: Schema.Struct(GenerateNotificationTokenResponse.fields),
+  }
+).annotate(MaxExpectedDailyCall, 1_000)
 
-export const InvalidateNotificationTokenEndpoint = HttpApiEndpoint.del(
+export const InvalidateNotificationTokenEndpoint = HttpApiEndpoint.delete(
   'invalidateNotificationToken',
-  '/token/invalidate'
-)
-  .setPayload(InvalidateNotificationTokenRequest)
-  .annotate(MaxExpectedDailyCall, 1_000)
+  '/token/invalidate',
+  {
+    disableCodecs: true,
+    payload: Schema.Struct(InvalidateNotificationTokenRequest.fields),
+    error: Schema.Union([...commonApiErrors]),
+  }
+).annotate(MaxExpectedDailyCall, 1_000)
 
-export const InvalidateNotificationSecretEndpoint = HttpApiEndpoint.del(
+export const InvalidateNotificationSecretEndpoint = HttpApiEndpoint.delete(
   'invalidateNotificationSecret',
-  '/token/invalidate/secret'
-)
-  .setPayload(InvalidateNotificationSecretRequest)
-  .annotate(MaxExpectedDailyCall, 1_000)
+  '/token/invalidate/secret',
+  {
+    disableCodecs: true,
+    payload: Schema.Struct(InvalidateNotificationSecretRequest.fields),
+    error: Schema.Union([...commonApiErrors]),
+  }
+).annotate(MaxExpectedDailyCall, 1_000)
 
 const NotificationTokenGroup = HttpApiGroup.make('NotificationTokenGroup')
   .add(CreateNotificationSecretEndpoint)
@@ -117,8 +152,6 @@ const NotificationTokenGroup = HttpApiGroup.make('NotificationTokenGroup')
   .add(InvalidateNotificationSecretEndpoint)
 
 export const NotificationApiSpecification = HttpApi.make('Notification API')
-  .middleware(RateLimitingMiddleware)
   .add(RootGroup)
   .add(NotificationTokenGroup)
-  .addError(NotFoundError, {status: 404})
-  .addError(UnexpectedServerError, {status: 500})
+  .middleware(RateLimitingMiddleware)

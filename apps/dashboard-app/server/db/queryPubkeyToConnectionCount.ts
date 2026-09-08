@@ -1,17 +1,18 @@
-import {type SqlError} from '@effect/sql/SqlError'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
+import {NumberFromString} from '@vexl-next/generic-utils/src/effect-helpers/NumberFromString'
 import {Effect, Option, Schema} from 'effect'
-import {type ParseError} from 'effect/ParseResult'
+import {type SchemaError} from 'effect/Schema'
+import {type SqlError} from 'effect/unstable/sql/SqlError'
 import {type ContactConnectionId} from './ContactConnectionId'
 import {PgContactClient} from './layer'
 
 const PubKeyToConnectionsRow = Schema.Struct({
   publicKey: PublicKeyPemBase64,
-  count: Schema.NumberFromString,
+  count: NumberFromString,
 })
 export type PubKeyToConnectionsRow = typeof PubKeyToConnectionsRow.Type
 
-const decodePubkeysToConnectionsQueryResult = Schema.decodeUnknown(
+const decodePubkeysToConnectionsQueryResult = Schema.decodeUnknownEffect(
   Schema.Array(PubKeyToConnectionsRow)
 )
 
@@ -26,7 +27,7 @@ export const queryPubkeysToConnections = ({
   maxId: ContactConnectionId
 }): Effect.Effect<
   readonly PubKeyToConnectionsRow[],
-  SqlError | ParseError,
+  SqlError | SchemaError,
   PgContactClient
 > =>
   PgContactClient.pipe(

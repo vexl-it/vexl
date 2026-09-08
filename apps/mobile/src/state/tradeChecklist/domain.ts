@@ -8,7 +8,9 @@ import {
   MeetingLocationChatMessage,
   NetworkChatMessage,
 } from '@vexl-next/domain/src/general/tradeChecklist'
-import {Either, Schema} from 'effect/index'
+import {optionalNullable} from '@vexl-next/generic-utils/src/effect-helpers/optionalNullable'
+import {withDecodingFallback} from '@vexl-next/generic-utils/src/effect-helpers/withDecodingFallback'
+import {Schema} from 'effect'
 import reportError from '../../utils/reportError'
 
 export const ChatDataForTradeChecklist = Schema.Struct({
@@ -17,68 +19,59 @@ export const ChatDataForTradeChecklist = Schema.Struct({
 })
 export type ChatDataForTradeChecklist = typeof ChatDataForTradeChecklist.Type
 
-export const withFallback = <A, I, R>(
-  self: Schema.Schema<A, I, R>,
-  fallback: NoInfer<A>
-): Schema.Schema<A, I, R> => {
-  return self.annotations({
-    decodingFallback: (issue) => {
-      reportError(
-        'error',
-        new Error('Trade checklist in state formatting error caught'),
-        {
-          err: issue,
-        }
-      )
-      return Either.right(fallback)
-    },
+export const withFallback = <S extends Schema.Constraint>(
+  self: S,
+  fallback: NoInfer<S['Type']>
+): ReturnType<typeof withDecodingFallback<S>> =>
+  withDecodingFallback(self, (issue) => {
+    reportError(
+      'error',
+      new Error('Trade checklist in state formatting error caught'),
+      {err: issue}
+    )
+    return fallback
   })
-}
 
 export const TradeChecklistInState = Schema.Struct({
   dateAndTime: withFallback(
     Schema.Struct({
-      sent: Schema.optionalWith(DateTimeChatMessage, {nullable: true}),
-      received: Schema.optionalWith(DateTimeChatMessage, {nullable: true}),
+      sent: optionalNullable(DateTimeChatMessage),
+      received: optionalNullable(DateTimeChatMessage),
     }),
     {}
   ),
   location: withFallback(
     Schema.Struct({
-      sent: Schema.optionalWith(MeetingLocationChatMessage, {nullable: true}),
-      received: Schema.optionalWith(MeetingLocationChatMessage, {
-        nullable: true,
-      }),
+      sent: optionalNullable(MeetingLocationChatMessage),
+      received: optionalNullable(MeetingLocationChatMessage),
     }),
     {}
   ),
   amount: withFallback(
     Schema.Struct({
-      sent: Schema.optionalWith(AmountChatMessage, {nullable: true}),
-      received: Schema.optionalWith(AmountChatMessage, {nullable: true}),
+      sent: optionalNullable(AmountChatMessage),
+      received: optionalNullable(AmountChatMessage),
     }),
     {}
   ),
   network: withFallback(
     Schema.Struct({
-      sent: Schema.optionalWith(NetworkChatMessage, {nullable: true}),
-      received: Schema.optionalWith(NetworkChatMessage, {nullable: true}),
+      sent: optionalNullable(NetworkChatMessage),
+      received: optionalNullable(NetworkChatMessage),
     }),
     {}
   ),
   identity: withFallback(
     Schema.Struct({
-      sent: Schema.optionalWith(IdentityRevealChatMessage, {nullable: true}),
-      received: Schema.optionalWith(IdentityRevealChatMessage, {
-        nullable: true,
-      }),
+      sent: optionalNullable(IdentityRevealChatMessage),
+      received: optionalNullable(IdentityRevealChatMessage),
     }),
     {}
   ),
   contact: withFallback(
     Schema.Struct({
-      sent: Schema.optionalWith(ContactRevealChatMessage, {nullable: true}),
-      received: Schema.optionalWith(ContactRevealChatMessage, {nullable: true}),
+      sent: optionalNullable(ContactRevealChatMessage),
+      received: optionalNullable(ContactRevealChatMessage),
     }),
     {}
   ),

@@ -86,7 +86,7 @@ const getAddress = ({
   responseData: GoogleGeocodeResponse
   firstHit: GoogleGeocodeResult
 }): Effect.Effect<string> =>
-  Effect.gen(function* (_) {
+  Effect.gen(function* () {
     const country = findTypeInAddressComponents(
       'country',
       firstHit.address_components
@@ -127,8 +127,8 @@ const getAddress = ({
       ? finalAddress
       : firstHit.formatted_address.replace(/^[\d\s]*/, '')
   }).pipe(
-    Effect.catchAllDefect((defect) =>
-      Effect.zipRight(
+    Effect.catchDefect((defect) =>
+      Effect.andThen(
         Effect.logError(
           'Error while getting address. Falling back to formatted address',
           defect
@@ -148,79 +148,73 @@ export const googleGeocode =
     GetGeocodedCoordinatesResponse,
     UnexpectedServerError | LocationNotFoundError
   > => {
-    return Effect.gen(function* (_) {
-      const response = yield* _(
-        Effect.tryPromise({
-          try: async () =>
-            await axios.get<unknown>(
-              'https://maps.googleapis.com/maps/api/geocode/json',
-              {
-                params: {
-                  key: Redacted.value(apiKey),
-                  language: lang,
-                  result_type: 'locality|political|street_address',
-                  latlng: `${latitude},${longitude}`,
-                },
-              }
-            ),
-          catch: (error) =>
-            unexpectedGoogleMapsError({
-              operation: 'geocode',
-              category: 'RequestFailed',
-              error,
-              request: {latitude, longitude, lang},
-            }),
-        })
-      )
-
-      const responseEnvelope = yield* _(
-        Schema.decodeUnknown(GoogleResponseEnvelope)(response.data)
-      )
-      if (responseEnvelope.status === 'ZERO_RESULTS') {
-        return yield* _(new LocationNotFoundError({status: 404}))
-      }
-      if (responseEnvelope.status !== 'OK') {
-        return yield* _(
+    return Effect.gen(function* () {
+      const response = yield* Effect.tryPromise({
+        try: async () =>
+          await axios.get<unknown>(
+            'https://maps.googleapis.com/maps/api/geocode/json',
+            {
+              params: {
+                key: Redacted.value(apiKey),
+                language: lang,
+                result_type: 'locality|political|street_address',
+                latlng: `${latitude},${longitude}`,
+              },
+            }
+          ),
+        catch: (error) =>
           unexpectedGoogleMapsError({
             operation: 'geocode',
-            category: 'ResponseRejected',
+            category: 'RequestFailed',
+            error,
             request: {latitude, longitude, lang},
-            response: response.data,
-            responseStatus: responseEnvelope.status,
-          })
-        )
+          }),
+      })
+
+      const responseEnvelope = yield* Schema.decodeUnknownEffect(
+        GoogleResponseEnvelope
+      )(response.data)
+      if (responseEnvelope.status === 'ZERO_RESULTS') {
+        return yield* new LocationNotFoundError({status: 404})
+      }
+      if (responseEnvelope.status !== 'OK') {
+        return yield* unexpectedGoogleMapsError({
+          operation: 'geocode',
+          category: 'ResponseRejected',
+          request: {latitude, longitude, lang},
+          response: response.data,
+          responseStatus: responseEnvelope.status,
+        })
       }
 
-      const responseData = yield* _(
-        Schema.decodeUnknown(GoogleGeocodeResponse)(response.data)
-      )
+      const responseData = yield* Schema.decodeUnknownEffect(
+        GoogleGeocodeResponse
+      )(response.data)
       const firstHit = responseData.results.at(0)
-      if (!firstHit) return yield* _(new LocationNotFoundError({status: 404}))
+      if (!firstHit) return yield* new LocationNotFoundError({status: 404})
 
-      const address = yield* _(getAddress({responseData, firstHit}))
+      const address = yield* getAddress({responseData, firstHit})
 
-      return yield* _(
-        Schema.decode(GetGeocodedCoordinatesResponse)({
-          placeId: firstHit.place_id,
-          // Remove postal code from the start as per #865
-          address,
-          latitude: firstHit.geometry.location.lat,
-          longitude: firstHit.geometry.location.lng,
-          viewport: {
-            northeast: {
-              latitude: firstHit.geometry.viewport.northeast.lat,
-              longitude: firstHit.geometry.viewport.northeast.lng,
-            },
-            southwest: {
-              latitude: firstHit.geometry.viewport.southwest.lat,
-              longitude: firstHit.geometry.viewport.southwest.lng,
-            },
+      return yield* Schema.decodeEffect(GetGeocodedCoordinatesResponse)({
+        placeId: firstHit.place_id,
+        // Remove postal code from the start as per #865
+        address,
+        latitude: firstHit.geometry.location.lat,
+        longitude: firstHit.geometry.location.lng,
+        viewport: {
+          northeast: {
+            latitude: firstHit.geometry.viewport.northeast.lat,
+            longitude: firstHit.geometry.viewport.northeast.lng,
           },
-        })
-      )
+          southwest: {
+            latitude: firstHit.geometry.viewport.southwest.lat,
+            longitude: firstHit.geometry.viewport.southwest.lng,
+          },
+        },
+      })
     }).pipe(
       Effect.catchTag(
-        'ParseError',
+        'SchemaError',
         (error) =>
           new UnexpectedServerError({
             status: 500,

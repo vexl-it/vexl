@@ -1,13 +1,13 @@
-import {HttpApiBuilder} from '@effect/platform/index'
 import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
-import {Array, Effect, pipe} from 'effect/index'
+import {makeHttpApiHandler} from '@vexl-next/server-utils/src/makeHttpApiHandler'
+import {Array, Effect, pipe} from 'effect'
 import {
   hashForClient,
   serverHashPhoneNumber,
 } from '../../utils/serverHashContact'
 
-export const convertPhoneNumberHashesToServerHashes = HttpApiBuilder.handler(
+export const convertPhoneNumberHashesToServerHashes = makeHttpApiHandler(
   ContactApiSpecification,
   'Contact',
   'convertPhoneNumberHashesToServerHashes',
@@ -24,7 +24,7 @@ export const convertPhoneNumberHashesToServerHashes = HttpApiBuilder.handler(
           }))
         )
       ),
-      Effect.allWith({concurrency: 'unbounded'}),
+      (effects) => Effect.all(effects, {concurrency: 'unbounded'}),
       Effect.map((result) => ({result})),
       Effect.withSpan('ConvertPhoneNumberHashesToServerHashes'),
       makeEndpointEffect

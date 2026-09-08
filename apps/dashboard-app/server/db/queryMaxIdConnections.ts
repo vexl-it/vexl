@@ -1,11 +1,12 @@
+import {NumberFromString} from '@vexl-next/generic-utils/src/effect-helpers/NumberFromString'
 import {Effect, Schema} from 'effect'
 import {ContactConnectionId} from './ContactConnectionId'
 import {PgContactClient} from './layer'
 
-const decodeMaxContactsQueryResult = Schema.decodeUnknown(
+const decodeMaxContactsQueryResult = Schema.decodeUnknownEffect(
   Schema.NonEmptyArray(
     Schema.Struct({
-      max: Schema.compose(Schema.NumberFromString, ContactConnectionId),
+      max: NumberFromString.pipe(Schema.decodeTo(ContactConnectionId)),
     })
   )
 )

@@ -6,7 +6,7 @@ import {
 import {Schema} from 'effect'
 
 export const VersionString = Schema.String.pipe(
-  Schema.filter(validate),
+  Schema.check(Schema.makeFilter(validate)),
   Schema.brand('VersionString')
 )
 

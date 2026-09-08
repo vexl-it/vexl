@@ -19,7 +19,7 @@
     "@vexl-next/eslint-config": "0.0.0",
     "@vexl-next/prettier-config": "0.0.0",
     "@vexl-next/tsconfig": "0.0.0",
-    "effect": "^3.20.0",
+    "effect": "4.0.0-rc.112",
     "eslint": "^9.20.0",
     "jotai": "^2.15.0",
     "prettier": "^3.3.2",
@@ -35,7 +35,7 @@
     "typescript": "~6.0.3"
   },
   "peerDependencies": {
-    "effect": ">=3",
+    "effect": "4.0.0-rc.112",
     "jotai": ">=2",
     "react": ">=18",
     "react-native": ">=0.81",

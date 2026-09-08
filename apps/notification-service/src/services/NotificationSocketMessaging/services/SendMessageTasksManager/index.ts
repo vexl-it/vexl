@@ -10,14 +10,14 @@ import {
   Context,
   Duration,
   Effect,
-  Either,
   flow,
   identity,
   Layer,
   pipe,
+  Result,
   Schema,
   Stream,
-} from 'effect/index'
+} from 'effect'
 import {type NotificationMetricsService} from '../../../../metrics'
 import {type ThrottledPushNotificationService} from '../../../ThrottledPushNotificationService'
 import {
@@ -46,11 +46,11 @@ const createPendingTaskKey = (taskId: SendMessageTaskId): string =>
   `notification-service:pendingTask:${taskId}`
 
 export const TaskWorkerLayer = Layer.effectDiscard(
-  Effect.gen(function* (_) {
-    const redisPubSub = yield* _(RedisPubSubService)
-    const redis = yield* _(RedisService)
-    const myPubSubChannel = yield* _(MyManagerIdProvider)
-    const processTask = yield* _(TaskProcessor)
+  Effect.gen(function* () {
+    const redisPubSub = yield* RedisPubSubService
+    const redis = yield* RedisService
+    const myPubSubChannel = yield* MyManagerIdProvider
+    const processTask = yield* TaskProcessor
 
     const deletePendingFromRedis = flow(
       createPendingTaskKey,
@@ -60,11 +60,11 @@ export const TaskWorkerLayer = Layer.effectDiscard(
       )
     )
 
-    yield* _(
-      pipe(
-        redisPubSub.subscribe(SendMessageTask)(myPubSubChannel),
-        Stream.flatMap(
-          (task) =>
+    yield* pipe(
+      redisPubSub.subscribe(SendMessageTask)(myPubSubChannel),
+      Stream.flatMap(
+        (task) =>
+          Stream.fromEffect(
             processTask(task).pipe(
               Effect.filterOrFail(identity),
               Effect.zip(
@@ -78,33 +78,33 @@ export const TaskWorkerLayer = Layer.effectDiscard(
                 )
               ),
               Effect.ignore
-            ),
-          {concurrency: 20, bufferSize: 100}
-        ),
-        Stream.runDrain,
-        Effect.tapError((e) =>
-          Effect.logError('Send message tasks worker failed', e)
-        ),
-        Effect.catchTag(
-          'RedisError',
-          (e) =>
-            new SendMessageTasksManagerError({
-              cause: e,
-              message: 'Redis error when subcribing to redis pubsub channel',
-            })
-        )
+            )
+          ),
+        {concurrency: 20, bufferSize: 100}
+      ),
+      Stream.runDrain,
+      Effect.tapError((e) =>
+        Effect.logError('Send message tasks worker failed', e)
+      ),
+      Effect.catchTag(
+        'RedisError',
+        (e) =>
+          new SendMessageTasksManagerError({
+            cause: e,
+            message: 'Redis error when subcribing to redis pubsub channel',
+          })
       )
     )
   })
 )
 
 export const TimeoutWorkerLayer = Layer.effectDiscard(
-  Effect.gen(function* (_) {
-    const jobsStream = yield* _(TimeoutJobsStream)
-    const redis = yield* _(RedisService)
-    const processTimeout = yield* _(TimeoutProcessor)
+  Effect.gen(function* () {
+    const jobsStream = yield* TimeoutJobsStream
+    const redis = yield* RedisService
+    const processTimeout = yield* TimeoutProcessor
 
-    yield* _(
+    yield* pipe(
       jobsStream,
       Stream.filterEffect((task) =>
         // If the pending task is still recorded in redis, process it
@@ -118,15 +118,17 @@ export const TimeoutWorkerLayer = Layer.effectDiscard(
       ),
       Stream.flatMap(
         (data) =>
-          Effect.zip(
-            processTimeout(data),
-            redis
-              .delete(createPendingTaskKey(data.id))
-              .pipe(
-                SendMessageTasksManagerError.wrapErrors(
-                  'Error while checking pending task existence in redis'
+          Stream.fromEffect(
+            Effect.zip(
+              processTimeout(data),
+              redis
+                .delete(createPendingTaskKey(data.id))
+                .pipe(
+                  SendMessageTasksManagerError.wrapErrors(
+                    'Error while checking pending task existence in redis'
+                  )
                 )
-              )
+            )
           ),
         {concurrency: 10, bufferSize: 100}
       ),
@@ -138,13 +140,14 @@ export const TimeoutWorkerLayer = Layer.effectDiscard(
   })
 )
 
-export class SendMessageTasksManager extends Context.Tag(
-  'SendMessageTasksManager'
-)<SendMessageTasksManager, SendMessageTasksManagerOperations>() {
+export class SendMessageTasksManager extends Context.Service<
+  SendMessageTasksManager,
+  SendMessageTasksManagerOperations
+>()('SendMessageTasksManager') {
   static layer = ({
     timeout,
   }: {
-    timeout: Duration.DurationInput
+    timeout: Duration.Input
   }): Layer.Layer<
     | TaskProcessor
     | TimeoutJobsStream
@@ -159,14 +162,14 @@ export class SendMessageTasksManager extends Context.Tag(
     | NotificationMetricsService
     | ThrottledPushNotificationService
   > =>
-    Layer.scoped(
+    Layer.effect(
       SendMessageTasksManager,
-      Effect.gen(function* (_) {
+      Effect.gen(function* () {
         const timeoutMs = Duration.toMillis(timeout)
         const recordExpiration = (): UnixMilliseconds =>
           unixMillisecondsFromNow(timeoutMs + 60_000)
 
-        const redis = yield* _(RedisService)
+        const redis = yield* RedisService
         const insertAsPendingToRedis = (
           task: SendMessageTask
         ): Effect.Effect<void, SendMessageTasksManagerError, never> =>
@@ -183,7 +186,7 @@ export class SendMessageTasksManager extends Context.Tag(
             )
           )
 
-        const redisPubSub = yield* _(RedisPubSubService)
+        const redisPubSub = yield* RedisPubSubService
 
         const publishTask = (
           task: SendMessageTask,
@@ -198,7 +201,7 @@ export class SendMessageTasksManager extends Context.Tag(
               )
             )
 
-        const enqueueTimeout = yield* _(EnqueuePendingTask)
+        const enqueueTimeout = yield* EnqueuePendingTask
 
         return {
           emitTask: (task, ...managerIds) => {
@@ -220,13 +223,14 @@ export class SendMessageTasksManager extends Context.Tag(
                   )
                 )
               ),
-              Effect.allWith({concurrency: 'unbounded', mode: 'either'}),
+              (effects) =>
+                Effect.all(effects, {concurrency: 'unbounded', mode: 'result'}),
               // At least one manager must have received the task
               Effect.filterOrFail(
-                Array.some(Either.isRight),
+                Array.some(Result.isSuccess),
                 (e) =>
                   new SendMessageTasksManagerError({
-                    'cause': Array.filterMap(e, Either.getLeft),
+                    'cause': Array.getFailures(e),
                     'message': 'Failed to emit task to any manager',
                   })
               )

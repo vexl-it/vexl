@@ -1,12 +1,12 @@
-import {HttpApiBuilder} from '@effect/platform/index'
 import {CurrentSecurity} from '@vexl-next/rest-api/src/apiSecurity'
 import {UserNotFoundError} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {makeHttpApiHandler} from '@vexl-next/server-utils/src/makeHttpApiHandler'
 import {commonMetricAttributesFromHeaders} from '@vexl-next/server-utils/src/metrics/commonMetricAttributesFromHeaders'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import dayjs from 'dayjs'
-import {Array, Effect, Option} from 'effect'
+import {Array, Effect, Option, pipe} from 'effect'
 import {
   contactActiveWindowDaysConfig,
   contactConsideredAsExpiredForMetricsAfterDaysConfig,
@@ -34,7 +34,7 @@ const isUserInactive = ({
   return refreshedAt < activeAfter
 }
 
-export const refreshUser = HttpApiBuilder.handler(
+export const refreshUser = makeHttpApiHandler(
   ContactApiSpecification,
   'User',
   'refreshUser',
@@ -42,24 +42,22 @@ export const refreshUser = HttpApiBuilder.handler(
     CurrentSecurity.pipe(
       Effect.bind('serverHash', (s) => serverHashPhoneNumber(s.hash)),
       Effect.flatMap((security) =>
-        Effect.gen(function* (_) {
+        Effect.gen(function* () {
           const commonMetricAttributes = commonMetricAttributesFromHeaders(
             req.headers
           )
-          yield* _(reportUserRefresh(commonMetricAttributes))
-          const userDb = yield* _(UserDbService)
-          const contactDb = yield* _(ContactDbService)
-          const contactActiveWindowDays = yield* _(
-            contactActiveWindowDaysConfig
-          )
+          yield* reportUserRefresh(commonMetricAttributes)
+          const userDb = yield* UserDbService
+          const contactDb = yield* ContactDbService
+          const contactActiveWindowDays = yield* contactActiveWindowDaysConfig
 
-          const existingUser = yield* _(
+          const existingUser = yield* pipe(
             userDb.findUserByPublicKeyAndHash({
               hash: security.serverHash,
               publicKey: security.publicKey,
             }),
-            Effect.flatten,
-            Effect.catchTag('NoSuchElementException', () =>
+            Effect.flatMap(Effect.fromOption),
+            Effect.catchTag('NoSuchElementError', () =>
               Effect.fail(new UserNotFoundError())
             )
           )
@@ -69,9 +67,8 @@ export const refreshUser = HttpApiBuilder.handler(
             activeWithinDays: contactActiveWindowDays,
           })
 
-          const expiredForMetricsAfterDays = yield* _(
-            contactConsideredAsExpiredForMetricsAfterDaysConfig
-          )
+          const expiredForMetricsAfterDays =
+            yield* contactConsideredAsExpiredForMetricsAfterDaysConfig
           const daysInactive = dayjs().diff(existingUser.refreshedAt, 'day')
           const remindersReceived =
             existingUser.numberOfInactivityNotificationsSent
@@ -82,47 +79,41 @@ export const refreshUser = HttpApiBuilder.handler(
             remindersReceived > 0 || daysInactive >= expiredForMetricsAfterDays
 
           if (Option.isSome(req.payload.vexlNotificationToken)) {
-            yield* _(
-              userDb.clearVexlNotificationTokenHeldByOtherUsers({
-                publicKey: security.publicKey,
-                hash: security.serverHash,
-                token: req.payload.vexlNotificationToken.value,
-              })
-            )
-          }
-
-          yield* _(
-            userDb.updateRefreshUser({
+            yield* userDb.clearVexlNotificationTokenHeldByOtherUsers({
               publicKey: security.publicKey,
               hash: security.serverHash,
-              clientVersion: req.headers.clientVersionOrNone,
-              countryPrefix: req.headers.prefixOrNone,
-              appSource: req.headers.appSourceOrNone,
-              vexlNotificationToken: req.payload.vexlNotificationToken,
-              refreshedAt: new Date(),
-              publicKeyV2: security.publicKeyV2,
+              token: req.payload.vexlNotificationToken.value,
             })
-          )
+          }
+
+          yield* userDb.updateRefreshUser({
+            publicKey: security.publicKey,
+            hash: security.serverHash,
+            clientVersion: req.headers.clientVersionOrNone,
+            countryPrefix: req.headers.prefixOrNone,
+            appSource: req.headers.appSourceOrNone,
+            vexlNotificationToken: req.payload.vexlNotificationToken,
+            refreshedAt: new Date(),
+            publicKeyV2: security.publicKeyV2,
+          })
 
           if (isReactivatedForMetrics) {
-            yield* _(
-              reportUserReactivated({
-                commonMetricAttributes,
-                daysInactive,
-                remindersReceived,
-                daysSinceLastReminder: Option.match(
-                  existingUser.lastInactivityNotificationSentAt,
-                  {
-                    onNone: () => 'none',
-                    onSome: (sentAt) => dayjs().diff(sentAt, 'day'),
-                  }
-                ),
-              })
-            )
+            yield* reportUserReactivated({
+              commonMetricAttributes,
+              daysInactive,
+              remindersReceived,
+              daysSinceLastReminder: Option.match(
+                existingUser.lastInactivityNotificationSentAt,
+                {
+                  onNone: () => 'none',
+                  onSome: (sentAt) => dayjs().diff(sentAt, 'day'),
+                }
+              ),
+            })
           }
 
           const importedHashes = wasInactiveBeforeRefresh
-            ? yield* _(
+            ? yield* pipe(
                 contactDb.findContactsByHashFrom(security.serverHash),
                 Effect.map(Array.map((one) => one.hashTo))
               )
@@ -136,7 +127,7 @@ export const refreshUser = HttpApiBuilder.handler(
           withDbTransaction,
           withUserActionRedisLock(security.hash),
           Effect.tap(({importedHashes, ownerHash}) =>
-            Array.isEmptyReadonlyArray(importedHashes)
+            Array.isReadonlyArrayEmpty(importedHashes)
               ? Effect.void
               : notifyOthersAboutNewUserForked({
                   importedHashes,

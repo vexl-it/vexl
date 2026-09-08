@@ -2,7 +2,7 @@ import {type CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.br
 import {type PlatformName} from '@vexl-next/domain/src/utility/PlatformName'
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {type VersionString} from '@vexl-next/domain/src/utility/VersionString.brand'
-import {Effect} from 'effect/index'
+import {Effect} from 'effect'
 import {createClientInstance} from '../../client'
 import {type AppSource} from '../../commonHeaders'
 import {type ServiceUrl} from '../../ServiceUrl.brand'
@@ -39,36 +39,27 @@ export function api({
   osVersion?: string
   prefix?: CountryPrefix
 }) {
-  return Effect.gen(function* (_) {
-    const client = yield* _(
-      createClientInstance({
-        api: BtcExchangeRateApiSpecification,
-        platform,
-        clientVersion,
-        clientSemver,
-        language,
-        appSource,
-        isDeveloper,
-        url,
-        loggingFunction,
-        deviceModel,
-        osVersion,
-        prefix,
-      })
-    )
+  return Effect.gen(function* () {
+    const client = yield* createClientInstance({
+      api: BtcExchangeRateApiSpecification,
+      platform,
+      clientVersion,
+      clientSemver,
+      language,
+      appSource,
+      isDeveloper,
+      url,
+      loggingFunction,
+      deviceModel,
+      osVersion,
+      prefix,
+    })
 
     return {
       getExchangeRate: (exchangeRateInput: GetExchangeRateInput) =>
-        client.getExchangeRate({urlParams: exchangeRateInput.query}).pipe(
+        client.getExchangeRate({query: exchangeRateInput.query}).pipe(
           Effect.catchTags({
-            HttpApiDecodeError: () =>
-              Effect.fail(
-                new GetExchangeRateError({
-                  reason: 'YadioError',
-                  status: 502,
-                })
-              ),
-            ParseError: () =>
+            SchemaError: () =>
               Effect.fail(
                 new GetExchangeRateError({
                   reason: 'YadioError',
@@ -80,4 +71,4 @@ export function api({
     }
   })
 }
-export type BtcExchangeRateApi = Effect.Effect.Success<ReturnType<typeof api>>
+export type BtcExchangeRateApi = Effect.Success<ReturnType<typeof api>>

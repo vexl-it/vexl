@@ -1,19 +1,19 @@
-import {
-  HttpApiClient,
-  HttpClient,
-  HttpClientRequest,
-  HttpClientResponse,
-  type Headers,
-  type HttpApi,
-  type HttpApiGroup,
-  type HttpApiMiddleware,
-} from '@effect/platform'
 import {type CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {type PlatformName} from '@vexl-next/domain/src/utility/PlatformName'
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {type VersionString} from '@vexl-next/domain/src/utility/VersionString.brand'
 import {Effect, Option, Schema} from 'effect'
-import {type Simplify} from 'effect/Types'
+import {
+  HttpClient,
+  HttpClientRequest,
+  HttpClientResponse,
+  type Headers,
+} from 'effect/unstable/http'
+import {
+  HttpApiClient,
+  type HttpApi,
+  type HttpApiGroup,
+} from 'effect/unstable/httpapi'
 import {type ServiceUrl} from './ServiceUrl.brand'
 import {
   CommonHeaders,
@@ -63,11 +63,9 @@ function stripSensitiveUrl(url: string | undefined): string | undefined {
 
 export interface ClientProps<
   ApiId extends string,
-  Groups extends HttpApiGroup.HttpApiGroup.Any,
-  ApiError,
-  ApiR,
+  Groups extends HttpApiGroup.Constraint,
 > {
-  api: HttpApi.HttpApi<ApiId, Groups, ApiError, ApiR>
+  api: HttpApi.HttpApi<ApiId, Groups>
   platform: PlatformName
   clientVersion: VersionCode
   clientSemver: VersionString
@@ -118,7 +116,6 @@ const makeClient =
           })
         )
       }),
-
       HttpClient.transformResponse(
         Effect.map(
           HttpClientResponse.matchStatus({
@@ -236,9 +233,7 @@ const makeClient =
 
 export function createClientInstance<
   ApiId extends string,
-  Groups extends HttpApiGroup.HttpApiGroup.Any,
-  ApiError,
-  ApiR,
+  Groups extends HttpApiGroup.Constraint,
 >({
   api,
   platform,
@@ -252,13 +247,10 @@ export function createClientInstance<
   deviceModel,
   osVersion,
   prefix,
-}: ClientProps<ApiId, Groups, ApiError, ApiR>): Effect.Effect<
-  Simplify<HttpApiClient.Client<Groups, ApiError, never>>,
+}: ClientProps<ApiId, Groups>): Effect.Effect<
+  HttpApiClient.Client<Groups>,
   never,
-  | HttpApiMiddleware.HttpApiMiddleware.Without<
-      ApiR | HttpApiGroup.HttpApiGroup.ClientContext<Groups>
-    >
-  | HttpClient.HttpClient
+  HttpApiGroup.MiddlewareClient<Groups> | HttpClient.HttpClient
 > {
   const vexlAppMetaHeader: VexlAppMetaHeader = {
     platform,
@@ -267,9 +259,9 @@ export function createClientInstance<
     appSource,
     language,
     isDeveloper,
-    deviceModel: Option.fromNullable(deviceModel),
-    osVersion: Option.fromNullable(osVersion),
-    prefix: Option.fromNullable(prefix),
+    deviceModel: Option.fromNullishOr(deviceModel),
+    osVersion: Option.fromNullishOr(osVersion),
+    prefix: Option.fromNullishOr(prefix),
   }
 
   return HttpApiClient.make(api, {

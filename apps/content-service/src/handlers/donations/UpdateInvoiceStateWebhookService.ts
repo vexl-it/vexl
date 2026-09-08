@@ -24,29 +24,28 @@ export interface UpdateInvoiceStateWebhookOperations {
   }) => Effect.Effect<InvoiceStatusType, UnexpectedServerError | NotFoundError>
 }
 
-export class UpdateInvoiceStateWebhookService extends Context.Tag(
-  'UpdateInvoiceStateWebhookService'
-)<UpdateInvoiceStateWebhookService, UpdateInvoiceStateWebhookOperations>() {
+export class UpdateInvoiceStateWebhookService extends Context.Service<
+  UpdateInvoiceStateWebhookService,
+  UpdateInvoiceStateWebhookOperations
+>()('UpdateInvoiceStateWebhookService') {
   static readonly Live = Layer.effect(
     UpdateInvoiceStateWebhookService,
-    Effect.gen(function* (_) {
-      const redis = yield* _(RedisService)
+    Effect.gen(function* () {
+      const redis = yield* RedisService
 
       const toReturn: UpdateInvoiceStateWebhookOperations = {
         createOrUpdateInvoiceState: ({invoiceId, type}) =>
-          Effect.gen(function* (_) {
+          Effect.gen(function* () {
             const invoiceRecordKey = createInvoiceRecordKey(invoiceId)
             const expiresAt = Schema.decodeSync(UnixMilliseconds)(
               DateTime.now().plus({days: 1}).toMillis()
             )
 
-            yield* _(
-              redis.set(InvoiceStatusType)(invoiceRecordKey, type, {
-                expiresAt,
-              })
-            )
+            yield* redis.set(InvoiceStatusType)(invoiceRecordKey, type, {
+              expiresAt,
+            })
           }).pipe(
-            Effect.catchAll((e) =>
+            Effect.catch((e) =>
               Effect.fail(
                 new UnexpectedServerError({
                   status: 500,
@@ -57,19 +56,18 @@ export class UpdateInvoiceStateWebhookService extends Context.Tag(
             )
           ),
         getInvoiceStatusType: ({invoiceId}) =>
-          Effect.gen(function* (_) {
+          Effect.gen(function* () {
             const invoiceRecordKey = createInvoiceRecordKey(invoiceId)
-            const invoiceState = yield* _(
-              redis.get(InvoiceStatusType)(invoiceRecordKey)
-            )
+            const invoiceState =
+              yield* redis.get(InvoiceStatusType)(invoiceRecordKey)
 
             return invoiceState
           }).pipe(
-            Effect.catchAll(
+            Effect.catch(
               (
                 e
               ): Effect.Effect<never, UnexpectedServerError | NotFoundError> =>
-                e._tag === 'NoSuchElementException'
+                e._tag === 'NoSuchElementError'
                   ? new NotFoundError({
                       status: 404,
                       message:

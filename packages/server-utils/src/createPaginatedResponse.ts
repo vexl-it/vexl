@@ -9,7 +9,7 @@ export const FetchCommonConnectionsNextPageToken = Schema.Struct({
   lastUserContactId: Schema.Int,
 })
 
-function createPaginatedResponse<R, E, S extends Schema.Schema.Any>({
+function createPaginatedResponse<R, E, S extends Schema.Constraint>({
   dbEffectToRun,
   limit,
   nextPageTokenSchema,
@@ -21,14 +21,14 @@ function createPaginatedResponse<R, E, S extends Schema.Schema.Any>({
     decodedNextPageToken,
     limit,
   }: {
-    decodedNextPageToken: Schema.Schema.Type<S>
+    decodedNextPageToken: S['Type']
     limit: number
   }) => Effect.Effect<readonly R[], E>
   limit: number
   nextPageTokenSchema: S
   nextPageToken: string | undefined
-  defaultNextPageToken: Schema.Schema.Type<S>
-  createNextPageToken: (lastItem: R) => Schema.Schema.Type<S>
+  defaultNextPageToken: S['Type']
+  createNextPageToken: (lastItem: R) => S['Type']
 }): Effect.Effect<
   {
     nextPageToken: string | null
@@ -37,9 +37,9 @@ function createPaginatedResponse<R, E, S extends Schema.Schema.Any>({
     items: readonly R[]
   },
   E | InvalidNextPageTokenError,
-  Schema.Schema.Context<S>
+  S['DecodingServices'] | S['EncodingServices']
 > {
-  return Effect.gen(function* (_) {
+  return Effect.gen(function* () {
     if (limit <= 0) {
       return {
         nextPageToken: null,
@@ -51,13 +51,11 @@ function createPaginatedResponse<R, E, S extends Schema.Schema.Any>({
 
     const increasedLimit = limit + 1
     const decodedNextPageToken = nextPageToken
-      ? yield* _(
-          base64UrlStringToDecoded({
-            base64UrlString: nextPageToken,
-            decodeSchema: nextPageTokenSchema,
-          })
-        ).pipe(
-          Effect.catchTag('ParseError', (e) =>
+      ? yield* base64UrlStringToDecoded({
+          base64UrlString: nextPageToken,
+          decodeSchema: nextPageTokenSchema,
+        }).pipe(
+          Effect.catchTag('SchemaError', (e) =>
             Effect.fail(
               new InvalidNextPageTokenError({
                 cause: e,
@@ -67,23 +65,19 @@ function createPaginatedResponse<R, E, S extends Schema.Schema.Any>({
         )
       : defaultNextPageToken
 
-    const data = yield* _(
-      dbEffectToRun({
-        limit: increasedLimit,
-        decodedNextPageToken,
-      })
-    )
+    const data = yield* dbEffectToRun({
+      limit: increasedLimit,
+      decodedNextPageToken,
+    })
     const isThereNextPage = data.length === increasedLimit
     const dataToReturn = Array.take(limit)(data)
     const lastElementOfThisPage = Array.last(dataToReturn)
     const newNextPageToken = Option.isSome(lastElementOfThisPage)
-      ? yield* _(
-          objectToBase64UrlEncoded({
-            object: createNextPageToken(lastElementOfThisPage.value),
-            schema: nextPageTokenSchema,
-          })
-        ).pipe(
-          Effect.catchTag('ParseError', (e) =>
+      ? yield* objectToBase64UrlEncoded({
+          object: createNextPageToken(lastElementOfThisPage.value),
+          schema: nextPageTokenSchema,
+        }).pipe(
+          Effect.catchTag('SchemaError', (e) =>
             Effect.fail(
               new InvalidNextPageTokenError({
                 cause: e,

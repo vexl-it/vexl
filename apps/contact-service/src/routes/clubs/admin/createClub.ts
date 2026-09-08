@@ -1,37 +1,35 @@
-import {HttpApiBuilder} from '@effect/platform/index'
 import {HEADER_ADMIN_TOKEN} from '@vexl-next/rest-api/src/constants'
 import {ClubAlreadyExistsError} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {makeHttpApiHandler} from '@vexl-next/server-utils/src/makeHttpApiHandler'
 import {Effect, Option} from 'effect'
 import {ClubsDbService} from '../../../db/ClubsDbService'
 import {validateAdminToken} from '../utils/validateAdminToken'
 
-export const createClub = HttpApiBuilder.handler(
+export const createClub = makeHttpApiHandler(
   ContactApiSpecification,
   'ClubsAdmin',
   'createClub',
   (req) =>
-    Effect.gen(function* (_) {
-      yield* _(validateAdminToken(req.headers[HEADER_ADMIN_TOKEN]))
+    Effect.gen(function* () {
+      yield* validateAdminToken(req.headers[HEADER_ADMIN_TOKEN])
 
-      const clubsDb = yield* _(ClubsDbService)
+      const clubsDb = yield* ClubsDbService
 
-      const existingClub = yield* _(
-        clubsDb.findClubByUuid({uuid: req.payload.club.uuid})
-      )
+      const existingClub = yield* clubsDb.findClubByUuid({
+        uuid: req.payload.club.uuid,
+      })
       if (Option.isSome(existingClub)) {
-        return yield* _(new ClubAlreadyExistsError())
+        return yield* new ClubAlreadyExistsError()
       }
 
-      const createdClub = yield* _(
-        clubsDb.insertClub({
-          ...req.payload.club,
-          madeInactiveAt: Option.none(),
-          madeInactiveReason: Option.none(),
-          report: 0,
-        })
-      )
+      const createdClub = yield* clubsDb.insertClub({
+        ...req.payload.club,
+        madeInactiveAt: Option.none(),
+        madeInactiveReason: Option.none(),
+        report: 0,
+      })
       return {
         clubInfo: createdClub,
       }

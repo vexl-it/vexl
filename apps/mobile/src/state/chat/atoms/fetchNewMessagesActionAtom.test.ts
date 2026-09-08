@@ -120,12 +120,15 @@ describe('fetchMessagesForAllInboxesAtom', () => {
     let resolvePresentedNotifications:
       | ((notifications: Notification[]) => void)
       | undefined
-    getPresentedNotificationsAsyncMock.mockImplementation(
-      async () =>
-        await new Promise<Notification[]>((resolve) => {
-          resolvePresentedNotifications = resolve
-        })
-    )
+    const notificationsRequested = new Promise<void>((resolve) => {
+      getPresentedNotificationsAsyncMock.mockImplementation(
+        async () =>
+          await new Promise<Notification[]>((_resolve) => {
+            resolvePresentedNotifications = _resolve
+            resolve()
+          })
+      )
+    })
 
     let reachedDurableBoundary = false
     const fetchAndFlush = Effect.runPromise(
@@ -135,7 +138,7 @@ describe('fetchMessagesForAllInboxesAtom', () => {
       reachedDurableBoundary = true
     })
 
-    await new Promise((resolve) => setTimeout(resolve, 0))
+    await notificationsRequested
 
     expect(getPresentedNotificationsAsyncMock).toHaveBeenCalledTimes(1)
     expect(reachedDurableBoundary).toBe(false)

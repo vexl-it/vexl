@@ -1,4 +1,3 @@
-import {HttpApiBuilder} from '@effect/platform/index'
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {type UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {
@@ -15,6 +14,7 @@ import {
 } from '@vexl-next/server-utils/src/RedisService'
 import {type ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {makeHttpApiHandler} from '@vexl-next/server-utils/src/makeHttpApiHandler'
 import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {
   commonMetricAttributesFromHeaders,
@@ -22,7 +22,7 @@ import {
 } from '@vexl-next/server-utils/src/metrics/commonMetricAttributesFromHeaders'
 import {validateChallengeInBody} from '@vexl-next/server-utils/src/services/challenge/utils/validateChallengeInBody'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
-import {Array, Effect, Option, pipe, type ConfigError} from 'effect'
+import {Array, Effect, Option, pipe, type Config} from 'effect'
 import {InboxDbService} from '../../db/InboxDbService'
 import {MessagesDbService} from '../../db/MessagesDbService'
 import {encryptPublicKey, hashPublicKey} from '../../db/domain'
@@ -43,7 +43,7 @@ const sendMessage = (
   SendMessageResponse,
   | ReceiverInboxDoesNotExistError
   | UnexpectedServerError
-  | ConfigError.ConfigError
+  | Config.ConfigError
   | RedisLockError
   | ForbiddenMessageTyperror,
   | MessagesDbService
@@ -52,24 +52,22 @@ const sendMessage = (
   | RedisService
   | MetricsClientService
 > =>
-  Effect.gen(function* (_) {
-    const receiverInbox = yield* _(
-      findAndEnsureReceiverInbox(message.receiverPublicKey)
+  Effect.gen(function* () {
+    const receiverInbox = yield* findAndEnsureReceiverInbox(
+      message.receiverPublicKey
     )
 
     if (forbiddenMessageTypes.includes(message.messageType)) {
-      return yield* _(Effect.fail(new ForbiddenMessageTyperror()))
+      return yield* Effect.fail(new ForbiddenMessageTyperror())
     }
 
-    const messagesDb = yield* _(MessagesDbService)
-    const messageRecord = yield* _(
-      messagesDb.insertMessageForInbox({
-        message: message.message,
-        senderPublicKey: yield* _(encryptPublicKey(senderPublicKey)),
-        inboxId: receiverInbox.id,
-        type: message.messageType,
-      })
-    )
+    const messagesDb = yield* MessagesDbService
+    const messageRecord = yield* messagesDb.insertMessageForInbox({
+      message: message.message,
+      senderPublicKey: yield* encryptPublicKey(senderPublicKey),
+      inboxId: receiverInbox.id,
+      type: message.messageType,
+    })
 
     return {
       ...messageRecordToServerMessage({messageRecord, senderPublicKey}),
@@ -77,7 +75,7 @@ const sendMessage = (
     } satisfies SendMessageResponse
   }).pipe(
     withInboxActionRedisLock(message.receiverPublicKey),
-    Effect.zipLeft(
+    Effect.tap(
       Effect.all([
         reportMessageSent(1, commonMetricAttributes),
         reportRequestMetricsByMessageType(
@@ -88,7 +86,7 @@ const sendMessage = (
     )
   ) // TODO lock two inboxes
 
-export const sendMessages = HttpApiBuilder.handler(
+export const sendMessages = makeHttpApiHandler(
   ChatApiSpecification,
   'Messages',
   'sendMessages',
@@ -96,29 +94,27 @@ export const sendMessages = HttpApiBuilder.handler(
     pipe(
       req.payload.data,
       Array.map((oneMessage) =>
-        Effect.gen(function* (_) {
-          yield* _(
-            validateChallengeInBody({
-              publicKey: oneMessage.senderPublicKey,
-              publicKeyV2: Option.none(),
-              ...oneMessage,
-            })
-          )
+        Effect.gen(function* () {
+          yield* validateChallengeInBody({
+            publicKey: oneMessage.senderPublicKey,
+            publicKeyV2: Option.none(),
+            ...oneMessage,
+          })
 
-          const inboxDb = yield* _(InboxDbService)
-          const hashedSenderKey = yield* _(
-            hashPublicKey(oneMessage.senderPublicKey)
+          const inboxDb = yield* InboxDbService
+          const hashedSenderKey = yield* hashPublicKey(
+            oneMessage.senderPublicKey
           )
-          yield* _(
+          yield* pipe(
             inboxDb.findInboxByPublicKey(hashedSenderKey),
-            Effect.flatten,
+            Effect.flatMap(Effect.fromOption),
             Effect.catchTag(
-              'NoSuchElementException',
+              'NoSuchElementError',
               () => new SenderInboxDoesNotExistError()
             )
           )
 
-          const result = yield* _(
+          const result = yield* pipe(
             oneMessage.messages,
             Array.map((message) =>
               sendMessage(

@@ -9,7 +9,7 @@ import {
   UserLoginOnDifferentDeviceNotificationData,
   VexlProductNotificationData,
 } from '@vexl-next/domain/src/general/notifications'
-import {Schema} from 'effect/index'
+import {Schema} from 'effect'
 
 export class ErrorParsingNotification extends Schema.TaggedError<ErrorParsingNotification>(
   'ErrorParsingNotification'
@@ -22,14 +22,11 @@ export class ErrorLoadingSession extends Schema.TaggedError<ErrorLoadingSession>
 )('ErrorLoadingSession', {}) {}
 
 export const RawNotificationData = Schema.Struct({
-  data: Schema.Record({
-    key: Schema.String,
-    value: Schema.Unknown,
-  }),
+  data: Schema.Record(Schema.String, Schema.Unknown),
 })
 export type RawNotificationData = typeof RawNotificationData.Type
 
-export const AcceptedNotificationTypes = Schema.Union(
+export const AcceptedNotificationTypes = Schema.Union([
   NewChatMessageNoticeNotificationData,
   NewSocialNetworkConnectionNotificationData,
   NewClubConnectionNotificationData,
@@ -38,6 +35,6 @@ export const AcceptedNotificationTypes = Schema.Union(
   UserLoginOnDifferentDeviceNotificationData,
   UserInactivityNotificationData,
   VexlProductNotificationData,
-  DebugDummyNotificationData
-)
+  DebugDummyNotificationData,
+])
 export type AcceptedNotificationTypes = typeof AcceptedNotificationTypes.Type

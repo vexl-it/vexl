@@ -1,4 +1,4 @@
-import {Array, Option, Schema, pipe} from 'effect/index'
+import {Array, Option, Schema, pipe} from 'effect'
 import {atom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {Platform} from 'react-native'
@@ -52,7 +52,7 @@ export const importNewContactsSuggestionDismissedStorageAtom =
 
 export const shouldShowCreateOfferInMarketplaceSuggestionAtom = atom((get) => {
   return (
-    Array.isNonEmptyArray(
+    Array.isArrayNonEmpty(
       get(filteredOffersIncludingLocationFilterAtomsAtom)
     ) &&
     !get(areThereAnyMyOffersAtom) &&
@@ -63,7 +63,7 @@ export const shouldShowCreateOfferInMarketplaceSuggestionAtom = atom((get) => {
 export const shouldShowImportContactsInMarketplaceSuggestionAtom = atom(
   (get) => {
     return (
-      Array.isNonEmptyArray(
+      Array.isArrayNonEmpty(
         get(filteredOffersIncludingLocationFilterAtomsAtom)
       ) &&
       get(reachNumberAtom) < REACH_NUMBER_THRESHOLD &&
@@ -90,7 +90,7 @@ export const shouldShowImportNewContactsInMarketplaceSuggestionAtom = atom(
     )
 
     return (
-      Array.isNonEmptyArray(
+      Array.isArrayNonEmpty(
         get(filteredOffersIncludingLocationFilterAtomsAtom)
       ) && hasUndismissedNewPhoneContacts
     )
@@ -102,7 +102,7 @@ export const shouldShowEnableNotificationsInMarketplaceSuggestionAtom = atom(
     const notificationsEnabled = get(notificationsEnabledAtom)
 
     return (
-      Array.isNonEmptyArray(
+      Array.isArrayNonEmpty(
         get(filteredOffersIncludingLocationFilterAtomsAtom)
       ) &&
       Option.isSome(notificationsEnabled) &&
@@ -118,7 +118,7 @@ export const shouldShowEnableBackgroundRefreshInMarketplaceSuggestionAtom =
 
     return (
       Platform.OS === 'ios' &&
-      Array.isNonEmptyArray(
+      Array.isArrayNonEmpty(
         get(filteredOffersIncludingLocationFilterAtomsAtom)
       ) &&
       Option.isSome(notificationsEnabled) &&
@@ -137,7 +137,7 @@ const missingProductCategoriesSuggestionDismissedThisSessionAtom =
 
 export const shouldShowMissingProductCategoriesInMyOffersSuggestionAtom = atom(
   (get) =>
-    Array.isNonEmptyArray(get(myProductOffersMissingCategoryAtom)) &&
+    Array.isArrayNonEmpty(get(myProductOffersMissingCategoryAtom)) &&
     !get(missingProductCategoriesSuggestionDismissedThisSessionAtom)
 )
 

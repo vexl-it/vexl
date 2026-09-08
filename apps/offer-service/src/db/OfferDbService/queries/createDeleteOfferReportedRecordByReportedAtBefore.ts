@@ -3,8 +3,8 @@ import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {Effect} from 'effect'
 
 export const createDeleteOfferReportedRecordByReportedAtBefore = Effect.gen(
-  function* (_) {
-    const sql = yield* _(PgClient.PgClient)
+  function* () {
+    const sql = yield* PgClient.PgClient
 
     return (deleteOlderThanDays: number) =>
       sql`

@@ -7,7 +7,7 @@ import {
   useTheme,
   type TypographyProps,
 } from '@vexl-next/ui'
-import {Option} from 'effect/index'
+import {Option} from 'effect'
 import {
   atom,
   useAtomValue,

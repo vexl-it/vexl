@@ -32,7 +32,7 @@ export function useSingleOffer(
   const foundOffer = useAtomValue(
     useMemo(() => singleOfferAtom(offerId), [offerId])
   )
-  return Option.fromNullable(foundOffer)
+  return Option.fromNullishOr(foundOffer)
 }
 
 export function useOfferForChatOrigin(

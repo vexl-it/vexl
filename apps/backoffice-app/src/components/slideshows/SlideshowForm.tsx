@@ -8,7 +8,7 @@ import {
   type SlideshowSlide,
 } from '@/src/services/slideshows/domain'
 import {uploadToPresignedUrl} from '@/src/services/uploadToPresignedUrl'
-import {Array, Either, pipe, Schema} from 'effect'
+import {Array, pipe, Result, Schema} from 'effect'
 import {useRouter} from 'next/navigation'
 import {useCallback, useState} from 'react'
 
@@ -315,9 +315,9 @@ export function SlideshowForm({
       return
     }
 
-    const decodedSlides = Schema.decodeUnknownEither(SlideshowSlides)(slides)
+    const decodedSlides = Schema.decodeUnknownResult(SlideshowSlides)(slides)
 
-    if (Either.isLeft(decodedSlides)) {
+    if (Result.isFailure(decodedSlides)) {
       setError('Slides contain invalid data')
       return
     }
@@ -330,7 +330,7 @@ export function SlideshowForm({
         name: name.trim(),
         publicSlug: normalizedPublicSlug || null,
         isEnabled,
-        slides: decodedSlides.right,
+        slides: decodedSlides.success,
       })
     } catch (submitError) {
       setError(

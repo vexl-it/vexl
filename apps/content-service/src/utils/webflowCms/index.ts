@@ -1,6 +1,6 @@
 import axios from 'axios'
 import {Context, Effect, Layer, Schema} from 'effect'
-import {type ParseError} from 'effect/ParseResult'
+import {type SchemaError} from 'effect/Schema'
 import {
   webflowBlogCollectionIdConfig,
   webflowEventsCollectionIdConfig,
@@ -17,15 +17,15 @@ import {
 export interface WebflowCmsOperations {
   fetchEvents: () => Effect.Effect<
     WebflowEventsResponse,
-    WebflowFetchError | ParseError
+    WebflowFetchError | SchemaError
   >
   fetchSpeakers: () => Effect.Effect<
     WebflowSpeakersResponse,
-    WebflowFetchError | ParseError
+    WebflowFetchError | SchemaError
   >
   fetchBlogs: () => Effect.Effect<
     WebflowBlogsResponse,
-    WebflowFetchError | ParseError
+    WebflowFetchError | SchemaError
   >
 }
 
@@ -54,40 +54,41 @@ function listCollectionItems({
   }).pipe(Effect.map((one) => one.data))
 }
 
-export class WebflowCmsService extends Context.Tag('WebflowCmsService')<
+export class WebflowCmsService extends Context.Service<
   WebflowCmsService,
   WebflowCmsOperations
->() {
+>()('WebflowCmsService') {
   static readonly Live = Layer.effect(
     WebflowCmsService,
-    Effect.gen(function* (_) {
-      const webflowToken = yield* _(webflowTokenConfig)
-      const webflowEventsCollectionId = yield* _(
-        webflowEventsCollectionIdConfig
-      )
-      const webflowSpeakersCollectionId = yield* _(
-        webflowSpeakersCollectionIdConfig
-      )
-      const webflowBlogCollectionId = yield* _(webflowBlogCollectionIdConfig)
+    Effect.gen(function* () {
+      const webflowToken = yield* webflowTokenConfig
+      const webflowEventsCollectionId = yield* webflowEventsCollectionIdConfig
+      const webflowSpeakersCollectionId =
+        yield* webflowSpeakersCollectionIdConfig
+      const webflowBlogCollectionId = yield* webflowBlogCollectionIdConfig
 
       const toReturn = {
         fetchEvents: () =>
           listCollectionItems({
             collectionId: webflowEventsCollectionId,
             token: webflowToken,
-          }).pipe(Effect.flatMap(Schema.decodeUnknown(WebflowEventsResponse))),
+          }).pipe(
+            Effect.flatMap(Schema.decodeUnknownEffect(WebflowEventsResponse))
+          ),
         fetchSpeakers: () =>
           listCollectionItems({
             collectionId: webflowSpeakersCollectionId,
             token: webflowToken,
           }).pipe(
-            Effect.flatMap(Schema.decodeUnknown(WebflowSpeakersResponse))
+            Effect.flatMap(Schema.decodeUnknownEffect(WebflowSpeakersResponse))
           ),
         fetchBlogs: () =>
           listCollectionItems({
             collectionId: webflowBlogCollectionId,
             token: webflowToken,
-          }).pipe(Effect.flatMap(Schema.decodeUnknown(WebflowBlogsResponse))),
+          }).pipe(
+            Effect.flatMap(Schema.decodeUnknownEffect(WebflowBlogsResponse))
+          ),
       } satisfies WebflowCmsOperations
 
       return toReturn

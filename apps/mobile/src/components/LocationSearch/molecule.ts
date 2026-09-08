@@ -2,9 +2,9 @@ import {
   GetLocationSuggestionsResponse,
   type LocationSuggestion,
 } from '@vexl-next/rest-api/src/services/location/contracts'
-import {createScope, molecule, use} from 'bunshi/dist/react'
+import {createScope, molecule, use} from 'bunshi/react'
 import {randomUUID} from 'crypto'
-import {Effect, Schema} from 'effect/index'
+import {Effect, Schema} from 'effect'
 import {atom} from 'jotai'
 import {splitAtom} from 'jotai/utils'
 import {apiAtom} from '../../api'
@@ -13,7 +13,7 @@ import {currentAppLanguageAtom} from '../../utils/preferences'
 import {reportLocationServiceError} from '../../utils/reportLocationServiceError'
 import {transientRequestRetryPolicy} from '../../utils/transientRequestRetryPolicy'
 
-export const LocationSessionId = Schema.UUID.pipe(
+export const LocationSessionId = Schema.String.check(Schema.isUUID()).pipe(
   Schema.brand('LocationSessionId')
 )
 export type LocationSessionId = typeof LocationSessionId.Type

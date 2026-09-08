@@ -1,7 +1,8 @@
-import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
+import {NumberFromString} from '@vexl-next/generic-utils/src/effect-helpers/NumberFromString'
 import {Effect, flow, Schema} from 'effect'
+import {SqlSchema} from 'effect/unstable/sql'
 import {ClubRecordId} from '../../ClubsDbService/domain'
 
 export const CountClubMemebersParams = Schema.Struct({
@@ -9,13 +10,13 @@ export const CountClubMemebersParams = Schema.Struct({
 })
 export type CountClubMemebersParams = typeof CountClubMemebersParams.Type
 
-export const createCountClubMemebers = Effect.gen(function* (_) {
-  const sql = yield* _(PgClient.PgClient)
+export const createCountClubMemebers = Effect.gen(function* () {
+  const sql = yield* PgClient.PgClient
 
-  const query = SqlSchema.single({
+  const query = SqlSchema.findOne({
     Request: CountClubMemebersParams,
     Result: Schema.Struct({
-      countResult: Schema.NumberFromString,
+      countResult: NumberFromString,
     }),
     execute: (params) => sql`
       SELECT

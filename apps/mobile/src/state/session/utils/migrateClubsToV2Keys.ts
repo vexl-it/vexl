@@ -1,6 +1,6 @@
 import {generateV2KeyPair} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {type ContactApi} from '@vexl-next/rest-api/src/services/contact'
-import {Array, Data, Effect, Either, pipe, Struct} from 'effect/index'
+import {Array, Data, Effect, pipe, Result} from 'effect'
 import {toEntries} from 'effect/Record'
 import {getDefaultStore} from 'jotai'
 import {type SessionV2} from '../../../brands/Session.brand'
@@ -15,14 +15,14 @@ export const migrateClubsToV2Keys = (
   session: SessionV2,
   contactApi: ContactApi
 ): Effect.Effect<boolean> =>
-  Effect.gen(function* (_) {
+  Effect.gen(function* () {
     const existingClubsInSession = getDefaultStore().get(
       oldClubsKeyHolderStorageAtom
     )
 
     const clubUuids = toEntries(existingClubsInSession.data)
 
-    if (!Array.isNonEmptyArray(clubUuids)) {
+    if (!Array.isArrayNonEmpty(clubUuids)) {
       // No clubs to migrate, we can exit early
       return true
     }
@@ -30,15 +30,13 @@ export const migrateClubsToV2Keys = (
     const migratedClubs = yield* pipe(
       clubUuids,
       Array.map(([clubUuid, oldKeypair]) =>
-        Effect.gen(function* (_) {
-          const keypairV2 = yield* _(generateV2KeyPair())
-          yield* _(
-            contactApi.setPublicKeyV2({
-              clubUuid,
-              keyPair: oldKeypair,
-              keyPairV2: keypairV2,
-            })
-          )
+        Effect.gen(function* () {
+          const keypairV2 = yield* generateV2KeyPair()
+          yield* contactApi.setPublicKeyV2({
+            clubUuid,
+            keyPair: oldKeypair,
+            keyPairV2: keypairV2,
+          })
           getDefaultStore().set(clubsToKeyHolderAtom, (prev) => ({
             ...prev,
             [clubUuid]: {
@@ -46,11 +44,6 @@ export const migrateClubsToV2Keys = (
               oldKeyPair: oldKeypair,
             },
           }))
-
-          getDefaultStore().set(
-            oldClubsKeyHolderStorageAtom,
-            Struct.omit(clubUuid)
-          )
         }).pipe(
           Effect.tapError((e) => reportErrorE('error', e)),
           Effect.tapError((e) =>
@@ -65,7 +58,7 @@ export const migrateClubsToV2Keys = (
                 message: `Error migrating club ${clubUuid} to V2 keys`,
               })
           ),
-          Effect.either
+          Effect.result
         )
       ),
       Effect.all
@@ -73,24 +66,22 @@ export const migrateClubsToV2Keys = (
 
     const migrationsWithErrors = pipe(
       migratedClubs,
-      Array.filter(Either.isLeft)
+      Array.filter(Result.isFailure)
     )
 
-    if (Array.isNonEmptyArray(migrationsWithErrors)) {
-      yield* _(
-        reportErrorE(
-          'warn',
-          new Error(
-            'Session upgraded with partial club migration failures. Login is not blocked.'
+    if (Array.isArrayNonEmpty(migrationsWithErrors)) {
+      yield* reportErrorE(
+        'warn',
+        new Error(
+          'Session upgraded with partial club migration failures. Login is not blocked.'
+        ),
+        {
+          failedClubMigrations: Array.map(
+            migrationsWithErrors,
+            (migration) => migration.failure.message
           ),
-          {
-            failedClubMigrations: Array.map(
-              migrationsWithErrors,
-              (migration) => migration.left.message
-            ),
-            failedClubMigrationsCount: migrationsWithErrors.length,
-          }
-        )
+          failedClubMigrationsCount: migrationsWithErrors.length,
+        }
       )
       return false
     }

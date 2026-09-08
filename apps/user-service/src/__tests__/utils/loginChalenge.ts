@@ -1,12 +1,12 @@
 import {signLoginChallenge} from '@vexl-next/resources-utils/src/loginChallenge'
-import {Effect} from 'effect/index'
+import {Effect} from 'effect'
 import {NodeTestingApp} from './NodeTestingApp'
 
-export const generateAndSignChallenge = Effect.gen(function* (_) {
-  const client = yield* _(NodeTestingApp)
+export const generateAndSignChallenge = Effect.gen(function* () {
+  const client = yield* NodeTestingApp
 
-  const loginChallenge = yield* _(client.generateLoginChallenge({}))
-  const clientSignature = yield* _(signLoginChallenge(loginChallenge.challenge))
+  const loginChallenge = yield* client.generateLoginChallenge({})
+  const clientSignature = yield* signLoginChallenge(loginChallenge.challenge)
 
   return {
     clientSignature,

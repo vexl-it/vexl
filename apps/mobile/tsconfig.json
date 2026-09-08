@@ -6,7 +6,7 @@
     "jsx": "react-jsx",
     "lib": ["DOM", "ESNext"],
     "types": ["node", "jest"],
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "noEmit": true,
     "resolveJsonModule": true,
     "target": "ESNext",

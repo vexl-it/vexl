@@ -1,4 +1,3 @@
-import {SqlClient} from '@effect/sql'
 import {
   generatePrivateKey,
   type PublicKeyPemBase64,
@@ -11,7 +10,8 @@ import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
-import {Effect, Schema} from 'effect'
+import {Effect, pipe, Schema} from 'effect'
+import {SqlClient} from 'effect/unstable/sql'
 import {hashPublicKey} from '../../db/domain'
 import {addChallengeForKey} from '../utils/addChallengeForKey'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
@@ -28,13 +28,11 @@ let addChallengeForUser1: ReturnType<typeof addChallengeForKey>
 
 beforeAll(async () => {
   await runPromiseInMockedEnvironment(
-    Effect.gen(function* (_) {
-      user1authHeaders = yield* _(
-        createDummyAuthHeadersForUser({
-          phoneNumber: user1Number,
-          publicKey: user1Credentials.publicKeyPemBase64,
-        })
-      )
+    Effect.gen(function* () {
+      user1authHeaders = yield* createDummyAuthHeadersForUser({
+        phoneNumber: user1Number,
+        publicKey: user1Credentials.publicKeyPemBase64,
+      })
 
       addChallengeForUser1 = addChallengeForKey(
         user1Credentials,
@@ -47,27 +45,27 @@ beforeAll(async () => {
 describe('Create inbox', () => {
   afterEach(async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const sql = yield* _(SqlClient.SqlClient)
-        yield* _(sql`DELETE FROM inbox`)
+      Effect.gen(function* () {
+        const sql = yield* SqlClient.SqlClient
+        yield* sql`DELETE FROM inbox`
       })
     )
   })
 
   it('Does not create inbox with invalid challenge', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
 
-        yield* _(setAuthHeaders(user1authHeaders))
-        const createResponse = yield* _(
+        yield* setAuthHeaders(user1authHeaders)
+        const createResponse = yield* pipe(
           client.Inboxes.createInbox({
-            payload: yield* _(addChallengeForUser1({}, true)),
+            payload: yield* addChallengeForUser1({}, true),
             headers: Schema.decodeSync(CommonHeaders)({
               'user-agent': 'Vexl/1 (1.0.0) ANDROID',
             }),
           }),
-          Effect.either
+          Effect.result
         )
         expectErrorResponse(InvalidChallengeError)(createResponse)
       })
@@ -76,28 +74,28 @@ describe('Create inbox', () => {
 
   it('Creates inbox', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
 
-        yield* _(setAuthHeaders(user1authHeaders))
-        const createResponse = yield* _(
+        yield* setAuthHeaders(user1authHeaders)
+        const createResponse = yield* pipe(
           client.Inboxes.createInbox({
-            payload: yield* _(addChallengeForUser1({})),
+            payload: yield* addChallengeForUser1({}),
             headers: Schema.decodeSync(CommonHeaders)({
               'user-agent': 'Vexl/1 (1.0.0) ANDROID',
             }),
           }),
-          Effect.either
+          Effect.result
         )
 
-        expect(createResponse._tag).toBe('Right')
+        expect(createResponse._tag).toBe('Success')
 
-        const hashedPublicKey = yield* _(
-          hashPublicKey(user1Credentials.publicKeyPemBase64)
+        const hashedPublicKey = yield* hashPublicKey(
+          user1Credentials.publicKeyPemBase64
         )
 
-        const sql = yield* _(SqlClient.SqlClient)
-        const data = yield* _(sql`
+        const sql = yield* SqlClient.SqlClient
+        const data = yield* sql`
           SELECT
             *
           FROM
@@ -106,7 +104,7 @@ describe('Create inbox', () => {
             public_key = ${hashedPublicKey}
             AND platform = 'ANDROID'
             AND client_version = 1
-        `)
+        `
 
         expect(data).toHaveLength(1)
       })
@@ -115,44 +113,44 @@ describe('Create inbox', () => {
 
   it('Does not fail when inbox already exists & updates metadata', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
 
-        yield* _(setAuthHeaders(user1authHeaders))
-        const createResponse = yield* _(
+        yield* setAuthHeaders(user1authHeaders)
+        const createResponse = yield* pipe(
           client.Inboxes.createInbox({
-            payload: yield* _(addChallengeForUser1({})),
+            payload: yield* addChallengeForUser1({}),
             headers: Schema.decodeSync(CommonHeaders)({
               'user-agent': 'Vexl/1 (1.0.0) ANDROID',
             }),
           }),
-          Effect.either
+          Effect.result
         )
-        expect(createResponse._tag).toBe('Right')
+        expect(createResponse._tag).toBe('Success')
 
-        const createResponse2 = yield* _(
+        const createResponse2 = yield* pipe(
           client.Inboxes.createInbox({
-            payload: yield* _(addChallengeForUser1({})),
+            payload: yield* addChallengeForUser1({}),
             headers: Schema.decodeSync(CommonHeaders)({
               'user-agent': 'Vexl/2 (1.0.0) IOS',
             }),
           }),
-          Effect.either
+          Effect.result
         )
-        expect(createResponse2._tag).toBe('Right')
+        expect(createResponse2._tag).toBe('Success')
 
-        const inboxHash = yield* _(
-          hashPublicKey(user1Credentials.publicKeyPemBase64)
+        const inboxHash = yield* hashPublicKey(
+          user1Credentials.publicKeyPemBase64
         )
-        const sql = yield* _(SqlClient.SqlClient)
-        const data = yield* _(sql`
+        const sql = yield* SqlClient.SqlClient
+        const data = yield* sql`
           SELECT
             *
           FROM
             inbox
           WHERE
             public_key = ${inboxHash}
-        `)
+        `
         expect(data[0].platform).toBe('IOS')
         expect(data[0].clientVersion).toBe(2)
       })

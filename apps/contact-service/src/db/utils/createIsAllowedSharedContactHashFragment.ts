@@ -1,6 +1,6 @@
 import {type PgClient} from '@effect/sql-pg/PgClient'
-import {type Fragment} from '@effect/sql/Statement'
 import {Array} from 'effect'
+import {type Fragment} from 'effect/unstable/sql/Statement'
 
 /**
  * Filters out "public" contact hashes - numbers imported by more than
@@ -75,7 +75,7 @@ export const createIsInAllowedSharedContactHashesFragment = ({
   publicImportCountThreshold: number
   sql: PgClient
 }): Fragment => {
-  if (!Array.isNonEmptyReadonlyArray(hashes)) return sql`1 = 0`
+  if (!Array.isReadonlyArrayNonEmpty(hashes)) return sql`1 = 0`
   if (publicImportCountThreshold === -1)
     return sql`${hashColumn} IN ${sql.in(hashes)}`
 

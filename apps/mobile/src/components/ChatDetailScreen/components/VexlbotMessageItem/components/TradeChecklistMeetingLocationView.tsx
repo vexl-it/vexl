@@ -1,7 +1,7 @@
 import Clipboard from '@react-native-clipboard/clipboard'
 import {useNavigation} from '@react-navigation/native'
 import {Button, Calendar, Copy, XStack, YStack} from '@vexl-next/ui'
-import {useMolecule} from 'bunshi/dist/react'
+import {useMolecule} from 'bunshi/react'
 import {Array as ArrayE, Option, pipe} from 'effect'
 import {useAtomValue, useSetAtom, useStore} from 'jotai'
 import React from 'react'

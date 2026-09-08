@@ -151,7 +151,7 @@ export function createOfferFormFieldActionAtoms({
     const location = get(locationAtom)
 
     if (
-      Array.isNonEmptyReadonlyArray(location) &&
+      Array.isReadonlyArrayNonEmpty(location) &&
       !pipe(
         locationState,
         Array.some((state) => state === 'IN_PERSON')
@@ -203,7 +203,7 @@ export function createOfferFormFieldActionAtoms({
     null,
     (get, set, category: ProductCategory) => {
       const currentFirst = pipe(
-        Option.fromNullable(get(productCategoriesAtom)),
+        Option.fromNullishOr(get(productCategoriesAtom)),
         Option.flatMap(Array.head)
       )
       if (Option.getOrUndefined(currentFirst) === category) {

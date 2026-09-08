@@ -19,7 +19,7 @@ export const validatePrivatePartsWhenSavingAll = ({
   void,
   MissingOwnerPrivatePartError | DuplicatedPublicKeyError
 > =>
-  Effect.gen(function* (_) {
+  Effect.gen(function* () {
     const keysArray = Array.map(
       privateParts,
       (privatePart) => privatePart.userPublicKey
@@ -28,12 +28,12 @@ export const validatePrivatePartsWhenSavingAll = ({
     const hasUserPublicKey = Array.contains(keysArray, ownersPublicKey)
 
     if (!hasUserPublicKey) {
-      return yield* _(new MissingOwnerPrivatePartError({status: 400}))
+      return yield* new MissingOwnerPrivatePartError({status: 400})
     }
 
     const uniqueLength = pipe(keysArray, Array.dedupe, Array.length)
     if (uniqueLength !== keysArray.length) {
-      return yield* _(new DuplicatedPublicKeyError({status: 400}))
+      return yield* new DuplicatedPublicKeyError({status: 400})
     }
 
     return Effect.void

@@ -1,4 +1,4 @@
-import {Schema} from 'effect/index'
+import {Schema} from 'effect'
 import {getCrypto} from '../getCrypto'
 import {normalizeCurveName, type Curve} from './Curve.brand'
 import ECConverter from './ECConverter'

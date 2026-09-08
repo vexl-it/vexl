@@ -3,12 +3,13 @@ import {ClubInfo} from '@vexl-next/domain/src/general/clubs'
 import {ClubDeactivatedNotificationData} from '@vexl-next/domain/src/general/notifications'
 import {VexlProductNotification} from '@vexl-next/domain/src/general/vexlProductNotification'
 import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {Schema} from 'effect/index'
+import {Effect, Schema} from 'effect'
 
 export const NotificationStatus = Schema.Struct({
-  isSeen: Schema.optionalWith(Schema.Boolean, {
-    default: () => true,
-  }),
+  isSeen: Schema.Boolean.pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): true => true)),
+    Schema.withConstructorDefault(Effect.sync((): true => true))
+  ),
   isCancelled: Schema.Boolean,
 })
 export type NotificationStatus = typeof NotificationStatus.Type
@@ -43,11 +44,11 @@ export const ClubDeactivationNotificationData = Schema.TaggedStruct(
 export type ClubDeactivationNotificationData =
   typeof ClubDeactivationNotificationData.Type
 
-export const NotificationCenterRecordData = Schema.Union(
+export const NotificationCenterRecordData = Schema.Union([
   VexlProductNotificationData,
   ClubAdmissionNotificationData,
-  ClubDeactivationNotificationData
-)
+  ClubDeactivationNotificationData,
+])
 export type NotificationCenterRecordData =
   typeof NotificationCenterRecordData.Type
 

@@ -11,7 +11,7 @@ import {
 import {IdNumeric} from '@vexl-next/domain/src/utility/IdNumeric'
 import {IsoDatetimeString} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {Schema} from 'effect'
+import {Effect, Schema} from 'effect'
 import {RequestBaseWithChallenge} from '../../challenges/contracts'
 import {NoContentResponse} from '../../NoContentResponse.brand'
 import {createPageResponse, PageRequestMeta} from '../../Pagination.brand'
@@ -20,7 +20,10 @@ import {CommaSeparatedDedupedStrings} from '../../utils'
 export class ReportOfferLimitReachedError extends Schema.TaggedError<ReportOfferLimitReachedError>(
   'ReportOfferLimitReachedError'
 )('ReportOfferLimitReachedError', {
-  status: Schema.optionalWith(Schema.Literal(429), {default: () => 429}),
+  status: Schema.Literal(429).pipe(
+    Schema.withDecodingDefaultType(Effect.sync((): 429 => 429)),
+    Schema.withConstructorDefault(Effect.sync((): 429 => 429))
+  ),
 }) {}
 
 export class MissingOwnerPrivatePartError extends Schema.TaggedError<MissingOwnerPrivatePartError>(
@@ -71,7 +74,7 @@ export type GetOffersForMeCreatedOrModifiedAfterPaginatedResponse =
   typeof GetOffersForMeCreatedOrModifiedAfterPaginatedResponse.Type
 
 export const ServerPrivatePart = Schema.Struct({
-  userPublicKey: Schema.Union(PublicKeyPemBase64, PublicKeyV2),
+  userPublicKey: Schema.Union([PublicKeyPemBase64, PublicKeyV2]),
   payloadPrivate: PrivatePayloadEncrypted,
 })
 export type ServerPrivatePart = Schema.Schema.Type<typeof ServerPrivatePart>
@@ -102,7 +105,7 @@ export type RefreshOfferResponse = typeof RefreshOfferResponse.Type
 
 export const DeleteOfferRequest = Schema.Struct({
   adminIds: CommaSeparatedDedupedStrings.pipe(
-    Schema.compose(Schema.Array(OfferAdminId))
+    Schema.decodeTo(Schema.Array(OfferAdminId))
   ),
 })
 export type DeleteOfferRequest = Schema.Schema.Type<typeof DeleteOfferRequest>
@@ -144,7 +147,7 @@ export class CanNotDeletePrivatePartOfAuthor extends Schema.TaggedError<CanNotDe
 
 export const DeletePrivatePartRequest = Schema.Struct({
   adminIds: Schema.Array(OfferAdminId),
-  publicKeys: Schema.Array(Schema.Union(PublicKeyPemBase64, PublicKeyV2)),
+  publicKeys: Schema.Array(Schema.Union([PublicKeyPemBase64, PublicKeyV2])),
 })
 export type DeletePrivatePartRequest = typeof DeletePrivatePartRequest.Type
 

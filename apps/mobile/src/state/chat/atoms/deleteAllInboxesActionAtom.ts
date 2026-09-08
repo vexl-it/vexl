@@ -53,7 +53,7 @@ const deleteAllInboxesActionAtom = atom(
           notificationApi: api.notification,
           otherSideVersion: oneChat.chat.otherSideVersion,
         }),
-        Effect.ignoreLogged
+        Effect.ignore({log: true})
       )
     })
 
@@ -63,7 +63,7 @@ const deleteAllInboxesActionAtom = atom(
         api.chat.deleteInbox({
           keyPair: oneInbox.privateKey,
         }),
-        Effect.ignoreLogged
+        Effect.ignore({log: true})
       )
     )
 
@@ -109,9 +109,11 @@ const deleteAllInboxesActionAtom = atom(
         })
       ),
       Effect.all,
-      Effect.andThen(() => {
-        set(messagingStateAtom, [])
-      }),
+      Effect.andThen(() =>
+        Effect.sync(() => {
+          set(messagingStateAtom, [])
+        })
+      ),
       effectToTaskEither
     )
   }

@@ -3,7 +3,7 @@ import {
   fromDateTime,
   UnixMilliseconds,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {Array as ArrayE, pipe, Schema} from 'effect'
+import {Array as ArrayE, Option, pipe, Schema} from 'effect'
 import {atom, type WritableAtom} from 'jotai'
 import {DateTime, type DateTimeUnit} from 'luxon'
 import {type DateData} from 'react-native-calendars'
@@ -123,7 +123,7 @@ export const manageAvailableDateTimesActionAtom = atom(
           prev,
           prev.findIndex((entry) => entry === previousTimestamp),
           newTimestamp
-        )
+        ).pipe(Option.getOrElse(() => prev))
       )
 
       set(removeAvailableDateTimeActionAtom, {

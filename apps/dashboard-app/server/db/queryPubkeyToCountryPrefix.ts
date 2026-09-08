@@ -1,8 +1,9 @@
-import {type SqlError} from '@effect/sql/SqlError'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
+import {NumberFromString} from '@vexl-next/generic-utils/src/effect-helpers/NumberFromString'
 import {Effect, Option, Schema} from 'effect'
-import {type ParseError} from 'effect/ParseResult'
+import {type SchemaError} from 'effect/Schema'
+import {type SqlError} from 'effect/unstable/sql/SqlError'
 import {PgContactClient} from './layer'
 
 export const PubKeyToCountryPrefixId = Schema.Number.pipe(
@@ -11,16 +12,16 @@ export const PubKeyToCountryPrefixId = Schema.Number.pipe(
 export type PubKeyToCountryPrefixId = typeof PubKeyToCountryPrefixId.Type
 
 export class UserRow extends Schema.Class<UserRow>('UserRow')({
-  id: Schema.compose(Schema.NumberFromString, PubKeyToCountryPrefixId),
+  id: NumberFromString.pipe(Schema.decodeTo(PubKeyToCountryPrefixId)),
   publicKey: PublicKeyPemBase64,
   countryPrefix: CountryPrefix,
 }) {}
 
-const decodeUserRows = Schema.decodeUnknown(Schema.Array(UserRow))
+const decodeUserRows = Schema.decodeUnknownEffect(Schema.Array(UserRow))
 
 export const queryPubkeyToCountryPrefix = (
   lastId: Option.Option<PubKeyToCountryPrefixId>
-): Effect.Effect<readonly UserRow[], ParseError | SqlError, PgContactClient> =>
+): Effect.Effect<readonly UserRow[], SchemaError | SqlError, PgContactClient> =>
   PgContactClient.pipe(
     Effect.flatMap(
       (sql) => sql`

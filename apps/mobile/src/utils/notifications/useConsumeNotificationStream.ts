@@ -1,5 +1,3 @@
-import {Socket} from '@effect/platform'
-import {RpcClient, RpcSerialization} from '@effect/rpc'
 import {VexlProductNotificationData} from '@vexl-next/domain/src/general/notifications'
 import {type VexlNotificationTokenSecret} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {setForegroundStreamConnected} from '@vexl-next/expo-background-notification-socket'
@@ -15,6 +13,10 @@ import {
   type UserInactivityNoticeMessage,
 } from '@vexl-next/rest-api/src/services/notification/Rpcs'
 import {
+  generateNotificationRequestId,
+  notificationRpcSerializationLayer,
+} from '@vexl-next/rest-api/src/services/notification/rpcSerialization'
+import {
   Array,
   Console,
   Effect,
@@ -26,6 +28,8 @@ import {
   Schedule,
   Stream,
 } from 'effect'
+import {RpcClient} from 'effect/unstable/rpc'
+import {Socket} from 'effect/unstable/socket'
 import {AndroidNotificationPriority} from 'expo-notifications'
 import {atom, useAtomValue, useSetAtom} from 'jotai'
 import {useCallback} from 'react'
@@ -78,42 +82,40 @@ const ProtocoSocketLive = RpcClient.layerProtocolSocket({
     Socket.layerWebSocket(`${getApiPreset().notificationMs}/rpc`).pipe(
       Layer.provide(WebSocketConstructorLive)
     ),
-    RpcSerialization.layerNdjson,
+    notificationRpcSerializationLayer,
   ])
 )
 
-const makeClient = RpcClient.make(Rpcs)
+const makeClient = RpcClient.make(Rpcs, {
+  generateRequestId: generateNotificationRequestId,
+})
 
 const processNewChatMessageActionAtom = atom(
   null,
   (get, set, message: NewChatMessageNoticeMessage | StreamOnlyChatMessage) =>
-    Effect.gen(function* (_) {
+    Effect.gen(function* () {
       const cypher = message.targetToken ?? message.targetCypher
       const inboxForCypher = set(
         getKeyHolderForNotificationTokenOrCypherActionAtom,
         cypher
       )
       if (!inboxForCypher) {
-        yield* _(
-          reportErrorE(
-            'warn',
-            new Error(
-              'Error decrypting notification from stream - unable to find private key for cypher'
-            )
+        yield* reportErrorE(
+          'warn',
+          new Error(
+            'Error decrypting notification from stream - unable to find private key for cypher'
           )
         )
         return
       }
 
       if (message._tag === 'NewChatMessageNoticeMessage') {
-        yield* _(
-          Console.log('📩 Processing chat message notification from stream')
+        yield* Console.log(
+          '📩 Processing chat message notification from stream'
         )
-        yield* _(
-          set(fetchAndStoreMessagesForInboxHandleNotificationsActionAtom, {
-            key: inboxForCypher.publicKeyPemBase64,
-          })
-        )
+        yield* set(fetchAndStoreMessagesForInboxHandleNotificationsActionAtom, {
+          key: inboxForCypher.publicKeyPemBase64,
+        })
       } else if (message._tag === 'StreamOnlyChatMessage') {
         const inbox = Array.findFirst(
           get(messagingStateAtom),
@@ -122,23 +124,19 @@ const processNewChatMessageActionAtom = atom(
             inboxForCypher.publicKeyPemBase64
         )
         if (Option.isNone(inbox)) {
-          yield* _(
-            reportErrorE(
-              'warn',
-              new Error(
-                'WTF? Got inbox key from keyHolderForNotificaitonCypherActionAtom but no matching inbox in state'
-              )
+          yield* reportErrorE(
+            'warn',
+            new Error(
+              'WTF? Got inbox key from keyHolderForNotificaitonCypherActionAtom but no matching inbox in state'
             )
           )
           return
         }
 
-        yield* _(
-          set(processStreamOnlyNotificationActionAtom, {
-            message,
-            inbox: inbox.value,
-          })
-        )
+        yield* set(processStreamOnlyNotificationActionAtom, {
+          message,
+          inbox: inbox.value,
+        })
       }
     })
 )
@@ -146,57 +144,47 @@ const processNewChatMessageActionAtom = atom(
 const processNewUserNotificationActionAtom = atom(
   null,
   (get, set, message: NewUserNoticeMessage) =>
-    Effect.gen(function* (_) {
+    Effect.gen(function* () {
       const api = get(apiAtom)
 
-      yield* _(
-        reportNewConnectionNotificationForked(
-          api.metrics,
-          Option.some(message.trackingId)
-        )
+      yield* reportNewConnectionNotificationForked(
+        api.metrics,
+        Option.some(message.trackingId)
       )
-      yield* _(set(syncConnectionsActionAtom))
-      yield* _(
-        set(updateAndReencryptAllOffersConnectionsActionAtom, {
-          isInBackground: false,
-        })
-      )
-      yield* _(
-        set(updateAndReencryptAllNotesConnectionsActionAtom, {
-          isInBackground: false,
-        })
-      )
+      yield* set(syncConnectionsActionAtom)
+      yield* set(updateAndReencryptAllOffersConnectionsActionAtom, {
+        isInBackground: false,
+      })
+      yield* set(updateAndReencryptAllNotesConnectionsActionAtom, {
+        isInBackground: false,
+      })
     })
 )
 
 const processNewClubConnectionNotificationActionAtom = atom(
   null,
   (get, set, message: NewClubUserNoticeMessage) =>
-    Effect.gen(function* (_) {
-      yield* _(
-        set(syncAllClubsHandleStateWhenNotFoundActionAtom, {
-          updateOnlyUuids: [message.clubUuid],
-        })
-      )
+    Effect.gen(function* () {
+      yield* set(syncAllClubsHandleStateWhenNotFoundActionAtom, {
+        updateOnlyUuids: [message.clubUuid],
+      })
 
-      yield* _(
-        set(updateAndReencryptAllOffersConnectionsActionAtom, {
-          isInBackground: false,
-        })
-      )
+      yield* set(updateAndReencryptAllOffersConnectionsActionAtom, {
+        isInBackground: false,
+      })
     })
 )
 
 const processUserAdmittedToClubNotificationActionAtom = atom(null, (get, set) =>
-  Effect.gen(function* (_) {
-    yield* _(set(checkForClubsAdmissionActionAtom))
+  Effect.gen(function* () {
+    yield* set(checkForClubsAdmissionActionAtom)
   })
 )
 
 const processClubExpiredOrFlaggedNotificationActionAtom = atom(
   null,
   (get, set, message: ClubExpiredNoticeMessage | ClubFlaggedNoticeMessage) =>
-    Effect.gen(function* (_) {
+    Effect.gen(function* () {
       const {t} = get(translationAtom)
 
       const publicKeyO = Record.get(
@@ -204,21 +192,19 @@ const processClubExpiredOrFlaggedNotificationActionAtom = atom(
         message.clubUuid
       ).pipe(Option.map((k) => k.keyPair.publicKey))
 
-      yield* _(
-        set(syncSingleClubHandleStateWhenNotFoundActionAtom, {
-          clubUuid: message.clubUuid,
-        }).pipe(
-          Effect.catchAll((e) => {
-            if (
-              e._tag === 'ClubNotFoundError' ||
-              e._tag === 'FetchingClubError' ||
-              e._tag === 'NoSuchElementException'
-            )
-              return Effect.succeed(Effect.void)
+      yield* set(syncSingleClubHandleStateWhenNotFoundActionAtom, {
+        clubUuid: message.clubUuid,
+      }).pipe(
+        Effect.catch((e) => {
+          if (
+            e._tag === 'ClubNotFoundError' ||
+            e._tag === 'FetchingClubError' ||
+            e._tag === 'NoSuchElementError'
+          )
+            return Effect.succeed(Effect.void)
 
-            return Effect.fail(e)
-          })
-        )
+          return Effect.fail(e)
+        })
       )
 
       const reason =
@@ -229,28 +215,24 @@ const processClubExpiredOrFlaggedNotificationActionAtom = atom(
         reason,
       })
 
-      yield* _(
-        Effect.log(
-          `📳 Received notification about club deactivation ${message.clubUuid}`
-        )
+      yield* Effect.log(
+        `📳 Received notification about club deactivation ${message.clubUuid}`
       )
 
       const clubInfo = get(createSingleRemovedClubAtom(message.clubUuid))
 
       if (clubInfo) {
-        yield* _(
-          Effect.promise(async () => {
-            await displayLocalNotification({
-              channelId: await getDefaultChannel(),
-              content: {
-                title: t(`notifications.CLUB_DEACTIVATED.${reason}.title`),
-                body: t(`notifications.CLUB_DEACTIVATED.${reason}.body`, {
-                  name: clubInfo.clubInfo.name,
-                }),
-              },
-            })
+        yield* Effect.promise(async () => {
+          await displayLocalNotification({
+            channelId: await getDefaultChannel(),
+            content: {
+              title: t(`notifications.CLUB_DEACTIVATED.${reason}.title`),
+              body: t(`notifications.CLUB_DEACTIVATED.${reason}.body`, {
+                name: clubInfo.clubInfo.name,
+              }),
+            },
           })
-        )
+        })
 
         if (Option.isSome(publicKeyO))
           set(addNotificationToCenterActionAtom, {
@@ -270,72 +252,64 @@ const processClubExpiredOrFlaggedNotificationActionAtom = atom(
 const processUserInactivityNotificationActionAtom = atom(
   null,
   (get, set, message: UserInactivityNoticeMessage) =>
-    Effect.gen(function* (_) {
+    Effect.gen(function* () {
       const {t} = get(translationAtom)
       const notificationPreferences = get(notificationPreferencesAtom)
 
       if (!notificationPreferences.inactivityWarnings) {
-        yield* _(
-          Effect.log(
-            'Received inactivity reminder notification but INACTIVITY_REMINDER notifications are disabled. Not showing notification.'
-          )
+        yield* Effect.log(
+          'Received inactivity reminder notification but INACTIVITY_REMINDER notifications are disabled. Not showing notification.'
         )
         return true
       }
 
-      yield* _(
-        Effect.promise(async () => {
-          void displayLocalNotification({
-            channelId: await getDefaultChannel(),
-            content:
-              message.variant === 'OFFERS_DEACTIVATED'
-                ? {
-                    title: t(
-                      `notifications.INACTIVITY_REMINDER_OFFERS_DEACTIVATED.title`
-                    ),
-                    body: t(
-                      `notifications.INACTIVITY_REMINDER_OFFERS_DEACTIVATED.body`
-                    ),
-                  }
-                : {
-                    title: t(`notifications.INACTIVITY_REMINDER.title`),
-                    body: t(`notifications.INACTIVITY_REMINDER.body`),
-                  },
-          })
+      yield* Effect.promise(async () => {
+        void displayLocalNotification({
+          channelId: await getDefaultChannel(),
+          content:
+            message.variant === 'OFFERS_DEACTIVATED'
+              ? {
+                  title: t(
+                    `notifications.INACTIVITY_REMINDER_OFFERS_DEACTIVATED.title`
+                  ),
+                  body: t(
+                    `notifications.INACTIVITY_REMINDER_OFFERS_DEACTIVATED.body`
+                  ),
+                }
+              : {
+                  title: t(`notifications.INACTIVITY_REMINDER.title`),
+                  body: t(`notifications.INACTIVITY_REMINDER.body`),
+                },
         })
-      )
+      })
     })
 )
 
 const processUserLoginOnDifferentDeviceNotificationActionAtom = atom(
   null,
   (get, set) =>
-    Effect.gen(function* (_) {
+    Effect.gen(function* () {
       const {t} = get(translationAtom)
 
-      yield* _(
-        Effect.promise(async () => {
-          void displayLocalNotification({
-            channelId: await getDefaultChannel(),
-            content: {
-              title: t('notifications.loggingOnDifferentDevice.title'),
-              body: t('notifications.loggingOnDifferentDevice.body'),
-              priority: AndroidNotificationPriority.HIGH,
-            },
-          })
+      yield* Effect.promise(async () => {
+        void displayLocalNotification({
+          channelId: await getDefaultChannel(),
+          content: {
+            title: t('notifications.loggingOnDifferentDevice.title'),
+            body: t('notifications.loggingOnDifferentDevice.body'),
+            priority: AndroidNotificationPriority.HIGH,
+          },
         })
-      )
+      })
     })
 )
 
 const processNewStreamNotificationActionAtom = atom(
   null,
   (get, set, message: NotificationStreamMessage) =>
-    Effect.gen(function* (_) {
+    Effect.gen(function* () {
       if (message._tag === 'DebugMessage') {
-        yield* _(
-          Console.debug('Received debug message from notification stream')
-        )
+        yield* Console.debug('Received debug message from notification stream')
         return
       }
 
@@ -353,52 +327,48 @@ const processNewStreamNotificationActionAtom = atom(
           ),
         })
 
-      yield* _(
-        Match.value(message).pipe(
-          Match.tag('NewChatMessageNoticeMessage', (m) =>
-            set(processNewChatMessageActionAtom, m)
-          ),
-          Match.tag('StreamOnlyChatMessage', (m) =>
-            set(processNewChatMessageActionAtom, m)
-          ),
-          Match.tag('NewUserNoticeMessage', (m) =>
-            set(processNewUserNotificationActionAtom, m)
-          ),
-          Match.tag('NewClubUserNoticeMessage', (m) =>
-            set(processNewClubConnectionNotificationActionAtom, m)
-          ),
-          Match.tag('UserAdmittedToClubNoticeMessage', () =>
-            set(processUserAdmittedToClubNotificationActionAtom)
-          ),
-          Match.tag('ClubExpiredNoticeMessage', (m) =>
-            set(processClubExpiredOrFlaggedNotificationActionAtom, m)
-          ),
-          Match.tag('ClubFlaggedNoticeMessage', (m) =>
-            set(processClubExpiredOrFlaggedNotificationActionAtom, m)
-          ),
-          Match.tag('UserInactivityNoticeMessage', (m) =>
-            set(processUserInactivityNotificationActionAtom, m)
-          ),
-          Match.tag('UserLoginOnDifferentDeviceNoticeMessage', () =>
-            set(processUserLoginOnDifferentDeviceNotificationActionAtom)
-          ),
-          Match.tag('VexlProductNotificationMessage', (v) =>
-            set(
-              processVexlProductNotificationActionAtom,
-              new VexlProductNotificationData({
-                ...v.vexlProductNotification,
-                trackingId: Option.some(v.trackingId),
-              })
-            )
-          ),
-          Match.tag('NewContentNoticeMessage', () => Effect.void),
-          Match.exhaustive
-        )
+      yield* Match.value(message).pipe(
+        Match.tag('NewChatMessageNoticeMessage', (m) =>
+          set(processNewChatMessageActionAtom, m)
+        ),
+        Match.tag('StreamOnlyChatMessage', (m) =>
+          set(processNewChatMessageActionAtom, m)
+        ),
+        Match.tag('NewUserNoticeMessage', (m) =>
+          set(processNewUserNotificationActionAtom, m)
+        ),
+        Match.tag('NewClubUserNoticeMessage', (m) =>
+          set(processNewClubConnectionNotificationActionAtom, m)
+        ),
+        Match.tag('UserAdmittedToClubNoticeMessage', () =>
+          set(processUserAdmittedToClubNotificationActionAtom)
+        ),
+        Match.tag('ClubExpiredNoticeMessage', (m) =>
+          set(processClubExpiredOrFlaggedNotificationActionAtom, m)
+        ),
+        Match.tag('ClubFlaggedNoticeMessage', (m) =>
+          set(processClubExpiredOrFlaggedNotificationActionAtom, m)
+        ),
+        Match.tag('UserInactivityNoticeMessage', (m) =>
+          set(processUserInactivityNotificationActionAtom, m)
+        ),
+        Match.tag('UserLoginOnDifferentDeviceNoticeMessage', () =>
+          set(processUserLoginOnDifferentDeviceNotificationActionAtom)
+        ),
+        Match.tag('VexlProductNotificationMessage', (v) =>
+          set(
+            processVexlProductNotificationActionAtom,
+            new VexlProductNotificationData({
+              ...v.vexlProductNotification,
+              trackingId: Option.some(v.trackingId),
+            })
+          )
+        ),
+        Match.tag('NewContentNoticeMessage', () => Effect.void),
+        Match.exhaustive
       )
 
-      yield* _(
-        Console.log('Received notification stream message', message._tag)
-      )
+      yield* Console.log('Received notification stream message', message._tag)
     }).pipe(
       Effect.exit,
       Effect.tap((e) => {
@@ -428,8 +398,8 @@ const reportForegroundStreamConnected = (connected: boolean): void => {
 const startListeningToNotificationStreamActionAtom = atom(
   null,
   (get, set, notificationSecret: VexlNotificationTokenSecret) =>
-    Effect.gen(function* (_) {
-      const rpc = yield* _(makeClient)
+    Effect.gen(function* () {
+      const rpc = yield* makeClient
       return yield* rpc
         .listenToNotifications({
           notificationToken: notificationSecret,

@@ -1,20 +1,20 @@
-import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {ClubUuid, OfferIdHashed} from '@vexl-next/domain/src/general/clubs'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {Effect, flow, Schema} from 'effect'
+import {SqlSchema} from 'effect/unstable/sql'
 
 export const InsertClubOfferReportedInfoRequest = Schema.Struct({
   offerId: OfferIdHashed,
   clubUuid: ClubUuid,
-  reportedAt: Schema.DateFromSelf,
+  reportedAt: Schema.Date,
 })
 
 export type InsertClubOfferReportedInfoRequest =
   typeof InsertClubOfferReportedInfoRequest.Type
 
-export const createInsertClubOfferReportedInfo = Effect.gen(function* (_) {
-  const sql = yield* _(PgClient.PgClient)
+export const createInsertClubOfferReportedInfo = Effect.gen(function* () {
+  const sql = yield* PgClient.PgClient
 
   const query = SqlSchema.void({
     Request: InsertClubOfferReportedInfoRequest,

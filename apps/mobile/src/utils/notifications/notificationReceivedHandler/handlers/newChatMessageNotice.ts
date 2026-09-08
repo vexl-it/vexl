@@ -3,7 +3,7 @@ import {type NewChatMessageNoticeNotificationData} from '@vexl-next/domain/src/g
 import {generateUuid, Uuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {type MetricsApi} from '@vexl-next/rest-api/src/services/metrics'
 import {type NotificationApi} from '@vexl-next/rest-api/src/services/notification'
-import {Effect, Option, Schema} from 'effect/index'
+import {Effect, Option, pipe, Schema} from 'effect'
 import {getDefaultStore} from 'jotai'
 import {AppState} from 'react-native'
 import {areNotificationsEnabledE} from '../..'
@@ -18,9 +18,9 @@ const processChatNotificationProcessed = (
   metricsApi: MetricsApi,
   notificationData: NewChatMessageNoticeNotificationData
 ): Effect.Effect<void> => {
-  return Effect.gen(function* (_) {
+  return Effect.gen(function* () {
     console.info(`Reporting BackgroundMessageReceived`)
-    const notificationsEnabled = yield* _(
+    const notificationsEnabled = yield* pipe(
       areNotificationsEnabledE(),
       Effect.option
     )
@@ -56,7 +56,7 @@ const processChatNotificationProcessed = (
           }
         )
       ),
-      Effect.forkDaemon
+      Effect.forkDetach
     )
 
     const reportNotificationProcessedToNotificationService = notificationApi
@@ -77,7 +77,7 @@ const processChatNotificationProcessed = (
             }
           )
         ),
-        Effect.forkDaemon
+        Effect.forkDetach
       )
 
     const reportNotificationProcessedToMetricsService = metricsApi
@@ -112,18 +112,16 @@ const processChatNotificationProcessed = (
             }
           )
         ),
-        Effect.forkDaemon
+        Effect.forkDetach
       )
 
-    return yield* _(
-      Effect.all(
-        [
-          reportNotificationProcessedToNotificationService,
-          reportNotificationProcessedToMetricsService,
-          reportUiNotificationReceivedIfAppInTheForeground,
-        ],
-        {concurrency: 'unbounded'}
-      )
+    return yield* Effect.all(
+      [
+        reportNotificationProcessedToNotificationService,
+        reportNotificationProcessedToMetricsService,
+        reportUiNotificationReceivedIfAppInTheForeground,
+      ],
+      {concurrency: 'unbounded'}
     )
   })
 }
@@ -134,20 +132,18 @@ export function handleNewChatMessageNoticeNotification(
   // If app is open, we can skipp this. There is already a scoket connected + we fetch the notifications on start
   if (AppState.currentState === 'active') return Effect.void
 
-  return Effect.gen(function* (_) {
+  return Effect.gen(function* () {
     console.info(`Refreshing inbox`)
 
     const store = getDefaultStore()
     const api = store.get(apiAtom)
 
     if (Option.isSome(notificationData.trackingId))
-      yield* _(
-        processChatNotificationProcessed(
-          notificationData.trackingId.value,
-          api.notification,
-          api.metrics,
-          notificationData
-        )
+      yield* processChatNotificationProcessed(
+        notificationData.trackingId.value,
+        api.notification,
+        api.metrics,
+        notificationData
       )
 
     // Disable for now
@@ -167,10 +163,11 @@ export function handleNewChatMessageNoticeNotification(
       return
     }
 
-    yield* _(
-      store.set(fetchAndStoreMessagesForInboxHandleNotificationsActionAtom, {
+    yield* store.set(
+      fetchAndStoreMessagesForInboxHandleNotificationsActionAtom,
+      {
         key: inboxForCypher.publicKeyPemBase64,
-      })
+      }
     )
   })
 }

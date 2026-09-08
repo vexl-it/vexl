@@ -1,4 +1,4 @@
-import {Effect} from 'effect'
+import {Effect, pipe} from 'effect'
 import {
   FIVE_MINUTES_MS,
   registerInAppLoadingTask,
@@ -18,7 +18,7 @@ export const syncConnectionsInAppTaskId = registerInAppLoadingTask({
     minTimeBetweenRunsMs: FIVE_MINUTES_MS,
   },
   task: (store) =>
-    Effect.gen(function* (_) {
+    Effect.gen(function* () {
       const syncConnections = store.set(syncConnectionsActionAtom)
       const syncClubs = store.set(syncAllClubsHandleStateWhenNotFoundActionAtom)
       const updateOffers = store.set(
@@ -34,7 +34,7 @@ export const syncConnectionsInAppTaskId = registerInAppLoadingTask({
         checkUserNeedsToImportContactsAndReencryptOffersActionAtom
       )
 
-      yield* _(
+      yield* pipe(
         syncConnections,
         Effect.andThen(checkUserNeedsToImportContactsAndReencryptOffers),
         Effect.andThen(checkForClubAdmissions),

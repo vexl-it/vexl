@@ -1,8 +1,6 @@
-import {HttpApi, HttpApiEndpoint, HttpApiGroup} from '@effect/platform/index'
-import {
-  NotFoundError,
-  UnexpectedServerError,
-} from '@vexl-next/domain/src/general/commonErrors'
+import {Schema} from 'effect'
+import {HttpApi, HttpApiEndpoint, HttpApiGroup} from 'effect/unstable/httpapi'
+import {commonApiErrors} from '../commonApiErrors'
 
 import {MaxExpectedDailyCall} from '../MaxExpectedDailyCountAnnotation'
 import {
@@ -14,25 +12,29 @@ import {
 
 export const CreateChallengeEndpoint = HttpApiEndpoint.post(
   'createChallenge',
-  '/api/v1/challenges'
-)
-  .setPayload(CreateChallengeRequest)
-  .addSuccess(CreateChallengeResponse)
-  .annotate(MaxExpectedDailyCall, 5000)
+  '/api/v1/challenges',
+  {
+    disableCodecs: true,
+    payload: CreateChallengeRequest,
+    error: Schema.Union([...commonApiErrors]),
+    success: CreateChallengeResponse,
+  }
+).annotate(MaxExpectedDailyCall, 5000)
 
 export const CreateChallengeBatchEndpoint = HttpApiEndpoint.post(
   'createChallengeBatch',
-  '/api/v1/challenges/batch'
-)
-  .setPayload(CreateChallengesRequest)
-  .addSuccess(CreateChallengesResponse)
-  .annotate(MaxExpectedDailyCall, 5000)
+  '/api/v1/challenges/batch',
+  {
+    disableCodecs: true,
+    payload: CreateChallengesRequest,
+    error: Schema.Union([...commonApiErrors]),
+    success: CreateChallengesResponse,
+  }
+).annotate(MaxExpectedDailyCall, 5000)
 
 export const ChallengeApiGroup = HttpApiGroup.make('Challenges')
   .add(CreateChallengeEndpoint)
   .add(CreateChallengeBatchEndpoint)
 
-export const ChallengeApiSpecification = HttpApi.make('Challenge API')
-  .add(ChallengeApiGroup)
-  .addError(NotFoundError, {status: 404})
-  .addError(UnexpectedServerError, {status: 500})
+export const ChallengeApiSpecification =
+  HttpApi.make('Challenge API').add(ChallengeApiGroup)

@@ -76,5 +76,5 @@ export function isNoteMineAtom(noteId: NoteId | undefined): Atom<boolean> {
 export const areThereAnyNotesAtom = atom((get) => get(notesAtom).length > 0)
 
 export const areThereAnyMyNotesAtom = atom((get) =>
-  Array.isNonEmptyArray(get(myNotesAtom))
+  Array.isArrayNonEmpty(get(myNotesAtom))
 )

@@ -1,4 +1,3 @@
-import {HttpApiMiddleware} from '@effect/platform'
 import {PublicKeyV2} from '@vexl-next/cryptography'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {
@@ -7,7 +6,8 @@ import {
 } from '@vexl-next/domain/src/general/commonErrors'
 import {HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/EcdsaSignature.brand'
-import {Context, Effect, Schema} from 'effect'
+import {Context, Effect, Option, Schema} from 'effect'
+import {HttpApiMiddleware} from 'effect/unstable/httpapi'
 import {CommonHeaders} from './commonHeaders'
 import {
   HEADER_AUTHORIZATION,
@@ -22,7 +22,7 @@ export const SecurityHeaders = Schema.Struct({
   [HEADER_HASH]: HashedPhoneNumber,
   [HEADER_SIGNATURE]: EcdsaSignature,
   [HEADER_PUBLIC_KEY]: PublicKeyPemBase64,
-  [HEADER_AUTHORIZATION]: Schema.UndefinedOr(VexlAuthHeader),
+  [HEADER_AUTHORIZATION]: Schema.optional(VexlAuthHeader),
 })
 
 export type SecurityHeaders = typeof SecurityHeaders.Type
@@ -30,23 +30,23 @@ export type SecurityHeaders = typeof SecurityHeaders.Type
 const AuthenticatedUserInfo = Schema.Struct({
   hash: HashedPhoneNumber,
   publicKey: PublicKeyPemBase64,
-  publicKeyV2: Schema.optionalWith(PublicKeyV2, {as: 'Option'}),
+  publicKeyV2: Schema.OptionFromOptional(PublicKeyV2).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
 })
 export type AuthenticatedUserInfo = typeof AuthenticatedUserInfo.Type
 
-export class CurrentSecurity extends Context.Tag('CurrentSecurity')<
+export class CurrentSecurity extends Context.Service<
   CurrentSecurity,
   AuthenticatedUserInfo
->() {}
+>()('CurrentSecurity') {}
 
-export class ServerSecurityMiddleware extends HttpApiMiddleware.Tag<ServerSecurityMiddleware>()(
-  'ServerSecurityMiddleware',
-  {
-    optional: false,
-    provides: CurrentSecurity,
-    failure: Schema.Union(UnauthorizedError, UnexpectedServerError),
-  }
-) {}
+export class ServerSecurityMiddleware extends HttpApiMiddleware.Service<
+  ServerSecurityMiddleware,
+  {provides: CurrentSecurity}
+>()('ServerSecurityMiddleware', {
+  error: Schema.Union([UnauthorizedError, UnexpectedServerError]),
+}) {}
 
 export class CommonAndSecurityHeaders extends CommonHeaders.extend<CommonAndSecurityHeaders>(
   'CommonAndSecurityHeaders'

@@ -231,7 +231,7 @@ const prepareContactsForImportActionAtom = atom(
 
     const {t} = get(translationAtom)
 
-    return Effect.gen(function* (_) {
+    return Effect.gen(function* () {
       set(showContactImportLoaderStepActionAtom, {
         enabled: showContactImportProgressDialog,
         title: t('contacts.importProgress.titleReadingContacts'),
@@ -240,24 +240,22 @@ const prepareContactsForImportActionAtom = atom(
       const titlePreparingContacts = t(
         'contacts.importProgress.titlePreparingContacts'
       )
-      yield* _(
-        set(loadAndNormalizeContactsFromDeviceActionAtom, {
-          onContactsLoaded: () => {
-            set(showContactImportLoaderStepActionAtom, {
-              enabled: showContactImportProgressDialog,
-              title: titlePreparingContacts,
-            })
-          },
-          onNormalizationProgress: ({total, percentDone}) => {
-            set(showContactImportCountProgressActionAtom, {
-              enabled: showContactImportProgressDialog,
-              title: titlePreparingContacts,
-              processed: Math.round(total * percentDone),
-              total,
-            })
-          },
-        })
-      )
+      yield* set(loadAndNormalizeContactsFromDeviceActionAtom, {
+        onContactsLoaded: () => {
+          set(showContactImportLoaderStepActionAtom, {
+            enabled: showContactImportProgressDialog,
+            title: titlePreparingContacts,
+          })
+        },
+        onNormalizationProgress: ({total, percentDone}) => {
+          set(showContactImportCountProgressActionAtom, {
+            enabled: showContactImportProgressDialog,
+            title: titlePreparingContacts,
+            processed: Math.round(total * percentDone),
+            total,
+          })
+        },
+      })
     })
   }
 )
@@ -277,7 +275,7 @@ const determineContactsImportUpdatePlanActionAtom = atom(
   ): Effect.Effect<ContactsImportUpdatePlan> => {
     const {t} = get(translationAtom)
 
-    return Effect.gen(function* (_) {
+    return Effect.gen(function* () {
       const allContacts = get(normalizedContactsAtom)
       const needsFullContactsReplaceAfterContactEdit = get(
         needsFullContactsReplaceAfterContactEditAtom
@@ -337,11 +335,9 @@ const determineContactsImportUpdatePlanActionAtom = atom(
           processed: checkedContactsCount,
           total: contactsToCheckTotal,
         })
-        yield* _(
-          set(waitForContactImportProgressFrameActionAtom, {
-            enabled: showContactImportProgressDialog,
-          })
-        )
+        yield* set(waitForContactImportProgressFrameActionAtom, {
+          enabled: showContactImportProgressDialog,
+        })
       }
 
       for (const numbersToImportChunk of pipe(
@@ -362,11 +358,9 @@ const determineContactsImportUpdatePlanActionAtom = atom(
           processed: checkedContactsCount,
           total: contactsToCheckTotal,
         })
-        yield* _(
-          set(waitForContactImportProgressFrameActionAtom, {
-            enabled: showContactImportProgressDialog,
-          })
-        )
+        yield* set(waitForContactImportProgressFrameActionAtom, {
+          enabled: showContactImportProgressDialog,
+        })
       }
 
       return determineContactsImportUpdatePlan({
@@ -438,12 +432,12 @@ const importContactsAndUpdateStoredContactsActionAtom = atom(
     const contactApi = get(apiAtom).contact
     const {t} = get(translationAtom)
 
-    return Effect.gen(function* (_) {
-      const importedNumbersSoFarRef = yield* _(
-        Ref.make(HashSet.empty<E164PhoneNumber>())
+    return Effect.gen(function* () {
+      const importedNumbersSoFarRef = yield* Ref.make(
+        HashSet.empty<E164PhoneNumber>()
       )
-      const hashedPhoneNumberToServerToClientHashRef = yield* _(
-        Ref.make(HashMap.empty<HashedPhoneNumber, ServerToClientHashedNumber>())
+      const hashedPhoneNumberToServerToClientHashRef = yield* Ref.make(
+        HashMap.empty<HashedPhoneNumber, ServerToClientHashedNumber>()
       )
       const totalContactsToImport = newContactsToImport.length
 
@@ -462,92 +456,85 @@ const importContactsAndUpdateStoredContactsActionAtom = atom(
       }
 
       if (totalContactsToImport === 0 && !doIncrementalUpdate) {
-        yield* _(
-          contactApi.importContacts({
-            contacts: [],
-            replace: true,
-          })
-        )
+        yield* contactApi.importContacts({
+          contacts: [],
+          replace: true,
+        })
       }
 
-      yield* _(
-        pipe(
-          newContactsToImport,
-          Array.chunksOf(CONTACT_IMPORT_BATCH_SIZE),
-          Effect.forEach(
-            (chunkToImport, i) => {
-              const replace = i === 0 && !doIncrementalUpdate
-              return contactApi
-                .importContacts({
-                  contacts: pipe(
-                    chunkToImport,
-                    Array.map((one) => one.computedValues.hash)
-                  ),
-                  replace,
-                })
-                .pipe(
-                  Effect.tap((response) =>
-                    Ref.update(
-                      hashedPhoneNumberToServerToClientHashRef,
-                      (ref) =>
-                        pipe(
-                          response.phoneNumberHashesToServerToClientHash,
-                          Array.reduce(
-                            HashMap.empty<
-                              HashedPhoneNumber,
-                              ServerToClientHashedNumber
-                            >(),
-                            (map, {hashedNumber, serverToClientHash}) =>
-                              HashMap.set(map, hashedNumber, serverToClientHash)
-                          ),
-                          (addition) => HashMap.union(addition, ref)
-                        )
+      yield* pipe(
+        newContactsToImport,
+        Array.chunksOf(CONTACT_IMPORT_BATCH_SIZE),
+        Effect.forEach(
+          (chunkToImport, i) => {
+            const replace = i === 0 && !doIncrementalUpdate
+            return contactApi
+              .importContacts({
+                contacts: pipe(
+                  chunkToImport,
+                  Array.map((one) => one.computedValues.hash)
+                ),
+                replace,
+              })
+              .pipe(
+                Effect.tap((response) =>
+                  Ref.update(hashedPhoneNumberToServerToClientHashRef, (ref) =>
+                    pipe(
+                      response.phoneNumberHashesToServerToClientHash,
+                      Array.reduce(
+                        HashMap.empty<
+                          HashedPhoneNumber,
+                          ServerToClientHashedNumber
+                        >(),
+                        (map, {hashedNumber, serverToClientHash}) =>
+                          HashMap.set(map, hashedNumber, serverToClientHash)
+                      ),
+                      (addition) => HashMap.union(addition, ref)
                     )
-                  ),
-                  Effect.zipLeft(
-                    Ref.update(
-                      importedNumbersSoFarRef,
-                      HashSet.union(
-                        pipe(
-                          chunkToImport,
-                          Array.map(
-                            (one) => one.computedValues.normalizedNumber
-                          )
-                        )
+                  )
+                ),
+                Effect.tap(
+                  Ref.update(
+                    importedNumbersSoFarRef,
+                    HashSet.union(
+                      pipe(
+                        chunkToImport,
+                        Array.map((one) => one.computedValues.normalizedNumber),
+                        HashSet.fromIterable
                       )
                     )
-                  ),
-                  Effect.tap(() =>
-                    Effect.sync(() => {
-                      set(showContactImportCountProgressActionAtom, {
-                        enabled: showContactImportProgressDialog,
-                        title: t('contacts.importProgress.titleAddingContacts'),
-                        processed: Math.min(
-                          (i + 1) * CONTACT_IMPORT_BATCH_SIZE,
-                          totalContactsToImport
-                        ),
-                        total: totalContactsToImport,
-                      })
-                    })
                   )
+                ),
+                Effect.tap(() =>
+                  Effect.sync(() => {
+                    set(showContactImportCountProgressActionAtom, {
+                      enabled: showContactImportProgressDialog,
+                      title: t('contacts.importProgress.titleAddingContacts'),
+                      processed: Math.min(
+                        (i + 1) * CONTACT_IMPORT_BATCH_SIZE,
+                        totalContactsToImport
+                      ),
+                      total: totalContactsToImport,
+                    })
+                  })
                 )
-            },
-            {discard: true}
-          ),
-          Effect.ensuring(
-            Effect.all({
-              importedNumbers: Ref.get(importedNumbersSoFarRef),
-              hashedNumbersToServerClientHash: Ref.get(
-                hashedPhoneNumberToServerToClientHashRef
-              ),
-            }).pipe(
-              Effect.flatMap((importedContactsData) =>
-                set(updateStoredContactsAfterImportActionAtom, {
-                  ...importedContactsData,
-                  doIncrementalUpdate,
-                  showContactImportProgressDialog,
-                })
               )
+          },
+          {discard: true}
+        ),
+        Effect.ensuring(
+          Effect.all({
+            importedNumbers: Ref.get(importedNumbersSoFarRef),
+            hashedNumbersToServerClientHash: Ref.get(
+              hashedPhoneNumberToServerToClientHashRef
+            ),
+          }).pipe(
+            Effect.flatMap((importedContactsData) =>
+              set(updateStoredContactsAfterImportActionAtom, {
+                ...importedContactsData,
+                doIncrementalUpdate,
+                showContactImportProgressDialog,
+              })
             )
           )
         )
@@ -593,7 +580,7 @@ const syncNetworkAfterContactsImportActionAtom = atom(
       totalWeight,
     })
 
-    return Effect.gen(function* (_) {
+    return Effect.gen(function* () {
       if (
         (areThereAnyMyOffers || areThereAnyMyNotes) &&
         showOfferReencryptionDialog
@@ -614,7 +601,7 @@ const syncNetworkAfterContactsImportActionAtom = atom(
           indicateProgress: {type: 'intermediate'},
         })
 
-        yield* _(
+        yield* pipe(
           set(syncConnectionsActionAtom),
           Effect.zip(
             set(updateAndReencryptAllOffersConnectionsActionAtom, {
@@ -644,7 +631,7 @@ const syncNetworkAfterContactsImportActionAtom = atom(
               isInBackground: false,
             })
           ),
-          Effect.zipLeft(
+          Effect.tap(
             set(updateAndReencryptAllNotesConnectionsActionAtom, {
               onProgres: ({noteI, totalNotes, progress}) => {
                 set(offerProgressModalActionAtoms.showStep, {
@@ -701,39 +688,31 @@ const syncNetworkAfterContactsImportActionAtom = atom(
                   ),
                 }
 
-        yield* _(
-          set(offerProgressModalActionAtoms.hideDeffered, {
-            data: {
-              ...refreshingDoneCopy,
-              belowProgressRight: t('progressBar.DONE'),
-              indicateProgress: {
-                type: 'done',
-              },
+        yield* set(offerProgressModalActionAtoms.hideDeffered, {
+          data: {
+            ...refreshingDoneCopy,
+            belowProgressRight: t('progressBar.DONE'),
+            indicateProgress: {
+              type: 'done',
             },
-            delayMs: 3000,
-          })
-        )
+          },
+          delayMs: 3000,
+        })
       } else {
         set(showContactImportLoaderStepActionAtom, {
           enabled: showContactImportProgressDialog,
           title: t('contacts.importProgress.titleUpdatingNetwork'),
         })
-        yield* _(set(syncConnectionsActionAtom))
-        yield* _(
-          set(updateAndReencryptAllOffersConnectionsActionAtom, {
-            isInBackground: false,
-          })
-        )
-        yield* _(
-          set(updateAndReencryptAllNotesConnectionsActionAtom, {
-            isInBackground: false,
-          })
-        )
-        yield* _(
-          set(showContactImportProgressDoneActionAtom, {
-            enabled: showContactImportProgressDialog,
-          })
-        )
+        yield* set(syncConnectionsActionAtom)
+        yield* set(updateAndReencryptAllOffersConnectionsActionAtom, {
+          isInBackground: false,
+        })
+        yield* set(updateAndReencryptAllNotesConnectionsActionAtom, {
+          isInBackground: false,
+        })
+        yield* set(showContactImportProgressDoneActionAtom, {
+          enabled: showContactImportProgressDialog,
+        })
       }
     })
   }
@@ -756,35 +735,30 @@ export const submitContactsActionAtom = atom(
       set(loadingOverlayDisplayedAtom, true)
     }
 
-    return Effect.gen(function* (_) {
-      yield* _(
-        set(prepareContactsForImportActionAtom, {
-          normalizeAndImportAll: params.normalizeAndImportAll,
-          showContactImportProgressDialog,
-        })
-      )
+    return Effect.gen(function* () {
+      yield* set(prepareContactsForImportActionAtom, {
+        normalizeAndImportAll: params.normalizeAndImportAll,
+        showContactImportProgressDialog,
+      })
 
-      const importUpdatePlan = yield* _(
-        set(determineContactsImportUpdatePlanActionAtom, {
+      const importUpdatePlan = yield* set(
+        determineContactsImportUpdatePlanActionAtom,
+        {
           contactsImportSource: params,
           showContactImportProgressDialog,
-        })
+        }
       )
 
-      yield* _(
-        set(importContactsAndUpdateStoredContactsActionAtom, {
-          ...importUpdatePlan,
-          showContactImportProgressDialog,
-        })
-      )
+      yield* set(importContactsAndUpdateStoredContactsActionAtom, {
+        ...importUpdatePlan,
+        showContactImportProgressDialog,
+      })
 
-      yield* _(
-        set(syncNetworkAfterContactsImportActionAtom, {
-          manageLoadingOverlay,
-          showContactImportProgressDialog,
-          showOfferReencryptionDialog: params.showOfferReencryptionDialog,
-        })
-      )
+      yield* set(syncNetworkAfterContactsImportActionAtom, {
+        manageLoadingOverlay,
+        showContactImportProgressDialog,
+        showOfferReencryptionDialog: params.showOfferReencryptionDialog,
+      })
 
       set(
         lastImportOfContactsAtom,
@@ -837,9 +811,6 @@ export const submitContactsActionAtom = atom(
           return 'success'
         },
       }),
-      // Callers show dialogs/alerts right after this effect resolves. A native
-      // dialog presented while the progress modal is still dismissing is
-      // silently dropped on iOS, so do not resolve until it is fully gone.
       Effect.tap(() => set(waitUntilProgressModalIsFullyHiddenActionAtom)),
       Effect.ensuring(
         Effect.sync(() => {

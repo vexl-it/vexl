@@ -8,7 +8,7 @@ import {
   tokens,
   useTheme,
 } from '@vexl-next/ui'
-import {useMolecule} from 'bunshi/dist/react'
+import {useMolecule} from 'bunshi/react'
 import {Effect} from 'effect'
 import {CameraView, type BarcodeScanningResult} from 'expo-camera'
 import {StatusBar} from 'expo-status-bar'

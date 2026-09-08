@@ -1,9 +1,10 @@
-import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {PublicKeyV2} from '@vexl-next/cryptography'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
+import {NumberFromString} from '@vexl-next/generic-utils/src/effect-helpers/NumberFromString'
 import {Effect, flow, Schema} from 'effect'
+import {SqlSchema} from 'effect/unstable/sql'
 import {ServerHashedNumber} from '../../../utils/serverHashContact'
 import {createIsAllowedSharedContactHashFragment} from '../../utils/createIsAllowedSharedContactHashFragment'
 
@@ -23,14 +24,14 @@ export const FindCommonFriendsPaginatedResult = Schema.Struct({
   publicKeyV2: Schema.NullOr(PublicKeyV2),
   commonFriends: Schema.Array(ServerHashedNumber),
   verifiedFriends: Schema.Array(ServerHashedNumber),
-  userContactId: Schema.NumberFromString,
+  userContactId: NumberFromString,
 })
 export type FindCommonFriendsPaginatedResult =
   typeof FindCommonFriendsPaginatedResult.Type
 
 export const createFindCommonFriendsByOwnerHashAndPublicKeysPaginated =
-  Effect.gen(function* (_) {
-    const sql = yield* _(PgClient.PgClient)
+  Effect.gen(function* () {
+    const sql = yield* PgClient.PgClient
 
     const query = SqlSchema.findAll({
       Request: FindCommonFriendsPaginatedParams,

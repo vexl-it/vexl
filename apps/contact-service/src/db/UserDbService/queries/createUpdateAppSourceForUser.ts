@@ -1,20 +1,22 @@
-import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
-import {Effect, flow, Schema} from 'effect'
+import {Effect, flow, Option, Schema} from 'effect'
+import {SqlSchema} from 'effect/unstable/sql'
 import {ServerHashedNumber} from '../../../utils/serverHashContact'
 
 export const UpdateAppSourceForUserParams = Schema.Struct({
   publicKey: PublicKeyPemBase64,
   hash: ServerHashedNumber,
-  appSource: Schema.optionalWith(Schema.String, {as: 'Option'}),
+  appSource: Schema.OptionFromOptional(Schema.String).pipe(
+    Schema.withConstructorDefault(Effect.succeed(Option.none()))
+  ),
 })
 export type UpdateAppSourceForUserParams =
   typeof UpdateAppSourceForUserParams.Type
 
-export const createUpdateAppSourceForUser = Effect.gen(function* (_) {
-  const sql = yield* _(PgClient.PgClient)
+export const createUpdateAppSourceForUser = Effect.gen(function* () {
+  const sql = yield* PgClient.PgClient
 
   const query = SqlSchema.void({
     Request: UpdateAppSourceForUserParams,

@@ -71,28 +71,24 @@ export interface ContactDbOperations {
   >
 }
 
-export class ContactDbService extends Context.Tag('ContactDbService')<
+export class ContactDbService extends Context.Service<
   ContactDbService,
   ContactDbOperations
->() {
+>()('ContactDbService') {
   static readonly Live = Layer.effect(
     ContactDbService,
-    Effect.gen(function* (_) {
-      const deleteContactsByHashFrom = yield* _(createDeleteContactsByHashFrom)
-      const findContactsByHashFrom = yield* _(createFindContactsByHashFrom)
-      const insertContact = yield* _(createInsertContact)
-      const findFirstLevelContactsPublicKeysByHashFromPaginated = yield* _(
-        createFindFirstLevelContactsPublicKeysByHashFromPaginated
-      )
-      const findSecondLevelContactsPublicKeysByHashFromPaginated = yield* _(
-        createFindSecondLevelContactsPublicKeysByHashFromPaginated
-      )
-      const findCommonFriendsPaginated = yield* _(
-        createFindCommonFriendsByOwnerHashAndPublicKeysPaginated
-      )
-      const findNotificationTokensByFilter = yield* _(
-        createFindNotificationTokensByFilter
-      )
+    Effect.gen(function* () {
+      const deleteContactsByHashFrom = yield* createDeleteContactsByHashFrom
+      const findContactsByHashFrom = yield* createFindContactsByHashFrom
+      const insertContact = yield* createInsertContact
+      const findFirstLevelContactsPublicKeysByHashFromPaginated =
+        yield* createFindFirstLevelContactsPublicKeysByHashFromPaginated
+      const findSecondLevelContactsPublicKeysByHashFromPaginated =
+        yield* createFindSecondLevelContactsPublicKeysByHashFromPaginated
+      const findCommonFriendsPaginated =
+        yield* createFindCommonFriendsByOwnerHashAndPublicKeysPaginated
+      const findNotificationTokensByFilter =
+        yield* createFindNotificationTokensByFilter
 
       return {
         deleteContactsByHashFrom,

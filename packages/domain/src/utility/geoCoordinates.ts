@@ -1,23 +1,28 @@
-import {Schema} from 'effect'
+import {Schema, SchemaTransformation} from 'effect'
 
 export const Latitude = Schema.Number.pipe(
-  Schema.greaterThanOrEqualTo(-90),
-  Schema.lessThanOrEqualTo(90),
+  Schema.check(Schema.isGreaterThanOrEqualTo(-90)),
+  Schema.check(Schema.isLessThanOrEqualTo(90)),
   Schema.brand('Latitude')
 )
 export type Latitude = Schema.Schema.Type<typeof Latitude>
 
-export const Longitude = Schema.transform(Schema.Number, Schema.Number, {
-  decode: (v): number => {
-    const maxLongitude = 180
-    const minLongitude = -180
-    const range = maxLongitude - minLongitude
-    return ((((v - minLongitude) % range) + range) % range) + minLongitude
-  },
-  encode: (v): number => v,
-}).pipe(
-  Schema.greaterThanOrEqualTo(-180),
-  Schema.lessThanOrEqualTo(180),
+export const Longitude = Schema.Number.pipe(
+  Schema.decodeTo(
+    Schema.Number,
+    SchemaTransformation.transform({
+      decode: (v): number => {
+        const maxLongitude = 180
+        const minLongitude = -180
+        const range = maxLongitude - minLongitude
+        return ((((v - minLongitude) % range) + range) % range) + minLongitude
+      },
+      encode: (v): number => v,
+    })
+  )
+).pipe(
+  Schema.check(Schema.isGreaterThanOrEqualTo(-180)),
+  Schema.check(Schema.isLessThanOrEqualTo(180)),
   Schema.brand('Longitude')
 )
 export type Longitude = Schema.Schema.Type<typeof Longitude>
@@ -34,7 +39,7 @@ export interface Viewport {
 }
 
 export const Radius = Schema.Number.pipe(
-  Schema.positive(),
+  Schema.check(Schema.isGreaterThan(0)),
   Schema.brand('Radius')
 )
 export type Radius = Schema.Schema.Type<typeof Radius>

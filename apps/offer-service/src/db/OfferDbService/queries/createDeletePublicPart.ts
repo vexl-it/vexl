@@ -1,26 +1,24 @@
-import {SqlResolver} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {Effect, flow} from 'effect'
+import {SqlResolver} from 'effect/unstable/sql'
 import {OfferAdminIdHashed} from '../domain'
 
 const DeletePublicPartRequest = OfferAdminIdHashed
 export type DeletePublicPartRequest = typeof DeletePublicPartRequest.Type
-export const createDeletePublicPart = Effect.gen(function* (_) {
-  const sql = yield* _(PgClient.PgClient)
+export const createDeletePublicPart = Effect.gen(function* () {
+  const sql = yield* PgClient.PgClient
 
-  const DeletePublicPart = yield* _(
-    SqlResolver.void('DeletePublicPart', {
-      Request: DeletePublicPartRequest,
-      execute: (req) => sql`
-        DELETE FROM offer_public
-        WHERE
-          ${sql.in('admin_id', req)}
-      `,
-    })
-  )
+  const DeletePublicPart = SqlResolver.void({
+    Request: DeletePublicPartRequest,
+    execute: (req) => sql`
+      DELETE FROM offer_public
+      WHERE
+        ${sql.in('admin_id', req)}
+    `,
+  })
   return flow(
-    DeletePublicPart.execute,
+    SqlResolver.request(DeletePublicPart),
     UnexpectedServerError.wrapErrors('Error deleting public part')
   )
 })

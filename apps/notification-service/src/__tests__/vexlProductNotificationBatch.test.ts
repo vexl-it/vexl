@@ -1,5 +1,3 @@
-import {type HttpClient} from '@effect/platform/HttpClient'
-import {SqlClient} from '@effect/sql'
 import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {
   VexlProductNotificationUuid,
@@ -14,7 +12,9 @@ import {
 } from '@vexl-next/rest-api/src/commonHeaders'
 import {VexlProductNotificationMqEntry} from '@vexl-next/server-utils/src/UserNotificationMq'
 import {type TestRequestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
-import {Array, Effect, Either, Option, Schema} from 'effect'
+import {Array, Effect, Option, pipe, Result, Schema} from 'effect'
+import {type HttpClient} from 'effect/unstable/http/HttpClient'
+import {SqlClient} from 'effect/unstable/sql'
 import {NotificationTokensDb} from '../services/NotificationTokensDb'
 import {
   PendingBatchedNotificationDbRecord,
@@ -66,58 +66,54 @@ const createSecretWithTokens = (args: {
   systemVexlToken?: VexlNotificationToken
   marketingVexlToken?: VexlNotificationToken
 }): Effect.Effect<void, never, HttpClient | TestRequestHeaders> =>
-  Effect.gen(function* (_) {
-    const app = yield* _(NodeTestingApp)
-    const createResp = yield* _(
+  Effect.gen(function* () {
+    const app = yield* NodeTestingApp
+    const createResp = yield* pipe(
       app.NotificationTokenGroup.CreateNotificationSecret({
         payload: {expoNotificationToken: args.expoToken},
         headers,
       }),
-      Effect.either
+      Effect.result
     )
 
-    expect(Either.isRight(createResp)).toBe(true)
-    if (Either.isLeft(createResp)) return
+    expect(Result.isSuccess(createResp)).toBe(true)
+    if (Result.isFailure(createResp)) return
 
-    const updateResp = yield* _(
+    const updateResp = yield* pipe(
       app.NotificationTokenGroup.updateNoficationInfo({
         payload: {
-          secret: createResp.right.secret,
+          secret: createResp.success.secret,
           expoNotificationToken: args.expoToken,
           systemVexlToken: args.systemVexlToken,
           marketingVexlToken: args.marketingVexlToken,
         },
         headers,
       }),
-      Effect.either
+      Effect.result
     )
 
-    expect(Either.isRight(updateResp)).toBe(true)
+    expect(Result.isSuccess(updateResp)).toBe(true)
   }).pipe(Effect.orDie)
 
 describe('Vexl product notification batching', () => {
   it('uses marketing tokens for MARKETING notifications and skips nulls', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const db = yield* _(NotificationTokensDb)
+      Effect.gen(function* () {
+        const db = yield* NotificationTokensDb
         const marketingToken = token('vexl_nt_marketing_batch_1')
         const systemToken = token('vexl_nt_system_batch_1')
 
-        yield* _(
-          createSecretWithTokens({
-            expoToken: expoToken('ExponentPushToken[marketingBatch1]'),
-            systemVexlToken: systemToken,
-            marketingVexlToken: marketingToken,
-          })
-        )
-        yield* _(
-          createSecretWithTokens({
-            expoToken: expoToken('ExponentPushToken[marketingBatch2]'),
-            systemVexlToken: token('vexl_nt_system_batch_2'),
-          })
-        )
+        yield* createSecretWithTokens({
+          expoToken: expoToken('ExponentPushToken[marketingBatch1]'),
+          systemVexlToken: systemToken,
+          marketingVexlToken: marketingToken,
+        })
+        yield* createSecretWithTokens({
+          expoToken: expoToken('ExponentPushToken[marketingBatch2]'),
+          systemVexlToken: token('vexl_nt_system_batch_2'),
+        })
 
-        const selectedTokens = yield* _(db.selectVexlTokens('marketing'))
+        const selectedTokens = yield* db.selectVexlTokens('marketing')
         expect(
           Option.isSome(
             Array.findFirst(selectedTokens, (one) => one === marketingToken)
@@ -134,26 +130,22 @@ describe('Vexl product notification batching', () => {
 
   it('uses system tokens for GENERAL notifications and skips nulls', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const db = yield* _(NotificationTokensDb)
+      Effect.gen(function* () {
+        const db = yield* NotificationTokensDb
         const systemToken = token('vexl_nt_system_batch_3')
         const marketingToken = token('vexl_nt_marketing_batch_3')
 
-        yield* _(
-          createSecretWithTokens({
-            expoToken: expoToken('ExponentPushToken[generalBatch1]'),
-            systemVexlToken: systemToken,
-            marketingVexlToken: marketingToken,
-          })
-        )
-        yield* _(
-          createSecretWithTokens({
-            expoToken: expoToken('ExponentPushToken[generalBatch2]'),
-            marketingVexlToken: token('vexl_nt_marketing_batch_4'),
-          })
-        )
+        yield* createSecretWithTokens({
+          expoToken: expoToken('ExponentPushToken[generalBatch1]'),
+          systemVexlToken: systemToken,
+          marketingVexlToken: marketingToken,
+        })
+        yield* createSecretWithTokens({
+          expoToken: expoToken('ExponentPushToken[generalBatch2]'),
+          marketingVexlToken: token('vexl_nt_marketing_batch_4'),
+        })
 
-        const selectedTokens = yield* _(db.selectVexlTokens('general'))
+        const selectedTokens = yield* db.selectVexlTokens('general')
         expect(
           Option.isSome(
             Array.findFirst(selectedTokens, (one) => one === systemToken)
@@ -170,13 +162,13 @@ describe('Vexl product notification batching', () => {
 
   it('selects vexl tokens from rows with null expo notification token', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
-        const db = yield* _(NotificationTokensDb)
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
+        const db = yield* NotificationTokensDb
         const systemToken = token('vexl_nt_null_expo_system')
 
-        const createResp = yield* _(
-          app.NotificationTokenGroup.CreateNotificationSecret({
+        const createResp =
+          yield* app.NotificationTokenGroup.CreateNotificationSecret({
             payload: {
               expoNotificationToken: expoToken(
                 'ExponentPushToken[nullExpoSelection]'
@@ -184,19 +176,16 @@ describe('Vexl product notification batching', () => {
             },
             headers,
           })
-        )
 
-        yield* _(
-          app.NotificationTokenGroup.updateNoficationInfo({
-            payload: {
-              secret: createResp.secret,
-              systemVexlToken: systemToken,
-            },
-            headers,
-          })
-        )
+        yield* app.NotificationTokenGroup.updateNoficationInfo({
+          payload: {
+            secret: createResp.secret,
+            systemVexlToken: systemToken,
+          },
+          headers,
+        })
 
-        const selectedTokens = yield* _(db.selectVexlTokens('general'))
+        const selectedTokens = yield* db.selectVexlTokens('general')
         expect(
           Option.isSome(
             Array.findFirst(selectedTokens, (one) => one === systemToken)
@@ -208,10 +197,10 @@ describe('Vexl product notification batching', () => {
 
   it('pending rows encode and decode through UserNotificationMqEntry JSON', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const sql = yield* _(SqlClient.SqlClient)
-        yield* _(sql`DELETE FROM pending_batched_notifications`)
-        const db = yield* _(PendingBatchedNotificationsDb)
+      Effect.gen(function* () {
+        const sql = yield* SqlClient.SqlClient
+        yield* sql`DELETE FROM pending_batched_notifications`
+        const db = yield* PendingBatchedNotificationsDb
         const entry = new VexlProductNotificationMqEntry({
           token: token('vexl_nt_encode_decode'),
           notificationToken: null,
@@ -221,9 +210,9 @@ describe('Vexl product notification batching', () => {
           }),
         })
 
-        yield* _(db.insertPendingEntries([entry]))
+        yield* db.insertPendingEntries([entry])
 
-        const rows = yield* _(db.findOldestPendingRows(1))
+        const rows = yield* db.findOldestPendingRows(1)
         expect(rows).toHaveLength(1)
         const decoded = Schema.decodeUnknownSync(
           PendingBatchedNotificationDbRecord
@@ -235,11 +224,11 @@ describe('Vexl product notification batching', () => {
 
   it('batch worker sends only the configured oldest batch size', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
+      Effect.gen(function* () {
         process.env.VEXL_PRODUCT_NOTIFICATION_BATCH_SIZE = '2'
-        const sql = yield* _(SqlClient.SqlClient)
-        yield* _(sql`DELETE FROM pending_batched_notifications`)
-        const db = yield* _(PendingBatchedNotificationsDb)
+        const sql = yield* SqlClient.SqlClient
+        yield* sql`DELETE FROM pending_batched_notifications`
+        const db = yield* PendingBatchedNotificationsDb
         const entries = [
           new VexlProductNotificationMqEntry({
             token: token('vexl_nt_batch_oldest_1'),
@@ -267,11 +256,11 @@ describe('Vexl product notification batching', () => {
           }),
         ]
 
-        yield* _(db.insertPendingEntries(entries))
-        yield* _(issueNotificationBatch)
+        yield* db.insertPendingEntries(entries)
+        yield* issueNotificationBatch
 
         expect(enqueuedUserNotifications).toEqual([entries[0], entries[1]])
-        const remainingRows = yield* _(db.findOldestPendingRows(10))
+        const remainingRows = yield* db.findOldestPendingRows(10)
         expect(remainingRows).toHaveLength(1)
         const decodedRemaining = Schema.decodeUnknownSync(
           PendingBatchedNotificationDbRecord
@@ -283,11 +272,11 @@ describe('Vexl product notification batching', () => {
 
   it('deletes successfully enqueued and invalid rows while keeping failed rows', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
+      Effect.gen(function* () {
         process.env.VEXL_PRODUCT_NOTIFICATION_BATCH_SIZE = '10'
-        const db = yield* _(PendingBatchedNotificationsDb)
-        const sql = yield* _(SqlClient.SqlClient)
-        yield* _(sql`DELETE FROM pending_batched_notifications`)
+        const db = yield* PendingBatchedNotificationsDb
+        const sql = yield* SqlClient.SqlClient
+        yield* sql`DELETE FROM pending_batched_notifications`
         const failedToken = token('vexl_nt_batch_failure')
         const successfulEntry = new VexlProductNotificationMqEntry({
           token: token('vexl_nt_batch_success'),
@@ -307,18 +296,18 @@ describe('Vexl product notification batching', () => {
         })
 
         failUserNotificationEnqueueForToken(failedToken)
-        yield* _(db.insertPendingEntries([successfulEntry, failedEntry]))
-        yield* _(sql`
+        yield* db.insertPendingEntries([successfulEntry, failedEntry])
+        yield* sql`
           INSERT INTO
             pending_batched_notifications (notification_data)
           VALUES
             (${JSON.stringify({unexpected: true})}::jsonb)
-        `)
+        `
 
-        yield* _(issueNotificationBatch)
+        yield* issueNotificationBatch
 
         expect(enqueuedUserNotifications).toEqual([successfulEntry])
-        const remainingRows = yield* _(db.findOldestPendingRows(10))
+        const remainingRows = yield* db.findOldestPendingRows(10)
         expect(remainingRows).toHaveLength(1)
         const decodedRemaining = Schema.decodeUnknownSync(
           PendingBatchedNotificationDbRecord

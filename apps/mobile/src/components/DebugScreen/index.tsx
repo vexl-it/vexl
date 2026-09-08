@@ -40,7 +40,7 @@ import {
   Array,
   Effect,
   pipe as effectPipe,
-  Either,
+  Filter,
   HashMap,
   Option,
   Schema,
@@ -687,7 +687,7 @@ function DebugScreen(): React.ReactElement {
             text="Refresh connectionss"
             onPress={() => {
               Effect.runFork(
-                Effect.gen(function* (_) {
+                Effect.gen(function* () {
                   yield* store.set(syncConnectionsActionAtom)
 
                   const connectionState = store.get(connectionStateAtom)
@@ -792,30 +792,34 @@ function DebugScreen(): React.ReactElement {
                   const newStoredContacts = effectPipe(
                     numbersToImport,
                     Array.filter((number) => !existingRawNumbers.has(number)),
-                    Array.filterMap((number): Option.Option<StoredContact> => {
-                      const hash = hashPhoneNumber(number)
-                      if (hash._tag !== 'Right') return Option.none()
-                      return Option.some({
-                        info: {
-                          name: `Seed user ${number.slice(-3)}`,
-                          label: Option.none(),
-                          nonUniqueContactId: Option.none(),
-                          numberToDisplay: number,
-                          rawNumber: number,
-                        },
-                        computedValues: Option.some({
-                          normalizedNumber: number,
-                          hash: hash.right,
-                        }),
-                        serverHashToClient: Option.none(),
-                        flags: {
-                          seen: true,
-                          imported: false,
-                          importedManually: true,
-                          invalidNumber: 'valid',
-                        },
-                      })
-                    })
+                    Array.filterMap(
+                      Filter.fromPredicateOption(
+                        (number): Option.Option<StoredContact> => {
+                          const hash = hashPhoneNumber(number)
+                          if (hash._tag !== 'Right') return Option.none()
+                          return Option.some({
+                            info: {
+                              name: `Seed user ${number.slice(-3)}`,
+                              label: Option.none(),
+                              nonUniqueContactId: Option.none(),
+                              numberToDisplay: number,
+                              rawNumber: number,
+                            },
+                            computedValues: Option.some({
+                              normalizedNumber: number,
+                              hash: hash.right,
+                            }),
+                            serverHashToClient: Option.none(),
+                            flags: {
+                              seen: true,
+                              imported: false,
+                              importedManually: true,
+                              invalidNumber: 'valid',
+                            },
+                          })
+                        }
+                      )
+                    )
                   )
                   store.set(storedContactsAtom, (existing) => [
                     ...existing,
@@ -854,24 +858,26 @@ function DebugScreen(): React.ReactElement {
                     Array.flatMap((inbox) =>
                       effectPipe(
                         inbox.chats,
-                        Array.filterMap((chatWithMessages) => {
-                          const lastMessage = chatWithMessages.messages.at(-1)
-                          return lastMessage?.message.messageType ===
-                            'REQUEST_MESSAGING' &&
-                            lastMessage.state === 'received'
-                            ? Option.some({
-                                inboxKey:
-                                  inbox.inbox.privateKey.publicKeyPemBase64,
-                                senderKey:
-                                  chatWithMessages.chat.otherSide.publicKey,
-                              })
-                            : Option.none()
-                        })
+                        Array.filterMap(
+                          Filter.fromPredicateOption((chatWithMessages) => {
+                            const lastMessage = chatWithMessages.messages.at(-1)
+                            return lastMessage?.message.messageType ===
+                              'REQUEST_MESSAGING' &&
+                              lastMessage.state === 'received'
+                              ? Option.some({
+                                  inboxKey:
+                                    inbox.inbox.privateKey.publicKeyPemBase64,
+                                  senderKey:
+                                    chatWithMessages.chat.otherSide.publicKey,
+                                })
+                              : Option.none()
+                          })
+                        )
                       )
                     )
                   )
 
-                  if (!Array.isNonEmptyArray(pending)) {
+                  if (!Array.isArrayNonEmpty(pending)) {
                     Alert.alert('No pending chat requests found')
                     return
                   }
@@ -885,7 +891,7 @@ function DebugScreen(): React.ReactElement {
                       Effect.forEach(
                         pending,
                         ({inboxKey, senderKey}, i) =>
-                          Effect.gen(function* (_) {
+                          Effect.gen(function* () {
                             const focusedChatAtom =
                               focusChatByInboxKeyAndSenderKey({
                                 inboxKey,
@@ -910,14 +916,12 @@ function DebugScreen(): React.ReactElement {
                                   )
                                 }
                               )
-                            yield* _(
-                              taskEitherToEffect(
-                                store.set(acceptMessagingRequestAtom, {
-                                  chatAtom: definiteChatAtom,
-                                  approve: true,
-                                  text: 'Hi! Sure, let us talk.',
-                                })
-                              )
+                            yield* taskEitherToEffect(
+                              store.set(acceptMessagingRequestAtom, {
+                                chatAtom: definiteChatAtom,
+                                approve: true,
+                                text: 'Hi! Sure, let us talk.',
+                              })
                             )
                             console.log(
                               `Approved chat request ${i + 1}/${pending.length}`
@@ -967,35 +971,34 @@ function DebugScreen(): React.ReactElement {
                 Effect.forEach(
                   Array.range(0, 99),
                   (index) =>
-                    Effect.gen(function* (_) {
+                    Effect.gen(function* () {
                       const offerId = newOfferId()
-                      const inbox = yield* _(
-                        store.set(upsertInboxOnBeAndLocallyActionAtom, {
+                      const inbox = yield* store.set(
+                        upsertInboxOnBeAndLocallyActionAtom,
+                        {
                           for: 'myOffer',
                           offerId,
-                        })
+                        }
                       )
 
-                      return yield* _(
-                        store.set(createOfferActionAtom, {
-                          offerId,
-                          payloadPublic: createDebugEuropeOfferPublicPart({
-                            index,
-                            offerPublicKey:
-                              inbox.inbox.privateKey.publicKeyPemBase64,
-                          }),
-                          intendedConnectionLevel: 'ALL',
-                          intendedClubs: [],
-                          offerKey: inbox.inbox.privateKey,
-                          onProgress: (progress) => {
-                            console.log(
-                              `Creating debug Europe offer ${
-                                index + 1
-                              }/100: ${JSON.stringify(progress)}`
-                            )
-                          },
-                        })
-                      )
+                      return yield* store.set(createOfferActionAtom, {
+                        offerId,
+                        payloadPublic: createDebugEuropeOfferPublicPart({
+                          index,
+                          offerPublicKey:
+                            inbox.inbox.privateKey.publicKeyPemBase64,
+                        }),
+                        intendedConnectionLevel: 'ALL',
+                        intendedClubs: [],
+                        offerKey: inbox.inbox.privateKey,
+                        onProgress: (progress) => {
+                          console.log(
+                            `Creating debug Europe offer ${
+                              index + 1
+                            }/100: ${JSON.stringify(progress)}`
+                          )
+                        },
+                      })
                     }),
                   {concurrency: 1}
                 ),
@@ -1059,13 +1062,14 @@ function DebugScreen(): React.ReactElement {
                 Effect.forEach(
                   specsWithIndex,
                   ({spec, index}) =>
-                    Effect.gen(function* (_) {
+                    Effect.gen(function* () {
                       const offerId = newOfferId()
-                      const inbox = yield* _(
-                        store.set(upsertInboxOnBeAndLocallyActionAtom, {
+                      const inbox = yield* store.set(
+                        upsertInboxOnBeAndLocallyActionAtom,
+                        {
                           for: 'myOffer',
                           offerId,
-                        })
+                        }
                       )
                       const currency =
                         selectedCurrencies[index % selectedCurrencies.length] ??
@@ -1078,28 +1082,26 @@ function DebugScreen(): React.ReactElement {
                         `Creating debug filter test offer ${index + 1}/${specs.length}: ${spec.label}`
                       )
 
-                      return yield* _(
-                        store.set(createOfferActionAtom, {
-                          offerId,
-                          payloadPublic: createDebugFilterTestOfferPublicPart({
-                            index,
-                            offerPublicKey:
-                              inbox.inbox.privateKey.publicKeyPemBase64,
-                            spec,
-                            currency,
-                          }),
-                          intendedConnectionLevel: spec.intendedConnectionLevel,
-                          intendedClubs,
-                          offerKey: inbox.inbox.privateKey,
-                          onProgress: (progress) => {
-                            console.log(
-                              `Creating debug filter test offer ${
-                                index + 1
-                              }/${specs.length}: ${JSON.stringify(progress)}`
-                            )
-                          },
-                        })
-                      )
+                      return yield* store.set(createOfferActionAtom, {
+                        offerId,
+                        payloadPublic: createDebugFilterTestOfferPublicPart({
+                          index,
+                          offerPublicKey:
+                            inbox.inbox.privateKey.publicKeyPemBase64,
+                          spec,
+                          currency,
+                        }),
+                        intendedConnectionLevel: spec.intendedConnectionLevel,
+                        intendedClubs,
+                        offerKey: inbox.inbox.privateKey,
+                        onProgress: (progress) => {
+                          console.log(
+                            `Creating debug filter test offer ${
+                              index + 1
+                            }/${specs.length}: ${JSON.stringify(progress)}`
+                          )
+                        },
+                      })
                     }),
                   {concurrency: 1}
                 ),
@@ -1156,12 +1158,8 @@ function DebugScreen(): React.ReactElement {
                     ])
                   },
                   (result) => {
-                    const errors = effectPipe(
-                      Array.filterMap(result, Either.getLeft)
-                    )
-                    const success = effectPipe(
-                      Array.filterMap(result, Either.getRight)
-                    )
+                    const errors = effectPipe(Array.getFailures(result))
+                    const success = effectPipe(Array.getSuccesses(result))
 
                     Alert.alert(
                       'success',
@@ -1280,9 +1278,11 @@ function DebugScreen(): React.ReactElement {
             onPress={() => {
               pipe(
                 refreshMessaging(),
-                Effect.andThen((r) => {
-                  Alert.alert(r)
-                }),
+                Effect.andThen((r) =>
+                  Effect.sync(() => {
+                    Alert.alert(String(r))
+                  })
+                ),
                 Effect.runFork
               )
             }}
@@ -1389,13 +1389,15 @@ function DebugScreen(): React.ReactElement {
             text="Delete user inbox"
             onPress={() =>
               deleteInbox(session.privateKey).pipe(
-                Effect.tap((result) => {
-                  if (result) {
-                    Alert.alert('done')
-                  } else {
-                    Alert.alert('error')
-                  }
-                }),
+                Effect.tap((result) =>
+                  Effect.sync(() => {
+                    if (result) {
+                      Alert.alert('done')
+                    } else {
+                      Alert.alert('error')
+                    }
+                  })
+                ),
                 Effect.runFork
               )
             }
@@ -1425,7 +1427,7 @@ function DebugScreen(): React.ReactElement {
             text="Send version update to all chats"
             onPress={() => {
               Effect.runFork(
-                Effect.gen(function* (_) {
+                Effect.gen(function* () {
                   const allChats = store.get(allChatsAtom).flat()
                   const sendUpdate = Array.map(allChats, (one) => {
                     const inboxAtom = focusChatByInboxKeyAndSenderKey({
@@ -1437,7 +1439,7 @@ function DebugScreen(): React.ReactElement {
                       inboxAtom
                     )
                   })
-                  yield* _(Effect.all(sendUpdate))
+                  yield* Effect.all(sendUpdate)
                 })
               )
             }}
@@ -1523,33 +1525,27 @@ function DebugScreen(): React.ReactElement {
             text="Create and Copy notification cypher"
             onPress={() => {
               Effect.runFork(
-                Effect.gen(function* (_) {
-                  const notificationToken = yield* _(getNotificationTokenE())
+                Effect.gen(function* () {
+                  const notificationToken = yield* getNotificationTokenE()
                   if (!notificationToken) {
-                    yield* _(
-                      Effect.sync(() => {
-                        Alert.alert('No notification token')
-                      })
-                    )
+                    yield* Effect.sync(() => {
+                      Alert.alert('No notification token')
+                    })
                     return
                   }
 
-                  const cypher = yield* _(
-                    fetchAndEncryptNotificationToken({
-                      clientPlatform: platform,
-                      clientVersion: versionCode,
-                      expoToken: notificationToken,
-                      notificationApi: store.get(apiAtom).notification,
-                      locale: t('localeName'),
-                    })
-                  )
+                  const cypher = yield* fetchAndEncryptNotificationToken({
+                    clientPlatform: platform,
+                    clientVersion: versionCode,
+                    expoToken: notificationToken,
+                    notificationApi: store.get(apiAtom).notification,
+                    locale: t('localeName'),
+                  })
 
-                  yield* _(
-                    Effect.sync(() => {
-                      Clipboard.setString(cypher)
-                      Alert.alert('Copied')
-                    })
-                  )
+                  yield* Effect.sync(() => {
+                    Clipboard.setString(cypher)
+                    Alert.alert('Copied')
+                  })
                 })
               )
             }}
@@ -1662,7 +1658,7 @@ function DebugScreen(): React.ReactElement {
             size="small"
             text={`(Effect) Generate and measure decoding of ${NUMBER_OF_TEST_CONTACTS} contacts`}
             onPress={() => {
-              Effect.gen(function* (_) {
+              Effect.gen(function* () {
                 const contacts = generateTestContacts()
                 const measureDecodingContacts = startMeasure(
                   `Measure decoding large amount of ${NUMBER_OF_TEST_CONTACTS} contacts`
@@ -1671,7 +1667,7 @@ function DebugScreen(): React.ReactElement {
                 const result = pipe(
                   contacts,
                   Schema.decodeSync(
-                    Schema.parseJson(Schema.Array(StoredContact))
+                    Schema.fromJsonString(Schema.Array(StoredContact))
                   )
                 )
 

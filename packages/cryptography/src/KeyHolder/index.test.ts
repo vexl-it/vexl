@@ -1,4 +1,4 @@
-import {Schema} from 'effect/index'
+import {Schema} from 'effect'
 import {PrivateKeyPemBase64} from './brands'
 import {generatePrivateKey, importPrivateKey} from './index'
 

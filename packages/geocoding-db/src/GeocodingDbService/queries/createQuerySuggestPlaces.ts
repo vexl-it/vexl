@@ -1,7 +1,7 @@
-import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {Effect, flow, Schema} from 'effect'
+import {SqlSchema} from 'effect/unstable/sql'
 import {GeocodingRecordWithContext} from '../domain'
 
 const SuggestPlacesRequest = Schema.Struct({
@@ -20,8 +20,8 @@ const SuggestPlacesRequest = Schema.Struct({
   limit: Schema.Int,
 })
 
-export const createQuerySuggestPlaces = Effect.gen(function* (_) {
-  const sql = yield* _(PgClient.PgClient)
+export const createQuerySuggestPlaces = Effect.gen(function* () {
+  const sql = yield* PgClient.PgClient
 
   const query = SqlSchema.findAll({
     Request: SuggestPlacesRequest,

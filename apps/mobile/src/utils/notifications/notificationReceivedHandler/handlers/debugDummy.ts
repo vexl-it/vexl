@@ -1,5 +1,5 @@
 import {type DebugDummyNotificationData} from '@vexl-next/domain/src/general/notifications'
-import {Effect} from 'effect/index'
+import {Effect} from 'effect'
 import {displayLocalNotification} from '../../displayLocalNotification'
 
 export function handleDebugDummyNotification(

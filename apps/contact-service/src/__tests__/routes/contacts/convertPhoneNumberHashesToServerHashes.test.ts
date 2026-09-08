@@ -1,7 +1,7 @@
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {hashPhoneNumber} from '@vexl-next/server-utils/src/generateUserAuthData'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
-import {Array, Effect, pipe, Schema} from 'effect/index'
+import {Array, Effect, pipe, Schema} from 'effect'
 import {
   hashForClient,
   serverHashPhoneNumber,
@@ -12,20 +12,20 @@ import {generateKeysAndHasheForNumber} from './utils'
 
 it('Converts phone number hashes to server hashes', async () => {
   await runPromiseInMockedEnvironment(
-    Effect.gen(function* (_) {
-      const somePhoneNumbers = yield* _(
+    Effect.gen(function* () {
+      const somePhoneNumbers = yield* pipe(
         ['+420733333001', '+420733333002', '+420733333003'],
         Array.map((numberString) =>
           pipe(
             numberString,
-            Schema.decode(E164PhoneNumber),
+            Schema.decodeEffect(E164PhoneNumber),
             Effect.flatMap(hashPhoneNumber)
           )
         ),
         Effect.all
       )
 
-      const expectedResult = yield* _(
+      const expectedResult = yield* pipe(
         somePhoneNumbers,
         Array.map((number) =>
           pipe(
@@ -41,10 +41,10 @@ it('Converts phone number hashes to server hashes', async () => {
         Effect.all
       )
 
-      const me = yield* _(generateKeysAndHasheForNumber('+420733333001'))
+      const me = yield* generateKeysAndHasheForNumber('+420733333001')
 
-      yield* _(setAuthHeaders(me.authHeaders))
-      const client = yield* _(
+      yield* setAuthHeaders(me.authHeaders)
+      const client = yield* pipe(
         NodeTestingApp,
         Effect.flatMap((app) =>
           app.Contact.convertPhoneNumberHashesToServerHashes({

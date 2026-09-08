@@ -32,37 +32,33 @@ beforeEach(() => {
 describe('loginFlow', () => {
   it('should generate proper user credentials', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
+      Effect.gen(function* () {
         createVerificationMock.mockReturnValueOnce(
           Effect.succeed(Schema.decodeSync(SmsVerificationSid)('123456'))
         )
-        const client = yield* _(NodeTestingApp)
-        const initResponse = yield* _(
-          client.Login.initVerification({
-            headers: Schema.decodeSync(CommonHeaders)({
-              'user-agent': 'Vexl/2 (1.0.0) IOS',
-            }),
-            payload: {
-              challenge: yield* _(generateAndSignChallenge),
-              phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333333'),
-            },
-          })
-        )
+        const client = yield* NodeTestingApp
+        const initResponse = yield* client.Login.initVerification({
+          headers: Schema.decodeSync(CommonHeaders)({
+            'user-agent': 'Vexl/2 (1.0.0) IOS',
+          }),
+          payload: {
+            challenge: yield* generateAndSignChallenge,
+            phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333333'),
+          },
+        })
 
         expect(initResponse.verificationId).toBeDefined()
         expect(initResponse.expirationAt).toBeDefined()
 
         checkVerificationMock.mockReturnValueOnce(Effect.succeed('valid'))
         const keypair = generatePrivateKey()
-        const checkResponse = yield* _(
-          client.Login.verifyCode({
-            payload: {
-              userPublicKey: keypair.publicKeyPemBase64,
-              id: initResponse.verificationId,
-              code: '123456',
-            },
-          })
-        )
+        const checkResponse = yield* client.Login.verifyCode({
+          payload: {
+            userPublicKey: keypair.publicKeyPemBase64,
+            id: initResponse.verificationId,
+            code: '123456',
+          },
+        })
 
         expect(checkResponse.challenge).toBeDefined()
 
@@ -74,19 +70,17 @@ describe('loginFlow', () => {
           Schema.decodeSync(EcdsaSignature)
         )
 
-        const verifyChallenge = yield* _(
-          client.Login.verifyChallenge({
-            payload: {
-              userPublicKey: keypair.publicKeyPemBase64,
-              signature: signedChallenge,
-            },
-          })
-        )
+        const verifyChallenge = yield* client.Login.verifyChallenge({
+          payload: {
+            userPublicKey: keypair.publicKeyPemBase64,
+            signature: signedChallenge,
+          },
+        })
 
         expect(verifyChallenge.hash).toBeDefined()
         expect(verifyChallenge.signature).toBeDefined()
 
-        const usersDb = yield* _(LoggedInUsersDbService)
+        const usersDb = yield* LoggedInUsersDbService
         expect(usersDb.insertUser).toHaveBeenCalledWith({
           publicKey: keypair.publicKeyPemBase64,
           countryPrefix: 420,
@@ -95,15 +89,15 @@ describe('loginFlow', () => {
         expect(mockedReportNewUserCreated).toHaveBeenCalledTimes(1)
 
         expect(
-          (yield* _(
+          (yield* pipe(
             verifyUserSecurity({
               hash: verifyChallenge.hash,
               signature: verifyChallenge.signature,
               publicKey: keypair.publicKeyPemBase64,
             }),
-            Effect.either
+            Effect.result
           ))._tag
-        ).toBe('Right')
+        ).toBe('Success')
       })
     )
   })

@@ -1,5 +1,5 @@
 import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
-import {Option, Schema} from 'effect/index'
+import {Option, Schema} from 'effect'
 import {Paths} from 'expo-file-system'
 import {Platform} from 'react-native'
 

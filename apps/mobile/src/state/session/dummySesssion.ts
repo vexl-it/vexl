@@ -4,7 +4,7 @@ import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.bra
 import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {type CryptoBoxSignature} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {type EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/EcdsaSignature.brand'
-import {Schema} from 'effect/index'
+import {Schema} from 'effect'
 import {type SessionV2} from '../../brands/Session.brand'
 
 const dummyPrivKey = KeyHolder.generatePrivateKey()

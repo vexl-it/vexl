@@ -95,35 +95,28 @@ function TradeCalculator({
         <SwitchTradePriceTypeButton
           onPress={() => {
             void Effect.runPromise(
-              Effect.gen(function* (_) {
-                const selectedTradePriceType = yield* _(
-                  showTradePriceTypeDialog()
-                )
+              Effect.gen(function* () {
+                const selectedTradePriceType = yield* showTradePriceTypeDialog()
 
                 if (!selectedTradePriceType) return
 
                 if (selectedTradePriceType === 'your') {
                   setOwnPrice(undefined)
-                  const confirmed = yield* _(
-                    showGlobalDialog({
-                      title: t(
-                        'tradeChecklist.calculateAmount.setYourOwnPrice'
-                      ),
-                      positiveButtonText: t('common.save'),
-                      negativeButtonText: t('common.close'),
-                      positiveButtonDisabledAtom:
-                        ownPriceSaveButtonDisabledAtom,
-                      children: (
-                        <SetYourOwnPriceDialogContent
-                          fiatCurrency={fiatCurrency ?? 'USD'}
-                        />
-                      ),
-                    })
-                  )
+                  const confirmed = yield* showGlobalDialog({
+                    title: t('tradeChecklist.calculateAmount.setYourOwnPrice'),
+                    positiveButtonText: t('common.save'),
+                    negativeButtonText: t('common.close'),
+                    positiveButtonDisabledAtom: ownPriceSaveButtonDisabledAtom,
+                    children: (
+                      <SetYourOwnPriceDialogContent
+                        fiatCurrency={fiatCurrency ?? 'USD'}
+                      />
+                    ),
+                  })
 
                   if (confirmed) {
-                    yield* _(
-                      Effect.promise(dismissKeyboardAndResolveOnLayoutUpdate)
+                    yield* Effect.promise(
+                      dismissKeyboardAndResolveOnLayoutUpdate
                     )
                     saveYourPrice(fiatCurrency)
                   }

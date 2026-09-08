@@ -1,4 +1,4 @@
-import {Effect} from 'effect/index'
+import {Effect, pipe} from 'effect'
 import {
   FIVE_MINUTES_MS,
   InAppLoadingTaskError,
@@ -16,29 +16,27 @@ export const loadContactsFromDeviceActionAtomInAppLoadingTaskId =
       minTimeBetweenRunsMs: FIVE_MINUTES_MS,
     },
     task: (store) =>
-      Effect.gen(function* (_) {
-        const contactsPermissionsAlreadyGranted = yield* _(
+      Effect.gen(function* () {
+        const contactsPermissionsAlreadyGranted = yield* pipe(
           areContactsPermissionsAlreadyGranted(),
-          Effect.catchAll(() => Effect.succeed(false))
+          Effect.catch(() => Effect.succeed(false))
         )
 
         if (!contactsPermissionsAlreadyGranted) return
 
-        yield* _(
-          store.set(loadAndNormalizeContactsFromDeviceActionAtom).pipe(
-            Effect.catchAll((error) => {
-              if (error._tag === 'UnknownContactsError') {
-                return Effect.succeed(true)
-              }
+        yield* store.set(loadAndNormalizeContactsFromDeviceActionAtom).pipe(
+          Effect.catch((error) => {
+            if (error._tag === 'UnknownContactsError') {
+              return Effect.succeed(true)
+            }
 
-              return Effect.fail(
-                new InAppLoadingTaskError({
-                  message: 'Error while loading contacts from device',
-                  cause: error,
-                })
-              )
-            })
-          )
+            return Effect.fail(
+              new InAppLoadingTaskError({
+                message: 'Error while loading contacts from device',
+                cause: error,
+              })
+            )
+          })
         )
       }),
   })

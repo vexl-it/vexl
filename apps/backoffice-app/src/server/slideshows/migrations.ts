@@ -27,54 +27,50 @@ const migrations: readonly Migration[] = [
   },
 ]
 
-export const runBackofficeMigrationsEffect = Effect.gen(function* (_) {
-  const sql = yield* _(PgClient.PgClient)
+export const runBackofficeMigrationsEffect = Effect.gen(function* () {
+  const sql = yield* PgClient.PgClient
 
-  yield* _(sql`
+  yield* sql`
     CREATE TABLE IF NOT EXISTS backoffice_migrations (
       id integer PRIMARY KEY,
       name text NOT NULL,
       created_at timestamptz NOT NULL DEFAULT now()
     );
-  `)
+  `
 
-  yield* _(
-    Effect.forEach(
-      migrations,
-      (migration) =>
-        Effect.gen(function* (_) {
-          const applied = yield* _(sql<AppliedMigrationRow>`
-            SELECT
-              id
-            FROM
-              backoffice_migrations
-            WHERE
-              id = ${migration.id}
-            LIMIT
-              1
-          `)
+  yield* Effect.forEach(
+    migrations,
+    (migration) =>
+      Effect.gen(function* () {
+        const applied = yield* sql<AppliedMigrationRow>`
+          SELECT
+            id
+          FROM
+            backoffice_migrations
+          WHERE
+            id = ${migration.id}
+          LIMIT
+            1
+        `
 
-          if (Array.isNonEmptyReadonlyArray(applied)) return
+        if (Array.isReadonlyArrayNonEmpty(applied)) return
 
-          yield* _(
-            sql.withTransaction(
-              Effect.gen(function* (_) {
-                yield* _(migration.effect)
-                yield* _(sql`
-                  INSERT INTO
-                    backoffice_migrations (id, name)
-                  VALUES
-                    (
-                      ${migration.id},
-                      ${migration.name}
-                    )
-                `)
-              })
-            )
-          )
-        }),
-      {discard: true}
-    )
+        yield* sql.withTransaction(
+          Effect.gen(function* () {
+            yield* migration.effect
+            yield* sql`
+              INSERT INTO
+                backoffice_migrations (id, name)
+              VALUES
+                (
+                  ${migration.id},
+                  ${migration.name}
+                )
+            `
+          })
+        )
+      }),
+    {discard: true}
   )
 })
 

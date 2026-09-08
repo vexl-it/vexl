@@ -1,4 +1,3 @@
-import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {
   type ClubCode,
@@ -19,7 +18,8 @@ import {
 } from '@vexl-next/rest-api/src/services/contact/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {addTestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
-import {Effect, Option, Schema} from 'effect'
+import {Effect, Option, pipe, Schema} from 'effect'
+import {SqlClient} from 'effect/unstable/sql'
 import {ClubMembersDbService} from '../../../../db/ClubMemberDbService'
 import {ClubsDbService} from '../../../../db/ClubsDbService'
 import {type ClubRecordId} from '../../../../db/ClubsDbService/domain'
@@ -53,51 +53,45 @@ let code: ClubCode
 
 beforeEach(async () => {
   await runPromiseInMockedEnvironment(
-    Effect.gen(function* (_) {
-      const sql = yield* _(SqlClient.SqlClient)
-      yield* _(sql`DELETE FROM club_invitation_link`)
-      yield* _(sql`DELETE FROM club_member`)
-      yield* _(sql`DELETE FROM club`)
+    Effect.gen(function* () {
+      const sql = yield* SqlClient.SqlClient
+      yield* sql`DELETE FROM club_invitation_link`
+      yield* sql`DELETE FROM club_member`
+      yield* sql`DELETE FROM club`
 
-      const app = yield* _(NodeTestingApp)
-      yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
-      yield* _(
-        app.ClubsAdmin.createClub({
-          headers: {'x-admin-token': ADMIN_TOKEN},
-          payload: {
-            club,
-          },
-        })
-      )
+      const app = yield* NodeTestingApp
+      yield* addTestHeaders({'x-admin-token': ADMIN_TOKEN})
+      yield* app.ClubsAdmin.createClub({
+        headers: {'x-admin-token': ADMIN_TOKEN},
+        payload: {
+          club,
+        },
+      })
 
-      const clubsDb = yield* _(ClubsDbService)
-      const createdClub = yield* _(
+      const clubsDb = yield* ClubsDbService
+      const createdClub = yield* pipe(
         clubsDb.findClubByUuid({uuid: club.uuid}),
-        Effect.flatten
+        Effect.flatMap(Effect.fromOption)
       )
       clubId = createdClub.id
 
-      const clubDb = yield* _(ClubMembersDbService)
-      yield* _(
-        clubDb.insertClubMember({
-          clubId,
-          publicKey: userKey.publicKeyPemBase64,
-          isModerator: true,
-          lastRefreshedAt: new Date(),
-          notificationToken: 'someToken' as ExpoNotificationToken,
-          vexlNotificationToken: 'vexl_nt_test' as VexlNotificationToken,
-          publicKeyV2: null,
-        })
-      )
+      const clubDb = yield* ClubMembersDbService
+      yield* clubDb.insertClubMember({
+        clubId,
+        publicKey: userKey.publicKeyPemBase64,
+        isModerator: true,
+        lastRefreshedAt: new Date(),
+        notificationToken: 'someToken' as ExpoNotificationToken,
+        vexlNotificationToken: 'vexl_nt_test' as VexlNotificationToken,
+        publicKeyV2: null,
+      })
 
-      const link = yield* _(
-        app.ClubsModerator.generateClubJoinLink({
-          payload: {
-            clubUuid: club.uuid,
-            ...(yield* _(generateAndSignChallenge(userKey))),
-          },
-        })
-      )
+      const link = yield* app.ClubsModerator.generateClubJoinLink({
+        payload: {
+          clubUuid: club.uuid,
+          ...(yield* generateAndSignChallenge(userKey)),
+        },
+      })
       code = link.codeInfo.code
     })
   )
@@ -106,24 +100,23 @@ beforeEach(async () => {
 describe('Deactivate link', () => {
   it('Deactivates link', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
-        const deactivateLinkResponse = yield* _(
-          app.ClubsModerator.deactivateClubJoinLink({
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
+        const deactivateLinkResponse =
+          yield* app.ClubsModerator.deactivateClubJoinLink({
             payload: {
               code,
               clubUuid: club.uuid,
-              ...(yield* _(generateAndSignChallenge(userKey))),
+              ...(yield* generateAndSignChallenge(userKey)),
             },
           })
-        )
 
         expect(deactivateLinkResponse).toEqual({
           clubUuid: club.uuid,
           deactivatedCode: code,
         })
 
-        const errorResponse = yield* _(
+        const errorResponse = yield* pipe(
           app.ClubsMember.joinClub({
             headers: testCommonHeaders,
             payload: {
@@ -131,10 +124,10 @@ describe('Deactivate link', () => {
               notificationToken: Option.none(),
               vexlNotificationToken: Option.none(),
               contactsImported: false,
-              ...(yield* _(generateAndSignChallenge(user1))),
+              ...(yield* generateAndSignChallenge(user1)),
             },
           }),
-          Effect.either
+          Effect.result
         )
         expectErrorResponse(NotFoundError)(errorResponse)
       })
@@ -143,17 +136,17 @@ describe('Deactivate link', () => {
 
   it('Fails invite code not found when invite code is not found', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
-        const failedResponse = yield* _(
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
+        const failedResponse = yield* pipe(
           app.ClubsModerator.deactivateClubJoinLink({
             payload: {
               code: '112345' as ClubCode,
               clubUuid: club.uuid,
-              ...(yield* _(generateAndSignChallenge(userKey))),
+              ...(yield* generateAndSignChallenge(userKey)),
             },
           }),
-          Effect.either
+          Effect.result
         )
 
         expectErrorResponse(InviteCodeNotFoundError)(failedResponse)
@@ -163,32 +156,30 @@ describe('Deactivate link', () => {
 
   it('Fails with UserIsNotModeratorError when member is not a moderator', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
 
-        const memberDb = yield* _(ClubMembersDbService)
+        const memberDb = yield* ClubMembersDbService
         const nonModeratorMember = generatePrivateKey()
-        yield* _(
-          memberDb.insertClubMember({
-            publicKey: nonModeratorMember.publicKeyPemBase64,
-            clubId,
-            isModerator: false,
-            lastRefreshedAt: new Date(),
-            notificationToken: null,
-            vexlNotificationToken: null,
-            publicKeyV2: null,
-          })
-        )
+        yield* memberDb.insertClubMember({
+          publicKey: nonModeratorMember.publicKeyPemBase64,
+          clubId,
+          isModerator: false,
+          lastRefreshedAt: new Date(),
+          notificationToken: null,
+          vexlNotificationToken: null,
+          publicKeyV2: null,
+        })
 
-        const errorResponse = yield* _(
+        const errorResponse = yield* pipe(
           app.ClubsModerator.deactivateClubJoinLink({
             payload: {
               code,
               clubUuid: club.uuid,
-              ...(yield* _(generateAndSignChallenge(nonModeratorMember))),
+              ...(yield* generateAndSignChallenge(nonModeratorMember)),
             },
           }),
-          Effect.either
+          Effect.result
         )
 
         expectErrorResponse(UserIsNotModeratorError)(errorResponse)
@@ -198,20 +189,20 @@ describe('Deactivate link', () => {
 
   it('Fails with 404 when member is not found', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
 
         const nonModeratorMember = generatePrivateKey()
 
-        const errorResponse = yield* _(
+        const errorResponse = yield* pipe(
           app.ClubsModerator.deactivateClubJoinLink({
             payload: {
               code,
               clubUuid: club.uuid,
-              ...(yield* _(generateAndSignChallenge(nonModeratorMember))),
+              ...(yield* generateAndSignChallenge(nonModeratorMember)),
             },
           }),
-          Effect.either
+          Effect.result
         )
 
         expectErrorResponse(NotFoundError)(errorResponse)
@@ -221,18 +212,18 @@ describe('Deactivate link', () => {
 
   it('Fails with 404 when club is not found', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
 
-        const errorResponse = yield* _(
+        const errorResponse = yield* pipe(
           app.ClubsModerator.deactivateClubJoinLink({
             payload: {
               code,
               clubUuid: generateClubUuid(),
-              ...(yield* _(generateAndSignChallenge(userKey))),
+              ...(yield* generateAndSignChallenge(userKey)),
             },
           }),
-          Effect.either
+          Effect.result
         )
 
         expectErrorResponse(NotFoundError)(errorResponse)
@@ -242,12 +233,12 @@ describe('Deactivate link', () => {
 
   it('Fails with Invalid challenge', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
 
-        const challenge = yield* _(generateAndSignChallenge(userKey))
+        const challenge = yield* generateAndSignChallenge(userKey)
 
-        const errorResponse = yield* _(
+        const errorResponse = yield* pipe(
           app.ClubsModerator.deactivateClubJoinLink({
             payload: {
               code,
@@ -260,7 +251,7 @@ describe('Deactivate link', () => {
               },
             },
           }),
-          Effect.either
+          Effect.result
         )
 
         expectErrorResponse(InvalidChallengeError)(errorResponse)

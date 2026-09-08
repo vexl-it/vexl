@@ -3,7 +3,7 @@ import {
   effectToTaskEither,
   taskToEffect,
 } from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import {Array, Effect, Option, pipe} from 'effect'
+import {Array, Effect, Filter, Option, pipe} from 'effect'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {atom} from 'jotai'
@@ -22,14 +22,16 @@ import {offersMissingOnServerAtom} from './marketplace/atoms/offersMissingOnServ
 import {updateOfferActionAtom} from './marketplace/atoms/updateOfferActionAtom'
 
 const refreshOffersActionAtom = atom(null, (get, set) => {
-  return Effect.gen(function* (_) {
+  return Effect.gen(function* () {
     const api = get(apiAtom)
     const myOffers = get(myOffersAtom)
 
     const adminIds = pipe(
       myOffers,
-      Array.filterMap((offer) =>
-        Option.fromNullable(offer.ownershipInfo?.adminId)
+      Array.filterMap(
+        Filter.fromPredicateOption((offer) =>
+          Option.fromNullishOr(offer.ownershipInfo?.adminId)
+        )
       ),
       (o) => {
         console.info(`🦋 Refreshing ${o.length} offers`)
@@ -37,11 +39,11 @@ const refreshOffersActionAtom = atom(null, (get, set) => {
       }
     )
 
-    if (Array.isEmptyArray(adminIds)) {
-      return yield* _(Effect.fail({_tag: 'noOffersToRefresh' as const}))
+    if (Array.isArrayEmpty(adminIds)) {
+      return yield* Effect.fail({_tag: 'noOffersToRefresh' as const})
     }
 
-    const offerIdsOnServer = yield* _(api.offer.refreshOffer({adminIds}))
+    const offerIdsOnServer = yield* api.offer.refreshOffer({adminIds})
 
     const offerIdsOnDevice = myOffers.map((one) => one.offerInfo.offerId)
     const offerIdsNotOnServer = offerIdsOnDevice.filter(
@@ -52,7 +54,7 @@ const refreshOffersActionAtom = atom(null, (get, set) => {
 
     console.info(`🦋 Offers refreshed`)
   }).pipe(
-    Effect.catchAll((e) => {
+    Effect.catch((e) => {
       if (e._tag === 'noOffersToRefresh') {
         console.info('🦋 No offers to refresh')
         return Effect.void
@@ -132,11 +134,11 @@ const recreateInboxAndUpdateOfferAtom = atom(
 const checkOfferInboxesExistAndRecreateIfNotActionAtom = atom(
   null,
   (get, set) => {
-    return Effect.gen(function* (_) {
+    return Effect.gen(function* () {
       const inboxes = get(inboxesAtom)
       const publicKeys = inboxes.map((one) => one.privateKey.publicKeyPemBase64)
 
-      yield* _(
+      yield* pipe(
         get(myOffersAtom),
         Array.filter((offer) => {
           const offerPublicKey = offer.offerInfo.publicPart.offerPublicKey
@@ -161,20 +163,18 @@ export const refreshOffersAndEnsureInboxesTaskId = registerInAppLoadingTask({
     minTimeBetweenRunsMs: FIVE_MINUTES_MS,
   },
   task: (store) =>
-    Effect.gen(function* (_) {
+    Effect.gen(function* () {
       const refreshOffers = store.set(refreshOffersActionAtom)
       const checkOfferInboxesExistAndRecreateIfNot = store.set(
         checkOfferInboxesExistAndRecreateIfNotActionAtom
       )
 
-      yield* _(
-        pipe(
-          refreshOffers,
-          Effect.andThen(checkOfferInboxesExistAndRecreateIfNot),
-          Effect.mapError((e) => {
-            return new InAppLoadingTaskError({cause: e})
-          })
-        )
+      yield* pipe(
+        refreshOffers,
+        Effect.andThen(checkOfferInboxesExistAndRecreateIfNot),
+        Effect.mapError((e) => {
+          return new InAppLoadingTaskError({cause: e})
+        })
       )
     }),
 })

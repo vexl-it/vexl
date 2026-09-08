@@ -1,6 +1,6 @@
 import {useNavigation} from '@react-navigation/native'
 import {ChevronLeft, NavigationBar, Stack} from '@vexl-next/ui'
-import {useMolecule} from 'bunshi/dist/react'
+import {useMolecule} from 'bunshi/react'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {TouchableOpacity} from 'react-native'
 import {type RootStackScreenProps} from '../../../navigationTypes'

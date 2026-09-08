@@ -13,7 +13,7 @@ import {
   useTheme,
 } from '@vexl-next/ui'
 import {type IconProps} from '@vexl-next/ui/src/icons/types'
-import {Effect, Either} from 'effect'
+import {Effect, Result} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useMemo} from 'react'
 import {type RootStackScreenProps} from '../../navigationTypes'
@@ -101,14 +101,14 @@ export default function NoteDetailScreen({
   const runNoteAction = useCallback(
     <A,>(effect: Effect.Effect<A, unknown>, onSuccess?: (value: A) => void) => {
       setLoading(true)
-      void Effect.runPromise(effect.pipe(Effect.either)).then((result) => {
+      void Effect.runPromise(effect.pipe(Effect.result)).then((result) => {
         setLoading(false)
-        if (Either.isRight(result)) {
-          onSuccess?.(result.right)
+        if (Result.isSuccess(result)) {
+          onSuccess?.(result.success)
         } else {
           showErrorAlert({
             title: t('common.somethingWentWrong'),
-            error: result.left,
+            error: result.failure,
           })
         }
       })

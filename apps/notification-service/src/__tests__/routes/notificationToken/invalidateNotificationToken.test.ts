@@ -5,7 +5,7 @@ import {
   AppSource,
   makeCommonHeaders,
 } from '@vexl-next/rest-api/src/commonHeaders'
-import {Effect, Option, Schema} from 'effect'
+import {Effect, Option, pipe, Schema} from 'effect'
 import {NotificationTokensDb} from '../../../services/NotificationTokensDb'
 import {NodeTestingApp} from '../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../utils/runPromiseInMockedEnvironment'
@@ -32,51 +32,51 @@ const validHeaders = makeCommonHeaders({
 describe('InvalidateNotificationToken', () => {
   it('Should delete token successfully', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
-        const db = yield* _(NotificationTokensDb)
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
+        const db = yield* NotificationTokensDb
 
         // First create a secret
-        const createResp = yield* _(
+        const createResp = yield* pipe(
           app.NotificationTokenGroup.CreateNotificationSecret({
             payload: {
               expoNotificationToken: validExpoToken,
             },
             headers: validHeaders,
           }),
-          Effect.either
+          Effect.result
         )
 
-        expect(createResp._tag).toEqual('Right')
-        if (createResp._tag !== 'Right') return
+        expect(createResp._tag).toEqual('Success')
+        if (createResp._tag !== 'Success') return
 
         // Then generate a token
-        const generateResp = yield* _(
+        const generateResp = yield* pipe(
           app.NotificationTokenGroup.generateNotificationToken({
             payload: {
-              secret: createResp.right.secret,
+              secret: createResp.success.secret,
             },
           }),
-          Effect.either
+          Effect.result
         )
 
-        expect(generateResp._tag).toEqual('Right')
-        if (generateResp._tag !== 'Right') return
+        expect(generateResp._tag).toEqual('Success')
+        if (generateResp._tag !== 'Success') return
 
         // Then invalidate the token
-        const resp = yield* _(
+        const resp = yield* pipe(
           app.NotificationTokenGroup.invalidateNotificationToken({
             payload: {
-              secret: createResp.right.secret,
-              tokenToInvalidate: generateResp.right.token,
+              secret: createResp.success.secret,
+              tokenToInvalidate: generateResp.success.token,
             },
           }),
-          Effect.either
+          Effect.result
         )
 
-        expect(resp._tag).toEqual('Right')
-        const tokenOwner = yield* _(
-          db.findSecretByNotificationToken(generateResp.right.token)
+        expect(resp._tag).toEqual('Success')
+        const tokenOwner = yield* db.findSecretByNotificationToken(
+          generateResp.success.token
         )
         expect(Option.isNone(tokenOwner)).toEqual(true)
       })
@@ -85,65 +85,65 @@ describe('InvalidateNotificationToken', () => {
 
   it('Should keep token when invalidated with a different secret', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
-        const db = yield* _(NotificationTokensDb)
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
+        const db = yield* NotificationTokensDb
 
-        const firstSecret = yield* _(
+        const firstSecret = yield* pipe(
           app.NotificationTokenGroup.CreateNotificationSecret({
             payload: {
               expoNotificationToken: validExpoToken,
             },
             headers: validHeaders,
           }),
-          Effect.either
+          Effect.result
         )
 
-        expect(firstSecret._tag).toEqual('Right')
-        if (firstSecret._tag !== 'Right') return
+        expect(firstSecret._tag).toEqual('Success')
+        if (firstSecret._tag !== 'Success') return
 
-        const secondSecret = yield* _(
+        const secondSecret = yield* pipe(
           app.NotificationTokenGroup.CreateNotificationSecret({
             payload: {
               expoNotificationToken: validExpoToken,
             },
             headers: validHeaders,
           }),
-          Effect.either
+          Effect.result
         )
 
-        expect(secondSecret._tag).toEqual('Right')
-        if (secondSecret._tag !== 'Right') return
+        expect(secondSecret._tag).toEqual('Success')
+        if (secondSecret._tag !== 'Success') return
 
-        const generateResp = yield* _(
+        const generateResp = yield* pipe(
           app.NotificationTokenGroup.generateNotificationToken({
             payload: {
-              secret: firstSecret.right.secret,
+              secret: firstSecret.success.secret,
             },
           }),
-          Effect.either
+          Effect.result
         )
 
-        expect(generateResp._tag).toEqual('Right')
-        if (generateResp._tag !== 'Right') return
+        expect(generateResp._tag).toEqual('Success')
+        if (generateResp._tag !== 'Success') return
 
-        const resp = yield* _(
+        const resp = yield* pipe(
           app.NotificationTokenGroup.invalidateNotificationToken({
             payload: {
-              secret: secondSecret.right.secret,
-              tokenToInvalidate: generateResp.right.token,
+              secret: secondSecret.success.secret,
+              tokenToInvalidate: generateResp.success.token,
             },
           }),
-          Effect.either
+          Effect.result
         )
 
-        expect(resp._tag).toEqual('Right')
-        const tokenOwner = yield* _(
-          db.findSecretByNotificationToken(generateResp.right.token)
+        expect(resp._tag).toEqual('Success')
+        const tokenOwner = yield* db.findSecretByNotificationToken(
+          generateResp.success.token
         )
         expect(Option.isSome(tokenOwner)).toEqual(true)
         if (Option.isNone(tokenOwner)) return
-        expect(tokenOwner.value.secret).toEqual(firstSecret.right.secret)
+        expect(tokenOwner.value.secret).toEqual(firstSecret.success.secret)
       })
     )
   })

@@ -4,12 +4,12 @@ import {clearExpiredMessagesCronConfig} from './configs'
 import {MessagesDbService} from './db/MessagesDbService'
 import {reportMessageExpired} from './metrics'
 
-export const clearExpiredMessagesTask = Effect.gen(function* (_) {
-  const db = yield* _(MessagesDbService)
-  const deletedCount = yield* _(db.deleteExpiredMessages())
+export const clearExpiredMessagesTask = Effect.gen(function* () {
+  const db = yield* MessagesDbService
+  const deletedCount = yield* db.deleteExpiredMessages()
 
-  yield* _(Effect.log(`Deleted ${deletedCount} expired messages`))
-  yield* _(reportMessageExpired(deletedCount))
+  yield* Effect.log(`Deleted ${deletedCount} expired messages`)
+  yield* reportMessageExpired(deletedCount)
 })
 
 export const ExpiredMessagesCleanupWorkerLayer = makeRepeatingTaskLayer({

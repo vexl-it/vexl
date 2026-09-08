@@ -123,42 +123,34 @@ export interface NoteDbOperations {
   ) => Effect.Effect<void, UnexpectedServerError>
 }
 
-export class NoteDbService extends Context.Tag('NoteDbService')<
+export class NoteDbService extends Context.Service<
   NoteDbService,
   NoteDbOperations
->() {
+>()('NoteDbService') {
   static readonly Live = Layer.effect(
     NoteDbService,
-    Effect.gen(function* (_) {
+    Effect.gen(function* () {
       return {
-        queryNotesForUserPaginated: yield* _(createQueryNotesForUserPaginated),
-        queryNoteByPublicKeyAndNoteId: yield* _(
-          createQueryNoteByPublicKeyAndNoteId
-        ),
-        queryNoteIdsForUser: yield* _(createQueryNoteIdsForUser),
-        queryNoteIdByRepostId: yield* _(createQueryNoteIdByRepostId),
-        queryNumberOfNoteReportsForUser: yield* _(
-          createQueryNumberOfNoteReportsForUser
-        ),
-        queryNotePublicPartByAdminId: yield* _(
-          createQueryNotePublicPartByAdminId
-        ),
-        queryNotePublicPartByNoteId: yield* _(
-          createQueryNotePublicPartByNoteId
-        ),
-        insertNotePublicPart: yield* _(createInsertNotePublicPart),
-        insertNotePrivatePart: yield* _(createInsertNotePrivatePart),
-        insertNoteReportedRecord: yield* _(createInsertNoteReportedRecord),
-        updateReportNote: yield* _(createUpdateReportNote),
-        deleteNotePublicPart: yield* _(createDeleteNotePublicPart),
-        deleteNotePrivatePart: yield* _(createDeleteNotePrivatePart),
-        deleteNotePrivatePartsByRepostId: yield* _(
-          createDeleteNotePrivatePartsByRepostId
-        ),
-        deleteExpiredNotes: yield* _(createDeleteExpiredNotes),
-        deleteNoteReportedRecordByReportedAtBefore: yield* _(
-          createDeleteNoteReportedRecordByReportedAtBefore
-        ),
+        queryNotesForUserPaginated: yield* createQueryNotesForUserPaginated,
+        queryNoteByPublicKeyAndNoteId:
+          yield* createQueryNoteByPublicKeyAndNoteId,
+        queryNoteIdsForUser: yield* createQueryNoteIdsForUser,
+        queryNoteIdByRepostId: yield* createQueryNoteIdByRepostId,
+        queryNumberOfNoteReportsForUser:
+          yield* createQueryNumberOfNoteReportsForUser,
+        queryNotePublicPartByAdminId: yield* createQueryNotePublicPartByAdminId,
+        queryNotePublicPartByNoteId: yield* createQueryNotePublicPartByNoteId,
+        insertNotePublicPart: yield* createInsertNotePublicPart,
+        insertNotePrivatePart: yield* createInsertNotePrivatePart,
+        insertNoteReportedRecord: yield* createInsertNoteReportedRecord,
+        updateReportNote: yield* createUpdateReportNote,
+        deleteNotePublicPart: yield* createDeleteNotePublicPart,
+        deleteNotePrivatePart: yield* createDeleteNotePrivatePart,
+        deleteNotePrivatePartsByRepostId:
+          yield* createDeleteNotePrivatePartsByRepostId,
+        deleteExpiredNotes: yield* createDeleteExpiredNotes,
+        deleteNoteReportedRecordByReportedAtBefore:
+          yield* createDeleteNoteReportedRecordByReportedAtBefore,
       }
     })
   )

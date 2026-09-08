@@ -1,4 +1,4 @@
-import {Effect, Match, Option} from 'effect/index'
+import {Effect, Match, Option, pipe} from 'effect'
 import {apiAtom} from '../api'
 import {registerInAppLoadingTask} from '../utils/inAppLoadingTasks'
 import reportError from '../utils/reportError'
@@ -14,11 +14,11 @@ export const refreshUserOnContactServiceInAppBackgroundTaskId =
       runOn: 'resume',
     },
     task: (store) =>
-      Effect.gen(function* (_) {
+      Effect.gen(function* () {
         const session = store.get(sessionDataOrDummyAtom)
 
-        const sessionNotificationToken = yield* _(
-          Option.fromNullable(session.sessionNotificationToken),
+        const sessionNotificationToken = yield* pipe(
+          Option.fromNullishOr(session.sessionNotificationToken),
           Option.match({
             onSome: (token) => Effect.succeed(Option.some(token)),
             onNone: () =>
@@ -31,8 +31,8 @@ export const refreshUserOnContactServiceInAppBackgroundTaskId =
                   )
                   return token
                 }),
-                Effect.catchAll((e) =>
-                  Effect.zipRight(
+                Effect.catch((e) =>
+                  Effect.andThen(
                     Effect.sync(() => {
                       reportError(
                         'warn',
@@ -49,7 +49,7 @@ export const refreshUserOnContactServiceInAppBackgroundTaskId =
           })
         )
 
-        yield* _(
+        yield* pipe(
           store.get(apiAtom).contact.refreshUser({
             offersAlive: true,
             vexlNotificationToken: sessionNotificationToken,
@@ -62,13 +62,7 @@ export const refreshUserOnContactServiceInAppBackgroundTaskId =
                   void store.set(logoutActionAtom)
                 }),
                 Match.tags({
-                  ResponseError: () => {
-                    console.warn(
-                      '🦋 Network error refreshing user. Not logging out.',
-                      e
-                    )
-                  },
-                  RequestError: () => {
+                  HttpClientError: () => {
                     console.warn(
                       '🦋 Network error refreshing user. Not logging out.',
                       e
@@ -89,24 +83,11 @@ export const refreshUserOnContactServiceInAppBackgroundTaskId =
                   )
                 }),
                 Match.tags({
-                  HttpApiDecodeError: () => {
+                  SchemaError: () => {
                     reportError(
                       'warn',
                       new Error(
-                        'HttpApiDecodeError or ParseError error refreshing user. Not logging out.'
-                      ),
-                      {e}
-                    )
-                    console.warn(
-                      '🦋 🚨 UnexpectedApiResponseError error refreshing user. Not logging out.',
-                      e._tag
-                    )
-                  },
-                  ParseError: () => {
-                    reportError(
-                      'warn',
-                      new Error(
-                        'HttpApiDecodeError or ParseError error refreshing user. Not logging out.'
+                        'HttpApiSchemaError or ParseError error refreshing user. Not logging out.'
                       ),
                       {e}
                     )

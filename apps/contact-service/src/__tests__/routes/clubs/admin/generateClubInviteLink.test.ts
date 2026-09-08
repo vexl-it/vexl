@@ -1,4 +1,3 @@
-import {SqlClient} from '@effect/sql'
 import {generateClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
@@ -8,7 +7,8 @@ import {
   addTestHeaders,
   clearTestAuthHeaders,
 } from '@vexl-next/server-utils/src/tests/nodeTestingApp'
-import {Effect, Option, Schema} from 'effect'
+import {Effect, Option, pipe, Schema} from 'effect'
+import {SqlClient} from 'effect/unstable/sql'
 import {NodeTestingApp} from '../../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../../utils/runPromiseInMockedEnvironment'
 
@@ -48,55 +48,49 @@ const clubsToSave = [
 describe('Generate club invite link', () => {
   beforeEach(async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const sql = yield* _(SqlClient.SqlClient)
-        yield* _(sql`DELETE FROM club_invitation_link`)
-        yield* _(sql`DELETE FROM club_member`)
-        yield* _(sql`DELETE FROM club`)
+      Effect.gen(function* () {
+        const sql = yield* SqlClient.SqlClient
+        yield* sql`DELETE FROM club_invitation_link`
+        yield* sql`DELETE FROM club_member`
+        yield* sql`DELETE FROM club`
 
-        const app = yield* _(NodeTestingApp)
-        yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
-        yield* _(
-          app.ClubsAdmin.createClub({
-            headers: {'x-admin-token': ADMIN_TOKEN},
-            payload: {
-              club: clubsToSave[0],
-            },
-          })
-        )
-        yield* _(
-          app.ClubsAdmin.createClub({
-            headers: {'x-admin-token': ADMIN_TOKEN},
-            payload: {
-              club: clubsToSave[1],
-            },
-          })
-        )
-        yield* _(
-          app.ClubsAdmin.createClub({
-            headers: {'x-admin-token': ADMIN_TOKEN},
-            payload: {
-              club: clubsToSave[2],
-            },
-          })
-        )
-        yield* _(clearTestAuthHeaders)
+        const app = yield* NodeTestingApp
+        yield* addTestHeaders({'x-admin-token': ADMIN_TOKEN})
+        yield* app.ClubsAdmin.createClub({
+          headers: {'x-admin-token': ADMIN_TOKEN},
+          payload: {
+            club: clubsToSave[0],
+          },
+        })
+        yield* app.ClubsAdmin.createClub({
+          headers: {'x-admin-token': ADMIN_TOKEN},
+          payload: {
+            club: clubsToSave[1],
+          },
+        })
+        yield* app.ClubsAdmin.createClub({
+          headers: {'x-admin-token': ADMIN_TOKEN},
+          payload: {
+            club: clubsToSave[2],
+          },
+        })
+        yield* clearTestAuthHeaders
       })
     )
   })
 
   it('Should return 403 when bad admin token', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
-        const errorResponse = yield* _(
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
+        const errorResponse = yield* pipe(
           app.ClubsAdmin.generateClubInviteLinkForAdmin({
             headers: {'x-admin-token': 'aha'},
             payload: {
               clubUuid: clubsToSave[0].uuid,
             },
           }),
-          Effect.either
+          Effect.result
         )
 
         expectErrorResponse(InvalidAdminTokenError)(errorResponse)
@@ -106,17 +100,17 @@ describe('Generate club invite link', () => {
 
   it('Should create invite link', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
         const forClub = clubsToSave[0].uuid
-        yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
-        const inviteLink = yield* _(
-          app.ClubsAdmin.generateClubInviteLinkForAdmin({
+        yield* addTestHeaders({'x-admin-token': ADMIN_TOKEN})
+        const inviteLink = yield* app.ClubsAdmin.generateClubInviteLinkForAdmin(
+          {
             headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               clubUuid: forClub,
             },
-          })
+          }
         )
         expect(inviteLink.clubUuid).toEqual(forClub)
         expect(inviteLink.link.code).toHaveLength(6)
@@ -126,18 +120,18 @@ describe('Generate club invite link', () => {
 
   it('Should return 404 when club does not exist', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const app = yield* NodeTestingApp
         const forClub = generateClubUuid()
-        yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
-        const errorResponse = yield* _(
+        yield* addTestHeaders({'x-admin-token': ADMIN_TOKEN})
+        const errorResponse = yield* pipe(
           app.ClubsAdmin.generateClubInviteLinkForAdmin({
             headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               clubUuid: forClub,
             },
           }),
-          Effect.either
+          Effect.result
         )
 
         expectErrorResponse(NotFoundError)(errorResponse)

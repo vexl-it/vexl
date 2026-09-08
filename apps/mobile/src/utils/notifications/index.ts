@@ -1,6 +1,6 @@
 import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {effectToTask} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import {Effect, Option, Schema} from 'effect'
+import {Effect, Option, pipe, Schema} from 'effect'
 import {BackgroundTaskStatus, getStatusAsync} from 'expo-background-task'
 import * as Device from 'expo-device'
 import * as Notifications from 'expo-notifications'
@@ -99,18 +99,18 @@ export function getNotificationTokenE(): Effect.Effect<ExpoNotificationToken | n
     }
   })
 
-  return Effect.gen(function* (_) {
-    const notificationEnabled = yield* _(
+  return Effect.gen(function* () {
+    const notificationEnabled = yield* pipe(
       areNotificationsEnabledE(),
       Effect.map((s) => s.notifications),
-      Effect.catchAll((e) => Effect.succeed(false))
+      Effect.catch((e) => Effect.succeed(false))
     )
 
     if (!notificationEnabled) {
       return null
     }
 
-    return yield* _(getExpoNotificationToken)
+    return yield* getExpoNotificationToken
   })
 }
 
@@ -125,13 +125,13 @@ const getCachedNotificationTokenE: Effect.Effect<
   Option.Option<ExpoNotificationToken>
 > = Effect.suspend(() =>
   Option.match(
-    Option.fromNullable(
+    Option.fromNullishOr(
       storage._storage.getString(NOTIFICATION_TOKEN_CACHE_KEY)
     ),
     {
       onNone: () => Effect.succeedNone,
       onSome: (cached) =>
-        Schema.decodeUnknown(ExpoNotificationToken)(cached).pipe(
+        Schema.decodeUnknownEffect(ExpoNotificationToken)(cached).pipe(
           Effect.map(Option.some),
           Effect.orElseSucceed(() => Option.none<ExpoNotificationToken>())
         ),
@@ -149,8 +149,8 @@ export function getNotificationTokenWithTimeoutE(): Effect.Effect<
 > {
   return getNotificationTokenE().pipe(
     Effect.timeout('3 seconds'),
-    Effect.map(Option.fromNullable),
-    Effect.catchTag('TimeoutException', () => getCachedNotificationTokenE)
+    Effect.map(Option.fromNullishOr),
+    Effect.catchTag('TimeoutError', () => getCachedNotificationTokenE)
   )
 }
 

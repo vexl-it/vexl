@@ -1,15 +1,12 @@
-import {
-  HttpApiBuilder,
-  HttpApiSwagger,
-  HttpLayerRouter,
-} from '@effect/platform/index'
+import {notificationRpcSerializationLayer} from '@vexl-next/rest-api/src/services/notification/rpcSerialization'
 import {NotificationApiSpecification} from '@vexl-next/rest-api/src/services/notification/specification'
 import {healthServerLayer} from '@vexl-next/server-utils/src/HealthServer'
 import {NodeHttpServerLiveWithPortFromEnv} from '@vexl-next/server-utils/src/NodeHttpServerLiveWithPortFromEnv'
 import {RateLimitingService} from '@vexl-next/server-utils/src/RateLimiting'
 import {rateLimitingMiddlewareLayer} from '@vexl-next/server-utils/src/RateLimiting/rateLimitngMiddlewareLayer'
+import {HttpRouter} from 'effect/unstable/http'
+import {HttpApiBuilder, HttpApiSwagger} from 'effect/unstable/httpapi'
 
-import {RpcSerialization, RpcServer} from '@effect/rpc/index'
 import {Rpcs} from '@vexl-next/rest-api/src/services/notification/Rpcs'
 import {RedisConnectionService} from '@vexl-next/server-utils/src/RedisConnection'
 import {RedisService} from '@vexl-next/server-utils/src/RedisService'
@@ -23,6 +20,7 @@ import {
 import {MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {ServerSecurityMiddlewareLive} from '@vexl-next/server-utils/src/serverSecurity'
 import {Layer} from 'effect'
+import {RpcServer} from 'effect/unstable/rpc'
 import {NotificationMetricsService} from './metrics'
 import {getCypherPublicKeyHandler} from './routes/getCypherPublicKeyHandler'
 import {issueNotifcationHandler} from './routes/issueNotificationHandler'
@@ -76,7 +74,7 @@ const NotificationTokenGroupLive = HttpApiBuilder.group(
       )
 )
 
-const NotificationHttpApiLive = HttpLayerRouter.addHttpApi(
+const NotificationHttpApiLive = HttpApiBuilder.layer(
   NotificationApiSpecification
 ).pipe(
   Layer.provide(RootGroupLive),
@@ -85,21 +83,20 @@ const NotificationHttpApiLive = HttpLayerRouter.addHttpApi(
   Layer.provide(ServerSecurityMiddlewareLive)
 )
 
-const RpcRouter = RpcServer.layerHttpRouter({
+const RpcRouter = RpcServer.layerHttp({
   group: Rpcs,
   path: '/rpc',
   protocol: 'websocket',
 }).pipe(
   Layer.provide(NotificationRpcsHandlers),
-  Layer.provide(RpcSerialization.layerNdjson)
+  Layer.provide(notificationRpcSerializationLayer)
 )
 
-const ApiServerLive = HttpLayerRouter.serve(
+const ApiServerLive = HttpRouter.serve(
   Layer.mergeAll(
     NotificationHttpApiLive,
     RpcRouter,
-    HttpApiSwagger.layerHttpLayerRouter({
-      api: NotificationApiSpecification,
+    HttpApiSwagger.layer(NotificationApiSpecification, {
       path: '/docs',
     })
   )

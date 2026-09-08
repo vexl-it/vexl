@@ -1,13 +1,13 @@
-import {SqlClient, SqlSchema} from '@effect/sql'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {Effect, flow} from 'effect'
+import {SqlClient, SqlSchema} from 'effect/unstable/sql'
 import {PublicKeyHashed} from '../../domain'
 import {InboxRecord} from '../domain'
 
-export const createFindInboxByPublicKey = Effect.gen(function* (_) {
-  const sql = yield* _(SqlClient.SqlClient)
+export const createFindInboxByPublicKey = Effect.gen(function* () {
+  const sql = yield* SqlClient.SqlClient
 
-  const query = SqlSchema.findOne({
+  const query = SqlSchema.findOneOption({
     Request: PublicKeyHashed,
     Result: InboxRecord,
     execute: (params) => sql`

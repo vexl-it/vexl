@@ -1,7 +1,7 @@
-import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {Effect, flow, Schema} from 'effect'
+import {SqlSchema} from 'effect/unstable/sql'
 import {ClubMemberRecordId} from '../../ClubMemberDbService/domain'
 import {ClubRecordId} from '../../ClubsDbService/domain'
 import {ClubInvitationLinkRecord} from '../domain'
@@ -14,8 +14,8 @@ export type FindInvitationLinkByClubIdAndMemberIdParams =
   typeof FindInvitationLinkByClubIdAndMemberIdParams.Type
 
 export const createFindInvitationLinkByClubIdAndMemberId = Effect.gen(
-  function* (_) {
-    const sql = yield* _(PgClient.PgClient)
+  function* () {
+    const sql = yield* PgClient.PgClient
 
     const query = SqlSchema.findAll({
       Request: FindInvitationLinkByClubIdAndMemberIdParams,

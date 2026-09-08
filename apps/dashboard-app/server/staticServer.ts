@@ -5,46 +5,44 @@ import {clientServerPortConfig, isRunningInDevConfig} from './configs'
 
 class StaticServerError extends Data.TaggedError('StaticServerError') {}
 
-export const StaticServerLive = Layer.scopedDiscard(
-  Effect.gen(function* (_) {
-    yield* _(Effect.log('Starting static server'))
-    if (yield* _(isRunningInDevConfig)) {
-      yield* _(Effect.log('Skipping static server in development'))
-      return yield* _(Effect.void)
+export const StaticServerLive = Layer.effectDiscard(
+  Effect.gen(function* () {
+    yield* Effect.log('Starting static server')
+    if (yield* isRunningInDevConfig) {
+      yield* Effect.log('Skipping static server in development')
+      return yield* Effect.void
     }
-    const port = yield* _(clientServerPortConfig)
-    yield* _(Effect.log(`Starting static server on port: ${port}`))
+    const port = yield* clientServerPortConfig
+    yield* Effect.log(`Starting static server on port: ${port}`)
 
-    yield* _(
-      Effect.acquireRelease(
-        Effect.async<ReturnType<typeof http.createServer>, StaticServerError>(
-          (cb) => {
-            const server = http.createServer((req, res) => {
-              void handler(req, res, {
-                public: './dist/client',
-              })
+    yield* Effect.acquireRelease(
+      Effect.callback<ReturnType<typeof http.createServer>, StaticServerError>(
+        (cb) => {
+          const server = http.createServer((req, res) => {
+            void handler(req, res, {
+              public: './dist/client',
             })
+          })
 
-            server.listen(port, () => {
-              cb(
-                Effect.zipLeft(
-                  Effect.succeed(server),
-                  Effect.log(`Client server listening on port: ${port}`)
-                )
+          server.listen(port, () => {
+            cb(
+              Effect.tap(
+                Effect.succeed(server),
+                Effect.log(`Client server listening on port: ${port}`)
               )
-            })
-            server.on('error', (e) => {
-              cb(
-                Effect.zipLeft(
-                  new StaticServerError(),
-                  Effect.logError('Error on static server', e)
-                )
+            )
+          })
+          server.on('error', (e) => {
+            cb(
+              Effect.tap(
+                new StaticServerError(),
+                Effect.logError('Error on static server', e)
               )
-            })
-          }
-        ),
-        (server) => Effect.sync(() => server.close())
-      )
+            )
+          })
+        }
+      ),
+      (server) => Effect.sync(() => server.close())
     )
   })
 ).pipe(Layer.withSpan('StaticServerLive'))

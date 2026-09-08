@@ -14,7 +14,7 @@ export const ensureMyOffersHaveOwnershipInfoUploadedInPrivatepayloadForOwner =
       )
     )
 
-    if (!Array.isNonEmptyArray(offersToUpdate)) return Effect.void
+    if (!Array.isArrayNonEmpty(offersToUpdate)) return Effect.void
 
     console.log(
       `Updating offers to include owner info in owner's private payload. Count: ${offersToUpdate.length}`

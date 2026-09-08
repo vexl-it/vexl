@@ -7,9 +7,9 @@ import {
   type UserInsert,
 } from '../../db/loggedInUsersDb'
 
-const mockedClientEffect = Effect.gen(function* (_) {
-  const ref = yield* _(
-    Ref.make<HashMap.HashMap<PublicKeyPemBase64, UserInsert>>(HashMap.empty())
+const mockedClientEffect = Effect.gen(function* () {
+  const ref = yield* Ref.make<HashMap.HashMap<PublicKeyPemBase64, UserInsert>>(
+    HashMap.empty()
   )
 
   const insertUser = jest.fn<LoggedInUsersDbOperations['insertUser']>((user) =>

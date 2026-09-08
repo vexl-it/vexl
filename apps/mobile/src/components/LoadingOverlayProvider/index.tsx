@@ -1,5 +1,5 @@
 import {Stack} from '@vexl-next/ui'
-import {Effect} from 'effect/index'
+import {Effect} from 'effect'
 import {atom, useAtomValue, useSetAtom} from 'jotai'
 import React, {useMemo, type ReactNode} from 'react'
 import VexlActivityIndicator from './VexlActivityIndicator'
@@ -37,7 +37,7 @@ export const withLoadingOverlayAtom = atom(
   null,
   (get, set) =>
     <A, E, R>(effect: Effect.Effect<A, E, R>): Effect.Effect<A, E, R> =>
-      Effect.zipRight(
+      Effect.andThen(
         Effect.sync(() => {
           set(loadingOverlayDisplayedAtom, true)
         }),

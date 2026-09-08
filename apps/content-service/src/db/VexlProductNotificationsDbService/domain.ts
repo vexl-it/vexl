@@ -4,7 +4,7 @@ import {
 } from '@vexl-next/domain/src/general/vexlProductNotification'
 import {Schema} from 'effect'
 
-export const VexlProductNotificationRecordId = Schema.BigInt.pipe(
+export const VexlProductNotificationRecordId = Schema.BigIntFromString.pipe(
   Schema.brand('VexlProductNotificationRecordId')
 )
 export type VexlProductNotificationRecordId =
@@ -18,10 +18,10 @@ export class VexlProductNotificationDbRecord extends Schema.Class<VexlProductNot
   title: Schema.String,
   description: Schema.String,
   issuePushNotification: Schema.Boolean,
-  date: Schema.DateFromSelf,
+  date: Schema.Date,
   actionLink: Schema.NullOr(Schema.String),
   actionText: Schema.NullOr(Schema.String),
-  type: Schema.Literal('MARKETING', 'GENERAL'),
+  type: Schema.Literals(['MARKETING', 'GENERAL']),
 }) {}
 
 export const vexlProductNotificationFromDbRecord = (

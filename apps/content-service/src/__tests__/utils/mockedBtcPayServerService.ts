@@ -1,3 +1,4 @@
+import {jest} from '@jest/globals'
 import {type UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {
   type InvoiceId,

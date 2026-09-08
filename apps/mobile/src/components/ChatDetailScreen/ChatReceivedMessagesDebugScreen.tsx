@@ -8,7 +8,7 @@ import {
   Typography,
   YStack,
 } from '@vexl-next/ui'
-import {ScopeProvider, useMolecule} from 'bunshi/dist/react'
+import {ScopeProvider, useMolecule} from 'bunshi/react'
 import {Array, pipe} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useMemo} from 'react'

@@ -23,7 +23,7 @@ export class ConnectionsCountByCountry extends Schema.Class<ConnectionsCountByCo
 export class ConnectionsCountByCountryListMessage extends Schema.TaggedClass<ConnectionsCountByCountryListMessage>(
   'ConnectionsCountByCountryListMessage'
 )('ConnectionsCountByCountryListMessage', {
-  type: Schema.Literal('full', 'delta'),
+  type: Schema.Literals(['full', 'delta']),
   connectionsCountByCountryList: Schema.Array(ConnectionsCountByCountry),
 }) {}
 
@@ -51,7 +51,7 @@ export class TotalUsersCountMessage extends Schema.TaggedClass<TotalUsersCountMe
 export class DashboardBootstrappingMessage extends Schema.TaggedClass<DashboardBootstrappingMessage>(
   'DashboardBootstrappingMessage'
 )('DashboardBootstrappingMessage', {
-  status: Schema.Literal('loading', 'ready'),
+  status: Schema.Literals(['loading', 'ready']),
   message: Schema.String,
 }) {}
 
@@ -61,7 +61,7 @@ export class ReceivedUnexpectedMessage extends Schema.TaggedClass<ReceivedUnexpe
   messageReceived: Schema.String,
 }) {}
 
-export const ServerMessage = Schema.Union(
+export const ServerMessage = Schema.Union([
   DebugMessage,
   PongMessage,
   TimeoutClose,
@@ -69,6 +69,6 @@ export const ServerMessage = Schema.Union(
   ConnectionsCountByCountryListMessage,
   NewUserWithConnectionsMessage,
   TotalUsersCountMessage,
-  DashboardBootstrappingMessage
-)
+  DashboardBootstrappingMessage,
+])
 export type ServerMessage = Schema.Schema.Type<typeof ServerMessage>

@@ -3,7 +3,7 @@ import {
   unixMillisecondsNow,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {type Uuid} from '@vexl-next/domain/src/utility/Uuid.brand'
-import {Option} from 'effect/index'
+import {Option} from 'effect'
 import {atom} from 'jotai'
 
 export const processingNotificationsAtom = atom<

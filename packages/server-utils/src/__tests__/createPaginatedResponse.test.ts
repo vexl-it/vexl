@@ -1,5 +1,5 @@
 import {type UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
-import {Effect, type ParseResult, Schema} from 'effect'
+import {Effect, Schema} from 'effect'
 import createPaginatedResponse from '../../../server-utils/src/createPaginatedResponse'
 
 const MockedDataSchema = Schema.Struct({
@@ -30,9 +30,9 @@ function mockedDbEffect(
   startIndex = 0
 ): Effect.Effect<
   readonly MockedDataSchema[],
-  ParseResult.ParseError | UnexpectedServerError
+  Schema.SchemaError | UnexpectedServerError
 > {
-  return Effect.gen(function* (_) {
+  return Effect.gen(function* () {
     return data.slice(startIndex)
   })
 }

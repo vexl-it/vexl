@@ -5,7 +5,7 @@ import {
   CommonFriends as CommonFriendsUI,
   type CommonFriend,
 } from '@vexl-next/ui'
-import {Array, Effect, HashMap, Option, pipe} from 'effect'
+import {Array, Effect, Filter, HashMap, Option, pipe} from 'effect'
 import {useAtomValue, useStore} from 'jotai'
 import React, {useCallback, useEffect, useMemo, useState} from 'react'
 import {
@@ -43,7 +43,7 @@ const resolveContactImage = (
         Effect.map((uri) =>
           uri ? {hash: contact.computedValues.hash, uri} : null
         ),
-        Effect.catchAll(() => Effect.succeed(null))
+        Effect.catch(() => Effect.succeed(null))
       ),
   })
 
@@ -58,22 +58,26 @@ function useContactImageSources(
     const fiber = pipe(
       contacts,
       Effect.forEach(resolveContactImage, {concurrency: 5}),
-      Effect.tap((results) => {
-        setSources(
-          HashMap.fromIterable(
-            pipe(
-              results,
-              Array.filterMap(Option.fromNullable),
-              Array.map((result) => [result.hash, {uri: result.uri}])
+      Effect.tap((results) =>
+        Effect.sync(() => {
+          setSources(
+            HashMap.fromIterable(
+              pipe(
+                results,
+                Array.filterMap(
+                  Filter.fromPredicateOption(Option.fromNullishOr)
+                ),
+                Array.map((result) => [result.hash, {uri: result.uri}])
+              )
             )
           )
-        )
-      }),
+        })
+      ),
       Effect.runFork
     )
 
     return () => {
-      Effect.runFork(fiber.interruptAsFork(fiber.id()))
+      fiber.interruptUnsafe()
     }
   }, [contacts])
 

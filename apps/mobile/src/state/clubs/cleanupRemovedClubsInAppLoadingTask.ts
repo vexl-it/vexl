@@ -1,4 +1,4 @@
-import {Effect} from 'effect/index'
+import {Effect} from 'effect'
 import {registerInAppLoadingTask} from '../../utils/inAppLoadingTasks'
 import {cleanupRemovedClubsActionAtom} from './atom/removedClubsAtom'
 
@@ -9,7 +9,7 @@ export const cleanupRemovedClubsInAppLoadingTaskId = registerInAppLoadingTask({
     runOn: 'start',
   },
   task: (store) =>
-    Effect.gen(function* (_) {
+    Effect.gen(function* () {
       store.set(cleanupRemovedClubsActionAtom)
     }),
 })

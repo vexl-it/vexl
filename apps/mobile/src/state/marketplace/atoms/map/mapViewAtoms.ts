@@ -56,7 +56,7 @@ export const fitToCoordinatesActionAtom = atom(
   ) => {
     const camera = get(mapCameraControlsAtom)
     if (!camera) return
-    if (!Array.isNonEmptyReadonlyArray(coordinates)) return
+    if (!Array.isReadonlyArrayNonEmpty(coordinates)) return
 
     set(requestMapRegionCommitAfterCameraMoveActionAtom)
     camera.fitBounds(coordinatesToBounds(coordinates), {

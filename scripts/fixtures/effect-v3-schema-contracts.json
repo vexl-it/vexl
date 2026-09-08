@@ -1,0 +1,981 @@
+[
+  {
+    "name": "tracking",
+    "index": 0,
+    "decoded": {
+      "value": {
+        "none": true
+      }
+    },
+    "encoded": {
+      "value": {}
+    }
+  },
+  {
+    "name": "tracking",
+    "index": 1,
+    "decoded": {
+      "value": {
+        "none": true
+      }
+    },
+    "encoded": {
+      "value": {}
+    }
+  },
+  {
+    "name": "tracking",
+    "index": 2,
+    "rejected": true
+  },
+  {
+    "name": "tracking",
+    "index": 3,
+    "decoded": {
+      "value": {
+        "some": ""
+      }
+    },
+    "encoded": {
+      "value": {
+        "value": ""
+      }
+    }
+  },
+  {
+    "name": "tracking",
+    "index": 4,
+    "rejected": true
+  },
+  {
+    "name": "tracking",
+    "index": 5,
+    "rejected": true
+  },
+  {
+    "name": "tracking",
+    "index": 6,
+    "decoded": {
+      "value": {
+        "some": "tracking-fixture"
+      }
+    },
+    "encoded": {
+      "value": {
+        "value": "tracking-fixture"
+      }
+    }
+  },
+  {
+    "name": "description",
+    "index": 0,
+    "decoded": {
+      "value": {
+        "none": true
+      }
+    },
+    "encoded": {
+      "value": {}
+    }
+  },
+  {
+    "name": "description",
+    "index": 1,
+    "decoded": {
+      "value": {
+        "none": true
+      }
+    },
+    "encoded": {
+      "value": {}
+    }
+  },
+  {
+    "name": "description",
+    "index": 2,
+    "rejected": true
+  },
+  {
+    "name": "description",
+    "index": 3,
+    "decoded": {
+      "value": {
+        "some": ""
+      }
+    },
+    "encoded": {
+      "value": {
+        "value": ""
+      }
+    }
+  },
+  {
+    "name": "description",
+    "index": 4,
+    "rejected": true
+  },
+  {
+    "name": "description",
+    "index": 5,
+    "rejected": true
+  },
+  {
+    "name": "description",
+    "index": 6,
+    "decoded": {
+      "value": {
+        "some": "tracking-fixture"
+      }
+    },
+    "encoded": {
+      "value": {
+        "value": "tracking-fixture"
+      }
+    }
+  },
+  {
+    "name": "inactiveReason",
+    "index": 0,
+    "decoded": {
+      "value": {
+        "none": true
+      }
+    },
+    "encoded": {
+      "value": {}
+    }
+  },
+  {
+    "name": "inactiveReason",
+    "index": 1,
+    "decoded": {
+      "value": {
+        "none": true
+      }
+    },
+    "encoded": {
+      "value": {}
+    }
+  },
+  {
+    "name": "inactiveReason",
+    "index": 2,
+    "decoded": {
+      "value": {
+        "none": true
+      }
+    },
+    "encoded": {
+      "value": {}
+    }
+  },
+  {
+    "name": "inactiveReason",
+    "index": 3,
+    "rejected": true
+  },
+  {
+    "name": "inactiveReason",
+    "index": 4,
+    "rejected": true
+  },
+  {
+    "name": "inactiveReason",
+    "index": 5,
+    "rejected": true
+  },
+  {
+    "name": "inactiveReason",
+    "index": 6,
+    "rejected": true
+  },
+  {
+    "name": "lastRead",
+    "index": 0,
+    "decoded": {},
+    "encoded": {
+      "value": {}
+    }
+  },
+  {
+    "name": "lastRead",
+    "index": 1,
+    "decoded": {
+      "value": {
+        "undefined": true
+      }
+    },
+    "encoded": {
+      "value": {
+        "value": {
+          "undefined": true
+        }
+      }
+    }
+  },
+  {
+    "name": "lastRead",
+    "index": 2,
+    "decoded": {},
+    "encoded": {
+      "value": {}
+    }
+  },
+  {
+    "name": "lastRead",
+    "index": 3,
+    "rejected": true
+  },
+  {
+    "name": "lastRead",
+    "index": 4,
+    "decoded": {
+      "value": 0
+    },
+    "encoded": {
+      "value": {
+        "value": 0
+      }
+    }
+  },
+  {
+    "name": "lastRead",
+    "index": 5,
+    "decoded": {
+      "value": 123
+    },
+    "encoded": {
+      "value": {
+        "value": 123
+      }
+    }
+  },
+  {
+    "name": "lastRead",
+    "index": 6,
+    "rejected": true
+  },
+  {
+    "name": "isUnread",
+    "index": 0,
+    "decoded": {
+      "value": true
+    },
+    "encoded": {
+      "value": {
+        "value": true
+      }
+    }
+  },
+  {
+    "name": "isUnread",
+    "index": 1,
+    "decoded": {
+      "value": true
+    },
+    "encoded": {
+      "value": {
+        "value": true
+      }
+    }
+  },
+  {
+    "name": "isUnread",
+    "index": 2,
+    "rejected": true
+  },
+  {
+    "name": "isUnread",
+    "index": 3,
+    "rejected": true
+  },
+  {
+    "name": "isUnread",
+    "index": 4,
+    "rejected": true
+  },
+  {
+    "name": "isUnread",
+    "index": 5,
+    "rejected": true
+  },
+  {
+    "name": "isUnread",
+    "index": 6,
+    "rejected": true
+  },
+  {
+    "name": "reportLimit",
+    "index": 0,
+    "decoded": {
+      "value": 0
+    },
+    "encoded": {
+      "value": {
+        "value": 0
+      }
+    }
+  },
+  {
+    "name": "reportLimit",
+    "index": 1,
+    "decoded": {
+      "value": 0
+    },
+    "encoded": {
+      "value": {
+        "value": 0
+      }
+    }
+  },
+  {
+    "name": "reportLimit",
+    "index": 2,
+    "rejected": true
+  },
+  {
+    "name": "reportLimit",
+    "index": 3,
+    "rejected": true
+  },
+  {
+    "name": "reportLimit",
+    "index": 4,
+    "decoded": {
+      "value": 0
+    },
+    "encoded": {
+      "value": {
+        "value": 0
+      }
+    }
+  },
+  {
+    "name": "reportLimit",
+    "index": 5,
+    "decoded": {
+      "value": 123
+    },
+    "encoded": {
+      "value": {
+        "value": 123
+      }
+    }
+  },
+  {
+    "name": "reportLimit",
+    "index": 6,
+    "rejected": true
+  },
+  {
+    "name": "offer-location",
+    "index": 0,
+    "decoded": {
+      "value": []
+    },
+    "encoded": {
+      "value": {
+        "value": []
+      }
+    }
+  },
+  {
+    "name": "offer-location",
+    "index": 1,
+    "decoded": {
+      "value": []
+    },
+    "encoded": {
+      "value": {
+        "value": []
+      }
+    }
+  },
+  {
+    "name": "offer-location",
+    "index": 2,
+    "decoded": {
+      "value": []
+    },
+    "encoded": {
+      "value": {
+        "value": []
+      }
+    }
+  },
+  {
+    "name": "offer-location",
+    "index": 3,
+    "decoded": {
+      "value": []
+    },
+    "encoded": {
+      "value": {
+        "value": []
+      }
+    }
+  },
+  {
+    "name": "offer-location",
+    "index": 4,
+    "decoded": {
+      "value": []
+    },
+    "encoded": {
+      "value": {
+        "value": []
+      }
+    }
+  },
+  {
+    "name": "offer-location",
+    "index": 5,
+    "decoded": {
+      "value": []
+    },
+    "encoded": {
+      "value": {
+        "value": []
+      }
+    }
+  },
+  {
+    "name": "offer-location",
+    "index": 6,
+    "decoded": {
+      "value": []
+    },
+    "encoded": {
+      "value": {
+        "value": []
+      }
+    }
+  },
+  {
+    "name": "offer-locationState",
+    "index": 0,
+    "decoded": {
+      "value": []
+    },
+    "encoded": {
+      "value": {
+        "value": []
+      }
+    }
+  },
+  {
+    "name": "offer-locationState",
+    "index": 1,
+    "decoded": {
+      "value": []
+    },
+    "encoded": {
+      "value": {
+        "value": []
+      }
+    }
+  },
+  {
+    "name": "offer-locationState",
+    "index": 2,
+    "decoded": {
+      "value": []
+    },
+    "encoded": {
+      "value": {
+        "value": []
+      }
+    }
+  },
+  {
+    "name": "offer-locationState",
+    "index": 3,
+    "decoded": {
+      "value": []
+    },
+    "encoded": {
+      "value": {
+        "value": []
+      }
+    }
+  },
+  {
+    "name": "offer-locationState",
+    "index": 4,
+    "decoded": {
+      "value": []
+    },
+    "encoded": {
+      "value": {
+        "value": []
+      }
+    }
+  },
+  {
+    "name": "offer-locationState",
+    "index": 5,
+    "decoded": {
+      "value": []
+    },
+    "encoded": {
+      "value": {
+        "value": []
+      }
+    }
+  },
+  {
+    "name": "offer-locationState",
+    "index": 6,
+    "decoded": {
+      "value": []
+    },
+    "encoded": {
+      "value": {
+        "value": []
+      }
+    }
+  },
+  {
+    "name": "locationState",
+    "index": 0,
+    "decoded": ["ONLINE"],
+    "encoded": {
+      "value": ["ONLINE"]
+    }
+  },
+  {
+    "name": "locationState",
+    "index": 1,
+    "decoded": ["IN_PERSON"],
+    "encoded": {
+      "value": ["IN_PERSON"]
+    }
+  },
+  {
+    "name": "locationState",
+    "index": 2,
+    "decoded": ["ONLINE"],
+    "encoded": {
+      "value": ["ONLINE"]
+    }
+  },
+  {
+    "name": "locationState",
+    "index": 3,
+    "decoded": ["ONLINE", "IN_PERSON"],
+    "encoded": {
+      "value": ["ONLINE", "IN_PERSON"]
+    }
+  },
+  {
+    "name": "locationState",
+    "index": 4,
+    "decoded": [],
+    "encoded": {
+      "value": []
+    }
+  },
+  {
+    "name": "locationState",
+    "index": 5,
+    "rejected": true
+  },
+  {
+    "name": "locationState",
+    "index": 6,
+    "rejected": true
+  },
+  {
+    "name": "number",
+    "index": 0,
+    "decoded": 1,
+    "encoded": {
+      "value": "1"
+    }
+  },
+  {
+    "name": "number",
+    "index": 1,
+    "decoded": 0,
+    "encoded": {
+      "value": "0"
+    }
+  },
+  {
+    "name": "number",
+    "index": 2,
+    "decoded": -2.3,
+    "encoded": {
+      "value": "-2.3"
+    }
+  },
+  {
+    "name": "number",
+    "index": 3,
+    "rejected": true
+  },
+  {
+    "name": "number",
+    "index": 4,
+    "rejected": true
+  },
+  {
+    "name": "number",
+    "index": 5,
+    "rejected": true
+  },
+  {
+    "name": "number",
+    "index": 6,
+    "rejected": true
+  },
+  {
+    "name": "number",
+    "index": 7,
+    "decoded": 16,
+    "encoded": {
+      "value": "16"
+    }
+  },
+  {
+    "name": "number",
+    "index": 8,
+    "decoded": 1000,
+    "encoded": {
+      "value": "1000"
+    }
+  },
+  {
+    "name": "number",
+    "index": 9,
+    "decoded": {
+      "number": "NaN"
+    },
+    "encoded": {
+      "value": "NaN"
+    }
+  },
+  {
+    "name": "number",
+    "index": 10,
+    "decoded": {
+      "number": "Infinity"
+    },
+    "encoded": {
+      "value": "Infinity"
+    }
+  },
+  {
+    "name": "number",
+    "index": 11,
+    "decoded": {
+      "number": "-Infinity"
+    },
+    "encoded": {
+      "value": "-Infinity"
+    }
+  },
+  {
+    "name": "number",
+    "index": 12,
+    "decoded": 2,
+    "encoded": {
+      "value": "2"
+    }
+  },
+  {
+    "name": "boolean",
+    "index": 0,
+    "decoded": true,
+    "encoded": {
+      "value": "true"
+    }
+  },
+  {
+    "name": "boolean",
+    "index": 1,
+    "decoded": false,
+    "encoded": {
+      "value": "false"
+    }
+  },
+  {
+    "name": "boolean",
+    "index": 2,
+    "rejected": true
+  },
+  {
+    "name": "boolean",
+    "index": 3,
+    "rejected": true
+  },
+  {
+    "name": "boolean",
+    "index": 4,
+    "rejected": true
+  },
+  {
+    "name": "boolean",
+    "index": 5,
+    "rejected": true
+  },
+  {
+    "name": "boolean",
+    "index": 6,
+    "rejected": true
+  },
+  {
+    "name": "boolean",
+    "index": 7,
+    "rejected": true
+  },
+  {
+    "name": "boolean",
+    "index": 8,
+    "rejected": true
+  },
+  {
+    "name": "uuid",
+    "index": 0,
+    "decoded": "00000000-0000-0000-0000-000000000000",
+    "encoded": {
+      "value": "00000000-0000-0000-0000-000000000000"
+    }
+  },
+  {
+    "name": "uuid",
+    "index": 1,
+    "decoded": "11111111-1111-4111-8111-111111111111",
+    "encoded": {
+      "value": "11111111-1111-4111-8111-111111111111"
+    }
+  },
+  {
+    "name": "uuid",
+    "index": 2,
+    "decoded": "ffffffff-ffff-ffff-ffff-ffffffffffff",
+    "encoded": {
+      "value": "ffffffff-ffff-ffff-ffff-ffffffffffff"
+    }
+  },
+  {
+    "name": "uuid",
+    "index": 3,
+    "decoded": "11111111-1111-1111-8111-111111111111",
+    "encoded": {
+      "value": "11111111-1111-1111-8111-111111111111"
+    }
+  },
+  {
+    "name": "uuid",
+    "index": 4,
+    "decoded": "11111111-1111-7111-8111-111111111111",
+    "encoded": {
+      "value": "11111111-1111-7111-8111-111111111111"
+    }
+  },
+  {
+    "name": "uuid",
+    "index": 5,
+    "rejected": true
+  },
+  {
+    "name": "commonConnections",
+    "index": 0,
+    "decoded": {
+      "entries": []
+    },
+    "encoded": {
+      "value": []
+    }
+  },
+  {
+    "name": "commonConnections",
+    "index": 1,
+    "decoded": {
+      "entries": [["key", ["hash"]]]
+    },
+    "encoded": {
+      "value": [["key", ["hash"]]]
+    }
+  },
+  {
+    "name": "commonConnections",
+    "index": 2,
+    "decoded": {
+      "entries": [["key", []]]
+    },
+    "encoded": {
+      "value": [["key", []]]
+    }
+  },
+  {
+    "name": "commonConnections",
+    "index": 3,
+    "rejected": true
+  },
+  {
+    "name": "commonConnections",
+    "index": 4,
+    "rejected": true
+  },
+  {
+    "name": "chatNotification",
+    "index": 0,
+    "decoded": {
+      "inbox": "fixture-inbox",
+      "sender": "fixture-sender",
+      "trackingId": {
+        "none": true
+      },
+      "type": "MESSAGE"
+    },
+    "encoded": {
+      "value": {
+        "inbox": "fixture-inbox",
+        "sender": "fixture-sender",
+        "type": "MESSAGE"
+      }
+    }
+  },
+  {
+    "name": "chatNotification",
+    "index": 1,
+    "decoded": {
+      "inbox": "fixture-inbox",
+      "sender": "fixture-sender",
+      "trackingId": {
+        "none": true
+      },
+      "type": "UNKNOWN"
+    },
+    "encoded": {
+      "value": {
+        "inbox": "fixture-inbox",
+        "sender": "fixture-sender",
+        "type": "UNKNOWN"
+      }
+    }
+  },
+  {
+    "name": "chatNotification",
+    "index": 2,
+    "decoded": {
+      "inbox": "fixture-inbox",
+      "preview": "fixture",
+      "sender": "fixture-sender",
+      "trackingId": {
+        "some": "id"
+      },
+      "type": "MESSAGE"
+    },
+    "encoded": {
+      "value": {
+        "inbox": "fixture-inbox",
+        "preview": "fixture",
+        "sender": "fixture-sender",
+        "trackingId": "id",
+        "type": "MESSAGE"
+      }
+    }
+  },
+  {
+    "name": "chatNotification",
+    "index": 3,
+    "rejected": true
+  },
+  {
+    "name": "chatNotification",
+    "index": 4,
+    "rejected": true
+  },
+  {
+    "name": "url",
+    "index": 0,
+    "decoded": {
+      "origin": "https://example.com",
+      "pathname": "/path",
+      "searchParams": {
+        "page": 2
+      }
+    },
+    "encoded": {
+      "value": "https://example.com/path?page=2"
+    }
+  },
+  {
+    "name": "url",
+    "index": 1,
+    "rejected": true
+  },
+  {
+    "name": "url",
+    "index": 2,
+    "rejected": true
+  },
+  {
+    "name": "loginChallenge",
+    "index": 0,
+    "decoded": {
+      "challenge": "fixture-challenge",
+      "privateKey": "fixture-not-a-real-key",
+      "validUntil": 1000
+    },
+    "encoded": {
+      "value": "eyJwcml2YXRlS2V5IjoiZml4dHVyZS1ub3QtYS1yZWFsLWtleSIsImNoYWxsZW5nZSI6ImZpeHR1cmUtY2hhbGxlbmdlIiwidmFsaWRVbnRpbCI6MTAwMH0="
+    }
+  },
+  {
+    "name": "loginChallenge",
+    "index": 1,
+    "rejected": true
+  },
+  {
+    "name": "loginChallenge",
+    "index": 2,
+    "rejected": true
+  },
+  {
+    "name": "pagination",
+    "index": 0,
+    "decoded": {
+      "lastId": "fixture"
+    },
+    "encoded": {
+      "value": "eyJsYXN0SWQiOiJmaXh0dXJlIn0"
+    }
+  },
+  {
+    "name": "pagination",
+    "index": 1,
+    "rejected": true
+  },
+  {
+    "name": "pagination",
+    "index": 2,
+    "rejected": true
+  },
+  {
+    "name": "construct-NotFoundError",
+    "value": {
+      "_tag": "NotFoundError",
+      "status": 404
+    }
+  },
+  {
+    "name": "construct-UnexpectedServerError",
+    "value": {
+      "_tag": "UnexpectedServerError",
+      "status": 500
+    }
+  },
+  {
+    "name": "construct-RateLimitedError",
+    "value": {
+      "_tag": "RateLimitedError",
+      "rateLimitResetAtMs": 1000,
+      "retryAfterMs": 5,
+      "status": 429
+    }
+  }
+]

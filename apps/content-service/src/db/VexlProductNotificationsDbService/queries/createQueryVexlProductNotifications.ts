@@ -1,15 +1,15 @@
-import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {VexlProductNotificationUuid} from '@vexl-next/domain/src/general/vexlProductNotification'
 import {Array, Effect, flow, Schema} from 'effect'
+import {SqlSchema} from 'effect/unstable/sql'
 import {
   VexlProductNotificationDbRecord,
   vexlProductNotificationFromDbRecord,
 } from '../domain'
 
 export const QueryVexlProductNotificationsParams = Schema.Struct({
-  newerThan: Schema.DateFromSelf,
+  newerThan: Schema.Date,
   lastVexlProductNotificationUuidFetched: Schema.optional(
     VexlProductNotificationUuid
   ),
@@ -17,8 +17,8 @@ export const QueryVexlProductNotificationsParams = Schema.Struct({
 export type QueryVexlProductNotificationsParams =
   typeof QueryVexlProductNotificationsParams.Type
 
-export const createQueryVexlProductNotifications = Effect.gen(function* (_) {
-  const sql = yield* _(PgClient.PgClient)
+export const createQueryVexlProductNotifications = Effect.gen(function* () {
+  const sql = yield* PgClient.PgClient
 
   const query = SqlSchema.findAll({
     Request: QueryVexlProductNotificationsParams,

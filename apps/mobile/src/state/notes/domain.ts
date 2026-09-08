@@ -4,12 +4,13 @@ import {
   IsoDatetimeString,
   MINIMAL_DATE,
 } from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
-import {Schema} from 'effect'
+import {Effect, Schema} from 'effect'
 
 export const NotesState = Schema.Struct({
-  lastUpdatedAt: Schema.optionalWith(IsoDatetimeString, {
-    default: () => MINIMAL_DATE,
-  }),
+  lastUpdatedAt: IsoDatetimeString.pipe(
+    Schema.withDecodingDefaultType(Effect.sync(() => MINIMAL_DATE)),
+    Schema.withConstructorDefault(Effect.sync(() => MINIMAL_DATE))
+  ),
   notesNextPageParam: Schema.optional(Base64String),
   notes: Schema.Array(OneNoteInState).pipe(Schema.mutable),
 })

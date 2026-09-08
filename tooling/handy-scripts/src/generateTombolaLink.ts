@@ -1,4 +1,3 @@
-import {FileSystem} from '@effect/platform'
 import * as NodeFileSystem from '@effect/platform-node/NodeFileSystem'
 import * as NodeRuntime from '@effect/platform-node/NodeRuntime'
 import {importKeyPair} from '@vexl-next/cryptography/src/KeyHolder'
@@ -7,14 +6,23 @@ import {
   type PublicKeyPemBase64,
 } from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {eciesLegacyEncrypt} from '@vexl-next/cryptography/src/operations/eciesLegacy'
-import {Array, Data, Effect, Schema, String, flow, pipe} from 'effect'
+import {
+  Array,
+  Data,
+  Effect,
+  FileSystem,
+  Schema,
+  String,
+  flow,
+  pipe,
+} from 'effect'
 import {toFile} from 'qrcode'
 import {fileURLToPath} from 'url'
 
 const LIGHTNING_URL_PREFIX = 'lightning:'
 const CSV_DELIMITER = '\n'
 
-const privateKey = Schema.decode(PrivateKeyPemBase64)(
+const privateKey = Schema.decodeEffect(PrivateKeyPemBase64)(
   'LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JR0VBZ0VBTUJBR0J5cUdTTTQ5QWdFR0JTdUJCQUFLQkcwd2F3SUJBUVFndWIyTDJaMFd5YVhvSVZmaUk3b3IKUFZTK2JTOGpGUXpVaUxvUkNjT2N3MnFoUkFOQ0FBU1c2USs4NXRQQ3RjMDFMdU5nZUVMY3ZIZGlDbmErMThOdwpWanpVUXc2T3RvbDdvWW5BMUVzR2tWOUZqdUVURzJzSTBIdG1RQmk0eFlXT3VQVTdRYmNvCi0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0K'
 )
 
@@ -59,14 +67,14 @@ const generateQrcode = (
     catch: (e) => new GeneratingQrCodeError({originalData: e}),
   })
 
-export const program = Effect.gen(function* (_) {
+export const program = Effect.gen(function* () {
   const csvFilePath = './inout/input.csv'
   const outputFilePath = './inout/output.csv'
   const outputQrcodeFolder = `./inout/qrcodes-${Date.now()}`
-  const filesystem = yield* _(FileSystem.FileSystem)
+  const filesystem = yield* FileSystem.FileSystem
 
-  const {publicKeyPemBase64} = yield* _(keyHolder)
-  yield* _(Effect.log(`Using ${publicKeyPemBase64}`))
+  const {publicKeyPemBase64} = yield* keyHolder
+  yield* Effect.log(`Using ${publicKeyPemBase64}`)
 
   const encryptPayload = encryptPayloadWithkey(publicKeyPemBase64)
 
@@ -79,39 +87,39 @@ export const program = Effect.gen(function* (_) {
       Effect.flatMap(generateLink)
     )
 
-  yield* _(filesystem.makeDirectory(outputQrcodeFolder))
+  yield* filesystem.makeDirectory(outputQrcodeFolder)
 
-  yield* _(Effect.log('Reading links from file and encrypting'))
-  const links = yield* _(
+  yield* Effect.log('Reading links from file and encrypting')
+  const links = yield* pipe(
     filesystem.readFileString(csvFilePath),
-    // Encrpt links
     Effect.flatMap(
       flow(
         String.split(CSV_DELIMITER),
         Array.map(String.trim),
         Array.filter(String.isNonEmpty),
         Array.map(encryptlnurlToEncryptedDeepLink),
-        Effect.allWith({concurrency: 'unbounded'})
+        (effects) => Effect.all(effects, {concurrency: 'unbounded'})
       )
     )
   )
-  yield* _(Effect.log('Done'))
+  yield* Effect.log('Done')
 
-  yield* _(Effect.log('Generating qrcodes'))
-  yield* _(
+  yield* Effect.log('Generating qrcodes')
+  yield* pipe(
     links,
     Array.map((link, i) =>
       generateQrcode(`${outputQrcodeFolder}/${i}.png`, link)
     ),
-    Effect.allWith({concurrency: 'unbounded'})
+    (effects) => Effect.all(effects, {concurrency: 'unbounded'})
   )
-  yield* _(Effect.log('Done'))
+  yield* Effect.log('Done')
 
-  yield* _(Effect.log('Writing output file'))
-  yield* _(
-    filesystem.writeFileString(outputFilePath, Array.join(links, CSV_DELIMITER))
+  yield* Effect.log('Writing output file')
+  yield* filesystem.writeFileString(
+    outputFilePath,
+    Array.join(links, CSV_DELIMITER)
   )
-  yield* _(Effect.log('Done'))
+  yield* Effect.log('Done')
 })
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {

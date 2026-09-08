@@ -1,5 +1,3 @@
-import {type HttpApiDecodeError} from '@effect/platform/HttpApiError'
-import {type HttpClientError} from '@effect/platform/index'
 import {
   type NotFoundError,
   type RateLimitedError,
@@ -11,7 +9,9 @@ import confirmMessagingRequest, {
 import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/src/chat/utils/chatCrypto'
 import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {type JsonStringifyError} from '@vexl-next/resources-utils/src/utils/parsing'
-import {type ParseResult} from 'effect/index'
+import {type Schema} from 'effect'
+import {type HttpClientError} from 'effect/unstable/http'
+import {type HttpApiSchemaError} from 'effect/unstable/httpapi/HttpApiError'
 import * as TE from 'fp-ts/TaskEither'
 import {flow, pipe} from 'fp-ts/function'
 import {atom, type PrimitiveAtom} from 'jotai'
@@ -42,8 +42,8 @@ const acceptMessagingRequestAtom = atom(
   ): TE.TaskEither<
     | ApiConfirmMessagingRequest
     | JsonStringifyError
-    | ParseResult.ParseError
-    | HttpApiDecodeError
+    | Schema.SchemaError
+    | HttpApiSchemaError
     | RateLimitedError
     | UnexpectedServerError
     | NotFoundError

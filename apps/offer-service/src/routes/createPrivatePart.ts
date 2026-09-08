@@ -1,4 +1,3 @@
-import {HttpApiBuilder} from '@effect/platform/index'
 import {
   type PublicKeyPemBase64,
   type PublicKeyV2,
@@ -10,6 +9,7 @@ import {
 } from '@vexl-next/rest-api/src/services/offer/contracts'
 import {OfferApiSpecification} from '@vexl-next/rest-api/src/services/offer/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {makeHttpApiHandler} from '@vexl-next/server-utils/src/makeHttpApiHandler'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import {Array, Effect, Option} from 'effect'
 import {OfferDbService} from '../db/OfferDbService'
@@ -26,32 +26,30 @@ const isWithoutDuplicates = (
   return Array.length(deduped) === Array.length(privateList)
 }
 
-export const createPrivatePart = HttpApiBuilder.handler(
+export const createPrivatePart = makeHttpApiHandler(
   OfferApiSpecification,
   'root',
   'createPrivatePart',
   (req) =>
-    Effect.gen(function* (_) {
-      const offerDbService = yield* _(OfferDbService)
+    Effect.gen(function* () {
+      const offerDbService = yield* OfferDbService
 
       if (!isWithoutDuplicates(req.payload.offerPrivateList)) {
-        return yield* _(
-          Effect.fail(new DuplicatedPublicKeyError({status: 400}))
-        )
+        return yield* Effect.fail(new DuplicatedPublicKeyError({status: 400}))
       }
 
-      const adminIdHashed = yield* _(hashAdminId(req.payload.adminId))
+      const adminIdHashed = yield* hashAdminId(req.payload.adminId)
 
-      const offer = yield* _(
-        offerDbService.queryPublicPartByAdminId(adminIdHashed)
-      )
+      const offer =
+        yield* offerDbService.queryPublicPartByAdminId(adminIdHashed)
       if (Option.isNone(offer)) {
-        return yield* _(Effect.fail(new NotFoundError()))
+        return yield* Effect.fail(new NotFoundError())
       }
 
-      const existingPrivateParts = yield* _(
-        offerDbService.queryAllPrivateRecordsByPublicRecordId(offer.value.id)
-      )
+      const existingPrivateParts =
+        yield* offerDbService.queryAllPrivateRecordsByPublicRecordId(
+          offer.value.id
+        )
 
       const privatePartsToRemove = Array.intersectionWith<{
         userPublicKey: PublicKeyPemBase64 | PublicKeyV2
@@ -60,28 +58,24 @@ export const createPrivatePart = HttpApiBuilder.handler(
         req.payload.offerPrivateList
       )
 
-      yield* _(
-        Effect.forEach(
-          privatePartsToRemove,
-          ({userPublicKey}) =>
-            offerDbService.deletePrivatePart({
-              forPublicKey: userPublicKey,
-              offerId: offer.value.id,
-            }),
-          {batching: true}
-        )
+      yield* Effect.forEach(
+        privatePartsToRemove,
+        ({userPublicKey}) =>
+          offerDbService.deletePrivatePart({
+            forPublicKey: userPublicKey,
+            offerId: offer.value.id,
+          }),
+        {}
       )
 
-      yield* _(
-        Effect.forEach(
-          req.payload.offerPrivateList,
-          (privatePart) =>
-            offerDbService.insertOfferPrivatePart({
-              ...privatePart,
-              offerId: offer.value.id,
-            }),
-          {batching: true}
-        )
+      yield* Effect.forEach(
+        req.payload.offerPrivateList,
+        (privatePart) =>
+          offerDbService.insertOfferPrivatePart({
+            ...privatePart,
+            offerId: offer.value.id,
+          }),
+        {}
       )
       return {}
     }).pipe(

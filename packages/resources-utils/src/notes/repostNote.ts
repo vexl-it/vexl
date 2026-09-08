@@ -16,7 +16,7 @@ import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.b
 import {type ContactApi} from '@vexl-next/rest-api/src/services/contact'
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
 import {type ServerNotePrivatePart} from '@vexl-next/rest-api/src/services/offer/notesContracts'
-import {Array, Effect, Either, type HashMap, pipe, Schema} from 'effect'
+import {Array, Effect, pipe, Schema, type HashMap} from 'effect'
 import {PRIVATE_PARTS_BATCH_SIZE} from '../offers/privatePartsUploadBatchSize'
 import fetchContactsForOffer, {
   type ApiErrorFetchingContactsForOffer,
@@ -26,7 +26,7 @@ import {
   type NotePrivatePartEncryptionError,
 } from './utils/encryptNotePrivatePart'
 
-export type ApiErrorWhileRepostingNote = Effect.Effect.Error<
+export type ApiErrorWhileRepostingNote = Effect.Error<
   ReturnType<OfferApi['repostNote']>
 >
 
@@ -66,17 +66,15 @@ export default function repostNote({
   | ApiErrorWhileRepostingNote
   | NotePrivatePartEncryptionError
 > {
-  return Effect.gen(function* (_) {
+  return Effect.gen(function* () {
     const repostId = generateNoteRepostId()
 
-    const connectionsInfo = yield* _(
-      fetchContactsForOffer({
-        contactApi,
-        intendedConnectionLevel: 'ALL',
-        intendedClubs: {},
-        serverToClientHashesToHashedPhoneNumbersMap,
-      })
-    )
+    const connectionsInfo = yield* fetchContactsForOffer({
+      contactApi,
+      intendedConnectionLevel: 'ALL',
+      intendedClubs: {},
+      serverToClientHashesToHashedPhoneNumbersMap,
+    })
 
     const recipients = pipe(
       [
@@ -92,10 +90,10 @@ export default function repostNote({
       )
     )
 
-    const encryptionResult = yield* _(
+    const encryptionResult = yield* pipe(
       recipients,
       Array.map((toPublicKey) =>
-        Effect.either(
+        Effect.result(
           encryptNotePrivatePart({
             toPublicKey,
             payloadPrivate: {
@@ -110,29 +108,24 @@ export default function repostNote({
       Effect.all
     )
 
-    const encryptionErrors = pipe(
-      encryptionResult,
-      Array.filterMap(Either.getLeft)
-    )
+    const encryptionErrors = pipe(encryptionResult, Array.getFailures)
 
     const notePrivateList: readonly ServerNotePrivatePart[] = pipe(
       encryptionResult,
-      Array.filterMap(Either.getRight),
+      Array.getSuccesses,
       Array.dedupeWith((one, two) => one.userPublicKey === two.userPublicKey)
     )
 
-    yield* _(
+    yield* pipe(
       Array.chunksOf(notePrivateList, PRIVATE_PARTS_BATCH_SIZE),
       Array.map((batch) =>
         offerApi.repostNote({noteId, repostId, notePrivateList: batch})
       ),
       Effect.all,
-      // Roll back already uploaded batches so a partial repost does not stay
-      // on the server with a repostId the client is about to discard.
       Effect.tapError(() =>
         offerApi
           .undoRepostNote({repostIds: [repostId]})
-          .pipe(Effect.ignoreLogged)
+          .pipe(Effect.ignore({log: true}))
       )
     )
 

@@ -1,6 +1,4 @@
 import * as NodeHttpServer from '@effect/platform-node/NodeHttpServer'
-import {type HttpClient} from '@effect/platform/HttpClient'
-import {HttpApiBuilder} from '@effect/platform/index'
 import {type DashboardReportsService} from '@vexl-next/server-utils/src/DashboardReportsService'
 import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {type RateLimitingService} from '@vexl-next/server-utils/src/RateLimiting'
@@ -11,7 +9,10 @@ import {mockedMetricsClientService} from '@vexl-next/server-utils/src/tests/mock
 import {mockedRateLimitingLayer} from '@vexl-next/server-utils/src/tests/mockedRateLimitingLayer'
 import {mockedRedisLayer} from '@vexl-next/server-utils/src/tests/mockedRedisLayer'
 import {TestRequestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
+import {testConfigProviderLayer} from '@vexl-next/server-utils/src/tests/testConfigProvider'
 import {Console, Effect, Layer, ManagedRuntime, type Scope} from 'effect'
+import {HttpRouter} from 'effect/unstable/http'
+import {type HttpClient} from 'effect/unstable/http/HttpClient'
 import {cryptoConfig} from '../../configs'
 import {type LoggedInUsersDbService} from '../../db/loggedInUsersDb'
 import {UserApiLive} from '../../httpServer'
@@ -35,8 +36,7 @@ const universalContext = Layer.mergeAll(
   ServerCrypto.layer(cryptoConfig)
 )
 
-const TestServerLive = HttpApiBuilder.serve().pipe(
-  Layer.provide(UserApiLive),
+const TestServerLive = HttpRouter.serve(UserApiLive).pipe(
   Layer.provideMerge(NodeHttpServer.layerTest)
 )
 
@@ -53,7 +53,9 @@ const context = Layer.empty.pipe(
   Layer.provideMerge(universalContext)
 )
 
-const runtime = ManagedRuntime.make(context)
+const runtime = ManagedRuntime.make(
+  context.pipe(Layer.provideMerge(testConfigProviderLayer))
+)
 let runtimeReady = false
 
 export const startRuntime = async (): Promise<void> => {
@@ -76,8 +78,8 @@ export const runPromiseInMockedEnvironment = async (
   await runtime.runPromise(
     effectToRun.pipe(
       Effect.scoped,
-      Effect.catchAll((e) => {
-        return Effect.zipRight(
+      Effect.catch((e) => {
+        return Effect.andThen(
           Effect.logError('Error in test', e),
           Effect.fail(e)
         )

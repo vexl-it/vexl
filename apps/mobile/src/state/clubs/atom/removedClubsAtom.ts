@@ -5,7 +5,7 @@ import {
   unixMillisecondsFromNow,
   unixMillisecondsNow,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {Array, Option, Schema} from 'effect'
+import {Array, Effect, Option, Schema} from 'effect'
 import {atom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
@@ -18,9 +18,9 @@ const RemovedClubInfo = Schema.Struct({
   clubInfo: ClubInfo,
   removedAt: UnixMilliseconds,
   notified: Schema.Boolean,
-  reason: Schema.optionalWith(ClubDeactivatedNotificationData.fields.reason, {
-    as: 'Option',
-  }),
+  reason: Schema.OptionFromOptional(
+    ClubDeactivatedNotificationData.fields.reason
+  ).pipe(Schema.withConstructorDefault(Effect.succeed(Option.none()))),
   stats: ClubStats,
   hiddenForVexlbot: Schema.Boolean,
 })

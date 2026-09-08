@@ -8,7 +8,7 @@ import {type SendMessageApiErrors} from '@vexl-next/resources-utils/src/chat/sen
 import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/src/chat/utils/chatCrypto'
 import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {type JsonStringifyError} from '@vexl-next/resources-utils/src/utils/parsing'
-import {Array, flow, pipe, type Effect, type ParseResult} from 'effect'
+import {Array, flow, pipe, type Effect, type Schema} from 'effect'
 import * as E from 'fp-ts/Either'
 import * as TE from 'fp-ts/TaskEither'
 import {atom} from 'jotai'
@@ -34,7 +34,7 @@ export default function deleteChatActionAtom(
           _tag: 'ReceiverInboxDoesNotExistError'
         }
       >
-    | ParseResult.ParseError
+    | Schema.SchemaError
     | JsonStringifyError,
     ChatMessageWithState
   >
@@ -70,9 +70,7 @@ export default function deleteChatActionAtom(
               otherSideVersion: chat.otherSideVersion,
             })
           )
-        : TE.right<Effect.Effect.Error<ReturnType<typeof sendLeaveChat>>, {}>(
-            {}
-          ),
+        : TE.right<Effect.Error<ReturnType<typeof sendLeaveChat>>, {}>({}),
       TE.matchW(
         (e) => {
           if (e._tag === 'ReceiverInboxDoesNotExistError') {

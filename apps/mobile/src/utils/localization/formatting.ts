@@ -6,7 +6,7 @@ export const FormattingLocale = Schema.String.pipe(
 )
 export type FormattingLocale = Schema.Schema.Type<typeof FormattingLocale>
 
-const SupportedFormattingLanguage = Schema.Literal(
+const SupportedFormattingLanguage = Schema.Literals([
   'ar',
   'bg',
   'cs',
@@ -28,8 +28,8 @@ const SupportedFormattingLanguage = Schema.Literal(
   'sw',
   'tr',
   'uk',
-  'zh'
-)
+  'zh',
+])
 
 const toFormattingLocale = Schema.decodeSync(FormattingLocale)
 const FALLBACK_FORMATTING_LOCALE = toFormattingLocale('en-US')
@@ -38,7 +38,7 @@ export function normalizeFormattingLocale(
   locale: string | undefined
 ): FormattingLocale {
   return pipe(
-    Option.fromNullable(locale),
+    Option.fromNullishOr(locale),
     Option.flatMap(localeToLanguageCode),
     Option.filter(Schema.is(SupportedFormattingLanguage)),
     Option.map(toFormattingLocale),

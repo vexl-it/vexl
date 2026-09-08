@@ -1,4 +1,4 @@
-import {Effect} from 'effect'
+import {Effect, pipe} from 'effect'
 import {getPermissionsAsync} from 'expo-contacts'
 import {atom} from 'jotai'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
@@ -16,11 +16,11 @@ export const showNoContactsFoundExplanationActionAtom = atom(
   (get, set) => {
     const {t} = get(translationAtom)
 
-    return Effect.gen(function* (_) {
-      const accessPrivileges = yield* _(
+    return Effect.gen(function* () {
+      const accessPrivileges = yield* pipe(
         Effect.tryPromise(async () => await getPermissionsAsync()),
         Effect.map((permissions) => permissions.accessPrivileges),
-        Effect.catchAll(() => Effect.succeed(undefined))
+        Effect.catch(() => Effect.succeed(undefined))
       )
 
       reportError(
@@ -31,7 +31,7 @@ export const showNoContactsFoundExplanationActionAtom = atom(
 
       const limitedAccess = accessPrivileges === 'limited'
 
-      yield* _(
+      yield* pipe(
         set(globalDialogAtom, {
           title: limitedAccess
             ? t('postLoginFlow.contactsImport.limitedAccess.title')

@@ -8,9 +8,10 @@ import {
   type ServerMessage,
 } from '@vexl-next/domain/src/general/messaging'
 import {type VersionString} from '@vexl-next/domain/src/utility/VersionString.brand'
-import {type ParseResult} from 'effect/index'
+import {Effect, type Schema} from 'effect'
 import * as TE from 'fp-ts/TaskEither'
 import {flow, pipe} from 'fp-ts/function'
+import {effectToTaskEither} from '../../effect-helpers/TaskEitherConverter'
 import {type JsonStringifyError} from '../../utils/parsing'
 import {
   decryptMessage,
@@ -30,12 +31,13 @@ export function messageToNetwork(
 ): (
   message: ChatMessage
 ) => TE.TaskEither<
-  JsonStringifyError | ParseResult.ParseError | ErrorEncryptingMessage,
+  JsonStringifyError | Schema.SchemaError | ErrorEncryptingMessage,
   MessageCypher
 > {
   return flow(
     serializeChatMessage,
-    TE.fromEither,
+    Effect.fromResult,
+    effectToTaskEither,
     TE.chainW(encryptMessage(receiverPublicKey))
   )
 }

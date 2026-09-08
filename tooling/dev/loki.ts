@@ -51,7 +51,7 @@ export function createLokiPusher(pushUrl: string): LokiPusher {
   }
 
   const flushOnce = async (): Promise<void> => {
-    if (!Array.isNonEmptyArray(buffer)) return
+    if (!Array.isArrayNonEmpty(buffer)) return
     const batch = buffer
     buffer = []
 

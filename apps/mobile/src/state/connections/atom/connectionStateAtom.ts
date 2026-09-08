@@ -10,8 +10,7 @@ import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {FETCH_CONNECTIONS_PAGE_SIZE} from '@vexl-next/resources-utils/src/offers/utils/fetchContactsForOffer'
 import fetchAllPaginatedData from '@vexl-next/rest-api/src/fetchAllPaginatedData'
 import {type ContactApi} from '@vexl-next/rest-api/src/services/contact'
-import {Array, Effect, HashMap, Number, Option} from 'effect'
-import {pipe} from 'fp-ts/function'
+import {Array, Effect, Filter, HashMap, Number, Option, pipe} from 'effect'
 import {atom, type Atom} from 'jotai'
 import {apiAtom} from '../../../api'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
@@ -47,7 +46,7 @@ function fetchContacts(
   api: ContactApi
 ): Effect.Effect<
   Array<PublicKeyPemBase64 | PublicKeyV2>,
-  Effect.Effect.Error<ReturnType<ContactApi['fetchMyContactsPaginated']>>
+  Effect.Error<ReturnType<ContactApi['fetchMyContactsPaginated']>>
 > {
   return fetchAllPaginatedData({
     fetchEffectToRun: (nextPageToken) =>
@@ -66,20 +65,18 @@ export const syncConnectionsActionAtom = atom(
     set,
     notificationTrackingId?: NotificationTrackingId
   ): Effect.Effect<boolean> => {
-    return Effect.gen(function* (_) {
+    return Effect.gen(function* () {
       const api = get(apiAtom)
 
       console.log('🦋 Refreshing connections state')
       const updateStarted = unixMillisecondsNow()
 
-      const {firstLevel, secondLevel} = yield* _(
-        Effect.all(
-          {
-            firstLevel: fetchContacts('FIRST', api.contact),
-            secondLevel: fetchContacts('SECOND', api.contact),
-          },
-          {concurrency: 'unbounded'}
-        )
+      const {firstLevel, secondLevel} = yield* Effect.all(
+        {
+          firstLevel: fetchContacts('FIRST', api.contact),
+          secondLevel: fetchContacts('SECOND', api.contact),
+        },
+        {concurrency: 'unbounded'}
       )
 
       // report difference
@@ -88,9 +85,9 @@ export const syncConnectionsActionAtom = atom(
       const connectionState = get(connectionStateAtom)
 
       if (connectionState.lastUpdate) {
-        yield* _(
-          Effect.gen(function* (_) {
-            const notificationToken = yield* _(
+        yield* pipe(
+          Effect.gen(function* () {
+            const notificationToken = yield* pipe(
               getNotificationTokenE(),
               Effect.timeout('3 seconds'),
               Effect.option
@@ -117,61 +114,57 @@ export const syncConnectionsActionAtom = atom(
 
             // only if notification tracking id has been passed
             if (notificationTrackingId) {
-              const notificationsEnabled = yield* _(
+              const notificationsEnabled = yield* pipe(
                 areNotificationsEnabledE(),
                 Effect.option
               )
 
-              yield* _(
-                api.metrics
-                  .reportNotificationInteraction({
-                    count: newConnectionsUnique.length,
-                    notificationType: 'Network',
-                    ...(Option.isSome(notificationsEnabled)
-                      ? {
-                          notificationsEnabled:
-                            notificationsEnabled.value.notifications,
-                          backgroundTaskEnabled:
-                            notificationsEnabled.value.backgroundTasks,
-                        }
-                      : {}),
-                    type: 'NewConnectionsReceived',
-                    uuid: generateUuid(),
-                    trackingId: notificationTrackingId,
-                  })
-                  .pipe(
-                    Effect.timeout(500),
-                    Effect.retry({times: 3}),
-                    Effect.tapError((e) =>
-                      reportErrorE(
-                        'warn',
-                        new Error('Error reporting new connections'),
-                        {e}
-                      )
+              yield* api.metrics
+                .reportNotificationInteraction({
+                  count: newConnectionsUnique.length,
+                  notificationType: 'Network',
+                  ...(Option.isSome(notificationsEnabled)
+                    ? {
+                        notificationsEnabled:
+                          notificationsEnabled.value.notifications,
+                        backgroundTaskEnabled:
+                          notificationsEnabled.value.backgroundTasks,
+                      }
+                    : {}),
+                  type: 'NewConnectionsReceived',
+                  uuid: generateUuid(),
+                  trackingId: notificationTrackingId,
+                })
+                .pipe(
+                  Effect.timeout(500),
+                  Effect.retry({times: 3}),
+                  Effect.tapError((e) =>
+                    reportErrorE(
+                      'warn',
+                      new Error('Error reporting new connections'),
+                      {e}
                     )
                   )
-              )
+                )
             }
           }),
           Effect.ignore,
-          Effect.forkDaemon
+          Effect.forkDetach
         )
       }
 
-      const serverToClientHashesToHashedPhoneNumbersMap = yield* _(
-        set(ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom)
+      const serverToClientHashesToHashedPhoneNumbersMap = yield* set(
+        ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom
       )
 
-      const commonConnectionsData = yield* _(
-        fetchAllPaginatedData({
-          fetchEffectToRun: (nextPageToken) =>
-            api.contact.fetchCommonConnectionsPaginated({
-              publicKeys: pipe([...firstLevel, ...secondLevel], deduplicate),
-              limit: FETCH_CONNECTIONS_PAGE_SIZE,
-              nextPageToken,
-            }),
-        })
-      )
+      const commonConnectionsData = yield* fetchAllPaginatedData({
+        fetchEffectToRun: (nextPageToken) =>
+          api.contact.fetchCommonConnectionsPaginated({
+            publicKeys: pipe([...firstLevel, ...secondLevel], deduplicate),
+            limit: FETCH_CONNECTIONS_PAGE_SIZE,
+            nextPageToken,
+          }),
+      })
 
       const commonFriends = pipe(
         commonConnectionsData,
@@ -179,8 +172,11 @@ export const syncConnectionsActionAtom = atom(
           (one) =>
             [
               one.publicKey,
-              Array.filterMap(one.common.hashes, (hash) =>
-                HashMap.get(serverToClientHashesToHashedPhoneNumbersMap, hash)
+              Array.filterMap(
+                one.common.hashes,
+                Filter.fromPredicateOption((hash) =>
+                  HashMap.get(serverToClientHashesToHashedPhoneNumbersMap, hash)
+                )
               ),
             ] as const
         ),
@@ -193,8 +189,11 @@ export const syncConnectionsActionAtom = atom(
           (one) =>
             [
               one.publicKey,
-              Array.filterMap(one.common.verifiedHashes, (hash) =>
-                HashMap.get(serverToClientHashesToHashedPhoneNumbersMap, hash)
+              Array.filterMap(
+                one.common.verifiedHashes,
+                Filter.fromPredicateOption((hash) =>
+                  HashMap.get(serverToClientHashesToHashedPhoneNumbersMap, hash)
+                )
               ),
             ] as const
         ),
@@ -235,7 +234,7 @@ export const syncConnectionsActionAtom = atom(
         onFailure: () => false,
         onSuccess: () => true,
       }),
-      Effect.merge,
+      Effect.catch(Effect.succeed),
       effectWithEnsuredBenchmark('Sync connections')
     )
   }

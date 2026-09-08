@@ -113,28 +113,25 @@ function AddToContactsButton({
     if (!fullPhoneNumber) return
 
     void Effect.runPromise(
-      Effect.gen(function* (_) {
-        const normalizedNumber = yield* _(
-          Schema.decodeUnknown(E164PhoneNumber)(fullPhoneNumber)
-        )
-        const hash = yield* _(hashPhoneNumberE(normalizedNumber))
+      Effect.gen(function* () {
+        const normalizedNumber =
+          yield* Schema.decodeUnknownEffect(E164PhoneNumber)(fullPhoneNumber)
+        const hash = yield* hashPhoneNumberE(normalizedNumber)
 
-        return yield* _(
-          addRevealedContact({
-            avatar: userImage,
-            info: {
-              name: userName,
-              numberToDisplay: fullPhoneNumber,
-              rawNumber: fullPhoneNumber,
-              label: Option.none(),
-              nonUniqueContactId: Option.none(),
-            },
-            computedValues: {
-              hash,
-              normalizedNumber,
-            },
-          })
-        )
+        return yield* addRevealedContact({
+          avatar: userImage,
+          info: {
+            name: userName,
+            numberToDisplay: fullPhoneNumber,
+            rawNumber: fullPhoneNumber,
+            label: Option.none(),
+            nonUniqueContactId: Option.none(),
+          },
+          computedValues: {
+            hash,
+            normalizedNumber,
+          },
+        })
       }).pipe(
         Effect.tap((contactSuccessfullyImportedOrEdited) =>
           Effect.sync(() => {

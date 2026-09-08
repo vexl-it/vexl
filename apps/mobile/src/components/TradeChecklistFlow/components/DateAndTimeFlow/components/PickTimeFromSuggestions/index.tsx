@@ -10,7 +10,7 @@ import {
   tokens,
   useTheme,
 } from '@vexl-next/ui'
-import {Schema} from 'effect/index'
+import {Schema} from 'effect'
 import {useAtomValue, useSetAtom, type Atom} from 'jotai'
 import {type DateTime} from 'luxon'
 import React, {useCallback} from 'react'

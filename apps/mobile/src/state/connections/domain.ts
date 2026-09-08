@@ -9,16 +9,17 @@ import {
 } from '@vexl-next/domain/src/general/notes'
 import {OfferAdminId, SymmetricKey} from '@vexl-next/domain/src/general/offers'
 import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {HashMap, Schema} from 'effect'
+import {Effect, HashMap, Schema} from 'effect'
 
 export const ConnectionsState = Schema.Struct({
   lastUpdate: UnixMilliseconds,
-  firstLevel: Schema.Array(Schema.Union(PublicKeyPemBase64, PublicKeyV2)),
-  secondLevel: Schema.Array(Schema.Union(PublicKeyPemBase64, PublicKeyV2)),
+  firstLevel: Schema.Array(Schema.Union([PublicKeyPemBase64, PublicKeyV2])),
+  secondLevel: Schema.Array(Schema.Union([PublicKeyPemBase64, PublicKeyV2])),
   commonFriends: CommonConnectionsForUsers,
-  verifiedFriends: Schema.optionalWith(CommonConnectionsForUsers, {
-    default: () => HashMap.empty(),
-  }),
+  verifiedFriends: CommonConnectionsForUsers.pipe(
+    Schema.withDecodingDefaultType(Effect.sync(() => HashMap.empty())),
+    Schema.withConstructorDefault(Effect.sync(() => HashMap.empty()))
+  ),
 })
 export type ConnectionsState = typeof ConnectionsState.Type
 
@@ -26,14 +27,20 @@ export const OfferToConnectionsItem = Schema.Struct({
   adminId: OfferAdminId,
   symmetricKey: SymmetricKey,
   connections: Schema.Struct({
-    firstLevel: Schema.Array(Schema.Union(PublicKeyPemBase64, PublicKeyV2)),
+    firstLevel: Schema.Array(Schema.Union([PublicKeyPemBase64, PublicKeyV2])),
     secondLevel: Schema.Array(
-      Schema.Union(PublicKeyPemBase64, PublicKeyV2)
-    ).pipe(Schema.optionalWith({default: () => []})),
-    clubs: Schema.Record({
-      key: ClubUuid,
-      value: Schema.Array(Schema.Union(PublicKeyPemBase64, PublicKeyV2)),
-    }).pipe(Schema.optionalWith({default: () => ({})})),
+      Schema.Union([PublicKeyPemBase64, PublicKeyV2])
+    ).pipe(
+      Schema.withDecodingDefaultType(Effect.sync(() => [])),
+      Schema.withConstructorDefault(Effect.sync(() => []))
+    ),
+    clubs: Schema.Record(
+      ClubUuid,
+      Schema.Array(Schema.Union([PublicKeyPemBase64, PublicKeyV2]))
+    ).pipe(
+      Schema.withDecodingDefaultType(Effect.sync(() => ({}))),
+      Schema.withConstructorDefault(Effect.sync(() => ({})))
+    ),
   }),
 })
 
@@ -47,10 +54,13 @@ export const NoteToConnectionsItem = Schema.Struct({
   adminId: NoteAdminId,
   symmetricKey: SymmetricKey,
   connections: Schema.Struct({
-    firstLevel: Schema.Array(Schema.Union(PublicKeyPemBase64, PublicKeyV2)),
+    firstLevel: Schema.Array(Schema.Union([PublicKeyPemBase64, PublicKeyV2])),
     secondLevel: Schema.Array(
-      Schema.Union(PublicKeyPemBase64, PublicKeyV2)
-    ).pipe(Schema.optionalWith({default: () => []})),
+      Schema.Union([PublicKeyPemBase64, PublicKeyV2])
+    ).pipe(
+      Schema.withDecodingDefaultType(Effect.sync(() => [])),
+      Schema.withConstructorDefault(Effect.sync(() => []))
+    ),
   }),
 })
 
@@ -65,10 +75,13 @@ export const RepostToConnectionsItem = Schema.Struct({
   noteId: NoteId,
   symmetricKey: SymmetricKey,
   connections: Schema.Struct({
-    firstLevel: Schema.Array(Schema.Union(PublicKeyPemBase64, PublicKeyV2)),
+    firstLevel: Schema.Array(Schema.Union([PublicKeyPemBase64, PublicKeyV2])),
     secondLevel: Schema.Array(
-      Schema.Union(PublicKeyPemBase64, PublicKeyV2)
-    ).pipe(Schema.optionalWith({default: () => []})),
+      Schema.Union([PublicKeyPemBase64, PublicKeyV2])
+    ).pipe(
+      Schema.withDecodingDefaultType(Effect.sync(() => [])),
+      Schema.withConstructorDefault(Effect.sync(() => []))
+    ),
   }),
 })
 

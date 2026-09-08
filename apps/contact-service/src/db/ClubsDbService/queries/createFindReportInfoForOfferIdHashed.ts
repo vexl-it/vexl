@@ -1,14 +1,14 @@
-import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {OfferIdHashed} from '@vexl-next/domain/src/general/clubs'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {Effect, flow} from 'effect'
+import {SqlSchema} from 'effect/unstable/sql'
 import {ClubOfferReporedInfoRecord} from '../domain'
 
-export const createFindReportInfoForOfferIdHashed = Effect.gen(function* (_) {
-  const sql = yield* _(PgClient.PgClient)
+export const createFindReportInfoForOfferIdHashed = Effect.gen(function* () {
+  const sql = yield* PgClient.PgClient
 
-  const query = SqlSchema.findOne({
+  const query = SqlSchema.findOneOption({
     Request: OfferIdHashed,
     Result: ClubOfferReporedInfoRecord,
     execute: (offerIdHashed) => sql`

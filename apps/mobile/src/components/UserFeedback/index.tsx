@@ -2,7 +2,7 @@ import {
   type Feedback,
   type FeedbackType,
 } from '@vexl-next/domain/src/general/feedback'
-import {ScopeProvider} from 'bunshi/dist/react'
+import {ScopeProvider} from 'bunshi/react'
 import {atom} from 'jotai'
 import React, {useMemo} from 'react'
 import {FeedbackScope, generateInitialFeedback} from './atoms'

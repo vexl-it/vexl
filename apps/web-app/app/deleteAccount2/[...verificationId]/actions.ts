@@ -2,7 +2,7 @@
 
 import {decodeFormData} from '@/src/server/formData'
 import {type ErrorFormState} from '@/src/shared/formState'
-import {Effect, Either, Schema} from 'effect'
+import {Effect, Result, Schema} from 'effect'
 import {isRedirectError} from 'next/dist/client/components/redirect-error'
 import {redirect} from 'next/navigation'
 
@@ -30,12 +30,12 @@ export async function submitDeleteAccount2(
       import('@vexl-next/rest-api/src/services/user/contracts'),
     ])
     const verificationId = Effect.runSync(
-      Schema.decodeUnknown(EraseUserVerificationId)(rawVerificationId)
+      Schema.decodeUnknownEffect(EraseUserVerificationId)(rawVerificationId)
     )
     const userApi = await createUserPublicApi()
     const contactsApi = await createContactsPublicApi()
     const verificationResult = await Effect.runPromise(
-      Effect.either(
+      Effect.result(
         userApi.verifyAndEraseUser({
           code,
           verificationId,
@@ -43,21 +43,21 @@ export async function submitDeleteAccount2(
       )
     )
 
-    if (Either.isLeft(verificationResult)) {
-      if (verificationResult.left._tag === 'UnableToVerifySmsCodeError') {
-        if (verificationResult.left.reason === 'BadCode') {
+    if (Result.isFailure(verificationResult)) {
+      if (verificationResult.failure._tag === 'UnableToVerifySmsCodeError') {
+        if (verificationResult.failure.reason === 'BadCode') {
           return {
             error: 'Wrong code provided.',
           }
         }
 
-        if (verificationResult.left.reason === 'Expired') {
+        if (verificationResult.failure.reason === 'Expired') {
           return {
             error: 'Verification expired. Please resend the code.',
           }
         }
 
-        if (verificationResult.left.reason === 'MaxAttemptsReached') {
+        if (verificationResult.failure.reason === 'MaxAttemptsReached') {
           return {
             error: 'Too many attempts. Please resend the code and try again.',
           }
@@ -65,8 +65,8 @@ export async function submitDeleteAccount2(
       }
 
       if (
-        verificationResult.left._tag === 'VerificationNotFoundError' ||
-        verificationResult.left._tag === 'InvalidVerificationError'
+        verificationResult.failure._tag === 'VerificationNotFoundError' ||
+        verificationResult.failure._tag === 'InvalidVerificationError'
       ) {
         return {
           error: 'Bad verification code.',
@@ -75,7 +75,7 @@ export async function submitDeleteAccount2(
 
       console.error(
         'submitDeleteAccount2 verification failed',
-        verificationResult.left
+        verificationResult.failure
       )
 
       return {
@@ -84,19 +84,19 @@ export async function submitDeleteAccount2(
     }
 
     const eraseFromNetworkResult = await Effect.runPromise(
-      Effect.either(
+      Effect.result(
         contactsApi.eraseUserFromNetwork({
           token:
-            verificationResult.right
+            verificationResult.success
               .shortLivedTokenForErasingUserOnContactService,
         })
       )
     )
 
-    if (Either.isLeft(eraseFromNetworkResult)) {
+    if (Result.isFailure(eraseFromNetworkResult)) {
       console.error(
         'submitDeleteAccount2 eraseUserFromNetwork failed',
-        eraseFromNetworkResult.left
+        eraseFromNetworkResult.failure
       )
 
       return {
@@ -107,7 +107,7 @@ export async function submitDeleteAccount2(
 
     if (process.env.NEXT_PUBLIC_DEBUG_DATA === 'true') {
       redirect(
-        `/printSession/${verificationResult.right.shortLivedTokenForErasingUserOnContactService}`
+        `/printSession/${verificationResult.success.shortLivedTokenForErasingUserOnContactService}`
       )
     }
 

@@ -17,6 +17,6 @@ export const countryPrefixFromNumber = (
     try: () => parsePhoneNumber(number).countryCode,
     catch: () => new UnknownCountryPrefix({number}),
   }).pipe(
-    Effect.flatMap(Schema.decodeUnknown(CountryPrefix)),
-    Effect.catchAll(() => Effect.fail(new UnknownCountryPrefix({number})))
+    Effect.flatMap(Schema.decodeUnknownEffect(CountryPrefix)),
+    Effect.catch(() => Effect.fail(new UnknownCountryPrefix({number})))
   )

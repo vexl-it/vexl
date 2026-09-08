@@ -1,5 +1,5 @@
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {Array, Effect, HashMap, HashSet, Option, pipe} from 'effect'
+import {Array, Effect, Filter, HashMap, HashSet, Option, pipe} from 'effect'
 import {atom, getDefaultStore} from 'jotai'
 import {type Store} from 'jotai/vanilla/store'
 import {startBenchmark} from '../../state/ActionBenchmarks'
@@ -24,10 +24,12 @@ export const activeLoadingTasksAtom = atom((get) => {
 
   const activeTasks = pipe(
     Array.fromIterable(registry),
-    Array.filterMap(([id, task]) =>
-      task.status._tag === 'pending'
-        ? Option.some({id, name: task.name})
-        : Option.none()
+    Array.filterMap(
+      Filter.fromPredicateOption(([id, task]) =>
+        task.status._tag === 'pending'
+          ? Option.some({id, name: task.name})
+          : Option.none()
+      )
     )
   )
 
@@ -65,7 +67,7 @@ const executeSingleTask = (
   taskId: InAppLoadingTaskId,
   task: InAppLoadingTask
 ): Effect.Effect<void, never> =>
-  Effect.gen(function* (_) {
+  Effect.gen(function* () {
     // Throttled tasks keep their previous 'completed' status (and its
     // finishedAt), so a skipped run still counts as succeeded for dependents.
     const minTimeBetweenRunsMs = task.requirements.minTimeBetweenRunsMs
@@ -95,10 +97,10 @@ const executeSingleTask = (
     })
 
     // Run the task and catch all errors
-    const result = yield* _(
+    const result = yield* pipe(
       task.task(store),
-      Effect.catchAllDefect((d) =>
-        Effect.zipRight(
+      Effect.catchDefect((d) =>
+        Effect.andThen(
           reportErrorE(
             'error',
             new Error(`Defect in InAppLoadingTask ${task.name}`, {cause: d})
@@ -111,14 +113,14 @@ const executeSingleTask = (
           )
         )
       ),
-      Effect.either
+      Effect.result
     )
 
     console.log('InAppLoadingTasks', taskId, {result})
 
     const finishedAt = unixMillisecondsNow()
 
-    if (result._tag === 'Right') {
+    if (result._tag === 'Success') {
       // Update status to completed
       updateTaskStatus(store, taskId, {
         _tag: 'completed',
@@ -129,7 +131,7 @@ const executeSingleTask = (
       endBenchmark('Success')
       console.log('InAppLoadingTasks', `✅ Completed task: ${task.name}`)
     } else {
-      const taskError = result.left
+      const taskError = result.failure
 
       updateTaskStatus(store, taskId, {
         _tag: 'failed',
@@ -142,7 +144,7 @@ const executeSingleTask = (
       console.error(
         'InAppLoadingTasks',
         `❌ Failed task: ${task.name}`,
-        result.left
+        result.failure
       )
     }
   })
@@ -151,7 +153,7 @@ const executeSingleTask = (
 export const executeTasksWithDependencies = (
   taskIds: InAppLoadingTaskId[]
 ): Effect.Effect<void> =>
-  Effect.gen(function* (_) {
+  Effect.gen(function* () {
     console.log(
       'InAppLoadingTasks',
       'Executing tasks with dependencies:',
@@ -165,12 +167,14 @@ export const executeTasksWithDependencies = (
     // Build a map of tasks to execute using HashMap
     const tasksToExecute = pipe(
       taskIds,
-      Array.filterMap((taskId) => {
-        const taskOption = HashMap.get(registry, taskId)
-        return Option.isSome(taskOption)
-          ? Option.some([taskId, taskOption.value] as const)
-          : Option.none()
-      }),
+      Array.filterMap(
+        Filter.fromPredicateOption((taskId) => {
+          const taskOption = HashMap.get(registry, taskId)
+          return Option.isSome(taskOption)
+            ? Option.some([taskId, taskOption.value] as const)
+            : Option.none()
+        })
+      ),
       HashMap.fromIterable
     )
 
@@ -225,23 +229,25 @@ export const executeTasksWithDependencies = (
       // satisfied only once succeeded.
       const readyTasks = pipe(
         pendingArray,
-        Array.filterMap((taskId) => {
-          if (HashSet.has(skipSet, taskId)) return Option.none()
+        Array.filterMap(
+          Filter.fromPredicateOption((taskId) => {
+            if (HashSet.has(skipSet, taskId)) return Option.none()
 
-          const allDepsSatisfied = pipe(
-            depsOf(taskId),
-            Array.every((dep) =>
-              dep.onlyIfSucceeds === true
-                ? HashSet.has(succeeded, dep.id)
-                : HashSet.has(resolved, dep.id)
+            const allDepsSatisfied = pipe(
+              depsOf(taskId),
+              Array.every((dep) =>
+                dep.onlyIfSucceeds === true
+                  ? HashSet.has(succeeded, dep.id)
+                  : HashSet.has(resolved, dep.id)
+              )
             )
-          )
 
-          const taskOption = HashMap.get(tasksToExecute, taskId)
-          return allDepsSatisfied && Option.isSome(taskOption)
-            ? Option.some({id: taskId, task: taskOption.value})
-            : Option.none()
-        })
+            const taskOption = HashMap.get(tasksToExecute, taskId)
+            return allDepsSatisfied && Option.isSome(taskOption)
+              ? Option.some({id: taskId, task: taskOption.value})
+              : Option.none()
+          })
+        )
       )
 
       // If nothing can be skipped or run yet we have a circular/missing
@@ -271,9 +277,9 @@ export const executeTasksWithDependencies = (
         Array.map(({id, task}) => executeSingleTask(store, id, task))
       )
 
-      yield* _(
-        Effect.all(taskEffects, {concurrency: runInParallel ? 'unbounded' : 1})
-      )
+      yield* Effect.all(taskEffects, {
+        concurrency: runInParallel ? 'unbounded' : 1,
+      })
 
       // Record execution outcomes so dependents resolve correctly.
       const registryAfterWave = store.get(taskRegistryAtom)

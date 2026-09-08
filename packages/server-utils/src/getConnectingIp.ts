@@ -1,5 +1,5 @@
-import {HttpServerRequest} from '@effect/platform'
-import {Effect, Option, Schema} from 'effect/index'
+import {Effect, Option, Schema} from 'effect'
+import {HttpServerRequest} from 'effect/unstable/http'
 
 const ConnectingIp = Schema.String.pipe(Schema.brand('ConnectingIp'))
 export type ConnectingIp = typeof ConnectingIp.Type
@@ -10,9 +10,11 @@ export const getConnectingIp: Effect.Effect<
   HttpServerRequest.HttpServerRequest
 > = HttpServerRequest.schemaHeaders(
   Schema.Struct({
-    'cf-connecting-ip': Schema.optionalWith(ConnectingIp, {as: 'Option'}),
+    'cf-connecting-ip': Schema.OptionFromOptional(ConnectingIp).pipe(
+      Schema.withConstructorDefault(Effect.succeed(Option.none()))
+    ),
   })
 ).pipe(
   Effect.map((headers) => headers['cf-connecting-ip']),
-  Effect.catchAll((e) => Effect.succeed(Option.none()))
+  Effect.catch((e) => Effect.succeed(Option.none()))
 )

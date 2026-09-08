@@ -131,7 +131,7 @@ function AppSettingsLanguageScreen({
         placeholder={t('common.search')}
         marginBottom="$4"
       />
-      {Array.isNonEmptyArray(languagesToDisplay) ? (
+      {Array.isArrayNonEmpty(languagesToDisplay) ? (
         <LanguageList
           languagesToDisplay={languagesToDisplay}
           renderItem={renderItem}

@@ -26,18 +26,16 @@ export const makeTestCommonAndSecurityHeadersWithPublicKeyV2 = ({
   unknown,
   ServerCrypto
 > =>
-  Effect.gen(function* (_) {
-    const crypto = yield* _(ServerCrypto)
-    const encodedData = yield* _(
-      Schema.encode(UserDataShape)({
-        hash: authHeaders.hash,
-        pk: publicKeyV2,
-      })
-    )
+  Effect.gen(function* () {
+    const crypto = yield* ServerCrypto
+    const encodedData = yield* Schema.encodeEffect(UserDataShape)({
+      hash: authHeaders.hash,
+      pk: publicKeyV2,
+    })
 
-    const signature = yield* _(crypto.cryptoBoxSign(encodedData))
-    const vexlAuthHeader = yield* _(
-      Schema.decode(VexlAuthHeader)(`VexlAuth ${encodedData}.${signature}`)
+    const signature = yield* crypto.cryptoBoxSign(encodedData)
+    const vexlAuthHeader = yield* Schema.decodeEffect(VexlAuthHeader)(
+      `VexlAuth ${encodedData}.${signature}`
     )
 
     return makeCommonAndSecurityHeaders(

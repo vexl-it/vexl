@@ -77,12 +77,10 @@ export function createUpdateContactActionAtom({
       const replaceWithExistingContact = (
         existingContact: StoredContactWithComputedValues
       ): Effect.Effect<boolean, unknown> =>
-        Effect.gen(function* (_) {
-          const dialogResult = yield* _(
-            set(showContactExistsDialogAtom, {
-              existingContact,
-            })
-          )
+        Effect.gen(function* () {
+          const dialogResult = yield* set(showContactExistsDialogAtom, {
+            existingContact,
+          })
 
           if (!dialogResult) return false
 
@@ -111,7 +109,7 @@ export function createUpdateContactActionAtom({
           )
           reloadContacts()
 
-          yield* _(
+          yield* pipe(
             set(globalDialogAtom, {
               title: t('addContactDialog.changesSaved'),
             }),
@@ -121,13 +119,13 @@ export function createUpdateContactActionAtom({
         })
 
       const updateContact = (): Effect.Effect<boolean, unknown> =>
-        Effect.gen(function* (_) {
-          const confirmedReplacement = yield* _(confirmNumberReplacement())
+        Effect.gen(function* () {
+          const confirmedReplacement = yield* confirmNumberReplacement()
 
           if (!confirmedReplacement) return false
 
           const hash = numberChanged
-            ? yield* _(hashPhoneNumberE(normalizedNumber.value))
+            ? yield* hashPhoneNumberE(normalizedNumber.value)
             : params.contact.computedValues.hash
 
           const updatedContact = buildUpdatedContact({
@@ -167,7 +165,7 @@ export function createUpdateContactActionAtom({
 
           reloadContacts()
 
-          yield* _(
+          yield* pipe(
             set(globalDialogAtom, {
               title: t('addContactDialog.changesSaved'),
             }),
@@ -177,7 +175,7 @@ export function createUpdateContactActionAtom({
           return true
         })
 
-      return Effect.gen(function* (_) {
+      return Effect.gen(function* () {
         const existingContactWithNumber = numberChanged
           ? findContactWithNumber(
               get(storedContactsAtom),
@@ -185,13 +183,11 @@ export function createUpdateContactActionAtom({
             )
           : Option.none()
 
-        return yield* _(
-          Option.isSome(existingContactWithNumber)
-            ? replaceWithExistingContact(existingContactWithNumber.value)
-            : updateContact()
-        )
+        return yield* Option.isSome(existingContactWithNumber)
+          ? replaceWithExistingContact(existingContactWithNumber.value)
+          : updateContact()
       }).pipe(
-        Effect.catchAll((e) => {
+        Effect.catch((e) => {
           showErrorAlert({
             title: t('common.somethingWentWrong'),
             error: e,

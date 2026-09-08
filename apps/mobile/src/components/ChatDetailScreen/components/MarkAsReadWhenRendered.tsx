@@ -1,6 +1,6 @@
 import {useIsFocused} from '@react-navigation/native'
-import {useMolecule} from 'bunshi/dist/react'
-import {Effect} from 'effect/index'
+import {useMolecule} from 'bunshi/react'
+import {Effect} from 'effect'
 import {useAtom, useSetAtom} from 'jotai'
 import {useEffect, useMemo} from 'react'
 import focusIsUnReadAtom from '../../../state/chat/atoms/focusIsUnReadAtom'

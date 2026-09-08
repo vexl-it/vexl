@@ -288,64 +288,62 @@ export const showUpsertContactDialogAtom = atom(
       (get) => get(contactNameAtom).trim().length === 0
     )
 
-    return Effect.gen(function* (_) {
-      const confirmed = yield* _(
-        set(globalDialogAtom, {
-          title:
-            params.type === 'edit'
-              ? t('addContactDialog.contactExistsTitle')
-              : t('addContactDialog.addContact'),
-          negativeButtonText:
-            params.type === 'edit'
-              ? t('addContactDialog.keepCurrent')
-              : t('common.notNow'),
-          positiveButtonText:
-            params.type === 'edit'
-              ? t('addContactDialog.update')
-              : t('addContactDialog.addContact'),
-          positiveButtonDisabledAtom,
-          children:
-            params.type === 'edit' ? (
-              <ContactExistsFromLinkDialogBody
-                contactNameAtom={contactNameAtom}
-                contactNumber={formattedContactNumber}
-                description={t('addContactDialog.contactExistsDescription', {
-                  contactName: params.existingContactName,
-                })}
-                fallbackContactName={params.contactName}
-                profileImage={params.profileImage}
-                saveToPhoneAtom={saveToPhoneAtom}
-                saveToPhoneLabel={
-                  isAlreadyInPhoneContacts
-                    ? t('addContactDialog.updateInYourPhoneContacts')
-                    : t('addContactDialog.alsoSaveToYourPhone')
-                }
-                editLabel={t('common.edit')}
-              />
-            ) : (
-              <UpsertContactDialogBody
-                contactNameAtom={contactNameAtom}
-                contactNumber={formattedContactNumber}
-                fallbackContactName={params.contactName}
-                placeholder={t('addContactDialog.addContactName')}
-                phoneContactId={params.phoneContactId}
-                profileImage={params.profileImage}
-                saveToPhoneAtom={
-                  shouldShowSaveToPhoneSelector ? saveToPhoneAtom : undefined
-                }
-                saveToPhoneLabel={
-                  shouldShowSaveToPhoneSelector
-                    ? t('addContactDialog.alsoSaveToYourPhone')
-                    : undefined
-                }
-              />
-            ),
-        })
-      )
+    return Effect.gen(function* () {
+      const confirmed = yield* set(globalDialogAtom, {
+        title:
+          params.type === 'edit'
+            ? t('addContactDialog.contactExistsTitle')
+            : t('addContactDialog.addContact'),
+        negativeButtonText:
+          params.type === 'edit'
+            ? t('addContactDialog.keepCurrent')
+            : t('common.notNow'),
+        positiveButtonText:
+          params.type === 'edit'
+            ? t('addContactDialog.update')
+            : t('addContactDialog.addContact'),
+        positiveButtonDisabledAtom,
+        children:
+          params.type === 'edit' ? (
+            <ContactExistsFromLinkDialogBody
+              contactNameAtom={contactNameAtom}
+              contactNumber={formattedContactNumber}
+              description={t('addContactDialog.contactExistsDescription', {
+                contactName: params.existingContactName,
+              })}
+              fallbackContactName={params.contactName}
+              profileImage={params.profileImage}
+              saveToPhoneAtom={saveToPhoneAtom}
+              saveToPhoneLabel={
+                isAlreadyInPhoneContacts
+                  ? t('addContactDialog.updateInYourPhoneContacts')
+                  : t('addContactDialog.alsoSaveToYourPhone')
+              }
+              editLabel={t('common.edit')}
+            />
+          ) : (
+            <UpsertContactDialogBody
+              contactNameAtom={contactNameAtom}
+              contactNumber={formattedContactNumber}
+              fallbackContactName={params.contactName}
+              placeholder={t('addContactDialog.addContactName')}
+              phoneContactId={params.phoneContactId}
+              profileImage={params.profileImage}
+              saveToPhoneAtom={
+                shouldShowSaveToPhoneSelector ? saveToPhoneAtom : undefined
+              }
+              saveToPhoneLabel={
+                shouldShowSaveToPhoneSelector
+                  ? t('addContactDialog.alsoSaveToYourPhone')
+                  : undefined
+              }
+            />
+          ),
+      })
 
       if (!confirmed) {
-        return yield* _(
-          Effect.fail(toBasicError('UserDeclinedError')(new Error('Declined')))
+        return yield* Effect.fail(
+          toBasicError('UserDeclinedError')(new Error('Declined'))
         )
       }
 

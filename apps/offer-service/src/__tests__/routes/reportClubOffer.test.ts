@@ -1,4 +1,3 @@
-import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {
@@ -15,7 +14,8 @@ import {
 } from '@vexl-next/rest-api/src/services/offer/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
-import {Effect, Option, Schema} from 'effect'
+import {Effect, Option, pipe, Schema} from 'effect'
+import {SqlClient} from 'effect/unstable/sql'
 import {addChallengeForKey} from '../utils/addChallengeForKey'
 import {
   createMockedUser,
@@ -40,12 +40,12 @@ let commonAndSecurityHeadersForUser2: ReturnType<
 
 beforeEach(async () => {
   await runPromiseInMockedEnvironment(
-    Effect.gen(function* (_) {
-      const client = yield* _(NodeTestingApp)
+    Effect.gen(function* () {
+      const client = yield* NodeTestingApp
 
-      me = yield* _(createMockedUser('+420733333330'))
-      user1 = yield* _(createMockedUser('+420733333331'))
-      user2 = yield* _(createMockedUser('+420733333332'))
+      me = yield* createMockedUser('+420733333330')
+      user1 = yield* createMockedUser('+420733333331')
+      user2 = yield* createMockedUser('+420733333332')
 
       const request1: CreateNewOfferRequest = {
         adminId: generateAdminId(),
@@ -78,19 +78,17 @@ beforeEach(async () => {
         offerId: newOfferId(),
       }
 
-      yield* _(setAuthHeaders(user2.authHeaders))
+      yield* setAuthHeaders(user2.authHeaders)
 
       commonAndSecurityHeadersForUser2 = makeTestCommonAndSecurityHeaders(
         user2.authHeaders
       )
 
       offer1 = {
-        ...(yield* _(
-          client.createNewOffer({
-            payload: request1,
-            headers: commonAndSecurityHeadersForUser2,
-          })
-        )),
+        ...(yield* client.createNewOffer({
+          payload: request1,
+          headers: commonAndSecurityHeadersForUser2,
+        })),
         adminId: request1.adminId,
       }
 
@@ -113,12 +111,10 @@ beforeEach(async () => {
       }
 
       offer2 = {
-        ...(yield* _(
-          client.createNewOffer({
-            payload: request2,
-            headers: commonAndSecurityHeadersForUser2,
-          })
-        )),
+        ...(yield* client.createNewOffer({
+          payload: request2,
+          headers: commonAndSecurityHeadersForUser2,
+        })),
         adminId: request2.adminId,
       }
 
@@ -141,12 +137,10 @@ beforeEach(async () => {
       }
 
       offer3 = {
-        ...(yield* _(
-          client.createNewOffer({
-            payload: request3,
-            headers: commonAndSecurityHeadersForUser2,
-          })
-        )),
+        ...(yield* client.createNewOffer({
+          payload: request3,
+          headers: commonAndSecurityHeadersForUser2,
+        })),
         adminId: request3.adminId,
       }
     })
@@ -156,40 +150,39 @@ beforeEach(async () => {
 describe('Report club offer', () => {
   it('Should properly increase report counter', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
 
-        const requestWithChallenge = yield* _(
-          addChallengeForKey(clubKeypairForMe, me.authHeaders)({})
-        )
+        const requestWithChallenge = yield* addChallengeForKey(
+          clubKeypairForMe,
+          me.authHeaders
+        )({})
 
-        yield* _(setAuthHeaders(me.authHeaders))
+        yield* setAuthHeaders(me.authHeaders)
 
         const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
           me.authHeaders
         )
 
-        yield* _(
-          client.reportClubOffer({
-            payload: {
-              offerId: offer1.offerId,
-              publicKey: requestWithChallenge.publicKey,
-              publicKeyV2: Option.none(),
-              signedChallenge: requestWithChallenge.signedChallenge,
-            },
-            headers: commonAndSecurityHeaders,
-          })
-        )
+        yield* client.reportClubOffer({
+          payload: {
+            offerId: offer1.offerId,
+            publicKey: requestWithChallenge.publicKey,
+            publicKeyV2: Option.none(),
+            signedChallenge: requestWithChallenge.signedChallenge,
+          },
+          headers: commonAndSecurityHeaders,
+        })
 
-        const sql = yield* _(SqlClient.SqlClient)
-        const reportedInDb = yield* _(sql`
+        const sql = yield* SqlClient.SqlClient
+        const reportedInDb = yield* sql`
           SELECT
             report
           FROM
             offer_public
           WHERE
             offer_id = ${offer1.offerId}
-        `)
+        `
         expect(reportedInDb.at(0)).toHaveProperty('report', 1)
       })
     )
@@ -197,12 +190,12 @@ describe('Report club offer', () => {
 
   it('Should properly increase report counter when visibility is through public key v2', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
-        const sql = yield* _(SqlClient.SqlClient)
-        const publicKeyV2 = yield* _(generateV2KeyPair())
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
+        const sql = yield* SqlClient.SqlClient
+        const publicKeyV2 = yield* generateV2KeyPair()
 
-        yield* _(sql`
+        yield* sql`
           UPDATE offer_private
           SET
             user_public_key = ${publicKeyV2.publicKey}
@@ -217,38 +210,38 @@ describe('Report club offer', () => {
                 offer_public.offer_id = ${offer1.offerId}
                 AND offer_private.user_public_key = ${clubKeypairForMe.publicKeyPemBase64}
             );
-        `)
+        `
 
-        const requestWithChallenge = yield* _(
-          addChallengeForKey(clubKeypairForMe, me.authHeaders, publicKeyV2)({})
-        )
+        const requestWithChallenge = yield* addChallengeForKey(
+          clubKeypairForMe,
+          me.authHeaders,
+          publicKeyV2
+        )({})
 
-        yield* _(setAuthHeaders(me.authHeaders))
+        yield* setAuthHeaders(me.authHeaders)
 
         const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
           me.authHeaders
         )
 
-        yield* _(
-          client.reportClubOffer({
-            payload: {
-              offerId: offer1.offerId,
-              publicKey: requestWithChallenge.publicKey,
-              publicKeyV2: requestWithChallenge.publicKeyV2,
-              signedChallenge: requestWithChallenge.signedChallenge,
-            },
-            headers: commonAndSecurityHeaders,
-          })
-        )
+        yield* client.reportClubOffer({
+          payload: {
+            offerId: offer1.offerId,
+            publicKey: requestWithChallenge.publicKey,
+            publicKeyV2: requestWithChallenge.publicKeyV2,
+            signedChallenge: requestWithChallenge.signedChallenge,
+          },
+          headers: commonAndSecurityHeaders,
+        })
 
-        const reportedInDb = yield* _(sql`
+        const reportedInDb = yield* sql`
           SELECT
             report
           FROM
             offer_public
           WHERE
             offer_id = ${offer1.offerId}
-        `)
+        `
         expect(reportedInDb.at(0)).toHaveProperty('report', 1)
       })
     )
@@ -256,52 +249,51 @@ describe('Report club offer', () => {
 
   it('Returns error when report limit is reached', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
 
-        const requestWithChallenge = yield* _(
-          addChallengeForKey(clubKeypairForUser1, user1.authHeaders)({})
-        )
+        const requestWithChallenge = yield* addChallengeForKey(
+          clubKeypairForUser1,
+          user1.authHeaders
+        )({})
 
-        yield* _(setAuthHeaders(user1.authHeaders))
+        yield* setAuthHeaders(user1.authHeaders)
 
         const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
           user1.authHeaders
         )
 
-        yield* _(
-          client.reportClubOffer({
-            payload: {
-              offerId: offer1.offerId,
-              publicKey: requestWithChallenge.publicKey,
-              publicKeyV2: Option.none(),
-              signedChallenge: requestWithChallenge.signedChallenge,
-            },
-            headers: commonAndSecurityHeaders,
-          })
-        )
+        yield* client.reportClubOffer({
+          payload: {
+            offerId: offer1.offerId,
+            publicKey: requestWithChallenge.publicKey,
+            publicKeyV2: Option.none(),
+            signedChallenge: requestWithChallenge.signedChallenge,
+          },
+          headers: commonAndSecurityHeaders,
+        })
 
-        const secondRequestWithChallenge = yield* _(
-          addChallengeForKey(clubKeypairForUser1, user1.authHeaders)({})
-        )
+        const secondRequestWithChallenge = yield* addChallengeForKey(
+          clubKeypairForUser1,
+          user1.authHeaders
+        )({})
 
-        yield* _(
-          client.reportClubOffer({
-            payload: {
-              offerId: offer2.offerId,
-              publicKey: secondRequestWithChallenge.publicKey,
-              publicKeyV2: Option.none(),
-              signedChallenge: secondRequestWithChallenge.signedChallenge,
-            },
-            headers: commonAndSecurityHeaders,
-          })
-        )
+        yield* client.reportClubOffer({
+          payload: {
+            offerId: offer2.offerId,
+            publicKey: secondRequestWithChallenge.publicKey,
+            publicKeyV2: Option.none(),
+            signedChallenge: secondRequestWithChallenge.signedChallenge,
+          },
+          headers: commonAndSecurityHeaders,
+        })
 
-        const thirdRequestWithChallenge = yield* _(
-          addChallengeForKey(clubKeypairForUser1, user1.authHeaders)({})
-        )
+        const thirdRequestWithChallenge = yield* addChallengeForKey(
+          clubKeypairForUser1,
+          user1.authHeaders
+        )({})
 
-        const errorResponse = yield* _(
+        const errorResponse = yield* pipe(
           client.reportClubOffer({
             payload: {
               offerId: offer3.offerId,
@@ -311,7 +303,7 @@ describe('Report club offer', () => {
             },
             headers: commonAndSecurityHeaders,
           }),
-          Effect.either
+          Effect.result
         )
 
         expectErrorResponse(ReportOfferLimitReachedError)(errorResponse)
@@ -321,20 +313,21 @@ describe('Report club offer', () => {
 
   it('return 404 when I am reporting offer that is not ment for me', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
 
-        const requestWithChallenge = yield* _(
-          addChallengeForKey(clubKeypairForMe, me.authHeaders)({})
-        )
+        const requestWithChallenge = yield* addChallengeForKey(
+          clubKeypairForMe,
+          me.authHeaders
+        )({})
 
-        yield* _(setAuthHeaders(me.authHeaders))
+        yield* setAuthHeaders(me.authHeaders)
 
         const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
           me.authHeaders
         )
 
-        const response = yield* _(
+        const response = yield* pipe(
           client.reportClubOffer({
             payload: {
               offerId: offer2.offerId,
@@ -344,23 +337,23 @@ describe('Report club offer', () => {
             },
             headers: commonAndSecurityHeaders,
           }),
-          Effect.either
+          Effect.result
         )
 
-        expect(response._tag).toBe('Left')
-        if (response._tag === 'Left') {
-          expect(response.left).toHaveProperty('status', 404)
+        expect(response._tag).toBe('Failure')
+        if (response._tag === 'Failure') {
+          expect(response.failure).toHaveProperty('status', 404)
         }
 
-        const sql = yield* _(SqlClient.SqlClient)
-        const reportedInDb = yield* _(sql`
+        const sql = yield* SqlClient.SqlClient
+        const reportedInDb = yield* sql`
           SELECT
             report
           FROM
             offer_public
           WHERE
             offer_id = ${offer2.offerId}
-        `)
+        `
         expect(reportedInDb.at(0)).toHaveProperty('report', 0)
       })
     )
@@ -368,19 +361,20 @@ describe('Report club offer', () => {
 
   it('Returns 404 when reporting offer that does not exist', async () => {
     await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
-        const requestWithChallenge = yield* _(
-          addChallengeForKey(clubKeypairForMe, me.authHeaders)({})
-        )
+      Effect.gen(function* () {
+        const client = yield* NodeTestingApp
+        const requestWithChallenge = yield* addChallengeForKey(
+          clubKeypairForMe,
+          me.authHeaders
+        )({})
 
-        yield* _(setAuthHeaders(me.authHeaders))
+        yield* setAuthHeaders(me.authHeaders)
 
         const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
           me.authHeaders
         )
 
-        const response = yield* _(
+        const response = yield* pipe(
           client.reportClubOffer({
             payload: {
               offerId: newOfferId(),
@@ -390,12 +384,12 @@ describe('Report club offer', () => {
             },
             headers: commonAndSecurityHeaders,
           }),
-          Effect.either
+          Effect.result
         )
 
-        expect(response._tag).toBe('Left')
-        if (response._tag === 'Left') {
-          expect(response.left).toHaveProperty('status', 404)
+        expect(response._tag).toBe('Failure')
+        if (response._tag === 'Failure') {
+          expect(response.failure).toHaveProperty('status', 404)
         }
       })
     )

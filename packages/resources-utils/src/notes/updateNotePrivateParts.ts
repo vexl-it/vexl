@@ -8,7 +8,7 @@ import {type SymmetricKey} from '@vexl-next/domain/src/general/offers'
 import {type UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
 import {type ServerNotePrivatePart} from '@vexl-next/rest-api/src/services/offer/notesContracts'
-import {Array, Effect, Either, HashMap, pipe} from 'effect'
+import {Array, Effect, HashMap, pipe, Result} from 'effect'
 import {type OfferEncryptionProgress} from '../offers/OfferEncryptionProgress'
 import {PRIVATE_PARTS_BATCH_SIZE} from '../offers/privatePartsUploadBatchSize'
 import {TimeLimitReachedError} from '../offers/updatePrivateParts'
@@ -25,7 +25,7 @@ import {
 interface UploadNotePrivatePartsBatchResult {
   succeeded: ServerNotePrivatePart[]
   failed: Array<{
-    error: Effect.Effect.Error<ReturnType<OfferApi['createNotePrivatePart']>>
+    error: Effect.Error<ReturnType<OfferApi['createNotePrivatePart']>>
     privatePart: ServerNotePrivatePart
   }>
 }
@@ -62,11 +62,11 @@ function uploadNotePrivatePartsBatch({
               )
             })
           ),
-          Effect.either,
+          Effect.result,
           Effect.map((result) => ({chunk: oneChunk, result}))
         )
     ),
-    Effect.allWith({concurrency: 'unbounded'}),
+    (effects) => Effect.all(effects, {concurrency: 'unbounded'}),
     Effect.map(
       Array.reduce(
         emptyResult,
@@ -74,14 +74,14 @@ function uploadNotePrivatePartsBatch({
           acc: UploadNotePrivatePartsBatchResult,
           {chunk, result}
         ): UploadNotePrivatePartsBatchResult => {
-          if (Either.isLeft(result))
+          if (Result.isFailure(result))
             return {
               ...acc,
               failed: [
                 ...acc.failed,
                 ...Array.map(chunk, (one) => ({
                   privatePart: one,
-                  error: result.left,
+                  error: result.failure,
                 })),
               ],
             }
@@ -139,9 +139,9 @@ export default function updateNotePrivateParts({
     }
   },
   | NotePrivatePayloadsConstructionError
-  | Effect.Effect.Error<ReturnType<OfferApi['deleteNotePrivatePart']>>
+  | Effect.Error<ReturnType<OfferApi['deleteNotePrivatePart']>>
 > {
-  return Effect.gen(function* (_) {
+  return Effect.gen(function* () {
     // The owner keys are excluded defensively — the author's private part
     // carries the adminId and the server refuses to delete it.
     const removedConnections = subtractArrays(
@@ -169,25 +169,23 @@ export default function updateNotePrivateParts({
 
     if (onProgress) onProgress({type: 'CONSTRUCTING_PRIVATE_PAYLOADS'})
 
-    const privatePayloads = yield* _(
-      constructNotePrivatePayloads({
-        connectionsInfo: {
-          firstDegreeConnections: newFirstLevelConnections,
-          secondDegreeConnections: newSecondLevelConnections,
-          commonFriends,
-          verifiedFriends: HashMap.empty(),
-          clubsConnections: {},
-        },
-        symmetricKey,
-      })
-    )
+    const privatePayloads = yield* constructNotePrivatePayloads({
+      connectionsInfo: {
+        firstDegreeConnections: newFirstLevelConnections,
+        secondDegreeConnections: newSecondLevelConnections,
+        commonFriends,
+        verifiedFriends: HashMap.empty(),
+        clubsConnections: {},
+      },
+      symmetricKey,
+    })
 
-    const encryptionResult = yield* _(
+    const encryptionResult = yield* pipe(
       privatePayloads,
       Array.map((payload, i) =>
         pipe(
           Effect.succeed(payload),
-          Effect.zipLeft(
+          Effect.tap(
             Effect.sync(() => {
               if (onProgress)
                 onProgress({
@@ -210,18 +208,18 @@ export default function updateNotePrivateParts({
             return Effect.succeed(payload)
           }),
           Effect.flatMap(encryptNotePrivatePart),
-          Effect.either
+          Effect.result
         )
       ),
       Effect.all,
       Effect.map((result) => ({
-        timeLimitReachedErrors: Array.getLefts(result).filter(
+        timeLimitReachedErrors: Array.getFailures(result).filter(
           (left) => left._tag === 'TimeLimitReachedError'
         ),
-        encryptionErrors: Array.getLefts(result).filter(
+        encryptionErrors: Array.getFailures(result).filter(
           (left) => left._tag === 'NotePrivatePartEncryptionError'
         ),
-        privateParts: Array.getRights(result),
+        privateParts: Array.getSuccesses(result),
       }))
     )
 
@@ -229,10 +227,10 @@ export default function updateNotePrivateParts({
 
     let uploadErrors: Array<{
       toPublicKey: PublicKeyPemBase64 | PublicKeyV2
-      error: Effect.Effect.Error<ReturnType<OfferApi['createNotePrivatePart']>>
+      error: Effect.Error<ReturnType<OfferApi['createNotePrivatePart']>>
     }> = []
     if (encryptionResult.privateParts.length > 0) {
-      uploadErrors = yield* _(
+      uploadErrors = yield* pipe(
         uploadNotePrivatePartsBatch({
           offerApi: api,
           adminId,
@@ -248,12 +246,10 @@ export default function updateNotePrivateParts({
     }
 
     if (removedConnections.length > 0) {
-      yield* _(
-        api.deleteNotePrivatePart({
-          adminIds: [adminId],
-          publicKeys: removedConnections,
-        })
-      )
+      yield* api.deleteNotePrivatePart({
+        adminIds: [adminId],
+        publicKeys: removedConnections,
+      })
     }
 
     if (onProgress) onProgress({type: 'DONE'})

@@ -1,4 +1,4 @@
-import {Option, Schema} from 'effect/index'
+import {Effect, Option, Schema} from 'effect'
 import {focusAtom} from 'jotai-optics'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
 
@@ -6,7 +6,9 @@ const vexlCalendarStorageAtom = atomWithParsedMmkvStorage(
   'vexlCalendar',
   {id: Option.none()},
   Schema.Struct({
-    id: Schema.optionalWith(Schema.String, {as: 'Option'}),
+    id: Schema.OptionFromOptional(Schema.String).pipe(
+      Schema.withConstructorDefault(Effect.succeed(Option.none()))
+    ),
   })
 )
 

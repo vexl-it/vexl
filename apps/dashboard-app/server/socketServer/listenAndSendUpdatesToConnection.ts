@@ -69,7 +69,7 @@ const changeMessagesToSendStream = Stream.mergeAll<
                   })
               ),
               Array.sortBy(
-                Order.reverse(Order.mapInput(Order.number, (a) => a.count))
+                Order.flip(Order.mapInput(Order.Number, (a) => a.count))
               )
             ),
           })

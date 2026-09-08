@@ -149,6 +149,7 @@ import deleteInboxAtom from './atoms/deleteInboxAtom'
 import {ActionBenchmarks} from './components/ActionBenchmarks'
 import AfterInteractionTaskDemo from './components/AfterInteractionTaskDemo'
 import CryptoBenchmarks from './components/CryptoBenchmarks'
+import DebugInfo from './components/DebugInfo'
 import LanguagePicker from './components/LanguagePicker'
 import NewCrypto from './components/NewCrypto'
 import Preferences from './components/Preferences'
@@ -600,6 +601,7 @@ function DebugScreen(): React.ReactElement {
       : 'Hide translators debug button'
     return (
       <Screen
+        scrollable
         navigationBar={
           <NavigationBar
             style="back"
@@ -619,6 +621,7 @@ function DebugScreen(): React.ReactElement {
             text={buttonText}
           />
           <LanguagePicker />
+          <DebugInfo />
           <Button variant="secondary" text="back" onPress={safeGoBack} />
         </YStack>
       </Screen>

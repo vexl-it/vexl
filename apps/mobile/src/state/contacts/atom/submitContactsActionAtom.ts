@@ -68,7 +68,10 @@ type SubmitContactsActionParams = {
 } & ContactsImportSource
 
 type SubmitContactsResult =
-  'success' | 'noContactsSelected' | 'permissionsNotGranted' | 'otherError'
+  | 'success'
+  | 'noContactsSelected'
+  | 'permissionsNotGranted'
+  | 'otherError'
 
 interface ContactsImportUpdatePlan {
   readonly doIncrementalUpdate: boolean

@@ -195,7 +195,8 @@ export type CommunityParamsList = {
   Events: undefined
   Clubs: undefined
   Board:
-    {initialFilter?: 'all' | 'mine'; filterSwitchRequestId?: string} | undefined
+    | {initialFilter?: 'all' | 'mine'; filterSwitchRequestId?: string}
+    | undefined
   Blog: undefined
 }
 

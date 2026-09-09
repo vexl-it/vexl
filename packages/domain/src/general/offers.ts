@@ -125,12 +125,7 @@ export const OfferLocation = Schema.Struct({
   radius: Radius,
   address: Schema.String,
   shortAddress: Schema.String,
-  // A malformed map must not invalidate its location and trigger the parent array fallback.
-  localizedAddresses: Schema.optional(
-    LocalizedAddresses.annotations({
-      decodingFallback: () => Either.right({}),
-    })
-  ),
+  localizedAddresses: Schema.optional(LocalizedAddresses),
 })
 export type OfferLocation = typeof OfferLocation.Type
 

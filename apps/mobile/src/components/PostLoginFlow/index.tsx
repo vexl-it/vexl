@@ -6,7 +6,6 @@ import {
   type PostLoginFlowStackParamsList,
   type PostLoginFlowStackScreenProps,
 } from '../../navigationTypes'
-import {importedContactsCountAtom} from '../../state/contacts/atom/contactsStore'
 import {checkAreNotificationsEnabledAtom} from '../../state/notifications/areNotificationsEnabledAtom'
 import {
   postLoginFlowCompletedScreensAtom,
@@ -37,43 +36,35 @@ export default function PostLoginFlow(): React.ReactElement {
     postLoginFlowEffectiveCompletedScreensAtom
   )
   const storedCompletedScreens = useAtomValue(postLoginFlowCompletedScreensAtom)
-  const importedContactsCount = useAtomValue(importedContactsCountAtom)
   const checkAreNotificationsEnabled = useSetAtom(
     checkAreNotificationsEnabledAtom
   )
-  const [hasCheckedNotifications, setHasCheckedNotifications] = useState(false)
-  const [isCheckingNotifications, setIsCheckingNotifications] = useState(false)
-  const contactsImportCompleted =
-    importedContactsCount > 0 ||
-    Array.contains(storedCompletedScreens, 'contactsImport')
-  const notificationSetupCompleted = Array.contains(
-    storedCompletedScreens,
-    'notificationSetup'
+  // Only check when resuming past contacts import. Starting a check during an
+  // active import would unmount the navigator before its goNext callback runs.
+  // Use stored notification completion so cached permission state is rechecked.
+  const [isCheckingNotifications, setIsCheckingNotifications] = useState(
+    () =>
+      Array.contains(completedScreens, 'contactsImport') &&
+      !Array.contains(storedCompletedScreens, 'notificationSetup')
   )
-  const shouldCheckNotifications =
-    contactsImportCompleted &&
-    !notificationSetupCompleted &&
-    !hasCheckedNotifications
 
   useEffect(() => {
-    if (!shouldCheckNotifications) return
+    if (!isCheckingNotifications) return
 
     let shouldUpdateState = true
 
-    setIsCheckingNotifications(true)
     void Effect.runPromise(checkAreNotificationsEnabled()).finally(() => {
       if (!shouldUpdateState) return
 
-      setHasCheckedNotifications(true)
       setIsCheckingNotifications(false)
     })
 
     return () => {
       shouldUpdateState = false
     }
-  }, [checkAreNotificationsEnabled, shouldCheckNotifications])
+  }, [checkAreNotificationsEnabled, isCheckingNotifications])
 
-  if (shouldCheckNotifications || isCheckingNotifications) {
+  if (isCheckingNotifications) {
     return <></>
   }
 

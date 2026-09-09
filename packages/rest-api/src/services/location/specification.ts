@@ -8,6 +8,8 @@ import {RateLimitingMiddleware} from '../../rateLimititing'
 import {
   GetGeocodedCoordinatesRequest,
   GetGeocodedCoordinatesResponse,
+  GetLocalizedAddressesRequest,
+  GetLocalizedAddressesResponse,
   GetLocationSuggestionsRequest,
   GetLocationSuggestionsResponse,
   LocationNotFoundError,
@@ -49,11 +51,21 @@ export const GetGeocodedCoordinatesV2Endpoint = HttpApiEndpoint.get(
   .addError(LocationNotFoundError, {status: 404})
   .annotate(MaxExpectedDailyCall, 50)
 
+export const GetLocalizedAddressesEndpoint = HttpApiEndpoint.get(
+  'getLocalizedAddresses',
+  '/api/v2/localized-addresses'
+)
+  .setUrlParams(GetLocalizedAddressesRequest)
+  .addSuccess(GetLocalizedAddressesResponse)
+  .addError(LocationNotFoundError, {status: 404})
+  .annotate(MaxExpectedDailyCall, 50)
+
 const RootGroup = HttpApiGroup.make('root', {topLevel: true})
   .add(GetLocationSuggestionEndpoint)
   .add(GetGeocodedCoordinatesEndpoint)
   .add(GetLocationSuggestionV2Endpoint)
   .add(GetGeocodedCoordinatesV2Endpoint)
+  .add(GetLocalizedAddressesEndpoint)
 
 export const LocationApiSpecification = HttpApi.make('Location Service')
   .middleware(RateLimitingMiddleware)

@@ -9,6 +9,7 @@
   "clubs.commonFriends": "{{count}} gemeenschappelijke vrienden",
   "clubs.commonFriendsFormatted": "{{localizedString}} gemeenschappelijke vrienden",
   "clubs.clubsReach": "Bereik van clubs",
+  "clubs.reachExplanation": "Het bereik van je clubs schat hoeveel mensen de aanbiedingen kunnen zien die je met je Vexl Clubs deelt. Het telt de andere leden op van alle clubs waarvan je lid bent.",
   "clubs.expiresOn": "Verloopt op {{expirationDate}}",
   "clubs.moderator.inviteCodeLabel": "Uitnodigingscode",
   "clubs.joinClub": "Lid worden van club",

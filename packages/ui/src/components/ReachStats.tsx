@@ -1,9 +1,11 @@
 import React from 'react'
 import {getTokens, useTheme} from 'tamagui'
 
+import {InfoCircle} from '../icons'
 import type {IconProps} from '../icons/types'
 import {SizableText, Stack, XStack, YStack} from '../primitives'
 import {Button} from './Button'
+import {getReachPressProps} from './getReachPressProps'
 
 export interface ReachStatsStep {
   readonly label: string
@@ -18,6 +20,7 @@ export interface ReachStatsProps {
   readonly steps: readonly ReachStatsStep[]
   readonly buttonLabel: string
   readonly onButtonPress?: () => void
+  readonly onReachPress?: () => void
 }
 
 export function ReachStats({
@@ -26,6 +29,7 @@ export function ReachStats({
   steps,
   buttonLabel,
   onButtonPress,
+  onReachPress,
 }: ReachStatsProps): React.JSX.Element {
   const theme = useTheme()
   const stepIconSize = getTokens().size.$5.val
@@ -40,7 +44,11 @@ export function ReachStats({
       justifyContent="center"
     >
       <YStack gap="$5" alignItems="center" justifyContent="center">
-        <YStack gap="$3" alignSelf="stretch">
+        <YStack
+          gap="$3"
+          alignSelf="stretch"
+          {...getReachPressProps(onReachPress, `${subtitle}. ${headline}`)}
+        >
           <SizableText
             fontFamily="$body"
             fontSize="$2"
@@ -50,15 +58,21 @@ export function ReachStats({
           >
             {subtitle}
           </SizableText>
-          <SizableText
-            fontFamily="$heading"
-            fontSize="$2"
-            fontWeight="700"
-            letterSpacing="$2"
-            color="$foregroundPrimary"
-          >
-            {headline}
-          </SizableText>
+          <XStack ai="center" gap="$2">
+            <SizableText
+              fontFamily="$heading"
+              fontSize="$2"
+              fontWeight="700"
+              letterSpacing="$2"
+              color="$foregroundPrimary"
+              flexShrink={1}
+            >
+              {headline}
+            </SizableText>
+            {!!onReachPress && (
+              <InfoCircle size={stepIconSize} color={defaultIconColor} />
+            )}
+          </XStack>
         </YStack>
 
         {steps.length > 0 ? (

@@ -9,6 +9,7 @@
   "clubs.commonFriends": "{{count}} wspólnych znajomych",
   "clubs.commonFriendsFormatted": "{{localizedString}} wspólnych znajomych",
   "clubs.clubsReach": "Zasięg klubów",
+  "clubs.reachExplanation": "Zasięg klubów to szacunkowa liczba osób, które mogą zobaczyć oferty udostępniane przez ciebie w Vexl Clubs. Oblicza się go, sumując pozostałych członków każdego klubu, do którego należysz.",
   "clubs.expiresOn": "Wygasa {{expirationDate}}",
   "clubs.moderator.inviteCodeLabel": "Kod zaproszenia",
   "clubs.joinClub": "Dołącz do klubu",

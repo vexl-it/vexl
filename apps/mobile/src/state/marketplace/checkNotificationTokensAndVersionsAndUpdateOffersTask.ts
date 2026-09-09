@@ -85,8 +85,8 @@ const updateOfferVersion = atom(null, (get, set, offer: MyOfferInState) =>
     return yield* _(
       set(updateOfferActionAtom, {
         payloadPublic: {
-          authorClientVersion: version,
           ...offer.offerInfo.publicPart,
+          authorClientVersion: version,
         },
         intendedClubs: offer.ownershipInfo.intendedClubs,
         symmetricKey: offer.offerInfo.privatePart.symmetricKey,

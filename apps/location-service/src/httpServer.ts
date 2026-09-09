@@ -21,6 +21,7 @@ import {GeocodingService} from './geocoding'
 import {
   getGeocodedCoordinatesHandler,
   getGeocodedCoordinatesV2Handler,
+  getLocalizedAddressesHandler,
   getLocationSuggestionHandler,
   getLocationSuggestionV2Handler,
 } from './handlers'
@@ -35,6 +36,7 @@ const RootApiGroupLive = HttpApiBuilder.group(
       .handle('getLocationSuggestion', getLocationSuggestionHandler)
       .handle('getGeocodedCoordinatesV2', getGeocodedCoordinatesV2Handler)
       .handle('getLocationSuggestionV2', getLocationSuggestionV2Handler)
+      .handle('getLocalizedAddresses', getLocalizedAddressesHandler)
 )
 
 export const LocationApiLive = HttpApiBuilder.api(

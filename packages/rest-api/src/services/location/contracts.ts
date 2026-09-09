@@ -76,6 +76,18 @@ export class GetGeocodedCoordinatesResponse extends Schema.Class<GetGeocodedCoor
   }),
 }) {}
 
+export class GetLocalizedAddressesRequest extends Schema.Class<GetLocalizedAddressesRequest>(
+  'GetLocalizedAddressesRequest'
+)({
+  placeId: LocationPlaceId,
+}) {}
+
+export class GetLocalizedAddressesResponse extends Schema.Class<GetLocalizedAddressesResponse>(
+  'GetLocalizedAddressesResponse'
+)({
+  localizedAddresses: LocalizedAddresses,
+}) {}
+
 export class LocationNotFoundError extends Schema.TaggedError<LocationNotFoundError>(
   'LocationNotFoundError'
 )('LocationNotFoundError', {

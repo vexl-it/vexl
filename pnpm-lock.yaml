@@ -2308,6 +2308,40 @@ importers:
         specifier: ~6.0.3
         version: 6.0.3
 
+  tooling/expo-token-notifier:
+    dependencies:
+      csv-parse:
+        specifier: ^6.1.0
+        version: 6.2.1
+      effect:
+        specifier: ^3.20.0
+        version: 3.21.4
+      expo-server-sdk:
+        specifier: ^5.0.0
+        version: 5.0.0
+    devDependencies:
+      '@types/node':
+        specifier: ^22.10.5
+        version: 22.20.1
+      '@vexl-next/eslint-config':
+        specifier: 0.0.0
+        version: link:../eslint
+      '@vexl-next/prettier-config':
+        specifier: 0.0.0
+        version: link:../prettier
+      eslint:
+        specifier: ^9.20.0
+        version: 9.39.4(jiti@2.7.0)
+      prettier:
+        specifier: ^3.3.2
+        version: 3.8.4
+      typescript:
+        specifier: ~6.0.3
+        version: 6.0.3
+      undici:
+        specifier: ^7.29.1
+        version: 7.29.1
+
   tooling/generate-api-call-limits:
     dependencies:
       '@effect/platform':
@@ -7337,6 +7371,9 @@ packages:
   csstype@3.2.3:
     resolution: {integrity: sha512-z1HGKcYy2xA8AGQfwrn0PAy+PB7X/GSj3UVJW9qKyn43xWa+gl5nXmU4qqLMRzWVLFC8KusUX8T/0kCiOYpAIQ==}
 
+  csv-parse@6.2.1:
+    resolution: {integrity: sha512-LRLMV+UCyfMokp8Wb411duBf1gaBKJfOfBWU9eHMJ+b+cJYZsNu3AFmjJf3+yPGd59Exz1TsMjaSFyxnYB9+IQ==}
+
   d3-array@3.2.4:
     resolution: {integrity: sha512-tdQAmyA18i4J7wprpYq8ClcxZy3SC31QMeByyCFyRt7BVHdREQZ5lpzoe5mFEYZUWe+oq8HBvk9JjpibyEV4Jg==}
     engines: {node: '>=12'}
@@ -11701,6 +11738,10 @@ packages:
 
   undici@7.28.0:
     resolution: {integrity: sha512-cRZYrTDwWznlnRiPjggAGxZXanty6M8RV1ff8Wm4LWXBp7/IG8v5DnOm74DtUBp9OONpK75YlPnIjQqX0dBDtA==}
+    engines: {node: '>=20.18.1'}
+
+  undici@7.29.1:
+    resolution: {integrity: sha512-RYONW2MeafgYlkVOKYKkA/Ag7BmXqgIWCa8t1m0JcxrQg9pI9lEqRhAOruOBCbAohOa/gkCF+iPi9hrgvTzu6Q==}
     engines: {node: '>=20.18.1'}
 
   unicode-canonical-property-names-ecmascript@2.0.1:
@@ -19497,6 +19538,8 @@ snapshots:
 
   csstype@3.2.3: {}
 
+  csv-parse@6.2.1: {}
+
   d3-array@3.2.4:
     dependencies:
       internmap: 2.0.3
@@ -25159,6 +25202,8 @@ snapshots:
   undici@6.28.0: {}
 
   undici@7.28.0: {}
+
+  undici@7.29.1: {}
 
   unicode-canonical-property-names-ecmascript@2.0.1: {}
 

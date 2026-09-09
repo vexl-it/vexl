@@ -9,6 +9,7 @@
   "clubs.commonFriends": "marafiki wa pamoja {{count}}",
   "clubs.commonFriendsFormatted": "marafiki wa pamoja {{localizedString}}",
   "clubs.clubsReach": "Ufikiaji wa vilabu",
+  "clubs.reachExplanation": "Ufikiaji wa vilabu unakadiria idadi ya watu wanaoweza kuona ofa unazoshiriki na Vexl Clubs vyako. Hujumlisha wanachama wengine wa kila klabu uliyojiunga nayo.",
   "clubs.expiresOn": "Inaisha tarehe {{expirationDate}}",
   "clubs.moderator.inviteCodeLabel": "Msimbo wa mwaliko",
   "clubs.joinClub": "Jiunge na klabu",

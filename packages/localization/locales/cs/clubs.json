@@ -9,6 +9,7 @@
   "clubs.commonFriends": "{{count}} společných přátel",
   "clubs.commonFriendsFormatted": "{{localizedString}} společných přátel",
   "clubs.clubsReach": "Dosah klubů",
+  "clubs.reachExplanation": "Dosah klubů ukazuje přibližně, kolik lidí může vidět nabídky, které sdílíš ve svých Vexl Clubs. Vypočítá se součtem ostatních členů všech klubů, do kterých patříš.",
   "clubs.expiresOn": "Vyprší {{expirationDate}}",
   "clubs.moderator.inviteCodeLabel": "Pozvánkový kód",
   "clubs.joinClub": "Přidat se ke klubu",

@@ -9,6 +9,7 @@
   "clubs.commonFriends": "{{count}} общи приятели",
   "clubs.commonFriendsFormatted": "{{localizedString}} общи приятели",
   "clubs.clubsReach": "Обхват на клубовете",
+  "clubs.reachExplanation": "Обхватът на клубовете показва приблизително колко души могат да видят офертите, които споделяш с твоите Vexl Clubs. Той събира броя на останалите членове във всеки клуб, в който членуваш.",
   "clubs.expiresOn": "Изтича на {{expirationDate}}",
   "clubs.moderator.inviteCodeLabel": "Код за покана",
   "clubs.joinClub": "Присъедини се към клуб",

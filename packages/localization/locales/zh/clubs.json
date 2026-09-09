@@ -9,6 +9,7 @@
   "clubs.commonFriends": "{{count}} 个共同好友",
   "clubs.commonFriendsFormatted": "{{localizedString}} 个共同好友",
   "clubs.clubsReach": "俱乐部触达范围",
+  "clubs.reachExplanation": "俱乐部触达范围估算有多少人能看到你分享到 Vexl Clubs的出价。它会把你加入的每个俱乐部中的其他成员人数加起来。",
   "clubs.expiresOn": "到期日期 {{expirationDate}}",
   "clubs.moderator.inviteCodeLabel": "邀请码",
   "clubs.joinClub": "加入俱乐部",

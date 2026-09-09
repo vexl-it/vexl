@@ -9,6 +9,7 @@
   "clubs.commonFriends": "{{count}} gemeinsame Freunde",
   "clubs.commonFriendsFormatted": "{{localizedString}} gemeinsame Freunde",
   "clubs.clubsReach": "Reichweite der Clubs",
+  "clubs.reachExplanation": "Die Reichweite deiner Clubs zeigt dir ungefähr, wie viele Menschen die Angebote sehen können, die du mit deinen Vexl Clubs teilst. Dafür werden die anderen Mitglieder aller Clubs zusammengezählt, denen du beigetreten bist.",
   "clubs.expiresOn": "Läuft am {{expirationDate}} ab",
   "clubs.moderator.inviteCodeLabel": "Einladungscode",
   "clubs.joinClub": "Club beitreten",

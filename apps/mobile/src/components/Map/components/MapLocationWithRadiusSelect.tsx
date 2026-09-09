@@ -25,7 +25,6 @@ import {type LayoutChangeEvent, type NativeSyntheticEvent} from 'react-native'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {apiAtom} from '../../../api'
 import {createEffectAtomWithProgress} from '../../../utils/atomUtils/createEffectAtomWithProgress'
-import {appLanguageCodes} from '../../../utils/localization/appLanguageCodes'
 import {formatDecimal} from '../../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../../utils/localization/formattingLocaleAtom'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
@@ -109,7 +108,6 @@ function useAtoms({
             get(apiAtom)
               .location.getGeocodedCoordinates({
                 lang: get(currentAppLanguageAtom),
-                langs: appLanguageCodes,
                 latitude,
                 longitude,
               })

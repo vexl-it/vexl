@@ -6,12 +6,6 @@ export const LanguageCode = Schema.String.pipe(
 )
 export type LanguageCode = Schema.Schema.Type<typeof LanguageCode>
 
-export const LanguageCodes = Schema.compose(
-  Schema.split(','),
-  Schema.Array(LanguageCode)
-)
-export type LanguageCodes = typeof LanguageCodes.Type
-
 export const englishLanguageCode = Schema.decodeSync(LanguageCode)('en')
 
 export function localeToLanguageCode(

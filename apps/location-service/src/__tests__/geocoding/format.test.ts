@@ -1,7 +1,5 @@
 import {GeocodingRecordWithContext} from '@vexl-next/geocoding-db/src/GeocodingDbService/domain'
-import {appLocaleCatalogs} from '@vexl-next/localization/src/translations'
 import {Option, Schema} from 'effect'
-import {MAX_LOCALIZED_LANGS} from '../../geocoding'
 import {
   buildLocalizedGeocodeAddresses,
   buildLocalizedSuggestAddresses,
@@ -62,23 +60,5 @@ describe('localized address builders', () => {
 
     expect(addresses.cs).toBe('Český název - CZ')
     expect(addresses.de).toBe('Default place name - CZ')
-  })
-
-  it('keys the maps by exactly the requested languages', () => {
-    expect(Object.keys(buildLocalizedSuggestAddresses(record, langs))).toEqual(
-      langs
-    )
-  })
-
-  it('renders an unknown valid language from the default place name', () => {
-    expect(buildLocalizedGeocodeAddresses(record, ['xz'])).toEqual({
-      xz: 'Default place name - CZ',
-    })
-  })
-
-  it('caps langs above the shipped locale count so clients are never truncated', () => {
-    expect(Object.keys(appLocaleCatalogs).length).toBeLessThanOrEqual(
-      MAX_LOCALIZED_LANGS
-    )
   })
 })

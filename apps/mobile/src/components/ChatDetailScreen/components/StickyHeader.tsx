@@ -17,9 +17,8 @@ import isNoteChatOrigin from '../../../state/chat/utils/isNoteChatOrigin'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {formatFullCurrencyAmount} from '../../../utils/localization/currency'
 import {formattingLocaleAtom} from '../../../utils/localization/formattingLocaleAtom'
-import {getLocationCompactDisplayLabelForLocations} from '../../../utils/offerLocationLabels'
+import {offerLocationLabelsAtom} from '../../../utils/offerLocationLabelsAtom'
 import {getUserFacingOfferType} from '../../../utils/offerTypeSemantics'
-import {currentAppLanguageAtom} from '../../../utils/preferences'
 import {chatMolecule} from '../atoms'
 
 function getOfferTitleKey({
@@ -109,7 +108,7 @@ function StickyHeader(): React.ReactElement | null {
   const inboxKey = useAtomValue(publicKeyPemBase64Atom)
   const showInfoBar = useAtomValue(showInfoBarAtom)
   const currentLocale = useAtomValue(formattingLocaleAtom)
-  const appLanguage = useAtomValue(currentAppLanguageAtom)
+  const {getCompactLabelForLocations} = useAtomValue(offerLocationLabelsAtom)
   const setShowInfoBar = useSetAtom(showInfoBarAtom)
 
   const openOfferDetail = useCallback(() => {
@@ -174,11 +173,8 @@ function StickyHeader(): React.ReactElement | null {
   const offerCity = useMemo(() => {
     if (!offer) return null
 
-    return getLocationCompactDisplayLabelForLocations(
-      offer.offerInfo.publicPart.location,
-      appLanguage
-    )
-  }, [appLanguage, offer])
+    return getCompactLabelForLocations(offer.offerInfo.publicPart.location)
+  }, [getCompactLabelForLocations, offer])
 
   const offerLanguageFlags = useMemo(() => {
     if (!offer) return []

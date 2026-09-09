@@ -4,7 +4,6 @@ import {
   type OfferType,
   type OneOfferInState,
 } from '@vexl-next/domain/src/general/offers'
-import {type LanguageCode} from '@vexl-next/domain/src/utility/LanguageCode.brand'
 import {type IconTagVariant, type OfferCardMarkBadge} from '@vexl-next/ui'
 import {Array, pipe} from 'effect'
 import {atom} from 'jotai'
@@ -12,7 +11,6 @@ import {formatFullCurrencyAmount} from './localization/currency'
 import formatSpokenLanguages from './localization/formatSpokenLanguages'
 import {formattingLocaleAtom} from './localization/formattingLocaleAtom'
 import {translationAtom} from './localization/I18nProvider'
-import {getLocationFullDisplayLabels} from './offerLocationLabels'
 import {getUserFacingOfferType} from './offerTypeSemantics'
 
 export {getUserFacingOfferType} from './offerTypeSemantics'
@@ -72,16 +70,6 @@ export const getAmountLabelActionAtom = atom(
     return ''
   }
 )
-
-export function getLocationLabels(
-  offer: OneOfferInState,
-  appLanguage: LanguageCode
-): readonly string[] {
-  return getLocationFullDisplayLabels(
-    offer.offerInfo.publicPart.location,
-    appLanguage
-  )
-}
 
 export function getPaymentMethodLabel(
   offer: OneOfferInState,

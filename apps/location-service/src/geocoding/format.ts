@@ -23,35 +23,6 @@ export const localizedName = (
   lang: string
 ): string => names[lang] ?? name
 
-// Constructing Intl.DisplayNames is expensive and the localized address
-// builders need one per requested language for every suggestion row.
-// Bound caller-selected locales with LRU eviction. Runtime locale data does
-// not change during the process lifetime, so entries need no TTL.
-const MAX_DISPLAY_NAMES = 64
-const displayNamesByLang = new Map<string, Intl.DisplayNames>()
-
-const regionDisplayNames = (lang: string): Intl.DisplayNames => {
-  const cached = displayNamesByLang.get(lang)
-  if (cached !== undefined) {
-    displayNamesByLang.delete(lang)
-    displayNamesByLang.set(lang, cached)
-    return cached
-  }
-
-  const displayNames = new Intl.DisplayNames([lang, 'en'], {
-    type: 'region',
-    fallback: 'code',
-  })
-
-  if (displayNamesByLang.size >= MAX_DISPLAY_NAMES) {
-    const oldestKey = displayNamesByLang.keys().next().value
-    if (oldestKey !== undefined) displayNamesByLang.delete(oldestKey)
-  }
-
-  displayNamesByLang.set(lang, displayNames)
-  return displayNames
-}
-
 /**
  * Intl.DisplayNames throws (rather than returning undefined) on a malformed
  * region subtag, e.g. a bad country_code from a future ingest bug. Falls back
@@ -64,7 +35,12 @@ export const countryDisplayName = (
   Option.map(countryCode, (code) => {
     const upperCode = code.toUpperCase()
     try {
-      return regionDisplayNames(lang).of(upperCode) ?? upperCode
+      return (
+        new Intl.DisplayNames([lang, 'en'], {
+          type: 'region',
+          fallback: 'code',
+        }).of(upperCode) ?? upperCode
+      )
     } catch {
       return upperCode
     }

@@ -33,8 +33,7 @@ import {
   getIsOffering,
   getOfferMarkBadge,
 } from '../utils/offerHelpers'
-import {getLocationCompactDisplayLabelForLocations} from '../utils/offerLocationLabels'
-import {currentAppLanguageAtom} from '../utils/preferences'
+import {offerLocationLabelsAtom} from '../utils/offerLocationLabelsAtom'
 import {randomSeedFromOfferInfo} from '../utils/RandomSeed'
 import {offerRerequestLimitDaysAtom} from '../utils/versionService/atoms'
 import {AnonymousAvatarOrClubImage} from './AnonymousAvatar'
@@ -53,7 +52,7 @@ export default function OfferOnMarketplace({
 }): React.ReactElement {
   const {t} = useTranslation()
   const locale = useAtomValue(formattingLocaleAtom)
-  const appLanguage = useAtomValue(currentAppLanguageAtom)
+  const {getCompactLabelForLocations} = useAtomValue(offerLocationLabelsAtom)
   const {publicPart, privatePart} = offer.offerInfo
   const {ownershipInfo} = offer
   const isMine = !!ownershipInfo?.adminId
@@ -167,10 +166,7 @@ export default function OfferOnMarketplace({
       }
     }
 
-    const locationText = getLocationCompactDisplayLabelForLocations(
-      publicPart.location,
-      appLanguage
-    )
+    const locationText = getCompactLabelForLocations(publicPart.location)
     if (locationText) result.push(locationText)
 
     if (publicPart.spokenLanguages.length > 0) {
@@ -181,7 +177,7 @@ export default function OfferOnMarketplace({
     }
 
     return result
-  }, [appLanguage, publicPart, t])
+  }, [getCompactLabelForLocations, publicPart, t])
 
   return (
     <OfferCard

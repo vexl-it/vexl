@@ -1,11 +1,17 @@
-import {GeocodingRecordWithContext} from '@vexl-next/geocoding-db/src/GeocodingDbService/domain'
+import {
+  GeocodingRecordId,
+  GeocodingRecordWithContext,
+} from '@vexl-next/geocoding-db/src/GeocodingDbService/domain'
 import {Option, Schema} from 'effect'
 import {
+  buildGeocodePlaceId,
   buildLocalizedGeocodeAddresses,
   buildLocalizedSuggestAddresses,
+  buildSuggestPlaceId,
   buildSuggestSecondRow,
   countryDisplayName,
   localizedName,
+  parsePlaceId,
 } from '../../geocoding/format'
 
 const record = Schema.decodeSync(GeocodingRecordWithContext)({
@@ -60,5 +66,33 @@ describe('localized address builders', () => {
 
     expect(addresses.cs).toBe('Český název - CZ')
     expect(addresses.de).toBe('Default place name - CZ')
+  })
+})
+
+describe('place ids', () => {
+  const id = Schema.decodeSync(GeocodingRecordId)('123')
+
+  it('round trips a suggestion id', () => {
+    const parsed = parsePlaceId(buildSuggestPlaceId(id))
+
+    expect(Option.getOrThrow(parsed).id).toBe(id)
+    expect(Option.getOrThrow(parsed).coordinates).toEqual(Option.none())
+  })
+
+  it('round trips a geocoded pin id with its coordinates', () => {
+    const parsed = Option.getOrThrow(
+      parsePlaceId(buildGeocodePlaceId(id, 50.07551, -14.43789))
+    )
+    const coordinates = Option.getOrThrow(parsed.coordinates)
+
+    expect(parsed.id).toBe(id)
+    expect(coordinates.latitude).toBeCloseTo(50.0755, 4)
+    expect(coordinates.longitude).toBeCloseTo(-14.4379, 4)
+  })
+
+  it('rejects ids not issued by this service', () => {
+    expect(parsePlaceId('ChIJi3lwCZyTC0cRkEAWZg-vAAQ')).toEqual(Option.none())
+    expect(parsePlaceId('osm:abc')).toEqual(Option.none())
+    expect(parsePlaceId('osm:1@200,0')).toEqual(Option.none())
   })
 })

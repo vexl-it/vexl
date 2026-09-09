@@ -3,6 +3,7 @@ import {PgClient} from '@effect/sql-pg'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {Effect, flow, Schema} from 'effect'
 import {GeocodingRecordWithContext} from '../domain'
+import {cityContextJoin, placeWithCityContextColumns} from './cityContext'
 
 const SuggestPlacesRequest = Schema.Struct({
   /** Already normalized (normalizeName) and LIKE-escaped prefix. */
@@ -103,54 +104,9 @@ export const createQuerySuggestPlaces = Effect.gen(function* (_) {
             ${params.limit}
         )
       SELECT
-        r.id,
-        r.place_type,
-        r.name,
-        r.names,
-        r.country_code,
-        r.population,
-        r.importance,
-        r.latitude,
-        r.longitude,
-        c.name AS city_name,
-        c.names AS city_names
+        ${placeWithCityContextColumns(sql)}
       FROM
-        ranked r
-        LEFT JOIN LATERAL (
-          SELECT
-            candidates.name,
-            candidates.names
-          FROM
-            (
-              SELECT
-                city.name,
-                city.names,
-                city.place_type,
-                earth_distance (
-                  ll_to_earth (r.latitude, r.longitude),
-                  ll_to_earth (city.latitude, city.longitude)
-                ) AS city_distance
-              FROM
-                places city
-              WHERE
-                r.place_type NOT IN ('city', 'town', 'municipality')
-                AND city.place_type IN ('city', 'town')
-              ORDER BY
-                ll_to_earth (city.latitude, city.longitude) <-> ll_to_earth (r.latitude, r.longitude)
-              LIMIT
-                24
-            ) candidates
-          WHERE
-            candidates.city_distance <= 30000
-          ORDER BY
-            CASE
-              WHEN candidates.place_type = 'city' THEN 0
-              ELSE 1
-            END,
-            candidates.city_distance ASC
-          LIMIT
-            1
-        ) c ON TRUE
+        ranked r ${cityContextJoin(sql)}
       ORDER BY
         r.sim DESC,
         r.importance DESC

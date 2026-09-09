@@ -1,21 +1,32 @@
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {GeocodingDbService} from '@vexl-next/geocoding-db/src/GeocodingDbService'
 import {type GeocodingRecordWithContext} from '@vexl-next/geocoding-db/src/GeocodingDbService/domain'
-import {normalizeName} from '@vexl-next/geocoding-db/src/common'
+import {type NearestGeocodingRecord} from '@vexl-next/geocoding-db/src/GeocodingDbService/queries/createQueryNearestPlace'
+import {
+  normalizeName,
+  SUPPORTED_LANGS,
+} from '@vexl-next/geocoding-db/src/common'
 import {
   GetGeocodedCoordinatesResponse,
+  GetLocalizedAddressesResponse,
   GetLocationSuggestionsResponse,
   LocationNotFoundError,
   type GetGeocodedCoordinatesRequest,
+  type GetLocalizedAddressesRequest,
   type GetLocationSuggestionsRequest,
 } from '@vexl-next/rest-api/src/services/location/contracts'
 import {Array, Context, Effect, Layer, Option, pipe, Schema} from 'effect'
 import {
   buildGeocodeAddress,
+  buildGeocodePlaceId,
+  buildLocalizedGeocodeAddresses,
+  buildLocalizedSuggestAddresses,
+  buildSuggestPlaceId,
   buildSuggestSecondRow,
   buildViewport,
   escapeLikePattern,
   localizedName,
+  parsePlaceId,
   pickLang,
 } from './format'
 
@@ -42,12 +53,27 @@ export interface GeocodingOperations {
     GetGeocodedCoordinatesResponse,
     UnexpectedServerError | LocationNotFoundError
   >
+  queryLocalizedAddresses: (
+    request: GetLocalizedAddressesRequest
+  ) => Effect.Effect<
+    GetLocalizedAddressesResponse,
+    UnexpectedServerError | LocationNotFoundError
+  >
 }
+
+const orLocationNotFound = <A>(
+  option: Option.Option<A>
+): Effect.Effect<A, LocationNotFoundError> =>
+  Option.match(option, {
+    onNone: () => Effect.fail(new LocationNotFoundError({status: 404})),
+    onSome: Effect.succeed,
+  })
 
 interface SuggestionUserData {
   placeId: string
   suggestFirstRow: string
   suggestSecondRow: string
+  localizedAddresses: Record<string, string>
   latitude: number
   longitude: number
   viewport: ReturnType<typeof buildViewport>
@@ -67,9 +93,10 @@ const suggestionUserData = (
   record: GeocodingRecordWithContext,
   lang: string
 ): SuggestionUserData => ({
-  placeId: `osm:${record.id}`,
+  placeId: buildSuggestPlaceId(record.id),
   suggestFirstRow: localizedName(record.name, record.names, lang),
   suggestSecondRow: buildSuggestSecondRow(record, lang),
+  localizedAddresses: buildLocalizedSuggestAddresses(record, SUPPORTED_LANGS),
   latitude: record.latitude,
   longitude: record.longitude,
   viewport: buildViewport(record.latitude, record.longitude, record.placeType),
@@ -83,6 +110,20 @@ export class GeocodingService extends Context.Tag('GeocodingService')<
     GeocodingService,
     Effect.gen(function* (_) {
       const geocodingDb = yield* _(GeocodingDbService)
+
+      const findNearestPlace = (coordinates: {
+        latitude: number
+        longitude: number
+      }): Effect.Effect<
+        NearestGeocodingRecord,
+        UnexpectedServerError | LocationNotFoundError
+      > =>
+        geocodingDb
+          .nearestPlace({
+            ...coordinates,
+            maxDistanceMeters: GEOCODE_MAX_DISTANCE_METERS,
+          })
+          .pipe(Effect.flatMap(orLocationNotFound))
 
       const querySuggest: GeocodingOperations['querySuggest'] = (request) =>
         Effect.gen(function* (_) {
@@ -158,27 +199,20 @@ export class GeocodingService extends Context.Tag('GeocodingService')<
       const queryGeocode: GeocodingOperations['queryGeocode'] = (request) =>
         Effect.gen(function* (_) {
           const lang = pickLang(request.lang)
-
-          const nearest = yield* _(
-            geocodingDb.nearestPlace({
-              latitude: request.latitude,
-              longitude: request.longitude,
-              maxDistanceMeters: GEOCODE_MAX_DISTANCE_METERS,
-            })
-          )
-
-          if (Option.isNone(nearest))
-            return yield* _(
-              Effect.fail(new LocationNotFoundError({status: 404}))
-            )
-          const place = nearest.value
+          const place = yield* _(findNearestPlace(request))
 
           return yield* _(
             Schema.decodeUnknown(GetGeocodedCoordinatesResponse)({
-              // placeId carries the pin coordinates so two different pins in
-              // the same settlement stay distinct entries on the client.
-              placeId: `osm:${place.id}@${request.latitude.toFixed(4)},${request.longitude.toFixed(4)}`,
+              placeId: buildGeocodePlaceId(
+                place.id,
+                request.latitude,
+                request.longitude
+              ),
               address: buildGeocodeAddress(place, lang),
+              localizedAddresses: buildLocalizedGeocodeAddresses(
+                place,
+                SUPPORTED_LANGS
+              ),
               // The pin position is the location the user chose — returning it
               // verbatim (instead of the settlement center) keeps meeting
               // location picks exact.
@@ -194,7 +228,42 @@ export class GeocodingService extends Context.Tag('GeocodingService')<
           )
         }).pipe(Effect.withSpan('queryGeocode'))
 
-      return {querySuggest, queryGeocode}
+      const queryLocalizedAddresses: GeocodingOperations['queryLocalizedAddresses'] =
+        (request) =>
+          Effect.gen(function* (_) {
+            const {id, coordinates} = yield* _(
+              orLocationNotFound(parsePlaceId(request.placeId))
+            )
+
+            const localizedAddresses = yield* _(
+              Option.match(coordinates, {
+                onSome: (pin) =>
+                  Effect.map(findNearestPlace(pin), (place) =>
+                    buildLocalizedGeocodeAddresses(place, SUPPORTED_LANGS)
+                  ),
+                onNone: () =>
+                  Effect.map(
+                    Effect.flatMap(
+                      geocodingDb.placeById(id),
+                      orLocationNotFound
+                    ),
+                    (record) =>
+                      buildLocalizedSuggestAddresses(record, SUPPORTED_LANGS)
+                  ),
+              })
+            )
+
+            return yield* _(
+              Schema.decodeUnknown(GetLocalizedAddressesResponse)({
+                localizedAddresses,
+              }),
+              UnexpectedServerError.wrapErrors(
+                'Failed to build localized addresses response'
+              )
+            )
+          }).pipe(Effect.withSpan('queryLocalizedAddresses'))
+
+      return {querySuggest, queryGeocode, queryLocalizedAddresses}
     })
   )
 }

@@ -44,6 +44,7 @@ describe('geocoding reporting', () => {
     const geocodingDbLayer = Layer.succeed(GeocodingDbService, {
       suggestPlaces: () => Effect.succeed([invalidRecord]),
       nearestPlace: () => Effect.die('Unused in this test'),
+      placeById: () => Effect.die('Unused in this test'),
     })
 
     const result = await Effect.runPromise(
@@ -63,6 +64,7 @@ describe('geocoding reporting', () => {
       suggestPlaces: () =>
         Effect.die(new Error('Defect for private search phrase at 50.1,14.4')),
       nearestPlace: () => Effect.die('Unused in this test'),
+      placeById: () => Effect.die('Unused in this test'),
     })
 
     const exit = await Effect.runPromise(

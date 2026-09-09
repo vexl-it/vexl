@@ -1,7 +1,9 @@
 import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
+import {type LanguageCode} from '@vexl-next/domain/src/utility/LanguageCode.brand'
 import {Array, Option, pipe} from 'effect'
 
+import {getLocationFullDisplayLabel} from '../../../utils/offerLocationLabels'
 import {type StoredContactWithComputedValues} from '../../contacts/domain'
 import {deriveVisibleCommonFriendsForOffer} from './visibleCommonFriends'
 
@@ -11,11 +13,13 @@ export default function filterOffersByText({
   offers,
   importedContacts,
   importedContactsHashes,
+  appLanguage,
 }: {
   text: string
   offers: OneOfferInState[]
   importedContacts: StoredContactWithComputedValues[]
   importedContactsHashes: readonly HashedPhoneNumber[]
+  appLanguage: LanguageCode
 }): OneOfferInState[] {
   // TODO - better search. This is just a placeholder
 
@@ -68,7 +72,7 @@ export default function filterOffersByText({
           ).join(DIVIDER),
           pipe(
             offer.offerInfo.publicPart.location ?? [],
-            Array.map((one) => one.address ?? '')
+            Array.map((one) => getLocationFullDisplayLabel(one, appLanguage))
           ).join(DIVIDER),
         ]
           .join(DIVIDER)

@@ -10,6 +10,7 @@ import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand
 import {type LoggingFunction} from '../../utils'
 import {
   type GetGeocodedCoordinatesRequest,
+  type GetLocalizedAddressesRequest,
   type GetLocationSuggestionsRequest,
 } from './contracts'
 import {LocationApiSpecification} from './specification'
@@ -69,6 +70,10 @@ export function api({
         }),
       getGeocodedCoordinates: (query: GetGeocodedCoordinatesRequest) =>
         client.getGeocodedCoordinatesV2({
+          urlParams: query,
+        }),
+      getLocalizedAddresses: (query: GetLocalizedAddressesRequest) =>
+        client.getLocalizedAddresses({
           urlParams: query,
         }),
     }

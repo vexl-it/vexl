@@ -12,9 +12,9 @@ import {
 import {
   getAmountLabelActionAtom,
   getLanguagesLabel,
-  getLocationLabels,
   getPaymentMethodLabel,
 } from '../utils/offerHelpers'
+import {offerLocationLabelsAtom} from '../utils/offerLocationLabelsAtom'
 
 function DetailRow({
   label,
@@ -75,6 +75,7 @@ export default function OfferPropertiesCard({
 }): React.ReactElement | null {
   const {t} = useTranslation()
   const locale = useAtomValue(formattingLocaleAtom)
+  const {getFullLabels} = useAtomValue(offerLocationLabelsAtom)
   const {
     feeAmount,
     expirationDate,
@@ -121,7 +122,7 @@ export default function OfferPropertiesCard({
         },
         {
           label: t('offerForm.location.location'),
-          value: getLocationLabels(offer),
+          value: getFullLabels(offer.offerInfo.publicPart.location),
         },
         {
           label: t('offerForm.paymentMethod.paymentMethod'),
@@ -145,6 +146,7 @@ export default function OfferPropertiesCard({
     expirationDate,
     feeAmount,
     getAmountLabel,
+    getFullLabels,
     listingType,
     locale,
     offer,

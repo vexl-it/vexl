@@ -19,6 +19,7 @@ export function locationSuggestionToMapValue(
   return {
     placeId: locationSuggestion.userData.placeId,
     address: `${locationSuggestion.userData.suggestFirstRow}, ${locationSuggestion.userData.suggestSecondRow}`,
+    localizedAddresses: locationSuggestion.userData.localizedAddresses,
     latitude: locationSuggestion.userData.latitude,
     longitude: locationSuggestion.userData.longitude,
     viewport: locationSuggestion.userData.viewport,
@@ -38,6 +39,7 @@ export function pickedLocationToOfferLocation({
     placeId: pickedLocation.placeId,
     address: pickedLocation.address,
     shortAddress: pickedLocation.address,
+    localizedAddresses: pickedLocation.localizedAddresses,
     radius: pickedLocation.radius,
     latitude,
     longitude,
@@ -106,6 +108,7 @@ export function offerLocationToMapValueWithRadius(
   return {
     placeId: offerLocation.placeId,
     address: offerLocation.address,
+    localizedAddresses: offerLocation.localizedAddresses,
     latitude: offerLocation.latitude,
     longitude: offerLocation.longitude,
     radius: offerLocation.radius,

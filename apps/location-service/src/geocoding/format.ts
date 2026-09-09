@@ -1,4 +1,6 @@
+import {Latitude, Longitude} from '@vexl-next/domain/src/utility/geoCoordinates'
 import {
+  GeocodingRecordId,
   type GeocodingRecordWithContext,
   type GeocodingTranslations,
 } from '@vexl-next/geocoding-db/src/GeocodingDbService/domain'
@@ -6,7 +8,47 @@ import {
   isCityType,
   viewportLatRadiusDeg,
 } from '@vexl-next/geocoding-db/src/common'
-import {Option} from 'effect'
+import {Array, Option, pipe, Schema} from 'effect'
+
+export const buildSuggestPlaceId = (id: GeocodingRecordId): string =>
+  `osm:${id}`
+
+/**
+ * The pin coordinates are part of the id so two different pins in the same
+ * settlement stay distinct entries on the client.
+ */
+export const buildGeocodePlaceId = (
+  id: GeocodingRecordId,
+  latitude: number,
+  longitude: number
+): string => `osm:${id}@${latitude.toFixed(4)},${longitude.toFixed(4)}`
+
+const ParsedPlaceId = Schema.Struct({
+  id: GeocodingRecordId,
+  coordinates: Schema.OptionFromNullOr(
+    Schema.Struct({
+      latitude: Schema.NumberFromString.pipe(Schema.compose(Latitude)),
+      longitude: Schema.NumberFromString.pipe(Schema.compose(Longitude)),
+    })
+  ),
+})
+export type ParsedPlaceId = typeof ParsedPlaceId.Type
+
+const PLACE_ID_PATTERN = /^osm:(\d+)(?:@(-?[\d.]+),(-?[\d.]+))?$/
+
+/** None for ids not issued by this service (legacy Google place ids). */
+export const parsePlaceId = (placeId: string): Option.Option<ParsedPlaceId> =>
+  Option.flatMap(
+    Option.fromNullable(PLACE_ID_PATTERN.exec(placeId)),
+    ([, id, latitude, longitude]) =>
+      Schema.decodeUnknownOption(ParsedPlaceId)({
+        id,
+        coordinates:
+          latitude === undefined || longitude === undefined
+            ? null
+            : {latitude, longitude},
+      })
+  )
 
 /**
  * "cs-CZ" / "CS" / "cs" → "cs". Anything that isn't a two-letter code falls
@@ -82,6 +124,28 @@ export const buildSuggestSecondRow = (
     : localizedName(record.name, record.names, lang)
 }
 
+const buildLocalizedAddresses = (
+  langs: readonly string[],
+  buildAddress: (lang: string) => string
+): Record<string, string> =>
+  Object.fromEntries(
+    pipe(
+      langs,
+      Array.map((lang): [string, string] => [lang, buildAddress(lang)])
+    )
+  )
+
+/** Mirrors how the mobile client joins suggestFirstRow + suggestSecondRow. */
+export const buildLocalizedSuggestAddresses = (
+  record: GeocodingRecordWithContext,
+  langs: readonly string[]
+): Record<string, string> =>
+  buildLocalizedAddresses(
+    langs,
+    (lang) =>
+      `${localizedName(record.name, record.names, lang)}, ${buildSuggestSecondRow(record, lang)}`
+  )
+
 /**
  * Reverse-geocode address, matching the shape the app displayed with Google:
  * "Vinohrady, Praha - CZ" for sub-city places, "Bratislava - SK" for cities.
@@ -105,6 +169,15 @@ export const buildGeocodeAddress = (
     onSome: (code) => `${namePart} - ${code.toUpperCase()}`,
   })
 }
+
+export const buildLocalizedGeocodeAddresses = (
+  record: Pick<
+    GeocodingRecordWithContext,
+    'placeType' | 'name' | 'names' | 'countryCode' | 'cityName' | 'cityNames'
+  >,
+  langs: readonly string[]
+): Record<string, string> =>
+  buildLocalizedAddresses(langs, (lang) => buildGeocodeAddress(record, lang))
 
 export const buildViewport = (
   latitude: number,

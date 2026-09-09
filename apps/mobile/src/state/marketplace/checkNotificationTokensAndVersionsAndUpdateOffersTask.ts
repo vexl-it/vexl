@@ -16,6 +16,7 @@ import {generateAndRegisterVexlTokenActionAtom} from '../notifications/actions/g
 import {ensureVexlSecretExistsTaskId} from '../notifications/ensureVexlSecretExistsTask'
 import {refreshOffersAndEnsureInboxesTaskId} from '../refreshOffersAndEnsureInboxesInAppLoadingTask'
 import {myOffersAtom} from './atoms/myOffers'
+import {refreshLocalizedAddressesForLocationsActionAtom} from './atoms/refreshLocalizedAddressesForLocationsActionAtom'
 import {updateOfferActionAtom} from './atoms/updateOfferActionAtom'
 
 const doesOfferNeedsUpdateNotificationToken = atom(
@@ -80,29 +81,38 @@ const updateOfferNotificationTokenActionAtom = atom(
     )
 )
 
-const updateOfferVersion = atom(null, (get, set, offer: MyOfferInState) =>
-  Effect.gen(function* (_) {
-    return yield* _(
-      set(updateOfferActionAtom, {
-        payloadPublic: {
-          authorClientVersion: version,
-          ...offer.offerInfo.publicPart,
-        },
-        intendedClubs: offer.ownershipInfo.intendedClubs,
-        symmetricKey: offer.offerInfo.privatePart.symmetricKey,
-        adminId: offer.ownershipInfo.adminId,
-        intendedConnectionLevel: offer.ownershipInfo.intendedConnectionLevel,
-        updatePrivateParts: false,
-      })
+const updateOfferVersionAndLocalizedAddresses = atom(
+  null,
+  (get, set, offer: MyOfferInState) =>
+    Effect.gen(function* (_) {
+      const location = yield* _(
+        set(
+          refreshLocalizedAddressesForLocationsActionAtom,
+          offer.offerInfo.publicPart.location
+        )
+      )
+      return yield* _(
+        set(updateOfferActionAtom, {
+          payloadPublic: {
+            ...offer.offerInfo.publicPart,
+            authorClientVersion: version,
+            location,
+          },
+          intendedClubs: offer.ownershipInfo.intendedClubs,
+          symmetricKey: offer.offerInfo.privatePart.symmetricKey,
+          adminId: offer.ownershipInfo.adminId,
+          intendedConnectionLevel: offer.ownershipInfo.intendedConnectionLevel,
+          updatePrivateParts: false,
+        })
+      )
+    }).pipe(
+      Effect.tapError((e) =>
+        reportErrorE('error', new Error('Error while updating offer version'), {
+          e,
+        })
+      ),
+      mergeToBoolean
     )
-  }).pipe(
-    Effect.tapError((e) =>
-      reportErrorE('error', new Error('Error while updating offer version'), {
-        e,
-      })
-    ),
-    mergeToBoolean
-  )
 )
 
 export const checkNotificationTokensAndVersionsAndUpdateOffersTaskId =
@@ -165,7 +175,9 @@ export const checkNotificationTokensAndVersionsAndUpdateOffersTaskId =
         const offerUpdatesVersion = yield* _(
           pipe(
             offersToUpdateVersion,
-            Array.map((offer) => store.set(updateOfferVersion, offer)),
+            Array.map((offer) =>
+              store.set(updateOfferVersionAndLocalizedAddresses, offer)
+            ),
             Effect.allWith({
               concurrency: 'unbounded',
             })

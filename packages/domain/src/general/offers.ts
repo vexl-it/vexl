@@ -5,6 +5,7 @@ import {Array, Either, Schema} from 'effect'
 import {IdNumeric} from '../utility/IdNumeric'
 import {IsoDatetimeString} from '../utility/IsoDatetimeString.brand'
 import {JSDateString} from '../utility/JSDateString.brand'
+import {LanguageCode} from '../utility/LanguageCode.brand'
 import {VersionString} from '../utility/VersionString.brand'
 import {Latitude, Longitude, Radius} from '../utility/geoCoordinates'
 import {HashedPhoneNumber} from './HashedPhoneNumber.brand'
@@ -109,6 +110,14 @@ export const LocationPlaceId = Schema.String.pipe(
 )
 export type LocationPlaceId = typeof LocationPlaceId.Type
 
+// Keys are pattern-validated language codes, kept open to future locales so
+// entries from newer clients with additional languages still decode.
+export const LocalizedAddresses = Schema.Record({
+  key: LanguageCode,
+  value: Schema.String,
+})
+export type LocalizedAddresses = typeof LocalizedAddresses.Type
+
 export const OfferLocation = Schema.Struct({
   placeId: LocationPlaceId,
   latitude: Latitude,
@@ -116,6 +125,7 @@ export const OfferLocation = Schema.Struct({
   radius: Radius,
   address: Schema.String,
   shortAddress: Schema.String,
+  localizedAddresses: Schema.optional(LocalizedAddresses),
 })
 export type OfferLocation = typeof OfferLocation.Type
 

@@ -1,10 +1,11 @@
 import {type UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {Context, Effect, Layer, type Option} from 'effect'
-import {type GeocodingRecordWithContext} from './domain'
+import {type GeocodingRecordId, type GeocodingRecordWithContext} from './domain'
 import {
   createQueryNearestPlace,
   type NearestGeocodingRecord,
 } from './queries/createQueryNearestPlace'
+import {createQueryPlaceById} from './queries/createQueryPlaceById'
 import {createQuerySuggestPlaces} from './queries/createQuerySuggestPlaces'
 
 export interface GeocodingDbOperations {
@@ -27,6 +28,12 @@ export interface GeocodingDbOperations {
     Option.Option<NearestGeocodingRecord>,
     UnexpectedServerError
   >
+  placeById: (
+    id: GeocodingRecordId
+  ) => Effect.Effect<
+    Option.Option<GeocodingRecordWithContext>,
+    UnexpectedServerError
+  >
 }
 
 export class GeocodingDbService extends Context.Tag('GeocodingDbService')<
@@ -38,8 +45,13 @@ export class GeocodingDbService extends Context.Tag('GeocodingDbService')<
     Effect.gen(function* (_) {
       const suggestPlaces = yield* _(createQuerySuggestPlaces)
       const nearestPlace = yield* _(createQueryNearestPlace)
+      const queryPlaceById = yield* _(createQueryPlaceById)
 
-      return {suggestPlaces, nearestPlace}
+      return {
+        suggestPlaces,
+        nearestPlace,
+        placeById: (id) => queryPlaceById({id}),
+      }
     })
   )
 }

@@ -57,3 +57,14 @@ export const getLocationSuggestionV2Handler = HttpApiBuilder.handler(
       makeEndpointEffect
     )
 )
+
+export const getLocalizedAddressesHandler = HttpApiBuilder.handler(
+  LocationApiSpecification,
+  'root',
+  'getLocalizedAddresses',
+  (req) =>
+    Effect.gen(function* (_) {
+      const geocoding = yield* _(GeocodingService)
+      return yield* _(geocoding.queryLocalizedAddresses(req.urlParams))
+    }).pipe(Effect.withSpan('getLocalizedAddressesHandler'), makeEndpointEffect)
+)

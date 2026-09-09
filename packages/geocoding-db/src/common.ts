@@ -12,9 +12,7 @@ import * as translations from '@vexl-next/localization/src/translations'
  * language flows through automatically on the next places ingest (weekly
  * cron) instead of relying on someone remembering to update this list.
  */
-export const SUPPORTED_LANGS = Object.keys(translations).filter(
-  (lang) => lang !== 'dev'
-)
+export const SUPPORTED_LANGS = Object.keys(translations.appLocaleCatalogs)
 
 /**
  * OSM place=* values that represent settlements people would pick as an offer

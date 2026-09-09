@@ -1,4 +1,7 @@
-import {LocationPlaceId} from '@vexl-next/domain/src/general/offers'
+import {
+  LocalizedAddresses,
+  LocationPlaceId,
+} from '@vexl-next/domain/src/general/offers'
 import {Latitude, Longitude} from '@vexl-next/domain/src/utility/geoCoordinates'
 import {Schema} from 'effect'
 
@@ -18,6 +21,7 @@ export class LocationData extends Schema.Class<LocationData>('LocationData')({
   placeId: LocationPlaceId,
   suggestFirstRow: Schema.String,
   suggestSecondRow: Schema.String,
+  localizedAddresses: Schema.optional(LocalizedAddresses),
   latitude: Latitude,
   longitude: Longitude,
   viewport: Schema.Struct({
@@ -57,6 +61,7 @@ export class GetGeocodedCoordinatesResponse extends Schema.Class<GetGeocodedCoor
 )({
   placeId: LocationPlaceId,
   address: Schema.String,
+  localizedAddresses: Schema.optional(LocalizedAddresses),
   latitude: Latitude,
   longitude: Longitude,
   viewport: Schema.Struct({
@@ -69,6 +74,18 @@ export class GetGeocodedCoordinatesResponse extends Schema.Class<GetGeocodedCoor
       longitude: Longitude,
     }),
   }),
+}) {}
+
+export class GetLocalizedAddressesRequest extends Schema.Class<GetLocalizedAddressesRequest>(
+  'GetLocalizedAddressesRequest'
+)({
+  placeId: LocationPlaceId,
+}) {}
+
+export class GetLocalizedAddressesResponse extends Schema.Class<GetLocalizedAddressesResponse>(
+  'GetLocalizedAddressesResponse'
+)({
+  localizedAddresses: LocalizedAddresses,
 }) {}
 
 export class LocationNotFoundError extends Schema.TaggedError<LocationNotFoundError>(

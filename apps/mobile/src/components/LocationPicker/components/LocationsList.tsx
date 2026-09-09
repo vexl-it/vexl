@@ -8,6 +8,7 @@ import {TouchableOpacity} from 'react-native'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {formatDecimal} from '../../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../../utils/localization/formattingLocaleAtom'
+import {offerLocationLabelsAtom} from '../../../utils/offerLocationLabelsAtom'
 
 interface Props {
   locations: readonly OfferLocation[] | undefined
@@ -21,6 +22,7 @@ function LocationsList({
   const {t} = useTranslation()
   const theme = useTheme()
   const locale = useAtomValue(formattingLocaleAtom)
+  const {getFullLabel} = useAtomValue(offerLocationLabelsAtom)
 
   return locations
     ? pipe(
@@ -44,7 +46,7 @@ function LocationsList({
               ellipsizeMode="tail"
               flexShrink={1}
             >
-              {loc.address}
+              {getFullLabel(loc)}
               {' - '}
               {t('map.locationSelect.radius', {
                 radius: formatDecimal(

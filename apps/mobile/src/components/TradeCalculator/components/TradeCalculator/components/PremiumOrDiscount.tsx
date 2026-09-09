@@ -1,5 +1,5 @@
 import {ChevronRight, Switch, Typography} from '@vexl-next/ui'
-import {useAtomValue} from 'jotai'
+import {useAtomValue, useSetAtom} from 'jotai'
 import React from 'react'
 import {TouchableOpacity} from 'react-native'
 import {XStack, YStack, useTheme} from 'tamagui'
@@ -20,14 +20,27 @@ function PremiumOrDiscount({
   const {t} = useTranslation()
   const theme = useTheme()
   const premiumOrDiscountEnabled = useAtomValue(premiumOrDiscountEnabledAtom)
+  const setPremiumOrDiscountEnabled = useSetAtom(
+    premiumOrDiscountSwitchActionAtom
+  )
   const feeAmount = useAtomValue(feeAmountAtom)
 
   return (
     <YStack gap="$4">
       <XStack ai="center" jc="space-between">
-        <Typography variant="paragraphSmall" color="$foregroundPrimary">
-          {t('tradeChecklist.calculateAmount.premiumOrDiscount')}
-        </Typography>
+        <TouchableOpacity
+          style={{flex: 1}}
+          activeOpacity={0.7}
+          accessibilityRole="switch"
+          accessibilityState={{checked: premiumOrDiscountEnabled}}
+          onPress={() => {
+            setPremiumOrDiscountEnabled((value) => !value)
+          }}
+        >
+          <Typography variant="paragraphSmall" color="$foregroundPrimary">
+            {t('tradeChecklist.calculateAmount.premiumOrDiscount')}
+          </Typography>
+        </TouchableOpacity>
         <Switch valueAtom={premiumOrDiscountSwitchActionAtom} />
       </XStack>
       {!!premiumOrDiscountEnabled && (

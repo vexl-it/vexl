@@ -22,7 +22,6 @@ import {Array, Effect, pipe, Schema} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
 import {syncAllClubsHandleStateWhenNotFoundActionAtom} from '../../clubs/atom/refreshClubsActionAtom'
-import {syncConnectionsActionAtom} from '../../connections/atom/connectionStateAtom'
 import {updateAndReencryptSingleOfferConnectionActionAtom} from '../../connections/atom/offerToConnectionsAtom'
 import {sessionDataOrDummyAtom} from '../../session'
 import {reencryptSingleOfferMissingOnServerWhenEditingActionAtom} from './offersMissingOnServer'
@@ -136,8 +135,6 @@ export const updateOfferActionAtom = atom<
 
     if (params.updatePrivateParts) {
       yield* _(set(syncAllClubsHandleStateWhenNotFoundActionAtom))
-      yield* _(set(syncConnectionsActionAtom))
-
       yield* _(
         set(updateAndReencryptSingleOfferConnectionActionAtom, {
           adminId,

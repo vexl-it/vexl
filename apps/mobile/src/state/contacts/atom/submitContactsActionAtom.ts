@@ -19,7 +19,6 @@ import {formattingLocaleAtom} from '../../../utils/localization/formattingLocale
 import reportError from '../../../utils/reportError'
 import {waitForNextAnimationFrameEffect} from '../../../utils/runAfterAnimationFrames'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
-import {syncConnectionsActionAtom} from '../../connections/atom/connectionStateAtom'
 import {
   noteRecordsToReencryptCountAtom,
   updateAndReencryptAllNotesConnectionsActionAtom,
@@ -615,35 +614,32 @@ const syncNetworkAfterContactsImportActionAtom = atom(
         })
 
         yield* _(
-          set(syncConnectionsActionAtom),
-          Effect.zip(
-            set(updateAndReencryptAllOffersConnectionsActionAtom, {
-              onProgres: ({offerI, totalOffers, progress}) => {
-                set(offerProgressModalActionAtoms.showStep, {
-                  aggregateProgress: {
-                    processingIndex: offerI,
-                    totalToProcess: totalOffers,
-                    span: offersProgressSpan,
-                  },
-                  progress,
-                  textData: {
-                    title: t('contacts.refreshingOffers.title'),
-                    belowProgressLeft: t(
-                      'contacts.refreshingOffers.belowProgressLeft',
-                      {
-                        i: offerI + 1,
-                        total: totalOffers,
-                      }
-                    ),
-                    bottomText: t(
-                      'offerForm.offerEncryption.dontCloseTheAppCanTakeAWhile'
-                    ),
-                  },
-                })
-              },
-              isInBackground: false,
-            })
-          ),
+          set(updateAndReencryptAllOffersConnectionsActionAtom, {
+            onProgres: ({offerI, totalOffers, progress}) => {
+              set(offerProgressModalActionAtoms.showStep, {
+                aggregateProgress: {
+                  processingIndex: offerI,
+                  totalToProcess: totalOffers,
+                  span: offersProgressSpan,
+                },
+                progress,
+                textData: {
+                  title: t('contacts.refreshingOffers.title'),
+                  belowProgressLeft: t(
+                    'contacts.refreshingOffers.belowProgressLeft',
+                    {
+                      i: offerI + 1,
+                      total: totalOffers,
+                    }
+                  ),
+                  bottomText: t(
+                    'offerForm.offerEncryption.dontCloseTheAppCanTakeAWhile'
+                  ),
+                },
+              })
+            },
+            isInBackground: false,
+          }),
           Effect.zipLeft(
             set(updateAndReencryptAllNotesConnectionsActionAtom, {
               onProgres: ({noteI, totalNotes, progress}) => {
@@ -718,7 +714,6 @@ const syncNetworkAfterContactsImportActionAtom = atom(
           enabled: showContactImportProgressDialog,
           title: t('contacts.importProgress.titleUpdatingNetwork'),
         })
-        yield* _(set(syncConnectionsActionAtom))
         yield* _(
           set(updateAndReencryptAllOffersConnectionsActionAtom, {
             isInBackground: false,

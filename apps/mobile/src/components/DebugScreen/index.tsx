@@ -82,9 +82,7 @@ import {upsertInboxOnBeAndLocallyActionAtom} from '../../state/chat/hooks/useCre
 import {clubsToKeyHolderAtom} from '../../state/clubs/atom/clubsToKeyHolderV2Atom'
 import {clubsWithMembersAtom} from '../../state/clubs/atom/clubsWithMembersAtom'
 import {type ClubWithMembers} from '../../state/clubs/domain'
-import connectionStateAtom, {
-  syncConnectionsActionAtom,
-} from '../../state/connections/atom/connectionStateAtom'
+import connectionStateAtom from '../../state/connections/atom/connectionStateAtom'
 import offerToConnectionsAtom, {
   deleteOrphanRecordsActionAtom,
   updateAndReencryptAllOffersConnectionsActionAtom,
@@ -684,12 +682,14 @@ function DebugScreen(): React.ReactElement {
           <Button
             variant="primary"
             size="small"
-            text="Refresh connectionss"
+            text="Refresh offers and connections"
             onPress={() => {
               Effect.runFork(
                 Effect.gen(function* (_) {
-                  yield* store.set(syncConnectionsActionAtom)
-
+                  yield* store.set(
+                    updateAndReencryptAllOffersConnectionsActionAtom,
+                    {}
+                  )
                   const connectionState = store.get(connectionStateAtom)
                   console.log(connectionState)
                 })

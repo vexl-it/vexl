@@ -59,13 +59,9 @@ function fetchContacts(
   })
 }
 
-export const syncConnectionsActionAtom = atom(
+export const fetchConnectionsActionAtom = atom(
   null,
-  (
-    get,
-    set,
-    notificationTrackingId?: NotificationTrackingId
-  ): Effect.Effect<boolean> => {
+  (get, set, notificationTrackingId?: NotificationTrackingId) => {
     return Effect.gen(function* (_) {
       const api = get(apiAtom)
 
@@ -205,23 +201,23 @@ export const syncConnectionsActionAtom = atom(
 
       void showDebugNotificationIfEnabled({
         title: 'Connections synced',
-        subtitle: 'syncConnectionsActionAtom',
+        subtitle: 'fetchConnectionsActionAtom',
         body: `Finished syncing connections in ${unixMillisecondsNow() - updateStarted} ms`,
       })
 
-      set(connectionStateAtom, {
+      return {
         firstLevel,
         secondLevel,
         commonFriends,
         verifiedFriends,
         lastUpdate,
-      })
+      }
     }).pipe(
       Effect.tapError((e) =>
         Effect.sync(() => {
           void showDebugNotificationIfEnabled({
             title: 'Error while syncing connections',
-            subtitle: 'syncConnectionsActionAtom',
+            subtitle: 'fetchConnectionsActionAtom',
             body: e._tag,
           })
           reportError(
@@ -231,11 +227,6 @@ export const syncConnectionsActionAtom = atom(
           )
         })
       ),
-      Effect.mapBoth({
-        onFailure: () => false,
-        onSuccess: () => true,
-      }),
-      Effect.merge,
       effectWithEnsuredBenchmark('Sync connections')
     )
   }

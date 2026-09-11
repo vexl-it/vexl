@@ -29,8 +29,15 @@ import {
   offersStateAtom,
   singleOfferByAdminIdAtom,
 } from '../../marketplace/atoms/offersState'
-import {OfferToConnectionsItems, type OfferToConnectionsItem} from '../domain'
-import connectionStateAtom from './connectionStateAtom'
+import {
+  OfferToConnectionsItems,
+  type ConnectionsState,
+  type OfferToConnectionsItem,
+} from '../domain'
+import {getChangedConnectionPublicKeys} from '../utils/getChangedConnectionPublicKeys'
+import connectionStateAtom, {
+  fetchConnectionsActionAtom,
+} from './connectionStateAtom'
 
 const BACKGROUND_TIME_LIMIT_MS = 25_000
 
@@ -255,6 +262,26 @@ interface UpdateSingleOfferConnectionParams {
 }
 
 /**
+ * Fetches the current graph and diffs it against the stored one. The stored
+ * graph is left untouched so that a failed upload round re-uploads the same
+ * diff next time. Falls back to the stored graph when the fetch fails.
+ */
+const fetchConnectionsDiffActionAtom = atom(null, (get, set) =>
+  Effect.gen(function* (_) {
+    const previous = get(connectionStateAtom)
+    const fetched = yield* _(set(fetchConnectionsActionAtom), Effect.option)
+    return {
+      fetched,
+      connectionState: Option.getOrElse(fetched, () => previous),
+      connectionsToRefresh: Option.match(fetched, {
+        onNone: () => [],
+        onSome: (next) => getChangedConnectionPublicKeys(previous, next),
+      }),
+    }
+  })
+)
+
+/**
  * Uploads new/removed private parts for a single offer and returns an updater
  * that applies the resulting connection changes to the locally stored
  * `OfferToConnectionsItem`. Persisting the returned update is left to the
@@ -271,12 +298,16 @@ const computeSingleOfferConnectionUpdateActionAtom = atom(
       intendedConnectionLevel,
       stopProcessingAfter,
       onProgress,
-    }: UpdateSingleOfferConnectionParams
+      connectionState,
+      connectionsToRefresh,
+    }: UpdateSingleOfferConnectionParams & {
+      connectionState: ConnectionsState
+      connectionsToRefresh: ReadonlyArray<PublicKeyPemBase64 | PublicKeyV2>
+    }
   ) =>
     Effect.gen(function* (_) {
       const offerApi = get(apiAtom).offer
 
-      const connectionState = get(connectionStateAtom)
       const oneOfferConnectionsAtom =
         createSingleOfferToConnectionsAtom(adminId)
       const oneOfferConnections = yield* _(get(oneOfferConnectionsAtom))
@@ -314,6 +345,7 @@ const computeSingleOfferConnectionUpdateActionAtom = atom(
         'Update one offer connections'
       )
       const {
+        updateSuccess,
         encryptionErrors,
         newConnections,
         timeLimitReachedErrors,
@@ -321,6 +353,7 @@ const computeSingleOfferConnectionUpdateActionAtom = atom(
       } = yield* _(
         updatePrivateParts({
           currentConnections: oneOfferConnections.connections,
+          connectionsToRefresh,
           targetConnections: {
             firstLevel: connectionState.firstLevel,
             secondLevel:
@@ -363,44 +396,57 @@ const computeSingleOfferConnectionUpdateActionAtom = atom(
         )
       }
 
-      return (val: OfferToConnectionsItem): OfferToConnectionsItem => ({
-        ...val,
-        connections: {
-          firstLevel: subtractArrays(
-            [...val.connections.firstLevel, ...newConnections.firstLevel],
-            removedConnections
-          ),
-          secondLevel:
-            connectionLevel === 'ALL'
-              ? subtractArrays(
-                  [
-                    ...(val.connections.secondLevel ?? []),
-                    ...(newConnections.secondLevel ?? []),
-                  ],
-                  removedConnections
-                )
-              : [],
-          clubs: processClubConnections({
-            currentConnections: val.connections.clubs ?? {},
-            newConnections: newConnections.clubs ?? {},
-            removedConnections,
-          }),
-        },
-      })
+      return {
+        updateSuccess,
+        applyConnectionsUpdate: (
+          val: OfferToConnectionsItem
+        ): OfferToConnectionsItem => ({
+          ...val,
+          connections: {
+            firstLevel: subtractArrays(
+              [...val.connections.firstLevel, ...newConnections.firstLevel],
+              removedConnections
+            ),
+            secondLevel:
+              connectionLevel === 'ALL'
+                ? subtractArrays(
+                    [
+                      ...(val.connections.secondLevel ?? []),
+                      ...(newConnections.secondLevel ?? []),
+                    ],
+                    removedConnections
+                  )
+                : [],
+            clubs: processClubConnections({
+              currentConnections: val.connections.clubs ?? {},
+              newConnections: newConnections.clubs ?? {},
+              removedConnections,
+            }),
+          },
+        }),
+      }
     })
 )
 
 export const updateAndReencryptSingleOfferConnectionActionAtom = atom(
   null,
   (get, set, params: UpdateSingleOfferConnectionParams) =>
-    set(computeSingleOfferConnectionUpdateActionAtom, params).pipe(
-      Effect.map((applyConnectionsUpdate) => {
-        set(
-          createSingleOfferToConnectionsAtom(params.adminId),
-          applyConnectionsUpdate
-        )
-      })
-    )
+    Effect.gen(function* (_) {
+      const {connectionState, connectionsToRefresh} = yield* _(
+        set(fetchConnectionsDiffActionAtom)
+      )
+      const {applyConnectionsUpdate} = yield* _(
+        set(computeSingleOfferConnectionUpdateActionAtom, {
+          ...params,
+          connectionState,
+          connectionsToRefresh,
+        })
+      )
+      set(
+        createSingleOfferToConnectionsAtom(params.adminId),
+        applyConnectionsUpdate
+      )
+    })
 )
 
 export const updateAndReencryptAllOffersConnectionsActionAtom = atom(
@@ -426,6 +472,9 @@ export const updateAndReencryptAllOffersConnectionsActionAtom = atom(
     }>
   > =>
     Effect.gen(function* (_) {
+      const {fetched, connectionState, connectionsToRefresh} = yield* _(
+        set(fetchConnectionsDiffActionAtom)
+      )
       const stopProcessingAfter: UnixMilliseconds | undefined = isInBackground
         ? Schema.decodeSync(UnixMilliseconds)(
             unixMillisecondsNow() + BACKGROUND_TIME_LIMIT_MS
@@ -482,6 +531,8 @@ export const updateAndReencryptAllOffersConnectionsActionAtom = atom(
           const adminId = get(oneOfferAtom).adminId
           return set(computeSingleOfferConnectionUpdateActionAtom, {
             adminId,
+            connectionState,
+            connectionsToRefresh,
             onProgress: onProgres
               ? (progress) => {
                   onProgres({
@@ -493,14 +544,14 @@ export const updateAndReencryptAllOffersConnectionsActionAtom = atom(
               : undefined,
             stopProcessingAfter,
           }).pipe(
-            Effect.map((applyConnectionsUpdate) => {
+            Effect.map(({updateSuccess, applyConnectionsUpdate}) => {
               pendingConnectionUpdates.set(adminId, applyConnectionsUpdate)
               if (
                 pendingConnectionUpdates.size >=
                 PERSIST_CONNECTION_UPDATES_CHUNK_SIZE
               )
                 persistPendingConnectionUpdates()
-              return {adminId, success: true}
+              return {adminId, success: updateSuccess}
             }),
             Effect.catchAll((e) =>
               Effect.sync(() => {
@@ -539,6 +590,19 @@ export const updateAndReencryptAllOffersConnectionsActionAtom = atom(
             // (current === target, so nothing is deleted). Force one synchronous
             // durable write to bound that window to the sync loop itself.
             offerToConnectionsAtom.flushNow()
+          })
+        ),
+        // The fetched graph is stored only once every offer carries it, so a
+        // failed round re-uploads the same diff next time.
+        Effect.tap((res) =>
+          Effect.sync(() => {
+            if (
+              Option.isSome(fetched) &&
+              Array.every(res, (one) => one.success)
+            ) {
+              set(connectionStateAtom, fetched.value)
+              connectionStateAtom.flushNow()
+            }
           })
         ),
         Effect.tap((res) =>

@@ -187,6 +187,7 @@ function uploadPrivatePartsBatch({
 export default function updatePrivateParts({
   currentConnections,
   targetConnections,
+  connectionsToRefresh = [],
   commonFriends,
   verifiedFriends,
   adminId,
@@ -211,6 +212,7 @@ export default function updatePrivateParts({
       ReadonlyArray<PublicKeyPemBase64 | PublicKeyV2>
     >
   }
+  connectionsToRefresh?: ReadonlyArray<PublicKeyPemBase64 | PublicKeyV2>
   commonFriends: CommonConnectionsForUsers
   verifiedFriends: CommonConnectionsForUsers
   adminId: OfferAdminId
@@ -220,6 +222,7 @@ export default function updatePrivateParts({
   onProgress?: (status: OfferEncryptionProgress) => void
 }): Effect.Effect<
   {
+    updateSuccess: boolean
     encryptionErrors: PrivatePartEncryptionError[]
     timeLimitReachedErrors: TimeLimitReachedError[]
     removedConnections: Array<PublicKeyPemBase64 | PublicKeyV2>
@@ -310,14 +313,29 @@ export default function updatePrivateParts({
 
     if (onProgress) onProgress({type: 'CONSTRUCTING_PRIVATE_PAYLOADS'})
 
+    const publicKeysToUpdate = new Set([
+      ...newFirstLevelConnections,
+      ...(newSecondLevelConnections ?? []),
+      ...pipe(newClubsConnections, Record.values, Array.flatten),
+      ...connectionsToRefresh,
+    ])
     const privatePayloads = yield* _(
       constructPrivatePayloads({
         connectionsInfo: {
-          firstDegreeConnections: newFirstLevelConnections,
-          secondDegreeConnections: newSecondLevelConnections ?? [],
+          firstDegreeConnections: Array.filter(
+            targetConnections.firstLevel,
+            (key) => publicKeysToUpdate.has(key)
+          ),
+          secondDegreeConnections: Array.filter(
+            targetConnections.secondLevel,
+            (key) => publicKeysToUpdate.has(key)
+          ),
           commonFriends,
           verifiedFriends,
-          clubsConnections: newClubsConnections,
+          clubsConnections: Record.map(
+            targetConnections.clubs,
+            Array.filter((key) => publicKeysToUpdate.has(key))
+          ),
         },
         symmetricKey,
       })
@@ -404,6 +422,9 @@ export default function updatePrivateParts({
     ].map((one) => one.toPublicKey)
 
     return {
+      updateSuccess:
+        !Array.isNonEmptyArray(encryptionResult.timeLimitReachedErrors) &&
+        !Array.isNonEmptyArray(uploadErrors),
       encryptionErrors: encryptionResult.encryptionErrors,
       timeLimitReachedErrors: encryptionResult.timeLimitReachedErrors,
       removedConnections: deduplicate(removedConnections),

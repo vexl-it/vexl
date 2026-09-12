@@ -1,7 +1,8 @@
 # Publishing to Zapstore
 
-Run **[Release] Zapstore** from GitHub Actions to publish the latest stable GitHub
-release containing a production APK. The publisher selects assets matching
+Run **[Release] Zapstore** from the `main` branch in GitHub Actions to publish the
+latest stable GitHub release containing a production APK. Dispatches from other
+branches or tags skip the publishing job. The publisher selects assets matching
 `vexl-production-*.apk` and uses the metadata in `apps/mobile/zapstore.yaml`.
 Drafts and prereleases are excluded.
 

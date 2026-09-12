@@ -14,7 +14,7 @@ concurrency:
 jobs:
   publish:
     name: Publish latest production APK
-    if: github.repository == 'vexl-it/vexl'
+    if: github.repository == 'vexl-it/vexl' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:

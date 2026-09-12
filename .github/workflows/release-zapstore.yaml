@@ -1,0 +1,44 @@
+name: "[Release] Zapstore"
+run-name: "Publish latest GitHub release to Zapstore"
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-zapstore
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Publish latest production APK
+    if: github.repository == 'vexl-it/vexl'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          persist-credentials: false
+
+      - name: Install Zapstore publisher
+        working-directory: ${{ runner.temp }}
+        run: |
+          curl --fail --location --silent --show-error --retry 3 \
+            https://github.com/zapstore/zsp/releases/download/v0.4.17/zsp-0.4.17-linux-amd64 \
+            --output zsp
+          echo '3f241da6a5dc7a85fe851d3b42b77790b651bd36c7029382a701262bda832d20  zsp' | sha256sum --check
+          chmod +x zsp
+
+      - name: Sign and publish to Zapstore
+        working-directory: apps/mobile
+        env:
+          SIGN_WITH: ${{ secrets.NSEC }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          if [ -z "$SIGN_WITH" ]; then
+            echo '::error::The NSEC repository secret is required to sign Zapstore releases.'
+            exit 1
+          fi
+          "$RUNNER_TEMP/zsp" publish --quiet zapstore.yaml

@@ -15,6 +15,7 @@ jobs:
   publish:
     name: Publish latest production APK
     if: github.repository == 'vexl-it/vexl' && github.ref == 'refs/heads/main'
+    environment: zapstore-publishing
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
@@ -38,7 +39,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
           if [ -z "$SIGN_WITH" ]; then
-            echo '::error::The NSEC repository secret is required to sign Zapstore releases.'
+            echo '::error::The NSEC secret in the zapstore-publishing environment is required to sign Zapstore releases.'
             exit 1
           fi
           "$RUNNER_TEMP/zsp" publish --quiet zapstore.yaml

@@ -4,12 +4,12 @@ import {
   registerInAppLoadingTask,
 } from '../../utils/inAppLoadingTasks'
 import {reportErrorE} from '../../utils/reportError'
-import {sessionNotificationTokenAtom} from '../session'
+import {sessionDataOrDummyAtom, sessionNotificationTokenAtom} from '../session'
 import {generateVexlTokenActionAtom} from './actions/generateVexlTokenActionAtom'
 import {ensureVexlSecretExistsTaskId} from './ensureVexlSecretExistsTask'
 import {vexlNotificationTokenAtom} from './vexlNotificationTokenAtom'
 
-export const ensureSessionNotificationTokenExistsTask =
+export const ensureSessionNotificationTokenExistsTaskId =
   registerInAppLoadingTask({
     name: 'ensureSessionNotificationTokenExists',
     dependsOn: [{id: ensureVexlSecretExistsTaskId}],
@@ -19,6 +19,9 @@ export const ensureSessionNotificationTokenExistsTask =
     },
     task: (store) =>
       Effect.gen(function* (_) {
+        const session = store.get(sessionDataOrDummyAtom)
+        if (session.sessionNotificationToken) return
+
         const vexlNotificationState = store.get(vexlNotificationTokenAtom)
 
         if (!vexlNotificationState.secret) {

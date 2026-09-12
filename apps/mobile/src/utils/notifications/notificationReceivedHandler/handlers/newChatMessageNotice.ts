@@ -9,7 +9,7 @@ import {AppState} from 'react-native'
 import {areNotificationsEnabledE} from '../..'
 import {apiAtom} from '../../../../api'
 import {fetchAndStoreMessagesForInboxHandleNotificationsActionAtom} from '../../../../state/chat/atoms/fetchNewMessagesActionAtom'
-import {getKeyHolderForNotificationTokenOrCypherActionAtom} from '../../../../state/notifications/fcmCypherToKeyHolderAtom'
+import {getKeyHolderForVexlTokenActionAtom} from '../../../../state/notifications/vexlTokenToKeyHolderAtom'
 import reportError, {reportErrorE} from '../../../reportError'
 
 const processChatNotificationProcessed = (
@@ -153,15 +153,15 @@ export function handleNewChatMessageNoticeNotification(
     // Disable for now
     // if (notificationData.includesSystemNotification) return false
 
-    const inboxForCypher = store.set(
-      getKeyHolderForNotificationTokenOrCypherActionAtom,
-      notificationData.targetToken ?? notificationData.targetCypher
+    const inboxForToken = store.set(
+      getKeyHolderForVexlTokenActionAtom,
+      notificationData.targetToken
     )
-    if (!inboxForCypher) {
+    if (!inboxForToken) {
       reportError(
         'warn',
         new Error(
-          'Error decrypting notification FCM - unable to find private key for cypher'
+          'Error decrypting notification - unable to find private key for token'
         )
       )
       return
@@ -169,7 +169,7 @@ export function handleNewChatMessageNoticeNotification(
 
     yield* _(
       store.set(fetchAndStoreMessagesForInboxHandleNotificationsActionAtom, {
-        key: inboxForCypher.publicKeyPemBase64,
+        key: inboxForToken.publicKeyPemBase64,
       })
     )
   })

@@ -214,7 +214,6 @@ describe('Vexl product notification batching', () => {
         const db = yield* _(PendingBatchedNotificationsDb)
         const entry = new VexlProductNotificationMqEntry({
           token: token('vexl_nt_encode_decode'),
-          notificationToken: null,
           vexlProductNotification: makeVexlProductNotification({
             uuid: uuid('cc8e3f9b-f8b4-4739-a1db-1d8f02ae3187'),
             type: 'GENERAL',
@@ -243,7 +242,6 @@ describe('Vexl product notification batching', () => {
         const entries = [
           new VexlProductNotificationMqEntry({
             token: token('vexl_nt_batch_oldest_1'),
-            notificationToken: null,
             vexlProductNotification: makeVexlProductNotification({
               uuid: uuid('75b15fea-00ef-430f-a36e-2fa195e3e722'),
               type: 'GENERAL',
@@ -251,7 +249,6 @@ describe('Vexl product notification batching', () => {
           }),
           new VexlProductNotificationMqEntry({
             token: token('vexl_nt_batch_oldest_2'),
-            notificationToken: null,
             vexlProductNotification: makeVexlProductNotification({
               uuid: uuid('abf39bc3-cfc4-4c1f-b1c6-195a503568b5'),
               type: 'GENERAL',
@@ -259,7 +256,6 @@ describe('Vexl product notification batching', () => {
           }),
           new VexlProductNotificationMqEntry({
             token: token('vexl_nt_batch_oldest_3'),
-            notificationToken: null,
             vexlProductNotification: makeVexlProductNotification({
               uuid: uuid('2bc3871d-5128-48f3-9455-9d14e1f5233c'),
               type: 'GENERAL',
@@ -291,7 +287,6 @@ describe('Vexl product notification batching', () => {
         const failedToken = token('vexl_nt_batch_failure')
         const successfulEntry = new VexlProductNotificationMqEntry({
           token: token('vexl_nt_batch_success'),
-          notificationToken: null,
           vexlProductNotification: makeVexlProductNotification({
             uuid: uuid('aa282556-1872-48a7-ac38-8322f4b86f18'),
             type: 'GENERAL',
@@ -299,7 +294,6 @@ describe('Vexl product notification batching', () => {
         })
         const failedEntry = new VexlProductNotificationMqEntry({
           token: failedToken,
-          notificationToken: null,
           vexlProductNotification: makeVexlProductNotification({
             uuid: uuid('d25287a5-6261-4ea1-863e-08a31631e41d'),
             type: 'GENERAL',

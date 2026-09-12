@@ -35,7 +35,10 @@ export const createUpdateRefreshUser = Effect.gen(function* (_) {
         refreshed_at = ${params.refreshedAt},
         country_prefix = ${params.countryPrefix ?? null},
         app_source = ${params.appSource ?? null},
-        vexl_notification_token = ${params.vexlNotificationToken ?? null},
+        vexl_notification_token = COALESCE(
+          ${params.vexlNotificationToken ?? null},
+          vexl_notification_token
+        ),
         public_key_v2 = ${params.publicKeyV2 ?? null},
         last_inactivity_notification_sent_at = NULL,
         number_of_inactivity_notifications_sent = 0

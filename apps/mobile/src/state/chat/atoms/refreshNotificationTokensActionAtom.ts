@@ -11,7 +11,6 @@ import {
   effectToTask,
   effectToTaskEither,
 } from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import {type NotificationTokenOrCypher} from '@vexl-next/resources-utils/src/notifications/callWithNotificationService'
 import {Effect, Option, Schema} from 'effect/index'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
@@ -23,23 +22,20 @@ import reportError from '../../../utils/reportError'
 import {generateAndRegisterVexlTokenActionAtom} from '../../notifications/actions/generateVexlTokenActionAtom'
 import {type ChatWithMessages} from '../domain'
 import focusChatByInboxKeyAndSenderKey from './focusChatByInboxKeyAndSenderKey'
-import {updateMyNotificationTokenInfoInChat} from './generateMyNotificationTokenInfoActionAtom'
+import {updateMyNotificationTokenInfoInChat} from './updateMyNotificationTokenInfoInChat'
 
 const FCM_TOKEN_UPDATE_MESSAGE_MINIMAL_VERSION =
   Schema.decodeSync(VersionString)('1.13.1')
 
 function createFcmCypherUpdateMessage(
   senderPublicKey: PublicKeyPemBase64,
-  vexlToken?: VexlNotificationToken,
-  lastReceivedFcmCypher?: NotificationTokenOrCypher
+  vexlToken?: VexlNotificationToken
 ): ChatMessage {
   return {
     uuid: generateChatMessageId(),
-    myFcmCypher: vexlToken,
     myVexlToken: vexlToken,
     time: now(),
     myVersion: version,
-    lastReceivedFcmCypher,
     messageType: 'FCM_CYPHER_UPDATE',
     minimalRequiredVersion: FCM_TOKEN_UPDATE_MESSAGE_MINIMAL_VERSION,
     senderPublicKey,
@@ -70,9 +66,7 @@ export const sendFcmCypherUpdateMessageActionAtom = atom(
           T.of(
             createFcmCypherUpdateMessage(
               chatWithMessages.chat.inbox.privateKey.publicKeyPemBase64,
-              Option.getOrUndefined(vexlNotificationToken),
-              chatWithMessages.chat.otherSideVexlToken ??
-                chatWithMessages.chat.otherSideFcmCypher
+              Option.getOrUndefined(vexlNotificationToken)
             )
           )
         ),
@@ -85,10 +79,7 @@ export const sendFcmCypherUpdateMessageActionAtom = atom(
               receiverPublicKey: chatWithMessages.chat.otherSide.publicKey,
               message: messageToSend,
               notificationApi: get(apiAtom).notification,
-              theirNotificationCypher:
-                chatWithMessages.chat.otherSideVexlToken ??
-                chatWithMessages.chat.otherSideFcmCypher,
-              otherSideVersion: chatWithMessages.chat.otherSideVersion,
+              theirNotificationToken: chatWithMessages.chat.otherSideVexlToken,
             })
           )
         ),

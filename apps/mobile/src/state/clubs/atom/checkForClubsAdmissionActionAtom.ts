@@ -3,7 +3,6 @@ import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
 import {addNotificationToCenterActionAtom} from '../../../components/NotificationsScreen/state'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
-import {getNotificationTokenWithTimeoutE} from '../../../utils/notifications'
 import {showInternalNotificationForClubAdmission} from '../../../utils/notifications/clubNotifications'
 import {ignoreReportErrors} from '../../../utils/reportError'
 import {effectWithEnsuredBenchmark} from '../../ActionBenchmarks'
@@ -21,9 +20,6 @@ export const checkForClubsAdmissionActionAtom = atom(null, (get, set) => {
     const api = get(apiAtom)
 
     const keysWaitingForAdmission = get(keysWaitingForAdmissionAtom)
-    // Time-limited so a hanging push-token fetch can never stall the
-    // admission check (same treatment as in syncConnectionsActionAtom).
-    const notificationToken = yield* _(getNotificationTokenWithTimeoutE())
 
     yield* _(
       keysWaitingForAdmission,
@@ -41,7 +37,6 @@ export const checkForClubsAdmissionActionAtom = atom(null, (get, set) => {
               oldKeyPair: key.oldKeyPair,
               keyPair: key.keyPair,
               contactApi: api.contact,
-              notificationToken,
               vexlNotificationToken,
             })
           )

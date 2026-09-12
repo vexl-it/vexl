@@ -1,28 +1,10 @@
-import {type NotificationCypher} from '@vexl-next/domain/src/general/notifications/NotificationCypher.brand'
-import {
-  isVexlNotificationToken,
-  type VexlNotificationToken,
-} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
-import {
-  VersionString,
-  compare,
-} from '@vexl-next/domain/src/utility/VersionString.brand'
+import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {type NotificationApi} from '@vexl-next/rest-api/src/services/notification'
-import {Effect, Schema} from 'effect'
+import {Effect} from 'effect'
 import reportErrorFromResourcesUtils from '../reportErrorFromResourcesUtils'
 
-const FE_VERSION_SUPPORTING_V2_NOTIFICATIONS =
-  Schema.decodeSync(VersionString)('1.17.0')
-
-// Union type for notification token - accepts both legacy cypher and new vexl token
-export type NotificationTokenOrCypher =
-  | NotificationCypher
-  | VexlNotificationToken
-
 interface NotificationArgs {
-  otherSideVersion?: VersionString | undefined
-  // todo #2124 - remove cypher option
-  notificationCypher?: NotificationTokenOrCypher | undefined
+  notificationToken?: VexlNotificationToken | undefined
   notificationApi: NotificationApi
   sendSystemNotification: boolean
 }
@@ -35,19 +17,9 @@ export function callWithNotificationService<
   f: (arg: T) => Effect.Effect<L, R>,
   fArgs: Omit<T, 'notificationServiceReady'>
 ): (args: NotificationArgs) => Effect.Effect<L, R> {
-  return ({
-    notificationApi,
-    notificationCypher,
-    otherSideVersion,
-    sendSystemNotification,
-  }) => {
+  return ({notificationApi, notificationToken, sendSystemNotification}) => {
     return Effect.gen(function* (_) {
-      // Do not try to issue notification if there is no fcmCypher or the other side does not support V2 notifications
-      if (
-        !notificationCypher ||
-        !otherSideVersion ||
-        compare(otherSideVersion)('<', FE_VERSION_SUPPORTING_V2_NOTIFICATIONS)
-      ) {
+      if (!notificationToken) {
         return yield* _(f({...(fArgs as T), notificationServiceReady: false}))
       }
 
@@ -58,15 +30,8 @@ export function callWithNotificationService<
         return result
       }
 
-      const notificationToken = isVexlNotificationToken(notificationCypher)
-        ? notificationCypher
-        : undefined
-
       yield* _(
         notificationApi.issueNotification({
-          notificationCypher: notificationToken
-            ? undefined
-            : notificationCypher,
           notificationToken,
           sendNewChatMessageNotification: sendSystemNotification,
         })

@@ -78,7 +78,6 @@ export function api({
     })
 
     return {
-      getNotificationPublicKey: () => client.getNotificationPublicKey({}),
       issueStreamOnlyMessage: (payload: IssueStreamOnlyMessageRequest) =>
         client.issueStreamOnlyMessage({payload}),
       issueNotification: (payload: IssueNotificationRequest) =>

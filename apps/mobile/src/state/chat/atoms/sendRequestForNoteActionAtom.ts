@@ -38,16 +38,13 @@ const sendRequestForNoteActionAtom = atom(
         sendMessagingRequest({
           text,
           notificationApi: api.notification,
-          theirNotificationCypher:
+          theirNotificationToken:
             note.noteInfo.publicPart.vexlNotificationToken,
           api: api.chat,
           fromKeypair: inbox.privateKey,
           myVersion: version,
           toPublicKey: note.noteInfo.publicPart.notePublicKey,
-          otherSideVersion: note.noteInfo.publicPart.authorClientVersion,
-          myNotificationCypher: notificationToken,
-          lastReceivedNotificationCypher:
-            note.noteInfo.publicPart.vexlNotificationToken,
+          myVexlToken: notificationToken,
           goldenAvatarType,
           forClubsUuids: [],
           commonFriends: note.noteInfo.privatePart.commonFriends,

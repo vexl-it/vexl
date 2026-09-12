@@ -23,7 +23,7 @@ import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 import addMessageToChat from '../utils/addMessageToChat'
 import createAccountDeletedMessage from '../utils/createAccountDeletedMessage'
 import {resetTradeChecklist} from '../utils/resetData'
-import {updateMyNotificationTokenInfoInChat} from './generateMyNotificationTokenInfoActionAtom'
+import {updateMyNotificationTokenInfoInChat} from './updateMyNotificationTokenInfoInChat'
 
 const acceptMessagingRequestAtom = atom(
   null,
@@ -71,16 +71,12 @@ const acceptMessagingRequestAtom = atom(
             text,
             approve,
             api: api.chat,
-            theirNotificationCypher:
-              chat.otherSideVexlToken ?? chat.otherSideFcmCypher,
+            theirNotificationToken: chat.otherSideVexlToken,
             notificationApi: api.notification,
             fromKeypair: chat.inbox.privateKey,
             toPublicKey: chat.otherSide.publicKey,
             myVersion: version,
-            myNotificationCypher: vexlToken,
-            lastReceivedNotificationCypher:
-              chat.otherSideVexlToken ?? chat.otherSideFcmCypher,
-            otherSideVersion: chat.otherSideVersion,
+            myVexlToken: vexlToken,
           })
         )
       ),

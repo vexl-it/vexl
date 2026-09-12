@@ -7,7 +7,7 @@ import {
   generateChatMessageId,
   type ChatMessage,
 } from '@vexl-next/domain/src/general/messaging'
-import {isVexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
+import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {
   now,
   type UnixMilliseconds,
@@ -16,7 +16,6 @@ import {type VersionString} from '@vexl-next/domain/src/utility/VersionString.br
 import {type ChatApi} from '@vexl-next/rest-api/src/services/chat'
 import {type NotificationApi} from '@vexl-next/rest-api/src/services/notification'
 import {Effect, type ParseResult} from 'effect'
-import {type NotificationTokenOrCypher} from '../notifications/callWithNotificationService'
 import {type JsonStringifyError} from '../utils/parsing'
 import sendMessage, {type SendMessageApiErrors} from './sendMessage'
 import {type ErrorEncryptingMessage} from './utils/chatCrypto'
@@ -26,15 +25,13 @@ function createApproveChatMessage({
   senderPublicKey,
   approve,
   myVersion,
-  myNotificationCypher,
-  lastReceivedNotificationCypher,
+  myVexlToken,
 }: {
   text: string
   senderPublicKey: PublicKeyPemBase64
   approve: boolean
   myVersion: VersionString
-  myNotificationCypher?: NotificationTokenOrCypher
-  lastReceivedNotificationCypher?: NotificationTokenOrCypher
+  myVexlToken?: VexlNotificationToken
 }): ChatMessage {
   return {
     uuid: generateChatMessageId(),
@@ -43,13 +40,7 @@ function createApproveChatMessage({
     time: now(),
     myVersion,
     senderPublicKey,
-    // TODO #2124
-    myFcmCypher: myNotificationCypher,
-    myVexlToken:
-      myNotificationCypher && isVexlNotificationToken(myNotificationCypher)
-        ? myNotificationCypher
-        : undefined,
-    lastReceivedFcmCypher: lastReceivedNotificationCypher,
+    myVexlToken,
     senderClubsUuids: [],
     commonFriends: [],
     friendLevel: [],
@@ -70,10 +61,8 @@ export default function confirmMessagingRequest({
   api,
   approve,
   myVersion,
-  myNotificationCypher,
-  lastReceivedNotificationCypher,
-  theirNotificationCypher,
-  otherSideVersion,
+  myVexlToken,
+  theirNotificationToken,
   notificationApi,
 }: {
   text: string
@@ -82,10 +71,8 @@ export default function confirmMessagingRequest({
   api: ChatApi
   approve: boolean
   myVersion: VersionString
-  myNotificationCypher?: NotificationTokenOrCypher
-  lastReceivedNotificationCypher?: NotificationTokenOrCypher
-  theirNotificationCypher?: NotificationTokenOrCypher | undefined
-  otherSideVersion: VersionString | undefined
+  myVexlToken?: VexlNotificationToken
+  theirNotificationToken?: VexlNotificationToken | undefined
   notificationApi: NotificationApi
 }): Effect.Effect<
   SentConfirmMessagingRequest,
@@ -100,8 +87,7 @@ export default function confirmMessagingRequest({
       myVersion,
       senderPublicKey: fromKeypair.publicKeyPemBase64,
       approve,
-      myNotificationCypher,
-      lastReceivedNotificationCypher,
+      myVexlToken,
     })
 
     const serverMessage = yield* _(
@@ -110,8 +96,7 @@ export default function confirmMessagingRequest({
         receiverPublicKey: toPublicKey,
         message: approvedMessage,
         senderKeypair: fromKeypair,
-        theirNotificationCypher,
-        otherSideVersion,
+        theirNotificationToken,
         notificationApi,
       })
     )

@@ -21,12 +21,12 @@ const notifyAndGetEnqueued = Effect.gen(function* (_) {
 
 const variantForToken = (
   enqueued: EnqueuedNotification[],
-  expoToken: string
+  token: string
 ): string | undefined => {
   const entry = enqueued.find(
     (one) =>
       one.task._tag === 'UserInactivityNotificationMqEntry' &&
-      one.task.notificationToken === expoToken
+      one.task.token === token
   )
   if (!entry || entry.task._tag !== 'UserInactivityNotificationMqEntry')
     return undefined
@@ -49,7 +49,7 @@ describe('Notify users about inactivity', () => {
               public_key,
               hash,
               refreshed_at,
-              expo_token,
+              vexl_notification_token,
               number_of_inactivity_notifications_sent,
               last_inactivity_notification_sent_at
             )
@@ -58,7 +58,7 @@ describe('Notify users about inactivity', () => {
               'pkFirst',
               'h1',
               CURRENT_DATE - 3,
-              'tokenFirst',
+              'vexl_nt_First',
               0,
               NULL
             ),
@@ -66,7 +66,7 @@ describe('Notify users about inactivity', () => {
               'pkLongInactive',
               'h2',
               CURRENT_DATE - 40,
-              'tokenLongInactive',
+              'vexl_nt_LongInactive',
               0,
               NULL
             ),
@@ -74,7 +74,7 @@ describe('Notify users about inactivity', () => {
               'pkFollowUpDue',
               'h3',
               CURRENT_DATE - 40,
-              'tokenFollowUpDue',
+              'vexl_nt_FollowUpDue',
               1,
               now() - INTERVAL '8 days'
             ),
@@ -82,7 +82,7 @@ describe('Notify users about inactivity', () => {
               'pkFollowUpNotDue',
               'h4',
               CURRENT_DATE - 40,
-              'tokenFollowUpNotDue',
+              'vexl_nt_FollowUpNotDue',
               1,
               now() - INTERVAL '2 days'
             ),
@@ -90,7 +90,7 @@ describe('Notify users about inactivity', () => {
               'pkRecurringNotDue',
               'h5',
               CURRENT_DATE - 40,
-              'tokenRecurringNotDue',
+              'vexl_nt_RecurringNotDue',
               2,
               now() - INTERVAL '10 days'
             ),
@@ -98,7 +98,7 @@ describe('Notify users about inactivity', () => {
               'pkRecurringDue',
               'h6',
               CURRENT_DATE - 40,
-              'tokenRecurringDue',
+              'vexl_nt_RecurringDue',
               2,
               now() - INTERVAL '31 days'
             ),
@@ -106,7 +106,7 @@ describe('Notify users about inactivity', () => {
               'pkActive',
               'h7',
               CURRENT_DATE,
-              'tokenActive',
+              'vexl_nt_Active',
               0,
               NULL
             ),
@@ -126,14 +126,14 @@ describe('Notify users about inactivity', () => {
         yield* _(Effect.sleep(200))
 
         expect(enqueued).toHaveLength(4)
-        expect(variantForToken(enqueued, 'tokenFirst')).toEqual('FIRST')
-        expect(variantForToken(enqueued, 'tokenLongInactive')).toEqual(
+        expect(variantForToken(enqueued, 'vexl_nt_First')).toEqual('FIRST')
+        expect(variantForToken(enqueued, 'vexl_nt_LongInactive')).toEqual(
           'OFFERS_DEACTIVATED'
         )
-        expect(variantForToken(enqueued, 'tokenFollowUpDue')).toEqual(
+        expect(variantForToken(enqueued, 'vexl_nt_FollowUpDue')).toEqual(
           'OFFERS_DEACTIVATED'
         )
-        expect(variantForToken(enqueued, 'tokenRecurringDue')).toEqual(
+        expect(variantForToken(enqueued, 'vexl_nt_RecurringDue')).toEqual(
           'OFFERS_DEACTIVATED'
         )
 
@@ -232,7 +232,7 @@ describe('Notify users about inactivity', () => {
               public_key,
               hash,
               refreshed_at,
-              expo_token,
+              vexl_notification_token,
               number_of_inactivity_notifications_sent,
               last_inactivity_notification_sent_at
             )
@@ -241,7 +241,7 @@ describe('Notify users about inactivity', () => {
               'pkComesBack',
               'ServerHash:h1',
               CURRENT_DATE - 40,
-              'tokenComesBack',
+              'vexl_nt_ComesBack',
               3,
               now() - INTERVAL '40 days'
             )

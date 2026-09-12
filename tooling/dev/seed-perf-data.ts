@@ -520,8 +520,6 @@ async function phaseRegister(targetPhone: E164PhoneNumber): Promise<void> {
       yield* _(
         apis.contact.createUser({
           vexlNotificationToken: Option.none(),
-          firebaseToken: null,
-          expoToken: null,
           publicKeyV2: Option.none(),
         })
       )

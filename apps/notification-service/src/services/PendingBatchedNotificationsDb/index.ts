@@ -62,7 +62,6 @@ export class PendingBatchedNotificationsDb extends Context.Tag(
             (token) =>
               new VexlProductNotificationMqEntry({
                 token,
-                notificationToken: null,
                 vexlProductNotification,
               })
           ),

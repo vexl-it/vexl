@@ -37,7 +37,7 @@ function updateChatVersion(
   }
 }
 
-function updateFcmToken(
+function updateVexlToken(
   message: ChatMessageWithState
 ): (chat: ChatWithMessages) => ChatWithMessages {
   return (chat) => {
@@ -46,8 +46,6 @@ function updateFcmToken(
         ...chat,
         chat: {
           ...chat.chat,
-          otherSideFcmCypher:
-            message.message.myVexlToken ?? message.message.myFcmCypher,
           otherSideVexlToken: message.message.myVexlToken,
         },
       }
@@ -93,7 +91,7 @@ export default function addMessageToChat(
           } satisfies ChatWithMessages),
     markLastMessageAsNotReadByOtherSide(message),
     updateChatVersion(message),
-    updateFcmToken(message)
+    updateVexlToken(message)
   )
 }
 
@@ -110,7 +108,7 @@ export function addMessagesToChat(
         ),
       }) satisfies ChatWithMessages,
     (chat) => (messages[0] ? updateChatVersion(messages[0])(chat) : chat),
-    (chat) => (messages[0] ? updateFcmToken(messages[0])(chat) : chat)
+    (chat) => (messages[0] ? updateVexlToken(messages[0])(chat) : chat)
   )
 }
 

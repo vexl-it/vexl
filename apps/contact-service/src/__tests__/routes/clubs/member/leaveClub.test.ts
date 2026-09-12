@@ -3,7 +3,6 @@ import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {generateClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
-import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {InvalidChallengeError} from '@vexl-next/rest-api/src/challenges/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
@@ -63,7 +62,6 @@ beforeEach(async () => {
           publicKey: userKey.publicKeyPemBase64,
           isModerator: false,
           lastRefreshedAt: new Date(),
-          notificationToken: 'someToken' as ExpoNotificationToken,
           vexlNotificationToken: 'vexl_nt_test' as VexlNotificationToken,
           publicKeyV2: null,
         })
@@ -90,9 +88,6 @@ describe('Leave club', () => {
           app.ClubsMember.getClubInfo({
             payload: {
               ...(yield* _(generateAndSignChallenge(userKey))),
-              notificationToken: Option.some(
-                'someToken' as ExpoNotificationToken
-              ),
               vexlNotificationToken: Option.some(
                 'vexl_nt_test' as VexlNotificationToken
               ),

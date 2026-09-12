@@ -64,10 +64,8 @@ export default function deleteChatActionAtom(
               senderKeypair: chat.inbox.privateKey,
               receiverPublicKey: chat.otherSide.publicKey,
               message: messageToSend,
-              theirNotificationCypher:
-                chat.otherSideVexlToken ?? chat.otherSideFcmCypher,
+              theirNotificationToken: chat.otherSideVexlToken,
               notificationApi: api.notification,
-              otherSideVersion: chat.otherSideVersion,
             })
           )
         : TE.right<Effect.Effect.Error<ReturnType<typeof sendLeaveChat>>, {}>(

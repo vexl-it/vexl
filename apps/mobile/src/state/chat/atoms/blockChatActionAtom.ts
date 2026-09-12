@@ -57,9 +57,7 @@ export default function blockChatActionAtom(
             receiverPublicKey: chat.otherSide.publicKey,
             message: messageToSend,
             notificationApi: api.notification,
-            theirNotificationCypher:
-              chat.otherSideVexlToken ?? chat.otherSideFcmCypher,
-            otherSideVersion: chat.otherSideVersion,
+            theirNotificationToken: chat.otherSideVexlToken,
           })
         ),
         TE.matchW(

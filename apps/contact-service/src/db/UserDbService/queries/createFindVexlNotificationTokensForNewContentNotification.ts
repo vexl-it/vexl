@@ -5,7 +5,7 @@ import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications
 import {Effect, flow, Schema} from 'effect'
 
 export const NewContentNotificationResults = Schema.Struct({
-  vexlNotificationToken: Schema.NullOr(VexlNotificationToken),
+  vexlNotificationToken: VexlNotificationToken,
 })
 export type NewContentNotificationResults =
   typeof NewContentNotificationResults.Type

@@ -9,6 +9,7 @@
   "clubs.commonFriends": "共通の友達{{count}}人",
   "clubs.commonFriendsFormatted": "共通の友達{{localizedString}}人",
   "clubs.clubsReach": "クラブのリーチ",
+  "clubs.reachExplanation": "クラブのリーチは、Vexl Clubsでシェアしたオファーを見られる人数の目安です。参加している各クラブについて、自分以外のメンバー数を合計します。",
   "clubs.expiresOn": "{{expirationDate}}に期限切れ",
   "clubs.moderator.inviteCodeLabel": "招待コード",
   "clubs.joinClub": "クラブに参加",

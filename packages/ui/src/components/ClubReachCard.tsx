@@ -1,13 +1,15 @@
 import React from 'react'
-import {styled, useTheme} from 'tamagui'
+import {getTokens, styled, useTheme} from 'tamagui'
 
-import {ConferenceClub} from '../icons'
+import {ConferenceClub, InfoCircle} from '../icons'
 import {XStack, YStack} from '../primitives'
 import {Typography} from './Typography'
+import {getReachPressProps} from './getReachPressProps'
 
 export interface ClubReachCardProps {
   readonly title: string
   readonly reachLabel: string
+  readonly onReachPress?: () => void
 }
 
 const ClubReachCardFrame = styled(XStack, {
@@ -34,6 +36,7 @@ const ReachPill = styled(XStack, {
 export function ClubReachCard({
   title,
   reachLabel,
+  onReachPress,
 }: ClubReachCardProps): React.JSX.Element {
   const theme = useTheme()
   const iconColor = theme.foregroundSecondary.get()
@@ -44,7 +47,9 @@ export function ClubReachCard({
         <Typography variant="tabSmallBold" color="$foregroundPrimary">
           {title}
         </Typography>
-        <ReachPill>
+        <ReachPill
+          {...getReachPressProps(onReachPress, `${title}. ${reachLabel}`)}
+        >
           <ConferenceClub size={16} color={iconColor} />
           <Typography
             variant="description"
@@ -53,6 +58,9 @@ export function ClubReachCard({
           >
             {reachLabel}
           </Typography>
+          {!!onReachPress && (
+            <InfoCircle size={getTokens().size.$4.val} color={iconColor} />
+          )}
         </ReachPill>
       </YStack>
     </ClubReachCardFrame>

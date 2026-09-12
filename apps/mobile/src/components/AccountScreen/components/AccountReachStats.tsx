@@ -3,15 +3,17 @@ import {PeopleUsers, ReachStats, type ReachStatsStep} from '@vexl-next/ui'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useMemo} from 'react'
 import {type RootStackScreenProps} from '../../../navigationTypes'
-import {fistAndSecondLevelConnectionsReachAtom} from '../../../state/connections/atom/connectionStateAtom'
+import {reachNumberAtom} from '../../../state/connections/atom/connectionStateAtom'
 import {useTranslation as useTranslations} from '../../../utils/localization/I18nProvider'
 import {localizedDecimalNumberActionAtom} from '../../../utils/localization/localizedNumbersAtoms'
+import {useShowReachExplanation} from '../../useShowReachExplanation'
 
 export function AccountReachStats(): React.ReactElement {
   const {t} = useTranslations()
+  const showReachExplanation = useShowReachExplanation()
   const navigation =
     useNavigation<RootStackScreenProps<'Account'>['navigation']>()
-  const reachNumber = useAtomValue(fistAndSecondLevelConnectionsReachAtom)
+  const reachNumber = useAtomValue(reachNumberAtom)
   const localizeDecimalNumber = useSetAtom(localizedDecimalNumberActionAtom)
   const localizedReachNumber = localizeDecimalNumber({number: reachNumber})
   const localizedSmallPoolFrom = localizeDecimalNumber({number: 1})
@@ -77,6 +79,7 @@ export function AccountReachStats(): React.ReactElement {
       steps={steps}
       buttonLabel={t('account.reachStats.addContacts')}
       onButtonPress={navigateToContacts}
+      onReachPress={showReachExplanation}
     />
   )
 }

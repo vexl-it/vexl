@@ -9,6 +9,7 @@
   "clubs.commonFriends": "{{count}} amigos en común",
   "clubs.commonFriendsFormatted": "{{localizedString}} amigos en común",
   "clubs.clubsReach": "Alcance de los clubs",
+  "clubs.reachExplanation": "El alcance de los clubes estima cuántas personas pueden ver las ofertas que compartes con tus Vexl Clubs. Suma los demás miembros de cada club al que te has unido.",
   "clubs.expiresOn": "Caduca el {{expirationDate}}",
   "clubs.moderator.inviteCodeLabel": "Código de invitación",
   "clubs.joinClub": "Unirse al club",

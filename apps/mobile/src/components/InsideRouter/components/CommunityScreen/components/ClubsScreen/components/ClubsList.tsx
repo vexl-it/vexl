@@ -24,6 +24,7 @@ import atomKeyExtractor from '../../../../../../../utils/atomUtils/atomKeyExtrac
 import {useTranslation} from '../../../../../../../utils/localization/I18nProvider'
 import {formatInteger} from '../../../../../../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../../../../../../utils/localization/formattingLocaleAtom'
+import {useShowReachExplanation} from '../../../../../../useShowReachExplanation'
 import ClubAvatar from './ClubAvatar'
 
 type Navigation = CommunityTabsScreenProps<'Clubs'>['navigation']
@@ -103,12 +104,14 @@ function Separator(): React.JSX.Element {
 
 function ClubsReachFooter(): React.JSX.Element {
   const {t} = useTranslation()
+  const showReachExplanation = useShowReachExplanation('clubs')
   const clubsReach = useAtomValue(clubsConnectionsReachAtom)
   const locale = useAtomValue(formattingLocaleAtom)
 
   return (
     <YStack paddingTop="$3" gap="$2">
       <ClubReachCard
+        onReachPress={showReachExplanation}
         title={t('clubs.clubsReach')}
         reachLabel={t('offerForm.friendLevel.reachPeopleFormatted', {
           localizedString: formatInteger(clubsReach, locale),

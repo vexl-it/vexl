@@ -2,6 +2,7 @@ import {
   type PublicKeyPemBase64,
   type PublicKeyV2,
 } from '@vexl-next/cryptography/src/KeyHolder'
+import {isPublicKeyV2} from '@vexl-next/cryptography/src/KeyHolder/brandsV2'
 import {Array, HashMap, Option} from 'effect'
 import {type ConnectionsState} from '../domain'
 
@@ -54,5 +55,15 @@ export function getChangedConnectionPublicKeys(
         Option.getOrElse(HashMap.get(previous.verifiedFriends, key), () => []),
         Option.getOrElse(HashMap.get(next.verifiedFriends, key), () => [])
       )
+  )
+}
+
+export function getConnectionsToRefresh(
+  previous: ConnectionSnapshot,
+  next: ConnectionSnapshot
+): PublicKeyV2[] {
+  return Array.filter(
+    getChangedConnectionPublicKeys(previous, next),
+    isPublicKeyV2
   )
 }

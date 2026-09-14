@@ -34,7 +34,7 @@ import {
   type ConnectionsState,
   type OfferToConnectionsItem,
 } from '../domain'
-import {getChangedConnectionPublicKeys} from '../utils/getChangedConnectionPublicKeys'
+import {getConnectionsToRefresh} from '../utils/getChangedConnectionPublicKeys'
 import connectionStateAtom, {
   fetchConnectionsActionAtom,
 } from './connectionStateAtom'
@@ -275,7 +275,7 @@ const fetchConnectionsDiffActionAtom = atom(null, (get, set) =>
       connectionState: Option.getOrElse(fetched, () => previous),
       connectionsToRefresh: Option.match(fetched, {
         onNone: () => [],
-        onSome: (next) => getChangedConnectionPublicKeys(previous, next),
+        onSome: (next) => getConnectionsToRefresh(previous, next),
       }),
     }
   })

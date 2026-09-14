@@ -1,4 +1,7 @@
-import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
+import {
+  generatePrivateKey,
+  PublicKeyV2,
+} from '@vexl-next/cryptography/src/KeyHolder'
 import {
   OfferId,
   OfferInfo,
@@ -109,7 +112,7 @@ jest.mock('../../ActionBenchmarks', () => ({
   effectWithEnsuredBenchmark: () => (effect: unknown) => effect,
 }))
 
-const publicKey = generatePrivateKey().publicKeyPemBase64
+const publicKey = Schema.decodeSync(PublicKeyV2)('V2_PUB_recipient')
 const otherKey = generatePrivateKey().publicKeyPemBase64
 const initial = Schema.decodeUnknownSync(OfferToConnectionsItem)({
   adminId: 'admin-id',
@@ -131,7 +134,7 @@ const offerInfo = Schema.decodeUnknownSync(OfferInfo)({
     friendLevel: [],
   },
   publicPart: {
-    offerPublicKey: publicKey,
+    offerPublicKey: otherKey,
     location: [],
     offerDescription: 'offer',
     amountBottomLimit: 1,
@@ -157,7 +160,10 @@ function graph(friends: string[]): ConnectionsState {
     lastUpdate: 1,
     firstLevel: [publicKey, otherKey],
     secondLevel: [],
-    commonFriends: [[publicKey, friends]],
+    commonFriends: [
+      [publicKey, friends],
+      [otherKey, friends],
+    ],
     verifiedFriends: [],
   })
 }
@@ -230,13 +236,17 @@ beforeEach(() => {
 })
 
 it.each([false, true])(
-  'stores the graph after all uploads, then skips unchanged recipients (background: %s)',
+  'refreshes only changed v2 recipients, then skips unchanged recipients (background: %s)',
   async (isInBackground) => {
     const store = setupStore()
     jest.mocked(updatePrivateParts).mockImplementationOnce((params) =>
       Effect.sync(() => {
         expect(store.get(connectionStateAtom)).toEqual(graph(['old-friend']))
         expect(params.connectionsToRefresh).toEqual([publicKey])
+        expect(params.targetConnections.firstLevel).toEqual([
+          publicKey,
+          otherKey,
+        ])
         expect(params.commonFriends).toEqual(
           graph(['new-friend']).commonFriends
         )

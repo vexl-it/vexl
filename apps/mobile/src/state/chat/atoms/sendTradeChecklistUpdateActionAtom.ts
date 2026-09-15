@@ -1,4 +1,3 @@
-import {type RealLifeInfo} from '@vexl-next/domain/src/general/UserNameAndAvatar.brand'
 import {
   generateChatMessageId,
   type ChatMessage,
@@ -24,8 +23,7 @@ import {tradeChecklistDataAtom} from '../../tradeChecklist/atoms/fromChatAtoms'
 import {updateTradeChecklistState} from '../../tradeChecklist/utils'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 import {addMessagesToChat} from '../utils/addMessageToChat'
-import processTradeChecklistContactRevealMessageIfAny from '../utils/processTradeChecklistContactRevealMessageIfAny'
-import processTradeChecklistIdentityRevealMessageIfAny from '../utils/processTradeChecklistIdentityRevealMessageIfAny'
+import addRealLifeInfoToChat from '../utils/addRealLifeInfoToChat'
 import {replaceIdentityImageFileUriWithBase64} from '../utils/replaceImageFileUrisWithBase64'
 
 const MINIMAL_REQUIRED_VERSION = Schema.decodeSync(VersionString)('1.25.0')
@@ -116,38 +114,22 @@ export default function createSubmitChecklistUpdateActionAtom(
         void removeFile(tradeChecklistData.identity.received.image)()
       }
 
-      const realLifeInfo = (
-        update.identity?.status === 'APPROVE_REVEAL'
-          ? processTradeChecklistIdentityRevealMessageIfAny(
-              tradeChecklistData.identity.received,
-              chatWithMessages.chat
-            )
-          : update.contact?.status === 'APPROVE_REVEAL'
-            ? processTradeChecklistContactRevealMessageIfAny(
-                tradeChecklistData.contact.received,
-                chatWithMessages.chat.otherSide.realLifeInfo
-              )
-            : undefined
-      ) satisfies RealLifeInfo | undefined
-
       set(
         chatWithMessagesAtom,
         flow(
           (old) =>
             ({
               ...old,
-              chat: {
-                ...old.chat,
-                otherSide: {
-                  ...old.chat.otherSide,
-                  realLifeInfo: realLifeInfo ?? old.chat.otherSide.realLifeInfo,
-                },
-              },
               tradeChecklist: updateTradeChecklistState(old.tradeChecklist)({
                 update,
                 direction: 'sent',
               }),
             }) satisfies ChatWithMessages,
+          (chat) =>
+            addRealLifeInfoToChat(chat, {
+              update,
+              requested: chatWithMessages.tradeChecklist,
+            }),
           addMessagesToChat(successMessages)
         )
       )

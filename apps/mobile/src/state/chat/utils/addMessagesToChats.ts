@@ -4,10 +4,7 @@ import addToSortedArray from '../../../utils/addToSortedArray'
 import notEmpty from '../../../utils/notEmpty'
 import {updateTradeChecklistState} from '../../tradeChecklist/utils'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
-import {
-  addContactRealLifeInfoToChat,
-  addIdentityRealLifeInfoToChat,
-} from './addRealLifeInfoToChat'
+import addRealLifeInfoToChat from './addRealLifeInfoToChat'
 import areMessagesEqual from './areMessagesEqual'
 import compareMessages from './compareMessages'
 import processContactRevealMessageIfAny from './processContactRevealMessageIfAny'
@@ -59,18 +56,6 @@ export default function addMessagesToChats(
           )
           .map((one) => one.message.tradeChecklistUpdate)
           .filter(notEmpty)
-
-        const tradeChecklistIdentityRevealMessage = tradeChecklistUpdates.find(
-          (update) =>
-            update.identity?.status &&
-            ['APPROVE_REVEAL'].includes(update.identity.status)
-        )?.identity
-
-        const tradeChecklistContactRevealMessage = tradeChecklistUpdates.find(
-          (update) =>
-            update.contact?.status &&
-            ['APPROVE_REVEAL'].includes(update.contact.status)
-        )?.contact
 
         const lastReceivedMessage = messages.findLast(
           (one) =>
@@ -140,8 +125,7 @@ export default function addMessagesToChats(
           },
           processIdentityRevealMessageIfAny(identityRevealMessage),
           processContactRevealMessageIfAny(contactRevealMessage),
-          addIdentityRealLifeInfoToChat(tradeChecklistIdentityRevealMessage),
-          addContactRealLifeInfoToChat(tradeChecklistContactRevealMessage),
+          addRealLifeInfoToChat,
           scheduleTradeReminderIfNeeded(tradeChecklistUpdates)
         )
       })

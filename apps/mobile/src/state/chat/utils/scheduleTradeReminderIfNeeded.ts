@@ -7,7 +7,6 @@ import {type ChatWithMessages} from '../domain'
 
 /**
  * Schedules a trade reminder notification if the trade checklist has an agreed date/time.
- * Similar to addIdentityRealLifeInfoToChat, this function is used in the message processing pipeline.
  * Only triggers when there are trade checklist updates with date/time information.
  */
 export function scheduleTradeReminderIfNeeded(

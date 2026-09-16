@@ -34,10 +34,6 @@ export function getChangedConnectionPublicKeys(
     ...previous.secondLevel,
     ...next.firstLevel,
     ...next.secondLevel,
-    ...HashMap.keys(previous.commonFriends),
-    ...HashMap.keys(next.commonFriends),
-    ...HashMap.keys(previous.verifiedFriends),
-    ...HashMap.keys(next.verifiedFriends),
   ])
   return Array.filter(
     Array.fromIterable(publicKeys),

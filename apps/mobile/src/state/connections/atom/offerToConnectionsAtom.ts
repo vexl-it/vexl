@@ -302,7 +302,7 @@ const computeSingleOfferConnectionUpdateActionAtom = atom(
       connectionsToRefresh,
     }: UpdateSingleOfferConnectionParams & {
       connectionState: ConnectionsState
-      connectionsToRefresh: ReadonlyArray<PublicKeyPemBase64 | PublicKeyV2>
+      connectionsToRefresh: readonly PublicKeyV2[]
     }
   ) =>
     Effect.gen(function* (_) {

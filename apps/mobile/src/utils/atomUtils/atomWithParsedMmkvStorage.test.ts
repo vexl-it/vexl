@@ -515,7 +515,7 @@ describe('atomWithParsedMmkvStorage', () => {
     // not persisted yet — the deferred flush has not run
     expect(storage._storage.getString(key)).toBeUndefined()
 
-    testAtom.flushNow()
+    expect(testAtom.flushNow()).toBe(true)
 
     // written immediately, without waiting for the idle callback
     expect(JSON.parse(storage._storage.getString(key) ?? '')).toEqual({
@@ -540,10 +540,51 @@ describe('atomWithParsedMmkvStorage', () => {
 
     const setSpy = jest.spyOn(storage._storage, 'set')
 
-    testAtom.flushNow()
+    expect(testAtom.flushNow()).toBe(true)
 
     expect(setSpy).not.toHaveBeenCalled()
     expect(storage._storage.getString(key)).toBeUndefined()
+  })
+
+  it('flushNow reports a failed write so callers can keep their previous checkpoint', () => {
+    const key = 'test-flush-now-failure'
+    const testAtom = atomWithParsedMmkvStorage(
+      key,
+      defaultValue,
+      TestValueSchema
+    )
+    const store = createStore()
+    jest.spyOn(storage._storage, 'set').mockImplementationOnce(() => {
+      throw new TypeError('write failed')
+    })
+
+    store.set(testAtom, {name: 'pending', count: 1})
+    expect(testAtom.flushNow()).toBe(false)
+    expect(storage._storage.getString(key)).toBeUndefined()
+    expect(mockedReportError).toHaveBeenCalled()
+
+    store.set(testAtom, {name: 'retried', count: 2})
+    expect(testAtom.flushNow()).toBe(true)
+    expect(JSON.parse(storage._storage.getString(key) ?? '')).toEqual({
+      name: 'retried',
+      count: 2,
+    })
+  })
+
+  it('flushNow reports a write discarded during a storage clear', () => {
+    const testAtom = atomWithParsedMmkvStorage(
+      'test-flush-during-clear',
+      defaultValue,
+      TestValueSchema
+    )
+    const store = createStore()
+    const finishClear = beginMmkvStorageClear()
+    try {
+      store.set(testAtom, {name: 'discarded', count: 1})
+      expect(testAtom.flushNow()).toBe(false)
+    } finally {
+      finishClear()
+    }
   })
 
   it('registers the global flush callback only while a write is pending', () => {

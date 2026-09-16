@@ -134,6 +134,7 @@ export const createOfferActionAtom = atom<
     set(incrementPostedOffersActionAtom)
 
     set(upsertOfferToConnectionsActionAtom, {
+      pendingConnectionsToRefresh: [],
       connections: {
         firstLevel: createOfferResult.encryptedFor.firstDegreeConnections,
         secondLevel:

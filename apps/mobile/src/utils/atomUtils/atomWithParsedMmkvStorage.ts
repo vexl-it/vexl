@@ -127,7 +127,8 @@ export interface FlushablePrimitiveAtom<A> extends PrimitiveAtom<A> {
   /**
    * Synchronously persists the value currently waiting behind the deferred,
    * coalesced idle-callback flush, then clears it. No-op when nothing is
-   * pending. Honors the clear-generation guard: a write queued before a
+   * pending. Returns false if the pending write failed or was discarded.
+   * Honors the clear-generation guard: a write queued before a
    * storage wipe is dropped rather than resurrecting just-cleared data (see
    * `invalidateScheduledMmkvWrites`).
    *
@@ -135,7 +136,7 @@ export interface FlushablePrimitiveAtom<A> extends PrimitiveAtom<A> {
    * flush — e.g. local state the server was just mutated to match, where a
    * process kill before the flush would otherwise leave storage stale.
    */
-  flushNow: () => void
+  flushNow: () => boolean
 }
 
 function isValidJson(raw: string): boolean {
@@ -319,11 +320,11 @@ export function atomWithParsedMmkvStorageWithImmediateSaveOption<
   // no flush is scheduled.
   let pendingWrite: {value: A; generation: number} | undefined
 
-  const flushPendingWrite = (): void => {
+  const flushPendingWrite = (): boolean => {
     scheduledMmkvWriteFlushes.delete(flushPendingWrite)
     const toPersist = pendingWrite
     pendingWrite = undefined
-    if (toPersist === undefined) return
+    if (toPersist === undefined) return true
 
     // Storage was wiped after this write was scheduled — persisting it now
     // would resurrect just-cleared data. Drop it. See `clearGeneration`.
@@ -331,10 +332,10 @@ export function atomWithParsedMmkvStorageWithImmediateSaveOption<
       toPersist.generation !== clearGeneration ||
       activeStorageClears.size > 0
     )
-      return
+      return false
 
     recordOwnWrite()
-    pipe(
+    return pipe(
       persistValue(toPersist.value),
       Either.match({
         onLeft: (l) => {
@@ -344,8 +345,12 @@ export function atomWithParsedMmkvStorageWithImmediateSaveOption<
             new Error(`Error while saving value to storage. Key: ${key}`),
             {errorTag: l._tag}
           )
+          return false
         },
-        onRight: recordSuccessfulPersist,
+        onRight: () => {
+          recordSuccessfulPersist()
+          return true
+        },
       })
     )
   }

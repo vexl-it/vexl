@@ -25,6 +25,9 @@ export type ConnectionsState = typeof ConnectionsState.Type
 export const OfferToConnectionsItem = Schema.Struct({
   adminId: OfferAdminId,
   symmetricKey: SymmetricKey,
+  pendingConnectionsToRefresh: Schema.Array(PublicKeyV2).pipe(
+    Schema.optionalWith({default: () => []})
+  ),
   connections: Schema.Struct({
     firstLevel: Schema.Array(Schema.Union(PublicKeyPemBase64, PublicKeyV2)),
     secondLevel: Schema.Array(

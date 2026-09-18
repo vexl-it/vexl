@@ -1061,3 +1061,185 @@ describe('Report note', () => {
     )
   })
 })
+
+describe('Refreshing note sharing paths', () => {
+  it('replaces direct and repost payloads independently and keeps owner access', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* () {
+        const owner = yield* createMockedUser('+420733001001')
+        const reposter = yield* createMockedUser('+420733001002')
+        const recipient = yield* createMockedUser('+420733001003')
+        const note = yield* createNote({
+          owner,
+          privateParts: [
+            privatePartFor(owner, '0owner'),
+            privatePartFor(reposter, '0reposter'),
+            privatePartFor(recipient, '0old-direct'),
+          ],
+        })
+        const client = yield* NodeTestingApp
+        const firstRepost = generateNoteRepostId()
+        const otherRepost = generateNoteRepostId()
+        yield* setAuthHeaders(reposter.authHeaders)
+        const headers = makeTestCommonAndSecurityHeaders(reposter.authHeaders)
+        yield* client.Notes.repostNote({
+          headers,
+          payload: {
+            noteId: note.noteId,
+            repostId: firstRepost,
+            notePrivateList: [privatePartFor(recipient, '0first-repost')],
+          },
+        })
+        yield* client.Notes.repostNote({
+          headers,
+          payload: {
+            noteId: note.noteId,
+            repostId: otherRepost,
+            notePrivateList: [privatePartFor(recipient, '0other-repost')],
+          },
+        })
+        const beforeRefresh = yield* fetchNotesForMe(recipient)
+        yield* client.Notes.createNotePrivatePart({
+          payload: {
+            adminId: note.adminId,
+            notePrivateList: [privatePartFor(recipient, '0fresh-direct')],
+          },
+        })
+        yield* client.Notes.createNotePrivatePart({
+          payload: {
+            adminId: note.adminId,
+            notePrivateList: [privatePartFor(recipient, '0fresh-direct')],
+          },
+        })
+        yield* client.Notes.createRepostNotePrivatePart({
+          payload: {
+            repostId: firstRepost,
+            notePrivateList: [privatePartFor(recipient, '0fresh-repost')],
+          },
+        })
+        const result = yield* fetchNotesForMe(recipient)
+        const incremental =
+          yield* client.Notes.getNotesForMeModifiedOrCreatedAfterPaginated({
+            headers: makeTestCommonAndSecurityHeaders(recipient.authHeaders),
+            urlParams: {
+              limit: 100,
+              nextPageToken: beforeRefresh.nextPageToken ?? undefined,
+            },
+          })
+        expect(incremental.items).toHaveLength(2)
+        expect(incremental.items).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({privatePayload: '0fresh-direct'}),
+            expect.objectContaining({privatePayload: '0fresh-repost'}),
+          ])
+        )
+        expect(result.items).toHaveLength(3)
+        expect(result.items).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({privatePayload: '0fresh-direct'}),
+            expect.objectContaining({privatePayload: '0fresh-repost'}),
+            expect.objectContaining({privatePayload: '0other-repost'}),
+          ])
+        )
+        const ownerResult = yield* fetchNotesForMe(owner)
+        expect(ownerResult.items).toHaveLength(1)
+        expect(ownerResult.items[0]?.privatePayload).toBe('0owner')
+
+        yield* client.Notes.deleteRepostNotePrivatePart({
+          payload: {
+            repostId: firstRepost,
+            publicKeys: [recipient.mainKeyPair.publicKeyPemBase64],
+          },
+        })
+        const afterRemoval = yield* fetchNotesForMe(recipient)
+        expect(afterRemoval.items).toHaveLength(2)
+        expect(afterRemoval.items).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({privatePayload: '0fresh-direct'}),
+            expect.objectContaining({privatePayload: '0other-repost'}),
+          ])
+        )
+        // Removing the last recipient leaves no row that could locate this
+        // repost. The authenticated repost endpoint must be able to recreate it.
+        yield* setAuthHeaders(reposter.authHeaders)
+        yield* client.Notes.repostNote({
+          headers,
+          payload: {
+            noteId: note.noteId,
+            repostId: firstRepost,
+            notePrivateList: [privatePartFor(recipient, '0recreated')],
+          },
+        })
+        yield* client.Notes.repostNote({
+          headers,
+          payload: {
+            noteId: note.noteId,
+            repostId: firstRepost,
+            notePrivateList: [privatePartFor(recipient, '0recreated')],
+          },
+        })
+        const recreated = yield* fetchNotesForMe(recipient)
+        expect(recreated.items).toHaveLength(3)
+        expect(recreated.items).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({privatePayload: '0recreated'}),
+          ])
+        )
+      })
+    )
+  })
+
+  it('revokes a repost-only recipient and treats repeated or unknown removals as no-ops', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* () {
+        const owner = yield* createMockedUser('+420733001011')
+        const reposter = yield* createMockedUser('+420733001012')
+        const recipient = yield* createMockedUser('+420733001013')
+        const note = yield* createNote({
+          owner,
+          privateParts: [
+            privatePartFor(owner, '0owner'),
+            privatePartFor(reposter, '0reposter'),
+          ],
+        })
+        const client = yield* NodeTestingApp
+        const repostId = generateNoteRepostId()
+        yield* setAuthHeaders(reposter.authHeaders)
+        yield* client.Notes.repostNote({
+          headers: makeTestCommonAndSecurityHeaders(reposter.authHeaders),
+          payload: {
+            noteId: note.noteId,
+            repostId,
+            notePrivateList: [privatePartFor(recipient, '0repost')],
+          },
+        })
+        yield* client.Notes.deleteRepostNotePrivatePart({
+          payload: {
+            repostId: generateNoteRepostId(),
+            publicKeys: [recipient.mainKeyPair.publicKeyPemBase64],
+          },
+        })
+        expect((yield* fetchNotesForMe(recipient)).items).toHaveLength(1)
+        yield* client.Notes.deleteRepostNotePrivatePart({
+          payload: {
+            repostId,
+            publicKeys: [recipient.mainKeyPair.publicKeyPemBase64],
+          },
+        })
+        yield* client.Notes.deleteRepostNotePrivatePart({
+          payload: {
+            repostId,
+            publicKeys: [recipient.mainKeyPair.publicKeyPemBase64],
+          },
+        })
+        expect((yield* fetchNotesForMe(recipient)).items).toHaveLength(0)
+        yield* setAuthHeaders(recipient.authHeaders)
+        const removed = yield* client.Notes.getRemovedNotes({
+          headers: makeTestCommonAndSecurityHeaders(recipient.authHeaders),
+          payload: {noteIds: [note.noteId]},
+        })
+        expect(removed.noteIds).toEqual([note.noteId])
+      })
+    )
+  })
+})

@@ -10,6 +10,7 @@ import {Array, Effect, Option} from 'effect'
 import {NoteDbService} from '../../db/NoteDbService'
 import {hashNoteRepostId} from '../../utils/hashNoteIds'
 import {withNoteRepostActionRedisLock} from '../../utils/withNoteRedisLock'
+import {replaceNotePrivateParts} from './utils/replaceNotePrivateParts'
 
 const isWithoutDuplicates = (
   privateList: readonly ServerNotePrivatePart[]
@@ -49,20 +50,12 @@ export const repostNote = HttpApiBuilder.handler(
 
       const hashedRepostId = yield* _(hashNoteRepostId(req.payload.repostId))
 
-      // Duplicates against already existing rows are allowed by design
-      // (spec §4.6); the repost parts are tagged with the encrypted repostId
-      // so the reposter can later undo exactly these rows.
-      yield* _(
-        Effect.forEach(
-          req.payload.notePrivateList,
-          (privatePart) =>
-            noteDb.insertNotePrivatePart({
-              ...privatePart,
-              noteId: note.value.publicPart.id,
-              repostId: hashedRepostId,
-            }),
-          {batching: true}
-        )
+      yield* replaceNotePrivateParts(
+        Array.map(req.payload.notePrivateList, (part) => ({
+          ...part,
+          noteId: note.value.publicPart.id,
+          repostId: hashedRepostId,
+        }))
       )
 
       return {}

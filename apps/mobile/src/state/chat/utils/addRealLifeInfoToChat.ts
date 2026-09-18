@@ -1,58 +1,70 @@
-import {type RealLifeInfo} from '@vexl-next/domain/src/general/UserNameAndAvatar.brand'
 import {
-  type ContactReveal,
-  type IdentityReveal,
+  type RevealStatus,
+  type TradeChecklistUpdate,
 } from '@vexl-next/domain/src/general/tradeChecklist'
+import {type TradeChecklistInState} from '../../tradeChecklist/domain'
 import {type ChatWithMessages} from '../domain'
-import processTradeChecklistContactRevealMessageIfAny from './processTradeChecklistContactRevealMessageIfAny'
 import processTradeChecklistIdentityRevealMessageIfAny from './processTradeChecklistIdentityRevealMessageIfAny'
 
-function setRealLifeInfo(
-  realLifeInfo: RealLifeInfo | undefined
-): (chat: ChatWithMessages) => ChatWithMessages {
-  return (chat) => ({
+function approvedReceivedReveal<T extends {status?: RevealStatus}>({
+  received,
+  requested,
+  sent,
+}: {
+  received?: T
+  requested?: T
+  sent?: {status?: RevealStatus}
+}): T | undefined {
+  if (received?.status === 'APPROVE_REVEAL') return received
+
+  return requested?.status === 'REQUEST_REVEAL' &&
+    sent?.status === 'APPROVE_REVEAL'
+    ? requested
+    : undefined
+}
+
+export default function addRealLifeInfoToChat(
+  chat: ChatWithMessages,
+  currentSend?: {
+    update: TradeChecklistUpdate
+    requested: TradeChecklistInState
+  }
+): ChatWithMessages {
+  const identity = approvedReceivedReveal({
+    received: chat.tradeChecklist.identity.received,
+    requested: currentSend?.requested.identity.received,
+    sent: currentSend?.update.identity,
+  })
+  const contact = approvedReceivedReveal({
+    received: chat.tradeChecklist.contact.received,
+    requested: currentSend?.requested.contact.received,
+    sent: currentSend?.update.contact,
+  })
+  const revealedIdentity = processTradeChecklistIdentityRevealMessageIfAny(
+    identity,
+    chat.chat
+  )
+  const existingInfo = chat.chat.otherSide.realLifeInfo
+
+  const realLifeInfo = revealedIdentity
+    ? {...existingInfo, ...revealedIdentity}
+    : existingInfo
+
+  if (!realLifeInfo) return chat
+
+  return {
     ...chat,
     chat: {
       ...chat.chat,
       otherSide: {
         ...chat.chat.otherSide,
-        realLifeInfo,
+        realLifeInfo: {
+          ...realLifeInfo,
+          ...(contact?.fullPhoneNumber
+            ? {fullPhoneNumber: contact.fullPhoneNumber}
+            : {}),
+        },
       },
     },
-  })
-}
-
-export function addIdentityRealLifeInfoToChat(
-  identityRevealData: IdentityReveal | undefined
-): (chat: ChatWithMessages) => ChatWithMessages {
-  return (chat) => {
-    if (identityRevealData) {
-      const dataFromIdentityReveal =
-        processTradeChecklistIdentityRevealMessageIfAny(
-          identityRevealData,
-          chat.chat
-        )
-
-      return setRealLifeInfo(dataFromIdentityReveal)(chat)
-    }
-
-    return chat
-  }
-}
-
-export function addContactRealLifeInfoToChat(
-  contactRevealData: ContactReveal | undefined
-): (chat: ChatWithMessages) => ChatWithMessages {
-  return (chat) => {
-    if (contactRevealData) {
-      const dataFromContactReveal =
-        processTradeChecklistContactRevealMessageIfAny(
-          contactRevealData,
-          chat.chat.otherSide.realLifeInfo
-        )
-      return setRealLifeInfo(dataFromContactReveal)(chat)
-    }
-
-    return chat
   }
 }

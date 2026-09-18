@@ -90,6 +90,14 @@ export const CreateRepostNotePrivatePartResponse = NoContentResponse
 export type CreateRepostNotePrivatePartResponse =
   typeof CreateRepostNotePrivatePartResponse.Type
 
+export const DeleteRepostNotePrivatePartRequest = Schema.Struct({
+  repostId: NoteRepostId,
+  publicKeys: Schema.Array(Schema.Union(PublicKeyPemBase64, PublicKeyV2)),
+})
+export type DeleteRepostNotePrivatePartRequest =
+  typeof DeleteRepostNotePrivatePartRequest.Type
+export const DeleteRepostNotePrivatePartResponse = NoContentResponse
+
 export const DeleteNoteRequest = Schema.Struct({
   adminIds: CommaSeparatedDedupedStrings.pipe(
     Schema.compose(Schema.Array(NoteAdminId))

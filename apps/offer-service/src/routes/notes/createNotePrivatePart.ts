@@ -9,6 +9,7 @@ import {Array, Effect, Option} from 'effect'
 import {NoteDbService} from '../../db/NoteDbService'
 import {hashNoteAdminId} from '../../utils/hashNoteIds'
 import {withNoteAdminActionRedisLock} from '../../utils/withNoteRedisLock'
+import {replaceNotePrivateParts} from './utils/replaceNotePrivateParts'
 
 const isWithoutDuplicates = (
   privateList: readonly ServerNotePrivatePart[]
@@ -41,19 +42,12 @@ export const createNotePrivatePart = HttpApiBuilder.handler(
         return yield* _(Effect.fail(new NotFoundError()))
       }
 
-      // Duplicates against already existing rows are allowed by design
-      // (spec §4.6), so unlike offers we do not delete matching rows first.
-      yield* _(
-        Effect.forEach(
-          req.payload.notePrivateList,
-          (privatePart) =>
-            noteDb.insertNotePrivatePart({
-              ...privatePart,
-              noteId: note.value.id,
-              repostId: null,
-            }),
-          {batching: true}
-        )
+      yield* replaceNotePrivateParts(
+        Array.map(req.payload.notePrivateList, (part) => ({
+          ...part,
+          noteId: note.value.id,
+          repostId: null,
+        }))
       )
 
       return {}

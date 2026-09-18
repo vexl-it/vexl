@@ -3,12 +3,13 @@ import {PgClient} from '@effect/sql-pg'
 import {PublicKeyV2} from '@vexl-next/cryptography'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
-import {Effect, flow, Schema} from 'effect'
-import {NotePublicPartId} from '../domain'
+import {Array, Effect, flow, Schema} from 'effect'
+import {NotePublicPartId, NoteRepostIdHashed} from '../domain'
 
 export const DeleteNotePrivatePartRequest = Schema.Struct({
   userPublicKey: Schema.Union(PublicKeyPemBase64, PublicKeyV2),
   noteId: NotePublicPartId,
+  repostId: Schema.NullOr(NoteRepostIdHashed),
 })
 export type DeleteNotePrivatePartRequest =
   typeof DeleteNotePrivatePartRequest.Type
@@ -19,16 +20,15 @@ export const createDeleteNotePrivatePart = Effect.gen(function* (_) {
   const DeleteNotePrivatePart = yield* _(
     SqlResolver.void('DeleteNotePrivatePart', {
       Request: DeleteNotePrivatePartRequest,
-      // Only direct private parts (created by the note author) are removed.
-      // Reposted private parts are owned by the reposter and are managed
-      // through undoRepostNote instead.
       execute: (req) => sql`
         DELETE FROM note_private
         WHERE
-          repost_id IS NULL
-          AND ${sql.or(
-          req.map((one) =>
+          ${sql.or(
+          Array.map(req, (one) =>
             sql.and([
+              one.repostId === null
+                ? sql`repost_id IS NULL`
+                : sql`repost_id = ${one.repostId}`,
               sql`note_id = ${one.noteId}`,
               sql`user_public_key = ${one.userPublicKey}`,
             ])

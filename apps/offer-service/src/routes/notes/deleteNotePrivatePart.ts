@@ -57,6 +57,7 @@ export const deleteNotePrivatePart = HttpApiBuilder.handler(
           Array.map(req.payload.publicKeys, (pubKey) => ({
             userPublicKey: pubKey,
             noteId: note.id,
+            repostId: null,
           }))
         ),
         Array.flatten

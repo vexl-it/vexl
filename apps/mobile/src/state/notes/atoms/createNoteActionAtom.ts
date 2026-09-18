@@ -101,6 +101,7 @@ export const createNoteActionAtom = atom(
       set(upsertNoteToConnectionsActionAtom, {
         adminId: createNoteResult.adminId,
         symmetricKey: createNoteResult.symmetricKey,
+        pendingConnectionsToRefresh: [],
         connections: {
           firstLevel: createNoteResult.encryptedFor.firstDegreeConnections,
           secondLevel: createNoteResult.encryptedFor.secondDegreeConnections,

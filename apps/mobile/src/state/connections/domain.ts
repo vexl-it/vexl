@@ -49,6 +49,9 @@ export const OfferToConnectionsItems = Schema.Struct({
 export const NoteToConnectionsItem = Schema.Struct({
   adminId: NoteAdminId,
   symmetricKey: SymmetricKey,
+  pendingConnectionsToRefresh: Schema.Array(PublicKeyV2).pipe(
+    Schema.optionalWith({default: () => []})
+  ),
   connections: Schema.Struct({
     firstLevel: Schema.Array(Schema.Union(PublicKeyPemBase64, PublicKeyV2)),
     secondLevel: Schema.Array(
@@ -60,6 +63,7 @@ export const NoteToConnectionsItem = Schema.Struct({
 export type NoteToConnectionsItem = typeof NoteToConnectionsItem.Type
 
 export const NoteToConnectionsItems = Schema.Struct({
+  connectionsState: Schema.optional(ConnectionsState),
   noteToConnections: Schema.Array(NoteToConnectionsItem).pipe(Schema.mutable),
 })
 

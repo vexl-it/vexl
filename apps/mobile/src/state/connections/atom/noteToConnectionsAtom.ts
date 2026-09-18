@@ -1,3 +1,4 @@
+import {isPublicKeyV2} from '@vexl-next/cryptography/src/KeyHolder/brandsV2'
 import {
   type NoteAdminId,
   type NoteRepostId,
@@ -10,22 +11,30 @@ import updateNotePrivateParts from '@vexl-next/resources-utils/src/notes/updateN
 import updateRepostNotePrivateParts from '@vexl-next/resources-utils/src/notes/updateRepostNotePrivateParts'
 import {type OfferEncryptionProgress} from '@vexl-next/resources-utils/src/offers/OfferEncryptionProgress'
 import {subtractArrays} from '@vexl-next/resources-utils/src/utils/array'
-import {Array, Effect, Option, Schema} from 'effect'
+import {Array, Effect, HashMap, Option, Schema} from 'effect'
 import {pipe} from 'fp-ts/function'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
 import reportError from '../../../utils/reportError'
-import {myNotesAtom, notesAtom} from '../../notes/atoms/notesState'
+import {
+  myNotesAtom,
+  notesAtom,
+  notesStateAtom,
+} from '../../notes/atoms/notesState'
 import {sessionDataOrDummyAtom} from '../../session'
 import {NoteToConnectionsItems, type NoteToConnectionsItem} from '../domain'
-import connectionStateAtom from './connectionStateAtom'
+import {getConnectionsToRefresh} from '../utils/getChangedConnectionPublicKeys'
+import {fetchConnectionsActionAtom} from './connectionStateAtom'
 import {
   deleteRepostToConnectionsActionAtom,
   repostToConnectionsAtom,
 } from './repostToConnectionsAtom'
 
 const BACKGROUND_TIME_LIMIT_MS = 25_000
+const noteConnectionUpdatesSemaphoreAtom = atom(() =>
+  Effect.unsafeMakeSemaphore(1)
+)
 
 export const noteToConnectionsAtom = atomWithParsedMmkvStorage(
   'note-to-connections',
@@ -41,6 +50,7 @@ export const upsertNoteToConnectionsActionAtom = atom<
   unknown
 >(null, (get, set, newValue) => {
   set(noteToConnectionsAtom, (previousValue) => ({
+    ...previousValue,
     noteToConnections: [
       ...previousValue.noteToConnections.filter(
         (one) => one.adminId !== newValue.adminId
@@ -54,6 +64,7 @@ export const deleteNoteToConnectionsActionAtom = atom(
   null,
   (get, set, adminIdsToDelete: readonly NoteAdminId[]) => {
     set(noteToConnectionsAtom, (old) => ({
+      ...old,
       noteToConnections: old.noteToConnections.filter(
         (one) => !Array.contains(adminIdsToDelete, one.adminId)
       ),
@@ -73,15 +84,15 @@ const filterNotExpiredNotes = <T extends {noteInfo: {expiresAt: number}}>(
 
 // Drops records of deleted/expired notes and creates empty records for notes
 // that miss one (notes created before connection tracking existed). An empty
-// record makes the next update re-encrypt for every current connection —
-// the server allows private parts duplicated against existing rows, so
-// already-covered contacts are unaffected.
+// record makes the next update re-encrypt for every current connection.
+// Direct private parts are replaced without touching repost sharing paths.
 const ensureConnectionsRecordForEveryMyNoteActionAtom = atom(
   null,
   (get, set) => {
     const myNotes = filterNotExpiredNotes(get(myNotesAtom))
 
     set(noteToConnectionsAtom, (old) => ({
+      ...old,
       noteToConnections: pipe(
         myNotes,
         Array.map((note) =>
@@ -93,6 +104,7 @@ const ensureConnectionsRecordForEveryMyNoteActionAtom = atom(
             Option.getOrElse(() => ({
               adminId: note.ownershipInfo.adminId,
               symmetricKey: note.noteInfo.privatePart.symmetricKey,
+              pendingConnectionsToRefresh: [],
               connections: {
                 firstLevel: [],
                 secondLevel: [],
@@ -178,12 +190,56 @@ export const updateAndReencryptAllNotesConnectionsActionAtom = atom(
         `🗒️ Updating note connections. Total notes to update: ${noteConnections.length}. Total reposts to update: ${repostConnections.length}.`
       )
 
+      const fetched = yield* set(fetchConnectionsActionAtom).pipe(Effect.option)
+      const previous = get(noteToConnectionsAtom).connectionsState
+      const connectionState = Option.getOrElse(fetched, () => previous)
+      if (!connectionState) {
+        return [
+          ...Array.map(noteConnections, ({adminId}) => ({
+            adminId,
+            success: false,
+          })),
+          ...Array.map(repostConnections, ({repostId}) => ({
+            repostId,
+            success: false,
+          })),
+        ]
+      }
+      const changedKeys = previous
+        ? getConnectionsToRefresh(
+            {...previous, verifiedFriends: HashMap.empty()},
+            {...connectionState, verifiedFriends: HashMap.empty()}
+          )
+        : Array.filter(
+            [...connectionState.firstLevel, ...connectionState.secondLevel],
+            isPublicKeyV2
+          )
+      // Save the note baseline and each note's pending recipients together.
+      // Offer refreshes never advance this baseline or consume these queues.
+      set(noteToConnectionsAtom, (old) => ({
+        ...old,
+        connectionsState: connectionState,
+        noteToConnections: Array.map(old.noteToConnections, (one) => {
+          const recipients = new Set([
+            ...one.connections.firstLevel,
+            ...one.connections.secondLevel,
+          ])
+          return {
+            ...one,
+            pendingConnectionsToRefresh: Array.dedupe([
+              ...one.pendingConnectionsToRefresh,
+              ...Array.filter(changedKeys, (key) => recipients.has(key)),
+            ]),
+          }
+        }),
+      }))
+      noteToConnectionsAtom.flushNow()
+
       const offerApi = get(apiAtom).offer
-      const connectionState = get(connectionStateAtom)
       const session = get(sessionDataOrDummyAtom)
 
       const processMyNotes = pipe(
-        noteConnections,
+        get(noteToConnectionsAtom).noteToConnections,
         Array.map((oneNoteConnections, i) =>
           updateNotePrivateParts({
             currentConnections: oneNoteConnections.connections,
@@ -192,6 +248,8 @@ export const updateAndReencryptAllNotesConnectionsActionAtom = atom(
               secondLevel: connectionState.secondLevel,
             },
             commonFriends: connectionState.commonFriends,
+            connectionsToRefresh:
+              oneNoteConnections.pendingConnectionsToRefresh,
             ownerPublicKeys: [
               session.privateKey.publicKeyPemBase64,
               session.keyPairV2.publicKey,
@@ -212,18 +270,35 @@ export const updateAndReencryptAllNotesConnectionsActionAtom = atom(
           }).pipe(
             Effect.map(
               ({
+                noteNotFoundOnServer,
+                updateSuccess,
                 encryptionErrors,
                 newConnections,
                 removedConnections,
                 timeLimitReachedErrors,
               }) => {
+                if (noteNotFoundOnServer) {
+                  set(deleteNoteToConnectionsActionAtom, [
+                    oneNoteConnections.adminId,
+                  ])
+                  set(notesAtom, (notes) =>
+                    Array.filter(
+                      notes,
+                      (one) =>
+                        one.ownershipInfo?.adminId !==
+                        oneNoteConnections.adminId
+                    )
+                  )
+                  notesStateAtom.flushNow()
+                  return {adminId: oneNoteConnections.adminId, success: true}
+                }
                 if (encryptionErrors.length > 0) {
                   reportError(
                     'error',
                     new Error(
                       'Error while encrypting new connections for note'
                     ),
-                    {encryptionErrors}
+                    {count: encryptionErrors.length}
                   )
                 }
                 if (timeLimitReachedErrors.length > 0) {
@@ -232,15 +307,19 @@ export const updateAndReencryptAllNotesConnectionsActionAtom = atom(
                     new Error(
                       `Note did not update fully due to time limit reached. Skipped: ${timeLimitReachedErrors.length}.`
                     ),
-                    {timeLimitReachedErrors}
+                    {count: timeLimitReachedErrors.length}
                   )
                 }
 
                 set(noteToConnectionsAtom, (old) => ({
-                  noteToConnections: old.noteToConnections.map((one) =>
+                  ...old,
+                  noteToConnections: Array.map(old.noteToConnections, (one) =>
                     one.adminId === oneNoteConnections.adminId
                       ? {
                           ...one,
+                          pendingConnectionsToRefresh: updateSuccess
+                            ? []
+                            : one.pendingConnectionsToRefresh,
                           connections: {
                             firstLevel: subtractArrays(
                               [
@@ -262,7 +341,10 @@ export const updateAndReencryptAllNotesConnectionsActionAtom = atom(
                   ),
                 }))
 
-                return {adminId: oneNoteConnections.adminId, success: true}
+                return {
+                  adminId: oneNoteConnections.adminId,
+                  success: updateSuccess,
+                }
               }
             ),
             Effect.catchAll((e) =>
@@ -270,7 +352,7 @@ export const updateAndReencryptAllNotesConnectionsActionAtom = atom(
                 reportError(
                   'warn',
                   new Error('Unable to update note connections'),
-                  {e}
+                  {errorTag: e._tag}
                 )
                 return {adminId: oneNoteConnections.adminId, success: false}
               })
@@ -294,6 +376,7 @@ export const updateAndReencryptAllNotesConnectionsActionAtom = atom(
               session.keyPairV2.publicKey,
             ],
             repostId: oneRepostConnections.repostId,
+            noteId: oneRepostConnections.noteId,
             symmetricKey: oneRepostConnections.symmetricKey,
             stopProcessingAfter,
             api: offerApi,
@@ -309,6 +392,7 @@ export const updateAndReencryptAllNotesConnectionsActionAtom = atom(
           }).pipe(
             Effect.map(
               ({
+                updateSuccess,
                 encryptionErrors,
                 newConnections,
                 removedConnections,
@@ -333,7 +417,7 @@ export const updateAndReencryptAllNotesConnectionsActionAtom = atom(
                     new Error(
                       'Error while encrypting new connections for note repost'
                     ),
-                    {encryptionErrors}
+                    {count: encryptionErrors.length}
                   )
                 }
                 if (timeLimitReachedErrors.length > 0) {
@@ -342,7 +426,7 @@ export const updateAndReencryptAllNotesConnectionsActionAtom = atom(
                     new Error(
                       `Note repost did not update fully due to time limit reached. Skipped: ${timeLimitReachedErrors.length}.`
                     ),
-                    {timeLimitReachedErrors}
+                    {count: timeLimitReachedErrors.length}
                   )
                 }
 
@@ -372,15 +456,28 @@ export const updateAndReencryptAllNotesConnectionsActionAtom = atom(
                   ),
                 }))
 
-                return {repostId: oneRepostConnections.repostId, success: true}
+                return {
+                  repostId: oneRepostConnections.repostId,
+                  success: updateSuccess,
+                }
               }
+            ),
+            Effect.catchAll((e) =>
+              Effect.sync(() => {
+                reportError(
+                  'warn',
+                  new Error('Unable to update repost connections'),
+                  {errorTag: e._tag}
+                )
+                return {repostId: oneRepostConnections.repostId, success: false}
+              })
             )
           )
         ),
         Effect.all
       )
 
-      return yield* _(
+      const results = yield* _(
         Effect.zipWith(
           processMyNotes,
           processReposts,
@@ -401,5 +498,8 @@ export const updateAndReencryptAllNotesConnectionsActionAtom = atom(
           })
         )
       )
-    })
+      return Option.isSome(fetched)
+        ? results
+        : Array.map(results, (one) => ({...one, success: false}))
+    }).pipe(get(noteConnectionUpdatesSemaphoreAtom).withPermits(1))
 )

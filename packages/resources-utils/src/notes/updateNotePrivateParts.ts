@@ -58,7 +58,7 @@ function uploadNotePrivatePartsBatch({
               reportErrorFromResourcesUtils(
                 'error',
                 new Error('Error uploading note private parts from update'),
-                {e}
+                {errorTag: e._tag}
               )
             })
           ),
@@ -104,6 +104,7 @@ export default function updateNotePrivateParts({
   currentConnections,
   targetConnections,
   commonFriends,
+  connectionsToRefresh = [],
   ownerPublicKeys,
   adminId,
   symmetricKey,
@@ -119,6 +120,7 @@ export default function updateNotePrivateParts({
     readonly firstLevel: ReadonlyArray<PublicKeyPemBase64 | PublicKeyV2>
     readonly secondLevel: ReadonlyArray<PublicKeyPemBase64 | PublicKeyV2>
   }
+  connectionsToRefresh?: readonly PublicKeyV2[]
   commonFriends: CommonConnectionsForUsers
   // The owner's own private part carries the adminId and must never be
   // overshadowed by a regular one, so the owner keys are excluded here.
@@ -130,6 +132,8 @@ export default function updateNotePrivateParts({
   onProgress?: (status: OfferEncryptionProgress) => void
 }): Effect.Effect<
   {
+    noteNotFoundOnServer: boolean
+    updateSuccess: boolean
     encryptionErrors: NotePrivatePartEncryptionError[]
     timeLimitReachedErrors: TimeLimitReachedError[]
     removedConnections: Array<PublicKeyPemBase64 | PublicKeyV2>
@@ -169,11 +173,28 @@ export default function updateNotePrivateParts({
 
     if (onProgress) onProgress({type: 'CONSTRUCTING_PRIVATE_PAYLOADS'})
 
+    if (Array.isNonEmptyArray(removedConnections)) {
+      yield* api.deleteNotePrivatePart({
+        adminIds: [adminId],
+        publicKeys: removedConnections,
+      })
+    }
+    const keysToUpdate = new Set([
+      ...newFirstLevelConnections,
+      ...newSecondLevelConnections,
+      ...subtractArrays(connectionsToRefresh, ownerPublicKeys),
+    ])
     const privatePayloads = yield* _(
       constructNotePrivatePayloads({
         connectionsInfo: {
-          firstDegreeConnections: newFirstLevelConnections,
-          secondDegreeConnections: newSecondLevelConnections,
+          firstDegreeConnections: Array.filter(
+            targetConnections.firstLevel,
+            (key) => keysToUpdate.has(key)
+          ),
+          secondDegreeConnections: Array.filter(
+            targetConnections.secondLevel,
+            (key) => keysToUpdate.has(key)
+          ),
           commonFriends,
           verifiedFriends: HashMap.empty(),
           clubsConnections: {},
@@ -247,15 +268,6 @@ export default function updateNotePrivateParts({
       )
     }
 
-    if (removedConnections.length > 0) {
-      yield* _(
-        api.deleteNotePrivatePart({
-          adminIds: [adminId],
-          publicKeys: removedConnections,
-        })
-      )
-    }
-
     if (onProgress) onProgress({type: 'DONE'})
 
     const pubKeysThatFailedEncryptTo = [
@@ -265,6 +277,14 @@ export default function updateNotePrivateParts({
     ].map((one) => one.toPublicKey)
 
     return {
+      noteNotFoundOnServer: Array.some(
+        uploadErrors,
+        (one) => one.error._tag === 'NotFoundError'
+      ),
+      updateSuccess:
+        !Array.isNonEmptyArray(encryptionResult.encryptionErrors) &&
+        !Array.isNonEmptyArray(encryptionResult.timeLimitReachedErrors) &&
+        !Array.isNonEmptyArray(uploadErrors),
       encryptionErrors: encryptionResult.encryptionErrors,
       timeLimitReachedErrors: encryptionResult.timeLimitReachedErrors,
       removedConnections: deduplicate(removedConnections),

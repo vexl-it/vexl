@@ -29,10 +29,21 @@ import {
   offersStateAtom,
   singleOfferByAdminIdAtom,
 } from '../../marketplace/atoms/offersState'
-import {OfferToConnectionsItems, type OfferToConnectionsItem} from '../domain'
-import connectionStateAtom from './connectionStateAtom'
+import {
+  OfferToConnectionsItems,
+  type ConnectionsState,
+  type OfferToConnectionsItem,
+} from '../domain'
+import {getConnectionsToRefresh} from '../utils/getChangedConnectionPublicKeys'
+import connectionStateAtom, {
+  fetchConnectionsActionAtom,
+} from './connectionStateAtom'
 
 const BACKGROUND_TIME_LIMIT_MS = 25_000
+
+// Full syncs and manual edits must not upload older payloads or clear each
+// other's pending refreshes. Keep the lock scoped to the Jotai store.
+const connectionUpdatesSemaphoreAtom = atom(() => Effect.unsafeMakeSemaphore(1))
 
 const offerToConnectionsAtom = atomWithParsedMmkvStorage(
   'offer-to-connections',
@@ -187,6 +198,7 @@ export const ensureConnectionsForEveryOffer = atom(null, (get, set) => {
           ),
           Option.getOrElse(() => ({
             adminId,
+            pendingConnectionsToRefresh: [],
             connections: {
               clubs: {},
               firstLevel: [],
@@ -255,6 +267,48 @@ interface UpdateSingleOfferConnectionParams {
 }
 
 /**
+ * Queues changed existing recipients for every offer before advancing the
+ * shared graph. Must run under connectionUpdatesSemaphoreAtom, including
+ * when only one offer is being updated. A failed fetch keeps pending work.
+ */
+const fetchAndQueueConnectionsActionAtom = atom(null, (get, set) =>
+  Effect.gen(function* (_) {
+    const previous = get(connectionStateAtom)
+    const fetched = yield* _(set(fetchConnectionsActionAtom), Effect.option)
+
+    set(deleteOrphanRecordsActionAtom)
+    set(ensureConnectionsForEveryOffer)
+    if (Option.isNone(fetched)) return previous
+
+    const changedKeys = getConnectionsToRefresh(previous, fetched.value)
+    set(offerToConnectionsAtom, (old) => ({
+      ...old,
+      offerToConnections: Array.map(old.offerToConnections, (one) => {
+        const recipients = new Set([
+          ...one.connections.firstLevel,
+          ...one.connections.secondLevel,
+        ])
+        return {
+          ...one,
+          pendingConnectionsToRefresh: Array.dedupe([
+            ...one.pendingConnectionsToRefresh,
+            ...Array.filter(changedKeys, (key) => recipients.has(key)),
+          ]),
+        }
+      }),
+    }))
+
+    // If persisting the queues fails, keep the previous baseline so a restart
+    // can rediscover the work. Uploads can still use the fresh graph in memory.
+    if (offerToConnectionsAtom.flushNow()) {
+      set(connectionStateAtom, fetched.value)
+      connectionStateAtom.flushNow()
+    }
+    return fetched.value
+  })
+)
+
+/**
  * Uploads new/removed private parts for a single offer and returns an updater
  * that applies the resulting connection changes to the locally stored
  * `OfferToConnectionsItem`. Persisting the returned update is left to the
@@ -271,15 +325,19 @@ const computeSingleOfferConnectionUpdateActionAtom = atom(
       intendedConnectionLevel,
       stopProcessingAfter,
       onProgress,
-    }: UpdateSingleOfferConnectionParams
+      connectionState,
+    }: UpdateSingleOfferConnectionParams & {
+      connectionState: ConnectionsState
+    }
   ) =>
     Effect.gen(function* (_) {
       const offerApi = get(apiAtom).offer
 
-      const connectionState = get(connectionStateAtom)
       const oneOfferConnectionsAtom =
         createSingleOfferToConnectionsAtom(adminId)
       const oneOfferConnections = yield* _(get(oneOfferConnectionsAtom))
+      const connectionsToRefresh =
+        oneOfferConnections.pendingConnectionsToRefresh
 
       const offer = get(singleOfferByAdminIdAtom(adminId))
 
@@ -314,6 +372,7 @@ const computeSingleOfferConnectionUpdateActionAtom = atom(
         'Update one offer connections'
       )
       const {
+        updateSuccess,
         encryptionErrors,
         newConnections,
         timeLimitReachedErrors,
@@ -321,6 +380,7 @@ const computeSingleOfferConnectionUpdateActionAtom = atom(
       } = yield* _(
         updatePrivateParts({
           currentConnections: oneOfferConnections.connections,
+          connectionsToRefresh,
           targetConnections: {
             firstLevel: connectionState.firstLevel,
             secondLevel:
@@ -363,44 +423,59 @@ const computeSingleOfferConnectionUpdateActionAtom = atom(
         )
       }
 
-      return (val: OfferToConnectionsItem): OfferToConnectionsItem => ({
-        ...val,
-        connections: {
-          firstLevel: subtractArrays(
-            [...val.connections.firstLevel, ...newConnections.firstLevel],
-            removedConnections
-          ),
-          secondLevel:
-            connectionLevel === 'ALL'
-              ? subtractArrays(
-                  [
-                    ...(val.connections.secondLevel ?? []),
-                    ...(newConnections.secondLevel ?? []),
-                  ],
-                  removedConnections
-                )
-              : [],
-          clubs: processClubConnections({
-            currentConnections: val.connections.clubs ?? {},
-            newConnections: newConnections.clubs ?? {},
-            removedConnections,
-          }),
-        },
-      })
+      const success = updateSuccess && !Array.isNonEmptyArray(encryptionErrors)
+      return {
+        updateSuccess: success,
+        applyConnectionsUpdate: (
+          val: OfferToConnectionsItem
+        ): OfferToConnectionsItem => ({
+          ...val,
+          pendingConnectionsToRefresh: success
+            ? []
+            : val.pendingConnectionsToRefresh,
+          connections: {
+            firstLevel: subtractArrays(
+              [...val.connections.firstLevel, ...newConnections.firstLevel],
+              removedConnections
+            ),
+            secondLevel:
+              connectionLevel === 'ALL'
+                ? subtractArrays(
+                    [
+                      ...(val.connections.secondLevel ?? []),
+                      ...(newConnections.secondLevel ?? []),
+                    ],
+                    removedConnections
+                  )
+                : [],
+            clubs: processClubConnections({
+              currentConnections: val.connections.clubs ?? {},
+              newConnections: newConnections.clubs ?? {},
+              removedConnections,
+            }),
+          },
+        }),
+      }
     })
 )
 
 export const updateAndReencryptSingleOfferConnectionActionAtom = atom(
   null,
   (get, set, params: UpdateSingleOfferConnectionParams) =>
-    set(computeSingleOfferConnectionUpdateActionAtom, params).pipe(
-      Effect.map((applyConnectionsUpdate) => {
-        set(
-          createSingleOfferToConnectionsAtom(params.adminId),
-          applyConnectionsUpdate
-        )
-      })
-    )
+    Effect.gen(function* (_) {
+      const connectionState = yield* _(set(fetchAndQueueConnectionsActionAtom))
+      const {applyConnectionsUpdate} = yield* _(
+        set(computeSingleOfferConnectionUpdateActionAtom, {
+          ...params,
+          connectionState,
+        })
+      )
+      set(
+        createSingleOfferToConnectionsAtom(params.adminId),
+        applyConnectionsUpdate
+      )
+      offerToConnectionsAtom.flushNow()
+    }).pipe(get(connectionUpdatesSemaphoreAtom).withPermits(1))
 )
 
 export const updateAndReencryptAllOffersConnectionsActionAtom = atom(
@@ -426,6 +501,7 @@ export const updateAndReencryptAllOffersConnectionsActionAtom = atom(
     }>
   > =>
     Effect.gen(function* (_) {
+      const connectionState = yield* _(set(fetchAndQueueConnectionsActionAtom))
       const stopProcessingAfter: UnixMilliseconds | undefined = isInBackground
         ? Schema.decodeSync(UnixMilliseconds)(
             unixMillisecondsNow() + BACKGROUND_TIME_LIMIT_MS
@@ -444,9 +520,6 @@ export const updateAndReencryptAllOffersConnectionsActionAtom = atom(
       const endUpdateOfferConnectionsMeasure = startMeasure(
         'Update all offers connections'
       )
-      set(deleteOrphanRecordsActionAtom)
-      set(ensureConnectionsForEveryOffer)
-
       const offerToConnectionsAtoms = get(offerToConnectionsAtomsAtom)
 
       // Per-offer results are accumulated in memory and persisted in chunks
@@ -482,6 +555,7 @@ export const updateAndReencryptAllOffersConnectionsActionAtom = atom(
           const adminId = get(oneOfferAtom).adminId
           return set(computeSingleOfferConnectionUpdateActionAtom, {
             adminId,
+            connectionState,
             onProgress: onProgres
               ? (progress) => {
                   onProgres({
@@ -493,14 +567,14 @@ export const updateAndReencryptAllOffersConnectionsActionAtom = atom(
               : undefined,
             stopProcessingAfter,
           }).pipe(
-            Effect.map((applyConnectionsUpdate) => {
+            Effect.map(({updateSuccess, applyConnectionsUpdate}) => {
               pendingConnectionUpdates.set(adminId, applyConnectionsUpdate)
               if (
                 pendingConnectionUpdates.size >=
                 PERSIST_CONNECTION_UPDATES_CHUNK_SIZE
               )
                 persistPendingConnectionUpdates()
-              return {adminId, success: true}
+              return {adminId, success: updateSuccess}
             }),
             Effect.catchAll((e) =>
               Effect.sync(() => {
@@ -564,5 +638,5 @@ export const updateAndReencryptAllOffersConnectionsActionAtom = atom(
         ),
         effectWithEnsuredBenchmark('Update and reencrypt all offers')
       )
-    })
+    }).pipe(get(connectionUpdatesSemaphoreAtom).withPermits(1))
 )

@@ -141,6 +141,7 @@ const reencryptOneOfferActionAtom = atom(
           set(offerAtom, recreatedOffer)
           set(deleteOfferToConnectionsAtom, offer.ownershipInfo.adminId)
           set(upsertOfferToConnectionsActionAtom, {
+            pendingConnectionsToRefresh: [],
             connections: {
               firstLevel: r.encryptedFor.firstDegreeConnections,
               secondLevel:

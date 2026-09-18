@@ -12,6 +12,7 @@ import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.b
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
 import {Array, Effect, HashMap, Option, Schema} from 'effect'
 import reportErrorFromResourcesUtils from '../reportErrorFromResourcesUtils'
+import {createTestOfferApi} from '../testUtils/offerApi'
 import {eciesDecryptE} from '../utils/crypto'
 import updatePrivateParts from './updatePrivateParts'
 
@@ -41,34 +42,8 @@ function setup(): {
     ReturnType<OfferApi['deletePrivatePart']>,
     Parameters<OfferApi['deletePrivatePart']>
   >(() => Effect.succeed({}))
-  const unusedApiCall = (): Effect.Effect<never> =>
-    Effect.die('Unexpected API call')
   const params: Parameters<typeof updatePrivateParts>[0] = {
-    api: {
-      createPrivatePart,
-      deletePrivatePart,
-      getOffersForMeModifiedOrCreatedAfterPaginated: unusedApiCall,
-      getClubOffersForMeModifiedOrCreatedAfterPaginated: unusedApiCall,
-      createNewOffer: unusedApiCall,
-      refreshOffer: unusedApiCall,
-      deleteOffer: unusedApiCall,
-      updateOffer: unusedApiCall,
-      getRemovedOffers: unusedApiCall,
-      getRemovedClubOffers: unusedApiCall,
-      reportOffer: unusedApiCall,
-      reportClubOffer: unusedApiCall,
-      getNotesForMeModifiedOrCreatedAfterPaginated: unusedApiCall,
-      createNewNote: unusedApiCall,
-      deleteNote: unusedApiCall,
-      createNotePrivatePart: unusedApiCall,
-      deleteNotePrivatePart: unusedApiCall,
-      createRepostNotePrivatePart: unusedApiCall,
-      repostNote: unusedApiCall,
-      undoRepostNote: unusedApiCall,
-      getRemovedNotes: unusedApiCall,
-      reportNote: unusedApiCall,
-      createChallenge: unusedApiCall,
-    },
+    api: createTestOfferApi({createPrivatePart, deletePrivatePart}),
     adminId: generateAdminId(),
     symmetricKey: Schema.decodeSync(SymmetricKey)('symmetric-key'),
     currentConnections: connections,

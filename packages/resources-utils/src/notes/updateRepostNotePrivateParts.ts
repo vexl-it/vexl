@@ -2,7 +2,10 @@ import {
   type PublicKeyPemBase64,
   type PublicKeyV2,
 } from '@vexl-next/cryptography/src/KeyHolder'
-import {type NoteRepostId} from '@vexl-next/domain/src/general/notes'
+import {
+  type NoteId,
+  type NoteRepostId,
+} from '@vexl-next/domain/src/general/notes'
 import {type SymmetricKey} from '@vexl-next/domain/src/general/offers'
 import {type UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
@@ -20,7 +23,7 @@ import {
 } from './utils/encryptNotePrivatePart'
 
 type CreateRepostNotePrivatePartError = Effect.Effect.Error<
-  ReturnType<OfferApi['createRepostNotePrivatePart']>
+  ReturnType<OfferApi['repostNote'] | OfferApi['createRepostNotePrivatePart']>
 >
 
 interface UploadRepostNotePrivatePartsBatchResult {
@@ -34,10 +37,12 @@ interface UploadRepostNotePrivatePartsBatchResult {
 function uploadRepostNotePrivatePartsBatch({
   offerApi,
   repostId,
+  noteId,
   privateParts,
 }: {
   offerApi: OfferApi
   repostId: NoteRepostId
+  noteId: NoteId
   privateParts: readonly ServerNotePrivatePart[]
 }): Effect.Effect<UploadRepostNotePrivatePartsBatchResult> {
   const emptyResult: UploadRepostNotePrivatePartsBatchResult = {
@@ -54,6 +59,10 @@ function uploadRepostNotePrivatePartsBatch({
           notePrivateList: oneChunk,
         })
         .pipe(
+          // An empty sharing path has no row left to locate the note.
+          Effect.catchTag('NotFoundError', () =>
+            offerApi.repostNote({repostId, noteId, notePrivateList: oneChunk})
+          ),
           Effect.tapError((e) =>
             Effect.sync(() => {
               // The repost's note being gone (deleted / expired) is an
@@ -64,7 +73,7 @@ function uploadRepostNotePrivatePartsBatch({
                 new Error(
                   'Error uploading repost note private parts from update'
                 ),
-                {e}
+                {errorTag: e._tag}
               )
             })
           ),
@@ -101,18 +110,12 @@ function uploadRepostNotePrivatePartsBatch({
   )
 }
 
-/**
- * Uploads repost private parts for connections that are missing them (e.g.
- * newly imported contacts of the reposter). There is no endpoint to delete
- * individual repost private parts, so removed connections are only dropped
- * from the returned local tracking data — they keep access to the note until
- * it expires or the repost is undone.
- */
 export default function updateRepostNotePrivateParts({
   currentConnections,
   targetConnections,
   ownerPublicKeys,
   repostId,
+  noteId,
   symmetricKey,
   stopProcessingAfter,
   api,
@@ -129,22 +132,27 @@ export default function updateRepostNotePrivateParts({
   // The reposter never sends the note to themselves.
   ownerPublicKeys: ReadonlyArray<PublicKeyPemBase64 | PublicKeyV2>
   repostId: NoteRepostId
+  noteId: NoteId
   symmetricKey: SymmetricKey
   stopProcessingAfter?: UnixMilliseconds
   api: OfferApi
   onProgress?: (status: OfferEncryptionProgress) => void
-}): Effect.Effect<{
-  encryptionErrors: NotePrivatePartEncryptionError[]
-  timeLimitReachedErrors: TimeLimitReachedError[]
-  removedConnections: Array<PublicKeyPemBase64 | PublicKeyV2>
-  newConnections: {
-    firstLevel: Array<PublicKeyPemBase64 | PublicKeyV2>
-    secondLevel: Array<PublicKeyPemBase64 | PublicKeyV2>
-  }
-  // True when the server no longer knows the repost (note deleted or
-  // expired). Callers should drop their local tracking record.
-  repostNotFoundOnServer: boolean
-}> {
+}): Effect.Effect<
+  {
+    updateSuccess: boolean
+    encryptionErrors: NotePrivatePartEncryptionError[]
+    timeLimitReachedErrors: TimeLimitReachedError[]
+    removedConnections: Array<PublicKeyPemBase64 | PublicKeyV2>
+    newConnections: {
+      firstLevel: Array<PublicKeyPemBase64 | PublicKeyV2>
+      secondLevel: Array<PublicKeyPemBase64 | PublicKeyV2>
+    }
+    // True when the server no longer knows the repost (note deleted or
+    // expired). Callers should drop their local tracking record.
+    repostNotFoundOnServer: boolean
+  },
+  Effect.Effect.Error<ReturnType<OfferApi['deleteRepostNotePrivatePart']>>
+> {
   return Effect.gen(function* (_) {
     const removedConnections = subtractArrays(
       deduplicate([
@@ -165,6 +173,13 @@ export default function updateRepostNotePrivateParts({
       subtractArrays(targetConnections.secondLevel, ownerPublicKeys),
       currentConnections.secondLevel
     )
+
+    if (Array.isNonEmptyArray(removedConnections)) {
+      yield* api.deleteRepostNotePrivatePart({
+        repostId,
+        publicKeys: removedConnections,
+      })
+    }
 
     if (onProgress) onProgress({type: 'CONSTRUCTING_PRIVATE_PAYLOADS'})
 
@@ -239,6 +254,7 @@ export default function updateRepostNotePrivateParts({
         uploadRepostNotePrivatePartsBatch({
           offerApi: api,
           repostId,
+          noteId,
           privateParts: encryptionResult.privateParts,
         }),
         Effect.map((result) =>
@@ -264,6 +280,10 @@ export default function updateRepostNotePrivateParts({
     ].map((one) => one.toPublicKey)
 
     return {
+      updateSuccess:
+        !Array.isNonEmptyArray(encryptionResult.encryptionErrors) &&
+        !Array.isNonEmptyArray(encryptionResult.timeLimitReachedErrors) &&
+        !Array.isNonEmptyArray(uploadErrors),
       encryptionErrors: encryptionResult.encryptionErrors,
       timeLimitReachedErrors: encryptionResult.timeLimitReachedErrors,
       removedConnections: deduplicate(removedConnections),

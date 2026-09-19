@@ -24,7 +24,6 @@ import {MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsC
 import {ServerSecurityMiddlewareLive} from '@vexl-next/server-utils/src/serverSecurity'
 import {Layer} from 'effect'
 import {NotificationMetricsService} from './metrics'
-import {getCypherPublicKeyHandler} from './routes/getCypherPublicKeyHandler'
 import {issueNotifcationHandler} from './routes/issueNotificationHandler'
 import {issueStreamOnlyMessageHandler} from './routes/issueStreamOnlyMessageHandler'
 import {createNotificationSecretHandler} from './routes/notificationToken/createNotificationSecretHandler'
@@ -47,7 +46,6 @@ import {PosgressDbLive} from './services/PostgressDb'
 import {ProcessVexlProductNotificationWorker} from './services/ProcessVexlProductNotificationWorker'
 import {ThrottledPushNotificationService} from './services/ThrottledPushNotificationService'
 import {processThrottledNotificationsWorker} from './services/ThrottledPushNotificationService/services/ThrottledNotificationMq'
-import {VexlNotificationTokenService} from './services/VexlNotificationTokenService'
 import {VexlProductNotificationBatchWorkerLayer} from './services/VexlProductNotificationBatchWorker'
 
 const RootGroupLive = HttpApiBuilder.group(
@@ -56,7 +54,6 @@ const RootGroupLive = HttpApiBuilder.group(
   (h) =>
     h
       .handle('issueNotification', issueNotifcationHandler)
-      .handle('getNotificationPublicKey', getCypherPublicKeyHandler)
       .handle('reportNotificationProcessed', reportNotificationProcessedHandler)
       .handle('issueStreamOnlyMessage', issueStreamOnlyMessageHandler)
 )
@@ -123,7 +120,6 @@ export const HttpServerLive = Layer.mergeAll(
   Layer.provide(NotificationSocketMessaging.Live),
   Layer.provide(ThrottledPushNotificationService.Live),
   Layer.provide(OfflineNotificationBuffer.Live),
-  Layer.provide(VexlNotificationTokenService.Live),
   Layer.provide(NotificationMetricsService.Live),
   Layer.provide(NotificationTokensDb.Live),
   Layer.provide(PendingBatchedNotificationsDb.Live),

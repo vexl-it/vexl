@@ -14,12 +14,14 @@ import {canDeliverTaskToConnection} from '../services/NotificationSocketMessagin
 const noticeTask = Schema.decodeSync(NewChatMessageNoticeSendTask)({
   _tag: 'NewChatMessageNoticeSendTask',
   notificationToken: 'vexl_nt_secret_test',
+  targetToken: 'vexl_nt_test',
   sendNewChatMessageNotification: true,
 })
 
 const streamOnlyTask = Schema.decodeSync(StreamOnlyChatMessageSendTask)({
   _tag: 'StreamOnlyChatMessageSendTask',
   notificationToken: 'vexl_nt_secret_test',
+  targetToken: 'vexl_nt_test',
   message: 'cypher',
 })
 
@@ -67,6 +69,7 @@ describe('notification connection kind', () => {
     const task = Schema.decodeSync(NewChatMessageNoticeSendTask)({
       _tag: 'NewChatMessageNoticeSendTask',
       notificationToken: 'vexl_nt_secret_test',
+      targetToken: 'vexl_nt_test',
       sendNewChatMessageNotification: true,
       minimalClientVersion: 900,
     })

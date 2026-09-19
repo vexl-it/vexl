@@ -17,7 +17,7 @@ export type FindVexlNotificationTokensOfUsersWhoHaveHashAsSecondLevelContactPara
 
 export const FindVexlNotificationTokensOfUsersWhoHaveHashAsSecondLevelContactResult =
   Schema.Struct({
-    vexlNotificationToken: Schema.NullOr(VexlNotificationToken),
+    vexlNotificationToken: VexlNotificationToken,
   })
 export type FindVexlNotificationTokensOfUsersWhoHaveHashAsSecondLevelContactResult =
   typeof FindVexlNotificationTokensOfUsersWhoHaveHashAsSecondLevelContactResult.Type

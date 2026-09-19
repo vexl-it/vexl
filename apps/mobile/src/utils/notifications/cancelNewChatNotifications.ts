@@ -97,8 +97,6 @@ const isPlaceholderNotificationForChatTargetTokens =
     if (Option.isNone(chatMessageNotificationO)) return Option.none()
 
     const {targetToken} = chatMessageNotificationO.value
-    if (!targetToken) return Option.none()
-
     if (
       chatMessageNotificationO.value.includesSystemNotification &&
       Array.contains(targetTokens, targetToken)

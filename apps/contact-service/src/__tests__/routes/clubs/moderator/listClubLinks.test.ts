@@ -3,7 +3,6 @@ import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {generateClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
-import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {
   InvalidChallengeError,
@@ -74,7 +73,6 @@ beforeEach(async () => {
           publicKey: userKey.publicKeyPemBase64,
           isModerator: true,
           lastRefreshedAt: new Date(),
-          notificationToken: 'someToken' as ExpoNotificationToken,
           vexlNotificationToken: 'vexl_nt_test' as VexlNotificationToken,
           publicKeyV2: null,
         })
@@ -152,7 +150,6 @@ describe('List club links', () => {
             clubId,
             isModerator: false,
             lastRefreshedAt: new Date(),
-            notificationToken: null,
             vexlNotificationToken: null,
             publicKeyV2: null,
           })
@@ -282,7 +279,6 @@ describe('List club links', () => {
               code: adminInviteCodeForClub2.link.code,
               ...(yield* _(generateAndSignChallenge(user2))),
               contactsImported: false,
-              notificationToken: Option.none(),
               vexlNotificationToken: Option.none(),
               publicKeyV2: Option.none(),
             },

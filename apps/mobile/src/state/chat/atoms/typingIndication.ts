@@ -77,16 +77,13 @@ export const createSendTypingIndicationForChatAtom = (
           )
         )
 
-        if (!chat.otherSideVexlToken && !chat.otherSideFcmCypher) {
+        if (!chat.otherSideVexlToken) {
           return
         }
 
         yield* _(
           api.notification.issueStreamOnlyMessage({
             message: encryptedMessage,
-            notificationCypher: chat.otherSideVexlToken
-              ? undefined
-              : chat.otherSideFcmCypher,
             notificationToken: chat.otherSideVexlToken,
           })
         )

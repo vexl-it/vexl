@@ -59,9 +59,7 @@ export const sendUpdateNoticeMessageActionAtom = atom(
           receiverPublicKey: chat.chat.otherSide.publicKey,
           message: messageToSend,
           notificationApi: api.notification,
-          theirNotificationCypher:
-            chat.chat.otherSideVexlToken ?? chat.chat.otherSideFcmCypher,
-          otherSideVersion: chat.chat.otherSideVersion,
+          theirNotificationToken: chat.chat.otherSideVexlToken,
         })
       )
       set(

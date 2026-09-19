@@ -6,15 +6,12 @@ import {
   type ChatMessage,
   type ServerMessage,
 } from '@vexl-next/domain/src/general/messaging'
-import {type VersionString} from '@vexl-next/domain/src/utility/VersionString.brand'
+import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {type ChatApi} from '@vexl-next/rest-api/src/services/chat'
 import {type NotificationApi} from '@vexl-next/rest-api/src/services/notification'
 import {Effect, type ParseResult} from 'effect'
 import {taskEitherToEffect} from '../effect-helpers/TaskEitherConverter'
-import {
-  callWithNotificationService,
-  type NotificationTokenOrCypher,
-} from '../notifications/callWithNotificationService'
+import {callWithNotificationService} from '../notifications/callWithNotificationService'
 import {type JsonStringifyError} from '../utils/parsing'
 import {type ErrorEncryptingMessage} from './utils/chatCrypto'
 import {messageToNetwork} from './utils/messageIO'
@@ -64,17 +61,15 @@ export default function sendMessage({
   receiverPublicKey,
   message,
   senderKeypair,
-  theirNotificationCypher,
+  theirNotificationToken,
   notificationApi,
-  otherSideVersion,
 }: {
   api: ChatApi
   receiverPublicKey: PublicKeyPemBase64
   message: ChatMessage
   senderKeypair: PrivateKeyHolder
-  theirNotificationCypher?: NotificationTokenOrCypher | undefined
+  theirNotificationToken?: VexlNotificationToken | undefined
   notificationApi: NotificationApi
-  otherSideVersion: VersionString | undefined
 }): Effect.Effect<
   ServerMessage,
   | ErrorEncryptingMessage
@@ -111,8 +106,7 @@ export default function sendMessage({
         senderPublicKey: senderKeypair.publicKeyPemBase64,
         keyPair: senderKeypair,
       })({
-        notificationCypher: theirNotificationCypher,
-        otherSideVersion,
+        notificationToken: theirNotificationToken,
         notificationApi,
         sendSystemNotification: sendSystemNotification(message.messageType),
       })

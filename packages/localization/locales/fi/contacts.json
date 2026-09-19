@@ -80,6 +80,8 @@
   "contactPreferences.emptyContacts.allowAccessTitle": "Salli pääsy yhteystietoihin",
   "contactPreferences.emptyContacts.allowAccessDescription": "Vexl tarvitsee Yhteystiedot-luvan tuodakseen ihmisiä puhelimestasi. Avaa asetukset, salli pääsy ja palaa jatkamaan.",
   "contactPreferences.emptyContacts.allowAccessInSettings": "Salli pääsy asetuksissa",
+  "contactPreferences.emptyContacts.limitedAccessTitle": "Vexl näkee vain osan yhteystiedoistasi",
+  "contactPreferences.emptyContacts.limitedAccessDescription": "Sallit pääsyn vain valittuihin yhteystietoihin, eikä niistä ole vielä yhtäkään jaettu Vexlin kanssa. Avaa asetukset, salli pääsy useampaan yhteystietoon ja palaa jatkamaan.",
   "contactPreferences.addContactManually.title": "Lisää uusi yhteystieto",
   "contactPreferences.addContactManually.phoneNumber": "Puhelinnumero",
   "contactPreferences.addContactManually.invalidPhoneNumber": "Syötä kelvollinen puhelinnumero.",

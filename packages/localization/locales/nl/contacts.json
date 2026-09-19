@@ -80,6 +80,8 @@
   "contactPreferences.emptyContacts.allowAccessTitle": "Toegang tot contacten toestaan",
   "contactPreferences.emptyContacts.allowAccessDescription": "Vexl heeft toestemming voor Contacten nodig om mensen vanaf je telefoon te importeren. Open de instellingen, sta toegang toe en kom terug om door te gaan.",
   "contactPreferences.emptyContacts.allowAccessInSettings": "Toegang toestaan in instellingen",
+  "contactPreferences.emptyContacts.limitedAccessTitle": "Vexl kan maar een deel van je contacten zien",
+  "contactPreferences.emptyContacts.limitedAccessDescription": "Je hebt alleen toegang gegeven tot geselecteerde contacten en daarvan deel je er nog geen met Vexl. Open de instellingen, geef toegang tot meer contacten en kom terug om door te gaan.",
   "vexlOnlyContacts.title": "Back-up van contacten",
   "vexlOnlyContacts.description": "Deze contacten zijn alleen in Vexl opgeslagen, niet op je telefoon — je hebt ze handmatig toegevoegd of hersteld uit een back-up. Exporteer ze als contactbestand (.vcf) om een veilige kopie buiten de app te bewaren.",
   "vexlOnlyContacts.exportButton": "Contacten exporteren",

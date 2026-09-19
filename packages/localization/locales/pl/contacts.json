@@ -80,6 +80,8 @@
   "contactPreferences.emptyContacts.allowAccessTitle": "Zezwól na dostęp do kontaktów",
   "contactPreferences.emptyContacts.allowAccessDescription": "Vexl potrzebuje uprawnienia do Kontaktów, aby importować osoby z Twojego telefonu. Otwórz ustawienia, zezwól na dostęp i wróć, aby kontynuować.",
   "contactPreferences.emptyContacts.allowAccessInSettings": "Zezwól na dostęp w ustawieniach",
+  "contactPreferences.emptyContacts.limitedAccessTitle": "Vexl widzi tylko część Twoich kontaktów",
+  "contactPreferences.emptyContacts.limitedAccessDescription": "Zezwoliłeś na dostęp tylko do wybranych kontaktów i na razie nie udostępniasz Vexlowi żadnego z nich. Otwórz ustawienia, zezwól na dostęp do większej liczby kontaktów i wróć, aby kontynuować.",
   "vexlOnlyContacts.title": "Kopia zapasowa kontaktów",
   "vexlOnlyContacts.description": "Te kontakty są zapisane tylko w Vexlu, nie w telefonie — zostały dodane ręcznie albo przywrócone z kopii zapasowej. Wyeksportuj je jako plik kontaktów (.vcf), aby mieć bezpieczną kopię poza aplikacją.",
   "vexlOnlyContacts.exportButton": "Eksportuj kontakty",

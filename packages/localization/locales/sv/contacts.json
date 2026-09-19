@@ -80,6 +80,8 @@
   "contactPreferences.emptyContacts.allowAccessTitle": "Tillåt åtkomst till kontakter",
   "contactPreferences.emptyContacts.allowAccessDescription": "Vexl behöver behörighet till Kontakter för att importera personer från din telefon. Öppna inställningarna, tillåt åtkomst och kom tillbaka för att fortsätta.",
   "contactPreferences.emptyContacts.allowAccessInSettings": "Tillåt åtkomst i inställningarna",
+  "contactPreferences.emptyContacts.limitedAccessTitle": "Vexl ser bara några av dina kontakter",
+  "contactPreferences.emptyContacts.limitedAccessDescription": "Du gav bara åtkomst till utvalda kontakter, och ingen av dem delas med Vexl än. Öppna inställningarna, tillåt åtkomst till fler kontakter och kom tillbaka för att fortsätta.",
   "contactPreferences.addContactManually.title": "Lägg till ny kontakt",
   "contactPreferences.addContactManually.phoneNumber": "Telefonnummer",
   "contactPreferences.addContactManually.invalidPhoneNumber": "Ange ett giltigt telefonnummer.",

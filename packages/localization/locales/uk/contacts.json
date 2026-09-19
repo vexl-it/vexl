@@ -80,6 +80,8 @@
   "contactPreferences.emptyContacts.allowAccessTitle": "Дозволити доступ до контактів",
   "contactPreferences.emptyContacts.allowAccessDescription": "Vexl потрібен дозвіл до Контактів, щоб імпортувати людей із твого телефону. Відкрий налаштування, дозволь доступ і повернися, щоб продовжити.",
   "contactPreferences.emptyContacts.allowAccessInSettings": "Дозволити доступ у налаштуваннях",
+  "contactPreferences.emptyContacts.limitedAccessTitle": "Vexl бачить лише деякі твої контакти",
+  "contactPreferences.emptyContacts.limitedAccessDescription": "Ти дозволив доступ лише до вибраних контактів і жодним із них поки не поділився з Vexl. Відкрий налаштування, дозволь доступ до більшої кількості контактів і повернися, щоб продовжити.",
   "contactPreferences.addContactManually.title": "Додати новий контакт",
   "contactPreferences.addContactManually.phoneNumber": "Номер телефону",
   "contactPreferences.addContactManually.invalidPhoneNumber": "Введи дійсний номер телефону.",

@@ -80,6 +80,8 @@
   "contactPreferences.emptyContacts.allowAccessTitle": "允许访问通讯录",
   "contactPreferences.emptyContacts.allowAccessDescription": "Vexl 需要通讯录权限，才能从你的手机导入联系人。打开设置，允许访问，然后回来继续。",
   "contactPreferences.emptyContacts.allowAccessInSettings": "在设置中允许访问",
+  "contactPreferences.emptyContacts.limitedAccessTitle": "Vexl 只能看到你的部分联系人",
+  "contactPreferences.emptyContacts.limitedAccessDescription": "你只允许访问选定的联系人，而且还没有任何一个分享给 Vexl。打开设置，允许访问更多联系人，然后回来继续。",
   "vexlOnlyContacts.title": "联系人备份",
   "vexlOnlyContacts.description": "这些联系人只保存在 Vexl 中，不在你的手机里——它们是你手动添加或从备份恢复的。将它们导出为联系人文件（.vcf），在应用之外保留一份安全副本。",
   "vexlOnlyContacts.exportButton": "导出联系人",

@@ -80,6 +80,8 @@
   "contactPreferences.emptyContacts.allowAccessTitle": "Allow contacts access",
   "contactPreferences.emptyContacts.allowAccessDescription": "Vexl need Contacts permission to import people from your phone. Open settings, allow access, then come back make we continue.",
   "contactPreferences.emptyContacts.allowAccessInSettings": "Allow access for settings",
+  "contactPreferences.emptyContacts.limitedAccessTitle": "Vexl fit only see some of your contacts",
+  "contactPreferences.emptyContacts.limitedAccessDescription": "You allow access to only the contacts wey you pick, and none of dem don reach Vexl yet. Open settings, allow access to more contacts, then come back make we continue.",
   "contactPreferences.addContactManually.title": "Add new contact",
   "contactPreferences.addContactManually.phoneNumber": "Phone number",
   "contactPreferences.addContactManually.invalidPhoneNumber": "Enter correct phone number.",

@@ -15,7 +15,7 @@
     "@vexl-next/prettier-config": "0.0.0",
     "@vexl-next/tsconfig": "0.0.0",
     "eslint": "^9.20.0",
-    "expo": "~57.0.15",
+    "expo": "~57.0.24",
     "prettier": "^3.3.2",
     "react-native": "0.86.2",
     "typescript": "~6.0.3"

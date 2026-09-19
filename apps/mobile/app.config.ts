@@ -279,6 +279,7 @@ export default {
       {
         'ios': {
           'useFrameworks': 'static',
+          'enableSceneSupport': true,
         },
         'android': {
           'targetSdkVersion': 36,

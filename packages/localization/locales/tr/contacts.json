@@ -80,6 +80,8 @@
   "contactPreferences.emptyContacts.allowAccessTitle": "Kişiler erişimine izin ver",
   "contactPreferences.emptyContacts.allowAccessDescription": "Vexl'in telefonundaki kişileri içe aktarabilmesi için Kişiler iznine ihtiyacı var. Ayarları aç, erişime izin ver ve devam etmek için geri dön.",
   "contactPreferences.emptyContacts.allowAccessInSettings": "Ayarlardan erişime izin ver",
+  "contactPreferences.emptyContacts.limitedAccessTitle": "Vexl kişilerinin yalnızca bir kısmını görebiliyor",
+  "contactPreferences.emptyContacts.limitedAccessDescription": "Yalnızca seçtiğin kişilere erişim izni verdin ve bunlardan hiçbiri henüz Vexl ile paylaşılmadı. Ayarları aç, daha fazla kişiye erişim izni ver ve devam etmek için geri dön.",
   "contactPreferences.addContactManually.title": "Yeni kişi ekle",
   "contactPreferences.addContactManually.phoneNumber": "Telefon numarası",
   "contactPreferences.addContactManually.invalidPhoneNumber": "Geçerli bir telefon numarası gir.",

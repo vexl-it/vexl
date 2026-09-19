@@ -80,6 +80,8 @@
   "contactPreferences.emptyContacts.allowAccessTitle": "اسمح بالوصول إلى جهات الاتصال",
   "contactPreferences.emptyContacts.allowAccessDescription": "يحتاج Vexl إذن جهات الاتصال لاستيراد الأشخاص من هاتفك. افتح الإعدادات، واسمح بالوصول، ثم ارجع للمتابعة.",
   "contactPreferences.emptyContacts.allowAccessInSettings": "اسمح بالوصول من الإعدادات",
+  "contactPreferences.emptyContacts.limitedAccessTitle": "لا يستطيع Vexl رؤية سوى بعض جهات اتصالك",
+  "contactPreferences.emptyContacts.limitedAccessDescription": "سمحت بالوصول إلى جهات اتصال محددة فقط، ولم تتم مشاركة أي منها مع Vexl بعد. افتح الإعدادات، واسمح بالوصول إلى المزيد من جهات الاتصال، ثم ارجع للمتابعة.",
   "contactPreferences.addContactManually.title": "أضف جهة اتصال جديدة",
   "contactPreferences.addContactManually.phoneNumber": "رقم الهاتف",
   "contactPreferences.addContactManually.invalidPhoneNumber": "أدخل رقم هاتف صالح.",

@@ -80,6 +80,8 @@
   "contactPreferences.emptyContacts.allowAccessTitle": "Ruhusu ufikiaji wa mawasiliano",
   "contactPreferences.emptyContacts.allowAccessDescription": "Vexl inahitaji ruhusa ya Contacts ili kuleta watu kutoka kwenye simu yako. Fungua mipangilio, ruhusu ufikiaji, kisha rudi kuendelea.",
   "contactPreferences.emptyContacts.allowAccessInSettings": "Ruhusu ufikiaji kwenye mipangilio",
+  "contactPreferences.emptyContacts.limitedAccessTitle": "Vexl inaweza kuona baadhi tu ya mawasiliano yako",
+  "contactPreferences.emptyContacts.limitedAccessDescription": "Umeruhusu ufikiaji wa mawasiliano uliyochagua pekee, na bado hujashiriki yoyote kati yao na Vexl. Fungua mipangilio, ruhusu ufikiaji wa mawasiliano zaidi, kisha rudi kuendelea.",
   "vexlOnlyContacts.title": "Nakala rudufu ya mawasiliano",
   "vexlOnlyContacts.description": "Mawasiliano haya yamehifadhiwa kwenye Vexl pekee, si kwenye simu yako — uliyaongeza mwenyewe au kuyarejesha kutoka kwenye nakala rudufu. Yahamishe kama faili la mawasiliano (.vcf) ili uwe na nakala salama nje ya programu.",
   "vexlOnlyContacts.exportButton": "Hamisha mawasiliano",

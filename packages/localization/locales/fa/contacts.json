@@ -80,6 +80,8 @@
   "contactPreferences.emptyContacts.allowAccessTitle": "اجازه دسترسی به مخاطبین",
   "contactPreferences.emptyContacts.allowAccessDescription": "Vexl برای وارد کردن آدم‌ها از گوشی‌ات به اجازه دسترسی به مخاطبین نیاز داره. تنظیمات رو باز کن، دسترسی رو بده و برگرد تا ادامه بدی.",
   "contactPreferences.emptyContacts.allowAccessInSettings": "دادن دسترسی در تنظیمات",
+  "contactPreferences.emptyContacts.limitedAccessTitle": "Vexl فقط بعضی از مخاطبین تو رو می‌بینه",
+  "contactPreferences.emptyContacts.limitedAccessDescription": "فقط به مخاطبین انتخاب‌شده اجازه دسترسی دادی و هنوز هیچ‌کدومشون با Vexl به اشتراک گذاشته نشده. تنظیمات رو باز کن، به مخاطبین بیشتری دسترسی بده و برگرد تا ادامه بدی.",
   "contactPreferences.addContactManually.title": "افزودن مخاطب جدید",
   "contactPreferences.addContactManually.phoneNumber": "شماره تلفن",
   "contactPreferences.addContactManually.invalidPhoneNumber": "یه شماره تلفن معتبر وارد کن.",

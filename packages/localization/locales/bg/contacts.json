@@ -80,6 +80,8 @@
   "contactPreferences.emptyContacts.allowAccessTitle": "Разреши достъп до контактите",
   "contactPreferences.emptyContacts.allowAccessDescription": "Vexl има нужда от разрешение за Контакти, за да импортира хора от телефона ти. Отвори настройките, разреши достъп и се върни, за да продължиш.",
   "contactPreferences.emptyContacts.allowAccessInSettings": "Разреши достъп в настройките",
+  "contactPreferences.emptyContacts.limitedAccessTitle": "Vexl вижда само част от контактите ти",
+  "contactPreferences.emptyContacts.limitedAccessDescription": "Даде достъп само до избрани контакти и засега не споделяш нито един от тях с Vexl. Отвори настройките, разреши достъп до повече контакти и се върни, за да продължиш.",
   "vexlOnlyContacts.title": "Резервно копие на контактите",
   "vexlOnlyContacts.description": "Тези контакти са запазени само във Vexl, не в телефона ти — добавени са ръчно или са възстановени от резервно копие. Експортирай ги като файл с контакти (.vcf), за да имаш сигурно копие извън приложението.",
   "vexlOnlyContacts.exportButton": "Експортирай контактите",

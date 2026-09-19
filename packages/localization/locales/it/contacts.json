@@ -80,6 +80,8 @@
   "contactPreferences.emptyContacts.allowAccessTitle": "Consenti l'accesso ai contatti",
   "contactPreferences.emptyContacts.allowAccessDescription": "Vexl ha bisogno dell'autorizzazione ai Contatti per importare persone dal tuo telefono. Apri le impostazioni, consenti l'accesso e torna qui per continuare.",
   "contactPreferences.emptyContacts.allowAccessInSettings": "Consenti accesso nelle impostazioni",
+  "contactPreferences.emptyContacts.limitedAccessTitle": "Vexl può vedere solo alcuni dei tuoi contatti",
+  "contactPreferences.emptyContacts.limitedAccessDescription": "Hai consentito l'accesso solo ai contatti selezionati e finora nessuno di loro è condiviso con Vexl. Apri le impostazioni, consenti l'accesso a più contatti e torna qui per continuare.",
   "vexlOnlyContacts.title": "Backup dei contatti",
   "vexlOnlyContacts.description": "Questi contatti sono salvati solo in Vexl, non sul tuo telefono — li hai aggiunti manualmente o ripristinati da un backup. Esportali come file di contatti (.vcf) per conservarne una copia sicura fuori dall'app.",
   "vexlOnlyContacts.exportButton": "Esporta contatti",

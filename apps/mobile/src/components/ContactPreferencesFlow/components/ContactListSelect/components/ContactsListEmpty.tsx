@@ -1,3 +1,4 @@
+import {type TranslationKey} from '@vexl-next/localization/src/translations'
 import {Button, Stack, Typography} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {Effect} from 'effect'
@@ -16,16 +17,43 @@ interface Props {
   readonly variant?: ContactsListEmptyVariant
 }
 
+type EmptyContactsState = 'importFromPhone' | 'allowAccess' | 'limitedAccess'
+
+const emptyContactsCopy: Record<
+  EmptyContactsState,
+  Record<'title' | 'description' | 'button', TranslationKey>
+> = {
+  importFromPhone: {
+    title: 'contactPreferences.emptyContacts.title',
+    description: 'contactPreferences.emptyContacts.description',
+    button: 'contactPreferences.emptyContacts.importFromPhone',
+  },
+  allowAccess: {
+    title: 'contactPreferences.emptyContacts.allowAccessTitle',
+    description: 'contactPreferences.emptyContacts.allowAccessDescription',
+    button: 'contactPreferences.emptyContacts.allowAccessInSettings',
+  },
+  limitedAccess: {
+    title: 'contactPreferences.emptyContacts.limitedAccessTitle',
+    description: 'contactPreferences.emptyContacts.limitedAccessDescription',
+    button: 'contactPreferences.emptyContacts.allowAccessInSettings',
+  },
+}
+
 function ContactsListEmpty({
   variant = 'noMatchingContacts',
 }: Props): React.ReactElement {
   const {t} = useTranslation()
-  const {importContactsFromPhoneActionAtom, shouldOpenContactsSettingsAtom} =
-    useMolecule(contactSelectMolecule)
+  const {
+    importContactsFromPhoneActionAtom,
+    shouldOpenContactsSettingsAtom,
+    hasLimitedContactsAccessAtom,
+  } = useMolecule(contactSelectMolecule)
   const importContactsFromPhone = useSetAtom(importContactsFromPhoneActionAtom)
   const shouldOpenContactsSettings = useAtomValue(
     shouldOpenContactsSettingsAtom
   )
+  const hasLimitedContactsAccess = useAtomValue(hasLimitedContactsAccessAtom)
 
   if (
     variant === 'noMatchingContacts' ||
@@ -63,6 +91,13 @@ function ContactsListEmpty({
     )
   }
 
+  const emptyContactsState: EmptyContactsState = shouldOpenContactsSettings
+    ? 'allowAccess'
+    : hasLimitedContactsAccess
+      ? 'limitedAccess'
+      : 'importFromPhone'
+  const copy = emptyContactsCopy[emptyContactsState]
+
   return (
     <Stack flex={1} px="$5" pt="$10">
       <Stack width="100%" px="$6" py="$6" gap="$5" alignItems="center">
@@ -72,11 +107,7 @@ function ContactsListEmpty({
           color="$foregroundPrimary"
           variant="heading3"
         >
-          {t(
-            shouldOpenContactsSettings
-              ? 'contactPreferences.emptyContacts.allowAccessTitle'
-              : 'contactPreferences.emptyContacts.title'
-          )}
+          {t(copy.title)}
         </Typography>
         <Typography
           width="100%"
@@ -84,30 +115,24 @@ function ContactsListEmpty({
           color="$foregroundSecondary"
           variant="description"
         >
-          {t(
-            shouldOpenContactsSettings
-              ? 'contactPreferences.emptyContacts.allowAccessDescription'
-              : 'contactPreferences.emptyContacts.description'
-          )}
+          {t(copy.description)}
         </Typography>
         <Button
           width="100%"
           size="small"
           variant="tertiary"
           onPress={() => {
-            if (shouldOpenContactsSettings) {
-              void Linking.openSettings()
+            if (emptyContactsState === 'importFromPhone') {
+              Effect.runFork(
+                importContactsFromPhone({requestPermissions: true})
+              )
               return
             }
 
-            Effect.runFork(importContactsFromPhone({requestPermissions: true}))
+            void Linking.openSettings()
           }}
         >
-          {t(
-            shouldOpenContactsSettings
-              ? 'contactPreferences.emptyContacts.allowAccessInSettings'
-              : 'contactPreferences.emptyContacts.importFromPhone'
-          )}
+          {t(copy.button)}
         </Button>
       </Stack>
     </Stack>

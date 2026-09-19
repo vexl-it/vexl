@@ -80,6 +80,8 @@
   "contactPreferences.emptyContacts.allowAccessTitle": "Izinkan akses kontak",
   "contactPreferences.emptyContacts.allowAccessDescription": "Vexl butuh izin Kontak untuk mengimpor orang dari ponselmu. Buka pengaturan, izinkan akses, lalu kembali ke sini untuk melanjutkan.",
   "contactPreferences.emptyContacts.allowAccessInSettings": "Izinkan akses di pengaturan",
+  "contactPreferences.emptyContacts.limitedAccessTitle": "Vexl cuma bisa lihat sebagian kontakmu",
+  "contactPreferences.emptyContacts.limitedAccessDescription": "Kamu cuma mengizinkan akses ke kontak tertentu, dan belum ada satu pun yang dibagikan ke Vexl. Buka pengaturan, izinkan akses ke lebih banyak kontak, lalu kembali ke sini untuk melanjutkan.",
   "contactPreferences.addContactManually.title": "Tambah kontak baru",
   "contactPreferences.addContactManually.phoneNumber": "Nomor telepon",
   "contactPreferences.addContactManually.invalidPhoneNumber": "Masukkan nomor telepon yang valid.",

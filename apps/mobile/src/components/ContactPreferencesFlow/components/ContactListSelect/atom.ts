@@ -233,12 +233,12 @@ export const contactSelectMolecule = molecule((_, getScope) => {
   const contactsToDisplayCountAtom = atom(
     (get) => get(contactsToDisplayAtomsAtom).length
   )
-  const contactsAccessPrivilegesAtom = atom<
-    ContactsPermissionResponse['accessPrivileges'] | undefined
-  >()
   const contactsPermissionResponseAtom = atom<
     ContactsPermissionResponse | undefined
   >()
+  const contactsAccessPrivilegesAtom = atom(
+    (get) => get(contactsPermissionResponseAtom)?.accessPrivileges
+  )
   const shouldOpenContactsSettingsAtom = atom((get) => {
     const contactsPermissionResponse = get(contactsPermissionResponseAtom)
 
@@ -248,6 +248,14 @@ export const contactSelectMolecule = molecule((_, getScope) => {
       !contactsPermissionResponse.canAskAgain
     )
   })
+  const hasLimitedContactsAccessAtom = atom((get) => {
+    const contactsPermissionResponse = get(contactsPermissionResponseAtom)
+
+    return (
+      contactsPermissionResponse?.granted === true &&
+      contactsPermissionResponse.accessPrivileges === 'limited'
+    )
+  })
   const displayInfoAboutContactsAccessPrivilegesAtom = atom<boolean>(false)
 
   const checkContactsAccessPrivilegesActionAtom = atom(null, (get, set) => {
@@ -255,7 +263,6 @@ export const contactSelectMolecule = molecule((_, getScope) => {
       try {
         const contactsPermissions = await getPermissionsAsync()
         set(contactsPermissionResponseAtom, contactsPermissions)
-        set(contactsAccessPrivilegesAtom, contactsPermissions.accessPrivileges)
         set(
           displayInfoAboutContactsAccessPrivilegesAtom,
           contactsPermissions.accessPrivileges === 'limited'
@@ -263,7 +270,6 @@ export const contactSelectMolecule = molecule((_, getScope) => {
       } catch {
         // ignore errors here, it's used to display only info modal to user
         set(contactsPermissionResponseAtom, undefined)
-        set(contactsAccessPrivilegesAtom, undefined)
         set(displayInfoAboutContactsAccessPrivilegesAtom, false)
       }
     })
@@ -938,6 +944,7 @@ export const contactSelectMolecule = molecule((_, getScope) => {
     updateContactActionAtom,
     contactsAccessPrivilegesAtom,
     shouldOpenContactsSettingsAtom,
+    hasLimitedContactsAccessAtom,
     checkContactsAccessPrivilegesActionAtom,
     displayInfoAboutContactsAccessPrivilegesAtom,
   }

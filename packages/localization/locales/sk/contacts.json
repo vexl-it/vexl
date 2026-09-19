@@ -80,6 +80,8 @@
   "contactPreferences.emptyContacts.allowAccessTitle": "Povoliť prístup ku kontaktom",
   "contactPreferences.emptyContacts.allowAccessDescription": "Vexl potrebuje povolenie ku Kontaktom, aby mohol importovať ľudí z tvojho telefónu. Otvor nastavenia, povoľ prístup a vráť sa späť, aby si mohol pokračovať.",
   "contactPreferences.emptyContacts.allowAccessInSettings": "Povoliť prístup v nastaveniach",
+  "contactPreferences.emptyContacts.limitedAccessTitle": "Vexl vidí iba niektoré tvoje kontakty",
+  "contactPreferences.emptyContacts.limitedAccessDescription": "Povolil si prístup iba k vybraným kontaktom a zatiaľ žiadny z nich s Vexlom nezdieľaš. Otvor nastavenia, povoľ prístup k viacerým kontaktom a vráť sa späť, aby si mohol pokračovať.",
   "vexlOnlyContacts.title": "Záloha kontaktov",
   "vexlOnlyContacts.description": "Tieto kontakty sú uložené len vo Vexli, nie v telefóne — boli pridané ručne alebo obnovené zo zálohy. Exportuj ich ako súbor kontaktov (.vcf), nech máš bezpečnú kópiu aj mimo aplikácie.",
   "vexlOnlyContacts.exportButton": "Exportovať kontakty",

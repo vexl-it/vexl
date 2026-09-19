@@ -80,6 +80,8 @@
   "contactPreferences.emptyContacts.allowAccessTitle": "連絡先へのアクセスを許可",
   "contactPreferences.emptyContacts.allowAccessDescription": "スマホから連絡先をインポートするには、Vexlに連絡先へのアクセス許可が必要です。設定を開いてアクセスを許可したら、戻って続けてね。",
   "contactPreferences.emptyContacts.allowAccessInSettings": "設定でアクセスを許可",
+  "contactPreferences.emptyContacts.limitedAccessTitle": "Vexlは一部の連絡先しか確認できません",
+  "contactPreferences.emptyContacts.limitedAccessDescription": "選択した連絡先だけにアクセスを許可していて、Vexlと共有されている連絡先はまだありません。設定を開いて、もっと多くの連絡先へのアクセスを許可したら、戻って続けてね。",
   "vexlOnlyContacts.title": "連絡先のバックアップ",
   "vexlOnlyContacts.description": "これらの連絡先はVexlにのみ保存されており、スマホには保存されていません。手動で追加したか、バックアップから復元したものです。連絡先ファイル（.vcf）としてエクスポートして、アプリの外に安全なコピーを保管しましょう。",
   "vexlOnlyContacts.exportButton": "連絡先をエクスポート",

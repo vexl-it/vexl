@@ -1,0 +1,12 @@
+# Track only package source and configuration. Runtime data stays local.
+*
+!/.gitignore
+!/.prettierignore
+!/README.md
+!/package.json
+!/tsconfig.json
+!/eslint.config.mjs
+!/src/
+!/src/*.ts
+!/test/
+!/test/*.ts

@@ -13,7 +13,7 @@ iOS previously showed only a generic, server-composed "you have a new message" a
 1. **Vexl tokens only.** The NSE acts only on payloads with `targetToken` (`vexl_nt_…`). Legacy `NotificationCypher` payloads bail to generic content (legacy cyphers are being removed).
 2. **secp256k1 only.** Legacy secp224r1 inbox keys bail to generic content. Enforced at PEM parse time (PKCS#8 and SEC1 forms, including params-less SEC1 rejection).
 3. **Strictly read-only server-side.** `retrieveMessages` gained an optional `markAsPulled` (default `true`). The NSE sends `false`: no pulled flags, no inbox metadata writes. "Seen" semantics belong exclusively to the JS app.
-4. **Additive key bridge; MMKV stays the source of truth.** JS syncs copies of the vexl-token → inbox-private-key map into a shared keychain access group (`kSecAttrAccessibleAfterFirstUnlock`, so it works while the device is locked) and non-secret metadata (sender display names, chat-service URL, locale) into the App Group container. Declarative replace-all sync; purged on logout and on logged-out startup. No private keys ever land in the app-group file; no session credentials are synced (the NSE doesn't need them).
+4. **Additive key bridge; MMKV stays the source of truth.** JS syncs copies of the vexl-token → inbox-private-key map into a shared keychain access group (`kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly`: readable while the device is locked, never included in backups or device migrations) and non-secret metadata (sender display names, chat-service URL, locale) into the App Group container. Declarative replace-all sync; purged on logout and on logged-out startup. No private keys ever land in the app-group file; no session credentials are synced (the NSE doesn't need them).
 5. **No new backend metadata.** The push payload is unchanged and the NSE fetch looks like the existing background fetch. Lock-screen exposure is governed by the iOS system "Show Previews" setting (default: only when unlocked); no in-app setting.
 6. **Swift crypto via `swift-secp256k1`** (21-DOT-DEV wrapper around bitcoin-core libsecp256k1) + CryptoKit. No hand-rolled curve math.
 
@@ -44,7 +44,7 @@ Key components:
 | NSE target | `apps/mobile/targets/vexl-nse/` | `UNNotificationServiceExtension`; thin orchestration, always-deliver guarantee (NSLock-guarded check-and-clear) |
 | Swift core | `apps/mobile/native/VexlNotificationCore/` | Crypto, protocol, storage readers, rendering; testable via `swift test` without an Xcode project |
 | Bridge module | `apps/mobile/modules/vexl-nse-bridge/` | Local Expo module (CocoaPod); writes keychain + app-group stores; `syncAll`/`clear` |
-| JS sync | `apps/mobile/src/state/notifications/nseBridge/` | Assembles payload (secp256k1 filter, sender names via `getOtherSideData`), debounced sync on token-map/chat/session/locale changes |
+| JS sync | `apps/mobile/src/state/notifications/nseBridge/` | Assembles payload (secp256k1 filter, sender names via `getChatNotificationName`, same as the JS notifications), debounced sync on token-map/chat/session/locale changes |
 | SPM link plugin | `apps/mobile/expo-plugins/with-nse-local-spm.js` | Links the local SPM package into the VexlNSE target; must stay registered **before** `@bacons/apple-targets` in `app.config.ts` |
 | Server param | `packages/rest-api` chat contracts + `apps/chat-service` `retrieveMessages` | `markAsPulled: false` → read-only retrieve |
 | Test vectors | `packages/cryptography/test-vectors/nse-test-vectors.json` | eciesLegacy/GTM decrypt + ECDSA vectors pinned to the TS reference; consumed by Swift tests |
@@ -61,8 +61,8 @@ Key components:
 
 Constants are intentionally duplicated between the writer (`VexlNseBridgeModule.swift`, a CocoaPod that cannot link the local SPM package) and the reader (`NseBridgeConstants.swift`); **`BridgeContractTests` fails if they drift** — change both sides in lockstep.
 
-- Keychain, service `it.vexl.nse.inboxKeys`: one generic-password item per token, account = `vexl_nt_…`, value = JSON `{privateKeyPemBase64, publicKeyPemBase64}`, shared access group, `AfterFirstUnlock`.
-- App Group file `nse-metadata.json` (`group.<bundleId>.shared`, i.e. `group.it.vexl.next.shared` prod / `group.it.vexl.nextstaging.shared` staging): `{version, chatServiceUrl, notificationServiceUrl?, locale, senderNames[]}`.
+- Keychain, service `it.vexl.nse.inboxKeys`: one generic-password item per token, account = `vexl_nt_…`, value = JSON `{privateKeyPemBase64, publicKeyPemBase64}`, shared access group, `AfterFirstUnlockThisDeviceOnly`.
+- App Group file `nse-metadata.json` (`group.<bundleId>.shared`, i.e. `group.it.vexl.next.shared` prod / `group.it.vexl.nextstaging.shared` staging): `{version, chatServiceUrl, locale, senderNames[]}`.
 - Enriched-notification marker: `vexlNseEnriched: "true"` (+ inbox/sender/type) in `userInfo.body` and `dataString`; JS cancel logic skips these, and `showChatNotification` dismisses them (error-tolerantly) before showing the richer local notification.
 
 ## ⚠️ Deployment ordering (hard constraint)

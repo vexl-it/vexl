@@ -14,10 +14,6 @@ private enum NseBridgeStorage {
   /// token. Account = the vexl token ("vexl_nt_..."), value = UTF-8 JSON
   /// {"privateKeyPemBase64": "...", "publicKeyPemBase64": "..."}.
   static let inboxKeysService = "it.vexl.nse.inboxKeys"
-  /// Keychain service earlier development builds used for session credential
-  /// headers. Never written anymore (the NSE endpoints need no security
-  /// headers) - only purged so no stale secrets linger.
-  static let legacySessionService = "it.vexl.nse.session"
   /// File inside the App Group container with the non-secret metadata.
   static let metadataFileName = "nse-metadata.json"
   /// Info.plist key (on the main app and on the NSE) holding the App Group
@@ -47,7 +43,6 @@ internal struct NseSenderNameEntry: Record {
 
 internal struct NseMetadata: Record {
   @Field var chatServiceUrl: String = ""
-  @Field var notificationServiceUrl: String? = nil
   @Field var locale: String = "en"
   @Field var senderNames: [NseSenderNameEntry] = []
 }
@@ -96,16 +91,9 @@ public class VexlNseBridgeModule: Module {
       )
     }
 
-    // 2. Purge the legacy session-headers item (written by earlier dev
-    // builds; session credentials are deliberately not mirrored anymore).
-    try deleteAllKeychainItems(
-      service: NseBridgeStorage.legacySessionService,
-      accessGroup: appGroup
-    )
-
-    // 3. Non-secret metadata: one atomically-replaced JSON file in the App
+    // 2. Non-secret metadata: one atomically-replaced JSON file in the App
     // Group container.
-    var metadataJson: [String: Any] = [
+    let metadataJson: [String: Any] = [
       "version": NseBridgeStorage.metadataSchemaVersion,
       "chatServiceUrl": payload.metadata.chatServiceUrl,
       "locale": payload.metadata.locale,
@@ -117,9 +105,6 @@ public class VexlNseBridgeModule: Module {
         ]
       },
     ]
-    if let notificationServiceUrl = payload.metadata.notificationServiceUrl {
-      metadataJson["notificationServiceUrl"] = notificationServiceUrl
-    }
 
     let data = try jsonData(from: metadataJson)
     let fileUrl = try metadataFileUrl(appGroup: appGroup)
@@ -140,10 +125,6 @@ public class VexlNseBridgeModule: Module {
 
     try deleteAllKeychainItems(
       service: NseBridgeStorage.inboxKeysService,
-      accessGroup: appGroup
-    )
-    try deleteAllKeychainItems(
-      service: NseBridgeStorage.legacySessionService,
       accessGroup: appGroup
     )
 
@@ -228,7 +209,8 @@ public class VexlNseBridgeModule: Module {
       kSecAttrAccount as String: account,
       kSecAttrAccessGroup as String: accessGroup,
       // The NSE runs while the device is locked (post first unlock).
-      kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlock,
+      // ThisDeviceOnly keeps inbox keys out of backups and device migrations.
+      kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly,
       kSecValueData as String: value,
     ]
     let status = SecItemAdd(attributes as CFDictionary, nil)

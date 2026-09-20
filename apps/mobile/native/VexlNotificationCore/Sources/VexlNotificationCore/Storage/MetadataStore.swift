@@ -1,8 +1,7 @@
 import Foundation
 
 /// Precomputed display name of a chat counterparty, synced by JS
-/// (chat.otherSide.realLifeInfo?.userName or the deterministic anonymous
-/// randomName - the seed-random generator is not reproducible in Swift).
+/// (getChatNotificationName - not reproducible in Swift).
 public struct SenderNameEntry: Codable, Equatable, Sendable {
   public let inboxPublicKey: String
   public let senderPublicKey: String
@@ -20,20 +19,17 @@ public struct SenderNameEntry: Codable, Equatable, Sendable {
 public struct NseMetadata: Codable, Equatable, Sendable {
   public let version: Int
   public let chatServiceUrl: String
-  public let notificationServiceUrl: String?
   public let locale: String
   public let senderNames: [SenderNameEntry]
 
   public init(
     version: Int = NseBridgeConstants.metadataSchemaVersion,
     chatServiceUrl: String,
-    notificationServiceUrl: String? = nil,
     locale: String,
     senderNames: [SenderNameEntry]
   ) {
     self.version = version
     self.chatServiceUrl = chatServiceUrl
-    self.notificationServiceUrl = notificationServiceUrl
     self.locale = locale
     self.senderNames = senderNames
   }

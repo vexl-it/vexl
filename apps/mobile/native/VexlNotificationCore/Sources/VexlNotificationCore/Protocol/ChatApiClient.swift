@@ -57,22 +57,14 @@ public struct ChatApiClient: Sendable {
 
   private let baseUrl: URL
   private let http: HttpClient
-  private let extraHeaders: [String: String]
 
-  /// - Parameters:
-  ///   - chatServiceUrl: e.g. "https://chat.vexl.it" (from the bridge metadata)
-  ///   - extraHeaders: optional common headers (user-agent, client-version, ...)
-  public init(
-    chatServiceUrl: String,
-    http: HttpClient,
-    extraHeaders: [String: String] = [:]
-  ) throws {
+  /// - Parameter chatServiceUrl: e.g. "https://chat.vexl.it" (from the bridge metadata)
+  public init(chatServiceUrl: String, http: HttpClient) throws {
     guard let baseUrl = URL(string: chatServiceUrl) else {
       throw ChatApiError.invalidBaseUrl
     }
     self.baseUrl = baseUrl
     self.http = http
-    self.extraHeaders = extraHeaders
   }
 
   /// POST /api/v1/challenges - returns the opaque challenge string
@@ -146,9 +138,6 @@ public struct ChatApiClient: Sendable {
     request.httpMethod = method
     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
     request.setValue("IOS", forHTTPHeaderField: "X-Platform")
-    for (header, value) in extraHeaders {
-      request.setValue(value, forHTTPHeaderField: header)
-    }
     request.httpBody = try JSONSerialization.data(withJSONObject: body)
 
     let (data, response) = try await http.send(request)

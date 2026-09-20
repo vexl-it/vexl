@@ -29,7 +29,6 @@ export interface NseSenderNameEntry {
 
 export interface NseMetadata {
   chatServiceUrl: string
-  notificationServiceUrl?: string
   locale: string
   senderNames: NseSenderNameEntry[]
 }

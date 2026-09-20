@@ -1,6 +1,6 @@
 # iOS Rich Chat Notifications (Notification Service Extension)
 
-Status: implemented on branch `feat/ios-nse-chat-notifications`, PR [#2571](https://github.com/vexl-it/vexl/pull/2571). All review rounds addressed (Greptile 5/5). Not yet verified on a physical device.
+Status: implemented on branch `feat/ios-nse-chat-notifications`, PR [#2571](https://github.com/vexl-it/vexl/pull/2571). Rebased on main 2026-09-20. Verified on the simulator and against a live local chat-service; the NSE itself has not yet run on a physical device.
 
 ## What this is
 
@@ -75,17 +75,17 @@ Constants are intentionally duplicated between the writer (`VexlNseBridgeModule.
 
 ## Verification status
 
-- `pnpm turbo:typecheck` / `turbo:lint` / `turbo:format`: 29/29 each
-- chat-service: 73/73 (incl. read-only-retrieve regression tests: pulled flags and `client_version` proven untouched)
-- cryptography: 81/81 (vector pin suite)
-- Swift: `cd apps/mobile/native/VexlNotificationCore && swift test` — 60/60 (all shared vectors, secp224r1 + params-less SEC1 rejection, thread-id parity pinned against node crypto, end-to-end enricher test)
-- `expo prebuild` smoke test: VexlNSE target, local-SPM link, and app-group entitlements verified in the generated project
-- Reviews: internal multi-agent adversarial review (16 confirmed findings fixed), then PR bots — 9 comments triaged (8 fixed, 1 rebutted false positive), Greptile confidence 5/5
+- `pnpm turbo:typecheck` / `turbo:lint` / `turbo:format`: 34/34 each
+- chat-service `retrieveMessages` tests incl. read-only regressions (pulled flags and `client_version` untouched, survives `deletePulledMessages`)
+- Swift: `cd apps/mobile/native/VexlNotificationCore && swift test` - 60 tests (1 opt-in live test skipped)
+- Simulator build (2026-09-20): app, bridge module, SPM package and embedded `VexlNSE.appex` compile and link; both carry the app-group entitlement. Bridge sync verified in a running app: metadata file correct and free of private keys, keychain items written, logout wipes both.
+- Live protocol test (2026-09-20): `LiveChatServiceTests` ran the real enricher with a real `URLSession` against a local chat-service on a message sent through the app's own send helpers. It rendered sender name + text; SQL showed the row still `pulled = false` afterwards; a normal retrieve then returned it, marked it pulled, and `deletePulledMessages` removed it. A mismatched key got a 401. Run it with `VEXL_NSE_LIVE_FIXTURE=<fixture.json> swift test --filter LiveChatServiceTests`.
+- NOT verified: the extension being triggered by a real APNs push, the extension reading the app's keychain items under real signing, locked-device delivery. `xcrun simctl push` does not execute service extensions, so these need a signed build on a physical device.
 
 ## Remaining before release
 
 1. Deploy chat-service `markAsPulled` change to production (safe immediately).
 2. EAS credentials sync — registers the `it.vexl.next.nse` bundle ID + App Group; extension declared via `extra.eas.build.experimental.ios.appExtensions`. Build image needs Xcode 16.3+ (swift-secp256k1 0.23.2).
-3. Dev build on a physical device: full push → enrich flow (the bridge Expo module Swift is parse-checked only; the NSE has never run on-device), including locked-device delivery.
+3. Dev build on a physical device: real push → enriched notification, app ↔ extension keychain sharing, locked-device delivery. This is the only part not yet exercised.
 4. The new native target changes the fingerprint → new `runtimeVersion` for OTA updates.
 5. Optional: dedicated hidden-previews localization string (placeholder currently reuses "New message"); regenerate the NSE localization snapshot (`node scripts/generateNotificationLocalizations.mjs`) when notification strings change — no CI drift check yet.

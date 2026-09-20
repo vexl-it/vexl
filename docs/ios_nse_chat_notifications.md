@@ -69,6 +69,10 @@ Constants are intentionally duplicated between the writer (`VexlNseBridgeModule.
 
 **Deploy chat-service before shipping any app build containing the NSE.** The server change is fully backward compatible and can go out immediately. If the order is reversed: the NSE sends no Vexl client-version header, so against an old server the request deterministically 500s at the `updateInboxMetadata` NOT-NULL write — inside the transaction, before any pulled-marking — and the NSE falls back to generic content. Harmless (log noise only), and deliberately kept: **do not add a client-version header to the NSE's `ChatApiClient` before the server ships**, or old servers would accept the request and mark messages pulled, enabling a message-loss race with `deletePulledMessages` (documented in `ChatApiClient.swift` and `contracts.ts`).
 
+## Build note: Swift package plugin trust
+
+`swift-secp256k1` ships a build-tool plugin (`SharedSourcesPlugin`). Xcode asks to trust it interactively, which fails in non-interactive builds. EAS: handled by the `eas-build-pre-install` script in `apps/mobile/package.json`. Local `xcodebuild`: pass `-skipPackagePluginValidation`. The package is pinned by revision in `Package.resolved`.
+
 ## Verification status
 
 - `pnpm turbo:typecheck` / `turbo:lint` / `turbo:format`: 29/29 each

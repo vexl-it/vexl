@@ -23,7 +23,7 @@ private enum NseBridgeStorage {
   static let metadataSchemaVersion = 1
 }
 
-internal final class NseBridgeException: GenericException<String> {
+internal final class NseBridgeException: GenericException<String>, @unchecked Sendable {
   override var reason: String {
     "NSE bridge error: \(param)"
   }

@@ -176,6 +176,7 @@ describe('Retrieve messages', () => {
         yield* _(setAuthHeaders(user2.authHeaders))
         yield* _(
           client.Messages.sendMessage({
+            headers: commonHeaders,
             payload: messageToSend,
           })
         )
@@ -197,6 +198,7 @@ describe('Retrieve messages', () => {
 
         yield* _(
           client.Inboxes.deletePulledMessages({
+            headers: commonHeaders,
             payload: yield* _(user1.addChallengeForMainInbox({})),
           })
         )
@@ -217,6 +219,7 @@ describe('Retrieve messages', () => {
         // The previous retrieve marked it as pulled so now it gets deleted
         yield* _(
           client.Inboxes.deletePulledMessages({
+            headers: commonHeaders,
             payload: yield* _(user1.addChallengeForMainInbox({})),
           })
         )
@@ -256,6 +259,7 @@ describe('Retrieve messages', () => {
         yield* _(setAuthHeaders(user2.authHeaders))
         yield* _(
           client.Messages.sendMessage({
+            headers: commonHeaders,
             payload: messageToSend,
           })
         )

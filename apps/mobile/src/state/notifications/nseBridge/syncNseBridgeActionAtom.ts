@@ -12,9 +12,9 @@ import {
 } from '../../../../modules/vexl-nse-bridge'
 import {apiEnv} from '../../../api'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
+import {getChatNotificationName} from '../../../utils/notifications/getChatNotificationName'
 import reportError from '../../../utils/reportError'
 import messagingStateAtom from '../../chat/atoms/messagingStateAtom'
-import {getOtherSideData} from '../../chat/atoms/selectOtherSideDataAtom'
 import {sessionAtom} from '../../session'
 import {vexlTokenToKeyHolderAtom} from '../vexlTokenToKeyHolderAtom'
 
@@ -88,8 +88,7 @@ export const syncNseBridgeActionAtom = atom(
       )
     )
 
-    // Counterparty display names exactly as the app would show them
-    // (revealed identity name or the deterministic anonymous name).
+    // Same names the JS chat notifications show.
     const senderNames: NseSenderNameEntry[] = pipe(
       get(messagingStateAtom),
       Array.flatMap((inboxInState) =>
@@ -98,7 +97,7 @@ export const syncNseBridgeActionAtom = atom(
           Array.map((chatWithMessages) => ({
             inboxPublicKey: inboxInState.inbox.privateKey.publicKeyPemBase64,
             senderPublicKey: chatWithMessages.chat.otherSide.publicKey,
-            displayName: getOtherSideData(chatWithMessages.chat).userName,
+            displayName: getChatNotificationName(get, chatWithMessages),
           }))
         )
       )
@@ -114,7 +113,6 @@ export const syncNseBridgeActionAtom = atom(
       keys,
       metadata: {
         chatServiceUrl: apiEnv.chatMs,
-        notificationServiceUrl: apiEnv.notificationMs,
         locale: t('localeName'),
         senderNames,
       },

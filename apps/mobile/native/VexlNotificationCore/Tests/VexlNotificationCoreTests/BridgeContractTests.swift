@@ -55,7 +55,6 @@ final class BridgeContractTests: XCTestCase {
       {
         "version": 1,
         "chatServiceUrl": "https://chat.vexl.it",
-        "notificationServiceUrl": "https://notification.vexl.it",
         "locale": "cs",
         "senderNames": [
           {"inboxPublicKey": "inboxPem", "senderPublicKey": "senderPem", "displayName": "Alice"}
@@ -69,11 +68,4 @@ final class BridgeContractTests: XCTestCase {
     XCTAssertNil(decoded.displayName(inbox: "inboxPem", sender: "otherPem"))
   }
 
-  func testMetadataWithoutOptionalFieldsDecodes() throws {
-    let json = """
-      {"version": 1, "chatServiceUrl": "https://chat.vexl.it", "locale": "en", "senderNames": []}
-      """
-    let decoded = try JSONDecoder().decode(NseMetadata.self, from: Data(json.utf8))
-    XCTAssertNil(decoded.notificationServiceUrl)
-  }
 }

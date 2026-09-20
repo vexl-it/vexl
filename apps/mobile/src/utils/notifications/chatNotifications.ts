@@ -188,11 +188,14 @@ export async function showChatNotification({
   })
 
   // The iOS notification service extension may already show an enriched copy
-  // of the push for this conversation; replace it so the message isn't shown twice.
-  await dismissNseEnrichedNotificationsForChat({
-    inbox: inbox.inbox.privateKey.publicKeyPemBase64,
-    sender: newMessage.message.senderPublicKey,
-  })
+  // of this message. Dismiss it only once the local notification is on screen,
+  // so a failure never leaves the user without any notification.
+  const dismissNseEnrichedCopy = async (): Promise<void> => {
+    await dismissNseEnrichedNotificationsForChat({
+      inbox: inbox.inbox.privateKey.publicKeyPemBase64,
+      sender: newMessage.message.senderPublicKey,
+    })
+  }
 
   if (type === 'MESSAGE' && Platform.OS === 'android') {
     await showAndroidConversationNotification({
@@ -218,6 +221,7 @@ export async function showChatNotification({
       (one) => one.request.identifier === newMessage.message.uuid
     )
   ) {
+    await dismissNseEnrichedCopy()
     return
   }
 
@@ -252,6 +256,7 @@ export async function showChatNotification({
       threadIdentifier: groupId,
     },
   })
+  await dismissNseEnrichedCopy()
 
   if (Platform.OS !== 'android' || !isRequest) return
 

@@ -42,10 +42,9 @@ export const isNseEnrichedNotification = (n: Notification): boolean =>
   )
 
 /**
- * Dismisses presented NSE-enriched notifications for one conversation. Called
- * right before the JS side shows its own (richer, per-message) local
- * notification for that conversation, so the user never sees the same
- * message twice (the enriched remote + the JS local one).
+ * Dismisses presented NSE-enriched notifications for one conversation, once
+ * the JS local notification for it is on screen, so the user never sees the
+ * same message twice. Never rejects.
  */
 export async function dismissNseEnrichedNotificationsForChat({
   inbox,
@@ -56,35 +55,32 @@ export async function dismissNseEnrichedNotificationsForChat({
 }): Promise<void> {
   if (Platform.OS !== 'ios') return
 
-  const presentedNotifications = await getPresentedNotificationsAsync()
-  await Promise.all(
-    pipe(
-      presentedNotifications,
-      Array.filter((notification) =>
-        pipe(
-          Schema.decodeUnknownOption(NseEnrichedChatNotificationData)(
-            notification.request.content.data
-          ),
-          Option.exists(
-            (data) => data.inbox === inbox && data.sender === sender
-          )
-        )
-      ),
-      // A dismiss failure must never block the JS-side local notification that
-      // follows this call, so each rejection is reported and swallowed.
-      Array.map(async (notification) => {
-        await dismissNotificationAsync(notification.request.identifier).catch(
-          (error: unknown) => {
-            reportError(
-              'warn',
-              new Error('Failed to dismiss NSE enriched chat notification'),
-              {error}
+  try {
+    await Promise.all(
+      pipe(
+        await getPresentedNotificationsAsync(),
+        Array.filter((notification) =>
+          pipe(
+            Schema.decodeUnknownOption(NseEnrichedChatNotificationData)(
+              notification.request.content.data
+            ),
+            Option.exists(
+              (data) => data.inbox === inbox && data.sender === sender
             )
-          }
-        )
-      })
+          )
+        ),
+        Array.map(async (notification) => {
+          await dismissNotificationAsync(notification.request.identifier)
+        })
+      )
     )
-  )
+  } catch (error) {
+    reportError(
+      'warn',
+      new Error('Failed to dismiss NSE enriched chat notification'),
+      {error}
+    )
+  }
 }
 
 /**

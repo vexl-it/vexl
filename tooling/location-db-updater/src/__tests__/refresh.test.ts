@@ -336,6 +336,8 @@ describe('refresh.sh', () => {
   })
 
   it('discards a stale download before retrying instead of resuming it', async () => {
+    // A path containing "-C" must not be mistaken for curl's resume option.
+    dataDir = path.join(workDir, 'data-C-download')
     await runScript(['-r', 'europe', 'fetch'])
     const rawPath = path.join(dataDir, 'raw/europe-latest.osm.pbf')
     writeFileSync(rawPath, 'stale partial content')
@@ -345,13 +347,15 @@ describe('refresh.sh', () => {
 
     const run = await runScript(['-r', 'europe', 'fetch'])
     expect(run.code).toEqual(0)
-    // The stub always writes a full file — a resume (-C) would have appended
+    // The stale content must be replaced by the full download.
     expect(readFileSync(rawPath, 'utf8')).toEqual(
       'fake pbf from https://download.geofabrik.de/europe-latest.osm.pbf\n'
     )
-    expect(
-      invocations().some((one) => one.startsWith('curl') && one.includes('-C'))
-    ).toBe(false)
+    for (const invocation of invocations()) {
+      if (invocation.startsWith('curl ')) {
+        expect(invocation).not.toMatch(/(?:^|\s)(?:-C|--continue-at(?:\s|=|$))/)
+      }
+    }
   })
 
   it('refuses to extract without a validated raw extract', async () => {

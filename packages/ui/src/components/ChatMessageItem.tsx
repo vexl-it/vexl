@@ -147,10 +147,8 @@ export function ChatMessageItem({
       )}
       <YStack flex={1} gap="$1">
         <XStack alignItems="center" gap="$2">
-          <XStack flex={1} alignItems="center" gap="$2">
-            <NameText flexShrink={1}>{name}</NameText>
-            {unread ? <Dot backgroundColor="$accentYellowPrimary" /> : null}
-          </XStack>
+          <NameText flexShrink={1}>{name}</NameText>
+          {unread ? <Dot backgroundColor="$accentYellowPrimary" /> : null}
           {disappearingMessages ? (
             <DisappearingMessagesIndicator {...disappearingMessages} />
           ) : null}

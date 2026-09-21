@@ -19,13 +19,19 @@ export function DisappearingMessagesIndicator({
   const theme = useTheme()
   return (
     <XStack
-      alignItems="center"
-      gap="$1"
+      alignItems="baseline"
+      gap="$0.25"
       flexShrink={0}
       tabIndex={0}
       aria-label={accessibilityLabel}
     >
-      <ClockTime size={16} color={theme.foregroundSecondary.get()} />
+      <ClockTime
+        size={14}
+        color={theme.foregroundSecondary.get()}
+        // Align the artwork's bottom edge with the text baseline.
+        viewBox="0 0 24 20.2488"
+        preserveAspectRatio="xMidYMax"
+      />
       <Typography variant={textVariant} color="$foregroundSecondary">
         {duration}
       </Typography>

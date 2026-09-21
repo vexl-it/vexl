@@ -34,7 +34,7 @@ export function formatDisappearingTimerShort(
     style: 'unit',
     unit,
     unitDisplay: 'narrow',
-  })
+  }).replace(/\s/g, '')
 }
 
 export function formatDisappearingTimer(

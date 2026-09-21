@@ -100,7 +100,7 @@ const ChatInfoColumn = styled(YStack, {
 
 const ChatSubtitleRow = styled(XStack, {
   name: 'NavigationBarChatSubtitle',
-  alignItems: 'flex-end',
+  alignItems: 'baseline',
   gap: '$1',
 })
 
@@ -192,12 +192,15 @@ export function NavigationBar(props: NavigationBarProps): React.JSX.Element {
                 {props.name}
               </Typography>
               {props.subtitle || props.disappearingMessages ? (
-                <XStack alignItems="center" gap="$3" flexWrap="wrap">
+                <XStack alignItems="baseline" gap="$3" flexWrap="wrap">
                   {props.subtitle ? (
                     <ChatSubtitleRow>
                       <PeopleUsers
                         color={theme.foregroundSecondary.get()}
                         size={getTokens().size.$5.val}
+                        // Align the artwork's bottom edge with the text baseline.
+                        viewBox="0 0 24 19.5"
+                        preserveAspectRatio="xMidYMax"
                       />
                       <Typography variant="micro" color="$foregroundSecondary">
                         {props.subtitle}

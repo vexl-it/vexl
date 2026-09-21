@@ -11,6 +11,7 @@ import {updateAndReencryptAllOffersConnectionsActionAtom} from './atom/offerToCo
 
 export const syncConnectionsInAppTaskId = registerInAppLoadingTask({
   name: 'syncConnections',
+  runAfterOtherTasks: true,
   requirements: {
     requiresUserLoggedIn: true,
     runOn: 'resume',

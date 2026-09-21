@@ -48,6 +48,7 @@ import {vexlTokenToKeyHolderAtom} from '../../notifications/vexlTokenToKeyHolder
 import messagingStateAtom from '../atoms/messagingStateAtom'
 import {type InboxInState} from '../domain'
 import addMessagesToChats from '../utils/addMessagesToChats'
+import {isMessageExpired} from '../utils/disappearingMessages'
 import {filterIncomingMessages} from '../utils/filterIncomingMessages'
 import replaceBase64UriWithImageFileUri from '../utils/replaceBase64UriWithImageFileUri'
 import {type ChatMessageWithState} from './../domain'
@@ -255,6 +256,7 @@ function refreshInboxActionAtom(
             rerequestLimitDays: get(offerRerequestLimitDaysAtom),
           })
         ),
+        TE.map(A.filter((message) => !isMessageExpired(message, Date.now()))),
         TE.chainW(
           flow(
             A.map((oneMessage): T.Task<ChatMessageWithState> => {

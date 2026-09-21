@@ -78,7 +78,7 @@ function MessageItem({
   const {t} = useTranslation()
   const chatState = useAtomValue(chatStateAtom)
   const chat = useAtomValue(chatAtom)
-  const {image} = useAtomValue(otherSideDataAtom)
+  const {image, userName} = useAtomValue(otherSideDataAtom)
   const otherSideSupportsTradingChecklist = useAtomValue(
     otherSideSupportsTradingChecklistAtom
   )
@@ -261,7 +261,7 @@ function MessageItem({
             {disappearingTimerUpdateText({
               timer: item.message.message.disappearingTimer,
               direction,
-              name: otherSideName,
+              name: userName,
               t,
             })}
           </Typography>

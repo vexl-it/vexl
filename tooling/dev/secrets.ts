@@ -1,11 +1,11 @@
 /**
  * Loads the optional, gitignored root `.env.local`.
  *
- * `.env.local` is for OPTIONAL feature secrets only (see example.env.local).
+ * `.env.local` is for optional feature secrets and settings (see example.env.local).
  * The core stack runs without any of them. To keep a stale or legacy `.env.local`
  * (e.g. one left over from the old orchestrator with a global `DB_URL`,
  * `DB_PASSWORD`, `REDIS_URL`, …) from clobbering the per-service connection
- * config computed in dev.config.ts, ONLY the allow-listed optional-secret keys
+ * config computed in dev.config.ts, ONLY the allow-listed optional keys
  * below are injected into spawned processes. Everything else in `.env.local` is
  * ignored for env injection.
  *
@@ -34,6 +34,7 @@ export const OPTIONAL_SECRET_KEYS: ReadonlySet<string> = new Set([
   'TURNSTILE_SECRET_KEY',
   'TURNSTILE_EXPECTED_HOSTNAME',
   'EXPO_ACCESS_TOKEN',
+  'NOTIFICATION_THROTTLE_TTL_MINUTES',
   'FCM_TOKEN_PUBLIC_KEY',
   'FCM_TOKEN_PRIVATE_KEY',
   'GOOGLE_PLACES_API_KEY',
@@ -87,7 +88,7 @@ export function loadRawEnvLocal(): Record<string, string> {
 }
 
 /**
- * Optional secrets to inject into spawned processes: only allow-listed keys
+ * Optional secrets and settings to inject: only allow-listed keys
  * with a NON-EMPTY value. An empty value (e.g. a freshly copied template) does
  * NOT override the non-secret default from dev.config.ts.
  */

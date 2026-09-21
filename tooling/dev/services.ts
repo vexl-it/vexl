@@ -229,6 +229,7 @@ export const SERVICES: readonly RunnableApp[] = [
     run: tsxService('src/index.ts'),
     secretKeys: [
       'EXPO_ACCESS_TOKEN',
+      'NOTIFICATION_THROTTLE_TTL_MINUTES',
       'FCM_TOKEN_PUBLIC_KEY',
       'FCM_TOKEN_PRIVATE_KEY',
     ],

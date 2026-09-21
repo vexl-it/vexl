@@ -109,16 +109,18 @@ const runRefreshNotesActionAtom = atom(null, (get, set) =>
     const session = get(sessionDataOrDummyAtom)
     const updateStartedAt = isoNow()
     const storedNotes = get(notesAtom)
+    const initialCursor = get(notesNextPageParamAtom)
+    let nextCursor = initialCursor
 
     const serverNotes = yield* _(
       fetchAllPaginatedData({
         fetchEffectToRun: (nextPageToken) =>
           api.offer.getNotesForMeModifiedOrCreatedAfterPaginated({
-            nextPageToken: nextPageToken ?? get(notesNextPageParamAtom),
+            nextPageToken: nextPageToken ?? initialCursor,
             limit: NOTES_PAGE_LIMIT,
           }),
         storeNextPageToken: (nextPageToken) => {
-          set(notesNextPageParamAtom, nextPageToken)
+          nextCursor = nextPageToken
         },
       })
     )
@@ -168,6 +170,8 @@ const runRefreshNotesActionAtom = atom(null, (get, set) =>
 
     set(notesStateAtom, (old) => ({
       ...old,
+      // Committed together with the notes so a failed refresh cannot skip them.
+      notesNextPageParam: nextCursor,
       notes: mergeIncomingNotesToState({
         incomingNotes,
         storedNotes: old.notes,

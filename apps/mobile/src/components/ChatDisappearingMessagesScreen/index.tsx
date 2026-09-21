@@ -4,7 +4,6 @@ import {
   generateChatMessageId,
 } from '@vexl-next/domain/src/general/messaging'
 import {now} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {VersionString} from '@vexl-next/domain/src/utility/VersionString.brand'
 import {
   NavigationBar,
   Screen,
@@ -20,15 +19,13 @@ import React, {useMemo} from 'react'
 import {type RootStackScreenProps} from '../../navigationTypes'
 import {focusChatWithMessagesByKeysAtom} from '../../state/chat/atoms/focusChatWithMessagesAtom'
 import {dummyChatWithMessages} from '../../state/chat/domain'
+import {MINIMAL_VERSION_SUPPORTING_DISAPPEARING_MESSAGES} from '../../state/chat/utils/disappearingMessages'
 import valueOrDefaultAtom from '../../utils/atomUtils/valueOrDefaultAtom'
 import {formatDisappearingTimer} from '../../utils/chat/disappearingTimerText'
 import {enableHiddenFeatures, version} from '../../utils/environment'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import {ChatScope, chatMolecule} from '../ChatDetailScreen/atoms'
-
-const MINIMAL_VERSION_SUPPORTING_DISAPPEARING_MESSAGES =
-  Schema.decodeSync(VersionString)('26.9.4')
 
 const DEBUG_TIMER = Schema.decodeSync(DisappearingTimerSeconds)(30)
 const TIMER_OPTIONS = enableHiddenFeatures

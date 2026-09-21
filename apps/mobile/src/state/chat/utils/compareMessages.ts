@@ -1,6 +1,6 @@
 import {type ChatMessageWithState} from '../domain'
 
-function getOrderingTime(message: ChatMessageWithState): number {
+export function getOrderingTime(message: ChatMessageWithState): number {
   return message.receivedByServerAt ?? message.message.time
 }
 

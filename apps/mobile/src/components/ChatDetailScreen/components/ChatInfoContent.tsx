@@ -196,6 +196,7 @@ export default function ChatInfoContent({
     offerForChatAtom,
     otherSideClubsIdsAtom,
     otherSideDataAtom,
+    otherSideSupportsDisappearingMessagesAtom,
     otherSideSupportsTradingChecklistAtom,
     publicKeyPemBase64Atom,
     shouldGrayScaleAvatarAtom,
@@ -213,6 +214,9 @@ export default function ChatInfoContent({
   const offer = useAtomValue(offerForChatAtom)
   const otherSideClubsIds = useAtomValue(otherSideClubsIdsAtom)
   const otherSideData = useAtomValue(otherSideDataAtom)
+  const otherSideSupportsDisappearingMessages = useAtomValue(
+    otherSideSupportsDisappearingMessagesAtom
+  )
   const otherSideSupportsTradingChecklist = useAtomValue(
     otherSideSupportsTradingChecklistAtom
   )
@@ -411,20 +415,24 @@ export default function ChatInfoContent({
                 navigation.navigate('ChatTags', {chatId})
               }}
             />
-            <SectionSeparator />
-            <ActionRow
-              showChevron
-              color="foregroundPrimary"
-              icon={ClockTime}
-              label={t('messages.disappearing.title')}
-              value={formatDisappearingTimer(chat.disappearingTimer, t)}
-              onPress={() => {
-                navigation.navigate('ChatDisappearingMessages', {
-                  inboxKey,
-                  otherSideKey: chat.otherSide.publicKey,
-                })
-              }}
-            />
+            {otherSideSupportsDisappearingMessages ? (
+              <>
+                <SectionSeparator />
+                <ActionRow
+                  showChevron
+                  color="foregroundPrimary"
+                  icon={ClockTime}
+                  label={t('messages.disappearing.title')}
+                  value={formatDisappearingTimer(chat.disappearingTimer, t)}
+                  onPress={() => {
+                    navigation.navigate('ChatDisappearingMessages', {
+                      inboxKey,
+                      otherSideKey: chat.otherSide.publicKey,
+                    })
+                  }}
+                />
+              </>
+            ) : null}
           </YStack>
 
           {showReceivedMessagesDebugAction ? (

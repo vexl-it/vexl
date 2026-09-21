@@ -30,6 +30,7 @@ import cancelRequestActionAtomHandleUI from '../../../state/chat/atoms/cancelReq
 import createCanChatBeRerequestedAtom from '../../../state/chat/atoms/createCanBeRerequestedAtom'
 import {createCanSendMessagesAtom} from '../../../state/chat/atoms/createCanSendMessagesAtom'
 import {createOtherSideSupportsTradingChecklistAtom} from '../../../state/chat/atoms/createOtherSideSupportTradingChecklistAtom'
+import {createOtherSideVersionIsAtLeastAtom} from '../../../state/chat/atoms/createOtherSideVersionIsAtLeastAtom'
 import {createRequestStateAtom} from '../../../state/chat/atoms/createRequestStateAtom'
 import deleteChatActionAtom from '../../../state/chat/atoms/deleteChatActionAtom'
 import {focusWasDeniedAtom} from '../../../state/chat/atoms/focusDenyRequestMessageAtom'
@@ -46,6 +47,7 @@ import {
   type ChatTransientMessageId,
   type ChatWithMessages,
 } from '../../../state/chat/domain'
+import {MINIMAL_VERSION_SUPPORTING_DISAPPEARING_MESSAGES} from '../../../state/chat/utils/disappearingMessages'
 import isNoteChatOrigin from '../../../state/chat/utils/isNoteChatOrigin'
 import {getChatState} from '../../../state/chat/utils/offerStates'
 import {importedContactsHashesAtom} from '../../../state/contacts/atom/contactsStore'
@@ -1156,6 +1158,11 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     showOfferDeletedWithOptionToDeleteActionAtom,
     otherSideSupportsTradingChecklistAtom:
       createOtherSideSupportsTradingChecklistAtom(chatAtom),
+    otherSideSupportsDisappearingMessagesAtom:
+      createOtherSideVersionIsAtLeastAtom(
+        chatAtom,
+        MINIMAL_VERSION_SUPPORTING_DISAPPEARING_MESSAGES
+      ),
     cancelRequestActionAtom,
     showInfoBarAtom,
     showVexlbotNotificationsForCurrentChatAtom,

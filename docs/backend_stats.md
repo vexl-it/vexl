@@ -74,7 +74,7 @@ These are referred to as *common* in the tables below.
 | `REQUEST_REJECTED` | Increment | common | Messaging request is disapproved — from `sendMessage`/`sendMessages` (`messageType` `DISAPPROVE_MESSAGING`) and the legacy V1/V2 handshake compat endpoints. |
 | `CHAT_CLOSED` | Increment | common | User leaves a chat. |
 | `MESSAGE_FETCHED_AND_REMOVED` | Increment (value = count) | common + `messageAgeSeconds` | Client confirms pulled messages, which deletes them from the inbox. `messageAgeSeconds` is the average age of the removed messages (seconds since the server accepted them); `unknown` when no messages were pulled (average of an empty set). |
-| `MESSAGE_EXPIRED` | Increment (value = count) | — | Expired-messages cleanup task deletes old undelivered messages. |
+| `MESSAGE_EXPIRED` | Increment (value = count) | — | Expired-messages cleanup task (hourly by default) deletes undelivered messages past their expiration, including disappearing messages sent with a retention bucket. |
 | `TOTAL_INBOXES` | Total | — | Gauge, every 60 s; total inboxes. |
 | `TOTAL_INBOXES_WITH_UNREAD_MESSAGES` | Total | — | Gauge, every 60 s; inboxes that have undelivered messages waiting. |
 

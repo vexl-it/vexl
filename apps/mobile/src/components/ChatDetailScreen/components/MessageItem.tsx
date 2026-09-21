@@ -1,9 +1,16 @@
-import {DotTypingIndicator, Rejected, Typography, useTheme} from '@vexl-next/ui'
+import {
+  ClockTime,
+  DotTypingIndicator,
+  Rejected,
+  Typography,
+  useTheme,
+} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue, type Atom} from 'jotai'
 import React, {useMemo} from 'react'
-import {Stack, XStack} from 'tamagui'
+import {Stack, XStack, getTokens} from 'tamagui'
 import {createIsOtherSideTypingAtom} from '../../../state/chat/atoms/typingIndication'
+import {disappearingTimerUpdateText} from '../../../utils/chat/disappearingTimerText'
 import {formattingLocaleAtom} from '../../../utils/localization/formattingLocaleAtom'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import UserAvatar from '../../UserAvatar'
@@ -71,7 +78,7 @@ function MessageItem({
   const {t} = useTranslation()
   const chatState = useAtomValue(chatStateAtom)
   const chat = useAtomValue(chatAtom)
-  const {image} = useAtomValue(otherSideDataAtom)
+  const {image, userName} = useAtomValue(otherSideDataAtom)
   const otherSideSupportsTradingChecklist = useAtomValue(
     otherSideSupportsTradingChecklistAtom
   )
@@ -235,6 +242,30 @@ function MessageItem({
           <VexlBotRequestHelp message={item.message} />
           {!!item.isLatest && <LastMessageTime message={item.message} />}
         </>
+      )
+    }
+
+    if (item.message.message.messageType === 'DISAPPEARING_MESSAGES_UPDATE') {
+      return (
+        <XStack mx="$5" my="$3" gap="$2" ai="center" jc="center">
+          <ClockTime
+            size={getTokens().size.$5.val}
+            color={theme.foregroundTertiary.get()}
+          />
+          <Typography
+            flexShrink={1}
+            color="$foregroundTertiary"
+            variant="micro"
+            textAlign="center"
+          >
+            {disappearingTimerUpdateText({
+              timer: item.message.message.disappearingTimer,
+              direction,
+              name: userName,
+              t,
+            })}
+          </Typography>
+        </XStack>
       )
     }
 

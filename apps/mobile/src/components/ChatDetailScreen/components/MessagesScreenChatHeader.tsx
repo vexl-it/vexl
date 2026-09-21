@@ -4,6 +4,7 @@ import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {TouchableOpacity} from 'react-native'
 import {type RootStackScreenProps} from '../../../navigationTypes'
+import {disappearingMessagesIndicator} from '../../../utils/chat/disappearingTimerText'
 import {getOtherSideRealNameOrFriendLevel} from '../../../utils/chat/getOtherSideFriendLevel'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {formatInteger} from '../../../utils/localization/formatting'
@@ -69,6 +70,11 @@ export function MessagesScreenChatHeader(): React.ReactElement {
         }
         subtitle={t('offer.numberOfCommon', {
           number: formatInteger(commonConnectionsCount, locale),
+        })}
+        disappearingMessages={disappearingMessagesIndicator({
+          timer: chat.disappearingTimer,
+          locale,
+          t,
         })}
         leftAction={{icon: ChevronLeft, onPress: safeGoBack}}
         avatar={

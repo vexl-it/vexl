@@ -24,8 +24,15 @@ type SendMessageAtom = ActionAtomType<[ChatMessage], void>
 export default function sendMessageActionAtom(
   chatWithMessagesAtom: FocusAtomType<ChatWithMessages>
 ): SendMessageAtom {
-  return atom(null, (get, set, message) => {
+  return atom(null, (get, set, messageToSend) => {
     const api = get(apiAtom)
+    const message: ChatMessage =
+      messageToSend.messageType === 'MESSAGE'
+        ? {
+            ...messageToSend,
+            disappearingTimer: get(chatWithMessagesAtom).chat.disappearingTimer,
+          }
+        : messageToSend
 
     set(
       chatWithMessagesAtom,

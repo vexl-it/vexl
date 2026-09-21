@@ -137,6 +137,33 @@ function ThemeGroup({
           time="Tue"
         />
 
+        <SectionLabel>Disappearing messages</SectionLabel>
+        <ChatMessageItem
+          onPress={() => {}}
+          avatar={<DemoAvatar />}
+          name="Direct friend"
+          message="You: See you tomorrow"
+          time="15:05"
+          disappearingMessages={{
+            duration: '2d',
+            accessibilityLabel: 'Disappearing messages: 2 days',
+          }}
+        />
+        <ChatMessageItem
+          onPress={() => {}}
+          avatar={<DemoAvatar2 />}
+          name="A friend with a very long name that should truncate"
+          message="Last message before typing"
+          time="15:05"
+          unread
+          isTyping
+          tags={['Trade']}
+          disappearingMessages={{
+            duration: '1h',
+            accessibilityLabel: 'Disappearing messages: 1 hour',
+          }}
+        />
+
         <SectionLabel>Typing</SectionLabel>
         <ChatMessageItem
           onPress={() => {}}

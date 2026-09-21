@@ -7,6 +7,7 @@ import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 import addRealLifeInfoToChat from './addRealLifeInfoToChat'
 import areMessagesEqual from './areMessagesEqual'
 import compareMessages from './compareMessages'
+import {applyLatestDisappearingTimerUpdate} from './disappearingMessages'
 import processContactRevealMessageIfAny from './processContactRevealMessageIfAny'
 import processIdentityRevealMessageIfAny from './processIdentityRevealMessageIfAny'
 import {scheduleTradeReminderIfNeeded} from './scheduleTradeReminderIfNeeded'
@@ -126,7 +127,8 @@ export default function addMessagesToChats(
           processIdentityRevealMessageIfAny(identityRevealMessage),
           processContactRevealMessageIfAny(contactRevealMessage),
           addRealLifeInfoToChat,
-          scheduleTradeReminderIfNeeded(tradeChecklistUpdates)
+          scheduleTradeReminderIfNeeded(tradeChecklistUpdates),
+          applyLatestDisappearingTimerUpdate
         )
       })
     )

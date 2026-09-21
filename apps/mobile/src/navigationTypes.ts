@@ -128,6 +128,11 @@ export type RootStackParamsList = {
 
   ChatTags: {chatId: ChatId}
 
+  ChatDisappearingMessages: {
+    otherSideKey: PublicKeyPemBase64
+    inboxKey: PublicKeyPemBase64
+  }
+
   CommonFriends: {
     readonly contactsHashes: readonly HashedPhoneNumber[]
     readonly verifiedHashes?: readonly HashedPhoneNumber[]

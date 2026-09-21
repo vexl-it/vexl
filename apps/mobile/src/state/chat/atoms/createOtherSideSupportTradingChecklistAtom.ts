@@ -1,10 +1,8 @@
 import {type Chat} from '@vexl-next/domain/src/general/messaging'
-import {
-  compare,
-  VersionString,
-} from '@vexl-next/domain/src/utility/VersionString.brand'
+import {VersionString} from '@vexl-next/domain/src/utility/VersionString.brand'
 import {Schema} from 'effect/index'
-import {atom, type Atom} from 'jotai'
+import {type Atom} from 'jotai'
+import {createOtherSideVersionIsAtLeastAtom} from './createOtherSideVersionIsAtLeastAtom'
 
 const MINIMAL_VERSION_FOR_TRADING_CHECKLIST =
   Schema.decodeSync(VersionString)('1.13.1')
@@ -12,12 +10,8 @@ const MINIMAL_VERSION_FOR_TRADING_CHECKLIST =
 export function createOtherSideSupportsTradingChecklistAtom(
   chatAtom: Atom<Chat>
 ): Atom<boolean> {
-  return atom((get) => {
-    const otherSideVersion = get(chatAtom).otherSideVersion
-    if (!otherSideVersion) return false
-    return compare(otherSideVersion)(
-      '>=',
-      MINIMAL_VERSION_FOR_TRADING_CHECKLIST
-    )
-  })
+  return createOtherSideVersionIsAtLeastAtom(
+    chatAtom,
+    MINIMAL_VERSION_FOR_TRADING_CHECKLIST
+  )
 }

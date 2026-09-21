@@ -3,6 +3,7 @@ import {
   type PublicKeyPemBase64,
 } from '@vexl-next/cryptography/src/KeyHolder'
 import {
+  retentionBucketForTimer,
   type ChatMessage,
   type ServerMessage,
 } from '@vexl-next/domain/src/general/messaging'
@@ -41,6 +42,7 @@ type HANDLED_MESSAGE_TYPES =
   | 'FCM_CYPHER_UPDATE'
   | 'VERSION_UPDATE'
   | 'MESSAGE_READ'
+  | 'DISAPPEARING_MESSAGES_UPDATE'
 
 const sendSystemNotification = (
   messageType: HANDLED_MESSAGE_TYPES
@@ -48,7 +50,8 @@ const sendSystemNotification = (
   if (
     messageType === 'FCM_CYPHER_UPDATE' ||
     messageType === 'VERSION_UPDATE' ||
-    messageType === 'MESSAGE_READ'
+    messageType === 'MESSAGE_READ' ||
+    messageType === 'DISAPPEARING_MESSAGES_UPDATE'
   )
     return false
 
@@ -107,6 +110,10 @@ export default function sendMessage({
         message: encryptedMessage,
         messagePreview: encryptedPreview,
         messageType: message.messageType,
+        retentionBucket:
+          message.messageType === 'MESSAGE' && message.disappearingTimer
+            ? retentionBucketForTimer(message.disappearingTimer)
+            : undefined,
         receiverPublicKey,
         senderPublicKey: senderKeypair.publicKeyPemBase64,
         keyPair: senderKeypair,

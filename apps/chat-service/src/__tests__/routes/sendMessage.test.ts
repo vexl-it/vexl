@@ -1,6 +1,6 @@
 import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
-import {type MessageCypher} from '@vexl-next/domain/src/general/messaging'
+import {MessageCypher} from '@vexl-next/domain/src/general/messaging'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {
   ReceiverInboxDoesNotExistError,
@@ -174,11 +174,13 @@ describe('Send message', () => {
 
         const messageToSend = (yield* _(
           user1.addChallengeForMainInbox({
-            message: 'someDisappearingMessage' as MessageCypher,
-            messageType: 'MESSAGE' as const,
-            retentionBucket: 'ONE_DAY' as const,
+            message: Schema.decodeSync(MessageCypher)(
+              'someDisappearingMessage'
+            ),
+            messageType: 'MESSAGE',
+            retentionBucket: 'ONE_DAY',
             receiverPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-          })
+          } satisfies Partial<SendMessageRequest>)
         )) satisfies SendMessageRequest
 
         yield* _(setAuthHeaders(user1.authHeaders))

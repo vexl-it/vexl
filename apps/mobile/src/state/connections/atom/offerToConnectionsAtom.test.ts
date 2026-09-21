@@ -22,6 +22,7 @@ import {
   OfferToConnectionsItems,
 } from '../domain'
 import connectionStateAtom from './connectionStateAtom'
+import {offersReencryptionStartedAtAtom} from './offersReencryptionStartedAtAtom'
 import offerToConnectionsAtom, {
   updateAndReencryptAllOffersConnectionsActionAtom,
   updateAndReencryptSingleOfferConnectionActionAtom,
@@ -244,6 +245,193 @@ beforeEach(() => {
     .mockReturnValue(Effect.succeed(offerInfo))
 })
 
+it.each([true, false])(
+  'keeps the status active through uploads and clears it after the batch (success: %s)',
+  async (success) => {
+    const store = setupStore([initial, second])
+    const onProgres = jest.fn()
+    let startedAt: number | null = null
+    jest.mocked(updatePrivateParts).mockImplementation(({onProgress}) =>
+      Effect.sync(() => {
+        onProgress?.({type: 'CONSTRUCTING_PRIVATE_PAYLOADS'})
+        expect(store.get(offersReencryptionStartedAtAtom)).toBe(startedAt)
+        onProgress?.({
+          type: 'ENCRYPTING_PRIVATE_PAYLOADS',
+          currentlyProcessingIndex: 0,
+          totalToEncrypt: 1,
+        })
+        if (startedAt === null) {
+          startedAt = store.get(offersReencryptionStartedAtAtom)
+          expect(startedAt).not.toBeNull()
+        }
+        onProgress?.({type: 'SENDING_OFFER_TO_NETWORK'})
+        onProgress?.({type: 'DONE'})
+        expect(store.get(offersReencryptionStartedAtAtom)).toBe(startedAt)
+        return result(success)
+      })
+    )
+
+    await Effect.runPromise(
+      store.set(updateAndReencryptAllOffersConnectionsActionAtom, {onProgres})
+    )
+
+    expect(onProgres).toHaveBeenCalledTimes(8)
+    expect(store.get(offersReencryptionStartedAtAtom)).toBeNull()
+  }
+)
+
+it('does not show encryption activity for a refresh without payloads to encrypt', async () => {
+  const store = setupStore()
+  const listener = jest.fn()
+  const unsubscribe = store.sub(offersReencryptionStartedAtAtom, listener)
+  jest.mocked(updatePrivateParts).mockImplementation(({onProgress}) =>
+    Effect.sync(() => {
+      onProgress?.({type: 'CONSTRUCTING_PRIVATE_PAYLOADS'})
+      onProgress?.({type: 'SENDING_OFFER_TO_NETWORK'})
+      onProgress?.({type: 'DONE'})
+      return result()
+    })
+  )
+
+  await run(store)
+
+  expect(listener).not.toHaveBeenCalled()
+  unsubscribe()
+})
+
+it('does not rewrite unchanged connection records before retrying pending encryption', async () => {
+  const record = {...initial, pendingConnectionsToRefresh: [publicKey]}
+  const store = setupStore([record])
+  const unchanged = store.get(connectionStateAtom)
+  mockFetchGraph.mockReturnValue(Effect.succeed(unchanged))
+  const listener = jest.fn()
+  const unsubscribe = store.sub(offerToConnectionsAtom, listener)
+  jest.mocked(updatePrivateParts).mockImplementation(() =>
+    Effect.sync(() => {
+      expect(listener).not.toHaveBeenCalled()
+      expect(store.get(offerToConnectionsAtom).offerToConnections[0]).toBe(
+        record
+      )
+      return result()
+    })
+  )
+
+  await run(store)
+
+  unsubscribe()
+})
+
+it('persists already queued recipients before advancing a changed graph baseline', async () => {
+  const store = setupStore([
+    {...initial, pendingConnectionsToRefresh: [publicKey]},
+  ])
+  const listener = jest.fn()
+  const unsubscribe = store.sub(offerToConnectionsAtom, listener)
+  jest.mocked(offerToConnectionsAtom.flushNow).mockImplementation(() => {
+    expect(listener).toHaveBeenCalled()
+    return true
+  })
+
+  await run(store)
+
+  unsubscribe()
+})
+
+it.each([false, true])(
+  'keeps encryption status active across ten offers for new and existing recipients (all new: %s)',
+  async (allNew) => {
+    const recipients = Array.makeBy(3, (i) =>
+      Schema.decodeSync(PublicKeyV2)(`V2_PUB_recipient-${i}`)
+    )
+    const records = Array.makeBy(10, (i) =>
+      Schema.decodeUnknownSync(OfferToConnectionsItem)({
+        ...initial,
+        adminId: `offer-${i}`,
+        connections: {
+          firstLevel: allNew ? [] : recipients,
+          secondLevel: [],
+          clubs: {},
+        },
+      })
+    )
+    const store = setupStore(records)
+    const previous = Schema.decodeUnknownSync(ConnectionsState)({
+      lastUpdate: 1,
+      firstLevel: recipients,
+      secondLevel: [],
+      commonFriends: [],
+      verifiedFriends: [],
+    })
+    store.set(connectionStateAtom, previous)
+    mockFetchGraph.mockReturnValue(
+      Effect.succeed(
+        Schema.decodeUnknownSync(ConnectionsState)({
+          lastUpdate: 2,
+          firstLevel: recipients,
+          secondLevel: [],
+          commonFriends: [[recipients[0], ['new-friend']]],
+          verifiedFriends: [],
+        })
+      )
+    )
+    jest.mocked(updatePrivateParts).mockImplementation(({onProgress}) =>
+      Effect.sync(() => {
+        onProgress?.({
+          type: 'ENCRYPTING_PRIVATE_PAYLOADS',
+          currentlyProcessingIndex: 0,
+          totalToEncrypt: allNew ? recipients.length : 1,
+        })
+        expect(store.get(offersReencryptionStartedAtAtom)).not.toBeNull()
+        onProgress?.({type: 'SENDING_OFFER_TO_NETWORK'})
+        expect(store.get(offersReencryptionStartedAtAtom)).not.toBeNull()
+        return result()
+      })
+    )
+
+    await run(store)
+
+    expect(store.get(offersReencryptionStartedAtAtom)).toBeNull()
+  }
+)
+
+it('retries pending queues on an unchanged graph without duplicating recipients', async () => {
+  const recipients = Array.makeBy(30, (i) =>
+    Schema.decodeSync(PublicKeyV2)(`V2_PUB_pending-${i}`)
+  )
+  const records = Array.makeBy(10, (i) =>
+    Schema.decodeUnknownSync(OfferToConnectionsItem)({
+      ...initial,
+      adminId: `pending-offer-${i}`,
+      pendingConnectionsToRefresh: [...recipients, ...recipients],
+      connections: {firstLevel: recipients, secondLevel: [], clubs: {}},
+    })
+  )
+  const store = setupStore(records)
+  const unchanged = Schema.decodeUnknownSync(ConnectionsState)({
+    lastUpdate: 1,
+    firstLevel: recipients,
+    secondLevel: [],
+    commonFriends: [],
+    verifiedFriends: [],
+  })
+  store.set(connectionStateAtom, unchanged)
+  mockFetchGraph.mockReturnValue(Effect.succeed(unchanged))
+  jest.mocked(updatePrivateParts).mockReturnValue(Effect.succeed(result(false)))
+
+  await run(store)
+
+  expect(updatePrivateParts).toHaveBeenCalledTimes(10)
+  for (const keys of refreshSets()) expect(keys).toEqual(recipients)
+  for (const record of store.get(offerToConnectionsAtom).offerToConnections)
+    expect(record.pendingConnectionsToRefresh).toEqual(recipients)
+
+  jest.mocked(updatePrivateParts).mockReturnValue(Effect.succeed(result()))
+  await run(store)
+
+  for (const record of store.get(offerToConnectionsAtom).offerToConnections)
+    expect(record.pendingConnectionsToRefresh).toEqual([])
+})
+
 it.each([false, true])(
   'refreshes only changed v2 recipients, then skips unchanged recipients (background: %s)',
   async (isInBackground) => {
@@ -328,14 +516,25 @@ it('keeps pending work after interruption and releases the sync lock', async () 
   jest
     .mocked(updatePrivateParts)
     .mockReturnValueOnce(Effect.succeed(result()))
-    .mockReturnValueOnce(
-      Deferred.succeed(started, undefined).pipe(Effect.andThen(Effect.never))
+    .mockImplementationOnce(({onProgress}) =>
+      Effect.sync(() => {
+        onProgress?.({
+          type: 'ENCRYPTING_PRIVATE_PAYLOADS',
+          currentlyProcessingIndex: 0,
+          totalToEncrypt: 1,
+        })
+      }).pipe(
+        Effect.andThen(Deferred.succeed(started, undefined)),
+        Effect.andThen(Effect.never)
+      )
     )
   const running = Effect.runFork(
     store.set(updateAndReencryptAllOffersConnectionsActionAtom, {})
   )
   await Effect.runPromise(Deferred.await(started))
+  expect(store.get(offersReencryptionStartedAtAtom)).not.toBeNull()
   await Effect.runPromise(Fiber.interrupt(running))
+  expect(store.get(offersReencryptionStartedAtAtom)).toBeNull()
   expect(store.get(connectionStateAtom)).toEqual(graph(['new-friend']))
   expect(
     Array.map(

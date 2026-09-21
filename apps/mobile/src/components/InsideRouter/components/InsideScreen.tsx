@@ -1,4 +1,4 @@
-import {navBarHeightAtom} from '@vexl-next/ui'
+import {navBarHeightAtom, OffersReencryptionStatus} from '@vexl-next/ui'
 import {useAtomValue} from 'jotai'
 import React, {createContext, useContext, useMemo} from 'react'
 import {
@@ -8,6 +8,8 @@ import {
 } from 'react-native-reanimated'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {getTokens, Stack} from 'tamagui'
+import {offersReencryptionStartedAtAtom} from '../../../state/connections/atom/offersReencryptionStartedAtAtom'
+import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {GraphicHeaderDecoration} from '../../GraphicHeaderDecoration'
 import InsideNavigationBar from './InsideNavigationBar'
 
@@ -33,6 +35,8 @@ export function InsideScreenListHeader({
   readonly children?: React.ReactNode
 }): React.JSX.Element {
   const navBarHeight = useAtomValue(navBarHeightAtom)
+  const startedAt = useAtomValue(offersReencryptionStartedAtAtom)
+  const {t} = useTranslation()
   const insets = useSafeAreaInsets()
   const initialNavBarHeight =
     insets.top + getTokens().size.$8.val + getTokens().space.$5.val * 2
@@ -41,6 +45,10 @@ export function InsideScreenListHeader({
     <Stack>
       <GraphicHeaderDecoration />
       <Stack height={Math.max(navBarHeight, initialNavBarHeight)} />
+      <OffersReencryptionStatus
+        startedAt={startedAt}
+        label={t('offer.encryptingForNetwork')}
+      />
       {children}
     </Stack>
   )

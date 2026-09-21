@@ -690,8 +690,7 @@ function DebugScreen(): React.ReactElement {
                     updateAndReencryptAllOffersConnectionsActionAtom,
                     {}
                   )
-                  const connectionState = store.get(connectionStateAtom)
-                  console.log(connectionState)
+                  console.log('Finished refreshing offers and connections')
                 })
               )
             }}

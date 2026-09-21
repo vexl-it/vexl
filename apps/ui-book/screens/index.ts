@@ -43,6 +43,7 @@ import {NavigationBarScreen} from './NavigationBarScreen'
 import {NoteScreen} from './NoteScreen'
 import {NotificationCardScreen} from './NotificationCardScreen'
 import {OfferCardScreen} from './OfferCardScreen'
+import {OffersReencryptionStatusScreen} from './OffersReencryptionStatusScreen'
 import {PickerScreen} from './PickerScreen'
 import {PriceRangeInputScreen} from './PriceRangeInputScreen'
 import {RadioGroupScreen} from './RadioGroupScreen'
@@ -123,6 +124,10 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'Note', component: NoteScreen},
   {label: 'Notification Card', component: NotificationCardScreen},
   {label: 'Offer Card', component: OfferCardScreen},
+  {
+    label: 'Offers Reencryption Status',
+    component: OffersReencryptionStatusScreen,
+  },
   {label: 'Picker', component: PickerScreen},
   {label: 'Price Range Input', component: PriceRangeInputScreen},
   {label: 'Radio Group', component: RadioGroupScreen},

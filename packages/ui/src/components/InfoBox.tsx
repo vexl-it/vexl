@@ -3,6 +3,7 @@ import {styled, useTheme} from 'tamagui'
 
 import {InfoCircle} from '../icons/InfoCircle'
 import {XStack} from '../primitives'
+import {Loader} from './Loader'
 import {Typography} from './Typography'
 
 export type InfoBoxVariant =
@@ -61,6 +62,7 @@ export interface InfoBoxProps extends Omit<
   readonly children: string
   readonly variant?: InfoBoxVariant
   readonly iconSize?: number
+  readonly loading?: boolean
   readonly textMt?: React.ComponentProps<typeof Typography>['mt']
 }
 
@@ -68,6 +70,7 @@ export function InfoBox({
   children,
   variant = 'default',
   iconSize = 18,
+  loading = false,
   textMt = '$2',
   ...rest
 }: InfoBoxProps): React.JSX.Element {
@@ -87,7 +90,11 @@ export function InfoBox({
 
   return (
     <InfoBoxFrame variant={variant} {...rest}>
-      <InfoCircle color={foregroundColor} size={iconSize} />
+      {loading ? (
+        <Loader color={foregroundColor} size="small" />
+      ) : (
+        <InfoCircle color={foregroundColor} size={iconSize} />
+      )}
       <Typography mt={textMt} color={textColor} flex={1} variant="description">
         {children}
       </Typography>

@@ -5,6 +5,7 @@ import {
 import {useAtomValue} from 'jotai'
 import React, {memo} from 'react'
 import {type RootStackParamsList} from '../../navigationTypes'
+import {useRemoveExpiredMessages} from '../../state/chat/atoms/removeExpiredMessagesActionAtom'
 import {useManageTypingIndications} from '../../state/chat/atoms/typingIndication'
 import {useIsUserLoggedIn} from '../../state/session'
 import useHandleNotificationOpen from '../../state/useHandleNotificationOpen'
@@ -31,6 +32,7 @@ import ChatNoteDetailScreen from '../ChatDetailScreen/ChatNoteDetailScreen'
 import ChatReceivedMessagesDebugScreen from '../ChatDetailScreen/ChatReceivedMessagesDebugScreen'
 import DeclineChatRequestScreen from '../ChatDetailScreen/DeclineChatRequestScreen'
 import ChatOfferDetailScreen from '../ChatDetailScreen/OfferDetailScreen'
+import ChatDisappearingMessagesScreen from '../ChatDisappearingMessagesScreen'
 import ChatSearchScreen from '../ChatSearchScreen'
 import ChatTagsScreen from '../ChatTagsScreen'
 import ClubDetail from '../ClubDetail'
@@ -101,6 +103,7 @@ function LoggedInHookGroup(): null {
   useHandleUniversalAndAppLinks()
 
   useManageTypingIndications()
+  useRemoveExpiredMessages()
 
   return null
 }
@@ -211,6 +214,10 @@ function RootNavigation(): React.ReactElement {
             />
             <Stack.Screen name="ChatSearch" component={ChatSearchScreen} />
             <Stack.Screen name="ChatTags" component={ChatTagsScreen} />
+            <Stack.Screen
+              name="ChatDisappearingMessages"
+              component={ChatDisappearingMessagesScreen}
+            />
             <Stack.Screen
               name="CommonFriends"
               options={{

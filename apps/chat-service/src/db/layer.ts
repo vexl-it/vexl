@@ -10,6 +10,7 @@ import addReceivedByServerAtToMessage from './migrations/0005_add_received_by_se
 import dropInboxTokenColumn from './migrations/0006_drop_inbox_token_column'
 import makeReceivedByServerAtNonNullable from './migrations/0007_make_received_by_server_at_non_nullable'
 import dropWhiteListTable from './migrations/0008_drop_white_list_table'
+import makeMessageExpiresAtTimestamp from './migrations/0009_make_message_expires_at_timestamp'
 
 const migrations = [
   {
@@ -51,6 +52,11 @@ const migrations = [
     id: 8,
     name: 'Drop white_list table',
     migrationEffect: dropWhiteListTable,
+  },
+  {
+    id: 9,
+    name: 'Make message expires_at a timestamp',
+    migrationEffect: makeMessageExpiresAtTimestamp,
   },
 ] as const
 

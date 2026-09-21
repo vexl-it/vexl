@@ -61,6 +61,7 @@ export default function serializeChatMessage(
       commonFriends: message.commonFriends,
       verifiedCommonFriends: message.verifiedCommonFriends,
       friendLevel: message.friendLevel,
+      disappearingTimer: message.disappearingTimer,
     } satisfies ChatMessagePayload,
     Schema.decodeUnknownEither(ChatMessagePayload),
     Either.flatMap(stringifyToJson)

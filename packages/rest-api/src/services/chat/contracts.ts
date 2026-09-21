@@ -1,6 +1,7 @@
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {
   MessageCypher,
+  MessageRetentionBucket,
   MessageType,
   ServerMessage,
 } from '@vexl-next/domain/src/general/messaging'
@@ -167,6 +168,7 @@ export const SendMessageRequest = Schema.Struct({
   message: MessageCypher,
   messageType: MessageType,
   messagePreview: Schema.optional(Schema.String),
+  retentionBucket: Schema.optional(MessageRetentionBucket),
 })
 export type SendMessageRequest = Schema.Schema.Type<typeof SendMessageRequest>
 

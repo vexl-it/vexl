@@ -52,6 +52,7 @@ export const sendMessage = HttpApiBuilder.handler(
           ),
           inboxId: receiverInbox.id,
           type: req.payload.messageType,
+          retentionBucket: req.payload.retentionBucket,
         })
       )
 

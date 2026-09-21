@@ -41,11 +41,44 @@ export const MessageType = Schema.Literal(
   'VERSION_UPDATE',
   'FCM_CYPHER_UPDATE',
   'MESSAGE_READ',
+  'DISAPPEARING_MESSAGES_UPDATE',
   // Local-only nudge to clean up an inactive chat. MUST NEVER be sent to the
   // server or the other side.
   'INACTIVITY_REMINDER'
 )
 export type MessageType = typeof MessageType.Type
+
+export const DisappearingTimerSeconds = Schema.Int.pipe(
+  Schema.positive(),
+  Schema.brand('DisappearingTimerSeconds')
+)
+export type DisappearingTimerSeconds = typeof DisappearingTimerSeconds.Type
+
+const HOUR_SECONDS = 60 * 60
+const DAY_SECONDS = 24 * HOUR_SECONDS
+export const DISAPPEARING_TIMER_OPTIONS = Schema.decodeSync(
+  Schema.Array(DisappearingTimerSeconds)
+)([
+  HOUR_SECONDS,
+  6 * HOUR_SECONDS,
+  12 * HOUR_SECONDS,
+  DAY_SECONDS,
+  3 * DAY_SECONDS,
+  7 * DAY_SECONDS,
+  12 * DAY_SECONDS,
+])
+
+// The server only learns this coarse bucket - never the exact timer - so the
+// timer can't be used to link the two inboxes of a conversation.
+export const MessageRetentionBucket = Schema.Literal('ONE_DAY', 'TWELVE_DAYS')
+export type MessageRetentionBucket = typeof MessageRetentionBucket.Type
+
+export const retentionBucketDays = (bucket: MessageRetentionBucket): number =>
+  bucket === 'ONE_DAY' ? 1 : 12
+
+export const retentionBucketForTimer = (
+  timer: DisappearingTimerSeconds
+): MessageRetentionBucket => (timer <= DAY_SECONDS ? 'ONE_DAY' : 'TWELVE_DAYS')
 
 export const ChatUserIdentity = Schema.Struct({
   publicKey: PublicKeyPemBase64,
@@ -105,6 +138,9 @@ export const ChatMessagePayload = Schema.Struct({
   senderClubsUuids: Schema.optional(Schema.Array(ClubUuid)),
   commonFriends: Schema.optional(Schema.Array(HashedPhoneNumber)),
   verifiedCommonFriends: Schema.optional(Schema.Array(HashedPhoneNumber)),
+  // MESSAGE: the message disappears this long after `time`.
+  // DISAPPEARING_MESSAGES_UPDATE: the new chat timer, missing means turned off.
+  disappearingTimer: Schema.optional(DisappearingTimerSeconds),
   friendLevel: Schema.optional(Schema.Array(FriendLevel)),
 })
 export type ChatMessagePayload = typeof ChatMessagePayload.Type
@@ -146,6 +182,9 @@ export const ChatMessage = Schema.Struct({
   senderClubsUuids: Schema.optional(Schema.Array(ClubUuid)),
   commonFriends: Schema.optional(Schema.Array(HashedPhoneNumber)),
   verifiedCommonFriends: Schema.optional(Schema.Array(HashedPhoneNumber)),
+  // MESSAGE: the message disappears this long after `time`.
+  // DISAPPEARING_MESSAGES_UPDATE: the new chat timer, missing means turned off.
+  disappearingTimer: Schema.optional(DisappearingTimerSeconds),
   friendLevel: Schema.optional(Schema.Array(FriendLevel)),
 })
 export type ChatMessage = typeof ChatMessage.Type
@@ -236,6 +275,7 @@ export const Chat = Schema.Struct({
   // Time of the last real message for which an INACTIVITY_REMINDER was already
   // inserted - ensures the reminder is inserted at most once per episode.
   inactivityReminderInsertedForMessageTime: Schema.optional(UnixMilliseconds),
+  disappearingTimer: Schema.optional(DisappearingTimerSeconds),
 })
 export type Chat = typeof Chat.Type
 

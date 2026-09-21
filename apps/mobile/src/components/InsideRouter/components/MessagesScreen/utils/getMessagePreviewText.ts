@@ -1,5 +1,6 @@
 import {type ChatMessageItemVariant} from '@vexl-next/ui'
 import {type ChatMessageWithState} from '../../../../../state/chat/domain'
+import {disappearingTimerUpdateText} from '../../../../../utils/chat/disappearingTimerText'
 import {type TFunction} from '../../../../../utils/localization/I18nProvider'
 
 export function getMessagePreviewText({
@@ -100,6 +101,16 @@ export function getMessagePreviewText({
   }
   if (message.messageType === 'VERSION_UPDATE') {
     return {text: t(`messages.textMessageTypes.VERSION_UPDATE`)}
+  }
+  if (message.messageType === 'DISAPPEARING_MESSAGES_UPDATE') {
+    return {
+      text: disappearingTimerUpdateText({
+        timer: message.disappearingTimer,
+        direction,
+        name,
+        t,
+      }),
+    }
   }
   if (message.messageType === 'INACTIVITY_REMINDER') {
     return {

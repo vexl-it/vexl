@@ -7,6 +7,7 @@ import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 import addRealLifeInfoToChat from './addRealLifeInfoToChat'
 import areMessagesEqual from './areMessagesEqual'
 import compareMessages from './compareMessages'
+import {applyDisappearingTimerUpdate} from './disappearingMessages'
 import processContactRevealMessageIfAny from './processContactRevealMessageIfAny'
 import processIdentityRevealMessageIfAny from './processIdentityRevealMessageIfAny'
 import {scheduleTradeReminderIfNeeded} from './scheduleTradeReminderIfNeeded'
@@ -45,6 +46,10 @@ export default function addMessagesToChats(
             ['APPROVE_CONTACT_REVEAL'].includes(one.message.messageType)
           )
           ?.at(-1)
+
+        const disappearingTimerUpdateMessage = messagesToAddToThisChat.findLast(
+          (one) => one.message.messageType === 'DISAPPEARING_MESSAGES_UPDATE'
+        )
 
         const tradeChecklistUpdates = messagesToAddToThisChat
           .filter(
@@ -126,7 +131,8 @@ export default function addMessagesToChats(
           processIdentityRevealMessageIfAny(identityRevealMessage),
           processContactRevealMessageIfAny(contactRevealMessage),
           addRealLifeInfoToChat,
-          scheduleTradeReminderIfNeeded(tradeChecklistUpdates)
+          scheduleTradeReminderIfNeeded(tradeChecklistUpdates),
+          applyDisappearingTimerUpdate(disappearingTimerUpdateMessage)
         )
       })
     )

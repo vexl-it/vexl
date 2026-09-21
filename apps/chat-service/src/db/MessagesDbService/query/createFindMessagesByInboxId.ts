@@ -17,6 +17,7 @@ export const createFindMessagesByInboxId = Effect.gen(function* (_) {
         message
       WHERE
         inbox_id = ${params}
+        AND expires_at > NOW()
     `,
   })
 

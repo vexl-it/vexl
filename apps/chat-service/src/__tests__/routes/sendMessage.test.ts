@@ -167,6 +167,45 @@ describe('Send message', () => {
     )
   })
 
+  it('Expires message within the retention bucket when one is sent', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const client = yield* _(NodeTestingApp)
+
+        const messageToSend = (yield* _(
+          user1.addChallengeForMainInbox({
+            message: 'someDisappearingMessage' as MessageCypher,
+            messageType: 'MESSAGE' as const,
+            retentionBucket: 'ONE_DAY' as const,
+            receiverPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
+          })
+        )) satisfies SendMessageRequest
+
+        yield* _(setAuthHeaders(user1.authHeaders))
+        yield* _(
+          client.Messages.sendMessage({
+            headers: commonHeaders,
+            payload: messageToSend,
+          })
+        )
+
+        const sql = yield* _(SqlClient.SqlClient)
+        const messages = yield* _(sql`
+          SELECT
+            expires_at
+          FROM
+            message
+          WHERE
+            message = 'someDisappearingMessage'
+        `)
+        const expiresAt = dayjs(new Date(String(messages[0].expiresAt)))
+
+        expect(expiresAt.isAfter(dayjs().add(23, 'hours'))).toBe(true)
+        expect(expiresAt.isBefore(dayjs().add(25, 'hours'))).toBe(true)
+      })
+    )
+  })
+
   it('Throws correct error when Receiver inbox does not exist', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {

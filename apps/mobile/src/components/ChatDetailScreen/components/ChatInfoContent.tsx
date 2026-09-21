@@ -4,6 +4,7 @@ import {
   Button,
   ChevronRight,
   Circle,
+  ClockTime,
   DocumentsFiles,
   EyeShut,
   FlagReport,
@@ -29,6 +30,7 @@ import isNoteChatOrigin from '../../../state/chat/utils/isNoteChatOrigin'
 import {useGetAllClubsNamesForIds} from '../../../state/clubs/atom/clubsWithMembersAtom'
 import {useStatusBarStyleForScreen} from '../../../state/statusBarStyleAtom'
 import {andThenExpectBooleanNoErrors} from '../../../utils/andThenExpectNoErrors'
+import {formatDisappearingTimer} from '../../../utils/chat/disappearingTimerText'
 import {getOtherSideRealNameOrFriendLevel} from '../../../utils/chat/getOtherSideFriendLevel'
 import {enableHiddenFeatures} from '../../../utils/environment'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
@@ -113,6 +115,7 @@ function ActionRow({
   color,
   icon: Icon,
   label,
+  value,
   showChevron,
   onPress,
 }: {
@@ -122,6 +125,7 @@ function ActionRow({
     readonly size?: number | undefined
   }>
   readonly label: string
+  readonly value?: string
   showChevron?: boolean
   readonly onPress: () => void
 }): React.ReactElement {
@@ -149,12 +153,17 @@ function ActionRow({
         {label}
       </Typography>
       {!!showChevron && (
-        <Stack flex={1} alignItems="flex-end">
+        <XStack flex={1} alignItems="center" justifyContent="flex-end" gap="$2">
+          {!!value && (
+            <Typography color="$foregroundTertiary" variant="paragraph">
+              {value}
+            </Typography>
+          )}
           <ChevronRight
             color={theme.foregroundTertiary.get()}
             size={tokens.size.$7.val}
           />
-        </Stack>
+        </XStack>
       )}
     </XStack>
   )
@@ -400,6 +409,20 @@ export default function ChatInfoContent({
               label={t('messages.tags.action')}
               onPress={() => {
                 navigation.navigate('ChatTags', {chatId})
+              }}
+            />
+            <SectionSeparator />
+            <ActionRow
+              showChevron
+              color="foregroundPrimary"
+              icon={ClockTime}
+              label={t('messages.disappearing.title')}
+              value={formatDisappearingTimer(chat.disappearingTimer, t)}
+              onPress={() => {
+                navigation.navigate('ChatDisappearingMessages', {
+                  inboxKey,
+                  otherSideKey: chat.otherSide.publicKey,
+                })
               }}
             />
           </YStack>

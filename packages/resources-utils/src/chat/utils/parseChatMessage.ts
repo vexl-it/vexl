@@ -166,6 +166,7 @@ export function chatMessagePayloadToChatMessage(
     commonFriends: payload.commonFriends,
     verifiedCommonFriends: payload.verifiedCommonFriends,
     friendLevel: payload.friendLevel,
+    disappearingTimer: payload.disappearingTimer,
   })
 }
 

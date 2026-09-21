@@ -4,6 +4,7 @@ import addToSortedArray from '../../../utils/addToSortedArray'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 import areMessagesEqual from './areMessagesEqual'
 import compareMessages from './compareMessages'
+import {applyDisappearingTimerUpdate} from './disappearingMessages'
 
 function updateChatVersion(
   message: ChatMessageWithState
@@ -93,7 +94,8 @@ export default function addMessageToChat(
           } satisfies ChatWithMessages),
     markLastMessageAsNotReadByOtherSide(message),
     updateChatVersion(message),
-    updateFcmToken(message)
+    updateFcmToken(message),
+    applyDisappearingTimerUpdate(message)
   )
 }
 

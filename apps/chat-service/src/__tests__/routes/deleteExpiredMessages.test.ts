@@ -101,7 +101,7 @@ describe('clear expired messages', () => {
         yield* _(sql`
           UPDATE message
           SET
-            expires_at = now()::date
+            expires_at = now()
           WHERE
             message = 'someMessageToBeDeleted'
         `)

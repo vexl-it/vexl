@@ -4,6 +4,10 @@ import {getTokens, styled, useTheme} from 'tamagui'
 import {PeopleUsers} from '../icons/PeopleUsers'
 import type {IconProps} from '../icons/types'
 import {SizableText, Stack, XStack, YStack} from '../primitives'
+import {
+  DisappearingMessagesIndicator,
+  type DisappearingMessagesIndicatorProps,
+} from './DisappearingMessagesIndicator'
 import {NavButton, type NavButtonVariant} from './NavButton'
 import {Typography} from './Typography'
 
@@ -111,6 +115,7 @@ interface NavigationBarChatProps {
   readonly style: 'chat'
   readonly name: string
   readonly subtitle?: string
+  readonly disappearingMessages?: DisappearingMessagesIndicatorProps
   readonly avatar?: React.ReactNode
   readonly leftAction?: NavigationBarAction
   readonly rightActions?: readonly NavigationBarAction[]
@@ -186,16 +191,26 @@ export function NavigationBar(props: NavigationBarProps): React.JSX.Element {
               <Typography variant="paragraphSmall" color="$foregroundPrimary">
                 {props.name}
               </Typography>
-              {props.subtitle ? (
-                <ChatSubtitleRow>
-                  <PeopleUsers
-                    color={theme.foregroundSecondary.get()}
-                    size={getTokens().size.$5.val}
-                  />
-                  <Typography variant="micro" color="$foregroundSecondary">
-                    {props.subtitle}
-                  </Typography>
-                </ChatSubtitleRow>
+              {props.subtitle || props.disappearingMessages ? (
+                <XStack alignItems="center" gap="$3" flexWrap="wrap">
+                  {props.subtitle ? (
+                    <ChatSubtitleRow>
+                      <PeopleUsers
+                        color={theme.foregroundSecondary.get()}
+                        size={getTokens().size.$5.val}
+                      />
+                      <Typography variant="micro" color="$foregroundSecondary">
+                        {props.subtitle}
+                      </Typography>
+                    </ChatSubtitleRow>
+                  ) : null}
+                  {props.disappearingMessages ? (
+                    <DisappearingMessagesIndicator
+                      {...props.disappearingMessages}
+                      textVariant="micro"
+                    />
+                  ) : null}
+                </XStack>
               ) : null}
             </ChatInfoColumn>
           </ChatPressableArea>

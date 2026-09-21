@@ -6,6 +6,10 @@ import {styled, useTheme} from 'tamagui'
 import {TagLabel} from '../icons/TagLabel'
 import type {IconProps} from '../icons/types'
 import {SizableText, XStack, YStack} from '../primitives'
+import {
+  DisappearingMessagesIndicator,
+  type DisappearingMessagesIndicatorProps,
+} from './DisappearingMessagesIndicator'
 import {Dot} from './Dot'
 import {DotTypingIndicator} from './DotTypingIndicator'
 
@@ -26,6 +30,7 @@ export interface ChatMessageItemProps {
   readonly isTyping?: boolean
   readonly grayscaleAvatar?: boolean
   readonly tags?: readonly string[]
+  readonly disappearingMessages?: DisappearingMessagesIndicatorProps
   readonly onPress: () => void
 }
 
@@ -113,6 +118,7 @@ export function ChatMessageItem({
   isTyping = false,
   grayscaleAvatar = false,
   tags = [],
+  disappearingMessages,
   onPress,
 }: ChatMessageItemProps): React.JSX.Element {
   const theme = useTheme()
@@ -141,8 +147,13 @@ export function ChatMessageItem({
       )}
       <YStack flex={1} gap="$1">
         <XStack alignItems="center" gap="$2">
-          <NameText flexShrink={1}>{name}</NameText>
-          {unread ? <Dot backgroundColor="$accentYellowPrimary" /> : null}
+          <XStack flex={1} alignItems="center" gap="$2">
+            <NameText flexShrink={1}>{name}</NameText>
+            {unread ? <Dot backgroundColor="$accentYellowPrimary" /> : null}
+          </XStack>
+          {disappearingMessages ? (
+            <DisappearingMessagesIndicator {...disappearingMessages} />
+          ) : null}
         </XStack>
         <XStack alignItems="center" gap="$3">
           <XStack flex={1} alignItems="center" gap="$1">

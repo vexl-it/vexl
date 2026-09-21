@@ -19,6 +19,7 @@ import {
 import isNoteChatOrigin from '../../../../../state/chat/utils/isNoteChatOrigin'
 import {useOfferForChatOrigin} from '../../../../../state/marketplace'
 import {noteForChatOriginAtom} from '../../../../../state/notes/atoms/notesState'
+import {disappearingMessagesIndicator} from '../../../../../utils/chat/disappearingTimerText'
 import {getOtherSideRealNameOrFriendLevel} from '../../../../../utils/chat/getOtherSideFriendLevel'
 import {chatDetailRouteParams} from '../../../../../utils/chat/goToChatDetail'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
@@ -161,6 +162,11 @@ function ChatListItem({
             name={displayName}
             message={preview.text}
             time={time}
+            disappearingMessages={disappearingMessagesIndicator({
+              timer: chatInfo.disappearingTimer,
+              locale,
+              t,
+            })}
             unread={isUnread}
             variant={preview.variant}
             isTyping={isTyping}

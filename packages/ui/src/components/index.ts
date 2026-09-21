@@ -51,6 +51,8 @@ export type {
   DialogFromAtomProps,
   DialogProps,
 } from './Dialog'
+export {DisappearingMessagesIndicator} from './DisappearingMessagesIndicator'
+export type {DisappearingMessagesIndicatorProps} from './DisappearingMessagesIndicator'
 export {DismissKeyboardOnPressOutside} from './DismissKeyboardOnPressOutside'
 export type {DismissKeyboardOnPressOutsideProps} from './DismissKeyboardOnPressOutside'
 export {Dot} from './Dot'

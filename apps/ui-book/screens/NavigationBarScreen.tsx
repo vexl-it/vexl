@@ -102,6 +102,10 @@ function ThemedColumn({
           style="chat"
           name="Friend of friend"
           subtitle="136 in common"
+          disappearingMessages={{
+            duration: '2d',
+            accessibilityLabel: 'Disappearing messages: 2 days',
+          }}
           onPress={() => {}}
           leftAction={{icon: ChevronLeft, onPress: () => {}}}
           avatar={

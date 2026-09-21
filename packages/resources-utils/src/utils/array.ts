@@ -1,10 +1,16 @@
+import {Array, pipe} from 'effect'
+
 export function subtractArrays<T>(
   baseArray: readonly T[],
   elementsToSubtract: readonly T[]
 ): T[] {
-  return baseArray.filter((one) => !elementsToSubtract.includes(one))
+  const excluded = new Set(elementsToSubtract)
+  return pipe(
+    baseArray,
+    Array.filter((one) => !excluded.has(one))
+  )
 }
 
 export function deduplicate<T>(array: readonly T[]): T[] {
-  return Array.from(new Set(array))
+  return Array.fromIterable(new Set(array))
 }

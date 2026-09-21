@@ -14,6 +14,7 @@ import {PRIVATE_PARTS_BATCH_SIZE} from '../offers/privatePartsUploadBatchSize'
 import {TimeLimitReachedError} from '../offers/updatePrivateParts'
 import reportErrorFromResourcesUtils from '../reportErrorFromResourcesUtils'
 import {deduplicate, subtractArrays} from '../utils/array'
+import {createEncryptionYield} from '../utils/createEncryptionYield'
 import constructNotePrivatePayloads, {
   type NotePrivatePayloadsConstructionError,
 } from './utils/constructNotePrivatePayloads'
@@ -203,6 +204,7 @@ export default function updateNotePrivateParts({
       })
     )
 
+    const yieldToUi = createEncryptionYield()
     const encryptionResult = yield* _(
       privatePayloads,
       Array.map((payload, i) =>
@@ -218,6 +220,7 @@ export default function updateNotePrivateParts({
                 })
             })
           ),
+          Effect.zipLeft(yieldToUi),
           Effect.flatMap((payload) => {
             if (stopProcessingAfter && Date.now() >= stopProcessingAfter)
               return Effect.fail(

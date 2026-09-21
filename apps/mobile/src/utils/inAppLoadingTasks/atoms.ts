@@ -174,12 +174,30 @@ export const executeTasksWithDependencies = (
       HashMap.fromIterable
     )
 
+    const tasksBeforeDeferred = pipe(
+      Array.fromIterable(tasksToExecute),
+      Array.filterMap(([id, task]) =>
+        task.runAfterOtherTasks ? Option.none() : Option.some({id})
+      )
+    )
+
     // Build dependency graph using HashMap, preserving onlyIfSucceeds so a
     // dependent can require its dependency to have completed *successfully*
     // (not merely to have run).
     const dependencyMap = pipe(
       Array.fromIterable(tasksToExecute),
-      Array.map(([taskId, task]) => [taskId, task.dependsOn ?? []] as const),
+      Array.map(
+        ([taskId, task]): readonly [
+          InAppLoadingTaskId,
+          InAppLoadingTaskDependency[],
+        ] => [
+          taskId,
+          [
+            ...(task.dependsOn ?? []),
+            ...(task.runAfterOtherTasks ? tasksBeforeDeferred : []),
+          ],
+        ]
+      ),
       HashMap.fromIterable
     )
 

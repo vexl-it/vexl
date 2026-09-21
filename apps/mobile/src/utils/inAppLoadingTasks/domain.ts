@@ -65,4 +65,9 @@ export interface InAppLoadingTask {
   task: (store: Store) => Effect.Effect<void, InAppLoadingTaskError>
   requirements: InAppLoadingTasksRequirements
   dependsOn?: InAppLoadingTaskDependency[]
+  /**
+   * Wait for all other selected tasks without this flag to finish or be
+   * skipped, regardless of success. Those tasks must not depend on this task.
+   */
+  runAfterOtherTasks?: boolean
 }

@@ -1,9 +1,8 @@
 import {
-  type PublicKeyPemBase64,
   PublicKeyPemBase64 as PublicKeyPemBase64Schema,
   PublicKeyV2,
+  type PublicKeyPemBase64,
 } from '@vexl-next/cryptography/src/KeyHolder'
-import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {type CommonConnectionsForUsers} from '@vexl-next/domain/src/general/contacts'
 import {
   type OfferAdminId,
@@ -16,7 +15,12 @@ import {Array, Effect, Either, pipe, Record, Schema} from 'effect'
 import {type ReadonlyRecord} from 'effect/Record'
 import reportErrorFromResourcesUtils from '../reportErrorFromResourcesUtils'
 import {deduplicate, subtractArrays} from '../utils/array'
+import {createEncryptionYield} from '../utils/createEncryptionYield'
 import {type OfferEncryptionProgress} from './OfferEncryptionProgress'
+import {
+  planPrivatePartsUpdate,
+  type OfferConnections,
+} from './planPrivatePartsUpdate'
 import {PRIVATE_PARTS_BATCH_SIZE} from './privatePartsUploadBatchSize'
 import constructPrivatePayloads, {
   type PrivatePayloadsConstructionError,
@@ -25,38 +29,6 @@ import {
   encryptPrivatePart,
   type PrivatePartEncryptionError,
 } from './utils/encryptPrivatePart'
-
-type ClubConnections = Record<
-  ClubUuid,
-  ReadonlyArray<PublicKeyPemBase64 | PublicKeyV2>
->
-
-const calculateNewClubsConnections = ({
-  currentConnections,
-  targetConnections,
-}: {
-  currentConnections: ClubConnections
-  targetConnections: ClubConnections
-}): ClubConnections => {
-  const allClubsUuids = Array.dedupe([
-    ...Record.keys(currentConnections),
-    ...Record.keys(targetConnections),
-  ])
-
-  return pipe(
-    allClubsUuids,
-    Array.map((clubUuid) => {
-      const currentConnectionsForClub = currentConnections[clubUuid] ?? []
-      const targetConnectionsForClub = targetConnections[clubUuid] ?? []
-
-      return [
-        clubUuid,
-        subtractArrays(targetConnectionsForClub, currentConnectionsForClub),
-      ] as const
-    }),
-    Record.fromEntries
-  )
-}
 
 const substractArrayFromAllValues = <K extends string, V>(
   values: V[],
@@ -196,23 +168,9 @@ export default function updatePrivateParts({
   api,
   onProgress,
 }: {
-  currentConnections: {
-    readonly firstLevel: ReadonlyArray<PublicKeyPemBase64 | PublicKeyV2>
-    readonly secondLevel: ReadonlyArray<PublicKeyPemBase64 | PublicKeyV2>
-    readonly clubs: Record<
-      ClubUuid,
-      ReadonlyArray<PublicKeyPemBase64 | PublicKeyV2>
-    >
-  }
-  targetConnections: {
-    readonly firstLevel: ReadonlyArray<PublicKeyPemBase64 | PublicKeyV2>
-    readonly secondLevel: ReadonlyArray<PublicKeyPemBase64 | PublicKeyV2>
-    readonly clubs: Record<
-      ClubUuid,
-      ReadonlyArray<PublicKeyPemBase64 | PublicKeyV2>
-    >
-  }
-  connectionsToRefresh?: ReadonlyArray<PublicKeyPemBase64 | PublicKeyV2>
+  currentConnections: OfferConnections
+  targetConnections: OfferConnections
+  connectionsToRefresh?: readonly PublicKeyV2[]
   commonFriends: CommonConnectionsForUsers
   verifiedFriends: CommonConnectionsForUsers
   adminId: OfferAdminId
@@ -226,11 +184,7 @@ export default function updatePrivateParts({
     encryptionErrors: PrivatePartEncryptionError[]
     timeLimitReachedErrors: TimeLimitReachedError[]
     removedConnections: Array<PublicKeyPemBase64 | PublicKeyV2>
-    newConnections: {
-      firstLevel: Array<PublicKeyPemBase64 | PublicKeyV2>
-      secondLevel: Array<PublicKeyPemBase64 | PublicKeyV2> | undefined
-      clubs: Record<ClubUuid, ReadonlyArray<PublicKeyPemBase64 | PublicKeyV2>>
-    }
+    newConnections: OfferConnections
   },
   | PrivatePayloadsConstructionError
   | Effect.Effect.Error<ReturnType<OfferApi['createPrivatePart']>>
@@ -273,20 +227,17 @@ export default function updatePrivateParts({
       removedClubsConnections,
     })
 
-    const newFirstLevelConnections = subtractArrays(
-      targetConnections.firstLevel,
-      currentConnections.firstLevel
-    )
-    const newSecondLevelConnections = currentConnections.secondLevel
-      ? subtractArrays(
-          targetConnections.secondLevel,
-          currentConnections.secondLevel
-        )
-      : undefined
-
-    const newClubsConnections = calculateNewClubsConnections({
-      currentConnections: currentConnections.clubs ?? {},
-      targetConnections: targetConnections.clubs,
+    const {
+      newConnections: {
+        firstLevel: newFirstLevelConnections,
+        secondLevel: newSecondLevelConnections,
+        clubs: newClubsConnections,
+      },
+      encryptionCandidates,
+    } = planPrivatePartsUpdate({
+      currentConnections,
+      targetConnections,
+      connectionsToRefresh,
     })
 
     const removedConnections = [
@@ -302,7 +253,7 @@ export default function updatePrivateParts({
       }. Number of newFirstLevelConnections: ${
         newFirstLevelConnections.length
       }. Number of newSecondLevelConnections: ${
-        newSecondLevelConnections?.length ?? 'undefined'
+        newSecondLevelConnections.length
       }. Number of newClubsConnections: ${pipe(
         newClubsConnections,
         Record.toEntries,
@@ -313,34 +264,29 @@ export default function updatePrivateParts({
 
     if (onProgress) onProgress({type: 'CONSTRUCTING_PRIVATE_PAYLOADS'})
 
-    const publicKeysToUpdate = new Set([
-      ...newFirstLevelConnections,
-      ...(newSecondLevelConnections ?? []),
-      ...pipe(newClubsConnections, Record.values, Array.flatten),
-      ...connectionsToRefresh,
-    ])
     const privatePayloads = yield* _(
       constructPrivatePayloads({
         connectionsInfo: {
           firstDegreeConnections: Array.filter(
             targetConnections.firstLevel,
-            (key) => publicKeysToUpdate.has(key)
+            (key) => encryptionCandidates.has(key)
           ),
           secondDegreeConnections: Array.filter(
             targetConnections.secondLevel,
-            (key) => publicKeysToUpdate.has(key)
+            (key) => encryptionCandidates.has(key)
           ),
           commonFriends,
           verifiedFriends,
           clubsConnections: Record.map(
             targetConnections.clubs,
-            Array.filter((key) => publicKeysToUpdate.has(key))
+            Array.filter((key) => encryptionCandidates.has(key))
           ),
         },
         symmetricKey,
       })
     )
 
+    const yieldToUi = createEncryptionYield()
     const encryptionResult = yield* _(
       privatePayloads,
       Array.map((payload, i) => {
@@ -356,6 +302,7 @@ export default function updatePrivateParts({
                 })
             })
           ),
+          Effect.zipLeft(yieldToUi),
           Effect.flatMap((payload) => {
             if (stopProcessingAfter && Date.now() >= stopProcessingAfter)
               return Effect.fail(
@@ -433,12 +380,10 @@ export default function updatePrivateParts({
           newFirstLevelConnections,
           pubKeysThatFailedEncryptTo
         ),
-        secondLevel: newSecondLevelConnections
-          ? subtractArrays(
-              newSecondLevelConnections,
-              pubKeysThatFailedEncryptTo
-            )
-          : undefined,
+        secondLevel: subtractArrays(
+          newSecondLevelConnections,
+          pubKeysThatFailedEncryptTo
+        ),
         clubs: substractArrayFromAllValues(
           pubKeysThatFailedEncryptTo,
           newClubsConnections

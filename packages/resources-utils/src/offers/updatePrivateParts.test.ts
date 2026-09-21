@@ -1,4 +1,7 @@
-import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
+import {
+  generatePrivateKey,
+  type PublicKeyV2,
+} from '@vexl-next/cryptography/src/KeyHolder'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
@@ -9,11 +12,17 @@ import {
   SymmetricKey,
 } from '@vexl-next/domain/src/general/offers'
 import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {
+  CryptoBoxCypher,
+  cryptoBoxUnseal,
+  generateV2KeyPair,
+} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
 import {Array, Effect, HashMap, Option, Schema} from 'effect'
 import reportErrorFromResourcesUtils from '../reportErrorFromResourcesUtils'
 import {createTestOfferApi} from '../testUtils/offerApi'
 import {eciesDecryptE} from '../utils/crypto'
+import {type OfferConnections} from './planPrivatePartsUpdate'
 import updatePrivateParts from './updatePrivateParts'
 
 jest.mock('../reportErrorFromResourcesUtils')
@@ -21,19 +30,21 @@ jest.mock('../reportErrorFromResourcesUtils')
 beforeEach(() => jest.mocked(reportErrorFromResourcesUtils).mockClear())
 afterEach(() => jest.restoreAllMocks())
 
-const recipient = generatePrivateKey()
-const publicKey = recipient.publicKeyPemBase64
 const otherRecipient = generatePrivateKey()
 const friend = Schema.decodeSync(HashedPhoneNumber)('common-friend')
 const newFriend = Schema.decodeSync(HashedPhoneNumber)('new-common-friend')
-const connections = {firstLevel: [], secondLevel: [publicKey], clubs: {}}
 
-function setup(): {
+async function setup(): Promise<{
+  publicKey: PublicKeyV2
+  connections: OfferConnections
   params: Parameters<typeof updatePrivateParts>[0]
   createPrivatePart: jest.MockedFunction<OfferApi['createPrivatePart']>
   deletePrivatePart: jest.MockedFunction<OfferApi['deletePrivatePart']>
   readUploadedPayload: () => Promise<OfferPrivatePart>
-} {
+}> {
+  const recipient = await Effect.runPromise(generateV2KeyPair())
+  const publicKey = recipient.publicKey
+  const connections = {firstLevel: [], secondLevel: [publicKey], clubs: {}}
   const createPrivatePart = jest.fn<
     ReturnType<OfferApi['createPrivatePart']>,
     Parameters<OfferApi['createPrivatePart']>
@@ -57,14 +68,20 @@ function setup(): {
     expect(part?.userPublicKey).toBe(publicKey)
     if (!part) throw new Error('Expected an uploaded private part')
     return await Effect.runPromise(
-      eciesDecryptE(recipient.privateKeyPemBase64)(
-        part.payloadPrivate.slice(1)
-      ).pipe(
+      Schema.decode(CryptoBoxCypher)(part.payloadPrivate.slice(1)).pipe(
+        Effect.flatMap(cryptoBoxUnseal(recipient)),
         Effect.flatMap(Schema.decodeUnknown(Schema.parseJson(OfferPrivatePart)))
       )
     )
   }
-  return {params, createPrivatePart, deletePrivatePart, readUploadedPayload}
+  return {
+    publicKey,
+    connections,
+    params,
+    createPrivatePart,
+    deletePrivatePart,
+    readUploadedPayload,
+  }
 }
 
 it.each([
@@ -75,7 +92,8 @@ it.each([
 ])(
   'refreshes only changed existing $level recipients (background: $background)',
   async ({level, background}) => {
-    const {params, createPrivatePart, readUploadedPayload} = setup()
+    const {publicKey, params, createPrivatePart, readUploadedPayload} =
+      await setup()
     const targetConnections = {
       firstLevel: level === 'firstLevel' ? [publicKey] : [],
       secondLevel: level === 'secondLevel' ? [publicKey] : [],
@@ -108,8 +126,9 @@ it.each([
   }
 )
 
-it('includes new recipients and deduplicates changed recipients using their current level', async () => {
-  const {params, createPrivatePart, readUploadedPayload} = setup()
+it('includes new legacy recipients and deduplicates changed V2 recipients using their current level', async () => {
+  const {publicKey, params, createPrivatePart, readUploadedPayload} =
+    await setup()
   const newPublicKey = otherRecipient.publicKeyPemBase64
   const result = await Effect.runPromise(
     updatePrivateParts({
@@ -134,7 +153,7 @@ it('includes new recipients and deduplicates changed recipients using their curr
 })
 
 it('adds club identities alongside changed social recipients and skips unchanged clubs', async () => {
-  const {params, createPrivatePart} = setup()
+  const {publicKey, connections, params, createPrivatePart} = await setup()
   const clubUuid = Schema.decodeUnknownSync(ClubUuid)(
     '00000000-0000-4000-8000-000000000001'
   )
@@ -185,12 +204,13 @@ it('adds club identities alongside changed social recipients and skips unchanged
 })
 
 it('preserves separate social and club removal counts and does not recreate removed recipients', async () => {
-  const {params, createPrivatePart, deletePrivatePart} = setup()
+  const {publicKey, connections, params, createPrivatePart, deletePrivatePart} =
+    await setup()
   const info = jest.spyOn(console, 'info').mockImplementation(() => undefined)
   const clubUuid = Schema.decodeUnknownSync(ClubUuid)(
     '00000000-0000-4000-8000-000000000001'
   )
-  const clubPublicKey = otherRecipient.publicKeyPemBase64
+  const clubPublicKey = (await Effect.runPromise(generateV2KeyPair())).publicKey
   await Effect.runPromise(
     updatePrivateParts({
       ...params,
@@ -198,24 +218,25 @@ it('preserves separate social and club removal counts and does not recreate remo
         ...connections,
         clubs: {[clubUuid]: [clubPublicKey]},
       },
-      connectionsToRefresh: [clubPublicKey],
+      targetConnections: {firstLevel: [], secondLevel: [], clubs: {}},
+      connectionsToRefresh: [publicKey, clubPublicKey],
     })
   )
   expect(createPrivatePart).not.toHaveBeenCalled()
   expect(deletePrivatePart).toHaveBeenCalledWith({
     adminIds: [params.adminId],
-    publicKeys: [clubPublicKey],
+    publicKeys: [publicKey, clubPublicKey],
   })
   expect(info).toHaveBeenLastCalledWith(
     expect.stringContaining(
-      'Number of removedConnections: 0. Number of removed clubs connections: 1.'
+      'Number of removedConnections: 1. Number of removed clubs connections: 1.'
     )
   )
   expect(reportErrorFromResourcesUtils).not.toHaveBeenCalled()
 })
 
 it('still reports existing recipients skipped by the background deadline', async () => {
-  const {params, createPrivatePart} = setup()
+  const {publicKey, params, createPrivatePart} = await setup()
   const result = await Effect.runPromise(
     updatePrivateParts({
       ...params,
@@ -231,7 +252,7 @@ it('still reports existing recipients skipped by the background deadline', async
 })
 
 it('does not report a completed refresh when an existing recipient upload fails', async () => {
-  const {params, createPrivatePart} = setup()
+  const {publicKey, params, createPrivatePart} = await setup()
   createPrivatePart.mockReturnValue(Effect.fail(new NotFoundError()))
   const result = await Effect.runPromise(
     updatePrivateParts({...params, connectionsToRefresh: [publicKey]})
@@ -241,7 +262,7 @@ it('does not report a completed refresh when an existing recipient upload fails'
 })
 
 it('reports a completed refresh when a recipient cannot be encrypted for', async () => {
-  const {params, createPrivatePart} = setup()
+  const {publicKey, params, createPrivatePart} = await setup()
   const brokenKey = Schema.decodeSync(PublicKeyPemBase64)('not-a-key')
   const result = await Effect.runPromise(
     updatePrivateParts({

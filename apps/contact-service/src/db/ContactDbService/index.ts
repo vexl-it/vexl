@@ -15,11 +15,6 @@ import {
   type FindFirstLevelContactsPublicKeysByHashFromPaginatedResult,
 } from './queries/createFindFirstLevelContactsPublicKeysByHashFromPaginated'
 import {
-  createFindNotificationTokensByFilter,
-  type FindNotificationTokensByFiltersArgs,
-  type FindNotificationTokensByFiltersResult,
-} from './queries/createFindNotificationTokensByFilter'
-import {
   createFindSecondLevelContactsPublicKeysByHashFromPaginated,
   type FindSecondLevelContactsPublicKeysByHashFromPaginatedParams,
   type FindSecondLevelContactsPublicKeysByHashFromPaginatedResult,
@@ -62,13 +57,6 @@ export interface ContactDbOperations {
     readonly FindCommonFriendsPaginatedResult[],
     UnexpectedServerError
   >
-
-  findNotificationTokensByFilter: (
-    args: FindNotificationTokensByFiltersArgs
-  ) => Effect.Effect<
-    readonly FindNotificationTokensByFiltersResult[],
-    UnexpectedServerError
-  >
 }
 
 export class ContactDbService extends Context.Tag('ContactDbService')<
@@ -90,9 +78,6 @@ export class ContactDbService extends Context.Tag('ContactDbService')<
       const findCommonFriendsPaginated = yield* _(
         createFindCommonFriendsByOwnerHashAndPublicKeysPaginated
       )
-      const findNotificationTokensByFilter = yield* _(
-        createFindNotificationTokensByFilter
-      )
 
       return {
         deleteContactsByHashFrom,
@@ -100,7 +85,6 @@ export class ContactDbService extends Context.Tag('ContactDbService')<
         insertContact,
         findFirstLevelContactsPublicKeysByHashFromPaginated,
         findSecondLevelContactsPublicKeysByHashFromPaginated,
-        findNotificationTokensByFilter,
         findCommonFriendsPaginated,
       }
     })

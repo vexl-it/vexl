@@ -1,7 +1,7 @@
 import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {
   VexlNotificationToken,
-  VexlNotificationTokenSecretNotTemporary,
+  VexlNotificationTokenSecret,
 } from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
@@ -31,7 +31,7 @@ export class NotificationSecretRecord extends Schema.Class<NotificationSecretRec
   'NotificationSecretRecord'
 )({
   id: NotificationSecretRecordId,
-  secret: VexlNotificationTokenSecretNotTemporary,
+  secret: VexlNotificationTokenSecret,
   expoNotificationToken: Schema.NullOr(ExpoNotificationToken),
   systemVexlToken: Schema.NullOr(VexlNotificationToken),
   marketingVexlToken: Schema.NullOr(VexlNotificationToken),

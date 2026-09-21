@@ -64,7 +64,6 @@ describe('Reactivate club', () => {
               club_id,
               public_key,
               public_key_v2,
-              notification_token,
               vexl_notification_token,
               last_refreshed_at,
               is_moderator
@@ -72,7 +71,6 @@ describe('Reactivate club', () => {
           SELECT
             id,
             'reactivate-test-key',
-            NULL,
             NULL,
             NULL,
             now(),

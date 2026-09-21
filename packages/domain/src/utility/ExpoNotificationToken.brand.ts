@@ -1,5 +1,4 @@
 import {Schema, String} from 'effect'
-import {FcmToken} from './FcmToken.brand'
 
 export const ExpoNotificationToken = Schema.String.pipe(
   Schema.brand('ExpoNotificationToken')
@@ -10,9 +9,3 @@ export const isExpoNotificationToken = (
   token: unknown
 ): token is ExpoNotificationToken =>
   String.isString(token) && String.startsWith('ExponentPushToken')(token)
-
-export const ExpoOrFcmNotificationToken = Schema.Union(
-  ExpoNotificationToken,
-  FcmToken
-)
-export type ExpoOrFcmNotificationToken = typeof ExpoOrFcmNotificationToken.Type

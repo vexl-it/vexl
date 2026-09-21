@@ -1,7 +1,6 @@
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
-import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {makeCommonAndSecurityHeaders} from '@vexl-next/rest-api/src/apiSecurity'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {hashPhoneNumber} from '@vexl-next/server-utils/src/generateUserAuthData'
@@ -58,11 +57,8 @@ export const generateKeysAndHasheForNumber = (numberRaw: string) =>
       hashedNumber,
       keys,
       authHeaders,
-      notificationToken: Schema.decodeSync(ExpoNotificationToken)(
-        `token:${number}`
-      ),
       vexlNotificationToken: Option.some(
-        Schema.decodeSync(VexlNotificationToken)('vexl_nt_test')
+        Schema.decodeSync(VexlNotificationToken)(`vexl_nt_${number}`)
       ),
       serverHashedNumber,
       serverHashedNumberForClient,
@@ -108,8 +104,6 @@ export const createAndImportUsersFromNetwork = (
     yield* _(
       app.User.createUser({
         payload: {
-          expoToken: user.notificationToken,
-          firebaseToken: null,
           vexlNotificationToken: user.vexlNotificationToken,
           publicKeyV2: Option.none(),
         },
@@ -148,8 +142,6 @@ export const createUserOnNetwork = (
     yield* _(
       app.User.createUser({
         payload: {
-          expoToken: user.notificationToken,
-          firebaseToken: null,
           vexlNotificationToken: user.vexlNotificationToken,
           publicKeyV2: Option.none(),
         },

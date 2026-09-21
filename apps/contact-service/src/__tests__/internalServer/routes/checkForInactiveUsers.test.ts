@@ -94,7 +94,6 @@ describe('Check for inactive club members', () => {
               clubId,
               publicKey: key.publicKeyPemBase64,
               publicKeyV2: null,
-              notificationToken: null,
               vexlNotificationToken: null,
               lastRefreshedAt,
               isModerator: false,

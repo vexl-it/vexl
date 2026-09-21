@@ -1,33 +1,13 @@
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {type UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
-import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
-import {type FcmToken} from '@vexl-next/domain/src/utility/FcmToken.brand'
 import {Context, Effect, Layer, type Option} from 'effect'
 import {type ServerHashedNumber} from '../../utils/serverHashContact'
 import {type UserRecord} from './domain'
-import {
-  createClearExpoTokenHeldByOtherUsers,
-  type ClearExpoTokenHeldByOtherUsersParams,
-} from './queries/createClearExpoTokenHeldByOtherUsers'
 import {
   createClearVexlNotificationTokenHeldByOtherUsers,
   type ClearVexlNotificationTokenHeldByOtherUsersParams,
 } from './queries/createClearVexlNotificationTokenHeldByOtherUsers'
 import {createDeleteUserByPublicKeyAndHash} from './queries/createDeleteUserByPublicKeyAndHash'
-import {
-  createFindFirebaseTokensOfUsersWhoHaveHashAsSecondLevelContact,
-  type FindFirebaseTokensOfUsersWhoHaveHashAsSecondLevelContactParams,
-  type FindFirebaseTokensOfUsersWhoHaveHashAsSecondLevelContactResult,
-} from './queries/createFindFirebaseTokensOfUsersWhoHaveHashAsSecondLevelContact'
-import {
-  createFindTokensOfUsersWhoDirectlyImportedHash,
-  type FindTokensOfUsersWhoDirectlyImportedHashParams,
-  type FindTokensOfUsersWhoDirectlyImportedHashResult,
-} from './queries/createFindTokenOfUsersWhoDirectlyImportedHash'
-import {
-  createFindTokensForNewContentNotification,
-  type FindFirebaseTokensForNewContentNotificationResults,
-} from './queries/createFindTokensForNewContentNotification'
 import {createFindUserByHash} from './queries/createFindUserByHash'
 import {createFindUserbyPublicKeyAndHash} from './queries/createFindUserByPublicKeyAndHash'
 import {
@@ -58,15 +38,9 @@ import {
   type UpdateAppSourceForUserParams,
 } from './queries/createUpdateAppSourceForUser'
 import {
-  createUpdateExpoToken,
-  type UpdateExpoTokenParams,
-} from './queries/createUpdateExpoToken'
-import {
   createUpdateInactivityNotificationSent,
   type UpdateInactivityNotificationSentParams,
 } from './queries/createUpdateInactivityNotificationSent'
-import {createUpdateInvalidateExpoToken} from './queries/createUpdateInvalidateExpoToken'
-import {createUpdateInvalidateFirebaseToken} from './queries/createUpdateInvalidateFirebaseToken'
 import {
   createUpdatePublicKeyV2,
   type UpdatePublicKeyV2Params,
@@ -81,10 +55,6 @@ import {
 } from './queries/createUpdateUserInitialImportDone'
 
 export interface UserDbOperations {
-  clearExpoTokenHeldByOtherUsers: (
-    args: ClearExpoTokenHeldByOtherUsersParams
-  ) => Effect.Effect<void, UnexpectedServerError>
-
   clearVexlNotificationTokenHeldByOtherUsers: (
     args: ClearVexlNotificationTokenHeldByOtherUsersParams
   ) => Effect.Effect<void, UnexpectedServerError>
@@ -101,20 +71,6 @@ export interface UserDbOperations {
     hash: ServerHashedNumber
     publicKey: PublicKeyPemBase64
   }) => Effect.Effect<Option.Option<UserRecord>, UnexpectedServerError>
-
-  findFirebaseTokensOfUsersWhoDirectlyImportedHash: (
-    args: FindTokensOfUsersWhoDirectlyImportedHashParams
-  ) => Effect.Effect<
-    readonly FindTokensOfUsersWhoDirectlyImportedHashResult[],
-    UnexpectedServerError
-  >
-
-  findFirebaseTokensOfUsersWhoHaveHAshAsSecondLevelContact: (
-    args: FindFirebaseTokensOfUsersWhoHaveHashAsSecondLevelContactParams
-  ) => Effect.Effect<
-    readonly FindFirebaseTokensOfUsersWhoHaveHashAsSecondLevelContactResult[],
-    UnexpectedServerError
-  >
 
   findVexlNotificationTokensOfUsersWhoDirectlyImportedHash: (
     args: FindVexlNotificationTokensOfUsersWhoDirectlyImportedHashParams
@@ -141,13 +97,6 @@ export interface UserDbOperations {
     args: UpdateInactivityNotificationSentParams
   ) => Effect.Effect<void, UnexpectedServerError>
 
-  findFirebaseTokensForNewContentNotification: (
-    beforeRefreshetAt: Date
-  ) => Effect.Effect<
-    readonly FindFirebaseTokensForNewContentNotificationResults[],
-    UnexpectedServerError
-  >
-
   findVexlNotificationTokensForNewContentNotification: (
     beforeRefreshetAt: Date
   ) => Effect.Effect<
@@ -162,18 +111,6 @@ export interface UserDbOperations {
 
   updateRefreshUser: (
     args: UpdateRefreshUserParams
-  ) => Effect.Effect<void, UnexpectedServerError>
-
-  updateExpoToken: (
-    args: UpdateExpoTokenParams
-  ) => Effect.Effect<void, UnexpectedServerError>
-
-  updateInvalidateFirebaseToken: (
-    args: FcmToken
-  ) => Effect.Effect<void, UnexpectedServerError>
-
-  updateInvalidateExpoToken: (
-    args: ExpoNotificationToken
   ) => Effect.Effect<void, UnexpectedServerError>
 
   updateUserInitialImportDone: (
@@ -196,9 +133,6 @@ export class UserDbService extends Context.Tag('UserDbService')<
   static readonly Live = Layer.effect(
     UserDbService,
     Effect.gen(function* (_) {
-      const clearExpoTokenHeldByOtherUsers = yield* _(
-        createClearExpoTokenHeldByOtherUsers
-      )
       const clearVexlNotificationTokenHeldByOtherUsers = yield* _(
         createClearVexlNotificationTokenHeldByOtherUsers
       )
@@ -211,20 +145,6 @@ export class UserDbService extends Context.Tag('UserDbService')<
         createDeleteUserByPublicKeyAndHash
       )
       const updateRefreshUser = yield* _(createUpdateRefreshUser)
-      const updateExpoToken = yield* _(createUpdateExpoToken)
-      const updateInvalidateFirebaseToken = yield* _(
-        createUpdateInvalidateFirebaseToken
-      )
-      const updateInvalidateExpoToken = yield* _(
-        createUpdateInvalidateExpoToken
-      )
-
-      const findFirebaseTokensOfUsersWhoDirectlyImportedHash = yield* _(
-        createFindTokensOfUsersWhoDirectlyImportedHash
-      )
-      const findFirebaseTokensOfUsersWhoHaveHAshAsSecondLevelContact = yield* _(
-        createFindFirebaseTokensOfUsersWhoHaveHashAsSecondLevelContact
-      )
 
       const findVexlNotificationTokensOfUsersWhoDirectlyImportedHash = yield* _(
         createFindVexlNotificationTokensOfUsersWhoDirectlyImportedHash
@@ -242,10 +162,6 @@ export class UserDbService extends Context.Tag('UserDbService')<
         createUpdateInactivityNotificationSent
       )
 
-      const findFirebaseTokensForNewContentNotification = yield* _(
-        createFindTokensForNewContentNotification
-      )
-
       const findVexlNotificationTokensForNewContentNotification = yield* _(
         createFindVexlNotificationTokensForNewContentNotification
       )
@@ -258,23 +174,16 @@ export class UserDbService extends Context.Tag('UserDbService')<
       const updatePublicKeyV2 = yield* _(createUpdatePublicKeyV2)
 
       return {
-        clearExpoTokenHeldByOtherUsers,
         clearVexlNotificationTokenHeldByOtherUsers,
         insertUser,
         findUserByHash,
         findUserByPublicKeyAndHash,
         deleteUserByPublicKeyAndHash,
         updateRefreshUser,
-        updateExpoToken,
-        updateInvalidateFirebaseToken,
-        updateInvalidateExpoToken,
-        findFirebaseTokensOfUsersWhoDirectlyImportedHash,
-        findFirebaseTokensOfUsersWhoHaveHAshAsSecondLevelContact,
         findVexlNotificationTokensOfUsersWhoDirectlyImportedHash,
         findVexlNotificationTokensOfUsersWhoHaveHashAsSecondLevelContact,
         findUsersToNotifyAboutInactivity,
         updateInactivityNotificationSent,
-        findFirebaseTokensForNewContentNotification,
         findVexlNotificationTokensForNewContentNotification,
         updateUserInitialImportDone,
         updateAppSourceForUser,

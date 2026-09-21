@@ -10,7 +10,6 @@ import clearMmkvStorageAndEmptyAtoms from '../clearMmkvStorageAndEmptyAtoms'
 import reportError from '../reportError'
 import {
   CRITICAL_KEYS_PRESENCE_RECORD_KEY,
-  FCM_CYPHER_TO_KEY_HOLDER_MMKV_KEY,
   STORED_CLUBS_V2_MMKV_KEY,
   VEXL_TOKEN_TO_KEY_HOLDER_MMKV_KEY,
 } from './criticalMmkvKeys'
@@ -127,32 +126,31 @@ describe('detectMmkvDataLoss', () => {
     )
   })
 
-  it.each([
-    STORED_CLUBS_V2_MMKV_KEY,
-    FCM_CYPHER_TO_KEY_HOLDER_MMKV_KEY,
-    VEXL_TOKEN_TO_KEY_HOLDER_MMKV_KEY,
-  ])('reports partial data loss when %s disappears', async (key) => {
-    storage._storage.set('__mmkv_data_exists', '1700000000000')
-    mockedAsyncStorage.getItem.mockImplementation(async (storageKey) => {
-      if (storageKey === ASYNC_SENTINEL_KEY) return '1700000000000'
-      if (storageKey === CRITICAL_KEYS_PRESENCE_RECORD_KEY) {
-        return JSON.stringify({presentKeys: [key]})
-      }
-      return null
-    })
+  it.each([STORED_CLUBS_V2_MMKV_KEY, VEXL_TOKEN_TO_KEY_HOLDER_MMKV_KEY])(
+    'reports partial data loss when %s disappears',
+    async (key) => {
+      storage._storage.set('__mmkv_data_exists', '1700000000000')
+      mockedAsyncStorage.getItem.mockImplementation(async (storageKey) => {
+        if (storageKey === ASYNC_SENTINEL_KEY) return '1700000000000'
+        if (storageKey === CRITICAL_KEYS_PRESENCE_RECORD_KEY) {
+          return JSON.stringify({presentKeys: [key]})
+        }
+        return null
+      })
 
-    detectMmkvDataLoss()
-    await flushDetection()
+      detectMmkvDataLoss()
+      await flushDetection()
 
-    expect(mockedReportError).toHaveBeenCalledWith(
-      'error',
-      expect.objectContaining({
-        message:
-          'MMKV partial data loss detected: critical keys disappeared since last launch',
-      }),
-      expect.objectContaining({disappearedKeys: [key]})
-    )
-  })
+      expect(mockedReportError).toHaveBeenCalledWith(
+        'error',
+        expect.objectContaining({
+          message:
+            'MMKV partial data loss detected: critical keys disappeared since last launch',
+        }),
+        expect.objectContaining({disappearedKeys: [key]})
+      )
+    }
+  )
 
   it('does not report partial data loss when the critical-keys record is missing', async () => {
     storage._storage.set('__mmkv_data_exists', '1700000000000')
@@ -244,7 +242,6 @@ describe('detectMmkvDataLoss', () => {
       recordCriticalMmkvKeyPersisted('messagingState'),
       recordCriticalMmkvKeyPersisted('offers'),
       recordCriticalMmkvKeyPersisted(STORED_CLUBS_V2_MMKV_KEY),
-      recordCriticalMmkvKeyPersisted(FCM_CYPHER_TO_KEY_HOLDER_MMKV_KEY),
       recordCriticalMmkvKeyPersisted(VEXL_TOKEN_TO_KEY_HOLDER_MMKV_KEY),
     ])
 
@@ -254,7 +251,6 @@ describe('detectMmkvDataLoss', () => {
           'messagingState',
           'offers',
           STORED_CLUBS_V2_MMKV_KEY,
-          FCM_CYPHER_TO_KEY_HOLDER_MMKV_KEY,
           VEXL_TOKEN_TO_KEY_HOLDER_MMKV_KEY,
         ],
       })

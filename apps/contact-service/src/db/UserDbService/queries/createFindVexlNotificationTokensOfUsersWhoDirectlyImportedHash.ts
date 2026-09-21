@@ -15,7 +15,7 @@ export type FindVexlNotificationTokensOfUsersWhoDirectlyImportedHashParams =
 
 export const FindVexlNotificationTokensOfUsersWhoDirectlyImportedHashResult =
   Schema.Struct({
-    vexlNotificationToken: Schema.NullOr(VexlNotificationToken),
+    vexlNotificationToken: VexlNotificationToken,
   })
 export type FindVexlNotificationTokensOfUsersWhoDirectlyImportedHashResult =
   typeof FindVexlNotificationTokensOfUsersWhoDirectlyImportedHashResult.Type

@@ -2,7 +2,6 @@ import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {StreamOnlyMessageCypher} from '@vexl-next/domain/src/general/messaging'
 import {UserInactivityNotificationVariant} from '@vexl-next/domain/src/general/notifications'
-import {NotificationCypher} from '@vexl-next/domain/src/general/notifications/NotificationCypher.brand'
 import {
   VexlNotificationToken,
   VexlNotificationTokenSecret,
@@ -13,7 +12,6 @@ import {
   createNotificationTrackingId,
   NotificationTrackingId,
 } from '@vexl-next/domain/src/general/NotificationTrackingId.brand'
-import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {
   UnixMilliseconds,
   unixMillisecondsNow,
@@ -38,9 +36,7 @@ import {
   type NotificationStreamError,
   type NotificationStreamMessage,
 } from '@vexl-next/rest-api/src/services/notification/Rpcs'
-import {Option, pipe, Schema, String, type Effect} from 'effect/index'
-
-const EXPO_PREFIX = 'expo-'
+import {Schema, type Effect} from 'effect/index'
 
 /**
  * The target token has no open socket connections (matching the minimal
@@ -67,26 +63,6 @@ export const StreamConnectionId = Schema.String.pipe(
 export type StreamConnectionId = typeof StreamConnectionId.Type
 export const newStreamConnectionId = (): StreamConnectionId =>
   Schema.decodeSync(StreamConnectionId)(generateUuid())
-
-export const vexlNotificationTokenToExpoToken = (
-  vexlNotificationToken: VexlNotificationToken
-): Option.Option<ExpoNotificationToken> => {
-  return pipe(
-    Option.some(vexlNotificationToken),
-    Option.filter(String.startsWith(EXPO_PREFIX)),
-    Option.map(String.replace(EXPO_PREFIX, '')),
-    Option.flatMap(Schema.decodeOption(ExpoNotificationToken))
-  )
-}
-
-export const vexlNotificationTokenFromExpoToken = (
-  expoNotificationToken: ExpoNotificationToken
-): VexlNotificationToken => {
-  return pipe(
-    String.concat(EXPO_PREFIX, expoNotificationToken),
-    Schema.decodeSync(VexlNotificationToken)
-  )
-}
 
 export const ConnectionManagerChannelId = Schema.String.pipe(
   Schema.brand('ConnectionManagerChannelId')
@@ -121,12 +97,7 @@ export class NewChatMessageNoticeSendTask extends Schema.TaggedClass<NewChatMess
     default: () => newSendMessageTaskId(),
   }),
   notificationToken: VexlNotificationTokenSecret,
-  // todo #2124 - remove this since notification cypher is not used anymore
-  targetCypher: Schema.optional(
-    Schema.Union(NotificationCypher, VexlNotificationToken)
-  ),
-  // todo #2124 - Remove nullOr
-  targetToken: Schema.optional(VexlNotificationToken),
+  targetToken: VexlNotificationToken,
   sendNewChatMessageNotification: Schema.Boolean,
   sentAt: Schema.optionalWith(UnixMilliseconds, {
     default: () => unixMillisecondsNow(),
@@ -139,7 +110,6 @@ export class NewChatMessageNoticeSendTask extends Schema.TaggedClass<NewChatMess
   get socketMessage(): NewChatMessageNoticeMessage {
     return new NewChatMessageNoticeMessage({
       sentAt: this.sentAt,
-      targetCypher: this.targetCypher,
       targetToken: this.targetToken,
       trackingId: this.trackingId,
     })
@@ -156,12 +126,7 @@ export class StreamOnlyChatMessageSendTask extends Schema.TaggedClass<StreamOnly
     default: () => newSendMessageTaskId(),
   }),
   notificationToken: VexlNotificationTokenSecret,
-  // todo #2124 - Remove
-  targetCypher: Schema.optional(
-    Schema.Union(NotificationCypher, VexlNotificationToken)
-  ),
-  // todo #2124 - Remove nullOr
-  targetToken: Schema.optional(VexlNotificationToken),
+  targetToken: VexlNotificationToken,
   message: StreamOnlyMessageCypher,
   sentAt: Schema.optionalWith(UnixMilliseconds, {
     default: () => unixMillisecondsNow(),
@@ -176,7 +141,6 @@ export class StreamOnlyChatMessageSendTask extends Schema.TaggedClass<StreamOnly
       sentAt: this.sentAt,
       trackingId: this.trackingId,
       message: this.message,
-      targetCypher: this.targetCypher,
       targetToken: this.targetToken,
     })
   }
@@ -192,12 +156,6 @@ export class NewUserNoticeSendTask extends Schema.TaggedClass<NewUserNoticeSendT
     default: () => newSendMessageTaskId(),
   }),
   notificationToken: VexlNotificationTokenSecret,
-  // todo #2124 - Remove
-  targetCypher: Schema.optional(
-    Schema.Union(NotificationCypher, VexlNotificationToken)
-  ),
-  // todo #2124 - Remove nullOr
-  targetToken: Schema.NullOr(VexlNotificationToken),
   sentAt: Schema.optionalWith(UnixMilliseconds, {
     default: () => unixMillisecondsNow(),
   }),
@@ -221,12 +179,6 @@ export class NewClubUserNoticeSendTask extends Schema.TaggedClass<NewClubUserNot
     default: () => newSendMessageTaskId(),
   }),
   notificationToken: VexlNotificationTokenSecret,
-  // todo #2124 - Remove
-  targetCypher: Schema.optional(
-    Schema.Union(NotificationCypher, VexlNotificationToken)
-  ),
-  // todo #2124 - Remove nullOr
-  targetToken: Schema.NullOr(VexlNotificationToken),
   sentAt: Schema.optionalWith(UnixMilliseconds, {
     default: () => unixMillisecondsNow(),
   }),
@@ -252,12 +204,6 @@ export class UserAdmittedToClubNoticeSendTask extends Schema.TaggedClass<UserAdm
     default: () => newSendMessageTaskId(),
   }),
   notificationToken: VexlNotificationTokenSecret,
-  // todo #2124 - Remove
-  targetCypher: Schema.optional(
-    Schema.Union(NotificationCypher, VexlNotificationToken)
-  ),
-  // todo #2124 - Remove nullOr
-  targetToken: Schema.NullOr(VexlNotificationToken),
   sentAt: Schema.optionalWith(UnixMilliseconds, {
     default: () => unixMillisecondsNow(),
   }),
@@ -283,12 +229,6 @@ export class UserInactivityNoticeSendTask extends Schema.TaggedClass<UserInactiv
     default: () => newSendMessageTaskId(),
   }),
   notificationToken: VexlNotificationTokenSecret,
-  // todo #2124 - Remove
-  targetCypher: Schema.optional(
-    Schema.Union(NotificationCypher, VexlNotificationToken)
-  ),
-  // todo #2124 - Remove nullOr
-  targetToken: Schema.NullOr(VexlNotificationToken),
   sentAt: Schema.optionalWith(UnixMilliseconds, {
     default: () => unixMillisecondsNow(),
   }),
@@ -316,12 +256,6 @@ export class UserLoginOnDifferentDeviceNoticeSendTask extends Schema.TaggedClass
     default: () => newSendMessageTaskId(),
   }),
   notificationToken: VexlNotificationTokenSecret,
-  // todo #2124 - Remove
-  targetCypher: Schema.optional(
-    Schema.Union(NotificationCypher, VexlNotificationToken)
-  ),
-  // todo #2124 - Remove nullOr
-  targetToken: Schema.NullOr(VexlNotificationToken),
   sentAt: Schema.optionalWith(UnixMilliseconds, {
     default: () => unixMillisecondsNow(),
   }),
@@ -345,12 +279,6 @@ export class ClubFlaggedNoticeSendTask extends Schema.TaggedClass<ClubFlaggedNot
     default: () => newSendMessageTaskId(),
   }),
   notificationToken: VexlNotificationTokenSecret,
-  // todo #2124 - Remove
-  targetCypher: Schema.optional(
-    Schema.Union(NotificationCypher, VexlNotificationToken)
-  ),
-  // todo #2124 - Remove nullOr
-  targetToken: Schema.NullOr(VexlNotificationToken),
   sentAt: Schema.optionalWith(UnixMilliseconds, {
     default: () => unixMillisecondsNow(),
   }),
@@ -376,12 +304,6 @@ export class ClubExpiredNoticeSendTask extends Schema.TaggedClass<ClubExpiredNot
     default: () => newSendMessageTaskId(),
   }),
   notificationToken: VexlNotificationTokenSecret,
-  // todo #2124 - Remove
-  targetCypher: Schema.optional(
-    Schema.Union(NotificationCypher, VexlNotificationToken)
-  ),
-  // todo #2124 - Remove nullOr
-  targetToken: Schema.NullOr(VexlNotificationToken),
   sentAt: Schema.optionalWith(UnixMilliseconds, {
     default: () => unixMillisecondsNow(),
   }),
@@ -407,12 +329,6 @@ export class NewContentNoticeSendTask extends Schema.TaggedClass<NewContentNotic
     default: () => newSendMessageTaskId(),
   }),
   notificationToken: VexlNotificationTokenSecret,
-  // todo #2124 - Remove
-  targetCypher: Schema.optional(
-    Schema.Union(NotificationCypher, VexlNotificationToken)
-  ),
-  // todo #2124 - Remove nullOr
-  targetToken: Schema.NullOr(VexlNotificationToken),
   sentAt: Schema.optionalWith(UnixMilliseconds, {
     default: () => unixMillisecondsNow(),
   }),
@@ -436,12 +352,6 @@ export class VexlProductNotificationSendTask extends Schema.TaggedClass<VexlProd
     default: () => newSendMessageTaskId(),
   }),
   notificationToken: VexlNotificationTokenSecret,
-  // todo #2124 - Remove
-  targetCypher: Schema.optional(
-    Schema.Union(NotificationCypher, VexlNotificationToken)
-  ),
-  // todo #2124 - Remove nullOr
-  targetToken: Schema.NullOr(VexlNotificationToken),
   sentAt: Schema.optionalWith(UnixMilliseconds, {
     default: () => unixMillisecondsNow(),
   }),

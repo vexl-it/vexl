@@ -132,11 +132,16 @@ jest.mock('../../../components/UploadingOfferProgressModal/atoms', () => {
   }
 })
 
-jest.mock('../../connections/atom/connectionStateAtom', () => {
-  const {atom} = jest.requireActual('jotai')
-  const {Effect} = jest.requireActual('effect')
-  return {syncConnectionsActionAtom: atom(null, () => Effect.void)}
-})
+jest.mock(
+  '../../connections/atom/updateAndReencryptAllConnectionsActionAtom',
+  () => {
+    const {atom} = jest.requireActual('jotai')
+    const {Effect} = jest.requireActual('effect')
+    return {
+      updateAndReencryptAllConnectionsActionAtom: atom(null, () => Effect.void),
+    }
+  }
+)
 
 jest.mock('../../connections/atom/noteToConnectionsAtom', () => {
   const {atom} = jest.requireActual('jotai')

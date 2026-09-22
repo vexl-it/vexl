@@ -12,7 +12,7 @@ import {
 import {type OfferEncryptionProgress} from '@vexl-next/resources-utils/src/offers/OfferEncryptionProgress'
 import updatePrivateParts from '@vexl-next/resources-utils/src/offers/updatePrivateParts'
 import {subtractArrays} from '@vexl-next/resources-utils/src/utils/array'
-import {Array, Effect, Option, Record, Schema, Struct} from 'effect'
+import {Array, Effect, Option, Record, Schema, Struct, Tuple} from 'effect'
 import {pipe} from 'fp-ts/function'
 import {atom, type SetStateAction, type WritableAtom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
@@ -42,6 +42,11 @@ import connectionStateAtom, {
 import {offersReencryptionStartedAtAtom} from './offersReencryptionStartedAtAtom'
 
 const BACKGROUND_TIME_LIMIT_MS = 25_000
+
+class SkippedBecauseTimeLimitReached extends Schema.TaggedError<SkippedBecauseTimeLimitReached>()(
+  'SkippedBecauseTimeLimitReached',
+  {}
+) {}
 
 // Full syncs and manual edits must not upload older payloads or clear each
 // other's pending refreshes. Keep the lock scoped to the Jotai store.
@@ -270,7 +275,7 @@ const processClubConnections = ({
         Array.difference(removedConnections)
       )
 
-      return [clubUuid, finalConnections] as const
+      return Tuple.make(clubUuid, finalConnections)
     }),
     Record.fromEntries
   )
@@ -388,9 +393,7 @@ const computeSingleOfferConnectionUpdateActionAtom = atom(
         !!stopProcessingAfter &&
         unixMillisecondsNow() > stopProcessingAfter
       ) {
-        return yield* _(
-          Effect.fail({_tag: 'SkippedBecauseTimeLimitReached' as const})
-        )
+        return yield* _(Effect.fail(new SkippedBecauseTimeLimitReached()))
       }
 
       const endOneOfferUpdateMeasure = startMeasure(

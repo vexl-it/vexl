@@ -8,6 +8,7 @@ import {
   OfferInfo,
   type OneOfferInState,
 } from '@vexl-next/domain/src/general/offers'
+import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import updateOffer from '@vexl-next/resources-utils/src/offers/updateOffer'
 import updatePrivateParts from '@vexl-next/resources-utils/src/offers/updatePrivateParts'
 import {PrivatePartEncryptionError} from '@vexl-next/resources-utils/src/offers/utils/encryptPrivatePart'
@@ -811,4 +812,46 @@ it('stores a fetched graph even when the user has no offers', async () => {
   await run(store)
   expect(store.get(connectionStateAtom)).toEqual(graph(['new-friend']))
   expect(updatePrivateParts).not.toHaveBeenCalled()
+})
+
+describe('graph fetched by the caller', () => {
+  const newer = {
+    ...graph(['new-friend']),
+    lastUpdate: Schema.decodeSync(UnixMilliseconds)(2),
+  }
+
+  it('is used without fetching again when newer than the baseline', async () => {
+    const store = setupStore()
+    await Effect.runPromise(
+      store.set(updateAndReencryptAllOffersConnectionsActionAtom, {
+        fetchedConnections: Option.some(newer),
+      })
+    )
+    expect(mockFetchGraph).not.toHaveBeenCalled()
+    expect(refreshSets()).toEqual([[publicKey]])
+    expect(store.get(connectionStateAtom)).toEqual(newer)
+  })
+
+  it('is fetched again under the lock when not newer than the baseline', async () => {
+    const store = setupStore()
+    store.set(connectionStateAtom, newer)
+    await Effect.runPromise(
+      store.set(updateAndReencryptAllOffersConnectionsActionAtom, {
+        fetchedConnections: Option.some(newer),
+      })
+    )
+    expect(mockFetchGraph).toHaveBeenCalledTimes(1)
+  })
+
+  it('keeps the stored graph without fetching when the caller fetch failed', async () => {
+    const store = setupStore()
+    await Effect.runPromise(
+      store.set(updateAndReencryptAllOffersConnectionsActionAtom, {
+        fetchedConnections: Option.none(),
+      })
+    )
+    expect(mockFetchGraph).not.toHaveBeenCalled()
+    expect(refreshSets()).toEqual([[]])
+    expect(store.get(connectionStateAtom)).toEqual(graph(['old-friend']))
+  })
 })

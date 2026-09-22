@@ -5,6 +5,7 @@ import {
 } from '@vexl-next/domain/src/general/notes'
 import {
   UnixMilliseconds,
+  UnixMilliseconds0,
   unixMillisecondsNow,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import updateNotePrivateParts from '@vexl-next/resources-utils/src/notes/updateNotePrivateParts'
@@ -23,8 +24,13 @@ import {
   notesStateAtom,
 } from '../../notes/atoms/notesState'
 import {sessionDataOrDummyAtom} from '../../session'
-import {NoteToConnectionsItems, type NoteToConnectionsItem} from '../domain'
+import {
+  NoteToConnectionsItems,
+  type ConnectionsState,
+  type NoteToConnectionsItem,
+} from '../domain'
 import {getConnectionsToRefresh} from '../utils/getChangedConnectionPublicKeys'
+import {resolveFetchedConnections} from '../utils/resolveFetchedConnections'
 import {fetchConnectionsActionAtom} from './connectionStateAtom'
 import {
   deleteRepostToConnectionsActionAtom,
@@ -157,6 +163,7 @@ export const updateAndReencryptAllNotesConnectionsActionAtom = atom(
     {
       isInBackground,
       onProgres,
+      fetchedConnections,
     }: {
       isInBackground?: boolean
       onProgres?: (args: {
@@ -164,6 +171,7 @@ export const updateAndReencryptAllNotesConnectionsActionAtom = atom(
         totalNotes: number
         progress: OfferEncryptionProgress
       }) => void
+      fetchedConnections?: Option.Option<ConnectionsState>
     }
   ): Effect.Effect<
     ReadonlyArray<
@@ -190,8 +198,14 @@ export const updateAndReencryptAllNotesConnectionsActionAtom = atom(
         `🗒️ Updating note connections. Total notes to update: ${noteConnections.length}. Total reposts to update: ${repostConnections.length}.`
       )
 
-      const fetched = yield* set(fetchConnectionsActionAtom).pipe(Effect.option)
       const previous = get(noteToConnectionsAtom).connectionsState
+      const fetched = yield* _(
+        resolveFetchedConnections({
+          fetchedConnections,
+          baselineLastUpdate: previous?.lastUpdate ?? UnixMilliseconds0,
+          fetch: () => set(fetchConnectionsActionAtom),
+        })
+      )
       const connectionState = Option.getOrElse(fetched, () => previous)
       if (!connectionState) {
         return [

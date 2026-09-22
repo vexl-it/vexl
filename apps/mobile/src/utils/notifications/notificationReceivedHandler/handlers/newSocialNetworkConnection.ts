@@ -2,8 +2,7 @@ import {type NewSocialNetworkConnectionNotificationData} from '@vexl-next/domain
 import {Effect} from 'effect/index'
 import {getDefaultStore} from 'jotai'
 import {apiAtom} from '../../../../api'
-import {updateAndReencryptAllNotesConnectionsActionAtom} from '../../../../state/connections/atom/noteToConnectionsAtom'
-import {updateAndReencryptAllOffersConnectionsActionAtom} from '../../../../state/connections/atom/offerToConnectionsAtom'
+import {updateAndReencryptAllConnectionsActionAtom} from '../../../../state/connections/atom/updateAndReencryptAllConnectionsActionAtom'
 import {reportNewConnectionNotificationForked} from '../../../../state/notifications/reportNewConnectionNotification'
 
 export function handleNewSocialNetworkConnectionNotification(
@@ -19,10 +18,7 @@ export function handleNewSocialNetworkConnectionNotification(
       store.get(apiAtom).metrics,
       notificationData.trackingId
     )
-    yield* store.set(updateAndReencryptAllOffersConnectionsActionAtom, {
-      isInBackground: true,
-    })
-    yield* store.set(updateAndReencryptAllNotesConnectionsActionAtom, {
+    yield* store.set(updateAndReencryptAllConnectionsActionAtom, {
       isInBackground: true,
     })
   })

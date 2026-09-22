@@ -46,8 +46,8 @@ import {
   createSingleRemovedClubAtom,
   markRemovedClubAsNotifiedActionAtom,
 } from '../../state/clubs/atom/removedClubsAtom'
-import {updateAndReencryptAllNotesConnectionsActionAtom} from '../../state/connections/atom/noteToConnectionsAtom'
 import {updateAndReencryptAllOffersConnectionsActionAtom} from '../../state/connections/atom/offerToConnectionsAtom'
+import {updateAndReencryptAllConnectionsActionAtom} from '../../state/connections/atom/updateAndReencryptAllConnectionsActionAtom'
 import {getKeyHolderForNotificationTokenOrCypherActionAtom} from '../../state/notifications/fcmCypherToKeyHolderAtom'
 import {reportNewConnectionNotificationForked} from '../../state/notifications/reportNewConnectionNotification'
 import {vexlNotificationTokenAtom} from '../../state/notifications/vexlNotificationTokenAtom'
@@ -155,12 +155,7 @@ const processNewUserNotificationActionAtom = atom(
         )
       )
       yield* _(
-        set(updateAndReencryptAllOffersConnectionsActionAtom, {
-          isInBackground: false,
-        })
-      )
-      yield* _(
-        set(updateAndReencryptAllNotesConnectionsActionAtom, {
+        set(updateAndReencryptAllConnectionsActionAtom, {
           isInBackground: false,
         })
       )

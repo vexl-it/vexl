@@ -10,9 +10,10 @@ import {
   MyNoteInState,
   newNoteId,
 } from '@vexl-next/domain/src/general/notes'
+import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import updateNotePrivateParts from '@vexl-next/resources-utils/src/notes/updateNotePrivateParts'
 import updateRepostNotePrivateParts from '@vexl-next/resources-utils/src/notes/updateRepostNotePrivateParts'
-import {Array, Effect, HashMap, Schema} from 'effect'
+import {Array, Effect, HashMap, Option, Schema} from 'effect'
 import {createStore} from 'jotai'
 import {notesAtom} from '../../notes/atoms/notesState'
 import {ConnectionsState, NoteToConnectionsItems} from '../domain'
@@ -452,4 +453,59 @@ it('refreshes common friends only for V2 recipients on initialization, changes, 
     store.get(noteToConnectionsAtom).noteToConnections[0]
       ?.pendingConnectionsToRefresh
   ).toEqual([])
+})
+
+describe('graph fetched by the caller', () => {
+  const friend = Schema.decodeSync(HashedPhoneNumber)('friend')
+  const newer = {
+    ...graph,
+    lastUpdate: Schema.decodeSync(UnixMilliseconds)(2),
+    commonFriends: HashMap.make([publicKey, [friend]]),
+  }
+
+  it('is used without fetching again when newer than the baseline', async () => {
+    const store = setup()
+    await run(store)
+    jest.mocked(fetchConnectionsActionAtom.write).mockClear()
+    await Effect.runPromise(
+      store.set(updateAndReencryptAllNotesConnectionsActionAtom, {
+        fetchedConnections: Option.some(newer),
+      })
+    )
+    expect(fetchConnectionsActionAtom.write).not.toHaveBeenCalled()
+    expect(jest.mocked(updateNotePrivateParts).mock.lastCall?.[0]).toEqual(
+      expect.objectContaining({
+        commonFriends: newer.commonFriends,
+        connectionsToRefresh: [publicKey],
+      })
+    )
+    expect(store.get(noteToConnectionsAtom).connectionsState).toEqual(newer)
+  })
+
+  it('is fetched again under the lock when not newer than the baseline', async () => {
+    const store = setup()
+    await run(store)
+    jest.mocked(fetchConnectionsActionAtom.write).mockClear()
+    await Effect.runPromise(
+      store.set(updateAndReencryptAllNotesConnectionsActionAtom, {
+        fetchedConnections: Option.some(graph),
+      })
+    )
+    expect(fetchConnectionsActionAtom.write).toHaveBeenCalledTimes(1)
+  })
+
+  it('reports every record as failed without fetching when the caller fetch failed', async () => {
+    const store = setup()
+    expect(
+      await Effect.runPromise(
+        store.set(updateAndReencryptAllNotesConnectionsActionAtom, {
+          fetchedConnections: Option.none(),
+        })
+      )
+    ).toEqual([
+      {adminId: note.ownershipInfo.adminId, success: false},
+      {repostId, success: false},
+    ])
+    expect(fetchConnectionsActionAtom.write).not.toHaveBeenCalled()
+  })
 })

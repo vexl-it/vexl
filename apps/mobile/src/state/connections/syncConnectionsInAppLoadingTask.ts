@@ -6,8 +6,7 @@ import {
 import {checkForClubsAdmissionActionAtom} from '../clubs/atom/checkForClubsAdmissionActionAtom'
 import {syncAllClubsHandleStateWhenNotFoundActionAtom} from '../clubs/atom/refreshClubsActionAtom'
 import {checkUserNeedsToImportContactsAndReencryptOffersActionAtom} from './atom/checkUserNeedsToImportAndReencryptOffersActionAtom'
-import {updateAndReencryptAllNotesConnectionsActionAtom} from './atom/noteToConnectionsAtom'
-import {updateAndReencryptAllOffersConnectionsActionAtom} from './atom/offerToConnectionsAtom'
+import {updateAndReencryptAllConnectionsActionAtom} from './atom/updateAndReencryptAllConnectionsActionAtom'
 
 export const syncConnectionsInAppTaskId = registerInAppLoadingTask({
   name: 'syncConnections',
@@ -20,12 +19,8 @@ export const syncConnectionsInAppTaskId = registerInAppLoadingTask({
   task: (store) =>
     Effect.gen(function* (_) {
       const syncClubs = store.set(syncAllClubsHandleStateWhenNotFoundActionAtom)
-      const updateOffers = store.set(
-        updateAndReencryptAllOffersConnectionsActionAtom,
-        {isInBackground: false}
-      )
-      const updateNotes = store.set(
-        updateAndReencryptAllNotesConnectionsActionAtom,
+      const updateConnections = store.set(
+        updateAndReencryptAllConnectionsActionAtom,
         {isInBackground: false}
       )
       const checkForClubAdmissions = store.set(checkForClubsAdmissionActionAtom)
@@ -36,9 +31,8 @@ export const syncConnectionsInAppTaskId = registerInAppLoadingTask({
       yield* _(
         checkForClubAdmissions,
         Effect.andThen(syncClubs),
-        Effect.andThen(updateOffers),
-        Effect.andThen(checkUserNeedsToImportContactsAndReencryptOffers),
-        Effect.andThen(updateNotes)
+        Effect.andThen(updateConnections),
+        Effect.andThen(checkUserNeedsToImportContactsAndReencryptOffers)
       )
     }),
 })

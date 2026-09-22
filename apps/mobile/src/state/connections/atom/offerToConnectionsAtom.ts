@@ -36,6 +36,7 @@ import {
 } from '../domain'
 import {getConnectionsToRefresh} from '../utils/getChangedConnectionPublicKeys'
 import {getOfferTargetConnections} from '../utils/getOfferTargetConnections'
+import {resolveFetchedConnections} from '../utils/resolveFetchedConnections'
 import connectionStateAtom, {
   fetchConnectionsActionAtom,
 } from './connectionStateAtom'
@@ -294,58 +295,66 @@ interface UpdateSingleOfferConnectionParams {
  * shared graph. Must run under connectionUpdatesSemaphoreAtom, including
  * when only one offer is being updated. A failed fetch keeps pending work.
  */
-const fetchAndQueueConnectionsActionAtom = atom(null, (get, set) =>
-  Effect.gen(function* (_) {
-    const previous = get(connectionStateAtom)
-    const fetched = yield* _(set(fetchConnectionsActionAtom), Effect.option)
+const fetchAndQueueConnectionsActionAtom = atom(
+  null,
+  (get, set, fetchedConnections?: Option.Option<ConnectionsState>) =>
+    Effect.gen(function* (_) {
+      const previous = get(connectionStateAtom)
+      const fetched = yield* _(
+        resolveFetchedConnections({
+          fetchedConnections,
+          baselineLastUpdate: previous.lastUpdate,
+          fetch: () => set(fetchConnectionsActionAtom),
+        })
+      )
 
-    set(deleteOrphanRecordsActionAtom)
-    set(ensureConnectionsForEveryOffer)
-    if (Option.isNone(fetched)) return previous
+      set(deleteOrphanRecordsActionAtom)
+      set(ensureConnectionsForEveryOffer)
+      if (Option.isNone(fetched)) return previous
 
-    const changedKeys = getConnectionsToRefresh(previous, fetched.value)
-    const records = Array.map(
-      get(offerToConnectionsAtom).offerToConnections,
-      (one) => {
-        const recipients = new Set([
-          ...one.connections.firstLevel,
-          ...one.connections.secondLevel,
-        ])
-        const pendingConnectionsToRefresh = Array.fromIterable(
-          new Set([
-            ...one.pendingConnectionsToRefresh,
-            ...Array.filter(changedKeys, (key) => recipients.has(key)),
+      const changedKeys = getConnectionsToRefresh(previous, fetched.value)
+      const records = Array.map(
+        get(offerToConnectionsAtom).offerToConnections,
+        (one) => {
+          const recipients = new Set([
+            ...one.connections.firstLevel,
+            ...one.connections.secondLevel,
           ])
-        )
-        if (
-          pendingConnectionsToRefresh.length ===
-            one.pendingConnectionsToRefresh.length &&
-          Array.every(
-            pendingConnectionsToRefresh,
-            (key, i) => key === one.pendingConnectionsToRefresh[i]
+          const pendingConnectionsToRefresh = Array.fromIterable(
+            new Set([
+              ...one.pendingConnectionsToRefresh,
+              ...Array.filter(changedKeys, (key) => recipients.has(key)),
+            ])
           )
-        )
-          return one
-        return {...one, pendingConnectionsToRefresh}
-      }
-    )
-    // A changed graph always writes, so queues left in memory by an earlier
-    // failed write are retried before the baseline advances.
-    if (Array.isNonEmptyArray(changedKeys))
-      set(offerToConnectionsAtom, (old) => ({
-        ...old,
-        offerToConnections: records,
-      }))
-    else set(setOfferConnectionRecordsIfChangedAtom, records)
+          if (
+            pendingConnectionsToRefresh.length ===
+              one.pendingConnectionsToRefresh.length &&
+            Array.every(
+              pendingConnectionsToRefresh,
+              (key, i) => key === one.pendingConnectionsToRefresh[i]
+            )
+          )
+            return one
+          return {...one, pendingConnectionsToRefresh}
+        }
+      )
+      // A changed graph always writes, so queues left in memory by an earlier
+      // failed write are retried before the baseline advances.
+      if (Array.isNonEmptyArray(changedKeys))
+        set(offerToConnectionsAtom, (old) => ({
+          ...old,
+          offerToConnections: records,
+        }))
+      else set(setOfferConnectionRecordsIfChangedAtom, records)
 
-    // If persisting the queues fails, keep the previous baseline so a restart
-    // can rediscover the work. Uploads can still use the fresh graph in memory.
-    if (offerToConnectionsAtom.flushNow()) {
-      set(connectionStateAtom, fetched.value)
-      connectionStateAtom.flushNow()
-    }
-    return fetched.value
-  })
+      // If persisting the queues fails, keep the previous baseline so a restart
+      // can rediscover the work. Uploads can still use the fresh graph in memory.
+      if (offerToConnectionsAtom.flushNow()) {
+        set(connectionStateAtom, fetched.value)
+        connectionStateAtom.flushNow()
+      }
+      return fetched.value
+    })
 )
 
 /**
@@ -509,6 +518,7 @@ export const updateAndReencryptAllOffersConnectionsActionAtom = atom(
     {
       isInBackground,
       onProgres,
+      fetchedConnections,
     }: {
       isInBackground?: boolean
       onProgres?: (args: {
@@ -516,6 +526,7 @@ export const updateAndReencryptAllOffersConnectionsActionAtom = atom(
         totalOffers: number
         progress: OfferEncryptionProgress
       }) => void
+      fetchedConnections?: Option.Option<ConnectionsState>
     }
   ): Effect.Effect<
     ReadonlyArray<{
@@ -524,7 +535,9 @@ export const updateAndReencryptAllOffersConnectionsActionAtom = atom(
     }>
   > =>
     Effect.gen(function* (_) {
-      const connectionState = yield* _(set(fetchAndQueueConnectionsActionAtom))
+      const connectionState = yield* _(
+        set(fetchAndQueueConnectionsActionAtom, fetchedConnections)
+      )
       const stopProcessingAfter: UnixMilliseconds | undefined = isInBackground
         ? Schema.decodeSync(UnixMilliseconds)(
             unixMillisecondsNow() + BACKGROUND_TIME_LIMIT_MS

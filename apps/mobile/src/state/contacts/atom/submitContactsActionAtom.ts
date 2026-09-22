@@ -19,11 +19,12 @@ import {formattingLocaleAtom} from '../../../utils/localization/formattingLocale
 import reportError from '../../../utils/reportError'
 import {waitForNextAnimationFrameEffect} from '../../../utils/runAfterAnimationFrames'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
+import {fistAndSecondLevelConnectionsReachAtom} from '../../connections/atom/connectionStateAtom'
 import {noteRecordsToReencryptCountAtom} from '../../connections/atom/noteToConnectionsAtom'
 import {offersToReencryptCountAtom} from '../../connections/atom/offerToConnectionsAtom'
 import {
+  persistentDataAboutReachAtom,
   updatePersistentDataAboutNumberOfImportedContactsActionAtom,
-  updatePersistentDataAboutReachActionAtom,
 } from '../../connections/atom/reachNumberWithoutClubsConnectionsMmkvAtom'
 import {updateAndReencryptAllConnectionsActionAtom} from '../../connections/atom/updateAndReencryptAllConnectionsActionAtom'
 import {areThereAnyMyOffersAtom} from '../../marketplace/atoms/myOffers'
@@ -773,7 +774,10 @@ export const submitContactsActionAtom = atom(
       set(needsFullContactsReplaceAfterContactEditAtom, false)
 
       set(updatePersistentDataAboutNumberOfImportedContactsActionAtom)
-      set(updatePersistentDataAboutReachActionAtom)
+      set(
+        persistentDataAboutReachAtom,
+        get(fistAndSecondLevelConnectionsReachAtom)
+      )
     }).pipe(
       Effect.tapError((e) => {
         set(hideContactImportProgressActionAtom, {

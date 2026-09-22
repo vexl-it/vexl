@@ -5,10 +5,7 @@ import {translationAtom} from '../../../utils/localization/I18nProvider'
 import reportError from '../../../utils/reportError'
 import {effectWithEnsuredBenchmark} from '../../ActionBenchmarks'
 import {submitContactsActionAtom} from '../../contacts/atom/submitContactsActionAtom'
-import {fistAndSecondLevelConnectionsReachAtom} from './connectionStateAtom'
-import {persistentDataAboutReachAndImportedContactsAtom} from './reachNumberWithoutClubsConnectionsMmkvAtom'
-
-const THRESHOLD_REACH_NUMBER = 50
+import {unexpectedReachDropDetectedAtom} from './connectionStateAtom'
 
 const showUnexpectedReachDropDialogActionAtom = atom(null, (get, set) => {
   return Effect.gen(function* (_) {
@@ -49,28 +46,17 @@ const showUnexpectedReachDropDialogActionAtom = atom(null, (get, set) => {
 })
 
 /**
- * This atom should check if user needs to be prompted to import contacts and re-encrypt offers
- * There were scenarios when user had 0 connections after update even though they imported contacts and had reach over threshold
- * This atom does not take clubs connections into consideration
+ * Prompts the user to re-import contacts after a connections fetch was rejected
+ * with UnexpectedReachDropError. This does not take clubs into consideration.
  */
 export const checkUserNeedsToImportContactsAndReencryptOffersActionAtom = atom(
   null,
   (get, set) => {
     return Effect.gen(function* (_) {
-      const firstAndSecondLevelConnectionsReach = get(
-        fistAndSecondLevelConnectionsReachAtom
-      )
-      const persistentDataAboutReachAndImportedContacts = get(
-        persistentDataAboutReachAndImportedContactsAtom
-      )
-      if (
-        firstAndSecondLevelConnectionsReach === 0 &&
-        persistentDataAboutReachAndImportedContacts.reach >
-          THRESHOLD_REACH_NUMBER &&
-        persistentDataAboutReachAndImportedContacts.numberOfImportedContacts > 0
-      ) {
-        yield* _(set(showUnexpectedReachDropDialogActionAtom))
-      }
+      if (!get(unexpectedReachDropDetectedAtom)) return
+
+      set(unexpectedReachDropDetectedAtom, false)
+      yield* _(set(showUnexpectedReachDropDialogActionAtom))
     }).pipe(
       effectWithEnsuredBenchmark(
         'check if user needs to import contacts and reencrypt offers'

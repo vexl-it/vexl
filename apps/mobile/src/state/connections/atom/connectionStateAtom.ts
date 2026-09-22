@@ -10,7 +10,7 @@ import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {FETCH_CONNECTIONS_PAGE_SIZE} from '@vexl-next/resources-utils/src/offers/utils/fetchContactsForOffer'
 import fetchAllPaginatedData from '@vexl-next/rest-api/src/fetchAllPaginatedData'
 import {type ContactApi} from '@vexl-next/rest-api/src/services/contact'
-import {Array, Effect, HashMap, Number, Option} from 'effect'
+import {Array, Effect, HashMap, Number, Option, Schema} from 'effect'
 import {pipe} from 'fp-ts/function'
 import {atom, type Atom} from 'jotai'
 import {apiAtom} from '../../../api'
@@ -27,6 +27,7 @@ import {clubsWithMembersAtom} from '../../clubs/atom/clubsWithMembersAtom'
 import {getClubReach} from '../../clubs/utils'
 import {ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom} from '../../contacts/atom/ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom'
 import {ConnectionsState} from '../domain'
+import {persistedReachRequiresConnectionsAtom} from './reachNumberWithoutClubsConnectionsMmkvAtom'
 
 const connectionStateAtom = atomWithParsedMmkvStorage(
   'connectionsStateV2',
@@ -41,6 +42,20 @@ const connectionStateAtom = atomWithParsedMmkvStorage(
 )
 
 export default connectionStateAtom
+
+export class UnexpectedReachDropError extends Schema.TaggedError<UnexpectedReachDropError>()(
+  'UnexpectedReachDropError',
+  {}
+) {}
+
+export const unexpectedReachDropDetectedAtom = atom(false)
+
+function firstAndSecondLevelConnections<T>(
+  firstLevel: readonly T[],
+  secondLevel: readonly T[]
+): T[] {
+  return deduplicate([...firstLevel, ...secondLevel])
+}
 
 function fetchContacts(
   level: 'FIRST' | 'SECOND',
@@ -77,6 +92,15 @@ export const fetchConnectionsActionAtom = atom(
           {concurrency: 'unbounded'}
         )
       )
+
+      const publicKeys = firstAndSecondLevelConnections(firstLevel, secondLevel)
+      if (
+        !Array.isNonEmptyArray(publicKeys) &&
+        get(persistedReachRequiresConnectionsAtom)
+      ) {
+        set(unexpectedReachDropDetectedAtom, true)
+        return yield* _(Effect.fail(new UnexpectedReachDropError()))
+      }
 
       // report difference
       // Forked and time-limited (like the metrics report below) so a hanging
@@ -162,7 +186,7 @@ export const fetchConnectionsActionAtom = atom(
         fetchAllPaginatedData({
           fetchEffectToRun: (nextPageToken) =>
             api.contact.fetchCommonConnectionsPaginated({
-              publicKeys: pipe([...firstLevel, ...secondLevel], deduplicate),
+              publicKeys,
               limit: FETCH_CONNECTIONS_PAGE_SIZE,
               nextPageToken,
             }),
@@ -233,15 +257,9 @@ export const fetchConnectionsActionAtom = atom(
 )
 
 export const fistAndSecondLevelConnectionsReachAtom = atom((get) => {
-  const connectionState = get(connectionStateAtom)
+  const {firstLevel, secondLevel} = get(connectionStateAtom)
 
-  // deduplicate to be double sure, even if we should not have duplicates here
-  const firstAndSecondLevelConnections = deduplicate([
-    ...connectionState.firstLevel,
-    ...connectionState.secondLevel,
-  ])
-
-  return firstAndSecondLevelConnections.length
+  return firstAndSecondLevelConnections(firstLevel, secondLevel).length
 })
 
 export const clubsConnectionsReachAtom = atom((get) => {

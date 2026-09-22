@@ -176,7 +176,7 @@ jest.mock(
         null,
         () => {}
       ),
-      updatePersistentDataAboutReachActionAtom: atom(null, () => {}),
+      persistentDataAboutReachAtom: atom(0),
     }
   }
 )

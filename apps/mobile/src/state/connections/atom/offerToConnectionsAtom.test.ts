@@ -25,6 +25,7 @@ import {
 import connectionStateAtom from './connectionStateAtom'
 import {offersReencryptionStartedAtAtom} from './offersReencryptionStartedAtAtom'
 import offerToConnectionsAtom, {
+  runningOffersBatchesAtom,
   updateAndReencryptAllOffersConnectionsActionAtom,
   updateAndReencryptSingleOfferConnectionActionAtom,
 } from './offerToConnectionsAtom'
@@ -744,14 +745,26 @@ it('retains work for offers skipped by the background deadline', async () => {
   }
 })
 
-it('serializes manual refreshes with full syncs so newer queued work is not cleared', async () => {
-  const store = setupStore([initial, second])
+it('lets an offer edit interrupt a running batch and restarts it afterwards', async () => {
+  const third = Schema.decodeUnknownSync(OfferToConnectionsItem)({
+    ...initial,
+    adminId: 'third-offer',
+  })
+  const store = setupStore([initial, second, third])
   const started = await Effect.runPromise(Deferred.make<undefined>())
+  const restarted = await Effect.runPromise(Deferred.make<undefined>())
   const release = await Effect.runPromise(Deferred.make<undefined>())
   jest
     .mocked(updatePrivateParts)
+    .mockReturnValueOnce(
+      Effect.succeed({...result(), removedConnections: [otherKey]})
+    )
     .mockImplementationOnce(() =>
-      Deferred.succeed(started, undefined).pipe(
+      Deferred.succeed(started, undefined).pipe(Effect.andThen(Effect.never))
+    )
+    .mockReturnValueOnce(Effect.succeed(result()))
+    .mockImplementationOnce(() =>
+      Deferred.succeed(restarted, undefined).pipe(
         Effect.andThen(Deferred.await(release)),
         Effect.as(result())
       )
@@ -763,34 +776,55 @@ it('serializes manual refreshes with full syncs so newer queued work is not clea
     store.set(updateAndReencryptAllOffersConnectionsActionAtom, {})
   )
   await Effect.runPromise(Deferred.await(started))
-  const manual = Effect.runFork(
+
+  // The edit completes while the batch's second offer would block forever.
+  await Effect.runPromise(
     store.set(updateAndReencryptSingleOfferConnectionActionAtom, {
       adminId: initial.adminId,
     })
   )
-  await Effect.runPromise(Effect.yieldNow())
-  expect(mockFetchGraph).toHaveBeenCalledTimes(1)
-  expect(Option.isNone(await Effect.runPromise(Fiber.poll(manual)))).toBe(true)
 
-  await Effect.runPromise(Deferred.succeed(release, undefined))
-  await Effect.runPromise(Fiber.join(batch))
-  await Effect.runPromise(Fiber.join(manual))
-  expect(refreshSets()).toEqual([[publicKey], [publicKey], [publicKey]])
+  expect(await Effect.runPromise(Fiber.join(batch))).toEqual([
+    {adminId: initial.adminId, success: true},
+    {adminId: second.adminId, success: false},
+    {adminId: third.adminId, success: false},
+  ])
+  await Effect.runPromise(Deferred.await(restarted))
+  expect(refreshSets()).toEqual([[publicKey], [publicKey], [publicKey], []])
   expect(store.get(connectionStateAtom)).toEqual(graph(['newer-friend']))
-  expect(
-    Array.map(
-      store.get(offerToConnectionsAtom).offerToConnections,
-      (one) => one.pendingConnectionsToRefresh
-    )
-  ).toEqual([[], [publicKey]])
-  await run(store)
+  expect(store.get(offerToConnectionsAtom).offerToConnections).toEqual([
+    {
+      ...initial,
+      connections: {...initial.connections, firstLevel: [publicKey]},
+      pendingConnectionsToRefresh: [],
+    },
+    {...second, pendingConnectionsToRefresh: [publicKey]},
+    {...third, pendingConnectionsToRefresh: [publicKey]},
+  ])
+
+  const restart = Option.getOrThrow(
+    Array.head(store.get(runningOffersBatchesAtom))
+  )
+  await Effect.runPromise(Deferred.succeed(release, undefined))
+  expect(await Effect.runPromise(Fiber.join(restart))).toEqual([
+    {adminId: initial.adminId, success: true},
+    {adminId: second.adminId, success: true},
+    {adminId: third.adminId, success: true},
+  ])
   expect(refreshSets()).toEqual([
     [publicKey],
     [publicKey],
     [publicKey],
     [],
     [publicKey],
+    [publicKey],
   ])
+  expect(
+    Array.map(
+      store.get(offerToConnectionsAtom).offerToConnections,
+      (one) => one.pendingConnectionsToRefresh
+    )
+  ).toEqual([[], [], []])
 })
 
 it('keeps the old baseline if the pending queues could not be persisted', async () => {

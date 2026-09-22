@@ -12,7 +12,17 @@ import {
 import {type OfferEncryptionProgress} from '@vexl-next/resources-utils/src/offers/OfferEncryptionProgress'
 import updatePrivateParts from '@vexl-next/resources-utils/src/offers/updatePrivateParts'
 import {subtractArrays} from '@vexl-next/resources-utils/src/utils/array'
-import {Array, Effect, Option, Record, Schema, Struct, Tuple} from 'effect'
+import {
+  Array,
+  Effect,
+  Exit,
+  Fiber,
+  Option,
+  Record,
+  Schema,
+  Struct,
+  Tuple,
+} from 'effect'
 import {pipe} from 'fp-ts/function'
 import {atom, type SetStateAction, type WritableAtom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
@@ -52,6 +62,23 @@ class SkippedBecauseTimeLimitReached extends Schema.TaggedError<SkippedBecauseTi
 // Full syncs and manual edits must not upload older payloads or clear each
 // other's pending refreshes. Keep the lock scoped to the Jotai store.
 const connectionUpdatesSemaphoreAtom = atom(() => Effect.unsafeMakeSemaphore(1))
+
+interface OfferConnectionsUpdateResult {
+  readonly adminId: OfferAdminId
+  readonly success: boolean
+}
+
+// All-offers batches holding or waiting for the lock. An offer edit interrupts
+// them instead of waiting behind a run that can hold the lock for a long time.
+export const runningOffersBatchesAtom = atom<
+  ReadonlyArray<Fiber.RuntimeFiber<readonly OfferConnectionsUpdateResult[]>>
+>([])
+
+const interruptRunningOffersBatchesActionAtom = atom(null, (get) =>
+  Effect.forEach(get(runningOffersBatchesAtom), Fiber.interrupt).pipe(
+    Effect.map(Array.some(Exit.isInterrupted))
+  )
+)
 
 const offerToConnectionsAtom = atomWithParsedMmkvStorage(
   'offer-to-connections',
@@ -491,25 +518,6 @@ const computeSingleOfferConnectionUpdateActionAtom = atom(
     })
 )
 
-export const updateAndReencryptSingleOfferConnectionActionAtom = atom(
-  null,
-  (get, set, params: UpdateSingleOfferConnectionParams) =>
-    Effect.gen(function* (_) {
-      const connectionState = yield* _(set(fetchAndQueueConnectionsActionAtom))
-      const {applyConnectionsUpdate} = yield* _(
-        set(computeSingleOfferConnectionUpdateActionAtom, {
-          ...params,
-          connectionState,
-        })
-      )
-      set(
-        createSingleOfferToConnectionsAtom(params.adminId),
-        applyConnectionsUpdate
-      )
-      offerToConnectionsAtom.flushNow()
-    }).pipe(get(connectionUpdatesSemaphoreAtom).withPermits(1))
-)
-
 export const updateAndReencryptAllOffersConnectionsActionAtom = atom(
   null,
   (
@@ -528,13 +536,10 @@ export const updateAndReencryptAllOffersConnectionsActionAtom = atom(
       }) => void
       fetchedConnections?: Option.Option<ConnectionsState>
     }
-  ): Effect.Effect<
-    ReadonlyArray<{
-      readonly adminId: OfferAdminId
-      readonly success: boolean
-    }>
-  > =>
-    Effect.gen(function* (_) {
+  ): Effect.Effect<readonly OfferConnectionsUpdateResult[]> => {
+    const completed: OfferConnectionsUpdateResult[] = []
+
+    const processAllOffers = Effect.gen(function* (_) {
       const connectionState = yield* _(
         set(fetchAndQueueConnectionsActionAtom, fetchedConnections)
       )
@@ -640,6 +645,11 @@ export const updateAndReencryptAllOffersConnectionsActionAtom = atom(
 
                 return {adminId, success: false}
               })
+            ),
+            Effect.tap((result) =>
+              Effect.sync(() => {
+                completed.push(result)
+              })
             )
           )
         }),
@@ -688,4 +698,71 @@ export const updateAndReencryptAllOffersConnectionsActionAtom = atom(
       ),
       get(connectionUpdatesSemaphoreAtom).withPermits(1)
     )
+
+    // The work runs in a child fiber so an offer edit can interrupt it while
+    // callers awaiting the batch still get a normal result.
+    return Effect.gen(function* (_) {
+      const batch = yield* _(Effect.fork(processAllOffers))
+      set(runningOffersBatchesAtom, Array.append(batch))
+      const exit = yield* _(
+        Fiber.await(batch),
+        Effect.ensuring(
+          Effect.sync(() => {
+            set(
+              runningOffersBatchesAtom,
+              Array.filter((one) => one !== batch)
+            )
+          })
+        )
+      )
+      if (!Exit.isInterrupted(exit)) return yield* _(exit)
+
+      const processed = new Set(Array.map(completed, (one) => one.adminId))
+      return [
+        ...completed,
+        ...pipe(
+          get(offerToConnectionsAtom).offerToConnections,
+          Array.filter((one) => !processed.has(one.adminId)),
+          Array.map(({adminId}) => ({adminId, success: false}))
+        ),
+      ]
+    })
+  }
+)
+
+export const updateAndReencryptSingleOfferConnectionActionAtom = atom(
+  null,
+  (get, set, params: UpdateSingleOfferConnectionParams) =>
+    Effect.gen(function* (_) {
+      const interruptedBatch = yield* _(
+        set(interruptRunningOffersBatchesActionAtom)
+      )
+      yield* _(
+        Effect.gen(function* (_) {
+          const connectionState = yield* _(
+            set(fetchAndQueueConnectionsActionAtom)
+          )
+          const {applyConnectionsUpdate} = yield* _(
+            set(computeSingleOfferConnectionUpdateActionAtom, {
+              ...params,
+              connectionState,
+            })
+          )
+          set(
+            createSingleOfferToConnectionsAtom(params.adminId),
+            applyConnectionsUpdate
+          )
+          offerToConnectionsAtom.flushNow()
+        }),
+        get(connectionUpdatesSemaphoreAtom).withPermits(1)
+      )
+      // The interrupted batch left its unprocessed offers queued; pick them up.
+      if (interruptedBatch)
+        yield* _(
+          set(updateAndReencryptAllOffersConnectionsActionAtom, {
+            isInBackground: false,
+          }),
+          Effect.forkDaemon
+        )
+    })
 )

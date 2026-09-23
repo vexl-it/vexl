@@ -7,6 +7,11 @@ import {type SqlError} from '@effect/sql/SqlError'
 import {Array, Effect, Option, pipe, Schema} from 'effect'
 import {randomInt} from 'node:crypto'
 import {isUniqueViolationError} from '../db'
+import {
+  cacheShortLinkTarget,
+  getCachedShortLinkTarget,
+  invalidateShortLinkTarget,
+} from './cache'
 
 interface ShortLinkRow {
   readonly slug: string
@@ -166,6 +171,7 @@ export const updateShortLinkTarget = (
       WHERE
         slug = ${slug}
     `)
+    yield* _(invalidateShortLinkTarget(slug))
 
     return yield* _(findShortLink(slug))
   })
@@ -182,11 +188,12 @@ export const deleteShortLink = (
       RETURNING
         slug
     `)
+    yield* _(invalidateShortLinkTarget(slug))
 
     return Array.isNonEmptyReadonlyArray(rows)
   })
 
-export const findShortLinkTarget = (
+const findShortLinkTargetInDb = (
   slug: string
 ): Effect.Effect<string | null, SqlError, PgClient.PgClient> =>
   Effect.gen(function* (_) {
@@ -208,6 +215,20 @@ export const findShortLinkTarget = (
       Option.map((row) => row.targetUrl),
       Option.getOrNull
     )
+  })
+
+// Targets are cached for a day on first use and dropped on edit or delete.
+export const findShortLinkTarget = (
+  slug: string
+): Effect.Effect<string | null, SqlError, PgClient.PgClient> =>
+  Effect.gen(function* (_) {
+    const cached = yield* _(getCachedShortLinkTarget(slug))
+    if (Option.isSome(cached)) return cached.value
+
+    const targetUrl = yield* _(findShortLinkTargetInDb(slug))
+    if (targetUrl !== null) yield* _(cacheShortLinkTarget(slug, targetUrl))
+
+    return targetUrl
   })
 
 // Only a per-day counter is kept: no IP, user agent, or referrer.

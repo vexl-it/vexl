@@ -28,6 +28,7 @@ const nextConfig = {
   // NOTE: `next dev` does not honour this for the instrumentation entry — see
   // the webpack externals below, which cover that case.
   serverExternalPackages: [
+    'ioredis',
     'pg',
     'pg-cursor',
     'pg-native',

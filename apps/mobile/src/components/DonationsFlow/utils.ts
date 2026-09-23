@@ -1,8 +1,20 @@
-import {type InvoicePaymentMethod} from '@vexl-next/rest-api/src/services/content/contracts'
+import {type TranslationKey} from '@vexl-next/localization/src/translations'
+import {
+  type InvoicePaymentMethod,
+  type InvoiceStatus,
+} from '@vexl-next/rest-api/src/services/content/contracts'
 import {DateTime} from 'luxon'
 import {type useTranslation} from '../../utils/localization/I18nProvider'
 
 const MILLISECONDS_TIMESTAMP_MIN_VALUE = 10_000_000_000
+
+export function donationStatusTranslationKey(
+  status: InvoiceStatus
+): TranslationKey {
+  return status === 'New'
+    ? 'donations.invoiceStatus.Created'
+    : `donations.invoiceStatus.${status}`
+}
 
 export function donationTitle({
   paymentMethod,

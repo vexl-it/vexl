@@ -23,6 +23,7 @@ function MyDonationsScreen({navigation}: Props): React.ReactElement {
 
   return (
     <Screen
+      noHorizontalPadding
       navigationBar={
         <NavigationBar
           style="back"

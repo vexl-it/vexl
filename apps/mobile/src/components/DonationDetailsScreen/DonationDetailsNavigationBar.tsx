@@ -1,4 +1,4 @@
-import {useRoute} from '@react-navigation/native'
+import {useNavigation, useRoute} from '@react-navigation/native'
 import {ChevronLeft, NavigationBar, TrashBin} from '@vexl-next/ui'
 import {Effect} from 'effect'
 import {useSetAtom} from 'jotai'
@@ -15,6 +15,7 @@ export function DonationDetailsNavigationBar({
   const {
     params: {invoiceId},
   } = useRoute<DonationsFlowScreenProps<'DonationDetails'>['route']>()
+  const navigation = useNavigation()
   const safeGoBack = useSafeGoBack()
   const deleteDonationWithConfirmation = useSetAtom(
     deleteDonationWithConfirmationActionAtom
@@ -34,7 +35,7 @@ export function DonationDetailsNavigationBar({
               Effect.andThen(
                 deleteDonationWithConfirmation(invoiceId),
                 (deleted) => {
-                  if (deleted) safeGoBack()
+                  if (deleted && navigation.isFocused()) safeGoBack()
                 }
               )
             )

@@ -95,11 +95,10 @@ function ContactsListSelect({
     setSubmitBarHeight(measuredSubmitBarHeight)
   }, [])
   const shouldShowSubmitBar = areThereAnyContactsToDisplayForSelectedTab
-  const effectiveSubmitBarHeight = shouldShowSubmitBar ? submitBarHeight : 0
   const keyboardBottomSpacerHeight = useKeyboardAwareFooterListPadding({
     footerHeight: 0,
     footerHeightFallback: 0,
-    keyboardHeightOffset: effectiveSubmitBarHeight,
+    keyboardHeightOffset: submitBarHeight,
   })
 
   const shouldShowEmptyContactsState =
@@ -150,7 +149,7 @@ function ContactsListSelect({
 
   return (
     <Stack f={1} pos="relative">
-      <Stack f={1} pb={effectiveSubmitBarHeight}>
+      <Stack f={1} pb={submitBarHeight}>
         <ContactsFilterBar
           items={contactsFilterItems}
           selectedFilter={selectedFilter}
@@ -223,20 +222,29 @@ function ContactsListSelect({
           />
         </Stack>
       </Stack>
-      {shouldShowSubmitBar ? (
-        <KeyboardStickyView
-          style={{position: 'absolute', left: 0, right: 0, bottom: 0}}
+      {/* Keep the footer measured and list viewports stable across empty tabs. */}
+      <KeyboardStickyView
+        style={{position: 'absolute', left: 0, right: 0, bottom: 0}}
+      >
+        <Stack
+          px="$5"
+          py="$4"
+          onLayout={handleSubmitBarLayout}
+          opacity={shouldShowSubmitBar ? 1 : 0}
+          pointerEvents={shouldShowSubmitBar ? 'auto' : 'none'}
+          aria-hidden={!shouldShowSubmitBar}
+          importantForAccessibility={
+            shouldShowSubmitBar ? 'auto' : 'no-hide-descendants'
+          }
         >
-          <Stack px="$5" py="$4" onLayout={handleSubmitBarLayout}>
-            <Button
-              disabled={isSubmittingContacts || isBulkSelectionPreparing}
-              onPress={submitSelectedContacts}
-            >
-              {t('common.submit')}
-            </Button>
-          </Stack>
-        </KeyboardStickyView>
-      ) : null}
+          <Button
+            disabled={isSubmittingContacts || isBulkSelectionPreparing}
+            onPress={submitSelectedContacts}
+          >
+            {t('common.submit')}
+          </Button>
+        </Stack>
+      </KeyboardStickyView>
       <PreparingContactsOverlay
         labelKey="contacts.processingContacts"
         visible={shouldShowSubmittingContactsOverlay}

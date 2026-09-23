@@ -16,14 +16,12 @@ interface ContactsListSceneProps {
     ReadonlyArray<Atom<StoredContactWithComputedValues>>
   >
   readonly emptyVariant: 'noContactsInSelectedFilter' | 'noMatchingContacts'
-  readonly isActive: boolean
   readonly keyboardBottomSpacerHeight: number
 }
 
 const ContactsListScene = React.memo(function ContactsListScene({
   contactsAtom,
   emptyVariant,
-  isActive,
   keyboardBottomSpacerHeight,
 }: ContactsListSceneProps): React.ReactElement {
   const contacts = useAtomValue(contactsAtom)
@@ -33,7 +31,6 @@ const ContactsListScene = React.memo(function ContactsListScene({
       <ContactsList
         contacts={contacts}
         emptyVariant={emptyVariant}
-        isActive={isActive}
         keyboardBottomSpacerHeight={keyboardBottomSpacerHeight}
       />
     </Stack>
@@ -86,7 +83,6 @@ function FilteredContacts({
           <ContactsListScene
             contactsAtom={allContactsToDisplayAtomsAtom}
             emptyVariant={emptyVariant}
-            isActive={contactsFilter === 'all'}
             keyboardBottomSpacerHeight={keyboardBottomSpacerHeight}
           />
         </RetainedScene>
@@ -96,7 +92,6 @@ function FilteredContacts({
           <ContactsListScene
             contactsAtom={newContactsToDisplayAtomsAtom}
             emptyVariant={emptyVariant}
-            isActive={contactsFilter === 'new'}
             keyboardBottomSpacerHeight={keyboardBottomSpacerHeight}
           />
         </RetainedScene>
@@ -106,7 +101,6 @@ function FilteredContacts({
           <ContactsListScene
             contactsAtom={submittedContactsToDisplayAtomsAtom}
             emptyVariant={emptyVariant}
-            isActive={contactsFilter === 'submitted'}
             keyboardBottomSpacerHeight={keyboardBottomSpacerHeight}
           />
         </RetainedScene>
@@ -116,7 +110,6 @@ function FilteredContacts({
           <ContactsListScene
             contactsAtom={nonSubmittedContactsToDisplayAtomsAtom}
             emptyVariant={emptyVariant}
-            isActive={contactsFilter === 'nonSubmitted'}
             keyboardBottomSpacerHeight={keyboardBottomSpacerHeight}
           />
         </RetainedScene>

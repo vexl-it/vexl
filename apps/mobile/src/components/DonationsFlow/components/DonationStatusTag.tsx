@@ -3,6 +3,7 @@ import {Stack, Typography} from '@vexl-next/ui'
 import React from 'react'
 import {styled} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
+import {donationStatusTranslationKey} from '../utils'
 
 const StatusTagFrame = styled(Stack, {
   name: 'DonationStatusTag',
@@ -23,6 +24,7 @@ export function DonationStatusTag({
   readonly status: InvoiceStatus
 }): React.ReactElement {
   const {t} = useTranslation()
+  const label = t(donationStatusTranslationKey(status))
 
   switch (status) {
     case 'New':
@@ -30,9 +32,7 @@ export function DonationStatusTag({
       return (
         <StatusTagFrame backgroundColor="$accentYellowSecondary">
           <Typography variant="micro" color="$accentHighlightPrimary">
-            {status === 'New'
-              ? t('donations.invoiceStatus.Created')
-              : t('donations.invoiceStatus.Processing')}
+            {label}
           </Typography>
         </StatusTagFrame>
       )
@@ -43,13 +43,7 @@ export function DonationStatusTag({
       return (
         <StatusTagFrame backgroundColor="$greenBackground">
           <Typography variant="micro" color="$greenForeground">
-            {status === 'Settled'
-              ? t('donations.invoiceStatus.Settled')
-              : status === 'Complete'
-                ? t('donations.invoiceStatus.Complete')
-                : status === 'Confirmed'
-                  ? t('donations.invoiceStatus.Confirmed')
-                  : t('donations.invoiceStatus.Paid')}
+            {label}
           </Typography>
         </StatusTagFrame>
       )
@@ -57,7 +51,7 @@ export function DonationStatusTag({
       return (
         <StatusTagFrame backgroundColor="$backgroundHighlight">
           <Typography variant="micro" color="$foregroundPrimary">
-            {t('donations.invoiceStatus.Expired')}
+            {label}
           </Typography>
         </StatusTagFrame>
       )
@@ -65,7 +59,7 @@ export function DonationStatusTag({
       return (
         <StatusTagFrame backgroundColor="$redBackground">
           <Typography variant="micro" color="$foregroundPrimary">
-            {t('donations.invoiceStatus.Invalid')}
+            {label}
           </Typography>
         </StatusTagFrame>
       )

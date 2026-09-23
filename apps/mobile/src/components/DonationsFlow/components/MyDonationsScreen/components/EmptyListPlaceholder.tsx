@@ -5,21 +5,37 @@ import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 
 interface Props {
   readonly onDonatePress: () => void
+  readonly variant?: 'noDonations' | 'noMatchingDonations'
 }
 
-function EmptyListPlaceholder({onDonatePress}: Props): React.ReactElement {
+function EmptyListPlaceholder({
+  onDonatePress,
+  variant = 'noDonations',
+}: Props): React.ReactElement {
   const {t} = useTranslation()
+  const isFiltered = variant === 'noMatchingDonations'
 
   return (
-    <YStack f={1} ai="center" jc="flex-start" gap="$9" px="$5" pt="$5">
-      <MyDonationsEmptyStateGraphic width={240} height={240} />
+    <YStack
+      f={isFiltered ? undefined : 1}
+      ai="center"
+      jc="flex-start"
+      gap="$9"
+      px="$5"
+      pt="$5"
+    >
+      {!isFiltered && <MyDonationsEmptyStateGraphic width={240} height={240} />}
       <YStack ai="center" gap="$4" width="100%" maxWidth={295}>
         <Typography
           variant="heading3"
           color="$foregroundPrimary"
           textAlign="center"
         >
-          {t('donationPrompt.giveLove')}
+          {t(
+            isFiltered
+              ? 'donations.filteredEmptyState.title'
+              : 'donations.emptyState.title'
+          )}
         </Typography>
         <YStack ai="center" gap="$4" width="100%">
           <Typography
@@ -27,16 +43,22 @@ function EmptyListPlaceholder({onDonatePress}: Props): React.ReactElement {
             color="$foregroundSecondary"
             textAlign="center"
           >
-            {t('donations.emptyState.description')}
+            {t(
+              isFiltered
+                ? 'donations.filteredEmptyState.description'
+                : 'donations.emptyState.description'
+            )}
           </Typography>
-          <Button
-            variant="tertiary"
-            size="small"
-            onPress={onDonatePress}
-            width="100%"
-          >
-            {t('donationPrompt.donate')}
-          </Button>
+          {!isFiltered && (
+            <Button
+              variant="tertiary"
+              size="small"
+              onPress={onDonatePress}
+              width="100%"
+            >
+              {t('donationPrompt.donate')}
+            </Button>
+          )}
         </YStack>
       </YStack>
     </YStack>

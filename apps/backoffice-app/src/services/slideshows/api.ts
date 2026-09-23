@@ -1,4 +1,5 @@
 import {Schema} from 'effect'
+import {jsonHeaders, requestJson, requestNoContent} from '../adminFetch'
 import {
   RequestUploadResponse as RequestUploadResponseSchema,
   type CreateSlideshowRequest,
@@ -8,34 +9,6 @@ import {
   type SlideshowResponse,
   type UpdateSlideshowRequest,
 } from './domain'
-
-const jsonHeaders = (adminToken: string): HeadersInit => ({
-  'Content-Type': 'application/json',
-  'x-admin-token': adminToken,
-})
-
-const readError = async (response: Response): Promise<string> => {
-  try {
-    const body = await response.json()
-    if (typeof body.error === 'string') return body.error
-    return response.statusText
-  } catch {
-    return response.statusText
-  }
-}
-
-const requestJson = async <A>(
-  input: RequestInfo | URL,
-  init: RequestInit
-): Promise<A> => {
-  const response = await fetch(input, init)
-
-  if (!response.ok) {
-    throw new Error(await readError(response))
-  }
-
-  return await response.json()
-}
 
 export const listSlideshows = (
   adminToken: string
@@ -75,19 +48,14 @@ export const updateSlideshow = (
     body: JSON.stringify(payload),
   })
 
-export const deleteSlideshow = async (
+export const deleteSlideshow = (
   adminToken: string,
   uuid: string
-): Promise<void> => {
-  const response = await fetch(`/api/admin/slideshows/${uuid}`, {
+): Promise<void> =>
+  requestNoContent(`/api/admin/slideshows/${uuid}`, {
     method: 'DELETE',
     headers: jsonHeaders(adminToken),
   })
-
-  if (!response.ok) {
-    throw new Error(await readError(response))
-  }
-}
 
 export const duplicateSlideshow = (
   adminToken: string,

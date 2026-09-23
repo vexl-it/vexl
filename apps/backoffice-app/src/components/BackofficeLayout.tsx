@@ -36,6 +36,11 @@ export function BackofficeLayout({children}: {children: React.ReactNode}) {
       href: '/slideshows',
       current: pathname.startsWith('/slideshows'),
     },
+    {
+      name: 'Short links',
+      href: '/short-links',
+      current: pathname.startsWith('/short-links'),
+    },
   ]
 
   return (

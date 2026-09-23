@@ -4,7 +4,7 @@ import {
   internalServerError,
   jsonOk,
   requireAdmin,
-} from '@/src/server/slideshows/http'
+} from '@/src/server/http'
 import {createSlideshowUpload} from '@/src/server/slideshows/s3'
 import {RequestUploadRequest} from '@/src/services/slideshows/domain'
 import {Effect, Either} from 'effect'

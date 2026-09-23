@@ -46,7 +46,9 @@ jobs:
 
       # The manifests already hold the right ECR repo per service, so updating
       # is just rewriting the image tag in every <env>/manifests/*/deployment.yaml
-      # — no per-service list to keep in sync with this repo.
+      # — no per-service list to keep in sync with this repo. A pod may run the
+      # same image in several containers (backoffice admin + public), so every
+      # container that shares the first container's image gets the new tag.
       - name: Update manifest image tags
         env:
           DEPLOY_ENV: ${{ inputs.env }}
@@ -59,7 +61,7 @@ jobs:
             exit 1
           fi
           for manifest in "${manifests[@]}"; do
-            yq -i '.spec.template.spec.containers[0].image |= sub(":[^:/]+$"; ":" + strenv(NEW_TAG))' "$manifest"
+            yq -i '.spec.template.spec.containers[0].image as $image | (.spec.template.spec.containers[] | select(.image == $image) | .image) |= sub(":[^:/]+$"; ":" + strenv(NEW_TAG))' "$manifest"
             echo "updated $manifest"
           done
 

@@ -1,4 +1,4 @@
-import {isDuplicatePublicSlugError, runDb} from '@/src/server/slideshows/db'
+import {isUniqueViolationError, runDb} from '@/src/server/db'
 import {
   badRequest,
   decodeJsonBody,
@@ -7,7 +7,7 @@ import {
   noContent,
   notFound,
   requireAdmin,
-} from '@/src/server/slideshows/http'
+} from '@/src/server/http'
 import {
   deleteSlideshow,
   findSlideshowByUuid,
@@ -74,7 +74,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
 
       return jsonOk({slideshow})
     } catch (error) {
-      if (isDuplicatePublicSlugError(error)) {
+      if (isUniqueViolationError(error)) {
         return badRequest('Public slug is already used')
       }
 

@@ -1,11 +1,11 @@
-import {runDb} from '@/src/server/slideshows/db'
+import {runDb} from '@/src/server/db'
 import {
   badRequest,
   internalServerError,
   jsonOk,
   notFound,
   requireAdmin,
-} from '@/src/server/slideshows/http'
+} from '@/src/server/http'
 import {regenerateSlideshowToken} from '@/src/server/slideshows/repository'
 import {Either, Schema} from 'effect'
 import {type NextRequest} from 'next/server'

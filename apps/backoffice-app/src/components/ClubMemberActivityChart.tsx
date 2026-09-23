@@ -14,15 +14,21 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
+import {
+  CHART_AXIS,
+  CHART_BLUE,
+  CHART_GRID,
+  CHART_MUTED,
+  CHART_RED,
+} from './chartTheme'
 
 const DAY_MS = 24 * 60 * 60 * 1000
 
-// Palette validated for CVD safety and >=3:1 contrast on white
-const BLUE = '#2a78d6'
-const RED = '#e34948'
-const GRID = '#e5e7eb'
-const AXIS = '#d1d5db'
-const MUTED = '#6b7280'
+const BLUE = CHART_BLUE
+const RED = CHART_RED
+const GRID = CHART_GRID
+const AXIS = CHART_AXIS
+const MUTED = CHART_MUTED
 
 const RANGES = [
   {label: '1m', days: 30},

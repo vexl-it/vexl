@@ -3,6 +3,7 @@
 import {SlideshowForm} from '@/src/components/slideshows/SlideshowForm'
 import {getAdminToken} from '@/src/services/adminTokenService'
 import {copyToClipboard} from '@/src/services/clipboard'
+import {publicUrl, usePublicHosts} from '@/src/services/publicHosts'
 import {
   getSlideshow,
   regenerateSlideshowToken,
@@ -22,10 +23,11 @@ interface SubmitData {
   readonly slides: SlideshowSlides
 }
 
-const getPublicPath = (slideshow: TvSlideshow): string =>
-  `/tv/slideshows/${slideshow.publicSlug ?? slideshow.publicToken}`
+const getPublicIdentifier = (slideshow: TvSlideshow): string =>
+  slideshow.publicSlug ?? slideshow.publicToken
 
 export default function EditSlideshowPage() {
+  const hosts = usePublicHosts()
   const params = useParams<{uuid: string}>()
   const [slideshow, setSlideshow] = useState<TvSlideshow | null>(null)
   const [loading, setLoading] = useState(true)
@@ -112,7 +114,7 @@ export default function EditSlideshowPage() {
 
   const handleCopyUrl = async () => {
     if (!slideshow) return
-    const tvUrl = `${window.location.origin}${getPublicPath(slideshow)}`
+    const tvUrl = publicUrl(hosts.slideshows, getPublicIdentifier(slideshow))
 
     try {
       await copyToClipboard(tvUrl)
@@ -154,7 +156,7 @@ export default function EditSlideshowPage() {
             Edit slideshow
           </h1>
           <p className="mt-2 break-all text-sm text-gray-700">
-            {getPublicPath(slideshow)}
+            {publicUrl(hosts.slideshows, getPublicIdentifier(slideshow))}
           </p>
         </div>
         <div className="mt-4 flex flex-wrap gap-2 sm:mt-0">

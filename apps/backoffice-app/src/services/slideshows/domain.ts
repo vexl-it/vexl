@@ -1,25 +1,5 @@
 import {Schema} from 'effect'
-
-const HttpsUrl = Schema.String.pipe(
-  Schema.filter((url) => {
-    try {
-      return new URL(url).protocol === 'https:'
-    } catch {
-      return false
-    }
-  })
-)
-
-const AssetUrl = Schema.String.pipe(
-  Schema.filter((url) => {
-    try {
-      const protocol = new URL(url).protocol
-      return protocol === 'https:' || protocol === 'http:'
-    } catch {
-      return false
-    }
-  })
-)
+import {HttpsUrl, HttpUrl} from '../urlSchemas'
 
 export const SlideDurationSeconds = Schema.Int.pipe(
   Schema.greaterThanOrEqualTo(1),
@@ -37,7 +17,7 @@ export type OptionalPublicSlug = typeof OptionalPublicSlug.Type
 export const ImageSlide = Schema.Struct({
   uuid: Schema.UUID,
   type: Schema.Literal('image'),
-  url: AssetUrl,
+  url: HttpUrl,
   s3Key: Schema.NonEmptyString,
   fit: Schema.Literal('cover', 'contain'),
   durationSeconds: SlideDurationSeconds,
@@ -46,7 +26,7 @@ export const ImageSlide = Schema.Struct({
 export const VideoSlide = Schema.Struct({
   uuid: Schema.UUID,
   type: Schema.Literal('video'),
-  url: AssetUrl,
+  url: HttpUrl,
   s3Key: Schema.NonEmptyString,
   durationSeconds: SlideDurationSeconds,
 })
@@ -121,7 +101,7 @@ export type RequestUploadRequest = typeof RequestUploadRequest.Type
 
 export const RequestUploadResponse = Schema.Struct({
   presignedUrl: Schema.NonEmptyString,
-  assetUrl: AssetUrl,
+  assetUrl: HttpUrl,
   s3Key: Schema.NonEmptyString,
   contentType: Schema.NonEmptyString,
   expiresIn: Schema.Int,

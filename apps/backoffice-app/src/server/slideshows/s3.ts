@@ -7,7 +7,7 @@ import {PutObjectCommand, S3Client} from '@aws-sdk/client-s3'
 import {getSignedUrl} from '@aws-sdk/s3-request-presigner'
 import {type ConfigError, Effect, Schema} from 'effect'
 import {randomUUID} from 'node:crypto'
-import {slideshowS3Config} from './config'
+import {slideshowS3Config} from '../config'
 
 export class S3UploadRequestError extends Schema.TaggedError<S3UploadRequestError>(
   'S3UploadRequestError'

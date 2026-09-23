@@ -2,6 +2,7 @@
 
 import {getAdminToken} from '@/src/services/adminTokenService'
 import {copyToClipboard} from '@/src/services/clipboard'
+import {publicUrl, usePublicHosts} from '@/src/services/publicHosts'
 import {
   deleteSlideshow,
   duplicateSlideshow,
@@ -15,10 +16,8 @@ import {useCallback, useEffect, useRef, useState} from 'react'
 const getPublicIdentifier = (slideshow: TvSlideshow): string =>
   slideshow.publicSlug ?? slideshow.publicToken
 
-const getTvUrl = (slideshow: TvSlideshow): string =>
-  `${window.location.origin}/tv/slideshows/${getPublicIdentifier(slideshow)}`
-
 export default function SlideshowsPage() {
+  const hosts = usePublicHosts()
   const [slideshows, setSlideshows] = useState<readonly TvSlideshow[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -64,7 +63,7 @@ export default function SlideshowsPage() {
 
   const handleCopyUrl = async (slideshow: TvSlideshow) => {
     const publicIdentifier = getPublicIdentifier(slideshow)
-    const tvUrl = getTvUrl(slideshow)
+    const tvUrl = publicUrl(hosts.slideshows, publicIdentifier)
 
     try {
       await copyToClipboard(tvUrl)
@@ -225,7 +224,7 @@ export default function SlideshowsPage() {
                           </div>
                           {!!slideshow.publicSlug && (
                             <div className="mt-1 font-mono text-xs text-indigo-700">
-                              /tv/slideshows/{slideshow.publicSlug}
+                              {hosts.slideshows}/{slideshow.publicSlug}
                             </div>
                           )}
                         </td>

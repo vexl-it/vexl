@@ -48,8 +48,12 @@ export const requireAdmin = async (
   throw new Error('Failed to validate admin token')
 }
 
-export const internalServerError = (error: unknown): NextResponse => {
-  console.error('Backoffice slideshow API error:', error)
+export const reportError = (error: unknown): void => {
+  console.error('Backoffice API error:', error)
   Sentry.captureException(error)
+}
+
+export const internalServerError = (error: unknown): NextResponse => {
+  reportError(error)
   return NextResponse.json({error: 'Internal server error'}, {status: 500})
 }

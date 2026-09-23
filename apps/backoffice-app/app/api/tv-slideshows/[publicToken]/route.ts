@@ -1,9 +1,5 @@
-import {runDb} from '@/src/server/slideshows/db'
-import {
-  internalServerError,
-  jsonOk,
-  notFound,
-} from '@/src/server/slideshows/http'
+import {runDb} from '@/src/server/db'
+import {internalServerError, jsonOk, notFound} from '@/src/server/http'
 import {findEnabledSlideshowByPublicIdentifier} from '@/src/server/slideshows/repository'
 import {type NextRequest} from 'next/server'
 

@@ -23,7 +23,6 @@
   "tradeChecklist.exchangeDetails.requestHeading": "Cosa vuoi scambiare?",
   "tradeChecklist.exchangeDetails.respondHeading": "Controlla i tuoi dati",
   "tradeChecklist.exchangeDetails.respondDescription": "Condividerete entrambi gli stessi dati. Controlla i tuoi prima di accettare.",
-  "tradeChecklist.exchangeDetails.sharedWithYou": "Condiviso con te",
   "tradeChecklist.exchangeDetails.everythingShared": "Avete scambiato tutto ciò che si poteva condividere.",
   "tradeChecklist.exchangeDetails.pendingHeading": "In attesa della sua risposta",
   "tradeChecklist.exchangeDetails.pendingDescription": "Hai chiesto: {{details}}. L'altra persona non ha ancora risposto. Se chiedi di nuovo, invii la stessa richiesta un'altra volta.",

@@ -23,7 +23,6 @@
   "tradeChecklist.exchangeDetails.requestHeading": "你想交换什么？",
   "tradeChecklist.exchangeDetails.respondHeading": "检查你的信息",
   "tradeChecklist.exchangeDetails.respondDescription": "你们双方会分享相同的信息。同意前请检查你的信息。",
-  "tradeChecklist.exchangeDetails.sharedWithYou": "与你分享的信息",
   "tradeChecklist.exchangeDetails.everythingShared": "你们已经交换了所有可以分享的信息。",
   "tradeChecklist.exchangeDetails.pendingHeading": "等待对方回复",
   "tradeChecklist.exchangeDetails.pendingDescription": "你请求了：{{details}}。对方还没有回复。再次请求会重新发送同样的请求。",

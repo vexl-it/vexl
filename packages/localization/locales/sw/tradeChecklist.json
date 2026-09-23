@@ -23,7 +23,6 @@
   "tradeChecklist.exchangeDetails.requestHeading": "Ungependa kubadilishana nini?",
   "tradeChecklist.exchangeDetails.respondHeading": "Kagua taarifa zako",
   "tradeChecklist.exchangeDetails.respondDescription": "Nyote mtashiriki taarifa zilezile. Kagua zako kabla ya kukubali.",
-  "tradeChecklist.exchangeDetails.sharedWithYou": "Imeshirikiwa nawe",
   "tradeChecklist.exchangeDetails.everythingShared": "Mmebadilishana kila kitu kinachoweza kushirikiwa.",
   "tradeChecklist.exchangeDetails.pendingHeading": "Unasubiri jibu la mtu mwingine",
   "tradeChecklist.exchangeDetails.pendingDescription": "Uliomba: {{details}}. Mtu mwingine bado hajajibu. Ukiomba tena, ombi hilohilo litatumwa mara nyingine.",

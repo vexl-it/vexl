@@ -20,6 +20,7 @@ function RevealIdentityCell(): React.ReactElement {
   return (
     <ChecklistCell
       icon={EyeShut}
+      pressable
       state={mapTradeChecklistItemStatusToUiState(itemStatus)}
       subtitle={t('tradeChecklist.exchangeDetails.checklistSubtitle')}
       onPress={() => {

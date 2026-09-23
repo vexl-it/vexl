@@ -8,6 +8,7 @@ import {type RootStackScreenProps} from '../../../navigationTypes'
 import {type ChatMessageWithState} from '../../../state/chat/domain'
 import anonymizePhoneNumber from '../../../state/chat/utils/anonymizePhoneNumber'
 import {
+  anonymizedUserDataAtom,
   userDataRealOrAnonymizedAtom,
   userPhoneNumberAtom,
 } from '../../../state/session/userDataAtoms'
@@ -130,6 +131,7 @@ function OutcomeCard({event}: {event: RevealEvent}): React.ReactElement {
   const otherSideData = useAtomValue(otherSideDataAtom)
   const otherSideImage = otherSideData.image
   const myRealLifeInfo = useAtomValue(userDataRealOrAnonymizedAtom)
+  const myAnonymousInfo = useAtomValue(anonymizedUserDataAtom)
   const myPhoneNumber = useAtomValue(userPhoneNumberAtom)
 
   const {mine, theirs} = exchangedDetailsForEvent(chat, event)
@@ -161,8 +163,10 @@ function OutcomeCard({event}: {event: RevealEvent}): React.ReactElement {
       contactName={otherSideData.userName}
       fullPhoneNumber={theirFullPhoneNumber}
       leftSide={{
-        image: myRealLifeInfo.image,
-        name: myRealLifeInfo.userName,
+        image: mine.photo ? myRealLifeInfo.image : myAnonymousInfo.image,
+        name: mine.nickname
+          ? myRealLifeInfo.userName
+          : myAnonymousInfo.userName,
         phoneNumber: mine.phoneNumber
           ? getInternationalPhoneNumber(myPhoneNumber)
           : anonymizePhoneNumber(myPhoneNumber),

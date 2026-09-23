@@ -251,29 +251,24 @@ function ExchangeDetailsScreen(): React.ReactElement {
     <TradeChecklistItemPageLayout
       header={{
         title: t('tradeChecklist.exchangeDetails.title'),
-        onBackPress: closeFlow,
         rightActions: [{icon: XmarkCancelClose, onPress: closeFlow}],
       }}
+      hideLeftChevron
       bottomButton={bottomButton}
       footer={
-        bottomButton ? (
-          <Typography
-            variant="description"
-            color="$foregroundSecondary"
-            textAlign="center"
-          >
-            {t('tradeChecklist.exchangeDetails.privacyNote')}
-          </Typography>
-        ) : undefined
+        <Typography
+          variant="description"
+          color="$foregroundSecondary"
+          textAlign="center"
+        >
+          {mode === 'complete'
+            ? t('tradeChecklist.exchangeDetails.everythingShared')
+            : t('tradeChecklist.exchangeDetails.privacyNote')}
+        </Typography>
       }
     >
       <Stack gap="$5" pt="$4">
         <SharedProfile />
-        {mode === 'complete' ? (
-          <Typography variant="description" color="$foregroundSecondary">
-            {t('tradeChecklist.exchangeDetails.everythingShared')}
-          </Typography>
-        ) : null}
         {mode === 'pending' ? (
           <YStack gap="$2">
             <Typography variant="heading3" color="$foregroundPrimary">

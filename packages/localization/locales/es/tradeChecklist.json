@@ -24,6 +24,7 @@
   "tradeChecklist.exchangeDetails.respondHeading": "Revisa tus datos",
   "tradeChecklist.exchangeDetails.respondDescription": "Los dos compartirán los mismos datos. Revisa los tuyos antes de aceptar.",
   "tradeChecklist.exchangeDetails.nickname": "Apodo",
+  "tradeChecklist.exchangeDetails.nicknameNotSet": "Activa para definir",
   "tradeChecklist.exchangeDetails.phoneNumber": "Número de teléfono",
   "tradeChecklist.exchangeDetails.photo": "Foto de perfil",
   "tradeChecklist.exchangeDetails.noPhotoYet": "Aún no hay foto",

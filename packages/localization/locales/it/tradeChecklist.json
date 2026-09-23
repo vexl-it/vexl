@@ -24,6 +24,7 @@
   "tradeChecklist.exchangeDetails.respondHeading": "Controlla i tuoi dati",
   "tradeChecklist.exchangeDetails.respondDescription": "Condividerete entrambi gli stessi dati. Controlla i tuoi prima di accettare.",
   "tradeChecklist.exchangeDetails.nickname": "Nickname",
+  "tradeChecklist.exchangeDetails.nicknameNotSet": "Attiva per impostare",
   "tradeChecklist.exchangeDetails.phoneNumber": "Numero di telefono",
   "tradeChecklist.exchangeDetails.photo": "Foto profilo",
   "tradeChecklist.exchangeDetails.noPhotoYet": "Ancora nessuna foto",

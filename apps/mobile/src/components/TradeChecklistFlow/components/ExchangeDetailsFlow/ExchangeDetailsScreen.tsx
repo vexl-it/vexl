@@ -45,13 +45,14 @@ function NicknameRow(): React.ReactElement {
   const {t} = useTranslation()
   const {phoneNumber} = useAtomValue(sessionDataOrDummyAtom)
   const selected = useAtomValue(exchangeDetailsSelectionAtom).nickname
+  const nickname = useAtomValue(exchangeDetailsNicknameAtom).trim()
   const toggle = useSetAtom(toggleExchangeDetailActionAtom)
 
   return (
     <YStack gap="$2">
       <RowCheckbox
         label={t('tradeChecklist.exchangeDetails.nickname')}
-        description={anonymizePhoneNumber(phoneNumber)}
+        description={`${nickname || t('tradeChecklist.exchangeDetails.nicknameNotSet')} · ${anonymizePhoneNumber(phoneNumber)}`}
         checked={selected}
         onCheckedChange={() => {
           toggle('nickname')

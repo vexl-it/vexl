@@ -24,6 +24,7 @@
   "tradeChecklist.exchangeDetails.respondHeading": "Sprawdź swoje dane",
   "tradeChecklist.exchangeDetails.respondDescription": "Oboje udostępnicie te same dane. Sprawdź swoje, zanim się zgodzisz.",
   "tradeChecklist.exchangeDetails.nickname": "Pseudonim",
+  "tradeChecklist.exchangeDetails.nicknameNotSet": "Włącz, aby ustawić",
   "tradeChecklist.exchangeDetails.phoneNumber": "Numer telefonu",
   "tradeChecklist.exchangeDetails.photo": "Zdjęcie profilowe",
   "tradeChecklist.exchangeDetails.noPhotoYet": "Brak zdjęcia",

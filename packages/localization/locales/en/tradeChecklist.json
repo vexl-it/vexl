@@ -24,6 +24,7 @@
   "tradeChecklist.exchangeDetails.respondHeading": "Review your details",
   "tradeChecklist.exchangeDetails.respondDescription": "You'll both share the same details. Check yours before agreeing.",
   "tradeChecklist.exchangeDetails.nickname": "Nickname",
+  "tradeChecklist.exchangeDetails.nicknameNotSet": "Toggle to set",
   "tradeChecklist.exchangeDetails.phoneNumber": "Phone number",
   "tradeChecklist.exchangeDetails.photo": "Profile photo",
   "tradeChecklist.exchangeDetails.noPhotoYet": "No photo yet",

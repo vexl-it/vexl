@@ -24,6 +24,7 @@
   "tradeChecklist.exchangeDetails.respondHeading": "Skontroluj svoje údaje",
   "tradeChecklist.exchangeDetails.respondDescription": "Navzájom si vyzdieľate rovnaké údaje. Skôr než súhlasíš, skontroluj tie svoje.",
   "tradeChecklist.exchangeDetails.nickname": "Prezývka",
+  "tradeChecklist.exchangeDetails.nicknameNotSet": "Zapni a nastav",
   "tradeChecklist.exchangeDetails.phoneNumber": "Telefónne číslo",
   "tradeChecklist.exchangeDetails.photo": "Profilová fotka",
   "tradeChecklist.exchangeDetails.noPhotoYet": "Zatiaľ bez fotky",

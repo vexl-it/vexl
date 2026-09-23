@@ -18,11 +18,11 @@ import {updateTradeChecklistState} from '../utils'
 import {
   canExchangeDetails,
   exchangedDetails,
-  isCurrentPendingRequest,
   latestReveal,
   pendingRequestFromThem,
   revealEventForMessage,
   selectionFromReveal,
+  stillPendingDetails,
   type RevealUpdate,
 } from './exchangeDetails'
 
@@ -159,9 +159,34 @@ it('reports what they asked for until I answer', () => {
     phoneNumber: false,
   })
   const requestEvent = revealEventForMessage(answered, request)
-  expect(requestEvent && isCurrentPendingRequest(answered, requestEvent)).toBe(
-    false
+  expect(requestEvent && stillPendingDetails(answered, requestEvent)).toEqual({
+    nickname: false,
+    photo: false,
+    phoneNumber: false,
+  })
+})
+
+it('keeps only the unanswered part of a request pending', () => {
+  const request = message(
+    'sent',
+    {
+      identity: identity('REQUEST_REVEAL', 1),
+      contact: contact('REQUEST_REVEAL', 1),
+    },
+    1
   )
+  const chat = chatWith([
+    request,
+    message('received', {identity: identity('APPROVE_REVEAL', 2)}, 2),
+  ])
+  const event = revealEventForMessage(chat, request)
+
+  expect(event && stillPendingDetails(chat, event)).toEqual({
+    nickname: false,
+    photo: false,
+    phoneNumber: true,
+  })
+  expect(canExchangeDetails(chat)).toBe(false)
 })
 
 it('blocks a new request while mine is unanswered', () => {

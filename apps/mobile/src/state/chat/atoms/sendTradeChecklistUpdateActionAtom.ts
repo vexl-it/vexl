@@ -17,7 +17,7 @@ import sendMessage, {
 import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/src/chat/utils/chatCrypto'
 import {taskToEffect} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {type JsonStringifyError} from '@vexl-next/resources-utils/src/utils/parsing'
-import {Array, Effect, Schema, type ParseResult} from 'effect/index'
+import {Array, Effect, Schema, Struct, type ParseResult} from 'effect/index'
 import {flow, pipe} from 'fp-ts/function'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
@@ -60,9 +60,7 @@ export default function createSubmitChecklistUpdateActionAtom(
     const tradeChecklistData = get(tradeChecklistDataAtom)
 
     return Effect.gen(function* (_) {
-      const updateKeys = Object.keys(update) as Array<
-        keyof TradeChecklistUpdate
-      >
+      const updateKeys = Struct.keys(update)
 
       const identityRevealChatMessageOrUndefined = yield* _(
         taskToEffect(

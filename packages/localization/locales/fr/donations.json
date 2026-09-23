@@ -35,6 +35,8 @@
   "donations.invoiceStatus.Settled": "Effectué",
   "donations.detail.title": "Détail du don",
   "donations.detail.donationNotFound": "Don introuvable. Il a peut-être été supprimé de cet appareil.",
+  "donations.detail.deleteDonation": "Supprimer le don ?",
+  "donations.detail.deleteDonationDescription": "Le don sera supprimé de cet appareil. Le paiement ne sera ni annulé ni remboursé. Cette action est irréversible.",
   "donations.detail.invoiceId": "ID de facture",
   "donations.detail.paidAt": "Payé le",
   "donations.detail.thanksTitle": "Merci pour ton don !",

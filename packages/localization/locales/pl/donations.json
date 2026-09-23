@@ -35,6 +35,8 @@
   "donations.invoiceStatus.Settled": "Rozliczona",
   "donations.detail.title": "Szczegóły darowizny",
   "donations.detail.donationNotFound": "Nie znaleziono darowizny. Mogła zostać usunięta z tego urządzenia.",
+  "donations.detail.deleteDonation": "Usunąć darowiznę?",
+  "donations.detail.deleteDonationDescription": "Darowizna zostanie usunięta z tego urządzenia. Nie anuluje to płatności ani nie spowoduje zwrotu środków. Tej operacji nie można cofnąć.",
   "donations.detail.invoiceId": "ID faktury",
   "donations.detail.paidAt": "Zapłacono o",
   "donations.detail.thanksTitle": "Dzięki za darowiznę!",

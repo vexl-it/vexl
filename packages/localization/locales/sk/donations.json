@@ -35,6 +35,8 @@
   "donations.invoiceStatus.Settled": "Potvrdená",
   "donations.detail.title": "Detail daru",
   "donations.detail.donationNotFound": "Dar sa nenašiel. Možno bol z tohto zariadenia odstránený.",
+  "donations.detail.deleteDonation": "Odstrániť dar?",
+  "donations.detail.deleteDonationDescription": "Týmto odstrániš dar z tohto zariadenia. Platbu tým nezrušíš ani nedostaneš peniaze späť. Tento krok sa nedá vrátiť späť.",
   "donations.detail.invoiceId": "ID faktúry",
   "donations.detail.paidAt": "Zaplatené o",
   "donations.detail.thanksTitle": "Vďaka za dar!",

@@ -1,10 +1,10 @@
 import {
   Button,
+  ChevronLeft,
   NavigationBar,
   Screen,
   Typography,
   useScreenFooterHeight,
-  XmarkCancelClose,
   YStack,
 } from '@vexl-next/ui'
 import {Effect, Fiber} from 'effect'
@@ -55,7 +55,7 @@ function DonationDetailsScreen({
     <NavigationBar
       style="back"
       title={t('donations.detail.title')}
-      rightActions={[{icon: XmarkCancelClose, onPress: safeGoBack}]}
+      leftAction={{icon: ChevronLeft, onPress: safeGoBack}}
     />
   )
 

@@ -1,24 +1,17 @@
 import Clipboard from '@react-native-clipboard/clipboard'
-import {useNavigation} from '@react-navigation/native'
-import {
-  DonationThanksHeartGraphic,
-  NavigationBar,
-  Screen,
-  Typography,
-  XmarkCancelClose,
-} from '@vexl-next/ui'
+import {DonationThanksHeartGraphic, Screen, Typography} from '@vexl-next/ui'
 import {ScrollView, YStack} from '@vexl-next/ui/src/primitives'
 import {useSetAtom} from 'jotai'
 import React from 'react'
 import {getTokens} from 'tamagui'
-import {type DonationsFlowScreenProps} from '../../navigationTypes'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import {toastNotificationAtom} from '../ToastNotification/atom'
-import {DonationDetailTitleRow} from './DonationDetailTitleRow'
+import {DonationDetailsNavigationBar} from './DonationDetailsNavigationBar'
 import {
   DonationSummaryCard,
   type DonationSummaryData,
 } from './DonationDetailsSummary'
+import {DonationDetailTitleRow} from './DonationDetailTitleRow'
 
 export function SettledDonationDetails({
   footerHeight,
@@ -32,24 +25,13 @@ export function SettledDonationDetails({
   readonly paidAt: string
 }): React.ReactElement {
   const {t} = useTranslation()
-  const navigation =
-    useNavigation<DonationsFlowScreenProps<'DonationDetails'>['navigation']>()
   const tokens = getTokens()
   const setToastNotification = useSetAtom(toastNotificationAtom)
 
   return (
     <Screen
       navigationBar={
-        <NavigationBar
-          style="back"
-          title={t('donations.detail.title')}
-          rightActions={[
-            {
-              icon: XmarkCancelClose,
-              onPress: navigation.goBack,
-            },
-          ]}
-        />
+        <DonationDetailsNavigationBar title={t('donations.detail.title')} />
       }
     >
       <ScrollView

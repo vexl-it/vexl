@@ -4,11 +4,9 @@ import {
   Button,
   Copy,
   Download,
-  NavigationBar,
   Screen,
   Typography,
   useTheme,
-  XmarkCancelClose,
 } from '@vexl-next/ui'
 import {ScrollView, Stack, YStack} from '@vexl-next/ui/src/primitives'
 import {useSetAtom} from 'jotai'
@@ -23,6 +21,8 @@ import {
   DonationSummaryCard,
   type DonationSummaryData,
 } from './DonationDetailsSummary'
+
+import {DonationDetailsNavigationBar} from './DonationDetailsNavigationBar'
 
 const QR_CODE_SIZE = 300
 const QR_CODE_BORDER_WIDTH = 2
@@ -52,16 +52,7 @@ export function NewDonationDetails({
   return (
     <Screen
       navigationBar={
-        <NavigationBar
-          style="back"
-          title={t('donations.completePayment')}
-          rightActions={[
-            {
-              icon: XmarkCancelClose,
-              onPress: navigation.goBack,
-            },
-          ]}
-        />
+        <DonationDetailsNavigationBar title={t('donations.completePayment')} />
       }
       footer={
         <Button width="100%" onPress={navigation.goBack}>

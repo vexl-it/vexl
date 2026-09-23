@@ -35,6 +35,8 @@
   "donations.invoiceStatus.Settled": "Saldata",
   "donations.detail.title": "Dettaglio donazione",
   "donations.detail.donationNotFound": "Donazione non trovata. Potrebbe essere stata rimossa da questo dispositivo.",
+  "donations.detail.deleteDonation": "Eliminare la donazione?",
+  "donations.detail.deleteDonationDescription": "La donazione verrà rimossa da questo dispositivo. Il pagamento non verrà annullato né rimborsato. Questa azione non può essere annullata.",
   "donations.detail.invoiceId": "ID fattura",
   "donations.detail.paidAt": "Pagato il",
   "donations.detail.thanksTitle": "Grazie per la donazione!",

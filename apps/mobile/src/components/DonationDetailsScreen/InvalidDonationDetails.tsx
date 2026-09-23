@@ -1,14 +1,6 @@
 import Clipboard from '@react-native-clipboard/clipboard'
 import {useNavigation} from '@react-navigation/native'
-import {
-  Button,
-  NavigationBar,
-  Rejected,
-  Screen,
-  Typography,
-  useTheme,
-  XmarkCancelClose,
-} from '@vexl-next/ui'
+import {Button, Rejected, Screen, Typography, useTheme} from '@vexl-next/ui'
 import {ScrollView, YStack} from '@vexl-next/ui/src/primitives'
 import {Effect} from 'effect'
 import {useSetAtom} from 'jotai'
@@ -19,6 +11,7 @@ import {type MyDonation} from '../../state/donations/domain'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import {toastNotificationAtom} from '../ToastNotification/atom'
 import {retryDonationActionAtom} from './atoms'
+import {DonationDetailsNavigationBar} from './DonationDetailsNavigationBar'
 import {
   DonationSummaryCard,
   type DonationSummaryData,
@@ -59,16 +52,7 @@ export function InvalidDonationDetails({
   return (
     <Screen
       navigationBar={
-        <NavigationBar
-          style="back"
-          title={t('donations.detail.title')}
-          rightActions={[
-            {
-              icon: XmarkCancelClose,
-              onPress: navigation.goBack,
-            },
-          ]}
-        />
+        <DonationDetailsNavigationBar title={t('donations.detail.title')} />
       }
       footer={
         <Button size="large" width="100%" onPress={handleRetryDonationPress}>

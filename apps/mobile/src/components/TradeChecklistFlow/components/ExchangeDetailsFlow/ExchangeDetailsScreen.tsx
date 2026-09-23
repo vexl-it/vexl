@@ -1,3 +1,4 @@
+import {useNavigation} from '@react-navigation/native'
 import {
   Button,
   Disclosure,
@@ -13,6 +14,8 @@ import {
 } from '@vexl-next/ui'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React from 'react'
+import {TouchableOpacity} from 'react-native'
+import {type TradeChecklistStackScreenProps} from '../../../../navigationTypes'
 import anonymizePhoneNumber from '../../../../state/chat/utils/anonymizePhoneNumber'
 import {selectImageActionAtom} from '../../../../state/selectImageActionAtom'
 import {sessionDataOrDummyAtom} from '../../../../state/session'
@@ -153,8 +156,13 @@ const ROWS: Record<ExchangeDetailKey, () => React.ReactElement> = {
 }
 
 function SharedProfile(): React.ReactElement | null {
+  const navigation =
+    useNavigation<
+      TradeChecklistStackScreenProps<'ExchangeDetails'>['navigation']
+    >()
   const sharedByThem = useAtomValue(detailsSharedByThemAtom)
   const otherSideData = useAtomValue(otherSideDataAtom)
+  const otherSideImage = otherSideData.image
 
   if (!isAnyDetailSelected(sharedByThem)) return null
 
@@ -164,11 +172,21 @@ function SharedProfile(): React.ReactElement | null {
 
   return (
     <YStack ai="center" gap="$4" py="$4">
-      <UserAvatar
-        userImage={otherSideData.image}
-        width={SHARED_AVATAR_SIZE}
-        height={SHARED_AVATAR_SIZE}
-      />
+      <TouchableOpacity
+        disabled={otherSideImage.type !== 'imageUri'}
+        onPress={() => {
+          if (otherSideImage.type !== 'imageUri') return
+          navigation.navigate('ChatImagePreview', {
+            imageUri: resolveLocalUri(otherSideImage.imageUri),
+          })
+        }}
+      >
+        <UserAvatar
+          userImage={otherSideImage}
+          width={SHARED_AVATAR_SIZE}
+          height={SHARED_AVATAR_SIZE}
+        />
+      </TouchableOpacity>
       <YStack ai="center" gap="$1">
         <Typography
           variant="heading3"

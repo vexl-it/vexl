@@ -13,7 +13,7 @@ import {DeanonymizedUser} from './DeanonymizedUser'
 import {E164PhoneNumber} from './E164PhoneNumber.brand'
 import {HashedPhoneNumber} from './HashedPhoneNumber.brand'
 import {UserName} from './UserName.brand'
-import {RealLifeInfo} from './UserNameAndAvatar.brand'
+import {RevealedRealLifeInfo} from './UserNameAndAvatar.brand'
 import {ClubUuid} from './clubs'
 import {NoteId, OneNoteInState} from './notes'
 import {NotificationCypher} from './notifications/NotificationCypher.brand'
@@ -51,7 +51,7 @@ export const ChatUserIdentity = Schema.Struct({
   publicKey: PublicKeyPemBase64,
   goldenAvatarType: Schema.optional(GoldenAvatarType),
   clubsIds: Schema.optional(Schema.Array(ClubUuid)),
-  realLifeInfo: Schema.optional(RealLifeInfo),
+  realLifeInfo: Schema.optional(RevealedRealLifeInfo),
 })
 export type ChatUserIdentity = typeof ChatUserIdentity.Type
 

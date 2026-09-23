@@ -5,7 +5,6 @@ export const TradeChecklistItem = Schema.Literal(
   'MEETING_LOCATION',
   'CALCULATE_AMOUNT',
   'SET_NETWORK',
-  'REVEAL_IDENTITY',
-  'REVEAL_PHONE_NUMBER'
+  'REVEAL_IDENTITY'
 )
 export type TradeChecklistItem = typeof TradeChecklistItem.Type

@@ -14,6 +14,7 @@ import {ClubCardScreen} from './ClubCardScreen'
 import {ClubReachCardScreen} from './ClubReachCardScreen'
 import {CommonFriendsScreen} from './CommonFriendsScreen'
 import {DialogScreen} from './DialogScreen'
+import {DisclosureScreen} from './DisclosureScreen'
 import {DismissKeyboardOnPressOutsideScreen} from './DismissKeyboardOnPressOutsideScreen'
 import {DotScreen} from './DotScreen'
 import {DotTypingIndicatorScreen} from './DotTypingIndicatorScreen'
@@ -89,6 +90,7 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'Club Reach Card', component: ClubReachCardScreen},
   {label: 'Common Friends', component: CommonFriendsScreen},
   {label: 'Dialog', component: DialogScreen},
+  {label: 'Disclosure', component: DisclosureScreen},
   {
     label: 'Dismiss Keyboard On Press Outside',
     component: DismissKeyboardOnPressOutsideScreen,

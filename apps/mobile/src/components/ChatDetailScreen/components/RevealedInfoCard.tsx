@@ -173,12 +173,14 @@ function AddToContactsButton({
 
 function RevealedInfoCard({
   title,
+  description,
   leftSide,
   rightSide,
   fullPhoneNumber,
   contactName,
 }: {
   title: string
+  description?: string
   leftSide: SideInfo
   rightSide: SideInfo
   fullPhoneNumber?: string
@@ -196,13 +198,24 @@ function RevealedInfoCard({
         padding="$5"
         width="100%"
       >
-        <Typography
-          color="$foregroundPrimary"
-          textAlign="center"
-          variant="micro"
-        >
-          {title}
-        </Typography>
+        <YStack alignItems="center" gap="$1">
+          <Typography
+            color="$foregroundPrimary"
+            textAlign="center"
+            variant="micro"
+          >
+            {title}
+          </Typography>
+          {description ? (
+            <Typography
+              color="$foregroundSecondary"
+              textAlign="center"
+              variant="paragraphSmall"
+            >
+              {description}
+            </Typography>
+          ) : null}
+        </YStack>
         <XStack alignItems="center" gap="$4" width="100%">
           <RevealedInfoCardSide {...leftSide} />
           <ArrowsHorizontal color={theme.foregroundPrimary.get()} size={28} />

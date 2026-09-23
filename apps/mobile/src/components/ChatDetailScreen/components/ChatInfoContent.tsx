@@ -39,7 +39,7 @@ import OfferAuthorBanner from '../../OfferAuthorBanner'
 import {reportOfferActionAtom} from '../../OfferDetailScreen/atoms'
 import UserAvatar from '../../UserAvatar'
 import {chatMolecule} from '../atoms'
-import useOpenRevealIdentityFlow from './useOpenRevealIdentityFlow'
+import useOpenExchangeDetails from './useOpenExchangeDetails'
 
 function SectionSeparator(): React.ReactElement {
   return <Stack height="$0.5" backgroundColor="$backgroundTertiary" ml="$12" />
@@ -176,13 +176,12 @@ export default function ChatInfoContent({
   const reportOffer = useSetAtom(reportOfferActionAtom)
   const isDeveloper = useAtomValue(isDeveloperAtom)
   const {
-    canSendMessagesAtom,
+    canExchangeDetailsAtom,
     chatAtom,
     chatIdAtom,
     commonConnectionsCountAtom,
     deleteChatWithUiFeedbackAtom,
     friendLevelInfoAtom,
-    identityRevealStatusAtom,
     listingTypeIsOtherAtom,
     offerForChatAtom,
     otherSideClubsIdsAtom,
@@ -193,13 +192,11 @@ export default function ChatInfoContent({
     theirOfferAndNotReportedAtom,
     feedbackSubmittedAtom,
   } = useMolecule(chatMolecule)
-  const canSendMessages = useAtomValue(canSendMessagesAtom)
   const chat = useAtomValue(chatAtom)
   const chatId = useAtomValue(chatIdAtom)
   const commonConnectionsCount = useAtomValue(commonConnectionsCountAtom)
   const friendLevelInfo = useAtomValue(friendLevelInfoAtom)
   const deleteChatWithUiFeedback = useSetAtom(deleteChatWithUiFeedbackAtom)
-  const identityRevealStatus = useAtomValue(identityRevealStatusAtom)
   const listingTypeIsOther = useAtomValue(listingTypeIsOtherAtom)
   const offer = useAtomValue(offerForChatAtom)
   const otherSideClubsIds = useAtomValue(otherSideClubsIdsAtom)
@@ -213,7 +210,7 @@ export default function ChatInfoContent({
   const shouldGrayScaleAvatar = useAtomValue(shouldGrayScaleAvatarAtom)
   const inboxKey = useAtomValue(publicKeyPemBase64Atom)
   const theirOfferAndNotReported = useAtomValue(theirOfferAndNotReportedAtom)
-  const openRevealIdentityFlow = useOpenRevealIdentityFlow()
+  const openExchangeDetails = useOpenExchangeDetails()
   const localizedCommonConnectionsCount = localizeNumber({
     number: commonConnectionsCount,
   })
@@ -221,8 +218,7 @@ export default function ChatInfoContent({
     !!otherSideSupportsTradingChecklist &&
     !listingTypeIsOther &&
     !isNoteChatOrigin(chat.origin)
-  const showRevealIdentityAction =
-    canSendMessages && identityRevealStatus === 'notStarted'
+  const showExchangeDetailsAction = useAtomValue(canExchangeDetailsAtom)
   const showOfferDetailAction = !!offer
   const showReceivedMessagesDebugAction = !!enableHiddenFeatures || isDeveloper
   const otherSideIsOfferCreator =
@@ -362,14 +358,14 @@ export default function ChatInfoContent({
               </>
             ) : null}
 
-            {showRevealIdentityAction ? (
+            {showExchangeDetailsAction ? (
               <>
                 <ActionRow
                   showChevron
                   color="foregroundPrimary"
                   icon={EyeShut}
-                  label={t('messages.askToReveal')}
-                  onPress={openRevealIdentityFlow}
+                  label={t('tradeChecklist.exchangeDetails.title')}
+                  onPress={openExchangeDetails}
                 />
                 <SectionSeparator />
               </>

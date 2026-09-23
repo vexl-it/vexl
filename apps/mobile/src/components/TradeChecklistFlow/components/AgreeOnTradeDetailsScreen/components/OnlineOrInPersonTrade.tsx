@@ -10,7 +10,6 @@ import CalculateAmountCell from './CalculateAmountCell'
 import DateAndTimeCell from './DateAndTimeCell'
 import MeetingLocationCell from './MeetingLocationCell'
 import RevealIdentityCell from './RevealIdentityCell'
-import RevealPhoneNumberCell from './RevealPhoneNumberCell'
 import SetNetworkCell from './SetNetworkCell'
 import TradeRule from './TradeRule'
 function SectionTitle({
@@ -85,7 +84,6 @@ function OnlineOrInPersonTrade(): React.ReactElement {
         <Stack gap="$2">
           <CalculateAmountCell />
           <RevealIdentityCell />
-          <RevealPhoneNumberCell />
         </Stack>
         <AnonymizationNotice />
       </YStack>
@@ -116,7 +114,6 @@ function OnlineOrInPersonTrade(): React.ReactElement {
         <SectionTitle>{t('tradeChecklist.privacy')}</SectionTitle>
         <Stack gap="$2">
           <RevealIdentityCell />
-          <RevealPhoneNumberCell />
         </Stack>
       </Stack>
     </YStack>

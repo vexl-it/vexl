@@ -11,7 +11,7 @@ import type {ChatIds, ChatWithMessages} from '../../chat/domain'
 import {dummyChatWithMessages} from '../../chat/domain'
 import {offerForChatOriginAtom} from '../../marketplace/atoms/offersState'
 import {getLatestAmountDataMessage} from '../utils/amount'
-import getIdentityRevealStatus from '../utils/getIdentityRevealStatus'
+import {canExchangeDetails} from '../utils/exchangeDetails'
 import {clearUpdatesToBeSentActionAtom} from './updatesToBeSentAtom'
 
 export const parentChatAtomAtom = atom<FocusAtomType<ChatWithMessages>>(
@@ -59,10 +59,6 @@ export const tradeChecklistContactDataAtom = atom(
   (get) => get(tradeChecklistDataAtom).contact
 )
 
-export const identityRevealedAtom = atom((get) => {
-  return getIdentityRevealStatus(get(chatWithMessagesAtom)) === 'shared'
-})
-
 const chatOriginAtom = focusAtom(chatWithMessagesAtom, (p) =>
   p.prop('chat').prop('origin')
 )
@@ -91,29 +87,9 @@ export const otherSideDataAtom = atom((get) => {
   return getOtherSideData(chatData.chat)
 })
 
-export const identityRevealTriggeredFromChatAtom = atom((get) => {
-  const chatWithMessages = get(chatWithMessagesAtom)
-  const identityRevealMessage = chatWithMessages.messages.find(
-    (one) =>
-      one.message.messageType === 'DISAPPROVE_REVEAL' ||
-      one.message.messageType === 'APPROVE_REVEAL' ||
-      one.message.messageType === 'REQUEST_REVEAL'
-  )
-
-  return !!identityRevealMessage
-})
-
-export const contactRevealTriggeredFromChatAtom = atom((get) => {
-  const chatWithMessages = get(chatWithMessagesAtom)
-  const contactRevealMessage = chatWithMessages.messages.find(
-    (one) =>
-      one.message.messageType === 'DISAPPROVE_CONTACT_REVEAL' ||
-      one.message.messageType === 'APPROVE_CONTACT_REVEAL' ||
-      one.message.messageType === 'REQUEST_CONTACT_REVEAL'
-  )
-
-  return !!contactRevealMessage
-})
+export const canExchangeDetailsAtom = atom((get) =>
+  canExchangeDetails(get(chatWithMessagesAtom))
+)
 
 export const setParentChatActionAtom = atom(
   null,

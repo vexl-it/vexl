@@ -13,7 +13,7 @@ import useSafeGoBack from '../../../utils/useSafeGoBack'
 import {showGoldenAvatarInfoModalActionAton} from '../../GoldenAvatar/atoms'
 import UserAvatar from '../../UserAvatar'
 import {chatMolecule} from '../atoms'
-import useChatHeaderRightAction from './useChatHeaderRightAction'
+import useChatHeaderRightActions from './useChatHeaderRightActions'
 
 export function MessagesScreenChatHeader(): React.ReactElement {
   const safeGoBack = useSafeGoBack()
@@ -43,7 +43,7 @@ export function MessagesScreenChatHeader(): React.ReactElement {
   const showGoldenAvatarInfoModal = useSetAtom(
     showGoldenAvatarInfoModalActionAton
   )
-  const rightAction = useChatHeaderRightAction()
+  const rightActions = useChatHeaderRightActions()
 
   const noImageUri =
     otherSideData.image.type === 'imageUri' && !otherSideData.image.imageUri
@@ -101,7 +101,7 @@ export function MessagesScreenChatHeader(): React.ReactElement {
             otherSideKey: chat.otherSide.publicKey,
           })
         }}
-        rightActions={[rightAction]}
+        rightActions={rightActions}
       />
     </Stack>
   )

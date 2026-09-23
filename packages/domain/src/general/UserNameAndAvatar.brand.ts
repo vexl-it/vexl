@@ -22,3 +22,11 @@ export const RealLifeInfo = Schema.Struct({
   fullPhoneNumber: Schema.optional(E164PhoneNumber),
 })
 export type RealLifeInfo = typeof RealLifeInfo.Type
+
+// What the other side chose to reveal in a chat. A photo can be revealed on
+// its own, so the name is optional here.
+export const RevealedRealLifeInfo = Schema.Struct({
+  ...RealLifeInfo.fields,
+  userName: Schema.optional(UserName),
+})
+export type RevealedRealLifeInfo = typeof RevealedRealLifeInfo.Type

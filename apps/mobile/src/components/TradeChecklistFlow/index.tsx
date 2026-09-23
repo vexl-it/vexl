@@ -18,13 +18,11 @@ import AddTimeOptionsScreen from './components/DateAndTimeFlow/components/AddTim
 import ChooseAvailableDaysScreen from './components/DateAndTimeFlow/components/ChooseAvailableDaysScreen'
 import PickDateFromSuggestionsScreen from './components/DateAndTimeFlow/components/PickDateFromSuggestionsScreen'
 import PickTimeFromSuggestions from './components/DateAndTimeFlow/components/PickTimeFromSuggestions'
+import ExchangeDetailsScreen from './components/ExchangeDetailsFlow/ExchangeDetailsScreen'
 import LocationMapPreview from './components/MeetingLocation/components/LocationMapPreview'
 import LocationMapSelect from './components/MeetingLocation/components/LocationMapSelect'
 import LocationSearch from './components/MeetingLocation/components/LocationSearch'
 import NetworkScreen from './components/NetworkFlow/components/NetworkScreen'
-import RevealIdentityNicknameScreen from './components/RevealIdentityFlow/RevealIdentityNicknameScreen'
-import RevealIdentityPhotoScreen from './components/RevealIdentityFlow/RevealIdentityPhotoScreen'
-import RevealIdentitySummaryScreen from './components/RevealIdentityFlow/RevealIdentitySummaryScreen'
 
 const StackNavigator =
   createNativeStackNavigator<TradeChecklistStackParamsList>()
@@ -69,16 +67,8 @@ export default function TradeChecklistFlow({
           component={AgreeOnTradeDetailsScreen}
         />
         <StackNavigator.Screen
-          name="RevealIdentityPhoto"
-          component={RevealIdentityPhotoScreen}
-        />
-        <StackNavigator.Screen
-          name="RevealIdentityNickname"
-          component={RevealIdentityNicknameScreen}
-        />
-        <StackNavigator.Screen
-          name="RevealIdentitySummary"
-          component={RevealIdentitySummaryScreen}
+          name="ExchangeDetails"
+          component={ExchangeDetailsScreen}
         />
         <StackNavigator.Screen
           name="ChooseAvailableDays"

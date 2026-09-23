@@ -1,22 +1,15 @@
-import {type ViewToken} from '@shopify/flash-list'
-import {
-  type ChatMessageId,
-  type MessageType,
-} from '@vexl-next/domain/src/general/messaging'
+import {type ChatMessageId} from '@vexl-next/domain/src/general/messaging'
 import {type FriendLevel} from '@vexl-next/domain/src/general/offers'
-import {toBasicError} from '@vexl-next/domain/src/utility/errors'
 import {
   effectToTaskEither,
   taskEitherToEffect,
 } from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {createScope, molecule} from 'bunshi/dist/react'
 import {Array, Effect, Either, HashSet, Option, pipe} from 'effect'
-import * as E from 'fp-ts/Either'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {
   atom,
-  type Atom,
   type PrimitiveAtom,
   type SetStateAction,
   type WritableAtom,
@@ -34,10 +27,6 @@ import {createRequestStateAtom} from '../../../state/chat/atoms/createRequestSta
 import deleteChatActionAtom from '../../../state/chat/atoms/deleteChatActionAtom'
 import {focusWasDeniedAtom} from '../../../state/chat/atoms/focusDenyRequestMessageAtom'
 import focusOtherSideLeftAtom from '../../../state/chat/atoms/focusOtherSideLeftAtom'
-import revealContactActionAtom, {
-  type RevealContactMessageType,
-} from '../../../state/chat/atoms/revealContactActionAtom'
-import revealIdentityActionAtom from '../../../state/chat/atoms/revealIdentityActionAtom'
 import selectOtherSideDataAtom from '../../../state/chat/atoms/selectOtherSideDataAtom'
 import sendMessageActionAtom from '../../../state/chat/atoms/sendMessageActionAtom'
 import {
@@ -59,6 +48,7 @@ import {noteForChatOriginAtom} from '../../../state/notes/atoms/notesState'
 import * as amount from '../../../state/tradeChecklist/utils/amount'
 import {getLatestAmountDataMessage} from '../../../state/tradeChecklist/utils/amount'
 import * as dateAndTime from '../../../state/tradeChecklist/utils/dateAndTime'
+import {canExchangeDetails} from '../../../state/tradeChecklist/utils/exchangeDetails'
 import getContactRevealStatus from '../../../state/tradeChecklist/utils/getContactRevealStatus'
 import getIdentityRevealStatus from '../../../state/tradeChecklist/utils/getIdentityRevealStatus'
 import * as MeetingLocation from '../../../state/tradeChecklist/utils/location'
@@ -210,147 +200,6 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
   const lastMessageReadByOtherSideAtAtom = focusAtom(chatAtom, (o) =>
     o.prop('lastMessageReadByOtherSideAt')
   )
-
-  function createFindMessageIndexInListAtom({
-    direction,
-    messageType,
-  }: {
-    direction: 'received' | 'sent'
-    messageType: MessageType
-  }): Atom<number> {
-    return atom((get) => {
-      const messagesList = get(messagesListDataAtom)
-
-      return messagesList.findIndex(
-        (message, index) =>
-          message.type === 'message' &&
-          message.message.state === direction &&
-          (message.message.message.messageType === messageType ||
-            message.message.message.tradeChecklistUpdate?.identity?.status ===
-              messageType)
-      )
-    })
-  }
-
-  const revealIdentityRequestSentMessageIndexAtom =
-    createFindMessageIndexInListAtom({
-      messageType: 'REQUEST_REVEAL',
-      direction: 'sent',
-    })
-  const isRevealIdentityRequestSentMessageHiddenAtom = atom(false)
-
-  const revealIdentityRequestReceivedMessageIndexAtom =
-    createFindMessageIndexInListAtom({
-      messageType: 'REQUEST_REVEAL',
-      direction: 'received',
-    })
-
-  const isRevealIdentityRequestReceivedMessageHiddenAtom = atom(false)
-
-  const contactRevealRequestReceivedMessageIndexAtom =
-    createFindMessageIndexInListAtom({
-      messageType: 'REQUEST_CONTACT_REVEAL',
-      direction: 'received',
-    })
-  const isContactRevealRequestReceivedMessageHiddenAtom = atom(false)
-
-  const contactRevealRequestSentMessageIndexAtom =
-    createFindMessageIndexInListAtom({
-      messageType: 'REQUEST_CONTACT_REVEAL',
-      direction: 'sent',
-    })
-  const isContactRevealRequestSentMessageHiddenAtom = atom(false)
-
-  const handleIsRevealIdentityOrContactRevealMessageVisibleActionAtom = atom(
-    null,
-    (
-      get,
-      set,
-      info: {
-        viewableItems: Array<ViewToken<Atom<MessagesListItem>>>
-        changed: Array<ViewToken<Atom<MessagesListItem>>>
-      }
-    ) => {
-      const {viewableItems} = info
-      const identityRevealStatus = get(identityRevealStatusAtom)
-      const contactRevealStatus = get(contactRevealStatusAtom)
-
-      const revealIdentityRequestSentMessageIndex = get(
-        revealIdentityRequestSentMessageIndexAtom
-      )
-      const revealIdentityRequestReceivedMessageIndex = get(
-        revealIdentityRequestReceivedMessageIndexAtom
-      )
-      const contactRevealRequestSentMessageIndex = get(
-        contactRevealRequestSentMessageIndexAtom
-      )
-      const contactRevealRequestReceivedMessageIndex = get(
-        contactRevealRequestReceivedMessageIndexAtom
-      )
-
-      if (identityRevealStatus === 'iAsked') {
-        set(
-          isRevealIdentityRequestSentMessageHiddenAtom,
-          !viewableItems.some(
-            (item) => item.index === revealIdentityRequestSentMessageIndex
-          )
-        )
-      }
-
-      if (identityRevealStatus === 'theyAsked') {
-        set(
-          isRevealIdentityRequestReceivedMessageHiddenAtom,
-          !viewableItems.some(
-            (item) => item.index === revealIdentityRequestReceivedMessageIndex
-          )
-        )
-      }
-
-      if (contactRevealStatus === 'iAsked') {
-        set(
-          isContactRevealRequestSentMessageHiddenAtom,
-          !viewableItems.some(
-            (item) => item.index === contactRevealRequestSentMessageIndex
-          )
-        )
-      }
-
-      if (contactRevealStatus === 'theyAsked') {
-        set(
-          isContactRevealRequestReceivedMessageHiddenAtom,
-          !viewableItems.some(
-            (item) => item.index === contactRevealRequestReceivedMessageIndex
-          )
-        )
-      }
-    }
-  )
-
-  const identityRevealRequestMessageIdAtom = atom((get) => {
-    const messages = get(messagesAtom)
-
-    return messages.find(
-      (message) =>
-        message.state === 'sent' &&
-        (message.message.messageType === 'REQUEST_REVEAL' ||
-          (message.message.messageType === 'TRADE_CHECKLIST_UPDATE' &&
-            message.message.tradeChecklistUpdate?.identity?.status ===
-              'REQUEST_REVEAL'))
-    )?.message.uuid
-  })
-
-  const contactRevealRequestMessageIdAtom = atom((get) => {
-    const messages = get(messagesAtom)
-
-    return messages.find(
-      (message) =>
-        message.state === 'sent' &&
-        (message.message.messageType === 'REQUEST_CONTACT_REVEAL' ||
-          (message.message.messageType === 'TRADE_CHECKLIST_UPDATE' &&
-            message.message.tradeChecklistUpdate?.contact?.status ===
-              'REQUEST_REVEAL'))
-    )?.message.uuid
-  })
 
   // Keyed by the stable item key so row atoms (and thus FlashList keys)
   // survive list updates instead of being regenerated per change.
@@ -597,148 +446,15 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     )
   })
 
-  const revealIdentityAtom = revealIdentityActionAtom(chatWithMessagesAtom)
-  const revealContactAtom = revealContactActionAtom(chatWithMessagesAtom)
-
-  const disapproveIdentityRevealWithUiFeedbackAtom = atom(
-    null,
-    async (get, set) => {
-      const {t} = get(translationAtom)
-
-      set(loadingOverlayDisplayedAtom, true)
-
-      return await pipe(
-        set(revealIdentityAtom, {
-          type: 'DISAPPROVE_REVEAL',
-          username: undefined,
-        }),
-        TE.match(
-          (e) => {
-            set(loadingOverlayDisplayedAtom, false)
-            reportError('error', new Error('Error declining identityReveal'), {
-              e,
-            })
-            showErrorAlert({
-              title: t('common.somethingWentWrong'),
-              description:
-                toCommonErrorMessage(e, t) ??
-                t('common.somethingWentWrongDescription'),
-              error: e,
-            })
-            return false
-          },
-          () => {
-            set(loadingOverlayDisplayedAtom, false)
-            return true
-          }
-        )
-      )()
-    }
-  )
-
-  const revealContactWithUiFeedbackAtom = atom(
-    null,
-    async (get, set, type: 'REQUEST_REVEAL' | 'RESPOND_REVEAL') => {
-      const {t} = get(translationAtom)
-
-      const modalContent = (() => {
-        if (type === 'REQUEST_REVEAL') {
-          return {
-            title: t('messages.contactRevealRequestModal.title'),
-            description: t('messages.contactRevealRequestModal.text'),
-            negativeButtonText: t('common.back'),
-            positiveButtonText: t('common.sendRequest'),
-          }
-        }
-        return {
-          title: t('messages.contactRevealRespondModal.title'),
-          description: t('messages.contactRevealRespondModal.text'),
-          negativeButtonText: t('common.no'),
-          positiveButtonText: t('common.yes'),
-        }
-      })()
-      const userDeclinedError = toBasicError('UserDeclinedError')(
-        new Error('Declined')
-      )
-
-      return await pipe(
-        set(globalDialogAtom, {
-          title: modalContent.title,
-          subtitle: modalContent.description,
-          negativeButtonText: modalContent.negativeButtonText,
-          positiveButtonText: modalContent.positiveButtonText,
-        }),
-        effectToTaskEither,
-        TE.chainEitherK((confirmed) => {
-          if (!confirmed) {
-            if (type === 'RESPOND_REVEAL') {
-              const revealType: RevealContactMessageType =
-                'DISAPPROVE_CONTACT_REVEAL'
-              return E.right(revealType)
-            }
-
-            return E.left(userDeclinedError)
-          }
-
-          const revealType: RevealContactMessageType =
-            type === 'RESPOND_REVEAL'
-              ? 'APPROVE_CONTACT_REVEAL'
-              : 'REQUEST_CONTACT_REVEAL'
-          return E.right(revealType)
-        }),
-        TE.map((revealType) => {
-          set(loadingOverlayDisplayedAtom, true)
-          return revealType
-        }),
-        TE.chainW((revealType) => set(revealContactAtom, {type: revealType})),
-        TE.match(
-          (e) => {
-            set(loadingOverlayDisplayedAtom, false)
-
-            if (e._tag === 'UserDeclinedError') {
-              return false
-            }
-            if (e._tag === 'ContactRevealRequestAlreadySentError') {
-              showErrorAlert({
-                title: t('messages.contactAlreadyRequested'),
-                error: e,
-              })
-              return false
-            }
-            reportError('error', new Error('Error sending contact reveal'), {
-              e,
-            })
-            showErrorAlert({
-              title: t('common.somethingWentWrong'),
-              description:
-                toCommonErrorMessage(e, t) ??
-                t('common.somethingWentWrongDescription'),
-              error: e,
-            })
-            return false
-          },
-          () => {
-            set(loadingOverlayDisplayedAtom, false)
-            return true
-          }
-        )
-      )()
-    }
-  )
-
   const identityRevealStatusAtom = selectAtom(
     chatWithMessagesAtom,
     getIdentityRevealStatus
   )
 
-  const contactRevealTriggeredFromTradeChecklistAtom = atom((get) => {
-    const chatWithMessages = get(chatWithMessagesAtom)
-
-    return (
-      chatWithMessages.tradeChecklist.contact.received?.status ===
-      'REQUEST_REVEAL'
-    )
-  })
+  const canExchangeDetailsAtom = atom(
+    (get) =>
+      get(canSendMessagesAtom) && canExchangeDetails(get(chatWithMessagesAtom))
+  )
 
   const contactRevealStatusAtom = selectAtom(
     chatWithMessagesAtom,
@@ -1140,8 +856,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     otherSideDataAtom,
     identityRevealStatusAtom,
     contactRevealStatusAtom,
-    disapproveIdentityRevealWithUiFeedbackAtom,
-    revealContactWithUiFeedbackAtom,
+    canExchangeDetailsAtom,
     deleteChatWithUiFeedbackAtom,
     messagesListAtomAtoms,
     lastMessageAtom,
@@ -1166,7 +881,6 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     tradeChecklistNetworkAtom,
     tradeChecklistAmountAtom,
     tradeChecklistContactRevealAtom,
-    contactRevealTriggeredFromTradeChecklistAtom,
     tradeChecklistMeetingLocationAtom,
     shouldHideNetworkCellForTradeChecklistAtom,
     tradeOrOriginOfferCurrencyAtom,
@@ -1174,9 +888,6 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     isDateAndTimePickedAtom,
     addEventToCalendarActionAtom,
     listingTypeIsOtherAtom,
-    handleIsRevealIdentityOrContactRevealMessageVisibleActionAtom,
-    identityRevealRequestMessageIdAtom,
-    contactRevealRequestMessageIdAtom,
     feedbackSubmittedAtom,
     btcPricePercentageDifferenceToDisplayInVexlbotMessageAtom,
     otherSideGoldenAvatarTypeAtom,

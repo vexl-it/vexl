@@ -2,7 +2,7 @@ import {FlashList, type FlashListRef} from '@shopify/flash-list'
 import {type ChatMessageId} from '@vexl-next/domain/src/general/messaging'
 import {tokens, useScreenFooterHeight} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
-import {useAtomValue, useSetAtom, useStore, type Atom} from 'jotai'
+import {useAtomValue, useStore, type Atom} from 'jotai'
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react'
 import {
   Animated,
@@ -10,7 +10,6 @@ import {
   type LayoutChangeEvent,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
-  type ViewabilityConfig,
 } from 'react-native'
 import {KeyboardEvents} from 'react-native-keyboard-controller'
 import atomKeyExtractor from '../../../utils/atomUtils/atomKeyExtractor'
@@ -21,14 +20,9 @@ import findTargetMessageIndex, {
 } from '../utils/findTargetMessageIndex'
 import MessageItem, {type MessagesListItem} from './MessageItem'
 
-const LIST_ITEM_VISIBILITY_PERCENTAGE_THRESHOLD = 0
 const SCROLLED_TO_BOTTOM_THRESHOLD_PX = 48
 const VIEWPORT_HEIGHT_CHANGE_THRESHOLD_PX = 1
 const KEYBOARD_SPACER_ANIMATION_FALLBACK_MS = 250
-
-const viewabilityConfig: ViewabilityConfig = {
-  itemVisiblePercentThreshold: LIST_ITEM_VISIBILITY_PERCENTAGE_THRESHOLD,
-}
 
 type MessageListMessageItem = Extract<MessagesListItem, {type: 'message'}>
 
@@ -45,17 +39,11 @@ function MessagesList({
 }: {
   targetMessageId?: ChatMessageId | undefined
 }): React.ReactElement {
-  const {
-    messagesListAtomAtoms,
-    handleIsRevealIdentityOrContactRevealMessageVisibleActionAtom,
-  } = useMolecule(chatMolecule)
+  const {messagesListAtomAtoms} = useMolecule(chatMolecule)
   const dataAtoms = useAtomValue(messagesListAtomAtoms)
   const {footerHeightAtom} = useScreenFooterHeight()
   const footerHeight = useAtomValue(footerHeightAtom)
   const store = useStore()
-  const handleIsRevealIdentityOrContactRevealMessageVisible = useSetAtom(
-    handleIsRevealIdentityOrContactRevealMessageVisibleActionAtom
-  )
   const listRef = useRef<FlashListRef<Atom<MessagesListItem>>>(null)
   const currentScrollOffsetRef = useRef(0)
   const viewportHeightRef = useRef(0)
@@ -462,10 +450,6 @@ function MessagesList({
       onScroll={onScroll}
       renderItem={renderItem}
       scrollEventThrottle={16}
-      onViewableItemsChanged={
-        handleIsRevealIdentityOrContactRevealMessageVisible
-      }
-      viewabilityConfig={viewabilityConfig}
     />
   )
 }

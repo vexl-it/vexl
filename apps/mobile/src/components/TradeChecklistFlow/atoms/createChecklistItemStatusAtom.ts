@@ -95,37 +95,6 @@ export default function createChecklistItemStatusAtom(
         return 'pending'
     }
 
-    if (item === 'REVEAL_PHONE_NUMBER') {
-      const contactReveal = tradeChecklistData.contact
-      const bothSharedPhones =
-        !!contactReveal?.sent?.fullPhoneNumber &&
-        !!contactReveal?.received?.fullPhoneNumber
-
-      if (updates.contact?.status === 'REQUEST_REVEAL') return 'readyToSend'
-
-      if (
-        contactReveal?.received?.status === 'DISAPPROVE_REVEAL' ||
-        updates?.contact?.status === 'DISAPPROVE_REVEAL' ||
-        contactReveal?.sent?.status === 'DISAPPROVE_REVEAL'
-      )
-        return 'declined'
-
-      if (
-        bothSharedPhones &&
-        (contactReveal?.received?.status === 'APPROVE_REVEAL' ||
-          contactReveal?.sent?.status === 'APPROVE_REVEAL')
-      )
-        return 'accepted'
-
-      if (
-        contactReveal?.received?.fullPhoneNumber ||
-        contactReveal?.sent?.fullPhoneNumber ||
-        contactReveal?.sent?.status === 'REQUEST_REVEAL' ||
-        contactReveal?.received?.status === 'REQUEST_REVEAL'
-      )
-        return 'pending'
-    }
-
     if (item === 'MEETING_LOCATION') {
       if (updates.location) return 'readyToSend'
       if (

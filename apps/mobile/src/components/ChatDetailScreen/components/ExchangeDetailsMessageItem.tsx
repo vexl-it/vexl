@@ -14,12 +14,12 @@ import {
 import {
   exchangedDetails,
   isAnyDetailSelected,
-  isCurrentPendingRequest,
   isResponse,
   latestReveal,
-  requestedDetails,
   revealEventForMessage,
   selectionsEqual,
+  stillPendingDetails,
+  type ExchangeDetailsSelection,
   type RevealEvent,
 } from '../../../state/tradeChecklist/utils/exchangeDetails'
 import {getInternationalPhoneNumber} from '../../../utils/getInternationalPhoneNumber'
@@ -34,11 +34,17 @@ import VexlbotActionCard from './VexlbotMessageItem/components/VexlbotActionCard
 
 const requestDeclinedAvatar = require('./images/requestDeclined.png')
 
-function RequestCard({event}: {event: RevealEvent}): React.ReactElement {
+function RequestCard({
+  event,
+  pending,
+}: {
+  event: RevealEvent
+  pending: ExchangeDetailsSelection
+}): React.ReactElement {
   const {t} = useTranslation()
   const store = useStore()
   const openExchangeDetails = useOpenExchangeDetails()
-  const details = formatSelectedDetails(t, requestedDetails(event.reveal))
+  const details = formatSelectedDetails(t, pending)
 
   if (event.direction === 'sent') {
     return (
@@ -196,14 +202,14 @@ function ExchangeDetailsMessageItem({
 
   if (!event) return null
 
-  const showRequest =
-    isAnyDetailSelected(requestedDetails(event.reveal)) &&
-    isCurrentPendingRequest(chat, event)
+  const pending = stillPendingDetails(chat, event)
 
   return (
     <>
       {isResponse(event.reveal) ? <OutcomeCard event={event} /> : null}
-      {showRequest ? <RequestCard event={event} /> : null}
+      {isAnyDetailSelected(pending) ? (
+        <RequestCard event={event} pending={pending} />
+      ) : null}
     </>
   )
 }

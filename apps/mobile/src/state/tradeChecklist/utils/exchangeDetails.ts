@@ -293,24 +293,20 @@ export function revealEventForMessage(
   return {direction, reveal: {identity: reveal.identity, contact}, timestamp}
 }
 
-export function isCurrentPendingRequest(
+// Details asked for in this event that the other direction has not answered.
+export function stillPendingDetails(
   chat: ChatReveals,
   event: RevealEvent
-): boolean {
-  const pending = pendingRequest({chat, direction: event.direction})
-
-  return (
-    pending.identity?.timestamp === event.timestamp ||
-    pending.contact?.timestamp === event.timestamp
-  )
-}
-
-export function requestedDetails(
-  reveal: RevealUpdate
 ): ExchangeDetailsSelection {
+  const pending = pendingRequest({chat, direction: event.direction})
+  const fromThisEvent = <T extends {timestamp: number}>(
+    reveal: T | undefined
+  ): T | undefined =>
+    reveal?.timestamp === event.timestamp ? reveal : undefined
+
   return selectionFromReveal({
-    identity: isRequest(reveal.identity) ? reveal.identity : undefined,
-    contact: isRequest(reveal.contact) ? reveal.contact : undefined,
+    identity: fromThisEvent(pending.identity),
+    contact: fromThisEvent(pending.contact),
   })
 }
 

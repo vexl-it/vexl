@@ -234,6 +234,7 @@ function ExchangeDetailsScreen(): React.ReactElement {
   const availableKeys = useAtomValue(availableDetailKeysAtom)
   const canSubmit = useAtomValue(canSubmitExchangeDetailsAtom)
   const pendingDetails = useAtomValue(pendingSentDetailsAtom)
+  const sharedByThem = useAtomValue(detailsSharedByThemAtom)
   const saveDraft = useSetAtom(saveExchangeDetailsDraftActionAtom)
   const prepareAskAgain = useSetAtom(prepareAskAgainActionAtom)
 
@@ -305,7 +306,9 @@ function ExchangeDetailsScreen(): React.ReactElement {
               <Typography variant="heading3" color="$foregroundPrimary">
                 {mode === 'respond'
                   ? t('tradeChecklist.exchangeDetails.respondHeading')
-                  : t('tradeChecklist.exchangeDetails.requestHeading')}
+                  : isAnyDetailSelected(sharedByThem)
+                    ? t('tradeChecklist.exchangeDetails.requestMoreHeading')
+                    : t('tradeChecklist.exchangeDetails.requestHeading')}
               </Typography>
               {mode === 'respond' ? (
                 <Typography variant="description" color="$foregroundSecondary">

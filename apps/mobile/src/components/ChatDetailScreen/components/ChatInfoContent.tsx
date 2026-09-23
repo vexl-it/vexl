@@ -176,7 +176,7 @@ export default function ChatInfoContent({
   const reportOffer = useSetAtom(reportOfferActionAtom)
   const isDeveloper = useAtomValue(isDeveloperAtom)
   const {
-    canExchangeDetailsAtom,
+    canSendMessagesAtom,
     chatAtom,
     chatIdAtom,
     commonConnectionsCountAtom,
@@ -218,7 +218,7 @@ export default function ChatInfoContent({
     !!otherSideSupportsTradingChecklist &&
     !listingTypeIsOther &&
     !isNoteChatOrigin(chat.origin)
-  const showExchangeDetailsAction = useAtomValue(canExchangeDetailsAtom)
+  const showExchangeDetailsAction = useAtomValue(canSendMessagesAtom)
   const showOfferDetailAction = !!offer
   const showReceivedMessagesDebugAction = !!enableHiddenFeatures || isDeveloper
   const otherSideIsOfferCreator =

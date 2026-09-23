@@ -10,9 +10,9 @@ import useOpenExchangeDetails from './useOpenExchangeDetails'
 export default function useChatHeaderRightActions(): NavigationBarAction[] {
   const navigation =
     useNavigation<RootStackScreenProps<'ChatDetail'>['navigation']>()
-  const {canExchangeDetailsAtom, chatAtom, chatIdAtom, publicKeyPemBase64Atom} =
+  const {canSendMessagesAtom, chatAtom, chatIdAtom, publicKeyPemBase64Atom} =
     useMolecule(chatMolecule)
-  const canExchangeDetails = useAtomValue(canExchangeDetailsAtom)
+  const canSendMessages = useAtomValue(canSendMessagesAtom)
   const chat = useAtomValue(chatAtom)
   const chatId = useAtomValue(chatIdAtom)
   const inboxKey = useAtomValue(publicKeyPemBase64Atom)
@@ -20,7 +20,7 @@ export default function useChatHeaderRightActions(): NavigationBarAction[] {
 
   const exchangeDetailsAction: NavigationBarAction = {
     icon: EyeShut,
-    disabled: !canExchangeDetails,
+    disabled: !canSendMessages,
     onPress: openExchangeDetails,
   }
 

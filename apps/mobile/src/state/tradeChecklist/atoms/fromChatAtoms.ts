@@ -11,7 +11,6 @@ import type {ChatIds, ChatWithMessages} from '../../chat/domain'
 import {dummyChatWithMessages} from '../../chat/domain'
 import {offerForChatOriginAtom} from '../../marketplace/atoms/offersState'
 import {getLatestAmountDataMessage} from '../utils/amount'
-import {canExchangeDetails} from '../utils/exchangeDetails'
 import {clearUpdatesToBeSentActionAtom} from './updatesToBeSentAtom'
 
 export const parentChatAtomAtom = atom<FocusAtomType<ChatWithMessages>>(
@@ -86,10 +85,6 @@ export const otherSideDataAtom = atom((get) => {
   const chatData = get(chatWithMessagesAtom)
   return getOtherSideData(chatData.chat)
 })
-
-export const canExchangeDetailsAtom = atom((get) =>
-  canExchangeDetails(get(chatWithMessagesAtom))
-)
 
 export const setParentChatActionAtom = atom(
   null,

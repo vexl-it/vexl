@@ -1,4 +1,4 @@
-import {FlashList, type FlashListRef} from '@shopify/flash-list'
+import {FlashList} from '@shopify/flash-list'
 import {Separator, Stack} from '@vexl-next/ui'
 import {type Atom} from 'jotai'
 import React from 'react'
@@ -13,7 +13,6 @@ interface Props {
   readonly contacts: ReadonlyArray<Atom<StoredContactWithComputedValues>>
   readonly keyboardBottomSpacerHeight: number
   readonly emptyVariant: ContactsListEmptyVariant
-  readonly isActive: boolean
 }
 
 function renderItem({
@@ -32,17 +31,7 @@ function ContactsList({
   contacts,
   emptyVariant,
   keyboardBottomSpacerHeight,
-  isActive,
 }: Props): React.ReactElement {
-  const listRef =
-    React.useRef<FlashListRef<Atom<StoredContactWithComputedValues>>>(null)
-
-  React.useEffect(() => {
-    if (!isActive) return
-
-    listRef.current?.scrollToOffset({offset: 0, animated: false})
-  }, [isActive])
-
   const listFooterComponent = React.useCallback(
     () => <Stack h={keyboardBottomSpacerHeight + 16} />,
     [keyboardBottomSpacerHeight]
@@ -55,7 +44,6 @@ function ContactsList({
   return (
     <Stack f={1}>
       <FlashList
-        ref={listRef}
         showsHorizontalScrollIndicator={false}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={listEmptyComponent}

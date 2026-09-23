@@ -187,16 +187,27 @@ export const contactSelectMolecule = molecule((_, getScope) => {
     )
   })
 
-  const allContactsToDisplayAtomsAtom = splitAtom(allContactsToDisplayAtom)
+  const allContactsToDisplayAtomsAtom = splitAtom(
+    allContactsToDisplayAtom,
+    (contact) => contact.computedValues.normalizedNumber
+  )
   const createFilteredContactAtomsAtom = (
     shouldDisplayContact: (contact: StoredContactWithComputedValues) => boolean
   ): Atom<ReadonlyArray<Atom<StoredContactWithComputedValues>>> =>
-    atom((get) =>
-      pipe(
-        get(allContactsToDisplayAtomsAtom),
-        Array.filter((contactAtom) => shouldDisplayContact(get(contactAtom)))
+    atom((get) => {
+      const contacts = get(allContactsToDisplayAtom)
+      const contactAtoms = get(allContactsToDisplayAtomsAtom)
+
+      // Filter the values without subscribing to every row atom. Reading each
+      // splitAtom row performs an index lookup in the full contact list.
+      return pipe(
+        contactAtoms,
+        Array.filter((_, index) => {
+          const contact = contacts[index]
+          return contact !== undefined && shouldDisplayContact(contact)
+        })
       )
-    )
+    })
   const newContactsToDisplayAtomsAtom =
     createFilteredContactAtomsAtom(isNewContact)
   const submittedContactsToDisplayAtomsAtom =
@@ -219,19 +230,19 @@ export const contactSelectMolecule = molecule((_, getScope) => {
   })
 
   const newContactsToDisplayCountAtom = atom(
-    (get) => get(newContactsToDisplayAtomsAtom).length
+    (get) => get(newContactsToDisplayAtom).length
   )
   const submittedContactsToDisplayCountAtom = atom(
-    (get) => get(submittedContactsToDisplayAtomsAtom).length
+    (get) => get(submittedContactsToDisplayAtom).length
   )
   const nonSubmittedContactsToDisplayCountAtom = atom(
-    (get) => get(nonSubmittedContactsToDisplayAtomsAtom).length
+    (get) => get(nonSubmittedContactsToDisplayAtom).length
   )
   const allContactsToDisplayCountAtom = atom(
-    (get) => get(allContactsToDisplayAtomsAtom).length
+    (get) => get(allContactsToDisplayAtom).length
   )
   const contactsToDisplayCountAtom = atom(
-    (get) => get(contactsToDisplayAtomsAtom).length
+    (get) => get(_contactsToDisplayAtom).length
   )
   const contactsPermissionResponseAtom = atom<
     ContactsPermissionResponse | undefined

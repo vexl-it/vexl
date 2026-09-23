@@ -379,9 +379,7 @@ export type DonationsFlowScreenProps<T extends keyof DonationsFlowParamsList> =
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type TradeChecklistStackParamsList = {
   AgreeOnTradeDetails: undefined
-  RevealIdentityPhoto: undefined
-  RevealIdentityNickname: undefined
-  RevealIdentitySummary: undefined
+  ExchangeDetails: undefined
   ChooseAvailableDays: {
     readonly chosenDateTimes: AvailableDateTimeOption[] | undefined
   }

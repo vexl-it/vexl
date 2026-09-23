@@ -5,27 +5,30 @@ import {useAtomValue} from 'jotai'
 import {type RootStackScreenProps} from '../../../navigationTypes'
 import isNoteChatOrigin from '../../../state/chat/utils/isNoteChatOrigin'
 import {chatMolecule} from '../atoms'
-import useOpenRevealIdentityFlow from './useOpenRevealIdentityFlow'
+import useOpenExchangeDetails from './useOpenExchangeDetails'
 
-export default function useChatHeaderRightAction(): NavigationBarAction {
+export default function useChatHeaderRightActions(): NavigationBarAction[] {
   const navigation =
     useNavigation<RootStackScreenProps<'ChatDetail'>['navigation']>()
-  const {
-    canSendMessagesAtom,
-    chatAtom,
-    chatIdAtom,
-    identityRevealStatusAtom,
-    publicKeyPemBase64Atom,
-  } = useMolecule(chatMolecule)
-  const canSendMessages = useAtomValue(canSendMessagesAtom)
+  const {canExchangeDetailsAtom, chatAtom, chatIdAtom, publicKeyPemBase64Atom} =
+    useMolecule(chatMolecule)
+  const canExchangeDetails = useAtomValue(canExchangeDetailsAtom)
   const chat = useAtomValue(chatAtom)
   const chatId = useAtomValue(chatIdAtom)
-  const identityRevealStatus = useAtomValue(identityRevealStatusAtom)
   const inboxKey = useAtomValue(publicKeyPemBase64Atom)
-  const openRevealIdentityFlow = useOpenRevealIdentityFlow()
+  const openExchangeDetails = useOpenExchangeDetails()
 
-  if (!isNoteChatOrigin(chat.origin)) {
-    return {
+  const exchangeDetailsAction: NavigationBarAction = {
+    icon: EyeShut,
+    disabled: !canExchangeDetails,
+    onPress: openExchangeDetails,
+  }
+
+  if (isNoteChatOrigin(chat.origin)) return [exchangeDetailsAction]
+
+  return [
+    exchangeDetailsAction,
+    {
       icon: Checklist,
       onPress: () => {
         navigation.navigate('TradeChecklistFlow', {
@@ -34,15 +37,6 @@ export default function useChatHeaderRightAction(): NavigationBarAction {
           inboxKey,
         })
       },
-    }
-  }
-
-  return {
-    icon: EyeShut,
-    disabled:
-      !canSendMessages ||
-      (identityRevealStatus !== 'notStarted' &&
-        identityRevealStatus !== 'theyAsked'),
-    onPress: openRevealIdentityFlow,
-  }
+    },
+  ]
 }

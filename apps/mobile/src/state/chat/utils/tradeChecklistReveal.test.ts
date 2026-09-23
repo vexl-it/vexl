@@ -205,6 +205,18 @@ it.each(['omit', 'decline'])(
     expect(
       store.get(chat).chat.otherSide.realLifeInfo?.fullPhoneNumber
     ).toBeUndefined()
+
+    const sentContacts = pipe(
+      jest.mocked(sendMessage).mock.calls,
+      filterMap(([{message}]) =>
+        Option.fromNullable(message.tradeChecklistUpdate?.contact)
+      )
+    )
+    if (choice === 'decline') {
+      expect(sentContacts).toEqual([{status: 'DISAPPROVE_REVEAL', timestamp}])
+    } else {
+      expect(sentContacts).toEqual([])
+    }
   }
 )
 

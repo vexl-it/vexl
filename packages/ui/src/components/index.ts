@@ -51,6 +51,8 @@ export type {
   DialogFromAtomProps,
   DialogProps,
 } from './Dialog'
+export {Disclosure} from './Disclosure'
+export type {DisclosureProps} from './Disclosure'
 export {DismissKeyboardOnPressOutside} from './DismissKeyboardOnPressOutside'
 export type {DismissKeyboardOnPressOutsideProps} from './DismissKeyboardOnPressOutside'
 export {Dot} from './Dot'

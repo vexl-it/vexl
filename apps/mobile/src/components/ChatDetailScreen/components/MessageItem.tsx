@@ -11,9 +11,8 @@ import {chatMolecule} from '../atoms'
 import {type MessagesListItem} from '../utils/buildMessagesListData'
 import formatChatTime from '../utils/formatChatTime'
 import {BigImageMessage} from './BigImageMessage'
-import ContactRevealMessageItem from './ContactRevealMessageItem'
 import {DisapproveMessagingMessage} from './DisapproveMessagingMessage'
-import IdentityRevealMessageItem from './IdentityRevealMessageItem'
+import ExchangeDetailsMessageItem from './ExchangeDetailsMessageItem'
 import {LastMessageTime} from './LastMessageTime'
 import MessageIncompatibleItem from './MessageIncompatibleItem'
 import {OtherSideLeftVexlBot} from './OtherSideLeftVexlBot'
@@ -189,25 +188,14 @@ function MessageItem({
       item.message.message.messageType === 'REQUEST_REVEAL' ||
       item.message.message.messageType === 'APPROVE_REVEAL' ||
       item.message.message.messageType === 'DISAPPROVE_REVEAL' ||
-      (item.message.message.messageType === 'TRADE_CHECKLIST_UPDATE' &&
-        item.message.message.tradeChecklistUpdate?.identity)
-    ) {
-      return (
-        <IdentityRevealMessageItem
-          message={item.message}
-          isLatest={item.isLatest}
-        />
-      )
-    }
-
-    if (
       item.message.message.messageType === 'REQUEST_CONTACT_REVEAL' ||
       item.message.message.messageType === 'APPROVE_CONTACT_REVEAL' ||
       item.message.message.messageType === 'DISAPPROVE_CONTACT_REVEAL' ||
       (item.message.message.messageType === 'TRADE_CHECKLIST_UPDATE' &&
-        item.message.message.tradeChecklistUpdate?.contact)
+        (item.message.message.tradeChecklistUpdate?.identity ||
+          item.message.message.tradeChecklistUpdate?.contact))
     ) {
-      return <ContactRevealMessageItem message={item.message} />
+      return <ExchangeDetailsMessageItem message={item.message} />
     }
 
     if (

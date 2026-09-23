@@ -4,46 +4,41 @@ import {useCallback} from 'react'
 import {type TradeChecklistStackScreenProps} from '../../../../navigationTypes'
 import {chatWithMessagesKeys} from '../../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {
-  discardRevealIdentityDraftActionAtom,
-  restoreRevealIdentityDraftAfterFailedSubmitActionAtom,
-} from '../../atoms/revealIdentityAtoms'
+  discardExchangeDetailsDraftActionAtom,
+  restoreExchangeDetailsDraftAfterFailedSubmitActionAtom,
+} from '../../atoms/exchangeDetailsAtoms'
 import {useTradeChecklistExitNavigation} from '../../useTradeChecklistExitNavigation'
 import {useWasOpenFromAgreeOnTradeDetailsScreen} from '../../utils'
 
-export default function useRevealIdentityFlowNavigation(): {
+export default function useExchangeDetailsNavigation(): {
   readonly closeFlow: () => void
   readonly finishFlowWithPendingUpdates: () => void
 } {
   const navigation =
     useNavigation<
-      TradeChecklistStackScreenProps<'RevealIdentitySummary'>['navigation']
+      TradeChecklistStackScreenProps<'ExchangeDetails'>['navigation']
     >()
   const store = useStore()
   const wasOpenFromAgreeOnTradeDetailsScreen =
     useWasOpenFromAgreeOnTradeDetailsScreen()
-  const restoreRevealIdentityDraftAfterFailedSubmit = useSetAtom(
-    restoreRevealIdentityDraftAfterFailedSubmitActionAtom
+  const restoreDraftAfterFailedSubmit = useSetAtom(
+    restoreExchangeDetailsDraftAfterFailedSubmitActionAtom
   )
-  const discardRevealIdentityDraft = useSetAtom(
-    discardRevealIdentityDraftActionAtom
-  )
+  const discardDraft = useSetAtom(discardExchangeDetailsDraftActionAtom)
 
-  const returnToFlowOrigin = useCallback(() => {
+  const closeFlow = useCallback(() => {
+    discardDraft()
+
     if (wasOpenFromAgreeOnTradeDetailsScreen) {
       navigation.popTo('AgreeOnTradeDetails')
       return
     }
 
     navigation.popTo('ChatDetail', store.get(chatWithMessagesKeys))
-  }, [navigation, store, wasOpenFromAgreeOnTradeDetailsScreen])
-
-  const closeFlow = useCallback(() => {
-    discardRevealIdentityDraft()
-    returnToFlowOrigin()
-  }, [discardRevealIdentityDraft, returnToFlowOrigin])
+  }, [discardDraft, navigation, store, wasOpenFromAgreeOnTradeDetailsScreen])
 
   const finishFlowWithPendingUpdates = useTradeChecklistExitNavigation(
-    restoreRevealIdentityDraftAfterFailedSubmit
+    restoreDraftAfterFailedSubmit
   )
 
   return {closeFlow, finishFlowWithPendingUpdates}

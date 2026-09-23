@@ -3,35 +3,22 @@ import {useMolecule} from 'bunshi/dist/react'
 import {useSetAtom, useStore} from 'jotai'
 import {useCallback} from 'react'
 import {type RootStackScreenProps} from '../../../navigationTypes'
-import {
-  prepareRevealIdentityDraftActionAtom,
-  shouldOpenRevealIdentitySummaryAtom,
-} from '../../TradeChecklistFlow/atoms/revealIdentityAtoms'
+import {prepareExchangeDetailsDraftActionAtom} from '../../TradeChecklistFlow/atoms/exchangeDetailsAtoms'
 import {chatMolecule} from '../atoms'
 
-export default function useOpenRevealIdentityFlow(): () => void {
+export default function useOpenExchangeDetails(): () => void {
   const navigation =
     useNavigation<RootStackScreenProps<'ChatDetail'>['navigation']>()
   const store = useStore()
   const {chatIdAtom, publicKeyPemBase64Atom} = useMolecule(chatMolecule)
-  const prepareRevealIdentityDraft = useSetAtom(
-    prepareRevealIdentityDraftActionAtom
-  )
+  const prepareDraft = useSetAtom(prepareExchangeDetailsDraftActionAtom)
 
   return useCallback(() => {
-    prepareRevealIdentityDraft()
+    prepareDraft()
     navigation.navigate('TradeChecklistFlow', {
-      screen: store.get(shouldOpenRevealIdentitySummaryAtom)
-        ? 'RevealIdentitySummary'
-        : 'RevealIdentityPhoto',
+      screen: 'ExchangeDetails',
       chatId: store.get(chatIdAtom),
       inboxKey: store.get(publicKeyPemBase64Atom),
     })
-  }, [
-    chatIdAtom,
-    navigation,
-    prepareRevealIdentityDraft,
-    publicKeyPemBase64Atom,
-    store,
-  ])
+  }, [chatIdAtom, navigation, prepareDraft, publicKeyPemBase64Atom, store])
 }

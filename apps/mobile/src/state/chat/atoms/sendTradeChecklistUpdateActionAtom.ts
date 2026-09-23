@@ -2,8 +2,14 @@ import {
   generateChatMessageId,
   type ChatMessage,
 } from '@vexl-next/domain/src/general/messaging'
-import {type TradeChecklistUpdate} from '@vexl-next/domain/src/general/tradeChecklist'
-import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {
+  type RevealStatus,
+  type TradeChecklistUpdate,
+} from '@vexl-next/domain/src/general/tradeChecklist'
+import {
+  unixMillisecondsNow,
+  type UnixMilliseconds,
+} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {VersionString} from '@vexl-next/domain/src/utility/VersionString.brand'
 import sendMessage, {
   type SendMessageApiErrors,
@@ -28,6 +34,14 @@ import {replaceIdentityImageFileUriWithBase64} from '../utils/replaceImageFileUr
 
 const MINIMAL_REQUIRED_VERSION = Schema.decodeSync(VersionString)('1.25.0')
 
+// A decline must never carry the sender's name, photo or phone number.
+function withoutDataWhenDeclined<
+  T extends {status?: RevealStatus; timestamp: UnixMilliseconds},
+>(reveal: T | undefined): T | Pick<T, 'status' | 'timestamp'> | undefined {
+  if (reveal?.status !== 'DISAPPROVE_REVEAL') return reveal
+  return {status: reveal.status, timestamp: reveal.timestamp}
+}
+
 export default function createSubmitChecklistUpdateActionAtom(
   chatWithMessagesAtom: FocusAtomType<ChatWithMessages>
 ): ActionAtomType<
@@ -51,7 +65,11 @@ export default function createSubmitChecklistUpdateActionAtom(
       >
 
       const identityRevealChatMessageOrUndefined = yield* _(
-        taskToEffect(replaceIdentityImageFileUriWithBase64(update.identity))
+        taskToEffect(
+          replaceIdentityImageFileUriWithBase64(
+            withoutDataWhenDeclined(update.identity)
+          )
+        )
       )
 
       const toSend: ChatMessage[] = updateKeys.map((key) => ({
@@ -62,9 +80,9 @@ export default function createSubmitChecklistUpdateActionAtom(
             ? {
                 identity: identityRevealChatMessageOrUndefined,
               }
-            : {
-                [key]: update[key],
-              },
+            : key === 'contact'
+              ? {contact: withoutDataWhenDeclined(update.contact)}
+              : {[key]: update[key]},
         time: unixMillisecondsNow(),
         uuid: generateChatMessageId(),
         myVersion: version,

@@ -24,6 +24,7 @@
   "tradeChecklist.exchangeDetails.respondHeading": "Vérifie tes infos",
   "tradeChecklist.exchangeDetails.respondDescription": "Vous partagerez tous les deux les mêmes infos. Vérifie les tiennes avant d'accepter.",
   "tradeChecklist.exchangeDetails.nickname": "Surnom",
+  "tradeChecklist.exchangeDetails.nicknameNotSet": "Active pour définir",
   "tradeChecklist.exchangeDetails.phoneNumber": "Numéro de téléphone",
   "tradeChecklist.exchangeDetails.photo": "Photo de profil",
   "tradeChecklist.exchangeDetails.noPhotoYet": "Pas encore de photo",

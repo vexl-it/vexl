@@ -24,6 +24,7 @@
   "tradeChecklist.exchangeDetails.respondHeading": "Прегледай данните си",
   "tradeChecklist.exchangeDetails.respondDescription": "И двамата ще споделите едни и същи данни. Провери своите, преди да се съгласиш.",
   "tradeChecklist.exchangeDetails.nickname": "Псевдоним",
+  "tradeChecklist.exchangeDetails.nicknameNotSet": "Включи, за да зададеш",
   "tradeChecklist.exchangeDetails.phoneNumber": "Телефонен номер",
   "tradeChecklist.exchangeDetails.photo": "Профилна снимка",
   "tradeChecklist.exchangeDetails.noPhotoYet": "Все още няма снимка",

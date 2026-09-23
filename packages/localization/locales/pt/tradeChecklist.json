@@ -24,6 +24,7 @@
   "tradeChecklist.exchangeDetails.respondHeading": "Revê os teus dados",
   "tradeChecklist.exchangeDetails.respondDescription": "Ambos vão partilhar os mesmos dados. Revê os teus antes de aceitares.",
   "tradeChecklist.exchangeDetails.nickname": "Alcunha",
+  "tradeChecklist.exchangeDetails.nicknameNotSet": "Ativa para definir",
   "tradeChecklist.exchangeDetails.phoneNumber": "Número de telefone",
   "tradeChecklist.exchangeDetails.photo": "Foto de perfil",
   "tradeChecklist.exchangeDetails.noPhotoYet": "Ainda sem foto",

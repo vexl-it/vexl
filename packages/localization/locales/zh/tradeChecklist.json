@@ -24,6 +24,7 @@
   "tradeChecklist.exchangeDetails.respondHeading": "检查你的信息",
   "tradeChecklist.exchangeDetails.respondDescription": "你们双方会分享相同的信息。同意前请检查你的信息。",
   "tradeChecklist.exchangeDetails.nickname": "昵称",
+  "tradeChecklist.exchangeDetails.nicknameNotSet": "开启以设置",
   "tradeChecklist.exchangeDetails.phoneNumber": "手机号码",
   "tradeChecklist.exchangeDetails.photo": "头像",
   "tradeChecklist.exchangeDetails.noPhotoYet": "还没有照片",

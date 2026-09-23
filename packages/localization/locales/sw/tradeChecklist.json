@@ -24,6 +24,7 @@
   "tradeChecklist.exchangeDetails.respondHeading": "Kagua taarifa zako",
   "tradeChecklist.exchangeDetails.respondDescription": "Nyote mtashiriki taarifa zilezile. Kagua zako kabla ya kukubali.",
   "tradeChecklist.exchangeDetails.nickname": "Jina la utani",
+  "tradeChecklist.exchangeDetails.nicknameNotSet": "Washa ili kuweka",
   "tradeChecklist.exchangeDetails.phoneNumber": "Nambari ya simu",
   "tradeChecklist.exchangeDetails.photo": "Picha ya wasifu",
   "tradeChecklist.exchangeDetails.noPhotoYet": "Bado hakuna picha",

@@ -24,6 +24,7 @@
   "tradeChecklist.exchangeDetails.respondHeading": "Controleer je gegevens",
   "tradeChecklist.exchangeDetails.respondDescription": "Jullie delen allebei dezelfde gegevens. Controleer die van jou voordat je akkoord gaat.",
   "tradeChecklist.exchangeDetails.nickname": "Bijnaam",
+  "tradeChecklist.exchangeDetails.nicknameNotSet": "Zet aan om in te stellen",
   "tradeChecklist.exchangeDetails.phoneNumber": "Telefoonnummer",
   "tradeChecklist.exchangeDetails.photo": "Profielfoto",
   "tradeChecklist.exchangeDetails.noPhotoYet": "Nog geen foto",

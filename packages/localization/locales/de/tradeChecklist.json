@@ -24,6 +24,7 @@
   "tradeChecklist.exchangeDetails.respondHeading": "Prüfe deine Details",
   "tradeChecklist.exchangeDetails.respondDescription": "Ihr teilt beide dieselben Details. Prüfe deine, bevor du zustimmst.",
   "tradeChecklist.exchangeDetails.nickname": "Spitzname",
+  "tradeChecklist.exchangeDetails.nicknameNotSet": "Zum Festlegen einschalten",
   "tradeChecklist.exchangeDetails.phoneNumber": "Telefonnummer",
   "tradeChecklist.exchangeDetails.photo": "Profilfoto",
   "tradeChecklist.exchangeDetails.noPhotoYet": "Noch kein Foto",

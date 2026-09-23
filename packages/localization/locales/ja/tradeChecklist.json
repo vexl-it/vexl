@@ -23,7 +23,6 @@
   "tradeChecklist.exchangeDetails.requestHeading": "何を交換しますか？",
   "tradeChecklist.exchangeDetails.respondHeading": "自分の情報を確認",
   "tradeChecklist.exchangeDetails.respondDescription": "お互いに同じ情報を共有します。同意する前に自分の情報を確認しましょう。",
-  "tradeChecklist.exchangeDetails.sharedWithYou": "共有された情報",
   "tradeChecklist.exchangeDetails.everythingShared": "共有できる情報はすべて交換済みです。",
   "tradeChecklist.exchangeDetails.pendingHeading": "相手の返事を待っています",
   "tradeChecklist.exchangeDetails.pendingDescription": "リクエストした内容：{{details}}。相手はまだ返事をしていません。もう一度リクエストすると、同じリクエストが再送されます。",

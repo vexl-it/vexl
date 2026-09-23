@@ -47,7 +47,7 @@ import {formatSelectedDetails} from './formatSelectedDetails'
 import useExchangeDetailsNavigation from './useExchangeDetailsNavigation'
 
 const PHOTO_PREVIEW_SIZE = 56
-const SHARED_AVATAR_SIZE = 120
+const SHARED_AVATAR_SIZE = 144
 
 function NicknameRow(): React.ReactElement {
   const {t} = useTranslation()
@@ -152,8 +152,7 @@ const ROWS: Record<ExchangeDetailKey, () => React.ReactElement> = {
   photo: PhotoRow,
 }
 
-function SharedWithYouCard(): React.ReactElement | null {
-  const {t} = useTranslation()
+function SharedProfile(): React.ReactElement | null {
   const sharedByThem = useAtomValue(detailsSharedByThemAtom)
   const otherSideData = useAtomValue(otherSideDataAtom)
 
@@ -164,38 +163,31 @@ function SharedWithYouCard(): React.ReactElement | null {
     : otherSideData.partialPhoneNumber
 
   return (
-    <YStack gap="$2">
-      <Typography variant="paragraphSmallBold" color="$foregroundPrimary">
-        {t('tradeChecklist.exchangeDetails.sharedWithYou')}
-      </Typography>
-      <YStack
-        ai="center"
-        gap="$3"
-        p="$5"
-        borderRadius="$4"
-        backgroundColor="$backgroundSecondary"
-      >
-        <UserAvatar
-          userImage={otherSideData.image}
-          width={SHARED_AVATAR_SIZE}
-          height={SHARED_AVATAR_SIZE}
-        />
-        <YStack ai="center" gap="$1">
-          <Typography variant="paragraphSmallBold" color="$foregroundPrimary">
-            {otherSideData.userName}
+    <YStack ai="center" gap="$4" py="$4">
+      <UserAvatar
+        userImage={otherSideData.image}
+        width={SHARED_AVATAR_SIZE}
+        height={SHARED_AVATAR_SIZE}
+      />
+      <YStack ai="center" gap="$1">
+        <Typography
+          variant="heading3"
+          color="$foregroundPrimary"
+          textAlign="center"
+        >
+          {otherSideData.userName}
+        </Typography>
+        {phoneNumber ? (
+          <Typography variant="paragraphSmall" color="$foregroundSecondary">
+            {phoneNumber}
           </Typography>
-          {phoneNumber ? (
-            <Typography variant="description" color="$foregroundSecondary">
-              {phoneNumber}
-            </Typography>
-          ) : null}
-        </YStack>
-        <AddToContactsButton
-          fullPhoneNumber={otherSideData.fullPhoneNumber}
-          userImage={otherSideData.image}
-          userName={otherSideData.userName}
-        />
+        ) : null}
       </YStack>
+      <AddToContactsButton
+        fullPhoneNumber={otherSideData.fullPhoneNumber}
+        userImage={otherSideData.image}
+        userName={otherSideData.userName}
+      />
     </YStack>
   )
 }
@@ -276,7 +268,7 @@ function ExchangeDetailsScreen(): React.ReactElement {
       }
     >
       <Stack gap="$5" pt="$4">
-        <SharedWithYouCard />
+        <SharedProfile />
         {mode === 'complete' ? (
           <Typography variant="description" color="$foregroundSecondary">
             {t('tradeChecklist.exchangeDetails.everythingShared')}

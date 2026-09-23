@@ -23,7 +23,6 @@
   "tradeChecklist.exchangeDetails.requestHeading": "Czym chcesz się wymienić?",
   "tradeChecklist.exchangeDetails.respondHeading": "Sprawdź swoje dane",
   "tradeChecklist.exchangeDetails.respondDescription": "Oboje udostępnicie te same dane. Sprawdź swoje, zanim się zgodzisz.",
-  "tradeChecklist.exchangeDetails.sharedWithYou": "Udostępnione tobie",
   "tradeChecklist.exchangeDetails.everythingShared": "Wymieniliście się wszystkim, czym można się podzielić.",
   "tradeChecklist.exchangeDetails.pendingHeading": "Czekasz na odpowiedź drugiej osoby",
   "tradeChecklist.exchangeDetails.pendingDescription": "Twoja prośba: {{details}}. Druga osoba jeszcze nie odpowiedziała. Jeśli poprosisz ponownie, ta sama prośba zostanie wysłana jeszcze raz.",

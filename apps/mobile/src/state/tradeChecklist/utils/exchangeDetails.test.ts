@@ -17,6 +17,7 @@ import {createEmptyTradeChecklistInState} from '../domain'
 import {updateTradeChecklistState} from '../utils'
 import {
   exchangedDetails,
+  exchangedDetailsForEvent,
   latestReveal,
   pendingRequestFromThem,
   revealEventForMessage,
@@ -183,6 +184,41 @@ it('keeps only the unanswered part of a request pending', () => {
     nickname: false,
     photo: false,
     phoneNumber: true,
+  })
+})
+
+it('treats an answer as newer by message order even when its clock runs behind', () => {
+  const request = message(
+    'sent',
+    {identity: identity('REQUEST_REVEAL', 1000)},
+    1000
+  )
+  const chat = chatWith([
+    request,
+    message('received', {identity: identity('APPROVE_REVEAL', 500)}, 500),
+  ])
+  const event = revealEventForMessage(chat, request)
+
+  expect(event && stillPendingDetails(chat, event)).toEqual({
+    nickname: false,
+    photo: false,
+    phoneNumber: false,
+  })
+})
+
+it('scopes an outcome to the groups of its own event', () => {
+  const chat = chatWith([
+    message('sent', {identity: identity('REQUEST_REVEAL', 1)}, 1),
+    message('received', {identity: identity('APPROVE_REVEAL', 2)}, 2),
+    message('sent', {contact: contact('REQUEST_REVEAL', 3)}, 3),
+    message('received', {contact: contact('DISAPPROVE_REVEAL', 4)}, 4),
+  ])
+  const decline = chat.messages[3]
+  const event = decline && revealEventForMessage(chat, decline)
+
+  expect(event && exchangedDetailsForEvent(chat, event)).toEqual({
+    mine: {nickname: false, photo: false, phoneNumber: false},
+    theirs: {nickname: false, photo: false, phoneNumber: false},
   })
 })
 

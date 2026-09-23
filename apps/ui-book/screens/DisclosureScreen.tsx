@@ -1,4 +1,4 @@
-import {Disclosure, SizableText, Theme, YStack} from '@vexl-next/ui'
+import {Disclosure, SizableText, Theme, XStack, YStack} from '@vexl-next/ui'
 import React from 'react'
 import {ScrollView} from 'react-native'
 
@@ -52,10 +52,10 @@ export function DisclosureScreen(): React.JSX.Element {
           Disclosure
         </SizableText>
 
-        <YStack gap="$3">
+        <XStack gap="$3">
           <ThemedColumn theme="light" />
           <ThemedColumn theme="dark" />
-        </YStack>
+        </XStack>
       </YStack>
     </ScrollView>
   )

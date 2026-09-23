@@ -11,7 +11,9 @@ import {randomSeedFromChat} from '../../../utils/RandomSeed'
 import {randomNumberFromSeed} from '../../../utils/randomNumber'
 import resolveLocalUri from '../../../utils/resolveLocalUri'
 
-function anonymousAvatarForChat(chat: Chat): RevealedRealLifeInfo['image'] {
+export function anonymousAvatarForChat(
+  chat: Chat
+): RevealedRealLifeInfo['image'] {
   const goldenAvatarType =
     chat.origin.type === 'theirOffer'
       ? chat.origin.offer?.offerInfo.publicPart.goldenAvatarType

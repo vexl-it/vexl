@@ -4,7 +4,9 @@ import {
 } from '@vexl-next/domain/src/general/tradeChecklist'
 import {type TradeChecklistInState} from '../../tradeChecklist/domain'
 import {type ChatWithMessages} from '../domain'
-import processTradeChecklistIdentityRevealMessageIfAny from './processTradeChecklistIdentityRevealMessageIfAny'
+import processTradeChecklistIdentityRevealMessageIfAny, {
+  anonymousAvatarForChat,
+} from './processTradeChecklistIdentityRevealMessageIfAny'
 
 function approvedReceivedReveal<T extends {status?: RevealStatus}>({
   received,
@@ -50,7 +52,7 @@ export default function addRealLifeInfoToChat(
     ? {...existingInfo, ...revealedIdentity}
     : existingInfo
 
-  if (!realLifeInfo) return chat
+  if (!realLifeInfo && !contact?.fullPhoneNumber) return chat
 
   return {
     ...chat,
@@ -59,7 +61,8 @@ export default function addRealLifeInfoToChat(
       otherSide: {
         ...chat.chat.otherSide,
         realLifeInfo: {
-          ...realLifeInfo,
+          // A phone number can be revealed on its own; keep the anonymous avatar
+          ...(realLifeInfo ?? {image: anonymousAvatarForChat(chat.chat)}),
           ...(contact?.fullPhoneNumber
             ? {fullPhoneNumber: contact.fullPhoneNumber}
             : {}),

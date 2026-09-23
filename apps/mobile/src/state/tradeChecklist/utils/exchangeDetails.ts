@@ -153,32 +153,48 @@ export function revealFromMessage(
   }
 }
 
-function newer<T extends {timestamp: number}>(
-  a: T | undefined,
-  b: T | undefined
-): T | undefined {
-  if (!a) return b
-  if (!b) return a
-  return b.timestamp > a.timestamp ? b : a
-}
-
 export interface ChatReveals {
   readonly messages: ChatMessageWithState[]
   readonly tradeChecklist: TradeChecklistInState
 }
 
-function notAfter(
-  limit: number | undefined
-): <T extends {timestamp: number}>(reveal: T | undefined) => T | undefined {
-  return (reveal) =>
-    limit !== undefined && reveal && reveal.timestamp > limit
-      ? undefined
-      : reveal
+// Messages are ordered by server receipt time, so their position is a clock
+// both sides agree on. Reveals known only from checklist state get no position
+// and fall back to the sender's timestamp.
+interface Located<T> {
+  readonly reveal: T
+  readonly order: number
 }
 
-// Latest reveal per group in one direction, across checklist state and
-// legacy messages. `until` limits the search to reveals up to that time.
-export function latestReveal({
+interface LocatedReveals {
+  readonly identity?: Located<IdentityRevealChatMessage>
+  readonly contact?: Located<ContactRevealChatMessage>
+}
+
+const NO_ORDER = -1
+
+function isAfter<A extends {timestamp: number}, B extends {timestamp: number}>(
+  a: Located<A>,
+  b: Located<B>
+): boolean {
+  if (a.order !== NO_ORDER && b.order !== NO_ORDER) return a.order > b.order
+  return a.reveal.timestamp > b.reveal.timestamp
+}
+
+function opposite(direction: RevealDirection): RevealDirection {
+  return direction === 'sent' ? 'received' : 'sent'
+}
+
+function locate<T>(
+  reveal: T | undefined,
+  order: number
+): Located<T> | undefined {
+  return reveal ? {reveal, order} : undefined
+}
+
+// Latest reveal per group in one direction, up to and including message
+// position `until`.
+function latestLocatedReveals({
   chat,
   direction,
   until,
@@ -186,39 +202,59 @@ export function latestReveal({
   chat: ChatReveals
   direction: RevealDirection
   until?: number
-}): RevealUpdate {
-  const limit = notAfter(until)
-
-  return pipe(
+}): LocatedReveals {
+  const fromMessages = pipe(
     chat.messages,
-    Array.filter((message) => message.state === direction),
-    Array.filterMap((message) =>
-      Option.fromNullable(revealFromMessage(message))
+    Array.filterMap((message, order) =>
+      message.state === direction && (until === undefined || order <= until)
+        ? Option.fromNullable(revealFromMessage(message)).pipe(
+            Option.map((reveal) => ({reveal, order}))
+          )
+        : Option.none()
     ),
-    Array.reduce<RevealUpdate, RevealUpdate>(
-      {
-        identity: limit(chat.tradeChecklist.identity[direction] ?? undefined),
-        contact: limit(chat.tradeChecklist.contact[direction] ?? undefined),
-      },
-      (acc, reveal) => ({
-        identity: newer(acc.identity, limit(reveal.identity)),
-        contact: newer(acc.contact, limit(reveal.contact)),
+    Array.reduce<LocatedReveals, {reveal: RevealUpdate; order: number}>(
+      {},
+      (acc, {reveal, order}) => ({
+        identity: locate(reveal.identity, order) ?? acc.identity,
+        contact: locate(reveal.contact, order) ?? acc.contact,
       })
     )
   )
+
+  if (until !== undefined) return fromMessages
+
+  return {
+    identity:
+      fromMessages.identity ??
+      locate(chat.tradeChecklist.identity[direction] ?? undefined, NO_ORDER),
+    contact:
+      fromMessages.contact ??
+      locate(chat.tradeChecklist.contact[direction] ?? undefined, NO_ORDER),
+  }
+}
+
+export function latestReveal(args: {
+  chat: ChatReveals
+  direction: RevealDirection
+  until?: number
+}): RevealUpdate {
+  const located = latestLocatedReveals(args)
+  return {
+    identity: located.identity?.reveal,
+    contact: located.contact?.reveal,
+  }
 }
 
 function isRequest(reveal: {status?: string} | undefined): boolean {
   return reveal?.status === 'REQUEST_REVEAL'
 }
 
-function isPendingRequest(
-  request: {status?: string; timestamp: number} | undefined,
-  answer: {timestamp: number} | undefined
-): boolean {
-  return (
-    isRequest(request) && (answer?.timestamp ?? 0) < (request?.timestamp ?? 0)
-  )
+function isPendingRequest<
+  A extends {status?: string; timestamp: number},
+  B extends {timestamp: number},
+>(request: Located<A> | undefined, answer: Located<B> | undefined): boolean {
+  if (!request || !isRequest(request.reveal)) return false
+  return !answer || !isAfter(answer, request)
 }
 
 // The request sent in `direction` that the other direction has not answered.
@@ -229,18 +265,15 @@ export function pendingRequest({
   chat: ChatReveals
   direction: RevealDirection
 }): RevealUpdate {
-  const asked = latestReveal({chat, direction})
-  const answered = latestReveal({
-    chat,
-    direction: direction === 'sent' ? 'received' : 'sent',
-  })
+  const asked = latestLocatedReveals({chat, direction})
+  const answered = latestLocatedReveals({chat, direction: opposite(direction)})
 
   return {
     identity: isPendingRequest(asked.identity, answered.identity)
-      ? asked.identity
+      ? asked.identity?.reveal
       : undefined,
     contact: isPendingRequest(asked.contact, answered.contact)
-      ? asked.contact
+      ? asked.contact?.reveal
       : undefined,
   }
 }
@@ -249,6 +282,7 @@ export interface RevealEvent {
   readonly direction: RevealDirection
   readonly reveal: RevealUpdate
   readonly timestamp: number
+  readonly order: number
 }
 
 // Identity and contact updates sent together share a timestamp and are shown
@@ -265,32 +299,53 @@ export function revealEventForMessage(
   const timestamp = (reveal.identity ?? reveal.contact)?.timestamp
   if (timestamp === undefined) return undefined
 
-  const siblingReveals = pipe(
+  const siblings = pipe(
     chat.messages,
-    Array.filter((one) => one.state === direction && one !== message),
-    Array.filterMap((one) => Option.fromNullable(revealFromMessage(one)))
+    Array.filterMap((one, order) =>
+      one.state === direction && one !== message
+        ? Option.fromNullable(revealFromMessage(one)).pipe(
+            Option.map((sibling) => ({reveal: sibling, order}))
+          )
+        : Option.none()
+    )
+  )
+  const order = pipe(
+    chat.messages,
+    Array.findFirstIndex((one) => one === message),
+    Option.getOrElse(() => chat.messages.length)
   )
 
   if (!reveal.identity) {
     const renderedByIdentityMessage = pipe(
-      siblingReveals,
-      Array.some((one) => one.identity?.timestamp === timestamp)
+      siblings,
+      Array.some((one) => one.reveal.identity?.timestamp === timestamp)
     )
     return renderedByIdentityMessage
       ? undefined
-      : {direction, reveal, timestamp}
+      : {direction, reveal, timestamp, order}
   }
 
+  const contactSibling = pipe(
+    siblings,
+    Array.findFirst((one) => one.reveal.contact?.timestamp === timestamp)
+  )
   const contact =
     reveal.contact ??
-    pipe(
-      siblingReveals,
-      Array.findFirst((one) => one.contact?.timestamp === timestamp),
-      Option.map((one) => one.contact),
-      Option.getOrUndefined
+    Option.getOrUndefined(
+      Option.map(contactSibling, (one) => one.reveal.contact)
     )
+  const eventOrder = pipe(
+    contactSibling,
+    Option.map((one) => Math.max(one.order, order)),
+    Option.getOrElse(() => order)
+  )
 
-  return {direction, reveal: {identity: reveal.identity, contact}, timestamp}
+  return {
+    direction,
+    reveal: {identity: reveal.identity, contact},
+    timestamp,
+    order: eventOrder,
+  }
 }
 
 // Details asked for in this event that the other direction has not answered.
@@ -337,6 +392,28 @@ function groupExchanged(
 
 // Details that actually changed hands: a group counts only once both sides
 // offered it, and within the group each side shares what it selected.
+// Only the groups this event touches, paired with what the other direction
+// had offered by then.
+export function exchangedDetailsForEvent(
+  chat: ChatReveals,
+  event: RevealEvent
+): {mine: ExchangeDetailsSelection; theirs: ExchangeDetailsSelection} {
+  const other = latestReveal({
+    chat,
+    direction: opposite(event.direction),
+    until: event.order,
+  })
+  const inEvent = (reveal: RevealUpdate): RevealUpdate => ({
+    identity: event.reveal.identity ? reveal.identity : undefined,
+    contact: event.reveal.contact ? reveal.contact : undefined,
+  })
+
+  return exchangedDetails({
+    sent: event.direction === 'sent' ? event.reveal : inEvent(other),
+    received: event.direction === 'received' ? event.reveal : inEvent(other),
+  })
+}
+
 export function exchangedDetails({
   sent,
   received,

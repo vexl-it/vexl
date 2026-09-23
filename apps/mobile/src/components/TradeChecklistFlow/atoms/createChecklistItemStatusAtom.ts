@@ -4,6 +4,7 @@ import {atom, type Atom} from 'jotai'
 import {tradeChecklistDataAtom} from '../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {updatesToBeSentAtom} from '../../../state/tradeChecklist/atoms/updatesToBeSentAtom'
 import * as DateAndTime from '../../../state/tradeChecklist/utils/dateAndTime'
+import getContactRevealStatus from '../../../state/tradeChecklist/utils/getContactRevealStatus'
 import getIdentityRevealStatus from '../../../state/tradeChecklist/utils/getIdentityRevealStatus'
 import * as MeetingLocation from '../../../state/tradeChecklist/utils/location'
 import {type TradeChecklistItem} from '../domain'
@@ -77,22 +78,20 @@ export default function createChecklistItemStatusAtom(
     }
 
     if (item === 'REVEAL_IDENTITY') {
-      if (updates.identity?.status === 'REQUEST_REVEAL') return 'readyToSend'
-      if (updates.identity?.status === 'DISAPPROVE_REVEAL') return 'declined'
-      if (updates.identity?.status === 'APPROVE_REVEAL') return 'accepted'
+      const drafted = [updates.identity?.status, updates.contact?.status]
+      if (drafted.includes('REQUEST_REVEAL')) return 'readyToSend'
+      if (drafted.includes('APPROVE_REVEAL')) return 'accepted'
+      if (drafted.includes('DISAPPROVE_REVEAL')) return 'declined'
 
-      const identityRevealStatus = getIdentityRevealStatus({
-        messages: [],
-        tradeChecklist: tradeChecklistData,
-      })
-
-      if (identityRevealStatus === 'denied') return 'declined'
-      if (identityRevealStatus === 'shared') return 'accepted'
-      if (
-        identityRevealStatus === 'iAsked' ||
-        identityRevealStatus === 'theyAsked'
-      )
+      const stateOnly = {messages: [], tradeChecklist: tradeChecklistData}
+      const statuses = [
+        getIdentityRevealStatus(stateOnly),
+        getContactRevealStatus(stateOnly),
+      ]
+      if (statuses.includes('iAsked') || statuses.includes('theyAsked'))
         return 'pending'
+      if (statuses.includes('shared')) return 'accepted'
+      if (statuses.includes('denied')) return 'declined'
     }
 
     if (item === 'MEETING_LOCATION') {

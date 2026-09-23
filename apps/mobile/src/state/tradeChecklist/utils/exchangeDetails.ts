@@ -323,20 +323,6 @@ export function pendingRequestFromThem(
   return selectionFromReveal(pendingRequest({chat, direction: 'received'}))
 }
 
-// Nothing left to exchange, or my own request is still unanswered.
-export function canExchangeDetails(chat: ChatReveals & {chat: Chat}): boolean {
-  const sharedByThem = detailsSharedByThem(chat.chat)
-  const somethingLeft = pipe(
-    EXCHANGE_DETAIL_KEYS,
-    Array.some((key) => !sharedByThem[key])
-  )
-  const waitingForThem = isAnyDetailSelected(
-    selectionFromReveal(pendingRequest({chat, direction: 'sent'}))
-  )
-
-  return somethingLeft && !waitingForThem
-}
-
 function groupExchanged(
   a: {status?: string} | undefined,
   b: {status?: string} | undefined

@@ -26,6 +26,7 @@ import {
   isAnyDetailSelected,
   NO_DETAILS_SELECTED,
   otherSideSupportsPhotoOnlyExchange,
+  pendingRequest,
   pendingRequestFromThem,
   selectionFromReveal,
   type ExchangeDetailKey,
@@ -44,18 +45,47 @@ export const requestedDetailsAtom = atom((get) =>
   pendingRequestFromThem(get(chatWithMessagesAtom))
 )
 
-export const exchangeDetailsModeAtom = atom((get): 'request' | 'respond' =>
-  isAnyDetailSelected(get(requestedDetailsAtom)) ? 'respond' : 'request'
+export const detailsSharedByThemAtom = atom((get) =>
+  detailsSharedByThem(get(chatWithMessagesAtom).chat)
 )
 
 export const availableDetailKeysAtom = atom((get) => {
-  const sharedByThem = detailsSharedByThem(get(chatWithMessagesAtom).chat)
+  const sharedByThem = get(detailsSharedByThemAtom)
   const requested = get(requestedDetailsAtom)
 
   return pipe(
     EXCHANGE_DETAIL_KEYS,
     Array.filter((key) => requested[key] || !sharedByThem[key])
   )
+})
+
+const pendingSentRequestAtom = atom((get) =>
+  pendingRequest({chat: get(chatWithMessagesAtom), direction: 'sent'})
+)
+
+export const pendingSentDetailsAtom = atom((get) =>
+  selectionFromReveal(get(pendingSentRequestAtom))
+)
+
+export type ExchangeDetailsMode = 'respond' | 'pending' | 'complete' | 'request'
+
+export const exchangeDetailsModeAtom = atom((get): ExchangeDetailsMode => {
+  if (isAnyDetailSelected(get(requestedDetailsAtom))) return 'respond'
+  if (isAnyDetailSelected(get(pendingSentDetailsAtom))) return 'pending'
+  if (!Array.isNonEmptyArray(get(availableDetailKeysAtom))) return 'complete'
+  return 'request'
+})
+
+// Sends the unanswered request again, with the same details.
+export const prepareAskAgainActionAtom = atom(null, (get, set) => {
+  const {identity, contact} = get(pendingSentRequestAtom)
+  const timestamp = unixMillisecondsNow()
+
+  set(updatesToBeSentAtom, (updates) => ({
+    ...updates,
+    ...(identity ? {identity: {...identity, timestamp}} : {}),
+    ...(contact ? {contact: {...contact, timestamp}} : {}),
+  }))
 })
 
 export const photoRequiresNicknameAtom = atom(

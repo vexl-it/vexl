@@ -16,7 +16,6 @@ import {
 import {createEmptyTradeChecklistInState} from '../domain'
 import {updateTradeChecklistState} from '../utils'
 import {
-  canExchangeDetails,
   exchangedDetails,
   latestReveal,
   pendingRequestFromThem,
@@ -146,7 +145,6 @@ it('reports what they asked for until I answer', () => {
     photo: false,
     phoneNumber: true,
   })
-  expect(canExchangeDetails(asked)).toBe(true)
 
   const answered = chatWith([
     request,
@@ -186,15 +184,6 @@ it('keeps only the unanswered part of a request pending', () => {
     photo: false,
     phoneNumber: true,
   })
-  expect(canExchangeDetails(chat)).toBe(false)
-})
-
-it('blocks a new request while mine is unanswered', () => {
-  expect(
-    canExchangeDetails(
-      chatWith([message('sent', {identity: identity('REQUEST_REVEAL', 1)}, 1)])
-    )
-  ).toBe(false)
 })
 
 it('counts a group as exchanged only when both sides offered it', () => {

@@ -48,7 +48,6 @@ import {noteForChatOriginAtom} from '../../../state/notes/atoms/notesState'
 import * as amount from '../../../state/tradeChecklist/utils/amount'
 import {getLatestAmountDataMessage} from '../../../state/tradeChecklist/utils/amount'
 import * as dateAndTime from '../../../state/tradeChecklist/utils/dateAndTime'
-import {canExchangeDetails} from '../../../state/tradeChecklist/utils/exchangeDetails'
 import getContactRevealStatus from '../../../state/tradeChecklist/utils/getContactRevealStatus'
 import getIdentityRevealStatus from '../../../state/tradeChecklist/utils/getIdentityRevealStatus'
 import * as MeetingLocation from '../../../state/tradeChecklist/utils/location'
@@ -451,11 +450,6 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     getIdentityRevealStatus
   )
 
-  const canExchangeDetailsAtom = atom(
-    (get) =>
-      get(canSendMessagesAtom) && canExchangeDetails(get(chatWithMessagesAtom))
-  )
-
   const contactRevealStatusAtom = selectAtom(
     chatWithMessagesAtom,
     getContactRevealStatus
@@ -856,7 +850,6 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     otherSideDataAtom,
     identityRevealStatusAtom,
     contactRevealStatusAtom,
-    canExchangeDetailsAtom,
     deleteChatWithUiFeedbackAtom,
     messagesListAtomAtoms,
     lastMessageAtom,

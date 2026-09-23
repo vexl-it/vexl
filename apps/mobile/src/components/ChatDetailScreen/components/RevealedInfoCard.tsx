@@ -95,7 +95,7 @@ function RevealedInfoCardSide({
   )
 }
 
-function AddToContactsButton({
+export function AddToContactsButton({
   fullPhoneNumber,
   userImage,
   userName,

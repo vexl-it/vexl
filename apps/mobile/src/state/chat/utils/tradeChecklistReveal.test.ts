@@ -242,6 +242,23 @@ it('does not reveal a phone included in a declined incoming contact update', () 
   expect(chat.chat.otherSide.realLifeInfo?.fullPhoneNumber).toBeUndefined()
 })
 
+it('stores a phone revealed on its own in a fresh chat', () => {
+  const chat = receive(
+    {
+      ...freshChat(),
+      tradeChecklist: {
+        ...createEmptyTradeChecklistInState(),
+        contact: {
+          sent: {...request.contact, timestamp, status: 'REQUEST_REVEAL'},
+        },
+      },
+    },
+    {contact: approval.contact}
+  )
+  expect(chat.chat.otherSide.realLifeInfo?.userName).toBeUndefined()
+  expect(chat.chat.otherSide.realLifeInfo?.fullPhoneNumber).toBe(responderPhone)
+})
+
 it('preserves an already revealed phone without checklist contact history', () => {
   const previouslyRevealed = {
     ...receive(freshChat(), approval),

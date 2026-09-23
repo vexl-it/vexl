@@ -12,10 +12,9 @@ import {
   userPhoneNumberAtom,
 } from '../../../state/session/userDataAtoms'
 import {
-  exchangedDetails,
+  exchangedDetailsForEvent,
   isAnyDetailSelected,
   isResponse,
-  latestReveal,
   revealEventForMessage,
   selectionsEqual,
   stillPendingDetails,
@@ -133,14 +132,10 @@ function OutcomeCard({event}: {event: RevealEvent}): React.ReactElement {
   const myRealLifeInfo = useAtomValue(userDataRealOrAnonymizedAtom)
   const myPhoneNumber = useAtomValue(userPhoneNumberAtom)
 
-  const {mine, theirs} = exchangedDetails({
-    sent: latestReveal({chat, direction: 'sent', until: event.timestamp}),
-    received: latestReveal({
-      chat,
-      direction: 'received',
-      until: event.timestamp,
-    }),
-  })
+  const {mine, theirs} = exchangedDetailsForEvent(chat, event)
+  const theirFullPhoneNumber = theirs.phoneNumber
+    ? otherSideData.fullPhoneNumber
+    : undefined
 
   if (!isAnyDetailSelected(mine) && !isAnyDetailSelected(theirs)) {
     return <DeclinedCard event={event} />
@@ -164,7 +159,7 @@ function OutcomeCard({event}: {event: RevealEvent}): React.ReactElement {
       title={t('messages.exchangeDetails.complete')}
       description={description}
       contactName={otherSideData.userName}
-      fullPhoneNumber={otherSideData.fullPhoneNumber}
+      fullPhoneNumber={theirFullPhoneNumber}
       leftSide={{
         image: myRealLifeInfo.image,
         name: myRealLifeInfo.userName,
@@ -175,8 +170,8 @@ function OutcomeCard({event}: {event: RevealEvent}): React.ReactElement {
       rightSide={{
         image: otherSideData.image,
         name: otherSideData.userName,
-        phoneNumber: otherSideData.fullPhoneNumber
-          ? getInternationalPhoneNumber(otherSideData.fullPhoneNumber)
+        phoneNumber: theirFullPhoneNumber
+          ? getInternationalPhoneNumber(theirFullPhoneNumber)
           : otherSideData.partialPhoneNumber,
         onAvatarPress:
           otherSideImage.type === 'imageUri'

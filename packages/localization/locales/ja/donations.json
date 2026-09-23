@@ -35,6 +35,8 @@
   "donations.invoiceStatus.Settled": "決済済み",
   "donations.detail.title": "寄付詳細",
   "donations.detail.donationNotFound": "寄付が見つかりません。このデバイスから削除された可能性があります。",
+  "donations.detail.deleteDonation": "寄付を削除しますか？",
+  "donations.detail.deleteDonationDescription": "このデバイスから寄付が削除されます。支払いのキャンセルや返金は行われません。この操作は取り消せません。",
   "donations.detail.invoiceId": "請求書ID",
   "donations.detail.paidAt": "支払い日時",
   "donations.detail.thanksTitle": "寄付ありがとう！",

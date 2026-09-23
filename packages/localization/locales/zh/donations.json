@@ -35,6 +35,8 @@
   "donations.invoiceStatus.Settled": "已结算",
   "donations.detail.title": "捐赠详情",
   "donations.detail.donationNotFound": "未找到捐赠。它可能已从此设备中移除。",
+  "donations.detail.deleteDonation": "删除捐赠？",
+  "donations.detail.deleteDonationDescription": "这会从此设备中移除该捐赠，但不会取消付款，也不会退还款项。此操作无法撤销。",
   "donations.detail.invoiceId": "发票编号",
   "donations.detail.paidAt": "付款时间",
   "donations.detail.thanksTitle": "谢谢你的捐赠！",

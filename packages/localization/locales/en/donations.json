@@ -35,6 +35,8 @@
   "donations.invoiceStatus.Settled": "Settled",
   "donations.detail.title": "Donation detail",
   "donations.detail.donationNotFound": "Donation not found. It might have been removed from this device.",
+  "donations.detail.deleteDonation": "Delete donation?",
+  "donations.detail.deleteDonationDescription": "This removes the donation from this device. It won’t cancel or refund a payment. This can’t be undone.",
   "donations.detail.invoiceId": "Invoice ID",
   "donations.detail.paidAt": "Paid at",
   "donations.detail.thanksTitle": "Thanks for donating!",

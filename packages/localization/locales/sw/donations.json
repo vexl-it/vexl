@@ -35,6 +35,8 @@
   "donations.invoiceStatus.Settled": "Imelipwa kikamilifu",
   "donations.detail.title": "Maelezo ya mchango",
   "donations.detail.donationNotFound": "Mchango haukupatikana. Huenda umeondolewa kwenye kifaa hiki.",
+  "donations.detail.deleteDonation": "Ufute mchango?",
+  "donations.detail.deleteDonationDescription": "Hii itaondoa mchango kwenye kifaa hiki. Haitaghairi wala kurejesha malipo. Kitendo hiki hakiwezi kutenduliwa.",
   "donations.detail.invoiceId": "Kitambulisho cha ankara",
   "donations.detail.paidAt": "Ililipwa saa",
   "donations.detail.thanksTitle": "Asante kwa kuchangia!",

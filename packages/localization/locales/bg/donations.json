@@ -35,6 +35,8 @@
   "donations.invoiceStatus.Settled": "Уреден",
   "donations.detail.title": "Детайли за дарението",
   "donations.detail.donationNotFound": "Дарението не е намерено. Може да е било премахнато от това устройство.",
+  "donations.detail.deleteDonation": "Изтриване на дарението?",
+  "donations.detail.deleteDonationDescription": "Дарението ще бъде премахнато от това устройство. Плащането няма да бъде отменено и сумата няма да бъде възстановена. Това действие не може да бъде отменено.",
   "donations.detail.invoiceId": "ID на фактура",
   "donations.detail.paidAt": "Платено на",
   "donations.detail.thanksTitle": "Благодарим за дарението!",

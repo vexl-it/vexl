@@ -35,6 +35,8 @@
   "donations.invoiceStatus.Settled": "Afgehandeld",
   "donations.detail.title": "Donatiedetail",
   "donations.detail.donationNotFound": "Donatie niet gevonden. Misschien is die van dit apparaat verwijderd.",
+  "donations.detail.deleteDonation": "Donatie verwijderen?",
+  "donations.detail.deleteDonationDescription": "Hiermee verwijder je de donatie van dit apparaat. De betaling wordt niet geannuleerd of terugbetaald. Dit kan niet ongedaan worden gemaakt.",
   "donations.detail.invoiceId": "Factuur-ID",
   "donations.detail.paidAt": "Betaald op",
   "donations.detail.thanksTitle": "Bedankt voor je donatie!",

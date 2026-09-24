@@ -3,7 +3,8 @@ import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {validateChallengeInBody} from '@vexl-next/server-utils/src/services/challenge/utils/validateChallengeInBody'
-import {Effect, Option} from 'effect'
+import {Array, Effect, Option} from 'effect'
+import {contactHideUsersWithoutPublicKeyV2Config} from '../../../configs'
 import {ClubMembersDbService} from '../../../db/ClubMemberDbService'
 import {ClubsDbService} from '../../../db/ClubsDbService'
 import {findClubMemberByPublicKeyV1OrV2} from '../../../utils/findClubMemberByPublicKeyV1OrV2'
@@ -39,8 +40,17 @@ export const getClubContacts = HttpApiBuilder.handler(
         )
       )
 
+      const hideUsersWithoutPublicKeyV2 = yield* _(
+        contactHideUsersWithoutPublicKeyV2Config
+      )
       const clubContacts = yield* _(
-        clubMembersDb.queryAllClubMembers({id: club.id})
+        clubMembersDb.queryAllClubMembers({id: club.id}),
+        Effect.map(
+          Array.filter(
+            (member) =>
+              !hideUsersWithoutPublicKeyV2 || member.publicKeyV2 !== null
+          )
+        )
       )
 
       return {

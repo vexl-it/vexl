@@ -1,14 +1,18 @@
 import {SqlClient} from '@effect/sql'
+import {type PublicKeyV2} from '@vexl-next/cryptography/src/KeyHolder/brandsV2'
 import {generateClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
+import {generateV2KeyPair} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {InvalidChallengeError} from '@vexl-next/rest-api/src/challenges/contracts'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {addTestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Option, Schema} from 'effect'
+import {ClubMembersDbService} from '../../../../db/ClubMemberDbService'
+import {ClubsDbService} from '../../../../db/ClubsDbService'
 import {
   createMockedUser,
   type MockedUser,
@@ -16,6 +20,7 @@ import {
 import {generateAndSignChallenge} from '../../../utils/generateAndSignChallenge'
 import {NodeTestingApp} from '../../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../../utils/runPromiseInMockedEnvironment'
+import {withEnvVar} from '../../contacts/utils'
 
 const ADMIN_TOKEN = 'dev'
 const CLUB_VALID_UNTIL = new Date(Date.now() + 1000 * 60 * 60)
@@ -519,6 +524,84 @@ describe('Get club contacts', () => {
         )
         expectErrorResponse(NotFoundError)(errorResponse)
       })
+    )
+  })
+
+  it('Should not return club members without publicKeyV2 when hiding them is enabled', async () => {
+    await withEnvVar(
+      'CONTACT_HIDE_USERS_WITHOUT_PUBLIC_KEY_V2',
+      'true',
+      async () => {
+        await runPromiseInMockedEnvironment(
+          Effect.gen(function* (_) {
+            const app = yield* _(NodeTestingApp)
+            const forClubUuid = generateClubUuid()
+
+            yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
+            yield* _(
+              app.ClubsAdmin.createClub({
+                headers: {'x-admin-token': ADMIN_TOKEN},
+                payload: {
+                  club: {
+                    clubImageUrl: SOME_URL,
+                    name: 'someName',
+                    description: Option.some('someDescription'),
+                    membersCountLimit: 100,
+                    uuid: forClubUuid,
+                    validUntil: CLUB_VALID_UNTIL,
+                    reportLimit: 10,
+                  },
+                },
+              })
+            )
+
+            const {id: clubId} = yield* _(
+              ClubsDbService,
+              Effect.flatMap((clubsDb) =>
+                clubsDb.findClubByUuid({uuid: forClubUuid})
+              ),
+              Effect.flatten
+            )
+            const clubMembersDb = yield* _(ClubMembersDbService)
+            const insertMember = (
+              user: MockedUser,
+              publicKeyV2: PublicKeyV2 | null
+            ): ReturnType<typeof clubMembersDb.insertClubMember> =>
+              clubMembersDb.insertClubMember({
+                clubId,
+                publicKey: user.mainKeyPair.publicKeyPemBase64,
+                isModerator: false,
+                lastRefreshedAt: new Date(),
+                notificationToken: null,
+                vexlNotificationToken: null,
+                publicKeyV2,
+              })
+
+            const {publicKey: user2PublicKeyV2} = yield* _(generateV2KeyPair())
+            yield* _(insertMember(user1, null))
+            yield* _(insertMember(user2, user2PublicKeyV2))
+
+            const challengeForUser1 = yield* _(
+              generateAndSignChallenge(user1.mainKeyPair)
+            )
+            const clubMembers = yield* _(
+              app.ClubsMember.getClubContacts({
+                headers: commonHeaders,
+                payload: {
+                  clubUuid: forClubUuid,
+                  publicKey: challengeForUser1.publicKey,
+                  publicKeyV2: challengeForUser1.publicKeyV2,
+                  signedChallenge: challengeForUser1.signedChallenge,
+                },
+              })
+            )
+
+            expect(clubMembers.items).toEqual([
+              user2.mainKeyPair.publicKeyPemBase64,
+            ])
+          })
+        )
+      }
     )
   })
 })

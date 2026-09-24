@@ -7,14 +7,21 @@ import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {generateV2KeyPair} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {addChallengeToRequest2} from '@vexl-next/rest-api/src/services/utils/addChallengeToRequest2'
 import {addTestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
-import {Effect, Option, Schema} from 'effect'
+import {Array, Effect, Option, Schema} from 'effect'
 import {ClubMembersDbService} from '../../../../db/ClubMemberDbService'
 import {ClubsDbService} from '../../../../db/ClubsDbService'
-import {makeTestCommonAndSecurityHeaders} from '../../../routes/contacts/utils'
+import {
+  makeTestCommonAndSecurityHeaders,
+  withEnvVar,
+} from '../../../routes/contacts/utils'
 import {
   type MockedUser,
   createMockedUser,
 } from '../../../utils/createMockedUser'
+import {
+  clearEnqueuedNotifications,
+  getEnqueuedNotifications,
+} from '../../../utils/mockEnqueueUserNotification'
 import {NodeTestingApp} from '../../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../../utils/runPromiseInMockedEnvironment'
 
@@ -170,5 +177,88 @@ describe('Set club public key v2', () => {
         expect(secondClubResult.at(0)?.publicKeyV2).toBe(null)
       })
     )
+  })
+
+  describe('when users without publicKeyV2 are hidden', () => {
+    const otherMemberToken = Schema.decodeSync(VexlNotificationToken)(
+      'vexl_nt_other_club_member'
+    )
+
+    const expectOtherMemberNotified = async ({
+      hideUsersWithoutPublicKeyV2,
+      notified,
+    }: {
+      hideUsersWithoutPublicKeyV2: boolean
+      notified: boolean
+    }): Promise<void> => {
+      await withEnvVar(
+        'CONTACT_HIDE_USERS_WITHOUT_PUBLIC_KEY_V2',
+        String(hideUsersWithoutPublicKeyV2),
+        async () => {
+          await runPromiseInMockedEnvironment(
+            Effect.gen(function* (_) {
+              const app = yield* _(NodeTestingApp)
+              const clubsDb = yield* _(ClubsDbService)
+              const clubMembersDb = yield* _(ClubMembersDbService)
+              const {id: clubId} = yield* _(
+                clubsDb.findClubByUuid({uuid: firstClub.uuid}),
+                Effect.flatten
+              )
+              yield* _(
+                clubMembersDb.insertClubMember({
+                  clubId,
+                  publicKey: generatePrivateKey().publicKeyPemBase64,
+                  isModerator: false,
+                  lastRefreshedAt: new Date(),
+                  notificationToken: null,
+                  vexlNotificationToken: otherMemberToken,
+                  publicKeyV2: null,
+                })
+              )
+
+              yield* _(addTestHeaders(user.authHeaders))
+              const payload = yield* _(
+                addChallengeToRequest2(app.Challenges.createChallenge)({
+                  clubUuid: firstClub.uuid,
+                  keyPair: memberKeyPair,
+                  keyPairV2: yield* _(generateV2KeyPair()),
+                })
+              )
+
+              yield* _(clearEnqueuedNotifications)
+              yield* _(
+                app.ClubsMember.setPublicKeyV2({
+                  payload,
+                  headers: makeTestCommonAndSecurityHeaders(user.authHeaders),
+                })
+              )
+
+              const notifications = yield* _(getEnqueuedNotifications)
+              const otherMemberNotified = Array.some(
+                notifications,
+                (one) =>
+                  one.task._tag === 'NewClubUserNotificationMqEntry' &&
+                  one.task.token === otherMemberToken
+              )
+              expect(otherMemberNotified).toBe(notified)
+            })
+          )
+        }
+      )
+    }
+
+    it('Notifies other club members when member gets publicKeyV2', async () => {
+      await expectOtherMemberNotified({
+        hideUsersWithoutPublicKeyV2: true,
+        notified: true,
+      })
+    })
+
+    it('Does not notify other club members when hiding is disabled', async () => {
+      await expectOtherMemberNotified({
+        hideUsersWithoutPublicKeyV2: false,
+        notified: false,
+      })
+    })
   })
 })

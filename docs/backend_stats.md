@@ -3,7 +3,7 @@
 All backend services report metrics as `MetricsMessage`s pushed to a BullMQ queue. The metrics service consumes the queue and inserts each message into the `metrics` table (`name`, `uuid`, `value`, `timestamp`, `type`, `attributes` jsonb). The only exception is the notification interaction endpoint, which the metrics service writes to the table directly.
 
 - `type` is `Increment` (event counter, `value` defaults to 1) or `Total` (gauge — absolute value at report time).
-- Gauges are reported periodically by a background loop in each service.
+- Gauges are reported periodically. In contact-, offer- and chat-service they run as a Redis-locked scheduled task (only one replica runs each tick) on the `REPORT_GAUGES_CRON` cron pattern (default `0 * * * *`, hourly at minute 0 UTC). user-service still reports from a background loop on every replica.
 
 **Keep this document in sync**: when a metric or its attributes change, or a new one is added, update this file.
 
@@ -35,14 +35,14 @@ These are referred to as *common* in the tables below.
 | `USER_LOGGED_IN` | Increment | common + `countryPrefix`, `numberExists` | User registers with the contact service right after login. `numberExists` is true when a user with the same phone number already existed (login from a new device / re-login without account deletion). |
 | `USER_REFRESH` | Increment | common | User refresh endpoint is called (app foregrounded / periodic refresh). |
 | `USER_REACTIVATED` | Increment | common + `daysInactive` (int), `remindersReceived` (int), `daysSinceLastReminder` (int or `none`) | A returning user refreshes after being inactive longer than `CONTACT_CONSIDERED_AS_EXPIRED_FOR_METRICS_AFTER_DAYS` (default 30), or after having received at least one inactivity reminder (so reminder-driven returns below the window are counted too). |
-| `COUNT_OF_UNIQUE_USERS` | Total | — | Gauge, every 60 s; users that have imported at least one contact. |
-| `COUNT_OF_UNIQUE_CONTACTS` | Total | — | Gauge, every 60 s; distinct imported contacts. |
+| `COUNT_OF_UNIQUE_USERS` | Total | — | Gauge, hourly (`REPORT_GAUGES_CRON`); users that have imported at least one contact. |
+| `COUNT_OF_UNIQUE_CONTACTS` | Total | — | Gauge, hourly (`REPORT_GAUGES_CRON`); distinct imported contacts. |
 | `COUNT_OF_INACTIVE_USERS` | Total | — | Reported by the user-inactivity notification job; users whose `refreshed_at` is older than the inactivity threshold (or null). |
 | `COUNT_OF_INACTIVE_USERS_BY_REMINDERS_SENT` | Total | `remindersSent` (int) | Reported alongside `COUNT_OF_INACTIVE_USERS`; inactive users grouped by how many inactivity reminders they have received so far. Rows from one report share a timestamp. |
 | `INACTIVITY_NOTIFICATION_SENT` | Increment (value = user count) | `variant` (`FIRST`/`OFFERS_DEACTIVATED`), `notificationOrdinal` (int — which reminder in a row this was) | The user-inactivity notification job enqueued reminders; one message per (variant, ordinal) group. |
 | `COUNT_OF_ACTIVE_USERS` | Total | — | Daily scheduled task (`REPORT_ACTIVE_USERS_CRON`, default 00:30 UTC); users refreshed within the active window (`ACTIVE_USER_WINDOW_DAYS`, default 30 days). |
 | `COUNT_OF_ACTIVE_USERS_BY_COUNTRY` | Total | `countryPrefix` (`none` if unknown) | Reported alongside `COUNT_OF_ACTIVE_USERS`; active users grouped by their phone country prefix. Rows from one report share a timestamp, and countries with no active users are omitted. |
-| `COUNT_OF_CONNECTIONS` | Total | — | Gauge, every 60 s; total user⇄contact connections. |
+| `COUNT_OF_CONNECTIONS` | Total | — | Gauge, hourly (`REPORT_GAUGES_CRON`); total user⇄contact connections. |
 | `USER_JOINED_CLUB_AND_IMPORTED_CONTACTS` | Increment | common + `clubUUid`, `contactsImported` | User joins a club (attribute says whether they imported contacts). |
 | `CLUB_REPORTED` | Increment | common | Club member reports a club. |
 | `CLUB_DEACTIVATED` | Increment | common | A report pushes a club over its report limit and it gets deactivated. |
@@ -56,12 +56,12 @@ These are referred to as *common* in the tables below.
 | `OFFER_MODIFIED` | Increment | common | Offer is updated. |
 | `OFFER_REPORTED` | Increment | common + `offerId` | Offer is reported — both the contact-network and the club report endpoints report under this name. |
 | `OFFER_PUBLIC_PART_DELETED` | Increment | common | Offer is deleted. |
-| `TOTAL_BUY_OFFERS`, `TOTAL_SELL_OFFERS` | Total | `countryPrefix` (`none` if unknown) | Gauge, every 10 min; active offers (refreshed within last 30 days) per country. |
-| `TOTAL_BUY_OFFERS_ACROSS_ALL`, `TOTAL_SELL_OFFERS_ACROSS_ALL`, `TOTAL_OFFERS_ACROSS_ALL` | Total | — | Gauge, every 10 min; sums of the above across countries. |
-| `TOTAL_BUY_OFFERS_EXPIRED`, `TOTAL_SELL_OFFERS_EXPIRED` | Total | `countryPrefix` (`none` if unknown) | Gauge, every 10 min; offers not refreshed within the expiration period, per country. |
-| `TOTAL_BUY_OFFERS_EXPIRED_ACROSS_ALL`, `TOTAL_SELL_OFFERS_EXPIRED_ACROSS_ALL`, `TOTAL_OFFERS_EXPIRED_ACROSS_ALL` | Total | — | Gauge, every 10 min; sums of the above across countries. |
-| `TOTAL_OFFERS_FLAGGED_ACROSS_ALL` | Total | — | Gauge, every 10 min; non-expired offers with reports at or above the report threshold. |
-| `MEAN_OFFER_VISIBILITY_PER_COUNTRY`, `MEDIAN_OFFER_VISIBILITY_PER_COUNTRY` | Increment (value = mean/median) | `countryPrefix` | Gauge-like, every 10 min; mean/median number of users an active offer is visible to (private parts per offer). |
+| `TOTAL_BUY_OFFERS`, `TOTAL_SELL_OFFERS` | Total | `countryPrefix` (`none` if unknown) | Gauge, hourly (`REPORT_GAUGES_CRON`); active offers (refreshed within last 30 days) per country. |
+| `TOTAL_BUY_OFFERS_ACROSS_ALL`, `TOTAL_SELL_OFFERS_ACROSS_ALL`, `TOTAL_OFFERS_ACROSS_ALL` | Total | — | Gauge, hourly (`REPORT_GAUGES_CRON`); sums of the above across countries. |
+| `TOTAL_BUY_OFFERS_EXPIRED`, `TOTAL_SELL_OFFERS_EXPIRED` | Total | `countryPrefix` (`none` if unknown) | Gauge, hourly (`REPORT_GAUGES_CRON`); offers not refreshed within the expiration period, per country. |
+| `TOTAL_BUY_OFFERS_EXPIRED_ACROSS_ALL`, `TOTAL_SELL_OFFERS_EXPIRED_ACROSS_ALL`, `TOTAL_OFFERS_EXPIRED_ACROSS_ALL` | Total | — | Gauge, hourly (`REPORT_GAUGES_CRON`); sums of the above across countries. |
+| `TOTAL_OFFERS_FLAGGED_ACROSS_ALL` | Total | — | Gauge, hourly (`REPORT_GAUGES_CRON`); non-expired offers with reports at or above the report threshold. |
+| `MEAN_OFFER_VISIBILITY_PER_COUNTRY`, `MEDIAN_OFFER_VISIBILITY_PER_COUNTRY` | Increment (value = mean/median) | `countryPrefix` | Gauge-like, hourly (`REPORT_GAUGES_CRON`); mean/median number of users an active offer is visible to (private parts per offer). |
 
 ## chat-service
 
@@ -75,8 +75,8 @@ These are referred to as *common* in the tables below.
 | `CHAT_CLOSED` | Increment | common | User leaves a chat. |
 | `MESSAGE_FETCHED_AND_REMOVED` | Increment (value = count) | common + `messageAgeSeconds` | Client confirms pulled messages, which deletes them from the inbox. `messageAgeSeconds` is the average age of the removed messages (seconds since the server accepted them); `unknown` when no messages were pulled (average of an empty set). |
 | `MESSAGE_EXPIRED` | Increment (value = count) | — | Expired-messages cleanup task deletes old undelivered messages. |
-| `TOTAL_INBOXES` | Total | — | Gauge, every 60 s; total inboxes. |
-| `TOTAL_INBOXES_WITH_UNREAD_MESSAGES` | Total | — | Gauge, every 60 s; inboxes that have undelivered messages waiting. |
+| `TOTAL_INBOXES` | Total | — | Gauge, hourly (`REPORT_GAUGES_CRON`); total inboxes. |
+| `TOTAL_INBOXES_WITH_UNREAD_MESSAGES` | Total | — | Gauge, hourly (`REPORT_GAUGES_CRON`); inboxes that have undelivered messages waiting. |
 
 `REQUEST_SENT`/`REQUEST_CANCELED`/`REQUEST_APPROVED`/`REQUEST_REJECTED` reported from `sendMessage`/`sendMessages` rely on the `messageType` the client declares in the request — the server cannot inspect encrypted message content, so these counts are best-effort and can be spoofed by a malicious client.
 

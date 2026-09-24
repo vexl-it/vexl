@@ -35,7 +35,6 @@ import {UserDbService} from './db/UserDbService'
 import DbLayer from './db/layer'
 import {internalServerLive} from './internalServer'
 
-import {reportGaguesLayer} from './metrics'
 import {createClub} from './routes/clubs/admin/createClub'
 import {generateClubInviteLink} from './routes/clubs/admin/generateClubInviteLink'
 import {getClubStats} from './routes/clubs/admin/getClubStats'
@@ -176,7 +175,6 @@ const DbsLive = Layer.mergeAll(
 
 export const HttpServerLive = Layer.mergeAll(
   ApiServerLive,
-  reportGaguesLayer,
   internalServerLive,
   CleanReportedClubRecordsWorkerLayer,
   ScheduledTaskWorkersLayer,

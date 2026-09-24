@@ -29,3 +29,7 @@ export const cleanExpiredNotesIntervalMsConfig = Config.number(
 export const cleanReportedRecordsIntervalMsConfig = Config.number(
   'CLEAN_REPORTED_RECORDS_INTERVAL_MS'
 ).pipe(Config.withDefault(24 * 60 * 60 * 1000))
+
+export const reportGaugesCronConfig = Config.string('REPORT_GAUGES_CRON').pipe(
+  Config.withDefault('0 * * * *')
+)

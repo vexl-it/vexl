@@ -5,8 +5,10 @@ import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {validateChallengeInBody} from '@vexl-next/server-utils/src/services/challenge/utils/validateChallengeInBody'
 import {Effect, Option} from 'effect'
+import {contactHideUsersWithoutPublicKeyV2Config} from '../../../configs'
 import {ClubMembersDbService} from '../../../db/ClubMemberDbService'
 import {ClubsDbService} from '../../../db/ClubsDbService'
+import {UserNotificationService} from '../../../services/UserNotificationService'
 
 export const setPublicKeyV2 = HttpApiBuilder.handler(
   ContactApiSpecification,
@@ -43,6 +45,19 @@ export const setPublicKeyV2 = HttpApiBuilder.handler(
           publicKeyV2: req.payload.publicKeyV2.value,
         })
       )
+
+      const hideUsersWithoutPublicKeyV2 = yield* _(
+        contactHideUsersWithoutPublicKeyV2Config
+      )
+      if (hideUsersWithoutPublicKeyV2 && member.publicKeyV2 === null) {
+        const userNotificationService = yield* _(UserNotificationService)
+        yield* _(
+          userNotificationService.notifyOthersAboutNewClubUser(
+            club.uuid,
+            req.payload.publicKeyV2.value
+          )
+        )
+      }
 
       return {result: 'ok'}
     }).pipe(

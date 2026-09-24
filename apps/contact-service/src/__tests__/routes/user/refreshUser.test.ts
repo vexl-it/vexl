@@ -1,5 +1,6 @@
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
-import {Effect, Option, Schema} from 'effect'
+import {generateKeyPair} from '@vexl-next/cryptography/src/operations/cryptobox'
+import {Array, Effect, Option, Schema} from 'effect'
 import {NodeTestingApp} from '../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../utils/runPromiseInMockedEnvironment'
 
@@ -19,6 +20,7 @@ import {
   clearEnqueuedNotifications,
   getEnqueuedNotifications,
 } from '../../utils/mockEnqueueUserNotification'
+import {createVexlAuthHeader, withEnvVar} from '../contacts/utils'
 
 const keys = generatePrivateKey()
 const phoneNumber = Schema.decodeSync(E164PhoneNumber)('+420733333333')
@@ -529,5 +531,162 @@ describe('Refresh user', () => {
         )
       })
     )
+  })
+
+  describe('when users without publicKeyV2 are hidden', () => {
+    const contactPhoneNumber =
+      Schema.decodeSync(E164PhoneNumber)('+420733333336')
+    const contactNotificationToken = Schema.decodeSync(VexlNotificationToken)(
+      'vexl_nt_public_key_v2_contact'
+    )
+
+    const expectContactNotifiedAfterRefresh = async ({
+      withPublicKeyV2,
+      notified,
+    }: {
+      withPublicKeyV2: boolean
+      notified: boolean
+    }): Promise<void> => {
+      await withEnvVar(
+        'CONTACT_HIDE_USERS_WITHOUT_PUBLIC_KEY_V2',
+        'true',
+        async () => {
+          await runPromiseInMockedEnvironment(
+            Effect.gen(function* (_) {
+              const sql = yield* _(SqlClient.SqlClient)
+              const app = yield* _(NodeTestingApp)
+
+              const contactKeys = generatePrivateKey()
+              const contactAuthHeaders = yield* _(
+                createDummyAuthHeadersForUser({
+                  phoneNumber: contactPhoneNumber,
+                  publicKey: contactKeys.publicKeyPemBase64,
+                })
+              )
+              const contactHeaders = makeCommonAndSecurityHeaders(
+                () => ({
+                  publicKey: contactAuthHeaders['public-key'],
+                  hash: contactAuthHeaders.hash,
+                  signature: contactAuthHeaders.signature,
+                }),
+                commonHeaders
+              )
+              yield* _(setAuthHeaders(contactAuthHeaders))
+              yield* _(
+                app.User.createUser({
+                  payload: {
+                    firebaseToken: null,
+                    expoToken: null,
+                    vexlNotificationToken: Option.some(
+                      contactNotificationToken
+                    ),
+                    publicKeyV2: Option.none(),
+                  },
+                  headers: contactHeaders,
+                })
+              )
+              yield* _(
+                app.Contact.importContacts({
+                  payload: {
+                    contacts: [yield* _(hashPhoneNumber(phoneNumber))],
+                    replace: true,
+                  },
+                  headers: contactHeaders,
+                })
+              )
+
+              const authHeaders = yield* _(
+                createDummyAuthHeadersForUser({
+                  phoneNumber,
+                  publicKey: keys.publicKeyPemBase64,
+                })
+              )
+              yield* _(setAuthHeaders(authHeaders))
+              yield* _(
+                app.Contact.importContacts({
+                  payload: {
+                    contacts: [yield* _(hashPhoneNumber(contactPhoneNumber))],
+                    replace: true,
+                  },
+                  headers: makeCommonAndSecurityHeaders(
+                    () => ({
+                      publicKey: authHeaders['public-key'],
+                      hash: authHeaders.hash,
+                      signature: authHeaders.signature,
+                    }),
+                    commonHeaders
+                  ),
+                })
+              )
+
+              yield* _(sql`
+                UPDATE users
+                SET
+                  refreshed_at = CURRENT_DATE,
+                  public_key_v2 = NULL
+                WHERE
+                  public_key = ${keys.publicKeyPemBase64}
+              `)
+
+              const vexlAuthHeader = withPublicKeyV2
+                ? yield* _(
+                    Effect.promise(async () => await generateKeyPair()),
+                    Effect.flatMap(({publicKey}) =>
+                      createVexlAuthHeader({
+                        hash: authHeaders.hash,
+                        publicKeyV2: publicKey,
+                      })
+                    )
+                  )
+                : undefined
+
+              yield* _(clearEnqueuedNotifications)
+              yield* _(setAuthHeaders(authHeaders))
+              yield* _(
+                app.User.refreshUser({
+                  payload: {
+                    offersAlive: true,
+                    vexlNotificationToken: Option.none(),
+                  },
+                  headers: makeCommonAndSecurityHeaders(
+                    () => ({
+                      publicKey: authHeaders['public-key'],
+                      hash: authHeaders.hash,
+                      signature: authHeaders.signature,
+                      vexlAuthHeader,
+                    }),
+                    commonHeaders
+                  ),
+                })
+              )
+              yield* _(Effect.sleep(200))
+
+              const notifications = yield* _(getEnqueuedNotifications)
+              const contactNotified = Array.some(
+                notifications,
+                (one) =>
+                  one.task._tag === 'NewUserNotificationMqEntry' &&
+                  one.task.token === contactNotificationToken
+              )
+              expect(contactNotified).toBe(notified)
+            })
+          )
+        }
+      )
+    }
+
+    it('Notifies contacts when user gets publicKeyV2', async () => {
+      await expectContactNotifiedAfterRefresh({
+        withPublicKeyV2: true,
+        notified: true,
+      })
+    })
+
+    it('Does not notify contacts when user stays without publicKeyV2', async () => {
+      await expectContactNotifiedAfterRefresh({
+        withPublicKeyV2: false,
+        notified: false,
+      })
+    })
   })
 })

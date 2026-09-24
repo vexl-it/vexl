@@ -5,6 +5,7 @@ import {PublicKeyV2} from '@vexl-next/cryptography/src/KeyHolder/brandsV2'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {Array, Effect, flow, Schema} from 'effect'
 import {ServerHashedNumber} from '../../../utils/serverHashContact'
+import {createIsVisibleContactFragment} from '../../utils/createIsVisibleContactFragment'
 
 export const FindFirstLevelContactsPublicKeysByHashFromPaginatedParams =
   Schema.Struct({
@@ -12,6 +13,7 @@ export const FindFirstLevelContactsPublicKeysByHashFromPaginatedParams =
     userId: Schema.Int,
     limit: Schema.Int,
     activeWithinDays: Schema.Int,
+    hideUsersWithoutPublicKeyV2: Schema.Boolean,
   })
 export type FindFirstLevelContactsPublicKeysByHashFromPaginatedParams =
   typeof FindFirstLevelContactsPublicKeysByHashFromPaginatedParams.Type
@@ -47,12 +49,12 @@ export const createFindFirstLevelContactsPublicKeysByHashFromPaginated =
           ${sql.and([
           sql`users.id > ${params.userId}`,
           sql`hash_from = ${params.hashFrom}`,
-          sql.or([
-            sql`${params.activeWithinDays}::int = -1`,
-            sql`
-              users.refreshed_at >= CURRENT_DATE - ${params.activeWithinDays}::int
-            `,
-          ]),
+          createIsVisibleContactFragment({
+            usersTable: sql`users`,
+            activeWithinDays: params.activeWithinDays,
+            hideUsersWithoutPublicKeyV2: params.hideUsersWithoutPublicKeyV2,
+            sql,
+          }),
         ])}
         GROUP BY
           users.id,

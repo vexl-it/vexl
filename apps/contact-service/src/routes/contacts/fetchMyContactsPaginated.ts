@@ -6,6 +6,7 @@ import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect
 import {Array, Effect, Option, pipe, Schema} from 'effect'
 import {
   contactActiveWindowDaysConfig,
+  contactHideUsersWithoutPublicKeyV2Config,
   contactPublicImportCountThresholdConfig,
 } from '../../configs'
 import {ContactDbService} from '../../db/ContactDbService'
@@ -34,6 +35,9 @@ export const fetchMyContactsPaginated = HttpApiBuilder.handler(
       )
       const contactDb = yield* _(ContactDbService)
       const contactActiveWindowDays = yield* _(contactActiveWindowDaysConfig)
+      const hideUsersWithoutPublicKeyV2 = yield* _(
+        contactHideUsersWithoutPublicKeyV2Config
+      )
       const publicImportCountThreshold = yield* _(
         contactPublicImportCountThresholdConfig
       )
@@ -69,12 +73,14 @@ export const fetchMyContactsPaginated = HttpApiBuilder.handler(
                   limit,
                   userId: decodedNextPageToken?.userId,
                   activeWithinDays: contactActiveWindowDays,
+                  hideUsersWithoutPublicKeyV2,
                 })
               : contactDb.findSecondLevelContactsPublicKeysByHashFromPaginated({
                   hashFrom: security.serverHash,
                   limit,
                   userId: decodedNextPageToken?.userId,
                   activeWithinDays: contactActiveWindowDays,
+                  hideUsersWithoutPublicKeyV2,
                   publicImportCountThreshold,
                 }),
         }),

@@ -81,3 +81,7 @@ export const rerequestLimitDaysConfig = Config.number(
     validation: (v) => Number.isInteger(v) && v >= 0,
   })
 )
+
+export const reportGaugesCronConfig = Config.string('REPORT_GAUGES_CRON').pipe(
+  Config.withDefault('0 * * * *')
+)

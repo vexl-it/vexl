@@ -10,8 +10,13 @@ import {type CommonMetricAttributes} from '@vexl-next/server-utils/src/metrics/c
 import {MetricsMessage} from '@vexl-next/server-utils/src/metrics/domain'
 import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {reportMetricForked} from '@vexl-next/server-utils/src/metrics/reportMetricForked'
-import {Array, Effect, Layer, Option, pipe, Schema} from 'effect'
-import {expirationPeriodDaysConfig, offerReportFilterConfig} from './configs'
+import {makeRepeatingTaskLayer} from '@vexl-next/server-utils/src/repeatingTask'
+import {Array, Effect, Option, pipe, Schema} from 'effect'
+import {
+  expirationPeriodDaysConfig,
+  offerReportFilterConfig,
+  reportGaugesCronConfig,
+} from './configs'
 
 const OFFER_PUBLIC_PART_DELETED = 'OFFER_PUBLIC_PART_DELETED' as const
 const OFFER_MODIFIED = 'OFFER_MODIFIED' as const
@@ -498,151 +503,156 @@ const queryMedianOfferVisibilityPerCountry = Effect.gen(function* (_) {
   return result
 })
 
-export const reportMetricsLayer = Layer.effectDiscard(
-  Effect.gen(function* (_) {
-    if (yield* _(shouldDisableMetrics)) {
-      return
-    }
+const reportGaugesTask = Effect.gen(function* (_) {
+  if (yield* _(shouldDisableMetrics)) {
+    return
+  }
 
-    const queryAndReportOffers = queryOffersStats.pipe(
-      Effect.flatMap((listOfCountries) =>
-        pipe(
-          Array.map(listOfCountries, (one) => [
-            reportTotalBuyOffers({
-              countryPrefix: one.countryPrefix ?? undefined,
-              value: one.buy,
-            }),
-            reportTotalSellOffers({
-              countryPrefix: one.countryPrefix ?? undefined,
-              value: one.sell,
-            }),
-          ]),
-          Array.flatten,
-          Array.appendAll([
-            // Sum of all buy
-            pipe(
-              listOfCountries,
-              Array.map((one) => one.buy),
-              Array.reduce(0, (a, b) => a + b),
-              (v) => reportTotalBuyOffersAcrossAll({value: v})
-            ),
-            // Sum of all sell
-            pipe(
-              listOfCountries,
-              Array.map((one) => one.sell),
-              Array.reduce(0, (a, b) => a + b),
-              (v) => reportTotalSellOffersAcrossAll({value: v})
-            ),
-            // Sum of all
-            pipe(
-              listOfCountries,
-              Array.map((one) => one.sell + one.buy),
-              Array.reduce(0, (a, b) => a + b),
-              (v) => reportTotalOffersAcrossAll({value: v})
-            ),
-          ]),
-          Effect.all
-        )
-      ),
-      Effect.withSpan('QueryAndReportNumberOfOffers')
-    )
+  const queryAndReportOffers = queryOffersStats.pipe(
+    Effect.flatMap((listOfCountries) =>
+      pipe(
+        Array.map(listOfCountries, (one) => [
+          reportTotalBuyOffers({
+            countryPrefix: one.countryPrefix ?? undefined,
+            value: one.buy,
+          }),
+          reportTotalSellOffers({
+            countryPrefix: one.countryPrefix ?? undefined,
+            value: one.sell,
+          }),
+        ]),
+        Array.flatten,
+        Array.appendAll([
+          // Sum of all buy
+          pipe(
+            listOfCountries,
+            Array.map((one) => one.buy),
+            Array.reduce(0, (a, b) => a + b),
+            (v) => reportTotalBuyOffersAcrossAll({value: v})
+          ),
+          // Sum of all sell
+          pipe(
+            listOfCountries,
+            Array.map((one) => one.sell),
+            Array.reduce(0, (a, b) => a + b),
+            (v) => reportTotalSellOffersAcrossAll({value: v})
+          ),
+          // Sum of all
+          pipe(
+            listOfCountries,
+            Array.map((one) => one.sell + one.buy),
+            Array.reduce(0, (a, b) => a + b),
+            (v) => reportTotalOffersAcrossAll({value: v})
+          ),
+        ]),
+        Effect.all
+      )
+    ),
+    Effect.withSpan('QueryAndReportNumberOfOffers')
+  )
 
-    const queryAndReportExpiredOffers = queryExpiredOffersStats.pipe(
+  const queryAndReportExpiredOffers = queryExpiredOffersStats.pipe(
+    Effect.flatMap((listOfCountries) =>
+      pipe(
+        listOfCountries,
+        Array.map((one) => [
+          reportTotalBuyOffersExpired({
+            countryPrefix: one.countryPrefix ?? undefined,
+            value: one.buy,
+          }),
+          reportTotalSellOffersExpired({
+            countryPrefix: one.countryPrefix ?? undefined,
+            value: one.sell,
+          }),
+        ]),
+        Array.flatten,
+        Array.appendAll([
+          // Sum of all buy
+          pipe(
+            listOfCountries,
+            Array.map((one) => one.buy),
+            Array.reduce(0, (a, b) => a + b),
+            (v) => reportTotalBuyOffersExpiredAcrossAll({value: v})
+          ),
+          // Sum of all sell
+          pipe(
+            listOfCountries,
+            Array.map((one) => one.sell),
+            Array.reduce(0, (a, b) => a + b),
+            (v) => reportTotalSellOffersExpiredAcrossAll({value: v})
+          ),
+          // Sum of all
+          pipe(
+            listOfCountries,
+            Array.map((one) => one.sell + one.buy),
+            Array.reduce(0, (a, b) => a + b),
+            (v) => reportTotalOffersExpiredAcrossAll({value: v})
+          ),
+        ]),
+        Effect.all
+      )
+    ),
+    Effect.withSpan('QueryAndReportNumberOfExpiredOffers')
+  )
+
+  const queryAndReportOfferVisibility = Effect.all([
+    queryMeanOfferVisibilityPerCountry.pipe(
       Effect.flatMap((listOfCountries) =>
         pipe(
           listOfCountries,
-          Array.map((one) => [
-            reportTotalBuyOffersExpired({
-              countryPrefix: one.countryPrefix ?? undefined,
-              value: one.buy,
-            }),
-            reportTotalSellOffersExpired({
-              countryPrefix: one.countryPrefix ?? undefined,
-              value: one.sell,
-            }),
-          ]),
-          Array.flatten,
-          Array.appendAll([
-            // Sum of all buy
-            pipe(
-              listOfCountries,
-              Array.map((one) => one.buy),
-              Array.reduce(0, (a, b) => a + b),
-              (v) => reportTotalBuyOffersExpiredAcrossAll({value: v})
-            ),
-            // Sum of all sell
-            pipe(
-              listOfCountries,
-              Array.map((one) => one.sell),
-              Array.reduce(0, (a, b) => a + b),
-              (v) => reportTotalSellOffersExpiredAcrossAll({value: v})
-            ),
-            // Sum of all
-            pipe(
-              listOfCountries,
-              Array.map((one) => one.sell + one.buy),
-              Array.reduce(0, (a, b) => a + b),
-              (v) => reportTotalOffersExpiredAcrossAll({value: v})
-            ),
-          ]),
+          Array.map((one) =>
+            reportMeanOfferVisibilityPerCountry({
+              countryPrefix: one.countryPrefix,
+              value: one.value,
+            })
+          ),
           Effect.all
         )
-      ),
-      Effect.withSpan('QueryAndReportNumberOfExpiredOffers')
-    )
-
-    const queryAndReportOfferVisibility = Effect.all([
-      queryMeanOfferVisibilityPerCountry.pipe(
-        Effect.flatMap((listOfCountries) =>
-          pipe(
-            listOfCountries,
-            Array.map((one) =>
-              reportMeanOfferVisibilityPerCountry({
-                countryPrefix: one.countryPrefix,
-                value: one.value,
-              })
-            ),
-            Effect.all
-          )
+      )
+    ),
+    queryMedianOfferVisibilityPerCountry.pipe(
+      Effect.flatMap((listOfCountries) =>
+        pipe(
+          listOfCountries,
+          Array.map((one) =>
+            reportMedianOfferVisibilityPerCountry({
+              countryPrefix: one.countryPrefix,
+              value: one.value,
+            })
+          ),
+          Effect.all
         )
-      ),
-      queryMedianOfferVisibilityPerCountry.pipe(
-        Effect.flatMap((listOfCountries) =>
-          pipe(
-            listOfCountries,
-            Array.map((one) =>
-              reportMedianOfferVisibilityPerCountry({
-                countryPrefix: one.countryPrefix,
-                value: one.value,
-              })
-            ),
-            Effect.all
-          )
-        )
-      ),
-    ]).pipe(Effect.withSpan('queryAndReportOfferVisibility'))
+      )
+    ),
+  ]).pipe(Effect.withSpan('queryAndReportOfferVisibility'))
 
-    const queryAndReportTotalOffersFlagged = queryTotalOffersFlagged.pipe(
-      Effect.flatMap((v) => reportTotalOffersFlaggedAcrossAll({value: v})),
-      Effect.withSpan('queryAndReportTotalOffersFlagged')
-    )
+  const queryAndReportTotalOffersFlagged = queryTotalOffersFlagged.pipe(
+    Effect.flatMap((v) => reportTotalOffersFlaggedAcrossAll({value: v})),
+    Effect.withSpan('queryAndReportTotalOffersFlagged')
+  )
 
-    yield* _(
-      Effect.zip(
-        Effect.logInfo('Reporting metrics'),
-        Effect.all([
-          queryAndReportOffers,
-          queryAndReportExpiredOffers,
-          queryAndReportOfferVisibility,
-          queryAndReportTotalOffersFlagged,
-        ])
-      ),
-      Effect.tapError((e) => Effect.logWarning(`Error reporting metrics`, e)),
-      Effect.tap(() => Effect.logInfo('Metrics reported')),
-      Effect.flatMap(() => Effect.sleep('10 minutes')),
-      Effect.forever,
-      Effect.withSpan('Report metrics'),
-      Effect.fork
-    )
-  })
-)
+  yield* _(
+    Effect.zip(
+      Effect.logInfo('Reporting metrics'),
+      Effect.all([
+        queryAndReportOffers,
+        queryAndReportExpiredOffers,
+        queryAndReportOfferVisibility,
+        queryAndReportTotalOffersFlagged,
+      ])
+    ),
+    Effect.tapError((e) => Effect.logWarning(`Error reporting metrics`, e)),
+    Effect.tap(() => Effect.logInfo('Metrics reported')),
+    Effect.ignore,
+    Effect.withSpan('Report metrics')
+  )
+})
+
+export const reportMetricsLayer = makeRepeatingTaskLayer({
+  queueName: 'offer-service-report-gauges',
+  jobName: 'report_gauges',
+  cronPattern: reportGaugesCronConfig,
+  lockResource: 'offerService:reportGauges',
+  lockDuration: '10 minutes',
+  task: reportGaugesTask,
+})

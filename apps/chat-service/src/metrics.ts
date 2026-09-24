@@ -8,7 +8,9 @@ import {type CommonMetricAttributes} from '@vexl-next/server-utils/src/metrics/c
 import {MetricsMessage} from '@vexl-next/server-utils/src/metrics/domain'
 import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {reportMetricForked} from '@vexl-next/server-utils/src/metrics/reportMetricForked'
-import {Effect, flow, Layer, Option, Schema} from 'effect'
+import {makeRepeatingTaskLayer} from '@vexl-next/server-utils/src/repeatingTask'
+import {Effect, flow, Option, Schema} from 'effect'
+import {reportGaugesCronConfig} from './configs'
 
 const MESSAGE_SENT = 'MESSAGE_SENT'
 const MESSAGE_FETCHED_AND_REMOVED = 'MESSAGE_FETCHED_AND_REMOVED'
@@ -175,72 +177,76 @@ const reportTotalInboxes = (
     })
   )
 
-export const reportMetricsLayer = Layer.effectDiscard(
-  Effect.gen(function* (_) {
-    if (yield* _(shouldDisableMetrics)) {
-      return
-    }
-    const sql = yield* _(SqlClient.SqlClient)
+const reportGaugesTask = Effect.gen(function* (_) {
+  if (yield* _(shouldDisableMetrics)) {
+    return
+  }
+  const sql = yield* _(SqlClient.SqlClient)
 
-    const queryTotalInboxes = SqlSchema.findOne({
-      Request: Schema.Null,
-      Result: Schema.Struct({count: Schema.NumberFromString}),
-      execute: () => sql`
-        SELECT
-          count(*) AS COUNT
-        FROM
-          inbox
-      `,
-    })(null).pipe(
-      Effect.map(
-        flow(
-          Option.map((r) => r.count),
-          Option.getOrElse(() => 0)
-        )
-      ),
-      Effect.flatMap(reportTotalInboxes)
-    )
+  const queryTotalInboxes = SqlSchema.findOne({
+    Request: Schema.Null,
+    Result: Schema.Struct({count: Schema.NumberFromString}),
+    execute: () => sql`
+      SELECT
+        count(*) AS COUNT
+      FROM
+        inbox
+    `,
+  })(null).pipe(
+    Effect.map(
+      flow(
+        Option.map((r) => r.count),
+        Option.getOrElse(() => 0)
+      )
+    ),
+    Effect.flatMap(reportTotalInboxes)
+  )
 
-    const queryUnreadInboxes = SqlSchema.findOne({
-      Request: Schema.Null,
-      Result: Schema.Struct({count: Schema.NumberFromString}),
-      execute: () => sql`
-        SELECT
-          count(*) AS COUNT
-        FROM
-          (
-            SELECT
-              inbox.id,
-              count(*)
-            FROM
-              inbox
-              INNER JOIN public.message m ON inbox.id = m.inbox_id
-            GROUP BY
-              inbox.id
-          ) AS a
-      `,
-    })(null).pipe(
-      Effect.map(
-        flow(
-          Option.map((r) => r.count),
-          Option.getOrElse(() => 0)
-        )
-      ),
-      Effect.flatMap(reportInboxesWithUnreadMessages)
-    )
+  const queryUnreadInboxes = SqlSchema.findOne({
+    Request: Schema.Null,
+    Result: Schema.Struct({count: Schema.NumberFromString}),
+    execute: () => sql`
+      SELECT
+        count(*) AS COUNT
+      FROM
+        (
+          SELECT
+            inbox.id,
+            count(*)
+          FROM
+            inbox
+            INNER JOIN public.message m ON inbox.id = m.inbox_id
+          GROUP BY
+            inbox.id
+        ) AS a
+    `,
+  })(null).pipe(
+    Effect.map(
+      flow(
+        Option.map((r) => r.count),
+        Option.getOrElse(() => 0)
+      )
+    ),
+    Effect.flatMap(reportInboxesWithUnreadMessages)
+  )
 
-    yield* _(
-      Effect.zip(
-        Effect.logInfo('Reporting metrics'),
-        Effect.all([queryTotalInboxes, queryUnreadInboxes])
-      ),
-      Effect.tapError((e) => Effect.logWarning(`Error reporting metrics`, e)),
-      Effect.tap(() => Effect.logInfo('Metrics reported')),
-      Effect.ignore,
-      Effect.flatMap(() => Effect.sleep(60_000)),
-      Effect.forever,
-      Effect.withSpan('Report metrics'),
-      Effect.fork
-    )
-  })
-)
+  yield* _(
+    Effect.zip(
+      Effect.logInfo('Reporting metrics'),
+      Effect.all([queryTotalInboxes, queryUnreadInboxes])
+    ),
+    Effect.tapError((e) => Effect.logWarning(`Error reporting metrics`, e)),
+    Effect.tap(() => Effect.logInfo('Metrics reported')),
+    Effect.ignore,
+    Effect.withSpan('Report metrics')
+  )
+})
+
+export const reportMetricsLayer = makeRepeatingTaskLayer({
+  queueName: 'chat-service-report-gauges',
+  jobName: 'report_gauges',
+  cronPattern: reportGaugesCronConfig,
+  lockResource: 'chatService:reportGauges',
+  lockDuration: '10 minutes',
+  task: reportGaugesTask,
+})

@@ -95,6 +95,10 @@ export const reportActiveUsersCronConfig = Config.string(
   'REPORT_ACTIVE_USERS_CRON'
 ).pipe(Config.withDefault('30 0 * * *'))
 
+export const reportGaugesCronConfig = Config.string('REPORT_GAUGES_CRON').pipe(
+  Config.withDefault('0 * * * *')
+)
+
 export const activeUserWindowDaysConfig = Config.number(
   'ACTIVE_USER_WINDOW_DAYS'
 ).pipe(Config.withDefault(30))

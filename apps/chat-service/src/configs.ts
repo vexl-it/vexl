@@ -26,3 +26,7 @@ export const messageExpirationUpperLimitDaysConfig = Config.number(
 export const clearExpiredMessagesCronConfig = Config.string(
   'CLEAR_EXPIRED_MESSAGES_CRON'
 ).pipe(Config.withDefault('0 0 * * *'))
+
+export const reportGaugesCronConfig = Config.string('REPORT_GAUGES_CRON').pipe(
+  Config.withDefault('0 * * * *')
+)

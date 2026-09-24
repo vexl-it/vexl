@@ -6,10 +6,11 @@ import {
   processNewContentNotificationCronConfig,
   processUserInactivityCronConfig,
   reportActiveUsersCronConfig,
+  reportGaugesCronConfig,
 } from './configs'
 import {checkForInactiveUsers} from './internalServer/routes/checkForInactiveUsers'
 import {deactivateAndClearClubs} from './internalServer/routes/deactivateAndClearClubs'
-import {queryAndReportNumberOfActiveUsers} from './metrics'
+import {queryAndReportNumberOfActiveUsers, reportGaugesTask} from './metrics'
 import {UserNotificationService} from './services/UserNotificationService'
 
 const processUserInactivityLayer = makeRepeatingTaskLayer({
@@ -61,10 +62,20 @@ const reportActiveUsersLayer = makeRepeatingTaskLayer({
   task: queryAndReportNumberOfActiveUsers,
 })
 
+const reportGaugesLayer = makeRepeatingTaskLayer({
+  queueName: 'contact-service-report-gauges',
+  jobName: 'report_gauges',
+  cronPattern: reportGaugesCronConfig,
+  lockResource: 'contactService:reportGauges',
+  lockDuration: '30 minutes',
+  task: reportGaugesTask,
+})
+
 export const ScheduledTaskWorkersLayer = Layer.mergeAll(
   processUserInactivityLayer,
   processNewContentNotificationLayer,
   deleteInactiveClubMembersLayer,
   deactivateAndClearClubsLayer,
-  reportActiveUsersLayer
+  reportActiveUsersLayer,
+  reportGaugesLayer
 )

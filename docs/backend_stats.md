@@ -3,7 +3,7 @@
 All backend services report metrics as `MetricsMessage`s pushed to a BullMQ queue. The metrics service consumes the queue and inserts each message into the `metrics` table (`name`, `uuid`, `value`, `timestamp`, `type`, `attributes` jsonb). The only exception is the notification interaction endpoint, which the metrics service writes to the table directly.
 
 - `type` is `Increment` (event counter, `value` defaults to 1) or `Total` (gauge — absolute value at report time).
-- Gauges are reported periodically. In contact-, offer- and chat-service they run as a Redis-locked scheduled task (only one replica runs each tick) on the `REPORT_GAUGES_CRON` cron pattern (default `0 * * * *`, hourly at minute 0 UTC). user-service still reports from a background loop on every replica.
+- Gauges are reported periodically. They run as a Redis-locked scheduled task (only one replica runs each tick) on each service's `REPORT_GAUGES_CRON` cron pattern (default `0 * * * *`, hourly at minute 0 UTC).
 
 **Keep this document in sync**: when a metric or its attributes change, or a new one is added, update this file.
 
@@ -25,8 +25,8 @@ These are referred to as *common* in the tables below.
 
 | Metric | Type | Attributes | Reported when |
 | --- | --- | --- | --- |
-| `NUMBER_OF_USERS_BY_COUNTRY` | Total | `countryPrefix` (`none` if unknown) | Gauge, every 60 s; count of rows in `users` per country. |
-| `NUMBER_OF_USERS` | Total | — | Gauge, every 60 s; total count of users across all countries. |
+| `NUMBER_OF_USERS_BY_COUNTRY` | Total | `countryPrefix` (`none` if unknown) | Gauge, hourly (`REPORT_GAUGES_CRON`); count of rows in `users` per country. |
+| `NUMBER_OF_USERS` | Total | — | Gauge, hourly (`REPORT_GAUGES_CRON`); total count of users across all countries. |
 
 ## contact-service
 

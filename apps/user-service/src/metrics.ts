@@ -5,8 +5,10 @@ import {shouldDisableMetrics} from '@vexl-next/server-utils/src/commonConfigs'
 import {MetricsMessage} from '@vexl-next/server-utils/src/metrics/domain'
 import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {reportMetricForked} from '@vexl-next/server-utils/src/metrics/reportMetricForked'
-import {Array, Effect, Layer, pipe, Schema} from 'effect'
+import {makeRepeatingTaskLayer} from '@vexl-next/server-utils/src/repeatingTask'
+import {Array, Effect, pipe, Schema} from 'effect'
 import {type ReadonlyArray} from 'effect/Array'
+import {reportGaugesCronConfig} from './configs'
 
 const NUMBER_OF_USERS = 'NUMBER_OF_USERS_BY_COUNTRY' as const
 const NUMBER_OF_USERS_ALL_COUNTRIES = 'NUMBER_OF_USERS' as const
@@ -53,46 +55,51 @@ export const reportTotalNumberOfUsers = (
     )
   })
 
-export const reportMetricsLayer = Layer.effectDiscard(
-  Effect.gen(function* (_) {
-    if (yield* _(shouldDisableMetrics)) {
-      return
-    }
-    const sql = yield* _(SqlClient.SqlClient)
+const reportGaugesTask = Effect.gen(function* (_) {
+  if (yield* _(shouldDisableMetrics)) {
+    return
+  }
+  const sql = yield* _(SqlClient.SqlClient)
 
-    const queryNumberOfUsers = SqlSchema.findAll({
-      Request: Schema.Null,
-      Result: Schema.Struct({
-        count: Schema.NumberFromString,
-        countryPrefix: Schema.Union(CountryPrefix, Schema.Null),
-      }),
-      execute: () => sql`
-        SELECT
-          count(*) AS "count",
-          country_prefix AS "countryPrefix"
-        FROM
-          users
-        GROUP BY
-          country_prefix
-      `,
-    })(null).pipe(
-      Effect.flatMap((v) =>
-        Effect.zipRight(
-          Effect.logInfo(`Reporting number of logged users`, v),
-          reportTotalNumberOfUsers(v)
-        )
-      ),
-      Effect.withSpan('Query number of users')
-    )
+  const queryNumberOfUsers = SqlSchema.findAll({
+    Request: Schema.Null,
+    Result: Schema.Struct({
+      count: Schema.NumberFromString,
+      countryPrefix: Schema.Union(CountryPrefix, Schema.Null),
+    }),
+    execute: () => sql`
+      SELECT
+        count(*) AS "count",
+        country_prefix AS "countryPrefix"
+      FROM
+        users
+      GROUP BY
+        country_prefix
+    `,
+  })(null).pipe(
+    Effect.flatMap((v) =>
+      Effect.zipRight(
+        Effect.logInfo(`Reporting number of logged users`, v),
+        reportTotalNumberOfUsers(v)
+      )
+    ),
+    Effect.withSpan('Query number of users')
+  )
 
-    yield* _(
-      Effect.zip(Effect.logInfo('Reporting metrics'), queryNumberOfUsers),
-      Effect.tapError((e) => Effect.logWarning(`Error reporting metrics`, e)),
-      Effect.tap(() => Effect.logInfo('Metrics reported')),
-      Effect.flatMap(() => Effect.sleep(60_000)),
-      Effect.forever,
-      Effect.withSpan('Report metrics'),
-      Effect.fork
-    )
-  })
-)
+  yield* _(
+    Effect.zip(Effect.logInfo('Reporting metrics'), queryNumberOfUsers),
+    Effect.tapError((e) => Effect.logWarning(`Error reporting metrics`, e)),
+    Effect.tap(() => Effect.logInfo('Metrics reported')),
+    Effect.ignore,
+    Effect.withSpan('Report metrics')
+  )
+})
+
+export const reportMetricsLayer = makeRepeatingTaskLayer({
+  queueName: 'user-service-report-gauges',
+  jobName: 'report_gauges',
+  cronPattern: reportGaugesCronConfig,
+  lockResource: 'userService:reportGauges',
+  lockDuration: '10 minutes',
+  task: reportGaugesTask,
+})

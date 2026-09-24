@@ -6,6 +6,7 @@ import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {Array, Effect, flow, Schema} from 'effect'
 import {ServerHashedNumber} from '../../../utils/serverHashContact'
 import {createIsAllowedSharedContactHashFragment} from '../../utils/createIsAllowedSharedContactHashFragment'
+import {createIsVisibleContactFragment} from '../../utils/createIsVisibleContactFragment'
 
 export const FindSecondLevelContactsPublicKeysByHashFromPaginatedParams =
   Schema.Struct({
@@ -13,6 +14,7 @@ export const FindSecondLevelContactsPublicKeysByHashFromPaginatedParams =
     userId: Schema.Int,
     limit: Schema.Int,
     activeWithinDays: Schema.Int,
+    hideUsersWithoutPublicKeyV2: Schema.Boolean,
     publicImportCountThreshold: Schema.Int,
   })
 export type FindSecondLevelContactsPublicKeysByHashFromPaginatedParams =
@@ -51,12 +53,12 @@ export const createFindSecondLevelContactsPublicKeysByHashFromPaginated =
           sql`their_contacts.id > ${params.userId}`,
           sql`my_contacts.hash_from = ${params.hashFrom}`,
           sql`second_lvl_friend.hash != ${params.hashFrom}`,
-          sql.or([
-            sql`${params.activeWithinDays}::int = -1`,
-            sql`
-              second_lvl_friend.refreshed_at >= CURRENT_DATE - ${params.activeWithinDays}::int
-            `,
-          ]),
+          createIsVisibleContactFragment({
+            usersTable: sql`second_lvl_friend`,
+            activeWithinDays: params.activeWithinDays,
+            hideUsersWithoutPublicKeyV2: params.hideUsersWithoutPublicKeyV2,
+            sql,
+          }),
           createIsAllowedSharedContactHashFragment({
             hashColumn: sql`my_contacts.hash_to`,
             publicImportCountThreshold: params.publicImportCountThreshold,

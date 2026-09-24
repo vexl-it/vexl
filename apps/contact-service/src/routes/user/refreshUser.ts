@@ -1,4 +1,5 @@
 import {HttpApiBuilder} from '@effect/platform/index'
+import {type PublicKeyV2} from '@vexl-next/cryptography/src/KeyHolder/brandsV2'
 import {CurrentSecurity} from '@vexl-next/rest-api/src/apiSecurity'
 import {UserNotFoundError} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/specification'
@@ -10,6 +11,7 @@ import {Array, Effect, Option} from 'effect'
 import {
   contactActiveWindowDaysConfig,
   contactConsideredAsExpiredForMetricsAfterDaysConfig,
+  contactHideUsersWithoutPublicKeyV2Config,
 } from '../../configs'
 import {ContactDbService} from '../../db/ContactDbService'
 import {UserDbService} from '../../db/UserDbService'
@@ -34,6 +36,20 @@ const isUserInactive = ({
   return refreshedAt < activeAfter
 }
 
+const isHiddenAsContact = ({
+  refreshedAt,
+  publicKeyV2,
+  activeWithinDays,
+  hideUsersWithoutPublicKeyV2,
+}: {
+  refreshedAt: Date
+  publicKeyV2: Option.Option<PublicKeyV2>
+  activeWithinDays: number
+  hideUsersWithoutPublicKeyV2: boolean
+}): boolean =>
+  isUserInactive({refreshedAt, activeWithinDays}) ||
+  (hideUsersWithoutPublicKeyV2 && Option.isNone(publicKeyV2))
+
 export const refreshUser = HttpApiBuilder.handler(
   ContactApiSpecification,
   'User',
@@ -52,6 +68,9 @@ export const refreshUser = HttpApiBuilder.handler(
           const contactActiveWindowDays = yield* _(
             contactActiveWindowDaysConfig
           )
+          const hideUsersWithoutPublicKeyV2 = yield* _(
+            contactHideUsersWithoutPublicKeyV2Config
+          )
 
           const existingUser = yield* _(
             userDb.findUserByPublicKeyAndHash({
@@ -64,10 +83,19 @@ export const refreshUser = HttpApiBuilder.handler(
             )
           )
 
-          const wasInactiveBeforeRefresh = isUserInactive({
-            refreshedAt: existingUser.refreshedAt,
-            activeWithinDays: contactActiveWindowDays,
-          })
+          const becameVisibleAsContact =
+            isHiddenAsContact({
+              refreshedAt: existingUser.refreshedAt,
+              publicKeyV2: existingUser.publicKeyV2,
+              activeWithinDays: contactActiveWindowDays,
+              hideUsersWithoutPublicKeyV2,
+            }) &&
+            !isHiddenAsContact({
+              refreshedAt: new Date(),
+              publicKeyV2: security.publicKeyV2,
+              activeWithinDays: contactActiveWindowDays,
+              hideUsersWithoutPublicKeyV2,
+            })
 
           const expiredForMetricsAfterDays = yield* _(
             contactConsideredAsExpiredForMetricsAfterDaysConfig
@@ -121,7 +149,7 @@ export const refreshUser = HttpApiBuilder.handler(
             )
           }
 
-          const importedHashes = wasInactiveBeforeRefresh
+          const importedHashes = becameVisibleAsContact
             ? yield* _(
                 contactDb.findContactsByHashFrom(security.serverHash),
                 Effect.map(Array.map((one) => one.hashTo))

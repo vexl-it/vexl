@@ -2,20 +2,16 @@ import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {generateKeyPair} from '@vexl-next/cryptography/src/operations/cryptobox'
 import {InvalidNextPageTokenError} from '@vexl-next/domain/src/general/commonErrors'
 import {makeCommonAndSecurityHeaders} from '@vexl-next/rest-api/src/apiSecurity'
-import {
-  UserDataShape,
-  VexlAuthHeader,
-} from '@vexl-next/rest-api/src/VexlAuthHeader'
-import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
-import {Array, Effect, Option, Order, pipe, Schema} from 'effect'
+import {Array, Effect, Option, Order, pipe} from 'effect'
 import {NodeTestingApp} from '../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../utils/runPromiseInMockedEnvironment'
 import {
   commonHeaders,
   createAndImportUsersFromNetwork,
   createUserOnNetwork,
+  createVexlAuthHeader,
   generateKeysAndHasheForNumber,
   importUsersFromNetwork,
   makeTestCommonAndSecurityHeaders,
@@ -40,28 +36,6 @@ const getPublicKeyV2ForUser = (user: DummyUser): PublicKeyV2KeyPair => {
 
   return publicKeyV2
 }
-
-const createVexlAuthHeader = ({
-  hash,
-  publicKeyV2,
-}: {
-  hash: DummyUser['authHeaders']['hash']
-  publicKeyV2: PublicKeyV2KeyPair['publicKey']
-}): Effect.Effect<typeof VexlAuthHeader.Type, unknown, ServerCrypto> =>
-  Effect.gen(function* (_) {
-    const crypto = yield* _(ServerCrypto)
-    const encodedData = yield* _(
-      Schema.encode(UserDataShape)({
-        hash,
-        pk: publicKeyV2,
-      })
-    )
-
-    const signature = yield* _(crypto.cryptoBoxSign(encodedData))
-    return yield* _(
-      Schema.decode(VexlAuthHeader)(`VexlAuth ${encodedData}.${signature}`)
-    )
-  })
 
 beforeAll(async () => {
   await runPromiseInMockedEnvironment(

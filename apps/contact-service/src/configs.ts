@@ -134,6 +134,10 @@ export const contactActiveWindowDaysConfig = Config.number(
   Config.withDefault(90)
 )
 
+export const contactHideUsersWithoutPublicKeyV2Config = Config.boolean(
+  'CONTACT_HIDE_USERS_WITHOUT_PUBLIC_KEY_V2'
+).pipe(Config.withDefault(false))
+
 export const contactConsideredAsExpiredForMetricsAfterDaysConfig =
   Config.number('CONTACT_CONSIDERED_AS_EXPIRED_FOR_METRICS_AFTER_DAYS').pipe(
     Config.withDefault(30)

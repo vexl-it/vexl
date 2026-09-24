@@ -1,4 +1,5 @@
 import {SqlClient} from '@effect/sql/SqlClient'
+import {generateKeyPair} from '@vexl-next/cryptography/src/operations/cryptobox'
 import {InvalidNextPageTokenError} from '@vexl-next/domain/src/general/commonErrors'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
@@ -12,6 +13,7 @@ import {
   generateKeysAndHasheForNumber,
   importUsersFromNetwork,
   makeTestCommonAndSecurityHeaders,
+  withEnvVar,
   withPublicImportCountThreshold,
   type DummyUser,
 } from './utils'
@@ -532,6 +534,80 @@ describe('Fetch my contacts paginated', () => {
           inactiveContact.keys.publicKeyPemBase64
         )
       })
+    )
+  })
+
+  it('Does not return contacts without publicKeyV2 when hiding them is enabled', async () => {
+    await withEnvVar(
+      'CONTACT_HIDE_USERS_WITHOUT_PUBLIC_KEY_V2',
+      'true',
+      async () => {
+        await runPromiseInMockedEnvironment(
+          Effect.gen(function* (_) {
+            const me = networkOne[0]
+            const [, firstLevelWithV2, firstLevelWithoutV2] = networkOne
+            const [secondLevelWithV2, secondLevelWithoutV2] = networkTwo
+            const app = yield* _(NodeTestingApp)
+            const sql = yield* _(SqlClient)
+
+            const usersWithV2 = [firstLevelWithV2, secondLevelWithV2]
+            yield* _(
+              Effect.forEach(usersWithV2, (user) =>
+                Effect.gen(function* (_) {
+                  const {publicKey} = yield* _(
+                    Effect.promise(async () => await generateKeyPair())
+                  )
+                  yield* _(sql`
+                    UPDATE users
+                    SET
+                      public_key_v2 = ${publicKey}
+                    WHERE
+                      public_key = ${user.keys.publicKeyPemBase64}
+                  `)
+                })
+              )
+            )
+
+            yield* _(setAuthHeaders(me.authHeaders))
+            const headers = makeTestCommonAndSecurityHeaders(me.authHeaders)
+            const fetchLevel = (
+              level: 'FIRST' | 'SECOND'
+            ): Effect.Effect<readonly string[], unknown> =>
+              app.Contact.fetchMyContactsPaginated({
+                headers,
+                urlParams: {level, limit: 50},
+              }).pipe(Effect.map((response) => response.items))
+
+            const [firstLevel, secondLevel] = yield* _(
+              Effect.all([fetchLevel('FIRST'), fetchLevel('SECOND')]),
+              Effect.ensuring(
+                Effect.forEach(usersWithV2, (user) =>
+                  Effect.ignore(sql`
+                    UPDATE users
+                    SET
+                      public_key_v2 = NULL
+                    WHERE
+                      public_key = ${user.keys.publicKeyPemBase64}
+                  `)
+                )
+              )
+            )
+
+            expect(firstLevel).toContain(
+              firstLevelWithV2.keys.publicKeyPemBase64
+            )
+            expect(firstLevel).not.toContain(
+              firstLevelWithoutV2.keys.publicKeyPemBase64
+            )
+            expect(secondLevel).toContain(
+              secondLevelWithV2.keys.publicKeyPemBase64
+            )
+            expect(secondLevel).not.toContain(
+              secondLevelWithoutV2.keys.publicKeyPemBase64
+            )
+          })
+        )
+      }
     )
   })
 })

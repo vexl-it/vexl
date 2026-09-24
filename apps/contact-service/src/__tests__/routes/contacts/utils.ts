@@ -1,10 +1,16 @@
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
+import {type PublicKeyV2} from '@vexl-next/cryptography/src/KeyHolder/brandsV2'
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {makeCommonAndSecurityHeaders} from '@vexl-next/rest-api/src/apiSecurity'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
+import {
+  UserDataShape,
+  VexlAuthHeader,
+} from '@vexl-next/rest-api/src/VexlAuthHeader'
 import {hashPhoneNumber} from '@vexl-next/server-utils/src/generateUserAuthData'
+import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
 import {addTestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Array, Effect, Option, pipe, Schema} from 'effect'
@@ -73,24 +79,58 @@ export type DummyUser = Effect.Effect.Success<
   ReturnType<typeof generateKeysAndHasheForNumber>
 >
 
-export const withPublicImportCountThreshold = async (
-  threshold: number,
+export const withEnvVar = async (
+  name: string,
+  value: string,
   run: () => Promise<void>
 ): Promise<void> => {
-  const previousThreshold = process.env.CONTACT_PUBLIC_IMPORT_COUNT_THRESHOLD
+  const previousValue = process.env[name]
 
-  process.env.CONTACT_PUBLIC_IMPORT_COUNT_THRESHOLD = String(threshold)
+  process.env[name] = value
 
   try {
     await run()
   } finally {
-    if (previousThreshold === undefined) {
-      delete process.env.CONTACT_PUBLIC_IMPORT_COUNT_THRESHOLD
+    if (previousValue === undefined) {
+      Reflect.deleteProperty(process.env, name)
     } else {
-      process.env.CONTACT_PUBLIC_IMPORT_COUNT_THRESHOLD = previousThreshold
+      process.env[name] = previousValue
     }
   }
 }
+
+export const withPublicImportCountThreshold = async (
+  threshold: number,
+  run: () => Promise<void>
+): Promise<void> => {
+  await withEnvVar(
+    'CONTACT_PUBLIC_IMPORT_COUNT_THRESHOLD',
+    String(threshold),
+    run
+  )
+}
+
+export const createVexlAuthHeader = ({
+  hash,
+  publicKeyV2,
+}: {
+  hash: DummyUser['authHeaders']['hash']
+  publicKeyV2: PublicKeyV2
+}): Effect.Effect<typeof VexlAuthHeader.Type, unknown, ServerCrypto> =>
+  Effect.gen(function* (_) {
+    const crypto = yield* _(ServerCrypto)
+    const encodedData = yield* _(
+      Schema.encode(UserDataShape)({
+        hash,
+        pk: publicKeyV2,
+      })
+    )
+
+    const signature = yield* _(crypto.cryptoBoxSign(encodedData))
+    return yield* _(
+      Schema.decode(VexlAuthHeader)(`VexlAuth ${encodedData}.${signature}`)
+    )
+  })
 
 export const createAndImportUsersFromNetwork = (
   user: DummyUser,

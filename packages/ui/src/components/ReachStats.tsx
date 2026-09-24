@@ -1,3 +1,4 @@
+import {Array, pipe} from 'effect'
 import React from 'react'
 import {getTokens, useTheme} from 'tamagui'
 
@@ -35,6 +36,12 @@ export function ReachStats({
   const stepIconSize = getTokens().size.$5.val
   const activeIconColor = theme.foregroundPrimary.get()
   const defaultIconColor = theme.foregroundTertiary.get()
+  const accessibilityLabel = pipe(
+    steps,
+    Array.map((step) => `${step.label} ${step.range}`),
+    Array.prepend(`${subtitle}. ${headline}`),
+    Array.join('. ')
+  )
 
   return (
     <YStack
@@ -47,7 +54,7 @@ export function ReachStats({
         <YStack
           gap="$5"
           alignSelf="stretch"
-          {...getReachPressProps(onReachPress, `${subtitle}. ${headline}`)}
+          {...getReachPressProps(onReachPress, accessibilityLabel)}
         >
           <YStack gap="$3" alignSelf="stretch">
             <SizableText

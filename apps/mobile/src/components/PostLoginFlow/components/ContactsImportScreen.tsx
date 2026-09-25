@@ -1,3 +1,4 @@
+import {type ContactsImportOutcome} from '@vexl-next/analytics-definitions/src/definitions/onboarding'
 import {ContactsGraphic, YStack} from '@vexl-next/ui'
 import {Effect} from 'effect'
 import {useSetAtom} from 'jotai'
@@ -7,12 +8,23 @@ import {type PostLoginFlowStackScreenProps} from '../../../navigationTypes'
 import {resolveAllContactsAsSeenActionAtom} from '../../../state/contacts/atom/contactsStore'
 import {submitContactsActionAtom} from '../../../state/contacts/atom/submitContactsActionAtom'
 import {completePostLoginFlowScreenActionAtom} from '../../../state/postLoginOnboarding'
+import {reportOnboardingStepActionAtom} from '../../../utils/analytics'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {showContactsAccessDeniedExplanationActionAtom} from '../atoms/showContactsAccesDeniedExplanationActionAtom'
 import {showNoContactsFoundExplanationActionAtom} from '../atoms/showNoContactsFoundExplanationActionAtom'
 import PostLoginFlowScreen, {PostLoginFlowCopy} from './PostLoginFlowScreen'
 
 type Props = PostLoginFlowStackScreenProps<'ContactsImport'>
+
+const contactsImportOutcome: Record<
+  'success' | 'noContactsSelected' | 'permissionsNotGranted' | 'otherError',
+  ContactsImportOutcome
+> = {
+  success: 'success',
+  noContactsSelected: 'zero',
+  permissionsNotGranted: 'denied',
+  otherError: 'error',
+}
 
 export default function ContactsImportScreen({
   navigation,
@@ -33,6 +45,7 @@ export default function ContactsImportScreen({
     showNoContactsFoundExplanationActionAtom
   )
   const completeScreen = useSetAtom(completePostLoginFlowScreenActionAtom)
+  const reportOnboardingStep = useSetAtom(reportOnboardingStepActionAtom)
 
   const goNext = (): void => {
     completeScreen('contactsImport')
@@ -55,6 +68,10 @@ export default function ContactsImportScreen({
             })
           )
             .then((result) => {
+              reportOnboardingStep({
+                step: 'contactsImport',
+                contactsImport: contactsImportOutcome[result],
+              })
               resolveAllContactsAsSeen()
 
               if (result === 'otherError') return
@@ -84,7 +101,13 @@ export default function ContactsImportScreen({
       secondaryButton={{
         disabled: contactsLoading,
         label: t('postLoginFlow.v2.contactsImport.skip'),
-        onPress: goNext,
+        onPress: () => {
+          reportOnboardingStep({
+            step: 'contactsImport',
+            contactsImport: 'skipped',
+          })
+          goNext()
+        },
       }}
     >
       <YStack alignItems="center" flex={1} justifyContent="center" gap="$9">

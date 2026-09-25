@@ -25,6 +25,10 @@ import {type SymmetricKeyGenerationError} from '@vexl-next/resources-utils/src/o
 import {Array, Effect, Option, Record, pipe} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
+import {
+  activationClassForCreatedOffer,
+  reportActivationActionAtom,
+} from '../../../utils/analytics'
 import getCountryPrefix from '../../../utils/getCountryCode'
 import reportError from '../../../utils/reportError'
 import {incrementPostedOffersActionAtom} from '../../accountStatsAtom'
@@ -132,6 +136,10 @@ export const createOfferActionAtom = atom<
     set(offersAtom, (oldState) => [...oldState, createdOffer])
     set(postedFirstOfferAtom, true)
     set(incrementPostedOffersActionAtom)
+    set(reportActivationActionAtom, {
+      activatedBy: 'offer',
+      activationClass: activationClassForCreatedOffer(intendedClubs),
+    })
 
     set(upsertOfferToConnectionsActionAtom, {
       pendingConnectionsToRefresh: [],

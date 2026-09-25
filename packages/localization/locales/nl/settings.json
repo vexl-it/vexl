@@ -151,6 +151,8 @@
   "appSettings.changeCurrency": "Valuta wijzigen",
   "appSettings.appearanceTitle": "Weergave",
   "appSettings.allowScreencapture": "Schermafbeeldingen toestaan",
+  "appSettings.anonymousUsageStatistics": "Anonieme gebruiksstatistieken",
+  "appSettings.anonymousUsageStatisticsNote": "Laat ons zien hoeveel mensen stappen zoals aanmelden of de marktplaats openen doorlopen, zonder jou ooit te identificeren.",
   "appSettings.appearance.light": "Lichte modus",
   "appSettings.appearance.dark": "Donkere modus",
   "appSettings.appearance.system": "Apparaat volgen"

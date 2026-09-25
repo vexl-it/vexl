@@ -1,4 +1,5 @@
 import {HttpApi, HttpApiEndpoint, HttpApiGroup} from '@effect/platform/index'
+import {AnalyticsStateUpsert} from '@vexl-next/analytics-definitions/src/core'
 import {
   NotFoundError,
   UnexpectedServerError,
@@ -7,7 +8,10 @@ import {CommonHeaders} from '../../commonHeaders'
 import {MaxExpectedDailyCall} from '../../MaxExpectedDailyCountAnnotation'
 import {NoContentResponse} from '../../NoContentResponse.brand'
 import {RateLimitingMiddleware} from '../../rateLimititing'
-import {ReportNotificationInteractionRequest} from './contracts'
+import {
+  InvalidAnalyticsStateError,
+  ReportNotificationInteractionRequest,
+} from './contracts'
 
 export const ReportNotificationInteractionEndpoint = HttpApiEndpoint.get(
   'reportNotificationInteraction',
@@ -18,9 +22,19 @@ export const ReportNotificationInteractionEndpoint = HttpApiEndpoint.get(
   .addSuccess(NoContentResponse)
   .annotate(MaxExpectedDailyCall, 5000)
 
-const RootGroup = HttpApiGroup.make('root', {topLevel: true}).add(
-  ReportNotificationInteractionEndpoint
+export const UpsertAnalyticsStateEndpoint = HttpApiEndpoint.put(
+  'upsertAnalyticsState',
+  '/analytics/state'
 )
+  .setHeaders(CommonHeaders)
+  .setPayload(AnalyticsStateUpsert)
+  .addSuccess(NoContentResponse)
+  .addError(InvalidAnalyticsStateError, {status: 400})
+  .annotate(MaxExpectedDailyCall, 300)
+
+const RootGroup = HttpApiGroup.make('root', {topLevel: true})
+  .add(ReportNotificationInteractionEndpoint)
+  .add(UpsertAnalyticsStateEndpoint)
 
 export const MetricsApiSpecification = HttpApi.make('Metrics Service')
   .middleware(RateLimitingMiddleware)

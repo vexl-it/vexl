@@ -92,3 +92,7 @@ These are referred to as *common* in the tables below.
 | Metric | Type | Attributes | Reported when |
 | --- | --- | --- | --- |
 | `NOTIFICATION_INTERACTION_<notificationType>_<type>` | Increment (value = reported count) | common + `clientVersion`, `clientPlatform`, and optional `notificationsEnabled`, `backgroundTaskEnabled`, `trackingId`, `isVisible`, `systemNotificationSent` | Client reports a notification interaction. `notificationType` is `Chat` or `Network`; `type` is `ChatMessageReceived`, `BackgroundMessageReceived`, `NewConnectionsReceived`, or `UINotificationReceived`. Inserted into the db directly (not via the queue). |
+
+### Frontend analytics states
+
+The metrics service also owns the `analytics_states` table, written by `PUT /analytics/state` from the mobile app. It is not a metric row: it holds the latest validated state of one journey instance or one calendar bucket under a random, expiring client id, with no timestamp and no per-user attribute beyond platform, release line and phone country prefix. Its contract, schema, validation rules and the daily expiry job (`ANALYTICS_EXPIRY_CRON`, `ANALYTICS_GRACE_DAYS`, `ANALYTICS_SETTLE_DAYS`, `ANALYTICS_RETENTION_DAYS`) are documented in `docs/analytics/system.md`, section 4.

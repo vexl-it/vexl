@@ -151,6 +151,8 @@
   "appSettings.changeCurrency": "Badilisha sarafu",
   "appSettings.appearanceTitle": "Mwonekano",
   "appSettings.allowScreencapture": "Ruhusu kupiga picha ya skrini",
+  "appSettings.anonymousUsageStatistics": "Takwimu za matumizi bila majina",
+  "appSettings.anonymousUsageStatisticsNote": "Inatuonyesha ni watu wangapi wanapita hatua kama kujisajili au kufungua soko, bila kukutambua kamwe.",
   "appSettings.appearance.light": "Hali angavu",
   "appSettings.appearance.dark": "Hali nyeusi",
   "appSettings.appearance.system": "Linganishwa na kifaa"

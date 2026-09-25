@@ -27,6 +27,7 @@ import {
 import {refreshOffersActionAtom} from '../../../../../state/marketplace/atoms/refreshOffersActionAtom'
 import {showMarketplaceIntroDialogIfNeededActionAtom} from '../../../../../state/marketplace/atoms/showMarketplaceIntroDialogIfNeededActionAtom'
 import {useHandleRedirectToContactsScreen} from '../../../../../state/useHandleRedirectToContactsScreen'
+import {reportMarketplaceWeeklyActionAtom} from '../../../../../utils/analytics'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {
   runAfterAnimationFrame,
@@ -352,6 +353,20 @@ function AllOffersActiveEffects({
   )
   const showMarketplaceIntroDialogIfNeeded = useSetAtom(
     showMarketplaceIntroDialogIfNeededActionAtom
+  )
+  const reportMarketplaceWeekly = useSetAtom(reportMarketplaceWeeklyActionAtom)
+
+  useFocusEffect(
+    useCallback(() => {
+      if (!isActive) return undefined
+
+      reportMarketplaceWeekly((state) => ({
+        ...state,
+        marketplaceOpened: Math.min(state.marketplaceOpened + 1, 50),
+      }))
+
+      return undefined
+    }, [isActive, reportMarketplaceWeekly])
   )
 
   useFocusEffect(

@@ -82,6 +82,7 @@ const nextConfig = {
 
   // Transpile monorepo packages
   transpilePackages: [
+    '@vexl-next/analytics-definitions',
     '@vexl-next/rest-api',
     '@vexl-next/domain',
     '@vexl-next/cryptography',

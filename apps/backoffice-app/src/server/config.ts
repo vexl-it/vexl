@@ -9,6 +9,19 @@ export const backofficeDatabaseConfig = Config.all({
   database: Config.string('DB_NAME'),
 })
 
+// Read-only access to the metrics-service database for the analytics charts.
+export const metricsDatabaseConfig = Config.all({
+  host: Config.string('METRICS_DB_HOST'),
+  port: Config.number('METRICS_DB_PORT'),
+  username: Config.string('METRICS_DB_USER'),
+  password: Config.redacted('METRICS_DB_PASSWORD'),
+  database: Config.string('METRICS_DB_NAME'),
+})
+
+export const analyticsMinGroupSizeConfig = Config.integer(
+  'ANALYTICS_MIN_GROUP_SIZE'
+).pipe(Config.withDefault(20))
+
 export const adminTokenHashConfig = Config.string('ADMIN_TOKEN_HASH')
 
 export const slideshowS3Config = Config.all({

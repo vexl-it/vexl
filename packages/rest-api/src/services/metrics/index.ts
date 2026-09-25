@@ -1,3 +1,4 @@
+import {type AnalyticsStateUpsert} from '@vexl-next/analytics-definitions/src/core'
 import {type CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {type PlatformName} from '@vexl-next/domain/src/utility/PlatformName'
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
@@ -77,6 +78,11 @@ export function api({
       ) =>
         client.reportNotificationInteraction({
           urlParams: request,
+          headers: commonHeaders,
+        }),
+      upsertAnalyticsState: (request: AnalyticsStateUpsert) =>
+        client.upsertAnalyticsState({
+          payload: request,
           headers: commonHeaders,
         }),
     }

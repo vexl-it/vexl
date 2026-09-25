@@ -131,7 +131,7 @@ export function applyJourneyStep<S extends object, I>({
         updatedDay,
         payload,
         closed,
-        pending: 'nextStart',
+        pending: true,
       }),
       onSome: (one): AnalyticsInstance => ({
         ...one,
@@ -139,7 +139,7 @@ export function applyJourneyStep<S extends object, I>({
         updatedDay,
         payload,
         closed,
-        pending: one.pending === 'nextStart' ? 'nextStart' : 'now',
+        pending: true,
       }),
     })
   )
@@ -185,14 +185,14 @@ export function applyAggregationUpdate<S extends object, I>({
         updatedDay,
         payload,
         closed: false,
-        pending: 'now',
+        pending: true,
       }),
       onSome: (one): AnalyticsInstance => ({
         ...one,
         revision: one.revision + 1,
         updatedDay,
         payload,
-        pending: 'now',
+        pending: true,
       }),
     })
   )
@@ -212,7 +212,7 @@ export function settleInstance(
   if (instance === undefined || instance.revision !== revision) return instances
   if (instance.closed || isExpired(instance, now))
     return Record.remove(instances, id)
-  return {...instances, [id]: {...instance, pending: 'none'}}
+  return {...instances, [id]: {...instance, pending: false}}
 }
 
 /** Drops expired entries that have nothing left to upload. */
@@ -220,19 +220,7 @@ export function pruneSettledExpired(
   instances: AnalyticsInstances,
   now: Date
 ): AnalyticsInstances {
-  return Record.filter(
-    instances,
-    (one) => one.pending !== 'none' || !isExpired(one, now)
-  )
-}
-
-/** The next app start arrived: everything queued for it becomes due. */
-export function releaseDelayedUploads(
-  instances: AnalyticsInstances
-): AnalyticsInstances {
-  return Record.map(instances, (one) =>
-    one.pending === 'nextStart' ? {...one, pending: 'now'} : one
-  )
+  return Record.filter(instances, (one) => one.pending || !isExpired(one, now))
 }
 
 export function pendingUploads(
@@ -240,6 +228,6 @@ export function pendingUploads(
 ): AnalyticsInstance[] {
   return pipe(
     Record.values(instances),
-    Array.filter((one) => one.pending === 'now')
+    Array.filter((one) => one.pending)
   )
 }

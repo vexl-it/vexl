@@ -25,7 +25,7 @@
 ### Dormant to returning users
 
 - **Status: planned**.
-- **Type**: journey `reactivationEpisode`, lifetime 7 days, written once (terminal at creation), day precision, country stored, upload at next app start. Fields: `gap` (`GapBucket`), `firstActionType` (`offerMain`, `offerBoth`, `requestMain`, `requestClub`), `clubMember`, `previousEpisode` (`GapBucket`, optional).
+- **Type**: journey `reactivationEpisode`, lifetime 7 days, written once (terminal at creation), day precision, country stored, uploaded when written. Fields: `gap` (`GapBucket`), `firstActionType` (`offerMain`, `offerBoth`, `requestMain`, `requestClub`), `clubMember`, `previousEpisode` (`GapBucket`, optional).
 - **Definition**: At a core action, compare with `lastCoreActionAt`; a gap of at least 30 days opens one episode. Fresh installs, logouts and MMKV loss have no marker and open nothing. After the reactivating action the marker is updated, so the next action does not open another episode.
 - **Where in the code**: the two core-action success points with the `lastCoreActionAt` and `lastReactivationAt` markers. Backend counterpart at foreground level: `USER_REACTIVATED` in `apps/contact-service/src/routes/user/refreshUser.ts`.
 - **Privacy notes**: four enums on a row that lives 7 days; suppression applies to every cross-tab.
@@ -71,7 +71,7 @@
 - **Status: planned**.
 - **Type**: journey `exposure` (source `notification`, `type = userInactivity`), fields `displayed`, `dormantAtBaseline`, outcomes `offerCreated`, `chatInitiated`. Canonical for "Notification to user reactivated".
 - **Definition**: Enrol at receipt of an inactivity notification with the local dormancy snapshot; a core action within 7 days is the outcome. Recipients who never return stay at `received`, so the denominator is complete. Coverage is "delivered", not "targeted" (compare with `INACTIVITY_NOTIFICATION_SENT`); there is no holdout, so the number is correlation only.
-- **Where in the code**: `handleUserInactivityNotification` in `apps/mobile/src/utils/notifications/notificationReceivedHandler/handlers/userInactivity.ts` (runs in the background without a loaded session; the enrolment is an MMKV write flushed with `flushAllScheduledMmkvWrites` and uploaded at the next start). `displayed` is false when `notificationPreferences.inactivityWarnings` suppressed the banner. "Opened" is not distinguishable from "received" for this type (no tap branch, no payload on the local banner).
+- **Where in the code**: `handleUserInactivityNotification` in `apps/mobile/src/utils/notifications/notificationReceivedHandler/handlers/userInactivity.ts` (runs in the background without a loaded session; the enrolment is an MMKV write flushed with `flushAllScheduledMmkvWrites` and uploaded right away; the next start retries a failed request). `displayed` is false when `notificationPreferences.inactivityWarnings` suppressed the banner. "Opened" is not distinguishable from "received" for this type (no tap branch, no payload on the local banner).
 - **Privacy notes**: never the `trackingId`; `dormantAtBaseline` is a boolean, not a gap; `variant` is not carried (the type is enough).
 
 ### Sessions before reactivation

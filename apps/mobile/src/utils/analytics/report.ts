@@ -1,6 +1,6 @@
 import {AnalyticsStateId} from '@vexl-next/analytics-definitions/src/core'
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
-import {Option, Schema} from 'effect'
+import {Effect, Option, Schema} from 'effect'
 import {atom, type WritableAtom} from 'jotai'
 import reportError from '../reportError'
 import {
@@ -8,6 +8,7 @@ import {
   analyticsInstancesAtom,
   setAnalyticsInstancesAtom,
 } from './atoms'
+import {flushAnalyticsActionAtom} from './flush'
 import {
   applyAggregationUpdate,
   applyJourneyStep,
@@ -54,6 +55,9 @@ export function journeyReportActionAtom<S extends object, I>(
       return
     }
     set(setAnalyticsInstancesAtom, {...instances, [next.value.id]: next.value})
+    // Journey steps go out right away; a failure leaves the entry pending for
+    // the next start or background flush.
+    Effect.runFork(set(flushAnalyticsActionAtom))
   })
 }
 

@@ -14,7 +14,7 @@
 ## Category summary
 
 - Every metric is "enrol at milestone M, observe core activity in fixed windows relative to M". Three cohort journeys are owned here: `activationCohort` ("Retention after activation", "Repeat marketplace usage", "Repeat offer creation"), `initiationCohort` ("Retention after opening a chat", "Repeat chat usage") and the retention bits of `clubJoinCohort` ("Retention after joining a Club"). The registration bits ("D1 retention", "D7 retention", "D30 retention") live on `registrationCohort`, owned by `acquisition.md` "Time from registration to activation".
-- All cohort journeys live 31 days, carry booleans and enums only, round `updatedDay` to the week, and upload their initial state at the next app start. Each milestone has its own random id; they are never chained. D90 is not built.
+- All cohort journeys live 31 days, carry booleans and enums only, round `updatedDay` to the week, and are uploaded on each step. Each milestone has its own random id; they are never chained. D90 is not built.
 - "Average chats opened per user" and "Chat opens per active user" are monthly counters on `monthlyActivity`; "Chat opens per offer" is the owner-side offer window of "Number of offers receiving a request".
 - Instances that registered before the release have no journey; logout and MMKV loss end a journey silently, and the dashboard reports `unknown`, never churn.
 
@@ -24,7 +24,7 @@
 - **Type**: journey `registrationCohort` (31 days), boolean `d1`.
 - **Definition**: A core action between 24 and 48 hours after registration, one contribution per instance. Denominator = enrolled registrations, including instances that never report again.
 - **Where in the code**: enrolment in `handleUserCreationActionAtom` with the `registeredAt` marker; the core-action success points compare `Date.now() - registeredAt` with the window and flip the bit.
-- **Privacy notes**: the record exists from registration day; its initial upload is delayed so it cannot be timed against `USER_LOGGED_IN`.
+- **Privacy notes**: the record exists from registration day; its first upload lands within seconds of `USER_LOGGED_IN`, the timing-join trade-off accepted in system.md section 8.
 
 ### D7 retention
 
@@ -49,7 +49,7 @@
 ### Retention after activation
 
 - **Status: planned**
-- **Type**: journey `activationCohort`, lifetime 31 days from the first core action, week precision, country stored, initial upload at next start. Fields: `activatedBy` (`offer`, `request`), `d7`, `d30`, `return7d`, `return30d`, `repeat30d`, `secondOfferMain30d`, `secondOfferBoth30d`. Canonical for "Retention after first marketplace action", "Activation to return drop-off", "Marketplace to return drop-off".
+- **Type**: journey `activationCohort`, lifetime 31 days from the first core action, week precision, country stored, uploaded on each step. Fields: `activatedBy` (`offer`, `request`), `d7`, `d30`, `return7d`, `return30d`, `repeat30d`, `secondOfferMain30d`, `secondOfferBoth30d`. Canonical for "Retention after first marketplace action", "Activation to return drop-off", "Marketplace to return drop-off".
 - **Definition**: Enrol at activation (the `activatedAt` marker). `d7` / `d30` are exact-day windows; `return7d` / `return30d` are any later core action on a later day within the window ("Activation to return drop-off"'s complement is their false share). Denominator = enrolled activators.
 - **Where in the code**: the two core-action success points; `activatedAt` marker.
 - **Privacy notes**: separate id from `registrationCohort`; the two are never joinable. `activatedBy` doubles the cohort space and is dropped by the dashboard when cohorts are small.
@@ -61,7 +61,7 @@ Merged into "Retention after activation". The first core action is activation; a
 ### Retention after opening a chat
 
 - **Status: planned**
-- **Type**: journey `initiationCohort`, lifetime 31 days from the first successful request, week precision, country stored, initial upload at next start. Fields: `d7`, `d30`, `return7d`, `return30d`, `secondInitiation30d`. Canonical for "Chat to return drop-off".
+- **Type**: journey `initiationCohort`, lifetime 31 days from the first successful request, week precision, country stored, uploaded on each step. Fields: `d7`, `d30`, `return7d`, `return30d`, `secondInitiation30d`. Canonical for "Chat to return drop-off".
 - **Definition**: Baseline = first successful conversation initiation (note requests excluded). Overlaps with "Retention after activation" when activation happened through a request; the dashboard says so.
 - **Where in the code**: `sendRequestActionAtom` success, first time (a local "has initiated" flag; `idsOfRequestedOffersAtom` is not reused).
 - **Privacy notes**: third concurrent cohort journey per device, each with its own id.
@@ -72,7 +72,7 @@ Merged into "Retention after activation". The first core action is activation; a
 - **Type**: journey `clubJoinCohort` (defined in `clubs.md` "Returning to a Club"), booleans `d7Main`, `d30Main`, `d7Club`, `d30Club`. Canonical for "Club to return drop-off".
 - **Definition**: Exact-day windows after the first club join, main-class and club-class core actions as separate series. Differs from the "any visit" milestone of "Returning to a Club".
 - **Where in the code**: the core-action success points, classes from `coreAction.ts`; enrolment as in section 6.6.
-- **Privacy notes**: club definition: no country, delayed uploads, no club uuid.
+- **Privacy notes**: club definition: no country, no club uuid.
 
 ### Repeat marketplace usage
 

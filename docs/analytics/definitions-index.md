@@ -5,7 +5,7 @@ The shared list of journey and aggregation definitions that the twelve files in 
 Rules that apply to every definition (system.md sections 2 and 3):
 
 - Journeys with a lifetime over 7 days carry booleans and enums only and round `updatedDay` to the ISO week. Short journeys and aggregations may carry capped counters and duration buckets.
-- The initial upload of every journey, and every upload of a club definition, is queued for the next app start.
+- Every journey step is uploaded right away; aggregations are uploaded on app start and best effort on background. Club definitions follow the same rule and differ only in storing no country.
 - Country is stored on every row except club definitions (`storeCountry: false`); the dashboard suppresses small groups.
 - Missing data is `unknown`, never churn. A journey that reaches its lifetime without a terminal step is reported as `unknown`.
 - Core action, creation class and request class are defined once and used by every definition below: planned in `coreAction.ts`, for now `activationClassForCreatedOffer` and `activationClassForRequest` in `apps/mobile/src/utils/analytics/index.ts` (`club` when the offer's `friendLevel` has `CLUB` and no contact degree). No UI surface is tracked; classes come from the offer.

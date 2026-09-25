@@ -917,8 +917,10 @@
           open id, so a burst of steps uploads the latest state only.
         </div>
         <div class="step">
-          Flush on app start (reliable, random 0 to 60 s delay) and on
-          background (best effort, short timeout).
+          Journey steps are uploaded right away; aggregations flush on app start
+          (reliable, random 0 to 60 s delay) and on background (best effort,
+          short timeout). A failed upload stays in the outbox for the next
+          flush.
         </div>
         <div class="arrow">
           <b>PUT /analytics/state</b> {id, kind, name, schemaVersion, revision,
@@ -972,11 +974,14 @@
       </div>
     </div>
     <p class="prose">
-      Delayed uploads: the initial upload of any journey and every club-related
-      upload are queued for the next app start, not sent in the session of the
-      triggering action. This prevents joining them by timing with backend rows
-      such as <code>USER_LOGGED_IN</code>, <code>OFFER_CREATED</code> or
-      <code>USER_JOINED_CLUB_AND_IMPORTED_CONTACTS</code>.
+      Upload timing: a journey step forks a flush right away, fire and forget;
+      aggregation updates only queue and go out with the next start or
+      background flush. Flushes are serialized, so several steps recorded during
+      one request collapse into a single follow-up request with the latest
+      state. A journey's first upload therefore lands within seconds of backend
+      rows such as <code>USER_LOGGED_IN</code>, <code>OFFER_CREATED</code> or
+      <code>USER_JOINED_CLUB_AND_IMPORTED_CONTACTS</code>; the privacy section
+      records why that is accepted.
     </p>
 
     <h3>The server primitive</h3>
@@ -1304,10 +1309,7 @@
           </tr>
           <tr>
             <td><code>analyticsOutbox</code></td>
-            <td>
-              Ordered list of {id, kind, name, revision, notBefore: now |
-              nextStart}
-            </td>
+            <td>Ordered list of {id, kind, name, revision}</td>
             <td>The upload queue.</td>
           </tr>
           <tr>
@@ -1320,16 +1322,20 @@
     </div>
     <ul class="prose">
       <li>
+        <b>Journey step flush</b>: every journey step forks a flush right away;
+        flushes are serialized, so a step recorded during an upload goes out in
+        the following flush with the latest state.
+      </li>
+      <li>
         <b>Start flush</b>: an in-app loading task (<code>runOn: 'start'</code>,
-        no login required) drains the outbox including
-        <code>nextStart</code> entries, after a random 0 to 60 s delay so it
-        does not line up with the refresh calls made at the same moment.
+        no login required) drains the outbox after a random 0 to 60 s delay so
+        it does not line up with the refresh calls made at the same moment.
       </li>
       <li>
         <b>Background flush</b>: <code>useAppState</code> on
-        <code>background</code> (not iOS <code>inactive</code>) sends
-        <code>now</code> entries with a short timeout. Losing it is fine; the
-        next start catches up. No background task and no push-driven flush.
+        <code>background</code> (not iOS <code>inactive</code>) sends pending
+        entries with a short timeout. Losing it is fine; the next start catches
+        up. No background task and no push-driven flush.
       </li>
       <li>
         <b>Pre-login</b>: the onboarding journey starts before a session exists,
@@ -1399,14 +1405,18 @@
       Two residual risks are handled by policy, not schema. In a small
       population (a new release line on its first day, a small country) the
       shared tuple can be a group of one; suppression hides it on the dashboard,
-      and the rule is to never add dimensions. Timing joins with backend rows
-      that carry exact timestamps are broken by delayed initial and club
-      uploads, day granularity and the absence of write timestamps; Postgres
-      <code>xmin</code>, <code>pk</code> order and access logs remain as weak
-      side channels, which is why the ingress requirement is mandatory. Clubs
-      are tiny, so club definitions carry no country, round to week and are
-      always delayed. Long-lived journeys are the most linkable objects because
-      an id lives 30 days: they carry booleans and enums only, one journey per
+      and the rule is to never add dimensions. Journey steps are uploaded as
+      they happen, so a journey's first row is written within seconds of the
+      backend row of the same action (<code>USER_LOGGED_IN</code> and the
+      onboarding or registration cohort row), and Postgres <code>xmin</code>,
+      <code>pk</code> order or access logs could in principle pair the two.
+      Accepted mitigations: the table has no timestamp column, the ingress
+      requirement keeps access logs short-lived, and a pair yields only what the
+      metric row already knows plus the journey state. The trade-off was taken
+      deliberately because delaying the first upload made single-session churn
+      invisible. Clubs are tiny, so club definitions carry no country and round
+      to week. Long-lived journeys are the most linkable objects because an id
+      lives 30 days: they carry booleans and enums only, one journey per
       milestone, never chained. The endpoint is unauthenticated, so junk writes
       are possible; schema validation, caps, the body limit, rate limiting and
       dashboard suppression bound the damage to noise.
@@ -1442,8 +1452,9 @@
         overwritten on every start is a standing device profile.
       </li>
       <li>
-        <b>Initial journey uploads and all club uploads are delayed</b> to the
-        next app start so they cannot be timed against backend rows.
+        <b>Journey steps are uploaded immediately</b>; aggregations go out on
+        app start and best effort on background. The timing-join trade-off is
+        accepted and documented in the privacy section.
       </li>
       <li>
         <b>Long-lived journeys</b> (30 days) carry booleans and enums only, one
@@ -1796,8 +1807,8 @@
               <code>metrics.ts</code>, client success in
               <code>handleUserCreationActionAtom</code>. <b>Privacy:</b> the
               backend row already carries country plus an exact timestamp; the
-              journey's initial upload is delayed to the next start so it cannot
-              be timed against it.
+              journey's first upload lands within seconds of it, the accepted
+              timing-join trade-off.
             </p>
           </li>
           <li class="m" data-status="deferred">
@@ -2922,9 +2933,9 @@
           here are computed on the phone. Two definitions: the
           <code>clubJoinCohort</code> journey (one per instance at its first
           club join ever) and the <code>clubActivityMonthly</code> aggregation.
-          Both are club definitions: no country column, week precision, every
-          upload delayed to the next app start. Weekly club activity is read
-          from the class counters on <code>weeklyActivity</code>. Two join paths
+          Both are club definitions: no country column, week precision; uploads
+          follow the common rule. Weekly club activity is read from the class
+          counters on <code>weeklyActivity</code>. Two join paths
           (<code>submitCodeToJoinClubActionAtom</code>, moderator admission in
           <code>checkForClubsAdmissionActionAtom</code>) feed one hook.
         </p>
@@ -2950,7 +2961,7 @@
               <code>clubsToKeyHolderAtom</code> empties on leave, seeded true at
               rollout for existing members. <b>Privacy:</b> the backend row
               carries the club uuid and an exact timestamp; the client record
-              carries neither and is uploaded at the next start.
+              carries neither.
             </p>
           </li>
           <li class="m" data-status="planned">
@@ -3001,7 +3012,7 @@
             </div>
             <p class="m-type">
               journey <b>clubJoinCohort</b> (31 days from first join ever, week
-              precision, no country, all uploads delayed)
+              precision, no country, uploaded on each step)
             </p>
             <p class="m-def">
               Defines the journey: an eligibility snapshot at join (had imported
@@ -3219,8 +3230,8 @@
               <span class="pill planned">planned</span>
             </div>
             <p class="m-type">
-              aggregation <b>clubActivityMonthly</b> (month, no country, delayed
-              upload); defines the record
+              aggregation <b>clubActivityMonthly</b> (month, no country);
+              defines the record
             </p>
             <p class="m-def">
               <code>clubOfferCreations</code> counts creations with class
@@ -3318,11 +3329,11 @@
           <code>activationCohort</code>, <code>initiationCohort</code> and the
           retention bits of <code>clubJoinCohort</code>; the registration bits
           live on <code>registrationCohort</code>. All cohort journeys live 31
-          days, carry booleans and enums only, round to the week and upload
-          their initial state at the next app start. Each milestone has its own
-          random id; they are never chained. Instances that registered before
-          the release have no journey; logout and MMKV loss end a journey
-          silently and the dashboard reports <code>unknown</code>.
+          days, carry booleans and enums only, round to the week and are
+          uploaded on each step. Each milestone has its own random id; they are
+          never chained. Instances that registered before the release have no
+          journey; logout and MMKV loss end a journey silently and the dashboard
+          reports <code>unknown</code>.
         </p>
         <ul class="metrics">
           <li class="m" data-status="planned">
@@ -3343,8 +3354,8 @@
               <code>handleUserCreationActionAtom</code> with the
               <code>registeredAt</code> marker; core-action success points
               compare the elapsed time with the window and flip the bit.
-              <b>Privacy:</b> the initial upload is delayed so it cannot be
-              timed against <code>USER_LOGGED_IN</code>.
+              <b>Privacy:</b> the first upload lands within seconds of
+              <code>USER_LOGGED_IN</code>, the accepted timing-join trade-off.
             </p>
           </li>
           <li class="m" data-status="planned">
@@ -3459,8 +3470,7 @@
               visit" milestone of "Returning to a Club".
             </p>
             <p class="m-meta">
-              <b>Privacy:</b> club definition: no country, delayed uploads, no
-              club uuid.
+              <b>Privacy:</b> club definition: no country, no club uuid.
             </p>
           </li>
           <li class="m" data-status="planned">
@@ -3789,7 +3799,7 @@
             </div>
             <p class="m-type">
               journey <b>reactivationEpisode</b> (7 days, written once, day
-              precision, country stored, upload at next start), fields
+              precision, country stored, uploaded when written), fields
               <code>gap</code>, <code>firstActionType</code>,
               <code>clubMember</code>, <code>previousEpisode</code>
             </p>
@@ -3908,7 +3918,7 @@
             <p class="m-meta">
               <b>Code:</b> <code>handleUserInactivityNotification</code> runs in
               the background without a session; the enrolment is an MMKV write
-              uploaded at the next start. "Opened" is not distinguishable from
+              uploaded right away. "Opened" is not distinguishable from
               "received" for this type. <b>Privacy:</b> never the
               <code>trackingId</code>; <code>dormantAtBaseline</code> is a
               boolean, not a gap.

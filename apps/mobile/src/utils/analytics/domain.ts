@@ -9,9 +9,6 @@ export const AnalyticsMarkers = Schema.Struct({
 })
 export type AnalyticsMarkers = typeof AnalyticsMarkers.Type
 
-export const AnalyticsPending = Schema.Literal('none', 'now', 'nextStart')
-export type AnalyticsPending = typeof AnalyticsPending.Type
-
 /**
  * One open journey instance or one aggregation bucket: the upsert the server
  * receives plus the local upload bookkeeping.
@@ -20,7 +17,8 @@ export const AnalyticsInstance = Schema.Struct({
   ...AnalyticsStateUpsert.fields,
   payload: Schema.Object,
   closed: Schema.Boolean,
-  pending: AnalyticsPending,
+  /** Local state is newer than what the server acknowledged. */
+  pending: Schema.Boolean,
 })
 export type AnalyticsInstance = typeof AnalyticsInstance.Type
 

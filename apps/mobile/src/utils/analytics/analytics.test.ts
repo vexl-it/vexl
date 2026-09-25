@@ -7,7 +7,7 @@ import {
 import {onboardingJourney} from '@vexl-next/analytics-definitions/src/definitions/onboarding'
 import {registrationCohortJourney} from '@vexl-next/analytics-definitions/src/definitions/registrationCohort'
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {Effect, Option, Schema} from 'effect'
+import {Deferred, Effect, Option, Schema} from 'effect'
 import {getDefaultStore} from 'jotai'
 import clearMmkvStorageAndEmptyAtoms from '../clearMmkvStorageAndEmptyAtoms'
 import {storage} from '../mmkv/effectMmkv'
@@ -27,9 +27,9 @@ import {
   findAggregationBucket,
   pendingUploads,
   pruneSettledExpired,
-  releaseDelayedUploads,
   settleInstance,
 } from './instances'
+import {journeyReportActionAtom} from './report'
 
 jest.mock('react-native-mmkv')
 jest.mock('@react-native-async-storage/async-storage', () => ({
@@ -87,7 +87,7 @@ const someInstance = (
   updatedDay: dayOf(monday),
   payload: {step: 'intro'},
   closed: false,
-  pending: 'now',
+  pending: true,
   ...overrides,
 })
 
@@ -111,7 +111,7 @@ beforeEach(() => {
 })
 
 describe('applyJourneyStep', () => {
-  it('starts a new instance queued for the next app start', () => {
+  it('starts a new instance queued for upload', () => {
     const instance = openOnboarding()
 
     expect(instance).toMatchObject({
@@ -123,7 +123,7 @@ describe('applyJourneyStep', () => {
       updatedDay: '2026-09-21',
       payload: {step: 'opened'},
       closed: false,
-      pending: 'nextStart',
+      pending: true,
     })
   })
 
@@ -131,7 +131,7 @@ describe('applyJourneyStep', () => {
     const next = Option.getOrThrow(
       applyJourneyStep({
         definition: onboardingJourney,
-        current: Option.some(someInstance({pending: 'none'})),
+        current: Option.some(someInstance({pending: false})),
         partial: {step: 'phoneSubmitted', reLogin: true},
         now: wednesday,
         newId,
@@ -143,22 +143,8 @@ describe('applyJourneyStep', () => {
       revision: 4,
       updatedDay: '2026-09-23',
       payload: {step: 'phoneSubmitted', reLogin: true},
-      pending: 'now',
+      pending: true,
     })
-  })
-
-  it('keeps the delayed flag until the initial upload went out', () => {
-    const next = Option.getOrThrow(
-      applyJourneyStep({
-        definition: onboardingJourney,
-        current: Option.some(openOnboarding()),
-        partial: {step: 'intro'},
-        now: monday,
-        newId,
-      })
-    )
-
-    expect(next.pending).toBe('nextStart')
   })
 
   it('closes the instance on a terminal step', () => {
@@ -243,7 +229,7 @@ describe('applyAggregationUpdate', () => {
       startDay: '2026-09-21',
       updatedDay: '2026-09-23',
       payload: {marketplaceOpened: 1, firstLoadResult: 'notLoaded'},
-      pending: 'now',
+      pending: true,
     })
   })
 
@@ -307,7 +293,7 @@ describe('settleInstance and pruning', () => {
       wednesday
     )
 
-    expect(settled[instance.id]?.pending).toBe('none')
+    expect(settled[instance.id]?.pending).toBe(false)
   })
 
   it('keeps a newer local revision pending', () => {
@@ -319,7 +305,7 @@ describe('settleInstance and pruning', () => {
       wednesday
     )
 
-    expect(settled[instance.id]?.pending).toBe('now')
+    expect(settled[instance.id]?.pending).toBe(true)
   })
 
   it('forgets closed instances and ended buckets once acknowledged', () => {
@@ -340,8 +326,8 @@ describe('settleInstance and pruning', () => {
   })
 
   it('prunes expired entries with nothing left to upload', () => {
-    const expiredJourney = someInstance({id: id(1), pending: 'none'})
-    const expiredButPending = someInstance({id: id(2), pending: 'now'})
+    const expiredJourney = someInstance({id: id(1), pending: false})
+    const expiredButPending = someInstance({id: id(2), pending: true})
     const pruned = pruneSettledExpired(
       {[expiredJourney.id]: expiredJourney, [id(2)]: expiredButPending},
       eightDaysLater
@@ -350,17 +336,11 @@ describe('settleInstance and pruning', () => {
     expect(Object.keys(pruned)).toEqual([id(2)])
   })
 
-  it('uploads delayed entries only once the next start released them', () => {
-    const delayed = someInstance({id: id(1), pending: 'nextStart'})
-    const ready = someInstance({id: id(2), pending: 'now'})
-    const uploaded = someInstance({id: id(3), pending: 'none'})
-    const instances = {[id(1)]: delayed, [id(2)]: ready, [id(3)]: uploaded}
+  it('lists only entries with something to upload', () => {
+    const ready = someInstance({id: id(1), pending: true})
+    const uploaded = someInstance({id: id(2), pending: false})
 
-    expect(pendingUploads(instances)).toEqual([ready])
-    expect(pendingUploads(releaseDelayedUploads(instances))).toEqual([
-      {...delayed, pending: 'now'},
-      ready,
-    ])
+    expect(pendingUploads({[id(1)]: ready, [id(2)]: uploaded})).toEqual([ready])
   })
 })
 
@@ -396,7 +376,7 @@ describe('flushAnalyticsActionAtom', () => {
 
   it('marks the entry uploaded on success', async () => {
     const after = await flushWith(someInstance(), Effect.void)
-    expect(after?.pending).toBe('none')
+    expect(after?.pending).toBe(false)
   })
 
   it('drops the entry on a 4xx response', async () => {
@@ -404,13 +384,13 @@ describe('flushAnalyticsActionAtom', () => {
       someInstance(),
       Effect.fail({_tag: 'InvalidAnalyticsStateError', status: 400})
     )
-    expect(after?.pending).toBe('none')
+    expect(after?.pending).toBe(false)
 
     const afterNotFound = await flushWith(
       someInstance(),
       Effect.fail({_tag: 'ResponseError', response: {status: 404}})
     )
-    expect(afterNotFound?.pending).toBe('none')
+    expect(afterNotFound?.pending).toBe(false)
   })
 
   it('keeps the entry when rate limited', async () => {
@@ -418,7 +398,7 @@ describe('flushAnalyticsActionAtom', () => {
       someInstance(),
       Effect.fail({_tag: 'ResponseError', response: {status: 429}})
     )
-    expect(after?.pending).toBe('now')
+    expect(after?.pending).toBe(true)
   })
 
   it('keeps the entry on 5xx and network errors', async () => {
@@ -426,18 +406,86 @@ describe('flushAnalyticsActionAtom', () => {
       someInstance(),
       Effect.fail({_tag: 'UnexpectedServerError', status: 500})
     )
-    expect(after5xx?.pending).toBe('now')
+    expect(after5xx?.pending).toBe(true)
 
     const afterOffline = await flushWith(
       someInstance(),
       Effect.fail({_tag: 'RequestError', reason: 'Transport'})
     )
-    expect(afterOffline?.pending).toBe('now')
+    expect(afterOffline?.pending).toBe(true)
+  })
+})
+
+describe('journey step upload', () => {
+  const reportOnboarding = journeyReportActionAtom(onboardingJourney)
+  const settle = async (): Promise<void> => {
+    await new Promise((resolve) => setTimeout(resolve, 20))
+  }
+  const onboardingInstance = (): AnalyticsInstance =>
+    Option.getOrThrow(
+      Option.fromNullable(
+        Object.values(store.get(analyticsInstancesAtom)).find(
+          (one) => one.name === 'onboarding'
+        )
+      )
+    )
+
+  beforeEach(() => {
+    store.set(setAnalyticsInstancesAtom, {})
   })
 
-  it('never sends an upload still queued for the next start', async () => {
-    await flushWith(someInstance({pending: 'nextStart'}), Effect.void)
-    expect(mockUpsertAnalyticsState).not.toHaveBeenCalled()
+  it('uploads the step right away', async () => {
+    mockUpsertAnalyticsState.mockReturnValue(Effect.void)
+
+    store.set(reportOnboarding, {step: 'opened'})
+    await settle()
+
+    expect(mockUpsertAnalyticsState).toHaveBeenCalledTimes(1)
+    expect(mockUpsertAnalyticsState).toHaveBeenCalledWith(
+      expect.objectContaining({revision: 0, payload: {step: 'opened'}})
+    )
+    expect(onboardingInstance().pending).toBe(false)
+  })
+
+  it('collapses steps recorded during an upload into one request with the latest state', async () => {
+    const firstUpload = Effect.runSync(Deferred.make())
+    mockUpsertAnalyticsState
+      .mockReturnValueOnce(Deferred.await(firstUpload))
+      .mockReturnValue(Effect.void)
+
+    store.set(reportOnboarding, {step: 'opened'})
+    await settle()
+    store.set(reportOnboarding, {step: 'intro'})
+    store.set(reportOnboarding, {step: 'phoneSubmitted'})
+    await settle()
+    expect(mockUpsertAnalyticsState).toHaveBeenCalledTimes(1)
+
+    Effect.runSync(Deferred.succeed(firstUpload, undefined))
+    await settle()
+
+    expect(mockUpsertAnalyticsState).toHaveBeenCalledTimes(2)
+    expect(mockUpsertAnalyticsState).toHaveBeenLastCalledWith(
+      expect.objectContaining({revision: 2, payload: {step: 'phoneSubmitted'}})
+    )
+    expect(onboardingInstance().pending).toBe(false)
+  })
+
+  it('keeps a failed upload pending for the next flush', async () => {
+    mockUpsertAnalyticsState.mockReturnValue(
+      Effect.fail({_tag: 'RequestError', reason: 'Transport'})
+    )
+
+    store.set(reportOnboarding, {step: 'opened'})
+    await settle()
+    expect(onboardingInstance().pending).toBe(true)
+
+    mockUpsertAnalyticsState.mockReturnValue(Effect.void)
+    await Effect.runPromise(store.set(flushAnalyticsActionAtom))
+
+    expect(mockUpsertAnalyticsState).toHaveBeenLastCalledWith(
+      expect.objectContaining({revision: 0, payload: {step: 'opened'}})
+    )
+    expect(onboardingInstance().pending).toBe(false)
   })
 })
 

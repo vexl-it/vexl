@@ -26,6 +26,10 @@ export const isRejectedByServer = (error: unknown): boolean =>
     (status) => status >= 400 && status < 500 && status !== RATE_LIMITED
   )
 
+// Flushes run one at a time so a step recorded while an upload is in flight
+// goes out in the next flush with the latest state instead of racing it.
+const flushLock = Effect.unsafeMakeSemaphore(1)
+
 export const flushAnalyticsActionAtom = atom(
   null,
   (get, set): Effect.Effect<void> =>
@@ -71,5 +75,5 @@ export const flushAnalyticsActionAtom = atom(
           ),
         {discard: true}
       )
-    })
+    }).pipe(flushLock.withPermits(1))
 )

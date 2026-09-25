@@ -41,8 +41,8 @@ Long-lived journeys (lifetime over 7 days) carry booleans and enums only in the 
    | record step / bump counter
    v
  outbox in MMKV (immediate save)
-   | flush: app start (reliable),
-   | app background (best effort)
+   | flush: journey step (right away),
+   | app start (reliable), app background (best effort)
    v
  PUT /analytics/state  {id, kind, name, ...}  --->  validate name + schema
    (unauthenticated, rate limited,               |  extract platform, release line
@@ -56,7 +56,7 @@ Long-lived journeys (lifetime over 7 days) carry booleans and enums only in the 
                                                                                    suppression + maturity
 ```
 
-Delayed uploads: the _initial_ upload of any journey and _every_ club-related upload are queued for the next app start, not sent in the same session as the triggering action. This prevents joining them by timing with backend rows such as `USER_LOGGED_IN`, `OFFER_CREATED` or `USER_JOINED_CLUB_AND_IMPORTED_CONTACTS`.
+Upload timing: a journey step forks a flush right away (fire and forget; a failed request leaves the entry in the outbox for the next start or background flush). Aggregation updates only queue and go out with the next start or background flush. Flushes are serialized, so several steps recorded during one request go out as a single follow-up request with the latest state. The first upload of a journey therefore lands within seconds of the backend row of the same action (`USER_LOGGED_IN`, `OFFER_CREATED`, `USER_JOINED_CLUB_AND_IMPORTED_CONTACTS`); section 8 records why that is accepted.
 
 ## 4. Server
 
@@ -132,7 +132,7 @@ The request itself reveals IP, exact time and the `vexl-app-meta` header (countr
 
 - Exclude `/analytics/state` from long-term edge access logging, or keep those logs at short retention (7 days or less).
 - Do not log request headers for this path in the service (the default `HttpMiddleware.logger` logs method and path; keep it that way, never add header logging).
-- Combined with delayed uploads and day-granular rows, this is what prevents a log-to-row join.
+- Combined with day-granular rows and the absence of write timestamps, this is what keeps a log-to-row join from being trivial (section 8).
 
 ## 5. Definitions package
 
@@ -212,11 +212,11 @@ Schema changes bump `schemaVersion`. The server accepts exactly one version per 
 
 All in MMKV, immediate save, all deleted on logout with everything else (`apps/mobile/src/utils/analytics/atoms.ts`, schemas in `domain.ts`):
 
-| Key                  | Content                                                                                                                                           | Leaves device?                                      |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
-| `analyticsMarkers`   | `firstOpenAt`, `registeredAt`, `activatedAt` (exact `UnixMilliseconds`); `firstClubJoinedAt`, `lastCoreActionAt` follow with their definitions    | Never. Only buckets derived from them are uploaded. |
-| `analyticsInstances` | `Record<id, AnalyticsStateUpsert & {closed, pending: 'none' \| 'now' \| 'nextStart'}>`: one entry per open journey instance or aggregation bucket | State only; `pending` entries are the outbox.       |
-| `analyticsSession`   | Session tracker checkpoint (open session start, accumulated foreground seconds, short ring of session starts). Not built yet.                     | Never raw.                                          |
+| Key                  | Content                                                                                                                                        | Leaves device?                                      |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| `analyticsMarkers`   | `firstOpenAt`, `registeredAt`, `activatedAt` (exact `UnixMilliseconds`); `firstClubJoinedAt`, `lastCoreActionAt` follow with their definitions | Never. Only buckets derived from them are uploaded. |
+| `analyticsInstances` | `Record<id, AnalyticsStateUpsert & {closed, pending: boolean}>`: one entry per open journey instance or aggregation bucket                     | State only; `pending` entries are the outbox.       |
+| `analyticsSession`   | Session tracker checkpoint (open session start, accumulated foreground seconds, short ring of session starts). Not built yet.                  | Never raw.                                          |
 
 One record instead of separate journey, aggregation and outbox stores: the entry is the upsert body plus two flags, so a burst of steps before a flush uploads the latest state only and there is nothing to keep in sync. The analytics atoms are never mounted by React; `clearMmkvStorageAndEmptyAtoms` resets them explicitly.
 
@@ -224,17 +224,18 @@ One record instead of separate journey, aggregation and outbox stores: the entry
 
 One module `apps/mobile/src/utils/analytics/`:
 
-- `instances.ts`: the pure rules, unit tested in `analytics.test.ts`. `applyJourneyStep(definition, current, partial)` merges `{...previous, ...partial}`, validates against the definition schema, bumps `revision`, sets `updatedDay` (ISO week start for `updatedDayPrecision: 'week'`), closes on a terminal `step`, and creates the instance with a fresh uuid v4 and `pending: 'nextStart'` when none is open. A step after the lifetime is ignored and closes the instance. `applyAggregationUpdate(definition, current, initialState, update)` resolves the current bucket (`isoWeekStart(now)` for `week`) and applies the updater; an unchanged state is not queued. `settleInstance` marks an acknowledged revision uploaded and forgets closed instances and ended buckets; `pruneSettledExpired` drops expired entries with nothing left to upload; `releaseDelayedUploads` turns every `nextStart` entry into `now` and `pendingUploads` lists the `now` entries.
-- `report.ts`: `journeyReportActionAtom(definition)` and `aggregationReportActionAtom(definition, initialState)` wrap the rules in jotai action atoms that no-op when analytics is disabled. Journey reports take `{onlyIfOpen: true}` for steps that must never start an instance.
+- `instances.ts`: the pure rules, unit tested in `analytics.test.ts`. `applyJourneyStep(definition, current, partial)` merges `{...previous, ...partial}`, validates against the definition schema, bumps `revision`, sets `updatedDay` (ISO week start for `updatedDayPrecision: 'week'`), closes on a terminal `step`, and creates the instance with a fresh uuid v4 and `pending: true` when none is open. A step after the lifetime is ignored and closes the instance. `applyAggregationUpdate(definition, current, initialState, update)` resolves the current bucket (`isoWeekStart(now)` for `week`) and applies the updater; an unchanged state is not queued. `settleInstance` marks an acknowledged revision uploaded and forgets closed instances and ended buckets; `pruneSettledExpired` drops expired entries with nothing left to upload; `pendingUploads` lists the pending entries.
+- `report.ts`: `journeyReportActionAtom(definition)` and `aggregationReportActionAtom(definition, initialState)` wrap the rules in jotai action atoms that no-op when analytics is disabled. A journey step forks a flush right away (fire and forget, the caller never waits); an aggregation update only queues. Journey reports take `{onlyIfOpen: true}` for steps that must never start an instance.
 - `index.ts`: the per-definition atoms the signal sites call: `reportAppOpenedWhileLoggedOutActionAtom` (sets `firstOpenAt`, starts `onboarding`), `reportOnboardingStepActionAtom` (onboarding steps; never starts an instance and never moves `step` backwards, so a screen shown again is not a drop-off), `reportRegisteredActionAtom` (`registered` with `openToRegistration`, sets `registeredAt`, starts `registrationCohort`), `reportActivationActionAtom` (first core action, guarded by `activatedAt`, writes the cohort activation fields), `reportMarketplaceWeeklyActionAtom`, and the class rules `activationClassForCreatedOffer` (`main` without intended clubs, else `both`) / `activationClassForRequest` (`club` when the offer's `friendLevel` has `CLUB` and no contact degree, else `main`), to move to `coreAction.ts` in the definitions package when it exists.
-- `flush.ts`: `flushAnalyticsActionAtom` prunes, then uploads every `now` entry through `api.metrics.upsertAnalyticsState`. Success or any 4xx except 429 settles the entry (4xx is reported with `name` and status only); 5xx or a network error keeps it for the next flush. `nextStart` entries are never uploaded directly: the start task releases them to `now` at process start (section 6.4).
+- `flush.ts`: `flushAnalyticsActionAtom` prunes, then uploads every pending entry through `api.metrics.upsertAnalyticsState`. Success or any 4xx except 429 settles the entry (4xx is reported with `name` and status only); 5xx or a network error keeps it for the next flush. Flushes are serialized through a semaphore, so a step recorded while a request is in flight goes out in the following flush with the latest state instead of racing it (section 6.4).
 
 Signal sites wired for the first slice: `LoginFlow/index.tsx` (`opened`), `Intro1Screen` (`intro` when its action is pressed, after the pre-login clear; the screen's mount effect would run before the parent `LoginFlow` effect that starts the journey), `initPhoneVerificationAtom` (`phoneSubmitted`), `verifyPhoneNumberAtom` (`codeVerified`), `finishLoginActionAtom` (`reLogin` after `checkUserExists`, `registered` in `handleUserCreationActionAtom`), `ContactsImportScreen.tsx` (`contactsImport` outcome, `skipped` on the secondary button), `NotificationSetupScreen.tsx` (`notifications`: `granted` when the permission was granted, otherwise `skipped`), `finishPostLoginFlowActionAtom` (`onboardingFinished`), `createOfferActionAtom` and `sendRequestActionAtom` (activation; re-requests detected through the existing chat for the offer, note requests never reach `sendRequestActionAtom`), `AllOffersActiveEffects` in `MarketplaceScreenContent.tsx` (`marketplaceOpened` on focus), `refreshOffersActionAtom` (first successful load of the week: `firstLoadResult` and `offersVisibleBucket` from `offersToSeeInMarketplaceAtom`, only while the app is active). Club join sites follow with the club definitions.
 
 ### 6.4 Flush
 
-- **App start**: `flushAnalyticsOnStartInAppLoadingTask.ts` releases every `nextStart` entry to `now` at module load, the only point that runs before any signal site of the process (start tasks themselves run from an `App` effect, after the `LoginFlow` mount effect that starts the onboarding journey, so a journey created in this session stays queued for the next start). The task itself, `runOn: 'start'`, no login required, `runAfterOtherTasks` so its random 0 to 60 s delay never holds up another task, then flushes the `now` entries. The delay keeps start flushes from lining up with the refresh calls the app makes at the same moment.
-- **Background**: `useFlushAnalyticsOnBackground` (called from `App.tsx`) runs a best-effort flush of `now` entries with a 5 s timeout on `background` (not iOS `inactive`). Losing it is fine; the next start catches up.
+- **Journey step**: `journeyReportActionAtom` forks `flushAnalyticsActionAtom` after saving the step; the caller never waits and a failed request leaves the entry pending. The server's `revision` guard drops a late lower revision, and the client serializes flushes, so a burst of steps during one request collapses into a single follow-up request carrying the latest state.
+- **App start**: `flushAnalyticsOnStartInAppLoadingTask.ts`, `runOn: 'start'`, no login required, `runAfterOtherTasks` so its random 0 to 60 s delay never holds up another task, then flushes every pending entry (aggregation buckets and any journey state whose immediate upload failed). The delay keeps start flushes from lining up with the refresh calls the app makes at the same moment.
+- **Background**: `useFlushAnalyticsOnBackground` (called from `App.tsx`) runs a best-effort flush of pending entries with a 5 s timeout on `background` (not iOS `inactive`). Losing it is fine; the next start catches up.
 - No background task, no push-driven flush: those entry points return control to the OS unpredictably and the existing `flushAllScheduledMmkvWrites` note in `atomWithParsedMmkvStorage.ts` shows why.
 
 ### 6.5 Pre-login reporting
@@ -249,14 +250,15 @@ The onboarding journey starts before a session exists. The rest-api client for t
 
 ### 6.7 Failure modes
 
-| Situation                                | Effect                                                                                                                                          | Dashboard handling                                                      |
-| ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| Logout (`clearMmkvStorageAndEmptyAtoms`) | All local analytics state gone; open journeys stay at their last server state.                                                                  | Counted as `unknown` outcome once the cohort matures.                   |
-| Reinstall or silent MMKV loss            | Same as logout; the next open is a new instance with new ids.                                                                                   | Same. Re-login is a new instance, never a continuation.                 |
-| Process killed before flush              | Outbox is durable (immediate save); state uploads on next start.                                                                                | None.                                                                   |
-| Offline for days                         | Outbox grows bounded by the number of open journeys plus buckets (one entry per id). Entries older than lifetime or settle are dropped locally. | Late aggregation flushes land inside the settle period or are rejected. |
-| Server rejects (4xx except 429)          | Entry dropped, error reported with `name` and status only. A 429 is kept for the next flush.                                                    | Missing row.                                                            |
-| Clock skew on device                     | `updatedDay` may be off by a day; server tolerates one day forward.                                                                             | Day-level noise, acceptable.                                            |
+| Situation                                          | Effect                                                                                                                                          | Dashboard handling                                                      |
+| -------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| Logout (`clearMmkvStorageAndEmptyAtoms`)           | All local analytics state gone; open journeys stay at their last server state.                                                                  | Counted as `unknown` outcome once the cohort matures.                   |
+| Reinstall or silent MMKV loss                      | Same as logout; the next open is a new instance with new ids.                                                                                   | Same. Re-login is a new instance, never a continuation.                 |
+| Immediate journey upload fails (offline, 5xx, 429) | Entry stays pending; the next journey step, background or start flush retries it with the latest state.                                         | None; the row lags by at most one session.                              |
+| Process killed before flush                        | Outbox is durable (immediate save); state uploads on next start.                                                                                | None.                                                                   |
+| Offline for days                                   | Outbox grows bounded by the number of open journeys plus buckets (one entry per id). Entries older than lifetime or settle are dropped locally. | Late aggregation flushes land inside the settle period or are rejected. |
+| Server rejects (4xx except 429)                    | Entry dropped, error reported with `name` and status only. A 429 is kept for the next flush.                                                    | Missing row.                                                            |
+| Clock skew on device                               | `updatedDay` may be off by a day; server tolerates one day forward.                                                                             | Day-level noise, acceptable.                                            |
 
 Every cohort therefore has an explicit `unknown` bucket: journeys that reached the end of their lifetime without a terminal step. Churn read from last states is an upper bound that includes reinstalls, logouts, opt-outs and data loss.
 
@@ -282,9 +284,9 @@ What they cannot learn:
 
 Linkability across rows: two rows share nothing but `(app_platform, app_major_version, country_prefix, start_day)`. In a small population (a new release line on its first day, a small country) that tuple can be a group of one; the suppression rule in section 7 hides it on dashboards, but the raw table still holds it. Mitigation is population size, not schema; do not add dimensions.
 
-Timing joins with backend rows: backend metrics (`USER_LOGGED_IN`, `OFFER_CREATED`, `USER_JOINED_CLUB_AND_IMPORTED_CONTACTS`) carry exact timestamps and country. A frontend row with the same day and a matching state would be joinable if it were written at the same time. Delayed initial uploads (next start), club uploads (next start), day granularity and the absence of write timestamps break that join. Residual side channels: Postgres `xmin`, `pk` order and backups taken at known times reveal approximate write order; access logs reveal upload time and IP. Both are why the ingress requirement in section 4.5 and the delayed upload are mandatory, not optional.
+Timing joins with backend rows: backend metrics (`USER_LOGGED_IN`, `OFFER_CREATED`, `USER_JOINED_CLUB_AND_IMPORTED_CONTACTS`) carry exact timestamps and country. Journey steps are uploaded as they happen, so an `onboarding` or `registrationCohort` row is written within seconds of the `USER_LOGGED_IN` metric row, and an attacker with the database could in principle pair the two through Postgres write order (`xmin`, the `pk` sequence, backups taken at known times) or through access logs (upload time and IP). The accepted mitigations: `analytics_states` has no timestamp column, so write order must be reconstructed from side channels instead of read from the row; the ingress requirement in section 4.5 keeps access logs short-lived and free of headers; and a successful pair yields only what the metric row already knows (country, exact time) plus the journey state, never a new identifier. This trade-off was taken deliberately: delaying the first upload to the next app start made a user who churns in their first session invisible, which defeats the purpose of journeys.
 
-Small groups: clubs are tiny, so club journeys carry no country, no version and `updatedDay` at week precision, and their uploads are always delayed. Long-lived journeys are the most linkable objects in the system because a random id lives for 30 days; they carry booleans and enums only, one journey per milestone, never chained.
+Small groups: clubs are tiny, so club journeys carry no country, no version and `updatedDay` at week precision. Long-lived journeys are the most linkable objects in the system because a random id lives for 30 days; they carry booleans and enums only, one journey per milestone, never chained.
 
 Endpoint abuse: the endpoint is unauthenticated, so anyone can write junk. Schema validation, caps, the 4 KB body limit and per-IP rate limiting bound the damage to noise, and the dashboard's suppression and maturity rules bound the effect of a burst. Nothing in the payload can point at another user's data.
 
@@ -348,6 +350,7 @@ Recorded so they are not re-litigated in review:
 - Buckets are UTC.
 - `app_major_version` stores the CalVer release line `YY.M`.
 - Rejected payloads are dropped, not dead-lettered.
+- Journey steps are uploaded right away; aggregations are flushed on app start and best effort on background. The first upload of a journey can be paired by write order with the backend row of the same action; this trade-off is accepted and analysed in section 8.
 - Opt-out defaults to enabled (it is an opt-out, not opt-in) and wipes local analytics state.
 - Country prefix is stored on all rows (journeys and aggregations), except definitions marked `storeCountry: false` (clubs). Small-group suppression on the dashboard is the mitigation.
 - Daily active users come from the backend refresh metric only. Client activity records are weekly and monthly engaged flags with no per-day bits.

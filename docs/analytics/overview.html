@@ -1,0 +1,4755 @@
+<title>Vexl Analytics Atlas</title>
+<link
+  rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap"
+/>
+<style>
+  :root {
+    --bg: #f3f5f7;
+    --surface: #ffffff;
+    --surface-2: #e9edf1;
+    --ink: #161d24;
+    --muted: #5a6672;
+    --hair: #d6dce2;
+    --accent: #8a5f00;
+    --mark: #f5c453;
+    --focus: #1f5fbf;
+    --planned-bg: #ddf2e6;
+    --planned-fg: #155c3a;
+    --deferred-bg: #fbebc8;
+    --deferred-fg: #6e4700;
+    --rejected-bg: #f9ddd8;
+    --rejected-fg: #8a2a1d;
+    --merged-bg: #e1e7ed;
+    --merged-fg: #3e4f5f;
+    --external-bg: #e6e2f6;
+    --external-fg: #4a3c8f;
+    --display:
+      "Bricolage Grotesque", "Avenir Next", Avenir, "Segoe UI", system-ui,
+      sans-serif;
+    --body:
+      "IBM Plex Sans", "Helvetica Neue", Helvetica, Arial, system-ui, sans-serif;
+    --mono: "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #111519;
+      --surface: #181d23;
+      --surface-2: #20262d;
+      --ink: #e7ebef;
+      --muted: #9aa6b2;
+      --hair: #2b343d;
+      --accent: #f5c453;
+      --mark: #f5c453;
+      --focus: #7fb0ff;
+      --planned-bg: #173a2a;
+      --planned-fg: #8eddb4;
+      --deferred-bg: #3f2e0c;
+      --deferred-fg: #f2cb74;
+      --rejected-bg: #44201b;
+      --rejected-fg: #f3a79b;
+      --merged-bg: #283440;
+      --merged-fg: #b5c3d0;
+      --external-bg: #2c2650;
+      --external-fg: #c4b8f5;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #111519;
+    --surface: #181d23;
+    --surface-2: #20262d;
+    --ink: #e7ebef;
+    --muted: #9aa6b2;
+    --hair: #2b343d;
+    --accent: #f5c453;
+    --mark: #f5c453;
+    --focus: #7fb0ff;
+    --planned-bg: #173a2a;
+    --planned-fg: #8eddb4;
+    --deferred-bg: #3f2e0c;
+    --deferred-fg: #f2cb74;
+    --rejected-bg: #44201b;
+    --rejected-fg: #f3a79b;
+    --merged-bg: #283440;
+    --merged-fg: #b5c3d0;
+    --external-bg: #2c2650;
+    --external-fg: #c4b8f5;
+    color-scheme: dark;
+  }
+  * {
+    box-sizing: border-box;
+  }
+  [hidden] {
+    display: none !important;
+  }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 16px;
+    line-height: 1.55;
+    -webkit-text-size-adjust: 100%;
+  }
+  a {
+    color: var(--accent);
+    text-underline-offset: 0.15em;
+  }
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  summary:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+  code,
+  .mono {
+    font-family: var(--mono);
+    font-size: 0.92em;
+  }
+  code {
+    background: var(--surface-2);
+    padding: 0.05em 0.3em;
+    border-radius: 3px;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--display);
+    font-weight: 600;
+    line-height: 1.15;
+    text-wrap: balance;
+    margin: 0;
+  }
+  h1 {
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  h2 {
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    margin-block: 0 1rem;
+  }
+  h3 {
+    font-size: 1.2rem;
+    margin-block: 2rem 0.6rem;
+  }
+  h4 {
+    font-size: 1rem;
+    font-weight: 600;
+  }
+  p {
+    margin: 0 0 0.9rem;
+  }
+  ul,
+  ol {
+    margin: 0 0 1rem;
+    padding-left: 1.3rem;
+  }
+  li {
+    margin-bottom: 0.35rem;
+  }
+  .wrap {
+    max-width: 76rem;
+    margin-inline: auto;
+    padding-inline: clamp(16px, 4vw, 40px);
+    padding-block: 0 5rem;
+  }
+  .prose {
+    max-width: 65ch;
+  }
+  .eyebrow {
+    font-family: var(--display);
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 0.5rem;
+  }
+  section.part {
+    padding-block: 3rem 1rem;
+    border-top: 1px solid var(--hair);
+  }
+  .lead {
+    font-size: 1.1rem;
+    color: var(--muted);
+    max-width: 60ch;
+  }
+
+  /* top bar */
+  .bar {
+    position: sticky;
+    top: env(safe-area-inset-top, 0px);
+    z-index: 5;
+    background: var(--bg);
+    border-bottom: 1px solid var(--hair);
+  }
+  .bar-in {
+    max-width: 76rem;
+    margin-inline: auto;
+    padding-inline: clamp(16px, 4vw, 40px);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem 1.2rem;
+    min-height: 3rem;
+    padding-block: 0.4rem;
+  }
+  .brand {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 1rem;
+    letter-spacing: 0.01em;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .brand i {
+    display: inline-block;
+    width: 0.75rem;
+    height: 0.75rem;
+    background: var(--mark);
+    border-radius: 2px;
+  }
+  .bar nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.2rem 0.9rem;
+    font-family: var(--display);
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+  .bar nav a {
+    color: var(--muted);
+    text-decoration: none;
+    padding-block: 0.2rem;
+  }
+  .bar nav a:hover {
+    color: var(--ink);
+  }
+
+  /* hero */
+  .hero {
+    padding-block: 3rem 2.5rem;
+    display: grid;
+    gap: 1.2rem;
+  }
+  .facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.6rem;
+    font-size: 0.9rem;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .facts b {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  /* pills */
+  .pill {
+    display: inline-block;
+    font-family: var(--display);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 0.12em 0.55em;
+    border-radius: 999px;
+    white-space: nowrap;
+    line-height: 1.5;
+  }
+  .pill.planned {
+    background: var(--planned-bg);
+    color: var(--planned-fg);
+  }
+  .pill.deferred {
+    background: var(--deferred-bg);
+    color: var(--deferred-fg);
+  }
+  .pill.rejected {
+    background: var(--rejected-bg);
+    color: var(--rejected-fg);
+  }
+  .pill.merged {
+    background: var(--merged-bg);
+    color: var(--merged-fg);
+  }
+  .pill.external {
+    background: var(--external-bg);
+    color: var(--external-fg);
+  }
+
+  /* tl;dr */
+  .tldr {
+    display: grid;
+    gap: 1rem;
+    max-width: 65ch;
+  }
+  .tldr p {
+    margin: 0;
+  }
+  .tldr .k {
+    font-family: var(--display);
+    font-weight: 600;
+    display: block;
+    margin-bottom: 0.15rem;
+  }
+  .rules {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+    gap: 1rem;
+    max-width: 65ch;
+    margin-block: 0.5rem 1.5rem;
+  }
+  .rule {
+    border: 1px solid var(--hair);
+    background: var(--surface);
+    padding: 1rem 1.1rem;
+  }
+  .rule b {
+    font-family: var(--display);
+    display: block;
+    margin-bottom: 0.3rem;
+    font-size: 1.05rem;
+  }
+  .rule p {
+    margin: 0;
+    font-size: 0.95rem;
+    color: var(--muted);
+  }
+  .ask {
+    border-left: 3px solid var(--mark);
+    padding: 0.2rem 0 0.2rem 1rem;
+    margin-block: 0.5rem 1rem;
+  }
+  .ask li {
+    margin-bottom: 0.5rem;
+  }
+
+  /* tables */
+  .tbl {
+    overflow-x: auto;
+    border: 1px solid var(--hair);
+    background: var(--surface);
+    margin-block: 0.5rem 1.5rem;
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 0.92rem;
+    min-width: 36rem;
+  }
+  th,
+  td {
+    text-align: left;
+    vertical-align: top;
+    padding: 0.55rem 0.75rem;
+    border-bottom: 1px solid var(--hair);
+  }
+  th {
+    font-family: var(--display);
+    font-size: 0.78rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 600;
+    background: var(--surface-2);
+  }
+  tr:last-child td {
+    border-bottom: 0;
+  }
+  td.num {
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  /* data flow diagram */
+  .flow {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+    gap: 1rem;
+    margin-block: 1rem 1.5rem;
+  }
+  .node {
+    background: var(--surface);
+    border: 1px solid var(--hair);
+    padding: 1rem 1.1rem;
+    display: grid;
+    gap: 0.5rem;
+    align-content: start;
+  }
+  .node h4 {
+    font-size: 0.8rem;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .node .step {
+    font-size: 0.92rem;
+    padding-left: 1rem;
+    position: relative;
+  }
+  .node .step::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.6em;
+    width: 0.45rem;
+    height: 0.45rem;
+    background: var(--mark);
+    border-radius: 50%;
+  }
+  .node .arrow {
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    color: var(--muted);
+    border-top: 1px dashed var(--hair);
+    padding-top: 0.5rem;
+    margin-top: 0.2rem;
+  }
+  .node .arrow b {
+    color: var(--ink);
+    font-weight: 500;
+  }
+
+  /* decisions */
+  .decisions {
+    columns: 2;
+    column-gap: 2.5rem;
+    max-width: 76rem;
+  }
+  .decisions li {
+    break-inside: avoid;
+    font-size: 0.95rem;
+  }
+  @media (max-width: 720px) {
+    .decisions {
+      columns: 1;
+    }
+  }
+
+  /* filters */
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem 1rem;
+    align-items: center;
+    padding: 0.9rem 1rem;
+    background: var(--surface);
+    border: 1px solid var(--hair);
+    margin-block: 1rem 1.5rem;
+  }
+  .filters label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.92rem;
+    cursor: pointer;
+  }
+  .filters input[type="checkbox"] {
+    accent-color: var(--accent);
+    width: 1rem;
+    height: 1rem;
+    margin: 0;
+  }
+  .filters input[type="search"] {
+    font: inherit;
+    font-size: 0.95rem;
+    padding: 0.4rem 0.6rem;
+    border: 1px solid var(--hair);
+    background: var(--bg);
+    color: var(--ink);
+    border-radius: 4px;
+    min-width: 12rem;
+    flex: 1 1 12rem;
+  }
+  .filters .count {
+    font-size: 0.85rem;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+    margin-left: auto;
+  }
+
+  /* categories */
+  details.cat {
+    border-top: 1px solid var(--hair);
+  }
+  details.cat:last-of-type {
+    border-bottom: 1px solid var(--hair);
+  }
+  details.cat > summary {
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.4rem 1rem;
+    padding: 0.9rem 0;
+  }
+  details.cat > summary::-webkit-details-marker {
+    display: none;
+  }
+  details.cat > summary::before {
+    content: "+";
+    font-family: var(--mono);
+    color: var(--muted);
+    width: 1rem;
+    display: inline-block;
+  }
+  details.cat[open] > summary::before {
+    content: "\2212";
+  }
+  details.cat > summary h3 {
+    margin: 0;
+    font-size: 1.25rem;
+  }
+  .counts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    font-size: 0.8rem;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+    margin-left: auto;
+  }
+  .counts span {
+    white-space: nowrap;
+  }
+  .counts .n {
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .cat-body {
+    padding: 0 0 1.5rem 1rem;
+  }
+  .cat-summary {
+    max-width: 65ch;
+    color: var(--muted);
+    font-size: 0.95rem;
+    margin-bottom: 0.5rem;
+  }
+  .metrics {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .m {
+    padding: 0.85rem 0;
+    border-top: 1px solid var(--hair);
+    display: grid;
+    gap: 0.3rem;
+  }
+  .m-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem 0.7rem;
+  }
+  .m-type {
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    color: var(--muted);
+    margin: 0;
+  }
+  .m-type b {
+    font-weight: 500;
+    color: var(--ink);
+  }
+  .m-def {
+    margin: 0;
+    max-width: 78ch;
+    font-size: 0.95rem;
+  }
+  .m-meta {
+    margin: 0;
+    font-size: 0.82rem;
+    color: var(--muted);
+    max-width: 90ch;
+  }
+  .m-meta b {
+    font-weight: 600;
+    color: var(--muted);
+  }
+  .m-meta code {
+    font-size: 0.9em;
+    background: transparent;
+    padding: 0;
+  }
+  .m.merged .m-def {
+    color: var(--muted);
+  }
+  .m .m-def em {
+    font-style: normal;
+    color: var(--muted);
+  }
+
+  /* open questions */
+  .q {
+    border: 1px solid var(--hair);
+    background: var(--surface);
+    padding: 1.1rem 1.2rem;
+    margin-block: 0 1rem;
+    max-width: 76rem;
+  }
+  .q h3 {
+    margin: 0 0 0.4rem;
+  }
+  .q .aff {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-bottom: 0.6rem;
+  }
+  .q ol {
+    margin: 0.4rem 0 0;
+    padding-left: 1.4rem;
+  }
+  .q li.rec {
+    position: relative;
+  }
+  .q li.rec::after {
+    content: "recommended";
+    font-family: var(--display);
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-left: 0.5rem;
+    white-space: nowrap;
+  }
+  .answered {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-width: 76rem;
+  }
+  .answered li {
+    display: grid;
+    grid-template-columns: 3.2rem 1fr;
+    gap: 0.6rem;
+    padding: 0.55rem 0;
+    border-top: 1px solid var(--hair);
+    font-size: 0.95rem;
+  }
+  .answered li:last-child {
+    border-bottom: 1px solid var(--hair);
+  }
+  .answered .qn {
+    font-family: var(--mono);
+    color: var(--muted);
+  }
+  footer {
+    padding-block: 2rem;
+    font-size: 0.85rem;
+    color: var(--muted);
+    border-top: 1px solid var(--hair);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    details.cat > summary::before {
+      transition: transform 0.15s;
+    }
+  }
+</style>
+
+<header class="bar">
+  <div class="bar-in">
+    <a class="brand" href="#top"><i></i>Vexl Analytics Atlas</a>
+    <nav aria-label="Sections">
+      <a href="#tldr">TL;DR</a>
+      <a href="#system">How it works</a>
+      <a href="#definitions">Definitions</a>
+      <a href="#metrics">Metrics</a>
+      <a href="#questions">Open questions</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap" id="top">
+  <div class="hero">
+    <p class="eyebrow">Privacy-aware frontend analytics</p>
+    <h1>Counting what happens in Vexl without ever looking at one person</h1>
+    <p class="lead">
+      The design, the vocabulary and every metric of the client-side analytics
+      system, condensed from <code>docs/analytics/</code>. Working notes as of
+      September 2026; nothing here is shipped yet.
+    </p>
+    <div class="facts">
+      <span><b>152</b> metrics in 12 categories</span>
+      <span><b>83</b> planned</span>
+      <span><b>34</b> deferred</span>
+      <span><b>4</b> rejected</span>
+      <span><b>30</b> merged</span>
+      <span><b>1</b> external</span>
+      <span><b>7</b> journeys, <b>6</b> aggregations</span>
+    </div>
+  </div>
+
+  <section class="part" id="tldr">
+    <p class="eyebrow">Part 1</p>
+    <h2>TL;DR for business</h2>
+    <div class="tldr">
+      <p>
+        <span class="k">What we measure and why.</span> Funnels (first open to
+        registration to first offer or request), weekly and monthly activity,
+        whether offers get requests and requests get answers, club adoption,
+        notification and pop-up outcomes, and how people come back after going
+        quiet. The point is to answer product questions like "where does
+        onboarding lose people" and "do club joiners ever use the main
+        marketplace", not to follow individuals.
+      </p>
+      <p>
+        <span class="k">Two privacy rules, no exceptions.</span> First, no exact
+        timestamps leave the phone: only a day, an ISO week or a month, and
+        every duration is turned into a coarse bucket (for example "1 hour to 1
+        day") on the device. Second, there is no user id and no device id on the
+        server. Every row carries a random id that belongs to one flow or one
+        calendar bucket and is wiped once that flow ends. In practice this means
+        we can count, compare weeks and read funnels, but we can never open a
+        table and look at one person, and two rows from the same phone cannot be
+        linked to each other.
+      </p>
+    </div>
+    <div class="rules">
+      <div class="rule">
+        <b>Journeys</b>
+        <p>
+          One predefined flow on one phone, reported as a single state that gets
+          replaced at each milestone. Example: the onboarding funnel. A phone
+          that reaches "code verified" but never "registered" stays in that
+          state; after 7 days the dashboard counts it among the drop-offs at
+          that step.
+        </p>
+      </div>
+      <div class="rule">
+        <b>Aggregations</b>
+        <p>
+          Capped counters per calendar bucket, one row per phone per bucket.
+          Example: the weekly marketplace counters. A phone adds up "marketplace
+          opened" (cap 50) and "offers created, main" (cap 20) for the week and
+          uploads that total; the dashboard sums rows into "how many instances
+          did at least one".
+        </p>
+      </div>
+    </div>
+    <div class="tldr">
+      <p>
+        <span class="k">Numbers are "reporting instances", never users.</span> A
+        reporting instance is one app install with analytics enabled that
+        uploaded at least one row. A person with two phones is two instances;
+        someone who reinstalls or logs out and back in is a new instance. Every
+        chart says "reporting instances" and the backend user totals are shown
+        separately and never used as a denominator.
+      </p>
+      <p>
+        <span class="k">What the dashboard will and will not show.</span> Any
+        group smaller than 20 reporting instances (a small country, a small club
+        cohort, a rare notification type) is hidden or merged into "other".
+        Cohorts appear only after they mature: a 31-day journey cohort is drawn
+        when the last possible start plus grace has passed, a weekly bucket 14
+        days after the week ended. Every cohort has an "unknown" share: phones
+        that stopped reporting because of a reinstall, logout, data loss or
+        opt-out. "Unknown" is never labelled churn.
+      </p>
+      <p>
+        <span class="k">Opt-out.</span> Analytics is on by default and can be
+        switched off in Settings. Switching it off deletes everything queued on
+        the phone and stops recording; the rows already on the server keep their
+        last state and expire on schedule. There is no "opted out" row, and
+        there is no sampling beyond the opt-out.
+      </p>
+      <p>
+        <span class="k">What is deliberately not built.</span> No D90 retention
+        (a 91-day id behaves like a device id), no "actions before churn"
+        snapshots (a per-device record overwritten on every start is a standing
+        profile), no per-day activity bits on client records, no A/B variants.
+        Feedback ratings stay in the feedback service.
+      </p>
+    </div>
+    <h3>Three questions business still owes an answer to</h3>
+    <ul class="ask">
+      <li>
+        <b>Acquisition source (Q9).</b> Vexl has no campaign, referral or
+        link-source concept, so every "by source" metric is deferred. Is knowing
+        the source worth adding an optional "how did you hear about Vexl" picker
+        to onboarding (a closed list: event, friend, social, press, organic,
+        unknown), or do we drop these metrics until a campaign programme exists?
+      </li>
+      <li>
+        <b>Completed trades (Q10).</b> Vexl cannot see a trade. The only way to
+        count completions is one optional question at the existing post-chat
+        feedback prompt (traded, met but no trade, no meeting, prefer not to
+        answer), counted on the device and never stored next to free text. Do we
+        add that question, or does the whole completed-trade group stay
+        deferred?
+      </li>
+      <li>
+        <b>Session tracking (Q11).</b> Sessions per user, session duration and
+        depth need a tracker that runs on every foreground and background change
+        and checkpoints to storage every 30 seconds. Weekly and monthly activity
+        already answer "who was active". Is the extra bookkeeping worth it, or
+        do we leave the sessions category out?
+      </li>
+    </ul>
+  </section>
+
+  <section class="part" id="system">
+    <p class="eyebrow">Part 2</p>
+    <h2>How the system works</h2>
+    <p class="lead">
+      A compact version of <code>system.md</code>. The metric files say what to
+      collect; this says how.
+    </p>
+
+    <h3>Concepts</h3>
+    <div class="tbl">
+      <table>
+        <thead>
+          <tr>
+            <th>Concept</th>
+            <th>Meaning</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><b>Journey</b></td>
+            <td>
+              One instance of a predefined flow on one device. The client owns a
+              random <code>journeyId</code>, keeps the whole state locally, and
+              every upload replaces the state under that id. The server keeps
+              the latest state only. The last state of a journey that never
+              reached a terminal step is the churn signal.
+            </td>
+          </tr>
+          <tr>
+            <td><b>Journey lifetime</b></td>
+            <td>
+              Declared per definition (7 or 31 days from <code>startDay</code>).
+              After the terminal step or the lifetime the client deletes the id;
+              the server nulls it after lifetime plus grace so the row can never
+              be updated or linked again.
+            </td>
+          </tr>
+          <tr>
+            <td><b>Aggregation</b></td>
+            <td>
+              Per absolute calendar bucket the client keeps capped counters and
+              small enums and upserts them under a random per-bucket id. One row
+              per reporting instance per bucket. Once the bucket is closed and
+              the final flush acknowledged, the id is dropped.
+            </td>
+          </tr>
+          <tr>
+            <td><b>Bucket</b></td>
+            <td>
+              Calendar-aligned, UTC: day, ISO week (Monday start) or month.
+              Absolute, never relative to install or registration.
+            </td>
+          </tr>
+          <tr>
+            <td><b>Settle period</b></td>
+            <td>
+              14 days (tunable) after a bucket closes during which late flushes
+              still land. Dashboards show a bucket as final only after it.
+            </td>
+          </tr>
+          <tr>
+            <td><b>Reporting instance</b></td>
+            <td>
+              One app install with analytics enabled that uploaded at least one
+              row for the population in question. All dashboard populations are
+              counted in reporting instances, never users.
+            </td>
+          </tr>
+          <tr>
+            <td><b>Core action</b></td>
+            <td>
+              Successful offer creation or successful messaging request.
+              Re-requests and note-origin requests are excluded.
+            </td>
+          </tr>
+          <tr>
+            <td><b>Creation class</b></td>
+            <td>
+              <code>main</code> when no clubs were selected,
+              <code>both</code> when at least one was. No club-only class: the
+              offer form always has a contact connection level.
+            </td>
+          </tr>
+          <tr>
+            <td><b>Request class</b></td>
+            <td>
+              <code>club</code> when the offer reached the device only through a
+              club, <code>main</code> otherwise. Taken from the offer's origin,
+              never from which screen was open.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="prose">
+      Long-lived journeys (over 7 days) carry booleans and enums only and never
+      free numbers; country, platform and release line are row columns, not
+      payload fields. Short journeys and aggregations may carry capped counters
+      and duration buckets.
+    </p>
+
+    <h3>Data flow</h3>
+    <div
+      class="flow"
+      role="img"
+      aria-label="Data flow from the mobile app through metrics-service to the dashboard"
+    >
+      <div class="node">
+        <h4>Mobile app</h4>
+        <div class="step">
+          Signal site fires (for example
+          <code>createOfferActionAtom</code> resolves): record a journey step or
+          bump a counter.
+        </div>
+        <div class="step">
+          State saved to MMKV immediately; the outbox holds one reference per
+          open id, so a burst of steps uploads the latest state only.
+        </div>
+        <div class="step">
+          Flush on app start (reliable, random 0 to 60 s delay) and on
+          background (best effort, short timeout).
+        </div>
+        <div class="arrow">
+          <b>PUT /analytics/state</b> {id, kind, name, schemaVersion, revision,
+          startDay, updatedDay, payload}. Unauthenticated, common headers only,
+          rate limited.
+        </div>
+      </div>
+      <div class="node">
+        <h4>metrics-service</h4>
+        <div class="step">
+          Validate name against the definitions registry and the payload against
+          its schema, excess properties rejected. Rejected rows are dropped,
+          never stored.
+        </div>
+        <div class="step">
+          Read exactly three header getters: platform, release line, country
+          prefix. Drop everything else in <code>vexl-app-meta</code>.
+        </div>
+        <div class="step">
+          Upsert into <code>analytics_states</code> by id, only when the client
+          revision is not lower than the stored one.
+        </div>
+        <div class="step">
+          Daily job at 03:15 UTC: null expired ids, delete rows older than 540
+          days.
+        </div>
+        <div class="arrow">
+          <b>204</b> acknowledge, drop id if closed. <b>4xx</b> client drops the
+          entry. <b>5xx / offline</b> keep and retry next flush.
+        </div>
+      </div>
+      <div class="node">
+        <h4>Dashboard</h4>
+        <div class="step">
+          Read-only connection to the metrics database; labels and cap values
+          imported from the definitions package.
+        </div>
+        <div class="step">
+          Suppress groups under 20 reporting instances after filtering, so
+          drilling down cannot reveal them.
+        </div>
+        <div class="step">
+          Show journey cohorts only after lifetime plus grace, aggregation
+          buckets only after bucket end plus settle.
+        </div>
+        <div class="arrow">
+          Outcomes: terminal state, <b>open</b> (inside lifetime),
+          <b>unknown</b> (lifetime elapsed without a terminal step). Never
+          labelled churn.
+        </div>
+      </div>
+    </div>
+    <p class="prose">
+      Delayed uploads: the initial upload of any journey and every club-related
+      upload are queued for the next app start, not sent in the session of the
+      triggering action. This prevents joining them by timing with backend rows
+      such as <code>USER_LOGGED_IN</code>, <code>OFFER_CREATED</code> or
+      <code>USER_JOINED_CLUB_AND_IMPORTED_CONTACTS</code>.
+    </p>
+
+    <h3>The server primitive</h3>
+    <p class="prose">
+      One endpoint on metrics-service, defined next to
+      <code>reportNotificationInteraction</code> (the existing unauthenticated
+      precedent): <code>PUT /analytics/state</code>,
+      <code>CommonHeaders</code> only, callable before login, per-IP rate limit
+      (24 h window, placeholder 300 calls), 4 KB raw body cap (413), payload cap
+      in the schema (64 keys, strings up to 32 chars, integers up to 1000),
+      success 204. Staleness is rejected with 400: a journey whose
+      <code>startDay</code> is older than lifetime plus grace, or an aggregation
+      past bucket end plus settle.
+    </p>
+    <div class="tbl">
+      <table>
+        <thead>
+          <tr>
+            <th>Body field</th>
+            <th>Type</th>
+            <th>Rule</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>id</code></td>
+            <td><code>AnalyticsStateId</code></td>
+            <td>
+              Client-generated random uuid v4, one per journey instance or per
+              aggregation bucket. A string brand defined in the definitions
+              package, which cannot depend on <code>domain</code>.
+            </td>
+          </tr>
+          <tr>
+            <td><code>kind</code></td>
+            <td><code>journey</code> | <code>aggregation</code></td>
+            <td>
+              Must match the definition registered under <code>name</code>.
+            </td>
+          </tr>
+          <tr>
+            <td><code>name</code></td>
+            <td>string, at most 64 chars</td>
+            <td>Must be in the definitions allow-list; unknown name is 400.</td>
+          </tr>
+          <tr>
+            <td><code>schemaVersion</code></td>
+            <td>integer</td>
+            <td>
+              Must equal the version the server knows for <code>name</code>;
+              older versions are 400 and the client drops the row. Keep a
+              two-version window during rollouts.
+            </td>
+          </tr>
+          <tr>
+            <td><code>revision</code></td>
+            <td>integer, 0 or more</td>
+            <td>
+              Per-id counter bumped on every state change. Lower revision than
+              stored is ignored (out-of-order retries). Not a timestamp.
+            </td>
+          </tr>
+          <tr>
+            <td><code>startDay</code></td>
+            <td><code>YYYY-MM-DD</code></td>
+            <td>
+              Journey: day the instance started. Aggregation: first day of the
+              bucket.
+            </td>
+          </tr>
+          <tr>
+            <td><code>updatedDay</code></td>
+            <td><code>YYYY-MM-DD</code></td>
+            <td>
+              Day of the last local change; at least <code>startDay</code>, at
+              most one day in the future. Long-lived journeys round it to the
+              ISO week start.
+            </td>
+          </tr>
+          <tr>
+            <td><code>payload</code></td>
+            <td>object</td>
+            <td>
+              Validated with the definition's effect Schema,
+              <code>onExcessProperty: 'error'</code>.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>Table <code>analytics_states</code></h4>
+    <p class="prose">
+      New table in metrics-service (migration
+      <code>0004_add_analytics_states_table.ts</code>). The existing
+      <code>metrics</code> table is not used: it has an exact timestamp column
+      and the notification <code>trackingId</code> convention. Indexes:
+      <code>(name, start_day)</code> for reads and a partial unique index on
+      <code>id WHERE id IS NOT NULL</code>.
+    </p>
+    <div class="tbl">
+      <table>
+        <thead>
+          <tr>
+            <th>Column</th>
+            <th>Type</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>pk</code></td>
+            <td>bigint identity</td>
+            <td>
+              Primary key. Row order is a weak write-order side channel,
+              accepted.
+            </td>
+          </tr>
+          <tr>
+            <td><code>id</code></td>
+            <td>uuid, nullable</td>
+            <td>
+              Client id. Set to null by the expiry job; a nulled row can never
+              be matched again.
+            </td>
+          </tr>
+          <tr>
+            <td><code>kind</code></td>
+            <td>varchar</td>
+            <td><code>journey</code> or <code>aggregation</code>.</td>
+          </tr>
+          <tr>
+            <td><code>name</code></td>
+            <td>varchar</td>
+            <td>Definition name.</td>
+          </tr>
+          <tr>
+            <td><code>schema_version</code></td>
+            <td>integer</td>
+            <td>Payload schema version at write time.</td>
+          </tr>
+          <tr>
+            <td><code>revision</code></td>
+            <td>integer</td>
+            <td>Last accepted client revision.</td>
+          </tr>
+          <tr>
+            <td><code>start_day</code></td>
+            <td>date</td>
+            <td>As in the body.</td>
+          </tr>
+          <tr>
+            <td><code>updated_day</code></td>
+            <td>date</td>
+            <td>As in the body.</td>
+          </tr>
+          <tr>
+            <td><code>payload</code></td>
+            <td>jsonb</td>
+            <td>Validated state.</td>
+          </tr>
+          <tr>
+            <td><code>app_platform</code></td>
+            <td>varchar</td>
+            <td>
+              <code>IOS</code> / <code>ANDROID</code> from the common headers,
+              <code>unknown</code> fallback.
+            </td>
+          </tr>
+          <tr>
+            <td><code>app_major_version</code></td>
+            <td>varchar</td>
+            <td>
+              CalVer release line <code>YY.M</code>,
+              <code>unknown</code> fallback.
+            </td>
+          </tr>
+          <tr>
+            <td><code>country_prefix</code></td>
+            <td>varchar</td>
+            <td>
+              Phone country prefix, <code>none</code> fallback; club definitions
+              (<code>storeCountry: false</code>) always store <code>none</code>.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="prose">
+      No <code>created_at</code>, no <code>updated_at</code>, no IP, no version
+      code, no app source, no language, no device model, no OS version.
+      Retention in one line: a row keeps its id for at most lifetime plus grace
+      (7 days), keeps its payload for at most 540 days, and never gets a
+      timestamp added. Ingress requirement for the infrastructure repo: exclude
+      <code>/analytics/state</code> from long-term edge access logs (or keep
+      them 7 days or less) and never log request headers for the path.
+    </p>
+
+    <h3>The definitions package</h3>
+    <p class="prose">
+      <code>packages/analytics-definitions</code>
+      (<code>@vexl-next/analytics-definitions</code>, imported as
+      <code>@vexl-next/analytics-definitions/src/&lt;file&gt;</code>),
+      platform-agnostic, depends on <code>effect</code> only. Consumers:
+      <code>apps/mobile</code> produces,
+      <code>apps/metrics-service</code> validates and stores,
+      <code>apps/dashboard-app</code> reads and labels. The first slice ships
+      three definitions: the <code>onboarding</code> and
+      <code>registrationCohort</code> journeys and the
+      <code>marketplaceWeekly</code> aggregation; the remaining buckets,
+      <code>coreAction.ts</code> and the other fields listed in Part 3 are added
+      with the metrics that need them, each with a
+      <code>schemaVersion</code> bump.
+    </p>
+    <div class="tbl">
+      <table>
+        <thead>
+          <tr>
+            <th>Module</th>
+            <th>Contents</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>calendar.ts</code></td>
+            <td>
+              <code>dayOf</code>, <code>isoWeekOf</code>, <code>monthOf</code>,
+              <code>bucketStartDay</code>, <code>bucketEndDay</code>,
+              <code>isBucketClosed</code>. All UTC.
+            </td>
+          </tr>
+          <tr>
+            <td><code>buckets.ts</code></td>
+            <td>
+              <code>DurationBucket</code>, <code>DaysBucket</code>,
+              <code>CountBucket</code> and the other shared enums, with the pure
+              functions that produce them.
+            </td>
+          </tr>
+          <tr>
+            <td><code>counters.ts</code></td>
+            <td>
+              <code>cappedCounter(max)</code> schema and
+              <code>increment</code> that saturates at the cap.
+            </td>
+          </tr>
+          <tr>
+            <td><code>journey.ts</code></td>
+            <td>
+              <code
+                >defineJourney({name, schemaVersion, lifetimeDays,
+                updatedDayPrecision, state, terminalStates, reduce})</code
+              >; <code>reduce</code> is the pure replace reducer.
+            </td>
+          </tr>
+          <tr>
+            <td><code>aggregation.ts</code></td>
+            <td>
+              <code
+                >defineAggregation({name, schemaVersion, period, counters,
+                fields})</code
+              >
+              producing the payload schema and an <code>empty()</code> state.
+            </td>
+          </tr>
+          <tr>
+            <td><code>registry.ts</code></td>
+            <td>
+              <code>definitions</code> record and
+              <code>payloadSchemaFor(name)</code>. This record is the server
+              allow-list.
+            </td>
+          </tr>
+          <tr>
+            <td><code>coreAction.ts</code></td>
+            <td>
+              <code>creationClass(intendedClubs)</code> and
+              <code>requestClass(offerOrigin)</code>, the single implementation
+              of the class rules.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>The client: outbox and flush</h3>
+    <p class="prose">
+      One module <code>apps/mobile/src/utils/analytics/</code> exposes
+      <code>recordJourneyStep</code>, <code>bumpCounter</code>,
+      <code>setField</code>, <code>closeBucket</code> and
+      <code>flushAnalytics</code>. All local state lives in MMKV through the
+      immediate-save atom variant (the deferred variant can be killed by the OS
+      before it writes) and is wiped on logout with everything else.
+    </p>
+    <div class="tbl">
+      <table>
+        <thead>
+          <tr>
+            <th>MMKV key</th>
+            <th>Content</th>
+            <th>Leaves the device?</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>analyticsMarkers</code></td>
+            <td>
+              <code>firstOpenAt</code>, <code>registeredAt</code>,
+              <code>activatedAt</code>, <code>firstClubJoinedAt</code>,
+              <code>lastCoreActionAt</code> and a few more exact timestamps
+            </td>
+            <td>Never. Only buckets derived from them.</td>
+          </tr>
+          <tr>
+            <td><code>analyticsJourneys</code></td>
+            <td>Per name: id, revision, startDay, state, closed</td>
+            <td>State only, via the outbox.</td>
+          </tr>
+          <tr>
+            <td><code>analyticsAggregations</code></td>
+            <td>
+              Per name and bucket: id, revision, state, acknowledgedRevision
+            </td>
+            <td>State only, via the outbox.</td>
+          </tr>
+          <tr>
+            <td><code>analyticsOutbox</code></td>
+            <td>
+              Ordered list of {id, kind, name, revision, notBefore: now |
+              nextStart}
+            </td>
+            <td>The upload queue.</td>
+          </tr>
+          <tr>
+            <td><code>analyticsSession</code></td>
+            <td>Session tracker checkpoint (only if Q11 is answered yes)</td>
+            <td>Never raw.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <ul class="prose">
+      <li>
+        <b>Start flush</b>: an in-app loading task (<code>runOn: 'start'</code>,
+        no login required) drains the outbox including
+        <code>nextStart</code> entries, after a random 0 to 60 s delay so it
+        does not line up with the refresh calls made at the same moment.
+      </li>
+      <li>
+        <b>Background flush</b>: <code>useAppState</code> on
+        <code>background</code> (not iOS <code>inactive</code>) sends
+        <code>now</code> entries with a short timeout. Losing it is fine; the
+        next start catches up. No background task and no push-driven flush.
+      </li>
+      <li>
+        <b>Pre-login</b>: the onboarding journey starts before a session exists,
+        so the rest-api client function builds the request with
+        <code>makeCommonHeaders</code> only and never calls
+        <code>getUserSessionCredentials</code>.
+      </li>
+      <li>
+        <b>Opt-out</b>: <code>preferencesAtom.analyticsEnabled</code>, default
+        true, toggle in Settings. Off clears the outbox, deletes all local ids
+        and stops recording; on again starts fresh instances. The opt-out state
+        itself is never reported.
+      </li>
+      <li>
+        <b>Failure modes</b>: logout, reinstall and silent MMKV loss end open
+        journeys at their last server state (counted as <code>unknown</code> at
+        maturity); a killed process loses nothing because the outbox is durable;
+        days offline are bounded by one outbox entry per open id; a 4xx drops
+        the entry and reports name and status only; clock skew is tolerated one
+        day forward.
+      </li>
+    </ul>
+
+    <h3>Dashboard rules</h3>
+    <ul class="prose">
+      <li>
+        Every chart states its population as reporting instances on a release
+        line that ships the definition. Backend counts
+        (<code>NUMBER_OF_USERS</code>, <code>COUNT_OF_ACTIVE_USERS</code>) are
+        shown separately and never used as a denominator for frontend rows.
+      </li>
+      <li>
+        Any group under 20 reporting instances (cohort week, platform, release
+        line, state value, country) is hidden or merged into "other", applied
+        after filtering.
+      </li>
+      <li>
+        Journey cohorts appear after <code>lifetimeDays + graceDays</code> since
+        the last possible <code>startDay</code>; aggregation buckets after
+        <code>bucketEndDay + settleDays</code>. Immature buckets are provisional
+        or absent.
+      </li>
+      <li>
+        Outcome categories are terminal states, <code>open</code> and
+        <code>unknown</code>. Never label <code>unknown</code> as churn.
+      </li>
+      <li>
+        <code>apps/dashboard-app</code> needs a new read-only connection to the
+        metrics database; <code>mixed</code> metrics take their backend half
+        from the existing <code>metrics</code> table.
+      </li>
+    </ul>
+
+    <h3>Privacy analysis in short</h3>
+    <p class="prose">
+      Attacker model: full read access to <code>analytics_states</code>. Per row
+      they learn platform, release line, phone country prefix (none for clubs),
+      a definition name, a start day, an update day (week for long journeys) and
+      a small enum or capped-counter state. They cannot learn who the instance
+      is (no phone number, hash, IP, device model, installation id or session
+      token), when exactly anything happened (day or week granularity; the
+      upload time is not stored), or whether two rows belong to the same device
+      (independent random ids, and rows share nothing but platform, release
+      line, country prefix and start day).
+    </p>
+    <p class="prose">
+      Two residual risks are handled by policy, not schema. In a small
+      population (a new release line on its first day, a small country) the
+      shared tuple can be a group of one; suppression hides it on the dashboard,
+      and the rule is to never add dimensions. Timing joins with backend rows
+      that carry exact timestamps are broken by delayed initial and club
+      uploads, day granularity and the absence of write timestamps; Postgres
+      <code>xmin</code>, <code>pk</code> order and access logs remain as weak
+      side channels, which is why the ingress requirement is mandatory. Clubs
+      are tiny, so club definitions carry no country, round to week and are
+      always delayed. Long-lived journeys are the most linkable objects because
+      an id lives 30 days: they carry booleans and enums only, one journey per
+      milestone, never chained. The endpoint is unauthenticated, so junk writes
+      are possible; schema validation, caps, the body limit, rate limiting and
+      dashboard suppression bound the damage to noise.
+    </p>
+
+    <h3>Decisions taken</h3>
+    <ul class="decisions">
+      <li>
+        <b>Core action</b> = successful offer creation or successful messaging
+        request. Re-requests and note-origin requests are excluded.
+      </li>
+      <li>
+        <b>Creation class</b>: <code>main</code> when no clubs were selected,
+        <code>both</code> when clubs were selected. No club-only class exists.
+      </li>
+      <li>
+        <b>Request class</b>: <code>club</code> when the offer reached the
+        device only through a club, <code>main</code> otherwise. Classification
+        comes from the offer, never from the screen, so no route param for the
+        UI surface is added.
+      </li>
+      <li>
+        <b>Country</b> is stored on journeys and aggregations alike (except club
+        definitions); the dashboard suppresses small groups.
+      </li>
+      <li>
+        <b>Daily active users</b> come from the backend refresh metric only.
+        Client activity records are weekly and monthly flags with no per-day
+        bits.
+      </li>
+      <li>
+        <b>"Before churn" snapshots</b> are rejected: a per-device record
+        overwritten on every start is a standing device profile.
+      </li>
+      <li>
+        <b>Initial journey uploads and all club uploads are delayed</b> to the
+        next app start so they cannot be timed against backend rows.
+      </li>
+      <li>
+        <b>Long-lived journeys</b> (30 days) carry booleans and enums only, one
+        journey per milestone, never chained. D90 retention is not built.
+      </li>
+      <li>
+        <b>Missing data is "unknown", never churn.</b> MMKV is wiped on logout
+        and data loss happens; a reinstall or re-login is a new instance.
+      </li>
+      <li>
+        <b>Onboarding is a 7-day journey</b> ending at
+        <code>onboardingFinished</code>. Activation, activation latency and
+        D1/D7/D30 live on <code>registrationCohort</code>, a 31-day journey from
+        registration.
+      </li>
+      <li>
+        <b>Reactivation</b> is a 7-day write-once
+        <code>reactivationEpisode</code> journey carrying the gap bucket, first
+        action type and club membership. Time to the next dormancy is computed
+        from local markers at the next episode.
+      </li>
+      <li>
+        <b>Owner-side and requester-side outcomes</b> use local 7-day window
+        records per owned offer and per sent request, rolled into weekly
+        counters. Nothing per offer or per request reaches the server.
+      </li>
+      <li>
+        <b>Exposure journeys</b> enrol only campaign-like notifications
+        (product, inactivity, new offers, marketplace ready, new contacts, club
+        admission, new content). Chat notifications are counted in weekly
+        counters only.
+      </li>
+      <li><b>Minimum suppression group</b> is 20 reporting instances.</li>
+      <li>
+        <b>Backend DAU and WAU</b>: extend the existing active-users job in
+        contact-service with 1-day and 7-day rolling windows, labelled rolling.
+      </li>
+      <li>
+        <b>Club join totals</b> are read from the contact-service
+        <code>member_count_changes</code> table, which already counts both join
+        paths.
+      </li>
+      <li>
+        <b>Notifications sent by type</b>: add <code>notificationType</code> to
+        <code>NOTIFICATION_SENT</code>; no Expo ticket handling.
+      </li>
+      <li>
+        <b>Also from system.md</b>: buckets are UTC;
+        <code>revision</code> resolves retry ordering with no server timestamp;
+        rejected payloads are dropped, not dead-lettered; opt-out defaults to
+        enabled and wipes local state; first-release scope is decided later, not
+        by the CSV priority column.
+      </li>
+    </ul>
+  </section>
+
+  <section class="part" id="definitions">
+    <p class="eyebrow">Part 3</p>
+    <h2>Definitions</h2>
+    <p class="lead">
+      The shared journey and aggregation definitions every metric references, as
+      registered in <code>registry.ts</code>.
+    </p>
+
+    <h3>Journeys</h3>
+    <div class="tbl">
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Starts at</th>
+            <th>Lifetime</th>
+            <th>Country</th>
+            <th>Serves</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>onboarding</code></td>
+            <td>First app open while logged out</td>
+            <td class="num">
+              7 days, terminal <code>onboardingFinished</code>
+            </td>
+            <td>yes</td>
+            <td>
+              Onboarding completion and churn, time from download to
+              registration, drop-off by step
+            </td>
+          </tr>
+          <tr>
+            <td><code>registrationCohort</code></td>
+            <td>Registration success</td>
+            <td class="num">31 days, no terminal step</td>
+            <td>yes</td>
+            <td>
+              Registrations denominator, time to activation, first core action,
+              D1/D7/D30, registration to activation drop-off, time from
+              registration to churn
+            </td>
+          </tr>
+          <tr>
+            <td><code>activationCohort</code></td>
+            <td>First core action</td>
+            <td class="num">31 days, no terminal step</td>
+            <td>yes</td>
+            <td>
+              Retention after activation, repeat marketplace usage, repeat offer
+              creation, activation and marketplace return drop-offs
+            </td>
+          </tr>
+          <tr>
+            <td><code>initiationCohort</code></td>
+            <td>First successful messaging request</td>
+            <td class="num">31 days, no terminal step</td>
+            <td>yes</td>
+            <td>
+              Retention after opening a chat, repeat chat usage, chat to return
+              drop-off
+            </td>
+          </tr>
+          <tr>
+            <td><code>clubJoinCohort</code></td>
+            <td>First club join ever</td>
+            <td class="num">31 days, no terminal step</td>
+            <td>no</td>
+            <td>
+              Returning to a club, club to import and to main-marketplace
+              conversions, club offer creation and reaction rates, retention
+              after joining a club
+            </td>
+          </tr>
+          <tr>
+            <td><code>reactivationEpisode</code></td>
+            <td>
+              A core action at least 30 days after <code>lastCoreActionAt</code>
+            </td>
+            <td class="num">7 days, written once</td>
+            <td>yes</td>
+            <td>
+              Dormant to returning, time dormant to reactivation, actions after
+              reactivation, club user reactivation, time to next dormancy
+            </td>
+          </tr>
+          <tr>
+            <td><code>exposure</code></td>
+            <td>
+              Receipt of a campaign-like notification, or a prompt rendered
+            </td>
+            <td class="num">7 days, terminal at lifetime</td>
+            <td>yes</td>
+            <td>
+              All notification-to-outcome and pop-up-to-outcome metrics,
+              performance by notification type, conversion rate by pop-up
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Aggregations</h3>
+    <div class="tbl">
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Bucket</th>
+            <th>Country</th>
+            <th>Counters and fields</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>weeklyActivity</code></td>
+            <td>week</td>
+            <td>yes</td>
+            <td>
+              booleans <code>engaged</code>, <code>coreActive</code>; cap-20
+              counters <code>offersCreatedMain</code>,
+              <code>offersCreatedBoth</code>, <code>requestsSentMain</code>,
+              <code>requestsSentClub</code>, <code>rerequests</code>, the import
+              start and outcome counters, the gap counters
+              <code>gapD0To6</code> to <code>gapGt90</code>
+            </td>
+          </tr>
+          <tr>
+            <td><code>monthlyActivity</code></td>
+            <td>month</td>
+            <td>yes</td>
+            <td>
+              booleans <code>engaged</code>, <code>coreActive</code>,
+              <code>coreMain</code>, <code>coreClub</code>;
+              <code>initiations</code> (CountBucket)
+            </td>
+          </tr>
+          <tr>
+            <td><code>marketplaceWeekly</code></td>
+            <td>week</td>
+            <td>yes</td>
+            <td>
+              cap-50 <code>marketplaceOpened</code>,
+              <code>clubOffersOpened</code>; <code>firstLoadResult</code>,
+              <code>visibleOffers</code>, <code>filteredEmptySeen</code>; offer
+              demand roll-ups by creation week (cap 20):
+              <code>offersEnrolled</code>, <code>offersRequests0</code> to
+              <code>offersRequests6Plus</code>, deleted, paused, not observed,
+              and the first-request latency counters
+            </td>
+          </tr>
+          <tr>
+            <td><code>chatOutcomesWeekly</code></td>
+            <td>week</td>
+            <td>yes</td>
+            <td>
+              cap-50 <code>composerOpened</code>; request roll-ups by request
+              week (cap 20): enrolled, accepted, rejected, human reply,
+              cancelled by me, no answer, unknown, plus latency counters for
+              accept, reject and reply; snapshots <code>openChats</code>,
+              <code>inactiveChats30d</code>; feedback latency counters
+            </td>
+          </tr>
+          <tr>
+            <td><code>clubActivityMonthly</code></td>
+            <td>month</td>
+            <td>no</td>
+            <td>
+              booleans <code>isClubMember</code>, <code>firstClubJoin</code>;
+              cap-10 <code>clubJoins</code>; buckets <code>membership</code>,
+              <code>clubsActedIn</code>, <code>clubOfferCreations</code>,
+              <code>clubRequests</code>
+            </td>
+          </tr>
+          <tr>
+            <td><code>notificationsWeekly</code></td>
+            <td>week</td>
+            <td>yes</td>
+            <td>
+              cap-50 <code>received&lt;Type&gt;</code> and
+              <code>tapped&lt;Type&gt;</code> per notification type,
+              <code>displayed</code>; permission transition booleans and
+              per-preference opt-in / opt-out booleans
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="prose">
+      Shared enums: <code>DurationBucket</code> (lt1m, 1mTo10m, 10mTo1h, 1hTo1d,
+      gt1d), <code>DaysBucket</code> (d0, d1, d2To7, d8To30, gt30),
+      <code>CountBucket</code> (0, 1, 2To5, 6To10, gt10),
+      <code>LatencyBucket</code> (lt1h, 1hTo24h, 1dTo3d, 3dTo7d),
+      <code>GapBucket</code> (d0To6, d7To29, d30To59, d60To89, gt90),
+      <code>VisibleOffersBucket</code> (0, 1To5, 6To20, 21To50, gt50),
+      <code>MembershipBucket</code> (0, 1, 2To3, 4Plus). Three weekly records
+      instead of one keep each under the 64-key cap and let a device that never
+      opened the marketplace simply have no <code>marketplaceWeekly</code> row
+      that week.
+    </p>
+  </section>
+
+  <section class="part" id="metrics">
+    <p class="eyebrow">Part 4</p>
+    <h2>Metrics</h2>
+    <p class="lead">
+      All 152 entries from the twelve category files, in the order of the
+      original wishlist. Each row keeps the file's verdict; merged rows only
+      point at their canonical metric.
+    </p>
+
+    <form class="filters" id="filters" onsubmit="return false;">
+      <label
+        ><input type="checkbox" id="f-planned" checked />
+        <span class="pill planned">planned</span></label
+      >
+      <label
+        ><input type="checkbox" id="f-deferred" checked />
+        <span class="pill deferred">deferred</span></label
+      >
+      <label
+        ><input type="checkbox" id="f-rejected" checked />
+        <span class="pill rejected">rejected</span></label
+      >
+      <label
+        ><input type="checkbox" id="f-merged" checked />
+        <span class="pill merged">merged</span></label
+      >
+      <label
+        ><input type="checkbox" id="f-external" checked />
+        <span class="pill external">external</span></label
+      >
+      <input
+        type="search"
+        id="f-search"
+        placeholder="Search metric names"
+        aria-label="Search metric names"
+      />
+      <span class="count" id="f-count">152 of 152 shown</span>
+    </form>
+
+    <details class="cat" id="cat-acquisition">
+      <summary>
+        <h3>Acquisition</h3>
+        <span class="counts"
+          ><span><span class="n">10</span> metrics</span
+          ><span><span class="n">4</span> planned</span
+          ><span><span class="n">3</span> deferred</span
+          ><span><span class="n">2</span> merged</span
+          ><span><span class="n">1</span> external</span></span
+        >
+      </summary>
+      <div class="cat-body">
+        <p class="cat-summary">
+          Two journeys cover the category: <code>onboarding</code> (first open
+          to <code>onboardingFinished</code>, 7 days) gives the setup funnel and
+          its drop-off, <code>registrationCohort</code> (registration to day 31)
+          gives activation, its latency and the D1/D7/D30 bits. Registrations by
+          country are backend. Acquisition source is deferred behind Q9 because
+          no source concept exists; app downloads are store-console data.
+        </p>
+        <ul class="metrics">
+          <li class="m" data-status="external">
+            <div class="m-head">
+              <h4>App downloads</h4>
+              <span class="pill external">external</span>
+            </div>
+            <p class="m-type">not collected by the app</p>
+            <p class="m-def">
+              App Store Connect and Google Play Console first-acquisition
+              reports, by week and by the region the store exposes. The nearest
+              in-app proxy is first opens (<code>onboarding</code> journeys
+              started). Never join store data to app data.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Registrations</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              backend <b>USER_LOGGED_IN</b>; journey
+              <b>registrationCohort</b> as denominator
+            </p>
+            <p class="m-def">
+              Registration = successful phone verification plus account
+              creation, not phone submission.
+              <code>numberExists = true</code> is a re-login from a new device
+              and is shown separately. No city.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> <code>reportUserLoggedIn</code> in contact-service
+              <code>metrics.ts</code>, client success in
+              <code>handleUserCreationActionAtom</code>. <b>Privacy:</b> the
+              backend row already carries country plus an exact timestamp; the
+              journey's initial upload is delayed to the next start so it cannot
+              be timed against it.
+            </p>
+          </li>
+          <li class="m" data-status="deferred">
+            <div class="m-head">
+              <h4>Registrations by acquisition source</h4>
+              <span class="pill deferred">deferred</span>
+            </div>
+            <p class="m-type">open Q9</p>
+            <p class="m-def">
+              No campaign, referral, UTM or install-referrer concept exists;
+              deep links carry no source and are handled only after login. Would
+              become a <code>source</code> enum on the
+              <code>onboarding</code> journey.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Onboarding completion and onboarding churn</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              journey <b>onboarding</b> (7 days, terminal
+              <code>onboardingFinished</code>)
+            </p>
+            <p class="m-def">
+              Enrol at first open, replace the state at each completed milestone
+              (<code>opened</code>, <code>intro</code>,
+              <code>phoneSubmitted</code>, <code>codeVerified</code>,
+              <code>registered</code>, <code>contactsImport</code>,
+              <code>notifications</code>, <code>onboardingFinished</code>) with
+              the import outcome, notification outcome and
+              <code>openToRegistration</code> bucket. After maturity the
+              dashboard shows the share that never advanced past each step. An
+              import skip is not a failure; a record that stops updating is "not
+              observed", never confirmed abandonment.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> login screens in <code>LoginFlow/</code>,
+              <code>initPhoneVerificationAtom</code>,
+              <code>verifyPhoneNumberAtom</code>,
+              <code>handleUserCreationActionAtom</code>; post-login steps in
+              <code>postLoginOnboarding.ts</code>,
+              <code>ContactsImportScreen.tsx</code>,
+              <code>NotificationSetupScreen.tsx</code>.
+              <b>Privacy:</b> durations only as <code>DurationBucket</code>;
+              instances registered before the release are not back-filled.
+            </p>
+          </li>
+          <li class="m" data-status="deferred">
+            <div class="m-head">
+              <h4>Activation by acquisition source</h4>
+              <span class="pill deferred">deferred</span>
+            </div>
+            <p class="m-type">open Q9</p>
+            <p class="m-def">
+              Activation exists (Time from registration to activation); source
+              does not. Would become the <code>source</code> slice of
+              <code>registrationCohort</code>.
+            </p>
+          </li>
+          <li class="m" data-status="deferred">
+            <div class="m-head">
+              <h4>Number of new users from events</h4>
+              <span class="pill deferred">deferred</span>
+            </div>
+            <p class="m-type">open Q9</p>
+            <p class="m-def">
+              No event code in the login flow; the <code>join-club</code> deep
+              link is processed after onboarding and a club is not an event.
+              Interim proxy without new input:
+              <code>clubJoinCohort</code> started within the registration week.
+            </p>
+          </li>
+          <li class="m merged" data-status="merged">
+            <div class="m-head">
+              <h4>Activation of users from events</h4>
+              <span class="pill merged">merged</span>
+            </div>
+            <p class="m-def">
+              Merged into <b>Activation by acquisition source</b>.
+            </p>
+          </li>
+          <li class="m merged" data-status="merged">
+            <div class="m-head">
+              <h4>Activation of users from Clubs</h4>
+              <span class="pill merged">merged</span>
+            </div>
+            <p class="m-def">
+              Merged into <b>Club to main marketplace activation rate</b>.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Time from download to registration</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              journey <b>onboarding</b>, field
+              <code>openToRegistration</code> (DurationBucket)
+            </p>
+            <p class="m-def">
+              Replaced by first app open to successful registration, over
+              observed registrants only. Nothing is implied about
+              download-to-open. A reinstall between first open and registration
+              restarts the clock; an app update does not.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> <code>firstOpenAt</code> and
+              <code>registeredAt</code> markers, bucketed on device.
+              <b>Privacy:</b> bucket only.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Time from registration to activation</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              journey <b>registrationCohort</b> (31 days, week precision)
+            </p>
+            <p class="m-def">
+              Enrol at registration. The first core action writes
+              <code>activatedBy</code>, <code>activationClass</code> and the
+              <code>registrationToActivation</code> bucket once;
+              <code>d0</code>, <code>d1</code>, <code>d2To7</code> give the
+              7-day rate and <code>d8To30</code> the 30-day rate. Records
+              without an activation field at maturity are the "no observed
+              activation" share. Latency describes activators only.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> enrolment in
+              <code>handleUserCreationActionAtom</code>;
+              <code>activatedAt</code> marker written once at
+              <code>createOfferActionAtom</code> or
+              <code>sendRequestActionAtom</code> success;
+              <code>postedFirstOfferAtom</code> and
+              <code>idsOfRequestedOffersAtom</code> are not reused.
+              <b>Privacy:</b> enums and booleans only; long-lived journey rules
+              apply.
+            </p>
+          </li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="cat" id="cat-activation">
+      <summary>
+        <h3>Activation</h3>
+        <span class="counts"
+          ><span><span class="n">13</span> metrics</span
+          ><span><span class="n">8</span> planned</span
+          ><span><span class="n">1</span> deferred</span
+          ><span><span class="n">4</span> merged</span></span
+        >
+      </summary>
+      <div class="cat-body">
+        <p class="cat-summary">
+          The journeys live in Acquisition; this file owns the per-bucket
+          counters most other files read: contact import on
+          <code>weeklyActivity</code>, marketplace first load on
+          <code>marketplaceWeekly</code>, and the core-action counters. "Offers
+          created" and "Offers reacted to" are mixed: backend totals plus client
+          counters for the creation and request class the server cannot see.
+          Code caveat: <code>loadingStateAtom</code> ends in
+          <code>success</code> even after a failed refresh, so successful load
+          is read from the fetch result inside
+          <code>refreshOffersActionAtom</code>.
+        </p>
+        <ul class="metrics">
+          <li class="m merged" data-status="merged">
+            <div class="m-head">
+              <h4>Onboarding completion rate</h4>
+              <span class="pill merged">merged</span>
+            </div>
+            <p class="m-def">
+              Merged into <b>Onboarding completion and onboarding churn</b>.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Contact import started</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              aggregation <b>weeklyActivity</b>, counters
+              <code>importStartedOnboarding</code>,
+              <code>importStartedSettings</code>,
+              <code>importStartedReimport</code> (cap 20)
+            </p>
+            <p class="m-def">
+              One increment per user-initiated import attempt. Instances with at
+              least one start = rows with a counter above zero. Permission
+              denial is an outcome of "Contact import completed", not a separate
+              start.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> <code>submitContactsActionAtom</code> is the single
+              entry point; callers are <code>ContactsImportScreen.tsx</code>,
+              the contact picker atom and the reach-drop re-import.
+              <b>Privacy:</b> never report contact counts or reach next to these
+              counters.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Contact import completed</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              aggregation <b>weeklyActivity</b>, counters
+              <code>importSuccess</code>, <code>importNothingNew</code>,
+              <code>importZeroContacts</code>,
+              <code>importPermissionDenied</code>, <code>importQuota</code>,
+              <code>importError</code> (cap 20)
+            </p>
+            <p class="m-def">
+              One increment per attempt outcome, on the same row as the starts
+              so completion among starters is computable per row.
+              <code>importNothingNew</code> is a success with nothing new to
+              import; <code>importZeroContacts</code> is no contacts selected.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> the <code>Effect.match</code> at the end of
+              <code>submitContactsActionAtom</code>; quota errors split out of
+              <code>otherError</code>. <b>Privacy:</b> outcome counters only.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Marketplace opened</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              aggregation <b>marketplaceWeekly</b>, counters
+              <code>marketplaceOpened</code>, <code>clubOffersOpened</code> (cap
+              50)
+            </p>
+            <p class="m-def">
+              The main marketplace becoming visible in the foreground, once per
+              foreground session (a tab switch and back is one open). Background
+              refreshes do not count; club browsing is its own counter. The
+              marketplace is the initial tab, so most app opens count.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> <code>useFocusEffect</code> in
+              <code>AllOffersActiveEffects</code>
+              (<code>MarketplaceScreenContent.tsx</code>),
+              <code>ClubOffersScreen</code>; deduped with an in-memory flag
+              reset on background. <b>Privacy:</b> never add the active filter,
+              tab or section.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Users who see at least one offer</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              aggregation <b>marketplaceWeekly</b>, field
+              <code>firstLoadResult</code> (offers, empty, notLoaded), boolean
+              <code>filteredEmptySeen</code>
+            </p>
+            <p class="m-def">
+              At the first successful unfiltered marketplace load in the week
+              record whether at least one eligible offer is visible; never
+              overwritten within the week. <code>notLoaded</code> excludes the
+              row from the denominator. Filtered emptiness is the separate
+              boolean.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> success path of <code>refreshOffersActionAtom</code>,
+              visibility from
+              <code>areThereOffersToSeeInMarketplaceWithoutFiltersAtom</code>;
+              only loads from the marketplace screen count. <b>Privacy:</b> an
+              empty marketplace plus a small country plus a week is a small
+              group; suppression handles it.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Users who see no offers</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              aggregation <b>marketplaceWeekly</b>, the <code>empty</code> value
+              of <code>firstLoadResult</code>
+            </p>
+            <p class="m-def">
+              The complementary outcome from the same first-successful-load
+              population, so the two metrics are mutually exclusive. API errors
+              and user filters are not "no offers"; pending decryption is not a
+              state because the atom merges decrypted offers before it resolves.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> as "Users who see at least one offer"; the
+              marketplace-ready notification transition is not reused.
+            </p>
+          </li>
+          <li class="m" data-status="deferred">
+            <div class="m-head">
+              <h4>Offers viewed</h4>
+              <span class="pill deferred">deferred</span>
+            </div>
+            <p class="m-type">
+              CSV decision: defer until a UX question needs it
+            </p>
+            <p class="m-def">
+              Would be a capped <code>offerDetailOpened</code> counter on
+              <code>marketplaceWeekly</code> from the
+              <code>OfferDetailScreen</code> mount hook, which is built anyway
+              for the <code>engaged</code> flag.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Offers created</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              mixed: backend <b>OFFER_CREATED</b>; aggregation
+              <b>weeklyActivity</b>, counters <code>offersCreatedMain</code>,
+              <code>offersCreatedBoth</code> (cap 20)
+            </p>
+            <p class="m-def">
+              One increment per successful creation, class
+              <code>main</code> when no clubs were selected and
+              <code>both</code> when clubs were. Frontend and backend counts are
+              never summed. Publishing an existing offer to a newly joined club
+              is an update, not a creation.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> <code>createOfferActionAtom</code> resolving, class
+              from <code>creationClass(intendedClubs)</code>;
+              <code>publishSelectedOffersToJoinedClubActionAtom</code> excluded;
+              backend <code>reportOfferCreated</code> in offer-service.
+              <b>Privacy:</b> no offer type, currency, amount, location or club
+              ids on the client counters.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Offers reacted to</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              mixed: backend <b>REQUEST_SENT</b>; aggregation
+              <b>weeklyActivity</b> counters <code>requestsSentMain</code>,
+              <code>requestsSentClub</code>, <code>rerequests</code>;
+              <b>chatOutcomesWeekly</b> counter <code>composerOpened</code>
+            </p>
+            <p class="m-def">
+              Reaction = a successfully sent initial messaging request, class
+              <code>club</code> when the offer reached the device only through a
+              club, <code>main</code> otherwise. Re-requests into an existing
+              chat are <code>rerequests</code>; note requests are excluded.
+              Canonical for requests, chats initiated, composer opens and club
+              reactions.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> <code>sendRequestActionAtom</code> resolving, new
+              chat vs re-request from
+              <code>upsertChatForTheirOfferActionAtom</code>; composer open =
+              <code>SendMessageScreen</code> mount with
+              <code>mode === 'request'</code>. <b>Privacy:</b> never include
+              offer id, inbox keys, common friends or club uuids.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>First meaningful core marketplace action</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              journey <b>registrationCohort</b>, fields
+              <code>activatedBy</code>, <code>activationClass</code>
+            </p>
+            <p class="m-def">
+              Activation = the first successful core action (offer creation or
+              messaging request). Browsing, opening an existing chat and contact
+              import do not activate. The class is reported and the dashboard
+              decides whether a club request or a <code>both</code> creation
+              counts as main-marketplace activation.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> the two core-action success points, guarded by the
+              <code>activatedAt</code> marker. <b>Privacy:</b> two enums,
+              nothing about the offer or chat.
+            </p>
+          </li>
+          <li class="m merged" data-status="merged">
+            <div class="m-head">
+              <h4>Activation rate by event by channel or source</h4>
+              <span class="pill merged">merged</span>
+            </div>
+            <p class="m-def">
+              Merged into <b>Time from registration to activation</b>.
+            </p>
+          </li>
+          <li class="m merged" data-status="merged">
+            <div class="m-head">
+              <h4>
+                Time from registration to first meaningful marketplace action
+              </h4>
+              <span class="pill merged">merged</span>
+            </div>
+            <p class="m-def">
+              Merged into <b>Time from registration to activation</b>.
+            </p>
+          </li>
+          <li class="m merged" data-status="merged">
+            <div class="m-head">
+              <h4>Percentage of registrations that reach activation</h4>
+              <span class="pill merged">merged</span>
+            </div>
+            <p class="m-def">
+              Merged into <b>Time from registration to activation</b>.
+            </p>
+          </li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="cat" id="cat-active-users">
+      <summary>
+        <h3>Active users</h3>
+        <span class="counts"
+          ><span><span class="n">5</span> metrics</span
+          ><span><span class="n">4</span> planned</span
+          ><span><span class="n">1</span> deferred</span></span
+        >
+      </summary>
+      <div class="cat-body">
+        <p class="cat-summary">
+          Daily active users are backend only. Weekly and monthly "engaged" and
+          "core active" come from <code>weeklyActivity</code> and
+          <code>monthlyActivity</code>. <code>engaged</code> = at least one
+          foreground marketplace load, offer detail open, chat open or core
+          action in the bucket; <code>coreActive</code> = at least one core
+          action. Reporting on the next app start means a device active in week
+          N reports week N only if it comes back within the settle period; the
+          background flush shrinks that gap.
+        </p>
+        <ul class="metrics">
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Daily active users</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              backend <b>COUNT_OF_ACTIVE_USERS</b> with a 1-day window
+            </p>
+            <p class="m-def">
+              Users whose <code>refreshed_at</code> falls in the window, that is
+              "opened the app while logged in". No daily engaged series is
+              built.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> <code>refreshUser</code> on every cold start and
+              foreground; the job in contact-service <code>metrics.ts</code>.
+              <b>Privacy:</b> none new; the gauge has no per-user data.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Weekly active users</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              mixed: backend 7-day rolling window; aggregation
+              <b>weeklyActivity</b>, booleans <code>engaged</code>,
+              <code>coreActive</code>
+            </p>
+            <p class="m-def">
+              Engaged instances per UTC calendar week, one row per reporting
+              instance per week. Calendar weeks replace rolling WAU on purpose;
+              daily counts cannot be summed into unique weekly counts.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> the summary signal sites set <code>engaged</code>,
+              the core-action sites set <code>coreActive</code>.
+              <b>Privacy:</b> no per-day bits; the counters add pattern bits,
+              which is why they are capped and small groups are suppressed.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Monthly active users</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              mixed: backend rolling 30-day <b>COUNT_OF_ACTIVE_USERS</b>;
+              aggregation <b>monthlyActivity</b>, booleans <code>engaged</code>,
+              <code>coreActive</code>, <code>coreMain</code>,
+              <code>coreClub</code>, <code>initiations</code>
+            </p>
+            <p class="m-def">
+              Engaged instances per calendar month. Weekly rows cannot be
+              deduplicated into a month because their ids are independent, hence
+              the separate record. A month completes late: devices not active at
+              month end upload at their next start.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> same signal sites, second record.
+              <b>Privacy:</b> booleans and one bucket; the least pattern-bearing
+              record in the system.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>
+                Daily weekly and monthly active users performing core
+                marketplace actions
+              </h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              aggregation <b>weeklyActivity</b> <code>coreActive</code> plus
+              class counters; <b>monthlyActivity</b> <code>coreActive</code>,
+              <code>coreMain</code>, <code>coreClub</code>
+            </p>
+            <p class="m-def">
+              Core action = successful offer creation or messaging request.
+              "Main" = creation class <code>main</code> or request class
+              <code>main</code>; "club" = creation class <code>both</code> or
+              request class <code>club</code>. Club join is not a core action.
+              No daily series.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> <code>createOfferActionAtom</code> and
+              <code>sendRequestActionAtom</code> success;
+              <code>accountStatsAtom.postedOffers</code> is the existing pattern
+              for a persisted counter there. <b>Privacy:</b> no per-task-per-day
+              bits; that combination was the fingerprint risk.
+            </p>
+          </li>
+          <li class="m" data-status="deferred">
+            <div class="m-head">
+              <h4>Ratio of weekly active users to monthly active users</h4>
+              <span class="pill deferred">deferred</span>
+            </div>
+            <p class="m-type">CSV decision: defer</p>
+            <p class="m-def">
+              Nothing is collected; if revived it is a dashboard quotient of the
+              weekly and monthly records for weeks fully inside the month,
+              labelled a calendar-period comparison.
+            </p>
+          </li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="cat" id="cat-marketplace">
+      <summary>
+        <h3>Marketplace and liquidity</h3>
+        <span class="counts"
+          ><span><span class="n">15</span> metrics</span
+          ><span><span class="n">10</span> planned</span
+          ><span><span class="n">1</span> deferred</span
+          ><span><span class="n">4</span> merged</span></span
+        >
+      </summary>
+      <div class="cat-body">
+        <p class="cat-summary">
+          Supply (active offers, by country, by type) is backend: the hourly
+          offer-service gauges see <code>country_prefix</code>,
+          <code>offer_type</code> and <code>refreshed_at</code> only. Owner-side
+          demand is one local window record per owned offer, evaluated after 7
+          days and rolled into <code>marketplaceWeekly</code> keyed by the
+          creation week; requester-side outcomes are the same mechanism per sent
+          request, rolled into <code>chatOutcomesWeekly</code>. Nothing per
+          offer or per request reaches the server. Chats from notes are filtered
+          out of every request metric.
+        </p>
+        <ul class="metrics">
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Active offers</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              backend <b>TOTAL_BUY_OFFERS</b>, <b>TOTAL_SELL_OFFERS</b>,
+              <b>TOTAL_OFFERS_ACROSS_ALL</b> (hourly gauges)
+            </p>
+            <p class="m-def">
+              Offers refreshed within 30 days and below the report threshold.
+              The server cannot see deactivation or the user-set expiration, so
+              "eligible" means exactly that. No main / club / both split exists
+              server-side.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> <code>queryOffersStats</code> in offer-service
+              ignores the report filter today; adding it is the one backend
+              change. <b>Privacy:</b> country by type is already reported; no
+              finer cross-tabs.
+            </p>
+          </li>
+          <li class="m merged" data-status="merged">
+            <div class="m-head">
+              <h4>Offers created during one day one week or one month</h4>
+              <span class="pill merged">merged</span>
+            </div>
+            <p class="m-def">Merged into <b>Offers created</b>.</p>
+          </li>
+          <li class="m merged" data-status="merged">
+            <div class="m-head">
+              <h4>Offers viewed or opened</h4>
+              <span class="pill merged">merged</span>
+            </div>
+            <p class="m-def">Merged into <b>Offers viewed</b>.</p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Offers by country</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              backend offer gauges by <code>countryPrefix</code>, weekly
+            </p>
+            <p class="m-def">
+              Eligible offers by the author's phone country, labelled as such:
+              an offer located in Vienna created by a +420 number counts as CZ.
+              Minimum group sizes apply.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> country set at creation from
+              <code>getCountryPrefix(session.phoneNumber)</code>.
+              <b>Privacy:</b> suppress small countries; no cross with club or
+              time of day.
+            </p>
+          </li>
+          <li class="m" data-status="deferred">
+            <div class="m-head">
+              <h4>Offers by city</h4>
+              <span class="pill deferred">deferred</span>
+            </div>
+            <p class="m-type">CSV decision: defer</p>
+            <p class="m-def">
+              Location is inside the encrypted public part; any city report
+              would need plaintext location on the server or a device-side geo
+              bucket, both outside this system.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Offers by type</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              backend <b>TOTAL_BUY_OFFERS_ACROSS_ALL</b> /
+              <b>TOTAL_SELL_OFFERS_ACROSS_ALL</b>
+            </p>
+            <p class="m-def">
+              Eligible offers split BUY / SELL under the "Active offers" rules.
+              Listing type (BTC, product, service) is encrypted and not
+              reported.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> offer-service <code>metrics.ts</code>.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Number of offers receiving a request</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              aggregation <b>marketplaceWeekly</b> keyed by creation week,
+              counters <code>offersEnrolled</code>,
+              <code>offersRequests0</code>, <code>offersRequests1</code>,
+              <code>offersRequests2To5</code>, <code>offersRequests6Plus</code>,
+              <code>offersDeletedBefore7d</code>,
+              <code>offersPausedBefore7d</code>,
+              <code>offersNotObserved</code> (cap 20)
+            </p>
+            <p class="m-def">
+              Enrol every created offer locally, never sent. At the first app
+              start after day 7 the record is evaluated once into exactly one
+              outcome counter and deleted: a request bucket when the inbox was
+              pulled after the window, <code>notObserved</code> when it was not,
+              deleted or paused when the owner removed it first. Enrolled minus
+              outcomes is the "owner never came back" share.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> enrol at <code>createOfferActionAtom</code>; request
+              observed when
+              <code>createNewChatsFromFirstMessagesActionAtom</code> creates a
+              <code>myOffer</code> chat; inbox pull in
+              <code>fetchAndStoreMessagesForInboxAtom</code>; deletion and pause
+              atoms. <b>Privacy:</b> counters only; cohorts are weekly.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Number of offers receiving no request</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              aggregation <b>marketplaceWeekly</b>, the zero, paused, deleted
+              and not-observed counters above
+            </p>
+            <p class="m-def">
+              An observed zero requires an inbox pull after the window;
+              otherwise the offer is not observed. Paused and deleted offers are
+              separated because they cannot receive requests.
+            </p>
+          </li>
+          <li class="m merged" data-status="merged">
+            <div class="m-head">
+              <h4>Number of requests</h4>
+              <span class="pill merged">merged</span>
+            </div>
+            <p class="m-def">Merged into <b>Offers reacted to</b>.</p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Number of requests receiving a response</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              aggregation <b>chatOutcomesWeekly</b> keyed by request week,
+              counters <code>requestsEnrolled</code>,
+              <code>requestsAccepted</code>, <code>requestsRejected</code>,
+              <code>requestsHumanReply</code>,
+              <code>requestsCancelledByMe</code>, <code>requestsNoAnswer</code>,
+              <code>requestsUnknown</code> (cap 20)
+            </p>
+            <p class="m-def">
+              Enrol every sent initial request locally (server accept time,
+              answer, cancelled, last inbox pull), never sent. Within 7 days
+              classify the first explicit answer as accepted, rejected or first
+              human reply; evaluated once at the first start after day 7 and
+              deleted. Counted on the requester device only.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> answers arrive through
+              <code>addMessagesToChats</code> as <code>APPROVE_MESSAGING</code>,
+              <code>DISAPPROVE_MESSAGING</code> or <code>MESSAGE</code>;
+              <code>CANCEL_REQUEST_MESSAGING</code> is cancelled by me.
+              <b>Privacy:</b> the local record lives with the chat and is purged
+              with it.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Number of requests receiving no response</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              aggregation <b>chatOutcomesWeekly</b>, counters
+              <code>requestsNoAnswer</code>, <code>requestsUnknown</code>
+            </p>
+            <p class="m-def">
+              <code>noAnswer</code> only when the device pulled the request
+              inbox after day 7 with no answer; otherwise <code>unknown</code>.
+              Cancellation and local deletion are their own outcomes, not
+              silence.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Average number of offers visible to users</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              aggregation <b>marketplaceWeekly</b>, field
+              <code>visibleOffers</code> (VisibleOffersBucket)
+            </p>
+            <p class="m-def">
+              The count of eligible unfiltered offers at the first successful
+              load in the week, as a bucket. <code>0</code> is the zero bucket
+              of "Users who see no offers". This section defines the whole
+              <code>marketplaceWeekly</code> record.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b>
+              <code>offersToSeeInMarketplaceAtom.length</code> inside the
+              success path of <code>refreshOffersActionAtom</code>.
+              <b>Privacy:</b> bucket only, never the exact count.
+            </p>
+          </li>
+          <li class="m merged" data-status="merged">
+            <div class="m-head">
+              <h4>Number of users who see no offers</h4>
+              <span class="pill merged">merged</span>
+            </div>
+            <p class="m-def">Merged into <b>Users who see no offers</b>.</p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Time from offer creation to first request</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              aggregation <b>marketplaceWeekly</b>, counters
+              <code>firstRequestLt1h</code>, <code>firstRequest1hTo24h</code>,
+              <code>firstRequest1dTo3d</code>,
+              <code>firstRequest3dTo7d</code> (cap 20)
+            </p>
+            <p class="m-def">
+              Creation to the first request's server accept time, so it is send
+              latency, not observation latency. Denominator = offers with an
+              observed request.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> creation time from the local record; first request
+              time = <code>receivedByServerAt</code> on the received
+              <code>REQUEST_MESSAGING</code>. <b>Privacy:</b> bucket counters
+              only.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Time from request to response</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              aggregation <b>chatOutcomesWeekly</b>, one LatencyBucket counter
+              set each for accept, reject and human reply (12 counters, cap 20)
+            </p>
+            <p class="m-def">
+              Request send time to the first explicit answer of each kind, both
+              from server accept times, so offline delivery does not distort it.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> <code>sentMessage.receivedByServerAt</code> from
+              <code>sendMessagingRequest</code>; answer time from the request
+              record. <b>Privacy:</b> bucket counters only; no club or offer
+              type dimension.
+            </p>
+          </li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="cat" id="cat-chats">
+      <summary>
+        <h3>Chats and trade outcomes</h3>
+        <span class="counts"
+          ><span><span class="n">21</span> metrics</span
+          ><span><span class="n">3</span> planned</span
+          ><span><span class="n">13</span> deferred</span
+          ><span><span class="n">5</span> merged</span></span
+        >
+      </summary>
+      <div class="cat-body">
+        <p class="cat-summary">
+          Requests sent and composer opens are "Offers reacted to";
+          requester-side answers live in Marketplace and liquidity. This file
+          owns two additions to <code>chatOutcomesWeekly</code>: time to
+          feedback and the chat inactivity snapshot. Chat closed is backend.
+          Feedback ratings are stored by feedback-service and are out of this
+          system. Every completed-trade metric hinges on one optional structured
+          question that does not exist yet (Q10). Never send chat ids, inbox
+          keys, form ids, free text or message timestamps.
+        </p>
+        <ul class="metrics">
+          <li class="m merged" data-status="merged">
+            <div class="m-head">
+              <h4>Chats opened from an offer</h4>
+              <span class="pill merged">merged</span>
+            </div>
+            <p class="m-def">Merged into <b>Offers reacted to</b>.</p>
+          </li>
+          <li class="m merged" data-status="merged">
+            <div class="m-head">
+              <h4>Chats initiated</h4>
+              <span class="pill merged">merged</span>
+            </div>
+            <p class="m-def">Merged into <b>Offers reacted to</b>.</p>
+          </li>
+          <li class="m merged" data-status="merged">
+            <div class="m-head">
+              <h4>Chats that receive a response</h4>
+              <span class="pill merged">merged</span>
+            </div>
+            <p class="m-def">
+              Merged into <b>Number of requests receiving a response</b>.
+            </p>
+          </li>
+          <li class="m merged" data-status="merged">
+            <div class="m-head">
+              <h4>Chats with no response</h4>
+              <span class="pill merged">merged</span>
+            </div>
+            <p class="m-def">
+              Merged into <b>Number of requests receiving no response</b>.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Chat closed</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">backend <b>CHAT_CLOSED</b></p>
+            <p class="m-def">
+              Explicit leave or close actions; the unit is closure actions,
+              since both sides can close. Closure is not completion or churn. A
+              split by chat state at closure is not built.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> chat-service <code>metrics.ts</code> on the
+              leave-chat message; client <code>deleteChatActionAtom</code> sends
+              <code>DELETE_CHAT</code>.
+            </p>
+          </li>
+          <li class="m" data-status="deferred">
+            <div class="m-head">
+              <h4>Optional post-chat trade feedback</h4>
+              <span class="pill deferred">deferred</span>
+            </div>
+            <p class="m-type">feedback ratings are out of this system</p>
+            <p class="m-def">
+              Prompts shown vs answered would be a
+              <code>feedbackPrompts</code> counter set on
+              <code>chatOutcomesWeekly</code> if the feedback data ever gets a
+              dashboard read path.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> <code>submitFeedbackActionAtom</code> to
+              <code>feedback_submit</code> in feedback-service.
+            </p>
+          </li>
+          <li class="m" data-status="deferred">
+            <div class="m-head">
+              <h4>Optional question Did it go well</h4>
+              <span class="pill deferred">deferred</span>
+            </div>
+            <p class="m-type">open Q10</p>
+            <p class="m-def">
+              Recommended outcome there: dropped as a duplicate of the star
+              rating.
+            </p>
+          </li>
+          <li class="m" data-status="deferred">
+            <div class="m-head">
+              <h4>Optional question How was your experience using Vexl</h4>
+              <span class="pill deferred">deferred</span>
+            </div>
+            <p class="m-type">feedback ratings are out of this system</p>
+            <p class="m-def">
+              Only <code>CHAT_RATING</code> is wired; the offer-creation rating
+              (<code>OFFER_RATING</code>) is dead code.
+            </p>
+          </li>
+          <li class="m" data-status="deferred">
+            <div class="m-head">
+              <h4>Optional question Did you connect successfully</h4>
+              <span class="pill deferred">deferred</span>
+            </div>
+            <p class="m-type">open Q10</p>
+            <p class="m-def">
+              This is the one question worth adding, reworded toward trade
+              completion. Would be a new page in the feedback flow with the
+              answer counted on <code>chatOutcomesWeekly</code>, never stored in
+              <code>feedback_submit</code> next to free text.
+            </p>
+          </li>
+          <li class="m" data-status="deferred">
+            <div class="m-head">
+              <h4>Optional question Did this work out for you</h4>
+              <span class="pill deferred">deferred</span>
+            </div>
+            <p class="m-type">open Q10</p>
+            <p class="m-def">Recommended outcome there: dropped.</p>
+          </li>
+          <li class="m" data-status="deferred">
+            <div class="m-head">
+              <h4>Positive or negative trade feedback</h4>
+              <span class="pill deferred">deferred</span>
+            </div>
+            <p class="m-type">feedback ratings are out of this system</p>
+            <p class="m-def">
+              <code>POSITIVE_STAR_RATING_THRESHOLD</code> in the domain package
+              is the fixed threshold if feedback-service data is ever charted.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Time between opening a chat and submitting feedback</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              aggregation <b>chatOutcomesWeekly</b>, counters
+              <code>feedbackAfterD0</code>, <code>feedbackAfterD1</code>,
+              <code>feedbackAfterD2To7</code>, <code>feedbackAfterD8To30</code>,
+              <code>feedbackAfterGt30</code> (cap 20)
+            </p>
+            <p class="m-def">
+              Successful initiation to feedback submission, bucketed on device,
+              among respondents. Reopening does not reset. This is time to
+              feedback, not time to a trade.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> baseline = <code>receivedByServerAt</code> of the
+              chat's first <code>REQUEST_MESSAGING</code>, captured at
+              initiation because <code>deleteChatActionAtom</code> trims
+              messages before the dialog opens; submission =
+              <code>submitFeedbackActionAtom</code> finishing.
+              <b>Privacy:</b> bucket counters only.
+            </p>
+          </li>
+          <li class="m" data-status="deferred">
+            <div class="m-head">
+              <h4>Number of completed trades</h4>
+              <span class="pill deferred">deferred</span>
+            </div>
+            <p class="m-type">open Q10</p>
+            <p class="m-def">
+              No completion signal. The trade checklist is a "meeting planned"
+              milestone, not completion.
+            </p>
+          </li>
+          <li class="m" data-status="deferred">
+            <div class="m-head">
+              <h4>Open chat to completed trade ratio</h4>
+              <span class="pill deferred">deferred</span>
+            </div>
+            <p class="m-type">open Q10</p>
+            <p class="m-def">
+              Would be reports among respondents over the
+              <code>requestsEnrolled</code> cohort, labelled "observed
+              completion-report rate".
+            </p>
+          </li>
+          <li class="m" data-status="deferred">
+            <div class="m-head">
+              <h4>Open chat to completed trade time</h4>
+              <span class="pill deferred">deferred</span>
+            </div>
+            <p class="m-type">open Q10</p>
+            <p class="m-def">
+              Not measurable even with the question; a cheap proxy exists
+              (initiation to agreed checklist date) but is not built unless
+              asked.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Chat churn rate and time from last activity to churn</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              aggregation <b>chatOutcomesWeekly</b>, fields
+              <code>openChats</code>,
+              <code>inactiveChats30d</code> (CountBucket)
+            </p>
+            <p class="m-def">
+              Inactivity = no human message for 30 days in a visible chat,
+              written at the first app start in the week. A snapshot ratio per
+              reporting instance; users who stopped opening the app are
+              invisible by construction. The latency to a fixed threshold is 30
+              days by definition and is not reported.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b>
+              <code>checkInactiveChatsInAppLoadingTask.ts</code> already walks
+              chats on resume; visible chats = <code>chatShouldBeVisible</code>;
+              system messages excluded when finding the last message.
+              <b>Privacy:</b> buckets only.
+            </p>
+          </li>
+          <li class="m" data-status="deferred">
+            <div class="m-head">
+              <h4>Post-trade return rate</h4>
+              <span class="pill deferred">deferred</span>
+            </div>
+            <p class="m-type">open Q10</p>
+            <p class="m-def">Needs the completion question.</p>
+          </li>
+          <li class="m" data-status="deferred">
+            <div class="m-head">
+              <h4>Users who completed more than one trade</h4>
+              <span class="pill deferred">deferred</span>
+            </div>
+            <p class="m-type">open Q10</p>
+            <p class="m-def">Needs the completion question.</p>
+          </li>
+          <li class="m" data-status="deferred">
+            <div class="m-head">
+              <h4>Average time between trades</h4>
+              <span class="pill deferred">deferred</span>
+            </div>
+            <p class="m-type">open Q10</p>
+            <p class="m-def">Recommended outcome there: stays unmeasurable.</p>
+          </li>
+          <li class="m merged" data-status="merged">
+            <div class="m-head">
+              <h4>Average time spent in app per day week or month</h4>
+              <span class="pill merged">merged</span>
+            </div>
+            <p class="m-def">Merged into <b>Session duration</b>.</p>
+          </li>
+          <li class="m" data-status="deferred">
+            <div class="m-head">
+              <h4>Average time between app activities</h4>
+              <span class="pill deferred">deferred</span>
+            </div>
+            <p class="m-type">CSV decision: defer</p>
+            <p class="m-def">
+              If revived, one predefined pair only (first marketplace load to
+              first request), as a bucket on <code>registrationCohort</code>;
+              never a generic timeline.
+            </p>
+          </li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="cat" id="cat-clubs">
+      <summary>
+        <h3>Clubs</h3>
+        <span class="counts"
+          ><span><span class="n">20</span> metrics</span
+          ><span><span class="n">15</span> planned</span
+          ><span><span class="n">5</span> merged</span></span
+        >
+      </summary>
+      <div class="cat-body">
+        <p class="cat-summary">
+          Membership lives on the device and every membership is a fresh
+          keypair, so first-time joiners, membership counts and every cohort
+          here are computed on the phone. Two definitions: the
+          <code>clubJoinCohort</code> journey (one per instance at its first
+          club join ever) and the <code>clubActivityMonthly</code> aggregation.
+          Both are club definitions: no country column, week precision, every
+          upload delayed to the next app start. Weekly club activity is read
+          from the class counters on <code>weeklyActivity</code>. Two join paths
+          (<code>submitCodeToJoinClubActionAtom</code>, moderator admission in
+          <code>checkForClubsAdmissionActionAtom</code>) feed one hook.
+        </p>
+        <ul class="metrics">
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Club joins</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              mixed: backend <b>member_count_changes</b>; aggregation
+              <b>clubActivityMonthly</b>, boolean <code>firstClubJoin</code>,
+              counter <code>clubJoins</code> (cap 10)
+            </p>
+            <p class="m-def">
+              Successful join actions, and separately instances joining any club
+              for the first time ever. Rejoining or a second club is a join
+              action, not acquisition.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> the two success points; new
+              <code>everJoinedClub</code> marker because
+              <code>clubsToKeyHolderAtom</code> empties on leave, seeded true at
+              rollout for existing members. <b>Privacy:</b> the backend row
+              carries the club uuid and an exact timestamp; the client record
+              carries neither and is uploaded at the next start.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Club activity</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              aggregation <b>weeklyActivity</b>, read as
+              <code>offersCreatedBoth > 0 or requestsSentClub > 0</code>
+            </p>
+            <p class="m-def">
+              Activity = a successful creation with clubs selected or a
+              successful request on a club-origin offer. Active instances and
+              capped action counts are reported separately. Adding an existing
+              offer to a club at join time is an update and is not counted.
+            </p>
+            <p class="m-meta">
+              <b>Privacy:</b> this record carries country; the suppression rule
+              applies to the club slices.
+            </p>
+          </li>
+          <li class="m merged" data-status="merged">
+            <div class="m-head">
+              <h4>Club offers created</h4>
+              <span class="pill merged">merged</span>
+            </div>
+            <p class="m-def">Merged into <b>Offers created</b>.</p>
+          </li>
+          <li class="m merged" data-status="merged">
+            <div class="m-head">
+              <h4>Club offers reacted to</h4>
+              <span class="pill merged">merged</span>
+            </div>
+            <p class="m-def">Merged into <b>Offers reacted to</b>.</p>
+          </li>
+          <li class="m merged" data-status="merged">
+            <div class="m-head">
+              <h4>Club chats opened</h4>
+              <span class="pill merged">merged</span>
+            </div>
+            <p class="m-def">Merged into <b>Offers reacted to</b>.</p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Returning to a Club</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              journey <b>clubJoinCohort</b> (31 days from first join ever, week
+              precision, no country, all uploads delayed)
+            </p>
+            <p class="m-def">
+              Defines the journey: an eligibility snapshot at join (had imported
+              contacts, browsed main, sent a main request, created an offer,
+              activated), one <code>DaysBucket</code> per milestone written once
+              at its first occurrence, ordering booleans and the D7/D30 bits.
+              <code>returnedToClub</code> = a later foreground visit to any club
+              screen after the join session.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> enrol in the "Club joins" hook when
+              <code>everJoinedClub</code> was false;
+              <code>firstClubJoinedAt</code> marker is the baseline; visits via
+              <code>useFocusEffect</code> on <code>ClubDetail</code>,
+              <code>ClubOffersScreen</code> and the Community clubs tab.
+              <b>Privacy:</b> never the club uuid, club count or country; clubs
+              are small and cohorts below the threshold are suppressed.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Club to contact import conversion</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              journey <b>clubJoinCohort</b>, snapshot
+              <code>hadImportedContacts</code>, milestone
+              <code>importedContacts</code>
+            </p>
+            <p class="m-def">
+              Among first-time joiners without imported contacts, a successful
+              import within each window. Existing importers are excluded from
+              the denominator and counted separately.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> snapshot =
+              <code>importedContactsCountAtom > 0</code>; milestone =
+              <code>submitContactsActionAtom</code> success. The
+              <code>contactsImported: true</code> sent to the backend is not a
+              source of truth.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Club to marketplace browsing rate</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              journey <b>clubJoinCohort</b>, snapshot
+              <code>hadBrowsedMain</code>, milestone <code>browsedMain</code>
+            </p>
+            <p class="m-def">
+              A later successful foreground load of the main marketplace within
+              the window; no import required. Installs from before the marker
+              shipped report <code>unknown</code>. The main list also contains
+              club offers, so this measures the screen, not non-club content.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> the marketplace load hook writes the
+              <code>firstMainMarketplaceLoadAt</code> marker.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Club to main marketplace offer view rate</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              journey <b>clubJoinCohort</b>, milestones
+              <code>importedContacts</code> then <code>openedMainDetail</code>
+            </p>
+            <p class="m-def">
+              Contact import followed by a main-marketplace offer detail open,
+              among eligible joiners. Diagnostic only; the reaction rate is the
+              stronger funnel over the same two signals.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> <code>OfferDetailScreen</code> mount where the offer
+              is not club-only; ordering checked locally before bucketing.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Club to main marketplace offer reaction rate</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              journey <b>clubJoinCohort</b>, snapshot
+              <code>hadMainRequest</code>, milestone
+              <code>sentMainRequest</code>, boolean
+              <code>importBeforeMainRequest</code>
+            </p>
+            <p class="m-def">
+              Among joiners without a prior main request, a successful import
+              followed by a successful main-class request within the window.
+              Kept apart from the general main-request rate.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> <code>sendRequestActionAtom</code> success with
+              request class <code>main</code>; snapshot from existing
+              <code>theirOffer</code> chats or
+              <code>idsOfRequestedOffersAtom</code>.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Club to main marketplace offer creation rate</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              journey <b>clubJoinCohort</b>, snapshot
+              <code>hadCreatedOffer</code>, milestone
+              <code>createdMainOffer</code>, boolean
+              <code>importBeforeCreate</code>
+            </p>
+            <p class="m-def">
+              Same eligible cohort; import followed by a successful creation.
+              Every creation is encrypted for the contact network, so any
+              creation class counts once.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> <code>createOfferActionAtom</code> success; snapshot
+              from <code>hasPostedFirstOfferActionStepAtom</code> or
+              <code>accountStatsAtom.postedOffers</code>.
+            </p>
+          </li>
+          <li class="m merged" data-status="merged">
+            <div class="m-head">
+              <h4>Club to main marketplace chat initiation rate</h4>
+              <span class="pill merged">merged</span>
+            </div>
+            <p class="m-def">
+              Merged into <b>Club to main marketplace offer reaction rate</b>.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Club to main marketplace activation rate</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              journey <b>clubJoinCohort</b>, snapshot <code>hadActivated</code>,
+              milestone <code>mainActivation</code> (DaysBucket), boolean
+              <code>importBeforeActivation</code>
+            </p>
+            <p class="m-def">
+              Among first-time joiners not yet activated at join, the first
+              main-class core action after join within 1, 7 and 30 days. The
+              bucket is also the latency of "Time from Club join to first main
+              marketplace action". Import is the separate "import-assisted"
+              view, not a prerequisite. It is a club-join cohort, not an
+              acquisition source.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> <code>hadActivated</code> from the
+              <code>activatedAt</code> marker; milestone set by whichever of the
+              reaction or creation milestones comes first.
+            </p>
+          </li>
+          <li class="m merged" data-status="merged">
+            <div class="m-head">
+              <h4>Time from Club join to first main marketplace action</h4>
+              <span class="pill merged">merged</span>
+            </div>
+            <p class="m-def">
+              Merged into <b>Club to main marketplace activation rate</b>.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Club offer creation rate</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              mixed: journey <b>clubJoinCohort</b> milestone
+              <code>createdClubOffer</code>, boolean
+              <code>sharedExistingOfferAtJoin</code>; ongoing
+              <b>clubActivityMonthly</b> <code>clubOfferCreations</code>
+            </p>
+            <p class="m-def">
+              First-time joiners who create at least one offer with clubs
+              selected within 30 days. Sharing an existing offer at join is
+              recorded as the boolean, not as a creation.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> <code>createOfferActionAtom</code> success with class
+              <code>both</code>;
+              <code>publishSelectedOffersToJoinedClubActionAtom</code> sets the
+              boolean.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Club offer reaction rate</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              mixed: journey <b>clubJoinCohort</b> milestone
+              <code>sentClubRequest</code>; ongoing <b>clubActivityMonthly</b>
+              <code>clubRequests</code>
+            </p>
+            <p class="m-def">
+              Same cohort and window as the creation rate; numerator is
+              instances with at least one successful club-class request. Missing
+              outcomes are unobserved, not zero.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> <code>sendRequestActionAtom</code> success with
+              request class <code>club</code>.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Offers created per Club member</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              aggregation <b>clubActivityMonthly</b> (month, no country, delayed
+              upload); defines the record
+            </p>
+            <p class="m-def">
+              <code>clubOfferCreations</code> counts creations with class
+              <code>both</code> in the month, as a bucket that includes zero for
+              every reporting member instance (<code>isClubMember</code> true at
+              report time). Means are reporter-based and capped.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> <code>createOfferActionAtom</code> success with clubs
+              selected; membership =
+              <code>Record.size(clubsToKeyHolderAtom) > 0</code> at flush.
+              <b>Privacy:</b> buckets, no club uuid, no country.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Offer reactions per Club member</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              aggregation <b>clubActivityMonthly</b>, bucket
+              <code>clubRequests</code>
+            </p>
+            <p class="m-def">
+              Successful club-class requests in the month over the same
+              population; requests, not distinct offers; observed zeros
+              included; re-requests excluded.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> <code>sendRequestActionAtom</code> success with
+              request class <code>club</code>.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Users active in more than one Club</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              aggregation <b>clubActivityMonthly</b>, buckets
+              <code>membership</code>, <code>clubsActedIn</code>
+            </p>
+            <p class="m-def">
+              Membership in 2+ clubs is not activity in 2+ clubs; both buckets
+              are reported. <code>clubsActedIn</code> counts clubs with a core
+              action in the month; a request on an offer shared with several of
+              my clubs counts the club the UI shows.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> a local per-month set of club uuids fed by
+              <code>intendedClubs</code> and the request's club, of which only
+              the size bucket is uploaded. <b>Privacy:</b> the uuid set never
+              leaves the device.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Average Clubs per user</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              aggregation <b>clubActivityMonthly</b>, bucket
+              <code>membership</code> (0, 1, 2To3, 4Plus)
+            </p>
+            <p class="m-def">
+              Current membership count at the report snapshot, over all
+              reporting instances; "members only" is the dashboard filter on
+              bucket above zero. Historical joins are not current membership.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> <code>Record.size(clubsToKeyHolderAtom)</code> at
+              flush; deactivated clubs kept in <code>removedClubsAtom</code> are
+              not counted. <b>Privacy:</b> <code>4Plus</code> is rare; the
+              dashboard merges it into <code>2To3</code> below the threshold.
+            </p>
+          </li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="cat" id="cat-retention">
+      <summary>
+        <h3>Retention</h3>
+        <span class="counts"
+          ><span><span class="n">14</span> metrics</span
+          ><span><span class="n">11</span> planned</span
+          ><span><span class="n">1</span> rejected</span
+          ><span><span class="n">2</span> merged</span></span
+        >
+      </summary>
+      <div class="cat-body">
+        <p class="cat-summary">
+          Every metric is "enrol at milestone M, observe core activity in fixed
+          windows relative to M". Three cohort journeys are owned here:
+          <code>activationCohort</code>, <code>initiationCohort</code> and the
+          retention bits of <code>clubJoinCohort</code>; the registration bits
+          live on <code>registrationCohort</code>. All cohort journeys live 31
+          days, carry booleans and enums only, round to the week and upload
+          their initial state at the next app start. Each milestone has its own
+          random id; they are never chained. Instances that registered before
+          the release have no journey; logout and MMKV loss end a journey
+          silently and the dashboard reports <code>unknown</code>.
+        </p>
+        <ul class="metrics">
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>D1 retention</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              journey <b>registrationCohort</b>, boolean <code>d1</code>
+            </p>
+            <p class="m-def">
+              A core action between 24 and 48 hours after registration, one
+              contribution per instance. Denominator = enrolled registrations,
+              including instances that never report again.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> enrolment in
+              <code>handleUserCreationActionAtom</code> with the
+              <code>registeredAt</code> marker; core-action success points
+              compare the elapsed time with the window and flip the bit.
+              <b>Privacy:</b> the initial upload is delayed so it cannot be
+              timed against <code>USER_LOGGED_IN</code>.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>D7 retention</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              journey <b>registrationCohort</b>, boolean <code>d7</code>
+            </p>
+            <p class="m-def">
+              A core action between 7 x 24 and 8 x 24 hours after registration.
+              The "any core action by day 7" variant is the activation rate and
+              is not duplicated.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>D30 retention</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              journey <b>registrationCohort</b>, boolean <code>d30</code>
+            </p>
+            <p class="m-def">
+              A core action between 30 x 24 and 31 x 24 hours after
+              registration. Mature, large cohorts only; this is not 30-day MAU.
+            </p>
+            <p class="m-meta">
+              <b>Privacy:</b> the id is dropped locally after day 31; 31 days is
+              the lifetime cap for every journey.
+            </p>
+          </li>
+          <li class="m" data-status="rejected">
+            <div class="m-head">
+              <h4>D90 retention</h4>
+              <span class="pill rejected">rejected</span>
+            </div>
+            <p class="m-type">not built</p>
+            <p class="m-def">
+              A 91-day id behaves like a device id; the 30-day journey lifetime
+              cap stands.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Retention after activation</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              journey <b>activationCohort</b> (31 days from the first core
+              action), fields <code>activatedBy</code>, <code>d7</code>,
+              <code>d30</code>, <code>return7d</code>, <code>return30d</code>,
+              <code>repeat30d</code>, <code>secondOfferMain30d</code>,
+              <code>secondOfferBoth30d</code>
+            </p>
+            <p class="m-def">
+              Enrol at activation. <code>d7</code> / <code>d30</code> are
+              exact-day windows; <code>return7d</code> /
+              <code>return30d</code> are any later core action on a later day
+              within the window. Denominator = enrolled activators.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> the two core-action success points;
+              <code>activatedAt</code> marker. <b>Privacy:</b> separate id from
+              <code>registrationCohort</code>, never joinable;
+              <code>activatedBy</code> is dropped by the dashboard when cohorts
+              are small.
+            </p>
+          </li>
+          <li class="m merged" data-status="merged">
+            <div class="m-head">
+              <h4>Retention after first marketplace action</h4>
+              <span class="pill merged">merged</span>
+            </div>
+            <p class="m-def">Merged into <b>Retention after activation</b>.</p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Retention after opening a chat</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              journey <b>initiationCohort</b> (31 days from the first successful
+              request), fields <code>d7</code>, <code>d30</code>,
+              <code>return7d</code>, <code>return30d</code>,
+              <code>secondInitiation30d</code>
+            </p>
+            <p class="m-def">
+              Baseline = first successful conversation initiation (note requests
+              excluded). Overlaps with "Retention after activation" when
+              activation happened through a request; the dashboard says so.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> <code>sendRequestActionAtom</code> success, first
+              time (a local "has initiated" flag). <b>Privacy:</b> third
+              concurrent cohort journey per device, each with its own id.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Retention after joining a Club</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              journey <b>clubJoinCohort</b>, booleans <code>d7Main</code>,
+              <code>d30Main</code>, <code>d7Club</code>, <code>d30Club</code>
+            </p>
+            <p class="m-def">
+              Exact-day windows after the first club join, main-class and
+              club-class core actions as separate series. Differs from the "any
+              visit" milestone of "Returning to a Club".
+            </p>
+            <p class="m-meta">
+              <b>Privacy:</b> club definition: no country, delayed uploads, no
+              club uuid.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Repeat marketplace usage</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              journey <b>activationCohort</b>, booleans <code>repeat30d</code>,
+              <code>return30d</code>
+            </p>
+            <p class="m-def">
+              <code>repeat30d</code> = at least two successful core actions
+              within 30 days of activation (same day counts);
+              <code>return30d</code> is the different-day flag. Distinct
+              successful operations, not retries.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Repeat offer creation</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              journey <b>activationCohort</b>, booleans
+              <code>secondOfferMain30d</code>, <code>secondOfferBoth30d</code>
+            </p>
+            <p class="m-def">
+              A second distinct successful creation within 30 days of
+              activation, by class. Editing does not count; re-creation after
+              deletion does. The dashboard filters on
+              <code>activatedBy = offer</code> for a creator-only view.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> <code>createOfferActionAtom</code> success.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Repeat chat usage</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              journey <b>initiationCohort</b>, boolean
+              <code>secondInitiation30d</code>
+            </p>
+            <p class="m-def">
+              A second successful initiation on a different offer within 30 days
+              of the first. Re-requests to the same offer are excluded by a
+              local offer id comparison.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> <code>sendRequestActionAtom</code> success;
+              <code>canChatBeRequested</code> is the re-request path.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Average chats opened per user</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              aggregation <b>monthlyActivity</b>, field
+              <code>initiations</code> (CountBucket)
+            </p>
+            <p class="m-def">
+              Successfully initiated conversations per reporting instance per
+              calendar month, as a bucket. Not an average over all registered
+              people.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> <code>sendRequestActionAtom</code> success, new chat
+              only. <b>Privacy:</b> bucket; <code>gt10</code> caps the tail.
+            </p>
+          </li>
+          <li class="m merged" data-status="merged">
+            <div class="m-head">
+              <h4>Chat opens per offer</h4>
+              <span class="pill merged">merged</span>
+            </div>
+            <p class="m-def">
+              Merged into <b>Number of offers receiving a request</b>.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Chat opens per active user</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              derived on the dashboard from <b>monthlyActivity</b>:
+              <code>initiations</code> over rows with
+              <code>coreActive = true</code>
+            </p>
+            <p class="m-def">
+              Initiations per reporting core-active instance in the month,
+              labelled capped. Zero initiations remain possible for active
+              creators.
+            </p>
+          </li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="cat" id="cat-churn">
+      <summary>
+        <h3>Churn</h3>
+        <span class="counts"
+          ><span><span class="n">13</span> metrics</span
+          ><span><span class="n">2</span> planned</span
+          ><span><span class="n">1</span> deferred</span
+          ><span><span class="n">3</span> rejected</span
+          ><span><span class="n">7</span> merged</span></span
+        >
+      </summary>
+      <div class="cat-body">
+        <p class="cat-summary">
+          Every "no observed X within N days" metric is the complement of a
+          cohort journey defined elsewhere; a journey that never advanced by
+          maturity day is the churn readout, labelled <code>unknown</code>,
+          never "churned". This file owns the gap histogram between consecutive
+          core actions and the derived "Time from registration to churn". The
+          "before churn" snapshots are rejected. Backend covers the population
+          side (<code>USER_LOGGED_IN</code>, <code>USER_REFRESH</code>,
+          <code>USER_REACTIVATED</code>, <code>COUNT_OF_INACTIVE_USERS</code>);
+          backend "inactive" means the app was not foregrounded, not the absence
+          of a core action, and the two populations are never mixed.
+        </p>
+        <ul class="metrics">
+          <li class="m merged" data-status="merged">
+            <div class="m-head">
+              <h4>Download to registration drop-off</h4>
+              <span class="pill merged">merged</span>
+            </div>
+            <p class="m-def">
+              Merged into <b>Onboarding completion and onboarding churn</b>.
+            </p>
+          </li>
+          <li class="m merged" data-status="merged">
+            <div class="m-head">
+              <h4>Onboarding drop-off by step</h4>
+              <span class="pill merged">merged</span>
+            </div>
+            <p class="m-def">
+              Merged into <b>Onboarding completion and onboarding churn</b>.
+            </p>
+          </li>
+          <li class="m merged" data-status="merged">
+            <div class="m-head">
+              <h4>Registration to activation drop-off</h4>
+              <span class="pill merged">merged</span>
+            </div>
+            <p class="m-def">
+              Merged into <b>Time from registration to activation</b>.
+            </p>
+          </li>
+          <li class="m merged" data-status="merged">
+            <div class="m-head">
+              <h4>Activation to return drop-off</h4>
+              <span class="pill merged">merged</span>
+            </div>
+            <p class="m-def">Merged into <b>Retention after activation</b>.</p>
+          </li>
+          <li class="m merged" data-status="merged">
+            <div class="m-head">
+              <h4>Marketplace to return drop-off</h4>
+              <span class="pill merged">merged</span>
+            </div>
+            <p class="m-def">Merged into <b>Retention after activation</b>.</p>
+          </li>
+          <li class="m merged" data-status="merged">
+            <div class="m-head">
+              <h4>Chat to return drop-off</h4>
+              <span class="pill merged">merged</span>
+            </div>
+            <p class="m-def">
+              Merged into <b>Retention after opening a chat</b>.
+            </p>
+          </li>
+          <li class="m merged" data-status="merged">
+            <div class="m-head">
+              <h4>Club to return drop-off</h4>
+              <span class="pill merged">merged</span>
+            </div>
+            <p class="m-def">
+              Merged into <b>Retention after joining a Club</b>.
+            </p>
+          </li>
+          <li class="m" data-status="deferred">
+            <div class="m-head">
+              <h4>Churn by acquisition source</h4>
+              <span class="pill deferred">deferred</span>
+            </div>
+            <p class="m-type">open Q9</p>
+            <p class="m-def">
+              No source concept. The install channel (<code>appSource</code>) is
+              a request header the analytics rows do not store, so it cannot
+              serve as a segment either.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Time from last meaningful action to churn</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              aggregation <b>weeklyActivity</b>, counters <code>gapD0To6</code>,
+              <code>gapD7To29</code>, <code>gapD30To59</code>,
+              <code>gapD60To89</code>, <code>gapGt90</code> (cap 20)
+            </p>
+            <p class="m-def">
+              Replaced by the distribution of observed gaps between consecutive
+              core actions, among returning instances. At each core action
+              bucket the gap since <code>lastCoreActionAt</code> and bump the
+              counter. Instances without a marker bump nothing. The
+              <code>d30To59</code> and up counters are the reactivation count
+              seen from the aggregation side.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> <code>lastCoreActionAt</code> marker updated at both
+              core-action success points; MMKV loss detection in
+              <code>detectMmkvDataLoss.ts</code>. <b>Privacy:</b> bucket
+              counters only, never the timestamps.
+            </p>
+          </li>
+          <li class="m" data-status="rejected">
+            <div class="m-head">
+              <h4>Marketplace actions before churn</h4>
+              <span class="pill rejected">rejected</span>
+            </div>
+            <p class="m-type">not built</p>
+            <p class="m-def">
+              A per-device record overwritten on every start is a standing
+              device profile.
+            </p>
+          </li>
+          <li class="m" data-status="rejected">
+            <div class="m-head">
+              <h4>Chats opened before churn</h4>
+              <span class="pill rejected">rejected</span>
+            </div>
+            <p class="m-type">not built</p>
+            <p class="m-def">
+              Same record as "Marketplace actions before churn"; rejected for
+              the same reason.
+            </p>
+          </li>
+          <li class="m" data-status="rejected">
+            <div class="m-head">
+              <h4>App sessions before churn</h4>
+              <span class="pill rejected">rejected</span>
+            </div>
+            <p class="m-type">not built</p>
+            <p class="m-def">
+              Same record as "Marketplace actions before churn"; rejected for
+              the same reason.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Time from registration to churn</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              derived on the dashboard from <b>registrationCohort</b> and
+              <b>activationCohort</b>; no new signal
+            </p>
+            <p class="m-def">
+              Cohort no-observed-return curves at the fixed 7 and 30 day
+              windows: registration to activation, then activation to return. No
+              individual churn date is ever assigned; only "state at maturity"
+              per weekly cohort.
+            </p>
+          </li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="cat" id="cat-reactivation">
+      <summary>
+        <h3>Reactivation</h3>
+        <span class="counts"
+          ><span><span class="n">10</span> metrics</span
+          ><span><span class="n">8</span> planned</span
+          ><span><span class="n">2</span> deferred</span></span
+        >
+      </summary>
+      <div class="cat-body">
+        <p class="cat-summary">
+          Two "dormant" definitions stay separate on the dashboard. Backend
+          dormancy = no <code>refreshUser</code> call for N days; client
+          dormancy = 30 days without a core action, known only from the local
+          <code>lastCoreActionAt</code> marker. One client definition: the
+          <code>reactivationEpisode</code> journey, written once when a core
+          action follows a gap of at least 30 days. "Dormant users" and
+          "Reactivation rate" are dashboard compositions of backend totals and
+          client episode counts, never one divided by the other.
+        </p>
+        <ul class="metrics">
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Dormant users</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              backend <b>COUNT_OF_INACTIVE_USERS</b>,
+              <b>COUNT_OF_INACTIVE_USERS_BY_REMINDERS_SENT</b>, plus the cohort
+              view of "Retention after activation"
+            </p>
+            <p class="m-def">
+              Frontend reports cannot enumerate dormant instances (absent
+              devices do not report). The backend count is the operational "not
+              refreshed for 30 days" number; the client side shows return
+              coverage per activation cohort. Neither is labelled an exact total
+              of dormant core users.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> <code>queryAndReportNumberOfInactiveUsers</code> in
+              contact-service <code>metrics.ts</code>.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Dormant to returning users</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              journey <b>reactivationEpisode</b> (7 days, written once, day
+              precision, country stored, upload at next start), fields
+              <code>gap</code>, <code>firstActionType</code>,
+              <code>clubMember</code>, <code>previousEpisode</code>
+            </p>
+            <p class="m-def">
+              At a core action, compare with <code>lastCoreActionAt</code>; a
+              gap of at least 30 days opens one episode. Fresh installs, logouts
+              and MMKV loss have no marker and open nothing. After the
+              reactivating action the marker is updated, so the next action does
+              not open another episode.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> the two core-action success points with the
+              <code>lastCoreActionAt</code> and
+              <code>lastReactivationAt</code> markers; backend counterpart
+              <code>USER_REACTIVATED</code> in <code>refreshUser.ts</code>.
+              <b>Privacy:</b> four enums on a row that lives 7 days; suppression
+              applies to every cross-tab.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Reactivation rate</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              backend rate (<b>USER_REACTIVATED</b> over
+              <b>COUNT_OF_INACTIVE_USERS</b> at period start) and the client
+              episode count shown as a count
+            </p>
+            <p class="m-def">
+              A client dormant denominator would need the rejected before-churn
+              snapshot, so the client side stays a count, never a rate.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Time from becoming dormant to reactivation</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              journey <b>reactivationEpisode</b>, field
+              <code>gap</code> (GapBucket)
+            </p>
+            <p class="m-def">
+              The gap bucket of the episode (<code>d30To59</code>,
+              <code>d60To89</code>, <code>gt90</code>); the dashboard subtracts
+              the 30-day threshold in the label. Unknown history is excluded by
+              construction.
+            </p>
+            <p class="m-meta"><b>Privacy:</b> bucket, never the day count.</p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Actions after reactivation</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              journey <b>reactivationEpisode</b>, field
+              <code>firstActionType</code> (offerMain, offerBoth, requestMain,
+              requestClub)
+            </p>
+            <p class="m-def">
+              The core action that opened the episode, by class. Marketplace
+              opens before it are not reactivation; nothing after it is
+              uploaded.
+            </p>
+          </li>
+          <li class="m" data-status="deferred">
+            <div class="m-head">
+              <h4>Reactivation by acquisition source</h4>
+              <span class="pill deferred">deferred</span>
+            </div>
+            <p class="m-type">open Q9</p>
+            <p class="m-def">
+              The install channel header cannot substitute for a source.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Club user reactivation</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              journey <b>reactivationEpisode</b>, boolean
+              <code>clubMember</code>
+            </p>
+            <p class="m-def">
+              Current club membership at the reactivating action; "ever joined"
+              is not used. Counts only; no club-member dormancy denominator.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> <code>clubsToKeyHolderAtom</code> non-empty.
+              <b>Privacy:</b> the dashboard does not cross
+              <code>clubMember</code> with
+              <code>firstActionType = requestClub</code> and country at once.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Notification to reactivation</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              journey <b>exposure</b> (source notification, type
+              <code>userInactivity</code>), fields <code>displayed</code>,
+              <code>dormantAtBaseline</code>, outcomes
+              <code>offerCreated</code>, <code>chatInitiated</code>
+            </p>
+            <p class="m-def">
+              Enrol at receipt of an inactivity notification with the local
+              dormancy snapshot; a core action within 7 days is the outcome.
+              Recipients who never return stay at <code>received</code>, so the
+              denominator is complete. Coverage is "delivered", not "targeted";
+              there is no holdout, so the number is correlation only.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> <code>handleUserInactivityNotification</code> runs in
+              the background without a session; the enrolment is an MMKV write
+              uploaded at the next start. "Opened" is not distinguishable from
+              "received" for this type. <b>Privacy:</b> never the
+              <code>trackingId</code>; <code>dormantAtBaseline</code> is a
+              boolean, not a gap.
+            </p>
+          </li>
+          <li class="m" data-status="deferred">
+            <div class="m-head">
+              <h4>Sessions before reactivation</h4>
+              <span class="pill deferred">deferred</span>
+            </div>
+            <p class="m-type">open Q11</p>
+            <p class="m-def">
+              Renamed "sessions after reactivation and before the next
+              dormancy"; needs the session tracker.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Time from reactivation to next dormancy</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              journey <b>reactivationEpisode</b>, field
+              <code>previousEpisode</code> (GapBucket)
+            </p>
+            <p class="m-def">
+              Written on the next episode from local markers:
+              <code>(lastCoreActionAt + 30 days) - lastReactivationAt</code>,
+              bucketed. Returners only by construction, labelled "observed
+              recurrence among returners". No long-lived episode is kept open
+              for it.
+            </p>
+            <p class="m-meta"><b>Privacy:</b> bucket only.</p>
+          </li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="cat" id="cat-notifications">
+      <summary>
+        <h3>Notifications</h3>
+        <span class="counts"
+          ><span><span class="n">11</span> metrics</span
+          ><span><span class="n">9</span> planned</span
+          ><span><span class="n">1</span> deferred</span
+          ><span><span class="n">1</span> merged</span></span
+        >
+      </summary>
+      <div class="cat-body">
+        <p class="cat-summary">
+          Two definitions. <code>notificationsWeekly</code> counts receipts and
+          taps per broad type and the opt-out transitions. The
+          <code>exposure</code> journey follows one campaign-like receipt for 7
+          days and records the outcomes; it is shared with the prompts category.
+          "Notifications sent" is backend plus one attribute. "Campaign" means
+          the product notification uuid or the content-service warning id; no
+          A/B variant concept exists. The existing per-notification
+          <code>trackingId</code> stays in the backend delivery-debugging path
+          and is never carried into the new system.
+        </p>
+        <ul class="metrics">
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Notifications sent</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              backend <b>NOTIFICATION_SENT</b> plus a new
+              <code>notificationType</code> attribute;
+              <b>INACTIVITY_NOTIFICATION_SENT</b> for reminders
+            </p>
+            <p class="m-def">
+              Backend send attempts by broad type, aggregated to day. A send is
+              not a delivery. Client-scheduled local notifications appear in
+              "Notifications delivered" only.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> <code>reportNotificationSent</code> in
+              notification-service; <code>ExpoClientService</code> never reads
+              tickets. <b>Privacy:</b> exact <code>sentAt</code> plus
+              <code>trackingId</code> stays internal; the dashboard reads day
+              aggregates by type.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Notifications delivered</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              aggregation <b>notificationsWeekly</b>; defines the record:
+              counters <code>received&lt;Type&gt;</code>,
+              <code>tapped&lt;Type&gt;</code> (cap 50), <code>displayed</code>,
+              permission and preference booleans
+            </p>
+            <p class="m-def">
+              Renamed "observed device receipts": a handler ran for the
+              notification. Receipts are a lower bound on delivery; provider
+              acceptance is not delivery.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> one increment at the top of
+              <code>processNotification</code> and in the stream consumer, keyed
+              by <code>_tag</code>; one at
+              <code>displayLocalNotification</code>. <b>Privacy:</b> no
+              <code>trackingId</code>, inbox or sender keys, or preview. Chat
+              receipt counts reveal chat volume, hence the cap and the weekly
+              bucket.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Notifications opened</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              aggregation <b>notificationsWeekly</b>, counters
+              <code>tapped&lt;Type&gt;</code>; plus the <code>tapped</code> step
+              on <b>exposure</b> for campaign-like types
+            </p>
+            <p class="m-def">
+              Taps from the notification-tap callback, deduplicated locally, by
+              broad type; per campaign through the journey. Product
+              notifications opened from the in-app Notifications screen are not
+              taps.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> <code>reactOnNotificationOpenAtom</code>; the decode
+              branches give the type and, for product notifications, the
+              campaign uuid. <b>Privacy:</b> never the chat inbox or sender
+              keys, the browser url or the club uuid from the tap payload.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Notification to app opened</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              journey <b>exposure</b> (source notification), fields
+              <code>step = tapped</code>, <code>foregroundOpen</code>,
+              <code>daysToOpen</code>
+            </p>
+            <p class="m-def">
+              Direct tap opens, separated from any later foreground open within
+              7 days of receipt (association only). Campaign-like types only;
+              chat notifications would create a journey per message.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> tap as above; later open =
+              <code>useAppState</code> reporting active with no new notification
+              response, evaluated in the start and resume loading tasks.
+              <b>Privacy:</b> receipt day, not time; <code>daysToOpen</code> is
+              a bucket.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Notification to marketplace opened</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              journey <b>exposure</b>, outcome <code>marketplaceLoaded</code>
+            </p>
+            <p class="m-def">
+              A successful main-marketplace load within 7 days of receipt among
+              enrolled recipients. For <code>newOffers</code> and
+              <code>marketplaceReady</code> taps the handler navigates straight
+              to the marketplace, so the outcome is tap-attributed by
+              construction and shown as such.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> the marketplace load hook sets the flag on every open
+              exposure journey. <b>Privacy:</b> boolean only; campaign rows
+              below the threshold are hidden.
+            </p>
+          </li>
+          <li class="m" data-status="deferred">
+            <div class="m-head">
+              <h4>Notification to offer viewed</h4>
+              <span class="pill deferred">deferred</span>
+            </div>
+            <p class="m-type">
+              CSV decision: defer until a UX question needs it
+            </p>
+            <p class="m-def">
+              Would be one more outcome boolean (<code>detailOpened</code>) on
+              the <code>exposure</code> journey from the
+              <code>OfferDetailScreen</code> mount hook.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Notification to offer created</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              journey <b>exposure</b>, outcome <code>offerCreated</code>
+            </p>
+            <p class="m-def">
+              A successful creation (any class, since every offer reaches the
+              contact network) within 7 days of receipt, once per instance and
+              campaign.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> <code>createOfferActionAtom</code> resolving sets the
+              flag; backend <code>OFFER_CREATED</code> cannot be tied to a
+              notification. <b>Privacy:</b> no offer type, class or club info on
+              the journey.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Notification to chat opened</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              journey <b>exposure</b>, outcome <code>chatInitiated</code>
+            </p>
+            <p class="m-def">
+              A successful conversation initiation within 7 days of receipt.
+              Chat-screen opens are not counted and chat notifications are not
+              enrolled, so this measures campaign-type notifications leading to
+              a new request.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> <code>sendRequestActionAtom</code> resolving sets the
+              flag.
+            </p>
+          </li>
+          <li class="m merged" data-status="merged">
+            <div class="m-head">
+              <h4>Notification to user reactivated</h4>
+              <span class="pill merged">merged</span>
+            </div>
+            <p class="m-def">
+              Merged into <b>Notification to reactivation</b>.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Notification opt-outs</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              aggregation <b>notificationsWeekly</b>, booleans
+              <code>permissionEnabledToDisabled</code>,
+              <code>permissionDisabledToEnabled</code>,
+              <code>prefOptOut&lt;Preference&gt;</code>,
+              <code>prefOptIn&lt;Preference&gt;</code>
+            </p>
+            <p class="m-def">
+              OS permission transitions detected when the state is next observed
+              (the time of the change is unknown), and in-app preference
+              toggles, counted separately. Uninstalls are not opt-outs. Booleans
+              per week, since a device almost never transitions twice.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> <code>areNotificationsEnabledAtom</code> diffed
+              against a new "last observed permission state" marker; preferences
+              toggled in <code>NotificationSettingsScreen</code>.
+              <b>Privacy:</b> do not attach the permission state to unrelated
+              events (the <code>reportNotificationInteraction</code> query
+              params do that today and can be dropped).
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Performance by notification type</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              mixed, dashboard view: sends, receipts and taps by type, 7-day
+              outcomes by type from <b>exposure</b> journeys
+            </p>
+            <p class="m-def">
+              Observational comparison of fixed broad types with the same
+              definitions and minimum group sizes. Causal lift needs a
+              randomized holdout, which does not exist and is not built.
+            </p>
+            <p class="m-meta">
+              <b>Privacy:</b> small types (club flagged, login on different
+              device) fall under suppression; no type by country by version
+              cross-tabs.
+            </p>
+          </li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="cat" id="cat-popups">
+      <summary>
+        <h3>Pop-ups and in-app prompts</h3>
+        <span class="counts"
+          ><span><span class="n">10</span> metrics</span
+          ><span><span class="n">9</span> planned</span
+          ><span><span class="n">1</span> deferred</span></span
+        >
+      </summary>
+      <div class="cat-body">
+        <p class="cat-summary">
+          The whole category is the <code>exposure</code> journey with
+          <code>source = prompt</code>: steps <code>shown</code>,
+          <code>dismissed</code>, <code>ctaClicked</code> and the 7-day outcome
+          flags. No weekly impression counters are built. "Variant" means
+          <code>PromptId</code> (a fixed enum of marketplace banners, global
+          dialogs and the remote full-screen warning) plus the warning id as
+          <code>campaign</code>. One open journey per prompt per device; a
+          repeat render while it is open is not a new exposure. Marketplace
+          banners render on the marketplace, so "Pop-up to marketplace opened"
+          only means something for prompts shown elsewhere.
+        </p>
+        <ul class="metrics">
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Pop-ups shown</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              journey <b>exposure</b> (source prompt), enrolment with
+              <code>step = shown</code>, attributes <code>importEligible</code>,
+              <code>dormantAtBaseline</code>, <code>exposedOnMarketplace</code>
+            </p>
+            <p class="m-def">
+              The prompt visibly rendered in the foreground; fetched content is
+              not an exposure. Exposed instances per prompt = journeys per type.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> banners mounting inside
+              <code>MarketplaceScreenContent.tsx</code> while focused and
+              active; dialogs via <code>askAreYouSureActionAtom</code> /
+              <code>globalDialogAtom</code> with a new
+              <code>promptId</code> argument; warning via
+              <code>OverlayInfoScreen</code>. <b>Privacy:</b> the warning id is
+              a global content id; never its title or url.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Pop-ups dismissed</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              journey <b>exposure</b>, <code>step = dismissed</code>
+            </p>
+            <p class="m-def">
+              An explicit dismiss of an exposed prompt. Leaving the screen or
+              killing the app is not a dismiss.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> the
+              <code>dismiss*InMarketplaceSuggestionActionAtom</code> setters
+              (secondary button only; the primary CTA also calls them and must
+              not count as dismiss), the <code>UserDeclinedError</code> path in
+              <code>GlobalDialog.tsx</code>,
+              <code>setCancelledIdActionAtom</code> for warnings.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Pop-up call-to-action clicked</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              journey <b>exposure</b>, <code>step = ctaClicked</code>
+            </p>
+            <p class="m-def">
+              An explicit CTA press, once per exposure. A click is intent, not
+              completion. Product notification action-link taps on the
+              Notifications screen count as <code>ctaClicked</code> on that
+              campaign's notification exposure journey.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> banner <code>primaryButton.onPress</code>, the
+              positive result in <code>GlobalDialog.tsx</code>, the
+              <code>openUrl</code> button in the warning. <b>Privacy:</b> never
+              the CTA target.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Pop-up to contact import completed</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              journey <b>exposure</b>, attribute <code>importEligible</code>,
+              outcome <code>importCompleted</code>
+            </p>
+            <p class="m-def">
+              Among exposed instances with <code>importEligible = true</code>, a
+              successful import within 7 days. <code>ctaClicked</code> gives
+              click-to-completion for free.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> exposure = <code>mpImportContacts</code> or
+              <code>mpImportNewContacts</code>; completion =
+              <code>submitContactsActionAtom</code> success.
+              <b>Privacy:</b> never the number of contacts or the reach.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Pop-up to marketplace opened</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              journey <b>exposure</b>, outcome <code>marketplaceLoaded</code>,
+              attribute <code>exposedOnMarketplace</code>
+            </p>
+            <p class="m-def">
+              A later successful main-marketplace load within 7 days, computed
+              only for prompts shown off the marketplace.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> the marketplace load hook sets the flag on every open
+              exposure journey.
+            </p>
+          </li>
+          <li class="m" data-status="deferred">
+            <div class="m-head">
+              <h4>Pop-up to offer viewed</h4>
+              <span class="pill deferred">deferred</span>
+            </div>
+            <p class="m-type">CSV decision: defer</p>
+            <p class="m-def">
+              Same optional <code>detailOpened</code> outcome as "Notification
+              to offer viewed".
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Pop-up to offer created</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              journey <b>exposure</b>, outcome <code>offerCreated</code>
+            </p>
+            <p class="m-def">
+              A successful creation within 7 days after exposure, once per
+              instance and prompt. Denominator = exposed cohort of that prompt.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> exposure <code>mpCreateOffer</code>; outcome
+              <code>createOfferActionAtom</code> resolving. <b>Privacy:</b> no
+              offer type, class, country or club info on the journey.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Pop-up to chat opened</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              journey <b>exposure</b>, outcome <code>chatInitiated</code>
+            </p>
+            <p class="m-def">
+              A successful conversation initiation within 7 days. No prompt
+              targets chat today; it is a generic outcome on every exposure.
+            </p>
+            <p class="m-meta">
+              <b>Code:</b> <code>sendRequestActionAtom</code> resolving.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Pop-up to reactivation</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              journey <b>exposure</b>, attribute <code>dormantAtBaseline</code>,
+              outcome <code>offerCreated</code> or <code>chatInitiated</code>
+            </p>
+            <p class="m-def">
+              Only instances core-dormant at exposure (30 days without a core
+              action per <code>lastCoreActionAt</code>); a core action within 7
+              days is reactivation. Instances without a marker are unknown, not
+              dormant, and are excluded.
+            </p>
+            <p class="m-meta">
+              <b>Privacy:</b> dormant exposed instances are a small group;
+              suppression applies per prompt and week.
+            </p>
+          </li>
+          <li class="m" data-status="planned">
+            <div class="m-head">
+              <h4>Conversion rate by pop-up</h4>
+              <span class="pill planned">planned</span>
+            </div>
+            <p class="m-type">
+              derived on the dashboard from <b>exposure</b> journeys grouped by
+              type; nothing new collected
+            </p>
+            <p class="m-def">
+              One primary outcome per prompt over the eligible exposed cohort
+              after maturity, with counts and suppression, no lift claims.
+              Import prompts map to <code>importCompleted</code>,
+              <code>mpCreateOffer</code> to <code>offerCreated</code>,
+              notification prompts to <code>permissionGranted</code>, the
+              warning and the rest to <code>ctaClicked</code>. Donation invoice
+              creation is not tracked.
+            </p>
+          </li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="cat" id="cat-sessions">
+      <summary>
+        <h3>Sessions</h3>
+        <span class="counts"
+          ><span><span class="n">10</span> metrics</span
+          ><span><span class="n">10</span> deferred</span></span
+        >
+      </summary>
+      <div class="cat-body">
+        <p class="cat-summary">
+          The whole category is deferred behind Q11: the app has no session
+          concept, and every metric here needs a tracker that runs on each
+          foreground and background transition, checkpoints foreground seconds
+          to MMKV every 30 seconds and keeps a short ring of session starts. If
+          built, the per-week metrics are histogram counters on
+          <code>weeklyActivity</code>, the first-open metrics are one
+          <code>firstOpenCohort</code> journey (7 days), and the "sessions
+          before" metrics are one-shot buckets on
+          <code>registrationCohort</code>. Foreground time cannot exclude idle
+          time; the published definition would say "foreground time".
+        </p>
+        <ul class="metrics">
+          <li class="m" data-status="deferred">
+            <div class="m-head">
+              <h4>Sessions per user</h4>
+              <span class="pill deferred">deferred</span>
+            </div>
+            <p class="m-type">open Q11</p>
+            <p class="m-def">
+              Would be a session count bucket (1, 2To5, 6To10, 11Plus) on
+              <code>weeklyActivity</code>.
+            </p>
+          </li>
+          <li class="m" data-status="deferred">
+            <div class="m-head">
+              <h4>Sessions per active user</h4>
+              <span class="pill deferred">deferred</span>
+            </div>
+            <p class="m-type">open Q11</p>
+            <p class="m-def">
+              Same bucket filtered on <code>coreActive</code>.
+            </p>
+          </li>
+          <li class="m" data-status="deferred">
+            <div class="m-head">
+              <h4>Session frequency</h4>
+              <span class="pill deferred">deferred</span>
+            </div>
+            <p class="m-type">open Q11</p>
+            <p class="m-def">
+              Median gap between session starts as one bucket per instance per
+              month.
+            </p>
+          </li>
+          <li class="m" data-status="deferred">
+            <div class="m-head">
+              <h4>Session duration</h4>
+              <span class="pill deferred">deferred</span>
+            </div>
+            <p class="m-type">open Q11</p>
+            <p class="m-def">
+              Foreground-time histogram per week (under 1, 1 to 5, 5 to 15, over
+              15 minutes, plus incomplete). Canonical for "Average time spent in
+              app per day week or month".
+            </p>
+          </li>
+          <li class="m" data-status="deferred">
+            <div class="m-head">
+              <h4>Session depth</h4>
+              <span class="pill deferred">deferred</span>
+            </div>
+            <p class="m-type">open Q11</p>
+            <p class="m-def">
+              Successful core actions per session as a histogram, main and club
+              classes separately.
+            </p>
+          </li>
+          <li class="m" data-status="deferred">
+            <div class="m-head">
+              <h4>Single-session users</h4>
+              <span class="pill deferred">deferred</span>
+            </div>
+            <p class="m-type">open Q11</p>
+            <p class="m-def">
+              Complement of "Repeat-session users" on the same
+              <code>firstOpenCohort</code> journey; never-returning instances
+              are unknown, not single-session.
+            </p>
+          </li>
+          <li class="m" data-status="deferred">
+            <div class="m-head">
+              <h4>Repeat-session users</h4>
+              <span class="pill deferred">deferred</span>
+            </div>
+            <p class="m-type">open Q11</p>
+            <p class="m-def">
+              Boolean "second session within 7 days of first open".
+            </p>
+          </li>
+          <li class="m" data-status="deferred">
+            <div class="m-head">
+              <h4>Sessions before first marketplace action</h4>
+              <span class="pill deferred">deferred</span>
+            </div>
+            <p class="m-type">open Q11</p>
+            <p class="m-def">
+              One bucket (1, 2To3, 4Plus) written on
+              <code>registrationCohort</code> at activation.
+            </p>
+          </li>
+          <li class="m" data-status="deferred">
+            <div class="m-head">
+              <h4>Sessions before first chat</h4>
+              <span class="pill deferred">deferred</span>
+            </div>
+            <p class="m-type">open Q11</p>
+            <p class="m-def">Same bucket written at first initiation.</p>
+          </li>
+          <li class="m" data-status="deferred">
+            <div class="m-head">
+              <h4>Sessions before churn</h4>
+              <span class="pill deferred">deferred</span>
+            </div>
+            <p class="m-type">open Q11</p>
+            <p class="m-def">
+              Not measurable as proposed (absent phones never deliver a final
+              count); the returner-only alternative is "Sessions before
+              reactivation", and churn volume itself is backend.
+            </p>
+          </li>
+        </ul>
+      </div>
+    </details>
+  </section>
+
+  <section class="part" id="questions">
+    <p class="eyebrow">Part 5</p>
+    <h2>Open questions</h2>
+    <p class="lead">
+      Three questions wait on business. Eight engineering questions are answered
+      and recorded under "Decisions taken".
+    </p>
+
+    <h3>Pending for business</h3>
+    <div class="q">
+      <h3>Q9: Acquisition source</h3>
+      <p class="aff">
+        Affects: Registrations by acquisition source, Activation by acquisition
+        source, Number of new users from events, Activation of users from
+        events, the source slice of Activation rate by event by channel or
+        source, Churn by acquisition source, Reactivation by acquisition source.
+      </p>
+      <p>
+        No campaign, referral, link parameter or install-referrer concept
+        exists, so every "by source" metric is deferred. Business needs to
+        decide whether a source signal is worth an extra input, and which one.
+      </p>
+      <ol type="a">
+        <li>
+          Do not build; the "by source" metrics are dropped and re-opened when a
+          campaign programme exists.
+        </li>
+        <li class="rec">
+          Add an optional "how did you hear about Vexl" picker in onboarding
+          with a closed list (event, friend, social, press, organic, unknown),
+          stored on the device and copied onto the onboarding and registration
+          journeys. The only option that works on both platforms and keeps the
+          value a small enum, if the metrics are wanted.
+        </li>
+        <li>
+          Add a <code>source</code> parameter to
+          <code>app.vexl.it/link/</code> handled before login; covers links only
+          and needs the initial-URL handling moved out of the logged-in hooks.
+        </li>
+      </ol>
+    </div>
+    <div class="q">
+      <h3>Q10: Completed trades</h3>
+      <p class="aff">
+        Affects: the three optional questions, Number of completed trades, Open
+        chat to completed trade ratio and time, Post-trade return rate, Users
+        who completed more than one trade, Average time between trades.
+      </p>
+      <p>
+        Vexl cannot observe a trade. The only way to get a completion signal is
+        one optional structured question at the existing post-chat feedback
+        prompt, kept out of the feedback-service row and counted as client
+        aggregation. Should that question be added, and if so which one?
+      </p>
+      <ol type="a">
+        <li class="rec">
+          Add one question with the answers traded, met but no trade, no
+          meeting, prefer not to answer. This unlocks "Did you connect
+          successfully", Number of completed trades, Open chat to completed
+          trade ratio, Post-trade return rate and Users who completed more than
+          one trade as self-reported metrics; "Did it go well" and "Did this
+          work out for you" are dropped as duplicates of the star rating; the
+          two time metrics stay unmeasurable.
+        </li>
+        <li>
+          No new question; the whole completed-trade group stays deferred.
+        </li>
+      </ol>
+    </div>
+    <div class="q">
+      <h3>Q11: Foreground session tracking</h3>
+      <p class="aff">
+        Affects: the whole Sessions category, Average time spent in app per day
+        week or month, Sessions before reactivation.
+      </p>
+      <p>
+        Session metrics need a tracker that runs on every foreground and
+        background transition, checkpoints foreground seconds to storage every
+        30 seconds and keeps a short ring of session starts on the device. Is
+        that continuous bookkeeping worth it, given that the activity records
+        already answer "who was active this week"?
+      </p>
+      <ol type="a">
+        <li>
+          Build the tracker and ship Sessions per user, Sessions per active
+          user, Session frequency, Session duration and Session depth as weekly
+          histograms, with the first-open cohort metrics as a later step.
+        </li>
+        <li class="rec">
+          Do not build; sessions stay deferred and the activity and retention
+          records are the engagement measure.
+        </li>
+      </ol>
+    </div>
+
+    <h3>Answered (engineering)</h3>
+    <ul class="answered">
+      <li>
+        <span class="qn">Q1</span
+        ><span
+          >Onboarding is a 7-day journey ending at
+          <code>onboardingFinished</code>; activation, its class and latency
+          move to the 31-day <code>registrationCohort</code>.</span
+        >
+      </li>
+      <li>
+        <span class="qn">Q2</span
+        ><span
+          >Reactivation is a 7-day write-once
+          <code>reactivationEpisode</code> carrying gap, first action type, club
+          membership and the previous episode's length.</span
+        >
+      </li>
+      <li>
+        <span class="qn">Q3</span
+        ><span
+          >Owner-side offer demand and requester-side answers use local 7-day
+          window records rolled into weekly counters; nothing per offer or per
+          request reaches the server.</span
+        >
+      </li>
+      <li>
+        <span class="qn">Q4</span
+        ><span
+          >Only campaign-like notification types enrol an
+          <code>exposure</code> journey; chat notifications are counted in
+          <code>notificationsWeekly</code> only.</span
+        >
+      </li>
+      <li>
+        <span class="qn">Q5</span
+        ><span>The minimum suppression group is 20 reporting instances.</span>
+      </li>
+      <li>
+        <span class="qn">Q6</span
+        ><span
+          >DAU and WAU come from the existing contact-service job with 1-day and
+          7-day rolling windows, labelled rolling.</span
+        >
+      </li>
+      <li>
+        <span class="qn">Q7</span
+        ><span
+          >Club join totals are read from the
+          <code>member_count_changes</code> table, which counts both join
+          paths.</span
+        >
+      </li>
+      <li>
+        <span class="qn">Q8</span
+        ><span
+          >Add <code>notificationType</code> to
+          <code>NOTIFICATION_SENT</code> only; no Expo ticket or receipt
+          handling.</span
+        >
+      </li>
+    </ul>
+  </section>
+
+  <footer>
+    Condensed from <code>docs/analytics/README.md</code>,
+    <code>system.md</code>, <code>definitions-index.md</code>,
+    <code>open-questions.md</code> and the twelve files in
+    <code>metrics/</code>. The Markdown files remain the source of truth.
+  </footer>
+</main>
+
+<script>
+  (function () {
+    var rows = [].slice.call(document.querySelectorAll(".m"));
+    var boxes = {};
+    ["planned", "deferred", "rejected", "merged", "external"].forEach(
+      function (s) {
+        boxes[s] = document.getElementById("f-" + s);
+      },
+    );
+    var search = document.getElementById("f-search");
+    var count = document.getElementById("f-count");
+    var cats = [].slice.call(document.querySelectorAll("details.cat"));
+    function apply() {
+      var q = search.value.trim().toLowerCase();
+      var shown = 0;
+      rows.forEach(function (r) {
+        var ok =
+          boxes[r.dataset.status].checked &&
+          (!q ||
+            r.querySelector("h4").textContent.toLowerCase().indexOf(q) >= 0);
+        r.hidden = !ok;
+        if (ok) shown++;
+      });
+      cats.forEach(function (c) {
+        var visible = c.querySelectorAll(".m:not([hidden])").length;
+        c.hidden = visible === 0;
+        if (q && visible > 0) c.open = true;
+      });
+      count.textContent = shown + " of " + rows.length + " shown";
+    }
+    Object.keys(boxes).forEach(function (s) {
+      boxes[s].addEventListener("change", apply);
+    });
+    search.addEventListener("input", apply);
+  })();
+</script>

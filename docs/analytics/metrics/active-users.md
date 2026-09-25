@@ -27,7 +27,7 @@
 - **Status: planned**.
 - **Type**: mixed. Backend: 7-day window on the same job (label "rolling"). Client: aggregation `weeklyActivity` (week), booleans `engaged`, `coreActive`. Counters on the same record: `offersCreatedMain`, `offersCreatedBoth`, `requestsSentMain`, `requestsSentClub`, `rerequests` ("Offers created", "Offers reacted to"), the import counters ("Contact import started", "Contact import completed") and the gap counters ("Time from last meaningful action to churn"); all cap 20.
 - **Definition**: Engaged instances per UTC calendar week, one row per reporting instance per week. Calendar weeks replace rolling WAU on purpose; daily counts cannot be summed into unique weekly counts.
-- **Where in the code**: the signal sites in the summary set `engaged`; the core-action sites set `coreActive`. Record handling via `setField` and `bumpCounter` (system.md "Club offers created").
+- **Where in the code**: the signal sites in the summary set `engaged`; the core-action sites set `coreActive`. Record handling via `setField` and `bumpCounter` (system.md section 6.3).
 - **Privacy notes**: no per-day bits. Country is a row column; a week with `engaged` alone is low information, the counters add pattern bits, which is why they are capped and the dashboard suppresses small groups.
 
 ### Monthly active users

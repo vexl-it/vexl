@@ -71,7 +71,7 @@ Merged into "Retention after activation". The first core action is activation; a
 - **Status: planned**
 - **Type**: journey `clubJoinCohort` (defined in `clubs.md` "Returning to a Club"), booleans `d7Main`, `d30Main`, `d7Club`, `d30Club`. Canonical for "Club to return drop-off".
 - **Definition**: Exact-day windows after the first club join, main-class and club-class core actions as separate series. Differs from the "any visit" milestone of "Returning to a Club".
-- **Where in the code**: the core-action success points, classes from `coreAction.ts`; enrolment as in "Returning to a Club".
+- **Where in the code**: the core-action success points, classes from `coreAction.ts`; enrolment as in section 6.6.
 - **Privacy notes**: club definition: no country, delayed uploads, no club uuid.
 
 ### Repeat marketplace usage

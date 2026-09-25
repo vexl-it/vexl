@@ -153,6 +153,8 @@
   "appSettings.changeCurrency": "Zmeniť menu",
   "appSettings.appearanceTitle": "Vzhľad",
   "appSettings.allowScreencapture": "Povoliť snímky obrazovky",
+  "appSettings.anonymousUsageStatistics": "Anonymné štatistiky používania",
+  "appSettings.anonymousUsageStatisticsNote": "Ukazuje nám, koľko ľudí prejde krokmi ako registrácia alebo otvorenie trhoviska, bez toho, aby sme kedy zistili, kto si.",
   "appSettings.appearance.light": "Svetlý režim",
   "appSettings.appearance.dark": "Tmavý režim",
   "appSettings.appearance.system": "Podľa zariadenia"

@@ -1,9 +1,11 @@
+import {bucketOffersVisible} from '@vexl-next/analytics-definitions/src/buckets'
 import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {type OfferId} from '@vexl-next/domain/src/general/offers'
 import {Array, Effect, Record, pipe} from 'effect'
 import {atom} from 'jotai'
 import {AppState} from 'react-native'
 import {apiAtom} from '../../../../api'
+import {reportMarketplaceWeeklyActionAtom} from '../../../../utils/analytics'
 import {markMarketplaceReadyNotificationFlowAsCompletedIfOffersAreVisibleActionAtom} from '../../../../utils/marketplaceReadyNotification/store'
 import {refreshLastSeenOffersActionAtom} from '../../../../utils/newOffersNotificationBackgroundTask/store'
 import reportError from '../../../../utils/reportError'
@@ -15,7 +17,10 @@ import {ensureMyOffersHaveOwnershipInfoUploadedInPrivatepayloadForOwner} from '.
 import {loadingStateAtom} from '../loadingState'
 import {anyMarketplaceSuggestionDismissedInThisSessionAtom} from '../offerSuggestionVisible'
 import {offersAtom, offersStateAtom} from '../offersState'
-import {reportOffersWithoutLocationActionAtom} from '../offersToSeeInMarketplace'
+import {
+  offersToSeeInMarketplaceAtom,
+  reportOffersWithoutLocationActionAtom,
+} from '../offersToSeeInMarketplace'
 import {combineIncomingOffers} from './utils/combineIncomingOffers'
 import {fetchOffersReportErrorsActionAtom} from './utils/fetchOffersReportErrorsActionAtom'
 import {getRemovedOffersIds} from './utils/getRemovedOffersIds'
@@ -125,6 +130,16 @@ export const refreshOffersActionAtom = atom(
       )
 
       if (AppState.currentState === 'active') {
+        const visibleOffersCount = get(offersToSeeInMarketplaceAtom).length
+        set(reportMarketplaceWeeklyActionAtom, (state) =>
+          state.firstLoadResult !== 'notLoaded'
+            ? state
+            : {
+                ...state,
+                firstLoadResult: visibleOffersCount > 0 ? 'offers' : 'empty',
+                offersVisibleBucket: bucketOffersVisible(visibleOffersCount),
+              }
+        )
         set(refreshLastSeenOffersActionAtom)
         set(
           markMarketplaceReadyNotificationFlowAsCompletedIfOffersAreVisibleActionAtom

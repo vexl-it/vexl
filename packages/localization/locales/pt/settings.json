@@ -152,6 +152,8 @@
   "appSettings.changeCurrency": "Alterar moeda",
   "appSettings.appearanceTitle": "Aparência",
   "appSettings.allowScreencapture": "Permitir capturas de ecrã",
+  "appSettings.anonymousUsageStatistics": "Estatísticas de utilização anónimas",
+  "appSettings.anonymousUsageStatisticsNote": "Mostra-nos quantas pessoas passam por passos como o registo ou a abertura do mercado, sem nunca te identificar.",
   "appSettings.appearance.light": "Modo claro",
   "appSettings.appearance.dark": "Modo escuro",
   "appSettings.appearance.system": "Igual ao dispositivo"

@@ -21,6 +21,10 @@ import {vexlNotificationTokenAtom} from '../../../state/notifications/vexlNotifi
 import {sessionAtom} from '../../../state/session'
 import {upgradeSession} from '../../../state/session/upgradeSession'
 import {
+  reportOnboardingStepActionAtom,
+  reportRegisteredActionAtom,
+} from '../../../utils/analytics'
+import {
   appSource,
   deviceModel,
   osVersion,
@@ -89,6 +93,7 @@ const handleUserCreationActionAtom = atom(
       }
 
       set(beginMarketplaceReadyNotificationFlowActionAtom)
+      set(reportRegisteredActionAtom)
       set(sessionAtom, O.some(session))
     }).pipe(
       Effect.tapError((e) => {
@@ -242,6 +247,7 @@ export const finishLoginActionAtom = atom(
           notifyExistingUserAboutLogin: true,
         })
       )
+      set(reportOnboardingStepActionAtom, {reLogin: userExists.exists})
 
       if (userExists.exists) {
         const confirmed = yield* _(

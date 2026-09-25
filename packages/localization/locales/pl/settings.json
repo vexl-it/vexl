@@ -153,6 +153,8 @@
   "appSettings.changeCurrency": "Zmień walutę",
   "appSettings.appearanceTitle": "Wygląd",
   "appSettings.allowScreencapture": "Zezwól na zrzuty ekranu",
+  "appSettings.anonymousUsageStatistics": "Anonimowe statystyki użytkowania",
+  "appSettings.anonymousUsageStatisticsNote": "Pokazuje nam, ile osób przechodzi kroki takie jak rejestracja czy otwarcie rynku, i nigdy nie zdradza, kim jesteś.",
   "appSettings.appearance.light": "Tryb jasny",
   "appSettings.appearance.dark": "Tryb ciemny",
   "appSettings.appearance.system": "Dopasuj do urządzenia"

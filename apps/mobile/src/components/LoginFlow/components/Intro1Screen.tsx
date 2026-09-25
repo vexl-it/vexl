@@ -9,6 +9,7 @@ import {useSetAtom} from 'jotai'
 import React, {useEffect} from 'react'
 import {useWindowDimensions} from 'react-native'
 import {type LoginFlowStackScreenProps} from '../../../navigationTypes'
+import {reportOnboardingStepActionAtom} from '../../../utils/analytics'
 import clearMmkvStorageAndEmptyAtoms from '../../../utils/clearMmkvStorageAndEmptyAtoms'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {showTosSummaryForAlreadyLoggedInUserAtom} from '../../../utils/preferences'
@@ -29,6 +30,8 @@ export default function Intro1Screen({navigation}: Props): React.ReactElement {
     showTosSummaryForAlreadyLoggedInUserAtom
   )
 
+  const reportOnboardingStep = useSetAtom(reportOnboardingStepActionAtom)
+
   useEffect(() => {
     setShowTosSummaryForAlreadyLoggedInUser(false)
   }, [setShowTosSummaryForAlreadyLoggedInUser])
@@ -38,7 +41,8 @@ export default function Intro1Screen({navigation}: Props): React.ReactElement {
       action={{
         label: t('loginFlow.v2.intro1.action'),
         onPress: () => {
-          void clearMmkvStorageAndEmptyAtoms().then(() => {
+          void clearMmkvStorageAndEmptyAtoms({keepAnalytics: true}).then(() => {
+            reportOnboardingStep({step: 'intro'})
             navigation.navigate('Intro2')
           })
         },

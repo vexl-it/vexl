@@ -5,6 +5,7 @@ import {databaseConfig} from '../configs'
 import initialMigraiton from './migrations/0001_initial'
 import fixBadAttributesFormat from './migrations/0002_fix_bad_attributes_format'
 import addLastReportedByServiceTable from './migrations/0003_add_last_reported_by_service_table'
+import addAnalyticsStatesTable from './migrations/0004_add_analytics_states_table'
 
 const migrations = [
   {
@@ -21,6 +22,11 @@ const migrations = [
     id: 3,
     name: 'add_last_reported_by_service_table',
     migrationEffect: addLastReportedByServiceTable,
+  },
+  {
+    id: 4,
+    name: 'add_analytics_states_table',
+    migrationEffect: addAnalyticsStatesTable,
   },
 ] as const
 

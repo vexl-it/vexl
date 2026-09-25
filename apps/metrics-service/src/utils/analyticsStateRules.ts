@@ -1,5 +1,8 @@
-import {dayOf} from '@vexl-next/analytics-definitions/src/buckets'
-import {type DayString} from '@vexl-next/analytics-definitions/src/core'
+import {dayOf, isoWeekStart} from '@vexl-next/analytics-definitions/src/buckets'
+import {
+  type DayString,
+  type UpdatedDayPrecision,
+} from '@vexl-next/analytics-definitions/src/core'
 import {type VersionString} from '@vexl-next/domain/src/utility/VersionString.brand'
 import {Array, Clock, Effect, Option, pipe, Schema, String} from 'effect'
 
@@ -13,6 +16,7 @@ export class AnalyticsDayRuleError extends Schema.TaggedError<AnalyticsDayRuleEr
   rule: Schema.Literal(
     'malformedDay',
     'updatedBeforeStart',
+    'startDayInFuture',
     'updatedDayInFuture',
     'stale'
   ),
@@ -34,11 +38,13 @@ export const checkAnalyticsStateDays = ({
   updatedDay,
   today,
   maxAgeDays,
+  updatedDayPrecision,
 }: {
   startDay: DayString
   updatedDay: DayString
   today: DayString
   maxAgeDays: number
+  updatedDayPrecision: UpdatedDayPrecision
 }): Effect.Effect<void, AnalyticsDayRuleError> =>
   Effect.gen(function* (_) {
     const fail = (rule: AnalyticsDayRuleError['rule']): AnalyticsDayRuleError =>
@@ -57,7 +63,12 @@ export const checkAnalyticsStateDays = ({
       Effect.mapError(() => fail('malformedDay'))
     )
 
-    if (updated < start) return yield* _(fail('updatedBeforeStart'))
+    const earliestUpdate =
+      updatedDayPrecision === 'week'
+        ? Date.parse(isoWeekStart(new Date(start)))
+        : start
+    if (updated < earliestUpdate) return yield* _(fail('updatedBeforeStart'))
+    if (start > now + DAY_MS) return yield* _(fail('startDayInFuture'))
     if (updated > now + DAY_MS) return yield* _(fail('updatedDayInFuture'))
     if (now - start > maxAgeDays * DAY_MS) return yield* _(fail('stale'))
   })

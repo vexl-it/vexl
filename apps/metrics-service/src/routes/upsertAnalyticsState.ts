@@ -50,6 +50,10 @@ export const upsertAnalyticsState = HttpApiBuilder.handler(
           updatedDay: payload.updatedDay,
           today,
           maxAgeDays: analyticsStateMaxAgeDays(definition, window),
+          updatedDayPrecision:
+            definition.kind === 'journey'
+              ? definition.updatedDayPrecision
+              : 'day',
         })
       )
 

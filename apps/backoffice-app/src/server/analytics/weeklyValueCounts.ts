@@ -9,6 +9,7 @@ import {
   pipe,
   Record,
   Schema,
+  String,
   type ParseResult,
 } from 'effect'
 
@@ -85,7 +86,7 @@ export const toValueCounts = (
 ): ValueCounts =>
   pipe(
     rows,
-    Array.groupBy((row) => row.key),
+    Array.groupBy((row) => String.snakeToCamel(row.key)),
     Record.map((keyRows) =>
       pipe(
         keyRows,

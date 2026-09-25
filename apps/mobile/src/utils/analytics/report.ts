@@ -57,7 +57,7 @@ export function journeyReportActionAtom<S extends object, I>(
     set(setAnalyticsInstancesAtom, {...instances, [next.value.id]: next.value})
     // Journey steps go out right away; a failure leaves the entry pending for
     // the next start or background flush.
-    Effect.runFork(set(flushAnalyticsActionAtom))
+    Effect.runFork(set(flushAnalyticsActionAtom, 'journeys'))
   })
 }
 

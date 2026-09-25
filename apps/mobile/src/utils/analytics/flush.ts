@@ -2,7 +2,11 @@ import {Effect, Option, Predicate} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../api'
 import reportError from '../reportError'
-import {analyticsInstancesAtom, setAnalyticsInstancesAtom} from './atoms'
+import {
+  analyticsEnabledAtom,
+  analyticsInstancesAtom,
+  setAnalyticsInstancesAtom,
+} from './atoms'
 import {toUpsert} from './domain'
 import {pendingUploads, pruneSettledExpired, settleInstance} from './instances'
 
@@ -32,8 +36,9 @@ const flushLock = Effect.unsafeMakeSemaphore(1)
 
 export const flushAnalyticsActionAtom = atom(
   null,
-  (get, set): Effect.Effect<void> =>
+  (get, set, scope: 'all' | 'journeys' = 'all'): Effect.Effect<void> =>
     Effect.gen(function* () {
+      if (!get(analyticsEnabledAtom)) return
       set(setAnalyticsInstancesAtom, (instances) =>
         pruneSettledExpired(instances, new Date())
       )
@@ -41,38 +46,48 @@ export const flushAnalyticsActionAtom = atom(
 
       yield* Effect.forEach(
         pendingUploads(get(analyticsInstancesAtom)),
-        (instance) =>
-          api.upsertAnalyticsState(toUpsert(instance)).pipe(
-            Effect.map(() => true),
-            Effect.catchAll((error) =>
-              Effect.sync(() => {
-                const rejected = isRejectedByServer(error)
-                if (rejected)
-                  reportError(
-                    'warn',
-                    new Error('Analytics state rejected by server'),
-                    {
-                      name: instance.name,
-                      status: Option.getOrUndefined(errorStatus(error)),
-                    }
-                  )
-                return rejected
-              })
-            ),
-            Effect.tap((settled) =>
-              Effect.sync(() => {
-                if (!settled) return
-                set(setAnalyticsInstancesAtom, (instances) =>
-                  settleInstance(
-                    instances,
-                    instance.id,
-                    instance.revision,
-                    new Date()
-                  )
-                )
-              })
+        (queued) =>
+          Effect.gen(function* () {
+            const instance = get(analyticsInstancesAtom)[queued.id]
+            if (
+              !get(analyticsEnabledAtom) ||
+              instance?.pending !== true ||
+              (scope === 'journeys' && instance.kind !== 'journey')
             )
-          ),
+              return
+
+            yield* api.upsertAnalyticsState(toUpsert(instance)).pipe(
+              Effect.map(() => true),
+              Effect.catchAll((error) =>
+                Effect.sync(() => {
+                  const rejected = isRejectedByServer(error)
+                  if (rejected)
+                    reportError(
+                      'warn',
+                      new Error('Analytics state rejected by server'),
+                      {
+                        name: instance.name,
+                        status: Option.getOrUndefined(errorStatus(error)),
+                      }
+                    )
+                  return rejected
+                })
+              ),
+              Effect.tap((settled) =>
+                Effect.sync(() => {
+                  if (!settled) return
+                  set(setAnalyticsInstancesAtom, (instances) =>
+                    settleInstance(
+                      instances,
+                      instance.id,
+                      instance.revision,
+                      new Date()
+                    )
+                  )
+                })
+              )
+            )
+          }),
         {discard: true}
       )
     }).pipe(flushLock.withPermits(1))

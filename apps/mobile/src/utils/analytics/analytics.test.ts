@@ -447,6 +447,36 @@ describe('journey step upload', () => {
     expect(onboardingInstance().pending).toBe(false)
   })
 
+  it('leaves aggregations pending until a lifecycle flush', async () => {
+    const aggregation = someInstance({
+      kind: 'aggregation',
+      name: 'marketplaceWeekly',
+      payload: {marketplaceOpened: 1, firstLoadResult: 'empty'},
+    })
+    store.set(setAnalyticsInstancesAtom, {[aggregation.id]: aggregation})
+    mockUpsertAnalyticsState.mockReturnValue(Effect.void)
+
+    store.set(reportOnboarding, {step: 'opened'})
+    await settle()
+
+    expect(mockUpsertAnalyticsState).toHaveBeenCalledTimes(1)
+    expect(mockUpsertAnalyticsState).toHaveBeenCalledWith(
+      expect.objectContaining({name: 'onboarding'})
+    )
+    expect(store.get(analyticsInstancesAtom)[aggregation.id]?.pending).toBe(
+      true
+    )
+
+    await Effect.runPromise(store.set(flushAnalyticsActionAtom))
+
+    expect(mockUpsertAnalyticsState).toHaveBeenLastCalledWith(
+      expect.objectContaining({name: 'marketplaceWeekly'})
+    )
+    expect(store.get(analyticsInstancesAtom)[aggregation.id]?.pending).toBe(
+      false
+    )
+  })
+
   it('collapses steps recorded during an upload into one request with the latest state', async () => {
     const firstUpload = Effect.runSync(Deferred.make())
     mockUpsertAnalyticsState
@@ -490,6 +520,37 @@ describe('journey step upload', () => {
 })
 
 describe('opt-out', () => {
+  it.each([false, true])(
+    'does not send captured entries after opt-out (re-enabled: %s)',
+    async (reEnable) => {
+      const first = someInstance({id: id(1)})
+      const second = someInstance({id: id(2)})
+      store.set(setAnalyticsInstancesAtom, {
+        [first.id]: first,
+        [second.id]: second,
+      })
+      const started = Effect.runSync(Deferred.make())
+      const finish = Effect.runSync(Deferred.make())
+      mockUpsertAnalyticsState
+        .mockReturnValueOnce(
+          Deferred.succeed(started, undefined).pipe(
+            Effect.andThen(Deferred.await(finish))
+          )
+        )
+        .mockReturnValue(Effect.void)
+      const flushing = Effect.runPromise(store.set(flushAnalyticsActionAtom))
+      await Effect.runPromise(Deferred.await(started))
+
+      store.set(analyticsEnabledAtom, false)
+      if (reEnable) store.set(analyticsEnabledAtom, true)
+      Effect.runSync(Deferred.succeed(finish, undefined))
+      await flushing
+
+      expect(mockUpsertAnalyticsState).toHaveBeenCalledTimes(1)
+      expect(store.get(analyticsInstancesAtom)).toEqual({})
+    }
+  )
+
   it('wipes the local analytics state', () => {
     const store = getDefaultStore()
     const instance = someInstance()

@@ -1,3 +1,4 @@
+import {dayOf, isoWeekStart} from '@vexl-next/analytics-definitions/src/buckets'
 import {DayString} from '@vexl-next/analytics-definitions/src/core'
 import {InvalidAnalyticsStateError} from '@vexl-next/rest-api/src/services/metrics/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
@@ -18,6 +19,67 @@ beforeEach(async () => {
 })
 
 describe('upsertAnalyticsState', () => {
+  it('accepts a weekly update rounded before the registration day', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const updatedDay = isoWeekStart(new Date(daysAgo(7)))
+        const startDay = dayOf(
+          new Date(Date.parse(updatedDay) + 6 * 24 * 60 * 60 * 1000)
+        )
+        const request = onboardingUpsert({
+          name: 'registrationCohort',
+          startDay,
+          updatedDay,
+          payload: {},
+        })
+
+        yield* _(upsertState(request))
+        expect(yield* _(readStoredStates)).toMatchObject([
+          {name: 'registrationCohort', startDay, updatedDay, payload: {}},
+        ])
+      })
+    )
+  })
+
+  it('rejects a weekly update from before the registration week', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const result = yield* _(
+          Effect.either(
+            upsertState(
+              onboardingUpsert({
+                name: 'registrationCohort',
+                updatedDay: isoWeekStart(new Date(daysAgo(7))),
+                payload: {},
+              })
+            )
+          )
+        )
+        expectErrorResponse(InvalidAnalyticsStateError)(result)
+      })
+    )
+  })
+
+  it('rejects a future registration even with a weekly update in the past', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const result = yield* _(
+          Effect.either(
+            upsertState(
+              onboardingUpsert({
+                name: 'registrationCohort',
+                startDay: daysAgo(-2),
+                updatedDay: isoWeekStart(new Date()),
+                payload: {},
+              })
+            )
+          )
+        )
+        expectErrorResponse(InvalidAnalyticsStateError)(result)
+      })
+    )
+  })
+
   it('stores a valid journey with platform, release line and country prefix', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {

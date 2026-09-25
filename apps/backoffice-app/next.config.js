@@ -13,6 +13,7 @@ const isNodeBuiltinRequest = (request) => {
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  allowedDevOrigins: process.env.NEXT_ALLOWED_DEV_ORIGINS?.split(','),
   reactStrictMode: true,
   output: 'standalone',
 

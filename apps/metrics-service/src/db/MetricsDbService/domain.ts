@@ -41,3 +41,9 @@ export class LastReportedByServiceRecord extends Schema.Class<LastReportedByServ
   lastEventAt: Schema.DateFromSelf,
   serviceName: Schema.String,
 }) {}
+
+export class AnalyticsStateConflictError extends Schema.TaggedError<AnalyticsStateConflictError>(
+  'AnalyticsStateConflictError'
+)('AnalyticsStateConflictError', {
+  name: Schema.String,
+}) {}

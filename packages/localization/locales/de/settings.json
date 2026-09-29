@@ -151,6 +151,8 @@
   "appSettings.changeCurrency": "Währung ändern",
   "appSettings.appearanceTitle": "Darstellung",
   "appSettings.allowScreencapture": "Screenshots erlauben",
+  "appSettings.anonymousUsageStatistics": "Anonyme Nutzungsstatistiken",
+  "appSettings.anonymousUsageStatisticsNote": "Zeigt uns, wie viele Leute Schritte wie die Registrierung oder das Öffnen des Marktplatzes schaffen, ohne dich jemals zu identifizieren.",
   "appSettings.appearance.light": "Heller Modus",
   "appSettings.appearance.dark": "Dunkler Modus",
   "appSettings.appearance.system": "Geräteeinstellung verwenden"

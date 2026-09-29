@@ -151,6 +151,8 @@
   "appSettings.changeCurrency": "通貨を変更",
   "appSettings.appearanceTitle": "外観",
   "appSettings.allowScreencapture": "スクリーンキャプチャを許可",
+  "appSettings.anonymousUsageStatistics": "匿名の利用統計",
+  "appSettings.anonymousUsageStatisticsNote": "登録やマーケットを開くなどのステップを何人が進んだかを把握するためのもので、あなたを特定することは一切ありません。",
   "appSettings.appearance.light": "ライトモード",
   "appSettings.appearance.dark": "ダークモード",
   "appSettings.appearance.system": "端末に合わせる"

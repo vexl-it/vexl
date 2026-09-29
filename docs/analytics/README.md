@@ -30,8 +30,8 @@ Both client types are the same server primitive: an upsert of a schema-validated
 - **Country** is stored on journeys and aggregations alike (except club definitions), and the dashboard suppresses small groups.
 - **Daily active users** come from the backend refresh metric only. Client activity records are weekly and monthly engaged flags with no per-day bits.
 - **"Before churn" snapshots** ("Marketplace actions before churn", "Chats opened before churn", "App sessions before churn") are rejected. A per-device record overwritten on every start is a standing device profile.
-- **Journey steps are uploaded immediately**; aggregations go out on app start and best effort on background. A journey's first upload can be paired by write order with backend rows such as `USER_LOGGED_IN`; that timing-join trade-off is accepted and documented in `system.md` section 8.
-- **Long-lived journeys** (30 days) carry booleans and enums only, one journey per milestone, never chained. D90 retention is not built.
+- **Journey steps are uploaded immediately**, and that upload carries journey entries only; aggregations go out on app start and best effort on background. A journey's first upload can be paired by write order with backend rows such as `USER_LOGGED_IN`; that timing-join trade-off is accepted and documented in `system.md` section 8.
+- **Long-lived journeys** (31 days) carry booleans and enums only, one journey per milestone, never chained. D90 retention is not built.
 - **Missing data is "unknown", never churn.** MMKV is wiped on logout and data loss happens; a reinstall or re-login is a new instance.
 - **Onboarding is a 7-day journey** ending at `onboardingFinished`. Activation, activation latency and D1/D7/D30 live on `registrationCohort`, a 31-day journey that starts at registration.
 - **Reactivation** is a 7-day write-once `reactivationEpisode` journey carrying the gap bucket, first action type and club membership. The time to the next dormancy is computed from local markers at the next episode.

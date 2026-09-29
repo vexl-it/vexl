@@ -64,7 +64,7 @@ Merged into "Onboarding completion and onboarding churn" (`acquisition.md`). Das
 
 - **Status: planned**
 - **Type**: aggregation `marketplaceWeekly` (week), the `empty` value of `firstLoadResult` from "Users who see at least one offer". Canonical for "Number of users who see no offers".
-- **Definition**: The complementary outcome from the same first-successful-load population, so "Users who see at least one offer" and "Users who see no offers" are mutually exclusive. API errors and user filters are not "no offers". Pending decryption is not a state: `refreshOffersActionAtom` merges decrypted offers before it resolves.
+- **Definition**: The complementary outcome from the same first-successful-load population, so "Users who see at least one offer" and "Users who see no offers" are mutually exclusive. Empty rate = `empty` / (`offers` + `empty`); `notLoaded` rows are outside the denominator and the dashboard shows them as their own count. API errors and user filters are not "no offers". Pending decryption is not a state: `refreshOffersActionAtom` merges decrypted offers before it resolves.
 - **Where in the code**: as "Users who see at least one offer". `markMarketplaceReadyNotificationFlowAsCompletedIfOffersAreVisibleActionAtom` (`apps/mobile/src/utils/marketplaceReadyNotification/store.ts`) is an existing "first offer became visible" transition, not reused.
 - **Privacy notes**: see "Users who see at least one offer".
 

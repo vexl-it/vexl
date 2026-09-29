@@ -1,4 +1,8 @@
-import {dayOf, isoWeekStart} from '@vexl-next/analytics-definitions/src/buckets'
+import {
+  dayOf,
+  isoWeekStart,
+  updatedDayFor,
+} from '@vexl-next/analytics-definitions/src/buckets'
 import {
   type AggregationDefinition,
   type AggregationPeriod,
@@ -116,8 +120,16 @@ export function applyJourneyStep<S extends object, I>({
     'step' in payload &&
     typeof payload.step === 'string' &&
     definition.terminalStates.includes(payload.step)
-  const updatedDay =
-    definition.updatedDayPrecision === 'week' ? isoWeekStart(now) : dayOf(now)
+  const startDay = pipe(
+    current,
+    Option.map((one) => one.startDay),
+    Option.getOrElse(() => dayOf(now))
+  )
+  const updatedDay = updatedDayFor(
+    definition.updatedDayPrecision,
+    startDay,
+    now
+  )
 
   return Option.some(
     Option.match(current, {
@@ -127,7 +139,7 @@ export function applyJourneyStep<S extends object, I>({
         name: definition.name,
         schemaVersion: definition.schemaVersion,
         revision: 0,
-        startDay: dayOf(now),
+        startDay,
         updatedDay,
         payload,
         closed,
@@ -170,7 +182,11 @@ export function applyAggregationUpdate<S extends object, I>({
     Option.getOrElse(() => initialState)
   )
   const payload = update(state)
-  if (Option.isSome(current) && payload === state) return Option.none()
+  if (
+    Option.isSome(current) &&
+    Schema.equivalence(definition.payloadSchema)(payload, state)
+  )
+    return Option.none()
 
   const updatedDay = dayOf(now)
   return Option.some(

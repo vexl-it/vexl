@@ -188,19 +188,50 @@ describe('applyJourneyStep', () => {
     expect(Option.isNone(next)).toBe(true)
   })
 
-  it('rounds updatedDay to the ISO week for week precision journeys', () => {
-    const next = Option.getOrThrow(
-      applyJourneyStep({
-        definition: registrationCohortJourney,
-        current: Option.none(),
-        partial: {},
-        now: wednesday,
-        newId,
-      })
-    )
+  describe('week precision journeys', () => {
+    const startedOnWednesday = (): AnalyticsInstance =>
+      Option.getOrThrow(
+        applyJourneyStep({
+          definition: registrationCohortJourney,
+          current: Option.none(),
+          partial: {},
+          now: wednesday,
+          newId,
+        })
+      )
+    const activatedAt = (now: Date): AnalyticsInstance =>
+      Option.getOrThrow(
+        applyJourneyStep({
+          definition: registrationCohortJourney,
+          current: Option.some(startedOnWednesday()),
+          partial: {activatedBy: 'offer'},
+          now,
+          newId,
+        })
+      )
 
-    expect(next.startDay).toBe('2026-09-23')
-    expect(next.updatedDay).toBe('2026-09-21')
+    it('start with updatedDay equal to startDay when started mid-week', () => {
+      expect(startedOnWednesday()).toMatchObject({
+        startDay: '2026-09-23',
+        updatedDay: '2026-09-23',
+      })
+    })
+
+    it('keep updatedDay at startDay for an update in the first week', () => {
+      expect(activatedAt(new Date('2026-09-27T10:00:00Z'))).toMatchObject({
+        startDay: '2026-09-23',
+        updatedDay: '2026-09-23',
+        revision: 1,
+      })
+    })
+
+    it('round updatedDay to the ISO week start from the next week on', () => {
+      expect(activatedAt(eightDaysLater)).toMatchObject({
+        startDay: '2026-09-23',
+        updatedDay: '2026-09-28',
+        revision: 1,
+      })
+    })
   })
 })
 
@@ -250,6 +281,62 @@ describe('applyAggregationUpdate', () => {
     })
 
     expect(Option.isNone(next)).toBe(true)
+  })
+
+  it('does nothing when the state is unchanged by value', () => {
+    const atCap = someInstance({
+      kind: 'aggregation',
+      name: 'marketplaceWeekly',
+      payload: {
+        marketplaceOpened: 50,
+        firstLoadResult: 'offers',
+        offersVisibleBucket: '6to20',
+      },
+      pending: false,
+    })
+
+    const next = applyAggregationUpdate({
+      definition: marketplaceWeeklyAggregation,
+      current: Option.some(atCap),
+      initialState,
+      update: (state) => ({
+        ...state,
+        marketplaceOpened: Math.min(state.marketplaceOpened + 1, 50),
+      }),
+      now: wednesday,
+      newId,
+    })
+
+    expect(Option.isNone(next)).toBe(true)
+  })
+
+  it('queues the bucket when a value changed', () => {
+    const belowCap = someInstance({
+      kind: 'aggregation',
+      name: 'marketplaceWeekly',
+      payload: {marketplaceOpened: 49, firstLoadResult: 'offers'},
+      pending: false,
+    })
+
+    const next = Option.getOrThrow(
+      applyAggregationUpdate({
+        definition: marketplaceWeeklyAggregation,
+        current: Option.some(belowCap),
+        initialState,
+        update: (state) => ({
+          ...state,
+          marketplaceOpened: Math.min(state.marketplaceOpened + 1, 50),
+        }),
+        now: wednesday,
+        newId,
+      })
+    )
+
+    expect(next).toMatchObject({
+      revision: 4,
+      payload: {marketplaceOpened: 50, firstLoadResult: 'offers'},
+      pending: true,
+    })
   })
 
   it('resolves buckets by week start', () => {
@@ -358,6 +445,9 @@ describe('flushAnalyticsActionAtom', () => {
     return store.get(analyticsInstancesAtom)[instance.id]
   }
 
+  const startedToday = (): AnalyticsInstance =>
+    someInstance({startDay: dayOf(new Date()), updatedDay: dayOf(new Date())})
+
   it('uploads the state without the local bookkeeping', async () => {
     const instance = someInstance()
     await flushWith(instance, Effect.void)
@@ -375,19 +465,19 @@ describe('flushAnalyticsActionAtom', () => {
   })
 
   it('marks the entry uploaded on success', async () => {
-    const after = await flushWith(someInstance(), Effect.void)
+    const after = await flushWith(startedToday(), Effect.void)
     expect(after?.pending).toBe(false)
   })
 
   it('drops the entry on a 4xx response', async () => {
     const after = await flushWith(
-      someInstance(),
+      startedToday(),
       Effect.fail({_tag: 'InvalidAnalyticsStateError', status: 400})
     )
     expect(after?.pending).toBe(false)
 
     const afterNotFound = await flushWith(
-      someInstance(),
+      startedToday(),
       Effect.fail({_tag: 'ResponseError', response: {status: 404}})
     )
     expect(afterNotFound?.pending).toBe(false)
@@ -395,7 +485,7 @@ describe('flushAnalyticsActionAtom', () => {
 
   it('keeps the entry when rate limited', async () => {
     const after = await flushWith(
-      someInstance(),
+      startedToday(),
       Effect.fail({_tag: 'ResponseError', response: {status: 429}})
     )
     expect(after?.pending).toBe(true)
@@ -403,13 +493,13 @@ describe('flushAnalyticsActionAtom', () => {
 
   it('keeps the entry on 5xx and network errors', async () => {
     const after5xx = await flushWith(
-      someInstance(),
+      startedToday(),
       Effect.fail({_tag: 'UnexpectedServerError', status: 500})
     )
     expect(after5xx?.pending).toBe(true)
 
     const afterOffline = await flushWith(
-      someInstance(),
+      startedToday(),
       Effect.fail({_tag: 'RequestError', reason: 'Transport'})
     )
     expect(afterOffline?.pending).toBe(true)
@@ -451,6 +541,8 @@ describe('journey step upload', () => {
     const aggregation = someInstance({
       kind: 'aggregation',
       name: 'marketplaceWeekly',
+      startDay: isoWeekStart(new Date()),
+      updatedDay: dayOf(new Date()),
       payload: {marketplaceOpened: 1, firstLoadResult: 'empty'},
     })
     store.set(setAnalyticsInstancesAtom, {[aggregation.id]: aggregation})

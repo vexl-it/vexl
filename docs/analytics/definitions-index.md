@@ -4,7 +4,7 @@ The shared list of journey and aggregation definitions that the twelve files in 
 
 Rules that apply to every definition (system.md sections 2 and 3):
 
-- Journeys with a lifetime over 7 days carry booleans and enums only and round `updatedDay` to the ISO week. Short journeys and aggregations may carry capped counters and duration buckets.
+- Journeys with a lifetime over 7 days carry booleans and enums only and round `updatedDay` to the ISO week, never below `startDay`. Short journeys and aggregations may carry capped counters and duration buckets.
 - Every journey step is uploaded right away; aggregations are uploaded on app start and best effort on background. Club definitions follow the same rule and differ only in storing no country.
 - Country is stored on every row except club definitions (`storeCountry: false`); the dashboard suppresses small groups.
 - Missing data is `unknown`, never churn. A journey that reaches its lifetime without a terminal step is reported as `unknown`.

@@ -66,10 +66,22 @@ const countryLabel = (countryPrefix: string): string => {
   return `+${countryPrefix}`
 }
 
-const emptyRate = (week: MarketplaceWeek): string => {
-  const empty = week.firstLoadResult.counts.empty
-  return empty > 0 ? formatShare(empty / week.instances) : 'n/a'
+// A pooled category reads as 0, so the rate is withheld when `offers` or
+// `empty` may be the pooled one.
+const emptyRate = ({
+  firstLoadResult: {counts, other},
+}: MarketplaceWeek): string => {
+  const loaded = counts.offers + counts.empty
+  const mayBePooled = other > 0 && (counts.offers === 0 || counts.empty === 0)
+  return loaded === 0 || mayBePooled
+    ? 'n/a'
+    : formatShare(counts.empty / loaded)
 }
+
+const notLoadedCount = ({
+  firstLoadResult: {counts, other},
+}: MarketplaceWeek): string =>
+  counts.notLoaded === 0 && other > 0 ? '0 or pooled' : String(counts.notLoaded)
 
 function ShareBarChart({
   title,
@@ -155,7 +167,7 @@ export function MarketplaceChart({
   return (
     <ChartSection
       title="Marketplace first load by week"
-      description="First unfiltered main-marketplace load of each reporting instance in the week: empty-marketplace rate and how many offers it showed. Weeks settle 14 days after they end."
+      description="First unfiltered main-marketplace load of each reporting instance in the week. Empty rate = empty / (offers shown + empty); instances whose marketplace never loaded in the week are counted separately as not loaded. Weeks settle 14 days after they end."
       hiddenWeeks={report.hiddenWeeks}
       minGroupSize={minGroupSize}
     >
@@ -197,7 +209,14 @@ export function MarketplaceChart({
                 header: 'Reporting instances',
                 cell: (week) => String(week.instances),
               },
-              {header: 'Empty rate', cell: emptyRate},
+              {
+                header: 'Empty rate: empty / (offers shown + empty)',
+                cell: emptyRate,
+              },
+              {
+                header: 'Not loaded (not in the empty rate)',
+                cell: notLoadedCount,
+              },
               {
                 header: 'Offers visible',
                 cell: (week) =>

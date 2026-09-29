@@ -16,7 +16,7 @@ Q1 to Q8 are answered; the outcome is recorded in `README.md` under "Decisions t
 ### Q2: Reactivation episode shape
 
 - Affects: "Dormant to returning users", "Time from becoming dormant to reactivation", "Actions after reactivation", "Club user reactivation", "Time from reactivation to next dormancy"
-- Question: The episode as first analysed stayed open up to 180 days so "Sessions before reactivation" and "Time from reactivation to next dormancy" could overwrite it later, which breaks the 30-day journey lifetime rule. Is a write-once episode acceptable, with "Time from reactivation to next dormancy" computed from local markers at the next episode instead?
+- Question: The episode as first analysed stayed open up to 180 days so "Sessions before reactivation" and "Time from reactivation to next dormancy" could overwrite it later, which breaks the 31-day journey lifetime rule. Is a write-once episode acceptable, with "Time from reactivation to next dormancy" computed from local markers at the next episode instead?
 - Options: a) `reactivationEpisode` is a 7-day, write-once journey carrying `gap`, `firstActionType`, `clubMember` and, when a `lastReactivationAt` marker exists, `previousEpisode` for "Time from reactivation to next dormancy". (Recommended) b) counters only: `reactivations` and gap buckets on `weeklyActivity`; "Actions after reactivation", "Club user reactivation" and "Time from reactivation to next dormancy" are dropped because counters cannot carry the per-episode attributes. c) do not build the reactivation category on the client; keep the backend `USER_REACTIVATED` view only.
 - Answer: a
 

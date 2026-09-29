@@ -917,10 +917,10 @@
           open id, so a burst of steps uploads the latest state only.
         </div>
         <div class="step">
-          Journey steps are uploaded right away; aggregations flush on app start
-          (reliable, random 0 to 60 s delay) and on background (best effort,
-          short timeout). A failed upload stays in the outbox for the next
-          flush.
+          Journey steps are uploaded right away, without the pending aggregation
+          buckets; aggregations flush on app start (reliable, random 0 to 60 s
+          delay) and on background (best effort, short timeout). A failed upload
+          stays in the outbox for the next flush.
         </div>
         <div class="arrow">
           <b>PUT /analytics/state</b> {id, kind, name, schemaVersion, revision,
@@ -948,7 +948,7 @@
           days.
         </div>
         <div class="arrow">
-          <b>204</b> acknowledge, drop id if closed. <b>4xx</b> client drops the
+          <b>200</b> acknowledge, drop id if closed. <b>4xx</b> client drops the
           entry. <b>5xx / offline</b> keep and retry next flush.
         </div>
       </div>
@@ -974,12 +974,13 @@
       </div>
     </div>
     <p class="prose">
-      Upload timing: a journey step forks a flush right away, fire and forget;
-      aggregation updates only queue and go out with the next start or
-      background flush. Flushes are serialized, so several steps recorded during
-      one request collapse into a single follow-up request with the latest
-      state. A journey's first upload therefore lands within seconds of backend
-      rows such as <code>USER_LOGGED_IN</code>, <code>OFFER_CREATED</code> or
+      Upload timing: a journey step forks a flush of the journey entries right
+      away, fire and forget; aggregation updates only queue and go out with the
+      next start or background flush. Flushes are serialized, so several steps
+      recorded during one request collapse into a single follow-up request with
+      the latest state. A journey's first upload therefore lands within seconds
+      of backend rows such as <code>USER_LOGGED_IN</code>,
+      <code>OFFER_CREATED</code> or
       <code>USER_JOINED_CLUB_AND_IMPORTED_CONTACTS</code>; the privacy section
       records why that is accepted.
     </p>
@@ -992,9 +993,9 @@
       <code>CommonHeaders</code> only, callable before login, per-IP rate limit
       (24 h window, placeholder 300 calls), 4 KB raw body cap (413), payload cap
       in the schema (64 keys, strings up to 32 chars, integers up to 1000),
-      success 204. Staleness is rejected with 400: a journey whose
-      <code>startDay</code> is older than lifetime plus grace, or an aggregation
-      past bucket end plus settle.
+      success 200 with an empty body. Staleness is rejected with 400: a journey
+      whose <code>startDay</code> is older than lifetime plus grace, or an
+      aggregation past bucket end plus settle.
     </p>
     <div class="tbl">
       <table>
@@ -1058,7 +1059,8 @@
             <td>
               Day of the last local change; at least <code>startDay</code>, at
               most one day in the future. Long-lived journeys round it to the
-              ISO week start.
+              ISO week start, never below <code>startDay</code>: in the first
+              week it equals <code>startDay</code>.
             </td>
           </tr>
           <tr>
@@ -1322,9 +1324,10 @@
     </div>
     <ul class="prose">
       <li>
-        <b>Journey step flush</b>: every journey step forks a flush right away;
-        flushes are serialized, so a step recorded during an upload goes out in
-        the following flush with the latest state.
+        <b>Journey step flush</b>: every journey step forks a flush right away.
+        It sends journey entries only; pending aggregation buckets wait for the
+        start or background flush. Flushes are serialized, so a step recorded
+        during an upload goes out in the following flush with the latest state.
       </li>
       <li>
         <b>Start flush</b>: an in-app loading task (<code>runOn: 'start'</code>,
@@ -1416,10 +1419,14 @@
       deliberately because delaying the first upload made single-session churn
       invisible. Clubs are tiny, so club definitions carry no country and round
       to week. Long-lived journeys are the most linkable objects because an id
-      lives 30 days: they carry booleans and enums only, one journey per
+      lives 31 days: they carry booleans and enums only, one journey per
       milestone, never chained. The endpoint is unauthenticated, so junk writes
       are possible; schema validation, caps, the body limit, rate limiting and
-      dashboard suppression bound the damage to noise.
+      dashboard suppression bound the damage to noise. Open item: the shared
+      rate limiter logs the IP of every request and keeps per-IP request times
+      in Redis for 24 h, which puts an IP and a time next to every upload. The
+      options are in <code>system.md</code> section 4.5 and the decision belongs
+      to the project owner.
     </p>
 
     <h3>Decisions taken</h3>
@@ -1457,7 +1464,7 @@
         accepted and documented in the privacy section.
       </li>
       <li>
-        <b>Long-lived journeys</b> (30 days) carry booleans and enums only, one
+        <b>Long-lived journeys</b> (31 days) carry booleans and enums only, one
         journey per milestone, never chained. D90 retention is not built.
       </li>
       <li>
@@ -2075,8 +2082,9 @@
               At the first successful unfiltered marketplace load in the week
               record whether at least one eligible offer is visible; never
               overwritten within the week. <code>notLoaded</code> excludes the
-              row from the denominator. Filtered emptiness is the separate
-              boolean.
+              row from the denominator: empty rate = empty / (offers + empty),
+              with not loaded shown as its own count. Filtered emptiness is the
+              separate boolean.
             </p>
             <p class="m-meta">
               <b>Code:</b> success path of <code>refreshOffersActionAtom</code>,
@@ -3396,7 +3404,7 @@
             </div>
             <p class="m-type">not built</p>
             <p class="m-def">
-              A 91-day id behaves like a device id; the 30-day journey lifetime
+              A 91-day id behaves like a device id; the 31-day journey lifetime
               cap stands.
             </p>
           </li>

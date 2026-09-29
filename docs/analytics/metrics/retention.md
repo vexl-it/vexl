@@ -44,7 +44,7 @@
 
 ### D90 retention
 
-- **Status: rejected**. Not built (README: 30-day journey lifetime cap; a 91-day id behaves like a device id).
+- **Status: rejected**. Not built (README: 31-day journey lifetime cap; a 91-day id behaves like a device id).
 
 ### Retention after activation
 

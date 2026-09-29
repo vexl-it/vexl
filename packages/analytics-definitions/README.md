@@ -5,7 +5,7 @@ Shared definitions for the privacy-aware frontend analytics described in `docs/a
 ## Rules
 
 - Every payload field must be a bounded enum (`Schema.Literal`), a boolean, or a capped integer (`cappedCounter(max)`). Never a timestamp, a free number, a free string, or any id.
-- Journeys longer than 7 days carry booleans and enums only and round `updatedDay` to the ISO week (`updatedDayPrecision: 'week'`).
+- Journeys longer than 7 days carry booleans and enums only and round `updatedDay` to the ISO week (`updatedDayPrecision: 'week'`), never below `startDay` (`updatedDayFor` in `src/buckets.ts`).
 - Durations and counts are bucketed on the device with the helpers in `src/buckets.ts`; only the bucket is uploaded.
 - All calendar helpers are UTC.
 

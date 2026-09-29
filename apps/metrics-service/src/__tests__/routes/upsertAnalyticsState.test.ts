@@ -14,6 +14,21 @@ import {
 
 import {runPromiseInMockedEnvironment} from '../utils/runPromiseInMockedEnvironment'
 
+const DAY_MS = 24 * 60 * 60 * 1000
+const daysBefore = (day: DayString, days: number): DayString =>
+  dayOf(new Date(Date.parse(day) - days * DAY_MS))
+
+const thisMonday = isoWeekStart(new Date())
+const lastWeekMonday = daysBefore(thisMonday, 7)
+const lastWeekWednesday = daysBefore(thisMonday, 5)
+
+const cohortStartedLastWednesday = onboardingUpsert({
+  name: 'registrationCohort',
+  startDay: lastWeekWednesday,
+  updatedDay: lastWeekWednesday,
+  payload: {},
+})
+
 beforeEach(async () => {
   await runPromiseInMockedEnvironment(clearStoredStates)
 })
@@ -183,6 +198,40 @@ describe('upsertAnalyticsState', () => {
         const result = yield* _(Effect.either(upsertState(request)))
         expectErrorResponse(InvalidAnalyticsStateError)(result)
         expect(yield* _(readStoredStates)).toHaveLength(0)
+      })
+    )
+  })
+
+  it('stores a week precision journey started mid-week and its update in a later week', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        yield* _(upsertState(cohortStartedLastWednesday))
+        expect(yield* _(readStoredStates)).toMatchObject([
+          {
+            name: 'registrationCohort',
+            revision: 0,
+            startDay: lastWeekWednesday,
+            updatedDay: lastWeekWednesday,
+            payload: {},
+          },
+        ])
+
+        yield* _(
+          upsertState({
+            ...cohortStartedLastWednesday,
+            revision: 1,
+            updatedDay: thisMonday,
+            payload: {activatedBy: 'offer', activationClass: 'main'},
+          })
+        )
+        expect(yield* _(readStoredStates)).toMatchObject([
+          {
+            revision: 1,
+            startDay: lastWeekWednesday,
+            updatedDay: thisMonday,
+            payload: {activatedBy: 'offer', activationClass: 'main'},
+          },
+        ])
       })
     )
   })

@@ -7,7 +7,9 @@ import {
   cappedCounter,
   dayOf,
   isoWeekStart,
+  updatedDayFor,
 } from './buckets'
+import {DayString} from './core'
 
 const HOUR = 60 * 60 * 1000
 const DAY = 24 * HOUR
@@ -44,6 +46,47 @@ describe('isoWeekStart', () => {
     expect(isoWeekStart(new Date('2026-09-27T23:30:00-02:00'))).toBe(
       '2026-09-28'
     )
+  })
+})
+
+describe('updatedDayFor', () => {
+  const day = Schema.decodeSync(DayString)
+  const wednesday = day('2026-09-23')
+
+  it('is the day of now for day precision', () => {
+    expect(
+      updatedDayFor('day', wednesday, new Date('2026-09-25T10:00:00Z'))
+    ).toBe('2026-09-25')
+  })
+
+  it('is the start day while the journey is in its first week', () => {
+    expect(
+      updatedDayFor('week', wednesday, new Date('2026-09-23T10:00:00Z'))
+    ).toBe('2026-09-23')
+    expect(
+      updatedDayFor('week', wednesday, new Date('2026-09-27T23:59:59Z'))
+    ).toBe('2026-09-23')
+  })
+
+  it('is the ISO week start from the following week on', () => {
+    expect(
+      updatedDayFor('week', wednesday, new Date('2026-09-28T00:00:00Z'))
+    ).toBe('2026-09-28')
+    expect(
+      updatedDayFor('week', wednesday, new Date('2026-10-08T10:00:00Z'))
+    ).toBe('2026-10-05')
+  })
+
+  it('is the week start for a journey started on a Monday', () => {
+    expect(
+      updatedDayFor('week', day('2026-09-21'), new Date('2026-09-24T10:00:00Z'))
+    ).toBe('2026-09-21')
+  })
+
+  it('never goes before the start day when the clock moved back', () => {
+    expect(
+      updatedDayFor('day', wednesday, new Date('2026-09-22T10:00:00Z'))
+    ).toBe('2026-09-23')
   })
 })
 

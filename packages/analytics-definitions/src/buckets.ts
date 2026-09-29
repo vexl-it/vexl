@@ -1,5 +1,5 @@
 import {Schema} from 'effect'
-import {DayString} from './core'
+import {DayString, type UpdatedDayPrecision} from './core'
 
 const HOUR_MS = 60 * 60 * 1000
 const DAY_MS = 24 * HOUR_MS
@@ -14,6 +14,17 @@ export const isoWeekStart = (date: Date): DayString => {
   const daysSinceMonday = (monday.getUTCDay() + 6) % 7
   monday.setUTCDate(monday.getUTCDate() - daysSinceMonday)
   return dayOf(monday)
+}
+
+// Never earlier than `startDay`: the server refuses such a pair, and in the
+// journey's first week the start day is already known to it.
+export const updatedDayFor = (
+  precision: UpdatedDayPrecision,
+  startDay: DayString,
+  now: Date
+): DayString => {
+  const day = precision === 'week' ? isoWeekStart(now) : dayOf(now)
+  return day < startDay ? startDay : day
 }
 
 export const DurationBucket = Schema.Literal(

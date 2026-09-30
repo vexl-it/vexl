@@ -1,6 +1,5 @@
 import {
   Avatar,
-  Banner,
   CellPhoneMobileDevice,
   ChatBubbles,
   ChevronLeft,
@@ -27,6 +26,7 @@ import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {lastUsedOfferSpokenLanguagesAtom} from '../../../utils/preferences'
 import resolveLocalUri from '../../../utils/resolveLocalUri'
 import useSafeGoBack from '../../../utils/useSafeGoBack'
+import AddIdentityBanner from '../../AddIdentityBanner'
 
 function Card({
   title,
@@ -145,17 +145,7 @@ function EditProfileDefaultScreen({
             </XStack>
           </Card>
         ) : (
-          <Banner
-            color="pink"
-            title={t('editProfileScreen.addIdentity.title')}
-            description={t('editProfileScreen.addIdentity.description')}
-            primaryButton={{
-              label: t('editProfileScreen.addIdentity.button'),
-              onPress: () => {
-                navigation.navigate('EditIdentity')
-              },
-            }}
-          />
+          <AddIdentityBanner />
         )}
         <Card
           title={t('editProfileScreen.vexlAlias.title')}

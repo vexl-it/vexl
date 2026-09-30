@@ -9,6 +9,7 @@ import {
 import {useAtomValue} from 'jotai'
 import React, {useCallback, useMemo} from 'react'
 import {type SharedValue} from 'react-native-reanimated'
+import {shouldShowAccountIdentityDotAtom} from '../../../state/session/userDataAtoms'
 import {areThereNotSeenNotificationsAtom} from '../../NotificationsScreen/state'
 
 function InsideNavigationBar({
@@ -21,6 +22,9 @@ function InsideNavigationBar({
   const navigation = useNavigation()
   const areThereNotSeenNotifications = useAtomValue(
     areThereNotSeenNotificationsAtom
+  )
+  const shouldShowAccountIdentityDot = useAtomValue(
+    shouldShowAccountIdentityDotAtom
   )
 
   const handleCalculatorPress = useCallback(() => {
@@ -43,10 +47,15 @@ function InsideNavigationBar({
         badge: areThereNotSeenNotifications,
       },
       {icon: MathCalculate, onPress: handleCalculatorPress},
-      {icon: UserProfile, onPress: handleSettingsPress},
+      {
+        icon: UserProfile,
+        onPress: handleSettingsPress,
+        badge: shouldShowAccountIdentityDot,
+      },
     ],
     [
       areThereNotSeenNotifications,
+      shouldShowAccountIdentityDot,
       handleCalculatorPress,
       handleNotificationsPress,
       handleSettingsPress,

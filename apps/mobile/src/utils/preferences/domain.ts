@@ -107,6 +107,9 @@ export const Preferences = Schema.Struct({
   enableBackupDevMode: Schema.optionalWith(Schema.Boolean, {
     default: () => false,
   }),
+  showAccountIdentityDot: Schema.optionalWith(Schema.Boolean, {
+    default: () => true,
+  }),
   notesBoardEnabled: Schema.optionalWith(Schema.Boolean, {
     default: () => false,
   }),

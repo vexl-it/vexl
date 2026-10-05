@@ -7,7 +7,6 @@ import {atom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {atomWithParsedMmkvStorage} from '../atomUtils/atomWithParsedMmkvStorage'
 import {devAppLanguage, getDeviceLanguage} from '../localization/appLanguage'
-import {currencies} from '../localization/currency'
 import getDefaultSpokenLanguage from '../localization/getDefaultSpokenLanguage'
 import {Preferences} from './domain'
 
@@ -38,7 +37,7 @@ export const preferencesAtom = atomWithParsedMmkvStorage(
     lastDisplayOfDonationPromptTimestamp: undefined,
     showTosSummaryForAlreadyLoggedInUser: true,
     showCheckUpdatedPrivacyPolicySuggestion: true,
-    defaultCurrency: currencies.USD.code,
+    defaultCurrency: 'USD',
     runTasksInParallel: true,
     sendReadReceipts: true,
     showVerifiedContacts: false,

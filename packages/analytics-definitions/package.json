@@ -1,0 +1,28 @@
+{
+  "name": "@vexl-next/analytics-definitions",
+  "version": "0.0.0",
+  "type": "module",
+  "main": "src/index",
+  "scripts": {
+    "clean": "rimraf .turbo node_modules",
+    "lint": "eslint .",
+    "format": "prettier --check \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\"",
+    "format:fix": "prettier --write \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\"",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@vexl-next/eslint-config": "0.0.0",
+    "@vexl-next/prettier-config": "0.0.0",
+    "@vexl-next/tsconfig": "0.0.0",
+    "eslint": "^9.20.0",
+    "prettier": "^3.3.2",
+    "rimraf": "^4.4.0",
+    "typescript": "~6.0.3",
+    "vitest": "^4.1.11"
+  },
+  "dependencies": {
+    "effect": "^3.20.0"
+  },
+  "prettier": "@vexl-next/prettier-config"
+}

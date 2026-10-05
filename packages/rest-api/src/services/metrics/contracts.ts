@@ -21,3 +21,10 @@ export const ReportNotificationInteractionRequest = Schema.Struct({
 
 export type ReportNotificationInteractionRequest =
   typeof ReportNotificationInteractionRequest.Type
+
+export class InvalidAnalyticsStateError extends Schema.TaggedError<InvalidAnalyticsStateError>(
+  'InvalidAnalyticsStateError'
+)('InvalidAnalyticsStateError', {
+  status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
+  message: Schema.optional(Schema.String),
+}) {}

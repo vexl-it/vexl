@@ -153,6 +153,8 @@
   "appSettings.changeCurrency": "Změnit měnu",
   "appSettings.appearanceTitle": "Vzhled",
   "appSettings.allowScreencapture": "Povolit snímání obrazovky",
+  "appSettings.anonymousUsageStatistics": "Anonymní statistiky používání",
+  "appSettings.anonymousUsageStatisticsNote": "Ukazuje nám, kolik lidí projde kroky jako registrace nebo otevření tržiště, aniž bychom kdy zjistili, kdo jsi.",
   "appSettings.appearance.light": "Světlý režim",
   "appSettings.appearance.dark": "Tmavý režim",
   "appSettings.appearance.system": "Podle zařízení"

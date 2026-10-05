@@ -1,6 +1,8 @@
 import {createNativeStackNavigator} from '@react-navigation/native-stack'
-import React from 'react'
+import {useSetAtom} from 'jotai'
+import React, {useEffect} from 'react'
 import {type LoginFlowStackParamsList} from '../../navigationTypes'
+import {reportAppOpenedWhileLoggedOutActionAtom} from '../../utils/analytics'
 import CountryPickerScreen from './components/CountryPickerScreen'
 import Intro1Screen from './components/Intro1Screen'
 import Intro2Screen from './components/Intro2Screen'
@@ -10,6 +12,12 @@ import VerificationCodeScreen from './components/VerificationCodeScreen'
 const LoginStack = createNativeStackNavigator<LoginFlowStackParamsList>()
 
 export default function LoginFlow(): React.ReactElement {
+  const reportAppOpened = useSetAtom(reportAppOpenedWhileLoggedOutActionAtom)
+
+  useEffect(() => {
+    reportAppOpened()
+  }, [reportAppOpened])
+
   return (
     <LoginStack.Navigator
       initialRouteName="Intro1"

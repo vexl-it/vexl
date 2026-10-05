@@ -151,6 +151,8 @@
   "appSettings.changeCurrency": "Смени валутата",
   "appSettings.appearanceTitle": "Външен вид",
   "appSettings.allowScreencapture": "Позволи снимки на екрана",
+  "appSettings.anonymousUsageStatistics": "Анонимна статистика за използването",
+  "appSettings.anonymousUsageStatisticsNote": "Показва ни колко хора минават през стъпки като регистрация или отваряне на пазара, без изобщо да те идентифицира.",
   "appSettings.appearance.light": "Светъл режим",
   "appSettings.appearance.dark": "Тъмен режим",
   "appSettings.appearance.system": "Според устройството"

@@ -2,16 +2,20 @@ import {type VerifyPhoneNumberRequest} from '@vexl-next/rest-api/src/services/us
 import {Effect} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
+import {reportOnboardingStepActionAtom} from '../../../utils/analytics'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import reportError from '../../../utils/reportError'
 
 export const verifyPhoneNumberAtom = atom(
   null,
-  (get, _, inputRequest: VerifyPhoneNumberRequest) => {
+  (get, set, inputRequest: VerifyPhoneNumberRequest) => {
     const userApi = get(apiAtom).user
     const {t} = get(translationAtom)
 
     return userApi.verifyPhoneNumber(inputRequest).pipe(
+      Effect.tap(() => {
+        set(reportOnboardingStepActionAtom, {step: 'codeVerified'})
+      }),
       Effect.catchAll((e) => {
         if (e._tag === 'VerificationNotFoundError')
           return Effect.fail(

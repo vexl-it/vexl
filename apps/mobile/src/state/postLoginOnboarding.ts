@@ -3,6 +3,7 @@ import {pipe} from 'fp-ts/lib/function'
 import {atom, useAtomValue} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {showErrorAlert} from '../components/ErrorAlert'
+import {reportOnboardingStepActionAtom} from '../utils/analytics'
 import {atomWithParsedMmkvStorage} from '../utils/atomUtils/atomWithParsedMmkvStorage'
 import {translationAtom} from '../utils/localization/I18nProvider'
 import {showCheckUpdatedPrivacyPolicySuggestionAtom} from '../utils/preferences'
@@ -101,6 +102,7 @@ export const finishPostLoginFlowActionAtom = atom(null, (get, set) => {
       onSuccess() {
         set(showCheckUpdatedPrivacyPolicySuggestionAtom, false)
         set(postLoginFlowCompletedScreensAtom, allPostLoginFlowScreens)
+        set(reportOnboardingStepActionAtom, {step: 'onboardingFinished'})
       },
     })
   )

@@ -27,6 +27,7 @@ import {UserFeedbackDialog} from './components/UserFeedback/UserFeedbackDialog'
 import {useSyncNseBridge} from './state/notifications/nseBridge/useSyncNseBridge'
 import {useSetRelativeDateFormatting} from './state/useSetRelativeDateFormatting'
 import ThemeProvider from './utils/ThemeProvider'
+import {useFlushAnalyticsOnBackground} from './utils/analytics/useFlushAnalyticsOnBackground'
 import {useInAppLoadingTasks} from './utils/inAppLoadingTasks/useInAppLoadingTasks'
 import {setLastTimeAppWasRunningToNow} from './utils/lastTimeAppWasRunning'
 import {navigationRef} from './utils/navigation'
@@ -40,6 +41,7 @@ function App(): React.ReactElement {
   const navigationTheme = isDarkTheme ? DarkTheme : DefaultTheme
 
   useAppState(setLastTimeAppWasRunningToNow)
+  useFlushAnalyticsOnBackground()
 
   useSetRelativeDateFormatting()
   useInAppLoadingTasks()

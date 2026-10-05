@@ -114,6 +114,9 @@ export const Preferences = Schema.Struct({
   notesBoardEnabled: Schema.optionalWith(Schema.Boolean, {
     default: () => false,
   }),
+  analyticsEnabled: Schema.optionalWith(Schema.Boolean, {
+    default: () => true,
+  }),
   lastUsedOfferSpokenLanguages: Schema.optionalWith(
     Schema.Array(SpokenLanguage),
     {

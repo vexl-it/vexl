@@ -11,6 +11,7 @@ import {
   allowLoginAgainAtom,
   updateNumberOfLoginAttemptsActionAtom,
 } from '../../../state/numberOfLoginAttemptsMmkvAtom'
+import {reportOnboardingStepActionAtom} from '../../../utils/analytics'
 import isString from '../../../utils/isString'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import reportError from '../../../utils/reportError'
@@ -78,6 +79,7 @@ export const initPhoneVerificationAtom = atom(
         })
       )
 
+      set(reportOnboardingStepActionAtom, {step: 'phoneSubmitted'})
       return toReturn
     }).pipe(
       Effect.catchTags({

@@ -1,3 +1,4 @@
+import {type NotificationsOutcome} from '@vexl-next/analytics-definitions/src/definitions/onboarding'
 import {NotificationsGraphic, YStack} from '@vexl-next/ui'
 import {Effect} from 'effect'
 import {useSetAtom} from 'jotai'
@@ -5,6 +6,7 @@ import React from 'react'
 import {useWindowDimensions} from 'react-native'
 import {type PostLoginFlowStackScreenProps} from '../../../navigationTypes'
 import {completePostLoginFlowScreenActionAtom} from '../../../state/postLoginOnboarding'
+import {reportOnboardingStepActionAtom} from '../../../utils/analytics'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {offerBackgroundNotificationSocketActionAtom} from '../../../utils/notifications/backgroundNotificationSocket'
 import {setBackgroundNotificationSocketEnabledActionAtom} from '../../../utils/notifications/backgroundNotificationSocket/setBackgroundNotificationSocketEnabledActionAtom'
@@ -21,6 +23,7 @@ export default function NotificationSetupScreen({
   const availableWidth = windowWidth - 40
   const graphicScale = Math.min(1, availableWidth / 157)
   const completeScreen = useSetAtom(completePostLoginFlowScreenActionAtom)
+  const reportOnboardingStep = useSetAtom(reportOnboardingStepActionAtom)
   const offerBackgroundSocket = useSetAtom(
     offerBackgroundNotificationSocketActionAtom
   )
@@ -39,7 +42,16 @@ export default function NotificationSetupScreen({
         label: t('postLoginFlow.v2.notificationSetup.action'),
         onPress: () => {
           void Effect.runPromise(
-            requestPermissions.pipe(Effect.catchAll(() => Effect.void))
+            requestPermissions.pipe(
+              Effect.match({
+                onFailure: (): NotificationsOutcome => 'skipped',
+                onSuccess: (): NotificationsOutcome => 'granted',
+              }),
+              Effect.tap((notifications) => {
+                reportOnboardingStep({step: 'notifications', notifications})
+              }),
+              Effect.asVoid
+            )
           )
             .then(offerBackgroundSocket)
             .finally(goNext)
@@ -48,6 +60,10 @@ export default function NotificationSetupScreen({
       secondaryButton={{
         label: t('postLoginFlow.v2.notificationSetup.skip'),
         onPress: () => {
+          reportOnboardingStep({
+            step: 'notifications',
+            notifications: 'skipped',
+          })
           void setBackgroundSocketEnabled(false).finally(goNext)
         },
       }}

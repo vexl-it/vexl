@@ -1,6 +1,7 @@
 import {FetchHttpClient} from '@effect/platform/index'
 import {type KeyHolder} from '@vexl-next/cryptography/src'
 import {type PublicKeyV2} from '@vexl-next/cryptography/src/KeyHolder/brandsV2'
+import {countryPrefixFromNumber} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {
   EcdsaSignature,
@@ -57,6 +58,9 @@ const handleUserCreationActionAtom = atom(
   ) => {
     return Effect.gen(function* () {
       const startedAt = Date.now()
+      const prefix = yield* countryPrefixFromNumber(session.phoneNumber).pipe(
+        Effect.option
+      )
 
       const contactApi = yield* contact.api({
         platform,
@@ -67,6 +71,7 @@ const handleUserCreationActionAtom = atom(
         appSource,
         language: get(translationAtom).t('localeName'),
         isDeveloper: get(isDeveloperAtom),
+        prefix: Option.getOrUndefined(prefix),
       })
 
       yield* contactApi.createUser({

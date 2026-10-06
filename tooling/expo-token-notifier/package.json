@@ -1,0 +1,37 @@
+{
+  "name": "@vexl-next/expo-token-notifier",
+  "version": "0.0.0",
+  "type": "module",
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "files": [
+    "src/*.ts"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "notify": "node src/cli.ts",
+    "test": "node --test test/*.test.ts",
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --check \"**/*.{js,mjs,cjs,ts,md,json}\"",
+    "format:fix": "prettier --write \"**/*.{js,mjs,cjs,ts,md,json}\"",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "csv-parse": "^6.1.0",
+    "effect": "^3.20.0",
+    "expo-server-sdk": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "@vexl-next/eslint-config": "0.0.0",
+    "@vexl-next/prettier-config": "0.0.0",
+    "eslint": "^9.20.0",
+    "prettier": "^3.3.2",
+    "typescript": "~6.0.3",
+    "undici": "^7.29.1"
+  },
+  "prettier": "@vexl-next/prettier-config"
+}

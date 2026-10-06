@@ -1,0 +1,9 @@
+*
+!README.md
+!package.json
+!tsconfig.json
+!eslint.config.mjs
+!src/
+!src/*.ts
+!test/
+!test/*.ts

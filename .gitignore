@@ -17,6 +17,10 @@ next-env.d.ts
 node_modules
 .turbo
 
+# Gradle writes build output next to each local native module's android/ dir
+.gradle/
+**/android/build/
+
 # turbo prune output (Docker builds)
 /out
 

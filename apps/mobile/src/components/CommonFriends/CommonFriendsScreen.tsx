@@ -166,15 +166,15 @@ function ListHeader({
           : 'offer.beCautiousWeCannotVerify'
       )}`
     }
-    if (
-      Array.contains(friendLevel, 'CLUB') &&
-      !Array.contains(friendLevel, 'SECOND_DEGREE')
-    ) {
+    if (Array.contains(friendLevel, 'SECOND_DEGREE') && hasCommonFriends) {
+      return `${t('commonFriends.header.friendOfFriend')} ${t(
+        'offer.dontForgetToVerifyTheIdentity'
+      )}`
+    }
+    if (Array.contains(friendLevel, 'CLUB')) {
       return t('commonFriends.header.club')
     }
-    return `${t('commonFriends.header.friendOfFriend')} ${t(
-      'offer.dontForgetToVerifyTheIdentity'
-    )}`
+    return t('offer.beCautiousWeCannotVerify')
   })()
 
   return (

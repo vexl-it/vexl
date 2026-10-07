@@ -38,6 +38,8 @@ export default function ChatNoteDetailContent({
   const {
     chatAtom,
     commonConnectionsHashesAtom,
+    friendLevelInfoAtom,
+    isMyChatOriginAtom,
     noteForChatAtom,
     otherSideClubsIdsAtom,
     verifiedConnectionsHashesAtom,
@@ -46,6 +48,8 @@ export default function ChatNoteDetailContent({
   const chat = useAtomValue(chatAtom)
   const note = useAtomValue(noteForChatAtom)
   const commonConnectionsHashes = useAtomValue(commonConnectionsHashesAtom)
+  const friendLevel = useAtomValue(friendLevelInfoAtom)
+  const isMine = useAtomValue(isMyChatOriginAtom)
   const verifiedConnectionsHashes = useAtomValue(verifiedConnectionsHashesAtom)
   const otherSideClubsIds = useAtomValue(otherSideClubsIdsAtom)
   const otherSideClubs = useGetAllClubsForIds(otherSideClubsIds ?? [])
@@ -122,6 +126,8 @@ export default function ChatNoteDetailContent({
             commonConnectionsHashes={commonConnectionsHashes}
             verifiedConnectionsHashes={verifiedConnectionsHashes}
             otherSideClubs={otherSideClubs}
+            friendLevel={friendLevel}
+            isMine={isMine}
           />
 
           {theirNoteAndNotReported ? (

@@ -187,6 +187,8 @@ function OfferDetailScrollContent({
               visibleCommonFriends.verifiedCommonFriends
             }
             otherSideClubs={otherSideClubs}
+            friendLevel={offer.offerInfo.privatePart.friendLevel}
+            isMine={!!offer.ownershipInfo}
           />
         ) : (
           <XStack

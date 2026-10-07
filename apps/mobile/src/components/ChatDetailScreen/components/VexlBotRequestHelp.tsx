@@ -27,6 +27,8 @@ export function VexlBotRequestHelp({
     verifiedConnectionsHashesAtom,
     canBeRerequestedAtom,
     otherSideClubsIdsAtom,
+    friendLevelInfoAtom,
+    isMyChatOriginAtom,
   } = useMolecule(chatMolecule)
   const chat = useAtomValue(chatAtom)
   const inboxKey = useAtomValue(publicKeyPemBase64Atom)
@@ -35,6 +37,8 @@ export function VexlBotRequestHelp({
   const otherSideClubsIds = useAtomValue(otherSideClubsIdsAtom)
   const otherSideClubs = useGetAllClubsForIds(otherSideClubsIds ?? [])
   const canBeRerequested = useAtomValue(canBeRerequestedAtom)
+  const friendLevel = useAtomValue(friendLevelInfoAtom)
+  const isMine = useAtomValue(isMyChatOriginAtom)
   const chatState = useAtomValue(chatStateAtom)
 
   const handleOfferDetailsPress = useCallback(() => {
@@ -56,9 +60,13 @@ export function VexlBotRequestHelp({
       contactsHashes: commonConnectionsHashes,
       verifiedHashes: verifiedConnectionsHashes,
       clubs: otherSideClubs,
+      friendLevel,
+      isMine,
     })
   }, [
     commonConnectionsHashes,
+    friendLevel,
+    isMine,
     navigation,
     otherSideClubs,
     verifiedConnectionsHashes,

@@ -233,6 +233,8 @@ export default function NoteDetailScreen({
             <CommonFriends
               commonConnectionsHashes={commonFriends}
               otherSideClubs={[]}
+              friendLevel={note.noteInfo.privatePart.friendLevel}
+              isMine={false}
               label={t('notes.detail.commonFriendsCount', {
                 count: commonFriends.length,
               })}

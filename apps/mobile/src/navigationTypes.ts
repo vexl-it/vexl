@@ -17,6 +17,7 @@ import {
 } from '@vexl-next/domain/src/general/messaging'
 import {type NoteId} from '@vexl-next/domain/src/general/notes'
 import {
+  type FriendLevel,
   type LocationPlaceId,
   type OfferId,
 } from '@vexl-next/domain/src/general/offers'
@@ -132,6 +133,8 @@ export type RootStackParamsList = {
     readonly contactsHashes: readonly HashedPhoneNumber[]
     readonly verifiedHashes?: readonly HashedPhoneNumber[]
     readonly clubs: readonly CommonFriendsClub[]
+    readonly friendLevel: readonly FriendLevel[]
+    readonly isMine: boolean
   }
 
   ClubDetail: {clubUuid: ClubUuid}

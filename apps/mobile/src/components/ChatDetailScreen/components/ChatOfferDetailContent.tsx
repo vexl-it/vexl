@@ -40,6 +40,8 @@ export default function ChatOfferDetailContent({
   const {
     chatAtom,
     commonConnectionsHashesAtom,
+    friendLevelInfoAtom,
+    isMyChatOriginAtom,
     offerForChatAtom,
     otherSideClubsIdsAtom,
     otherSideDataAtom,
@@ -52,6 +54,8 @@ export default function ChatOfferDetailContent({
   const offer = useAtomValue(offerForChatAtom)
   const otherSideData = useAtomValue(otherSideDataAtom)
   const commonConnectionsHashes = useAtomValue(commonConnectionsHashesAtom)
+  const friendLevel = useAtomValue(friendLevelInfoAtom)
+  const isMine = useAtomValue(isMyChatOriginAtom)
   const verifiedConnectionsHashes = useAtomValue(verifiedConnectionsHashesAtom)
   const otherSideClubsIds = useAtomValue(otherSideClubsIdsAtom)
   const theirOfferAndNotReported = useAtomValue(theirOfferAndNotReportedAtom)
@@ -139,6 +143,8 @@ export default function ChatOfferDetailContent({
             commonConnectionsHashes={commonConnectionsHashes}
             verifiedConnectionsHashes={verifiedConnectionsHashes}
             otherSideClubs={otherSideClubs}
+            friendLevel={friendLevel}
+            isMine={isMine}
           />
 
           {theirOfferAndNotReported ? (

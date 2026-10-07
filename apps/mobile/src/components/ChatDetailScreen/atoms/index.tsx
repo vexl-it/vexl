@@ -455,22 +455,21 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     getContactRevealStatus
   )
 
-  const friendLevelInfoAtom = atom<readonly FriendLevel[]>((get) => {
+  const isMyChatOriginAtom = atom((get) => {
     const originOffer = get(offerForChatAtom)
+    if (originOffer) return !!originOffer.ownershipInfo?.adminId
+    return !!get(noteForChatAtom)?.ownershipInfo?.adminId
+  })
 
-    if (originOffer?.ownershipInfo?.adminId) {
-      return get(friendLevelForMyOfferAtom)
-    }
+  const friendLevelInfoAtom = atom<readonly FriendLevel[]>((get) => {
+    // My offer or note - the responder reported their friend level in the
+    // request message. Theirs - the level is in the private part.
+    if (get(isMyChatOriginAtom)) return get(friendLevelForMyOfferAtom)
+
+    const originOffer = get(offerForChatAtom)
     if (originOffer) return originOffer.offerInfo.privatePart?.friendLevel ?? []
 
-    const originNote = get(noteForChatAtom)
-    // My note - the responder reported their friend level in the request
-    // message. Their note - the level is in the note's private part.
-    if (originNote?.ownershipInfo?.adminId) {
-      return get(friendLevelForMyOfferAtom)
-    }
-
-    return originNote?.noteInfo.privatePart.friendLevel ?? []
+    return get(noteForChatAtom)?.noteInfo.privatePart.friendLevel ?? []
   })
 
   const theirOfferAndNotReportedAtom = selectAtom(
@@ -855,6 +854,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     lastMessageAtom,
     canSendMessagesAtom,
     friendLevelInfoAtom,
+    isMyChatOriginAtom,
     replyToMessageAtom,
     theirOfferAndNotReportedAtom,
     requestStateAtom: createRequestStateAtom(chatWithMessagesAtom),

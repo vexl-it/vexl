@@ -53,7 +53,6 @@
   "offer.youSeeThisOfferBecause": "You see this offer because the other person has your phone number saved in their contacts.",
   "offer.beCautiousWeCannotVerify": "Be cautious; we can't verify whether you really know each other in real life.",
   "offer.dontForgetToVerifyTheIdentity": "Don't forget to verify their identity with a common contact.",
-  "offer.youSeeThisClubOfferBecause": "You see this offer because it was posted in a club you are part of. Don't forget to verify the identity of the person you are trading with.",
   "offer.noDirectConnection": "This is a contact with whom you have no direct connection.",
   "offer.rerequestTomorrow": "You can send another request tomorrow.",
   "offer.rerequestDays": "You can send another request in {{days}} days.",

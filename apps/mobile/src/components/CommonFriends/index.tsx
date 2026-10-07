@@ -1,6 +1,7 @@
 import {useNavigation} from '@react-navigation/native'
 import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {type ClubInfo} from '@vexl-next/domain/src/general/clubs'
+import {type FriendLevel} from '@vexl-next/domain/src/general/offers'
 import {
   CommonFriends as CommonFriendsUI,
   type CommonFriend,
@@ -26,6 +27,8 @@ interface Props {
   otherSideClubs: ClubInfo[]
   // Optional override for the card label. Falls back to the offer wording.
   label?: string
+  friendLevel: readonly FriendLevel[]
+  isMine: boolean
 }
 
 function trimClubName(name: string): string {
@@ -85,6 +88,8 @@ function CommonFriends({
   verifiedConnectionsHashes,
   otherSideClubs,
   label,
+  friendLevel,
+  isMine,
 }: Props): React.ReactElement | null {
   const {t} = useTranslation()
   const locale = useAtomValue(formattingLocaleAtom)
@@ -153,10 +158,14 @@ function CommonFriends({
       contactsHashes: commonConnectionsHashes,
       verifiedHashes: verifiedConnectionsHashes,
       clubs: commonFriendsClubs,
+      friendLevel,
+      isMine,
     })
   }, [
     commonConnectionsHashes,
     commonFriendsClubs,
+    friendLevel,
+    isMine,
     navigation,
     verifiedConnectionsHashes,
   ])

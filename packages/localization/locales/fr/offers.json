@@ -52,7 +52,7 @@
   "offer.offerFromFriendOfFriend": "Offre d'un ami d'ami",
   "offer.youSeeThisOfferBecause": "Vous voyez cette offre parce que l'autre partie a enregistré votre numéro de téléphone dans sa liste de contacts.",
   "offer.beCautiousWeCannotVerify": "Soyez prudent, nous ne pouvons pas vérifier si vous vous connaissez vraiment dans la vie réelle.",
-  "offer.dontForgetToVerifyTheIdentity": "N'oubliez pas de vérifier son identité auprès d'un contact commun.",
+  "offer.dontForgetToVerifyTheIdentity": "N'oublie pas de vérifier son identité auprès d'un contact commun.",
   "offer.noDirectConnection": "Il s'agit d'un contact avec lequel vous n'avez pas de lien direct.",
   "offer.rerequestTomorrow": "Vous pourrez envoyer une nouvelle demande demain",
   "offer.rerequestDays": "Vous pourrez envoyer une nouvelle demande dans {{days}} jours",

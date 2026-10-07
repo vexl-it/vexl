@@ -52,7 +52,7 @@
   "offer.offerFromFriendOfFriend": "Оферта от приятел на приятел",
   "offer.youSeeThisOfferBecause": "Виждаш тази оферта, защото другият човек е запазил телефонния ти номер в контактите си.",
   "offer.beCautiousWeCannotVerify": "Бъдете внимателни, не можем да проверим дали наистина се познавате в реалния живот.",
-  "offer.dontForgetToVerifyTheIdentity": "Не забравяйте да потвърдите самоличността им с общ контакт.",
+  "offer.dontForgetToVerifyTheIdentity": "Не забравяй да провериш самоличността на другия човек чрез общ контакт.",
   "offer.noDirectConnection": "Това е контакт, с който вие нямате директна връзка.",
   "offer.rerequestTomorrow": "Може да изпратите друга заявка утре.",
   "offer.rerequestDays": "Може да изпратите друга заявка след {{days}} дена.",

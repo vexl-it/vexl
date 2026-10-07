@@ -172,7 +172,9 @@ function ListHeader({
     ) {
       return t('commonFriends.header.club')
     }
-    return t('commonFriends.header.friendOfFriend')
+    return `${t('commonFriends.header.friendOfFriend')} ${t(
+      'offer.dontForgetToVerifyTheIdentity'
+    )}`
   })()
 
   return (

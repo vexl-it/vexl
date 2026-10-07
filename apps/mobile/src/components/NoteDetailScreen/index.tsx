@@ -18,7 +18,10 @@ import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useMemo} from 'react'
 import {type RootStackScreenProps} from '../../navigationTypes'
 import {importedContactsHashesAtom} from '../../state/contacts/atom/contactsStore'
-import {deriveVisibleCommonFriendsForNote} from '../../state/marketplace/utils/visibleCommonFriends'
+import {
+  applyTrustedFriendsFeatureFlag,
+  deriveVisibleCommonFriendsForNote,
+} from '../../state/marketplace/utils/visibleCommonFriends'
 import {deleteNoteActionAtom} from '../../state/notes/atoms/deleteNoteActionAtom'
 import {singleNoteAtom} from '../../state/notes/atoms/notesState'
 import {reportNoteWithPromptActionAtom} from '../../state/notes/atoms/reportNoteActionAtom'
@@ -28,6 +31,7 @@ import {
 } from '../../state/notes/atoms/repostNoteActionAtom'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import navigateToBoard from '../../utils/navigateToBoard'
+import {showVerifiedContactsAtom} from '../../utils/preferences'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import CommonFriends from '../CommonFriends'
 import {showErrorAlert} from '../ErrorAlert'
@@ -86,6 +90,7 @@ export default function NoteDetailScreen({
   const noteAtom = useMemo(() => singleNoteAtom(noteId), [noteId])
   const note = useAtomValue(noteAtom)
   const importedContactsHashes = useAtomValue(importedContactsHashesAtom)
+  const showVerifiedContacts = useAtomValue(showVerifiedContactsAtom)
   const {isChatOpen, navigateToChat} = useNoteChatNavigation(noteId)
 
   const askDialog = useSetAtom(globalDialogAtom)
@@ -190,10 +195,13 @@ export default function NoteDetailScreen({
     return <Screen navigationBar={navigationBar}>{null}</Screen>
   }
 
-  const commonFriends = deriveVisibleCommonFriendsForNote({
-    noteInfo: note.noteInfo,
-    importedContactsHashes,
-  })
+  const {commonFriends, verifiedCommonFriends} = applyTrustedFriendsFeatureFlag(
+    deriveVisibleCommonFriendsForNote({
+      noteInfo: note.noteInfo,
+      importedContactsHashes,
+    }),
+    showVerifiedContacts
+  )
   const isReported = note.flags.reported
   const canRepost =
     !isMine &&
@@ -232,6 +240,9 @@ export default function NoteDetailScreen({
           commonFriends.length > 0 ? (
             <CommonFriends
               commonConnectionsHashes={commonFriends}
+              verifiedConnectionsHashes={verifiedCommonFriends}
+              role="otherPerson"
+              explainTrustedFriendsOnce
               otherSideClubs={[]}
               label={t('notes.detail.commonFriendsCount', {
                 count: commonFriends.length,

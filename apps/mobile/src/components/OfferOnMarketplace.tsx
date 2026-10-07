@@ -35,6 +35,7 @@ import {
 } from '../utils/offerHelpers'
 import {offerLocationLabelsAtom} from '../utils/offerLocationLabelsAtom'
 import {randomSeedFromOfferInfo} from '../utils/RandomSeed'
+import {trustedFriendsCountText} from '../utils/trustedFriendsText'
 import {offerRerequestLimitDaysAtom} from '../utils/versionService/atoms'
 import {AnonymousAvatarOrClubImage} from './AnonymousAvatar'
 
@@ -213,6 +214,14 @@ export default function OfferOnMarketplace({
         <IconTag neutral={shouldBeGrayscaled} variant={iconTagVariant} />
       }
       commonFriends={commonFriendsText}
+      trustedFriends={
+        !isMine
+          ? trustedFriendsCountText(
+              visibleCommonFriends.verifiedCommonFriends.length,
+              t
+            )
+          : undefined
+      }
       clubNames={clubNames}
       price={price}
       premiumLabel={premiumLabel.length > 0 ? premiumLabel : undefined}

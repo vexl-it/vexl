@@ -25,8 +25,6 @@
   "messages.vexlBot.chatOpened": "Toppen! Nu kan du chatta med den andra parten för att komma överens om detaljerna för er affär. Skicka ett meddelande eller öppna checklistan för affären.",
   "messages.vexlBot.welcomeToTheTradeChat.title": "Välkommen till affärschatten",
   "messages.vexlBot.welcomeToTheTradeChat.receiverDescription": "Innan du godkänner affärschatten, kolla gemensamma vänner och erbjudandedetaljer.",
-  "messages.vexlBot.welcomeToTheTradeChat.senderDescriptionFirst": "Väntar på den andra partens svar. Du får en notis när de svarar.",
-  "messages.vexlBot.welcomeToTheTradeChat.senderDescriptionRerequestTimeout": "Du kan skicka en påminnelse till den andra parten imorgon",
   "messages.messagePreviews.incoming.MESSAGE": "{{them}}: {{message}}",
   "messages.messagePreviews.incoming.REQUEST_REVEAL": "{{them}} requested identity reveal",
   "messages.messagePreviews.incoming.APPROVE_REVEAL": "Identity revealed",

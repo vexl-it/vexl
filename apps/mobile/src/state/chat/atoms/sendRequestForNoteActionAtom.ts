@@ -10,6 +10,7 @@ import checkNotificationPermissionsAndAskIfPossibleActionAtom from '../../../uti
 import {goldenAvatarTypeAtom} from '../../../utils/preferences'
 import reportError from '../../../utils/reportError'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
+import {getNoteVerifiedCommonFriends} from '../../marketplace/utils/visibleCommonFriends'
 import {generateAndRegisterVexlTokenActionAtom} from '../../notifications/actions/generateVexlTokenActionAtom'
 import {upsertInboxOnBeAndLocallyActionAtom} from '../hooks/useCreateInbox'
 import {version} from './../../../utils/environment'
@@ -51,7 +52,9 @@ const sendRequestForNoteActionAtom = atom(
           goldenAvatarType,
           forClubsUuids: [],
           commonFriends: note.noteInfo.privatePart.commonFriends,
-          verifiedCommonFriends: [],
+          verifiedCommonFriends: getNoteVerifiedCommonFriends(
+            note.noteInfo.privatePart
+          ),
           friendLevel: note.noteInfo.privatePart.friendLevel,
         })
       )

@@ -80,6 +80,21 @@ function ThemedColumn({
           {theme.charAt(0).toUpperCase() + theme.slice(1)}
         </SizableText>
 
+        <SectionLabel>Chat with trusted friends</SectionLabel>
+        <NavigationBar
+          style="chat"
+          name="Direct friend"
+          subtitle="5 common friends"
+          trustedFriends="2 trusted"
+          avatar={
+            <Avatar size="$9">
+              {AnonymousAvatar ? <AnonymousAvatar size={40} /> : null}
+            </Avatar>
+          }
+          leftAction={{icon: ChevronLeft, onPress: () => {}}}
+          onPress={() => {}}
+        />
+
         <SectionLabel>{'  Animated (scroll = 0)'}</SectionLabel>
         <AnimatedNavBarExample scrollValue={0} />
 

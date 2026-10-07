@@ -25,8 +25,6 @@
   "messages.vexlBot.chatOpened": "Safi! Sasa unaweza kuzungumza na upande mwingine ili kupanga maelezo ya biashara yenu. Watumie ujumbe au fungua orodha ya ukaguzi wa biashara.",
   "messages.vexlBot.welcomeToTheTradeChat.title": "Karibu kwenye gumzo la biashara",
   "messages.vexlBot.welcomeToTheTradeChat.receiverDescription": "Kabla hujaidhinisha gumzo la biashara, angalia marafiki wa pamoja na maelezo ya ofa.",
-  "messages.vexlBot.welcomeToTheTradeChat.senderDescriptionFirst": "Inasubiri jibu la upande mwingine. Utapata arifa mara watakapojibu.",
-  "messages.vexlBot.welcomeToTheTradeChat.senderDescriptionRerequestTimeout": "Unaweza kutuma kikumbusho kwa upande mwingine kesho",
   "messages.messagePreviews.incoming.MESSAGE": "{{them}}: {{message}}",
   "messages.messagePreviews.incoming.REQUEST_REVEAL": "{{them}} ameomba kufichua utambulisho",
   "messages.messagePreviews.incoming.APPROVE_REVEAL": "Utambulisho umefichuliwa",

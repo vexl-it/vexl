@@ -21,8 +21,13 @@ export function NoteCard({
   onPress,
 }: Props): React.JSX.Element {
   const {t} = useTranslation()
-  const {tierLabel, commonFriendsText, expiryText, repostLabel} =
-    useNoteDisplayData(note)
+  const {
+    tierLabel,
+    commonFriendsText,
+    trustedFriendsText,
+    expiryText,
+    repostLabel,
+  } = useNoteDisplayData(note)
   const {isChatOpen, navigateToChat} = useNoteChatNavigation(
     note.noteInfo.noteId
   )
@@ -38,6 +43,7 @@ export function NoteCard({
       }
       name={tierLabel}
       commonFriends={commonFriendsText}
+      trustedFriends={trustedFriendsText}
       expiration={expiryText}
       message={note.noteInfo.publicPart.text}
       messageNumberOfLines={messageNumberOfLines}

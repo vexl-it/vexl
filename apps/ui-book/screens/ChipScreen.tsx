@@ -33,6 +33,28 @@ function ThemeGroup({
           color="$foregroundSecondary"
           paddingTop="$3"
         >
+          Trusted with avatar
+        </SizableText>
+        <Chip name="Jana Nováková" avatarSource={vexlAvatarSource} trusted />
+
+        <SizableText
+          fontFamily="$body"
+          fontWeight="600"
+          fontSize="$2"
+          color="$foregroundSecondary"
+          paddingTop="$3"
+        >
+          Trusted without avatar
+        </SizableText>
+        <Chip name="Petr Svoboda" trusted />
+
+        <SizableText
+          fontFamily="$body"
+          fontWeight="600"
+          fontSize="$2"
+          color="$foregroundSecondary"
+          paddingTop="$3"
+        >
           Single chip
         </SizableText>
         <Chip name="Marcel Mrkev" avatarSource={vexlAvatarSource} />

@@ -12,6 +12,7 @@ import {ChecklistCellScreen} from './ChecklistCellScreen'
 import {ChipScreen} from './ChipScreen'
 import {ClubCardScreen} from './ClubCardScreen'
 import {ClubReachCardScreen} from './ClubReachCardScreen'
+import {CommonFriendsCountScreen} from './CommonFriendsCountScreen'
 import {CommonFriendsScreen} from './CommonFriendsScreen'
 import {DialogScreen} from './DialogScreen'
 import {DisclosureScreen} from './DisclosureScreen'
@@ -68,6 +69,9 @@ import {TabsScreen} from './TabsScreen'
 import {TextFieldScreen} from './TextFieldScreen'
 import {TextTagScreen} from './TextTagScreen'
 import {ToastScreen} from './ToastScreen'
+import {TrustBadgeScreen} from './TrustBadgeScreen'
+import {TrustedFriendsBoxScreen} from './TrustedFriendsBoxScreen'
+import {TrustedFriendsExplanationScreen} from './TrustedFriendsExplanationScreen'
 import {TypographyScreen} from './TypographyScreen'
 
 export interface ScreenEntry {
@@ -89,6 +93,7 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'Club Card', component: ClubCardScreen},
   {label: 'Club Reach Card', component: ClubReachCardScreen},
   {label: 'Common Friends', component: CommonFriendsScreen},
+  {label: 'Common Friends Count', component: CommonFriendsCountScreen},
   {label: 'Dialog', component: DialogScreen},
   {label: 'Disclosure', component: DisclosureScreen},
   {
@@ -153,5 +158,11 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'Text Field', component: TextFieldScreen},
   {label: 'Text Tag', component: TextTagScreen},
   {label: 'Toast', component: ToastScreen},
+  {label: 'Trust Badge', component: TrustBadgeScreen},
+  {label: 'Trusted Friends Box', component: TrustedFriendsBoxScreen},
+  {
+    label: 'Trusted Friends Explanation',
+    component: TrustedFriendsExplanationScreen,
+  },
   {label: 'Typography', component: TypographyScreen},
 ]

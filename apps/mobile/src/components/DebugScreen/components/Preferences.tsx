@@ -1,7 +1,9 @@
 import {Switch, Typography, XStack, YStack} from '@vexl-next/ui'
+import {Array} from 'effect'
 import {atom, type SetStateAction} from 'jotai'
 import React from 'react'
 import {preferencesAtom} from '../../../utils/preferences'
+import {type Preferences} from '../../../utils/preferences/domain'
 
 const preferencesToEdit = [
   'disableOfferRerequestLimit',
@@ -14,7 +16,7 @@ const preferencesToEdit = [
   'runTasksInParallel',
   'showVerifiedContacts',
   'notesBoardEnabled',
-] as const
+] satisfies ReadonlyArray<keyof Preferences>
 
 type PreferenceKey = (typeof preferencesToEdit)[number]
 
@@ -43,13 +45,13 @@ function PreferenceSwitch({
   return <Switch valueAtom={preferenceAtom} />
 }
 
-function Preferences(): React.ReactElement {
+function DebugPreferences(): React.ReactElement {
   return (
     <YStack gap="$2">
       <Typography variant="titlesSmall" color="$foregroundPrimary">
         Preferences
       </Typography>
-      {preferencesToEdit.map((key) => (
+      {Array.map(preferencesToEdit, (key) => (
         <XStack key={key} alignItems="center" justifyContent="space-between">
           <Typography variant="paragraphSmall" color="$foregroundPrimary">
             {key}
@@ -61,4 +63,4 @@ function Preferences(): React.ReactElement {
   )
 }
 
-export default Preferences
+export default DebugPreferences

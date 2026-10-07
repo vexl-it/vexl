@@ -1,11 +1,33 @@
 import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
-import {type NoteInfo} from '@vexl-next/domain/src/general/notes'
+import {
+  type NoteInfo,
+  type NotePrivatePart,
+} from '@vexl-next/domain/src/general/notes'
 import {type OfferInfo} from '@vexl-next/domain/src/general/offers'
 import {Array, pipe} from 'effect'
 
 export interface VisibleCommonFriends {
   readonly commonFriends: readonly HashedPhoneNumber[]
   readonly verifiedCommonFriends: readonly HashedPhoneNumber[]
+}
+
+const hiddenTrustedFriendsCache = new WeakMap<
+  VisibleCommonFriends,
+  VisibleCommonFriends
+>()
+
+export function applyTrustedFriendsFeatureFlag(
+  friends: VisibleCommonFriends,
+  showVerifiedContacts: boolean
+): VisibleCommonFriends {
+  if (showVerifiedContacts) return friends
+
+  const cached = hiddenTrustedFriendsCache.get(friends)
+  if (cached) return cached
+
+  const hidden = {...friends, verifiedCommonFriends: []}
+  hiddenTrustedFriendsCache.set(friends, hidden)
+  return hidden
 }
 
 // Builds the imported-contacts-hashes lookup Set once per hashes-array
@@ -45,8 +67,10 @@ export function deriveVisibleCommonFriendsFromHashes({
       // dedupe while preserving first-occurrence order
       (visibleHashes) => Array.fromIterable(new Set(visibleHashes))
     ),
-    verifiedCommonFriends: Array.filter(verifiedCommonFriends, (one) =>
-      importedContactsHashesSet.has(one)
+    verifiedCommonFriends: pipe(
+      verifiedCommonFriends,
+      Array.filter((one) => importedContactsHashesSet.has(one)),
+      (visibleHashes) => Array.fromIterable(new Set(visibleHashes))
     ),
   }
 }
@@ -103,11 +127,19 @@ export function deriveVisibleCommonFriendsForOffer({
   return memoizedVisibleCommonFriendsForOffer(offerInfo, importedContactsHashes)
 }
 
+export function getNoteVerifiedCommonFriends(
+  privatePart: NotePrivatePart
+): readonly HashedPhoneNumber[] {
+  return privatePart.viaRepost ? [] : privatePart.verifiedCommonFriends
+}
+
 const memoizedVisibleCommonFriendsForNote = memoizePerEntityAndContacts(
   (noteInfo: NoteInfo, importedContactsHashes) =>
-    Array.filter(noteInfo.privatePart.commonFriends, (one) =>
-      toHashesSet(importedContactsHashes).has(one)
-    )
+    deriveVisibleCommonFriendsFromHashes({
+      commonFriends: noteInfo.privatePart.commonFriends,
+      verifiedCommonFriends: getNoteVerifiedCommonFriends(noteInfo.privatePart),
+      importedContactsHashes,
+    })
 )
 
 export function deriveVisibleCommonFriendsForNote({
@@ -116,7 +148,7 @@ export function deriveVisibleCommonFriendsForNote({
 }: {
   readonly noteInfo: NoteInfo
   readonly importedContactsHashes: readonly HashedPhoneNumber[]
-}): readonly HashedPhoneNumber[] {
+}): VisibleCommonFriends {
   return memoizedVisibleCommonFriendsForNote(noteInfo, importedContactsHashes)
 }
 

@@ -25,8 +25,6 @@
   "messages.vexlBot.chatOpened": "Świetnie! Teraz możesz czatować z drugą stroną, żeby ustalić szczegóły transakcji. Wyślij wiadomość albo otwórz checklistę transakcji.",
   "messages.vexlBot.welcomeToTheTradeChat.title": "Witaj na czacie transakcji",
   "messages.vexlBot.welcomeToTheTradeChat.receiverDescription": "Zanim zatwierdzisz czat transakcji, sprawdź wspólnych znajomych i szczegóły oferty.",
-  "messages.vexlBot.welcomeToTheTradeChat.senderDescriptionFirst": "Czekamy na odpowiedź drugiej strony. Dostaniesz powiadomienie, gdy odpisze.",
-  "messages.vexlBot.welcomeToTheTradeChat.senderDescriptionRerequestTimeout": "Jutro możesz wysłać przypomnienie drugiej stronie",
   "messages.messagePreviews.incoming.MESSAGE": "{{them}}: {{message}}",
   "messages.messagePreviews.incoming.REQUEST_REVEAL": "{{them}} prosi o ujawnienie tożsamości",
   "messages.messagePreviews.incoming.APPROVE_REVEAL": "Tożsamość ujawniona",

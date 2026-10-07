@@ -13,6 +13,8 @@
   "faqs.byDefaultYouParticipateInTheNetwork": "Por lo general, participas en la red bajo tu nombre Vexl y el avatar Vexl que se te dieron durante el registro. Solo puedes revelar tu identidad para una operación particular en nuestro chat seguro y encriptado.",
   "faqs.howDoIKnowWhoIAmTalkingTo": "¿Cómo sé con quién estoy hablando?",
   "faqs.oneChallenge": "Uno de los retos de los sistemas de comunicación verdaderamente anónimos como Vexl es que a veces es necesario verificar la identidad de la persona con la que estás hablando. En estos casos, lo mejor es utilizar un canal de comunicación segundario y seguro para confirmar con la otra persona que ambos son quien dicen ser.",
+  "faqs.whatIsATrustedFriend": "¿Qué es un amigo de confianza?",
+  "faqs.trustedFriendExplanation": "Un amigo de confianza es un amigo común que usa Vexl y te tiene a ti y a la otra persona en sus contactos. Así que, cuando alguien aparece como amigo de confianza, también sabes que tiene tu número guardado. Lo mismo pasa con los demás: pueden ver cuáles de sus contactos tienen tu número guardado. Los nombres siempre salen solo de tus propios contactos.",
   "faqs.areMyChatsAndDealsPrivate": "¿Mis chats y tratos son privados?",
   "faqs.vexlIsOpensource": "Vexl es de código abierto: cualquiera puede buscar puertas traseras o intenciones maliciosas. También puedes consultar el informe de una auditoría de seguridad independiente.",
   "faqs.howDoYouProtectMyData": "¿Cómo protegéis mis datos?",

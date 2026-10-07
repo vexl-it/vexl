@@ -56,6 +56,19 @@ function SectionLabel({
 function Demos(): React.JSX.Element {
   return (
     <YStack gap="$4">
+      <SectionLabel>Trusted friends</SectionLabel>
+      <OfferCard
+        avatar={<AnonAvatar />}
+        name="Direct friend"
+        textTag={<TextTag variant="offer" label="Offer" />}
+        iconTag={<IconTag variant="bitcoin" />}
+        commonFriends="5 common friends"
+        trustedFriends="2 trusted"
+        price="€ 200 – 1 500"
+        description="Selling sats for cash in Prague."
+        details={['Cash', 'Prague 2', 'CZ, EN']}
+      />
+
       <SectionLabel>Basic request</SectionLabel>
       <OfferCard
         avatar={<AnonAvatar />}

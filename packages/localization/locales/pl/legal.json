@@ -13,6 +13,8 @@
   "faqs.byDefaultYouParticipateInTheNetwork": "Domyślnie uczestniczysz w sieci pod nazwą i awatarem, które zostały podane podczas rejestracji. Możesz ujawnić swoją tożsamość tylko w przypadku konkretnej transakcji w naszym bezpiecznym, szyfrowanym czacie.",
   "faqs.howDoIKnowWhoIAmTalkingTo": "Skąd wiem, z kim rozmawiam?",
   "faqs.oneChallenge": "Jednym z wyzwań związanych z całkowicie anonimowymi systemami komunikacji, takimi jak Vexl czasami, jest konieczność weryfikacji tożsamości osoby, z którą rozmawiasz! W takich przypadkach najlepiej jest użyć dodatkowego, bezpiecznego kanału komunikacji, aby potwierdzić z drugą osobą, że obydwoje jesteście tymi, za kogo się podajecie.",
+  "faqs.whatIsATrustedFriend": "Kim jest zaufany znajomy?",
+  "faqs.trustedFriendExplanation": "Zaufany znajomy to wspólny znajomy, który korzysta z Vexl i ma w kontaktach Ciebie i drugą osobę. Kiedy więc ktoś pojawia się jako zaufany znajomy, dowiadujesz się też, że ma zapisany Twój numer. To samo dotyczy innych: widzą, którzy z ich kontaktów mają zapisany Twój numer. Imiona zawsze pochodzą wyłącznie z Twoich własnych kontaktów.",
   "faqs.areMyChatsAndDealsPrivate": "Czy moje czaty i transakcje są prywatne?",
   "faqs.vexlIsOpensource": "Vexl jest open source - każdy może sprawdzić, czy nie ma backdoorów ani złośliwych zamiarów. Możesz też zobaczyć raport z niezależnego audytu bezpieczeństwa.",
   "faqs.howDoYouProtectMyData": "Jak chronicie moje dane?",

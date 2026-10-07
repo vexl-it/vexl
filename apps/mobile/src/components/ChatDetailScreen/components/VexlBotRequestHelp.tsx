@@ -1,5 +1,5 @@
 import {useNavigation} from '@react-navigation/native'
-import {Button, Checklist, XStack} from '@vexl-next/ui'
+import {Button, Checklist, XStack, YStack} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue} from 'jotai'
 import {useCallback} from 'react'
@@ -9,6 +9,7 @@ import isNoteChatOrigin from '../../../state/chat/utils/isNoteChatOrigin'
 import {useGetAllClubsForIds} from '../../../state/clubs/atom/clubsWithMembersAtom'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {chatMolecule} from '../atoms'
+import ChatTrustedFriendsBox from './ChatTrustedFriendsBox'
 import VexlbotActionCard from './VexlbotMessageItem/components/VexlbotActionCard'
 
 export function VexlBotRequestHelp({
@@ -25,7 +26,7 @@ export function VexlBotRequestHelp({
     publicKeyPemBase64Atom,
     chatStateAtom,
     verifiedConnectionsHashesAtom,
-    canBeRerequestedAtom,
+    otherPersonRoleAtom,
     otherSideClubsIdsAtom,
   } = useMolecule(chatMolecule)
   const chat = useAtomValue(chatAtom)
@@ -34,7 +35,7 @@ export function VexlBotRequestHelp({
   const verifiedConnectionsHashes = useAtomValue(verifiedConnectionsHashesAtom)
   const otherSideClubsIds = useAtomValue(otherSideClubsIdsAtom)
   const otherSideClubs = useGetAllClubsForIds(otherSideClubsIds ?? [])
-  const canBeRerequested = useAtomValue(canBeRerequestedAtom)
+  const role = useAtomValue(otherPersonRoleAtom)
   const chatState = useAtomValue(chatStateAtom)
 
   const handleOfferDetailsPress = useCallback(() => {
@@ -56,10 +57,12 @@ export function VexlBotRequestHelp({
       contactsHashes: commonConnectionsHashes,
       verifiedHashes: verifiedConnectionsHashes,
       clubs: otherSideClubs,
+      role,
     })
   }, [
     commonConnectionsHashes,
     navigation,
+    role,
     otherSideClubs,
     verifiedConnectionsHashes,
   ])
@@ -109,20 +112,23 @@ export function VexlBotRequestHelp({
   if (chatState === 'chatOpen') return null
   if (chatState === 'requestedByMe') return null
 
-  if (message.message.messageType === 'REQUEST_MESSAGING') {
-    if (message.state === 'received') {
-      const isMyNoteChat = chat.origin.type === 'myNote'
+  if (
+    message.message.messageType === 'REQUEST_MESSAGING' &&
+    message.state === 'received'
+  ) {
+    const isMyNoteChat = chat.origin.type === 'myNote'
 
-      // Other side sent the request messaging
-      return (
-        <VexlbotActionCard
-          title={t('messages.vexlBot.welcomeToTheTradeChat.title')}
-          description={
-            isMyNoteChat
-              ? t('notes.chat.welcomeReceiverDescription')
-              : t('messages.vexlBot.welcomeToTheTradeChat.receiverDescription')
-          }
-        >
+    return (
+      <VexlbotActionCard
+        title={t('messages.vexlBot.welcomeToTheTradeChat.title')}
+        description={
+          isMyNoteChat
+            ? t('notes.chat.welcomeReceiverDescription')
+            : t('messages.vexlBot.welcomeToTheTradeChat.receiverDescription')
+        }
+      >
+        <YStack gap="$3">
+          <ChatTrustedFriendsBox />
           <XStack gap="$3">
             <Button
               f={1}
@@ -146,25 +152,9 @@ export function VexlBotRequestHelp({
               {t('common.commonFriends')}
             </Button>
           </XStack>
-        </VexlbotActionCard>
-      )
-    } else {
-      const description = t(
-        'messages.vexlBot.welcomeToTheTradeChat.senderDescriptionFirst'
-      )
-      const rerequestIn = canBeRerequested.canBeRerequested
-        ? t(
-            'messages.vexlBot.welcomeToTheTradeChat.senderDescriptionRerequestTimeout'
-          )
-        : null
-      // I sent the request
-      return (
-        <VexlbotActionCard
-          title={t('messages.vexlBot.welcomeToTheTradeChat.title')}
-          description={`${description}${rerequestIn ? ` ${rerequestIn}` : ''}`}
-        />
-      )
-    }
+        </YStack>
+      </VexlbotActionCard>
+    )
   }
 
   return null

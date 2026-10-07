@@ -42,6 +42,7 @@ export const preferencesAtom = atomWithParsedMmkvStorage(
     runTasksInParallel: true,
     sendReadReceipts: true,
     showVerifiedContacts: false,
+    showTrustedFriendsExplanation: true,
     showCreateOfferInMarketplaceSuggestion: true,
     showImportContactsInMarketplaceSuggestion: true,
     showEnableNotificationsInMarketplaceSuggestion: true,
@@ -138,6 +139,11 @@ export const sendReadReceiptsAtom = focusAtom(preferencesAtom, (o) =>
 
 export const showVerifiedContactsAtom = focusAtom(preferencesAtom, (o) =>
   o.prop('showVerifiedContacts')
+)
+
+export const showTrustedFriendsExplanationAtom = focusAtom(
+  preferencesAtom,
+  (o) => o.prop('showTrustedFriendsExplanation')
 )
 
 export const showCreateOfferInMarketplaceSuggestionAtom = focusAtom(

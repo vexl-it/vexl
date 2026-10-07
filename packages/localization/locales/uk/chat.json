@@ -25,8 +25,6 @@
   "messages.vexlBot.chatOpened": "Чудово! Тепер ти можеш спілкуватися з іншою стороною, щоб домовитися про деталі угоди. Надішли повідомлення або відкрий чекліст угоди.",
   "messages.vexlBot.welcomeToTheTradeChat.title": "Ласкаво просимо до чату угоди",
   "messages.vexlBot.welcomeToTheTradeChat.receiverDescription": "Перед тим як підтвердити чат угоди, перевір спільних друзів і деталі пропозиції.",
-  "messages.vexlBot.welcomeToTheTradeChat.senderDescriptionFirst": "Очікуємо відповіді іншої сторони. Ти отримаєш сповіщення, щойно вони дадуть відповідь.",
-  "messages.vexlBot.welcomeToTheTradeChat.senderDescriptionRerequestTimeout": "Ти можеш надіслати нагадування іншій стороні завтра",
   "messages.messagePreviews.incoming.MESSAGE": "{{them}}: {{message}}",
   "messages.messagePreviews.incoming.REQUEST_REVEAL": "{{them}} requested identity reveal",
   "messages.messagePreviews.incoming.APPROVE_REVEAL": "Identity revealed",

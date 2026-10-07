@@ -25,8 +25,6 @@
   "messages.vexlBot.chatOpened": "Great! Now you can chat with the other person to arrange the details of your trade. Send them a message or open the trade checklist.",
   "messages.vexlBot.welcomeToTheTradeChat.title": "Welcome to the chat!",
   "messages.vexlBot.welcomeToTheTradeChat.receiverDescription": "Before you start the conversation you can check your common friends and offer details.",
-  "messages.vexlBot.welcomeToTheTradeChat.senderDescriptionFirst": "Waiting for the other person’s response. You’ll get a notification once they reply.",
-  "messages.vexlBot.welcomeToTheTradeChat.senderDescriptionRerequestTimeout": "You can send a reminder to the other person tomorrow.",
   "messages.messagePreviews.incoming.MESSAGE": "{{them}}: {{message}}",
   "messages.messagePreviews.incoming.REQUEST_REVEAL": "{{them}} requested identity reveal",
   "messages.messagePreviews.incoming.APPROVE_REVEAL": "Identity revealed",

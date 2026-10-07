@@ -13,6 +13,8 @@
   "faqs.byDefaultYouParticipateInTheNetwork": "By default, you participate in the network under the Vexl name and avatar you were given during registration. You can reveal your identity only for a particular trade in our secure, end-to-end encrypted chat.",
   "faqs.howDoIKnowWhoIAmTalkingTo": "How do I know who I am talking to?",
   "faqs.oneChallenge": "One challenge with truly anonymous communications systems like Vexl is that sometimes you do need to verify the identity of the person you’re talking to! In cases like these, it’s best to use a secure secondary channel of communication to confirm with the other person that you’re both who you say you are.",
+  "faqs.whatIsATrustedFriend": "What’s a trusted friend?",
+  "faqs.trustedFriendExplanation": "A trusted friend is a common friend who uses Vexl and has you and the other person in their contacts. So when someone shows up as a trusted friend, you also learn they have your number saved. The same goes for others: they can see which of their contacts have your number saved. Names only ever come from your own contacts.",
   "faqs.areMyChatsAndDealsPrivate": "Are my chats and deals private?",
   "faqs.vexlIsOpensource": "Vexl is open source; anyone can look for backdoors or malicious intent. You can also read the independent security audit report.",
   "faqs.howDoYouProtectMyData": "How do you protect my data?",

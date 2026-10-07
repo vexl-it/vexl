@@ -16,13 +16,12 @@ import React from 'react'
 import {ScrollView} from 'react-native'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {getTokens, Stack, useTheme} from 'tamagui'
-import {useGetAllClubsForIds} from '../../../state/clubs/atom/clubsWithMembersAtom'
 import {reportNoteWithPromptActionAtom} from '../../../state/notes/atoms/reportNoteActionAtom'
 import {useStatusBarStyleForScreen} from '../../../state/statusBarStyleAtom'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
-import CommonFriends from '../../CommonFriends'
 import {NotePreview} from '../../Notes/NotePreview'
 import {chatMolecule} from '../atoms'
+import ChatCommonFriends from './ChatCommonFriends'
 
 export default function ChatNoteDetailContent({
   chatExists,
@@ -35,20 +34,10 @@ export default function ChatNoteDetailContent({
   const {bottom} = useSafeAreaInsets()
   const {t} = useTranslation()
   const reportNoteWithPrompt = useSetAtom(reportNoteWithPromptActionAtom)
-  const {
-    chatAtom,
-    commonConnectionsHashesAtom,
-    noteForChatAtom,
-    otherSideClubsIdsAtom,
-    verifiedConnectionsHashesAtom,
-  } = useMolecule(chatMolecule)
+  const {chatAtom, noteForChatAtom} = useMolecule(chatMolecule)
 
   const chat = useAtomValue(chatAtom)
   const note = useAtomValue(noteForChatAtom)
-  const commonConnectionsHashes = useAtomValue(commonConnectionsHashesAtom)
-  const verifiedConnectionsHashes = useAtomValue(verifiedConnectionsHashesAtom)
-  const otherSideClubsIds = useAtomValue(otherSideClubsIdsAtom)
-  const otherSideClubs = useGetAllClubsForIds(otherSideClubsIds ?? [])
 
   const theirNoteAndNotReported =
     chat.origin.type === 'theirNote' && !note?.flags.reported
@@ -118,11 +107,7 @@ export default function ChatNoteDetailContent({
         <YStack gap="$5">
           <NotePreview note={note} />
 
-          <CommonFriends
-            commonConnectionsHashes={commonConnectionsHashes}
-            verifiedConnectionsHashes={verifiedConnectionsHashes}
-            otherSideClubs={otherSideClubs}
-          />
+          <ChatCommonFriends />
 
           {theirNoteAndNotReported ? (
             <Stack position="relative">

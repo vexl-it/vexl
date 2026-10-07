@@ -25,8 +25,6 @@
   "messages.vexlBot.chatOpened": "Skvělé! Teď můžeš chatovat s druhou stranou a domluvit detaily obchodu. Pošli zprávu nebo otevři obchodní checklist.",
   "messages.vexlBot.welcomeToTheTradeChat.title": "Vítej v obchodním chatu",
   "messages.vexlBot.welcomeToTheTradeChat.receiverDescription": "Než obchodní chat schválíš, zkontroluj společné přátele a detaily nabídky.",
-  "messages.vexlBot.welcomeToTheTradeChat.senderDescriptionFirst": "Čeká se na odpověď druhé strany. Jakmile odpoví, dostaneš oznámení.",
-  "messages.vexlBot.welcomeToTheTradeChat.senderDescriptionRerequestTimeout": "Připomínku druhé straně můžeš poslat zítra",
   "messages.messagePreviews.incoming.MESSAGE": "{{them}}: {{message}}",
   "messages.messagePreviews.incoming.REQUEST_REVEAL": "{{them}} požádal o odhalení identity",
   "messages.messagePreviews.incoming.APPROVE_REVEAL": "Identita odhalena",

@@ -8,14 +8,17 @@ import {
   FaqStayAnonymous,
   FaqWhatIsVexl,
 } from '@vexl-next/ui'
+import {useAtomValue} from 'jotai'
 import type React from 'react'
 import {useTranslation} from '../../utils/localization/I18nProvider'
+import {showVerifiedContactsAtom} from '../../utils/preferences'
 
 export type FaqType =
   | 'WHAT_IS_VEXL'
   | 'WHO_CAN_SEE_MY_CONTACTS'
   | 'HOW_CAN_I_REMAIN_ANONYMOUS'
   | 'HOW_CAN_I_MAKE_SURE'
+  | 'WHAT_IS_A_TRUSTED_FRIEND'
   | 'HOW_CAN_I_ENSURE'
   | 'HOW_CAN_YOU_ENSURE'
   | 'WHAT_ARE_VEXL_CLUBS'
@@ -38,6 +41,7 @@ export interface FaqContent {
 
 export default function useContent(): readonly FaqContent[] {
   const {t} = useTranslation()
+  const showVerifiedContacts = useAtomValue(showVerifiedContactsAtom)
 
   return [
     {
@@ -64,6 +68,16 @@ export default function useContent(): readonly FaqContent[] {
       title: t('faqs.howDoIKnowWhoIAmTalkingTo'),
       text: t('faqs.oneChallenge'),
     },
+    ...(showVerifiedContacts
+      ? [
+          {
+            type: 'WHAT_IS_A_TRUSTED_FRIEND',
+            graphic: FaqAnonymousCounterpart,
+            title: t('faqs.whatIsATrustedFriend'),
+            text: t('faqs.trustedFriendExplanation'),
+          } satisfies FaqContent,
+        ]
+      : []),
     {
       type: 'HOW_CAN_I_ENSURE',
       graphic: FaqOpenSource,

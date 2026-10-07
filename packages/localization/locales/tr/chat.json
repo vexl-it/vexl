@@ -25,8 +25,6 @@
   "messages.vexlBot.chatOpened": "Harika! Artık takasının detaylarını ayarlamak için karşı tarafla sohbet edebilirsin. Ona mesaj gönder veya takas kontrol listesini aç.",
   "messages.vexlBot.welcomeToTheTradeChat.title": "Takas sohbetine hoş geldin",
   "messages.vexlBot.welcomeToTheTradeChat.receiverDescription": "Takas sohbetini onaylamadan önce ortak arkadaşları ve teklif detaylarını kontrol et.",
-  "messages.vexlBot.welcomeToTheTradeChat.senderDescriptionFirst": "Karşı tarafın yanıtı bekleniyor. Yanıt verdiğinde bildirim alacaksın.",
-  "messages.vexlBot.welcomeToTheTradeChat.senderDescriptionRerequestTimeout": "Karşı tarafa yarın hatırlatma gönderebilirsin",
   "messages.messagePreviews.incoming.MESSAGE": "{{them}}: {{message}}",
   "messages.messagePreviews.incoming.REQUEST_REVEAL": "{{them}} requested identity reveal",
   "messages.messagePreviews.incoming.APPROVE_REVEAL": "Identity revealed",

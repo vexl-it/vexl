@@ -11,15 +11,20 @@ import {getTokens, styled, useTheme} from 'tamagui'
 import {ChevronRight} from '../icons'
 import {SizableText, Stack, XStack, YStack} from '../primitives'
 import {Chip} from './Chip'
+import {TrustBadge} from './TrustBadge'
+import {Typography} from './Typography'
 
 export interface CommonFriend {
   readonly id: string
   readonly name: string
   readonly avatarSource?: RNImageProps['source']
+  readonly trusted?: boolean
 }
 
 export interface CommonFriendsProps {
   readonly label: string
+  readonly trustedLabel?: string
+  readonly trustedFriendsText?: string
   readonly friends: readonly CommonFriend[]
   readonly onPress?: () => void
 }
@@ -36,6 +41,8 @@ const CommonFriendsFrame = styled(Stack, {
 
 export function CommonFriends({
   label,
+  trustedLabel,
+  trustedFriendsText,
   friends,
   onPress,
 }: CommonFriendsProps): React.JSX.Element {
@@ -49,59 +56,86 @@ export function CommonFriends({
 
   return (
     <CommonFriendsFrame onPress={onPress}>
-      <YStack px="$5" py="$4" gap="$3">
-        <SizableText
-          fontFamily="$body"
-          fontSize="$1"
-          fontWeight="500"
-          color="$foregroundSecondary"
+      <Stack position="relative">
+        <YStack px="$5" py="$4" gap="$3">
+          <SizableText
+            fontFamily="$body"
+            fontSize="$1"
+            fontWeight="500"
+            color="$foregroundSecondary"
+          >
+            {label}
+            {trustedLabel != null ? (
+              <>
+                {' · '}
+                <SizableText
+                  fontFamily="$body"
+                  fontSize="$1"
+                  color="$foregroundPrimary"
+                  fontWeight="600"
+                >
+                  {trustedLabel}
+                </SizableText>
+              </>
+            ) : null}
+          </SizableText>
+          <XStack gap={gap} alignItems="center" overflow="hidden">
+            {friends.map((friend) => (
+              <Chip
+                key={friend.id}
+                name={friend.name}
+                avatarSource={friend.avatarSource}
+                trusted={friend.trusted}
+              />
+            ))}
+          </XStack>
+        </YStack>
+        <Stack
+          position="absolute"
+          top={0}
+          bottom={0}
+          right={0}
+          width={gradientWidth}
+          pointerEvents="none"
         >
-          {label}
-        </SizableText>
-        <XStack gap={gap} alignItems="center" overflow="hidden">
-          {friends.map((friend) => (
-            <Chip
-              key={friend.id}
-              name={friend.name}
-              avatarSource={friend.avatarSource}
-            />
-          ))}
-        </XStack>
-      </YStack>
-      <Stack
-        position="absolute"
-        top={0}
-        bottom={0}
-        right={0}
-        width={gradientWidth}
-        pointerEvents="none"
-      >
-        <Svg width="100%" height="100%">
-          <Defs>
-            <SvgLinearGradient
-              id="commonFriendsFade"
-              x1="0"
-              y1="0"
-              x2="1"
-              y2="0"
-            >
-              <Stop offset="0" stopColor={bgColor} stopOpacity="0" />
-              <Stop offset="0.4" stopColor={bgColor} stopOpacity="1" />
-            </SvgLinearGradient>
-          </Defs>
-          <Rect width="100%" height="100%" fill="url(#commonFriendsFade)" />
-        </Svg>
+          <Svg width="100%" height="100%">
+            <Defs>
+              <SvgLinearGradient
+                id="commonFriendsFade"
+                x1="0"
+                y1="0"
+                x2="1"
+                y2="0"
+              >
+                <Stop offset="0" stopColor={bgColor} stopOpacity="0" />
+                <Stop offset="0.4" stopColor={bgColor} stopOpacity="1" />
+              </SvgLinearGradient>
+            </Defs>
+            <Rect width="100%" height="100%" fill="url(#commonFriendsFade)" />
+          </Svg>
+        </Stack>
+        <Stack
+          position="absolute"
+          right="$3"
+          top={0}
+          bottom={0}
+          justifyContent="center"
+          pointerEvents="none"
+        >
+          <ChevronRight size={24} color={chevronColor} />
+        </Stack>
       </Stack>
-      <Stack
-        position="absolute"
-        right="$3"
-        top={0}
-        bottom={0}
-        justifyContent="center"
-        pointerEvents="none"
-      >
-        <ChevronRight size={24} color={chevronColor} />
-      </Stack>
+      {trustedFriendsText != null ? (
+        <>
+          <Stack height="$0.5" backgroundColor="$backgroundTertiary" />
+          <XStack px="$5" pt="$3" pb="$4" gap="$3" alignItems="flex-start">
+            <TrustBadge size={getTokens().size.$5.val} />
+            <Typography variant="micro" color="$foregroundPrimary" flex={1}>
+              {trustedFriendsText}
+            </Typography>
+          </XStack>
+        </>
+      ) : null}
     </CommonFriendsFrame>
   )
 }

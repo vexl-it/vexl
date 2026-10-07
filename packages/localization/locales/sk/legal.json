@@ -13,6 +13,8 @@
   "faqs.byDefaultYouParticipateInTheNetwork": "Ostatní účastníci siete ťa uvidia pod tvojím Vexl menom a avatarom, ktoré ti boli pridelené pri registrácii. Svoju identitu môžeš odhaliť iba pre konkrétny obchod v našom zabezpečenom, end-to-end šifrovanom chate.",
   "faqs.howDoIKnowWhoIAmTalkingTo": "Ako viem, s kým sa rozprávam?",
   "faqs.oneChallenge": "Jedným z úskalí skutočne anonymných komunikačných systémov, ako je Vexl, je to, že si niekedy musíš overiť totožnosť osoby, s ktorou komunikuješ! V takýchto prípadoch je najlepšie použiť zabezpečený sekundárny komunikačný kanál, aby si si s druhou stranou potvrdil, že ste obaja tí, za ktorých sa vydávate.",
+  "faqs.whatIsATrustedFriend": "Kto je dôveryhodný priateľ?",
+  "faqs.trustedFriendExplanation": "Dôveryhodný priateľ je spoločný priateľ, ktorý používa Vexl a má v kontaktoch teba aj druhú stranu. Keď sa teda niekto zobrazí ako dôveryhodný priateľ, zistíš tým aj to, že má uložené tvoje číslo. Rovnako to funguje aj pre ostatných: vidia, kto z ich kontaktov má uložené tvoje číslo. Mená pochádzajú vždy len z tvojich vlastných kontaktov.",
   "faqs.areMyChatsAndDealsPrivate": "Sú moje chaty a obchody súkromné?",
   "faqs.vexlIsOpensource": "Vexl je open source - ktokoľvek môže hľadať zadné vrátka alebo škodlivý zámer. Môžeš si pozrieť aj správu z nezávislého bezpečnostného auditu.",
   "faqs.howDoYouProtectMyData": "Ako chránite moje údaje?",

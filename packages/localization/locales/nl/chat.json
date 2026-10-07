@@ -25,8 +25,6 @@
   "messages.vexlBot.chatOpened": "Top! Nu kun je met de andere partij chatten om de details van je trade af te spreken. Stuur een bericht of open de tradechecklist.",
   "messages.vexlBot.welcomeToTheTradeChat.title": "Welkom in de tradechat",
   "messages.vexlBot.welcomeToTheTradeChat.receiverDescription": "Controleer de gemeenschappelijke vrienden en aanbiedingsdetails voordat je de tradechat goedkeurt.",
-  "messages.vexlBot.welcomeToTheTradeChat.senderDescriptionFirst": "Wachten op reactie van de andere partij. Je krijgt een melding zodra diegene antwoordt.",
-  "messages.vexlBot.welcomeToTheTradeChat.senderDescriptionRerequestTimeout": "Je kunt morgen een herinnering naar de andere partij sturen",
   "messages.messagePreviews.incoming.MESSAGE": "{{them}}: {{message}}",
   "messages.messagePreviews.incoming.REQUEST_REVEAL": "{{them}} heeft gevraagd om identiteit te onthullen",
   "messages.messagePreviews.incoming.APPROVE_REVEAL": "Identiteit onthuld",

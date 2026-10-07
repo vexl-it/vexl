@@ -25,8 +25,6 @@
   "messages.vexlBot.chatOpened": "عالیه! حالا می‌تونی با طرف مقابل چت کنی و جزئیات معامله‌تون رو هماهنگ کنید. براش پیام بفرست یا چک‌لیست معامله رو باز کن.",
   "messages.vexlBot.welcomeToTheTradeChat.title": "به چت معامله خوش اومدی",
   "messages.vexlBot.welcomeToTheTradeChat.receiverDescription": "قبل از تأیید چت معامله، دوست‌های مشترک و جزئیات پیشنهاد رو بررسی کن.",
-  "messages.vexlBot.welcomeToTheTradeChat.senderDescriptionFirst": "منتظر پاسخ طرف مقابل هستیم. وقتی جواب بده، اعلان می‌گیری.",
-  "messages.vexlBot.welcomeToTheTradeChat.senderDescriptionRerequestTimeout": "فردا می‌تونی برای طرف مقابل یادآوری بفرستی",
   "messages.messagePreviews.incoming.MESSAGE": "{{them}}: {{message}}",
   "messages.messagePreviews.incoming.REQUEST_REVEAL": "{{them}} requested identity reveal",
   "messages.messagePreviews.incoming.APPROVE_REVEAL": "Identity revealed",

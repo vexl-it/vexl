@@ -25,8 +25,6 @@
   "messages.vexlBot.chatOpened": "Super ! Tu peux maintenant discuter avec l'autre personne pour organiser les détails de votre transaction. Envoie-lui un message ou ouvre la checklist de transaction.",
   "messages.vexlBot.welcomeToTheTradeChat.title": "Bienvenue dans le chat de transaction",
   "messages.vexlBot.welcomeToTheTradeChat.receiverDescription": "Avant d'approuver le chat de transaction, vérifie les amis en commun et les détails de l'offre.",
-  "messages.vexlBot.welcomeToTheTradeChat.senderDescriptionFirst": "En attente de la réponse de l'autre personne. Tu recevras une notification dès qu'elle répondra.",
-  "messages.vexlBot.welcomeToTheTradeChat.senderDescriptionRerequestTimeout": "Tu pourras envoyer un rappel à l'autre personne demain",
   "messages.messagePreviews.incoming.MESSAGE": "{{them}} : {{message}}",
   "messages.messagePreviews.incoming.REQUEST_REVEAL": "{{them}} demande de révélation d'identité",
   "messages.messagePreviews.incoming.APPROVE_REVEAL": "Identité révélée",

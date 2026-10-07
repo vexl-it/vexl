@@ -25,8 +25,6 @@
   "messages.vexlBot.chatOpened": "Super! Jetzt kannst du mit der anderen Partei chatten, um die Details eures Trades zu klären. Schick ihr eine Nachricht oder öffne die Trade-Checkliste.",
   "messages.vexlBot.welcomeToTheTradeChat.title": "Willkommen im Trade-Chat",
   "messages.vexlBot.welcomeToTheTradeChat.receiverDescription": "Bevor du den Trade-Chat bestätigst, prüfe die gemeinsamen Freunde und Angebotsdetails.",
-  "messages.vexlBot.welcomeToTheTradeChat.senderDescriptionFirst": "Warte auf die Antwort der anderen Partei. Du bekommst eine Benachrichtigung, sobald sie antwortet.",
-  "messages.vexlBot.welcomeToTheTradeChat.senderDescriptionRerequestTimeout": "Du kannst der anderen Partei morgen eine Erinnerung senden",
   "messages.messagePreviews.incoming.MESSAGE": "{{them}}: {{message}}",
   "messages.messagePreviews.incoming.REQUEST_REVEAL": "{{them}} beantragte Identitätsenthüllung",
   "messages.messagePreviews.incoming.APPROVE_REVEAL": "Identität offenbart",

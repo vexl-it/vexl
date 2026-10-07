@@ -90,6 +90,7 @@ interface EditRowIconProps extends EditRowBaseProps {
 interface EditRowProfileProps extends EditRowBaseProps {
   readonly state: 'profile'
   readonly avatar: Omit<AvatarProps, 'size' | 'customSize'>
+  readonly avatarBadge?: React.ReactNode
   readonly icon?: never
 }
 
@@ -158,6 +159,7 @@ export function EditRow({
 }: EditRowProps): React.JSX.Element {
   const icon = 'icon' in rest ? rest.icon : undefined
   const avatar = 'avatar' in rest ? rest.avatar : undefined
+  const avatarBadge = 'avatarBadge' in rest ? rest.avatarBadge : undefined
   const theme = useTheme()
   const iconBoxSize = getTokens().size.$9.val
 
@@ -211,7 +213,10 @@ export function EditRow({
     >
       {showLeadingIcon ? (
         isProfile && avatar ? (
-          <Avatar customSize={iconBoxSize} {...avatar} />
+          <Stack>
+            <Avatar customSize={iconBoxSize} {...avatar} />
+            {avatarBadge}
+          </Stack>
         ) : (
           <IconBox tone={iconBoxTone}>{leadingIcon}</IconBox>
         )

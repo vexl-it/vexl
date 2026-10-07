@@ -25,8 +25,6 @@
   "messages.vexlBot.chatOpened": "Nice! Now you fit chat with di oda party to arrange details of your trade. Send dem message or open trade checklist.",
   "messages.vexlBot.welcomeToTheTradeChat.title": "Welcome to di chat",
   "messages.vexlBot.welcomeToTheTradeChat.receiverDescription": "Before you approve di chat! check di common friends and offer details.",
-  "messages.vexlBot.welcomeToTheTradeChat.senderDescriptionFirst": "Dey wait for di oda party response. You go get notification once dem reply.",
-  "messages.vexlBot.welcomeToTheTradeChat.senderDescriptionRerequestTimeout": "You fit send reminder to di oda party tomorrow",
   "messages.messagePreviews.incoming.MESSAGE": "{{them}}: {{message}}",
   "messages.messagePreviews.incoming.REQUEST_REVEAL": "{{them}} requested identity reveal",
   "messages.messagePreviews.incoming.APPROVE_REVEAL": "Identity revealed",

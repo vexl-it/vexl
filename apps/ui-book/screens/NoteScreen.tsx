@@ -66,6 +66,16 @@ function ThemeGroup({
           {theme.charAt(0).toUpperCase() + theme.slice(1)}
         </SizableText>
 
+        <SectionLabel>Trusted friends</SectionLabel>
+        <Note
+          avatar={<SvgAvatar />}
+          name="Direct friend"
+          commonFriends="5 common friends"
+          trustedFriends="2 trusted"
+          expiration="expires in 3 days"
+          message="Looking to trade sats for cash in Prague."
+        />
+
         <SectionLabel>PNG avatar</SectionLabel>
         <Note
           avatar={<PngAvatar />}

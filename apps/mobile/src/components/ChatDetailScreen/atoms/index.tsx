@@ -41,8 +41,11 @@ import {importedContactsHashesAtom} from '../../../state/contacts/atom/contactsS
 import {createBtcPriceForCurrencyAtom} from '../../../state/currentBtcPriceAtoms'
 import {offerForChatOriginAtom} from '../../../state/marketplace/atoms/offersState'
 import {
+  applyTrustedFriendsFeatureFlag,
   deriveVisibleCommonFriendsForChat,
+  deriveVisibleCommonFriendsForNote,
   deriveVisibleCommonFriendsForOffer,
+  type VisibleCommonFriends,
 } from '../../../state/marketplace/utils/visibleCommonFriends'
 import {noteForChatOriginAtom} from '../../../state/notes/atoms/notesState'
 import * as amount from '../../../state/tradeChecklist/utils/amount'
@@ -64,6 +67,8 @@ import {
   navigationRef,
   safeNavigateBackOutsideReact,
 } from '../../../utils/navigation'
+import {getOtherPersonRole} from '../../../utils/otherPersonRole'
+import {showVerifiedContactsAtom} from '../../../utils/preferences'
 import reportError from '../../../utils/reportError'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import showDonationPromptGiveLoveActionAtom from '../../DonationPrompt/atoms/showDonationPromptGiveLoveActionAtom'
@@ -234,98 +239,76 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
       ) ?? []
   )
 
-  const commonConnectionsHashesAtom = atom((get) => {
+  const commonFriendsForChatAtom = atom((get): VisibleCommonFriends => {
     const offer = get(offerForChatAtom)
     const importedContactsHashes = get(importedContactsHashesAtom)
+    const note = offer ? undefined : get(noteForChatAtom)
+
+    if (offer && !offer.ownershipInfo) {
+      return deriveVisibleCommonFriendsForOffer({
+        offerInfo: offer.offerInfo,
+        importedContactsHashes,
+      })
+    }
+
+    if (note && !note.ownershipInfo) {
+      return deriveVisibleCommonFriendsForNote({
+        noteInfo: note.noteInfo,
+        importedContactsHashes,
+      })
+    }
+
+    if (!offer && !note) return {commonFriends: [], verifiedCommonFriends: []}
+
     const requestMessage = get(requestMessageAtom)
-    const commonFriendsForMyOffer = pipe(
-      requestMessage,
-      Option.flatMap((message) =>
-        Option.fromNullable(message.message.commonFriends)
+    return deriveVisibleCommonFriendsForChat({
+      commonFriends: pipe(
+        requestMessage,
+        Option.flatMap((message) =>
+          Option.fromNullable(message.message.commonFriends)
+        ),
+        Option.getOrElse(() => [])
       ),
-      Option.getOrElse(() => [])
-    )
-    const verifiedCommonFriendsForMyOffer = pipe(
-      requestMessage,
-      Option.flatMap((message) =>
-        Option.fromNullable(message.message.verifiedCommonFriends)
+      verifiedCommonFriends: pipe(
+        requestMessage,
+        Option.flatMap((message) =>
+          Option.fromNullable(message.message.verifiedCommonFriends)
+        ),
+        Option.getOrElse(() => [])
       ),
-      Option.getOrElse(() => [])
-    )
-
-    if (!offer) {
-      const note = get(noteForChatAtom)
-      if (!note) return []
-
-      // My note - the responder sent their common friends in the request
-      // message. Their note - common friends are in the note's private part.
-      return deriveVisibleCommonFriendsForChat({
-        commonFriends: note.ownershipInfo
-          ? commonFriendsForMyOffer
-          : note.noteInfo.privatePart.commonFriends,
-        verifiedCommonFriends: note.ownershipInfo
-          ? verifiedCommonFriendsForMyOffer
-          : [],
-        importedContactsHashes,
-      }).commonFriends
-    }
-
-    if (offer.ownershipInfo) {
-      return deriveVisibleCommonFriendsForChat({
-        commonFriends: commonFriendsForMyOffer,
-        verifiedCommonFriends: verifiedCommonFriendsForMyOffer,
-        importedContactsHashes,
-      }).commonFriends
-    }
-
-    return deriveVisibleCommonFriendsForOffer({
-      offerInfo: offer.offerInfo,
       importedContactsHashes,
-    }).commonFriends
+    })
   })
 
-  const verifiedConnectionsHashesAtom = atom((get) => {
-    const offer = get(offerForChatAtom)
-    const commonConnectionsHashes = get(commonConnectionsHashesAtom)
-    const importedContactsHashes = get(importedContactsHashesAtom)
-    const verifiedCommonFriendsForMyOffer = pipe(
-      get(requestMessageAtom),
-      Option.flatMap((message) =>
-        Option.fromNullable(message.message.verifiedCommonFriends)
-      ),
-      Option.getOrElse(() => [])
+  const visibleCommonFriendsForChatAtom = atom((get) =>
+    applyTrustedFriendsFeatureFlag(
+      get(commonFriendsForChatAtom),
+      get(showVerifiedContactsAtom)
     )
+  )
 
-    if (!offer) {
-      const note = get(noteForChatAtom)
-      // Notes carry no verified common friends; for my note the responder
-      // may have sent theirs in the request message.
-      if (!note?.ownershipInfo) return []
+  const commonConnectionsHashesAtom = selectAtom(
+    visibleCommonFriendsForChatAtom,
+    (friends) => friends.commonFriends
+  )
 
-      return deriveVisibleCommonFriendsForChat({
-        commonFriends: commonConnectionsHashes,
-        verifiedCommonFriends: verifiedCommonFriendsForMyOffer,
-        importedContactsHashes,
-      }).verifiedCommonFriends
-    }
-
-    if (offer.ownershipInfo) {
-      return deriveVisibleCommonFriendsForChat({
-        commonFriends: commonConnectionsHashes,
-        verifiedCommonFriends: verifiedCommonFriendsForMyOffer,
-        importedContactsHashes,
-      }).verifiedCommonFriends
-    }
-
-    return deriveVisibleCommonFriendsForOffer({
-      offerInfo: offer.offerInfo,
-      importedContactsHashes,
-    }).verifiedCommonFriends
-  })
+  const verifiedConnectionsHashesAtom = selectAtom(
+    visibleCommonFriendsForChatAtom,
+    (friends) => friends.verifiedCommonFriends
+  )
 
   const commonConnectionsCountAtom = selectAtom(
     commonConnectionsHashesAtom,
     (connections) => connections.length
+  )
+
+  const verifiedConnectionsCountAtom = selectAtom(
+    verifiedConnectionsHashesAtom,
+    (connections) => connections.length
+  )
+
+  const otherPersonRoleAtom = atom((get) =>
+    getOtherPersonRole(get(offerForChatAtom) ?? undefined)
   )
 
   const deleteChatWithUiFeedbackAtom = atom(
@@ -843,6 +826,8 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     commonConnectionsHashesAtom,
     verifiedConnectionsHashesAtom,
     commonConnectionsCountAtom,
+    verifiedConnectionsCountAtom,
+    otherPersonRoleAtom,
     messagesAtom,
     offerForChatAtom,
     noteForChatAtom,

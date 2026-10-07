@@ -37,6 +37,7 @@ import {type FaqType} from './components/FaqScreen/useContent'
 import {type TabType} from './components/TosScreen/useContent'
 import {type ChatIds} from './state/chat/domain'
 import {type ContactsFilter} from './state/contacts/domain'
+import {type OtherPersonRole} from './utils/otherPersonRole'
 
 export interface CommonFriendsClub {
   readonly uuid: ClubUuid
@@ -130,8 +131,9 @@ export type RootStackParamsList = {
 
   CommonFriends: {
     readonly contactsHashes: readonly HashedPhoneNumber[]
-    readonly verifiedHashes?: readonly HashedPhoneNumber[]
+    readonly verifiedHashes: readonly HashedPhoneNumber[]
     readonly clubs: readonly CommonFriendsClub[]
+    readonly role: OtherPersonRole
   }
 
   ClubDetail: {clubUuid: ClubUuid}

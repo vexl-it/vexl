@@ -9,6 +9,7 @@ import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {formatInteger} from '../../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../../utils/localization/formattingLocaleAtom'
 import resolveLocalUri from '../../../utils/resolveLocalUri'
+import {trustedFriendsCountText} from '../../../utils/trustedFriendsText'
 import useSafeGoBack from '../../../utils/useSafeGoBack'
 import {showGoldenAvatarInfoModalActionAton} from '../../GoldenAvatar/atoms'
 import UserAvatar from '../../UserAvatar'
@@ -25,6 +26,7 @@ export function MessagesScreenChatHeader(): React.ReactElement {
   const {
     chatAtom,
     commonConnectionsCountAtom,
+    verifiedConnectionsCountAtom,
     friendLevelInfoAtom,
     offerForChatAtom,
     otherSideDataAtom,
@@ -34,6 +36,7 @@ export function MessagesScreenChatHeader(): React.ReactElement {
   } = useMolecule(chatMolecule)
   const chat = useAtomValue(chatAtom)
   const commonConnectionsCount = useAtomValue(commonConnectionsCountAtom)
+  const verifiedConnectionsCount = useAtomValue(verifiedConnectionsCountAtom)
   const friendLevelInfo = useAtomValue(friendLevelInfoAtom)
   const inboxKey = useAtomValue(publicKeyPemBase64Atom)
   const offer = useAtomValue(offerForChatAtom)
@@ -67,6 +70,7 @@ export function MessagesScreenChatHeader(): React.ReactElement {
             t,
           }) ?? otherSideData.userName
         }
+        trustedFriends={trustedFriendsCountText(verifiedConnectionsCount, t)}
         subtitle={t('offer.numberOfCommon', {
           number: formatInteger(commonConnectionsCount, locale),
         })}

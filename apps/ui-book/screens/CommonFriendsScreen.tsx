@@ -56,6 +56,55 @@ function ThemeGroup({
           color="$foregroundSecondary"
           paddingTop="$3"
         >
+          Trusted first
+        </SizableText>
+        <CommonFriends
+          label="5 common"
+          trustedLabel="2 trusted"
+          friends={[
+            {
+              id: 'jana',
+              name: 'Jana Nováková',
+              avatarSource: vexlAvatarSource,
+              trusted: true,
+            },
+            {id: 'petr', name: 'Petr Svoboda', trusted: true},
+            {id: 'lukas', name: 'Lukáš Dvořák'},
+            {id: 'tereza', name: 'Tereza Malá'},
+            {id: 'martin', name: 'Martin Kříž'},
+          ]}
+          trustedFriendsText="Jana Nováková and Petr Svoboda have you and the seller in their contacts."
+          onPress={() => {
+            Alert.alert('Trusted friends', 'Two trusted friends')
+          }}
+        />
+
+        <SizableText
+          fontFamily="$body"
+          fontWeight="600"
+          fontSize="$2"
+          color="$foregroundSecondary"
+          paddingTop="$3"
+        >
+          One trusted friend
+        </SizableText>
+        <CommonFriends
+          label="2 common"
+          trustedLabel="1 trusted"
+          friends={[
+            {id: 'jana', name: 'Jana Nováková', trusted: true},
+            {id: 'lukas', name: 'Lukáš Dvořák'},
+          ]}
+          trustedFriendsText="Jana Nováková has you and the seller in their contacts."
+        />
+
+        <SizableText
+          fontFamily="$body"
+          fontWeight="600"
+          fontSize="$2"
+          color="$foregroundSecondary"
+          paddingTop="$3"
+        >
           Pressable
         </SizableText>
         <CommonFriends

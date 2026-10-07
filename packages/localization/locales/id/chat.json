@@ -25,8 +25,6 @@
   "messages.vexlBot.chatOpened": "Mantap! Sekarang kamu bisa chat dengan pihak lain untuk mengatur detail trade-mu. Kirim pesan atau buka checklist trade.",
   "messages.vexlBot.welcomeToTheTradeChat.title": "Selamat datang di chat trade",
   "messages.vexlBot.welcomeToTheTradeChat.receiverDescription": "Sebelum kamu menyetujui chat trade, cek teman bersama dan detail penawaran.",
-  "messages.vexlBot.welcomeToTheTradeChat.senderDescriptionFirst": "Menunggu respons pihak lain. Kamu akan mendapat notifikasi setelah mereka membalas.",
-  "messages.vexlBot.welcomeToTheTradeChat.senderDescriptionRerequestTimeout": "Kamu bisa mengirim pengingat ke pihak lain besok",
   "messages.messagePreviews.incoming.MESSAGE": "{{them}}: {{message}}",
   "messages.messagePreviews.incoming.REQUEST_REVEAL": "{{them}} requested identity reveal",
   "messages.messagePreviews.incoming.APPROVE_REVEAL": "Identity revealed",

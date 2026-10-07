@@ -25,8 +25,6 @@
   "messages.vexlBot.chatOpened": "Flott! Nå kan du chatte med den andre parten for å avtale detaljene for handelen. Send dem en melding eller åpne handelssjekklisten.",
   "messages.vexlBot.welcomeToTheTradeChat.title": "Velkommen til handelschatten",
   "messages.vexlBot.welcomeToTheTradeChat.receiverDescription": "Før du godkjenner handelschatten, sjekk felles venner og tilbudsdetaljer.",
-  "messages.vexlBot.welcomeToTheTradeChat.senderDescriptionFirst": "Venter på svar fra den andre parten. Du får et varsel når de svarer.",
-  "messages.vexlBot.welcomeToTheTradeChat.senderDescriptionRerequestTimeout": "Du kan sende en påminnelse til den andre parten i morgen",
   "messages.messagePreviews.incoming.MESSAGE": "{{them}}: {{message}}",
   "messages.messagePreviews.incoming.REQUEST_REVEAL": "{{them}} requested identity reveal",
   "messages.messagePreviews.incoming.APPROVE_REVEAL": "Identity revealed",

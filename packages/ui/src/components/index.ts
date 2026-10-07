@@ -37,6 +37,8 @@ export {ClubReachCard} from './ClubReachCard'
 export type {ClubReachCardProps} from './ClubReachCard'
 export {CommonFriends} from './CommonFriends'
 export type {CommonFriend, CommonFriendsProps} from './CommonFriends'
+export {CommonFriendsCount} from './CommonFriendsCount'
+export type {CommonFriendsCountProps} from './CommonFriendsCount'
 export {
   Dialog,
   DialogDescription,
@@ -169,6 +171,16 @@ export {TextTag} from './TextTag'
 export type {TextTagVariant} from './TextTag'
 export {Toast} from './Toast'
 export type {ToastMessage, ToastProps} from './Toast'
+export {TrustBadge} from './TrustBadge'
+export type {TrustBadgeProps} from './TrustBadge'
+export {TrustedFriendsBox} from './TrustedFriendsBox'
+export type {TrustedFriendsBoxProps} from './TrustedFriendsBox'
+export {TrustedFriendsExplanation} from './TrustedFriendsExplanation'
+export type {
+  TrustedFriendsExplanationComparison,
+  TrustedFriendsExplanationNode,
+  TrustedFriendsExplanationProps,
+} from './TrustedFriendsExplanation'
 export {TwoToneContentFrame, TwoToneHeaderFrame} from './TwoToneCardFrames'
 export {Typography} from './Typography'
 export type {TypographyProps, TypographyVariant} from './Typography'

@@ -25,8 +25,6 @@
   "messages.vexlBot.chatOpened": "¡Genial! Ahora puedes chatear con la otra parte para acordar los detalles de tu intercambio. Envíale un mensaje o abre la lista de comprobación del intercambio.",
   "messages.vexlBot.welcomeToTheTradeChat.title": "Te damos la bienvenida al chat del intercambio",
   "messages.vexlBot.welcomeToTheTradeChat.receiverDescription": "Antes de aprobar el chat del intercambio, revisa los amigos en común y los detalles de la oferta.",
-  "messages.vexlBot.welcomeToTheTradeChat.senderDescriptionFirst": "Esperando la respuesta de la otra parte. Recibirás una notificación cuando responda.",
-  "messages.vexlBot.welcomeToTheTradeChat.senderDescriptionRerequestTimeout": "Puedes enviar un recordatorio a la otra parte mañana",
   "messages.messagePreviews.incoming.MESSAGE": "{{them}}: {{message}}",
   "messages.messagePreviews.incoming.REQUEST_REVEAL": "{{them}} Solicitó revelar identidad",
   "messages.messagePreviews.incoming.APPROVE_REVEAL": "Identidad revelada",

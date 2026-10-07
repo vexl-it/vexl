@@ -36,6 +36,7 @@ import {useNavigateToChatDetail} from '../../utils/chat/goToChatDetail'
 import {formatInteger} from '../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../utils/localization/formattingLocaleAtom'
 import {useTranslation} from '../../utils/localization/I18nProvider'
+import {getOtherPersonRole} from '../../utils/otherPersonRole'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import {offerRerequestLimitDaysAtom} from '../../utils/versionService/atoms'
 import CommonFriends from '../CommonFriends'
@@ -182,6 +183,8 @@ function OfferDetailScrollContent({
 
         {hasCommonFriendsOrClubs ? (
           <CommonFriends
+            role={getOtherPersonRole(offer)}
+            explainTrustedFriendsOnce
             commonConnectionsHashes={visibleCommonFriends.commonFriends}
             verifiedConnectionsHashes={
               visibleCommonFriends.verifiedCommonFriends

@@ -5,79 +5,37 @@ import {
   CommonFriends as CommonFriendsUI,
   type CommonFriend,
 } from '@vexl-next/ui'
-import {Array, Effect, HashMap, Option, pipe} from 'effect'
-import {useAtomValue, useStore} from 'jotai'
-import React, {useCallback, useEffect, useMemo, useState} from 'react'
+import {Array, pipe} from 'effect'
+import {useAtomValue, useSetAtom} from 'jotai'
+import React, {useCallback, useEffect, useMemo} from 'react'
 import {
   type CommonFriendsClub,
   type RootStackScreenProps,
 } from '../../navigationTypes'
-import createImportedContactsForHashesAtom from '../../state/contacts/atom/createImportedContactsForHashesAtom'
-import {type StoredContactWithComputedValues} from '../../state/contacts/domain'
-import {getContactImageUri} from '../../state/contacts/getContactImageUri'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import {formatInteger} from '../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../utils/localization/formattingLocaleAtom'
-import {showVerifiedContactsAtom} from '../../utils/preferences'
+import {type OtherPersonRole} from '../../utils/otherPersonRole'
+import {
+  trustedFriendsCountText,
+  trustedFriendsLine,
+} from '../../utils/trustedFriendsText'
+import {showTrustedFriendsExplanationOnceActionAtom} from '../TrustedFriends/atoms'
+import useCommonFriendsChips from './useCommonFriendsChips'
+import useCommonFriendsContacts from './useCommonFriendsContacts'
 
 interface Props {
   commonConnectionsHashes: readonly HashedPhoneNumber[]
-  verifiedConnectionsHashes?: readonly HashedPhoneNumber[]
+  verifiedConnectionsHashes: readonly HashedPhoneNumber[]
   otherSideClubs: ClubInfo[]
   // Optional override for the card label. Falls back to the offer wording.
   label?: string
+  role: OtherPersonRole
+  explainTrustedFriendsOnce?: boolean
 }
 
 function trimClubName(name: string): string {
   return name.length > 25 ? `${name.slice(0, 25)}...` : name
-}
-
-const resolveContactImage = (
-  contact: StoredContactWithComputedValues
-): Effect.Effect<{hash: string; uri: string} | null> =>
-  Option.match(contact.info.nonUniqueContactId, {
-    onNone: () => Effect.succeed(null),
-    onSome: (id) =>
-      pipe(
-        Effect.tryPromise(() => getContactImageUri(id)),
-        Effect.map((uri) =>
-          uri ? {hash: contact.computedValues.hash, uri} : null
-        ),
-        Effect.catchAll(() => Effect.succeed(null))
-      ),
-  })
-
-function useContactImageSources(
-  contacts: readonly StoredContactWithComputedValues[]
-): HashMap.HashMap<string, {uri: string}> {
-  const [sources, setSources] = useState<
-    HashMap.HashMap<string, {uri: string}>
-  >(HashMap.empty())
-
-  useEffect(() => {
-    const fiber = pipe(
-      contacts,
-      Effect.forEach(resolveContactImage, {concurrency: 5}),
-      Effect.tap((results) => {
-        setSources(
-          HashMap.fromIterable(
-            pipe(
-              results,
-              Array.filterMap(Option.fromNullable),
-              Array.map((result) => [result.hash, {uri: result.uri}])
-            )
-          )
-        )
-      }),
-      Effect.runFork
-    )
-
-    return () => {
-      Effect.runFork(fiber.interruptAsFork(fiber.id()))
-    }
-  }, [contacts])
-
-  return sources
 }
 
 function CommonFriends({
@@ -85,13 +43,28 @@ function CommonFriends({
   verifiedConnectionsHashes,
   otherSideClubs,
   label,
+  role,
+  explainTrustedFriendsOnce,
 }: Props): React.ReactElement | null {
   const {t} = useTranslation()
   const locale = useAtomValue(formattingLocaleAtom)
   const navigation =
     useNavigation<RootStackScreenProps<'CommonFriends'>['navigation']>()
-  const store = useStore()
-  const showVerifiedContacts = useAtomValue(showVerifiedContactsAtom)
+  const showExplanationOnce = useSetAtom(
+    showTrustedFriendsExplanationOnceActionAtom
+  )
+  const {trustedFriends, otherCommonFriends} = useCommonFriendsContacts(
+    commonConnectionsHashes,
+    verifiedConnectionsHashes
+  )
+  const firstTrustedFriend = trustedFriends[0]
+
+  useEffect(() => {
+    if (explainTrustedFriendsOnce && firstTrustedFriend) {
+      showExplanationOnce({friend: firstTrustedFriend, role})
+    }
+  }, [explainTrustedFriendsOnce, firstTrustedFriend, role, showExplanationOnce])
+
   const commonFriendsCount = commonConnectionsHashes.length
   const clubsCount = otherSideClubs.length
 
@@ -108,56 +81,33 @@ function CommonFriends({
     [otherSideClubs]
   )
 
-  const commonFriends = useMemo(
-    () =>
-      store.get(createImportedContactsForHashesAtom(commonConnectionsHashes)),
-    [commonConnectionsHashes, store]
+  const sortedCommonFriends = useMemo(
+    () => Array.appendAll(trustedFriends, otherCommonFriends),
+    [trustedFriends, otherCommonFriends]
   )
-
-  const verifiedHashesSet = useMemo(
-    () =>
-      showVerifiedContacts
-        ? new Set(verifiedConnectionsHashes ?? [])
-        : new Set<HashedPhoneNumber>(),
-    [showVerifiedContacts, verifiedConnectionsHashes]
-  )
-
-  const sortedCommonFriends = useMemo(() => {
-    if (!showVerifiedContacts) return commonFriends
-
-    const verifiedFriends = pipe(
-      commonFriends,
-      Array.filter((friend) =>
-        verifiedHashesSet.has(friend.computedValues.hash)
-      )
-    )
-    const regularFriends = pipe(
-      commonFriends,
-      Array.filter(
-        (friend) => !verifiedHashesSet.has(friend.computedValues.hash)
-      )
-    )
-
-    return Array.appendAll(verifiedFriends, regularFriends)
-  }, [commonFriends, showVerifiedContacts, verifiedHashesSet])
 
   const visibleFriendsInPreview = useMemo(
     () => Array.take(sortedCommonFriends, 5),
     [sortedCommonFriends]
   )
 
-  const imageSources = useContactImageSources(visibleFriendsInPreview)
+  const friendChips = useCommonFriendsChips(
+    visibleFriendsInPreview,
+    verifiedConnectionsHashes
+  )
 
   const handlePress = useCallback(() => {
     navigation.navigate('CommonFriends', {
       contactsHashes: commonConnectionsHashes,
       verifiedHashes: verifiedConnectionsHashes,
       clubs: commonFriendsClubs,
+      role,
     })
   }, [
     commonConnectionsHashes,
     commonFriendsClubs,
     navigation,
+    role,
     verifiedConnectionsHashes,
   ])
 
@@ -172,21 +122,6 @@ function CommonFriends({
         }))
       ),
     [commonFriendsClubs]
-  )
-
-  const friendChips: readonly CommonFriend[] = useMemo(
-    () =>
-      pipe(
-        visibleFriendsInPreview,
-        Array.map((friend) => ({
-          id: friend.computedValues.hash,
-          name: friend.info.name,
-          avatarSource: Option.getOrUndefined(
-            HashMap.get(imageSources, friend.computedValues.hash)
-          ),
-        }))
-      ),
-    [visibleFriendsInPreview, imageSources]
   )
 
   const friends: readonly CommonFriend[] = useMemo(
@@ -209,6 +144,12 @@ function CommonFriends({
               number: formatInteger(commonFriendsCount, locale),
             }))
       }
+      trustedLabel={trustedFriendsCountText(trustedFriends.length, t)}
+      trustedFriendsText={trustedFriendsLine({
+        names: Array.map(trustedFriends, (friend) => friend.info.name),
+        role,
+        t,
+      })}
       friends={friends}
       onPress={handlePress}
     />

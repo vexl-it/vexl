@@ -84,6 +84,9 @@ export const Preferences = Schema.Struct({
   showVerifiedContacts: Schema.optionalWith(Schema.Boolean, {
     default: () => false,
   }),
+  showTrustedFriendsExplanation: Schema.optionalWith(Schema.Boolean, {
+    default: () => true,
+  }),
   showCreateOfferInMarketplaceSuggestion: Schema.optionalWith(Schema.Boolean, {
     default: () => true,
   }),

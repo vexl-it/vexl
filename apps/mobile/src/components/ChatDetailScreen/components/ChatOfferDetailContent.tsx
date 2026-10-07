@@ -16,15 +16,14 @@ import React from 'react'
 import {ScrollView} from 'react-native'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {getTokens, Stack, useTheme} from 'tamagui'
-import {useGetAllClubsForIds} from '../../../state/clubs/atom/clubsWithMembersAtom'
 import {useStatusBarStyleForScreen} from '../../../state/statusBarStyleAtom'
 import {andThenExpectBooleanNoErrors} from '../../../utils/andThenExpectNoErrors'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
-import CommonFriends from '../../CommonFriends'
 import OfferAuthorBanner from '../../OfferAuthorBanner'
 import {reportOfferActionAtom} from '../../OfferDetailScreen/atoms'
 import OfferPropertiesCard from '../../OfferPropertiesCard'
 import {chatMolecule} from '../atoms'
+import ChatCommonFriends from './ChatCommonFriends'
 
 export default function ChatOfferDetailContent({
   chatExists,
@@ -39,23 +38,18 @@ export default function ChatOfferDetailContent({
   const reportOffer = useSetAtom(reportOfferActionAtom)
   const {
     chatAtom,
-    commonConnectionsHashesAtom,
     offerForChatAtom,
     otherSideClubsIdsAtom,
     otherSideDataAtom,
     shouldGrayScaleAvatarAtom,
     theirOfferAndNotReportedAtom,
-    verifiedConnectionsHashesAtom,
   } = useMolecule(chatMolecule)
 
   const chat = useAtomValue(chatAtom)
   const offer = useAtomValue(offerForChatAtom)
   const otherSideData = useAtomValue(otherSideDataAtom)
-  const commonConnectionsHashes = useAtomValue(commonConnectionsHashesAtom)
-  const verifiedConnectionsHashes = useAtomValue(verifiedConnectionsHashesAtom)
   const otherSideClubsIds = useAtomValue(otherSideClubsIdsAtom)
   const theirOfferAndNotReported = useAtomValue(theirOfferAndNotReportedAtom)
-  const otherSideClubs = useGetAllClubsForIds(otherSideClubsIds ?? [])
   const shouldGrayScaleAvatar = useAtomValue(shouldGrayScaleAvatarAtom)
 
   if (!chatExists || !offer) {
@@ -135,11 +129,7 @@ export default function ChatOfferDetailContent({
 
           <OfferPropertiesCard offer={offer} />
 
-          <CommonFriends
-            commonConnectionsHashes={commonConnectionsHashes}
-            verifiedConnectionsHashes={verifiedConnectionsHashes}
-            otherSideClubs={otherSideClubs}
-          />
+          <ChatCommonFriends />
 
           {theirOfferAndNotReported ? (
             <Stack position="relative">

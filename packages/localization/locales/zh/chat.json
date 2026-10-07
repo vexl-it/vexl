@@ -25,8 +25,6 @@
   "messages.vexlBot.chatOpened": "太好了！现在你可以和对方聊天，安排交易细节。给他们发消息，或打开交易清单。",
   "messages.vexlBot.welcomeToTheTradeChat.title": "欢迎来到交易聊天",
   "messages.vexlBot.welcomeToTheTradeChat.receiverDescription": "批准交易聊天前，先查看共同好友和出价详情。",
-  "messages.vexlBot.welcomeToTheTradeChat.senderDescriptionFirst": "正在等待对方回复。他们一回复，你就会收到通知。",
-  "messages.vexlBot.welcomeToTheTradeChat.senderDescriptionRerequestTimeout": "你明天可以给对方发送提醒",
   "messages.messagePreviews.incoming.MESSAGE": "{{them}}：{{message}}",
   "messages.messagePreviews.incoming.REQUEST_REVEAL": "{{them}} 请求身份透露",
   "messages.messagePreviews.incoming.APPROVE_REVEAL": "身份已被透露！",

@@ -3,12 +3,11 @@ import {
   BulletListMenu,
   Button,
   ChevronRight,
-  Circle,
+  CommonFriendsCount,
   DocumentsFiles,
   EyeShut,
   FlagReport,
   NavigationBar,
-  PeopleUsers,
   Screen,
   TagLabel,
   TrashBin,
@@ -34,11 +33,13 @@ import {enableHiddenFeatures} from '../../../utils/environment'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {localizedDecimalNumberActionAtom} from '../../../utils/localization/localizedNumbersAtoms'
 import {isDeveloperAtom} from '../../../utils/preferences'
+import {trustedFriendsCountText} from '../../../utils/trustedFriendsText'
 import useResetNavigationToMessagingScreen from '../../../utils/useResetNavigationToMessagingScreen'
 import OfferAuthorBanner from '../../OfferAuthorBanner'
 import {reportOfferActionAtom} from '../../OfferDetailScreen/atoms'
 import UserAvatar from '../../UserAvatar'
 import {chatMolecule} from '../atoms'
+import ChatCommonFriends from './ChatCommonFriends'
 import useOpenExchangeDetails from './useOpenExchangeDetails'
 
 function SectionSeparator(): React.ReactElement {
@@ -50,16 +51,17 @@ function OtherSideInfoBanner({
   userImage,
   grayAvatar,
   commonConnectionsCount,
+  trustedFriends,
   clubLabel,
 }: {
   readonly title: string
   readonly userImage: React.ComponentProps<typeof UserAvatar>['userImage']
   readonly grayAvatar: boolean
   readonly commonConnectionsCount: string | number
+  readonly trustedFriends?: string
   readonly clubLabel?: string
 }): React.ReactElement {
   const {t} = useTranslation()
-  const theme = useTheme()
 
   return (
     <XStack alignItems="center" gap="$3">
@@ -77,33 +79,13 @@ function OtherSideInfoBanner({
         >
           {title}
         </Typography>
-        <XStack gap="$2" alignItems="center">
-          {clubLabel != null ? (
-            <>
-              <Typography
-                variant="micro"
-                color="$foregroundSecondary"
-                numberOfLines={1}
-              >
-                {clubLabel}
-              </Typography>
-              <Circle
-                size="$2"
-                backgroundColor={theme.foregroundSecondary.get()}
-              />
-            </>
-          ) : null}
-          <XStack gap="$1" alignItems="center">
-            <PeopleUsers size={16} color={theme.foregroundSecondary.get()} />
-            <Typography
-              variant="micro"
-              color="$foregroundSecondary"
-              numberOfLines={1}
-            >
-              {t('offer.numberOfCommon', {number: commonConnectionsCount})}
-            </Typography>
-          </XStack>
-        </XStack>
+        <CommonFriendsCount
+          clubLabels={clubLabel !== undefined ? [clubLabel] : undefined}
+          commonFriends={t('offer.numberOfCommon', {
+            number: commonConnectionsCount,
+          })}
+          trustedFriends={trustedFriends}
+        />
       </YStack>
     </XStack>
   )
@@ -180,6 +162,7 @@ export default function ChatInfoContent({
     chatAtom,
     chatIdAtom,
     commonConnectionsCountAtom,
+    verifiedConnectionsCountAtom,
     deleteChatWithUiFeedbackAtom,
     friendLevelInfoAtom,
     listingTypeIsOtherAtom,
@@ -195,6 +178,7 @@ export default function ChatInfoContent({
   const chat = useAtomValue(chatAtom)
   const chatId = useAtomValue(chatIdAtom)
   const commonConnectionsCount = useAtomValue(commonConnectionsCountAtom)
+  const verifiedConnectionsCount = useAtomValue(verifiedConnectionsCountAtom)
   const friendLevelInfo = useAtomValue(friendLevelInfoAtom)
   const deleteChatWithUiFeedback = useSetAtom(deleteChatWithUiFeedbackAtom)
   const listingTypeIsOther = useAtomValue(listingTypeIsOtherAtom)
@@ -309,22 +293,29 @@ export default function ChatInfoContent({
         }}
       >
         <YStack gap="$8">
-          {offer != null && otherSideIsOfferCreator ? (
-            <OfferAuthorBanner
-              offer={offer}
-              realUserName={otherSideRealUserName}
-              userImage={otherSideData.image}
-              grayAvatar={shouldGrayScaleAvatar}
-            />
-          ) : (
-            <OtherSideInfoBanner
-              title={connectionTitle}
-              userImage={otherSideData.image}
-              grayAvatar={shouldGrayScaleAvatar}
-              commonConnectionsCount={localizedCommonConnectionsCount}
-              clubLabel={otherSideClubLabel}
-            />
-          )}
+          <YStack gap="$3">
+            {offer != null && otherSideIsOfferCreator ? (
+              <OfferAuthorBanner
+                offer={offer}
+                realUserName={otherSideRealUserName}
+                userImage={otherSideData.image}
+                grayAvatar={shouldGrayScaleAvatar}
+              />
+            ) : (
+              <OtherSideInfoBanner
+                title={connectionTitle}
+                userImage={otherSideData.image}
+                grayAvatar={shouldGrayScaleAvatar}
+                commonConnectionsCount={localizedCommonConnectionsCount}
+                clubLabel={otherSideClubLabel}
+                trustedFriends={trustedFriendsCountText(
+                  verifiedConnectionsCount,
+                  t
+                )}
+              />
+            )}
+            <ChatCommonFriends />
+          </YStack>
 
           <YStack
             backgroundColor="$backgroundSecondary"

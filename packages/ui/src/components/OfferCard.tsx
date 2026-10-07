@@ -3,11 +3,11 @@ import {type GestureResponderEvent} from 'react-native'
 import {getTokens, styled, useTheme} from 'tamagui'
 
 import {ArchiveInbox} from '../icons/ArchiveInbox'
-import {PeopleUsers} from '../icons/PeopleUsers'
 import {StarFilled} from '../icons/StarFilled'
 import {type IconProps} from '../icons/types'
 import {Circle, Stack, XStack, YStack} from '../primitives'
 import {CardButton} from './CardButton'
+import {CommonFriendsCount} from './CommonFriendsCount'
 import {TextTag, type TextTagVariant} from './TextTag'
 import {Typography} from './Typography'
 
@@ -33,6 +33,7 @@ export interface OfferCardProps {
   readonly textTag: React.ReactNode
   readonly iconTag: React.ReactNode
   readonly commonFriends?: string
+  readonly trustedFriends?: string
   readonly clubNames?: readonly string[]
   readonly price: string
   readonly description: string
@@ -88,6 +89,7 @@ export function OfferCard({
   textTag,
   iconTag,
   commonFriends,
+  trustedFriends,
   clubNames,
   price,
   description,
@@ -109,42 +111,13 @@ export function OfferCard({
     [actionButton]
   )
 
-  const hasClubs = clubNames != null && clubNames.length > 0
-  const hasFriends = commonFriends != null
-  const subRow =
-    hasClubs || hasFriends ? (
-      <XStack gap="$2" alignItems="center" flexShrink={1} minWidth={0}>
-        {clubNames?.map((cn, idx) => (
-          <React.Fragment key={cn}>
-            {idx > 0 ? (
-              <Circle size="$2" backgroundColor={secondaryColor} />
-            ) : null}
-            <Typography
-              variant="micro"
-              color="$foregroundSecondary"
-              numberOfLines={1}
-            >
-              {cn}
-            </Typography>
-          </React.Fragment>
-        ))}
-        {hasClubs && hasFriends ? (
-          <Circle size="$2" backgroundColor={secondaryColor} />
-        ) : null}
-        {hasFriends ? (
-          <XStack gap="$1" alignItems="center">
-            <PeopleUsers size={sizeTokens.$5.val} color={secondaryColor} />
-            <Typography
-              variant="micro"
-              color="$foregroundSecondary"
-              numberOfLines={1}
-            >
-              {commonFriends}
-            </Typography>
-          </XStack>
-        ) : null}
-      </XStack>
-    ) : null
+  const subRow = (
+    <CommonFriendsCount
+      clubLabels={clubNames}
+      commonFriends={commonFriends}
+      trustedFriends={trustedFriends}
+    />
+  )
 
   return (
     <CardFrame pressable={!!onPress} onPress={onPress}>

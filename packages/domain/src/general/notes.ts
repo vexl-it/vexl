@@ -36,6 +36,9 @@ export const NOTE_MAX_EXPIRATION_DAYS = 7
 
 export const NotePrivatePart = Schema.Struct({
   commonFriends: Schema.Array(HashedPhoneNumber),
+  verifiedCommonFriends: Schema.optionalWith(Schema.Array(HashedPhoneNumber), {
+    default: () => [],
+  }),
   friendLevel: Schema.Array(FriendLevel),
   symmetricKey: SymmetricKey,
   viaRepost: Schema.optionalWith(Schema.Boolean, {default: () => false}),

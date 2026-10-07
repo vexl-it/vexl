@@ -8,7 +8,7 @@ import {type SymmetricKey} from '@vexl-next/domain/src/general/offers'
 import {type UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
 import {type ServerNotePrivatePart} from '@vexl-next/rest-api/src/services/offer/notesContracts'
-import {Array, Effect, Either, HashMap, pipe} from 'effect'
+import {Array, Effect, Either, pipe} from 'effect'
 import {type OfferEncryptionProgress} from '../offers/OfferEncryptionProgress'
 import {PRIVATE_PARTS_BATCH_SIZE} from '../offers/privatePartsUploadBatchSize'
 import {TimeLimitReachedError} from '../offers/updatePrivateParts'
@@ -105,6 +105,7 @@ export default function updateNotePrivateParts({
   currentConnections,
   targetConnections,
   commonFriends,
+  verifiedFriends,
   connectionsToRefresh = [],
   ownerPublicKeys,
   adminId,
@@ -123,6 +124,7 @@ export default function updateNotePrivateParts({
   }
   connectionsToRefresh?: readonly PublicKeyV2[]
   commonFriends: CommonConnectionsForUsers
+  verifiedFriends: CommonConnectionsForUsers
   // The owner's own private part carries the adminId and must never be
   // overshadowed by a regular one, so the owner keys are excluded here.
   ownerPublicKeys: ReadonlyArray<PublicKeyPemBase64 | PublicKeyV2>
@@ -197,7 +199,7 @@ export default function updateNotePrivateParts({
             (key) => keysToUpdate.has(key)
           ),
           commonFriends,
-          verifiedFriends: HashMap.empty(),
+          verifiedFriends,
           clubsConnections: {},
         },
         symmetricKey,

@@ -59,6 +59,7 @@ function update(
         ...params,
         adminId: generateNoteAdminId(),
         commonFriends: HashMap.empty(),
+        verifiedFriends: HashMap.empty(),
       })
 }
 

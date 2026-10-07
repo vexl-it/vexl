@@ -35,6 +35,7 @@ beforeAll(async () => {
   owner = (await Effect.runPromise(generateV2KeyPair())).publicKey
 })
 const friend = Schema.decodeSync(HashedPhoneNumber)('new-common-friend')
+const verifiedFriend = Schema.decodeSync(HashedPhoneNumber)('trusted-friend')
 const symmetricKey = Schema.decodeSync(SymmetricKey)('symmetric-key')
 
 function setup(): {
@@ -64,6 +65,7 @@ function setup(): {
       currentConnections: {firstLevel: [owner], secondLevel: [publicKey]},
       targetConnections: {firstLevel: [owner], secondLevel: [publicKey]},
       commonFriends: HashMap.make([publicKey, [friend]]),
+      verifiedFriends: HashMap.make([publicKey, [verifiedFriend]]),
       connectionsToRefresh: [publicKey, owner],
     },
   }
@@ -86,6 +88,7 @@ it('replaces an existing recipient payload with fresh common friends and the ful
     )
   )
   expect(payload.commonFriends).toEqual([friend])
+  expect(payload.verifiedCommonFriends).toEqual([verifiedFriend])
   expect(payload.friendLevel).toEqual(['SECOND_DEGREE'])
   expect(payload.adminId).toBeUndefined()
 })
@@ -196,6 +199,7 @@ it('recreates an empty repost using the note ID without including common friends
     )
   )
   expect(payload.commonFriends).toEqual([])
+  expect(payload.verifiedCommonFriends).toEqual([])
   expect(payload.friendLevel).toEqual(['NOT_SPECIFIED'])
   expect(payload.viaRepost).toBe(true)
 })

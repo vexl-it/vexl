@@ -193,6 +193,7 @@ export default function updateRepostNotePrivateParts({
           toPublicKey,
           payloadPrivate: {
             commonFriends: [],
+            verifiedCommonFriends: [],
             friendLevel: ['NOT_SPECIFIED'],
             symmetricKey,
             viaRepost: true,

@@ -12,7 +12,7 @@ import updateNotePrivateParts from '@vexl-next/resources-utils/src/notes/updateN
 import updateRepostNotePrivateParts from '@vexl-next/resources-utils/src/notes/updateRepostNotePrivateParts'
 import {type OfferEncryptionProgress} from '@vexl-next/resources-utils/src/offers/OfferEncryptionProgress'
 import {subtractArrays} from '@vexl-next/resources-utils/src/utils/array'
-import {Array, Effect, HashMap, Option, Schema} from 'effect'
+import {Array, Effect, Option, Schema} from 'effect'
 import {pipe} from 'fp-ts/function'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
@@ -220,10 +220,7 @@ export const updateAndReencryptAllNotesConnectionsActionAtom = atom(
         ]
       }
       const changedKeys = previous
-        ? getConnectionsToRefresh(
-            {...previous, verifiedFriends: HashMap.empty()},
-            {...connectionState, verifiedFriends: HashMap.empty()}
-          )
+        ? getConnectionsToRefresh(previous, connectionState)
         : Array.filter(
             [...connectionState.firstLevel, ...connectionState.secondLevel],
             isPublicKeyV2
@@ -262,6 +259,7 @@ export const updateAndReencryptAllNotesConnectionsActionAtom = atom(
               secondLevel: connectionState.secondLevel,
             },
             commonFriends: connectionState.commonFriends,
+            verifiedFriends: connectionState.verifiedFriends,
             connectionsToRefresh:
               oneNoteConnections.pendingConnectionsToRefresh,
             ownerPublicKeys: [

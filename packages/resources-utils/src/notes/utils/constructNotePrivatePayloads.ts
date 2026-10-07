@@ -26,13 +26,13 @@ const addOrCreate = <K extends string, T>(
   } else record[key] = HashSet.make(value)
 }
 
-// Note fan-out mirrors offer fan-out (constructPrivatePayloads) but has no clubs
-// and no verified-friends notion.
+// Note fan-out mirrors offer fan-out (constructPrivatePayloads) but has no clubs.
 export default function constructNotePrivatePayloads({
   connectionsInfo: {
     firstDegreeConnections,
     secondDegreeConnections,
     commonFriends,
+    verifiedFriends,
   },
   symmetricKey,
 }: {
@@ -66,6 +66,10 @@ export default function constructNotePrivatePayloads({
           payloadPrivate: {
             commonFriends: Option.getOrElse(
               HashMap.get(commonFriends, toPublicKey),
+              () => []
+            ),
+            verifiedCommonFriends: Option.getOrElse(
+              HashMap.get(verifiedFriends, toPublicKey),
               () => []
             ),
             friendLevel: Array.fromIterable(friendLevelValue),

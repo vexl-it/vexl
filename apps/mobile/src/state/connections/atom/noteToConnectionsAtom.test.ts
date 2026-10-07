@@ -218,6 +218,7 @@ it('passes the snapshot and changed recipients to notes and keeps failed repost 
   expect(jest.mocked(updateNotePrivateParts).mock.lastCall?.[0]).toEqual(
     expect.objectContaining({
       commonFriends: graph.commonFriends,
+      verifiedFriends: graph.verifiedFriends,
       connectionsToRefresh: [publicKey],
     })
   )
@@ -293,7 +294,7 @@ it('refreshes changed common friends independently and keeps retries when the gr
   )
 })
 
-it('does not refresh note payloads for verified-friend-only changes', async () => {
+it('refreshes note payloads for verified-friend-only changes', async () => {
   const store = setup()
   await run(store)
   const friend = Schema.decodeSync(HashedPhoneNumber)('friend')
@@ -306,9 +307,13 @@ it('does not refresh note payloads for verified-friend-only changes', async () =
     })
   )
   await run(store)
-  expect(
-    jest.mocked(updateNotePrivateParts).mock.lastCall?.[0].connectionsToRefresh
-  ).toEqual([])
+  expect(jest.mocked(updateNotePrivateParts).mock.lastCall?.[0]).toEqual(
+    expect.objectContaining({
+      connectionsToRefresh: [publicKey],
+      commonFriends: graph.commonFriends,
+      verifiedFriends: HashMap.make([publicKey, [friend]]),
+    })
+  )
 })
 
 it('keeps retries on the failed note without refreshing successful notes again', async () => {

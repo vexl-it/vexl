@@ -17,7 +17,7 @@ it.each([
   {keyVersion: 'legacy', direct: false},
   {keyVersion: 'V2', direct: false},
 ])(
-  'decrypts a note with three common friends ($keyVersion, direct: $direct)',
+  'decrypts a note with common and verified friends ($keyVersion, direct: $direct)',
   async ({keyVersion, direct}) => {
     await Effect.runPromise(
       Effect.gen(function* () {
@@ -31,6 +31,7 @@ it.each([
           ['common-friend-1', 'common-friend-2', 'common-friend-3'],
           (value) => Schema.decodeSync(HashedPhoneNumber)(value)
         )
+        const verifiedCommonFriends = Array.take(commonFriends, 2)
         const symmetricKey = yield* generateSymmetricKey()
         const publicPart = {
           notePublicKey: generatePrivateKey().publicKeyPemBase64,
@@ -48,7 +49,7 @@ it.each([
             // Direct friendship must take precedence when both paths exist.
             secondDegreeConnections: [publicKey],
             commonFriends: HashMap.make([publicKey, commonFriends]),
-            verifiedFriends: HashMap.empty(),
+            verifiedFriends: HashMap.make([publicKey, verifiedCommonFriends]),
             clubsConnections: {},
           },
         })
@@ -70,6 +71,9 @@ it.each([
         expect(encrypted.userPublicKey).toBe(publicKey)
         expect(note.publicPart).toEqual(publicPart)
         expect(note.privatePart.commonFriends).toEqual(commonFriends)
+        expect(note.privatePart.verifiedCommonFriends).toEqual(
+          verifiedCommonFriends
+        )
         expect(note.privatePart.friendLevel).toEqual([
           direct ? 'FIRST_DEGREE' : 'SECOND_DEGREE',
         ])
@@ -79,3 +83,45 @@ it.each([
     )
   }
 )
+
+it('constructs verified friends separately for each recipient and defaults missing entries to empty', async () => {
+  await Effect.runPromise(
+    Effect.gen(function* () {
+      const firstRecipient = yield* generateV2KeyPair()
+      const secondRecipient = yield* generateV2KeyPair()
+      const thirdRecipient = yield* generateV2KeyPair()
+      const firstFriend = Schema.decodeSync(HashedPhoneNumber)('first-friend')
+      const secondFriend = Schema.decodeSync(HashedPhoneNumber)('second-friend')
+      const payloads = yield* constructNotePrivatePayloads({
+        symmetricKey: yield* generateSymmetricKey(),
+        connectionsInfo: {
+          firstDegreeConnections: [firstRecipient.publicKey],
+          secondDegreeConnections: [
+            secondRecipient.publicKey,
+            thirdRecipient.publicKey,
+          ],
+          commonFriends: HashMap.empty(),
+          verifiedFriends: HashMap.make(
+            [firstRecipient.publicKey, [firstFriend]],
+            [secondRecipient.publicKey, [secondFriend]]
+          ),
+          clubsConnections: {},
+        },
+      })
+      expect(payloads).toHaveLength(3)
+      for (const [recipient, expected] of [
+        [firstRecipient.publicKey, [firstFriend]],
+        [secondRecipient.publicKey, [secondFriend]],
+        [thirdRecipient.publicKey, []],
+      ] satisfies ReadonlyArray<
+        readonly [typeof firstRecipient.publicKey, readonly HashedPhoneNumber[]]
+      >) {
+        const payload = yield* Array.findFirst(
+          payloads,
+          (one) => one.toPublicKey === recipient
+        )
+        expect(payload.payloadPrivate.verifiedCommonFriends).toEqual(expected)
+      }
+    })
+  )
+})

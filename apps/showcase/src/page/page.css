@@ -4,6 +4,11 @@ body {
   background: #000;
 }
 
+/* Demo phone halos may reach past the window's sides. */
+main {
+  overflow-x: clip;
+}
+
 .page-width {
   box-sizing: border-box;
   width: 100%;
@@ -54,7 +59,7 @@ body {
 }
 
 .page-demo-switcher {
-  width: min(100%, 360px);
+  width: min(100%, 480px);
 }
 
 .page-demo-intro {

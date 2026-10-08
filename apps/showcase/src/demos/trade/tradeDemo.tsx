@@ -1,14 +1,16 @@
+import {CommonFriends} from '@vexl-next/ui'
 import type {Demo} from '../shared/DemoPlayer'
+import {MarketplaceScene} from '../shared/MarketplaceScene'
+import {OfferDetailScene, SendMessageScene} from '../shared/OfferScenes'
 import {PhoneScreens} from '../shared/PhoneScreens'
+import {typedAt} from '../shared/playback'
+import {PushNotification} from '../shared/PushNotification'
 import {
   CalculateAmountScene,
   ChecklistHubScene,
   TimeOptionsScene,
 } from './scenes/AgreeScenes'
-import {MarketplaceScene} from './scenes/MarketplaceScene'
 import {OfferFormScene} from './scenes/OfferFormScene'
-import {OfferDetailScene, SendMessageScene} from './scenes/OfferScenes'
-import {PushNotification} from './scenes/PushNotification'
 import {
   ConfirmAmountScene,
   PickDateScene,
@@ -18,8 +20,12 @@ import {TradeChatScene} from './scenes/TradeChatScene'
 import {
   cues,
   focus,
+  myOldOffer,
+  myTradeOffer,
+  otherOffers,
   themScreens,
   timelineTimes,
+  tradeOffer,
   typing,
   youScreens,
   type Cue,
@@ -39,7 +45,8 @@ function youScreen(
       return (
         <MarketplaceScene
           tab="mine"
-          newOffer={at('published')}
+          offers={at('published') ? [myTradeOffer, myOldOffer] : [myOldOffer]}
+          arrivingOfferId={myTradeOffer.id}
           tapNewOffer={at('youTapNewOffer')}
         />
       )
@@ -66,16 +73,35 @@ function themScreen(
       return (
         <MarketplaceScene
           tab="all"
-          newOffer={at('offerArrives')}
-          tapOffer={at('themTapOffer')}
+          offers={
+            at('offerArrives') ? [tradeOffer, ...otherOffers] : otherOffers
+          }
+          arrivingOfferId={tradeOffer.id}
+          tappedOfferId={at('themTapOffer') ? tradeOffer.id : undefined}
         />
       )
     case 'offerDetail':
-      return <OfferDetailScene tapSendMessage={at('themTapSendMessage')} />
+      return (
+        <OfferDetailScene
+          offer={tradeOffer}
+          connection={
+            <CommonFriends
+              label="3 common"
+              friends={[
+                {id: 'petra', name: 'Petra'},
+                {id: 'tomas', name: 'Tomáš'},
+                {id: 'jana', name: 'Jana'},
+              ]}
+            />
+          }
+          tapSendMessage={at('themTapSendMessage')}
+        />
+      )
     case 'sendMessage':
       return (
         <SendMessageScene
-          playhead={playhead}
+          offer={tradeOffer}
+          message={typedAt(typing.request, playhead)}
           tapSend={at('themTapSendRequest')}
         />
       )

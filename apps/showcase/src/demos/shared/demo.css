@@ -8,6 +8,8 @@
 .demo-phones {
   display: flex;
   gap: 40px;
+  /* Halos sit behind both phones. */
+  isolation: isolate;
 }
 
 .demo-phone {
@@ -114,6 +116,11 @@
 }
 
 /* Phone */
+
+.demo-phone-device {
+  position: relative;
+  width: 100%;
+}
 
 .phone-bezel {
   box-sizing: border-box;

@@ -17,7 +17,7 @@ const safetyPoints: ReadonlyArray<{
   {
     icon: PeopleUsers,
     title: 'Only people you’re connected to',
-    text: 'Offers reach your phone contacts and their contacts, nobody else. Common friends show how you’re connected.',
+    text: 'Offers reach your phone contacts and their contacts, unless you choose to share one with people nearby. Common friends show how you’re connected.',
   },
   {
     icon: Lock,

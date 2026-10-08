@@ -20,6 +20,8 @@ export interface Demo {
   /** From which moment which phone is shown on narrow screens. */
   readonly focus: ReadonlyArray<readonly [number, Side]>
   readonly phones: (playhead: number) => Record<Side, ReactNode>
+  /** Drawn around and behind each phone, outside its screen. */
+  readonly halos?: (playhead: number) => Partial<Record<Side, ReactNode>>
 }
 
 const lastStarted = <T,>(
@@ -30,9 +32,11 @@ const lastStarted = <T,>(
 
 function Phone({
   side,
+  halo,
   children,
 }: {
   side: Side
+  halo: ReactNode
   children: ReactNode
 }): React.JSX.Element {
   return (
@@ -40,7 +44,10 @@ function Phone({
       <Typography variant="paragraphDemibold" color="$foregroundSecondary">
         {side === 'you' ? 'You' : 'Them'}
       </Typography>
-      <PhoneFrame>{children}</PhoneFrame>
+      <div className="demo-phone-device">
+        {halo}
+        <PhoneFrame>{children}</PhoneFrame>
+      </div>
     </figure>
   )
 }
@@ -121,11 +128,16 @@ function Timeline({
     Option.getOrElse((): Side => 'you')
   )
   const phones = demo.phones(playhead)
+  const halos = demo.halos?.(playhead)
   return (
     <div className="demo-body" data-focus={focus}>
       <div className="demo-phones">
-        <Phone side="you">{phones.you}</Phone>
-        <Phone side="them">{phones.them}</Phone>
+        <Phone side="you" halo={halos?.you}>
+          {phones.you}
+        </Phone>
+        <Phone side="them" halo={halos?.them}>
+          {phones.them}
+        </Phone>
       </div>
       <YStack gap="$6" className="demo-captions">
         <StepList demo={demo} active={active} onSeek={onSeek} />

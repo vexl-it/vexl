@@ -1,10 +1,11 @@
 import {SegmentedPicker, Typography, YStack} from '@vexl-next/ui'
 import {useState} from 'react'
 import {identityRevealDemo} from '../demos/identityReveal/identityRevealDemo'
+import {nearbyDemo} from '../demos/nearby/nearbyDemo'
 import {DemoPlayer, type Demo} from '../demos/shared/DemoPlayer'
 import {tradeDemo} from '../demos/trade/tradeDemo'
 
-type DemoId = 'trade' | 'identityReveal'
+type DemoId = 'trade' | 'identityReveal' | 'nearby'
 
 const demos: Record<
   DemoId,
@@ -22,6 +23,12 @@ const demos: Record<
     text: 'When it’s time to meet, reveal your nickname and photo, but only if they reveal theirs too.',
     demo: identityRevealDemo,
   },
+  nearby: {
+    label: 'Nearby',
+    title: 'Nearby offers over Bluetooth',
+    text: 'Share an offer with people around you, even outside your network. The offer is uploaded to Vexl’s server, encrypted, as usual. Only a key goes out over Bluetooth: phones nearby use it to fetch and decrypt the offer, and the chat runs through the server like any other.',
+    demo: nearbyDemo,
+  },
 }
 
 export function DemoSection(): React.JSX.Element {
@@ -34,6 +41,7 @@ export function DemoSection(): React.JSX.Element {
           tabs={[
             {label: demos.trade.label, value: 'trade'},
             {label: demos.identityReveal.label, value: 'identityReveal'},
+            {label: demos.nearby.label, value: 'nearby'},
           ]}
           activeTab={active}
           onTabPress={setActive}

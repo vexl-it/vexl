@@ -2,7 +2,6 @@ import {
   ArchiveInbox,
   Button,
   ChevronLeft,
-  CommonFriends,
   FlagReport,
   InfoCircle,
   Menu,
@@ -19,22 +18,31 @@ import {
   XStack,
   YStack,
 } from '@vexl-next/ui'
-import {AnonymousAvatar} from '../../shared/chat'
-import {noop} from '../../shared/noop'
-import {typedAt} from '../../shared/playback'
-import {Tap} from '../../shared/Tap'
-import {offer, typing} from '../script'
-import {tradeOffer} from './MarketplaceScene'
+import type {ReactNode} from 'react'
+import {AnonymousAvatar} from './chat'
+import type {MarketplaceOffer} from './MarketplaceScene'
+import {noop} from './noop'
+import {Tap} from './Tap'
 
-function AuthorBanner(): React.JSX.Element {
+/** An offer someone else posted, as its detail screen shows it. Its author is always `you`. */
+export interface DetailedOffer extends MarketplaceOffer {
+  readonly location: string
+  readonly paymentMethod: string
+}
+
+function AuthorBanner({offer}: {offer: DetailedOffer}): React.JSX.Element {
   return (
     <OfferAuthorBanner
       avatar={<AnonymousAvatar side="you" size={offerAuthorBannerAvatarSize} />}
-      name={tradeOffer.name}
-      textTagVariant="offer"
-      textTagLabel="Has"
-      iconTagVariant="bitcoin"
-      commonFriendsLabel="3 common"
+      name={offer.name}
+      textTagVariant={offer.selling ? 'offer' : 'request'}
+      textTagLabel={offer.selling ? 'Has' : 'Wants'}
+      iconTagVariant={offer.iconTag}
+      commonFriendsLabel={
+        offer.commonFriends === undefined
+          ? undefined
+          : `${offer.commonFriends} common`
+      }
     />
   )
 }
@@ -57,9 +65,14 @@ function FirstInteractionNote(): React.JSX.Element {
   )
 }
 
+/** `connection` says how the offer reached you, e.g. your common friends. */
 export function OfferDetailScene({
+  offer,
+  connection,
   tapSendMessage,
 }: {
+  offer: DetailedOffer
+  connection: ReactNode
   tapSendMessage: boolean
 }): React.JSX.Element {
   return (
@@ -84,7 +97,7 @@ export function OfferDetailScene({
       }
     >
       <YStack gap="$4">
-        <AuthorBanner />
+        <AuthorBanner offer={offer} />
         <Typography
           variant="description"
           color="$foregroundPrimary"
@@ -94,20 +107,13 @@ export function OfferDetailScene({
         </Typography>
         <OfferPropertiesCard
           rows={[
-            {label: 'Amount', value: tradeOffer.price},
+            {label: 'Amount', value: offer.price},
             {label: 'Location', value: [offer.location]},
-            {label: 'Payment method', value: 'Cash • Lightning'},
-            {label: 'Preferred languages', value: tradeOffer.language},
+            {label: 'Payment method', value: offer.paymentMethod},
+            {label: 'Preferred languages', value: offer.language},
           ]}
         />
-        <CommonFriends
-          label="3 common"
-          friends={[
-            {id: 'petra', name: 'Petra'},
-            {id: 'tomas', name: 'Tomáš'},
-            {id: 'jana', name: 'Jana'},
-          ]}
-        />
+        {connection}
         <Menu>
           <MenuItem
             label="Archive offer"
@@ -127,13 +133,14 @@ export function OfferDetailScene({
 }
 
 export function SendMessageScene({
-  playhead,
+  offer,
+  message,
   tapSend,
 }: {
-  playhead: number
+  offer: DetailedOffer
+  message: string
   tapSend: boolean
 }): React.JSX.Element {
-  const message = typedAt(typing.request, playhead)
   return (
     <Screen
       navigationBar={
@@ -153,7 +160,7 @@ export function SendMessageScene({
       }
     >
       <YStack gap="$5">
-        <AuthorBanner />
+        <AuthorBanner offer={offer} />
         <YStack
           height={250}
           backgroundColor="$backgroundTertiary"

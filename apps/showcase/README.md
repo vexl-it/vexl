@@ -1,6 +1,6 @@
 # @vexl-next/showcase
 
-Marketing page that replays Vexl features inside phone mockups. Every screen is built from the real `@vexl-next/ui` components, rendered on the web through react-native-web. Visitors switch between two demos: a full trade (default) and identity reveal.
+Marketing page that replays Vexl features inside phone mockups. Every screen is built from the real `@vexl-next/ui` components, rendered on the web through react-native-web. Visitors switch between three demos: a full trade (default), identity reveal and nearby offers over Bluetooth.
 
 ## Run
 
@@ -31,13 +31,14 @@ When a ui component needs a different implementation on the web, add a platform-
 
 `src/page/DemoSection.tsx` holds the switcher and each demo's title. A demo is a `Demo` object (`src/demos/shared/DemoPlayer.tsx`): captioned steps with start times, every moment the screens change, which phone to show on narrow screens, and a function rendering both phones at a playhead.
 
-`src/demos/shared` is the infrastructure both demos use:
+`src/demos/shared` is the infrastructure and the scenes the demos share:
 
-- `DemoPlayer.tsx`: the phone pair, the step captions and Replay. It replays when the demo scrolls into view, and clicking a caption remounts the timeline at that step's start. On narrow screens only the focused phone shows.
+- `DemoPlayer.tsx`: the phone pair, the step captions and Replay. It replays when the demo scrolls into view, and clicking a caption remounts the timeline at that step's start. On narrow screens only the focused phone shows. A demo can also draw `halos` around and behind a phone, like the nearby demo's Bluetooth waves.
 - `playback.ts`: `usePlayhead(times, startAt)` advances one playhead through the times after `startAt`, plus typing helpers. With reduced motion the playhead stays put: the end, or the step clicked.
 - `PhoneScreens.tsx`: the stack of app screens open at the playhead, with push and sheet transitions.
 - `PhoneFrame.tsx`: lays a screen out at 390×844, scales it into a device bezel, and adds a fake status bar and safe-area insets.
-- `Tap.tsx`: a fake touch over a press target. `chat.tsx`: chat header, bubbles and the anonymous avatars.
+- `Tap.tsx`: a fake touch over a press target. `chat.tsx`: chat header, bubbles, the anonymous avatars and the pieces of a chat waiting for its request to be accepted.
+- `MarketplaceScene.tsx`, `OfferScenes.tsx` (offer detail, send a message) and `PushNotification.tsx`: app screens filled with each demo's fictional offers.
 
 Each demo folder has a `script.ts` (cues in ms, typing, fictional data, which screens are open when) and presentational scenes that read the cues through `at(cue)`.
 

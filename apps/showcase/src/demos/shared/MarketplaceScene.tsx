@@ -28,13 +28,13 @@ import {
   type IconTagVariant,
 } from '@vexl-next/ui'
 import {Array, pipe} from 'effect'
+import {Fragment} from 'react'
 import {useSharedValue} from 'react-native-reanimated'
-import {AnonymousAvatar, Arrive} from '../../shared/chat'
-import {noop} from '../../shared/noop'
-import {Tap} from '../../shared/Tap'
-import {offer} from '../script'
+import {AnonymousAvatar, Arrive} from './chat'
+import {noop} from './noop'
+import {Tap} from './Tap'
 
-interface MarketplaceOffer {
+export interface MarketplaceOffer {
   readonly id: string
   readonly name: string
   readonly mine: boolean
@@ -45,66 +45,6 @@ interface MarketplaceOffer {
   readonly description: string
   readonly details: readonly string[]
   readonly language: string
-}
-
-export const tradeOffer: MarketplaceOffer = {
-  id: 'trade',
-  name: 'Friend of a friend',
-  mine: false,
-  selling: true,
-  iconTag: 'bitcoin',
-  commonFriends: 3,
-  price: 'Up to 10 000 Kč',
-  description: offer.description,
-  details: ['Cash', offer.location],
-  language: 'en',
-}
-
-const otherOffers: readonly MarketplaceOffer[] = [
-  {
-    id: 'brno',
-    name: 'Friend of a friend',
-    mine: false,
-    selling: false,
-    iconTag: 'bitcoin',
-    commonFriends: 2,
-    price: 'Up to 20 000 Kč',
-    description: 'Buying for cash in Brno, weekends only.',
-    details: ['Cash', 'Brno'],
-    language: 'cs, en',
-  },
-  {
-    id: 'prague7',
-    name: 'Direct friend',
-    mine: false,
-    selling: true,
-    iconTag: 'bitcoin',
-    commonFriends: 5,
-    price: '1 000 – 3 000 Kč',
-    description: 'Small amounts over Lightning. Coffee near Letná?',
-    details: ['Cash', 'Prague 7'],
-    language: 'cs',
-  },
-]
-
-const myOldOffer: MarketplaceOffer = {
-  id: 'bike',
-  name: 'Me',
-  mine: true,
-  selling: true,
-  iconTag: 'product',
-  price: '8 000 Kč',
-  description: 'Road bike, 56 cm frame. Serviced this spring.',
-  details: ['Pickup', 'Prague 2'],
-  language: 'en, cs',
-}
-
-const myTradeOffer: MarketplaceOffer = {
-  ...tradeOffer,
-  id: 'mine',
-  name: 'Me',
-  mine: true,
-  commonFriends: undefined,
 }
 
 const tabBarItems: ReadonlyArray<{
@@ -232,21 +172,22 @@ function MyOffersHeader({count}: {count: number}): React.JSX.Element {
   )
 }
 
-/** The Marketplace tab: everyone's offers, or your own. */
+/** The Marketplace tab: everyone's offers, or your own, listed top to bottom. */
 export function MarketplaceScene({
   tab,
-  newOffer,
-  tapOffer,
+  offers,
+  arrivingOfferId,
+  tappedOfferId,
   tapNewOffer,
 }: {
   tab: 'all' | 'mine'
-  newOffer: boolean
-  tapOffer?: boolean
+  offers: readonly MarketplaceOffer[]
+  arrivingOfferId?: string
+  tappedOfferId?: string
   tapNewOffer?: boolean
 }): React.JSX.Element {
   const scrollY = useSharedValue(0)
   const theme = useTheme()
-  const listed = tab === 'all' ? otherOffers : [myOldOffer]
   return (
     <Stack flex={1} backgroundColor="$backgroundPrimary">
       <AnimatedNavigationBar
@@ -272,23 +213,23 @@ export function MarketplaceScene({
         {tab === 'all' ? (
           <AllOffersHeader />
         ) : (
-          <MyOffersHeader count={newOffer ? 2 : 1} />
+          <MyOffersHeader count={offers.length} />
         )}
         <YStack gap="$5" px="$5">
-          {newOffer ? (
-            <Arrive>
-              <Tap on={tapOffer ?? false}>
-                <MarketplaceOfferCard
-                  offer={tab === 'all' ? tradeOffer : myTradeOffer}
-                />
-              </Tap>
-            </Arrive>
-          ) : null}
           {pipe(
-            listed,
-            Array.map((card) => (
-              <MarketplaceOfferCard key={card.id} offer={card} />
-            ))
+            offers,
+            Array.map((card) => {
+              const listed = (
+                <Tap on={card.id === tappedOfferId}>
+                  <MarketplaceOfferCard offer={card} />
+                </Tap>
+              )
+              return card.id === arrivingOfferId ? (
+                <Arrive key={card.id}>{listed}</Arrive>
+              ) : (
+                <Fragment key={card.id}>{listed}</Fragment>
+              )
+            })
           )}
         </YStack>
       </YStack>

@@ -120,6 +120,7 @@ export function ChatScene({
       <Stack flex={1}>
         <ChatHeader
           name={revealed ? people[otherSide(side)].name : 'Friend of a friend'}
+          subtitle="3 common"
           avatar={
             <Stack
               key={String(revealed)}

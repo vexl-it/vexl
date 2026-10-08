@@ -1,4 +1,6 @@
 import {Array, Record} from 'effect'
+import type {MarketplaceOffer} from '../shared/MarketplaceScene'
+import type {DetailedOffer} from '../shared/OfferScenes'
 import {screenTimes, type PhoneScreen} from '../shared/PhoneScreens'
 import {
   keystrokeTimes,
@@ -20,6 +22,69 @@ export const offer = {
   btcPrice: '2 400 000',
   fiatAmount: '5 000',
   btcAmount: (fiatAmount / btcPriceCzk).toFixed(8).replace('.', ','),
+}
+
+// The offer as they see it.
+export const tradeOffer: DetailedOffer = {
+  id: 'trade',
+  name: 'Friend of a friend',
+  mine: false,
+  selling: true,
+  iconTag: 'bitcoin',
+  commonFriends: 3,
+  price: 'Up to 10 000 Kč',
+  description: offer.description,
+  details: ['Cash', offer.location],
+  language: 'en',
+  location: offer.location,
+  paymentMethod: 'Cash • Lightning',
+}
+
+export const myTradeOffer: MarketplaceOffer = {
+  ...tradeOffer,
+  id: 'mine',
+  name: 'Me',
+  mine: true,
+  commonFriends: undefined,
+}
+
+export const otherOffers: readonly MarketplaceOffer[] = [
+  {
+    id: 'brno',
+    name: 'Friend of a friend',
+    mine: false,
+    selling: false,
+    iconTag: 'bitcoin',
+    commonFriends: 2,
+    price: 'Up to 20 000 Kč',
+    description: 'Buying for cash in Brno, weekends only.',
+    details: ['Cash', 'Brno'],
+    language: 'cs, en',
+  },
+  {
+    id: 'prague7',
+    name: 'Direct friend',
+    mine: false,
+    selling: true,
+    iconTag: 'bitcoin',
+    commonFriends: 5,
+    price: '1 000 – 3 000 Kč',
+    description: 'Small amounts over Lightning. Coffee near Letná?',
+    details: ['Cash', 'Prague 7'],
+    language: 'cs',
+  },
+]
+
+export const myOldOffer: MarketplaceOffer = {
+  id: 'bike',
+  name: 'Me',
+  mine: true,
+  selling: true,
+  iconTag: 'product',
+  price: '8 000 Kč',
+  description: 'Road bike, 56 cm frame. Serviced this spring.',
+  details: ['Pickup', 'Prague 2'],
+  language: 'en, cs',
 }
 
 // Fictional meeting, shown as the app formats it in English.

@@ -1,0 +1,9 @@
+{
+  "platforms": ["apple", "android"],
+  "apple": {
+    "modules": ["VexlNearbyBleModule"]
+  },
+  "android": {
+    "modules": ["expo.modules.vexlnearbyble.VexlNearbyBleModule"]
+  }
+}

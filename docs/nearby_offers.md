@@ -79,6 +79,7 @@ fetch, refresh, prune and report the offer without any new endpoint.
 
 Local Expo module. Android is the primary target. iOS is best effort with
 CoreBluetooth and the same JS API.
+Android 12+ is required: below it `requestPermissions` resolves `false`.
 
 ```ts
 setAdvertisedKeys(keysBase64: string[]): Promise<void> // [] stops advertising

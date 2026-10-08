@@ -7,22 +7,30 @@ import {Array, Option} from 'effect'
 
 export function offerWithoutSourceOrNone(
   offer: OneOfferInState,
-  removedFromClubs: ClubUuid[],
-  removedFromContacts: boolean
+  {
+    removedFromClubs = [],
+    removedFromContacts = false,
+    removedFromNearby = false,
+  }: {
+    removedFromClubs?: readonly ClubUuid[]
+    removedFromContacts?: boolean
+    removedFromNearby?: boolean
+  }
 ): Option.Option<OneOfferInState> {
   const remainingClubIds = Array.difference(
     offer.offerInfo.privatePart.clubIds,
     removedFromClubs
   )
-  const friendLevelsToRemove: FriendLevel[] = [
-    ...(Array.isEmptyArray(remainingClubIds) ? ['CLUB' as const] : []),
-    ...(removedFromContacts
-      ? ['FIRST_DEGREE' as const, 'SECOND_DEGREE' as const]
-      : []),
-  ]
-  const remainingFriendLevels = Array.difference(
+  const isFriendLevelRemoved: Record<FriendLevel, boolean> = {
+    CLUB: Array.isEmptyArray(remainingClubIds),
+    FIRST_DEGREE: removedFromContacts,
+    SECOND_DEGREE: removedFromContacts,
+    NEARBY: removedFromNearby,
+    NOT_SPECIFIED: false,
+  }
+  const remainingFriendLevels = Array.filter(
     offer.offerInfo.privatePart.friendLevel,
-    friendLevelsToRemove
+    (friendLevel) => !isFriendLevelRemoved[friendLevel]
   )
 
   if (Array.isEmptyArray(remainingFriendLevels) && !offer.ownershipInfo)

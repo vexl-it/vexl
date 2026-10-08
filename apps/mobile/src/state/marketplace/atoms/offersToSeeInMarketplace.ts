@@ -82,15 +82,14 @@ export const offersToSeeInMarketplaceAtom = atom((get) => {
       })
 
       return (
-        // Offers that has at least one visible common contact or are first degree
+        // Offers that has at least one visible common contact or are first degree, club or nearby
         (Array.isNonEmptyReadonlyArray(visibleCommonFriends.commonFriends) ||
           pipe(
             oneOffer.offerInfo.privatePart.friendLevel,
-            Array.some((one) => one === 'FIRST_DEGREE')
-          ) ||
-          pipe(
-            oneOffer.offerInfo.privatePart.friendLevel,
-            Array.some((one) => one === 'CLUB')
+            Array.some(
+              (one) =>
+                one === 'FIRST_DEGREE' || one === 'CLUB' || one === 'NEARBY'
+            )
           )) &&
         // Filter offers that are set to be in person but have no location
         (isDeveloper ||

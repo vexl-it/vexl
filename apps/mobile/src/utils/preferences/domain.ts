@@ -114,6 +114,12 @@ export const Preferences = Schema.Struct({
   notesBoardEnabled: Schema.optionalWith(Schema.Boolean, {
     default: () => false,
   }),
+  nearbyOffersEnabled: Schema.optionalWith(Schema.Boolean, {
+    default: () => false,
+  }),
+  nearbyOffersReceivingEnabled: Schema.optionalWith(Schema.Boolean, {
+    default: () => false,
+  }),
   lastUsedOfferSpokenLanguages: Schema.optionalWith(
     Schema.Array(SpokenLanguage),
     {

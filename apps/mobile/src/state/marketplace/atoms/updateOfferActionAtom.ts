@@ -18,12 +18,13 @@ import updateOffer, {
 import {type PublicPartEncryptionError} from '@vexl-next/resources-utils/src/offers/utils/encryptOfferPublicPayload'
 import {type PrivatePartEncryptionError} from '@vexl-next/resources-utils/src/offers/utils/encryptPrivatePart'
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
-import {Array, Effect, pipe, Schema} from 'effect'
+import {Array, Effect, Option, pipe, Schema} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
 import {syncAllClubsHandleStateWhenNotFoundActionAtom} from '../../clubs/atom/refreshClubsActionAtom'
 import {updateAndReencryptSingleOfferConnectionActionAtom} from '../../connections/atom/offerToConnectionsAtom'
 import {sessionDataOrDummyAtom} from '../../session'
+import {myOffersAtom} from './myOffers'
 import {reencryptSingleOfferMissingOnServerWhenEditingActionAtom} from './offersMissingOnServer'
 import {offersAtom} from './offersState'
 
@@ -72,7 +73,14 @@ export const updateOfferActionAtom = atom<
     if (params.onProgress)
       params.onProgress({type: 'CONSTRUCTING_PUBLIC_PAYLOAD'})
 
-    const offerInfo = yield* _(
+    const nearbyKey = pipe(
+      get(myOffersAtom),
+      Array.findFirst((offer) => offer.ownershipInfo.adminId === adminId),
+      Option.flatMapNullable((offer) => offer.ownershipInfo.nearbyKey),
+      Option.getOrUndefined
+    )
+
+    const {offerInfo, keptNearbyKey} = yield* _(
       updateOffer({
         offerApi: api.offer,
         adminId,
@@ -82,7 +90,10 @@ export const updateOfferActionAtom = atom<
         intendedClubs: intendedClubs ?? [],
         ownerKeypair: session.privateKey,
         ownerKeyPairV2: session.keyPairV2,
+        nearbyKey,
       }).pipe(
+        Effect.map((offerInfo) => ({offerInfo, keptNearbyKey: nearbyKey})),
+        // Offer re-created on the server lost its nearby private part
         Effect.catchTag('NotFoundError', () =>
           pipe(
             set(reencryptSingleOfferMissingOnServerWhenEditingActionAtom, {
@@ -92,7 +103,10 @@ export const updateOfferActionAtom = atom<
               intendedClubs,
               onProgress: params.onProgress,
             }),
-            Effect.map((result) => result.offerInfo),
+            Effect.map((result) => ({
+              offerInfo: result.offerInfo,
+              keptNearbyKey: undefined,
+            })),
             Effect.mapError(
               (e) => new ErrorReencryptingOfferInUpdate({cause: e})
             )
@@ -109,6 +123,7 @@ export const updateOfferActionAtom = atom<
         adminId,
         intendedConnectionLevel,
         intendedClubs,
+        nearbyKey: keptNearbyKey,
       },
       offerInfo,
     }

@@ -69,9 +69,12 @@ fetch, refresh, prune and report the offer without any new endpoint.
   nearby keys of all my offers with `ownershipInfo.nearbyKey` set. Empty list
   stops advertising.
 - Receiving: when the flag and the receiving toggle are on, the module scans.
-  Each discovered key that is not yet known is fetched and stored. If the app
-  is not in the foreground a local notification "New offer nearby" is shown
-  via `displayLocalNotification`, and tapping it opens the offer.
+  Each discovered key that is not yet stored (and is not one of mine) is
+  fetched and stored. If the app is not in the foreground a local notification
+  "New offer nearby" is shown via `displayLocalNotification` for every such
+  batch, even when the offer is already known from contacts or clubs, and
+  tapping it opens the offer. The stored offer keeps all its sources, so its
+  `friendLevel` can be e.g. `['FIRST_DEGREE', 'NEARBY']`.
 - Refresh: the normal offers refresh also re-fetches each known nearby key and
   prunes removed ones.
 

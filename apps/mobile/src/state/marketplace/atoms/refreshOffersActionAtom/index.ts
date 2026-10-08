@@ -1,11 +1,16 @@
 import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
-import {type OfferId} from '@vexl-next/domain/src/general/offers'
+import {
+  type OfferId,
+  type OfferInfo,
+  type OneOfferInState,
+} from '@vexl-next/domain/src/general/offers'
 import {Array, Effect, Record, pipe} from 'effect'
 import {atom} from 'jotai'
 import {AppState} from 'react-native'
 import {apiAtom} from '../../../../api'
 import {markMarketplaceReadyNotificationFlowAsCompletedIfOffersAreVisibleActionAtom} from '../../../../utils/marketplaceReadyNotification/store'
 import {refreshLastSeenOffersActionAtom} from '../../../../utils/newOffersNotificationBackgroundTask/store'
+import {nearbyOffersEnabledAtom} from '../../../../utils/preferences'
 import reportError from '../../../../utils/reportError'
 import {startBenchmark} from '../../../ActionBenchmarks'
 import {clubsToKeyHolderAtom} from '../../../clubs/atom/clubsToKeyHolderV2Atom'
@@ -13,6 +18,10 @@ import {updateOffersIdsForClubStateActionAtom} from '../../../clubs/atom/clubsWi
 import {sessionDataOrDummyAtom} from '../../../session'
 import {ensureMyOffersHaveOwnershipInfoUploadedInPrivatepayloadForOwner} from '../ensureMyOffersHaveOwnershipInfoUploadedInPrivatepayloadForOwner'
 import {loadingStateAtom} from '../loadingState'
+import {
+  fetchNearbyOffers,
+  receivedNearbyKeysByOfferIdAtom,
+} from '../nearbyOffers/nearbyOffersState'
 import {anyMarketplaceSuggestionDismissedInThisSessionAtom} from '../offerSuggestionVisible'
 import {offersAtom, offersStateAtom} from '../offersState'
 import {reportOffersWithoutLocationActionAtom} from '../offersToSeeInMarketplace'
@@ -33,7 +42,36 @@ const NO_REMOVED_OFFERS: {
     clubUuid: ClubUuid
     removedIds: readonly OfferId[]
   }>
-} = {removedContactOfferIds: [], removedClubsOfferIdsToClubUuid: []}
+  removedNearbyOfferIds: readonly OfferId[]
+} = {
+  removedContactOfferIds: [],
+  removedClubsOfferIdsToClubUuid: [],
+  removedNearbyOfferIds: [],
+}
+
+// Unchanged re-fetched nearby offers would only rewrite the persisted state
+const changedNearbyOffers = ({
+  storedOffers,
+  nearbyOffers,
+}: {
+  storedOffers: readonly OneOfferInState[]
+  nearbyOffers: readonly OfferInfo[]
+}): readonly OfferInfo[] => {
+  const storedOffersById = new Map(
+    Array.map(storedOffers, (one): [OfferId, OfferInfo] => [
+      one.offerInfo.offerId,
+      one.offerInfo,
+    ])
+  )
+  return Array.filter(nearbyOffers, (nearbyOffer) => {
+    const storedOffer = storedOffersById.get(nearbyOffer.offerId)
+    return (
+      storedOffer === undefined ||
+      storedOffer.modifiedAt !== nearbyOffer.modifiedAt ||
+      !Array.contains(storedOffer.privatePart.friendLevel, 'NEARBY')
+    )
+  })
+}
 
 export const refreshOffersActionAtom = atom(
   null,
@@ -73,12 +111,32 @@ export const refreshOffersActionAtom = atom(
         Date.now() - get(lastRemovedOffersReconciliationAtAtom) >=
           REMOVED_OFFERS_RECONCILIATION_INTERVAL_MS
 
-      const {removedClubsOfferIdsToClubUuid, removedContactOfferIds} = yield* _(
+      const nearbyKeysByOfferId = get(nearbyOffersEnabledAtom)
+        ? Record.map(get(receivedNearbyKeysByOfferIdAtom), ({key}) => key)
+        : {}
+
+      // Nearby offers have no incremental endpoint (one request per key), so
+      // they are re-fetched together with the throttled reconciliation.
+      const newNearbyOffers = yield* _(
+        shouldReconcileRemovedOffers
+          ? fetchNearbyOffers({
+              offerApi: api.offer,
+              keys: Record.values(nearbyKeysByOfferId),
+            })
+          : Effect.succeed([])
+      )
+
+      const {
+        removedClubsOfferIdsToClubUuid,
+        removedContactOfferIds,
+        removedNearbyOfferIds,
+      } = yield* _(
         shouldReconcileRemovedOffers
           ? getRemovedOffersIds({
               offersApi: api.offer,
               storedOffers,
               storedClubs: myStoredClubs,
+              nearbyKeysByOfferId,
             }).pipe(
               Effect.tap((result) =>
                 Effect.sync(() => {
@@ -94,7 +152,14 @@ export const refreshOffersActionAtom = atom(
       )
 
       const incomingOffers = pipe(
-        [...newContactOffers, ...newClubsOffers],
+        [
+          ...newContactOffers,
+          ...newClubsOffers,
+          ...changedNearbyOffers({
+            storedOffers,
+            nearbyOffers: Array.map(newNearbyOffers, (one) => one.offerInfo),
+          }),
+        ],
         Array.groupBy((one) => one.offerId),
         Record.values,
         Array.filterMap(combineIncomingOffers)
@@ -109,8 +174,17 @@ export const refreshOffersActionAtom = atom(
         removedOffersIds: {
           clubs: removedClubsOfferIdsToClubUuid,
           contacts: removedContactOfferIds,
+          nearby: removedNearbyOfferIds,
         },
       })
+
+      if (Array.isNonEmptyReadonlyArray(removedNearbyOfferIds))
+        set(receivedNearbyKeysByOfferIdAtom, (keys) =>
+          Record.filter(
+            keys,
+            (_, offerId) => !Array.contains(removedNearbyOfferIds, offerId)
+          )
+        )
 
       // Skip the state write (and the full persisted-blob rewrite + derived-atom
       // invalidation it causes) when the refresh changed nothing.
@@ -132,7 +206,7 @@ export const refreshOffersActionAtom = atom(
       }
 
       endBenchmark(
-        `Incoming offers: ${incomingOffers.length}. Removed offers: ${removedClubsOfferIdsToClubUuid.length + removedContactOfferIds.length}`
+        `Incoming offers: ${incomingOffers.length}. Removed offers: ${removedClubsOfferIdsToClubUuid.length + removedContactOfferIds.length + removedNearbyOfferIds.length}`
       )
     }).pipe(
       Effect.catchAll((e) => {

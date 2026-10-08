@@ -59,7 +59,8 @@ export function getOtherSideFriendLevel({
     return t('offer.friendOfFriend')
   if (friendLevelToUse.includes('CLUB')) return t('offer.clubMember')
 
-  // NOT_SPECIFIED (e.g. reposted notes) - let callers fall back to a name.
+  // NEARBY (strangers met over Bluetooth) and NOT_SPECIFIED (e.g. reposted
+  // notes) - let callers fall back to a name.
   return undefined
 }
 

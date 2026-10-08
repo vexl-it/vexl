@@ -2,11 +2,13 @@ import {
   type OfferInfo,
   type OneOfferInState,
 } from '@vexl-next/domain/src/general/offers'
+import {nearbyKeyToKeyPairE} from '@vexl-next/resources-utils/src/offers/nearby/nearbyKey'
 import {Array, Effect, Either, Option, Record} from 'effect'
 import {atom} from 'jotai'
 import {Alert} from 'react-native'
 import {apiAtom} from '../../api'
 import {clubsToKeyHolderAtom} from '../../state/clubs/atom/clubsToKeyHolderV2Atom'
+import {receivedNearbyKeysByOfferIdAtom} from '../../state/marketplace/atoms/nearbyOffers/nearbyOffersState'
 import {createSingleOfferReportedFlagAtom} from '../../state/marketplace/atoms/offersState'
 import {translationAtom} from '../../utils/localization/I18nProvider'
 import reportError from '../../utils/reportError'
@@ -102,6 +104,17 @@ export const reportOfferActionAtom = atom(
       const isClubOffer =
         !!offer.offerInfo.privatePart.clubIds &&
         offer.offerInfo.privatePart.clubIds.length > 0
+      // Offers seen only nearby are reported the club way, signed with the nearby key
+      const isContactOffer = Array.some(
+        offer.offerInfo.privatePart.friendLevel,
+        (one) => one === 'FIRST_DEGREE' || one === 'SECOND_DEGREE'
+      )
+      const nearbyKey = isContactOffer
+        ? Option.none()
+        : Record.get(
+            get(receivedNearbyKeysByOfferIdAtom),
+            offer.offerInfo.offerId
+          )
       const reportedFlagAtom = createSingleOfferReportedFlagAtom(
         offer.offerInfo.offerId
       )
@@ -124,6 +137,11 @@ export const reportOfferActionAtom = atom(
             })
           ),
           Effect.flatten
+        )
+      } else if (Option.isSome(nearbyKey)) {
+        const keyPair = yield* _(nearbyKeyToKeyPairE(nearbyKey.value.key))
+        yield* _(
+          api.offer.reportClubOffer({offerId: offer.offerInfo.offerId, keyPair})
         )
       } else {
         yield* _(

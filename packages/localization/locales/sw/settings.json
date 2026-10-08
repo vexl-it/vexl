@@ -151,6 +151,8 @@
   "appSettings.changeCurrency": "Badilisha sarafu",
   "appSettings.appearanceTitle": "Mwonekano",
   "appSettings.allowScreencapture": "Ruhusu kupiga picha ya skrini",
+  "appSettings.receiveNearbyOffers": "Pokea ofa za karibu",
+  "appSettings.receiveNearbyOffersNote": "Vexl itatafuta kupitia Bluetooth ofa ambazo watu walio karibu nawe wanashiriki.",
   "appSettings.appearance.light": "Hali angavu",
   "appSettings.appearance.dark": "Hali nyeusi",
   "appSettings.appearance.system": "Linganishwa na kifaa"

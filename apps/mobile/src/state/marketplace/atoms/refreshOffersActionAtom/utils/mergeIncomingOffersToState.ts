@@ -6,6 +6,10 @@ import {
 } from '@vexl-next/domain/src/general/offers'
 import extractOwnerInfoFromOwnerPrivatePayload from '@vexl-next/resources-utils/src/offers/extractOwnerInfoFromOwnerPrivatePayload'
 import {Array, Option, pipe} from 'effect'
+import {
+  hasNearbySource,
+  isOnlyNearbyOffer,
+} from '../../../utils/isOnlyNearbyOffer'
 import {offerWithoutSourceOrNone} from '../../../utils/offerWithoutSourceOrNone'
 import {combineIncomingOffers} from './combineIncomingOffers'
 
@@ -27,10 +31,6 @@ const addOwnershipInfoFromPrivatePayloadIfMissing = (
   return Option.some(offer)
 }
 
-const isOnlyNearbyOffer = ({privatePart: {friendLevel}}: OfferInfo): boolean =>
-  Array.isNonEmptyReadonlyArray(friendLevel) &&
-  Array.every(friendLevel, (one) => one === 'NEARBY')
-
 // Nearby offers are fetched separately from contact and club offers, so an
 // update from one side must not drop the source known only to the other.
 // NEARBY is removed only through `removedOffersIds.nearby`.
@@ -44,7 +44,7 @@ const withSourcesKnownOnlyToStoredOffer = (
       Option.getOrElse(() => incomingOffer)
     )
 
-  if (Array.contains(storedOffer.privatePart.friendLevel, 'NEARBY'))
+  if (hasNearbySource(storedOffer))
     return {
       ...incomingOffer,
       privatePart: {

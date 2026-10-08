@@ -10,6 +10,7 @@ import {apiAtom} from '../../api'
 import {clubsToKeyHolderAtom} from '../../state/clubs/atom/clubsToKeyHolderV2Atom'
 import {receivedNearbyKeysByOfferIdAtom} from '../../state/marketplace/atoms/nearbyOffers/nearbyOffersState'
 import {createSingleOfferReportedFlagAtom} from '../../state/marketplace/atoms/offersState'
+import {isOnlyNearbyOffer} from '../../state/marketplace/utils/isOnlyNearbyOffer'
 import {translationAtom} from '../../utils/localization/I18nProvider'
 import reportError from '../../utils/reportError'
 import {toCommonErrorMessage} from '../../utils/useCommonErrorMessages'
@@ -60,22 +61,42 @@ export const showCommonFriendsExplanationActionAtom = atom(
   }
 )
 
+type OfferSource = 'club' | 'nearby' | 'contacts'
+
+// Offers also seen nearby are told apart by `showsNearbyTag`, so NEARBY next
+// to another friend level does not change the source here.
+export function getOfferSource({offerInfo}: OneOfferInState): OfferSource {
+  if (isOnlyNearbyOffer(offerInfo)) return 'nearby'
+  const {friendLevel} = offerInfo.privatePart
+  return Array.contains(friendLevel, 'CLUB') &&
+    Array.every(friendLevel, (one) => one === 'CLUB' || one === 'NEARBY')
+    ? 'club'
+    : 'contacts'
+}
+
 export const showNoCommonFriendsExplanationActionAtom = atom(
   null,
   (get, set, offer: OneOfferInState) => {
     const {t} = get(translationAtom)
-    const isClubOffer =
-      offer.offerInfo.privatePart.friendLevel.length === 1 &&
-      offer.offerInfo.privatePart.friendLevel[0] === 'CLUB'
+    const {title, subtitle} = {
+      club: {
+        title: t('offer.clubOffer.title'),
+        subtitle: t('offer.clubOffer.description'),
+      },
+      nearby: {
+        title: t('offer.nearbyOffer.title'),
+        subtitle: t('offer.nearbyOffer.description'),
+      },
+      contacts: {
+        title: t('offer.noCommonFriends.title'),
+        subtitle: t('offer.noCommonFriends.description'),
+      },
+    }[getOfferSource(offer)]
 
     Effect.runFork(
       set(globalDialogAtom, {
-        title: isClubOffer
-          ? t('offer.clubOffer.title')
-          : t('offer.noCommonFriends.title'),
-        subtitle: isClubOffer
-          ? t('offer.clubOffer.description')
-          : t('offer.noCommonFriends.description'),
+        title,
+        subtitle,
         positiveButtonText: t('common.gotIt'),
       })
     )

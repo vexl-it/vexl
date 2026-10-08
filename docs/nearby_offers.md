@@ -62,9 +62,11 @@ fetch, refresh, prune and report the offer without any new endpoint.
   when the flag is on).
 - `nearbyOffersStateAtom` (MMKV): `Record<OfferId, {key: NearbyOfferKey, lastSeenAt}>`
   for received offers. The decrypted offers live in the normal
-  `offersStateAtom` with `friendLevel: ['NEARBY']` and a `Nearby` badge in the
-  marketplace. They are never filtered out by the friend level or source
-  filters.
+  `offersStateAtom` with `friendLevel: ['NEARBY']`, shown with `Nearby` in
+  place of the friend level. They are never filtered out by the friend level
+  or source filters. An offer that also comes from contacts or a club keeps its
+  friend level label and gets a `Nearby` tag next to it on the card and in the
+  offer detail, where a note says it is also shared over Bluetooth.
 - Advertising: whenever the feature flag is on, the module advertises the
   nearby keys of all my offers with `ownershipInfo.nearbyKey` set. Empty list
   stops advertising.

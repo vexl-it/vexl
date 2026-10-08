@@ -8,11 +8,17 @@ import {
   Screen,
   ScreenCaptureShot,
   Switch,
+  TelescopeExplore,
   YStack,
 } from '@vexl-next/ui'
+import {useAtomValue} from 'jotai'
 import React from 'react'
 import {type AppSettingsStackScreenProps} from '../../../navigationTypes'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
+import {
+  nearbyOffersEnabledAtom,
+  nearbyOffersReceivingEnabledAtom,
+} from '../../../utils/preferences'
 import useSafeGoBack from '../../../utils/useSafeGoBack'
 import {allowScreenshotsAtom} from '../atoms'
 
@@ -21,6 +27,7 @@ function AppSettingsDefaultScreen({
 }: AppSettingsStackScreenProps<'AppSettingsDefault'>): React.ReactElement {
   const {t} = useTranslation()
   const goBack = useSafeGoBack()
+  const nearbyOffersEnabled = useAtomValue(nearbyOffersEnabledAtom)
 
   return (
     <Screen
@@ -64,6 +71,15 @@ function AppSettingsDefaultScreen({
           showChevron={false}
           tag={<Switch valueAtom={allowScreenshotsAtom} />}
         />
+        {nearbyOffersEnabled ? (
+          <MenuItem
+            label={t('appSettings.receiveNearbyOffers')}
+            note={t('appSettings.receiveNearbyOffersNote')}
+            icon={TelescopeExplore}
+            showChevron={false}
+            tag={<Switch valueAtom={nearbyOffersReceivingEnabledAtom} />}
+          />
+        ) : null}
       </YStack>
     </Screen>
   )

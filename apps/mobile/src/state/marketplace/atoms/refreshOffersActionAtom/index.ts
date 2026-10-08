@@ -16,6 +16,7 @@ import {startBenchmark} from '../../../ActionBenchmarks'
 import {clubsToKeyHolderAtom} from '../../../clubs/atom/clubsToKeyHolderV2Atom'
 import {updateOffersIdsForClubStateActionAtom} from '../../../clubs/atom/clubsWithMembersAtom'
 import {sessionDataOrDummyAtom} from '../../../session'
+import {hasNearbySource} from '../../utils/isOnlyNearbyOffer'
 import {ensureMyOffersHaveOwnershipInfoUploadedInPrivatepayloadForOwner} from '../ensureMyOffersHaveOwnershipInfoUploadedInPrivatepayloadForOwner'
 import {loadingStateAtom} from '../loadingState'
 import {
@@ -68,7 +69,7 @@ const changedNearbyOffers = ({
     return (
       storedOffer === undefined ||
       storedOffer.modifiedAt !== nearbyOffer.modifiedAt ||
-      !Array.contains(storedOffer.privatePart.friendLevel, 'NEARBY')
+      !hasNearbySource(storedOffer)
     )
   })
 }

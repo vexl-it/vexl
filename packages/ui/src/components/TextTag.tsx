@@ -105,15 +105,18 @@ type TextTagFrameProps = React.ComponentProps<typeof TextTagFrame>
 interface TextTagProps extends Omit<TextTagFrameProps, 'children' | 'variant'> {
   readonly label: string
   readonly variant: TextTagVariant
+  readonly icon?: React.ReactNode
 }
 
 export function TextTag({
   label,
   variant,
+  icon,
   ...rest
 }: TextTagProps): React.JSX.Element {
   return (
-    <TextTagFrame variant={variant} {...rest}>
+    <TextTagFrame variant={variant} gap="$1" {...rest}>
+      {icon}
       <TextTagLabel variant={variant}>{label}</TextTagLabel>
     </TextTagFrame>
   )

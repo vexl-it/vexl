@@ -4,11 +4,13 @@ import {
   Button,
   ConferenceClub,
   FlagReport,
+  type IconProps,
   InfoCircle,
   Menu,
   MenuItem,
   NavigationBar,
   PeopleUsers,
+  PinGeolocation,
   Screen,
   Typography,
   UnarchiveInbox,
@@ -32,6 +34,7 @@ import {useGetAllClubsForIds} from '../../state/clubs/atom/clubsWithMembersAtom'
 import {useSingleOffer} from '../../state/marketplace'
 import {toggleOfferMarkActionAtom} from '../../state/marketplace/atoms/offerMarkActionAtoms'
 import {useVisibleCommonFriendsForOffer} from '../../state/marketplace/hooks/useVisibleCommonFriendsForOffer'
+import {showsNearbyTag} from '../../state/marketplace/utils/isOnlyNearbyOffer'
 import {useNavigateToChatDetail} from '../../utils/chat/goToChatDetail'
 import {formatInteger} from '../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../utils/localization/formattingLocaleAtom'
@@ -42,6 +45,7 @@ import CommonFriends from '../CommonFriends'
 import OfferAuthorBanner from '../OfferAuthorBanner'
 import OfferPropertiesCard from '../OfferPropertiesCard'
 import {
+  getOfferSource,
   reportOfferActionAtom,
   showNoCommonFriendsExplanationActionAtom,
 } from './atoms'
@@ -133,6 +137,34 @@ function Footer({
   )
 }
 
+function SourceExplanation({
+  icon: Icon,
+  text,
+  onPress,
+}: {
+  readonly icon: React.ComponentType<IconProps>
+  readonly text: string
+  readonly onPress?: () => void
+}): React.ReactElement {
+  const theme = useTheme()
+
+  return (
+    <XStack
+      backgroundColor="$backgroundSecondary"
+      borderRadius="$5"
+      padding="$5"
+      gap="$1"
+      alignItems="center"
+      onPress={onPress}
+    >
+      <Icon size={18} color={theme.foregroundSecondary.get()} />
+      <Typography variant="micro" color="$foregroundSecondary" flex={1}>
+        {text}
+      </Typography>
+    </XStack>
+  )
+}
+
 function OfferDetailScrollContent({
   offer,
   isMyOffer,
@@ -147,7 +179,6 @@ function OfferDetailScrollContent({
   readonly onNoCommonFriendsPress: () => void
 }): React.ReactElement {
   const {t} = useTranslation()
-  const theme = useTheme()
   const {footerHeightAtom} = useScreenFooterHeight()
   const footerHeight = useAtomValue(footerHeightAtom)
   const visibleCommonFriends = useVisibleCommonFriendsForOffer(offer.offerInfo)
@@ -157,9 +188,11 @@ function OfferDetailScrollContent({
   )
   const clubsCount = otherSideClubs.length
   const hasCommonFriendsOrClubs = commonFriendsCount > 0 || clubsCount > 0
-  const isClubOffer =
-    offer.offerInfo.privatePart.friendLevel.length === 1 &&
-    offer.offerInfo.privatePart.friendLevel[0] === 'CLUB'
+  const {icon: explanationIcon, text: explanationText} = {
+    club: {icon: ConferenceClub, text: t('offer.clubOfferExplanation')},
+    nearby: {icon: PinGeolocation, text: t('offer.nearbyOfferExplanation')},
+    contacts: {icon: PeopleUsers, text: t('offer.noCommonFriendsExplanation')},
+  }[getOfferSource(offer)]
 
   return (
     <ScrollView
@@ -189,29 +222,19 @@ function OfferDetailScrollContent({
             otherSideClubs={otherSideClubs}
           />
         ) : (
-          <XStack
-            backgroundColor="$backgroundSecondary"
-            borderRadius="$5"
-            padding="$5"
-            gap="$1"
-            alignItems="center"
+          <SourceExplanation
+            icon={explanationIcon}
+            text={explanationText}
             onPress={onNoCommonFriendsPress}
-          >
-            {isClubOffer ? (
-              <ConferenceClub
-                size={18}
-                color={theme.foregroundSecondary.get()}
-              />
-            ) : (
-              <PeopleUsers size={18} color={theme.foregroundSecondary.get()} />
-            )}
-            <Typography variant="micro" color="$foregroundSecondary" flex={1}>
-              {isClubOffer
-                ? t('offer.clubOfferExplanation')
-                : t('offer.noCommonFriendsExplanation')}
-            </Typography>
-          </XStack>
+          />
         )}
+
+        {showsNearbyTag(offer.offerInfo) ? (
+          <SourceExplanation
+            icon={PinGeolocation}
+            text={t('offer.alsoSharedNearby')}
+          />
+        ) : null}
 
         <Menu>
           {!isMyOffer ? (

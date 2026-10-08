@@ -62,6 +62,7 @@
   "notifications.DISAPPROVE_CONTACT_REVEAL.body": "Вашето искане за размяна на телефонни номера беше отказано.",
   "notifications.NEW_OFFERS_IN_MARKETPLACE.title": "Нови оферти на пазара",
   "notifications.NEW_OFFERS_IN_MARKETPLACE.body": "Има нови оферти на пазара. Отвори приложението да ги видите.",
+  "notifications.NEARBY_OFFER.title": "Нова оферта наблизо",
   "notifications.MARKETPLACE_READY.title": "Пазарът ти е готов",
   "notifications.MARKETPLACE_READY.body": "Чакат те предложения от твоята мрежа. Виж ги.",
   "notifications.NEW_CONTACTS_ON_DEVICE.title": "Вашите контакти не са изцяло синхронизирани",

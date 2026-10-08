@@ -28,8 +28,7 @@ export function showInternalNotificationForNearbyOffers(
       id: NEARBY_OFFERS_NOTIFICATION_ID,
       channelId: await getDefaultChannel(),
       content: {
-        // TODO translate in the nearby offers UI change
-        title: 'New offer nearby',
+        title: t('notifications.NEARBY_OFFER.title'),
         body: t('notifications.NEW_OFFERS_IN_MARKETPLACE.body'),
         data: new NearbyOffersInternalNotificationData(
           offerIds.length === 1 ? {offerId: offerIds[0]} : {}

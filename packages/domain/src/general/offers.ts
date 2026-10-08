@@ -2,6 +2,8 @@ import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {getCrypto} from '@vexl-next/cryptography/src/getCrypto'
 import {orElseSchema} from '@vexl-next/generic-utils/src/effect-helpers/orElseSchema'
 import {Array, Either, Schema} from 'effect'
+import {Base64} from 'js-base64'
+import {Base64String} from '../utility/Base64String.brand'
 import {IdNumeric} from '../utility/IdNumeric'
 import {IsoDatetimeString} from '../utility/IsoDatetimeString.brand'
 import {JSDateString} from '../utility/JSDateString.brand'
@@ -94,6 +96,7 @@ export const FriendLevel = Schema.Literal(
   'FIRST_DEGREE',
   'SECOND_DEGREE',
   'CLUB',
+  'NEARBY',
   'NOT_SPECIFIED' // TODO remove this but make sure to not break parsing in newer versions
 )
 export type FriendLevel = typeof FriendLevel.Type
@@ -288,12 +291,20 @@ export const PublicPayloadEncrypted = Schema.String.pipe(
 )
 export type PublicPayloadEncrypted = typeof PublicPayloadEncrypted.Type
 
+// Raw 32-byte secp256k1 private scalar of the per-offer nearby key pair, base64 encoded
+export const NearbyOfferKey = Base64String.pipe(
+  Schema.filter((key) => Base64.toUint8Array(key).length === 32),
+  Schema.brand('NearbyOfferKey')
+)
+export type NearbyOfferKey = typeof NearbyOfferKey.Type
+
 export const OwnershipInfo = Schema.Struct({
   adminId: OfferAdminId,
   intendedConnectionLevel: IntendedConnectionLevel,
   intendedClubs: Schema.optionalWith(Schema.Array(ClubUuid), {
     default: () => [],
   }),
+  nearbyKey: Schema.optional(NearbyOfferKey),
 })
 export type OwnershipInfo = typeof OwnershipInfo.Type
 

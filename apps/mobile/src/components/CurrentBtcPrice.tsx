@@ -1,12 +1,5 @@
 import {type CurrencyCode} from '@vexl-next/domain/src/general/offers'
-import {
-  Loader,
-  Typography,
-  XStack,
-  YStack,
-  useTheme,
-  type TypographyProps,
-} from '@vexl-next/ui'
+import {BtcPriceLabel, type TypographyProps} from '@vexl-next/ui'
 import {Option} from 'effect/index'
 import {
   atom,
@@ -16,7 +9,6 @@ import {
   type PrimitiveAtom,
 } from 'jotai'
 import React, {useEffect, useMemo} from 'react'
-import {TouchableOpacity} from 'react-native'
 import {
   createBtcPriceForCurrencyAtom,
   refreshBtcPriceActionAtom,
@@ -53,7 +45,6 @@ function CurrentBtcPrice({
   ...props
 }: Props): React.ReactElement {
   const {t} = useTranslation()
-  const theme = useTheme()
   const currency = useAtomValue(currencyAtom) ?? currencies.USD.code
   const customBtcPrice = useAtomValue(customBtcPriceAtom ?? emptyAtom)
   const refreshBtcPrice = useSetAtom(refreshBtcPriceActionAtom)
@@ -96,9 +87,9 @@ function CurrentBtcPrice({
   const pressDisabled = Boolean(disabled) && !onPricePress
 
   return (
-    <TouchableOpacity
+    <BtcPriceLabel
+      {...props}
       disabled={pressDisabled}
-      activeOpacity={pressDisabled ? 1 : 0.7}
       onPress={() => {
         if (onPricePress) {
           onPricePress()
@@ -107,41 +98,29 @@ function CurrentBtcPrice({
 
         void refreshBtcPrice(currency)().then(postRefreshActions)
       }}
-    >
-      <XStack ai="center" gap="$2">
-        {btcPriceWithState?.state === 'loading' ? (
-          <Loader size="small" color={theme.foregroundSecondary.get()} />
-        ) : (
-          <YStack>
-            <Typography
-              variant="paragraphSmall"
-              color="$foregroundPrimary"
-              {...props}
-            >
-              {`1 BTC = ${
-                customBtcPrice
-                  ? formatDecimal(customBtcPrice, currentLocale, {
-                      maximumFractionDigits: 0,
-                    })
-                  : btcPriceWithState?.state === 'error'
-                    ? '-'
-                    : formatDecimal(
-                        btcPriceWithState?.btcPrice.BTC ?? 0,
-                        currentLocale,
-                        {maximumFractionDigits: 0}
-                      )
-              } ${currency}`}
-            </Typography>
-            {showLastUpdatedAt && lastUpdatedAtFormattedValue !== null ? (
-              <Typography variant="micro" color="$foregroundTertiary">
-                {t('common.lastUpdated')}: {lastUpdatedAtFormattedValue}
-              </Typography>
-            ) : null}
-          </YStack>
-        )}
-        {trailingElement}
-      </XStack>
-    </TouchableOpacity>
+      loading={btcPriceWithState?.state === 'loading'}
+      priceLabel={`1 BTC = ${
+        customBtcPrice
+          ? formatDecimal(customBtcPrice, currentLocale, {
+              maximumFractionDigits: 0,
+            })
+          : btcPriceWithState?.state === 'error'
+            ? '-'
+            : formatDecimal(
+                btcPriceWithState?.btcPrice?.BTC ?? 0,
+                currentLocale,
+                {
+                  maximumFractionDigits: 0,
+                }
+              )
+      } ${currency}`}
+      lastUpdatedLabel={
+        showLastUpdatedAt && lastUpdatedAtFormattedValue !== null
+          ? `${t('common.lastUpdated')}: ${lastUpdatedAtFormattedValue}`
+          : undefined
+      }
+      trailingElement={trailingElement}
+    />
   )
 }
 

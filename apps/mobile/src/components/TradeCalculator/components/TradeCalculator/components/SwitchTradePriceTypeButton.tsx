@@ -1,32 +1,31 @@
-import {ChevronDown} from '@vexl-next/ui'
+import {TradePriceTypeButton} from '@vexl-next/ui'
 import {useAtomValue} from 'jotai'
 import React from 'react'
-import {TouchableOpacity, type TouchableOpacityProps} from 'react-native'
-import {XStack, useTheme} from 'tamagui'
+import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {tradePriceTypeAtom} from '../../../atoms'
-import PriceTypeIndicator from '../../PriceTypeIndicator'
 
-function SwitchTradePriceTypeButton(
-  props: TouchableOpacityProps
-): React.ReactElement {
-  const theme = useTheme()
-  const tradePriceType = useAtomValue(tradePriceTypeAtom)
+function SwitchTradePriceTypeButton({
+  onPress,
+}: {
+  readonly onPress: () => void
+}): React.ReactElement {
+  const {t} = useTranslation()
+  const tradePriceType = useAtomValue(tradePriceTypeAtom) ?? 'live'
+
   return (
-    <TouchableOpacity activeOpacity={0.7} {...props}>
-      <XStack ai="center" gap="$2">
-        <PriceTypeIndicator />
-        <ChevronDown
-          color={
-            !tradePriceType || tradePriceType === 'live'
-              ? theme.accentHighlightSecondary.get()
-              : tradePriceType === 'frozen'
-                ? theme.pinkForeground.get()
-                : theme.greenForeground.get()
-          }
-          size={20}
-        />
-      </XStack>
-    </TouchableOpacity>
+    <TradePriceTypeButton
+      priceType={tradePriceType}
+      label={
+        tradePriceType === 'live'
+          ? t('tradeCalculator.liveMarketPrice')
+          : tradePriceType === 'frozen'
+            ? t('tradeChecklist.calculateAmount.frozenPrice')
+            : tradePriceType === 'custom'
+              ? t('tradeChecklist.calculateAmount.customPrice')
+              : t('tradeChecklist.calculateAmount.yourPrice')
+      }
+      onPress={onPress}
+    />
   )
 }
 

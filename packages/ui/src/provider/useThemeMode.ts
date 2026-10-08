@@ -1,5 +1,5 @@
 import {useCallback, useEffect, useMemo, useState} from 'react'
-import {Appearance, useColorScheme} from 'react-native'
+import {Appearance, Platform, useColorScheme} from 'react-native'
 
 export type ThemeMode = 'light' | 'dark' | 'system'
 
@@ -22,6 +22,7 @@ export function useThemeMode(
 
   // Keeps native controls (e.g. iOS switch, alerts, keyboard) on the app theme
   useEffect(() => {
+    if (Platform.OS === 'web') return
     Appearance.setColorScheme(mode === 'system' ? 'unspecified' : mode)
   }, [mode])
 

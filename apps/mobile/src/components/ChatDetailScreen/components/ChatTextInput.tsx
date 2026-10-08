@@ -4,8 +4,7 @@ import {
 } from '@vexl-next/domain/src/general/messaging'
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {
-  Send,
-  Stack,
+  ChatInputBar,
   Typography,
   IconButton as UiIconButton,
   XStack,
@@ -16,13 +15,8 @@ import {useMolecule} from 'bunshi/dist/react'
 import {useAtom, useAtomValue, useSetAtom} from 'jotai'
 import truncate from 'just-truncate'
 import React, {useCallback, useEffect, useRef, useState} from 'react'
-import {Platform, TextInput as RNTextInput} from 'react-native'
-import Animated, {
-  SlideInDown,
-  SlideOutDown,
-  useAnimatedStyle,
-  withSpring,
-} from 'react-native-reanimated'
+import {Platform, type TextInput as RNTextInput} from 'react-native'
+import Animated, {SlideInDown, SlideOutDown} from 'react-native-reanimated'
 import {useTheme} from 'tamagui'
 import {useSessionAssumeLoggedIn} from '../../../state/session'
 import {version} from '../../../utils/environment'
@@ -61,13 +55,6 @@ function ChatTextInput(): React.ReactElement | null {
     if (!replyToMessage) return
     textInputRef.current?.focus()
   }, [replyToMessage])
-
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
-      marginRight: 5,
-      opacity: withSpring(value ? 1 : 0),
-    }
-  }, [value])
 
   const clearTextInput = useCallback(() => {
     textInputRef.current?.clear()
@@ -160,16 +147,6 @@ function ChatTextInput(): React.ReactElement | null {
 
   useEffect(() => clearPendingIosSendTimeout, [clearPendingIosSendTimeout])
 
-  const inputStyles = {
-    minHeight: 21,
-    maxHeight: 110,
-    paddingVertical: 0,
-    paddingHorizontal: 0,
-    color: theme.foregroundPrimary.get(),
-    fontFamily: 'TTSatoshi500',
-    fontSize: 16,
-  }
-
   return (
     <YStack>
       {!!replyToMessage && (
@@ -222,48 +199,13 @@ function ChatTextInput(): React.ReactElement | null {
           </XStack>
         </Animated.View>
       )}
-      <XStack
-        backgroundColor="$backgroundSecondary"
-        gap="$3"
-        alignItems="flex-end"
-      >
-        <Stack flex={1}>
-          <XStack
-            alignItems="center"
-            gap="$3"
-            my="$3"
-            mx="$4"
-            px="$6"
-            py="$3"
-            borderRadius="$9"
-            backgroundColor="$backgroundOnBar"
-          >
-            <Stack flex={1} justifyContent="center">
-              <RNTextInput
-                ref={textInputRef}
-                multiline
-                value={value}
-                onChangeText={handleChangeText}
-                style={inputStyles}
-                placeholder={t('messages.typeSomething')}
-                placeholderTextColor={theme.foregroundTertiary.get()}
-                selectionColor={theme.accentHighlightPrimary.get()}
-              />
-            </Stack>
-            <Animated.View style={animatedStyle}>
-              <UiIconButton
-                width="$9"
-                height="$9"
-                borderRadius="$3"
-                backgroundColor="$accentYellowSecondary"
-                onPress={sendText}
-              >
-                <Send size={20} color={theme.accentHighlightPrimary.get()} />
-              </UiIconButton>
-            </Animated.View>
-          </XStack>
-        </Stack>
-      </XStack>
+      <ChatInputBar
+        inputRef={textInputRef}
+        value={value}
+        onChangeText={handleChangeText}
+        onSendPress={sendText}
+        placeholder={t('messages.typeSomething')}
+      />
     </YStack>
   )
 }

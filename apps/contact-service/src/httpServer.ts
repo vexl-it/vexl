@@ -35,13 +35,6 @@ import {UserDbService} from './db/UserDbService'
 import DbLayer from './db/layer'
 import {internalServerLive} from './internalServer'
 
-import {createClub} from './routes/clubs/admin/createClub'
-import {generateClubInviteLink} from './routes/clubs/admin/generateClubInviteLink'
-import {getClubStats} from './routes/clubs/admin/getClubStats'
-import {listClubs} from './routes/clubs/admin/listClubs'
-import {modifyClub} from './routes/clubs/admin/modifyClub'
-import {reactivateClub} from './routes/clubs/admin/reactivateClub'
-import {requestClubImageUpload} from './routes/clubs/admin/requestClubImageUpload'
 import {getClubContacts} from './routes/clubs/member/getClubContacts'
 import {getClubInfo} from './routes/clubs/member/getClubInfo'
 import {getClubInfoByAccessCode} from './routes/clubs/member/getClubInfoByAccessCode'
@@ -98,20 +91,6 @@ const ContactApiGroupLive = HttpApiBuilder.group(
       )
 )
 
-const ClubsAdminApiGroupLive = HttpApiBuilder.group(
-  ContactApiSpecification,
-  'ClubsAdmin',
-  (h) =>
-    h
-      .handle('createClub', createClub)
-      .handle('modifyClub', modifyClub)
-      .handle('generateClubInviteLinkForAdmin', generateClubInviteLink)
-      .handle('listClubs', listClubs)
-      .handle('getClubStats', getClubStats)
-      .handle('reactivateClub', reactivateClub)
-      .handle('requestClubImageUpload', requestClubImageUpload)
-)
-
 const ClubsMemberApiGroupLive = HttpApiBuilder.group(
   ContactApiSpecification,
   'ClubsMember',
@@ -149,7 +128,6 @@ const ChallengeApiGroupLive = HttpApiBuilder.group(
 export const ContactApiLive = HttpApiBuilder.api(ContactApiSpecification).pipe(
   Layer.provide(UserApiGroupLive),
   Layer.provide(ContactApiGroupLive),
-  Layer.provide(ClubsAdminApiGroupLive),
   Layer.provide(ClubsMemberApiGroupLive),
   Layer.provide(ClubsModeratorApiGroupLive),
   Layer.provide(ChallengeApiGroupLive),

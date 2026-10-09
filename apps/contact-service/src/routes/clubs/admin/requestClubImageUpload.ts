@@ -4,7 +4,7 @@ import {
   type ImageExtension,
   S3ServiceError,
 } from '@vexl-next/rest-api/src/services/contact/contracts'
-import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/specification'
+import {ContactInternalApiSpecification} from '@vexl-next/rest-api/src/services/contact/internalSpecification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {randomUUID} from 'crypto'
 import {Effect} from 'effect'
@@ -22,7 +22,7 @@ const getContentTypeFromExtension = (extension: ImageExtension): string => {
 }
 
 export const requestClubImageUpload = HttpApiBuilder.handler(
-  ContactApiSpecification,
+  ContactInternalApiSpecification,
   'ClubsAdmin',
   'requestClubImageUpload',
   (req) =>

@@ -5,6 +5,7 @@ import {getAdminToken} from '@/src/services/adminTokenService'
 import {
   makeBackofficeCommonHeaders,
   makeContentAdminClient,
+  makeContentClient,
 } from '@/src/services/contentAdminApi'
 import {
   VexlProductNotificationUuid,
@@ -63,7 +64,7 @@ export default function ProductNotificationPage() {
     setError(null)
 
     try {
-      const client = await runEffect(makeContentAdminClient())
+      const client = await runEffect(makeContentClient())
       const result = await runEffect(
         client.getVexlProductNotifications({
           headers: makeBackofficeCommonHeaders(),

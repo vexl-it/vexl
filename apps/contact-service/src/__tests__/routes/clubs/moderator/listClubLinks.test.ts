@@ -18,7 +18,10 @@ import {ClubMembersDbService} from '../../../../db/ClubMemberDbService'
 import {ClubsDbService} from '../../../../db/ClubsDbService'
 import {type ClubRecordId} from '../../../../db/ClubsDbService/domain'
 import {generateAndSignChallenge} from '../../../utils/generateAndSignChallenge'
-import {NodeTestingApp} from '../../../utils/NodeTestingApp'
+import {
+  NodeTestingApp,
+  NodeTestingInternalApp,
+} from '../../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../../utils/runPromiseInMockedEnvironment'
 
 const testCommonHeaders = Schema.decodeSync(CommonHeaders)({
@@ -49,10 +52,10 @@ beforeEach(async () => {
       yield* _(sql`DELETE FROM club_member`)
       yield* _(sql`DELETE FROM club`)
 
-      const app = yield* _(NodeTestingApp)
+      const internalApp = yield* _(NodeTestingInternalApp)
       yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
       yield* _(
-        app.ClubsAdmin.createClub({
+        internalApp.ClubsAdmin.createClub({
           headers: {'x-admin-token': ADMIN_TOKEN},
           payload: {
             club,
@@ -246,6 +249,7 @@ describe('List club links', () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const app = yield* _(NodeTestingApp)
+        const internalApp = yield* _(NodeTestingInternalApp)
 
         const user2 = generatePrivateKey()
         const club2 = {
@@ -259,7 +263,7 @@ describe('List club links', () => {
         }
         yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
         yield* _(
-          app.ClubsAdmin.createClub({
+          internalApp.ClubsAdmin.createClub({
             headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               club: club2,
@@ -267,7 +271,7 @@ describe('List club links', () => {
           })
         )
         const adminInviteCodeForClub2 = yield* _(
-          app.ClubsAdmin.generateClubInviteLinkForAdmin({
+          internalApp.ClubsAdmin.generateClubInviteLinkForAdmin({
             headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               clubUuid: club2.uuid,

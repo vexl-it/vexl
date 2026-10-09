@@ -72,6 +72,9 @@ export const ports = {
   feedbackService: 3008,
   contentService: 3009,
   metricsService: 3010,
+  // Internal servers (cluster-only in prod), reached by backoffice-app's proxy.
+  contactServiceInternal: 3017,
+  contentServiceInternal: 3018,
 
   // Web apps
   backofficeApp: 3011,
@@ -185,9 +188,6 @@ export const internalUrls = {
   feedbackService: `http://${infra.host}:${ports.feedbackService}`,
   // location-service redirects exchange-rate lookups to btc-exchange-rate-service.
   btcExchangeRateService: `http://${infra.host}:${ports.btcExchangeRateService}`,
-  // backoffice-app proxies admin calls to contact/content services.
-  contactService: `http://${infra.host}:${ports.contactService}`,
-  contentService: `http://${infra.host}:${ports.contentService}`,
 };
 
 // ---------------------------------------------------------------------------

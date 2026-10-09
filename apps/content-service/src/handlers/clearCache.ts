@@ -3,7 +3,7 @@ import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {hashSha256} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {HEADER_ADMIN_TOKEN} from '@vexl-next/rest-api/src/constants'
 import {InvalidTokenError} from '@vexl-next/rest-api/src/services/content/contracts'
-import {ContentApiSpecification} from '@vexl-next/rest-api/src/services/content/specification'
+import {ContentInternalApiSpecification} from '@vexl-next/rest-api/src/services/content/internalSpecification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {Effect, flow} from 'effect'
 import {clearCacheTokenHashConfig} from '../configs'
@@ -21,7 +21,7 @@ const validateAdminToken = flow(
 )
 
 export const clearCacheHandler = HttpApiBuilder.handler(
-  ContentApiSpecification,
+  ContentInternalApiSpecification,
   'Cms',
   'clearCache',
   (req) =>

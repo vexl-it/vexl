@@ -1,14 +1,14 @@
 import {HttpApiBuilder} from '@effect/platform/index'
 import {HEADER_ADMIN_TOKEN} from '@vexl-next/rest-api/src/constants'
 import {ClubAlreadyExistsError} from '@vexl-next/rest-api/src/services/contact/contracts'
-import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/specification'
+import {ContactInternalApiSpecification} from '@vexl-next/rest-api/src/services/contact/internalSpecification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {Effect, Option} from 'effect'
 import {ClubsDbService} from '../../../db/ClubsDbService'
 import {validateAdminToken} from '../utils/validateAdminToken'
 
 export const createClub = HttpApiBuilder.handler(
-  ContactApiSpecification,
+  ContactInternalApiSpecification,
   'ClubsAdmin',
   'createClub',
   (req) =>

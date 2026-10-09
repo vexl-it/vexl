@@ -10,7 +10,6 @@ import {type AppSource, makeCommonHeaders} from '../../commonHeaders'
 import {type LoggingFunction} from '../../utils'
 import {
   type CreateInvoiceRequest,
-  type CreateVexlProductNotificationRequest,
   type GetInvoiceRequest,
   type GetInvoiceStatusTypeRequest,
   type GetVexlProductNotificationsRequest,
@@ -83,14 +82,6 @@ export function api({
           headers: commonHeaders,
         }),
       getMapStyles: () => client.Map.getMapStyles({}),
-      createVexlProductNotification: (
-        adminToken: string,
-        request: CreateVexlProductNotificationRequest
-      ) =>
-        client.VexlProductNotifications.createVexlProductNotification({
-          headers: {'x-admin-token': adminToken},
-          payload: request,
-        }),
       getVexlProductNotifications: (
         request: GetVexlProductNotificationsRequest
       ) =>

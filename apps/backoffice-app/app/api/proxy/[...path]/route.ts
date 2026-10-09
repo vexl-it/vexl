@@ -1,16 +1,18 @@
 import {type NextRequest, NextResponse} from 'next/server'
 
-const CONTACT_API_INTERNAL_URL =
-  process.env.CONTACT_API_INTERNAL_URL ??
-  process.env.API_INTERNAL_URL ??
-  'http://localhost:3002'
-const CONTENT_API_INTERNAL_URL =
-  process.env.CONTENT_API_INTERNAL_URL ?? 'http://localhost:3009'
-
-const getBackendUrl = (path: string): string =>
-  path.startsWith('content/')
-    ? CONTENT_API_INTERNAL_URL
-    : CONTACT_API_INTERNAL_URL
+// The first proxy path segment selects the backend, e.g.
+// /api/proxy/contact-internal/api/v1/clubs/admin
+const PROXY_TARGETS = new Map([
+  [
+    'contact-internal',
+    process.env.CONTACT_INTERNAL_SERVER_URL ?? 'http://localhost:3017',
+  ],
+  [
+    'content-internal',
+    process.env.CONTENT_INTERNAL_SERVER_URL ?? 'http://localhost:3018',
+  ],
+  ['content', process.env.CONTENT_API_INTERNAL_URL ?? 'http://localhost:3009'],
+])
 
 const getRequestId = (request: NextRequest): string =>
   request.headers.get('x-request-id') ??
@@ -25,12 +27,20 @@ const getContentLength = (body: BodyInit | null): number | null => {
 
 const ABSOLUTE_URL_SCHEME_REGEX = /^[a-z][a-z0-9+.-]*:/i
 
-const buildBackendUrl = (path: string): URL | undefined => {
-  if (!path || path.startsWith('/') || ABSOLUTE_URL_SCHEME_REGEX.test(path)) {
+const buildBackendUrl = (proxyPath: string): URL | undefined => {
+  const [target = '', ...pathSegments] = proxyPath.split('/')
+  const backendBaseUrl = PROXY_TARGETS.get(target)
+  const path = pathSegments.join('/')
+  if (
+    !backendBaseUrl ||
+    !path ||
+    path.startsWith('/') ||
+    ABSOLUTE_URL_SCHEME_REGEX.test(path)
+  ) {
     return undefined
   }
 
-  const backendUrl = new URL(getBackendUrl(path))
+  const backendUrl = new URL(backendBaseUrl)
   const backendBasePath = backendUrl.pathname.endsWith('/')
     ? backendUrl.pathname.slice(0, -1)
     : backendUrl.pathname
@@ -46,7 +56,6 @@ async function proxyRequest(request: NextRequest, method: string) {
   try {
     // Get the path from the URL
     const path = request.nextUrl.pathname.replace('/api/proxy/', '')
-    const backendBaseUrl = getBackendUrl(path)
 
     // Build the backend URL
     const backendUrl = buildBackendUrl(path)
@@ -76,7 +85,6 @@ async function proxyRequest(request: NextRequest, method: string) {
       requestId,
       method,
       path,
-      backendBaseUrl,
       backendUrl: backendUrl.toString(),
       contentType: request.headers.get('content-type'),
       contentLength: getContentLength(body),

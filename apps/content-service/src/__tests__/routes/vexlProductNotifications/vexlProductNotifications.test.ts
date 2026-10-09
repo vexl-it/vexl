@@ -16,7 +16,10 @@ import {
 } from '@vexl-next/rest-api/src/services/content/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {Array, Effect, Either, Option, Schema} from 'effect'
-import {NodeTestingApp} from '../../utils/NodeTestingApp'
+import {
+  NodeTestingApp,
+  NodeTestingInternalApp,
+} from '../../utils/NodeTestingApp'
 import {
   enqueuedVexlProductNotifications,
   runPromiseInMockedEnvironment,
@@ -64,7 +67,7 @@ describe('Vexl product notifications', () => {
   it('creates and returns a Vexl product notification with action fields for a valid admin token', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+        const internalApp = yield* _(NodeTestingInternalApp)
         const vexlProductNotification = makeVexlProductNotification({
           uuid: uuid('2f7c70e1-91a0-4010-bf9e-fcae8de71801'),
           title: 'Created with action',
@@ -75,7 +78,7 @@ describe('Vexl product notifications', () => {
         })
 
         const resp = yield* _(
-          app.VexlProductNotifications.createVexlProductNotification({
+          internalApp.VexlProductNotifications.createVexlProductNotification({
             headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {vexlProductNotification, issuePushNotification: false},
           }),
@@ -95,7 +98,7 @@ describe('Vexl product notifications', () => {
   it('normalizes issuePushNotification from the top-level request flag', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+        const internalApp = yield* _(NodeTestingInternalApp)
         const vexlProductNotification = makeVexlProductNotification({
           uuid: uuid('0a954a60-7446-4ca4-8ee9-9c90376e08dd'),
           title: 'Normalize top-level flag',
@@ -103,7 +106,7 @@ describe('Vexl product notifications', () => {
         })
 
         const resp = yield* _(
-          app.VexlProductNotifications.createVexlProductNotification({
+          internalApp.VexlProductNotifications.createVexlProductNotification({
             headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {vexlProductNotification, issuePushNotification: true},
           }),
@@ -123,7 +126,7 @@ describe('Vexl product notifications', () => {
   it('does not enqueue when issuePushNotification is false', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+        const internalApp = yield* _(NodeTestingInternalApp)
         const vexlProductNotification = makeVexlProductNotification({
           uuid: uuid('0f71e018-d9c4-44b9-9ebc-0b27f51d029d'),
           title: 'Do not enqueue',
@@ -131,7 +134,7 @@ describe('Vexl product notifications', () => {
         })
 
         const resp = yield* _(
-          app.VexlProductNotifications.createVexlProductNotification({
+          internalApp.VexlProductNotifications.createVexlProductNotification({
             headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {vexlProductNotification, issuePushNotification: false},
           }),
@@ -147,7 +150,7 @@ describe('Vexl product notifications', () => {
   it('enqueues the created notification when issuePushNotification is true', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+        const internalApp = yield* _(NodeTestingInternalApp)
         const vexlProductNotification = makeVexlProductNotification({
           uuid: uuid('3cd06543-5536-4939-a1b5-a5f1489bba5a'),
           title: 'Enqueue',
@@ -155,7 +158,7 @@ describe('Vexl product notifications', () => {
         })
 
         const resp = yield* _(
-          app.VexlProductNotifications.createVexlProductNotification({
+          internalApp.VexlProductNotifications.createVexlProductNotification({
             headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {vexlProductNotification, issuePushNotification: true},
           }),
@@ -176,6 +179,7 @@ describe('Vexl product notifications', () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const app = yield* _(NodeTestingApp)
+        const internalApp = yield* _(NodeTestingInternalApp)
         const vexlProductNotification = makeVexlProductNotification({
           uuid: uuid('c22ee1d2-1eb2-4a6d-a1e6-7259debe3d8d'),
           title: 'Rollback on enqueue failure',
@@ -184,7 +188,7 @@ describe('Vexl product notifications', () => {
 
         setShouldFailVexlProductNotificationEnqueue(true)
         const resp = yield* _(
-          app.VexlProductNotifications.createVexlProductNotification({
+          internalApp.VexlProductNotifications.createVexlProductNotification({
             headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {vexlProductNotification, issuePushNotification: true},
           }),
@@ -219,7 +223,7 @@ describe('Vexl product notifications', () => {
   it('returns 401 for an invalid admin token', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+        const internalApp = yield* _(NodeTestingInternalApp)
         const vexlProductNotification = makeVexlProductNotification({
           uuid: uuid('5952517e-ecc2-4088-b70c-1a95148a4787'),
           title: 'Invalid token',
@@ -227,7 +231,7 @@ describe('Vexl product notifications', () => {
         })
 
         const resp = yield* _(
-          app.VexlProductNotifications.createVexlProductNotification({
+          internalApp.VexlProductNotifications.createVexlProductNotification({
             headers: {'x-admin-token': 'bad-token'},
             payload: {vexlProductNotification, issuePushNotification: false},
           }),
@@ -242,7 +246,7 @@ describe('Vexl product notifications', () => {
   it('does not accept legacy admin token URL params', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+        const internalApp = yield* _(NodeTestingInternalApp)
         const vexlProductNotification = makeVexlProductNotification({
           uuid: uuid('f7bc3eb0-d512-45e7-ae00-2587187f0e57'),
           title: 'Legacy token URL param',
@@ -250,7 +254,7 @@ describe('Vexl product notifications', () => {
         })
 
         const resp = yield* _(
-          app.VexlProductNotifications.createVexlProductNotification({
+          internalApp.VexlProductNotifications.createVexlProductNotification({
             // @ts-expect-error Legacy URL admin-token transport is unsupported.
             urlParams: {adminToken: ADMIN_TOKEN},
             payload: {vexlProductNotification, issuePushNotification: false},
@@ -266,7 +270,7 @@ describe('Vexl product notifications', () => {
   it('returns the handled duplicate UUID error', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+        const internalApp = yield* _(NodeTestingInternalApp)
         const vexlProductNotification = makeVexlProductNotification({
           uuid: uuid('0fbfb72e-073a-4a55-badb-948f32bc768c'),
           title: 'Duplicate',
@@ -274,14 +278,14 @@ describe('Vexl product notifications', () => {
         })
 
         yield* _(
-          app.VexlProductNotifications.createVexlProductNotification({
+          internalApp.VexlProductNotifications.createVexlProductNotification({
             headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {vexlProductNotification, issuePushNotification: false},
           })
         )
 
         const resp = yield* _(
-          app.VexlProductNotifications.createVexlProductNotification({
+          internalApp.VexlProductNotifications.createVexlProductNotification({
             headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {vexlProductNotification, issuePushNotification: false},
           }),
@@ -297,6 +301,7 @@ describe('Vexl product notifications', () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const app = yield* _(NodeTestingApp)
+        const internalApp = yield* _(NodeTestingInternalApp)
         const first = makeVexlProductNotification({
           uuid: uuid('f530f462-1288-457f-9e96-de0458753671'),
           title: 'First',
@@ -314,7 +319,7 @@ describe('Vexl product notifications', () => {
         })
 
         yield* _(
-          app.VexlProductNotifications.createVexlProductNotification({
+          internalApp.VexlProductNotifications.createVexlProductNotification({
             headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               vexlProductNotification: third,
@@ -323,7 +328,7 @@ describe('Vexl product notifications', () => {
           })
         )
         yield* _(
-          app.VexlProductNotifications.createVexlProductNotification({
+          internalApp.VexlProductNotifications.createVexlProductNotification({
             headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               vexlProductNotification: first,
@@ -332,7 +337,7 @@ describe('Vexl product notifications', () => {
           })
         )
         yield* _(
-          app.VexlProductNotifications.createVexlProductNotification({
+          internalApp.VexlProductNotifications.createVexlProductNotification({
             headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               vexlProductNotification: second,
@@ -366,6 +371,7 @@ describe('Vexl product notifications', () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const app = yield* _(NodeTestingApp)
+        const internalApp = yield* _(NodeTestingInternalApp)
         const first = makeVexlProductNotification({
           uuid: uuid('6c6f21be-3388-43f0-b585-052b204ff224'),
           title: 'Cursor first',
@@ -383,7 +389,7 @@ describe('Vexl product notifications', () => {
         })
 
         yield* _(
-          app.VexlProductNotifications.createVexlProductNotification({
+          internalApp.VexlProductNotifications.createVexlProductNotification({
             headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               vexlProductNotification: first,
@@ -392,7 +398,7 @@ describe('Vexl product notifications', () => {
           })
         )
         yield* _(
-          app.VexlProductNotifications.createVexlProductNotification({
+          internalApp.VexlProductNotifications.createVexlProductNotification({
             headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               vexlProductNotification: second,
@@ -401,7 +407,7 @@ describe('Vexl product notifications', () => {
           })
         )
         yield* _(
-          app.VexlProductNotifications.createVexlProductNotification({
+          internalApp.VexlProductNotifications.createVexlProductNotification({
             headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               vexlProductNotification: third,
@@ -437,6 +443,7 @@ describe('Vexl product notifications', () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const app = yield* _(NodeTestingApp)
+        const internalApp = yield* _(NodeTestingInternalApp)
         const vexlProductNotification = makeVexlProductNotification({
           uuid: uuid('f32a26e7-f82f-4c85-9cd8-cfe989184e15'),
           title: 'Known Vexl product notification',
@@ -444,7 +451,7 @@ describe('Vexl product notifications', () => {
         })
 
         yield* _(
-          app.VexlProductNotifications.createVexlProductNotification({
+          internalApp.VexlProductNotifications.createVexlProductNotification({
             headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {vexlProductNotification, issuePushNotification: false},
           })

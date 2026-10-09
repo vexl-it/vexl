@@ -163,6 +163,7 @@ export const SERVICES: readonly RunnableApp[] = [
     dir: 'apps/contact-service',
     kind: 'service',
     portKey: 'contactService',
+    extraPortKeys: ['contactServiceInternal'],
     healthPortKey: 'contactService',
     needs: {db: dbn.contact, redis: true, s3: true},
     run: tsxService('src/index.ts'),
@@ -177,6 +178,7 @@ export const SERVICES: readonly RunnableApp[] = [
       // Existing webhook mechanism: notify the dashboard's updates server when
       // contacts are imported, so its connection metrics update live.
       DASHBOARD_CONTACTS_IMPORTED_HOOK: `${httpUrl(ctx, 'dashboardUpdates')}/new-connections`,
+      INTERNAL_SERVER_PORT: String(ctx.ports.contactServiceInternal),
       ...stringifyValues(sc.contactService),
       ...s3Env(ctx),
     }),
@@ -269,6 +271,7 @@ export const SERVICES: readonly RunnableApp[] = [
     dir: 'apps/content-service',
     kind: 'service',
     portKey: 'contentService',
+    extraPortKeys: ['contentServiceInternal'],
     healthPortKey: 'contentService',
     needs: {db: dbn.content, redis: false, s3: false},
     run: tsxService('src/index.ts'),
@@ -283,8 +286,9 @@ export const SERVICES: readonly RunnableApp[] = [
       'BTC_PAY_SERVER_STORE_ID',
       'BTC_PAY_SERVER_WEBHOOK_SECRET',
     ],
-    buildEnv: () => ({
+    buildEnv: (ctx) => ({
       ...stringifyValues(sc.contentService),
+      INTERNAL_SERVER_PORT: String(ctx.ports.contentServiceInternal),
       // Optional integrations — empty by default, set in .env.local to enable.
       WEBFLOW_TOKEN: '',
       WEBFLOW_EVENTS_COLLECTION_ID: '',
@@ -327,7 +331,8 @@ export const WEB_APPS: readonly RunnableApp[] = [
       PORT: String(ctx.ports.backofficeApp),
       ...dbEnv(ctx, dbn.backoffice),
       ADMIN_TOKEN_HASH: sc.backofficeApp.ADMIN_TOKEN_HASH,
-      CONTACT_API_INTERNAL_URL: httpUrl(ctx, 'contactService'),
+      CONTACT_INTERNAL_SERVER_URL: httpUrl(ctx, 'contactServiceInternal'),
+      CONTENT_INTERNAL_SERVER_URL: httpUrl(ctx, 'contentServiceInternal'),
       CONTENT_API_INTERNAL_URL: httpUrl(ctx, 'contentService'),
       ...s3Env(ctx),
       RESOURCES_BASE_URL: `${httpUrl(ctx, 'minioApi')}/${ctx.cfg.infra.minio.bucket}`,

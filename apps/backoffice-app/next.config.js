@@ -16,12 +16,6 @@ const nextConfig = {
   reactStrictMode: true,
   output: 'standalone',
 
-  // Environment variables accessible in the browser
-  env: {
-    // NEXT_PUBLIC_API_INTERNAL_URL:
-    //   process.env.API_INTERNAL_URL || 'http://localhost:3002',
-  },
-
   // Keep the Postgres driver stack (used server-side only, via @effect/sql-pg in
   // instrumentation/migrations) out of the *production* bundle so it is traced
   // into the standalone output and loaded from node_modules at runtime.

@@ -28,7 +28,10 @@ import {
   clearEnqueuedNotifications,
   getEnqueuedNotifications,
 } from '../../../utils/mockEnqueueUserNotification'
-import {NodeTestingApp} from '../../../utils/NodeTestingApp'
+import {
+  NodeTestingApp,
+  NodeTestingInternalApp,
+} from '../../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../../utils/runPromiseInMockedEnvironment'
 
 const ADMIN_TOKEN = 'dev'
@@ -62,10 +65,10 @@ beforeEach(async () => {
       yield* _(sql`DELETE FROM club_member_count_change`)
       yield* _(sql`DELETE FROM club`)
 
-      const app = yield* _(NodeTestingApp)
+      const internalApp = yield* _(NodeTestingInternalApp)
       yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
       yield* _(
-        app.ClubsAdmin.createClub({
+        internalApp.ClubsAdmin.createClub({
           headers: {'x-admin-token': ADMIN_TOKEN},
           payload: {
             club,
@@ -101,6 +104,7 @@ describe('Add user to the club', () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const app = yield* _(NodeTestingApp)
+        const internalApp = yield* _(NodeTestingInternalApp)
         const addResponse = yield* _(
           app.ClubsModerator.addUserToTheClub({
             payload: {
@@ -137,7 +141,9 @@ describe('Add user to the club', () => {
 
         yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
         const clubs = yield* _(
-          app.ClubsAdmin.listClubs({headers: {'x-admin-token': ADMIN_TOKEN}})
+          internalApp.ClubsAdmin.listClubs({
+            headers: {'x-admin-token': ADMIN_TOKEN},
+          })
         )
         expect(clubs.clubs).toEqual([
           expect.objectContaining({
@@ -505,6 +511,7 @@ describe('Add user to the club', () => {
         yield* _(clearEnqueuedNotifications)
 
         const app = yield* _(NodeTestingApp)
+
         yield* _(
           app.ClubsModerator.addUserToTheClub({
             payload: {

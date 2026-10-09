@@ -7,7 +7,7 @@ import {Array, Effect, Option, Schema} from 'effect'
 import {ClubMembersDbService} from '../../../db/ClubMemberDbService'
 import {ClubsDbService} from '../../../db/ClubsDbService'
 import {checkForInactiveUsers} from '../../../internalServer/routes/checkForInactiveUsers'
-import {NodeTestingApp} from '../../utils/NodeTestingApp'
+import {NodeTestingInternalApp} from '../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../utils/runPromiseInMockedEnvironment'
 
 const ADMIN_TOKEN = 'dev'
@@ -29,14 +29,14 @@ describe('Check for inactive club members', () => {
   it('counts removed inactive members as left for each club', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+        const internalApp = yield* _(NodeTestingInternalApp)
         const firstClubUuid = generateClubUuid()
         const secondClubUuid = generateClubUuid()
         const validUntil = new Date(Date.now() + 24 * 60 * 60 * 1000)
 
         yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
         yield* _(
-          app.ClubsAdmin.createClub({
+          internalApp.ClubsAdmin.createClub({
             headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               club: {
@@ -52,7 +52,7 @@ describe('Check for inactive club members', () => {
           })
         )
         yield* _(
-          app.ClubsAdmin.createClub({
+          internalApp.ClubsAdmin.createClub({
             headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               club: {
@@ -106,7 +106,9 @@ describe('Check for inactive club members', () => {
         yield* _(checkForInactiveUsers)
 
         const result = yield* _(
-          app.ClubsAdmin.listClubs({headers: {'x-admin-token': ADMIN_TOKEN}})
+          internalApp.ClubsAdmin.listClubs({
+            headers: {'x-admin-token': ADMIN_TOKEN},
+          })
         )
         expect(result.clubs).toEqual([
           expect.objectContaining({

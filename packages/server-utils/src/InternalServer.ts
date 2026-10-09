@@ -1,56 +1,40 @@
 import {
+  HttpApiBuilder,
   HttpMiddleware,
-  HttpRouter,
   HttpServer,
-  HttpServerRequest,
-  HttpServerResponse,
+  type HttpApi,
 } from '@effect/platform'
 import * as NodeHttpServer from '@effect/platform-node/NodeHttpServer'
 import {type ServeError} from '@effect/platform/HttpServerError'
 import {Effect, Layer, type Config, type ConfigError, type Option} from 'effect'
 import {createServer} from 'http'
 
-export const makeInternalServer = <E, R>(
-  Router: HttpRouter.HttpRouter<E, R>,
+/**
+ * Serves an `HttpApi` on the internal port, which is reachable only from inside
+ * the cluster. Never expose the internal port through an ingress.
+ */
+export const makeInternalApiServer = <E, R>(
+  apiLive: Layer.Layer<HttpApi.Api, E, R>,
   args: {
     port: Config.Config<Option.Option<number>>
   }
-): Layer.Layer<never, ConfigError.ConfigError | ServeError, R> =>
+): Layer.Layer<never, E | ConfigError.ConfigError | ServeError, R> =>
   Effect.gen(function* (_) {
     const port = yield* _(args.port, Effect.flatten)
 
-    const InternalServerLive = NodeHttpServer.layer(() => createServer(), {
-      port,
-    })
-
-    return Router.pipe(
-      HttpRouter.catchAll((e) =>
-        Effect.gen(function* (_) {
-          const request = yield* _(HttpServerRequest.HttpServerRequest)
-          yield* _(
-            Effect.logError('Error on internal server', e, {
-              method: request.method,
-              url: request.url,
-            })
-          )
-          return yield* _(
-            HttpServerResponse.json(
-              {message: 'Internal server error'},
-              {status: 500}
-            )
-          )
-        })
-      ),
-      HttpMiddleware.logger,
-      HttpServer.serve(),
-      Layer.provide(InternalServerLive),
-      Layer.tap(() => Effect.logInfo(`Internal server running on ${port}`)),
-      Layer.provide(Layer.span('Internal server', {attributes: {port}}))
+    return HttpApiBuilder.serve(HttpMiddleware.logger).pipe(
+      Layer.provide(apiLive),
+      HttpServer.withLogAddress,
+      Layer.provide(NodeHttpServer.layer(createServer, {port})),
+      // HttpApiBuilder registers every group into one shared router layer.
+      // Building fresh gives this server its own router, so internal routes
+      // never end up on the public server.
+      Layer.fresh
     )
   }).pipe(
     Effect.catchTag('NoSuchElementException', () =>
       Effect.zipRight(
-        Effect.logInfo(
+        Effect.logWarning(
           'Internal server not running. No port for internal server specified.'
         ),
         Effect.succeed(Layer.empty)

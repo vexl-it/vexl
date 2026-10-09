@@ -9,7 +9,7 @@ import {
 } from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Array, Effect, Option, pipe, Schema, String} from 'effect'
 import {ClubsDbService} from '../../../../db/ClubsDbService'
-import {NodeTestingApp} from '../../../utils/NodeTestingApp'
+import {NodeTestingInternalApp} from '../../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../../utils/runPromiseInMockedEnvironment'
 
 const ADMIN_TOKEN = 'dev'
@@ -55,10 +55,10 @@ describe('List clubs', () => {
         yield* _(sql`DELETE FROM club_member_count_change`)
         yield* _(sql`DELETE FROM club`)
 
-        const app = yield* _(NodeTestingApp)
+        const internalApp = yield* _(NodeTestingInternalApp)
         yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
         yield* _(
-          app.ClubsAdmin.createClub({
+          internalApp.ClubsAdmin.createClub({
             headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               club: clubsToSave[0],
@@ -66,7 +66,7 @@ describe('List clubs', () => {
           })
         )
         yield* _(
-          app.ClubsAdmin.createClub({
+          internalApp.ClubsAdmin.createClub({
             headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               club: clubsToSave[1],
@@ -74,7 +74,7 @@ describe('List clubs', () => {
           })
         )
         yield* _(
-          app.ClubsAdmin.createClub({
+          internalApp.ClubsAdmin.createClub({
             headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               club: clubsToSave[2],
@@ -89,9 +89,9 @@ describe('List clubs', () => {
   it('Should return 403 when bad admin token', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+        const internalApp = yield* _(NodeTestingInternalApp)
         const errorResponse = yield* _(
-          app.ClubsAdmin.listClubs({
+          internalApp.ClubsAdmin.listClubs({
             headers: {'x-admin-token': 'aha'},
           }),
           Effect.either
@@ -105,10 +105,12 @@ describe('List clubs', () => {
   it('Should return all clubs in db', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+        const internalApp = yield* _(NodeTestingInternalApp)
         yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
         const clubs = yield* _(
-          app.ClubsAdmin.listClubs({headers: {'x-admin-token': ADMIN_TOKEN}}),
+          internalApp.ClubsAdmin.listClubs({
+            headers: {'x-admin-token': ADMIN_TOKEN},
+          }),
           Effect.map((o) => o.clubs)
         )
         expect(
@@ -146,7 +148,7 @@ describe('List clubs', () => {
   it('Excludes member changes older than 30 days', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+        const internalApp = yield* _(NodeTestingInternalApp)
         const clubsDb = yield* _(ClubsDbService)
         const clubInDb = yield* _(
           clubsDb.findClubByUuid({uuid: clubsToSave[0].uuid}),
@@ -173,7 +175,9 @@ describe('List clubs', () => {
 
         yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
         const result = yield* _(
-          app.ClubsAdmin.listClubs({headers: {'x-admin-token': ADMIN_TOKEN}})
+          internalApp.ClubsAdmin.listClubs({
+            headers: {'x-admin-token': ADMIN_TOKEN},
+          })
         )
         const clubInfo = yield* _(
           pipe(

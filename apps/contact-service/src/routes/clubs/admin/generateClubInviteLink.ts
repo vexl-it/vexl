@@ -2,7 +2,7 @@ import {HttpApiBuilder} from '@effect/platform/index'
 import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {HEADER_ADMIN_TOKEN} from '@vexl-next/rest-api/src/constants'
 import {type GenerateInviteLinkForAdminResponse} from '@vexl-next/rest-api/src/services/contact/contracts'
-import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/specification'
+import {ContactInternalApiSpecification} from '@vexl-next/rest-api/src/services/contact/internalSpecification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {Effect} from 'effect'
 import {ClubInvitationLinkDbService} from '../../../db/ClubInvitationLinkDbService'
@@ -12,7 +12,7 @@ import {generateRandomInviteCode} from '../utils/generateRandomInviteCode'
 import {validateAdminToken} from '../utils/validateAdminToken'
 
 export const generateClubInviteLink = HttpApiBuilder.handler(
-  ContactApiSpecification,
+  ContactInternalApiSpecification,
   'ClubsAdmin',
   'generateClubInviteLinkForAdmin',
   (req) =>

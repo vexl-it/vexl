@@ -8,7 +8,7 @@ import {
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {addTestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Either, Option, Schema} from 'effect'
-import {NodeTestingApp} from '../../../utils/NodeTestingApp'
+import {NodeTestingInternalApp} from '../../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../../utils/runPromiseInMockedEnvironment'
 
 const ADMIN_TOKEN = 'dev'
@@ -29,7 +29,7 @@ describe('Create club', () => {
   it('Should return 403 when bad admin token', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+        const internalApp = yield* _(NodeTestingInternalApp)
 
         const clubData = {
           clubImageUrl: SOME_URL,
@@ -41,7 +41,7 @@ describe('Create club', () => {
           reportLimit: 10,
         }
         const errorResponse = yield* _(
-          app.ClubsAdmin.createClub({
+          internalApp.ClubsAdmin.createClub({
             headers: {'x-admin-token': 'aha'},
             payload: {
               club: clubData,
@@ -58,7 +58,7 @@ describe('Create club', () => {
   it('Should not accept legacy admin token URL params', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+        const internalApp = yield* _(NodeTestingInternalApp)
 
         const clubData = {
           clubImageUrl: SOME_URL,
@@ -70,7 +70,7 @@ describe('Create club', () => {
           reportLimit: 10,
         }
         const errorResponse = yield* _(
-          app.ClubsAdmin.createClub({
+          internalApp.ClubsAdmin.createClub({
             // @ts-expect-error Legacy URL admin-token transport is unsupported.
             urlParams: {
               adminToken: ADMIN_TOKEN,
@@ -90,7 +90,7 @@ describe('Create club', () => {
   it('Should create a club in db', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+        const internalApp = yield* _(NodeTestingInternalApp)
 
         const clubData = {
           clubImageUrl: SOME_URL,
@@ -104,7 +104,7 @@ describe('Create club', () => {
 
         yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
         const createdClub = yield* _(
-          app.ClubsAdmin.createClub({
+          internalApp.ClubsAdmin.createClub({
             headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               club: clubData,
@@ -116,7 +116,7 @@ describe('Create club', () => {
 
         yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
         const clubsInDb = yield* _(
-          app.ClubsAdmin.listClubs({
+          internalApp.ClubsAdmin.listClubs({
             headers: {'x-admin-token': ADMIN_TOKEN},
           })
         )
@@ -130,7 +130,7 @@ describe('Create club', () => {
   it('Should retrun 404 if club already exists', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+        const internalApp = yield* _(NodeTestingInternalApp)
 
         const clubData = {
           clubImageUrl: SOME_URL,
@@ -144,7 +144,7 @@ describe('Create club', () => {
 
         yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
         yield* _(
-          app.ClubsAdmin.createClub({
+          internalApp.ClubsAdmin.createClub({
             headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               club: clubData,
@@ -153,7 +153,7 @@ describe('Create club', () => {
         )
 
         const errorResponse = yield* _(
-          app.ClubsAdmin.createClub({
+          internalApp.ClubsAdmin.createClub({
             headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               club: clubData,

@@ -503,3 +503,14 @@ export const ConvertPhoneNumberHashesToServerHashesResponse = Schema.Struct({
 })
 export type ConvertPhoneNumberHashesToServerHashesResponse =
   typeof ConvertPhoneNumberHashesToServerHashesResponse.Type
+
+export const TestHashingSpeedRequest = Schema.Struct({
+  iterations: Schema.Number,
+  numberOfElements: Schema.Number,
+})
+export type TestHashingSpeedRequest = typeof TestHashingSpeedRequest.Type
+
+export const TestHashingSpeedResponse = Schema.Struct({
+  durationMs: Schema.Number,
+})
+export type TestHashingSpeedResponse = typeof TestHashingSpeedResponse.Type

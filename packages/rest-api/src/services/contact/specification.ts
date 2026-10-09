@@ -5,7 +5,6 @@ import {
   UnexpectedServerError,
 } from '@vexl-next/domain/src/general/commonErrors'
 import {BadShortLivedTokenForErasingUserOnContactServiceError} from '@vexl-next/domain/src/general/ShortLivedTokenForErasingUserOnContactService'
-import {AdminTokenHeaders} from '../../adminTokenHeaders'
 import {
   CommonAndSecurityHeaders,
   ServerSecurityMiddleware,
@@ -24,13 +23,9 @@ import {
   AddUserToTheClubRequest,
   AddUserToTheClubResponse,
   CheckUserExistsRequest,
-  ClubAlreadyExistsError,
-  ClubCannotBeReactivatedError,
   ClubUserLimitExceededError,
   ConvertPhoneNumberHashesToServerHashesRequest,
   ConvertPhoneNumberHashesToServerHashesResponse,
-  CreateClubRequest,
-  CreateClubResponse,
   CreateUserRequest,
   DeactivateClubJoinLinkRequest,
   DeactivateClubJoinLinkResponse,
@@ -42,40 +37,27 @@ import {
   FetchMyContactsPaginatedResponse,
   GenerateClubJoinLinkRequest,
   GenerateClubJoinLinkResponse,
-  GenerateInviteLinkForAdminRequest,
-  GenerateInviteLinkForAdminResponse,
   GetClubContactsRequest,
   GetClubContactsResponse,
   GetClubInfoByAccessCodeRequest,
   GetClubInfoByAccessCodeResponse,
   GetClubInfoRequest,
   GetClubInfoResponse,
-  GetClubStatsRequest,
-  GetClubStatsResponse,
   ImportContactsQuotaReachedError,
   ImportContactsRequest,
   ImportContactsResponse,
   InitialImportContactsQuotaReachedError,
-  InvalidAdminTokenError,
   InviteCodeNotFoundError,
   JoinClubRequest,
   JoinClubResponse,
   LeaveClubRequest,
   ListClubLinksRequest,
   ListClubLinksResponse,
-  ListClubsResponse,
   MemberAlreadyInClubError,
-  ModifyClubRequest,
-  ModifyClubResponse,
-  ReactivateClubRequest,
-  ReactivateClubResponse,
   RefreshUserRequest,
   ReportClubLimitReachedError,
   ReportClubRequest,
   ReportClubResponse,
-  RequestClubImageUploadRequest,
-  RequestClubImageUploadResponse,
-  S3ServiceError,
   SetPublicKeyV2Request,
   UpdateNotificationTokenRequest,
   UserExistsResponse,
@@ -187,80 +169,6 @@ export const ConvertPhoneNumberHashesToServerHashesEndpoint =
     .setPayload(ConvertPhoneNumberHashesToServerHashesRequest)
     .addSuccess(ConvertPhoneNumberHashesToServerHashesResponse)
     .annotate(MaxExpectedDailyCall, 100)
-
-export const CreateClubEndpoint = HttpApiEndpoint.post(
-  'createClub',
-  '/api/v1/clubs/admin'
-)
-  .setHeaders(AdminTokenHeaders)
-  .setPayload(CreateClubRequest)
-  .addSuccess(CreateClubResponse)
-  .addError(ClubAlreadyExistsError, {status: 400})
-  .addError(InvalidAdminTokenError, {status: 401})
-  .annotate(MaxExpectedDailyCall, 100)
-
-export const ModfiyClubEndpoint = HttpApiEndpoint.put(
-  'modifyClub',
-  '/api/v1/clubs/admin'
-)
-  .setHeaders(AdminTokenHeaders)
-  .setPayload(ModifyClubRequest)
-  .addSuccess(ModifyClubResponse)
-  .addError(InvalidAdminTokenError, {status: 401})
-  .annotate(MaxExpectedDailyCall, 100)
-
-export const GenerateClubInviteLinkForAdminEndpoint = HttpApiEndpoint.put(
-  'generateClubInviteLinkForAdmin',
-  '/api/v1/clubs/admin/generate-admin-link'
-)
-  .setHeaders(AdminTokenHeaders)
-  .setPayload(GenerateInviteLinkForAdminRequest)
-  .addSuccess(GenerateInviteLinkForAdminResponse)
-  .addError(InvalidAdminTokenError, {status: 401})
-  .annotate(MaxExpectedDailyCall, 10000)
-
-export const ListClubsEndpoint = HttpApiEndpoint.get(
-  'listClubs',
-  '/api/v1/clubs/admin'
-)
-  .setHeaders(AdminTokenHeaders)
-  .addSuccess(ListClubsResponse)
-  .addError(InvalidAdminTokenError, {status: 401})
-  .annotate(MaxExpectedDailyCall, 100)
-
-export const GetClubStatsEndpoint = HttpApiEndpoint.get(
-  'getClubStats',
-  '/api/v1/clubs/admin/stats'
-)
-  .setHeaders(AdminTokenHeaders)
-  .setUrlParams(GetClubStatsRequest)
-  .addSuccess(GetClubStatsResponse)
-  .addError(InvalidAdminTokenError, {status: 401})
-  .addError(NotFoundError, {status: 404})
-  .annotate(MaxExpectedDailyCall, 100)
-
-export const ReactivateClubEndpoint = HttpApiEndpoint.put(
-  'reactivateClub',
-  '/api/v1/clubs/admin/reactivate'
-)
-  .setHeaders(AdminTokenHeaders)
-  .setPayload(ReactivateClubRequest)
-  .addSuccess(ReactivateClubResponse)
-  .addError(InvalidAdminTokenError, {status: 401})
-  .addError(ClubCannotBeReactivatedError, {status: 400})
-  .addError(NotFoundError, {status: 404})
-  .annotate(MaxExpectedDailyCall, 100)
-
-export const RequestClubImageUploadEndpoint = HttpApiEndpoint.post(
-  'requestClubImageUpload',
-  '/api/v1/clubs/admin/request-image-upload'
-)
-  .setHeaders(AdminTokenHeaders)
-  .setPayload(RequestClubImageUploadRequest)
-  .addSuccess(RequestClubImageUploadResponse)
-  .addError(InvalidAdminTokenError, {status: 401})
-  .addError(S3ServiceError, {status: 502})
-  .annotate(MaxExpectedDailyCall, 1000)
 
 export const GetClubInfoEndpoint = HttpApiEndpoint.post(
   'getClubInfo',
@@ -393,15 +301,6 @@ const ContactApiGroup = HttpApiGroup.make('Contact')
   .add(FetchMyContactsPaginatedEndpoint)
   .add(FetchCommonConnectionsPaginatedEndpoint)
 
-const ClubsAdminApiGroup = HttpApiGroup.make('ClubsAdmin')
-  .add(CreateClubEndpoint)
-  .add(ModfiyClubEndpoint)
-  .add(GenerateClubInviteLinkForAdminEndpoint)
-  .add(ListClubsEndpoint)
-  .add(GetClubStatsEndpoint)
-  .add(ReactivateClubEndpoint)
-  .add(RequestClubImageUploadEndpoint)
-
 const ClubsMemberApiGroup = HttpApiGroup.make('ClubsMember')
   .add(GetClubInfoEndpoint)
   .add(JoinClubEndpoint)
@@ -421,7 +320,6 @@ export const ContactApiSpecification = HttpApi.make('Contact API')
   .middleware(RateLimitingMiddleware)
   .add(UserApiGroup)
   .add(ContactApiGroup)
-  .add(ClubsAdminApiGroup)
   .add(ClubsMemberApiGroup)
   .add(ClubsModeratorApiGroup)
   .add(ChallengeApiGroup)

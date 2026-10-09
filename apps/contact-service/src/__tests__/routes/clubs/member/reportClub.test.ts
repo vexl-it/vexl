@@ -21,7 +21,10 @@ import {
   createMockedUser,
 } from '../../../utils/createMockedUser'
 import {generateAndSignChallenge} from '../../../utils/generateAndSignChallenge'
-import {NodeTestingApp} from '../../../utils/NodeTestingApp'
+import {
+  NodeTestingApp,
+  NodeTestingInternalApp,
+} from '../../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../../utils/runPromiseInMockedEnvironment'
 
 const ADMIN_TOKEN = 'dev'
@@ -57,10 +60,10 @@ beforeEach(async () => {
       yield* _(sql`DELETE FROM club`)
       yield* _(sql`DELETE FROM club_offer_reported_info`)
 
-      const app = yield* _(NodeTestingApp)
+      const internalApp = yield* _(NodeTestingInternalApp)
       yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
       yield* _(
-        app.ClubsAdmin.createClub({
+        internalApp.ClubsAdmin.createClub({
           headers: {'x-admin-token': ADMIN_TOKEN},
           payload: {
             club,

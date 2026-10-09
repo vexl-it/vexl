@@ -1,7 +1,7 @@
 import {HttpApiBuilder} from '@effect/platform/index'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {HEADER_ADMIN_TOKEN} from '@vexl-next/rest-api/src/constants'
-import {ContentApiSpecification} from '@vexl-next/rest-api/src/services/content/specification'
+import {ContentInternalApiSpecification} from '@vexl-next/rest-api/src/services/content/internalSpecification'
 import {EnqueueVexlProductNotification} from '@vexl-next/server-utils/src/ContentServiceVexlProductNotificationMq'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
@@ -10,7 +10,7 @@ import {VexlProductNotificationsDbService} from '../../db/VexlProductNotificatio
 import {validateAdminToken} from './validateAdminToken'
 
 export const createVexlProductNotificationHandler = HttpApiBuilder.handler(
-  ContentApiSpecification,
+  ContentInternalApiSpecification,
   'VexlProductNotifications',
   'createVexlProductNotification',
   (req) =>

@@ -5,10 +5,6 @@ import {
   UnexpectedServerError,
 } from '@vexl-next/domain/src/general/commonErrors'
 import {Schema} from 'effect'
-import {
-  AdminTokenHeaders,
-  ClearCacheTokenHeaders,
-} from '../../adminTokenHeaders'
 import {BtcPayServerWebhookHeader} from '../../btcPayServerWebhookHeader'
 import {CommonHeaders} from '../../commonHeaders'
 import {MaxExpectedDailyCall} from '../../MaxExpectedDailyCountAnnotation'
@@ -19,8 +15,6 @@ import {
   CreateInvoiceError,
   CreateInvoiceRequest,
   CreateInvoiceResponse,
-  CreateVexlProductNotificationRequest,
-  DuplicateVexlProductNotificationUuidError,
   EventsResponse,
   GetInvoiceGeneralError,
   GetInvoicePaymentMethodsGeneralError,
@@ -30,13 +24,10 @@ import {
   GetInvoiceStatusTypeResponse,
   GetVexlProductNotificationsRequest,
   GetVexlProductNotificationsResponse,
-  InvalidContentAdminTokenError,
-  InvalidTokenError,
   InvoiceNotFoundError,
   MapStylesResponse,
   NewsAndAnnouncementsResponse,
   UpdateInvoiceWebhookError,
-  VexlProductNotificationResponse,
 } from './contracts'
 
 export const GetEventsEndpoint = HttpApiEndpoint.get(
@@ -45,15 +36,6 @@ export const GetEventsEndpoint = HttpApiEndpoint.get(
 )
   .addSuccess(EventsResponse)
   .annotate(MaxExpectedDailyCall, 100)
-
-export const ClearEventsCacheEndpoint = HttpApiEndpoint.post(
-  'clearCache',
-  '/content/clear-cache'
-)
-  .setHeaders(ClearCacheTokenHeaders)
-  .addError(InvalidTokenError)
-  .addSuccess(NoContentResponse)
-  .annotate(MaxExpectedDailyCall, 10)
 
 export const GetBlogArticlesEndpoint = HttpApiEndpoint.get(
   'getBlogArticles',
@@ -64,7 +46,6 @@ export const GetBlogArticlesEndpoint = HttpApiEndpoint.get(
 
 const CmsContentApiGroup = HttpApiGroup.make('Cms')
   .add(GetEventsEndpoint)
-  .add(ClearEventsCacheEndpoint)
   .add(GetBlogArticlesEndpoint)
 
 export const NewsAndAnonouncementsEndpoint = HttpApiEndpoint.get(
@@ -88,17 +69,6 @@ export const GetMapStylesEndpoint = HttpApiEndpoint.get(
 
 const MapApiGroup = HttpApiGroup.make('Map').add(GetMapStylesEndpoint)
 
-export const CreateVexlProductNotificationEndpoint = HttpApiEndpoint.post(
-  'createVexlProductNotification',
-  '/content/vexl-product-notifications/admin'
-)
-  .setHeaders(AdminTokenHeaders)
-  .setPayload(CreateVexlProductNotificationRequest)
-  .addSuccess(VexlProductNotificationResponse)
-  .addError(InvalidContentAdminTokenError, {status: 401})
-  .addError(DuplicateVexlProductNotificationUuidError, {status: 400})
-  .annotate(MaxExpectedDailyCall, 100)
-
 export const GetVexlProductNotificationsEndpoint = HttpApiEndpoint.get(
   'getVexlProductNotifications',
   '/content/vexl-product-notifications'
@@ -110,9 +80,7 @@ export const GetVexlProductNotificationsEndpoint = HttpApiEndpoint.get(
 
 const VexlProductNotificationsApiGroup = HttpApiGroup.make(
   'VexlProductNotifications'
-)
-  .add(CreateVexlProductNotificationEndpoint)
-  .add(GetVexlProductNotificationsEndpoint)
+).add(GetVexlProductNotificationsEndpoint)
 
 export const CreateInvoiceEndpoint = HttpApiEndpoint.post(
   'createInvoice',

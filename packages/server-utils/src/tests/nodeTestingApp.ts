@@ -1,5 +1,8 @@
+import * as NodeHttpServer from '@effect/platform-node/NodeHttpServer'
 import {type Client} from '@effect/platform/HttpApiClient'
+import {type ServeError} from '@effect/platform/HttpServerError'
 import {
+  HttpApiBuilder,
   HttpApiClient,
   HttpClient,
   HttpClientRequest,
@@ -77,6 +80,47 @@ export const createNodeTestingApp = <
       })
     )
   })
+
+export class InternalServerTestClient extends Context.Tag(
+  'InternalServerTestClient'
+)<InternalServerTestClient, HttpClient.HttpClient>() {}
+
+/**
+ * Serves an internal `HttpApi` on its own test server, mirroring
+ * `makeInternalApiServer` (fresh build => its own router).
+ */
+export const internalApiTestServerLayer = <E, R>(
+  apiLive: Layer.Layer<HttpApi.Api, E, R>
+): Layer.Layer<InternalServerTestClient, E | ServeError, R> =>
+  Layer.effect(InternalServerTestClient, HttpClient.HttpClient).pipe(
+    Layer.provide(
+      HttpApiBuilder.serve().pipe(
+        Layer.provide(apiLive),
+        Layer.provideMerge(NodeHttpServer.layerTest)
+      )
+    ),
+    Layer.fresh
+  )
+
+export const createNodeTestingInternalApp = <
+  ApiId extends string,
+  Groups extends HttpApiGroup.HttpApiGroup.Any,
+  ApiError,
+  ApiR,
+>(
+  api: HttpApi.HttpApi<ApiId, Groups, ApiError, ApiR>
+): Effect.Effect<
+  Simplify<Client<Groups, ApiError, never>>,
+  never,
+  | HttpApiMiddleware.HttpApiMiddleware.Without<
+      ApiR | HttpApiGroup.HttpApiGroup.ClientContext<Groups>
+    >
+  | InternalServerTestClient
+  | TestRequestHeaders
+> =>
+  createNodeTestingApp(api).pipe(
+    Effect.provideServiceEffect(HttpClient.HttpClient, InternalServerTestClient)
+  )
 
 export const setAuthHeaders = (headers: {
   'public-key': PublicKeyPemBase64

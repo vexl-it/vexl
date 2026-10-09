@@ -26,7 +26,10 @@ import {
   clearEnqueuedNotifications,
   getEnqueuedNotifications,
 } from '../../../utils/mockEnqueueUserNotification'
-import {NodeTestingApp} from '../../../utils/NodeTestingApp'
+import {
+  NodeTestingApp,
+  NodeTestingInternalApp,
+} from '../../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../../utils/runPromiseInMockedEnvironment'
 
 const testCommonHeaders = Schema.decodeSync(CommonHeaders)({
@@ -65,10 +68,10 @@ beforeEach(async () => {
       yield* _(sql`DELETE FROM club_member_count_change`)
       yield* _(sql`DELETE FROM club`)
 
-      const app = yield* _(NodeTestingApp)
+      const internalApp = yield* _(NodeTestingInternalApp)
       yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
       yield* _(
-        app.ClubsAdmin.createClub({
+        internalApp.ClubsAdmin.createClub({
           headers: {'x-admin-token': ADMIN_TOKEN},
           payload: {
             club,
@@ -102,6 +105,7 @@ describe('Join club', () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const app = yield* _(NodeTestingApp)
+        const internalApp = yield* _(NodeTestingInternalApp)
         const joinedClub = yield* _(
           app.ClubsMember.joinClub({
             headers: testCommonHeaders,
@@ -146,7 +150,9 @@ describe('Join club', () => {
 
         yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
         const clubs = yield* _(
-          app.ClubsAdmin.listClubs({headers: {'x-admin-token': ADMIN_TOKEN}})
+          internalApp.ClubsAdmin.listClubs({
+            headers: {'x-admin-token': ADMIN_TOKEN},
+          })
         )
         expect(clubs.clubs).toEqual([
           expect.objectContaining({
@@ -163,10 +169,11 @@ describe('Join club', () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const app = yield* _(NodeTestingApp)
+        const internalApp = yield* _(NodeTestingInternalApp)
 
         yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
         const inviteLink = yield* _(
-          app.ClubsAdmin.generateClubInviteLinkForAdmin({
+          internalApp.ClubsAdmin.generateClubInviteLinkForAdmin({
             headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               clubUuid: club.uuid,
@@ -223,9 +230,10 @@ describe('Join club', () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const app = yield* _(NodeTestingApp)
+        const internalApp = yield* _(NodeTestingInternalApp)
 
         const inviteLink = yield* _(
-          app.ClubsAdmin.generateClubInviteLinkForAdmin({
+          internalApp.ClubsAdmin.generateClubInviteLinkForAdmin({
             headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               clubUuid: club.uuid,
@@ -487,6 +495,7 @@ describe('Join club', () => {
         )
 
         const app = yield* _(NodeTestingApp)
+
         yield* _(
           app.ClubsMember.joinClub({
             headers: testCommonHeaders,
@@ -591,6 +600,7 @@ describe('Join club', () => {
         )
 
         const app = yield* _(NodeTestingApp)
+
         yield* _(
           app.ClubsMember.joinClub({
             headers: testCommonHeaders,
@@ -755,6 +765,7 @@ describe('Join club', () => {
         )
 
         const app = yield* _(NodeTestingApp)
+
         yield* _(
           app.ClubsMember.joinClub({
             headers: testCommonHeaders,
@@ -852,6 +863,7 @@ describe('Join club', () => {
         )
 
         const app = yield* _(NodeTestingApp)
+
         yield* _(
           app.ClubsMember.joinClub({
             headers: testCommonHeaders,

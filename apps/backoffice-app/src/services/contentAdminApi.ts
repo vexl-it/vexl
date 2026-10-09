@@ -6,12 +6,21 @@ import {
   AppSource,
   makeCommonHeaders,
 } from '@vexl-next/rest-api/src/commonHeaders'
+import {ContentInternalApiSpecification} from '@vexl-next/rest-api/src/services/content/internalSpecification'
 import {ContentApiSpecification} from '@vexl-next/rest-api/src/services/content/specification'
 import {Effect, Option, Schema} from 'effect'
 
-export const makeContentAdminClient = (baseUrl = '/api/proxy') =>
+export const makeContentAdminClient = () =>
+  HttpApiClient.make(ContentInternalApiSpecification, {
+    baseUrl: '/api/proxy/content-internal',
+  }).pipe(
+    Effect.map((client) => client.VexlProductNotifications),
+    Effect.provide(FetchHttpClient.layer)
+  )
+
+export const makeContentClient = () =>
   HttpApiClient.make(ContentApiSpecification, {
-    baseUrl,
+    baseUrl: '/api/proxy/content',
   }).pipe(
     Effect.map((client) => client.VexlProductNotifications),
     Effect.provide(FetchHttpClient.layer)

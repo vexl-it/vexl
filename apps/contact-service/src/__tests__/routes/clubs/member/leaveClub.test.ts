@@ -12,7 +12,10 @@ import {Effect, Option, Schema} from 'effect'
 import {ClubMembersDbService} from '../../../../db/ClubMemberDbService'
 import {ClubsDbService} from '../../../../db/ClubsDbService'
 import {generateAndSignChallenge} from '../../../utils/generateAndSignChallenge'
-import {NodeTestingApp} from '../../../utils/NodeTestingApp'
+import {
+  NodeTestingApp,
+  NodeTestingInternalApp,
+} from '../../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../../utils/runPromiseInMockedEnvironment'
 
 const ADMIN_TOKEN = 'dev'
@@ -39,10 +42,10 @@ beforeEach(async () => {
       yield* _(sql`DELETE FROM club_member_count_change`)
       yield* _(sql`DELETE FROM club`)
 
-      const app = yield* _(NodeTestingApp)
+      const internalApp = yield* _(NodeTestingInternalApp)
       yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
       yield* _(
-        app.ClubsAdmin.createClub({
+        internalApp.ClubsAdmin.createClub({
           headers: {'x-admin-token': ADMIN_TOKEN},
           payload: {
             club,
@@ -77,6 +80,7 @@ describe('Leave club', () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const app = yield* _(NodeTestingApp)
+        const internalApp = yield* _(NodeTestingInternalApp)
         yield* _(
           app.ClubsMember.leaveClub({
             payload: {
@@ -106,7 +110,9 @@ describe('Leave club', () => {
 
         yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
         const clubs = yield* _(
-          app.ClubsAdmin.listClubs({headers: {'x-admin-token': ADMIN_TOKEN}})
+          internalApp.ClubsAdmin.listClubs({
+            headers: {'x-admin-token': ADMIN_TOKEN},
+          })
         )
         expect(clubs.clubs).toEqual([
           expect.objectContaining({

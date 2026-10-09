@@ -4,7 +4,7 @@ import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {addTestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Option, Schema} from 'effect'
 import {deactivateAndClearClubs} from '../../../internalServer/routes/deactivateAndClearClubs'
-import {NodeTestingApp} from '../../utils/NodeTestingApp'
+import {NodeTestingInternalApp} from '../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../utils/runPromiseInMockedEnvironment'
 
 const ADMIN_TOKEN = 'dev'
@@ -26,12 +26,12 @@ describe('Deactivate and clear clubs', () => {
   it('Stores EXPIRED when a club is both expired and over its report limit', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+        const internalApp = yield* _(NodeTestingInternalApp)
         const clubUuid = generateClubUuid()
 
         yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
         yield* _(
-          app.ClubsAdmin.createClub({
+          internalApp.ClubsAdmin.createClub({
             headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               club: {
@@ -75,14 +75,14 @@ describe('Deactivate and clear clubs', () => {
   it('clears member changes for deleted clubs and keeps active club history', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+        const internalApp = yield* _(NodeTestingInternalApp)
         const removableClubUuid = generateClubUuid()
         const activeClubUuid = generateClubUuid()
         const validUntil = new Date(Date.now() + 24 * 60 * 60 * 1000)
 
         yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
         yield* _(
-          app.ClubsAdmin.createClub({
+          internalApp.ClubsAdmin.createClub({
             headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               club: {
@@ -98,7 +98,7 @@ describe('Deactivate and clear clubs', () => {
           })
         )
         yield* _(
-          app.ClubsAdmin.createClub({
+          internalApp.ClubsAdmin.createClub({
             headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               club: {

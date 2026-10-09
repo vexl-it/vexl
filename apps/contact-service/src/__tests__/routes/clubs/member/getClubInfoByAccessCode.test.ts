@@ -14,7 +14,10 @@ import {ClubInvitationLinkDbService} from '../../../../db/ClubInvitationLinkDbSe
 import {ClubsDbService} from '../../../../db/ClubsDbService'
 import {type ClubRecordId} from '../../../../db/ClubsDbService/domain'
 import {generateAndSignChallenge} from '../../../utils/generateAndSignChallenge'
-import {NodeTestingApp} from '../../../utils/NodeTestingApp'
+import {
+  NodeTestingApp,
+  NodeTestingInternalApp,
+} from '../../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../../utils/runPromiseInMockedEnvironment'
 
 const ADMIN_TOKEN = 'dev'
@@ -42,10 +45,10 @@ beforeEach(async () => {
       yield* _(sql`DELETE FROM club_member`)
       yield* _(sql`DELETE FROM club`)
 
-      const app = yield* _(NodeTestingApp)
+      const internalApp = yield* _(NodeTestingInternalApp)
       yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
       yield* _(
-        app.ClubsAdmin.createClub({
+        internalApp.ClubsAdmin.createClub({
           headers: {'x-admin-token': ADMIN_TOKEN},
           payload: {
             club,
@@ -102,12 +105,13 @@ describe('Get club info by access code', () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const app = yield* _(NodeTestingApp)
+        const internalApp = yield* _(NodeTestingInternalApp)
 
         const challengeForUser = yield* _(generateAndSignChallenge(userKey))
 
         yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
         const inviteLink = yield* _(
-          app.ClubsAdmin.generateClubInviteLinkForAdmin({
+          internalApp.ClubsAdmin.generateClubInviteLinkForAdmin({
             headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               clubUuid: forClubUuid,
@@ -159,13 +163,14 @@ describe('Get club info by access code', () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const app = yield* _(NodeTestingApp)
+        const internalApp = yield* _(NodeTestingInternalApp)
 
         const signedChallenge = yield* _(generateAndSignChallenge(userKey))
         const invalidKey = generatePrivateKey()
 
         yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
         const inviteLink = yield* _(
-          app.ClubsAdmin.generateClubInviteLinkForAdmin({
+          internalApp.ClubsAdmin.generateClubInviteLinkForAdmin({
             headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               clubUuid: forClubUuid,

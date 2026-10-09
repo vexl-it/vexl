@@ -5,7 +5,7 @@ import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {addTestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Option, Schema} from 'effect'
-import {NodeTestingApp} from '../../../utils/NodeTestingApp'
+import {NodeTestingInternalApp} from '../../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../../utils/runPromiseInMockedEnvironment'
 
 const ADMIN_TOKEN = 'dev'
@@ -27,12 +27,12 @@ describe('Get club stats', () => {
   it('returns current member count and the last 366 days of ordered changes', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+        const internalApp = yield* _(NodeTestingInternalApp)
         const clubUuid = generateClubUuid()
 
         yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
         yield* _(
-          app.ClubsAdmin.createClub({
+          internalApp.ClubsAdmin.createClub({
             headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               club: {
@@ -100,7 +100,7 @@ describe('Get club stats', () => {
         `)
 
         const response = yield* _(
-          app.ClubsAdmin.getClubStats({
+          internalApp.ClubsAdmin.getClubStats({
             headers: {'x-admin-token': ADMIN_TOKEN},
             urlParams: {clubUuid},
           })
@@ -121,11 +121,11 @@ describe('Get club stats', () => {
   it('returns not found for an unknown club', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+        const internalApp = yield* _(NodeTestingInternalApp)
 
         yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
         const errorResponse = yield* _(
-          app.ClubsAdmin.getClubStats({
+          internalApp.ClubsAdmin.getClubStats({
             headers: {'x-admin-token': ADMIN_TOKEN},
             urlParams: {clubUuid: generateClubUuid()},
           }),

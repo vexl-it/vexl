@@ -1,7 +1,7 @@
 import {InvalidTokenError} from '@vexl-next/rest-api/src/services/content/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {Effect, Either} from 'effect'
-import {NodeTestingApp} from '../utils/NodeTestingApp'
+import {NodeTestingInternalApp} from '../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../utils/runPromiseInMockedEnvironment'
 
 const CLEAR_CACHE_TOKEN = 'dev'
@@ -10,9 +10,9 @@ describe('clear cache', () => {
   it('clears cache for a valid admin token header', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+        const internalApp = yield* _(NodeTestingInternalApp)
         const resp = yield* _(
-          app.Cms.clearCache({
+          internalApp.Cms.clearCache({
             headers: {'x-admin-token': CLEAR_CACHE_TOKEN},
           }),
           Effect.either
@@ -26,9 +26,9 @@ describe('clear cache', () => {
   it('returns 401 for an invalid admin token header', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+        const internalApp = yield* _(NodeTestingInternalApp)
         const resp = yield* _(
-          app.Cms.clearCache({
+          internalApp.Cms.clearCache({
             headers: {'x-admin-token': 'bad-token'},
           }),
           Effect.either
@@ -42,9 +42,9 @@ describe('clear cache', () => {
   it('does not accept legacy token URL params', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+        const internalApp = yield* _(NodeTestingInternalApp)
         const resp = yield* _(
-          app.Cms.clearCache({
+          internalApp.Cms.clearCache({
             // @ts-expect-error Legacy URL admin-token transport is unsupported.
             urlParams: {token: CLEAR_CACHE_TOKEN},
           }),

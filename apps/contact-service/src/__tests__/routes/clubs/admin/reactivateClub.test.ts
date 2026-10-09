@@ -6,7 +6,7 @@ import {ClubCannotBeReactivatedError} from '@vexl-next/rest-api/src/services/con
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {addTestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Either, Option, Schema} from 'effect'
-import {NodeTestingApp} from '../../../utils/NodeTestingApp'
+import {NodeTestingInternalApp} from '../../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../../utils/runPromiseInMockedEnvironment'
 
 const ADMIN_TOKEN = 'dev'
@@ -28,12 +28,12 @@ describe('Reactivate club', () => {
   it('Reactivates an eligible inactive club', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+        const internalApp = yield* _(NodeTestingInternalApp)
         const clubUuid = generateClubUuid()
 
         yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
         yield* _(
-          app.ClubsAdmin.createClub({
+          internalApp.ClubsAdmin.createClub({
             headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               club: {
@@ -97,7 +97,7 @@ describe('Reactivate club', () => {
         `)
 
         const response = yield* _(
-          app.ClubsAdmin.reactivateClub({
+          internalApp.ClubsAdmin.reactivateClub({
             headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {clubUuid},
           })
@@ -117,12 +117,12 @@ describe('Reactivate club', () => {
   it('Rejects a club past its validity date', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+        const internalApp = yield* _(NodeTestingInternalApp)
         const clubUuid = generateClubUuid()
 
         yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
         yield* _(
-          app.ClubsAdmin.createClub({
+          internalApp.ClubsAdmin.createClub({
             headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               club: {
@@ -139,7 +139,7 @@ describe('Reactivate club', () => {
         )
 
         const errorResponse = yield* _(
-          app.ClubsAdmin.reactivateClub({
+          internalApp.ClubsAdmin.reactivateClub({
             headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {clubUuid},
           }),
@@ -160,12 +160,12 @@ describe('Reactivate club', () => {
   it('Rejects a club whose report count reached its limit', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+        const internalApp = yield* _(NodeTestingInternalApp)
         const clubUuid = generateClubUuid()
 
         yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
         yield* _(
-          app.ClubsAdmin.createClub({
+          internalApp.ClubsAdmin.createClub({
             headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               club: {
@@ -193,7 +193,7 @@ describe('Reactivate club', () => {
         `)
 
         const errorResponse = yield* _(
-          app.ClubsAdmin.reactivateClub({
+          internalApp.ClubsAdmin.reactivateClub({
             headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {clubUuid},
           }),
@@ -214,11 +214,11 @@ describe('Reactivate club', () => {
   it('Returns not found for an unknown club', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+        const internalApp = yield* _(NodeTestingInternalApp)
 
         yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
         const errorResponse = yield* _(
-          app.ClubsAdmin.reactivateClub({
+          internalApp.ClubsAdmin.reactivateClub({
             headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {clubUuid: generateClubUuid()},
           }),

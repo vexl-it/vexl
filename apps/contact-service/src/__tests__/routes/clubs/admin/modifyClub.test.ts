@@ -9,7 +9,7 @@ import {
   clearTestAuthHeaders,
 } from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Option, Schema} from 'effect'
-import {NodeTestingApp} from '../../../utils/NodeTestingApp'
+import {NodeTestingInternalApp} from '../../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../../utils/runPromiseInMockedEnvironment'
 
 const ADMIN_TOKEN = 'dev'
@@ -53,10 +53,10 @@ describe('Modify club', () => {
         yield* _(sql`DELETE FROM club_member`)
         yield* _(sql`DELETE FROM club`)
 
-        const app = yield* _(NodeTestingApp)
+        const internalApp = yield* _(NodeTestingInternalApp)
         yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
         yield* _(
-          app.ClubsAdmin.createClub({
+          internalApp.ClubsAdmin.createClub({
             headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               club: clubsToSave[0],
@@ -64,7 +64,7 @@ describe('Modify club', () => {
           })
         )
         yield* _(
-          app.ClubsAdmin.createClub({
+          internalApp.ClubsAdmin.createClub({
             headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               club: clubsToSave[1],
@@ -72,7 +72,7 @@ describe('Modify club', () => {
           })
         )
         yield* _(
-          app.ClubsAdmin.createClub({
+          internalApp.ClubsAdmin.createClub({
             headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               club: clubsToSave[2],
@@ -87,7 +87,7 @@ describe('Modify club', () => {
   it('Should return 403 when bad admin token', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+        const internalApp = yield* _(NodeTestingInternalApp)
 
         const clubData = {
           clubImageUrl: SOME_URL,
@@ -99,7 +99,7 @@ describe('Modify club', () => {
           reportLimit: 10,
         }
         const errorResponse = yield* _(
-          app.ClubsAdmin.modifyClub({
+          internalApp.ClubsAdmin.modifyClub({
             headers: {'x-admin-token': 'aha'},
             payload: {
               clubInfo: clubData,
@@ -116,7 +116,7 @@ describe('Modify club', () => {
   it('Should modify a club in db', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+        const internalApp = yield* _(NodeTestingInternalApp)
 
         const clubData = {
           clubImageUrl: SOME_URL,
@@ -130,7 +130,7 @@ describe('Modify club', () => {
 
         yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
         const modifiedClub = yield* _(
-          app.ClubsAdmin.modifyClub({
+          internalApp.ClubsAdmin.modifyClub({
             headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               clubInfo: clubData,
@@ -141,7 +141,7 @@ describe('Modify club', () => {
         expect(modifiedClub.clubInfo).toMatchObject(clubData)
 
         const clubsInDb = yield* _(
-          app.ClubsAdmin.listClubs({
+          internalApp.ClubsAdmin.listClubs({
             headers: {'x-admin-token': ADMIN_TOKEN},
           })
         )
@@ -157,7 +157,7 @@ describe('Modify club', () => {
   it('Should retrun 404 if club does not exist', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+        const internalApp = yield* _(NodeTestingInternalApp)
 
         const clubData = {
           clubImageUrl: SOME_URL,
@@ -171,7 +171,7 @@ describe('Modify club', () => {
 
         yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
         const errorResponse = yield* _(
-          app.ClubsAdmin.modifyClub({
+          internalApp.ClubsAdmin.modifyClub({
             headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               clubInfo: clubData,

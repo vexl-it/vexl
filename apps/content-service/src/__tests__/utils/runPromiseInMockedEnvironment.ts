@@ -13,7 +13,11 @@ import {MqServiceError} from '@vexl-next/server-utils/src/mqService'
 import {mockedMetricsClientService} from '@vexl-next/server-utils/src/tests/mockedMetricsClientService'
 import {mockedRateLimitingLayer} from '@vexl-next/server-utils/src/tests/mockedRateLimitingLayer'
 import {mockedRedisLayer} from '@vexl-next/server-utils/src/tests/mockedRedisLayer'
-import {TestRequestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
+import {
+  internalApiTestServerLayer,
+  TestRequestHeaders,
+  type InternalServerTestClient,
+} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {
   disposeTestDatabase,
   setupTestDatabase,
@@ -25,6 +29,7 @@ import {VexlProductNotificationsDbService} from '../../db/VexlProductNotificatio
 import DbLayer from '../../db/layer'
 import {UpdateInvoiceStateWebhookService} from '../../handlers/donations/UpdateInvoiceStateWebhookService'
 import {ContentApiLive} from '../../httpServer'
+import {ContentInternalApiLive} from '../../internalServer'
 import {type CacheService} from '../../utils/cache'
 import {type BtcPayServerService} from '../../utils/donations'
 import {type MapStylesService} from '../../utils/mapStyles'
@@ -47,6 +52,7 @@ export type MockedContexts =
   | BtcPayServerService
   | HttpClient
   | TestRequestHeaders
+  | InternalServerTestClient
   | RateLimitingService
 
 export const enqueuedVexlProductNotifications: VexlProductNotification[] = []
@@ -84,6 +90,7 @@ const TestServerLive = HttpApiBuilder.serve().pipe(
 )
 const context = Layer.empty.pipe(
   Layer.provideMerge(TestServerLive),
+  Layer.provideMerge(internalApiTestServerLayer(ContentInternalApiLive)),
   Layer.provideMerge(mockedRateLimitingLayer),
   Layer.provideMerge(TestRequestHeaders.Live),
   Layer.provideMerge(universalContext),

@@ -1,14 +1,10 @@
 import {FetchHttpClient, HttpApiClient} from '@effect/platform'
-import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/specification'
+import {ContactInternalApiSpecification} from '@vexl-next/rest-api/src/services/contact/internalSpecification'
 import {Effect} from 'effect'
 
-// Derive the typed client from the ContactApiSpecification
-// Base URL points to the Next.js API proxy route
-// The FetchHttpClient.layer is provided here so the returned Effect is ready to run
-// Admin token is passed via urlParams in each API call
-export const makeClubsAdminClient = (baseUrl = '/api/proxy') =>
-  HttpApiClient.make(ContactApiSpecification, {
-    baseUrl,
+export const makeClubsAdminClient = () =>
+  HttpApiClient.make(ContactInternalApiSpecification, {
+    baseUrl: '/api/proxy/contact-internal',
   }).pipe(
     Effect.map((client) => client.ClubsAdmin),
     Effect.provide(FetchHttpClient.layer)

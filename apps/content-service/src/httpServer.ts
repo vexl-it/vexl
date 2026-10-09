@@ -19,10 +19,8 @@ import {cryptoConfig, healthServerPortConfig} from './configs'
 import DbLayer from './db/layer'
 import {VexlProductNotificationsDbService} from './db/VexlProductNotificationsDbService'
 import {getBlogsHandler} from './handlers/blog'
-import {clearCacheHandler} from './handlers/clearCache'
 import {createInvoiceHandler} from './handlers/donations/createInvoice'
 import {getInvoiceHandler} from './handlers/donations/getInvoice'
-import {createVexlProductNotificationHandler} from './handlers/vexlProductNotifications/createVexlProductNotification'
 import {getVexlProductNotificationsHandler} from './handlers/vexlProductNotifications/getVexlProductNotifications'
 
 import {getInvoiceStatusTypeHandler} from './handlers/donations/getInvoiceStatusType'
@@ -31,6 +29,7 @@ import {UpdateInvoiceStateWebhookService} from './handlers/donations/UpdateInvoi
 import {getEventsHandler} from './handlers/events'
 import {getMapStylesHandler} from './handlers/getMapStyles'
 import {newsAndAnonouncementsHandler} from './handlers/getNewsAndAnnonuncements'
+import {internalServerLive} from './internalServer'
 import {CacheService} from './utils/cache'
 import {BtcPayServerService} from './utils/donations'
 import {MapStylesService} from './utils/mapStyles'
@@ -42,7 +41,6 @@ const CmsApiGroupLive = HttpApiBuilder.group(
   (h) =>
     h
       .handle('getEvents', getEventsHandler)
-      .handle('clearCache', clearCacheHandler)
       .handle('getBlogArticles', getBlogsHandler)
 )
 
@@ -62,12 +60,7 @@ const VexlProductNotificationsApiGroupLive = HttpApiBuilder.group(
   ContentApiSpecification,
   'VexlProductNotifications',
   (h) =>
-    h
-      .handle(
-        'createVexlProductNotification',
-        createVexlProductNotificationHandler
-      )
-      .handle('getVexlProductNotifications', getVexlProductNotificationsHandler)
+    h.handle('getVexlProductNotifications', getVexlProductNotificationsHandler)
 )
 
 const DonationsApiGroupLive = HttpApiBuilder.group(
@@ -100,6 +93,7 @@ export const ApiServerLive = HttpApiBuilder.serve(HttpMiddleware.logger).pipe(
 
 export const HttpServerLive = Layer.mergeAll(
   ApiServerLive,
+  internalServerLive,
   healthServerLayer({port: healthServerPortConfig})
 ).pipe(
   Layer.provideMerge(ServerCrypto.layer(cryptoConfig)),

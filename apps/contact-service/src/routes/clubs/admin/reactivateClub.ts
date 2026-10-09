@@ -2,7 +2,7 @@ import {HttpApiBuilder} from '@effect/platform/index'
 import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {HEADER_ADMIN_TOKEN} from '@vexl-next/rest-api/src/constants'
 import {ClubCannotBeReactivatedError} from '@vexl-next/rest-api/src/services/contact/contracts'
-import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/specification'
+import {ContactInternalApiSpecification} from '@vexl-next/rest-api/src/services/contact/internalSpecification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {Effect} from 'effect'
 import {ClubsDbService} from '../../../db/ClubsDbService'
@@ -10,7 +10,7 @@ import {validateAdminToken} from '../utils/validateAdminToken'
 import {clubDbRecordToClubAdminInfo} from './clubDbRecordToClubAdminInfo'
 
 export const reactivateClub = HttpApiBuilder.handler(
-  ContactApiSpecification,
+  ContactInternalApiSpecification,
   'ClubsAdmin',
   'reactivateClub',
   (req) =>

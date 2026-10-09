@@ -12,7 +12,11 @@ import {mockedDashboardReportsService} from '@vexl-next/server-utils/src/tests/m
 import {mockedMetricsClientService} from '@vexl-next/server-utils/src/tests/mockedMetricsClientService'
 import {mockedRateLimitingLayer} from '@vexl-next/server-utils/src/tests/mockedRateLimitingLayer'
 import {mockedRedisLayer} from '@vexl-next/server-utils/src/tests/mockedRedisLayer'
-import {TestRequestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
+import {
+  internalApiTestServerLayer,
+  TestRequestHeaders,
+  type InternalServerTestClient,
+} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {
   disposeTestDatabase,
   setupTestDatabase,
@@ -27,6 +31,7 @@ import {ContactDbService} from '../../db/ContactDbService'
 import {UserDbService} from '../../db/UserDbService'
 import DbLayer from '../../db/layer'
 import {ContactApiLive} from '../../httpServer'
+import {ContactInternalApiLive} from '../../internalServer'
 import {ImportContactsQuotaService} from '../../routes/contacts/importContactsQuotaService'
 import {UserNotificationService} from '../../services/UserNotificationService'
 import {type S3Service} from '../../utils/S3Service'
@@ -49,6 +54,7 @@ export type MockedContexts =
   | ClubInvitationLinkDbService
   | HttpClient
   | TestRequestHeaders
+  | InternalServerTestClient
   | RateLimitingService
   | UserNotificationService
 
@@ -82,6 +88,7 @@ const dbServiceLayers = Layer.mergeAll(
 
 const context = Layer.empty.pipe(
   Layer.provideMerge(TestServerLive),
+  Layer.provideMerge(internalApiTestServerLayer(ContactInternalApiLive)),
   Layer.provideMerge(TestRequestHeaders.Live),
   Layer.provideMerge(UserNotificationServiceTest),
   Layer.provideMerge(universalContext),

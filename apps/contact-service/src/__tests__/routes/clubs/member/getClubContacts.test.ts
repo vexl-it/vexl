@@ -18,7 +18,10 @@ import {
   type MockedUser,
 } from '../../../utils/createMockedUser'
 import {generateAndSignChallenge} from '../../../utils/generateAndSignChallenge'
-import {NodeTestingApp} from '../../../utils/NodeTestingApp'
+import {
+  NodeTestingApp,
+  NodeTestingInternalApp,
+} from '../../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../../utils/runPromiseInMockedEnvironment'
 import {withEnvVar} from '../../contacts/utils'
 
@@ -51,11 +54,12 @@ describe('Get club contacts', () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const app = yield* _(NodeTestingApp)
+        const internalApp = yield* _(NodeTestingInternalApp)
         const forClubUuid = generateClubUuid()
 
         yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
         yield* _(
-          app.ClubsAdmin.createClub({
+          internalApp.ClubsAdmin.createClub({
             headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               club: {
@@ -80,7 +84,7 @@ describe('Get club contacts', () => {
         )
 
         const inviteLink1 = yield* _(
-          app.ClubsAdmin.generateClubInviteLinkForAdmin({
+          internalApp.ClubsAdmin.generateClubInviteLinkForAdmin({
             headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               clubUuid: forClubUuid,
@@ -109,7 +113,7 @@ describe('Get club contacts', () => {
         )
 
         const inviteLink2 = yield* _(
-          app.ClubsAdmin.generateClubInviteLinkForAdmin({
+          internalApp.ClubsAdmin.generateClubInviteLinkForAdmin({
             headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               clubUuid: forClubUuid,
@@ -170,10 +174,11 @@ describe('Get club contacts', () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const app = yield* _(NodeTestingApp)
+        const internalApp = yield* _(NodeTestingInternalApp)
         const forClubUuid = generateClubUuid()
 
         yield* _(
-          app.ClubsAdmin.createClub({
+          internalApp.ClubsAdmin.createClub({
             payload: {
               club: {
                 clubImageUrl: SOME_URL,
@@ -194,7 +199,7 @@ describe('Get club contacts', () => {
         )
 
         const inviteLink = yield* _(
-          app.ClubsAdmin.generateClubInviteLinkForAdmin({
+          internalApp.ClubsAdmin.generateClubInviteLinkForAdmin({
             payload: {
               clubUuid: forClubUuid,
             },
@@ -247,11 +252,12 @@ describe('Get club contacts', () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const app = yield* _(NodeTestingApp)
+        const internalApp = yield* _(NodeTestingInternalApp)
         const forClubUuid1 = generateClubUuid()
         const forClubUuid2 = generateClubUuid()
 
         yield* _(
-          app.ClubsAdmin.createClub({
+          internalApp.ClubsAdmin.createClub({
             payload: {
               club: {
                 clubImageUrl: SOME_URL,
@@ -272,7 +278,7 @@ describe('Get club contacts', () => {
         )
 
         const inviteLink1 = yield* _(
-          app.ClubsAdmin.generateClubInviteLinkForAdmin({
+          internalApp.ClubsAdmin.generateClubInviteLinkForAdmin({
             payload: {
               clubUuid: forClubUuid1,
             },
@@ -301,7 +307,7 @@ describe('Get club contacts', () => {
         )
 
         yield* _(
-          app.ClubsAdmin.createClub({
+          internalApp.ClubsAdmin.createClub({
             payload: {
               club: {
                 clubImageUrl: SOME_URL,
@@ -322,7 +328,7 @@ describe('Get club contacts', () => {
         )
 
         const inviteLink2 = yield* _(
-          app.ClubsAdmin.generateClubInviteLinkForAdmin({
+          internalApp.ClubsAdmin.generateClubInviteLinkForAdmin({
             payload: {
               clubUuid: forClubUuid2,
             },
@@ -375,11 +381,12 @@ describe('Get club contacts', () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const app = yield* _(NodeTestingApp)
+        const internalApp = yield* _(NodeTestingInternalApp)
         const forClubUuid = generateClubUuid()
         const notExistingClubUuid = generateClubUuid()
 
         yield* _(
-          app.ClubsAdmin.createClub({
+          internalApp.ClubsAdmin.createClub({
             payload: {
               club: {
                 clubImageUrl: SOME_URL,
@@ -400,7 +407,7 @@ describe('Get club contacts', () => {
         )
 
         const inviteLink = yield* _(
-          app.ClubsAdmin.generateClubInviteLinkForAdmin({
+          internalApp.ClubsAdmin.generateClubInviteLinkForAdmin({
             payload: {
               clubUuid: forClubUuid,
             },
@@ -454,10 +461,11 @@ describe('Get club contacts', () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const app = yield* _(NodeTestingApp)
+        const internalApp = yield* _(NodeTestingInternalApp)
         const forClubUuid = generateClubUuid()
 
         yield* _(
-          app.ClubsAdmin.createClub({
+          internalApp.ClubsAdmin.createClub({
             payload: {
               club: {
                 clubImageUrl: SOME_URL,
@@ -474,7 +482,7 @@ describe('Get club contacts', () => {
         )
 
         const inviteLink = yield* _(
-          app.ClubsAdmin.generateClubInviteLinkForAdmin({
+          internalApp.ClubsAdmin.generateClubInviteLinkForAdmin({
             payload: {
               clubUuid: forClubUuid,
             },
@@ -535,11 +543,12 @@ describe('Get club contacts', () => {
         await runPromiseInMockedEnvironment(
           Effect.gen(function* (_) {
             const app = yield* _(NodeTestingApp)
+            const internalApp = yield* _(NodeTestingInternalApp)
             const forClubUuid = generateClubUuid()
 
             yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
             yield* _(
-              app.ClubsAdmin.createClub({
+              internalApp.ClubsAdmin.createClub({
                 headers: {'x-admin-token': ADMIN_TOKEN},
                 payload: {
                   club: {

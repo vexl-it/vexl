@@ -28,6 +28,7 @@
     "@emotion/styled": "^11.11.5",
     "@vexl-next/cryptography": "0.0.0",
     "@vexl-next/domain": "0.0.0",
+    "@vexl-next/rest-api": "0.0.0",
     "@vexl-next/server-utils": "0.0.0",
     "dayjs": "^1.11.11",
     "dotenv": "^16.4.5",

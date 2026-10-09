@@ -18,14 +18,9 @@ import {MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsC
 import {ServerSecurityMiddlewareLive} from '@vexl-next/server-utils/src/serverSecurity'
 import {createChallenge} from '@vexl-next/server-utils/src/services/challenge/routes/createChalenge'
 import {createChallenges} from '@vexl-next/server-utils/src/services/challenge/routes/createChallenges'
-import {Config, Layer, Option} from 'effect'
+import {Layer} from 'effect'
 import {CleanReportedClubRecordsWorkerLayer} from './cleanReportedClubRecordsWorker'
-import {
-  cryptoConfig,
-  dashboardContactsImportedHookConfig,
-  healthServerPortConfig,
-  redisUrl,
-} from './configs'
+import {cryptoConfig, healthServerPortConfig, redisUrl} from './configs'
 import {ClubInvitationLinkDbService} from './db/ClubInvitationLinkDbService'
 import {ClubMemberCountChangeDbService} from './db/ClubMemberCountChangeDbService'
 import {ClubMembersDbService} from './db/ClubMemberDbService'
@@ -167,10 +162,5 @@ export const HttpServerLive = Layer.mergeAll(
   Layer.provide(MetricsClientService.Live),
   Layer.provide(RedisConnectionService.layer(redisUrl)),
   Layer.provide(ServerCrypto.layer(cryptoConfig)),
-  Layer.provide(
-    DashboardReportsService.make({
-      contactsImportedHookConfig: dashboardContactsImportedHookConfig,
-      newUserHookOption: Config.succeed(Option.none()),
-    })
-  )
+  Layer.provide(DashboardReportsService.Live)
 )

@@ -12,13 +12,8 @@ import {RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {ServerSecurityMiddlewareLive} from '@vexl-next/server-utils/src/serverSecurity'
-import {Config, Layer, Option} from 'effect'
-import {
-  cryptoConfig,
-  dashboardNewUserHookConfig,
-  healthServerPortConfig,
-  redisUrl,
-} from './configs'
+import {Layer} from 'effect'
+import {cryptoConfig, healthServerPortConfig, redisUrl} from './configs'
 import DbLayer from './db/layer'
 import {reportMetricsLayer} from './metrics'
 import {initEraseUserEndpoint} from './routes/eraseUser/handlers/initEraseUser'
@@ -104,12 +99,7 @@ export const HttpServerLive = Layer.mergeAll(
   Layer.provideMerge(PreludeService.Live),
   Layer.provideMerge(TurnstileService.Live),
   Layer.provideMerge(MetricsClientService.Live),
-  Layer.provideMerge(
-    DashboardReportsService.make({
-      newUserHookOption: dashboardNewUserHookConfig,
-      contactsImportedHookConfig: Config.succeed(Option.none()),
-    })
-  ),
+  Layer.provideMerge(DashboardReportsService.Live),
   Layer.provideMerge(VerificationStateDbService.Live),
   Layer.provideMerge(LoggedInUsersDbService.Live),
   Layer.provideMerge(DbLayer),

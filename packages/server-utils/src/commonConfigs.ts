@@ -176,6 +176,10 @@ export const internalServerPortConfig = Config.option(
   Config.number('INTERNAL_SERVER_PORT')
 )
 
+export const dashboardUpdatesUrlConfig = Config.option(
+  Config.string('DASHBOARD_UPDATES_URL')
+)
+
 export const memoryDebugIntervalMsConfig = Config.option(
   Config.number('MEMORY_DEBUG_INTERVAL_MS')
 )

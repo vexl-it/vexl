@@ -1,12 +1,17 @@
+import {HttpApiBuilder} from '@effect/platform'
+import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
+import {DashboardInternalApiSpecification} from '@vexl-next/rest-api/src/services/dashboard/internalSpecification'
+import {makeInternalApiServer} from '@vexl-next/server-utils/src/InternalServer'
 import {
-  HttpMiddleware,
-  HttpRouter,
-  HttpServer,
-  HttpServerResponse,
-} from '@effect/platform'
-import * as NodeHttpServer from '@effect/platform-node/NodeHttpServer'
-import {Effect, Layer, PubSub, Ref, Stream} from 'effect'
-import {createServer} from 'http'
+  Config,
+  Context,
+  Effect,
+  Layer,
+  Option,
+  PubSub,
+  Ref,
+  Stream,
+} from 'effect'
 import {updatesServerPortConfig} from './configs'
 import {
   DashboardBootstrapState,
@@ -16,13 +21,15 @@ import {syncCountOfUsersEffect} from './metrics/countOfUsers'
 import {syncPubKeyToCountryEffect} from './metrics/pubKeyToCountry'
 import {syncCountriesToConnectionsEffect} from './metrics/pubKeysToConnectionsCount'
 
-const ServerLive = NodeHttpServer.layerConfig(() => createServer(), {
-  port: updatesServerPortConfig,
-})
-
 type UpdateEvent = 'newUser' | 'newConnections'
 
-export const UpdatesServerLive = Layer.scopedDiscard(
+class DashboardUpdates extends Context.Tag('DashboardUpdates')<
+  DashboardUpdates,
+  (updateEvent: UpdateEvent) => Effect.Effect<void, UnexpectedServerError>
+>() {}
+
+const DashboardUpdatesLive = Layer.scoped(
+  DashboardUpdates,
   Effect.gen(function* (_) {
     const updateEventPubSub = yield* _(PubSub.bounded<UpdateEvent>(1))
     const pendingNewUserUpdateRef = yield* _(Ref.make(false))
@@ -60,31 +67,31 @@ export const UpdatesServerLive = Layer.scopedDiscard(
         yield* _(publishUpdate(updateEvent))
       })
 
-    const handleUpdateRequest = (
+    const bootstrapState = yield* _(DashboardBootstrapState)
+
+    const handleUpdate = (
       updateEvent: UpdateEvent
-    ): Effect.Effect<
-      HttpServerResponse.HttpServerResponse,
-      never,
-      DashboardBootstrapState
-    > =>
+    ): Effect.Effect<void, UnexpectedServerError> =>
       Effect.gen(function* (_) {
         const dashboardReady = yield* _(isDashboardReady)
 
         if (!dashboardReady) {
           yield* _(markPendingUpdate(updateEvent))
-          return HttpServerResponse.raw('accepted')
+          return
         }
 
         const published = yield* _(publishUpdate(updateEvent))
-        return published
-          ? HttpServerResponse.raw('accepted')
-          : HttpServerResponse.raw('Error', {status: 500})
-      })
-
-    const RouterLive = HttpRouter.empty.pipe(
-      HttpRouter.post('/new-user', handleUpdateRequest('newUser')),
-      HttpRouter.post('/new-connections', handleUpdateRequest('newConnections'))
-    )
+        if (!published) {
+          return yield* _(
+            Effect.fail(
+              new UnexpectedServerError({
+                status: 500,
+                message: `Failed to publish dashboard update: ${updateEvent}`,
+              })
+            )
+          )
+        }
+      }).pipe(Effect.provideService(DashboardBootstrapState, bootstrapState))
 
     const updateStream = Stream.fromPubSub(updateEventPubSub)
 
@@ -106,7 +113,7 @@ export const UpdatesServerLive = Layer.scopedDiscard(
             cause
           )
         ),
-        Effect.fork
+        Effect.forkScoped
       )
     )
 
@@ -120,7 +127,7 @@ export const UpdatesServerLive = Layer.scopedDiscard(
         Effect.catchAllDefect((e) =>
           Effect.logError('Defect while syncing users', e)
         ),
-        Effect.fork
+        Effect.forkScoped
       )
     )
 
@@ -141,21 +148,32 @@ export const UpdatesServerLive = Layer.scopedDiscard(
         Effect.catchAllDefect((e) =>
           Effect.log('Defect while syncing connections', e)
         ),
-        Effect.fork
+        Effect.forkScoped
       )
     )
 
-    yield* _(
-      RouterLive.pipe(
-        HttpServer.serve(HttpMiddleware.logger),
-        Layer.provide(ServerLive),
-        Layer.tap((_) =>
-          Effect.flatMap(updatesServerPortConfig, (p) =>
-            Effect.log(`Running updates server on port ${p}`)
-          )
-        ),
-        Layer.launch
-      )
-    )
+    return handleUpdate
   })
-).pipe(Layer.withSpan('Updates server'))
+)
+
+const UpdatesApiGroupLive = HttpApiBuilder.group(
+  DashboardInternalApiSpecification,
+  'Updates',
+  (h) =>
+    h
+      .handle('reportNewUser', () =>
+        DashboardUpdates.pipe(Effect.flatMap((update) => update('newUser')))
+      )
+      .handle('reportNewConnections', () =>
+        DashboardUpdates.pipe(
+          Effect.flatMap((update) => update('newConnections'))
+        )
+      )
+)
+
+export const UpdatesServerLive = makeInternalApiServer(
+  HttpApiBuilder.api(DashboardInternalApiSpecification).pipe(
+    Layer.provide(UpdatesApiGroupLive)
+  ),
+  {port: updatesServerPortConfig.pipe(Config.map(Option.some))}
+).pipe(Layer.provide(DashboardUpdatesLive), Layer.withSpan('Updates server'))

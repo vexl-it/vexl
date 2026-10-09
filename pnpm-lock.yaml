@@ -489,6 +489,9 @@ importers:
       '@vexl-next/domain':
         specifier: 0.0.0
         version: link:../../packages/domain
+      '@vexl-next/rest-api':
+        specifier: 0.0.0
+        version: link:../../packages/rest-api
       '@vexl-next/server-utils':
         specifier: 0.0.0
         version: link:../../packages/server-utils

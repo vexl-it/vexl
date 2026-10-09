@@ -62,6 +62,7 @@
   "notifications.DISAPPROVE_CONTACT_REVEAL.body": "您的手机号码交换的请求已被拒绝。",
   "notifications.NEW_OFFERS_IN_MARKETPLACE.title": "市场上的新报价",
   "notifications.NEW_OFFERS_IN_MARKETPLACE.body": "市场上有新的报价。打开应用程序来查看它们。",
+  "notifications.NEARBY_OFFER.title": "附近有新出价",
   "notifications.MARKETPLACE_READY.title": "你的交易市场已准备就绪",
   "notifications.MARKETPLACE_READY.body": "你的社交圈中有报价等你查看。",
   "notifications.NEW_CONTACTS_ON_DEVICE.title": "您的通讯录未被完全同步",

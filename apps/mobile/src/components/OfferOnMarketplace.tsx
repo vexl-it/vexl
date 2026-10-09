@@ -18,8 +18,12 @@ import {
 } from '../state/clubs/atom/clubsWithMembersAtom'
 import {type ClubWithMembers} from '../state/clubs/domain'
 import {useVisibleCommonFriendsForOffer} from '../state/marketplace/hooks/useVisibleCommonFriendsForOffer'
+import {
+  isOnlyNearbyOffer,
+  showsNearbyTag,
+} from '../state/marketplace/utils/isOnlyNearbyOffer'
 import {isProductOfferMissingCategory} from '../state/marketplace/utils/isProductOfferMissingCategory'
-import {getOtherSideFriendLevel} from '../utils/chat/getOtherSideFriendLevel'
+import {getOfferAuthorFriendLevelLabel} from '../utils/chat/getOtherSideFriendLevel'
 import {useNavigateToChatDetail} from '../utils/chat/goToChatDetail'
 import {isOfferExpired} from '../utils/isOfferExpired'
 import formatSpokenLanguages from '../utils/localization/formatSpokenLanguages'
@@ -37,6 +41,7 @@ import {offerLocationLabelsAtom} from '../utils/offerLocationLabelsAtom'
 import {randomSeedFromOfferInfo} from '../utils/RandomSeed'
 import {offerRerequestLimitDaysAtom} from '../utils/versionService/atoms'
 import {AnonymousAvatarOrClubImage} from './AnonymousAvatar'
+import NearbyTag from './NearbyTag'
 
 const noClubNamesAtom = atom<string[]>([])
 const noSmallestClubAtom = atom(Option.none<ClubWithMembers>())
@@ -103,15 +108,15 @@ export default function OfferOnMarketplace({
 
   const name = isMine
     ? t('common.me')
-    : (getOtherSideFriendLevel({offerInfo: offer.offerInfo, t}) ??
-      t('offer.friendOfFriend'))
+    : getOfferAuthorFriendLevelLabel({offerInfo: offer.offerInfo, t})
 
   const commonFriendsCount = visibleCommonFriends.commonFriends.length
-  const commonFriendsText = !isMine
-    ? t('marketplace.commonFriendsFormatted', {
-        localizedString: formatInteger(commonFriendsCount, locale),
-      })
-    : undefined
+  const commonFriendsText =
+    !isMine && !isOnlyNearbyOffer(offer.offerInfo)
+      ? t('marketplace.commonFriendsFormatted', {
+          localizedString: formatInteger(commonFriendsCount, locale),
+        })
+      : undefined
 
   const clubNames = isMine
     ? myClubNames
@@ -131,7 +136,9 @@ export default function OfferOnMarketplace({
     ? t('marketplace.missingProductCategoriesSuggestion.cardLabel')
     : isExpiredMyOffer
       ? t('editOffer.expiredOffer')
-      : undefined
+      : ownershipInfo?.nearbyKey
+        ? t('editOffer.sharingNearby')
+        : undefined
 
   const premiumLabel = useMemo(
     () =>
@@ -193,6 +200,9 @@ export default function OfferOnMarketplace({
       }
       markBadge={markBadge}
       name={name}
+      nameTag={
+        !isMine && showsNearbyTag(offer.offerInfo) ? <NearbyTag /> : undefined
+      }
       textTag={
         <TextTag
           variant={

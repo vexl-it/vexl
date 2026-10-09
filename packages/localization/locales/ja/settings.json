@@ -151,6 +151,8 @@
   "appSettings.changeCurrency": "通貨を変更",
   "appSettings.appearanceTitle": "外観",
   "appSettings.allowScreencapture": "スクリーンキャプチャを許可",
+  "appSettings.receiveNearbyOffers": "近くのオファーを受け取る",
+  "appSettings.receiveNearbyOffersNote": "近くにいる人がBluetoothで共有したオファーをVexlが探します。",
   "appSettings.appearance.light": "ライトモード",
   "appSettings.appearance.dark": "ダークモード",
   "appSettings.appearance.system": "端末に合わせる"

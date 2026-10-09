@@ -16,6 +16,7 @@ import {BooleanFromString} from '@vexl-next/generic-utils/src/effect-helpers/Boo
 import {
   CryptoBoxCypher,
   cryptoBoxUnseal,
+  CryptoError,
 } from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {ServerOffer} from '@vexl-next/rest-api/src/services/offer/contracts'
 import {Effect, Either, flow, Schema} from 'effect'
@@ -104,7 +105,7 @@ const ensureOfferFromSupportedClient = (
 // TODO write unit test for this function
 export default function decryptOffer(
   privateKey: KeyHolder.PrivateKeyHolder,
-  privateKeyV2: KeyHolder.KeyPairV2
+  privateKeyV2?: KeyHolder.KeyPairV2
 ): (
   serverOffer: ServerOffer
 ) => Effect.Effect<
@@ -137,7 +138,13 @@ export default function decryptOffer(
           ? eciesDecryptE(privateKey.privateKeyPemBase64)
           : flow(
               Schema.decode(CryptoBoxCypher),
-              Effect.flatMap(cryptoBoxUnseal(privateKeyV2))
+              Effect.flatMap((cypher) =>
+                privateKeyV2
+                  ? cryptoBoxUnseal(privateKeyV2)(cypher)
+                  : Effect.fail(
+                      new CryptoError({message: 'Missing V2 key pair'})
+                    )
+              )
             ),
         Effect.flatMap(
           Schema.decodeUnknown(Schema.parseJson(OfferPrivatePart))

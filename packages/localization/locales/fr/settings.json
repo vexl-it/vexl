@@ -152,6 +152,8 @@
   "appSettings.changeCurrency": "Changer de devise",
   "appSettings.appearanceTitle": "Apparence",
   "appSettings.allowScreencapture": "Autoriser les captures d'écran",
+  "appSettings.receiveNearbyOffers": "Recevoir les offres à proximité",
+  "appSettings.receiveNearbyOffersNote": "Vexl cherchera via Bluetooth les offres partagées par les gens près de toi.",
   "appSettings.appearance.light": "Mode clair",
   "appSettings.appearance.dark": "Mode sombre",
   "appSettings.appearance.system": "Suivre l'appareil"

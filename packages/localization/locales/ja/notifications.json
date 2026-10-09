@@ -62,6 +62,7 @@
   "notifications.DISAPPROVE_CONTACT_REVEAL.body": "電話番号の交換要求が拒否されました。",
   "notifications.NEW_OFFERS_IN_MARKETPLACE.title": "マーケットプレイスの新しいオファー",
   "notifications.NEW_OFFERS_IN_MARKETPLACE.body": "マーケットプレイスに新しいオファーがあります。それらを表示するにはアプリを開いてください。",
+  "notifications.NEARBY_OFFER.title": "近くに新しいオファー",
   "notifications.MARKETPLACE_READY.title": "マーケットプレイスの準備ができました",
   "notifications.MARKETPLACE_READY.body": "あなたのつながりからの売買提案が届いています。見てみよう。",
   "notifications.NEW_CONTACTS_ON_DEVICE.title": "連絡先が完全に同期されていません",

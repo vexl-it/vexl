@@ -62,6 +62,7 @@
   "notifications.DISAPPROVE_CONTACT_REVEAL.body": "Twoja prośba o wymianę numerów telefonów została odrzucona.",
   "notifications.NEW_OFFERS_IN_MARKETPLACE.title": "Nowe oferty na rynku",
   "notifications.NEW_OFFERS_IN_MARKETPLACE.body": "Są nowe oferty na rynku. Otwórz aplikację, aby je zobaczyć.",
+  "notifications.NEARBY_OFFER.title": "Nowa oferta w pobliżu",
   "notifications.MARKETPLACE_READY.title": "Twój Marketplace jest gotowy",
   "notifications.MARKETPLACE_READY.body": "Czekają na Ciebie oferty z Twojej sieci. Sprawdź je.",
   "notifications.NEW_CONTACTS_ON_DEVICE.title": "Twoje kontakty nie są w pełni zsynchronizowane",

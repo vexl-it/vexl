@@ -6,7 +6,12 @@ import {
 } from '@vexl-next/domain/src/general/offers'
 import extractOwnerInfoFromOwnerPrivatePayload from '@vexl-next/resources-utils/src/offers/extractOwnerInfoFromOwnerPrivatePayload'
 import {Array, Option, pipe} from 'effect'
+import {
+  hasNearbySource,
+  isOnlyNearbyOffer,
+} from '../../../utils/isOnlyNearbyOffer'
 import {offerWithoutSourceOrNone} from '../../../utils/offerWithoutSourceOrNone'
+import {combineIncomingOffers} from './combineIncomingOffers'
 
 // Process offers that have adminId in private part but do not have ownershipInfo.
 // Returns the same reference when there is nothing to extract, and None when
@@ -26,6 +31,33 @@ const addOwnershipInfoFromPrivatePayloadIfMissing = (
   return Option.some(offer)
 }
 
+// Nearby offers are fetched separately from contact and club offers, so an
+// update from one side must not drop the source known only to the other.
+// NEARBY is removed only through `removedOffersIds.nearby`.
+const withSourcesKnownOnlyToStoredOffer = (
+  incomingOffer: OfferInfo,
+  storedOffer: OfferInfo
+): OfferInfo => {
+  if (isOnlyNearbyOffer(incomingOffer))
+    return pipe(
+      combineIncomingOffers([incomingOffer, storedOffer]),
+      Option.getOrElse(() => incomingOffer)
+    )
+
+  if (hasNearbySource(storedOffer))
+    return {
+      ...incomingOffer,
+      privatePart: {
+        ...incomingOffer.privatePart,
+        friendLevel: Array.union(incomingOffer.privatePart.friendLevel, [
+          'NEARBY',
+        ]),
+      },
+    }
+
+  return incomingOffer
+}
+
 /**
  * Merges incoming offers into the stored offers in O(stored + incoming).
  *
@@ -43,6 +75,7 @@ export const mergeIncomingOffersToState = ({
   removedOffersIds: {
     clubs: ReadonlyArray<{clubUuid: ClubUuid; removedIds: readonly OfferId[]}>
     contacts: readonly OfferId[]
+    nearby: readonly OfferId[]
   }
 }): OneOfferInState[] => {
   const incomingOffersById = new Map(
@@ -52,6 +85,7 @@ export const mergeIncomingOffersToState = ({
     Array.map(storedOffers, (one) => one.offerInfo.offerId)
   )
   const removedContactsOfferIds = new Set(removedOffersIds.contacts)
+  const removedNearbyOfferIds = new Set(removedOffersIds.nearby)
   const removedClubUuidsByOfferId = new Map<OfferId, ClubUuid[]>()
   for (const {clubUuid, removedIds} of removedOffersIds.clubs) {
     for (const offerId of removedIds) {
@@ -71,7 +105,12 @@ export const mergeIncomingOffersToState = ({
     const removedFromContacts = removedContactsOfferIds.has(
       offer.offerInfo.offerId
     )
-    if (Array.isEmptyArray(removedFromClubs) && !removedFromContacts) {
+    const removedFromNearby = removedNearbyOfferIds.has(offer.offerInfo.offerId)
+    if (
+      Array.isEmptyArray(removedFromClubs) &&
+      !removedFromContacts &&
+      !removedFromNearby
+    ) {
       // Nothing was removed, but keep normalizing degenerate offers (no
       // friend level left, or CLUB friend level with no clubs) the same way
       // the removal path does, so they do not survive in state forever.
@@ -82,11 +121,11 @@ export const mergeIncomingOffersToState = ({
           Array.isNonEmptyReadonlyArray(clubIds))
       if (isNormalized) return Option.some(offer)
     }
-    return offerWithoutSourceOrNone(
-      offer,
+    return offerWithoutSourceOrNone(offer, {
       removedFromClubs,
-      removedFromContacts
-    )
+      removedFromContacts,
+      removedFromNearby,
+    })
   }
 
   const mergedStoredOffers = Array.filterMap(storedOffers, (storedOffer) => {
@@ -99,7 +138,10 @@ export const mergeIncomingOffersToState = ({
       incomingOffer !== undefined
         ? ({
             ...storedOffer,
-            offerInfo: incomingOffer,
+            offerInfo: withSourcesKnownOnlyToStoredOffer(
+              incomingOffer,
+              storedOffer.offerInfo
+            ),
           } satisfies OneOfferInState)
         : storedOffer
 

@@ -2,7 +2,6 @@ import * as NodeHttpServer from '@effect/platform-node/NodeHttpServer'
 import {type Client} from '@effect/platform/HttpApiClient'
 import {type ServeError} from '@effect/platform/HttpServerError'
 import {
-  HttpApiBuilder,
   HttpApiClient,
   HttpClient,
   HttpClientRequest,
@@ -20,6 +19,7 @@ import {
 import {Context, Effect, flow, Layer, Ref} from 'effect/index'
 import {type ReadonlyRecord} from 'effect/Record'
 import {type Simplify} from 'effect/Types'
+import {serveInternalApi} from '../InternalServer'
 import {type ServerCrypto} from '../ServerCrypto'
 import {
   createDummyAuthHeaders,
@@ -85,21 +85,11 @@ export class InternalServerTestClient extends Context.Tag(
   'InternalServerTestClient'
 )<InternalServerTestClient, HttpClient.HttpClient>() {}
 
-/**
- * Serves an internal `HttpApi` on its own test server, mirroring
- * `makeInternalApiServer` (fresh build => its own router).
- */
 export const internalApiTestServerLayer = <E, R>(
   apiLive: Layer.Layer<HttpApi.Api, E, R>
 ): Layer.Layer<InternalServerTestClient, E | ServeError, R> =>
   Layer.effect(InternalServerTestClient, HttpClient.HttpClient).pipe(
-    Layer.provide(
-      HttpApiBuilder.serve().pipe(
-        Layer.provide(apiLive),
-        Layer.provideMerge(NodeHttpServer.layerTest)
-      )
-    ),
-    Layer.fresh
+    Layer.provide(serveInternalApi(apiLive, NodeHttpServer.layerTest))
   )
 
 export const createNodeTestingInternalApp = <

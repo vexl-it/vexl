@@ -3,21 +3,14 @@ import {Array, Effect, Option, Schema} from 'effect/index'
 import {atom} from 'jotai'
 import {addNotificationToCenterActionAtom} from '.'
 import {apiAtom} from '../../../api'
-import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
+import {atomWithParsedMmkvStorageWithImmediateSaveOption} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
 import reportError from '../../../utils/reportError'
 
 const VexlProductNotificationsCursorRecord = Schema.Struct({
   lastFetchedId: Schema.optionalWith(VexlProductNotificationUuid, {
     as: 'Option',
   }),
-  // This should be set to a date from which on we want to fetch notifications.
-  // This will automatically be set when user first uses notifications and should not be chagned,
-  // but it should be used  when calling getVexlProductNotifications endpoint to make sure we fetch all notifications that were created
-  // since the user first used notifications.
-  //
-  // If we omit this, all historic notificaitons will be fetched, we don't want that. We want to fetch
-  // only notifications that were created since the user first used notifications, and we consider that date
-  // to be the date when cursor was created for the first time, so we set it to current date when it's not provided.
+  // Exclude notifications published before this installation became active.
   activeSince: Schema.optionalWith(Schema.DateFromString, {
     default: () => new Date(),
   }),
@@ -26,7 +19,10 @@ const VexlProductNotificationsCursorRecord = Schema.Struct({
 type VexlProductNotificationsCursorRecord =
   typeof VexlProductNotificationsCursorRecord.Type
 
-const vexlProductNotificationsCursorAtom = atomWithParsedMmkvStorage(
+const {
+  atom: vexlProductNotificationsCursorAtom,
+  setAndSaveImmediatelyAtom: setVexlProductNotificationsCursorImmediatelyAtom,
+} = atomWithParsedMmkvStorageWithImmediateSaveOption(
   'vexlProductNotificationsCursor',
   {
     lastFetchedId: Option.none(),
@@ -72,6 +68,7 @@ export const fetchVexlProductNotificationsActionAtom = atom(null, (get, set) =>
     const cursor = get(vexlProductNotificationsCursorAtom)
 
     set(vexlProductNotificationsFetchStateAtom, {state: 'loading'})
+    set(setVexlProductNotificationsCursorImmediatelyAtom, cursor)
 
     const response = yield* _(
       contentApi.getVexlProductNotifications({

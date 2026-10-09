@@ -1,10 +1,8 @@
 import {type AvailableDateTimeOption} from '@vexl-next/domain/src/general/tradeChecklist'
 import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {
-  RadiobuttonCircleEmpty,
-  RadiobuttonCircleFilled,
+  TimeSuggestionCard as TimeSuggestionCardView,
   Typography,
-  XStack,
   XmarkCancelClose,
   YStack,
   tokens,
@@ -14,7 +12,7 @@ import {Schema} from 'effect/index'
 import {useAtomValue, useSetAtom, type Atom} from 'jotai'
 import {type DateTime} from 'luxon'
 import React, {useCallback} from 'react'
-import {FlatList, TouchableOpacity} from 'react-native'
+import {FlatList} from 'react-native'
 import type {TradeChecklistStackScreenProps} from '../../../../../../navigationTypes'
 import atomKeyExtractor from '../../../../../../utils/atomUtils/atomKeyExtractor'
 import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
@@ -52,47 +50,16 @@ function TimeSuggestionCard({
   onPress: (item: DateTime) => void
 }): React.ReactElement {
   const item = useAtomValue(itemAtom)
-  const theme = useTheme()
-  const itemColor = item.outdated
-    ? theme.foregroundTertiary.get()
-    : item.selected
-      ? theme.accentHighlightPrimary.get()
-      : theme.foregroundPrimary.get()
 
   return (
-    <TouchableOpacity
-      disabled={item.outdated}
-      activeOpacity={0.85}
+    <TimeSuggestionCardView
+      label={item.title}
+      selected={item.selected}
+      outdated={item.outdated}
       onPress={() => {
         onPress(item.data)
       }}
-    >
-      <XStack
-        alignItems="center"
-        gap="$4"
-        backgroundColor={
-          item.selected
-            ? theme.accentYellowSecondary.get()
-            : theme.backgroundSecondary.get()
-        }
-        borderRadius="$5"
-        paddingHorizontal="$5"
-        paddingVertical="$5"
-        opacity={item.outdated ? 0.5 : 1}
-      >
-        {item.selected ? (
-          <RadiobuttonCircleFilled
-            color={itemColor}
-            size={tokens.size[7].val}
-          />
-        ) : (
-          <RadiobuttonCircleEmpty color={itemColor} size={tokens.size[7].val} />
-        )}
-        <Typography variant="paragraph" color={itemColor}>
-          {item.title}
-        </Typography>
-      </XStack>
-    </TouchableOpacity>
+    />
   )
 }
 

@@ -2,14 +2,8 @@ import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {type UserName} from '@vexl-next/domain/src/general/UserName.brand'
 import {
-  Circle,
-  IconTag,
-  PeopleUsers,
-  TextTag,
-  Typography,
-  useTheme,
-  XStack,
-  YStack,
+  OfferAuthorBanner as OfferAuthorBannerView,
+  offerAuthorBannerAvatarSize,
 } from '@vexl-next/ui'
 import {Array, Option, pipe} from 'effect'
 import {useAtomValue} from 'jotai'
@@ -43,7 +37,6 @@ function OfferAuthorBanner({
   readonly clubIdsForAvatar?: readonly ClubUuid[]
 }): React.ReactElement {
   const {t} = useTranslation()
-  const theme = useTheme()
   const visibleCommonFriends = useVisibleCommonFriendsForOffer(offer.offerInfo)
   const commonFriendsCount = visibleCommonFriends.commonFriends.length
   const locale = useAtomValue(formattingLocaleAtom)
@@ -89,114 +82,51 @@ function OfferAuthorBanner({
 
   const shouldDisplayClubImage = clubImageUrl && userImage?.type !== 'imageUri'
 
+  const avatar = shouldDisplayClubImage ? (
+    <AnonymousAvatarOrClubImage
+      grayScale={grayAvatar ?? false}
+      customSize={offerAuthorBannerAvatarSize}
+      seed={randomSeedFromOfferInfo(offer.offerInfo)}
+      clubImageUrl={clubImageUrl}
+    />
+  ) : userImage ? (
+    <UserAvatar
+      grayScale={grayAvatar}
+      userImage={userImage}
+      width={offerAuthorBannerAvatarSize}
+      height={offerAuthorBannerAvatarSize}
+    />
+  ) : (
+    <AnonymousAvatarOrClubImage
+      grayScale={grayAvatar ?? false}
+      customSize={offerAuthorBannerAvatarSize}
+      seed={randomSeedFromOfferInfo(offer.offerInfo)}
+      clubImageUrl={clubImageUrl}
+    />
+  )
+
   return (
-    <XStack gap="$3" alignItems="flex-start">
-      {shouldDisplayClubImage ? (
-        <AnonymousAvatarOrClubImage
-          grayScale={grayAvatar ?? false}
-          customSize={40}
-          seed={randomSeedFromOfferInfo(offer.offerInfo)}
-          clubImageUrl={clubImageUrl}
-        />
-      ) : userImage ? (
-        <UserAvatar
-          grayScale={grayAvatar}
-          userImage={userImage}
-          width={40}
-          height={40}
-        />
-      ) : (
-        <AnonymousAvatarOrClubImage
-          grayScale={grayAvatar ?? false}
-          customSize={40}
-          seed={randomSeedFromOfferInfo(offer.offerInfo)}
-          clubImageUrl={clubImageUrl}
-        />
-      )}
-      <YStack flex={1} minWidth={0}>
-        <XStack alignItems="center" justifyContent="space-between">
-          <Typography
-            variant="descriptionBold"
-            color="$foregroundPrimary"
-            numberOfLines={1}
-            flexShrink={1}
-            minWidth={0}
-          >
-            {isMine ? t('common.me') : friendLevelText}
-          </Typography>
-          <XStack alignItems="center" gap="$1" flexShrink={0}>
-            <TextTag
-              variant={isOffering ? 'offer' : 'request'}
-              label={
-                isMine
-                  ? isOffering
-                    ? t('marketplace.iHave')
-                    : t('marketplace.iWant')
-                  : isOffering
-                    ? t('marketplace.has')
-                    : t('marketplace.wants')
-              }
-            />
-            <IconTag
-              variant={getIconTagVariant(
-                offer.offerInfo.publicPart.listingType
-              )}
-            />
-          </XStack>
-        </XStack>
-        {clubLabel != null ? (
-          <XStack gap="$2" alignItems="center" flexShrink={1} minWidth={0}>
-            <Typography
-              variant="micro"
-              color="$foregroundSecondary"
-              numberOfLines={1}
-              flexShrink={1}
-              minWidth={0}
-            >
-              {clubLabel}
-            </Typography>
-            <Circle
-              size="$2"
-              backgroundColor={theme.foregroundSecondary.get()}
-            />
-            {!isMine && (
-              <XStack gap="$1" alignItems="center" flexShrink={1} minWidth={0}>
-                <PeopleUsers
-                  size={16}
-                  color={theme.foregroundSecondary.get()}
-                />
-                <Typography
-                  variant="micro"
-                  color="$foregroundSecondary"
-                  numberOfLines={1}
-                  flexShrink={1}
-                  minWidth={0}
-                >
-                  {t('offer.numberOfCommon', {
-                    number: localizedCommonFriendsCount,
-                  })}
-                </Typography>
-              </XStack>
-            )}
-          </XStack>
-        ) : !isMine ? (
-          <XStack alignItems="center" gap="$1" flexShrink={1} minWidth={0}>
-            <PeopleUsers size={16} color={theme.foregroundSecondary.get()} />
-            <Typography
-              variant="micro"
-              color="$foregroundSecondary"
-              numberOfLines={1}
-              flexShrink={1}
-              minWidth={0}
-            >
-              {t('offer.numberOfCommon', {
-                number: localizedCommonFriendsCount,
-              })}
-            </Typography>
-          </XStack>
-        ) : null}
-      </YStack>
-    </XStack>
+    <OfferAuthorBannerView
+      avatar={avatar}
+      name={isMine ? t('common.me') : friendLevelText}
+      textTagVariant={isOffering ? 'offer' : 'request'}
+      textTagLabel={
+        isMine
+          ? isOffering
+            ? t('marketplace.iHave')
+            : t('marketplace.iWant')
+          : isOffering
+            ? t('marketplace.has')
+            : t('marketplace.wants')
+      }
+      iconTagVariant={getIconTagVariant(offer.offerInfo.publicPart.listingType)}
+      clubLabel={clubLabel}
+      commonFriendsLabel={
+        isMine
+          ? undefined
+          : t('offer.numberOfCommon', {number: localizedCommonFriendsCount})
+      }
+    />
   )
 }
 

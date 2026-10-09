@@ -2,7 +2,7 @@ import {Effect} from 'effect'
 import type {Atom, WritableAtom} from 'jotai'
 import {atom, useAtomValue} from 'jotai'
 import React, {useCallback, useEffect, useRef, useState} from 'react'
-import {Dimensions, Modal} from 'react-native'
+import {Dimensions} from 'react-native'
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -15,6 +15,7 @@ import {getTokens, styled} from 'tamagui'
 
 import {SizableText, Stack, XStack, YStack} from '../primitives'
 import {Button, type ButtonVariant} from './Button'
+import {DialogModal} from './DialogModal'
 import {KeyboardAvoidingView} from './KeyboardAvoidingView'
 
 const SCREEN_HEIGHT = Dimensions.get('window').height
@@ -167,13 +168,13 @@ export function Dialog({
   )
 
   return (
-    <Modal transparent visible animationType="none" onRequestClose={onClose}>
+    <DialogModal onRequestClose={onClose}>
       {avoidKeyboard !== false ? (
         <KeyboardAvoidingView>{content}</KeyboardAvoidingView>
       ) : (
         content
       )}
-    </Modal>
+    </DialogModal>
   )
 }
 

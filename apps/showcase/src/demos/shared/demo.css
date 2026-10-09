@@ -1,0 +1,330 @@
+.demo-body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 64px;
+}
+
+.demo-phones {
+  display: flex;
+  gap: 40px;
+  /* Halos sit behind both phones. */
+  isolation: isolate;
+}
+
+.demo-phone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin: 0;
+  /* The phone's height must fit the viewport. */
+  width: min(300px, calc(64vh * 390 / 844));
+}
+
+.demo-captions {
+  width: 340px;
+}
+
+.demo-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.demo-step {
+  position: relative;
+  display: flex;
+  gap: 16px;
+  width: 100%;
+  padding: 16px;
+  overflow: hidden;
+  border: none;
+  border-radius: 18px;
+  background: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  opacity: 0.4;
+  transition:
+    opacity 400ms ease-out,
+    background-color 400ms ease-out;
+}
+
+.demo-step:hover,
+.demo-step:focus-visible {
+  opacity: 0.75;
+}
+
+.demo-step:focus-visible {
+  outline: 2px solid var(--accentYellowPrimary);
+}
+
+.demo-step.is-active {
+  opacity: 1;
+  background-color: var(--backgroundSecondary);
+}
+
+.demo-step-progress {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 3px;
+  transform-origin: left;
+  background: var(--accentYellowPrimary);
+  animation: demo-step-progress linear both;
+}
+
+@keyframes demo-step-progress {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+@media (max-width: 1100px) {
+  .demo-body {
+    flex-direction: column;
+    gap: 40px;
+  }
+
+  .demo-captions {
+    width: min(100%, 640px);
+  }
+}
+
+@media (max-width: 900px) {
+  .demo-phone {
+    width: min(300px, 78vw, calc(64vh * 390 / 844));
+  }
+
+  .demo-step:not(.is-active) .demo-step-text {
+    display: none;
+  }
+
+  .demo-body[data-focus='you'] .demo-phone[data-side='them'],
+  .demo-body[data-focus='them'] .demo-phone[data-side='you'] {
+    display: none;
+  }
+
+  .demo-phone {
+    animation: demo-fade-in 400ms ease-out both;
+  }
+}
+
+/* Phone */
+
+.demo-phone-device {
+  position: relative;
+  width: 100%;
+}
+
+.phone-bezel {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 3.5%;
+  border-radius: 16% / 7.4%;
+  background: #111;
+  box-shadow:
+    0 0 0 1.5px #3a3a3a,
+    0 30px 80px -20px
+      color-mix(in srgb, var(--accentYellowPrimary) 30%, transparent);
+}
+
+.phone-screen {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 390 / 844;
+  overflow: hidden;
+  border-radius: 12.5% / 5.8%;
+  background: var(--backgroundPrimary);
+}
+
+.phone-viewport {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  transform-origin: top left;
+}
+
+.phone-status-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 30px 0 44px;
+  color: var(--foregroundPrimary);
+  pointer-events: none;
+}
+
+.phone-island {
+  width: 120px;
+  height: 34px;
+  border-radius: 20px;
+  background: #000;
+}
+
+.phone-home-indicator {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  width: 134px;
+  height: 5px;
+  translate: -50% 0;
+  border-radius: 3px;
+  background: var(--foregroundPrimary);
+}
+
+/* Scenes */
+
+.demo-layer {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  isolation: isolate;
+  background: var(--backgroundPrimary);
+}
+
+.demo-sheet-in {
+  animation: demo-sheet-in 450ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes demo-sheet-in {
+  from {
+    transform: translateY(100%);
+  }
+}
+
+.demo-sheet-out {
+  animation: demo-sheet-out 400ms cubic-bezier(0.4, 0, 0.8, 0.4) both;
+}
+
+@keyframes demo-sheet-out {
+  to {
+    transform: translateY(100%);
+    visibility: hidden;
+  }
+}
+
+.demo-push-in {
+  animation: demo-push-in 400ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes demo-push-in {
+  from {
+    transform: translateX(100%);
+  }
+}
+
+.demo-push-out {
+  animation: demo-push-out 350ms cubic-bezier(0.4, 0, 0.8, 0.4) both;
+}
+
+@keyframes demo-push-out {
+  to {
+    transform: translateX(100%);
+    visibility: hidden;
+  }
+}
+
+.demo-arrive {
+  animation: demo-arrive 320ms ease-out both;
+}
+
+@keyframes demo-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+@keyframes demo-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* A touch as screen recordings show it: lands, presses, lifts. */
+.demo-tap {
+  translate: -50% -50%;
+  opacity: 0;
+  pointer-events: none;
+  animation: demo-tap 650ms ease-out both;
+}
+
+@keyframes demo-tap {
+  0% {
+    opacity: 0;
+    transform: scale(1.5);
+  }
+  25% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  45% {
+    opacity: 0.6;
+    transform: scale(0.85);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.1);
+  }
+}
+
+.demo-press {
+  animation: demo-press 300ms ease-out 100ms;
+}
+
+@keyframes demo-press {
+  40% {
+    transform: scale(0.96);
+  }
+}
+
+.demo-notification {
+  position: absolute;
+  top: 54px;
+  left: 10px;
+  right: 10px;
+  z-index: 1;
+  animation: demo-notification-in 450ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes demo-notification-in {
+  from {
+    transform: translateY(-140%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .demo-sheet-in,
+  .demo-push-in,
+  .demo-notification,
+  .demo-arrive,
+  .demo-press,
+  .demo-phone,
+  .demo-step {
+    animation: none;
+    transition: none;
+  }
+
+  .demo-sheet-out,
+  .demo-push-out {
+    display: none;
+  }
+
+  /* Tamagui's display class would win over display: none. */
+  .demo-tap {
+    visibility: hidden;
+  }
+}

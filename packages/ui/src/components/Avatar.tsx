@@ -66,7 +66,6 @@ export function Avatar({
         <FilterImage
           source={source}
           style={{width: px, height: px}}
-          resizeMode="cover"
           filters={grayscale ? GRAYSCALE_FILTER : undefined}
         />
       </Stack>

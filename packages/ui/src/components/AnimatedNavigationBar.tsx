@@ -1,6 +1,6 @@
 import {atom, useSetAtom} from 'jotai'
 import React, {useCallback} from 'react'
-import {type LayoutChangeEvent} from 'react-native'
+import {Platform, type LayoutChangeEvent} from 'react-native'
 import Animated, {
   interpolateColor,
   useAnimatedStyle,
@@ -102,7 +102,11 @@ export function AnimatedNavigationBar({
   scrollY,
 }: AnimatedNavigationBarProps): React.JSX.Element {
   const theme = useTheme()
-  const backgroundSecondary = theme.backgroundSecondary.get()
+  // On the web `get()` returns a CSS variable, which Reanimated can't interpolate.
+  const backgroundSecondary =
+    Platform.OS === 'web'
+      ? theme.backgroundSecondary.val
+      : theme.backgroundSecondary.get()
   const insets = useSafeAreaInsets()
   const setNavBarHeight = useSetAtom(navBarHeightAtom)
 

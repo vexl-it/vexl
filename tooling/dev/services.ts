@@ -150,9 +150,9 @@ export const SERVICES: readonly RunnableApp[] = [
     ],
     buildEnv: (ctx) => ({
       FEEDBACK_URL_TO_REDIRECT_TO: httpUrl(ctx, 'feedbackService'),
-      // Existing webhook mechanism: notify the dashboard's updates server when a
-      // new user registers, so its UI updates live.
-      DASHBOARD_NEW_USER_HOOK: `${httpUrl(ctx, 'dashboardUpdates')}/new-user`,
+      // Notify the dashboard's updates server when a new user registers, so
+      // its UI updates live.
+      DASHBOARD_UPDATES_URL: httpUrl(ctx, 'dashboardUpdates'),
       ...ctx.cfg.dummyLogin,
       ...stringifyValues(sc.userService),
     }),
@@ -175,9 +175,9 @@ export const SERVICES: readonly RunnableApp[] = [
     buildEnv: (ctx) => ({
       // Optional feature; real token via .env.local enables Expo push.
       EXPO_ACCESS_TOKEN: '',
-      // Existing webhook mechanism: notify the dashboard's updates server when
-      // contacts are imported, so its connection metrics update live.
-      DASHBOARD_CONTACTS_IMPORTED_HOOK: `${httpUrl(ctx, 'dashboardUpdates')}/new-connections`,
+      // Notify the dashboard's updates server when contacts are imported, so
+      // its connection metrics update live.
+      DASHBOARD_UPDATES_URL: httpUrl(ctx, 'dashboardUpdates'),
       INTERNAL_SERVER_PORT: String(ctx.ports.contactServiceInternal),
       ...stringifyValues(sc.contactService),
       ...s3Env(ctx),

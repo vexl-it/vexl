@@ -37,10 +37,6 @@ export const loginCodeDummyForAll = Config.option(
   Config.string('LOGIN_CODE_DUMMY_FOR_ALL')
 )
 
-export const dashboardNewUserHookConfig = Config.option(
-  Config.string('DASHBOARD_NEW_USER_HOOK')
-)
-
 export const feedbackServiceUrlToRedirectToConfig = Config.string(
   'FEEDBACK_URL_TO_REDIRECT_TO'
 )

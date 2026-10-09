@@ -213,10 +213,7 @@ function RootNavigation(): React.ReactElement {
             <Stack.Screen name="ChatTags" component={ChatTagsScreen} />
             <Stack.Screen
               name="CommonFriends"
-              options={{
-                animation: 'slide_from_bottom',
-                presentation: 'modal',
-              }}
+              options={slideFromBottomCardOptions}
               component={CommonFriendsScreen}
             />
             <Stack.Screen name="ClubDetail" component={ClubDetail} />

@@ -1,5 +1,6 @@
 import {FlashList} from '@shopify/flash-list'
 import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
+import {type FriendLevel} from '@vexl-next/domain/src/general/offers'
 import {
   EditRow,
   Image,
@@ -143,11 +144,38 @@ function keyExtractor(item: ListItem): string {
 }
 
 function ListHeader({
+  friendLevel,
+  isMine,
   hasCommonFriends,
 }: {
+  readonly friendLevel: readonly FriendLevel[]
+  readonly isMine: boolean
   readonly hasCommonFriends: boolean
 }): React.ReactElement {
   const {t} = useTranslation()
+
+  const text = (() => {
+    if (Array.contains(friendLevel, 'FIRST_DEGREE')) {
+      return `${t(
+        isMine
+          ? 'commonFriends.header.directFriendYouHaveTheirNumber'
+          : 'commonFriends.header.directFriendTheyHaveYourNumber'
+      )} ${t(
+        hasCommonFriends
+          ? 'offer.dontForgetToVerifyTheIdentity'
+          : 'offer.beCautiousWeCannotVerify'
+      )}`
+    }
+    if (
+      Array.contains(friendLevel, 'CLUB') &&
+      !Array.contains(friendLevel, 'SECOND_DEGREE')
+    ) {
+      return t('commonFriends.header.club')
+    }
+    return `${t('commonFriends.header.friendOfFriend')} ${t(
+      'offer.dontForgetToVerifyTheIdentity'
+    )}`
+  })()
 
   return (
     <Typography
@@ -155,9 +183,7 @@ function ListHeader({
       color="$foregroundPrimary"
       marginBottom="$5"
     >
-      {hasCommonFriends
-        ? `${t('offer.youSeeThisOfferBecause')} ${t('offer.dontForgetToVerifyTheIdentity')}`
-        : t('offer.youSeeThisClubOfferBecause')}
+      {text}
     </Typography>
   )
 }
@@ -248,7 +274,7 @@ type Props = RootStackScreenProps<'CommonFriends'>
 
 function CommonFriendsScreen({
   route: {
-    params: {contactsHashes, verifiedHashes, clubs},
+    params: {contactsHashes, verifiedHashes, clubs, friendLevel, isMine},
   },
 }: Props): React.ReactElement {
   const {t} = useTranslation()
@@ -258,8 +284,14 @@ function CommonFriendsScreen({
   const hasCommonFriends = contactsHashes.length > 0
 
   const ListHeaderWithProps = useCallback(
-    () => <ListHeader hasCommonFriends={hasCommonFriends} />,
-    [hasCommonFriends]
+    () => (
+      <ListHeader
+        friendLevel={friendLevel}
+        isMine={isMine}
+        hasCommonFriends={hasCommonFriends}
+      />
+    ),
+    [friendLevel, hasCommonFriends, isMine]
   )
 
   const renderItem = useCallback(({item}: {item: ListItem}) => {

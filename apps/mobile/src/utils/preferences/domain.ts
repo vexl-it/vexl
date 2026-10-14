@@ -7,7 +7,6 @@ import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.b
 import {Schema} from 'effect'
 import {FiatOrSats} from '../../state/marketplace/domain'
 import {getDeviceLanguage} from '../localization/appLanguage'
-import {currencies} from '../localization/currency'
 import getDefaultSpokenLanguage from '../localization/getDefaultSpokenLanguage'
 
 export const AppThemeMode = Schema.Literal('light', 'dark', 'system')
@@ -73,7 +72,7 @@ export const Preferences = Schema.Struct({
     default: () => true,
   }),
   defaultCurrency: Schema.optionalWith(CurrencyCode, {
-    default: () => currencies.USD.code,
+    default: () => 'USD',
   }),
   runTasksInParallel: Schema.optionalWith(Schema.Boolean, {
     default: () => true,

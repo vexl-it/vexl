@@ -3,6 +3,7 @@ import {Schema} from 'effect'
 /** Everything business people can tweak in the app animation. All data is fictional. */
 
 export const StepId = Schema.Literal(
+  'welcome',
   'phone',
   'contacts',
   'browse',
@@ -74,6 +75,7 @@ export type AppAnimationConfig = typeof AppAnimationConfig.Type
 
 export const defaultConfig: AppAnimationConfig = {
   captions: {
+    welcome: 'Get started with Vexl',
     phone: 'Enter your phone number',
     contacts: 'Upload contacts',
     browse: 'Browse offers on the dashboard',

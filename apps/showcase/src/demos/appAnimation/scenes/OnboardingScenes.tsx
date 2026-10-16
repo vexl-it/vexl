@@ -1,10 +1,12 @@
 import {
   Button,
   ContactsGraphic,
+  FaqStayAnonymous,
   ProgressDialog,
   Stack,
   Typography,
   useTheme,
+  VexlTextGraphic,
   XStack,
   YStack,
   type ProgressDialogProps,
@@ -169,6 +171,65 @@ function PhoneNumberGroups({
 }
 
 /** Login: the phone number, typed on the phone pad, footer above the keyboard. */
+/** The app's first screen, as LoginFlow's Intro1Screen shows it. */
+export function WelcomeScene({at}: SceneProps): React.JSX.Element {
+  const insets = useSafeAreaInsets()
+  return (
+    <YStack
+      flex={1}
+      backgroundColor="$backgroundPrimary"
+      paddingTop={Math.max(insets.top, 20)}
+      paddingBottom={Math.max(insets.bottom, 16)}
+      paddingHorizontal="$5"
+    >
+      <Stack alignItems="center" mt="$5">
+        <VexlTextGraphic variant="light" animate height={27} />
+      </Stack>
+      <YStack flex={1} alignItems="center" justifyContent="center" gap="$9">
+        <FaqStayAnonymous animate width={330} height={236} />
+        <YStack gap="$4" width="100%">
+          <Typography
+            variant="heading3"
+            color="$foregroundPrimary"
+            textAlign="center"
+          >
+            Take back your freedom to transact
+          </Typography>
+          <Typography
+            variant="paragraphSmall"
+            color="$foregroundSecondary"
+            textAlign="center"
+          >
+            Trade bitcoin with people you know. No one watching.
+          </Typography>
+        </YStack>
+      </YStack>
+      <YStack gap="$4">
+        <Typography
+          variant="paragraphSmall"
+          color="$foregroundPrimary"
+          textAlign="center"
+        >
+          By continuing, you agree to Vexl{' '}
+          <Typography
+            variant="paragraphSmall"
+            color="$accentYellowPrimary"
+            textDecorationLine="underline"
+          >
+            Terms of use
+          </Typography>
+          .
+        </Typography>
+        <Tap on={at('tapGetStarted')}>
+          <Button onPress={noop} width="100%">
+            Get started
+          </Button>
+        </Tap>
+      </YStack>
+    </YStack>
+  )
+}
+
 export function PhoneNumberScene({
   config,
   script,

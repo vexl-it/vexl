@@ -10,6 +10,7 @@ import {
 import type {AnimationOffer, AppAnimationConfig, StepId} from './config'
 
 export type AppScreen =
+  | 'welcome'
   | 'phoneNumber'
   | 'contactsImport'
   | 'marketplace'
@@ -46,6 +47,8 @@ const fallbackOffer: AnimationOffer = {
 }
 
 export type AppCue =
+  | 'tapGetStarted'
+  | 'phoneOpen'
   | 'tapPhoneContinue'
   | 'contactsOpen'
   | 'tapImportContacts'
@@ -124,6 +127,10 @@ export function buildScript(config: AppAnimationConfig): AppAnimationScript {
     t = typingEnd(typing)
     return typing
   }
+
+  // 0. The app's first screen.
+  const tapGetStarted = wait(2800)
+  const phoneOpen = wait(300)
 
   // 1. Phone number.
   wait(600)
@@ -211,6 +218,8 @@ export function buildScript(config: AppAnimationConfig): AppAnimationScript {
   const end = wait(3500)
 
   const cues = {
+    tapGetStarted,
+    phoneOpen,
     tapPhoneContinue,
     contactsOpen,
     tapImportContacts,
@@ -267,7 +276,8 @@ export function buildScript(config: AppAnimationConfig): AppAnimationScript {
   } satisfies Record<TypingKey, Typing>
 
   const screens: ReadonlyArray<PhoneScreen<AppScreen>> = [
-    {key: 'phoneNumber', open: 0},
+    {key: 'welcome', open: 0},
+    {key: 'phoneNumber', open: phoneOpen, transition: 'push'},
     {key: 'contactsImport', open: contactsOpen, transition: 'push'},
     {key: 'marketplace', open: marketplaceOpen, transition: 'fade'},
     {
@@ -306,7 +316,8 @@ export function buildScript(config: AppAnimationConfig): AppAnimationScript {
     readonly start: number
     readonly hold?: number
   }> = [
-    {id: 'phone', start: 0},
+    {id: 'welcome', start: 0},
+    {id: 'phone', start: phoneOpen},
     {id: 'contacts', start: contactsOpen},
     {id: 'browse', start: marketplaceOpen, hold: scrollToChosen + 1500},
     {

@@ -14,7 +14,11 @@ import {
   ChosenOfferDetailScene,
   RequestScene,
 } from './scenes/OfferScenes'
-import {ContactsImportScene, PhoneNumberScene} from './scenes/OnboardingScenes'
+import {
+  ContactsImportScene,
+  PhoneNumberScene,
+  WelcomeScene,
+} from './scenes/OnboardingScenes'
 import type {AppAnimationScript, AppScreen, At, SceneProps} from './script'
 
 function Scene({
@@ -22,6 +26,8 @@ function Scene({
   ...props
 }: SceneProps & {screen: AppScreen}): React.JSX.Element {
   switch (screen) {
+    case 'welcome':
+      return <WelcomeScene {...props} />
     case 'phoneNumber':
       return <PhoneNumberScene {...props} />
     case 'contactsImport':

@@ -16,6 +16,7 @@ export interface SettingsPanelProps {
 }
 
 const stepLabels: Record<StepId, string> = {
+  welcome: 'Welcome screen',
   phone: 'Phone number',
   contacts: 'Upload contacts',
   browse: 'Browse offers',

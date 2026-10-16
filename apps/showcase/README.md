@@ -46,7 +46,7 @@ Measurements based on `onLayout` include the phone's scale transform on the web,
 
 ## App animation (`/app-animation-1`)
 
-One phone walks through the whole app for marketing reels: phone number, contacts, browsing offers, an optional new offer, a request, the chat, the trade checklist, an optional "meeting successful" screen with confetti and the Vexl end card. `main.tsx` picks the page from the path; `public/vercel.json` rewrites the path to `index.html` on Vercel.
+One phone walks through the whole app for marketing reels: the welcome screen, phone number, contacts, browsing offers, an optional new offer, a request, the chat, the trade checklist, an optional "meeting successful" screen with confetti and the Vexl end card. `main.tsx` picks the page from the path; `public/vercel.json` rewrites the path to `index.html` on Vercel.
 
 - `src/demos/appAnimation/config.ts`: everything the page lets people edit, as an `effect/Schema`, with fictional defaults. `src/page/appAnimation/useStoredConfig.ts` keeps edits in localStorage.
 - `src/demos/appAnimation/script.ts`: `buildScript(config)` lays the cues out one after another, so typed text and the optional sections retime everything after them. Skipped sections get `Infinity` cues.

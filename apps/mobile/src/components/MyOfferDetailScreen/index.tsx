@@ -52,6 +52,7 @@ import PriceUpToStep from '../CRUDOfferFlow/components/PriceUpToStep'
 import ProductCategoryStep from '../CRUDOfferFlow/components/ProductCategoryStep'
 import {type EditableOfferField} from '../CRUDOfferFlow/offerSetupSteps'
 import {useFriendLevelLabels} from '../CRUDOfferFlow/useFriendLevelLabels'
+import NearbySharingMenuItem from './components/NearbySharingMenuItem'
 
 type Props = RootStackScreenProps<'MyOfferDetail'>
 
@@ -252,7 +253,15 @@ function MyOfferDetailScreen({
             >
               {offerTitle}
             </Typography>
-            <TextTag variant={offerStatusVariant} label={offerStatusLabel} />
+            <YStack gap="$2" alignItems="flex-end">
+              <TextTag variant={offerStatusVariant} label={offerStatusLabel} />
+              {offerOption.value.ownershipInfo?.nearbyKey ? (
+                <TextTag
+                  variant="neutral"
+                  label={t('editOffer.sharingNearby')}
+                />
+              ) : null}
+            </YStack>
           </XStack>
 
           {listingType === 'PRODUCT' ? (
@@ -357,6 +366,7 @@ function MyOfferDetailScreen({
               }}
             />
           ) : null}
+          <NearbySharingMenuItem offerId={offerId} />
           {hasUnsavedChanges ? (
             <Button
               variant="primary"

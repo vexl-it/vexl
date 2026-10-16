@@ -5,6 +5,7 @@ import {
 import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {
   type IntendedConnectionLevel,
+  type NearbyOfferKey,
   type OfferAdminId,
   type OfferInfo,
   type OfferPublicPart,
@@ -16,6 +17,7 @@ import decryptOffer, {
   type DecryptingOfferError,
   type NonCompatibleOfferVersionError,
 } from './decryptOffer'
+import {uploadNearbyPrivatePart} from './nearby/nearbySharing'
 import updateOwnerPrivatePayload from './updateOwnerPrivatePayload'
 import encryptOfferPublicPayload, {
   type PublicPartEncryptionError,
@@ -34,6 +36,7 @@ export default function updateOffer({
   ownerKeyPairV2,
   intendedConnectionLevel,
   intendedClubs,
+  nearbyKey,
 }: {
   offerApi: OfferApi
   adminId: OfferAdminId
@@ -43,6 +46,7 @@ export default function updateOffer({
   ownerKeyPairV2: KeyPairV2
   intendedConnectionLevel: IntendedConnectionLevel
   intendedClubs: readonly ClubUuid[]
+  nearbyKey?: NearbyOfferKey
 }): Effect.Effect<
   OfferInfo,
   | ApiErrorUpdatingOffer
@@ -71,6 +75,12 @@ export default function updateOffer({
         intendedClubs,
       })
     )
+
+    if (nearbyKey) {
+      yield* _(
+        uploadNearbyPrivatePart({offerApi, adminId, symmetricKey, nearbyKey})
+      )
+    }
 
     const updatedOffer = yield* _(
       offerApi.updateOffer({

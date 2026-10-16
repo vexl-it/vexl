@@ -24,6 +24,10 @@ export function combineIncomingOffers([
       offerA.privatePart.commonFriends,
       offerB.privatePart.commonFriends
     ),
+    verifiedCommonFriends: Array.union(
+      offerA.privatePart.verifiedCommonFriends,
+      offerB.privatePart.verifiedCommonFriends
+    ),
     friendLevel: Array.union(
       offerA.privatePart.friendLevel,
       offerB.privatePart.friendLevel

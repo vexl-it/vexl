@@ -151,6 +151,8 @@
   "appSettings.changeCurrency": "Смени валутата",
   "appSettings.appearanceTitle": "Външен вид",
   "appSettings.allowScreencapture": "Позволи снимки на екрана",
+  "appSettings.receiveNearbyOffers": "Получавай оферти наблизо",
+  "appSettings.receiveNearbyOffersNote": "Vexl ще търси през Bluetooth оферти, които хора близо до теб споделят.",
   "appSettings.appearance.light": "Светъл режим",
   "appSettings.appearance.dark": "Тъмен режим",
   "appSettings.appearance.system": "Според устройството"

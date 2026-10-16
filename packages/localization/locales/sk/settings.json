@@ -153,6 +153,8 @@
   "appSettings.changeCurrency": "Zmeniť menu",
   "appSettings.appearanceTitle": "Vzhľad",
   "appSettings.allowScreencapture": "Povoliť snímky obrazovky",
+  "appSettings.receiveNearbyOffers": "Prijímať ponuky z okolia",
+  "appSettings.receiveNearbyOffersNote": "Vexl bude cez Bluetooth hľadať ponuky, ktoré zdieľajú ľudia v tvojom okolí.",
   "appSettings.appearance.light": "Svetlý režim",
   "appSettings.appearance.dark": "Tmavý režim",
   "appSettings.appearance.system": "Podľa zariadenia"

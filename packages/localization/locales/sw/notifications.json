@@ -62,6 +62,7 @@
   "notifications.DISAPPROVE_CONTACT_REVEAL.body": "Ombi lako la kubadilishana namba za simu limekataliwa.",
   "notifications.NEW_OFFERS_IN_MARKETPLACE.title": "Ofa mpya katika soko",
   "notifications.NEW_OFFERS_IN_MARKETPLACE.body": "Kuna ofa mpya katika soko. Fungua programu kuona.",
+  "notifications.NEARBY_OFFER.title": "Ofa mpya karibu nawe",
   "notifications.MARKETPLACE_READY.title": "Soko lako liko tayari",
   "notifications.MARKETPLACE_READY.body": "Ofa kutoka kwa mtandao wako zinakusubiri. Ziangalie.",
   "notifications.NEW_CONTACTS_ON_DEVICE.title": "Mawasiliano yako hayajasawazishwa kikamilifu",

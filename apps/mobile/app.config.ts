@@ -96,10 +96,19 @@ export default {
       'usesNonExemptEncryption': false,
     },
     'infoPlist': {
-      'UIBackgroundModes': ['fetch', 'remote-notification', 'processing'],
+      'UIBackgroundModes': [
+        'fetch',
+        'remote-notification',
+        'processing',
+        // Nearby offers (modules/vexl-nearby-ble).
+        'bluetooth-central',
+        'bluetooth-peripheral',
+      ],
       'LSApplicationQueriesSchemes': ['itms-apps'],
       'BGTaskSchedulerPermittedIdentifiers': ['com.transistorsoft.fetch'],
       'CFBundleAllowMixedLocalizations': true,
+      'NSBluetoothAlwaysUsageDescription':
+        'Vexl uses Bluetooth to share your offers with people nearby and to discover offers around you.',
       'NSLocationWhenInUseUsageDescription':
         'Vexl needs access to you location to show your position on the map. Location will never be share with anyone (even ourselves).',
       // App Group shared with the notification service extension (NSE). Read

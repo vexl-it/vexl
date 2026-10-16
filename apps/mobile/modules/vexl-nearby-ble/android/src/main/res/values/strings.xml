@@ -1,0 +1,5 @@
+<resources>
+  <string name="vexl_nearby_ble_notification_channel">Nearby offers</string>
+  <string name="vexl_nearby_ble_notification_sharing_title">Vexl is sharing your offers nearby</string>
+  <string name="vexl_nearby_ble_notification_looking_title">Vexl is looking for offers nearby</string>
+</resources>

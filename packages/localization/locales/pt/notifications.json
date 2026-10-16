@@ -62,6 +62,7 @@
   "notifications.DISAPPROVE_CONTACT_REVEAL.body": "A outra pessoa optou por não partilhar o número.",
   "notifications.NEW_OFFERS_IN_MARKETPLACE.title": "Novas ofertas no mercado",
   "notifications.NEW_OFFERS_IN_MARKETPLACE.body": "Há novas ofertas no mercado. Abra o aplicativo para visualizá-las.",
+  "notifications.NEARBY_OFFER.title": "Nova oferta por perto",
   "notifications.MARKETPLACE_READY.title": "Seu Marketplace está pronto",
   "notifications.MARKETPLACE_READY.body": "Há ofertas da sua rede esperando por você. Dá uma olhada.",
   "notifications.NEW_CONTACTS_ON_DEVICE.title": "Os seus contactos não estão completamente sincronizados",

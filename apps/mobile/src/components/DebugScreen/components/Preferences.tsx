@@ -14,6 +14,7 @@ const preferencesToEdit = [
   'runTasksInParallel',
   'showVerifiedContacts',
   'notesBoardEnabled',
+  'nearbyOffersEnabled',
 ] as const
 
 type PreferenceKey = (typeof preferencesToEdit)[number]

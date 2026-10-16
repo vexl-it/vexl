@@ -76,6 +76,9 @@ dist/
 # expo - use expo prebuild to generate those folders
 /ios
 /android
+# Gradle output of local expo modules
+/modules/*/android/build/
+/modules/*/android/.gradle/
 
 /credentials/*
 /credentials.json

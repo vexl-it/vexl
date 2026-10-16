@@ -29,6 +29,7 @@ export interface OfferCardProps {
   readonly avatar?: React.ReactNode
   readonly markBadge?: OfferCardMarkBadge
   readonly name: string
+  readonly nameTag?: React.ReactNode
   readonly premiumLabel?: string
   readonly textTag: React.ReactNode
   readonly iconTag: React.ReactNode
@@ -84,6 +85,7 @@ export function OfferCard({
   avatar,
   markBadge,
   name,
+  nameTag,
   premiumLabel,
   textTag,
   iconTag,
@@ -193,9 +195,11 @@ export function OfferCard({
                     variant="descriptionBold"
                     color="$foregroundPrimary"
                     numberOfLines={1}
+                    flexShrink={1}
                   >
                     {name}
                   </Typography>
+                  {nameTag}
                 </XStack>
                 <XStack gap="$1" alignItems="center">
                   {textTag}
@@ -208,13 +212,17 @@ export function OfferCard({
         ) : (
           <XStack gap="$2" alignItems="center" justifyContent="space-between">
             <YStack gap="$1" flexShrink={1} minWidth={0}>
-              <Typography
-                variant="descriptionBold"
-                color="$foregroundPrimary"
-                numberOfLines={1}
-              >
-                {name}
-              </Typography>
+              <XStack gap="$2" alignItems="center" minWidth={0}>
+                <Typography
+                  variant="descriptionBold"
+                  color="$foregroundPrimary"
+                  numberOfLines={1}
+                  flexShrink={1}
+                >
+                  {name}
+                </Typography>
+                {nameTag}
+              </XStack>
               {subRow}
             </YStack>
             <XStack gap="$1" alignItems="center">

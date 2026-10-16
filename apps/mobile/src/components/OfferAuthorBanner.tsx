@@ -20,13 +20,18 @@ import {
   useGetAllClubsNamesForIds,
 } from '../state/clubs/atom/clubsWithMembersAtom'
 import {useVisibleCommonFriendsForOffer} from '../state/marketplace/hooks/useVisibleCommonFriendsForOffer'
-import {getOtherSideFriendLevel} from '../utils/chat/getOtherSideFriendLevel'
+import {
+  isOnlyNearbyOffer,
+  showsNearbyTag,
+} from '../state/marketplace/utils/isOnlyNearbyOffer'
+import {getOfferAuthorFriendLevelLabel} from '../utils/chat/getOtherSideFriendLevel'
 import {formatInteger} from '../utils/localization/formatting'
 import {formattingLocaleAtom} from '../utils/localization/formattingLocaleAtom'
 import {useTranslation} from '../utils/localization/I18nProvider'
 import {getIconTagVariant, getIsOffering} from '../utils/offerHelpers'
 import {randomSeedFromOfferInfo} from '../utils/RandomSeed'
 import {AnonymousAvatarOrClubImage} from './AnonymousAvatar'
+import NearbyTag from './NearbyTag'
 import UserAvatar from './UserAvatar'
 
 function OfferAuthorBanner({
@@ -70,8 +75,7 @@ function OfferAuthorBanner({
   )
   const friendLevelText =
     realUserName ??
-    getOtherSideFriendLevel({offerInfo: offer.offerInfo, t}) ??
-    t('offer.friendOfFriend')
+    getOfferAuthorFriendLevelLabel({offerInfo: offer.offerInfo, t})
   const clubImageUrl = Option.isSome(avatarClub)
     ? avatarClub.value.club.clubImageUrl
     : pipe(
@@ -115,15 +119,18 @@ function OfferAuthorBanner({
       )}
       <YStack flex={1} minWidth={0}>
         <XStack alignItems="center" justifyContent="space-between">
-          <Typography
-            variant="descriptionBold"
-            color="$foregroundPrimary"
-            numberOfLines={1}
-            flexShrink={1}
-            minWidth={0}
-          >
-            {isMine ? t('common.me') : friendLevelText}
-          </Typography>
+          <XStack gap="$2" alignItems="center" flexShrink={1} minWidth={0}>
+            <Typography
+              variant="descriptionBold"
+              color="$foregroundPrimary"
+              numberOfLines={1}
+              flexShrink={1}
+              minWidth={0}
+            >
+              {isMine ? t('common.me') : friendLevelText}
+            </Typography>
+            {!isMine && showsNearbyTag(offer.offerInfo) ? <NearbyTag /> : null}
+          </XStack>
           <XStack alignItems="center" gap="$1" flexShrink={0}>
             <TextTag
               variant={isOffering ? 'offer' : 'request'}
@@ -179,7 +186,7 @@ function OfferAuthorBanner({
               </XStack>
             )}
           </XStack>
-        ) : !isMine ? (
+        ) : !isMine && !isOnlyNearbyOffer(offer.offerInfo) ? (
           <XStack alignItems="center" gap="$1" flexShrink={1} minWidth={0}>
             <PeopleUsers size={16} color={theme.foregroundSecondary.get()} />
             <Typography

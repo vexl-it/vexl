@@ -1,8 +1,10 @@
 import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {
+  type NearbyOfferKey,
   type OfferId,
   type OneOfferInState,
 } from '@vexl-next/domain/src/general/offers'
+import {getRemovedNearbyOffers} from '@vexl-next/resources-utils/src/offers/nearby/getRemovedNearbyOffers'
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
 import {Array, Effect, Option, pipe, Record} from 'effect'
 import reportError from '../../../../../utils/reportError'
@@ -12,16 +14,19 @@ export const getRemovedOffersIds = ({
   storedOffers,
   offersApi,
   storedClubs,
+  nearbyKeysByOfferId,
 }: {
   storedOffers: OneOfferInState[]
   offersApi: OfferApi
   storedClubs: Record<ClubUuid, ClubKeys>
+  nearbyKeysByOfferId: Record<OfferId, NearbyOfferKey>
 }): Effect.Effect<{
   removedContactOfferIds: readonly OfferId[]
   removedClubsOfferIdsToClubUuid: ReadonlyArray<{
     clubUuid: ClubUuid
     removedIds: readonly OfferId[]
   }>
+  removedNearbyOfferIds: readonly OfferId[]
   // False when any removed-offer check failed and was swallowed, so callers can
   // avoid recording a failed reconciliation as successful.
   succeeded: boolean
@@ -95,17 +100,33 @@ export const getRemovedOffersIds = ({
     Effect.all
   )
 
+  const removedNearbyOffers = pipe(
+    getRemovedNearbyOffers({
+      offerApi: offersApi,
+      keysByOfferId: nearbyKeysByOfferId,
+    }),
+    Effect.option
+  )
+
   return Effect.all({
     contact: removedContactOffers,
     clubs: removedClubsOffers,
+    nearby: removedNearbyOffers,
   }).pipe(
-    Effect.map(({contact, clubs}) => ({
+    Effect.map(({contact, clubs, nearby}) => ({
       removedContactOfferIds: Option.getOrElse(
         contact,
         (): readonly OfferId[] => []
       ),
       removedClubsOfferIdsToClubUuid: Array.getSomes(clubs),
-      succeeded: Option.isSome(contact) && Array.every(clubs, Option.isSome),
+      removedNearbyOfferIds: Option.getOrElse(
+        nearby,
+        (): readonly OfferId[] => []
+      ),
+      succeeded:
+        Option.isSome(contact) &&
+        Array.every(clubs, Option.isSome) &&
+        Option.isSome(nearby),
     }))
   )
 }

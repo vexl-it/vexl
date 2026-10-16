@@ -62,6 +62,7 @@
   "notifications.DISAPPROVE_CONTACT_REVEAL.body": "Tvoja žiadosť o odhalenie telefónneho čísla bola zamietnutá.",
   "notifications.NEW_OFFERS_IN_MARKETPLACE.title": "Nové ponuky na marketplace",
   "notifications.NEW_OFFERS_IN_MARKETPLACE.body": "Máš nové ponuky na marketplace",
+  "notifications.NEARBY_OFFER.title": "Nová ponuka nablízku",
   "notifications.MARKETPLACE_READY.title": "Tvoje trhovisko je pripravené",
   "notifications.MARKETPLACE_READY.body": "Čakajú na teba ponuky z tvojej siete. Pozri sa.",
   "notifications.NEW_CONTACTS_ON_DEVICE.title": "Nemáš synchronizované všetky svoje kontakty",

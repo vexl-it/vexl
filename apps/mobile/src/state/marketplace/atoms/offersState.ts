@@ -132,7 +132,7 @@ export const updateOrFilterOffersFromDeletedClubsActionAtom = atom(
     set(
       offersAtom,
       Array.filterMap((offer) =>
-        offerWithoutSourceOrNone(offer, deletedClubs, false)
+        offerWithoutSourceOrNone(offer, {removedFromClubs: deletedClubs})
       )
     )
   }

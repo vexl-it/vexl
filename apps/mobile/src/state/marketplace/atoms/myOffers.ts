@@ -197,6 +197,7 @@ export const updateMyOfferPrivatePayloadActionAtom = atom(
           privatePart: payloadPrivate,
         },
         ownershipInfo: {
+          ...offerToUpdate.ownershipInfo,
           adminId,
           intendedConnectionLevel,
           intendedClubs,

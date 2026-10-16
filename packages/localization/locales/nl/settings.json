@@ -151,6 +151,8 @@
   "appSettings.changeCurrency": "Valuta wijzigen",
   "appSettings.appearanceTitle": "Weergave",
   "appSettings.allowScreencapture": "Schermafbeeldingen toestaan",
+  "appSettings.receiveNearbyOffers": "Aanbiedingen in de buurt ontvangen",
+  "appSettings.receiveNearbyOffersNote": "Vexl zoekt via Bluetooth naar aanbiedingen die mensen bij jou in de buurt delen.",
   "appSettings.appearance.light": "Lichte modus",
   "appSettings.appearance.dark": "Donkere modus",
   "appSettings.appearance.system": "Apparaat volgen"

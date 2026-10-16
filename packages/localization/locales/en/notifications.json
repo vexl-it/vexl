@@ -62,6 +62,7 @@
   "notifications.DISAPPROVE_CONTACT_REVEAL.body": "They chose not to share their number.",
   "notifications.NEW_OFFERS_IN_MARKETPLACE.title": "New offers in the market",
   "notifications.NEW_OFFERS_IN_MARKETPLACE.body": "Take a look before they're gone.",
+  "notifications.NEARBY_OFFER.title": "New offer nearby",
   "notifications.MARKETPLACE_READY.title": "Your marketplace is ready",
   "notifications.MARKETPLACE_READY.body": "Offers from your network are waiting. Take a look.",
   "notifications.NEW_CONTACTS_ON_DEVICE.title": "Your contacts are not fully synced",

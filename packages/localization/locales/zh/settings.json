@@ -151,6 +151,8 @@
   "appSettings.changeCurrency": "更改货币",
   "appSettings.appearanceTitle": "外观",
   "appSettings.allowScreencapture": "允许截屏",
+  "appSettings.receiveNearbyOffers": "接收附近的出价",
+  "appSettings.receiveNearbyOffersNote": "Vexl 会通过 Bluetooth 搜索你附近的人分享的出价。",
   "appSettings.appearance.light": "浅色模式",
   "appSettings.appearance.dark": "深色模式",
   "appSettings.appearance.system": "跟随设备"

@@ -15,6 +15,7 @@ import {
   navigationRef,
 } from '../utils/navigation'
 import {ClubAdmissionInternalNotificationData} from '../utils/notifications/clubNotifications'
+import {NearbyOffersInternalNotificationData} from '../utils/notifications/nearbyOffersNotification'
 import {
   MARKETPLACE_READY,
   NEW_CONTACTS_TO_SYNC,
@@ -53,7 +54,8 @@ const reactOnNotificationOpenAtom = atom(
         Schema.Union(
           OpenBrowserLinkNotificationData,
           ClubAdmissionInternalNotificationData,
-          TradeReminderNotificationData
+          TradeReminderNotificationData,
+          NearbyOffersInternalNotificationData
         )
       )(data)
 
@@ -72,6 +74,16 @@ const reactOnNotificationOpenAtom = atom(
         navigationRef.navigate('ClubDetail', {
           clubUuid: knownNotificationDataO.value.clubUuid,
         })
+      } else if (
+        Option.isSome(knownNotificationDataO) &&
+        Schema.is(NearbyOffersInternalNotificationData)(
+          knownNotificationDataO.value
+        ) &&
+        navigationRef.isReady()
+      ) {
+        const {offerId} = knownNotificationDataO.value
+        if (offerId) navigationRef.navigate('OfferDetail', {offerId})
+        else navigationRef.navigate('InsideTabs', {screen: 'Marketplace'})
       } else if (
         Option.isSome(knownNotificationDataO) &&
         Schema.is(TradeReminderNotificationData)(

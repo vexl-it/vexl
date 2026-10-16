@@ -6,6 +6,7 @@ import {
 } from '@vexl-next/domain/src/general/offers'
 import {Array, Option, pipe} from 'effect'
 import {type ChatWithMessages} from '../../state/chat/domain'
+import {isOnlyNearbyOffer} from '../../state/marketplace/utils/isOnlyNearbyOffer'
 import {type TFunction} from '../localization/I18nProvider'
 
 interface GetOtherSideFriendLevelParams {
@@ -59,8 +60,24 @@ export function getOtherSideFriendLevel({
     return t('offer.friendOfFriend')
   if (friendLevelToUse.includes('CLUB')) return t('offer.clubMember')
 
-  // NOT_SPECIFIED (e.g. reposted notes) - let callers fall back to a name.
+  // NEARBY (strangers met over Bluetooth) and NOT_SPECIFIED (e.g. reposted
+  // notes) - let callers fall back to a name.
   return undefined
+}
+
+export function getOfferAuthorFriendLevelLabel({
+  offerInfo,
+  t,
+}: {
+  offerInfo: OfferInfo
+  t: TFunction
+}): string {
+  return (
+    getOtherSideFriendLevel({offerInfo, t}) ??
+    (isOnlyNearbyOffer(offerInfo)
+      ? t('offer.nearby')
+      : t('offer.friendOfFriend'))
+  )
 }
 
 function getChat(chat: Chat | ChatWithMessages): Chat {

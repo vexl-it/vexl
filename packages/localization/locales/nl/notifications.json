@@ -62,6 +62,7 @@
   "notifications.DISAPPROVE_CONTACT_REVEAL.body": "Diegene heeft ervoor gekozen om het nummer niet te delen.",
   "notifications.NEW_OFFERS_IN_MARKETPLACE.title": "Nieuwe aanbiedingen op marktplaats",
   "notifications.NEW_OFFERS_IN_MARKETPLACE.body": "Er zijn nieuwe aanbiedingen op marketplace. Open de app om ze te bekijken.",
+  "notifications.NEARBY_OFFER.title": "Nieuwe aanbieding in de buurt",
   "notifications.MARKETPLACE_READY.title": "Je Marktplaats staat klaar",
   "notifications.MARKETPLACE_READY.body": "Er staan aanbiedingen uit je netwerk voor je klaar. Kijk maar.",
   "notifications.NEW_CONTACTS_ON_DEVICE.title": "Uw contacten worden niet helemaal gesynchroniseerd",

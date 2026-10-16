@@ -91,17 +91,10 @@ const framingStyle = (framing: Framing, zoom: number): React.CSSProperties => {
 }
 
 /** The Vexl app tile bouncing in and away before the phone appears; black on light colors. */
-function LogoIntro({colors}: {colors: ReelColors}): React.JSX.Element {
-  const onLight = colors.logo === 'dark'
+function LogoIntro(): React.JSX.Element {
   return (
     <div className="reel-intro">
-      <div className={onLight ? 'reel-intro-tile is-black' : 'reel-intro-tile'}>
-        <VexlTextGraphic
-          variant={onLight ? 'light' : 'dark'}
-          width={150}
-          height={46}
-        />
-      </div>
+      <img className="reel-intro-tile" src="/vexl-app-icon.jpg" alt="" />
     </div>
   )
 }
@@ -174,9 +167,7 @@ export function ReelStage({
             <PhoneFrame bezel={false}>{children}</PhoneFrame>
           </div>
         </div>
-        {motion?.intro ? (
-          <LogoIntro key={motion.stepKey} colors={motion.colors} />
-        ) : null}
+        {motion?.intro ? <LogoIntro key={motion.stepKey} /> : null}
         {ended ? (
           <div className="reel-end">
             <div className={motion ? 'reel-end-logo' : undefined}>

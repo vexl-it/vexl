@@ -1,5 +1,5 @@
 import {tokens} from '@vexl-next/ui'
-import {Array, Option, Order, pipe} from 'effect'
+import {Array, Option, pipe} from 'effect'
 import type {
   ReelCamera,
   ReelColor,
@@ -10,6 +10,7 @@ import type {
   AppAnimationScript,
   AppAnimationStep,
 } from '../../demos/appAnimation/script'
+import {typingEnd} from '../../demos/shared/playback'
 
 /** Which part of the screen the camera frames; zoomed framings push the rest out of view. */
 export type Framing = Exclude<ReelCamera, 'auto'>
@@ -62,39 +63,31 @@ export const reelColors = (
         })
       )
 
-/** Where the camera moves by itself, following what each moment of the script is about. */
-function autoFraming({cues}: AppAnimationScript, playhead: number): Framing {
+/** Where the camera moves by itself: zoomed on what the viewer should read, back to full before screens change. */
+function autoFraming(
+  {cues, typing}: AppAnimationScript,
+  playhead: number
+): Framing {
   const keyframes: ReadonlyArray<readonly [number, Framing]> = [
-    [0, 'full'],
-    [cues.phoneOpen + 400, 'bottom'],
-    [cues.contactsOpen, 'full'],
-    [cues.importingContacts, 'bottom'],
-    [cues.marketplaceOpen + 300, 'top'],
-    [cues.tapNewOffer - 300, 'full'],
-    [cues.formOpen + 600, 'bottom'],
-    [cues.formClose, 'full'],
-    [cues.detailOpen + 400, 'top'],
-    [cues.tapSendMessage - 300, 'bottom'],
-    [cues.sendMessageOpen + 300, 'top'],
-    [cues.chatOpen + 300, 'bottom'],
-    [cues.approvedNotification - 200, 'top'],
-    [cues.approved + 300, 'bottom'],
-    [cues.tapChecklist - 500, 'top'],
-    [cues.checklistOpen + 300, 'full'],
-    [cues.dateTimeOpen + 300, 'top'],
-    [cues.dateQueued, 'full'],
-    [cues.locationOpen + 300, 'top'],
-    [cues.locationQueued, 'full'],
-    [cues.checklistSent + 300, 'bottom'],
+    // The contacts import counting up in the bottom sheet.
+    [cues.tapImportContacts, 'bottom'],
+    [cues.marketplaceOpen, 'full'],
+    // The typed offer description, who will see it and the encryption.
+    [cues.networkDone, 'bottom'],
+    [cues.published, 'full'],
+    // The chosen offer and the typed request; the sent request and the approval read in full.
+    [cues.detailOpen, 'top'],
+    [typingEnd(typing.request), 'full'],
+    // The conversation growing above the input.
+    [cues.approved, 'bottom'],
+    [cues.theirLetsMeetReply, 'full'],
+    // The agreed time and place.
+    [cues.checklistSent, 'bottom'],
     [cues.successOpen, 'tilt'],
     [cues.endOpen, 'full'],
   ]
   return pipe(
     keyframes,
-    Array.filter(([time]) => Number.isFinite(time)),
-    Array.sort(
-      Order.mapInput(Order.number, ([time]: readonly [number, Framing]) => time)
-    ),
     Array.findLast(([time]) => playhead >= time),
     Option.map(([, framing]) => framing),
     Option.getOrElse((): Framing => 'full')

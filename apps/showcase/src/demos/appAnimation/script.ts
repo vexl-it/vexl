@@ -117,7 +117,7 @@ export interface AppAnimationScript {
 }
 
 const never = Number.POSITIVE_INFINITY
-const messageKeystrokeMs = 55
+const messageKeystrokeMs = 40
 
 /** Ms after the start of every moment, in time order; skipped sections never happen. */
 export function buildScript(config: AppAnimationConfig): AppAnimationScript {
@@ -136,93 +136,94 @@ export function buildScript(config: AppAnimationConfig): AppAnimationScript {
       : 0
 
   // 0. The app's first screen.
-  const tapGetStarted = wait(2800)
-  const phoneOpen = wait(300)
+  const tapGetStarted = wait(1500)
+  const phoneOpen = wait(250)
 
   // 1. Phone number.
-  wait(600)
-  const phoneDigits = type(config.phone.number.replace(/\D/g, ''), 150)
-  const tapPhoneContinue = wait(500)
-  const contactsOpen = wait(300)
+  wait(350)
+  const phoneDigits = type(config.phone.number.replace(/\D/g, ''), 85)
+  const tapPhoneContinue = wait(350)
+  const contactsOpen = wait(250)
 
   // 2. Contacts.
-  const tapImportContacts = wait(1800)
-  const importingContacts = wait(300)
-  const addingContacts = wait(500)
-  const contactsMostlyAdded = wait(500)
-  const contactsImported = wait(500)
-  const marketplaceOpen = wait(900)
+  const tapImportContacts = wait(900)
+  const importingContacts = wait(250)
+  const addingContacts = wait(350)
+  const contactsMostlyAdded = wait(350)
+  const contactsImported = wait(350)
+  const marketplaceOpen = wait(600)
 
   // 3. Browse offers.
-  const scrollDown = wait(1000)
-  const scrollToChosen = wait(2200)
-  wait(1600)
+  const scrollDown = wait(300)
+  const scrollToChosen = wait(1200)
+  wait(1100)
 
   // 4. Add your own offer.
   const addOfferStart = t
   const tapNewOffer = config.includeAddOffer ? wait(0) : never
   const form = offerFormTimeline(
-    config.includeAddOffer ? wait(300) : never,
-    config.myOffer.description
+    config.includeAddOffer ? wait(250) : never,
+    config.myOffer.description,
+    0.45
   )
   if (config.includeAddOffer) t = form.cues.published
-  const formClose = config.includeAddOffer ? wait(1200) : never
-  if (config.includeAddOffer) wait(800)
+  const formClose = config.includeAddOffer ? wait(900) : never
+  if (config.includeAddOffer) wait(500)
 
   // 5. Message the chosen offer.
   const tapChosenOffer = wait(0)
-  const detailOpen = wait(300)
-  const tapSendMessage = wait(1800)
-  const sendMessageOpen = wait(300)
-  wait(500)
+  const detailOpen = wait(250)
+  const tapSendMessage = wait(1100)
+  const sendMessageOpen = wait(250)
+  wait(250)
   const request = type(config.messages.request)
-  const tapSendRequest = wait(400)
-  const chatOpen = wait(300)
+  const tapSendRequest = wait(300)
+  const chatOpen = wait(250)
 
   // 6. They accept.
-  const approvedNotification = wait(1800)
-  const tapApprovedNotification = wait(1500)
-  const approved = wait(300)
+  const approvedNotification = wait(900)
+  const tapApprovedNotification = wait(900)
+  const approved = wait(250)
 
   // 7. Chat.
-  const theirFirstMessage = wait(1200)
-  wait(900)
+  const theirFirstMessage = wait(600)
+  wait(500)
   const yourReply = type(config.messages.yourReply)
-  const sendYourReply = wait(300)
+  const sendYourReply = wait(250)
 
   // 8. Let's meet.
-  wait(900)
+  wait(400)
   const letsMeet = type(config.messages.letsMeet)
-  const sendLetsMeet = wait(300)
-  const theirLetsMeetReply = wait(1300)
+  const sendLetsMeet = wait(250)
+  const theirLetsMeetReply = wait(800)
 
   // 9. Place and time.
-  const tapChecklist = wait(1200)
-  const checklistOpen = wait(300)
-  const tapDateAndTime = wait(1000)
-  const dateTimeOpen = wait(300)
-  const tapTimeSlot = wait(900)
-  const tapSlotsSave = wait(700)
-  const tapDateTimeContinue = wait(800)
-  const dateQueued = wait(300)
-  const tapMeetingLocation = wait(800)
-  const locationOpen = wait(300)
-  const tapPlace = wait(1000)
-  const placePicked = wait(300)
-  const tapLocationSave = wait(800)
-  const locationQueued = wait(300)
-  const tapChecklistSend = wait(800)
-  const checklistSent = wait(300)
-  const meetingAccepted = wait(1800)
-  wait(2200)
+  const tapChecklist = wait(700)
+  const checklistOpen = wait(250)
+  const tapDateAndTime = wait(550)
+  const dateTimeOpen = wait(250)
+  const tapTimeSlot = wait(500)
+  const tapSlotsSave = wait(400)
+  const tapDateTimeContinue = wait(450)
+  const dateQueued = wait(250)
+  const tapMeetingLocation = wait(450)
+  const locationOpen = wait(250)
+  const tapPlace = wait(550)
+  const placePicked = wait(250)
+  const tapLocationSave = wait(450)
+  const locationQueued = wait(250)
+  const tapChecklistSend = wait(450)
+  const checklistSent = wait(250)
+  const meetingAccepted = wait(1000)
+  wait(1500)
 
   // 10. Meeting successful.
   const successOpen = config.includeMeetingSuccess ? wait(0) : never
-  if (config.includeMeetingSuccess) wait(3500)
+  if (config.includeMeetingSuccess) wait(2600)
 
   // 11. Vexl.
   const endOpen = wait(0)
-  const end = wait(3500)
+  const end = wait(2400)
 
   const cues = {
     introEnd,

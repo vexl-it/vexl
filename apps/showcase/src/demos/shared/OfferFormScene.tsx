@@ -73,20 +73,22 @@ const afterDescription = {
 }
 
 /** When each form step happens if the form opens at `formOpen`; never when it is `Infinity`. */
+/** `pace` below 1 plays the form faster. */
 export function offerFormTimeline(
   formOpen: number,
-  description: string
+  description: string,
+  pace = 1
 ): {cues: Record<OfferFormCue, number>; description: Typing} {
   const typing: Typing = {
     text: description,
-    start: formOpen + descriptionStart,
-    keystrokeMs: 40,
+    start: formOpen + descriptionStart * pace,
+    keystrokeMs: Math.round(40 * pace),
   }
   const typed = typingEnd(typing)
   return {
     cues: {
-      ...Record.map(beforeDescription, (offset) => formOpen + offset),
-      ...Record.map(afterDescription, (offset) => typed + offset),
+      ...Record.map(beforeDescription, (offset) => formOpen + offset * pace),
+      ...Record.map(afterDescription, (offset) => typed + offset * pace),
     },
     description: typing,
   }

@@ -1,20 +1,13 @@
-import {
-  Button,
-  Calendar,
-  ChatInputBar,
-  Checklist,
-  Screen,
-  Stack,
-  Typography,
-  YStack,
-} from '@vexl-next/ui'
-import {Array, pipe} from 'effect'
+import {Button, ChatInputBar, Screen, Stack, YStack} from '@vexl-next/ui'
 import {
   AnonymousAvatar,
   Arrive,
   BotCard,
   ChatHeader,
   ChatMessage,
+  ChatOpenedCard,
+  DateSuggestionsCard,
+  MeetingCard,
   OfferStrip,
   RequestFooter,
   WelcomeCard,
@@ -23,54 +16,9 @@ import {noop} from '../../shared/noop'
 import {typedAt} from '../../shared/playback'
 import {otherSide, type Side} from '../../shared/side'
 import {Tap} from '../../shared/Tap'
-import {meeting, offer, typing} from '../script'
+import {meeting, offer, tradeOffer, typing} from '../script'
 import type {At} from '../tradeDemo'
 import {CopyAmountButtons} from './CopyAmountButtons'
-
-function DateCard({side, at}: {side: Side; at: At}): React.JSX.Element {
-  const received = side === 'you'
-  const outdated = at('meetingSet')
-  return (
-    <BotCard
-      statusLabel={
-        outdated
-          ? 'Outdated'
-          : received
-            ? 'Reaction required'
-            : 'Waiting for Other person'
-      }
-      statusVariant={outdated ? 'outdated' : 'waitingForConfirmation'}
-      title={received ? 'Confirm meeting date' : 'Suggested meeting dates'}
-    >
-      <YStack gap="$2">
-        {received ? (
-          <Typography variant="description" color="$foregroundPrimary">
-            Pick a time or suggest your own
-          </Typography>
-        ) : null}
-        {pipe(
-          meeting.suggestions,
-          Array.map((suggestion) => (
-            <Typography
-              key={suggestion}
-              variant="description"
-              color={outdated ? '$foregroundTertiary' : '$foregroundSecondary'}
-            >
-              {suggestion}
-            </Typography>
-          ))
-        )}
-        {received && !outdated ? (
-          <Tap on={at('youTapRespond')}>
-            <Button size="medium" variant="secondary" onPress={noop}>
-              Respond
-            </Button>
-          </Tap>
-        ) : null}
-      </YStack>
-    </BotCard>
-  )
-}
 
 function AmountCard({side, at}: {side: Side; at: At}): React.JSX.Element {
   const accepted = at('amountAccepted')
@@ -100,25 +48,6 @@ function AmountCard({side, at}: {side: Side; at: At}): React.JSX.Element {
   )
 }
 
-function MeetingCard(): React.JSX.Element {
-  return (
-    <BotCard
-      statusLabel="Accepted"
-      statusVariant="waiting"
-      title="Your meeting is on:"
-    >
-      <YStack gap="$3">
-        <Typography variant="description" color="$foregroundSecondary">
-          {meeting.pick}
-        </Typography>
-        <Button icon={Calendar} size="small" variant="secondary" onPress={noop}>
-          Add to calendar
-        </Button>
-      </YStack>
-    </BotCard>
-  )
-}
-
 function Messages({side, at}: {side: Side; at: At}): React.JSX.Element {
   const cardsArrived = at(side === 'you' ? 'youCardsArrive' : 'checklistSent')
   return (
@@ -130,21 +59,7 @@ function Messages({side, at}: {side: Side; at: At}): React.JSX.Element {
         notice="Requested with"
       />
       {side === 'you' && !at('accepted') ? <WelcomeCard /> : null}
-      {at('accepted') ? (
-        <BotCard
-          description="Great! Now you can chat with the other person to arrange the details of your trade. Send them a message or open the trade checklist."
-          onClosePress={noop}
-        >
-          <Button
-            variant="secondary"
-            size="medium"
-            icon={Checklist}
-            onPress={noop}
-          >
-            Open trade checklist
-          </Button>
-        </BotCard>
-      ) : null}
+      {at('accepted') ? <ChatOpenedCard /> : null}
       {at('youSendReply') ? (
         <Arrive>
           <ChatMessage side={side} from="you" text={typing.youReply.text} />
@@ -157,11 +72,16 @@ function Messages({side, at}: {side: Side; at: At}): React.JSX.Element {
       ) : null}
       {cardsArrived ? (
         <>
-          <DateCard side={side} at={at} />
+          <DateSuggestionsCard
+            received={side === 'you'}
+            outdated={at('meetingSet')}
+            suggestions={meeting.suggestions}
+            tapRespond={at('youTapRespond')}
+          />
           <AmountCard side={side} at={at} />
         </>
       ) : null}
-      {at('meetingSet') ? <MeetingCard /> : null}
+      {at('meetingSet') ? <MeetingCard details={[meeting.pick]} /> : null}
       {at('nextStep') ? (
         <BotCard
           title="Set network"
@@ -232,6 +152,7 @@ export function TradeChatScene({
         />
         <OfferStrip
           side={side}
+          selling={tradeOffer.selling}
           summary={`Up to 10 000 Kč • Cash • ${offer.location}`}
         />
         <Messages side={side} at={at} />

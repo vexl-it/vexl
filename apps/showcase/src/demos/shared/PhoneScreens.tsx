@@ -5,7 +5,7 @@ export interface PhoneScreen<Key extends string> {
   readonly key: Key
   readonly open: number
   readonly close?: number
-  readonly transition?: 'push' | 'sheet'
+  readonly transition?: 'push' | 'sheet' | 'fade'
 }
 
 // Matches the longest exit animation in demo.css.

@@ -1,6 +1,7 @@
 import {Typography} from '@vexl-next/ui'
-import {useLayoutEffect, useRef, useState, type ReactNode} from 'react'
+import type {ReactNode} from 'react'
 import {SafeAreaInsetsContext} from 'react-native-safe-area-context'
+import {useScaleToWidth} from './useScaleToWidth'
 
 // Screens are laid out at a real phone's CSS size, then scaled into the frame.
 const screenWidth = 390
@@ -31,58 +32,52 @@ function StatusIcons(): React.JSX.Element {
   )
 }
 
-function StatusBar(): React.JSX.Element {
+function StatusBar({island}: {island: boolean}): React.JSX.Element {
   return (
     <div className="phone-status-bar">
       <Typography variant="paragraphDemibold" color="$foregroundPrimary">
         9:41
       </Typography>
-      <div className="phone-island" />
+      {island ? <div className="phone-island" /> : null}
       <StatusIcons />
     </div>
   )
 }
 
-/** Inert, phone-sized app screens in a device bezel, scaled to the frame's width. */
+/** Inert, phone-sized app screens scaled to the frame's width, in a device bezel or bare like a screen recording. */
 export function PhoneFrame({
+  bezel = true,
   children,
 }: {
+  bezel?: boolean
   children: ReactNode
 }): React.JSX.Element {
-  const ref = useRef<HTMLDivElement>(null)
-  const [scale, setScale] = useState(0)
-  useLayoutEffect(() => {
-    const element = ref.current
-    if (!element) return
-    const observer = new ResizeObserver(([entry]) => {
-      if (entry) setScale(entry.contentRect.width / screenWidth)
-    })
-    observer.observe(element)
-    return () => {
-      observer.disconnect()
-    }
-  }, [])
-  return (
-    <div className="phone-bezel">
-      <div ref={ref} className="phone-screen" inert aria-hidden>
-        <div
-          className="phone-viewport"
-          style={{
-            width: screenWidth,
-            height: screenHeight,
-            transform: `scale(${scale})`,
-          }}
-        >
-          {/* Mounted once scaled, so the screens measure their layout at the final scale. */}
-          {scale > 0 ? (
-            <SafeAreaInsetsContext.Provider value={insets}>
-              {children}
-            </SafeAreaInsetsContext.Provider>
-          ) : null}
-          <StatusBar />
-          <div className="phone-home-indicator" />
-        </div>
+  const [ref, scale] = useScaleToWidth<HTMLDivElement>(screenWidth)
+  const screen = (
+    <div
+      ref={ref}
+      className={bezel ? 'phone-screen' : 'phone-screen is-bare'}
+      inert
+      aria-hidden
+    >
+      <div
+        className="phone-viewport"
+        style={{
+          width: screenWidth,
+          height: screenHeight,
+          transform: `scale(${scale})`,
+        }}
+      >
+        {/* Mounted once scaled, so the screens measure their layout at the final scale. */}
+        {scale > 0 ? (
+          <SafeAreaInsetsContext.Provider value={insets}>
+            {children}
+          </SafeAreaInsetsContext.Provider>
+        ) : null}
+        <StatusBar island={bezel} />
+        <div className="phone-home-indicator" />
       </div>
     </div>
   )
+  return bezel ? <div className="phone-bezel">{screen}</div> : screen
 }

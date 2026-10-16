@@ -18,6 +18,7 @@
     "effect": "^3.20.0",
     "jotai": "^2.15.0",
     "react": "19.2.3",
+    "react-confetti": "^6.1.0",
     "react-dom": "19.2.3",
     "react-native": "0.86.2",
     "react-native-gesture-handler": "~2.32.0",

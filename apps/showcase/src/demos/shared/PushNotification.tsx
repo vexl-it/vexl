@@ -41,15 +41,19 @@ export function SystemNotification({
   )
 }
 
-/** The notification sliding in over the open app when someone answers your offer. */
-export function PushNotification({tap}: {tap: boolean}): React.JSX.Element {
+/** A notification sliding in over the open app, by default a new response to your offer. */
+export function PushNotification({
+  title = 'New response to your offer',
+  body = 'Someone wants to connect with you.',
+  tap,
+}: {
+  title?: string
+  body?: string
+  tap: boolean
+}): React.JSX.Element {
   return (
     <div className="demo-notification">
-      <SystemNotification
-        title="New response to your offer"
-        body="Someone wants to connect with you."
-        tap={tap}
-      />
+      <SystemNotification title={title} body={body} tap={tap} />
     </div>
   )
 }

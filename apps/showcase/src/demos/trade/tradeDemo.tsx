@@ -1,6 +1,7 @@
 import {CommonFriends} from '@vexl-next/ui'
 import type {Demo} from '../shared/DemoPlayer'
 import {MarketplaceScene} from '../shared/MarketplaceScene'
+import {OfferFormScene} from '../shared/OfferFormScene'
 import {OfferDetailScene, SendMessageScene} from '../shared/OfferScenes'
 import {PhoneScreens} from '../shared/PhoneScreens'
 import {typedAt} from '../shared/playback'
@@ -10,7 +11,6 @@ import {
   ChecklistHubScene,
   TimeOptionsScene,
 } from './scenes/AgreeScenes'
-import {OfferFormScene} from './scenes/OfferFormScene'
 import {
   ConfirmAmountScene,
   PickDateScene,
@@ -22,6 +22,7 @@ import {
   focus,
   myOldOffer,
   myTradeOffer,
+  offer,
   otherOffers,
   themScreens,
   timelineTimes,
@@ -51,7 +52,14 @@ function youScreen(
         />
       )
     case 'form':
-      return <OfferFormScene at={at} playhead={playhead} />
+      return (
+        <OfferFormScene
+          at={at}
+          playhead={playhead}
+          offer={offer}
+          description={typing.description}
+        />
+      )
     case 'chat':
       return <TradeChatScene side="you" at={at} playhead={playhead} />
     case 'pickDate':

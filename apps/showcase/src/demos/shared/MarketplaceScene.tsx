@@ -28,8 +28,15 @@ import {
   type IconTagVariant,
 } from '@vexl-next/ui'
 import {Array, pipe} from 'effect'
-import {Fragment} from 'react'
-import {useSharedValue} from 'react-native-reanimated'
+import {useEffect, useRef, useState} from 'react'
+import type {LayoutChangeEvent} from 'react-native'
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+  type SharedValue,
+} from 'react-native-reanimated'
 import {AnonymousAvatar, Arrive} from './chat'
 import {noop} from './noop'
 import {Tap} from './Tap'
@@ -172,21 +179,111 @@ function MyOffersHeader({count}: {count: number}): React.JSX.Element {
   )
 }
 
+interface ListLayout {
+  readonly viewportHeight: number
+  readonly contentHeight: number
+  readonly cardsTop: number
+  readonly cardMiddles: Readonly<Record<string, number>>
+}
+
+type OnLayout = (event: LayoutChangeEvent) => void
+
+interface ScriptedScroll {
+  readonly scrollY: SharedValue<number>
+  readonly onViewportLayout: OnLayout
+  readonly onContentLayout: OnLayout
+  readonly onCardsLayout: OnLayout
+  readonly onCardLayout: (offerId: string) => OnLayout
+}
+
+/** Scrolls to the card `offerId` (or the list top), like a flick when it changes. */
+function useScriptedScroll(offerId: string | undefined): ScriptedScroll {
+  const [layout, setLayout] = useState<ListLayout>({
+    viewportHeight: 0,
+    contentHeight: 0,
+    cardsTop: 0,
+    cardMiddles: {},
+  })
+  const measure =
+    (
+      change: (
+        current: ListLayout,
+        rect: {y: number; height: number}
+      ) => ListLayout
+    ): OnLayout =>
+    (event) => {
+      const {y, height} = event.nativeEvent.layout
+      setLayout((current) => change(current, {y, height}))
+    }
+
+  // The card's middle a third down the viewport, clear of the FAB, but never past the list end.
+  const cardMiddle =
+    offerId === undefined ? undefined : layout.cardMiddles[offerId]
+  const target =
+    cardMiddle === undefined
+      ? 0
+      : Math.max(
+          0,
+          Math.min(
+            layout.cardsTop + cardMiddle - layout.viewportHeight / 3,
+            layout.contentHeight - layout.viewportHeight
+          )
+        )
+
+  const scrollY = useSharedValue(target)
+  const scrolledTo = useRef(offerId)
+  useEffect(() => {
+    // Only a scripted change animates, a seek or a new measurement jumps.
+    const scripted = scrolledTo.current !== offerId
+    scrolledTo.current = offerId
+    scrollY.value = scripted
+      ? withTiming(target, {
+          duration: 1700,
+          easing: Easing.bezier(0.2, 0.7, 0.2, 1),
+        })
+      : target
+  }, [offerId, target, scrollY])
+
+  return {
+    scrollY,
+    onViewportLayout: measure((current, {height}) => ({
+      ...current,
+      viewportHeight: height,
+    })),
+    onContentLayout: measure((current, {height}) => ({
+      ...current,
+      contentHeight: height,
+    })),
+    onCardsLayout: measure((current, {y}) => ({...current, cardsTop: y})),
+    onCardLayout: (id: string) =>
+      measure((current, {y, height}) => ({
+        ...current,
+        cardMiddles: {...current.cardMiddles, [id]: y + height / 2},
+      })),
+  }
+}
+
 /** The Marketplace tab: everyone's offers, or your own, listed top to bottom. */
 export function MarketplaceScene({
   tab,
   offers,
   arrivingOfferId,
   tappedOfferId,
+  scrolledToOfferId,
   tapNewOffer,
 }: {
   tab: 'all' | 'mine'
   offers: readonly MarketplaceOffer[]
   arrivingOfferId?: string
   tappedOfferId?: string
+  /** The list scrolls to this offer's card when it changes, and starts at the top without it. */
+  scrolledToOfferId?: string
   tapNewOffer?: boolean
 }): React.JSX.Element {
-  const scrollY = useSharedValue(0)
+  const scroll = useScriptedScroll(scrolledToOfferId)
+  const contentStyle = useAnimatedStyle(() => ({
+    transform: [{translateY: -scroll.scrollY.value}],
+  }))
   const theme = useTheme()
   return (
     <Stack flex={1} backgroundColor="$backgroundPrimary">
@@ -197,41 +294,47 @@ export function MarketplaceScene({
           {icon: MathCalculate, onPress: noop},
           {icon: UserProfile, onPress: noop},
         ]}
-        scrollY={scrollY}
+        scrollY={scroll.scrollY}
       />
-      <YStack flex={1} overflow="hidden">
-        <Stack paddingLeft="$5">
-          <Tabs
-            tabs={[
-              {label: 'All offers', value: 'all'},
-              {label: 'My offers', value: 'mine'},
-            ]}
-            activeTab={tab}
-            onTabPress={noop}
-          />
-        </Stack>
-        {tab === 'all' ? (
-          <AllOffersHeader />
-        ) : (
-          <MyOffersHeader count={offers.length} />
-        )}
-        <YStack gap="$5" px="$5">
-          {pipe(
-            offers,
-            Array.map((card) => {
-              const listed = (
-                <Tap on={card.id === tappedOfferId}>
-                  <MarketplaceOfferCard offer={card} />
-                </Tap>
-              )
-              return card.id === arrivingOfferId ? (
-                <Arrive key={card.id}>{listed}</Arrive>
-              ) : (
-                <Fragment key={card.id}>{listed}</Fragment>
-              )
-            })
+      <YStack flex={1} overflow="hidden" onLayout={scroll.onViewportLayout}>
+        <Animated.View style={contentStyle} onLayout={scroll.onContentLayout}>
+          <Stack paddingLeft="$5">
+            <Tabs
+              tabs={[
+                {label: 'All offers', value: 'all'},
+                {label: 'My offers', value: 'mine'},
+              ]}
+              activeTab={tab}
+              onTabPress={noop}
+            />
+          </Stack>
+          {tab === 'all' ? (
+            <AllOffersHeader />
+          ) : (
+            <MyOffersHeader count={offers.length} />
           )}
-        </YStack>
+          <YStack gap="$5" px="$5" pb="$13" onLayout={scroll.onCardsLayout}>
+            {pipe(
+              offers,
+              Array.map((card) => {
+                const listed = (
+                  <Tap on={card.id === tappedOfferId}>
+                    <MarketplaceOfferCard offer={card} />
+                  </Tap>
+                )
+                return (
+                  <Stack key={card.id} onLayout={scroll.onCardLayout(card.id)}>
+                    {card.id === arrivingOfferId ? (
+                      <Arrive>{listed}</Arrive>
+                    ) : (
+                      listed
+                    )}
+                  </Stack>
+                )
+              })
+            )}
+          </YStack>
+        </Animated.View>
       </YStack>
       <Stack position="absolute" bottom={84 + 16} right="$4" zIndex={2}>
         <Tap on={tapNewOffer ?? false}>

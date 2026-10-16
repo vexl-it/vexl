@@ -7,11 +7,11 @@ import {
   YStack,
 } from '@vexl-next/ui'
 import {Array, pipe} from 'effect'
+import {ChecklistPage} from '../../shared/checklist'
 import {noop} from '../../shared/noop'
 import {Tap} from '../../shared/Tap'
 import {meeting, offer} from '../script'
 import type {At} from '../tradeDemo'
-import {ChecklistPage} from './ChecklistPage'
 import {CopyAmountButtons} from './CopyAmountButtons'
 
 const close = [{icon: XmarkCancelClose, onPress: noop}]

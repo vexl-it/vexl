@@ -24,17 +24,82 @@ import {
   XStack,
   YStack,
 } from '@vexl-next/ui'
+import {Array, pipe, Record} from 'effect'
 import type {ReactNode} from 'react'
-import {Arrive} from '../../shared/chat'
-import {noop} from '../../shared/noop'
-import {typedAt} from '../../shared/playback'
-import {Tap} from '../../shared/Tap'
-import {useValueAtom} from '../../shared/useValueAtom'
-import {offer, typing} from '../script'
-import type {At} from '../tradeDemo'
+import {Arrive} from './chat'
+import {noop} from './noop'
+import {typedAt, typingEnd, type Typing} from './playback'
+import {Tap} from './Tap'
+import {useValueAtom} from './useValueAtom'
+
+export interface OfferFormData {
+  readonly selling: boolean
+  readonly maxAmount: number
+  readonly location: string
+  readonly description: string
+}
+
+// Ms after the form opens, then after the description is typed.
+const beforeDescription = {
+  formOpen: 0,
+  tapBitcoin: 800,
+  listingDone: 1100,
+  tapSide: 1800,
+  sideDone: 2100,
+  amountMax: 2600,
+  tapAmountNext: 3400,
+  amountDone: 3700,
+  tapAddLocation: 4300,
+  locationAdded: 4700,
+  tapLocationNext: 5300,
+  locationDone: 5600,
+  tapLightning: 6200,
+  tapNetworkNext: 6800,
+  networkDone: 7100,
+}
+const descriptionStart = 7600
+export type OfferFormCue =
+  | keyof typeof beforeDescription
+  | keyof typeof afterDescription
+const afterDescription = {
+  tapDescribeNext: 400,
+  describeDone: 700,
+  tapSecondDegree: 1300,
+  tapFriendNext: 1900,
+  friendDone: 2200,
+  tapPublish: 2900,
+  publishing: 3100,
+  published: 4400,
+}
+
+/** When each form step happens if the form opens at `formOpen`; never when it is `Infinity`. */
+export function offerFormTimeline(
+  formOpen: number,
+  description: string
+): {cues: Record<OfferFormCue, number>; description: Typing} {
+  const typing: Typing = {
+    text: description,
+    start: formOpen + descriptionStart,
+    keystrokeMs: 40,
+  }
+  const typed = typingEnd(typing)
+  return {
+    cues: {
+      ...Record.map(beforeDescription, (offset) => formOpen + offset),
+      ...Record.map(afterDescription, (offset) => typed + offset),
+    },
+    description: typing,
+  }
+}
+
+type At = (cue: OfferFormCue) => boolean
 
 const czkLimit = 250_000
-const locationLabel = `${offer.location}, radius of 1 km`
+const formatCzk = (amount: number): string => amount.toLocaleString('cs-CZ')
+const locationLabel = (offer: OfferFormData): string =>
+  `${offer.location}, radius of 1 km`
+const sideLabel = (selling: boolean): string =>
+  `I want to ${selling ? 'sell' : 'buy'} bitcoin`
 
 function ActiveStep({
   headline,
@@ -104,9 +169,15 @@ function NetworkRow({
   )
 }
 
-function AmountStep({at}: {at: At}): React.JSX.Element {
+function AmountStep({
+  at,
+  maxAmount,
+}: {
+  at: At
+  maxAmount: number
+}): React.JSX.Element {
   const minAtom = useValueAtom(0)
-  const maxAtom = useValueAtom(at('amountMax') ? offer.maxAmount : czkLimit)
+  const maxAtom = useValueAtom(at('amountMax') ? maxAmount : czkLimit)
   return (
     <ActiveStep headline="Select amount">
       <PriceRangeInput
@@ -122,7 +193,7 @@ function AmountStep({at}: {at: At}): React.JSX.Element {
   )
 }
 
-function LocationStep({at}: {at: At}): React.JSX.Element {
+function LocationStep({at, label}: {at: At; label: string}): React.JSX.Element {
   const theme = useTheme()
   return (
     <ActiveStep headline="Set location">
@@ -151,7 +222,7 @@ function LocationStep({at}: {at: At}): React.JSX.Element {
                 flex={1}
                 numberOfLines={1}
               >
-                {locationLabel}
+                {label}
               </Typography>
               <TrashBin size={24} color={theme.foregroundPrimary.get()} />
             </XStack>
@@ -204,11 +275,13 @@ function NetworkStep({at}: {at: At}): React.JSX.Element {
 function DescribeStep({
   at,
   playhead,
+  typing,
 }: {
   at: At
   playhead: number
+  typing: Typing
 }): React.JSX.Element {
-  const description = typedAt(typing.description, playhead)
+  const description = typedAt(typing, playhead)
   return (
     <ActiveStep headline="Describe your offer">
       <YStack
@@ -263,7 +336,45 @@ function FriendLevelStep({at}: {at: At}): React.JSX.Element {
   )
 }
 
-function Steps({at, playhead}: {at: At; playhead: number}): React.JSX.Element {
+interface FormProps {
+  at: At
+  playhead: number
+  offer: OfferFormData
+  description: Typing
+}
+
+const sides = [
+  {selling: false, icon: ArrowLeft},
+  {selling: true, icon: ArrowRight},
+]
+
+function SideStep({at, offer}: FormProps): React.JSX.Element {
+  return (
+    <ActiveStep headline="What do you want to do?">
+      <YStack gap="$3">
+        {pipe(
+          sides,
+          Array.map(({selling, icon}) => {
+            const tapped = at('tapSide') && selling === offer.selling
+            return (
+              <Tap key={sideLabel(selling)} on={tapped}>
+                <RowButton
+                  label={sideLabel(selling)}
+                  icon={icon}
+                  selected={tapped}
+                  onPress={noop}
+                />
+              </Tap>
+            )
+          })
+        )}
+      </YStack>
+    </ActiveStep>
+  )
+}
+
+function Steps(props: FormProps): React.JSX.Element {
+  const {at, playhead, offer, description} = props
   return (
     <>
       {at('listingDone') ? (
@@ -288,48 +399,32 @@ function Steps({at, playhead}: {at: At; playhead: number}): React.JSX.Element {
           </YStack>
         </ActiveStep>
       )}
-      {!at('listingDone') ? null : at('sellDone') ? (
+      {!at('listingDone') ? null : at('sideDone') ? (
         <EditRow
           state="completed"
           overline="What do you want to do?"
-          headline="I want to sell bitcoin"
+          headline={sideLabel(offer.selling)}
         />
       ) : (
-        <ActiveStep headline="What do you want to do?">
-          <YStack gap="$3">
-            <RowButton
-              label="I want to buy bitcoin"
-              icon={ArrowLeft}
-              onPress={noop}
-            />
-            <Tap on={at('tapSell')}>
-              <RowButton
-                label="I want to sell bitcoin"
-                icon={ArrowRight}
-                selected={at('tapSell')}
-                onPress={noop}
-              />
-            </Tap>
-          </YStack>
-        </ActiveStep>
+        <SideStep {...props} />
       )}
-      {!at('sellDone') ? null : at('amountDone') ? (
+      {!at('sideDone') ? null : at('amountDone') ? (
         <EditRow
           state="completed"
           overline="Select amount"
-          headline="0 – 10 000 CZK"
+          headline={`0 – ${formatCzk(offer.maxAmount)} CZK`}
         />
       ) : (
-        <AmountStep at={at} />
+        <AmountStep at={at} maxAmount={offer.maxAmount} />
       )}
       {!at('amountDone') ? null : at('locationDone') ? (
         <EditRow
           state="completed"
           overline="Set location"
-          headline={locationLabel}
+          headline={locationLabel(offer)}
         />
       ) : (
-        <LocationStep at={at} />
+        <LocationStep at={at} label={locationLabel(offer)} />
       )}
       {!at('locationDone') ? null : at('networkDone') ? (
         <EditRow
@@ -354,7 +449,7 @@ function Steps({at, playhead}: {at: At; playhead: number}): React.JSX.Element {
           />
         </>
       ) : (
-        <DescribeStep at={at} playhead={playhead} />
+        <DescribeStep at={at} playhead={playhead} typing={description} />
       )}
       {!at('describeDone') ? null : at('friendDone') ? (
         <>
@@ -379,14 +474,12 @@ function Steps({at, playhead}: {at: At; playhead: number}): React.JSX.Element {
   )
 }
 
-/** "New offer": one step open at a time, finished steps collapsed into rows above it. */
-export function OfferFormScene({
-  at,
-  playhead,
-}: {
-  at: At
-  playhead: number
-}): React.JSX.Element {
+/**
+ * "New offer": one step open at a time, finished steps collapsed into rows above it.
+ * `description` is the typing from `offerFormTimeline`.
+ */
+export function OfferFormScene(props: FormProps): React.JSX.Element {
+  const {at} = props
   return (
     <Screen
       navigationBar={
@@ -400,7 +493,7 @@ export function OfferFormScene({
       {/* Scrolled to the newest step: content grows upwards once it overflows. */}
       <YStack flex={1} overflow="hidden" justifyContent="flex-end">
         <YStack minHeight="100%" flexShrink={0} gap="$5" pb="$5">
-          <Steps at={at} playhead={playhead} />
+          <Steps {...props} />
         </YStack>
       </YStack>
       <ProgressDialog

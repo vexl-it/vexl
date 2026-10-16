@@ -37,9 +37,18 @@ When a ui component needs a different implementation on the web, add a platform-
 - `playback.ts`: `usePlayhead(times, startAt)` advances one playhead through the times after `startAt`, plus typing helpers. With reduced motion the playhead stays put: the end, or the step clicked.
 - `PhoneScreens.tsx`: the stack of app screens open at the playhead, with push and sheet transitions.
 - `PhoneFrame.tsx`: lays a screen out at 390×844, scales it into a device bezel, and adds a fake status bar and safe-area insets.
-- `Tap.tsx`: a fake touch over a press target. `chat.tsx`: chat header, bubbles, the anonymous avatars and the pieces of a chat waiting for its request to be accepted.
+- `Tap.tsx`: a fake touch over a press target. `chat.tsx`: chat header, bubbles, the anonymous avatars and the pieces of a chat waiting for its request to be accepted. `checklist.tsx`: the trade checklist hub, the date and time slots and the page layout of checklist screens.
 - `MarketplaceScene.tsx`, `OfferScenes.tsx` (offer detail, send a message) and `PushNotification.tsx`: app screens filled with each demo's fictional offers.
 
 Each demo folder has a `script.ts` (cues in ms, typing, fictional data, which screens are open when) and presentational scenes that read the cues through `at(cue)`.
 
 Measurements based on `onLayout` include the phone's scale transform on the web, because Tamagui and react-native-web measure with `getBoundingClientRect()`. `unscaledLayout.ts` reports unscaled rects inside the phone viewport, and `PhoneFrame` mounts the screens only once their scale is known.
+
+## App animation (`/app-animation-1`)
+
+One phone walks through the whole app for marketing reels: phone number, contacts, browsing offers, an optional new offer, a request, the chat, the trade checklist, an optional "meeting successful" screen with confetti and the Vexl end card. `main.tsx` picks the page from the path; `public/vercel.json` rewrites the path to `index.html` on Vercel.
+
+- `src/demos/appAnimation/config.ts`: everything the page lets people edit, as an `effect/Schema`, with fictional defaults. `src/page/appAnimation/useStoredConfig.ts` keeps edits in localStorage.
+- `src/demos/appAnimation/script.ts`: `buildScript(config)` lays the cues out one after another, so typed text and the optional sections retime everything after them. Skipped sections get `Infinity` cues.
+- `src/page/appAnimation`: the page, its playback (`?at=<ms>` freezes a frame), the reel frame and the settings panel. Focusing a setting holds the animation at the end of its step.
+- `recordElement.ts`: the mp4 download. The person shares the tab (Chrome or Edge), Region Capture crops it to the stage, a canvas scales it to 1080×1920 (reel) or 1080×2338 (bare screen) and `MediaRecorder` encodes it in real time.

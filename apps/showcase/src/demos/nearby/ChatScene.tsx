@@ -24,7 +24,11 @@ export function ChatScene({side}: {side: Side}): React.JSX.Element {
           avatar={<AnonymousAvatar side={otherSide(side)} size={40} />}
           eyeDisabled
         />
-        <OfferStrip side={side} summary={offerSummary} />
+        <OfferStrip
+          side={side}
+          selling={nearbyOffer.selling}
+          summary={offerSummary}
+        />
         <YStack flex={1} justifyContent="flex-end" overflow="hidden" pb="$4">
           <ChatMessage
             side={side}

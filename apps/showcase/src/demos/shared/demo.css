@@ -143,6 +143,10 @@
   background: var(--backgroundPrimary);
 }
 
+.phone-screen.is-bare {
+  border-radius: 0;
+}
+
 .phone-viewport {
   position: absolute;
   top: 0;
@@ -237,6 +241,21 @@
   }
 }
 
+.demo-fade-in {
+  animation: demo-fade-in 400ms ease-out both;
+}
+
+.demo-fade-out {
+  animation: demo-fade-out 400ms ease-in both;
+}
+
+@keyframes demo-fade-out {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
 .demo-arrive {
   animation: demo-arrive 320ms ease-out both;
 }
@@ -309,6 +328,7 @@
 @media (prefers-reduced-motion: reduce) {
   .demo-sheet-in,
   .demo-push-in,
+  .demo-fade-in,
   .demo-notification,
   .demo-arrive,
   .demo-press,
@@ -319,7 +339,8 @@
   }
 
   .demo-sheet-out,
-  .demo-push-out {
+  .demo-push-out,
+  .demo-fade-out {
     display: none;
   }
 

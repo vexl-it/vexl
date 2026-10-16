@@ -2,6 +2,7 @@ import {
   Avatar,
   avatarsSvg,
   Button,
+  Calendar,
   ChatBubble,
   Checklist,
   ChevronLeft,
@@ -17,6 +18,7 @@ import {
   YStack,
   type VexlbotActionCardProps,
 } from '@vexl-next/ui'
+import {Array, pipe} from 'effect'
 import type {ReactNode} from 'react'
 import {noop} from './noop'
 import type {Side} from './side'
@@ -127,12 +129,19 @@ export function BotCard(
   )
 }
 
-/** The offer the chat is about, pinned under the header. Your offer, so they're the buyer. */
+const offerTitles: Record<Side, Record<'sell' | 'buy', string>> = {
+  you: {sell: 'You’re selling bitcoin', buy: 'You want bitcoin'},
+  them: {sell: 'They’re selling bitcoin', buy: 'They want bitcoin'},
+}
+
+/** The offer the chat is about, pinned under the header. `side` 'you' is its author. */
 export function OfferStrip({
   side,
+  selling,
   summary,
 }: {
   side: Side
+  selling: boolean
   summary: string
 }): React.JSX.Element {
   return (
@@ -145,9 +154,7 @@ export function OfferStrip({
     >
       <YStack gap="$1">
         <Typography variant="paragraphSmallBold" color="$foregroundPrimary">
-          {side === 'you'
-            ? 'You’re selling bitcoin'
-            : 'They’re selling bitcoin'}
+          {offerTitles[side][selling ? 'sell' : 'buy']}
         </Typography>
         <Typography variant="description" color="$foregroundSecondary">
           {summary}
@@ -173,6 +180,109 @@ export function WelcomeCard(): React.JSX.Element {
           Common friends
         </Button>
       </XStack>
+    </BotCard>
+  )
+}
+
+/** What both sides see once the request is accepted. */
+export function ChatOpenedCard(): React.JSX.Element {
+  return (
+    <BotCard
+      description="Great! Now you can chat with the other person to arrange the details of your trade. Send them a message or open the trade checklist."
+      onClosePress={noop}
+    >
+      <Button variant="secondary" size="medium" icon={Checklist} onPress={noop}>
+        Open trade checklist
+      </Button>
+    </BotCard>
+  )
+}
+
+/** Suggested meeting times from the checklist, as their sender or receiver sees them. */
+export function DateSuggestionsCard({
+  received,
+  outdated,
+  suggestions,
+  tapRespond = false,
+}: {
+  received: boolean
+  outdated: boolean
+  suggestions: readonly string[]
+  tapRespond?: boolean
+}): React.JSX.Element {
+  return (
+    <BotCard
+      statusLabel={
+        outdated
+          ? 'Outdated'
+          : received
+            ? 'Reaction required'
+            : 'Waiting for Other person'
+      }
+      statusVariant={outdated ? 'outdated' : 'waitingForConfirmation'}
+      title={received ? 'Confirm meeting date' : 'Suggested meeting dates'}
+    >
+      <YStack gap="$2">
+        {received ? (
+          <Typography variant="description" color="$foregroundPrimary">
+            Pick a time or suggest your own
+          </Typography>
+        ) : null}
+        {pipe(
+          suggestions,
+          Array.map((suggestion) => (
+            <Typography
+              key={suggestion}
+              variant="description"
+              color={outdated ? '$foregroundTertiary' : '$foregroundSecondary'}
+            >
+              {suggestion}
+            </Typography>
+          ))
+        )}
+        {received && !outdated ? (
+          <Tap on={tapRespond}>
+            <Button size="medium" variant="secondary" onPress={noop}>
+              Respond
+            </Button>
+          </Tap>
+        ) : null}
+      </YStack>
+    </BotCard>
+  )
+}
+
+/** The agreed meeting. */
+export function MeetingCard({
+  details,
+}: {
+  details: readonly string[]
+}): React.JSX.Element {
+  return (
+    <BotCard
+      statusLabel="Accepted"
+      statusVariant="waiting"
+      title="Your meeting is on:"
+    >
+      <YStack gap="$3">
+        <YStack gap="$2">
+          {pipe(
+            details,
+            Array.map((detail) => (
+              <Typography
+                key={detail}
+                variant="description"
+                color="$foregroundSecondary"
+              >
+                {detail}
+              </Typography>
+            ))
+          )}
+        </YStack>
+        <Button icon={Calendar} size="small" variant="secondary" onPress={noop}>
+          Add to calendar
+        </Button>
+      </YStack>
     </BotCard>
   )
 }

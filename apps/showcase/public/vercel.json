@@ -1,0 +1,3 @@
+{
+  "rewrites": [{"source": "/app-animation-1", "destination": "/index.html"}]
+}

@@ -1390,6 +1390,9 @@ importers:
       react:
         specifier: 19.2.3
         version: 19.2.3
+      react-confetti:
+        specifier: ^6.1.0
+        version: 6.4.0(react@19.2.3)
       react-dom:
         specifier: 19.2.3
         version: 19.2.3(react@19.2.3)

@@ -1,5 +1,6 @@
 import {Array, Record} from 'effect'
 import type {MarketplaceOffer} from '../shared/MarketplaceScene'
+import {offerFormTimeline} from '../shared/OfferFormScene'
 import type {DetailedOffer} from '../shared/OfferScenes'
 import {screenTimes, type PhoneScreen} from '../shared/PhoneScreens'
 import {
@@ -15,6 +16,7 @@ const fiatAmount = 5_000
 
 // Fictional offer and price.
 export const offer = {
+  selling: true,
   description: 'Cash only, Prague 2. Evenings work best.',
   location: 'Prague 2',
   maxAmount: 10_000,
@@ -98,8 +100,10 @@ export const meeting = {
 
 const fastTyping = 40
 
+const form = offerFormTimeline(700, offer.description)
+
 export const typing = {
-  description: {text: offer.description, start: 8300, keystrokeMs: fastTyping},
+  description: form.description,
   request: {
     text: 'Hi! Could I buy 5 000 CZK worth of sats this week?',
     start: 19100,
@@ -122,29 +126,7 @@ export const typing = {
 export const cues = {
   // 1. You create an offer.
   youTapNewOffer: 400,
-  formOpen: 700,
-  tapBitcoin: 1500,
-  listingDone: 1800,
-  tapSell: 2500,
-  sellDone: 2800,
-  amountMax: 3300,
-  tapAmountNext: 4100,
-  amountDone: 4400,
-  tapAddLocation: 5000,
-  locationAdded: 5400,
-  tapLocationNext: 6000,
-  locationDone: 6300,
-  tapLightning: 6900,
-  tapNetworkNext: 7500,
-  networkDone: 7800,
-  tapDescribeNext: typingEnd(typing.description) + 400,
-  describeDone: typingEnd(typing.description) + 700,
-  tapSecondDegree: 11200,
-  tapFriendNext: 11800,
-  friendDone: 12100,
-  tapPublish: 12800,
-  publishing: 13000,
-  published: 14300,
+  ...form.cues,
   formClose: 15500,
 
   // 2. They find it and send a request.

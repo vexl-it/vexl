@@ -1,0 +1,132 @@
+.anim-page {
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+  padding-bottom: 120px;
+}
+
+.anim-intro {
+  display: flex;
+  padding-top: 24px;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 720px;
+}
+
+.anim-player {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 64px;
+}
+
+.anim-stage {
+  flex-shrink: 0;
+  width: min(340px, calc(78vh * 390 / 844));
+}
+
+.anim-stage[data-view='reel'] {
+  width: min(420px, calc(78vh * 9 / 16));
+}
+
+.anim-side {
+  width: 360px;
+}
+
+.anim-step {
+  align-items: center;
+  padding: 10px 16px;
+}
+
+/* Reel */
+
+.reel {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 9 / 16;
+  overflow: hidden;
+  background: var(--accentYellowPrimary);
+}
+
+.reel-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 28px 28px 26px;
+  transform-origin: top left;
+}
+
+.reel-caption {
+  display: flex;
+  align-items: center;
+  min-height: 60px;
+}
+
+.reel-screen {
+  flex: 1;
+  min-height: 0;
+  aspect-ratio: 390 / 844;
+  margin-top: 6px;
+  overflow: hidden;
+  border-radius: 26px;
+  box-shadow: 0 18px 40px -12px rgb(0 0 0 / 0.45);
+}
+
+.reel-end {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accentYellowPrimary);
+  animation: demo-fade-in 400ms ease-out both;
+}
+
+/* Recording: the stage fills the screen beside a small control panel, which stays out of the crop. */
+
+.anim-recording {
+  --aspect: calc(844 / 390);
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  background: #000;
+}
+
+.anim-recording[data-variant='reel'] {
+  --aspect: calc(16 / 9);
+}
+
+.anim-recording-panel {
+  width: 240px;
+}
+
+.anim-recording-stage {
+  height: min(100vh, calc((100vw - 320px) * var(--aspect)));
+  aspect-ratio: 1 / var(--aspect);
+}
+
+.anim-recording-stage .phone-screen,
+.anim-recording-stage .reel {
+  height: 100%;
+}
+
+@media (max-width: 1000px) {
+  .anim-player {
+    flex-direction: column;
+    align-items: center;
+    gap: 32px;
+  }
+
+  .anim-side {
+    width: min(100%, 560px);
+  }
+}

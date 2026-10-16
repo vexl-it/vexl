@@ -1,0 +1,247 @@
+.settings {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: start;
+  gap: 16px;
+  width: 100%;
+}
+
+/* Later cards fill the column next to the offers, in timeline order. */
+.settings-offers-card {
+  grid-column: span 2;
+  grid-row: span 4;
+}
+
+.settings-captions-card {
+  grid-column: span 2;
+}
+
+.settings-card {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  margin: 0;
+  padding: 16px;
+  border: none;
+  border-radius: 20px;
+  background: var(--backgroundSecondary);
+}
+
+/* A floated legend lays out like a regular first child. */
+.settings-card-header {
+  float: left;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 0;
+}
+
+.settings-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.settings-phone {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+}
+
+.settings-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.settings-input {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background: var(--backgroundTertiary);
+  color: var(--foregroundPrimary);
+  font-family: 'TTSatoshi', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 20px;
+  outline: none;
+  color-scheme: dark;
+  transition: border-color 150ms ease-out;
+}
+
+input.settings-input,
+select.settings-input {
+  height: 42px;
+}
+
+textarea.settings-input {
+  resize: vertical;
+}
+
+.settings-input:hover {
+  border-color: var(--foregroundTertiary);
+}
+
+.settings-input:focus {
+  border-color: var(--accentYellowPrimary);
+}
+
+.settings-offer {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--backgroundTertiary);
+  border-radius: 16px;
+}
+
+.settings-offer.is-chosen {
+  border-color: var(--accentYellowPrimary);
+}
+
+.settings-offer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Relation, type, common friends, price; then location, language, description. */
+.settings-offer-fields {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 2fr;
+  gap: 10px;
+}
+
+.settings-offer-description {
+  grid-column: span 2;
+}
+
+.settings-captions {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.settings-radio,
+.settings-switch {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.settings-radio input {
+  margin: 0;
+  accent-color: var(--accentYellowPrimary);
+  cursor: pointer;
+}
+
+.settings-switch input {
+  position: relative;
+  width: 40px;
+  height: 24px;
+  margin: 0;
+  border-radius: 12px;
+  background: var(--backgroundTertiary);
+  appearance: none;
+  cursor: pointer;
+  transition: background-color 150ms ease-out;
+}
+
+.settings-switch input::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--foregroundPrimary);
+  transition: translate 150ms ease-out;
+}
+
+.settings-switch input:checked {
+  background: var(--accentYellowPrimary);
+}
+
+.settings-switch input:checked::after {
+  translate: 16px 0;
+  background: var(--black100, #000);
+}
+
+.settings-button,
+.settings-remove {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 12px;
+  background: var(--accentYellowSecondary);
+  font: inherit;
+  cursor: pointer;
+}
+
+.settings-remove {
+  padding: 4px 8px;
+  border-radius: 8px;
+  background: none;
+}
+
+.settings-button:hover,
+.settings-remove:hover:enabled {
+  opacity: 0.8;
+}
+
+.settings-remove:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.settings-button:focus-visible,
+.settings-remove:focus-visible,
+.settings-switch input:focus-visible,
+.settings-radio input:focus-visible {
+  outline: 2px solid var(--accentYellowPrimary);
+  outline-offset: 2px;
+}
+
+.settings-offers-card > .settings-button {
+  align-self: flex-start;
+}
+
+@media (max-width: 1100px) {
+  .settings-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .settings-offers-card,
+  .settings-captions-card {
+    grid-column: 1 / -1;
+    grid-row: auto;
+  }
+}
+
+@media (max-width: 700px) {
+  .settings-grid,
+  .settings-captions {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .settings-offer-fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .settings-offer-description {
+    grid-column: 1 / -1;
+  }
+}

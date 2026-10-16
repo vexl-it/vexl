@@ -14,7 +14,10 @@ import {focusAtom} from 'jotai-optics'
 import {askAreYouSureActionAtom} from '../../components/GlobalDialog'
 import getValueFromSetStateActionOfAtom from '../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 import {translationAtom} from '../../utils/localization/I18nProvider'
-import {goldenAvatarTypeAtom} from '../../utils/preferences'
+import {
+  goldenAvatarTypeAtom,
+  showAccountIdentityDotAtom,
+} from '../../utils/preferences'
 import {sessionDataOrDummyAtom} from './index'
 import {generateRandomUserInSessionData} from './utils/generateRandomUserData'
 
@@ -49,6 +52,10 @@ export const areRealUserDataSet = atom((get) => {
   const {userName} = get(realUserDataAtom) ?? {}
   return !!userName
 })
+
+export const shouldShowAccountIdentityDotAtom = atom(
+  (get) => get(showAccountIdentityDotAtom) && !get(areRealUserDataSet)
+)
 
 export const realUserNameAtom = atom(
   (get): UserName | undefined => {

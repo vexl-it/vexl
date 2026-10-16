@@ -30,7 +30,12 @@ export const AnimationOffer = Schema.Struct({
 })
 export type AnimationOffer = typeof AnimationOffer.Type
 
+export const Appearance = Schema.Literal('light', 'dark')
+export type Appearance = typeof Appearance.Type
+
 export const AppAnimationConfig = Schema.Struct({
+  /** The app's color theme. Optional, so settings saved before it existed still load. */
+  appearance: Schema.optionalWith(Appearance, {default: () => 'light'}),
   /** The reel caption above the screen, per step. */
   captions: Schema.Record({key: StepId, value: Schema.String}),
   phone: Schema.Struct({
@@ -74,6 +79,7 @@ export const AppAnimationConfig = Schema.Struct({
 export type AppAnimationConfig = typeof AppAnimationConfig.Type
 
 export const defaultConfig: AppAnimationConfig = {
+  appearance: 'light',
   captions: {
     welcome: 'Get started with Vexl',
     phone: 'Enter your phone number',

@@ -1,6 +1,7 @@
 import {
   Button,
   SegmentedPicker,
+  Theme,
   Typography,
   VexlTextGraphic,
   XStack,
@@ -9,7 +10,7 @@ import {
 import {Array, Option, pipe} from 'effect'
 import {useMemo, useRef, useState, type ReactNode} from 'react'
 import {AppAnimationScreens} from '../../demos/appAnimation/AppAnimationScreens'
-import type {StepId} from '../../demos/appAnimation/config'
+import type {Appearance, StepId} from '../../demos/appAnimation/config'
 import {
   buildScript,
   type AppAnimationStep,
@@ -108,23 +109,30 @@ function StepList({
   )
 }
 
+/** The page stays dark; only the phone takes the app theme picked in the settings. */
 function Stage({
   view,
+  appearance,
   caption,
   ended,
   children,
 }: {
   view: View
+  appearance: Appearance
   caption: string
   ended: boolean
   children: ReactNode
 }): React.JSX.Element {
-  return view === 'reel' ? (
-    <ReelStage caption={caption} ended={ended}>
-      {children}
-    </ReelStage>
-  ) : (
-    <PhoneFrame bezel={view === 'phone'}>{children}</PhoneFrame>
+  return (
+    <Theme name={appearance}>
+      {view === 'reel' ? (
+        <ReelStage caption={caption} ended={ended}>
+          {children}
+        </ReelStage>
+      ) : (
+        <PhoneFrame bezel={view === 'phone'}>{children}</PhoneFrame>
+      )}
+    </Theme>
   )
 }
 
@@ -223,6 +231,7 @@ export function AppAnimationPage(): React.JSX.Element {
   const stage = (stageView: View): React.JSX.Element => (
     <Stage
       view={stageView}
+      appearance={config.appearance}
       caption={active?.caption ?? ''}
       ended={active?.id === 'end'}
     >
@@ -314,6 +323,16 @@ export function AppAnimationPage(): React.JSX.Element {
               ]}
               activeTab={view}
               onTabPress={setView}
+            />
+            <SegmentedPicker<Appearance>
+              tabs={[
+                {label: 'Light', value: 'light'},
+                {label: 'Dark', value: 'dark'},
+              ]}
+              activeTab={config.appearance}
+              onTabPress={(appearance) => {
+                setConfig({...config, appearance})
+              }}
             />
             <StepList
               steps={script.steps}

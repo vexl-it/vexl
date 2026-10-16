@@ -50,5 +50,5 @@ One phone walks through the whole app for marketing reels: the welcome screen, p
 
 - `src/demos/appAnimation/config.ts`: everything the page lets people edit, as an `effect/Schema`, with fictional defaults. `src/page/appAnimation/useStoredConfig.ts` keeps edits in localStorage.
 - `src/demos/appAnimation/script.ts`: `buildScript(config)` lays the cues out one after another, so typed text and the optional sections retime everything after them. Skipped sections get `Infinity` cues.
-- `src/page/appAnimation`: the page, its playback (`?at=<ms>` freezes a frame), the reel frame and the settings panel. Focusing a setting holds the animation at the end of its step.
+- `src/page/appAnimation`: the page, its playback (`?at=<ms>` freezes a frame), the reel frame and the settings panel. Focusing a setting holds the animation at the end of its step. The phone gets its own Tamagui `Theme` (light by default), so the page stays dark. The ui graphics pick their variant from the system color scheme, so scenes pass it explicitly.
 - `recordElement.ts`: the mp4 download. The person shares the tab (Chrome or Edge), Region Capture crops it to the stage, a canvas scales it to 1080×1920 (reel) or 1080×2338 (bare screen) and `MediaRecorder` encodes it in real time.

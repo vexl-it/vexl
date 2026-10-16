@@ -172,7 +172,7 @@ function PhoneNumberGroups({
 
 /** Login: the phone number, typed on the phone pad, footer above the keyboard. */
 /** The app's first screen, as LoginFlow's Intro1Screen shows it. */
-export function WelcomeScene({at}: SceneProps): React.JSX.Element {
+export function WelcomeScene({config, at}: SceneProps): React.JSX.Element {
   const insets = useSafeAreaInsets()
   return (
     <YStack
@@ -183,10 +183,19 @@ export function WelcomeScene({at}: SceneProps): React.JSX.Element {
       paddingHorizontal="$5"
     >
       <Stack alignItems="center" mt="$5">
-        <VexlTextGraphic variant="light" animate height={27} />
+        <VexlTextGraphic
+          variant={config.appearance === 'dark' ? 'light' : 'dark'}
+          animate
+          height={27}
+        />
       </Stack>
       <YStack flex={1} alignItems="center" justifyContent="center" gap="$9">
-        <FaqStayAnonymous animate width={330} height={236} />
+        <FaqStayAnonymous
+          variant={config.appearance}
+          animate
+          width={330}
+          height={236}
+        />
         <YStack gap="$4" width="100%">
           <Typography
             variant="heading3"
@@ -331,7 +340,10 @@ function importProgress(at: At): Omit<ProgressDialogProps, 'visible'> {
 }
 
 /** Post login: find friends by importing contacts. */
-export function ContactsImportScene({at}: SceneProps): React.JSX.Element {
+export function ContactsImportScene({
+  config,
+  at,
+}: SceneProps): React.JSX.Element {
   const insets = useSafeAreaInsets()
   const importing = at('importingContacts')
   return (
@@ -344,7 +356,11 @@ export function ContactsImportScene({at}: SceneProps): React.JSX.Element {
       paddingHorizontal="$5"
     >
       <YStack flex={1} alignItems="center" justifyContent="center" gap="$9">
-        <ContactsGraphic animate disableReplayOnPress />
+        <ContactsGraphic
+          variant={config.appearance}
+          animate
+          disableReplayOnPress
+        />
         <YStack alignItems="center" gap="$4">
           <Typography
             variant="heading3"

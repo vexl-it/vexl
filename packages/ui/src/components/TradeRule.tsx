@@ -1,13 +1,17 @@
-import {Typography} from '@vexl-next/ui'
 import React from 'react'
-import {Stack, XStack} from 'tamagui'
 
-interface Props {
-  ruleNumber: number
-  title: string
+import {Stack, XStack} from '../primitives'
+import {Typography} from './Typography'
+
+export interface TradeRuleProps {
+  readonly ruleNumber: number
+  readonly title: string
 }
 
-function TradeRule({ruleNumber, title}: Props): React.ReactElement {
+export function TradeRule({
+  ruleNumber,
+  title,
+}: TradeRuleProps): React.JSX.Element {
   return (
     <XStack ai="center" gap="$4">
       <Stack
@@ -35,5 +39,3 @@ function TradeRule({ruleNumber, title}: Props): React.ReactElement {
     </XStack>
   )
 }
-
-export default TradeRule

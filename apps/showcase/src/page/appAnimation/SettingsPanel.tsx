@@ -2,9 +2,12 @@ import {Typography} from '@vexl-next/ui'
 import {Array, Option, pipe} from 'effect'
 import {useId, type ReactNode} from 'react'
 import {
+  ReelCamera,
+  ReelColor,
   StepId,
   type AnimationOffer,
   type AppAnimationConfig,
+  type ReelMotion,
 } from '../../demos/appAnimation/config'
 import './settings.css'
 
@@ -27,6 +30,23 @@ const stepLabels: Record<StepId, string> = {
   letsMeet: 'Let’s meet',
   meeting: 'Place and time',
   success: 'Meeting successful',
+}
+
+const cameraLabels: Record<ReelCamera, string> = {
+  auto: 'Auto',
+  full: 'Whole screen',
+  top: 'Zoom on top',
+  bottom: 'Zoom on bottom',
+  tilt: 'Tilted',
+}
+
+const colorLabels: Record<ReelColor, string> = {
+  yellow: 'Yellow',
+  green: 'Light green',
+  pink: 'Light pink',
+  black: 'Black',
+  darkGreen: 'Dark green',
+  darkPink: 'Dark pink',
 }
 
 const relations = ['Friend of a friend', 'Direct friend']
@@ -317,6 +337,24 @@ export function SettingsPanel({
           />
         </Card>
 
+        <Card
+          title="Animated reel"
+          className="settings-captions-card"
+          included={config.reelStyle === 'animated'}
+          onIncludedChange={(animated) => {
+            set('reelStyle', animated ? 'animated' : 'static')
+          }}
+        >
+          <ReelMotionFields
+            motion={config.reelMotion}
+            steps={captionSteps}
+            onChange={(reelMotion) => {
+              set('reelMotion', reelMotion)
+            }}
+            onFocusStep={onFocusStep}
+          />
+        </Card>
+
         <Card title="Reel captions" className="settings-captions-card">
           <div className="settings-captions">
             {Array.map(captionSteps, (step) => (
@@ -344,6 +382,168 @@ export function SettingsPanel({
         </Typography>
       </button>
     </div>
+  )
+}
+
+function Toggle({
+  label,
+  checked,
+  onChange,
+}: {
+  readonly label: string
+  readonly checked: boolean
+  readonly onChange: (checked: boolean) => void
+}): React.JSX.Element {
+  return (
+    <label className="settings-switch">
+      <Typography variant="description" color="$foregroundSecondary">
+        {label}
+      </Typography>
+      <input
+        type="checkbox"
+        role="switch"
+        checked={checked}
+        onChange={(event) => {
+          onChange(event.target.checked)
+        }}
+      />
+    </label>
+  )
+}
+
+function Select<T extends string>({
+  label,
+  value,
+  options,
+  labels,
+  onChange,
+}: {
+  readonly label: string
+  readonly value: T
+  readonly options: readonly T[]
+  readonly labels: Record<T, string>
+  readonly onChange: (value: T) => void
+}): React.JSX.Element {
+  return (
+    <Field label={label}>
+      <select
+        className="settings-input"
+        value={value}
+        onChange={(event) => {
+          pipe(
+            options,
+            Array.findFirst((option) => option === event.target.value),
+            Option.map(onChange)
+          )
+        }}
+      >
+        {Array.map(options, (option) => (
+          <option key={option} value={option}>
+            {labels[option]}
+          </option>
+        ))}
+      </select>
+    </Field>
+  )
+}
+
+function ReelMotionFields({
+  motion,
+  steps,
+  onChange,
+  onFocusStep,
+}: {
+  readonly motion: ReelMotion
+  readonly steps: readonly StepId[]
+  readonly onChange: (motion: ReelMotion) => void
+  readonly onFocusStep: (step: StepId) => void
+}): React.JSX.Element {
+  const patch = (value: Partial<ReelMotion>): void => {
+    onChange({...motion, ...value})
+  }
+  return (
+    <>
+      <div className="settings-row settings-motion-toggles">
+        <Toggle
+          label="Logo intro"
+          checked={motion.logoIntro}
+          onChange={(logoIntro) => {
+            patch({logoIntro})
+          }}
+        />
+        <Toggle
+          label="Captions word by word"
+          checked={motion.wordByWordCaptions}
+          onChange={(wordByWordCaptions) => {
+            patch({wordByWordCaptions})
+          }}
+        />
+        <Toggle
+          label="Color wipe between steps"
+          checked={motion.colorWipe}
+          onChange={(colorWipe) => {
+            patch({colorWipe})
+          }}
+        />
+        <Field label={`Zoom ${motion.zoom.toFixed(1)}×`}>
+          <input
+            type="range"
+            min={1.1}
+            max={2.2}
+            step={0.1}
+            value={motion.zoom}
+            onChange={(event) => {
+              patch({zoom: event.target.valueAsNumber})
+            }}
+          />
+        </Field>
+      </div>
+      <div className="settings-captions">
+        {Array.map(steps, (step) => (
+          <div
+            key={step}
+            className="settings-motion-step"
+            onFocus={() => {
+              onFocusStep(step)
+            }}
+          >
+            <Typography variant="paragraphSmallBold" color="$foregroundPrimary">
+              {stepLabels[step]}
+            </Typography>
+            <div className="settings-row">
+              <Select
+                label="Camera"
+                value={motion.steps[step].camera}
+                options={ReelCamera.literals}
+                labels={cameraLabels}
+                onChange={(camera) => {
+                  patch({
+                    steps: {
+                      ...motion.steps,
+                      [step]: {...motion.steps[step], camera},
+                    },
+                  })
+                }}
+              />
+              <Select
+                label="Color"
+                value={motion.steps[step].color}
+                options={ReelColor.literals}
+                labels={colorLabels}
+                onChange={(color) => {
+                  patch({
+                    steps: {
+                      ...motion.steps,
+                      [step]: {...motion.steps[step], color},
+                    },
+                  })
+                }}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+    </>
   )
 }
 

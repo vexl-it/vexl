@@ -10,7 +10,11 @@ import {
 import {Array, Option, pipe} from 'effect'
 import {useMemo, useRef, useState, type ReactNode} from 'react'
 import {AppAnimationScreens} from '../../demos/appAnimation/AppAnimationScreens'
-import type {Appearance, StepId} from '../../demos/appAnimation/config'
+import type {
+  Appearance,
+  ReelStyle,
+  StepId,
+} from '../../demos/appAnimation/config'
 import {
   buildScript,
   type AppAnimationStep,
@@ -25,7 +29,8 @@ import {
   recordElement,
   type VideoFormat,
 } from './recordElement'
-import {ReelStage} from './ReelStage'
+import {reelColors, reelFraming} from './reelMotion'
+import {ReelStage, type ReelMotionFrame} from './ReelStage'
 import {SettingsPanel} from './SettingsPanel'
 import {usePlayback} from './usePlayback'
 import {useStoredConfig} from './useStoredConfig'
@@ -115,18 +120,20 @@ function Stage({
   appearance,
   caption,
   ended,
+  motion,
   children,
 }: {
   view: View
   appearance: Appearance
   caption: string
   ended: boolean
+  motion: ReelMotionFrame | undefined
   children: ReactNode
 }): React.JSX.Element {
   return (
     <Theme name={appearance}>
       {view === 'reel' ? (
-        <ReelStage caption={caption} ended={ended}>
+        <ReelStage caption={caption} ended={ended} motion={motion}>
           {children}
         </ReelStage>
       ) : (
@@ -228,10 +235,33 @@ export function AppAnimationPage(): React.JSX.Element {
       playhead={playhead}
     />
   )
+  const activeIndex = pipe(
+    Array.findFirstIndex(script.steps, (step) => step === active),
+    Option.getOrElse(() => 0)
+  )
+  const {reelMotion: motionConfig} = config
+  const reelMotion: ReelMotionFrame | undefined =
+    config.reelStyle === 'animated'
+      ? {
+          framing: reelFraming(script, motionConfig, active, playhead),
+          zoom: motionConfig.zoom,
+          colors: reelColors(motionConfig, active),
+          previousColors: reelColors(
+            motionConfig,
+            script.steps[activeIndex - 1] ?? active
+          ),
+          stepKey: `${active?.id ?? ''}-${seekCount}`,
+          colorWipe: motionConfig.colorWipe,
+          wordByWord: motionConfig.wordByWordCaptions,
+          intro: active?.id === 'intro',
+          popKey: playhead === script.cues.introEnd ? seekCount : undefined,
+        }
+      : undefined
   const stage = (stageView: View): React.JSX.Element => (
     <Stage
       view={stageView}
       appearance={config.appearance}
+      motion={reelMotion}
       caption={active?.caption ?? ''}
       ended={active?.id === 'end'}
     >
@@ -332,6 +362,17 @@ export function AppAnimationPage(): React.JSX.Element {
               activeTab={config.appearance}
               onTabPress={(appearance) => {
                 setConfig({...config, appearance})
+              }}
+            />
+            <SegmentedPicker<ReelStyle>
+              tabs={[
+                {label: 'Static reel', value: 'static'},
+                {label: 'Animated reel', value: 'animated'},
+              ]}
+              activeTab={config.reelStyle}
+              onTabPress={(reelStyle) => {
+                setConfig({...config, reelStyle})
+                setView('reel')
               }}
             />
             <StepList

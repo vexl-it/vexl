@@ -33,7 +33,70 @@ export type AnimationOffer = typeof AnimationOffer.Type
 export const Appearance = Schema.Literal('light', 'dark')
 export type Appearance = typeof Appearance.Type
 
+export const ReelStyle = Schema.Literal('static', 'animated')
+export type ReelStyle = typeof ReelStyle.Type
+
+/** What the animated reel's camera frames: `auto` follows what happens on screen. */
+export const ReelCamera = Schema.Literal(
+  'auto',
+  'full',
+  'top',
+  'bottom',
+  'tilt'
+)
+export type ReelCamera = typeof ReelCamera.Type
+
+export const ReelColor = Schema.Literal(
+  'yellow',
+  'green',
+  'pink',
+  'black',
+  'darkGreen',
+  'darkPink'
+)
+export type ReelColor = typeof ReelColor.Type
+
+export const ReelMotion = Schema.Struct({
+  /** The Vexl app tile bouncing in before the phone. */
+  logoIntro: Schema.Boolean,
+  wordByWordCaptions: Schema.Boolean,
+  /** Each step's color wipes in over the previous one. */
+  colorWipe: Schema.Boolean,
+  /** How far zoomed framings enlarge the screen. */
+  zoom: Schema.Number.pipe(Schema.between(1, 2.5)),
+  steps: Schema.Record({
+    key: StepId,
+    value: Schema.Struct({camera: ReelCamera, color: ReelColor}),
+  }),
+})
+export type ReelMotion = typeof ReelMotion.Type
+
+export const defaultReelMotion: ReelMotion = {
+  logoIntro: true,
+  wordByWordCaptions: true,
+  colorWipe: true,
+  zoom: 1.5,
+  steps: {
+    welcome: {camera: 'auto', color: 'yellow'},
+    phone: {camera: 'auto', color: 'green'},
+    contacts: {camera: 'auto', color: 'pink'},
+    browse: {camera: 'auto', color: 'black'},
+    addOffer: {camera: 'auto', color: 'darkGreen'},
+    request: {camera: 'auto', color: 'yellow'},
+    approved: {camera: 'auto', color: 'darkPink'},
+    chat: {camera: 'auto', color: 'green'},
+    letsMeet: {camera: 'auto', color: 'pink'},
+    meeting: {camera: 'auto', color: 'black'},
+    success: {camera: 'auto', color: 'yellow'},
+  },
+}
+
 export const AppAnimationConfig = Schema.Struct({
+  /** Animated reels move a camera over the screen and change colors per step. */
+  reelStyle: Schema.optionalWith(ReelStyle, {default: () => 'static'}),
+  reelMotion: Schema.optionalWith(ReelMotion, {
+    default: () => defaultReelMotion,
+  }),
   /** The app's color theme. Optional, so settings saved before it existed still load. */
   appearance: Schema.optionalWith(Appearance, {default: () => 'light'}),
   /** The reel caption above the screen, per step. */
@@ -80,6 +143,8 @@ export type AppAnimationConfig = typeof AppAnimationConfig.Type
 
 export const defaultConfig: AppAnimationConfig = {
   appearance: 'light',
+  reelStyle: 'static',
+  reelMotion: defaultReelMotion,
   captions: {
     welcome: 'Get started with Vexl',
     phone: 'Enter your phone number',

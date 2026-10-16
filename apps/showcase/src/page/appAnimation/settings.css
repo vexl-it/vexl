@@ -245,3 +245,20 @@ textarea.settings-input {
     grid-column: 1 / -1;
   }
 }
+
+.settings-motion-toggles {
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px 24px;
+}
+
+.settings-motion-step {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.settings-motion-toggles input[type='range'] {
+  width: 100%;
+  accent-color: var(--accentYellowPrimary);
+}

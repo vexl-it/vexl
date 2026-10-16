@@ -27,7 +27,7 @@ export type AppScreen =
 export type MarketplaceScroll = 'top' | 'down' | 'chosen'
 
 export interface AppAnimationStep {
-  readonly id: StepId | 'end'
+  readonly id: StepId | 'intro' | 'end'
   readonly caption: string
   readonly start: number
   /** Where to stop while its settings are edited: a moment showing everything they change. */
@@ -47,6 +47,7 @@ const fallbackOffer: AnimationOffer = {
 }
 
 export type AppCue =
+  | 'introEnd'
   | 'tapGetStarted'
   | 'phoneOpen'
   | 'tapPhoneContinue'
@@ -127,6 +128,12 @@ export function buildScript(config: AppAnimationConfig): AppAnimationScript {
     t = typingEnd(typing)
     return typing
   }
+
+  // The animated reel's logo intro, over the first screen.
+  const introEnd =
+    config.reelStyle === 'animated' && config.reelMotion.logoIntro
+      ? wait(1800)
+      : 0
 
   // 0. The app's first screen.
   const tapGetStarted = wait(2800)
@@ -218,6 +225,7 @@ export function buildScript(config: AppAnimationConfig): AppAnimationScript {
   const end = wait(3500)
 
   const cues = {
+    introEnd,
     tapGetStarted,
     phoneOpen,
     tapPhoneContinue,
@@ -312,11 +320,12 @@ export function buildScript(config: AppAnimationConfig): AppAnimationScript {
   ]
 
   const stepMoments: ReadonlyArray<{
-    readonly id: StepId | 'end'
+    readonly id: StepId | 'intro' | 'end'
     readonly start: number
     readonly hold?: number
   }> = [
-    {id: 'welcome', start: 0},
+    {id: 'intro', start: introEnd > 0 ? 0 : never},
+    {id: 'welcome', start: introEnd},
     {id: 'phone', start: phoneOpen},
     {id: 'contacts', start: contactsOpen},
     {id: 'browse', start: marketplaceOpen, hold: scrollToChosen + 1500},
@@ -340,7 +349,7 @@ export function buildScript(config: AppAnimationConfig): AppAnimationScript {
       id,
       start,
       hold: hold ?? (included[index + 1]?.start ?? end) - 1,
-      caption: id === 'end' ? '' : config.captions[id],
+      caption: id === 'end' || id === 'intro' ? '' : config.captions[id],
     })
   )
 

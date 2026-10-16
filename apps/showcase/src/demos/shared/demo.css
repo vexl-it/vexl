@@ -190,6 +190,11 @@
 
 /* Scenes */
 
+/* react-native-web renders multiline inputs as two-row textareas; size them to their text like on a phone. */
+.phone-viewport textarea {
+  field-sizing: content;
+}
+
 .demo-layer {
   position: absolute;
   inset: 0;

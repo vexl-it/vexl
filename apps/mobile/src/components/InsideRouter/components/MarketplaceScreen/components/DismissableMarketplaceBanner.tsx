@@ -22,14 +22,14 @@ function DismissableMarketplaceBanner({
 }: Props): React.ReactElement {
   const isFocused = useIsFocused()
   const isSceneActive = useIsRetainedSceneActive()
+  const [isDismissing, setIsDismissing] = useState(false)
   const reportPromptOutcome = useReportPrompt(
     promptId,
-    isFocused && isSceneActive
+    isFocused && isSceneActive && !isDismissing
   )
   const {width} = useWindowDimensions()
   const opacity = useRef(new Animated.Value(1)).current
   const translateX = useRef(new Animated.Value(0)).current
-  const [isDismissing, setIsDismissing] = useState(false)
 
   const dismissWithAnimation = useCallback(
     (onDismiss?: () => void) => {

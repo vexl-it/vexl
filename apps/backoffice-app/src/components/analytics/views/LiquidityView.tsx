@@ -109,6 +109,7 @@ function Liquidity({data}: {data: LiquidityData}) {
             points={data.offersCreated}
             format="count"
             stacked
+            timeAxis
           />
         </ChartCard>
         <ChartCard
@@ -195,6 +196,7 @@ function Liquidity({data}: {data: LiquidityData}) {
                   points={outcome.points}
                   format="pct"
                   stacked
+                  timeAxis
                 />
               </div>
             ))}

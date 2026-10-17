@@ -448,12 +448,14 @@ export function BucketBarChart({
   points,
   format,
   stacked = false,
+  timeAxis = false,
   height = 'h-48',
 }: {
   series: readonly ChartSeries[]
   points: readonly SeriesPoint[]
   format: ValueFormat
   stacked?: boolean
+  timeAxis?: boolean
   height?: string
 }) {
   const isShareStack = stacked && format === 'pct'
@@ -478,9 +480,14 @@ export function BucketBarChart({
             <CartesianGrid vertical={false} stroke={CHART_GRID} />
             <XAxis
               dataKey="label"
-              interval="preserveStartEnd"
+              interval={timeAxis ? 'preserveStartEnd' : 0}
               minTickGap={16}
-              tick={{fontSize: 11, fill: CHART_MUTED}}
+              height={timeAxis ? undefined : 40}
+              tick={{
+                fontSize: 11,
+                fill: CHART_MUTED,
+                width: timeAxis ? undefined : 72,
+              }}
               tickLine={false}
               axisLine={{stroke: CHART_AXIS}}
             />

@@ -213,6 +213,7 @@ export const NotificationRpcsHandlers = Rpcs.toLayer(
                       clientInfo.connectionKind === 'foreground'
                         ? 'foreground_socket'
                         : 'background_socket',
+                    sendTaskType: task._tag,
                   }),
                 {discard: true}
               )

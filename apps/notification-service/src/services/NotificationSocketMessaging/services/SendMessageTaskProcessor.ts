@@ -48,6 +48,7 @@ export class TaskProcessor extends Context.Tag('TaskProcessor')<
                         'foreground'
                           ? 'foreground_socket'
                           : 'background_socket',
+                      sendTaskType: task._tag,
                     })
                   })
                 )

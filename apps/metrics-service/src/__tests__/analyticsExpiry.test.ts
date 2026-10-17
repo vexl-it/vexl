@@ -26,31 +26,31 @@ describe('expireAnalyticsStatesTask', () => {
           {
             id: liveJourney,
             kind: 'journey',
-            name: 'onboarding',
+            name: 'testJourney',
             startDay: daysAgo(14),
           },
           {
             id: expiredJourney,
             kind: 'journey',
-            name: 'onboarding',
+            name: 'testJourney',
             startDay: daysAgo(15),
           },
           {
             id: liveBucket,
             kind: 'aggregation',
-            name: 'marketplaceWeekly',
+            name: 'testAggregation',
             startDay: daysAgo(20),
           },
           {
             id: expiredBucket,
             kind: 'aggregation',
-            name: 'marketplaceWeekly',
+            name: 'testAggregation',
             startDay: daysAgo(21),
           },
           {
             id: null,
             kind: 'journey',
-            name: 'onboarding',
+            name: 'testJourney',
             startDay: daysAgo(541),
           },
         ]

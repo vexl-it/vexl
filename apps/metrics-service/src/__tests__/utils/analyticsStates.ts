@@ -38,12 +38,12 @@ export const iosClientWithPrefix: AnalyticsClientInfo = {
   prefix: Option.some(Schema.decodeSync(CountryPrefix)(420)),
 }
 
-export const onboardingUpsert = (
+export const testJourneyUpsert = (
   overrides: Partial<AnalyticsStateUpsert> = {}
 ): AnalyticsStateUpsert => ({
   id: newStateId(),
   kind: 'journey',
-  name: 'onboarding',
+  name: 'testJourney',
   schemaVersion: 1,
   revision: 0,
   startDay: daysAgo(0),

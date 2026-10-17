@@ -1,5 +1,10 @@
-import {dayOf, isoWeekStart} from '@vexl-next/analytics-definitions/src/buckets'
 import {
+  bucketStartDay,
+  dayOf,
+  isoWeekStart,
+} from '@vexl-next/analytics-definitions/src/buckets'
+import {
+  type AggregationPeriod,
   type DayString,
   type UpdatedDayPrecision,
 } from '@vexl-next/analytics-definitions/src/core'
@@ -18,6 +23,7 @@ export class AnalyticsDayRuleError extends Schema.TaggedError<AnalyticsDayRuleEr
 )('AnalyticsDayRuleError', {
   rule: Schema.Literal(
     'malformedDay',
+    'misalignedStartDay',
     'updatedBeforeStart',
     'startDayInFuture',
     'updatedDayInFuture',
@@ -42,12 +48,14 @@ export const checkAnalyticsStateDays = ({
   today,
   maxAgeDays,
   updatedDayPrecision,
+  startDayPeriod,
 }: {
   startDay: DayString
   updatedDay: DayString
   today: DayString
   maxAgeDays: number
   updatedDayPrecision: UpdatedDayPrecision
+  startDayPeriod: AggregationPeriod
 }): Effect.Effect<void, AnalyticsDayRuleError> =>
   Effect.gen(function* (_) {
     const fail = (rule: AnalyticsDayRuleError['rule']): AnalyticsDayRuleError =>
@@ -65,6 +73,9 @@ export const checkAnalyticsStateDays = ({
       dayToMs(today),
       Effect.mapError(() => fail('malformedDay'))
     )
+
+    if (bucketStartDay(startDayPeriod, new Date(start)) !== startDay)
+      return yield* _(fail('misalignedStartDay'))
 
     const earliestUpdate =
       updatedDayPrecision === 'week'

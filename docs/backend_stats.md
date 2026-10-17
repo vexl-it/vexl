@@ -84,8 +84,16 @@ These are referred to as *common* in the tables below.
 
 | Metric | Type | Attributes | Reported when |
 | --- | --- | --- | --- |
-| `NOTIFICATION_SENT` | Increment | `trackingId`, `clientVersion`, `clientPlatform`, `systemNotificationSent`, `sentAt`, `channel` (`foreground_socket`/`background_socket`/`push`) | A notification is issued to a device through a socket or push. Includes notifications replayed on socket connect (throttle waiting list and the offline buffer for background-socket users). |
+| `NOTIFICATION_SENT` | Increment | `trackingId`, `clientVersion`, `clientPlatform`, `systemNotificationSent`, `sentAt`, `channel` (`foreground_socket`/`background_socket`/`push`), `sendTaskType` | A notification is issued to a device through a socket or push. Includes notifications replayed on socket connect (throttle waiting list and the offline buffer for background-socket users). |
 | `NOTIFICATION_PROCESSED` | Increment | common + `trackingId`, `processedAt` | Client reports it processed a received notification. |
+
+`sendTaskType` is the `_tag` of the send task that produced the notification: `NewChatMessageNoticeSendTask`, `NewUserNoticeSendTask`, `NewClubUserNoticeSendTask`, `UserAdmittedToClubNoticeSendTask`, `UserInactivityNoticeSendTask`, `UserLoginOnDifferentDeviceNoticeSendTask`, `ClubFlaggedNoticeSendTask`, `ClubExpiredNoticeSendTask`, `NewContentNoticeSendTask` or `VexlProductNotificationSendTask`. Stream-only chat messages (`StreamOnlyChatMessageSendTask`) are never reported.
+
+## feedback-service
+
+| Metric | Type | Attributes | Reported when |
+| --- | --- | --- | --- |
+| `TRADE_FEEDBACK_SUBMITTED` | Increment | common + `positive` (boolean, stars >= 4) | A `trade` feedback form gets its stars for the first time (once per `formId`; later star changes are not reported). It is a chat rating, not a completed trade. Stars, objections, text and `formId` are not part of the metric. |
 
 ## metrics-service
 

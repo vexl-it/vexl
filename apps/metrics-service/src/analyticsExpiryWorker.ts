@@ -8,11 +8,13 @@ import {
   analyticsWindowConfig,
 } from './configs'
 import {MetricsDbService} from './db/MetricsDbService'
+import {todayDay} from './utils/analyticsStateRules'
 
 export const expireAnalyticsStatesTask = Effect.gen(function* (_) {
   const db = yield* _(MetricsDbService)
   const window = yield* _(analyticsWindowConfig)
   const retentionDays = yield* _(analyticsRetentionDaysConfig)
+  const today = yield* _(todayDay)
 
   yield* _(
     Effect.forEach(Record.values(analyticsDefinitions), (definition) =>
@@ -20,6 +22,7 @@ export const expireAnalyticsStatesTask = Effect.gen(function* (_) {
         .expireAnalyticsStateIds({
           name: definition.name,
           maxAgeDays: analyticsStateMaxAgeDays(definition, window),
+          today,
         })
         .pipe(
           Effect.tap((count) =>
@@ -31,7 +34,9 @@ export const expireAnalyticsStatesTask = Effect.gen(function* (_) {
     )
   )
 
-  const deleted = yield* _(db.deleteExpiredAnalyticsStates({retentionDays}))
+  const deleted = yield* _(
+    db.deleteExpiredAnalyticsStates({retentionDays, today})
+  )
   yield* _(
     Effect.log(
       `Deleted ${deleted} analytics states older than ${retentionDays} days`

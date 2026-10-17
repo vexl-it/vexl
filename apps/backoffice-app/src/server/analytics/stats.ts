@@ -3,7 +3,7 @@ import {
   MIN_GROUP_SIZE,
   type SeriesPoint,
 } from '@/src/services/analytics/domain'
-import {Array, Option, pipe, Predicate} from 'effect'
+import {Array, Number, Option, pipe, Predicate} from 'effect'
 import {type Bucket} from './buckets'
 
 // Every number leaves the server through these: groups smaller than
@@ -16,15 +16,15 @@ export const percentOrNull = (part: number, whole: number): number | null =>
     ? null
     : (part / whole) * 100
 
-// Within one row a lone hidden part equals the whole minus the visible parts,
-// so the smallest visible part is hidden with it
+// When the parts add up to the whole, a lone hidden part equals the whole minus
+// the visible parts, so the smallest visible part is hidden with it
 const sharesOf = (parts: readonly number[], whole: number) => {
   const [visible, hidden] = Array.partition(
     parts,
     (part) => percentOrNull(part, whole) === null
   )
   const alsoHiddenUpTo =
-    hidden.length === 1
+    hidden.length === 1 && Number.sumAll(parts) === whole
       ? Math.min(...Array.filter(visible, (part) => part > 0))
       : 0
   return (part: number): number | null =>

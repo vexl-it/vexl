@@ -31,7 +31,7 @@ jest.mock('./relayConfig', () => ({
 const state = Schema.decodeSync(AnalyticsStateUpsert)({
   id: '00000000-0000-4000-8000-000000000001',
   kind: 'journey',
-  name: 'onboarding',
+  name: 'testJourney',
   schemaVersion: 1,
   revision: 0,
   startDay: '2026-09-21',

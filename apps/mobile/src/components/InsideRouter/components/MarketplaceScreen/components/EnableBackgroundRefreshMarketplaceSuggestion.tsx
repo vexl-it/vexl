@@ -13,6 +13,7 @@ function EnableBackgroundRefreshMarketplaceSuggestion(): React.ReactElement {
 
   return (
     <DismissableMarketplaceBanner
+      promptId="enableBackgroundRefresh"
       color="pink"
       title={t('marketplace.enableBackgroundRefreshSuggestion.title')}
       description={t(

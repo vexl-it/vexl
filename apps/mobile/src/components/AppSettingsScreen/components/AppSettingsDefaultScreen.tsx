@@ -13,7 +13,7 @@ import {
 } from '@vexl-next/ui'
 import React from 'react'
 import {type AppSettingsStackScreenProps} from '../../../navigationTypes'
-import {analyticsEnabledAtom} from '../../../utils/analytics'
+import {analyticsOptInAtom} from '../../../utils/analytics'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../../utils/useSafeGoBack'
 import {allowScreenshotsAtom} from '../atoms'
@@ -71,7 +71,7 @@ function AppSettingsDefaultScreen({
           note={t('appSettings.anonymousUsageStatisticsNote')}
           icon={PeopleUsers}
           showChevron={false}
-          tag={<Switch valueAtom={analyticsEnabledAtom} />}
+          tag={<Switch valueAtom={analyticsOptInAtom} />}
         />
       </YStack>
     </Screen>

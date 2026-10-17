@@ -6,6 +6,7 @@ import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
 import {showErrorAlert} from '../../../components/ErrorAlert'
 import {withLoadingOverlayAtom} from '../../../components/LoadingOverlayProvider'
+import {reportRequestSentActionAtom} from '../../../utils/analytics'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import checkNotificationPermissionsAndAskIfPossibleActionAtom from '../../../utils/notifications/checkAndAskForPermissionsActionAtom'
 import {goldenAvatarTypeAtom} from '../../../utils/preferences'
@@ -16,6 +17,7 @@ import {generateAndRegisterVexlTokenActionAtom} from '../../notifications/action
 import {upsertInboxOnBeAndLocallyActionAtom} from '../hooks/useCreateInbox'
 import {myRecoveryProof} from '../utils/myChatRecoveryProof'
 import {version} from './../../../utils/environment'
+import focusChatForTheirOfferAtom from './focusChatForTheirOfferAtom'
 import upsertChatForTheirOfferActionAtom from './upsertChatForTheirOfferActionAtom'
 
 const sendRequestActionAtom = atom(
@@ -42,6 +44,10 @@ const sendRequestActionAtom = atom(
           offerId: originOffer.offerInfo.offerId,
         })
       )
+      const isRerequest =
+        get(
+          focusChatForTheirOfferAtom({inbox, offerInfo: originOffer.offerInfo})
+        ) !== undefined
       const notificationToken = yield* _(
         set(generateAndRegisterVexlTokenActionAtom, {
           keyHolder: inbox.privateKey,
@@ -72,7 +78,7 @@ const sendRequestActionAtom = atom(
         })
       )
 
-      return set(upsertChatForTheirOfferActionAtom, {
+      const chat = set(upsertChatForTheirOfferActionAtom, {
         inbox: {privateKey: inbox.privateKey},
         initialMessage: {
           state: 'sent',
@@ -82,6 +88,12 @@ const sendRequestActionAtom = atom(
         sentVexlNotificationToken: notificationToken,
         offer: originOffer,
       })
+      if (!isRerequest)
+        set(reportRequestSentActionAtom, {
+          chatId: chat.id,
+          friendLevel: originOffer.offerInfo.privatePart.friendLevel,
+        })
+      return chat
     })
 )
 

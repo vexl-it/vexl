@@ -11,7 +11,10 @@ import {useSetAtom} from 'jotai'
 import React, {useEffect} from 'react'
 import {useWindowDimensions} from 'react-native'
 import {type LoginFlowStackScreenProps} from '../../../navigationTypes'
-import {analyticsEnabledAtom} from '../../../utils/analytics'
+import {
+  analyticsOptInAtom,
+  reportFirstOpenActionAtom,
+} from '../../../utils/analytics'
 import clearMmkvStorageAndEmptyAtoms from '../../../utils/clearMmkvStorageAndEmptyAtoms'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {showTosSummaryForAlreadyLoggedInUserAtom} from '../../../utils/preferences'
@@ -31,6 +34,7 @@ export default function Intro1Screen({navigation}: Props): React.ReactElement {
   const setShowTosSummaryForAlreadyLoggedInUser = useSetAtom(
     showTosSummaryForAlreadyLoggedInUserAtom
   )
+  const reportFirstOpen = useSetAtom(reportFirstOpenActionAtom)
 
   useEffect(() => {
     setShowTosSummaryForAlreadyLoggedInUser(false)
@@ -41,7 +45,8 @@ export default function Intro1Screen({navigation}: Props): React.ReactElement {
       action={{
         label: t('loginFlow.v2.intro1.action'),
         onPress: () => {
-          void clearMmkvStorageAndEmptyAtoms().then(() => {
+          void clearMmkvStorageAndEmptyAtoms({keepAnalytics: true}).then(() => {
+            reportFirstOpen()
             navigation.navigate('Intro2')
           })
         },
@@ -52,7 +57,7 @@ export default function Intro1Screen({navigation}: Props): React.ReactElement {
             label={t('loginFlow.v2.intro1.shareUsageStatistics')}
             note={t('loginFlow.v2.intro1.shareUsageStatisticsNote')}
             showChevron={false}
-            tag={<Switch valueAtom={analyticsEnabledAtom} />}
+            tag={<Switch valueAtom={analyticsOptInAtom} />}
           />
           <Typography
             color="$foregroundPrimary"

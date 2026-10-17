@@ -1,11 +1,16 @@
-import {dayOf, isoWeekStart} from '@vexl-next/analytics-definitions/src/buckets'
-import {AnalyticsStateId} from '@vexl-next/analytics-definitions/src/core'
 import {
-  marketplaceWeeklyAggregation,
-  type MarketplaceWeeklyState,
-} from '@vexl-next/analytics-definitions/src/definitions/marketplaceWeekly'
+  bucketStartDay,
+  dayOf,
+  isoWeekStart,
+} from '@vexl-next/analytics-definitions/src/buckets'
+import {AnalyticsStateId} from '@vexl-next/analytics-definitions/src/core'
 import {onboardingJourney} from '@vexl-next/analytics-definitions/src/definitions/onboarding'
-import {registrationCohortJourney} from '@vexl-next/analytics-definitions/src/definitions/registrationCohort'
+import {
+  testAggregation,
+  testJourney,
+  testWeekJourney,
+  type TestAggregationState,
+} from '@vexl-next/analytics-definitions/src/testDefinitions'
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {Deferred, Effect, Option, Schema} from 'effect'
 import {getDefaultStore} from 'jotai'
@@ -23,14 +28,19 @@ import {flushAnalyticsActionAtom} from './flush'
 import {
   applyAggregationUpdate,
   applyJourneyStep,
-  bucketStartDay,
   findAggregationBucket,
   pendingUploads,
   pruneSettledExpired,
   settleInstance,
 } from './instances'
+import {reportFirstOpenActionAtom} from './onboarding'
+import {analyticsOptInAtom} from './optIn'
 import {AnalyticsUploadError} from './relay'
 import {journeyReportActionAtom} from './report'
+
+jest.mock('@vexl-next/analytics-definitions/src/definitions', () =>
+  jest.requireActual('@vexl-next/analytics-definitions/src/testDefinitions')
+)
 
 jest.mock('react-native-mmkv')
 jest.mock('@react-native-async-storage/async-storage', () => ({
@@ -56,11 +66,9 @@ jest.mock('../preferences', () => ({
     .atomWithParsedMmkvStorage(
       'preferences',
       {analyticsEnabled: false},
-      jest
-        .requireActual('effect')
-        .Schema.Struct({
-          analyticsEnabled: jest.requireActual('effect').Schema.Boolean,
-        })
+      jest.requireActual('effect').Schema.Struct({
+        analyticsEnabled: jest.requireActual('effect').Schema.Boolean,
+      })
     ),
 }))
 
@@ -101,7 +109,7 @@ const someInstance = (
 ): AnalyticsInstance => ({
   id: id(99),
   kind: 'journey',
-  name: 'onboarding',
+  name: 'testJourney',
   schemaVersion: 1,
   revision: 3,
   startDay: dayOf(monday),
@@ -115,7 +123,7 @@ const someInstance = (
 const openOnboarding = (): AnalyticsInstance =>
   Option.getOrThrow(
     applyJourneyStep({
-      definition: onboardingJourney,
+      definition: testJourney,
       current: Option.none(),
       partial: {step: 'opened'},
       now: monday,
@@ -128,7 +136,7 @@ const store = getDefaultStore()
 beforeEach(() => {
   nextId = 1
   mockUploadAnalyticsState.mockReset()
-  store.set(analyticsEnabledAtom, true)
+  store.set(analyticsOptInAtom, true)
 })
 
 describe('applyJourneyStep', () => {
@@ -137,7 +145,7 @@ describe('applyJourneyStep', () => {
 
     expect(instance).toMatchObject({
       kind: 'journey',
-      name: 'onboarding',
+      name: 'testJourney',
       schemaVersion: 1,
       revision: 0,
       startDay: '2026-09-21',
@@ -151,7 +159,7 @@ describe('applyJourneyStep', () => {
   it('merges the step into the previous state and bumps the revision', () => {
     const next = Option.getOrThrow(
       applyJourneyStep({
-        definition: onboardingJourney,
+        definition: testJourney,
         current: Option.some(someInstance({pending: false})),
         partial: {step: 'phoneSubmitted', reLogin: true},
         now: wednesday,
@@ -171,9 +179,9 @@ describe('applyJourneyStep', () => {
   it('closes the instance on a terminal step', () => {
     const next = Option.getOrThrow(
       applyJourneyStep({
-        definition: onboardingJourney,
+        definition: testJourney,
         current: Option.some(someInstance()),
-        partial: {step: 'onboardingFinished'},
+        partial: {step: 'finished'},
         now: wednesday,
         newId,
       })
@@ -186,7 +194,7 @@ describe('applyJourneyStep', () => {
     const current = someInstance()
     const next = Option.getOrThrow(
       applyJourneyStep({
-        definition: onboardingJourney,
+        definition: testJourney,
         current: Option.some(current),
         partial: {step: 'registered'},
         now: eightDaysLater,
@@ -199,7 +207,7 @@ describe('applyJourneyStep', () => {
 
   it('rejects a state the definition schema does not accept', () => {
     const next = applyJourneyStep({
-      definition: onboardingJourney,
+      definition: testJourney,
       current: Option.none(),
       partial: {reLogin: true},
       now: monday,
@@ -213,7 +221,7 @@ describe('applyJourneyStep', () => {
     const startedOnWednesday = (): AnalyticsInstance =>
       Option.getOrThrow(
         applyJourneyStep({
-          definition: registrationCohortJourney,
+          definition: testWeekJourney,
           current: Option.none(),
           partial: {},
           now: wednesday,
@@ -223,7 +231,7 @@ describe('applyJourneyStep', () => {
     const activatedAt = (now: Date): AnalyticsInstance =>
       Option.getOrThrow(
         applyJourneyStep({
-          definition: registrationCohortJourney,
+          definition: testWeekJourney,
           current: Option.some(startedOnWednesday()),
           partial: {activatedBy: 'offer'},
           now,
@@ -257,7 +265,7 @@ describe('applyJourneyStep', () => {
 })
 
 describe('applyAggregationUpdate', () => {
-  const initialState: MarketplaceWeeklyState = {
+  const initialState: TestAggregationState = {
     marketplaceOpened: 0,
     firstLoadResult: 'notLoaded',
   }
@@ -265,7 +273,7 @@ describe('applyAggregationUpdate', () => {
   it('creates the bucket for the ISO week of now', () => {
     const next = Option.getOrThrow(
       applyAggregationUpdate({
-        definition: marketplaceWeeklyAggregation,
+        definition: testAggregation,
         current: Option.none(),
         initialState,
         update: (state) => ({...state, marketplaceOpened: 1}),
@@ -276,7 +284,7 @@ describe('applyAggregationUpdate', () => {
 
     expect(next).toMatchObject({
       kind: 'aggregation',
-      name: 'marketplaceWeekly',
+      name: 'testAggregation',
       revision: 0,
       startDay: '2026-09-21',
       updatedDay: '2026-09-23',
@@ -288,12 +296,12 @@ describe('applyAggregationUpdate', () => {
   it('does nothing when the updater returns the same state', () => {
     const current = someInstance({
       kind: 'aggregation',
-      name: 'marketplaceWeekly',
+      name: 'testAggregation',
       payload: {marketplaceOpened: 2, firstLoadResult: 'offers'},
     })
 
     const next = applyAggregationUpdate({
-      definition: marketplaceWeeklyAggregation,
+      definition: testAggregation,
       current: Option.some(current),
       initialState,
       update: (state) => state,
@@ -307,7 +315,7 @@ describe('applyAggregationUpdate', () => {
   it('does nothing when the state is unchanged by value', () => {
     const atCap = someInstance({
       kind: 'aggregation',
-      name: 'marketplaceWeekly',
+      name: 'testAggregation',
       payload: {
         marketplaceOpened: 50,
         firstLoadResult: 'offers',
@@ -317,7 +325,7 @@ describe('applyAggregationUpdate', () => {
     })
 
     const next = applyAggregationUpdate({
-      definition: marketplaceWeeklyAggregation,
+      definition: testAggregation,
       current: Option.some(atCap),
       initialState,
       update: (state) => ({
@@ -331,17 +339,40 @@ describe('applyAggregationUpdate', () => {
     expect(Option.isNone(next)).toBe(true)
   })
 
+  it('keeps a counter at its cap', () => {
+    const atCap = someInstance({
+      kind: 'aggregation',
+      name: 'testAggregation',
+      payload: {marketplaceOpened: 50, firstLoadResult: 'offers'},
+      pending: false,
+    })
+
+    const next = applyAggregationUpdate({
+      definition: testAggregation,
+      current: Option.some(atCap),
+      initialState,
+      update: (state) => ({
+        ...state,
+        marketplaceOpened: state.marketplaceOpened + 1,
+      }),
+      now: wednesday,
+      newId,
+    })
+
+    expect(Option.isNone(next)).toBe(true)
+  })
+
   it('queues the bucket when a value changed', () => {
     const belowCap = someInstance({
       kind: 'aggregation',
-      name: 'marketplaceWeekly',
+      name: 'testAggregation',
       payload: {marketplaceOpened: 49, firstLoadResult: 'offers'},
       pending: false,
     })
 
     const next = Option.getOrThrow(
       applyAggregationUpdate({
-        definition: marketplaceWeeklyAggregation,
+        definition: testAggregation,
         current: Option.some(belowCap),
         initialState,
         update: (state) => ({
@@ -366,7 +397,7 @@ describe('applyAggregationUpdate', () => {
 
     const bucket = someInstance({
       kind: 'aggregation',
-      name: 'marketplaceWeekly',
+      name: 'testAggregation',
       startDay: dayOf(monday),
     })
     const instances = {[bucket.id]: bucket}
@@ -374,7 +405,7 @@ describe('applyAggregationUpdate', () => {
       Option.isSome(
         findAggregationBucket(
           instances,
-          'marketplaceWeekly',
+          'testAggregation',
           bucketStartDay('week', wednesday)
         )
       )
@@ -383,7 +414,7 @@ describe('applyAggregationUpdate', () => {
       Option.isNone(
         findAggregationBucket(
           instances,
-          'marketplaceWeekly',
+          'testAggregation',
           bucketStartDay('week', nextMonday)
         )
       )
@@ -421,7 +452,7 @@ describe('settleInstance and pruning', () => {
     const endedBucket = someInstance({
       id: id(2),
       kind: 'aggregation',
-      name: 'marketplaceWeekly',
+      name: 'testAggregation',
     })
     const instances = {[closed.id]: closed, [endedBucket.id]: endedBucket}
 
@@ -470,13 +501,13 @@ describe('flushAnalyticsActionAtom', () => {
     someInstance({startDay: dayOf(new Date()), updatedDay: dayOf(new Date())})
 
   it('uploads the state without the local bookkeeping', async () => {
-    const instance = someInstance()
+    const instance = someInstance({key: 'local-offer-id'})
     await flushWith(instance, Effect.void)
 
     expect(mockUploadAnalyticsState).toHaveBeenCalledWith({
       id: instance.id,
       kind: 'journey',
-      name: 'onboarding',
+      name: 'testJourney',
       schemaVersion: 1,
       revision: 3,
       startDay: '2026-09-21',
@@ -522,15 +553,15 @@ describe('flushAnalyticsActionAtom', () => {
 })
 
 describe('journey step upload', () => {
-  const reportOnboarding = journeyReportActionAtom(onboardingJourney)
+  const reportTestJourney = journeyReportActionAtom(testJourney)
   const settle = async (): Promise<void> => {
     await new Promise((resolve) => setTimeout(resolve, 20))
   }
-  const onboardingInstance = (): AnalyticsInstance =>
+  const testJourneyInstance = (): AnalyticsInstance =>
     Option.getOrThrow(
       Option.fromNullable(
         Object.values(store.get(analyticsInstancesAtom)).find(
-          (one) => one.name === 'onboarding'
+          (one) => one.name === 'testJourney'
         )
       )
     )
@@ -542,20 +573,20 @@ describe('journey step upload', () => {
   it('uploads the step right away', async () => {
     mockUploadAnalyticsState.mockReturnValue(Effect.void)
 
-    store.set(reportOnboarding, {step: 'opened'})
+    store.set(reportTestJourney, {step: 'opened'})
     await settle()
 
     expect(mockUploadAnalyticsState).toHaveBeenCalledTimes(1)
     expect(mockUploadAnalyticsState).toHaveBeenCalledWith(
       expect.objectContaining({revision: 0, payload: {step: 'opened'}})
     )
-    expect(onboardingInstance().pending).toBe(false)
+    expect(testJourneyInstance().pending).toBe(false)
   })
 
   it('leaves aggregations pending until a lifecycle flush', async () => {
     const aggregation = someInstance({
       kind: 'aggregation',
-      name: 'marketplaceWeekly',
+      name: 'testAggregation',
       startDay: isoWeekStart(new Date()),
       updatedDay: dayOf(new Date()),
       payload: {marketplaceOpened: 1, firstLoadResult: 'empty'},
@@ -563,12 +594,12 @@ describe('journey step upload', () => {
     store.set(setAnalyticsInstancesAtom, {[aggregation.id]: aggregation})
     mockUploadAnalyticsState.mockReturnValue(Effect.void)
 
-    store.set(reportOnboarding, {step: 'opened'})
+    store.set(reportTestJourney, {step: 'opened'})
     await settle()
 
     expect(mockUploadAnalyticsState).toHaveBeenCalledTimes(1)
     expect(mockUploadAnalyticsState).toHaveBeenCalledWith(
-      expect.objectContaining({name: 'onboarding'})
+      expect.objectContaining({name: 'testJourney'})
     )
     expect(store.get(analyticsInstancesAtom)[aggregation.id]?.pending).toBe(
       true
@@ -577,7 +608,7 @@ describe('journey step upload', () => {
     await Effect.runPromise(store.set(flushAnalyticsActionAtom))
 
     expect(mockUploadAnalyticsState).toHaveBeenLastCalledWith(
-      expect.objectContaining({name: 'marketplaceWeekly'})
+      expect.objectContaining({name: 'testAggregation'})
     )
     expect(store.get(analyticsInstancesAtom)[aggregation.id]?.pending).toBe(
       false
@@ -590,10 +621,10 @@ describe('journey step upload', () => {
       .mockReturnValueOnce(Deferred.await(firstUpload))
       .mockReturnValue(Effect.void)
 
-    store.set(reportOnboarding, {step: 'opened'})
+    store.set(reportTestJourney, {step: 'opened'})
     await settle()
-    store.set(reportOnboarding, {step: 'intro'})
-    store.set(reportOnboarding, {step: 'phoneSubmitted'})
+    store.set(reportTestJourney, {step: 'intro'})
+    store.set(reportTestJourney, {step: 'phoneSubmitted'})
     await settle()
     expect(mockUploadAnalyticsState).toHaveBeenCalledTimes(1)
 
@@ -604,7 +635,55 @@ describe('journey step upload', () => {
     expect(mockUploadAnalyticsState).toHaveBeenLastCalledWith(
       expect.objectContaining({revision: 2, payload: {step: 'phoneSubmitted'}})
     )
-    expect(onboardingInstance().pending).toBe(false)
+    expect(testJourneyInstance().pending).toBe(false)
+  })
+
+  it('updates only the instance with the given key', async () => {
+    mockUploadAnalyticsState.mockReturnValue(Effect.void)
+
+    store.set(reportTestJourney, {step: 'opened'}, {key: 'a'})
+    store.set(reportTestJourney, {step: 'opened'}, {key: 'b'})
+    store.set(reportTestJourney, {step: 'intro'}, {key: 'b', onlyIfOpen: true})
+    store.set(reportTestJourney, {step: 'intro'}, {key: 'c', onlyIfOpen: true})
+    await settle()
+
+    const steps = Object.values(store.get(analyticsInstancesAtom)).map(
+      (one) => [one.key, one.payload]
+    )
+    expect(steps).toEqual(
+      expect.arrayContaining([
+        ['a', {step: 'opened'}],
+        ['b', {step: 'intro'}],
+      ])
+    )
+    expect(steps).toHaveLength(2)
+  })
+
+  it('starts a new instance on alwaysStart and updates every open one without a key', async () => {
+    mockUploadAnalyticsState.mockReturnValue(Effect.void)
+
+    store.set(reportTestJourney, {step: 'opened'})
+    store.set(reportTestJourney, {step: 'opened'}, {alwaysStart: true})
+    store.set(reportTestJourney, {reLogin: true}, {onlyIfOpen: true})
+    await settle()
+
+    expect(
+      Object.values(store.get(analyticsInstancesAtom)).map((one) => one.payload)
+    ).toEqual([
+      {step: 'opened', reLogin: true},
+      {step: 'opened', reLogin: true},
+    ])
+  })
+
+  it('does not upload an update that changes nothing', async () => {
+    mockUploadAnalyticsState.mockReturnValue(Effect.void)
+
+    store.set(reportTestJourney, {step: 'opened'})
+    await settle()
+    store.set(reportTestJourney, {step: 'opened'})
+    await settle()
+
+    expect(mockUploadAnalyticsState).toHaveBeenCalledTimes(1)
   })
 
   it('keeps a failed upload pending for the next flush', async () => {
@@ -612,9 +691,9 @@ describe('journey step upload', () => {
       Effect.fail(new AnalyticsUploadError({cause: new Error('offline')}))
     )
 
-    store.set(reportOnboarding, {step: 'opened'})
+    store.set(reportTestJourney, {step: 'opened'})
     await settle()
-    expect(onboardingInstance().pending).toBe(true)
+    expect(testJourneyInstance().pending).toBe(true)
 
     mockUploadAnalyticsState.mockReturnValue(Effect.void)
     await Effect.runPromise(store.set(flushAnalyticsActionAtom))
@@ -622,7 +701,7 @@ describe('journey step upload', () => {
     expect(mockUploadAnalyticsState).toHaveBeenLastCalledWith(
       expect.objectContaining({revision: 0, payload: {step: 'opened'}})
     )
-    expect(onboardingInstance().pending).toBe(false)
+    expect(testJourneyInstance().pending).toBe(false)
   })
 })
 
@@ -648,8 +727,8 @@ describe('opt-out', () => {
       const flushing = Effect.runPromise(store.set(flushAnalyticsActionAtom))
       await Effect.runPromise(Deferred.await(started))
 
-      store.set(analyticsEnabledAtom, false)
-      if (reEnable) store.set(analyticsEnabledAtom, true)
+      store.set(analyticsOptInAtom, false)
+      if (reEnable) store.set(analyticsOptInAtom, true)
       Effect.runSync(Deferred.succeed(finish, undefined))
       await flushing
 
@@ -663,10 +742,40 @@ describe('opt-out', () => {
     const instance = someInstance()
     store.set(setAnalyticsInstancesAtom, {[instance.id]: instance})
 
-    store.set(analyticsEnabledAtom, false)
+    store.set(analyticsOptInAtom, false)
 
     expect(store.get(analyticsEnabledAtom)).toBe(false)
     expect(store.get(analyticsInstancesAtom)).toEqual({})
+  })
+})
+
+describe('opt-in', () => {
+  const optInAgain = (): void => {
+    store.set(analyticsOptInAtom, false)
+    mockUploadAnalyticsState.mockReturnValue(Effect.void)
+    store.set(analyticsOptInAtom, true)
+  }
+
+  it('records nothing until the first open is reported', () => {
+    optInAgain()
+
+    expect(store.get(analyticsMarkersAtom)).toEqual({})
+    expect(store.get(analyticsInstancesAtom)).toEqual({})
+  })
+
+  it('starts the onboarding journey on the first open once', () => {
+    optInAgain()
+
+    store.set(reportFirstOpenActionAtom)
+    store.set(reportFirstOpenActionAtom)
+
+    expect(store.get(analyticsMarkersAtom).firstOpenAt).toBeDefined()
+    expect(Object.values(store.get(analyticsInstancesAtom))).toEqual([
+      expect.objectContaining({
+        name: onboardingJourney.name,
+        payload: {step: 'opened'},
+      }),
+    ])
   })
 })
 

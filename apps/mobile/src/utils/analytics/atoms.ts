@@ -1,6 +1,5 @@
-import {atom, type SetStateAction} from 'jotai'
+import {atom} from 'jotai'
 import {atomWithParsedMmkvStorageWithImmediateSaveOption} from '../atomUtils/atomWithParsedMmkvStorage'
-import getValueFromSetStateActionOfAtom from '../atomUtils/getValueFromSetStateActionOfAtom'
 import {preferencesAtom} from '../preferences'
 import {AnalyticsInstances, AnalyticsMarkers} from './domain'
 
@@ -26,14 +25,6 @@ export const resetAnalyticsStateActionAtom = atom(null, (get, set) => {
   set(setAnalyticsInstancesAtom, {})
 })
 
-/** Opt-in toggle, off by default. Turning it off wipes everything recorded so far. */
 export const analyticsEnabledAtom = atom(
-  (get) => get(preferencesAtom).analyticsEnabled,
-  (get, set, update: SetStateAction<boolean>) => {
-    const enabled = getValueFromSetStateActionOfAtom(update)(
-      () => get(preferencesAtom).analyticsEnabled
-    )
-    set(preferencesAtom, (old) => ({...old, analyticsEnabled: enabled}))
-    if (!enabled) set(resetAnalyticsStateActionAtom)
-  }
+  (get) => get(preferencesAtom).analyticsEnabled
 )

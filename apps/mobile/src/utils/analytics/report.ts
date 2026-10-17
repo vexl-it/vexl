@@ -1,20 +1,18 @@
+import {bucketStartDay} from '@vexl-next/analytics-definitions/src/buckets'
 import {AnalyticsStateId} from '@vexl-next/analytics-definitions/src/core'
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
-import {Effect, Option, Schema} from 'effect'
-import {atom, type WritableAtom} from 'jotai'
+import {Array, Effect, Option, Record, Schema, pipe} from 'effect'
+import {type Getter, type WritableAtom} from 'jotai'
 import reportError from '../reportError'
-import {
-  analyticsEnabledAtom,
-  analyticsInstancesAtom,
-  setAnalyticsInstancesAtom,
-} from './atoms'
+import {analyticsActionAtom} from './analyticsActionAtom'
+import {analyticsInstancesAtom, setAnalyticsInstancesAtom} from './atoms'
+import {type AnalyticsInstance} from './domain'
 import {flushAnalyticsActionAtom} from './flush'
 import {
   applyAggregationUpdate,
   applyJourneyStep,
-  bucketStartDay,
   findAggregationBucket,
-  findOpenJourney,
+  findOpenJourneys,
   type AggregationDefinitionOf,
   type JourneyDefinitionOf,
 } from './instances'
@@ -22,52 +20,103 @@ import {
 const newAnalyticsStateId = (): AnalyticsStateId =>
   Schema.decodeSync(AnalyticsStateId)(generateUuid())
 
+export type JourneyUpdate<S> =
+  | Partial<S>
+  | ((current: Option.Option<S>) => Partial<S>)
+
 export interface JourneyReportOptions {
+  /**
+   * Targets only the instance with this key, and gives it to a new one.
+   * Without it the update goes to every open instance of the journey.
+   */
+  readonly key?: string
   /** Do not start a new instance when none is open. */
   readonly onlyIfOpen?: boolean
+  /** Start a new instance even when one is open. */
+  readonly alwaysStart?: boolean
+}
+
+const changesNothing = (state: object, partial: object): boolean =>
+  Array.every(
+    Record.toEntries(partial),
+    ([field, value]) => Reflect.get(state, field) === value
+  )
+
+export function openJourneyStates<S extends object, I>(
+  get: Getter,
+  definition: JourneyDefinitionOf<S, I>,
+  key?: string
+): S[] {
+  return pipe(
+    findOpenJourneys(get(analyticsInstancesAtom), definition.name, key),
+    Array.map((one) => one.payload),
+    Array.filter(Schema.is(definition.payloadSchema))
+  )
 }
 
 export function journeyReportActionAtom<S extends object, I>(
   definition: JourneyDefinitionOf<S, I>
 ): WritableAtom<
   null,
-  [partial: Partial<S>, options?: JourneyReportOptions],
+  [update: JourneyUpdate<S>, options?: JourneyReportOptions],
   void
 > {
-  return atom(null, (get, set, partial, options) => {
-    if (!get(analyticsEnabledAtom)) return
+  return analyticsActionAtom(
+    (get, set, update: JourneyUpdate<S>, options?: JourneyReportOptions) => {
+      const instances = get(analyticsInstancesAtom)
+      const open = options?.alwaysStart
+        ? []
+        : findOpenJourneys(instances, definition.name, options?.key)
+      const targets: Array<Option.Option<AnalyticsInstance>> =
+        Array.isNonEmptyArray(open)
+          ? Array.map(open, Option.some)
+          : options?.onlyIfOpen
+            ? []
+            : [Option.none()]
+      const now = new Date()
 
-    const instances = get(analyticsInstancesAtom)
-    const current = findOpenJourney(instances, definition.name)
-    if (Option.isNone(current) && options?.onlyIfOpen) return
+      const updated = Array.filterMap(targets, (current) => {
+        const state = Option.flatMap(current, (one) =>
+          Schema.is(definition.payloadSchema)(one.payload)
+            ? Option.some(one.payload)
+            : Option.none()
+        )
+        const partial = typeof update === 'function' ? update(state) : update
+        if (Option.isSome(state) && changesNothing(state.value, partial))
+          return Option.none()
 
-    const next = applyJourneyStep({
-      definition,
-      current,
-      partial,
-      now: new Date(),
-      newId: newAnalyticsStateId,
-    })
-    if (Option.isNone(next)) {
-      reportError('warn', new Error('Invalid analytics journey state'), {
-        name: definition.name,
+        const next = applyJourneyStep({
+          definition,
+          current,
+          partial,
+          now,
+          newId: newAnalyticsStateId,
+          key: options?.key,
+        })
+        if (Option.isNone(next))
+          reportError('warn', new Error('Invalid analytics journey state'), {
+            name: definition.name,
+          })
+        return next
       })
-      return
+      if (!Array.isNonEmptyArray(updated)) return
+
+      set(setAnalyticsInstancesAtom, {
+        ...instances,
+        ...Record.fromEntries(Array.map(updated, (one) => [one.id, one])),
+      })
+      // Journey steps go out right away; a failure leaves the entry pending for
+      // the next start or background flush.
+      Effect.runFork(set(flushAnalyticsActionAtom, 'journeys'))
     }
-    set(setAnalyticsInstancesAtom, {...instances, [next.value.id]: next.value})
-    // Journey steps go out right away; a failure leaves the entry pending for
-    // the next start or background flush.
-    Effect.runFork(set(flushAnalyticsActionAtom, 'journeys'))
-  })
+  )
 }
 
 export function aggregationReportActionAtom<S extends object, I>(
   definition: AggregationDefinitionOf<S, I>,
-  initialState: S
+  initialState: (get: Getter, now: Date) => S
 ): WritableAtom<null, [update: (state: S) => S], void> {
-  return atom(null, (get, set, update) => {
-    if (!get(analyticsEnabledAtom)) return
-
+  return analyticsActionAtom((get, set, update: (state: S) => S) => {
     const now = new Date()
     const instances = get(analyticsInstancesAtom)
     const next = applyAggregationUpdate({
@@ -77,7 +126,7 @@ export function aggregationReportActionAtom<S extends object, I>(
         definition.name,
         bucketStartDay(definition.period, now)
       ),
-      initialState,
+      initialState: initialState(get, now),
       update,
       now,
       newId: newAnalyticsStateId,

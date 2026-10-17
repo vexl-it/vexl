@@ -97,8 +97,8 @@ const DORMANT_FOR: ReadonlyArray<readonly [string, DormancyBucket]> = [
 
 const REACTIVATED_AFTER_DAYS = {daysInactive: 30}
 
-// The D30 window (days 28 to 34) fits the 37-day journey only for installs
-// that registered at most 2 days after first open
+// The D30 window (days 28 to 34) is only guaranteed to fit the 37-day journey
+// for d0/d1 registrations
 const d30Unknown = (state: {registeredAfter?: string}): boolean =>
   state.registeredAfter === 'd2To7' || state.registeredAfter === 'd8Plus'
 

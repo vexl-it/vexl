@@ -59,6 +59,7 @@ const MenuItemNote = styled(SizableText, {
   fontWeight: '500',
   fontSize: '$1',
   letterSpacing: '$1',
+  lineHeight: '$1',
   color: '$foregroundSecondary',
 
   variants: {

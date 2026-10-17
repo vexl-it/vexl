@@ -5,6 +5,7 @@ import {
   Language,
   MenuItem,
   NavigationBar,
+  PeopleUsers,
   Screen,
   ScreenCaptureShot,
   Switch,
@@ -12,6 +13,7 @@ import {
 } from '@vexl-next/ui'
 import React from 'react'
 import {type AppSettingsStackScreenProps} from '../../../navigationTypes'
+import {analyticsEnabledAtom} from '../../../utils/analytics'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../../utils/useSafeGoBack'
 import {allowScreenshotsAtom} from '../atoms'
@@ -63,6 +65,13 @@ function AppSettingsDefaultScreen({
           icon={ScreenCaptureShot}
           showChevron={false}
           tag={<Switch valueAtom={allowScreenshotsAtom} />}
+        />
+        <MenuItem
+          label={t('appSettings.anonymousUsageStatistics')}
+          note={t('appSettings.anonymousUsageStatisticsNote')}
+          icon={PeopleUsers}
+          showChevron={false}
+          tag={<Switch valueAtom={analyticsEnabledAtom} />}
         />
       </YStack>
     </Screen>

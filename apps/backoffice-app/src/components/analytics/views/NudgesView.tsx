@@ -29,7 +29,7 @@ function Nudges({data}: {data: NudgesData}) {
           title="Notification opens"
           population="client"
           cohorts={data.openCohorts}
-          note="Notifications opened, by type; reminders and news first. → columns: % of opens followed by that action on the same day. — = chat notifications open the chat themselves, so Chat opened says nothing there. These types don't match the sent table, so there is no open rate. Inactivity reminder: not available yet; until the app labels them they count as Other."
+          note="Notifications opened, by type; reminders and news first. → columns: % of opens followed by that action on the same day. — = chat notifications open the chat themselves, so Chat opened says nothing there. These types don't match the sent table, so there is no open rate."
         >
           <DataTable data={data.opens} />
         </ChartCard>

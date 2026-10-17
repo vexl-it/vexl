@@ -120,7 +120,7 @@ function Retention({data}: {data: RetentionData}) {
           population="client"
           className="lg:col-span-2"
           cohorts={data.reactivationCohorts}
-          note="Installs returning after 30+ days away, by the notification they opened to come back (or none), with the % that did a core action within 7 days. Coming back through a notification doesn't prove the notification caused it. Inactivity reminders show up once the app labels them; until then they count as Other."
+          note="Installs returning after 30+ days away, by the notification they opened to come back (or none), with the % that did a core action within 7 days. Coming back through a notification doesn't prove the notification caused it."
         >
           <DataTable data={data.returnsByEntry} />
         </ChartCard>

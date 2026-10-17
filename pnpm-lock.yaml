@@ -1616,6 +1616,37 @@ importers:
         specifier: ~6.0.3
         version: 6.0.3
 
+  packages/analytics-definitions:
+    dependencies:
+      effect:
+        specifier: ^3.20.0
+        version: 3.21.4
+    devDependencies:
+      '@vexl-next/eslint-config':
+        specifier: 0.0.0
+        version: link:../../tooling/eslint
+      '@vexl-next/prettier-config':
+        specifier: 0.0.0
+        version: link:../../tooling/prettier
+      '@vexl-next/tsconfig':
+        specifier: 0.0.0
+        version: link:../../tooling/tsconfig
+      eslint:
+        specifier: ^9.20.0
+        version: 9.39.4(jiti@2.7.0)
+      prettier:
+        specifier: ^3.3.2
+        version: 3.8.4
+      rimraf:
+        specifier: ^4.4.0
+        version: 4.4.1
+      typescript:
+        specifier: ~6.0.3
+        version: 6.0.3
+      vitest:
+        specifier: ^4.1.11
+        version: 4.1.11(@opentelemetry/api@1.9.1)(@types/node@26.4.1)(jsdom@20.0.3)(vite@7.3.6(@types/node@26.4.1)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.51.2)(tsx@4.22.4)(yaml@2.9.0))
+
   packages/cryptography:
     dependencies:
       '@craftzdog/react-native-buffer':
@@ -2032,6 +2063,9 @@ importers:
       '@effect/rpc':
         specifier: ^0.72.2
         version: 0.72.2(@effect/platform@0.93.8(effect@3.21.4))(effect@3.21.4)
+      '@vexl-next/analytics-definitions':
+        specifier: 0.0.0
+        version: link:../analytics-definitions
       '@vexl-next/cryptography':
         specifier: 0.0.0
         version: link:../cryptography

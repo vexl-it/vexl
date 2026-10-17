@@ -13,6 +13,7 @@ import {
   applyJourneyStep,
   findAggregationBucket,
   findOpenJourneys,
+  isExpired,
   type AggregationDefinitionOf,
   type JourneyDefinitionOf,
 } from './instances'
@@ -49,6 +50,7 @@ export function openJourneyStates<S extends object, I>(
 ): S[] {
   return pipe(
     findOpenJourneys(get(analyticsInstancesAtom), definition.name, key),
+    Array.filter((one) => !isExpired(one, new Date())),
     Array.map((one) => one.payload),
     Array.filter(Schema.is(definition.payloadSchema))
   )

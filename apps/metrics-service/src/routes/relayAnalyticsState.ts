@@ -119,6 +119,7 @@ const storeAnalyticsState = ({
 
   return Effect.gen(function* (_) {
     const definition = yield* _(findAnalyticsDefinition(state.name))
+    if (definition.kind !== state.kind) return yield* _(reject('kindMismatch'))
     const payload = yield* _(
       decodeAnalyticsPayload(state.name, state.schemaVersion, state.payload)
     )
@@ -135,6 +136,8 @@ const storeAnalyticsState = ({
           definition.kind === 'journey'
             ? definition.updatedDayPrecision
             : 'day',
+        startDayPeriod:
+          definition.kind === 'aggregation' ? definition.period : 'day',
       })
     )
 

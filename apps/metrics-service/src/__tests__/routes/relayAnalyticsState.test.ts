@@ -15,10 +15,10 @@ import {
   daysAgo,
   iosClientWithPrefix,
   newStateId,
-  onboardingUpsert,
   readStoredStates,
   relayRequest,
   testGatewayKeyConfig,
+  testJourneyUpsert,
   testRelayToken,
   upsertState,
 } from '../utils/analyticsStates'
@@ -33,8 +33,8 @@ const thisMonday = isoWeekStart(new Date())
 const lastWeekMonday = daysBefore(thisMonday, 7)
 const lastWeekWednesday = daysBefore(thisMonday, 5)
 
-const cohortStartedLastWednesday = onboardingUpsert({
-  name: 'registrationCohort',
+const cohortStartedLastWednesday = testJourneyUpsert({
+  name: 'testWeekJourney',
   startDay: lastWeekWednesday,
   updatedDay: lastWeekWednesday,
   payload: {},
@@ -52,8 +52,8 @@ describe('relayAnalyticsState', () => {
         const startDay = dayOf(
           new Date(Date.parse(updatedDay) + 6 * 24 * 60 * 60 * 1000)
         )
-        const request = onboardingUpsert({
-          name: 'registrationCohort',
+        const request = testJourneyUpsert({
+          name: 'testWeekJourney',
           startDay,
           updatedDay,
           payload: {},
@@ -61,7 +61,7 @@ describe('relayAnalyticsState', () => {
 
         yield* _(upsertState(request))
         expect(yield* _(readStoredStates)).toMatchObject([
-          {name: 'registrationCohort', startDay, updatedDay, payload: {}},
+          {name: 'testWeekJourney', startDay, updatedDay, payload: {}},
         ])
       })
     )
@@ -73,8 +73,8 @@ describe('relayAnalyticsState', () => {
         const result = yield* _(
           Effect.either(
             upsertState(
-              onboardingUpsert({
-                name: 'registrationCohort',
+              testJourneyUpsert({
+                name: 'testWeekJourney',
                 updatedDay: isoWeekStart(new Date(daysAgo(7))),
                 payload: {},
               })
@@ -92,8 +92,8 @@ describe('relayAnalyticsState', () => {
         const result = yield* _(
           Effect.either(
             upsertState(
-              onboardingUpsert({
-                name: 'registrationCohort',
+              testJourneyUpsert({
+                name: 'testWeekJourney',
                 startDay: daysAgo(-2),
                 updatedDay: isoWeekStart(new Date()),
                 payload: {},
@@ -109,7 +109,7 @@ describe('relayAnalyticsState', () => {
   it('stores a valid journey with platform, release line and country prefix', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
-        const request = onboardingUpsert({revision: 2})
+        const request = testJourneyUpsert({revision: 2})
         yield* _(upsertState(request))
 
         const stored = yield* _(readStoredStates)
@@ -117,7 +117,7 @@ describe('relayAnalyticsState', () => {
         expect(stored[0]).toMatchObject({
           id: request.id,
           kind: 'journey',
-          name: 'onboarding',
+          name: 'testJourney',
           schemaVersion: 1,
           revision: 2,
           startDay: request.startDay,
@@ -134,7 +134,7 @@ describe('relayAnalyticsState', () => {
   it('replaces the payload when the revision is higher', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
-        const first = onboardingUpsert({revision: 1})
+        const first = testJourneyUpsert({revision: 1})
         yield* _(upsertState(first))
         yield* _(
           upsertState({
@@ -157,7 +157,7 @@ describe('relayAnalyticsState', () => {
   it('ignores an upsert with a lower revision', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
-        const latest = onboardingUpsert({
+        const latest = testJourneyUpsert({
           revision: 5,
           payload: {step: 'registered'},
         })
@@ -177,28 +177,28 @@ describe('relayAnalyticsState', () => {
   })
 
   it.each([
-    ['unknown name', onboardingUpsert({name: 'nope'})],
-    ['unknown schema version', onboardingUpsert({schemaVersion: 2})],
+    ['unknown name', testJourneyUpsert({name: 'nope'})],
+    ['unknown schema version', testJourneyUpsert({schemaVersion: 2})],
     [
       'excess payload property',
-      onboardingUpsert({payload: {step: 'opened', extra: true}}),
+      testJourneyUpsert({payload: {step: 'opened', extra: true}}),
     ],
-    ['invalid payload value', onboardingUpsert({payload: {step: 'nope'}})],
+    ['invalid payload value', testJourneyUpsert({payload: {step: 'nope'}})],
     [
       'stale start day',
-      onboardingUpsert({startDay: daysAgo(15), updatedDay: daysAgo(15)}),
+      testJourneyUpsert({startDay: daysAgo(15), updatedDay: daysAgo(15)}),
     ],
     [
       'updated day before start day',
-      onboardingUpsert({startDay: daysAgo(1), updatedDay: daysAgo(2)}),
+      testJourneyUpsert({startDay: daysAgo(1), updatedDay: daysAgo(2)}),
     ],
     [
       'updated day too far in the future',
-      onboardingUpsert({startDay: daysAgo(0), updatedDay: daysAgo(-2)}),
+      testJourneyUpsert({startDay: daysAgo(0), updatedDay: daysAgo(-2)}),
     ],
     [
       'malformed day',
-      onboardingUpsert({
+      testJourneyUpsert({
         startDay: Schema.decodeSync(DayString)('2026-02-30'),
         updatedDay: daysAgo(0),
       }),
@@ -219,7 +219,7 @@ describe('relayAnalyticsState', () => {
         yield* _(upsertState(cohortStartedLastWednesday))
         expect(yield* _(readStoredStates)).toMatchObject([
           {
-            name: 'registrationCohort',
+            name: 'testWeekJourney',
             revision: 0,
             startDay: lastWeekWednesday,
             updatedDay: lastWeekWednesday,
@@ -252,7 +252,7 @@ describe('relayAnalyticsState', () => {
       Effect.gen(function* (_) {
         yield* _(
           upsertState(
-            onboardingUpsert({startDay: daysAgo(14), updatedDay: daysAgo(0)})
+            testJourneyUpsert({startDay: daysAgo(14), updatedDay: daysAgo(0)})
           )
         )
         expect(yield* _(readStoredStates)).toHaveLength(1)
@@ -263,7 +263,7 @@ describe('relayAnalyticsState', () => {
   it('rejects a kind mismatch on an existing id with 400', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
-        const journey = onboardingUpsert({revision: 1})
+        const journey = testJourneyUpsert({revision: 1})
         yield* _(upsertState(journey))
 
         const result = yield* _(
@@ -271,7 +271,8 @@ describe('relayAnalyticsState', () => {
             upsertState({
               ...journey,
               kind: 'aggregation',
-              name: 'marketplaceWeekly',
+              name: 'testAggregation',
+              startDay: thisMonday,
               revision: 2,
               payload: {marketplaceOpened: 1, firstLoadResult: 'offers'},
             })
@@ -289,14 +290,14 @@ describe('relayAnalyticsState', () => {
   it('rejects a name mismatch on an existing id with 400', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
-        const journey = onboardingUpsert({revision: 1})
+        const journey = testJourneyUpsert({revision: 1})
         yield* _(upsertState(journey))
 
         const result = yield* _(
           Effect.either(
             upsertState({
               ...journey,
-              name: 'registrationCohort',
+              name: 'testWeekJourney',
               revision: 2,
               payload: {activatedBy: 'offer'},
             })
@@ -311,11 +312,12 @@ describe('relayAnalyticsState', () => {
   it('stores an aggregation inside its settle period and rejects one past it', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
-        const inSettle = onboardingUpsert({
+        // Week buckets start on Mondays: 14 to 20 days ago is inside, 21 to 27 past.
+        const inSettle = testJourneyUpsert({
           id: newStateId(),
           kind: 'aggregation',
-          name: 'marketplaceWeekly',
-          startDay: daysAgo(20),
+          name: 'testAggregation',
+          startDay: isoWeekStart(new Date(daysAgo(14))),
           updatedDay: daysAgo(14),
           payload: {marketplaceOpened: 3, firstLoadResult: 'offers'},
         })
@@ -326,8 +328,8 @@ describe('relayAnalyticsState', () => {
             upsertState({
               ...inSettle,
               id: newStateId(),
-              startDay: daysAgo(21),
-              updatedDay: daysAgo(15),
+              startDay: isoWeekStart(new Date(daysAgo(21))),
+              updatedDay: daysAgo(21),
             })
           )
         )
@@ -337,12 +339,46 @@ describe('relayAnalyticsState', () => {
     )
   })
 
+  it('rejects an aggregation whose start day is not its period start', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const result = yield* _(
+          Effect.either(
+            upsertState(
+              testJourneyUpsert({
+                kind: 'aggregation',
+                name: 'testAggregation',
+                startDay: daysBefore(thisMonday, 1),
+                updatedDay: daysAgo(0),
+                payload: {marketplaceOpened: 1, firstLoadResult: 'offers'},
+              })
+            )
+          )
+        )
+        expectErrorResponse(InvalidAnalyticsStateError)(result)
+        expect(yield* _(readStoredStates)).toHaveLength(0)
+      })
+    )
+  })
+
+  it('rejects a state whose kind differs from its definition', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const result = yield* _(
+          Effect.either(upsertState(testJourneyUpsert({kind: 'aggregation'})))
+        )
+        expectErrorResponse(InvalidAnalyticsStateError)(result)
+        expect(yield* _(readStoredStates)).toHaveLength(0)
+      })
+    )
+  })
+
   it('rejects a body over the size cap with 413 before parsing', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const result = yield* _(
           Effect.either(
-            upsertState(onboardingUpsert({payload: {step: 'x'.repeat(5000)}}))
+            upsertState(testJourneyUpsert({payload: {step: 'x'.repeat(5000)}}))
           )
         )
         expect(result).toMatchObject({
@@ -359,7 +395,7 @@ describe('relayAnalyticsState', () => {
       keyConfig: testGatewayKeyConfig,
       plaintext: encodeRelayedAnalyticsState({
         client: iosClientWithPrefix,
-        state: onboardingUpsert(),
+        state: testJourneyUpsert(),
       }),
     })
 
@@ -391,7 +427,7 @@ describe('relayAnalyticsState', () => {
               keyConfig,
               plaintext: encodeRelayedAnalyticsState({
                 client: iosClientWithPrefix,
-                state: onboardingUpsert(),
+                state: testJourneyUpsert(),
               }),
             })
           )

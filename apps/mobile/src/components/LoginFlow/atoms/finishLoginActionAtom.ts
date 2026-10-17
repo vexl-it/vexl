@@ -22,6 +22,10 @@ import {vexlNotificationTokenAtom} from '../../../state/notifications/vexlNotifi
 import {sessionAtom} from '../../../state/session'
 import {upgradeSession} from '../../../state/session/upgradeSession'
 import {
+  reportExistingAccountActionAtom,
+  reportRegisteredActionAtom,
+} from '../../../utils/analytics'
+import {
   appSource,
   deviceModel,
   osVersion,
@@ -52,8 +56,10 @@ const handleUserCreationActionAtom = atom(
     set,
     {
       session,
+      existingAccount,
     }: {
       session: SessionV2
+      existingAccount: boolean
     }
   ) => {
     return Effect.gen(function* () {
@@ -95,6 +101,7 @@ const handleUserCreationActionAtom = atom(
 
       set(beginMarketplaceReadyNotificationFlowActionAtom)
       set(sessionAtom, O.some(session))
+      set(reportRegisteredActionAtom, {existingAccount})
     }).pipe(
       Effect.tapError((e) => {
         reportError('error', new Error('Error creating user at contact MS'), {
@@ -248,6 +255,8 @@ export const finishLoginActionAtom = atom(
         })
       )
 
+      set(reportExistingAccountActionAtom, userExists.exists)
+
       if (userExists.exists) {
         const confirmed = yield* _(
           set(globalDialogAtom, {
@@ -262,6 +271,7 @@ export const finishLoginActionAtom = atom(
           yield* _(
             set(handleUserCreationActionAtom, {
               session,
+              existingAccount: true,
             })
           )
         } else {
@@ -275,6 +285,7 @@ export const finishLoginActionAtom = atom(
         yield* _(
           set(handleUserCreationActionAtom, {
             session,
+            existingAccount: false,
           })
         )
       }

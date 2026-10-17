@@ -7,6 +7,10 @@ import {type PostLoginFlowStackScreenProps} from '../../../navigationTypes'
 import {resolveAllContactsAsSeenActionAtom} from '../../../state/contacts/atom/contactsStore'
 import {submitContactsActionAtom} from '../../../state/contacts/atom/submitContactsActionAtom'
 import {completePostLoginFlowScreenActionAtom} from '../../../state/postLoginOnboarding'
+import {
+  contactsImportOutcome,
+  reportContactsImportActionAtom,
+} from '../../../utils/analytics'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {showContactsAccessDeniedExplanationActionAtom} from '../atoms/showContactsAccesDeniedExplanationActionAtom'
 import {showNoContactsFoundExplanationActionAtom} from '../atoms/showNoContactsFoundExplanationActionAtom'
@@ -33,6 +37,7 @@ export default function ContactsImportScreen({
     showNoContactsFoundExplanationActionAtom
   )
   const completeScreen = useSetAtom(completePostLoginFlowScreenActionAtom)
+  const reportContactsImport = useSetAtom(reportContactsImportActionAtom)
 
   const goNext = (): void => {
     completeScreen('contactsImport')
@@ -46,6 +51,7 @@ export default function ContactsImportScreen({
         label: t('postLoginFlow.v2.contactsImport.action'),
         onPress: () => {
           setContactsLoading(true)
+          reportContactsImport('started')
           void Effect.runPromise(
             submitContacts({
               normalizeAndImportAll: true,
@@ -55,6 +61,7 @@ export default function ContactsImportScreen({
             })
           )
             .then((result) => {
+              reportContactsImport(contactsImportOutcome[result])
               resolveAllContactsAsSeen()
 
               if (result === 'otherError') return
@@ -84,7 +91,10 @@ export default function ContactsImportScreen({
       secondaryButton={{
         disabled: contactsLoading,
         label: t('postLoginFlow.v2.contactsImport.skip'),
-        onPress: goNext,
+        onPress: () => {
+          reportContactsImport('skipped')
+          goNext()
+        },
       }}
     >
       <YStack alignItems="center" flex={1} justifyContent="center" gap="$9">

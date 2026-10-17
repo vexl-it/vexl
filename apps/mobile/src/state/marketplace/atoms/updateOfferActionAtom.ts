@@ -21,9 +21,11 @@ import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
 import {Array, Effect, pipe, Schema} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
+import {reportPromptTargetReachedActionAtom} from '../../../utils/analytics'
 import {syncAllClubsHandleStateWhenNotFoundActionAtom} from '../../clubs/atom/refreshClubsActionAtom'
 import {updateAndReencryptSingleOfferConnectionActionAtom} from '../../connections/atom/offerToConnectionsAtom'
 import {sessionDataOrDummyAtom} from '../../session'
+import {myProductOffersMissingCategoryAtom} from './myOffers'
 import {reencryptSingleOfferMissingOnServerWhenEditingActionAtom} from './offersMissingOnServer'
 import {offersAtom} from './offersState'
 
@@ -149,6 +151,9 @@ export const updateOfferActionAtom = atom<
     if (shouldUpdateLocalStateAfterPrivateParts) {
       yield* _(updateLocalState)
     }
+
+    if (!Array.isNonEmptyArray(get(myProductOffersMissingCategoryAtom)))
+      set(reportPromptTargetReachedActionAtom, 'missingProductCategories')
 
     return createdOffer
   })

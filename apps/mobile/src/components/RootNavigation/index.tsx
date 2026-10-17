@@ -8,6 +8,7 @@ import {type RootStackParamsList} from '../../navigationTypes'
 import {useManageTypingIndications} from '../../state/chat/atoms/typingIndication'
 import {useIsUserLoggedIn} from '../../state/session'
 import useHandleNotificationOpen from '../../state/useHandleNotificationOpen'
+import {useReportAnalyticsOnForeground} from '../../utils/analytics'
 import {useSetupBackgroundTask} from '../../utils/backgroundTask'
 import {useHandleUniversalAndAppLinks} from '../../utils/deepLinks'
 import {useBackgroundNotificationSocket} from '../../utils/notifications/backgroundNotificationSocket'
@@ -101,6 +102,8 @@ function LoggedInHookGroup(): null {
   useHandleUniversalAndAppLinks()
 
   useManageTypingIndications()
+
+  useReportAnalyticsOnForeground()
 
   return null
 }

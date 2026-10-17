@@ -1,11 +1,10 @@
 import {
+  bucketStartDay,
   dayOf,
-  isoWeekStart,
   updatedDayFor,
 } from '@vexl-next/analytics-definitions/src/buckets'
 import {
   type AggregationDefinition,
-  type AggregationPeriod,
   type AnalyticsStateId,
   type DayString,
   type JourneyDefinition,
@@ -31,19 +30,6 @@ export type AggregationDefinitionOf<S, I> = WithState<
 
 const DAY_MS = 24 * 60 * 60 * 1000
 
-const definitionsByName: Record<
-  string,
-  (typeof analyticsDefinitions)[keyof typeof analyticsDefinitions]
-> = analyticsDefinitions
-
-export function bucketStartDay(
-  period: AggregationPeriod,
-  now: Date
-): DayString {
-  if (period === 'week') return isoWeekStart(now)
-  return dayOf(new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)))
-}
-
 function lifetimePassed(
   startDay: DayString,
   lifetimeDays: number,
@@ -54,21 +40,27 @@ function lifetimePassed(
 
 /** Journeys past their lifetime and aggregation buckets whose period ended. */
 export function isExpired(instance: AnalyticsInstance, now: Date): boolean {
-  const definition = definitionsByName[instance.name]
+  const definition = analyticsDefinitions[instance.name]
   if (definition === undefined) return true
   if (definition.kind === 'journey')
     return lifetimePassed(instance.startDay, definition.lifetimeDays, now)
   return bucketStartDay(definition.period, now) > instance.startDay
 }
 
-export function findOpenJourney(
+/** Every open instance of the journey, or only the one with `key` when given. */
+export function findOpenJourneys(
   instances: AnalyticsInstances,
-  name: string
-): Option.Option<AnalyticsInstance> {
+  name: string,
+  key?: string
+): AnalyticsInstance[] {
   return pipe(
     Record.values(instances),
-    Array.findFirst(
-      (one) => one.kind === 'journey' && one.name === name && !one.closed
+    Array.filter(
+      (one) =>
+        one.kind === 'journey' &&
+        one.name === name &&
+        !one.closed &&
+        (key === undefined || one.key === key)
     )
   )
 }
@@ -95,12 +87,14 @@ export function applyJourneyStep<S extends object, I>({
   partial,
   now,
   newId,
+  key,
 }: {
   definition: JourneyDefinitionOf<S, I>
   current: Option.Option<AnalyticsInstance>
   partial: Partial<S>
   now: Date
   newId: () => AnalyticsStateId
+  key?: string
 }): Option.Option<AnalyticsInstance> {
   if (
     Option.isSome(current) &&
@@ -142,6 +136,7 @@ export function applyJourneyStep<S extends object, I>({
         startDay,
         updatedDay,
         payload,
+        ...(key !== undefined ? {key} : {}),
         closed,
         pending: true,
       }),
@@ -182,9 +177,11 @@ export function applyAggregationUpdate<S extends object, I>({
     Option.getOrElse(() => initialState)
   )
   const payload = update(state)
+  // A counter bumped past its cap fails the schema, so it stays at the cap.
   if (
-    Option.isSome(current) &&
-    Schema.equivalence(definition.payloadSchema)(payload, state)
+    !Schema.is(definition.payloadSchema)(payload) ||
+    (Option.isSome(current) &&
+      Schema.equivalence(definition.payloadSchema)(payload, state))
   )
     return Option.none()
 

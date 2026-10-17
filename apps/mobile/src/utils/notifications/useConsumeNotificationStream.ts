@@ -58,6 +58,8 @@ import {reportErrorE} from '../reportError'
 import {useAppState} from '../useAppState'
 import {displayLocalNotification} from './displayLocalNotification'
 import {getDefaultChannel} from './notificationChannels'
+import {showUserInactivityNotification} from './notificationReceivedHandler/handlers/userInactivity'
+import {CLUB_DEACTIVATED} from './notificationTypes'
 import {processVexlProductNotificationActionAtom} from './processVexlProductNotification'
 import {
   getShowDebugNotifications,
@@ -240,6 +242,7 @@ const processClubExpiredOrFlaggedNotificationActionAtom = atom(
                 body: t(`notifications.CLUB_DEACTIVATED.${reason}.body`, {
                   name: clubInfo.clubInfo.name,
                 }),
+                data: {type: CLUB_DEACTIVATED},
               },
             })
           })
@@ -277,25 +280,7 @@ const processUserInactivityNotificationActionAtom = atom(
       }
 
       yield* _(
-        Effect.promise(async () => {
-          void displayLocalNotification({
-            channelId: await getDefaultChannel(),
-            content:
-              message.variant === 'OFFERS_DEACTIVATED'
-                ? {
-                    title: t(
-                      `notifications.INACTIVITY_REMINDER_OFFERS_DEACTIVATED.title`
-                    ),
-                    body: t(
-                      `notifications.INACTIVITY_REMINDER_OFFERS_DEACTIVATED.body`
-                    ),
-                  }
-                : {
-                    title: t(`notifications.INACTIVITY_REMINDER.title`),
-                    body: t(`notifications.INACTIVITY_REMINDER.body`),
-                  },
-          })
-        })
+        Effect.promise(() => showUserInactivityNotification(t, message.variant))
       )
     })
 )

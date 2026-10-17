@@ -1,5 +1,6 @@
 import {Effect, Option} from 'effect/index'
 import {atom} from 'jotai'
+import {reportNotificationSettingsActionAtom} from '../../utils/analytics'
 import {
   areNotificationsEnabledE,
   type NotificationsEnabledSettings,
@@ -14,6 +15,8 @@ export const checkAreNotificationsEnabledAtom = atom(null, (get, set) => {
     const status = yield* _(areNotificationsEnabledE(), Effect.option)
 
     set(notificationsEnabledAtom, status)
+    if (Option.isSome(status))
+      set(reportNotificationSettingsActionAtom, status.value)
     return status
   })
 })

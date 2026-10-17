@@ -186,6 +186,12 @@ jest.mock('../../marketplace/atoms/myOffers', () => {
   return {areThereAnyMyOffersAtom: atom(false)}
 })
 
+jest.mock('../../../utils/analytics', () => ({
+  reportContactsImportedActionAtom: jest
+    .requireActual('jotai')
+    .atom(null, () => undefined),
+}))
+
 jest.mock('../../notes/atoms/notesState', () => {
   const {atom} = jest.requireActual('jotai')
   return {areThereAnyMyNotesAtom: atom(false)}

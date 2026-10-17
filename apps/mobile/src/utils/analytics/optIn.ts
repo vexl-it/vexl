@@ -1,0 +1,16 @@
+import {atom, type SetStateAction} from 'jotai'
+import getValueFromSetStateActionOfAtom from '../atomUtils/getValueFromSetStateActionOfAtom'
+import {preferencesAtom} from '../preferences'
+import {analyticsEnabledAtom, resetAnalyticsStateActionAtom} from './atoms'
+
+/** The opt-in toggle, off by default. Opting out wipes everything recorded so far. */
+export const analyticsOptInAtom = atom(
+  (get) => get(analyticsEnabledAtom),
+  (get, set, update: SetStateAction<boolean>) => {
+    const enabled = getValueFromSetStateActionOfAtom(update)(() =>
+      get(analyticsEnabledAtom)
+    )
+    set(preferencesAtom, (old) => ({...old, analyticsEnabled: enabled}))
+    if (!enabled) set(resetAnalyticsStateActionAtom)
+  }
+)

@@ -22,6 +22,7 @@
     "dev:backend": "tsx tooling/dev/dev-backend.ts",
     "dev:mobile": "tsx tooling/dev/dev-mobile.ts",
     "dev:infra": "tsx tooling/dev/dev-infra.ts",
+    "dev:seed-analytics": "tsx tooling/dev/seed-analytics.ts",
     "postinstall": "manypkg check"
   },
   "private": true,

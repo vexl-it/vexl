@@ -2,6 +2,7 @@ import {Duration, Effect, Option, Schema} from 'effect'
 import {getDefaultStore} from 'jotai'
 import bundledRelaysJson from '../../../../../analytics-relays.json'
 import {preferencesAtom} from '../preferences'
+import {analyticsOptInAtom} from './optIn'
 import {
   AnalyticsRelaysFile,
   analyticsRelayAtom,
@@ -18,7 +19,10 @@ jest.mock('../mmkv/mmkvDataLossDiagnosticStorage', () => ({
   recordCriticalMmkvKeyPersisted: jest.fn(async () => undefined),
 }))
 jest.mock('../preferences', () => ({
-  preferencesAtom: jest.requireActual('jotai').atom({analyticsEnabled: false}),
+  preferencesAtom: Object.assign(
+    jest.requireActual('jotai').atom({analyticsEnabled: false}),
+    {flushNow: jest.fn()}
+  ),
 }))
 
 const bundled = Schema.decodeUnknownSync(AnalyticsRelaysFile)(bundledRelaysJson)
@@ -82,5 +86,16 @@ describe('analytics relays', () => {
 
     expect(fetchMock).toHaveBeenCalledTimes(1)
     expect(store.get(analyticsRelayAtom)).toEqual(Option.some(newerRelay))
+  })
+
+  it('forgets the fetched list and its fetch time on opt-out', async () => {
+    store.set(analyticsOptInAtom, false)
+    store.set(analyticsOptInAtom, true)
+
+    expect(store.get(analyticsRelayAtom)).toEqual(
+      Option.fromNullable(bundled.stage)
+    )
+    await refresh()
+    expect(fetchMock).toHaveBeenCalledTimes(1)
   })
 })

@@ -30,7 +30,7 @@ import {
   applyJourneyStep,
   findAggregationBucket,
   pendingUploads,
-  pruneSettledExpired,
+  pruneExpired,
   settleInstance,
 } from './instances'
 import {reportFirstOpenActionAtom} from './onboarding'
@@ -119,6 +119,15 @@ const someInstance = (
   pending: true,
   ...overrides,
 })
+
+const startedToday = (
+  overrides: Partial<AnalyticsInstance> = {}
+): AnalyticsInstance =>
+  someInstance({
+    startDay: dayOf(new Date()),
+    updatedDay: dayOf(new Date()),
+    ...overrides,
+  })
 
 const openOnboarding = (): AnalyticsInstance =>
   Option.getOrThrow(
@@ -467,12 +476,23 @@ describe('settleInstance and pruning', () => {
   it('prunes expired entries with nothing left to upload', () => {
     const expiredJourney = someInstance({id: id(1), pending: false})
     const expiredButPending = someInstance({id: id(2), pending: true})
-    const pruned = pruneSettledExpired(
+    const pruned = pruneExpired(
       {[expiredJourney.id]: expiredJourney, [id(2)]: expiredButPending},
       eightDaysLater
     )
 
     expect(Object.keys(pruned)).toEqual([id(2)])
+  })
+
+  it('prunes pending entries once the server would refuse them', () => {
+    const pending = someInstance({id: id(1), pending: true})
+    const lastAcceptedDay = new Date('2026-10-05T23:00:00Z')
+    const firstRefusedDay = new Date('2026-10-06T00:00:00Z')
+
+    expect(pruneExpired({[id(1)]: pending}, lastAcceptedDay)).toHaveProperty(
+      id(1)
+    )
+    expect(pruneExpired({[id(1)]: pending}, firstRefusedDay)).toEqual({})
   })
 
   it('lists only entries with something to upload', () => {
@@ -497,11 +517,8 @@ describe('flushAnalyticsActionAtom', () => {
     return store.get(analyticsInstancesAtom)[instance.id]
   }
 
-  const startedToday = (): AnalyticsInstance =>
-    someInstance({startDay: dayOf(new Date()), updatedDay: dayOf(new Date())})
-
   it('uploads the state without the local bookkeeping', async () => {
-    const instance = someInstance({key: 'local-offer-id'})
+    const instance = startedToday({key: 'local-offer-id'})
     await flushWith(instance, Effect.void)
 
     expect(mockUploadAnalyticsState).toHaveBeenCalledWith({
@@ -510,8 +527,8 @@ describe('flushAnalyticsActionAtom', () => {
       name: 'testJourney',
       schemaVersion: 1,
       revision: 3,
-      startDay: '2026-09-21',
-      updatedDay: '2026-09-21',
+      startDay: instance.startDay,
+      updatedDay: instance.updatedDay,
       payload: {step: 'intro'},
     })
   })
@@ -709,8 +726,8 @@ describe('opt-out', () => {
   it.each([false, true])(
     'does not send captured entries after opt-out (re-enabled: %s)',
     async (reEnable) => {
-      const first = someInstance({id: id(1)})
-      const second = someInstance({id: id(2)})
+      const first = startedToday({id: id(1)})
+      const second = startedToday({id: id(2)})
       store.set(setAnalyticsInstancesAtom, {
         [first.id]: first,
         [second.id]: second,

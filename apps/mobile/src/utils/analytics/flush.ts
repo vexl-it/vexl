@@ -7,7 +7,7 @@ import {
   setAnalyticsInstancesAtom,
 } from './atoms'
 import {toUpsert} from './domain'
-import {pendingUploads, pruneSettledExpired, settleInstance} from './instances'
+import {pendingUploads, pruneExpired, settleInstance} from './instances'
 import {isRejectedByGateway, uploadAnalyticsStateAtom} from './relay'
 
 // Flushes run one at a time so a step recorded while an upload is in flight
@@ -20,7 +20,7 @@ export const flushAnalyticsActionAtom = atom(
     Effect.gen(function* () {
       if (!get(analyticsEnabledAtom)) return
       set(setAnalyticsInstancesAtom, (instances) =>
-        pruneSettledExpired(instances, new Date())
+        pruneExpired(instances, new Date())
       )
       const upload = get(uploadAnalyticsStateAtom)
       if (Option.isNone(upload)) return

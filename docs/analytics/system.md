@@ -234,7 +234,7 @@ Three behaviours follow from where the signals sit. They are correct, and whoeve
 
 - **No country before registration.** The app derives the phone prefix from the session (`apiAtom` reads `sessionHolderAtom`), and no session exists before login. Every onboarding upload before registration goes out without a prefix, so the row is stored with `country_prefix = none`. The upload of the `registered` step is the first one that carries the prefix, and the same row switches from `none` to the prefix at that step. Drop-off before registration cannot be split by country: every row that stopped before `registered` sits in the `none` group.
 - **`phoneSubmitted` means the SMS code request succeeded.** `initPhoneVerificationAtom` reports it after `initPhoneVerification` returns. A person who leaves on the phone screen, or whose code request failed, stays at `opened`.
-- **`registeredAfter` and the retention windows are clipped by the lifetime.** The journey lives 37 days from first open. A registration later than that writes nothing, and a `coreActionD30` window that ends after the lifetime stays absent and reads as `unknown`.
+- **`registeredAfter` and the retention windows are clipped by the lifetime.** The journey lives 37 days from first open. A registration later than that writes nothing, and a `coreActionD30` window that may end after the lifetime reads as `unknown`, even when the field is set.
 
 ## 7. Dashboard rules
 

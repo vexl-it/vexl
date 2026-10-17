@@ -53,16 +53,17 @@ export const reportContactsImportedActionAtom = analyticsActionAtom(
   }
 )
 
-/** Reports the prompt as shown and returns the reporter of its outcome. */
+/** Reports the prompt as shown once visible, returns its outcome reporter. */
 export function useReportPrompt(
-  promptId: PromptId
+  promptId: PromptId,
+  isVisible: boolean
 ): (outcome: PromptOutcome) => void {
   const reportShown = useSetAtom(reportPromptShownActionAtom)
   const reportOutcome = useSetAtom(reportPromptOutcomeActionAtom)
 
   useEffect(() => {
-    reportShown(promptId)
-  }, [promptId, reportShown])
+    if (isVisible) reportShown(promptId)
+  }, [isVisible, promptId, reportShown])
 
   return useCallback(
     (outcome) => {

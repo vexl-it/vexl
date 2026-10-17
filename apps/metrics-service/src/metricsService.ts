@@ -1,6 +1,8 @@
 import {healthServerLayer} from '@vexl-next/server-utils/src/HealthServer'
 import {RedisConnectionService} from '@vexl-next/server-utils/src/RedisConnection'
+import {RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {Layer, pipe} from 'effect/index'
+import {AnalyticsExpiryWorkerLayer} from './analyticsExpiryWorker'
 import {healthServerPortConfig, redisUrl} from './configs'
 import DbLayer from './db/layer'
 import {MetricsDbService} from './db/MetricsDbService'
@@ -17,11 +19,13 @@ const MainLive = pipe(
   ),
   Layer.provideMerge(reportLastReportedMetricsGaugeLive),
   Layer.provideMerge(MetricsDbService.Live),
+  Layer.provideMerge(RedisService.Live),
   Layer.provideMerge(RedisConnectionService.layer(redisUrl)),
   Layer.provideMerge(DbLayer)
 )
 
 export const metricsService = Layer.mergeAll(
   ApiServerLive,
-  MetricsConsumerServiceLive
+  MetricsConsumerServiceLive,
+  AnalyticsExpiryWorkerLayer
 ).pipe(Layer.provide(MainLive))

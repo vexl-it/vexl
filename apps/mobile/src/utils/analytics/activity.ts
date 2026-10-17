@@ -90,7 +90,9 @@ export const reportActivityCoreActionActionAtom = analyticsActionAtom(
     const mark = markCoreAction(actionClass)
     set(activityDailyAtom, mark)
     set(activityMonthlyAtom, mark)
-    set(activityWeeklyAtom, (state) => countCoreAction[kind](mark(state)))
+    set(activityWeeklyAtom, mark)
+    // Separate update: a counter at its cap fails alone and keeps the mark.
+    set(activityWeeklyAtom, countCoreAction[kind])
   }
 )
 

@@ -421,7 +421,7 @@ export function TimeSeriesChart({
                 dataKey={matureSegment(item.key)}
                 stroke={item.color}
                 strokeWidth={2}
-                dot={false}
+                dot={{r: 2, fill: item.color, strokeWidth: 0}}
                 connectNulls={false}
                 isAnimationActive={false}
               />,
@@ -431,7 +431,7 @@ export function TimeSeriesChart({
                 stroke={item.color}
                 strokeWidth={2}
                 strokeDasharray="4 3"
-                dot={false}
+                dot={{r: 2, fill: item.color, strokeWidth: 0}}
                 connectNulls={false}
                 isAnimationActive={false}
               />,

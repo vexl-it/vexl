@@ -1,5 +1,4 @@
 import {
-  formatValue,
   type CountryFilter,
   type LiquidityData,
   type SeriesPoint,
@@ -296,18 +295,13 @@ export const loadLiquidity = (scope: QueryScope): QueryResult<LiquidityData> =>
             rows,
             (row) => row.state.offersVisible !== undefined
           )
-          return [
+          return shareRow(
             countryLabel(country),
-            formatValue.count(countOrNull(installs)),
-            ...Array.map(OFFERS_VISIBLE, (bucket) =>
-              formatValue.pct(
-                percentOrNull(
-                  sumWhere(rows, (row) => row.state.offersVisible === bucket),
-                  installs
-                )
-              )
-            ),
-          ]
+            installs,
+            Array.map(OFFERS_VISIBLE, (bucket) =>
+              sumWhere(rows, (row) => row.state.offersVisible === bucket)
+            )
+          )
         }
       ),
     }

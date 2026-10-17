@@ -11,6 +11,8 @@ export const analyticsOptInAtom = atom(
       get(analyticsEnabledAtom)
     )
     set(preferencesAtom, (old) => ({...old, analyticsEnabled: enabled}))
+    // A deferred write lost to an app kill would silently undo an opt-out.
+    preferencesAtom.flushNow()
     if (!enabled) set(resetAnalyticsStateActionAtom)
   }
 )

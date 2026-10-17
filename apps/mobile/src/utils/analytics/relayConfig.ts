@@ -64,7 +64,7 @@ export const analyticsRelayAtom = atom((get): Option.Option<AnalyticsRelay> => {
   )
 })
 
-/** At most once a day and only for opted-in installs. Failures keep the previous relays. */
+/** At most once a day, failed attempts included, and only for opted-in installs. Failures keep the previous relays. */
 export const refreshAnalyticsRelaysActionAtom = atom(
   null,
   (get, set): Effect.Effect<void> => {
@@ -77,6 +77,7 @@ export const refreshAnalyticsRelaysActionAtom = atom(
     )
       return Effect.void
 
+    set(fetchedRelaysAtom, (old) => ({...old, fetchedAt: Date.now()}))
     return Effect.tryPromise(async () => {
       const response = await fetch(RELAYS_URL)
       if (!response.ok) throw new Error(`HTTP ${response.status}`)
@@ -87,7 +88,7 @@ export const refreshAnalyticsRelaysActionAtom = atom(
       Effect.timeout(Duration.seconds(10)),
       Effect.tap((file) =>
         Effect.sync(() => {
-          set(fetchedRelaysAtom, {fetchedAt: Date.now(), file})
+          set(fetchedRelaysAtom, (old) => ({...old, file}))
         })
       ),
       Effect.ignore

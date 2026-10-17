@@ -1,4 +1,5 @@
 import {FetchHttpClient} from '@effect/platform/index'
+import {OhttpKeyConfig} from '@vexl-next/cryptography/src/operations/ohttp.brand'
 import {countryPrefixFromNumber} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {
   ENV_PRESETS,
@@ -55,6 +56,9 @@ function buildLocalEnvFromEnvVars(): EnvPreset | null {
   const contentMs = process.env.EXPO_PUBLIC_LOCAL_CONTENT_MS
   const metricsMs = process.env.EXPO_PUBLIC_LOCAL_METRICS_MS
   const chatImagesUrl = process.env.EXPO_PUBLIC_LOCAL_CHAT_IMAGES_URL
+  const analyticsRelayUrl = process.env.EXPO_PUBLIC_LOCAL_ANALYTICS_RELAY
+  const analyticsGatewayKeyConfig =
+    process.env.EXPO_PUBLIC_LOCAL_ANALYTICS_GATEWAY_KEY_CONFIG
 
   if (
     !userMs ||
@@ -85,6 +89,15 @@ function buildLocalEnvFromEnvVars(): EnvPreset | null {
     contentMs: Schema.decodeSync(ServiceUrl)(contentMs),
     metrics: Schema.decodeSync(ServiceUrl)(metricsMs),
     chatImagesUrl: Schema.decodeSync(ServiceUrl)(chatImagesUrl),
+    analyticsRelay:
+      analyticsRelayUrl && analyticsGatewayKeyConfig
+        ? Option.some({
+            relayUrls: [Schema.decodeSync(ServiceUrl)(analyticsRelayUrl)],
+            gatewayKeyConfig: Schema.decodeSync(OhttpKeyConfig)(
+              analyticsGatewayKeyConfig
+            ),
+          })
+        : Option.none(),
   }
 }
 

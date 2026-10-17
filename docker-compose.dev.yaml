@@ -122,6 +122,22 @@ services:
         mc anonymous set-json /tmp/chat-images-policy.json local/"$${S3_CHAT_IMAGES_BUCKET_NAME}"
         echo '{"Rules":[{"ID":"expire-chat-images","Status":"Enabled","Filter":{"Prefix":""},"Expiration":{"Days":'"$${CHAT_IMAGES_EXPIRE_DAYS}"'}}]}' | mc ilm import local/"$${S3_CHAT_IMAGES_BUCKET_NAME}"
 
+  # OHTTP analytics relay: the same Caddyfile relay partners run in prod.
+  # Forwards encrypted analytics to the metrics-service gateway on the host.
+  ohttp-relay:
+    image: caddy:2.11.7-alpine
+    container_name: vexl-ohttp-relay
+    environment:
+      RELAY_SITE: ":80"
+      GATEWAY_UPSTREAM: http://host.docker.internal:${METRICS_SERVICE_PORT:-3010}
+      RELAY_TOKEN: ${ANALYTICS_RELAY_TOKEN:-local-relay-token}
+    ports:
+      - "${OHTTP_RELAY_PORT:-3017}:80"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./tooling/ohttp-relay/Caddyfile:/etc/caddy/Caddyfile:ro
+
   loki:
     image: grafana/loki:3.6.0
     container_name: vexl-loki

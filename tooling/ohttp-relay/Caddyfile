@@ -1,0 +1,38 @@
+# Vexl analytics OHTTP relay. The same file runs in local dev (docker compose),
+# on staging and at relay partners; only the environment differs:
+#   RELAY_SITE        site address, e.g. relay.example.org (or :80 for plain HTTP)
+#   GATEWAY_UPSTREAM  the metrics-service gateway, e.g. https://metrics.vexl.it
+#   RELAY_TOKEN       shared secret identifying this relay to the gateway
+{
+	# Caddy writes no access logs without a `log` directive. Error logs carry
+	# the client IP, so they are dropped too.
+	log default {
+		exclude http.log.error
+	}
+}
+
+{$RELAY_SITE} {
+	@ohttp {
+		method POST
+		path /vexl-analytics
+	}
+
+	handle @ohttp {
+		request_body {
+			max_size 8KB
+		}
+		rewrite * /analytics/ohttp
+		reverse_proxy {$GATEWAY_UPSTREAM} {
+			# Drop every client header, including the X-Forwarded-* ones Caddy
+			# adds itself, then set only what the gateway needs.
+			header_up -*
+			header_up Host {upstream_hostport}
+			header_up Content-Type message/ohttp-req
+			header_up X-Relay-Token {$RELAY_TOKEN}
+		}
+	}
+
+	handle {
+		respond 404
+	}
+}

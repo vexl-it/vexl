@@ -1,44 +1,54 @@
 import {Schema} from 'effect'
-import {DurationBucket} from '../buckets'
+import {DaysBucket, OffersVisibleBucket} from '../buckets'
 import {defineJourney} from '../core'
 
 export const OnboardingStep = Schema.Literal(
   'opened',
-  'intro',
   'phoneSubmitted',
   'codeVerified',
-  'registered',
-  'contactsImport',
-  'notifications',
-  'onboardingFinished'
+  'registered'
 )
 export type OnboardingStep = typeof OnboardingStep.Type
 
 export const ContactsImportOutcome = Schema.Literal(
-  'success',
-  'zero',
+  'started',
+  'completed',
   'skipped',
   'denied',
-  'error'
+  'failed'
 )
 export type ContactsImportOutcome = typeof ContactsImportOutcome.Type
 
-export const NotificationsOutcome = Schema.Literal('granted', 'skipped')
-export type NotificationsOutcome = typeof NotificationsOutcome.Type
+export const ActivationKind = Schema.Literal('offer', 'request')
+export type ActivationKind = typeof ActivationKind.Type
+
+export const ClubJoinTiming = Schema.Literal(
+  'beforeContactsImport',
+  'afterContactsImport'
+)
+export type ClubJoinTiming = typeof ClubJoinTiming.Type
 
 export const onboardingJourney = defineJourney({
   name: 'onboarding',
   schemaVersion: 1,
-  lifetimeDays: 7,
-  updatedDayPrecision: 'day',
+  lifetimeDays: 37,
+  updatedDayPrecision: 'week',
   state: Schema.Struct({
     step: OnboardingStep,
-    reLogin: Schema.optional(Schema.Boolean),
+    existingAccount: Schema.optional(Schema.Boolean),
+    registeredAfter: Schema.optional(DaysBucket),
     contactsImport: Schema.optional(ContactsImportOutcome),
-    notifications: Schema.optional(NotificationsOutcome),
-    openToRegistration: Schema.optional(DurationBucket),
+    firstMarketplaceLoad: Schema.optional(OffersVisibleBucket),
+    offerOpened: Schema.optional(Schema.Boolean),
+    activation: Schema.optional(ActivationKind),
+    activatedAfter: Schema.optional(DaysBucket),
+    clubJoin: Schema.optional(ClubJoinTiming),
+    clubActivation: Schema.optional(ActivationKind),
+    coreActionD1: Schema.optional(Schema.Boolean),
+    coreActionD7: Schema.optional(Schema.Boolean),
+    coreActionD30: Schema.optional(Schema.Boolean),
   }),
-  terminalStates: ['onboardingFinished'],
+  terminalStates: [],
 })
 
 export type OnboardingState = typeof onboardingJourney.payloadSchema.Type

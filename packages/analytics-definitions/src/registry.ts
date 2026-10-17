@@ -1,22 +1,10 @@
 import {Effect, Option, Record, Schema, type ParseResult} from 'effect'
-import {marketplaceWeeklyAggregation} from './definitions/marketplaceWeekly'
-import {onboardingJourney} from './definitions/onboarding'
-import {registrationCohortJourney} from './definitions/registrationCohort'
+import {
+  analyticsDefinitions,
+  type RegisteredAnalyticsDefinition,
+} from './definitions'
 
-export const analyticsDefinitions = {
-  onboarding: onboardingJourney,
-  registrationCohort: registrationCohortJourney,
-  marketplaceWeekly: marketplaceWeeklyAggregation,
-}
-
-export type AnalyticsDefinitionName = keyof typeof analyticsDefinitions
-export type RegisteredAnalyticsDefinition =
-  (typeof analyticsDefinitions)[AnalyticsDefinitionName]
-export type AnalyticsPayload =
-  RegisteredAnalyticsDefinition['payloadSchema']['Type']
-
-const definitionsByName: Record<string, RegisteredAnalyticsDefinition> =
-  analyticsDefinitions
+export {analyticsDefinitions, type RegisteredAnalyticsDefinition}
 
 export class UnknownAnalyticsDefinitionError extends Schema.TaggedError<UnknownAnalyticsDefinitionError>(
   'UnknownAnalyticsDefinitionError'
@@ -38,7 +26,7 @@ export const findAnalyticsDefinition = (
   RegisteredAnalyticsDefinition,
   UnknownAnalyticsDefinitionError
 > =>
-  Record.get(definitionsByName, name).pipe(
+  Record.get(analyticsDefinitions, name).pipe(
     Option.match({
       onNone: () => new UnknownAnalyticsDefinitionError({name}),
       onSome: Effect.succeed,
@@ -50,7 +38,7 @@ export const decodeAnalyticsPayload = (
   schemaVersion: number,
   payload: unknown
 ): Effect.Effect<
-  AnalyticsPayload,
+  object,
   | UnknownAnalyticsDefinitionError
   | AnalyticsSchemaVersionMismatchError
   | ParseResult.ParseError
@@ -63,8 +51,7 @@ export const decodeAnalyticsPayload = (
         expectedVersion: definition.schemaVersion,
         receivedVersion: schemaVersion,
       })
-    return yield* Schema.decodeUnknown(
-      Schema.asSchema(definition.payloadSchema),
-      {onExcessProperty: 'error'}
-    )(payload)
+    return yield* Schema.decodeUnknown(definition.payloadSchema, {
+      onExcessProperty: 'error',
+    })(payload)
   })

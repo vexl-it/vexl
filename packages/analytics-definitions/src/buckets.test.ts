@@ -1,9 +1,14 @@
 import {Schema} from 'effect'
 import {describe, expect, it} from 'vitest'
 import {
+  bucketClubCount,
   bucketDays,
+  bucketDormancy,
   bucketDuration,
   bucketOffersVisible,
+  bucketRequestCount,
+  bucketStartDay,
+  bucketTenure,
   cappedCounter,
   dayOf,
   isoWeekStart,
@@ -45,6 +50,25 @@ describe('isoWeekStart', () => {
   it('uses UTC for the week day', () => {
     expect(isoWeekStart(new Date('2026-09-27T23:30:00-02:00'))).toBe(
       '2026-09-28'
+    )
+  })
+})
+
+describe('bucketStartDay', () => {
+  const now = new Date('2026-09-23T23:59:59Z')
+
+  it('is the UTC day for day buckets', () => {
+    expect(bucketStartDay('day', now)).toBe('2026-09-23')
+  })
+
+  it('is the ISO week start for week buckets', () => {
+    expect(bucketStartDay('week', now)).toBe('2026-09-21')
+  })
+
+  it('is the first of the UTC month for month buckets', () => {
+    expect(bucketStartDay('month', now)).toBe('2026-09-01')
+    expect(bucketStartDay('month', new Date('2027-01-01T00:00:00Z'))).toBe(
+      '2027-01-01'
     )
   })
 })
@@ -110,8 +134,8 @@ describe('bucketDays', () => {
     expect(bucketDays(2 * DAY - 1)).toBe('d1')
     expect(bucketDays(2 * DAY)).toBe('d2To7')
     expect(bucketDays(8 * DAY - 1)).toBe('d2To7')
-    expect(bucketDays(8 * DAY)).toBe('d8To30')
-    expect(bucketDays(45 * DAY)).toBe('d8To30')
+    expect(bucketDays(8 * DAY)).toBe('d8Plus')
+    expect(bucketDays(45 * DAY)).toBe('d8Plus')
   })
 })
 
@@ -125,6 +149,73 @@ describe('bucketOffersVisible', () => {
     expect(bucketOffersVisible(21)).toBe('21to50')
     expect(bucketOffersVisible(50)).toBe('21to50')
     expect(bucketOffersVisible(51)).toBe('51plus')
+  })
+})
+
+describe('bucketRequestCount', () => {
+  it('buckets counts at the edges', () => {
+    expect(bucketRequestCount(1)).toBe('1')
+    expect(bucketRequestCount(2)).toBe('2to5')
+    expect(bucketRequestCount(5)).toBe('2to5')
+    expect(bucketRequestCount(6)).toBe('6plus')
+  })
+})
+
+describe('bucketClubCount', () => {
+  it('buckets counts at the edges', () => {
+    expect(bucketClubCount(0)).toBe('0')
+    expect(bucketClubCount(1)).toBe('1')
+    expect(bucketClubCount(2)).toBe('2')
+    expect(bucketClubCount(3)).toBe('3plus')
+    expect(bucketClubCount(12)).toBe('3plus')
+  })
+})
+
+describe('bucketTenure', () => {
+  const registeredAt = new Date('2026-09-27T23:00:00Z')
+  const weeksLater = (weeks: number): Date =>
+    new Date(Date.parse('2026-09-21T00:00:00Z') + weeks * 7 * DAY)
+
+  it('counts ISO weeks, not elapsed time', () => {
+    expect(bucketTenure(registeredAt, new Date('2026-09-21T00:00:00Z'))).toBe(
+      'w0'
+    )
+    expect(bucketTenure(registeredAt, new Date('2026-09-28T00:00:00Z'))).toBe(
+      'w1'
+    )
+  })
+
+  it('buckets weeks at the edges', () => {
+    expect(bucketTenure(registeredAt, weeksLater(2))).toBe('w2to3')
+    expect(bucketTenure(registeredAt, weeksLater(3))).toBe('w2to3')
+    expect(bucketTenure(registeredAt, weeksLater(4))).toBe('w4')
+    expect(bucketTenure(registeredAt, weeksLater(5))).toBe('w5to12')
+    expect(bucketTenure(registeredAt, weeksLater(12))).toBe('w5to12')
+    expect(bucketTenure(registeredAt, weeksLater(13))).toBe('w13')
+    expect(bucketTenure(registeredAt, weeksLater(14))).toBe('w14plus')
+  })
+
+  it('crosses the year boundary', () => {
+    expect(
+      bucketTenure(
+        new Date('2026-12-31T12:00:00Z'),
+        new Date('2027-01-04T00:00:00Z')
+      )
+    ).toBe('w1')
+  })
+
+  it('is w0 when the clock moved back before registration', () => {
+    expect(bucketTenure(registeredAt, weeksLater(-1))).toBe('w0')
+  })
+})
+
+describe('bucketDormancy', () => {
+  it('buckets whole elapsed days', () => {
+    expect(bucketDormancy(30 * DAY)).toBe('d30To60')
+    expect(bucketDormancy(61 * DAY - 1)).toBe('d30To60')
+    expect(bucketDormancy(61 * DAY)).toBe('d61To180')
+    expect(bucketDormancy(181 * DAY - 1)).toBe('d61To180')
+    expect(bucketDormancy(181 * DAY)).toBe('over180')
   })
 })
 

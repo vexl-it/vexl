@@ -80,6 +80,7 @@ function Clubs({data}: {data: ClubsData}) {
             series={JOIN_SERIES}
             points={data.joins}
             format="count"
+            timeAxis
           />
         </ChartCard>
         <ChartCard

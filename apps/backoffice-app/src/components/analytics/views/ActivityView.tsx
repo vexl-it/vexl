@@ -92,6 +92,7 @@ function Activity({data}: {data: ActivityData}) {
           points={data.actives}
           format="count"
           stacked
+          timeAxis
           height="h-56"
         />
       </ChartCard>

@@ -6,6 +6,7 @@ export const BackofficeSection = Schema.Literal(
   'productNotifications',
   'slideshows',
   'shortLinks',
+  'analytics',
   'cms',
   'admins'
 )
@@ -19,6 +20,7 @@ export const SECTION_NAMES: Readonly<Record<BackofficeSection, string>> = {
   productNotifications: 'Product notifications',
   slideshows: 'TV slideshows',
   shortLinks: 'Short links',
+  analytics: 'Analytics',
   cms: 'Blog posts and events',
   admins: 'Admins',
 }

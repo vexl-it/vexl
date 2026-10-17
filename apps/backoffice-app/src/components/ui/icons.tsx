@@ -63,6 +63,9 @@ export const CalendarIcon = icon(
 export const ShieldIcon = icon(
   <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" />
 )
+export const BarChartIcon = icon(
+  <path d="M3 3v18h18M8 17v-6M13 17V7M18 17v-3" />
+)
 export const MenuIcon = icon(<path d="M4 6h16M4 12h16M4 18h16" />)
 export const XIcon = icon(<path d="M18 6 6 18M6 6l12 12" />)
 export const LogOutIcon = icon(

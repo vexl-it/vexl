@@ -11,7 +11,7 @@
  * METRICS_QUEUE_NAME, OTLP_TRACE_EXPORTER_URL, SERVICE_NAME/VERSION and NODE_ENV
  * (via `commonServiceEnv`). Each service's `buildEnv` only adds its own extras.
  */
-import {Array, Option, pipe} from 'effect'
+import {Array, Option, pipe, Record} from 'effect'
 import devConfig, {type DevConfig} from '../../dev.config'
 import {detectLanIp} from './lanIp'
 import {type Secrets} from './secrets'
@@ -332,6 +332,7 @@ export const WEB_APPS: readonly RunnableApp[] = [
       ...dbEnv(ctx, dbn.backoffice),
       ...stringifyValues(sc.backofficeApp),
       BACKOFFICE_ORIGIN: httpUrl(ctx, 'backofficeApp'),
+      ...Record.mapKeys(dbEnv(ctx, dbn.metrics), (key) => `METRICS_${key}`),
       CONTACT_INTERNAL_SERVER_URL: httpUrl(ctx, 'contactServiceInternal'),
       CONTENT_INTERNAL_SERVER_URL: httpUrl(ctx, 'contentServiceInternal'),
       CONTENT_API_INTERNAL_URL: httpUrl(ctx, 'contentService'),

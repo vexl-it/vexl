@@ -2,6 +2,7 @@
 
 import {
   BanIcon,
+  BarChartIcon,
   BellIcon,
   CalendarIcon,
   cx,
@@ -33,6 +34,7 @@ const NAV_ICONS: Record<NavigationItemId, Icon> = {
   slideshows: TvIcon,
   productNotifications: BellIcon,
   shortLinks: LinkIcon,
+  analytics: BarChartIcon,
   admins: ShieldIcon,
 }
 

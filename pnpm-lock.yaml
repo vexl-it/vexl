@@ -95,6 +95,9 @@ importers:
       '@tiptap/starter-kit':
         specifier: 3.32.0
         version: 3.32.0
+      '@vexl-next/analytics-definitions':
+        specifier: 0.0.0
+        version: link:../../packages/analytics-definitions
       '@vexl-next/domain':
         specifier: 0.0.0
         version: link:../../packages/domain
@@ -104,6 +107,9 @@ importers:
       '@vexl-next/rest-api':
         specifier: 0.0.0
         version: link:../../packages/rest-api
+      awesome-phonenumber:
+        specifier: ^7.4.0
+        version: 7.8.0
       effect:
         specifier: ^3.20.0
         version: 3.21.4
@@ -2404,6 +2410,15 @@ importers:
       '@effect/platform':
         specifier: ^0.93.6
         version: 0.93.8(effect@3.21.4)
+      '@effect/sql':
+        specifier: ^0.48.6
+        version: 0.48.6(@effect/experimental@0.57.11(@effect/platform@0.93.8(effect@3.21.4))(effect@3.21.4)(ioredis@5.11.1))(@effect/platform@0.93.8(effect@3.21.4))(effect@3.21.4)
+      '@effect/sql-pg':
+        specifier: ^0.49.7
+        version: 0.49.7(@effect/experimental@0.57.11(@effect/platform@0.93.8(effect@3.21.4))(effect@3.21.4)(ioredis@5.11.1))(@effect/platform@0.93.8(effect@3.21.4))(@effect/sql@0.48.6(@effect/experimental@0.57.11(@effect/platform@0.93.8(effect@3.21.4))(effect@3.21.4)(ioredis@5.11.1))(@effect/platform@0.93.8(effect@3.21.4))(effect@3.21.4))(effect@3.21.4)
+      '@vexl-next/analytics-definitions':
+        specifier: 0.0.0
+        version: link:../../packages/analytics-definitions
       '@vexl-next/cryptography':
         specifier: 0.0.0
         version: link:../../packages/cryptography

@@ -9,6 +9,7 @@ export type NavigationItemId =
   | 'slideshows'
   | 'productNotifications'
   | 'shortLinks'
+  | 'analytics'
   | 'admins'
 
 export interface NavigationItem {
@@ -68,6 +69,17 @@ export const NAVIGATION: readonly NavigationGroup[] = [
         name: 'Short links',
         href: '/short-links',
         section: 'shortLinks',
+      },
+    ],
+  },
+  {
+    title: 'Insights',
+    items: [
+      {
+        id: 'analytics',
+        name: 'Analytics',
+        href: '/analytics',
+        section: 'analytics',
       },
     ],
   },

@@ -1,4 +1,4 @@
-import {Effect, Option, Schema} from 'effect'
+import {Duration, Effect, Option, Schema} from 'effect'
 import {getDefaultStore} from 'jotai'
 import bundledRelaysJson from '../../../../../analytics-relays.json'
 import {preferencesAtom} from '../preferences'
@@ -51,7 +51,7 @@ describe('analytics relays', () => {
     expect(fetchMock).not.toHaveBeenCalled()
   })
 
-  it('ignores an invalid or plain http relay list', async () => {
+  it('ignores an invalid or plain http relay list and retries it at most once a day', async () => {
     store.set(preferencesAtom, (old) => ({...old, analyticsEnabled: true}))
     fetchMock.mockResolvedValue(
       Response.json({
@@ -61,13 +61,18 @@ describe('analytics relays', () => {
     )
 
     await refresh()
+    await refresh()
 
+    expect(fetchMock).toHaveBeenCalledTimes(1)
     expect(store.get(analyticsRelayAtom)).toEqual(
       Option.fromNullable(bundled.stage)
     )
   })
 
   it('uses a newer fetched list and fetches at most once a day', async () => {
+    jest
+      .spyOn(Date, 'now')
+      .mockReturnValue(Date.now() + Duration.toMillis(Duration.days(1)))
     fetchMock.mockResolvedValue(
       Response.json({revision: bundled.revision + 1, stage: newerRelay})
     )

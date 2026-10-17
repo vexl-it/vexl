@@ -1,11 +1,13 @@
 import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
+import {DayString} from '@vexl-next/analytics-definitions/src/core'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {Effect, flow, Schema} from 'effect'
 import {countOfAffectedRows} from './countOfAffectedRows'
 
 export const DeleteExpiredAnalyticsStatesParams = Schema.Struct({
   retentionDays: Schema.Int,
+  today: DayString,
 })
 export type DeleteExpiredAnalyticsStatesParams =
   typeof DeleteExpiredAnalyticsStatesParams.Type
@@ -21,7 +23,7 @@ export const createDeleteExpiredAnalyticsStates = Effect.gen(function* (_) {
         deleted AS (
           DELETE FROM analytics_states
           WHERE
-            start_day < CURRENT_DATE - ${params.retentionDays}::int
+            start_day < ${params.today}::date - ${params.retentionDays}::int
           RETURNING
             pk
         )

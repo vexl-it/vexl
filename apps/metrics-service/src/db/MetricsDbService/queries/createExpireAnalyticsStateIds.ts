@@ -1,5 +1,6 @@
 import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
+import {DayString} from '@vexl-next/analytics-definitions/src/core'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {Effect, flow, Schema} from 'effect'
 import {countOfAffectedRows} from './countOfAffectedRows'
@@ -7,6 +8,7 @@ import {countOfAffectedRows} from './countOfAffectedRows'
 export const ExpireAnalyticsStateIdsParams = Schema.Struct({
   name: Schema.String,
   maxAgeDays: Schema.Int,
+  today: DayString,
 })
 export type ExpireAnalyticsStateIdsParams =
   typeof ExpireAnalyticsStateIdsParams.Type
@@ -26,7 +28,7 @@ export const createExpireAnalyticsStateIds = Effect.gen(function* (_) {
           WHERE
             id IS NOT NULL
             AND name = ${params.name}
-            AND start_day < CURRENT_DATE - ${params.maxAgeDays}::int
+            AND start_day < ${params.today}::date - ${params.maxAgeDays}::int
           RETURNING
             pk
         )

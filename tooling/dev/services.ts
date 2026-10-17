@@ -310,7 +310,10 @@ export const SERVICES: readonly RunnableApp[] = [
     healthPortKey: 'metricsService',
     needs: {db: dbn.metrics, redis: true, s3: false},
     run: tsxService('src/index.ts'),
-    buildEnv: () => ({}),
+    buildEnv: (ctx) => ({
+      ANALYTICS_OHTTP_GATEWAY_SECRETS: ctx.cfg.analyticsRelay.gatewaySecret,
+      ANALYTICS_RELAY_TOKENS: ctx.cfg.analyticsRelay.relayToken,
+    }),
   },
 ]
 

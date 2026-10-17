@@ -107,6 +107,22 @@ services:
         'until mc alias set local http://minio:9000 "$${MINIO_ROOT_USER}" "$${MINIO_ROOT_PASSWORD}"; do sleep 1; done && mc mb --ignore-existing local/"$${S3_BUCKET_NAME}" && mc anonymous set download local/"$${S3_BUCKET_NAME}"',
       ]
 
+  # OHTTP analytics relay: the same Caddyfile relay partners run in prod.
+  # Forwards encrypted analytics to the metrics-service gateway on the host.
+  ohttp-relay:
+    image: caddy:2.11.7-alpine
+    container_name: vexl-ohttp-relay
+    environment:
+      RELAY_SITE: ":80"
+      GATEWAY_UPSTREAM: http://host.docker.internal:${METRICS_SERVICE_PORT:-3010}
+      RELAY_TOKEN: ${ANALYTICS_RELAY_TOKEN:-local-relay-token}
+    ports:
+      - "${OHTTP_RELAY_PORT:-3017}:80"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./tooling/ohttp-relay/Caddyfile:/etc/caddy/Caddyfile:ro
+
   loki:
     image: grafana/loki:3.6.0
     container_name: vexl-loki

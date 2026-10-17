@@ -20,6 +20,7 @@ export {
   dayOf,
   isoWeekStart,
   updatedDayFor,
+  utcDaysBetween,
 } from './buckets'
 export {
   AnalyticsKind,

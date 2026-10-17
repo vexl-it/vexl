@@ -1,6 +1,6 @@
 import {
   bucketDormancy,
-  dayOf,
+  utcDaysBetween,
   type DormancyBucket,
 } from '@vexl-next/analytics-definitions/src/buckets'
 import {Option} from 'effect'
@@ -23,10 +23,7 @@ export function coreActionWindow(
   registeredAt: number,
   now: Date
 ): Option.Option<CoreActionWindow> {
-  const days = Math.round(
-    (Date.parse(dayOf(now)) - Date.parse(dayOf(new Date(registeredAt)))) /
-      DAY_MS
-  )
+  const days = utcDaysBetween(new Date(registeredAt), now)
   if (days === 1) return Option.some('coreActionD1')
   if (days >= 7 && days <= 13) return Option.some('coreActionD7')
   if (days >= 28 && days <= 34) return Option.some('coreActionD30')

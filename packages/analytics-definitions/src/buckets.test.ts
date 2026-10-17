@@ -13,6 +13,7 @@ import {
   dayOf,
   isoWeekStart,
   updatedDayFor,
+  utcDaysBetween,
 } from './buckets'
 import {DayString} from './core'
 
@@ -126,16 +127,23 @@ describe('bucketDuration', () => {
   })
 })
 
+describe('utcDaysBetween', () => {
+  it('counts UTC calendar days, not elapsed 24h periods', () => {
+    const evening = new Date('2026-03-01T22:00:00Z')
+    expect(utcDaysBetween(evening, new Date('2026-03-01T23:59:00Z'))).toBe(0)
+    expect(utcDaysBetween(evening, new Date('2026-03-02T08:00:00Z'))).toBe(1)
+    expect(utcDaysBetween(evening, new Date('2026-03-09T00:00:00Z'))).toBe(8)
+  })
+})
+
 describe('bucketDays', () => {
-  it('buckets whole elapsed days', () => {
+  it('buckets day counts', () => {
     expect(bucketDays(0)).toBe('d0')
-    expect(bucketDays(DAY - 1)).toBe('d0')
-    expect(bucketDays(DAY)).toBe('d1')
-    expect(bucketDays(2 * DAY - 1)).toBe('d1')
-    expect(bucketDays(2 * DAY)).toBe('d2To7')
-    expect(bucketDays(8 * DAY - 1)).toBe('d2To7')
-    expect(bucketDays(8 * DAY)).toBe('d8Plus')
-    expect(bucketDays(45 * DAY)).toBe('d8Plus')
+    expect(bucketDays(1)).toBe('d1')
+    expect(bucketDays(2)).toBe('d2To7')
+    expect(bucketDays(7)).toBe('d2To7')
+    expect(bucketDays(8)).toBe('d8Plus')
+    expect(bucketDays(45)).toBe('d8Plus')
   })
 })
 

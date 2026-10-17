@@ -1,6 +1,7 @@
 import {
   bucketDays,
   bucketOffersVisible,
+  utcDaysBetween,
 } from '@vexl-next/analytics-definitions/src/buckets'
 import {
   isClubCoreAction,
@@ -81,7 +82,11 @@ export const reportRegisteredActionAtom = analyticsActionAtom(
     set(updateOnboardingActionAtom, (current) => ({
       ...advanceTo('registered')(current),
       ...(firstOpenAt !== undefined
-        ? {registeredAfter: bucketDays(registeredAt - firstOpenAt)}
+        ? {
+            registeredAfter: bucketDays(
+              utcDaysBetween(new Date(firstOpenAt), new Date(registeredAt))
+            ),
+          }
         : {}),
     }))
   }
@@ -167,7 +172,7 @@ export const reportOnboardingCoreActionActionAtom = analyticsActionAtom(
       Option.map(
         ([one, at]): Partial<OnboardingState> => ({
           activation: one,
-          activatedAfter: bucketDays(now.getTime() - at),
+          activatedAfter: bucketDays(utcDaysBetween(new Date(at), now)),
         })
       )
     )

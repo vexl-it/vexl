@@ -1,6 +1,5 @@
-import {OhttpKeyConfig} from '@vexl-next/cryptography/src/operations/ohttp.brand'
 import {PlatformName} from '@vexl-next/domain/src/utility/PlatformName'
-import {Option, Schema} from 'effect'
+import {Schema} from 'effect'
 import {ServiceUrl} from './ServiceUrl.brand'
 import * as UserSessionCredentials from './UserSessionCredentials.brand'
 import * as btcExchangeRate from './services/btcExchangeRate'
@@ -26,13 +25,6 @@ export const EnvPreset = Schema.Struct({
   contentMs: ServiceUrl,
   metrics: ServiceUrl,
   chatImagesUrl: ServiceUrl,
-  // None disables analytics uploads: there is no direct, non-relayed path.
-  analyticsRelay: Schema.OptionFromSelf(
-    Schema.Struct({
-      relayUrls: Schema.NonEmptyArray(ServiceUrl),
-      gatewayKeyConfig: OhttpKeyConfig,
-    })
-  ),
 })
 export type EnvPreset = Schema.Schema.Type<typeof EnvPreset>
 
@@ -74,7 +66,6 @@ export const ENV_PRESETS: {stageEnv: EnvPreset; prodEnv: EnvPreset} = {
     chatImagesUrl: Schema.decodeSync(ServiceUrl)(
       'https://stage-chat-images.vexl.it'
     ),
-    analyticsRelay: Option.none(),
   },
   prodEnv: {
     userMs: Schema.decodeSync(ServiceUrl)('https://user.vexl.it'),
@@ -92,7 +83,6 @@ export const ENV_PRESETS: {stageEnv: EnvPreset; prodEnv: EnvPreset} = {
     contentMs: Schema.decodeSync(ServiceUrl)('https://content.vexl.it'),
     metrics: Schema.decodeSync(ServiceUrl)('https://metrics.vexl.it'),
     chatImagesUrl: Schema.decodeSync(ServiceUrl)('https://chat-images.vexl.it'),
-    analyticsRelay: Option.none(),
   },
 }
 export {PlatformName, UserSessionCredentials}

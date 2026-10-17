@@ -36,7 +36,7 @@ import {
 import {reportFirstOpenActionAtom} from './onboarding'
 import {analyticsOptInAtom} from './optIn'
 import {AnalyticsUploadError} from './relay'
-import {journeyReportActionAtom} from './report'
+import {journeyReportActionAtom, openJourneyStates} from './report'
 
 jest.mock('@vexl-next/analytics-definitions/src/definitions', () =>
   jest.requireActual('@vexl-next/analytics-definitions/src/testDefinitions')
@@ -719,6 +719,23 @@ describe('journey step upload', () => {
       expect.objectContaining({revision: 0, payload: {step: 'opened'}})
     )
     expect(testJourneyInstance().pending).toBe(false)
+  })
+
+  it('lists open states without the expired ones', () => {
+    const expired = someInstance({
+      id: id(1),
+      key: 'a',
+      payload: {step: 'opened'},
+    })
+    const current = startedToday({id: id(2), key: 'a'})
+    store.set(setAnalyticsInstancesAtom, {
+      [expired.id]: expired,
+      [current.id]: current,
+    })
+
+    expect(openJourneyStates(store.get, testJourney, 'a')).toEqual([
+      {step: 'intro'},
+    ])
   })
 })
 

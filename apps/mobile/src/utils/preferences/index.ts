@@ -48,6 +48,7 @@ export const preferencesAtom = atomWithParsedMmkvStorage(
     showMarketplaceIntroDialog: true,
     showNotesBoardIntroSheet: true,
     notesBoardEnabled: false,
+    analyticsEnabled: false,
     lastUsedOfferSpokenLanguages: getDefaultSpokenLanguage(getDeviceLanguage()),
   },
   Preferences

@@ -1,0 +1,7 @@
+{
+  "revision": 1,
+  "stage": {
+    "relayUrls": ["https://ohttp.eu.freedomrelay.dev/vexl-analytics"],
+    "gatewayKeyConfig": "AQAg6HYuWqR8iJCPxnaIegBTEDJUSYsJafmspSWjmbGyIxUABAABAAM="
+  }
+}

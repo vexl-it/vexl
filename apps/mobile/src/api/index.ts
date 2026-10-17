@@ -1,5 +1,4 @@
 import {FetchHttpClient} from '@effect/platform/index'
-import {OhttpKeyConfig} from '@vexl-next/cryptography/src/operations/ohttp.brand'
 import {countryPrefixFromNumber} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {
   ENV_PRESETS,
@@ -55,9 +54,6 @@ function buildLocalEnvFromEnvVars(): EnvPreset | null {
   const feedbackMs = process.env.EXPO_PUBLIC_LOCAL_FEEDBACK_MS
   const contentMs = process.env.EXPO_PUBLIC_LOCAL_CONTENT_MS
   const metricsMs = process.env.EXPO_PUBLIC_LOCAL_METRICS_MS
-  const analyticsRelayUrl = process.env.EXPO_PUBLIC_LOCAL_ANALYTICS_RELAY
-  const analyticsGatewayKeyConfig =
-    process.env.EXPO_PUBLIC_LOCAL_ANALYTICS_GATEWAY_KEY_CONFIG
 
   if (
     !userMs ||
@@ -86,15 +82,6 @@ function buildLocalEnvFromEnvVars(): EnvPreset | null {
     feedbackMs: Schema.decodeSync(ServiceUrl)(feedbackMs),
     contentMs: Schema.decodeSync(ServiceUrl)(contentMs),
     metrics: Schema.decodeSync(ServiceUrl)(metricsMs),
-    analyticsRelay:
-      analyticsRelayUrl && analyticsGatewayKeyConfig
-        ? Option.some({
-            relayUrls: [Schema.decodeSync(ServiceUrl)(analyticsRelayUrl)],
-            gatewayKeyConfig: Schema.decodeSync(OhttpKeyConfig)(
-              analyticsGatewayKeyConfig
-            ),
-          })
-        : Option.none(),
   }
 }
 
@@ -164,21 +151,24 @@ function getUserSessionCredentials(): UserSessionCredentials {
   throw error
 }
 
+export const sessionCountryPrefixAtom = atom((get) => {
+  const sessionHolder = get(sessionHolderAtom)
+  return sessionHolder.state === 'loggedIn'
+    ? Effect.runSync(
+        countryPrefixFromNumber(sessionHolder.session.phoneNumber).pipe(
+          Effect.option
+        )
+      )
+    : Option.none()
+})
+
 export const apiAtom = atom((get) =>
   Effect.gen(function* (_) {
     const {t} = get(translationAtom)
     const language = t('localeName')
     const isDeveloper = get(isDeveloperAtom)
 
-    const sessionHolder = get(sessionHolderAtom)
-    const prefix =
-      sessionHolder.state === 'loggedIn'
-        ? yield* _(
-            countryPrefixFromNumber(sessionHolder.session.phoneNumber).pipe(
-              Effect.option
-            )
-          )
-        : Option.none()
+    const prefix = get(sessionCountryPrefixAtom)
 
     return {
       contact: yield* _(

@@ -14,6 +14,12 @@ describe('analyticsStateMaxAgeDays', () => {
   it('counts settle days from the bucket end', () => {
     expect(
       analyticsStateMaxAgeDays(
+        {kind: 'aggregation', period: 'day'},
+        defaultAnalyticsWindow
+      )
+    ).toBe(14)
+    expect(
+      analyticsStateMaxAgeDays(
         {kind: 'aggregation', period: 'week'},
         defaultAnalyticsWindow
       )

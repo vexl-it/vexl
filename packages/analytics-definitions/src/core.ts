@@ -30,7 +30,7 @@ export const AnalyticsStateUpsert = Schema.Struct({
 export type AnalyticsStateUpsert = typeof AnalyticsStateUpsert.Type
 
 export type UpdatedDayPrecision = 'day' | 'week'
-export type AggregationPeriod = 'week' | 'month'
+export type AggregationPeriod = 'day' | 'week' | 'month'
 
 interface DefinitionBase<
   K extends AnalyticsKind,
@@ -118,7 +118,11 @@ export const defaultAnalyticsWindow: AnalyticsWindow = {
   settleDays: 14,
 }
 
-const PERIOD_DAYS: Record<AggregationPeriod, number> = {week: 7, month: 31}
+const PERIOD_DAYS: Record<AggregationPeriod, number> = {
+  day: 1,
+  week: 7,
+  month: 31,
+}
 
 export type AnalyticsRetentionShape =
   | {readonly kind: 'journey'; readonly lifetimeDays: number}

@@ -36,7 +36,7 @@ const bundledRelays = Schema.decodeUnknownOption(AnalyticsRelaysFile)(
   bundledRelaysJson
 ).pipe(Option.getOrElse((): AnalyticsRelaysFile => ({revision: 0})))
 
-const fetchedRelaysAtom = atomWithParsedMmkvStorage(
+export const fetchedRelaysAtom = atomWithParsedMmkvStorage(
   'analyticsRelays',
   {},
   Schema.Struct({

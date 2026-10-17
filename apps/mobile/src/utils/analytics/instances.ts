@@ -4,6 +4,8 @@ import {
   updatedDayFor,
 } from '@vexl-next/analytics-definitions/src/buckets'
 import {
+  analyticsStateMaxAgeDays,
+  defaultAnalyticsWindow,
   type AggregationDefinition,
   type AnalyticsStateId,
   type DayString,
@@ -228,12 +230,27 @@ export function settleInstance(
   return {...instances, [id]: {...instance, pending: false}}
 }
 
-/** Drops expired entries that have nothing left to upload. */
-export function pruneSettledExpired(
+function isTooOldToUpload(instance: AnalyticsInstance, now: Date): boolean {
+  const definition = analyticsDefinitions[instance.name]
+  if (definition === undefined) return true
+  const maxAgeDays = analyticsStateMaxAgeDays(
+    definition,
+    defaultAnalyticsWindow
+  )
+  // The server still accepts uploads on day `startDay + maxAgeDays`.
+  return lifetimePassed(instance.startDay, maxAgeDays + 1, now)
+}
+
+/** Drops settled expired entries and any the server would refuse. */
+export function pruneExpired(
   instances: AnalyticsInstances,
   now: Date
 ): AnalyticsInstances {
-  return Record.filter(instances, (one) => one.pending || !isExpired(one, now))
+  return Record.filter(
+    instances,
+    (one) =>
+      !isTooOldToUpload(one, now) && (one.pending || !isExpired(one, now))
+  )
 }
 
 export function pendingUploads(

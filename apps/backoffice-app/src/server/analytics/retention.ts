@@ -99,12 +99,8 @@ const REACTIVATED_AFTER_DAYS = {daysInactive: 30}
 
 // The D30 window (days 28 to 34) fits the 37-day journey only for installs
 // that registered at most 2 days after first open
-const d30Unknown = (state: {
-  coreActionD30?: boolean
-  registeredAfter?: string
-}): boolean =>
-  state.coreActionD30 !== true &&
-  (state.registeredAfter === 'd2To7' || state.registeredAfter === 'd8Plus')
+const d30Unknown = (state: {registeredAfter?: string}): boolean =>
+  state.registeredAfter === 'd2To7' || state.registeredAfter === 'd8Plus'
 
 export const loadRetention = (scope: QueryScope): QueryResult<RetentionData> =>
   Effect.gen(function* (_) {
@@ -310,7 +306,11 @@ export const loadRetention = (scope: QueryScope): QueryResult<RetentionData> =>
         ),
         formatValue.pct(
           percentOrNull(
-            sumWhere(rows, (row) => row.state.coreActionD30 === true),
+            sumWhere(
+              rows,
+              (row) =>
+                row.state.coreActionD30 === true && !d30Unknown(row.state)
+            ),
             installs - unknown
           )
         ),

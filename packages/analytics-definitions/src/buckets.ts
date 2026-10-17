@@ -58,8 +58,11 @@ export const bucketDuration = (ms: number): DurationBucket => {
 export const DaysBucket = Schema.Literal('d0', 'd1', 'd2To7', 'd8Plus')
 export type DaysBucket = typeof DaysBucket.Type
 
-export const bucketDays = (ms: number): DaysBucket => {
-  const days = Math.floor(ms / DAY_MS)
+/** UTC calendar days from the day of `from` to the day of `to`. */
+export const utcDaysBetween = (from: Date, to: Date): number =>
+  Math.round((Date.parse(dayOf(to)) - Date.parse(dayOf(from))) / DAY_MS)
+
+export const bucketDays = (days: number): DaysBucket => {
   if (days < 1) return 'd0'
   if (days < 2) return 'd1'
   if (days < 8) return 'd2To7'

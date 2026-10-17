@@ -125,11 +125,8 @@ const bucketLabel = (period: Period, startMs: number): string => {
   const date = new Date(startMs)
   if (period === 'quarter')
     return `Q${Math.floor(date.getUTCMonth() / 3) + 1} ${shortYear(startMs)}`
-  return date.toLocaleDateString('en', {
-    month: 'short',
-    year: '2-digit',
-    timeZone: 'UTC',
-  })
+  const month = date.toLocaleDateString('en', {month: 'short', timeZone: 'UTC'})
+  return `${month} ${shortYear(startMs)}`
 }
 
 const rangeStartMs = (range: Range): number =>

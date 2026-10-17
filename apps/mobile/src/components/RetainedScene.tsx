@@ -1,5 +1,11 @@
 import {Stack} from '@vexl-next/ui'
-import React from 'react'
+import React, {createContext, useContext} from 'react'
+
+const RetainedSceneActiveContext = createContext(true)
+
+/** False inside a retained scene that is mounted but hidden. */
+export const useIsRetainedSceneActive = (): boolean =>
+  useContext(RetainedSceneActiveContext)
 
 function RetainedScene({
   children,
@@ -21,7 +27,9 @@ function RetainedScene({
       aria-hidden={!isActive}
       importantForAccessibility={isActive ? 'auto' : 'no-hide-descendants'}
     >
-      {children}
+      <RetainedSceneActiveContext.Provider value={isActive}>
+        {children}
+      </RetainedSceneActiveContext.Provider>
     </Stack>
   )
 }

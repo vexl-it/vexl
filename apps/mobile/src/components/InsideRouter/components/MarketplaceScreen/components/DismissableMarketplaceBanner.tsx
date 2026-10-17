@@ -1,8 +1,10 @@
+import {useIsFocused} from '@react-navigation/native'
 import {type PromptId} from '@vexl-next/analytics-definitions/src/definitions/prompt'
 import {Banner, type BannerButton, type BannerProps} from '@vexl-next/ui'
 import React, {useCallback, useRef, useState} from 'react'
 import {Animated, Easing, useWindowDimensions} from 'react-native'
 import {useReportPrompt} from '../../../../../utils/analytics'
+import {useIsRetainedSceneActive} from '../../../../RetainedScene'
 
 const DISMISS_ANIMATION_DURATION_MS = 350
 
@@ -18,7 +20,12 @@ function DismissableMarketplaceBanner({
   secondaryButton,
   ...props
 }: Props): React.ReactElement {
-  const reportPromptOutcome = useReportPrompt(promptId)
+  const isFocused = useIsFocused()
+  const isSceneActive = useIsRetainedSceneActive()
+  const reportPromptOutcome = useReportPrompt(
+    promptId,
+    isFocused && isSceneActive
+  )
   const {width} = useWindowDimensions()
   const opacity = useRef(new Animated.Value(1)).current
   const translateX = useRef(new Animated.Value(0)).current

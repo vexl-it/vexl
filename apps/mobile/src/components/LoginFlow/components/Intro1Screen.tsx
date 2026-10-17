@@ -1,6 +1,8 @@
 import {
   FaqStayAnonymous,
+  MenuItem,
   Stack,
+  Switch,
   Typography,
   VexlTextGraphic,
   YStack,
@@ -9,6 +11,7 @@ import {useSetAtom} from 'jotai'
 import React, {useEffect} from 'react'
 import {useWindowDimensions} from 'react-native'
 import {type LoginFlowStackScreenProps} from '../../../navigationTypes'
+import {analyticsEnabledAtom} from '../../../utils/analytics'
 import clearMmkvStorageAndEmptyAtoms from '../../../utils/clearMmkvStorageAndEmptyAtoms'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {showTosSummaryForAlreadyLoggedInUserAtom} from '../../../utils/preferences'
@@ -44,30 +47,39 @@ export default function Intro1Screen({navigation}: Props): React.ReactElement {
         },
       }}
       footer={
-        <Typography
-          color="$foregroundPrimary"
-          textAlign="center"
-          variant="paragraphSmall"
-        >
-          {t('loginFlow.v2.intro1.termsPrefix')}{' '}
+        <>
+          <MenuItem
+            label={t('loginFlow.v2.intro1.shareUsageStatistics')}
+            note={t('loginFlow.v2.intro1.shareUsageStatisticsNote')}
+            showChevron={false}
+            tag={<Switch valueAtom={analyticsEnabledAtom} />}
+          />
           <Typography
-            color="$accentYellowPrimary"
-            onPress={() => {
-              navigation.navigate('TermsAndConditions')
-            }}
-            textDecorationLine="underline"
+            color="$foregroundPrimary"
+            textAlign="center"
             variant="paragraphSmall"
           >
-            {t('loginFlow.start.termsOfUse')}
+            {t('loginFlow.v2.intro1.termsPrefix')}{' '}
+            <Typography
+              color="$accentYellowPrimary"
+              onPress={() => {
+                navigation.navigate('TermsAndConditions')
+              }}
+              textDecorationLine="underline"
+              variant="paragraphSmall"
+            >
+              {t('loginFlow.start.termsOfUse')}
+            </Typography>
+            .
           </Typography>
-          .
-        </Typography>
+        </>
       }
       header={
         <Stack alignItems="center" mt="$5">
           <VexlTextGraphic animate height={27} />
         </Stack>
       }
+      scroll
     >
       <LoginFlowCentered>
         <YStack alignItems="center" gap="$9" width="100%">

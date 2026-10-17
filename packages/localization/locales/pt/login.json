@@ -32,6 +32,8 @@
   "loginFlow.v2.intro1.termsPrefix": "Ao continuares, aceitas a Vexl",
   "loginFlow.v2.intro1.title": "Recupera a tua liberdade de transacionar",
   "loginFlow.v2.intro1.text": "Compra e vende bitcoin com pessoas que conheces. Sem ninguém a observar.",
+  "loginFlow.v2.intro1.shareUsageStatistics": "Partilhar estatísticas de utilização anónimas",
+  "loginFlow.v2.intro1.shareUsageStatisticsNote": "Ajuda-nos a melhorar a Vexl sem nunca te identificar. Podes alterar isto nas definições.",
   "loginFlow.v2.intro2.title": "Constrói a tua rede de confiança",
   "loginFlow.v2.intro2.text": "Verifica o teu número, liga-te aos amigos e começa a explorar. Demora cerca de um minuto.",
   "loginFlow.v2.phoneNumber.title": "Qual é o teu número de telefone?",

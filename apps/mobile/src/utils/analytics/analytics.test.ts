@@ -51,7 +51,17 @@ jest.mock('../mmkv/mmkvDataLossDiagnosticStorage', () => ({
   ),
 }))
 jest.mock('../preferences', () => ({
-  preferencesAtom: jest.requireActual('jotai').atom({analyticsEnabled: true}),
+  preferencesAtom: jest
+    .requireActual('../atomUtils/atomWithParsedMmkvStorage')
+    .atomWithParsedMmkvStorage(
+      'preferences',
+      {analyticsEnabled: false},
+      jest
+        .requireActual('effect')
+        .Schema.Struct({
+          analyticsEnabled: jest.requireActual('effect').Schema.Boolean,
+        })
+    ),
 }))
 
 jest.mock('../../api', () => ({
@@ -661,12 +671,22 @@ describe('opt-out', () => {
 })
 
 describe('storage clear', () => {
+  // Mounted like in the app, so the clear resets the preferences.
+  let unmountPreferences: () => void
+  beforeAll(() => {
+    unmountPreferences = store.sub(analyticsEnabledAtom, () => {})
+  })
+  afterAll(() => {
+    unmountPreferences()
+  })
+
   it('leaves no analytics behind on logout', async () => {
     store.set(setAnalyticsMarkersAtom, {firstOpenAt: unixMillisecondsNow()})
     store.set(setAnalyticsInstancesAtom, {[id(1)]: someInstance()})
 
     await clearMmkvStorageAndEmptyAtoms()
 
+    expect(store.get(analyticsEnabledAtom)).toBe(false)
     expect(store.get(analyticsMarkersAtom)).toEqual({})
     expect(store.get(analyticsInstancesAtom)).toEqual({})
     expect(storage._storage.getAllKeys()).toEqual([])
@@ -680,11 +700,13 @@ describe('storage clear', () => {
 
     await clearMmkvStorageAndEmptyAtoms({keepAnalytics: true})
 
+    expect(store.get(analyticsEnabledAtom)).toBe(true)
     expect(store.get(analyticsMarkersAtom)).toEqual(markers)
     expect(store.get(analyticsInstancesAtom)).toEqual({[instance.id]: instance})
     expect(storage._storage.getAllKeys().sort()).toEqual([
       'analyticsInstances',
       'analyticsMarkers',
+      'preferences',
     ])
   })
 })

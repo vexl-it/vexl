@@ -1,5 +1,6 @@
 import {getDefaultStore} from 'jotai'
 import {
+  analyticsEnabledAtom,
   analyticsInstancesAtom,
   analyticsMarkersAtom,
   setAnalyticsInstancesAtom,
@@ -11,15 +12,17 @@ import {
 } from './atomUtils/atomWithParsedMmkvStorage'
 import {storage} from './mmkv/effectMmkv'
 import {clearMmkvDataLossDiagnostics} from './mmkv/mmkvDataLossDiagnosticStorage'
+import {preferencesAtom} from './preferences'
 
 export default async function clearMmkvStorageAndEmptyAtoms({
   keepAnalytics = false,
 }: {
-  /** Pre-login clears keep the onboarding journey and its markers. */
+  /** Pre-login clears keep the opt-in, the onboarding journey and its markers. */
   keepAnalytics?: boolean
 } = {}): Promise<void> {
   const store = getDefaultStore()
   const analytics = {
+    enabled: store.get(analyticsEnabledAtom),
     markers: store.get(analyticsMarkersAtom),
     instances: store.get(analyticsInstancesAtom),
   }
@@ -45,4 +48,11 @@ export default async function clearMmkvStorageAndEmptyAtoms({
   if (!keepAnalytics) return
   store.set(setAnalyticsMarkersAtom, analytics.markers)
   store.set(setAnalyticsInstancesAtom, analytics.instances)
+  store.set(preferencesAtom, (old) => ({
+    ...old,
+    analyticsEnabled: analytics.enabled,
+  }))
+  // Saved right away: the change listener re-reads the cleared storage and
+  // would reset the choice before a deferred write lands.
+  preferencesAtom.flushNow()
 }

@@ -32,6 +32,8 @@
   "loginFlow.v2.intro1.termsPrefix": "Ukiendelea, unakubali Vexl",
   "loginFlow.v2.intro1.title": "Chukua tena uhuru wako wa kufanya miamala",
   "loginFlow.v2.intro1.text": "Fanya biashara ya bitcoin na watu unaowajua. Hakuna anayekuchungulia.",
+  "loginFlow.v2.intro1.shareUsageStatistics": "Shiriki takwimu za matumizi bila majina",
+  "loginFlow.v2.intro1.shareUsageStatisticsNote": "Inatusaidia kuboresha Vexl bila kukutambua kamwe. Unaweza kubadilisha hili kwenye mipangilio.",
   "loginFlow.v2.intro2.title": "Jenga mtandao wako wa kuaminika",
   "loginFlow.v2.intro2.text": "Thibitisha nambari yako, ungana na marafiki, kisha anza kuvinjari. Inachukua takriban dakika moja.",
   "loginFlow.v2.phoneNumber.title": "Nambari yako ya simu ni ipi?",

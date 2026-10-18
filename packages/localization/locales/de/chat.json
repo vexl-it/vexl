@@ -122,7 +122,7 @@
   "messages.startConversationByReactingToOffer": "Beginn eine Konversation, indem du auf ein Angebot reagierst.",
   "messages.seeMarketplace": "Marktplatz anzeigen",
   "messages.youHaveChattedWithThisPartyBefore": "Sieht so aus, als hättest du über dieses Angebot schon gechattet, aber du bist gegangen und hast die Unterhaltung gelöscht.",
-  "messages.restoredMessagesDivider": "Aus der Kopie der anderen Person wiederhergestellt",
+  "messages.restoredMessagesDivider": "Verlauf von der anderen Person nach Wiederherstellung deines Accounts",
   "messages.areYouSureYouWantToDeleteChat": "Bist du sicher, dass du diesen Chat löschen möchtest? Alle Nachrichten gehen verloren.",
   "vexlbot.bot": "bot",
   "vexlbot.initialWelcomeMessage": "Willkommen im Chat. Lass uns die Handelsdetails mit {{name}} abstimmen. Ich helfe dir dabei.",

@@ -122,7 +122,7 @@
   "messages.startConversationByReactingToOffer": "Започнете разговор, реагирайки на оферта.",
   "messages.seeMarketplace": "Виж пазар",
   "messages.youHaveChattedWithThisPartyBefore": "Изглежда вече си чатил за тази оферта, но си излязъл и си изтрил разговора.",
-  "messages.restoredMessagesDivider": "Възстановено от копието на другия човек",
+  "messages.restoredMessagesDivider": "История от събеседника ти след възстановяване на акаунта",
   "messages.areYouSureYouWantToDeleteChat": "Сигурен ли сте, че искате да изтриете този разговор? Всички съобщения ще бъдат загубени.",
   "vexlbot.bot": "бот",
   "vexlbot.initialWelcomeMessage": "Добре дошъл в чата. Нека договорим детайлите по обмяната в {{name}}. Ще ти помагам.",

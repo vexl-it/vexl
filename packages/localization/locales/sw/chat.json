@@ -122,7 +122,7 @@
   "messages.startConversationByReactingToOffer": "Anza mazungumzo kwa kutoa majibu kwa offer.",
   "messages.seeMarketplace": "Tazama soko",
   "messages.youHaveChattedWithThisPartyBefore": "Inaonekana tayari ulizungumza kuhusu ofa hii lakini uliondoka na kufuta mazungumzo.",
-  "messages.restoredMessagesDivider": "Zimerejeshwa kutoka kwa nakala ya mtu mwingine",
+  "messages.restoredMessagesDivider": "Historia kutoka kwa mtu uliyezungumza naye baada ya kurejesha akaunti",
   "messages.areYouSureYouWantToDeleteChat": "Je, una uhakika unataka kufuta gumzo hili? Barua pepe zote zitapotea.",
   "vexlbot.bot": "bot",
   "vexlbot.initialWelcomeMessage": "Karibu kwenye gumzo. Wacha tukubaliane kuhusu maelezo ya biashara na {{name}}. Nita kusaidia kwenye njia.",

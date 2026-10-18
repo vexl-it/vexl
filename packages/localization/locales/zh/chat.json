@@ -122,7 +122,7 @@
   "messages.startConversationByReactingToOffer": "通过对报价做出反应来开始对话。",
   "messages.seeMarketplace": "浏览市场",
   "messages.youHaveChattedWithThisPartyBefore": "看起来你之前已经就这个出价聊过，但你离开并删除了对话。",
-  "messages.restoredMessagesDivider": "从对方的副本恢复",
+  "messages.restoredMessagesDivider": "账户恢复后从对方找回的聊天记录",
   "messages.areYouSureYouWantToDeleteChat": "您确定要删除此聊天吗？所有消息都将丢失。",
   "vexlbot.bot": "机器人",
   "vexlbot.initialWelcomeMessage": "欢迎来到聊天室。让我们同意 {{name}} 的交易细节。我将一路帮助您。",

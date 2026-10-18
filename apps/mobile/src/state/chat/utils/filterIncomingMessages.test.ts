@@ -681,6 +681,36 @@ describe('filterIncomingMessages on an inbox restored from a backup', () => {
     expect(filter(restoredInbox, [request, regularMessage])).toEqual([request])
   })
 
+  it('accepts only a requested history from a pending recovery sender', () => {
+    const history = receivedMessage({
+      messageType: 'HISTORY',
+      senderPublicKey: senderKey.publicKeyPemBase64,
+    })
+    const pendingChat: ChatWithMessages = {
+      ...chatWithMessages({
+        inboxKey,
+        senderPublicKey: senderKey.publicKeyPemBase64,
+        messages: [],
+      }),
+      restoredFromBackup: true,
+    }
+
+    expect(
+      filter({...restoredInbox, pendingRecoveryChats: [pendingChat]}, [history])
+    ).toEqual([])
+    expect(
+      filter(
+        {
+          ...restoredInbox,
+          pendingRecoveryChats: [
+            {...pendingChat, historyRequestedAt: timestamp(1)},
+          ],
+        },
+        [history]
+      )
+    ).toEqual([history])
+  })
+
   it('accepts history messages in a recovered chat', () => {
     const regularMessage = receivedMessage({
       messageType: 'MESSAGE',

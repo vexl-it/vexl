@@ -11,7 +11,11 @@ import {updateTradeChecklistState} from '../../tradeChecklist/utils'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 import addRealLifeInfoToChat from './addRealLifeInfoToChat'
 import areMessagesEqual from './areMessagesEqual'
-import {consumesHistory, restoredMessagesFromHistory} from './chatRecovery'
+import {
+  consumesHistory,
+  latestRecoveryProof,
+  restoredMessagesFromHistory,
+} from './chatRecovery'
 import compareMessages from './compareMessages'
 import {
   isHiddenMetadataMessage,
@@ -123,6 +127,9 @@ export default function addMessagesToChats(
           {
             ...oneChat,
             historyMerged,
+            otherSideRecoveryProof:
+              latestRecoveryProof(messagesToAddToThisChat) ??
+              oneChat.otherSideRecoveryProof,
             messages: messages.filter((one) => !isHiddenMetadataMessage(one)),
             // Restored history lands before updates we already applied
             tradeChecklist: isHistoryMerged

@@ -17,6 +17,7 @@ import {version} from '../../../utils/environment'
 import runWhenIdleWithTimeout from '../../../utils/runWhenIdleWithTimeout'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 import addMessageToChat from '../utils/addMessageToChat'
+import {myChatRecoveryProofToShare} from '../utils/myChatRecoveryProof'
 import replaceImageFileUrisWithBase64 from '../utils/replaceImageFileUrisWithBase64'
 
 type SendMessageAtom = ActionAtomType<[ChatMessage], void>
@@ -37,6 +38,7 @@ export default function sendMessageActionAtom(
 
     const chatWithMessages = get(chatWithMessagesAtom)
     const {chat, messages} = chatWithMessages
+    const recoveryProof = myChatRecoveryProofToShare(get, chatWithMessages)
     const numberOfMessagesInChat = messages.length
 
     // Timeout prevents message sending from starving during continuous interactions.
@@ -57,6 +59,7 @@ export default function sendMessageActionAtom(
               theirNotificationCypher:
                 chat.otherSideVexlToken ?? chat.otherSideFcmCypher,
               otherSideVersion: chat.otherSideVersion,
+              recoveryProof,
             })
           )
 

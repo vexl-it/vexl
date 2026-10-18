@@ -25,6 +25,8 @@ interface SenderFilterState {
   readonly receivedMessageSinceOpen: boolean
   // Restored inbox without a chat with this sender yet
   readonly canRecoverChat: boolean
+  // Recovered chat waiting for the history we asked for
+  readonly awaitsHistory: boolean
 }
 
 const terminalChatStates: readonly ChatState[] = [
@@ -84,7 +86,10 @@ function shouldAcceptForState({
       incomingMessage?.state === 'receivedButRequiresNewerVersion' ||
       (state.canRecoverChat &&
         !!incomingMessage &&
-        startsChatRecovery(incomingMessage))
+        startsChatRecovery(incomingMessage)) ||
+      (state.awaitsHistory &&
+        incomingMessage?.state === 'received' &&
+        messageType === 'HISTORY')
     )
   }
 
@@ -178,6 +183,14 @@ function getInitialSenderState(
     lastTerminalMessage: findLastTerminalMessage(chat),
     receivedMessageSinceOpen: hasReceivedMessageSinceOpen(chat),
     canRecoverChat: !!inbox.restoredFromBackup && !chat,
+    awaitsHistory:
+      !chat &&
+      Array.some(
+        inbox.pendingRecoveryChats ?? [],
+        (pending) =>
+          pending.chat.otherSide.publicKey === senderPublicKey &&
+          !!pending.historyRequestedAt
+      ),
   }
 }
 

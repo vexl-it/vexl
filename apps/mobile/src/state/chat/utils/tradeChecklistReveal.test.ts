@@ -37,6 +37,10 @@ jest.mock('@vexl-next/resources-utils/src/chat/sendMessage', () => {
   }
 })
 
+jest.mock('./myChatRecoveryProof', () => ({
+  myChatRecoveryProofToShare: () => undefined,
+}))
+
 jest.mock('./scheduleTradeReminderIfNeeded', () => ({
   scheduleTradeReminderIfNeeded: () => (chat: ChatWithMessages) => chat,
 }))

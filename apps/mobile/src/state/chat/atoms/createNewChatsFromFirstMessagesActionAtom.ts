@@ -20,7 +20,7 @@ import {focusOfferByPublicKeyAtom} from '../../marketplace/atoms/offersState'
 import {notesAtom, singleNoteAtom} from '../../notes/atoms/notesState'
 import {createEmptyTradeChecklistInState} from '../../tradeChecklist/domain'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
-import {startsChatRecovery} from '../utils/chatRecovery'
+import {latestRecoveryProof, startsChatRecovery} from '../utils/chatRecovery'
 import compareMessages from '../utils/compareMessages'
 import {isHiddenMetadataMessage} from '../utils/isMetadataMessage'
 
@@ -190,6 +190,7 @@ export default function createNewChatsFromFirstMessagesActionAtom({
               (one) => !isHiddenMetadataMessage(one)
             ),
             restoredFromBackup,
+            otherSideRecoveryProof: latestRecoveryProof(sortedMessages),
           } satisfies ChatWithMessages
 
           set(updateChatsPeakCountStatActionAtom, {chat: newChat.chat})

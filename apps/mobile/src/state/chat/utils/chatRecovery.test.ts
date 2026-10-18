@@ -3,6 +3,7 @@ import {
   type PrivateKeyHolder,
 } from '@vexl-next/cryptography/src/KeyHolder'
 import {
+  ChatRecoveryProof,
   generateChatId,
   generateChatMessageId,
   type ChatMessage,
@@ -24,9 +25,11 @@ import addMessagesToChats from './addMessagesToChats'
 import {
   chatsToAnswerWithHistory,
   chatsWaitingForHistoryRequest,
+  isPendingRecoveryChatExpired,
   isRestoredInboxInGracePeriod,
   messagesToShareAsHistory,
   restoredMessagesFromHistory,
+  startedSupportingChatRecovery,
 } from './chatRecovery'
 import isChatOpen from './isChatOpen'
 import {getChatState} from './offerStates'
@@ -47,6 +50,9 @@ jest.mock('../../../utils/reportError', () => ({
 const version = Schema.decodeSync(VersionString)('26.10.0')
 const myKey = generatePrivateKey()
 const theirKey = generatePrivateKey()
+const recoveryProof = Schema.decodeSync(ChatRecoveryProof)(
+  'P1ue9DFW6etINYILGhfXuAZiiwHjfj40ZGSNF7T/whY='
+)
 
 function at(day: number): UnixMilliseconds {
   return Schema.decodeSync(UnixMilliseconds)(Date.UTC(2026, 0, day))
@@ -129,6 +135,7 @@ function historyFromTheirCopy(
       messages: messagesToShareAsHistory(
         chat({inboxKey: theirKey, otherSideKey: myKey, messages: theirMessages})
       ),
+      historyRecoveryProof: recoveryProof,
     })
   )
 }
@@ -151,7 +158,7 @@ describe('restored chat state', () => {
     expect(isChatOpen(regularChat)).toBe(false)
   })
 
-  it('lists recovered chats that still need a history request', () => {
+  it('lists pending recovery chats that still need a history request', () => {
     const waiting = chat({
       inboxKey: myKey,
       otherSideKey: theirKey,
@@ -159,28 +166,107 @@ describe('restored chat state', () => {
       restoredFromBackup: true,
     })
     const requested = {...waiting, historyRequestedAt: at(20)}
-    const regular = chat({
-      inboxKey: myKey,
-      otherSideKey: theirKey,
-      messages: [],
-    })
 
     expect(
       chatsWaitingForHistoryRequest({
         inbox: {privateKey: myKey},
-        chats: [waiting, requested, regular],
+        chats: [waiting],
+        pendingRecoveryChats: [waiting, requested],
       })
     ).toEqual([waiting])
+  })
+
+  it('drops a pending recovery chat 30 days after its first message', () => {
+    const pending = chat({
+      inboxKey: myKey,
+      otherSideKey: theirKey,
+      messages: [received(message(theirKey, {time: at(1)}))],
+      restoredFromBackup: true,
+    })
+
+    expect(isPendingRecoveryChatExpired({chat: pending, now: at(30)})).toBe(
+      false
+    )
+    expect(isPendingRecoveryChatExpired({chat: pending, now: at(31)})).toBe(
+      true
+    )
+  })
+
+  it('times a pending recovery chat by the server, not the sender clock', () => {
+    const futureDated: ChatMessageWithState = {
+      ...received(message(theirKey, {time: at(1000)})),
+      receivedByServerAt: at(1),
+    }
+    const pending = chat({
+      inboxKey: myKey,
+      otherSideKey: theirKey,
+      messages: [futureDated],
+      restoredFromBackup: true,
+    })
+
+    expect(isPendingRecoveryChatExpired({chat: pending, now: at(31)})).toBe(
+      true
+    )
+  })
+})
+
+describe('delivering our recovery proof', () => {
+  const v = Schema.decodeSync(VersionString)
+
+  it('resends it once the other side updates to a version that keeps it', () => {
+    expect(
+      startedSupportingChatRecovery({
+        previousVersion: v('26.9.5'),
+        reportedVersion: v('26.10.0'),
+      })
+    ).toBe(true)
+    expect(
+      startedSupportingChatRecovery({
+        previousVersion: undefined,
+        reportedVersion: v('26.10.1'),
+      })
+    ).toBe(true)
+  })
+
+  it('does not resend it for other version updates', () => {
+    expect(
+      startedSupportingChatRecovery({
+        previousVersion: v('26.10.0'),
+        reportedVersion: v('26.10.1'),
+      })
+    ).toBe(false)
+    expect(
+      startedSupportingChatRecovery({
+        previousVersion: v('26.9.0'),
+        reportedVersion: v('26.9.5'),
+      })
+    ).toBe(false)
+  })
+
+  it('keeps the latest proof the other side sent', () => {
+    const regularChat = chat({
+      inboxKey: myKey,
+      otherSideKey: theirKey,
+      messages: [],
+    })
+    const [withProof] = addMessagesToChats([regularChat])([
+      received(message(theirKey, {time: at(1), recoveryProof})),
+    ])
+    const [afterMessageWithoutProof] = addMessagesToChats(
+      withProof ? [withProof] : []
+    )([received(message(theirKey, {time: at(2)}))])
+
+    expect(withProof?.otherSideRecoveryProof).toBe(recoveryProof)
+    expect(afterMessageWithoutProof?.otherSideRecoveryProof).toBe(recoveryProof)
   })
 })
 
 describe('answering history requests', () => {
   const requester = generatePrivateKey()
-  const knownChat = chat({
-    inboxKey: myKey,
-    otherSideKey: requester,
-    messages: [],
-  })
+  const knownChat: ChatWithMessages = {
+    ...chat({inboxKey: myKey, otherSideKey: requester, messages: []}),
+    otherSideRecoveryProof: recoveryProof,
+  }
   const inbox: InboxInState = {inbox: {privateKey: myKey}, chats: [knownChat]}
 
   function request(key: PrivateKeyHolder): ChatMessageWithState {
@@ -204,6 +290,18 @@ describe('answering history requests', () => {
         ],
       })
     ).toEqual([knownChat])
+  })
+
+  it('does not answer without the requester proof', () => {
+    expect(
+      chatsToAnswerWithHistory({
+        inbox: {
+          ...inbox,
+          chats: [{...knownChat, otherSideRecoveryProof: undefined}],
+        },
+        newMessages: [request(requester)],
+      })
+    ).toEqual([])
   })
 
   it('shares only delivered messages', () => {

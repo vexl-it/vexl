@@ -135,6 +135,8 @@ export const ChatWithMessages = Schema.Struct({
   // in `pendingRecoveryChats` until its history proves the other side is a
   // real chat partner, then counts as open until its history says otherwise.
   restoredFromBackup: Schema.optional(Schema.Boolean),
+  // Local time the pending recovery started, see `isPendingRecoveryChatExpired`
+  recoveryStartedAt: Schema.optional(UnixMilliseconds),
   // History is accepted once, and only messages from before the request
   historyRequestedAt: Schema.optional(UnixMilliseconds),
   historyMerged: Schema.optional(Schema.Boolean),

@@ -14,6 +14,7 @@ import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import {clubsToKeyHolderAtom} from '../../clubs/atom/clubsToKeyHolderV2Atom'
 import {generateAndRegisterVexlTokenActionAtom} from '../../notifications/actions/generateVexlTokenActionAtom'
 import {upsertInboxOnBeAndLocallyActionAtom} from '../hooks/useCreateInbox'
+import {myRecoveryProof} from '../utils/myChatRecoveryProof'
 import {version} from './../../../utils/environment'
 import upsertChatForTheirOfferActionAtom from './upsertChatForTheirOfferActionAtom'
 
@@ -67,6 +68,10 @@ const sendRequestActionAtom = atom(
           verifiedCommonFriends:
             originOffer.offerInfo.privatePart.verifiedCommonFriends,
           friendLevel: originOffer.offerInfo.privatePart.friendLevel,
+          recoveryProof: myRecoveryProof(get, {
+            myPublicKey: inbox.privateKey.publicKeyPemBase64,
+            otherSidePublicKey: originOffer.offerInfo.publicPart.offerPublicKey,
+          }),
         })
       )
 

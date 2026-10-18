@@ -85,15 +85,9 @@ export function isPendingRecoveryChatExpired({
   chat: ChatWithMessages
   now: UnixMilliseconds
 }): boolean {
-  return pipe(
-    Array.head(chat.messages),
-    Option.match({
-      onNone: () => true,
-      onSome: (first) =>
-        now >=
-        (first.receivedByServerAt ?? first.message.time) +
-          RESTORED_INBOX_GRACE_PERIOD_MS,
-    })
+  return (
+    !chat.recoveryStartedAt ||
+    now >= chat.recoveryStartedAt + RESTORED_INBOX_GRACE_PERIOD_MS
   )
 }
 

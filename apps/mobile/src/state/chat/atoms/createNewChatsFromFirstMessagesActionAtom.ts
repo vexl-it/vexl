@@ -5,6 +5,7 @@ import {
   type Inbox,
 } from '@vexl-next/domain/src/general/messaging'
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
+import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {keys} from '@vexl-next/resources-utils/src/utils/keys'
 import {Array, HashSet, Option} from 'effect'
 import {pipe} from 'fp-ts/function'
@@ -190,6 +191,9 @@ export default function createNewChatsFromFirstMessagesActionAtom({
               (one) => !isHiddenMetadataMessage(one)
             ),
             restoredFromBackup,
+            recoveryStartedAt: restoredFromBackup
+              ? unixMillisecondsNow()
+              : undefined,
             otherSideRecoveryProof: latestRecoveryProof(sortedMessages),
           } satisfies ChatWithMessages
 

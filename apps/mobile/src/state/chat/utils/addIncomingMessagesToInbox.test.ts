@@ -100,6 +100,7 @@ function createNewChats(messages: ChatMessageWithState[]): ChatWithMessages[] {
     },
     feedbackSubmitted: false,
     restoredFromBackup: startsChatRecovery(first),
+    recoveryStartedAt: at(4),
   }))
 }
 
@@ -234,7 +235,7 @@ describe('recovering a chat on a restored inbox', () => {
     const [recovered] = updatedInbox.chats
 
     expect(updatedInbox.pendingRecoveryChats).toEqual([])
-    expect(visibleMessages).toEqual([proven])
+    expect(visibleMessages).toEqual([strangerMessage, proven])
     expect(recovered?.historyMerged).toBe(true)
     expect(recovered && isChatOpen(recovered)).toBe(true)
     expect(

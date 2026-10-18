@@ -1,5 +1,5 @@
 import {type ChatRecoveryProof} from '@vexl-next/domain/src/general/messaging'
-import {Array} from 'effect'
+import {Array, pipe} from 'effect'
 import {
   type ChatMessageWithState,
   type ChatWithMessages,
@@ -18,7 +18,8 @@ function isFromChat(
 
 /**
  * Adds already filtered messages to the chats of the inbox. Messages of
- * pending recovery chats are held there and left out of `visibleMessages`.
+ * pending recovery chats are held there and left out of `visibleMessages`
+ * until the chat is recovered.
  */
 export default function addIncomingMessagesToInbox({
   inbox,
@@ -62,8 +63,21 @@ export default function addIncomingMessagesToInbox({
       chats,
       pendingRecoveryChats: [...newPendingChats, ...pending],
     },
-    visibleMessages: Array.filter(messages, (one) =>
-      Array.some(chats, isFromChat(one))
-    ),
+    visibleMessages: [
+      // Held messages of recovered chats are seen only now
+      ...pipe(
+        pendingRecoveryChats,
+        Array.filter((pendingChat) =>
+          Array.some(
+            recovered,
+            (chat) =>
+              chat.chat.otherSide.publicKey ===
+              pendingChat.chat.otherSide.publicKey
+          )
+        ),
+        Array.flatMap((pendingChat) => pendingChat.messages)
+      ),
+      ...Array.filter(messages, (one) => Array.some(chats, isFromChat(one))),
+    ],
   }
 }

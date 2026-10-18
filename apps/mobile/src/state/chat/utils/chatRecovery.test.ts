@@ -176,34 +176,24 @@ describe('restored chat state', () => {
     ).toEqual([waiting])
   })
 
-  it('drops a pending recovery chat 30 days after its first message', () => {
-    const pending = chat({
-      inboxKey: myKey,
-      otherSideKey: theirKey,
-      messages: [received(message(theirKey, {time: at(1)}))],
-      restoredFromBackup: true,
-    })
+  it('drops a pending recovery chat 30 days after the recovery started', () => {
+    const pending = {
+      ...chat({
+        inboxKey: myKey,
+        otherSideKey: theirKey,
+        // Neither an old queued message nor a future-dated one matters
+        messages: [
+          received(message(theirKey, {time: at(-100)})),
+          received(message(theirKey, {time: at(1000)})),
+        ],
+        restoredFromBackup: true,
+      }),
+      recoveryStartedAt: at(1),
+    }
 
     expect(isPendingRecoveryChatExpired({chat: pending, now: at(30)})).toBe(
       false
     )
-    expect(isPendingRecoveryChatExpired({chat: pending, now: at(31)})).toBe(
-      true
-    )
-  })
-
-  it('times a pending recovery chat by the server, not the sender clock', () => {
-    const futureDated: ChatMessageWithState = {
-      ...received(message(theirKey, {time: at(1000)})),
-      receivedByServerAt: at(1),
-    }
-    const pending = chat({
-      inboxKey: myKey,
-      otherSideKey: theirKey,
-      messages: [futureDated],
-      restoredFromBackup: true,
-    })
-
     expect(isPendingRecoveryChatExpired({chat: pending, now: at(31)})).toBe(
       true
     )
@@ -250,7 +240,13 @@ describe('delivering our recovery proof', () => {
       messages: [],
     })
     const [withProof] = addMessagesToChats([regularChat])([
-      received(message(theirKey, {time: at(1), recoveryProof})),
+      received(
+        message(theirKey, {
+          time: at(1),
+          messageType: 'REQUEST_MESSAGING',
+          recoveryProof,
+        })
+      ),
     ])
     const [afterMessageWithoutProof] = addMessagesToChats(
       withProof ? [withProof] : []

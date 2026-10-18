@@ -1,3 +1,4 @@
+import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {
   type Chat,
   type ChatRecoveryProof,
@@ -9,14 +10,24 @@ import {type ChatWithMessages} from '../domain'
 import {isChatRecoveryPending} from './chatRecovery'
 import isChatOpen from './isChatOpen'
 
-export function myChatRecoveryProof(
+export function myRecoveryProof(
   get: Getter,
-  chat: Chat
+  keys: {
+    myPublicKey: PublicKeyPemBase64
+    otherSidePublicKey: PublicKeyPemBase64
+  }
 ): ChatRecoveryProof | undefined {
   const session = get(sessionAtom)
   if (session.state !== 'loggedIn') return undefined
 
-  return deriveChatRecoveryProof(session.session.masterSeed, {
+  return deriveChatRecoveryProof(session.session.masterSeed, keys)
+}
+
+export function myChatRecoveryProof(
+  get: Getter,
+  chat: Chat
+): ChatRecoveryProof | undefined {
+  return myRecoveryProof(get, {
     myPublicKey: chat.inbox.privateKey.publicKeyPemBase64,
     otherSidePublicKey: chat.otherSide.publicKey,
   })

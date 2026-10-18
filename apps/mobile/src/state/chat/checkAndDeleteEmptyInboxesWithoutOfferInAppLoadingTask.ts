@@ -11,7 +11,10 @@ import {myNotesAtom} from '../notes/atoms/notesState'
 import {sessionDataOrDummyAtom} from '../session'
 import messagingStateAtom from './atoms/messagingStateAtom'
 import {fetchMessagesForAllInboxesInAppLoadingTaskId} from './fetchMessagesForAllInboxesInAppLoadingTask'
-import {isRestoredInboxInGracePeriod} from './utils/chatRecovery'
+import {
+  isPendingRecoveryChatExpired,
+  isRestoredInboxInGracePeriod,
+} from './utils/chatRecovery'
 
 // Lightweight probe used only to tell whether the persisted offers blob holds
 // any offers. It decodes just the `offers` array shape (elements stay
@@ -108,6 +111,15 @@ export const checkAndDeleteEmptyInboxesWithoutOfferInAppLoadingTaskId =
 
               // Its chats come back only once the other side writes again
               if (isRestoredInboxInGracePeriod({inbox: one, now})) return true
+
+              // A recovering chat still waits for its history here
+              if (
+                Array.some(
+                  one.pendingRecoveryChats ?? [],
+                  (chat) => !isPendingRecoveryChatExpired({chat, now})
+                )
+              )
+                return true
 
               // In all other cases, inbox is valid only if there are open chats
               return one.chats.length > 0

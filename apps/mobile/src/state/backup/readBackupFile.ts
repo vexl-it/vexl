@@ -2,7 +2,7 @@ import {
   BackupFileFromJson,
   type BackupFile,
 } from '@vexl-next/resources-utils/src/backup/BackupFile'
-import {Effect, Option, Schema} from 'effect'
+import {Array, Effect, Option, Schema} from 'effect'
 import {getDocumentAsync} from 'expo-document-picker'
 import {File} from 'expo-file-system'
 
@@ -60,31 +60,38 @@ const readAndDeletePickedFile = (
     catch: (cause) => new ReadingBackupFileError({cause}),
   })
 
-// None when the user closes the picker.
-export const pickBackupFile = (): Effect.Effect<
-  Option.Option<BackupFile>,
-  InvalidBackupFileError | ReadingBackupFileError
+// None when the user closes the picker. Only picks - reading a large file
+// takes seconds, so callers show progress before calling readBackupFile.
+export const pickBackupFileUri = (): Effect.Effect<
+  Option.Option<string>,
+  ReadingBackupFileError
 > =>
-  Effect.gen(function* () {
-    const pickerResult = yield* Effect.tryPromise({
-      try: async () =>
-        await getDocumentAsync({
-          // The custom extension has no registered MIME type, so the content
-          // is validated instead.
-          type: '*/*',
-          copyToCacheDirectory: true,
-          multiple: false,
-        }),
-      catch: (cause) => new ReadingBackupFileError({cause}),
-    })
-    if (pickerResult.canceled) return Option.none()
+  Effect.tryPromise({
+    try: async () =>
+      await getDocumentAsync({
+        // The custom extension has no registered MIME type, so the content
+        // is validated instead.
+        type: '*/*',
+        copyToCacheDirectory: true,
+        multiple: false,
+      }),
+    catch: (cause) => new ReadingBackupFileError({cause}),
+  }).pipe(
+    Effect.map((pickerResult) =>
+      pickerResult.canceled
+        ? Option.none()
+        : Option.map(Array.head(pickerResult.assets), (asset) => asset.uri)
+    )
+  )
 
-    const pickedAsset = pickerResult.assets[0]
-    if (pickedAsset === undefined) return Option.none()
-
-    const content = yield* readAndDeletePickedFile(pickedAsset.uri)
-    if (Option.isNone(content))
-      return yield* new InvalidBackupFileError({reason: 'notABackup'})
-
-    return Option.some(yield* decodeBackupFile(content.value))
-  })
+export const readBackupFile = (
+  uri: string
+): Effect.Effect<BackupFile, InvalidBackupFileError | ReadingBackupFileError> =>
+  readAndDeletePickedFile(uri).pipe(
+    Effect.flatMap(
+      Option.match({
+        onNone: () => new InvalidBackupFileError({reason: 'notABackup'}),
+        onSome: decodeBackupFile,
+      })
+    )
+  )

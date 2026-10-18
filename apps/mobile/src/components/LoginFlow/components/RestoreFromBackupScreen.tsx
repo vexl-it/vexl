@@ -7,7 +7,10 @@ import {
   restoreFromBackupStateAtom,
   type RestoreFailure,
 } from '../../../state/backup/restoreFromBackup'
-import {useTranslation} from '../../../utils/localization/I18nProvider'
+import {
+  useTranslation,
+  type TFunction,
+} from '../../../utils/localization/I18nProvider'
 
 type Props = LoginFlowStackScreenProps<'RestoreFromBackup'>
 
@@ -55,6 +58,13 @@ function RestoringContent(): React.ReactElement {
   )
 }
 
+function failureText(failure: RestoreFailure, t: TFunction): string {
+  if (failure === 'notABackup' || failure === 'unsupportedVersion')
+    return t(`loginFlow.restoreFromBackup.errors.${failure}`)
+  if (failure === 'offline') return t('common.NetworkError')
+  return t('loginFlow.restoreFromBackup.failed.unknown')
+}
+
 function FailedContent({
   failure,
   onBackToLogin,
@@ -86,11 +96,7 @@ function FailedContent({
         ) : (
           <>
             <Title>{t('loginFlow.restoreFromBackup.failed.title')}</Title>
-            <Text>
-              {failure === 'offline'
-                ? t('common.NetworkError')
-                : t('loginFlow.restoreFromBackup.failed.unknown')}
-            </Text>
+            <Text>{failureText(failure, t)}</Text>
           </>
         )}
       </YStack>

@@ -7,7 +7,7 @@ import React, {useCallback, useEffect, useRef, useState} from 'react'
 import {Keyboard, StyleSheet, TextInput} from 'react-native'
 import {getCountryByCca2, type ICountry} from 'react-native-country-select'
 import {type LoginFlowStackScreenProps} from '../../../navigationTypes'
-import {pickBackupFile} from '../../../state/backup/readBackupFile'
+import {pickBackupFileUri} from '../../../state/backup/readBackupFile'
 import {startRestoreFromBackupActionAtom} from '../../../state/backup/restoreFromBackup'
 import {
   dismissKeyboardAndResolveOnLayoutUpdate,
@@ -146,7 +146,7 @@ export default function PhoneNumberScreen({
     pickingBackupFileRef.current = true
     navigationInProgressRef.current = true
     setErrorMessage(undefined)
-    void Effect.runPromise(Effect.either(pickBackupFile()))
+    void Effect.runPromise(Effect.either(pickBackupFileUri()))
       .then(async (result) => {
         if (Either.isRight(result) && Option.isSome(result.right)) {
           await dismissKeyboardAndResolveOnLayoutUpdate()
@@ -158,11 +158,7 @@ export default function PhoneNumberScreen({
         navigationInProgressRef.current = false
         inputRef.current?.focus()
         if (Either.isLeft(result))
-          setErrorMessage(
-            result.left._tag === 'InvalidBackupFileError'
-              ? t(`loginFlow.restoreFromBackup.errors.${result.left.reason}`)
-              : t('common.somethingWentWrong')
-          )
+          setErrorMessage(t('common.somethingWentWrong'))
       })
       .finally(() => {
         pickingBackupFileRef.current = false

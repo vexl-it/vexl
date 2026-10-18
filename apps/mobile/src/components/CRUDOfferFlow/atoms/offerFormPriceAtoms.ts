@@ -18,7 +18,7 @@ import {parseDecimalInput} from '../../../utils/normalizeDecimalInput'
 import {globalDialogAtom} from '../../GlobalDialog'
 
 export interface OfferFormPriceAtoms {
-  readonly maxAmountForCurrencyAtom: Atom<number>
+  readonly maxAmountForCurrencyAtom: Atom<number | undefined>
   readonly btcPricesLoadingAtom: Atom<boolean>
   readonly btcPricesReadyAtom: Atom<boolean>
   readonly btcPriceForOfferWithCurrencyAtom: Atom<
@@ -41,6 +41,11 @@ export interface OfferFormPriceAtoms {
   >
   readonly retryBtcPriceForOfferCurrencyActionAtom: WritableAtom<null, [], void>
   readonly initializeAmountTopLimitFromBtcPriceActionAtom: WritableAtom<
+    null,
+    [],
+    Effect.Effect<void>
+  >
+  readonly initializeSatsValueFromBtcPriceActionAtom: WritableAtom<
     null,
     [],
     Effect.Effect<void>
@@ -80,6 +85,11 @@ export function createOfferFormPriceAtoms({
       })
     }
   )
+
+  const alignAmountTopLimitToMaxAmountActionAtom = atom(null, (get, set) => {
+    const maxAmount = get(maxAmountForCurrencyAtom)
+    if (maxAmount !== undefined) set(amountTopLimitAtom, maxAmount)
+  })
 
   const calculateSatsValueOnFiatValueChangeActionAtom = atom(
     null,
@@ -149,7 +159,7 @@ export function createOfferFormPriceAtoms({
           // Realign the top limit to the fresh cap once the new currency's
           // price resolves — the limit atom still holds the previous
           // currency's cap until the fetch completes.
-          set(amountTopLimitAtom, get(maxAmountForCurrencyAtom))
+          set(alignAmountTopLimitToMaxAmountActionAtom)
           if (currentResult) {
             set(
               calculateFiatValueOnSatsValueChangeActionAtom,
@@ -173,7 +183,7 @@ export function createOfferFormPriceAtoms({
         )
         if (get(currencyAtom) !== currency) return
 
-        set(amountTopLimitAtom, get(maxAmountForCurrencyAtom))
+        set(alignAmountTopLimitToMaxAmountActionAtom)
         if (!currentResult) {
           yield* _(set(showExchangeRateRequestTimedOutDialogActionAtom))
 
@@ -195,39 +205,63 @@ export function createOfferFormPriceAtoms({
 
       return Effect.gen(function* (_) {
         yield* _(refreshBtcPriceWithEurEffect(set, currency))
-        set(amountTopLimitAtom, get(maxAmountForCurrencyAtom))
+        set(alignAmountTopLimitToMaxAmountActionAtom)
+      })
+    }
+  )
+
+  // An edited offer keeps its limits, only its sats value comes from the rate.
+  const initializeSatsValueFromBtcPriceActionAtom = atom(
+    null,
+    (get, set): Effect.Effect<void> => {
+      const currency = get(currencyAtom)
+
+      return Effect.gen(function* (_) {
+        yield* _(refreshBtcPriceWithEurEffect(set, currency))
+        if (get(currencyAtom) !== currency) return
+        set(
+          calculateSatsValueOnFiatValueChangeActionAtom,
+          String(get(amountBottomLimitAtom))
+        )
       })
     }
   )
 
   const checkAmountExceedsLimitAndShowDialogActionAtom = atom(
     null,
-    (get, set): Effect.Effect<boolean> => {
-      const {t} = get(translationAtom)
-      const currency = get(currencyAtom)
-      const amountBottomLimit = get(amountBottomLimitAtom)
-      const amountTopLimit = get(amountTopLimitAtom)
-      const maxAmount = get(maxAmountForCurrencyAtom)
-      const locale = get(formattingLocaleAtom)
+    (get, set): Effect.Effect<boolean> =>
+      Effect.gen(function* (_) {
+        const currency = get(currencyAtom)
+        if (get(maxAmountForCurrencyAtom) === undefined)
+          yield* _(refreshBtcPriceWithEurEffect(set, currency))
 
-      if (amountBottomLimit <= maxAmount && amountTopLimit <= maxAmount) {
-        return Effect.succeed(true)
-      }
+        const maxAmount = get(maxAmountForCurrencyAtom)
+        if (maxAmount === undefined) {
+          yield* _(set(showExchangeRateRequestTimedOutDialogActionAtom))
+          return false
+        }
 
-      return Effect.as(
-        set(globalDialogAtom, {
-          title: t('offerForm.errorExceededLimitsTitle'),
-          subtitle: t('offerForm.errorExceededLimitsDescription', {
-            limit: formatDecimal(maxAmount, locale, {
-              maximumFractionDigits: 0,
+        if (
+          get(amountBottomLimitAtom) <= maxAmount &&
+          get(amountTopLimitAtom) <= maxAmount
+        )
+          return true
+
+        const {t} = get(translationAtom)
+        yield* _(
+          set(globalDialogAtom, {
+            title: t('offerForm.errorExceededLimitsTitle'),
+            subtitle: t('offerForm.errorExceededLimitsDescription', {
+              limit: formatDecimal(maxAmount, get(formattingLocaleAtom), {
+                maximumFractionDigits: 0,
+              }),
+              currency,
             }),
-            currency,
-          }),
-          positiveButtonText: t('offerForm.errorExceededLimitsButton'),
-        }),
-        false
-      )
-    }
+            positiveButtonText: t('offerForm.errorExceededLimitsButton'),
+          })
+        )
+        return false
+      })
   )
 
   return {
@@ -240,6 +274,7 @@ export function createOfferFormPriceAtoms({
     changePriceCurrencyActionAtom,
     retryBtcPriceForOfferCurrencyActionAtom,
     initializeAmountTopLimitFromBtcPriceActionAtom,
+    initializeSatsValueFromBtcPriceActionAtom,
     checkAmountExceedsLimitAndShowDialogActionAtom,
   }
 }

@@ -99,10 +99,11 @@ export function createBtcPricesLoadingAtom(
   })
 }
 
+// Undefined until the rates are known - the EUR cap means nothing in other currencies.
 export function createMaxAmountForCurrencyAtom(
   currencyStringOrAtom: CurrencyCode | Atom<CurrencyCode | undefined>
-): Atom<number> {
-  return atom((get): number => {
+): Atom<number | undefined> {
+  return atom((get): number | undefined => {
     const btcPriceData = get(btcPriceDataAtom)
     const currency =
       typeof currencyStringOrAtom === 'string'

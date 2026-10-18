@@ -12,7 +12,10 @@ import {
 } from '../../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {updatesToBeSentAtom} from '../../../../state/tradeChecklist/atoms/updatesToBeSentAtom'
 import {translationAtom} from '../../../../utils/localization/I18nProvider'
-import {computeMaxAmountForCurrency} from '../../../../utils/localization/currency'
+import {
+  computeMaxAmountForCurrency,
+  MAX_AMOUNT_EUR,
+} from '../../../../utils/localization/currency'
 import {formatDecimal} from '../../../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../../../utils/localization/formattingLocaleAtom'
 import {globalDialogAtom} from '../../../GlobalDialog'
@@ -153,12 +156,13 @@ export const saveLocalCalculatedAmountDataStateToMainStateActionAtom = atom(
     const fiatAmountWithoutFee = Math.round(cancelFee(fiatAmount, feeAmount))
 
     const btcPriceData = get(btcPriceDataAtom)
-    const maxAmount = computeMaxAmountForCurrency({
-      btcPriceInCurrency: currency
-        ? btcPriceData[currency]?.btcPrice?.BTC
-        : undefined,
-      btcPriceInEur: btcPriceData.EUR?.btcPrice?.BTC,
-    })
+    const maxAmount =
+      computeMaxAmountForCurrency({
+        btcPriceInCurrency: currency
+          ? btcPriceData[currency]?.btcPrice?.BTC
+          : undefined,
+        btcPriceInEur: btcPriceData.EUR?.btcPrice?.BTC,
+      }) ?? MAX_AMOUNT_EUR
     if (currency && fiatAmount > maxAmount) {
       return pipe(
         set(globalDialogAtom, {

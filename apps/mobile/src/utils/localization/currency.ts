@@ -23,8 +23,8 @@ export function computeMaxAmountForCurrency({
 }: {
   btcPriceInCurrency: number | undefined
   btcPriceInEur: number | undefined
-}): number {
-  if (!btcPriceInCurrency || !btcPriceInEur) return MAX_AMOUNT_EUR
+}): number | undefined {
+  if (!btcPriceInCurrency || !btcPriceInEur) return undefined
   return floorToSigDigits(MAX_AMOUNT_EUR * (btcPriceInCurrency / btcPriceInEur))
 }
 

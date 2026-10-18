@@ -2,6 +2,7 @@ import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {
   ChatRecoveryProof,
   generateChatId,
+  generateChatMessageId,
   type ChatMessage,
 } from '@vexl-next/domain/src/general/messaging'
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
@@ -144,6 +145,18 @@ describe('chat history requests and answers', () => {
 
   it('answers a request with history carrying a fresh token', async () => {
     const known = chat({
+      messages: [
+        {
+          state: 'sent',
+          message: {
+            uuid: generateChatMessageId(),
+            text: '',
+            time: unixMillisecondsNow(),
+            messageType: 'APPROVE_MESSAGING',
+            senderPublicKey: myKey.publicKeyPemBase64,
+          },
+        },
+      ],
       otherSideRecoveryProof: Schema.decodeSync(ChatRecoveryProof)(
         'P1ue9DFW6etINYILGhfXuAZiiwHjfj40ZGSNF7T/whY='
       ),

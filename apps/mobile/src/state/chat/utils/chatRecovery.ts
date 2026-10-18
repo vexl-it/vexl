@@ -15,6 +15,7 @@ import {
   type ChatWithMessages,
   type InboxInState,
 } from '../domain'
+import isChatOpen from './isChatOpen'
 import {isMetadataMessageType} from './isMetadataMessage'
 
 const messageTypesNotStartingRecovery: ReadonlyArray<
@@ -150,8 +151,8 @@ export function startedSupportingChatRecovery({
 }
 
 /**
- * Chats whose other side asked for their history. Requests from senders we
- * have no chat with are ignored, and so are chats without the other side's
+ * Open chats whose other side asked for their history. Requests from senders
+ * we have no chat with are ignored, and so are chats without the other side's
  * recovery proof: without it the requester could not tell us from a stranger.
  */
 export function chatsToAnswerWithHistory({
@@ -178,7 +179,7 @@ export function chatsToAnswerWithHistory({
           chat.chat.otherSide.publicKey === request.message.senderPublicKey
       )
     ),
-    Array.filter((chat) => !!chat.otherSideRecoveryProof)
+    Array.filter((chat) => isChatOpen(chat) && !!chat.otherSideRecoveryProof)
   )
 }
 

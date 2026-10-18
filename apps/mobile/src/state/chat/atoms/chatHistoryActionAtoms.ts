@@ -150,6 +150,7 @@ const sendHistoryActionAtom = atom(
             historyRecoveryProof,
             myVexlToken,
           }),
+        failure: {lvl: 'warn', message: 'Error sending chat history'},
       })
     ).pipe(Effect.asVoid)
 )

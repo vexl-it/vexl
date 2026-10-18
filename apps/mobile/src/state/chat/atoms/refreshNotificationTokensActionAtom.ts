@@ -19,7 +19,7 @@ import {pipe} from 'fp-ts/lib/function'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
 import {version} from '../../../utils/environment'
-import reportError from '../../../utils/reportError'
+import reportError, {type LogLvl} from '../../../utils/reportError'
 import {generateAndRegisterVexlTokenActionAtom} from '../../notifications/actions/generateVexlTokenActionAtom'
 import {type ChatWithMessages} from '../domain'
 import {myChatRecoveryProofToShare} from '../utils/myChatRecoveryProof'
@@ -56,11 +56,13 @@ export const sendMessageWithMyVexlTokenActionAtom = atom(
     {
       chatWithMessages,
       createMessage,
+      failure = {lvl: 'error', message: 'Error while refreshing fcm cypher'},
     }: {
       chatWithMessages: ChatWithMessages
       createMessage: (
         vexlToken: VexlNotificationToken | undefined
       ) => ChatMessage
+      failure?: {lvl: LogLvl; message: string}
     }
   ): T.Task<boolean> =>
     pipe(
@@ -112,9 +114,7 @@ export const sendMessageWithMyVexlTokenActionAtom = atom(
       }),
       TE.matchW(
         (e) => {
-          reportError('error', new Error('Error while refreshing fcm cypher'), {
-            e,
-          })
+          reportError(failure.lvl, new Error(failure.message), {e})
           console.warn(
             `🔥 Refresh notifications tokens',  'Refreshing chat with Id ${chatWithMessages.chat.id}`,
             `Error refreshing ${e._tag}`

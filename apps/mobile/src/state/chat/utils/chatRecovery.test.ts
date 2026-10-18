@@ -263,7 +263,13 @@ describe('delivering our recovery proof', () => {
 describe('answering history requests', () => {
   const requester = generatePrivateKey()
   const knownChat: ChatWithMessages = {
-    ...chat({inboxKey: myKey, otherSideKey: requester, messages: []}),
+    ...chat({
+      inboxKey: myKey,
+      otherSideKey: requester,
+      messages: [
+        sent(message(myKey, {time: at(1), messageType: 'APPROVE_MESSAGING'})),
+      ],
+    }),
     otherSideRecoveryProof: recoveryProof,
   }
   const inbox: InboxInState = {inbox: {privateKey: myKey}, chats: [knownChat]}
@@ -289,6 +295,23 @@ describe('answering history requests', () => {
         ],
       })
     ).toEqual([knownChat])
+  })
+
+  it('does not answer in a closed chat', () => {
+    const closedChat: ChatWithMessages = {
+      ...knownChat,
+      messages: [
+        ...knownChat.messages,
+        received(message(requester, {time: at(2), messageType: 'DELETE_CHAT'})),
+      ],
+    }
+
+    expect(
+      chatsToAnswerWithHistory({
+        inbox: {...inbox, chats: [closedChat]},
+        newMessages: [request(requester)],
+      })
+    ).toEqual([])
   })
 
   it('does not answer without the requester proof', () => {
@@ -341,7 +364,7 @@ describe('answering history requests', () => {
     ])
 
     expect(updated?.chat.otherSideFcmCypher).toBe(oldToken)
-    expect(updated?.messages).toEqual([])
+    expect(updated?.messages).toEqual(knownChat.messages)
   })
 })
 

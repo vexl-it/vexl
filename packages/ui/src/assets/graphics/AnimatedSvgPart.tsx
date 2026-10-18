@@ -1,5 +1,5 @@
 import type {ReactNode} from 'react'
-import React, {useEffect} from 'react'
+import React, {useEffect, useState} from 'react'
 import Animated, {
   Easing,
   interpolate,
@@ -10,6 +10,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated'
 import {G} from 'react-native-svg'
+import {scheduleOnRN} from 'react-native-worklets'
 
 const AnimatedGroup = Animated.createAnimatedComponent(G)
 
@@ -33,13 +34,16 @@ export function AnimatedSvgPart({
   readonly children: ReactNode
 }): React.JSX.Element {
   const progress = useSharedValue(animate ? 0 : 1)
+  const [settled, setSettled] = useState(!animate)
 
   useEffect(() => {
     if (!animate) {
       progress.value = 1
+      setSettled(true)
       return
     }
 
+    setSettled(false)
     progress.value = 0
     progress.value = withDelay(
       index * POP_DELAY,
@@ -48,10 +52,16 @@ export function AnimatedSvgPart({
           duration: POP_IN_DURATION,
           easing: Easing.out(Easing.cubic),
         }),
-        withTiming(1, {
-          duration: POP_SETTLE_DURATION,
-          easing: Easing.out(Easing.quad),
-        })
+        withTiming(
+          1,
+          {
+            duration: POP_SETTLE_DURATION,
+            easing: Easing.out(Easing.quad),
+          },
+          (finished) => {
+            if (finished) scheduleOnRN(setSettled, true)
+          }
+        )
       )
     )
   }, [animate, index, progress, trigger])
@@ -65,5 +75,12 @@ export function AnimatedSvgPart({
     }
   })
 
-  return <AnimatedGroup animatedProps={animatedProps}>{children}</AnimatedGroup>
+  // Reanimated can drop the final values before syncing them back to React when
+  // the JS thread is busy, so a later re-render would restore the hidden
+  // first-frame props. Once settled, render without animated props instead.
+  return (
+    <AnimatedGroup animatedProps={settled ? undefined : animatedProps}>
+      {children}
+    </AnimatedGroup>
+  )
 }

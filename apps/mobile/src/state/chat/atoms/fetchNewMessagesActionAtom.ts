@@ -49,9 +49,14 @@ import messagingStateAtom from '../atoms/messagingStateAtom'
 import {type InboxInState} from '../domain'
 import addMessagesToChats from '../utils/addMessagesToChats'
 import {filterIncomingMessages} from '../utils/filterIncomingMessages'
+import {isMetadataMessageType} from '../utils/isMetadataMessage'
 import replaceBase64UriWithImageFileUri from '../utils/replaceBase64UriWithImageFileUri'
 import {type ChatMessageWithState} from './../domain'
 import {blockedChatSendersAtom} from './blockedChatSendersAtom'
+import {
+  answerHistoryRequestsActionAtom,
+  requestHistoryForRecoveredChatsActionAtom,
+} from './chatHistoryActionAtoms'
 import {sendUpdateNoticeMessageActionAtom} from './checkAndReportCurrentVersionToChatsActionAtom'
 import createNewChatsFromMessagesActionAtom from './createNewChatsFromFirstMessagesActionAtom'
 import focusChatByInboxKeyAndSenderKey from './focusChatByInboxKeyAndSenderKey'
@@ -293,6 +298,7 @@ function refreshInboxActionAtom(
                     createNewChatsFromMessagesActionAtom({
                       inbox: inbox.inbox,
                       inboxOffer,
+                      inboxRestoredFromBackup: inbox.restoredFromBackup,
                     })(messagesInNewChat ?? [])
                   ),
                   ...addMessagesToChats(inbox.chats)(
@@ -363,17 +369,13 @@ export const fetchAndStoreMessagesForInboxAtom = atom<
       const visibleMessagesToReport = newMessages.filter(
         (one) =>
           one.state === 'received' &&
-          !['FCM_CYPHER_UPDATE', 'VERSION_UPDATE'].includes(
-            one.message.messageType
-          )
+          !isMetadataMessageType(one.message.messageType)
       )
 
       const nonVisibleMessagesToReport = newMessages.filter(
         (one) =>
           one.state === 'received' &&
-          ['FCM_CYPHER_UPDATE', 'VERSION_UPDATE'].includes(
-            one.message.messageType
-          )
+          isMetadataMessageType(one.message.messageType)
       )
 
       return Effect.all([
@@ -473,6 +475,10 @@ export const fetchAndStoreMessagesForInboxAtom = atom<
         return Effect.all(
           [
             handleOtherSideUpdated,
+            set(answerHistoryRequestsActionAtom, {
+              newMessages,
+              inbox: updatedInbox,
+            }),
             taskToEffect(
               deletePulledMessagesReportLeft({
                 api: api.chat,
@@ -512,6 +518,9 @@ export const fetchAndStoreMessagesForInboxHandleNotificationsActionAtom = atom<
     )
 
     if (!updates) return undefined
+
+    // Also retries requests that failed on an earlier fetch
+    yield* _(set(requestHistoryForRecoveredChatsActionAtom, key))
 
     if (Platform.OS === 'ios') {
       const targetTokens = pipe(

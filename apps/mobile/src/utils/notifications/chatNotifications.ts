@@ -159,6 +159,8 @@ export async function showChatNotification({
     type === 'FCM_CYPHER_UPDATE' ||
     type === 'OFFER_DELETED' ||
     type === 'MESSAGE_READ' ||
+    type === 'REQUEST_HISTORY' ||
+    type === 'HISTORY' ||
     // type === 'INBOX_DELETED' ||
     // type === 'CANCEL_REQUEST_MESSAGING' ||
     type === 'REQUIRES_NEWER_VERSION'

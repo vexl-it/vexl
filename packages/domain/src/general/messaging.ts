@@ -21,7 +21,8 @@ import {VexlNotificationToken} from './notifications/VexlNotificationToken'
 import {FriendLevel, GoldenAvatarType, OfferId, OneOfferInState} from './offers'
 import {TradeChecklistUpdate} from './tradeChecklist'
 
-export const MessageType = Schema.Literal(
+// Message types the chat-service sees in plaintext on send.
+export const ServerVisibleMessageType = Schema.Literal(
   'MESSAGE',
   'REQUEST_REVEAL',
   'APPROVE_REVEAL',
@@ -41,13 +42,28 @@ export const MessageType = Schema.Literal(
   'VERSION_UPDATE',
   'FCM_CYPHER_UPDATE',
   'MESSAGE_READ',
-  'REQUEST_HISTORY',
-  'HISTORY',
   // Local-only nudge to clean up an inactive chat. MUST NEVER be sent to the
   // server or the other side.
   'INACTIVITY_REMINDER'
 )
+export type ServerVisibleMessageType = typeof ServerVisibleMessageType.Type
+
+export const MessageType = Schema.Literal(
+  ...ServerVisibleMessageType.literals,
+  // Chat restore must stay invisible to the server, so these travel as
+  // 'MESSAGE' and only the encrypted payload carries the real type.
+  'REQUEST_HISTORY',
+  'HISTORY'
+)
 export type MessageType = typeof MessageType.Type
+
+const isServerVisibleMessageType = Schema.is(ServerVisibleMessageType)
+
+export function toServerVisibleMessageType(
+  messageType: MessageType
+): ServerVisibleMessageType {
+  return isServerVisibleMessageType(messageType) ? messageType : 'MESSAGE'
+}
 
 export const ChatUserIdentity = Schema.Struct({
   publicKey: PublicKeyPemBase64,

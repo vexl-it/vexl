@@ -172,5 +172,5 @@ export function getChatState(chat?: ChatWithMessages): ChatState {
     }
   }
 
-  return 'chatClosed'
+  return chat?.restoredFromBackup ? 'chatOpen' : 'chatClosed'
 }

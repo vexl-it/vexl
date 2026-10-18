@@ -122,6 +122,7 @@
   "messages.startConversationByReactingToOffer": "Inicie uma conversa reagindo a uma oferta.",
   "messages.seeMarketplace": "Ver mercado",
   "messages.youHaveChattedWithThisPartyBefore": "Parece que já falaste sobre esta oferta, mas saíste e eliminaste a conversa.",
+  "messages.restoredMessagesDivider": "Restaurado a partir da cópia da outra pessoa",
   "messages.areYouSureYouWantToDeleteChat": "Queres mesmo eliminar este chat? Todas as mensagens serão perdidas.",
   "vexlbot.bot": "bot",
   "vexlbot.initialWelcomeMessage": "Bem-vindo ao chat. Vamos pactar os termos do negócio com {{name}}. Vou ajudar-lhe ao longo do caminho.",

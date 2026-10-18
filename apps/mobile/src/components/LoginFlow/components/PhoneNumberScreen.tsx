@@ -1,12 +1,14 @@
 import {useFocusEffect} from '@react-navigation/native'
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {Typography, XStack, YStack} from '@vexl-next/ui'
-import {Effect, Option} from 'effect'
+import {Effect, Either, Option} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useEffect, useRef, useState} from 'react'
 import {Keyboard, StyleSheet, TextInput} from 'react-native'
 import {getCountryByCca2, type ICountry} from 'react-native-country-select'
 import {type LoginFlowStackScreenProps} from '../../../navigationTypes'
+import {pickBackupFile} from '../../../state/backup/readBackupFile'
+import {startRestoreFromBackupActionAtom} from '../../../state/backup/restoreFromBackup'
 import {
   dismissKeyboardAndResolveOnLayoutUpdate,
   runAfterKeyboardDismiss,
@@ -64,6 +66,8 @@ export default function PhoneNumberScreen({
   const initPhoneVerificationInProgressRef = useRef(false)
   const loadingOverlay = useShowLoadingOverlay()
   const initPhoneVerification = useSetAtom(initPhoneVerificationAtom)
+  const startRestoreFromBackup = useSetAtom(startRestoreFromBackupActionAtom)
+  const pickingBackupFileRef = useRef(false)
   const phoneNumberGroupLengths = getGroupLengths(selectedCountry)
   const selectedCountryCode = useAtomValue(selectedCountryCodeAtom)
   const setSelectedCountryCode = useSetAtom(selectedCountryCodeAtom)
@@ -136,10 +140,51 @@ export default function PhoneNumberScreen({
     setPhoneNumber(Option.none())
   }, [selectedCountryCode, selectedCountry?.cca2])
 
+  const restoreFromBackup = (): void => {
+    if (pickingBackupFileRef.current) return
+
+    pickingBackupFileRef.current = true
+    navigationInProgressRef.current = true
+    setErrorMessage(undefined)
+    void Effect.runPromise(Effect.either(pickBackupFile()))
+      .then(async (result) => {
+        if (Either.isRight(result) && Option.isSome(result.right)) {
+          await dismissKeyboardAndResolveOnLayoutUpdate()
+          navigation.navigate('RestoreFromBackup')
+          void Effect.runPromise(startRestoreFromBackup(result.right.value))
+          return
+        }
+
+        navigationInProgressRef.current = false
+        inputRef.current?.focus()
+        if (Either.isLeft(result))
+          setErrorMessage(
+            result.left._tag === 'InvalidBackupFileError'
+              ? t(`loginFlow.restoreFromBackup.errors.${result.left.reason}`)
+              : t('common.somethingWentWrong')
+          )
+      })
+      .finally(() => {
+        pickingBackupFileRef.current = false
+      })
+  }
+
   return (
     <LoginFlowScreen
       footer={
-        <LoginFlowText>{t('loginFlow.v2.phoneNumber.caption')}</LoginFlowText>
+        <YStack gap="$4">
+          <LoginFlowText>{t('loginFlow.v2.phoneNumber.caption')}</LoginFlowText>
+          <Typography
+            color="$foregroundSecondary"
+            onPress={restoreFromBackup}
+            pressStyle={{opacity: 0.8}}
+            textAlign="center"
+            textDecorationLine="underline"
+            variant="paragraphSmall"
+          >
+            {t('loginFlow.v2.phoneNumber.restoreFromBackup')}
+          </Typography>
+        </YStack>
       }
       action={{
         disabled: Option.isNone(phoneNumber),

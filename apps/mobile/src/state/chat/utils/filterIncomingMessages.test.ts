@@ -604,3 +604,107 @@ describe('filterIncomingMessages', () => {
     ).toBe(true)
   })
 })
+
+describe('filterIncomingMessages on an inbox restored from a backup', () => {
+  const inboxKey = generatePrivateKey()
+  const senderKey = generatePrivateKey()
+  const restoredInbox: InboxInState = {
+    ...inboxState(inboxKey),
+    restoredFromBackup: true,
+  }
+
+  function filter(
+    inbox: InboxInState,
+    messages: ChatMessageWithState[]
+  ): ChatMessageWithState[] {
+    return filterIncomingMessages({
+      inbox,
+      messages,
+      blockedSenders: [],
+      rerequestLimitDays: 7,
+    })
+  }
+
+  it('recovers the chat from a regular message of an unknown sender', () => {
+    const first = receivedMessage({
+      messageType: 'MESSAGE',
+      senderPublicKey: senderKey.publicKeyPemBase64,
+    })
+    const second = receivedMessage({
+      messageType: 'TRADE_CHECKLIST_UPDATE',
+      senderPublicKey: senderKey.publicKeyPemBase64,
+      time: timestamp(Date.UTC(2026, 0, 2)),
+    })
+
+    expect(filter(restoredInbox, [first, second])).toEqual([first, second])
+  })
+
+  it('still drops messages of unknown senders on regular inboxes', () => {
+    const message = receivedMessage({
+      messageType: 'MESSAGE',
+      senderPublicKey: senderKey.publicKeyPemBase64,
+    })
+
+    expect(filter(inboxState(inboxKey), [message])).toEqual([])
+  })
+
+  it.each([
+    'DELETE_CHAT',
+    'BLOCK_CHAT',
+    'INBOX_DELETED',
+    'DISAPPROVE_MESSAGING',
+    'CANCEL_REQUEST_MESSAGING',
+    'REQUEST_HISTORY',
+    'HISTORY',
+    'FCM_CYPHER_UPDATE',
+    'MESSAGE_READ',
+  ] as const)('does not recover a chat from %s', (messageType) => {
+    const message = receivedMessage({
+      messageType,
+      senderPublicKey: senderKey.publicKeyPemBase64,
+    })
+
+    expect(filter(restoredInbox, [message])).toEqual([])
+  })
+
+  it('handles a request from an unknown sender as a new request', () => {
+    const request = receivedMessage({
+      messageType: 'REQUEST_MESSAGING',
+      senderPublicKey: senderKey.publicKeyPemBase64,
+    })
+    const regularMessage = receivedMessage({
+      messageType: 'MESSAGE',
+      senderPublicKey: senderKey.publicKeyPemBase64,
+      time: timestamp(Date.UTC(2026, 0, 2)),
+    })
+
+    expect(filter(restoredInbox, [request, regularMessage])).toEqual([request])
+  })
+
+  it('accepts history messages in a recovered chat', () => {
+    const regularMessage = receivedMessage({
+      messageType: 'MESSAGE',
+      senderPublicKey: senderKey.publicKeyPemBase64,
+    })
+    const history = receivedMessage({
+      messageType: 'HISTORY',
+      senderPublicKey: senderKey.publicKeyPemBase64,
+      time: timestamp(Date.UTC(2026, 0, 2)),
+    })
+    const inbox: InboxInState = {
+      ...inboxState(inboxKey, [
+        {
+          ...chatWithMessages({
+            inboxKey,
+            senderPublicKey: senderKey.publicKeyPemBase64,
+            messages: [regularMessage],
+          }),
+          restoredFromBackup: true,
+        },
+      ]),
+      restoredFromBackup: true,
+    }
+
+    expect(filter(inbox, [history])).toEqual([history])
+  })
+})

@@ -1,10 +1,9 @@
-import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
-import {generateV2KeyPair} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {Stack} from '@vexl-next/ui'
 import {Effect, Option} from 'effect'
 import {atom} from 'jotai'
 import {Share} from 'react-native'
 import {addKeyToWaitingForAdmissionActionAtom} from '../../../state/clubs/atom/clubsToKeyHolderV2Atom'
+import {createClubKeysActionAtom} from '../../../state/keyDerivation'
 import {generateVexlTokenActionAtom} from '../../../state/notifications/actions/generateVexlTokenActionAtom'
 import {createClubAdmitionRequestLink} from '../../../utils/deepLinks/createLinks'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
@@ -23,8 +22,7 @@ export const showClubAccessDialogActionAtom = atom(null, (get, set) => {
       getNotificationTokenE(),
       Effect.map(Option.fromNullable)
     )
-    const privateKey = generatePrivateKey()
-    const privateKeyV2 = yield* generateV2KeyPair()
+    const clubKeys = yield* _(set(createClubKeysActionAtom))
     const langCode = t('localeName')
 
     const vexlNotificationToken = yield* _(set(generateVexlTokenActionAtom))
@@ -33,8 +31,8 @@ export const showClubAccessDialogActionAtom = atom(null, (get, set) => {
       langCode,
       notificationToken,
       vexlNotificationToken: Option.some(vexlNotificationToken),
-      publicKey: privateKey.publicKeyPemBase64,
-      publicKeyV2: privateKeyV2.publicKey,
+      publicKey: clubKeys.oldKeyPair.publicKeyPemBase64,
+      publicKeyV2: clubKeys.keyPair.publicKey,
     })
 
     const confirmed = yield* _(
@@ -57,10 +55,7 @@ export const showClubAccessDialogActionAtom = atom(null, (get, set) => {
 
     if (!confirmed) return
 
-    set(addKeyToWaitingForAdmissionActionAtom, {
-      keyPair: privateKeyV2,
-      oldKeyPair: privateKey,
-    })
+    set(addKeyToWaitingForAdmissionActionAtom, clubKeys)
 
     yield* _(
       Effect.promise(async () => {

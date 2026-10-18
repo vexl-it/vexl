@@ -4,6 +4,7 @@ import {type MMKV} from 'react-native-mmkv'
 export const STORED_CLUBS_V2_MMKV_KEY = 'storedClubsV2'
 export const FCM_CYPHER_TO_KEY_HOLDER_MMKV_KEY = 'fcmCypherToKeyHolder'
 export const VEXL_TOKEN_TO_KEY_HOLDER_MMKV_KEY = 'vexlTokenToKeyHolder'
+export const KEY_DERIVATION_COUNTERS_MMKV_KEY = 'keyDerivationCounters'
 
 export const CriticalMmkvKeySchema = Schema.Literal(
   'messagingState',
@@ -14,7 +15,8 @@ export const CriticalMmkvKeySchema = Schema.Literal(
   'postLoginFlowProgress1',
   STORED_CLUBS_V2_MMKV_KEY,
   FCM_CYPHER_TO_KEY_HOLDER_MMKV_KEY,
-  VEXL_TOKEN_TO_KEY_HOLDER_MMKV_KEY
+  VEXL_TOKEN_TO_KEY_HOLDER_MMKV_KEY,
+  KEY_DERIVATION_COUNTERS_MMKV_KEY
 )
 
 export type CriticalMmkvKey = typeof CriticalMmkvKeySchema.Type
@@ -29,6 +31,7 @@ export const CRITICAL_MMKV_KEYS: readonly CriticalMmkvKey[] = [
   STORED_CLUBS_V2_MMKV_KEY,
   FCM_CYPHER_TO_KEY_HOLDER_MMKV_KEY,
   VEXL_TOKEN_TO_KEY_HOLDER_MMKV_KEY,
+  KEY_DERIVATION_COUNTERS_MMKV_KEY,
 ]
 
 export const CRITICAL_KEYS_PRESENCE_RECORD_KEY = '__mmkv_critical_keys_present'

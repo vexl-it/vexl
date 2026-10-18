@@ -1,4 +1,4 @@
-import {Array, HashSet, pipe} from 'effect'
+import {Array, HashSet, Option, pipe} from 'effect'
 import {type DateTime} from 'luxon'
 import {
   type ChatMessageWithState,
@@ -44,8 +44,22 @@ export type MessagesListItem =
       type: 'typingIndicator'
       key: string
     }
+  | {
+      type: 'restoredDivider'
+      key: string
+    }
 
-function messagesToListData(messages: MessageWithState[]): MessagesListItem[] {
+function isRestored(message: ChatMessageWithState): boolean {
+  return (
+    (message.state === 'received' || message.state === 'sent') &&
+    !!message.restored
+  )
+}
+
+function messagesToListData(
+  messages: MessageWithState[],
+  lastRestoredMessageKey: string | undefined
+): MessagesListItem[] {
   const result = [] as MessagesListItem[]
 
   let prevMessageTime: DateTime | null = null
@@ -91,6 +105,10 @@ function messagesToListData(messages: MessageWithState[]): MessagesListItem[] {
       isLatest: i === 0,
       key: `message-${getUniqueKey(message)}`,
     })
+
+    if (getUniqueKey(message) === lastRestoredMessageKey) {
+      result.push({type: 'restoredDivider', key: 'restoredDivider'})
+    }
   }
 
   return [...result, {type: 'typingIndicator', key: 'typingIndicator'}]
@@ -107,7 +125,7 @@ export default function buildMessagesListData(
   hiddenMessagesIds: ChatWithMessages['hiddenMessagesIds'],
   tradeChecklist: TradeChecklistInState
 ): MessagesListItem[] {
-  return pipe(
+  const visibleMessages = pipe(
     messages,
     Array.filter(filterHiddenMessagesIds(hiddenMessagesIds)),
     Array.filter(
@@ -118,8 +136,17 @@ export default function buildMessagesListData(
         type: 'message',
         message,
       })
-    ),
-    Array.reverse,
-    messagesToListData
+    )
+  )
+  const lastRestoredMessageKey = pipe(
+    visibleMessages,
+    Array.findLast((one) => isRestored(one.message)),
+    Option.map(getUniqueKey),
+    Option.getOrUndefined
+  )
+
+  return messagesToListData(
+    Array.reverse(visibleMessages),
+    lastRestoredMessageKey
   )
 }

@@ -32,6 +32,7 @@ import {IconTagScreen} from './IconTagScreen'
 import {InfoBoxScreen} from './InfoBoxScreen'
 import {InputHintScreen} from './InputHintScreen'
 import {KeyboardAvoidingViewScreen} from './KeyboardAvoidingViewScreen'
+import {LabeledDividerScreen} from './LabeledDividerScreen'
 import {LabeledTextAreaScreen} from './LabeledTextAreaScreen'
 import {LengthCounterScreen} from './LengthCounterScreen'
 import {LoaderScreen} from './LoaderScreen'
@@ -111,6 +112,7 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'Info Box', component: InfoBoxScreen},
   {label: 'Input Hint', component: InputHintScreen},
   {label: 'Keyboard Avoiding View', component: KeyboardAvoidingViewScreen},
+  {label: 'Labeled Divider', component: LabeledDividerScreen},
   {label: 'Labeled Text Area', component: LabeledTextAreaScreen},
   {label: 'Length Counter', component: LengthCounterScreen},
   {label: 'Loader', component: LoaderScreen},

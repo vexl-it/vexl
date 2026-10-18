@@ -169,6 +169,8 @@ export type RootStackParamsList = {
 
   VexlOnlyContacts: undefined
 
+  AccountBackup: undefined
+
   NotificationSettings: undefined
 
   Notifications: undefined
@@ -289,6 +291,7 @@ export type LoginStackParamsList = {
     readonly phoneNumber: E164PhoneNumber
     readonly initPhoneVerificationResponse: InitPhoneVerificationResponse
   }
+  RestoreFromBackup: undefined
 }
 
 export type LoginStackScreenProps<T extends keyof LoginStackParamsList> =
@@ -307,6 +310,7 @@ export type LoginFlowStackParamsList = {
     readonly phoneNumber: E164PhoneNumber
     readonly initPhoneVerificationResponse: InitPhoneVerificationResponse
   }
+  RestoreFromBackup: undefined
 }
 
 export type LoginFlowStackScreenProps<

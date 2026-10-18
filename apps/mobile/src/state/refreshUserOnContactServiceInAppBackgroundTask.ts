@@ -3,6 +3,7 @@ import {apiAtom} from '../api'
 import {registerInAppLoadingTask} from '../utils/inAppLoadingTasks'
 import reportError from '../utils/reportError'
 import {generateVexlTokenActionAtom} from './notifications/actions/generateVexlTokenActionAtom'
+import {clearDeviceAfterLoginOnAnotherDeviceActionAtom} from './resetLocalDataActionAtom'
 import {sessionDataOrDummyAtom, sessionNotificationTokenAtom} from './session'
 import {logoutActionAtom} from './useLogout'
 
@@ -53,6 +54,7 @@ export const refreshUserOnContactServiceInAppBackgroundTaskId =
           store.get(apiAtom).contact.refreshUser({
             offersAlive: true,
             vexlNotificationToken: sessionNotificationToken,
+            loginSessionId: session.loginSessionId,
           }),
           Effect.match({
             onFailure: (e) => {
@@ -60,6 +62,12 @@ export const refreshUserOnContactServiceInAppBackgroundTaskId =
                 Match.tag('UserNotFoundError', () => {
                   console.log('🦋 🚨 User to refresh not found. Logging out')
                   void store.set(logoutActionAtom)
+                }),
+                Match.tag('LoggedInOnAnotherDeviceError', () => {
+                  console.log(
+                    '🦋 🚨 Account is active on another device. Clearing local data only.'
+                  )
+                  void store.set(clearDeviceAfterLoginOnAnotherDeviceActionAtom)
                 }),
                 Match.tags({
                   ResponseError: () => {

@@ -4,6 +4,7 @@ import {
   MessageCypher,
   ServerMessage,
   generateChatMessageId,
+  toServerVisibleMessageType,
 } from '@vexl-next/domain/src/general/messaging'
 import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {UserName} from '@vexl-next/domain/src/general/UserName.brand'
@@ -18,6 +19,7 @@ import {
   createRequestHistoryMessage,
   type ChatMessageWithDirection,
 } from './chatHistory'
+import {messagePreviewToNetwork} from './messagePreviewIO'
 import {parseChatMessage} from './parseChatMessage'
 import serializeChatMessage from './serializeChatMessage'
 
@@ -158,4 +160,28 @@ it('delivers the requester notification token with REQUEST_HISTORY', () => {
 
   expect(received.messageType).toBe('REQUEST_HISTORY')
   expect(received.myFcmCypher).toBe(myVexlToken)
+})
+
+it('hides history messages from the server behind the MESSAGE type', async () => {
+  const history = createHistoryMessage({
+    senderPublicKey: historySender.publicKeyPemBase64,
+    myVersion: appVersion,
+    messages: [],
+  })
+  const request = createRequestHistoryMessage({
+    senderPublicKey: historySender.publicKeyPemBase64,
+    myVersion: appVersion,
+  })
+
+  expect(toServerVisibleMessageType(history.messageType)).toBe('MESSAGE')
+  expect(toServerVisibleMessageType(request.messageType)).toBe('MESSAGE')
+  expect(toServerVisibleMessageType('APPROVE_MESSAGING')).toBe(
+    'APPROVE_MESSAGING'
+  )
+
+  // Like every MESSAGE, they carry a preview
+  const preview = await messagePreviewToNetwork(
+    historyReceiver.publicKeyPemBase64
+  )(history)()
+  expect(E.isRight(preview) && typeof preview.right).toBe('string')
 })

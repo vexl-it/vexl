@@ -42,6 +42,10 @@ jest.mock('../../../utils/reportError', () => ({
   __esModule: true,
   default: jest.fn(),
 }))
+jest.mock('../../backup/linkRestoredInboxesActionAtom', () => {
+  const {atom} = jest.requireActual('jotai')
+  return {linkRestoredInboxesToMyOffersAndNotesActionAtom: atom(null, () => {})}
+})
 
 const previousCursor = Schema.decodeSync(Base64String)('cHJldmlvdXM=')
 const nextCursor = Schema.decodeSync(Base64String)('bmV4dA==')

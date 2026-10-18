@@ -3,6 +3,7 @@ import {
   type PublicKeyPemBase64,
 } from '@vexl-next/cryptography/src/KeyHolder'
 import {
+  toServerVisibleMessageType,
   type ChatMessage,
   type ServerMessage,
 } from '@vexl-next/domain/src/general/messaging'
@@ -110,7 +111,7 @@ export default function sendMessage({
       callWithNotificationService(api.sendMessage, {
         message: encryptedMessage,
         messagePreview: encryptedPreview,
-        messageType: message.messageType,
+        messageType: toServerVisibleMessageType(message.messageType),
         receiverPublicKey,
         senderPublicKey: senderKeypair.publicKeyPemBase64,
         keyPair: senderKeypair,

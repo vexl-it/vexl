@@ -122,6 +122,7 @@
   "messages.startConversationByReactingToOffer": "Začni konverzáciu reakciou na ponuku.",
   "messages.seeMarketplace": "Pozri si trhovisko",
   "messages.youHaveChattedWithThisPartyBefore": "Vyzerá to, že si už o tejto ponuke chatoval, ale odišiel si a konverzáciu vymazal.",
+  "messages.restoredMessagesDivider": "Obnovené z kópie druhej strany",
   "messages.areYouSureYouWantToDeleteChat": "Si si istý, že chceš tento chat vymazať? Všetky správy sa stratia.",
   "vexlbot.bot": "bot",
   "vexlbot.initialWelcomeMessage": "Vitaj v chate! Dohodnite sa s {{name}} na detailoch. Rád vám s tým pomôžem.",

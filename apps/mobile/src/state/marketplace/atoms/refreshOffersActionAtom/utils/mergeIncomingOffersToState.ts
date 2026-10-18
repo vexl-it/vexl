@@ -13,6 +13,9 @@ import {offerWithoutSourceOrNone} from '../../../utils/offerWithoutSourceOrNone'
 // the private part has adminId but ownership info can not be extracted (data
 // written by older clients) — such offers are dropped from state so they do
 // not linger forever as ghost "foreign" offers.
+// Extracted ownership means the offer was created on another install (e.g.
+// before a backup restore), so its notification token points to that device.
+// Dropping it makes the notification token check issue a new one.
 const addOwnershipInfoFromPrivatePayloadIfMissing = (
   offer: OneOfferInState
 ): Option.Option<OneOfferInState> => {
@@ -20,7 +23,17 @@ const addOwnershipInfoFromPrivatePayloadIfMissing = (
     // TODO handle offerToConnections
     return pipe(
       extractOwnerInfoFromOwnerPrivatePayload(offer.offerInfo.privatePart),
-      Option.map((ownershipInfo) => ({...offer, ownershipInfo}))
+      Option.map((ownershipInfo) => ({
+        ...offer,
+        offerInfo: {
+          ...offer.offerInfo,
+          publicPart: {
+            ...offer.offerInfo.publicPart,
+            vexlNotificationToken: undefined,
+          },
+        },
+        ownershipInfo,
+      }))
     )
   }
   return Option.some(offer)

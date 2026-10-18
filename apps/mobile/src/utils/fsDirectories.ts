@@ -8,12 +8,18 @@ import reportError from './reportError'
 export const IMAGES_DIRECTORY = 'chat-images'
 export const PROFILE_PICTURE_DIRECTORY = 'profilePicture'
 const CONTACTS_BACKUP_FILE = 'vexl-contacts-backup.vcf'
+const ACCOUNT_BACKUP_DIRECTORY = 'account-backup'
 
 export function getContactsBackupFile(): File {
   return new File(Paths.cache, CONTACTS_BACKUP_FILE)
 }
 
-function deleteIfExists(path: Directory | File): void {
+// Lives in the cache dir, which neither iOS nor Android include in device backups.
+export function getAccountBackupDirectory(): Directory {
+  return new Directory(Paths.cache, ACCOUNT_BACKUP_DIRECTORY)
+}
+
+export function deleteIfExists(path: Directory | File): void {
   if (path.exists) path.delete()
 }
 
@@ -24,6 +30,7 @@ export async function deleteAllFiles(): Promise<void> {
   deleteIfExists(new Directory(documentDirectory, IMAGES_DIRECTORY))
   deleteIfExists(new Directory(documentDirectory, PROFILE_PICTURE_DIRECTORY))
   deleteIfExists(getContactsBackupFile())
+  deleteIfExists(getAccountBackupDirectory())
 }
 
 export async function deleteChatFiles(

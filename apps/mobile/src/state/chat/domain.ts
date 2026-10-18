@@ -42,10 +42,15 @@ export class ErrorInboxAlreadyExists extends Schema.TaggedError<ErrorInboxAlread
   cause: Schema.Unknown,
 }) {}
 
+// Rebuilt from the other side's HISTORY after a backup restore. The other side
+// could have altered it, so it is shown above a "restored" divider.
+const restored = Schema.optional(Schema.Boolean)
+
 export const ReceivedMessage = Schema.Struct({
   state: Schema.Literal('received'),
   message: ChatMessage,
   receivedByServerAt: Schema.optional(UnixMilliseconds),
+  restored,
 })
 
 export const ReceivedButRequiresNewerVersionMessage = Schema.Struct({
@@ -64,6 +69,7 @@ export const SentMessage = Schema.Struct({
   state: Schema.Literal('sent'),
   message: ChatMessage,
   receivedByServerAt: Schema.optional(UnixMilliseconds),
+  restored,
 })
 
 export const SendingErrorMessage = Schema.Struct({
@@ -124,12 +130,18 @@ export const ChatWithMessages = Schema.Struct({
   feedbackSubmitted: Schema.optionalWith(Schema.Boolean, {
     default: () => false,
   }),
+  // Recovered after a backup restore from a message of the other side. Counts
+  // as open until its history says otherwise.
+  restoredFromBackup: Schema.optional(Schema.Boolean),
+  historyRequested: Schema.optional(Schema.Boolean),
 })
 export type ChatWithMessages = typeof ChatWithMessages.Type
 
 export const InboxInState = Schema.Struct({
   inbox: Inbox,
   chats: Schema.Array(ChatWithMessages).pipe(Schema.mutable),
+  // Registered by a backup restore: chats are recovered from the other side.
+  restoredFromBackup: Schema.optional(Schema.Boolean),
 })
 export type InboxInState = typeof InboxInState.Type
 

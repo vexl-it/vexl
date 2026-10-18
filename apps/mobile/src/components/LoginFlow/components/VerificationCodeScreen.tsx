@@ -1,5 +1,6 @@
 import {useFocusEffect} from '@react-navigation/native'
-import {KeyHolder} from '@vexl-next/cryptography'
+import {generateMasterSeed} from '@vexl-next/domain/src/general/MasterSeed.brand'
+import {deriveIdentityPrivateKey} from '@vexl-next/resources-utils/src/keyDerivation/keyFactory'
 import {Typography, XStack, YStack} from '@vexl-next/ui'
 import {parsePhoneNumber} from 'awesome-phonenumber'
 import {Effect} from 'effect'
@@ -140,7 +141,11 @@ export default function VerificationCodeScreen({
       loadingOverlay.show()
       void Effect.runPromise(
         Effect.gen(function* (_) {
-          const privateKey = KeyHolder.generatePrivateKey()
+          const masterSeed = generateMasterSeed()
+          const privateKey = yield* _(
+            deriveIdentityPrivateKey(masterSeed),
+            Effect.mapError(() => t('common.cryptoError'))
+          )
           const verifyPhoneNumberResponse = yield* _(
             verifyPhoneNumber({
               code,
@@ -155,6 +160,7 @@ export default function VerificationCodeScreen({
             finishLogin({
               verifyPhoneNumberResponse,
               privateKey,
+              masterSeed,
               phoneNumber,
             })
           )
@@ -176,6 +182,7 @@ export default function VerificationCodeScreen({
       finishLogin,
       loadingOverlay,
       phoneNumber,
+      t,
       verifyPhoneNumber,
     ]
   )

@@ -6,6 +6,7 @@ import {
   type ChatWithMessages,
   type InboxInState,
 } from '../domain'
+import {startsChatRecovery} from './chatRecovery'
 import compareMessages from './compareMessages'
 import {
   getChatState,
@@ -22,6 +23,8 @@ interface SenderFilterState {
   readonly chatState: ChatState | undefined
   readonly lastTerminalMessage: ChatMessageWithState | undefined
   readonly receivedMessageSinceOpen: boolean
+  // Restored inbox without a chat with this sender yet
+  readonly canRecoverChat: boolean
 }
 
 const terminalChatStates: readonly ChatState[] = [
@@ -78,7 +81,10 @@ function shouldAcceptForState({
   if (!state.chatState) {
     return (
       messageType === 'REQUEST_MESSAGING' ||
-      incomingMessage?.state === 'receivedButRequiresNewerVersion'
+      incomingMessage?.state === 'receivedButRequiresNewerVersion' ||
+      (state.canRecoverChat &&
+        !!incomingMessage &&
+        startsChatRecovery(incomingMessage))
     )
   }
 
@@ -171,13 +177,21 @@ function getInitialSenderState(
     chatState: chat ? getChatState(chat) : undefined,
     lastTerminalMessage: findLastTerminalMessage(chat),
     receivedMessageSinceOpen: hasReceivedMessageSinceOpen(chat),
+    canRecoverChat: !!inbox.restoredFromBackup && !chat,
   }
 }
 
 function updateSenderState(
-  state: SenderFilterState,
+  previousState: SenderFilterState,
   message: ChatMessageWithState
 ): SenderFilterState {
+  const state: SenderFilterState =
+    !previousState.chatState &&
+    previousState.canRecoverChat &&
+    startsChatRecovery(message)
+      ? {...previousState, chatState: 'chatOpen'}
+      : previousState
+
   if (message.state === 'receivedButRequiresNewerVersion') {
     return state.chatState ? state : {...state, chatState: 'requestedByThem'}
   }

@@ -103,6 +103,9 @@ export const checkAndDeleteEmptyInboxesWithoutOfferInAppLoadingTaskId =
               if (one.inbox.noteId && myNotesIds.includes(one.inbox.noteId))
                 return true
 
+              // Its chats come back only once the other side writes again
+              if (one.restoredFromBackup) return true
+
               // In all other cases, inbox is valid only if there are open chats
               return one.chats.length > 0
             })()

@@ -1,8 +1,8 @@
 import {FetchHttpClient} from '@effect/platform/index'
 import {type KeyHolder} from '@vexl-next/cryptography/src'
 import {type PublicKeyV2} from '@vexl-next/cryptography/src/KeyHolder/brandsV2'
-import {countryPrefixFromNumber} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {type MasterSeed} from '@vexl-next/domain/src/general/MasterSeed.brand'
 import {
   EcdsaSignature,
   ecdsaSignE,
@@ -13,12 +13,11 @@ import {Effect, Match, Option, Schema} from 'effect'
 import * as O from 'fp-ts/Option'
 import {atom} from 'jotai'
 import {apiAtom, apiEnv, platform} from '../../../api'
+import {contactApiForSession} from '../../../api/contactApiForSession'
 import {type Session, type SessionV2} from '../../../brands/Session.brand'
 import {defaultCurrencyBaseOnCountryCodeActionAtom} from '../../../state/defaultCurrencyBaseOnCountryCodeActionAtom'
-import {createVexlSecretActionAtom} from '../../../state/notifications/actions/createVexlSecretActionAtom'
-import {generateVexlTokenActionAtom} from '../../../state/notifications/actions/generateVexlTokenActionAtom'
-import {syncVexlNotificationTokensActionAtom} from '../../../state/notifications/actions/syncVexlNotificationTokensActionAtom'
-import {vexlNotificationTokenAtom} from '../../../state/notifications/vexlNotificationTokenAtom'
+import {initializeKeyDerivationCountersActionAtom} from '../../../state/keyDerivation'
+import {createVexlSecretAndSessionTokenActionAtom} from '../../../state/notifications/actions/createVexlSecretAndSessionTokenActionAtom'
 import {sessionAtom} from '../../../state/session'
 import {upgradeSession} from '../../../state/session/upgradeSession'
 import {
@@ -31,7 +30,6 @@ import {
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import {beginMarketplaceReadyNotificationFlowActionAtom} from '../../../utils/marketplaceReadyNotification/store'
 import {navigationRef} from '../../../utils/navigation'
-import {getNotificationTokenE} from '../../../utils/notifications'
 import {isDeveloperAtom} from '../../../utils/preferences'
 import reportError from '../../../utils/reportError'
 import {showErrorAlert} from '../../ErrorAlert'
@@ -58,29 +56,15 @@ const handleUserCreationActionAtom = atom(
   ) => {
     return Effect.gen(function* () {
       const startedAt = Date.now()
-      const prefix = yield* countryPrefixFromNumber(session.phoneNumber).pipe(
-        Effect.option
-      )
 
-      const contactApi = yield* contact.api({
-        platform,
-        clientVersion: versionCode,
-        clientSemver: version,
-        url: apiEnv.contactMs,
-        getUserSessionCredentials: () => session.sessionCredentials,
-        appSource,
-        language: get(translationAtom).t('localeName'),
-        isDeveloper: get(isDeveloperAtom),
-        prefix: Option.getOrUndefined(prefix),
-      })
-
-      yield* contactApi.createUser({
+      yield* contactApiForSession(get, session).createUser({
         firebaseToken: null,
         expoToken: null,
         publicKeyV2: Option.none<PublicKeyV2>(),
         vexlNotificationToken: Option.fromNullable(
           session.sessionNotificationToken
         ),
+        loginSessionId: session.loginSessionId,
       })
 
       const leftToWait = TARGET_TIME_MILLISECONDS - (Date.now() - startedAt)
@@ -94,6 +78,7 @@ const handleUserCreationActionAtom = atom(
       }
 
       set(beginMarketplaceReadyNotificationFlowActionAtom)
+      set(initializeKeyDerivationCountersActionAtom)
       set(sessionAtom, O.some(session))
     }).pipe(
       Effect.tapError((e) => {
@@ -136,48 +121,6 @@ const deleteUserAndResetFlowActionAtom = atom(
   }
 )
 
-const handleSecretTokenAndSessionTokenCreationActionAtom = atom(
-  null,
-  (get, set) =>
-    Effect.gen(function* (_) {
-      if (get(vexlNotificationTokenAtom).secret) {
-        console.log(
-          'Vexl notification secret already exists, this should not happen, lets remove it first'
-        )
-
-        set(vexlNotificationTokenAtom, {
-          secret: null,
-          systemVexlToken: null,
-          marketingVexlToken: null,
-          lastUpdatedMetadata: null,
-        })
-      }
-
-      console.log('Vexl notification secret does not exist, creating...')
-      const expoToken = yield* _(getNotificationTokenE())
-
-      yield* _(
-        set(createVexlSecretActionAtom, {
-          expoNotificationToken: expoToken,
-        }),
-        Effect.either
-      )
-
-      console.log('Vexl notification secret created successfully')
-
-      yield* set(syncVexlNotificationTokensActionAtom, {
-        expoNotificationToken: expoToken,
-      })
-
-      const sessionNotificationToken = yield* _(
-        set(generateVexlTokenActionAtom),
-        Effect.option
-      )
-
-      return sessionNotificationToken
-    })
-)
-
 export const finishLoginActionAtom = atom(
   null,
   (
@@ -186,10 +129,12 @@ export const finishLoginActionAtom = atom(
     {
       verifyPhoneNumberResponse,
       privateKey,
+      masterSeed,
       phoneNumber,
     }: {
       verifyPhoneNumberResponse: VerifyPhoneNumberResponse
       privateKey: KeyHolder.PrivateKeyHolder
+      masterSeed: MasterSeed
       phoneNumber: E164PhoneNumber
     }
   ) => {
@@ -210,24 +155,27 @@ export const finishLoginActionAtom = atom(
         })
       )
 
-      const sessionNotificationToken = yield* _(
-        set(handleSecretTokenAndSessionTokenCreationActionAtom)
+      const {sessionNotificationToken} = yield* _(
+        set(createVexlSecretAndSessionTokenActionAtom)
       )
 
-      const session = yield* upgradeSession({
-        version: 1,
-        sessionCredentials: {
-          publicKey: privateKey.publicKeyPemBase64,
-          hash: verifiedChallengeResponse.hash,
-          signature: verifiedChallengeResponse.signature,
+      const session = yield* upgradeSession(
+        {
+          version: 1,
+          sessionCredentials: {
+            publicKey: privateKey.publicKeyPemBase64,
+            hash: verifiedChallengeResponse.hash,
+            signature: verifiedChallengeResponse.signature,
+          },
+          keyPairV2: undefined,
+          phoneNumber,
+          privateKey,
+          sessionNotificationToken: Option.getOrUndefined(
+            sessionNotificationToken
+          ),
         },
-        keyPairV2: undefined,
-        phoneNumber,
-        privateKey,
-        sessionNotificationToken: Option.getOrUndefined(
-          sessionNotificationToken
-        ),
-      })
+        masterSeed
+      )
 
       const contactApi = yield* _(
         contact.api({

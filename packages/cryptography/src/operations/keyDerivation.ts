@@ -1,4 +1,5 @@
 import {hkdf} from '@noble/hashes/hkdf.js'
+import {hmac} from '@noble/hashes/hmac.js'
 import {sha256} from '@noble/hashes/sha2.js'
 import {getCrypto} from '../getCrypto'
 import {type PrivateKeyHolder} from '../KeyHolder/brands'
@@ -63,4 +64,22 @@ export async function deriveKeyPairV2(
   return await generateKeyPairFromSeed(
     deriveBytes(masterSeed, `${path}/ed25519`, 32)
   )
+}
+
+// Handed to chat partners so a device restored from the same seed can tell
+// them apart from strangers. Public keys never contain '|'.
+export function deriveChatRecoveryProof(
+  masterSeed: Uint8Array,
+  {
+    myPublicKey,
+    otherSidePublicKey,
+  }: {myPublicKey: string; otherSidePublicKey: string}
+): string {
+  return Buffer.from(
+    hmac(
+      sha256,
+      deriveBytes(masterSeed, 'chat-recovery/v1', 32),
+      `${myPublicKey}|${otherSidePublicKey}`
+    )
+  ).toString('base64')
 }

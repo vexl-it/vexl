@@ -1,6 +1,7 @@
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {
   ChatMessage,
+  ChatRecoveryProof,
   MessageCypher,
   ServerMessage,
   generateChatMessageId,
@@ -27,6 +28,9 @@ const historySender = generatePrivateKey()
 const historyReceiver = generatePrivateKey()
 const image = Schema.decodeSync(UriString)('data:image/jpg;base64,aGVsbG8=')
 const appVersion = Schema.decodeSync(VersionString)('26.10.0')
+const historyRecoveryProof = Schema.decodeSync(ChatRecoveryProof)(
+  'P1ue9DFW6etINYILGhfXuAZiiwHjfj40ZGSNF7T/whY='
+)
 
 const chatMessage = (fields: Partial<ChatMessage>): ChatMessage =>
   Schema.decodeSync(ChatMessage)({
@@ -86,11 +90,13 @@ it('rebuilds chat history on the other side with flipped direction and no images
       senderPublicKey: historySender.publicKeyPemBase64,
       myVersion: appVersion,
       messages,
+      historyRecoveryProof,
     })
   )
 
   expect(received.messageType).toBe('HISTORY')
   expect(received.minimalRequiredVersion).toBe('26.10.0')
+  expect(received.historyRecoveryProof).toBe(historyRecoveryProof)
 
   const rebuilt = chatHistoryToMessages({
     history: received.history ?? [],
@@ -128,6 +134,7 @@ it('shows HISTORY as requiring a newer version on older clients', () => {
       senderPublicKey: historySender.publicKeyPemBase64,
       myVersion: appVersion,
       messages: [],
+      historyRecoveryProof,
     })
   )
   if (!Either.isRight(serialized)) throw new Error('Failed to serialize')
@@ -167,6 +174,7 @@ it('hides history messages from the server behind the MESSAGE type', async () =>
     senderPublicKey: historySender.publicKeyPemBase64,
     myVersion: appVersion,
     messages: [],
+    historyRecoveryProof,
   })
   const request = createRequestHistoryMessage({
     senderPublicKey: historySender.publicKeyPemBase64,
@@ -184,4 +192,40 @@ it('hides history messages from the server behind the MESSAGE type', async () =>
     historyReceiver.publicKeyPemBase64
   )(history)()
   expect(E.isRight(preview) && typeof preview.right).toBe('string')
+})
+
+it('leaves claims about friends, clubs and avatars out of history', () => {
+  const request = chatMessage({
+    messageType: 'REQUEST_MESSAGING',
+    goldenAvatarType: 'BACKGROUND_AND_GLASSES',
+    commonFriends: [],
+    verifiedCommonFriends: [],
+    friendLevel: ['FIRST_DEGREE'],
+    senderClubsUuids: [],
+  })
+
+  const [shared] =
+    createHistoryMessage({
+      senderPublicKey: historySender.publicKeyPemBase64,
+      myVersion: appVersion,
+      messages: [{state: 'sent', message: request}],
+      historyRecoveryProof,
+    }).history ?? []
+
+  expect(shared).toBeDefined()
+  expect(shared).not.toHaveProperty('goldenAvatarType')
+  expect(shared).not.toHaveProperty('commonFriends')
+  expect(shared).not.toHaveProperty('verifiedCommonFriends')
+  expect(shared).not.toHaveProperty('friendLevel')
+  expect(shared).not.toHaveProperty('senderClubsUuids')
+})
+
+it('delivers the sender recovery proof', () => {
+  const message = chatMessage({})
+  const recoveryProof = historyRecoveryProof
+
+  expect(sendAndReceive({...message, recoveryProof}).recoveryProof).toBe(
+    recoveryProof
+  )
+  expect(sendAndReceive(message).recoveryProof).toBeUndefined()
 })

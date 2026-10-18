@@ -167,6 +167,8 @@ export function chatMessagePayloadToChatMessage(
     verifiedCommonFriends: payload.verifiedCommonFriends,
     friendLevel: payload.friendLevel,
     history: payload.history,
+    recoveryProof: payload.recoveryProof,
+    historyRecoveryProof: payload.historyRecoveryProof,
   })
 }
 

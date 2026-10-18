@@ -5,6 +5,7 @@ import {
 import {
   toServerVisibleMessageType,
   type ChatMessage,
+  type ChatRecoveryProof,
   type ServerMessage,
 } from '@vexl-next/domain/src/general/messaging'
 import {type VersionString} from '@vexl-next/domain/src/utility/VersionString.brand'
@@ -72,6 +73,7 @@ export default function sendMessage({
   theirNotificationCypher,
   notificationApi,
   otherSideVersion,
+  recoveryProof,
 }: {
   api: ChatApi
   receiverPublicKey: PublicKeyPemBase64
@@ -80,6 +82,8 @@ export default function sendMessage({
   theirNotificationCypher?: NotificationTokenOrCypher | undefined
   notificationApi: NotificationApi
   otherSideVersion: VersionString | undefined
+  // Goes only over the wire, never into the stored message
+  recoveryProof?: ChatRecoveryProof | undefined
 }): Effect.Effect<
   ServerMessage,
   | ErrorEncryptingMessage
@@ -101,7 +105,9 @@ export default function sendMessage({
     }
 
     const encryptedMessage = yield* _(
-      taskEitherToEffect(messageToNetwork(receiverPublicKey)(message))
+      taskEitherToEffect(
+        messageToNetwork(receiverPublicKey)({...message, recoveryProof})
+      )
     )
     const encryptedPreview = yield* _(
       taskEitherToEffect(messagePreviewToNetwork(receiverPublicKey)(message))

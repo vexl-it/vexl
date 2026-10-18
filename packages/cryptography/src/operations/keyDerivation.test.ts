@@ -1,5 +1,6 @@
 import {Schema} from 'effect/index'
 import {
+  createHmac,
   createPrivateKey,
   createPublicKey,
   hkdfSync,
@@ -16,6 +17,7 @@ import {
 import {privatePemToRaw} from '../KeyHolder/keyUtils'
 import {
   deriveBytes,
+  deriveChatRecoveryProof,
   deriveKeyPairV2,
   derivePrivateKeyHolder,
   generateMasterSeed,
@@ -32,9 +34,19 @@ const KeyDerivationTestVectors = Schema.Struct({
       keyPairV2: KeyPairV2,
     })
   ),
+  chatRecoveryProofs: Schema.Array(
+    Schema.Struct({
+      masterSeedHex: Schema.String,
+      myPublicKey: Schema.String,
+      otherSidePublicKey: Schema.String,
+      proof: Schema.String,
+    })
+  ),
 })
 
-const {vectors} = Schema.decodeUnknownSync(KeyDerivationTestVectors)(
+const {vectors, chatRecoveryProofs} = Schema.decodeUnknownSync(
+  KeyDerivationTestVectors
+)(
   JSON.parse(
     readFileSync(
       join(__dirname, '../../test-vectors/key-derivation-test-vectors.json'),
@@ -72,6 +84,14 @@ describe('key derivation test vectors', () => {
   })
 })
 
+describe('chat recovery proof test vectors', () => {
+  it.each(chatRecoveryProofs)('proof from seed $masterSeedHex', (vector) => {
+    expect(
+      deriveChatRecoveryProof(Buffer.from(vector.masterSeedHex, 'hex'), vector)
+    ).toBe(vector.proof)
+  })
+})
+
 describe('key derivation cross-checked against node crypto', () => {
   const seed = generateMasterSeed()
   const path = 'inbox/42'
@@ -81,6 +101,26 @@ describe('key derivation cross-checked against node crypto', () => {
       hkdfSync('sha256', seed, Buffer.alloc(0), `vexl/${path}`, 32)
     )
     expect(Buffer.from(deriveBytes(seed, path, 32))).toEqual(expected)
+  })
+
+  it('chat recovery proof is an HMAC keyed by the HKDF output', () => {
+    const keys = {myPublicKey: 'my-key', otherSidePublicKey: 'their-key'}
+    const expected = createHmac(
+      'sha256',
+      Buffer.from(
+        hkdfSync('sha256', seed, Buffer.alloc(0), 'vexl/chat-recovery/v1', 32)
+      )
+    )
+      .update('my-key|their-key')
+      .digest('base64')
+
+    expect(deriveChatRecoveryProof(seed, keys)).toBe(expected)
+    expect(
+      deriveChatRecoveryProof(seed, {
+        myPublicKey: 'their-key',
+        otherSidePublicKey: 'my-key',
+      })
+    ).not.toBe(expected)
   })
 
   it('V1 private scalar is the HKDF output', () => {

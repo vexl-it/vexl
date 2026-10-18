@@ -4,6 +4,7 @@ import {
   generateChatMessageId,
   type ChatHistoryMessage,
   type ChatMessage,
+  type ChatRecoveryProof,
 } from '@vexl-next/domain/src/general/messaging'
 import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {type TradeChecklistUpdate} from '@vexl-next/domain/src/general/tradeChecklist'
@@ -68,11 +69,6 @@ function toChatHistoryMessage({
     repliedTo: message.repliedTo && Struct.omit(message.repliedTo, 'image'),
     tradeChecklistUpdate: withoutImages(message.tradeChecklistUpdate),
     deanonymizedUser: message.deanonymizedUser,
-    goldenAvatarType: message.goldenAvatarType,
-    senderClubsUuids: message.senderClubsUuids,
-    commonFriends: message.commonFriends,
-    verifiedCommonFriends: message.verifiedCommonFriends,
-    friendLevel: message.friendLevel,
   })
 }
 
@@ -80,10 +76,12 @@ export function createHistoryMessage({
   senderPublicKey,
   myVersion,
   messages,
+  historyRecoveryProof,
 }: {
   senderPublicKey: PublicKeyPemBase64
   myVersion: VersionString
   messages: readonly ChatMessageWithDirection[]
+  historyRecoveryProof: ChatRecoveryProof
 }): ChatMessage {
   return {
     uuid: generateChatMessageId(),
@@ -94,6 +92,7 @@ export function createHistoryMessage({
     myVersion,
     senderPublicKey,
     history: Array.filterMap(messages, toChatHistoryMessage),
+    historyRecoveryProof,
   }
 }
 

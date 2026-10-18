@@ -76,6 +76,14 @@ export type ChatUserIdentity = typeof ChatUserIdentity.Type
 export const ChatMessageId = Schema.UUID.pipe(Schema.brand('ChatMessageId'))
 export type ChatMessageId = typeof ChatMessageId.Type
 
+// Derived from the sender's master seed for one chat, see
+// `deriveChatRecoveryProof`. Sent only into open chats, so after a backup
+// restore it tells a real chat partner apart from anyone who knows the key.
+export const ChatRecoveryProof = Base64String.pipe(
+  Schema.brand('ChatRecoveryProof')
+)
+export type ChatRecoveryProof = typeof ChatRecoveryProof.Type
+
 export const RepliedToData = Schema.Struct({
   text: Schema.String,
   messageAuthor: Schema.Literal('me', 'them'),
@@ -121,11 +129,6 @@ export const ChatHistoryMessage = Schema.Struct({
   repliedTo: Schema.optional(RepliedToData.pipe(Schema.omit('image'))),
   tradeChecklistUpdate: Schema.optional(TradeChecklistUpdate),
   deanonymizedUser: Schema.optional(DeanonymizedUser),
-  goldenAvatarType: Schema.optional(GoldenAvatarType),
-  senderClubsUuids: Schema.optional(Schema.Array(ClubUuid)),
-  commonFriends: Schema.optional(Schema.Array(HashedPhoneNumber)),
-  verifiedCommonFriends: Schema.optional(Schema.Array(HashedPhoneNumber)),
-  friendLevel: Schema.optional(Schema.Array(FriendLevel)),
 })
 export type ChatHistoryMessage = typeof ChatHistoryMessage.Type
 
@@ -164,6 +167,8 @@ export const ChatMessagePayload = Schema.Struct({
   verifiedCommonFriends: Schema.optional(Schema.Array(HashedPhoneNumber)),
   friendLevel: Schema.optional(Schema.Array(FriendLevel)),
   history: Schema.optional(Schema.Array(ChatHistoryMessage)),
+  recoveryProof: Schema.optional(ChatRecoveryProof),
+  historyRecoveryProof: Schema.optional(ChatRecoveryProof),
 })
 export type ChatMessagePayload = typeof ChatMessagePayload.Type
 
@@ -207,6 +212,11 @@ export const ChatMessage = Schema.Struct({
   friendLevel: Schema.optional(Schema.Array(FriendLevel)),
   // Used only for messages of type `HISTORY`
   history: Schema.optional(Schema.Array(ChatHistoryMessage)),
+  // The sender's proof for this chat
+  recoveryProof: Schema.optional(ChatRecoveryProof),
+  // Used only for messages of type `HISTORY`: the receiver's proof, showing
+  // the history comes from someone the receiver chatted with
+  historyRecoveryProof: Schema.optional(ChatRecoveryProof),
 })
 export type ChatMessage = typeof ChatMessage.Type
 

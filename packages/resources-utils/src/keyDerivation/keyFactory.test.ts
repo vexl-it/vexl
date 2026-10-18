@@ -25,6 +25,7 @@ import {
 import {NoteId, NoteRepostId} from '@vexl-next/domain/src/general/notes'
 import {Effect, Schema} from 'effect'
 import {
+  deriveChatRecoveryProof,
   deriveClubKeys,
   deriveIdentityKeyPairV2,
   deriveIdentityPrivateKey,
@@ -105,6 +106,24 @@ describe('key factory', () => {
     expect(deriveNoteRepostId(fixedSeed, noteId)).not.toBe(
       deriveNoteRepostId(fixedSeed, otherNoteId)
     )
+  })
+
+  it('derives a chat recovery proof per seed and chat', async () => {
+    const {inbox0, inbox1} = await deriveAll(fixedSeed)
+    const chat = {
+      myPublicKey: inbox0.publicKeyPemBase64,
+      otherSidePublicKey: inbox1.publicKeyPemBase64,
+    }
+    const proof = deriveChatRecoveryProof(fixedSeed, chat)
+
+    expect(deriveChatRecoveryProof(fixedSeed, chat)).toBe(proof)
+    expect(
+      deriveChatRecoveryProof(fixedSeed, {
+        myPublicKey: inbox1.publicKeyPemBase64,
+        otherSidePublicKey: inbox0.publicKeyPemBase64,
+      })
+    ).not.toBe(proof)
+    expect(deriveChatRecoveryProof(generateMasterSeed(), chat)).not.toBe(proof)
   })
 
   it('derives V1 keys that work with ecies and ecdsa', async () => {

@@ -1,9 +1,11 @@
 import {
   type KeyPairV2,
   type PrivateKeyHolder,
+  type PublicKeyPemBase64,
 } from '@vexl-next/cryptography/src/KeyHolder'
 import {
   deriveBytes,
+  deriveChatRecoveryProof as deriveChatRecoveryProofFromBytes,
   deriveKeyPairV2,
   derivePrivateKeyHolder,
 } from '@vexl-next/cryptography/src/operations/keyDerivation'
@@ -13,6 +15,7 @@ import {
   type KeyDerivationIndex,
   type MasterSeed,
 } from '@vexl-next/domain/src/general/MasterSeed.brand'
+import {ChatRecoveryProof} from '@vexl-next/domain/src/general/messaging'
 import {NoteRepostId, type NoteId} from '@vexl-next/domain/src/general/notes'
 import {CryptoError} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {Effect, Schema} from 'effect'
@@ -84,3 +87,14 @@ export const deriveNoteRepostId = (
     ].join('-')
   )
 }
+
+export const deriveChatRecoveryProof = (
+  masterSeed: MasterSeed,
+  keys: {
+    myPublicKey: PublicKeyPemBase64
+    otherSidePublicKey: PublicKeyPemBase64
+  }
+): ChatRecoveryProof =>
+  ChatRecoveryProof.make(
+    deriveChatRecoveryProofFromBytes(masterSeedToBytes(masterSeed), keys)
+  )

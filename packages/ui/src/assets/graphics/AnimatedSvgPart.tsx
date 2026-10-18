@@ -1,5 +1,5 @@
 import type {ReactNode} from 'react'
-import React, {useEffect, useState} from 'react'
+import React, {useEffect, useRef, useState} from 'react'
 import Animated, {
   Easing,
   interpolate,
@@ -35,6 +35,7 @@ export function AnimatedSvgPart({
 }): React.JSX.Element {
   const progress = useSharedValue(animate ? 0 : 1)
   const [settled, setSettled] = useState(!animate)
+  const runRef = useRef(0)
 
   useEffect(() => {
     if (!animate) {
@@ -44,6 +45,10 @@ export function AnimatedSvgPart({
     }
 
     setSettled(false)
+    const run = ++runRef.current
+    const settleRun = (finishedRun: number): void => {
+      if (finishedRun === runRef.current) setSettled(true)
+    }
     progress.value = 0
     progress.value = withDelay(
       index * POP_DELAY,
@@ -59,7 +64,7 @@ export function AnimatedSvgPart({
             easing: Easing.out(Easing.quad),
           },
           (finished) => {
-            if (finished) scheduleOnRN(setSettled, true)
+            if (finished) scheduleOnRN(settleRun, run)
           }
         )
       )

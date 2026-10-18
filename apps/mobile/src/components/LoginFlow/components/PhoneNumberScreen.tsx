@@ -146,10 +146,12 @@ export default function PhoneNumberScreen({
     pickingBackupFileRef.current = true
     navigationInProgressRef.current = true
     setErrorMessage(undefined)
-    void Effect.runPromise(Effect.either(pickBackupFileUri()))
-      .then(async (result) => {
+    void dismissKeyboardAndResolveOnLayoutUpdate()
+      .then(
+        async () => await Effect.runPromise(Effect.either(pickBackupFileUri()))
+      )
+      .then((result) => {
         if (Either.isRight(result) && Option.isSome(result.right)) {
-          await dismissKeyboardAndResolveOnLayoutUpdate()
           navigation.navigate('RestoreFromBackup')
           void Effect.runPromise(startRestoreFromBackup(result.right.value))
           return

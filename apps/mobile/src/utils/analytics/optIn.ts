@@ -17,6 +17,7 @@ export const analyticsOptInAtom = atom(
     if (!enabled) {
       set(resetAnalyticsStateActionAtom)
       set(fetchedRelaysAtom, {})
+      fetchedRelaysAtom.flushNow()
     }
   }
 )

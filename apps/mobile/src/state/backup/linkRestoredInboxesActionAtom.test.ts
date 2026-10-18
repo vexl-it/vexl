@@ -9,6 +9,7 @@ import {
   type ChatWithMessages,
   type InboxInState,
 } from '../chat/domain'
+import {vexlTokenToKeyHolderAtom} from '../notifications/vexlTokenToKeyHolderAtom'
 import {linkRestoredInboxesToMyOffersAndNotesActionAtom} from './linkRestoredInboxesActionAtom'
 
 jest.mock('react-native-mmkv')
@@ -23,14 +24,24 @@ const offerKey = generatePrivateKey()
 const noteKey = generatePrivateKey()
 const offerId = Schema.decodeSync(OfferId)('offer-id')
 const noteId = Schema.decodeSync(NoteId)('7c9e6679-7425-40de-944b-e07fc1f90ae7')
+// Older offers carry the token only in fcmCypher.
 const mockMyOffer = {
   offerInfo: {
     offerId,
-    publicPart: {offerPublicKey: offerKey.publicKeyPemBase64},
+    publicPart: {
+      offerPublicKey: offerKey.publicKeyPemBase64,
+      fcmCypher: 'vexl_nt_offer',
+    },
   },
 }
 const mockMyNote = {
-  noteInfo: {noteId, publicPart: {notePublicKey: noteKey.publicKeyPemBase64}},
+  noteInfo: {
+    noteId,
+    publicPart: {
+      notePublicKey: noteKey.publicKeyPemBase64,
+      vexlNotificationToken: 'vexl_nt_note',
+    },
+  },
 }
 jest.mock('../marketplace/atoms/myOffers', () => ({
   myOffersAtom: jest.requireActual('jotai').atom(() => [mockMyOffer]),
@@ -58,6 +69,10 @@ const restoredInbox = (inboxKey: typeof offerKey): InboxInState => ({
 })
 
 describe('linkRestoredInboxesToMyOffersAndNotesActionAtom', () => {
+  beforeEach(() => {
+    store.set(vexlTokenToKeyHolderAtom, {data: {}})
+  })
+
   it('links restored inboxes to own offers and notes and fixes the origin of their recovered chats', () => {
     const otherInbox = restoredInbox(generatePrivateKey())
     store.set(messagingStateAtom, [
@@ -83,5 +98,33 @@ describe('linkRestoredInboxesToMyOffersAndNotesActionAtom', () => {
       note: mockMyNote,
     })
     expect(untouchedInbox).toBe(otherInbox)
+  })
+
+  it('maps the tokens of own offers and notes to their restored inboxes', () => {
+    store.set(messagingStateAtom, [
+      restoredInbox(offerKey),
+      restoredInbox(noteKey),
+    ])
+
+    store.set(linkRestoredInboxesToMyOffersAndNotesActionAtom)
+
+    expect(store.get(vexlTokenToKeyHolderAtom).data).toEqual({
+      vexl_nt_offer: offerKey,
+      vexl_nt_note: noteKey,
+    })
+  })
+
+  it('leaves inboxes and tokens alone once linked', () => {
+    const linkedInbox: InboxInState = {
+      ...restoredInbox(offerKey),
+      inbox: {privateKey: offerKey, offerId},
+    }
+    const messagingState = [linkedInbox]
+    store.set(messagingStateAtom, messagingState)
+
+    store.set(linkRestoredInboxesToMyOffersAndNotesActionAtom)
+
+    expect(store.get(messagingStateAtom)).toBe(messagingState)
+    expect(store.get(vexlTokenToKeyHolderAtom).data).toEqual({})
   })
 })

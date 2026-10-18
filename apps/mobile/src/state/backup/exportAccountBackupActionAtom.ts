@@ -19,7 +19,6 @@ import messagingStateAtom from '../chat/atoms/messagingStateAtom'
 import {clubsKeyHolderStorageAtom} from '../clubs/atom/clubsToKeyHolderV2Atom'
 import {keyDerivationCountersAtom} from '../keyDerivation'
 import {vexlNotificationTokenAtom} from '../notifications/vexlNotificationTokenAtom'
-import {vexlTokenToKeyHolderAtom} from '../notifications/vexlTokenToKeyHolderAtom'
 import {sessionAtom} from '../session'
 import {notificationSecretForBackup} from './backupNotificationSecret'
 import {userDataForBackup} from './backupUserData'
@@ -80,11 +79,9 @@ export const exportAccountBackupActionAtom = atom(
       clubs,
       clubKeysWaitingForAdmission: waitingForAdmission,
       realUserData: userDataForBackup(session.session.realUserData),
-      notificationSecret: notificationSecretForBackup({
-        notificationState: get(vexlNotificationTokenAtom),
-        tokenToKeyHolder: get(vexlTokenToKeyHolderAtom).data,
-        sessionNotificationToken: session.session.sessionNotificationToken,
-      }),
+      notificationSecret: notificationSecretForBackup(
+        get(vexlNotificationTokenAtom)
+      ),
     }).pipe(
       Effect.flatMap(Schema.encode(BackupFileFromJson)),
       Effect.flatMap((content) =>

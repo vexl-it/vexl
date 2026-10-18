@@ -51,6 +51,7 @@ import {createUser} from './routes/user/createUser'
 import {deleteUser} from './routes/user/deleteUser'
 import {eraseUserFromNetwork} from './routes/user/eraseUserFromNetwork'
 import {refreshUser} from './routes/user/refreshUser'
+import {restoreUser} from './routes/user/restoreUser'
 import {updateNotificationToken} from './routes/user/updateNotificationToken'
 import {ScheduledTaskWorkersLayer} from './scheduledTaskWorkers'
 import {UserNotificationService} from './services/UserNotificationService'
@@ -64,6 +65,7 @@ const UserApiGroupLive = HttpApiBuilder.group(
       .handle('checkUserExists', checkUserExists)
       .handle('createUser', createUser)
       .handle('refreshUser', refreshUser)
+      .handle('restoreUser', restoreUser)
       .handle('deleteUser', deleteUser)
       .handle('eraseUserFromNetwork', eraseUserFromNetwork)
       .handle('updateNotificationToken', updateNotificationToken)

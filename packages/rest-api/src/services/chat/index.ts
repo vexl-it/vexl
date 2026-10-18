@@ -22,6 +22,7 @@ import {
   type BlockInboxRequest,
   type CancelApprovalRequest,
   type CancelApprovalV2Request,
+  type CheckInboxesExistRequest,
   type CreateInboxRequest,
   type DeleteInboxRequest,
   type DeleteInboxesRequest,
@@ -129,6 +130,11 @@ export function api({
           )
         )
       },
+      checkInboxesExist: (checkInboxesExistRequest: CheckInboxesExistRequest) =>
+        client.Inboxes.checkInboxesExist({
+          payload: checkInboxesExistRequest,
+          headers: commonHeaders,
+        }),
       deleteInbox: (
         deleteInboxRequest: RequestWithGeneratableChallenge<DeleteInboxRequest>
       ) =>

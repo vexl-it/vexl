@@ -1,5 +1,7 @@
 import {getCrypto} from '@vexl-next/cryptography/src/getCrypto'
 import {
+  KeyPairV2,
+  PrivateKeyHolder,
   PublicKeyPemBase64,
   PublicKeyV2,
 } from '@vexl-next/cryptography/src/KeyHolder'
@@ -19,6 +21,12 @@ export type ClubUuid = typeof ClubUuid.Type
 
 export const generateClubUuid = (): ClubUuid =>
   Schema.decodeSync(ClubUuid)(getCrypto().randomUUID())
+
+export const ClubKeys = Schema.Struct({
+  keyPair: KeyPairV2,
+  oldKeyPair: PrivateKeyHolder,
+})
+export type ClubKeys = typeof ClubKeys.Type
 
 export const ClubInfo = Schema.Struct({
   uuid: ClubUuid,

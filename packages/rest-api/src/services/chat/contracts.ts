@@ -229,3 +229,17 @@ export const SendMessagesResponse = Schema.Array(
   })
 )
 export type SendMessagesResponse = typeof SendMessagesResponse.Type
+
+export const MAX_PUBLIC_KEYS_IN_CHECK_INBOXES_EXIST_REQUEST = 200
+
+export const CheckInboxesExistRequest = Schema.Struct({
+  publicKeys: Schema.Array(PublicKeyPemBase64).pipe(
+    Schema.maxItems(MAX_PUBLIC_KEYS_IN_CHECK_INBOXES_EXIST_REQUEST)
+  ),
+})
+export type CheckInboxesExistRequest = typeof CheckInboxesExistRequest.Type
+
+export const CheckInboxesExistResponse = Schema.Struct({
+  existingPublicKeys: Schema.Array(PublicKeyPemBase64),
+})
+export type CheckInboxesExistResponse = typeof CheckInboxesExistResponse.Type

@@ -68,6 +68,10 @@ import {
 import {createUpdateInvalidateExpoToken} from './queries/createUpdateInvalidateExpoToken'
 import {createUpdateInvalidateFirebaseToken} from './queries/createUpdateInvalidateFirebaseToken'
 import {
+  createUpdateLoginSessionId,
+  type UpdateLoginSessionIdParams,
+} from './queries/createUpdateLoginSessionId'
+import {
   createUpdatePublicKeyV2,
   type UpdatePublicKeyV2Params,
 } from './queries/createUpdatePublicKeyV2'
@@ -168,6 +172,10 @@ export interface UserDbOperations {
     args: UpdateExpoTokenParams
   ) => Effect.Effect<void, UnexpectedServerError>
 
+  updateLoginSessionId: (
+    args: UpdateLoginSessionIdParams
+  ) => Effect.Effect<void, UnexpectedServerError>
+
   updateInvalidateFirebaseToken: (
     args: FcmToken
   ) => Effect.Effect<void, UnexpectedServerError>
@@ -212,6 +220,7 @@ export class UserDbService extends Context.Tag('UserDbService')<
       )
       const updateRefreshUser = yield* _(createUpdateRefreshUser)
       const updateExpoToken = yield* _(createUpdateExpoToken)
+      const updateLoginSessionId = yield* _(createUpdateLoginSessionId)
       const updateInvalidateFirebaseToken = yield* _(
         createUpdateInvalidateFirebaseToken
       )
@@ -266,6 +275,7 @@ export class UserDbService extends Context.Tag('UserDbService')<
         deleteUserByPublicKeyAndHash,
         updateRefreshUser,
         updateExpoToken,
+        updateLoginSessionId,
         updateInvalidateFirebaseToken,
         updateInvalidateExpoToken,
         findFirebaseTokensOfUsersWhoDirectlyImportedHash,

@@ -37,17 +37,27 @@ export function importKeyPair(
   }
 }
 
-function generatePrivateKey(curve: Curve = defaultCurve): PrivateKeyHolder {
-  const crypto = getCrypto()
-  const ecdh = crypto.createECDH(curve)
-  ecdh.generateKeys()
-  const privateKeyPem = privateRawToPem(ecdh.getPrivateKey(), curve)
-  const publicKeyPem = publicRawToPem(ecdh.getPublicKey(), curve)
+export function privateKeyHolderFromRaw(
+  rawPrivateKey: Buffer,
+  curve: Curve = defaultCurve
+): PrivateKeyHolder {
+  const ecdh = getCrypto().createECDH(curve)
+  ecdh.setPrivateKey(rawPrivateKey)
 
   return Schema.decodeSync(PrivateKeyHolder)({
-    publicKeyPemBase64: publicKeyPem.toString('base64'),
-    privateKeyPemBase64: privateKeyPem.toString('base64'),
+    publicKeyPemBase64: publicRawToPem(ecdh.getPublicKey(), curve).toString(
+      'base64'
+    ),
+    privateKeyPemBase64: privateRawToPem(rawPrivateKey, curve).toString(
+      'base64'
+    ),
   })
+}
+
+function generatePrivateKey(curve: Curve = defaultCurve): PrivateKeyHolder {
+  const ecdh = getCrypto().createECDH(curve)
+  ecdh.generateKeys()
+  return privateKeyHolderFromRaw(ecdh.getPrivateKey(), curve)
 }
 
 export {

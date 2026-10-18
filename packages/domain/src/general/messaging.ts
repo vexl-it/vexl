@@ -41,6 +41,8 @@ export const MessageType = Schema.Literal(
   'VERSION_UPDATE',
   'FCM_CYPHER_UPDATE',
   'MESSAGE_READ',
+  'REQUEST_HISTORY',
+  'HISTORY',
   // Local-only nudge to clean up an inactive chat. MUST NEVER be sent to the
   // server or the other side.
   'INACTIVITY_REMINDER'
@@ -71,6 +73,45 @@ export const RepliedToDataPayload = Schema.Struct({
   image: Base64String,
 })
 export type RepliedToDataPayload = typeof RepliedToDataPayload.Type
+
+export const ChatHistoryMessageType = MessageType.pipe(
+  Schema.pickLiteral(
+    'MESSAGE',
+    'REQUEST_REVEAL',
+    'APPROVE_REVEAL',
+    'DISAPPROVE_REVEAL',
+    'REQUEST_MESSAGING',
+    'APPROVE_MESSAGING',
+    'DISAPPROVE_MESSAGING',
+    'CANCEL_REQUEST_MESSAGING',
+    'APPROVE_CONTACT_REVEAL',
+    'DISAPPROVE_CONTACT_REVEAL',
+    'REQUEST_CONTACT_REVEAL',
+    'TRADE_CHECKLIST_UPDATE'
+  )
+)
+export type ChatHistoryMessageType = typeof ChatHistoryMessageType.Type
+
+/**
+ * One message of a chat as stored by the sender of a HISTORY message. Images
+ * are never included. `author` is relative to the HISTORY sender.
+ */
+export const ChatHistoryMessage = Schema.Struct({
+  uuid: ChatMessageId,
+  author: Schema.Literal('me', 'them'),
+  messageType: ChatHistoryMessageType,
+  text: Schema.String,
+  time: UnixMilliseconds,
+  repliedTo: Schema.optional(RepliedToData.pipe(Schema.omit('image'))),
+  tradeChecklistUpdate: Schema.optional(TradeChecklistUpdate),
+  deanonymizedUser: Schema.optional(DeanonymizedUser),
+  goldenAvatarType: Schema.optional(GoldenAvatarType),
+  senderClubsUuids: Schema.optional(Schema.Array(ClubUuid)),
+  commonFriends: Schema.optional(Schema.Array(HashedPhoneNumber)),
+  verifiedCommonFriends: Schema.optional(Schema.Array(HashedPhoneNumber)),
+  friendLevel: Schema.optional(Schema.Array(FriendLevel)),
+})
+export type ChatHistoryMessage = typeof ChatHistoryMessage.Type
 
 export const ChatMessagePayload = Schema.Struct({
   uuid: ChatMessageId,
@@ -106,6 +147,7 @@ export const ChatMessagePayload = Schema.Struct({
   commonFriends: Schema.optional(Schema.Array(HashedPhoneNumber)),
   verifiedCommonFriends: Schema.optional(Schema.Array(HashedPhoneNumber)),
   friendLevel: Schema.optional(Schema.Array(FriendLevel)),
+  history: Schema.optional(Schema.Array(ChatHistoryMessage)),
 })
 export type ChatMessagePayload = typeof ChatMessagePayload.Type
 
@@ -147,6 +189,8 @@ export const ChatMessage = Schema.Struct({
   commonFriends: Schema.optional(Schema.Array(HashedPhoneNumber)),
   verifiedCommonFriends: Schema.optional(Schema.Array(HashedPhoneNumber)),
   friendLevel: Schema.optional(Schema.Array(FriendLevel)),
+  // Used only for messages of type `HISTORY`
+  history: Schema.optional(Schema.Array(ChatHistoryMessage)),
 })
 export type ChatMessage = typeof ChatMessage.Type
 

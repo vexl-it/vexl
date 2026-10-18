@@ -41,6 +41,8 @@ type HANDLED_MESSAGE_TYPES =
   | 'FCM_CYPHER_UPDATE'
   | 'VERSION_UPDATE'
   | 'MESSAGE_READ'
+  | 'REQUEST_HISTORY'
+  | 'HISTORY'
 
 const sendSystemNotification = (
   messageType: HANDLED_MESSAGE_TYPES
@@ -48,7 +50,9 @@ const sendSystemNotification = (
   if (
     messageType === 'FCM_CYPHER_UPDATE' ||
     messageType === 'VERSION_UPDATE' ||
-    messageType === 'MESSAGE_READ'
+    messageType === 'MESSAGE_READ' ||
+    messageType === 'REQUEST_HISTORY' ||
+    messageType === 'HISTORY'
   )
     return false
 

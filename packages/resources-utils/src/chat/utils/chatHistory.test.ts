@@ -152,21 +152,36 @@ it('shows HISTORY as requiring a newer version on older clients', () => {
   )
 })
 
-it('delivers the requester notification token with REQUEST_HISTORY', () => {
+it('delivers the history sender notification token with HISTORY', () => {
   const myVexlToken = Schema.decodeSync(VexlNotificationToken)(
     'vexl_nt_3J5j2mYQF3v8mS1kWq0dQgZk9t2yBcE4'
   )
 
   const received = sendAndReceive(
-    createRequestHistoryMessage({
+    createHistoryMessage({
       senderPublicKey: historySender.publicKeyPemBase64,
       myVersion: appVersion,
+      messages: [],
+      historyRecoveryProof,
       myVexlToken,
     })
   )
 
-  expect(received.messageType).toBe('REQUEST_HISTORY')
+  expect(received.messageType).toBe('HISTORY')
   expect(received.myFcmCypher).toBe(myVexlToken)
+})
+
+it('sends REQUEST_HISTORY without a notification token', () => {
+  const received = sendAndReceive(
+    createRequestHistoryMessage({
+      senderPublicKey: historySender.publicKeyPemBase64,
+      myVersion: appVersion,
+    })
+  )
+
+  expect(received.messageType).toBe('REQUEST_HISTORY')
+  expect(received.myFcmCypher).toBeUndefined()
+  expect(received.myVexlToken).toBeUndefined()
 })
 
 it('hides history messages from the server behind the MESSAGE type', async () => {

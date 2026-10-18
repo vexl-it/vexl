@@ -91,6 +91,32 @@ export function isPendingRecoveryChatExpired({
   )
 }
 
+/**
+ * Chats that became visible since `previousInbox` because their history
+ * proved the sender. They still need a token to notify us.
+ */
+export function newlyRecoveredChats({
+  previousInbox,
+  updatedInbox,
+}: {
+  previousInbox: InboxInState
+  updatedInbox: InboxInState
+}): ChatWithMessages[] {
+  const isWithSenderOf =
+    (chat: ChatWithMessages) =>
+    (other: ChatWithMessages): boolean =>
+      other.chat.otherSide.publicKey === chat.chat.otherSide.publicKey
+
+  return Array.filter(
+    updatedInbox.chats,
+    (chat) =>
+      Array.some(
+        previousInbox.pendingRecoveryChats ?? [],
+        isWithSenderOf(chat)
+      ) && !Array.some(previousInbox.chats, isWithSenderOf(chat))
+  )
+}
+
 export function chatsWaitingForHistoryRequest(
   inbox: InboxInState
 ): readonly ChatWithMessages[] {

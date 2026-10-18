@@ -7,7 +7,6 @@ import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifica
 import {now} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {VersionString} from '@vexl-next/domain/src/utility/VersionString.brand'
 import sendMessage from '@vexl-next/resources-utils/src/chat/sendMessage'
-import {createRequestHistoryMessage} from '@vexl-next/resources-utils/src/chat/utils/chatHistory'
 import {
   effectToTask,
   effectToTaskEither,
@@ -23,6 +22,7 @@ import {version} from '../../../utils/environment'
 import reportError from '../../../utils/reportError'
 import {generateAndRegisterVexlTokenActionAtom} from '../../notifications/actions/generateVexlTokenActionAtom'
 import {type ChatWithMessages} from '../domain'
+import {myChatRecoveryProofToShare} from '../utils/myChatRecoveryProof'
 import focusChatByInboxKeyAndSenderKey from './focusChatByInboxKeyAndSenderKey'
 import {updateMyNotificationTokenInfoInChat} from './generateMyNotificationTokenInfoActionAtom'
 
@@ -48,7 +48,7 @@ function createFcmCypherUpdateMessage(
   }
 }
 
-const sendMessageWithMyVexlTokenActionAtom = atom(
+export const sendMessageWithMyVexlTokenActionAtom = atom(
   null,
   (
     get,
@@ -94,6 +94,7 @@ const sendMessageWithMyVexlTokenActionAtom = atom(
               chatWithMessages.chat.otherSideVexlToken ??
               chatWithMessages.chat.otherSideFcmCypher,
             otherSideVersion: chatWithMessages.chat.otherSideVersion,
+            recoveryProof: myChatRecoveryProofToShare(get, chatWithMessages),
           })
         )
       ),
@@ -145,19 +146,4 @@ export const sendFcmCypherUpdateMessageActionAtom = atom(
               chatWithMessages.chat.otherSideFcmCypher
           ),
       })
-)
-
-export const sendHistoryRequestActionAtom = atom(
-  null,
-  (get, set, chatWithMessages: ChatWithMessages): T.Task<boolean> =>
-    set(sendMessageWithMyVexlTokenActionAtom, {
-      chatWithMessages,
-      createMessage: (vexlToken) =>
-        createRequestHistoryMessage({
-          senderPublicKey:
-            chatWithMessages.chat.inbox.privateKey.publicKeyPemBase64,
-          myVersion: version,
-          myVexlToken: vexlToken,
-        }),
-    })
 )

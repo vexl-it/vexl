@@ -20,14 +20,14 @@ export interface ChatMessageWithDirection {
   message: ChatMessage
 }
 
+// Carries no notification token: the sender is not proven to be a chat
+// partner yet. It can still notify us with the token it got before the restore.
 export function createRequestHistoryMessage({
   senderPublicKey,
   myVersion,
-  myVexlToken,
 }: {
   senderPublicKey: PublicKeyPemBase64
   myVersion: VersionString
-  myVexlToken?: VexlNotificationToken | undefined
 }): ChatMessage {
   return {
     uuid: generateChatMessageId(),
@@ -37,9 +37,6 @@ export function createRequestHistoryMessage({
     minimalRequiredVersion: CHAT_HISTORY_MINIMAL_REQUIRED_VERSION,
     myVersion,
     senderPublicKey,
-    // Like FCM_CYPHER_UPDATE: only `myFcmCypher` goes over the wire
-    myFcmCypher: myVexlToken,
-    myVexlToken,
   }
 }
 
@@ -77,11 +74,13 @@ export function createHistoryMessage({
   myVersion,
   messages,
   historyRecoveryProof,
+  myVexlToken,
 }: {
   senderPublicKey: PublicKeyPemBase64
   myVersion: VersionString
   messages: readonly ChatMessageWithDirection[]
   historyRecoveryProof: ChatRecoveryProof
+  myVexlToken?: VexlNotificationToken | undefined
 }): ChatMessage {
   return {
     uuid: generateChatMessageId(),
@@ -93,6 +92,9 @@ export function createHistoryMessage({
     senderPublicKey,
     history: Array.filterMap(messages, toChatHistoryMessage),
     historyRecoveryProof,
+    // Like FCM_CYPHER_UPDATE: only `myFcmCypher` goes over the wire
+    myFcmCypher: myVexlToken,
+    myVexlToken,
   }
 }
 

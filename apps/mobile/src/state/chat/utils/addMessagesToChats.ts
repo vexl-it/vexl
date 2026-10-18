@@ -115,12 +115,13 @@ export default function addMessagesToChats(
           isMetadataMessageType(one.message.messageType)
         )
 
-        // History requests carry the token of the other side's new device
+        // A history carries a token for the chat recovered by it
         const fcmCypherUpdateFromOtherSide = messagesToAddToThisChat.findLast(
           (one) =>
             one.state === 'received' &&
             (one.message.messageType === 'FCM_CYPHER_UPDATE' ||
-              one.message.messageType === 'REQUEST_HISTORY')
+              (one.message.messageType === 'HISTORY' &&
+                !!one.message.myFcmCypher))
         )
 
         return pipe(

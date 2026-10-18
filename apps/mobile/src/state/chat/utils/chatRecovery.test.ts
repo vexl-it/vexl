@@ -28,6 +28,7 @@ import {
   isPendingRecoveryChatExpired,
   isRestoredInboxInGracePeriod,
   messagesToShareAsHistory,
+  newlyRecoveredChats,
   restoredMessagesFromHistory,
   startedSupportingChatRecovery,
 } from './chatRecovery'
@@ -126,7 +127,8 @@ function chat({
 
 // What the other side (`theirKey`) sends after we restored our account
 function historyFromTheirCopy(
-  theirMessages: ChatMessageWithState[]
+  theirMessages: ChatMessageWithState[],
+  myVexlToken?: VexlNotificationToken
 ): ChatMessageWithState {
   return received(
     createHistoryMessage({
@@ -136,6 +138,7 @@ function historyFromTheirCopy(
         chat({inboxKey: theirKey, otherSideKey: myKey, messages: theirMessages})
       ),
       historyRecoveryProof: recoveryProof,
+      myVexlToken,
     })
   )
 }
@@ -322,19 +325,22 @@ describe('answering history requests', () => {
     ])
   })
 
-  it('switches notifications to the token from the request', () => {
-    const token = Schema.decodeSync(VexlNotificationToken)('vexl_nt_new_device')
-    const [updated] = addMessagesToChats([knownChat])([
+  it('keeps notifying the token it had when a history is requested', () => {
+    const oldToken = Schema.decodeSync(VexlNotificationToken)(
+      'vexl_nt_before_restore'
+    )
+    const [updated] = addMessagesToChats([
+      {...knownChat, chat: {...knownChat.chat, otherSideFcmCypher: oldToken}},
+    ])([
       received(
         createRequestHistoryMessage({
           senderPublicKey: requester.publicKeyPemBase64,
           myVersion: version,
-          myVexlToken: token,
         })
       ),
     ])
 
-    expect(updated?.chat.otherSideFcmCypher).toBe(token)
+    expect(updated?.chat.otherSideFcmCypher).toBe(oldToken)
     expect(updated?.messages).toEqual([])
   })
 })
@@ -371,6 +377,15 @@ describe('merging received history', () => {
       historyRequestedAt: at(11),
     }
   }
+
+  it('switches notifications to the token from the history', () => {
+    const token = Schema.decodeSync(VexlNotificationToken)('vexl_nt_history')
+    const [merged] = addMessagesToChats([restoredChat()])([
+      historyFromTheirCopy(theirCopy, token),
+    ])
+
+    expect(merged?.chat.otherSideFcmCypher).toBe(token)
+  })
 
   it('puts restored messages before live ones with flipped direction', () => {
     const [merged] = addMessagesToChats([restoredChat()])([
@@ -476,6 +491,55 @@ describe('merging received history', () => {
 
     expect(checklist?.amount.received?.btcAmount).toBe(10)
     expect(checklist?.amount.sent?.btcAmount).toBe(2)
+  })
+})
+
+describe('sending our token to recovered chats', () => {
+  const pending = chat({
+    inboxKey: myKey,
+    otherSideKey: theirKey,
+    messages: [],
+    restoredFromBackup: true,
+  })
+  const recovered = {...pending, historyMerged: true}
+  const previousInbox: InboxInState = {
+    inbox: {privateKey: myKey},
+    chats: [],
+    pendingRecoveryChats: [pending],
+  }
+
+  it('lists a chat its history just recovered', () => {
+    expect(
+      newlyRecoveredChats({
+        previousInbox,
+        updatedInbox: {
+          ...previousInbox,
+          chats: [recovered],
+          pendingRecoveryChats: [],
+        },
+      })
+    ).toEqual([recovered])
+  })
+
+  it('lists nothing while the chat is pending or after it was dropped', () => {
+    expect(
+      newlyRecoveredChats({previousInbox, updatedInbox: previousInbox})
+    ).toEqual([])
+    expect(
+      newlyRecoveredChats({
+        previousInbox,
+        updatedInbox: {...previousInbox, pendingRecoveryChats: []},
+      })
+    ).toEqual([])
+  })
+
+  it('does not list a chat that was already visible', () => {
+    expect(
+      newlyRecoveredChats({
+        previousInbox: {...previousInbox, chats: [recovered]},
+        updatedInbox: {...previousInbox, chats: [recovered]},
+      })
+    ).toEqual([])
   })
 })
 

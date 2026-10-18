@@ -47,7 +47,10 @@ import {vexlTokenToKeyHolderAtom} from '../../notifications/vexlTokenToKeyHolder
 import messagingStateAtom from '../atoms/messagingStateAtom'
 import {type InboxInState} from '../domain'
 import addIncomingMessagesToInbox from '../utils/addIncomingMessagesToInbox'
-import {startedSupportingChatRecovery} from '../utils/chatRecovery'
+import {
+  newlyRecoveredChats,
+  startedSupportingChatRecovery,
+} from '../utils/chatRecovery'
 import {filterIncomingMessages} from '../utils/filterIncomingMessages'
 import {isMetadataMessageType} from '../utils/isMetadataMessage'
 import {myChatRecoveryProof} from '../utils/myChatRecoveryProof'
@@ -61,6 +64,7 @@ import {
 import {sendUpdateNoticeMessageActionAtom} from './checkAndReportCurrentVersionToChatsActionAtom'
 import createNewChatsFromMessagesActionAtom from './createNewChatsFromFirstMessagesActionAtom'
 import focusChatByInboxKeyAndSenderKey from './focusChatByInboxKeyAndSenderKey'
+import {sendFcmCypherUpdateMessageActionAtom} from './refreshNotificationTokensActionAtom'
 import {reportMessagesReceivedActionAtom} from './reportMessagesReceivedActionAtom'
 
 const handleOtherSideUpdatedActionAtom = atom(
@@ -463,6 +467,11 @@ export const fetchAndStoreMessagesForInboxAtom = atom<
               newMessages,
               inbox: updatedInbox,
             }),
+            ...Array.map(
+              newlyRecoveredChats({previousInbox: inbox, updatedInbox}),
+              (chat) =>
+                taskToEffect(set(sendFcmCypherUpdateMessageActionAtom)(chat))
+            ),
             taskToEffect(
               deletePulledMessagesReportLeft({
                 api: api.chat,

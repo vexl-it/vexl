@@ -2,7 +2,10 @@ import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {type ChatRecoveryProof} from '@vexl-next/domain/src/general/messaging'
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import sendMessage from '@vexl-next/resources-utils/src/chat/sendMessage'
-import {createHistoryMessage} from '@vexl-next/resources-utils/src/chat/utils/chatHistory'
+import {
+  createHistoryMessage,
+  createRequestHistoryMessage,
+} from '@vexl-next/resources-utils/src/chat/utils/chatHistory'
 import {taskToEffect} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {Array, Effect, Option, pipe} from 'effect'
 import {atom} from 'jotai'
@@ -20,9 +23,35 @@ import {
   isPendingRecoveryChatExpired,
   messagesToShareAsHistory,
 } from '../utils/chatRecovery'
-import {myChatRecoveryProofToShare} from '../utils/myChatRecoveryProof'
 import messagingStateAtom from './messagingStateAtom'
-import {sendHistoryRequestActionAtom} from './refreshNotificationTokensActionAtom'
+import {sendMessageWithMyVexlTokenActionAtom} from './refreshNotificationTokensActionAtom'
+
+// Goes to a sender not proven to be a chat partner yet, so it carries nothing
+// but the request
+const sendHistoryRequestActionAtom = atom(
+  null,
+  (get, set, chat: ChatWithMessages): Effect.Effect<boolean> =>
+    sendMessage({
+      api: get(apiAtom).chat,
+      notificationApi: get(apiAtom).notification,
+      senderKeypair: chat.chat.inbox.privateKey,
+      receiverPublicKey: chat.chat.otherSide.publicKey,
+      message: createRequestHistoryMessage({
+        senderPublicKey: chat.chat.inbox.privateKey.publicKeyPemBase64,
+        myVersion: version,
+      }),
+      theirNotificationCypher:
+        chat.chat.otherSideVexlToken ?? chat.chat.otherSideFcmCypher,
+      otherSideVersion: chat.chat.otherSideVersion,
+    }).pipe(
+      Effect.as(true),
+      Effect.catchAll((e) =>
+        reportErrorE('warn', new Error('Error requesting chat history'), {
+          e,
+        }).pipe(Effect.as(false))
+      )
+    )
+)
 
 const updatePendingRecoveryChatsActionAtom = atom(
   null,
@@ -79,7 +108,7 @@ export const processPendingRecoveryChatsActionAtom = atom(
           onSome: chatsWaitingForHistoryRequest,
         }),
         Array.map((chat) =>
-          taskToEffect(set(sendHistoryRequestActionAtom, chat)).pipe(
+          set(sendHistoryRequestActionAtom, chat).pipe(
             Effect.map((sent) => {
               if (!sent) return
               set(updatePendingRecoveryChatsActionAtom, {
@@ -110,27 +139,19 @@ const sendHistoryActionAtom = atom(
       historyRecoveryProof,
     }: {chat: ChatWithMessages; historyRecoveryProof: ChatRecoveryProof}
   ): Effect.Effect<void> =>
-    sendMessage({
-      api: get(apiAtom).chat,
-      notificationApi: get(apiAtom).notification,
-      senderKeypair: chat.chat.inbox.privateKey,
-      receiverPublicKey: chat.chat.otherSide.publicKey,
-      message: createHistoryMessage({
-        senderPublicKey: chat.chat.inbox.privateKey.publicKeyPemBase64,
-        myVersion: version,
-        messages: messagesToShareAsHistory(chat),
-        historyRecoveryProof,
-      }),
-      theirNotificationCypher:
-        chat.chat.otherSideVexlToken ?? chat.chat.otherSideFcmCypher,
-      otherSideVersion: chat.chat.otherSideVersion,
-      recoveryProof: myChatRecoveryProofToShare(get, chat),
-    }).pipe(
-      Effect.tapError((e) =>
-        reportErrorE('warn', new Error('Error sending chat history'), {e})
-      ),
-      Effect.ignore
-    )
+    taskToEffect(
+      set(sendMessageWithMyVexlTokenActionAtom, {
+        chatWithMessages: chat,
+        createMessage: (myVexlToken) =>
+          createHistoryMessage({
+            senderPublicKey: chat.chat.inbox.privateKey.publicKeyPemBase64,
+            myVersion: version,
+            messages: messagesToShareAsHistory(chat),
+            historyRecoveryProof,
+            myVexlToken,
+          }),
+      })
+    ).pipe(Effect.asVoid)
 )
 
 export const answerHistoryRequestsActionAtom = atom(

@@ -1,19 +1,21 @@
-import {Button, Screen, Typography, YStack} from '@vexl-next/ui'
+import {
+  Button,
+  ChatBubbles,
+  InfoPoint,
+  PeopleUsers,
+  RestoredAccountGraphic,
+  SandWatch,
+  Screen,
+  YStack,
+} from '@vexl-next/ui'
 import {useSetAtom} from 'jotai'
 import React from 'react'
 import {type PostLoginFlowStackScreenProps} from '../../../navigationTypes'
 import {showRestoredAccountInfoAtom} from '../../../state/backup/restoreFromBackup'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
+import {PostLoginFlowCopy} from './PostLoginFlowScreen'
 
 type Props = PostLoginFlowStackScreenProps<'RestoredAccountInfo'>
-
-function Text({children}: {readonly children: string}): React.ReactElement {
-  return (
-    <Typography color="$foregroundSecondary" variant="paragraphSmall">
-      {children}
-    </Typography>
-  )
-}
 
 export default function RestoredAccountInfoScreen({
   navigation,
@@ -36,22 +38,25 @@ export default function RestoredAccountInfoScreen({
         </Button>
       }
     >
-      <YStack gap="$8" paddingTop="$10">
-        <YStack gap="$3">
-          <Typography color="$foregroundPrimary" variant="heading3">
-            {t('loginFlow.restoreFromBackup.restored.title')}
-          </Typography>
-          <Text>{t('loginFlow.restoreFromBackup.restored.text')}</Text>
+      <YStack flex={1} justifyContent="center" gap="$8" paddingVertical="$5">
+        <YStack alignItems="center" gap="$9">
+          <RestoredAccountGraphic animate height={163} width={160} />
+          <PostLoginFlowCopy
+            title={t('loginFlow.restoreFromBackup.restored.title')}
+            text={t('loginFlow.restoreFromBackup.restored.text')}
+          />
         </YStack>
-        <YStack gap="$3">
-          <Typography color="$foregroundPrimary" variant="paragraphSmallBold">
-            {t('loginFlow.restoreFromBackup.restored.chatsTitle')}
-          </Typography>
-          <Text>{t('loginFlow.restoreFromBackup.restored.chatsText')}</Text>
-          <Text>{t('loginFlow.restoreFromBackup.restored.lostChatsText')}</Text>
-          <Text>{t('loginFlow.restoreFromBackup.restored.dividerText')}</Text>
+        <YStack gap="$4">
+          <InfoPoint icon={SandWatch}>
+            {t('loginFlow.restoreFromBackup.restored.chatsText')}
+          </InfoPoint>
+          <InfoPoint icon={ChatBubbles}>
+            {t('loginFlow.restoreFromBackup.restored.dividerText')}
+          </InfoPoint>
+          <InfoPoint icon={PeopleUsers}>
+            {t('loginFlow.restoreFromBackup.restored.contactsText')}
+          </InfoPoint>
         </YStack>
-        <Text>{t('loginFlow.restoreFromBackup.restored.contactsText')}</Text>
       </YStack>
     </Screen>
   )

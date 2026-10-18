@@ -1,9 +1,14 @@
 import {
+  AccountBackupGraphic,
   Button,
   ChevronLeft,
   InfoBox,
+  InfoPoint,
+  Lock,
   NavigationBar,
+  RefreshArrowsRectangle,
   Screen,
+  Stack,
   Typography,
   YStack,
 } from '@vexl-next/ui'
@@ -44,22 +49,25 @@ export default function AccountBackupScreen(): React.ReactElement {
         </Button>
       }
     >
-      <YStack gap="$5">
-        <Typography variant="paragraph" color="$foregroundPrimary">
-          {t('accountBackup.description')}
-        </Typography>
-        <YStack gap="$2">
-          <Typography variant="paragraphSmallBold" color="$foregroundPrimary">
-            {t('accountBackup.warningTitle')}
+      <YStack gap="$7" paddingBottom="$5">
+        <Stack alignItems="center">
+          <AccountBackupGraphic animate height={171} width={147} />
+        </Stack>
+        <YStack gap="$3">
+          <Typography color="$foregroundPrimary" variant="heading3">
+            {t('accountBackup.heading')}
           </Typography>
-          <InfoBox variant="pink">{t('accountBackup.warning')}</InfoBox>
+          <Typography color="$foregroundSecondary" variant="paragraphSmall">
+            {t('accountBackup.description')}
+          </Typography>
         </YStack>
-        <Typography variant="paragraphSmall" color="$foregroundSecondary">
-          {t('accountBackup.storeSafely')}
-        </Typography>
-        <Typography variant="paragraphSmall" color="$foregroundSecondary">
-          {t('accountBackup.onlyOnce')}
-        </Typography>
+        <InfoBox variant="pink">{t('accountBackup.warning')}</InfoBox>
+        <YStack gap="$4">
+          <InfoPoint icon={Lock}>{t('accountBackup.storeSafely')}</InfoPoint>
+          <InfoPoint icon={RefreshArrowsRectangle}>
+            {t('accountBackup.onlyOnce')}
+          </InfoPoint>
+        </YStack>
       </YStack>
     </Screen>
   )

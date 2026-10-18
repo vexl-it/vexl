@@ -2,6 +2,7 @@ import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
 import {type ClubKeys, type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {generateLoginSessionId} from '@vexl-next/domain/src/general/LoginSessionId.brand'
 import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
+import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {
   type BackupFile,
   type BackupNotificationSecret,
@@ -120,6 +121,7 @@ export const withRestoredInboxes = (
         inbox: {privateKey},
         chats: [],
         restoredFromBackup: true,
+        restoredAt: unixMillisecondsNow(),
       })
     )
   )

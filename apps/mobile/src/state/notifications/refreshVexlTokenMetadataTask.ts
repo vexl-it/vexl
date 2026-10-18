@@ -5,7 +5,7 @@ import {
 } from '../../utils/inAppLoadingTasks'
 import {getNotificationTokenE} from '../../utils/notifications'
 import {reportErrorE} from '../../utils/reportError'
-import {refreshUserOnContactServiceInAppBackgroundTaskId} from '../refreshUserOnContactServiceInAppBackgroundTask'
+import {afterRefreshUserUnlessAccountMoved} from '../refreshUserOnContactServiceInAppBackgroundTask'
 import {syncVexlNotificationTokensActionAtom} from './actions/syncVexlNotificationTokensActionAtom'
 import {ensureVexlSecretExistsTaskId} from './ensureVexlSecretExistsTask'
 import {vexlNotificationTokenAtom} from './vexlNotificationTokenAtom'
@@ -20,7 +20,7 @@ export const refreshVexlTokenMetadataTaskId = registerInAppLoadingTask({
   // forgets the secret, which this task must then not sync.
   dependsOn: [
     {id: ensureVexlSecretExistsTaskId},
-    {id: refreshUserOnContactServiceInAppBackgroundTaskId},
+    afterRefreshUserUnlessAccountMoved,
   ],
   task: (store) =>
     Effect.gen(function* () {

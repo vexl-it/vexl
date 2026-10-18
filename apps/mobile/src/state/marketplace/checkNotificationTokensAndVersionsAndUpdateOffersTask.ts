@@ -15,6 +15,7 @@ import {inboxesAtom} from '../chat/atoms/messagingStateAtom'
 import {generateAndRegisterVexlTokenActionAtom} from '../notifications/actions/generateVexlTokenActionAtom'
 import {ensureVexlSecretExistsTaskId} from '../notifications/ensureVexlSecretExistsTask'
 import {refreshOffersAndEnsureInboxesTaskId} from '../refreshOffersAndEnsureInboxesInAppLoadingTask'
+import {afterRefreshUserUnlessAccountMoved} from '../refreshUserOnContactServiceInAppBackgroundTask'
 import {myOffersAtom} from './atoms/myOffers'
 import {refreshLocalizedAddressesForLocationsActionAtom} from './atoms/refreshLocalizedAddressesForLocationsActionAtom'
 import {updateOfferActionAtom} from './atoms/updateOfferActionAtom'
@@ -168,6 +169,7 @@ export const checkNotificationTokensAndVersionsAndUpdateOffersTaskId =
         id: refreshNotificationTaskId,
       },
       {id: refreshOffersAndEnsureInboxesTaskId},
+      afterRefreshUserUnlessAccountMoved,
     ],
     task: (store) =>
       Effect.gen(function* (_) {

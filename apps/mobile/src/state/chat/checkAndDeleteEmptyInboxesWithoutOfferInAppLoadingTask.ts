@@ -1,5 +1,5 @@
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {Array, Effect, Either, flow, Schema} from 'effect'
+import {Array, Effect, Either, Schema} from 'effect'
 import {pipe} from 'fp-ts/lib/function'
 import {apiAtom} from '../../api'
 import {registerInAppLoadingTask} from '../../utils/inAppLoadingTasks'
@@ -89,64 +89,53 @@ export const checkAndDeleteEmptyInboxesWithoutOfferInAppLoadingTaskId =
         const now = unixMillisecondsNow()
         store.set(
           messagingStateAtom,
-          flow(
-            // The grace period of a restored inbox starts at its first check
-            Array.map((one) =>
-              one.restoredFromBackup && !one.restoredAt
-                ? {...one, restoredAt: now}
-                : one
-            ),
-            Array.filter((one) => {
-              const isInboxValid = (() => {
-                // Is inbox for my session pub key
-                if (
-                  one.inbox.privateKey.publicKeyPemBase64 ===
-                  session.privateKey.publicKeyPemBase64
-                )
-                  return true
+          Array.filter((one) => {
+            const isInboxValid = (() => {
+              // Is inbox for my session pub key
+              if (
+                one.inbox.privateKey.publicKeyPemBase64 ===
+                session.privateKey.publicKeyPemBase64
+              )
+                return true
 
-                // Inbox is for my offer that exists
-                if (
-                  one.inbox.offerId &&
-                  myOffersIds.includes(one.inbox.offerId)
-                )
-                  return true
+              // Inbox is for my offer that exists
+              if (one.inbox.offerId && myOffersIds.includes(one.inbox.offerId))
+                return true
 
-                // Inbox is for my note that exists
-                if (one.inbox.noteId && myNotesIds.includes(one.inbox.noteId))
-                  return true
+              // Inbox is for my note that exists
+              if (one.inbox.noteId && myNotesIds.includes(one.inbox.noteId))
+                return true
 
-                // Its chats come back only once the other side writes again
-                if (isRestoredInboxInGracePeriod({inbox: one, now})) return true
+              // Its chats come back only once the other side writes again
+              if (isRestoredInboxInGracePeriod({inbox: one, now})) return true
 
-                // In all other cases, inbox is valid only if there are open chats
-                return one.chats.length > 0
-              })()
+              // In all other cases, inbox is valid only if there are open chats
+              return one.chats.length > 0
+            })()
 
-              if (!isInboxValid) {
-                pipe(
-                  api.chat.deleteInbox({
-                    keyPair: one.inbox.privateKey,
-                  }),
-                  Effect.catchAll((e) => {
-                    reportError(
-                      'warn',
-                      new Error(
-                        'Failed to delete empty inbox without offer or any open chats'
-                      ),
-                      {e}
-                    )
+            if (!isInboxValid) {
+              pipe(
+                api.chat.deleteInbox({
+                  keyPair: one.inbox.privateKey,
+                }),
+                Effect.catchAll((e) => {
+                  reportError(
+                    'warn',
+                    new Error(
+                      'Failed to delete empty inbox without offer or any open chats'
+                    ),
+                    {e}
+                  )
 
-                    return Effect.void
-                  }),
-                  // no need to block here
-                  Effect.runFork
-                )
-              }
+                  return Effect.void
+                }),
+                // no need to block here
+                Effect.runFork
+              )
+            }
 
-              return isInboxValid
-            })
-          )
+            return isInboxValid
+          })
         )
       }),
   })

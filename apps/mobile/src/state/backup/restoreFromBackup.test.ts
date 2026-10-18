@@ -288,6 +288,7 @@ describe('restore from backup', () => {
           inbox: {privateKey},
           chats: [],
           restoredFromBackup: true,
+          restoredAt: expect.any(Number),
         })
       )
     )

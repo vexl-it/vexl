@@ -1,4 +1,5 @@
 import {apiAtom} from '../../api'
+import {afterRefreshUserUnlessAccountMoved} from '../../state/refreshUserOnContactServiceInAppBackgroundTask'
 import {storage} from '../mmkv/effectMmkv'
 import {reportErrorE} from '../reportError'
 
@@ -16,6 +17,7 @@ export const refreshNotificationTaskId = registerInAppLoadingTask({
     requiresUserLoggedIn: true,
     runOn: 'resume',
   },
+  dependsOn: [afterRefreshUserUnlessAccountMoved],
   task: (store) =>
     Effect.gen(function* (_) {
       const oldToken = storage._storage.getString(NOTIFICATION_TOKEN_CACHE_KEY)

@@ -55,9 +55,8 @@ export function isRestoredInboxInGracePeriod({
   now: UnixMilliseconds
 }): boolean {
   return (
-    !!inbox.restoredFromBackup &&
-    (!inbox.restoredAt ||
-      now < inbox.restoredAt + RESTORED_INBOX_GRACE_PERIOD_MS)
+    !!inbox.restoredAt &&
+    now < inbox.restoredAt + RESTORED_INBOX_GRACE_PERIOD_MS
   )
 }
 

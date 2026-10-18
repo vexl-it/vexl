@@ -1,6 +1,10 @@
 import {Effect, Match, Option} from 'effect/index'
 import {apiAtom} from '../api'
-import {registerInAppLoadingTask} from '../utils/inAppLoadingTasks'
+import {
+  InAppLoadingTaskError,
+  registerInAppLoadingTask,
+  type InAppLoadingTaskDependency,
+} from '../utils/inAppLoadingTasks'
 import reportError from '../utils/reportError'
 import {generateVexlTokenActionAtom} from './notifications/actions/generateVexlTokenActionAtom'
 import {forgetVexlSecretLocally} from './notifications/vexlNotificationTokenAtom'
@@ -57,7 +61,7 @@ export const refreshUserOnContactServiceInAppBackgroundTaskId =
             vexlNotificationToken: sessionNotificationToken,
             loginSessionId: session.loginSessionId,
           }),
-          Effect.match({
+          Effect.matchEffect({
             onFailure: (e) => {
               Match.value(e).pipe(
                 Match.tag('UserNotFoundError', () => {
@@ -167,11 +171,30 @@ export const refreshUserOnContactServiceInAppBackgroundTaskId =
                   )
                 })
               )
+
+              // Fails the task so tasks touching server data skip this device
+              return e._tag === 'LoggedInOnAnotherDeviceError'
+                ? Effect.fail(
+                    new InAppLoadingTaskError({
+                      message: 'Account is active on another device',
+                    })
+                  )
+                : Effect.void
             },
             onSuccess: () => {
               console.log('🦋 User refreshed')
+              return Effect.void
             },
           })
         )
       }),
   })
+
+/**
+ * For tasks that pull messages or change server data: a device whose account
+ * moved to another device must not touch it. Network errors don't block them.
+ */
+export const afterRefreshUserUnlessAccountMoved: InAppLoadingTaskDependency = {
+  id: refreshUserOnContactServiceInAppBackgroundTaskId,
+  onlyIfSucceeds: true,
+}

@@ -13,6 +13,7 @@ import {
   type ProgressIndication,
 } from '../../../components/UploadingOfferProgressModal/atoms'
 import {progressSpan} from '../../../components/UploadingOfferProgressModal/progressUtils'
+import {reportContactsImportedActionAtom} from '../../../utils/analytics'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import {formatInteger} from '../../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../../utils/localization/formattingLocaleAtom'
@@ -60,7 +61,7 @@ type SubmitContactsActionParams = {
   readonly showContactImportProgressDialog?: boolean
 } & ContactsImportSource
 
-type SubmitContactsResult =
+export type SubmitContactsResult =
   | 'success'
   | 'noContactsSelected'
   | 'permissionsNotGranted'
@@ -820,6 +821,9 @@ export const submitContactsActionAtom = atom(
           }
           return 'success'
         },
+      }),
+      Effect.tap((result) => {
+        if (result === 'success') set(reportContactsImportedActionAtom)
       }),
       // Callers show dialogs/alerts right after this effect resolves. A native
       // dialog presented while the progress modal is still dismissing is

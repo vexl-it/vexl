@@ -151,6 +151,8 @@
   "appSettings.changeCurrency": "更改货币",
   "appSettings.appearanceTitle": "外观",
   "appSettings.allowScreencapture": "允许截屏",
+  "appSettings.anonymousUsageStatistics": "匿名使用统计",
+  "appSettings.anonymousUsageStatisticsNote": "让我们了解有多少人完成了注册或打开市场等步骤，且绝不会识别你的身份。",
   "appSettings.appearance.light": "浅色模式",
   "appSettings.appearance.dark": "深色模式",
   "appSettings.appearance.system": "跟随设备"

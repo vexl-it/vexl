@@ -15,6 +15,7 @@ import {apiAtom} from '../../../api'
 import {showErrorAlert} from '../../../components/ErrorAlert'
 import {globalDialogAtom} from '../../../components/GlobalDialog'
 import {loadingOverlayDisplayedAtom} from '../../../components/LoadingOverlayProvider'
+import {reportRequestCancelledActionAtom} from '../../../utils/analytics'
 import {version} from '../../../utils/environment'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
@@ -95,6 +96,7 @@ const cancelRequestActionAtomHandleUI = atom(
       }
 
       set(chatAtom, addMessageToChat(successMessage))
+      set(reportRequestCancelledActionAtom, chat.id)
 
       return successMessage
     }).pipe(

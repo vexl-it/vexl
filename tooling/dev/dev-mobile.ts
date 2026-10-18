@@ -41,6 +41,7 @@ import {loadRawEnvLocal, repoRoot} from './secrets'
 const SERVICE_URL_MAP: ReadonlyArray<{
   readonly envVar: string
   readonly portKey: string
+  readonly path?: string
 }> = [
   {envVar: 'EXPO_PUBLIC_LOCAL_USER_MS', portKey: 'userService'},
   {envVar: 'EXPO_PUBLIC_LOCAL_CONTACT_MS', portKey: 'contactService'},
@@ -58,6 +59,11 @@ const SERVICE_URL_MAP: ReadonlyArray<{
   {envVar: 'EXPO_PUBLIC_LOCAL_FEEDBACK_MS', portKey: 'feedbackService'},
   {envVar: 'EXPO_PUBLIC_LOCAL_CONTENT_MS', portKey: 'contentService'},
   {envVar: 'EXPO_PUBLIC_LOCAL_METRICS_MS', portKey: 'metricsService'},
+  {
+    envVar: 'EXPO_PUBLIC_LOCAL_ANALYTICS_RELAY',
+    portKey: 'ohttpRelay',
+    path: devConfig.analyticsRelay.relayPath,
+  },
 ]
 
 const MOBILE_DIR = join(repoRoot, 'apps', 'mobile')
@@ -634,7 +640,7 @@ function generateEnv(options: CliOptions): GeneratedEnv {
 
   const serviceUrls = pipe(
     SERVICE_URL_MAP,
-    Array.map(({envVar, portKey}) => {
+    Array.map(({envVar, portKey, path}) => {
       const defaultPort = ports[portKey]
       // With an explicit `ip:basePort`, shift every service by the same offset it
       // has from the default user-service port, preserving the port layout.
@@ -642,13 +648,17 @@ function generateEnv(options: CliOptions): GeneratedEnv {
         backend.kind === 'host' && backend.basePort !== undefined
           ? backend.basePort + (defaultPort - defaultBasePort)
           : defaultPort
-      const url = `http://${resolvedHost.host}:${port}`
+      const url = `http://${resolvedHost.host}:${port}${path ?? ''}`
       const pair: readonly [string, string] = [envVar, url]
       return pair
     })
   )
 
-  const vars: Record<string, string> = {ENV_PRESET: 'local'}
+  const vars: Record<string, string> = {
+    ENV_PRESET: 'local',
+    EXPO_PUBLIC_LOCAL_ANALYTICS_GATEWAY_KEY_CONFIG:
+      devConfig.analyticsRelay.gatewayKeyConfig,
+  }
   for (const [envVar, url] of serviceUrls) {
     vars[envVar] = url
   }

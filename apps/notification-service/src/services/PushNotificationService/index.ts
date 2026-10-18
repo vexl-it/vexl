@@ -128,6 +128,7 @@ export class PushNotificationService extends Context.Tag(
                       task.minimalClientVersion
                     )
                   }),
+                  Effect.map((data) => ({...data, sendTaskType: task._tag})),
                   Effect.option
                 )
               ),
@@ -164,6 +165,7 @@ export class PushNotificationService extends Context.Tag(
                   ),
                   sentAt: unixMillisecondsNow(),
                   channel: 'push',
+                  sendTaskType: d.sendTaskType,
                 })
               })
             )

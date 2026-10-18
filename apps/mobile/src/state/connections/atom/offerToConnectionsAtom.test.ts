@@ -117,6 +117,11 @@ jest.mock('../../../utils/reportError', () => ({
   __esModule: true,
   default: jest.fn(),
 }))
+jest.mock('../../../utils/analytics', () => ({
+  reportPromptTargetReachedActionAtom: jest
+    .requireActual('jotai')
+    .atom(null, () => undefined),
+}))
 jest.mock('../../../utils/reportTime', () => ({startMeasure: () => () => 0}))
 jest.mock('../../ActionBenchmarks', () => ({
   effectWithEnsuredBenchmark: () => (effect: unknown) => effect,

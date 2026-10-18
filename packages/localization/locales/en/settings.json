@@ -151,6 +151,8 @@
   "appSettings.changeCurrency": "Change currency",
   "appSettings.appearanceTitle": "Appearance",
   "appSettings.allowScreencapture": "Allow screencapture",
+  "appSettings.anonymousUsageStatistics": "Anonymous usage statistics",
+  "appSettings.anonymousUsageStatisticsNote": "Shows us how many people get through steps like signing up or opening the marketplace, without ever identifying you.",
   "appSettings.appearance.light": "Light mode",
   "appSettings.appearance.dark": "Dark mode",
   "appSettings.appearance.system": "Match device"

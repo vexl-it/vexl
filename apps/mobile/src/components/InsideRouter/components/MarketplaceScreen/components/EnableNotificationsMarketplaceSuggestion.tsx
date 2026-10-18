@@ -14,6 +14,7 @@ function EnableNotificationsMarketplaceSuggestion(): React.ReactElement {
 
   return (
     <DismissableMarketplaceBanner
+      promptId="enableNotifications"
       color="pink"
       title={t('marketplace.enableNotificationsSuggestion.title')}
       description={t('marketplace.enableNotificationsSuggestion.description')}

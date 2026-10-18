@@ -16,6 +16,7 @@ import * as TE from 'fp-ts/TaskEither'
 import {flow, pipe} from 'fp-ts/function'
 import {atom, type PrimitiveAtom} from 'jotai'
 import {apiAtom} from '../../../api'
+import {reportRequestAnsweredActionAtom} from '../../../utils/analytics'
 import {version} from '../../../utils/environment'
 import {type NoVexlSecretError} from '../../notifications/actions/NoVexlSecretError'
 import {generateAndRegisterVexlTokenActionAtom} from '../../notifications/actions/generateVexlTokenActionAtom'
@@ -116,6 +117,7 @@ const acceptMessagingRequestAtom = atom(
             updateMyNotificationTokenInfoInChat(vexlToken)
           )
         )
+        set(reportRequestAnsweredActionAtom, {chat, approve})
         return message
       })
     )

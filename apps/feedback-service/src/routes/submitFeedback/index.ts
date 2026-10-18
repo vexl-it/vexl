@@ -2,18 +2,33 @@ import {HttpApiBuilder} from '@effect/platform/index'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {FeedbackApiSpecification} from '@vexl-next/rest-api/src/services/feedback/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {commonMetricAttributesFromHeaders} from '@vexl-next/server-utils/src/metrics/commonMetricAttributesFromHeaders'
 import {Effect} from 'effect'
+import {reportTradeFeedbackSubmitted} from '../../metrics'
 import {FeedbackDbService} from './db'
 
 export const submitFeedbackHandler = HttpApiBuilder.handler(
   FeedbackApiSpecification,
   'root',
   'submitFeedback',
-  ({payload}) =>
+  ({payload, headers}) =>
     Effect.gen(function* (_) {
-      const insertFeedback = yield* _(FeedbackDbService)
+      const upsertFeedback = yield* _(FeedbackDbService)
 
-      yield* _(insertFeedback(payload))
+      const {previousStars} = yield* _(upsertFeedback(payload))
+
+      if (
+        payload.type === 'trade' &&
+        payload.stars !== undefined &&
+        previousStars === null
+      ) {
+        yield* _(
+          reportTradeFeedbackSubmitted({
+            positive: payload.stars >= 4,
+            commonMetricAttributes: commonMetricAttributesFromHeaders(headers),
+          })
+        )
+      }
     }).pipe(
       Effect.catchAll((e) =>
         Effect.zipRight(

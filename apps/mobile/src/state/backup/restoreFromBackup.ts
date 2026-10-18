@@ -1,7 +1,6 @@
 import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
 import {type ClubKeys, type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {generateLoginSessionId} from '@vexl-next/domain/src/general/LoginSessionId.brand'
-import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {type BackupFile} from '@vexl-next/resources-utils/src/backup/BackupFile'
 import {Array, Effect, Option, pipe, Record, Schema} from 'effect'
 import * as O from 'fp-ts/Option'
@@ -34,6 +33,8 @@ import {refreshOffersActionAtom} from '../marketplace/atoms/refreshOffersActionA
 import {updateMissingOfferNotificationTokensActionAtom} from '../marketplace/checkNotificationTokensAndVersionsAndUpdateOffersTask'
 import {refreshNotesActionAtom} from '../notes/atoms/refreshNotesActionAtom'
 import {createVexlSecretAndSessionTokenActionAtom} from '../notifications/actions/createVexlSecretAndSessionTokenActionAtom'
+import {invalidateVexlSecretActionAtom} from '../notifications/actions/invalidateVexlSecretActionAtom'
+import {vexlNotificationTokenAtom} from '../notifications/vexlNotificationTokenAtom'
 import {postLoginFlowCompletedScreensAtom} from '../postLoginOnboarding'
 import {sessionAtom} from '../session'
 
@@ -53,22 +54,16 @@ export type RestoreFailure = 'backupNoLongerValid' | 'offline' | 'unknown'
 export type RestoreFromBackupState =
   | {readonly state: 'idle'}
   | {readonly state: 'restoring'}
-  | {readonly state: 'restored'; readonly account: RestoredAccount}
   | {readonly state: 'failed'; readonly failure: RestoreFailure}
 
-export const restoredSession = ({
-  backup,
-  sessionNotificationToken,
-}: {
+export const restoredSession = (
   backup: BackupFile
-  sessionNotificationToken: Option.Option<VexlNotificationToken>
-}): Effect.Effect<SessionV2, InvalidBackupSessionError> => {
+): Effect.Effect<SessionV2, InvalidBackupSessionError> => {
   const session: SessionV2 = {
     ...backup.session,
     version: 1,
     masterSeed: backup.masterSeed,
     loginSessionId: generateLoginSessionId(),
-    sessionNotificationToken: Option.getOrUndefined(sessionNotificationToken),
   }
   return sanityCheckSessionV2(session)
     ? Effect.succeed(session)
@@ -115,36 +110,22 @@ export const withRestoredInboxes = (
   return [...messagingState, ...restoredInboxes]
 }
 
-// Talks to the server only. Nothing is stored until the restore is committed,
-// so an abandoned restore leaves no account data on the device.
-export const prepareRestoreFromBackupActionAtom = atom(
+// Read-only on the server, so a failure here leaves the account untouched.
+const scanRestorableKeysActionAtom = atom(
   null,
-  (get, set, backup: BackupFile) =>
+  (get, _, {backup, session}: {backup: BackupFile; session: SessionV2}) =>
     Effect.gen(function* () {
-      const {expoToken, sessionNotificationToken} = yield* set(
-        createVexlSecretAndSessionTokenActionAtom
-      )
-      const session = yield* restoredSession({
-        backup,
-        sessionNotificationToken,
-      })
-
-      // Never createUser here - it would wipe the user's contacts on the server.
-      yield* contactApiForSession(get, session).restoreUser({
-        loginSessionId: session.loginSessionId,
-        vexlNotificationToken: sessionNotificationToken,
-        expoToken: Option.fromNullable(expoToken),
-      })
-
       const api = get(apiAtom)
       const [inboxes, clubs] = yield* Effect.all(
         [
           scanInboxes({masterSeed: session.masterSeed, chatApi: api.chat}),
           scanClubs({
             masterSeed: session.masterSeed,
+            // The new device's push token is only handed out once the
+            // restore succeeds - the regular club sync sends it.
             findClubUuid: findClubUuidOfMember({
               contactApi: api.contact,
-              notificationToken: Option.fromNullable(expoToken),
+              notificationToken: Option.none(),
             }),
           }),
         ],
@@ -167,7 +148,27 @@ export const prepareRestoreFromBackupActionAtom = atom(
     })
 )
 
-export const commitRestoredAccountActionAtom = atom(
+// Throws away a notification secret minted for a restore that didn't finish.
+const discardVexlSecretActionAtom = atom(null, (_, set) =>
+  set(invalidateVexlSecretActionAtom).pipe(
+    Effect.ignore,
+    Effect.zipRight(
+      Effect.sync(() => {
+        set(vexlNotificationTokenAtom, {
+          secret: null,
+          systemVexlToken: null,
+          marketingVexlToken: null,
+          lastUpdatedMetadata: null,
+        })
+      })
+    )
+  )
+)
+
+// In memory only: after an app kill the info screen is simply skipped.
+export const showRestoredAccountInfoAtom = atom(false)
+
+const commitRestoredAccountActionAtom = atom(
   null,
   (get, set, {session, inboxKeys, clubKeys, counters}: RestoredAccount) => {
     // Before the session exists, so nothing can allocate a key from stale counters.
@@ -182,6 +183,7 @@ export const commitRestoredAccountActionAtom = atom(
     // import and notifications stay, contacts give back the local names.
     set(postLoginFlowCompletedScreensAtom, ['usageInfo'])
     set(showCheckUpdatedPrivacyPolicySuggestionAtom, false)
+    set(showRestoredAccountInfoAtom, true)
 
     set(sessionAtom, O.some(session))
     set(defaultCurrencyBaseOnCountryCodeActionAtom)
@@ -200,6 +202,39 @@ export const commitRestoredAccountActionAtom = atom(
       )
     )
   }
+)
+
+// restoreUser rotates the login nonce, which wipes the old device on its next
+// start. It goes last, and the account is stored right after it, so a restore
+// that fails earlier leaves both the old device and this one as they were.
+const restoreAccountActionAtom = atom(null, (get, set, backup: BackupFile) =>
+  Effect.gen(function* () {
+    const session = yield* restoredSession(backup)
+    const account = yield* set(scanRestorableKeysActionAtom, {backup, session})
+
+    const sessionNotificationToken = yield* Effect.gen(function* () {
+      const {expoToken, sessionNotificationToken} = yield* set(
+        createVexlSecretAndSessionTokenActionAtom
+      )
+      // Never createUser here - it would wipe the user's contacts on the server.
+      yield* contactApiForSession(get, session).restoreUser({
+        loginSessionId: session.loginSessionId,
+        vexlNotificationToken: sessionNotificationToken,
+        expoToken: Option.fromNullable(expoToken),
+      })
+      return sessionNotificationToken
+    }).pipe(Effect.tapError(() => set(discardVexlSecretActionAtom)))
+
+    set(commitRestoredAccountActionAtom, {
+      ...account,
+      session: {
+        ...session,
+        sessionNotificationToken: Option.getOrUndefined(
+          sessionNotificationToken
+        ),
+      },
+    })
+  })
 )
 
 const toRestoreFailure = (e: {
@@ -226,10 +261,10 @@ export const startRestoreFromBackupActionAtom = atom(
       return Effect.void
     set(restoreFromBackupStateAtom, {state: 'restoring'})
 
-    return set(prepareRestoreFromBackupActionAtom, backup).pipe(
+    return set(restoreAccountActionAtom, backup).pipe(
       Effect.match({
-        onSuccess: (account) => {
-          set(restoreFromBackupStateAtom, {state: 'restored', account})
+        onSuccess: () => {
+          set(restoreFromBackupStateAtom, {state: 'idle'})
         },
         onFailure: (e) => {
           const failure = toRestoreFailure(e)
@@ -244,10 +279,3 @@ export const startRestoreFromBackupActionAtom = atom(
     )
   }
 )
-
-export const finishRestoreFromBackupActionAtom = atom(null, (get, set) => {
-  const restoreState = get(restoreFromBackupStateAtom)
-  set(restoreFromBackupStateAtom, {state: 'idle'})
-  if (restoreState.state === 'restored')
-    set(commitRestoredAccountActionAtom, restoreState.account)
-})

@@ -24,6 +24,7 @@ import addMessagesToChats from './addMessagesToChats'
 import {
   chatsToAnswerWithHistory,
   chatsWaitingForHistoryRequest,
+  isRestoredInboxInGracePeriod,
   messagesToShareAsHistory,
   restoredMessagesFromHistory,
 } from './chatRecovery'
@@ -157,7 +158,7 @@ describe('restored chat state', () => {
       messages: [],
       restoredFromBackup: true,
     })
-    const requested = {...waiting, historyRequested: true}
+    const requested = {...waiting, historyRequestedAt: at(20)}
     const regular = chat({
       inboxKey: myKey,
       otherSideKey: theirKey,
@@ -266,12 +267,15 @@ describe('merging received history', () => {
   ]
 
   function restoredChat(): ChatWithMessages {
-    return chat({
-      inboxKey: myKey,
-      otherSideKey: theirKey,
-      messages: [received(liveMessage)],
-      restoredFromBackup: true,
-    })
+    return {
+      ...chat({
+        inboxKey: myKey,
+        otherSideKey: theirKey,
+        messages: [received(liveMessage)],
+        restoredFromBackup: true,
+      }),
+      historyRequestedAt: at(11),
+    }
   }
 
   it('puts restored messages before live ones with flipped direction', () => {
@@ -295,14 +299,38 @@ describe('merging received history', () => {
     expect(merged && getChatState(merged)).toBe('chatOpen')
   })
 
-  it('merges a repeated history only once', () => {
-    const history = historyFromTheirCopy(theirCopy)
-    const [once] = addMessagesToChats([restoredChat()])([history])
+  it('accepts only one history', () => {
+    const [once] = addMessagesToChats([restoredChat()])([
+      historyFromTheirCopy(theirCopy),
+    ])
+    const injected = message(myKey, {time: at(5), text: 'injected'})
     const [twice] = addMessagesToChats(once ? [once] : [])([
+      historyFromTheirCopy([...theirCopy, received(injected)]),
+    ])
+
+    expect(once?.historyMerged).toBe(true)
+    expect(twice?.messages).toEqual(once?.messages)
+  })
+
+  it('accepts no history before it was requested', () => {
+    const notRequested = {...restoredChat(), historyRequestedAt: undefined}
+    const [merged] = addMessagesToChats([notRequested])([
       historyFromTheirCopy(theirCopy),
     ])
 
-    expect(twice?.messages).toEqual(once?.messages)
+    expect(merged?.messages).toEqual(notRequested.messages)
+    expect(merged?.historyMerged).toBe(false)
+  })
+
+  it('drops history messages dated after the request', () => {
+    const afterRequest = message(myKey, {time: at(12), text: 'after'})
+    const [merged] = addMessagesToChats([restoredChat()])([
+      historyFromTheirCopy([...theirCopy, received(afterRequest)]),
+    ])
+
+    expect(merged?.messages.map((one) => one.message.uuid)).not.toContain(
+      afterRequest.uuid
+    )
   })
 
   it('derives the chat state from the history', () => {
@@ -354,5 +382,32 @@ describe('merging received history', () => {
 
     expect(checklist?.amount.received?.btcAmount).toBe(10)
     expect(checklist?.amount.sent?.btcAmount).toBe(2)
+  })
+})
+
+describe('restored inbox cleanup', () => {
+  const restoredInbox: InboxInState = {
+    inbox: {privateKey: myKey},
+    chats: [],
+    restoredFromBackup: true,
+    restoredAt: at(1),
+  }
+
+  it('keeps a restored inbox for 30 days', () => {
+    expect(
+      isRestoredInboxInGracePeriod({inbox: restoredInbox, now: at(30)})
+    ).toBe(true)
+    expect(
+      isRestoredInboxInGracePeriod({inbox: restoredInbox, now: at(31)})
+    ).toBe(false)
+  })
+
+  it('does not keep regular inboxes', () => {
+    expect(
+      isRestoredInboxInGracePeriod({
+        inbox: {inbox: {privateKey: myKey}, chats: []},
+        now: at(1),
+      })
+    ).toBe(false)
   })
 })

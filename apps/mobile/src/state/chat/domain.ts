@@ -133,7 +133,9 @@ export const ChatWithMessages = Schema.Struct({
   // Recovered after a backup restore from a message of the other side. Counts
   // as open until its history says otherwise.
   restoredFromBackup: Schema.optional(Schema.Boolean),
-  historyRequested: Schema.optional(Schema.Boolean),
+  // History is accepted once, and only messages from before the request
+  historyRequestedAt: Schema.optional(UnixMilliseconds),
+  historyMerged: Schema.optional(Schema.Boolean),
 })
 export type ChatWithMessages = typeof ChatWithMessages.Type
 
@@ -142,6 +144,7 @@ export const InboxInState = Schema.Struct({
   chats: Schema.Array(ChatWithMessages).pipe(Schema.mutable),
   // Registered by a backup restore: chats are recovered from the other side.
   restoredFromBackup: Schema.optional(Schema.Boolean),
+  restoredAt: Schema.optional(UnixMilliseconds),
 })
 export type InboxInState = typeof InboxInState.Type
 

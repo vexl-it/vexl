@@ -1,10 +1,9 @@
 import {usePreventRemove} from '@react-navigation/native'
 import {Button, Loader, Screen, Typography, YStack} from '@vexl-next/ui'
-import {useAtomValue, useSetAtom} from 'jotai'
+import {useAtomValue} from 'jotai'
 import React from 'react'
 import {type LoginFlowStackScreenProps} from '../../../navigationTypes'
 import {
-  finishRestoreFromBackupActionAtom,
   restoreFromBackupStateAtom,
   type RestoreFailure,
 } from '../../../state/backup/restoreFromBackup'
@@ -51,35 +50,6 @@ function RestoringContent(): React.ReactElement {
             {t('loginFlow.restoreFromBackup.restoring.text')}
           </Typography>
         </YStack>
-      </YStack>
-    </Screen>
-  )
-}
-
-function RestoredContent(): React.ReactElement {
-  const {t} = useTranslation()
-  const finishRestore = useSetAtom(finishRestoreFromBackupActionAtom)
-
-  return (
-    <Screen
-      navigationBar={null}
-      scrollable
-      footer={<Button onPress={finishRestore}>{t('common.continue')}</Button>}
-    >
-      <YStack gap="$8" paddingTop="$10">
-        <YStack gap="$3">
-          <Title>{t('loginFlow.restoreFromBackup.restored.title')}</Title>
-          <Text>{t('loginFlow.restoreFromBackup.restored.text')}</Text>
-        </YStack>
-        <YStack gap="$3">
-          <Typography color="$foregroundPrimary" variant="paragraphSmallBold">
-            {t('loginFlow.restoreFromBackup.restored.chatsTitle')}
-          </Typography>
-          <Text>{t('loginFlow.restoreFromBackup.restored.chatsText')}</Text>
-          <Text>{t('loginFlow.restoreFromBackup.restored.lostChatsText')}</Text>
-          <Text>{t('loginFlow.restoreFromBackup.restored.dividerText')}</Text>
-        </YStack>
-        <Text>{t('loginFlow.restoreFromBackup.restored.contactsText')}</Text>
       </YStack>
     </Screen>
   )
@@ -135,8 +105,6 @@ export default function RestoreFromBackupScreen({
 
   // Leaving mid-restore would let a second restore race the first one.
   usePreventRemove(restoreState.state === 'restoring', () => {})
-
-  if (restoreState.state === 'restored') return <RestoredContent />
 
   if (restoreState.state === 'failed')
     return (

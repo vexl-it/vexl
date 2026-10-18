@@ -322,6 +322,7 @@ export type LoginFlowStackScreenProps<
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type PostLoginFlowStackParamsList = {
+  RestoredAccountInfo: undefined
   ContactsImport: undefined
   NotificationSetup: undefined
   UsageInfo: undefined

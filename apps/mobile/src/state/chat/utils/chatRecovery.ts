@@ -1,3 +1,4 @@
+import {type UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {
   chatHistoryToMessages,
   type ChatMessageWithDirection,
@@ -40,12 +41,32 @@ export function startsChatRecovery(message: ChatMessageWithState): boolean {
   )
 }
 
+const RESTORED_INBOX_GRACE_PERIOD_MS = 30 * 24 * 60 * 60 * 1000
+
+/**
+ * A restored inbox without chats is kept for a while so the other side has
+ * time to write again. After that the regular empty-inbox cleanup applies.
+ */
+export function isRestoredInboxInGracePeriod({
+  inbox,
+  now,
+}: {
+  inbox: InboxInState
+  now: UnixMilliseconds
+}): boolean {
+  return (
+    !!inbox.restoredFromBackup &&
+    (!inbox.restoredAt ||
+      now < inbox.restoredAt + RESTORED_INBOX_GRACE_PERIOD_MS)
+  )
+}
+
 export function chatsWaitingForHistoryRequest(
   inbox: InboxInState
 ): ChatWithMessages[] {
   return Array.filter(
     inbox.chats,
-    (chat) => !!chat.restoredFromBackup && !chat.historyRequested
+    (chat) => !!chat.restoredFromBackup && !chat.historyRequestedAt
   )
 }
 
@@ -90,9 +111,34 @@ export function messagesToShareAsHistory(
   )
 }
 
+function isHistory(message: ChatMessageWithState): boolean {
+  return (
+    message.state === 'received' && message.message.messageType === 'HISTORY'
+  )
+}
+
 /**
- * Messages rebuilt from HISTORY messages in `incoming`. Only restored chats
- * accept history, and messages we already have win over their restored copy.
+ * Whether `incoming` holds the one HISTORY a restored chat accepts: the answer
+ * to our request. Any later HISTORY is ignored.
+ */
+export function consumesHistory({
+  chat,
+  incoming,
+}: {
+  chat: ChatWithMessages
+  incoming: readonly ChatMessageWithState[]
+}): boolean {
+  return (
+    !!chat.restoredFromBackup &&
+    !!chat.historyRequestedAt &&
+    !chat.historyMerged &&
+    Array.some(incoming, isHistory)
+  )
+}
+
+/**
+ * Messages rebuilt from the HISTORY in `incoming`, see `consumesHistory`.
+ * Messages dated after our request and messages we already have are dropped.
  */
 export function restoredMessagesFromHistory({
   chat,
@@ -101,7 +147,8 @@ export function restoredMessagesFromHistory({
   chat: ChatWithMessages
   incoming: readonly ChatMessageWithState[]
 }): ChatMessageWithState[] {
-  if (!chat.restoredFromBackup) return []
+  const requestedAt = chat.historyRequestedAt
+  if (!requestedAt || !consumesHistory({chat, incoming})) return []
 
   const knownIds = new Set(
     Array.map([...chat.messages, ...incoming], (one) => one.message.uuid)
@@ -122,7 +169,10 @@ export function restoredMessagesFromHistory({
       })
     ),
     Array.dedupeWith((a, b) => a.message.uuid === b.message.uuid),
-    Array.filter((one) => !knownIds.has(one.message.uuid)),
+    Array.filter(
+      (one) =>
+        !knownIds.has(one.message.uuid) && one.message.time <= requestedAt
+    ),
     Array.map(
       ({state, message}): ChatMessageWithState =>
         state === 'sent'

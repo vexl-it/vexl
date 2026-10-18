@@ -1,4 +1,5 @@
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
+import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import sendMessage from '@vexl-next/resources-utils/src/chat/sendMessage'
 import {createHistoryMessage} from '@vexl-next/resources-utils/src/chat/utils/chatHistory'
 import {taskToEffect} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
@@ -42,7 +43,10 @@ export const requestHistoryForRecoveredChatsActionAtom = atom(
             })
             const current = get(chatAtom)
             if (sent && current)
-              set(chatAtom, {...current, historyRequested: true})
+              set(chatAtom, {
+                ...current,
+                historyRequestedAt: unixMillisecondsNow(),
+              })
           })
         )
       ),

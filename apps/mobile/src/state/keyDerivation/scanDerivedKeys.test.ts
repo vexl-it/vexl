@@ -83,6 +83,29 @@ describe('scanDerivedKeys', () => {
     expect(await scanIndexes(used)).toEqual(repeated)
     expect(repeated.nextIndex).toBe(15)
   })
+
+  it('lets timers, and so UI rendering, run before and while deriving keys', async () => {
+    const events: string[] = []
+
+    const scan = Effect.runPromise(
+      scanDerivedKeys({
+        batchSize: 10,
+        margin: 3,
+        derive: (i) =>
+          Effect.sync(() => {
+            events.push(`derive ${i}`)
+            if (i === 0) setTimeout(() => events.push('timer'), 0)
+            return i
+          }),
+        findExisting: (batch) =>
+          Effect.succeed(Array.map(batch, () => Option.none())),
+      })
+    )
+    expect(events).toEqual([])
+    await scan
+
+    expect(events.indexOf('timer')).toBeLessThan(events.indexOf('derive 9'))
+  })
 })
 
 describe('scanInboxes', () => {

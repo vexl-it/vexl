@@ -10,6 +10,7 @@ import {KeyPairV2, PrivateKeyV2, PublicKeyV2} from './brandsV2'
 import {
   privateRawToPem,
   publicPemFromPrivatePem,
+  publicRawFromPrivateRaw,
   publicRawToPem,
 } from './keyUtils'
 
@@ -41,16 +42,15 @@ export function privateKeyHolderFromRaw(
   rawPrivateKey: Buffer,
   curve: Curve = defaultCurve
 ): PrivateKeyHolder {
-  const ecdh = getCrypto().createECDH(curve)
-  ecdh.setPrivateKey(rawPrivateKey)
+  const publicKeyRaw = publicRawFromPrivateRaw(rawPrivateKey, curve)
 
   return Schema.decodeSync(PrivateKeyHolder)({
-    publicKeyPemBase64: publicRawToPem(ecdh.getPublicKey(), curve).toString(
-      'base64'
-    ),
-    privateKeyPemBase64: privateRawToPem(rawPrivateKey, curve).toString(
-      'base64'
-    ),
+    publicKeyPemBase64: publicRawToPem(publicKeyRaw, curve).toString('base64'),
+    privateKeyPemBase64: privateRawToPem(
+      rawPrivateKey,
+      curve,
+      publicKeyRaw
+    ).toString('base64'),
   })
 }
 

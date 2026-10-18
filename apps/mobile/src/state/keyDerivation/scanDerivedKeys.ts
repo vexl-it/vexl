@@ -25,6 +25,7 @@ const INBOX_COUNTER_MARGIN = 100
 export const CLUB_SCAN_BATCH_SIZE = 20
 const CLUB_COUNTER_MARGIN = 10
 const CLUB_SCAN_CONCURRENCY = 5
+const DERIVE_CHUNK_SIZE = 5
 
 export interface ScanResult<A> {
   readonly found: readonly A[]
@@ -32,6 +33,20 @@ export interface ScanResult<A> {
   // last found one, which must never be handed out again.
   readonly nextIndex: KeyDerivationIndex
 }
+
+// Effect yields on microtasks, which never let React Native render. A timer
+// break before every few keys keeps the UI responsive while they are derived.
+const deriveWithBreaks = <K>(
+  indexes: readonly KeyDerivationIndex[],
+  derive: (index: KeyDerivationIndex) => Effect.Effect<K, CryptoError>
+): Effect.Effect<K[], CryptoError> =>
+  pipe(
+    Array.chunksOf(indexes, DERIVE_CHUNK_SIZE),
+    Effect.forEach((chunk) =>
+      Effect.zipRight(Effect.sleep(0), Effect.forEach(chunk, derive))
+    ),
+    Effect.map(Array.flatten)
+  )
 
 // Derives keys in consecutive batches and stops after a batch without a hit.
 // `findExisting` answers for each key of the batch, in order.
@@ -55,7 +70,7 @@ export const scanDerivedKeys = <K, A, E>({
   ): Effect.Effect<ScanResult<A>, E | CryptoError> =>
     pipe(
       Array.makeBy(batchSize, (i) => KeyDerivationIndex.make(start + i)),
-      Effect.forEach(derive),
+      (indexes) => deriveWithBreaks(indexes, derive),
       Effect.flatMap(findExisting),
       Effect.flatMap((answers) =>
         pipe(

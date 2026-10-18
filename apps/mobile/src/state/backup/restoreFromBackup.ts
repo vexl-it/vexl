@@ -31,6 +31,7 @@ import {
   type FoundClub,
 } from '../keyDerivation/scanDerivedKeys'
 import {refreshOffersActionAtom} from '../marketplace/atoms/refreshOffersActionAtom'
+import {updateMissingOfferNotificationTokensActionAtom} from '../marketplace/checkNotificationTokensAndVersionsAndUpdateOffersTask'
 import {refreshNotesActionAtom} from '../notes/atoms/refreshNotesActionAtom'
 import {createVexlSecretAndSessionTokenActionAtom} from '../notifications/actions/createVexlSecretAndSessionTokenActionAtom'
 import {postLoginFlowCompletedScreensAtom} from '../postLoginOnboarding'
@@ -188,9 +189,15 @@ export const commitRestoredAccountActionAtom = atom(
     // Own offers and notes come back with ownership, which links them to
     // their restored inboxes. Don't wait for the marketplace screen.
     Effect.runFork(
-      Effect.all([set(refreshOffersActionAtom), set(refreshNotesActionAtom)], {
-        concurrency: 'unbounded',
-      })
+      Effect.all(
+        [
+          set(refreshOffersActionAtom).pipe(
+            Effect.zipRight(set(updateMissingOfferNotificationTokensActionAtom))
+          ),
+          set(refreshNotesActionAtom),
+        ],
+        {concurrency: 'unbounded'}
+      )
     )
   }
 )

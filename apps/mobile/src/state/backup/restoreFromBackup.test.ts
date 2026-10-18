@@ -98,6 +98,19 @@ jest.mock('../marketplace/atoms/refreshOffersActionAtom', () => ({
       jest.requireActual('effect').Effect.sync(mockRefreshOffers)
     ),
 }))
+const mockUpdateOfferNotificationTokens = jest.fn()
+jest.mock(
+  '../marketplace/checkNotificationTokensAndVersionsAndUpdateOffersTask',
+  () => ({
+    updateMissingOfferNotificationTokensActionAtom: jest
+      .requireActual('jotai')
+      .atom(null, () =>
+        jest
+          .requireActual('effect')
+          .Effect.sync(mockUpdateOfferNotificationTokens)
+      ),
+  })
+)
 jest.mock('../notes/atoms/refreshNotesActionAtom', () => ({
   refreshNotesActionAtom: jest
     .requireActual('jotai')
@@ -245,6 +258,7 @@ describe('restore from backup', () => {
     })
     expect(store.get(postLoginFlowCompletedScreensAtom)).toEqual(['usageInfo'])
     expect(mockRefreshOffers).toHaveBeenCalled()
+    expect(mockUpdateOfferNotificationTokens).toHaveBeenCalled()
     expect(store.get(restoreFromBackupStateAtom)).toEqual({state: 'idle'})
   })
 

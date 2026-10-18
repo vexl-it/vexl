@@ -81,6 +81,43 @@ const updateOfferNotificationTokenActionAtom = atom(
     )
 )
 
+// Also run right after a backup restore, so pushes for restored offers move
+// to the new device without waiting for the next resume.
+export const updateMissingOfferNotificationTokensActionAtom = atom(
+  null,
+  (get, set) =>
+    Effect.gen(function* (_) {
+      const offersToUpdateNotificationToken = pipe(
+        get(myOffersAtom),
+        Array.filter(set(doesOfferNeedsUpdateNotificationToken))
+      )
+      console.log(
+        `Refreshing notification tokens for ${offersToUpdateNotificationToken.length} offers`
+      )
+      const offerUpdatesNotification = yield* _(
+        pipe(
+          offersToUpdateNotificationToken,
+          Array.map((offer) =>
+            set(updateOfferNotificationTokenActionAtom, offer)
+          ),
+          Effect.allWith({
+            concurrency: 'unbounded',
+          })
+        )
+      )
+
+      const successNotificationCount =
+        offerUpdatesNotification.filter(Boolean).length
+      const failedNotificationCount =
+        offerUpdatesNotification.length - successNotificationCount
+
+      console.log(
+        `Finished refreshing Notifications for offers. Successfully refreshed: ${successNotificationCount}, failed: ${failedNotificationCount}`
+      )
+      return {successNotificationCount, failedNotificationCount}
+    })
+)
+
 const updateOfferVersionAndLocalizedAddresses = atom(
   null,
   (get, set, offer: MyOfferInState) =>
@@ -137,32 +174,8 @@ export const checkNotificationTokensAndVersionsAndUpdateOffersTaskId =
           body: 'Checking notification tokens and refreshing offers',
         })
 
-        const offersToUpdateNotificationToken = pipe(
-          store.get(myOffersAtom),
-          Array.filter(store.set(doesOfferNeedsUpdateNotificationToken))
-        )
-        console.log(
-          `Refreshing notification tokens for ${offersToUpdateNotificationToken.length} offers`
-        )
-        const offerUpdatesNotification = yield* _(
-          pipe(
-            offersToUpdateNotificationToken,
-            Array.map((offer) =>
-              store.set(updateOfferNotificationTokenActionAtom, offer)
-            ),
-            Effect.allWith({
-              concurrency: 'unbounded',
-            })
-          )
-        )
-
-        const successNotificationCount =
-          offerUpdatesNotification.filter(Boolean).length
-        const failedNotificationCount =
-          offerUpdatesNotification.length - successNotificationCount
-
-        console.log(
-          `Finished refreshing Notifications for offers. Successfully refreshed: ${successNotificationCount}, failed: ${failedNotificationCount}`
+        const {successNotificationCount, failedNotificationCount} = yield* _(
+          store.set(updateMissingOfferNotificationTokensActionAtom)
         )
 
         const offersToUpdateVersion = pipe(

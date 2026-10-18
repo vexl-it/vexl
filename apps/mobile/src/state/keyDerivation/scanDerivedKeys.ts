@@ -15,48 +15,69 @@ import {MAX_PUBLIC_KEYS_IN_CHECK_INBOXES_EXIST_REQUEST} from '@vexl-next/rest-ap
 import {type ContactApi} from '@vexl-next/rest-api/src/services/contact'
 import {Array, Effect, HashSet, Option, pipe} from 'effect'
 
+// A scan stops after a whole batch of unused indexes. The counter continues a
+// margin smaller than the batch past the last used index, so a key allocated
+// after a restore is always found by the next one.
 export const INBOX_SCAN_BATCH_SIZE =
   MAX_PUBLIC_KEYS_IN_CHECK_INBOXES_EXIST_REQUEST
+const INBOX_COUNTER_MARGIN = 100
 // Failed club joins burn indexes, so a batch has to span a run of them.
 export const CLUB_SCAN_BATCH_SIZE = 20
+const CLUB_COUNTER_MARGIN = 10
 const CLUB_SCAN_CONCURRENCY = 5
 
 export interface ScanResult<A> {
   readonly found: readonly A[]
-  // Every scanned index counts as used - a key of a deleted inbox or a failed
-  // club join must never be handed out again.
+  // The margin covers keys of deleted inboxes or failed club joins past the
+  // last found one, which must never be handed out again.
   readonly nextIndex: KeyDerivationIndex
 }
 
 // Derives keys in consecutive batches and stops after a batch without a hit.
+// `findExisting` answers for each key of the batch, in order.
 export const scanDerivedKeys = <K, A, E>({
   batchSize,
+  margin,
   derive,
   findExisting,
 }: {
   batchSize: number
+  margin: number
   derive: (index: KeyDerivationIndex) => Effect.Effect<K, CryptoError>
-  findExisting: (batch: readonly K[]) => Effect.Effect<readonly A[], E>
+  findExisting: (
+    batch: readonly K[]
+  ) => Effect.Effect<ReadonlyArray<Option.Option<A>>, E>
 }): Effect.Effect<ScanResult<A>, E | CryptoError> => {
   const scanFrom = (
     start: number,
-    found: readonly A[]
+    found: readonly A[],
+    nextIndex: number
   ): Effect.Effect<ScanResult<A>, E | CryptoError> =>
     pipe(
       Array.makeBy(batchSize, (i) => KeyDerivationIndex.make(start + i)),
       Effect.forEach(derive),
       Effect.flatMap(findExisting),
-      Effect.flatMap((hits) =>
-        Array.isNonEmptyReadonlyArray(hits)
-          ? scanFrom(start + batchSize, [...found, ...hits])
-          : Effect.succeed({
-              found,
-              nextIndex: KeyDerivationIndex.make(start + batchSize),
-            })
+      Effect.flatMap((answers) =>
+        pipe(
+          Array.findLastIndex(answers, Option.isSome),
+          Option.match({
+            onNone: () =>
+              Effect.succeed({
+                found,
+                nextIndex: KeyDerivationIndex.make(nextIndex),
+              }),
+            onSome: (lastHit) =>
+              scanFrom(
+                start + batchSize,
+                [...found, ...Array.getSomes(answers)],
+                start + lastHit + 1 + margin
+              ),
+          })
+        )
       )
     )
 
-  return scanFrom(0, [])
+  return scanFrom(0, [], margin)
 }
 
 export const scanInboxes = ({
@@ -71,6 +92,7 @@ export const scanInboxes = ({
 > =>
   scanDerivedKeys({
     batchSize: INBOX_SCAN_BATCH_SIZE,
+    margin: INBOX_COUNTER_MARGIN,
     derive: (index) => deriveInboxPrivateKey(masterSeed, index),
     findExisting: (keys) =>
       chatApi
@@ -80,8 +102,10 @@ export const scanInboxes = ({
         .pipe(
           Effect.map(({existingPublicKeys}) => {
             const existing = HashSet.fromIterable(existingPublicKeys)
-            return Array.filter(keys, (key) =>
+            return Array.map(keys, (key) =>
               HashSet.has(existing, key.publicKeyPemBase64)
+                ? Option.some(key)
+                : Option.none()
             )
           })
         ),
@@ -125,6 +149,7 @@ export const scanClubs = <E>({
 }): Effect.Effect<ScanResult<FoundClub>, E | CryptoError> =>
   scanDerivedKeys({
     batchSize: CLUB_SCAN_BATCH_SIZE,
+    margin: CLUB_COUNTER_MARGIN,
     derive: (index) => deriveClubKeys(masterSeed, index),
     findExisting: (batch) =>
       pipe(
@@ -136,7 +161,6 @@ export const scanClubs = <E>({
               Option.map((clubUuid) => ({clubUuid, keys}))
             ),
           {concurrency: CLUB_SCAN_CONCURRENCY}
-        ),
-        Effect.map(Array.getSomes)
+        )
       ),
   })

@@ -14,6 +14,7 @@ import {
   MasterSeed,
 } from '@vexl-next/domain/src/general/MasterSeed.brand'
 import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
+import {UserName} from '@vexl-next/domain/src/general/UserName.brand'
 import {type BackupFile} from '@vexl-next/resources-utils/src/backup/BackupFile'
 import {
   deriveClubKeys,
@@ -22,6 +23,7 @@ import {
 import {UserNotFoundError} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {Array, Effect, Option, Schema} from 'effect'
 import {getDefaultStore} from 'jotai'
+import {showMarketplaceIntroDialogAtom} from '../../utils/preferences'
 import messagingStateAtom from '../chat/atoms/messagingStateAtom'
 import {clubsKeyHolderStorageAtom} from '../clubs/atom/clubsToKeyHolderV2Atom'
 import {keyDerivationCountersAtom} from '../keyDerivation'
@@ -159,6 +161,7 @@ const setUp = async (): Promise<{
       privateKey: dummySession.privateKey,
       keyPairV2: dummySession.keyPairV2,
       isLiquidityProvider: true,
+      realUserData: {userName: Schema.decodeSync(UserName)('Satoshi')},
     },
     masterSeed,
     legacyInboxKeys: [generatePrivateKey()],
@@ -238,6 +241,7 @@ describe('restore from backup', () => {
     })
     expect(session).toEqual({
       ...backup.session,
+      realUserData: {userName: 'Satoshi', image: undefined},
       version: 1,
       masterSeed,
       loginSessionId: session.loginSessionId,
@@ -268,11 +272,12 @@ describe('restore from backup', () => {
       waitingForAdmission: backup.legacyClubKeysWaitingForAdmission,
     })
     expect(store.get(keyDerivationCountersAtom)).toEqual({
-      nextInboxIndex: 400,
-      nextClubIndex: 40,
+      nextInboxIndex: 7 + 1 + 100,
+      nextClubIndex: 1 + 1 + 10,
     })
     expect(store.get(postLoginFlowCompletedScreensAtom)).toEqual(['usageInfo'])
     expect(store.get(showRestoredAccountInfoAtom)).toBe(true)
+    expect(store.get(showMarketplaceIntroDialogAtom)).toBe(false)
     expect(mockRefreshOffers).toHaveBeenCalled()
     expect(mockUpdateOfferNotificationTokens).toHaveBeenCalled()
     expect(store.get(restoreFromBackupStateAtom)).toEqual({state: 'idle'})

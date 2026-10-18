@@ -5,7 +5,10 @@ import {
 import {type ClubKeys, type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {KeyDerivationIndex} from '@vexl-next/domain/src/general/MasterSeed.brand'
 import {type CryptoError} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
-import {type BackupFile} from '@vexl-next/resources-utils/src/backup/BackupFile'
+import {
+  type BackupFile,
+  type BackupUserData,
+} from '@vexl-next/resources-utils/src/backup/BackupFile'
 import {
   deriveClubKeys,
   deriveInboxPrivateKey,
@@ -37,8 +40,10 @@ export const createBackupFile = ({
   inboxKeys,
   clubs,
   clubKeysWaitingForAdmission,
+  realUserData,
 }: {
   session: SessionV2
+  realUserData?: BackupUserData
   counters: KeyDerivationCounters
   inboxKeys: readonly PrivateKeyHolder[]
   clubs: Record.ReadonlyRecord<ClubUuid, ClubKeys>
@@ -61,14 +66,17 @@ export const createBackupFile = ({
 
     return {
       version: 1,
-      session: Struct.pick(
-        session,
-        'phoneNumber',
-        'sessionCredentials',
-        'privateKey',
-        'keyPairV2',
-        'isLiquidityProvider'
-      ),
+      session: {
+        ...Struct.pick(
+          session,
+          'phoneNumber',
+          'sessionCredentials',
+          'privateKey',
+          'keyPairV2',
+          'isLiquidityProvider'
+        ),
+        realUserData,
+      },
       masterSeed,
       legacyInboxKeys: pipe(
         inboxKeys,

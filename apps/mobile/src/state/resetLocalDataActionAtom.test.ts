@@ -1,8 +1,14 @@
+import {Effect} from 'effect'
 import * as Notifications from 'expo-notifications'
 import {createStore} from 'jotai'
 import {clear as clearNseBridge} from '../../modules/vexl-nse-bridge'
 import clearMmkvStorageAndEmptyAtoms from '../utils/clearMmkvStorageAndEmptyAtoms'
 import {deleteAllFiles} from '../utils/fsDirectories'
+import {storage} from '../utils/mmkv/effectMmkv'
+import {
+  markAccountMovedNoticePending,
+  showAccountMovedNoticeIfPendingActionAtom,
+} from './accountMovedNotice'
 import {
   clearDeviceAfterLoginOnAnotherDeviceActionAtom,
   resetLocalDataActionAtom,
@@ -86,10 +92,21 @@ jest.mock('expo-notifications', () => ({
   unregisterForNotificationsAsync: jest.fn(async () => {}),
 }))
 
+jest.mock('react-native-mmkv')
+jest.mock('@react-native-async-storage/async-storage', () => ({
+  __esModule: true,
+  default: {getItem: jest.fn(), setItem: jest.fn(), removeItem: jest.fn()},
+}))
+jest.mock('../utils/runAfterAnimationFrames', () => {
+  const {Effect} = jest.requireActual('effect')
+  return {waitForNextAnimationFrameEffect: () => Effect.void}
+})
+
 const fetchMock = jest.fn()
 
 beforeEach(() => {
   jest.clearAllMocks()
+  storage._storage.clearAll()
   global.fetch = fetchMock
 })
 
@@ -113,4 +130,22 @@ it('tells the user the account moved after clearing the device', async () => {
   )
   expect(mockApiRead).not.toHaveBeenCalled()
   expect(fetchMock).not.toHaveBeenCalled()
+})
+
+it('shows a notice left pending by an earlier run once', async () => {
+  markAccountMovedNoticePending()
+  const store = createStore()
+
+  await Effect.runPromise(store.set(showAccountMovedNoticeIfPendingActionAtom))
+  await Effect.runPromise(store.set(showAccountMovedNoticeIfPendingActionAtom))
+
+  expect(mockShowDialog).toHaveBeenCalledTimes(1)
+})
+
+it('shows nothing without a pending notice', async () => {
+  await Effect.runPromise(
+    createStore().set(showAccountMovedNoticeIfPendingActionAtom)
+  )
+
+  expect(mockShowDialog).not.toHaveBeenCalled()
 })

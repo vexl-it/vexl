@@ -117,8 +117,8 @@ export const mergeIncomingOffersToState = ({
         : storedOffer
 
     return pipe(
-      withoutRemovedSourcesOrNone(updatedOffer),
-      Option.flatMap(addOwnershipInfoFromPrivatePayloadIfMissing)
+      addOwnershipInfoFromPrivatePayloadIfMissing(updatedOffer),
+      Option.flatMap(withoutRemovedSourcesOrNone)
     )
   })
 
@@ -126,14 +126,16 @@ export const mergeIncomingOffersToState = ({
     incomingOffers,
     Array.filter((one) => !storedOffersIds.has(one.offerId)),
     Array.filterMap((offerInfo) =>
+      // Ownership first: the owner's own private part has no friend level,
+      // so normalizing it as a foreign offer would drop it.
       pipe(
-        withoutRemovedSourcesOrNone({
+        addOwnershipInfoFromPrivatePayloadIfMissing({
           offerInfo,
           flags: {
             reported: false,
           },
         } satisfies OneOfferInState),
-        Option.flatMap(addOwnershipInfoFromPrivatePayloadIfMissing)
+        Option.flatMap(withoutRemovedSourcesOrNone)
       )
     )
   )

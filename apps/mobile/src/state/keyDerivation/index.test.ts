@@ -134,8 +134,8 @@ describe('key derivation counters', () => {
     )
     const expected = await Effect.runPromise(
       Effect.all([
-        deriveInboxPrivateKey(masterSeed, index(400)),
-        deriveInboxPrivateKey(masterSeed, index(401)),
+        deriveInboxPrivateKey(masterSeed, index(104)),
+        deriveInboxPrivateKey(masterSeed, index(105)),
       ])
     )
 
@@ -144,6 +144,6 @@ describe('key derivation counters', () => {
     expect(mockGetClubInfo).toHaveBeenCalledTimes(20)
     expect(allocated).toEqual(expect.arrayContaining(expected))
     // The club counter was already higher in memory and is never lowered.
-    expect(storedCounters()).toEqual({nextInboxIndex: 402, nextClubIndex: 40})
+    expect(storedCounters()).toEqual({nextInboxIndex: 106, nextClubIndex: 40})
   })
 })

@@ -5,10 +5,24 @@ import {
 import {ClubKeys, ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {MasterSeed} from '@vexl-next/domain/src/general/MasterSeed.brand'
+import {UserName} from '@vexl-next/domain/src/general/UserName.brand'
+import {Base64String} from '@vexl-next/domain/src/utility/Base64String.brand'
 import {UserSessionCredentialsV2} from '@vexl-next/rest-api/src/UserSessionCredentials.brand'
 import {Schema} from 'effect'
 
 export const BACKUP_FILE_EXTENSION = 'vexl-backup'
+
+export const BackupUserData = Schema.Struct({
+  userName: Schema.optional(UserName),
+  // The avatar file itself - its URI only points into the old device's storage.
+  image: Schema.optional(
+    Schema.Struct({
+      base64: Base64String,
+      extension: Schema.String.pipe(Schema.pattern(/^[a-z0-9]{1,5}$/)),
+    })
+  ),
+})
+export type BackupUserData = typeof BackupUserData.Type
 
 export const BackupSession = Schema.Struct({
   phoneNumber: E164PhoneNumber,
@@ -16,6 +30,7 @@ export const BackupSession = Schema.Struct({
   privateKey: PrivateKeyHolder,
   keyPairV2: KeyPairV2,
   isLiquidityProvider: Schema.Boolean,
+  realUserData: Schema.optional(BackupUserData),
 })
 export type BackupSession = typeof BackupSession.Type
 

@@ -8,7 +8,10 @@ import {atom} from 'jotai'
 import {apiAtom} from '../../api'
 import {contactApiForSession} from '../../api/contactApiForSession'
 import {sanityCheckSessionV2, type SessionV2} from '../../brands/Session.brand'
-import {showCheckUpdatedPrivacyPolicySuggestionAtom} from '../../utils/preferences'
+import {
+  showCheckUpdatedPrivacyPolicySuggestionAtom,
+  showMarketplaceIntroDialogAtom,
+} from '../../utils/preferences'
 import reportError from '../../utils/reportError'
 import messagingStateAtom, {
   messagingStateAtomStorageAtom,
@@ -37,6 +40,7 @@ import {invalidateVexlSecretActionAtom} from '../notifications/actions/invalidat
 import {vexlNotificationTokenAtom} from '../notifications/vexlNotificationTokenAtom'
 import {postLoginFlowCompletedScreensAtom} from '../postLoginOnboarding'
 import {sessionAtom} from '../session'
+import {restoredUserData} from './backupUserData'
 
 export class InvalidBackupSessionError extends Schema.TaggedError<InvalidBackupSessionError>(
   'InvalidBackupSessionError'
@@ -59,8 +63,9 @@ export type RestoreFromBackupState =
 export const restoredSession = (
   backup: BackupFile
 ): Effect.Effect<SessionV2, InvalidBackupSessionError> => {
+  const {realUserData: _restoredLater, ...backupSession} = backup.session
   const session: SessionV2 = {
-    ...backup.session,
+    ...backupSession,
     version: 1,
     masterSeed: backup.masterSeed,
     loginSessionId: generateLoginSessionId(),
@@ -183,6 +188,8 @@ const commitRestoredAccountActionAtom = atom(
     // import and notifications stay, contacts give back the local names.
     set(postLoginFlowCompletedScreensAtom, ['usageInfo'])
     set(showCheckUpdatedPrivacyPolicySuggestionAtom, false)
+    // A returning user knows the marketplace.
+    set(showMarketplaceIntroDialogAtom, false)
     set(showRestoredAccountInfoAtom, true)
 
     set(sessionAtom, O.some(session))
@@ -232,6 +239,8 @@ const restoreAccountActionAtom = atom(null, (get, set, backup: BackupFile) =>
         sessionNotificationToken: Option.getOrUndefined(
           sessionNotificationToken
         ),
+        // Writes the avatar file, so only once the restore went through.
+        realUserData: restoredUserData(backup.session.realUserData),
       },
     })
   })

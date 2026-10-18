@@ -90,8 +90,8 @@ const areCountersStored = (): boolean =>
     storage.getVerified(KEY_DERIVATION_COUNTERS_MMKV_KEY, KeyDerivationCounters)
   )
 
-// Counters lost while the session survived: everything up to the end of the
-// scan may already be in use.
+// Counters lost while the session survived: continue past the keys that still
+// exist on the server, same as after a restore.
 const recoverCountersFromServerActionAtom = atom(
   null,
   (get, set): Effect.Effect<void, KeyDerivationCountersRecoveryError> =>

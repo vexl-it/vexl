@@ -19,6 +19,7 @@ import messagingStateAtom from '../chat/atoms/messagingStateAtom'
 import {clubsKeyHolderStorageAtom} from '../clubs/atom/clubsToKeyHolderV2Atom'
 import {keyDerivationCountersAtom} from '../keyDerivation'
 import {sessionAtom} from '../session'
+import {userDataForBackup} from './backupUserData'
 import {createBackupFile} from './createBackupFile'
 
 class AccountBackupExportError extends Schema.TaggedError<AccountBackupExportError>(
@@ -75,6 +76,7 @@ export const exportAccountBackupActionAtom = atom(
       ),
       clubs,
       clubKeysWaitingForAdmission: waitingForAdmission,
+      realUserData: userDataForBackup(session.session.realUserData),
     }).pipe(
       Effect.flatMap(Schema.encode(BackupFileFromJson)),
       Effect.flatMap((content) =>

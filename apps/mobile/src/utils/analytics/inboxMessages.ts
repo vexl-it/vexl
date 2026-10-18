@@ -26,7 +26,7 @@ export const reportInboxMessagesActionAtom = analyticsActionAtom(
   ) => {
     if (offer)
       set(reportOfferRequestsReceivedActionAtom, {
-        offer,
+        offerId: offer.offerInfo.offerId,
         chats: inbox.chats,
         newRequestTimes: messageTimes(
           newMessages,

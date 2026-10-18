@@ -12,6 +12,7 @@ import {
   type JourneyDefinition,
 } from '@vexl-next/analytics-definitions/src/core'
 import {analyticsDefinitions} from '@vexl-next/analytics-definitions/src/registry'
+import {fromDate} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {Array, Option, Record, Schema, pipe} from 'effect'
 import {type AnalyticsInstance, type AnalyticsInstances} from './domain'
 
@@ -136,6 +137,7 @@ export function applyJourneyStep<S extends object, I>({
         schemaVersion: definition.schemaVersion,
         revision: 0,
         startDay,
+        startedAt: fromDate(now),
         updatedDay,
         payload,
         ...(key !== undefined ? {key} : {}),

@@ -14,15 +14,16 @@ import {type Chat} from '@vexl-next/domain/src/general/messaging'
 import {
   type OfferId,
   type OfferType,
-  type OneOfferInState,
 } from '@vexl-next/domain/src/general/offers'
 import {Array, Option, pipe} from 'effect'
 import messagingStateAtom from '../../state/chat/atoms/messagingStateAtom'
 import {type ChatWithMessages} from '../../state/chat/domain'
 import {reportAfterOpenActionAtom} from './afterOpenAction'
 import {analyticsActionAtom} from './analyticsActionAtom'
+import {analyticsInstancesAtom} from './atoms'
 import {earliest, receivedRequestTimes} from './chatMessages'
 import {reportCoreActionActionAtom} from './coreAction'
+import {findOpenJourneys} from './instances'
 import {reportPromptTargetReachedActionAtom} from './prompt'
 import {journeyReportActionAtom} from './report'
 
@@ -65,11 +66,11 @@ export const reportOfferRequestsReceivedActionAtom = analyticsActionAtom(
     get,
     set,
     {
-      offer,
+      offerId,
       chats,
       newRequestTimes,
     }: {
-      offer: OneOfferInState
+      offerId: OfferId
       chats: readonly ChatWithMessages[]
       newRequestTimes: readonly number[]
     }
@@ -77,25 +78,28 @@ export const reportOfferRequestsReceivedActionAtom = analyticsActionAtom(
     const firstNewRequestAt = earliest(newRequestTimes)
     if (Option.isNone(firstNewRequestAt)) return
 
-    const createdAt = Date.parse(offer.offerInfo.createdAt)
+    // offerInfo.createdAt comes back from the server with day precision only.
+    const createdAt = pipe(
+      findOpenJourneys(get(analyticsInstancesAtom), offerJourney.name, offerId),
+      Array.head,
+      Option.flatMapNullable((journey) => journey.startedAt)
+    )
     set(
       offerJourneyAtom,
       (current) => ({
-        ...(Option.exists(
-          current,
-          (state) => state.firstRequestAfter !== undefined
-        )
+        ...(Option.isNone(createdAt) ||
+        Option.exists(current, (state) => state.firstRequestAfter !== undefined)
           ? {}
           : {
               firstRequestAfter: bucketDuration(
-                firstNewRequestAt.value - createdAt
+                firstNewRequestAt.value - createdAt.value
               ),
             }),
         requestsReceived: bucketRequestCount(
           receivedRequestTimes(chats).length
         ),
       }),
-      {key: offer.offerInfo.offerId, onlyIfOpen: true}
+      {key: offerId, onlyIfOpen: true}
     )
   }
 )

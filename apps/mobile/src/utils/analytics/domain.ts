@@ -21,6 +21,8 @@ export const AnalyticsInstance = Schema.Struct({
   payload: Schema.Object,
   /** Tells concurrent journeys apart (an offer id, for example). Never uploaded. */
   key: Schema.optional(Schema.String),
+  /** Exact start time, for durations measured from it. Never uploaded. */
+  startedAt: Schema.optional(UnixMilliseconds),
   closed: Schema.Boolean,
   /** Local state is newer than what the server acknowledged. */
   pending: Schema.Boolean,
@@ -37,6 +39,7 @@ export function toUpsert({
   closed,
   pending,
   key,
+  startedAt,
   ...upsert
 }: AnalyticsInstance): AnalyticsStateUpsert {
   return upsert

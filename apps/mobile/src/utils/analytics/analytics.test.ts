@@ -4,6 +4,7 @@ import {
   isoWeekStart,
 } from '@vexl-next/analytics-definitions/src/buckets'
 import {AnalyticsStateId} from '@vexl-next/analytics-definitions/src/core'
+import {offerJourney} from '@vexl-next/analytics-definitions/src/definitions/offer'
 import {onboardingJourney} from '@vexl-next/analytics-definitions/src/definitions/onboarding'
 import {
   testAggregation,
@@ -11,6 +12,7 @@ import {
   testWeekJourney,
   type TestAggregationState,
 } from '@vexl-next/analytics-definitions/src/testDefinitions'
+import {newOfferId} from '@vexl-next/domain/src/general/offers'
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {Deferred, Effect, Option, Schema} from 'effect'
 import {getDefaultStore} from 'jotai'
@@ -33,6 +35,7 @@ import {
   pruneExpired,
   settleInstance,
 } from './instances'
+import {reportOfferRequestsReceivedActionAtom} from './offer'
 import {reportFirstOpenActionAtom} from './onboarding'
 import {analyticsOptInAtom} from './optIn'
 import {AnalyticsUploadError} from './relay'
@@ -78,6 +81,11 @@ jest.mock('../../api', () => ({
   sessionCountryPrefixAtom: jest
     .requireActual('jotai')
     .atom(jest.requireActual('effect').Option.none()),
+}))
+
+jest.mock('../../state/chat/atoms/messagingStateAtom', () => ({
+  __esModule: true,
+  default: jest.requireActual('jotai').atom([]),
 }))
 
 const mockUploadAnalyticsState = jest.fn()
@@ -518,7 +526,10 @@ describe('flushAnalyticsActionAtom', () => {
   }
 
   it('uploads the state without the local bookkeeping', async () => {
-    const instance = startedToday({key: 'local-offer-id'})
+    const instance = startedToday({
+      key: 'local-offer-id',
+      startedAt: unixMillisecondsNow(),
+    })
     await flushWith(instance, Effect.void)
 
     expect(mockUploadAnalyticsState).toHaveBeenCalledWith({
@@ -736,6 +747,36 @@ describe('journey step upload', () => {
     expect(openJourneyStates(store.get, testJourney, 'a')).toEqual([
       {step: 'intro'},
     ])
+  })
+})
+
+describe('offer journey', () => {
+  const offerId = newOfferId()
+  const startOfferJourney = journeyReportActionAtom(offerJourney)
+  const offerState = (): unknown =>
+    Object.values(store.get(analyticsInstancesAtom)).find(
+      (one) => one.key === offerId
+    )?.payload
+
+  beforeEach(() => {
+    store.set(setAnalyticsInstancesAtom, {})
+    mockUploadAnalyticsState.mockReturnValue(Effect.void)
+  })
+
+  it('measures the first request from the exact local offer creation', () => {
+    store.set(
+      startOfferJourney,
+      {offerType: 'sell', class: 'main'},
+      {key: offerId, alwaysStart: true}
+    )
+
+    store.set(reportOfferRequestsReceivedActionAtom, {
+      offerId,
+      chats: [],
+      newRequestTimes: [Date.now() + 125_000],
+    })
+
+    expect(offerState()).toMatchObject({firstRequestAfter: 'under1h'})
   })
 })
 

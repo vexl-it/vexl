@@ -7,6 +7,7 @@ import {KeyDerivationIndex} from '@vexl-next/domain/src/general/MasterSeed.brand
 import {type CryptoError} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {
   type BackupFile,
+  type BackupNotificationSecret,
   type BackupUserData,
 } from '@vexl-next/resources-utils/src/backup/BackupFile'
 import {
@@ -41,9 +42,11 @@ export const createBackupFile = ({
   clubs,
   clubKeysWaitingForAdmission,
   realUserData,
+  notificationSecret,
 }: {
   session: SessionV2
   realUserData?: BackupUserData
+  notificationSecret?: BackupNotificationSecret
   counters: KeyDerivationCounters
   inboxKeys: readonly PrivateKeyHolder[]
   clubs: Record.ReadonlyRecord<ClubUuid, ClubKeys>
@@ -90,6 +93,7 @@ export const createBackupFile = ({
         )
       ),
       legacyClubKeys: Record.filter(clubs, isLegacyClubKey),
+      notificationSecret,
       legacyClubKeysWaitingForAdmission: Array.filter(
         clubKeysWaitingForAdmission,
         isLegacyClubKey

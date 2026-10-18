@@ -64,8 +64,6 @@ describe('mergeIncomingOffersToState', () => {
       intendedConnectionLevel: 'ALL',
       intendedClubs: [],
     })
-    // The token belongs to the device that created the offer.
-    expect(merged?.offerInfo.publicPart.vexlNotificationToken).toBeUndefined()
   })
 
   it('still drops foreign offers without any friend level', () => {

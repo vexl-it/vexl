@@ -32,7 +32,7 @@ import {useCallback} from 'react'
 import {Platform} from 'react-native'
 import {apiAtom, getApiPreset} from '../../api'
 import {addNotificationToCenterActionAtom} from '../../components/NotificationsScreen/state'
-import {fetchAndStoreMessagesForInboxHandleNotificationsActionAtom} from '../../state/chat/atoms/fetchNewMessagesActionAtom'
+import {fetchMessagesForNotifiedInboxActionAtom} from '../../state/chat/atoms/fetchMessagesForNotifiedInboxActionAtom'
 import messagingStateAtom from '../../state/chat/atoms/messagingStateAtom'
 import {processStreamOnlyNotificationActionAtom} from '../../state/chat/atoms/processStreamOnlyChatMessage'
 import {checkForClubsAdmissionActionAtom} from '../../state/clubs/atom/checkForClubsAdmissionActionAtom'
@@ -88,32 +88,23 @@ const processNewChatMessageActionAtom = atom(
   (get, set, message: NewChatMessageNoticeMessage | StreamOnlyChatMessage) =>
     Effect.gen(function* (_) {
       const cypher = message.targetToken ?? message.targetCypher
-      const inboxForCypher = set(
-        getKeyHolderForNotificationTokenOrCypherActionAtom,
-        cypher
-      )
-      if (!inboxForCypher) {
-        yield* _(
-          reportErrorE(
-            'warn',
-            new Error(
-              'Error decrypting notification from stream - unable to find private key for cypher'
-            )
-          )
-        )
-        return
-      }
 
       if (message._tag === 'NewChatMessageNoticeMessage') {
         yield* _(
           Console.log('📩 Processing chat message notification from stream')
         )
-        yield* _(
-          set(fetchAndStoreMessagesForInboxHandleNotificationsActionAtom, {
-            key: inboxForCypher.publicKeyPemBase64,
-          })
-        )
-      } else if (message._tag === 'StreamOnlyChatMessage') {
+        yield* _(set(fetchMessagesForNotifiedInboxActionAtom, cypher))
+        return
+      }
+
+      const inboxForCypher = set(
+        getKeyHolderForNotificationTokenOrCypherActionAtom,
+        cypher
+      )
+      // Stream-only messages (e.g. typing) aren't worth fetching all inboxes.
+      if (!inboxForCypher) return
+
+      if (message._tag === 'StreamOnlyChatMessage') {
         const inbox = Array.findFirst(
           get(messagingStateAtom),
           (i) =>

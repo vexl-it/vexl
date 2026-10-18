@@ -13,7 +13,10 @@ import {
   KeyDerivationIndex,
   MasterSeed,
 } from '@vexl-next/domain/src/general/MasterSeed.brand'
-import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
+import {
+  VexlNotificationToken,
+  VexlNotificationTokenSecret,
+} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {UserName} from '@vexl-next/domain/src/general/UserName.brand'
 import {type BackupFile} from '@vexl-next/resources-utils/src/backup/BackupFile'
 import {
@@ -27,6 +30,8 @@ import {showMarketplaceIntroDialogAtom} from '../../utils/preferences'
 import messagingStateAtom from '../chat/atoms/messagingStateAtom'
 import {clubsKeyHolderStorageAtom} from '../clubs/atom/clubsToKeyHolderV2Atom'
 import {keyDerivationCountersAtom} from '../keyDerivation'
+import {vexlNotificationTokenAtom} from '../notifications/vexlNotificationTokenAtom'
+import {vexlTokenToKeyHolderAtom} from '../notifications/vexlTokenToKeyHolderAtom'
 import {postLoginFlowCompletedScreensAtom} from '../postLoginOnboarding'
 import {sessionHolderAtom} from '../session'
 import {dummySession} from '../session/dummySesssion'
@@ -102,7 +107,24 @@ jest.mock('../../api', () => ({
     contact: {getClubInfo: mockGetClubInfo},
   })),
 }))
-jest.mock('../../utils/notifications', () => ({}))
+const mockExpoToken = jest.fn((): string | null => null)
+jest.mock('../../utils/notifications', () => ({
+  getNotificationTokenE: () =>
+    jest.requireActual('effect').Effect.sync(mockExpoToken),
+}))
+const mockSyncNotificationTokens = jest.fn()
+jest.mock(
+  '../notifications/actions/syncVexlNotificationTokensActionAtom',
+  () => ({
+    syncVexlNotificationTokensActionAtom: jest
+      .requireActual('jotai')
+      .atom(null, (_: unknown, __: unknown, params: unknown) =>
+        jest
+          .requireActual('effect')
+          .Effect.sync(() => mockSyncNotificationTokens(params))
+      ),
+  })
+)
 
 const mockRefreshOffers = jest.fn()
 jest.mock('../marketplace/atoms/refreshOffersActionAtom', () => ({
@@ -116,12 +138,12 @@ const mockUpdateOfferNotificationTokens = jest.fn()
 jest.mock(
   '../marketplace/checkNotificationTokensAndVersionsAndUpdateOffersTask',
   () => ({
-    updateMissingOfferNotificationTokensActionAtom: jest
+    updateOfferNotificationTokensActionAtom: jest
       .requireActual('jotai')
-      .atom(null, () =>
+      .atom(null, (_: unknown, __: unknown, params: unknown) =>
         jest
           .requireActual('effect')
-          .Effect.sync(mockUpdateOfferNotificationTokens)
+          .Effect.sync(() => mockUpdateOfferNotificationTokens(params))
       ),
   })
 )
@@ -212,6 +234,13 @@ describe('restore from backup', () => {
     store.set(messagingStateAtom, [])
     store.set(restoreFromBackupStateAtom, {state: 'idle'})
     store.set(showRestoredAccountInfoAtom, false)
+    store.set(vexlNotificationTokenAtom, {
+      secret: null,
+      systemVexlToken: null,
+      marketingVexlToken: null,
+      lastUpdatedMetadata: null,
+    })
+    store.set(vexlTokenToKeyHolderAtom, {data: {}})
   })
 
   it('scans first, restores the user last without creating one and stores the account right away', async () => {
@@ -279,7 +308,11 @@ describe('restore from backup', () => {
     expect(store.get(showRestoredAccountInfoAtom)).toBe(true)
     expect(store.get(showMarketplaceIntroDialogAtom)).toBe(false)
     expect(mockRefreshOffers).toHaveBeenCalled()
-    expect(mockUpdateOfferNotificationTokens).toHaveBeenCalled()
+    // No secret in this backup: a new one was minted, so offer tokens follow.
+    expect(mockUpdateOfferNotificationTokens).toHaveBeenCalledWith({
+      regenerateAll: true,
+    })
+    expect(mockSyncNotificationTokens).not.toHaveBeenCalled()
     expect(store.get(restoreFromBackupStateAtom)).toEqual({state: 'idle'})
   })
 
@@ -316,5 +349,123 @@ describe('restore from backup', () => {
     expect(store.get(sessionHolderAtom).state).toBe('loggedOut')
     expect(store.get(messagingStateAtom)).toEqual([])
     expect(store.get(showRestoredAccountInfoAtom)).toBe(false)
+  })
+
+  describe('with the old notification secret in the backup', () => {
+    const notificationSecret = {
+      secret: Schema.decodeSync(VexlNotificationTokenSecret)(
+        'vexl_nt_secret_old_device'
+      ),
+      systemVexlToken: Schema.decodeSync(VexlNotificationToken)(
+        'vexl_nt_system'
+      ),
+      sessionNotificationToken,
+    }
+    const withSecret = async (): Promise<BackupFile> => {
+      const {backup} = await setUp()
+      const legacyInboxKey = backup.legacyInboxKeys[0]
+      if (!legacyInboxKey) throw new Error('Missing legacy inbox key')
+      const offerInboxToken = Schema.decodeSync(VexlNotificationToken)(
+        'vexl_nt_offer_inbox'
+      )
+      const goneInboxToken = Schema.decodeSync(VexlNotificationToken)(
+        'vexl_nt_gone_inbox'
+      )
+      return {
+        ...backup,
+        notificationSecret: {
+          ...notificationSecret,
+          inboxesByToken: {
+            [offerInboxToken]: legacyInboxKey.publicKeyPemBase64,
+            [goneInboxToken]: generatePrivateKey().publicKeyPemBase64,
+          },
+        },
+      }
+    }
+
+    it('takes over the secret right after restoreUser and keeps every token', async () => {
+      const backup = await withSecret()
+      mockRestoreUser.mockReturnValue(Effect.void)
+      mockExpoToken.mockReturnValue('ExponentPushToken[new-phone]')
+
+      await Effect.runPromise(
+        store.set(startRestoreFromBackupActionAtom, backup)
+      )
+
+      expect(mockSessionNotificationToken).not.toHaveBeenCalled()
+      expect(mockRestoreUser).toHaveBeenCalledWith(
+        expect.objectContaining({
+          vexlNotificationToken: Option.some(sessionNotificationToken),
+          expoToken: Option.some('ExponentPushToken[new-phone]'),
+        })
+      )
+      expect(mockSyncNotificationTokens).toHaveBeenCalledWith({
+        expoNotificationToken: 'ExponentPushToken[new-phone]',
+      })
+      expect(
+        Math.min(...callOrder(mockSyncNotificationTokens))
+      ).toBeGreaterThan(Math.max(...callOrder(mockRestoreUser)))
+      expect(store.get(vexlNotificationTokenAtom)).toEqual({
+        secret: notificationSecret.secret,
+        systemVexlToken: notificationSecret.systemVexlToken,
+        marketingVexlToken: null,
+        lastUpdatedMetadata: null,
+      })
+      expect(store.get(vexlTokenToKeyHolderAtom).data).toEqual({
+        vexl_nt_offer_inbox: backup.legacyInboxKeys[0],
+      })
+      const sessionHolder = store.get(sessionHolderAtom)
+      expect(
+        sessionHolder.state === 'loggedIn' &&
+          sessionHolder.session.sessionNotificationToken
+      ).toBe(sessionNotificationToken)
+      expect(mockUpdateOfferNotificationTokens).not.toHaveBeenCalled()
+    })
+
+    it('points the secret at no push token when notifications are off', async () => {
+      mockRestoreUser.mockReturnValue(Effect.void)
+      mockExpoToken.mockReturnValue(null)
+
+      await Effect.runPromise(
+        store.set(startRestoreFromBackupActionAtom, await withSecret())
+      )
+
+      expect(mockSyncNotificationTokens).toHaveBeenCalledWith({
+        expoNotificationToken: null,
+      })
+    })
+
+    it.each([
+      [
+        'a scan',
+        (): void => {
+          mockCheckInboxesExist.mockReturnValue(
+            Effect.fail(new UnexpectedServerError({status: 500}))
+          )
+        },
+      ],
+      [
+        'restoreUser',
+        (): void => {
+          mockRestoreUser.mockReturnValue(Effect.fail(new UserNotFoundError()))
+        },
+      ],
+    ])(
+      'leaves the secret with the old device when %s fails',
+      async (_, fail) => {
+        const backup = await withSecret()
+        fail()
+
+        await Effect.runPromise(
+          store.set(startRestoreFromBackupActionAtom, backup)
+        )
+
+        expect(store.get(restoreFromBackupStateAtom).state).toBe('failed')
+        expect(mockSyncNotificationTokens).not.toHaveBeenCalled()
+        expect(mockDiscardSecret).not.toHaveBeenCalled()
+        expect(store.get(vexlNotificationTokenAtom).secret).toBeNull()
+        expect(store.get(sessionHolderAtom).state).toBe('loggedOut')
+      }
+    )
   })
 })

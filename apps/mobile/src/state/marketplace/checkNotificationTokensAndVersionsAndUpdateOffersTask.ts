@@ -81,15 +81,18 @@ const updateOfferNotificationTokenActionAtom = atom(
     )
 )
 
-// Also run right after a backup restore, so pushes for restored offers move
-// to the new device without waiting for the next resume.
-export const updateMissingOfferNotificationTokensActionAtom = atom(
+// Regenerating all of them is the fallback for a restored backup that did not
+// carry the old device's notification secret.
+export const updateOfferNotificationTokensActionAtom = atom(
   null,
-  (get, set) =>
+  (get, set, {regenerateAll}: {regenerateAll: boolean}) =>
     Effect.gen(function* (_) {
       const offersToUpdateNotificationToken = pipe(
         get(myOffersAtom),
-        Array.filter(set(doesOfferNeedsUpdateNotificationToken))
+        Array.filter(
+          (offer) =>
+            regenerateAll || set(doesOfferNeedsUpdateNotificationToken)(offer)
+        )
       )
       console.log(
         `Refreshing notification tokens for ${offersToUpdateNotificationToken.length} offers`
@@ -175,7 +178,9 @@ export const checkNotificationTokensAndVersionsAndUpdateOffersTaskId =
         })
 
         const {successNotificationCount, failedNotificationCount} = yield* _(
-          store.set(updateMissingOfferNotificationTokensActionAtom)
+          store.set(updateOfferNotificationTokensActionAtom, {
+            regenerateAll: false,
+          })
         )
 
         const offersToUpdateVersion = pipe(

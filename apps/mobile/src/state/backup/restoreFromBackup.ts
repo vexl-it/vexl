@@ -1,18 +1,23 @@
 import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
 import {type ClubKeys, type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {generateLoginSessionId} from '@vexl-next/domain/src/general/LoginSessionId.brand'
-import {type BackupFile} from '@vexl-next/resources-utils/src/backup/BackupFile'
+import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
+import {
+  type BackupFile,
+  type BackupNotificationSecret,
+} from '@vexl-next/resources-utils/src/backup/BackupFile'
 import {Array, Effect, Option, pipe, Record, Schema} from 'effect'
 import * as O from 'fp-ts/Option'
 import {atom} from 'jotai'
 import {apiAtom} from '../../api'
 import {contactApiForSession} from '../../api/contactApiForSession'
 import {sanityCheckSessionV2, type SessionV2} from '../../brands/Session.brand'
+import {getNotificationTokenE} from '../../utils/notifications'
 import {
   showCheckUpdatedPrivacyPolicySuggestionAtom,
   showMarketplaceIntroDialogAtom,
 } from '../../utils/preferences'
-import reportError from '../../utils/reportError'
+import reportError, {reportErrorE} from '../../utils/reportError'
 import messagingStateAtom, {
   messagingStateAtomStorageAtom,
 } from '../chat/atoms/messagingStateAtom'
@@ -33,13 +38,19 @@ import {
   type FoundClub,
 } from '../keyDerivation/scanDerivedKeys'
 import {refreshOffersActionAtom} from '../marketplace/atoms/refreshOffersActionAtom'
-import {updateMissingOfferNotificationTokensActionAtom} from '../marketplace/checkNotificationTokensAndVersionsAndUpdateOffersTask'
+import {updateOfferNotificationTokensActionAtom} from '../marketplace/checkNotificationTokensAndVersionsAndUpdateOffersTask'
 import {refreshNotesActionAtom} from '../notes/atoms/refreshNotesActionAtom'
 import {createVexlSecretAndSessionTokenActionAtom} from '../notifications/actions/createVexlSecretAndSessionTokenActionAtom'
 import {invalidateVexlSecretActionAtom} from '../notifications/actions/invalidateVexlSecretActionAtom'
+import {syncVexlNotificationTokensActionAtom} from '../notifications/actions/syncVexlNotificationTokensActionAtom'
 import {vexlNotificationTokenAtom} from '../notifications/vexlNotificationTokenAtom'
+import {vexlTokenToKeyHolderAtom} from '../notifications/vexlTokenToKeyHolderAtom'
 import {postLoginFlowCompletedScreensAtom} from '../postLoginOnboarding'
 import {sessionAtom} from '../session'
+import {
+  restoredNotificationSecretState,
+  restoredTokenToKeyHolder,
+} from './backupNotificationSecret'
 import {restoredUserData} from './backupUserData'
 
 export class InvalidBackupSessionError extends Schema.TaggedError<InvalidBackupSessionError>(
@@ -175,9 +186,35 @@ export const showRestoredAccountInfoAtom = atom(false)
 
 const commitRestoredAccountActionAtom = atom(
   null,
-  (get, set, {session, inboxKeys, clubKeys, counters}: RestoredAccount) => {
+  (
+    get,
+    set,
+    {
+      account: {session, inboxKeys, clubKeys, counters},
+      takenOverSecret,
+    }: {
+      account: RestoredAccount
+      // None when a new secret was minted because the backup had none.
+      takenOverSecret: Option.Option<BackupNotificationSecret>
+    }
+  ) => {
     // Before the session exists, so nothing can allocate a key from stale counters.
     set(raiseKeyDerivationCountersActionAtom, counters)
+
+    if (Option.isSome(takenOverSecret)) {
+      set(
+        vexlNotificationTokenAtom,
+        restoredNotificationSecretState(takenOverSecret.value)
+      )
+      vexlNotificationTokenAtom.flushNow()
+      set(vexlTokenToKeyHolderAtom, {
+        data: restoredTokenToKeyHolder(
+          takenOverSecret.value.inboxesByToken,
+          inboxKeys
+        ),
+      })
+      vexlTokenToKeyHolderAtom.flushNow()
+    }
 
     set(messagingStateAtom, (state) => withRestoredInboxes(state, inboxKeys))
     messagingStateAtomStorageAtom.flushNow()
@@ -197,11 +234,18 @@ const commitRestoredAccountActionAtom = atom(
 
     // Own offers and notes come back with ownership, which links them to
     // their restored inboxes. Don't wait for the marketplace screen.
+    // Without the old secret, own offers still point to the old device.
     Effect.runFork(
       Effect.all(
         [
           set(refreshOffersActionAtom).pipe(
-            Effect.zipRight(set(updateMissingOfferNotificationTokensActionAtom))
+            Effect.zipRight(
+              Option.isNone(takenOverSecret)
+                ? set(updateOfferNotificationTokensActionAtom, {
+                    regenerateAll: true,
+                  })
+                : Effect.void
+            )
           ),
           set(refreshNotesActionAtom),
         ],
@@ -211,37 +255,99 @@ const commitRestoredAccountActionAtom = atom(
   }
 )
 
+const restoreUserActionAtom = atom(
+  null,
+  (
+    get,
+    _,
+    {
+      session,
+      expoToken,
+    }: {session: SessionV2; expoToken: ExpoNotificationToken | null}
+  ) =>
+    // Never createUser here - it would wipe the user's contacts on the server.
+    contactApiForSession(get, session).restoreUser({
+      loginSessionId: session.loginSessionId,
+      vexlNotificationToken: Option.fromNullable(
+        session.sessionNotificationToken
+      ),
+      expoToken: Option.fromNullable(expoToken),
+    })
+)
+
+// Points the old device's secret at this device, so every token already
+// handed out keeps working. The old device forgets it locally.
+const takeOverNotificationSecretActionAtom = atom(
+  null,
+  (_, set, expoToken: ExpoNotificationToken | null) =>
+    set(syncVexlNotificationTokensActionAtom, {
+      expoNotificationToken: expoToken,
+    }).pipe(
+      // Retried on every resume by refreshVexlTokenMetadataTask.
+      Effect.catchAll((e) =>
+        reportErrorE(
+          'warn',
+          new Error('Error taking over the notification secret'),
+          {errorTag: e._tag}
+        )
+      )
+    )
+)
+
 // restoreUser rotates the login nonce, which wipes the old device on its next
 // start. It goes last, and the account is stored right after it, so a restore
 // that fails earlier leaves both the old device and this one as they were.
 const restoreAccountActionAtom = atom(null, (get, set, backup: BackupFile) =>
   Effect.gen(function* () {
-    const session = yield* restoredSession(backup)
-    const account = yield* set(scanRestorableKeysActionAtom, {backup, session})
+    const backupSession = yield* restoredSession(backup)
+    const account = yield* set(scanRestorableKeysActionAtom, {
+      backup,
+      session: backupSession,
+    })
+    const withSession = (session: SessionV2): RestoredAccount => ({
+      ...account,
+      // Writes the avatar file, so only once the restore went through.
+      session: {
+        ...session,
+        realUserData: restoredUserData(backup.session.realUserData),
+      },
+    })
 
-    const sessionNotificationToken = yield* Effect.gen(function* () {
+    const takenOverSecret = Option.fromNullable(backup.notificationSecret)
+    if (Option.isSome(takenOverSecret)) {
+      const session = {
+        ...backupSession,
+        sessionNotificationToken:
+          takenOverSecret.value.sessionNotificationToken,
+      }
+      const expoToken = yield* getNotificationTokenE()
+      yield* set(restoreUserActionAtom, {session, expoToken})
+
+      set(commitRestoredAccountActionAtom, {
+        account: withSession(session),
+        takenOverSecret,
+      })
+      yield* set(takeOverNotificationSecretActionAtom, expoToken)
+      return
+    }
+
+    const session = yield* Effect.gen(function* () {
       const {expoToken, sessionNotificationToken} = yield* set(
         createVexlSecretAndSessionTokenActionAtom
       )
-      // Never createUser here - it would wipe the user's contacts on the server.
-      yield* contactApiForSession(get, session).restoreUser({
-        loginSessionId: session.loginSessionId,
-        vexlNotificationToken: sessionNotificationToken,
-        expoToken: Option.fromNullable(expoToken),
-      })
-      return sessionNotificationToken
-    }).pipe(Effect.tapError(() => set(discardVexlSecretActionAtom)))
-
-    set(commitRestoredAccountActionAtom, {
-      ...account,
-      session: {
-        ...session,
+      const session = {
+        ...backupSession,
         sessionNotificationToken: Option.getOrUndefined(
           sessionNotificationToken
         ),
-        // Writes the avatar file, so only once the restore went through.
-        realUserData: restoredUserData(backup.session.realUserData),
-      },
+      }
+      yield* set(restoreUserActionAtom, {session, expoToken})
+      return session
+    }).pipe(Effect.tapError(() => set(discardVexlSecretActionAtom)))
+
+    set(commitRestoredAccountActionAtom, {
+      account: withSession(session),
+      takenOverSecret,
     })
   })
 )

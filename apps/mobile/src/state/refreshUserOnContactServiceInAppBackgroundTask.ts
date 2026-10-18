@@ -3,6 +3,7 @@ import {apiAtom} from '../api'
 import {registerInAppLoadingTask} from '../utils/inAppLoadingTasks'
 import reportError from '../utils/reportError'
 import {generateVexlTokenActionAtom} from './notifications/actions/generateVexlTokenActionAtom'
+import {forgetVexlSecretLocally} from './notifications/vexlNotificationTokenAtom'
 import {clearDeviceAfterLoginOnAnotherDeviceActionAtom} from './resetLocalDataActionAtom'
 import {sessionDataOrDummyAtom, sessionNotificationTokenAtom} from './session'
 import {logoutActionAtom} from './useLogout'
@@ -67,6 +68,9 @@ export const refreshUserOnContactServiceInAppBackgroundTaskId =
                   console.log(
                     '🦋 🚨 Account is active on another device. Clearing local data only.'
                   )
+                  // Right away, before the wipe: the new device took over the
+                  // secret, a token sync from here would steal its pushes back.
+                  forgetVexlSecretLocally(store)
                   void store.set(clearDeviceAfterLoginOnAnotherDeviceActionAtom)
                 }),
                 Match.tags({

@@ -1,15 +1,11 @@
 import {
   KeyPairV2,
   PrivateKeyHolder,
-  PublicKeyPemBase64,
 } from '@vexl-next/cryptography/src/KeyHolder'
 import {ClubKeys, ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {MasterSeed} from '@vexl-next/domain/src/general/MasterSeed.brand'
-import {
-  VexlNotificationToken,
-  VexlNotificationTokenSecret,
-} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
+import {VexlNotificationTokenSecret} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {UserName} from '@vexl-next/domain/src/general/UserName.brand'
 import {Base64String} from '@vexl-next/domain/src/utility/Base64String.brand'
 import {UserSessionCredentialsV2} from '@vexl-next/rest-api/src/UserSessionCredentials.brand'
@@ -30,17 +26,11 @@ export const BackupUserData = Schema.Struct({
 export type BackupUserData = typeof BackupUserData.Type
 
 // Taken over by the restored device, so every notification token handed out
-// (in offers, notes, chats and clubs) keeps notifying the user.
+// (in offers, notes, chats and clubs) keeps notifying the user. Only the secret:
+// tokens go stale while the old device keeps using the app, so they are minted
+// anew on restore.
 export const BackupNotificationSecret = Schema.Struct({
   secret: VexlNotificationTokenSecret,
-  systemVexlToken: Schema.optional(VexlNotificationToken),
-  marketingVexlToken: Schema.optional(VexlNotificationToken),
-  sessionNotificationToken: Schema.optional(VexlNotificationToken),
-  // Inbox each token minted before the export notifies about.
-  inboxesByToken: Schema.Record({
-    key: VexlNotificationToken,
-    value: PublicKeyPemBase64,
-  }),
 })
 export type BackupNotificationSecret = typeof BackupNotificationSecret.Type
 

@@ -1,12 +1,14 @@
 import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
 import {type ClubKeys, type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {generateLoginSessionId} from '@vexl-next/domain/src/general/LoginSessionId.brand'
+import {
+  type VexlNotificationToken,
+  type VexlNotificationTokenSecret,
+} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {
-  type BackupFile,
-  type BackupNotificationSecret,
-} from '@vexl-next/resources-utils/src/backup/BackupFile'
+import {type BackupFile} from '@vexl-next/resources-utils/src/backup/BackupFile'
+import {GenerateNotificationTokenRequest} from '@vexl-next/rest-api/src/services/notification/contract'
 import {Array, Effect, Option, pipe, Record, Schema} from 'effect'
 import * as O from 'fp-ts/Option'
 import {atom} from 'jotai'
@@ -45,13 +47,9 @@ import {createVexlSecretAndSessionTokenActionAtom} from '../notifications/action
 import {invalidateVexlSecretActionAtom} from '../notifications/actions/invalidateVexlSecretActionAtom'
 import {syncVexlNotificationTokensActionAtom} from '../notifications/actions/syncVexlNotificationTokensActionAtom'
 import {vexlNotificationTokenAtom} from '../notifications/vexlNotificationTokenAtom'
-import {vexlTokenToKeyHolderAtom} from '../notifications/vexlTokenToKeyHolderAtom'
 import {postLoginFlowCompletedScreensAtom} from '../postLoginOnboarding'
 import {sessionAtom} from '../session'
-import {
-  restoredNotificationSecretState,
-  restoredTokenToKeyHolder,
-} from './backupNotificationSecret'
+import {restoredNotificationSecretState} from './backupNotificationSecret'
 import {restoredUserData} from './backupUserData'
 import {readBackupFile} from './readBackupFile'
 
@@ -202,8 +200,8 @@ const commitRestoredAccountActionAtom = atom(
       takenOverSecret,
     }: {
       account: RestoredAccount
-      // None when a new secret was minted because the backup had none.
-      takenOverSecret: Option.Option<BackupNotificationSecret>
+      // None when a new secret was minted instead.
+      takenOverSecret: Option.Option<VexlNotificationTokenSecret>
     }
   ) => {
     // Before the session exists, so nothing can allocate a key from stale counters.
@@ -215,13 +213,6 @@ const commitRestoredAccountActionAtom = atom(
         restoredNotificationSecretState(takenOverSecret.value)
       )
       vexlNotificationTokenAtom.flushNow()
-      set(vexlTokenToKeyHolderAtom, {
-        data: restoredTokenToKeyHolder(
-          takenOverSecret.value.inboxesByToken,
-          inboxKeys
-        ),
-      })
-      vexlTokenToKeyHolderAtom.flushNow()
     }
 
     set(messagingStateAtom, (state) => withRestoredInboxes(state, inboxKeys))
@@ -283,6 +274,32 @@ const restoreUserActionAtom = atom(
     })
 )
 
+interface SecretToTakeOver {
+  readonly secret: VexlNotificationTokenSecret
+  readonly sessionNotificationToken: VexlNotificationToken
+}
+
+// Minting the session token also proves the server still knows the secret.
+// None when the backup has none or it is gone - a new one is minted then.
+const secretToTakeOverActionAtom = atom(null, (get, _, backup: BackupFile) => {
+  if (!backup.notificationSecret) return Effect.succeedNone
+  const {secret} = backup.notificationSecret
+
+  return get(apiAtom)
+    .notification.generateNotificationToken(
+      new GenerateNotificationTokenRequest({secret})
+    )
+    .pipe(
+      Effect.map(({token}) =>
+        Option.some<SecretToTakeOver>({
+          secret,
+          sessionNotificationToken: token,
+        })
+      ),
+      Effect.catchTag('NotFoundError', () => Effect.succeedNone)
+    )
+})
+
 // Points the old device's secret at this device, so every token already
 // handed out keeps working. The old device forgets it locally.
 const takeOverNotificationSecretActionAtom = atom(
@@ -321,19 +338,16 @@ const restoreAccountActionAtom = atom(null, (get, set, backup: BackupFile) =>
       },
     })
 
-    const takenOverSecret = Option.fromNullable(backup.notificationSecret)
-    if (Option.isSome(takenOverSecret)) {
-      const session = {
-        ...backupSession,
-        sessionNotificationToken:
-          takenOverSecret.value.sessionNotificationToken,
-      }
+    const secretToTakeOver = yield* set(secretToTakeOverActionAtom, backup)
+    if (Option.isSome(secretToTakeOver)) {
+      const {secret, sessionNotificationToken} = secretToTakeOver.value
+      const session = {...backupSession, sessionNotificationToken}
       const expoToken = yield* getNotificationTokenE()
       yield* set(restoreUserActionAtom, {session, expoToken})
 
       set(commitRestoredAccountActionAtom, {
         account: withSession(session),
-        takenOverSecret,
+        takenOverSecret: Option.some(secret),
       })
       yield* set(takeOverNotificationSecretActionAtom, expoToken)
       return
@@ -355,7 +369,7 @@ const restoreAccountActionAtom = atom(null, (get, set, backup: BackupFile) =>
 
     set(commitRestoredAccountActionAtom, {
       account: withSession(session),
-      takenOverSecret,
+      takenOverSecret: Option.none(),
     })
   })
 )

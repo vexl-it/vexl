@@ -100,6 +100,7 @@ jest.mock('../../api/contactApiForSession', () => ({
 }))
 
 const mockCheckInboxesExist = jest.fn()
+const mockGenerateNotificationToken = jest.fn()
 const mockGetClubInfo = jest.fn()
 const mockBackupFiles = new Map<string, BackupFile>()
 const mockBackupFileUri = (backup: BackupFile): string => {
@@ -124,6 +125,7 @@ jest.mock('../../api', () => ({
   apiAtom: jest.requireActual('jotai').atom(() => ({
     chat: {checkInboxesExist: mockCheckInboxesExist},
     contact: {getClubInfo: mockGetClubInfo},
+    notification: {generateNotificationToken: mockGenerateNotificationToken},
   })),
 }))
 const mockExpoToken = jest.fn((): string | null => null)
@@ -394,38 +396,24 @@ describe('restore from backup', () => {
   })
 
   describe('with the old notification secret in the backup', () => {
-    const notificationSecret = {
-      secret: Schema.decodeSync(VexlNotificationTokenSecret)(
-        'vexl_nt_secret_old_device'
-      ),
-      systemVexlToken: Schema.decodeSync(VexlNotificationToken)(
-        'vexl_nt_system'
-      ),
-      sessionNotificationToken,
-    }
-    const withSecret = async (): Promise<BackupFile> => {
-      const {backup} = await setUp()
-      const legacyInboxKey = backup.legacyInboxKeys[0]
-      if (!legacyInboxKey) throw new Error('Missing legacy inbox key')
-      const offerInboxToken = Schema.decodeSync(VexlNotificationToken)(
-        'vexl_nt_offer_inbox'
-      )
-      const goneInboxToken = Schema.decodeSync(VexlNotificationToken)(
-        'vexl_nt_gone_inbox'
-      )
-      return {
-        ...backup,
-        notificationSecret: {
-          ...notificationSecret,
-          inboxesByToken: {
-            [offerInboxToken]: legacyInboxKey.publicKeyPemBase64,
-            [goneInboxToken]: generatePrivateKey().publicKeyPemBase64,
-          },
-        },
-      }
-    }
+    const secret = Schema.decodeSync(VexlNotificationTokenSecret)(
+      'vexl_nt_secret_old_device'
+    )
+    const mintedSessionToken = Schema.decodeSync(VexlNotificationToken)(
+      'vexl_nt_minted_with_old_secret'
+    )
+    const withSecret = async (): Promise<BackupFile> => ({
+      ...(await setUp()).backup,
+      notificationSecret: {secret},
+    })
 
-    it('takes over the secret right after restoreUser and keeps every token', async () => {
+    beforeEach(() => {
+      mockGenerateNotificationToken.mockReturnValue(
+        Effect.succeed({token: mintedSessionToken})
+      )
+    })
+
+    it('takes over the secret right after restoreUser with freshly minted tokens', async () => {
       const backup = await withSecret()
       mockRestoreUser.mockReturnValue(Effect.void)
       mockExpoToken.mockReturnValue('ExponentPushToken[new-phone]')
@@ -435,9 +423,15 @@ describe('restore from backup', () => {
       )
 
       expect(mockSessionNotificationToken).not.toHaveBeenCalled()
+      expect(mockGenerateNotificationToken).toHaveBeenCalledWith(
+        expect.objectContaining({secret})
+      )
+      expect(
+        Math.max(...callOrder(mockGenerateNotificationToken))
+      ).toBeLessThan(Math.min(...callOrder(mockRestoreUser)))
       expect(mockRestoreUser).toHaveBeenCalledWith(
         expect.objectContaining({
-          vexlNotificationToken: Option.some(sessionNotificationToken),
+          vexlNotificationToken: Option.some(mintedSessionToken),
           expoToken: Option.some('ExponentPushToken[new-phone]'),
         })
       )
@@ -447,21 +441,68 @@ describe('restore from backup', () => {
       expect(
         Math.min(...callOrder(mockSyncNotificationTokens))
       ).toBeGreaterThan(Math.max(...callOrder(mockRestoreUser)))
+      // No tokens, so the takeover sync mints system and marketing ones.
       expect(store.get(vexlNotificationTokenAtom)).toEqual({
-        secret: notificationSecret.secret,
-        systemVexlToken: notificationSecret.systemVexlToken,
+        secret,
+        systemVexlToken: null,
         marketingVexlToken: null,
         lastUpdatedMetadata: null,
       })
-      expect(store.get(vexlTokenToKeyHolderAtom).data).toEqual({
-        vexl_nt_offer_inbox: backup.legacyInboxKeys[0],
-      })
+      // Rebuilt once own offers and notes are back.
+      expect(store.get(vexlTokenToKeyHolderAtom).data).toEqual({})
       const sessionHolder = store.get(sessionHolderAtom)
       expect(
         sessionHolder.state === 'loggedIn' &&
           sessionHolder.session.sessionNotificationToken
-      ).toBe(sessionNotificationToken)
+      ).toBe(mintedSessionToken)
       expect(mockUpdateOfferNotificationTokens).not.toHaveBeenCalled()
+      expect(mockDiscardSecret).not.toHaveBeenCalled()
+    })
+
+    it('mints a new secret and offer tokens when the server no longer knows the old one', async () => {
+      const backup = await withSecret()
+      mockGenerateNotificationToken.mockReturnValue(
+        Effect.fail(new NotFoundError())
+      )
+      mockRestoreUser.mockReturnValue(Effect.void)
+
+      await Effect.runPromise(
+        store.set(startRestoreFromBackupActionAtom, mockBackupFileUri(backup))
+      )
+
+      expect(store.get(restoreFromBackupStateAtom)).toEqual({state: 'idle'})
+      expect(mockSessionNotificationToken).toHaveBeenCalled()
+      expect(mockRestoreUser).toHaveBeenCalledWith(
+        expect.objectContaining({
+          vexlNotificationToken: Option.some(sessionNotificationToken),
+        })
+      )
+      expect(store.get(vexlNotificationTokenAtom).secret).not.toBe(secret)
+      expect(mockSyncNotificationTokens).not.toHaveBeenCalled()
+      await new Promise(setImmediate)
+      expect(mockUpdateOfferNotificationTokens).toHaveBeenCalledWith({
+        regenerateAll: true,
+      })
+    })
+
+    it('leaves everything untouched when minting with the old secret fails', async () => {
+      const backup = await withSecret()
+      mockGenerateNotificationToken.mockReturnValue(
+        Effect.fail(new UnexpectedServerError({status: 500}))
+      )
+
+      await Effect.runPromise(
+        store.set(startRestoreFromBackupActionAtom, mockBackupFileUri(backup))
+      )
+
+      expect(store.get(restoreFromBackupStateAtom)).toEqual({
+        state: 'failed',
+        failure: 'unknown',
+      })
+      expect(mockRestoreUser).not.toHaveBeenCalled()
+      expect(mockSessionNotificationToken).not.toHaveBeenCalled()
+      expect(store.get(vexlNotificationTokenAtom).secret).toBeNull()
+      expect(store.get(sessionHolderAtom).state).toBe('loggedOut')
     })
 
     it('points the secret at no push token when notifications are off', async () => {

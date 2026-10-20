@@ -8,6 +8,44 @@ import extractOwnerInfoFromOwnerPrivatePayload from '@vexl-next/resources-utils/
 import {Array, Option, pipe} from 'effect'
 import {offerWithoutSourceOrNone} from '../../../utils/offerWithoutSourceOrNone'
 
+function mergeOfferSources(stored: OfferInfo, incoming: OfferInfo): OfferInfo {
+  if (incoming.privatePart.adminId) return incoming
+
+  // Each source has its own incremental cursor. Missing from this batch does
+  // not mean revoked: keep unchanged sources until removal reconciliation.
+  // Social fields must be replaced together, never unioned with stale friends
+  // or a previous connection level.
+  const socialPart = Array.some(
+    incoming.privatePart.friendLevel,
+    (level) => level === 'FIRST_DEGREE' || level === 'SECOND_DEGREE'
+  )
+    ? incoming.privatePart
+    : stored.privatePart
+
+  return {
+    ...incoming,
+    privatePart: {
+      ...incoming.privatePart,
+      commonFriends: socialPart.commonFriends,
+      verifiedCommonFriends: socialPart.verifiedCommonFriends,
+      friendLevel: Array.union(
+        socialPart.friendLevel,
+        Array.filter(
+          [
+            ...stored.privatePart.friendLevel,
+            ...incoming.privatePart.friendLevel,
+          ],
+          (level) => level === 'CLUB'
+        )
+      ),
+      clubIds: Array.union(
+        stored.privatePart.clubIds,
+        incoming.privatePart.clubIds
+      ),
+    },
+  }
+}
+
 // Process offers that have adminId in private part but do not have ownershipInfo.
 // Returns the same reference when there is nothing to extract, and None when
 // the private part has adminId but ownership info can not be extracted (data
@@ -99,7 +137,7 @@ export const mergeIncomingOffersToState = ({
       incomingOffer !== undefined
         ? ({
             ...storedOffer,
-            offerInfo: incomingOffer,
+            offerInfo: mergeOfferSources(storedOffer.offerInfo, incomingOffer),
           } satisfies OneOfferInState)
         : storedOffer
 

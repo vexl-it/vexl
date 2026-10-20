@@ -36,6 +36,12 @@ export function offerWithoutSourceOrNone(
         ...offer.offerInfo.privatePart,
         clubIds: remainingClubIds,
         friendLevel: remainingFriendLevels,
+        commonFriends: removedFromContacts
+          ? []
+          : offer.offerInfo.privatePart.commonFriends,
+        verifiedCommonFriends: removedFromContacts
+          ? []
+          : offer.offerInfo.privatePart.verifiedCommonFriends,
       },
     },
   } satisfies OneOfferInState)

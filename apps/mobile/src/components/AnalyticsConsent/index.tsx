@@ -24,8 +24,11 @@ export default function AnalyticsConsent({
 
   return (
     <PostLoginFlowScreen
-      primaryButton={{label: t('common.yes'), onPress: answer(true)}}
-      secondaryButton={{label: t('common.no'), onPress: answer(false)}}
+      primaryButton={{
+        label: t('analyticsConsent.accept'),
+        onPress: answer(true),
+      }}
+      secondaryButton={{label: t('common.notNow'), onPress: answer(false)}}
     >
       <YStack alignItems="center" flex={1} justifyContent="center" gap="$9">
         <UsageStatisticsGraphic

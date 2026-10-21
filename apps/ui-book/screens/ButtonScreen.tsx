@@ -53,10 +53,6 @@ function ButtonVariants({
         </Button>
       ) : null}
 
-      <Button variant="neutral" size={size} onPress={() => {}}>
-        Neutral
-      </Button>
-
       <Button variant="disabled" size={size} onPress={() => {}}>
         Disabled
       </Button>

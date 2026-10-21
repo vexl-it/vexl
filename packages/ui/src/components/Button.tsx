@@ -9,6 +9,7 @@ export type ButtonVariant =
   | 'secondary'
   | 'destructive'
   | 'tertiary'
+  | 'neutral'
   | 'disabled'
 type ButtonSize = 'large' | 'medium' | 'small'
 
@@ -56,6 +57,9 @@ const ButtonFrame = styled(Stack, {
       },
       tertiary: {
         backgroundColor: '$foregroundPrimary',
+      },
+      neutral: {
+        backgroundColor: '$backgroundTertiary',
       },
       disabled: {
         backgroundColor: '$backgroundTertiary',
@@ -106,6 +110,9 @@ const ButtonLabel = styled(SizableText, {
       tertiary: {
         color: '$backgroundPrimary',
       },
+      neutral: {
+        color: '$foregroundPrimary',
+      },
       disabled: {
         color: '$foregroundTertiary',
       },
@@ -145,7 +152,9 @@ export function Button({
           ? theme.white100.get()
           : variantOrDisabled === 'tertiary'
             ? theme.backgroundPrimary.get()
-            : theme.foregroundTertiary.get()
+            : variantOrDisabled === 'neutral'
+              ? theme.foregroundPrimary.get()
+              : theme.foregroundTertiary.get()
   const iconSize = size === 'large' ? 24 : size === 'medium' ? 20 : 18
 
   return (

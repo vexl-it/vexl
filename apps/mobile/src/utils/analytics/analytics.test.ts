@@ -19,6 +19,7 @@ import {getDefaultStore} from 'jotai'
 import clearMmkvStorageAndEmptyAtoms from '../clearMmkvStorageAndEmptyAtoms'
 import {storage} from '../mmkv/effectMmkv'
 import {
+  analyticsConsentAskedAtom,
   analyticsEnabledAtom,
   analyticsInstancesAtom,
   analyticsMarkersAtom,
@@ -68,9 +69,13 @@ jest.mock('../preferences', () => ({
     .requireActual('../atomUtils/atomWithParsedMmkvStorage')
     .atomWithParsedMmkvStorage(
       'preferences',
-      {analyticsEnabled: false},
+      {},
       jest.requireActual('effect').Schema.Struct({
-        analyticsEnabled: jest.requireActual('effect').Schema.Boolean,
+        analyticsConsent: jest
+          .requireActual('effect')
+          .Schema.optional(
+            jest.requireActual('effect').Schema.Literal('granted', 'denied')
+          ),
       })
     ),
 }))
@@ -871,6 +876,7 @@ describe('storage clear', () => {
     await clearMmkvStorageAndEmptyAtoms()
 
     expect(store.get(analyticsEnabledAtom)).toBe(false)
+    expect(store.get(analyticsConsentAskedAtom)).toBe(false)
     expect(store.get(analyticsMarkersAtom)).toEqual({})
     expect(store.get(analyticsInstancesAtom)).toEqual({})
     expect(storage._storage.getAllKeys()).toEqual([])

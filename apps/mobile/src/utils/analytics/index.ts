@@ -1,5 +1,6 @@
 export {reportNotificationSettingsActionAtom} from './activity'
 export {useReportChatOpened} from './afterOpenAction'
+export {analyticsConsentAskedAtom} from './atoms'
 export {useReportAnalyticsOnForeground} from './foreground'
 export {reportInboxMessagesActionAtom} from './inboxMessages'
 export {
@@ -21,7 +22,7 @@ export {
   reportOnboardingStepActionAtom,
   reportRegisteredActionAtom,
 } from './onboarding'
-export {analyticsOptInAtom} from './optIn'
+export {analyticsBlogPostUrl, analyticsOptInAtom} from './optIn'
 export {
   reportContactsImportedActionAtom,
   reportPromptTargetReachedActionAtom,

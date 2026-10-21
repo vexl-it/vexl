@@ -19,10 +19,9 @@ jest.mock('../mmkv/mmkvDataLossDiagnosticStorage', () => ({
   recordCriticalMmkvKeyPersisted: jest.fn(async () => undefined),
 }))
 jest.mock('../preferences', () => ({
-  preferencesAtom: Object.assign(
-    jest.requireActual('jotai').atom({analyticsEnabled: false}),
-    {flushNow: jest.fn()}
-  ),
+  preferencesAtom: Object.assign(jest.requireActual('jotai').atom({}), {
+    flushNow: jest.fn(),
+  }),
 }))
 
 const bundled = Schema.decodeUnknownSync(AnalyticsRelaysFile)(bundledRelaysJson)
@@ -56,7 +55,7 @@ describe('analytics relays', () => {
   })
 
   it('ignores an invalid or plain http relay list and retries it at most once a day', async () => {
-    store.set(preferencesAtom, (old) => ({...old, analyticsEnabled: true}))
+    store.set(preferencesAtom, (old) => ({...old, analyticsConsent: 'granted'}))
     fetchMock.mockResolvedValue(
       Response.json({
         revision: bundled.revision + 1,

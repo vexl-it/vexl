@@ -26,5 +26,9 @@ export const resetAnalyticsStateActionAtom = atom(null, (get, set) => {
 })
 
 export const analyticsEnabledAtom = atom(
-  (get) => get(preferencesAtom).analyticsEnabled
+  (get) => get(preferencesAtom).analyticsConsent === 'granted'
+)
+
+export const analyticsConsentAskedAtom = atom(
+  (get) => get(preferencesAtom).analyticsConsent !== undefined
 )

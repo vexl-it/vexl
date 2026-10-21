@@ -156,7 +156,7 @@
   "appSettings.usageStatistics": "Udostępniaj statystyki użytkowania",
   "appSettings.usageStatisticsLink": "Jak działają statystyki użytkowania",
   "analyticsConsent.title": "Statystyki użytkowania na twoich zasadach",
-  "analyticsConsent.text": "Czy możemy zbierać statystyki użytkowania? Pokazują nam, gdzie Vexl nie daje rady, na przykład gdy rejestracja się zacina albo na rynku nie ma ofert. Raporty nie zawierają twojego pełnego numeru telefonu, kontaktów, wiadomości ani treści ofert. Nie mają identyfikatora użytkownika ani dokładnych godzin i trafiają do nas przez niezależny serwer pośredniczący, więc nie widzimy twojego adresu IP. Możesz to w każdej chwili zmienić w Ustawieniach aplikacji.",
+  "analyticsConsent.text": "Czy możemy zbierać statystyki użytkowania? Pokazują nam, gdzie Vexl nie daje rady. Bez identyfikatora użytkownika, bez dokładnych godzin, bez adresu IP. Zmienisz to w każdej chwili w ustawieniach.",
   "analyticsConsent.link": "Przeczytaj, jak to działa",
   "appSettings.appearance.light": "Tryb jasny",
   "appSettings.appearance.dark": "Tryb ciemny",

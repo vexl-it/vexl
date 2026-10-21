@@ -156,7 +156,7 @@
   "appSettings.usageStatistics": "Sdílet statistiky používání",
   "appSettings.usageStatisticsLink": "Jak fungují statistiky používání",
   "analyticsConsent.title": "Statistiky používání podle tvých pravidel",
-  "analyticsConsent.text": "Můžeme sbírat statistiky používání? Ukazují nám, kde Vexl pokulhává, třeba když se zasekne registrace nebo když na tržišti nejsou žádné nabídky. Hlášení neobsahují tvoje celé telefonní číslo, kontakty, zprávy ani text nabídek. Nemají žádné ID uživatele ani přesné časy a chodí k nám přes nezávislý přeposílací server, takže nevidíme tvoji IP adresu. Můžeš to kdykoli změnit v Nastavení aplikace.",
+  "analyticsConsent.text": "Můžeme sbírat statistiky používání? Ukazují nám, kde Vexl pokulhává. Žádné ID uživatele, žádné přesné časy, žádná IP adresa. Změnit to můžeš kdykoli v nastavení.",
   "analyticsConsent.link": "Přečti si, jak to funguje",
   "appSettings.appearance.light": "Světlý režim",
   "appSettings.appearance.dark": "Tmavý režim",

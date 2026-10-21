@@ -154,7 +154,7 @@
   "appSettings.usageStatistics": "Nutzungsstatistiken teilen",
   "appSettings.usageStatisticsLink": "So funktionieren Nutzungsstatistiken",
   "analyticsConsent.title": "Nutzungsstatistiken zu deinen Bedingungen",
-  "analyticsConsent.text": "Dürfen wir Nutzungsstatistiken erfassen? Sie zeigen uns, wo Vexl hakt, etwa bei einer Registrierung, die hängen bleibt, oder einem Marktplatz ohne Angebote. Die Berichte enthalten weder deine vollständige Telefonnummer noch deine Kontakte, Nachrichten oder Angebotstexte. Sie haben keine Nutzer-ID und keine genauen Zeitangaben und erreichen uns über einen unabhängigen Weiterleitungsserver, sodass wir deine IP-Adresse nicht sehen. Du kannst das jederzeit in den App-Einstellungen ändern.",
+  "analyticsConsent.text": "Dürfen wir Nutzungsstatistiken erfassen? Sie zeigen uns, wo Vexl hakt. Keine Nutzer-ID, keine genauen Zeitangaben, keine IP-Adresse. Du kannst das jederzeit in den Einstellungen ändern.",
   "analyticsConsent.link": "Lies, wie es funktioniert",
   "appSettings.appearance.light": "Heller Modus",
   "appSettings.appearance.dark": "Dunkler Modus",

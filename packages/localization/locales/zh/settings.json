@@ -154,7 +154,7 @@
   "appSettings.usageStatistics": "分享使用统计",
   "appSettings.usageStatisticsLink": "使用统计如何运作",
   "analyticsConsent.title": "使用统计，由你决定",
-  "analyticsConsent.text": "我们可以收集使用统计吗？它们能让我们看到 Vexl 哪里做得不够好，比如注册卡住了，或者市场里没有报价。报告不包含你的完整手机号码、联系人、消息或报价文字。报告中没有用户 ID，也没有精确时间，并通过独立的中继服务器发送给我们，所以我们看不到你的 IP 地址。你可以随时在应用设置中更改。",
+  "analyticsConsent.text": "我们可以收集使用统计吗？它们能让我们看到 Vexl 哪里做得不够好。没有用户 ID，没有精确时间，没有 IP 地址。随时可以在设置中更改。",
   "analyticsConsent.link": "了解它如何运作",
   "appSettings.appearance.light": "浅色模式",
   "appSettings.appearance.dark": "深色模式",

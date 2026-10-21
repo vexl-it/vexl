@@ -155,7 +155,7 @@
   "appSettings.usageStatistics": "Partilhar estatísticas de utilização",
   "appSettings.usageStatisticsLink": "Como funcionam as estatísticas de utilização",
   "analyticsConsent.title": "Estatísticas de utilização, nos teus termos",
-  "analyticsConsent.text": "Podemos recolher estatísticas de utilização? Mostram-nos onde o Vexl falha, como um registo que encrava ou um mercado sem ofertas. Os relatórios não incluem o teu número de telefone completo, os teus contactos, mensagens ou o texto das tuas ofertas. Não têm ID de utilizador nem horas exatas e chegam-nos através de um servidor intermediário independente, por isso não vemos o teu endereço IP. Podes mudar isto a qualquer momento nas Definições da app.",
+  "analyticsConsent.text": "Podemos recolher estatísticas de utilização? Mostram-nos onde o Vexl falha. Sem ID de utilizador, sem horas exatas, sem endereço IP. Podes mudar isto a qualquer momento nas definições.",
   "analyticsConsent.link": "Lê como funciona",
   "appSettings.appearance.light": "Modo claro",
   "appSettings.appearance.dark": "Modo escuro",

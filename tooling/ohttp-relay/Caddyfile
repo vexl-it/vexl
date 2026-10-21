@@ -2,7 +2,6 @@
 # on staging and at relay partners; only the environment differs:
 #   RELAY_SITE        site address, e.g. relay.example.org (or :80 for plain HTTP)
 #   GATEWAY_UPSTREAM  the metrics-service gateway, e.g. https://metrics.vexl.it
-#   RELAY_TOKEN       shared secret identifying this relay to the gateway
 {
 	# Caddy writes no access logs without a `log` directive. Error logs carry
 	# the client IP, so they are dropped too.
@@ -28,7 +27,6 @@
 			header_up -*
 			header_up Host {upstream_hostport}
 			header_up Content-Type message/ohttp-req
-			header_up X-Relay-Token {$RELAY_TOKEN}
 		}
 	}
 

@@ -309,7 +309,6 @@ export const SERVICES: readonly RunnableApp[] = [
     run: tsxService('src/index.ts'),
     buildEnv: (ctx) => ({
       ANALYTICS_OHTTP_GATEWAY_SECRETS: ctx.cfg.analyticsRelay.gatewaySecret,
-      ANALYTICS_RELAY_TOKENS: ctx.cfg.analyticsRelay.relayToken,
     }),
   },
 ]

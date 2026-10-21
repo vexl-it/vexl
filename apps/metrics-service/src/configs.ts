@@ -36,9 +36,3 @@ export const analyticsOhttpGatewaySecretsConfig = Config.array(
   Config.redacted(),
   'ANALYTICS_OHTTP_GATEWAY_SECRETS'
 ).pipe(Config.withDefault([]))
-
-/** Comma-separated, one token per relay operator. */
-export const analyticsRelayTokensConfig = Config.array(
-  Config.redacted(),
-  'ANALYTICS_RELAY_TOKENS'
-).pipe(Config.withDefault([]))

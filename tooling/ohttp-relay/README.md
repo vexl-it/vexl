@@ -14,7 +14,6 @@ Any host with Caddy 2.x:
 ```sh
 RELAY_SITE=relay.example.org \
 GATEWAY_UPSTREAM=https://metrics.vexl.it \
-RELAY_TOKEN=<token agreed with Vexl> \
 caddy run --config Caddyfile
 ```
 
@@ -26,7 +25,6 @@ service that logs client IPs (for example a CDN Vexl also uses).
 - Keep access logging off (the Caddyfile writes none) and do not add request
   logging in front of it.
 - Do not change the header handling: the relay must forward no client header.
-- Keep `RELAY_TOKEN` secret; it only identifies the relay to the gateway.
 
 ## Local dev
 

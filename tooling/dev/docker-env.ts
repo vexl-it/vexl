@@ -38,7 +38,6 @@ export function buildDockerEnv(
     ),
     OHTTP_RELAY_PORT: String(ctx.ports.ohttpRelay),
     METRICS_SERVICE_PORT: String(ctx.ports.metricsService),
-    ANALYTICS_RELAY_TOKEN: ctx.cfg.analyticsRelay.relayToken,
     GRAFANA_PORT: String(ctx.ports.grafana),
     LOKI_PORT: String(ctx.ports.loki),
     TEMPO_PORT: String(ctx.ports.tempo),

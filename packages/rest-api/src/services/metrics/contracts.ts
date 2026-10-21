@@ -34,7 +34,6 @@ export class InvalidAnalyticsStateError extends Schema.TaggedError<InvalidAnalyt
 }) {}
 
 export const OHTTP_REQUEST_CONTENT_TYPE = 'message/ohttp-req'
-export const RELAY_TOKEN_HEADER = 'x-relay-token'
 
 /**
  * Sent inside the encrypted request instead of the common headers, so the
@@ -72,12 +71,6 @@ export const encodeRelayedAnalyticsState = (
   padded.set(json)
   return padded
 }
-
-export class UnknownAnalyticsRelayError extends Schema.TaggedError<UnknownAnalyticsRelayError>(
-  'UnknownAnalyticsRelayError'
-)('UnknownAnalyticsRelayError', {
-  status: Schema.optionalWith(Schema.Literal(403), {default: () => 403}),
-}) {}
 
 /** The gateway holds no key for the request: retry later, never drop. */
 export class AnalyticsGatewayKeyUnavailableError extends Schema.TaggedError<AnalyticsGatewayKeyUnavailableError>(

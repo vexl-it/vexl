@@ -2,14 +2,15 @@ import {
   ChevronLeft,
   DuoToneContrastTheme,
   EuroCurrency,
+  InfoCircle,
   Language,
+  Menu,
   MenuItem,
   NavigationBar,
   PeopleUsers,
   Screen,
   ScreenCaptureShot,
   Switch,
-  Typography,
   YStack,
 } from '@vexl-next/ui'
 import React from 'react'
@@ -71,23 +72,19 @@ function AppSettingsDefaultScreen({
           showChevron={false}
           tag={<Switch valueAtom={allowScreenshotsAtom} />}
         />
-        <YStack gap="$3">
+        <Menu>
           <MenuItem
             label={t('appSettings.usageStatistics')}
             icon={PeopleUsers}
             showChevron={false}
             tag={<Switch valueAtom={analyticsOptInAtom} />}
           />
-          <Typography
-            color="$accentYellowPrimary"
+          <MenuItem
+            label={t('appSettings.usageStatisticsLink')}
+            icon={InfoCircle}
             onPress={openUrl(analyticsBlogPostUrl)}
-            px="$4"
-            textDecorationLine="underline"
-            variant="paragraphSmall"
-          >
-            {t('appSettings.usageStatisticsLink')}
-          </Typography>
-        </YStack>
+          />
+        </Menu>
       </YStack>
     </Screen>
   )

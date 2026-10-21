@@ -151,8 +151,11 @@
   "appSettings.changeCurrency": "Valuta wijzigen",
   "appSettings.appearanceTitle": "Weergave",
   "appSettings.allowScreencapture": "Schermafbeeldingen toestaan",
-  "appSettings.anonymousUsageStatistics": "Anonieme gebruiksstatistieken",
-  "appSettings.anonymousUsageStatisticsNote": "Laat ons zien hoeveel mensen stappen zoals aanmelden of de marktplaats openen doorlopen, zonder jou ooit te identificeren.",
+  "appSettings.usageStatistics": "Gebruiksstatistieken delen",
+  "appSettings.usageStatisticsLink": "Zo werken gebruiksstatistieken",
+  "analyticsConsent.title": "Gebruiksstatistieken, op jouw voorwaarden",
+  "analyticsConsent.text": "Mogen we gebruiksstatistieken verzamelen? Ze laten ons zien waar Vexl tekortschiet, zoals een aanmelding die vastloopt of een marktplaats zonder aanbiedingen. Rapporten bevatten niet je volledige telefoonnummer, je contacten, je berichten of de tekst van je aanbiedingen. Ze hebben geen gebruikers-ID of exacte tijden en bereiken ons via een onafhankelijke tussenserver, dus we zien je IP-adres niet. Je kunt dit altijd wijzigen in App-instellingen.",
+  "analyticsConsent.link": "Lees hoe het werkt",
   "appSettings.appearance.light": "Lichte modus",
   "appSettings.appearance.dark": "Donkere modus",
   "appSettings.appearance.system": "Apparaat volgen"

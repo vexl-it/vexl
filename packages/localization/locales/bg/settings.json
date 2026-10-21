@@ -151,8 +151,11 @@
   "appSettings.changeCurrency": "Смени валутата",
   "appSettings.appearanceTitle": "Външен вид",
   "appSettings.allowScreencapture": "Позволи снимки на екрана",
-  "appSettings.anonymousUsageStatistics": "Анонимна статистика за използването",
-  "appSettings.anonymousUsageStatisticsNote": "Показва ни колко хора минават през стъпки като регистрация или отваряне на пазара, без изобщо да те идентифицира.",
+  "appSettings.usageStatistics": "Споделяй статистика за използването",
+  "appSettings.usageStatisticsLink": "Как работи статистиката за използването",
+  "analyticsConsent.title": "Статистика за използването, при твоите условия",
+  "analyticsConsent.text": "Може ли да събираме статистика за използването? Тя ни показва къде Vexl не се справя, например регистрация, която засича, или пазар без оферти. Докладите не съдържат пълния ти телефонен номер, контактите, съобщенията или текста на офертите ти. В тях няма потребителско ID, нито точни часове, и стигат до нас през независим препредаващ сървър, така че не виждаме IP адреса ти. Можеш да промениш това по всяко време в Настройки на приложението.",
+  "analyticsConsent.link": "Виж как работи",
   "appSettings.appearance.light": "Светъл режим",
   "appSettings.appearance.dark": "Тъмен режим",
   "appSettings.appearance.system": "Според устройството"

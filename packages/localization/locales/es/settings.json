@@ -152,8 +152,11 @@
   "appSettings.changeCurrency": "Cambiar moneda",
   "appSettings.appearanceTitle": "Apariencia",
   "appSettings.allowScreencapture": "Permitir capturas de pantalla",
-  "appSettings.anonymousUsageStatistics": "Estadísticas de uso anónimas",
-  "appSettings.anonymousUsageStatisticsNote": "Nos muestra cuántas personas completan pasos como registrarse o abrir el mercado, sin identificarte nunca.",
+  "appSettings.usageStatistics": "Compartir estadísticas de uso",
+  "appSettings.usageStatisticsLink": "Cómo funcionan las estadísticas de uso",
+  "analyticsConsent.title": "Estadísticas de uso, con tus reglas",
+  "analyticsConsent.text": "¿Podemos recopilar estadísticas de uso? Nos muestran dónde falla Vexl, como un registro que se atasca o un mercado sin ofertas. Los informes no incluyen tu número de teléfono completo, tus contactos, tus mensajes ni el texto de tus ofertas. No llevan ID de usuario ni horas exactas, y nos llegan a través de un servidor intermediario independiente, así que no vemos tu dirección IP. Puedes cambiarlo cuando quieras en Ajustes de la app.",
+  "analyticsConsent.link": "Lee cómo funciona",
   "appSettings.appearance.light": "Modo claro",
   "appSettings.appearance.dark": "Modo oscuro",
   "appSettings.appearance.system": "Igual que el dispositivo"

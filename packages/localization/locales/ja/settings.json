@@ -151,8 +151,11 @@
   "appSettings.changeCurrency": "通貨を変更",
   "appSettings.appearanceTitle": "外観",
   "appSettings.allowScreencapture": "スクリーンキャプチャを許可",
-  "appSettings.anonymousUsageStatistics": "匿名の利用統計",
-  "appSettings.anonymousUsageStatisticsNote": "登録やマーケットを開くなどのステップを何人が進んだかを把握するためのもので、あなたを特定することは一切ありません。",
+  "appSettings.usageStatistics": "利用統計を共有",
+  "appSettings.usageStatisticsLink": "利用統計のしくみ",
+  "analyticsConsent.title": "利用統計は、あなたが決める",
+  "analyticsConsent.text": "利用統計を集めてもいいですか？登録が途中で止まってしまう、マーケットにオファーがない、といったVexlの足りないところを見つけるのに役立ちます。レポートには、あなたの完全な電話番号、連絡先、メッセージ、オファーの本文は含まれません。ユーザーIDや正確な時刻も含まれず、独立した中継サーバーを経由して届くため、私たちがあなたのIPアドレスを見ることはありません。アプリ設定でいつでも変更できます。",
+  "analyticsConsent.link": "しくみを読む",
   "appSettings.appearance.light": "ライトモード",
   "appSettings.appearance.dark": "ダークモード",
   "appSettings.appearance.system": "端末に合わせる"

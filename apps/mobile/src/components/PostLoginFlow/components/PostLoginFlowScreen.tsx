@@ -1,4 +1,4 @@
-import {Button, Typography, YStack} from '@vexl-next/ui'
+import {Button, type ButtonVariant, Typography, YStack} from '@vexl-next/ui'
 import React, {type ReactNode} from 'react'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 
@@ -13,6 +13,7 @@ interface Props {
     readonly disabled?: boolean
     readonly label: string
     readonly onPress: () => void
+    readonly variant?: ButtonVariant
   }
 }
 
@@ -39,7 +40,7 @@ export default function PostLoginFlowScreen({
             disabled={secondaryButton.disabled}
             flex={1}
             onPress={secondaryButton.onPress}
-            variant="secondary"
+            variant={secondaryButton.variant ?? 'secondary'}
           >
             {secondaryButton.label}
           </Button>

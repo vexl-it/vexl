@@ -1,6 +1,7 @@
 import {createNativeStackNavigator} from '@react-navigation/native-stack'
 import React from 'react'
 import {type LoginFlowStackParamsList} from '../../navigationTypes'
+import AnalyticsConsentScreen from './components/AnalyticsConsentScreen'
 import CountryPickerScreen from './components/CountryPickerScreen'
 import Intro1Screen from './components/Intro1Screen'
 import Intro2Screen from './components/Intro2Screen'
@@ -19,6 +20,10 @@ export default function LoginFlow(): React.ReactElement {
       }}
     >
       <LoginStack.Screen name="Intro1" component={Intro1Screen} />
+      <LoginStack.Screen
+        name="AnalyticsConsent"
+        component={AnalyticsConsentScreen}
+      />
       <LoginStack.Screen name="Intro2" component={Intro2Screen} />
       <LoginStack.Screen name="PhoneNumber" component={PhoneNumberScreen} />
       <LoginStack.Screen name="CountryPicker" component={CountryPickerScreen} />

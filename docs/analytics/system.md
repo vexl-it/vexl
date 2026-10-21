@@ -10,7 +10,7 @@ Hard constraints (not negotiable, every work item below must respect them):
 
 1. **No exact event timestamps leave the device.** Only calendar buckets: day (`YYYY-MM-DD`), ISO week (`YYYY-Www`) or month (`YYYY-MM`). Durations are bucketed on the client before upload.
 2. **No per-user or per-device id on the server.** Every id is scoped to one journey instance or one calendar bucket, is random, and expires with it. Two rows from the same device never share an id or any attribute that could link them beyond platform and release line.
-3. **Users opt in** on the first screen or in settings; analytics is off by default. Opt-in is the only sampling mechanism; there is no server-side or client-side sampling on top of it.
+3. **Users opt in** on the consent screen (during onboarding, or once after updating) or in settings; analytics is off by default. Opt-in is the only sampling mechanism; there is no server-side or client-side sampling on top of it.
 
 Secondary goals: one server primitive, one shared definitions package, and a client that keeps working offline and before login.
 
@@ -166,8 +166,8 @@ Schema changes bump `schemaVersion`. The server accepts exactly one version per 
 - `atomWithParsedMmkvStorageWithImmediateSaveOption(key, default, schema)` in `apps/mobile/src/utils/atomUtils/atomWithParsedMmkvStorage.ts` returns `{atom, setAndSaveImmediatelyAtom}`. The plain `atomWithParsedMmkvStorage` defers writes behind an idle callback; the OS can kill the process first, so the outbox and markers use the immediate-save variant (or `flushNow` on the returned `FlushablePrimitiveAtom`).
 - `useAppState` (`apps/mobile/src/utils/useAppState.ts`), already wired in `App.tsx` as `useAppState(setLastTimeAppWasRunningToNow)`. The background flush hooks in beside it.
 - `useInAppLoadingTasks` with `requirements: {runOn: 'start', requiresUserLoggedIn: false}` for the start flush.
-- `preferencesAtom` (`apps/mobile/src/utils/preferences/index.ts`) for the opt-in toggle.
-- `clearMmkvStorageAndEmptyAtoms` wipes all MMKV on logout; `detectMmkvDataLoss.ts` shows that silent wipes happen in the wild. `Intro1Screen` runs the same wipe before login, so it takes `{keepAnalytics: true}` there: the opt-in, the onboarding journey, its markers and the outbox survive that pre-login clear and nothing else does.
+- `preferencesAtom` (`apps/mobile/src/utils/preferences/index.ts`) for the consent.
+- `clearMmkvStorageAndEmptyAtoms` wipes all MMKV on logout; `detectMmkvDataLoss.ts` shows that silent wipes happen in the wild. `Intro1Screen` runs the same wipe before login, so it takes `{keepAnalytics: true}` there: the consent, the onboarding journey, its markers and the outbox survive that pre-login clear and nothing else does.
 - `getLastTimeAppWasRunning` cannot detect dormancy: it is overwritten on mount and by iOS background launches. The `reactivation` journey needs its own `lastForegroundAt` marker, set only on AppState `active`.
 
 ### 6.2 Local state
@@ -203,14 +203,16 @@ Signal sites are listed per field in `definitions.md`.
 
 ### 6.5 Pre-login reporting
 
-The onboarding journey starts when the user leaves the first screen (`Intro1Screen`) with statistics turned on (section 6.6). Turning the toggle on and off there records nothing, so flipping it leaves no abandoned journeys on the server. Nothing is recorded or buffered before that. Uploads go through the relay with no session or Vexl headers (section 4.5), so the only difference before login is that rows carry no country (section 6.8).
+The onboarding journey starts when the user answers "Yes" on the consent screen that follows the first screen (section 6.6). Nothing is recorded or buffered before that. Uploads go through the relay with no session or Vexl headers (section 4.5), so the only difference before login is that rows carry no country (section 6.8).
 
-The first screen's Continue button wipes storage before login. It passes `{keepAnalytics: true}`, so the opt-in, the started journey, its markers and the outbox survive and the journey continues on the next screen. The preferences atom is mounted, so the clear resets it in memory; `clearMmkvStorageAndEmptyAtoms` writes `analyticsEnabled` back and saves it right away.
+The first screen's Continue button wipes storage before login. It passes `{keepAnalytics: true}`, so a consent given earlier (the user went back to the first screen), the started journey, its markers and the outbox survive and the journey continues. The preferences atom is mounted, so the clear resets it in memory; `clearMmkvStorageAndEmptyAtoms` writes `analyticsConsent` back and saves it right away.
 
 ### 6.6 Opt-in
 
-- `preferencesAtom.analyticsEnabled`, default `false`. Two toggles write it through `analyticsOptInAtom` (`optIn.ts`), so they are one setting: one on the first screen (`Intro1Screen.tsx`, `loginFlow.v2.intro1.shareUsageStatistics`) and one in App settings (`AppSettingsDefaultScreen.tsx`) with the note `appSettings.anonymousUsageStatisticsNote`.
-- The first screen's Continue button reports the first open (`firstOpenAt` marker and `step: 'opened'`) while analytics is on, unless a `firstOpenAt` marker exists. The toggles themselves start nothing, so turning it on after login starts no onboarding journey: the user is past onboarding and would show up as a new install.
+- `preferencesAtom.analyticsConsent`: unset until asked, then `'granted'` or `'denied'`. Analytics is on only for `'granted'`. Both the consent screen (`components/AnalyticsConsent`) and the App settings toggle (`AppSettingsDefaultScreen.tsx`) write it through `analyticsOptInAtom` (`optIn.ts`). Both link to the blog post (`analyticsBlogPostUrl`).
+- New users see the consent screen in the login flow right after the first screen (`LoginFlow/components/AnalyticsConsentScreen.tsx`). Its answer reports the first open (`firstOpenAt` marker and `step: 'opened'`) when the answer is "Yes", unless a `firstOpenAt` marker exists.
+- Logged-in users with no answer (they updated from a version without the consent) see the same screen instead of the app (`RootNavigation`); the logged-in hooks mount only after they answer. This answer and the settings toggle start nothing, so opting in after login starts no onboarding journey: the user is past onboarding and would show up as a new install.
+- Logout clears the consent, so the next login asks again.
 - Turning it off: clear the outbox, delete all journey and aggregation ids locally, stop recording. A request already in flight may finish, but the flush starts no further requests for the cleared entries, even if analytics is turned on again. Rows already on the server expire normally.
 - Turning it on again starts fresh instances. The toggle state itself is never reported and there is no "opted out" row.
 
@@ -306,7 +308,7 @@ In dependency order. Each item ends with the verification steps from `AGENTS.md`
 
 **apps/mobile**
 
-- [x] `analyticsEnabled` in `preferencesAtom` and the Settings toggle (follow `docs/ui_coding_guideline.md`).
+- [x] `analyticsConsent` in `preferencesAtom`, the consent screen and the Settings toggle (follow `docs/ui_coding_guideline.md`).
 - [x] Markers and instances atoms with `atomWithParsedMmkvStorageWithImmediateSaveOption` (section 6.2).
 - [x] `apps/mobile/src/utils/analytics/` module (section 6.3) with unit tests for the pure rules and the flush outcomes.
 - [x] Start flush as an in-app loading task (`runOn: 'start'`, `requiresUserLoggedIn: false`); background flush via `useAppState` in `App.tsx`.
@@ -348,7 +350,7 @@ Recorded so they are not re-litigated in review:
 - `app_major_version` stores the CalVer release line `YY.M`.
 - Rejected payloads are dropped, not dead-lettered.
 - Journey steps are uploaded right away, without the pending aggregation buckets; aggregations are flushed on app start and best effort on background. The first upload of a journey can be paired by write order with the backend row of the same action; this trade-off is accepted and analysed in section 8.
-- Analytics is opt-in: off by default, leaving the first screen with it on starts the onboarding journey, and turning it off wipes local analytics state.
+- Analytics is opt-in: off by default, answering "Yes" on the onboarding consent screen starts the onboarding journey, and turning it off wipes local analytics state.
 - Country prefix is stored on all rows (journeys and aggregations), except definitions marked `storeCountry: false`. Small-group suppression on the dashboard is the mitigation.
 - Active instances come from three activity aggregations (day, week, month), because unique counts cannot be summed across unlinkable rows. Totals are summed from day rows.
 - "Before churn" snapshots ("Marketplace actions before churn", "Chats opened before churn", "App sessions before churn") are rejected: a per-device record overwritten on every start is a standing device profile.

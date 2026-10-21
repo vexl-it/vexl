@@ -151,8 +151,11 @@
   "appSettings.changeCurrency": "Badilisha sarafu",
   "appSettings.appearanceTitle": "Mwonekano",
   "appSettings.allowScreencapture": "Ruhusu kupiga picha ya skrini",
-  "appSettings.anonymousUsageStatistics": "Takwimu za matumizi bila majina",
-  "appSettings.anonymousUsageStatisticsNote": "Inatuonyesha ni watu wangapi wanapita hatua kama kujisajili au kufungua soko, bila kukutambua kamwe.",
+  "appSettings.usageStatistics": "Shiriki takwimu za matumizi",
+  "appSettings.usageStatisticsLink": "Jinsi takwimu za matumizi zinavyofanya kazi",
+  "analyticsConsent.title": "Takwimu za matumizi, kwa masharti yako",
+  "analyticsConsent.text": "Je, tunaweza kukusanya takwimu za matumizi? Zinatuonyesha mahali Vexl ina mapungufu, kama usajili unaokwama au soko lisilo na ofa. Ripoti hazina namba yako kamili ya simu, waasiliani wako, ujumbe wala maandishi ya ofa. Hazina kitambulisho cha mtumiaji wala nyakati kamili, na hutufikia kupitia seva huru ya kupitisha data, kwa hivyo hatuoni anwani yako ya IP. Unaweza kubadilisha hili wakati wowote kwenye Mipangilio ya app.",
+  "analyticsConsent.link": "Soma jinsi inavyofanya kazi",
   "appSettings.appearance.light": "Hali angavu",
   "appSettings.appearance.dark": "Hali nyeusi",
   "appSettings.appearance.system": "Linganishwa na kifaa"

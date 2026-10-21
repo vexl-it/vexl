@@ -153,8 +153,11 @@
   "appSettings.changeCurrency": "Změnit měnu",
   "appSettings.appearanceTitle": "Vzhled",
   "appSettings.allowScreencapture": "Povolit snímání obrazovky",
-  "appSettings.anonymousUsageStatistics": "Anonymní statistiky používání",
-  "appSettings.anonymousUsageStatisticsNote": "Ukazuje nám, kolik lidí projde kroky jako registrace nebo otevření tržiště, aniž bychom kdy zjistili, kdo jsi.",
+  "appSettings.usageStatistics": "Sdílet statistiky používání",
+  "appSettings.usageStatisticsLink": "Jak fungují statistiky používání",
+  "analyticsConsent.title": "Statistiky používání podle tvých pravidel",
+  "analyticsConsent.text": "Můžeme sbírat statistiky používání? Ukazují nám, kde Vexl pokulhává, třeba když se zasekne registrace nebo když na tržišti nejsou žádné nabídky. Hlášení neobsahují tvoje celé telefonní číslo, kontakty, zprávy ani text nabídek. Nemají žádné ID uživatele ani přesné časy a chodí k nám přes nezávislý přeposílací server, takže nevidíme tvoji IP adresu. Můžeš to kdykoli změnit v Nastavení aplikace.",
+  "analyticsConsent.link": "Přečti si, jak to funguje",
   "appSettings.appearance.light": "Světlý režim",
   "appSettings.appearance.dark": "Tmavý režim",
   "appSettings.appearance.system": "Podle zařízení"

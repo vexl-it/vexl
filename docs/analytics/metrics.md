@@ -6,7 +6,7 @@ The draft lists about 130 metrics in 12 sections. Many of them are the same numb
 
 ## How to read the numbers
 
-Vexl has no user accounts we can track, by design. So the dashboard never counts people. It counts **installs**: copies of the app that have anonymous usage statistics turned on (it is off by default; users opt in on the first screen or in settings). One person with two phones is two installs. A person who reinstalls is a new install.
+Vexl has no user accounts we can track, by design. So the dashboard never counts people. It counts **installs**: copies of the app that have anonymous usage statistics turned on (it is off by default; users are asked on a consent screen during onboarding, or once after updating, and can change it in settings). One person with two phones is two installs. A person who reinstalls is a new install.
 
 Some numbers come from our servers instead (active offers, requests sent). Those cover every user, including the ones who switched statistics off. Every card says which group it counts: **All users** (servers) or **Installs with analytics on** (apps). We show them side by side but never divide one by the other, because the two groups differ. A ratio inside one group is fine (the reactivation rate is server returns divided by the server's dormant pool).
 
@@ -46,7 +46,7 @@ Snapshots (one total, not a series) follow the range, not the period: they add u
 
 Does a new install get from first open to real use, and where does it stop? Grouped by the week of first open.
 
-"First open" means leaving the first screen with statistics turned on. Installs that never opt in are not counted, and the opt-in rate cannot be measured, because nothing is sent before consent.
+"First open" means answering "Yes" on the consent screen during onboarding. Installs that never opt in are not counted, and the opt-in rate cannot be measured, because nothing is sent before consent.
 
 - Activation rate: share of new registrations that activated in the main marketplace, with the Clubs-only share next to it. The base is the same with or without a country filter.
 - Onboarding steps, as plain bars: first open → phone number entered (both include re-logins: the app learns about an existing account only at verification) → phone verified → registered → reached contact import → contacts imported → marketplace loaded → saw at least one main offer → opened a main offer → activated in the main marketplace (within 30 days), new accounts only from verification on. With a country filter the bars start at "registered", because the app learns the country only then.

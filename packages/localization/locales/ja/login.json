@@ -32,8 +32,6 @@
   "loginFlow.v2.intro1.termsPrefix": "続行すると、Vexlに同意したことになります",
   "loginFlow.v2.intro1.title": "取引する自由を取り戻そう",
   "loginFlow.v2.intro1.text": "知っている人とbitcoinを取引しよう。誰にも見られずに。",
-  "loginFlow.v2.intro1.shareUsageStatistics": "匿名の利用統計を共有する",
-  "loginFlow.v2.intro1.shareUsageStatisticsNote": "あなたを特定することなく、Vexlの改善に役立ちます。設定で変更できます。",
   "loginFlow.v2.intro2.title": "信頼できるネットワークを作ろう",
   "loginFlow.v2.intro2.text": "電話番号を認証して、友達とつながって、さっそく見てみよう。1分くらいで終わるよ。",
   "loginFlow.v2.phoneNumber.title": "電話番号を教えて？",

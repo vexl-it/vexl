@@ -115,7 +115,6 @@ services:
     environment:
       RELAY_SITE: ":80"
       GATEWAY_UPSTREAM: http://host.docker.internal:${METRICS_SERVICE_PORT:-3010}
-      RELAY_TOKEN: ${ANALYTICS_RELAY_TOKEN:-local-relay-token}
     ports:
       - "${OHTTP_RELAY_PORT:-3017}:80"
     extra_hosts:

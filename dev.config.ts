@@ -262,7 +262,6 @@ export const serviceConstants = {
 export const analyticsRelay = {
   gatewayKeyConfig: "AQAgYoWrdsc5Ml+j0GN7fXUkH5FgAf0Q0WWjN+0ccWVU014ABAABAAM=",
   gatewaySecret: "Aamt9uXCYOs4Oi8o/yUD7zzP1ENFt+t5VZDs2QAgIB9L",
-  relayToken: "local-relay-token",
   relayPath: "/vexl-analytics",
 };
 

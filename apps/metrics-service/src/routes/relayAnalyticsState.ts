@@ -10,9 +10,7 @@ import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {
   AnalyticsGatewayKeyUnavailableError,
   InvalidAnalyticsStateError,
-  RELAY_TOKEN_HEADER,
   RelayedAnalyticsState,
-  UnknownAnalyticsRelayError,
 } from '@vexl-next/rest-api/src/services/metrics/contracts'
 import {MetricsApiSpecification} from '@vexl-next/rest-api/src/services/metrics/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
@@ -24,10 +22,8 @@ import {
   Redacted,
   Schema,
 } from 'effect/index'
-import {timingSafeEqual} from 'node:crypto'
 import {
   analyticsOhttpGatewaySecretsConfig,
-  analyticsRelayTokensConfig,
   analyticsWindowConfig,
 } from '../configs'
 import {MetricsDbService} from '../db/MetricsDbService'
@@ -37,24 +33,6 @@ import {
   releaseLineOf,
   todayDay,
 } from '../utils/analyticsStateRules'
-
-const sameToken = (expected: string, actual: string): boolean => {
-  const a = Buffer.from(expected)
-  const b = Buffer.from(actual)
-  return a.length === b.length && timingSafeEqual(a, b)
-}
-
-const requireKnownRelay = (
-  token: string | undefined
-): Effect.Effect<void, UnknownAnalyticsRelayError | ConfigError.ConfigError> =>
-  Effect.gen(function* (_) {
-    const tokens = yield* _(analyticsRelayTokensConfig)
-    if (
-      token === undefined ||
-      !Array.some(tokens, (known) => sameToken(Redacted.value(known), token))
-    )
-      return yield* _(new UnknownAnalyticsRelayError())
-  })
 
 const openRelayedState = (
   request: Uint8Array
@@ -175,9 +153,8 @@ export const relayAnalyticsState = HttpApiBuilder.handler(
   MetricsApiSpecification,
   'root',
   'relayAnalyticsState',
-  ({headers, payload}) =>
-    requireKnownRelay(headers[RELAY_TOKEN_HEADER]).pipe(
-      Effect.zipRight(openRelayedState(payload)),
+  ({payload}) =>
+    openRelayedState(payload).pipe(
       Effect.flatMap(storeAnalyticsState),
       Effect.as({}),
       makeEndpointEffect

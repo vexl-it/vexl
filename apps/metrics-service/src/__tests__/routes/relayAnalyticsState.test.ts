@@ -19,7 +19,6 @@ import {
   relayRequest,
   testGatewayKeyConfig,
   testJourneyUpsert,
-  testRelayToken,
   upsertState,
 } from '../utils/analyticsStates'
 
@@ -399,25 +398,6 @@ describe('relayAnalyticsState', () => {
       }),
     })
 
-    it.each([
-      ['without a relay token', undefined],
-      ['with an unknown relay token', 'not-a-relay'],
-    ])('rejects a request %s with 403', async (_label, relayToken) => {
-      await runPromiseInMockedEnvironment(
-        Effect.gen(function* (_) {
-          const request = yield* _(encapsulatedOnboarding)
-          const result = yield* _(
-            Effect.either(relayRequest(request, relayToken))
-          )
-          expect(result).toMatchObject({
-            _tag: 'Left',
-            left: {_tag: 'UnknownAnalyticsRelayError'},
-          })
-          expect(yield* _(readStoredStates)).toHaveLength(0)
-        })
-      )
-    })
-
     it('answers 503 for a key the gateway does not hold, so the client retries', async () => {
       await runPromiseInMockedEnvironment(
         Effect.gen(function* (_) {
@@ -431,9 +411,7 @@ describe('relayAnalyticsState', () => {
               }),
             })
           )
-          const result = yield* _(
-            Effect.either(relayRequest(request, testRelayToken))
-          )
+          const result = yield* _(Effect.either(relayRequest(request)))
           expect(result).toMatchObject({
             _tag: 'Left',
             left: {_tag: 'AnalyticsGatewayKeyUnavailableError'},
@@ -447,9 +425,7 @@ describe('relayAnalyticsState', () => {
         Effect.gen(function* (_) {
           const request = yield* _(encapsulatedOnboarding)
           request[request.length - 1] = (request[request.length - 1] ?? 0) ^ 1
-          const result = yield* _(
-            Effect.either(relayRequest(request, testRelayToken))
-          )
+          const result = yield* _(Effect.either(relayRequest(request)))
           expectErrorResponse(InvalidAnalyticsStateError)(result)
           expect(yield* _(readStoredStates)).toHaveLength(0)
         })
@@ -465,9 +441,7 @@ describe('relayAnalyticsState', () => {
               plaintext: new TextEncoder().encode('{"state":{}}'),
             })
           )
-          const result = yield* _(
-            Effect.either(relayRequest(request, testRelayToken))
-          )
+          const result = yield* _(Effect.either(relayRequest(request)))
           expectErrorResponse(InvalidAnalyticsStateError)(result)
         })
       )

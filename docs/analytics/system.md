@@ -43,7 +43,7 @@ Long-lived journeys (lifetime over 7 days) carry booleans and enums only in the 
    | app start (reliable), app background (best effort)
    v
  OHTTP-encrypted {client, state}  ---> relay (third party, sees IP only)
-   (no Vexl headers)                              |  POST /analytics/ohttp + relay token
+   (no Vexl headers)                              |  POST /analytics/ohttp
                                                   v
                                           gateway: decrypt, validate name + schema
                                                   |  (sees relay IP only)
@@ -66,7 +66,7 @@ Upload timing: a journey step forks a flush right away (fire and forget; a faile
 One endpoint on metrics-service, defined in `packages/rest-api/src/services/metrics/specification.ts` next to `reportNotificationInteraction`. It is an Oblivious HTTP gateway (section 4.5): the client never calls it directly, it sends through an analytics relay run by a third party, so Vexl never sees the client IP.
 
 - Method and path: `POST /analytics/ohttp` (name `relayAnalyticsState`), body `message/ohttp-req`. There is no direct, non-relayed upload path.
-- Headers: only `x-relay-token`, which the relay adds. Unknown or missing token: 403. No `CommonHeaders`, no session; callable before login.
+- Headers: none. No `CommonHeaders`, no session, no relay authentication (RFC 9458 defines none); callable before login. A direct call skips the relay and only exposes the caller's own IP.
 - Middleware: `RateLimitingMiddleware`. Every request comes from a relay, so the per-IP limit (`MaxExpectedDailyCall` 1 000 000) is a per-relay cap.
 - Body: the RFC 9458 request encapsulation (suite X25519, HKDF-SHA256, ChaCha20Poly1305, `packages/cryptography/src/operations/ohttp.ts`) of `RelayedAnalyticsState` JSON: `{client: {platform, semver, prefix?}, state}`, padded with spaces to a multiple of 1 KB so the relay cannot tell definitions apart by size. The plaintext is JSON, not Binary HTTP; relays never see it, so this does not affect relay compatibility.
 - Body size: hard cap 4 KB plaintext plus the encapsulation overhead. A request whose `content-length` exceeds it is answered with 413 before the body is read. The payload cap is enforced again by the schema (max 64 keys, strings max 32 chars, integers max 1 000).
@@ -85,7 +85,7 @@ One endpoint on metrics-service, defined in `packages/rest-api/src/services/metr
 | `updatedDay`    | `YYYY-MM-DD`                 | Day of the last local state change. The client sends the day, or the ISO week start for journeys with `updatedDayPrecision: 'week'`, and never a day earlier than `startDay`: in a journey's first week it equals `startDay`. The server accepts `>= startDay`, and for week precision also the ISO week start of `startDay`. Both dates may be at most one day in the future for clock skew. |
 | `payload`       | object                       | Validated with the definition's effect Schema, `onExcessProperty: 'error'`. Extra or unknown fields: 400.                                                                                                                                                                                                                                                                                     |
 
-Errors: 400 invalid, undecryptable or stale (`startDay` older than lifetime plus grace, unknown name, schema mismatch, `kind` not matching the definition or an existing row, aggregation `startDay` not the first day of its bucket), 403 unknown relay, 413 too large, 429 rate limited, 503 encrypted to a key id the gateway does not hold, 500 unexpected. The client drops the outbox entry on 400 and 413 only; anything else (a relay or gateway problem) or a network failure is retried at the next flush.
+Errors: 400 invalid, undecryptable or stale (`startDay` older than lifetime plus grace, unknown name, schema mismatch, `kind` not matching the definition or an existing row, aggregation `startDay` not the first day of its bucket), 413 too large, 429 rate limited, 503 encrypted to a key id the gateway does not hold, 500 unexpected. The client drops the outbox entry on 400 and 413 only; anything else (a relay or gateway problem) or a network failure is retried at the next flush.
 
 ### 4.2 Table `analytics_states`
 
@@ -134,12 +134,12 @@ Retention policy in one line: a row keeps its id for at most lifetime plus grace
 Goal: the Vexl server is technically unable to see the client IP of an analytics upload, without users having to trust Vexl.
 
 ```
- app --(client IP, encrypted blob)--> relay --(relay IP, blob, x-relay-token)--> gateway (metrics-service)
+ app --(client IP, encrypted blob)--> relay --(relay IP, blob)--> gateway (metrics-service)
 ```
 
 - The app encrypts each upload to the gateway's public key config and posts it to a randomly chosen relay. The relay sees the client IP and an opaque blob; the gateway sees the content and only the relay IP. This holds as long as the relay operator does not collude with Vexl, so production relays must be run by independent parties, never by Vexl.
-- The relay is `tooling/ohttp-relay/Caddyfile`: one path, POST only, 8 KB cap, every client header dropped, no access or error logs, the relay's token added. The same file runs in local dev (`ohttp-relay` in `docker-compose.dev.yaml`), on staging and at partners.
-- Gateway keys: `ANALYTICS_OHTTP_GATEWAY_SECRETS` (comma-separated; hold the current and the next key during a rotation). Relay tokens: `ANALYTICS_RELAY_TOKENS` (comma-separated, one per relay). Generate a key with `pnpm --filter @vexl-next/cryptography generate:ohttp-key <keyId>`.
+- The relay is `tooling/ohttp-relay/Caddyfile`: one path, POST only, 8 KB cap, every client header dropped, no access or error logs. The same file runs in local dev (`ohttp-relay` in `docker-compose.dev.yaml`), on staging and at partners.
+- Gateway keys: `ANALYTICS_OHTTP_GATEWAY_SECRETS` (comma-separated; hold the current and the next key during a rotation). Generate a key with `pnpm --filter @vexl-next/cryptography generate:ohttp-key <keyId>`.
 - Client config: `analytics-relays.json` at the repo root, with relay URLs (https only) and the public key config per environment (`stage`, `prod`) and a `revision`. The app bundles the file at build time and, when statistics are on, fetches it from `raw.githubusercontent.com` (`main`) at most once a day, failed attempts included; it uses the fetched copy only when its `revision` is higher than the bundled one, and keeps the last good copy when a fetch fails. Every user must get the same key config, otherwise per-user keys could tag users: the file is public, so every change is visible in git history, and it is never served by Vexl. Bump `revision` on every change and only ever add fields, since old apps keep reading it. An environment without an entry has uploads disabled (prod for now). Local dev reads the relay from `EXPO_PUBLIC_LOCAL_ANALYTICS_*` (generated by `pnpm dev:mobile`) and never fetches.
 - The fetch tells GitHub the IP and time of opted-in installs once a day. It runs at app start, before the randomly delayed upload, so the two requests do not line up.
 - What still leaks: the relay sees client IP, time and size; Vexl sees arrival time. Journey steps are uploaded right away, so arrival time can still be correlated with authenticated traffic from the same device (section 8). The service's `HttpMiddleware.logger` logs method and path only; never add header logging.
@@ -268,7 +268,7 @@ Weekly tenure: `activityWeekly.tenure` names the registration week for `w0`, `w1
 
 Long-lived journeys are the most linkable objects in the system because a random id lives for up to 37 days; they carry booleans and enums only, one journey per milestone, never chained.
 
-Endpoint abuse: anyone can send junk through a relay. Schema validation, caps, the body limit and the per-relay rate limit bound the damage to noise, and the dashboard's suppression and maturity rules bound the effect of a burst. Nothing in the payload can point at another user's data.
+Endpoint abuse: anyone can send junk through a relay or straight to the gateway. Schema validation, caps, the body limit and the per-IP rate limit (per relay for relayed traffic) bound the damage to noise, and the dashboard's suppression and maturity rules bound the effect of a burst. Nothing in the payload can point at another user's data.
 
 Rate limiter: the shared limiter logs the connecting IP and keeps per-IP request times in Redis. For this endpoint that IP is always a relay's, so neither holds a client IP.
 
@@ -290,7 +290,7 @@ In dependency order. Each item ends with the verification steps from `AGENTS.md`
 **packages/rest-api**
 
 - [x] `AnalyticsStateUpsert` body schema (in the definitions package) and `InvalidAnalyticsStateError` in `services/metrics/contracts.ts`.
-- [x] `POST /analytics/ohttp` gateway endpoint in `services/metrics/specification.ts` with the relay token header, `MaxExpectedDailyCall`, 400/403/503 errors, plus `RelayedAnalyticsState` and its padded encoding in `contracts.ts`. 413 comes from the body size cap in the server.
+- [x] `POST /analytics/ohttp` gateway endpoint in `services/metrics/specification.ts` with `MaxExpectedDailyCall`, 400/503 errors, plus `RelayedAnalyticsState` and its padded encoding in `contracts.ts`. 413 comes from the body size cap in the server.
 - [x] `analytics-relays.json` (relay URLs and gateway key config per environment), fetched by the app.
 
 **apps/metrics-service**
@@ -301,7 +301,7 @@ In dependency order. Each item ends with the verification steps from `AGENTS.md`
 - [x] Daily expiry and retention task via `makeRepeatingTaskLayer` (`analyticsExpiryWorker.ts`).
 - [x] Config: `ANALYTICS_GRACE_DAYS`, `ANALYTICS_SETTLE_DAYS`, `ANALYTICS_RETENTION_DAYS`, `ANALYTICS_EXPIRY_CRON`.
 - [x] Add a pointer to this document in `docs/backend_stats.md`.
-- [x] OHTTP gateway: decapsulation, relay token check, key and token config.
+- [x] OHTTP gateway: decapsulation and key config.
 - [x] Handler tests (`src/__tests__/routes/relayAnalyticsState.test.ts`) and expiry job test, on the jest harness added to the service.
 
 **apps/mobile**
@@ -333,7 +333,7 @@ In dependency order. Each item ends with the verification steps from `AGENTS.md`
 **infrastructure (separate repo)**
 
 - [ ] Independent relay operators for production (section 4.5) and a staging relay; then add them to `analytics-relays.json`.
-- [ ] metrics-service env: `ANALYTICS_OHTTP_GATEWAY_SECRETS`, `ANALYTICS_RELAY_TOKENS`.
+- [ ] metrics-service env: `ANALYTICS_OHTTP_GATEWAY_SECRETS`.
 - [ ] Rate limit values and body size cap in the environment.
 - [ ] feedback-service env: `METRICS_QUEUE_NAME` (it now reports `TRADE_FEEDBACK_SUBMITTED` and does not start without it).
 - [ ] Database role for the dashboard read path: a read-only role on the metrics database, wired into the backoffice deployment as `METRICS_DB_HOST`, `METRICS_DB_PORT`, `METRICS_DB_USER`, `METRICS_DB_PASSWORD`, `METRICS_DB_NAME`.

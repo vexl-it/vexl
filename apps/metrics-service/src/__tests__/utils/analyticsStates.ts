@@ -29,8 +29,6 @@ export const newStateId = (): AnalyticsStateId =>
 export const testGatewayKeyConfig = OhttpKeyConfig.make(
   'CQAgphsQGbIEJaMHeIr1uINo4p3TFzLtJt8uSZdfIFOf5msABAABAAM='
 )
-// One of ANALYTICS_RELAY_TOKENS in .env.test
-export const testRelayToken = 'test-relay-token'
 
 export const iosClientWithPrefix: AnalyticsClientInfo = {
   platform: 'IOS',
@@ -53,20 +51,14 @@ export const testJourneyUpsert = (
 })
 
 export const relayRequest = (
-  request: Uint8Array,
-  relayToken: string | undefined
+  request: Uint8Array
 ): Effect.Effect<
   unknown,
   unknown,
   Effect.Effect.Context<typeof NodeTestingApp>
 > =>
   NodeTestingApp.pipe(
-    Effect.flatMap((client) =>
-      client.relayAnalyticsState({
-        payload: request,
-        headers: {'x-relay-token': relayToken},
-      })
-    )
+    Effect.flatMap((client) => client.relayAnalyticsState({payload: request}))
   )
 
 export const upsertState = (
@@ -80,7 +72,7 @@ export const upsertState = (
   encapsulateRequest({
     keyConfig: testGatewayKeyConfig,
     plaintext: encodeRelayedAnalyticsState({client, state}),
-  }).pipe(Effect.flatMap((request) => relayRequest(request, testRelayToken)))
+  }).pipe(Effect.flatMap(relayRequest))
 
 const StoredAnalyticsState = Schema.Struct({
   id: Schema.NullOr(Schema.String),

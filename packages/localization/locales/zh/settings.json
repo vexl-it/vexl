@@ -153,9 +153,10 @@
   "appSettings.allowScreencapture": "允许截屏",
   "appSettings.usageStatistics": "分享使用统计",
   "appSettings.usageStatisticsLink": "使用统计如何运作",
-  "analyticsConsent.title": "使用统计，由你决定",
+  "analyticsConsent.title": "帮我们把 Vexl 做得更好",
   "analyticsConsent.text": "我们可以收集使用统计吗？它们能让我们看到 Vexl 哪里做得不够好。没有用户 ID，没有精确时间，没有 IP 地址。随时可以在设置中更改。",
   "analyticsConsent.link": "了解它如何运作",
+  "analyticsConsent.accept": "分享统计",
   "appSettings.appearance.light": "浅色模式",
   "appSettings.appearance.dark": "深色模式",
   "appSettings.appearance.system": "跟随设备"

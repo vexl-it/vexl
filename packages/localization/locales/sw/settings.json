@@ -153,9 +153,10 @@
   "appSettings.allowScreencapture": "Ruhusu kupiga picha ya skrini",
   "appSettings.usageStatistics": "Shiriki takwimu za matumizi",
   "appSettings.usageStatisticsLink": "Jinsi takwimu za matumizi zinavyofanya kazi",
-  "analyticsConsent.title": "Takwimu za matumizi, kwa masharti yako",
+  "analyticsConsent.title": "Tusaidie kuboresha Vexl",
   "analyticsConsent.text": "Je, tunaweza kukusanya takwimu za matumizi? Zinatuonyesha mahali Vexl ina mapungufu. Hakuna kitambulisho cha mtumiaji, hakuna nyakati kamili, hakuna anwani ya IP. Badilisha hili wakati wowote kwenye mipangilio.",
   "analyticsConsent.link": "Soma jinsi inavyofanya kazi",
+  "analyticsConsent.accept": "Shiriki takwimu",
   "appSettings.appearance.light": "Hali angavu",
   "appSettings.appearance.dark": "Hali nyeusi",
   "appSettings.appearance.system": "Linganishwa na kifaa"

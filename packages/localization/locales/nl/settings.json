@@ -153,9 +153,10 @@
   "appSettings.allowScreencapture": "Schermafbeeldingen toestaan",
   "appSettings.usageStatistics": "Gebruiksstatistieken delen",
   "appSettings.usageStatisticsLink": "Zo werken gebruiksstatistieken",
-  "analyticsConsent.title": "Gebruiksstatistieken, op jouw voorwaarden",
+  "analyticsConsent.title": "Help ons Vexl beter te maken",
   "analyticsConsent.text": "Mogen we gebruiksstatistieken verzamelen? Ze laten ons zien waar Vexl tekortschiet. Geen gebruikers-ID, geen exacte tijden, geen IP-adres. Je kunt dit altijd wijzigen in de instellingen.",
   "analyticsConsent.link": "Lees hoe het werkt",
+  "analyticsConsent.accept": "Statistieken delen",
   "appSettings.appearance.light": "Lichte modus",
   "appSettings.appearance.dark": "Donkere modus",
   "appSettings.appearance.system": "Apparaat volgen"

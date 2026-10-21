@@ -154,9 +154,10 @@
   "appSettings.allowScreencapture": "Permitir capturas de pantalla",
   "appSettings.usageStatistics": "Compartir estadísticas de uso",
   "appSettings.usageStatisticsLink": "Cómo funcionan las estadísticas de uso",
-  "analyticsConsent.title": "Estadísticas de uso, con tus reglas",
+  "analyticsConsent.title": "Ayúdanos a mejorar Vexl",
   "analyticsConsent.text": "¿Podemos recopilar estadísticas de uso? Nos muestran dónde falla Vexl. Sin ID de usuario, sin horas exactas, sin dirección IP. Cámbialo cuando quieras en los ajustes.",
   "analyticsConsent.link": "Lee cómo funciona",
+  "analyticsConsent.accept": "Compartir estadísticas",
   "appSettings.appearance.light": "Modo claro",
   "appSettings.appearance.dark": "Modo oscuro",
   "appSettings.appearance.system": "Igual que el dispositivo"

@@ -153,9 +153,10 @@
   "appSettings.allowScreencapture": "Позволи снимки на екрана",
   "appSettings.usageStatistics": "Споделяй статистика за използването",
   "appSettings.usageStatisticsLink": "Как работи статистиката за използването",
-  "analyticsConsent.title": "Статистика за използването, при твоите условия",
+  "analyticsConsent.title": "Помогни ни да направим Vexl по-добър",
   "analyticsConsent.text": "Може ли да събираме статистика за използването? Тя ни показва къде Vexl не се справя. Без потребителско ID, без точни часове, без IP адрес. Можеш да го промениш по всяко време в настройките.",
   "analyticsConsent.link": "Виж как работи",
+  "analyticsConsent.accept": "Сподели статистика",
   "appSettings.appearance.light": "Светъл режим",
   "appSettings.appearance.dark": "Тъмен режим",
   "appSettings.appearance.system": "Според устройството"

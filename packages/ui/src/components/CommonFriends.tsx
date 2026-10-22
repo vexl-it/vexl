@@ -1,3 +1,4 @@
+import {Array, pipe} from 'effect'
 import React from 'react'
 import type {ImageProps as RNImageProps} from 'react-native'
 import Svg, {
@@ -9,17 +10,20 @@ import Svg, {
 import {getTokens, styled, useTheme} from 'tamagui'
 
 import {ChevronRight} from '../icons'
-import {SizableText, Stack, XStack, YStack} from '../primitives'
+import {Stack, XStack, YStack} from '../primitives'
 import {Chip} from './Chip'
+import {Typography} from './Typography'
 
 export interface CommonFriend {
   readonly id: string
+  readonly trusted?: boolean
   readonly name: string
   readonly avatarSource?: RNImageProps['source']
 }
 
 export interface CommonFriendsProps {
   readonly label: string
+  readonly trustedLabel?: string
   readonly friends: readonly CommonFriend[]
   readonly onPress?: () => void
 }
@@ -36,6 +40,7 @@ const CommonFriendsFrame = styled(Stack, {
 
 export function CommonFriends({
   label,
+  trustedLabel,
   friends,
   onPress,
 }: CommonFriendsProps): React.JSX.Element {
@@ -50,22 +55,25 @@ export function CommonFriends({
   return (
     <CommonFriendsFrame onPress={onPress}>
       <YStack px="$5" py="$4" gap="$3">
-        <SizableText
-          fontFamily="$body"
-          fontSize="$1"
-          fontWeight="500"
+        <Typography
+          variant="micro"
           color="$foregroundSecondary"
+          letterSpacing={0}
         >
-          {label}
-        </SizableText>
+          {trustedLabel ? `${label} · ${trustedLabel}` : label}
+        </Typography>
         <XStack gap={gap} alignItems="center" overflow="hidden">
-          {friends.map((friend) => (
-            <Chip
-              key={friend.id}
-              name={friend.name}
-              avatarSource={friend.avatarSource}
-            />
-          ))}
+          {pipe(
+            friends,
+            Array.map((friend) => (
+              <Chip
+                key={friend.id}
+                name={friend.name}
+                trusted={friend.trusted}
+                avatarSource={friend.avatarSource}
+              />
+            ))
+          )}
         </XStack>
       </YStack>
       <Stack

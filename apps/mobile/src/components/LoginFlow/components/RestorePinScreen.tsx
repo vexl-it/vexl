@@ -1,8 +1,12 @@
-import {Effect} from 'effect'
-import {useSetAtom} from 'jotai'
+import {Effect, Option} from 'effect'
+import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useState} from 'react'
 import {type LoginFlowStackScreenProps} from '../../../navigationTypes'
-import {decryptBackupToRestoreActionAtom} from '../../../state/backup/backupToRestore'
+import {
+  backupKeyPairAtom,
+  decryptBackupToRestoreActionAtom,
+  isBackupForKeyPair,
+} from '../../../state/backup/backupToRestore'
 import {startRestoreFromBackupActionAtom} from '../../../state/backup/restoreFromBackup'
 import {dismissKeyboardAndResolveOnLayoutUpdate} from '../../../utils/dismissKeyboardPromise'
 import {
@@ -12,6 +16,7 @@ import {
 import reportError from '../../../utils/reportError'
 import BackupPinScreen from '../../BackupPinScreen'
 import {useShowLoadingOverlay} from '../../LoadingOverlayProvider'
+import {usePickBackupFile} from '../utils/usePickBackupFile'
 
 type Props = LoginFlowStackScreenProps<'RestorePin'>
 
@@ -39,7 +44,15 @@ export default function RestorePinScreen({
   const [pin, setPin] = useState('')
   const [errorMessage, setErrorMessage] = useState<string>()
   const [decrypting, setDecrypting] = useState(false)
+  const [fileCorrupted, setFileCorrupted] = useState(false)
   const loadingOverlay = useShowLoadingOverlay()
+  const keyPair = useAtomValue(backupKeyPairAtom)
+  const {pick, errorMessage: pickErrorMessage} = usePickBackupFile((file) => {
+    if (Option.exists(keyPair, (one) => isBackupForKeyPair(file, one))) {
+      setFileCorrupted(false)
+      setErrorMessage(undefined)
+    } else navigation.replace('RestoreWrongPhoneNumber')
+  })
 
   return (
     <BackupPinScreen
@@ -50,7 +63,7 @@ export default function RestorePinScreen({
         setPin(newPin)
         setErrorMessage(undefined)
       }}
-      errorMessage={errorMessage}
+      errorMessage={pickErrorMessage ?? errorMessage}
       buttonLabel={t('loginFlow.restoreFromBackup.pin.restore')}
       busy={decrypting}
       onSubmit={(validPin) => {
@@ -68,6 +81,7 @@ export default function RestorePinScreen({
               },
               onFailure: (e) => {
                 setPin('')
+                setFileCorrupted(e._tag === 'BackupFileCorruptedError')
                 setErrorMessage(decryptErrorMessage(e, t))
               },
             })
@@ -78,6 +92,16 @@ export default function RestorePinScreen({
         })
       }}
       onBack={navigation.goBack}
+      secondaryAction={
+        fileCorrupted
+          ? {
+              label: t(
+                'loginFlow.restoreFromBackup.wrongPhoneNumber.chooseAnotherFile'
+              ),
+              onPress: pick,
+            }
+          : undefined
+      }
     />
   )
 }

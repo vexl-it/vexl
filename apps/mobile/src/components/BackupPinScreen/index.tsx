@@ -22,6 +22,10 @@ interface Props {
   readonly busy?: boolean
   readonly onSubmit: (pin: BackupPin) => void
   readonly onBack: () => void
+  readonly secondaryAction?: {
+    readonly label: string
+    readonly onPress: () => void
+  }
 }
 
 export default function BackupPinScreen({
@@ -34,6 +38,7 @@ export default function BackupPinScreen({
   busy,
   onSubmit,
   onBack,
+  secondaryAction,
 }: Props): React.ReactElement {
   const validPin = Schema.decodeOption(BackupPin)(pin)
 
@@ -47,14 +52,25 @@ export default function BackupPinScreen({
         />
       }
       footer={
-        <Button
-          disabled={Option.isNone(validPin) || busy}
-          onPress={() => {
-            if (Option.isSome(validPin)) onSubmit(validPin.value)
-          }}
-        >
-          {buttonLabel}
-        </Button>
+        <YStack gap="$4">
+          <Button
+            disabled={Option.isNone(validPin) || busy}
+            onPress={() => {
+              if (Option.isSome(validPin)) onSubmit(validPin.value)
+            }}
+          >
+            {buttonLabel}
+          </Button>
+          {secondaryAction ? (
+            <Button
+              disabled={busy}
+              variant="secondary"
+              onPress={secondaryAction.onPress}
+            >
+              {secondaryAction.label}
+            </Button>
+          ) : null}
+        </YStack>
       }
     >
       <YStack gap="$7" paddingVertical="$5">

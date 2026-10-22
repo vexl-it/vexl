@@ -12,8 +12,10 @@ import {
   Typography,
   YStack,
 } from '@vexl-next/ui'
-import React from 'react'
+import {useSetAtom} from 'jotai'
+import React, {useEffect} from 'react'
 import {type LoginFlowStackScreenProps} from '../../../navigationTypes'
+import {clearBackupToRestoreActionAtom} from '../../../state/backup/backupToRestore'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import InlineErrorText from '../../InlineErrorText'
 import {usePickBackupFile} from '../utils/usePickBackupFile'
@@ -24,6 +26,9 @@ export default function RestoreIntroScreen({
   navigation,
 }: Props): React.ReactElement {
   const {t} = useTranslation()
+  const clearBackupToRestore = useSetAtom(clearBackupToRestoreActionAtom)
+  // Leaving the restore flow must not keep the backup's private key in memory.
+  useEffect(() => clearBackupToRestore, [clearBackupToRestore])
   const {pick, errorMessage} = usePickBackupFile(() => {
     navigation.navigate('PhoneNumber', {restore: true})
   })

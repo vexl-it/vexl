@@ -244,6 +244,7 @@ export const serviceConstants = {
     ADMIN_TOKEN_HASH: "7yYOmqPGc68kDReiZgSANhqOCB0f/soqXtDjIZ/BhWc=",
     FORCE_UPDATE_FOR_VERSION_AND_LOWER: 0,
     APP_IN_MAINTENANCE_MODE: false,
+    TRUSTED_FRIENDS_ENABLED: false,
     VEXL_BLOG_URL_TEMPLATE: "https://vexl.it/post/{slug}",
   },
   backofficeApp: {

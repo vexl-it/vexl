@@ -25,6 +25,7 @@
   "messages.vexlBot.chatOpened": "Супер! Сега можеш да чатиш с отсрещната страна, за да уточните детайлите на сделката. Изпрати съобщение или отвори чеклиста за сделката.",
   "messages.vexlBot.welcomeToTheTradeChat.title": "Добре дошъл в чата за сделката",
   "messages.vexlBot.welcomeToTheTradeChat.receiverDescription": "Преди да одобриш чата за сделката, провери общите приятели и детайлите на офертата.",
+  "messages.vexlBot.welcomeToTheTradeChat.receiverDescriptionWithTrusted": "Преди да започнеш разговора, можеш да разгледаш общите ви приятели, включително доверените, и детайлите на офертата.",
   "messages.vexlBot.welcomeToTheTradeChat.senderDescriptionFirst": "Изчаква се отговор от отсрещната страна. Ще получиш известие, когато отговорят.",
   "messages.vexlBot.welcomeToTheTradeChat.senderDescriptionRerequestTimeout": "Можеш да изпратиш напомняне на отсрещната страна утре",
   "messages.messagePreviews.incoming.MESSAGE": "{{them}}: {{message}}",

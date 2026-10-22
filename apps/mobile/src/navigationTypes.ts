@@ -6,11 +6,9 @@ import {
 import {type NativeStackScreenProps} from '@react-navigation/native-stack'
 import {type KeyHolder} from '@vexl-next/cryptography'
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
+import {type ClubCode, type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
-import {type UserName} from '@vexl-next/domain/src/general/UserName.brand'
-import {type RealLifeInfo} from '@vexl-next/domain/src/general/UserNameAndAvatar.brand'
-import {type ClubCode, type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {
   type ChatId,
   type ChatMessageId,
@@ -27,6 +25,8 @@ import {
   type MeetingLocationData,
   type NetworkData,
 } from '@vexl-next/domain/src/general/tradeChecklist'
+import {type UserName} from '@vexl-next/domain/src/general/UserName.brand'
+import {type RealLifeInfo} from '@vexl-next/domain/src/general/UserNameAndAvatar.brand'
 import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {type InvoiceId} from '@vexl-next/rest-api/src/services/content/contracts'
 import {
@@ -38,6 +38,8 @@ import {type FaqType} from './components/FaqScreen/useContent'
 import {type TabType} from './components/TosScreen/useContent'
 import {type ChatIds} from './state/chat/domain'
 import {type ContactsFilter} from './state/contacts/domain'
+import {type OtherSideRole} from './utils/offerTypeSemantics'
+import {type RandomSeed} from './utils/RandomSeed'
 
 export interface CommonFriendsClub {
   readonly uuid: ClubUuid
@@ -130,6 +132,11 @@ export type RootStackParamsList = {
   ChatTags: {chatId: ChatId}
 
   CommonFriends: {
+    readonly otherSide?: {
+      readonly role: OtherSideRole
+      readonly avatarSeed: RandomSeed
+      readonly clubImageUrl?: UriString
+    }
     readonly contactsHashes: readonly HashedPhoneNumber[]
     readonly verifiedHashes?: readonly HashedPhoneNumber[]
     readonly clubs: readonly CommonFriendsClub[]

@@ -13,7 +13,11 @@ import {formattingLocaleAtom} from './localization/formattingLocaleAtom'
 import {translationAtom} from './localization/I18nProvider'
 import {getUserFacingOfferType} from './offerTypeSemantics'
 
-export {getUserFacingOfferType} from './offerTypeSemantics'
+export {
+  getOtherSideRole,
+  getUserFacingOfferType,
+  type OtherSideRole,
+} from './offerTypeSemantics'
 
 export function getIsOffering(
   listingType: ListingType | undefined,

@@ -3,6 +3,7 @@ import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {type UserName} from '@vexl-next/domain/src/general/UserName.brand'
 import {
   Circle,
+  CommonFriendsSummary,
   IconTag,
   PeopleUsers,
   TextTag,
@@ -24,6 +25,7 @@ import {getOtherSideFriendLevel} from '../utils/chat/getOtherSideFriendLevel'
 import {formatInteger} from '../utils/localization/formatting'
 import {formattingLocaleAtom} from '../utils/localization/formattingLocaleAtom'
 import {useTranslation} from '../utils/localization/I18nProvider'
+import {useTrustedFriendsText} from '../utils/localization/useTrustedFriendsText'
 import {getIconTagVariant, getIsOffering} from '../utils/offerHelpers'
 import {randomSeedFromOfferInfo} from '../utils/RandomSeed'
 import {AnonymousAvatarOrClubImage} from './AnonymousAvatar'
@@ -64,6 +66,9 @@ function OfferAuthorBanner({
     )
   )
   const isMine = !!offer.ownershipInfo
+  const trustedFriendsText = useTrustedFriendsText(
+    isMine ? 0 : new Set(visibleCommonFriends.verifiedCommonFriends).size
+  )
   const isOffering = getIsOffering(
     offer.offerInfo.publicPart.listingType,
     offer.offerInfo.publicPart.offerType
@@ -144,7 +149,15 @@ function OfferAuthorBanner({
             />
           </XStack>
         </XStack>
-        {clubLabel != null ? (
+        {trustedFriendsText ? (
+          <CommonFriendsSummary
+            clubNames={clubLabel ? [clubLabel] : undefined}
+            commonFriends={t('offer.numberOfCommon', {
+              number: localizedCommonFriendsCount,
+            })}
+            trustedFriends={trustedFriendsText}
+          />
+        ) : clubLabel != null ? (
           <XStack gap="$2" alignItems="center" flexShrink={1} minWidth={0}>
             <Typography
               variant="micro"

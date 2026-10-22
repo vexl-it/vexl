@@ -23,6 +23,7 @@ import {useTranslation} from '../../../utils/localization/I18nProvider'
 import CommonFriends from '../../CommonFriends'
 import {NotePreview} from '../../Notes/NotePreview'
 import {chatMolecule} from '../atoms'
+import {useCommonFriendsOtherSide} from '../utils/useCommonFriendsOtherSide'
 
 export default function ChatNoteDetailContent({
   chatExists,
@@ -34,6 +35,7 @@ export default function ChatNoteDetailContent({
   const theme = useTheme()
   const {bottom} = useSafeAreaInsets()
   const {t} = useTranslation()
+  const otherSide = useCommonFriendsOtherSide()
   const reportNoteWithPrompt = useSetAtom(reportNoteWithPromptActionAtom)
   const {
     chatAtom,
@@ -128,6 +130,7 @@ export default function ChatNoteDetailContent({
             otherSideClubs={otherSideClubs}
             friendLevel={friendLevel}
             isMine={isMine}
+            otherSide={otherSide}
           />
 
           {theirNoteAndNotReported ? (

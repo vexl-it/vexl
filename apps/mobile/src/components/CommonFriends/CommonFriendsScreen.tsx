@@ -1,36 +1,42 @@
 import {FlashList} from '@shopify/flash-list'
-import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {type FriendLevel} from '@vexl-next/domain/src/general/offers'
 import {
   EditRow,
   Image,
+  InfoCircle,
   NavigationBar,
   Screen,
   Typography,
   UserImagePlaceholder,
+  XStack,
   XmarkCancelClose,
+  useTheme,
 } from '@vexl-next/ui'
 import {parsePhoneNumber} from 'awesome-phonenumber'
-import {Array, pipe} from 'effect'
-import {useAtomValue, useStore} from 'jotai'
-import React, {memo, useCallback, useMemo} from 'react'
+import {Array} from 'effect'
+import React, {memo, useCallback} from 'react'
+import {Pressable} from 'react-native'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {Stack} from 'tamagui'
 import {
   type CommonFriendsClub,
   type RootStackScreenProps,
 } from '../../navigationTypes'
-import createImportedContactsForHashesAtom from '../../state/contacts/atom/createImportedContactsForHashesAtom'
 import {type StoredContactWithComputedValues} from '../../state/contacts/domain'
 import {useTranslation} from '../../utils/localization/I18nProvider'
-import {showVerifiedContactsAtom} from '../../utils/preferences'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import ContactPictureImage from '../ContactPictureImage'
+import {
+  useCommonFriendsListData,
+  type ListItem,
+} from './useCommonFriendsListData'
 
 function FriendListItem({
   friend,
+  trusted,
 }: {
   readonly friend: StoredContactWithComputedValues
+  readonly trusted: boolean
 }): React.ReactElement {
   const internationalNumber = parsePhoneNumber(
     friend.computedValues.normalizedNumber
@@ -43,6 +49,8 @@ function FriendListItem({
       overline={internationalNumber ?? friend.computedValues.normalizedNumber}
       showEditButton={false}
       avatar={{
+        trusted,
+        trustBadgeRingColor: '$backgroundSecondary',
         children: (
           <ContactPictureImage
             width={40}
@@ -95,43 +103,6 @@ function ClubListItem({
 }
 
 const MemoizedClubListItem = memo(ClubListItem)
-
-type ListItem =
-  | {
-      readonly type: 'friend'
-      readonly friend: StoredContactWithComputedValues
-    }
-  | {
-      readonly type: 'club'
-      readonly club: CommonFriendsClub
-    }
-  | {
-      readonly type: 'section'
-      readonly title: string
-    }
-
-function createFriendListItem(
-  friend: StoredContactWithComputedValues
-): ListItem {
-  return {
-    type: 'friend',
-    friend,
-  }
-}
-
-function createClubListItem(club: CommonFriendsClub): ListItem {
-  return {
-    type: 'club',
-    club,
-  }
-}
-
-function createSectionListItem(title: string): ListItem {
-  return {
-    type: 'section',
-    title,
-  }
-}
 
 function ItemSeparator(): React.ReactElement {
   return <Stack height={8} />
@@ -188,99 +159,30 @@ function ListHeader({
   )
 }
 
-function useCommonFriendsListData({
-  contactsHashes,
-  verifiedHashes,
-  clubs,
-}: {
-  readonly contactsHashes: readonly HashedPhoneNumber[]
-  readonly verifiedHashes?: readonly HashedPhoneNumber[]
-  readonly clubs: readonly CommonFriendsClub[]
-}): readonly ListItem[] {
-  const {t} = useTranslation()
-  const store = useStore()
-  const showVerifiedContacts = useAtomValue(showVerifiedContactsAtom)
-
-  const commonFriends = useMemo(
-    () => store.get(createImportedContactsForHashesAtom(contactsHashes)),
-    [contactsHashes, store]
-  )
-
-  const verifiedHashesSet = useMemo(
-    () =>
-      showVerifiedContacts
-        ? new Set(verifiedHashes ?? [])
-        : new Set<HashedPhoneNumber>(),
-    [showVerifiedContacts, verifiedHashes]
-  )
-
-  return useMemo((): readonly ListItem[] => {
-    const clubItems = pipe(clubs, Array.map(createClubListItem))
-    const clubSection = Array.isNonEmptyArray(clubItems)
-      ? Array.appendAll(
-          [createSectionListItem(t('commonFriends.clubs'))],
-          clubItems
-        )
-      : []
-
-    if (!showVerifiedContacts) {
-      return Array.appendAll(
-        pipe(commonFriends, Array.map(createFriendListItem)),
-        clubSection
-      )
-    }
-
-    const verifiedFriends = pipe(
-      commonFriends,
-      Array.filter((friend) =>
-        verifiedHashesSet.has(friend.computedValues.hash)
-      )
-    )
-    const commonFriendsWithoutVerified = pipe(
-      commonFriends,
-      Array.filter(
-        (friend) => !verifiedHashesSet.has(friend.computedValues.hash)
-      )
-    )
-
-    const verifiedItems = pipe(verifiedFriends, Array.map(createFriendListItem))
-    const commonItems = pipe(
-      commonFriendsWithoutVerified,
-      Array.map(createFriendListItem)
-    )
-
-    const verifiedSection = Array.isNonEmptyArray(verifiedItems)
-      ? Array.appendAll(
-          [createSectionListItem(t('commonFriends.verifiedFriends'))],
-          verifiedItems
-        )
-      : []
-    const commonSection = Array.isNonEmptyArray(commonItems)
-      ? Array.appendAll(
-          [createSectionListItem(t('commonFriends.commonFriends'))],
-          commonItems
-        )
-      : []
-
-    return pipe(
-      verifiedSection,
-      Array.appendAll(commonSection),
-      Array.appendAll(clubSection)
-    )
-  }, [clubs, commonFriends, showVerifiedContacts, t, verifiedHashesSet])
-}
-
 type Props = RootStackScreenProps<'CommonFriends'>
 
 function CommonFriendsScreen({
   route: {
-    params: {contactsHashes, verifiedHashes, clubs, friendLevel, isMine},
+    params: {
+      contactsHashes,
+      verifiedHashes,
+      clubs,
+      friendLevel,
+      isMine,
+      otherSide,
+    },
   },
 }: Props): React.ReactElement {
   const {t} = useTranslation()
+  const theme = useTheme()
   const {bottom} = useSafeAreaInsets()
   const safeGoBack = useSafeGoBack()
-  const data = useCommonFriendsListData({contactsHashes, verifiedHashes, clubs})
+  const data = useCommonFriendsListData({
+    contactsHashes,
+    verifiedHashes,
+    clubs,
+    otherSide,
+  })
   const hasCommonFriends = contactsHashes.length > 0
 
   const ListHeaderWithProps = useCallback(
@@ -294,25 +196,40 @@ function CommonFriendsScreen({
     [friendLevel, hasCommonFriends, isMine]
   )
 
-  const renderItem = useCallback(({item}: {item: ListItem}) => {
-    if (item.type === 'friend') {
-      return <MemoizedFriendListItem friend={item.friend} />
-    }
+  const renderItem = useCallback(
+    ({item}: {item: ListItem}) => {
+      if (item.type === 'friend') {
+        return (
+          <MemoizedFriendListItem friend={item.friend} trusted={item.trusted} />
+        )
+      }
 
-    if (item.type === 'club') {
-      return <MemoizedClubListItem club={item.club} />
-    }
+      if (item.type === 'club') {
+        return <MemoizedClubListItem club={item.club} />
+      }
 
-    return (
-      <Typography
-        variant="descriptionBold"
-        color="$foregroundSecondary"
-        marginTop="$2"
-      >
-        {item.title}
-      </Typography>
-    )
-  }, [])
+      return (
+        <XStack alignItems="center" gap="$2" marginTop="$2">
+          <Typography variant="descriptionBold" color="$foregroundSecondary">
+            {item.title}
+          </Typography>
+          {item.onInfoPress ? (
+            <Pressable
+              onPress={item.onInfoPress}
+              hitSlop={12}
+              accessibilityRole="button"
+              accessibilityLabel={t(
+                'commonFriends.trustedFriendsExplanation.title'
+              )}
+            >
+              <InfoCircle size={16} color={theme.foregroundTertiary.get()} />
+            </Pressable>
+          ) : null}
+        </XStack>
+      )
+    },
+    [t, theme]
+  )
 
   return (
     <Screen

@@ -1,5 +1,11 @@
 import type {CommonFriend} from '@vexl-next/ui'
-import {CommonFriends, SizableText, Theme, YStack} from '@vexl-next/ui'
+import {
+  CommonFriends,
+  SizableText,
+  Theme,
+  Typography,
+  YStack,
+} from '@vexl-next/ui'
 import React from 'react'
 import {Alert, ScrollView} from 'react-native'
 
@@ -98,6 +104,42 @@ function ThemeGroup({
           onPress={() => {
             Alert.alert('Pressed', 'Friends without avatar')
           }}
+        />
+
+        <Typography variant="descriptionBold" color="$foregroundSecondary">
+          Trusted
+        </Typography>
+        <CommonFriends
+          label="5 common"
+          trustedLabel="2 trusted"
+          friends={[
+            {
+              id: 'trusted-jana',
+              name: 'Jana',
+              avatarSource: vexlAvatarSource,
+              trusted: true,
+            },
+            {id: 'trusted-petr', name: 'Petr', trusted: true},
+            ...FEW_FRIENDS,
+          ]}
+        />
+        <Typography variant="descriptionBold" color="$foregroundSecondary">
+          Trusted + club
+        </Typography>
+        <CommonFriends
+          label="5 common and 1 clubs"
+          trustedLabel="2 trusted"
+          friends={[
+            {
+              id: 'trusted-jana',
+              name: 'Jana',
+              avatarSource: vexlAvatarSource,
+              trusted: true,
+            },
+            {id: 'trusted-petr', name: 'Petr', trusted: true},
+            ...FEW_FRIENDS,
+            {id: 'club', name: 'btc prague', avatarSource: vexlAvatarSource},
+          ]}
         />
 
         <SizableText

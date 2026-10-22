@@ -1,4 +1,11 @@
-import {Chip, SizableText, Theme, XStack, YStack} from '@vexl-next/ui'
+import {
+  Chip,
+  SizableText,
+  Theme,
+  Typography,
+  XStack,
+  YStack,
+} from '@vexl-next/ui'
 import React from 'react'
 import {ScrollView} from 'react-native'
 
@@ -61,6 +68,17 @@ function ThemeGroup({
           name="Very Long Username That Should Truncate"
           avatarSource={vexlAvatarSource}
         />
+
+        <Typography variant="descriptionBold" color="$foregroundSecondary">
+          Trusted
+        </Typography>
+        <Chip name="Jana" avatarSource={vexlAvatarSource} trusted />
+        <Chip name="Petr" trusted />
+        <XStack gap="$3" flexWrap="wrap">
+          <Chip name="Jana" avatarSource={vexlAvatarSource} trusted />
+          <Chip name="Petr" trusted />
+          <Chip name="Alice" avatarSource={vexlAvatarSource} />
+        </XStack>
 
         <SizableText
           fontFamily="$body"

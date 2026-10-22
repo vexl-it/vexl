@@ -150,6 +150,58 @@ function ThemedColumn({
           </Avatar>
         </XStack>
 
+        <SectionLabel>Trusted</SectionLabel>
+        <YStack gap="$5">
+          <XStack
+            gap="$5"
+            padding="$3"
+            backgroundColor="$backgroundPrimary"
+            alignItems="center"
+          >
+            <Avatar
+              customSize={16}
+              source={testAvatar}
+              trusted
+              trustBadgeRingColor="$backgroundPrimary"
+            />
+            <Avatar
+              customSize={40}
+              source={testAvatar}
+              trusted
+              trustBadgeRingColor="$backgroundPrimary"
+            />
+            <Avatar
+              customSize={16}
+              trusted
+              trustBadgeRingColor="$backgroundPrimary"
+            >
+              <UserImagePlaceholder size={16} />
+            </Avatar>
+            <Avatar
+              customSize={40}
+              trusted
+              trustBadgeRingColor="$backgroundPrimary"
+            >
+              <UserImagePlaceholder size={40} />
+            </Avatar>
+          </XStack>
+          <XStack
+            gap="$5"
+            padding="$3"
+            backgroundColor="$backgroundSecondary"
+            alignItems="center"
+          >
+            <Avatar customSize={16} source={testAvatar} trusted />
+            <Avatar customSize={40} source={testAvatar} grayscale trusted />
+            <Avatar customSize={16} trusted>
+              <UserImagePlaceholder size={16} />
+            </Avatar>
+            <Avatar customSize={40} grayscale trusted>
+              <UserImagePlaceholder size={40} />
+            </Avatar>
+          </XStack>
+        </YStack>
+
         <SectionLabel>Anonymous Avatars</SectionLabel>
         <XStack gap="$2" flexWrap="wrap">
           {avatarsSvg.map((AvatarComponent, i) => (

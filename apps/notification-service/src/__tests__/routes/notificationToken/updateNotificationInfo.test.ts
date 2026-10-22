@@ -8,10 +8,15 @@ import {
   CommonHeaders,
   makeCommonHeaders,
 } from '@vexl-next/rest-api/src/commonHeaders'
+import {UserLoginOnDifferentDeviceNotificationMqEntry} from '@vexl-next/server-utils/src/UserNotificationMq'
 import {Effect, Option, Schema} from 'effect'
 import {NotificationTokensDb} from '../../../services/NotificationTokensDb'
 import {NodeTestingApp} from '../../utils/NodeTestingApp'
-import {runPromiseInMockedEnvironment} from '../../utils/runPromiseInMockedEnvironment'
+import {
+  enqueuedUserNotifications,
+  runPromiseInMockedEnvironment,
+  sentSocketNotices,
+} from '../../utils/runPromiseInMockedEnvironment'
 
 const validVersionCode = Schema.decodeSync(VersionCode)(100)
 const validSemver = Schema.decodeSync(VersionString)('1.0.0')
@@ -485,6 +490,73 @@ describe('UpdateNotificationInfo', () => {
         expect(Option.isSome(disabledRecord)).toBe(true)
         if (Option.isNone(disabledRecord)) return
         expect(disabledRecord.value.backgroundSocketEnabled).toBe(false)
+      })
+    )
+  })
+
+  it('Should ask the replaced device to check its session when the expo token changes', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const app = yield* _(NodeTestingApp)
+
+        const created = yield* _(
+          app.NotificationTokenGroup.CreateNotificationSecret({
+            payload: {expoNotificationToken: validExpoToken},
+            headers: validHeaders,
+          })
+        )
+
+        yield* _(
+          app.NotificationTokenGroup.updateNoficationInfo({
+            payload: {
+              secret: created.secret,
+              expoNotificationToken: validExpoTokenUpdate,
+            },
+            headers: validHeaders,
+          })
+        )
+
+        expect(enqueuedUserNotifications).toEqual([
+          new UserLoginOnDifferentDeviceNotificationMqEntry({
+            notificationToken: validExpoToken,
+            token: null,
+            accountMoved: true,
+          }),
+        ])
+        expect(sentSocketNotices).toHaveLength(1)
+        expect(sentSocketNotices[0]).toMatchObject({
+          _tag: 'UserLoginOnDifferentDeviceNoticeSendTask',
+          notificationToken: created.secret,
+          accountMoved: true,
+        })
+      })
+    )
+  })
+
+  it('Should not nudge anyone when the expo token stays the same', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const app = yield* _(NodeTestingApp)
+
+        const created = yield* _(
+          app.NotificationTokenGroup.CreateNotificationSecret({
+            payload: {expoNotificationToken: validExpoToken},
+            headers: validHeaders,
+          })
+        )
+
+        yield* _(
+          app.NotificationTokenGroup.updateNoficationInfo({
+            payload: {
+              secret: created.secret,
+              expoNotificationToken: validExpoToken,
+            },
+            headers: validHeaders,
+          })
+        )
+
+        expect(enqueuedUserNotifications).toEqual([])
+        expect(sentSocketNotices).toEqual([])
       })
     )
   })

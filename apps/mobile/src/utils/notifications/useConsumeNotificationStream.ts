@@ -26,8 +26,7 @@ import {
   Schedule,
   Stream,
 } from 'effect'
-import {AndroidNotificationPriority} from 'expo-notifications'
-import {atom, useAtomValue, useSetAtom} from 'jotai'
+import {atom, getDefaultStore, useAtomValue, useSetAtom} from 'jotai'
 import {useCallback} from 'react'
 import {Platform} from 'react-native'
 import {apiAtom, getApiPreset} from '../../api'
@@ -58,6 +57,7 @@ import {reportErrorE} from '../reportError'
 import {useAppState} from '../useAppState'
 import {displayLocalNotification} from './displayLocalNotification'
 import {getDefaultChannel} from './notificationChannels'
+import {handleUserLoginOnDifferentDeviceNotice} from './notificationReceivedHandler/handlers/userLoginOnDifferentDevice'
 import {processVexlProductNotificationActionAtom} from './processVexlProductNotification'
 import {
   getShowDebugNotifications,
@@ -291,27 +291,6 @@ const processUserInactivityNotificationActionAtom = atom(
     })
 )
 
-const processUserLoginOnDifferentDeviceNotificationActionAtom = atom(
-  null,
-  (get, set) =>
-    Effect.gen(function* (_) {
-      const {t} = get(translationAtom)
-
-      yield* _(
-        Effect.promise(async () => {
-          void displayLocalNotification({
-            channelId: await getDefaultChannel(),
-            content: {
-              title: t('notifications.loggingOnDifferentDevice.title'),
-              body: t('notifications.loggingOnDifferentDevice.body'),
-              priority: AndroidNotificationPriority.HIGH,
-            },
-          })
-        })
-      )
-    })
-)
-
 const processNewStreamNotificationActionAtom = atom(
   null,
   (get, set, message: NotificationStreamMessage) =>
@@ -363,8 +342,8 @@ const processNewStreamNotificationActionAtom = atom(
           Match.tag('UserInactivityNoticeMessage', (m) =>
             set(processUserInactivityNotificationActionAtom, m)
           ),
-          Match.tag('UserLoginOnDifferentDeviceNoticeMessage', () =>
-            set(processUserLoginOnDifferentDeviceNotificationActionAtom)
+          Match.tag('UserLoginOnDifferentDeviceNoticeMessage', (m) =>
+            handleUserLoginOnDifferentDeviceNotice(getDefaultStore(), m)
           ),
           Match.tag('VexlProductNotificationMessage', (v) =>
             set(

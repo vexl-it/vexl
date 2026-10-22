@@ -71,6 +71,7 @@ export class UserLoginOnDifferentDeviceNotificationMqEntry extends Schema.Tagged
   notificationToken: Schema.NullOr(ExpoNotificationToken),
   // todo #2142: remove nullability after moving to vexlNotificationToken
   token: Schema.NullOr(VexlNotificationToken),
+  accountMoved: Schema.optionalWith(Schema.Boolean, {default: () => false}),
 }) {}
 
 export class ClubFlaggedNotificationMqEntry extends Schema.TaggedClass<ClubFlaggedNotificationMqEntry>(

@@ -124,6 +124,10 @@ export class UserLoginOnDifferentDeviceNotificationData extends Schema.TaggedCla
   'UserLoginOnDifferentDeviceNotificationData'
 )('UserLoginOnDifferentDeviceNotificationData', {
   trackingId: Schema.optionalWith(NotificationTrackingId, {as: 'Option'}),
+  // The account was restored on another device - only check, don't warn
+  accountMoved: Schema.optionalWith(Schema.BooleanFromString, {
+    default: () => false,
+  }),
 }) {
   toData = (): typeof UserLoginOnDifferentDeviceNotificationData.Encoded =>
     Schema.encodeSync(UserLoginOnDifferentDeviceNotificationData)(this)

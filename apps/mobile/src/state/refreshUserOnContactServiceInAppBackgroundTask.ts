@@ -1,4 +1,6 @@
+import {type LoggedInOnAnotherDeviceError} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {Effect, Match, Option} from 'effect/index'
+import {type Store} from 'jotai/vanilla/store'
 import {apiAtom} from '../api'
 import {
   InAppLoadingTaskError,
@@ -12,6 +14,173 @@ import {clearDeviceAfterLoginOnAnotherDeviceActionAtom} from './resetLocalDataAc
 import {sessionDataOrDummyAtom, sessionNotificationTokenAtom} from './session'
 import {logoutActionAtom} from './useLogout'
 
+/**
+ * Also tells whether the account still lives on this device. When it moved to
+ * another device, this device is cleared and the effect fails.
+ */
+export const refreshUserOnContactService = (
+  store: Store
+): Effect.Effect<void, LoggedInOnAnotherDeviceError> =>
+  Effect.gen(function* (_) {
+    const session = store.get(sessionDataOrDummyAtom)
+
+    const sessionNotificationToken = yield* _(
+      Option.fromNullable(session.sessionNotificationToken),
+      Option.match({
+        onSome: (token) => Effect.succeed(Option.some(token)),
+        onNone: () =>
+          store.set(generateVexlTokenActionAtom).pipe(
+            Effect.map(Option.some),
+            Effect.map((token) => {
+              store.set(
+                sessionNotificationTokenAtom,
+                Option.getOrUndefined(token)
+              )
+              return token
+            }),
+            Effect.catchAll((e) =>
+              Effect.zipRight(
+                Effect.sync(() => {
+                  reportError(
+                    'warn',
+                    new Error(
+                      'Error generating vexl notification token on refresh user'
+                    ),
+                    {e}
+                  )
+                }),
+                Effect.succeed(Option.none())
+              )
+            )
+          ),
+      })
+    )
+
+    yield* _(
+      store.get(apiAtom).contact.refreshUser({
+        offersAlive: true,
+        vexlNotificationToken: sessionNotificationToken,
+        loginSessionId: session.loginSessionId,
+      }),
+      Effect.matchEffect({
+        onFailure: (e) => {
+          Match.value(e).pipe(
+            Match.tag('UserNotFoundError', () => {
+              console.log('🦋 🚨 User to refresh not found. Logging out')
+              void store.set(logoutActionAtom)
+            }),
+            Match.tag('LoggedInOnAnotherDeviceError', () => {
+              console.log(
+                '🦋 🚨 Account is active on another device. Clearing local data only.'
+              )
+              // Right away, before the wipe: the new device took over the
+              // secret, a token sync from here would steal its pushes back.
+              forgetVexlSecretLocally(store)
+              void store.set(clearDeviceAfterLoginOnAnotherDeviceActionAtom)
+            }),
+            Match.tags({
+              ResponseError: () => {
+                console.warn(
+                  '🦋 Network error refreshing user. Not logging out.',
+                  e
+                )
+              },
+              RequestError: () => {
+                console.warn(
+                  '🦋 Network error refreshing user. Not logging out.',
+                  e
+                )
+              },
+            }),
+            Match.tag('UnexpectedServerError', () => {
+              reportError(
+                'warn',
+                new Error('Unknown error refreshing user. Not logging out.'),
+                {e}
+              )
+              console.warn(
+                '🦋 🚨 Unknown error refreshing user. Not logging out.',
+                e._tag
+              )
+            }),
+            Match.tags({
+              HttpApiDecodeError: () => {
+                reportError(
+                  'warn',
+                  new Error(
+                    'HttpApiDecodeError or ParseError error refreshing user. Not logging out.'
+                  ),
+                  {e}
+                )
+                console.warn(
+                  '🦋 🚨 UnexpectedApiResponseError error refreshing user. Not logging out.',
+                  e._tag
+                )
+              },
+              ParseError: () => {
+                reportError(
+                  'warn',
+                  new Error(
+                    'HttpApiDecodeError or ParseError error refreshing user. Not logging out.'
+                  ),
+                  {e}
+                )
+                console.warn(
+                  '🦋 🚨 UnexpectedApiResponseError error refreshing user. Not logging out.',
+                  e._tag
+                )
+              },
+            }),
+            Match.tag('NotFoundError', (notFoundError) => {
+              const codeStartsWith4XX = notFoundError.status
+                .toString()
+                .startsWith('4')
+              if (codeStartsWith4XX) {
+                console.warn('🦋 🚨 Bad status code while refreshing user')
+                reportError(
+                  'warn',
+                  new Error(
+                    'Bad status code while error refreshing user. Not logging out.'
+                  ),
+                  {e}
+                )
+                void store.set(logoutActionAtom)
+              } else {
+                console.warn('🦋 🚨 Bad status code while refreshing user')
+                reportError(
+                  'warn',
+                  new Error(
+                    'Bad status code error refreshing user. Not logging out.'
+                  ),
+                  {e}
+                )
+              }
+            }),
+            Match.orElse(() => {
+              reportError(
+                'error',
+                new Error('Uncaught error refreshing user. Not logging out.'),
+                {e}
+              )
+              console.error(
+                '🦋 🚨 UnexpectedApiResponseError error refreshing user. Not logging out.',
+                {e}
+              )
+            })
+          )
+
+          return e._tag === 'LoggedInOnAnotherDeviceError'
+            ? Effect.fail(e)
+            : Effect.void
+        },
+        onSuccess: () => {
+          console.log('🦋 User refreshed')
+          return Effect.void
+        },
+      })
+    )
+  })
+
 export const refreshUserOnContactServiceInAppBackgroundTaskId =
   registerInAppLoadingTask({
     name: 'refreshUserOnContactService',
@@ -20,174 +189,15 @@ export const refreshUserOnContactServiceInAppBackgroundTaskId =
       runOn: 'resume',
     },
     task: (store) =>
-      Effect.gen(function* (_) {
-        const session = store.get(sessionDataOrDummyAtom)
-
-        const sessionNotificationToken = yield* _(
-          Option.fromNullable(session.sessionNotificationToken),
-          Option.match({
-            onSome: (token) => Effect.succeed(Option.some(token)),
-            onNone: () =>
-              store.set(generateVexlTokenActionAtom).pipe(
-                Effect.map(Option.some),
-                Effect.map((token) => {
-                  store.set(
-                    sessionNotificationTokenAtom,
-                    Option.getOrUndefined(token)
-                  )
-                  return token
-                }),
-                Effect.catchAll((e) =>
-                  Effect.zipRight(
-                    Effect.sync(() => {
-                      reportError(
-                        'warn',
-                        new Error(
-                          'Error generating vexl notification token on refresh user'
-                        ),
-                        {e}
-                      )
-                    }),
-                    Effect.succeed(Option.none())
-                  )
-                )
-              ),
-          })
+      refreshUserOnContactService(store).pipe(
+        // Fails the task so tasks touching server data skip this device
+        Effect.mapError(
+          () =>
+            new InAppLoadingTaskError({
+              message: 'Account is active on another device',
+            })
         )
-
-        yield* _(
-          store.get(apiAtom).contact.refreshUser({
-            offersAlive: true,
-            vexlNotificationToken: sessionNotificationToken,
-            loginSessionId: session.loginSessionId,
-          }),
-          Effect.matchEffect({
-            onFailure: (e) => {
-              Match.value(e).pipe(
-                Match.tag('UserNotFoundError', () => {
-                  console.log('🦋 🚨 User to refresh not found. Logging out')
-                  void store.set(logoutActionAtom)
-                }),
-                Match.tag('LoggedInOnAnotherDeviceError', () => {
-                  console.log(
-                    '🦋 🚨 Account is active on another device. Clearing local data only.'
-                  )
-                  // Right away, before the wipe: the new device took over the
-                  // secret, a token sync from here would steal its pushes back.
-                  forgetVexlSecretLocally(store)
-                  void store.set(clearDeviceAfterLoginOnAnotherDeviceActionAtom)
-                }),
-                Match.tags({
-                  ResponseError: () => {
-                    console.warn(
-                      '🦋 Network error refreshing user. Not logging out.',
-                      e
-                    )
-                  },
-                  RequestError: () => {
-                    console.warn(
-                      '🦋 Network error refreshing user. Not logging out.',
-                      e
-                    )
-                  },
-                }),
-                Match.tag('UnexpectedServerError', () => {
-                  reportError(
-                    'warn',
-                    new Error(
-                      'Unknown error refreshing user. Not logging out.'
-                    ),
-                    {e}
-                  )
-                  console.warn(
-                    '🦋 🚨 Unknown error refreshing user. Not logging out.',
-                    e._tag
-                  )
-                }),
-                Match.tags({
-                  HttpApiDecodeError: () => {
-                    reportError(
-                      'warn',
-                      new Error(
-                        'HttpApiDecodeError or ParseError error refreshing user. Not logging out.'
-                      ),
-                      {e}
-                    )
-                    console.warn(
-                      '🦋 🚨 UnexpectedApiResponseError error refreshing user. Not logging out.',
-                      e._tag
-                    )
-                  },
-                  ParseError: () => {
-                    reportError(
-                      'warn',
-                      new Error(
-                        'HttpApiDecodeError or ParseError error refreshing user. Not logging out.'
-                      ),
-                      {e}
-                    )
-                    console.warn(
-                      '🦋 🚨 UnexpectedApiResponseError error refreshing user. Not logging out.',
-                      e._tag
-                    )
-                  },
-                }),
-                Match.tag('NotFoundError', (notFoundError) => {
-                  const codeStartsWith4XX = notFoundError.status
-                    .toString()
-                    .startsWith('4')
-                  if (codeStartsWith4XX) {
-                    console.warn('🦋 🚨 Bad status code while refreshing user')
-                    reportError(
-                      'warn',
-                      new Error(
-                        'Bad status code while error refreshing user. Not logging out.'
-                      ),
-                      {e}
-                    )
-                    void store.set(logoutActionAtom)
-                  } else {
-                    console.warn('🦋 🚨 Bad status code while refreshing user')
-                    reportError(
-                      'warn',
-                      new Error(
-                        'Bad status code error refreshing user. Not logging out.'
-                      ),
-                      {e}
-                    )
-                  }
-                }),
-                Match.orElse(() => {
-                  reportError(
-                    'error',
-                    new Error(
-                      'Uncaught error refreshing user. Not logging out.'
-                    ),
-                    {e}
-                  )
-                  console.error(
-                    '🦋 🚨 UnexpectedApiResponseError error refreshing user. Not logging out.',
-                    {e}
-                  )
-                })
-              )
-
-              // Fails the task so tasks touching server data skip this device
-              return e._tag === 'LoggedInOnAnotherDeviceError'
-                ? Effect.fail(
-                    new InAppLoadingTaskError({
-                      message: 'Account is active on another device',
-                    })
-                  )
-                : Effect.void
-            },
-            onSuccess: () => {
-              console.log('🦋 User refreshed')
-              return Effect.void
-            },
-          })
-        )
-      }),
+      ),
   })
 
 /**

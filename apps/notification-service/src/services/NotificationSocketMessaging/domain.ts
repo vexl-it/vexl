@@ -329,11 +329,13 @@ export class UserLoginOnDifferentDeviceNoticeSendTask extends Schema.TaggedClass
     default: () => createNotificationTrackingId(),
   }),
   minimalClientVersion: Schema.optional(VersionCode),
+  accountMoved: Schema.optionalWith(Schema.Boolean, {default: () => false}),
 }) {
   get socketMessage(): UserLoginOnDifferentDeviceNoticeMessage {
     return new UserLoginOnDifferentDeviceNoticeMessage({
       sentAt: this.sentAt,
       trackingId: this.trackingId,
+      accountMoved: this.accountMoved,
     })
   }
 }

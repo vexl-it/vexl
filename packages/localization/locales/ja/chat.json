@@ -25,6 +25,7 @@
   "messages.vexlBot.chatOpened": "いいね！これで相手とチャットして、取引の詳細を決められます。メッセージを送るか、取引チェックリストを開いてみて。",
   "messages.vexlBot.welcomeToTheTradeChat.title": "取引チャットへようこそ",
   "messages.vexlBot.welcomeToTheTradeChat.receiverDescription": "取引チャットを承認する前に、共通の友達とオファー詳細を確認してね。",
+  "messages.vexlBot.welcomeToTheTradeChat.receiverDescriptionWithTrusted": "会話を始める前に、信頼できる友達を含む共通の友達やオファーの詳細を確認できるよ。",
   "messages.vexlBot.welcomeToTheTradeChat.senderDescriptionFirst": "相手の返信を待っています。返信が来たら通知します。",
   "messages.vexlBot.welcomeToTheTradeChat.senderDescriptionRerequestTimeout": "明日、相手にリマインダーを送れます",
   "messages.messagePreviews.incoming.MESSAGE": "{{them}}：{{message}}",

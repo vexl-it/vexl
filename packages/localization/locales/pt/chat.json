@@ -25,6 +25,7 @@
   "messages.vexlBot.chatOpened": "Ótimo! Agora podes conversar com a outra pessoa para combinar os detalhes da tua troca. Envia-lhe uma mensagem ou abre a checklist da troca.",
   "messages.vexlBot.welcomeToTheTradeChat.title": "Boas-vindas ao chat da troca",
   "messages.vexlBot.welcomeToTheTradeChat.receiverDescription": "Antes de aprovares o chat da troca, verifica os amigos em comum e os detalhes da oferta.",
+  "messages.vexlBot.welcomeToTheTradeChat.receiverDescriptionWithTrusted": "Antes de começares a conversa, podes ver os amigos comuns, incluindo os de confiança, e os detalhes da oferta.",
   "messages.vexlBot.welcomeToTheTradeChat.senderDescriptionFirst": "À espera da resposta da outra pessoa. Vais receber uma notificação quando responder.",
   "messages.vexlBot.welcomeToTheTradeChat.senderDescriptionRerequestTimeout": "Podes enviar um lembrete à outra pessoa amanhã.",
   "messages.messagePreviews.incoming.MESSAGE": "{{them}}: {{message}}",

@@ -25,6 +25,7 @@ import OfferAuthorBanner from '../../OfferAuthorBanner'
 import {reportOfferActionAtom} from '../../OfferDetailScreen/atoms'
 import OfferPropertiesCard from '../../OfferPropertiesCard'
 import {chatMolecule} from '../atoms'
+import {useCommonFriendsOtherSide} from '../utils/useCommonFriendsOtherSide'
 
 export default function ChatOfferDetailContent({
   chatExists,
@@ -36,6 +37,7 @@ export default function ChatOfferDetailContent({
   const theme = useTheme()
   const {bottom} = useSafeAreaInsets()
   const {t} = useTranslation()
+  const otherSide = useCommonFriendsOtherSide()
   const reportOffer = useSetAtom(reportOfferActionAtom)
   const {
     chatAtom,
@@ -145,6 +147,7 @@ export default function ChatOfferDetailContent({
             otherSideClubs={otherSideClubs}
             friendLevel={friendLevel}
             isMine={isMine}
+            otherSide={otherSide}
           />
 
           {theirOfferAndNotReported ? (

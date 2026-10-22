@@ -28,7 +28,10 @@ import {
   canChatBeRequested,
   getRequestState,
 } from '../../state/chat/utils/offerStates'
-import {useGetAllClubsForIds} from '../../state/clubs/atom/clubsWithMembersAtom'
+import {
+  smallestClubForIdsAtom,
+  useGetAllClubsForIds,
+} from '../../state/clubs/atom/clubsWithMembersAtom'
 import {useSingleOffer} from '../../state/marketplace'
 import {toggleOfferMarkActionAtom} from '../../state/marketplace/atoms/offerMarkActionAtoms'
 import {useVisibleCommonFriendsForOffer} from '../../state/marketplace/hooks/useVisibleCommonFriendsForOffer'
@@ -36,6 +39,8 @@ import {useNavigateToChatDetail} from '../../utils/chat/goToChatDetail'
 import {formatInteger} from '../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../utils/localization/formattingLocaleAtom'
 import {useTranslation} from '../../utils/localization/I18nProvider'
+import {getOtherSideRole} from '../../utils/offerTypeSemantics'
+import {randomSeedFromOfferInfo} from '../../utils/RandomSeed'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import {offerRerequestLimitDaysAtom} from '../../utils/versionService/atoms'
 import CommonFriends from '../CommonFriends'
@@ -155,6 +160,12 @@ function OfferDetailScrollContent({
   const otherSideClubs = useGetAllClubsForIds(
     offer.offerInfo.privatePart.clubIds
   )
+  const avatarClub = useAtomValue(
+    useMemo(
+      () => smallestClubForIdsAtom(offer.offerInfo.privatePart.clubIds),
+      [offer.offerInfo.privatePart.clubIds]
+    )
+  )
   const clubsCount = otherSideClubs.length
   const hasCommonFriendsOrClubs = commonFriendsCount > 0 || clubsCount > 0
   const isClubOffer =
@@ -184,11 +195,20 @@ function OfferDetailScrollContent({
           <CommonFriends
             commonConnectionsHashes={visibleCommonFriends.commonFriends}
             verifiedConnectionsHashes={
-              visibleCommonFriends.verifiedCommonFriends
+              offer.ownershipInfo
+                ? []
+                : visibleCommonFriends.verifiedCommonFriends
             }
             otherSideClubs={otherSideClubs}
             friendLevel={offer.offerInfo.privatePart.friendLevel}
             isMine={!!offer.ownershipInfo}
+            otherSide={{
+              role: getOtherSideRole({offer: offer.offerInfo.publicPart}),
+              avatarSeed: randomSeedFromOfferInfo(offer.offerInfo),
+              clubImageUrl: Option.isSome(avatarClub)
+                ? avatarClub.value.club.clubImageUrl
+                : undefined,
+            }}
           />
         ) : (
           <XStack

@@ -323,6 +323,11 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     }).verifiedCommonFriends
   })
 
+  const trustedConnectionsCountAtom = selectAtom(
+    verifiedConnectionsHashesAtom,
+    (connections) => new Set(connections).size
+  )
+
   const commonConnectionsCountAtom = selectAtom(
     commonConnectionsHashesAtom,
     (connections) => connections.length
@@ -842,6 +847,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     commonConnectionsHashesAtom,
     verifiedConnectionsHashesAtom,
     commonConnectionsCountAtom,
+    trustedConnectionsCountAtom,
     messagesAtom,
     offerForChatAtom,
     noteForChatAtom,

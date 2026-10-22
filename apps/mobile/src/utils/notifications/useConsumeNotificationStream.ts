@@ -26,13 +26,12 @@ import {
   Schedule,
   Stream,
 } from 'effect'
-import {AndroidNotificationPriority} from 'expo-notifications'
-import {atom, useAtomValue, useSetAtom} from 'jotai'
+import {atom, getDefaultStore, useAtomValue, useSetAtom} from 'jotai'
 import {useCallback} from 'react'
 import {Platform} from 'react-native'
 import {apiAtom, getApiPreset} from '../../api'
 import {addNotificationToCenterActionAtom} from '../../components/NotificationsScreen/state'
-import {fetchAndStoreMessagesForInboxHandleNotificationsActionAtom} from '../../state/chat/atoms/fetchNewMessagesActionAtom'
+import {fetchMessagesForNotifiedInboxActionAtom} from '../../state/chat/atoms/fetchMessagesForNotifiedInboxActionAtom'
 import messagingStateAtom from '../../state/chat/atoms/messagingStateAtom'
 import {processStreamOnlyNotificationActionAtom} from '../../state/chat/atoms/processStreamOnlyChatMessage'
 import {checkForClubsAdmissionActionAtom} from '../../state/clubs/atom/checkForClubsAdmissionActionAtom'
@@ -58,6 +57,7 @@ import {reportErrorE} from '../reportError'
 import {useAppState} from '../useAppState'
 import {displayLocalNotification} from './displayLocalNotification'
 import {getDefaultChannel} from './notificationChannels'
+import {handleUserLoginOnDifferentDeviceNotice} from './notificationReceivedHandler/handlers/userLoginOnDifferentDevice'
 import {processVexlProductNotificationActionAtom} from './processVexlProductNotification'
 import {
   getShowDebugNotifications,
@@ -88,32 +88,23 @@ const processNewChatMessageActionAtom = atom(
   (get, set, message: NewChatMessageNoticeMessage | StreamOnlyChatMessage) =>
     Effect.gen(function* (_) {
       const cypher = message.targetToken ?? message.targetCypher
-      const inboxForCypher = set(
-        getKeyHolderForNotificationTokenOrCypherActionAtom,
-        cypher
-      )
-      if (!inboxForCypher) {
-        yield* _(
-          reportErrorE(
-            'warn',
-            new Error(
-              'Error decrypting notification from stream - unable to find private key for cypher'
-            )
-          )
-        )
-        return
-      }
 
       if (message._tag === 'NewChatMessageNoticeMessage') {
         yield* _(
           Console.log('📩 Processing chat message notification from stream')
         )
-        yield* _(
-          set(fetchAndStoreMessagesForInboxHandleNotificationsActionAtom, {
-            key: inboxForCypher.publicKeyPemBase64,
-          })
-        )
-      } else if (message._tag === 'StreamOnlyChatMessage') {
+        yield* _(set(fetchMessagesForNotifiedInboxActionAtom, cypher))
+        return
+      }
+
+      const inboxForCypher = set(
+        getKeyHolderForNotificationTokenOrCypherActionAtom,
+        cypher
+      )
+      // Stream-only messages (e.g. typing) aren't worth fetching all inboxes.
+      if (!inboxForCypher) return
+
+      if (message._tag === 'StreamOnlyChatMessage') {
         const inbox = Array.findFirst(
           get(messagingStateAtom),
           (i) =>
@@ -300,27 +291,6 @@ const processUserInactivityNotificationActionAtom = atom(
     })
 )
 
-const processUserLoginOnDifferentDeviceNotificationActionAtom = atom(
-  null,
-  (get, set) =>
-    Effect.gen(function* (_) {
-      const {t} = get(translationAtom)
-
-      yield* _(
-        Effect.promise(async () => {
-          void displayLocalNotification({
-            channelId: await getDefaultChannel(),
-            content: {
-              title: t('notifications.loggingOnDifferentDevice.title'),
-              body: t('notifications.loggingOnDifferentDevice.body'),
-              priority: AndroidNotificationPriority.HIGH,
-            },
-          })
-        })
-      )
-    })
-)
-
 const processNewStreamNotificationActionAtom = atom(
   null,
   (get, set, message: NotificationStreamMessage) =>
@@ -372,8 +342,8 @@ const processNewStreamNotificationActionAtom = atom(
           Match.tag('UserInactivityNoticeMessage', (m) =>
             set(processUserInactivityNotificationActionAtom, m)
           ),
-          Match.tag('UserLoginOnDifferentDeviceNoticeMessage', () =>
-            set(processUserLoginOnDifferentDeviceNotificationActionAtom)
+          Match.tag('UserLoginOnDifferentDeviceNoticeMessage', (m) =>
+            handleUserLoginOnDifferentDeviceNotice(getDefaultStore(), m)
           ),
           Match.tag('VexlProductNotificationMessage', (v) =>
             set(

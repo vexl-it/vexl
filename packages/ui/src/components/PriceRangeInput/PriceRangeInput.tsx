@@ -147,13 +147,27 @@ export function PriceRangeInput({
     }
   }, [minValue, maxValue, maxLimit, setMinValue, setMaxValue])
 
-  const handleMinChange = useCallback((text: string) => {
-    setMinText(text.replace(/[^0-9]/g, ''))
-  }, [])
+  // Values are committed while typing: dismissing the keyboard with Android
+  // Back keeps the input focused, so the blur may never come before a save.
+  const handleMinChange = useCallback(
+    (text: string) => {
+      const digits = text.replace(/[^0-9]/g, '')
+      setMinText(digits)
+      const num = parseInt(digits, 10)
+      if (!isNaN(num)) setMinValue(num)
+    },
+    [setMinValue]
+  )
 
-  const handleMaxChange = useCallback((text: string) => {
-    setMaxText(text.replace(/[^0-9]/g, ''))
-  }, [])
+  const handleMaxChange = useCallback(
+    (text: string) => {
+      const digits = text.replace(/[^0-9]/g, '')
+      setMaxText(digits)
+      const num = parseInt(digits, 10)
+      if (!isNaN(num)) setMaxValue(num)
+    },
+    [setMaxValue]
+  )
 
   const handleMinFocus = useCallback(() => {
     minFocusRef.current = true

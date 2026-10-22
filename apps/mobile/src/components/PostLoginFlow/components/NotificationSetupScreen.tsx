@@ -1,10 +1,13 @@
 import {NotificationsGraphic, YStack} from '@vexl-next/ui'
-import {Effect} from 'effect'
-import {useSetAtom} from 'jotai'
+import {Array, Effect} from 'effect'
+import {useAtomValue, useSetAtom} from 'jotai'
 import React from 'react'
 import {useWindowDimensions} from 'react-native'
 import {type PostLoginFlowStackScreenProps} from '../../../navigationTypes'
-import {completePostLoginFlowScreenActionAtom} from '../../../state/postLoginOnboarding'
+import {
+  completePostLoginFlowScreenActionAtom,
+  postLoginFlowEffectiveCompletedScreensAtom,
+} from '../../../state/postLoginOnboarding'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {offerBackgroundNotificationSocketActionAtom} from '../../../utils/notifications/backgroundNotificationSocket'
 import {setBackgroundNotificationSocketEnabledActionAtom} from '../../../utils/notifications/backgroundNotificationSocket/setBackgroundNotificationSocketEnabledActionAtom'
@@ -28,9 +31,15 @@ export default function NotificationSetupScreen({
     setBackgroundNotificationSocketEnabledActionAtom
   )
 
+  // Already done after a backup restore - completing this screen finishes the flow.
+  const usageInfoCompleted = Array.contains(
+    useAtomValue(postLoginFlowEffectiveCompletedScreensAtom),
+    'usageInfo'
+  )
+
   const goNext = (): void => {
     completeScreen('notificationSetup')
-    navigation.navigate('UsageInfo')
+    if (!usageInfoCompleted) navigation.navigate('UsageInfo')
   }
 
   return (

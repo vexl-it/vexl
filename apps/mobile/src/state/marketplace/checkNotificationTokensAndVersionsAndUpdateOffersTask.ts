@@ -15,6 +15,7 @@ import {inboxesAtom} from '../chat/atoms/messagingStateAtom'
 import {generateAndRegisterVexlTokenActionAtom} from '../notifications/actions/generateVexlTokenActionAtom'
 import {ensureVexlSecretExistsTaskId} from '../notifications/ensureVexlSecretExistsTask'
 import {refreshOffersAndEnsureInboxesTaskId} from '../refreshOffersAndEnsureInboxesInAppLoadingTask'
+import {afterRefreshUserUnlessAccountMoved} from '../refreshUserOnContactServiceInAppBackgroundTask'
 import {myOffersAtom} from './atoms/myOffers'
 import {refreshLocalizedAddressesForLocationsActionAtom} from './atoms/refreshLocalizedAddressesForLocationsActionAtom'
 import {updateOfferActionAtom} from './atoms/updateOfferActionAtom'
@@ -81,6 +82,46 @@ const updateOfferNotificationTokenActionAtom = atom(
     )
 )
 
+// Regenerating all of them is the fallback for a restored backup that did not
+// carry the old device's notification secret.
+export const updateOfferNotificationTokensActionAtom = atom(
+  null,
+  (get, set, {regenerateAll}: {regenerateAll: boolean}) =>
+    Effect.gen(function* (_) {
+      const offersToUpdateNotificationToken = pipe(
+        get(myOffersAtom),
+        Array.filter(
+          (offer) =>
+            regenerateAll || set(doesOfferNeedsUpdateNotificationToken)(offer)
+        )
+      )
+      console.log(
+        `Refreshing notification tokens for ${offersToUpdateNotificationToken.length} offers`
+      )
+      const offerUpdatesNotification = yield* _(
+        pipe(
+          offersToUpdateNotificationToken,
+          Array.map((offer) =>
+            set(updateOfferNotificationTokenActionAtom, offer)
+          ),
+          Effect.allWith({
+            concurrency: 'unbounded',
+          })
+        )
+      )
+
+      const successNotificationCount =
+        offerUpdatesNotification.filter(Boolean).length
+      const failedNotificationCount =
+        offerUpdatesNotification.length - successNotificationCount
+
+      console.log(
+        `Finished refreshing Notifications for offers. Successfully refreshed: ${successNotificationCount}, failed: ${failedNotificationCount}`
+      )
+      return {successNotificationCount, failedNotificationCount}
+    })
+)
+
 const updateOfferVersionAndLocalizedAddresses = atom(
   null,
   (get, set, offer: MyOfferInState) =>
@@ -128,6 +169,7 @@ export const checkNotificationTokensAndVersionsAndUpdateOffersTaskId =
         id: refreshNotificationTaskId,
       },
       {id: refreshOffersAndEnsureInboxesTaskId},
+      afterRefreshUserUnlessAccountMoved,
     ],
     task: (store) =>
       Effect.gen(function* (_) {
@@ -137,32 +179,10 @@ export const checkNotificationTokensAndVersionsAndUpdateOffersTaskId =
           body: 'Checking notification tokens and refreshing offers',
         })
 
-        const offersToUpdateNotificationToken = pipe(
-          store.get(myOffersAtom),
-          Array.filter(store.set(doesOfferNeedsUpdateNotificationToken))
-        )
-        console.log(
-          `Refreshing notification tokens for ${offersToUpdateNotificationToken.length} offers`
-        )
-        const offerUpdatesNotification = yield* _(
-          pipe(
-            offersToUpdateNotificationToken,
-            Array.map((offer) =>
-              store.set(updateOfferNotificationTokenActionAtom, offer)
-            ),
-            Effect.allWith({
-              concurrency: 'unbounded',
-            })
-          )
-        )
-
-        const successNotificationCount =
-          offerUpdatesNotification.filter(Boolean).length
-        const failedNotificationCount =
-          offerUpdatesNotification.length - successNotificationCount
-
-        console.log(
-          `Finished refreshing Notifications for offers. Successfully refreshed: ${successNotificationCount}, failed: ${failedNotificationCount}`
+        const {successNotificationCount, failedNotificationCount} = yield* _(
+          store.set(updateOfferNotificationTokensActionAtom, {
+            regenerateAll: false,
+          })
         )
 
         const offersToUpdateVersion = pipe(

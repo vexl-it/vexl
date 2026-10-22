@@ -330,6 +330,7 @@ export const generatePushNotificationsFromUserLoginOnDifferentDeviceNoticeSendTa
         token,
         data: new UserLoginOnDifferentDeviceNotificationData({
           trackingId: Option.some(trackingId),
+          accountMoved: task.accountMoved,
         }).toData(),
       }
 

@@ -51,6 +51,7 @@ import {
 import getValueFromSetStateActionOfAtom from '../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 import calculatePriceInFiatFromSats from '../../utils/calculatePriceInFiatFromSats'
 import calculatePriceInSats from '../../utils/calculatePriceInSats'
+import {MAX_AMOUNT_EUR} from '../../utils/localization/currency'
 import {defaultCurrencyAtom} from '../../utils/preferences'
 
 export const filterBarOptionsAtom = atom<
@@ -226,8 +227,12 @@ export const amountBottomLimitForRangeInputAtom = atom(
   }
 )
 
-export const maxAmountForFilterCurrencyAtom =
+const knownMaxAmountForFilterCurrencyAtom =
   createMaxAmountForCurrencyAtom(currencyAtom)
+
+export const maxAmountForFilterCurrencyAtom = atom(
+  (get) => get(knownMaxAmountForFilterCurrencyAtom) ?? MAX_AMOUNT_EUR
+)
 
 export const btcPricesReadyForFilterAtom =
   createBtcPricesReadyAtom(currencyAtom)

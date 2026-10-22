@@ -36,6 +36,7 @@ function removeSensitiveData(string: string): string {
     session.sessionCredentials.publicKey,
     session.phoneNumber,
     session.privateKey.privateKeyPemBase64,
+    session.masterSeed,
     // Strip V2 key material if present
     ...(session.keyPairV2
       ? [session.keyPairV2.publicKey, session.keyPairV2.privateKey]

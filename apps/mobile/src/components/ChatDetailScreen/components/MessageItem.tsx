@@ -1,4 +1,10 @@
-import {DotTypingIndicator, Rejected, Typography, useTheme} from '@vexl-next/ui'
+import {
+  DotTypingIndicator,
+  LabeledDivider,
+  Rejected,
+  Typography,
+  useTheme,
+} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue, type Atom} from 'jotai'
 import React, {useMemo} from 'react'
@@ -274,6 +280,12 @@ function MessageItem({
       </Stack>
     )
   if (item.type === 'space') return <Stack h="$5" />
+  if (item.type === 'restoredDivider')
+    return (
+      <Stack mx="$5" my="$5">
+        <LabeledDivider label={t('messages.restoredMessagesDivider')} />
+      </Stack>
+    )
   return null
 }
 

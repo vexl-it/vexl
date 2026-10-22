@@ -122,6 +122,7 @@
   "messages.startConversationByReactingToOffer": "Begin een gesprek door te reageren op een aanbod.",
   "messages.seeMarketplace": "Zie marktplaats",
   "messages.youHaveChattedWithThisPartyBefore": "Het lijkt erop dat je al over deze aanbieding hebt gechat, maar dat je bent weggegaan en het gesprek hebt verwijderd.",
+  "messages.restoredMessagesDivider": "Geschiedenis van de ander na herstel van je account",
   "messages.areYouSureYouWantToDeleteChat": "Weet je zeker dat je deze chat wil verwijderen? Alle berichten zullen verloren gaan.",
   "vexlbot.bot": "bot",
   "vexlbot.initialWelcomeMessage": "Welkom bij de chat. Laat ons akkoord gaan het over handelsdetailen met {{name}}. Ik zal je onderweg helpen.",

@@ -122,6 +122,7 @@
   "messages.startConversationByReactingToOffer": "ここにチャットが表示されます。オファーに反応してチャットを始めてみよう。",
   "messages.seeMarketplace": "マーケットを見る",
   "messages.youHaveChattedWithThisPartyBefore": "このオファーについて以前チャットしたようですが、あなたは退出して会話を削除しています。",
+  "messages.restoredMessagesDivider": "アカウント復元後に相手から届いた履歴",
   "messages.areYouSureYouWantToDeleteChat": "このチャットを削除してもよろしいですか？すべてのメッセージが失われます。",
   "vexlbot.bot": "ボット",
   "vexlbot.initialWelcomeMessage": "チャットへようこそ。 {{name}}との取引詳細に同意しましょう。途中でお手伝いします。",

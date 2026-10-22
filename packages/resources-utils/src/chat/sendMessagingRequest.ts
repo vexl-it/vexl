@@ -7,6 +7,7 @@ import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneN
 import {
   generateChatMessageId,
   type ChatMessage,
+  type ChatRecoveryProof,
 } from '@vexl-next/domain/src/general/messaging'
 import {
   type FriendLevel,
@@ -88,6 +89,7 @@ export function sendMessagingRequest({
   commonFriends,
   verifiedCommonFriends,
   friendLevel,
+  recoveryProof,
 }: {
   text: string
   fromKeypair: PrivateKeyHolder
@@ -104,6 +106,8 @@ export function sendMessagingRequest({
   commonFriends?: readonly HashedPhoneNumber[]
   verifiedCommonFriends?: readonly HashedPhoneNumber[]
   friendLevel?: readonly FriendLevel[]
+  // I chose to contact them, so they may hold it
+  recoveryProof?: ChatRecoveryProof | undefined
 }): Effect.Effect<
   SentMessagingRequest,
   | ApiErrorRequestMessaging
@@ -134,6 +138,7 @@ export function sendMessagingRequest({
         theirNotificationCypher,
         otherSideVersion,
         notificationApi,
+        recoveryProof,
       })
     )
 

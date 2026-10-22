@@ -1,8 +1,8 @@
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {
   MessageCypher,
-  MessageType,
   ServerMessage,
+  ServerVisibleMessageType,
 } from '@vexl-next/domain/src/general/messaging'
 import {IdNumeric} from '@vexl-next/domain/src/utility/IdNumeric'
 import {BooleanFromString} from '@vexl-next/generic-utils/src/effect-helpers/BooleanFromString'
@@ -177,7 +177,7 @@ export const SendMessageRequest = Schema.Struct({
   senderPublicKey: PublicKeyPemBase64,
   receiverPublicKey: PublicKeyPemBase64,
   message: MessageCypher,
-  messageType: MessageType,
+  messageType: ServerVisibleMessageType,
   messagePreview: Schema.optional(Schema.String),
 })
 export type SendMessageRequest = Schema.Schema.Type<typeof SendMessageRequest>
@@ -205,7 +205,7 @@ export type LeaveChatResponse = Schema.Schema.Type<typeof LeaveChatResponse>
 export const MessageInBatch = Schema.Struct({
   receiverPublicKey: PublicKeyPemBase64,
   message: MessageCypher,
-  messageType: MessageType,
+  messageType: ServerVisibleMessageType,
   messagePreview: Schema.optional(Schema.String),
 })
 export type MessageInBatch = Schema.Schema.Type<typeof MessageInBatch>
@@ -229,3 +229,17 @@ export const SendMessagesResponse = Schema.Array(
   })
 )
 export type SendMessagesResponse = typeof SendMessagesResponse.Type
+
+export const MAX_PUBLIC_KEYS_IN_CHECK_INBOXES_EXIST_REQUEST = 200
+
+export const CheckInboxesExistRequest = Schema.Struct({
+  publicKeys: Schema.Array(PublicKeyPemBase64).pipe(
+    Schema.maxItems(MAX_PUBLIC_KEYS_IN_CHECK_INBOXES_EXIST_REQUEST)
+  ),
+})
+export type CheckInboxesExistRequest = typeof CheckInboxesExistRequest.Type
+
+export const CheckInboxesExistResponse = Schema.Struct({
+  existingPublicKeys: Schema.Array(PublicKeyPemBase64),
+})
+export type CheckInboxesExistResponse = typeof CheckInboxesExistResponse.Type

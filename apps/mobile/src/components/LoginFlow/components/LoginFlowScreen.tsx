@@ -9,15 +9,18 @@ import {
   useTheme,
 } from '@vexl-next/ui'
 import React, {type ReactNode} from 'react'
-import {type LayoutChangeEvent} from 'react-native'
+import {type LayoutChangeEvent, TouchableOpacity} from 'react-native'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 
+interface Action {
+  readonly disabled?: boolean
+  readonly label: string
+  readonly onPress: () => void
+}
+
 interface Props {
-  readonly action?: {
-    readonly disabled?: boolean
-    readonly label: string
-    readonly onPress: () => void
-  }
+  readonly action?: Action
+  readonly secondaryAction?: Action
   readonly children: ReactNode
   readonly footer?: ReactNode
   readonly header?: ReactNode
@@ -27,6 +30,7 @@ interface Props {
 
 export default function LoginFlowScreen({
   action,
+  secondaryAction,
   children,
   header,
   footer,
@@ -64,6 +68,16 @@ export default function LoginFlowScreen({
               width="100%"
             >
               {action.label}
+            </Button>
+          ) : null}
+          {secondaryAction ? (
+            <Button
+              disabled={secondaryAction.disabled}
+              onPress={secondaryAction.onPress}
+              variant="secondary"
+              width="100%"
+            >
+              {secondaryAction.label}
             </Button>
           ) : null}
         </YStack>
@@ -140,6 +154,25 @@ export function LoginFlowText({
     >
       {children}
     </Typography>
+  )
+}
+
+export function LoginFlowLink({
+  disabled,
+  label,
+  onPress,
+}: Action): React.ReactElement {
+  return (
+    <TouchableOpacity disabled={disabled} onPress={onPress}>
+      <Typography
+        color="$foregroundSecondary"
+        textAlign="center"
+        textDecorationLine="underline"
+        variant="paragraphSmall"
+      >
+        {label}
+      </Typography>
+    </TouchableOpacity>
   )
 }
 

@@ -1,7 +1,7 @@
 // TODO
 
 import {SqlClient, SqlSchema} from '@effect/sql'
-import {type MessageType} from '@vexl-next/domain/src/general/messaging'
+import {type ServerVisibleMessageType} from '@vexl-next/domain/src/general/messaging'
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {shouldDisableMetrics} from '@vexl-next/server-utils/src/commonConfigs'
 import {type CommonMetricAttributes} from '@vexl-next/server-utils/src/metrics/commonMetricAttributesFromHeaders'
@@ -81,7 +81,7 @@ export const reportRequestRejected = (
   )
 
 export const reportRequestMetricsByMessageType = (
-  messageType: MessageType,
+  messageType: ServerVisibleMessageType,
   attributes: CommonMetricAttributes
 ): Effect.Effect<void, never, MetricsClientService> => {
   switch (messageType) {

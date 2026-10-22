@@ -1,6 +1,7 @@
+import {secp256k1} from '@noble/curves/secp256k1.js'
 import {Schema} from 'effect/index'
 import {getCrypto} from '../getCrypto'
-import {normalizeCurveName, type Curve} from './Curve.brand'
+import {curves, normalizeCurveName, type Curve} from './Curve.brand'
 import ECConverter from './ECConverter'
 import {PublicKeyPemBase64, type PrivateKeyPemBase64} from './brands'
 
@@ -28,17 +29,34 @@ function base64pemKeyToUtf8(
   return Buffer.from(key, 'base64').toString('utf-8')
 }
 
-function getPubKey(privateKeyRaw: Buffer, curve: Curve): Buffer {
-  const crypto = getCrypto()
-  const ecdh = crypto.createECDH(curve)
+// On mobile createECDH comes from crypto-browserify (elliptic), which is far
+// slower on Hermes than noble.
+export function publicRawFromPrivateRaw(
+  privateKeyRaw: Buffer,
+  curve: Curve
+): Buffer {
+  if (curve === curves.secp256k1)
+    // A bigint also takes the shorter keys createECDH().getPrivateKey() returns.
+    return Buffer.from(
+      secp256k1.getPublicKey(
+        BigInt(`0x${privateKeyRaw.toString('hex')}`),
+        false
+      )
+    )
+
+  const ecdh = getCrypto().createECDH(curve)
   ecdh.setPrivateKey(privateKeyRaw)
   return ecdh.getPublicKey()
 }
 
-export function privateRawToPem(rawPriv: Buffer, curve: Curve): Buffer {
+export function privateRawToPem(
+  rawPriv: Buffer,
+  curve: Curve,
+  publicKeyRaw = publicRawFromPrivateRaw(rawPriv, curve)
+): Buffer {
   const key = new ECConverter({
     privateKey: rawPriv,
-    publicKey: getPubKey(rawPriv, curve),
+    publicKey: publicKeyRaw,
     curve,
   })
 

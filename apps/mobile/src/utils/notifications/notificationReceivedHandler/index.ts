@@ -1,6 +1,7 @@
 import {Effect, Option, Schema} from 'effect/index'
 import * as Notifications from 'expo-notifications'
 import * as TaskManager from 'expo-task-manager'
+import {getDefaultStore} from 'jotai'
 import {loadSession} from '../../../state/session/loadSession'
 import {flushAllScheduledMmkvWrites} from '../../atomUtils/atomWithParsedMmkvStorage'
 import {reportErrorE} from '../../reportError'
@@ -14,7 +15,7 @@ import {handleNewChatMessageNoticeNotification} from './handlers/newChatMessageN
 import {handleNewClubConnectionNotification} from './handlers/newClubConnection'
 import {handleNewSocialNetworkConnectionNotification} from './handlers/newSocialNetworkConnection'
 import {handleUserInactivityNotification} from './handlers/userInactivity'
-import {handleUserLoginOnDifferentDeviceNotification} from './handlers/userLoginOnDifferentDevice'
+import {handleUserLoginOnDifferentDeviceNotice} from './handlers/userLoginOnDifferentDevice'
 import {handleVexlProductNotification} from './handlers/vexlProductNotification'
 
 const TASK = 'notification-background-task-v2'
@@ -109,7 +110,10 @@ const processNotification = (
     } else if (
       notificationData._tag === 'UserLoginOnDifferentDeviceNotificationData'
     ) {
-      yield* handleUserLoginOnDifferentDeviceNotification(notificationData)
+      yield* handleUserLoginOnDifferentDeviceNotice(
+        getDefaultStore(),
+        notificationData
+      )
     } else if (notificationData._tag === 'UserInactivityNotificationData') {
       yield* handleUserInactivityNotification(notificationData)
     } else if (notificationData._tag === 'VexlProductNotificationData') {

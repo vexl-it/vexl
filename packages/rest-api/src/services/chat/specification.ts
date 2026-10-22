@@ -29,6 +29,8 @@ import {
   CancelApprovalRequest,
   CancelApprovalResponse,
   CancelApprovalV2Request,
+  CheckInboxesExistRequest,
+  CheckInboxesExistResponse,
   CreateInboxRequest,
   CreateInboxResponse,
   DeleteInboxRequest,
@@ -75,6 +77,17 @@ export const CreateInboxEndpoint = HttpApiEndpoint.post(
   .setPayload(CreateInboxRequest)
   .addSuccess(CreateInboxResponse)
   .addError(InvalidChallengeError, {status: 401})
+  .annotate(MaxExpectedDailyCall, 100)
+
+// No security headers nor challenge on purpose - the server must not be able
+// to link the checked inboxes to a user.
+export const CheckInboxesExistEndpoint = HttpApiEndpoint.post(
+  'checkInboxesExist',
+  '/api/v1/inboxes/exist'
+)
+  .setHeaders(CommonHeaders)
+  .setPayload(CheckInboxesExistRequest)
+  .addSuccess(CheckInboxesExistResponse)
   .annotate(MaxExpectedDailyCall, 100)
 
 export const DeleteInboxEndpoint = HttpApiEndpoint.del(
@@ -234,6 +247,7 @@ export const SendMessagesEndpoint = HttpApiEndpoint.post(
 const InboxesApiGroup = HttpApiGroup.make('Inboxes')
   .add(UpdateInboxEndpoint)
   .add(CreateInboxEndpoint)
+  .add(CheckInboxesExistEndpoint)
   .add(DeleteInboxEndpoint)
   .add(BlockInboxEndpoint)
   .add(RequestApprovalEndpoint)

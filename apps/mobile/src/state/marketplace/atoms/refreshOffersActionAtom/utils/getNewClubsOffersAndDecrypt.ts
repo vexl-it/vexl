@@ -1,4 +1,4 @@
-import {ClubUuid} from '@vexl-next/domain/src/general/clubs'
+import {ClubUuid, type ClubKeys} from '@vexl-next/domain/src/general/clubs'
 import {OfferInfo} from '@vexl-next/domain/src/general/offers'
 import {type Base64String} from '@vexl-next/domain/src/utility/Base64String.brand'
 import decryptOffer from '@vexl-next/resources-utils/src/offers/decryptOffer'
@@ -6,7 +6,6 @@ import fetchAllPaginatedData from '@vexl-next/rest-api/src/fetchAllPaginatedData
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
 import {Array, Effect, flow, Record, Schema} from 'effect'
 import {atom} from 'jotai'
-import {type ClubKeys} from '../../../../clubs/atom/clubsToKeyHolderV2Atom'
 import {clubOffersNextPageParamAtom} from '../../offersState'
 
 const OFFERS_PAGE_LIMIT = 30

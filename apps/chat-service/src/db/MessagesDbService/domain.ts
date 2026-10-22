@@ -1,6 +1,6 @@
 import {
   MessageCypher,
-  MessageType,
+  ServerVisibleMessageType,
 } from '@vexl-next/domain/src/general/messaging'
 import {Schema} from 'effect'
 import {InboxRecordId} from '../InboxDbService/domain'
@@ -17,7 +17,7 @@ export class MessageRecord extends Schema.Class<MessageRecord>('MessageRecord')(
     message: MessageCypher,
     senderPublicKey: PublicKeyEncrypted, // TODO is this needed?
     pulled: Schema.Boolean,
-    type: MessageType, // TODO brand
+    type: ServerVisibleMessageType, // TODO brand
     inboxId: InboxRecordId,
     expiresAt: Schema.DateFromSelf,
     receivedByServerAt: Schema.DateFromSelf,

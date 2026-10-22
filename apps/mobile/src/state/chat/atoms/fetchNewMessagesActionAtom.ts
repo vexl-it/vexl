@@ -21,7 +21,6 @@ import * as A from 'fp-ts/Array'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {flow, pipe} from 'fp-ts/function'
-import {group} from 'group-items'
 import {atom, type SetStateAction, type WritableAtom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {Platform} from 'react-native'
@@ -47,14 +46,25 @@ import {
 import {vexlTokenToKeyHolderAtom} from '../../notifications/vexlTokenToKeyHolderAtom'
 import messagingStateAtom from '../atoms/messagingStateAtom'
 import {type InboxInState} from '../domain'
-import addMessagesToChats from '../utils/addMessagesToChats'
+import addIncomingMessagesToInbox from '../utils/addIncomingMessagesToInbox'
+import {
+  newlyRecoveredChats,
+  startedSupportingChatRecovery,
+} from '../utils/chatRecovery'
 import {filterIncomingMessages} from '../utils/filterIncomingMessages'
+import {isMetadataMessageType} from '../utils/isMetadataMessage'
+import {myChatRecoveryProof} from '../utils/myChatRecoveryProof'
 import replaceBase64UriWithImageFileUri from '../utils/replaceBase64UriWithImageFileUri'
 import {type ChatMessageWithState} from './../domain'
 import {blockedChatSendersAtom} from './blockedChatSendersAtom'
+import {
+  answerHistoryRequestsActionAtom,
+  processPendingRecoveryChatsActionAtom,
+} from './chatHistoryActionAtoms'
 import {sendUpdateNoticeMessageActionAtom} from './checkAndReportCurrentVersionToChatsActionAtom'
 import createNewChatsFromMessagesActionAtom from './createNewChatsFromFirstMessagesActionAtom'
 import focusChatByInboxKeyAndSenderKey from './focusChatByInboxKeyAndSenderKey'
+import {sendFcmCypherUpdateMessageActionAtom} from './refreshNotificationTokensActionAtom'
 import {reportMessagesReceivedActionAtom} from './reportMessagesReceivedActionAtom'
 
 const handleOtherSideUpdatedActionAtom = atom(
@@ -65,14 +75,32 @@ const handleOtherSideUpdatedActionAtom = atom(
     {
       newMessages,
       inbox,
-    }: {newMessages: readonly ChatMessageWithState[]; inbox: InboxInState}
+      previousInbox,
+    }: {
+      newMessages: readonly ChatMessageWithState[]
+      inbox: InboxInState
+      previousInbox: InboxInState
+    }
   ) =>
     pipe(
       newMessages,
       Array.filter(
         (one) =>
           one.message.messageType === 'VERSION_UPDATE' &&
-          one.message.lastReceivedVersion !== version
+          (one.message.lastReceivedVersion !== version ||
+            pipe(
+              previousInbox.chats,
+              Array.findFirst(
+                (chat) =>
+                  chat.chat.otherSide.publicKey === one.message.senderPublicKey
+              ),
+              Option.exists((chat) =>
+                startedSupportingChatRecovery({
+                  previousVersion: chat.chat.otherSideVersion,
+                  reportedVersion: one.message.myVersion,
+                })
+              )
+            ))
       ),
       Array.map((oneMessageToRespondWithCurrentVersion) => {
         const chatAtom = focusChatByInboxKeyAndSenderKey({
@@ -138,29 +166,6 @@ function focusInboxInMessagingStateAtom(
   return focusAtom(messagingStateAtom, (optic) =>
     optic.find((one) => one.inbox.privateKey.publicKeyPemBase64 === publicKey)
   )
-}
-
-function splitMessagesArrayToNewChatsAndExistingChats({
-  inbox,
-  messages,
-}: {
-  readonly inbox: InboxInState
-  readonly messages: readonly ChatMessageWithState[]
-}): {
-  messagesInNewChat: ChatMessageWithState[] | undefined
-  messagesInExistingChat: ChatMessageWithState[] | undefined
-} {
-  return group(messages)
-    .by((oneMessage) =>
-      inbox.chats.some(
-        (oneChat) =>
-          oneMessage.message.senderPublicKey ===
-          oneChat.chat.otherSide.publicKey
-      )
-        ? 'messagesInExistingChat'
-        : 'messagesInNewChat'
-    )
-    .asObject()
 }
 
 function incompatibleErrorToChatMessageWithState(
@@ -274,39 +279,27 @@ function refreshInboxActionAtom(
             TE.fromTask
           )
         ),
-        TE.bindTo('newMessages'),
-        TE.bindW('updatedInbox', ({newMessages}) =>
-          pipe(
-            TE.right(newMessages),
-            TE.map((newMessages) =>
-              splitMessagesArrayToNewChatsAndExistingChats({
-                inbox: getInbox(),
-                messages: newMessages,
-              })
-            ),
-            TE.map(({messagesInNewChat, messagesInExistingChat}) => {
-              const inbox = getInbox()
-              return {
-                ...getInbox(),
-                chats: [
-                  ...set(
-                    createNewChatsFromMessagesActionAtom({
-                      inbox: inbox.inbox,
-                      inboxOffer,
-                    })(messagesInNewChat ?? [])
-                  ),
-                  ...addMessagesToChats(inbox.chats)(
-                    messagesInExistingChat ?? []
-                  ),
-                ],
-              }
-            })
-          )
-        ),
+        TE.map((newMessages): RefreshInboxResult => {
+          const inbox = getInbox()
+          const {updatedInbox, visibleMessages} = addIncomingMessagesToInbox({
+            inbox,
+            messages: newMessages,
+            createNewChats: (messages) =>
+              set(
+                createNewChatsFromMessagesActionAtom({
+                  inbox: inbox.inbox,
+                  inboxOffer,
+                  inboxRestoredFromBackup: inbox.restoredFromBackup,
+                })(messages)
+              ),
+            expectedRecoveryProof: (chat) =>
+              myChatRecoveryProof(get, chat.chat),
+          })
+          return {updatedInbox, newMessages: visibleMessages}
+        }),
         TE.mapLeft((error) =>
           error === 'noMessages' ? noMessagesLeft() : error
-        ),
-        TE.map((result): RefreshInboxResult => result)
+        )
       )
     )
 }
@@ -363,17 +356,13 @@ export const fetchAndStoreMessagesForInboxAtom = atom<
       const visibleMessagesToReport = newMessages.filter(
         (one) =>
           one.state === 'received' &&
-          !['FCM_CYPHER_UPDATE', 'VERSION_UPDATE'].includes(
-            one.message.messageType
-          )
+          !isMetadataMessageType(one.message.messageType)
       )
 
       const nonVisibleMessagesToReport = newMessages.filter(
         (one) =>
           one.state === 'received' &&
-          ['FCM_CYPHER_UPDATE', 'VERSION_UPDATE'].includes(
-            one.message.messageType
-          )
+          isMetadataMessageType(one.message.messageType)
       )
 
       return Effect.all([
@@ -463,6 +452,7 @@ export const fetchAndStoreMessagesForInboxAtom = atom<
         const handleOtherSideUpdated = set(handleOtherSideUpdatedActionAtom, {
           newMessages,
           inbox: updatedInbox,
+          previousInbox: inbox,
         })
 
         set(handleOtherSideReadMessages, {
@@ -473,6 +463,15 @@ export const fetchAndStoreMessagesForInboxAtom = atom<
         return Effect.all(
           [
             handleOtherSideUpdated,
+            set(answerHistoryRequestsActionAtom, {
+              newMessages,
+              inbox: updatedInbox,
+            }),
+            ...Array.map(
+              newlyRecoveredChats({previousInbox: inbox, updatedInbox}),
+              (chat) =>
+                taskToEffect(set(sendFcmCypherUpdateMessageActionAtom)(chat))
+            ),
             taskToEffect(
               deletePulledMessagesReportLeft({
                 api: api.chat,
@@ -512,6 +511,8 @@ export const fetchAndStoreMessagesForInboxHandleNotificationsActionAtom = atom<
     )
 
     if (!updates) return undefined
+
+    yield* _(set(processPendingRecoveryChatsActionAtom, key))
 
     if (Platform.OS === 'ios') {
       const targetTokens = pipe(

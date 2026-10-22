@@ -8,9 +8,8 @@ import {getDefaultStore} from 'jotai'
 import {AppState} from 'react-native'
 import {areNotificationsEnabledE} from '../..'
 import {apiAtom} from '../../../../api'
-import {fetchAndStoreMessagesForInboxHandleNotificationsActionAtom} from '../../../../state/chat/atoms/fetchNewMessagesActionAtom'
-import {getKeyHolderForNotificationTokenOrCypherActionAtom} from '../../../../state/notifications/fcmCypherToKeyHolderAtom'
-import reportError, {reportErrorE} from '../../../reportError'
+import {fetchMessagesForNotifiedInboxActionAtom} from '../../../../state/chat/atoms/fetchMessagesForNotifiedInboxActionAtom'
+import {reportErrorE} from '../../../reportError'
 
 const processChatNotificationProcessed = (
   notificationTrackingId: NotificationTrackingId,
@@ -153,24 +152,11 @@ export function handleNewChatMessageNoticeNotification(
     // Disable for now
     // if (notificationData.includesSystemNotification) return false
 
-    const inboxForCypher = store.set(
-      getKeyHolderForNotificationTokenOrCypherActionAtom,
-      notificationData.targetToken ?? notificationData.targetCypher
-    )
-    if (!inboxForCypher) {
-      reportError(
-        'warn',
-        new Error(
-          'Error decrypting notification FCM - unable to find private key for cypher'
-        )
-      )
-      return
-    }
-
     yield* _(
-      store.set(fetchAndStoreMessagesForInboxHandleNotificationsActionAtom, {
-        key: inboxForCypher.publicKeyPemBase64,
-      })
+      store.set(
+        fetchMessagesForNotifiedInboxActionAtom,
+        notificationData.targetToken ?? notificationData.targetCypher
+      )
     )
   })
 }

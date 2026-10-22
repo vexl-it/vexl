@@ -6,6 +6,7 @@ import {
   type PostLoginFlowStackParamsList,
   type PostLoginFlowStackScreenProps,
 } from '../../navigationTypes'
+import {showRestoredAccountInfoAtom} from '../../state/backup/restoreFromBackup'
 import {checkAreNotificationsEnabledAtom} from '../../state/notifications/areNotificationsEnabledAtom'
 import {
   postLoginFlowCompletedScreensAtom,
@@ -13,13 +14,17 @@ import {
 } from '../../state/postLoginOnboarding'
 import ContactsImportScreen from './components/ContactsImportScreen'
 import NotificationSetupScreen from './components/NotificationSetupScreen'
+import RestoredAccountInfoScreen from './components/RestoredAccountInfoScreen'
 import UsageInfoScreen from './components/UsageInfoScreen'
 
 const Stack = createNativeStackNavigator<PostLoginFlowStackParamsList>()
 
 function getInitialRouteName(
-  completedScreens: readonly string[]
+  completedScreens: readonly string[],
+  showRestoredAccountInfo: boolean
 ): keyof PostLoginFlowStackParamsList {
+  if (showRestoredAccountInfo) return 'RestoredAccountInfo'
+
   if (!Array.contains(completedScreens, 'contactsImport')) {
     return 'ContactsImport'
   }
@@ -36,6 +41,7 @@ export default function PostLoginFlow(): React.ReactElement {
     postLoginFlowEffectiveCompletedScreensAtom
   )
   const storedCompletedScreens = useAtomValue(postLoginFlowCompletedScreensAtom)
+  const showRestoredAccountInfo = useAtomValue(showRestoredAccountInfoAtom)
   const checkAreNotificationsEnabled = useSetAtom(
     checkAreNotificationsEnabledAtom
   )
@@ -70,12 +76,19 @@ export default function PostLoginFlow(): React.ReactElement {
 
   return (
     <Stack.Navigator
-      initialRouteName={getInitialRouteName(completedScreens)}
+      initialRouteName={getInitialRouteName(
+        completedScreens,
+        showRestoredAccountInfo
+      )}
       screenOptions={{
         headerShown: false,
         presentation: 'card',
       }}
     >
+      <Stack.Screen
+        name="RestoredAccountInfo"
+        component={RestoredAccountInfoScreen}
+      />
       <Stack.Screen name="ContactsImport" component={ContactsImportScreen} />
       <Stack.Screen
         name="NotificationSetup"

@@ -1,5 +1,8 @@
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
-import {PublicKeyV2} from '@vexl-next/cryptography/src/KeyHolder/brandsV2'
+import {
+  KeyPairV2,
+  PublicKeyV2,
+} from '@vexl-next/cryptography/src/KeyHolder/brandsV2'
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {
@@ -328,3 +331,19 @@ export class UpgradeAuthInvalidSignatureError extends Schema.TaggedError<Upgrade
   message: Schema.String,
   cause: Schema.Unknown,
 }) {}
+
+export const GetBackupPublicKeyResponse = Schema.Struct({
+  publicKey: PublicKeyV2,
+})
+export type GetBackupPublicKeyResponse = typeof GetBackupPublicKeyResponse.Type
+
+export const GetBackupKeyPairRequest = Schema.Struct({
+  id: PhoneNumberVerificationId,
+  code: VerifyPhoneNumberRequest.fields.code,
+})
+export type GetBackupKeyPairRequest = typeof GetBackupKeyPairRequest.Type
+
+export const GetBackupKeyPairResponse = Schema.Struct({
+  keyPair: KeyPairV2,
+})
+export type GetBackupKeyPairResponse = typeof GetBackupKeyPairResponse.Type

@@ -17,6 +17,7 @@ import '../../state/chat/refreshNotificationTokensForActiveChatsAssumeLoginLoadi
 import '../../state/clubs/cleanupRemovedClubsInAppLoadingTask'
 import '../../state/connections/syncConnectionsInAppLoadingTask'
 import '../../state/contacts/loadContactsFromDeviceActionAtomInAppLoadingTask'
+import '../../state/keyDerivation/ensureKeyDerivationCountersInAppLoadingTask'
 import '../../state/marketplace/checkNotificationTokensAndVersionsAndUpdateOffersTask'
 import '../../state/notes/refreshNotesInAppLoadingTask'
 import '../../state/notifications/ensureVexlSecretExistsTask'

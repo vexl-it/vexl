@@ -1,7 +1,9 @@
 import {HttpApiBuilder} from '@effect/platform/index'
 import {type PublicKeyV2} from '@vexl-next/cryptography/src/KeyHolder/brandsV2'
+import {type UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
+import {type LoginSessionId} from '@vexl-next/domain/src/general/LoginSessionId.brand'
 import {CurrentSecurity} from '@vexl-next/rest-api/src/apiSecurity'
-import {UserNotFoundError} from '@vexl-next/rest-api/src/services/contact/contracts'
+import {LoggedInOnAnotherDeviceError} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {commonMetricAttributesFromHeaders} from '@vexl-next/server-utils/src/metrics/commonMetricAttributesFromHeaders'
@@ -19,6 +21,11 @@ import {reportUserReactivated, reportUserRefresh} from '../../metrics'
 import {serverHashPhoneNumber} from '../../utils/serverHashContact'
 import {withUserActionRedisLock} from '../../utils/withUserActionRedisLock'
 import {notifyOthersAboutNewUserForked} from '../contacts/utils/notifyOthersAboutNewUser'
+import {
+  findUserOrFail,
+  refreshUserRecord,
+  type UserSecurity,
+} from './utils/refreshUserRecord'
 
 const isUserInactive = ({
   refreshedAt,
@@ -50,6 +57,35 @@ const isHiddenAsContact = ({
   isUserInactive({refreshedAt, activeWithinDays}) ||
   (hideUsersWithoutPublicKeyV2 && Option.isNone(publicKeyV2))
 
+// Users logged in before login sessions existed adopt the first one they send.
+const ensureSameLoginSession = ({
+  security,
+  stored,
+  received,
+}: {
+  security: UserSecurity
+  stored: Option.Option<LoginSessionId>
+  received: Option.Option<LoginSessionId>
+}): Effect.Effect<
+  void,
+  LoggedInOnAnotherDeviceError | UnexpectedServerError,
+  UserDbService
+> => {
+  if (Option.isNone(received)) return Effect.void
+  if (Option.isSome(stored))
+    return stored.value === received.value
+      ? Effect.void
+      : Effect.fail(new LoggedInOnAnotherDeviceError())
+
+  return Effect.flatMap(UserDbService, (userDb) =>
+    userDb.updateLoginSessionId({
+      publicKey: security.publicKey,
+      hash: security.serverHash,
+      loginSessionId: received.value,
+    })
+  )
+}
+
 export const refreshUser = HttpApiBuilder.handler(
   ContactApiSpecification,
   'User',
@@ -63,7 +99,6 @@ export const refreshUser = HttpApiBuilder.handler(
             req.headers
           )
           yield* _(reportUserRefresh(commonMetricAttributes))
-          const userDb = yield* _(UserDbService)
           const contactDb = yield* _(ContactDbService)
           const contactActiveWindowDays = yield* _(
             contactActiveWindowDaysConfig
@@ -72,15 +107,13 @@ export const refreshUser = HttpApiBuilder.handler(
             contactHideUsersWithoutPublicKeyV2Config
           )
 
-          const existingUser = yield* _(
-            userDb.findUserByPublicKeyAndHash({
-              hash: security.serverHash,
-              publicKey: security.publicKey,
-            }),
-            Effect.flatten,
-            Effect.catchTag('NoSuchElementException', () =>
-              Effect.fail(new UserNotFoundError())
-            )
+          const existingUser = yield* _(findUserOrFail(security))
+          yield* _(
+            ensureSameLoginSession({
+              security,
+              stored: existingUser.loginSessionId,
+              received: Option.fromNullable(req.payload.loginSessionId),
+            })
           )
 
           const becameVisibleAsContact =
@@ -109,26 +142,11 @@ export const refreshUser = HttpApiBuilder.handler(
           const isReactivatedForMetrics =
             remindersReceived > 0 || daysInactive >= expiredForMetricsAfterDays
 
-          if (Option.isSome(req.payload.vexlNotificationToken)) {
-            yield* _(
-              userDb.clearVexlNotificationTokenHeldByOtherUsers({
-                publicKey: security.publicKey,
-                hash: security.serverHash,
-                token: req.payload.vexlNotificationToken.value,
-              })
-            )
-          }
-
           yield* _(
-            userDb.updateRefreshUser({
-              publicKey: security.publicKey,
-              hash: security.serverHash,
-              clientVersion: req.headers.clientVersionOrNone,
-              countryPrefix: req.headers.prefixOrNone,
-              appSource: req.headers.appSourceOrNone,
+            refreshUserRecord({
+              security,
+              headers: req.headers,
               vexlNotificationToken: req.payload.vexlNotificationToken,
-              refreshedAt: new Date(),
-              publicKeyV2: security.publicKeyV2,
             })
           )
 

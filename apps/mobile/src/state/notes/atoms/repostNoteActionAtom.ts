@@ -14,6 +14,7 @@ import {
   upsertRepostToConnectionsActionAtom,
 } from '../../connections/atom/repostToConnectionsAtom'
 import {ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom} from '../../contacts/atom/ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom'
+import {noteRepostIdActionAtom} from '../../keyDerivation'
 import {sessionDataOrDummyAtom} from '../../session'
 import {NoteNotFoundError, NoteRepostNotAllowedError} from '../domainErrors'
 import {notesAtom, singleNoteAtom} from './notesState'
@@ -57,6 +58,7 @@ export const repostNoteActionAtom = atom<
         offerApi: api.offer,
         contactApi: api.contact,
         noteId,
+        repostId: yield* _(set(noteRepostIdActionAtom, noteId)),
         symmetricKey: note.noteInfo.privatePart.symmetricKey,
         ownerKeyPair: session.privateKey,
         ownerKeyPairV2: session.keyPairV2,

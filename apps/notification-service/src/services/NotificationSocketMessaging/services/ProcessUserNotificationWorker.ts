@@ -97,11 +97,12 @@ export const ProcessUserNotificationsWorker =
         ),
         Match.tag(
           'UserLoginOnDifferentDeviceNotificationMqEntry',
-          ({token}) =>
+          ({token, accountMoved}) =>
             new UserLoginOnDifferentDeviceNoticeSendTask({
               notificationToken: secret,
               targetToken: token,
               trackingId,
+              accountMoved,
             })
         ),
         Match.tag(

@@ -16,6 +16,7 @@ import {version} from '../../../utils/environment'
 import {reportErrorE} from '../../../utils/reportError'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 import addMessageToChat from '../utils/addMessageToChat'
+import {myChatRecoveryProofToShare} from '../utils/myChatRecoveryProof'
 
 function createUpdateNoticeChatMessage({
   version,
@@ -62,6 +63,7 @@ export const sendUpdateNoticeMessageActionAtom = atom(
           theirNotificationCypher:
             chat.chat.otherSideVexlToken ?? chat.chat.otherSideFcmCypher,
           otherSideVersion: chat.chat.otherSideVersion,
+          recoveryProof: myChatRecoveryProofToShare(get, chat),
         })
       )
       set(

@@ -1,15 +1,47 @@
+import {Array} from 'effect'
 import * as A from 'fp-ts/Array'
 import {pipe} from 'fp-ts/function'
 import addToSortedArray from '../../../utils/addToSortedArray'
 import notEmpty from '../../../utils/notEmpty'
+import {
+  createEmptyTradeChecklistInState,
+  type TradeChecklistInState,
+} from '../../tradeChecklist/domain'
 import {updateTradeChecklistState} from '../../tradeChecklist/utils'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 import addRealLifeInfoToChat from './addRealLifeInfoToChat'
 import areMessagesEqual from './areMessagesEqual'
+import {
+  consumesHistory,
+  latestRecoveryProof,
+  restoredMessagesFromHistory,
+} from './chatRecovery'
 import compareMessages from './compareMessages'
+import {
+  isHiddenMetadataMessage,
+  isMetadataMessageType,
+} from './isMetadataMessage'
 import processContactRevealMessageIfAny from './processContactRevealMessageIfAny'
 import processIdentityRevealMessageIfAny from './processIdentityRevealMessageIfAny'
 import {scheduleTradeReminderIfNeeded} from './scheduleTradeReminderIfNeeded'
+
+function tradeChecklistFromMessages(
+  messages: readonly ChatMessageWithState[]
+): TradeChecklistInState {
+  return Array.reduce(
+    messages,
+    createEmptyTradeChecklistInState(),
+    (state, one) =>
+      one.message.messageType === 'TRADE_CHECKLIST_UPDATE' &&
+      one.message.tradeChecklistUpdate &&
+      (one.state === 'received' || one.state === 'sent')
+        ? updateTradeChecklistState(state)({
+            update: one.message.tradeChecklistUpdate,
+            direction: one.state,
+          })
+        : state
+  )
+}
 
 export default function addMessagesToChats(
   chats: ChatWithMessages[]
@@ -26,7 +58,23 @@ export default function addMessagesToChats(
 
         if (messagesToAddToThisChat.length === 0) return oneChat
 
-        const messages = messagesToAddToThisChat.reduce(
+        const restoredMessages = restoredMessagesFromHistory({
+          chat: oneChat,
+          incoming: messagesToAddToThisChat,
+        })
+        const isHistoryMerged = Array.isNonEmptyArray(restoredMessages)
+        const historyMerged =
+          oneChat.historyMerged ||
+          consumesHistory({chat: oneChat, incoming: messagesToAddToThisChat})
+        const incomingMessages = Array.sort(
+          [...messagesToAddToThisChat, ...restoredMessages],
+          compareMessages
+        )
+        const receivedMessages = incomingMessages.filter(
+          (one) => one.state === 'received'
+        )
+
+        const messages = incomingMessages.reduce(
           (originalList, newMessage) =>
             addToSortedArray(
               originalList,
@@ -36,11 +84,11 @@ export default function addMessagesToChats(
           oneChat.messages
         )
 
-        const identityRevealMessage = messagesToAddToThisChat
+        const identityRevealMessage = receivedMessages
           .filter((one) => ['APPROVE_REVEAL'].includes(one.message.messageType))
           ?.at(-1)
 
-        const contactRevealMessage = messagesToAddToThisChat
+        const contactRevealMessage = receivedMessages
           .filter((one) =>
             ['APPROVE_CONTACT_REVEAL'].includes(one.message.messageType)
           )
@@ -63,37 +111,38 @@ export default function addMessagesToChats(
             one.state === 'receivedButRequiresNewerVersion'
         )
 
-        const isOnlyMetadataUpdate = !messagesToAddToThisChat.some(
-          (one) =>
-            one.message.messageType !== 'VERSION_UPDATE' &&
-            one.message.messageType !== 'FCM_CYPHER_UPDATE' &&
-            one.message.messageType !== 'MESSAGE_READ'
+        const isOnlyMetadataUpdate = messagesToAddToThisChat.every((one) =>
+          isMetadataMessageType(one.message.messageType)
         )
 
+        // A history carries a token for the chat recovered by it
         const fcmCypherUpdateFromOtherSide = messagesToAddToThisChat.findLast(
           (one) =>
             one.state === 'received' &&
-            one.message.messageType === 'FCM_CYPHER_UPDATE'
+            (one.message.messageType === 'FCM_CYPHER_UPDATE' ||
+              (one.message.messageType === 'HISTORY' &&
+                !!one.message.myFcmCypher))
         )
 
         return pipe(
           {
             ...oneChat,
-            // Do not show metadata updates in chat
-            messages: messages.filter(
-              (one) =>
-                (one.message.messageType !== 'VERSION_UPDATE' &&
-                  one.message.messageType !== 'FCM_CYPHER_UPDATE' &&
-                  one.message.messageType !== 'MESSAGE_READ') ||
-                // Show messages with forceShow flag
-                (one.state !== 'receivedButRequiresNewerVersion' &&
-                  one.message.forceShow)
-            ),
-            tradeChecklist: tradeChecklistUpdates.reduce(
-              (acc, update) =>
-                updateTradeChecklistState(acc)({update, direction: 'received'}),
-              oneChat.tradeChecklist
-            ),
+            historyMerged,
+            otherSideRecoveryProof:
+              latestRecoveryProof(messagesToAddToThisChat) ??
+              oneChat.otherSideRecoveryProof,
+            messages: messages.filter((one) => !isHiddenMetadataMessage(one)),
+            // Restored history lands before updates we already applied
+            tradeChecklist: isHistoryMerged
+              ? tradeChecklistFromMessages(messages)
+              : tradeChecklistUpdates.reduce(
+                  (acc, update) =>
+                    updateTradeChecklistState(acc)({
+                      update,
+                      direction: 'received',
+                    }),
+                  oneChat.tradeChecklist
+                ),
             chat: {
               ...oneChat.chat,
               isUnread: isOnlyMetadataUpdate ? oneChat.chat.isUnread : true,
@@ -125,7 +174,20 @@ export default function addMessagesToChats(
           },
           processIdentityRevealMessageIfAny(identityRevealMessage),
           processContactRevealMessageIfAny(contactRevealMessage),
-          addRealLifeInfoToChat,
+          (chat) =>
+            addRealLifeInfoToChat(
+              chat,
+              // Covers reveals the other side requested and I approved
+              isHistoryMerged
+                ? {
+                    update: {
+                      identity: chat.tradeChecklist.identity.sent,
+                      contact: chat.tradeChecklist.contact.sent,
+                    },
+                    requested: chat.tradeChecklist,
+                  }
+                : undefined
+            ),
           scheduleTradeReminderIfNeeded(tradeChecklistUpdates)
         )
       })

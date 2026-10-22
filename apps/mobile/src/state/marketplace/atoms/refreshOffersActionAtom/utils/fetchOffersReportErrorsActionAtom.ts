@@ -2,7 +2,7 @@ import {
   type KeyPairV2,
   type PrivateKeyHolder,
 } from '@vexl-next/cryptography/src/KeyHolder'
-import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
+import {type ClubKeys, type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {type OfferInfo} from '@vexl-next/domain/src/general/offers'
 import {
   type DecryptingOfferError,
@@ -12,7 +12,6 @@ import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
 import {Array, Effect, Either, Option, pipe, Record} from 'effect'
 import {atom} from 'jotai'
 import reportError from '../../../../../utils/reportError'
-import {type ClubKeys} from '../../../../clubs/atom/clubsToKeyHolderV2Atom'
 import {type NotOfferFromContactNetworkError} from '../../../domain'
 import {
   clubOffersNextPageParamAtom,

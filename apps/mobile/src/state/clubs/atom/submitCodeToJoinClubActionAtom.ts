@@ -25,6 +25,7 @@ import {formattingLocaleAtom} from '../../../utils/localization/formattingLocale
 import {getNotificationTokenE} from '../../../utils/notifications'
 import reportError from '../../../utils/reportError'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
+import {createClubKeysActionAtom} from '../../keyDerivation'
 import {myActiveOffersAtom} from '../../marketplace/atoms/myOffers'
 import {updateOfferActionAtom} from '../../marketplace/atoms/updateOfferActionAtom'
 import {generateVexlTokenActionAtom} from '../../notifications/actions/generateVexlTokenActionAtom'
@@ -51,6 +52,20 @@ interface PublishOfferFailure {
 }
 
 type PublishOfferResult = PublishOfferSuccess | PublishOfferFailure
+
+// Club info lookup keys are never stored, so they stay random and don't
+// consume a derivation index.
+const getClubInfoByAccessCodeWithThrowawayKeysActionAtom = atom(
+  null,
+  (get, _, code: ClubCode) =>
+    Effect.gen(function* (_) {
+      const keyPair = yield* _(eitherToEffect(generateKeyPair()))
+      const keyPairV2 = yield* _(generateV2KeyPair())
+      return yield* _(
+        get(apiAtom).contact.getClubInfoByAccessCode({code, keyPair, keyPairV2})
+      )
+    })
+)
 
 function getCodeFromInput(input: SubmitCodeToJoinClubInput): ClubCode {
   return typeof input === 'string' ? input : input.code
@@ -320,19 +335,13 @@ export const submitCodeToJoinClubActionAtom = atom(
     const code = getCodeFromInput(input)
 
     return Effect.gen(function* (_) {
-      const newKeypair = yield* _(eitherToEffect(generateKeyPair()))
-      const newKeypairV2 = yield* _(generateV2KeyPair())
       const notificationToken = yield* _(
         getNotificationTokenE(),
         Effect.map(Option.fromNullable)
       )
 
       const club = yield* _(
-        api.contact.getClubInfoByAccessCode({
-          code,
-          keyPair: newKeypair,
-          keyPairV2: newKeypairV2,
-        })
+        set(getClubInfoByAccessCodeWithThrowawayKeysActionAtom, code)
       )
 
       if (typeof input === 'string' || !input.skipConfirmation) {
@@ -359,16 +368,11 @@ export const submitCodeToJoinClubActionAtom = atom(
 
       set(loadingOverlayDisplayedAtom, true)
 
-      const myStoredClubs = get(clubsToKeyHolderAtom)
-      const oldKeyPair = newKeypair
-      const clubKeys = {
-        keyPair: newKeypairV2,
-        oldKeyPair,
-      }
-
-      if (myStoredClubs[club.club.uuid]) {
+      if (get(clubsToKeyHolderAtom)[club.club.uuid]) {
         yield* _(Effect.fail(new MemberAlreadyInClubError()))
       }
+
+      const clubKeys = yield* _(set(createClubKeysActionAtom))
 
       set(clubsToKeyHolderAtom, (prevState) => ({
         ...prevState,
@@ -380,12 +384,12 @@ export const submitCodeToJoinClubActionAtom = atom(
       const {clubInfoForUser} = yield* _(
         api.contact
           .joinClub({
-            keyPair: oldKeyPair,
+            keyPair: clubKeys.oldKeyPair,
             code,
             contactsImported: true,
             notificationToken,
             vexlNotificationToken: Option.some(vexlNotificationToken),
-            keyPairV2: newKeypairV2,
+            keyPairV2: clubKeys.keyPair,
           })
           .pipe(
             Effect.tapError(() =>
@@ -490,18 +494,10 @@ export const validateCodeToJoinClubActionAtom = atom(
   null,
   (get, set, input: SubmitCodeToJoinClubOptions) => {
     const {t} = get(translationAtom)
-    const api = get(apiAtom)
 
     return Effect.gen(function* (_) {
-      const newKeypair = yield* _(eitherToEffect(generateKeyPair()))
-      const newKeypairV2 = yield* _(generateV2KeyPair())
-
       const club = yield* _(
-        api.contact.getClubInfoByAccessCode({
-          code: input.code,
-          keyPair: newKeypair,
-          keyPairV2: newKeypairV2,
-        })
+        set(getClubInfoByAccessCodeWithThrowawayKeysActionAtom, input.code)
       )
       yield* _(
         Effect.sync(() => {

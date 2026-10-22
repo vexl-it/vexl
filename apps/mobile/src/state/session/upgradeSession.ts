@@ -1,9 +1,9 @@
 import {FetchHttpClient} from '@effect/platform/index'
 import {type KeyPairV2} from '@vexl-next/cryptography/src/KeyHolder'
-import {
-  cryptoBoxSign,
-  generateV2KeyPair,
-} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
+import {generateLoginSessionId} from '@vexl-next/domain/src/general/LoginSessionId.brand'
+import {type MasterSeed} from '@vexl-next/domain/src/general/MasterSeed.brand'
+import {cryptoBoxSign} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
+import {deriveIdentityKeyPairV2} from '@vexl-next/resources-utils/src/keyDerivation/keyFactory'
 import {user} from '@vexl-next/rest-api/src'
 import {type VexlAuthHeader} from '@vexl-next/rest-api/src/VexlAuthHeader'
 import {Effect, Schema} from 'effect'
@@ -98,15 +98,16 @@ function fetchVexlAuthHeaderFromServer(
 }
 
 export const upgradeSession = (
-  session: SessionV1
+  session: SessionV1,
+  masterSeed: MasterSeed
 ): Effect.Effect<SessionV2, UpgradeSessionError> =>
   Effect.gen(function* (_) {
     const v2Keys = yield* _(
-      generateV2KeyPair(),
+      deriveIdentityKeyPairV2(masterSeed),
       Effect.mapError(
         (e) =>
           new UpgradeSessionError({
-            message: 'Failed to generate V2 keys during session upgrade',
+            message: 'Failed to derive V2 keys during session upgrade',
             cause: e,
           })
       )
@@ -124,5 +125,7 @@ export const upgradeSession = (
         vexlAuthHeader,
       },
       isLiquidityProvider: false,
+      masterSeed,
+      loginSessionId: generateLoginSessionId(),
     }
   })

@@ -5,6 +5,7 @@ import {
 import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {Schema} from 'effect'
+import {type Store} from 'jotai/vanilla/store'
 import {atomWithParsedMmkvStorage} from '../../utils/atomUtils/atomWithParsedMmkvStorage'
 
 const VexlNotificationSecretState = Schema.Struct({
@@ -41,3 +42,10 @@ export const vexlNotificationTokenAtom = atomWithParsedMmkvStorage(
   defaultState,
   VexlNotificationSecretState
 )
+
+// No server call - invalidating the secret would also cut off a device that
+// took it over from a backup.
+export const forgetVexlSecretLocally = (store: Store): void => {
+  store.set(vexlNotificationTokenAtom, defaultState)
+  vexlNotificationTokenAtom.flushNow()
+}

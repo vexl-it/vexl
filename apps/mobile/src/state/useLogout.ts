@@ -1,14 +1,9 @@
 import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {Array, Effect, Option, pipe, Record} from 'effect'
-import * as Notifications from 'expo-notifications'
-import * as O from 'fp-ts/Option'
 import {atom, useSetAtom} from 'jotai'
 import {useCallback} from 'react'
-import {clear as clearNseBridge} from '../../modules/vexl-nse-bridge'
 import {apiAtom} from '../api'
 import {offerProgressModalActionAtoms} from '../components/UploadingOfferProgressModal/atoms'
-import clearMmkvStorageAndEmptyAtoms from '../utils/clearMmkvStorageAndEmptyAtoms'
-import {deleteAllFiles} from '../utils/fsDirectories'
 import {translationAtom} from '../utils/localization/I18nProvider'
 import {formatInteger} from '../utils/localization/formatting'
 import {formattingLocaleAtom} from '../utils/localization/formattingLocaleAtom'
@@ -18,14 +13,12 @@ import {showDebugNotificationIfEnabled} from '../utils/notifications/showDebugNo
 import reportError from '../utils/reportError'
 import {waitForNextAnimationFrameEffect} from '../utils/runAfterAnimationFrames'
 import deleteAllInboxesActionAtom from './chat/atoms/deleteAllInboxesActionAtom'
-import {selectedChatTagFiltersAtom} from './chatTags/atoms'
 import {clubsToKeyHolderAtom} from './clubs/atom/clubsToKeyHolderV2Atom'
 import {clubsWithMembersAtom} from './clubs/atom/clubsWithMembersAtom'
-import {clearPersistentDataAboutReachAndImportedContactsActionAtom} from './connections/atom/reachNumberWithoutClubsConnectionsMmkvAtom'
 import {deleteOffersActionAtom} from './marketplace/atoms/deleteOffersActionAtom'
 import {myOffersAtom} from './marketplace/atoms/myOffers'
 import {invalidateVexlSecretActionAtom} from './notifications/actions/invalidateVexlSecretActionAtom'
-import {sessionAtom} from './session'
+import {resetLocalDataActionAtom} from './resetLocalDataActionAtom'
 
 async function failSilently<T>(promise: Promise<T>): Promise<
   | {success: true; result: T}
@@ -68,11 +61,6 @@ export const logoutActionAtom = atom(null, async (get, set) => {
     subtitle: 'logoutAtom',
     body: 'logging out from logout atom',
   })
-
-  set(selectedChatTagFiltersAtom, new Set())
-
-  // Clear connections reach and imported contacts count from persistent storage
-  set(clearPersistentDataAboutReachAndImportedContactsActionAtom)
 
   try {
     // The account-deletion confirmation dialog resolves while its native
@@ -173,9 +161,6 @@ export const logoutActionAtom = atom(null, async (get, set) => {
     // User service
     await failSilently(effectToTaskEither(get(apiAtom).user.deleteUser())())
 
-    // Notification badge
-    await failSilently(Notifications.setBadgeCountAsync(0))
-
     // Invalidate vexl notification secret on server (before clearing local storage)
     await failSilently(Effect.runPromise(set(invalidateVexlSecretActionAtom)))
 
@@ -184,21 +169,7 @@ export const logoutActionAtom = atom(null, async (get, set) => {
       stepLabel: t('account.deleteAccountProgress.clearingLocalData'),
     })
 
-    // session
-    set(sessionAtom, O.none)
-
-    // NSE bridge (inbox keys + metadata shared with the iOS notification
-    // service extension)
-    await failSilently(clearNseBridge())
-
-    // Local storage
-    await clearMmkvStorageAndEmptyAtoms()
-
-    // files
-    await failSilently(deleteAllFiles())
-
-    // firebase token
-    await failSilently(Notifications.unregisterForNotificationsAsync())
+    await set(resetLocalDataActionAtom)
 
     await Effect.runPromise(
       set(offerProgressModalActionAtoms.hideDeffered, {
@@ -214,11 +185,7 @@ export const logoutActionAtom = atom(null, async (get, set) => {
     reportError('error', new Error('Critical error while logging out'), {e})
 
     try {
-      set(sessionAtom, O.none)
-      await failSilently(clearNseBridge())
-      await clearMmkvStorageAndEmptyAtoms()
-      await failSilently(Notifications.unregisterForNotificationsAsync())
-      await failSilently(set(clearBackgroundNotificationSocketActionAtom))
+      await set(resetLocalDataActionAtom)
     } finally {
       set(offerProgressModalActionAtoms.hide)
     }

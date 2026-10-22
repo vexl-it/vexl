@@ -1,30 +1,95 @@
+import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {
   generateChatId,
+  type ChatOrigin,
   type Inbox,
 } from '@vexl-next/domain/src/general/messaging'
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
+import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {keys} from '@vexl-next/resources-utils/src/utils/keys'
-import {Array, HashSet} from 'effect'
+import {Array, HashSet, Option} from 'effect'
 import {pipe} from 'fp-ts/function'
 import {group} from 'group-items'
-import {atom} from 'jotai'
+import {atom, type Getter} from 'jotai'
 import {type ActionAtomType} from '../../../utils/atomUtils/ActionAtomType'
 import notEmpty from '../../../utils/notEmpty'
 import {
   clubsWithMembersAtom,
   updateChatsPeakCountStatActionAtom,
 } from '../../clubs/atom/clubsWithMembersAtom'
-import {singleNoteAtom} from '../../notes/atoms/notesState'
+import {focusOfferByPublicKeyAtom} from '../../marketplace/atoms/offersState'
+import {notesAtom, singleNoteAtom} from '../../notes/atoms/notesState'
 import {createEmptyTradeChecklistInState} from '../../tradeChecklist/domain'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
+import {latestRecoveryProof, startsChatRecovery} from '../utils/chatRecovery'
 import compareMessages from '../utils/compareMessages'
+import {isHiddenMetadataMessage} from '../utils/isMetadataMessage'
+
+function getChatOrigin(
+  get: Getter,
+  {
+    inbox,
+    inboxOffer,
+    otherSidePublicKey,
+  }: {
+    inbox: Inbox
+    inboxOffer?: OneOfferInState
+    otherSidePublicKey: PublicKeyPemBase64
+  }
+): ChatOrigin {
+  if (inbox.offerId)
+    return {type: 'myOffer', offerId: inbox.offerId, offer: inboxOffer}
+  if (inbox.noteId)
+    return {
+      type: 'myNote',
+      noteId: inbox.noteId,
+      note: get(singleNoteAtom(inbox.noteId)),
+    }
+
+  // Chats recovered after a backup restore may come from requesting the other
+  // side's offer or note. Their inbox key is the offer's or note's public key.
+  const theirOffer = get(focusOfferByPublicKeyAtom(otherSidePublicKey))
+  if (theirOffer)
+    return {
+      type: 'theirOffer',
+      offerId: theirOffer.offerInfo.offerId,
+      offer: theirOffer,
+    }
+
+  return pipe(
+    get(notesAtom),
+    Array.findFirst(
+      (note) => note.noteInfo.publicPart.notePublicKey === otherSidePublicKey
+    ),
+    Option.match({
+      onNone: (): ChatOrigin => ({type: 'unknown'}),
+      onSome: (note): ChatOrigin => ({
+        type: 'theirNote',
+        noteId: note.noteInfo.noteId,
+        note,
+      }),
+    })
+  )
+}
+
+function getOriginNotificationToken(
+  origin: ChatOrigin
+): ChatWithMessages['chat']['otherSideFcmCypher'] {
+  if (origin.type === 'theirOffer')
+    return origin.offer?.offerInfo.publicPart.vexlNotificationToken
+  if (origin.type === 'theirNote')
+    return origin.note?.noteInfo.publicPart.vexlNotificationToken
+  return undefined
+}
 
 export default function createNewChatsFromFirstMessagesActionAtom({
   inbox,
   inboxOffer,
+  inboxRestoredFromBackup,
 }: {
   inbox: Inbox
   inboxOffer?: OneOfferInState
+  inboxRestoredFromBackup?: boolean
 }): (
   messages: ChatMessageWithState[]
 ) => ActionAtomType<[], ChatWithMessages[]> {
@@ -43,8 +108,17 @@ export default function createNewChatsFromFirstMessagesActionAtom({
           if (!messages) return undefined
           const sortedMessages = Array.sort(messages, compareMessages)
 
+          const firstMessage = sortedMessages.at(0)
           const lastMessage = sortedMessages.at(-1)
-          if (!lastMessage) return undefined
+          if (!firstMessage || !lastMessage) return undefined
+
+          const restoredFromBackup =
+            !!inboxRestoredFromBackup && startsChatRecovery(firstMessage)
+          const origin = getChatOrigin(get, {
+            inbox,
+            inboxOffer,
+            otherSidePublicKey: senderPublicKey,
+          })
 
           const goldenAvatarType =
             lastMessage.state === 'received' &&
@@ -66,7 +140,7 @@ export default function createNewChatsFromFirstMessagesActionAtom({
 
           const otherSideFcmCypher =
             // If i received the message
-            lastMessage.state === 'received' ||
+            (lastMessage.state === 'received' ||
             lastMessage.state === 'receivedButRequiresNewerVersion'
               ? (lastMessage.message.myVexlToken ??
                 lastMessage.message.myFcmCypher)
@@ -74,7 +148,7 @@ export default function createNewChatsFromFirstMessagesActionAtom({
                 !inboxOffer?.ownershipInfo?.adminId
                 ? (inboxOffer?.offerInfo.publicPart.vexlNotificationToken ??
                   inboxOffer?.offerInfo.publicPart.fcmCypher)
-                : undefined
+                : undefined) ?? getOriginNotificationToken(origin)
 
           const otherSideClubsids =
             lastMessage.state === 'received' &&
@@ -92,15 +166,7 @@ export default function createNewChatsFromFirstMessagesActionAtom({
           const newChat = {
             chat: {
               inbox,
-              origin: inbox.offerId
-                ? {type: 'myOffer', offerId: inbox.offerId, offer: inboxOffer}
-                : inbox.noteId
-                  ? {
-                      type: 'myNote',
-                      noteId: inbox.noteId,
-                      note: get(singleNoteAtom(inbox.noteId)),
-                    }
-                  : {type: 'unknown'},
+              origin,
               otherSide: {
                 publicKey: senderPublicKey,
                 goldenAvatarType,
@@ -120,7 +186,15 @@ export default function createNewChatsFromFirstMessagesActionAtom({
             },
             feedbackSubmitted: false,
             hiddenMessagesIds: HashSet.empty(),
-            messages: sortedMessages,
+            messages: Array.filter(
+              sortedMessages,
+              (one) => !isHiddenMetadataMessage(one)
+            ),
+            restoredFromBackup,
+            recoveryStartedAt: restoredFromBackup
+              ? unixMillisecondsNow()
+              : undefined,
+            otherSideRecoveryProof: latestRecoveryProof(sortedMessages),
           } satisfies ChatWithMessages
 
           set(updateChatsPeakCountStatActionAtom, {chat: newChat.chat})

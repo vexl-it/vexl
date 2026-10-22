@@ -1,10 +1,10 @@
 import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
 import {type NoteId} from '@vexl-next/domain/src/general/notes'
 import {type OfferId} from '@vexl-next/domain/src/general/offers'
-import {generateKeyPairE} from '@vexl-next/resources-utils/src/utils/crypto'
 import {Array, Effect, Option} from 'effect/index'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
+import {createInboxPrivateKeyActionAtom} from '../../keyDerivation'
 import messagingStateAtom from '../atoms/messagingStateAtom'
 import {ApiErrorCreatingInbox, type InboxInState} from '../domain'
 
@@ -48,7 +48,7 @@ export const upsertInboxOnBeAndLocallyActionAtom = atom(
         return existingInbox.value
       }
 
-      const inboxKeypair = yield* _(generateKeyPairE())
+      const inboxKeypair = yield* _(set(createInboxPrivateKeyActionAtom))
       yield* _(
         api.chat.createInbox({
           keyPair: inboxKeypair,

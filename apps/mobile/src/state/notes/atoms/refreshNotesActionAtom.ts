@@ -10,6 +10,7 @@ import {Array, Effect, Either, Fiber, Option, pipe} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
 import reportError from '../../../utils/reportError'
+import {linkRestoredInboxesToMyOffersAndNotesActionAtom} from '../../backup/linkRestoredInboxesActionAtom'
 import {sessionDataOrDummyAtom} from '../../session'
 import {notesAtom, notesNextPageParamAtom, notesStateAtom} from './notesState'
 
@@ -179,6 +180,7 @@ const runRefreshNotesActionAtom = atom(null, (get, set) =>
       }),
       lastUpdatedAt: updateStartedAt,
     }))
+    set(linkRestoredInboxesToMyOffersAndNotesActionAtom)
   }).pipe(
     Effect.catchAll((e) => {
       reportError('error', new Error('Error refreshing notes'), {e})

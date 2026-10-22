@@ -1,53 +1,39 @@
 import {useFocusEffect} from '@react-navigation/native'
-import {KeyHolder} from '@vexl-next/cryptography'
-import {Typography, XStack, YStack} from '@vexl-next/ui'
+import {generateMasterSeed} from '@vexl-next/domain/src/general/MasterSeed.brand'
+import {deriveIdentityPrivateKey} from '@vexl-next/resources-utils/src/keyDerivation/keyFactory'
+import {CodeInput, Typography, YStack} from '@vexl-next/ui'
 import {parsePhoneNumber} from 'awesome-phonenumber'
-import {Effect} from 'effect'
-import {useSetAtom} from 'jotai'
+import {Effect, Option} from 'effect'
+import {useAtomValue, useSetAtom} from 'jotai'
 import {DateTime} from 'luxon'
 import React, {useCallback, useMemo, useRef, useState} from 'react'
-import {Keyboard, Platform, TextInput, TouchableOpacity} from 'react-native'
-import {getTokens} from 'tamagui'
+import {Keyboard, type TextInput} from 'react-native'
 import {type LoginFlowStackScreenProps} from '../../../navigationTypes'
+import {
+  backupFileToRestoreAtom,
+  backupKeyPairAtom,
+  isBackupForKeyPair,
+} from '../../../state/backup/backupToRestore'
 import {dismissKeyboardAndResolveOnLayoutUpdate} from '../../../utils/dismissKeyboardPromise'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../../utils/useSafeGoBack'
 import {globalDialogAtom} from '../../GlobalDialog'
+import InlineErrorText from '../../InlineErrorText'
 import {useShowLoadingOverlay} from '../../LoadingOverlayProvider'
+import {getBackupKeyPairAtom} from '../api/getBackupKeyPairAtom'
 import {initPhoneVerificationAtom} from '../api/initPhoneVerificationAtom'
 import {verifyPhoneNumberAtom} from '../api/verifyPhoneNumberAtom'
 import {finishLoginActionAtom} from '../atoms/finishLoginActionAtom'
 import Countdown from './Countdown'
-import LoginFlowScreen, {LoginFlowTitle} from './LoginFlowScreen'
+import LoginFlowScreen, {LoginFlowLink, LoginFlowTitle} from './LoginFlowScreen'
 
 type Props = LoginFlowStackScreenProps<'VerificationCode'>
-const codeBoxHeight = 48
-
-function CodeBox({
-  value,
-}: {
-  readonly value: string | undefined
-}): React.ReactElement {
-  return (
-    <YStack
-      alignItems="center"
-      borderColor="$backgroundHighlight"
-      borderRadius="$3"
-      borderWidth={1}
-      height={codeBoxHeight}
-      justifyContent="center"
-      width={50}
-    >
-      <Typography color="$foregroundPrimary" variant="paragraph">
-        {value ?? ''}
-      </Typography>
-    </YStack>
-  )
-}
+const CODE_LENGTH = 6
 
 export default function VerificationCodeScreen({
+  navigation,
   route: {
-    params: {phoneNumber, initPhoneVerificationResponse},
+    params: {phoneNumber, initPhoneVerificationResponse, restore},
   },
 }: Props): React.ReactElement {
   const safeGoBack = useSafeGoBack()
@@ -66,6 +52,9 @@ export default function VerificationCodeScreen({
   const initPhoneVerification = useSetAtom(initPhoneVerificationAtom)
   const verifyPhoneNumber = useSetAtom(verifyPhoneNumberAtom)
   const finishLogin = useSetAtom(finishLoginActionAtom)
+  const getBackupKeyPair = useSetAtom(getBackupKeyPairAtom)
+  const backupFileToRestore = useAtomValue(backupFileToRestoreAtom)
+  const setBackupKeyPair = useSetAtom(backupKeyPairAtom)
   const showGlobalDialog = useSetAtom(globalDialogAtom)
   const {t} = useTranslation()
   const loadingOverlay = useShowLoadingOverlay()
@@ -125,10 +114,76 @@ export default function VerificationCodeScreen({
       })
   }, [initPhoneVerification, loadingOverlay, phoneNumber, t])
 
+  const login = useCallback(
+    (code: string): Effect.Effect<void, string> =>
+      Effect.gen(function* (_) {
+        const masterSeed = generateMasterSeed()
+        const privateKey = yield* _(
+          deriveIdentityPrivateKey(masterSeed),
+          Effect.mapError(() => t('common.cryptoError'))
+        )
+        const verifyPhoneNumberResponse = yield* _(
+          verifyPhoneNumber({
+            code,
+            id: currentInitPhoneVerificationResponse.verificationId,
+            userPublicKey: privateKey.publicKeyPemBase64,
+          })
+        )
+
+        yield* _(Effect.promise(dismissKeyboardAndResolveOnLayoutUpdate))
+
+        yield* _(
+          finishLogin({
+            verifyPhoneNumberResponse,
+            privateKey,
+            masterSeed,
+            phoneNumber,
+          })
+        )
+      }),
+    [
+      currentInitPhoneVerificationResponse.verificationId,
+      finishLogin,
+      phoneNumber,
+      t,
+      verifyPhoneNumber,
+    ]
+  )
+
+  const continueRestore = useCallback(
+    (code: string): Effect.Effect<void, string> =>
+      Effect.gen(function* (_) {
+        const keyPair = yield* _(
+          getBackupKeyPair({
+            code,
+            id: currentInitPhoneVerificationResponse.verificationId,
+          })
+        )
+        setBackupKeyPair(Option.some(keyPair))
+
+        yield* _(Effect.promise(dismissKeyboardAndResolveOnLayoutUpdate))
+
+        navigation.replace(
+          Option.exists(backupFileToRestore, (file) =>
+            isBackupForKeyPair(file, keyPair)
+          )
+            ? 'RestorePin'
+            : 'RestoreWrongPhoneNumber'
+        )
+      }),
+    [
+      backupFileToRestore,
+      currentInitPhoneVerificationResponse.verificationId,
+      getBackupKeyPair,
+      navigation,
+      setBackupKeyPair,
+    ]
+  )
+
   const submitVerificationCode = useCallback(
     (code: string): void => {
       if (
-        code.length !== 6 ||
+        code.length !== CODE_LENGTH ||
         submitInProgressRef.current ||
         resendInProgressRef.current
       )
@@ -139,26 +194,7 @@ export default function VerificationCodeScreen({
       setSubmitInProgress(true)
       loadingOverlay.show()
       void Effect.runPromise(
-        Effect.gen(function* (_) {
-          const privateKey = KeyHolder.generatePrivateKey()
-          const verifyPhoneNumberResponse = yield* _(
-            verifyPhoneNumber({
-              code,
-              id: currentInitPhoneVerificationResponse.verificationId,
-              userPublicKey: privateKey.publicKeyPemBase64,
-            })
-          )
-
-          yield* _(Effect.promise(dismissKeyboardAndResolveOnLayoutUpdate))
-
-          yield* _(
-            finishLogin({
-              verifyPhoneNumberResponse,
-              privateKey,
-              phoneNumber,
-            })
-          )
-        }).pipe(
+        (restore ? continueRestore(code) : login(code)).pipe(
           Effect.catchAll((errorMessage) =>
             Effect.sync(() => {
               setErrorMessage(errorMessage)
@@ -171,13 +207,7 @@ export default function VerificationCodeScreen({
         loadingOverlay.hide()
       })
     },
-    [
-      currentInitPhoneVerificationResponse.verificationId,
-      finishLogin,
-      loadingOverlay,
-      phoneNumber,
-      verifyPhoneNumber,
-    ]
+    [continueRestore, loadingOverlay, login, restore]
   )
 
   useFocusEffect(
@@ -212,7 +242,10 @@ export default function VerificationCodeScreen({
   return (
     <LoginFlowScreen
       action={{
-        disabled: userCode.length !== 6 || submitInProgress || resendInProgress,
+        disabled:
+          userCode.length !== CODE_LENGTH ||
+          submitInProgress ||
+          resendInProgress,
         label: t('common.continue'),
         onPress: () => {
           submitVerificationCode(userCode)
@@ -220,19 +253,11 @@ export default function VerificationCodeScreen({
       }}
       footer={
         countdownFinished ? (
-          <TouchableOpacity
+          <LoginFlowLink
             disabled={resendInProgress}
+            label={t('loginFlow.v2.verificationCode.retry')}
             onPress={resendVerificationCode}
-          >
-            <Typography
-              color="$foregroundSecondary"
-              textAlign="center"
-              textDecorationLine="underline"
-              variant="paragraphSmall"
-            >
-              {t('loginFlow.v2.verificationCode.retry')}
-            </Typography>
-          </TouchableOpacity>
+          />
         ) : (
           <Typography
             color="$foregroundSecondary"
@@ -275,60 +300,19 @@ export default function VerificationCodeScreen({
             .
           </Typography>
         </YStack>
-        <TouchableOpacity
-          activeOpacity={1}
-          onPress={() => {
-            inputRef.current?.focus()
+        <CodeInput
+          editable={!submitInProgress && !resendInProgress}
+          inputRef={inputRef}
+          maxLength={CODE_LENGTH}
+          oneTimeCode
+          onChangeText={(code) => {
+            setErrorMessage(undefined)
+            setUserCode(code)
+            submitVerificationCode(code)
           }}
-        >
-          <YStack>
-            <TextInput
-              autoComplete={
-                Platform.OS === 'android' ? 'sms-otp' : 'one-time-code'
-              }
-              autoFocus
-              caretHidden
-              editable={!submitInProgress && !resendInProgress}
-              importantForAutofill="yes"
-              keyboardType="number-pad"
-              maxLength={6}
-              onChangeText={(value) => {
-                const code = value.replace(/\D/g, '').substring(0, 6)
-                setErrorMessage(undefined)
-                setUserCode(code)
-                submitVerificationCode(code)
-              }}
-              pointerEvents="none"
-              ref={inputRef}
-              style={{
-                height: codeBoxHeight,
-                opacity: 0,
-                position: 'absolute',
-                width: '100%',
-                zIndex: getTokens().zIndex.$5.val,
-              }}
-              textContentType="oneTimeCode"
-              value={userCode}
-            />
-            <XStack gap="$2" justifyContent="center">
-              <CodeBox value={userCode.charAt(0)} />
-              <CodeBox value={userCode.charAt(1)} />
-              <CodeBox value={userCode.charAt(2)} />
-              <CodeBox value={userCode.charAt(3)} />
-              <CodeBox value={userCode.charAt(4)} />
-              <CodeBox value={userCode.charAt(5)} />
-            </XStack>
-          </YStack>
-        </TouchableOpacity>
-        {errorMessage != null ? (
-          <Typography
-            color="$redForeground"
-            textAlign="center"
-            variant="paragraphSmall"
-          >
-            {errorMessage}
-          </Typography>
-        ) : null}
+          value={userCode}
+        />
+        <InlineErrorText>{errorMessage}</InlineErrorText>
       </YStack>
     </LoginFlowScreen>
   )

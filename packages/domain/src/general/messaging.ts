@@ -21,7 +21,8 @@ import {VexlNotificationToken} from './notifications/VexlNotificationToken'
 import {FriendLevel, GoldenAvatarType, OfferId, OneOfferInState} from './offers'
 import {TradeChecklistUpdate} from './tradeChecklist'
 
-export const MessageType = Schema.Literal(
+// Message types the chat-service sees in plaintext on send.
+export const ServerVisibleMessageType = Schema.Literal(
   'MESSAGE',
   'REQUEST_REVEAL',
   'APPROVE_REVEAL',
@@ -45,7 +46,24 @@ export const MessageType = Schema.Literal(
   // server or the other side.
   'INACTIVITY_REMINDER'
 )
+export type ServerVisibleMessageType = typeof ServerVisibleMessageType.Type
+
+export const MessageType = Schema.Literal(
+  ...ServerVisibleMessageType.literals,
+  // Chat restore must stay invisible to the server, so these travel as
+  // 'MESSAGE' and only the encrypted payload carries the real type.
+  'REQUEST_HISTORY',
+  'HISTORY'
+)
 export type MessageType = typeof MessageType.Type
+
+const isServerVisibleMessageType = Schema.is(ServerVisibleMessageType)
+
+export function toServerVisibleMessageType(
+  messageType: MessageType
+): ServerVisibleMessageType {
+  return isServerVisibleMessageType(messageType) ? messageType : 'MESSAGE'
+}
 
 export const ChatUserIdentity = Schema.Struct({
   publicKey: PublicKeyPemBase64,
@@ -57,6 +75,14 @@ export type ChatUserIdentity = typeof ChatUserIdentity.Type
 
 export const ChatMessageId = Schema.UUID.pipe(Schema.brand('ChatMessageId'))
 export type ChatMessageId = typeof ChatMessageId.Type
+
+// Derived from the sender's master seed for one chat, see
+// `deriveChatRecoveryProof`. Sent only into open chats, so after a backup
+// restore it tells a real chat partner apart from anyone who knows the key.
+export const ChatRecoveryProof = Base64String.pipe(
+  Schema.brand('ChatRecoveryProof')
+)
+export type ChatRecoveryProof = typeof ChatRecoveryProof.Type
 
 export const RepliedToData = Schema.Struct({
   text: Schema.String,
@@ -71,6 +97,40 @@ export const RepliedToDataPayload = Schema.Struct({
   image: Base64String,
 })
 export type RepliedToDataPayload = typeof RepliedToDataPayload.Type
+
+export const ChatHistoryMessageType = MessageType.pipe(
+  Schema.pickLiteral(
+    'MESSAGE',
+    'REQUEST_REVEAL',
+    'APPROVE_REVEAL',
+    'DISAPPROVE_REVEAL',
+    'REQUEST_MESSAGING',
+    'APPROVE_MESSAGING',
+    'DISAPPROVE_MESSAGING',
+    'CANCEL_REQUEST_MESSAGING',
+    'APPROVE_CONTACT_REVEAL',
+    'DISAPPROVE_CONTACT_REVEAL',
+    'REQUEST_CONTACT_REVEAL',
+    'TRADE_CHECKLIST_UPDATE'
+  )
+)
+export type ChatHistoryMessageType = typeof ChatHistoryMessageType.Type
+
+/**
+ * One message of a chat as stored by the sender of a HISTORY message. Images
+ * are never included. `author` is relative to the HISTORY sender.
+ */
+export const ChatHistoryMessage = Schema.Struct({
+  uuid: ChatMessageId,
+  author: Schema.Literal('me', 'them'),
+  messageType: ChatHistoryMessageType,
+  text: Schema.String,
+  time: UnixMilliseconds,
+  repliedTo: Schema.optional(RepliedToData.pipe(Schema.omit('image'))),
+  tradeChecklistUpdate: Schema.optional(TradeChecklistUpdate),
+  deanonymizedUser: Schema.optional(DeanonymizedUser),
+})
+export type ChatHistoryMessage = typeof ChatHistoryMessage.Type
 
 export const ChatMessagePayload = Schema.Struct({
   uuid: ChatMessageId,
@@ -106,6 +166,9 @@ export const ChatMessagePayload = Schema.Struct({
   commonFriends: Schema.optional(Schema.Array(HashedPhoneNumber)),
   verifiedCommonFriends: Schema.optional(Schema.Array(HashedPhoneNumber)),
   friendLevel: Schema.optional(Schema.Array(FriendLevel)),
+  history: Schema.optional(Schema.Array(ChatHistoryMessage)),
+  recoveryProof: Schema.optional(ChatRecoveryProof),
+  historyRecoveryProof: Schema.optional(ChatRecoveryProof),
 })
 export type ChatMessagePayload = typeof ChatMessagePayload.Type
 
@@ -147,6 +210,13 @@ export const ChatMessage = Schema.Struct({
   commonFriends: Schema.optional(Schema.Array(HashedPhoneNumber)),
   verifiedCommonFriends: Schema.optional(Schema.Array(HashedPhoneNumber)),
   friendLevel: Schema.optional(Schema.Array(FriendLevel)),
+  // Used only for messages of type `HISTORY`
+  history: Schema.optional(Schema.Array(ChatHistoryMessage)),
+  // The sender's proof for this chat
+  recoveryProof: Schema.optional(ChatRecoveryProof),
+  // Used only for messages of type `HISTORY`: the receiver's proof, showing
+  // the history comes from someone the receiver chatted with
+  historyRecoveryProof: Schema.optional(ChatRecoveryProof),
 })
 export type ChatMessage = typeof ChatMessage.Type
 

@@ -19,6 +19,9 @@ import {MaxExpectedDailyCall} from '../../MaxExpectedDailyCountAnnotation'
 import {RateLimitingMiddleware} from '../../rateLimititing'
 import {
   GenerateLoginChallengeResponse,
+  GetBackupKeyPairRequest,
+  GetBackupKeyPairResponse,
+  GetBackupPublicKeyResponse,
   GetVersionServiceInfoResponse,
   InitEraseUserRequest,
   InitEraseUserResponse,
@@ -184,11 +187,42 @@ const UpgradeAuthGroup = HttpApiGroup.make('UpgradeAuth')
   .add(InitUpgradeAuthEndpoint)
   .add(SubmitUpgradeAuthEndpoint)
 
+export const GetBackupPublicKeyEndpoint = HttpApiEndpoint.get(
+  'getBackupPublicKey',
+  '/api/v1/backup/public-key'
+)
+  .annotate(OpenApi.Description, 'Public key to seal account backups to')
+  .setHeaders(CommonAndSecurityHeaders)
+  .middleware(ServerSecurityMiddleware)
+  .addSuccess(GetBackupPublicKeyResponse)
+  .annotate(MaxExpectedDailyCall, 100)
+
+export const GetBackupKeyPairEndpoint = HttpApiEndpoint.post(
+  'getBackupKeyPair',
+  '/api/v1/backup/key-pair'
+)
+  .annotate(
+    OpenApi.Description,
+    'Consume phone verification started with initVerification and receive the backup key pair'
+  )
+  .setPayload(GetBackupKeyPairRequest)
+  .addSuccess(GetBackupKeyPairResponse)
+  .addError(VerificationNotFoundError, {status: 400})
+  .addError(InvalidVerificationIdError, {status: 400})
+  .addError(UnableToVerifySmsCodeError, {status: 400})
+  .addError(InvalidVerificationError, {status: 400})
+  .annotate(MaxExpectedDailyCall, 100)
+
+const BackupGroup = HttpApiGroup.make('Backup')
+  .add(GetBackupPublicKeyEndpoint)
+  .add(GetBackupKeyPairEndpoint)
+
 export const UserApiSpecification = HttpApi.make('User API')
   .middleware(RateLimitingMiddleware)
   .add(LoginGroup)
   .add(EraseUserGroup)
   .add(UpgradeAuthGroup)
+  .add(BackupGroup)
   .add(RootGroup)
   .addError(NotFoundError, {status: 404})
   .addError(UnexpectedServerError, {status: 500})

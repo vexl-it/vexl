@@ -80,9 +80,6 @@ export const Preferences = Schema.Struct({
   sendReadReceipts: Schema.optionalWith(Schema.Boolean, {
     default: () => true,
   }),
-  showVerifiedContacts: Schema.optionalWith(Schema.Boolean, {
-    default: () => false,
-  }),
   showCreateOfferInMarketplaceSuggestion: Schema.optionalWith(Schema.Boolean, {
     default: () => true,
   }),

@@ -40,7 +40,6 @@ export const preferencesAtom = atomWithParsedMmkvStorage(
     defaultCurrency: 'USD',
     runTasksInParallel: true,
     sendReadReceipts: true,
-    showVerifiedContacts: false,
     showCreateOfferInMarketplaceSuggestion: true,
     showImportContactsInMarketplaceSuggestion: true,
     showEnableNotificationsInMarketplaceSuggestion: true,
@@ -133,10 +132,6 @@ export const defaultCurrencyAtom = focusAtom(preferencesAtom, (o) =>
 
 export const sendReadReceiptsAtom = focusAtom(preferencesAtom, (o) =>
   o.prop('sendReadReceipts')
-)
-
-export const showVerifiedContactsAtom = focusAtom(preferencesAtom, (o) =>
-  o.prop('showVerifiedContacts')
 )
 
 export const showCreateOfferInMarketplaceSuggestionAtom = focusAtom(

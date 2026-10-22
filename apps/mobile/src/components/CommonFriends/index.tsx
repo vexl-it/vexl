@@ -7,19 +7,19 @@ import {
   type CommonFriend,
 } from '@vexl-next/ui'
 import {Array, Effect, HashMap, Option, pipe} from 'effect'
-import {useAtomValue, useStore} from 'jotai'
+import {useAtomValue} from 'jotai'
 import React, {useCallback, useEffect, useMemo, useState} from 'react'
 import {
   type CommonFriendsClub,
   type RootStackScreenProps,
 } from '../../navigationTypes'
-import createImportedContactsForHashesAtom from '../../state/contacts/atom/createImportedContactsForHashesAtom'
 import {type StoredContactWithComputedValues} from '../../state/contacts/domain'
 import {getContactImageUri} from '../../state/contacts/getContactImageUri'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import {formatInteger} from '../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../utils/localization/formattingLocaleAtom'
-import {showVerifiedContactsAtom} from '../../utils/preferences'
+import {useTrustedFriendsText} from '../../utils/localization/useTrustedFriendsText'
+import {useCommonFriends} from './useCommonFriends'
 
 interface Props {
   commonConnectionsHashes: readonly HashedPhoneNumber[]
@@ -29,6 +29,7 @@ interface Props {
   label?: string
   friendLevel: readonly FriendLevel[]
   isMine: boolean
+  otherSide?: RootStackScreenProps<'CommonFriends'>['route']['params']['otherSide']
 }
 
 function trimClubName(name: string): string {
@@ -90,13 +91,12 @@ function CommonFriends({
   label,
   friendLevel,
   isMine,
+  otherSide,
 }: Props): React.ReactElement | null {
   const {t} = useTranslation()
   const locale = useAtomValue(formattingLocaleAtom)
   const navigation =
     useNavigation<RootStackScreenProps<'CommonFriends'>['navigation']>()
-  const store = useStore()
-  const showVerifiedContacts = useAtomValue(showVerifiedContactsAtom)
   const commonFriendsCount = commonConnectionsHashes.length
   const clubsCount = otherSideClubs.length
 
@@ -113,42 +113,15 @@ function CommonFriends({
     [otherSideClubs]
   )
 
-  const commonFriends = useMemo(
-    () =>
-      store.get(createImportedContactsForHashesAtom(commonConnectionsHashes)),
-    [commonConnectionsHashes, store]
+  const {sortedFriends, trustedFriends, trustedHashes} = useCommonFriends(
+    commonConnectionsHashes,
+    verifiedConnectionsHashes
   )
-
-  const verifiedHashesSet = useMemo(
-    () =>
-      showVerifiedContacts
-        ? new Set(verifiedConnectionsHashes ?? [])
-        : new Set<HashedPhoneNumber>(),
-    [showVerifiedContacts, verifiedConnectionsHashes]
-  )
-
-  const sortedCommonFriends = useMemo(() => {
-    if (!showVerifiedContacts) return commonFriends
-
-    const verifiedFriends = pipe(
-      commonFriends,
-      Array.filter((friend) =>
-        verifiedHashesSet.has(friend.computedValues.hash)
-      )
-    )
-    const regularFriends = pipe(
-      commonFriends,
-      Array.filter(
-        (friend) => !verifiedHashesSet.has(friend.computedValues.hash)
-      )
-    )
-
-    return Array.appendAll(verifiedFriends, regularFriends)
-  }, [commonFriends, showVerifiedContacts, verifiedHashesSet])
+  const trustedLabel = useTrustedFriendsText(trustedFriends.length)
 
   const visibleFriendsInPreview = useMemo(
-    () => Array.take(sortedCommonFriends, 5),
-    [sortedCommonFriends]
+    () => Array.take(sortedFriends, 5),
+    [sortedFriends]
   )
 
   const imageSources = useContactImageSources(visibleFriendsInPreview)
@@ -160,6 +133,7 @@ function CommonFriends({
       clubs: commonFriendsClubs,
       friendLevel,
       isMine,
+      otherSide,
     })
   }, [
     commonConnectionsHashes,
@@ -167,6 +141,7 @@ function CommonFriends({
     friendLevel,
     isMine,
     navigation,
+    otherSide,
     verifiedConnectionsHashes,
   ])
 
@@ -190,12 +165,13 @@ function CommonFriends({
         Array.map((friend) => ({
           id: friend.computedValues.hash,
           name: friend.info.name,
+          trusted: trustedHashes.has(friend.computedValues.hash),
           avatarSource: Option.getOrUndefined(
             HashMap.get(imageSources, friend.computedValues.hash)
           ),
         }))
       ),
-    [visibleFriendsInPreview, imageSources]
+    [visibleFriendsInPreview, imageSources, trustedHashes]
   )
 
   const friends: readonly CommonFriend[] = useMemo(
@@ -218,6 +194,7 @@ function CommonFriends({
               number: formatInteger(commonFriendsCount, locale),
             }))
       }
+      trustedLabel={trustedLabel}
       friends={friends}
       onPress={handlePress}
     />

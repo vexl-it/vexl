@@ -18,3 +18,25 @@ export function getUserFacingOfferType({
   // user-facing choice and before rendering a persisted value.
   return offerType === 'BUY' ? 'SELL' : 'BUY'
 }
+
+export type OtherSideRole = 'seller' | 'buyer' | 'otherSide'
+
+export function getOtherSideRole({
+  offer,
+  otherSideIsAuthor = true,
+}: {
+  readonly offer?: {
+    readonly listingType?: ListingType
+    readonly offerType: OfferType
+  }
+  readonly otherSideIsAuthor?: boolean
+}): OtherSideRole {
+  if (!offer) return 'otherSide'
+
+  const authorIsSeller =
+    getUserFacingOfferType({
+      listingType: offer.listingType,
+      offerType: offer.offerType,
+    }) === 'SELL'
+  return authorIsSeller === otherSideIsAuthor ? 'seller' : 'buyer'
+}

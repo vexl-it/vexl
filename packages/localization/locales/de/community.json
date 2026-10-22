@@ -73,6 +73,7 @@
   "notes.chat.noteDetail": "Notizdetails",
   "notes.detail.noteNotFound": "Notiz nicht gefunden.",
   "notes.chat.welcomeReceiverDescription": "Bevor du die Unterhaltung beginnst, kannst du eure gemeinsamen Freunde und die Details der Notiz ansehen.",
+  "notes.chat.welcomeReceiverDescriptionWithTrusted": "Bevor du die Unterhaltung beginnst, kannst du eure gemeinsamen Freunde, darunter vertraute Freunde, und die Details der Notiz ansehen.",
   "goldenGlasses.errorSettingRewardForParticipationOnMeetup": "Fehler beim Festlegen der Prämie für die Teilnahme am Meetup. Bitte kontaktiere den Support.",
   "goldenGlasses.youReceived": "Du hast erhalten",
   "goldenGlasses.goldenGlasses": "goldene Brille",

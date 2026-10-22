@@ -73,6 +73,7 @@
   "notes.chat.noteDetail": "Notitiedetail",
   "notes.detail.noteNotFound": "Notitie niet gevonden.",
   "notes.chat.welcomeReceiverDescription": "Voordat je het gesprek begint, kun je jullie gemeenschappelijke vrienden en de notitiedetails bekijken.",
+  "notes.chat.welcomeReceiverDescriptionWithTrusted": "Voordat je het gesprek begint, kun je jullie gemeenschappelijke vrienden, inclusief vertrouwde vrienden, en de notitiedetails bekijken.",
   "goldenGlasses.errorSettingRewardForParticipationOnMeetup": "Fout bij het instellen van de beloning voor deelname bij vergadering. Neem contact op met support.",
   "goldenGlasses.youReceived": "U hebt ontvangen",
   "goldenGlasses.goldenGlasses": "gouden bril",

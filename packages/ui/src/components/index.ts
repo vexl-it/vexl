@@ -107,6 +107,8 @@ export type {
 } from './NavigationBar'
 export {Note} from './Note'
 export type {NoteActionButton, NoteProps, NoteTag} from './Note'
+export {NoteMeta} from './NoteMeta'
+export type {NoteMetaProps} from './NoteMeta'
 export {NotificationCard} from './NotificationCard'
 export type {NotificationCardProps} from './NotificationCard'
 export {OfferCard} from './OfferCard'

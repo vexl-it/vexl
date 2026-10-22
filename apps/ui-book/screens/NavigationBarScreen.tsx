@@ -127,6 +127,24 @@ function ThemedColumn({
           rightActions={[{icon: UserProfile, onPress: () => {}}]}
         />
 
+        <SectionLabel>Chat, long text</SectionLabel>
+        <NavigationBar
+          style="chat"
+          name="Freund eines Freundes aus deinem Netzwerk"
+          subtitle="1 234 gemeinsame Freunde"
+          trustedFriends="56 vertraut"
+          avatar={
+            <Avatar customSize={40}>
+              <AnonymousAvatar size={40} />
+            </Avatar>
+          }
+          leftAction={{icon: ChevronLeft, onPress: () => {}}}
+          rightActions={[
+            {icon: UserProfile, onPress: () => {}},
+            {icon: UserProfile, onPress: () => {}},
+          ]}
+        />
+
         <YStack height="$5" />
       </YStack>
     </Theme>

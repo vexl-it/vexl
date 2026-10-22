@@ -77,6 +77,7 @@
   "notes.chat.noteDetail": "Detail příspěvku",
   "notes.detail.noteNotFound": "Příspěvek nebyl nalezen.",
   "notes.chat.welcomeReceiverDescription": "Než zahájíš konverzaci, můžeš se podívat na společné přátele a detail příspěvku.",
+  "notes.chat.welcomeReceiverDescriptionWithTrusted": "Než zahájíš konverzaci, můžeš se podívat na společné přátele, včetně těch důvěryhodných, a detail příspěvku.",
   "goldenGlasses.errorSettingRewardForParticipationOnMeetup": "Chyba při nastavování odměny za účast na meetupu. Kontaktuj, prosím, podporu.",
   "goldenGlasses.youReceived": "Získáváš",
   "goldenGlasses.goldenGlasses": "zlaté brýle",

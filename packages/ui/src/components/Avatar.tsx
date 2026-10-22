@@ -99,8 +99,10 @@ export function Avatar({
 
   if (!trusted) return avatar
 
-  const largeBadge = px >= 32
-  const badgeOffset = -(0.3 * (largeBadge ? getTokens().size.$5.val : 10)) - 2
+  const {size: sizes} = getTokens()
+  const largeBadge = px >= sizes.$8.val
+  const badgeOffset =
+    -(0.3 * (largeBadge ? sizes.$5.val : sizes['$3.5'].val)) - sizes.$1.val
 
   return (
     <Stack position="relative" width={dimension} height={dimension}>

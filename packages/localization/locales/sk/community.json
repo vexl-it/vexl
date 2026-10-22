@@ -77,6 +77,7 @@
   "notes.chat.noteDetail": "Detail príspevku",
   "notes.detail.noteNotFound": "Príspevok nebol nájdený.",
   "notes.chat.welcomeReceiverDescription": "Pred začatím konverzácie si môžeš pozrieť spoločných priateľov a detail príspevku.",
+  "notes.chat.welcomeReceiverDescriptionWithTrusted": "Pred začatím konverzácie si môžeš pozrieť spoločných priateľov vrátane tých dôveryhodných a detail príspevku.",
   "goldenGlasses.errorSettingRewardForParticipationOnMeetup": "Chyba pri nastavovaní odmeny za účasť na stretnutí. Kontaktujte podporu.",
   "goldenGlasses.youReceived": "Dostal si",
   "goldenGlasses.goldenGlasses": "zlaté okuliare",

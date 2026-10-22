@@ -47,8 +47,8 @@ const ComparisonRow = styled(XStack, {
 
 function Node({label, avatar}: ExplanationNode): React.JSX.Element {
   return (
-    <YStack width={70} gap="$2" alignItems="center">
-      <Stack width={44} height={44}>
+    <YStack width="$12.5" gap="$2" alignItems="center">
+      <Stack width="$9.5" height="$9.5">
         {avatar}
       </Stack>
       <Typography
@@ -66,27 +66,32 @@ function Node({label, avatar}: ExplanationNode): React.JSX.Element {
 function TwoWayArrow(): React.JSX.Element {
   const theme = useTheme()
   const color = theme.accentHighlightSecondary.get()
+  const {size: sizes, space} = getTokens()
+  const headHeight = sizes['$3.5'].val
+  const headWidth = headHeight / 2
+  const headPoints = (tipX: number, baseX: number): string =>
+    `${tipX},${headWidth} ${baseX},0 ${baseX},${headHeight}`
 
   return (
     <Stack
       flex={1}
-      height={44}
-      marginHorizontal={getTokens().space.$2.val + getTokens().space.$1.val}
+      height="$9.5"
+      marginHorizontal={space.$2.val + space.$1.val}
       justifyContent="center"
       aria-hidden
       importantForAccessibility="no-hide-descendants"
     >
       <XStack alignItems="center">
-        <Svg width={5} height={10}>
-          <Polygon points="0,5 5,0 5,10" fill={color} />
+        <Svg width={headWidth} height={headHeight}>
+          <Polygon points={headPoints(0, headWidth)} fill={color} />
         </Svg>
         <Stack
           flex={1}
-          height={2}
+          height="$1"
           backgroundColor="$accentHighlightSecondary"
         />
-        <Svg width={5} height={10}>
-          <Polygon points="5,5 0,0 0,10" fill={color} />
+        <Svg width={headWidth} height={headHeight}>
+          <Polygon points={headPoints(headWidth, 0)} fill={color} />
         </Svg>
       </XStack>
     </Stack>
@@ -117,7 +122,7 @@ export function TrustedFriendExplanation({
             avatar={
               <Avatar
                 {...trustedFriend.avatar}
-                customSize={44}
+                customSize="$9.5"
                 trusted
                 trustBadgeRingColor="$backgroundSecondary"
               />

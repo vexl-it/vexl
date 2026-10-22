@@ -73,6 +73,7 @@
   "notes.chat.noteDetail": "帖子详情",
   "notes.detail.noteNotFound": "未找到帖子。",
   "notes.chat.welcomeReceiverDescription": "开始对话前，你可以查看共同好友和帖子详情。",
+  "notes.chat.welcomeReceiverDescriptionWithTrusted": "开始对话前，你可以查看共同好友（包括可信好友）和帖子详情。",
   "goldenGlasses.errorSettingRewardForParticipationOnMeetup": "为参与见面会设置奖励时出错。请联系客服。",
   "goldenGlasses.youReceived": "你已收到",
   "goldenGlasses.goldenGlasses": "金色眼镜",

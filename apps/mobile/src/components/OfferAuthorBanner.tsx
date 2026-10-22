@@ -67,7 +67,7 @@ function OfferAuthorBanner({
   )
   const isMine = !!offer.ownershipInfo
   const trustedFriendsText = useTrustedFriendsText(
-    isMine ? 0 : new Set(visibleCommonFriends.verifiedCommonFriends).size
+    isMine ? 0 : visibleCommonFriends.verifiedCommonFriends.length
   )
   const isOffering = getIsOffering(
     offer.offerInfo.publicPart.listingType,

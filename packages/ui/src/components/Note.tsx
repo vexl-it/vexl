@@ -1,11 +1,10 @@
 import React from 'react'
 import {styled, useTheme} from 'tamagui'
 
-import {SandWatch} from '../icons/SandWatch'
 import {type IconProps} from '../icons/types'
 import {XStack, YStack} from '../primitives'
 import {CardButton} from './CardButton'
-import {CommonFriendsSummary} from './CommonFriendsSummary'
+import {NoteMeta} from './NoteMeta'
 import {Typography} from './Typography'
 
 export interface NoteTag {
@@ -117,18 +116,11 @@ export function Note({
                 {name}
               </Typography>
             ) : null}
-            <XStack gap="$3" alignItems="center">
-              <CommonFriendsSummary
-                commonFriends={commonFriends}
-                trustedFriends={trustedFriends}
-              />
-              <XStack gap="$1" alignItems="center">
-                <SandWatch size={16} color={iconColor} />
-                <Typography variant="micro" color="$foregroundSecondary">
-                  {expiration}
-                </Typography>
-              </XStack>
-            </XStack>
+            <NoteMeta
+              commonFriends={commonFriends}
+              trustedFriends={trustedFriends}
+              expiration={expiration}
+            />
           </YStack>
         </HeaderFrame>
       </InformationFrame>

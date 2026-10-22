@@ -109,7 +109,11 @@ export default function decryptNote(
         Schema.decode(NoteInfo)({
           id: serverNote.id,
           noteId: serverNote.noteId,
-          privatePart: privatePayload.right,
+          // A reposter can't know who the author and the reader both trust,
+          // so a repost claiming trusted friends is ignored.
+          privatePart: privatePayload.right.viaRepost
+            ? {...privatePayload.right, verifiedCommonFriends: []}
+            : privatePayload.right,
           publicPart: publicPayload.right,
           expiresAt: serverNote.expiresAt,
           createdAt: serverNote.createdAt,

@@ -9,7 +9,7 @@ import {
   useTheme,
 } from '@vexl-next/ui'
 import React, {type ReactNode} from 'react'
-import {type LayoutChangeEvent} from 'react-native'
+import {type LayoutChangeEvent, TouchableOpacity} from 'react-native'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 
 interface Action {
@@ -154,6 +154,25 @@ export function LoginFlowText({
     >
       {children}
     </Typography>
+  )
+}
+
+export function LoginFlowLink({
+  disabled,
+  label,
+  onPress,
+}: Action): React.ReactElement {
+  return (
+    <TouchableOpacity disabled={disabled} onPress={onPress}>
+      <Typography
+        color="$foregroundSecondary"
+        textAlign="center"
+        textDecorationLine="underline"
+        variant="paragraphSmall"
+      >
+        {label}
+      </Typography>
+    </TouchableOpacity>
   )
 }
 

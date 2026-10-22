@@ -7,7 +7,7 @@ import {Effect, Option} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {DateTime} from 'luxon'
 import React, {useCallback, useMemo, useRef, useState} from 'react'
-import {Keyboard, type TextInput, TouchableOpacity} from 'react-native'
+import {Keyboard, type TextInput} from 'react-native'
 import {type LoginFlowStackScreenProps} from '../../../navigationTypes'
 import {
   backupFileToRestoreAtom,
@@ -25,7 +25,7 @@ import {initPhoneVerificationAtom} from '../api/initPhoneVerificationAtom'
 import {verifyPhoneNumberAtom} from '../api/verifyPhoneNumberAtom'
 import {finishLoginActionAtom} from '../atoms/finishLoginActionAtom'
 import Countdown from './Countdown'
-import LoginFlowScreen, {LoginFlowTitle} from './LoginFlowScreen'
+import LoginFlowScreen, {LoginFlowLink, LoginFlowTitle} from './LoginFlowScreen'
 
 type Props = LoginFlowStackScreenProps<'VerificationCode'>
 const CODE_LENGTH = 6
@@ -253,19 +253,11 @@ export default function VerificationCodeScreen({
       }}
       footer={
         countdownFinished ? (
-          <TouchableOpacity
+          <LoginFlowLink
             disabled={resendInProgress}
+            label={t('loginFlow.v2.verificationCode.retry')}
             onPress={resendVerificationCode}
-          >
-            <Typography
-              color="$foregroundSecondary"
-              textAlign="center"
-              textDecorationLine="underline"
-              variant="paragraphSmall"
-            >
-              {t('loginFlow.v2.verificationCode.retry')}
-            </Typography>
-          </TouchableOpacity>
+          />
         ) : (
           <Typography
             color="$foregroundSecondary"

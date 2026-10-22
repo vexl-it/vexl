@@ -17,6 +17,7 @@ import {
   CONTACT_NORMALIZATION_CHUNK_SIZE,
 } from '../../../../state/contacts/atom/contactImportUtils'
 import {
+  importedContactsCountAtom,
   normalizedContactsAtom,
   storedContactsAtom,
 } from '../../../../state/contacts/atom/contactsStore'
@@ -32,6 +33,7 @@ import {
   areContactsPermissionsGranted,
   hashPhoneNumberE,
 } from '../../../../state/contacts/utils'
+import {myOffersAtom} from '../../../../state/marketplace/atoms/myOffers'
 import getValueFromSetStateActionOfAtom from '../../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 import {translationAtom} from '../../../../utils/localization/I18nProvider'
 import {
@@ -41,7 +43,7 @@ import {
 import toE164PhoneNumberWithDefaultCountryCode from '../../../../utils/toE164PhoneNumberWithDefaultCountryCode'
 import {parseVcardString} from '../../../../utils/vCard'
 import {showErrorAlert} from '../../../ErrorAlert'
-import {globalDialogAtom} from '../../../GlobalDialog'
+import {askAreYouSureActionAtom, globalDialogAtom} from '../../../GlobalDialog'
 import {toastNotificationAtom} from '../../../ToastNotification/atom'
 import {createUpdateContactActionAtom} from './createUpdateContactActionAtom'
 
@@ -433,6 +435,38 @@ export const contactSelectMolecule = molecule((_, getScope) => {
         })
       }
     )
+  )
+
+  const confirmSubmitHidingOffersActionAtom = atom(
+    null,
+    (get, set): Effect.Effect<boolean> => {
+      const myOffers = get(myOffersAtom)
+      const removesAllContacts =
+        get(selectedNumbersAtom).size === 0 &&
+        get(importedContactsCountAtom) > 0
+      if (!removesAllContacts || !Array.isNonEmptyArray(myOffers))
+        return Effect.succeed(true)
+
+      const {t} = get(translationAtom)
+
+      return set(askAreYouSureActionAtom, {
+        variant: 'danger',
+        steps: [
+          {
+            type: 'StepWithText',
+            title: t('contacts.offersHiddenWithoutContacts.title'),
+            description: t('contacts.offersHiddenWithoutContacts.description'),
+            positiveButtonText: t(
+              'contacts.offersHiddenWithoutContacts.confirm'
+            ),
+            negativeButtonText: t('common.cancel'),
+          },
+        ],
+      }).pipe(
+        Effect.as(true),
+        Effect.catchAll(() => Effect.succeed(false))
+      )
+    }
   )
 
   const submitAllSelectedContactsActionAtom = atom(
@@ -937,6 +971,7 @@ export const contactSelectMolecule = molecule((_, getScope) => {
     selectedNumbersAtom,
     shouldShowContactImportProgressDialogAtom,
     syncDefaultSelectedContactsActionAtom,
+    confirmSubmitHidingOffersActionAtom,
     submitAllSelectedContactsActionAtom,
     importContactsFromPhoneActionAtom,
     normalizedContactsAtom,

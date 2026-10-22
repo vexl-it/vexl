@@ -758,6 +758,9 @@ export const submitContactsActionAtom = atom(
           showContactImportProgressDialog,
         })
       )
+      // Must precede the sync: a stale count would make the reach-drop guard
+      // reject a graph the user emptied on purpose.
+      set(updatePersistentDataAboutNumberOfImportedContactsActionAtom)
 
       yield* _(
         set(syncNetworkAfterContactsImportActionAtom, {
@@ -773,7 +776,6 @@ export const submitContactsActionAtom = atom(
       )
       set(needsFullContactsReplaceAfterContactEditAtom, false)
 
-      set(updatePersistentDataAboutNumberOfImportedContactsActionAtom)
       set(
         persistentDataAboutReachAtom,
         get(fistAndSecondLevelConnectionsReachAtom)

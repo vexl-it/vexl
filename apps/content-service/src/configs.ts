@@ -44,6 +44,10 @@ export const appInMaintenanceModeConfig = Config.boolean(
   'APP_IN_MAINTENANCE_MODE'
 ).pipe(Config.withDefault(false))
 
+export const trustedFriendsEnabledConfig = Config.boolean(
+  'TRUSTED_FRIENDS_ENABLED'
+).pipe(Config.withDefault(false))
+
 export const lightMapStyleUrlConfig = Schema.Config(
   'LIGHT_MAP_STYLE_URL',
   HttpsUrlString

@@ -17,6 +17,7 @@ import {
   smallestClubForIdsAtom,
 } from '../state/clubs/atom/clubsWithMembersAtom'
 import {type ClubWithMembers} from '../state/clubs/domain'
+import {trustedFriendsEnabledAtom} from '../state/featureFlags'
 import {useVisibleCommonFriendsForOffer} from '../state/marketplace/hooks/useVisibleCommonFriendsForOffer'
 import {isProductOfferMissingCategory} from '../state/marketplace/utils/isProductOfferMissingCategory'
 import {getOtherSideFriendLevel} from '../utils/chat/getOtherSideFriendLevel'
@@ -35,7 +36,6 @@ import {
   getOfferMarkBadge,
 } from '../utils/offerHelpers'
 import {offerLocationLabelsAtom} from '../utils/offerLocationLabelsAtom'
-import {showVerifiedContactsAtom} from '../utils/preferences'
 import {randomSeedFromOfferInfo} from '../utils/RandomSeed'
 import {offerRerequestLimitDaysAtom} from '../utils/versionService/atoms'
 import {AnonymousAvatarOrClubImage} from './AnonymousAvatar'
@@ -108,7 +108,7 @@ export default function OfferOnMarketplace({
     : (getOtherSideFriendLevel({offerInfo: offer.offerInfo, t}) ??
       t('offer.friendOfFriend'))
 
-  const showTrustedFriends = useAtomValue(showVerifiedContactsAtom)
+  const showTrustedFriends = useAtomValue(trustedFriendsEnabledAtom)
   const trustedFriendsText = useTrustedFriendsText(
     isMine ? 0 : new Set(visibleCommonFriends.verifiedCommonFriends).size
   )

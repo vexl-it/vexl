@@ -4,9 +4,9 @@ import {atom} from 'jotai'
 import React from 'react'
 import {type RootStackScreenProps} from '../../navigationTypes'
 import {type StoredContactWithComputedValues} from '../../state/contacts/domain'
+import {trustedFriendsEnabledAtom} from '../../state/featureFlags'
 import {userDataRealOrAnonymizedAtom} from '../../state/session/userDataAtoms'
 import {translationAtom} from '../../utils/localization/I18nProvider'
-import {showVerifiedContactsAtom} from '../../utils/preferences'
 import {RandomSeed} from '../../utils/RandomSeed'
 import {AnonymousAvatarOrClubImage} from '../AnonymousAvatar'
 import ContactPictureImage from '../ContactPictureImage'
@@ -28,7 +28,7 @@ export const showTrustedFriendExplanationActionAtom = atom(
       readonly otherSide: RootStackScreenProps<'CommonFriends'>['route']['params']['otherSide']
     }
   ) => {
-    if (!get(showVerifiedContactsAtom)) return
+    if (!get(trustedFriendsEnabledAtom)) return
 
     const {t} = get(translationAtom)
     const user = get(userDataRealOrAnonymizedAtom)

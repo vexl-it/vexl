@@ -12,7 +12,6 @@ const preferencesToEdit = [
   'isDeveloper',
   'showOfferDetail',
   'runTasksInParallel',
-  'showVerifiedContacts',
   'notesBoardEnabled',
 ] as const
 

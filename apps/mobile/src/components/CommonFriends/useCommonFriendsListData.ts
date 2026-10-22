@@ -7,8 +7,8 @@ import {
   type RootStackScreenProps,
 } from '../../navigationTypes'
 import {type StoredContactWithComputedValues} from '../../state/contacts/domain'
+import {trustedFriendsEnabledAtom} from '../../state/featureFlags'
 import {useTranslation} from '../../utils/localization/I18nProvider'
-import {showVerifiedContactsAtom} from '../../utils/preferences'
 import {showTrustedFriendExplanationActionAtom} from './atoms'
 import {useCommonFriends} from './useCommonFriends'
 
@@ -70,7 +70,7 @@ export function useCommonFriendsListData({
 }): readonly ListItem[] {
   const {t} = useTranslation()
   const showExplanation = useSetAtom(showTrustedFriendExplanationActionAtom)
-  const showVerifiedContacts = useAtomValue(showVerifiedContactsAtom)
+  const trustedFriendsEnabled = useAtomValue(trustedFriendsEnabledAtom)
 
   const {
     trustedFriends: verifiedFriends,
@@ -87,7 +87,7 @@ export function useCommonFriendsListData({
         )
       : []
 
-    if (!showVerifiedContacts) {
+    if (!trustedFriendsEnabled) {
       return Array.appendAll(
         pipe(
           commonFriends,
@@ -140,7 +140,7 @@ export function useCommonFriendsListData({
   }, [
     clubs,
     commonFriends,
-    showVerifiedContacts,
+    trustedFriendsEnabled,
     t,
     verifiedFriends,
     commonFriendsWithoutVerified,

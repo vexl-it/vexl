@@ -132,13 +132,19 @@ jest.mock('../../../components/UploadingOfferProgressModal/atoms', () => {
   }
 })
 
+const mockSubmitSteps: string[] = []
+
 jest.mock(
   '../../connections/atom/updateAndReencryptAllConnectionsActionAtom',
   () => {
     const {atom} = jest.requireActual('jotai')
     const {Effect} = jest.requireActual('effect')
     return {
-      updateAndReencryptAllConnectionsActionAtom: atom(null, () => Effect.void),
+      updateAndReencryptAllConnectionsActionAtom: atom(null, () =>
+        Effect.sync(() => {
+          mockSubmitSteps.push('syncConnections')
+        })
+      ),
     }
   }
 )
@@ -174,7 +180,9 @@ jest.mock(
     return {
       updatePersistentDataAboutNumberOfImportedContactsActionAtom: atom(
         null,
-        () => {}
+        () => {
+          mockSubmitSteps.push('persistImportedContactsCount')
+        }
       ),
       persistentDataAboutReachAtom: atom(0),
     }
@@ -339,6 +347,25 @@ describe('Onboarding contact import (fresh device)', () => {
     const result = await submitPromise
     expect(result).toEqual('success')
     expect(store.get(importedContactsCountAtom)).toEqual(800)
+  })
+
+  it('persists the imported contacts count before syncing connections', async () => {
+    mockFrameState.realistic = false
+    mockDeviceContactsState.count = 3
+    mockSubmitSteps.length = 0
+
+    const store = createStore()
+    await Effect.runPromise(
+      store.set(submitContactsActionAtom, onboardingSubmitParams)
+    )
+
+    // The reach-drop guard in fetchConnectionsActionAtom reads the persisted
+    // count. Updating it only after the sync made deselecting all contacts
+    // look like a server failure, so offers were never re-encrypted.
+    expect(mockSubmitSteps).toEqual([
+      'persistImportedContactsCount',
+      'syncConnections',
+    ])
   })
 
   it('reports noContactsSelected without calling the server when the device returns no contacts', async () => {

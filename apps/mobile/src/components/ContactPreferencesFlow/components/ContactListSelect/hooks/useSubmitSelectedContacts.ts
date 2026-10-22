@@ -13,8 +13,12 @@ export default function useSubmitSelectedContacts(): {
   readonly submitSelectedContacts: () => void
 } {
   const goBack = useSafeGoBack()
-  const {submitAllSelectedContactsActionAtom} = useMolecule(
-    contactSelectMolecule
+  const {
+    confirmSubmitHidingOffersActionAtom,
+    submitAllSelectedContactsActionAtom,
+  } = useMolecule(contactSelectMolecule)
+  const confirmSubmitHidingOffers = useSetAtom(
+    confirmSubmitHidingOffersActionAtom
   )
   const submitAllSelectedContacts = useSetAtom(
     submitAllSelectedContactsActionAtom
@@ -37,22 +41,33 @@ export default function useSubmitSelectedContacts(): {
   const submitSelectedContacts = useCallback(() => {
     if (isSubmittingContacts) return
 
-    setIsSubmittingContacts(true)
-    runAfterKeyboardDismiss(() => {
-      if (isUnmountedRef.current) return
+    // Confirm before the submitting overlay shows, so it does not sit behind
+    // the dialog.
+    void Effect.runPromise(confirmSubmitHidingOffers()).then((confirmed) => {
+      if (!confirmed || isUnmountedRef.current) return
 
-      cancelDeferredSubmitFrameRef.current = runAfterAnimationFrame(() => {
-        cancelDeferredSubmitFrameRef.current = undefined
-        void Effect.runPromise(
-          andThenExpectBooleanNoErrors((success) => {
-            if (success) goBack()
-          })(submitAllSelectedContacts())
-        ).finally(() => {
-          setIsSubmittingContacts(false)
+      setIsSubmittingContacts(true)
+      runAfterKeyboardDismiss(() => {
+        if (isUnmountedRef.current) return
+
+        cancelDeferredSubmitFrameRef.current = runAfterAnimationFrame(() => {
+          cancelDeferredSubmitFrameRef.current = undefined
+          void Effect.runPromise(
+            andThenExpectBooleanNoErrors((success) => {
+              if (success) goBack()
+            })(submitAllSelectedContacts())
+          ).finally(() => {
+            setIsSubmittingContacts(false)
+          })
         })
       })
     })
-  }, [goBack, isSubmittingContacts, submitAllSelectedContacts])
+  }, [
+    confirmSubmitHidingOffers,
+    goBack,
+    isSubmittingContacts,
+    submitAllSelectedContacts,
+  ])
 
   return {
     isSubmittingContacts,

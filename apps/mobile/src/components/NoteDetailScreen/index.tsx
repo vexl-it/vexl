@@ -28,6 +28,7 @@ import {
 } from '../../state/notes/atoms/repostNoteActionAtom'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import navigateToBoard from '../../utils/navigateToBoard'
+import {randomSeedFromNote} from '../../utils/RandomSeed'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import CommonFriends from '../CommonFriends'
 import {showErrorAlert} from '../ErrorAlert'
@@ -190,10 +191,11 @@ export default function NoteDetailScreen({
     return <Screen navigationBar={navigationBar}>{null}</Screen>
   }
 
-  const commonFriends = deriveVisibleCommonFriendsForNote({
-    noteInfo: note.noteInfo,
-    importedContactsHashes,
-  })
+  const {commonFriends, verifiedCommonFriends} =
+    deriveVisibleCommonFriendsForNote({
+      noteInfo: note.noteInfo,
+      importedContactsHashes,
+    })
   const isReported = note.flags.reported
   const canRepost =
     !isMine &&
@@ -232,9 +234,14 @@ export default function NoteDetailScreen({
           commonFriends.length > 0 ? (
             <CommonFriends
               commonConnectionsHashes={commonFriends}
+              verifiedConnectionsHashes={verifiedCommonFriends}
               otherSideClubs={[]}
               friendLevel={note.noteInfo.privatePart.friendLevel}
               isMine={false}
+              otherSide={{
+                role: 'otherSide',
+                avatarSeed: randomSeedFromNote(note),
+              }}
               label={t('notes.detail.commonFriendsCount', {
                 count: commonFriends.length,
               })}

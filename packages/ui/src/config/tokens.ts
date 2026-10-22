@@ -49,22 +49,27 @@ export const tokens = createTokens({
     '-5': -16,
   },
 
-  // Size scale (mirrors spacing for consistency)
+  // Size scale (mirrors spacing for consistency). Half steps are fixed
+  // component sizes; Tamagui skips them when stepping sizes up or down.
   size: {
     0: 0,
     0.5: 1,
     1: 2,
     2: 4,
     3: 8,
+    3.5: 10,
     4: 12,
+    4.5: 14,
     5: 16,
     6: 20,
     7: 24,
     8: 32,
     9: 40,
+    9.5: 44,
     10: 48,
     11: 56,
     12: 64,
+    12.5: 70,
     13: 80,
     true: 16,
   },

@@ -136,7 +136,11 @@ export function VexlBotRequestHelp({
           title={t('messages.vexlBot.welcomeToTheTradeChat.title')}
           description={
             isMyNoteChat
-              ? t('notes.chat.welcomeReceiverDescription')
+              ? t(
+                  trustedFriendsText
+                    ? 'notes.chat.welcomeReceiverDescriptionWithTrusted'
+                    : 'notes.chat.welcomeReceiverDescription'
+                )
               : t(
                   trustedFriendsText
                     ? 'messages.vexlBot.welcomeToTheTradeChat.receiverDescriptionWithTrusted'

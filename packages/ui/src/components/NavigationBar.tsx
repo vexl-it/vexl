@@ -177,7 +177,12 @@ export function NavigationBar(props: NavigationBarProps): React.JSX.Element {
           <ChatPressableArea onPress={props.onPress}>
             {props.avatar}
             <ChatInfoColumn>
-              <Typography variant="paragraphSmall" color="$foregroundPrimary">
+              <Typography
+                variant="paragraphSmall"
+                color="$foregroundPrimary"
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
                 {props.name}
               </Typography>
               <CommonFriendsSummary

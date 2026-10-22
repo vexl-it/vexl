@@ -73,6 +73,7 @@
   "notes.chat.noteDetail": "Maelezo ya chapisho",
   "notes.detail.noteNotFound": "Chapisho halikupatikana.",
   "notes.chat.welcomeReceiverDescription": "Kabla ya kuanza mazungumzo, unaweza kuangalia marafiki wenu wa pamoja na maelezo ya chapisho.",
+  "notes.chat.welcomeReceiverDescriptionWithTrusted": "Kabla ya kuanza mazungumzo, unaweza kuangalia marafiki wenu wa pamoja, wakiwemo waaminifu, na maelezo ya chapisho.",
   "goldenGlasses.errorSettingRewardForParticipationOnMeetup": "Hitilafu kuweka zawadi kwa ushiriki kwenye meetup. Tafadhali wasiliana na msaada.",
   "goldenGlasses.youReceived": "Umepokea",
   "goldenGlasses.goldenGlasses": "miwani ya dhahabu",

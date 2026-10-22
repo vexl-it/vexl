@@ -42,6 +42,7 @@ import {MenuItemScreen} from './MenuItemScreen'
 import {MenuScreen} from './MenuScreen'
 import {NavButtonScreen} from './NavButtonScreen'
 import {NavigationBarScreen} from './NavigationBarScreen'
+import {NoteMetaScreen} from './NoteMetaScreen'
 import {NoteScreen} from './NoteScreen'
 import {NotificationCardScreen} from './NotificationCardScreen'
 import {OfferCardScreen} from './OfferCardScreen'
@@ -128,6 +129,7 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'Nav Button', component: NavButtonScreen},
   {label: 'Navigation Bar', component: NavigationBarScreen},
   {label: 'Note', component: NoteScreen},
+  {label: 'Note Meta', component: NoteMetaScreen},
   {label: 'Notification Card', component: NotificationCardScreen},
   {label: 'Offer Card', component: OfferCardScreen},
   {

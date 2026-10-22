@@ -73,6 +73,7 @@
   "notes.chat.noteDetail": "Note detail",
   "notes.detail.noteNotFound": "Note not found.",
   "notes.chat.welcomeReceiverDescription": "Before you start the conversation you can check your common friends and note detail.",
+  "notes.chat.welcomeReceiverDescriptionWithTrusted": "Before you start the conversation you can check your common friends, including trusted ones, and note detail.",
   "goldenGlasses.errorSettingRewardForParticipationOnMeetup": "Couldn't set your meetup reward. Get in touch with support.",
   "goldenGlasses.youReceived": "You received",
   "goldenGlasses.goldenGlasses": "golden glasses",

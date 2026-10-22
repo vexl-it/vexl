@@ -37,17 +37,21 @@ export function deriveVisibleCommonFriendsFromHashes({
   readonly importedContactsHashes: readonly HashedPhoneNumber[]
 }): VisibleCommonFriends {
   const importedContactsHashesSet = toHashesSet(importedContactsHashes)
-
-  return {
-    commonFriends: pipe(
-      Array.appendAll(commonFriends, verifiedCommonFriends),
+  const visibleDeduped = (
+    hashes: readonly HashedPhoneNumber[]
+  ): readonly HashedPhoneNumber[] =>
+    pipe(
+      hashes,
       Array.filter((one) => importedContactsHashesSet.has(one)),
       // dedupe while preserving first-occurrence order
       (visibleHashes) => Array.fromIterable(new Set(visibleHashes))
+    )
+
+  return {
+    commonFriends: visibleDeduped(
+      Array.appendAll(commonFriends, verifiedCommonFriends)
     ),
-    verifiedCommonFriends: Array.filter(verifiedCommonFriends, (one) =>
-      importedContactsHashesSet.has(one)
-    ),
+    verifiedCommonFriends: visibleDeduped(verifiedCommonFriends),
   }
 }
 
@@ -105,9 +109,11 @@ export function deriveVisibleCommonFriendsForOffer({
 
 const memoizedVisibleCommonFriendsForNote = memoizePerEntityAndContacts(
   (noteInfo: NoteInfo, importedContactsHashes) =>
-    Array.filter(noteInfo.privatePart.commonFriends, (one) =>
-      toHashesSet(importedContactsHashes).has(one)
-    )
+    deriveVisibleCommonFriendsFromHashes({
+      commonFriends: noteInfo.privatePart.commonFriends,
+      verifiedCommonFriends: noteInfo.privatePart.verifiedCommonFriends,
+      importedContactsHashes,
+    })
 )
 
 export function deriveVisibleCommonFriendsForNote({
@@ -116,7 +122,7 @@ export function deriveVisibleCommonFriendsForNote({
 }: {
   readonly noteInfo: NoteInfo
   readonly importedContactsHashes: readonly HashedPhoneNumber[]
-}): readonly HashedPhoneNumber[] {
+}): VisibleCommonFriends {
   return memoizedVisibleCommonFriendsForNote(noteInfo, importedContactsHashes)
 }
 

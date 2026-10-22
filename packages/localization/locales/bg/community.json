@@ -73,6 +73,7 @@
   "notes.chat.noteDetail": "Детайли за бележката",
   "notes.detail.noteNotFound": "Бележката не е намерена.",
   "notes.chat.welcomeReceiverDescription": "Преди да започнеш разговора, можеш да провериш общите ви приятели и детайлите за бележката.",
+  "notes.chat.welcomeReceiverDescriptionWithTrusted": "Преди да започнеш разговора, можеш да провериш общите ви приятели, включително доверените, и детайлите за бележката.",
   "goldenGlasses.errorSettingRewardForParticipationOnMeetup": "Грешка при задаване на награда за участие в среща. Моля, свържете се с поддръжката.",
   "goldenGlasses.youReceived": "Вие получихте",
   "goldenGlasses.goldenGlasses": "златни очила",

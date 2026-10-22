@@ -110,7 +110,7 @@ export default function OfferOnMarketplace({
 
   const showTrustedFriends = useAtomValue(trustedFriendsEnabledAtom)
   const trustedFriendsText = useTrustedFriendsText(
-    isMine ? 0 : new Set(visibleCommonFriends.verifiedCommonFriends).size
+    isMine ? 0 : visibleCommonFriends.verifiedCommonFriends.length
   )
   const commonFriendsCount = visibleCommonFriends.commonFriends.length
   const commonFriendsText = !isMine

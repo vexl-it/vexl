@@ -31,6 +31,8 @@ export function CommonFriendsSummary({
     clubNames,
     Array.filter((name) => name.length > 0)
   )
+  // Club names truncate first; without them the counts truncate instead.
+  const countsShrink = Array.isNonEmptyArray(clubs) ? 0 : 1
   const parts: React.ReactNode[] = pipe(
     clubs,
     Array.map((name, index) => (
@@ -49,7 +51,13 @@ export function CommonFriendsSummary({
 
   if (commonFriends)
     parts.push(
-      <XStack key="common" gap="$1" alignItems="center" flexShrink={0}>
+      <XStack
+        key="common"
+        gap="$1"
+        alignItems="center"
+        flexShrink={countsShrink}
+        minWidth={0}
+      >
         <PeopleUsers
           size={getTokens().size.$5.val}
           color={theme.foregroundSecondary.get()}
@@ -58,6 +66,8 @@ export function CommonFriendsSummary({
           variant="micro"
           color="$foregroundSecondary"
           numberOfLines={1}
+          ellipsizeMode="tail"
+          flexShrink={1}
         >
           {commonFriends}
         </Typography>
@@ -65,12 +75,20 @@ export function CommonFriendsSummary({
     )
   if (trustedFriends)
     parts.push(
-      <XStack key="trusted" gap="$2" alignItems="center" flexShrink={0}>
+      <XStack
+        key="trusted"
+        gap="$2"
+        alignItems="center"
+        flexShrink={countsShrink}
+        minWidth={0}
+      >
         <TrustBadge size="medium" />
         <Typography
           variant="micro"
           color="$foregroundSecondary"
           numberOfLines={1}
+          ellipsizeMode="tail"
+          flexShrink={1}
         >
           {trustedFriends}
         </Typography>

@@ -75,6 +75,7 @@
   "notes.chat.noteDetail": "Detalle de la nota",
   "notes.detail.noteNotFound": "Nota no encontrada.",
   "notes.chat.welcomeReceiverDescription": "Antes de iniciar la conversación, puedes consultar los amigos en común y el detalle de la nota.",
+  "notes.chat.welcomeReceiverDescriptionWithTrusted": "Antes de iniciar la conversación, puedes consultar los amigos en común, incluidos los de confianza, y el detalle de la nota.",
   "goldenGlasses.errorSettingRewardForParticipationOnMeetup": "Error al establecer la recompensa por participar en el encuentro. Por favor, contacta con soporte.",
   "goldenGlasses.youReceived": "Recibiste",
   "goldenGlasses.goldenGlasses": "gafas de oro",

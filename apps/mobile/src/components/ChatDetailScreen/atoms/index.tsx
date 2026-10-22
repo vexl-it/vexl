@@ -265,7 +265,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
           : note.noteInfo.privatePart.commonFriends,
         verifiedCommonFriends: note.ownershipInfo
           ? verifiedCommonFriendsForMyOffer
-          : [],
+          : note.noteInfo.privatePart.verifiedCommonFriends,
         importedContactsHashes,
       }).commonFriends
     }
@@ -298,13 +298,13 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
 
     if (!offer) {
       const note = get(noteForChatAtom)
-      // Notes carry no verified common friends; for my note the responder
-      // may have sent theirs in the request message.
-      if (!note?.ownershipInfo) return []
+      if (!note) return []
 
       return deriveVisibleCommonFriendsForChat({
         commonFriends: commonConnectionsHashes,
-        verifiedCommonFriends: verifiedCommonFriendsForMyOffer,
+        verifiedCommonFriends: note.ownershipInfo
+          ? verifiedCommonFriendsForMyOffer
+          : note.noteInfo.privatePart.verifiedCommonFriends,
         importedContactsHashes,
       }).verifiedCommonFriends
     }
@@ -325,7 +325,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
 
   const trustedConnectionsCountAtom = selectAtom(
     verifiedConnectionsHashesAtom,
-    (connections) => new Set(connections).size
+    (connections) => connections.length
   )
 
   const commonConnectionsCountAtom = selectAtom(

@@ -2,6 +2,7 @@ import {TrustedFriendExplanation, UserImagePlaceholder} from '@vexl-next/ui'
 import {Effect, Schema} from 'effect'
 import {atom} from 'jotai'
 import React from 'react'
+import {getTokens} from 'tamagui'
 import {type RootStackScreenProps} from '../../navigationTypes'
 import {type StoredContactWithComputedValues} from '../../state/contacts/domain'
 import {trustedFriendsEnabledAtom} from '../../state/featureFlags'
@@ -58,6 +59,8 @@ export const showTrustedFriendExplanationActionAtom = atom(
       },
     }[role]
 
+    const avatarSize = getTokens().size['$9.5'].val
+
     Effect.runFork(
       set(globalDialogAtom, {
         title: t('commonFriends.trustedFriendsExplanation.title'),
@@ -67,19 +70,21 @@ export const showTrustedFriendExplanationActionAtom = atom(
             label: t('common.you'),
             avatar: React.createElement(UserAvatar, {
               userImage: user.image,
-              width: 44,
-              height: 44,
+              width: avatarSize,
+              height: avatarSize,
             }),
           },
           trustedFriend: {
             label: name,
             avatar: {
               children: React.createElement(ContactPictureImage, {
-                width: 44,
-                height: 44,
+                width: avatarSize,
+                height: avatarSize,
                 objectFit: 'cover',
                 contactId: friend.info.nonUniqueContactId,
-                fallback: React.createElement(UserImagePlaceholder, {size: 44}),
+                fallback: React.createElement(UserImagePlaceholder, {
+                  size: avatarSize,
+                }),
               }),
             },
           },
@@ -88,7 +93,7 @@ export const showTrustedFriendExplanationActionAtom = atom(
             avatar: React.createElement(AnonymousAvatarOrClubImage, {
               seed: otherSide?.avatarSeed ?? fallbackSeed,
               clubImageUrl: otherSide?.clubImageUrl,
-              customSize: 44,
+              customSize: avatarSize,
               grayScale: false,
             }),
           },

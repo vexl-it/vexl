@@ -19,31 +19,35 @@ const BadgeFrame = styled(Stack, {
   flexShrink: 0,
 })
 
+type SizeToken = keyof ReturnType<typeof getTokens>['size']
+
+const CIRCLE_SIZE_TOKENS: Record<TrustBadgeSize, SizeToken> = {
+  small: '$3.5',
+  medium: '$4.5',
+  large: '$5',
+  xlarge: '$6',
+}
+
+const TICK_TO_CIRCLE_RATIO = 0.75
+
 export function TrustBadge({
   size = 'medium',
   ringColor,
 }: TrustBadgeProps): React.JSX.Element {
-  const SIZES: Record<
-    TrustBadgeSize,
-    {readonly circle: number; readonly icon: number}
-  > = {
-    small: {circle: 10, icon: 7},
-    medium: {circle: 14, icon: 10},
-    large: {circle: getTokens().size.$5.val, icon: 12},
-    xlarge: {circle: getTokens().size.$6.val, icon: 15},
-  }
   const theme = useTheme()
-  const dimensions = SIZES[size]
+  const {size: sizes} = getTokens()
+  const circle = sizes[CIRCLE_SIZE_TOKENS[size]].val
+  const ring = ringColor ? 2 * sizes.$1.val : 0
   // The black tick on the yellow accent intentionally does not theme-switch.
   const black = theme.black100.get()
   const badge = (
     <BadgeFrame
-      width={dimensions.circle}
-      height={dimensions.circle}
+      width={circle}
+      height={circle}
       backgroundColor="$accentYellowPrimary"
     >
       <Checkmark
-        size={dimensions.icon}
+        size={circle * TICK_TO_CIRCLE_RATIO}
         color={black}
         stroke={black}
         strokeWidth={1.5}
@@ -54,8 +58,8 @@ export function TrustBadge({
 
   return (
     <BadgeFrame
-      width={dimensions.circle + (ringColor ? 4 : 0)}
-      height={dimensions.circle + (ringColor ? 4 : 0)}
+      width={circle + ring}
+      height={circle + ring}
       backgroundColor={ringColor}
       aria-hidden
       importantForAccessibility="no-hide-descendants"

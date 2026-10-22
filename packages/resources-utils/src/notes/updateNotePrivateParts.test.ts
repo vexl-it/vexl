@@ -35,6 +35,7 @@ beforeAll(async () => {
   owner = (await Effect.runPromise(generateV2KeyPair())).publicKey
 })
 const friend = Schema.decodeSync(HashedPhoneNumber)('new-common-friend')
+const trustedFriend = Schema.decodeSync(HashedPhoneNumber)('new-trusted-friend')
 const symmetricKey = Schema.decodeSync(SymmetricKey)('symmetric-key')
 
 function setup(): {
@@ -64,12 +65,13 @@ function setup(): {
       currentConnections: {firstLevel: [owner], secondLevel: [publicKey]},
       targetConnections: {firstLevel: [owner], secondLevel: [publicKey]},
       commonFriends: HashMap.make([publicKey, [friend]]),
+      verifiedFriends: HashMap.make([publicKey, [trustedFriend]]),
       connectionsToRefresh: [publicKey, owner],
     },
   }
 }
 
-it('replaces an existing recipient payload with fresh common friends and the full target level, excluding the owner', async () => {
+it('replaces an existing recipient payload with fresh common and trusted friends and the full target level, excluding the owner', async () => {
   const {params, create} = setup()
   const result = await Effect.runPromise(updateNotePrivateParts(params))
   expect(result.updateSuccess).toBe(true)
@@ -86,6 +88,7 @@ it('replaces an existing recipient payload with fresh common friends and the ful
     )
   )
   expect(payload.commonFriends).toEqual([friend])
+  expect(payload.verifiedCommonFriends).toEqual([trustedFriend])
   expect(payload.friendLevel).toEqual(['SECOND_DEGREE'])
   expect(payload.adminId).toBeUndefined()
 })
@@ -179,7 +182,7 @@ it('revokes removed repost recipients before uploading and reports upload failur
   expect(result.repostNotFoundOnServer).toBe(true)
 })
 
-it('recreates an empty repost using the note ID without including common friends', async () => {
+it('recreates an empty repost using the note ID without including common or trusted friends', async () => {
   const {params, upload} = repostSetup()
   const result = await Effect.runPromise(updateRepostNotePrivateParts(params))
   expect(result.updateSuccess).toBe(true)
@@ -196,6 +199,7 @@ it('recreates an empty repost using the note ID without including common friends
     )
   )
   expect(payload.commonFriends).toEqual([])
+  expect(payload.verifiedCommonFriends).toEqual([])
   expect(payload.friendLevel).toEqual(['NOT_SPECIFIED'])
   expect(payload.viaRepost).toBe(true)
 })

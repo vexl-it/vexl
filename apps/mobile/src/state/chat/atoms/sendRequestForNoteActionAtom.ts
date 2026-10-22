@@ -51,7 +51,8 @@ const sendRequestForNoteActionAtom = atom(
           goldenAvatarType,
           forClubsUuids: [],
           commonFriends: note.noteInfo.privatePart.commonFriends,
-          verifiedCommonFriends: [],
+          verifiedCommonFriends:
+            note.noteInfo.privatePart.verifiedCommonFriends,
           friendLevel: note.noteInfo.privatePart.friendLevel,
         })
       )

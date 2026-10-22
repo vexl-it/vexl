@@ -79,3 +79,52 @@ it.each([
     )
   }
 )
+
+it.each([
+  {viaRepost: false, expectedTrusted: ['trusted-friend']},
+  {viaRepost: true, expectedTrusted: []},
+])(
+  'keeps trusted friends only on direct notes (viaRepost: $viaRepost)',
+  async ({viaRepost, expectedTrusted}) => {
+    await Effect.runPromise(
+      Effect.gen(function* () {
+        const recipient = generatePrivateKey()
+        const recipientV2 = yield* generateV2KeyPair()
+        const symmetricKey = yield* generateSymmetricKey()
+        const publicPayload = yield* encryptNotePublicPayload({
+          notePublicPart: {
+            notePublicKey: generatePrivateKey().publicKeyPemBase64,
+            text: 'A note for friends.',
+            allowRepost: true,
+          },
+          symmetricKey,
+        })
+        const encrypted = yield* encryptNotePrivatePart({
+          toPublicKey: recipientV2.publicKey,
+          payloadPrivate: {
+            commonFriends: [],
+            verifiedCommonFriends: [
+              Schema.decodeSync(HashedPhoneNumber)('trusted-friend'),
+            ],
+            friendLevel: ['NOT_SPECIFIED'],
+            symmetricKey,
+            viaRepost,
+          },
+        })
+        const note = yield* decryptNote(
+          recipient,
+          recipientV2
+        )({
+          id: 1,
+          noteId: newNoteId(),
+          publicPayload,
+          privatePayload: encrypted.payloadPrivate,
+          expiresAt: unixMillisecondsFromNow(86_400_000),
+          createdAt: isoNow(),
+          modifiedAt: isoNow(),
+        })
+        expect(note.privatePart.verifiedCommonFriends).toEqual(expectedTrusted)
+      })
+    )
+  }
+)

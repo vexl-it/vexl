@@ -36,6 +36,7 @@ jobs:
           context: .
           file: ./tooling/location-db-updater/Dockerfile
           platforms: linux/amd64
+          pull: true
           push: true
           provenance: false
           cache-from: type=gha,scope=geocoding-refresh

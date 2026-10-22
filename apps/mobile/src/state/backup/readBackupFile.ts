@@ -1,6 +1,6 @@
 import {
-  BackupFileFromJson,
-  type BackupFile,
+  EncryptedBackupFileFromJson,
+  type EncryptedBackupFile,
 } from '@vexl-next/resources-utils/src/backup/BackupFile'
 import {Array, Effect, Option, Schema} from 'effect'
 import {getDocumentAsync} from 'expo-document-picker'
@@ -27,7 +27,7 @@ const BackupFileVersion = Schema.parseJson(
 
 export const decodeBackupFile = (
   content: string
-): Effect.Effect<BackupFile, InvalidBackupFileError> =>
+): Effect.Effect<EncryptedBackupFile, InvalidBackupFileError> =>
   Schema.decodeUnknown(BackupFileVersion)(content).pipe(
     Effect.mapError(() => new InvalidBackupFileError({reason: 'notABackup'})),
     Effect.filterOrFail(
@@ -35,7 +35,7 @@ export const decodeBackupFile = (
       () => new InvalidBackupFileError({reason: 'unsupportedVersion'})
     ),
     Effect.zipRight(
-      Schema.decodeUnknown(BackupFileFromJson)(content).pipe(
+      Schema.decodeUnknown(EncryptedBackupFileFromJson)(content).pipe(
         Effect.mapError(
           () => new InvalidBackupFileError({reason: 'notABackup'})
         )
@@ -86,7 +86,10 @@ export const pickBackupFileUri = (): Effect.Effect<
 
 export const readBackupFile = (
   uri: string
-): Effect.Effect<BackupFile, InvalidBackupFileError | ReadingBackupFileError> =>
+): Effect.Effect<
+  EncryptedBackupFile,
+  InvalidBackupFileError | ReadingBackupFileError
+> =>
   readAndDeletePickedFile(uri).pipe(
     Effect.flatMap(
       Option.match({

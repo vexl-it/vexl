@@ -1,7 +1,6 @@
-import {MasterSeed} from '@vexl-next/domain/src/general/MasterSeed.brand'
 import {
-  BackupFileFromJson,
-  type BackupFile,
+  EncryptedBackupFileFromJson,
+  type EncryptedBackupFile,
 } from '@vexl-next/resources-utils/src/backup/BackupFile'
 import {Effect, Either, Schema} from 'effect'
 import {dummySession} from '../session/dummySesssion'
@@ -9,26 +8,18 @@ import {decodeBackupFile} from './readBackupFile'
 
 jest.mock('react-native-mmkv')
 
-const backupFile: BackupFile = {
+const backupFile: EncryptedBackupFile = {
   version: 1,
-  session: {
-    phoneNumber: dummySession.phoneNumber,
-    sessionCredentials: dummySession.sessionCredentials,
-    privateKey: dummySession.privateKey,
-    keyPairV2: dummySession.keyPairV2,
-    isLiquidityProvider: false,
-  },
-  masterSeed: Schema.decodeSync(MasterSeed)('44'.repeat(32)),
-  legacyInboxKeys: [],
-  legacyClubKeys: {},
-  legacyClubKeysWaitingForAdmission: [],
+  publicKey: dummySession.keyPairV2.publicKey,
+  ciphertext: 'ciphertext',
 }
-const backupJson = Schema.encodeSync(BackupFileFromJson)(backupFile)
+const backupJson = Schema.encodeSync(EncryptedBackupFileFromJson)(backupFile)
 
 const decode = async (
   content: string
-): Promise<Either.Either<BackupFile, {_tag: string; reason: string}>> =>
-  await Effect.runPromise(Effect.either(decodeBackupFile(content)))
+): Promise<
+  Either.Either<EncryptedBackupFile, {_tag: string; reason: string}>
+> => await Effect.runPromise(Effect.either(decodeBackupFile(content)))
 
 describe('decodeBackupFile', () => {
   it('decodes a valid backup', async () => {
@@ -39,8 +30,12 @@ describe('decodeBackupFile', () => {
     ['not json', 'definitely not json'],
     ['json without a version', JSON.stringify({hello: 'there'})],
     [
-      'a v1 file missing the seed',
-      JSON.stringify({...JSON.parse(backupJson), masterSeed: undefined}),
+      'a v1 file missing the ciphertext',
+      JSON.stringify({...JSON.parse(backupJson), ciphertext: undefined}),
+    ],
+    [
+      'an unencrypted backup',
+      JSON.stringify({version: 1, masterSeed: '44'.repeat(32)}),
     ],
   ])('rejects %s as not a backup', async (_, content) => {
     expect(await decode(content)).toEqual(

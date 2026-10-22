@@ -50,8 +50,8 @@ import {vexlNotificationTokenAtom} from '../notifications/vexlNotificationTokenA
 import {postLoginFlowCompletedScreensAtom} from '../postLoginOnboarding'
 import {sessionAtom} from '../session'
 import {restoredNotificationSecretState} from './backupNotificationSecret'
+import {clearBackupToRestoreActionAtom} from './backupToRestore'
 import {restoredUserData} from './backupUserData'
-import {readBackupFile} from './readBackupFile'
 
 export class InvalidBackupSessionError extends Schema.TaggedError<InvalidBackupSessionError>(
   'InvalidBackupSessionError'
@@ -64,12 +64,7 @@ export interface RestoredAccount {
   readonly counters: KeyDerivationCounters
 }
 
-export type RestoreFailure =
-  | 'notABackup'
-  | 'unsupportedVersion'
-  | 'backupNoLongerValid'
-  | 'offline'
-  | 'unknown'
+export type RestoreFailure = 'backupNoLongerValid' | 'offline' | 'unknown'
 
 export type RestoreFromBackupState =
   | {readonly state: 'idle'}
@@ -378,10 +373,6 @@ const toRestoreFailure = (e: {
   readonly _tag: string
   readonly reason?: unknown
 }): RestoreFailure => {
-  if (e._tag === 'InvalidBackupFileError')
-    return e.reason === 'unsupportedVersion'
-      ? 'unsupportedVersion'
-      : 'notABackup'
   if (e._tag === 'UserNotFoundError') return 'backupNoLongerValid'
   if (
     e._tag === 'NetworkError' ||
@@ -397,15 +388,15 @@ export const restoreFromBackupStateAtom = atom<RestoreFromBackupState>({
 
 export const startRestoreFromBackupActionAtom = atom(
   null,
-  (get, set, backupFileUri: string): Effect.Effect<void> => {
+  (get, set, backup: BackupFile): Effect.Effect<void> => {
     if (get(restoreFromBackupStateAtom).state === 'restoring')
       return Effect.void
     set(restoreFromBackupStateAtom, {state: 'restoring'})
 
-    return readBackupFile(backupFileUri).pipe(
-      Effect.flatMap((backup) => set(restoreAccountActionAtom, backup)),
+    return set(restoreAccountActionAtom, backup).pipe(
       Effect.match({
         onSuccess: () => {
+          set(clearBackupToRestoreActionAtom)
           set(restoreFromBackupStateAtom, {state: 'idle'})
         },
         onFailure: (e) => {

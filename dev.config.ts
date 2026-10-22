@@ -28,6 +28,7 @@
 //     ("V2_PRIV_" + base64url(secret key)).
 //   - SECRET_EAS_KEY: 32 random bytes, base64.
 //   - SECRET_SALT_FOR_SERVER_CONTACTS: 24 random bytes, hex.
+//   - SECRET_BACKUP_HMAC_KEY: 32 random bytes, base64.
 //
 // SECRET_HMAC_KEY is intentionally NOT random — see the note below.
 export const devCryptoKeys = {
@@ -40,6 +41,7 @@ export const devCryptoKeys = {
   SECRET_EAS_KEY: "ewsCJPUymc0+n3DJrM9tblZQej9TfQYGBwbADCh7QlU=",
   SECRET_SALT_FOR_SERVER_CONTACTS:
     "c71aa220a18c579b7f8b1f9e3ba990611fc2be694d600a4c",
+  SECRET_BACKUP_HMAC_KEY: "otyVNsv4wyerCxJIBMeTpybQ7RPRceiSl9ovVKg46nY=",
 
   // !!! MOBILE ALIGNMENT REQUIRED !!!
   // SECRET_HMAC_KEY is the key the backend uses to HMAC-hash phone numbers. For

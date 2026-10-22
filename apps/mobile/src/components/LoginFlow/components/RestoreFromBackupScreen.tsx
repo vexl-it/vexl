@@ -7,10 +7,7 @@ import {
   restoreFromBackupStateAtom,
   type RestoreFailure,
 } from '../../../state/backup/restoreFromBackup'
-import {
-  useTranslation,
-  type TFunction,
-} from '../../../utils/localization/I18nProvider'
+import {useTranslation} from '../../../utils/localization/I18nProvider'
 
 type Props = LoginFlowStackScreenProps<'RestoreFromBackup'>
 
@@ -58,19 +55,14 @@ function RestoringContent(): React.ReactElement {
   )
 }
 
-function failureText(failure: RestoreFailure, t: TFunction): string {
-  if (failure === 'notABackup' || failure === 'unsupportedVersion')
-    return t(`loginFlow.restoreFromBackup.errors.${failure}`)
-  if (failure === 'offline') return t('common.NetworkError')
-  return t('loginFlow.restoreFromBackup.failed.unknown')
-}
-
 function FailedContent({
   failure,
   onBackToLogin,
+  onTryAgain,
 }: {
   readonly failure: RestoreFailure
   readonly onBackToLogin: () => void
+  readonly onTryAgain: () => void
 }): React.ReactElement {
   const {t} = useTranslation()
 
@@ -78,9 +70,13 @@ function FailedContent({
     <Screen
       navigationBar={null}
       footer={
-        <Button onPress={onBackToLogin}>
-          {t('loginFlow.restoreFromBackup.failed.backToLogin')}
-        </Button>
+        failure === 'backupNoLongerValid' ? (
+          <Button onPress={onBackToLogin}>
+            {t('loginFlow.restoreFromBackup.failed.backToLogin')}
+          </Button>
+        ) : (
+          <Button onPress={onTryAgain}>{t('common.tryAgain')}</Button>
+        )
       }
     >
       <YStack gap="$3" paddingTop="$10">
@@ -96,7 +92,11 @@ function FailedContent({
         ) : (
           <>
             <Title>{t('loginFlow.restoreFromBackup.failed.title')}</Title>
-            <Text>{failureText(failure, t)}</Text>
+            <Text>
+              {failure === 'offline'
+                ? t('common.NetworkError')
+                : t('loginFlow.restoreFromBackup.failed.unknown')}
+            </Text>
           </>
         )}
       </YStack>
@@ -117,8 +117,9 @@ export default function RestoreFromBackupScreen({
       <FailedContent
         failure={restoreState.failure}
         onBackToLogin={() => {
-          navigation.navigate('PhoneNumber')
+          navigation.popTo('Intro2')
         }}
+        onTryAgain={navigation.goBack}
       />
     )
 

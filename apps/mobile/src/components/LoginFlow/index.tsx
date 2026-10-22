@@ -10,6 +10,9 @@ import Intro1Screen from './components/Intro1Screen'
 import Intro2Screen from './components/Intro2Screen'
 import PhoneNumberScreen from './components/PhoneNumberScreen'
 import RestoreFromBackupScreen from './components/RestoreFromBackupScreen'
+import RestoreIntroScreen from './components/RestoreIntroScreen'
+import RestorePinScreen from './components/RestorePinScreen'
+import RestoreWrongPhoneNumberScreen from './components/RestoreWrongPhoneNumberScreen'
 import VerificationCodeScreen from './components/VerificationCodeScreen'
 
 const LoginStack = createNativeStackNavigator<LoginFlowStackParamsList>()
@@ -44,6 +47,12 @@ export default function LoginFlow(): React.ReactElement {
         name="VerificationCode"
         component={VerificationCodeScreen}
       />
+      <LoginStack.Screen name="RestoreIntro" component={RestoreIntroScreen} />
+      <LoginStack.Screen
+        name="RestoreWrongPhoneNumber"
+        component={RestoreWrongPhoneNumberScreen}
+      />
+      <LoginStack.Screen name="RestorePin" component={RestorePinScreen} />
       <LoginStack.Screen
         name="RestoreFromBackup"
         component={RestoreFromBackupScreen}

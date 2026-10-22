@@ -35,6 +35,7 @@ import {vexlTokenToKeyHolderAtom} from '../notifications/vexlTokenToKeyHolderAto
 import {postLoginFlowCompletedScreensAtom} from '../postLoginOnboarding'
 import {sessionHolderAtom} from '../session'
 import {dummySession} from '../session/dummySesssion'
+import {backupFileToRestoreAtom, backupKeyPairAtom} from './backupToRestore'
 import {
   restoreFromBackupStateAtom,
   showRestoredAccountInfoAtom,
@@ -102,24 +103,6 @@ jest.mock('../../api/contactApiForSession', () => ({
 const mockCheckInboxesExist = jest.fn()
 const mockGenerateNotificationToken = jest.fn()
 const mockGetClubInfo = jest.fn()
-const mockBackupFiles = new Map<string, BackupFile>()
-const mockBackupFileUri = (backup: BackupFile): string => {
-  const uri = `file:///picked/${mockBackupFiles.size}.vexl-backup`
-  mockBackupFiles.set(uri, backup)
-  return uri
-}
-jest.mock('./readBackupFile', () => {
-  const {Effect} = jest.requireActual('effect')
-  const {InvalidBackupFileError} = jest.requireActual('./readBackupFile')
-  return {
-    readBackupFile: (uri: string) => {
-      const backup = mockBackupFiles.get(uri)
-      return backup
-        ? Effect.succeed(backup)
-        : Effect.fail(new InvalidBackupFileError({reason: 'notABackup'}))
-    },
-  }
-})
 
 jest.mock('../../api', () => ({
   apiAtom: jest.requireActual('jotai').atom(() => ({
@@ -194,7 +177,6 @@ const setUp = async (): Promise<{
   const legacyClubUuid = generateClubUuid()
   const scannedClubUuid = generateClubUuid()
   const backup: BackupFile = {
-    version: 1,
     session: {
       phoneNumber: dummySession.phoneNumber,
       sessionCredentials: {
@@ -262,15 +244,22 @@ describe('restore from backup', () => {
       lastUpdatedMetadata: null,
     })
     store.set(vexlTokenToKeyHolderAtom, {data: {}})
+    store.set(
+      backupFileToRestoreAtom,
+      Option.some({
+        version: 1,
+        publicKey: dummySession.keyPairV2.publicKey,
+        ciphertext: 'ciphertext',
+      })
+    )
+    store.set(backupKeyPairAtom, Option.some(dummySession.keyPairV2))
   })
 
   it('scans first, restores the user last without creating one and stores the account right away', async () => {
     const {backup, legacyClubUuid, scannedClubUuid} = await setUp()
     mockRestoreUser.mockReturnValue(Effect.void)
 
-    await Effect.runPromise(
-      store.set(startRestoreFromBackupActionAtom, mockBackupFileUri(backup))
-    )
+    await Effect.runPromise(store.set(startRestoreFromBackupActionAtom, backup))
 
     expect(mockCreateUser).not.toHaveBeenCalled()
     expect(mockRestoreUser).toHaveBeenCalledTimes(1)
@@ -338,6 +327,8 @@ describe('restore from backup', () => {
     })
     expect(mockSyncNotificationTokens).not.toHaveBeenCalled()
     expect(store.get(restoreFromBackupStateAtom)).toEqual({state: 'idle'})
+    expect(store.get(backupFileToRestoreAtom)).toEqual(Option.none())
+    expect(store.get(backupKeyPairAtom)).toEqual(Option.none())
   })
 
   it('leaves the account untouched when a scan fails', async () => {
@@ -346,9 +337,7 @@ describe('restore from backup', () => {
       Effect.fail(new UnexpectedServerError({status: 500}))
     )
 
-    await Effect.runPromise(
-      store.set(startRestoreFromBackupActionAtom, mockBackupFileUri(backup))
-    )
+    await Effect.runPromise(store.set(startRestoreFromBackupActionAtom, backup))
 
     expect(store.get(restoreFromBackupStateAtom)).toEqual({
       state: 'failed',
@@ -358,31 +347,15 @@ describe('restore from backup', () => {
     expect(mockRestoreUser).not.toHaveBeenCalled()
     expect(store.get(sessionHolderAtom).state).toBe('loggedOut')
     expect(store.get(messagingStateAtom)).toEqual([])
-  })
-
-  it('reports a file that is not a backup without touching the account', async () => {
-    await setUp()
-
-    await Effect.runPromise(
-      store.set(startRestoreFromBackupActionAtom, 'file:///picked/photo.jpg')
-    )
-
-    expect(store.get(restoreFromBackupStateAtom)).toEqual({
-      state: 'failed',
-      failure: 'notABackup',
-    })
-    expect(mockCheckInboxesExist).not.toHaveBeenCalled()
-    expect(mockRestoreUser).not.toHaveBeenCalled()
-    expect(store.get(sessionHolderAtom).state).toBe('loggedOut')
+    // Kept for trying again.
+    expect(Option.isSome(store.get(backupKeyPairAtom))).toBe(true)
   })
 
   it('reports a backup the server no longer knows and throws the new notification secret away', async () => {
     const {backup} = await setUp()
     mockRestoreUser.mockReturnValue(Effect.fail(new UserNotFoundError()))
 
-    await Effect.runPromise(
-      store.set(startRestoreFromBackupActionAtom, mockBackupFileUri(backup))
-    )
+    await Effect.runPromise(store.set(startRestoreFromBackupActionAtom, backup))
 
     expect(store.get(restoreFromBackupStateAtom)).toEqual({
       state: 'failed',
@@ -419,7 +392,7 @@ describe('restore from backup', () => {
       mockExpoToken.mockReturnValue('ExponentPushToken[new-phone]')
 
       await Effect.runPromise(
-        store.set(startRestoreFromBackupActionAtom, mockBackupFileUri(backup))
+        store.set(startRestoreFromBackupActionAtom, backup)
       )
 
       expect(mockSessionNotificationToken).not.toHaveBeenCalled()
@@ -467,7 +440,7 @@ describe('restore from backup', () => {
       mockRestoreUser.mockReturnValue(Effect.void)
 
       await Effect.runPromise(
-        store.set(startRestoreFromBackupActionAtom, mockBackupFileUri(backup))
+        store.set(startRestoreFromBackupActionAtom, backup)
       )
 
       expect(store.get(restoreFromBackupStateAtom)).toEqual({state: 'idle'})
@@ -492,7 +465,7 @@ describe('restore from backup', () => {
       )
 
       await Effect.runPromise(
-        store.set(startRestoreFromBackupActionAtom, mockBackupFileUri(backup))
+        store.set(startRestoreFromBackupActionAtom, backup)
       )
 
       expect(store.get(restoreFromBackupStateAtom)).toEqual({
@@ -510,10 +483,7 @@ describe('restore from backup', () => {
       mockExpoToken.mockReturnValue(null)
 
       await Effect.runPromise(
-        store.set(
-          startRestoreFromBackupActionAtom,
-          mockBackupFileUri(await withSecret())
-        )
+        store.set(startRestoreFromBackupActionAtom, await withSecret())
       )
 
       expect(mockSyncNotificationTokens).toHaveBeenCalledWith({
@@ -543,7 +513,7 @@ describe('restore from backup', () => {
         fail()
 
         await Effect.runPromise(
-          store.set(startRestoreFromBackupActionAtom, mockBackupFileUri(backup))
+          store.set(startRestoreFromBackupActionAtom, backup)
         )
 
         expect(store.get(restoreFromBackupStateAtom).state).toBe('failed')

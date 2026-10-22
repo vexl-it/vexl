@@ -1,19 +1,18 @@
 import {useFocusEffect} from '@react-navigation/native'
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {Typography, XStack, YStack} from '@vexl-next/ui'
-import {Effect, Either, Option} from 'effect'
+import {Effect, Option} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useEffect, useRef, useState} from 'react'
 import {Keyboard, StyleSheet, TextInput} from 'react-native'
 import {getCountryByCca2, type ICountry} from 'react-native-country-select'
 import {type LoginFlowStackScreenProps} from '../../../navigationTypes'
-import {pickBackupFileUri} from '../../../state/backup/readBackupFile'
-import {startRestoreFromBackupActionAtom} from '../../../state/backup/restoreFromBackup'
 import {
   dismissKeyboardAndResolveOnLayoutUpdate,
   runAfterKeyboardDismiss,
 } from '../../../utils/dismissKeyboardPromise'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
+import InlineErrorText from '../../InlineErrorText'
 import {useShowLoadingOverlay} from '../../LoadingOverlayProvider'
 import {initPhoneVerificationAtom} from '../api/initPhoneVerificationAtom'
 import {selectedCountryCodeAtom} from '../atoms/selectedCountryCodeAtom'
@@ -47,8 +46,10 @@ function NumberGroup({
 
 export default function PhoneNumberScreen({
   navigation,
+  route,
 }: Props): React.ReactElement {
   const {t} = useTranslation()
+  const restore = route.params?.restore === true
   const inputRef = useRef<TextInput>(null)
   const [selectedCountry, setSelectedCountry] = useState<ICountry | undefined>(
     DEFAULT_COUNTRY
@@ -66,8 +67,6 @@ export default function PhoneNumberScreen({
   const initPhoneVerificationInProgressRef = useRef(false)
   const loadingOverlay = useShowLoadingOverlay()
   const initPhoneVerification = useSetAtom(initPhoneVerificationAtom)
-  const startRestoreFromBackup = useSetAtom(startRestoreFromBackupActionAtom)
-  const pickingBackupFileRef = useRef(false)
   const phoneNumberGroupLengths = getGroupLengths(selectedCountry)
   const selectedCountryCode = useAtomValue(selectedCountryCodeAtom)
   const setSelectedCountryCode = useSetAtom(selectedCountryCodeAtom)
@@ -140,49 +139,10 @@ export default function PhoneNumberScreen({
     setPhoneNumber(Option.none())
   }, [selectedCountryCode, selectedCountry?.cca2])
 
-  const restoreFromBackup = (): void => {
-    if (pickingBackupFileRef.current) return
-
-    pickingBackupFileRef.current = true
-    navigationInProgressRef.current = true
-    setErrorMessage(undefined)
-    void dismissKeyboardAndResolveOnLayoutUpdate()
-      .then(
-        async () => await Effect.runPromise(Effect.either(pickBackupFileUri()))
-      )
-      .then((result) => {
-        if (Either.isRight(result) && Option.isSome(result.right)) {
-          navigation.navigate('RestoreFromBackup')
-          void Effect.runPromise(startRestoreFromBackup(result.right.value))
-          return
-        }
-
-        navigationInProgressRef.current = false
-        inputRef.current?.focus()
-        if (Either.isLeft(result))
-          setErrorMessage(t('common.somethingWentWrong'))
-      })
-      .finally(() => {
-        pickingBackupFileRef.current = false
-      })
-  }
-
   return (
     <LoginFlowScreen
       footer={
-        <YStack gap="$4">
-          <LoginFlowText>{t('loginFlow.v2.phoneNumber.caption')}</LoginFlowText>
-          <Typography
-            color="$foregroundSecondary"
-            onPress={restoreFromBackup}
-            pressStyle={{opacity: 0.8}}
-            textAlign="center"
-            textDecorationLine="underline"
-            variant="paragraphSmall"
-          >
-            {t('loginFlow.v2.phoneNumber.restoreFromBackup')}
-          </Typography>
-        </YStack>
+        <LoginFlowText>{t('loginFlow.v2.phoneNumber.caption')}</LoginFlowText>
       }
       action={{
         disabled: Option.isNone(phoneNumber),
@@ -201,6 +161,7 @@ export default function PhoneNumberScreen({
               navigation.navigate('VerificationCode', {
                 phoneNumber: phoneNumber.value,
                 initPhoneVerificationResponse: result,
+                restore,
               })
             })
             .catch((error: unknown) => {
@@ -220,8 +181,16 @@ export default function PhoneNumberScreen({
     >
       <YStack flex={1} gap="$10" justifyContent="flex-start" paddingTop="$11">
         <YStack gap="$4" width="100%">
-          <LoginFlowTitle>{t('loginFlow.v2.phoneNumber.title')}</LoginFlowTitle>
-          <LoginFlowText>{t('loginFlow.v2.phoneNumber.text')}</LoginFlowText>
+          <LoginFlowTitle>
+            {restore
+              ? t('loginFlow.restoreFromBackup.phoneNumber.title')
+              : t('loginFlow.v2.phoneNumber.title')}
+          </LoginFlowTitle>
+          <LoginFlowText>
+            {restore
+              ? t('loginFlow.restoreFromBackup.phoneNumber.text')
+              : t('loginFlow.v2.phoneNumber.text')}
+          </LoginFlowText>
         </YStack>
         <YStack alignItems="center" gap="$3" width="100%">
           <XStack
@@ -286,15 +255,7 @@ export default function PhoneNumberScreen({
               {phoneNumberGroupElements}
             </XStack>
           </XStack>
-          {errorMessage != null ? (
-            <Typography
-              color="$redForeground"
-              textAlign="center"
-              variant="paragraphSmall"
-            >
-              {errorMessage}
-            </Typography>
-          ) : null}
+          <InlineErrorText>{errorMessage}</InlineErrorText>
         </YStack>
       </YStack>
     </LoginFlowScreen>

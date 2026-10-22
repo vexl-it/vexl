@@ -35,6 +35,8 @@ export {ClubCard} from './ClubCard'
 export type {ClubCardProps} from './ClubCard'
 export {ClubReachCard} from './ClubReachCard'
 export type {ClubReachCardProps} from './ClubReachCard'
+export {CodeInput} from './CodeInput'
+export type {CodeInputProps} from './CodeInput'
 export {CommonFriends} from './CommonFriends'
 export type {CommonFriend, CommonFriendsProps} from './CommonFriends'
 export {

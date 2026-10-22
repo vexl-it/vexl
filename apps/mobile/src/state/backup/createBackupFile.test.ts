@@ -72,7 +72,6 @@ describe('createBackupFile', () => {
     )
 
     expect(backupFile).toEqual({
-      version: 1,
       session: {
         phoneNumber: session.phoneNumber,
         sessionCredentials: session.sessionCredentials,

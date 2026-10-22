@@ -11,6 +11,7 @@ import {makeRequestWithCommonAndSecurityHeaders} from '../../apiSecurity'
 import {createClientInstance} from '../../client'
 import {makeCommonHeaders, type AppSource} from '../../commonHeaders'
 import {
+  type GetBackupKeyPairRequest,
   type InitEraseUserRequest,
   type InitPhoneVerificationRequest,
   type InitUpgradeAuthRequest,
@@ -124,6 +125,12 @@ export function api({
         withSecurityHeaders((headers) =>
           client.UpgradeAuth.submitUpgradeAuth({payload: request, headers})
         ),
+      getBackupPublicKey: () =>
+        withSecurityHeaders((headers) =>
+          client.Backup.getBackupPublicKey({headers})
+        ),
+      getBackupKeyPair: (request: GetBackupKeyPairRequest) =>
+        client.Backup.getBackupKeyPair({payload: request}),
     }
   })
 }

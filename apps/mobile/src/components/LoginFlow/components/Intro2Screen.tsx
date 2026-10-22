@@ -27,9 +27,15 @@ export default function Intro2Screen({navigation}: Props): React.ReactElement {
     <LoginFlowScreen
       disableHorizontalPaddingForChildren
       action={{
-        label: t('common.continue'),
+        label: t('loginFlow.v2.intro2.action'),
         onPress: () => {
           navigation.navigate('PhoneNumber')
+        },
+      }}
+      secondaryAction={{
+        label: t('loginFlow.v2.intro2.restoreAction'),
+        onPress: () => {
+          navigation.navigate('RestoreIntro')
         },
       }}
     >

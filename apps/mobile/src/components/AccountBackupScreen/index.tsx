@@ -6,24 +6,25 @@ import {
   InfoPoint,
   Lock,
   NavigationBar,
+  QuestionmarkCircle,
   RefreshArrowsRectangle,
   Screen,
   Stack,
   Typography,
   YStack,
 } from '@vexl-next/ui'
-import {Effect} from 'effect'
-import {useSetAtom} from 'jotai'
-import React, {useState} from 'react'
-import {exportAccountBackupActionAtom} from '../../state/backup/exportAccountBackupActionAtom'
+import React from 'react'
+import {type RootStackScreenProps} from '../../navigationTypes'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 
-export default function AccountBackupScreen(): React.ReactElement {
+type Props = RootStackScreenProps<'AccountBackup'>
+
+export default function AccountBackupScreen({
+  navigation,
+}: Props): React.ReactElement {
   const {t} = useTranslation()
   const safeGoBack = useSafeGoBack()
-  const exportAccountBackup = useSetAtom(exportAccountBackupActionAtom)
-  const [exporting, setExporting] = useState(false)
 
   return (
     <Screen
@@ -37,12 +38,8 @@ export default function AccountBackupScreen(): React.ReactElement {
       }
       footer={
         <Button
-          variant={exporting ? 'disabled' : 'primary'}
           onPress={() => {
-            setExporting(true)
-            void Effect.runPromise(exportAccountBackup()).finally(() => {
-              setExporting(false)
-            })
+            navigation.navigate('AccountBackupPin')
           }}
         >
           {t('accountBackup.createButton')}
@@ -64,6 +61,9 @@ export default function AccountBackupScreen(): React.ReactElement {
         <InfoBox variant="pink">{t('accountBackup.warning')}</InfoBox>
         <YStack gap="$4">
           <InfoPoint icon={Lock}>{t('accountBackup.storeSafely')}</InfoPoint>
+          <InfoPoint icon={QuestionmarkCircle}>
+            {t('accountBackup.forgotPin')}
+          </InfoPoint>
           <InfoPoint icon={RefreshArrowsRectangle}>
             {t('accountBackup.onlyOnce')}
           </InfoPoint>

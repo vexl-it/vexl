@@ -68,7 +68,6 @@ export const createBackupFile = ({
       !HashSet.has(derivedClubPublicKeys, keys.oldKeyPair.publicKeyPemBase64)
 
     return {
-      version: 1,
       session: {
         ...Struct.pick(
           session,

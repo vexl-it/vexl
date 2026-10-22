@@ -44,6 +44,8 @@ export const feedbackServiceUrlToRedirectToConfig = Config.string(
 export const oldHmacKeyUsedForHashingNumbersConfig =
   Config.string('OLD_HMAC_KEY')
 
+export const backupHmacKeyConfig = Config.redacted('SECRET_BACKUP_HMAC_KEY')
+
 export const preludeApiTokenConfig = Config.string('PRELUDE_API_TOKEN')
 
 export const turnstileSecretKeyConfig = Config.option(

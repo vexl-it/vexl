@@ -1,6 +1,8 @@
 import {
   BACKUP_FILE_EXTENSION,
-  BackupFileFromJson,
+  encryptBackupFile,
+  EncryptedBackupFileFromJson,
+  type BackupPin,
 } from '@vexl-next/resources-utils/src/backup/BackupFile'
 import {Array, Effect, Schema} from 'effect'
 import {File} from 'expo-file-system'
@@ -8,13 +10,19 @@ import {shareAsync} from 'expo-sharing'
 import {atom} from 'jotai'
 import {DateTime} from 'luxon'
 import {Platform} from 'react-native'
+import {apiAtom} from '../../api'
 import {showErrorAlert} from '../../components/ErrorAlert'
+import {withLoadingOverlayAtom} from '../../components/LoadingOverlayProvider'
 import {
   deleteIfExists,
   getAccountBackupDirectory,
 } from '../../utils/fsDirectories'
 import {translationAtom} from '../../utils/localization/I18nProvider'
 import reportError from '../../utils/reportError'
+import {
+  isTransportRequestError,
+  toCommonErrorMessage,
+} from '../../utils/useCommonErrorMessages'
 import messagingStateAtom from '../chat/atoms/messagingStateAtom'
 import {clubsKeyHolderStorageAtom} from '../clubs/atom/clubsToKeyHolderV2Atom'
 import {keyDerivationCountersAtom} from '../keyDerivation'
@@ -62,28 +70,35 @@ const writeAndShareBackupFile = (
 
 export const exportAccountBackupActionAtom = atom(
   null,
-  (get): Effect.Effect<boolean> => {
+  (get, set, pin: BackupPin): Effect.Effect<boolean> => {
     const {t} = get(translationAtom)
     const session = get(sessionAtom)
     if (session.state !== 'loggedIn') return Effect.succeed(false)
 
     const {data: clubs, waitingForAdmission} = get(clubsKeyHolderStorageAtom)
 
-    return createBackupFile({
-      session: session.session,
-      counters: get(keyDerivationCountersAtom),
-      inboxKeys: Array.map(
-        get(messagingStateAtom),
-        (one) => one.inbox.privateKey
-      ),
-      clubs,
-      clubKeysWaitingForAdmission: waitingForAdmission,
-      realUserData: userDataForBackup(session.session.realUserData),
-      notificationSecret: notificationSecretForBackup(
-        get(vexlNotificationTokenAtom)
-      ),
+    return Effect.all({
+      publicKey: get(apiAtom).user.getBackupPublicKey(),
+      backup: createBackupFile({
+        session: session.session,
+        counters: get(keyDerivationCountersAtom),
+        inboxKeys: Array.map(
+          get(messagingStateAtom),
+          (one) => one.inbox.privateKey
+        ),
+        clubs,
+        clubKeysWaitingForAdmission: waitingForAdmission,
+        realUserData: userDataForBackup(session.session.realUserData),
+        notificationSecret: notificationSecretForBackup(
+          get(vexlNotificationTokenAtom)
+        ),
+      }),
     }).pipe(
-      Effect.flatMap(Schema.encode(BackupFileFromJson)),
+      Effect.flatMap(({publicKey: {publicKey}, backup}) =>
+        encryptBackupFile({backup, pin, publicKey})
+      ),
+      Effect.flatMap(Schema.encode(EncryptedBackupFileFromJson)),
+      set(withLoadingOverlayAtom),
       Effect.flatMap((content) =>
         writeAndShareBackupFile(
           backupFileName(DateTime.now()),
@@ -95,10 +110,15 @@ export const exportAccountBackupActionAtom = atom(
       Effect.catchAll((e) =>
         Effect.sync(() => {
           // Only the tag - the error could carry key material.
-          reportError('error', new Error('Error exporting account backup'), {
-            errorTag: e._tag,
+          if (!isTransportRequestError(e))
+            reportError('error', new Error('Error exporting account backup'), {
+              errorTag: e._tag,
+            })
+          showErrorAlert({
+            title:
+              toCommonErrorMessage(e, t, true) ??
+              t('common.somethingWentWrong'),
           })
-          showErrorAlert({title: t('common.somethingWentWrong')})
           return false
         })
       )

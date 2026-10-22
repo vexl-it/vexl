@@ -1,8 +1,9 @@
 import React from 'react'
 import type {ImageProps as RNImageProps} from 'react-native'
 import {FilterImage} from 'react-native-svg/filter-image'
-import {getTokens} from 'tamagui'
+import {getTokens, type ColorTokens} from 'tamagui'
 import {Stack, ZStack} from '../primitives'
+import {TrustBadge} from './TrustBadge'
 
 export type AvatarSize = 'small' | 'medium' | 'large' | '$9'
 
@@ -40,6 +41,8 @@ export interface AvatarProps {
   readonly size?: AvatarSize
   readonly customSize?: AvatarCustomSize
   readonly grayscale?: boolean
+  readonly trusted?: boolean
+  readonly trustBadgeRingColor?: ColorTokens
 }
 
 export function Avatar({
@@ -48,14 +51,15 @@ export function Avatar({
   size = 'medium',
   customSize,
   grayscale = false,
+  trusted = false,
+  trustBadgeRingColor = '$backgroundSecondary',
 }: AvatarProps): React.JSX.Element {
   const dimension = customSize ?? SIZE_TOKEN_MAP[size]
   const backgroundColor = grayscale ? '$black100' : '$backgroundSecondary'
 
-  if (source != null) {
-    const px = resolveSizePx(size, customSize)
-
-    return (
+  const px = resolveSizePx(size, customSize)
+  const avatar =
+    source != null ? (
       <Stack
         width={px}
         height={px}
@@ -70,29 +74,43 @@ export function Avatar({
           filters={grayscale ? GRAYSCALE_FILTER : undefined}
         />
       </Stack>
+    ) : (
+      <ZStack
+        width={dimension}
+        height={dimension}
+        borderRadius="$2.5"
+        overflow="hidden"
+        backgroundColor={backgroundColor}
+      >
+        <Stack
+          position="absolute"
+          top={0}
+          left={0}
+          right={0}
+          bottom={0}
+          alignItems="center"
+          justifyContent="center"
+          opacity={grayscale ? 0.5 : 1}
+        >
+          {children}
+        </Stack>
+      </ZStack>
     )
-  }
+
+  if (!trusted) return avatar
+
+  const largeBadge = px >= 32
+  const badgeOffset = -(0.3 * (largeBadge ? getTokens().size.$5.val : 10)) - 2
 
   return (
-    <ZStack
-      width={dimension}
-      height={dimension}
-      borderRadius="$2.5"
-      overflow="hidden"
-      backgroundColor={backgroundColor}
-    >
-      <Stack
-        position="absolute"
-        top={0}
-        left={0}
-        right={0}
-        bottom={0}
-        alignItems="center"
-        justifyContent="center"
-        opacity={grayscale ? 0.5 : 1}
-      >
-        {children}
+    <Stack position="relative" width={dimension} height={dimension}>
+      {avatar}
+      <Stack position="absolute" bottom={badgeOffset} right={badgeOffset}>
+        <TrustBadge
+          size={largeBadge ? 'large' : 'small'}
+          ringColor={trustBadgeRingColor}
+        />
       </Stack>
-    </ZStack>
+    </Stack>
   )
 }

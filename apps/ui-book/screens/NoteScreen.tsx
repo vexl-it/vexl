@@ -84,6 +84,16 @@ function ThemeGroup({
           message="Selling 0.05 BTC for cash in Prague. DM me if interested!"
         />
 
+        <SectionLabel>Trusted</SectionLabel>
+        <Note
+          avatar={<SvgAvatar />}
+          name="Friend of friend"
+          commonFriends="5 common friends"
+          trustedFriends="2 trusted"
+          expiration="18 h"
+          message="Looking to buy sats in Prague."
+        />
+
         <SectionLabel>Pressable</SectionLabel>
         <Note
           avatar={<SvgAvatar />}

@@ -225,6 +225,14 @@ function ThemeGroup({
           />
         </YStack>
 
+        <SectionLabel>Profile, trusted</SectionLabel>
+        <EditRow
+          state="profile"
+          overline="Contact"
+          headline="Jana Nováková"
+          avatar={{source: testAvatar, trusted: true}}
+        />
+
         <SectionLabel>Profile (with SVG avatar)</SectionLabel>
         <YStack gap="$3">
           <EditRow

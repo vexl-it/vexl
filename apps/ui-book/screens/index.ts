@@ -13,6 +13,7 @@ import {ChipScreen} from './ChipScreen'
 import {ClubCardScreen} from './ClubCardScreen'
 import {ClubReachCardScreen} from './ClubReachCardScreen'
 import {CommonFriendsScreen} from './CommonFriendsScreen'
+import {CommonFriendsSummaryScreen} from './CommonFriendsSummaryScreen'
 import {DialogScreen} from './DialogScreen'
 import {DisclosureScreen} from './DisclosureScreen'
 import {DismissKeyboardOnPressOutsideScreen} from './DismissKeyboardOnPressOutsideScreen'
@@ -68,6 +69,8 @@ import {TabsScreen} from './TabsScreen'
 import {TextFieldScreen} from './TextFieldScreen'
 import {TextTagScreen} from './TextTagScreen'
 import {ToastScreen} from './ToastScreen'
+import {TrustBadgeScreen} from './TrustBadgeScreen'
+import {TrustedFriendExplanationScreen} from './TrustedFriendExplanationScreen'
 import {TypographyScreen} from './TypographyScreen'
 
 export interface ScreenEntry {
@@ -89,6 +92,7 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'Club Card', component: ClubCardScreen},
   {label: 'Club Reach Card', component: ClubReachCardScreen},
   {label: 'Common Friends', component: CommonFriendsScreen},
+  {label: 'Common Friends Summary', component: CommonFriendsSummaryScreen},
   {label: 'Dialog', component: DialogScreen},
   {label: 'Disclosure', component: DisclosureScreen},
   {
@@ -153,5 +157,10 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'Text Field', component: TextFieldScreen},
   {label: 'Text Tag', component: TextTagScreen},
   {label: 'Toast', component: ToastScreen},
+  {label: 'Trust Badge', component: TrustBadgeScreen},
+  {
+    label: 'Trusted Friend Explanation',
+    component: TrustedFriendExplanationScreen,
+  },
   {label: 'Typography', component: TypographyScreen},
 ]

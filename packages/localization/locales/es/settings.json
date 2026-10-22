@@ -156,6 +156,8 @@
   "accountBackup.forgotPin": "¿Olvidaste el PIN? Entonces la copia no se puede usar. Simplemente haz una nueva mientras aún tengas Vexl en este teléfono.",
   "accountBackup.onlyOnce": "Con una copia basta. Funciona hasta que elimines tu cuenta o vuelvas a iniciar sesión con tu número de teléfono.",
   "accountBackup.createButton": "Crear archivo de copia de seguridad",
+  "accountBackup.saveToDeviceButton": "Guardar en el dispositivo",
+  "accountBackup.savedToDevice": "Archivo de copia de seguridad guardado",
   "accountBackup.pin.title": "Elige un PIN para la copia",
   "accountBackup.pin.text": "Usa de 4 a 8 dígitos que vayas a recordar. Nadie puede recuperarlo por ti, ni siquiera nosotros.",
   "accountBackup.pin.confirmTitle": "Vuelve a introducir el PIN",

@@ -155,6 +155,8 @@
   "accountBackup.forgotPin": "Pincode vergeten? Dan is de back-up niet meer te gebruiken. Maak gewoon een nieuwe zolang je Vexl nog op deze telefoon hebt.",
   "accountBackup.onlyOnce": "Eén back-up is genoeg. Hij blijft werken tot je je account verwijdert of opnieuw inlogt met je telefoonnummer.",
   "accountBackup.createButton": "Back-upbestand maken",
+  "accountBackup.saveToDeviceButton": "Opslaan op apparaat",
+  "accountBackup.savedToDevice": "Back-upbestand opgeslagen",
   "accountBackup.pin.title": "Kies een back-uppincode",
   "accountBackup.pin.text": "Gebruik 4 tot 8 cijfers die je onthoudt. Niemand kan hem voor je terughalen, ook wij niet.",
   "accountBackup.pin.confirmTitle": "Vul de pincode nog een keer in",

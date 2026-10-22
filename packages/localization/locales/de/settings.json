@@ -155,6 +155,8 @@
   "accountBackup.forgotPin": "PIN vergessen? Dann lässt sich das Backup nicht verwenden. Erstell einfach ein neues, solange du Vexl noch auf diesem Handy hast.",
   "accountBackup.onlyOnce": "Ein Backup reicht. Es funktioniert, bis du deinen Account löschst oder dich erneut mit deiner Telefonnummer anmeldest.",
   "accountBackup.createButton": "Backup-Datei erstellen",
+  "accountBackup.saveToDeviceButton": "Auf Gerät speichern",
+  "accountBackup.savedToDevice": "Backup-Datei gespeichert",
   "accountBackup.pin.title": "Wähle eine Backup-PIN",
   "accountBackup.pin.text": "Nimm 4 bis 8 Ziffern, die du dir merken kannst. Niemand kann sie für dich wiederherstellen, auch wir nicht.",
   "accountBackup.pin.confirmTitle": "Gib die PIN noch mal ein",

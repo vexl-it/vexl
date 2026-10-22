@@ -157,6 +157,8 @@
   "accountBackup.forgotPin": "Zapomeneš PIN? Pak záloha nepůjde použít. Prostě si udělej novou, dokud máš Vexl v tomhle telefonu.",
   "accountBackup.onlyOnce": "Stačí jedna záloha. Funguje, dokud nesmažeš účet nebo se znovu nepřihlásíš telefonním číslem.",
   "accountBackup.createButton": "Vytvořit záložní soubor",
+  "accountBackup.saveToDeviceButton": "Uložit do zařízení",
+  "accountBackup.savedToDevice": "Záložní soubor uložen",
   "accountBackup.pin.title": "Zvol si PIN k záloze",
   "accountBackup.pin.text": "Použij 4 až 8 číslic, které si zapamatuješ. Nikdo ti ho nedokáže obnovit, ani my.",
   "accountBackup.pin.confirmTitle": "Zadej PIN ještě jednou",

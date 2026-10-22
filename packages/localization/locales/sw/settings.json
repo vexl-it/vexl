@@ -155,6 +155,8 @@
   "accountBackup.forgotPin": "Umesahau PIN? Basi nakala rudufu haiwezi kutumika. Tengeneza tu nyingine mpya wakati bado una Vexl kwenye simu hii.",
   "accountBackup.onlyOnce": "Nakala moja inatosha. Inaendelea kufanya kazi hadi utakapofuta akaunti yako au kuingia tena kwa namba yako ya simu.",
   "accountBackup.createButton": "Tengeneza faili ya nakala rudufu",
+  "accountBackup.saveToDeviceButton": "Hifadhi kwenye kifaa",
+  "accountBackup.savedToDevice": "Faili ya nakala rudufu imehifadhiwa",
   "accountBackup.pin.title": "Chagua PIN ya nakala rudufu",
   "accountBackup.pin.text": "Tumia tarakimu 4 hadi 8 utakazozikumbuka. Hakuna anayeweza kuirejesha kwa niaba yako, hata sisi.",
   "accountBackup.pin.confirmTitle": "Weka PIN tena",

@@ -156,6 +156,8 @@
   "accountBackup.forgotPin": "Code PIN oublié ? Alors la sauvegarde est inutilisable. Fais-en simplement une nouvelle tant que tu as encore Vexl sur ce téléphone.",
   "accountBackup.onlyOnce": "Une seule sauvegarde suffit. Elle fonctionne jusqu'à ce que tu supprimes ton compte ou te reconnectes avec ton numéro de téléphone.",
   "accountBackup.createButton": "Créer le fichier de sauvegarde",
+  "accountBackup.saveToDeviceButton": "Enregistrer sur l'appareil",
+  "accountBackup.savedToDevice": "Fichier de sauvegarde enregistré",
   "accountBackup.pin.title": "Choisis un code PIN pour la sauvegarde",
   "accountBackup.pin.text": "Utilise 4 à 8 chiffres dont tu te souviendras. Personne ne pourra le récupérer pour toi, même pas nous.",
   "accountBackup.pin.confirmTitle": "Saisis à nouveau le code PIN",

@@ -155,6 +155,8 @@
   "accountBackup.forgotPin": "忘了 PIN 码？那这个备份就没法用了。趁这部手机上还有 Vexl，重新做一个就好。",
   "accountBackup.onlyOnce": "一个备份就够了。在你删除账户或再次用手机号码登录之前，它会一直有效。",
   "accountBackup.createButton": "创建备份文件",
+  "accountBackup.saveToDeviceButton": "保存到设备",
+  "accountBackup.savedToDevice": "备份文件已保存",
   "accountBackup.pin.title": "设置备份 PIN 码",
   "accountBackup.pin.text": "使用你记得住的 4 到 8 位数字。没人能帮你找回它，包括我们。",
   "accountBackup.pin.confirmTitle": "再次输入 PIN 码",

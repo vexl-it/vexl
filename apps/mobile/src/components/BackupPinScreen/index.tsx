@@ -25,6 +25,7 @@ interface Props {
   readonly secondaryAction?: {
     readonly label: string
     readonly onPress: () => void
+    readonly disabled?: boolean
   }
 }
 
@@ -63,7 +64,7 @@ export default function BackupPinScreen({
           </Button>
           {secondaryAction ? (
             <Button
-              disabled={busy}
+              disabled={busy || secondaryAction.disabled}
               variant="secondary"
               onPress={secondaryAction.onPress}
             >

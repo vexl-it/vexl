@@ -155,6 +155,8 @@
   "accountBackup.forgotPin": "PINを忘れたら、そのバックアップは使えません。このスマホにVexlがあるうちに、新しいバックアップを作ってください。",
   "accountBackup.onlyOnce": "バックアップは1回で十分です。アカウントを削除するか、電話番号でもう一度ログインするまで使えます。",
   "accountBackup.createButton": "バックアップファイルを作成",
+  "accountBackup.saveToDeviceButton": "デバイスに保存",
+  "accountBackup.savedToDevice": "バックアップファイルを保存しました",
   "accountBackup.pin.title": "バックアップ用のPINを設定",
   "accountBackup.pin.text": "忘れない4〜8桁の数字にしてください。PINは誰にも復元できません。私たちにもです。",
   "accountBackup.pin.confirmTitle": "もう一度PINを入力",

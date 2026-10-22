@@ -4,8 +4,8 @@ import {
   EncryptedBackupFileFromJson,
   type BackupPin,
 } from '@vexl-next/resources-utils/src/backup/BackupFile'
-import {Array, Effect, Schema} from 'effect'
-import {File} from 'expo-file-system'
+import {Array, Effect, Option, Schema} from 'effect'
+import {Directory, File} from 'expo-file-system'
 import {shareAsync} from 'expo-sharing'
 import {atom} from 'jotai'
 import {DateTime} from 'luxon'
@@ -13,6 +13,7 @@ import {Platform} from 'react-native'
 import {apiAtom} from '../../api'
 import {showErrorAlert} from '../../components/ErrorAlert'
 import {withLoadingOverlayAtom} from '../../components/LoadingOverlayProvider'
+import {toastNotificationAtom} from '../../components/ToastNotification/atom'
 import {
   deleteIfExists,
   getAccountBackupDirectory,
@@ -41,7 +42,7 @@ class AccountBackupExportError extends Schema.TaggedError<AccountBackupExportErr
 export const backupFileName = (date: DateTime): string =>
   `${date.toFormat('yyyy-MM-dd')}.${BACKUP_FILE_EXTENSION}`
 
-const writeAndShareBackupFile = (
+const shareBackupFile = (
   fileName: string,
   content: string,
   dialogTitle: string
@@ -68,9 +69,58 @@ const writeAndShareBackupFile = (
     catch: (cause) => new AccountBackupExportError({cause}),
   })
 
+const PickerCancelledError = Schema.Struct({
+  code: Schema.Literal('ERR_PICKER_CANCELLED'),
+})
+
+// None when the user closes the folder picker.
+const pickDirectory = (): Effect.Effect<
+  Option.Option<Directory>,
+  AccountBackupExportError
+> =>
+  Effect.tryPromise(async () => await Directory.pickDirectoryAsync()).pipe(
+    Effect.map(Option.some),
+    Effect.catchAll(({error}) =>
+      Schema.is(PickerCancelledError)(error)
+        ? Effect.succeedNone
+        : new AccountBackupExportError({cause: error})
+    )
+  )
+
+// False when the user closes the folder picker.
+const saveBackupFileToPickedDirectory = (
+  fileName: string,
+  content: string
+): Effect.Effect<boolean, AccountBackupExportError> =>
+  pickDirectory().pipe(
+    Effect.flatMap(
+      Option.match({
+        onNone: () => Effect.succeed(false),
+        onSome: (directory) =>
+          Effect.try({
+            try: () => {
+              // With a typed MIME the storage provider appends its own
+              // extension (.json), the generic one keeps the file name as is.
+              directory
+                .createFile(fileName, 'application/octet-stream')
+                .write(content, {encoding: 'utf8'})
+              return true
+            },
+            catch: (cause) => new AccountBackupExportError({cause}),
+          }),
+      })
+    )
+  )
+
+export type AccountBackupDestination = 'device' | 'share'
+
 export const exportAccountBackupActionAtom = atom(
   null,
-  (get, set, pin: BackupPin): Effect.Effect<boolean> => {
+  (
+    get,
+    set,
+    {pin, destination}: {pin: BackupPin; destination: AccountBackupDestination}
+  ): Effect.Effect<boolean> => {
     const {t} = get(translationAtom)
     const session = get(sessionAtom)
     if (session.state !== 'loggedIn') return Effect.succeed(false)
@@ -99,14 +149,26 @@ export const exportAccountBackupActionAtom = atom(
       ),
       Effect.flatMap(Schema.encode(EncryptedBackupFileFromJson)),
       set(withLoadingOverlayAtom),
-      Effect.flatMap((content) =>
-        writeAndShareBackupFile(
-          backupFileName(DateTime.now()),
-          content,
-          t('accountBackup.shareSheetTitle')
+      Effect.flatMap((content) => {
+        const fileName = backupFileName(DateTime.now())
+        if (destination === 'share')
+          return shareBackupFile(
+            fileName,
+            content,
+            t('accountBackup.shareSheetTitle')
+          ).pipe(Effect.as(true))
+
+        return saveBackupFileToPickedDirectory(fileName, content).pipe(
+          Effect.tap((saved) =>
+            Effect.when(
+              Effect.sync(() => {
+                set(toastNotificationAtom, t('accountBackup.savedToDevice'))
+              }),
+              () => saved
+            )
+          )
         )
-      ),
-      Effect.as(true),
+      }),
       Effect.catchAll((e) =>
         Effect.sync(() => {
           // Only the tag - the error could carry key material.

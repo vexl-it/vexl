@@ -126,6 +126,7 @@ jobs:
           context: .
           file: ${{ matrix.dockerfile || './Dockerfile' }}
           platforms: linux/amd64
+          pull: true
           push: true
           provenance: false
           cache-from: type=gha,scope=${{ matrix.service }}

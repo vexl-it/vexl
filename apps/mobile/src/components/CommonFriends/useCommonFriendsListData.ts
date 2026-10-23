@@ -7,7 +7,7 @@ import {
   type RootStackScreenProps,
 } from '../../navigationTypes'
 import {type StoredContactWithComputedValues} from '../../state/contacts/domain'
-import {trustedFriendsEnabledAtom} from '../../state/featureFlags'
+import {trustedFriendsEnabledAtom} from '../../state/deviceConfig'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import {showTrustedFriendExplanationActionAtom} from './atoms'
 import {useCommonFriends} from './useCommonFriends'

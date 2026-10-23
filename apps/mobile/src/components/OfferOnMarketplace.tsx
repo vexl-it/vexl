@@ -17,7 +17,7 @@ import {
   smallestClubForIdsAtom,
 } from '../state/clubs/atom/clubsWithMembersAtom'
 import {type ClubWithMembers} from '../state/clubs/domain'
-import {trustedFriendsEnabledAtom} from '../state/featureFlags'
+import {trustedFriendsEnabledAtom} from '../state/deviceConfig'
 import {useVisibleCommonFriendsForOffer} from '../state/marketplace/hooks/useVisibleCommonFriendsForOffer'
 import {isProductOfferMissingCategory} from '../state/marketplace/utils/isProductOfferMissingCategory'
 import {getOtherSideFriendLevel} from '../utils/chat/getOtherSideFriendLevel'

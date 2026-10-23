@@ -5,10 +5,10 @@ import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect
 import {Effect} from 'effect'
 import {trustedFriendsEnabledConfig} from '../configs'
 
-export const getFeatureFlagsHandler = HttpApiBuilder.handler(
+export const getDeviceConfigHandler = HttpApiBuilder.handler(
   ContentApiSpecification,
-  'FeatureFlags',
-  'getFeatureFlags',
+  'DeviceConfig',
+  'getDeviceConfig',
   () =>
     Effect.all({trustedFriends: trustedFriendsEnabledConfig}).pipe(
       Effect.catchAll(
@@ -18,7 +18,7 @@ export const getFeatureFlagsHandler = HttpApiBuilder.handler(
             status: 500,
           })
       ),
-      Effect.withSpan('getFeatureFlags'),
+      Effect.withSpan('getDeviceConfig'),
       makeEndpointEffect
     )
 )

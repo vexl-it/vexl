@@ -15,8 +15,8 @@ import {
   CreateInvoiceError,
   CreateInvoiceRequest,
   CreateInvoiceResponse,
+  DeviceConfigResponse,
   EventsResponse,
-  FeatureFlagsResponse,
   GetInvoiceGeneralError,
   GetInvoicePaymentMethodsGeneralError,
   GetInvoiceRequest,
@@ -70,15 +70,15 @@ export const GetMapStylesEndpoint = HttpApiEndpoint.get(
 
 const MapApiGroup = HttpApiGroup.make('Map').add(GetMapStylesEndpoint)
 
-export const GetFeatureFlagsEndpoint = HttpApiEndpoint.get(
-  'getFeatureFlags',
-  '/content/feature-flags'
+export const GetDeviceConfigEndpoint = HttpApiEndpoint.get(
+  'getDeviceConfig',
+  '/content/device-config'
 )
-  .addSuccess(FeatureFlagsResponse)
+  .addSuccess(DeviceConfigResponse)
   .annotate(MaxExpectedDailyCall, 500)
 
-const FeatureFlagsApiGroup = HttpApiGroup.make('FeatureFlags').add(
-  GetFeatureFlagsEndpoint
+const DeviceConfigApiGroup = HttpApiGroup.make('DeviceConfig').add(
+  GetDeviceConfigEndpoint
 )
 
 export const GetVexlProductNotificationsEndpoint = HttpApiEndpoint.get(
@@ -147,7 +147,7 @@ export const ContentApiSpecification = HttpApi.make('Content API')
   .add(CmsContentApiGroup)
   .add(NewsAndAnnouncementsApiGroup)
   .add(MapApiGroup)
-  .add(FeatureFlagsApiGroup)
+  .add(DeviceConfigApiGroup)
   .add(VexlProductNotificationsApiGroup)
   .add(DonationsApiGroup)
   .addError(NotFoundError, {status: 404})

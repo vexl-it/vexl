@@ -1,5 +1,5 @@
 import {useAtomValue} from 'jotai'
-import {trustedFriendsEnabledAtom} from '../../state/featureFlags'
+import {trustedFriendsEnabledAtom} from '../../state/deviceConfig'
 import {formatInteger} from './formatting'
 import {formattingLocaleAtom} from './formattingLocaleAtom'
 import {useTranslation} from './I18nProvider'

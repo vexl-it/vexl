@@ -3,7 +3,7 @@ import {useAtomValue} from 'jotai'
 import {useMemo} from 'react'
 import createImportedContactsForHashesAtom from '../../state/contacts/atom/createImportedContactsForHashesAtom'
 import {type StoredContactWithComputedValues} from '../../state/contacts/domain'
-import {trustedFriendsEnabledAtom} from '../../state/featureFlags'
+import {trustedFriendsEnabledAtom} from '../../state/deviceConfig'
 import {orderFriendsByTrust} from './orderFriendsByTrust'
 
 export function useCommonFriends(

@@ -82,7 +82,7 @@ export function api({
           headers: commonHeaders,
         }),
       getMapStyles: () => client.Map.getMapStyles({}),
-      getFeatureFlags: () => client.FeatureFlags.getFeatureFlags({}),
+      getDeviceConfig: () => client.DeviceConfig.getDeviceConfig({}),
       getVexlProductNotifications: (
         request: GetVexlProductNotificationsRequest
       ) =>

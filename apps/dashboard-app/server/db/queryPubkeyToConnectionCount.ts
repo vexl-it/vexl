@@ -30,25 +30,65 @@ export const queryPubkeysToConnections = ({
   PgContactClient
 > =>
   PgContactClient.pipe(
-    Effect.flatMap(
-      (sql) => sql`
-        SELECT
-          users.public_key AS "publicKey",
-          count(DISTINCT lvl1Users.id) + count(DISTINCT lvl2Users.id) AS "count"
-        FROM
-          users
-          LEFT JOIN user_contact lvl1 ON lvl1.hash_from = users.hash
-          AND lvl1.id > ${someOrZero(minId)}
-          AND lvl1.id <= ${maxId}
-          LEFT JOIN users lvl1users ON concat('next:', lvl1.hash_to) = lvl1users.hash
-          LEFT JOIN user_contact lvl2 ON lvl1.hash_to = lvl2.hash_to
-          AND lvl2.hash_from != users.hash
-          LEFT JOIN users lvl2Users ON lvl2.hash_from = lvl2Users.hash
-        GROUP BY
-          users.public_key
-        HAVING
-          count(DISTINCT lvl1Users.id) + count(DISTINCT lvl2Users.id) > 0
-      `
+    Effect.flatMap((sql) =>
+      sql.withTransaction(
+        sql`
+          SET
+            LOCAL statement_timeout = '5min'
+        `.pipe(
+          Effect.zipRight(sql`
+            WITH
+              new_contacts AS (
+                SELECT
+                  hash_from,
+                  hash_to
+                FROM
+                  user_contact
+                WHERE
+                  id > ${someOrZero(minId)}
+                  AND id <= ${maxId}
+              ),
+              lvl1 AS (
+                SELECT
+                  new_contacts.hash_from,
+                  count(*) AS "count"
+                FROM
+                  new_contacts
+                  JOIN users ON users.hash = new_contacts.hash_to
+                GROUP BY
+                  new_contacts.hash_from
+              ),
+              lvl2_pairs AS (
+                SELECT DISTINCT
+                  new_contacts.hash_from,
+                  other.hash_from AS other_hash
+                FROM
+                  new_contacts
+                  JOIN user_contact other ON other.hash_to = new_contacts.hash_to
+                  AND other.hash_from <> new_contacts.hash_from
+              ),
+              lvl2 AS (
+                SELECT
+                  lvl2_pairs.hash_from,
+                  count(*) AS "count"
+                FROM
+                  lvl2_pairs
+                  JOIN users ON users.hash = lvl2_pairs.other_hash
+                GROUP BY
+                  lvl2_pairs.hash_from
+              )
+            SELECT
+              users.public_key AS "publicKey",
+              coalesce(lvl1.count, 0) + coalesce(lvl2.count, 0) AS "count"
+            FROM
+              users
+              LEFT JOIN lvl1 ON lvl1.hash_from = users.hash
+              LEFT JOIN lvl2 ON lvl2.hash_from = users.hash
+            WHERE
+              coalesce(lvl1.count, 0) + coalesce(lvl2.count, 0) > 0
+          `)
+        )
+      )
     ),
     Effect.flatMap(decodePubkeysToConnectionsQueryResult)
   )

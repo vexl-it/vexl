@@ -18,6 +18,10 @@ const decodePubkeysToConnectionsQueryResult = Schema.decodeUnknown(
 const someOrZero = <T>(o: Option.Option<T>): T | 0 =>
   Option.getOrElse(o, () => 0)
 
+// Counting distinct second-degree users exactly over the whole contact graph
+// is too slow, so we count a deterministic 1/N sample of them and scale up.
+const LVL2_SAMPLE_RATE = 10
+
 export const queryPubkeysToConnections = ({
   minId,
   maxId,
@@ -66,11 +70,13 @@ export const queryPubkeysToConnections = ({
                   new_contacts
                   JOIN user_contact other ON other.hash_to = new_contacts.hash_to
                   AND other.hash_from <> new_contacts.hash_from
+                WHERE
+                  hashtext (other.hash_from) % ${LVL2_SAMPLE_RATE} = 0
               ),
               lvl2 AS (
                 SELECT
                   lvl2_pairs.hash_from,
-                  count(*) AS "count"
+                  count(*) * ${LVL2_SAMPLE_RATE} AS "count"
                 FROM
                   lvl2_pairs
                   JOIN users ON users.hash = lvl2_pairs.other_hash

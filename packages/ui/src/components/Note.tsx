@@ -1,11 +1,10 @@
 import React from 'react'
 import {styled, useTheme} from 'tamagui'
 
-import {PeopleUsers} from '../icons/PeopleUsers'
-import {SandWatch} from '../icons/SandWatch'
 import {type IconProps} from '../icons/types'
 import {XStack, YStack} from '../primitives'
 import {CardButton} from './CardButton'
+import {NoteMeta} from './NoteMeta'
 import {Typography} from './Typography'
 
 export interface NoteTag {
@@ -22,6 +21,7 @@ export interface NoteProps {
   readonly avatar: React.ReactNode
   readonly name?: string
   readonly commonFriends?: string
+  readonly trustedFriends?: string
   readonly expiration: string
   readonly message: string
   readonly messageNumberOfLines?: number
@@ -84,6 +84,7 @@ export function Note({
   avatar,
   name,
   commonFriends,
+  trustedFriends,
   expiration,
   message,
   messageNumberOfLines,
@@ -115,22 +116,11 @@ export function Note({
                 {name}
               </Typography>
             ) : null}
-            <XStack gap="$3" alignItems="center">
-              {commonFriends ? (
-                <XStack gap="$1" alignItems="center">
-                  <PeopleUsers size={16} color={iconColor} />
-                  <Typography variant="micro" color="$foregroundSecondary">
-                    {commonFriends}
-                  </Typography>
-                </XStack>
-              ) : null}
-              <XStack gap="$1" alignItems="center">
-                <SandWatch size={16} color={iconColor} />
-                <Typography variant="micro" color="$foregroundSecondary">
-                  {expiration}
-                </Typography>
-              </XStack>
-            </XStack>
+            <NoteMeta
+              commonFriends={commonFriends}
+              trustedFriends={trustedFriends}
+              expiration={expiration}
+            />
           </YStack>
         </HeaderFrame>
       </InformationFrame>

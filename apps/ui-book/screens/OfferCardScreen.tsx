@@ -105,6 +105,47 @@ function Demos(): React.JSX.Element {
         ]}
       />
 
+      <SectionLabel>Trusted</SectionLabel>
+      <OfferCard
+        avatar={<AnonAvatar />}
+        name="Friend of friend"
+        textTag={<TextTag variant="offer" label="Has" />}
+        iconTag={<IconTag variant="bitcoin" />}
+        commonFriends="5 common friends"
+        trustedFriends="2 trusted"
+        price="0.5 - 1 BTC"
+        description="Quick trade, Prague area."
+        details={['In cash', 'Prague']}
+      />
+      <SectionLabel>Club + trusted</SectionLabel>
+      <OfferCard
+        avatar={<ClubAvatar />}
+        name="Friend of friend"
+        textTag={<TextTag variant="offer" label="Has" />}
+        iconTag={<IconTag variant="bitcoin" />}
+        clubNames={['btc prague meetup']}
+        commonFriends="1 common"
+        trustedFriends="1 trusted"
+        price="0.5 - 1 BTC"
+        description="Quick trade, Prague area."
+        details={['In cash', 'Prague']}
+      />
+      <SectionLabel>Club + trusted, German worst case</SectionLabel>
+      <YStack width={375}>
+        <OfferCard
+          avatar={<ClubAvatar />}
+          name="Freund eines Freundes"
+          textTag={<TextTag variant="offer" label="Has" />}
+          iconTag={<IconTag variant="bitcoin" />}
+          clubNames={['btc prague meetup']}
+          commonFriends="12 Gemeinsam"
+          trustedFriends="3 vertraut"
+          price="0.5 - 1 BTC"
+          description="Quick trade, Prague area."
+          details={['In cash', 'Prague']}
+        />
+      </YStack>
+
       <SectionLabel>Premium</SectionLabel>
       <OfferCard
         avatar={<PremiumAvatar />}

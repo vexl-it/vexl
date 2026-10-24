@@ -17,6 +17,7 @@ import {
   smallestClubForIdsAtom,
 } from '../state/clubs/atom/clubsWithMembersAtom'
 import {type ClubWithMembers} from '../state/clubs/domain'
+import {trustedFriendsEnabledAtom} from '../state/deviceConfig'
 import {useVisibleCommonFriendsForOffer} from '../state/marketplace/hooks/useVisibleCommonFriendsForOffer'
 import {isProductOfferMissingCategory} from '../state/marketplace/utils/isProductOfferMissingCategory'
 import {getOtherSideFriendLevel} from '../utils/chat/getOtherSideFriendLevel'
@@ -26,6 +27,7 @@ import formatSpokenLanguages from '../utils/localization/formatSpokenLanguages'
 import {formatInteger} from '../utils/localization/formatting'
 import {formattingLocaleAtom} from '../utils/localization/formattingLocaleAtom'
 import {useTranslation} from '../utils/localization/I18nProvider'
+import {useTrustedFriendsText} from '../utils/localization/useTrustedFriendsText'
 import {getOfferFeeLabel} from '../utils/offerAmountDetails'
 import {
   getAmountLabelActionAtom,
@@ -106,11 +108,19 @@ export default function OfferOnMarketplace({
     : (getOtherSideFriendLevel({offerInfo: offer.offerInfo, t}) ??
       t('offer.friendOfFriend'))
 
+  const showTrustedFriends = useAtomValue(trustedFriendsEnabledAtom)
+  const trustedFriendsText = useTrustedFriendsText(
+    isMine ? 0 : visibleCommonFriends.verifiedCommonFriends.length
+  )
   const commonFriendsCount = visibleCommonFriends.commonFriends.length
   const commonFriendsText = !isMine
-    ? t('marketplace.commonFriendsFormatted', {
-        localizedString: formatInteger(commonFriendsCount, locale),
-      })
+    ? showTrustedFriends && Option.isSome(smallestClub)
+      ? t('offer.numberOfCommon', {
+          number: formatInteger(commonFriendsCount, locale),
+        })
+      : t('marketplace.commonFriendsFormatted', {
+          localizedString: formatInteger(commonFriendsCount, locale),
+        })
     : undefined
 
   const clubNames = isMine
@@ -213,6 +223,7 @@ export default function OfferOnMarketplace({
         <IconTag neutral={shouldBeGrayscaled} variant={iconTagVariant} />
       }
       commonFriends={commonFriendsText}
+      trustedFriends={trustedFriendsText}
       clubNames={clubNames}
       price={price}
       premiumLabel={premiumLabel.length > 0 ? premiumLabel : undefined}

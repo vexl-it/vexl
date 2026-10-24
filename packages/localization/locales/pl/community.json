@@ -77,6 +77,7 @@
   "notes.chat.noteDetail": "Szczegóły notatki",
   "notes.detail.noteNotFound": "Nie znaleziono notatki.",
   "notes.chat.welcomeReceiverDescription": "Zanim rozpoczniesz rozmowę, możesz sprawdzić wspólnych znajomych i szczegóły notatki.",
+  "notes.chat.welcomeReceiverDescriptionWithTrusted": "Zanim rozpoczniesz rozmowę, możesz sprawdzić wspólnych znajomych, w tym zaufanych, i szczegóły notatki.",
   "goldenGlasses.errorSettingRewardForParticipationOnMeetup": "Błąd podczas ustawiania nagrody za udział w spotkaniu. Skontaktuj się z działem wsparcia.",
   "goldenGlasses.youReceived": "Otrzymałeś",
   "goldenGlasses.goldenGlasses": "złote okulary",

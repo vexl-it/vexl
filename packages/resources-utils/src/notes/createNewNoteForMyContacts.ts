@@ -120,6 +120,7 @@ export default function createNewNoteForMyContacts({
         toPublicKey: ownerKeyPairV2.publicKey,
         payloadPrivate: {
           commonFriends: [],
+          verifiedCommonFriends: [],
           friendLevel: [],
           symmetricKey,
           viaRepost: false,

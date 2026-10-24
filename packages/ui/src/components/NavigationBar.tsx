@@ -1,9 +1,9 @@
 import React from 'react'
-import {getTokens, styled, useTheme} from 'tamagui'
+import {styled} from 'tamagui'
 
-import {PeopleUsers} from '../icons/PeopleUsers'
 import type {IconProps} from '../icons/types'
 import {SizableText, Stack, XStack, YStack} from '../primitives'
+import {CommonFriendsSummary} from './CommonFriendsSummary'
 import {NavButton, type NavButtonVariant} from './NavButton'
 import {Typography} from './Typography'
 
@@ -94,12 +94,6 @@ const ChatInfoColumn = styled(YStack, {
   justifyContent: 'flex-end',
 })
 
-const ChatSubtitleRow = styled(XStack, {
-  name: 'NavigationBarChatSubtitle',
-  alignItems: 'flex-end',
-  gap: '$1',
-})
-
 interface NavigationBarBackProps {
   readonly style: 'back'
   readonly title?: string
@@ -111,6 +105,7 @@ interface NavigationBarChatProps {
   readonly style: 'chat'
   readonly name: string
   readonly subtitle?: string
+  readonly trustedFriends?: string
   readonly avatar?: React.ReactNode
   readonly leftAction?: NavigationBarAction
   readonly rightActions?: readonly NavigationBarAction[]
@@ -152,7 +147,6 @@ function RightNavAction({
 }
 
 export function NavigationBar(props: NavigationBarProps): React.JSX.Element {
-  const theme = useTheme()
   return (
     <NavigationBarFrame>
       {props.style === 'back' ? (
@@ -183,20 +177,18 @@ export function NavigationBar(props: NavigationBarProps): React.JSX.Element {
           <ChatPressableArea onPress={props.onPress}>
             {props.avatar}
             <ChatInfoColumn>
-              <Typography variant="paragraphSmall" color="$foregroundPrimary">
+              <Typography
+                variant="paragraphSmall"
+                color="$foregroundPrimary"
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
                 {props.name}
               </Typography>
-              {props.subtitle ? (
-                <ChatSubtitleRow>
-                  <PeopleUsers
-                    color={theme.foregroundSecondary.get()}
-                    size={getTokens().size.$5.val}
-                  />
-                  <Typography variant="micro" color="$foregroundSecondary">
-                    {props.subtitle}
-                  </Typography>
-                </ChatSubtitleRow>
-              ) : null}
+              <CommonFriendsSummary
+                commonFriends={props.subtitle}
+                trustedFriends={props.trustedFriends}
+              />
             </ChatInfoColumn>
           </ChatPressableArea>
           {props.rightActions?.map((action, i) => (

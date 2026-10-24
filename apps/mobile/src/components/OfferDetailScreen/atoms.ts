@@ -1,7 +1,4 @@
-import {
-  type OfferInfo,
-  type OneOfferInState,
-} from '@vexl-next/domain/src/general/offers'
+import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {Array, Effect, Either, Option, Record} from 'effect'
 import {atom} from 'jotai'
 import {Alert} from 'react-native'
@@ -12,51 +9,8 @@ import {translationAtom} from '../../utils/localization/I18nProvider'
 import reportError from '../../utils/reportError'
 import {toCommonErrorMessage} from '../../utils/useCommonErrorMessages'
 import {showErrorAlert} from '../ErrorAlert'
-import {askAreYouSureActionAtom, globalDialogAtom} from '../GlobalDialog'
+import {globalDialogAtom} from '../GlobalDialog'
 import {loadingOverlayDisplayedAtom} from '../LoadingOverlayProvider'
-
-export const showCommonFriendsExplanationActionAtom = atom(
-  null,
-  (get, set, offerInfo: OfferInfo) => {
-    const {t} = get(translationAtom)
-
-    return Effect.gen(function* (_) {
-      const modalContent = (() => {
-        if (offerInfo.privatePart.friendLevel.includes('FIRST_DEGREE')) {
-          if (offerInfo.privatePart.commonFriends.length === 0) {
-            return {
-              title: t('offer.offerFromDirectFriend'),
-              description: `${t('offer.youSeeThisOfferBecause')} ${t(
-                'offer.beCautiousWeCannotVerify'
-              )}`,
-              positiveButtonText: t('common.gotIt'),
-            }
-          }
-          return {
-            title: t('offer.offerFromDirectFriend'),
-            description: `${t('offer.youSeeThisOfferBecause')} ${t(
-              'offer.dontForgetToVerifyTheIdentity'
-            )}`,
-            positiveButtonText: t('common.gotIt'),
-          }
-        }
-        return {
-          title: t('offer.offerFromFriendOfFriend'),
-          description: t('offer.noDirectConnection'),
-          positiveButtonText: t('common.gotIt'),
-        }
-      })()
-
-      return yield* _(
-        set(askAreYouSureActionAtom, {
-          steps: [{...modalContent, type: 'StepWithText'}],
-          variant: 'info',
-        }),
-        Effect.ignore
-      )
-    })
-  }
-)
 
 export const showNoCommonFriendsExplanationActionAtom = atom(
   null,

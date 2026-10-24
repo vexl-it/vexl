@@ -15,6 +15,7 @@ import {
   CreateInvoiceError,
   CreateInvoiceRequest,
   CreateInvoiceResponse,
+  DeviceConfigResponse,
   EventsResponse,
   GetInvoiceGeneralError,
   GetInvoicePaymentMethodsGeneralError,
@@ -68,6 +69,17 @@ export const GetMapStylesEndpoint = HttpApiEndpoint.get(
   .annotate(MaxExpectedDailyCall, 500)
 
 const MapApiGroup = HttpApiGroup.make('Map').add(GetMapStylesEndpoint)
+
+export const GetDeviceConfigEndpoint = HttpApiEndpoint.get(
+  'getDeviceConfig',
+  '/content/device-config'
+)
+  .addSuccess(DeviceConfigResponse)
+  .annotate(MaxExpectedDailyCall, 500)
+
+const DeviceConfigApiGroup = HttpApiGroup.make('DeviceConfig').add(
+  GetDeviceConfigEndpoint
+)
 
 export const GetVexlProductNotificationsEndpoint = HttpApiEndpoint.get(
   'getVexlProductNotifications',
@@ -135,6 +147,7 @@ export const ContentApiSpecification = HttpApi.make('Content API')
   .add(CmsContentApiGroup)
   .add(NewsAndAnnouncementsApiGroup)
   .add(MapApiGroup)
+  .add(DeviceConfigApiGroup)
   .add(VexlProductNotificationsApiGroup)
   .add(DonationsApiGroup)
   .addError(NotFoundError, {status: 404})

@@ -27,6 +27,7 @@ import {getInvoiceStatusTypeHandler} from './handlers/donations/getInvoiceStatus
 import {updateInvoiceStateWebhook} from './handlers/donations/updateInvoiceStateWebhook'
 import {UpdateInvoiceStateWebhookService} from './handlers/donations/UpdateInvoiceStateWebhookService'
 import {getEventsHandler} from './handlers/events'
+import {getDeviceConfigHandler} from './handlers/getDeviceConfig'
 import {getMapStylesHandler} from './handlers/getMapStyles'
 import {newsAndAnonouncementsHandler} from './handlers/getNewsAndAnnonuncements'
 import {internalServerLive} from './internalServer'
@@ -56,6 +57,12 @@ const MapApiGroupLive = HttpApiBuilder.group(
   (h) => h.handle('getMapStyles', getMapStylesHandler)
 )
 
+const DeviceConfigApiGroupLive = HttpApiBuilder.group(
+  ContentApiSpecification,
+  'DeviceConfig',
+  (h) => h.handle('getDeviceConfig', getDeviceConfigHandler)
+)
+
 const VexlProductNotificationsApiGroupLive = HttpApiBuilder.group(
   ContentApiSpecification,
   'VexlProductNotifications',
@@ -78,6 +85,7 @@ export const ContentApiLive = HttpApiBuilder.api(ContentApiSpecification).pipe(
   Layer.provide(CmsApiGroupLive),
   Layer.provide(NewsAndAnnouncementsApiGroupLive),
   Layer.provide(MapApiGroupLive),
+  Layer.provide(DeviceConfigApiGroupLive),
   Layer.provide(VexlProductNotificationsApiGroupLive),
   Layer.provide(VexlProductNotificationsDbService.Live),
   Layer.provide(DonationsApiGroupLive),

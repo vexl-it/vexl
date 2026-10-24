@@ -8,7 +8,9 @@ import {type ChatMessageWithState} from '../../../state/chat/domain'
 import isNoteChatOrigin from '../../../state/chat/utils/isNoteChatOrigin'
 import {useGetAllClubsForIds} from '../../../state/clubs/atom/clubsWithMembersAtom'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
+import {useTrustedFriendsText} from '../../../utils/localization/useTrustedFriendsText'
 import {chatMolecule} from '../atoms'
+import {useCommonFriendsOtherSide} from '../utils/useCommonFriendsOtherSide'
 import VexlbotActionCard from './VexlbotMessageItem/components/VexlbotActionCard'
 
 export function VexlBotRequestHelp({
@@ -17,10 +19,12 @@ export function VexlBotRequestHelp({
   message: ChatMessageWithState
 }): React.ReactElement | null {
   const {t} = useTranslation()
+  const otherSide = useCommonFriendsOtherSide()
   const navigation =
     useNavigation<RootStackScreenProps<'ChatDetail'>['navigation']>()
   const {
     chatAtom,
+    trustedConnectionsCountAtom,
     commonConnectionsHashesAtom,
     publicKeyPemBase64Atom,
     chatStateAtom,
@@ -30,6 +34,9 @@ export function VexlBotRequestHelp({
     friendLevelInfoAtom,
     isMyChatOriginAtom,
   } = useMolecule(chatMolecule)
+  const trustedFriendsText = useTrustedFriendsText(
+    useAtomValue(trustedConnectionsCountAtom)
+  )
   const chat = useAtomValue(chatAtom)
   const inboxKey = useAtomValue(publicKeyPemBase64Atom)
   const commonConnectionsHashes = useAtomValue(commonConnectionsHashesAtom)
@@ -62,6 +69,7 @@ export function VexlBotRequestHelp({
       clubs: otherSideClubs,
       friendLevel,
       isMine,
+      otherSide,
     })
   }, [
     commonConnectionsHashes,
@@ -69,6 +77,7 @@ export function VexlBotRequestHelp({
     isMine,
     navigation,
     otherSideClubs,
+    otherSide,
     verifiedConnectionsHashes,
   ])
 
@@ -127,8 +136,16 @@ export function VexlBotRequestHelp({
           title={t('messages.vexlBot.welcomeToTheTradeChat.title')}
           description={
             isMyNoteChat
-              ? t('notes.chat.welcomeReceiverDescription')
-              : t('messages.vexlBot.welcomeToTheTradeChat.receiverDescription')
+              ? t(
+                  trustedFriendsText
+                    ? 'notes.chat.welcomeReceiverDescriptionWithTrusted'
+                    : 'notes.chat.welcomeReceiverDescription'
+                )
+              : t(
+                  trustedFriendsText
+                    ? 'messages.vexlBot.welcomeToTheTradeChat.receiverDescriptionWithTrusted'
+                    : 'messages.vexlBot.welcomeToTheTradeChat.receiverDescription'
+                )
           }
         >
           <XStack gap="$3">

@@ -73,6 +73,7 @@
   "notes.chat.noteDetail": "ノート詳細",
   "notes.detail.noteNotFound": "ノートが見つかりません。",
   "notes.chat.welcomeReceiverDescription": "会話を始める前に、共通の友達とノートの詳細を確認できます。",
+  "notes.chat.welcomeReceiverDescriptionWithTrusted": "会話を始める前に、信頼できる友達を含む共通の友達とノートの詳細を確認できます。",
   "goldenGlasses.errorSettingRewardForParticipationOnMeetup": "ミートアップ参加報酬を設定できませんでした。サポートにお問い合わせください。",
   "goldenGlasses.youReceived": "獲得しました",
   "goldenGlasses.goldenGlasses": "ゴールデングラス",

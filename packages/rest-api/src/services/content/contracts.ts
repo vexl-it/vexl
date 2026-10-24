@@ -153,6 +153,11 @@ export const MapStylesResponse = Schema.Struct({
 })
 export type MapStylesResponse = typeof MapStylesResponse.Type
 
+export const DeviceConfigResponse = Schema.Struct({
+  trustedFriends: Schema.Boolean,
+})
+export type DeviceConfigResponse = typeof DeviceConfigResponse.Type
+
 export class CreateInvoiceError extends Schema.TaggedError<CreateInvoiceError>(
   'CreateInvoiceError'
 )('CreateInvoiceError', {

@@ -293,22 +293,26 @@ it('refreshes changed common friends independently and keeps retries when the gr
   )
 })
 
-it('does not refresh note payloads for verified-friend-only changes', async () => {
+it('refreshes note payloads for verified-friend-only changes', async () => {
   const store = setup()
   await run(store)
   const friend = Schema.decodeSync(HashedPhoneNumber)('friend')
+  const verifiedFriends = HashMap.make([publicKey, [friend]])
   jest.mocked(fetchConnectionsActionAtom.write).mockReturnValueOnce(
     Effect.succeed({
       ...graph,
       firstLevel: [...graph.firstLevel],
       secondLevel: [],
-      verifiedFriends: HashMap.make([publicKey, [friend]]),
+      verifiedFriends,
     })
   )
   await run(store)
-  expect(
-    jest.mocked(updateNotePrivateParts).mock.lastCall?.[0].connectionsToRefresh
-  ).toEqual([])
+  expect(jest.mocked(updateNotePrivateParts).mock.lastCall?.[0]).toEqual(
+    expect.objectContaining({
+      connectionsToRefresh: [publicKey],
+      verifiedFriends,
+    })
+  )
 })
 
 it('keeps retries on the failed note without refreshing successful notes again', async () => {

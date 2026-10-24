@@ -134,4 +134,20 @@ describe('geocode', () => {
       })
     )
   })
+
+  it('serves the v1 endpoint used by app versions older than 26.8.0', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const client = yield* _(NodeTestingApp)
+        yield* _(setDummyAuthHeaders)
+
+        const urlParams = {lang: 'en-US', ...coordinates(50.076, 14.438)}
+        const v1 = yield* _(client.getGeocodedCoordinates({urlParams}))
+        const v2 = yield* _(client.getGeocodedCoordinatesV2({urlParams}))
+
+        expect(v1.address).toEqual('Vinohrady, Prague - CZ')
+        expect(v1).toEqual(v2)
+      })
+    )
+  })
 })

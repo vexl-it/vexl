@@ -151,21 +151,24 @@ function getUserSessionCredentials(): UserSessionCredentials {
   throw error
 }
 
+export const sessionCountryPrefixAtom = atom((get) => {
+  const sessionHolder = get(sessionHolderAtom)
+  return sessionHolder.state === 'loggedIn'
+    ? Effect.runSync(
+        countryPrefixFromNumber(sessionHolder.session.phoneNumber).pipe(
+          Effect.option
+        )
+      )
+    : Option.none()
+})
+
 export const apiAtom = atom((get) =>
   Effect.gen(function* (_) {
     const {t} = get(translationAtom)
     const language = t('localeName')
     const isDeveloper = get(isDeveloperAtom)
 
-    const sessionHolder = get(sessionHolderAtom)
-    const prefix =
-      sessionHolder.state === 'loggedIn'
-        ? yield* _(
-            countryPrefixFromNumber(sessionHolder.session.phoneNumber).pipe(
-              Effect.option
-            )
-          )
-        : Option.none()
+    const prefix = get(sessionCountryPrefixAtom)
 
     return {
       contact: yield* _(

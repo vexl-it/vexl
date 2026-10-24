@@ -47,6 +47,7 @@ function MissingProductCategoriesMarketplaceSuggestion({
 
   return (
     <DismissableMarketplaceBanner
+      promptId="missingProductCategories"
       color="pink"
       title={t('marketplace.missingProductCategoriesSuggestion.title')}
       description={t(descriptionKey, {count: affectedOffersCount})}

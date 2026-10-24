@@ -32,6 +32,7 @@ import {useGetAllClubsForIds} from '../../state/clubs/atom/clubsWithMembersAtom'
 import {useSingleOffer} from '../../state/marketplace'
 import {toggleOfferMarkActionAtom} from '../../state/marketplace/atoms/offerMarkActionAtoms'
 import {useVisibleCommonFriendsForOffer} from '../../state/marketplace/hooks/useVisibleCommonFriendsForOffer'
+import {useReportOfferOpened} from '../../utils/analytics'
 import {useNavigateToChatDetail} from '../../utils/chat/goToChatDetail'
 import {formatInteger} from '../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../utils/localization/formattingLocaleAtom'
@@ -262,6 +263,7 @@ function OfferDetailScreen({
     showNoCommonFriendsExplanationActionAtom
   )
   const offer = useSingleOffer(offerId)
+  useReportOfferOpened(offer)
   const offerRerequestLimitDays = useAtomValue(offerRerequestLimitDaysAtom)
   const isMyOffer = Option.match(offer, {
     onNone: () => false,

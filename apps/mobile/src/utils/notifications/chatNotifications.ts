@@ -179,6 +179,7 @@ export async function showChatNotification({
     new SystemChatNotificationData({
       inbox: inbox.inbox.privateKey.publicKeyPemBase64,
       sender: newMessage.message.senderPublicKey,
+      type,
     })
   )
   const channelId = await getChannelForMessages()

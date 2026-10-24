@@ -93,6 +93,7 @@ export const ports = {
   redis: 6379,
   minioApi: 9000,
   minioConsole: 9001,
+  ohttpRelay: 3017,
 
   // Observability
   grafana: 3030,
@@ -255,6 +256,15 @@ export const serviceConstants = {
 // Mobile defaults (minimal — the mobile tooling reads these). Kept here so the
 // app and backend share one source of truth for ports/host.
 // ---------------------------------------------------------------------------
+// OHTTP analytics relay (docker compose) and the metrics-service gateway key.
+// Dev-only values, safe to commit. Generate others with
+// `pnpm --filter @vexl-next/cryptography generate:ohttp-key`.
+export const analyticsRelay = {
+  gatewayKeyConfig: "AQAgYoWrdsc5Ml+j0GN7fXUkH5FgAf0Q0WWjN+0ccWVU014ABAABAAM=",
+  gatewaySecret: "Aamt9uXCYOs4Oi8o/yUD7zzP1ENFt+t5VZDs2QAgIB9L",
+  relayPath: "/vexl-analytics",
+};
+
 export const mobile = {
   defaultPlatform: "ios",
   // 'local' | 'staging' | '<host>' — see spec §8.
@@ -274,6 +284,7 @@ const devConfig = {
   internalUrls,
   dummyLogin,
   serviceConstants,
+  analyticsRelay,
   mobile,
 };
 

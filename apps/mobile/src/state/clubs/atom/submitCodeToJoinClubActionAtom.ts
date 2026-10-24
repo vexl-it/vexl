@@ -16,6 +16,7 @@ import {globalDialogAtom} from '../../../components/GlobalDialog'
 import {clubToJoinAtom} from '../../../components/JoinClubFlow/atoms'
 import {loadingOverlayDisplayedAtom} from '../../../components/LoadingOverlayProvider'
 import {offerProgressModalActionAtoms} from '../../../components/UploadingOfferProgressModal/atoms'
+import {reportClubJoinedActionAtom} from '../../../utils/analytics'
 import {
   translationAtom,
   type TFunction,
@@ -401,6 +402,7 @@ export const submitCodeToJoinClubActionAtom = atom(
           clubUuid: clubInfoForUser.club.uuid,
         })
       )
+      set(reportClubJoinedActionAtom)
 
       set(loadingOverlayDisplayedAtom, false)
 

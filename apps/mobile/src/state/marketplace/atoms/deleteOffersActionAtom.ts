@@ -1,8 +1,9 @@
 import {type OfferAdminId} from '@vexl-next/domain/src/general/offers'
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
-import {Effect} from 'effect'
+import {Array, Effect} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
+import {reportOffersRemovedActionAtom} from '../../../utils/analytics'
 import reportError from '../../../utils/reportError'
 import offerToConnectionsAtom from '../../connections/atom/offerToConnectionsAtom'
 import {offersAtom} from './offersState'
@@ -27,13 +28,16 @@ export const deleteOffersActionAtom = atom<
     }))
 
     // Delete offers
+    const [keptOffers, deletedOffers] = Array.partition(
+      offers,
+      (o) =>
+        !!o.ownershipInfo?.adminId &&
+        adminIdsToDelete.includes(o.ownershipInfo.adminId)
+    )
+    set(offersAtom, keptOffers)
     set(
-      offersAtom,
-      offers.filter(
-        (o) =>
-          !o.ownershipInfo?.adminId ||
-          !adminIdsToDelete.includes(o.ownershipInfo?.adminId)
-      )
+      reportOffersRemovedActionAtom,
+      Array.map(deletedOffers, (o) => o.offerInfo.offerId)
     )
   }).pipe(
     Effect.mapError((e) => {

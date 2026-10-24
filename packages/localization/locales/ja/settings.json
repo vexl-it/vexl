@@ -151,6 +151,12 @@
   "appSettings.changeCurrency": "通貨を変更",
   "appSettings.appearanceTitle": "外観",
   "appSettings.allowScreencapture": "スクリーンキャプチャを許可",
+  "appSettings.usageStatistics": "利用統計を共有",
+  "appSettings.usageStatisticsLink": "利用統計のしくみ",
+  "analyticsConsent.title": "Vexlの改善に力を貸してください",
+  "analyticsConsent.text": "利用統計を集めてもいいですか？Vexlの足りないところがわかります。ユーザーIDなし、正確な時刻なし、IPアドレスなし。設定でいつでも変更できます。",
+  "analyticsConsent.link": "しくみを読む",
+  "analyticsConsent.accept": "統計を共有",
   "appSettings.appearance.light": "ライトモード",
   "appSettings.appearance.dark": "ダークモード",
   "appSettings.appearance.system": "端末に合わせる"

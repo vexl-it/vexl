@@ -8,24 +8,34 @@ import {
   Schema,
   String,
 } from 'effect'
-import {backofficeDatabaseConfig} from './config'
+import {backofficeDatabaseConfig, metricsDatabaseConfig} from './config'
 
-const SqlLive = backofficeDatabaseConfig.pipe(
-  Effect.map((config) =>
-    PgClient.layer({
-      ...config,
-      transformQueryNames: String.camelToSnake,
-      transformResultNames: String.snakeToCamel,
-    })
-  ),
-  Layer.unwrapEffect
-)
+const makeSqlRuntime = (
+  config: typeof backofficeDatabaseConfig
+): ManagedRuntime.ManagedRuntime<PgClient.PgClient, unknown> =>
+  ManagedRuntime.make(
+    config.pipe(
+      Effect.map((databaseConfig) =>
+        PgClient.layer({
+          ...databaseConfig,
+          transformQueryNames: String.camelToSnake,
+          transformResultNames: String.snakeToCamel,
+        })
+      ),
+      Layer.unwrapEffect
+    )
+  )
+
+const dbRuntime = makeSqlRuntime(backofficeDatabaseConfig)
+const metricsDbRuntime = makeSqlRuntime(metricsDatabaseConfig)
 
 export const runDb = <A, E>(
   effect: Effect.Effect<A, E, PgClient.PgClient>
 ): Promise<A> => dbRuntime.runPromise(effect)
 
-const dbRuntime = ManagedRuntime.make(SqlLive)
+export const runMetricsDb = <A, E>(
+  effect: Effect.Effect<A, E, PgClient.PgClient>
+): Promise<A> => metricsDbRuntime.runPromise(effect)
 
 const DatabaseError = Schema.Struct({
   cause: Schema.optional(Schema.Unknown),

@@ -8,6 +8,7 @@ import {MetricsMessage} from '@vexl-next/server-utils/src/metrics/domain'
 import {MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {reportMetricForked} from '@vexl-next/server-utils/src/metrics/reportMetricForked'
 import {Context, Effect, Layer, Schema} from 'effect'
+import {type SendMessageTask} from './services/NotificationSocketMessaging/domain'
 
 const NOTIFICATION_SENT = 'NOTIFICATION_SENT'
 const NOTIFICATION_PROCESSED = 'NOTIFICATION_PROCESSED'
@@ -36,6 +37,7 @@ export interface NotificationMetricsServiceOperations {
     systemNotificationSent: boolean
     clientPlatform: PlatformName
     channel: NotificationDeliveryChannel
+    sendTaskType: SendMessageTask['_tag']
   }) => Effect.Effect<void>
 
   reportNotificationProcessed: (args: {
@@ -61,6 +63,7 @@ export class NotificationMetricsService extends Context.Tag(
           systemNotificationSent,
           sentAt,
           channel,
+          sendTaskType,
         }) =>
           reportMetricForked(
             new MetricsMessage({
@@ -74,6 +77,7 @@ export class NotificationMetricsService extends Context.Tag(
                 sentAt,
                 clientPlatform,
                 channel,
+                sendTaskType,
               },
             })
           ).pipe(Effect.provideService(MetricsClientService, metricsClient)),

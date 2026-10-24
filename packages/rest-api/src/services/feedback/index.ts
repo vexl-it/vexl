@@ -2,9 +2,9 @@ import {type CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.br
 import {type PlatformName} from '@vexl-next/domain/src/utility/PlatformName'
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {type VersionString} from '@vexl-next/domain/src/utility/VersionString.brand'
-import {Effect} from 'effect/index'
+import {Effect, Option} from 'effect/index'
 import {createClientInstance} from '../../client'
-import {type AppSource} from '../../commonHeaders'
+import {type AppSource, makeCommonHeaders} from '../../commonHeaders'
 import {type ServiceUrl} from '../../ServiceUrl.brand'
 import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand'
 import {type LoggingFunction} from '../../utils'
@@ -57,9 +57,21 @@ export function api({
       })
     )
 
+    const commonHeaders = makeCommonHeaders({
+      appSource,
+      versionCode: clientVersion,
+      semver: clientSemver,
+      platform,
+      isDeveloper,
+      language,
+      deviceModel: Option.fromNullable(deviceModel),
+      osVersion: Option.fromNullable(osVersion),
+      prefix: Option.fromNullable(prefix),
+    })
+
     return {
       submitFeedback: (body: SubmitFeedbackRequest) =>
-        client.submitFeedback({payload: body}),
+        client.submitFeedback({payload: body, headers: commonHeaders}),
     }
   })
 }

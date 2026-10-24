@@ -11,6 +11,7 @@ import {apiAtom} from '../../../api'
 import showDonationPromptGiveLoveActionAtom, {
   DONATION_PROMPT_CHAT_MESSAGES_THRESHOLD_COUNT,
 } from '../../../components/DonationPrompt/atoms/showDonationPromptGiveLoveActionAtom'
+import {reportRequestChatUpdatedActionAtom} from '../../../utils/analytics'
 import {type ActionAtomType} from '../../../utils/atomUtils/ActionAtomType'
 import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
 import {version} from '../../../utils/environment'
@@ -102,6 +103,10 @@ export default function sendMessageActionAtom(
           }),
           Effect.map((message) => {
             set(chatWithMessagesAtom, addMessageToChat(message))
+            set(reportRequestChatUpdatedActionAtom, {
+              chat: get(chatWithMessagesAtom),
+              newMessages: [],
+            })
             return message
           }),
           Effect.runFork

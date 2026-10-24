@@ -11,7 +11,7 @@
  * METRICS_QUEUE_NAME, OTLP_TRACE_EXPORTER_URL, SERVICE_NAME/VERSION and NODE_ENV
  * (via `commonServiceEnv`). Each service's `buildEnv` only adds its own extras.
  */
-import {Array, pipe} from 'effect'
+import {Array, pipe, Record} from 'effect'
 import devConfig, {type DevConfig} from '../../dev.config'
 import {type Secrets} from './secrets'
 
@@ -310,7 +310,9 @@ export const SERVICES: readonly RunnableApp[] = [
     healthPortKey: 'metricsService',
     needs: {db: dbn.metrics, redis: true, s3: false},
     run: tsxService('src/index.ts'),
-    buildEnv: () => ({}),
+    buildEnv: (ctx) => ({
+      ANALYTICS_OHTTP_GATEWAY_SECRETS: ctx.cfg.analyticsRelay.gatewaySecret,
+    }),
   },
 ]
 
@@ -330,6 +332,7 @@ export const WEB_APPS: readonly RunnableApp[] = [
       SERVICE_VERSION: ctx.cfg.common.SERVICE_VERSION,
       PORT: String(ctx.ports.backofficeApp),
       ...dbEnv(ctx, dbn.backoffice),
+      ...Record.mapKeys(dbEnv(ctx, dbn.metrics), (key) => `METRICS_${key}`),
       ADMIN_TOKEN_HASH: sc.backofficeApp.ADMIN_TOKEN_HASH,
       CONTACT_INTERNAL_SERVER_URL: httpUrl(ctx, 'contactServiceInternal'),
       CONTENT_INTERNAL_SERVER_URL: httpUrl(ctx, 'contentServiceInternal'),

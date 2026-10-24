@@ -153,6 +153,12 @@
   "appSettings.changeCurrency": "Zmeniť menu",
   "appSettings.appearanceTitle": "Vzhľad",
   "appSettings.allowScreencapture": "Povoliť snímky obrazovky",
+  "appSettings.usageStatistics": "Zdieľať štatistiky používania",
+  "appSettings.usageStatisticsLink": "Ako fungujú štatistiky používania",
+  "analyticsConsent.title": "Pomôž nám vylepšiť Vexl",
+  "analyticsConsent.text": "Môžeme zbierať štatistiky používania? Ukazujú nám, kde Vexl zaostáva. Žiadne ID používateľa, žiadne presné časy, žiadna IP adresa. Zmeniť to môžeš kedykoľvek v nastaveniach.",
+  "analyticsConsent.link": "Prečítaj si, ako to funguje",
+  "analyticsConsent.accept": "Zdieľať štatistiky",
   "appSettings.appearance.light": "Svetlý režim",
   "appSettings.appearance.dark": "Tmavý režim",
   "appSettings.appearance.system": "Podľa zariadenia"

@@ -271,4 +271,20 @@ describe('suggest', () => {
       })
     )
   })
+
+  it('serves the v1 endpoint used by app versions older than 26.8.0', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const client = yield* _(NodeTestingApp)
+        yield* _(setDummyAuthHeaders)
+
+        const urlParams = {lang: 'en-US', phrase: 'Prague'}
+        const v1 = yield* _(client.getLocationSuggestion({urlParams}))
+        const v2 = yield* _(client.getLocationSuggestionV2({urlParams}))
+
+        expect(v1.result).toHaveLength(1)
+        expect(v1).toEqual(v2)
+      })
+    )
+  })
 })

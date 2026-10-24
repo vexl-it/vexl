@@ -665,9 +665,6 @@ importers:
       '@vexl-next/server-utils':
         specifier: 0.0.0
         version: link:../../packages/server-utils
-      axios:
-        specifier: ^1.15.2
-        version: 1.18.1
       dotenv:
         specifier: ^16.4.5
         version: 16.6.1

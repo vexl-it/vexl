@@ -214,11 +214,7 @@ export const SERVICES: readonly RunnableApp[] = [
     healthPortKey: 'locationService',
     needs: {geocodingDb: true, redis: false, s3: false},
     run: tsxService('src/index.ts'),
-    secretKeys: ['GOOGLE_PLACES_API_KEY'],
-    buildEnv: () => ({
-      // Optional feature; real key via .env.local enables autocomplete.
-      GOOGLE_PLACES_API_KEY: '',
-    }),
+    buildEnv: () => ({}),
   },
   {
     name: 'notification-service',

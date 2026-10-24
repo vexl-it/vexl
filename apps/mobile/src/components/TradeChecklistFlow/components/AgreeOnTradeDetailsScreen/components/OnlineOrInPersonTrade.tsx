@@ -1,4 +1,4 @@
-import {Button, Typography} from '@vexl-next/ui'
+import {Button, ChecklistSection, TradeRule, Typography} from '@vexl-next/ui'
 import {useAtomValue} from 'jotai'
 import React from 'react'
 import {Stack, YStack} from 'tamagui'
@@ -11,19 +11,6 @@ import DateAndTimeCell from './DateAndTimeCell'
 import MeetingLocationCell from './MeetingLocationCell'
 import RevealIdentityCell from './RevealIdentityCell'
 import SetNetworkCell from './SetNetworkCell'
-import TradeRule from './TradeRule'
-function SectionTitle({
-  children,
-}: {
-  children: React.ReactNode
-}): React.ReactElement {
-  return (
-    <Typography variant="paragraphSmall" color="$foregroundPrimary">
-      {children}
-    </Typography>
-  )
-}
-
 function OnlineOrInPersonTrade(): React.ReactElement {
   const {t} = useTranslation()
   const offerForTradeChecklist = useAtomValue(fromChatAtoms.originOfferAtom)
@@ -94,28 +81,19 @@ function OnlineOrInPersonTrade(): React.ReactElement {
     <YStack gap="$6" f={1}>
       {top}
 
-      <Stack gap="$3">
-        <SectionTitle>{t('tradeChecklist.meetingDetail')}</SectionTitle>
-        <Stack gap="$2">
-          <DateAndTimeCell />
-          <MeetingLocationCell />
-        </Stack>
-      </Stack>
+      <ChecklistSection title={t('tradeChecklist.meetingDetail')}>
+        <DateAndTimeCell />
+        <MeetingLocationCell />
+      </ChecklistSection>
 
-      <Stack gap="$3">
-        <SectionTitle>{t('tradeChecklist.paymentDetail')}</SectionTitle>
-        <Stack gap="$2">
-          <CalculateAmountCell />
-          <SetNetworkCell />
-        </Stack>
-      </Stack>
+      <ChecklistSection title={t('tradeChecklist.paymentDetail')}>
+        <CalculateAmountCell />
+        <SetNetworkCell />
+      </ChecklistSection>
 
-      <Stack gap="$3">
-        <SectionTitle>{t('tradeChecklist.privacy')}</SectionTitle>
-        <Stack gap="$2">
-          <RevealIdentityCell />
-        </Stack>
-      </Stack>
+      <ChecklistSection title={t('tradeChecklist.privacy')}>
+        <RevealIdentityCell />
+      </ChecklistSection>
     </YStack>
   )
 }

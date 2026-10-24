@@ -1,0 +1,79 @@
+/* Rings spreading from your phone, behind both phones. */
+.nearby-waves {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.nearby-waves span {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 300%;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  border: 2px solid var(--accentYellowPrimary);
+  border-radius: 50%;
+  opacity: 0;
+  animation: nearby-wave 3000ms ease-out infinite;
+}
+
+.nearby-waves span:nth-child(2) {
+  animation-delay: 1000ms;
+}
+
+.nearby-waves span:nth-child(3) {
+  animation-delay: 2000ms;
+}
+
+@keyframes nearby-wave {
+  from {
+    opacity: 0.6;
+    transform: scale(0.2);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1);
+  }
+}
+
+.nearby-off {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: #000;
+}
+
+.nearby-off.is-waking {
+  animation: nearby-wake 500ms ease-out both;
+}
+
+@keyframes nearby-wake {
+  to {
+    opacity: 0;
+  }
+}
+
+.nearby-lock {
+  flex: 1;
+  background:
+    radial-gradient(
+      120% 60% at 15% 0%,
+      color-mix(in srgb, var(--accentYellowPrimary) 22%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      100% 50% at 100% 100%,
+      color-mix(in srgb, var(--accentYellowPrimary) 10%, transparent),
+      transparent 70%
+    ),
+    #0b0b0b;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nearby-waves span,
+  .nearby-off.is-waking {
+    animation: none;
+  }
+}

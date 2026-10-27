@@ -34,6 +34,7 @@ import dedupe_notification_tokens from './migrations/0029_dedupe_notification_to
 import add_inactivity_notification_tracking_to_users from './migrations/0030_add_inactivity_notification_tracking_to_users'
 import cascade_delete_invitation_links_with_creator from './migrations/0031_cascade_delete_invitation_links_with_creator'
 import add_login_session_id_to_users from './migrations/0032_add_login_session_id_to_users'
+import drop_legacy_notification_token_columns from './migrations/0033_drop_legacy_notification_token_columns'
 
 const migrations = [
   {
@@ -196,6 +197,11 @@ const migrations = [
     id: 32,
     name: 'add_login_session_id_to_users',
     migrationEffect: add_login_session_id_to_users,
+  },
+  {
+    id: 33,
+    name: 'drop_legacy_notification_token_columns',
+    migrationEffect: drop_legacy_notification_token_columns,
   },
 ] as const
 

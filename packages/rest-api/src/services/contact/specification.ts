@@ -95,6 +95,17 @@ export const RefreshUserEndpoint = HttpApiEndpoint.post(
   .addError(UserNotFoundError, {status: 404})
   .annotate(MaxExpectedDailyCall, 1)
 
+// No-op kept so clients up to 26.9.5, which call it when their Expo token
+// changes, don't report a 404 to Sentry. TODO https://github.com/vexl-it/vexl/issues/2715
+export const UpdateNotificationTokenEndpoint = HttpApiEndpoint.put(
+  'updateNotificationToken',
+  '/api/v1/users/notification-token'
+)
+  .setHeaders(CommonAndSecurityHeaders)
+  .middleware(ServerSecurityMiddleware)
+  .addSuccess(NoContentResponse)
+  .annotate(MaxExpectedDailyCall, 1)
+
 export const DeleteUserEndpoint = HttpApiEndpoint.del(
   'deleteUser',
   '/api/v1/users/me'
@@ -279,6 +290,7 @@ const UserApiGroup = HttpApiGroup.make('User')
   .add(CheckUserExistsEndpoint)
   .add(CreateUserEndpoint)
   .add(RefreshUserEndpoint)
+  .add(UpdateNotificationTokenEndpoint)
   .add(DeleteUserEndpoint)
   .add(EraseUserFromNetworkEndpoint)
 

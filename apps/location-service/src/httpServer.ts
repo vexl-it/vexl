@@ -25,7 +25,6 @@ import {
   getLocationSuggestionHandler,
   getLocationSuggestionV2Handler,
 } from './handlers'
-import {GoogleMapsService} from './utils/googleMapsApi'
 
 const RootApiGroupLive = HttpApiBuilder.group(
   LocationApiSpecification,
@@ -61,7 +60,6 @@ export const HttpServerLive = Layer.mergeAll(
   Layer.provideMerge(RateLimitingService.Live),
   Layer.provideMerge(RedisConnectionService.layer(redisUrl)),
   Layer.provideMerge(ServerCrypto.layer(cryptoConfig)),
-  Layer.provideMerge(GoogleMapsService.Live),
   Layer.provideMerge(GeocodingService.Live),
   Layer.provideMerge(GeocodingDbService.Live),
   Layer.provideMerge(GeocodingDbLayer)

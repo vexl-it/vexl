@@ -83,6 +83,18 @@ export type ExtraToSend =
   | {type: 'image'; image: SelectedImage}
   | {type: 'reply'; message: ChatMessageWithState}
 
+export interface MessageLayout {
+  readonly x: number
+  readonly y: number
+  readonly width: number
+  readonly height: number
+}
+
+export interface MessageActionsSelection {
+  readonly message: ChatMessageWithState
+  readonly layout: MessageLayout
+}
+
 export const ChatScope = createScope<
   WritableAtom<ChatWithMessages, [SetStateAction<ChatWithMessages>], void>
 >(atom<ChatWithMessages>(dummyChatWithMessages))
@@ -558,6 +570,8 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
       }
     )
 
+  const messageActionsSelectionAtom = atom<MessageActionsSelection | null>(null)
+
   const showInfoBarAtom = focusAtom(chatAtom, (o) => o.prop('showInfoBar'))
 
   const calendarEventIdAtom = focusAtom(chatAtom, (o) =>
@@ -862,6 +876,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     friendLevelInfoAtom,
     isMyChatOriginAtom,
     replyToMessageAtom,
+    messageActionsSelectionAtom,
     theirOfferAndNotReportedAtom,
     requestStateAtom: createRequestStateAtom(chatWithMessagesAtom),
     chatStateAtom,

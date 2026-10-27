@@ -13,6 +13,7 @@ import {chatMolecule} from '../atoms'
 import {ChatActionButtons} from './ChatActionButtons'
 import ChatTextInput from './ChatTextInput'
 import MarkAsReadWhenRendered from './MarkAsReadWhenRendered'
+import MessageActionsOverlay from './MessageActionsOverlay'
 import MessagesList from './MessagesList'
 import {MessagesScreenChatHeader} from './MessagesScreenChatHeader'
 import StickyHeader from './StickyHeader'
@@ -56,6 +57,7 @@ function MessagesScreen({
         navigationBar={null}
         noHorizontalPadding
         footer={canSendMessages ? <ChatTextInput /> : <ChatActionButtons />}
+        footerSitsOnKeyboard
         footerFrameProps={{
           backgroundColor: '$backgroundSecondary',
           paddingHorizontal: 0,
@@ -70,6 +72,7 @@ function MessagesScreen({
           </Stack>
         </Stack>
       </Screen>
+      <MessageActionsOverlay />
     </>
   )
 }

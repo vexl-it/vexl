@@ -5,6 +5,8 @@
   "notifications.errorWhileOpening": "Hitilafu wakati wa kufungua arifa",
   "notifications.MESSAGE.title": "Ujumbe mpya",
   "notifications.MESSAGE.body": "Umepokea ujumbe mpya.",
+  "notifications.REACTION.title": "Mwitikio mpya",
+  "notifications.REACTION.body": "Ameitikia kwa {{emoji}} kwenye ujumbe",
   "notifications.REQUEST_REVEAL.title": "Ombi la kufichua utambulisho limepokelewa",
   "notifications.REQUEST_REVEAL.body": "Umeombwa kufichua utambulisho wako.",
   "notifications.APPROVE_REVEAL.title": "Utambulisho umefichuliwa!",

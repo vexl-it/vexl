@@ -1,7 +1,7 @@
 import Foundation
 
 /// Localized title/body pairs for the renderable message types, generated
-/// from packages/localization/<locale>-base.json by
+/// from packages/localization/locales/<locale>/notifications.json by
 /// scripts/generateNotificationLocalizations.mjs (checked-in resource).
 public struct NotificationLocalization: Sendable {
   public struct Entry: Codable, Equatable, Sendable {

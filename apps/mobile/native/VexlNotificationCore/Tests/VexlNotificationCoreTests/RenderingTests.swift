@@ -9,6 +9,7 @@ final class RenderingTests: XCTestCase {
     type: String,
     text: String? = nil,
     minimalRequiredVersion: String? = nil,
+    reactionEmoji: String? = nil,
     time: Int64 = 1_751_808_000_000
   ) -> DecryptedChatMessage {
     DecryptedChatMessage(
@@ -16,7 +17,8 @@ final class RenderingTests: XCTestCase {
       time: time,
       messageTypeRaw: type,
       text: text,
-      minimalRequiredVersion: minimalRequiredVersion
+      minimalRequiredVersion: minimalRequiredVersion,
+      reactionEmoji: reactionEmoji
     )
   }
 
@@ -53,7 +55,10 @@ final class RenderingTests: XCTestCase {
 
   func testAllRenderableTypesRender() throws {
     for type in RenderableMessageType.allCases {
-      let rendered = try render(message(type: type.rawValue, text: "hi"), displayName: "Alice")
+      let rendered = try render(
+        message(type: type.rawValue, text: "hi", reactionEmoji: "❤️"),
+        displayName: "Alice"
+      )
       XCTAssertNotNil(rendered, "type \(type.rawValue) must render")
     }
   }
@@ -104,6 +109,27 @@ final class RenderingTests: XCTestCase {
     )
     XCTAssertEqual(rendered.title, "Alice")
     XCTAssertEqual(rendered.body, "See you at 6")
+  }
+
+  func testReactionUsesNameAndEmoji() throws {
+    let rendered = try XCTUnwrap(
+      try render(message(type: "REACTION", text: "", reactionEmoji: "❤️"), displayName: "Alice")
+    )
+    XCTAssertEqual(rendered.title, "Alice")
+    XCTAssertEqual(rendered.body, "Reacted ❤️ to a message")
+
+    let anonymous = try XCTUnwrap(
+      try render(message(type: "REACTION", reactionEmoji: "👍"), displayName: nil)
+    )
+    XCTAssertEqual(anonymous.title, "New reaction")
+  }
+
+  func testRemovedReactionIsSilent() throws {
+    for emoji in [nil, ""] {
+      let removed = message(type: "REACTION", text: "", reactionEmoji: emoji)
+      XCTAssertFalse(removed.isPreviewable(appSemver: "26.11.0"))
+      XCTAssertNil(try render(removed, displayName: "Alice"))
+    }
   }
 
   func testMessageTypeFallsBackToLocalizedGenericStrings() throws {

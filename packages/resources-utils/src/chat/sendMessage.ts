@@ -40,16 +40,21 @@ type HANDLED_MESSAGE_TYPES =
   | 'MESSAGE_READ'
   | 'REACTION'
 
-const sendSystemNotification = (
+const sendSystemNotification = ({
+  messageType,
+  reaction,
+}: Pick<ChatMessage, 'reaction'> & {
   messageType: HANDLED_MESSAGE_TYPES
-): boolean => {
+}): boolean => {
   if (
     messageType === 'FCM_CYPHER_UPDATE' ||
     messageType === 'VERSION_UPDATE' ||
-    messageType === 'MESSAGE_READ' ||
-    messageType === 'REACTION'
+    messageType === 'MESSAGE_READ'
   )
     return false
+
+  // Removing a reaction is silent.
+  if (messageType === 'REACTION') return reaction?.emoji !== undefined
 
   return true
 }
@@ -110,7 +115,10 @@ export default function sendMessage({
       })({
         notificationToken: theirNotificationToken,
         notificationApi,
-        sendSystemNotification: sendSystemNotification(message.messageType),
+        sendSystemNotification: sendSystemNotification({
+          messageType: message.messageType,
+          reaction: message.reaction,
+        }),
       })
     )
 

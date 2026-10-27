@@ -5,6 +5,7 @@ import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
 import {versionCode} from '../../../utils/environment'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
+import {sessionNotificationTokenAtom} from '../../session'
 import {vexlNotificationTokenAtom} from '../vexlNotificationTokenAtom'
 import {syncVexlNotificationTokensActionAtom} from './syncVexlNotificationTokensActionAtom'
 
@@ -38,6 +39,8 @@ export const createVexlSecretActionAtom = atom(
           locale: language,
         },
       })
+      // Minted from the previous secret. ensureSessionNotificationTokenExistsTask mints a new one.
+      set(sessionNotificationTokenAtom, undefined)
 
       yield* set(syncVexlNotificationTokensActionAtom, {
         expoNotificationToken,

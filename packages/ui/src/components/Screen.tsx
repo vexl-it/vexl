@@ -51,6 +51,8 @@ export interface ScreenProps {
   readonly noHorizontalPadding?: boolean
   readonly footer?: React.ReactNode
   readonly footerAvoidsKeyboard?: boolean
+  /** Hides the footer's bottom safe-area padding behind the keyboard, so the footer content sits directly on it. */
+  readonly footerSitsOnKeyboard?: boolean
   readonly footerFrameProps?: StackProps
   readonly children: React.ReactNode
 }
@@ -64,6 +66,7 @@ export function Screen({
   children,
   footer,
   footerAvoidsKeyboard = true,
+  footerSitsOnKeyboard,
   footerFrameProps,
 }: ScreenProps): React.JSX.Element {
   const insets = useSafeAreaInsets()
@@ -144,6 +147,7 @@ export function Screen({
         )}
         {footerContent && footerAvoidsKeyboard ? (
           <KeyboardStickyView
+            offset={footerSitsOnKeyboard ? {opened: insets.bottom} : undefined}
             style={{
               position: 'absolute',
               bottom: 0,

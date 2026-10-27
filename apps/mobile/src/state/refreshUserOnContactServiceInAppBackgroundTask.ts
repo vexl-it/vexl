@@ -2,8 +2,8 @@ import {Effect, Match, Option} from 'effect/index'
 import {apiAtom} from '../api'
 import {registerInAppLoadingTask} from '../utils/inAppLoadingTasks'
 import reportError from '../utils/reportError'
-import {generateVexlTokenActionAtom} from './notifications/actions/generateVexlTokenActionAtom'
-import {sessionDataOrDummyAtom, sessionNotificationTokenAtom} from './session'
+import {ensureSessionNotificationTokenExistsTaskId} from './notifications/ensureSessionNotificationTokenExistsTask'
+import {sessionDataOrDummyAtom} from './session'
 import {logoutActionAtom} from './useLogout'
 
 export const refreshUserOnContactServiceInAppBackgroundTaskId =
@@ -13,40 +13,13 @@ export const refreshUserOnContactServiceInAppBackgroundTaskId =
       requiresUserLoggedIn: true,
       runOn: 'resume',
     },
+    dependsOn: [{id: ensureSessionNotificationTokenExistsTaskId}],
     task: (store) =>
       Effect.gen(function* (_) {
         const session = store.get(sessionDataOrDummyAtom)
 
-        const sessionNotificationToken = yield* _(
-          Option.fromNullable(session.sessionNotificationToken),
-          Option.match({
-            onSome: (token) => Effect.succeed(Option.some(token)),
-            onNone: () =>
-              store.set(generateVexlTokenActionAtom).pipe(
-                Effect.map(Option.some),
-                Effect.map((token) => {
-                  store.set(
-                    sessionNotificationTokenAtom,
-                    Option.getOrUndefined(token)
-                  )
-                  return token
-                }),
-                Effect.catchAll((e) =>
-                  Effect.zipRight(
-                    Effect.sync(() => {
-                      reportError(
-                        'warn',
-                        new Error(
-                          'Error generating vexl notification token on refresh user'
-                        ),
-                        {e}
-                      )
-                    }),
-                    Effect.succeed(Option.none())
-                  )
-                )
-              ),
-          })
+        const sessionNotificationToken = Option.fromNullable(
+          session.sessionNotificationToken
         )
 
         yield* _(

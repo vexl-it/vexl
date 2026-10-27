@@ -93,6 +93,7 @@ function chatNotification(identifier: string): Notification {
         data: {
           _tag: 'NewChatMessageNoticeNotificationData',
           sentAt: '1782219467129',
+          targetToken: 'vexl_nt_test',
           includesSystemNotification: 'true',
         },
         threadIdentifier: null,

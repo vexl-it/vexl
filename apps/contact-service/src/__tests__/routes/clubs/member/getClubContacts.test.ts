@@ -3,7 +3,6 @@ import {type PublicKeyV2} from '@vexl-next/cryptography/src/KeyHolder/brandsV2'
 import {generateClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
-import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {generateV2KeyPair} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {InvalidChallengeError} from '@vexl-next/rest-api/src/challenges/contracts'
@@ -101,9 +100,6 @@ describe('Get club contacts', () => {
               contactsImported: false,
               signedChallenge: challengeForUser1.signedChallenge,
               publicKey: challengeForUser1.publicKey,
-              notificationToken: Option.some(
-                'someToken' as ExpoNotificationToken
-              ),
               vexlNotificationToken: Option.some(
                 'vexl_nt_test' as VexlNotificationToken
               ),
@@ -130,9 +126,6 @@ describe('Get club contacts', () => {
               contactsImported: false,
               signedChallenge: challengeForUser2.signedChallenge,
               publicKey: challengeForUser2.publicKey,
-              notificationToken: Option.some(
-                'someToken' as ExpoNotificationToken
-              ),
               vexlNotificationToken: Option.some(
                 'vexl_nt_test' as VexlNotificationToken
               ),
@@ -215,9 +208,6 @@ describe('Get club contacts', () => {
               contactsImported: false,
               signedChallenge: challengeForUser.signedChallenge,
               publicKey: challengeForUser.publicKey,
-              notificationToken: Option.some(
-                'someToken' as ExpoNotificationToken
-              ),
               vexlNotificationToken: Option.some(
                 'vexl_nt_test' as VexlNotificationToken
               ),
@@ -295,9 +285,6 @@ describe('Get club contacts', () => {
               contactsImported: false,
               signedChallenge: challengeForUser1.signedChallenge,
               publicKey: challengeForUser1.publicKey,
-              notificationToken: Option.some(
-                'someToken' as ExpoNotificationToken
-              ),
               vexlNotificationToken: Option.some(
                 'vexl_nt_test' as VexlNotificationToken
               ),
@@ -345,9 +332,6 @@ describe('Get club contacts', () => {
               contactsImported: false,
               signedChallenge: challengeForUser2.signedChallenge,
               publicKey: challengeForUser2.publicKey,
-              notificationToken: Option.some(
-                'someToken' as ExpoNotificationToken
-              ),
               vexlNotificationToken: Option.some(
                 'vexl_nt_test' as VexlNotificationToken
               ),
@@ -424,9 +408,6 @@ describe('Get club contacts', () => {
               contactsImported: false,
               signedChallenge: challengeForUser1.signedChallenge,
               publicKey: challengeForUser1.publicKey,
-              notificationToken: Option.some(
-                'someToken' as ExpoNotificationToken
-              ),
               vexlNotificationToken: Option.some(
                 'vexl_nt_test' as VexlNotificationToken
               ),
@@ -503,9 +484,6 @@ describe('Get club contacts', () => {
               contactsImported: false,
               signedChallenge: challengeForUser1.signedChallenge,
               publicKey: challengeForUser1.publicKey,
-              notificationToken: Option.some(
-                'someToken' as ExpoNotificationToken
-              ),
               vexlNotificationToken: Option.some(
                 'vexl_nt_test' as VexlNotificationToken
               ),
@@ -581,7 +559,6 @@ describe('Get club contacts', () => {
                 publicKey: user.mainKeyPair.publicKeyPemBase64,
                 isModerator: false,
                 lastRefreshedAt: new Date(),
-                notificationToken: null,
                 vexlNotificationToken: null,
                 publicKeyV2,
               })

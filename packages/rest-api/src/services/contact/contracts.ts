@@ -15,8 +15,6 @@ import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications
 import {ConnectionLevel, OfferId} from '@vexl-next/domain/src/general/offers'
 import {ServerToClientHashedNumber} from '@vexl-next/domain/src/general/ServerToClientHashedNumber'
 import {ShortLivedTokenForErasingUserOnContactService} from '@vexl-next/domain/src/general/ShortLivedTokenForErasingUserOnContactService'
-import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
-import {FcmToken} from '@vexl-next/domain/src/utility/FcmToken.brand'
 import {BooleanFromString} from '@vexl-next/generic-utils/src/effect-helpers/BooleanFromString'
 import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/EcdsaSignature.brand'
 import {Schema} from 'effect'
@@ -78,11 +76,6 @@ export const CreateUserRequest = Schema.Struct({
     as: 'Option',
     nullable: true,
   }),
-  // todo #2124 remove after all clients are migrated to vexl notification tokens
-  firebaseToken: Schema.NullOr(FcmToken),
-  expoToken: Schema.optionalWith(Schema.NullOr(ExpoNotificationToken), {
-    default: () => null,
-  }),
   // V2 public key for cryptobox - optional for backward compatibility
   publicKeyV2: Schema.optionalWith(PublicKeyV2, {
     as: 'Option',
@@ -97,12 +90,6 @@ export const RefreshUserRequest = Schema.Struct({
   }),
 })
 export type RefreshUserRequest = Schema.Schema.Type<typeof RefreshUserRequest>
-
-export const UpdateNotificationTokenRequest = Schema.Struct({
-  expoToken: Schema.NullOr(ExpoNotificationToken),
-})
-export type UpdateNotificationTokenRequest =
-  typeof UpdateNotificationTokenRequest.Type
 
 export const ImportContactsRequest = Schema.Struct({
   contacts: Schema.Array(HashedPhoneNumber),
@@ -313,10 +300,6 @@ export class MemberAlreadyInClubError extends Schema.TaggedError<MemberAlreadyIn
 
 export const GetClubInfoRequest = Schema.Struct({
   ...RequestBaseWithChallenge.fields,
-  // #2124 - remove notificationToken when fully migrated to VexlNotificationToken
-  notificationToken: Schema.optionalWith(ExpoNotificationToken, {
-    as: 'Option',
-  }),
   vexlNotificationToken: Schema.optionalWith(VexlNotificationToken, {
     as: 'Option',
   }),
@@ -335,10 +318,6 @@ export const GetClubInfoResponse = Schema.Struct({
 export const JoinClubRequest = Schema.Struct({
   ...RequestBaseWithChallenge.fields,
   code: ClubCode,
-  // #2124 - remove notificationToken when fully migrated to VexlNotificationToken
-  notificationToken: Schema.optionalWith(ExpoNotificationToken, {
-    as: 'Option',
-  }),
   vexlNotificationToken: Schema.optionalWith(VexlNotificationToken, {
     as: 'Option',
   }),

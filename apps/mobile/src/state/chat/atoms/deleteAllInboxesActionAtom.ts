@@ -48,10 +48,8 @@ const deleteAllInboxesActionAtom = atom(
             myVersion: version,
           },
           senderKeypair: oneChat.chat.inbox.privateKey,
-          theirNotificationCypher:
-            oneChat.chat.otherSideVexlToken ?? oneChat.chat.otherSideFcmCypher,
+          theirNotificationToken: oneChat.chat.otherSideVexlToken,
           notificationApi: api.notification,
-          otherSideVersion: oneChat.chat.otherSideVersion,
         }),
         Effect.ignoreLogged
       )

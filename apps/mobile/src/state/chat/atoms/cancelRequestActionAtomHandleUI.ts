@@ -82,9 +82,8 @@ const cancelRequestActionAtomHandleUI = atom(
           fromKeypair: chat.inbox.privateKey,
           toPublicKey: chat.otherSide.publicKey,
           myVersion: version,
-          theirNotificationCypher: offer?.fcmCypher,
+          theirNotificationToken: offer?.vexlNotificationToken,
           notificationApi: api.notification,
-          otherSideVersion: offer?.authorClientVersion,
         })
       )
 

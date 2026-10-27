@@ -84,7 +84,6 @@ export const admitUserToClubActionAtom = atom(
         api.contact.addUserToTheClub({
           adminitionRequest: {
             langCode: link.langCode,
-            notificationToken: link.notificationToken,
             vexlNotificationToken: link.vexlNotificationToken,
             publicKey: link.publicKey,
             publicKeyV2: link.publicKeyV2,

@@ -3,7 +3,6 @@ import {ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {UserInactivityNotificationVariant} from '@vexl-next/domain/src/general/notifications'
 import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {VexlProductNotification} from '@vexl-next/domain/src/general/vexlProductNotification'
-import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {type UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {Data, type Effect, Schema} from 'effect/index'
 import {makeMqService} from './mqService'
@@ -25,39 +24,27 @@ const NEW_USER_NOTIFICATIONS_PROCESSING_QUEUE_KEY =
 export class NewUserNotificationMqEntry extends Schema.TaggedClass<NewUserNotificationMqEntry>(
   'NewUserNotificationMqEntry'
 )('NewUserNotificationMqEntry', {
-  // #2142: remove after moving to vexlNotificationToken
-  notificationToken: Schema.NullOr(ExpoNotificationToken),
-  // todo #2142: remove nullability after moving to vexlNotificationToken
-  token: Schema.NullOr(VexlNotificationToken),
+  token: VexlNotificationToken,
 }) {}
 
 export class NewClubUserNotificationMqEntry extends Schema.TaggedClass<NewClubUserNotificationMqEntry>(
   'NewClubUserNotificationMqEntry'
 )('NewClubUserNotificationMqEntry', {
-  // todo #2142: remove after moving to vexlNotificationToken
-  notificationToken: Schema.NullOr(ExpoNotificationToken),
-  // todo #2142: remove nullability after moving to vexlNotificationToken
-  token: Schema.NullOr(VexlNotificationToken),
+  token: VexlNotificationToken,
   clubUuid: ClubUuid,
 }) {}
 
 export class UserAdmittedToClubNotificationMqEntry extends Schema.TaggedClass<UserAdmittedToClubNotificationMqEntry>(
   'UserAdmittedToClubNotificationMqEntry'
 )('UserAdmittedToClubNotificationMqEntry', {
-  // todo #2142: remove after moving to vexlNotificationToken
-  notificationToken: Schema.NullOr(ExpoNotificationToken),
-  // todo #2142: remove nullability after moving to vexlNotificationToken
-  token: Schema.NullOr(VexlNotificationToken),
+  token: VexlNotificationToken,
   publicKey: PublicKeyPemBase64,
 }) {}
 
 export class UserInactivityNotificationMqEntry extends Schema.TaggedClass<UserInactivityNotificationMqEntry>(
   'UserInactivityNotificationMqEntry'
 )('UserInactivityNotificationMqEntry', {
-  // todo #2142: remove after moving to vexlNotificationToken
-  notificationToken: Schema.NullOr(ExpoNotificationToken),
-  // todo #2142: remove nullability after moving to vexlNotificationToken
-  token: Schema.NullOr(VexlNotificationToken),
+  token: VexlNotificationToken,
   // Optional so entries enqueued before this field existed still decode
   variant: Schema.optionalWith(UserInactivityNotificationVariant, {
     default: () => 'FIRST',
@@ -67,48 +54,33 @@ export class UserInactivityNotificationMqEntry extends Schema.TaggedClass<UserIn
 export class UserLoginOnDifferentDeviceNotificationMqEntry extends Schema.TaggedClass<UserLoginOnDifferentDeviceNotificationMqEntry>(
   'UserLoginOnDifferentDeviceNotificationMqEntry'
 )('UserLoginOnDifferentDeviceNotificationMqEntry', {
-  // todo #2142: remove after moving to vexlNotificationToken
-  notificationToken: Schema.NullOr(ExpoNotificationToken),
-  // todo #2142: remove nullability after moving to vexlNotificationToken
-  token: Schema.NullOr(VexlNotificationToken),
+  token: VexlNotificationToken,
 }) {}
 
 export class ClubFlaggedNotificationMqEntry extends Schema.TaggedClass<ClubFlaggedNotificationMqEntry>(
   'ClubFlaggedNotificationMqEntry'
 )('ClubFlaggedNotificationMqEntry', {
-  // todo #2142: remove after moving to vexlNotificationToken
-  notificationToken: Schema.NullOr(ExpoNotificationToken),
-  // todo #2142: remove nullability after moving to vexlNotificationToken
-  token: Schema.NullOr(VexlNotificationToken),
+  token: VexlNotificationToken,
   clubUuid: ClubUuid,
 }) {}
 
 export class ClubExpiredNotificationMqEntry extends Schema.TaggedClass<ClubExpiredNotificationMqEntry>(
   'ClubExpiredNotificationMqEntry'
 )('ClubExpiredNotificationMqEntry', {
-  // todo #2142: remove after moving to vexlNotificationToken
-  notificationToken: Schema.NullOr(ExpoNotificationToken),
-  // todo #2142: remove nullability after moving to vexlNotificationToken
-  token: Schema.NullOr(VexlNotificationToken),
+  token: VexlNotificationToken,
   clubUuid: ClubUuid,
 }) {}
 
 export class NewContentNotificationMqEntry extends Schema.TaggedClass<NewContentNotificationMqEntry>(
   'NewContentNotificationMqEntry'
 )('NewContentNotificationMqEntry', {
-  // todo #2142: remove after moving to vexlNotificationToken
-  notificationToken: Schema.NullOr(ExpoNotificationToken),
-  // todo #2142: remove nullability after moving to vexlNotificationToken
-  token: Schema.NullOr(VexlNotificationToken),
+  token: VexlNotificationToken,
 }) {}
 
 export class VexlProductNotificationMqEntry extends Schema.TaggedClass<VexlProductNotificationMqEntry>(
   'VexlProductNotificationMqEntry'
 )('VexlProductNotificationMqEntry', {
-  // todo #2142: remove after moving to vexlNotificationToken
-  notificationToken: Schema.NullOr(ExpoNotificationToken),
-  // todo #2142: remove nullability after moving to vexlNotificationToken
-  token: Schema.NullOr(VexlNotificationToken),
+  token: VexlNotificationToken,
   vexlProductNotification: VexlProductNotification,
 }) {}
 

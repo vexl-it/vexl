@@ -6,7 +6,6 @@ import {
 } from '@vexl-next/domain/src/general/clubs'
 import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
-import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {InvalidChallengeError} from '@vexl-next/rest-api/src/challenges/contracts'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
@@ -112,9 +111,6 @@ describe('Join club', () => {
             payload: {
               ...(yield* _(generateAndSignChallenge(userKey))),
               code: INVITATION_CODE,
-              notificationToken: Option.some(
-                'someToken' as ExpoNotificationToken
-              ),
               vexlNotificationToken: Option.some(
                 'vexl_nt_test' as VexlNotificationToken
               ),
@@ -128,9 +124,6 @@ describe('Join club', () => {
           app.ClubsMember.getClubInfo({
             payload: {
               ...(yield* _(generateAndSignChallenge(userKey))),
-              notificationToken: Option.some(
-                'someToken' as ExpoNotificationToken
-              ),
               vexlNotificationToken: Option.some(
                 'vexl_nt_test' as VexlNotificationToken
               ),
@@ -187,9 +180,6 @@ describe('Join club', () => {
             payload: {
               ...(yield* _(generateAndSignChallenge(userKey))),
               code: inviteLink.link.code,
-              notificationToken: Option.some(
-                'someToken' as ExpoNotificationToken
-              ),
               vexlNotificationToken: Option.some(
                 'vexl_nt_test' as VexlNotificationToken
               ),
@@ -203,9 +193,6 @@ describe('Join club', () => {
           app.ClubsMember.getClubInfo({
             payload: {
               ...(yield* _(generateAndSignChallenge(userKey))),
-              notificationToken: Option.some(
-                'someToken' as ExpoNotificationToken
-              ),
               vexlNotificationToken: Option.some(
                 'vexl_nt_test' as VexlNotificationToken
               ),
@@ -247,9 +234,6 @@ describe('Join club', () => {
             payload: {
               ...(yield* _(generateAndSignChallenge(userKey))),
               code: inviteLink.link.code,
-              notificationToken: Option.some(
-                'someToken' as ExpoNotificationToken
-              ),
               vexlNotificationToken: Option.some(
                 'vexl_nt_test' as VexlNotificationToken
               ),
@@ -265,9 +249,6 @@ describe('Join club', () => {
             payload: {
               ...(yield* _(generateAndSignChallenge(generatePrivateKey()))),
               code: inviteLink.link.code,
-              notificationToken: Option.some(
-                'someToken' as ExpoNotificationToken
-              ),
               vexlNotificationToken: Option.some(
                 'vexl_nt_test' as VexlNotificationToken
               ),
@@ -293,9 +274,6 @@ describe('Join club', () => {
             payload: {
               ...(yield* _(generateAndSignChallenge(user1))),
               code: INVITATION_CODE,
-              notificationToken: Option.some(
-                'someToken' as ExpoNotificationToken
-              ),
               vexlNotificationToken: Option.some(
                 'vexl_nt_test' as VexlNotificationToken
               ),
@@ -311,9 +289,6 @@ describe('Join club', () => {
             payload: {
               ...(yield* _(generateAndSignChallenge(user2))),
               code: INVITATION_CODE,
-              notificationToken: Option.some(
-                'someToken' as ExpoNotificationToken
-              ),
               vexlNotificationToken: Option.some(
                 'vexl_nt_test' as VexlNotificationToken
               ),
@@ -329,9 +304,6 @@ describe('Join club', () => {
             payload: {
               ...(yield* _(generateAndSignChallenge(user3))),
               code: INVITATION_CODE,
-              notificationToken: Option.some(
-                'someToken' as ExpoNotificationToken
-              ),
               vexlNotificationToken: Option.some(
                 'vexl_nt_test' as VexlNotificationToken
               ),
@@ -361,9 +333,6 @@ describe('Join club', () => {
               signedChallenge: signedChallenge.signedChallenge,
               publicKey: invalidKey.publicKeyPemBase64,
               code: INVITATION_CODE,
-              notificationToken: Option.some(
-                'someToken' as ExpoNotificationToken
-              ),
               vexlNotificationToken: Option.some(
                 'vexl_nt_test' as VexlNotificationToken
               ),
@@ -387,9 +356,6 @@ describe('Join club', () => {
             payload: {
               ...(yield* _(generateAndSignChallenge(userKey))),
               code: INVITATION_CODE,
-              notificationToken: Option.some(
-                'someToken' as ExpoNotificationToken
-              ),
               vexlNotificationToken: Option.some(
                 'vexl_nt_test' as VexlNotificationToken
               ),
@@ -405,9 +371,6 @@ describe('Join club', () => {
             payload: {
               ...(yield* _(generateAndSignChallenge(userKey))),
               code: INVITATION_CODE,
-              notificationToken: Option.some(
-                'someToken' as ExpoNotificationToken
-              ),
               vexlNotificationToken: Option.some(
                 'vexl_nt_test' as VexlNotificationToken
               ),
@@ -431,9 +394,6 @@ describe('Join club', () => {
             payload: {
               ...(yield* _(generateAndSignChallenge(userKey))),
               code: '123445' as ClubCode,
-              notificationToken: Option.some(
-                'someToken' as ExpoNotificationToken
-              ),
               vexlNotificationToken: Option.some(
                 'vexl_nt_test' as VexlNotificationToken
               ),
@@ -473,7 +433,6 @@ describe('Join club', () => {
           membersDb.insertClubMember({
             clubId,
             publicKey: user1.publicKeyPemBase64,
-            notificationToken: null,
             vexlNotificationToken:
               'vexl_nt_member1_token' as VexlNotificationToken,
             isModerator: false,
@@ -485,7 +444,6 @@ describe('Join club', () => {
           membersDb.insertClubMember({
             clubId,
             publicKey: user2.publicKeyPemBase64,
-            notificationToken: null,
             vexlNotificationToken:
               'vexl_nt_member2_token' as VexlNotificationToken,
             isModerator: false,
@@ -502,7 +460,6 @@ describe('Join club', () => {
             payload: {
               ...(yield* _(generateAndSignChallenge(userKey))),
               code: INVITATION_CODE,
-              notificationToken: Option.none(),
               vexlNotificationToken: Option.some(
                 'vexl_nt_joiner_token' as VexlNotificationToken
               ),
@@ -564,7 +521,6 @@ describe('Join club', () => {
           membersDb.insertClubMember({
             clubId,
             publicKey: user1.publicKeyPemBase64,
-            notificationToken: null,
             vexlNotificationToken:
               'vexl_nt_member1_token' as VexlNotificationToken,
             isModerator: false,
@@ -573,12 +529,11 @@ describe('Join club', () => {
           })
         )
 
-        // Insert member WITHOUT vexlNotificationToken (only expo token - legacy)
+        // Member without a notification token
         yield* _(
           membersDb.insertClubMember({
             clubId,
             publicKey: user2.publicKeyPemBase64,
-            notificationToken: 'expo_token_legacy' as ExpoNotificationToken,
             vexlNotificationToken: null,
             isModerator: false,
             lastRefreshedAt: new Date(),
@@ -591,7 +546,6 @@ describe('Join club', () => {
           membersDb.insertClubMember({
             clubId,
             publicKey: user3.publicKeyPemBase64,
-            notificationToken: null,
             vexlNotificationToken: null,
             isModerator: false,
             lastRefreshedAt: new Date(),
@@ -607,7 +561,6 @@ describe('Join club', () => {
             payload: {
               ...(yield* _(generateAndSignChallenge(userKey))),
               code: INVITATION_CODE,
-              notificationToken: Option.none(),
               vexlNotificationToken: Option.some(
                 'vexl_nt_joiner_token' as VexlNotificationToken
               ),
@@ -669,7 +622,6 @@ describe('Join club', () => {
           membersDb.insertClubMember({
             clubId,
             publicKey: user1.publicKeyPemBase64,
-            notificationToken: null,
             vexlNotificationToken:
               'vexl_nt_member1_token' as VexlNotificationToken,
             isModerator: false,
@@ -688,7 +640,6 @@ describe('Join club', () => {
             payload: {
               ...(yield* _(generateAndSignChallenge(userKey))),
               code: INVITATION_CODE,
-              notificationToken: Option.none(),
               vexlNotificationToken: Option.some(
                 'vexl_nt_joiner_token' as VexlNotificationToken
               ),
@@ -737,12 +688,11 @@ describe('Join club', () => {
 
         const membersDb = yield* _(ClubMembersDbService)
 
-        // Member with ONLY expo token (no vexl token - won't receive notification via new path)
+        // Member without a notification token
         yield* _(
           membersDb.insertClubMember({
             clubId,
             publicKey: user1.publicKeyPemBase64,
-            notificationToken: 'expo_only_token' as ExpoNotificationToken,
             vexlNotificationToken: null,
             isModerator: false,
             lastRefreshedAt: new Date(),
@@ -750,12 +700,11 @@ describe('Join club', () => {
           })
         )
 
-        // Member with BOTH expo and vexl token (new path only)
+        // Member with a notification token
         yield* _(
           membersDb.insertClubMember({
             clubId,
             publicKey: user2.publicKeyPemBase64,
-            notificationToken: 'expo_token_2' as ExpoNotificationToken,
             vexlNotificationToken:
               'vexl_nt_member2_token' as VexlNotificationToken,
             isModerator: false,
@@ -772,7 +721,6 @@ describe('Join club', () => {
             payload: {
               ...(yield* _(generateAndSignChallenge(userKey))),
               code: INVITATION_CODE,
-              notificationToken: Option.none(),
               vexlNotificationToken: Option.some(
                 'vexl_nt_joiner_token' as VexlNotificationToken
               ),
@@ -830,8 +778,8 @@ describe('Join club', () => {
           membersDb.insertClubMember({
             clubId,
             publicKey: user1.publicKeyPemBase64,
-            notificationToken: '1someToken1' as ExpoNotificationToken,
-            vexlNotificationToken: null,
+            vexlNotificationToken:
+              'vexl_nt_member2_token' as VexlNotificationToken,
             isModerator: false,
             lastRefreshedAt: new Date(),
             publicKeyV2: null,
@@ -841,8 +789,8 @@ describe('Join club', () => {
           membersDb.insertClubMember({
             clubId,
             publicKey: user2.publicKeyPemBase64,
-            notificationToken: '2someToken2' as ExpoNotificationToken,
-            vexlNotificationToken: null,
+            vexlNotificationToken:
+              'vexl_nt_member3_token' as VexlNotificationToken,
             isModerator: false,
             lastRefreshedAt: new Date(),
             publicKeyV2: null,
@@ -853,7 +801,6 @@ describe('Join club', () => {
           membersDb.insertClubMember({
             clubId,
             publicKey: user3.publicKeyPemBase64,
-            notificationToken: null,
             vexlNotificationToken:
               'vexl_nt_member1_token' as VexlNotificationToken,
             isModerator: false,
@@ -870,7 +817,6 @@ describe('Join club', () => {
             payload: {
               ...(yield* _(generateAndSignChallenge(userKey))),
               code: INVITATION_CODE,
-              notificationToken: Option.none(),
               vexlNotificationToken: Option.some(
                 'vexl_nt_joiner_token' as VexlNotificationToken
               ),

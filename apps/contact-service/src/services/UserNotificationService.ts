@@ -7,7 +7,6 @@ import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {type UserInactivityNotificationVariant} from '@vexl-next/domain/src/general/notifications'
 import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
-import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {
   ClubExpiredNotificationMqEntry,
@@ -43,7 +42,6 @@ import {ClubMembersDbService} from '../db/ClubMemberDbService'
 import {ClubsDbService} from '../db/ClubsDbService'
 import {type ClubRecordId} from '../db/ClubsDbService/domain'
 import {UserDbService} from '../db/UserDbService'
-import {NotificationsTokensEquivalence} from '../db/UserDbService/domain'
 import {type UserToNotifyAboutInactivity} from '../db/UserDbService/queries/createFindUsersToNotifyAboutInactivity'
 import {
   queryAndReportInactiveUsersByRemindersSent,
@@ -78,8 +76,7 @@ export interface UserNotificationServiceOperations {
     clubUuid: ClubUuid
   ) => Effect.Effect<void, UnexpectedServerError>
   notifyUserAboutLoginOnDifferentDevice: (
-    token: VexlNotificationToken | null,
-    notificationToken: ExpoNotificationToken | null
+    token: VexlNotificationToken
   ) => Effect.Effect<void>
   notifyUsersAboutNewContent: () => Effect.Effect<void, UnexpectedServerError>
 }
@@ -104,44 +101,15 @@ export class UserNotificationService extends Context.Tag(
             const publicImportCountThreshold = yield* _(
               contactPublicImportCountThresholdConfig
             )
-            // todo #2142 - remove after moving to vexlNotificationToken
             const firstLevelTokens = yield* _(
-              userDbService.findFirebaseTokensOfUsersWhoDirectlyImportedHash({
-                importedHashes,
-                userHash: ownerHash,
-              })
-            )
-
-            // todo #2142 - uncomment and use this after moving to vexlNotificationToken
-            /**
-              const firstLevelTokens = yield* _(
               userDbService.findVexlNotificationTokensOfUsersWhoDirectlyImportedHash(
                 {
                   importedHashes,
                   userHash: ownerHash,
                 }
-              ),
-              Effect.map(
-                Array.filterMap((r) =>
-                  Option.fromNullable(r.vexlNotificationToken)
-                )
-              )
-            )
-             */
-
-            // todo #2142 - remove after moving to vexlNotificationToken
-            const secondLevelTokens = yield* _(
-              userDbService.findFirebaseTokensOfUsersWhoHaveHAshAsSecondLevelContact(
-                {
-                  importedHashes,
-                  ownerHash,
-                  publicImportCountThreshold,
-                }
               )
             )
 
-            // todo #2142 - uncomment and use this after moving to vexlNotificationToken
-            /**
             const secondLevelTokens = yield* _(
               userDbService.findVexlNotificationTokensOfUsersWhoHaveHashAsSecondLevelContact(
                 {
@@ -149,35 +117,18 @@ export class UserNotificationService extends Context.Tag(
                   ownerHash,
                   publicImportCountThreshold,
                 }
-              ),
-              Effect.map(
-                Array.filterMap((r) =>
-                  Option.fromNullable(r.vexlNotificationToken)
-                )
               )
-            )
-             */
-
-            const allTokens = pipe(
-              firstLevelTokens,
-              Array.appendAll(secondLevelTokens),
-              Array.dedupeWith(NotificationsTokensEquivalence)
             )
 
             yield* _(
-              allTokens,
-              Array.filter(
-                (entry) =>
-                  Option.isSome(entry.vexlNotificationToken) ||
-                  Option.isSome(entry.expoToken)
-              ),
-              Array.map((entry) =>
+              firstLevelTokens,
+              Array.appendAll(secondLevelTokens),
+              Array.map((entry) => entry.vexlNotificationToken),
+              Array.dedupe,
+              Array.map((token) =>
                 pipe(
                   enqueueUserNotification(
-                    new NewUserNotificationMqEntry({
-                      token: Option.getOrNull(entry.vexlNotificationToken),
-                      notificationToken: Option.getOrNull(entry.expoToken),
-                    }),
+                    new NewUserNotificationMqEntry({token}),
                     {delay: 0}
                   ),
                   Effect.catchAll((e) =>
@@ -233,21 +184,14 @@ export class UserNotificationService extends Context.Tag(
               members,
               Array.filter(
                 (one) =>
-                  one.notificationToken !== null ||
-                  one.vexlNotificationToken !== null
-              ),
-              Array.filter(
-                (one) =>
                   one.publicKey !== triggeringUser &&
                   one.publicKeyV2 !== triggeringUser
               ),
+              Array.filterMap((one) =>
+                Option.fromNullable(one.vexlNotificationToken)
+              ),
               Array.map(
-                (entry) =>
-                  new NewClubUserNotificationMqEntry({
-                    token: entry.vexlNotificationToken,
-                    notificationToken: entry.notificationToken,
-                    clubUuid,
-                  })
+                (token) => new NewClubUserNotificationMqEntry({token, clubUuid})
               )
             )
 
@@ -288,10 +232,7 @@ export class UserNotificationService extends Context.Tag(
               )
             )
 
-            if (
-              member.notificationToken === null &&
-              member.vexlNotificationToken === null
-            ) {
+            if (member.vexlNotificationToken === null) {
               yield* _(
                 Effect.logWarning(
                   'No notification token found for user admitted to club, skipping notification',
@@ -305,7 +246,6 @@ export class UserNotificationService extends Context.Tag(
               enqueueUserNotification(
                 new UserAdmittedToClubNotificationMqEntry({
                   token: member.vexlNotificationToken,
-                  notificationToken: member.notificationToken,
                   publicKey,
                 }),
                 {delay: 0}
@@ -399,8 +339,7 @@ export class UserNotificationService extends Context.Tag(
               (variant: UserInactivityNotificationVariant) =>
               (user: UserToNotifyAboutInactivity) =>
                 new UserInactivityNotificationMqEntry({
-                  token: Option.getOrNull(user.vexlNotificationToken),
-                  notificationToken: Option.getOrNull(user.expoToken),
+                  token: user.vexlNotificationToken,
                   variant,
                 })
 
@@ -481,21 +420,13 @@ export class UserNotificationService extends Context.Tag(
             const flaggedClubNotifications = yield* _(
               clubMemberDb.queryAllClubMembers({id}),
               Effect.map(
-                Array.filter(
-                  (one) =>
-                    one.notificationToken !== null ||
-                    one.vexlNotificationToken !== null
-                )
-              ),
-              Effect.map(
                 flow(
+                  Array.filterMap((one) =>
+                    Option.fromNullable(one.vexlNotificationToken)
+                  ),
                   Array.map(
-                    (entry) =>
-                      new ClubFlaggedNotificationMqEntry({
-                        notificationToken: entry.notificationToken,
-                        token: entry.vexlNotificationToken,
-                        clubUuid,
-                      })
+                    (token) =>
+                      new ClubFlaggedNotificationMqEntry({token, clubUuid})
                   )
                 )
               )
@@ -529,18 +460,12 @@ export class UserNotificationService extends Context.Tag(
               clubMemberDb.queryAllClubMembers({id}),
               Effect.map(
                 flow(
-                  Array.filter(
-                    (one) =>
-                      one.vexlNotificationToken !== null ||
-                      one.notificationToken !== null
+                  Array.filterMap((one) =>
+                    Option.fromNullable(one.vexlNotificationToken)
                   ),
                   Array.map(
-                    (entry) =>
-                      new ClubExpiredNotificationMqEntry({
-                        notificationToken: entry.notificationToken,
-                        token: entry.vexlNotificationToken,
-                        clubUuid,
-                      })
+                    (token) =>
+                      new ClubExpiredNotificationMqEntry({token, clubUuid})
                   )
                 )
               )
@@ -568,71 +493,37 @@ export class UserNotificationService extends Context.Tag(
               )
             )
           }),
-        notifyUserAboutLoginOnDifferentDevice: (
-          token: VexlNotificationToken | null,
-          notificationToken: ExpoNotificationToken | null
-        ) =>
-          Effect.gen(function* (_) {
-            if (token === null && notificationToken === null) {
-              yield* _(
-                Effect.logWarning(
-                  'No notification token found for user login on different device, skipping notification'
-                )
-              )
-              return
-            }
-
-            yield* _(
-              enqueueUserNotification(
-                new UserLoginOnDifferentDeviceNotificationMqEntry({
-                  token,
-                  notificationToken,
-                }),
-                {delay: 0}
-              ),
-              Effect.catchAll((e) =>
-                Effect.logWarning(
-                  'Failed to enqueue login on different device notification',
-                  e
-                )
+        notifyUserAboutLoginOnDifferentDevice: (token: VexlNotificationToken) =>
+          enqueueUserNotification(
+            new UserLoginOnDifferentDeviceNotificationMqEntry({token}),
+            {delay: 0}
+          ).pipe(
+            Effect.catchAll((e) =>
+              Effect.logWarning(
+                'Failed to enqueue login on different device notification',
+                e
               )
             )
-          }),
+          ),
         notifyUsersAboutNewContent: () =>
           Effect.gen(function* (_) {
             const notifyBeforeDate = dayjs()
               .subtract(yield* _(newContentNotificationAfterConfig), 'day')
               .toDate()
 
-            // todo #2142 - remove after moving to vexlNotificationToken
-            const tokensToNofify = yield* _(
-              userDbService.findFirebaseTokensForNewContentNotification(
-                notifyBeforeDate
-              )
-            )
-
-            // todo #2142 - use this after moving to vexlNotificationToken
-            /**
             const tokensToNofify = yield* _(
               userDbService.findVexlNotificationTokensForNewContentNotification(
                 notifyBeforeDate
               )
             )
-             */
 
             yield* _(
               tokensToNofify,
-              Array.filter(
-                (entry) =>
-                  Option.isSome(entry.expoToken) ||
-                  Option.isSome(entry.vexlNotificationToken)
-              ),
               Array.map((entry) =>
                 pipe(
                   enqueueUserNotification(
                     new NewContentNotificationMqEntry({
-                      token: Option.getOrNull(entry.vexlNotificationToken),
-                      notificationToken: Option.getOrNull(entry.expoToken),
+                      token: entry.vexlNotificationToken,
                     }),
                     {delay: 0}
                   ),

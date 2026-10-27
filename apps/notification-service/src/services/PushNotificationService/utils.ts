@@ -9,11 +9,7 @@ import {
   UserLoginOnDifferentDeviceNotificationData,
   VexlProductNotificationData,
 } from '@vexl-next/domain/src/general/notifications'
-import {type NotificationCypher} from '@vexl-next/domain/src/general/notifications/NotificationCypher.brand'
-import {
-  isVexlNotificationToken,
-  type VexlNotificationTokenSecret,
-} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
+import {type VexlNotificationTokenSecret} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {
   createNotificationTrackingId,
   type NotificationTrackingId,
@@ -25,7 +21,6 @@ import {
   type AppLocale,
 } from '@vexl-next/localization/src/translations'
 import {type PlatformName} from '@vexl-next/rest-api'
-import {type InvalidFcmCypherError} from '@vexl-next/rest-api/src/services/notification/contract'
 import {Data, Effect, Option, Schema} from 'effect'
 import {type ExpoPushToken} from 'expo-server-sdk'
 import type {
@@ -40,7 +35,7 @@ import type {
   UserLoginOnDifferentDeviceNoticeSendTask,
   VexlProductNotificationSendTask,
 } from '../NotificationSocketMessaging/domain'
-import {VexlNotificationTokenService} from '../VexlNotificationTokenService'
+import {NotificationTokensDb} from '../NotificationTokensDb'
 import {type NotificationToSend} from './services/ExpoClientService'
 
 export class NoExpoTokenError extends Data.TaggedError('NoExpoTokenError')<{
@@ -57,41 +52,44 @@ interface Metadata {
 interface PushNotificationGeneratorResult {
   notificationToSend: NotificationToSend | NotificationToSend[]
   trackingId: NotificationTrackingId
-  // todo #2124: Remove optional once moving fully to vexl notification token
-  metadata: Option.Option<Metadata>
+  metadata: Metadata
 }
 
 const resolveTokenAndMetadata = (
-  notificationToken: VexlNotificationTokenSecret
+  secret: VexlNotificationTokenSecret
 ): Effect.Effect<
   {
     token: ExpoPushToken
-    metadata: Option.Option<Metadata>
+    metadata: Metadata
   },
   NoExpoTokenError,
-  VexlNotificationTokenService
+  NotificationTokensDb
 > =>
   Effect.gen(function* (_) {
-    const vexlNotificationTokenService = yield* _(VexlNotificationTokenService)
-
-    const token = yield* _(
-      vexlNotificationTokenService.getExpoToken(notificationToken),
-      Effect.catchAll(
-        () =>
-          new NoExpoTokenError({
-            message: 'No Expo token for given Vexl notification token',
-            vexlToken: notificationToken,
-          })
-      )
+    const tokenDb = yield* _(NotificationTokensDb)
+    const record = yield* _(
+      tokenDb.findSecretBySecretValue(secret),
+      Effect.flatten
     )
+    const token = yield* _(Effect.fromNullable(record.expoNotificationToken))
 
-    const metadata = yield* _(
-      vexlNotificationTokenService.getMetadata(notificationToken),
-      Effect.option
+    return {
+      token,
+      metadata: {
+        locale: record.clientLanguage,
+        clientVersion: record.clientVersion,
+        clientPlatform: record.clientPlatform,
+      },
+    }
+  }).pipe(
+    Effect.catchAll(
+      () =>
+        new NoExpoTokenError({
+          message: 'No Expo token for given Vexl notification token',
+          vexlToken: secret,
+        })
     )
-
-    return {token, metadata}
-  })
+  )
 
 export function getNotificationContentByLocale(locale: string): {
   title: string
@@ -115,44 +113,15 @@ export const generatePushNotificationsFromNewChatMessageNoticeSendTask = (
   task: NewChatMessageNoticeSendTask
 ): Effect.Effect<
   PushNotificationGeneratorResult,
-  NoExpoTokenError | InvalidFcmCypherError,
-  VexlNotificationTokenService
+  NoExpoTokenError,
+  NotificationTokensDb
 > =>
   Effect.gen(function* (_) {
-    const vexlNotificationTokenService = yield* _(VexlNotificationTokenService)
-
-    const token = yield* _(
-      vexlNotificationTokenService.getExpoToken(task.notificationToken),
-      Effect.catchAll(
-        () =>
-          new NoExpoTokenError({
-            message: 'No Expo token for given Vexl notification token',
-            vexlToken: task.notificationToken,
-          })
-      )
+    const {token, metadata} = yield* _(
+      resolveTokenAndMetadata(task.notificationToken)
     )
 
     yield* _(Effect.logInfo('Sending notification'))
-
-    const targetCypher = task.targetCypher
-
-    const metadata = yield* _(
-      vexlNotificationTokenService.getMetadata(
-        task.targetCypher ?? task.notificationToken
-      ),
-      Effect.option
-    )
-
-    if (Option.isNone(metadata)) {
-      return yield* _(
-        Effect.fail(
-          new NoExpoTokenError({
-            message: 'Unable to find metadata for the token',
-            vexlToken: task.notificationToken,
-          })
-        )
-      )
-    }
 
     const trackingId = createNotificationTrackingId()
 
@@ -160,50 +129,35 @@ export const generatePushNotificationsFromNewChatMessageNoticeSendTask = (
     // On Android we can rely on background notifications.
     const sendSystemNotification = task.sendNewChatMessageNotification
 
-    const systemNotification: NotificationToSend = {
-      token,
-      ...getNotificationContentByLocale(metadata.value.locale),
-      data: Schema.encodeSync(NewChatMessageNoticeNotificationData)(
+    const notificationData = (
+      includesSystemNotification: boolean
+    ): Record<string, string> =>
+      Schema.encodeSync(NewChatMessageNoticeNotificationData)(
         new NewChatMessageNoticeNotificationData({
           trackingId: Option.some(trackingId),
           sentAt: unixMillisecondsNow(),
-          targetCypher:
-            task.targetCypher && isVexlNotificationToken(task.targetCypher)
-              ? undefined
-              : // Backward compatibility - it's checked at the top
-                (task.targetCypher as NotificationCypher),
           targetToken: task.targetToken,
-          includesSystemNotification: true,
+          includesSystemNotification,
           systemNotificationSent: Option.some(sendSystemNotification),
         })
-      ),
+      )
+
+    const systemNotification: NotificationToSend = {
+      token,
+      ...getNotificationContentByLocale(metadata.locale),
+      data: notificationData(true),
     }
 
     const backgroundNotification: NotificationToSend = {
       token,
-      data: Schema.encodeSync(NewChatMessageNoticeNotificationData)(
-        new NewChatMessageNoticeNotificationData({
-          trackingId: Option.some(trackingId),
-          sentAt: unixMillisecondsNow(),
-          targetCypher:
-            // TODO remove #2124
-            !!targetCypher && !isVexlNotificationToken(targetCypher)
-              ? targetCypher
-              : undefined,
-          targetToken: task.targetToken,
-          includesSystemNotification: false,
-          systemNotificationSent: Option.some(sendSystemNotification),
-        })
-      ),
+      data: notificationData(false),
     }
 
     const notificationToSend = [
       // on iOS we send just the system notification.
-      ...(metadata.value.clientPlatform !== 'IOS'
-        ? [backgroundNotification]
-        : []),
+      ...(metadata.clientPlatform !== 'IOS' ? [backgroundNotification] : []),
       // In case of ios we don't send any notification if sendSystemNotification is false. That is ok
-      ...(sendSystemNotification && metadata.value.clientPlatform === 'IOS'
+      ...(sendSystemNotification && metadata.clientPlatform === 'IOS'
         ? [systemNotification]
         : []),
     ]
@@ -215,8 +169,8 @@ export const generatePushNotificationsFromNewUserNoticeSendTask = (
   task: NewUserNoticeSendTask
 ): Effect.Effect<
   PushNotificationGeneratorResult,
-  NoExpoTokenError | InvalidFcmCypherError,
-  VexlNotificationTokenService
+  NoExpoTokenError,
+  NotificationTokensDb
 > =>
   Effect.gen(function* (_) {
     const {token, metadata} = yield* _(
@@ -244,8 +198,8 @@ export const generatePushNotificationsFromNewClubUserNoticeSendTask = (
   task: NewClubUserNoticeSendTask
 ): Effect.Effect<
   PushNotificationGeneratorResult,
-  NoExpoTokenError | InvalidFcmCypherError,
-  VexlNotificationTokenService
+  NoExpoTokenError,
+  NotificationTokensDb
 > =>
   Effect.gen(function* (_) {
     const {token, metadata} = yield* _(
@@ -268,8 +222,8 @@ export const generatePushNotificationsFromUserAdmittedToClubNoticeSendTask = (
   task: UserAdmittedToClubNoticeSendTask
 ): Effect.Effect<
   PushNotificationGeneratorResult,
-  NoExpoTokenError | InvalidFcmCypherError,
-  VexlNotificationTokenService
+  NoExpoTokenError,
+  NotificationTokensDb
 > =>
   Effect.gen(function* (_) {
     const {token, metadata} = yield* _(
@@ -292,8 +246,8 @@ export const generatePushNotificationsFromUserInactivityNoticeSendTask = (
   task: UserInactivityNoticeSendTask
 ): Effect.Effect<
   PushNotificationGeneratorResult,
-  NoExpoTokenError | InvalidFcmCypherError,
-  VexlNotificationTokenService
+  NoExpoTokenError,
+  NotificationTokensDb
 > =>
   Effect.gen(function* (_) {
     const {token, metadata} = yield* _(
@@ -317,8 +271,8 @@ export const generatePushNotificationsFromUserLoginOnDifferentDeviceNoticeSendTa
     task: UserLoginOnDifferentDeviceNoticeSendTask
   ): Effect.Effect<
     PushNotificationGeneratorResult,
-    NoExpoTokenError | InvalidFcmCypherError,
-    VexlNotificationTokenService
+    NoExpoTokenError,
+    NotificationTokensDb
   > =>
     Effect.gen(function* (_) {
       const {token, metadata} = yield* _(
@@ -340,8 +294,8 @@ export const generatePushNotificationsFromClubFlaggedNoticeSendTask = (
   task: ClubFlaggedNoticeSendTask
 ): Effect.Effect<
   PushNotificationGeneratorResult,
-  NoExpoTokenError | InvalidFcmCypherError,
-  VexlNotificationTokenService
+  NoExpoTokenError,
+  NotificationTokensDb
 > =>
   Effect.gen(function* (_) {
     const {token, metadata} = yield* _(
@@ -365,8 +319,8 @@ export const generatePushNotificationsFromClubExpiredNoticeSendTask = (
   task: ClubExpiredNoticeSendTask
 ): Effect.Effect<
   PushNotificationGeneratorResult,
-  NoExpoTokenError | InvalidFcmCypherError,
-  VexlNotificationTokenService
+  NoExpoTokenError,
+  NotificationTokensDb
 > =>
   Effect.gen(function* (_) {
     const {token, metadata} = yield* _(
@@ -390,8 +344,8 @@ export const generatePushNotificationsFromNewContentNoticeSendTask = (
   task: NewContentNoticeSendTask
 ): Effect.Effect<
   PushNotificationGeneratorResult,
-  NoExpoTokenError | InvalidFcmCypherError,
-  VexlNotificationTokenService
+  NoExpoTokenError,
+  NotificationTokensDb
 > =>
   Effect.gen(function* (_) {
     const {token, metadata} = yield* _(
@@ -414,8 +368,8 @@ export const generatePushNotificationFromVexlProductNotificationNoticeSendTask =
     task: VexlProductNotificationSendTask
   ): Effect.Effect<
     PushNotificationGeneratorResult,
-    NoExpoTokenError | InvalidFcmCypherError,
-    VexlNotificationTokenService
+    NoExpoTokenError,
+    NotificationTokensDb
   > =>
     Effect.gen(function* (_) {
       const {token, metadata} = yield* _(

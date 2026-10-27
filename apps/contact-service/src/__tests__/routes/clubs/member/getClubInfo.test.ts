@@ -3,7 +3,6 @@ import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {generateClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
-import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {InvalidChallengeError} from '@vexl-next/rest-api/src/challenges/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
@@ -65,7 +64,6 @@ beforeEach(async () => {
           publicKey: userKey.publicKeyPemBase64,
           isModerator: false,
           lastRefreshedAt: new Date(),
-          notificationToken: 'someToken' as ExpoNotificationToken,
           vexlNotificationToken: 'vexl_nt_test' as VexlNotificationToken,
           publicKeyV2: null,
         })
@@ -84,9 +82,6 @@ describe('Get club info', () => {
           app.ClubsMember.getClubInfo({
             payload: {
               ...(yield* _(generateAndSignChallenge(userKey))),
-              notificationToken: Option.some(
-                'someToken' as ExpoNotificationToken
-              ),
               vexlNotificationToken: Option.none(),
               publicKeyV2: Option.none(),
             },
@@ -104,42 +99,6 @@ describe('Get club info', () => {
     )
   })
 
-  it('Correctly updates notification token', async () => {
-    await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
-
-        yield* _(
-          app.ClubsMember.getClubInfo({
-            payload: {
-              ...(yield* _(generateAndSignChallenge(userKey))),
-              notificationToken: Option.some(
-                'someToken2' as ExpoNotificationToken
-              ),
-              vexlNotificationToken: Option.none(),
-              publicKeyV2: Option.none(),
-            },
-          })
-        )
-
-        const data = yield* _(
-          SqlClient.SqlClient,
-          Effect.flatMap(
-            (sql) => sql`
-              SELECT
-                *
-              FROM
-                club_member
-              WHERE
-                notification_token = 'someToken2'
-            `
-          )
-        )
-        expect(data.length).toBe(1)
-      })
-    )
-  })
-
   it('Correctly updates vexl notification token', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
@@ -149,9 +108,6 @@ describe('Get club info', () => {
           app.ClubsMember.getClubInfo({
             payload: {
               ...(yield* _(generateAndSignChallenge(userKey))),
-              notificationToken: Option.some(
-                'someToken' as ExpoNotificationToken
-              ),
               vexlNotificationToken: Option.some(
                 'vexl_nt_updated' as VexlNotificationToken
               ),
@@ -186,9 +142,6 @@ describe('Get club info', () => {
           app.ClubsMember.getClubInfo({
             payload: {
               ...(yield* _(generateAndSignChallenge(userKey))),
-              notificationToken: Option.some(
-                'someToken' as ExpoNotificationToken
-              ),
               vexlNotificationToken: Option.none(),
             },
           })
@@ -231,9 +184,6 @@ describe('Get club info', () => {
           app.ClubsMember.getClubInfo({
             payload: {
               ...(yield* _(generateAndSignChallenge(userKey))),
-              notificationToken: Option.some(
-                'someToken' as ExpoNotificationToken
-              ),
               vexlNotificationToken: Option.none(),
               publicKeyV2: Option.none(),
             },
@@ -255,9 +205,6 @@ describe('Get club info', () => {
           app.ClubsMember.getClubInfo({
             payload: {
               ...(yield* _(generateAndSignChallenge(generatePrivateKey()))),
-              notificationToken: Option.some(
-                'someToken2' as ExpoNotificationToken
-              ),
               vexlNotificationToken: Option.none(),
               publicKeyV2: Option.none(),
             },
@@ -278,7 +225,7 @@ describe('Get club info', () => {
           SET
             is_moderator = TRUE
           WHERE
-            notification_token = 'someToken'
+            public_key = ${userKey.publicKeyPemBase64}
         `)
         const app = yield* _(NodeTestingApp)
 
@@ -286,9 +233,6 @@ describe('Get club info', () => {
           app.ClubsMember.getClubInfo({
             payload: {
               ...(yield* _(generateAndSignChallenge(userKey))),
-              notificationToken: Option.some(
-                'someToken' as ExpoNotificationToken
-              ),
               vexlNotificationToken: Option.none(),
               publicKeyV2: Option.none(),
             },
@@ -318,9 +262,6 @@ describe('Get club info', () => {
             payload: {
               publicKey: invalidKey.publicKeyPemBase64,
               signedChallenge: signedChallenge.signedChallenge,
-              notificationToken: Option.some(
-                'someToken2' as ExpoNotificationToken
-              ),
               vexlNotificationToken: Option.none(),
               publicKeyV2: Option.none(),
             },

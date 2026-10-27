@@ -7,7 +7,6 @@ import {runPromiseInMockedEnvironment} from '../../utils/runPromiseInMockedEnvir
 import {SqlClient} from '@effect/sql'
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
-import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {makeCommonAndSecurityHeaders} from '@vexl-next/rest-api/src/apiSecurity'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {UserNotFoundError} from '@vexl-next/rest-api/src/services/contact/contracts'
@@ -54,8 +53,6 @@ beforeAll(async () => {
       yield* _(
         app.User.createUser({
           payload: {
-            firebaseToken: null,
-            expoToken: Schema.decodeSync(ExpoNotificationToken)('someToken'),
             vexlNotificationToken: Option.some(
               Schema.decodeSync(VexlNotificationToken)('vexl_nt_test')
             ),
@@ -193,61 +190,6 @@ describe('Refresh user', () => {
     )
   })
 
-  it('Sets vexlNotificationToken to null when not provided', async () => {
-    await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const sql = yield* _(SqlClient.SqlClient)
-
-        // First set a token directly in DB
-        yield* _(sql`
-          UPDATE users
-          SET
-            vexl_notification_token = 'vexl_nt_existing'
-          WHERE
-            public_key = ${keys.publicKeyPemBase64}
-        `)
-
-        const authHeaders = yield* _(
-          createDummyAuthHeadersForUser({
-            phoneNumber,
-            publicKey: keys.publicKeyPemBase64,
-          })
-        )
-        const app = yield* _(NodeTestingApp)
-        yield* _(setAuthHeaders(authHeaders))
-
-        const commonAndSecurityHeaders = makeCommonAndSecurityHeaders(
-          () => ({
-            publicKey: authHeaders['public-key'],
-            hash: authHeaders.hash,
-            signature: authHeaders.signature,
-          }),
-          commonHeaders
-        )
-
-        yield* _(
-          app.User.refreshUser({
-            payload: {
-              offersAlive: true,
-              vexlNotificationToken: Option.none(),
-            },
-            headers: commonAndSecurityHeaders,
-          })
-        )
-
-        const userInDb = yield* _(sql`
-          SELECT
-            *
-          FROM
-            users
-          WHERE
-            public_key = ${keys.publicKeyPemBase64}
-        `)
-        expect(userInDb[0]).toHaveProperty('vexlNotificationToken', null)
-      })
-    )
-  })
-
   it('Returns userNotFound error when user does not exists', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
@@ -323,8 +265,6 @@ describe('Refresh user', () => {
         yield* _(
           app.User.createUser({
             payload: {
-              firebaseToken: null,
-              expoToken: null,
               vexlNotificationToken: Option.some(
                 Schema.decodeSync(VexlNotificationToken)(
                   'vexl_nt_refresh_contact'
@@ -575,8 +515,6 @@ describe('Refresh user', () => {
               yield* _(
                 app.User.createUser({
                   payload: {
-                    firebaseToken: null,
-                    expoToken: null,
                     vexlNotificationToken: Option.some(
                       contactNotificationToken
                     ),
@@ -688,5 +626,58 @@ describe('Refresh user', () => {
         notified: false,
       })
     })
+  })
+})
+
+describe('Refresh user notification token', () => {
+  it('Keeps the stored vexlNotificationToken when the request carries none', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const sql = yield* _(SqlClient.SqlClient)
+        yield* _(sql`
+          UPDATE users
+          SET
+            vexl_notification_token = 'vexl_nt_keep_me'
+          WHERE
+            public_key = ${keys.publicKeyPemBase64}
+        `)
+
+        const app = yield* _(NodeTestingApp)
+        const authHeaders = yield* _(
+          createDummyAuthHeadersForUser({
+            phoneNumber,
+            publicKey: keys.publicKeyPemBase64,
+          })
+        )
+        yield* _(setAuthHeaders(authHeaders))
+
+        yield* _(
+          app.User.refreshUser({
+            payload: {offersAlive: true, vexlNotificationToken: Option.none()},
+            headers: makeCommonAndSecurityHeaders(
+              () => ({
+                publicKey: authHeaders['public-key'],
+                hash: authHeaders.hash,
+                signature: authHeaders.signature,
+              }),
+              commonHeaders
+            ),
+          })
+        )
+
+        const userInDb = yield* _(sql`
+          SELECT
+            *
+          FROM
+            users
+          WHERE
+            public_key = ${keys.publicKeyPemBase64}
+        `)
+        expect(userInDb[0]).toHaveProperty(
+          'vexlNotificationToken',
+          'vexl_nt_keep_me'
+        )
+      })
+    )
   })
 })

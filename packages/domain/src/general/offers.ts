@@ -208,9 +208,6 @@ export const OfferPublicPart = Schema.Struct({
   productCategory: Schema.optional(ProductCategory),
   productCategories: Schema.optional(Schema.Array(ProductCategory)),
   vexlNotificationToken: Schema.optional(VexlNotificationToken),
-  // Copy of vexlNotificationToken, the only field clients up to 26.9.5 read.
-  // TODO https://github.com/vexl-it/vexl/issues/2715
-  fcmCypher: Schema.optional(VexlNotificationToken),
   authorClientVersion: Schema.optional(VersionString),
   goldenAvatarType: Schema.optional(GoldenAvatarType),
   byLiquidityProvider: Schema.optional(Schema.Boolean),

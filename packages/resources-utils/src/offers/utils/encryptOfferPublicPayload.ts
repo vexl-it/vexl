@@ -1,3 +1,4 @@
+import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {
   LocationStateToArray,
   OfferLocation,
@@ -48,6 +49,8 @@ const OfferPublicPartIncludingLegacyPropsToEncrypt = Schema.Struct({
   locationV2: Schema.Array(OfferLocation),
   locationState: Schema.String,
   locationStateV2: LocationStateToArray,
+  // Released clients <= 26.9.5 read only this key. TODO https://github.com/vexl-it/vexl/issues/2715
+  fcmCypher: Schema.optional(VexlNotificationToken),
 })
 
 type OfferPublicPartIncludingLegacyPropsToEncrypt = Schema.Schema.Type<
@@ -88,6 +91,7 @@ export default function encryptOfferPublicPayload({
         locationV2: publicPart.location,
         locationState: convertLocationStateToOldVersion(publicPart),
         locationStateV2: publicPart.locationState,
+        fcmCypher: publicPart.vexlNotificationToken,
       } satisfies OfferPublicPartIncludingLegacyPropsToEncrypt
     }),
     Effect.flatMap(

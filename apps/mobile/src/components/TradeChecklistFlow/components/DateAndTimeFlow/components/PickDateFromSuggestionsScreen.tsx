@@ -1,11 +1,14 @@
 import {type AvailableDateTimeOption} from '@vexl-next/domain/src/general/tradeChecklist'
-import {Button, Typography, XmarkCancelClose} from '@vexl-next/ui'
+import {
+  Button,
+  DateSuggestionCard as DateSuggestionCardView,
+  XmarkCancelClose,
+} from '@vexl-next/ui'
 import {atom, useAtomValue, type Atom} from 'jotai'
 import {splitAtom} from 'jotai/utils'
 import {DateTime} from 'luxon'
 import React, {useCallback} from 'react'
-import {TouchableOpacity} from 'react-native'
-import {XStack, YStack, useTheme} from 'tamagui'
+import {YStack} from 'tamagui'
 import type {TradeChecklistStackScreenProps} from '../../../../../navigationTypes'
 import atomKeyExtractor from '../../../../../utils/atomUtils/atomKeyExtractor'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
@@ -94,66 +97,20 @@ function DateSuggestionCard({
 }): React.ReactElement {
   const {t} = useTranslation()
   const item = useAtomValue(itemAtom)
-  const theme = useTheme()
   const locale = useAtomValue(formattingLocaleAtom)
   const {label, weekday} = getDateLabels(item.data.date, locale)
-  const primaryTextColor = item.outdated
-    ? theme.foregroundTertiary.get()
-    : theme.foregroundPrimary.get()
-  const secondaryTextColor = item.outdated
-    ? theme.foregroundTertiary.get()
-    : theme.foregroundSecondary.get()
 
   return (
-    <TouchableOpacity
-      disabled={item.outdated}
-      activeOpacity={0.85}
+    <DateSuggestionCardView
+      weekday={weekday}
+      dateLabel={label}
+      slotsCaption={item.outdated ? t('common.outdated') : 'time slots'}
+      slots={item.rightText}
+      outdated={item.outdated}
       onPress={() => {
         onPress(item.data)
       }}
-    >
-      <XStack
-        alignItems="center"
-        justifyContent="space-between"
-        backgroundColor={theme.backgroundSecondary.get()}
-        borderRadius="$5"
-        paddingHorizontal="$5"
-        paddingVertical="$5"
-        opacity={item.outdated ? 0.6 : 1}
-      >
-        <YStack flex={1} gap="$2">
-          <Typography variant="micro" color={secondaryTextColor}>
-            {weekday}
-          </Typography>
-          <Typography variant="paragraphSmall" color={primaryTextColor}>
-            {label}
-          </Typography>
-        </YStack>
-        <YStack alignItems="flex-end" gap="$2" maxWidth="45%" flexShrink={1}>
-          <Typography
-            variant="micro"
-            color={secondaryTextColor}
-            textAlign="right"
-          >
-            {item.outdated ? t('common.outdated') : 'time slots'}
-          </Typography>
-          {!!item.rightText && (
-            <Typography
-              variant="description"
-              color={
-                item.outdated
-                  ? theme.foregroundTertiary.get()
-                  : theme.accentHighlightSecondary.get()
-              }
-              textAlign="right"
-              numberOfLines={2}
-            >
-              {item.rightText}
-            </Typography>
-          )}
-        </YStack>
-      </XStack>
-    </TouchableOpacity>
+    />
   )
 }
 
@@ -164,7 +121,6 @@ export default function PickDateFromSuggestionsScreen({
   },
 }: Props): React.ReactElement {
   const {t} = useTranslation()
-  const theme = useTheme()
   const locale = useAtomValue(formattingLocaleAtom)
 
   const itemsToShowAtoms = useAtomValueRefreshOnFocus(

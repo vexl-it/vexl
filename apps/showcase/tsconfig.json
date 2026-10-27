@@ -1,0 +1,15 @@
+{
+  "extends": "@vexl-next/tsconfig/base.json",
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "types": ["vite/client"],
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "checkJs": false
+  },
+  "include": ["src", "vite.config.ts"]
+}

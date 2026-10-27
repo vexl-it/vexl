@@ -3,6 +3,7 @@ import {useNavigation} from '@react-navigation/native'
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {
   Button,
+  ChatBubble,
   Rejected,
   Reply,
   Stack,
@@ -10,6 +11,7 @@ import {
   useTheme,
   XStack,
   YStack,
+  type ChatBubbleRenderTextArgs,
 } from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {Effect} from 'effect/index'
@@ -73,96 +75,73 @@ const style = StyleSheet.create({
   },
 })
 
+const renderLinkifiedText = ({
+  text,
+  color,
+}: ChatBubbleRenderTextArgs): React.ReactNode => (
+  <Autolink
+    text={text}
+    url
+    linkStyle={[
+      style.link,
+      {
+        color,
+        fontSize: 18,
+        fontFamily: 'TTSatoshi500',
+      },
+    ]}
+    style={{
+      color,
+      fontSize: 18,
+      lineHeight: 24,
+      fontFamily: 'TTSatoshi500',
+    }}
+  />
+)
+
 function MessageBubble({
   isMine,
-  messageAuthorName,
   message,
-  messageBackgroundColor,
-  messageTextColor,
   onImagePressed,
 }: {
   isMine: boolean
-  messageAuthorName: string
   message: ChatMessageWithState
-  messageBackgroundColor: string
-  messageTextColor: string
   onImagePressed?: () => void
 }): React.ReactElement {
   const {t} = useTranslation()
   const repliedToMessage =
     'repliedTo' in message.message ? message.message.repliedTo : undefined
-
-  const isSpecialMessage =
-    message.message.messageType === 'REQUEST_MESSAGING' ||
-    message.message.messageType === 'DISAPPROVE_MESSAGING'
+  const {messageType, image} = message.message
 
   return (
-    <Stack>
-      {!!repliedToMessage && (
-        <XStack
-          borderRadius="$5"
-          marginBottom="$0.5"
-          borderBottomLeftRadius="$2"
-          borderBottomRightRadius="$2"
-          backgroundColor={
-            isMine ? '$accentYellowSecondary' : '$backgroundSecondary'
-          }
-          padding="$4"
-          paddingBottom="$3"
-          paddingTop="$4"
-          gap="$2"
-        >
-          <YStack gap="$1">
-            {!!repliedToMessage.image && (
-              <Image
-                style={style.replyImage}
-                resizeMode="contain"
-                source={{
-                  uri: resolveLocalUri(repliedToMessage.image),
-                }}
-              />
-            )}
-            <Typography color="$foregroundSecondary" variant="micro">
-              {t('common.replyTo')}
-            </Typography>
-            <Typography
-              color="$foregroundPrimary"
-              variant="micro"
-              marginTop="$1"
-            >
-              {repliedToMessage.text}
-            </Typography>
-          </YStack>
-        </XStack>
-      )}
-      {!!isSpecialMessage && (
-        <XStack
-          borderRadius="$5"
-          marginBottom="$0.5"
-          borderBottomLeftRadius="$2"
-          borderBottomRightRadius="$2"
-          backgroundColor={
-            isMine ? '$accentYellowSecondary' : '$backgroundSecondary'
-          }
-          padding="$4"
-          paddingBottom="$3"
-          paddingTop="$4"
-          gap="$2"
-        >
-          <Typography color="$foregroundSecondary" variant="micro">
-            {message.message.messageType === 'REQUEST_MESSAGING'
-              ? t('messages.requestedWith')
-              : t('messages.declinedWith')}
-          </Typography>
-        </XStack>
-      )}
-      {!!message.message.image && (
-        <YStack
-          borderRadius="$4"
-          padding="$3"
-          marginBottom="$2"
-          backgroundColor="$backgroundTertiary"
-        >
+    <ChatBubble
+      variant={isMine ? 'outgoing' : 'incoming'}
+      text={message.message.text}
+      renderText={renderLinkifiedText}
+      quote={
+        repliedToMessage
+          ? {
+              label: t('common.replyTo'),
+              text: repliedToMessage.text,
+              image: repliedToMessage.image ? (
+                <Image
+                  style={style.replyImage}
+                  resizeMode="contain"
+                  source={{uri: resolveLocalUri(repliedToMessage.image)}}
+                />
+              ) : undefined,
+            }
+          : undefined
+      }
+      notice={
+        messageType === 'REQUEST_MESSAGING'
+          ? t('messages.requestedWith')
+          : messageType === 'DISAPPROVE_MESSAGING'
+            ? t('messages.declinedWith')
+            : undefined
+      }
+      image={
+        image ? (
           <TouchableWithoutFeedback
             disabled={!onImagePressed}
             onPress={onImagePressed}
@@ -170,42 +149,12 @@ function MessageBubble({
             <Image
               style={style.image}
               resizeMode="contain"
-              source={{uri: resolveLocalUri(message.message.image)}}
+              source={{uri: resolveLocalUri(image)}}
             />
           </TouchableWithoutFeedback>
-        </YStack>
-      )}
-      <Stack
-        borderRadius="$6"
-        borderTopLeftRadius={repliedToMessage || isSpecialMessage ? '$2' : '$6'}
-        borderTopRightRadius={
-          repliedToMessage || isSpecialMessage ? '$2' : '$6'
-        }
-        backgroundColor={messageBackgroundColor}
-        px="$4"
-        pb="$4"
-        pt="$4"
-      >
-        <Autolink
-          text={message.message.text}
-          url
-          linkStyle={[
-            style.link,
-            {
-              color: messageTextColor,
-              fontSize: 18,
-              fontFamily: 'TTSatoshi500',
-            },
-          ]}
-          style={{
-            color: messageTextColor,
-            fontSize: 18,
-            lineHeight: 24,
-            fontFamily: 'TTSatoshi500',
-          }}
-        />
-      </Stack>
-    </Stack>
+        ) : undefined
+      }
+    />
   )
 }
 
@@ -433,27 +382,10 @@ function TextMessage({
   if (message.state === 'receivedButRequiresNewerVersion') return null
 
   const isMine = message.state !== 'received'
-  const messageTextColor = isMine
-    ? theme.black100.get()
-    : theme.foregroundPrimary.get()
-  const messageBackgroundColor = isMine
-    ? theme.accentYellowPrimary.get()
-    : theme.backgroundTertiary.get()
-  const repliedToMessage =
-    'repliedTo' in message.message ? message.message.repliedTo : undefined
-  const repliedMessageAuthorName =
-    (message.state === 'received' &&
-      repliedToMessage?.messageAuthor === 'them') ||
-    (message.state === 'sent' && repliedToMessage?.messageAuthor === 'me')
-      ? t('common.you')
-      : t('common.otherSide')
   const messageBubble = (
     <MessageBubble
       isMine={isMine}
-      messageAuthorName={repliedMessageAuthorName}
       message={message}
-      messageBackgroundColor={messageBackgroundColor}
-      messageTextColor={messageTextColor}
       onImagePressed={onImagePressed}
     />
   )

@@ -1,9 +1,19 @@
 import {useNavigation} from '@react-navigation/native'
-import {Avatar, Button, Typography, XStack, YStack} from '@vexl-next/ui'
+import {type RealLifeInfo} from '@vexl-next/domain/src/general/UserNameAndAvatar.brand'
+import {
+  Avatar,
+  Button,
+  RevealDeclinedCard,
+  RevealedInfoCard,
+  revealedInfoCardAvatarSize,
+  XStack,
+  YStack,
+} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {Effect} from 'effect/index'
 import {useAtomValue, useStore} from 'jotai'
 import React from 'react'
+import {SvgXml} from 'react-native-svg'
 import {type RootStackScreenProps} from '../../../navigationTypes'
 import {type ChatMessageWithState} from '../../../state/chat/domain'
 import anonymizePhoneNumber from '../../../state/chat/utils/anonymizePhoneNumber'
@@ -28,7 +38,7 @@ import resolveLocalUri from '../../../utils/resolveLocalUri'
 import {declineExchangeDetailsActionAtom} from '../../TradeChecklistFlow/atoms/exchangeDetailsAtoms'
 import {formatSelectedDetails} from '../../TradeChecklistFlow/components/ExchangeDetailsFlow/formatSelectedDetails'
 import {chatMolecule} from '../atoms'
-import RevealedInfoCard from './RevealedInfoCard'
+import {AddToContactsButton} from './AddToContactsButton'
 import useOpenExchangeDetails from './useOpenExchangeDetails'
 import VexlbotActionCard from './VexlbotMessageItem/components/VexlbotActionCard'
 
@@ -95,30 +105,37 @@ function DeclinedCard({event}: {event: RevealEvent}): React.ReactElement {
 
   return (
     <YStack mb="$4" mt="$4" mx="$4">
-      <YStack
-        alignItems="center"
-        backgroundColor="$backgroundSecondary"
-        borderRadius="$6"
-        gap="$1"
-        paddingHorizontal="$5"
-        paddingVertical="$4"
-        width="100%"
-      >
-        <Avatar customSize={56} source={requestDeclinedAvatar} />
-        <Typography color="$foregroundPrimary" variant="paragraphDemibold">
-          {event.direction === 'received'
+      <RevealDeclinedCard
+        imageSource={requestDeclinedAvatar}
+        title={
+          event.direction === 'received'
             ? t('messages.exchangeDetails.theyDeclined')
-            : t('messages.exchangeDetails.youDeclined')}
-        </Typography>
-        <Typography
-          color="$foregroundSecondary"
-          textAlign="center"
-          variant="paragraphSmall"
-        >
-          {t('messages.exchangeDetails.nothingShared')}
-        </Typography>
-      </YStack>
+            : t('messages.exchangeDetails.youDeclined')
+        }
+        description={t('messages.exchangeDetails.nothingShared')}
+      />
     </YStack>
+  )
+}
+
+function RevealAvatar({
+  image,
+}: {
+  image: RealLifeInfo['image']
+}): React.ReactElement {
+  return image.type === 'imageUri' ? (
+    <Avatar
+      customSize={revealedInfoCardAvatarSize}
+      source={{uri: resolveLocalUri(image.imageUri)}}
+    />
+  ) : (
+    <Avatar customSize={revealedInfoCardAvatarSize}>
+      <SvgXml
+        width={revealedInfoCardAvatarSize}
+        height={revealedInfoCardAvatarSize}
+        xml={image.svgXml.xml}
+      />
+    </Avatar>
   )
 }
 
@@ -156,37 +173,46 @@ function OutcomeCard({event}: {event: RevealEvent}): React.ReactElement {
         }),
       ].join('\n')
 
+  const myImage = mine.photo ? myRealLifeInfo.image : myAnonymousInfo.image
+
   return (
-    <RevealedInfoCard
-      title={t('messages.exchangeDetails.complete')}
-      description={description}
-      contactName={otherSideData.userName}
-      fullPhoneNumber={theirFullPhoneNumber}
-      leftSide={{
-        image: mine.photo ? myRealLifeInfo.image : myAnonymousInfo.image,
-        name: mine.nickname
-          ? myRealLifeInfo.userName
-          : myAnonymousInfo.userName,
-        phoneNumber: mine.phoneNumber
-          ? getInternationalPhoneNumber(myPhoneNumber)
-          : anonymizePhoneNumber(myPhoneNumber),
-      }}
-      rightSide={{
-        image: otherSideData.image,
-        name: otherSideData.userName,
-        phoneNumber: theirFullPhoneNumber
-          ? getInternationalPhoneNumber(theirFullPhoneNumber)
-          : otherSideData.partialPhoneNumber,
-        onAvatarPress:
-          otherSideImage.type === 'imageUri'
-            ? () => {
-                navigation.navigate('ChatImagePreview', {
-                  imageUri: resolveLocalUri(otherSideImage.imageUri),
-                })
-              }
-            : undefined,
-      }}
-    />
+    <YStack mx="$4" mt="$4">
+      <RevealedInfoCard
+        title={t('messages.exchangeDetails.complete')}
+        description={description}
+        leftSide={{
+          avatar: <RevealAvatar image={myImage} />,
+          name: mine.nickname
+            ? myRealLifeInfo.userName
+            : myAnonymousInfo.userName,
+          phoneNumber: mine.phoneNumber
+            ? getInternationalPhoneNumber(myPhoneNumber)
+            : anonymizePhoneNumber(myPhoneNumber),
+        }}
+        rightSide={{
+          avatar: <RevealAvatar image={otherSideImage} />,
+          name: otherSideData.userName,
+          phoneNumber: theirFullPhoneNumber
+            ? getInternationalPhoneNumber(theirFullPhoneNumber)
+            : otherSideData.partialPhoneNumber,
+          onAvatarPress:
+            otherSideImage.type === 'imageUri'
+              ? () => {
+                  navigation.navigate('ChatImagePreview', {
+                    imageUri: resolveLocalUri(otherSideImage.imageUri),
+                  })
+                }
+              : undefined,
+        }}
+        action={
+          <AddToContactsButton
+            fullPhoneNumber={theirFullPhoneNumber}
+            userImage={otherSideImage}
+            userName={otherSideData.userName}
+          />
+        }
+      />
+    </YStack>
   )
 }
 

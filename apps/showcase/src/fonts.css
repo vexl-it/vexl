@@ -1,0 +1,68 @@
+@font-face {
+  font-family: 'TTSatoshi';
+  font-weight: 400;
+  src: url('../../../packages/ui/src/assets/fonts/tt_satoshi_400.otf')
+    format('opentype');
+}
+@font-face {
+  font-family: 'TTSatoshi';
+  font-weight: 500;
+  src: url('../../../packages/ui/src/assets/fonts/tt_satoshi_500.otf')
+    format('opentype');
+}
+@font-face {
+  font-family: 'TTSatoshi';
+  font-weight: 600;
+  src: url('../../../packages/ui/src/assets/fonts/tt_satoshi_600.otf')
+    format('opentype');
+}
+@font-face {
+  font-family: 'TTSatoshi';
+  font-weight: 700;
+  src: url('../../../packages/ui/src/assets/fonts/tt_satoshi_700.otf')
+    format('opentype');
+}
+@font-face {
+  font-family: 'MonumentExtended';
+  font-weight: 400;
+  src: url('../../../packages/ui/src/assets/fonts/pp_monument_400.ttf')
+    format('truetype');
+}
+@font-face {
+  font-family: 'MonumentExtended';
+  font-weight: 700;
+  src: url('../../../packages/ui/src/assets/fonts/pp_monument_700.ttf')
+    format('truetype');
+}
+
+/* Native face names, which some components set as a raw `fontFamily` style. */
+@font-face {
+  font-family: 'TTSatoshi400';
+  src: url('../../../packages/ui/src/assets/fonts/tt_satoshi_400.otf')
+    format('opentype');
+}
+@font-face {
+  font-family: 'TTSatoshi500';
+  src: url('../../../packages/ui/src/assets/fonts/tt_satoshi_500.otf')
+    format('opentype');
+}
+@font-face {
+  font-family: 'TTSatoshi600';
+  src: url('../../../packages/ui/src/assets/fonts/tt_satoshi_600.otf')
+    format('opentype');
+}
+@font-face {
+  font-family: 'TTSatoshi700';
+  src: url('../../../packages/ui/src/assets/fonts/tt_satoshi_700.otf')
+    format('opentype');
+}
+@font-face {
+  font-family: 'PPMonument400';
+  src: url('../../../packages/ui/src/assets/fonts/pp_monument_400.ttf')
+    format('truetype');
+}
+@font-face {
+  font-family: 'PPMonument700';
+  src: url('../../../packages/ui/src/assets/fonts/pp_monument_700.ttf')
+    format('truetype');
+}

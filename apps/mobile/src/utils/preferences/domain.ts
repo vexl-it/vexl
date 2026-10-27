@@ -107,6 +107,9 @@ export const Preferences = Schema.Struct({
   showNotesBoardIntroSheet: Schema.optionalWith(Schema.Boolean, {
     default: () => true,
   }),
+  showAccountIdentityDot: Schema.optionalWith(Schema.Boolean, {
+    default: () => true,
+  }),
   notesBoardEnabled: Schema.optionalWith(Schema.Boolean, {
     default: () => false,
   }),

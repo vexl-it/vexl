@@ -59,8 +59,12 @@ function TextMessage({
 }): React.ReactElement | null {
   const theme = useTheme()
   const messageItem = useAtomValue(messageAtom)
-  const {sendMessageAtom, replyToMessageAtom, messageActionsSelectionAtom} =
-    useMolecule(chatMolecule)
+  const {
+    sendMessageAtom,
+    replyToMessageAtom,
+    messageActionsSelectionAtom,
+    reactionsAtom,
+  } = useMolecule(chatMolecule)
   const navigation =
     useNavigation<RootStackScreenProps<'ChatDetail'>['navigation']>()
   const bubbleRef = useAnimatedRef<Reanimated.View>()
@@ -84,6 +88,15 @@ function TextMessage({
           (selection) => selection?.message.message.uuid === messageUuid
         ),
       [messageActionsSelectionAtom, messageUuid]
+    )
+  )
+  const reactions = useAtomValue(
+    useMemo(
+      () =>
+        selectAtom(reactionsAtom, (all) =>
+          messageUuid ? all[messageUuid] : undefined
+        ),
+      [reactionsAtom, messageUuid]
     )
   )
 
@@ -291,6 +304,7 @@ function TextMessage({
                 <Reanimated.View ref={bubbleRef} style={bubbleAnimatedStyle}>
                   <MessageBubble
                     message={message}
+                    reactions={reactions}
                     onImagePressed={onImagePressed}
                   />
                 </Reanimated.View>

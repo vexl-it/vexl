@@ -7,8 +7,10 @@ import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 import addRealLifeInfoToChat from './addRealLifeInfoToChat'
 import areMessagesEqual from './areMessagesEqual'
 import compareMessages from './compareMessages'
+import isMetadataOnlyMessage from './isMetadataOnlyMessage'
 import processContactRevealMessageIfAny from './processContactRevealMessageIfAny'
 import processIdentityRevealMessageIfAny from './processIdentityRevealMessageIfAny'
+import {applyReceivedReactions} from './reactions'
 import {scheduleTradeReminderIfNeeded} from './scheduleTradeReminderIfNeeded'
 
 export default function addMessagesToChats(
@@ -63,11 +65,8 @@ export default function addMessagesToChats(
             one.state === 'receivedButRequiresNewerVersion'
         )
 
-        const isOnlyMetadataUpdate = !messagesToAddToThisChat.some(
-          (one) =>
-            one.message.messageType !== 'VERSION_UPDATE' &&
-            one.message.messageType !== 'FCM_CYPHER_UPDATE' &&
-            one.message.messageType !== 'MESSAGE_READ'
+        const isOnlyMetadataUpdate = messagesToAddToThisChat.every(
+          isMetadataOnlyMessage
         )
 
         const vexlTokenUpdateFromOtherSide = messagesToAddToThisChat.findLast(
@@ -82,12 +81,14 @@ export default function addMessagesToChats(
             // Do not show metadata updates in chat
             messages: messages.filter(
               (one) =>
-                (one.message.messageType !== 'VERSION_UPDATE' &&
-                  one.message.messageType !== 'FCM_CYPHER_UPDATE' &&
-                  one.message.messageType !== 'MESSAGE_READ') ||
+                !isMetadataOnlyMessage(one) ||
                 // Show messages with forceShow flag
                 (one.state !== 'receivedButRequiresNewerVersion' &&
                   one.message.forceShow)
+            ),
+            reactions: applyReceivedReactions(
+              oneChat.reactions,
+              messagesToAddToThisChat
             ),
             tradeChecklist: tradeChecklistUpdates.reduce(
               (acc, update) =>

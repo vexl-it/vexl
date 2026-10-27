@@ -1,8 +1,12 @@
 import {Stack, Typography, useTheme, XStack, YStack} from '@vexl-next/ui'
+import {Array} from 'effect'
 import React from 'react'
 import {Image, StyleSheet, TouchableWithoutFeedback} from 'react-native'
 import Autolink from 'react-native-autolink'
-import {type ChatMessageWithState} from '../../../state/chat/domain'
+import {
+  type ChatMessageWithState,
+  type MessageReactions,
+} from '../../../state/chat/domain'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import resolveLocalUri from '../../../utils/resolveLocalUri'
 
@@ -26,11 +30,49 @@ const style = StyleSheet.create({
   },
 })
 
+function ReactionsChip({
+  reactions,
+  isMine,
+}: {
+  reactions: MessageReactions
+  isMine: boolean
+}): React.ReactElement | null {
+  const emojis = Array.dedupe(
+    Array.filter([reactions.theirs, reactions.mine], (one) => one !== undefined)
+  )
+  if (!Array.isNonEmptyArray(emojis)) return null
+  const isSameReactionFromBoth =
+    reactions.mine !== undefined && reactions.mine === reactions.theirs
+
+  return (
+    <XStack
+      position="absolute"
+      bottom={0}
+      left={isMine ? '$3' : undefined}
+      right={isMine ? undefined : '$3'}
+      gap="$1"
+      px="$2"
+      py="$1"
+      borderRadius="$5"
+      borderWidth="$0.5"
+      borderColor="$backgroundSecondary"
+      backgroundColor="$backgroundOnBar"
+    >
+      <Typography variant="description" color="$foregroundPrimary">
+        {emojis.join('')}
+        {isSameReactionFromBoth ? ' 2' : ''}
+      </Typography>
+    </XStack>
+  )
+}
+
 function MessageBubble({
   message,
+  reactions,
   onImagePressed,
 }: {
   message: ChatMessageWithState
+  reactions?: MessageReactions | undefined
   onImagePressed?: () => void
 }): React.ReactElement {
   const theme = useTheme()
@@ -50,7 +92,7 @@ function MessageBubble({
     message.message.messageType === 'DISAPPROVE_MESSAGING'
 
   return (
-    <Stack>
+    <Stack pb={reactions ? '$5' : undefined}>
       {!!repliedToMessage && (
         <XStack
           borderRadius="$5"
@@ -158,6 +200,7 @@ function MessageBubble({
           }}
         />
       </Stack>
+      {!!reactions && <ReactionsChip reactions={reactions} isMine={isMine} />}
     </Stack>
   )
 }

@@ -29,6 +29,9 @@ import {focusWasDeniedAtom} from '../../../state/chat/atoms/focusDenyRequestMess
 import focusOtherSideLeftAtom from '../../../state/chat/atoms/focusOtherSideLeftAtom'
 import selectOtherSideDataAtom from '../../../state/chat/atoms/selectOtherSideDataAtom'
 import sendMessageActionAtom from '../../../state/chat/atoms/sendMessageActionAtom'
+import sendReactionActionAtom, {
+  otherSideSupportsReactions,
+} from '../../../state/chat/atoms/sendReactionActionAtom'
 import {
   dummyChatWithMessages,
   type ChatMessageWithState,
@@ -138,6 +141,14 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
 
   const tradeChecklistAtom = focusAtom(chatWithMessagesAtom, (o) =>
     o.prop('tradeChecklist')
+  )
+
+  const reactionsAtom = focusAtom(chatWithMessagesAtom, (o) =>
+    o.prop('reactions')
+  )
+
+  const otherSideSupportsReactionsAtom = atom((get) =>
+    otherSideSupportsReactions(get(chatAtom))
   )
 
   const hiddenMessagesIdsAtom = focusAtom(chatWithMessagesAtom, (o) =>
@@ -866,6 +877,9 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     offerForChatAtom,
     noteForChatAtom,
     sendMessageAtom: sendMessageActionAtom(chatWithMessagesAtom),
+    sendReactionAtom: sendReactionActionAtom(chatWithMessagesAtom),
+    reactionsAtom,
+    otherSideSupportsReactionsAtom,
     otherSideDataAtom,
     identityRevealStatusAtom,
     contactRevealStatusAtom,

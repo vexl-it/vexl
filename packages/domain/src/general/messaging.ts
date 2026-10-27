@@ -42,6 +42,7 @@ export const MessageType = Schema.Literal(
   'VERSION_UPDATE',
   'FCM_CYPHER_UPDATE',
   'MESSAGE_READ',
+  'REACTION',
   // Local-only nudge to clean up an inactive chat. MUST NEVER be sent to the
   // server or the other side.
   'INACTIVITY_REMINDER'
@@ -73,6 +74,23 @@ export const RepliedToDataPayload = Schema.Struct({
 })
 export type RepliedToDataPayload = typeof RepliedToDataPayload.Type
 
+export const ReactionEmoji = Schema.String.pipe(
+  Schema.minLength(1),
+  Schema.maxLength(32),
+  Schema.brand('ReactionEmoji')
+)
+export type ReactionEmoji = typeof ReactionEmoji.Type
+
+/**
+ * Carries the resulting reaction state (not a toggle), so a redelivered
+ * message can't undo itself. Missing `emoji` removes the reaction.
+ */
+export const MessageReaction = Schema.Struct({
+  targetMessageId: ChatMessageId,
+  emoji: Schema.optional(ReactionEmoji),
+})
+export type MessageReaction = typeof MessageReaction.Type
+
 export const ChatMessagePayload = Schema.Struct({
   uuid: ChatMessageId,
   text: Schema.optional(Schema.String),
@@ -84,6 +102,7 @@ export const ChatMessagePayload = Schema.Struct({
   myVersion: Schema.optional(VersionString),
   goldenAvatarType: Schema.optional(GoldenAvatarType),
   tradeChecklistUpdate: Schema.optional(TradeChecklistUpdate),
+  reaction: Schema.optional(MessageReaction),
   minimalRequiredVersion: Schema.optional(VersionString),
   deanonymizedUser: Schema.optional(
     Schema.Struct({
@@ -123,6 +142,7 @@ export const ChatMessage = Schema.Struct({
   image: Schema.optional(UriString),
   repliedTo: Schema.optional(RepliedToData),
   tradeChecklistUpdate: Schema.optional(TradeChecklistUpdate),
+  reaction: Schema.optional(MessageReaction),
   deanonymizedUser: Schema.optional(DeanonymizedUser),
   senderPublicKey: PublicKeyPemBase64,
   messageType: MessageType,

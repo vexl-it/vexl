@@ -10,7 +10,7 @@ import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.b
 import {HashSet, Schema} from 'effect'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 import addMessagesToChats from './addMessagesToChats'
-import {applyReceivedReactions, setReaction} from './reactions'
+import {applyReceivedReactions, setMyReaction} from './reactions'
 
 jest.mock('../../../utils/localization/I18nProvider', () => ({
   getCurrentLocale: () => 'en-US',
@@ -84,39 +84,18 @@ function chatWithMessages(): ChatWithMessages {
   }
 }
 
-describe('setReaction', () => {
-  it('keeps both sides and drops the entry once both are removed', () => {
-    const withBoth = setReaction({
-      reactions: setReaction({
-        reactions: {},
-        targetMessageId,
-        side: 'mine',
-        emoji: heart,
-      }),
+describe('setMyReaction', () => {
+  it('drops the entry once my reaction is removed and there is nothing else', () => {
+    const withMine = setMyReaction({
+      reactions: {},
       targetMessageId,
-      side: 'theirs',
-      emoji: thumbsUp,
+      emoji: heart,
     })
-    expect(withBoth[targetMessageId]).toEqual({mine: heart, theirs: thumbsUp})
+    expect(withMine[targetMessageId]).toEqual({mine: heart})
 
-    const withoutMine = setReaction({
-      reactions: withBoth,
-      targetMessageId,
-      side: 'mine',
-      emoji: undefined,
-    })
-    expect(withoutMine[targetMessageId]).toEqual({
-      mine: undefined,
-      theirs: thumbsUp,
-    })
-
-    const withoutAny = setReaction({
-      reactions: withoutMine,
-      targetMessageId,
-      side: 'theirs',
-      emoji: undefined,
-    })
-    expect(withoutAny).toEqual({})
+    expect(
+      setMyReaction({reactions: withMine, targetMessageId, emoji: undefined})
+    ).toEqual({})
   })
 })
 
@@ -136,7 +115,18 @@ describe('applyReceivedReactions', () => {
       receivedReaction({emoji: undefined, time: 2}),
     ])
 
-    expect(reactions).toEqual({})
+    expect(reactions[targetMessageId]?.theirs).toBeUndefined()
+  })
+
+  it('ignores an older reaction arriving in a later fetch', () => {
+    const afterFirstFetch = applyReceivedReactions({}, [
+      receivedReaction({emoji: thumbsUp, time: 2}),
+    ])
+    const afterSecondFetch = applyReceivedReactions(afterFirstFetch, [
+      receivedReaction({emoji: heart, time: 1}),
+    ])
+
+    expect(afterSecondFetch[targetMessageId]?.theirs).toBe(thumbsUp)
   })
 })
 

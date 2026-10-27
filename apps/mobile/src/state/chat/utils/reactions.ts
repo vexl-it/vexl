@@ -9,25 +9,31 @@ import {
   type MessageReactions,
 } from '../domain'
 
-export function setReaction({
+function setMessageReactions(
+  reactions: ChatReactions,
+  targetMessageId: ChatMessageId,
+  updated: MessageReactions
+): ChatReactions {
+  return updated.mine === undefined &&
+    updated.theirs === undefined &&
+    updated.theirsUpdatedAt === undefined
+    ? Record.remove(reactions, targetMessageId)
+    : {...reactions, [targetMessageId]: updated}
+}
+
+export function setMyReaction({
   reactions,
   targetMessageId,
-  side,
   emoji,
 }: {
   reactions: ChatReactions
   targetMessageId: ChatMessageId
-  side: keyof MessageReactions
   emoji: ReactionEmoji | undefined
 }): ChatReactions {
-  const updated: MessageReactions = {
+  return setMessageReactions(reactions, targetMessageId, {
     ...reactions[targetMessageId],
-    [side]: emoji,
-  }
-
-  return updated.mine === undefined && updated.theirs === undefined
-    ? Record.remove(reactions, targetMessageId)
-    : {...reactions, [targetMessageId]: updated}
+    mine: emoji,
+  })
 }
 
 export function applyReceivedReactions(
@@ -46,15 +52,21 @@ export function applyReceivedReactions(
         (one: ChatMessageWithState) => one.message.time
       )
     ),
-    Array.reduce(reactions, (acc, one) =>
-      one.message.reaction
-        ? setReaction({
-            reactions: acc,
-            targetMessageId: one.message.reaction.targetMessageId,
-            side: 'theirs',
-            emoji: one.message.reaction.emoji,
-          })
-        : acc
-    )
+    Array.reduce(reactions, (acc, one) => {
+      if (!one.message.reaction) return acc
+      const {targetMessageId, emoji} = one.message.reaction
+      const current = acc[targetMessageId]
+      if (
+        current?.theirsUpdatedAt !== undefined &&
+        one.message.time <= current.theirsUpdatedAt
+      )
+        return acc
+
+      return setMessageReactions(acc, targetMessageId, {
+        ...current,
+        theirs: emoji,
+        theirsUpdatedAt: one.message.time,
+      })
+    })
   )
 }

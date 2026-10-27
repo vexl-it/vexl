@@ -87,12 +87,14 @@ function MessageBubble({
   const repliedToMessage =
     'repliedTo' in message.message ? message.message.repliedTo : undefined
 
+  const hasReactions = !!reactions?.mine || !!reactions?.theirs
+
   const isSpecialMessage =
     message.message.messageType === 'REQUEST_MESSAGING' ||
     message.message.messageType === 'DISAPPROVE_MESSAGING'
 
   return (
-    <Stack pb={reactions ? '$5' : undefined}>
+    <Stack pb={hasReactions ? '$5' : undefined}>
       {!!repliedToMessage && (
         <XStack
           borderRadius="$5"
@@ -200,7 +202,9 @@ function MessageBubble({
           }}
         />
       </Stack>
-      {!!reactions && <ReactionsChip reactions={reactions} isMine={isMine} />}
+      {!!reactions && !!hasReactions && (
+        <ReactionsChip reactions={reactions} isMine={isMine} />
+      )}
     </Stack>
   )
 }

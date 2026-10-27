@@ -105,6 +105,9 @@ export type ChatTransientMessageId = typeof ChatTransientMessageId.Type
 export const MessageReactions = Schema.Struct({
   mine: Schema.optional(ReactionEmoji),
   theirs: Schema.optional(ReactionEmoji),
+  // Send time of the last applied reaction from the other side. Reactions can
+  // arrive out of order across fetches, so older ones must not win.
+  theirsUpdatedAt: Schema.optional(UnixMilliseconds),
 })
 export type MessageReactions = typeof MessageReactions.Type
 

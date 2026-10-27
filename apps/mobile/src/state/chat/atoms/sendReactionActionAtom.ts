@@ -46,12 +46,19 @@ type SendReactionAtom = ActionAtomType<
 export default function sendReactionActionAtom(
   chatWithMessagesAtom: FocusAtomType<ChatWithMessages>
 ): SendReactionAtom {
+  const latestReactionMessageIdByTarget = new Map<
+    ChatMessageId,
+    ChatMessageId
+  >()
+
   return atom(
     null,
     (get, set, {targetMessageId, emoji}): Effect.Effect<void, unknown> => {
       const {chat, reactions} = get(chatWithMessagesAtom)
       if (!otherSideSupportsReactions(chat)) return Effect.void
       const previousEmoji = reactions[targetMessageId]?.mine
+      const reactionMessageId = generateChatMessageId()
+      latestReactionMessageIdByTarget.set(targetMessageId, reactionMessageId)
 
       const setMine = (to: ReactionEmoji | undefined): void => {
         set(chatWithMessagesAtom, (old) => ({
@@ -73,7 +80,7 @@ export default function sendReactionActionAtom(
             senderKeypair: chat.inbox.privateKey,
             receiverPublicKey: chat.otherSide.publicKey,
             message: {
-              uuid: generateChatMessageId(),
+              uuid: reactionMessageId,
               time: now(),
               myVersion: version,
               minimalRequiredVersion: MINIMAL_VERSION_FOR_REACTIONS,
@@ -90,8 +97,8 @@ export default function sendReactionActionAtom(
           Effect.sync(() => {
             // Roll back only if no newer reaction replaced this one meanwhile.
             if (
-              get(chatWithMessagesAtom).reactions[targetMessageId]?.mine ===
-              emoji
+              latestReactionMessageIdByTarget.get(targetMessageId) ===
+              reactionMessageId
             )
               setMine(previousEmoji)
           })

@@ -27,15 +27,10 @@ export const checkUserExists = HttpApiBuilder.handler(
       ) {
         yield* _(Effect.logInfo('Sending notification to existing user'))
 
-        // todo #2124: remove expoToken after moving to vexlNotificationToken
-        if (
-          Option.isSome(existingUser.value.vexlNotificationToken) ||
-          Option.isSome(existingUser.value.expoToken)
-        ) {
+        if (Option.isSome(existingUser.value.vexlNotificationToken)) {
           yield* _(
             userNotificationService.notifyUserAboutLoginOnDifferentDevice(
-              Option.getOrNull(existingUser.value.vexlNotificationToken),
-              Option.getOrNull(existingUser.value.expoToken)
+              existingUser.value.vexlNotificationToken.value
             )
           )
         } else {
@@ -45,8 +40,7 @@ export const checkUserExists = HttpApiBuilder.handler(
               existingUserExists: Option.isSome(existingUser),
               existingUserHasToken:
                 Option.isSome(existingUser) &&
-                (Option.isSome(existingUser.value.vexlNotificationToken) ||
-                  Option.isSome(existingUser.value.expoToken)),
+                Option.isSome(existingUser.value.vexlNotificationToken),
             })
           )
         }

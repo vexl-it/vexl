@@ -2,7 +2,6 @@ import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {generateClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
-import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {generateV2KeyPair} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {addChallengeToRequest2} from '@vexl-next/rest-api/src/services/utils/addChallengeToRequest2'
@@ -101,9 +100,6 @@ beforeEach(async () => {
           publicKey: memberKeyPair.publicKeyPemBase64,
           isModerator: false,
           lastRefreshedAt: new Date(),
-          notificationToken: Schema.decodeSync(ExpoNotificationToken)(
-            'someToken'
-          ),
           vexlNotificationToken: Schema.decodeSync(VexlNotificationToken)(
             'vexl_nt_test'
           ),
@@ -116,9 +112,6 @@ beforeEach(async () => {
           publicKey: memberKeyPair.publicKeyPemBase64,
           isModerator: false,
           lastRefreshedAt: new Date(),
-          notificationToken: Schema.decodeSync(ExpoNotificationToken)(
-            'someToken'
-          ),
           vexlNotificationToken: Schema.decodeSync(VexlNotificationToken)(
             'vexl_nt_test'
           ),
@@ -213,7 +206,6 @@ describe('Set club public key v2', () => {
                   publicKey: generatePrivateKey().publicKeyPemBase64,
                   isModerator: false,
                   lastRefreshedAt: new Date(),
-                  notificationToken: null,
                   vexlNotificationToken: otherMemberToken,
                   publicKeyV2: null,
                 })

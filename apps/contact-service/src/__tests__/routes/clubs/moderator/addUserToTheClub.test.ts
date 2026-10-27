@@ -6,7 +6,6 @@ import {
 import {generateClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
-import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {
   InvalidChallengeError,
@@ -90,7 +89,6 @@ beforeEach(async () => {
           publicKey: userKey.publicKeyPemBase64,
           isModerator: true,
           lastRefreshedAt: new Date(),
-          notificationToken: 'someToken' as ExpoNotificationToken,
           vexlNotificationToken: 'vexl_nt_test' as VexlNotificationToken,
           publicKeyV2: null,
         })
@@ -110,7 +108,6 @@ describe('Add user to the club', () => {
             payload: {
               adminitionRequest: {
                 langCode: 'en',
-                notificationToken: Option.none(),
                 vexlNotificationToken: Option.none(),
                 publicKey: user1.publicKeyPemBase64,
                 publicKeyV2: toPublicKeyV2(user1.publicKeyPemBase64),
@@ -127,7 +124,6 @@ describe('Add user to the club', () => {
           app.ClubsMember.getClubInfo({
             payload: {
               ...(yield* _(generateAndSignChallenge(user1))),
-              notificationToken: Option.none(),
               vexlNotificationToken: Option.none(),
               publicKeyV2: Option.none(),
             },
@@ -166,7 +162,6 @@ describe('Add user to the club', () => {
             payload: {
               adminitionRequest: {
                 langCode: 'en',
-                notificationToken: Option.none(),
                 vexlNotificationToken: Option.none(),
                 publicKey: user1.publicKeyPemBase64,
                 publicKeyV2: toPublicKeyV2(user1.publicKeyPemBase64),
@@ -182,7 +177,6 @@ describe('Add user to the club', () => {
             payload: {
               adminitionRequest: {
                 langCode: 'en',
-                notificationToken: Option.none(),
                 vexlNotificationToken: Option.none(),
                 publicKey: user2.publicKeyPemBase64,
                 publicKeyV2: toPublicKeyV2(user2.publicKeyPemBase64),
@@ -198,7 +192,6 @@ describe('Add user to the club', () => {
             payload: {
               adminitionRequest: {
                 langCode: 'en',
-                notificationToken: Option.none(),
                 vexlNotificationToken: Option.none(),
                 publicKey: user3.publicKeyPemBase64,
                 publicKeyV2: toPublicKeyV2(user3.publicKeyPemBase64),
@@ -224,7 +217,6 @@ describe('Add user to the club', () => {
             payload: {
               adminitionRequest: {
                 langCode: 'en',
-                notificationToken: Option.none(),
                 vexlNotificationToken: Option.none(),
                 publicKey: user1.publicKeyPemBase64,
                 publicKeyV2: toPublicKeyV2(user1.publicKeyPemBase64),
@@ -240,7 +232,6 @@ describe('Add user to the club', () => {
             payload: {
               adminitionRequest: {
                 langCode: 'en',
-                notificationToken: Option.none(),
                 vexlNotificationToken: Option.none(),
                 publicKey: user1.publicKeyPemBase64,
                 publicKeyV2: toPublicKeyV2(user1.publicKeyPemBase64),
@@ -270,7 +261,6 @@ describe('Add user to the club', () => {
             clubId,
             isModerator: false,
             lastRefreshedAt: new Date(),
-            notificationToken: null,
             vexlNotificationToken: null,
             publicKeyV2: null,
           })
@@ -281,7 +271,6 @@ describe('Add user to the club', () => {
             payload: {
               adminitionRequest: {
                 langCode: 'en',
-                notificationToken: Option.none(),
                 vexlNotificationToken: Option.none(),
                 publicKey: user1.publicKeyPemBase64,
                 publicKeyV2: toPublicKeyV2(user1.publicKeyPemBase64),
@@ -310,7 +299,6 @@ describe('Add user to the club', () => {
             payload: {
               adminitionRequest: {
                 langCode: 'en',
-                notificationToken: Option.none(),
                 vexlNotificationToken: Option.none(),
                 publicKey: user1.publicKeyPemBase64,
                 publicKeyV2: toPublicKeyV2(user1.publicKeyPemBase64),
@@ -337,7 +325,6 @@ describe('Add user to the club', () => {
             payload: {
               adminitionRequest: {
                 langCode: 'en',
-                notificationToken: Option.none(),
                 vexlNotificationToken: Option.none(),
                 publicKey: user1.publicKeyPemBase64,
                 publicKeyV2: toPublicKeyV2(user1.publicKeyPemBase64),
@@ -366,7 +353,6 @@ describe('Add user to the club', () => {
             payload: {
               adminitionRequest: {
                 langCode: 'en',
-                notificationToken: Option.none(),
                 vexlNotificationToken: Option.none(),
                 publicKey: user1.publicKeyPemBase64,
                 publicKeyV2: toPublicKeyV2(user1.publicKeyPemBase64),
@@ -412,7 +398,6 @@ describe('Add user to the club', () => {
           membersDb.insertClubMember({
             clubId,
             publicKey: user1.publicKeyPemBase64,
-            notificationToken: null,
             vexlNotificationToken:
               'vexl_nt_member1_token' as VexlNotificationToken,
             isModerator: false,
@@ -424,7 +409,6 @@ describe('Add user to the club', () => {
           membersDb.insertClubMember({
             clubId,
             publicKey: user2.publicKeyPemBase64,
-            notificationToken: '2someToken2' as ExpoNotificationToken,
             vexlNotificationToken: null,
             isModerator: false,
             lastRefreshedAt: new Date(),
@@ -436,7 +420,6 @@ describe('Add user to the club', () => {
           membersDb.insertClubMember({
             clubId,
             publicKey: user3.publicKeyPemBase64,
-            notificationToken: null,
             vexlNotificationToken:
               'vexl_nt_member2_token' as VexlNotificationToken,
             isModerator: false,
@@ -453,7 +436,6 @@ describe('Add user to the club', () => {
             payload: {
               adminitionRequest: {
                 langCode: 'en',
-                notificationToken: Option.none(),
                 vexlNotificationToken: Option.none(),
                 publicKey: user4.publicKeyPemBase64,
                 publicKeyV2: toPublicKeyV2(user4.publicKeyPemBase64),
@@ -471,8 +453,8 @@ describe('Add user to the club', () => {
           (n) => n.task._tag === 'NewClubUserNotificationMqEntry'
         )
 
-        // 4 notifications: moderator + 3 existing members with either vexl or expo token.
-        expect(clubNotifications).toHaveLength(4)
+        // moderator + the 2 existing members holding a token
+        expect(clubNotifications).toHaveLength(3)
         expect(
           clubNotifications
             .map((n) =>
@@ -480,26 +462,13 @@ describe('Add user to the club', () => {
                 ? n.task.token
                 : ''
             )
-            .filter((token) => token !== null)
-            .sort((a, b) => (a ?? '').localeCompare(b ?? ''))
+            .sort((a, b) => a.localeCompare(b))
         ).toEqual(
           [
             'vexl_nt_member1_token',
             'vexl_nt_member2_token',
             'vexl_nt_test',
           ].sort((a, b) => a.localeCompare(b))
-        )
-        expect(
-          clubNotifications
-            .map((n) =>
-              n.task._tag === 'NewClubUserNotificationMqEntry'
-                ? (n.task.notificationToken ?? '')
-                : ''
-            )
-            .filter((notificationToken) => notificationToken !== '')
-            .sort((a, b) => a.localeCompare(b))
-        ).toEqual(
-          ['2someToken2', 'someToken'].sort((a, b) => a.localeCompare(b))
         )
       })
     )
@@ -517,7 +486,6 @@ describe('Add user to the club', () => {
             payload: {
               adminitionRequest: {
                 langCode: 'en',
-                notificationToken: Option.none(),
                 vexlNotificationToken: Option.some(
                   'vexl_nt_admitted_user' as VexlNotificationToken
                 ),
@@ -574,12 +542,11 @@ describe('Add user to the club', () => {
 
         const membersDb = yield* _(ClubMembersDbService)
 
-        // Member with ONLY expo token (no vexl token - won't receive notification via new path)
+        // Member without a notification token
         yield* _(
           membersDb.insertClubMember({
             clubId,
             publicKey: user1.publicKeyPemBase64,
-            notificationToken: 'expo_only_token' as ExpoNotificationToken,
             vexlNotificationToken: null,
             isModerator: false,
             lastRefreshedAt: new Date(),
@@ -587,12 +554,11 @@ describe('Add user to the club', () => {
           })
         )
 
-        // Member with BOTH expo and vexl token (new path only)
+        // Member with a notification token
         yield* _(
           membersDb.insertClubMember({
             clubId,
             publicKey: user2.publicKeyPemBase64,
-            notificationToken: 'expo_token_2' as ExpoNotificationToken,
             vexlNotificationToken:
               'vexl_nt_member2_token' as VexlNotificationToken,
             isModerator: false,
@@ -609,7 +575,6 @@ describe('Add user to the club', () => {
             payload: {
               adminitionRequest: {
                 langCode: 'en',
-                notificationToken: Option.none(),
                 vexlNotificationToken: Option.none(),
                 publicKey: user4.publicKeyPemBase64,
                 publicKeyV2: toPublicKeyV2(user4.publicKeyPemBase64),

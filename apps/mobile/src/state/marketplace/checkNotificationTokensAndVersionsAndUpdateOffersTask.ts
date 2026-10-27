@@ -8,7 +8,6 @@ import {
   InAppLoadingTaskError,
   registerInAppLoadingTask,
 } from '../../utils/inAppLoadingTasks'
-import {refreshNotificationTaskId} from '../../utils/notifications/refreshNotificationTokenOnResumeTask'
 import {showDebugNotificationIfEnabled} from '../../utils/notifications/showDebugNotificationIfEnabled'
 import {reportErrorE} from '../../utils/reportError'
 import {inboxesAtom} from '../chat/atoms/messagingStateAtom'
@@ -59,8 +58,6 @@ const updateOfferNotificationTokenActionAtom = atom(
           payloadPublic: {
             ...offer.offerInfo.publicPart,
             vexlNotificationToken,
-            // backward compatibility #2124 remove once all clients are updated
-            fcmCypher: vexlNotificationToken,
           },
           intendedClubs: offer.ownershipInfo.intendedClubs,
           symmetricKey: offer.offerInfo.privatePart.symmetricKey,
@@ -124,9 +121,6 @@ export const checkNotificationTokensAndVersionsAndUpdateOffersTaskId =
     },
     dependsOn: [
       {id: ensureVexlSecretExistsTaskId},
-      {
-        id: refreshNotificationTaskId,
-      },
       {id: refreshOffersAndEnsureInboxesTaskId},
     ],
     task: (store) =>

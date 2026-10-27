@@ -64,10 +64,9 @@ successful launch or after a successful persist:
 - `offer-to-connections`
 - `postLoginFlowProgress1`
 - `storedClubsV2`
-- `fcmCypherToKeyHolder`
 - `vexlTokenToKeyHolder`
 
-The last three include club and notification key-holder maps. Their values are
+The last two include club and notification key-holder maps. Their values are
 not copied to AsyncStorage or Sentry. Only their key names are recorded.
 
 ## Message catalog

@@ -76,9 +76,7 @@ export const sendMessageReadActionAtom = atom(
           receiverPublicKey: chat.otherSide.publicKey,
           message: messageToSend,
           notificationApi: get(apiAtom).notification,
-          theirNotificationCypher:
-            chat.otherSideVexlToken ?? chat.otherSideFcmCypher,
-          otherSideVersion: chat.otherSideVersion,
+          theirNotificationToken: chat.otherSideVexlToken,
         })
       )
     }).pipe(

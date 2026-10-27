@@ -7,7 +7,6 @@ import {SqlClient} from '@effect/sql'
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
-import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {hashPhoneNumber} from '@vexl-next/server-utils/src/generateUserAuthData'
 import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
@@ -36,8 +35,6 @@ describe('delete user', () => {
         yield* _(
           app.User.createUser({
             payload: {
-              firebaseToken: null,
-              expoToken: Schema.decodeSync(ExpoNotificationToken)('someToken'),
               vexlNotificationToken: Option.some(
                 Schema.decodeSync(VexlNotificationToken)('vexl_nt_test')
               ),

@@ -2,6 +2,19 @@ import {Effect, Either, Option} from 'effect'
 import {parseDeepLink} from './parseDeepLink'
 
 describe('parseDeepLink', () => {
+  it('ignores the removed notification token in old club admission links', () => {
+    const result = Effect.runSync(
+      parseDeepLink(
+        'https://app.vexl.it/link/?type=request-club-admition&publicKey=public-key&publicKeyV2=V2_PUB_public-key&langCode=en&notificationToken=ExponentPushToken%5Bold-token%5D'
+      )
+    )
+
+    if (result.searchParams.type !== 'request-club-admition')
+      throw new Error(`Unexpected link type: ${result.searchParams.type}`)
+
+    expect(result.searchParams).not.toHaveProperty('notificationToken')
+  })
+
   describe('load-pr-preview', () => {
     // This link format is the contract with CI — pr-preview.yaml generates
     // these links into PR comments.

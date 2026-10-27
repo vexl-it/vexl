@@ -8,6 +8,7 @@ import {
   generateChatMessageId,
   type ChatMessage,
 } from '@vexl-next/domain/src/general/messaging'
+import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {
   type FriendLevel,
   type GoldenAvatarType,
@@ -20,7 +21,6 @@ import {type VersionString} from '@vexl-next/domain/src/utility/VersionString.br
 import {type ChatApi} from '@vexl-next/rest-api/src/services/chat'
 import {type NotificationApi} from '@vexl-next/rest-api/src/services/notification'
 import {Effect, type ParseResult} from 'effect'
-import {type NotificationTokenOrCypher} from '../notifications/callWithNotificationService'
 import {type JsonStringifyError} from '../utils/parsing'
 import sendMessage, {type SendMessageApiErrors} from './sendMessage'
 import {type ErrorEncryptingMessage} from './utils/chatCrypto'
@@ -28,8 +28,7 @@ import {type ErrorEncryptingMessage} from './utils/chatCrypto'
 function createRequestChatMessage({
   text,
   senderPublicKey,
-  myNotificationCypher,
-  lastReceivedNotificationCypher,
+  myVexlToken,
   myVersion,
   goldenAvatarType,
   senderClubsUuids,
@@ -38,8 +37,7 @@ function createRequestChatMessage({
   friendLevel,
 }: {
   text: string
-  myNotificationCypher?: NotificationTokenOrCypher
-  lastReceivedNotificationCypher?: NotificationTokenOrCypher
+  myVexlToken?: VexlNotificationToken
   senderPublicKey: PublicKeyPemBase64
   myVersion: VersionString
   goldenAvatarType?: GoldenAvatarType
@@ -52,8 +50,7 @@ function createRequestChatMessage({
     uuid: generateChatMessageId(),
     messageType: 'REQUEST_MESSAGING',
     text,
-    myFcmCypher: myNotificationCypher,
-    lastReceivedFcmCypher: lastReceivedNotificationCypher,
+    myVexlToken,
     time: now(),
     myVersion,
     senderPublicKey,
@@ -76,13 +73,11 @@ export function sendMessagingRequest({
   text,
   fromKeypair,
   toPublicKey,
-  myNotificationCypher,
-  lastReceivedNotificationCypher,
+  myVexlToken,
   api,
   myVersion,
-  theirNotificationCypher,
+  theirNotificationToken,
   notificationApi,
-  otherSideVersion,
   goldenAvatarType,
   forClubsUuids,
   commonFriends,
@@ -92,13 +87,11 @@ export function sendMessagingRequest({
   text: string
   fromKeypair: PrivateKeyHolder
   toPublicKey: PublicKeyPemBase64
-  myNotificationCypher?: NotificationTokenOrCypher
-  lastReceivedNotificationCypher?: NotificationTokenOrCypher
+  myVexlToken?: VexlNotificationToken
   api: ChatApi
   myVersion: VersionString
-  theirNotificationCypher?: NotificationTokenOrCypher | undefined
+  theirNotificationToken?: VexlNotificationToken | undefined
   notificationApi: NotificationApi
-  otherSideVersion?: VersionString | undefined
   goldenAvatarType?: GoldenAvatarType
   forClubsUuids: readonly ClubUuid[]
   commonFriends?: readonly HashedPhoneNumber[]
@@ -116,8 +109,7 @@ export function sendMessagingRequest({
       text,
       senderPublicKey: fromKeypair.publicKeyPemBase64,
       myVersion,
-      myNotificationCypher,
-      lastReceivedNotificationCypher,
+      myVexlToken,
       goldenAvatarType,
       senderClubsUuids: forClubsUuids,
       commonFriends,
@@ -131,8 +123,7 @@ export function sendMessagingRequest({
         receiverPublicKey: toPublicKey,
         message: requestChatMessage,
         senderKeypair: fromKeypair,
-        theirNotificationCypher,
-        otherSideVersion,
+        theirNotificationToken,
         notificationApi,
       })
     )

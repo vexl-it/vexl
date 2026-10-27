@@ -5,14 +5,12 @@ import {ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {StreamOnlyMessageCypher} from '@vexl-next/domain/src/general/messaging'
 import {UserInactivityNotificationVariant} from '@vexl-next/domain/src/general/notifications'
-import {NotificationCypher} from '@vexl-next/domain/src/general/notifications/NotificationCypher.brand'
 import {
   VexlNotificationToken,
   VexlNotificationTokenSecret,
 } from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {NotificationTrackingId} from '@vexl-next/domain/src/general/NotificationTrackingId.brand'
 import {VexlProductNotification} from '@vexl-next/domain/src/general/vexlProductNotification'
-import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {PlatformName} from '@vexl-next/domain/src/utility/PlatformName'
 import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
@@ -35,16 +33,6 @@ export const NotificationsStreamClientInfo = Schema.Struct({
   connectionKind,
 })
 
-// todo #2124
-export const NotificationsStreamClientInfoOld = Schema.Struct({
-  version: VersionCode,
-  notificationToken: Schema.Union(
-    ExpoNotificationToken,
-    VexlNotificationTokenSecret
-  ),
-  platform: PlatformName,
-  connectionKind,
-})
 export type NotificationsStreamClientInfo =
   typeof NotificationsStreamClientInfo.Type
 
@@ -52,12 +40,7 @@ export class NewChatMessageNoticeMessage extends Schema.TaggedClass<NewChatMessa
   'NewChatMessageNoticeMessage'
 )('NewChatMessageNoticeMessage', {
   sentAt: UnixMilliseconds,
-  // TODO remove #2124
-  targetCypher: Schema.optional(
-    Schema.Union(NotificationCypher, VexlNotificationToken)
-  ),
-  // TODO remove optional #2124
-  targetToken: Schema.optional(VexlNotificationToken),
+  targetToken: VexlNotificationToken,
   trackingId: NotificationTrackingId,
 }) {}
 
@@ -67,12 +50,7 @@ export class StreamOnlyChatMessage extends Schema.TaggedClass<StreamOnlyChatMess
   sentAt: UnixMilliseconds,
   trackingId: NotificationTrackingId,
   message: StreamOnlyMessageCypher,
-  // TODO remove #2124
-  targetCypher: Schema.optional(
-    Schema.Union(NotificationCypher, VexlNotificationToken)
-  ),
-  // TODO remove nullOr #2124
-  targetToken: Schema.optional(VexlNotificationToken),
+  targetToken: VexlNotificationToken,
 }) {}
 
 export class NewUserNoticeMessage extends Schema.TaggedClass<NewUserNoticeMessage>(
@@ -181,7 +159,7 @@ export type NotificationStreamError = typeof NotificationStreamError.Type
 
 export class Rpcs extends RpcGroup.make(
   Rpc.make('listenToNotifications', {
-    payload: NotificationsStreamClientInfoOld,
+    payload: NotificationsStreamClientInfo,
     error: NotificationStreamError,
     success: NotificationStreamMessage,
     stream: true,

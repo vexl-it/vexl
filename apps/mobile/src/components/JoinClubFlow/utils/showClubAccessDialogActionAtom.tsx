@@ -8,7 +8,6 @@ import {addKeyToWaitingForAdmissionActionAtom} from '../../../state/clubs/atom/c
 import {generateVexlTokenActionAtom} from '../../../state/notifications/actions/generateVexlTokenActionAtom'
 import {createClubAdmitionRequestLink} from '../../../utils/deepLinks/createLinks'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
-import {getNotificationTokenE} from '../../../utils/notifications'
 import reportError from '../../../utils/reportError'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import {showErrorAlert} from '../../ErrorAlert'
@@ -19,10 +18,6 @@ export const showClubAccessDialogActionAtom = atom(null, (get, set) => {
   const {t} = get(translationAtom)
 
   return Effect.gen(function* (_) {
-    const notificationToken = yield* _(
-      getNotificationTokenE(),
-      Effect.map(Option.fromNullable)
-    )
     const privateKey = generatePrivateKey()
     const privateKeyV2 = yield* generateV2KeyPair()
     const langCode = t('localeName')
@@ -31,7 +26,6 @@ export const showClubAccessDialogActionAtom = atom(null, (get, set) => {
 
     const link = createClubAdmitionRequestLink({
       langCode,
-      notificationToken,
       vexlNotificationToken: Option.some(vexlNotificationToken),
       publicKey: privateKey.publicKeyPemBase64,
       publicKeyV2: privateKeyV2.publicKey,

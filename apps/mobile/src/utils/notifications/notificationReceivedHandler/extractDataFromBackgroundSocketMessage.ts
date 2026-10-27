@@ -8,7 +8,6 @@ import {
   UserLoginOnDifferentDeviceNotificationData,
   VexlProductNotificationData,
 } from '@vexl-next/domain/src/general/notifications'
-import {isVexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {NotificationStreamMessage} from '@vexl-next/rest-api/src/services/notification/Rpcs'
 import {Effect, Option, Schema} from 'effect'
 import {
@@ -23,11 +22,6 @@ const toNotificationData = (
     case 'NewChatMessageNoticeMessage':
       return Option.some(
         new NewChatMessageNoticeNotificationData({
-          targetCypher:
-            message.targetCypher &&
-            !isVexlNotificationToken(message.targetCypher)
-              ? message.targetCypher
-              : undefined,
           targetToken: message.targetToken,
           trackingId: Option.some(message.trackingId),
           sentAt: message.sentAt,

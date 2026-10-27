@@ -59,7 +59,6 @@ import {
   ReportClubRequest,
   ReportClubResponse,
   SetPublicKeyV2Request,
-  UpdateNotificationTokenRequest,
   UserExistsResponse,
   UserIsNotModeratorError,
   UserNotFoundError,
@@ -92,17 +91,6 @@ export const RefreshUserEndpoint = HttpApiEndpoint.post(
   .setHeaders(CommonAndSecurityHeaders)
   .middleware(ServerSecurityMiddleware)
   .setPayload(RefreshUserRequest)
-  .addSuccess(NoContentResponse)
-  .addError(UserNotFoundError, {status: 404})
-  .annotate(MaxExpectedDailyCall, 1)
-
-export const UpdateNotificationTokenEndpoint = HttpApiEndpoint.put(
-  'updateNotificationToken',
-  '/api/v1/users/notification-token'
-)
-  .setHeaders(CommonAndSecurityHeaders)
-  .middleware(ServerSecurityMiddleware)
-  .setPayload(UpdateNotificationTokenRequest)
   .addSuccess(NoContentResponse)
   .addError(UserNotFoundError, {status: 404})
   .annotate(MaxExpectedDailyCall, 1)
@@ -291,7 +279,6 @@ const UserApiGroup = HttpApiGroup.make('User')
   .add(CheckUserExistsEndpoint)
   .add(CreateUserEndpoint)
   .add(RefreshUserEndpoint)
-  .add(UpdateNotificationTokenEndpoint)
   .add(DeleteUserEndpoint)
   .add(EraseUserFromNetworkEndpoint)
 

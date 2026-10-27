@@ -1,4 +1,7 @@
-import {VexlNotificationTokenSecret} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
+import {
+  VexlNotificationToken,
+  VexlNotificationTokenSecret,
+} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {createNotificationTrackingId} from '@vexl-next/domain/src/general/NotificationTrackingId.brand'
 import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
@@ -61,6 +64,7 @@ const makeTask = (
 ): NewChatMessageNoticeSendTask =>
   new NewChatMessageNoticeSendTask({
     notificationToken,
+    targetToken: Schema.decodeSync(VexlNotificationToken)('vexl_nt_test'),
     sendNewChatMessageNotification: true,
     sentAt: Schema.decodeSync(UnixMilliseconds)(sentAtMs),
     trackingId: createNotificationTrackingId(),

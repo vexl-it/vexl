@@ -6,6 +6,7 @@ import {
   generateChatMessageId,
   type ChatMessage,
 } from '@vexl-next/domain/src/general/messaging'
+import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {
   now,
   type UnixMilliseconds,
@@ -14,7 +15,6 @@ import {type VersionString} from '@vexl-next/domain/src/utility/VersionString.br
 import {type ChatApi} from '@vexl-next/rest-api/src/services/chat'
 import {type NotificationApi} from '@vexl-next/rest-api/src/services/notification'
 import {Effect, type ParseResult} from 'effect'
-import {type NotificationTokenOrCypher} from '../notifications/callWithNotificationService'
 import {type JsonStringifyError} from '../utils/parsing'
 import sendMessage, {type SendMessageApiErrors} from './sendMessage'
 import {type ErrorEncryptingMessage} from './utils/chatCrypto'
@@ -54,8 +54,7 @@ export function sendCancelMessagingRequest({
   toPublicKey,
   api,
   myVersion,
-  theirNotificationCypher,
-  otherSideVersion,
+  theirNotificationToken,
   notificationApi,
 }: {
   text: string
@@ -63,8 +62,7 @@ export function sendCancelMessagingRequest({
   toPublicKey: PublicKeyPemBase64
   api: ChatApi
   myVersion: VersionString
-  theirNotificationCypher?: NotificationTokenOrCypher | undefined
-  otherSideVersion: VersionString | undefined
+  theirNotificationToken?: VexlNotificationToken | undefined
   notificationApi: NotificationApi
 }): Effect.Effect<
   SentCancelMessagingRequest,
@@ -86,8 +84,7 @@ export function sendCancelMessagingRequest({
         receiverPublicKey: toPublicKey,
         message: cancelRequestMessage,
         senderKeypair: fromKeypair,
-        theirNotificationCypher,
-        otherSideVersion,
+        theirNotificationToken,
         notificationApi,
       })
     )

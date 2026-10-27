@@ -38,6 +38,12 @@ export function canReactToMessage(message: ChatMessageWithState): boolean {
   )
 }
 
+interface ReactionSends {
+  inFlight: number
+  delivered: ReactionEmoji | undefined
+  deliveredSendNumber?: number
+}
+
 type SendReactionAtom = ActionAtomType<
   [{targetMessageId: ChatMessageId; emoji: ReactionEmoji | undefined}],
   Effect.Effect<void, unknown>
@@ -46,19 +52,22 @@ type SendReactionAtom = ActionAtomType<
 export default function sendReactionActionAtom(
   chatWithMessagesAtom: FocusAtomType<ChatWithMessages>
 ): SendReactionAtom {
-  const latestReactionMessageIdByTarget = new Map<
-    ChatMessageId,
-    ChatMessageId
-  >()
+  const sendsByTarget = new Map<ChatMessageId, ReactionSends>()
+  let sendCount = 0
 
   return atom(
     null,
     (get, set, {targetMessageId, emoji}): Effect.Effect<void, unknown> => {
       const {chat, reactions} = get(chatWithMessagesAtom)
       if (!otherSideSupportsReactions(chat)) return Effect.void
-      const previousEmoji = reactions[targetMessageId]?.mine
-      const reactionMessageId = generateChatMessageId()
-      latestReactionMessageIdByTarget.set(targetMessageId, reactionMessageId)
+
+      const sends = sendsByTarget.get(targetMessageId) ?? {
+        inFlight: 0,
+        delivered: reactions[targetMessageId]?.mine,
+      }
+      sendsByTarget.set(targetMessageId, sends)
+      sends.inFlight += 1
+      const sendNumber = ++sendCount
 
       const setMine = (to: ReactionEmoji | undefined): void => {
         set(chatWithMessagesAtom, (old) => ({
@@ -80,7 +89,7 @@ export default function sendReactionActionAtom(
             senderKeypair: chat.inbox.privateKey,
             receiverPublicKey: chat.otherSide.publicKey,
             message: {
-              uuid: reactionMessageId,
+              uuid: generateChatMessageId(),
               time: now(),
               myVersion: version,
               minimalRequiredVersion: MINIMAL_VERSION_FOR_REACTIONS,
@@ -93,14 +102,24 @@ export default function sendReactionActionAtom(
             theirNotificationToken: chat.otherSideVexlToken,
           })
         ),
-        Effect.tapError(() =>
+        Effect.tap(() =>
           Effect.sync(() => {
-            // Roll back only if no newer reaction replaced this one meanwhile.
+            if ((sends.deliveredSendNumber ?? 0) > sendNumber) return
+            sends.delivered = emoji
+            sends.deliveredSendNumber = sendNumber
+          })
+        ),
+        // Once the last send settles, show what the other side ended up with.
+        Effect.ensuring(
+          Effect.sync(() => {
+            sends.inFlight -= 1
+            if (sends.inFlight > 0) return
+            sendsByTarget.delete(targetMessageId)
             if (
-              latestReactionMessageIdByTarget.get(targetMessageId) ===
-              reactionMessageId
+              get(chatWithMessagesAtom).reactions[targetMessageId]?.mine !==
+              sends.delivered
             )
-              setMine(previousEmoji)
+              setMine(sends.delivered)
           })
         ),
         Effect.asVoid

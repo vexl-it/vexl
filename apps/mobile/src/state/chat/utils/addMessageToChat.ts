@@ -4,6 +4,7 @@ import addToSortedArray from '../../../utils/addToSortedArray'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 import areMessagesEqual from './areMessagesEqual'
 import compareMessages from './compareMessages'
+import isMetadataOnlyMessage from './isMetadataOnlyMessage'
 
 function updateChatVersion(
   message: ChatMessageWithState
@@ -58,12 +59,7 @@ function markLastMessageAsNotReadByOtherSide(
   message: ChatMessageWithState
 ): (chat: ChatWithMessages) => ChatWithMessages {
   return (chat) => {
-    if (
-      message.state === 'sent' &&
-      !['VERSION_UPDATE', 'FCM_CYPHER_UPDATE', 'MESSAGE_READ'].includes(
-        message.message.messageType
-      )
-    ) {
+    if (message.state === 'sent' && !isMetadataOnlyMessage(message)) {
       return {
         ...chat,
         chat: {
@@ -81,9 +77,7 @@ export default function addMessageToChat(
 ): (chat: ChatWithMessages) => ChatWithMessages {
   return flow(
     (chat) =>
-      message.message.messageType === 'VERSION_UPDATE' ||
-      message.message.messageType === 'FCM_CYPHER_UPDATE' ||
-      message.message.messageType === 'MESSAGE_READ'
+      isMetadataOnlyMessage(message)
         ? chat
         : ({
             ...chat,

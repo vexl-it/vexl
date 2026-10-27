@@ -1,5 +1,6 @@
 import Clipboard from '@react-native-clipboard/clipboard'
 import {BlurView} from '@react-native-community/blur'
+import {ReactionEmoji} from '@vexl-next/domain/src/general/messaging'
 import {
   Copy,
   Reply,
@@ -11,8 +12,9 @@ import {
   type IconProps,
 } from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
+import {Array, Effect, Schema} from 'effect'
 import {impactAsync, ImpactFeedbackStyle} from 'expo-haptics'
-import {useAtom, useSetAtom} from 'jotai'
+import {useAtom, useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useEffect} from 'react'
 import {
   BackHandler,
@@ -23,19 +25,32 @@ import {
 } from 'react-native'
 import {KeyboardController} from 'react-native-keyboard-controller'
 import Reanimated, {
+  Extrapolation,
   interpolate,
   useAnimatedStyle,
   useSharedValue,
   withSpring,
   withTiming,
+  type SharedValue,
 } from 'react-native-reanimated'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {scheduleOnRN} from 'react-native-worklets'
+import {canReactToMessage} from '../../../state/chat/atoms/sendReactionActionAtom'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
+import reportError from '../../../utils/reportError'
 import {toastNotificationAtom} from '../../ToastNotification/atom'
 import {chatMolecule, type MessageLayout} from '../atoms'
 import MessageBubble, {PRESSED_BUBBLE_SCALE} from './MessageBubble'
 
+const QUICK_REACTIONS = Array.map(
+  ['❤️', '👍', '👎', '😂', '😮', '😢'],
+  (emoji) => Schema.decodeSync(ReactionEmoji)(emoji)
+)
+const REACTION_SIZE = tokens.size[9].val
+const REACTION_BAR_PADDING = tokens.space[2].val
+const REACTION_BAR_HEIGHT = REACTION_SIZE + REACTION_BAR_PADDING * 2
+const REACTION_BAR_WIDTH =
+  REACTION_SIZE * QUICK_REACTIONS.length + REACTION_BAR_PADDING * 2
 const GAP = tokens.space[3].val
 const SCREEN_PADDING = tokens.space[5].val
 const MENU_WIDTH = tokens.size[13].val * 2.5
@@ -54,6 +69,7 @@ function clamp(value: number, min: number, max: number): number {
 function computePlacement({
   layout,
   isMine,
+  showReactions,
   windowWidth,
   windowHeight,
   insetTop,
@@ -61,12 +77,20 @@ function computePlacement({
 }: {
   layout: MessageLayout
   isMine: boolean
+  showReactions: boolean
   windowWidth: number
   windowHeight: number
   insetTop: number
   insetBottom: number
-}): {bubbleTop: number; menuTop: number; menuLeft: number} {
-  const minBubbleTop = insetTop + SCREEN_PADDING
+}): {
+  bubbleTop: number
+  reactionBarTop: number
+  reactionBarLeft: number
+  menuTop: number
+  menuLeft: number
+} {
+  const minBubbleTop =
+    insetTop + SCREEN_PADDING + (showReactions ? REACTION_BAR_HEIGHT + GAP : 0)
   const maxBubbleTop =
     windowHeight -
     insetBottom -
@@ -75,16 +99,72 @@ function computePlacement({
     GAP -
     layout.height
   const bubbleTop = Math.max(minBubbleTop, Math.min(layout.y, maxBubbleTop))
+  const alignedToBubble = (width: number): number =>
+    clamp(
+      isMine ? layout.x + layout.width - width : layout.x,
+      SCREEN_PADDING,
+      windowWidth - SCREEN_PADDING - width
+    )
 
   return {
     bubbleTop,
+    reactionBarTop: bubbleTop - GAP - REACTION_BAR_HEIGHT,
+    reactionBarLeft: alignedToBubble(REACTION_BAR_WIDTH),
     menuTop: bubbleTop + layout.height + GAP,
-    menuLeft: clamp(
-      isMine ? layout.x + layout.width - MENU_WIDTH : layout.x,
-      SCREEN_PADDING,
-      windowWidth - SCREEN_PADDING - MENU_WIDTH
-    ),
+    menuLeft: alignedToBubble(MENU_WIDTH),
   }
+}
+
+function QuickReaction({
+  emoji,
+  index,
+  isSelected,
+  progress,
+  onPress,
+}: {
+  emoji: ReactionEmoji
+  index: number
+  isSelected: boolean
+  progress: SharedValue<number>
+  onPress: (emoji: ReactionEmoji) => void
+}): React.ReactElement {
+  const staggeredStyle = useAnimatedStyle(() => {
+    const start = index * 0.06
+    return {
+      transform: [
+        {
+          scale: interpolate(
+            progress.value,
+            [start, start + 0.5],
+            [0.4, 1],
+            Extrapolation.CLAMP
+          ),
+        },
+      ],
+    }
+  })
+
+  return (
+    <Reanimated.View style={staggeredStyle}>
+      <Stack
+        role="button"
+        width={REACTION_SIZE}
+        height={REACTION_SIZE}
+        borderRadius={REACTION_SIZE}
+        alignItems="center"
+        justifyContent="center"
+        backgroundColor={isSelected ? '$backgroundHighlight' : undefined}
+        pressStyle={{scale: 1.2}}
+        onPress={() => {
+          onPress(emoji)
+        }}
+      >
+        <Typography variant="heading3" color="$foregroundPrimary">
+          {emoji}
+        </Typography>
+      </Stack>
+    </Reanimated.View>
+  )
 }
 
 function MenuItem({
@@ -121,20 +201,35 @@ function MessageActionsOverlay(): React.ReactElement | null {
   const {t} = useTranslation()
   const insets = useSafeAreaInsets()
   const {width: windowWidth, height: windowHeight} = useWindowDimensions()
-  const {messageActionsSelectionAtom, replyToMessageAtom} =
-    useMolecule(chatMolecule)
+  const {
+    messageActionsSelectionAtom,
+    replyToMessageAtom,
+    reactionsAtom,
+    otherSideSupportsReactionsAtom,
+    sendReactionAtom,
+  } = useMolecule(chatMolecule)
   const [selection, setSelection] = useAtom(messageActionsSelectionAtom)
   const setReplyToMessage = useSetAtom(replyToMessageAtom)
+  const reactions = useAtomValue(reactionsAtom)
+  const otherSideSupportsReactions = useAtomValue(
+    otherSideSupportsReactionsAtom
+  )
+  const sendReaction = useSetAtom(sendReactionAtom)
   const setToastNotification = useSetAtom(toastNotificationAtom)
   const progress = useSharedValue(0)
   const bubbleScale = useSharedValue(PRESSED_BUBBLE_SCALE)
   const layout = selection?.layout
   const isMine = selection?.message.state !== 'received'
+  const showReactions =
+    otherSideSupportsReactions &&
+    !!selection &&
+    canReactToMessage(selection.message)
   const placement =
     layout &&
     computePlacement({
       layout,
       isMine,
+      showReactions,
       windowWidth,
       windowHeight,
       insetTop: insets.top,
@@ -189,6 +284,14 @@ function MessageActionsOverlay(): React.ReactElement | null {
     ],
   }))
 
+  const reactionBarStyle = useAnimatedStyle(() => ({
+    opacity: progress.value,
+    transform: [
+      {scale: interpolate(progress.value, [0, 1], [0.6, 1])},
+      {translateY: interpolate(progress.value, [0, 1], [bubbleOffsetY, 0])},
+    ],
+  }))
+
   const menuStyle = useAnimatedStyle(() => ({
     opacity: progress.value,
     transform: [
@@ -199,6 +302,24 @@ function MessageActionsOverlay(): React.ReactElement | null {
 
   if (!selection || !layout || !placement) return null
   const {message} = selection
+  const messageReactions = reactions[message.message.uuid]
+
+  const react = (emoji: ReactionEmoji): void => {
+    Effect.runFork(
+      sendReaction({
+        targetMessageId: message.message.uuid,
+        emoji: messageReactions?.mine === emoji ? undefined : emoji,
+      }).pipe(
+        Effect.catchAll((e) =>
+          Effect.sync(() => {
+            reportError('warn', new Error('Error sending reaction'), {e})
+            setToastNotification(t('common.somethingWentWrong'))
+          })
+        )
+      )
+    )
+    close()
+  }
 
   return (
     <Stack style={StyleSheet.absoluteFill}>
@@ -231,8 +352,39 @@ function MessageActionsOverlay(): React.ReactElement | null {
           bubbleStyle,
         ]}
       >
-        <MessageBubble message={message} />
+        <MessageBubble message={message} reactions={messageReactions} />
       </Reanimated.View>
+      {!!showReactions && (
+        <Reanimated.View
+          style={[
+            {
+              position: 'absolute',
+              top: placement.reactionBarTop,
+              left: placement.reactionBarLeft,
+              transformOrigin: `${isMine ? 'right' : 'left'} bottom`,
+            },
+            reactionBarStyle,
+          ]}
+        >
+          <XStack
+            p={REACTION_BAR_PADDING}
+            borderRadius={REACTION_BAR_HEIGHT}
+            backgroundColor="$backgroundOnBar"
+            boxShadow={SURFACE_SHADOW}
+          >
+            {Array.map(QUICK_REACTIONS, (emoji, index) => (
+              <QuickReaction
+                key={emoji}
+                emoji={emoji}
+                index={index}
+                isSelected={messageReactions?.mine === emoji}
+                progress={progress}
+                onPress={react}
+              />
+            ))}
+          </XStack>
+        </Reanimated.View>
+      )}
       <Reanimated.View
         style={[
           {

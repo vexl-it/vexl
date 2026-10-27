@@ -153,6 +153,12 @@
   "appSettings.changeCurrency": "Zmień walutę",
   "appSettings.appearanceTitle": "Wygląd",
   "appSettings.allowScreencapture": "Zezwól na zrzuty ekranu",
+  "appSettings.usageStatistics": "Udostępniaj statystyki użytkowania",
+  "appSettings.usageStatisticsLink": "Jak działają statystyki użytkowania",
+  "analyticsConsent.title": "Pomóż nam ulepszyć Vexl",
+  "analyticsConsent.text": "Czy możemy zbierać statystyki użytkowania? Pokazują nam, gdzie Vexl nie daje rady. Bez identyfikatora użytkownika, bez dokładnych godzin, bez adresu IP. Zmienisz to w każdej chwili w ustawieniach.",
+  "analyticsConsent.link": "Przeczytaj, jak to działa",
+  "analyticsConsent.accept": "Udostępnij statystyki",
   "appSettings.appearance.light": "Tryb jasny",
   "appSettings.appearance.dark": "Tryb ciemny",
   "appSettings.appearance.system": "Dopasuj do urządzenia"

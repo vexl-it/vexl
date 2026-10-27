@@ -14,6 +14,7 @@ function ImportContactsMarketplaceSuggestion(): React.ReactElement {
 
   return (
     <DismissableMarketplaceBanner
+      promptId="importContacts"
       color="pink"
       title={t('marketplace.importContactsSuggestion.title')}
       description={t('marketplace.importContactsSuggestion.description')}

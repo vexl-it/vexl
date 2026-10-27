@@ -38,8 +38,8 @@ export default function Intro1Screen({navigation}: Props): React.ReactElement {
       action={{
         label: t('loginFlow.v2.intro1.action'),
         onPress: () => {
-          void clearMmkvStorageAndEmptyAtoms().then(() => {
-            navigation.navigate('Intro2')
+          void clearMmkvStorageAndEmptyAtoms({keepAnalytics: true}).then(() => {
+            navigation.navigate('AnalyticsConsent')
           })
         },
       }}
@@ -68,6 +68,7 @@ export default function Intro1Screen({navigation}: Props): React.ReactElement {
           <VexlTextGraphic animate height={27} />
         </Stack>
       }
+      scroll
     >
       <LoginFlowCentered>
         <YStack alignItems="center" gap="$9" width="100%">

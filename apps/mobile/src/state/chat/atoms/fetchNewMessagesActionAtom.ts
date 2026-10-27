@@ -27,6 +27,7 @@ import {focusAtom} from 'jotai-optics'
 import {Platform} from 'react-native'
 import {apiAtom} from '../../../api'
 import {refreshNotificationBadgeCountActionAtom} from '../../../components/BadgeCountManager'
+import {reportInboxMessagesActionAtom} from '../../../utils/analytics'
 import {type ActionAtomType} from '../../../utils/atomUtils/ActionAtomType'
 import {version} from '../../../utils/environment'
 import {isOnSpecificChat} from '../../../utils/navigation'
@@ -446,6 +447,11 @@ export const fetchAndStoreMessagesForInboxAtom = atom<
           ),
           updatedInbox
         )
+        set(reportInboxMessagesActionAtom, {
+          inbox: updatedInbox,
+          newMessages,
+          offer: get(singleOfferAtom(updatedInbox.inbox.offerId)),
+        })
 
         newMessages
           .filter((one) => one.message.messageType === 'BLOCK_CHAT')

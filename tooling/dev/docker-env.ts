@@ -11,6 +11,7 @@ export const INFRA_SERVICES: readonly string[] = [
   'geocoding-postgres',
   'redis',
   'minio',
+  'ohttp-relay',
 ]
 
 export function buildDockerEnv(
@@ -31,6 +32,8 @@ export function buildDockerEnv(
     MINIO_API_PORT: String(ctx.ports.minioApi),
     MINIO_CONSOLE_PORT: String(ctx.ports.minioConsole),
     S3_BUCKET_NAME: infra.minio.bucket,
+    OHTTP_RELAY_PORT: String(ctx.ports.ohttpRelay),
+    METRICS_SERVICE_PORT: String(ctx.ports.metricsService),
     GRAFANA_PORT: String(ctx.ports.grafana),
     LOKI_PORT: String(ctx.ports.loki),
     TEMPO_PORT: String(ctx.ports.tempo),

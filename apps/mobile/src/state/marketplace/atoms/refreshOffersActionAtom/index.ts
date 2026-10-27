@@ -4,6 +4,7 @@ import {Array, Effect, Record, pipe} from 'effect'
 import {atom} from 'jotai'
 import {AppState} from 'react-native'
 import {apiAtom} from '../../../../api'
+import {reportMarketplaceLoadedActionAtom} from '../../../../utils/analytics'
 import {markMarketplaceReadyNotificationFlowAsCompletedIfOffersAreVisibleActionAtom} from '../../../../utils/marketplaceReadyNotification/store'
 import {refreshLastSeenOffersActionAtom} from '../../../../utils/newOffersNotificationBackgroundTask/store'
 import reportError from '../../../../utils/reportError'
@@ -15,7 +16,10 @@ import {ensureMyOffersHaveOwnershipInfoUploadedInPrivatepayloadForOwner} from '.
 import {loadingStateAtom} from '../loadingState'
 import {anyMarketplaceSuggestionDismissedInThisSessionAtom} from '../offerSuggestionVisible'
 import {offersAtom, offersStateAtom} from '../offersState'
-import {reportOffersWithoutLocationActionAtom} from '../offersToSeeInMarketplace'
+import {
+  offersToSeeInMarketplaceAtom,
+  reportOffersWithoutLocationActionAtom,
+} from '../offersToSeeInMarketplace'
 import {combineIncomingOffers} from './utils/combineIncomingOffers'
 import {fetchOffersReportErrorsActionAtom} from './utils/fetchOffersReportErrorsActionAtom'
 import {getRemovedOffersIds} from './utils/getRemovedOffersIds'
@@ -125,6 +129,10 @@ export const refreshOffersActionAtom = atom(
       )
 
       if (AppState.currentState === 'active') {
+        set(
+          reportMarketplaceLoadedActionAtom,
+          get(offersToSeeInMarketplaceAtom)
+        )
         set(refreshLastSeenOffersActionAtom)
         set(
           markMarketplaceReadyNotificationFlowAsCompletedIfOffersAreVisibleActionAtom

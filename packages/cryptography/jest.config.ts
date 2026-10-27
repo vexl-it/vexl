@@ -8,6 +8,10 @@ const config: JestConfigWithTsJest = {
   extensionsToTreatAsEsm: ['.ts'],
 
   testTimeout: 60_000,
+  // hpke and noble ship ESM only
+  transformIgnorePatterns: [
+    '/node_modules/(?!(hpke|@panva/hpke-noble|@noble)/)',
+  ],
   testMatch: ['**/*.test.ts'], // This line ensures only files with .test.ts suffix are run
   transform: {
     '^.+\\.(ts|js)$': [

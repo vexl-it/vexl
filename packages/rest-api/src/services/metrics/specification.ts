@@ -1,4 +1,9 @@
-import {HttpApi, HttpApiEndpoint, HttpApiGroup} from '@effect/platform/index'
+import {
+  HttpApi,
+  HttpApiEndpoint,
+  HttpApiGroup,
+  HttpApiSchema,
+} from '@effect/platform/index'
 import {
   NotFoundError,
   UnexpectedServerError,
@@ -7,7 +12,12 @@ import {CommonHeaders} from '../../commonHeaders'
 import {MaxExpectedDailyCall} from '../../MaxExpectedDailyCountAnnotation'
 import {NoContentResponse} from '../../NoContentResponse.brand'
 import {RateLimitingMiddleware} from '../../rateLimititing'
-import {ReportNotificationInteractionRequest} from './contracts'
+import {
+  AnalyticsGatewayKeyUnavailableError,
+  InvalidAnalyticsStateError,
+  OHTTP_REQUEST_CONTENT_TYPE,
+  ReportNotificationInteractionRequest,
+} from './contracts'
 
 export const ReportNotificationInteractionEndpoint = HttpApiEndpoint.get(
   'reportNotificationInteraction',
@@ -18,9 +28,25 @@ export const ReportNotificationInteractionEndpoint = HttpApiEndpoint.get(
   .addSuccess(NoContentResponse)
   .annotate(MaxExpectedDailyCall, 5000)
 
-const RootGroup = HttpApiGroup.make('root', {topLevel: true}).add(
-  ReportNotificationInteractionEndpoint
+/**
+ * OHTTP gateway: the app only calls it through an analytics relay, so the
+ * client IP never reaches Vexl. Rate limiting therefore counts per relay.
+ */
+export const RelayAnalyticsStateEndpoint = HttpApiEndpoint.post(
+  'relayAnalyticsState',
+  '/analytics/ohttp'
 )
+  .setPayload(
+    HttpApiSchema.Uint8Array({contentType: OHTTP_REQUEST_CONTENT_TYPE})
+  )
+  .addSuccess(NoContentResponse)
+  .addError(InvalidAnalyticsStateError, {status: 400})
+  .addError(AnalyticsGatewayKeyUnavailableError, {status: 503})
+  .annotate(MaxExpectedDailyCall, 1_000_000)
+
+const RootGroup = HttpApiGroup.make('root', {topLevel: true})
+  .add(ReportNotificationInteractionEndpoint)
+  .add(RelayAnalyticsStateEndpoint)
 
 export const MetricsApiSpecification = HttpApi.make('Metrics Service')
   .middleware(RateLimitingMiddleware)

@@ -22,6 +22,7 @@ import '../../state/marketplace/checkNotificationTokensAndVersionsAndUpdateOffer
 import '../../state/notes/refreshNotesInAppLoadingTask'
 import '../../state/notifications/ensureVexlSecretExistsTask'
 import '../../state/notifications/refreshVexlTokenMetadataTask'
+import '../../state/notifications/removeLegacyNotificationStorageInAppLoadingTask'
 import '../../state/refreshOffersAndEnsureInboxesInAppLoadingTask'
 import '../../state/refreshUserOnContactServiceInAppBackgroundTask'
 

@@ -51,6 +51,7 @@ import {createUser} from './routes/user/createUser'
 import {deleteUser} from './routes/user/deleteUser'
 import {eraseUserFromNetwork} from './routes/user/eraseUserFromNetwork'
 import {refreshUser} from './routes/user/refreshUser'
+import {updateNotificationToken} from './routes/user/updateNotificationToken'
 import {ScheduledTaskWorkersLayer} from './scheduledTaskWorkers'
 import {UserNotificationService} from './services/UserNotificationService'
 import {S3Service} from './utils/S3Service'
@@ -65,6 +66,7 @@ const UserApiGroupLive = HttpApiBuilder.group(
       .handle('refreshUser', refreshUser)
       .handle('deleteUser', deleteUser)
       .handle('eraseUserFromNetwork', eraseUserFromNetwork)
+      .handle('updateNotificationToken', updateNotificationToken)
 )
 
 const ContactApiGroupLive = HttpApiBuilder.group(

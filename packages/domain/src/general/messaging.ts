@@ -15,7 +15,10 @@ import {UserName} from './UserName.brand'
 import {RevealedRealLifeInfo} from './UserNameAndAvatar.brand'
 import {ClubUuid} from './clubs'
 import {NoteId, OneNoteInState} from './notes'
-import {VexlNotificationToken} from './notifications/VexlNotificationToken'
+import {
+  isVexlNotificationToken,
+  VexlNotificationToken,
+} from './notifications/VexlNotificationToken'
 import {FriendLevel, GoldenAvatarType, OfferId, OneOfferInState} from './offers'
 import {TradeChecklistUpdate} from './tradeChecklist'
 
@@ -181,7 +184,7 @@ export const CalendarEventId = Schema.String.pipe(
 )
 export type CalendarEventId = typeof CalendarEventId.Type
 
-export const Chat = Schema.Struct({
+const chatFields = {
   id: ChatId,
   inbox: Inbox,
   origin: ChatOrigin,
@@ -206,7 +209,28 @@ export const Chat = Schema.Struct({
   // Time of the last real message for which an INACTIVITY_REMINDER was already
   // inserted - ensures the reminder is inserted at most once per episode.
   inactivityReminderInsertedForMessageTime: Schema.optional(UnixMilliseconds),
-})
+}
+
+export const Chat = Schema.transform(
+  Schema.Struct({
+    ...chatFields,
+    // Apps <= 26.9.5 stored the other side's token only here, see https://github.com/vexl-it/vexl/issues/2124
+    otherSideFcmCypher: Schema.optional(Schema.Unknown),
+  }),
+  Schema.typeSchema(Schema.Struct(chatFields)),
+  {
+    strict: true,
+    decode: ({otherSideFcmCypher, ...chat}) => ({
+      ...chat,
+      otherSideVexlToken:
+        chat.otherSideVexlToken ??
+        (isVexlNotificationToken(otherSideFcmCypher)
+          ? otherSideFcmCypher
+          : undefined),
+    }),
+    encode: (chat) => chat,
+  }
+)
 export type Chat = typeof Chat.Type
 
 export const MessageCypher = Schema.String.pipe(Schema.brand('MessageCypher'))

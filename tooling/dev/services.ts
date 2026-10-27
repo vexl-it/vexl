@@ -229,18 +229,9 @@ export const SERVICES: readonly RunnableApp[] = [
     healthPortKey: 'notificationService',
     needs: {db: dbn.notification, redis: true, s3: false},
     run: tsxService('src/index.ts'),
-    secretKeys: [
-      'EXPO_ACCESS_TOKEN',
-      'NOTIFICATION_THROTTLE_TTL_MINUTES',
-      'FCM_TOKEN_PUBLIC_KEY',
-      'FCM_TOKEN_PRIVATE_KEY',
-    ],
-    buildEnv: (ctx) => ({
+    secretKeys: ['EXPO_ACCESS_TOKEN', 'NOTIFICATION_THROTTLE_TTL_MINUTES'],
+    buildEnv: () => ({
       EXPO_ACCESS_TOKEN: '',
-      // Reuse the dev ECDSA pair for notification-token signing in dev. Override
-      // via .env.local for real FCM signing.
-      FCM_TOKEN_PUBLIC_KEY: ctx.cfg.devCryptoKeys.SECRET_PUBLIC_KEY,
-      FCM_TOKEN_PRIVATE_KEY: ctx.cfg.devCryptoKeys.SECRET_PRIVATE_KEY,
     }),
   },
   {

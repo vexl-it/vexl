@@ -23,7 +23,7 @@ import {
   StyleSheet,
   useWindowDimensions,
 } from 'react-native'
-import {KeyboardController} from 'react-native-keyboard-controller'
+import {useKeyboardState} from 'react-native-keyboard-controller'
 import Reanimated, {
   Extrapolation,
   interpolate,
@@ -71,19 +71,18 @@ function computePlacement({
   isMine,
   showReactions,
   windowWidth,
-  windowHeight,
   insetTop,
-  insetBottom,
+  bottomLimit,
 }: {
   layout: MessageLayout
   isMine: boolean
   showReactions: boolean
   windowWidth: number
-  windowHeight: number
   insetTop: number
-  insetBottom: number
+  bottomLimit: number
 }): {
   bubbleTop: number
+  bubbleHeight: number
   reactionBarTop: number
   reactionBarLeft: number
   menuTop: number
@@ -91,13 +90,10 @@ function computePlacement({
 } {
   const minBubbleTop =
     insetTop + SCREEN_PADDING + (showReactions ? REACTION_BAR_HEIGHT + GAP : 0)
-  const maxBubbleTop =
-    windowHeight -
-    insetBottom -
-    SCREEN_PADDING -
-    MENU_HEIGHT -
-    GAP -
-    layout.height
+  const maxBubbleBottom = bottomLimit - SCREEN_PADDING - MENU_HEIGHT - GAP
+  // Very long messages are clipped so the actions always stay on screen.
+  const bubbleHeight = Math.min(layout.height, maxBubbleBottom - minBubbleTop)
+  const maxBubbleTop = maxBubbleBottom - bubbleHeight
   const bubbleTop = Math.max(minBubbleTop, Math.min(layout.y, maxBubbleTop))
   const alignedToBubble = (width: number): number =>
     clamp(
@@ -108,9 +104,10 @@ function computePlacement({
 
   return {
     bubbleTop,
+    bubbleHeight,
     reactionBarTop: bubbleTop - GAP - REACTION_BAR_HEIGHT,
     reactionBarLeft: alignedToBubble(REACTION_BAR_WIDTH),
-    menuTop: bubbleTop + layout.height + GAP,
+    menuTop: bubbleTop + bubbleHeight + GAP,
     menuLeft: alignedToBubble(MENU_WIDTH),
   }
 }
@@ -201,19 +198,18 @@ function MessageActionsOverlay(): React.ReactElement | null {
   const {t} = useTranslation()
   const insets = useSafeAreaInsets()
   const {width: windowWidth, height: windowHeight} = useWindowDimensions()
+  const keyboardHeight = useKeyboardState((state) => state.height)
   const {
     messageActionsSelectionAtom,
     replyToMessageAtom,
     reactionsAtom,
-    otherSideSupportsReactionsAtom,
+    canSendReactionsAtom,
     sendReactionAtom,
   } = useMolecule(chatMolecule)
   const [selection, setSelection] = useAtom(messageActionsSelectionAtom)
   const setReplyToMessage = useSetAtom(replyToMessageAtom)
   const reactions = useAtomValue(reactionsAtom)
-  const otherSideSupportsReactions = useAtomValue(
-    otherSideSupportsReactionsAtom
-  )
+  const canSendReactions = useAtomValue(canSendReactionsAtom)
   const sendReaction = useSetAtom(sendReactionAtom)
   const setToastNotification = useSetAtom(toastNotificationAtom)
   const progress = useSharedValue(0)
@@ -221,9 +217,7 @@ function MessageActionsOverlay(): React.ReactElement | null {
   const layout = selection?.layout
   const isMine = selection?.message.state !== 'received'
   const showReactions =
-    otherSideSupportsReactions &&
-    !!selection &&
-    canReactToMessage(selection.message)
+    canSendReactions && !!selection && canReactToMessage(selection.message)
   const placement =
     layout &&
     computePlacement({
@@ -231,16 +225,14 @@ function MessageActionsOverlay(): React.ReactElement | null {
       isMine,
       showReactions,
       windowWidth,
-      windowHeight,
       insetTop: insets.top,
-      insetBottom: insets.bottom,
+      bottomLimit: windowHeight - Math.max(insets.bottom, keyboardHeight),
     })
   const bubbleOffsetY = layout && placement ? layout.y - placement.bubbleTop : 0
 
   useEffect(() => {
     if (!selection) return
     void impactAsync(ImpactFeedbackStyle.Medium)
-    void KeyboardController.dismiss()
     progress.value = 0
     bubbleScale.value = PRESSED_BUBBLE_SCALE
     progress.value = withSpring(1, OPEN_SPRING)
@@ -348,6 +340,8 @@ function MessageActionsOverlay(): React.ReactElement | null {
             top: placement.bubbleTop,
             left: layout.x,
             width: layout.width,
+            height: placement.bubbleHeight,
+            overflow: 'hidden',
           },
           bubbleStyle,
         ]}

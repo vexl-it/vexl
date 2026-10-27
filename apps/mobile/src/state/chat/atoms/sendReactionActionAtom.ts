@@ -17,7 +17,7 @@ import {type ActionAtomType} from '../../../utils/atomUtils/ActionAtomType'
 import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
 import {version} from '../../../utils/environment'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
-import {setReaction} from '../utils/reactions'
+import {setMyReaction} from '../utils/reactions'
 
 const MINIMAL_VERSION_FOR_REACTIONS =
   Schema.decodeSync(VersionString)('26.11.0')
@@ -51,23 +51,22 @@ export default function sendReactionActionAtom(
     (get, set, {targetMessageId, emoji}): Effect.Effect<void, unknown> => {
       const {chat, reactions} = get(chatWithMessagesAtom)
       if (!otherSideSupportsReactions(chat)) return Effect.void
+      const previousEmoji = reactions[targetMessageId]?.mine
 
-      const setMyReaction = (
-        reactionEmoji: ReactionEmoji | undefined
-      ): Effect.Effect<void> =>
-        Effect.sync(() => {
-          set(chatWithMessagesAtom, (old) => ({
-            ...old,
-            reactions: setReaction({
-              reactions: old.reactions,
-              targetMessageId,
-              side: 'mine',
-              emoji: reactionEmoji,
-            }),
-          }))
-        })
+      const setMine = (to: ReactionEmoji | undefined): void => {
+        set(chatWithMessagesAtom, (old) => ({
+          ...old,
+          reactions: setMyReaction({
+            reactions: old.reactions,
+            targetMessageId,
+            emoji: to,
+          }),
+        }))
+      }
 
-      return setMyReaction(emoji).pipe(
+      return Effect.sync(() => {
+        setMine(emoji)
+      }).pipe(
         Effect.zipRight(
           sendMessage({
             api: get(apiAtom).chat,
@@ -87,7 +86,16 @@ export default function sendReactionActionAtom(
             theirNotificationToken: chat.otherSideVexlToken,
           })
         ),
-        Effect.tapError(() => setMyReaction(reactions[targetMessageId]?.mine)),
+        Effect.tapError(() =>
+          Effect.sync(() => {
+            // Roll back only if no newer reaction replaced this one meanwhile.
+            if (
+              get(chatWithMessagesAtom).reactions[targetMessageId]?.mine ===
+              emoji
+            )
+              setMine(previousEmoji)
+          })
+        ),
         Effect.asVoid
       )
     }

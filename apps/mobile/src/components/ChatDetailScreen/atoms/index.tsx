@@ -147,10 +147,6 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     o.prop('reactions')
   )
 
-  const otherSideSupportsReactionsAtom = atom((get) =>
-    otherSideSupportsReactions(get(chatAtom))
-  )
-
   const hiddenMessagesIdsAtom = focusAtom(chatWithMessagesAtom, (o) =>
     o.prop('hiddenMessagesIds')
   )
@@ -458,6 +454,11 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
   )
 
   const canSendMessagesAtom = createCanSendMessagesAtom(messagesAtom)
+
+  const canSendReactionsAtom = atom(
+    (get) =>
+      get(canSendMessagesAtom) && otherSideSupportsReactions(get(chatAtom))
+  )
   const chatStateAtom = selectAtom(chatWithMessagesAtom, getChatState)
   const otherSideLeftAtom = focusOtherSideLeftAtom(chatWithMessagesAtom)
   const shouldGrayScaleAvatarAtom = atom((get) => {
@@ -879,7 +880,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     sendMessageAtom: sendMessageActionAtom(chatWithMessagesAtom),
     sendReactionAtom: sendReactionActionAtom(chatWithMessagesAtom),
     reactionsAtom,
-    otherSideSupportsReactionsAtom,
+    canSendReactionsAtom,
     otherSideDataAtom,
     identityRevealStatusAtom,
     contactRevealStatusAtom,

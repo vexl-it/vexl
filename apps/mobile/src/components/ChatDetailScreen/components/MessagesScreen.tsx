@@ -5,6 +5,7 @@ import {useMolecule} from 'bunshi/dist/react'
 import {Effect} from 'effect/index'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback} from 'react'
+import {KeyboardController} from 'react-native-keyboard-controller'
 import {fetchAndStoreMessagesForInboxHandleNotificationsActionAtom} from '../../../state/chat/atoms/fetchNewMessagesActionAtom'
 import {useStatusBarStyleForScreen} from '../../../state/statusBarStyleAtom'
 import * as fromChatAtoms from '../../../state/tradeChecklist/atoms/fromChatAtoms'
@@ -39,6 +40,17 @@ function MessagesScreen({
     useCallback(() => {
       setParentChat({chatId, inboxKey})
     }, [chatId, inboxKey, setParentChat])
+  )
+
+  // The message list only makes room for the keyboard when it sees it open,
+  // so it must not stay open across entering or leaving the chat.
+  useFocusEffect(
+    useCallback(() => {
+      void KeyboardController.dismiss()
+      return () => {
+        void KeyboardController.dismiss()
+      }
+    }, [])
   )
 
   useAppState(

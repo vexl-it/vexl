@@ -18,6 +18,8 @@ public enum NotificationRenderer {
   /// apps/mobile/src/utils/notifications/chatNotifications.ts:
   /// - MESSAGE: title = display name (fallback localized title), body = text
   ///   (fallback localized body)
+  /// - REACTION: title = display name (fallback localized title), body =
+  ///   localized body with `{{emoji}}`; removed reactions are not rendered
   /// - other renderable types: localized title/body with `{{them}}`
   ///   interpolation (empty string when the name is unknown)
   /// - threadIdentifier: "request-group-id" for REQUEST_MESSAGING, else
@@ -48,6 +50,10 @@ public enum NotificationRenderer {
       let hasPreviewText =
         message.text?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false
       body = (hasPreviewText ? message.text : nil) ?? interpolateThem(localized.body, them: them)
+    } else if type == .reaction {
+      guard let emoji = message.reactionEmoji, !emoji.isEmpty else { return nil }
+      title = displayName ?? interpolateThem(localized.title, them: them)
+      body = localized.body.replacingOccurrences(of: "{{emoji}}", with: emoji)
     } else {
       title = interpolateThem(localized.title, them: them)
       body = interpolateThem(localized.body, them: them)

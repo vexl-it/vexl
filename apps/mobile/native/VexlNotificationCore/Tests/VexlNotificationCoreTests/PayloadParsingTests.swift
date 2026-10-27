@@ -159,6 +159,23 @@ final class PayloadParsingTests: XCTestCase {
     XCTAssertNil(message.minimalRequiredVersion)
   }
 
+  func testParsesReactionEmoji() throws {
+    let reaction = try XCTUnwrap(
+      DecryptedChatMessage.parse(
+        plaintextJson: #"{"uuid":"a","time":1,"messageType":"REACTION","text":"","reaction":{"targetMessageId":"b","emoji":"❤️"}}"#
+      )
+    )
+    XCTAssertEqual(reaction.renderableType, .reaction)
+    XCTAssertEqual(reaction.reactionEmoji, "❤️")
+
+    let removal = try XCTUnwrap(
+      DecryptedChatMessage.parse(
+        plaintextJson: #"{"uuid":"a","time":1,"messageType":"REACTION","text":"","reaction":{"targetMessageId":"b"}}"#
+      )
+    )
+    XCTAssertNil(removal.reactionEmoji)
+  }
+
   func testChatMessageParseRejectsMalformedJson() {
     XCTAssertNil(DecryptedChatMessage.parse(plaintextJson: "not json"))
     XCTAssertNil(DecryptedChatMessage.parse(plaintextJson: "[]"))

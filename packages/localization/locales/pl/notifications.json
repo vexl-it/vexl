@@ -5,6 +5,8 @@
   "notifications.errorWhileOpening": "Błąd podczas otwierania powiadomienia",
   "notifications.MESSAGE.title": "Nowa wiadomość",
   "notifications.MESSAGE.body": "Masz nową wiadomość.",
+  "notifications.REACTION.title": "Nowa reakcja",
+  "notifications.REACTION.body": "Reaguje {{emoji}} na wiadomość",
   "notifications.REQUEST_REVEAL.title": "Otrzymano żądanie tożsamości",
   "notifications.REQUEST_REVEAL.body": "Poproszono Cię o ujawnienie swojej tożsamości.",
   "notifications.APPROVE_REVEAL.title": "Tożsamość ujawniona!",

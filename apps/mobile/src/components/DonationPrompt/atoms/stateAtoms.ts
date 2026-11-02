@@ -1,9 +1,9 @@
+import {type UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {type InvoiceStatus} from '@vexl-next/rest-api/src/services/content/contracts'
 import {Array, pipe} from 'effect'
 import {atom} from 'jotai'
 import {DateTime} from 'luxon'
 import {type MyDonation} from '../../../state/donations/domain'
-import {lastDisplayOfDonationPromptTimestampAtom} from '../../../utils/preferences'
 
 export const PREDEFINED_DONATION_AMOUNTS = [10, 20, 30, 50]
 export const MAX_DONATION_AMOUNT = 1000 // Maximum donation amount in EUR
@@ -31,19 +31,15 @@ export const resetDonationPromptValuesActionAtom = atom(null, (get, set) => {
   set(donationPaymentMethodAtom, 'BTC-LN')
 })
 
-export const shouldShowDonationPromptAtom = atom((get) => {
-  const lastDisplayOfDonationPromptTimestamp = get(
-    lastDisplayOfDonationPromptTimestampAtom
-  )
-
+export function donationPromptCooldownPassed(
+  lastDisplayTimestamp: UnixMilliseconds | undefined
+): boolean {
   return (
-    !lastDisplayOfDonationPromptTimestamp ||
-    DateTime.now().diff(
-      DateTime.fromMillis(lastDisplayOfDonationPromptTimestamp),
-      'days'
-    ).days > DONATION_PROMPT_DAYS_THRESHOLD_COUNT
+    !lastDisplayTimestamp ||
+    DateTime.now().diff(DateTime.fromMillis(lastDisplayTimestamp), 'days')
+      .days > DONATION_PROMPT_DAYS_THRESHOLD_COUNT
   )
-})
+}
 
 export function hasRecentDonation(donations: readonly MyDonation[]): boolean {
   const cutoff = DateTime.now().minus({days: RECENT_DONATION_DAYS}).toMillis()

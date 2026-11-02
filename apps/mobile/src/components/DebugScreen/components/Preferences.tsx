@@ -5,7 +5,6 @@ import {preferencesAtom} from '../../../utils/preferences'
 
 const preferencesToEdit = [
   'disableOfferRerequestLimit',
-  'allowSendingImages',
   'enableNewOffersNotificationDevMode',
   'showFriendLevelBanner',
   'showTextDebugButton',

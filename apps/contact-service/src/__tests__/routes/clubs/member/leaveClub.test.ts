@@ -1,6 +1,6 @@
 import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
-import {generateClubUuid} from '@vexl-next/domain/src/general/clubs'
+import {ClubCode, generateClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
@@ -8,6 +8,7 @@ import {InvalidChallengeError} from '@vexl-next/rest-api/src/challenges/contract
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {addTestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Option, Schema} from 'effect'
+import {ClubInvitationLinkDbService} from '../../../../db/ClubInvitationLinkDbService'
 import {ClubMembersDbService} from '../../../../db/ClubMemberDbService'
 import {ClubsDbService} from '../../../../db/ClubsDbService'
 import {generateAndSignChallenge} from '../../../utils/generateAndSignChallenge'
@@ -120,6 +121,50 @@ describe('Leave club', () => {
       })
     )
   })
+  it('Removes invitation links created by the leaving member', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const app = yield* _(NodeTestingApp)
+        const clubsDb = yield* _(ClubsDbService)
+        const membersDb = yield* _(ClubMembersDbService)
+        const linksDb = yield* _(ClubInvitationLinkDbService)
+
+        const {id: clubId} = yield* _(
+          clubsDb.findClubByUuid({uuid: club.uuid}),
+          Effect.flatten
+        )
+        const member = yield* _(
+          membersDb.findClubMemberByPublicKey({
+            publicKey: userKey.publicKeyPemBase64,
+          }),
+          Effect.flatten
+        )
+        yield* _(
+          linksDb.insertInvitationLink({
+            clubId,
+            createdByMemberId: member.id,
+            forAdmin: false,
+            code: Schema.decodeSync(ClubCode)('111111'),
+          })
+        )
+
+        yield* _(
+          app.ClubsMember.leaveClub({
+            payload: {
+              ...(yield* _(generateAndSignChallenge(userKey))),
+              clubUuid: club.uuid,
+            },
+          })
+        )
+
+        const remainingLinks = yield* _(
+          linksDb.findInvitationLinkByClubId({clubId})
+        )
+        expect(remainingLinks).toEqual([])
+      })
+    )
+  })
+
   it('Returns error when invalid challenge', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {

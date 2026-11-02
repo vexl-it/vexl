@@ -1,5 +1,12 @@
 import {ImageZoom} from '@likashefqet/react-native-image-zoom'
-import {IconButton, XmarkCancelClose} from '@vexl-next/ui'
+import {
+  IconButton,
+  Share,
+  useTheme,
+  XmarkCancelClose,
+  XStack,
+} from '@vexl-next/ui'
+import {shareAsync} from 'expo-sharing'
 import React from 'react'
 import {useWindowDimensions} from 'react-native'
 import {GestureHandlerRootView} from 'react-native-gesture-handler'
@@ -7,7 +14,9 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {Stack} from 'tamagui'
 import {type RootStackScreenProps} from '../../navigationTypes'
 import {useStatusBarStyleForScreen} from '../../state/statusBarStyleAtom'
+import {useTranslation} from '../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../utils/useSafeGoBack'
+import {showErrorAlert} from '../ErrorAlert'
 
 type Props = RootStackScreenProps<'ChatImagePreview'>
 
@@ -19,17 +28,35 @@ export default function ChatImagePreviewScreen({
   const {width, height} = useWindowDimensions()
   const {top} = useSafeAreaInsets()
   const safeGoBack = useSafeGoBack()
+  const theme = useTheme()
+  const {t} = useTranslation()
+
+  const shareImage = (): void => {
+    shareAsync(imageUri).catch((error: unknown) => {
+      showErrorAlert({title: t('common.somethingWentWrong'), error})
+    })
+  }
 
   useStatusBarStyleForScreen('secondary')
 
   return (
     <GestureHandlerRootView style={{flex: 1}}>
       <Stack f={1} bc="$backgroundPrimary">
-        <Stack pos="absolute" top={top} mt="$4" right="$4" zIndex={100}>
-          <IconButton onPress={safeGoBack}>
-            <XmarkCancelClose />
+        <XStack
+          pos="absolute"
+          top={top}
+          mt="$4"
+          right="$4"
+          gap="$3"
+          zIndex={100}
+        >
+          <IconButton onPress={shareImage}>
+            <Share color={theme.foregroundPrimary.get()} />
           </IconButton>
-        </Stack>
+          <IconButton onPress={safeGoBack}>
+            <XmarkCancelClose color={theme.foregroundPrimary.get()} />
+          </IconButton>
+        </XStack>
         <Stack f={1} ai="center" jc="center">
           <ImageZoom
             imageContainerStyle={{flex: 1}}

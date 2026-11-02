@@ -95,12 +95,15 @@ function MessagesList({
   }, [])
 
   // The list ends above the footer, so a growing input shrinks it from the bottom.
-  const keepEndVisibleWhenShrunk = useCallback((height: number) => {
-    const hasShrunk = height < listHeightRef.current
+  const keepBottomEdgeWhenShrunk = useCallback((height: number) => {
+    const shrunkBy = listHeightRef.current - height
     listHeightRef.current = height
-    if (hasShrunk && isEndVisibleRef.current) {
-      listRef.current?.getNativeScrollRef()?.scrollToEnd({animated: false})
-    }
+    if (shrunkBy <= 0) return
+    const list = listRef.current
+    list?.getNativeScrollRef()?.scrollTo({
+      y: list.getAbsoluteLastScrollOffset() + shrunkBy,
+      animated: false,
+    })
   }, [])
 
   const getItemType = useCallback(
@@ -141,7 +144,7 @@ function MessagesList({
         onEndVisible={onEndVisible}
         onLayout={(event: LayoutChangeEvent) => {
           props.onLayout?.(event)
-          keepEndVisibleWhenShrunk(event.nativeEvent.layout.height)
+          keepBottomEdgeWhenShrunk(event.nativeEvent.layout.height)
         }}
         onContentSizeChange={(width, height) => {
           props.onContentSizeChange?.(width, height)
@@ -151,7 +154,7 @@ function MessagesList({
     ),
     [
       insets.bottom,
-      keepEndVisibleWhenShrunk,
+      keepBottomEdgeWhenShrunk,
       onEndVisible,
       scrollToEndIfPending,
     ]

@@ -3,9 +3,11 @@ import {Array, pipe} from 'effect'
 import {atom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {DateTime} from 'luxon'
+import {deleteChatFiles} from '../../../utils/fsDirectories'
 import removeFile from '../../../utils/removeFile'
 import {pruneChatTagAssignmentsActionAtom} from '../../chatTags/atoms'
 import {cleanupOldTradeRemindersActionAtom} from '../../tradeReminders/atoms/cleanupOldTradeRemindersActionAtom'
+import {getChatKeys} from '../chatImages'
 import chatShouldBeVisible from '../utils/isChatActive'
 import messagingStateAtom from './messagingStateAtom'
 
@@ -28,11 +30,12 @@ export const checkAndDeleteOldChatsAndDataActionAtom = atom(
             lastMessage.message.time + ONE_MONTH_IN_MS <
               DateTime.now().toMillis())
 
-        if (
-          isChatDeletedAndExpired &&
-          oneChat.chat.otherSide.realLifeInfo?.image.type === 'imageUri'
-        ) {
-          void removeFile(oneChat.chat.otherSide.realLifeInfo.image.imageUri)()
+        if (isChatDeletedAndExpired) {
+          deleteChatFiles(getChatKeys(oneChat.chat))
+          if (oneChat.chat.otherSide.realLifeInfo?.image.type === 'imageUri')
+            void removeFile(
+              oneChat.chat.otherSide.realLifeInfo.image.imageUri
+            )()
         }
 
         return !isChatDeletedAndExpired

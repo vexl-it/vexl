@@ -162,6 +162,8 @@ export const infra = {
     rootUser: "vexl",
     rootPassword: "vexl-local-secret",
     bucket: "vexl-resources",
+    // Private bucket for encrypted chat images (chat-service only).
+    chatImagesBucket: "vexl-chat-images",
     region: "eu-west-1",
   },
 };

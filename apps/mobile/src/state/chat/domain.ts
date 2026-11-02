@@ -27,11 +27,11 @@ import {
 } from '@vexl-next/rest-api/src/services/contact/contracts'
 import {ErrorGeneratingChallenge} from '@vexl-next/rest-api/src/services/utils/addChallengeToRequest2'
 import {HashSet, Schema} from 'effect/index'
+import {ReadingFileError} from '../../utils/resizeImage'
 import {
   createEmptyTradeChecklistInState,
   TradeChecklistInState,
 } from '../tradeChecklist/domain'
-import {ReadingFileError} from './utils/replaceImageFileUrisWithBase64'
 export class ApiErrorCreatingInbox extends Schema.TaggedError<ApiErrorCreatingInbox>(
   'ApiErrorCreatingInbox'
 )('ApiErrorCreatingInbox', {

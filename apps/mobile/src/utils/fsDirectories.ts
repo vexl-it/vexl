@@ -1,8 +1,8 @@
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {hashMD5} from '@vexl-next/resources-utils/src/utils/crypto'
+import {Option} from 'effect'
 import {Directory, File, Paths} from 'expo-file-system'
 import * as E from 'fp-ts/Either'
-import {pipe} from 'fp-ts/function'
 import reportError from './reportError'
 
 export const IMAGES_DIRECTORY = 'chat-images'
@@ -26,29 +26,27 @@ export async function deleteAllFiles(): Promise<void> {
   deleteIfExists(getContactsBackupFile())
 }
 
-export async function deleteChatFiles(
-  myPublicKey: PublicKeyPemBase64,
-  otherSidePublicKey: PublicKeyPemBase64
-): Promise<void> {
-  const documentDirectory = Paths.document
-  if (!documentDirectory) return
+export interface ChatKeys {
+  inboxKey: PublicKeyPemBase64
+  otherSideKey: PublicKeyPemBase64
+}
 
-  const chatImagesDir = pipe(
-    hashMD5(`${myPublicKey}${otherSidePublicKey}`),
-    E.mapLeft((e) => {
-      reportError(
-        'warn',
-        new Error('Error getting MD5 of public key while deleting chat files'),
-        {e}
-      )
-    }),
-    E.getOrElse(() => '')
+export function getChatImagesDirectory({
+  inboxKey,
+  otherSideKey,
+}: ChatKeys): Option.Option<Directory> {
+  const chatDirectory = hashMD5(`${inboxKey}${otherSideKey}`)
+  if (E.isLeft(chatDirectory)) return Option.none()
+
+  return Option.some(
+    new Directory(Paths.document, IMAGES_DIRECTORY, chatDirectory.right)
   )
+}
 
-  if (!chatImagesDir) return
-
-  const imagesDirectory = new Directory(documentDirectory, IMAGES_DIRECTORY)
-  const chatImagesDirectory = new Directory(imagesDirectory, chatImagesDir)
-
-  chatImagesDirectory.delete()
+export function deleteChatFiles(chatKeys: ChatKeys): void {
+  try {
+    Option.map(getChatImagesDirectory(chatKeys), deleteIfExists)
+  } catch (e) {
+    reportError('warn', new Error('Error while deleting chat files'), {e})
+  }
 }

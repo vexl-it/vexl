@@ -6,9 +6,9 @@ import {
 } from '@vexl-next/rest-api/src/services/contact/contracts'
 import {ContactInternalApiSpecification} from '@vexl-next/rest-api/src/services/contact/internalSpecification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {S3Service} from '@vexl-next/server-utils/src/S3Service'
 import {randomUUID} from 'crypto'
 import {Effect} from 'effect'
-import {S3Service} from '../../../utils/S3Service'
 import {validateAdminToken} from '../utils/validateAdminToken'
 
 const getContentTypeFromExtension = (extension: ImageExtension): string => {

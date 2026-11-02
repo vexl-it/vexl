@@ -247,12 +247,12 @@ export const UploadChatImageEndpoint = HttpApiEndpoint.post(
   .addError(InvalidChallengeError, {status: 401})
   .annotate(MaxExpectedDailyCall, 500)
 
-export const DownloadChatImageEndpoint = HttpApiEndpoint.get(
+export const DownloadChatImageEndpoint = HttpApiEndpoint.post(
   'downloadChatImage',
-  '/api/v1/chat-images'
+  '/api/v1/chat-images/download'
 )
   .setHeaders(CommonHeaders)
-  .setUrlParams(DownloadChatImageRequest)
+  .setPayload(DownloadChatImageRequest)
   .addSuccess(DownloadChatImageResponse)
   .addError(ChatImageNotFoundError, {status: 404})
   .annotate(MaxExpectedDailyCall, 2000)

@@ -31,6 +31,10 @@ export function buildDockerEnv(
     MINIO_API_PORT: String(ctx.ports.minioApi),
     MINIO_CONSOLE_PORT: String(ctx.ports.minioConsole),
     S3_BUCKET_NAME: infra.minio.bucket,
+    S3_CHAT_IMAGES_BUCKET_NAME: infra.minio.chatImagesBucket,
+    CHAT_IMAGES_EXPIRE_DAYS: String(
+      ctx.cfg.serviceConstants.chatService.MESSAGE_EXPIRATION_UPPER_LIMIT_DAYS
+    ),
     GRAFANA_PORT: String(ctx.ports.grafana),
     LOKI_PORT: String(ctx.ports.loki),
     TEMPO_PORT: String(ctx.ports.tempo),

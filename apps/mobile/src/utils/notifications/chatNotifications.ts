@@ -24,6 +24,7 @@ import {
   type ChatMessageWithState,
   type InboxInState,
 } from '../../state/chat/domain'
+import {isImageOnlyMessage} from '../../state/chat/utils/chatImageMessage'
 import {createOpenChatLink} from '../deepLinks/createLinks'
 import {translationAtom} from '../localization/I18nProvider'
 import {useAppState} from '../useAppState'
@@ -182,6 +183,14 @@ export async function showChatNotification({
   const userName = chat ? getChatNotificationName(store.get, chat) : undefined
 
   const {t} = store.get(translationAtom)
+  const messageText =
+    type !== 'MESSAGE'
+      ? undefined
+      : isImageOnlyMessage(newMessage.message)
+        ? t('messages.messagePreviews.incoming.ONLY_IMAGE', {
+            them: userName ?? t('common.otherSide'),
+          })
+        : newMessage.message.text
   const chatData = SystemChatNotificationData.encode(
     new SystemChatNotificationData({
       inbox: inbox.inbox.privateKey.publicKeyPemBase64,
@@ -215,8 +224,7 @@ export async function showChatNotification({
         sender: newMessage.message.senderPublicKey,
       }),
       text:
-        newMessage.message.text ??
-        t('notifications.MESSAGE.body', {them: userName ?? ''}),
+        messageText ?? t('notifications.MESSAGE.body', {them: userName ?? ''}),
       data: chatData,
       channelId,
     })
@@ -251,8 +259,7 @@ export async function showChatNotification({
   const body =
     type === 'REACTION'
       ? t('notifications.REACTION.body', {emoji: reactionEmoji})
-      : ((type === 'MESSAGE' ? newMessage.message.text : undefined) ??
-        t(`notifications.${type}.body`, {them: userName ?? ''}))
+      : (messageText ?? t(`notifications.${type}.body`, {them: userName ?? ''}))
 
   await displayLocalNotification({
     id: newMessage.message.uuid,

@@ -1,29 +1,23 @@
+import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {Stack, Typography, useTheme, XStack, YStack} from '@vexl-next/ui'
 import {Array} from 'effect'
 import React from 'react'
-import {Image, StyleSheet, TouchableWithoutFeedback} from 'react-native'
+import {StyleSheet} from 'react-native'
 import Autolink from 'react-native-autolink'
 import {
   type ChatMessageWithState,
   type MessageReactions,
 } from '../../../state/chat/domain'
+import {
+  hasChatImage,
+  isImageOnlyMessage,
+} from '../../../state/chat/utils/chatImageMessage'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
-import resolveLocalUri from '../../../utils/resolveLocalUri'
+import ChatImage from './ChatImage'
 
 export const PRESSED_BUBBLE_SCALE = 0.96
 
-const imageHeight = 300
-const replyImageHeight = 50
-
 const style = StyleSheet.create({
-  image: {
-    width: '100%',
-    height: imageHeight,
-  },
-  replyImage: {
-    width: '100%',
-    height: replyImageHeight,
-  },
   link: {
     fontSize: 16,
     textDecorationLine: 'underline',
@@ -73,7 +67,7 @@ function MessageBubble({
 }: {
   message: ChatMessageWithState
   reactions?: MessageReactions | undefined
-  onImagePressed?: () => void
+  onImagePressed?: (uri: UriString) => void
 }): React.ReactElement {
   const theme = useTheme()
   const isMine = message.state !== 'received'
@@ -88,6 +82,7 @@ function MessageBubble({
     'repliedTo' in message.message ? message.message.repliedTo : undefined
 
   const hasReactions = !!reactions?.mine || !!reactions?.theirs
+  const hasImage = hasChatImage(message.message)
 
   const isSpecialMessage =
     message.message.messageType === 'REQUEST_MESSAGING' ||
@@ -110,15 +105,10 @@ function MessageBubble({
           gap="$2"
         >
           <YStack gap="$1">
-            {!!repliedToMessage.image && (
-              <Image
-                style={style.replyImage}
-                resizeMode="contain"
-                source={{
-                  uri: resolveLocalUri(repliedToMessage.image),
-                }}
-              />
-            )}
+            <ChatImage
+              variant="thumbnail"
+              imageAttachment={repliedToMessage.imageAttachment}
+            />
             <Typography color="$foregroundSecondary" variant="micro">
               {t('common.replyTo')}
             </Typography>
@@ -153,55 +143,50 @@ function MessageBubble({
           </Typography>
         </XStack>
       )}
-      {!!message.message.image && (
-        <YStack
-          borderRadius="$4"
-          padding="$3"
-          marginBottom="$2"
-          backgroundColor="$backgroundTertiary"
-        >
-          <TouchableWithoutFeedback
-            disabled={!onImagePressed}
+      {!!hasImage && (
+        <Stack marginBottom="$2">
+          <ChatImage
+            variant="message"
+            image={message.message.image}
+            imageAttachment={message.message.imageAttachment}
             onPress={onImagePressed}
-          >
-            <Image
-              style={style.image}
-              resizeMode="contain"
-              source={{uri: resolveLocalUri(message.message.image)}}
-            />
-          </TouchableWithoutFeedback>
-        </YStack>
+          />
+        </Stack>
       )}
-      <Stack
-        borderRadius="$6"
-        borderTopLeftRadius={repliedToMessage || isSpecialMessage ? '$2' : '$6'}
-        borderTopRightRadius={
-          repliedToMessage || isSpecialMessage ? '$2' : '$6'
-        }
-        backgroundColor={messageBackgroundColor}
-        px="$4"
-        pb="$4"
-        pt="$4"
-      >
-        <Autolink
-          text={message.message.text}
-          url
-          linkStyle={[
-            style.link,
-            {
+      {!isImageOnlyMessage(message.message) && (
+        <Stack
+          borderRadius="$6"
+          borderTopLeftRadius={
+            repliedToMessage || isSpecialMessage ? '$2' : '$6'
+          }
+          borderTopRightRadius={
+            repliedToMessage || isSpecialMessage ? '$2' : '$6'
+          }
+          backgroundColor={messageBackgroundColor}
+          px="$4"
+          pb="$4"
+          pt="$4"
+        >
+          <Autolink
+            text={message.message.text}
+            url
+            linkStyle={[
+              style.link,
+              {
+                color: messageTextColor,
+                fontSize: 18,
+                fontFamily: 'TTSatoshi500',
+              },
+            ]}
+            style={{
               color: messageTextColor,
               fontSize: 18,
+              lineHeight: 24,
               fontFamily: 'TTSatoshi500',
-            },
-          ]}
-          style={{
-            color: messageTextColor,
-            fontSize: 18,
-            lineHeight: 24,
-            fontFamily: 'TTSatoshi500',
-          }}
-        />
-      </Stack>
+            }}
+          />
+        </Stack>
+      )}
       {!!reactions && !!hasReactions && (
         <ReactionsChip reactions={reactions} isMine={isMine} />
       )}

@@ -295,12 +295,6 @@ importers:
 
   apps/contact-service:
     dependencies:
-      '@aws-sdk/client-s3':
-        specifier: ^3.705.0
-        version: 3.1075.0
-      '@aws-sdk/s3-request-presigner':
-        specifier: ^3.705.0
-        version: 3.1075.0
       '@effect/experimental':
         specifier: ^0.57.11
         version: 0.57.11(@effect/platform@0.93.8(effect@3.21.4))(effect@3.21.4)(ioredis@5.11.1)
@@ -2075,6 +2069,12 @@ importers:
 
   packages/server-utils:
     dependencies:
+      '@aws-sdk/client-s3':
+        specifier: ^3.705.0
+        version: 3.1075.0
+      '@aws-sdk/s3-request-presigner':
+        specifier: ^3.705.0
+        version: 3.1075.0
       '@effect/experimental':
         specifier: ^0.57.11
         version: 0.57.11(@effect/platform@0.93.8(effect@3.21.4))(effect@3.21.4)(ioredis@5.11.1)

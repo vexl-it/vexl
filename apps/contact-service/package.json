@@ -15,8 +15,6 @@
     "start": "node --enable-source-maps dist/index.js"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.705.0",
-    "@aws-sdk/s3-request-presigner": "^3.705.0",
     "@effect/experimental": "^0.57.11",
     "@effect/platform": "^0.93.6",
     "@effect/platform-node": "^0.103.0",

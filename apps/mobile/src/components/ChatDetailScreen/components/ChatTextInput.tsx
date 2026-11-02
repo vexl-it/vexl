@@ -3,7 +3,9 @@ import {
   type ChatMessage,
 } from '@vexl-next/domain/src/general/messaging'
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {
+  Camera,
   Send,
   Stack,
   Typography,
@@ -13,6 +15,7 @@ import {
   YStack,
 } from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
+import {Effect} from 'effect'
 import {useAtom, useAtomValue, useSetAtom} from 'jotai'
 import truncate from 'just-truncate'
 import React, {useCallback, useEffect, useRef, useState} from 'react'
@@ -26,23 +29,25 @@ import Animated, {
 import {useTheme} from 'tamagui'
 import {useSessionAssumeLoggedIn} from '../../../state/session'
 import {version} from '../../../utils/environment'
+import {getImageFromGalleryAndTryToResolveThePermissionsAlongTheWay} from '../../../utils/imagePickers'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {checkNotificationPermissionsAndAskIfPossibleTEActionAtom} from '../../../utils/notifications/checkAndAskForPermissionsActionAtom'
-import UriImageWithSizeLimits from '../../UriImageWithSizeLimits'
+import {preferencesAtom} from '../../../utils/preferences'
+import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
+import {showErrorAlert} from '../../ErrorAlert'
 import {chatMolecule} from '../atoms'
+import ChatImage from './ChatImage'
 import {CHAT_INPUT_NATIVE_ID} from './MessagesList'
 import {usePeriodicTypingIndication} from './usePeriodicTypingIndication'
 
-const responseImagePreviewLimits = {width: 200, height: 100}
 const iosAutocorrectCommitDelayMs = 50
 
 function ChatTextInput(): React.ReactElement | null {
   const theme = useTheme()
   const [value, setValue] = useState('')
-  const {sendMessageAtom, replyToMessageAtom, otherSideDataAtom} =
-    useMolecule(chatMolecule)
+  const {sendMessageAtom, replyToMessageAtom} = useMolecule(chatMolecule)
   const [replyToMessage, setReplyToMessage] = useAtom(replyToMessageAtom)
-  const otherSideData = useAtomValue(otherSideDataAtom)
+  const {allowSendingImages} = useAtomValue(preferencesAtom)
   const sendMessage = useSetAtom(sendMessageAtom)
   const session = useSessionAssumeLoggedIn()
   const {t} = useTranslation()
@@ -83,12 +88,11 @@ function ChatTextInput(): React.ReactElement | null {
     }
   }, [])
 
-  const sendTextImmediately = useCallback(
-    (text: string): boolean => {
-      if (!text.trim()) return false
-
+  const sendChatMessage = useCallback(
+    ({text, image}: {text: string; image?: UriString}) => {
       const message: ChatMessage = {
         text,
+        image,
         myVersion: version,
         time: unixMillisecondsNow(),
         uuid: generateChatMessageId(),
@@ -97,22 +101,18 @@ function ChatTextInput(): React.ReactElement | null {
               text: truncate(replyToMessage.message.text, 100, '...'),
               messageAuthor:
                 replyToMessage.state === 'received' ? 'them' : 'me',
-              image: replyToMessage.message.image,
+              imageAttachment: replyToMessage.message.imageAttachment,
             }
           : undefined,
         messageType: 'MESSAGE',
         senderPublicKey: session.privateKey.publicKeyPemBase64,
       }
-      clearTextInput()
       setReplyToMessage(undefined)
 
       sendMessage(message)
       void checkNotificationsAndAskIfPossible()()
-
-      return true
     },
     [
-      clearTextInput,
       replyToMessage,
       session.privateKey.publicKeyPemBase64,
       setReplyToMessage,
@@ -120,6 +120,38 @@ function ChatTextInput(): React.ReactElement | null {
       checkNotificationsAndAskIfPossible,
     ]
   )
+
+  const sendTextImmediately = useCallback(
+    (text: string): boolean => {
+      if (!text.trim()) return false
+
+      clearTextInput()
+      sendChatMessage({text})
+      return true
+    },
+    [clearTextInput, sendChatMessage]
+  )
+
+  const pickAndSendImage = useCallback(() => {
+    void getImageFromGalleryAndTryToResolveThePermissionsAlongTheWay({}).pipe(
+      Effect.match({
+        onSuccess: ({uri}) => {
+          sendChatMessage({text: '', image: uri})
+        },
+        onFailure: (e) => {
+          if (e.reason === 'NothingSelected') return
+          showErrorAlert({
+            title: t('common.somethingWentWrong'),
+            description:
+              toCommonErrorMessage(e, t) ??
+              t('common.somethingWentWrongDescription'),
+            error: e,
+          })
+        },
+      }),
+      Effect.runPromise
+    )
+  }, [sendChatMessage, t])
 
   const sendLatestText = useCallback(() => {
     clearPendingIosSendTimeout()
@@ -189,12 +221,11 @@ function ChatTextInput(): React.ReactElement | null {
             gap="$2"
           >
             <YStack flex={1} gap="$2">
-              {!!replyToMessage.message.image && (
-                <UriImageWithSizeLimits
-                  uri={replyToMessage.message.image}
-                  limits={responseImagePreviewLimits}
-                />
-              )}
+              <ChatImage
+                variant="thumbnail"
+                image={replyToMessage.message.image}
+                imageAttachment={replyToMessage.message.imageAttachment}
+              />
               <Typography color="$foregroundSecondary" variant="micro">
                 {t('common.replyTo')}
               </Typography>
@@ -228,6 +259,19 @@ function ChatTextInput(): React.ReactElement | null {
         gap="$3"
         alignItems="flex-end"
       >
+        {!!allowSendingImages && (
+          <UiIconButton
+            width="$9"
+            height="$9"
+            borderRadius="$3"
+            my="$3"
+            ml="$4"
+            backgroundColor="$backgroundOnBar"
+            onPress={pickAndSendImage}
+          >
+            <Camera size={20} color={theme.foregroundPrimary.get()} />
+          </UiIconButton>
+        )}
         <Stack flex={1}>
           <XStack
             alignItems="center"

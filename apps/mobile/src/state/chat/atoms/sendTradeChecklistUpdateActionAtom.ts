@@ -15,7 +15,6 @@ import sendMessage, {
   type SendMessageApiErrors,
 } from '@vexl-next/resources-utils/src/chat/sendMessage'
 import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/src/chat/utils/chatCrypto'
-import {taskToEffect} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {type JsonStringifyError} from '@vexl-next/resources-utils/src/utils/parsing'
 import {Array, Effect, Schema, Struct, type ParseResult} from 'effect/index'
 import {flow, pipe} from 'fp-ts/function'
@@ -30,7 +29,7 @@ import {updateTradeChecklistState} from '../../tradeChecklist/utils'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 import {addMessagesToChat} from '../utils/addMessageToChat'
 import addRealLifeInfoToChat from '../utils/addRealLifeInfoToChat'
-import {replaceIdentityImageFileUriWithBase64} from '../utils/replaceImageFileUrisWithBase64'
+import {replaceIdentityImageFileUriWithBase64} from '../utils/replaceIdentityImageFileUriWithBase64'
 
 const MINIMAL_REQUIRED_VERSION = Schema.decodeSync(VersionString)('1.25.0')
 
@@ -63,10 +62,8 @@ export default function createSubmitChecklistUpdateActionAtom(
       const updateKeys = Struct.keys(update)
 
       const identityRevealChatMessageOrUndefined = yield* _(
-        taskToEffect(
-          replaceIdentityImageFileUriWithBase64(
-            withoutDataWhenDeclined(update.identity)
-          )
+        replaceIdentityImageFileUriWithBase64(
+          withoutDataWhenDeclined(update.identity)
         )
       )
 

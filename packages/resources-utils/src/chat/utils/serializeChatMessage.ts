@@ -46,7 +46,7 @@ export default function serializeChatMessage(
       time: message.time,
       text: message.text,
       uuid: message.uuid,
-      image: message.image,
+      imageAttachment: message.imageAttachment,
       repliedTo: message.repliedTo,
       messageType: message.messageType,
       minimalRequiredVersion: message.minimalRequiredVersion,

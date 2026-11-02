@@ -42,6 +42,13 @@ jest.mock('expo-file-system', () => {
     write(bytes: Uint8Array): void {
       mockFiles.set(this.uri, bytes)
     }
+
+    moveSync(destination: {uri: string}): void {
+      const bytes = mockFiles.get(this.uri)
+      if (!bytes) throw new Error('Missing file')
+      mockFiles.delete(this.uri)
+      mockFiles.set(destination.uri, bytes)
+    }
   }
 
   return {Paths: {document: {uri: 'file://documents'}}, Directory, File}

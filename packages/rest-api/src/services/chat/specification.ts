@@ -29,6 +29,7 @@ import {
   CancelApprovalRequest,
   CancelApprovalResponse,
   CancelApprovalV2Request,
+  ChatImageNotFoundError,
   CreateInboxRequest,
   CreateInboxResponse,
   DeleteInboxRequest,
@@ -37,6 +38,8 @@ import {
   DeleteInboxesResponse,
   DeletePulledMessagesRequest,
   DeletePulledMessagesResponse,
+  DownloadChatImageRequest,
+  DownloadChatImageResponse,
   LeaveChatRequest,
   LeaveChatResponse,
   ReceiverInboxDoesNotExistError,
@@ -52,6 +55,8 @@ import {
   SenderInboxDoesNotExistError,
   UpdateInboxRequest,
   UpdateInboxResponse,
+  UploadChatImageRequest,
+  UploadChatImageResponse,
 } from './contracts'
 
 export const UpdateInboxEndpoint = HttpApiEndpoint.put(
@@ -231,6 +236,27 @@ export const SendMessagesEndpoint = HttpApiEndpoint.post(
   .addError(InvalidChallengeError, {status: 401})
   .annotate(MaxExpectedDailyCall, 10)
 
+export const UploadChatImageEndpoint = HttpApiEndpoint.post(
+  'uploadChatImage',
+  '/api/v1/chat-images'
+)
+  .setHeaders(CommonHeaders)
+  .setPayload(UploadChatImageRequest)
+  .addSuccess(UploadChatImageResponse)
+  .addError(SenderInboxDoesNotExistError, {status: 404})
+  .addError(InvalidChallengeError, {status: 401})
+  .annotate(MaxExpectedDailyCall, 500)
+
+export const DownloadChatImageEndpoint = HttpApiEndpoint.get(
+  'downloadChatImage',
+  '/api/v1/chat-images'
+)
+  .setHeaders(CommonHeaders)
+  .setUrlParams(DownloadChatImageRequest)
+  .addSuccess(DownloadChatImageResponse)
+  .addError(ChatImageNotFoundError, {status: 404})
+  .annotate(MaxExpectedDailyCall, 2000)
+
 const InboxesApiGroup = HttpApiGroup.make('Inboxes')
   .add(UpdateInboxEndpoint)
   .add(CreateInboxEndpoint)
@@ -250,10 +276,15 @@ const MessagesApiGroup = HttpApiGroup.make('Messages')
   .add(SendMessageEndpoint)
   .add(SendMessagesEndpoint)
 
+const ImagesApiGroup = HttpApiGroup.make('Images')
+  .add(UploadChatImageEndpoint)
+  .add(DownloadChatImageEndpoint)
+
 export const ChatApiSpecification = HttpApi.make('Chat API')
   .middleware(RateLimitingMiddleware)
   .add(InboxesApiGroup)
   .add(MessagesApiGroup)
+  .add(ImagesApiGroup)
   .add(ChallengeApiGroup)
   .addError(NotFoundError, {status: 404})
   .addError(UnexpectedServerError, {status: 500})

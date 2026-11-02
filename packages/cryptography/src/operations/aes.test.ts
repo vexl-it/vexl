@@ -1,9 +1,12 @@
 import {getCrypto} from '../getCrypto'
 import {
   aesGCMDecrypt,
+  aesGCMDecryptBytes,
   aesGCMEncrypt,
+  aesGCMEncryptBytes,
   aesGCMIgnoreTagDecrypt,
   aesGCMIgnoreTagEncrypt,
+  generateAesKey,
 } from './aes'
 
 describe('aes gcm', () => {
@@ -114,5 +117,33 @@ describe('aes gcm ignore tag', () => {
     const decrypted = aesGCMIgnoreTagDecrypt({data: encrypted, password})
 
     expect(decrypted).toEqual(message)
+  })
+})
+
+describe('aes gcm bytes', () => {
+  const data = getCrypto().randomBytes(1024)
+
+  it('Should encrypt and decrypt binary data', () => {
+    const key = generateAesKey()
+    const encrypted = aesGCMEncryptBytes({data, key})
+
+    expect(encrypted.equals(data)).toBe(false)
+    expect(aesGCMDecryptBytes({data: encrypted, key}).equals(data)).toBe(true)
+  })
+
+  it('Should fail to decrypt with a different key', () => {
+    const encrypted = aesGCMEncryptBytes({data, key: generateAesKey()})
+
+    expect(() =>
+      aesGCMDecryptBytes({data: encrypted, key: generateAesKey()})
+    ).toThrow()
+  })
+
+  it('Should fail to decrypt tampered data', () => {
+    const key = generateAesKey()
+    const encrypted = aesGCMEncryptBytes({data, key})
+    encrypted[20] = (encrypted[20] ?? 0) ^ 1
+
+    expect(() => aesGCMDecryptBytes({data: encrypted, key})).toThrow()
   })
 })

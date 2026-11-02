@@ -239,3 +239,53 @@ export async function aesCTRDecryptPromise({
     'utf8'
   )}`
 }
+
+const AES_KEY_BYTES = 32
+const GCM_IV_BYTES = 12
+const GCM_TAG_BYTES = 16
+
+export function generateAesKey(): Buffer {
+  return getCrypto().randomBytes(AES_KEY_BYTES)
+}
+
+/**
+ * Encrypts binary data with a random single-use key (see `generateAesKey`).
+ * Output layout: iv | ciphertext | authTag.
+ */
+export function aesGCMEncryptBytes({
+  data,
+  key,
+}: {
+  data: Uint8Array
+  key: Uint8Array
+}): Buffer {
+  const crypto = getCrypto()
+  const iv = crypto.randomBytes(GCM_IV_BYTES)
+  const cipher = crypto.createCipheriv(CYPHER_ALGORITHM, key, iv)
+
+  return Buffer.concat([
+    iv,
+    cipher.update(data),
+    cipher.final(),
+    cipher.getAuthTag(),
+  ])
+}
+
+export function aesGCMDecryptBytes({
+  data,
+  key,
+}: {
+  data: Uint8Array
+  key: Uint8Array
+}): Buffer {
+  if (data.length < GCM_IV_BYTES + GCM_TAG_BYTES) throw new Error('Bad data')
+
+  const iv = data.subarray(0, GCM_IV_BYTES)
+  const authTag = data.subarray(data.length - GCM_TAG_BYTES)
+  const encrypted = data.subarray(GCM_IV_BYTES, data.length - GCM_TAG_BYTES)
+
+  const decipher = getCrypto().createDecipheriv(CYPHER_ALGORITHM, key, iv)
+  decipher.setAuthTag(authTag)
+
+  return Buffer.concat([decipher.update(encrypted), decipher.final()])
+}

@@ -27,7 +27,7 @@ const CHAT_IMAGE_MAX_SIDE = 1920
 const CHAT_IMAGE_QUALITY = 80
 
 const MINIMAL_VERSION_FOR_CHAT_IMAGES =
-  Schema.decodeSync(VersionString)('26.11.0')
+  Schema.decodeSync(VersionString)('26.11.1')
 
 export class ChatImageProcessingError extends Schema.TaggedError<ChatImageProcessingError>(
   'ChatImageProcessingError'

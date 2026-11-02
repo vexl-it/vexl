@@ -4,11 +4,11 @@ import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {PublicKeyV2} from '@vexl-next/cryptography/src/KeyHolder/brandsV2'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
+import {ServerHashedNumber} from '@vexl-next/domain/src/general/ServerHashedNumber'
 import {PlatformName} from '@vexl-next/domain/src/utility/PlatformName'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {AppSource} from '@vexl-next/rest-api/src/commonHeaders'
 import {Effect, flow, Schema} from 'effect'
-import {ServerHashedNumber} from '../../../utils/serverHashContact'
 import {UserRecord} from '../domain'
 
 export const CreateUserParams = Schema.Struct({

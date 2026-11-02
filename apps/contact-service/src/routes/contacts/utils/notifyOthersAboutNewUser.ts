@@ -1,6 +1,6 @@
+import {type ServerHashedNumber} from '@vexl-next/domain/src/general/ServerHashedNumber'
 import {Array, Effect} from 'effect'
 import {UserNotificationService} from '../../../services/UserNotificationService'
-import {type ServerHashedNumber} from '../../../utils/serverHashContact'
 
 export const notifyOthersAboutNewUserForked = ({
   importedHashes,

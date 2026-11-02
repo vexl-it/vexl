@@ -1,8 +1,8 @@
 import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
+import {ServerHashedNumber} from '@vexl-next/domain/src/general/ServerHashedNumber'
 import {Effect, flow} from 'effect'
-import {ServerHashedNumber} from '../../../utils/serverHashContact'
 import {ContactRecord} from '../domain'
 
 export const createFindContactsByHashFrom = Effect.gen(function* (_) {

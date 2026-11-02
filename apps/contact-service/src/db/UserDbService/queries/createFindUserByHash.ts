@@ -1,8 +1,8 @@
 import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
+import {ServerHashedNumber} from '@vexl-next/domain/src/general/ServerHashedNumber'
 import {Effect, flow} from 'effect'
-import {ServerHashedNumber} from '../../../utils/serverHashContact'
 import {UserRecord} from '../domain'
 
 export const createFindUserByHash = Effect.gen(function* (_) {

@@ -1,7 +1,7 @@
 import {SqlClient, SqlResolver} from '@effect/sql'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
+import {ServerHashedNumber} from '@vexl-next/domain/src/general/ServerHashedNumber'
 import {Effect, flow, Schema} from 'effect'
-import {ServerHashedNumber} from '../../../utils/serverHashContact'
 
 const InsertContactParams = Schema.Struct({
   hashFrom: ServerHashedNumber,

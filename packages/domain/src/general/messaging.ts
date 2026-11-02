@@ -60,19 +60,27 @@ export type ChatUserIdentity = typeof ChatUserIdentity.Type
 export const ChatMessageId = Schema.UUID.pipe(Schema.brand('ChatMessageId'))
 export type ChatMessageId = typeof ChatMessageId.Type
 
+export const ChatImageId = Schema.UUID.pipe(Schema.brand('ChatImageId'))
+export type ChatImageId = typeof ChatImageId.Type
+
+/**
+ * Pointer to an encrypted image stored on chat-service. `key` is a single-use
+ * AES-256-GCM key, so only chat participants can decrypt the stored blob.
+ */
+export const ChatImageAttachment = Schema.Struct({
+  id: ChatImageId,
+  key: Base64String,
+  width: Schema.Int.pipe(Schema.positive()),
+  height: Schema.Int.pipe(Schema.positive()),
+})
+export type ChatImageAttachment = typeof ChatImageAttachment.Type
+
 export const RepliedToData = Schema.Struct({
   text: Schema.String,
   messageAuthor: Schema.Literal('me', 'them'),
-  image: Schema.optional(UriString),
+  imageAttachment: Schema.optional(ChatImageAttachment),
 })
 export type RepliedToData = typeof RepliedToData.Type
-
-export const RepliedToDataPayload = Schema.Struct({
-  text: Schema.String,
-  messageAuthor: Schema.Literal('me', 'them'),
-  image: Base64String,
-})
-export type RepliedToDataPayload = typeof RepliedToDataPayload.Type
 
 export const ReactionEmoji = Schema.String.pipe(
   Schema.minLength(1),
@@ -94,7 +102,7 @@ export type MessageReaction = typeof MessageReaction.Type
 export const ChatMessagePayload = Schema.Struct({
   uuid: ChatMessageId,
   text: Schema.optional(Schema.String),
-  image: Schema.optional(UriString),
+  imageAttachment: Schema.optional(ChatImageAttachment),
   repliedTo: Schema.optional(RepliedToData),
   time: UnixMilliseconds,
   messageType: MessageType,
@@ -139,7 +147,12 @@ export const ChatMessage = Schema.Struct({
   lastReceivedVersion: Schema.optional(VersionString),
   forceShow: Schema.optional(Schema.Boolean),
 
+  /**
+   * Local-only image uri. Holds the revealed identity photo, or a chat image
+   * received before images moved to `imageAttachment`.
+   */
   image: Schema.optional(UriString),
+  imageAttachment: Schema.optional(ChatImageAttachment),
   repliedTo: Schema.optional(RepliedToData),
   tradeChecklistUpdate: Schema.optional(TradeChecklistUpdate),
   reaction: Schema.optional(MessageReaction),
@@ -275,6 +288,7 @@ export const ChatMessageRequiringNewerVersion = Schema.Struct({
   text: Schema.Literal('-'),
   deanonymizedUser: Schema.optional(Schema.Undefined),
   image: Schema.optional(Schema.Undefined),
+  imageAttachment: Schema.optional(Schema.Undefined),
   myVexlToken: Schema.optional(VexlNotificationToken),
   commonFriends: Schema.optional(Schema.Array(HashedPhoneNumber)),
   verifiedCommonFriends: Schema.optional(Schema.Array(HashedPhoneNumber)),

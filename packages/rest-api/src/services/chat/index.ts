@@ -26,6 +26,7 @@ import {
   type DeleteInboxRequest,
   type DeleteInboxesRequest,
   type DeletePulledMessagesRequest,
+  type DownloadChatImageRequest,
   type LeaveChatRequest,
   type RequestApprovalRequest,
   type RequestApprovalV2Request,
@@ -33,6 +34,7 @@ import {
   type SendMessageRequest,
   type SendMessagesRequest,
   type UpdateInboxRequest,
+  type UploadChatImageRequest,
 } from './contracts'
 import {ChatApiSpecification} from './specification'
 
@@ -242,6 +244,25 @@ export function api({
       sendMessages: (sendMessagesRequest: SendMessagesRequest) =>
         client.Messages.sendMessages({
           payload: sendMessagesRequest,
+          headers: commonHeaders,
+        }),
+      // ----------------------
+      // 👇 Images
+      // ----------------------
+      uploadChatImage: (
+        uploadChatImageRequest: RequestWithGeneratableChallenge<UploadChatImageRequest>
+      ) =>
+        addChallenge(uploadChatImageRequest).pipe(
+          Effect.flatMap((body) =>
+            client.Images.uploadChatImage({
+              payload: body,
+              headers: commonHeaders,
+            })
+          )
+        ),
+      downloadChatImage: (downloadChatImageRequest: DownloadChatImageRequest) =>
+        client.Images.downloadChatImage({
+          urlParams: downloadChatImageRequest,
           headers: commonHeaders,
         }),
       // ----------------------

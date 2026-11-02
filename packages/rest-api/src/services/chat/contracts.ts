@@ -1,9 +1,11 @@
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {
+  ChatImageId,
   MessageCypher,
   MessageType,
   ServerMessage,
 } from '@vexl-next/domain/src/general/messaging'
+import {Base64String} from '@vexl-next/domain/src/utility/Base64String.brand'
 import {IdNumeric} from '@vexl-next/domain/src/utility/IdNumeric'
 import {BooleanFromString} from '@vexl-next/generic-utils/src/effect-helpers/BooleanFromString'
 import {Schema} from 'effect'
@@ -229,3 +231,37 @@ export const SendMessagesResponse = Schema.Array(
   })
 )
 export type SendMessagesResponse = typeof SendMessagesResponse.Type
+
+export const CHAT_IMAGE_MAX_BYTES = 5 * 1024 * 1024
+
+const EncryptedChatImageData = Base64String.pipe(
+  Schema.maxLength(Math.ceil(CHAT_IMAGE_MAX_BYTES / 3) * 4)
+)
+
+export const UploadChatImageRequest = Schema.Struct({
+  senderPublicKey: PublicKeyPemBase64,
+  signedChallenge: SignedChallenge,
+  data: EncryptedChatImageData,
+})
+export type UploadChatImageRequest = typeof UploadChatImageRequest.Type
+
+export const UploadChatImageResponse = Schema.Struct({
+  imageId: ChatImageId,
+})
+export type UploadChatImageResponse = typeof UploadChatImageResponse.Type
+
+export const DownloadChatImageRequest = Schema.Struct({
+  imageId: ChatImageId,
+})
+export type DownloadChatImageRequest = typeof DownloadChatImageRequest.Type
+
+export const DownloadChatImageResponse = Schema.Struct({
+  data: EncryptedChatImageData,
+})
+export type DownloadChatImageResponse = typeof DownloadChatImageResponse.Type
+
+export class ChatImageNotFoundError extends Schema.TaggedError<ChatImageNotFoundError>(
+  'ChatImageNotFoundError'
+)('ChatImageNotFoundError', {
+  status: Schema.optionalWith(Schema.Literal(404), {default: () => 404}),
+}) {}

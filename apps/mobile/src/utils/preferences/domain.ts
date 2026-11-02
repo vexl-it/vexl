@@ -25,9 +25,6 @@ export const Preferences = Schema.Struct({
   disableOfferRerequestLimit: Schema.optionalWith(Schema.Boolean, {
     default: () => false,
   }),
-  allowSendingImages: Schema.optionalWith(Schema.Boolean, {
-    default: () => false,
-  }),
   notificationPreferences: NotificationPreferences,
   showOfferDetail: Schema.optionalWith(Schema.Boolean, {
     default: () => false,

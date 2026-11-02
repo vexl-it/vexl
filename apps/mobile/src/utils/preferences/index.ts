@@ -14,7 +14,6 @@ export const preferencesAtom = atomWithParsedMmkvStorage(
   'preferences',
   {
     disableOfferRerequestLimit: false,
-    allowSendingImages: false,
     notificationPreferences: {
       marketing: true,
       chat: true,

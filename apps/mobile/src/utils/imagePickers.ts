@@ -157,7 +157,7 @@ export function getImageFromCameraAndTryToResolveThePermissionsAlongTheWay({
 
     const {assets, canceled} = await ImagePicker.launchCameraAsync({
       mediaTypes: 'images',
-      allowsEditing: true,
+      allowsEditing: aspect !== undefined,
       aspect,
       quality: 1,
       allowsMultipleSelection: false,

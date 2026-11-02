@@ -16,23 +16,26 @@ import {
 } from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {Effect} from 'effect'
-import {useAtom, useAtomValue, useSetAtom} from 'jotai'
+import {useAtom, useSetAtom} from 'jotai'
 import truncate from 'just-truncate'
 import React, {useCallback, useEffect, useRef, useState} from 'react'
-import {Platform, TextInput as RNTextInput} from 'react-native'
+import {Alert, Platform, TextInput as RNTextInput} from 'react-native'
 import Animated, {
   SlideInDown,
   SlideOutDown,
-  useAnimatedStyle,
-  withSpring,
+  ZoomIn,
 } from 'react-native-reanimated'
 import {useTheme} from 'tamagui'
 import {useSessionAssumeLoggedIn} from '../../../state/session'
 import {version} from '../../../utils/environment'
-import {getImageFromGalleryAndTryToResolveThePermissionsAlongTheWay} from '../../../utils/imagePickers'
+import {
+  getImageFromCameraAndTryToResolveThePermissionsAlongTheWay,
+  getImageFromGalleryAndTryToResolveThePermissionsAlongTheWay,
+  type ImagePickerError,
+  type SelectedImage,
+} from '../../../utils/imagePickers'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {checkNotificationPermissionsAndAskIfPossibleTEActionAtom} from '../../../utils/notifications/checkAndAskForPermissionsActionAtom'
-import {preferencesAtom} from '../../../utils/preferences'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import {showErrorAlert} from '../../ErrorAlert'
 import {chatMolecule} from '../atoms'
@@ -47,7 +50,6 @@ function ChatTextInput(): React.ReactElement | null {
   const [value, setValue] = useState('')
   const {sendMessageAtom, replyToMessageAtom} = useMolecule(chatMolecule)
   const [replyToMessage, setReplyToMessage] = useAtom(replyToMessageAtom)
-  const {allowSendingImages} = useAtomValue(preferencesAtom)
   const sendMessage = useSetAtom(sendMessageAtom)
   const session = useSessionAssumeLoggedIn()
   const {t} = useTranslation()
@@ -67,13 +69,6 @@ function ChatTextInput(): React.ReactElement | null {
     if (!replyToMessage) return
     textInputRef.current?.focus()
   }, [replyToMessage])
-
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
-      marginRight: 5,
-      opacity: withSpring(value ? 1 : 0),
-    }
-  }, [value])
 
   const clearTextInput = useCallback(() => {
     textInputRef.current?.clear()
@@ -132,26 +127,51 @@ function ChatTextInput(): React.ReactElement | null {
     [clearTextInput, sendChatMessage]
   )
 
-  const pickAndSendImage = useCallback(() => {
-    void getImageFromGalleryAndTryToResolveThePermissionsAlongTheWay({}).pipe(
-      Effect.match({
-        onSuccess: ({uri}) => {
-          sendChatMessage({text: '', image: uri})
+  const pickAndSendImage = useCallback(
+    (pickImage: Effect.Effect<SelectedImage, ImagePickerError>) => {
+      void pickImage.pipe(
+        Effect.match({
+          onSuccess: ({uri}) => {
+            sendChatMessage({text: '', image: uri})
+          },
+          onFailure: (e) => {
+            if (e.reason === 'NothingSelected') return
+            showErrorAlert({
+              title: t('common.somethingWentWrong'),
+              description:
+                toCommonErrorMessage(e, t) ??
+                t('common.somethingWentWrongDescription'),
+              error: e,
+            })
+          },
+        }),
+        Effect.runPromise
+      )
+    },
+    [sendChatMessage, t]
+  )
+
+  const selectImageSource = useCallback(() => {
+    Alert.alert(t('loginFlow.photo.selectSource'), undefined, [
+      {
+        text: t('loginFlow.photo.gallery'),
+        onPress: () => {
+          pickAndSendImage(
+            getImageFromGalleryAndTryToResolveThePermissionsAlongTheWay({})
+          )
         },
-        onFailure: (e) => {
-          if (e.reason === 'NothingSelected') return
-          showErrorAlert({
-            title: t('common.somethingWentWrong'),
-            description:
-              toCommonErrorMessage(e, t) ??
-              t('common.somethingWentWrongDescription'),
-            error: e,
-          })
+      },
+      {
+        text: t('loginFlow.photo.camera'),
+        onPress: () => {
+          pickAndSendImage(
+            getImageFromCameraAndTryToResolveThePermissionsAlongTheWay({})
+          )
         },
-      }),
-      Effect.runPromise
-    )
-  }, [sendChatMessage, t])
+      },
+      {text: t('common.cancel'), style: 'cancel'},
+    ])
+  }, [pickAndSendImage, t])
 
   const sendLatestText = useCallback(() => {
     clearPendingIosSendTimeout()
@@ -259,19 +279,6 @@ function ChatTextInput(): React.ReactElement | null {
         gap="$3"
         alignItems="flex-end"
       >
-        {!!allowSendingImages && (
-          <UiIconButton
-            width="$9"
-            height="$9"
-            borderRadius="$3"
-            my="$3"
-            ml="$4"
-            backgroundColor="$backgroundOnBar"
-            onPress={pickAndSendImage}
-          >
-            <Camera size={20} color={theme.foregroundPrimary.get()} />
-          </UiIconButton>
-        )}
         <Stack flex={1}>
           <XStack
             alignItems="center"
@@ -296,16 +303,22 @@ function ChatTextInput(): React.ReactElement | null {
                 selectionColor={theme.accentHighlightPrimary.get()}
               />
             </Stack>
-            <Animated.View style={animatedStyle}>
-              <UiIconButton
-                width="$9"
-                height="$9"
-                borderRadius="$3"
-                backgroundColor="$accentYellowSecondary"
-                onPress={sendText}
-              >
-                <Send size={20} color={theme.accentHighlightPrimary.get()} />
-              </UiIconButton>
+            <Animated.View key={value ? 'send' : 'camera'} entering={ZoomIn}>
+              {value ? (
+                <UiIconButton
+                  backgroundColor="$accentYellowSecondary"
+                  onPress={sendText}
+                >
+                  <Send size={20} color={theme.accentHighlightPrimary.get()} />
+                </UiIconButton>
+              ) : (
+                <UiIconButton
+                  backgroundColor="transparent"
+                  onPress={selectImageSource}
+                >
+                  <Camera size={24} color={theme.foregroundSecondary.get()} />
+                </UiIconButton>
+              )}
             </Animated.View>
           </XStack>
         </Stack>

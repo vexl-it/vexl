@@ -121,7 +121,11 @@ function decryptChatImage(
   key: string
 ): Effect.Effect<Uint8Array, ChatImageProcessingError> {
   return Effect.try({
-    try: () => aesGCMDecryptBytes({data, key: Buffer.from(key, 'base64')}),
+    // expo-file-system on iOS crashes on Buffer, it needs a plain Uint8Array.
+    try: () =>
+      new Uint8Array(
+        aesGCMDecryptBytes({data, key: Buffer.from(key, 'base64')})
+      ),
     catch: (cause) => new ChatImageProcessingError({cause}),
   })
 }

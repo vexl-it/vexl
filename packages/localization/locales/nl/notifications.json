@@ -5,6 +5,8 @@
   "notifications.errorWhileOpening": "Fout tijdens openen melding",
   "notifications.MESSAGE.title": "Nieuw bericht",
   "notifications.MESSAGE.body": "U heeft een nieuw bericht ontvangen.",
+  "notifications.REACTION.title": "Nieuwe reactie",
+  "notifications.REACTION.body": "Reageerde met {{emoji}} op een bericht",
   "notifications.REQUEST_REVEAL.title": "Identiteitsaanvraag ontvangen",
   "notifications.REQUEST_REVEAL.body": "U bent gevraagd om uw identiteit te onthullen.",
   "notifications.APPROVE_REVEAL.title": "Identiteit onthuld!",

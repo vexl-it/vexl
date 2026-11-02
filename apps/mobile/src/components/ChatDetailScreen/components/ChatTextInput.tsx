@@ -30,6 +30,7 @@ import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {checkNotificationPermissionsAndAskIfPossibleTEActionAtom} from '../../../utils/notifications/checkAndAskForPermissionsActionAtom'
 import UriImageWithSizeLimits from '../../UriImageWithSizeLimits'
 import {chatMolecule} from '../atoms'
+import {CHAT_INPUT_NATIVE_ID} from './MessagesList'
 import {usePeriodicTypingIndication} from './usePeriodicTypingIndication'
 
 const responseImagePreviewLimits = {width: 200, height: 100}
@@ -241,6 +242,7 @@ function ChatTextInput(): React.ReactElement | null {
             <Stack flex={1} justifyContent="center">
               <RNTextInput
                 ref={textInputRef}
+                nativeID={CHAT_INPUT_NATIVE_ID}
                 multiline
                 value={value}
                 onChangeText={handleChangeText}

@@ -29,6 +29,9 @@ import {focusWasDeniedAtom} from '../../../state/chat/atoms/focusDenyRequestMess
 import focusOtherSideLeftAtom from '../../../state/chat/atoms/focusOtherSideLeftAtom'
 import selectOtherSideDataAtom from '../../../state/chat/atoms/selectOtherSideDataAtom'
 import sendMessageActionAtom from '../../../state/chat/atoms/sendMessageActionAtom'
+import sendReactionActionAtom, {
+  otherSideSupportsReactions,
+} from '../../../state/chat/atoms/sendReactionActionAtom'
 import {
   dummyChatWithMessages,
   type ChatMessageWithState,
@@ -83,6 +86,18 @@ export type ExtraToSend =
   | {type: 'image'; image: SelectedImage}
   | {type: 'reply'; message: ChatMessageWithState}
 
+export interface MessageLayout {
+  readonly x: number
+  readonly y: number
+  readonly width: number
+  readonly height: number
+}
+
+export interface MessageActionsSelection {
+  readonly message: ChatMessageWithState
+  readonly layout: MessageLayout
+}
+
 export const ChatScope = createScope<
   WritableAtom<ChatWithMessages, [SetStateAction<ChatWithMessages>], void>
 >(atom<ChatWithMessages>(dummyChatWithMessages))
@@ -126,6 +141,10 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
 
   const tradeChecklistAtom = focusAtom(chatWithMessagesAtom, (o) =>
     o.prop('tradeChecklist')
+  )
+
+  const reactionsAtom = focusAtom(chatWithMessagesAtom, (o) =>
+    o.prop('reactions')
   )
 
   const hiddenMessagesIdsAtom = focusAtom(chatWithMessagesAtom, (o) =>
@@ -435,6 +454,11 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
   )
 
   const canSendMessagesAtom = createCanSendMessagesAtom(messagesAtom)
+
+  const canSendReactionsAtom = atom(
+    (get) =>
+      get(canSendMessagesAtom) && otherSideSupportsReactions(get(chatAtom))
+  )
   const chatStateAtom = selectAtom(chatWithMessagesAtom, getChatState)
   const otherSideLeftAtom = focusOtherSideLeftAtom(chatWithMessagesAtom)
   const shouldGrayScaleAvatarAtom = atom((get) => {
@@ -557,6 +581,8 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
         )
       }
     )
+
+  const messageActionsSelectionAtom = atom<MessageActionsSelection | null>(null)
 
   const showInfoBarAtom = focusAtom(chatAtom, (o) => o.prop('showInfoBar'))
 
@@ -852,6 +878,9 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     offerForChatAtom,
     noteForChatAtom,
     sendMessageAtom: sendMessageActionAtom(chatWithMessagesAtom),
+    sendReactionAtom: sendReactionActionAtom(chatWithMessagesAtom),
+    reactionsAtom,
+    canSendReactionsAtom,
     otherSideDataAtom,
     identityRevealStatusAtom,
     contactRevealStatusAtom,
@@ -862,6 +891,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     friendLevelInfoAtom,
     isMyChatOriginAtom,
     replyToMessageAtom,
+    messageActionsSelectionAtom,
     theirOfferAndNotReportedAtom,
     requestStateAtom: createRequestStateAtom(chatWithMessagesAtom),
     chatStateAtom,

@@ -10,6 +10,7 @@ import {
   ChatMessageRequiringNewerVersion,
   generateChatId,
   Inbox,
+  ReactionEmoji,
 } from '@vexl-next/domain/src/general/messaging'
 import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {CryptoError} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
@@ -101,6 +102,21 @@ export const ChatTransientMessageId = Schema.String.pipe(
 )
 export type ChatTransientMessageId = typeof ChatTransientMessageId.Type
 
+export const MessageReactions = Schema.Struct({
+  mine: Schema.optional(ReactionEmoji),
+  theirs: Schema.optional(ReactionEmoji),
+  // Send time of the last applied reaction from the other side. Reactions can
+  // arrive out of order across fetches, so older ones must not win.
+  theirsUpdatedAt: Schema.optional(UnixMilliseconds),
+})
+export type MessageReactions = typeof MessageReactions.Type
+
+export const ChatReactions = Schema.Record({
+  key: ChatMessageId,
+  value: MessageReactions,
+})
+export type ChatReactions = typeof ChatReactions.Type
+
 export const ChatWithMessages = Schema.Struct({
   chat: Chat,
   messages: Schema.Array(ChatMessageWithState).pipe(Schema.mutable),
@@ -124,6 +140,7 @@ export const ChatWithMessages = Schema.Struct({
   feedbackSubmitted: Schema.optionalWith(Schema.Boolean, {
     default: () => false,
   }),
+  reactions: Schema.optionalWith(ChatReactions, {default: () => ({})}),
 })
 export type ChatWithMessages = typeof ChatWithMessages.Type
 
@@ -169,5 +186,6 @@ export const dummyChatWithMessages: ChatWithMessages = {
     ...createEmptyTradeChecklistInState(),
   },
   feedbackSubmitted: false,
+  reactions: {},
   messages: [],
 }

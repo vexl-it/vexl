@@ -1,4 +1,5 @@
 import {HttpApiBuilder} from '@effect/platform/index'
+import {type ServerHashedNumber} from '@vexl-next/domain/src/general/ServerHashedNumber'
 import {CurrentSecurity} from '@vexl-next/rest-api/src/apiSecurity'
 import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/specification'
 import {DashboardReportsService} from '@vexl-next/server-utils/src/DashboardReportsService'
@@ -8,7 +9,6 @@ import {Array, Effect, flow, pipe} from 'effect'
 import {ContactDbService} from '../../db/ContactDbService'
 import {
   hashForClient,
-  type ServerHashedNumber,
   serverHashPhoneNumber,
 } from '../../utils/serverHashContact'
 import {withUserActionRedisLock} from '../../utils/withUserActionRedisLock'
@@ -81,7 +81,9 @@ export const importContacts = HttpApiBuilder.handler(
             })
           )
 
-          yield* _(Effect.log('New contacts. Notifying', newContacts))
+          yield* _(
+            Effect.log('New contacts. Notifying', {count: newContacts.length})
+          )
 
           yield* _(
             importContactsQuotaService.checkAndIncrementImportContactsQuota(

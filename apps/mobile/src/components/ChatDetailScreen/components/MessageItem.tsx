@@ -111,6 +111,8 @@ function MessageItem({
       )
     }
 
+    if (item.message.message.messageType === 'REACTION') return null
+
     const direction =
       item.message.state === 'received' ? 'incoming' : 'outgoing'
 

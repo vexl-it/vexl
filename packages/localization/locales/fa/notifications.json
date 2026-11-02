@@ -5,6 +5,8 @@
   "notifications.errorWhileOpening": "Error while opening notification",
   "notifications.MESSAGE.title": "New message",
   "notifications.MESSAGE.body": "You have received a new message.",
+  "notifications.REACTION.title": "واکنش جدید",
+  "notifications.REACTION.body": "با {{emoji}} به یک پیام واکنش نشان داد",
   "notifications.REQUEST_REVEAL.title": "Identity request received",
   "notifications.REQUEST_REVEAL.body": "You have been requested to reveal your identity.",
   "notifications.APPROVE_REVEAL.title": "Identity revealed!",

@@ -22,6 +22,7 @@ public enum RenderableMessageType: String, CaseIterable, Sendable {
   case disapproveContactReveal = "DISAPPROVE_CONTACT_REVEAL"
   case requestContactReveal = "REQUEST_CONTACT_REVEAL"
   case tradeChecklistUpdate = "TRADE_CHECKLIST_UPDATE"
+  case reaction = "REACTION"
 }
 
 /// The fields of the decrypted `ChatMessagePayload` JSON
@@ -36,6 +37,8 @@ public struct DecryptedChatMessage: Equatable, Sendable {
   public let messageTypeRaw: String
   public let text: String?
   public let minimalRequiredVersion: String?
+  /// `reaction.emoji` of a REACTION message; nil when the reaction is removed.
+  public let reactionEmoji: String?
 
   public var renderableType: RenderableMessageType? {
     RenderableMessageType(rawValue: messageTypeRaw)
@@ -46,13 +49,15 @@ public struct DecryptedChatMessage: Equatable, Sendable {
     time: Int64,
     messageTypeRaw: String,
     text: String?,
-    minimalRequiredVersion: String?
+    minimalRequiredVersion: String?,
+    reactionEmoji: String? = nil
   ) {
     self.uuid = uuid
     self.time = time
     self.messageTypeRaw = messageTypeRaw
     self.text = text
     self.minimalRequiredVersion = minimalRequiredVersion
+    self.reactionEmoji = reactionEmoji
   }
 
   /// Parses the decrypted plaintext JSON. Returns nil on any malformed input.
@@ -78,7 +83,8 @@ public struct DecryptedChatMessage: Equatable, Sendable {
       time: time,
       messageTypeRaw: messageType,
       text: dictionary["text"] as? String,
-      minimalRequiredVersion: dictionary["minimalRequiredVersion"] as? String
+      minimalRequiredVersion: dictionary["minimalRequiredVersion"] as? String,
+      reactionEmoji: (dictionary["reaction"] as? [String: Any])?["emoji"] as? String
     )
   }
 
@@ -87,7 +93,9 @@ public struct DecryptedChatMessage: Equatable, Sendable {
   /// app version, the message must not be previewed (the JS app converts it
   /// to a REQUIRES_NEWER_VERSION pseudo-message, which is never notified).
   public func isPreviewable(appSemver: String?) -> Bool {
-    guard renderableType != nil else { return false }
+    guard let renderableType else { return false }
+    // Removing a reaction is silent.
+    if renderableType == .reaction, reactionEmoji?.isEmpty ?? true { return false }
     guard let minimalRequiredVersion else { return true }
     guard let appSemver,
           let required = Semver(minimalRequiredVersion),

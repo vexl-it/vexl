@@ -160,6 +160,7 @@ export function chatMessagePayloadToChatMessage(
     goldenAvatarType: payload.goldenAvatarType,
     lastReceivedVersion: payload.lastReceivedVersion,
     tradeChecklistUpdate: payload.tradeChecklistUpdate,
+    reaction: payload.reaction,
     myVexlToken: payload.myFcmCypher,
     senderClubsUuids: payload.senderClubsUuids,
     commonFriends: payload.commonFriends,

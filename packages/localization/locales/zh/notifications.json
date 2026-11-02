@@ -5,6 +5,8 @@
   "notifications.errorWhileOpening": "打开通知时出错",
   "notifications.MESSAGE.title": "新的消息",
   "notifications.MESSAGE.body": "您收到了一条新的消息。",
+  "notifications.REACTION.title": "新的回应",
+  "notifications.REACTION.body": "用 {{emoji}} 回应了一条消息",
   "notifications.REQUEST_REVEAL.title": "已收到身份请求",
   "notifications.REQUEST_REVEAL.body": "您已被要求透露您的身份。",
   "notifications.APPROVE_REVEAL.title": "身份已被透露！",

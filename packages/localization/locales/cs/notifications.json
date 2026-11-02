@@ -5,6 +5,8 @@
   "notifications.errorWhileOpening": "Došlo k chybě při otevírání notifikace.",
   "notifications.MESSAGE.title": "Nová zpráva",
   "notifications.MESSAGE.body": "Dostal jsi novou zprávu.",
+  "notifications.REACTION.title": "Nová reakce",
+  "notifications.REACTION.body": "Reaguje {{emoji}} na zprávu",
   "notifications.REQUEST_REVEAL.title": "Žádost o odhalení identity",
   "notifications.REQUEST_REVEAL.body": "Byl jsi požádán o odhalení tvé identity.",
   "notifications.APPROVE_REVEAL.title": "Identita odhalena!",

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Generates Sources/VexlNotificationCore/Resources/notificationLocalizations.json
- * from packages/localization/<locale>-base.json.
+ * from packages/localization/locales/<locale>/notifications.json.
  *
  * The NSE renders chat-notification previews natively (Swift) and needs the same
  * localized title/body strings the JS app uses (`notifications.<TYPE>.title/body`).
@@ -15,7 +15,7 @@ import {fileURLToPath} from 'node:url'
 
 const packageDir = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const repoRoot = resolve(packageDir, '../../../..')
-const localizationDir = join(repoRoot, 'packages/localization')
+const localesDir = join(repoRoot, 'packages/localization/locales')
 const outFile = join(
   packageDir,
   'Sources/VexlNotificationCore/Resources/notificationLocalizations.json'
@@ -39,17 +39,20 @@ const RENDERABLE_TYPES = [
   'DISAPPROVE_CONTACT_REVEAL',
   'REQUEST_CONTACT_REVEAL',
   'TRADE_CHECKLIST_UPDATE',
+  'REACTION',
 ]
 
 const result = {}
 
-const files = readdirSync(localizationDir)
-  .filter((f) => f.endsWith('-base.json'))
+const locales = readdirSync(localesDir, {withFileTypes: true})
+  .filter((entry) => entry.isDirectory())
+  .map((entry) => entry.name)
   .sort()
 
-for (const file of files) {
-  const locale = file.replace(/-base\.json$/, '')
-  const content = JSON.parse(readFileSync(join(localizationDir, file), 'utf8'))
+for (const locale of locales) {
+  const content = JSON.parse(
+    readFileSync(join(localesDir, locale, 'notifications.json'), 'utf8')
+  )
   const table = {}
   for (const type of RENDERABLE_TYPES) {
     const title = content[`notifications.${type}.title`]

@@ -108,6 +108,7 @@ function chatWithMessages({
       contact: {},
     },
     feedbackSubmitted: false,
+    reactions: {},
   }
 }
 

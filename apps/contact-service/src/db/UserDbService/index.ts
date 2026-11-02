@@ -1,7 +1,7 @@
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {type UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
+import {type ServerHashedNumber} from '@vexl-next/domain/src/general/ServerHashedNumber'
 import {Context, Effect, Layer, type Option} from 'effect'
-import {type ServerHashedNumber} from '../../utils/serverHashContact'
 import {type UserRecord} from './domain'
 import {
   createClearVexlNotificationTokenHeldByOtherUsers,

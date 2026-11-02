@@ -1,6 +1,6 @@
 import {type UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
+import {type ServerHashedNumber} from '@vexl-next/domain/src/general/ServerHashedNumber'
 import {Context, Effect, Layer} from 'effect'
-import {type ServerHashedNumber} from '../../utils/serverHashContact'
 import {type ContactRecord} from './domain'
 import {createDeleteContactsByHashFrom} from './queries/createDeleteContactsByHashFrom'
 import {

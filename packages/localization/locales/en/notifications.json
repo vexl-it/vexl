@@ -5,6 +5,8 @@
   "notifications.errorWhileOpening": "Error while opening the notification",
   "notifications.MESSAGE.title": "New message",
   "notifications.MESSAGE.body": "Tap to read it.",
+  "notifications.REACTION.title": "New reaction",
+  "notifications.REACTION.body": "Reacted {{emoji}} to a message",
   "notifications.REQUEST_REVEAL.title": "Identity request",
   "notifications.REQUEST_REVEAL.body": "Someone wants to know who you are.",
   "notifications.APPROVE_REVEAL.title": "Identity revealed!",

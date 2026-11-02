@@ -167,6 +167,13 @@ export async function showChatNotification({
     return
   }
 
+  const reactionEmoji =
+    newMessage.state === 'receivedButRequiresNewerVersion'
+      ? undefined
+      : newMessage.message.reaction?.emoji
+  // Removing a reaction is silent.
+  if (type === 'REACTION' && reactionEmoji === undefined) return
+
   const chat = inbox.chats.find(
     (one) => one.chat.otherSide.publicKey === newMessage.message.senderPublicKey
   )
@@ -236,14 +243,16 @@ export async function showChatNotification({
   }
 
   const title =
-    type === 'MESSAGE'
-      ? (userName ?? t('notifications.MESSAGE.title', {them: ''}))
+    type === 'MESSAGE' || type === 'REACTION'
+      ? (userName ?? t(`notifications.${type}.title`, {them: ''}))
       : isRequest && chat?.chat.origin.type === 'myNote'
         ? t('notifications.REQUEST_MESSAGING.noteTitle', {them: userName ?? ''})
         : t(`notifications.${type}.title`, {them: userName ?? ''})
   const body =
-    (type === 'MESSAGE' ? newMessage.message.text : undefined) ??
-    t(`notifications.${type}.body`, {them: userName ?? ''})
+    type === 'REACTION'
+      ? t('notifications.REACTION.body', {emoji: reactionEmoji})
+      : ((type === 'MESSAGE' ? newMessage.message.text : undefined) ??
+        t(`notifications.${type}.body`, {them: userName ?? ''}))
 
   await displayLocalNotification({
     id: newMessage.message.uuid,

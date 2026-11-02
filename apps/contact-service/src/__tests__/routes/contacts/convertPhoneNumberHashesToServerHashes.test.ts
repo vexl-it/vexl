@@ -1,3 +1,9 @@
+import {
+  HttpClient,
+  type HttpClientError,
+  HttpClientRequest,
+  type HttpClientResponse,
+} from '@effect/platform'
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {hashPhoneNumber} from '@vexl-next/server-utils/src/generateUserAuthData'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
@@ -53,6 +59,36 @@ it('Converts phone number hashes to server hashes', async () => {
         )
       )
       expect(client.result).toEqual(expectedResult)
+    })
+  )
+})
+
+it('Rejects server hashes with a 400', async () => {
+  await runPromiseInMockedEnvironment(
+    Effect.gen(function* (_) {
+      const me = yield* _(generateKeysAndHasheForNumber('+420733333001'))
+      const client = yield* _(HttpClient.HttpClient)
+      const convert = (
+        hashedPhoneNumbers: readonly string[]
+      ): Effect.Effect<
+        HttpClientResponse.HttpClientResponse,
+        HttpClientError.HttpClientError
+      > =>
+        pipe(
+          HttpClientRequest.post('/api/v1/contacts/convert-to-server-hashes'),
+          HttpClientRequest.setHeaders({
+            ...me.authHeaders,
+            'user-agent': 'Vexl/1 (1.0.0) ANDROID',
+          }),
+          HttpClientRequest.bodyUnsafeJson({hashedPhoneNumbers}),
+          client.execute
+        )
+
+      expect((yield* _(convert(['someHash']))).status).toBe(200)
+
+      const rejected = yield* _(convert(['ServerHash:someHash']))
+      expect(rejected.status).toBe(400)
+      expect(yield* _(rejected.text)).not.toContain('ServerHash:someHash')
     })
   )
 })

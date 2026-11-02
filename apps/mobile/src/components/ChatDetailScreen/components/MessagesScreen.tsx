@@ -5,6 +5,7 @@ import {useMolecule} from 'bunshi/dist/react'
 import {Effect} from 'effect/index'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback} from 'react'
+import {KeyboardController} from 'react-native-keyboard-controller'
 import {fetchAndStoreMessagesForInboxHandleNotificationsActionAtom} from '../../../state/chat/atoms/fetchNewMessagesActionAtom'
 import {useStatusBarStyleForScreen} from '../../../state/statusBarStyleAtom'
 import * as fromChatAtoms from '../../../state/tradeChecklist/atoms/fromChatAtoms'
@@ -13,6 +14,7 @@ import {chatMolecule} from '../atoms'
 import {ChatActionButtons} from './ChatActionButtons'
 import ChatTextInput from './ChatTextInput'
 import MarkAsReadWhenRendered from './MarkAsReadWhenRendered'
+import MessageActionsOverlay from './MessageActionsOverlay'
 import MessagesList from './MessagesList'
 import {MessagesScreenChatHeader} from './MessagesScreenChatHeader'
 import StickyHeader from './StickyHeader'
@@ -40,6 +42,17 @@ function MessagesScreen({
     }, [chatId, inboxKey, setParentChat])
   )
 
+  // The message list only makes room for the keyboard when it sees it open,
+  // so it must not stay open across entering or leaving the chat.
+  useFocusEffect(
+    useCallback(() => {
+      void KeyboardController.dismiss()
+      return () => {
+        void KeyboardController.dismiss()
+      }
+    }, [])
+  )
+
   useAppState(
     useCallback(() => {
       fetchAndStoreMessagesForInbox({
@@ -56,6 +69,7 @@ function MessagesScreen({
         navigationBar={null}
         noHorizontalPadding
         footer={canSendMessages ? <ChatTextInput /> : <ChatActionButtons />}
+        footerSitsOnKeyboard
         footerFrameProps={{
           backgroundColor: '$backgroundSecondary',
           paddingHorizontal: 0,
@@ -70,6 +84,7 @@ function MessagesScreen({
           </Stack>
         </Stack>
       </Screen>
+      <MessageActionsOverlay />
     </>
   )
 }

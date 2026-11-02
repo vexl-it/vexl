@@ -1,5 +1,6 @@
 import {HttpApiBuilder} from '@effect/platform/index'
 import {type CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
+import {type ServerHashedNumber} from '@vexl-next/domain/src/general/ServerHashedNumber'
 import {type UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {CurrentSecurity} from '@vexl-next/rest-api/src/apiSecurity'
 import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/specification'
@@ -10,10 +11,7 @@ import {Effect, Option} from 'effect'
 import {ContactDbService} from '../../db/ContactDbService'
 import {UserDbService} from '../../db/UserDbService'
 import {reportUserLoggedIn} from '../../metrics'
-import {
-  serverHashPhoneNumber,
-  type ServerHashedNumber,
-} from '../../utils/serverHashContact'
+import {serverHashPhoneNumber} from '../../utils/serverHashContact'
 import {withUserActionRedisLock} from '../../utils/withUserActionRedisLock'
 
 const deleteIfExists = (

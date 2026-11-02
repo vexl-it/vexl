@@ -95,15 +95,6 @@ export const rateLimitingMiddlewareLayer = (
 
         const limit = endpointLimit.limit
 
-        yield* _(
-          Effect.log('Rate limiting check', {
-            ip: connectingIp,
-            route,
-            method: request.method,
-            limit,
-          })
-        )
-
         const rateLimitResult = yield* _(
           rateLimiting.incrementAndRateLimitIp({
             ip: connectingIp,
@@ -124,8 +115,7 @@ export const rateLimitingMiddlewareLayer = (
 
         if (!rateLimitResult.allowed) {
           yield* _(
-            Effect.logInfo('Rate limiting ip', {
-              ip: connectingIp,
+            Effect.logInfo('Rate limiting request', {
               route,
               method: request.method,
             })

@@ -5,6 +5,8 @@
   "notifications.errorWhileOpening": "Error al abrir la notificación",
   "notifications.MESSAGE.title": "Nuevo mensaje",
   "notifications.MESSAGE.body": "Has recibido un nuevo mensaje.",
+  "notifications.REACTION.title": "Nueva reacción",
+  "notifications.REACTION.body": "Reaccionó con {{emoji}} a un mensaje",
   "notifications.REQUEST_REVEAL.title": "Solicitud de revelación de identidad recibida",
   "notifications.REQUEST_REVEAL.body": "Se te ha solicitado que reveles tu identidad.",
   "notifications.APPROVE_REVEAL.title": "Identidad revelada!",

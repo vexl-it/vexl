@@ -25,12 +25,12 @@
       "body": "Your request was approved."
     },
     "DISAPPROVE_MESSAGING": {
-      "title": "Request denied",
+      "title": "{{them}} رفض الاتصال",
       "body": "Your request was denied."
     },
     "CANCEL_REQUEST_MESSAGING": {
       "title": "{{them}} cancelled chat request",
-      "body": "{{them}} cancelled chat request"
+      "body": "لن تبدأ المحادثة."
     },
     "DELETE_CHAT": {
       "title": "Chat deleted",
@@ -59,6 +59,10 @@
     "TRADE_CHECKLIST_UPDATE": {
       "title": "{{them}}",
       "body": "{{them}} Updated trade checklist"
+    },
+    "REACTION": {
+      "title": "تفاعل جديد",
+      "body": "تفاعل بـ {{emoji}} مع رسالة"
     }
   },
   "bg": {
@@ -87,12 +91,12 @@
       "body": "Вашето искане беше одобрено."
     },
     "DISAPPROVE_MESSAGING": {
-      "title": "Искането е отказано",
+      "title": "{{them}} отказа да се свърже",
       "body": "Вашето искане беше отказано."
     },
     "CANCEL_REQUEST_MESSAGING": {
       "title": "{{them}} отмени искане за чат",
-      "body": "{{them}} отмени искане за чат"
+      "body": "Разговорът няма да започне."
     },
     "DELETE_CHAT": {
       "title": "Разговорът е изтрит",
@@ -121,6 +125,10 @@
     "TRADE_CHECKLIST_UPDATE": {
       "title": "{{them}}",
       "body": "{{them}} Актуализиран контролен търговски списък"
+    },
+    "REACTION": {
+      "title": "Нова реакция",
+      "body": "Реагира с {{emoji}} на съобщение"
     }
   },
   "cs": {
@@ -149,16 +157,16 @@
       "body": "Tvoje žádost byla schválena."
     },
     "DISAPPROVE_MESSAGING": {
-      "title": "Žádost zamítnuta!",
+      "title": "{{them}} odmítá spojení",
       "body": "Tvoje žádost byla zamítnuta."
     },
     "CANCEL_REQUEST_MESSAGING": {
       "title": "{{them}} zrušil požadavek na chat",
-      "body": "{{them}} zrušil požadavek na chat"
+      "body": "Konverzace nebude zahájena."
     },
     "DELETE_CHAT": {
       "title": "Chat byl smazán",
-      "body": "Jeden z tvých chatů byl smazán."
+      "body": "Druhá strana odešla."
     },
     "BLOCK_CHAT": {
       "title": "Byl jsi zablokován!",
@@ -166,7 +174,7 @@
     },
     "INBOX_DELETED": {
       "title": "Chat byl smazán",
-      "body": "Jeden z tvých chatů byl smazán."
+      "body": "Druhá strana odešla."
     },
     "APPROVE_CONTACT_REVEAL": {
       "title": "Telefonní číslo odhaleno!",
@@ -183,6 +191,10 @@
     "TRADE_CHECKLIST_UPDATE": {
       "title": "{{them}}",
       "body": "{{them}} aktualizoval trading checklist"
+    },
+    "REACTION": {
+      "title": "Nová reakce",
+      "body": "Reaguje {{emoji}} na zprávu"
     }
   },
   "de": {
@@ -208,15 +220,15 @@
     },
     "APPROVE_MESSAGING": {
       "title": "Antrag genehmigt!",
-      "body": "Dein Antrag war genehmigt!"
+      "body": "Dein Antrag wurde genehmigt!"
     },
     "DISAPPROVE_MESSAGING": {
-      "title": "Antrag abgelehnt",
-      "body": "Dein Antrag war abgelehnt"
+      "title": "{{them}} hat die Verbindung abgelehnt",
+      "body": "Dein Antrag wurde abgelehnt"
     },
     "CANCEL_REQUEST_MESSAGING": {
       "title": "{{them}} Stornierte Chatanfrage",
-      "body": "{{them}} Stornierte Chatanfrage"
+      "body": "Die Unterhaltung wird nicht gestartet."
     },
     "DELETE_CHAT": {
       "title": "Chat gelöscht",
@@ -245,6 +257,10 @@
     "TRADE_CHECKLIST_UPDATE": {
       "title": "{{them}}",
       "body": "{{them}} Aktualisiert Handelscheckliste"
+    },
+    "REACTION": {
+      "title": "Neue Reaktion",
+      "body": "Hat mit {{emoji}} auf eine Nachricht reagiert"
     }
   },
   "en": {
@@ -307,6 +323,10 @@
     "TRADE_CHECKLIST_UPDATE": {
       "title": "{{them}}",
       "body": "{{them}} updated the trade checklist."
+    },
+    "REACTION": {
+      "title": "New reaction",
+      "body": "Reacted {{emoji}} to a message"
     }
   },
   "es": {
@@ -335,12 +355,12 @@
       "body": "Tu solicitud ha sido aprobada."
     },
     "DISAPPROVE_MESSAGING": {
-      "title": "Solicitud rechazada",
+      "title": "{{them}} rechazó la conexión",
       "body": "Tu solicitud ha sido rechazada."
     },
     "CANCEL_REQUEST_MESSAGING": {
       "title": "{{them}} canceló la solicitud de chat",
-      "body": "{{them}} canceló la solicitud de chat"
+      "body": "La conversación no se iniciará."
     },
     "DELETE_CHAT": {
       "title": "Chat borrado",
@@ -369,6 +389,10 @@
     "TRADE_CHECKLIST_UPDATE": {
       "title": "{{them}}",
       "body": "{{them}} Actualizó la lista de verificación de comercio"
+    },
+    "REACTION": {
+      "title": "Nueva reacción",
+      "body": "Reaccionó con {{emoji}} a un mensaje"
     }
   },
   "fa": {
@@ -397,12 +421,12 @@
       "body": "Your request was approved."
     },
     "DISAPPROVE_MESSAGING": {
-      "title": "Request denied",
+      "title": "{{them}} درخواست ارتباط را رد کرد",
       "body": "Your request was denied."
     },
     "CANCEL_REQUEST_MESSAGING": {
       "title": "{{them}} cancelled chat request",
-      "body": "{{them}} cancelled chat request"
+      "body": "گفت‌وگو آغاز نخواهد شد."
     },
     "DELETE_CHAT": {
       "title": "Chat deleted",
@@ -431,6 +455,10 @@
     "TRADE_CHECKLIST_UPDATE": {
       "title": "{{them}}",
       "body": "{{them}} Updated trade checklist"
+    },
+    "REACTION": {
+      "title": "واکنش جدید",
+      "body": "با {{emoji}} به یک پیام واکنش نشان داد"
     }
   },
   "fi": {
@@ -459,12 +487,12 @@
       "body": "Your request was approved."
     },
     "DISAPPROVE_MESSAGING": {
-      "title": "Request denied",
+      "title": "{{them}} kieltäytyi yhteydenpidosta",
       "body": "Your request was denied."
     },
     "CANCEL_REQUEST_MESSAGING": {
       "title": "{{them}} cancelled chat request",
-      "body": "{{them}} cancelled chat request"
+      "body": "Keskustelu ei ala."
     },
     "DELETE_CHAT": {
       "title": "Chat deleted",
@@ -493,6 +521,10 @@
     "TRADE_CHECKLIST_UPDATE": {
       "title": "{{them}}",
       "body": "{{them}} Updated trade checklist"
+    },
+    "REACTION": {
+      "title": "Uusi reaktio",
+      "body": "Reagoi {{emoji}} viestiin"
     }
   },
   "fr": {
@@ -521,12 +553,12 @@
       "body": "Votre demande a été acceptée."
     },
     "DISAPPROVE_MESSAGING": {
-      "title": "Demande refusée",
+      "title": "{{them}} a refusé de se connecter",
       "body": "Votre demande a été refusée."
     },
     "CANCEL_REQUEST_MESSAGING": {
       "title": "Demande de chat annulée par {{them}}",
-      "body": "Demande de chat annulée par {{them}}"
+      "body": "La conversation ne commencera pas."
     },
     "DELETE_CHAT": {
       "title": "Discussion supprimée",
@@ -541,20 +573,24 @@
       "body": "L'une de vos discussions a été supprimée."
     },
     "APPROVE_CONTACT_REVEAL": {
-      "title": "Phone number revealed!",
-      "body": "Your request to reveal phone numbers was approved."
+      "title": "Numéro de téléphone partagé !",
+      "body": "Vous avez échangé vos numéros de téléphone."
     },
     "DISAPPROVE_CONTACT_REVEAL": {
       "title": "Demande refusée",
-      "body": "Your request to reveal phone numbers was denied."
+      "body": "L'autre personne a choisi de ne pas partager son numéro."
     },
     "REQUEST_CONTACT_REVEAL": {
       "title": "Demande du numéro de téléphone",
-      "body": "You have been requested to reveal your phone number."
+      "body": "Quelqu'un veut échanger des numéros de téléphone."
     },
     "TRADE_CHECKLIST_UPDATE": {
       "title": "{{them}}",
       "body": "{{them}} A mis à jour la checklist de l'échange"
+    },
+    "REACTION": {
+      "title": "Nouvelle réaction",
+      "body": "A réagi par {{emoji}} à un message"
     }
   },
   "id": {
@@ -583,12 +619,12 @@
       "body": "Your request was approved."
     },
     "DISAPPROVE_MESSAGING": {
-      "title": "Request denied",
+      "title": "{{them}} menolak untuk terhubung",
       "body": "Your request was denied."
     },
     "CANCEL_REQUEST_MESSAGING": {
       "title": "{{them}} cancelled chat request",
-      "body": "{{them}} cancelled chat request"
+      "body": "Percakapan tidak akan dimulai."
     },
     "DELETE_CHAT": {
       "title": "Chat deleted",
@@ -617,6 +653,10 @@
     "TRADE_CHECKLIST_UPDATE": {
       "title": "{{them}}",
       "body": "{{them}} Updated trade checklist"
+    },
+    "REACTION": {
+      "title": "Reaksi baru",
+      "body": "Memberi reaksi {{emoji}} ke sebuah pesan"
     }
   },
   "it": {
@@ -645,12 +685,12 @@
       "body": "La tua richiesta è stata approvata."
     },
     "DISAPPROVE_MESSAGING": {
-      "title": "Richiesta negata",
+      "title": "{{them}} ha rifiutato la tua richiesta di contatto",
       "body": "La richiesta è stata rifiutata."
     },
     "CANCEL_REQUEST_MESSAGING": {
       "title": "{{them}} ha annullato la richiesta di chat",
-      "body": "{{them}} ha annullato la richiesta di chat"
+      "body": "La conversazione non inizierà."
     },
     "DELETE_CHAT": {
       "title": "Chat eliminata",
@@ -665,20 +705,24 @@
       "body": "Una delle tue chat è stata eliminata."
     },
     "APPROVE_CONTACT_REVEAL": {
-      "title": "Phone number revealed!",
-      "body": "Your request to reveal phone numbers was approved."
+      "title": "Numero di telefono condiviso!",
+      "body": "Vi siete scambiati i numeri di telefono."
     },
     "DISAPPROVE_CONTACT_REVEAL": {
       "title": "Richiesta rifiutata!",
-      "body": "Your request to reveal phone numbers was denied."
+      "body": "L'altra persona ha scelto di non condividere il proprio numero."
     },
     "REQUEST_CONTACT_REVEAL": {
       "title": "Richiesto numero di telefono",
-      "body": "You have been requested to reveal your phone number."
+      "body": "Qualcuno vuole scambiare il numero di telefono con te."
     },
     "TRADE_CHECKLIST_UPDATE": {
       "title": "{{them}}",
       "body": "{{them}} Checklist dell'operazione aggiornata"
+    },
+    "REACTION": {
+      "title": "Nuova reazione",
+      "body": "Ha reagito con {{emoji}} a un messaggio"
     }
   },
   "ja": {
@@ -707,12 +751,12 @@
       "body": "要求が承認されました"
     },
     "DISAPPROVE_MESSAGING": {
-      "title": "要請は拒否されました",
+      "title": "{{them}} は接続を拒否しました",
       "body": "取引要請が拒否されました。"
     },
     "CANCEL_REQUEST_MESSAGING": {
-      "title": "{{them}} cancelled chat request",
-      "body": "{{them}} cancelled chat request"
+      "title": "{{them}} がメッセージをキャンセルしました",
+      "body": "会話は開始されません。"
     },
     "DELETE_CHAT": {
       "title": "チャットが削除されました",
@@ -740,7 +784,11 @@
     },
     "TRADE_CHECKLIST_UPDATE": {
       "title": "{{them}}",
-      "body": "{{them}} Updated trade checklist"
+      "body": "{{them}} が取引チェックリストを更新しました"
+    },
+    "REACTION": {
+      "title": "新しいリアクション",
+      "body": "メッセージに{{emoji}}でリアクションしました"
     }
   },
   "nl": {
@@ -769,12 +817,12 @@
       "body": "Uw aanvraag werd goedgekeurd"
     },
     "DISAPPROVE_MESSAGING": {
-      "title": "Aanvraag geweigerd",
+      "title": "{{them}} heeft je verbindingsverzoek afgewezen",
       "body": "Uw aanvraag is geweigerd"
     },
     "CANCEL_REQUEST_MESSAGING": {
       "title": "{{them}} heeft de chataanvraag geannuleerd",
-      "body": "{{them}} heeft de chataanvraag geannuleerd"
+      "body": "Het gesprek wordt niet gestart."
     },
     "DELETE_CHAT": {
       "title": "Chat is verwijderd",
@@ -794,7 +842,7 @@
     },
     "DISAPPROVE_CONTACT_REVEAL": {
       "title": "Aanvraag geweigerd!",
-      "body": "Je verzoek om telefoonnummers te ruilen is goedgekeurd."
+      "body": "Diegene heeft ervoor gekozen om het nummer niet te delen."
     },
     "REQUEST_CONTACT_REVEAL": {
       "title": "Telefoonnummer aangevraagd",
@@ -803,6 +851,10 @@
     "TRADE_CHECKLIST_UPDATE": {
       "title": "{{them}}",
       "body": "{{them}} Heeft trading checklist bijgewerkt"
+    },
+    "REACTION": {
+      "title": "Nieuwe reactie",
+      "body": "Reageerde met {{emoji}} op een bericht"
     }
   },
   "no": {
@@ -831,12 +883,12 @@
       "body": "Your request was approved."
     },
     "DISAPPROVE_MESSAGING": {
-      "title": "Request denied",
+      "title": "{{them}} avslo forbindelsen",
       "body": "Your request was denied."
     },
     "CANCEL_REQUEST_MESSAGING": {
       "title": "{{them}} cancelled chat request",
-      "body": "{{them}} cancelled chat request"
+      "body": "Samtalen vil ikke starte."
     },
     "DELETE_CHAT": {
       "title": "Chat deleted",
@@ -865,6 +917,10 @@
     "TRADE_CHECKLIST_UPDATE": {
       "title": "{{them}}",
       "body": "{{them}} Updated trade checklist"
+    },
+    "REACTION": {
+      "title": "Ny reaksjon",
+      "body": "Reagerte med {{emoji}} på en melding"
     }
   },
   "pcm": {
@@ -893,12 +949,12 @@
       "body": "Your request was approved."
     },
     "DISAPPROVE_MESSAGING": {
-      "title": "Request denied",
+      "title": "{{them}} don refuse to connect",
       "body": "Your request was denied."
     },
     "CANCEL_REQUEST_MESSAGING": {
       "title": "{{them}} cancelled chat request",
-      "body": "{{them}} cancelled chat request"
+      "body": "Di conversation no go start."
     },
     "DELETE_CHAT": {
       "title": "Chat deleted",
@@ -927,6 +983,10 @@
     "TRADE_CHECKLIST_UPDATE": {
       "title": "{{them}}",
       "body": "{{them}} Updated trade checklist"
+    },
+    "REACTION": {
+      "title": "New reaction",
+      "body": "Don react {{emoji}} to one message"
     }
   },
   "pl": {
@@ -955,12 +1015,12 @@
       "body": "Twoja prośba została zatwierdzona."
     },
     "DISAPPROVE_MESSAGING": {
-      "title": "Prośba odrzucona",
+      "title": "Odrzucono prośbę o kontakt z {{them}}",
       "body": "Twoja prośba została odrzucona."
     },
     "CANCEL_REQUEST_MESSAGING": {
       "title": "{{them}} anulował żądanie czatu",
-      "body": "{{them}} anulował żądanie czatu"
+      "body": "Rozmowa się nie rozpocznie."
     },
     "DELETE_CHAT": {
       "title": "Czat usunięty",
@@ -989,6 +1049,10 @@
     "TRADE_CHECKLIST_UPDATE": {
       "title": "{{them}}",
       "body": "{{them}} zaktualizował listę kontrolną transakcji"
+    },
+    "REACTION": {
+      "title": "Nowa reakcja",
+      "body": "Reaguje {{emoji}} na wiadomość"
     }
   },
   "pt": {
@@ -1017,12 +1081,12 @@
       "body": "A sua requisição foi aprovada."
     },
     "DISAPPROVE_MESSAGING": {
-      "title": "Requisição recusada",
+      "title": "{{them}} recusou a ligação",
       "body": "A sua requisição foi rejeitada."
     },
     "CANCEL_REQUEST_MESSAGING": {
-      "title": "{{them}} cancelled chat request",
-      "body": "{{them}} cancelled chat request"
+      "title": "{{them}} cancelou a mensagem",
+      "body": "A conversa não será iniciada."
     },
     "DELETE_CHAT": {
       "title": "Chat apagado",
@@ -1037,20 +1101,24 @@
       "body": "Um dos seus chats foi apagado."
     },
     "APPROVE_CONTACT_REVEAL": {
-      "title": "Phone number revealed!",
-      "body": "Your request to reveal phone numbers was approved."
+      "title": "Número de telefone partilhado!",
+      "body": "Já trocaram números de telefone."
     },
     "DISAPPROVE_CONTACT_REVEAL": {
       "title": "Requisição recusada!",
-      "body": "Your request to reveal phone numbers was denied."
+      "body": "A outra pessoa optou por não partilhar o número."
     },
     "REQUEST_CONTACT_REVEAL": {
       "title": "Número de telefone solicitado",
-      "body": "You have been requested to reveal your phone number."
+      "body": "Alguém quer trocar números de telefone contigo."
     },
     "TRADE_CHECKLIST_UPDATE": {
       "title": "{{them}}",
-      "body": "{{them}} Updated trade checklist"
+      "body": "{{them}} atualizou a checklist da troca."
+    },
+    "REACTION": {
+      "title": "Nova reação",
+      "body": "Reagiu com {{emoji}} a uma mensagem"
     }
   },
   "sk": {
@@ -1079,16 +1147,16 @@
       "body": "Tvoja žiadosť bola schválená."
     },
     "DISAPPROVE_MESSAGING": {
-      "title": "Žiadosť zamietnutá!",
+      "title": "{{them}} odmieta spojenie",
       "body": "Tvoja žiadosť bola zamietnutá."
     },
     "CANCEL_REQUEST_MESSAGING": {
       "title": "{{them}} zrušil žiadosť o chat",
-      "body": "{{them}} zrušil žiadosť o chat"
+      "body": "Konverzácia sa nezačne."
     },
     "DELETE_CHAT": {
       "title": "Chat bol zmazaný",
-      "body": "Jeden z tvojich chatov bol vymazaný."
+      "body": "Druhá strana odišla."
     },
     "BLOCK_CHAT": {
       "title": "Bol si zablokovaný!",
@@ -1096,7 +1164,7 @@
     },
     "INBOX_DELETED": {
       "title": "Chat bol zmazaný",
-      "body": "Jeden z tvojich chatov bol vymazaný."
+      "body": "Druhá strana odišla."
     },
     "APPROVE_CONTACT_REVEAL": {
       "title": "Telefónne číslo odhalené!",
@@ -1113,6 +1181,10 @@
     "TRADE_CHECKLIST_UPDATE": {
       "title": "{{them}}",
       "body": "{{them}} aktualizoval trade checklist"
+    },
+    "REACTION": {
+      "title": "Nová reakcia",
+      "body": "Reaguje {{emoji}} na správu"
     }
   },
   "sv": {
@@ -1141,12 +1213,12 @@
       "body": "Your request was approved."
     },
     "DISAPPROVE_MESSAGING": {
-      "title": "Request denied",
+      "title": "{{them}} avböjde anslutningen",
       "body": "Your request was denied."
     },
     "CANCEL_REQUEST_MESSAGING": {
       "title": "{{them}} cancelled chat request",
-      "body": "{{them}} cancelled chat request"
+      "body": "Konversationen kommer inte att starta."
     },
     "DELETE_CHAT": {
       "title": "Chat deleted",
@@ -1175,6 +1247,10 @@
     "TRADE_CHECKLIST_UPDATE": {
       "title": "{{them}}",
       "body": "{{them}} Updated trade checklist"
+    },
+    "REACTION": {
+      "title": "Ny reaktion",
+      "body": "Reagerade med {{emoji}} på ett meddelande"
     }
   },
   "sw": {
@@ -1203,12 +1279,12 @@
       "body": "Ombi lako limekubaliwa."
     },
     "DISAPPROVE_MESSAGING": {
-      "title": "Ombi limekataliwa",
+      "title": "{{them}} amekataa kuunganishwa",
       "body": "Ombi lako limekataliwa."
     },
     "CANCEL_REQUEST_MESSAGING": {
       "title": "{{them}} ameghairi ombi la gumzo",
-      "body": "{{them}} ameghairi ombi la gumzo"
+      "body": "Mazungumzo hayataanza."
     },
     "DELETE_CHAT": {
       "title": "Gumzo limefutwa",
@@ -1237,6 +1313,10 @@
     "TRADE_CHECKLIST_UPDATE": {
       "title": "{{them}}",
       "body": "{{them}} Imesasisha orodha ya biashara"
+    },
+    "REACTION": {
+      "title": "Mwitikio mpya",
+      "body": "Ameitikia kwa {{emoji}} kwenye ujumbe"
     }
   },
   "tr": {
@@ -1265,12 +1345,12 @@
       "body": "Your request was approved."
     },
     "DISAPPROVE_MESSAGING": {
-      "title": "Request denied",
+      "title": "{{them}} bağlantı isteğini reddetti",
       "body": "Your request was denied."
     },
     "CANCEL_REQUEST_MESSAGING": {
       "title": "{{them}} cancelled chat request",
-      "body": "{{them}} cancelled chat request"
+      "body": "Konuşma başlamayacak."
     },
     "DELETE_CHAT": {
       "title": "Chat deleted",
@@ -1299,6 +1379,10 @@
     "TRADE_CHECKLIST_UPDATE": {
       "title": "{{them}}",
       "body": "{{them}} Updated trade checklist"
+    },
+    "REACTION": {
+      "title": "Yeni tepki",
+      "body": "Bir mesaja {{emoji}} ile tepki verdi"
     }
   },
   "uk": {
@@ -1327,12 +1411,12 @@
       "body": "Your request was approved."
     },
     "DISAPPROVE_MESSAGING": {
-      "title": "Request denied",
+      "title": "{{them}} відхилив(-ла) запит на зв’язок",
       "body": "Your request was denied."
     },
     "CANCEL_REQUEST_MESSAGING": {
       "title": "{{them}} cancelled chat request",
-      "body": "{{them}} cancelled chat request"
+      "body": "Розмова не розпочнеться."
     },
     "DELETE_CHAT": {
       "title": "Chat deleted",
@@ -1361,6 +1445,10 @@
     "TRADE_CHECKLIST_UPDATE": {
       "title": "{{them}}",
       "body": "{{them}} Updated trade checklist"
+    },
+    "REACTION": {
+      "title": "Нова реакція",
+      "body": "Реакція {{emoji}} на повідомлення"
     }
   },
   "zh": {
@@ -1389,12 +1477,12 @@
       "body": "您的请求已被批准。"
     },
     "DISAPPROVE_MESSAGING": {
-      "title": "请求已被拒绝",
+      "title": "{{them}} 拒绝了联系请求",
       "body": "您的请求已被拒绝。"
     },
     "CANCEL_REQUEST_MESSAGING": {
       "title": "{{them}} 取消了聊天请求",
-      "body": "{{them}} 取消了聊天请求"
+      "body": "对话将不会开始。"
     },
     "DELETE_CHAT": {
       "title": "聊天记录已被删除",
@@ -1423,6 +1511,10 @@
     "TRADE_CHECKLIST_UPDATE": {
       "title": "{{them}}",
       "body": "{{them}} 已更新交易清单"
+    },
+    "REACTION": {
+      "title": "新的回应",
+      "body": "用 {{emoji}} 回应了一条消息"
     }
   }
 }

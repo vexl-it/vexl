@@ -1,9 +1,10 @@
 import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
-import {generateClubUuid} from '@vexl-next/domain/src/general/clubs'
+import {ClubCode, generateClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {addTestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Array, Effect, Option, Schema} from 'effect'
+import {ClubInvitationLinkDbService} from '../../../db/ClubInvitationLinkDbService'
 import {ClubMembersDbService} from '../../../db/ClubMemberDbService'
 import {ClubsDbService} from '../../../db/ClubsDbService'
 import {checkForInactiveUsers} from '../../../internalServer/routes/checkForInactiveUsers'
@@ -120,6 +121,86 @@ describe('Check for inactive club members', () => {
             membersCount: 0,
             membersLeftLast30Days: 1,
           }),
+        ])
+      })
+    )
+  })
+
+  it('removes inactive members together with invitation links they created', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const internalApp = yield* _(NodeTestingInternalApp)
+        const clubUuid = generateClubUuid()
+
+        yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
+        yield* _(
+          internalApp.ClubsAdmin.createClub({
+            headers: {'x-admin-token': ADMIN_TOKEN},
+            payload: {
+              club: {
+                uuid: clubUuid,
+                name: 'Alpha',
+                description: Option.none(),
+                membersCountLimit: 100,
+                clubImageUrl: SOME_URL,
+                validUntil: new Date(Date.now() + 24 * 60 * 60 * 1000),
+                reportLimit: 10,
+              },
+            },
+          })
+        )
+
+        const clubsDb = yield* _(ClubsDbService)
+        const club = yield* _(
+          clubsDb.findClubByUuid({uuid: clubUuid}),
+          Effect.flatten
+        )
+        const membersDb = yield* _(ClubMembersDbService)
+        const linksDb = yield* _(ClubInvitationLinkDbService)
+
+        const [inactiveModerator, activeModerator] = yield* _(
+          [new Date(Date.now() - 31 * 24 * 60 * 60 * 1000), new Date()],
+          Array.map((lastRefreshedAt) =>
+            membersDb.insertClubMember({
+              clubId: club.id,
+              publicKey: generatePrivateKey().publicKeyPemBase64,
+              publicKeyV2: null,
+              vexlNotificationToken: null,
+              lastRefreshedAt,
+              isModerator: true,
+            })
+          ),
+          Effect.all
+        )
+        yield* _(
+          [
+            {member: inactiveModerator, code: '111111'},
+            {member: activeModerator, code: '222222'},
+          ],
+          Array.map(({member, code}) =>
+            linksDb.insertInvitationLink({
+              clubId: club.id,
+              createdByMemberId: member.id,
+              forAdmin: false,
+              code: Schema.decodeSync(ClubCode)(code),
+            })
+          ),
+          Effect.all
+        )
+
+        yield* _(checkForInactiveUsers)
+
+        const remainingMembers = yield* _(
+          membersDb.queryAllClubMembers({id: club.id})
+        )
+        expect(remainingMembers).toEqual([
+          expect.objectContaining({id: activeModerator.id}),
+        ])
+        const remainingLinks = yield* _(
+          linksDb.findInvitationLinkByClubId({clubId: club.id})
+        )
+        expect(remainingLinks).toEqual([
+          expect.objectContaining({createdByMemberId: activeModerator.id}),
         ])
       })
     )

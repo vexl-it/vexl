@@ -13,11 +13,12 @@ import {
 import {HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {ConnectionLevel, OfferId} from '@vexl-next/domain/src/general/offers'
+import {SERVER_HASH_PREFIX} from '@vexl-next/domain/src/general/ServerHashedNumber'
 import {ServerToClientHashedNumber} from '@vexl-next/domain/src/general/ServerToClientHashedNumber'
 import {ShortLivedTokenForErasingUserOnContactService} from '@vexl-next/domain/src/general/ShortLivedTokenForErasingUserOnContactService'
 import {BooleanFromString} from '@vexl-next/generic-utils/src/effect-helpers/BooleanFromString'
 import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/EcdsaSignature.brand'
-import {Schema} from 'effect'
+import {Schema, String} from 'effect'
 import {RequestBaseWithChallenge} from '../../challenges/contracts'
 import {NoContentResponse} from '../../NoContentResponse.brand'
 import {
@@ -91,8 +92,14 @@ export const RefreshUserRequest = Schema.Struct({
 })
 export type RefreshUserRequest = Schema.Schema.Type<typeof RefreshUserRequest>
 
+const ClientHashedPhoneNumber = HashedPhoneNumber.pipe(
+  Schema.filter((hash) => !String.startsWith(SERVER_HASH_PREFIX)(hash), {
+    message: () => 'Server hashes are not accepted',
+  })
+)
+
 export const ImportContactsRequest = Schema.Struct({
-  contacts: Schema.Array(HashedPhoneNumber),
+  contacts: Schema.Array(ClientHashedPhoneNumber),
   replace: Schema.optionalWith(Schema.Boolean, {default: () => true}),
 })
 export type ImportContactsRequest = typeof ImportContactsRequest.Type
@@ -467,7 +474,7 @@ export type EraseUserFromNetworkResponse =
   typeof EraseUserFromNetworkResponse.Type
 
 export const ConvertPhoneNumberHashesToServerHashesRequest = Schema.Struct({
-  hashedPhoneNumbers: Schema.Array(HashedPhoneNumber),
+  hashedPhoneNumbers: Schema.Array(ClientHashedPhoneNumber),
 })
 export type ConvertPhoneNumberHashesToServerHashesRequest =
   typeof ConvertPhoneNumberHashesToServerHashesRequest.Type

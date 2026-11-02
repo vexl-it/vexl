@@ -5,6 +5,8 @@
   "notifications.errorWhileOpening": "Грешка при отваряне на уведомление",
   "notifications.MESSAGE.title": "Ново съобщение",
   "notifications.MESSAGE.body": "Получихте ново съобщение.",
+  "notifications.REACTION.title": "Нова реакция",
+  "notifications.REACTION.body": "Реагира с {{emoji}} на съобщение",
   "notifications.REQUEST_REVEAL.title": "Получено е искане за идентификация",
   "notifications.REQUEST_REVEAL.body": "От вас беше поискано да разкриете самоличността си.",
   "notifications.APPROVE_REVEAL.title": "Самоличността е разкрита!",

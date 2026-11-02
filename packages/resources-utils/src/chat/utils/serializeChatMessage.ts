@@ -51,6 +51,7 @@ export default function serializeChatMessage(
       messageType: message.messageType,
       minimalRequiredVersion: message.minimalRequiredVersion,
       tradeChecklistUpdate: message.tradeChecklistUpdate,
+      reaction: message.reaction,
       myVersion: message.myVersion,
       goldenAvatarType: message.goldenAvatarType,
       lastReceivedVersion: message.lastReceivedVersion,

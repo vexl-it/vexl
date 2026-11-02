@@ -324,6 +324,47 @@ describe('Retrieve messages', () => {
     )
   })
 
+  it('Retrieves messages from a legacy inbox without platform and fills the platform in', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const user = yield* _(createMockedUser('+420733333332'))
+        const inboxHash = yield* _(
+          hashPublicKey(user.mainKeyPair.publicKeyPemBase64)
+        )
+        const sql = yield* _(SqlClient.SqlClient)
+        const selectPlatform = sql`
+          SELECT
+            platform
+          FROM
+            inbox
+          WHERE
+            public_key = ${inboxHash}
+        `
+        yield* _(sql`
+          UPDATE inbox
+          SET
+            platform = NULL
+          WHERE
+            public_key = ${inboxHash}
+        `)
+        expect((yield* _(selectPlatform))[0]?.platform).toBeNull()
+
+        const client = yield* _(NodeTestingApp)
+        yield* _(setAuthHeaders(user.authHeaders))
+        yield* _(
+          client.Messages.retrieveMessages({
+            payload: yield* _(user.addChallengeForMainInbox({})),
+            headers: Schema.decodeSync(CommonHeaders)({
+              'user-agent': 'Vexl/2 (1.0.0) IOS',
+            }),
+          })
+        )
+
+        expect((yield* _(selectPlatform))[0]?.platform).toBe('IOS')
+      })
+    )
+  })
+
   it('Retruns an error when inbox does not exist', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {

@@ -1,6 +1,7 @@
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {
   generateChatMessageId,
+  ReactionEmoji,
   type ChatOrigin,
   type MessageType,
 } from '@vexl-next/domain/src/general/messaging'
@@ -144,6 +145,42 @@ it.each<{friendLevel: FriendLevel; name: string}>([
       content: expect.objectContaining({title: name, body: 'See you tomorrow'}),
     })
   )
+})
+
+it('shows a reaction under the sender name and keeps removals silent', async () => {
+  const reaction = (emoji: string | undefined): ChatMessageWithState => {
+    const base = message('REACTION')
+    return {
+      ...base,
+      message: {
+        ...base.message,
+        reaction: {
+          targetMessageId: generateChatMessageId(),
+          emoji:
+            emoji === undefined
+              ? undefined
+              : Schema.decodeSync(ReactionEmoji)(emoji),
+        },
+      },
+    }
+  }
+  const chatWithMessages = chat([
+    message('REQUEST_MESSAGING', ['FIRST_DEGREE']),
+  ])
+
+  await notify(chatWithMessages, reaction('❤️'))
+  expect(scheduleNotificationAsync).toHaveBeenCalledWith(
+    expect.objectContaining({
+      content: expect.objectContaining({
+        title: 'Direct friend',
+        body: 'Reacted ❤️ to a message',
+      }),
+    })
+  )
+
+  jest.mocked(scheduleNotificationAsync).mockClear()
+  await notify(chatWithMessages, reaction(undefined))
+  expect(scheduleNotificationAsync).not.toHaveBeenCalled()
 })
 
 it('uses the most recent received request, ignoring requests we sent', () => {

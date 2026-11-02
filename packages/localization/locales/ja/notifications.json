@@ -5,6 +5,8 @@
   "notifications.errorWhileOpening": "通知を開く際のエラー",
   "notifications.MESSAGE.title": "新着メッセージ",
   "notifications.MESSAGE.body": "新しいメッセージが届きました。",
+  "notifications.REACTION.title": "新しいリアクション",
+  "notifications.REACTION.body": "メッセージに{{emoji}}でリアクションしました",
   "notifications.REQUEST_REVEAL.title": "身分の公開要求を受信しました",
   "notifications.REQUEST_REVEAL.body": "本人確認が要請されました。",
   "notifications.APPROVE_REVEAL.title": "身分が明らかになりました！",

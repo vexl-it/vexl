@@ -8,7 +8,7 @@ import {navigationRef} from '../../../utils/navigation'
 import {lastDisplayOfDonationPromptTimestampAtom} from '../../../utils/preferences'
 import {askAreYouSureActionAtom} from '../../GlobalDialog'
 import DonationPrompt from '../components/DonationPrompt'
-import {hasRecentDonation, shouldShowDonationPromptAtom} from './stateAtoms'
+import {donationPromptCooldownPassed, hasRecentDonation} from './stateAtoms'
 
 export const DONATION_PROMPT_CHAT_MESSAGES_THRESHOLD_COUNT = 10
 
@@ -16,11 +16,13 @@ const showDonationPromptGiveLoveActionAtom = atom(
   null,
   (get, set, {skipTimeCheck}: {skipTimeCheck: boolean}) => {
     const {t} = get(translationAtom)
-    const shouldShowDonationPrompt = get(shouldShowDonationPromptAtom)
 
     if (
       hasRecentDonation(get(myDonationsAtom)) ||
-      (!skipTimeCheck && !shouldShowDonationPrompt)
+      (!skipTimeCheck &&
+        !donationPromptCooldownPassed(
+          get(lastDisplayOfDonationPromptTimestampAtom)
+        ))
     )
       return Effect.succeed(Effect.void)
 

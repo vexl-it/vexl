@@ -283,6 +283,14 @@ export const uploadChatImageIfAnyActionAtom = atom(
   }
 )
 
+function deleteFileIfExists(file: File): void {
+  try {
+    if (file.exists) file.delete()
+  } catch (e) {
+    reportError('warn', new Error('Error while deleting chat image'), {e})
+  }
+}
+
 export function deleteChatImageFiles({
   messages,
   chatKeys,
@@ -295,15 +303,13 @@ export function deleteChatImageFiles({
     Array.filterMap(({message}) =>
       Option.fromNullable(message.imageAttachment)
     ),
-    Array.filterMap(({id}) => getChatImageFile(id, chatKeys)),
-    Array.forEach((file) => {
-      try {
-        if (file.exists) file.delete()
-      } catch (e) {
-        reportError('warn', new Error('Error while deleting chat image'), {
-          e,
+    Array.forEach(({id}) => {
+      Option.map(getChatImageFile(id, chatKeys), (file) => {
+        deleteFileIfExists(file)
+        void inFlightDownloads.get(id)?.finally(() => {
+          deleteFileIfExists(file)
         })
-      }
+      })
     })
   )
 }

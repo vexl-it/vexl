@@ -29,7 +29,6 @@ import {
   CancelApprovalRequest,
   CancelApprovalResponse,
   CancelApprovalV2Request,
-  ChatImageNotFoundError,
   CreateInboxRequest,
   CreateInboxResponse,
   DeleteInboxRequest,
@@ -38,14 +37,16 @@ import {
   DeleteInboxesResponse,
   DeletePulledMessagesRequest,
   DeletePulledMessagesResponse,
-  DownloadChatImageRequest,
-  DownloadChatImageResponse,
   LeaveChatRequest,
   LeaveChatResponse,
   ReceiverInboxDoesNotExistError,
   RequestApprovalRequest,
   RequestApprovalResponse,
   RequestApprovalV2Request,
+  RequestChatImageDownloadRequest,
+  RequestChatImageDownloadResponse,
+  RequestChatImageUploadRequest,
+  RequestChatImageUploadResponse,
   RetrieveMessagesRequest,
   RetrieveMessagesResponse,
   SendMessageRequest,
@@ -55,8 +56,6 @@ import {
   SenderInboxDoesNotExistError,
   UpdateInboxRequest,
   UpdateInboxResponse,
-  UploadChatImageRequest,
-  UploadChatImageResponse,
 } from './contracts'
 
 export const UpdateInboxEndpoint = HttpApiEndpoint.put(
@@ -236,25 +235,24 @@ export const SendMessagesEndpoint = HttpApiEndpoint.post(
   .addError(InvalidChallengeError, {status: 401})
   .annotate(MaxExpectedDailyCall, 10)
 
-export const UploadChatImageEndpoint = HttpApiEndpoint.post(
-  'uploadChatImage',
-  '/api/v1/chat-images'
+export const RequestChatImageUploadEndpoint = HttpApiEndpoint.post(
+  'requestChatImageUpload',
+  '/api/v1/chat-images/upload'
 )
   .setHeaders(CommonHeaders)
-  .setPayload(UploadChatImageRequest)
-  .addSuccess(UploadChatImageResponse)
+  .setPayload(RequestChatImageUploadRequest)
+  .addSuccess(RequestChatImageUploadResponse)
   .addError(SenderInboxDoesNotExistError, {status: 404})
   .addError(InvalidChallengeError, {status: 401})
   .annotate(MaxExpectedDailyCall, 500)
 
-export const DownloadChatImageEndpoint = HttpApiEndpoint.post(
-  'downloadChatImage',
+export const RequestChatImageDownloadEndpoint = HttpApiEndpoint.post(
+  'requestChatImageDownload',
   '/api/v1/chat-images/download'
 )
   .setHeaders(CommonHeaders)
-  .setPayload(DownloadChatImageRequest)
-  .addSuccess(DownloadChatImageResponse)
-  .addError(ChatImageNotFoundError, {status: 404})
+  .setPayload(RequestChatImageDownloadRequest)
+  .addSuccess(RequestChatImageDownloadResponse)
   .annotate(MaxExpectedDailyCall, 2000)
 
 const InboxesApiGroup = HttpApiGroup.make('Inboxes')
@@ -277,8 +275,8 @@ const MessagesApiGroup = HttpApiGroup.make('Messages')
   .add(SendMessagesEndpoint)
 
 const ImagesApiGroup = HttpApiGroup.make('Images')
-  .add(UploadChatImageEndpoint)
-  .add(DownloadChatImageEndpoint)
+  .add(RequestChatImageUploadEndpoint)
+  .add(RequestChatImageDownloadEndpoint)
 
 export const ChatApiSpecification = HttpApi.make('Chat API')
   .middleware(RateLimitingMiddleware)

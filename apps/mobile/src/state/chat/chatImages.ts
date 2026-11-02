@@ -12,8 +12,10 @@ import {
 import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {VersionString} from '@vexl-next/domain/src/utility/VersionString.brand'
 import {type ChatApi} from '@vexl-next/rest-api/src/services/chat'
+import {CHAT_IMAGE_CONTENT_TYPE} from '@vexl-next/rest-api/src/services/chat/contracts'
 import {Array, Effect, type Exit, Option, pipe, Schema} from 'effect'
 import {File} from 'expo-file-system'
+import {fetch, type FetchRequestInit} from 'expo/fetch'
 import {atom} from 'jotai'
 import {apiAtom} from '../../api'
 import {type ChatKeys, getChatImagesDirectory} from '../../utils/fsDirectories'
@@ -33,12 +35,38 @@ export class ChatImageProcessingError extends Schema.TaggedError<ChatImageProces
   cause: Schema.Unknown,
 }) {}
 
+/** Network failure or S3 refusal, e.g. 403/404 once the image expired. */
+export class ChatImageTransferError extends Schema.TaggedError<ChatImageTransferError>(
+  'ChatImageTransferError'
+)('ChatImageTransferError', {
+  cause: Schema.Unknown,
+}) {}
+
 type DownloadChatImageApiError = Effect.Effect.Error<
-  ReturnType<ChatApi['downloadChatImage']>
+  ReturnType<ChatApi['requestChatImageDownload']>
 >
 type UploadChatImageApiError = Effect.Effect.Error<
-  ReturnType<ChatApi['uploadChatImage']>
+  ReturnType<ChatApi['requestChatImageUpload']>
 >
+
+// Presigned S3 urls carry their own authorization: no Vexl headers, no cookies.
+function fetchPresignedUrl(
+  url: string,
+  init?: FetchRequestInit
+): Effect.Effect<Uint8Array, ChatImageTransferError> {
+  return Effect.tryPromise({
+    try: async (signal) => {
+      const response = await fetch(url, {
+        ...init,
+        credentials: 'omit',
+        signal,
+      })
+      if (!response.ok) throw new Error(`S3 responded ${response.status}`)
+      return await response.bytes()
+    },
+    catch: (cause) => new ChatImageTransferError({cause}),
+  })
+}
 
 export function getChatKeys(chat: Chat): ChatKeys {
   return {
@@ -89,22 +117,20 @@ function writeChatImageFile({
 }
 
 function decryptChatImage(
-  data: string,
+  data: Uint8Array,
   key: string
 ): Effect.Effect<Uint8Array, ChatImageProcessingError> {
   return Effect.try({
-    try: () =>
-      aesGCMDecryptBytes({
-        data: Buffer.from(data, 'base64'),
-        key: Buffer.from(key, 'base64'),
-      }),
+    try: () => aesGCMDecryptBytes({data, key: Buffer.from(key, 'base64')}),
     catch: (cause) => new ChatImageProcessingError({cause}),
   })
 }
 
-type ChatImageDownload = Promise<
-  Exit.Exit<UriString, DownloadChatImageApiError | ChatImageProcessingError>
->
+type ChatImageDownloadError =
+  | DownloadChatImageApiError
+  | ChatImageTransferError
+  | ChatImageProcessingError
+type ChatImageDownload = Promise<Exit.Exit<UriString, ChatImageDownloadError>>
 const inFlightDownloads = new Map<ChatImageId, ChatImageDownload>()
 
 function startDownload({
@@ -116,8 +142,9 @@ function startDownload({
   attachment: ChatImageAttachment
   chatKeys: ChatKeys
 }): ChatImageDownload {
-  const download = api.downloadChatImage({imageId: attachment.id}).pipe(
-    Effect.flatMap(({data}) => decryptChatImage(data, attachment.key)),
+  const download = api.requestChatImageDownload({imageId: attachment.id}).pipe(
+    Effect.flatMap(({downloadUrl}) => fetchPresignedUrl(downloadUrl)),
+    Effect.flatMap((data) => decryptChatImage(data, attachment.key)),
     Effect.flatMap((bytes) =>
       writeChatImageFile({
         id: attachment.id,
@@ -151,10 +178,7 @@ export const ensureChatImageDownloadedActionAtom = atom(
       attachment,
       chatKeys,
     }: {attachment: ChatImageAttachment; chatKeys: ChatKeys}
-  ): Effect.Effect<
-    UriString,
-    DownloadChatImageApiError | ChatImageProcessingError
-  > =>
+  ): Effect.Effect<UriString, ChatImageDownloadError> =>
     Effect.suspend(() =>
       Option.match(getDownloadedChatImageUri(attachment.id, chatKeys), {
         onSome: Effect.succeed,
@@ -221,7 +245,10 @@ export const uploadChatImageIfAnyActionAtom = atom(
     {message, chat}: {message: ChatMessage; chat: Chat}
   ): Effect.Effect<
     ChatMessage,
-    ReadingFileError | ChatImageProcessingError | UploadChatImageApiError
+    | ReadingFileError
+    | ChatImageProcessingError
+    | ChatImageTransferError
+    | UploadChatImageApiError
   > => {
     const {image} = message
     if (message.messageType !== 'MESSAGE' || !image || message.imageAttachment)
@@ -245,11 +272,18 @@ export const uploadChatImageIfAnyActionAtom = atom(
         })
       )
 
-      const {imageId} = yield* _(
-        get(apiAtom).chat.uploadChatImage({
+      const {imageId, uploadUrl} = yield* _(
+        get(apiAtom).chat.requestChatImageUpload({
           keyPair: chat.inbox.privateKey,
           senderPublicKey: chat.inbox.privateKey.publicKeyPemBase64,
-          data: encrypted.toString('base64'),
+          size: encrypted.byteLength,
+        })
+      )
+      yield* _(
+        fetchPresignedUrl(uploadUrl, {
+          method: 'PUT',
+          body: new Uint8Array(encrypted),
+          headers: {'Content-Type': CHAT_IMAGE_CONTENT_TYPE},
         })
       )
 

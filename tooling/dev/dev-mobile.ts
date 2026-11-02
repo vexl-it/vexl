@@ -20,7 +20,6 @@
 import {Array, Option, pipe, Schema} from 'effect'
 import {spawn, spawnSync} from 'node:child_process'
 import {existsSync, mkdirSync, readFileSync, writeFileSync} from 'node:fs'
-import {networkInterfaces} from 'node:os'
 import {dirname, join} from 'node:path'
 import {
   clearScreenDown,
@@ -29,6 +28,7 @@ import {
   type Key,
 } from 'node:readline'
 import devConfig, {devCryptoKeys} from '../../dev.config'
+import {detectLanIp} from './lanIp'
 import {isValidTcpPort, resolvePorts} from './ports'
 import {loadRawEnvLocal, repoRoot} from './secrets'
 
@@ -533,41 +533,6 @@ async function chooseDevice(platform: Platform): Promise<DeviceChoice> {
 
 // --- host resolution -------------------------------------------------------
 
-function detectLanIp(): string {
-  const interfaces = networkInterfaces()
-  // Prefer the conventional primary interfaces (macOS Wi-Fi/Ethernet, Linux).
-  const preferred = ['en0', 'en1', 'eth0', 'wlan0']
-  const candidates = pipe(
-    Object.entries(interfaces),
-    Array.flatMap(([name, addresses]) =>
-      addresses === undefined
-        ? []
-        : pipe(
-            addresses,
-            Array.filter(
-              (address) => address.family === 'IPv4' && !address.internal
-            ),
-            Array.map((address) => ({name, address: address.address}))
-          )
-    )
-  )
-
-  if (!Array.isNonEmptyReadonlyArray(candidates)) {
-    throw new Error(
-      'Could not auto-detect a LAN IPv4 address. Pass --host <ip> explicitly.'
-    )
-  }
-
-  for (const interfaceName of preferred) {
-    const match = pipe(
-      candidates,
-      Array.findFirst((candidate) => candidate.name === interfaceName)
-    )
-    if (match._tag === 'Some') return match.value.address
-  }
-  return candidates[0].address
-}
-
 interface ResolvedHost {
   readonly host: string
   readonly reason: string
@@ -591,7 +556,13 @@ function resolveHost(
   }
   if (options.device !== undefined) {
     return {
-      host: detectLanIp(),
+      host: Option.getOrThrowWith(
+        detectLanIp(),
+        () =>
+          new Error(
+            'Could not auto-detect a LAN IPv4 address. Pass --host <ip> explicitly.'
+          )
+      ),
       reason: `physical device assumed (--device ${options.device}) → LAN IP`,
     }
   }

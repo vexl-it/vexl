@@ -25,8 +25,8 @@ import {MessagesDbService} from './db/MessagesDbService'
 import DbLayer from './db/layer'
 import {ExpiredMessagesCleanupWorkerLayer} from './expiredMessagesCleanupWorker'
 import {reportMetricsLayer} from './metrics'
-import {downloadChatImage} from './routes/images/downloadChatImage'
-import {uploadChatImage} from './routes/images/uploadChatImage'
+import {requestChatImageDownload} from './routes/images/requestChatImageDownload'
+import {requestChatImageUpload} from './routes/images/requestChatImageUpload'
 import {approveRequest} from './routes/inbox/approveReqest'
 import {blockInbox} from './routes/inbox/blockInbox'
 import {cancelRequest, cancelRequestV2} from './routes/inbox/cancelRequest'
@@ -87,8 +87,8 @@ const ImagesApiGroupLive = HttpApiBuilder.group(
   'Images',
   (h) =>
     h
-      .handle('uploadChatImage', uploadChatImage)
-      .handle('downloadChatImage', downloadChatImage)
+      .handle('requestChatImageUpload', requestChatImageUpload)
+      .handle('requestChatImageDownload', requestChatImageDownload)
 )
 
 export const ChatApiLive = HttpApiBuilder.api(ChatApiSpecification).pipe(

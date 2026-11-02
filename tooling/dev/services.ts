@@ -11,8 +11,9 @@
  * METRICS_QUEUE_NAME, OTLP_TRACE_EXPORTER_URL, SERVICE_NAME/VERSION and NODE_ENV
  * (via `commonServiceEnv`). Each service's `buildEnv` only adds its own extras.
  */
-import {Array, pipe} from 'effect'
+import {Array, Option, pipe} from 'effect'
 import devConfig, {type DevConfig} from '../../dev.config'
+import {detectLanIp} from './lanIp'
 import {type Secrets} from './secrets'
 
 export type ServiceKind = 'service' | 'web'
@@ -209,6 +210,8 @@ export const SERVICES: readonly RunnableApp[] = [
     buildEnv: (ctx) => ({
       ...stringifyValues(sc.chatService),
       ...s3Env(ctx, ctx.cfg.infra.minio.chatImagesBucket),
+      // Only used to sign URLs the app calls directly, so devices must reach it.
+      S3_ENDPOINT: `http://${Option.getOrElse(detectLanIp(), () => ctx.cfg.infra.host)}:${ctx.ports.minioApi}`,
     }),
   },
   {

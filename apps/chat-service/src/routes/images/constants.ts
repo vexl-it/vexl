@@ -1,0 +1,1 @@
+export const CHAT_IMAGE_URL_EXPIRES_IN_SECONDS = 5 * 60

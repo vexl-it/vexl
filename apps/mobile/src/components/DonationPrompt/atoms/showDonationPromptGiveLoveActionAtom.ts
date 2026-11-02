@@ -2,12 +2,13 @@ import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.b
 import {Effect, Schema} from 'effect'
 import {atom} from 'jotai'
 import {DateTime} from 'luxon'
+import {myDonationsAtom} from '../../../state/donations/atom'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import {navigationRef} from '../../../utils/navigation'
 import {lastDisplayOfDonationPromptTimestampAtom} from '../../../utils/preferences'
 import {askAreYouSureActionAtom} from '../../GlobalDialog'
 import DonationPrompt from '../components/DonationPrompt'
-import {shouldShowDonationPromptAtom} from './stateAtoms'
+import {hasRecentDonation, shouldShowDonationPromptAtom} from './stateAtoms'
 
 export const DONATION_PROMPT_CHAT_MESSAGES_THRESHOLD_COUNT = 10
 
@@ -17,7 +18,10 @@ const showDonationPromptGiveLoveActionAtom = atom(
     const {t} = get(translationAtom)
     const shouldShowDonationPrompt = get(shouldShowDonationPromptAtom)
 
-    if (!skipTimeCheck && !shouldShowDonationPrompt)
+    if (
+      hasRecentDonation(get(myDonationsAtom)) ||
+      (!skipTimeCheck && !shouldShowDonationPrompt)
+    )
       return Effect.succeed(Effect.void)
 
     set(

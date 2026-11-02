@@ -1,6 +1,5 @@
 import {SqlClient, SqlSchema} from '@effect/sql'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
-import {InvalidInboxRecordError} from '@vexl-next/rest-api/src/services/chat/contracts'
 import {Effect, flow} from 'effect'
 import {PublicKeyHashed} from '../../domain'
 import {InboxRecord} from '../domain'
@@ -23,18 +22,7 @@ export const createFindInboxByPublicKey = Effect.gen(function* (_) {
 
   return flow(
     query,
-    Effect.catchTags({
-      ParseError: () =>
-        Effect.zipRight(
-          Effect.logWarning('Inbox record does not match the schema'),
-          new InvalidInboxRecordError()
-        ),
-      SqlError: (cause) =>
-        new UnexpectedServerError({
-          cause,
-          message: 'Error in findInboxByPublicKey',
-        }),
-    }),
+    UnexpectedServerError.wrapErrors('Error in findInboxByPublicKey'),
     Effect.withSpan('findInboxByPublicKey query')
   )
 })

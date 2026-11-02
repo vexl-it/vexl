@@ -1,6 +1,5 @@
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {type UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
-import {type InvalidInboxRecordError} from '@vexl-next/rest-api/src/services/chat/contracts'
 import {InboxDoesNotExistError} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {Effect} from 'effect'
 import {InboxDbService} from '../db/InboxDbService'
@@ -11,7 +10,7 @@ export const ensureInboxExists = (
   publicKey: PublicKeyPemBase64
 ): Effect.Effect<
   InboxRecord,
-  InboxDoesNotExistError | InvalidInboxRecordError | UnexpectedServerError,
+  InboxDoesNotExistError | UnexpectedServerError,
   InboxDbService
 > =>
   Effect.gen(function* (_) {

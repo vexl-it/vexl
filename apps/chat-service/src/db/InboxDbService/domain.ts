@@ -9,6 +9,9 @@ export type InboxRecordId = Schema.Schema.Type<typeof InboxRecordId>
 export class InboxRecord extends Schema.Class<InboxRecord>('InboxRecord')({
   id: InboxRecordId,
   publicKey: PublicKeyHashed,
-  platform: Schema.optionalWith(PlatformName, {as: 'Option'}),
-  clientVersion: Schema.optionalWith(VersionCode, {as: 'Option'}),
+  platform: Schema.optionalWith(PlatformName, {as: 'Option', nullable: true}),
+  clientVersion: Schema.optionalWith(VersionCode, {
+    as: 'Option',
+    nullable: true,
+  }),
 }) {}

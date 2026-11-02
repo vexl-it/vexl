@@ -1,7 +1,6 @@
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {type UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {
-  type InvalidInboxRecordError,
   ReceiverInboxDoesNotExistError,
   SenderInboxDoesNotExistError,
 } from '@vexl-next/rest-api/src/services/chat/contracts'
@@ -20,7 +19,6 @@ export const findAndEnsureReceiverAndSenderInbox = ({
   {senderInbox: InboxRecord; receiverInbox: InboxRecord},
   | SenderInboxDoesNotExistError
   | ReceiverInboxDoesNotExistError
-  | InvalidInboxRecordError
   | UnexpectedServerError,
   InboxDbService
 > =>

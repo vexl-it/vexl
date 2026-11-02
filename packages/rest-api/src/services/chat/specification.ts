@@ -37,6 +37,7 @@ import {
   DeleteInboxesResponse,
   DeletePulledMessagesRequest,
   DeletePulledMessagesResponse,
+  InvalidInboxRecordError,
   LeaveChatRequest,
   LeaveChatResponse,
   ReceiverInboxDoesNotExistError,
@@ -244,11 +245,13 @@ const InboxesApiGroup = HttpApiGroup.make('Inboxes')
   .add(DeleteInboxesEndpoint)
   .add(LeaveChatEndpoint)
   .add(DeletePulledMessagesEndpoint)
+  .addError(InvalidInboxRecordError, {status: 400})
 
 const MessagesApiGroup = HttpApiGroup.make('Messages')
   .add(RetrieveMessagesEndpoint)
   .add(SendMessageEndpoint)
   .add(SendMessagesEndpoint)
+  .addError(InvalidInboxRecordError, {status: 400})
 
 export const ChatApiSpecification = HttpApi.make('Chat API')
   .middleware(RateLimitingMiddleware)

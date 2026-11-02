@@ -8,7 +8,10 @@ import {
   MessageType,
 } from '@vexl-next/domain/src/general/messaging'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
-import {type SendMessageRequest} from '@vexl-next/rest-api/src/services/chat/contracts'
+import {
+  InvalidInboxRecordError,
+  type SendMessageRequest,
+} from '@vexl-next/rest-api/src/services/chat/contracts'
 import {InboxDoesNotExistError} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
@@ -320,6 +323,37 @@ describe('Retrieve messages', () => {
             public_key = ${inboxHash}
         `))[0]?.clientVersion
         expect(clientVersionAfter).toBe(clientVersionBefore)
+      })
+    )
+  })
+
+  it('Returns a 400 error when the inbox record has no platform', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const user = yield* _(createMockedUser('+420733333332'))
+        const inboxHash = yield* _(
+          hashPublicKey(user.mainKeyPair.publicKeyPemBase64)
+        )
+        const sql = yield* _(SqlClient.SqlClient)
+        yield* _(sql`
+          UPDATE inbox
+          SET
+            platform = NULL
+          WHERE
+            public_key = ${inboxHash}
+        `)
+
+        const client = yield* _(NodeTestingApp)
+        yield* _(setAuthHeaders(user.authHeaders))
+        const errorResponse = yield* _(
+          client.Messages.retrieveMessages({
+            payload: yield* _(user.addChallengeForMainInbox({})),
+            headers: commonHeaders,
+          }),
+          Effect.either
+        )
+
+        expectErrorResponse(InvalidInboxRecordError)(errorResponse)
       })
     )
   })

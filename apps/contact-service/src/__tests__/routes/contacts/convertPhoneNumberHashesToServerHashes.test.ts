@@ -1,4 +1,5 @@
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {hashPhoneNumber} from '@vexl-next/server-utils/src/generateUserAuthData'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Array, Effect, pipe, Schema} from 'effect/index'
@@ -53,6 +54,38 @@ it('Converts phone number hashes to server hashes', async () => {
         )
       )
       expect(client.result).toEqual(expectedResult)
+    })
+  )
+})
+
+it('Converts hashes that look like server hashes like any other hash', async () => {
+  await runPromiseInMockedEnvironment(
+    Effect.gen(function* (_) {
+      const serverHashLookingHash = Schema.decodeSync(HashedPhoneNumber)(
+        'ServerHash:someHash'
+      )
+      const expectedServerToClientHash = yield* _(
+        serverHashPhoneNumber(serverHashLookingHash),
+        Effect.flatMap(hashForClient)
+      )
+
+      const me = yield* _(generateKeysAndHasheForNumber('+420733333001'))
+
+      yield* _(setAuthHeaders(me.authHeaders))
+      const client = yield* _(
+        NodeTestingApp,
+        Effect.flatMap((app) =>
+          app.Contact.convertPhoneNumberHashesToServerHashes({
+            payload: {hashedPhoneNumbers: [serverHashLookingHash]},
+          })
+        )
+      )
+      expect(client.result).toEqual([
+        {
+          hashedNumber: serverHashLookingHash,
+          serverToClientHash: expectedServerToClientHash,
+        },
+      ])
     })
   )
 })

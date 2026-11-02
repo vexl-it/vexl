@@ -22,33 +22,23 @@ export const serverHashPhoneNumber = (
   ServerHashedNumber,
   ConfigError.ConfigError | UnexpectedServerError
 > =>
-  Effect.zipRight(
-    // If the hashed phone number already starts with the server hash prefix, we should not hash it again
-    String.startsWith(SERVER_HASH_PREFIX)(hashedPhoneNumber)
-      ? Effect.fail(
-          new UnexpectedServerError({
-            message: `Hashed phone number is already a server hashed contact ${hashedPhoneNumber}`,
-          })
-        )
-      : Effect.void,
-    secretSaltForServerContact.pipe(
-      Effect.flatMap((salt) =>
-        pbkdf2({
-          password: hashedPhoneNumber,
-          salt,
-          iterations: 100,
+  secretSaltForServerContact.pipe(
+    Effect.flatMap((salt) =>
+      pbkdf2({
+        password: hashedPhoneNumber,
+        salt,
+        iterations: 100,
+      })
+    ),
+    Effect.map((hash) => `${SERVER_HASH_PREFIX}${hash}`),
+    Effect.map(Schema.decodeSync(ServerHashedNumber)),
+    Effect.catchTag(
+      'CryptoError',
+      (e) =>
+        new UnexpectedServerError({
+          message: `Error server-hashing phone number: ${e.message}`,
+          cause: e,
         })
-      ),
-      Effect.map((hash) => `${SERVER_HASH_PREFIX}${hash}`),
-      Effect.map(Schema.decodeSync(ServerHashedNumber)),
-      Effect.catchTag(
-        'CryptoError',
-        (e) =>
-          new UnexpectedServerError({
-            message: `Error server-hashing phone number: ${e.message}`,
-            cause: e,
-          })
-      )
     )
   )
 

@@ -1,11 +1,6 @@
-import {
-  GetObjectCommand,
-  NoSuchKey,
-  PutObjectCommand,
-  S3Client,
-} from '@aws-sdk/client-s3'
+import {GetObjectCommand, PutObjectCommand, S3Client} from '@aws-sdk/client-s3'
 import {getSignedUrl} from '@aws-sdk/s3-request-presigner'
-import {Context, Effect, Layer, Option, Schema} from 'effect'
+import {Context, Effect, Layer, Schema} from 'effect'
 import {s3Config} from './commonConfigs'
 
 export class S3Error extends Schema.TaggedError<S3Error>('S3Error')('S3Error', {
@@ -13,15 +8,11 @@ export class S3Error extends Schema.TaggedError<S3Error>('S3Error')('S3Error', {
   message: Schema.optional(Schema.String),
 }) {}
 
-// Only the SDK error name goes into the message: S3 errors can carry bucket and
-// key, which must not leak into logs for privacy-sensitive objects.
-const s3ErrorMessage = (operation: string, error: unknown): string =>
-  `Failed to ${operation} (${error instanceof Error ? error.name : 'unknown error'})`
-
 export interface S3Operations {
   generatePresignedUploadUrl: (params: {
     key: string
     contentType: string
+    contentLength?: number
     expiresIn?: number
   }) => Effect.Effect<
     {
@@ -31,14 +22,10 @@ export interface S3Operations {
     },
     S3Error
   >
-  putObject: (params: {
+  generatePresignedDownloadUrl: (params: {
     key: string
-    body: Uint8Array
-    contentType: string
-  }) => Effect.Effect<void, S3Error>
-  getObject: (params: {
-    key: string
-  }) => Effect.Effect<Option.Option<Uint8Array>, S3Error>
+    expiresIn: number
+  }) => Effect.Effect<string, S3Error>
 }
 
 export class S3Service extends Context.Tag('S3Service')<
@@ -54,80 +41,63 @@ export class S3Service extends Context.Tag('S3Service')<
         region,
         endpoint: endpoint.length > 0 ? endpoint : undefined,
         forcePathStyle,
+        // By default upload URLs carry a CRC32 of the empty presign body, which
+        // S3 then checks against the uploaded bytes.
+        requestChecksumCalculation: 'WHEN_REQUIRED',
       })
 
+      // Spans carry no key: chat image keys must not end up in traces.
+      const presign = (
+        command: PutObjectCommand | GetObjectCommand,
+        expiresIn: number
+      ): Effect.Effect<string, S3Error> =>
+        Effect.tryPromise({
+          try: async () =>
+            await getSignedUrl(s3Client, command, {
+              expiresIn,
+              // The presigner leaves content-type unsigned by default.
+              signableHeaders: new Set(['content-type']),
+            }),
+          catch: (error) =>
+            new S3Error({
+              cause: error,
+              message: 'Failed to generate presigned URL',
+            }),
+        })
+
       const generatePresignedUploadUrl: S3Operations['generatePresignedUploadUrl'] =
-        ({key, contentType, expiresIn = 900}) =>
-          Effect.tryPromise({
-            try: async () =>
-              await getSignedUrl(
-                s3Client,
-                new PutObjectCommand({
-                  Bucket: bucketName,
-                  Key: key,
-                  ContentType: contentType,
-                }),
-                {expiresIn}
-              ),
-            catch: (error) =>
-              new S3Error({
-                cause: error,
-                message: 'Failed to generate presigned URL',
-              }),
-          }).pipe(
+        ({key, contentType, contentLength, expiresIn = 900}) =>
+          presign(
+            new PutObjectCommand({
+              Bucket: bucketName,
+              Key: key,
+              ContentType: contentType,
+              ContentLength: contentLength,
+            }),
+            expiresIn
+          ).pipe(
             Effect.map((presignedUrl) => ({
               presignedUrl,
               s3Key: key,
               expiresIn,
             })),
             Effect.withSpan('S3 generatePresignedUploadUrl', {
-              attributes: {key, contentType, expiresIn},
+              attributes: {contentType, contentLength, expiresIn},
             })
           )
 
-      const putObject: S3Operations['putObject'] = ({key, body, contentType}) =>
-        Effect.tryPromise({
-          try: async () =>
-            await s3Client.send(
-              new PutObjectCommand({
-                Bucket: bucketName,
-                Key: key,
-                Body: body,
-                ContentType: contentType,
-              })
-            ),
-          catch: (error) =>
-            new S3Error({
-              cause: error,
-              message: s3ErrorMessage('put object', error),
-            }),
-        }).pipe(Effect.asVoid, Effect.withSpan('S3 putObject'))
+      const generatePresignedDownloadUrl: S3Operations['generatePresignedDownloadUrl'] =
+        ({key, expiresIn}) =>
+          presign(
+            new GetObjectCommand({Bucket: bucketName, Key: key}),
+            expiresIn
+          ).pipe(
+            Effect.withSpan('S3 generatePresignedDownloadUrl', {
+              attributes: {expiresIn},
+            })
+          )
 
-      const getObject: S3Operations['getObject'] = ({key}) =>
-        Effect.tryPromise({
-          try: async () => {
-            const {Body} = await s3Client.send(
-              new GetObjectCommand({Bucket: bucketName, Key: key})
-            )
-            return Option.fromNullable(await Body?.transformToByteArray())
-          },
-          catch: (error) => error,
-        }).pipe(
-          Effect.catchIf(
-            (error) => error instanceof NoSuchKey,
-            () => Effect.succeedNone
-          ),
-          Effect.mapError(
-            (error) =>
-              new S3Error({
-                cause: error,
-                message: s3ErrorMessage('get object', error),
-              })
-          ),
-          Effect.withSpan('S3 getObject')
-        )
-
-      return {generatePresignedUploadUrl, putObject, getObject}
+      return {generatePresignedUploadUrl, generatePresignedDownloadUrl}
     })
   )
 }

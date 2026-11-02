@@ -1,14 +1,16 @@
+import {HttpClient, HttpClientRequest} from '@effect/platform'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {ChatImageId} from '@vexl-next/domain/src/general/messaging'
 import {InvalidChallengeError} from '@vexl-next/rest-api/src/challenges/contracts'
+import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {
   CHAT_IMAGE_MAX_BYTES,
-  ChatImageNotFoundError,
+  RequestChatImageUploadRequest,
   SenderInboxDoesNotExistError,
 } from '@vexl-next/rest-api/src/services/chat/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {Effect, Schema} from 'effect'
-import {randomBytes, randomUUID} from 'node:crypto'
+import {randomUUID} from 'node:crypto'
 import {addChallengeForKey} from '../utils/addChallengeForKey'
 import {
   commonHeaders,
@@ -20,9 +22,6 @@ import {runPromiseInMockedEnvironment} from '../utils/runPromiseInMockedEnvironm
 
 let user: MockedUser
 
-const randomImageData = (bytes: number): string =>
-  randomBytes(bytes).toString('base64')
-
 beforeAll(async () => {
   await runPromiseInMockedEnvironment(
     Effect.gen(function* (_) {
@@ -32,42 +31,35 @@ beforeAll(async () => {
 })
 
 describe('Chat images', () => {
-  it('Uploads an image of max size and downloads the same data', async () => {
+  it('Returns a new image id with an upload url signed for the exact size', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
-        const data = randomImageData(CHAT_IMAGE_MAX_BYTES)
 
-        const {imageId} = yield* _(
-          client.Images.uploadChatImage({
+        const {imageId, uploadUrl} = yield* _(
+          client.Images.requestChatImageUpload({
             headers: commonHeaders,
-            payload: yield* _(user.inbox1.addChallenge({data})),
+            payload: yield* _(
+              user.inbox1.addChallenge({size: CHAT_IMAGE_MAX_BYTES})
+            ),
           })
         )
 
-        const downloaded = yield* _(
-          client.Images.downloadChatImage({
-            headers: commonHeaders,
-            payload: {imageId},
-          })
-        )
-
-        expect(downloaded.data).toEqual(data)
+        expect(uploadUrl).toContain(`key=${imageId}`)
+        expect(uploadUrl).toContain(`contentLength=${CHAT_IMAGE_MAX_BYTES}`)
       })
     )
   })
 
-  it('Rejects upload with invalid challenge', async () => {
+  it('Rejects upload request with invalid challenge', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
 
         const response = yield* _(
-          client.Images.uploadChatImage({
+          client.Images.requestChatImageUpload({
             headers: commonHeaders,
-            payload: yield* _(
-              user.inbox1.addChallenge({data: randomImageData(16)}, true)
-            ),
+            payload: yield* _(user.inbox1.addChallenge({size: 16}, true)),
           }),
           Effect.either
         )
@@ -77,19 +69,19 @@ describe('Chat images', () => {
     )
   })
 
-  it('Rejects upload from a sender without inbox', async () => {
+  it('Rejects upload request from a sender without inbox', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
 
         const response = yield* _(
-          client.Images.uploadChatImage({
+          client.Images.requestChatImageUpload({
             headers: commonHeaders,
             payload: yield* _(
               addChallengeForKey(
                 generatePrivateKey(),
                 user.authHeaders
-              )({data: randomImageData(16)})
+              )({size: 16})
             ),
           }),
           Effect.either
@@ -100,20 +92,47 @@ describe('Chat images', () => {
     )
   })
 
-  it('Returns not found for unknown image id', async () => {
+  it('Rejects upload request over the size limit', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const payload = yield* _(
+          user.inbox1.addChallenge({size: 16}),
+          Effect.flatMap(Schema.encode(RequestChatImageUploadRequest))
+        )
+        const httpClient = yield* _(HttpClient.HttpClient)
+
+        const response = yield* _(
+          HttpClientRequest.post('/api/v1/chat-images/upload').pipe(
+            HttpClientRequest.setHeaders(
+              Schema.encodeSync(CommonHeaders)(commonHeaders)
+            ),
+            HttpClientRequest.bodyUnsafeJson({
+              ...payload,
+              size: CHAT_IMAGE_MAX_BYTES + 1,
+            }),
+            httpClient.execute
+          )
+        )
+
+        expect(response.status).toBe(400)
+      })
+    )
+  })
+
+  it('Returns a download url for the image id', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
+        const imageId = Schema.decodeSync(ChatImageId)(randomUUID())
 
-        const response = yield* _(
-          client.Images.downloadChatImage({
+        const {downloadUrl} = yield* _(
+          client.Images.requestChatImageDownload({
             headers: commonHeaders,
-            payload: {imageId: Schema.decodeSync(ChatImageId)(randomUUID())},
-          }),
-          Effect.either
+            payload: {imageId},
+          })
         )
 
-        expectErrorResponse(ChatImageNotFoundError)(response)
+        expect(downloadUrl).toContain(`key=${imageId}`)
       })
     )
   })

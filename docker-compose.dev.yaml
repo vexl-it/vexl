@@ -82,7 +82,9 @@ services:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER:-vexl}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-vexl-local-secret}
     ports:
-      - "${MINIO_API_PORT:-9000}:9000"
+      # Phones upload/download chat images straight to MinIO, so the API must
+      # be reachable on the LAN, not just on localhost.
+      - "0.0.0.0:${MINIO_API_PORT:-9000}:9000"
       - "${MINIO_CONSOLE_PORT:-9001}:9001"
     volumes:
       - minio_data:/data

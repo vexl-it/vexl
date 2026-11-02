@@ -1,30 +1,26 @@
 import {HttpApiBuilder} from '@effect/platform/index'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
-import {Base64String} from '@vexl-next/domain/src/utility/Base64String.brand'
-import {ChatImageNotFoundError} from '@vexl-next/rest-api/src/services/chat/contracts'
 import {ChatApiSpecification} from '@vexl-next/rest-api/src/services/chat/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {S3Service} from '@vexl-next/server-utils/src/S3Service'
-import {Effect, Option, Schema} from 'effect'
+import {Effect} from 'effect'
+import {CHAT_IMAGE_URL_EXPIRES_IN_SECONDS} from './constants'
 
-export const downloadChatImage = HttpApiBuilder.handler(
+export const requestChatImageDownload = HttpApiBuilder.handler(
   ChatApiSpecification,
   'Images',
-  'downloadChatImage',
+  'requestChatImageDownload',
   (req) =>
     Effect.gen(function* (_) {
       const s3 = yield* _(S3Service)
-      const image = yield* _(
-        s3.getObject({key: req.payload.imageId}),
+      const downloadUrl = yield* _(
+        s3.generatePresignedDownloadUrl({
+          key: req.payload.imageId,
+          expiresIn: CHAT_IMAGE_URL_EXPIRES_IN_SECONDS,
+        }),
         Effect.mapError((e) => new UnexpectedServerError({message: e.message}))
       )
 
-      if (Option.isNone(image)) return yield* _(new ChatImageNotFoundError())
-
-      return {
-        data: Schema.decodeSync(Base64String)(
-          Buffer.from(image.value).toString('base64')
-        ),
-      }
+      return {downloadUrl}
     }).pipe(makeEndpointEffect)
 )

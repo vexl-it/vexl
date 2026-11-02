@@ -2,6 +2,13 @@
 
 Scripts for running the local dev stack (`dev-backend.ts`, `dev-infra.ts`, `dev-mobile.ts` — wired to `pnpm dev:backend` and friends in the root package.json).
 
+## Chat images (MinIO)
+
+The app uploads and downloads chat images straight to MinIO using URLs presigned by chat-service. A presigned URL is bound to the host it was signed for, so `services.ts` sets chat-service's `S3_ENDPOINT` to the machine's LAN IP (`lanIp.ts`, the same detection `dev-mobile.ts` uses for physical devices). That address works from the iOS simulator, the Android emulator and physical devices on the same network. Caveats:
+
+- Without a LAN IPv4 it falls back to `localhost`, which only the iOS simulator can reach.
+- The IP is read when chat-service starts. After switching networks, restart `pnpm dev:backend`.
+
 ## Places DB seeding
 
 The standalone geocoding database (its own PostGIS-capable `geocoding-postgres` container, separate from the vexl service databases) seeds itself from the committed Czechia dump: `docker-compose.dev.yaml` mounts [geocoding-postgres-init/](geocoding-postgres-init/) into `docker-entrypoint-initdb.d`, so ~135k places and their reverse-geocoding boundaries restore automatically when the volume is first created — no downloads or external tools. `--fresh-db` recreates the volume and thereby re-restores the dump.

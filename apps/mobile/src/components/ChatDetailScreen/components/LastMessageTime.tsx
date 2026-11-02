@@ -21,7 +21,9 @@ export function LastMessageTime({
     lastMessageReadByOtherSideAtAtom
   )
 
-  const isMine = message.state !== 'received'
+  const isReceived =
+    message.state === 'received' ||
+    message.state === 'receivedButRequiresNewerVersion'
 
   return (
     <Typography
@@ -32,7 +34,7 @@ export function LastMessageTime({
           : '$foregroundTertiary'
       }
       variant="micro"
-      textAlign={isMine ? 'right' : 'left'}
+      textAlign={isReceived ? 'left' : 'right'}
       marginTop="$3"
     >
       {message.state === 'sending' && t('messages.sending')}
@@ -47,7 +49,7 @@ export function LastMessageTime({
       {message.state === 'sent' &&
         !lastMessageReadByOtherSideAt &&
         formatChatTime(DateTime.fromMillis(message.message.time), locale)}
-      {message.state === 'received' &&
+      {!!isReceived &&
         formatChatTime(DateTime.fromMillis(message.message.time), locale)}
     </Typography>
   )

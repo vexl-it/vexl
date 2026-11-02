@@ -120,9 +120,7 @@ export class PreludeService extends Context.Tag('PreludeService')<
           Effect.zipRight(
             Effect.succeed(Schema.decodeSync(SmsVerificationSid)(phoneNumber))
           ),
-          Effect.withSpan('createPreludeVerification', {
-            attributes: {phoneNumber, headers},
-          })
+          Effect.withSpan('createPreludeVerification')
         )
 
       const checkVerification: PreludeOperations['checkVerification'] = ({

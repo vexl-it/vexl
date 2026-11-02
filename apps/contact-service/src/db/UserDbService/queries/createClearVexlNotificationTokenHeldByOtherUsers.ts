@@ -3,8 +3,8 @@ import {PgClient} from '@effect/sql-pg'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
+import {ServerHashedNumber} from '@vexl-next/domain/src/general/ServerHashedNumber'
 import {Effect, flow, Schema} from 'effect'
-import {ServerHashedNumber} from '../../../utils/serverHashContact'
 
 export const ClearVexlNotificationTokenHeldByOtherUsersParams = Schema.Struct({
   publicKey: PublicKeyPemBase64,

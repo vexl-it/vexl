@@ -7,6 +7,7 @@ import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {type UserInactivityNotificationVariant} from '@vexl-next/domain/src/general/notifications'
 import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
+import {type ServerHashedNumber} from '@vexl-next/domain/src/general/ServerHashedNumber'
 import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {
   ClubExpiredNotificationMqEntry,
@@ -48,7 +49,6 @@ import {
   queryAndReportNumberOfInactiveUsers,
   reportInactivityNotificationsSent,
 } from '../metrics'
-import {type ServerHashedNumber} from '../utils/serverHashContact'
 
 export interface UserNotificationServiceOperations {
   notifyOthersAboutNewUser: (

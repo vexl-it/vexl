@@ -3,8 +3,8 @@ import {PgClient} from '@effect/sql-pg'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {PublicKeyV2} from '@vexl-next/cryptography/src/KeyHolder/brandsV2'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
+import {ServerHashedNumber} from '@vexl-next/domain/src/general/ServerHashedNumber'
 import {Array, Effect, flow, Schema} from 'effect'
-import {ServerHashedNumber} from '../../../utils/serverHashContact'
 import {createIsVisibleContactFragment} from '../../utils/createIsVisibleContactFragment'
 
 export const FindFirstLevelContactsPublicKeysByHashFromPaginatedParams =

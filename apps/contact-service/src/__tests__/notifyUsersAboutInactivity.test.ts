@@ -1,10 +1,10 @@
 import {SqlClient} from '@effect/sql'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
+import {ServerHashedNumber} from '@vexl-next/domain/src/general/ServerHashedNumber'
 import {mockedReportMetric} from '@vexl-next/server-utils/src/tests/mockedMetricsClientService'
 import {Effect, Option, Schema} from 'effect'
 import {UserDbService} from '../db/UserDbService'
 import {UserNotificationService} from '../services/UserNotificationService'
-import {ServerHashedNumber} from '../utils/serverHashContact'
 import {
   clearEnqueuedNotifications,
   getEnqueuedNotifications,

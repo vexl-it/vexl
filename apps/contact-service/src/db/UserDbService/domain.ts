@@ -2,11 +2,11 @@ import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {PublicKeyV2} from '@vexl-next/cryptography/src/KeyHolder/brandsV2'
 import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
+import {ServerHashedNumber} from '@vexl-next/domain/src/general/ServerHashedNumber'
 import {PlatformName} from '@vexl-next/domain/src/utility/PlatformName'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {AppSource} from '@vexl-next/rest-api/src/commonHeaders'
 import {Schema} from 'effect'
-import {ServerHashedNumber} from '../../utils/serverHashContact'
 
 export const UserRecordId = Schema.BigInt.pipe(Schema.brand('UserRecordId'))
 export type UserRecordId = typeof UserRecordId.Type

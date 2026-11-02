@@ -1,20 +1,16 @@
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {
+  SERVER_HASH_PREFIX,
+  ServerHashedNumber,
+} from '@vexl-next/domain/src/general/ServerHashedNumber'
+import {
   SERVER_TO_CLIENT_HASHED_NUMBER_PREFIX,
   ServerToClientHashedNumber,
 } from '@vexl-next/domain/src/general/ServerToClientHashedNumber'
 import {pbkdf2} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
-import {type ConfigError, Effect, pipe, Schema, String} from 'effect/index'
+import {type ConfigError, Effect, pipe, Schema} from 'effect/index'
 import {secretSaltForServerContact} from '../configs'
-
-const SERVER_HASH_PREFIX = 'ServerHash:'
-
-export const ServerHashedNumber = Schema.String.pipe(
-  Schema.filter(String.startsWith(SERVER_HASH_PREFIX)),
-  Schema.brand('ServerHashedNumber')
-)
-export type ServerHashedNumber = typeof ServerHashedNumber.Type
 
 export const serverHashPhoneNumber = (
   hashedPhoneNumber: HashedPhoneNumber

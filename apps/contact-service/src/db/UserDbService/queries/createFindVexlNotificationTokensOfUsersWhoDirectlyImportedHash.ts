@@ -2,8 +2,8 @@ import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
+import {ServerHashedNumber} from '@vexl-next/domain/src/general/ServerHashedNumber'
 import {Effect, flow, Schema} from 'effect'
-import {ServerHashedNumber} from '../../../utils/serverHashContact'
 
 export const FindVexlNotificationTokensOfUsersWhoDirectlyImportedHashParams =
   Schema.Struct({

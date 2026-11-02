@@ -1,4 +1,5 @@
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
+import {type ServerHashedNumber} from '@vexl-next/domain/src/general/ServerHashedNumber'
 import {getNextMidnightOnSelectedDate} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {
   ImportContactsQuotaReachedError,
@@ -14,7 +15,6 @@ import {
   initialImportContactsCountQuotaConfig,
 } from '../../configs'
 import {UserDbService} from '../../db/UserDbService'
-import {type ServerHashedNumber} from '../../utils/serverHashContact'
 
 export const ImportContactsQuotaRecord = Schema.Int.pipe(
   Schema.greaterThanOrEqualTo(0)

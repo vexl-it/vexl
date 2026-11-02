@@ -3,8 +3,8 @@ import {PgClient} from '@effect/sql-pg'
 import {PublicKeyV2} from '@vexl-next/cryptography'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
+import {ServerHashedNumber} from '@vexl-next/domain/src/general/ServerHashedNumber'
 import {Effect, flow, Schema} from 'effect'
-import {ServerHashedNumber} from '../../../utils/serverHashContact'
 import {createIsAllowedSharedContactHashFragment} from '../../utils/createIsAllowedSharedContactHashFragment'
 
 export const FindCommonFriendsPaginatedParams = Schema.Struct({

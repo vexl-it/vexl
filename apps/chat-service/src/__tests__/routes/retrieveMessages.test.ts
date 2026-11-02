@@ -8,10 +8,7 @@ import {
   MessageType,
 } from '@vexl-next/domain/src/general/messaging'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
-import {
-  InvalidInboxRecordError,
-  type SendMessageRequest,
-} from '@vexl-next/rest-api/src/services/chat/contracts'
+import {type SendMessageRequest} from '@vexl-next/rest-api/src/services/chat/contracts'
 import {InboxDoesNotExistError} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
@@ -327,7 +324,7 @@ describe('Retrieve messages', () => {
     )
   })
 
-  it('Returns a 400 error when the inbox record has no platform', async () => {
+  it('Retrieves messages from a legacy inbox without platform and fills the platform in', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const user = yield* _(createMockedUser('+420733333332'))
@@ -335,6 +332,14 @@ describe('Retrieve messages', () => {
           hashPublicKey(user.mainKeyPair.publicKeyPemBase64)
         )
         const sql = yield* _(SqlClient.SqlClient)
+        const selectPlatform = sql`
+          SELECT
+            platform
+          FROM
+            inbox
+          WHERE
+            public_key = ${inboxHash}
+        `
         yield* _(sql`
           UPDATE inbox
           SET
@@ -342,18 +347,20 @@ describe('Retrieve messages', () => {
           WHERE
             public_key = ${inboxHash}
         `)
+        expect((yield* _(selectPlatform))[0]?.platform).toBeNull()
 
         const client = yield* _(NodeTestingApp)
         yield* _(setAuthHeaders(user.authHeaders))
-        const errorResponse = yield* _(
+        yield* _(
           client.Messages.retrieveMessages({
             payload: yield* _(user.addChallengeForMainInbox({})),
-            headers: commonHeaders,
-          }),
-          Effect.either
+            headers: Schema.decodeSync(CommonHeaders)({
+              'user-agent': 'Vexl/2 (1.0.0) IOS',
+            }),
+          })
         )
 
-        expectErrorResponse(InvalidInboxRecordError)(errorResponse)
+        expect((yield* _(selectPlatform))[0]?.platform).toBe('IOS')
       })
     )
   })

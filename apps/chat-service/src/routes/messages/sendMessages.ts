@@ -3,7 +3,6 @@ import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {type UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {
   SenderInboxDoesNotExistError,
-  type InvalidInboxRecordError,
   type MessageInBatch,
   type ReceiverInboxDoesNotExistError,
   type SendMessageResponse,
@@ -43,7 +42,6 @@ const sendMessage = (
 ): Effect.Effect<
   SendMessageResponse,
   | ReceiverInboxDoesNotExistError
-  | InvalidInboxRecordError
   | UnexpectedServerError
   | ConfigError.ConfigError
   | RedisLockError

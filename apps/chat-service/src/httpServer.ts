@@ -12,6 +12,7 @@ import {rateLimitingMiddlewareLayer} from '@vexl-next/server-utils/src/RateLimit
 import {RateLimitingService} from '@vexl-next/server-utils/src/RateLimiting'
 import {RedisConnectionService} from '@vexl-next/server-utils/src/RedisConnection'
 import {RedisService} from '@vexl-next/server-utils/src/RedisService'
+import {S3Service} from '@vexl-next/server-utils/src/S3Service'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {ServerSecurityMiddlewareLive} from '@vexl-next/server-utils/src/serverSecurity'
@@ -24,6 +25,8 @@ import {MessagesDbService} from './db/MessagesDbService'
 import DbLayer from './db/layer'
 import {ExpiredMessagesCleanupWorkerLayer} from './expiredMessagesCleanupWorker'
 import {reportMetricsLayer} from './metrics'
+import {downloadChatImage} from './routes/images/downloadChatImage'
+import {uploadChatImage} from './routes/images/uploadChatImage'
 import {approveRequest} from './routes/inbox/approveReqest'
 import {blockInbox} from './routes/inbox/blockInbox'
 import {cancelRequest, cancelRequestV2} from './routes/inbox/cancelRequest'
@@ -79,10 +82,20 @@ const MessagesApiGroupLive = HttpApiBuilder.group(
       .handle('sendMessages', sendMessages)
 )
 
+const ImagesApiGroupLive = HttpApiBuilder.group(
+  ChatApiSpecification,
+  'Images',
+  (h) =>
+    h
+      .handle('uploadChatImage', uploadChatImage)
+      .handle('downloadChatImage', downloadChatImage)
+)
+
 export const ChatApiLive = HttpApiBuilder.api(ChatApiSpecification).pipe(
   Layer.provide(ChallengeApiGroupLive),
   Layer.provide(InboxesApiGroupLive),
   Layer.provide(MessagesApiGroupLive),
+  Layer.provide(ImagesApiGroupLive),
   Layer.provide(rateLimitingMiddlewareLayer(ChatApiSpecification)),
   Layer.provide(ServerSecurityMiddlewareLive)
 )
@@ -107,6 +120,7 @@ export const HttpServerLive = Layer.mergeAll(
   ),
   Layer.provideMerge(DbLayer),
   Layer.provideMerge(MetricsClientService.Live),
+  Layer.provide(S3Service.Live),
   Layer.provideMerge(RedisService.Live),
   Layer.provideMerge(RedisConnectionService.layer(redisUrl))
 )

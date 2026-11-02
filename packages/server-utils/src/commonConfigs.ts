@@ -240,3 +240,14 @@ export const requestTimeoutMsConfig = Config.number('REQUEST_TIMEOUT_MS').pipe(
 export const challengeExpirationMinutesConfig = Config.number(
   'CHALLENGE_EXPIRATION_MINUTES'
 ).pipe(Config.withDefault(10))
+
+export const s3Config = Config.all({
+  region: Config.string('AWS_REGION').pipe(Config.withDefault('eu-west-1')),
+  bucketName: Config.string('S3_BUCKET_NAME'),
+  // Optional custom endpoint + path-style addressing for S3-compatible stores
+  // (e.g. MinIO in local dev). Empty endpoint -> use the AWS SDK default.
+  endpoint: Config.string('S3_ENDPOINT').pipe(Config.withDefault('')),
+  forcePathStyle: Config.boolean('S3_FORCE_PATH_STYLE').pipe(
+    Config.withDefault(false)
+  ),
+})

@@ -1,5 +1,6 @@
 import {type ChatMessageItemVariant} from '@vexl-next/ui'
 import {type ChatMessageWithState} from '../../../../../state/chat/domain'
+import {isImageOnlyMessage} from '../../../../../state/chat/utils/chatImageMessage'
 import {type TFunction} from '../../../../../utils/localization/I18nProvider'
 
 export function getMessagePreviewText({
@@ -108,7 +109,7 @@ export function getMessagePreviewText({
     }
   }
   if (message.messageType === 'MESSAGE') {
-    if (message.text.trim() === '' && message.image !== undefined) {
+    if (isImageOnlyMessage(message)) {
       return {
         text: t(`messages.messagePreviews.${direction}.ONLY_IMAGE`, {
           message: message.text,

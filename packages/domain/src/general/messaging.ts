@@ -148,8 +148,9 @@ export const ChatMessage = Schema.Struct({
   forceShow: Schema.optional(Schema.Boolean),
 
   /**
-   * Local-only image uri. Holds the revealed identity photo, or a chat image
-   * received before images moved to `imageAttachment`.
+   * Local-only image uri. Holds the revealed identity photo, a picked chat
+   * image until it is uploaded as `imageAttachment`, or a chat image received
+   * before images moved to `imageAttachment`.
    */
   image: Schema.optional(UriString),
   imageAttachment: Schema.optional(ChatImageAttachment),

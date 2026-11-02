@@ -23,26 +23,21 @@ import {pipe} from 'fp-ts/lib/function'
 import {effectToEither} from '../../effect-helpers/TaskEitherConverter'
 import {parseJson} from '../../utils/parsing'
 
-function setImageForBackwardCompatibility(
+function deanonymizedUserImage(
   payload: ChatMessagePayload
-): ChatMessagePayload {
-  if (payload.image) return payload
-
+): UriString | undefined {
   if (
-    (payload.messageType === 'APPROVE_REVEAL' ||
-      payload.messageType === 'REQUEST_REVEAL') &&
-    payload.deanonymizedUser?.imageBase64
-  ) {
-    return pipe(
-      `data:image/jpg;base64,${payload.deanonymizedUser.imageBase64}`,
-      Schema.decodeUnknownOption(UriString),
-      Option.match({
-        onNone: () => payload,
-        onSome: (image) => ({...payload, image}),
-      })
+    (payload.messageType !== 'APPROVE_REVEAL' &&
+      payload.messageType !== 'REQUEST_REVEAL') ||
+    !payload.deanonymizedUser?.imageBase64
+  )
+    return undefined
+
+  return Option.getOrUndefined(
+    Schema.decodeUnknownOption(UriString)(
+      `data:image/jpg;base64,${payload.deanonymizedUser.imageBase64}`
     )
-  }
-  return payload
+  )
 }
 
 export type ErrorParsingChatMessage = BasicError<'ErrorParsingChatMessage'>
@@ -147,7 +142,8 @@ export function chatMessagePayloadToChatMessage(
     repliedTo: payload.repliedTo,
     text: payload.text ?? '-',
     messageType: payload.messageType,
-    image: payload.image,
+    image: deanonymizedUserImage(payload),
+    imageAttachment: payload.imageAttachment,
     deanonymizedUser: payload.deanonymizedUser
       ? {
           name: payload.deanonymizedUser.name,
@@ -187,7 +183,6 @@ export function parseChatMessage({
       E.chainW(parseJson),
       E.chainFirstW(ensureCompatibleVersion({appVersion, serverMessage})),
       E.chainW(flow(Schema.decodeUnknown(ChatMessagePayload), effectToEither)),
-      E.map(setImageForBackwardCompatibility),
       E.map(chatMessagePayloadToChatMessage(serverMessage.senderPublicKey)),
       E.mapLeft((error) => {
         if (error._tag === 'ErrorChatMessageRequiresNewerVersion') return error

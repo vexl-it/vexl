@@ -30,6 +30,7 @@ import {UserDbService} from './db/UserDbService'
 import DbLayer from './db/layer'
 import {internalServerLive} from './internalServer'
 
+import {S3Service} from '@vexl-next/server-utils/src/S3Service'
 import {getClubContacts} from './routes/clubs/member/getClubContacts'
 import {getClubInfo} from './routes/clubs/member/getClubInfo'
 import {getClubInfoByAccessCode} from './routes/clubs/member/getClubInfoByAccessCode'
@@ -54,7 +55,6 @@ import {refreshUser} from './routes/user/refreshUser'
 import {updateNotificationToken} from './routes/user/updateNotificationToken'
 import {ScheduledTaskWorkersLayer} from './scheduledTaskWorkers'
 import {UserNotificationService} from './services/UserNotificationService'
-import {S3Service} from './utils/S3Service'
 
 const UserApiGroupLive = HttpApiBuilder.group(
   ContactApiSpecification,

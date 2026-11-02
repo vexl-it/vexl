@@ -1,9 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import * as crypto from '@vexl-next/cryptography'
 import {type KeyHolder} from '@vexl-next/cryptography'
-import {Dimensions} from '@vexl-next/domain/src/utility/Dimensions.brand'
-import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
-import {toBasicError} from '@vexl-next/domain/src/utility/errors'
 import {
   effectToEither,
   effectToTaskEither,
@@ -13,8 +10,6 @@ import * as SecretStore from 'expo-secure-store'
 import * as E from 'fp-ts/Either'
 import * as TE from 'fp-ts/TaskEither'
 import {flow} from 'fp-ts/function'
-import {Image} from 'react-native'
-import {type GettingImageSizeError} from '../state/chat/utils/replaceBase64UriWithImageFileUri'
 
 export class JsonParseError extends Schema.TaggedError<JsonParseError>(
   'JsonParseError'
@@ -206,25 +201,4 @@ export function stringifyToJson(
     () => JSON.stringify(data),
     (e) => new JsonStringifyError({cause: e})
   )
-}
-
-export function getImageSize(
-  imageUri: UriString
-): TE.TaskEither<GettingImageSizeError, Dimensions> {
-  return TE.tryCatch(() => {
-    return new Promise((resolve, reject) => {
-      Image.getSize(
-        imageUri,
-        (width, height) => {
-          resolve(
-            Schema.decodeSync(Dimensions)({
-              width,
-              height,
-            })
-          )
-        },
-        reject
-      )
-    })
-  }, toBasicError('GettingImageSizeError'))
 }

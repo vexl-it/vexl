@@ -46,6 +46,7 @@ import {
 } from '../../marketplace/atoms/offersState'
 import {vexlTokenToKeyHolderAtom} from '../../notifications/vexlTokenToKeyHolderAtom'
 import messagingStateAtom from '../atoms/messagingStateAtom'
+import {downloadNewChatImagesActionAtom} from '../chatImages'
 import {type InboxInState} from '../domain'
 import addMessagesToChats from '../utils/addMessagesToChats'
 import {filterIncomingMessages} from '../utils/filterIncomingMessages'
@@ -257,20 +258,14 @@ function refreshInboxActionAtom(
         ),
         TE.chainW(
           flow(
-            A.map((oneMessage): T.Task<ChatMessageWithState> => {
-              if (
-                oneMessage.state !== 'receivedButRequiresNewerVersion' &&
-                !oneMessage.message.image &&
-                !oneMessage.message.tradeChecklistUpdate?.identity?.image
-              )
-                return T.of(oneMessage)
-              return replaceBase64UriWithImageFileUri(
-                oneMessage,
-                getInbox().inbox.privateKey.publicKeyPemBase64,
-                oneMessage.message.senderPublicKey
-              )
-            }),
-            T.sequenceArray,
+            A.map((oneMessage) =>
+              replaceBase64UriWithImageFileUri(oneMessage, {
+                inboxKey: getInbox().inbox.privateKey.publicKeyPemBase64,
+                otherSideKey: oneMessage.message.senderPublicKey,
+              })
+            ),
+            Effect.all,
+            effectToTask,
             TE.fromTask
           )
         ),
@@ -468,6 +463,11 @@ export const fetchAndStoreMessagesForInboxAtom = atom<
         set(handleOtherSideReadMessages, {
           newMessages,
           inbox: updatedInbox,
+        })
+
+        set(downloadNewChatImagesActionAtom, {
+          messages: newMessages,
+          inboxKey: updatedInbox.inbox.privateKey.publicKeyPemBase64,
         })
 
         return Effect.all(

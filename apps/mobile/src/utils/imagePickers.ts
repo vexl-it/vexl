@@ -90,10 +90,9 @@ export function getImageFromGalleryAndTryToResolveThePermissionsAlongTheWay({
 
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
-      allowsEditing: true,
+      allowsEditing: aspect !== undefined,
       aspect,
       quality: 1,
-      base64: true,
       allowsMultipleSelection: false,
     })
 

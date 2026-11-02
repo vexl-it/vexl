@@ -18,6 +18,7 @@ import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
 import {version} from '../../../utils/environment'
 import {incrementClosedChatsActionAtom} from '../../accountStatsAtom'
 import {cancelTradeReminderActionAtom} from '../../tradeReminders/atoms/cancelTradeReminderActionAtom'
+import {deleteChatImageFiles, getChatKeys} from '../chatImages'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 import {resetTradeChecklist} from '../utils/resetData'
 import shouldSendTerminationMessageToChat from '../utils/shouldSendTerminationMessageToChat'
@@ -102,6 +103,10 @@ export default function deleteChatActionAtom(
           )
 
         void set(cancelTradeReminderActionAtom, chatWithMessages.chat.id)
+        deleteChatImageFiles({
+          messages: chatWithMessages.messages,
+          chatKeys: getChatKeys(chat),
+        })
 
         const chatWasAlreadyClosed = pipe(
           chatWithMessages.messages,

@@ -262,7 +262,7 @@ export function api({
         ),
       downloadChatImage: (downloadChatImageRequest: DownloadChatImageRequest) =>
         client.Images.downloadChatImage({
-          urlParams: downloadChatImageRequest,
+          payload: downloadChatImageRequest,
           headers: commonHeaders,
         }),
       // ----------------------

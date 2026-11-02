@@ -91,10 +91,13 @@ export const geocodingDbEnv = (ctx: EnvContext): Record<string, string> => ({
   GEOCODING_DB_PASSWORD: ctx.cfg.infra.postgres.password,
 })
 
-const s3Env = (ctx: EnvContext): Record<string, string> => ({
+const s3Env = (
+  ctx: EnvContext,
+  bucket = ctx.cfg.infra.minio.bucket
+): Record<string, string> => ({
   S3_ENDPOINT: httpUrl(ctx, 'minioApi'),
   S3_FORCE_PATH_STYLE: 'true',
-  S3_BUCKET_NAME: ctx.cfg.infra.minio.bucket,
+  S3_BUCKET_NAME: bucket,
   AWS_REGION: ctx.cfg.infra.minio.region,
   AWS_ACCESS_KEY_ID: ctx.cfg.infra.minio.rootUser,
   AWS_SECRET_ACCESS_KEY: ctx.cfg.infra.minio.rootPassword,
@@ -201,9 +204,12 @@ export const SERVICES: readonly RunnableApp[] = [
     kind: 'service',
     portKey: 'chatService',
     healthPortKey: 'chatService',
-    needs: {db: dbn.chat, redis: true, s3: false},
+    needs: {db: dbn.chat, redis: true, s3: true},
     run: tsxService('src/index.ts'),
-    buildEnv: () => stringifyValues(sc.chatService),
+    buildEnv: (ctx) => ({
+      ...stringifyValues(sc.chatService),
+      ...s3Env(ctx, ctx.cfg.infra.minio.chatImagesBucket),
+    }),
   },
   {
     name: 'location-service',

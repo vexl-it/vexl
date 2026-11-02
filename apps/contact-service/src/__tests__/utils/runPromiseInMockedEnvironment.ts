@@ -6,12 +6,14 @@ import {type SqlClient} from '@effect/sql/SqlClient'
 import {type DashboardReportsService} from '@vexl-next/server-utils/src/DashboardReportsService'
 import {type RateLimitingService} from '@vexl-next/server-utils/src/RateLimiting'
 import {type RedisService} from '@vexl-next/server-utils/src/RedisService'
+import {type S3Service} from '@vexl-next/server-utils/src/S3Service'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {mockedDashboardReportsService} from '@vexl-next/server-utils/src/tests/mockedDashboardReportsService'
 import {mockedMetricsClientService} from '@vexl-next/server-utils/src/tests/mockedMetricsClientService'
 import {mockedRateLimitingLayer} from '@vexl-next/server-utils/src/tests/mockedRateLimitingLayer'
 import {mockedRedisLayer} from '@vexl-next/server-utils/src/tests/mockedRedisLayer'
+import {mockedS3ServiceLayer} from '@vexl-next/server-utils/src/tests/mockedS3Service'
 import {
   internalApiTestServerLayer,
   TestRequestHeaders,
@@ -34,9 +36,7 @@ import {ContactApiLive} from '../../httpServer'
 import {ContactInternalApiLive} from '../../internalServer'
 import {ImportContactsQuotaService} from '../../routes/contacts/importContactsQuotaService'
 import {UserNotificationService} from '../../services/UserNotificationService'
-import {type S3Service} from '../../utils/S3Service'
 import {mockedEnqueueUserNotificationLayer} from './mockEnqueueUserNotification'
-import {mockedS3ServiceLayer} from './mockedS3Service'
 
 export type MockedContexts =
   | RedisService

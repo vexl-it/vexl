@@ -1,6 +1,7 @@
 import Clipboard from '@react-native-clipboard/clipboard'
 import {useNavigation} from '@react-navigation/native'
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {
   Button,
   Rejected,
@@ -29,8 +30,8 @@ import Reanimated, {
 } from 'react-native-reanimated'
 import {scheduleOnRN} from 'react-native-worklets'
 import {type RootStackScreenProps} from '../../../navigationTypes'
+import {hasChatImage} from '../../../state/chat/utils/chatImageMessage'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
-import resolveLocalUri from '../../../utils/resolveLocalUri'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import {globalDialogAtom} from '../../GlobalDialog'
 import {toastNotificationAtom} from '../../ToastNotification/atom'
@@ -125,13 +126,12 @@ function TextMessage({
     [messageItem, setMessageActionsSelection]
   )
 
-  const onImagePressed = useCallback(() => {
-    if (messageItem.type !== 'message') return
-    if (!messageItem.message.message.image) return
-    navigation.navigate('ChatImagePreview', {
-      imageUri: resolveLocalUri(messageItem.message.message.image),
-    })
-  }, [messageItem, navigation])
+  const onImagePressed = useCallback(
+    (imageUri: UriString) => {
+      navigation.navigate('ChatImagePreview', {imageUri})
+    },
+    [navigation]
+  )
 
   const longPressGesture = Gesture.LongPress()
     .minDuration(longPressDurationMs)
@@ -269,7 +269,7 @@ function TextMessage({
           )}
           <View
             style={{
-              width: message.message.image ? '80%' : undefined,
+              width: hasChatImage(message.message) ? '80%' : undefined,
               maxWidth: '80%',
               opacity: isShownInActionsOverlay ? 0 : 1,
             }}

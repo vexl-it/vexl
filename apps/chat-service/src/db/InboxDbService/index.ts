@@ -1,4 +1,5 @@
 import {type UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
+import {type InvalidInboxRecordError} from '@vexl-next/rest-api/src/services/chat/contracts'
 import {Context, Effect, Layer, type Option} from 'effect'
 import {type PublicKeyHashed} from '../domain'
 import {type InboxRecord} from './domain'
@@ -20,7 +21,10 @@ export interface InboxDbOperations {
 
   findInboxByPublicKey: (
     args: PublicKeyHashed
-  ) => Effect.Effect<Option.Option<InboxRecord>, UnexpectedServerError>
+  ) => Effect.Effect<
+    Option.Option<InboxRecord>,
+    InvalidInboxRecordError | UnexpectedServerError
+  >
 
   insertInbox: (
     args: InsertInboxParams

@@ -35,6 +35,12 @@ export class SenderInboxDoesNotExistError extends Schema.TaggedError<SenderInbox
   }),
 }) {}
 
+export class InvalidInboxRecordError extends Schema.TaggedError<InvalidInboxRecordError>(
+  'InvalidInboxRecordError'
+)('InvalidInboxRecordError', {
+  status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
+}) {}
+
 export const ServerMessageWithId = Schema.Struct({
   ...ServerMessage.fields,
   id: IdNumeric,

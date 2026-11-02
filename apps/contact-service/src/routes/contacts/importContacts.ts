@@ -81,7 +81,9 @@ export const importContacts = HttpApiBuilder.handler(
             })
           )
 
-          yield* _(Effect.log('New contacts. Notifying', newContacts))
+          yield* _(
+            Effect.log('New contacts. Notifying', {count: newContacts.length})
+          )
 
           yield* _(
             importContactsQuotaService.checkAndIncrementImportContactsQuota(

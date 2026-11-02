@@ -83,7 +83,12 @@ function MessageItem({
 
   if (item.type === 'message') {
     if (item.message.state === 'receivedButRequiresNewerVersion') {
-      return <MessageIncompatibleItem message={item.message.message} />
+      return (
+        <>
+          <MessageIncompatibleItem message={item.message.message} />
+          {!!item.isLatest && <LastMessageTime message={item.message} />}
+        </>
+      )
     }
 
     if (

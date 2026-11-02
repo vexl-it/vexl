@@ -167,7 +167,14 @@ export default function ChatImage({
   imageAttachment?: ChatImageAttachment | undefined
 }): React.ReactElement | null {
   if (imageAttachment)
-    return <AttachmentImage {...props} attachment={imageAttachment} />
+    return (
+      <AttachmentImage
+        // Recycled list cells must not keep the previous image's state.
+        key={imageAttachment.id}
+        {...props}
+        attachment={imageAttachment}
+      />
+    )
 
   if (image)
     return (

@@ -132,6 +132,17 @@ type ChatImageDownloadError =
   | ChatImageProcessingError
 type ChatImageDownload = Promise<Exit.Exit<UriString, ChatImageDownloadError>>
 const inFlightDownloads = new Map<ChatImageId, ChatImageDownload>()
+let downloadsGeneration = 0
+
+/** Stops pending downloads from writing files, e.g. before logout wipes them. */
+export function cancelChatImageDownloads(): void {
+  downloadsGeneration += 1
+  inFlightDownloads.clear()
+}
+
+function interruptIfCancelledSince(generation: number): Effect.Effect<void> {
+  return generation === downloadsGeneration ? Effect.void : Effect.interrupt
+}
 
 function startDownload({
   api,
@@ -142,9 +153,11 @@ function startDownload({
   attachment: ChatImageAttachment
   chatKeys: ChatKeys
 }): ChatImageDownload {
+  const generation = downloadsGeneration
   const download = api.requestChatImageDownload({imageId: attachment.id}).pipe(
     Effect.flatMap(({downloadUrl}) => fetchPresignedUrl(downloadUrl)),
     Effect.flatMap((data) => decryptChatImage(data, attachment.key)),
+    Effect.tap(() => interruptIfCancelledSince(generation)),
     Effect.flatMap((bytes) =>
       writeChatImageFile({
         id: attachment.id,
@@ -205,6 +218,7 @@ export const downloadNewChatImagesActionAtom = atom(
       inboxKey: ChatKeys['inboxKey']
     }
   ): void => {
+    const generation = downloadsGeneration
     pipe(
       messages,
       Array.filterMap(({message}) =>
@@ -218,7 +232,8 @@ export const downloadNewChatImagesActionAtom = atom(
       ),
       Effect.forEach(
         (args) =>
-          set(ensureChatImageDownloadedActionAtom, args).pipe(
+          interruptIfCancelledSince(generation).pipe(
+            Effect.zipRight(set(ensureChatImageDownloadedActionAtom, args)),
             Effect.tapErrorTag('ChatImageProcessingError', (e) =>
               Effect.sync(() => {
                 reportError(

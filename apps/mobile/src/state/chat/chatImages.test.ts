@@ -14,9 +14,10 @@ import {
 import {now} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
-import {Deferred, Effect, Either, Schema} from 'effect'
+import {Deferred, Effect, Either, Exit, Schema} from 'effect'
 import {createStore} from 'jotai'
 import {
+  cancelChatImageDownloads,
   ensureChatImageDownloadedActionAtom,
   uploadChatImageIfAnyActionAtom,
 } from './chatImages'
@@ -194,6 +195,24 @@ it('retries a failed download on the next call', async () => {
   expect(Either.isLeft(await ensureDownloaded(store))).toBe(true)
   expect(mockFiles.size).toBe(0)
   expect(Either.isRight(await ensureDownloaded(store))).toBe(true)
+})
+
+it('does not store an image whose download finishes after cancelling', async () => {
+  const response = Effect.runSync(Deferred.make<{downloadUrl: string}>())
+  mockRequestChatImageDownload.mockReturnValue(Deferred.await(response))
+  mockFetch.mockResolvedValue(s3Response(encryptedImage))
+
+  const download = Effect.runPromiseExit(
+    createStore().set(ensureChatImageDownloadedActionAtom, {
+      attachment,
+      chatKeys,
+    })
+  )
+  cancelChatImageDownloads()
+  await Effect.runPromise(Deferred.succeed(response, {downloadUrl}))
+
+  expect(Exit.isInterrupted(await download)).toBe(true)
+  expect(mockFiles.size).toBe(0)
 })
 
 it('uploads the encrypted bytes directly to the presigned url', async () => {

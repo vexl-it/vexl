@@ -1,11 +1,18 @@
 import {Array, Option, pipe} from 'effect'
 import {networkInterfaces} from 'node:os'
+import {loadRawEnvLocal} from './secrets'
 
 // Prefer the conventional primary interfaces (macOS Wi-Fi/Ethernet, Linux).
 const PREFERRED_INTERFACES = ['en0', 'en1', 'eth0', 'wlan0']
 
-/** The machine's LAN IPv4, reachable from simulators, emulators and devices. */
+/**
+ * The machine's LAN IPv4, reachable from simulators, emulators and devices.
+ * `DEV_LAN_IP` (shell or `.env.local`) overrides the detection.
+ */
 export function detectLanIp(): Option.Option<string> {
+  const override = process.env.DEV_LAN_IP ?? loadRawEnvLocal().DEV_LAN_IP
+  if (override) return Option.some(override)
+
   const candidates = pipe(
     Object.entries(networkInterfaces()),
     Array.flatMap(([name, addresses]) =>

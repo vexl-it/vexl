@@ -6,6 +6,7 @@ Scripts for running the local dev stack (`dev-backend.ts`, `dev-infra.ts`, `dev-
 
 The app uploads and downloads chat images straight to MinIO using URLs presigned by chat-service. A presigned URL is bound to the host it was signed for, so `services.ts` sets chat-service's `S3_ENDPOINT` to the machine's LAN IP (`lanIp.ts`, the same detection `dev-mobile.ts` uses for physical devices). That address works from the iOS simulator, the Android emulator and physical devices on the same network. Caveats:
 
+- If detection picks the wrong interface (VPN, Docker bridge), set `DEV_LAN_IP=<ip>` in `.env.local` or the shell. It overrides the detection for both chat-service and `dev:mobile`.
 - Without a LAN IPv4 it falls back to `localhost`, which only the iOS simulator can reach.
 - The IP is read when chat-service starts. After switching networks, restart `pnpm dev:backend`.
 

@@ -3,7 +3,7 @@ import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {Effect, Schema} from 'effect'
 import {File} from 'expo-file-system'
 import reportError from '../../../utils/reportError'
-import {resizeImage} from '../../../utils/resizeImage'
+import {ReadingFileError, resizeImage} from '../../../utils/resizeImage'
 
 export function replaceIdentityImageFileUriWithBase64(
   identityRevealChatMessage: IdentityRevealChatMessage | undefined
@@ -13,10 +13,14 @@ export function replaceIdentityImageFileUriWithBase64(
   if (!image) return Effect.succeed(identityRevealChatMessage)
 
   return resizeImage({path: image, maxSide: 512, quality: 85}).pipe(
-    Effect.map(({uri}) =>
-      Schema.decodeSync(UriString)(
-        `data:image/jpeg;base64,${new File(uri).base64Sync()}`
-      )
+    Effect.flatMap(({uri}) =>
+      Effect.try({
+        try: () =>
+          Schema.decodeSync(UriString)(
+            `data:image/jpeg;base64,${new File(uri).base64Sync()}`
+          ),
+        catch: (cause) => new ReadingFileError({cause}),
+      })
     ),
     Effect.map((image) => ({...identityRevealChatMessage, image})),
     Effect.catchAll((e) => {

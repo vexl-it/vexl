@@ -69,6 +69,27 @@ function Demos(): React.JSX.Element {
         />
       </DemoSection>
 
+      <DemoSection title="Back, long title with text action">
+        <NavigationBar
+          style="back"
+          title="Kontaktní preference a nastavení soukromí"
+          leftAction={{icon: ChevronLeft, onPress: () => {}}}
+          rightActions={[{label: 'Vymazat vše', onPress: () => {}}]}
+        />
+      </DemoSection>
+
+      <DemoSection title="Back, two right actions">
+        <NavigationBar
+          style="back"
+          title="Offer"
+          leftAction={{icon: ChevronLeft, onPress: () => {}}}
+          rightActions={[
+            {icon: BellNotification, onPress: () => {}},
+            {icon: TuneSettings, onPress: () => {}},
+          ]}
+        />
+      </DemoSection>
+
       <DemoSection title="Chat">
         <NavigationBar
           style="chat"

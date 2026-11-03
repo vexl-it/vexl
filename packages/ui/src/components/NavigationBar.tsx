@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useState} from 'react'
 import {styled} from 'tamagui'
 
 import type {IconProps} from '../icons/types'
@@ -32,10 +32,9 @@ const NavigationBarFrame = styled(Stack, {
   alignSelf: 'stretch',
 })
 
-const BackBar = styled(XStack, {
+const BackBarFrame = styled(XStack, {
   name: 'NavigationBarBackBar',
   alignItems: 'center',
-  justifyContent: 'space-between',
   paddingHorizontal: '$5',
   paddingVertical: '$4',
   gap: '$3',
@@ -45,27 +44,17 @@ const BackBar = styled(XStack, {
 const BackSideContainer = styled(XStack, {
   name: 'NavigationBarBackSide',
   alignItems: 'center',
-  flexShrink: 0,
-  minWidth: '$9',
-  zIndex: 1,
+  flexGrow: 1,
+  flexBasis: 0,
 
   variants: {
     side: {
       left: {},
       right: {
         justifyContent: 'flex-end',
-        gap: '$3',
       },
     },
   } as const,
-})
-
-const BackCenterContainer = styled(YStack, {
-  name: 'NavigationBarBackCenter',
-  alignItems: 'center',
-  justifyContent: 'center',
-  flex: 1,
-  minWidth: 0,
 })
 
 const ChatBar = styled(XStack, {
@@ -150,39 +139,64 @@ function NavAction({
   )
 }
 
+// Both sides get the wider side's content width so the title stays centred on
+// screen and truncates between the actions instead of overlapping them.
+function BackBar({
+  title,
+  leftAction,
+  rightActions,
+}: NavigationBarBackProps): React.JSX.Element {
+  const [leftWidth, setLeftWidth] = useState(0)
+  const [rightWidth, setRightWidth] = useState(0)
+  const sideWidth = Math.max(leftWidth, rightWidth)
+
+  return (
+    <BackBarFrame>
+      <BackSideContainer side="left" minWidth={sideWidth}>
+        <XStack
+          onLayout={(event) => {
+            setLeftWidth(event.nativeEvent.layout.width)
+          }}
+        >
+          {leftAction ? (
+            <NavAction action={leftAction} defaultVariant="highlighted" />
+          ) : null}
+        </XStack>
+      </BackSideContainer>
+      {title ? (
+        <Typography
+          variant="titlesSmall"
+          color="$foregroundPrimary"
+          textAlign="center"
+          flexShrink={1}
+          minWidth={0}
+          numberOfLines={1}
+          ellipsizeMode="tail"
+        >
+          {title}
+        </Typography>
+      ) : null}
+      <BackSideContainer side="right" minWidth={sideWidth}>
+        <XStack
+          gap="$3"
+          onLayout={(event) => {
+            setRightWidth(event.nativeEvent.layout.width)
+          }}
+        >
+          {rightActions?.map((action, i) => (
+            <NavAction key={i} action={action} defaultVariant="normal" />
+          ))}
+        </XStack>
+      </BackSideContainer>
+    </BackBarFrame>
+  )
+}
+
 export function NavigationBar(props: NavigationBarProps): React.JSX.Element {
   return (
     <NavigationBarFrame>
       {props.style === 'back' ? (
-        <BackBar>
-          <BackSideContainer side="left">
-            {props.leftAction ? (
-              <NavAction
-                action={props.leftAction}
-                defaultVariant="highlighted"
-              />
-            ) : null}
-          </BackSideContainer>
-          <BackCenterContainer pointerEvents="none">
-            {props.title ? (
-              <Typography
-                variant="titlesSmall"
-                color="$foregroundPrimary"
-                textAlign="center"
-                maxWidth="100%"
-                numberOfLines={1}
-                ellipsizeMode="tail"
-              >
-                {props.title}
-              </Typography>
-            ) : null}
-          </BackCenterContainer>
-          <BackSideContainer side="right">
-            {props.rightActions?.map((action, i) => (
-              <NavAction key={i} action={action} defaultVariant="normal" />
-            ))}
-          </BackSideContainer>
-        </BackBar>
+        <BackBar {...props} />
       ) : (
         <ChatBar>
           {props.leftAction ? (

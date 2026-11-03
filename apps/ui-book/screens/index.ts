@@ -8,6 +8,7 @@ import {BlogCardScreen} from './BlogCardScreen'
 import {BottomSheetPanelScreen} from './BottomSheetPanelScreen'
 import {ButtonScreen} from './ButtonScreen'
 import {BuySellRangeSliderScreen} from './BuySellRangeSliderScreen'
+import {CalendarPickerScreen} from './CalendarPickerScreen'
 import {CardButtonScreen} from './CardButtonScreen'
 import {ChatMessageItemScreen} from './ChatMessageItemScreen'
 import {ChecklistCellScreen} from './ChecklistCellScreen'
@@ -124,6 +125,7 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'Buy/Sell Range Slider', component: BuySellRangeSliderScreen},
   {label: 'Bottom Sheet Panel', component: BottomSheetPanelScreen},
   {label: 'Button', component: ButtonScreen},
+  {label: 'Calendar Picker', component: CalendarPickerScreen},
   {label: 'Card Button', component: CardButtonScreen},
   {label: 'Chat Message Item', component: ChatMessageItemScreen},
   {label: 'Checklist Cell', component: ChecklistCellScreen},

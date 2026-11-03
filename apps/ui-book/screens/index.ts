@@ -66,7 +66,6 @@ import {PickerScreen} from './PickerScreen'
 import {PriceRangeInputScreen} from './PriceRangeInputScreen'
 import {QrScannerOverlayScreen} from './QrScannerOverlayScreen'
 import {RadioGroupScreen} from './RadioGroupScreen'
-import {RadiusSliderScreen} from './RadiusSliderScreen'
 import {RangeSliderScreen} from './RangeSliderScreen'
 import {ReachStatsScreen} from './ReachStatsScreen'
 import {RefreshControlScreen} from './RefreshControlScreen'
@@ -80,6 +79,7 @@ import {SegmentedPickerScreen} from './SegmentedPickerScreen'
 import {SelectableItemScreen} from './SelectableItemScreen'
 import {SelectClubCellScreen} from './SelectClubCellScreen'
 import {SelectorScreen} from './SelectorScreen'
+import {SliderScreen} from './SliderScreen'
 import {StarRatingScreen} from './StarRatingScreen'
 import {StepperCheckScreen} from './StepperCheckScreen'
 import {StoryPagerScreen} from './StoryPagerScreen'
@@ -179,7 +179,6 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'QR Scanner Overlay', component: QrScannerOverlayScreen},
   {label: 'Radio Group', component: RadioGroupScreen},
   {label: 'Range Slider', component: RangeSliderScreen},
-  {label: 'Radius Slider', component: RadiusSliderScreen},
   {label: 'Reach Stats', component: ReachStatsScreen},
   {label: 'Refresh Control', component: RefreshControlScreen},
   {label: 'Row Button', component: RowButtonScreen},
@@ -192,6 +191,7 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'Selectable Item', component: SelectableItemScreen},
   {label: 'Select Club Cell', component: SelectClubCellScreen},
   {label: 'Selector', component: SelectorScreen},
+  {label: 'Slider', component: SliderScreen},
   {label: 'Star Rating', component: StarRatingScreen},
   {label: 'Stepper Check', component: StepperCheckScreen},
   {label: 'Story Pager', component: StoryPagerScreen},

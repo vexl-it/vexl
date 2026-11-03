@@ -6,6 +6,7 @@ import {
   resolveSizePx,
   Stack,
   TextTag,
+  TwoToneCard,
   Typography,
   useTheme,
   XmarkCancelClose,
@@ -64,16 +65,12 @@ export default function VexlbotActionCard({
 
   if (isHidden) return null
   return (
-    <YStack {...rest} gap="$1" mx="$4">
-      <XStack
+    <TwoToneCard {...rest} mx="$4">
+      <TwoToneCard.Header
+        flexDirection="row"
         alignItems="center"
-        backgroundColor="$backgroundTertiary"
-        borderRadius="$6"
-        borderBottomLeftRadius="$2"
-        borderBottomRightRadius="$2"
         gap="$3"
         justifyContent="space-between"
-        padding="$4"
       >
         <XStack alignItems="center" flex={1} gap="$2">
           <Avatar size="$7">
@@ -125,16 +122,9 @@ export default function VexlbotActionCard({
             </Stack>
           </TouchableOpacity>
         ) : null}
-      </XStack>
+      </TwoToneCard.Header>
 
-      <YStack
-        backgroundColor="$backgroundSecondary"
-        borderRadius="$6"
-        borderTopLeftRadius="$2"
-        borderTopRightRadius="$2"
-        gap="$3"
-        padding="$5"
-      >
+      <TwoToneCard.Content gap="$3" padding="$5">
         {shouldRenderTextContent ? (
           <YStack gap="$3">
             {title ? (
@@ -175,7 +165,7 @@ export default function VexlbotActionCard({
         ) : null}
 
         {children}
-      </YStack>
-    </YStack>
+      </TwoToneCard.Content>
+    </TwoToneCard>
   )
 }

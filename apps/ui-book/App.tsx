@@ -4,17 +4,17 @@ import {
   Stack,
   Toast,
   useVexlTheme,
-  vexlFonts,
   VexlThemeProvider,
   XStack,
   YStack,
 } from '@vexl-next/ui'
-import {useFonts} from 'expo-font'
-import {atom} from 'jotai'
+import {atom, getDefaultStore} from 'jotai'
 
 import {StatusBar} from 'expo-status-bar'
 import React, {useEffect, useMemo, useRef, useState} from 'react'
 import {
+  Alert,
+  Platform,
   ScrollView,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
@@ -23,8 +23,16 @@ import {GestureHandlerRootView} from 'react-native-gesture-handler'
 import {KeyboardProvider} from 'react-native-keyboard-controller'
 import {SafeAreaProvider} from 'react-native-safe-area-context'
 import {toastAtom} from './state/toastAtom'
+import {useVexlFonts} from './useVexlFonts'
 
 import {screens, type ScreenEntry} from './screens'
+
+// react-native-web's Alert.alert is a no-op
+if (Platform.OS === 'web') {
+  Alert.alert = (title, message) => {
+    getDefaultStore().set(toastAtom, {title, description: message})
+  }
+}
 
 function ScreenNav(): React.JSX.Element {
   const {resolvedTheme, toggle} = useVexlTheme()
@@ -228,7 +236,7 @@ function ScreenNav(): React.JSX.Element {
 }
 
 export default function App(): React.JSX.Element {
-  const [fontsLoaded] = useFonts(vexlFonts)
+  const fontsLoaded = useVexlFonts()
 
   if (!fontsLoaded) {
     return <></>

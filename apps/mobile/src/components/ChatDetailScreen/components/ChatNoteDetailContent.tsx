@@ -1,6 +1,7 @@
 import {useNavigation} from '@react-navigation/native'
 import {
   Button,
+  EmptyState,
   FlagReport,
   NavigationBar,
   Screen,
@@ -77,22 +78,17 @@ export default function ChatNoteDetailContent({
           />
         }
       >
-        <YStack flex={1} justifyContent="center" gap="$5">
-          <Typography
-            color="$foregroundPrimary"
-            textAlign="center"
-            variant="paragraph"
-          >
-            {t('notes.detail.noteNotFound')}
-          </Typography>
-          <Button
-            onPress={() => {
+        <EmptyState
+          fullscreen
+          title={t('notes.detail.noteNotFound')}
+          action={{
+            label: t('common.back'),
+            onPress: () => {
               navigation.goBack()
-            }}
-          >
-            {t('common.back')}
-          </Button>
-        </YStack>
+            },
+            variant: 'primary',
+          }}
+        />
       </Screen>
     )
   }

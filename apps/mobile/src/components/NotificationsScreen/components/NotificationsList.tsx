@@ -1,4 +1,4 @@
-import {Typography, YStack} from '@vexl-next/ui'
+import {EmptyState} from '@vexl-next/ui'
 import {useAtomValue, type Atom} from 'jotai'
 import React, {useCallback} from 'react'
 import {FlatList} from 'react-native'
@@ -22,24 +22,11 @@ function NotificationsList(): React.ReactElement {
 
   const listEmptyComponent = useCallback(
     () => (
-      <YStack flex={1} py="$5" alignItems="center">
-        <YStack maxWidth="350" gap="$4">
-          <Typography
-            variant="heading3"
-            color="$foregroundPrimary"
-            textAlign="center"
-          >
-            {t('notificationsScreen.noNotifications.title')}
-          </Typography>
-          <Typography
-            variant="paragraph"
-            color="$foregroundSecondary"
-            textAlign="center"
-          >
-            {t('notificationsScreen.noNotifications.description')}
-          </Typography>
-        </YStack>
-      </YStack>
+      <EmptyState
+        px="$5"
+        title={t('notificationsScreen.noNotifications.title')}
+        description={t('notificationsScreen.noNotifications.description')}
+      />
     ),
     [t]
   )

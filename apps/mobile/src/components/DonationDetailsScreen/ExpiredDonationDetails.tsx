@@ -1,7 +1,16 @@
 import Clipboard from '@react-native-clipboard/clipboard'
 import {useNavigation} from '@react-navigation/native'
-import {Button, Rejected, Screen, Typography, useTheme} from '@vexl-next/ui'
-import {ScrollView, Stack, YStack} from '@vexl-next/ui/src/primitives'
+import {
+  Backdrop,
+  Button,
+  Rejected,
+  Screen,
+  ScrollView,
+  Stack,
+  Typography,
+  useTheme,
+  YStack,
+} from '@vexl-next/ui'
 import {Effect} from 'effect'
 import {useSetAtom} from 'jotai'
 import React from 'react'
@@ -118,16 +127,7 @@ export function ExpiredDonationDetails({
                 logoBackgroundColor={theme.gradientHelper.get()}
                 ecl="H"
               />
-              <Stack
-                position="absolute"
-                top="$0"
-                left="$0"
-                right="$0"
-                bottom="$0"
-                backgroundColor="$backgroundPrimary"
-                borderRadius="$3"
-                opacity={0.72}
-              />
+              <Backdrop variant="surface" borderRadius="$3" />
               <YStack
                 position="absolute"
                 width={EXPIRED_QR_STATUS_PANEL_SIZE}

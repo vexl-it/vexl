@@ -1,9 +1,8 @@
-import {Typography} from '@vexl-next/ui'
+import {Collapse, Typography} from '@vexl-next/ui'
 import {ChevronDown, ChevronUp} from '@vexl-next/ui/src/icons'
 import React, {type ReactNode, useState} from 'react'
 import {getTokens, useTheme, XStack} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
-import AnimatedCollapse from '../../FilterOffersScreen/components/AnimatedCollapse'
 
 interface Props {
   readonly changedOptionsCount: number
@@ -72,9 +71,9 @@ function MoreOptions({
       </XStack>
 
       {expanded ? (
-        <AnimatedCollapse expanded animateOnMount>
+        <Collapse expanded animateOnMount>
           {children}
-        </AnimatedCollapse>
+        </Collapse>
       ) : null}
     </>
   )

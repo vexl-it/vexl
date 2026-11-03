@@ -1,18 +1,19 @@
 import {
   Button,
+  Divider,
   FlagReport,
+  InfoBox,
   NavigationBar,
   PeopleUsers,
   RefreshArrowsRectangle,
   Screen,
-  Stack,
   Typography,
   XStack,
   XmarkCancelClose,
   YStack,
   useTheme,
+  type IconProps,
 } from '@vexl-next/ui'
-import {type IconProps} from '@vexl-next/ui/src/icons/types'
 import {Effect, Either} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useMemo} from 'react'
@@ -81,7 +82,6 @@ export default function NoteDetailScreen({
 }: Props): React.JSX.Element {
   const {noteId} = route.params
   const {t} = useTranslation()
-  const theme = useTheme()
   const goBack = useSafeGoBack()
 
   const noteAtom = useMemo(() => singleNoteAtom(noteId), [noteId])
@@ -247,20 +247,9 @@ export default function NoteDetailScreen({
               })}
             />
           ) : (
-            <XStack
-              backgroundColor="$backgroundSecondary"
-              borderRadius="$5"
-              padding="$5"
-              gap="$1"
-              alignItems="center"
-              pressStyle={{opacity: 0.7}}
-              onPress={handleNoCommonFriendsPress}
-            >
-              <PeopleUsers size={18} color={theme.foregroundSecondary.get()} />
-              <Typography variant="micro" color="$foregroundSecondary" flex={1}>
-                {t('offer.noCommonFriendsExplanation')}
-              </Typography>
-            </XStack>
+            <InfoBox icon={PeopleUsers} onPress={handleNoCommonFriendsPress}>
+              {t('offer.noCommonFriendsExplanation')}
+            </InfoBox>
           )
         ) : null}
 
@@ -286,11 +275,7 @@ export default function NoteDetailScreen({
               )
             ) : null}
             {showRepostRow && showReportRow ? (
-              <Stack
-                height={1}
-                marginHorizontal="$4"
-                backgroundColor="$backgroundTertiary"
-              />
+              <Divider marginHorizontal="$4" />
             ) : null}
             {showReportRow ? (
               <ActionRow

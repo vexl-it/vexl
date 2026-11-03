@@ -3,7 +3,6 @@ import {
   KeyboardAwareScrollView,
   KeyboardStickyView,
   Stack,
-  Typography,
   XStack,
   YStack,
   useTheme,
@@ -108,38 +107,6 @@ export default function LoginFlowScreen({
       {content}
       {bottomContent}
     </YStack>
-  )
-}
-
-export function LoginFlowTitle({
-  children,
-}: {
-  readonly children: ReactNode
-}): React.ReactElement {
-  return (
-    <Typography
-      color="$foregroundPrimary"
-      textAlign="center"
-      variant="heading3"
-    >
-      {children}
-    </Typography>
-  )
-}
-
-export function LoginFlowText({
-  children,
-}: {
-  readonly children: ReactNode
-}): React.ReactElement {
-  return (
-    <Typography
-      color="$foregroundSecondary"
-      textAlign="center"
-      variant="paragraphSmall"
-    >
-      {children}
-    </Typography>
   )
 }
 

@@ -1,10 +1,12 @@
 import {spokenLanguagesOptions} from '@vexl-next/domain/src/general/offers'
 import {
   ChevronLeft,
-  Loader,
+  Collapse,
+  Divider,
+  InfoBox,
   NavButton,
   Screen,
-  Separator,
+  SectionHeader,
   Stack,
   Switch,
   Typography,
@@ -33,7 +35,6 @@ import {
   saveFilterActionAtom,
   updateCurrencyLimitsAtom,
 } from './atom'
-import AnimatedCollapse from './components/AnimatedCollapse'
 import BtcPriceInfo from './components/BtcPriceInfo'
 import ClubsSection from './components/ClubsSection'
 import FilterOffersFooter from './components/FilterOffersFooter'
@@ -115,7 +116,7 @@ function FilterOffersScreen(): React.ReactElement {
         <YStack paddingHorizontal="$5" gap="$3">
           <LookingToSection />
 
-          <Separator marginVertical="$5" borderColor="$backgroundTertiary" />
+          <Divider marginVertical="$5" />
 
           {/* Sort by */}
           <Typography
@@ -127,7 +128,7 @@ function FilterOffersScreen(): React.ReactElement {
           </Typography>
           <Sorting />
 
-          <Separator marginVertical="$5" borderColor="$backgroundTertiary" />
+          <Divider marginVertical="$5" />
 
           {/* Show offers */}
           <Typography
@@ -141,32 +142,21 @@ function FilterOffersScreen(): React.ReactElement {
 
           <ProductCategorySection />
 
-          <Separator marginVertical="$5" borderColor="$backgroundTertiary" />
+          <Divider marginVertical="$5" />
 
           {/* Amount */}
-          <XStack alignItems="center" gap="$4" paddingVertical="$3">
-            <YStack flex={1} gap="$1">
-              <Typography variant="titlesSmall" color="$foregroundPrimary">
-                {t('offerForm.amountOfTransaction.amountOfTransaction')}
-              </Typography>
-              <Typography variant="description" color="$foregroundSecondary">
-                {t('filterOffers.amountDescription')}
-              </Typography>
-            </YStack>
-            <Switch valueAtom={amountFilterEnabledAtom} />
-          </XStack>
-          <AnimatedCollapse expanded={amountContentVisible}>
+          <SectionHeader
+            paddingVertical="$3"
+            title={t('offerForm.amountOfTransaction.amountOfTransaction')}
+            description={t('filterOffers.amountDescription')}
+            trailing={<Switch valueAtom={amountFilterEnabledAtom} />}
+          />
+          <Collapse expanded={amountContentVisible}>
             <YStack gap="$3">
               {amountContentVisible && !amountPricesReady ? (
-                <XStack alignItems="center" gap="$3" paddingHorizontal="$4">
-                  <Loader size="small" />
-                  <Typography
-                    variant="description"
-                    color="$foregroundSecondary"
-                  >
-                    {t('offerForm.loadingExchangeRate')}
-                  </Typography>
-                </XStack>
+                <InfoBox variant="naked" loading paddingHorizontal="$4">
+                  {t('offerForm.loadingExchangeRate')}
+                </InfoBox>
               ) : null}
               {amountContentVisible ? (
                 <>
@@ -193,9 +183,9 @@ function FilterOffersScreen(): React.ReactElement {
                 </>
               ) : null}
             </YStack>
-          </AnimatedCollapse>
+          </Collapse>
 
-          <Separator marginVertical="$5" borderColor="$backgroundTertiary" />
+          <Divider marginVertical="$5" />
 
           {/* Location */}
           <Typography
@@ -207,7 +197,7 @@ function FilterOffersScreen(): React.ReactElement {
           </Typography>
           <LocationSection />
 
-          <Separator marginVertical="$5" borderColor="$backgroundTertiary" />
+          <Divider marginVertical="$5" />
 
           {/* Preferred language */}
           <Typography
@@ -223,7 +213,7 @@ function FilterOffersScreen(): React.ReactElement {
             ))}
           </XStack>
 
-          <Separator marginVertical="$5" borderColor="$backgroundTertiary" />
+          <Divider marginVertical="$5" />
 
           {/* Network */}
           <Typography
@@ -235,7 +225,7 @@ function FilterOffersScreen(): React.ReactElement {
           </Typography>
           <NetworkSection />
 
-          <Separator marginVertical="$5" borderColor="$backgroundTertiary" />
+          <Divider marginVertical="$5" />
 
           {/* Connection */}
           <Typography
@@ -254,23 +244,18 @@ function FilterOffersScreen(): React.ReactElement {
             intendedConnectionLevelAtom={intendedConnectionLevelAtom}
           />
 
-          <Separator marginVertical="$5" borderColor="$backgroundTertiary" />
+          <Divider marginVertical="$5" />
 
           {/* Show club offers */}
-          <XStack alignItems="center" gap="$4" paddingVertical="$3">
-            <YStack flex={1} gap="$1">
-              <Typography variant="titlesSmall" color="$foregroundPrimary">
-                {t('filterOffers.showClubOffers')}
-              </Typography>
-              <Typography variant="description" color="$foregroundSecondary">
-                {t('filterOffers.clubsDescription')}
-              </Typography>
-            </YStack>
-            <Switch valueAtom={clubsFilterEnabledAtom} />
-          </XStack>
-          <AnimatedCollapse expanded={clubsFilterEnabled}>
+          <SectionHeader
+            paddingVertical="$3"
+            title={t('filterOffers.showClubOffers')}
+            description={t('filterOffers.clubsDescription')}
+            trailing={<Switch valueAtom={clubsFilterEnabledAtom} />}
+          />
+          <Collapse expanded={clubsFilterEnabled}>
             <ClubsSection />
-          </AnimatedCollapse>
+          </Collapse>
         </YStack>
       </DeferredContent>
     </Screen>

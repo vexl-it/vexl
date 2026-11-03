@@ -1,5 +1,5 @@
 import {useFocusEffect} from '@react-navigation/native'
-import {type TabItem, Tabs} from '@vexl-next/ui'
+import {LoadingOverlay, type TabItem, Tabs} from '@vexl-next/ui'
 import {Effect} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {
@@ -33,7 +33,6 @@ import {
   runAfterTwoAnimationFrames,
 } from '../../../../../utils/runAfterAnimationFrames'
 import {useAppState} from '../../../../../utils/useAppState'
-import MarketplaceLoadingOverlay from '../../../../MarketplaceLoadingOverlay'
 import OffersList from '../../../../OffersList'
 import RetainedScene from '../../../../RetainedScene'
 import {InsideScreenListHeader, useInsideScreenScroll} from '../../InsideScreen'
@@ -298,7 +297,7 @@ const AllOffersScene = React.memo(function AllOffersScene({
         maintainVisibleContentPosition={{disabled: true}}
         onCommitLayoutEffect={handleOffersListCommit}
       />
-      <MarketplaceLoadingOverlay
+      <LoadingOverlay
         label={t('marketplace.loadingOffers')}
         top={listHeaderHeight}
         visible={isFilterTransitionPending}

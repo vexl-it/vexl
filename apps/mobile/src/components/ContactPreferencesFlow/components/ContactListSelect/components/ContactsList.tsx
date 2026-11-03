@@ -1,5 +1,5 @@
 import {FlashList} from '@shopify/flash-list'
-import {Separator, Stack} from '@vexl-next/ui'
+import {Divider, Stack} from '@vexl-next/ui'
 import {type Atom} from 'jotai'
 import React from 'react'
 import {type StoredContactWithComputedValues} from '../../../../../state/contacts/domain'
@@ -24,7 +24,7 @@ function renderItem({
 }
 
 function ItemSeparatorComponent(): React.ReactElement {
-  return <Separator borderColor="$backgroundTertiary" />
+  return <Divider />
 }
 
 function ContactsList({

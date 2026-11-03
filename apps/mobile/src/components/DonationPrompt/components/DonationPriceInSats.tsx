@@ -1,4 +1,4 @@
-import {Typography, XStack} from '@vexl-next/ui'
+import {Loader, Typography, useTheme, XStack} from '@vexl-next/ui'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useEffect, useMemo} from 'react'
 import {
@@ -8,7 +8,6 @@ import {
 } from '../../../state/currentBtcPriceAtoms'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {localizedDecimalNumberActionAtom} from '../../../utils/localization/localizedNumbersAtoms'
-import VexlActivityIndicator from '../../LoadingOverlayProvider/VexlActivityIndicator'
 import {
   donationAmountAtom,
   selectedPredefinedDonationValueAtom,
@@ -16,6 +15,7 @@ import {
 
 function DonationPriceInSats(): React.ReactElement {
   const {t} = useTranslation()
+  const theme = useTheme()
 
   const donationAmount = useAtomValue(donationAmountAtom)
   const selectedPredefinedDonationValue = useAtomValue(
@@ -62,7 +62,7 @@ function DonationPriceInSats(): React.ReactElement {
         {`${t('offer.approximatelyAbbreviation')}`}
       </Typography>
       {btcPriceWithState?.state === 'loading' ? (
-        <VexlActivityIndicator size="small" bc="$backgroundTertiary" />
+        <Loader size="small" color={theme.foregroundSecondary.get()} />
       ) : (
         <Typography variant="description" color="$foregroundPrimary">
           {localizedDonationInSats}

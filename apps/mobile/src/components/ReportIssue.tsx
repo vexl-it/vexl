@@ -1,16 +1,14 @@
-import Clipboard from '@react-native-clipboard/clipboard'
-import {FlagReport, Stack, Typography, useTheme, XStack} from '@vexl-next/ui'
+import {CopyField, Stack, Typography} from '@vexl-next/ui'
 import {Effect} from 'effect/index'
 import {atom, useSetAtom} from 'jotai'
 import React from 'react'
-import {TouchableOpacity} from 'react-native'
 import {contactSupportActionAtom} from '../utils/contactSupportActionAtom'
+import {copyToClipboardWithToastActionAtom} from '../utils/copyToClipboardWithToastActionAtom'
 import {
   translationAtom,
   useTranslation,
 } from '../utils/localization/I18nProvider'
 import {askAreYouSureActionAtom} from './GlobalDialog'
-import {toastNotificationAtom} from './ToastNotification/atom'
 
 // atom needs to be defined here to avoid circular dependencies with MainSectionComponent: ReportIssue used in askAreYouSureActionAtom
 export const reportIssueDialogAtom = atom(
@@ -46,11 +44,10 @@ interface Props {
 
 function ReportIssue({title, subtitle}: Props): React.ReactElement {
   const {t} = useTranslation()
-  const theme = useTheme()
 
   const supportEmail = t('settings.items.supportEmail')
   const contactSupport = useSetAtom(contactSupportActionAtom)
-  const setToastNotification = useSetAtom(toastNotificationAtom)
+  const copyToClipboard = useSetAtom(copyToClipboardWithToastActionAtom)
 
   return (
     <Stack gap="$2" jc="flex-end">
@@ -66,21 +63,16 @@ function ReportIssue({title, subtitle}: Props): React.ReactElement {
       <Typography variant="paragraph" color="$foregroundSecondary">
         {subtitle ?? t('reportIssue.feelFreeToGetInTouch')}
       </Typography>
-      <XStack ai="center" gap="$3" mt="$6" onPress={contactSupport}>
-        <Stack ai="center" jc="center" bc="$backgroundSecondary" p="$3" br="$5">
-          <FlagReport color={theme.foregroundSecondary.get()} size={24} />
-        </Stack>
-        <TouchableOpacity
-          onPress={() => {
-            Clipboard.setString(supportEmail)
-            setToastNotification(t('common.copied'))
-          }}
-        >
-          <Typography variant="paragraph" color="$foregroundPrimary">
-            {supportEmail}
-          </Typography>
-        </TouchableOpacity>
-      </XStack>
+      <CopyField
+        mt="$6"
+        backgroundColor="$backgroundPrimary"
+        value={supportEmail}
+        copyAccessibilityLabel={t('common.copy')}
+        onPress={contactSupport}
+        onCopy={() => {
+          copyToClipboard(supportEmail)
+        }}
+      />
     </Stack>
   )
 }

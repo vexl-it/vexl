@@ -1,4 +1,4 @@
-import {Button, Screen, Stack, Typography} from '@vexl-next/ui'
+import {EmptyState, Screen} from '@vexl-next/ui'
 import {ScopeProvider} from 'bunshi/dist/react'
 import {useAtomValue, useStore} from 'jotai'
 import React, {useCallback, useMemo} from 'react'
@@ -52,20 +52,16 @@ export default function ChatDetailScreen({
   if (!chatExists)
     return (
       <Screen navigationBar={null} noHorizontalPadding>
-        <Stack gap="$5" f={1} ai="center" jc="center" mt="$6">
-          <Typography color="$foregroundPrimary" variant="heading3">
-            {t('common.chatNotFoundError')}
-          </Typography>
-          <Button
-            variant="primary"
-            size="large"
-            onPress={() => {
-              safeGoBack()
-            }}
-          >
-            {t('common.goBack')}
-          </Button>
-        </Stack>
+        <EmptyState
+          fullscreen
+          px="$5"
+          title={t('common.chatNotFoundError')}
+          action={{
+            label: t('common.goBack'),
+            onPress: safeGoBack,
+            variant: 'primary',
+          }}
+        />
       </Screen>
     )
 

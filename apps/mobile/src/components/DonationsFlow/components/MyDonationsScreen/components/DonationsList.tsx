@@ -1,7 +1,10 @@
 import {FlashList} from '@shopify/flash-list'
 import {
+  EmptyState,
   FabButton,
   Gift,
+  MyDonationsEmptyStateGraphic,
+  RefreshControl,
   Stack,
   Tabs,
   Typography,
@@ -12,7 +15,6 @@ import {
 import {Array, Effect} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useMemo, useState} from 'react'
-import {RefreshControl} from 'react-native-gesture-handler'
 import {getTokens} from 'tamagui'
 import {myDonationsSortedAtom} from '../../../../../state/donations/atom'
 import {type MyDonation} from '../../../../../state/donations/domain'
@@ -26,7 +28,6 @@ import {
   type DonationStatusFilter,
 } from '../donationStatusFilter'
 import DonationsListItem from './DonationsListItem'
-import EmptyListPlaceholder from './EmptyListPlaceholder'
 
 function Separator(): React.ReactElement {
   return <Stack height="$5" />
@@ -66,9 +67,14 @@ function DonationsList({onDonatePress}: Props): React.ReactElement {
 
   if (!Array.isNonEmptyArray(myDonationsSorted)) {
     return (
-      <Stack flex={1} px="$5">
-        <EmptyListPlaceholder onDonatePress={onDonatePress} />
-      </Stack>
+      <EmptyState
+        flex={1}
+        px="$5"
+        graphic={<MyDonationsEmptyStateGraphic width={240} height={240} />}
+        title={t('donations.emptyState.title')}
+        description={t('donations.emptyState.description')}
+        action={{label: t('donationPrompt.donate'), onPress: onDonatePress}}
+      />
     )
   }
 
@@ -100,20 +106,18 @@ function DonationsList({onDonatePress}: Props): React.ReactElement {
         }
         ItemSeparatorComponent={Separator}
         ListEmptyComponent={
-          <EmptyListPlaceholder
-            variant="noMatchingDonations"
-            onDonatePress={onDonatePress}
+          <EmptyState
+            title={t('donations.filteredEmptyState.title')}
+            description={t('donations.filteredEmptyState.description')}
           />
         }
         showsVerticalScrollIndicator={false}
         renderItem={renderItem}
         keyExtractor={(donation) => donation.invoiceId}
-        indicatorStyle="white"
         refreshControl={
           <RefreshControl
             refreshing={myDonationsRefreshing}
             onRefresh={() => Effect.runFork(refreshMyDonations())}
-            tintColor={theme.foregroundTertiary.get()}
           />
         }
       />

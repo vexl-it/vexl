@@ -1,18 +1,13 @@
-import Clipboard from '@react-native-clipboard/clipboard'
 import {FlashList} from '@shopify/flash-list'
 import {type Event} from '@vexl-next/rest-api/src/services/content/contracts'
 import {
   Banner,
-  Button,
-  Copy,
+  CopyField,
   EventCard,
   type EventCardAttendee,
-  Loader,
+  LoadErrorState,
   Stack,
   Typography,
-  XStack,
-  YStack,
-  useTheme,
 } from '@vexl-next/ui'
 import dayjs from 'dayjs'
 import {Array, Effect, Option, pipe} from 'effect'
@@ -20,9 +15,9 @@ import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useEffect, useMemo} from 'react'
 import {Linking} from 'react-native'
 import {getTokens} from 'tamagui'
+import {copyToClipboardWithToastActionAtom} from '../../../../../../utils/copyToClipboardWithToastActionAtom'
 import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
 import {globalDialogAtom} from '../../../../../GlobalDialog'
-import {toastNotificationAtom} from '../../../../../ToastNotification/atom'
 import {
   createEventActionAtom,
   eventsStateAtom,
@@ -98,59 +93,17 @@ function toEventCardAttendee(
 
 function MarketingEmailDialogContent(): React.JSX.Element {
   const {t} = useTranslation()
-  const theme = useTheme()
-  const setToastNotification = useSetAtom(toastNotificationAtom)
+  const copyToClipboard = useSetAtom(copyToClipboardWithToastActionAtom)
   const marketingEmail = t('common.marketingEmailAddress')
 
-  const handleCopyPress = useCallback(() => {
-    Clipboard.setString(marketingEmail)
-    setToastNotification(t('common.copied'))
-  }, [marketingEmail, setToastNotification, t])
-
   return (
-    <XStack
-      alignItems="center"
+    <CopyField
       backgroundColor="$backgroundPrimary"
-      borderRadius="$4"
-      gap="$3"
-      height="$12"
-      justifyContent="space-between"
-      paddingLeft="$4"
-      paddingRight="$2"
-    >
-      <Typography
-        color="$foregroundPrimary"
-        flex={1}
-        numberOfLines={1}
-        variant="paragraphSmall"
-      >
-        {marketingEmail}
-      </Typography>
-      <Stack
-        alignItems="center"
-        backgroundColor="$backgroundTertiary"
-        borderRadius="$3"
-        height="$9"
-        justifyContent="center"
-        onPress={handleCopyPress}
-        role="button"
-        width="$9"
-      >
-        <Copy color={theme.foregroundPrimary.get()} size={20} />
-      </Stack>
-    </XStack>
-  )
-}
-
-function SectionTitle({
-  children,
-}: {
-  readonly children: string
-}): React.JSX.Element {
-  return (
-    <Typography color="$foregroundPrimary" variant="titlesSmall">
-      {children}
-    </Typography>
+      value={marketingEmail}
+      onCopy={() => {
+        copyToClipboard(marketingEmail)
+      }}
+    />
   )
 }
 
@@ -288,7 +241,11 @@ function EventsScreen(): React.JSX.Element {
     ({item}: {readonly item: EventListItem}) => {
       switch (item.type) {
         case 'sectionTitle':
-          return <SectionTitle>{item.title}</SectionTitle>
+          return (
+            <Typography color="$foregroundPrimary" variant="titlesSmall">
+              {item.title}
+            </Typography>
+          )
         case 'event':
           return <EventItem event={item.event} state={item.state} />
         case 'contactBanner':
@@ -316,30 +273,17 @@ function EventsScreen(): React.JSX.Element {
 
   if (Option.isNone(data)) {
     return (
-      <YStack flex={1} paddingHorizontal="$5" paddingTop="$6" gap="$6">
-        {!!loading && (
-          <Stack paddingVertical="$5">
-            <Loader size="large" />
-          </Stack>
-        )}
-
-        {Option.isSome(error) && (
-          <YStack gap="$6" alignItems="flex-start">
-            <Typography color="$foregroundPrimary" variant="paragraphSmall">
-              {t('events.errorLoadingEvents')}
-            </Typography>
-            <Button
-              size="small"
-              variant="primary"
-              onPress={() => {
-                void loadEvents()
-              }}
-            >
-              {t('common.tryAgain')}
-            </Button>
-          </YStack>
-        )}
-      </YStack>
+      <LoadErrorState
+        paddingHorizontal="$5"
+        loading={loading}
+        errorMessage={
+          Option.isSome(error) ? t('events.errorLoadingEvents') : undefined
+        }
+        retryLabel={t('common.tryAgain')}
+        onRetry={() => {
+          void loadEvents()
+        }}
+      />
     )
   }
 

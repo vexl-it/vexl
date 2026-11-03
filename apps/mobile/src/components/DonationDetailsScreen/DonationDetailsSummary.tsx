@@ -1,12 +1,13 @@
-import {Copy, Typography, useTheme, XStack, YStack} from '@vexl-next/ui'
+import {
+  Copy,
+  DetailsCard,
+  KeyValueRow,
+  Typography,
+  useTheme,
+  XStack,
+} from '@vexl-next/ui'
 import React from 'react'
 import {useTranslation} from '../../utils/localization/I18nProvider'
-
-interface SummaryRowProps {
-  readonly label: string
-  readonly value?: string
-  readonly children?: React.ReactNode
-}
 
 export interface DonationSummaryData {
   readonly localizedSatsAmount: string
@@ -14,52 +15,6 @@ export interface DonationSummaryData {
   readonly localizedExchangeRate: string
   readonly invoiceId: string
   readonly createdAt: string
-}
-
-export function SummaryRow({
-  label,
-  value,
-  children,
-}: SummaryRowProps): React.ReactElement {
-  return (
-    <XStack alignItems="center" justifyContent="space-between" gap="$4">
-      <Typography
-        variant="micro"
-        color="$foregroundSecondary"
-        flex={1}
-        numberOfLines={1}
-      >
-        {label}
-      </Typography>
-      {children ?? (
-        <Typography
-          variant="descriptionBold"
-          color="$foregroundPrimary"
-          numberOfLines={1}
-          flexShrink={1}
-        >
-          {value}
-        </Typography>
-      )}
-    </XStack>
-  )
-}
-
-export function Card({
-  children,
-}: {
-  readonly children: React.ReactNode
-}): React.ReactElement {
-  return (
-    <YStack
-      backgroundColor="$backgroundSecondary"
-      borderRadius="$5"
-      padding="$4"
-      gap="$5"
-    >
-      {children}
-    </YStack>
-  )
 }
 
 export function DonationSummaryCard({
@@ -77,29 +32,34 @@ export function DonationSummaryCard({
   const theme = useTheme()
 
   return (
-    <Card>
-      <SummaryRow
+    <DetailsCard>
+      <KeyValueRow
         label={t('donationPrompt.totalPrice')}
         value={summary.localizedSatsAmount}
+        numberOfLines={1}
       />
-      <SummaryRow
+      <KeyValueRow
         label={t('donationPrompt.totalFiat')}
-        value={`${summary.localizedFiatAmount}`}
+        value={summary.localizedFiatAmount}
+        numberOfLines={1}
       />
-      <SummaryRow
+      <KeyValueRow
         label={t('donationPrompt.exchangeRate')}
         value={`1 BTC = ${summary.localizedExchangeRate}`}
+        numberOfLines={1}
       />
-      <SummaryRow
+      <KeyValueRow
         label={t('donationPrompt.amountDue')}
         value={summary.localizedSatsAmount}
+        numberOfLines={1}
       />
       {onCopyInvoiceId ? (
-        <SummaryRow label={t('donations.detail.invoiceId')}>
+        <KeyValueRow label={t('donations.detail.invoiceId')}>
           <XStack
+            flex={1}
             alignItems="center"
+            justifyContent="flex-end"
             gap="$1"
-            flexShrink={1}
             pressStyle={{opacity: 0.7}}
             onPress={onCopyInvoiceId}
           >
@@ -113,20 +73,26 @@ export function DonationSummaryCard({
               {summary.invoiceId}
             </Typography>
           </XStack>
-        </SummaryRow>
+        </KeyValueRow>
       ) : (
-        <SummaryRow
+        <KeyValueRow
           label={t('donations.detail.invoiceId')}
           value={summary.invoiceId}
+          numberOfLines={1}
         />
       )}
-      <SummaryRow
+      <KeyValueRow
         label={t('donationPrompt.createdAt')}
         value={summary.createdAt}
+        numberOfLines={1}
       />
       {finalTimestampLabel && finalTimestampValue ? (
-        <SummaryRow label={finalTimestampLabel} value={finalTimestampValue} />
+        <KeyValueRow
+          label={finalTimestampLabel}
+          value={finalTimestampValue}
+          numberOfLines={1}
+        />
       ) : null}
-    </Card>
+    </DetailsCard>
   )
 }

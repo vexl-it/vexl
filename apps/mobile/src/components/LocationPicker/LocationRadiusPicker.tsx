@@ -1,6 +1,12 @@
 import {useNavigation} from '@react-navigation/native'
 import {calculateViewportRadius} from '@vexl-next/domain/src/utility/geoCoordinates'
-import {Button, NavigationBar, TextField, Typography} from '@vexl-next/ui'
+import {
+  Button,
+  Divider,
+  NavigationBar,
+  TextField,
+  Typography,
+} from '@vexl-next/ui'
 import {ChevronLeft} from '@vexl-next/ui/src/icons'
 import {Stack, XStack, YStack} from '@vexl-next/ui/src/primitives'
 import {useMolecule} from 'bunshi/dist/react'
@@ -159,7 +165,7 @@ export default function LocationRadiusPicker({
             },
           }}
         />
-        <Stack height={1} backgroundColor="$backgroundPrimary" />
+        <Divider />
         <XStack paddingHorizontal="$5" paddingVertical="$5" alignItems="center">
           <Typography
             variant="micro"

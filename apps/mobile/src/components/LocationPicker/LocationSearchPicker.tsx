@@ -1,7 +1,8 @@
 import {useNavigation} from '@react-navigation/native'
 import {type LocationSuggestion} from '@vexl-next/rest-api/src/services/location/contracts'
 import {
-  Button,
+  Divider,
+  EmptyState,
   NavigationBar,
   Screen,
   SearchBar,
@@ -108,47 +109,20 @@ function LocationSearchContent({
           {t('common.loading')}...
         </Typography>
       ) : error != null ? (
-        <YStack
-          alignItems="center"
-          gap="$5"
-          paddingHorizontal="$5"
-          paddingTop="$10"
-        >
-          <Typography
-            variant="paragraph"
-            color="$foregroundSecondary"
-            textAlign="center"
-          >
-            {t('offerForm.location.searchError')}
-          </Typography>
-          <XStack gap="$3" alignSelf="stretch">
-            <Button
-              flex={1}
-              variant="primary"
-              size="medium"
-              onPress={handleRetry}
-            >
-              {t('common.tryAgain')}
-            </Button>
-            <Button
-              flex={1}
-              variant="secondary"
-              size="medium"
-              onPress={onPickOnMap}
-            >
-              {t('offerForm.location.pickOnMap')}
-            </Button>
-          </XStack>
-        </YStack>
+        <EmptyState
+          description={t('offerForm.location.searchError')}
+          action={{
+            label: t('common.tryAgain'),
+            onPress: handleRetry,
+            variant: 'primary',
+          }}
+          secondaryAction={{
+            label: t('offerForm.location.pickOnMap'),
+            onPress: onPickOnMap,
+          }}
+        />
       ) : searchResultsAtoms.length === 0 ? (
-        <Typography
-          variant="paragraph"
-          color="$foregroundSecondary"
-          textAlign="center"
-          paddingTop="$10"
-        >
-          {t('common.noResults')}
-        </Typography>
+        <EmptyState description={t('common.noResults')} />
       ) : (
         <FlatList
           showsVerticalScrollIndicator={false}
@@ -194,7 +168,7 @@ function LocationResultItem({
               {data.userData.suggestSecondRow}
             </Typography>
           </YStack>
-          <Stack height={1} backgroundColor="$backgroundHighlight" />
+          <Divider />
         </YStack>
       </XStack>
     </Stack>

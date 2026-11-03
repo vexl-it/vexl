@@ -1,6 +1,11 @@
 import Clipboard from '@react-native-clipboard/clipboard'
-import {DonationThanksHeartGraphic, Screen, Typography} from '@vexl-next/ui'
-import {ScrollView, YStack} from '@vexl-next/ui/src/primitives'
+import {
+  DonationThanksHeartGraphic,
+  EmptyState,
+  Screen,
+  ScrollView,
+  YStack,
+} from '@vexl-next/ui'
 import {useSetAtom} from 'jotai'
 import React from 'react'
 import {getTokens} from 'tamagui'
@@ -43,30 +48,12 @@ export function SettledDonationDetails({
       >
         <YStack gap="$5">
           <DonationDetailTitleRow title={title} status="Settled" />
-          <YStack
-            backgroundColor="$backgroundSecondary"
-            borderRadius="$5"
-            padding="$5"
-            gap="$5"
-            alignItems="center"
-            justifyContent="center"
-          >
-            <DonationThanksHeartGraphic />
-            <Typography
-              variant="heading2"
-              color="$foregroundPrimary"
-              textAlign="center"
-            >
-              {t('donations.detail.thanksTitle')}
-            </Typography>
-            <Typography
-              variant="paragraphSmall"
-              color="$foregroundSecondary"
-              textAlign="center"
-            >
-              {t('donations.detail.thanksDescription')}
-            </Typography>
-          </YStack>
+          <EmptyState
+            framed
+            graphic={<DonationThanksHeartGraphic />}
+            title={t('donations.detail.thanksTitle')}
+            description={t('donations.detail.thanksDescription')}
+          />
           <DonationSummaryCard
             summary={summary}
             finalTimestampLabel={t('donations.detail.paidAt')}

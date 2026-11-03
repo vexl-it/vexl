@@ -7,6 +7,7 @@ import {
   DismissKeyboardOnPressOutside,
   Input,
   KeyboardStickyView,
+  LoadingOverlay,
   Stack,
   Switch,
   Typography,
@@ -33,7 +34,6 @@ import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import toE164PhoneNumberWithDefaultCountryCode from '../../../../../utils/toE164PhoneNumberWithDefaultCountryCode'
 import usePreventDiscardChangesWithConfirmation from '../../../../../utils/usePreventDiscardChangesWithConfirmation'
 import {globalDialogAtom} from '../../../../GlobalDialog'
-import PreparingContactsOverlay from '../../PreparingContactsOverlay'
 import {contactSelectMolecule} from '../atom'
 
 interface Props {
@@ -406,9 +406,9 @@ export default function AddNewContactForm({
             </Button>
           </YStack>
         </KeyboardStickyView>
-        <PreparingContactsOverlay
-          labelKey="contacts.processingContacts"
+        <LoadingOverlay
           visible={isSavingContact}
+          label={t('contacts.processingContacts')}
         />
       </YStack>
     </DismissKeyboardOnPressOutside>

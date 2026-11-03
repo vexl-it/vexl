@@ -1,6 +1,7 @@
 import {
   Button,
   ChevronLeft,
+  EmptyState,
   NavigationBar,
   Screen,
   Stack,
@@ -109,18 +110,15 @@ function DeclineChatRequestContent({
   if (!chatExists) {
     return (
       <Screen navigationBar={navigationBar}>
-        <YStack flex={1} alignItems="center" justifyContent="center" gap="$5">
-          <Typography
-            variant="titlesSmall"
-            color="$foregroundPrimary"
-            textAlign="center"
-          >
-            {t('common.chatNotFoundError')}
-          </Typography>
-          <Button variant="primary" onPress={handleBack} width="100%">
-            {t('common.back')}
-          </Button>
-        </YStack>
+        <EmptyState
+          fullscreen
+          title={t('common.chatNotFoundError')}
+          action={{
+            label: t('common.back'),
+            onPress: handleBack,
+            variant: 'primary',
+          }}
+        />
       </Screen>
     )
   }
@@ -128,18 +126,15 @@ function DeclineChatRequestContent({
   if (!offer) {
     return (
       <Screen navigationBar={navigationBar}>
-        <YStack flex={1} alignItems="center" justifyContent="center" gap="$5">
-          <Typography
-            variant="titlesSmall"
-            color="$foregroundPrimary"
-            textAlign="center"
-          >
-            {t('offer.offerNotFound')}
-          </Typography>
-          <Button variant="primary" onPress={handleBack} width="100%">
-            {t('common.back')}
-          </Button>
-        </YStack>
+        <EmptyState
+          fullscreen
+          title={t('offer.offerNotFound')}
+          action={{
+            label: t('common.back'),
+            onPress: handleBack,
+            variant: 'primary',
+          }}
+        />
       </Screen>
     )
   }

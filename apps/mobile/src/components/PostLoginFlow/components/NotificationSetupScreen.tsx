@@ -1,4 +1,4 @@
-import {NotificationsGraphic, YStack} from '@vexl-next/ui'
+import {NotificationsGraphic, TitleBlock, YStack} from '@vexl-next/ui'
 import {Effect} from 'effect'
 import {useSetAtom} from 'jotai'
 import React from 'react'
@@ -9,7 +9,7 @@ import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {offerBackgroundNotificationSocketActionAtom} from '../../../utils/notifications/backgroundNotificationSocket'
 import {setBackgroundNotificationSocketEnabledActionAtom} from '../../../utils/notifications/backgroundNotificationSocket/setBackgroundNotificationSocketEnabledActionAtom'
 import {requestPermissions} from '../../../utils/notifications/checkAndAskForPermissionsActionAtom'
-import PostLoginFlowScreen, {PostLoginFlowCopy} from './PostLoginFlowScreen'
+import PostLoginFlowScreen from './PostLoginFlowScreen'
 
 type Props = PostLoginFlowStackScreenProps<'NotificationSetup'>
 
@@ -58,9 +58,11 @@ export default function NotificationSetupScreen({
           height={153 * graphicScale}
           width={157 * graphicScale}
         />
-        <PostLoginFlowCopy
-          text={t('postLoginFlow.v2.notificationSetup.text')}
+        <TitleBlock
+          align="center"
+          size="large"
           title={t('postLoginFlow.v2.notificationSetup.title')}
+          text={t('postLoginFlow.v2.notificationSetup.text')}
         />
       </YStack>
     </PostLoginFlowScreen>

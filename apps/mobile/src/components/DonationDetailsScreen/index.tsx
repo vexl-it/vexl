@@ -1,11 +1,10 @@
 import {
   Button,
   ChevronLeft,
+  EmptyState,
   NavigationBar,
   Screen,
-  Typography,
   useScreenFooterHeight,
-  YStack,
 } from '@vexl-next/ui'
 import {Effect, Fiber} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
@@ -86,15 +85,7 @@ function DonationDetailsScreen({
           </Button>
         }
       >
-        <YStack flex={1} alignItems="center" justifyContent="center">
-          <Typography
-            variant="titlesSmall"
-            color="$foregroundPrimary"
-            textAlign="center"
-          >
-            {t('donations.detail.donationNotFound')}
-          </Typography>
-        </YStack>
+        <EmptyState fullscreen title={t('donations.detail.donationNotFound')} />
       </Screen>
     )
   }

@@ -3,12 +3,11 @@ import {FlashList} from '@shopify/flash-list'
 import {type CurrencyInfo} from '@vexl-next/domain/src/general/currency.brand'
 import {
   Button,
+  EmptyState,
   NavigationBar,
   Screen,
   SearchBar,
   SelectableItem,
-  Stack,
-  Typography,
   XmarkCancelClose,
 } from '@vexl-next/ui'
 import {Array} from 'effect'
@@ -116,22 +115,10 @@ function AppSettingsCurrencyScreen({
           renderItem={renderItem}
         />
       ) : (
-        <Stack alignItems="center" gap="$4" padding="$6">
-          <Typography
-            variant="heading3"
-            textAlign="center"
-            color="$foregroundPrimary"
-          >
-            {t('common.nothingFound')}
-          </Typography>
-          <Typography
-            variant="description"
-            textAlign="center"
-            color="$foregroundSecondary"
-          >
-            {t('changeCurrency.trySearchingByCurrencyName')}
-          </Typography>
-        </Stack>
+        <EmptyState
+          title={t('common.nothingFound')}
+          description={t('changeCurrency.trySearchingByCurrencyName')}
+        />
       )}
     </Screen>
   )

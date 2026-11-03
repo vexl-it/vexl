@@ -1,4 +1,11 @@
-import {Button, Refresh, Screen, Stack, Typography, YStack} from '@vexl-next/ui'
+import {
+  Button,
+  EmptyState,
+  Refresh,
+  Screen,
+  Typography,
+  YStack,
+} from '@vexl-next/ui'
 import {useSetAtom} from 'jotai'
 import React from 'react'
 import {StyleSheet} from 'react-native'
@@ -45,37 +52,19 @@ export function SessionRecoveryScreen({
           </YStack>
         }
       >
-        <YStack flex={1} justifyContent="space-between" paddingBottom="$8">
-          <YStack flex={1} justifyContent="center" gap="$8">
-            <Stack alignItems="center" justifyContent="center">
-              <Typography
-                variant="heading3"
-                color="$foregroundPrimary"
-                textAlign="center"
-                adjustsFontSizeToFit
-                numberOfLines={3}
-              >
-                {t('errorGettingSession.title')}
-              </Typography>
-            </Stack>
-
-            <Typography
-              variant="paragraph"
-              color="$foregroundSecondary"
-              textAlign="center"
-            >
-              {t('errorGettingSession.text')}
-            </Typography>
-
-            <Typography
-              variant="micro"
-              color="$foregroundTertiary"
-              textAlign="center"
-            >
-              {errorCode}
-            </Typography>
-          </YStack>
-        </YStack>
+        <EmptyState
+          fullscreen
+          title={t('errorGettingSession.title')}
+          description={t('errorGettingSession.text')}
+        >
+          <Typography
+            variant="micro"
+            color="$foregroundTertiary"
+            textAlign="center"
+          >
+            {errorCode}
+          </Typography>
+        </EmptyState>
       </Screen>
     </SafeAreaProvider>
   )

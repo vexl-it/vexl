@@ -7,6 +7,7 @@ import {
   RowCheckbox,
   Stack,
   TextField,
+  TitleBlock,
   Typography,
   XmarkCancelClose,
   XStack,
@@ -289,33 +290,29 @@ function ExchangeDetailsScreen(): React.ReactElement {
       <Stack gap="$5" pt="$4">
         <SharedProfile />
         {mode === 'pending' ? (
-          <YStack gap="$2">
-            <Typography variant="heading3" color="$foregroundPrimary">
-              {t('tradeChecklist.exchangeDetails.pendingHeading')}
-            </Typography>
-            <Typography variant="description" color="$foregroundSecondary">
-              {t('tradeChecklist.exchangeDetails.pendingDescription', {
-                details: formatSelectedDetails(t, pendingDetails),
-              })}
-            </Typography>
-          </YStack>
+          <TitleBlock
+            title={t('tradeChecklist.exchangeDetails.pendingHeading')}
+            text={t('tradeChecklist.exchangeDetails.pendingDescription', {
+              details: formatSelectedDetails(t, pendingDetails),
+            })}
+          />
         ) : null}
         {mode === 'respond' || mode === 'request' ? (
           <>
-            <YStack gap="$2">
-              <Typography variant="heading3" color="$foregroundPrimary">
-                {mode === 'respond'
+            <TitleBlock
+              title={
+                mode === 'respond'
                   ? t('tradeChecklist.exchangeDetails.respondHeading')
                   : isAnyDetailSelected(sharedByThem)
                     ? t('tradeChecklist.exchangeDetails.requestMoreHeading')
-                    : t('tradeChecklist.exchangeDetails.requestHeading')}
-              </Typography>
-              {mode === 'respond' ? (
-                <Typography variant="description" color="$foregroundSecondary">
-                  {t('tradeChecklist.exchangeDetails.respondDescription')}
-                </Typography>
-              ) : null}
-            </YStack>
+                    : t('tradeChecklist.exchangeDetails.requestHeading')
+              }
+              text={
+                mode === 'respond'
+                  ? t('tradeChecklist.exchangeDetails.respondDescription')
+                  : undefined
+              }
+            />
             <YStack gap="$3">
               {availableKeys.map((key) => {
                 const Row = ROWS[key]

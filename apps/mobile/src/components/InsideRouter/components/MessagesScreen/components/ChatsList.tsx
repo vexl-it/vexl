@@ -1,11 +1,11 @@
 import {useNavigation} from '@react-navigation/native'
 import {FlashList} from '@shopify/flash-list'
 import {
+  EmptyState,
   FilterBar,
   type FilterBarItem,
   SearchBar,
   TagLabel,
-  Typography,
 } from '@vexl-next/ui'
 import {Option, pipe, Array as ReadonlyArray} from 'effect'
 import {atom, type Atom, useAtom, useAtomValue} from 'jotai'
@@ -30,7 +30,6 @@ import {
 } from '../../../../../state/chatTags/domain'
 import atomKeyExtractor from '../../../../../utils/atomUtils/atomKeyExtractor'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
-import EmptyListWrapper from '../../../../EmptyListWrapper'
 import usePixelsFromBottomWhereTabsEnd from '../../../utils'
 import {InsideScreenListHeader, useInsideScreenScroll} from '../../InsideScreen'
 import ChatListItem, {type ChatListData} from './ChatListItem'
@@ -230,34 +229,19 @@ function ChatsList(): React.ReactElement | null {
 
   const listEmptyComponent =
     selectedTagIds.size > 0 ? null : (
-      <EmptyListWrapper
-        horizontalPadding
-        inScrollView
-        buttonText={t('messages.seeMarketplace')}
-        onButtonPress={() => {
-          navigation.navigate('InsideTabs', {
-            screen: 'Marketplace',
-          })
+      <EmptyState
+        px="$5"
+        title={t('messages.youDontHaveAnyOpenChats')}
+        description={t('messages.startConversationByReactingToOffer')}
+        action={{
+          label: t('messages.seeMarketplace'),
+          onPress: () => {
+            navigation.navigate('InsideTabs', {
+              screen: 'Marketplace',
+            })
+          },
         }}
-      >
-        <Stack gap="$5" pt="$5">
-          <Typography
-            color="$foregroundPrimary"
-            variant="heading3"
-            textAlign="center"
-          >
-            {t('messages.youDontHaveAnyOpenChats')}
-          </Typography>
-          <Typography
-            color="$foregroundSecondary"
-            variant="description"
-            textAlign="center"
-            ta="center"
-          >
-            {t('messages.startConversationByReactingToOffer')}
-          </Typography>
-        </Stack>
-      </EmptyListWrapper>
+      />
     )
 
   return (

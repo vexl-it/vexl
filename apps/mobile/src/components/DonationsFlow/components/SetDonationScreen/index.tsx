@@ -1,6 +1,6 @@
 import {
   Button,
-  InfoCircle,
+  InfoBox,
   Input,
   NavigationBar,
   RadioGroup,
@@ -226,16 +226,9 @@ function SetDonationScreen({navigation}: Props): React.ReactElement {
             )}
           </XStack>
         </YStack>
-        <XStack
-          backgroundColor="$backgroundSecondary"
-          borderRadius="$3"
-          padding="$5"
-          gap="$2"
-          alignItems="center"
-        >
-          <InfoCircle size={18} color={theme.foregroundSecondary.get()} />
+        <InfoBox>
           <DonationPriceInSats />
-        </XStack>
+        </InfoBox>
       </YStack>
     </Screen>
   )

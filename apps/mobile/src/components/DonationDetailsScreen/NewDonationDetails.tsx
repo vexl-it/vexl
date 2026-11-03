@@ -3,12 +3,15 @@ import {useNavigation} from '@react-navigation/native'
 import {
   Button,
   Copy,
+  DetailsCard,
   Download,
   Screen,
+  ScrollView,
+  Stack,
   Typography,
   useTheme,
+  YStack,
 } from '@vexl-next/ui'
-import {ScrollView, Stack, YStack} from '@vexl-next/ui/src/primitives'
 import {useSetAtom} from 'jotai'
 import React from 'react'
 import {getTokens} from 'tamagui'
@@ -17,7 +20,6 @@ import {useTranslation} from '../../utils/localization/I18nProvider'
 import {SharableQrCode, type SharableQrCodeHandle} from '../SharableQrCode'
 import {toastNotificationAtom} from '../ToastNotification/atom'
 import {
-  Card,
   DonationSummaryCard,
   type DonationSummaryData,
 } from './DonationDetailsSummary'
@@ -70,7 +72,7 @@ export function NewDonationDetails({
         <YStack gap="$5">
           <DonationSummaryCard summary={summary} />
 
-          <Card>
+          <DetailsCard>
             <Stack
               width={QR_CODE_SIZE + QR_CODE_BORDER_WIDTH * 2}
               height={QR_CODE_SIZE + QR_CODE_BORDER_WIDTH * 2}
@@ -108,9 +110,9 @@ export function NewDonationDetails({
             >
               {t('donations.downloadImage')}
             </Button>
-          </Card>
+          </DetailsCard>
 
-          <Card>
+          <DetailsCard>
             <YStack gap="$2">
               <Typography variant="micro" color="$foregroundSecondary">
                 {paymentLabel}
@@ -131,7 +133,7 @@ export function NewDonationDetails({
             >
               {t('common.copy')}
             </Button>
-          </Card>
+          </DetailsCard>
         </YStack>
       </ScrollView>
     </Screen>

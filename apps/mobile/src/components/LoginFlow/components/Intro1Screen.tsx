@@ -1,6 +1,7 @@
 import {
   FaqStayAnonymous,
   Stack,
+  TitleBlock,
   Typography,
   VexlTextGraphic,
   YStack,
@@ -12,11 +13,7 @@ import {type LoginFlowStackScreenProps} from '../../../navigationTypes'
 import clearMmkvStorageAndEmptyAtoms from '../../../utils/clearMmkvStorageAndEmptyAtoms'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {showTosSummaryForAlreadyLoggedInUserAtom} from '../../../utils/preferences'
-import LoginFlowScreen, {
-  LoginFlowCentered,
-  LoginFlowText,
-  LoginFlowTitle,
-} from './LoginFlowScreen'
+import LoginFlowScreen, {LoginFlowCentered} from './LoginFlowScreen'
 
 type Props = LoginFlowStackScreenProps<'Intro1'>
 
@@ -76,10 +73,12 @@ export default function Intro1Screen({navigation}: Props): React.ReactElement {
             height={236 * faqGraphicScale}
             width={330 * faqGraphicScale}
           />
-          <YStack gap="$4" width="100%">
-            <LoginFlowTitle>{t('loginFlow.v2.intro1.title')}</LoginFlowTitle>
-            <LoginFlowText>{t('loginFlow.v2.intro1.text')}</LoginFlowText>
-          </YStack>
+          <TitleBlock
+            align="center"
+            size="large"
+            title={t('loginFlow.v2.intro1.title')}
+            text={t('loginFlow.v2.intro1.text')}
+          />
         </YStack>
       </LoginFlowCentered>
     </LoginFlowScreen>

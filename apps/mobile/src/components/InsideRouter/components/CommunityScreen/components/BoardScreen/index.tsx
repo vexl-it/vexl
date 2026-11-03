@@ -6,10 +6,11 @@ import {
 } from '@shopify/flash-list'
 import {type OneNoteInState} from '@vexl-next/domain/src/general/notes'
 import {
-  Button,
+  EmptyState,
   FabButton,
   FilterBar,
   PlusAdd,
+  RefreshControl,
   Stack,
   Typography,
   YStack,
@@ -26,7 +27,6 @@ import React, {
   useRef,
   useState,
 } from 'react'
-import {RefreshControl} from 'react-native'
 import {getTokens} from 'tamagui'
 import {type CommunityTabsScreenProps} from '../../../../../../navigationTypes'
 import {
@@ -289,47 +289,25 @@ function NotesBoard({navigation, route}: Props): React.JSX.Element {
         maintainVisibleContentPosition={{disabled: true}}
         ItemSeparatorComponent={BoardListSeparator}
         ListEmptyComponent={
-          <YStack
-            flex={1}
-            alignItems="center"
-            justifyContent="flex-start"
-            gap="$5"
-            padding="$7"
-          >
-            <Typography
-              variant="heading3"
-              color="$foregroundPrimary"
-              textAlign="center"
-            >
-              {filter === 'mine'
+          <EmptyState
+            title={
+              filter === 'mine'
                 ? t('notes.board.emptyMyTitle')
-                : t('notes.board.emptyAllTitle')}
-            </Typography>
-            <Typography
-              variant="description"
-              color="$foregroundSecondary"
-              textAlign="center"
-            >
-              {filter === 'mine'
+                : t('notes.board.emptyAllTitle')
+            }
+            description={
+              filter === 'mine'
                 ? t('notes.board.emptyMyDescription')
-                : t('notes.board.emptyAllDescription')}
-            </Typography>
-            <Button
-              variant="tertiary"
-              alignSelf="stretch"
-              size="small"
-              onPress={goToCreateNote}
-            >
-              {t('notes.board.newNote')}
-            </Button>
-          </YStack>
+                : t('notes.board.emptyAllDescription')
+            }
+            action={{label: t('notes.board.newNote'), onPress: goToCreateNote}}
+          />
         }
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={handlePullToRefresh}
-            tintColor={theme.foregroundSecondary.get()}
           />
         }
       />

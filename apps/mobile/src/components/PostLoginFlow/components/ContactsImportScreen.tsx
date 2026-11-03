@@ -1,4 +1,4 @@
-import {ContactsGraphic, YStack} from '@vexl-next/ui'
+import {ContactsGraphic, TitleBlock, YStack} from '@vexl-next/ui'
 import {Effect} from 'effect'
 import {useSetAtom} from 'jotai'
 import React, {useState} from 'react'
@@ -10,7 +10,7 @@ import {completePostLoginFlowScreenActionAtom} from '../../../state/postLoginOnb
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {showContactsAccessDeniedExplanationActionAtom} from '../atoms/showContactsAccesDeniedExplanationActionAtom'
 import {showNoContactsFoundExplanationActionAtom} from '../atoms/showNoContactsFoundExplanationActionAtom'
-import PostLoginFlowScreen, {PostLoginFlowCopy} from './PostLoginFlowScreen'
+import PostLoginFlowScreen from './PostLoginFlowScreen'
 
 type Props = PostLoginFlowStackScreenProps<'ContactsImport'>
 
@@ -93,9 +93,11 @@ export default function ContactsImportScreen({
           height={214 * graphicScale}
           width={184 * graphicScale}
         />
-        <PostLoginFlowCopy
-          text={t('postLoginFlow.v2.contactsImport.text')}
+        <TitleBlock
+          align="center"
+          size="large"
           title={t('postLoginFlow.v2.contactsImport.title')}
+          text={t('postLoginFlow.v2.contactsImport.text')}
         />
       </YStack>
     </PostLoginFlowScreen>

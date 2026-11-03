@@ -4,15 +4,13 @@ import {
 } from '@vexl-next/rest-api/src/services/content/contracts'
 import {
   Button,
+  EmptyState,
   FaqWhatIsVexl,
   FullscreenWarningRedGraphic,
   FullscreenWarningYellowGraphic,
   NavigationBar,
   Screen,
-  Stack,
-  Typography,
   XmarkCancelClose,
-  YStack,
 } from '@vexl-next/ui'
 import {Option} from 'effect'
 import React from 'react'
@@ -69,31 +67,12 @@ export function FullscreenWarningComponent({
         ) : undefined
       }
     >
-      <YStack flex={1} justifyContent="center" gap="$8" paddingBottom="$8">
-        <Stack alignItems="center" justifyContent="center">
-          <WarningGraphic type={type} />
-        </Stack>
-
-        <YStack gap="$5">
-          <Typography
-            variant="heading3"
-            color="$foregroundPrimary"
-            textAlign="center"
-            adjustsFontSizeToFit
-            numberOfLines={3}
-          >
-            {title}
-          </Typography>
-
-          <Typography
-            variant="paragraph"
-            color="$foregroundSecondary"
-            textAlign="center"
-          >
-            {description}
-          </Typography>
-        </YStack>
-      </YStack>
+      <EmptyState
+        fullscreen
+        graphic={<WarningGraphic type={type} />}
+        title={title}
+        description={description}
+      />
     </Screen>
   )
 }

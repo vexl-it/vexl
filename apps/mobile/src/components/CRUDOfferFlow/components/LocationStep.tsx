@@ -8,18 +8,18 @@ import {longitudeDeltaToKilometers} from '@vexl-next/domain/src/utility/geoCoord
 import {
   Button,
   EditRow,
+  InfoBox,
   RowButton,
   SegmentedPicker,
-  Typography,
 } from '@vexl-next/ui'
-import {ChevronRight, InfoCircle, PlusAdd} from '@vexl-next/ui/src/icons'
+import {PlusAdd} from '@vexl-next/ui/src/icons'
 import type {IconProps} from '@vexl-next/ui/src/icons/types'
 import {useMolecule} from 'bunshi/dist/react'
 import {Effect} from 'effect'
 import {useAtom, useAtomValue, useSetAtom} from 'jotai'
 import React from 'react'
 import Animated, {FadeIn, FadeOut} from 'react-native-reanimated'
-import {useTheme, XStack, YStack} from 'tamagui'
+import {YStack} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {formatDecimal} from '../../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../../utils/localization/formattingLocaleAtom'
@@ -78,7 +78,6 @@ function LocationStep({
   showInitialIcon,
 }: LocationStepProps): React.ReactElement {
   const {t} = useTranslation()
-  const theme = useTheme()
   const navigation = useNavigation()
   const locale = useAtomValue(formattingLocaleAtom)
   const {getFullLabel} = useAtomValue(offerLocationLabelsAtom)
@@ -211,32 +210,11 @@ function LocationStep({
           ) : (
             <YStack gap="$5">
               {isProduct ? (
-                <XStack
-                  backgroundColor="$backgroundSecondary"
-                  borderRadius="$3"
-                  padding="$5"
-                  gap="$3"
-                  alignItems="flex-start"
-                >
-                  <InfoCircle
-                    color={theme.foregroundSecondary.get()}
-                    size={24}
-                  />
-                  <Typography
-                    variant="description"
-                    color="$foregroundSecondary"
-                    flex={1}
-                  >
-                    {t('offerForm.location.meetingInPersonSafer')}
-                  </Typography>
-                </XStack>
+                <InfoBox>
+                  {t('offerForm.location.meetingInPersonSafer')}
+                </InfoBox>
               ) : (
-                <XStack
-                  backgroundColor="$backgroundSecondary"
-                  borderRadius="$3"
-                  padding="$5"
-                  gap="$5"
-                  alignItems="center"
+                <InfoBox
                   onPress={() => {
                     void Effect.runPromise(
                       showDialog({
@@ -251,24 +229,8 @@ function LocationStep({
                     )
                   }}
                 >
-                  <XStack flex={1} gap="$3" alignItems="flex-start">
-                    <InfoCircle
-                      color={theme.foregroundSecondary.get()}
-                      size={24}
-                    />
-                    <Typography
-                      variant="description"
-                      color="$foregroundSecondary"
-                      flex={1}
-                    >
-                      {t('offerForm.location.onlineTradeWarning')}
-                    </Typography>
-                  </XStack>
-                  <ChevronRight
-                    color={theme.foregroundSecondary.get()}
-                    size={24}
-                  />
-                </XStack>
+                  {t('offerForm.location.onlineTradeWarning')}
+                </InfoBox>
               )}
               <Button variant="primary" size="large" onPress={onComplete}>
                 {ctaLabel ?? t('offerForm.next')}

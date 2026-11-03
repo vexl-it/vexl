@@ -2,9 +2,10 @@ import {FlashList} from '@shopify/flash-list'
 import {
   Button,
   ChevronLeft,
+  Divider,
+  EmptyState,
   NavigationBar,
   Screen,
-  Separator,
   Stack,
   Typography,
 } from '@vexl-next/ui'
@@ -35,7 +36,7 @@ function keyExtractor(item: StoredContactWithComputedValues): string {
 }
 
 function ItemSeparatorComponent(): React.ReactElement {
-  return <Separator borderColor="$backgroundTertiary" />
+  return <Divider />
 }
 
 export default function VexlOnlyContactsScreen(): React.ReactElement {
@@ -96,26 +97,11 @@ export default function VexlOnlyContactsScreen(): React.ReactElement {
           </Stack>
         </Stack>
       ) : (
-        <Stack f={1} pt="$10">
-          <Stack width="100%" px="$6" py="$6" gap="$5" alignItems="center">
-            <Typography
-              width="100%"
-              textAlign="center"
-              color="$foregroundPrimary"
-              variant="heading3"
-            >
-              {t('vexlOnlyContacts.emptyTitle')}
-            </Typography>
-            <Typography
-              width="100%"
-              textAlign="center"
-              color="$foregroundSecondary"
-              variant="description"
-            >
-              {t('vexlOnlyContacts.emptyDescription')}
-            </Typography>
-          </Stack>
-        </Stack>
+        <EmptyState
+          px="$6"
+          title={t('vexlOnlyContacts.emptyTitle')}
+          description={t('vexlOnlyContacts.emptyDescription')}
+        />
       )}
     </Screen>
   )

@@ -1,15 +1,6 @@
 import {FlashList} from '@shopify/flash-list'
 import {type BlogArticlePreview} from '@vexl-next/rest-api/src/services/content/contracts'
-import {
-  BlogCard,
-  Button,
-  Image,
-  Loader,
-  Stack,
-  tokens,
-  Typography,
-  YStack,
-} from '@vexl-next/ui'
+import {BlogCard, Image, LoadErrorState, Stack, tokens} from '@vexl-next/ui'
 import {Option} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useEffect, useMemo} from 'react'
@@ -92,30 +83,17 @@ function BlogScreen(): React.JSX.Element {
 
   if (Option.isNone(data)) {
     return (
-      <YStack flex={1} paddingHorizontal="$5" paddingTop="$6" gap="$5">
-        {!!loading && (
-          <Stack paddingVertical="$5">
-            <Loader size="large" />
-          </Stack>
-        )}
-
-        {Option.isSome(error) && (
-          <YStack gap="$4" alignItems="flex-start">
-            <Typography variant="paragraphSmall" color="$foregroundPrimary">
-              {t('common.somethingWentWrong')}
-            </Typography>
-            <Button
-              size="small"
-              variant="primary"
-              onPress={() => {
-                void loadBlogs()
-              }}
-            >
-              {t('common.tryAgain')}
-            </Button>
-          </YStack>
-        )}
-      </YStack>
+      <LoadErrorState
+        paddingHorizontal="$5"
+        loading={loading}
+        errorMessage={
+          Option.isSome(error) ? t('common.somethingWentWrong') : undefined
+        }
+        retryLabel={t('common.tryAgain')}
+        onRetry={() => {
+          void loadBlogs()
+        }}
+      />
     )
   }
 

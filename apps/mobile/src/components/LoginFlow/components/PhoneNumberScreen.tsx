@@ -1,6 +1,6 @@
 import {useFocusEffect} from '@react-navigation/native'
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
-import {Typography, XStack, YStack} from '@vexl-next/ui'
+import {TitleBlock, Typography, XStack, YStack} from '@vexl-next/ui'
 import {Effect, Option} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useEffect, useRef, useState} from 'react'
@@ -22,7 +22,7 @@ import {
   parsePhoneNumberInput,
   splitNationalNumberIntoGroups,
 } from '../utils/phoneNumberInput'
-import LoginFlowScreen, {LoginFlowText, LoginFlowTitle} from './LoginFlowScreen'
+import LoginFlowScreen from './LoginFlowScreen'
 
 type Props = LoginFlowStackScreenProps<'PhoneNumber'>
 
@@ -139,7 +139,11 @@ export default function PhoneNumberScreen({
   return (
     <LoginFlowScreen
       footer={
-        <LoginFlowText>{t('loginFlow.v2.phoneNumber.caption')}</LoginFlowText>
+        <TitleBlock
+          align="center"
+          size="large"
+          text={t('loginFlow.v2.phoneNumber.caption')}
+        />
       }
       action={{
         disabled: Option.isNone(phoneNumber),
@@ -176,10 +180,12 @@ export default function PhoneNumberScreen({
       scroll
     >
       <YStack flex={1} gap="$10" justifyContent="flex-start" paddingTop="$11">
-        <YStack gap="$4" width="100%">
-          <LoginFlowTitle>{t('loginFlow.v2.phoneNumber.title')}</LoginFlowTitle>
-          <LoginFlowText>{t('loginFlow.v2.phoneNumber.text')}</LoginFlowText>
-        </YStack>
+        <TitleBlock
+          align="center"
+          size="large"
+          title={t('loginFlow.v2.phoneNumber.title')}
+          text={t('loginFlow.v2.phoneNumber.text')}
+        />
         <YStack alignItems="center" gap="$3" width="100%">
           <XStack
             alignItems="center"

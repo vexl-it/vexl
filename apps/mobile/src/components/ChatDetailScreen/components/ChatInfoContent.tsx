@@ -1,11 +1,12 @@
 import {useNavigation} from '@react-navigation/native'
 import {
   BulletListMenu,
-  Button,
   ChevronRight,
   Circle,
   CommonFriendsSummary,
+  Divider,
   DocumentsFiles,
+  EmptyState,
   EyeShut,
   FlagReport,
   NavigationBar,
@@ -47,10 +48,6 @@ import UserAvatar from '../../UserAvatar'
 import {chatMolecule} from '../atoms'
 import {useCommonFriendsOtherSide} from '../utils/useCommonFriendsOtherSide'
 import useOpenExchangeDetails from './useOpenExchangeDetails'
-
-function SectionSeparator(): React.ReactElement {
-  return <Stack height="$0.5" backgroundColor="$backgroundTertiary" ml="$12" />
-}
 
 function OtherSideInfoBanner({
   title,
@@ -295,22 +292,17 @@ export default function ChatInfoContent({
           />
         }
       >
-        <YStack flex={1} justifyContent="center" gap="$5">
-          <Typography
-            variant="heading3"
-            color="$foregroundPrimary"
-            textAlign="center"
-          >
-            {t('common.chatNotFoundError')}
-          </Typography>
-          <Button
-            onPress={() => {
+        <EmptyState
+          fullscreen
+          title={t('common.chatNotFoundError')}
+          action={{
+            label: t('common.back'),
+            onPress: () => {
               navigation.goBack()
-            }}
-          >
-            {t('common.back')}
-          </Button>
-        </YStack>
+            },
+            variant: 'primary',
+          }}
+        />
       </Screen>
     )
   }
@@ -398,7 +390,7 @@ export default function ChatInfoContent({
                     })
                   }}
                 />
-                <SectionSeparator />
+                <Divider ml="$12" />
               </>
             ) : null}
 
@@ -411,7 +403,7 @@ export default function ChatInfoContent({
                   label={t('tradeChecklist.exchangeDetails.title')}
                   onPress={openExchangeDetails}
                 />
-                <SectionSeparator />
+                <Divider ml="$12" />
               </>
             ) : null}
 
@@ -429,7 +421,7 @@ export default function ChatInfoContent({
                     })
                   }}
                 />
-                <SectionSeparator />
+                <Divider ml="$12" />
               </>
             ) : null}
 
@@ -497,7 +489,7 @@ export default function ChatInfoContent({
                 )
               }}
             />
-            {theirOfferAndNotReported && offer ? <SectionSeparator /> : null}
+            {theirOfferAndNotReported && offer ? <Divider ml="$12" /> : null}
             {theirOfferAndNotReported && offer ? (
               <>
                 <ActionRow

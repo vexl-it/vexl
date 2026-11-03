@@ -1,5 +1,5 @@
 import {useNavigation} from '@react-navigation/native'
-import {Loader, Map, Typography} from '@vexl-next/ui'
+import {InfoBox, Map} from '@vexl-next/ui'
 import {isNone} from 'fp-ts/Option'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback} from 'react'
@@ -74,18 +74,9 @@ function AllOffersListHeader({
           <Stack paddingHorizontal="$5">
             <XStack ai="center" jc="space-between">
               {isOffersLoaderVisible ? (
-                <XStack alignItems="center" gap="$2" marginVertical="$2">
-                  <Typography
-                    color="$foregroundSecondary"
-                    variant="description"
-                  >
-                    {t('marketplace.loadingOffers')}
-                  </Typography>
-                  <Loader
-                    color={theme.foregroundSecondary.get()}
-                    size="small"
-                  />
-                </XStack>
+                <InfoBox variant="naked" loading marginVertical="$2">
+                  {t('marketplace.loadingOffers')}
+                </InfoBox>
               ) : (
                 <TotalOffersCount filteredOffersCount={filteredOffersCount} />
               )}

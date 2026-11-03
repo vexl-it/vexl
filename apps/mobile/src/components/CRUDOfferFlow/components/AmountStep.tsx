@@ -1,15 +1,9 @@
-import {
-  Button,
-  EditRow,
-  Loader,
-  PriceRangeInput,
-  Typography,
-} from '@vexl-next/ui'
+import {Button, EditRow, InfoBox, PriceRangeInput} from '@vexl-next/ui'
 import type {IconProps} from '@vexl-next/ui/src/icons/types'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useMemo} from 'react'
-import {Stack, XStack, YStack} from 'tamagui'
+import {Stack, YStack} from 'tamagui'
 import {currencies} from '../../../utils/localization/currency'
 import {formatDecimal} from '../../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../../utils/localization/formattingLocaleAtom'
@@ -115,12 +109,9 @@ function AmountStep({
       />
       <YStack gap="$3" paddingVertical="$6">
         {pricesLoading ? (
-          <XStack alignItems="center" gap="$3" paddingHorizontal="$4">
-            <Loader size="small" />
-            <Typography variant="description" color="$foregroundSecondary">
-              {t('offerForm.loadingExchangeRate')}
-            </Typography>
-          </XStack>
+          <InfoBox variant="naked" loading paddingHorizontal="$4">
+            {t('offerForm.loadingExchangeRate')}
+          </InfoBox>
         ) : null}
         <Stack
           opacity={pricesLoading ? 0.5 : 1}

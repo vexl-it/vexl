@@ -1,7 +1,7 @@
 import {useNavigation} from '@react-navigation/native'
 import {FlashList, type ListRenderItemInfo} from '@shopify/flash-list'
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
-import {Button, Loader, Typography} from '@vexl-next/ui'
+import {EmptyState, LoadingIndicator} from '@vexl-next/ui'
 import {Stack, XStack, YStack} from '@vexl-next/ui/src/primitives'
 import {useAtomValue, useSetAtom, type Atom} from 'jotai'
 import {splitAtom} from 'jotai/utils'
@@ -87,18 +87,12 @@ function OffersListLoader(): React.JSX.Element {
   const {t} = useTranslation()
 
   return (
-    <YStack
+    <LoadingIndicator
       flex={1}
-      alignItems="center"
       justifyContent="center"
-      gap="$3"
       paddingVertical="$8"
-    >
-      <Loader size="medium" />
-      <Typography color="$foregroundPrimary" variant="paragraphSmall">
-        {t('marketplace.loadingOffers')}
-      </Typography>
-    </YStack>
+      label={t('marketplace.loadingOffers')}
+    />
   )
 }
 
@@ -111,30 +105,15 @@ function OffersListEmptyState(): React.JSX.Element {
   }, [navigation])
 
   return (
-    <YStack alignItems="center" gap="$4" paddingTop="$6" paddingHorizontal="$5">
-      <Typography
-        color="$foregroundPrimary"
-        textAlign="center"
-        variant="heading3"
-      >
-        {t('marketplace.noOffersYet')}
-      </Typography>
-      <Typography
-        color="$foregroundSecondary"
-        textAlign="center"
-        variant="description"
-      >
-        {t('marketplace.tryAdjustingMapOrClearingFilters')}
-      </Typography>
-      <Button
-        variant="tertiary"
-        size="small"
-        onPress={handleEditFiltersPress}
-        width="100%"
-      >
-        {t('marketplace.editFilters')}
-      </Button>
-    </YStack>
+    <EmptyState
+      paddingHorizontal="$5"
+      title={t('marketplace.noOffersYet')}
+      description={t('marketplace.tryAdjustingMapOrClearingFilters')}
+      action={{
+        label: t('marketplace.editFilters'),
+        onPress: handleEditFiltersPress,
+      }}
+    />
   )
 }
 

@@ -2,6 +2,7 @@ import {type MeetingLocationData} from '@vexl-next/domain/src/general/tradeCheck
 import {type LocationSuggestion} from '@vexl-next/rest-api/src/services/location/contracts'
 import {
   ChevronLeft,
+  EmptyState,
   IconButton,
   PinGeolocation,
   SearchBar,
@@ -158,25 +159,15 @@ function SearchScreenContent({
           </Typography>
         </YStack>
       ) : error != null ? (
-        <YStack px="$5" pt="$8">
-          <Typography
-            variant="description"
-            color="$foregroundSecondary"
-            textAlign="center"
-          >
-            {t('tradeChecklist.location.searchUnavailable')}
-          </Typography>
-        </YStack>
+        <EmptyState
+          paddingHorizontal="$5"
+          description={t('tradeChecklist.location.searchUnavailable')}
+        />
       ) : trimmedSearchText !== '' && searchResultsAtoms.length === 0 ? (
-        <YStack px="$5" pt="$8">
-          <Typography
-            variant="description"
-            color="$foregroundSecondary"
-            textAlign="center"
-          >
-            {t('common.noResults')}
-          </Typography>
-        </YStack>
+        <EmptyState
+          paddingHorizontal="$5"
+          description={t('common.noResults')}
+        />
       ) : (
         <FlatList
           keyboardShouldPersistTaps="handled"

@@ -1,17 +1,16 @@
 import {
-  Button,
   ClubCard,
   ClubReachCard,
+  EmptyState,
+  RefreshControl,
   Stack,
-  Typography,
-  useTheme,
   YStack,
 } from '@vexl-next/ui'
 import {Effect, pipe} from 'effect'
 import {isNonEmptyArray} from 'effect/Array'
 import {type Atom, useAtomValue, useSetAtom} from 'jotai'
 import React from 'react'
-import {FlatList, RefreshControl} from 'react-native'
+import {FlatList} from 'react-native'
 import {type CommunityTabsScreenProps} from '../../../../../../../navigationTypes'
 import {
   clubsWithMembersAtomsAtom,
@@ -64,37 +63,12 @@ function EmptyClubs({
   const {t} = useTranslation()
 
   return (
-    <YStack flex={1} alignItems="center" paddingTop="$8" gap="$5">
-      <Typography
-        variant="heading3"
-        color="$foregroundPrimary"
-        textAlign="center"
-      >
-        {t('clubs.joinYourFirstClub')}
-      </Typography>
-      <Typography
-        variant="description"
-        color="$foregroundSecondary"
-        textAlign="center"
-      >
-        {t('clubs.joinYourFirstClubDescription')}
-      </Typography>
-      <Button
-        size="small"
-        variant="tertiary"
-        onPress={onJoinPress}
-        width="100%"
-      >
-        {t('clubs.joinNewClub')}
-      </Button>
-      <Typography
-        variant="micro"
-        color="$accentHighlightPrimary"
-        onPress={onInfoPress}
-      >
-        {t('suggestion.whatAreClubs')}
-      </Typography>
-    </YStack>
+    <EmptyState
+      title={t('clubs.joinYourFirstClub')}
+      description={t('clubs.joinYourFirstClubDescription')}
+      action={{label: t('clubs.joinNewClub'), onPress: onJoinPress}}
+      link={{label: t('suggestion.whatAreClubs'), onPress: onInfoPress}}
+    />
   )
 }
 
@@ -133,7 +107,6 @@ export function ClubsList({
   const clubsAtoms = useAtomValue(clubsWithMembersAtomsAtom)
   const clubsLoading =
     useAtomValue(clubsWithMembersLoadingStateAtom).state === 'loading'
-  const theme = useTheme()
 
   const handleJoinPress = (): void => {
     navigation.navigate('JoinClubFlow', {
@@ -170,7 +143,6 @@ export function ClubsList({
           onRefresh={() => {
             pipe(syncAllClubsHandleStateWhenNotFound(), Effect.runFork)
           }}
-          tintColor={theme.foregroundSecondary.get()}
         />
       }
       ListFooterComponent={

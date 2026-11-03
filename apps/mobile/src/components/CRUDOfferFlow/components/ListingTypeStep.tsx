@@ -54,68 +54,28 @@ function ListingTypeStep({
       )}
       {active ? (
         <Animated.View entering={FadeIn} exiting={FadeOut}>
-          <YStack>
-            <YStack gap="$3" paddingVertical="$5">
-              <RowButton
-                label={t('offerForm.BITCOIN')}
-                icon={CurrencyBitcoinCircle}
-                value="BITCOIN"
-                selected={listingType === 'BITCOIN'}
-                onPress={handlePress}
-              />
-              <RowButton
-                label={t('offerForm.PRODUCTS')}
-                icon={BoxProduct}
-                value="PRODUCT"
-                selected={listingType === 'PRODUCT'}
-                onPress={handlePress}
-              />
-              <RowButton
-                label={t('offerForm.SERVICES')}
-                icon={Tools}
-                value="OTHER"
-                selected={listingType === 'OTHER'}
-                onPress={handlePress}
-              />
-            </YStack>
-            {/* TODO: uncomment when board functionality is implemented and ready
-            <YStack gap="$3" paddingTop="$3">
-              <XStack alignItems="center" gap="$3" paddingVertical="$3">
-                <Stack
-                  flex={1}
-                  height="$0.5"
-                  backgroundColor="$foregroundSecondary"
-                />
-                <Typography variant="micro" color="$foregroundSecondary">
-                  {t('offerForm.somethingElseOnYourMind')}
-                </Typography>
-                <Stack
-                  flex={1}
-                  height="$0.5"
-                  backgroundColor="$foregroundSecondary"
-                />
-              </XStack>
-              <XStack
-                alignItems="center"
-                justifyContent="center"
-                gap="$3"
-                onPress={() => {
-                  handlePress('OTHER')
-                }}
-              >
-                <PinBoard
-                  color={theme.accentHighlightSecondary.get()}
-                  size={getTokens().size.$7.val}
-                />
-                <Typography
-                  variant="paragraphSmallBold"
-                  color="$accentHighlightSecondary"
-                >
-                  {t('offerForm.postItOnTheBoard')}
-                </Typography>
-              </XStack>
-            </YStack>
-            */}
+          <YStack gap="$3" paddingVertical="$5">
+            <RowButton
+              label={t('offerForm.BITCOIN')}
+              icon={CurrencyBitcoinCircle}
+              value="BITCOIN"
+              selected={listingType === 'BITCOIN'}
+              onPress={handlePress}
+            />
+            <RowButton
+              label={t('offerForm.PRODUCTS')}
+              icon={BoxProduct}
+              value="PRODUCT"
+              selected={listingType === 'PRODUCT'}
+              onPress={handlePress}
+            />
+            <RowButton
+              label={t('offerForm.SERVICES')}
+              icon={Tools}
+              value="OTHER"
+              selected={listingType === 'OTHER'}
+              onPress={handlePress}
+            />
           </YStack>
         </Animated.View>
       ) : null}

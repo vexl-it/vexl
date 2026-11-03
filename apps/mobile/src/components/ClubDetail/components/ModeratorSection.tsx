@@ -1,5 +1,6 @@
 import {useNavigation} from '@react-navigation/native'
 import {
+  CopyField,
   Menu,
   MenuItem,
   QrCode,
@@ -13,12 +14,12 @@ import {useSetAtom} from 'jotai'
 import React from 'react'
 import {type RootStackScreenProps} from '../../../navigationTypes'
 import {type ClubWithMembers} from '../../../state/clubs/domain'
+import {copyToClipboardWithToastActionAtom} from '../../../utils/copyToClipboardWithToastActionAtom'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {globalDialogAtom} from '../../GlobalDialog'
 import {useShowLoadingOverlay} from '../../LoadingOverlayProvider'
 import {SharableQrCode} from '../../SharableQrCode'
 import {regenerateClubLinkActionAtom, useClubInviteLink} from '../state'
-import {InviteCodeRow} from './InviteCodeRow'
 
 export function ModeratorSection({
   clubWithMembers,
@@ -33,6 +34,7 @@ export function ModeratorSection({
   const regenerateLink = useSetAtom(regenerateClubLinkActionAtom)
   const showDialog = useSetAtom(globalDialogAtom)
   const loadingOverlay = useShowLoadingOverlay()
+  const copyToClipboard = useSetAtom(copyToClipboardWithToastActionAtom)
 
   if (!isModerator) return null
 
@@ -40,7 +42,15 @@ export function ModeratorSection({
     <YStack gap="$5">
       {Option.match(link, {
         onNone: () => null,
-        onSome: (clubLink) => <InviteCodeRow code={clubLink.code} />,
+        onSome: (clubLink) => (
+          <CopyField
+            label={t('clubs.moderator.inviteCodeLabel')}
+            value={clubLink.code}
+            onCopy={() => {
+              copyToClipboard(clubLink.code)
+            }}
+          />
+        ),
       })}
 
       <Menu>

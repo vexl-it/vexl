@@ -1,9 +1,10 @@
 import {
   ArrowLeft,
+  Divider,
+  EmptyState,
   NavigationBar,
   Screen,
   SearchBar,
-  Stack,
   Typography,
   YStack,
 } from '@vexl-next/ui'
@@ -14,14 +15,6 @@ import useSafeGoBack from '../../utils/useSafeGoBack'
 import ChatSearchChatResultItem from './components/ChatSearchChatResultItem'
 import ChatSearchMessageResultItem from './components/ChatSearchMessageResultItem'
 import {useChatSearchResults} from './state'
-
-function SectionTitle({children}: {children: string}): React.ReactElement {
-  return (
-    <Typography color="$foregroundPrimary" variant="titlesSmall">
-      {children}
-    </Typography>
-  )
-}
 
 // Non-virtualized scrolling is intentional here.
 // Search results are already filtered down from the full chat/message dataset,
@@ -72,11 +65,9 @@ function ChatSearchScreen(): React.ReactElement {
         <YStack f={1} pt="$5" pb="$5">
           {trimmedQuery !== '' && chats.length > 0 ? (
             <YStack gap="$2" mb="$5" px="$4">
-              <Stack>
-                <SectionTitle>
-                  {t('messages.search.sections.chats')}
-                </SectionTitle>
-              </Stack>
+              <Typography color="$foregroundPrimary" variant="titlesSmall">
+                {t('messages.search.sections.chats')}
+              </Typography>
               {chats.map((one) => (
                 <ChatSearchChatResultItem
                   key={one.chat.id}
@@ -89,16 +80,12 @@ function ChatSearchScreen(): React.ReactElement {
 
           {trimmedQuery !== '' && messages.length > 0 ? (
             <YStack gap="$2" px="$5">
-              <Stack>
-                <SectionTitle>
-                  {t('messages.search.sections.messages')}
-                </SectionTitle>
-              </Stack>
+              <Typography color="$foregroundPrimary" variant="titlesSmall">
+                {t('messages.search.sections.messages')}
+              </Typography>
               {messages.map((one, index) => (
                 <YStack key={one.messageId}>
-                  {index > 0 ? (
-                    <Stack h={1} mt="$4" mb="$5" bg="$backgroundTertiary" />
-                  ) : null}
+                  {index > 0 ? <Divider mt="$4" mb="$5" /> : null}
                   <ChatSearchMessageResultItem
                     result={one}
                     query={trimmedQuery}
@@ -109,22 +96,11 @@ function ChatSearchScreen(): React.ReactElement {
           ) : null}
 
           {showEmptyState ? (
-            <YStack f={1} ai="center" jc="flex-start" px="$5" pt="$10" gap="$4">
-              <Typography
-                color="$foregroundPrimary"
-                variant="heading3"
-                textAlign="center"
-              >
-                {t('messages.search.empty.title')}
-              </Typography>
-              <Typography
-                color="$foregroundSecondary"
-                variant="description"
-                textAlign="center"
-              >
-                {t('messages.search.empty.subtitle')}
-              </Typography>
-            </YStack>
+            <EmptyState
+              px="$5"
+              title={t('messages.search.empty.title')}
+              description={t('messages.search.empty.subtitle')}
+            />
           ) : null}
         </YStack>
       </YStack>

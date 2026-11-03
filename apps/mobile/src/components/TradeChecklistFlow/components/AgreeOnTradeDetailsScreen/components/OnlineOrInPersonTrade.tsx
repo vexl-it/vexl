@@ -1,11 +1,10 @@
-import {Button, Typography} from '@vexl-next/ui'
+import {Button, EyeOpen, InfoBox, TitleBlock, Typography} from '@vexl-next/ui'
 import {useAtomValue} from 'jotai'
 import React from 'react'
 import {Stack, YStack} from 'tamagui'
 import * as fromChatAtoms from '../../../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import openUrl from '../../../../../utils/openUrl'
-import AnonymizationNotice from '../../AnonymizationNotice'
 import CalculateAmountCell from './CalculateAmountCell'
 import DateAndTimeCell from './DateAndTimeCell'
 import MeetingLocationCell from './MeetingLocationCell'
@@ -29,14 +28,10 @@ function OnlineOrInPersonTrade(): React.ReactElement {
   const offerForTradeChecklist = useAtomValue(fromChatAtoms.originOfferAtom)
 
   const top = (
-    <Stack gap="$3">
-      <Typography variant="heading3" color="$foregroundPrimary">
-        {t('tradeChecklist.tradeChecklist')}
-      </Typography>
-      <Typography variant="description" color="$foregroundSecondary">
-        {t('tradeChecklist.agreeOnTradeDetailsSubtitle')}
-      </Typography>
-    </Stack>
+    <TitleBlock
+      title={t('tradeChecklist.tradeChecklist')}
+      text={t('tradeChecklist.agreeOnTradeDetailsSubtitle')}
+    />
   )
 
   if (
@@ -49,11 +44,7 @@ function OnlineOrInPersonTrade(): React.ReactElement {
         {top}
 
         <Stack p="$4" gap="$4" br="$5" bc="$backgroundSecondary">
-          <Typography
-            variant="description"
-            color="$accentHighlightPrimary"
-            lineHeight={20}
-          >
+          <Typography variant="description" color="$accentHighlightPrimary">
             {t('tradeChecklist.thisDealIsFullyOnline')}
           </Typography>
           <Button
@@ -85,7 +76,9 @@ function OnlineOrInPersonTrade(): React.ReactElement {
           <CalculateAmountCell />
           <RevealIdentityCell />
         </Stack>
-        <AnonymizationNotice />
+        <InfoBox variant="naked" icon={EyeOpen} mb="$2">
+          {t('tradeChecklist.notVisibleToAnyoneNotice')}
+        </InfoBox>
       </YStack>
     )
   }

@@ -2,6 +2,7 @@ import {
   Banner,
   Button,
   KeyboardStickyView,
+  LoadingOverlay,
   Stack,
   Typography,
   useTheme,
@@ -16,7 +17,6 @@ import {Pressable, type LayoutChangeEvent} from 'react-native'
 import {type ContactsFilter} from '../../../../state/contacts/domain'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import {useKeyboardAwareFooterListPadding} from '../../../../utils/useKeyboardAwareFooterListPadding'
-import PreparingContactsOverlay from '../PreparingContactsOverlay'
 import {contactSelectMolecule} from './atom'
 import ContactsAccessPrivilegesInfoBanner from './components/ContactsAccessPrivilegesInfoBanner'
 import ContactsFilterBar from './components/ContactsFilterBar'
@@ -216,9 +216,9 @@ function ContactsListSelect({
           <FilteredContacts
             keyboardBottomSpacerHeight={keyboardBottomSpacerHeight}
           />
-          <PreparingContactsOverlay
+          <LoadingOverlay
             visible={isContactsSearchPreparing || isBulkSelectionPreparing}
-            zIndex={10}
+            label={t('contacts.preparingContacts')}
           />
         </Stack>
       </Stack>
@@ -245,10 +245,10 @@ function ContactsListSelect({
           </Button>
         </Stack>
       </KeyboardStickyView>
-      <PreparingContactsOverlay
-        labelKey="contacts.processingContacts"
+      <LoadingOverlay
         visible={shouldShowSubmittingContactsOverlay}
-        zIndex={20}
+        label={t('contacts.processingContacts')}
+        zIndex="$2"
       />
     </Stack>
   )

@@ -1,5 +1,5 @@
 import Clipboard from '@react-native-clipboard/clipboard'
-import {Button, Stack, Typography} from '@vexl-next/ui'
+import {Backdrop, Button, Stack, Typography} from '@vexl-next/ui'
 import {atom, getDefaultStore, useAtomValue, useSetAtom} from 'jotai'
 import React from 'react'
 import {useTranslation} from '../utils/localization/I18nProvider'
@@ -36,15 +36,7 @@ function ErrorAlert(): React.ReactElement | null {
       bottom={0}
       zIndex="$5"
     >
-      <Stack
-        pos="absolute"
-        top={0}
-        left={0}
-        right={0}
-        bottom={0}
-        backgroundColor="$black100"
-        opacity={0.9}
-      />
+      <Backdrop opacity={0.9} />
       <Stack bc="$backgroundPrimary" maxWidth="80%" br="$4" p="$4">
         <Stack gap="$2" bc="$backgroundSecondary" br="$4" p="$4" mb="$4">
           <Typography variant="heading3" color="$foregroundPrimary">

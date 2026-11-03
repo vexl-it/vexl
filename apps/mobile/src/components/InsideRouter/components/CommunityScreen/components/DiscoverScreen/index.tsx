@@ -6,17 +6,14 @@ import {
   Banner,
   BlogCard,
   Calendar,
-  ChevronRight,
   ClubCard,
   ConferenceClub,
   EventCard,
   Image,
   PencilWriteEdit,
+  SectionHeader,
   Stack,
-  Typography,
-  XStack,
   YStack,
-  useTheme,
   type EventCardAttendee,
 } from '@vexl-next/ui'
 import dayjs from 'dayjs'
@@ -139,41 +136,6 @@ function HorizontalRow({
   )
 }
 
-function SectionTitle({
-  icon,
-  iconOffsetY = 0,
-  title,
-  onPress,
-}: {
-  readonly icon: React.ReactNode
-  readonly iconOffsetY?: number
-  readonly title: string
-  readonly onPress: () => void
-}): React.JSX.Element {
-  const theme = useTheme()
-
-  return (
-    <Stack
-      borderRadius="$3"
-      onPress={onPress}
-      pressStyle={{opacity: 0.65}}
-      role="button"
-    >
-      <XStack alignItems="center" justifyContent="space-between">
-        <XStack alignItems="center" gap="$2">
-          <Stack position="relative" top={iconOffsetY}>
-            {icon}
-          </Stack>
-          <Typography color="$foregroundPrimary" variant="titlesSmall">
-            {title}
-          </Typography>
-        </XStack>
-        <ChevronRight color={theme.foregroundPrimary.get()} size={24} />
-      </XStack>
-    </Stack>
-  )
-}
-
 function EventItem({
   event,
   locale,
@@ -249,7 +211,6 @@ function BlogItem({
 
 function DiscoverScreen({navigation}: Props): React.JSX.Element {
   const {t} = useTranslation()
-  const theme = useTheme()
   const locale = useAtomValue(formattingLocaleAtom)
   const loadEvents = useSetAtom(loadEventsActionAtom)
   const loadBlogs = useSetAtom(loadBlogsActionAtom)
@@ -273,7 +234,6 @@ function DiscoverScreen({navigation}: Props): React.JSX.Element {
     [blogsData]
   )
   const hasClubs = clubsAtoms.length > 0
-  const iconColor = theme.foregroundPrimary.get()
   const handleEventsPress = useCallback(() => {
     navigation.navigate('Events')
   }, [navigation])
@@ -306,8 +266,8 @@ function DiscoverScreen({navigation}: Props): React.JSX.Element {
       <YStack f={1} paddingHorizontal="$5" paddingTop="$6" gap="$6">
         {Array.isNonEmptyReadonlyArray(upcomingEvents) ? (
           <YStack gap="$4">
-            <SectionTitle
-              icon={<Calendar color={iconColor} size={24} />}
+            <SectionHeader
+              icon={Calendar}
               title={t('events.upcomingEvents')}
               onPress={handleEventsPress}
             />
@@ -323,9 +283,8 @@ function DiscoverScreen({navigation}: Props): React.JSX.Element {
         ) : null}
 
         <YStack gap="$6">
-          <SectionTitle
-            icon={<ConferenceClub color={iconColor} size={24} />}
-            iconOffsetY={-1}
+          <SectionHeader
+            icon={ConferenceClub}
             title={t('community.tabs.clubs')}
             onPress={handleClubsPress}
           />
@@ -369,8 +328,8 @@ function DiscoverScreen({navigation}: Props): React.JSX.Element {
 
         {Array.isNonEmptyReadonlyArray(latestBlogs) ? (
           <YStack gap="$4">
-            <SectionTitle
-              icon={<PencilWriteEdit color={iconColor} size={24} />}
+            <SectionHeader
+              icon={PencilWriteEdit}
               title={t('community.tabs.blog')}
               onPress={handleBlogPress}
             />

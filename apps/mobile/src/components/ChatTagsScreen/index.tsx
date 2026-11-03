@@ -1,12 +1,12 @@
 import {
   Button,
+  EmptyState,
   Input,
   NavigationBar,
   PlusAdd,
   Screen,
   SelectableItem,
   Stack,
-  Typography,
   useTheme,
   XmarkCancelClose,
   YStack,
@@ -243,18 +243,15 @@ function ChatTagsScreen({route}: Props): React.ReactElement {
           )}
         </YStack>
       ) : (
-        <YStack px="$5" pt="$8" gap="$6" ai="center">
-          <Typography
-            color="$foregroundPrimary"
-            variant="heading2"
-            textAlign="center"
-          >
-            {t('messages.tags.empty')}
-          </Typography>
-          <Button size="small" width="100%" onPress={showNewTagDialog}>
-            {t('messages.tags.addTag')}
-          </Button>
-        </YStack>
+        <EmptyState
+          px="$5"
+          title={t('messages.tags.empty')}
+          action={{
+            label: t('messages.tags.addTag'),
+            onPress: showNewTagDialog,
+            variant: 'primary',
+          }}
+        />
       )}
     </Screen>
   )

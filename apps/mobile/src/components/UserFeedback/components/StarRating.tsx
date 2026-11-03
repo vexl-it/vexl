@@ -1,22 +1,38 @@
-import {Stack, XStack} from '@vexl-next/ui'
-import {Array, pipe} from 'effect'
+import {StarRating as StarRatingInput} from '@vexl-next/ui'
+import {useMolecule} from 'bunshi/dist/react'
+import {Effect} from 'effect'
+import {useAtom, useAtomValue, useSetAtom} from 'jotai'
 import React from 'react'
-import TouchableStar from './TouchableStar'
-
-const STAR_ORDER_NUMBERS = [1, 2, 3, 4, 5]
+import {feedbackMolecule} from '../atoms'
 
 function StarRating(): React.ReactElement {
+  const {
+    starRatingAtom,
+    currentFeedbackPageAtom,
+    submitChatFeedbackAndHandleUIActionAtom,
+    submitOfferCreationFeedbackHandleUIActionAtom,
+  } = useMolecule(feedbackMolecule)
+  const [starRating, setStarRating] = useAtom(starRatingAtom)
+  const currentPage = useAtomValue(currentFeedbackPageAtom)
+  const submitChatFeedbackAndHandleUI = useSetAtom(
+    submitChatFeedbackAndHandleUIActionAtom
+  )
+  const submitOfferCreationFeedbackHandleUI = useSetAtom(
+    submitOfferCreationFeedbackHandleUIActionAtom
+  )
+
   return (
-    <Stack ai="center" gap="$4">
-      <XStack ai="center" gap="$2">
-        {pipe(
-          STAR_ORDER_NUMBERS,
-          Array.map((orderNumber) => (
-            <TouchableStar key={orderNumber} starOrderNumber={orderNumber} />
-          ))
-        )}
-      </XStack>
-    </Stack>
+    <StarRatingInput
+      value={starRating}
+      onChange={(stars) => {
+        setStarRating(stars)
+        if (currentPage === 'OFFER_RATING') {
+          Effect.runFork(submitOfferCreationFeedbackHandleUI())
+        } else {
+          Effect.runFork(submitChatFeedbackAndHandleUI())
+        }
+      }}
+    />
   )
 }
 

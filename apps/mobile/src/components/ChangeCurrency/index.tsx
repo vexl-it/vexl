@@ -6,12 +6,11 @@ import {
 } from '@vexl-next/domain/src/general/currency.brand'
 import {
   Button,
+  EmptyState,
   NavigationBar,
   Screen,
   SearchBar,
   SelectableItem,
-  Stack,
-  Typography,
   XmarkCancelClose,
 } from '@vexl-next/ui'
 import {Array} from 'effect'
@@ -137,18 +136,10 @@ function ChangeCurrencyContent({
           renderItem={renderItem}
         />
       ) : (
-        <Stack ai="center" gap="$4" p="$6">
-          <Typography variant="heading3" ta="center" color="$foregroundPrimary">
-            {t('common.nothingFound')}
-          </Typography>
-          <Typography
-            variant="description"
-            ta="center"
-            color="$foregroundSecondary"
-          >
-            {t('changeCurrency.trySearchingByCurrencyName')}
-          </Typography>
-        </Stack>
+        <EmptyState
+          title={t('common.nothingFound')}
+          description={t('changeCurrency.trySearchingByCurrencyName')}
+        />
       )}
     </Screen>
   )

@@ -2,12 +2,11 @@ import {useFocusEffect} from '@react-navigation/native'
 import {FlashList} from '@shopify/flash-list'
 import {
   Button,
+  EmptyState,
   NavigationBar,
   Screen,
   SearchBar,
   SelectableItem,
-  Stack,
-  Typography,
   XmarkCancelClose,
 } from '@vexl-next/ui'
 import {Array, Option, pipe} from 'effect'
@@ -137,15 +136,7 @@ function AppSettingsLanguageScreen({
           renderItem={renderItem}
         />
       ) : (
-        <Stack alignItems="center" gap="$4" padding="$6">
-          <Typography
-            variant="heading3"
-            textAlign="center"
-            color="$foregroundPrimary"
-          >
-            {t('common.nothingFound')}
-          </Typography>
-        </Stack>
+        <EmptyState title={t('common.nothingFound')} />
       )}
     </Screen>
   )

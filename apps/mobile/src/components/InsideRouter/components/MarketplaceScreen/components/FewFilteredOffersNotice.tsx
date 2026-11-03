@@ -1,7 +1,6 @@
 import {useNavigation} from '@react-navigation/native'
-import {Button, Typography} from '@vexl-next/ui'
+import {EmptyState} from '@vexl-next/ui'
 import React, {useCallback} from 'react'
-import {Stack} from 'tamagui'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 
 export const FEW_FILTERED_OFFERS_NOTICE_MAX_COUNT = 3
@@ -33,27 +32,14 @@ function FewFilteredOffersNotice({
   }, [navigation])
 
   return (
-    <Stack
-      gap="$5"
-      paddingTop="$5"
+    <EmptyState
       paddingHorizontal={withHorizontalPadding ? '$5' : '$0'}
-    >
-      <Typography
-        color="$foregroundSecondary"
-        textAlign="center"
-        variant="description"
-      >
-        {t('marketplace.fewOffersAfterFiltering')}
-      </Typography>
-      <Button
-        variant="tertiary"
-        size="small"
-        onPress={onEditFiltersPress}
-        width="100%"
-      >
-        {t('marketplace.editFilters')}
-      </Button>
-    </Stack>
+      description={t('marketplace.fewOffersAfterFiltering')}
+      action={{
+        label: t('marketplace.editFilters'),
+        onPress: onEditFiltersPress,
+      }}
+    />
   )
 }
 

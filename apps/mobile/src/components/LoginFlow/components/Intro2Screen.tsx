@@ -2,6 +2,7 @@ import {
   BuyingGraphic,
   SellingGraphic,
   Stack,
+  TitleBlock,
   XStack,
   YStack,
 } from '@vexl-next/ui'
@@ -9,11 +10,7 @@ import React from 'react'
 import {useWindowDimensions} from 'react-native'
 import {type LoginFlowStackScreenProps} from '../../../navigationTypes'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
-import LoginFlowScreen, {
-  LoginFlowCentered,
-  LoginFlowText,
-  LoginFlowTitle,
-} from './LoginFlowScreen'
+import LoginFlowScreen, {LoginFlowCentered} from './LoginFlowScreen'
 
 type Props = LoginFlowStackScreenProps<'Intro2'>
 
@@ -57,10 +54,13 @@ export default function Intro2Screen({navigation}: Props): React.ReactElement {
               />
             </YStack>
           </XStack>
-          <YStack gap="$4" px="$5" width="100%">
-            <LoginFlowTitle>{t('loginFlow.v2.intro2.title')}</LoginFlowTitle>
-            <LoginFlowText>{t('loginFlow.v2.intro2.text')}</LoginFlowText>
-          </YStack>
+          <TitleBlock
+            align="center"
+            size="large"
+            px="$5"
+            title={t('loginFlow.v2.intro2.title')}
+            text={t('loginFlow.v2.intro2.text')}
+          />
         </YStack>
       </LoginFlowCentered>
     </LoginFlowScreen>

@@ -1,5 +1,5 @@
 import {useNavigation} from '@react-navigation/native'
-import {Stack, Typography, XStack, YStack} from '@vexl-next/ui'
+import {HighlightedText, Stack, Typography, XStack, YStack} from '@vexl-next/ui'
 import React from 'react'
 import {TouchableOpacity} from 'react-native'
 import {type RootStackScreenProps} from '../../../navigationTypes'
@@ -8,7 +8,6 @@ import unixMillisecondsToLocaleDateTime from '../../../utils/unixMillisecondsToL
 import FromNowComponent from '../../FromNowComponent'
 import UserAvatar from '../../UserAvatar'
 import {type SearchableChat} from '../state'
-import HighlightedText from './HighlightedText'
 
 function ChatSearchChatResultItem({
   result,

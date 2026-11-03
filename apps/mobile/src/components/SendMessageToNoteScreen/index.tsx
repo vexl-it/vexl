@@ -3,11 +3,11 @@ import {NOTE_TEXT_MAX_LENGTH} from '@vexl-next/domain/src/general/notes'
 import {
   Button,
   ChevronLeft,
+  EmptyState,
   InfoBox,
   LabeledTextArea,
   NavigationBar,
   Screen,
-  Typography,
   XmarkCancelClose,
   YStack,
 } from '@vexl-next/ui'
@@ -129,18 +129,15 @@ export default function SendMessageToNoteScreen({
   if (!note) {
     return (
       <Screen navigationBar={navigationBar}>
-        <YStack flex={1} alignItems="center" justifyContent="center" gap="$5">
-          <Typography
-            variant="titlesSmall"
-            color="$foregroundPrimary"
-            textAlign="center"
-          >
-            {t('notes.detail.noteNotFound')}
-          </Typography>
-          <Button variant="primary" onPress={safeGoBack} width="100%">
-            {t('common.back')}
-          </Button>
-        </YStack>
+        <EmptyState
+          fullscreen
+          title={t('notes.detail.noteNotFound')}
+          action={{
+            label: t('common.back'),
+            onPress: safeGoBack,
+            variant: 'primary',
+          }}
+        />
       </Screen>
     )
   }

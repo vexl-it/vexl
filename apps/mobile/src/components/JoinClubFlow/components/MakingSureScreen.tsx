@@ -4,7 +4,7 @@ import {
   ConferenceClub,
   NavigationBar,
   Screen,
-  Typography,
+  TitleBlock,
   XStack,
   XmarkCancelClose,
   YStack,
@@ -168,13 +168,10 @@ function MakingSureScreen({navigation, route}: Props): React.JSX.Element {
               </YStack>
             )}
           </YStack>
-          <YStack alignItems="center" gap="$7">
-            <Typography
-              variant="heading3"
-              color="$foregroundPrimary"
-              textAlign="center"
-            >
-              {clubToJoin
+          <TitleBlock
+            align="center"
+            title={
+              clubToJoin
                 ? t(
                     clubToJoin.isModerator
                       ? 'clubs.joinSpecificClubAsModerator'
@@ -183,16 +180,10 @@ function MakingSureScreen({navigation, route}: Props): React.JSX.Element {
                       clubName: clubToJoin.club.name,
                     }
                   )
-                : t('clubs.joinClubQuestion')}
-            </Typography>
-            <Typography
-              variant="description"
-              color="$foregroundPrimary"
-              textAlign="center"
-            >
-              {t('clubs.joinClubQuestionDescription')}
-            </Typography>
-          </YStack>
+                : t('clubs.joinClubQuestion')
+            }
+            text={t('clubs.joinClubQuestionDescription')}
+          />
         </YStack>
       </YStack>
     </Screen>

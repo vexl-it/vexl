@@ -1,6 +1,6 @@
 import {useFocusEffect} from '@react-navigation/native'
 import {KeyHolder} from '@vexl-next/cryptography'
-import {Typography, XStack, YStack} from '@vexl-next/ui'
+import {TitleBlock, Typography, XStack, YStack} from '@vexl-next/ui'
 import {parsePhoneNumber} from 'awesome-phonenumber'
 import {Effect} from 'effect'
 import {useSetAtom} from 'jotai'
@@ -18,7 +18,7 @@ import {initPhoneVerificationAtom} from '../api/initPhoneVerificationAtom'
 import {verifyPhoneNumberAtom} from '../api/verifyPhoneNumberAtom'
 import {finishLoginActionAtom} from '../atoms/finishLoginActionAtom'
 import Countdown from './Countdown'
-import LoginFlowScreen, {LoginFlowTitle} from './LoginFlowScreen'
+import LoginFlowScreen from './LoginFlowScreen'
 
 type Props = LoginFlowStackScreenProps<'VerificationCode'>
 const codeBoxHeight = 48
@@ -257,24 +257,26 @@ export default function VerificationCodeScreen({
       scroll
     >
       <YStack flex={1} justifyContent="center" gap="$10">
-        <YStack alignItems="center" gap="$4">
-          <LoginFlowTitle>
-            {t('loginFlow.v2.verificationCode.title')}
-          </LoginFlowTitle>
-          <Typography color="$foregroundSecondary" variant="paragraphSmall">
-            {t('loginFlow.v2.verificationCode.text')}{' '}
-            <Typography
-              color="$foregroundSecondary"
-              onPress={showPhoneNumberConfirmationDialog}
-              pressStyle={{opacity: 0.8}}
-              textDecorationLine="underline"
-              variant="paragraphSmall"
-            >
-              {internationalPhoneNumber}
-            </Typography>
-            .
-          </Typography>
-        </YStack>
+        <TitleBlock
+          align="center"
+          size="large"
+          title={t('loginFlow.v2.verificationCode.title')}
+          text={
+            <>
+              {t('loginFlow.v2.verificationCode.text')}{' '}
+              <Typography
+                color="$foregroundSecondary"
+                onPress={showPhoneNumberConfirmationDialog}
+                pressStyle={{opacity: 0.8}}
+                textDecorationLine="underline"
+                variant="paragraphSmall"
+              >
+                {internationalPhoneNumber}
+              </Typography>
+              .
+            </>
+          }
+        />
         <TouchableOpacity
           activeOpacity={1}
           onPress={() => {

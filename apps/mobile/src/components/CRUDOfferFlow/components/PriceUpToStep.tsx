@@ -1,17 +1,10 @@
-import {
-  Button,
-  EditRow,
-  Exchange,
-  Loader,
-  Typography,
-  type BtcUnit,
-} from '@vexl-next/ui'
+import {Button, EditRow, Exchange, InfoBox, type BtcUnit} from '@vexl-next/ui'
 import type {IconProps} from '@vexl-next/ui/src/icons/types'
 import {useMolecule} from 'bunshi/dist/react'
 import {Effect} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useState} from 'react'
-import {XStack, YStack} from 'tamagui'
+import {YStack} from 'tamagui'
 import {SATOSHIS_IN_BTC} from '../../../state/currentBtcPriceAtoms'
 import {currencies} from '../../../utils/localization/currency'
 import {
@@ -181,12 +174,9 @@ function PriceUpToStep({
         />
 
         {pricesLoading ? (
-          <XStack alignItems="center" gap="$3" paddingHorizontal="$4">
-            <Loader size="small" />
-            <Typography variant="description" color="$foregroundSecondary">
-              {t('offerForm.loadingExchangeRate')}
-            </Typography>
-          </XStack>
+          <InfoBox variant="naked" loading paddingHorizontal="$4">
+            {t('offerForm.loadingExchangeRate')}
+          </InfoBox>
         ) : null}
 
         <Button

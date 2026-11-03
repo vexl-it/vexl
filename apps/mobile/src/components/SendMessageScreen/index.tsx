@@ -2,10 +2,10 @@ import {CommonActions} from '@react-navigation/native'
 import {
   Button,
   ChevronLeft,
+  EmptyState,
   NavigationBar,
   Screen,
   TextArea,
-  Typography,
   XmarkCancelClose,
   YStack,
 } from '@vexl-next/ui'
@@ -121,18 +121,15 @@ function SendMessageScreen({
   if (Option.isNone(offer)) {
     return (
       <Screen navigationBar={navigationBar}>
-        <YStack flex={1} alignItems="center" justifyContent="center" gap="$5">
-          <Typography
-            variant="titlesSmall"
-            color="$foregroundPrimary"
-            textAlign="center"
-          >
-            {t('offer.offerNotFound')}
-          </Typography>
-          <Button variant="primary" onPress={safeGoBack} width="100%">
-            {t('common.back')}
-          </Button>
-        </YStack>
+        <EmptyState
+          fullscreen
+          title={t('offer.offerNotFound')}
+          action={{
+            label: t('common.back'),
+            onPress: safeGoBack,
+            variant: 'primary',
+          }}
+        />
       </Screen>
     )
   }

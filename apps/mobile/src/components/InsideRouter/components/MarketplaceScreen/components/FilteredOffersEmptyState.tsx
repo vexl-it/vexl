@@ -1,7 +1,7 @@
 import {useNavigation} from '@react-navigation/native'
+import {EmptyState} from '@vexl-next/ui'
 import React, {useCallback} from 'react'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
-import EmptyMarketplaceList from './EmptyMarketplaceList'
 
 function FilteredOffersEmptyState(): React.ReactElement {
   const {t} = useTranslation()
@@ -12,11 +12,14 @@ function FilteredOffersEmptyState(): React.ReactElement {
   }, [navigation])
 
   return (
-    <EmptyMarketplaceList
+    <EmptyState
+      paddingHorizontal="$5"
       title={t('marketplace.noOffersYet')}
       description={t('marketplace.tryAdjustingFilters')}
-      buttonLabel={t('marketplace.editFilters')}
-      onButtonPress={onEditFiltersPress}
+      action={{
+        label: t('marketplace.editFilters'),
+        onPress: onEditFiltersPress,
+      }}
     />
   )
 }

@@ -2,6 +2,7 @@ import {useFocusEffect} from '@react-navigation/native'
 import {
   Button,
   EditRow,
+  EmptyState,
   NavigationBar,
   Pause,
   Play,
@@ -164,18 +165,15 @@ function MyOfferDetailScreen({
           />
         }
       >
-        <YStack flex={1} alignItems="center" justifyContent="center" gap="$5">
-          <Typography
-            variant="titlesSmall"
-            color="$foregroundPrimary"
-            textAlign="center"
-          >
-            {t('offer.offerNotFound')}
-          </Typography>
-          <Button variant="primary" onPress={safeGoBack} width="100%">
-            {t('common.back')}
-          </Button>
-        </YStack>
+        <EmptyState
+          fullscreen
+          title={t('offer.offerNotFound')}
+          action={{
+            label: t('common.back'),
+            onPress: safeGoBack,
+            variant: 'primary',
+          }}
+        />
       </Screen>
     )
   }

@@ -19,6 +19,16 @@ const FabButtonFrame = styled(Stack, {
   pressStyle: {
     opacity: 0.7,
   },
+
+  variants: {
+    floating: {
+      true: {
+        position: 'absolute',
+        bottom: '$5',
+        right: '$5',
+      },
+    },
+  } as const,
 })
 
 type FabButtonFrameProps = React.ComponentProps<typeof FabButtonFrame>

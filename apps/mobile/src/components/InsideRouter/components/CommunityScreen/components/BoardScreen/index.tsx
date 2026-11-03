@@ -9,12 +9,13 @@ import {
   EmptyState,
   FabButton,
   FilterBar,
+  type FilterBarItem,
+  getTokens,
   PlusAdd,
   RefreshControl,
   Stack,
   Typography,
   YStack,
-  type FilterBarItem,
 } from '@vexl-next/ui'
 import {Array, Effect, Option, Order, pipe} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
@@ -26,7 +27,6 @@ import React, {
   useRef,
   useState,
 } from 'react'
-import {getTokens} from 'tamagui'
 import {type CommunityTabsScreenProps} from '../../../../../../navigationTypes'
 import {
   myNotesAtom,
@@ -93,8 +93,8 @@ function BoardComingSoon(): React.JSX.Element {
         backgroundColor="$backgroundSecondary"
       >
         <Stack
-          width={48}
-          height={4}
+          width="$10"
+          height="$2"
           borderRadius="$8"
           backgroundColor="$accentYellowPrimary"
         />
@@ -311,9 +311,7 @@ function NotesBoard({navigation, route}: Props): React.JSX.Element {
       />
 
       <FabButton
-        position="absolute"
-        bottom="$5"
-        right="$5"
+        floating
         icon={PlusAdd}
         label={t('notes.board.newNote')}
         onPress={goToCreateNote}

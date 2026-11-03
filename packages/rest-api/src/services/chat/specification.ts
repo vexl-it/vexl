@@ -242,7 +242,7 @@ export const RequestChatImageUploadEndpoint = HttpApiEndpoint.post(
   .addSuccess(RequestChatImageUploadResponse)
   .addError(SenderInboxDoesNotExistError, {status: 404})
   .addError(InvalidChallengeError, {status: 401})
-  .annotate(MaxExpectedDailyCall, 500)
+  .annotate(MaxExpectedDailyCall, 2)
 
 const InboxesApiGroup = HttpApiGroup.make('Inboxes')
   .add(UpdateInboxEndpoint)

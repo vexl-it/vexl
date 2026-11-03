@@ -42,7 +42,8 @@ export class S3Service extends Context.Tag('S3Service')<
         requestChecksumCalculation: 'WHEN_REQUIRED',
       })
 
-      // The span carries no key: chat image keys must not end up in traces.
+      // The span carries no key or size: they must not end up in traces next to
+      // the client IP.
       const generatePresignedUploadUrl: S3Operations['generatePresignedUploadUrl'] =
         ({key, contentType, contentLength, expiresIn = 900}) =>
           Effect.tryPromise({
@@ -73,7 +74,7 @@ export class S3Service extends Context.Tag('S3Service')<
               expiresIn,
             })),
             Effect.withSpan('S3 generatePresignedUploadUrl', {
-              attributes: {contentType, contentLength, expiresIn},
+              attributes: {contentType, expiresIn},
             })
           )
 

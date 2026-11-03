@@ -3,17 +3,17 @@ import {ClubCode} from '@vexl-next/domain/src/general/clubs'
 import {
   ArrowLeft,
   Button,
+  CodeInput,
   NavigationBar,
   Screen,
   Typography,
-  XStack,
   YStack,
 } from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
-import {Array, Effect, pipe, Schema} from 'effect'
+import {Effect, Schema} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useEffect, useRef, useState} from 'react'
-import {Keyboard, TextInput, TouchableOpacity} from 'react-native'
+import {Keyboard, type TextInput} from 'react-native'
 import {type JoinClubFlowStackScreenProps} from '../../../../navigationTypes'
 import {validateCodeToJoinClubActionAtom} from '../../../../state/clubs/atom/submitCodeToJoinClubActionAtom'
 import {dismissKeyboardAndResolveOnLayoutUpdate} from '../../../../utils/dismissKeyboardPromise'
@@ -21,38 +21,6 @@ import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import {accessCodeMolecule, CODE_LENGTH} from '../../atoms'
 
 type Props = JoinClubFlowStackScreenProps<'FillClubAccessCodeScreen'>
-
-const codeBoxHeight = 48
-
-function CodeBox({
-  disabled,
-  invalid,
-  value,
-}: {
-  readonly disabled: boolean
-  readonly invalid: boolean
-  readonly value: string | undefined
-}): React.ReactElement {
-  return (
-    <YStack
-      alignItems="center"
-      backgroundColor={disabled ? '$backgroundTertiary' : '$backgroundPrimary'}
-      borderColor={invalid ? '$redForeground' : '$backgroundHighlight'}
-      borderRadius="$3"
-      borderWidth={1}
-      height={codeBoxHeight}
-      justifyContent="center"
-      width={50}
-    >
-      <Typography
-        color={disabled ? '$foregroundSecondary' : '$foregroundPrimary'}
-        variant="paragraph"
-      >
-        {value ?? ''}
-      </Typography>
-    </YStack>
-  )
-}
 
 function FillClubAccessCodeScreen({
   navigation,
@@ -189,65 +157,34 @@ function FillClubAccessCodeScreen({
             {t('clubs.enterYourClubCode')}
           </Typography>
         </YStack>
-        <TouchableOpacity
-          activeOpacity={1}
-          disabled={submitInProgress}
-          onPress={() => {
-            inputRef.current?.focus()
-          }}
-        >
-          <YStack gap="$3">
-            <TextInput
-              autoFocus
-              caretHidden
-              editable={!submitInProgress}
-              keyboardType="number-pad"
-              maxLength={CODE_LENGTH}
-              onChangeText={(value) => {
-                const code = value.replace(/\D/g, '').substring(0, CODE_LENGTH)
-                handleAccessCodeElementChange(code)
-              }}
-              ref={inputRef}
-              style={{
-                height: codeBoxHeight,
-                opacity: 0,
-                position: 'absolute',
-                width: '100%',
-              }}
-              value={accessCode.join('')}
-            />
-            <XStack gap="$2" justifyContent="center">
-              {pipe(
-                Array.makeBy(CODE_LENGTH, (index) => (
-                  <CodeBox
-                    key={index}
-                    disabled={submitInProgress}
-                    invalid={isCodeInvalid}
-                    value={accessCode[index]}
-                  />
-                ))
-              )}
-            </XStack>
-            {!!submitInProgress && (
-              <Typography
-                color="$foregroundPrimary"
-                textAlign="center"
-                variant="paragraphSmall"
-              >
-                {t('clubs.verifying')}
-              </Typography>
-            )}
-            {!!isCodeInvalid && !submitInProgress && (
-              <Typography
-                color="$redForeground"
-                textAlign="center"
-                variant="paragraphSmall"
-              >
-                {t('clubs.codeDidNotWorkDoubleCheckAndTryAgain')}
-              </Typography>
-            )}
-          </YStack>
-        </TouchableOpacity>
+        <YStack gap="$3">
+          <CodeInput
+            length={CODE_LENGTH}
+            value={accessCode.join('')}
+            onChangeText={handleAccessCodeElementChange}
+            invalid={isCodeInvalid}
+            disabled={submitInProgress}
+            inputRef={inputRef}
+          />
+          {!!submitInProgress && (
+            <Typography
+              color="$foregroundPrimary"
+              textAlign="center"
+              variant="paragraphSmall"
+            >
+              {t('clubs.verifying')}
+            </Typography>
+          )}
+          {!!isCodeInvalid && !submitInProgress && (
+            <Typography
+              color="$redForeground"
+              textAlign="center"
+              variant="paragraphSmall"
+            >
+              {t('clubs.codeDidNotWorkDoubleCheckAndTryAgain')}
+            </Typography>
+          )}
+        </YStack>
         <YStack />
       </YStack>
     </Screen>

@@ -5,58 +5,21 @@ import {
   MathCalculate,
   PeopleUsers,
   PinGeolocation,
-  SizableText,
-  Theme,
   YStack,
 } from '@vexl-next/ui'
 import React, {useCallback} from 'react'
-import {Alert, ScrollView} from 'react-native'
+import {Alert} from 'react-native'
 
-function SectionLabel({
-  children,
-}: {
-  readonly children: string
-}): React.JSX.Element {
-  return (
-    <SizableText
-      fontFamily="$body"
-      fontWeight="600"
-      fontSize="$2"
-      color="$foregroundSecondary"
-      paddingTop="$3"
-    >
-      {children}
-    </SizableText>
-  )
-}
+import {ComponentScreenLayout, DemoSection} from './ComponentScreenLayout'
 
-function ThemeGroup({
-  theme,
-}: {
-  readonly theme: 'light' | 'dark'
-}): React.JSX.Element {
+function Demos(): React.JSX.Element {
   const handlePress = useCallback((label: string) => {
     Alert.alert('Pressed', label)
   }, [])
 
   return (
-    <Theme name={theme}>
-      <YStack
-        gap="$4"
-        padding="$5"
-        backgroundColor="$backgroundPrimary"
-        borderRadius="$4"
-      >
-        <SizableText
-          fontFamily="$body"
-          fontWeight="600"
-          fontSize="$3"
-          color="$foregroundPrimary"
-        >
-          {theme.charAt(0).toUpperCase() + theme.slice(1)}
-        </SizableText>
-
-        <SectionLabel>Completed</SectionLabel>
+    <YStack gap="$5">
+      <DemoSection title="Completed">
         <YStack gap="$3">
           <ChecklistCell
             state="completed"
@@ -69,8 +32,9 @@ function ThemeGroup({
             subtitle="Set: Vinohradsky pivovar"
           />
         </YStack>
+      </DemoSection>
 
-        <SectionLabel>Initial (with icon)</SectionLabel>
+      <DemoSection title="Initial (with icon)">
         <YStack gap="$3">
           <ChecklistCell
             state="initial"
@@ -108,8 +72,9 @@ function ThemeGroup({
             }}
           />
         </YStack>
+      </DemoSection>
 
-        <SectionLabel>Pending</SectionLabel>
+      <DemoSection title="Pending">
         <YStack gap="$3">
           <ChecklistCell
             state="pending"
@@ -128,8 +93,9 @@ function ThemeGroup({
             }}
           />
         </YStack>
+      </DemoSection>
 
-        <SectionLabel>Mixed (realistic checklist)</SectionLabel>
+      <DemoSection title="Mixed (realistic checklist)">
         <YStack gap="$3">
           <ChecklistCell
             state="completed"
@@ -159,27 +125,11 @@ function ThemeGroup({
             }}
           />
         </YStack>
-      </YStack>
-    </Theme>
+      </DemoSection>
+    </YStack>
   )
 }
 
 export function ChecklistCellScreen(): React.JSX.Element {
-  return (
-    <ScrollView style={{flex: 1}}>
-      <YStack padding="$5" gap="$4">
-        <SizableText
-          fontFamily="$heading"
-          fontWeight="700"
-          fontSize="$3"
-          color="$foregroundPrimary"
-        >
-          Checklist Cell
-        </SizableText>
-
-        <ThemeGroup theme="light" />
-        <ThemeGroup theme="dark" />
-      </YStack>
-    </ScrollView>
-  )
+  return <ComponentScreenLayout title="Checklist Cell" demos={Demos} />
 }

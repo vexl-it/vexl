@@ -1,7 +1,7 @@
 import {Backdrop, type BackdropVariant, Typography, YStack} from '@vexl-next/ui'
 import React from 'react'
 
-import {ComponentScreenLayout} from './ComponentScreenLayout'
+import {ComponentScreenLayout, DemoSection} from './ComponentScreenLayout'
 
 function BackdropDemo({
   variant,
@@ -9,10 +9,7 @@ function BackdropDemo({
   readonly variant: BackdropVariant
 }): React.JSX.Element {
   return (
-    <YStack gap="$2">
-      <Typography variant="description" color="$foregroundSecondary">
-        {variant}
-      </Typography>
+    <DemoSection title={variant}>
       <YStack
         position="relative"
         height={120}
@@ -26,13 +23,13 @@ function BackdropDemo({
         </Typography>
         <Backdrop variant={variant} />
       </YStack>
-    </YStack>
+    </DemoSection>
   )
 }
 
 function Demos(): React.JSX.Element {
   return (
-    <YStack gap="$4">
+    <YStack gap="$5">
       <BackdropDemo variant="dark" />
       <BackdropDemo variant="surface" />
     </YStack>

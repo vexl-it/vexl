@@ -1,42 +1,39 @@
-import {CodeInput, Typography, YStack} from '@vexl-next/ui'
+import {CodeInput, YStack} from '@vexl-next/ui'
 import React, {useState} from 'react'
 
-import {ComponentScreenLayout} from './ComponentScreenLayout'
+import {ComponentScreenLayout, DemoSection} from './ComponentScreenLayout'
 
 function Demos(): React.JSX.Element {
   const [code, setCode] = useState('12')
 
   return (
     <YStack gap="$5">
-      <Typography variant="micro" color="$foregroundSecondary">
-        Interactive (6 digits)
-      </Typography>
-      <CodeInput
-        length={6}
-        value={code}
-        onChangeText={setCode}
-        autoFocus={false}
-      />
-      <Typography variant="micro" color="$foregroundSecondary">
-        Invalid
-      </Typography>
-      <CodeInput
-        length={6}
-        value="123456"
-        onChangeText={() => {}}
-        autoFocus={false}
-        invalid
-      />
-      <Typography variant="micro" color="$foregroundSecondary">
-        Disabled
-      </Typography>
-      <CodeInput
-        length={6}
-        value="123"
-        onChangeText={() => {}}
-        autoFocus={false}
-        disabled
-      />
+      <DemoSection title="Interactive (6 digits)">
+        <CodeInput
+          length={6}
+          value={code}
+          onChangeText={setCode}
+          autoFocus={false}
+        />
+      </DemoSection>
+      <DemoSection title="Invalid">
+        <CodeInput
+          length={6}
+          value="123456"
+          onChangeText={() => {}}
+          autoFocus={false}
+          invalid
+        />
+      </DemoSection>
+      <DemoSection title="Disabled">
+        <CodeInput
+          length={6}
+          value="123"
+          onChangeText={() => {}}
+          autoFocus={false}
+          disabled
+        />
+      </DemoSection>
     </YStack>
   )
 }

@@ -7,49 +7,47 @@ import {
 } from '@vexl-next/ui'
 import React, {useState} from 'react'
 
-import {ComponentScreenLayout} from './ComponentScreenLayout'
+import {ComponentScreenLayout, DemoSection} from './ComponentScreenLayout'
 
 function Demos(): React.JSX.Element {
   const [visible, setVisible] = useState(true)
 
   return (
-    <YStack gap="$5">
-      <Typography variant="description" color="$foregroundSecondary">
-        LoadingIndicator
-      </Typography>
-      <LoadingIndicator />
-      <LoadingIndicator label="Loading offers..." />
+    <>
+      <DemoSection title="LoadingIndicator">
+        <LoadingIndicator />
+        <LoadingIndicator label="Loading offers..." />
+      </DemoSection>
 
-      <Typography variant="description" color="$foregroundSecondary">
-        LoadingOverlay (inside a fixed-height box)
-      </Typography>
-      <Button
-        size="small"
-        variant="secondary"
-        onPress={() => {
-          setVisible((value) => !value)
-        }}
-      >
-        {visible ? 'Hide overlay' : 'Show overlay'}
-      </Button>
-      <YStack
-        position="relative"
-        height={200}
-        gap="$3"
-        padding="$4"
-        borderRadius="$4"
-        overflow="hidden"
-        backgroundColor="$backgroundSecondary"
-      >
-        <Typography variant="paragraph" color="$foregroundPrimary">
-          Content under the overlay
-        </Typography>
-        <Typography variant="description" color="$foregroundSecondary">
-          The overlay blocks touches while visible.
-        </Typography>
-        <LoadingOverlay visible={visible} label="Saving..." />
-      </YStack>
-    </YStack>
+      <DemoSection title="LoadingOverlay (inside a fixed-height box)">
+        <Button
+          size="small"
+          variant="secondary"
+          onPress={() => {
+            setVisible((value) => !value)
+          }}
+        >
+          {visible ? 'Hide overlay' : 'Show overlay'}
+        </Button>
+        <YStack
+          position="relative"
+          height={200}
+          gap="$3"
+          padding="$4"
+          borderRadius="$4"
+          overflow="hidden"
+          backgroundColor="$backgroundSecondary"
+        >
+          <Typography variant="paragraph" color="$foregroundPrimary">
+            Content under the overlay
+          </Typography>
+          <Typography variant="description" color="$foregroundSecondary">
+            The overlay blocks touches while visible.
+          </Typography>
+          <LoadingOverlay visible={visible} label="Saving..." />
+        </YStack>
+      </DemoSection>
+    </>
   )
 }
 

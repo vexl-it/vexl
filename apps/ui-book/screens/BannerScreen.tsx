@@ -1,32 +1,17 @@
-import {Banner, Button, Image, SizableText, Theme, YStack} from '@vexl-next/ui'
+import {Banner, Button, Image, YStack} from '@vexl-next/ui'
 import React, {useState} from 'react'
-import {ScrollView} from 'react-native'
+
+import {ComponentScreenLayout, DemoSection} from './ComponentScreenLayout'
 
 const testBannerSource = require('../assets/testBanner.png') as number
-
-function SectionLabel({
-  children,
-}: {
-  readonly children: string
-}): React.JSX.Element {
-  return (
-    <SizableText
-      fontFamily="$body"
-      fontWeight="600"
-      fontSize="$2"
-      color="$foregroundSecondary"
-      paddingTop="$3"
-    >
-      {children}
-    </SizableText>
-  )
-}
 
 function BannerImage(): React.JSX.Element {
   return (
     <Image
       source={testBannerSource}
-      style={{width: '100%', height: 98, borderRadius: 10}}
+      width="100%"
+      height={98}
+      borderRadius="$3"
       objectFit="cover"
     />
   )
@@ -71,29 +56,10 @@ function DismissibleDemo(): React.JSX.Element {
   )
 }
 
-function ThemeGroup({
-  theme,
-}: {
-  readonly theme: 'light' | 'dark'
-}): React.JSX.Element {
+function Demos(): React.JSX.Element {
   return (
-    <Theme name={theme}>
-      <YStack
-        gap="$4"
-        padding="$5"
-        backgroundColor="$backgroundPrimary"
-        borderRadius="$4"
-      >
-        <SizableText
-          fontFamily="$body"
-          fontWeight="600"
-          fontSize="$3"
-          color="$foregroundPrimary"
-        >
-          {theme.charAt(0).toUpperCase() + theme.slice(1)}
-        </SizableText>
-
-        <SectionLabel>Green with image</SectionLabel>
+    <YStack gap="$5">
+      <DemoSection title="Green with image">
         <Banner
           color="green"
           title="Title"
@@ -102,8 +68,9 @@ function ThemeGroup({
           primaryButton={{label: 'Label 1'}}
           secondaryButton={{label: 'Label 2'}}
         />
+      </DemoSection>
 
-        <SectionLabel>Pink with image</SectionLabel>
+      <DemoSection title="Pink with image">
         <Banner
           color="pink"
           title="Title"
@@ -112,46 +79,33 @@ function ThemeGroup({
           primaryButton={{label: 'Label 1'}}
           secondaryButton={{label: 'Label 2'}}
         />
+      </DemoSection>
 
-        <SectionLabel>Green without image</SectionLabel>
+      <DemoSection title="Green without image">
         <Banner
           color="green"
           title="Give love"
           description="Like Vexl? Help us improve it. Donate some sound money."
           primaryButton={{label: 'Donate'}}
         />
+      </DemoSection>
 
-        <SectionLabel>Pink without image</SectionLabel>
+      <DemoSection title="Pink without image">
         <Banner
           color="pink"
           title="Give love"
           description="Like Vexl? Help us improve it. Donate some sound money."
           primaryButton={{label: 'Donate'}}
         />
+      </DemoSection>
 
-        <SectionLabel>Dismissible (press a button)</SectionLabel>
+      <DemoSection title="Dismissible (press a button)">
         <DismissibleDemo />
-      </YStack>
-    </Theme>
+      </DemoSection>
+    </YStack>
   )
 }
 
 export function BannerScreen(): React.JSX.Element {
-  return (
-    <ScrollView style={{flex: 1}}>
-      <YStack padding="$5" gap="$4">
-        <SizableText
-          fontFamily="$heading"
-          fontWeight="700"
-          fontSize="$3"
-          color="$foregroundPrimary"
-        >
-          Banner
-        </SizableText>
-
-        <ThemeGroup theme="light" />
-        <ThemeGroup theme="dark" />
-      </YStack>
-    </ScrollView>
-  )
+  return <ComponentScreenLayout title="Banner" demos={Demos} />
 }

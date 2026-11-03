@@ -16,6 +16,7 @@
   "dependencies": {
     "@tamagui/babel-plugin": "^1.137.0",
     "@vexl-next/ui": "0.0.0",
+    "effect": "^3.20.0",
     "expo": "~57.0.24",
     "expo-asset": "~57.0.18",
     "expo-font": "~57.0.4",

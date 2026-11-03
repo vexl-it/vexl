@@ -1,13 +1,9 @@
 import type {CommonFriend} from '@vexl-next/ui'
-import {
-  CommonFriends,
-  SizableText,
-  Theme,
-  Typography,
-  YStack,
-} from '@vexl-next/ui'
+import {CommonFriends, YStack} from '@vexl-next/ui'
 import React from 'react'
-import {Alert, ScrollView} from 'react-native'
+import {Alert} from 'react-native'
+
+import {ComponentScreenLayout, DemoSection} from './ComponentScreenLayout'
 
 const vexlAvatarSource = require('../assets/vexlAvatar.png') as number
 
@@ -33,37 +29,10 @@ const FRIENDS_WITHOUT_AVATAR: readonly CommonFriend[] = [
   {id: '5', name: 'No image'},
 ]
 
-function ThemeGroup({
-  theme,
-}: {
-  readonly theme: 'light' | 'dark'
-}): React.JSX.Element {
+function Demos(): React.JSX.Element {
   return (
-    <Theme name={theme}>
-      <YStack
-        gap="$4"
-        padding="$5"
-        backgroundColor="$backgroundPrimary"
-        borderRadius="$4"
-      >
-        <SizableText
-          fontFamily="$body"
-          fontWeight="600"
-          fontSize="$3"
-          color="$foregroundPrimary"
-        >
-          {theme.charAt(0).toUpperCase() + theme.slice(1)}
-        </SizableText>
-
-        <SizableText
-          fontFamily="$body"
-          fontWeight="600"
-          fontSize="$2"
-          color="$foregroundSecondary"
-          paddingTop="$3"
-        >
-          Pressable
-        </SizableText>
+    <YStack gap="$5">
+      <DemoSection title="Pressable">
         <CommonFriends
           label="10 common friends"
           friends={SAMPLE_FRIENDS}
@@ -71,16 +40,9 @@ function ThemeGroup({
             Alert.alert('Pressed', 'Common friends')
           }}
         />
+      </DemoSection>
 
-        <SizableText
-          fontFamily="$body"
-          fontWeight="600"
-          fontSize="$2"
-          color="$foregroundSecondary"
-          paddingTop="$3"
-        >
-          Few friends
-        </SizableText>
+      <DemoSection title="Few friends">
         <CommonFriends
           label="2 common friends"
           friends={FEW_FRIENDS}
@@ -88,16 +50,9 @@ function ThemeGroup({
             Alert.alert('Pressed', 'Few friends')
           }}
         />
+      </DemoSection>
 
-        <SizableText
-          fontFamily="$body"
-          fontWeight="600"
-          fontSize="$2"
-          color="$foregroundSecondary"
-          paddingTop="$3"
-        >
-          Without avatar (default placeholder)
-        </SizableText>
+      <DemoSection title="Without avatar (default placeholder)">
         <CommonFriends
           label="5 common friends"
           friends={FRIENDS_WITHOUT_AVATAR}
@@ -105,10 +60,9 @@ function ThemeGroup({
             Alert.alert('Pressed', 'Friends without avatar')
           }}
         />
+      </DemoSection>
 
-        <Typography variant="descriptionBold" color="$foregroundSecondary">
-          Trusted
-        </Typography>
+      <DemoSection title="Trusted">
         <CommonFriends
           label="5 common"
           trustedLabel="2 trusted"
@@ -123,9 +77,8 @@ function ThemeGroup({
             ...FEW_FRIENDS,
           ]}
         />
-        <Typography variant="descriptionBold" color="$foregroundSecondary">
-          Trusted + club
-        </Typography>
+      </DemoSection>
+      <DemoSection title="Trusted + club">
         <CommonFriends
           label="5 common and 1 clubs"
           trustedLabel="2 trusted"
@@ -141,38 +94,15 @@ function ThemeGroup({
             {id: 'club', name: 'btc prague', avatarSource: vexlAvatarSource},
           ]}
         />
+      </DemoSection>
 
-        <SizableText
-          fontFamily="$body"
-          fontWeight="600"
-          fontSize="$2"
-          color="$foregroundSecondary"
-          paddingTop="$3"
-        >
-          Not pressable
-        </SizableText>
+      <DemoSection title="Not pressable">
         <CommonFriends label="6 common friends" friends={SAMPLE_FRIENDS} />
-      </YStack>
-    </Theme>
+      </DemoSection>
+    </YStack>
   )
 }
 
 export function CommonFriendsScreen(): React.JSX.Element {
-  return (
-    <ScrollView style={{flex: 1}}>
-      <YStack padding="$5" gap="$4">
-        <SizableText
-          fontFamily="$heading"
-          fontWeight="700"
-          fontSize="$3"
-          color="$foregroundPrimary"
-        >
-          Common Friends
-        </SizableText>
-
-        <ThemeGroup theme="light" />
-        <ThemeGroup theme="dark" />
-      </YStack>
-    </ScrollView>
-  )
+  return <ComponentScreenLayout title="Common Friends" demos={Demos} />
 }

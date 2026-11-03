@@ -1,6 +1,7 @@
-import {SegmentedPicker, SizableText, Theme, YStack} from '@vexl-next/ui'
-import React, {useCallback, useState} from 'react'
-import {ScrollView} from 'react-native'
+import {SegmentedPicker} from '@vexl-next/ui'
+import React, {useState} from 'react'
+
+import {ComponentScreenLayout, DemoSection} from './ComponentScreenLayout'
 
 const twoTabs = [
   {label: 'Buy', value: 'buy'},
@@ -13,90 +14,32 @@ const threeTabs = [
   {label: 'Requests', value: 'requests'},
 ] as const
 
-function ThemeGroup({
-  theme,
-}: {
-  readonly theme: 'light' | 'dark'
-}): React.JSX.Element {
+function Demos(): React.JSX.Element {
   const [twoActive, setTwoActive] = useState<'buy' | 'sell'>('buy')
   const [threeActive, setThreeActive] = useState<'all' | 'offers' | 'requests'>(
     'all'
   )
 
-  const handleTwoPress = useCallback((value: 'buy' | 'sell') => {
-    setTwoActive(value)
-  }, [])
-
-  const handleThreePress = useCallback(
-    (value: 'all' | 'offers' | 'requests') => {
-      setThreeActive(value)
-    },
-    []
-  )
-
   return (
-    <Theme name={theme}>
-      <YStack
-        gap="$4"
-        padding="$5"
-        backgroundColor="$backgroundPrimary"
-        borderRadius="$4"
-      >
-        <SizableText
-          fontFamily="$body"
-          fontWeight="600"
-          fontSize="$3"
-          color="$foregroundPrimary"
-        >
-          {theme.charAt(0).toUpperCase() + theme.slice(1)}
-        </SizableText>
-
-        <SizableText
-          fontWeight="500"
-          fontSize="$2"
-          color="$foregroundSecondary"
-        >
-          2 tabs
-        </SizableText>
+    <>
+      <DemoSection title="2 tabs">
         <SegmentedPicker
           tabs={twoTabs}
           activeTab={twoActive}
-          onTabPress={handleTwoPress}
+          onTabPress={setTwoActive}
         />
-
-        <SizableText
-          fontWeight="500"
-          fontSize="$2"
-          color="$foregroundSecondary"
-        >
-          3 tabs
-        </SizableText>
+      </DemoSection>
+      <DemoSection title="3 tabs">
         <SegmentedPicker
           tabs={threeTabs}
           activeTab={threeActive}
-          onTabPress={handleThreePress}
+          onTabPress={setThreeActive}
         />
-      </YStack>
-    </Theme>
+      </DemoSection>
+    </>
   )
 }
 
 export function SegmentedPickerScreen(): React.JSX.Element {
-  return (
-    <ScrollView style={{flex: 1}}>
-      <YStack padding="$5" gap="$4">
-        <SizableText
-          fontFamily="$heading"
-          fontWeight="700"
-          fontSize="$3"
-          color="$foregroundPrimary"
-        >
-          Segmented Picker
-        </SizableText>
-
-        <ThemeGroup theme="light" />
-        <ThemeGroup theme="dark" />
-      </YStack>
-    </ScrollView>
-  )
+  return <ComponentScreenLayout title="Segmented Picker" demos={Demos} />
 }

@@ -13,6 +13,7 @@ function Swatch({
   return (
     <Stack
       flex={1}
+      flexBasis={0}
       height={160}
       borderRadius="$5"
       overflow="hidden"

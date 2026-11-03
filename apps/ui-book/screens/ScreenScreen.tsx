@@ -3,81 +3,73 @@ import {
   ChevronLeft,
   NavigationBar,
   Screen,
-  SizableText,
-  Stack,
-  Theme,
   TitleBlock,
+  Typography,
   useScreenFooterHeight,
   XmarkCancelClose,
   YStack,
 } from '@vexl-next/ui'
 import {useAtomValue} from 'jotai'
-import React, {useState} from 'react'
+import React from 'react'
 import {ScrollView} from 'react-native'
 
-type ActiveExample =
-  | 'backFooter-dark'
-  | 'backFooter-light'
-  | 'scrollFooter-dark'
-  | 'scrollFooter-light'
-  | 'reservedFooter-dark'
-  | 'reservedFooter-light'
-  | null
+import {ComponentScreenLayout, DemoSection} from './ComponentScreenLayout'
 
-function BackStyleWithFooterExample({
-  onBack,
-  theme,
+const PREVIEW_HEIGHT = 600
+
+function PreviewFrame({
+  children,
 }: {
-  readonly onBack: () => void
-  readonly theme: 'light' | 'dark'
+  readonly children: React.ReactNode
 }): React.JSX.Element {
   return (
-    <Theme name={theme}>
-      <YStack flex={1}>
-        <Screen
-          navigationBar={
-            <NavigationBar
-              style="back"
-              title="Add a nickname"
-              leftAction={{icon: ChevronLeft, onPress: onBack}}
-              rightActions={[{icon: XmarkCancelClose, onPress: () => {}}]}
-            />
-          }
-          footer={
-            <Button variant="primary" size="large">
-              Next
-            </Button>
-          }
+    <YStack
+      height={PREVIEW_HEIGHT}
+      overflow="hidden"
+      borderRadius="$5"
+      borderWidth={1}
+      borderColor="$backgroundTertiary"
+      backgroundColor="$backgroundPrimary"
+    >
+      {children}
+    </YStack>
+  )
+}
+
+function BackStyleWithFooterExample(): React.JSX.Element {
+  return (
+    <Screen
+      navigationBar={
+        <NavigationBar
+          style="back"
+          title="Add a nickname"
+          leftAction={{icon: ChevronLeft, onPress: () => {}}}
+          rightActions={[{icon: XmarkCancelClose, onPress: () => {}}]}
+        />
+      }
+      footer={
+        <Button variant="primary" size="large">
+          Next
+        </Button>
+      }
+    >
+      <YStack gap="$8">
+        <Typography variant="description" color="$foregroundSecondary">
+          Pick a name people will see when you trade.
+        </Typography>
+        <YStack
+          backgroundColor="$backgroundSecondary"
+          borderRadius="$5"
+          height="$11"
+          justifyContent="center"
+          paddingHorizontal="$5"
         >
-          <YStack gap="$8">
-            <SizableText
-              fontFamily="$body"
-              fontWeight="500"
-              fontSize="$2"
-              color="$foregroundSecondary"
-            >
-              Pick a name people will see when you trade.
-            </SizableText>
-            <YStack
-              backgroundColor="$backgroundSecondary"
-              borderRadius="$5"
-              height="$11"
-              justifyContent="center"
-              paddingHorizontal="$5"
-            >
-              <SizableText
-                fontFamily="$body"
-                fontWeight="500"
-                fontSize="$4"
-                color="$foregroundPrimary"
-              >
-                Krabby
-              </SizableText>
-            </YStack>
-          </YStack>
-        </Screen>
+          <Typography variant="paragraph" color="$foregroundPrimary">
+            Krabby
+          </Typography>
+        </YStack>
       </YStack>
-    </Theme>
+    </Screen>
   )
 }
 
@@ -96,22 +88,12 @@ function ScrollWithFooterContent(): React.JSX.Element {
             padding="$5"
             gap="$3"
           >
-            <SizableText
-              fontFamily="$body"
-              fontWeight="600"
-              fontSize="$2"
-              color="$foregroundPrimary"
-            >
+            <Typography variant="descriptionBold" color="$foregroundPrimary">
               {`Option ${i + 1}`}
-            </SizableText>
-            <SizableText
-              fontFamily="$body"
-              fontWeight="500"
-              fontSize="$2"
-              color="$foregroundSecondary"
-            >
+            </Typography>
+            <Typography variant="description" color="$foregroundSecondary">
               Scrollable content with sticky footer
-            </SizableText>
+            </Typography>
           </YStack>
         ))}
       </YStack>
@@ -119,152 +101,73 @@ function ScrollWithFooterContent(): React.JSX.Element {
   )
 }
 
-function ScrollWithFooterExample({
-  onBack,
-  theme,
-}: {
-  readonly onBack: () => void
-  readonly theme: 'light' | 'dark'
-}): React.JSX.Element {
+function ScrollWithFooterExample(): React.JSX.Element {
   return (
-    <Theme name={theme}>
-      <YStack flex={1}>
-        <Screen
-          navigationBar={
-            <NavigationBar
-              style="back"
-              title="Select options"
-              leftAction={{icon: ChevronLeft, onPress: onBack}}
-            />
-          }
-          footer={
-            <Button variant="primary" size="large">
-              Confirm
-            </Button>
-          }
-        >
-          <ScrollWithFooterContent />
-        </Screen>
-      </YStack>
-    </Theme>
+    <Screen
+      navigationBar={
+        <NavigationBar
+          style="back"
+          title="Select options"
+          leftAction={{icon: ChevronLeft, onPress: () => {}}}
+        />
+      }
+      footer={
+        <Button variant="primary" size="large">
+          Confirm
+        </Button>
+      }
+    >
+      <ScrollWithFooterContent />
+    </Screen>
   )
 }
 
-function ReservedFooterSpaceExample({
-  onBack,
-  theme,
-}: {
-  readonly onBack: () => void
-  readonly theme: 'light' | 'dark'
-}): React.JSX.Element {
+function ReservedFooterSpaceExample(): React.JSX.Element {
   return (
-    <Theme name={theme}>
-      <YStack flex={1}>
-        <Screen
-          navigationBar={null}
-          reserveFooterSpace
-          footer={
-            <YStack gap="$3">
-              <Button variant="primary" onPress={onBack}>
-                Continue
-              </Button>
-              <Button variant="secondary" onPress={onBack}>
-                Back to the list
-              </Button>
-            </YStack>
-          }
-        >
-          <YStack flex={1} justifyContent="center">
-            <TitleBlock
-              align="center"
-              size="large"
-              title="No navigation bar"
-              text="reserveFooterSpace centres this text above the footer instead of under it."
-            />
-          </YStack>
-        </Screen>
+    <Screen
+      navigationBar={null}
+      reserveFooterSpace
+      footer={
+        <YStack gap="$3">
+          <Button variant="primary">Continue</Button>
+          <Button variant="secondary">Back to the list</Button>
+        </YStack>
+      }
+    >
+      <YStack flex={1} justifyContent="center">
+        <TitleBlock
+          align="center"
+          size="large"
+          title="No navigation bar"
+          text="reserveFooterSpace centres this text above the footer instead of under it."
+        />
       </YStack>
-    </Theme>
+    </Screen>
   )
 }
 
-const examples: ReadonlyArray<{
-  readonly key: ActiveExample & string
-  readonly label: string
-}> = [
-  {key: 'backFooter-dark', label: 'Back style with footer (dark)'},
-  {key: 'backFooter-light', label: 'Back style with footer (light)'},
-  {key: 'scrollFooter-dark', label: 'Scroll with footer (dark)'},
-  {key: 'scrollFooter-light', label: 'Scroll with footer (light)'},
-  {
-    key: 'reservedFooter-dark',
-    label: 'No navigation bar, reserved footer space (dark)',
-  },
-  {
-    key: 'reservedFooter-light',
-    label: 'No navigation bar, reserved footer space (light)',
-  },
-]
-
-function ActiveScreen({
-  active,
-  onBack,
-}: {
-  readonly active: ActiveExample & string
-  readonly onBack: () => void
-}): React.JSX.Element {
-  const theme = active.endsWith('-light') ? 'light' : 'dark'
-
-  if (active.startsWith('reservedFooter'))
-    return <ReservedFooterSpaceExample onBack={onBack} theme={theme} />
-  if (active.startsWith('scrollFooter'))
-    return <ScrollWithFooterExample onBack={onBack} theme={theme} />
-  return <BackStyleWithFooterExample onBack={onBack} theme={theme} />
+function Demos(): React.JSX.Element {
+  return (
+    <>
+      <DemoSection title="Back style with footer">
+        <PreviewFrame>
+          <BackStyleWithFooterExample />
+        </PreviewFrame>
+      </DemoSection>
+      <DemoSection title="Scroll with footer">
+        <PreviewFrame>
+          <ScrollWithFooterExample />
+        </PreviewFrame>
+      </DemoSection>
+      <DemoSection title="No navigation bar, reserved footer space">
+        <PreviewFrame>
+          <ReservedFooterSpaceExample />
+        </PreviewFrame>
+      </DemoSection>
+    </>
+  )
 }
 
 export function ScreenScreen(): React.JSX.Element {
-  const [active, setActive] = useState<ActiveExample>(null)
-
-  const goBack = (): void => {
-    setActive(null)
-  }
-
-  if (active) return <ActiveScreen active={active} onBack={goBack} />
-
-  return (
-    <ScrollView style={{flex: 1}}>
-      <YStack padding="$5" gap="$5">
-        <SizableText
-          fontFamily="$heading"
-          fontWeight="700"
-          fontSize="$3"
-          color="$foregroundPrimary"
-        >
-          Screen
-        </SizableText>
-        {examples.map((ex) => (
-          <Stack
-            key={ex.key}
-            onPress={() => {
-              setActive(ex.key)
-            }}
-            backgroundColor="$backgroundSecondary"
-            paddingVertical="$5"
-            paddingHorizontal="$5"
-            borderRadius="$4"
-            pressStyle={{opacity: 0.7}}
-          >
-            <SizableText
-              fontFamily="$body"
-              fontWeight="600"
-              fontSize="$2"
-              color="$foregroundPrimary"
-            >
-              {ex.label}
-            </SizableText>
-          </Stack>
-        ))}
-      </YStack>
-    </ScrollView>
-  )
+  return <ComponentScreenLayout title="Screen" demos={Demos} />
 }

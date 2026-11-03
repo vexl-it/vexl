@@ -5,36 +5,16 @@ import {
   BellNotification,
   ChevronLeft,
   NavigationBar,
-  SizableText,
-  Theme,
   TuneSettings,
   UserProfile,
-  YStack,
 } from '@vexl-next/ui'
 import React from 'react'
-import {ScrollView} from 'react-native'
 import {useSharedValue} from 'react-native-reanimated'
+
+import {ComponentScreenLayout, DemoSection} from './ComponentScreenLayout'
 
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 const AnonymousAvatar = avatarsSvg[0]!
-
-function SectionLabel({
-  children,
-}: {
-  readonly children: string
-}): React.JSX.Element {
-  return (
-    <SizableText
-      fontFamily="$body"
-      fontWeight="600"
-      fontSize="$2"
-      color="$foregroundSecondary"
-      paddingTop="$3"
-    >
-      {children}
-    </SizableText>
-  )
-}
 
 function AnimatedNavBarExample({
   scrollValue,
@@ -56,56 +36,40 @@ function AnimatedNavBarExample({
   )
 }
 
-function ThemedColumn({
-  theme,
-}: {
-  readonly theme: 'light' | 'dark'
-}): React.JSX.Element {
+function Demos(): React.JSX.Element {
   return (
-    <Theme name={theme}>
-      <YStack
-        gap="$4"
-        backgroundColor="$backgroundPrimary"
-        borderRadius="$4"
-        overflow="hidden"
-      >
-        <SizableText
-          fontFamily="$body"
-          fontWeight="600"
-          fontSize="$3"
-          color="$foregroundPrimary"
-          paddingHorizontal="$5"
-          paddingTop="$5"
-        >
-          {theme.charAt(0).toUpperCase() + theme.slice(1)}
-        </SizableText>
-
-        <SectionLabel>{'  Animated (scroll = 0)'}</SectionLabel>
+    <>
+      <DemoSection title="Animated (scroll = 0)">
         <AnimatedNavBarExample scrollValue={0} />
+      </DemoSection>
 
-        <SectionLabel>{'  Animated (scroll = 25)'}</SectionLabel>
+      <DemoSection title="Animated (scroll = 25)">
         <AnimatedNavBarExample scrollValue={25} />
+      </DemoSection>
 
-        <SectionLabel>{'  Animated (scroll = 50)'}</SectionLabel>
+      <DemoSection title="Animated (scroll = 50)">
         <AnimatedNavBarExample scrollValue={50} />
+      </DemoSection>
 
-        <SectionLabel>{'  Back'}</SectionLabel>
+      <DemoSection title="Back">
         <NavigationBar
           style="back"
           title="Settings"
           leftAction={{icon: ChevronLeft, onPress: () => {}}}
           rightActions={[{icon: TuneSettings, onPress: () => {}}]}
         />
+      </DemoSection>
 
-        <SectionLabel>{'  Back with text action'}</SectionLabel>
+      <DemoSection title="Back with text action">
         <NavigationBar
           style="back"
           title="Filters"
           leftAction={{icon: ChevronLeft, onPress: () => {}}}
           rightActions={[{label: 'Clear all', onPress: () => {}}]}
         />
+      </DemoSection>
 
-        <SectionLabel>{'  Chat'}</SectionLabel>
+      <DemoSection title="Chat">
         <NavigationBar
           style="chat"
           name="Friend of friend"
@@ -119,8 +83,9 @@ function ThemedColumn({
           }
           rightActions={[{icon: UserProfile, onPress: () => {}}]}
         />
+      </DemoSection>
 
-        <SectionLabel>Chat, trusted</SectionLabel>
+      <DemoSection title="Chat, trusted">
         <NavigationBar
           style="chat"
           name="Friend of friend"
@@ -134,8 +99,9 @@ function ThemedColumn({
           leftAction={{icon: ChevronLeft, onPress: () => {}}}
           rightActions={[{icon: UserProfile, onPress: () => {}}]}
         />
+      </DemoSection>
 
-        <SectionLabel>Chat, long text</SectionLabel>
+      <DemoSection title="Chat, long text">
         <NavigationBar
           style="chat"
           name="Freund eines Freundes aus deinem Netzwerk"
@@ -152,29 +118,11 @@ function ThemedColumn({
             {icon: UserProfile, onPress: () => {}},
           ]}
         />
-
-        <YStack height="$5" />
-      </YStack>
-    </Theme>
+      </DemoSection>
+    </>
   )
 }
 
 export function NavigationBarScreen(): React.JSX.Element {
-  return (
-    <ScrollView style={{flex: 1}}>
-      <YStack padding="$5" gap="$4">
-        <SizableText
-          fontFamily="$heading"
-          fontWeight="700"
-          fontSize="$3"
-          color="$foregroundPrimary"
-        >
-          Navigation Bar
-        </SizableText>
-
-        <ThemedColumn theme="light" />
-        <ThemedColumn theme="dark" />
-      </YStack>
-    </ScrollView>
-  )
+  return <ComponentScreenLayout title="Navigation Bar" demos={Demos} />
 }

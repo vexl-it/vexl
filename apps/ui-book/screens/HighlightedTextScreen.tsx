@@ -1,8 +1,8 @@
-import {HighlightedText, TextField, Typography, YStack} from '@vexl-next/ui'
+import {HighlightedText, TextField} from '@vexl-next/ui'
 import {atom, useAtomValue} from 'jotai'
 import React from 'react'
 
-import {ComponentScreenLayout} from './ComponentScreenLayout'
+import {ComponentScreenLayout, DemoSection} from './ComponentScreenLayout'
 
 const sampleText =
   'Selling bitcoin for cash in Prague. Bitcoin only, meet in person.'
@@ -13,35 +13,35 @@ function Demos(): React.JSX.Element {
   const query = useAtomValue(queryAtom)
 
   return (
-    <YStack gap="$4">
+    <>
       <TextField valueAtom={queryAtom} placeholder="Query" showClear />
-      <HighlightedText
-        variant="paragraph"
-        color="$foregroundPrimary"
-        text={sampleText}
-        query={query}
-      />
-      <Typography variant="description" color="$foregroundSecondary">
-        Custom highlight color and variant
-      </Typography>
-      <HighlightedText
-        variant="description"
-        color="$foregroundSecondary"
-        highlightColor="$pinkForeground"
-        highlightVariant="descriptionBold"
-        text={sampleText}
-        query={query}
-      />
-      <Typography variant="description" color="$foregroundSecondary">
-        No match
-      </Typography>
-      <HighlightedText
-        variant="paragraph"
-        color="$foregroundPrimary"
-        text={sampleText}
-        query="ethereum"
-      />
-    </YStack>
+      <DemoSection title="Default">
+        <HighlightedText
+          variant="paragraph"
+          color="$foregroundPrimary"
+          text={sampleText}
+          query={query}
+        />
+      </DemoSection>
+      <DemoSection title="Custom highlight color and variant">
+        <HighlightedText
+          variant="description"
+          color="$foregroundSecondary"
+          highlightColor="$pinkForeground"
+          highlightVariant="descriptionBold"
+          text={sampleText}
+          query={query}
+        />
+      </DemoSection>
+      <DemoSection title="No match">
+        <HighlightedText
+          variant="paragraph"
+          color="$foregroundPrimary"
+          text={sampleText}
+          query="ethereum"
+        />
+      </DemoSection>
+    </>
   )
 }
 

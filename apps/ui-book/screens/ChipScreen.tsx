@@ -1,77 +1,29 @@
-import {
-  Chip,
-  SizableText,
-  Theme,
-  Typography,
-  XStack,
-  YStack,
-} from '@vexl-next/ui'
+import {Chip, XStack, YStack} from '@vexl-next/ui'
 import React from 'react'
-import {ScrollView} from 'react-native'
+
+import {ComponentScreenLayout, DemoSection} from './ComponentScreenLayout'
 
 const vexlAvatarSource = require('../assets/vexlAvatar.png') as number
 
-function ThemeGroup({
-  theme,
-}: {
-  readonly theme: 'light' | 'dark'
-}): React.JSX.Element {
+function Demos(): React.JSX.Element {
   return (
-    <Theme name={theme}>
-      <YStack
-        gap="$4"
-        padding="$5"
-        backgroundColor="$backgroundPrimary"
-        borderRadius="$4"
-      >
-        <SizableText
-          fontFamily="$body"
-          fontWeight="600"
-          fontSize="$3"
-          color="$foregroundPrimary"
-        >
-          {theme.charAt(0).toUpperCase() + theme.slice(1)}
-        </SizableText>
-
-        <SizableText
-          fontFamily="$body"
-          fontWeight="600"
-          fontSize="$2"
-          color="$foregroundSecondary"
-          paddingTop="$3"
-        >
-          Single chip
-        </SizableText>
+    <YStack gap="$5">
+      <DemoSection title="Single chip">
         <Chip name="Marcel Mrkev" avatarSource={vexlAvatarSource} />
+      </DemoSection>
 
-        <SizableText
-          fontFamily="$body"
-          fontWeight="600"
-          fontSize="$2"
-          color="$foregroundSecondary"
-          paddingTop="$3"
-        >
-          No avatar
-        </SizableText>
+      <DemoSection title="No avatar">
         <Chip name="Anonymous User" />
+      </DemoSection>
 
-        <SizableText
-          fontFamily="$body"
-          fontWeight="600"
-          fontSize="$2"
-          color="$foregroundSecondary"
-          paddingTop="$3"
-        >
-          Long name (truncated)
-        </SizableText>
+      <DemoSection title="Long name (truncated)">
         <Chip
           name="Very Long Username That Should Truncate"
           avatarSource={vexlAvatarSource}
         />
+      </DemoSection>
 
-        <Typography variant="descriptionBold" color="$foregroundSecondary">
-          Trusted
-        </Typography>
+      <DemoSection title="Trusted">
         <Chip name="Jana" avatarSource={vexlAvatarSource} trusted />
         <Chip name="Petr" trusted />
         <XStack gap="$3" flexWrap="wrap">
@@ -79,43 +31,20 @@ function ThemeGroup({
           <Chip name="Petr" trusted />
           <Chip name="Alice" avatarSource={vexlAvatarSource} />
         </XStack>
+      </DemoSection>
 
-        <SizableText
-          fontFamily="$body"
-          fontWeight="600"
-          fontSize="$2"
-          color="$foregroundSecondary"
-          paddingTop="$3"
-        >
-          Multiple chips in a row
-        </SizableText>
+      <DemoSection title="Multiple chips in a row">
         <XStack gap="$3" flexWrap="wrap">
           <Chip name="Marcel" avatarSource={vexlAvatarSource} />
           <Chip name="Stepan" avatarSource={vexlAvatarSource} />
           <Chip name="Grafon" avatarSource={vexlAvatarSource} />
           <Chip name="Alice" avatarSource={vexlAvatarSource} />
         </XStack>
-      </YStack>
-    </Theme>
+      </DemoSection>
+    </YStack>
   )
 }
 
 export function ChipScreen(): React.JSX.Element {
-  return (
-    <ScrollView style={{flex: 1}}>
-      <YStack padding="$5" gap="$4">
-        <SizableText
-          fontFamily="$heading"
-          fontWeight="700"
-          fontSize="$3"
-          color="$foregroundPrimary"
-        >
-          Chip
-        </SizableText>
-
-        <ThemeGroup theme="light" />
-        <ThemeGroup theme="dark" />
-      </YStack>
-    </ScrollView>
-  )
+  return <ComponentScreenLayout title="Chip" demos={Demos} />
 }

@@ -1,64 +1,61 @@
-import {
-  SizableText,
-  StepperCheck,
-  StepperCheckContainer,
-  Theme,
-  YStack,
-} from '@vexl-next/ui'
-import React, {useCallback} from 'react'
-import {Alert, ScrollView} from 'react-native'
+import {StepperCheck, StepperCheckContainer, YStack} from '@vexl-next/ui'
+import React from 'react'
+import {Alert} from 'react-native'
 
-function SectionLabel({
-  children,
+import {ComponentScreenLayout, DemoSection} from './ComponentScreenLayout'
+
+const steps = [
+  {
+    label: 'Add your contacts',
+    note: 'Connect with friends and expand your network',
+  },
+  {
+    label: 'Set your identity',
+    note: 'Add a name and photo to share when you reveal your identity.',
+  },
+  {
+    label: 'Post your first offer',
+    note: "Let your network know what you're buying or selling.",
+  },
+]
+
+function StepList({
+  completedCount,
 }: {
-  readonly children: string
+  readonly completedCount: number
 }): React.JSX.Element {
   return (
-    <SizableText
-      fontFamily="$body"
-      fontWeight="600"
-      fontSize="$2"
-      color="$foregroundSecondary"
-      paddingTop="$3"
-    >
-      {children}
-    </SizableText>
+    <StepperCheckContainer>
+      {steps.map((step, index) => (
+        <StepperCheck
+          key={step.label}
+          selected={index < completedCount}
+          last={index === steps.length - 1}
+          label={step.label}
+          note={step.note}
+          onPress={
+            index < completedCount
+              ? undefined
+              : () => {
+                  Alert.alert('Pressed', step.label)
+                }
+          }
+        />
+      ))}
+    </StepperCheckContainer>
   )
 }
 
-function ThemeGroup({
-  theme,
-}: {
-  readonly theme: 'light' | 'dark'
-}): React.JSX.Element {
-  const handlePress = useCallback((label: string) => {
-    Alert.alert('Pressed', label)
-  }, [])
-
+function Demos(): React.JSX.Element {
   return (
-    <Theme name={theme}>
-      <YStack
-        gap="$4"
-        padding="$5"
-        backgroundColor="$backgroundPrimary"
-        borderRadius="$4"
-      >
-        <SizableText
-          fontFamily="$body"
-          fontWeight="600"
-          fontSize="$3"
-          color="$foregroundPrimary"
-        >
-          {theme.charAt(0).toUpperCase() + theme.slice(1)}
-        </SizableText>
-
-        <SectionLabel>All states (standalone)</SectionLabel>
+    <>
+      <DemoSection title="All states (standalone)">
         <YStack gap="$3">
           <StepperCheck
             label="Label"
             note="Note"
             onPress={() => {
-              handlePress('Default, not selected')
+              Alert.alert('Pressed', 'Default, not selected')
             }}
           />
           <StepperCheck selected label="Label" note="Note" />
@@ -67,102 +64,25 @@ function ThemeGroup({
             label="Label"
             note="Note"
             onPress={() => {
-              handlePress('Last, not selected')
+              Alert.alert('Pressed', 'Last, not selected')
             }}
           />
           <StepperCheck selected last label="Label" note="Note" />
         </YStack>
-
-        <SectionLabel>In container (realistic)</SectionLabel>
-        <StepperCheckContainer>
-          <StepperCheck
-            selected
-            label="Add your contacts"
-            note="Connect with friends and expand your network"
-          />
-          <StepperCheck
-            label="Set your identity"
-            note="Add a name and photo to share when you reveal your identity."
-            onPress={() => {
-              handlePress('Set your identity')
-            }}
-          />
-          <StepperCheck
-            last
-            label="Post your first offer"
-            note="Let your network know what you're buying or selling."
-            onPress={() => {
-              handlePress('Post your first offer')
-            }}
-          />
-        </StepperCheckContainer>
-
-        <SectionLabel>All completed</SectionLabel>
-        <StepperCheckContainer>
-          <StepperCheck
-            selected
-            label="Add your contacts"
-            note="Connect with friends and expand your network"
-          />
-          <StepperCheck
-            selected
-            label="Set your identity"
-            note="Add a name and photo to share when you reveal your identity."
-          />
-          <StepperCheck
-            selected
-            last
-            label="Post your first offer"
-            note="Let your network know what you're buying or selling."
-          />
-        </StepperCheckContainer>
-
-        <SectionLabel>None completed</SectionLabel>
-        <StepperCheckContainer>
-          <StepperCheck
-            label="Add your contacts"
-            note="Connect with friends and expand your network"
-            onPress={() => {
-              handlePress('Add your contacts')
-            }}
-          />
-          <StepperCheck
-            label="Set your identity"
-            note="Add a name and photo to share when you reveal your identity."
-            onPress={() => {
-              handlePress('Set your identity')
-            }}
-          />
-          <StepperCheck
-            last
-            label="Post your first offer"
-            note="Let your network know what you're buying or selling."
-            onPress={() => {
-              handlePress('Post your first offer')
-            }}
-          />
-        </StepperCheckContainer>
-      </YStack>
-    </Theme>
+      </DemoSection>
+      <DemoSection title="In container (realistic)">
+        <StepList completedCount={1} />
+      </DemoSection>
+      <DemoSection title="All completed">
+        <StepList completedCount={steps.length} />
+      </DemoSection>
+      <DemoSection title="None completed">
+        <StepList completedCount={0} />
+      </DemoSection>
+    </>
   )
 }
 
 export function StepperCheckScreen(): React.JSX.Element {
-  return (
-    <ScrollView style={{flex: 1}}>
-      <YStack padding="$5" gap="$4">
-        <SizableText
-          fontFamily="$heading"
-          fontWeight="700"
-          fontSize="$3"
-          color="$foregroundPrimary"
-        >
-          Stepper Check
-        </SizableText>
-
-        <ThemeGroup theme="light" />
-        <ThemeGroup theme="dark" />
-      </YStack>
-    </ScrollView>
-  )
+  return <ComponentScreenLayout title="Stepper Check" demos={Demos} />
 }

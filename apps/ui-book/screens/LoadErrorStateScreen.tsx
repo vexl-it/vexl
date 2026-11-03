@@ -1,30 +1,28 @@
-import {LoadErrorState, Typography, YStack} from '@vexl-next/ui'
+import {LoadErrorState} from '@vexl-next/ui'
 import React, {useState} from 'react'
 
-import {ComponentScreenLayout} from './ComponentScreenLayout'
+import {ComponentScreenLayout, DemoSection} from './ComponentScreenLayout'
 
 function Demos(): React.JSX.Element {
   const [retryCount, setRetryCount] = useState(0)
 
   return (
-    <YStack gap="$5">
-      <Typography variant="description" color="$foregroundSecondary">
-        Loading
-      </Typography>
-      <LoadErrorState loading retryLabel="Try again" onRetry={() => {}} />
+    <>
+      <DemoSection title="Loading">
+        <LoadErrorState loading retryLabel="Try again" onRetry={() => {}} />
+      </DemoSection>
 
-      <Typography variant="description" color="$foregroundSecondary">
-        Error (retried {retryCount} times)
-      </Typography>
-      <LoadErrorState
-        loading={false}
-        errorMessage="Could not load data. Check your connection and try again."
-        retryLabel="Try again"
-        onRetry={() => {
-          setRetryCount((count) => count + 1)
-        }}
-      />
-    </YStack>
+      <DemoSection title={`Error (retried ${retryCount} times)`}>
+        <LoadErrorState
+          loading={false}
+          errorMessage="Could not load data. Check your connection and try again."
+          retryLabel="Try again"
+          onRetry={() => {
+            setRetryCount((count) => count + 1)
+          }}
+        />
+      </DemoSection>
+    </>
   )
 }
 

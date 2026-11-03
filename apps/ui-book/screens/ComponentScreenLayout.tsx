@@ -69,10 +69,7 @@ export function ComponentScreenLayout({
         <Typography variant="tabLargeBold" color="$foregroundPrimary">
           {title}
         </Typography>
-        <YStack
-          gap="$5"
-          $lg={{flexDirection: 'row', alignItems: 'flex-start'}}
-        >
+        <YStack gap="$5" $lg={{flexDirection: 'row', alignItems: 'flex-start'}}>
           <ThemeColumn themeName="light" demos={demos} />
           <ThemeColumn themeName="dark" demos={demos} />
         </YStack>

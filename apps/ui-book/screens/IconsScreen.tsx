@@ -1,114 +1,26 @@
 import {
-  AddUserPersonContact,
-  ArchiveInbox,
-  ArrowLeft,
-  ArrowRight,
-  ArrowsHorizontal,
-  ArrowsVerticalSort,
-  BellNotification,
-  BitcoinLogo,
-  BoltElectric,
-  Book,
-  BoxProduct,
-  BubbleTip,
-  BulletListMenu,
-  Calendar,
-  Camera,
-  CellPhoneDisabled,
-  CellPhoneMobileDevice,
-  ChatBubbles,
-  CheckboxFilled,
-  Checklist,
-  Checkmark,
-  CherriesFoodFruit,
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-  ChevronUp,
-  ClockTime,
-  ConferenceClub,
-  Copy,
-  CurrencyBitcoinCircle,
-  DiplomaAsset,
-  DocumentsFiles,
-  Download,
-  DuoToneContrastTheme,
-  EuroCurrency,
-  ExchangeIcon,
-  EyeOpen,
-  EyeShut,
   FavouriteStarNavIcon,
-  FileImport,
-  FlagReport,
-  Gift,
-  GoldBricks,
-  Help,
-  HomeHomemade,
-  type IconProps,
-  InfoCircle,
-  Kebab,
-  Language,
-  LightningLogo,
-  ListWriteDocument,
-  Lock,
-  LogConsole,
-  Map,
-  MathCalculate,
-  MegaphoneNotifications,
-  Microphone,
-  MoneyBankNotes,
-  More,
-  OfferHandCash,
-  Pause,
-  PencilWriteEdit,
-  PeopleUsers,
-  PhoneCall,
-  PinBoard,
-  PinBoardFilled,
-  PinGeolocation,
-  Play,
-  PlusAdd,
-  QrCode,
-  QuestionmarkCircle,
-  QuestionsFaq,
-  RadiobuttonCircleEmpty,
-  RadiobuttonCircleFilled,
-  Refresh,
-  RefreshArrowsRectangle,
-  Rejected,
-  // Icons
-  Reply,
-  SandWatch,
-  ScreenCaptureShot,
-  SearchMagnifyGlass,
-  Send,
-  Share,
-  SignOut,
-  Snowflake,
-  SquareOutline,
-  StarFilled,
-  StarOutline,
-  TagLabel,
-  TelescopeExplore,
-  Toolbox,
-  Tools,
-  TrashBin,
-  TuneSettings,
   Typography,
-  UnarchiveInbox,
-  UserProfile,
   useTheme,
-  WardrobeFurniture,
-  XmarkCancelClose,
   XStack,
-  XTwitter,
   YStack,
+  type IconProps,
 } from '@vexl-next/ui'
-import {Array, pipe} from 'effect'
+import * as iconModule from '@vexl-next/ui/src/icons'
+import {Array, pipe, Record} from 'effect'
 import React from 'react'
 import {getTokens} from 'tamagui'
 
 import {ComponentScreenLayout} from './ComponentScreenLayout'
+
+const ICON_TILE_WIDTH = 112
+
+// ExchangeIcon is an alias of Exchange; FavouriteStarNavIcon needs its own prop.
+const {
+  ExchangeIcon: _exchangeAlias,
+  FavouriteStarNavIcon: _favouriteStar,
+  ...plainIcons
+} = iconModule
 
 function FavouriteStarOn(props: IconProps): React.JSX.Element {
   return <FavouriteStarNavIcon {...props} isFavourite />
@@ -118,109 +30,12 @@ function FavouriteStarOff(props: IconProps): React.JSX.Element {
   return <FavouriteStarNavIcon {...props} isFavourite={false} />
 }
 
-const allIcons: ReadonlyArray<{
-  readonly label: string
-  readonly Icon: (props: IconProps) => React.JSX.Element
-}> = [
-  {label: 'SquareOutline', Icon: SquareOutline},
-  {label: 'TuneSettings', Icon: TuneSettings},
-  {label: 'Map', Icon: Map},
-  {label: 'BulletListMenu', Icon: BulletListMenu},
-  {label: 'SearchMagnifyGlass', Icon: SearchMagnifyGlass},
-  {label: 'UserProfile', Icon: UserProfile},
-  {label: 'MathCalculate', Icon: MathCalculate},
-  {label: 'CurrencyBitcoinCircle', Icon: CurrencyBitcoinCircle},
-  {label: 'BoxProduct', Icon: BoxProduct},
-  {label: 'Tools', Icon: Tools},
-  {label: 'PeopleUsers', Icon: PeopleUsers},
-  {label: 'PlusAdd', Icon: PlusAdd},
-  {label: 'ArrowsHorizontal', Icon: ArrowsHorizontal},
-  {label: 'ArrowsVerticalSort', Icon: ArrowsVerticalSort},
-  {label: 'ChatBubbles', Icon: ChatBubbles},
-  {label: 'XmarkCancelClose', Icon: XmarkCancelClose},
-  {label: 'ChevronLeft', Icon: ChevronLeft},
-  {label: 'ChevronRight', Icon: ChevronRight},
-  {label: 'ChevronDown', Icon: ChevronDown},
-  {label: 'ChevronUp', Icon: ChevronUp},
-  {label: 'CheckboxFilled', Icon: CheckboxFilled},
-  {label: 'RadiobuttonCircleEmpty', Icon: RadiobuttonCircleEmpty},
-  {label: 'RadiobuttonCircleFilled', Icon: RadiobuttonCircleFilled},
-  {label: 'BoltElectric', Icon: BoltElectric},
-  {label: 'Book', Icon: Book},
-  {label: 'HomeHomemade', Icon: HomeHomemade},
-  {label: 'Toolbox', Icon: Toolbox},
-  {label: 'DiplomaAsset', Icon: DiplomaAsset},
-  {label: 'GoldBricks', Icon: GoldBricks},
-  {label: 'WardrobeFurniture', Icon: WardrobeFurniture},
-  {label: 'CherriesFoodFruit', Icon: CherriesFoodFruit},
-  {label: 'PinGeolocation', Icon: PinGeolocation},
-  {label: 'EyeShut', Icon: EyeShut},
-  {label: 'EyeOpen', Icon: EyeOpen},
-  {label: 'Rejected', Icon: Rejected},
-  {label: 'SignOut', Icon: SignOut},
-  {label: 'ArrowLeft', Icon: ArrowLeft},
-  {label: 'ArrowRight', Icon: ArrowRight},
-  {label: 'Checklist', Icon: Checklist},
-  {label: 'InfoCircle', Icon: InfoCircle},
-  {label: 'Microphone', Icon: Microphone},
-  {label: 'Camera', Icon: Camera},
-  {label: 'PencilWriteEdit', Icon: PencilWriteEdit},
-  {label: 'PinBoard', Icon: PinBoard},
-  {label: 'ConferenceClub', Icon: ConferenceClub},
-  {label: 'Calendar', Icon: Calendar},
-  {label: 'Help', Icon: Help},
-  {label: 'QuestionsFaq', Icon: QuestionsFaq},
-  {label: 'TrashBin', Icon: TrashBin},
-  {label: 'DocumentsFiles', Icon: DocumentsFiles},
-  {label: 'Gift', Icon: Gift},
-  {label: 'LogConsole', Icon: LogConsole},
-  {label: 'MegaphoneNotifications', Icon: MegaphoneNotifications},
-  {label: 'CellPhoneMobileDevice', Icon: CellPhoneMobileDevice},
-  {label: 'XTwitter', Icon: XTwitter},
-  {label: 'TelescopeExplore', Icon: TelescopeExplore},
-  {label: 'OfferHandCash', Icon: OfferHandCash},
-  {label: 'QuestionmarkCircle', Icon: QuestionmarkCircle},
-  {label: 'FlagReport', Icon: FlagReport},
-  {label: 'ListWriteDocument', Icon: ListWriteDocument},
-  {label: 'MoneyBankNotes', Icon: MoneyBankNotes},
-  {label: 'Exchange', Icon: ExchangeIcon},
-  {label: 'ClockTime', Icon: ClockTime},
-  {label: 'Lock', Icon: Lock},
-  {label: 'Refresh', Icon: Refresh},
-  {label: 'Send', Icon: Send},
-  {label: 'QrCode', Icon: QrCode},
-  {label: 'Copy', Icon: Copy},
-  {label: 'AddUserPersonContact', Icon: AddUserPersonContact},
-  {label: 'ScreenCaptureShot', Icon: ScreenCaptureShot},
-  {label: 'Language', Icon: Language},
-  {label: 'DuoToneContrastTheme', Icon: DuoToneContrastTheme},
-  {label: 'EuroCurrency', Icon: EuroCurrency},
-  {label: 'Snowflake', Icon: Snowflake},
-  {label: 'BellNotification', Icon: BellNotification},
-  {label: 'TagLabel', Icon: TagLabel},
-  {label: 'RefreshArrowsRectangle', Icon: RefreshArrowsRectangle},
-  {label: 'SandWatch', Icon: SandWatch},
-  {label: 'StarOutline', Icon: StarOutline},
-  {label: 'StarFilled', Icon: StarFilled},
-  {label: 'PinBoardFilled', Icon: PinBoardFilled},
-  {label: 'ArchiveInbox', Icon: ArchiveInbox},
-  {label: 'UnarchiveInbox', Icon: UnarchiveInbox},
-  {label: 'Checkmark', Icon: Checkmark},
-  {label: 'PhoneCall', Icon: PhoneCall},
-  {label: 'Pause', Icon: Pause},
-  {label: 'Play', Icon: Play},
-  {label: 'Download', Icon: Download},
-  {label: 'Share', Icon: Share},
-  {label: 'Kebab', Icon: Kebab},
-  {label: 'More', Icon: More},
-  {label: 'BitcoinLogo', Icon: BitcoinLogo},
-  {label: 'LightningLogo', Icon: LightningLogo},
-  {label: 'BubbleTip', Icon: BubbleTip},
-  {label: 'CellPhoneDisabled', Icon: CellPhoneDisabled},
-  {label: 'FileImport', Icon: FileImport},
-  {label: 'Reply', Icon: Reply},
-  {label: 'FavouriteStarNavIcon (favourite)', Icon: FavouriteStarOn},
-  {label: 'FavouriteStarNavIcon (not favourite)', Icon: FavouriteStarOff},
+const allIcons: ReadonlyArray<
+  readonly [string, (props: IconProps) => React.JSX.Element]
+> = [
+  ...Record.toEntries(plainIcons),
+  ['FavouriteStarNavIcon (on)', FavouriteStarOn],
+  ['FavouriteStarNavIcon (off)', FavouriteStarOff],
 ]
 
 function Demos(): React.JSX.Element {
@@ -228,19 +43,30 @@ function Demos(): React.JSX.Element {
   const color = theme.foregroundPrimary.get()
 
   return (
-    <YStack gap="$3">
+    <XStack flexWrap="wrap" rowGap="$5">
       {pipe(
         allIcons,
-        Array.map((entry) => (
-          <XStack key={entry.label} alignItems="center" gap="$3">
-            <entry.Icon size={getTokens().size.$7.val} color={color} />
-            <Typography variant="description" color="$foregroundTertiary">
-              {entry.label}
+        Array.map(([label, Icon]) => (
+          <YStack
+            key={label}
+            width={ICON_TILE_WIDTH}
+            alignItems="center"
+            gap="$2"
+            paddingHorizontal="$1"
+          >
+            <Icon size={getTokens().size.$7.val} color={color} />
+            <Typography
+              variant="micro"
+              color="$foregroundSecondary"
+              textAlign="center"
+              maxWidth="100%"
+            >
+              {label}
             </Typography>
-          </XStack>
+          </YStack>
         ))
       )}
-    </YStack>
+    </XStack>
   )
 }
 

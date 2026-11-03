@@ -1,13 +1,13 @@
 import {
   AnimatedNavigationBar,
   BellNotification,
-  SizableText,
   Stack,
   TuneSettings,
+  Typography,
   UserProfile,
   YStack,
 } from '@vexl-next/ui'
-import React, {useCallback, useMemo, useState} from 'react'
+import React, {useState} from 'react'
 import {
   type LayoutChangeEvent,
   type NativeScrollEvent,
@@ -16,28 +16,33 @@ import {
 } from 'react-native'
 import {useSharedValue} from 'react-native-reanimated'
 
-export function AnimatedNavigationBarScreen(): React.JSX.Element {
+import {ComponentScreenLayout} from './ComponentScreenLayout'
+
+const PREVIEW_HEIGHT = 480
+
+function Demos(): React.JSX.Element {
   const scrollY = useSharedValue(0)
   const [navBarHeight, setNavBarHeight] = useState(0)
 
-  const handleScroll = useCallback(
-    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      scrollY.value = event.nativeEvent.contentOffset.y
-    },
-    [scrollY]
-  )
+  const handleScroll = (
+    event: NativeSyntheticEvent<NativeScrollEvent>
+  ): void => {
+    scrollY.value = event.nativeEvent.contentOffset.y
+  }
 
-  const handleNavBarLayout = useCallback((event: LayoutChangeEvent) => {
+  const handleNavBarLayout = (event: LayoutChangeEvent): void => {
     setNavBarHeight(event.nativeEvent.layout.height)
-  }, [])
-
-  const contentContainerStyle = useMemo(
-    () => ({paddingTop: navBarHeight}),
-    [navBarHeight]
-  )
+  }
 
   return (
-    <Stack flex={1} backgroundColor="$backgroundPrimary">
+    <YStack
+      height={PREVIEW_HEIGHT}
+      borderRadius="$5"
+      overflow="hidden"
+      borderWidth={1}
+      borderColor="$backgroundTertiary"
+      backgroundColor="$backgroundPrimary"
+    >
       <Stack
         position="absolute"
         top={0}
@@ -59,9 +64,9 @@ export function AnimatedNavigationBarScreen(): React.JSX.Element {
       <ScrollView
         onScroll={handleScroll}
         scrollEventThrottle={16}
-        contentContainerStyle={contentContainerStyle}
+        contentContainerStyle={{paddingTop: navBarHeight}}
       >
-        <YStack gap="$4" paddingHorizontal="$5">
+        <YStack gap="$4" paddingHorizontal="$5" paddingBottom="$5">
           {Array.from({length: 30}, (_, i) => (
             <YStack
               key={i}
@@ -70,26 +75,20 @@ export function AnimatedNavigationBarScreen(): React.JSX.Element {
               padding="$5"
               gap="$2"
             >
-              <SizableText
-                fontFamily="$body"
-                fontWeight="600"
-                fontSize="$2"
-                color="$foregroundPrimary"
-              >
+              <Typography variant="descriptionBold" color="$foregroundPrimary">
                 {`Card item ${i + 1}`}
-              </SizableText>
-              <SizableText
-                fontFamily="$body"
-                fontWeight="500"
-                fontSize="$2"
-                color="$foregroundSecondary"
-              >
+              </Typography>
+              <Typography variant="description" color="$foregroundSecondary">
                 Scroll to see the navigation bar animate
-              </SizableText>
+              </Typography>
             </YStack>
           ))}
         </YStack>
       </ScrollView>
-    </Stack>
+    </YStack>
   )
+}
+
+export function AnimatedNavigationBarScreen(): React.JSX.Element {
+  return <ComponentScreenLayout title="Animated Navigation Bar" demos={Demos} />
 }

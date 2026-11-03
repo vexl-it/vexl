@@ -11,6 +11,7 @@ import {
   XStack,
   YStack,
 } from '@vexl-next/ui'
+import {Array, Option, pipe} from 'effect'
 import {atom, getDefaultStore, useAtomValue} from 'jotai'
 
 import {StatusBar} from 'expo-status-bar'
@@ -48,7 +49,7 @@ function Catalog({
   readonly onSelect: (label: string) => void
 }): React.JSX.Element {
   const searchQuery = useAtomValue(searchAtom).trim().toLowerCase()
-  const filteredScreens = screens.filter((entry) =>
+  const filteredScreens = Array.filter(screens, (entry) =>
     entry.label.toLowerCase().includes(searchQuery)
   )
 
@@ -63,7 +64,7 @@ function Catalog({
       </YStack>
       <ScrollView>
         <YStack paddingHorizontal="$5" paddingBottom="$5" gap="$2">
-          {filteredScreens.map((entry) => (
+          {Array.map(filteredScreens, (entry) => (
             <Stack
               key={entry.label}
               role="link"
@@ -93,9 +94,12 @@ function Catalog({
               </Typography>
             </Stack>
           ))}
-          {filteredScreens.length === 0 ? (
+          {!Array.isNonEmptyArray(filteredScreens) ? (
             <YStack gap="$2" paddingVertical="$5">
-              <Typography variant="paragraphSmallBold" color="$foregroundPrimary">
+              <Typography
+                variant="paragraphSmallBold"
+                color="$foregroundPrimary"
+              >
                 No components found
               </Typography>
               <Typography variant="description" color="$foregroundSecondary">
@@ -114,8 +118,12 @@ function ScreenNav(): React.JSX.Element {
   const insets = useSafeAreaInsets()
   const isWide = useMedia().lg
   const [activeLabel, navigate] = useScreenRoute()
-  const activeScreen = screens.find((entry) => entry.label === activeLabel)
-  const ActiveScreen = activeScreen?.component
+  const ActiveScreen = pipe(
+    screens,
+    Array.findFirst((entry) => entry.label === activeLabel),
+    Option.map((entry) => entry.component),
+    Option.getOrUndefined
+  )
   const showCatalog = isWide || ActiveScreen === undefined
 
   return (

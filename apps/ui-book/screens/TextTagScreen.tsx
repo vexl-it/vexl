@@ -1,8 +1,8 @@
-import {TextTag, type TextTagVariant, Typography, XStack} from '@vexl-next/ui'
+import {TextTag, type TextTagVariant, XStack} from '@vexl-next/ui'
 import {Array, pipe} from 'effect'
 import React from 'react'
 
-import {ComponentScreenLayout} from './ComponentScreenLayout'
+import {ComponentScreenLayout, DemoSection} from './ComponentScreenLayout'
 
 const regularVariants: readonly TextTagVariant[] = [
   'offer',
@@ -45,14 +45,12 @@ function TagRow({
 function Demos(): React.JSX.Element {
   return (
     <>
-      <Typography variant="descriptionBold" color="$foregroundSecondary">
-        Regular
-      </Typography>
-      <TagRow variants={regularVariants} />
-      <Typography variant="descriptionBold" color="$foregroundSecondary">
-        Status (e.g. donation status)
-      </Typography>
-      <TagRow variants={statusVariants} />
+      <DemoSection title="Regular">
+        <TagRow variants={regularVariants} />
+      </DemoSection>
+      <DemoSection title="Status (e.g. donation status)">
+        <TagRow variants={statusVariants} />
+      </DemoSection>
     </>
   )
 }

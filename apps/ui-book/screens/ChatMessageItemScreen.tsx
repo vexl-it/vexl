@@ -5,30 +5,11 @@ import {
   EyeOpen,
   Rejected,
   SignOut,
-  SizableText,
-  Theme,
   YStack,
 } from '@vexl-next/ui'
 import React from 'react'
-import {ScrollView} from 'react-native'
 
-function SectionLabel({
-  children,
-}: {
-  readonly children: string
-}): React.JSX.Element {
-  return (
-    <SizableText
-      fontFamily="$body"
-      fontWeight="600"
-      fontSize="$2"
-      color="$foregroundSecondary"
-      paddingTop="$3"
-    >
-      {children}
-    </SizableText>
-  )
-}
+import {ComponentScreenLayout, DemoSection} from './ComponentScreenLayout'
 
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 const AvatarSvg1 = avatarsSvg[0]!
@@ -61,29 +42,10 @@ function DemoAvatar3(): React.JSX.Element {
   )
 }
 
-function ThemeGroup({
-  theme,
-}: {
-  readonly theme: 'light' | 'dark'
-}): React.JSX.Element {
+function Demos(): React.JSX.Element {
   return (
-    <Theme name={theme}>
-      <YStack
-        gap="$2"
-        padding="$5"
-        backgroundColor="$backgroundPrimary"
-        borderRadius="$4"
-      >
-        <SizableText
-          fontFamily="$body"
-          fontWeight="600"
-          fontSize="$3"
-          color="$foregroundPrimary"
-        >
-          {theme.charAt(0).toUpperCase() + theme.slice(1)}
-        </SizableText>
-
-        <SectionLabel>Unread + highlighted</SectionLabel>
+    <YStack gap="$5">
+      <DemoSection title="Unread + highlighted">
         <ChatMessageItem
           onPress={() => {}}
           avatar={<DemoAvatar />}
@@ -120,8 +82,9 @@ function ThemeGroup({
           unread
           variant="highlighted"
         />
+      </DemoSection>
 
-        <SectionLabel>Regular messages</SectionLabel>
+      <DemoSection title="Regular messages">
         <ChatMessageItem
           onPress={() => {}}
           avatar={<DemoAvatar />}
@@ -136,8 +99,9 @@ function ThemeGroup({
           message="You: Lorem ipsum dolor sit amet, consectetur adipiscing elit"
           time="Tue"
         />
+      </DemoSection>
 
-        <SectionLabel>Search result (highlightQuery)</SectionLabel>
+      <DemoSection title="Search result (highlightQuery)">
         <ChatMessageItem
           onPress={() => {}}
           avatar={<DemoAvatar2 />}
@@ -146,8 +110,9 @@ function ThemeGroup({
           message="Hi, is this offer still active?"
           time="2 hours ago"
         />
+      </DemoSection>
 
-        <SectionLabel>Typing</SectionLabel>
+      <DemoSection title="Typing">
         <ChatMessageItem
           onPress={() => {}}
           avatar={<DemoAvatar />}
@@ -156,8 +121,9 @@ function ThemeGroup({
           time="4.11."
           isTyping
         />
+      </DemoSection>
 
-        <SectionLabel>Revealed (icon + success)</SectionLabel>
+      <DemoSection title="Revealed (icon + success)">
         <ChatMessageItem
           onPress={() => {}}
           avatar={<DemoAvatar2 />}
@@ -176,8 +142,9 @@ function ThemeGroup({
           variant="success"
           icon={EyeOpen}
         />
+      </DemoSection>
 
-        <SectionLabel>Declined (icon + destructive)</SectionLabel>
+      <DemoSection title="Declined (icon + destructive)">
         <ChatMessageItem
           onPress={() => {}}
           avatar={<DemoAvatar />}
@@ -196,8 +163,9 @@ function ThemeGroup({
           variant="destructive"
           icon={Rejected}
         />
+      </DemoSection>
 
-        <SectionLabel>Destructive actions</SectionLabel>
+      <DemoSection title="Destructive actions">
         <ChatMessageItem
           onPress={() => {}}
           avatar={<DemoAvatar3 />}
@@ -217,8 +185,9 @@ function ThemeGroup({
           icon={Rejected}
           grayscaleAvatar
         />
+      </DemoSection>
 
-        <SectionLabel>You: destructive</SectionLabel>
+      <DemoSection title="You: destructive">
         <ChatMessageItem
           onPress={() => {}}
           avatar={<DemoAvatar />}
@@ -235,8 +204,9 @@ function ThemeGroup({
           time="4.11."
           variant="destructive"
         />
+      </DemoSection>
 
-        <SectionLabel>Deleted (icon + destructive)</SectionLabel>
+      <DemoSection title="Deleted (icon + destructive)">
         <ChatMessageItem
           onPress={() => {}}
           avatar={<DemoAvatar2 />}
@@ -257,8 +227,9 @@ function ThemeGroup({
           icon={Rejected}
           grayscaleAvatar
         />
+      </DemoSection>
 
-        <SectionLabel>Left the chat</SectionLabel>
+      <DemoSection title="Left the chat">
         <ChatMessageItem
           onPress={() => {}}
           avatar={<DemoAvatar3 />}
@@ -267,27 +238,11 @@ function ThemeGroup({
           time="4.11."
           icon={SignOut}
         />
-      </YStack>
-    </Theme>
+      </DemoSection>
+    </YStack>
   )
 }
 
 export function ChatMessageItemScreen(): React.JSX.Element {
-  return (
-    <ScrollView style={{flex: 1}}>
-      <YStack padding="$5" gap="$4">
-        <SizableText
-          fontFamily="$heading"
-          fontWeight="700"
-          fontSize="$3"
-          color="$foregroundPrimary"
-        >
-          Chat Message Item
-        </SizableText>
-
-        <ThemeGroup theme="light" />
-        <ThemeGroup theme="dark" />
-      </YStack>
-    </ScrollView>
-  )
+  return <ComponentScreenLayout title="Chat Message Item" demos={Demos} />
 }

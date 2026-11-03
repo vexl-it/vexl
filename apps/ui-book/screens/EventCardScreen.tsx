@@ -1,6 +1,8 @@
-import {EventCard, SizableText, Theme, YStack} from '@vexl-next/ui'
+import {EventCard} from '@vexl-next/ui'
 import React from 'react'
-import {Alert, ScrollView} from 'react-native'
+import {Alert} from 'react-native'
+
+import {ComponentScreenLayout, DemoSection} from './ComponentScreenLayout'
 
 const vexlAvatarSource = require('../assets/vexlAvatar.png') as number
 
@@ -18,37 +20,10 @@ const MANY_ATTENDEES = [
   {id: '5', name: 'Bob', avatarSource: vexlAvatarSource},
 ]
 
-function ThemeGroup({
-  theme,
-}: {
-  readonly theme: 'light' | 'dark'
-}): React.JSX.Element {
+function Demos(): React.JSX.Element {
   return (
-    <Theme name={theme}>
-      <YStack
-        gap="$4"
-        padding="$5"
-        backgroundColor="$backgroundPrimary"
-        borderRadius="$4"
-      >
-        <SizableText
-          fontFamily="$body"
-          fontWeight="600"
-          fontSize="$3"
-          color="$foregroundPrimary"
-        >
-          {theme.charAt(0).toUpperCase() + theme.slice(1)}
-        </SizableText>
-
-        <SizableText
-          fontFamily="$body"
-          fontWeight="600"
-          fontSize="$2"
-          color="$foregroundSecondary"
-          paddingTop="$3"
-        >
-          Upcoming
-        </SizableText>
+    <>
+      <DemoSection title="Upcoming">
         <EventCard
           title="Vexl Meetup ft. Bitcoin Paraguay"
           details={['Tue, Nov 2025', '19:00-23:00', 'JazzCube, Asuncion']}
@@ -57,16 +32,9 @@ function ThemeGroup({
             Alert.alert('Pressed', 'Upcoming event')
           }}
         />
+      </DemoSection>
 
-        <SizableText
-          fontFamily="$body"
-          fontWeight="600"
-          fontSize="$2"
-          color="$foregroundSecondary"
-          paddingTop="$3"
-        >
-          Past
-        </SizableText>
+      <DemoSection title="Past">
         <EventCard
           title="Vexl Meetup ft. Bitcoin Paraguay"
           details={['Tue, Nov 2025', '19:00-23:00', 'JazzCube, Asuncion']}
@@ -76,16 +44,9 @@ function ThemeGroup({
             Alert.alert('Pressed', 'Past event')
           }}
         />
+      </DemoSection>
 
-        <SizableText
-          fontFamily="$body"
-          fontWeight="600"
-          fontSize="$2"
-          color="$foregroundSecondary"
-          paddingTop="$3"
-        >
-          Long location (2 lines)
-        </SizableText>
+      <DemoSection title="Long location (2 lines)">
         <EventCard
           title="Vexl Meetup ft. Bitcoin Paraguay"
           details={[
@@ -98,41 +59,18 @@ function ThemeGroup({
             Alert.alert('Pressed', 'Long location')
           }}
         />
+      </DemoSection>
 
-        <SizableText
-          fontFamily="$body"
-          fontWeight="600"
-          fontSize="$2"
-          color="$foregroundSecondary"
-          paddingTop="$3"
-        >
-          No attendees
-        </SizableText>
+      <DemoSection title="No attendees">
         <EventCard
           title="Bitcoin Conference 2026"
           details={['Mon, Jan 2026', '10:00-18:00', 'Prague Congress Centre']}
         />
-      </YStack>
-    </Theme>
+      </DemoSection>
+    </>
   )
 }
 
 export function EventCardScreen(): React.JSX.Element {
-  return (
-    <ScrollView style={{flex: 1}}>
-      <YStack padding="$5" gap="$4">
-        <SizableText
-          fontFamily="$heading"
-          fontWeight="700"
-          fontSize="$3"
-          color="$foregroundPrimary"
-        >
-          Event Card
-        </SizableText>
-
-        <ThemeGroup theme="light" />
-        <ThemeGroup theme="dark" />
-      </YStack>
-    </ScrollView>
-  )
+  return <ComponentScreenLayout title="Event Card" demos={Demos} />
 }

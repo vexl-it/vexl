@@ -1,13 +1,8 @@
-import {
-  Button,
-  ProgressDialog,
-  type ProgressIndication,
-  YStack,
-} from '@vexl-next/ui'
+import {Button, ProgressDialog, type ProgressIndication} from '@vexl-next/ui'
 import {Array, pipe} from 'effect'
 import React, {useEffect, useState} from 'react'
 
-import {ComponentScreenLayout} from './ComponentScreenLayout'
+import {ComponentScreenLayout, DemoSection} from './ComponentScreenLayout'
 
 const indications: ReadonlyArray<{
   readonly label: string
@@ -47,7 +42,7 @@ function Demos(): React.JSX.Element {
   }, [indication, isProgressing])
 
   return (
-    <YStack gap="$3">
+    <DemoSection title="Open with indication">
       {pipe(
         indications,
         Array.map(({label, indication: next}) => (
@@ -75,7 +70,7 @@ function Demos(): React.JSX.Element {
           setIndication(null)
         }}
       />
-    </YStack>
+    </DemoSection>
   )
 }
 

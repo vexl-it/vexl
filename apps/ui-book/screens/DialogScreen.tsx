@@ -4,20 +4,16 @@ import {
   createDialogAtom,
   DialogFromAtom,
   Exchange,
-  ScrollView,
-  SizableText,
-  Theme,
   YStack,
 } from '@vexl-next/ui'
 import {Effect} from 'effect'
 import {useSetAtom} from 'jotai'
 import React, {useMemo, useState} from 'react'
 
-function DialogDemos({
-  dialogAtom,
-}: {
-  readonly dialogAtom: DialogAtom
-}): React.JSX.Element {
+import {ComponentScreenLayout} from './ComponentScreenLayout'
+
+function Demos(): React.JSX.Element {
+  const dialogAtom: DialogAtom = useMemo(() => createDialogAtom(), [])
   const showDialog = useSetAtom(dialogAtom)
 
   const [btcValue, setBtcValue] = useState('0.00')
@@ -25,7 +21,7 @@ function DialogDemos({
   const [fiatValue, setFiatValue] = useState('2448543')
 
   return (
-    <>
+    <YStack gap="$4">
       <Button
         variant="primary"
         size="medium"
@@ -110,47 +106,10 @@ function DialogDemos({
       </Button>
 
       <DialogFromAtom dialogAtom={dialogAtom} />
-    </>
+    </YStack>
   )
 }
 
 export function DialogScreen(): React.JSX.Element {
-  const dialogAtom = useMemo(() => createDialogAtom(), [])
-  const darkDialogAtom = useMemo(() => createDialogAtom(), [])
-
-  return (
-    <ScrollView contentContainerStyle={{flexGrow: 1}}>
-      <YStack
-        flex={1}
-        padding="$5"
-        gap="$4"
-        backgroundColor="$backgroundPrimary"
-      >
-        <SizableText fontFamily="$body" fontWeight="600" fontSize="$5">
-          Light mode
-        </SizableText>
-        <DialogDemos dialogAtom={dialogAtom} />
-
-        <Theme name="dark">
-          <YStack
-            gap="$4"
-            backgroundColor="$backgroundPrimary"
-            padding="$5"
-            borderRadius="$5"
-            marginTop="$4"
-          >
-            <SizableText
-              fontFamily="$body"
-              fontWeight="600"
-              fontSize="$5"
-              color="$foregroundPrimary"
-            >
-              Dark mode
-            </SizableText>
-            <DialogDemos dialogAtom={darkDialogAtom} />
-          </YStack>
-        </Theme>
-      </YStack>
-    </ScrollView>
-  )
+  return <ComponentScreenLayout title="Dialog" demos={Demos} />
 }

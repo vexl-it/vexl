@@ -1,13 +1,9 @@
 import type {ReachStatsStep} from '@vexl-next/ui'
-import {
-  PeopleUsers,
-  ReachStats,
-  SizableText,
-  Theme,
-  YStack,
-} from '@vexl-next/ui'
-import React, {useCallback} from 'react'
-import {Alert, ScrollView} from 'react-native'
+import {PeopleUsers, ReachStats} from '@vexl-next/ui'
+import React from 'react'
+import {Alert} from 'react-native'
+
+import {ComponentScreenLayout, DemoSection} from './ComponentScreenLayout'
 
 const STEPS: readonly ReachStatsStep[] = [
   {label: 'Small pool', range: '1 - 100', icon: PeopleUsers, active: true},
@@ -33,51 +29,14 @@ const STEPS_NONE: readonly ReachStatsStep[] = [
   {label: 'Ocean', range: '500+', icon: PeopleUsers, active: false},
 ]
 
-function SectionLabel({
-  children,
-}: {
-  readonly children: string
-}): React.JSX.Element {
-  return (
-    <SizableText
-      fontFamily="$body"
-      fontWeight="600"
-      fontSize="$2"
-      color="$foregroundSecondary"
-      paddingTop="$3"
-    >
-      {children}
-    </SizableText>
-  )
+function handleButtonPress(): void {
+  Alert.alert('Pressed', 'Add contacts')
 }
 
-function ThemeGroup({
-  theme,
-}: {
-  readonly theme: 'light' | 'dark'
-}): React.JSX.Element {
-  const handleButtonPress = useCallback(() => {
-    Alert.alert('Pressed', 'Add contacts')
-  }, [])
-
+function Demos(): React.JSX.Element {
   return (
-    <Theme name={theme}>
-      <YStack
-        gap="$4"
-        padding="$5"
-        backgroundColor="$backgroundPrimary"
-        borderRadius="$4"
-      >
-        <SizableText
-          fontFamily="$body"
-          fontWeight="600"
-          fontSize="$3"
-          color="$foregroundPrimary"
-        >
-          {theme.charAt(0).toUpperCase() + theme.slice(1)}
-        </SizableText>
-
-        <SectionLabel>First step active (reach)</SectionLabel>
+    <>
+      <DemoSection title="First step active (reach)">
         <ReachStats
           subtitle="Your reach"
           headline="80 vexlaks"
@@ -85,8 +44,8 @@ function ThemeGroup({
           buttonLabel="Add contacts"
           onButtonPress={handleButtonPress}
         />
-
-        <SectionLabel>Two steps active</SectionLabel>
+      </DemoSection>
+      <DemoSection title="Two steps active">
         <ReachStats
           subtitle="Your reach"
           headline="350 vexlaks"
@@ -94,8 +53,8 @@ function ThemeGroup({
           buttonLabel="Add contacts"
           onButtonPress={handleButtonPress}
         />
-
-        <SectionLabel>All steps active</SectionLabel>
+      </DemoSection>
+      <DemoSection title="All steps active">
         <ReachStats
           subtitle="Your reach"
           headline="1200 vexlaks"
@@ -103,8 +62,8 @@ function ThemeGroup({
           buttonLabel="Add contacts"
           onButtonPress={handleButtonPress}
         />
-
-        <SectionLabel>No steps active (deals)</SectionLabel>
+      </DemoSection>
+      <DemoSection title="No steps active (deals)">
         <ReachStats
           subtitle="Closed"
           headline="0 deals"
@@ -112,8 +71,8 @@ function ThemeGroup({
           buttonLabel="View deals"
           onButtonPress={handleButtonPress}
         />
-
-        <SectionLabel>No stepper</SectionLabel>
+      </DemoSection>
+      <DemoSection title="No stepper">
         <ReachStats
           subtitle="Closed"
           headline="5 deals"
@@ -121,27 +80,11 @@ function ThemeGroup({
           buttonLabel="View deals"
           onButtonPress={handleButtonPress}
         />
-      </YStack>
-    </Theme>
+      </DemoSection>
+    </>
   )
 }
 
 export function ReachStatsScreen(): React.JSX.Element {
-  return (
-    <ScrollView style={{flex: 1}}>
-      <YStack padding="$5" gap="$4">
-        <SizableText
-          fontFamily="$heading"
-          fontWeight="700"
-          fontSize="$3"
-          color="$foregroundPrimary"
-        >
-          Reach Stats
-        </SizableText>
-
-        <ThemeGroup theme="light" />
-        <ThemeGroup theme="dark" />
-      </YStack>
-    </ScrollView>
-  )
+  return <ComponentScreenLayout title="Reach Stats" demos={Demos} />
 }

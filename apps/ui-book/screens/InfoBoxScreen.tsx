@@ -8,7 +8,7 @@ import {
 import {Array, pipe} from 'effect'
 import React, {useState} from 'react'
 
-import {ComponentScreenLayout} from './ComponentScreenLayout'
+import {ComponentScreenLayout, DemoSection} from './ComponentScreenLayout'
 
 const sampleText =
   "Waiting for the other party's response. You'll get a notification once they reply."
@@ -27,82 +27,84 @@ const variants: readonly InfoBoxVariant[] = [
 
 const noop = (): void => {}
 
-function Label({children}: {readonly children: string}): React.JSX.Element {
-  return (
-    <Typography variant="description" color="$foregroundSecondary">
-      {children}
-    </Typography>
-  )
-}
-
 function Demos(): React.JSX.Element {
   const [closed, setClosed] = useState(false)
 
   return (
-    <YStack gap="$3">
-      <Label>Variants</Label>
-      {pipe(
-        variants,
-        Array.map((variant) => (
-          <InfoBox key={variant} variant={variant}>
-            {`${variant}: ${sampleText}`}
-          </InfoBox>
-        ))
-      )}
+    <>
+      <DemoSection title="Variants">
+        {pipe(
+          variants,
+          Array.map((variant) => (
+            <InfoBox key={variant} variant={variant}>
+              {`${variant}: ${sampleText}`}
+            </InfoBox>
+          ))
+        )}
+      </DemoSection>
 
-      <Label>Custom icon</Label>
-      <InfoBox icon={BellNotification}>{sampleText}</InfoBox>
+      <DemoSection title="Custom icon">
+        <InfoBox icon={BellNotification}>{sampleText}</InfoBox>
+      </DemoSection>
 
-      <Label>Loading</Label>
-      <InfoBox loading>Re-encrypting your offers...</InfoBox>
+      <DemoSection title="Loading">
+        <InfoBox loading>Re-encrypting your offers...</InfoBox>
+      </DemoSection>
 
-      <Label>onPress (chevron)</Label>
-      <InfoBox onPress={noop}>Tap to learn more about trading safely.</InfoBox>
+      <DemoSection title="onPress (chevron)">
+        <InfoBox onPress={noop}>
+          Tap to learn more about trading safely.
+        </InfoBox>
+      </DemoSection>
 
-      <Label>ReactNode children</Label>
-      <InfoBox variant="yellow">
-        <YStack gap="$1">
-          <Typography
-            variant="descriptionBold"
-            color="$accentHighlightSecondary"
+      <DemoSection title="ReactNode children">
+        <InfoBox variant="yellow">
+          <YStack gap="$1">
+            <Typography
+              variant="descriptionBold"
+              color="$accentHighlightSecondary"
+            >
+              Custom content
+            </Typography>
+            <Typography variant="description" color="$accentHighlightSecondary">
+              Non-string children are rendered as-is, so they control their own
+              styling.
+            </Typography>
+          </YStack>
+        </InfoBox>
+      </DemoSection>
+
+      <DemoSection title="Action">
+        <InfoBox action={{label: 'Import contacts', onPress: noop}}>
+          Import your contacts to see more offers.
+        </InfoBox>
+      </DemoSection>
+
+      <DemoSection title="onClose">
+        {closed ? (
+          <InfoBox
+            variant="tertiary"
+            onPress={() => {
+              setClosed(false)
+            }}
           >
-            Custom content
-          </Typography>
-          <Typography variant="description" color="$accentHighlightSecondary">
-            Non-string children are rendered as-is, so they control their own
-            styling.
-          </Typography>
-        </YStack>
-      </InfoBox>
+            Closed. Tap to show again.
+          </InfoBox>
+        ) : (
+          <InfoBox
+            onClose={() => {
+              setClosed(true)
+            }}
+          >
+            {sampleText}
+          </InfoBox>
+        )}
+      </DemoSection>
 
-      <Label>Action</Label>
-      <InfoBox action={{label: 'Import contacts', onPress: noop}}>
-        Import your contacts to see more offers.
-      </InfoBox>
-
-      <Label>onClose</Label>
-      {closed ? (
-        <InfoBox
-          variant="tertiary"
-          onPress={() => {
-            setClosed(false)
-          }}
-        >
-          Closed. Tap to show again.
-        </InfoBox>
-      ) : (
-        <InfoBox
-          onClose={() => {
-            setClosed(true)
-          }}
-        >
-          {sampleText}
-        </InfoBox>
-      )}
-
-      <Label>Long multi-line text</Label>
-      <InfoBox>{longText}</InfoBox>
-    </YStack>
+      <DemoSection title="Long multi-line text">
+        <InfoBox>{longText}</InfoBox>
+      </DemoSection>
+    </>
   )
 }
 

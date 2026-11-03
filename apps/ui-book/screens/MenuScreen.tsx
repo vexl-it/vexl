@@ -4,60 +4,22 @@ import {
   Lock,
   Menu,
   MenuItem,
-  SizableText,
-  Theme,
   TrashBin,
   UserProfile,
-  YStack,
 } from '@vexl-next/ui'
-import React, {useCallback} from 'react'
-import {Alert, ScrollView} from 'react-native'
+import React from 'react'
+import {Alert} from 'react-native'
 
-function SectionLabel({
-  children,
-}: {
-  readonly children: string
-}): React.JSX.Element {
-  return (
-    <SizableText
-      fontFamily="$body"
-      fontWeight="600"
-      fontSize="$2"
-      color="$foregroundSecondary"
-      paddingTop="$3"
-    >
-      {children}
-    </SizableText>
-  )
+import {ComponentScreenLayout, DemoSection} from './ComponentScreenLayout'
+
+function handlePress(label: string): void {
+  Alert.alert('Pressed', label)
 }
 
-function ThemeGroup({
-  theme,
-}: {
-  readonly theme: 'light' | 'dark'
-}): React.JSX.Element {
-  const handlePress = useCallback((label: string) => {
-    Alert.alert('Pressed', label)
-  }, [])
-
+function Demos(): React.JSX.Element {
   return (
-    <Theme name={theme}>
-      <YStack
-        gap="$4"
-        padding="$5"
-        backgroundColor="$backgroundPrimary"
-        borderRadius="$4"
-      >
-        <SizableText
-          fontFamily="$body"
-          fontWeight="600"
-          fontSize="$3"
-          color="$foregroundPrimary"
-        >
-          {theme.charAt(0).toUpperCase() + theme.slice(1)}
-        </SizableText>
-
-        <SectionLabel>Default (3 items)</SectionLabel>
+    <>
+      <DemoSection title="Default (3 items)">
         <Menu>
           <MenuItem
             label="Display QR code"
@@ -81,8 +43,9 @@ function ThemeGroup({
             }}
           />
         </Menu>
+      </DemoSection>
 
-        <SectionLabel>With notes</SectionLabel>
+      <DemoSection title="With notes">
         <Menu>
           <MenuItem
             label="Notifications"
@@ -101,8 +64,9 @@ function ThemeGroup({
             }}
           />
         </Menu>
+      </DemoSection>
 
-        <SectionLabel>Danger variant</SectionLabel>
+      <DemoSection title="Danger variant">
         <Menu>
           <MenuItem
             label="Report user"
@@ -121,8 +85,9 @@ function ThemeGroup({
             }}
           />
         </Menu>
+      </DemoSection>
 
-        <SectionLabel>Single item</SectionLabel>
+      <DemoSection title="Single item">
         <Menu>
           <MenuItem
             label="Profile settings"
@@ -132,27 +97,11 @@ function ThemeGroup({
             }}
           />
         </Menu>
-      </YStack>
-    </Theme>
+      </DemoSection>
+    </>
   )
 }
 
 export function MenuScreen(): React.JSX.Element {
-  return (
-    <ScrollView style={{flex: 1}}>
-      <YStack padding="$5" gap="$4">
-        <SizableText
-          fontFamily="$heading"
-          fontWeight="700"
-          fontSize="$3"
-          color="$foregroundPrimary"
-        >
-          Menu
-        </SizableText>
-
-        <ThemeGroup theme="light" />
-        <ThemeGroup theme="dark" />
-      </YStack>
-    </ScrollView>
-  )
+  return <ComponentScreenLayout title="Menu" demos={Demos} />
 }

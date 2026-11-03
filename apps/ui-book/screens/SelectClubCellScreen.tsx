@@ -1,118 +1,52 @@
-import {Avatar, SelectClubCell, SizableText, Theme, YStack} from '@vexl-next/ui'
-import React, {useCallback, useState} from 'react'
-import {ScrollView} from 'react-native'
+import {Avatar, SelectClubCell, YStack} from '@vexl-next/ui'
+import React, {useState} from 'react'
+
+import {ComponentScreenLayout, DemoSection} from './ComponentScreenLayout'
 
 const clubTestAvatar = require('../assets/clubTestAvatar.png') as number
 
 const clubAvatar = <Avatar customSize={40} source={clubTestAvatar} />
 
-function Section({
-  title,
-  children,
-}: {
-  readonly title: string
-  readonly children: React.ReactNode
-}): React.JSX.Element {
-  return (
-    <YStack gap="$3">
-      <SizableText
-        fontFamily="$body"
-        fontWeight="600"
-        fontSize="$5"
-        letterSpacing="$5"
-        color="$foregroundPrimary"
-      >
-        {title}
-      </SizableText>
-      {children}
-    </YStack>
+const clubs = [
+  {key: 'prague', name: 'Bitcoin Prague', description: '10 members'},
+  {key: 'vienna', name: 'Bitcoin Vienna', description: '25 members'},
+  {key: 'berlin', name: 'Bitcoin Berlin', description: '8 members'},
+]
+
+function Demos(): React.JSX.Element {
+  const [selected, setSelected] = useState<ReadonlySet<string>>(
+    new Set(['vienna'])
   )
-}
 
-function ClubList(): React.JSX.Element {
-  const [selected, setSelected] = useState<ReadonlySet<string>>(new Set())
-
-  const toggle = useCallback((key: string) => {
+  const toggle = (key: string): void => {
     setSelected((prev) => {
       const next = new Set(prev)
-      if (next.has(key)) {
-        next.delete(key)
-      } else {
-        next.add(key)
-      }
+      if (next.has(key)) next.delete(key)
+      else next.add(key)
       return next
     })
-  }, [])
+  }
 
   return (
-    <YStack gap="$3">
-      <SelectClubCell
-        selected={selected.has('prague')}
-        name="Bitcoin Prague"
-        description="10 members"
-        avatar={clubAvatar}
-        onPress={() => {
-          toggle('prague')
-        }}
-      />
-      <SelectClubCell
-        selected={selected.has('vienna')}
-        name="Bitcoin Vienna"
-        description="25 members"
-        avatar={clubAvatar}
-        onPress={() => {
-          toggle('vienna')
-        }}
-      />
-      <SelectClubCell
-        selected={selected.has('berlin')}
-        name="Bitcoin Berlin"
-        description="8 members"
-        avatar={clubAvatar}
-        onPress={() => {
-          toggle('berlin')
-        }}
-      />
-    </YStack>
+    <DemoSection title="Multi-select list">
+      <YStack gap="$3">
+        {clubs.map((club) => (
+          <SelectClubCell
+            key={club.key}
+            selected={selected.has(club.key)}
+            name={club.name}
+            description={club.description}
+            avatar={clubAvatar}
+            onPress={() => {
+              toggle(club.key)
+            }}
+          />
+        ))}
+      </YStack>
+    </DemoSection>
   )
 }
 
 export function SelectClubCellScreen(): React.JSX.Element {
-  return (
-    <ScrollView>
-      <YStack
-        flex={1}
-        padding="$5"
-        gap="$7"
-        backgroundColor="$backgroundPrimary"
-      >
-        <SizableText
-          fontFamily="$heading"
-          fontWeight="700"
-          fontSize="$3"
-          letterSpacing="$3"
-          color="$foregroundPrimary"
-        >
-          SelectClubCell
-        </SizableText>
-
-        <Section title="Multi-select list">
-          <ClubList />
-        </Section>
-
-        <Section title="Multi-select list (dark)">
-          <Theme name="dark">
-            <YStack
-              gap="$3"
-              padding="$5"
-              borderRadius="$5"
-              backgroundColor="$backgroundPrimary"
-            >
-              <ClubList />
-            </YStack>
-          </Theme>
-        </Section>
-      </YStack>
-    </ScrollView>
-  )
+  return <ComponentScreenLayout title="Select Club Cell" demos={Demos} />
 }

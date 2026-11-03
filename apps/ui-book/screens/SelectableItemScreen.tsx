@@ -1,6 +1,7 @@
-import {SelectableItem, SizableText, Theme, YStack} from '@vexl-next/ui'
+import {SelectableItem, YStack} from '@vexl-next/ui'
 import React, {useState} from 'react'
-import {ScrollView} from 'react-native'
+
+import {ComponentScreenLayout, DemoSection} from './ComponentScreenLayout'
 
 const currencies = [
   {label: '🇺🇸 United States Dollar', note: 'USD / $', value: 'usd'},
@@ -17,50 +18,13 @@ const languages = [
   {label: '🇪🇸 Español', value: 'es'},
 ]
 
-function SectionLabel({
-  children,
-}: {
-  readonly children: string
-}): React.JSX.Element {
-  return (
-    <SizableText
-      fontFamily="$body"
-      fontWeight="600"
-      fontSize="$2"
-      color="$foregroundSecondary"
-      paddingTop="$3"
-    >
-      {children}
-    </SizableText>
-  )
-}
-
-function InteractiveGroup({
-  theme,
-}: {
-  readonly theme: 'light' | 'dark'
-}): React.JSX.Element {
+function Demos(): React.JSX.Element {
   const [selectedCurrency, setSelectedCurrency] = useState('usd')
   const [selectedLanguage, setSelectedLanguage] = useState('en')
 
   return (
-    <Theme name={theme}>
-      <YStack
-        gap="$4"
-        padding="$5"
-        backgroundColor="$backgroundPrimary"
-        borderRadius="$4"
-      >
-        <SizableText
-          fontFamily="$body"
-          fontWeight="600"
-          fontSize="$3"
-          color="$foregroundPrimary"
-        >
-          {theme.charAt(0).toUpperCase() + theme.slice(1)}
-        </SizableText>
-
-        <SectionLabel>With notes</SectionLabel>
+    <>
+      <DemoSection title="With notes">
         <YStack>
           {currencies.map((currency) => (
             <SelectableItem
@@ -74,8 +38,8 @@ function InteractiveGroup({
             />
           ))}
         </YStack>
-
-        <SectionLabel>Without notes</SectionLabel>
+      </DemoSection>
+      <DemoSection title="Without notes">
         <YStack>
           {languages.map((language) => (
             <SelectableItem
@@ -88,27 +52,11 @@ function InteractiveGroup({
             />
           ))}
         </YStack>
-      </YStack>
-    </Theme>
+      </DemoSection>
+    </>
   )
 }
 
 export function SelectableItemScreen(): React.JSX.Element {
-  return (
-    <ScrollView style={{flex: 1}}>
-      <YStack padding="$5" gap="$4">
-        <SizableText
-          fontFamily="$heading"
-          fontWeight="700"
-          fontSize="$3"
-          color="$foregroundPrimary"
-        >
-          Selectable Item
-        </SizableText>
-
-        <InteractiveGroup theme="light" />
-        <InteractiveGroup theme="dark" />
-      </YStack>
-    </ScrollView>
-  )
+  return <ComponentScreenLayout title="Selectable Item" demos={Demos} />
 }

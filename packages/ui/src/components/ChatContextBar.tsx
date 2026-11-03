@@ -54,7 +54,7 @@ export function ChatContextBar({
           </Typography>
         ) : null}
         {Array.isNonEmptyReadonlyArray(meta) ? (
-          <DotSeparatedRow flexWrap="wrap">
+          <DotSeparatedRow flexWrap="wrap" columnGap="$3">
             {pipe(
               meta,
               Array.map((item, index) => (

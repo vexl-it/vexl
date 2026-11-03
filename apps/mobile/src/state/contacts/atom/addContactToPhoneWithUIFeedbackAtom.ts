@@ -9,7 +9,6 @@ import {
 } from 'expo-contacts'
 import {atom} from 'jotai'
 import {askAreYouSureActionAtom} from '../../../components/GlobalDialog'
-import userSvg from '../../../components/images/userSvg'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import toE164PhoneNumberWithDefaultCountryCode from '../../../utils/toE164PhoneNumberWithDefaultCountryCode'
 
@@ -177,7 +176,6 @@ export const addContactToPhoneWithUIFeedbackActionAtom = atom(
               textInputProps: {
                 autoCorrect: false,
                 placeholder: customName,
-                icon: userSvg,
               },
             },
           ],

@@ -166,8 +166,6 @@ export type RootStackParamsList = {
       }
     | undefined
 
-  TodoScreen: undefined
-
   TradeCalculatorFlow: NavigatorScreenParams<TradeCalculatorStackParamsList>
 
   DonationsFlow: NavigatorScreenParams<DonationsFlowParamsList>

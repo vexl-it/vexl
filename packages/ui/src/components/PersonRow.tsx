@@ -9,7 +9,7 @@ const PersonRowFrame = styled(XStack, {
   gap: '$3',
 
   variants: {
-    background: {
+    surface: {
       none: {paddingVertical: '$4'},
       primary: {
         backgroundColor: '$backgroundPrimary',
@@ -49,7 +49,7 @@ export function PersonRow({
   subtitleTestID,
 }: PersonRowProps): React.JSX.Element {
   return (
-    <PersonRowFrame testID={testID} background={background}>
+    <PersonRowFrame testID={testID} surface={background}>
       {avatar}
       <YStack flex={1} minWidth={0} gap={size === 'large' ? '$2' : '$1'}>
         <Typography

@@ -1,6 +1,7 @@
 import {
   Avatar,
   CardButton,
+  Divider,
   PersonRow,
   Switch,
   UserImagePlaceholder,
@@ -23,6 +24,7 @@ function Demos(): React.JSX.Element {
           title="Satoshi Nakamoto"
           subtitle="+420 777 123 456"
         />
+        <Divider />
         <PersonRow
           dimmed
           avatar={

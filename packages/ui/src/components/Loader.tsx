@@ -1,6 +1,6 @@
 import React from 'react'
 import {ActivityIndicator, Platform} from 'react-native'
-import {useTheme} from 'tamagui'
+import {getTokens, useTheme} from 'tamagui'
 
 export type LoaderSize = 'small' | 'medium' | 'large'
 
@@ -9,11 +9,11 @@ export interface LoaderProps {
   readonly color?: string
 }
 
-const sizeMap: Record<LoaderSize, number> = {
-  small: 16,
-  medium: 24,
-  large: 40,
-}
+const sizeToken = {
+  small: '$5',
+  medium: '$7',
+  large: '$9',
+} as const satisfies Record<LoaderSize, string>
 
 export function Loader({
   size = 'medium',
@@ -23,7 +23,12 @@ export function Loader({
   const resolvedColor = color ?? theme.accentYellowPrimary.get()
 
   if (Platform.OS === 'android') {
-    return <ActivityIndicator size={sizeMap[size]} color={resolvedColor} />
+    return (
+      <ActivityIndicator
+        size={getTokens().size[sizeToken[size]].val}
+        color={resolvedColor}
+      />
+    )
   }
 
   return (

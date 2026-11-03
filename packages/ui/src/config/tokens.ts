@@ -1,27 +1,29 @@
 import {createTokens} from 'tamagui'
 
 // Design tokens from Figma — Vexl redesign DEV (node 593:39715)
+export const colors = {
+  // Primitives (mode-invariant)
+  black100: '#000000',
+  white100: '#FFFFFF',
+  transparent: 'transparent',
+
+  // Brand yellows
+  yellow100: '#FCCD6C',
+  yellow50: '#FFE1A2',
+  gold100: '#BE8821',
+  yellowDark: '#4C3E20',
+
+  // Vibrant palette
+  greenLight: '#ACD9B7',
+  greenDark: '#455749',
+  pinkLight: '#FCC5F3',
+  pinkDark: '#654F61',
+  redLight: '#EE675E',
+  redDark: '#A0433C',
+} as const
+
 export const tokens = createTokens({
-  color: {
-    // Primitives (mode-invariant)
-    black100: '#000000',
-    white100: '#FFFFFF',
-    transparent: 'transparent',
-
-    // Brand yellows
-    yellow100: '#FCCD6C',
-    yellow50: '#FFE1A2',
-    gold100: '#BE8821',
-    yellowDark: '#4C3E20',
-
-    // Vibrant palette
-    greenLight: '#ACD9B7',
-    greenDark: '#455749',
-    pinkLight: '#FCC5F3',
-    pinkDark: '#654F61',
-    redLight: '#EE675E',
-    redDark: '#A0433C',
-  },
+  color: colors,
 
   // Spacing scale from Figma
   space: {

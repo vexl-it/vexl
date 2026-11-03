@@ -39,7 +39,6 @@ import {HighlightedTextScreen} from './HighlightedTextScreen'
 import {IconsScreen} from './IconsScreen'
 import {IconTagScreen} from './IconTagScreen'
 import {InfoBoxScreen} from './InfoBoxScreen'
-import {InputHintScreen} from './InputHintScreen'
 import {KeyboardAvoidingViewScreen} from './KeyboardAvoidingViewScreen'
 import {KeyValueRowScreen} from './KeyValueRowScreen'
 import {LabeledTextAreaScreen} from './LabeledTextAreaScreen'
@@ -145,7 +144,6 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'Icon Tag', component: IconTagScreen},
   {label: 'Icons', component: IconsScreen},
   {label: 'Info Box', component: InfoBoxScreen},
-  {label: 'Input Hint', component: InputHintScreen},
   {label: 'Keyboard Avoiding View', component: KeyboardAvoidingViewScreen},
   {label: 'Key Value Row', component: KeyValueRowScreen},
   {label: 'Labeled Text Area', component: LabeledTextAreaScreen},

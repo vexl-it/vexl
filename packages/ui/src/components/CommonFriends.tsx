@@ -56,11 +56,7 @@ export function CommonFriends({
   return (
     <CommonFriendsFrame onPress={onPress}>
       <YStack px="$5" py="$4" gap="$3">
-        <Typography
-          variant="micro"
-          color="$foregroundSecondary"
-          letterSpacing={0}
-        >
+        <Typography variant="micro" color="$foregroundSecondary">
           {trustedLabel ? `${label} · ${trustedLabel}` : label}
         </Typography>
         <XStack gap={gap} alignItems="center" overflow="hidden">

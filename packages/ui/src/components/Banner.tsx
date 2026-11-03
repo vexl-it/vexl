@@ -72,21 +72,12 @@ export function Banner({
         {primaryButton != null || secondaryButton != null ? (
           <XStack gap="$3">
             {primaryButton != null ? (
-              <CardButton
-                height={36}
-                paddingVertical="$0"
-                onPress={primaryButton.onPress}
-              >
+              <CardButton onPress={primaryButton.onPress}>
                 {primaryButton.label}
               </CardButton>
             ) : null}
             {secondaryButton != null ? (
-              <CardButton
-                type="text"
-                height={36}
-                paddingVertical="$0"
-                onPress={secondaryButton.onPress}
-              >
+              <CardButton type="text" onPress={secondaryButton.onPress}>
                 {secondaryButton.label}
               </CardButton>
             ) : null}

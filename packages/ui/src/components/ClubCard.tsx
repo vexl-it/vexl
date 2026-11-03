@@ -1,8 +1,8 @@
 import React from 'react'
-import {styled, useTheme} from 'tamagui'
+import {getTokens, styled, useTheme} from 'tamagui'
 
 import {PeopleUsers} from '../icons/PeopleUsers'
-import {SizableText, XStack, YStack} from '../primitives'
+import {XStack, YStack} from '../primitives'
 import {Typography} from './Typography'
 
 const ClubCardFrame = styled(XStack, {
@@ -26,24 +26,6 @@ const ClubCardFrame = styled(XStack, {
   defaultVariants: {
     pressable: false,
   },
-})
-
-const NameText = styled(SizableText, {
-  name: 'ClubCardName',
-  fontFamily: '$heading',
-  fontWeight: '700',
-  fontSize: '$1',
-  letterSpacing: '$1',
-  color: '$foregroundPrimary',
-})
-
-const SubtitleText = styled(SizableText, {
-  name: 'ClubCardSubtitle',
-  fontFamily: '$body',
-  fontWeight: '500',
-  fontSize: '$1',
-  letterSpacing: '$1',
-  color: '$foregroundSecondary',
 })
 
 export interface ClubCardProps {
@@ -76,7 +58,7 @@ export function ClubCard({
           {name}
         </Typography>
         <XStack alignItems="center" gap="$1">
-          <PeopleUsers size={14} color={iconColor} />
+          <PeopleUsers size={getTokens().size['$4.5'].val} color={iconColor} />
           <Typography variant="micro" color="$foregroundSecondary">
             {subtitle}
           </Typography>

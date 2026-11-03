@@ -19,6 +19,7 @@ import {CollapseScreen} from './CollapseScreen'
 import {CommonFriendsScreen} from './CommonFriendsScreen'
 import {CommonFriendsSummaryScreen} from './CommonFriendsSummaryScreen'
 import {CopyFieldScreen} from './CopyFieldScreen'
+import {CountBadgeScreen} from './CountBadgeScreen'
 import {DecorativeGraphicsScreen} from './DecorativeGraphicsScreen'
 import {DialogScreen} from './DialogScreen'
 import {DisclosureScreen} from './DisclosureScreen'
@@ -31,6 +32,7 @@ import {EditStepScreen} from './EditStepScreen'
 import {EmptyStateScreen} from './EmptyStateScreen'
 import {EventCardScreen} from './EventCardScreen'
 import {ExchangeScreen} from './ExchangeScreen'
+import {ExpandToggleScreen} from './ExpandToggleScreen'
 import {FabButtonScreen} from './FabButtonScreen'
 import {FadeGradientScreen} from './FadeGradientScreen'
 import {FilterBarScreen} from './FilterBarScreen'
@@ -130,6 +132,7 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'Common Friends', component: CommonFriendsScreen},
   {label: 'Common Friends Summary', component: CommonFriendsSummaryScreen},
   {label: 'Copy Field', component: CopyFieldScreen},
+  {label: 'Count Badge', component: CountBadgeScreen},
   {label: 'Decorative Graphics', component: DecorativeGraphicsScreen},
   {label: 'Dialog', component: DialogScreen},
   {label: 'Disclosure', component: DisclosureScreen},
@@ -145,6 +148,7 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'Empty State', component: EmptyStateScreen},
   {label: 'Event Card', component: EventCardScreen},
   {label: 'Exchange', component: ExchangeScreen},
+  {label: 'Expand Toggle', component: ExpandToggleScreen},
   {label: 'Fab Button', component: FabButtonScreen},
   {label: 'Fade Gradient', component: FadeGradientScreen},
   {label: 'Filter Bar', component: FilterBarScreen},

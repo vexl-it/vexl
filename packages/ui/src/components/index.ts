@@ -48,6 +48,8 @@ export {CommonFriendsSummary} from './CommonFriendsSummary'
 export type {CommonFriendsSummaryProps} from './CommonFriendsSummary'
 export {CopyField} from './CopyField'
 export type {CopyFieldProps} from './CopyField'
+export {CountBadge} from './CountBadge'
+export type {CountBadgeProps} from './CountBadge'
 export {DetailsCard} from './DetailsCard'
 export {
   Dialog,
@@ -89,6 +91,8 @@ export type {
 } from './EventCard'
 export {Exchange} from './Exchange'
 export type {BtcUnit, ExchangeProps} from './Exchange'
+export {ExpandToggle} from './ExpandToggle'
+export type {ExpandToggleProps} from './ExpandToggle'
 export {FabButton} from './FabButton'
 export {FadeGradient} from './FadeGradient'
 export type {FadeGradientProps} from './FadeGradient'

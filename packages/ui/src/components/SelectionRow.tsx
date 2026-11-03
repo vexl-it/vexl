@@ -1,32 +1,15 @@
 import React from 'react'
 import {styled, useTheme} from 'tamagui'
 
-import {XStack, YStack} from '../primitives'
+import {YStack} from '../primitives'
+import {FieldFrame} from './Field'
 import {Typography} from './Typography'
 
-export const SelectionRowFrame = styled(XStack, {
+export const SelectionRowFrame = styled(FieldFrame, {
   name: 'SelectionRow',
-  alignItems: 'center',
-  gap: '$3',
   padding: '$5',
-  borderRadius: '$5',
-  backgroundColor: '$backgroundSecondary',
-
-  pressStyle: {
-    opacity: 0.7,
-  },
-
-  variants: {
-    selected: {
-      true: {
-        backgroundColor: '$accentYellowSecondary',
-      },
-    },
-  } as const,
-
-  defaultVariants: {
-    selected: false,
-  },
+  borderWidth: 0,
+  pressable: true,
 })
 
 export function selectionRowColor(

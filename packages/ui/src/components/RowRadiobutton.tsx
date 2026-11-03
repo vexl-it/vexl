@@ -39,7 +39,7 @@ export function RowRadiobutton<T extends string>({
         if (selected) onSelectedValuePress?.(value)
       }}
     >
-      <SelectionRowFrame selected={selected}>
+      <SelectionRowFrame selected={selected} pressable={false}>
         <Indicator size={getTokens().size.$7.val} color={iconColor} />
         <SelectionRowText
           selected={selected}

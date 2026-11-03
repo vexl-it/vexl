@@ -6,38 +6,15 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated'
 import {scheduleOnRN} from 'react-native-worklets'
-import {styled, useTheme} from 'tamagui'
+import {getTokens, styled, useTheme} from 'tamagui'
 
 import {ChevronDown} from '../icons/ChevronDown'
 import type {IconProps} from '../icons/types'
-import {SizableText, XStack, YStack} from '../primitives'
+import {XStack, YStack} from '../primitives'
+import {FieldFrame} from './Field'
+import {Typography} from './Typography'
 
 const ANIMATION_DURATION = 250
-
-const PickerTriggerFrame = styled(XStack, {
-  name: 'PickerTrigger',
-  role: 'button',
-  alignItems: 'center',
-  gap: '$3',
-  height: '$11',
-  paddingHorizontal: '$5',
-  borderRadius: '$5',
-  backgroundColor: '$backgroundSecondary',
-
-  pressStyle: {
-    opacity: 0.7,
-  },
-})
-
-const PickerLabel = styled(SizableText, {
-  name: 'PickerLabel',
-  fontFamily: '$body',
-  fontWeight: '500',
-  fontSize: '$4',
-  letterSpacing: '$4',
-  color: '$accentHighlightPrimary',
-  flex: 1,
-})
 
 const PickerItemFrame = styled(XStack, {
   name: 'PickerItemFrame',
@@ -50,15 +27,6 @@ const PickerItemFrame = styled(XStack, {
   pressStyle: {
     backgroundColor: '$backgroundTertiary',
   },
-})
-
-const PickerItemLabel = styled(SizableText, {
-  name: 'PickerItemLabel',
-  fontFamily: '$body',
-  fontWeight: '500',
-  fontSize: '$2',
-  letterSpacing: '$2',
-  color: '$foregroundPrimary',
 })
 
 const PickerDropdownFrame = styled(YStack, {
@@ -149,7 +117,9 @@ function PickerDropdown<T extends string>({
                 onItemPress(item.value)
               }}
             >
-              <PickerItemLabel>{item.label}</PickerItemLabel>
+              <Typography variant="description" color="$foregroundPrimary">
+                {item.label}
+              </Typography>
             </PickerItemFrame>
           ))}
         </PickerDropdownContent>
@@ -175,6 +145,7 @@ export function Picker<T extends string>({
 
   const SelectedIcon = selectedItem?.icon
   const triggerIconColor = theme.accentHighlightPrimary.get()
+  const iconSize = getTokens().size.$7.val
 
   const toggleOpen = useCallback(() => {
     if (open) {
@@ -199,13 +170,19 @@ export function Picker<T extends string>({
 
   return (
     <YStack>
-      <PickerTriggerFrame onPress={toggleOpen}>
+      <FieldFrame pressable role="button" onPress={toggleOpen}>
         {SelectedIcon ? (
-          <SelectedIcon color={triggerIconColor} size={24} />
+          <SelectedIcon color={triggerIconColor} size={iconSize} />
         ) : null}
-        <PickerLabel>{selectedItem?.label ?? placeholder}</PickerLabel>
-        <ChevronDown color={triggerIconColor} size={24} />
-      </PickerTriggerFrame>
+        <Typography
+          variant="paragraph"
+          color="$accentHighlightPrimary"
+          flex={1}
+        >
+          {selectedItem?.label ?? placeholder}
+        </Typography>
+        <ChevronDown color={triggerIconColor} size={iconSize} />
+      </FieldFrame>
 
       {open ? (
         <PickerDropdown

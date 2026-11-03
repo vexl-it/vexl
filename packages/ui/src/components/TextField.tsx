@@ -1,113 +1,88 @@
 import type {SetStateAction, WritableAtom} from 'jotai'
 import {useAtom} from 'jotai'
 import React, {useCallback, useState} from 'react'
-import {styled, useTheme} from 'tamagui'
+import type {TextInput, TextInputProps} from 'react-native'
+import {getTokens, useTheme} from 'tamagui'
 
 import {Checkmark} from '../icons/Checkmark'
 import {XmarkCancelClose} from '../icons/XmarkCancelClose'
 import type {IconProps} from '../icons/types'
-import {Input, Stack, XStack, YStack} from '../primitives'
+import {Stack, YStack} from '../primitives'
 import {Button} from './Button'
+import {FieldFrame, FieldInput} from './Field'
 import {LengthCounter} from './LengthCounter'
+import {NavButton} from './NavButton'
 
-const TextFieldFrame = styled(XStack, {
-  name: 'TextField',
-  alignItems: 'center',
-  alignSelf: 'stretch',
-  backgroundColor: '$backgroundSecondary',
-  borderRadius: '$5',
-  borderWidth: 1,
-  borderColor: 'transparent',
+type FieldFrameProps = React.ComponentProps<typeof FieldFrame>
 
-  variants: {
-    layout: {
-      standard: {
-        height: '$11',
-        paddingLeft: '$5',
-        paddingRight: '$3',
-        paddingVertical: '$5',
-      },
-      compact: {
-        paddingLeft: '$4',
-        paddingRight: '$3',
-        paddingVertical: '$3',
-      },
-    },
+type NativeInputProps = Pick<
+  TextInputProps,
+  | 'autoCapitalize'
+  | 'autoComplete'
+  | 'autoCorrect'
+  | 'autoFocus'
+  | 'editable'
+  | 'keyboardType'
+  | 'maxLength'
+  | 'onSubmitEditing'
+  | 'returnKeyType'
+  | 'secureTextEntry'
+  | 'submitBehavior'
+  | 'textContentType'
+>
 
-    highlighted: {
-      true: {
-        borderColor: '$accentHighlightSecondary',
-      },
-    },
-  } as const,
-
-  defaultVariants: {
-    layout: 'standard',
-  },
-})
-
-const TextFieldInput = styled(Input, {
-  name: 'TextFieldInput',
-  unstyled: true,
-  flex: 1,
-  fontFamily: '$body',
-  fontWeight: '500',
-  fontSize: '$4',
-  color: '$foregroundPrimary',
-  padding: 0,
-})
-
-const CheckmarkButtonFrame = styled(Stack, {
-  name: 'TextFieldCheckmarkButton',
-  role: 'button',
-  alignItems: 'center',
-  justifyContent: 'center',
-  width: '$9',
-  height: '$9',
-  borderRadius: '$3',
-  backgroundColor: '$accentYellowSecondary',
-
-  pressStyle: {
-    opacity: 0.7,
-  },
-})
-
-const IconPressable = styled(Stack, {
-  name: 'TextFieldIconPressable',
-  role: 'button',
-  alignItems: 'center',
-  justifyContent: 'center',
-  paddingRight: '$2',
-
-  pressStyle: {
-    opacity: 0.7,
-  },
-})
-
-type TextFieldFrameProps = React.ComponentProps<typeof TextFieldFrame>
-
-export interface TextFieldProps extends Omit<
-  TextFieldFrameProps,
-  'children' | 'layout' | 'highlighted' | 'backgroundColor'
-> {
-  readonly valueAtom: WritableAtom<string, [SetStateAction<string>], void>
+interface TextFieldBaseProps
+  extends
+    Omit<
+      FieldFrameProps,
+      'children' | 'highlighted' | 'selected' | 'pressable' | 'ref'
+    >,
+    NativeInputProps {
   readonly placeholder?: string
-  readonly autoFocus?: boolean
-  readonly maxLength?: number
-  readonly backgroundColor?: TextFieldFrameProps['backgroundColor']
   readonly showClear?: boolean
   readonly onCheckmarkPress?: () => void
   readonly buttonLabel?: string
   readonly onButtonPress?: () => void
   readonly icon?: React.ComponentType<IconProps>
   readonly onIconPress?: () => void
+  readonly ref?: React.Ref<TextInput>
 }
 
-export function TextField({
+interface ControlledTextFieldProps extends TextFieldBaseProps {
+  readonly value: string
+  readonly onChangeText: (text: string) => void
+  readonly valueAtom?: never
+}
+
+interface AtomTextFieldProps extends TextFieldBaseProps {
+  readonly valueAtom: WritableAtom<string, [SetStateAction<string>], void>
+  readonly value?: never
+  readonly onChangeText?: never
+}
+
+export type TextFieldProps = ControlledTextFieldProps | AtomTextFieldProps
+
+export function TextField(props: TextFieldProps): React.JSX.Element {
+  if (props.valueAtom !== undefined) {
+    const {valueAtom, ...rest} = props
+    return <AtomTextField valueAtom={valueAtom} {...rest} />
+  }
+
+  return <ControlledTextField {...props} />
+}
+
+function AtomTextField({
   valueAtom,
+  ...rest
+}: AtomTextFieldProps): React.JSX.Element {
+  const [value, setValue] = useAtom(valueAtom)
+  return <ControlledTextField value={value} onChangeText={setValue} {...rest} />
+}
+
+function ControlledTextField({
+  value,
+  onChangeText,
   placeholder = 'Input',
-  autoFocus,
-  maxLength,
   backgroundColor = '$backgroundSecondary',
   showClear,
   onCheckmarkPress,
@@ -115,12 +90,24 @@ export function TextField({
   onButtonPress,
   icon: Icon,
   onIconPress,
+  ref,
+  autoCapitalize,
+  autoComplete,
+  autoCorrect,
+  autoFocus,
+  editable,
+  keyboardType,
+  maxLength,
+  onSubmitEditing,
+  returnKeyType,
+  secureTextEntry,
+  submitBehavior,
+  textContentType,
   ...rest
-}: TextFieldProps): React.JSX.Element {
-  const [text, setText] = useAtom(valueAtom)
+}: ControlledTextFieldProps): React.JSX.Element {
   const [isFocused, setIsFocused] = useState(false)
   const theme = useTheme()
-  const hasText = text.length > 0
+  const iconSize = getTokens().size.$7.val
 
   const handleFocus = useCallback(() => {
     setIsFocused(true)
@@ -131,49 +118,66 @@ export function TextField({
   }, [])
 
   const handleClear = useCallback(() => {
-    setText('')
-  }, [setText])
+    onChangeText('')
+  }, [onChangeText])
 
+  const hasButton = buttonLabel != null && onButtonPress != null
   const hasCheckmark = onCheckmarkPress != null
-  const isCompact = buttonLabel != null && onButtonPress != null
-  const showBorder = hasCheckmark && isFocused
+  const TrailingIcon =
+    showClear === true && value.length > 0 ? XmarkCancelClose : Icon
+  const onTrailingIconPress =
+    TrailingIcon === XmarkCancelClose ? handleClear : onIconPress
 
   const field = (
-    <TextFieldFrame
-      layout={isCompact ? 'compact' : 'standard'}
+    <FieldFrame
       backgroundColor={backgroundColor}
-      highlighted={showBorder || undefined}
+      highlighted={(hasCheckmark && isFocused) || undefined}
+      paddingLeft={hasButton ? '$4' : '$5'}
+      paddingRight="$3"
+      paddingVertical={hasButton ? '$3' : '$0'}
       {...rest}
     >
-      <TextFieldInput
-        value={text}
-        onChangeText={setText}
+      <FieldInput
+        ref={ref}
+        value={value}
+        onChangeText={onChangeText}
         placeholder={placeholder}
         placeholderTextColor={theme.foregroundTertiary.get()}
         selectionColor={theme.accentYellowPrimary.get()}
+        autoCapitalize={autoCapitalize}
+        autoComplete={autoComplete}
+        autoCorrect={autoCorrect}
         autoFocus={autoFocus}
+        editable={editable}
+        keyboardType={keyboardType}
         maxLength={maxLength}
+        onSubmitEditing={onSubmitEditing}
+        returnKeyType={returnKeyType}
+        secureTextEntry={secureTextEntry}
+        submitBehavior={submitBehavior}
+        textContentType={textContentType}
         onFocus={handleFocus}
         onBlur={handleBlur}
       />
-      {buttonLabel != null && onButtonPress != null ? (
+      {hasButton ? (
         <Button variant="secondary" size="small" onPress={onButtonPress}>
           {buttonLabel}
         </Button>
-      ) : onCheckmarkPress != null ? (
-        <CheckmarkButtonFrame onPress={onCheckmarkPress}>
-          <Checkmark size={24} color={theme.accentHighlightPrimary.get()} />
-        </CheckmarkButtonFrame>
-      ) : showClear === true && hasText ? (
-        <IconPressable onPress={handleClear}>
-          <XmarkCancelClose size={24} color={theme.foregroundPrimary.get()} />
-        </IconPressable>
-      ) : Icon != null ? (
-        <IconPressable onPress={onIconPress}>
-          <Icon size={24} color={theme.foregroundPrimary.get()} />
-        </IconPressable>
+      ) : hasCheckmark ? (
+        <NavButton icon={Checkmark} onPress={onCheckmarkPress} />
+      ) : TrailingIcon != null ? (
+        <Stack
+          role="button"
+          alignItems="center"
+          justifyContent="center"
+          paddingRight="$2"
+          pressStyle={{opacity: 0.7}}
+          onPress={onTrailingIconPress}
+        >
+          <TrailingIcon size={iconSize} color={theme.foregroundPrimary.get()} />
+        </Stack>
       ) : null}
-    </TextFieldFrame>
+    </FieldFrame>
   )
 
   if (maxLength === undefined) return field
@@ -181,7 +185,7 @@ export function TextField({
   return (
     <YStack gap="$2">
       {field}
-      <LengthCounter length={text.length} maxLength={maxLength} />
+      <LengthCounter length={value.length} maxLength={maxLength} />
     </YStack>
   )
 }

@@ -2,33 +2,13 @@ import type {SetStateAction, WritableAtom} from 'jotai'
 import {useAtom} from 'jotai'
 import React, {useCallback, useEffect, useRef, useState} from 'react'
 import type {TextInput} from 'react-native'
-import {styled, useTheme} from 'tamagui'
+import {getTokens, styled, useTheme} from 'tamagui'
 
 import {ChevronDown} from '../../icons/ChevronDown'
-import {Input, SizableText, Stack, XStack, YStack} from '../../primitives'
+import {Stack, XStack, YStack} from '../../primitives'
+import {FieldFrame, FieldInput} from '../Field'
+import {Typography} from '../Typography'
 import {RangeSlider} from './RangeSlider'
-
-const InputFrame = styled(XStack, {
-  name: 'PriceRangeInputField',
-  flex: 1,
-  height: '$11',
-  alignItems: 'center',
-  backgroundColor: '$backgroundSecondary',
-  borderRadius: '$5',
-  paddingLeft: '$5',
-  paddingRight: '$3',
-})
-
-const NumberInput = styled(Input, {
-  name: 'PriceRangeNumberInput',
-  unstyled: true,
-  flex: 1,
-  fontFamily: '$body',
-  fontWeight: '500',
-  fontSize: '$4',
-  color: '$foregroundPrimary',
-  padding: 0,
-})
 
 const SeparatorFrame = styled(Stack, {
   name: 'PriceRangeSeparator',
@@ -37,38 +17,6 @@ const SeparatorFrame = styled(Stack, {
   alignItems: 'center',
   justifyContent: 'center',
   paddingHorizontal: '$1',
-})
-
-const SeparatorText = styled(SizableText, {
-  name: 'PriceRangeSeparatorText',
-  fontFamily: '$body',
-  fontWeight: '500',
-  fontSize: '$4',
-  color: '$foregroundPrimary',
-})
-
-const CurrencyButton = styled(XStack, {
-  name: 'PriceRangeCurrencyButton',
-  role: 'button',
-  height: '$11',
-  alignItems: 'center',
-  gap: '$3',
-  paddingHorizontal: '$5',
-  backgroundColor: '$backgroundSecondary',
-  borderRadius: '$5',
-
-  pressStyle: {
-    opacity: 0.7,
-  },
-})
-
-const CurrencyLabel = styled(SizableText, {
-  name: 'PriceRangeCurrencyLabel',
-  fontFamily: '$body',
-  fontWeight: '500',
-  fontSize: '$4',
-  color: '$accentHighlightPrimary',
-  flex: 1,
 })
 
 export interface PriceRangeInputProps {
@@ -210,8 +158,8 @@ export function PriceRangeInput({
   return (
     <YStack gap="$3">
       <XStack gap="$3">
-        <InputFrame>
-          <NumberInput
+        <FieldFrame flex={1} paddingRight="$3">
+          <FieldInput
             ref={minInputRef}
             value={minText}
             onChangeText={handleMinChange}
@@ -220,12 +168,14 @@ export function PriceRangeInput({
             onBlur={handleMinBlur}
             selectionColor={theme.accentYellowPrimary.get()}
           />
-        </InputFrame>
+        </FieldFrame>
         <SeparatorFrame>
-          <SeparatorText>-</SeparatorText>
+          <Typography variant="paragraph" color="$foregroundPrimary">
+            -
+          </Typography>
         </SeparatorFrame>
-        <InputFrame>
-          <NumberInput
+        <FieldFrame flex={1} paddingRight="$3">
+          <FieldInput
             ref={maxInputRef}
             value={maxText}
             onChangeText={handleMaxChange}
@@ -234,12 +184,18 @@ export function PriceRangeInput({
             onBlur={handleMaxBlur}
             selectionColor={theme.accentYellowPrimary.get()}
           />
-        </InputFrame>
+        </FieldFrame>
       </XStack>
-      <CurrencyButton onPress={onCurrencyPress}>
-        <CurrencyLabel>{currency}</CurrencyLabel>
-        <ChevronDown color={chevronColor} size={24} />
-      </CurrencyButton>
+      <FieldFrame pressable role="button" onPress={onCurrencyPress}>
+        <Typography
+          variant="paragraph"
+          color="$accentHighlightPrimary"
+          flex={1}
+        >
+          {currency}
+        </Typography>
+        <ChevronDown color={chevronColor} size={getTokens().size.$7.val} />
+      </FieldFrame>
       <RangeSlider
         onInteractionStart={handleSliderInteractionStart}
         minValueAtom={minValueAtom}

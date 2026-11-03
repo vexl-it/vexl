@@ -1,56 +1,21 @@
 import type {SetStateAction, WritableAtom} from 'jotai'
 import {useAtom} from 'jotai'
 import React from 'react'
-import {styled, useTheme} from 'tamagui'
+import {getTokens, useTheme} from 'tamagui'
 
 import {ChevronRight} from '../icons/ChevronRight'
 import type {IconProps} from '../icons/types'
-import {SizableText, Stack, XStack} from '../primitives'
+import {Stack} from '../primitives'
+import {FieldFrame} from './Field'
 import {Switch} from './Switch'
+import {Typography} from './Typography'
 
-const SelectorActionFrame = styled(XStack, {
-  name: 'SelectorAction',
-  role: 'button',
-  alignItems: 'center',
-  gap: '$3',
-  height: '$11',
-  paddingHorizontal: '$5',
-  borderRadius: '$5',
-  backgroundColor: '$backgroundSecondary',
-
-  pressStyle: {
-    opacity: 0.7,
-  },
-})
-
-const SelectorSwitchFrame = styled(XStack, {
-  name: 'SelectorSwitch',
-  role: 'button',
-  alignItems: 'center',
-  gap: '$3',
-  height: '$11',
-  paddingHorizontal: '$5',
-  borderRadius: '$5',
-  backgroundColor: '$backgroundSecondary',
-})
-
-const SelectorLabel = styled(SizableText, {
-  name: 'SelectorLabel',
-  fontFamily: '$body',
-  fontWeight: '500',
-  fontSize: '$4',
-  letterSpacing: '$4',
-  color: '$foregroundPrimary',
-  flex: 1,
-})
-
-type SelectorActionFrameProps = React.ComponentProps<typeof SelectorActionFrame>
-type SelectorSwitchFrameProps = React.ComponentProps<typeof SelectorSwitchFrame>
+type FieldFrameProps = React.ComponentProps<typeof FieldFrame>
 
 interface SelectorBaseProps {
   readonly label: string
   readonly icon?: React.ComponentType<IconProps>
-  readonly backgroundColor?: SelectorActionFrameProps['backgroundColor']
+  readonly backgroundColor?: FieldFrameProps['backgroundColor']
 }
 
 export interface SelectorActionProps extends SelectorBaseProps {
@@ -89,6 +54,14 @@ export function Selector(props: SelectorProps): React.JSX.Element {
   )
 }
 
+function SelectorLabel({label}: {readonly label: string}): React.JSX.Element {
+  return (
+    <Typography variant="paragraph" color="$foregroundPrimary" flex={1}>
+      {label}
+    </Typography>
+  )
+}
+
 function SelectorAction({
   label,
   icon: Icon,
@@ -97,17 +70,25 @@ function SelectorAction({
 }: {
   readonly label: string
   readonly icon?: React.ComponentType<IconProps>
-  readonly backgroundColor?: SelectorActionFrameProps['backgroundColor']
+  readonly backgroundColor?: FieldFrameProps['backgroundColor']
   readonly onPress: () => void
 }): React.JSX.Element {
   const theme = useTheme()
+  const iconSize = getTokens().size.$7.val
 
   return (
-    <SelectorActionFrame backgroundColor={backgroundColor} onPress={onPress}>
-      {Icon ? <Icon color={theme.foregroundPrimary.get()} size={24} /> : null}
-      <SelectorLabel>{label}</SelectorLabel>
-      <ChevronRight color={theme.foregroundSecondary.get()} size={24} />
-    </SelectorActionFrame>
+    <FieldFrame
+      pressable
+      role="button"
+      backgroundColor={backgroundColor}
+      onPress={onPress}
+    >
+      {Icon ? (
+        <Icon color={theme.foregroundPrimary.get()} size={iconSize} />
+      ) : null}
+      <SelectorLabel label={label} />
+      <ChevronRight color={theme.foregroundSecondary.get()} size={iconSize} />
+    </FieldFrame>
   )
 }
 
@@ -119,24 +100,28 @@ function SelectorSwitch({
 }: {
   readonly label: string
   readonly icon?: React.ComponentType<IconProps>
-  readonly backgroundColor?: SelectorSwitchFrameProps['backgroundColor']
+  readonly backgroundColor?: FieldFrameProps['backgroundColor']
   readonly valueAtom: WritableAtom<boolean, [SetStateAction<boolean>], void>
 }): React.JSX.Element {
   const theme = useTheme()
+  const iconSize = getTokens().size.$7.val
   const [, setIsOn] = useAtom(valueAtom)
 
   return (
-    <SelectorSwitchFrame
+    <FieldFrame
+      role="button"
       backgroundColor={backgroundColor}
       onPress={() => {
         setIsOn((prev) => !prev)
       }}
     >
-      {Icon ? <Icon color={theme.foregroundPrimary.get()} size={24} /> : null}
-      <SelectorLabel>{label}</SelectorLabel>
+      {Icon ? (
+        <Icon color={theme.foregroundPrimary.get()} size={iconSize} />
+      ) : null}
+      <SelectorLabel label={label} />
       <Stack alignSelf="center" justifyContent="center">
         <Switch valueAtom={valueAtom} />
       </Stack>
-    </SelectorSwitchFrame>
+    </FieldFrame>
   )
 }

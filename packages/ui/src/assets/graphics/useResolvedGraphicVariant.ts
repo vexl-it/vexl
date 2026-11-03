@@ -1,11 +1,11 @@
-import {useColorScheme} from 'react-native'
+import {useThemeName} from 'tamagui'
 
 export type GraphicVariant = 'dark' | 'light'
 
 export function useResolvedGraphicVariant(
   variant?: GraphicVariant
 ): GraphicVariant {
-  const systemColorScheme = useColorScheme()
+  const themeName = useThemeName()
 
-  return variant ?? (systemColorScheme === 'light' ? 'light' : 'dark')
+  return variant ?? (themeName.startsWith('dark') ? 'dark' : 'light')
 }

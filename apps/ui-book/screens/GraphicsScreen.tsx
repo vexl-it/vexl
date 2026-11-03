@@ -8,7 +8,6 @@ import {
 import * as graphicsModule from '@vexl-next/ui/src/assets/graphics'
 import {Array, pipe, Record} from 'effect'
 import React from 'react'
-import {useThemeName} from 'tamagui'
 
 import {ComponentScreenLayout, DemoSection} from './ComponentScreenLayout'
 
@@ -60,8 +59,6 @@ function GraphicTile({
 }
 
 function Demos(): React.JSX.Element {
-  const variant = useThemeName().startsWith('dark') ? 'dark' : 'light'
-
   return (
     <>
       <DemoSection title="Animated (tap to replay)">
@@ -70,12 +67,7 @@ function Demos(): React.JSX.Element {
             Record.toEntries(animatedGraphics),
             Array.map(([label, Graphic]) => (
               <GraphicTile key={label} label={label}>
-                <Graphic
-                  animate
-                  variant={variant}
-                  width={GRAPHIC_SIZE}
-                  height={GRAPHIC_SIZE}
-                />
+                <Graphic animate width={GRAPHIC_SIZE} height={GRAPHIC_SIZE} />
               </GraphicTile>
             ))
           )}

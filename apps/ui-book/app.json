@@ -11,6 +11,9 @@
     },
     "android": {
       "package": "it.vexl.uibook"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
     }
   }
 }

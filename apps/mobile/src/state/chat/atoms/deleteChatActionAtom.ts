@@ -104,7 +104,8 @@ export default function deleteChatActionAtom(
 
         void set(cancelTradeReminderActionAtom, chatWithMessages.chat.id)
         deleteChatImageFiles({
-          messages: chatWithMessages.messages,
+          // Fresh read: images may have arrived while the request was running.
+          messages: get(chatWithMessagesAtom).messages,
           chatKeys: getChatKeys(chat),
         })
 

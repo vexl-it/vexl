@@ -1,12 +1,31 @@
 import type {SetStateAction, WritableAtom} from 'jotai'
 import React from 'react'
+import {styled} from 'tamagui'
 
 import {XStack, YStack} from '../primitives'
 import {Switch} from './Switch'
 import {Typography} from './Typography'
 
+const SwitchCardFrame = styled(XStack, {
+  name: 'SwitchCard',
+  alignItems: 'center',
+  gap: '$4',
+  padding: '$5',
+  borderRadius: '$5',
+  backgroundColor: '$backgroundSecondary',
+
+  variants: {
+    plain: {
+      true: {
+        paddingHorizontal: '$0',
+        backgroundColor: 'transparent',
+      },
+    },
+  } as const,
+})
+
 export interface SwitchCardProps extends Omit<
-  React.ComponentProps<typeof XStack>,
+  React.ComponentProps<typeof SwitchCardFrame>,
   'children'
 > {
   readonly title: string
@@ -21,14 +40,7 @@ export function SwitchCard({
   ...rest
 }: SwitchCardProps): React.JSX.Element {
   return (
-    <XStack
-      alignItems="center"
-      gap="$4"
-      padding="$5"
-      borderRadius="$5"
-      backgroundColor="$backgroundSecondary"
-      {...rest}
-    >
+    <SwitchCardFrame {...rest}>
       <YStack flex={1} gap="$2">
         <Typography variant="paragraph" color="$foregroundPrimary">
           {title}
@@ -40,6 +52,6 @@ export function SwitchCard({
         ) : null}
       </YStack>
       <Switch aria-label={title} valueAtom={valueAtom} />
-    </XStack>
+    </SwitchCardFrame>
   )
 }

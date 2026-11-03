@@ -7,6 +7,7 @@ import {ComponentScreenLayout} from './ComponentScreenLayout'
 const titleOnlyAtom = atom(false)
 const withDescriptionAtom = atom(true)
 const tertiaryAtom = atom(true)
+const plainAtom = atom(false)
 
 function Demos(): React.JSX.Element {
   return (
@@ -23,6 +24,7 @@ function Demos(): React.JSX.Element {
         valueAtom={tertiaryAtom}
         backgroundColor="$backgroundTertiary"
       />
+      <SwitchCard plain title="Plain (no background)" valueAtom={plainAtom} />
     </YStack>
   )
 }

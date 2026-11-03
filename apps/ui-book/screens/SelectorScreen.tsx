@@ -40,6 +40,15 @@ function Demos(): React.JSX.Element {
           ))}
         </YStack>
       </DemoSection>
+      <DemoSection title="Accent (chosen value)">
+        <Selector
+          accent
+          label="+ 2 %"
+          onPress={() => {
+            Alert.alert('Pressed', 'Accent')
+          }}
+        />
+      </DemoSection>
       <DemoSection title="Switch (with toggle)">
         <YStack gap="$3">
           <Selector

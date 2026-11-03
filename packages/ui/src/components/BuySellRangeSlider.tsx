@@ -6,6 +6,8 @@ import {Slider} from './Slider'
 import {Typography} from './Typography'
 
 export interface BuySellRangeSliderProps {
+  readonly title?: string
+  readonly valueLabel?: string
   readonly leftLabel: string
   readonly rightLabel: string
   readonly minPercentage: number
@@ -13,10 +15,12 @@ export interface BuySellRangeSliderProps {
   readonly percentage: number
   readonly onPercentageChange: (percentage: number) => void
   readonly infoText: string
-  readonly amountText: string
+  readonly amountText?: string
 }
 
 export function BuySellRangeSlider({
+  title,
+  valueLabel,
   leftLabel,
   rightLabel,
   minPercentage,
@@ -24,7 +28,7 @@ export function BuySellRangeSlider({
   percentage,
   onPercentageChange,
   infoText,
-  amountText,
+  amountText = '',
 }: BuySellRangeSliderProps): React.JSX.Element {
   const range = maxPercentage - minPercentage
   const midPercentage = (minPercentage + maxPercentage) / 2
@@ -39,33 +43,58 @@ export function BuySellRangeSlider({
         : 'pink'
 
   return (
-    <YStack gap="$3">
-      <Stack gap="$3" paddingHorizontal="$2">
-        <XStack justifyContent="space-between">
-          <Typography variant="micro" color="$foregroundPrimary">
-            {leftLabel}
+    <YStack gap="$5">
+      {title ? (
+        <XStack alignItems="center" justifyContent="space-between" gap="$4">
+          <Typography
+            variant="paragraphDemibold"
+            color="$foregroundPrimary"
+            flex={1}
+          >
+            {title}
           </Typography>
-          <Typography variant="micro" color="$foregroundPrimary">
-            {rightLabel}
-          </Typography>
+          {valueLabel ? (
+            <XStack
+              backgroundColor="$backgroundSecondary"
+              paddingHorizontal="$4"
+              paddingVertical="$3"
+              borderRadius="$3"
+            >
+              <Typography variant="paragraphSmall" color="$foregroundPrimary">
+                {valueLabel}
+              </Typography>
+            </XStack>
+          ) : null}
         </XStack>
-        <Slider
-          min={minPercentage}
-          max={maxPercentage}
-          value={percentage}
-          onValueChange={onPercentageChange}
-        />
-        {amountText.length > 0 ? (
-          <XStack justifyContent="center" padding="$4">
-            <Typography variant="micro" color="$foregroundSecondary">
-              {amountText}
+      ) : null}
+      <YStack gap="$3">
+        <Stack gap="$3" paddingHorizontal="$2">
+          <XStack justifyContent="space-between">
+            <Typography variant="micro" color="$foregroundPrimary">
+              {leftLabel}
+            </Typography>
+            <Typography variant="micro" color="$foregroundPrimary">
+              {rightLabel}
             </Typography>
           </XStack>
-        ) : null}
-      </Stack>
-      <InfoBox variant={bannerVariant} iconSize={24} p="$5" gap="$3">
-        {infoText}
-      </InfoBox>
+          <Slider
+            min={minPercentage}
+            max={maxPercentage}
+            value={percentage}
+            onValueChange={onPercentageChange}
+          />
+          {amountText.length > 0 ? (
+            <XStack justifyContent="center" padding="$4">
+              <Typography variant="micro" color="$foregroundSecondary">
+                {amountText}
+              </Typography>
+            </XStack>
+          ) : null}
+        </Stack>
+        <InfoBox variant={bannerVariant} iconSize={24} p="$5" gap="$3">
+          {infoText}
+        </InfoBox>
+      </YStack>
     </YStack>
   )
 }

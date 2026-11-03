@@ -33,3 +33,11 @@ export function getInfoText(
     return t('offerForm.premiumOrDiscount.slider.sellSlightlyFaster')
   return t('offerForm.premiumOrDiscount.slider.sellMuchFaster')
 }
+
+export function formatPremiumOrDiscount(
+  feeAmount: number,
+  t: TFunction
+): string {
+  if (feeAmount === 0) return t('offerForm.premiumOrDiscount.marketPrice')
+  return `${feeAmount > 0 ? '+' : ''}${feeAmount} %`
+}

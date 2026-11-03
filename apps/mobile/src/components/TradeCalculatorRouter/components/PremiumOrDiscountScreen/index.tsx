@@ -2,26 +2,21 @@ import {useFocusEffect} from '@react-navigation/native'
 import {type OfferType} from '@vexl-next/domain/src/general/offers'
 import {
   Button,
-  BuySellRangeSlider,
   NavigationBar,
   Screen,
   SegmentedPicker,
-  Typography,
   useScreenFooterHeight,
 } from '@vexl-next/ui'
 import {XmarkCancelClose} from '@vexl-next/ui/src/icons'
-import {ScrollView, XStack, YStack} from '@vexl-next/ui/src/primitives'
+import {ScrollView, YStack} from '@vexl-next/ui/src/primitives'
 import {atom, useAtom, useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useMemo} from 'react'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import {currencies} from '../../../../utils/localization/currency'
 import {formatDecimal} from '../../../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../../../utils/localization/formattingLocaleAtom'
-import {
-  getInfoText,
-  SLIDER_THRESHOLD,
-} from '../../../../utils/premiumOrDiscount'
 import useSafeGoBack from '../../../../utils/useSafeGoBack'
+import PremiumOrDiscountSlider from '../../../PremiumOrDiscountSlider'
 import {
   applyFeeOnFeeChangeActionAtom,
   btcPriceCurrencyAtom,
@@ -61,11 +56,6 @@ function PremiumOrDiscountScreen(): React.ReactElement {
   const tabs = useOfferTypeTabs()
   const isBuy = offerType === 'BUY'
 
-  const priceTagText =
-    tempFeeAmount === 0
-      ? t('offerForm.premiumOrDiscount.marketPrice')
-      : `${tempFeeAmount > 0 ? '+' : ''}${tempFeeAmount} %`
-  const infoText = getInfoText(tempFeeAmount, isBuy, t)
   const amountText = useMemo(() => {
     if (fiatValueNumber === 0) return ''
 
@@ -138,48 +128,12 @@ function PremiumOrDiscountScreen(): React.ReactElement {
             onTabPress={setOfferType}
           />
 
-          <YStack gap="$5">
-            <XStack alignItems="center" justifyContent="space-between" gap="$4">
-              <Typography
-                variant="paragraphDemibold"
-                color="$foregroundPrimary"
-                flex={1}
-              >
-                {isBuy
-                  ? t('offerForm.premiumOrDiscount.youBuyBtcFor')
-                  : t('offerForm.premiumOrDiscount.youSellBtcFor')}
-              </Typography>
-              <XStack
-                backgroundColor="$backgroundSecondary"
-                paddingHorizontal="$4"
-                paddingVertical="$3"
-                borderRadius="$3"
-              >
-                <Typography variant="paragraphSmall" color="$foregroundPrimary">
-                  {priceTagText}
-                </Typography>
-              </XStack>
-            </XStack>
-
-            <BuySellRangeSlider
-              leftLabel={
-                isBuy
-                  ? t('offerForm.premiumOrDiscount.buyCheaply')
-                  : t('offerForm.premiumOrDiscount.sellFaster')
-              }
-              rightLabel={
-                isBuy
-                  ? t('offerForm.premiumOrDiscount.buyFaster')
-                  : t('offerForm.premiumOrDiscount.earnMore')
-              }
-              minPercentage={-SLIDER_THRESHOLD}
-              maxPercentage={SLIDER_THRESHOLD}
-              percentage={tempFeeAmount}
-              onPercentageChange={setTempFeeAmount}
-              infoText={infoText}
-              amountText={amountText}
-            />
-          </YStack>
+          <PremiumOrDiscountSlider
+            feeAmount={tempFeeAmount}
+            onFeeAmountChange={setTempFeeAmount}
+            isBuy={isBuy}
+            amountText={amountText}
+          />
         </YStack>
       </ScrollView>
     </Screen>

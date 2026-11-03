@@ -46,6 +46,12 @@ function InteractiveSlider({
         </SizableText>
 
         <BuySellRangeSlider
+          title="You sell BTC for"
+          valueLabel={
+            percentage === 0
+              ? 'Market price'
+              : `${percentage > 0 ? '+' : ''}${percentage} %`
+          }
           leftLabel="Sell faster"
           rightLabel="Earn more"
           minPercentage={-10}

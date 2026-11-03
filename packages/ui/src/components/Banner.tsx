@@ -102,8 +102,7 @@ export function Banner({
 
   return (
     <Animated.View
-      pointerEvents={dismissing ? 'none' : 'auto'}
-      style={dismissStyle}
+      style={[{pointerEvents: dismissing ? 'none' : 'auto'}, dismissStyle]}
     >
       <BannerFrame color={color}>
         {image != null ? <ImageFrame>{image}</ImageFrame> : null}

@@ -32,8 +32,7 @@ export function PhotoPickerPlaceholder({
       onPress={onPress}
     >
       <Svg
-        pointerEvents="none"
-        style={StyleSheet.absoluteFill}
+        style={[StyleSheet.absoluteFill, {pointerEvents: 'none'}]}
         width="100%"
         height="100%"
         viewBox={`0 0 ${size} ${size}`}

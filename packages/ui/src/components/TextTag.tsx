@@ -83,7 +83,7 @@ const TextTagFrame = styled(XStack, {
   variants: {
     shape: tagShapes,
     size: {
-      regular: {paddingVertical: '$1'},
+      regular: {paddingVertical: '$2'},
       status: {height: '$7', paddingVertical: '$2'},
     },
   } as const,

@@ -1,4 +1,4 @@
-import {TextTag, type TextTagVariant, XStack} from '@vexl-next/ui'
+import {IconTag, TextTag, type TextTagVariant, XStack} from '@vexl-next/ui'
 import {Array, pipe} from 'effect'
 import React from 'react'
 
@@ -47,6 +47,12 @@ function Demos(): React.JSX.Element {
     <>
       <DemoSection title="Regular">
         <TagRow variants={regularVariants} />
+      </DemoSection>
+      <DemoSection title="Next to an IconTag (offer card header)">
+        <XStack gap="$1" alignItems="center">
+          <TextTag variant="offer" label="I have" />
+          <IconTag variant="bitcoin" />
+        </XStack>
       </DemoSection>
       <DemoSection title="Status (e.g. donation status)">
         <TagRow variants={statusVariants} />

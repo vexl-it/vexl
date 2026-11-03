@@ -79,6 +79,7 @@ import {SelectClubCellScreen} from './SelectClubCellScreen'
 import {SelectorScreen} from './SelectorScreen'
 import {StarRatingScreen} from './StarRatingScreen'
 import {StepperCheckScreen} from './StepperCheckScreen'
+import {StoryPagerScreen} from './StoryPagerScreen'
 import {SwipeableOfferCardScreen} from './SwipeableOfferCardScreen'
 import {SwipeableRowScreen} from './SwipeableRowScreen'
 import {SwitchCardScreen} from './SwitchCardScreen'
@@ -187,6 +188,7 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'Selector', component: SelectorScreen},
   {label: 'Star Rating', component: StarRatingScreen},
   {label: 'Stepper Check', component: StepperCheckScreen},
+  {label: 'Story Pager', component: StoryPagerScreen},
   {label: 'Swipeable Offer Card', component: SwipeableOfferCardScreen},
   {label: 'Swipeable Row', component: SwipeableRowScreen},
   {label: 'Switch', component: SwitchScreen},

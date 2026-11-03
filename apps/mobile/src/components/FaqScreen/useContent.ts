@@ -7,8 +7,8 @@ import {
   FaqOpenSource,
   FaqStayAnonymous,
   FaqWhatIsVexl,
+  type StoryPage,
 } from '@vexl-next/ui'
-import type React from 'react'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 
 export type FaqType =
@@ -21,19 +21,8 @@ export type FaqType =
   | 'WHAT_ARE_VEXL_CLUBS'
   | 'HOW_DO_I_CONTACT_VEXL'
 
-export interface FaqGraphicProps {
-  readonly animate?: boolean
-  readonly disableReplayOnPress?: boolean
-  readonly height?: number
-  readonly variant?: 'dark' | 'light'
-  readonly width?: number
-}
-
-export interface FaqContent {
+export interface FaqContent extends StoryPage {
   readonly type: FaqType
-  readonly graphic: React.ComponentType<FaqGraphicProps>
-  readonly title: string
-  readonly text: string
 }
 
 export default function useContent(): readonly FaqContent[] {

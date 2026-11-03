@@ -201,6 +201,12 @@ export {StarRating} from './StarRating'
 export type {StarRatingProps} from './StarRating'
 export {StepperCheck, StepperCheckContainer} from './StepperCheck'
 export type {StepperCheckProps} from './StepperCheck'
+export {StoryPager} from './StoryPager'
+export type {
+  StoryPage,
+  StoryPagerGraphicProps,
+  StoryPagerProps,
+} from './StoryPager'
 export {SwipeableOfferCard} from './SwipeableOfferCard'
 export type {
   SwipeableOfferCardLabels,

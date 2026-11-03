@@ -73,6 +73,7 @@ function NetworkStep({
           {t('offerForm.network.network')}
         </Typography>
         <RowCheckbox
+          shape="circle"
           label={t('offerForm.network.lightning')}
           description={t('offerForm.network.lightningDescription')}
           checked={lightningSelected}
@@ -81,6 +82,7 @@ function NetworkStep({
           }}
         />
         <RowCheckbox
+          shape="circle"
           label={t('offerForm.network.onChainRedesign')}
           description={t('offerForm.network.onChainDescription')}
           checked={onChainSelected}

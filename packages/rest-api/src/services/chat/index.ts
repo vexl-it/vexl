@@ -29,7 +29,6 @@ import {
   type LeaveChatRequest,
   type RequestApprovalRequest,
   type RequestApprovalV2Request,
-  type RequestChatImageDownloadRequest,
   type RequestChatImageUploadRequest,
   type RetrieveMessagesRequest,
   type SendMessageRequest,
@@ -260,11 +259,6 @@ export function api({
             })
           )
         ),
-      requestChatImageDownload: (request: RequestChatImageDownloadRequest) =>
-        client.Images.requestChatImageDownload({
-          payload: request,
-          headers: commonHeaders,
-        }),
       // ----------------------
       // 👇 Challenge
       // ----------------------

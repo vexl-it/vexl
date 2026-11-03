@@ -104,8 +104,9 @@ services:
       S3_BUCKET_NAME: ${S3_BUCKET_NAME:-vexl-resources}
       S3_CHAT_IMAGES_BUCKET_NAME: ${S3_CHAT_IMAGES_BUCKET_NAME:-vexl-chat-images}
       CHAT_IMAGES_EXPIRE_DAYS: ${CHAT_IMAGES_EXPIRE_DAYS:-90}
-    # The chat images bucket stays private. `mc ilm import` replaces the whole
-    # lifecycle config, so re-running init never duplicates the expiry rule.
+    # Chat images are publicly readable by id (ciphertext only) but not
+    # listable. `mc ilm import` replaces the whole lifecycle config, so
+    # re-running init never duplicates the expiry rule.
     entrypoint:
       - /bin/sh
       - -c
@@ -115,6 +116,8 @@ services:
         mc mb --ignore-existing local/"$${S3_BUCKET_NAME}"
         mc anonymous set download local/"$${S3_BUCKET_NAME}"
         mc mb --ignore-existing local/"$${S3_CHAT_IMAGES_BUCKET_NAME}"
+        echo '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":["*"]},"Action":["s3:GetObject"],"Resource":["arn:aws:s3:::'"$${S3_CHAT_IMAGES_BUCKET_NAME}"'/*"]}]}' > /tmp/chat-images-policy.json
+        mc anonymous set-json /tmp/chat-images-policy.json local/"$${S3_CHAT_IMAGES_BUCKET_NAME}"
         echo '{"Rules":[{"ID":"expire-chat-images","Status":"Enabled","Filter":{"Prefix":""},"Expiration":{"Days":'"$${CHAT_IMAGES_EXPIRE_DAYS}"'}}]}' | mc ilm import local/"$${S3_CHAT_IMAGES_BUCKET_NAME}"
 
   loki:

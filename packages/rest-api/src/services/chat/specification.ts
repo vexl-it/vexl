@@ -43,8 +43,6 @@ import {
   RequestApprovalRequest,
   RequestApprovalResponse,
   RequestApprovalV2Request,
-  RequestChatImageDownloadRequest,
-  RequestChatImageDownloadResponse,
   RequestChatImageUploadRequest,
   RequestChatImageUploadResponse,
   RetrieveMessagesRequest,
@@ -246,15 +244,6 @@ export const RequestChatImageUploadEndpoint = HttpApiEndpoint.post(
   .addError(InvalidChallengeError, {status: 401})
   .annotate(MaxExpectedDailyCall, 500)
 
-export const RequestChatImageDownloadEndpoint = HttpApiEndpoint.post(
-  'requestChatImageDownload',
-  '/api/v1/chat-images/download'
-)
-  .setHeaders(CommonHeaders)
-  .setPayload(RequestChatImageDownloadRequest)
-  .addSuccess(RequestChatImageDownloadResponse)
-  .annotate(MaxExpectedDailyCall, 2000)
-
 const InboxesApiGroup = HttpApiGroup.make('Inboxes')
   .add(UpdateInboxEndpoint)
   .add(CreateInboxEndpoint)
@@ -274,9 +263,9 @@ const MessagesApiGroup = HttpApiGroup.make('Messages')
   .add(SendMessageEndpoint)
   .add(SendMessagesEndpoint)
 
-const ImagesApiGroup = HttpApiGroup.make('Images')
-  .add(RequestChatImageUploadEndpoint)
-  .add(RequestChatImageDownloadEndpoint)
+const ImagesApiGroup = HttpApiGroup.make('Images').add(
+  RequestChatImageUploadEndpoint
+)
 
 export const ChatApiSpecification = HttpApi.make('Chat API')
   .middleware(RateLimitingMiddleware)

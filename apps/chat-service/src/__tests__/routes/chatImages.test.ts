@@ -1,6 +1,5 @@
 import {HttpClient, HttpClientRequest} from '@effect/platform'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
-import {ChatImageId} from '@vexl-next/domain/src/general/messaging'
 import {InvalidChallengeError} from '@vexl-next/rest-api/src/challenges/contracts'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {
@@ -10,7 +9,6 @@ import {
 } from '@vexl-next/rest-api/src/services/chat/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {Effect, Schema} from 'effect'
-import {randomUUID} from 'node:crypto'
 import {addChallengeForKey} from '../utils/addChallengeForKey'
 import {
   commonHeaders,
@@ -115,24 +113,6 @@ describe('Chat images', () => {
         )
 
         expect(response.status).toBe(400)
-      })
-    )
-  })
-
-  it('Returns a download url for the image id', async () => {
-    await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
-        const imageId = Schema.decodeSync(ChatImageId)(randomUUID())
-
-        const {downloadUrl} = yield* _(
-          client.Images.requestChatImageDownload({
-            headers: commonHeaders,
-            payload: {imageId},
-          })
-        )
-
-        expect(downloadUrl).toContain(`key=${imageId}`)
       })
     )
   })

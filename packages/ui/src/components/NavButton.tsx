@@ -29,14 +29,23 @@ const NavButtonFrame = styled(Stack, {
   variants: {
     type: {
       icon: {
-        width: '$9',
-        height: '$9',
         padding: '$0',
       },
       text: {
-        height: '$9',
         paddingHorizontal: '$4',
         paddingVertical: '$0',
+      },
+    },
+
+    size: {
+      medium: {
+        height: '$9',
+        minWidth: '$9',
+      },
+      // Matches the SearchBar height, for buttons placed next to a search field.
+      large: {
+        height: '$10',
+        minWidth: '$10',
       },
     },
 
@@ -62,6 +71,7 @@ const NavButtonFrame = styled(Stack, {
   defaultVariants: {
     type: 'icon',
     variant: 'highlighted',
+    size: 'medium',
   },
 })
 

@@ -46,6 +46,24 @@ function Demos(): React.JSX.Element {
           <NavButton icon={BellNotification} disabled onPress={() => {}} />
         </XStack>
       </DemoSection>
+      <DemoSection title="Large size (next to a SearchBar)">
+        <XStack gap="$3">
+          <NavButton
+            variant="secondary"
+            size="large"
+            icon={BellNotification}
+            onPress={() => {}}
+          />
+          <NavButton
+            variant="normal"
+            size="large"
+            type="text"
+            onPress={() => {}}
+          >
+            Label
+          </NavButton>
+        </XStack>
+      </DemoSection>
       <DemoSection title="Text type">
         <XStack gap="$3" flexWrap="wrap">
           {pipe(

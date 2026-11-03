@@ -11,6 +11,7 @@ function FilterButton(): React.JSX.Element {
   return (
     <NavButton
       variant="secondary"
+      size="large"
       icon={TuneSettings}
       badge={isFilterActive}
       onPress={() => {

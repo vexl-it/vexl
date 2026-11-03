@@ -7,6 +7,9 @@ const MAX_CONTENT_WIDTH = 1280
 interface ComponentScreenLayoutProps {
   readonly title: string
   readonly demos: React.ComponentType
+  // For demos that scroll themselves (e.g. FlatList based): the columns fill
+  // the screen height instead of the page scrolling.
+  readonly fill?: boolean
 }
 
 export function DemoSection({
@@ -29,9 +32,11 @@ export function DemoSection({
 function ThemeColumn({
   themeName,
   demos: Demos,
+  fill,
 }: {
   readonly themeName: 'light' | 'dark'
   readonly demos: React.ComponentType
+  readonly fill: boolean
 }): React.JSX.Element {
   return (
     <Theme name={themeName}>
@@ -42,6 +47,7 @@ function ThemeColumn({
         backgroundColor="$backgroundPrimary"
         borderWidth={1}
         borderColor="$backgroundTertiary"
+        flex={fill ? 1 : undefined}
         $lg={{flex: 1, flexBasis: 0, minWidth: 0}}
       >
         <Typography variant="titlesSmall" color="$foregroundPrimary">
@@ -56,24 +62,35 @@ function ThemeColumn({
 export function ComponentScreenLayout({
   title,
   demos,
+  fill = false,
 }: ComponentScreenLayoutProps): React.JSX.Element {
-  return (
-    <ScrollView keyboardShouldPersistTaps="handled">
+  const content = (
+    <YStack
+      padding="$5"
+      gap="$5"
+      width="100%"
+      maxWidth={MAX_CONTENT_WIDTH}
+      alignSelf="center"
+      flex={fill ? 1 : undefined}
+    >
+      <Typography variant="tabLargeBold" color="$foregroundPrimary">
+        {title}
+      </Typography>
       <YStack
-        padding="$5"
         gap="$5"
-        width="100%"
-        maxWidth={MAX_CONTENT_WIDTH}
-        alignSelf="center"
+        flex={fill ? 1 : undefined}
+        $lg={{
+          flexDirection: 'row',
+          alignItems: fill ? 'stretch' : 'flex-start',
+        }}
       >
-        <Typography variant="tabLargeBold" color="$foregroundPrimary">
-          {title}
-        </Typography>
-        <YStack gap="$5" $lg={{flexDirection: 'row', alignItems: 'flex-start'}}>
-          <ThemeColumn themeName="light" demos={demos} />
-          <ThemeColumn themeName="dark" demos={demos} />
-        </YStack>
+        <ThemeColumn themeName="light" demos={demos} fill={fill} />
+        <ThemeColumn themeName="dark" demos={demos} fill={fill} />
       </YStack>
-    </ScrollView>
+    </YStack>
   )
+
+  if (fill) return content
+
+  return <ScrollView keyboardShouldPersistTaps="handled">{content}</ScrollView>
 }

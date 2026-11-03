@@ -6,7 +6,7 @@ Structure:
 
 Adding a new preview screen requires two changes:
 
-1. Create `screens/<ComponentName>Screen.tsx` showing all variants in light and dark themes side-by-side (wrap each column in `<Theme name="light">` / `<Theme name="dark">`).
+1. Create `screens/<ComponentName>Screen.tsx` that renders `<ComponentScreenLayout title="<label>" demos={Demos} />`. The layout renders `Demos` once per theme, light and dark side by side on wide screens. Group variants with `DemoSection`, write all text with `Typography`, and use theme tokens instead of hex colours. Keep demo state per instance (`useState(() => atom(...))`), because `Demos` mounts twice. Pass `fill` when the demo scrolls itself (FlatList based), so it is not nested in the page ScrollView.
 2. Add an entry to the `screens` array in `screens/index.ts`.
 
 Web:

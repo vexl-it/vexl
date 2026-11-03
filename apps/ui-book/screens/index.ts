@@ -36,6 +36,7 @@ import {EditRowScreen} from './EditRowScreen'
 import {EditStepScreen} from './EditStepScreen'
 import {EmptyStateScreen} from './EmptyStateScreen'
 import {EventCardScreen} from './EventCardScreen'
+import {ExchangeRevealCardScreen} from './ExchangeRevealCardScreen'
 import {ExchangeScreen} from './ExchangeScreen'
 import {ExpandToggleScreen} from './ExpandToggleScreen'
 import {FabButtonScreen} from './FabButtonScreen'
@@ -160,6 +161,7 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'Empty State', component: EmptyStateScreen},
   {label: 'Event Card', component: EventCardScreen},
   {label: 'Exchange', component: ExchangeScreen},
+  {label: 'Exchange Reveal Card', component: ExchangeRevealCardScreen},
   {label: 'Expand Toggle', component: ExpandToggleScreen},
   {label: 'Fab Button', component: FabButtonScreen},
   {label: 'Fade Gradient', component: FadeGradientScreen},

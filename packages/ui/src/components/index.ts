@@ -108,6 +108,11 @@ export type {
 } from './EventCard'
 export {Exchange} from './Exchange'
 export type {BtcUnit, ExchangeProps} from './Exchange'
+export {ExchangeRevealCard} from './ExchangeRevealCard'
+export type {
+  ExchangeRevealCardProps,
+  ExchangeRevealCardSide,
+} from './ExchangeRevealCard'
 export {ExpandToggle} from './ExpandToggle'
 export type {ExpandToggleProps} from './ExpandToggle'
 export {FabButton} from './FabButton'

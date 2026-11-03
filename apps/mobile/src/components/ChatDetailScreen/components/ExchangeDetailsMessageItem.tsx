@@ -1,5 +1,11 @@
 import {useNavigation} from '@react-navigation/native'
-import {Avatar, Button, ChatEventCard, XStack} from '@vexl-next/ui'
+import {
+  Avatar,
+  Button,
+  ChatEventCard,
+  ExchangeRevealCard,
+  XStack,
+} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {Effect} from 'effect/index'
 import {useAtomValue, useStore} from 'jotai'
@@ -25,10 +31,11 @@ import {
 import {getInternationalPhoneNumber} from '../../../utils/getInternationalPhoneNumber'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import resolveLocalUri from '../../../utils/resolveLocalUri'
+import {ProfileImageAvatar} from '../../ProfileImageAvatar'
 import {declineExchangeDetailsActionAtom} from '../../TradeChecklistFlow/atoms/exchangeDetailsAtoms'
 import {formatSelectedDetails} from '../../TradeChecklistFlow/components/ExchangeDetailsFlow/formatSelectedDetails'
 import {chatMolecule} from '../atoms'
-import RevealedInfoCard from './RevealedInfoCard'
+import {AddToContactsButton} from './AddToContactsButton'
 import useOpenExchangeDetails from './useOpenExchangeDetails'
 import VexlbotActionCard from './VexlbotMessageItem/components/VexlbotActionCard'
 
@@ -143,24 +150,29 @@ function OutcomeCard({event}: {event: RevealEvent}): React.ReactElement {
       ].join('\n')
 
   return (
-    <RevealedInfoCard
+    <ExchangeRevealCard
+      mx="$4"
+      mt="$4"
       title={t('messages.exchangeDetails.complete')}
       description={description}
-      contactName={otherSideData.userName}
-      fullPhoneNumber={theirFullPhoneNumber}
       leftSide={{
-        image: mine.photo ? myRealLifeInfo.image : myAnonymousInfo.image,
+        avatar: (
+          <ProfileImageAvatar
+            image={mine.photo ? myRealLifeInfo.image : myAnonymousInfo.image}
+            size="$13"
+          />
+        ),
         name: mine.nickname
           ? myRealLifeInfo.userName
           : myAnonymousInfo.userName,
-        phoneNumber: mine.phoneNumber
+        subtitle: mine.phoneNumber
           ? getInternationalPhoneNumber(myPhoneNumber)
           : anonymizePhoneNumber(myPhoneNumber),
       }}
       rightSide={{
-        image: otherSideData.image,
+        avatar: <ProfileImageAvatar image={otherSideImage} size="$13" />,
         name: otherSideData.userName,
-        phoneNumber: theirFullPhoneNumber
+        subtitle: theirFullPhoneNumber
           ? getInternationalPhoneNumber(theirFullPhoneNumber)
           : otherSideData.partialPhoneNumber,
         onAvatarPress:
@@ -172,6 +184,13 @@ function OutcomeCard({event}: {event: RevealEvent}): React.ReactElement {
               }
             : undefined,
       }}
+      footer={
+        <AddToContactsButton
+          fullPhoneNumber={theirFullPhoneNumber}
+          userImage={otherSideImage}
+          userName={otherSideData.userName}
+        />
+      }
     />
   )
 }

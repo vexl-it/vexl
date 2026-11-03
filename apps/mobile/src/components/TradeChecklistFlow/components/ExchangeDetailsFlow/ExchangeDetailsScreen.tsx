@@ -29,7 +29,7 @@ import {
 import {getInternationalPhoneNumber} from '../../../../utils/getInternationalPhoneNumber'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import resolveLocalUri from '../../../../utils/resolveLocalUri'
-import {AddToContactsButton} from '../../../ChatDetailScreen/components/RevealedInfoCard'
+import {AddToContactsButton} from '../../../ChatDetailScreen/components/AddToContactsButton'
 import {ProfileImageAvatar} from '../../../ProfileImageAvatar'
 import {
   availableDetailKeysAtom,

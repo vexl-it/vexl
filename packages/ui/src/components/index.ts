@@ -207,6 +207,13 @@ export type {
   SwipeableOfferCardMark,
   SwipeableOfferCardProps,
 } from './SwipeableOfferCard'
+export {SwipeAction, SwipeableRow} from './SwipeableRow'
+export type {
+  SwipeActionProps,
+  SwipeActionVariant,
+  SwipeableRowAction,
+  SwipeableRowProps,
+} from './SwipeableRow'
 export {Switch} from './Switch'
 export {SwitchCard} from './SwitchCard'
 export type {SwitchCardProps} from './SwitchCard'

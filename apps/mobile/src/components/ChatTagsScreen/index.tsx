@@ -7,6 +7,9 @@ import {
   Screen,
   SelectableItem,
   Stack,
+  SwipeableRow,
+  TrashBin,
+  Typography,
   useTheme,
   XmarkCancelClose,
   YStack,
@@ -20,10 +23,7 @@ import {
   useStore,
   type PrimitiveAtom,
 } from 'jotai'
-import React, {useCallback, useRef, useState} from 'react'
-import Swipeable, {
-  type SwipeableMethods,
-} from 'react-native-gesture-handler/ReanimatedSwipeable'
+import React, {useCallback, useState} from 'react'
 import {type RootStackScreenProps} from '../../navigationTypes'
 import {
   addChatTagActionAtom,
@@ -42,7 +42,6 @@ import {
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import {globalDialogAtom} from '../GlobalDialog'
-import ChatListItemRightSwipeActions from '../InsideRouter/components/MessagesScreen/components/ChatListItemRightSwipeActions'
 
 function NewTagInput({
   valueAtom,
@@ -89,19 +88,16 @@ function TagSelectionRow({
   readonly onSelectedChange: () => void
   readonly onDelete: () => void
 }): React.ReactElement {
-  const swipeableRef = useRef<SwipeableMethods>(null)
+  const {t} = useTranslation()
 
   return (
-    <Swipeable
-      ref={swipeableRef}
-      renderRightActions={() => (
-        <ChatListItemRightSwipeActions
-          onPress={() => {
-            swipeableRef.current?.close()
-            onDelete()
-          }}
-        />
-      )}
+    <SwipeableRow
+      rightAction={{
+        icon: TrashBin,
+        label: t('common.delete'),
+        variant: 'destructive',
+        onPress: onDelete,
+      }}
     >
       <Stack backgroundColor="$backgroundPrimary">
         <SelectableItem
@@ -111,7 +107,7 @@ function TagSelectionRow({
           onPress={onSelectedChange}
         />
       </Stack>
-    </Swipeable>
+    </SwipeableRow>
   )
 }
 

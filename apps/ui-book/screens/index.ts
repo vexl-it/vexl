@@ -80,6 +80,7 @@ import {SelectorScreen} from './SelectorScreen'
 import {StarRatingScreen} from './StarRatingScreen'
 import {StepperCheckScreen} from './StepperCheckScreen'
 import {SwipeableOfferCardScreen} from './SwipeableOfferCardScreen'
+import {SwipeableRowScreen} from './SwipeableRowScreen'
 import {SwitchCardScreen} from './SwitchCardScreen'
 import {SwitchScreen} from './SwitchScreen'
 import {TabBarScreen} from './TabBarScreen'
@@ -187,6 +188,7 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'Star Rating', component: StarRatingScreen},
   {label: 'Stepper Check', component: StepperCheckScreen},
   {label: 'Swipeable Offer Card', component: SwipeableOfferCardScreen},
+  {label: 'Swipeable Row', component: SwipeableRowScreen},
   {label: 'Switch', component: SwitchScreen},
   {label: 'Switch Card', component: SwitchCardScreen},
   {label: 'Tab Bar', component: TabBarScreen},

@@ -2,14 +2,14 @@ import {useNavigation} from '@react-navigation/native'
 import {
   ChatMessageItem,
   Stack,
+  SwipeableRow,
+  TagLabel,
+  TrashBin,
   type ChatMessageItemVariant,
 } from '@vexl-next/ui'
 import {useAtomValue, useSetAtom, type Atom} from 'jotai'
 import {selectAtom} from 'jotai/utils'
-import React, {useMemo, useRef} from 'react'
-import Swipeable, {
-  type SwipeableMethods,
-} from 'react-native-gesture-handler/ReanimatedSwipeable'
+import React, {useMemo} from 'react'
 import selectOtherSideDataAtom from '../../../../../state/chat/atoms/selectOtherSideDataAtom'
 import {createIsOtherSideTypingAtom} from '../../../../../state/chat/atoms/typingIndication'
 import {
@@ -28,8 +28,6 @@ import formatChatTime from '../../../../ChatDetailScreen/utils/formatChatTime'
 import {ProfileImageAvatar} from '../../../../ProfileImageAvatar'
 import {deleteChatFromListActionAtom} from '../atoms'
 import {getMessagePreviewText} from '../utils/getMessagePreviewText'
-import ChatListItemLeftSwipeActions from './ChatListItemLeftSwipeActions'
-import ChatListItemRightSwipeActions from './ChatListItemRightSwipeActions'
 
 export interface ChatListData {
   chat: ChatWithMessages
@@ -44,7 +42,6 @@ function ChatListItem({
 }): React.ReactElement {
   const {t} = useTranslation()
   const locale = useAtomValue(formattingLocaleAtom)
-  const swipeableRef = useRef<SwipeableMethods>(null)
   const navigation = useNavigation()
 
   const {
@@ -122,53 +119,50 @@ function ChatListItem({
   )
 
   return (
-    <Stack>
-      <Swipeable
-        ref={swipeableRef}
-        renderLeftActions={() => (
-          <ChatListItemLeftSwipeActions
-            onPress={() => {
-              swipeableRef.current?.close()
-              navigation.navigate('ChatTags', {chatId: chatInfo.id})
-            }}
-          />
-        )}
-        renderRightActions={() => (
-          <ChatListItemRightSwipeActions
-            onPress={() => {
-              void deleteChatFromList({
-                otherSideKey: chatInfo.otherSide.publicKey,
-                inboxKey: chatInfo.inbox.privateKey.publicKeyPemBase64,
-                skipAsk: otherSideLeft,
-              })
-              swipeableRef.current?.close()
-            }}
-          />
-        )}
-      >
-        <Stack paddingHorizontal="$5" backgroundColor="$backgroundPrimary">
-          <ChatMessageItem
-            avatar={
-              <ProfileImageAvatar
-                grayscale={otherSideLeft}
-                image={userAvatar}
-                size="$9"
-              />
-            }
-            name={displayName}
-            message={preview.text}
-            time={time}
-            unread={isUnread}
-            variant={preview.variant}
-            isTyping={isTyping}
-            tags={tagLabels}
-            onPress={() => {
-              navigation.navigate('ChatDetail', chatDetailRouteParams(chatInfo))
-            }}
-          />
-        </Stack>
-      </Swipeable>
-    </Stack>
+    <SwipeableRow
+      leftAction={{
+        icon: TagLabel,
+        label: t('messages.tags.action'),
+        variant: 'success',
+        onPress: () => {
+          navigation.navigate('ChatTags', {chatId: chatInfo.id})
+        },
+      }}
+      rightAction={{
+        icon: TrashBin,
+        label: t('common.delete'),
+        variant: 'destructive',
+        onPress: () => {
+          void deleteChatFromList({
+            otherSideKey: chatInfo.otherSide.publicKey,
+            inboxKey: chatInfo.inbox.privateKey.publicKeyPemBase64,
+            skipAsk: otherSideLeft,
+          })
+        },
+      }}
+    >
+      <Stack paddingHorizontal="$5" backgroundColor="$backgroundPrimary">
+        <ChatMessageItem
+          avatar={
+            <ProfileImageAvatar
+              grayscale={otherSideLeft}
+              image={userAvatar}
+              size="$9"
+            />
+          }
+          name={displayName}
+          message={preview.text}
+          time={time}
+          unread={isUnread}
+          variant={preview.variant}
+          isTyping={isTyping}
+          tags={tagLabels}
+          onPress={() => {
+            navigation.navigate('ChatDetail', chatDetailRouteParams(chatInfo))
+          }}
+        />
+      </Stack>
+    </SwipeableRow>
   )
 }
 

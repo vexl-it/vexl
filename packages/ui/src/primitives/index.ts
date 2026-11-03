@@ -19,5 +19,6 @@ export {
   XStack,
   YStack,
   ZStack,
+  getTokens,
   useTheme,
 } from 'tamagui'

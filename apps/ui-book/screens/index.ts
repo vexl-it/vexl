@@ -66,6 +66,7 @@ import {PickerScreen} from './PickerScreen'
 import {PriceRangeInputScreen} from './PriceRangeInputScreen'
 import {ProgressBarScreen} from './ProgressBarScreen'
 import {ProgressDialogScreen} from './ProgressDialogScreen'
+import {QrCodeFrameScreen} from './QrCodeFrameScreen'
 import {QrScannerOverlayScreen} from './QrScannerOverlayScreen'
 import {RadioGroupScreen} from './RadioGroupScreen'
 import {RangeSliderScreen} from './RangeSliderScreen'
@@ -75,6 +76,7 @@ import {RowButtonScreen} from './RowButtonScreen'
 import {RowCheckboxScreen} from './RowCheckboxScreen'
 import {RowRadiobuttonScreen} from './RowRadiobuttonScreen'
 import {ScreenScreen} from './ScreenScreen'
+import {SearchableSelectListScreen} from './SearchableSelectListScreen'
 import {SearchBarScreen} from './SearchBarScreen'
 import {SectionHeaderScreen} from './SectionHeaderScreen'
 import {SegmentedPickerScreen} from './SegmentedPickerScreen'
@@ -181,6 +183,7 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'Price Range Input', component: PriceRangeInputScreen},
   {label: 'Progress Bar', component: ProgressBarScreen},
   {label: 'Progress Dialog', component: ProgressDialogScreen},
+  {label: 'QR Code Frame', component: QrCodeFrameScreen},
   {label: 'QR Scanner Overlay', component: QrScannerOverlayScreen},
   {label: 'Radio Group', component: RadioGroupScreen},
   {label: 'Range Slider', component: RangeSliderScreen},
@@ -191,6 +194,7 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'Row Radiobutton', component: RowRadiobuttonScreen},
   {label: 'Screen', component: ScreenScreen},
   {label: 'Search Bar', component: SearchBarScreen},
+  {label: 'Searchable Select List', component: SearchableSelectListScreen},
   {label: 'Section Header', component: SectionHeaderScreen},
   {label: 'Segmented Picker', component: SegmentedPickerScreen},
   {label: 'Selectable Item', component: SelectableItemScreen},

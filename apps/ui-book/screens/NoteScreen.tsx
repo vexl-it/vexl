@@ -103,6 +103,16 @@ function ThemeGroup({
           message="Looking to buy sats with Revolut. Quick and easy trade preferred."
           onPress={() => {}}
         />
+
+        <SectionLabel>Preview variant</SectionLabel>
+        <Note
+          variant="preview"
+          avatar={<SvgAvatar />}
+          name="Friend of friend"
+          commonFriends="5 common friends"
+          expiration="expires in 1 day"
+          message="Looking to buy sats with Revolut. Quick and easy trade preferred."
+        />
       </YStack>
     </Theme>
   )

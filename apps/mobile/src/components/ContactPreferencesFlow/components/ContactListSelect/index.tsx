@@ -5,6 +5,7 @@ import {
   LoadingOverlay,
   Stack,
   Typography,
+  useKeyboardAwareFooterListPadding,
   XStack,
   type TabItem,
 } from '@vexl-next/ui'
@@ -15,7 +16,6 @@ import React, {useMemo} from 'react'
 import {type LayoutChangeEvent} from 'react-native'
 import {type ContactsFilter} from '../../../../state/contacts/domain'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
-import {useKeyboardAwareFooterListPadding} from '../../../../utils/useKeyboardAwareFooterListPadding'
 import {contactSelectMolecule} from './atom'
 import ContactsAccessPrivilegesInfoBanner from './components/ContactsAccessPrivilegesInfoBanner'
 import ContactsFilterBar from './components/ContactsFilterBar'

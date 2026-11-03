@@ -4,6 +4,7 @@ import {styled, useTheme} from 'tamagui'
 import {type IconProps} from '../icons/types'
 import {XStack, YStack} from '../primitives'
 import {CardButton} from './CardButton'
+import {TEXT_AREA_MIN_HEIGHT} from './LabeledTextArea'
 import {NoteMeta} from './NoteMeta'
 import {TwoToneCard} from './TwoToneCard'
 import {Typography} from './Typography'
@@ -19,6 +20,8 @@ export interface NoteActionButton {
 }
 
 export interface NoteProps {
+  /** `preview` shows the full message in a larger font, e.g. above a reply input. */
+  readonly variant?: 'card' | 'preview'
   readonly avatar: React.ReactNode
   readonly name?: string
   readonly commonFriends?: string
@@ -44,6 +47,7 @@ const HeaderFrame = styled(XStack, {
 })
 
 export function Note({
+  variant = 'card',
   avatar,
   name,
   commonFriends,
@@ -58,6 +62,7 @@ export function Note({
   const theme = useTheme()
   const iconColor = theme.foregroundSecondary.get()
   const TagIcon = tag?.icon
+  const isPreview = variant === 'preview'
 
   return (
     <TwoToneCard onPress={onPress}>
@@ -86,10 +91,13 @@ export function Note({
           </YStack>
         </HeaderFrame>
       </TwoToneCard.Header>
-      <TwoToneCard.Content gap="$3">
+      <TwoToneCard.Content
+        gap="$3"
+        minHeight={isPreview ? TEXT_AREA_MIN_HEIGHT : undefined}
+      >
         <Typography
-          variant="description"
-          color="$foregroundSecondary"
+          variant={isPreview ? 'paragraph' : 'description'}
+          color={isPreview ? '$foregroundPrimary' : '$foregroundSecondary'}
           numberOfLines={messageNumberOfLines}
           ellipsizeMode={messageNumberOfLines ? 'tail' : undefined}
         >

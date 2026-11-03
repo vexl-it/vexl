@@ -1,18 +1,10 @@
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
+import {Stack, type QrCodeSvgRef} from '@vexl-next/ui'
 import {File, Paths} from 'expo-file-system'
 import {shareAsync} from 'expo-sharing'
-import React, {useCallback, useImperativeHandle, useRef} from 'react'
+import React, {useCallback, useRef} from 'react'
 import {TouchableWithoutFeedback} from 'react-native'
 import SvgQRCode from 'react-native-qrcode-svg'
-import {Stack} from 'tamagui'
-
-export interface SharableQrCodeHandle {
-  readonly generateBase64File: () => void
-}
-
-interface SvgQRCodeRef {
-  readonly toDataURL: (callback: (url: string) => void) => void
-}
 
 const saveAndShareBase64Strig = async (base64String: string): Promise<void> => {
   const cacheDirectory = Paths.cache
@@ -23,15 +15,19 @@ const saveAndShareBase64Strig = async (base64String: string): Promise<void> => {
   await shareAsync(file.uri)
 }
 
-function SharableQrCodeComponent(
-  props: Omit<React.ComponentProps<typeof SvgQRCode>, 'getRef'>,
-  ref: React.ForwardedRef<SharableQrCodeHandle>
-): React.ReactElement {
-  const svgRef = useRef<SvgQRCodeRef | null>(null)
+export function useQrCodeSharing(): {
+  readonly getRef: (ref: QrCodeSvgRef | null) => void
+  readonly share: () => void
+} {
+  const svgRef = useRef<QrCodeSvgRef | null>(null)
+
+  const getRef = useCallback((ref: QrCodeSvgRef | null) => {
+    svgRef.current = ref
+  }, [])
 
   // This really does not matter if it fails. It's a nice feature to have
   // but not really worth the edgecase refining
-  const generateBase64File = useCallback(() => {
+  const share = useCallback(() => {
     if (!svgRef.current) return // If it fails it fails IDK...
     try {
       svgRef.current.toDataURL((url: string) => {
@@ -49,19 +45,19 @@ function SharableQrCodeComponent(
     }
   }, [])
 
-  useImperativeHandle(ref, () => ({generateBase64File}), [generateBase64File])
+  return {getRef, share}
+}
+
+export function SharableQrCode(
+  props: Omit<React.ComponentProps<typeof SvgQRCode>, 'getRef'>
+): React.ReactElement {
+  const {getRef, share} = useQrCodeSharing()
 
   return (
-    <TouchableWithoutFeedback
-      onPress={() => {
-        generateBase64File()
-      }}
-    >
+    <TouchableWithoutFeedback onPress={share}>
       <Stack>
-        <SvgQRCode {...props} getRef={(c) => (svgRef.current = c)} />
+        <SvgQRCode {...props} getRef={getRef} />
       </Stack>
     </TouchableWithoutFeedback>
   )
 }
-
-export const SharableQrCode = React.forwardRef(SharableQrCodeComponent)

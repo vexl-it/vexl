@@ -3,16 +3,15 @@ import {useNavigation} from '@react-navigation/native'
 import {
   Button,
   EmptyState,
+  getTokens,
   Rejected,
   Screen,
-  ScrollView,
   useTheme,
   YStack,
 } from '@vexl-next/ui'
 import {Effect} from 'effect'
 import {useSetAtom} from 'jotai'
 import React from 'react'
-import {getTokens} from 'tamagui'
 import {type DonationsFlowScreenProps} from '../../navigationTypes'
 import {type MyDonation} from '../../state/donations/domain'
 import {useTranslation} from '../../utils/localization/I18nProvider'
@@ -26,13 +25,11 @@ import {
 import {DonationDetailTitleRow} from './DonationDetailTitleRow'
 
 export function InvalidDonationDetails({
-  footerHeight,
   title,
   donation,
   summary,
   expiredAt,
 }: {
-  readonly footerHeight: number
   readonly title: string
   readonly donation: MyDonation | undefined
   readonly summary: DonationSummaryData
@@ -58,6 +55,7 @@ export function InvalidDonationDetails({
 
   return (
     <Screen
+      scrollable
       navigationBar={
         <DonationDetailsNavigationBar title={t('donations.detail.title')} />
       }
@@ -67,37 +65,29 @@ export function InvalidDonationDetails({
         </Button>
       }
     >
-      <ScrollView
-        flex={1}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{
-          paddingBottom: footerHeight + tokens.space.$5.val,
-        }}
-      >
-        <YStack gap="$5">
-          <DonationDetailTitleRow title={title} status="Invalid" />
-          <EmptyState
-            framed
-            graphic={
-              <Rejected
-                size={tokens.size.$12.val}
-                color={theme.redForeground.get()}
-              />
-            }
-            title={t('donations.detail.paymentFailedTitle')}
-            description={`${t('donations.detail.paymentFailedDescriptionFirstLine')}\n${t('donations.detail.paymentFailedDescriptionSecondLine')}`}
-          />
-          <DonationSummaryCard
-            summary={summary}
-            finalTimestampLabel={t('donationPrompt.expiredAt')}
-            finalTimestampValue={expiredAt}
-            onCopyInvoiceId={() => {
-              Clipboard.setString(summary.invoiceId)
-              setToastNotification(t('donations.copiedToClipboard'))
-            }}
-          />
-        </YStack>
-      </ScrollView>
+      <YStack gap="$5">
+        <DonationDetailTitleRow title={title} status="Invalid" />
+        <EmptyState
+          framed
+          graphic={
+            <Rejected
+              size={tokens.size.$12.val}
+              color={theme.redForeground.get()}
+            />
+          }
+          title={t('donations.detail.paymentFailedTitle')}
+          description={`${t('donations.detail.paymentFailedDescriptionFirstLine')}\n${t('donations.detail.paymentFailedDescriptionSecondLine')}`}
+        />
+        <DonationSummaryCard
+          summary={summary}
+          finalTimestampLabel={t('donationPrompt.expiredAt')}
+          finalTimestampValue={expiredAt}
+          onCopyInvoiceId={() => {
+            Clipboard.setString(summary.invoiceId)
+            setToastNotification(t('donations.copiedToClipboard'))
+          }}
+        />
+      </YStack>
     </Screen>
   )
 }

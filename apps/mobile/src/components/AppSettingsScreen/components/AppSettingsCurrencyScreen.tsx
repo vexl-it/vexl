@@ -1,50 +1,29 @@
 import {useFocusEffect} from '@react-navigation/native'
-import {FlashList} from '@shopify/flash-list'
 import {type CurrencyInfo} from '@vexl-next/domain/src/general/currency.brand'
 import {
   Button,
-  EmptyState,
   NavigationBar,
   Screen,
-  SearchBar,
-  SelectableItem,
+  SearchableSelectList,
   XmarkCancelClose,
 } from '@vexl-next/ui'
-import {Array} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useState} from 'react'
 import {type AppSettingsStackScreenProps} from '../../../navigationTypes'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {defaultCurrencyAtom} from '../../../utils/preferences'
-import {useKeyboardAwareFooterListPadding} from '../../../utils/useKeyboardAwareFooterListPadding'
 import {
   appSettingsCurrenciesToDisplayAtom,
   appSettingsCurrencySearchTextAtom,
   type AppSettingsCurrencyCode,
 } from '../atoms'
 
-function CurrencyList({
-  currenciesToDisplay,
-  renderItem,
-}: {
-  readonly currenciesToDisplay: readonly CurrencyInfo[]
-  readonly renderItem: (props: {
-    readonly item: CurrencyInfo
-  }) => React.ReactElement
-}): React.ReactElement {
-  const listPaddingBottom = useKeyboardAwareFooterListPadding()
+function currencyCode(item: CurrencyInfo): string {
+  return item.code
+}
 
-  return (
-    <FlashList
-      data={currenciesToDisplay}
-      renderItem={renderItem}
-      keyExtractor={(item) => item.code}
-      showsVerticalScrollIndicator={false}
-      contentContainerStyle={{
-        paddingBottom: listPaddingBottom,
-      }}
-    />
-  )
+function currencyNote(item: CurrencyInfo): string {
+  return `${item.code} / ${item.symbol}`
 }
 
 function AppSettingsCurrencyScreen({
@@ -74,19 +53,14 @@ function AppSettingsCurrencyScreen({
     }, [defaultCurrency, setSearchText])
   )
 
-  const renderItem = useCallback(
-    ({item}: {readonly item: CurrencyInfo}) => (
-      <SelectableItem
-        label={`${item.flag} ${t(`currency.${item.code}`)}`}
-        note={`${item.code} / ${item.symbol}`}
-        selected={item.code === tempSelection}
-        onPress={() => {
-          setTempSelection(item.code)
-        }}
-      />
-    ),
-    [t, tempSelection]
+  const getLabel = useCallback(
+    (item: CurrencyInfo) => `${item.flag} ${t(`currency.${item.code}`)}`,
+    [t]
   )
+
+  const selectCurrency = useCallback((item: CurrencyInfo) => {
+    setTempSelection(item.code)
+  }, [])
 
   return (
     <Screen
@@ -104,22 +78,18 @@ function AppSettingsCurrencyScreen({
       }
       footer={<Button onPress={save}>{t('common.save')}</Button>}
     >
-      <SearchBar
-        valueAtom={appSettingsCurrencySearchTextAtom}
-        placeholder={t('common.search')}
-        marginBottom="$4"
+      <SearchableSelectList
+        items={currenciesToDisplay}
+        keyExtractor={currencyCode}
+        getLabel={getLabel}
+        getNote={currencyNote}
+        selectedKey={tempSelection}
+        onSelect={selectCurrency}
+        searchValueAtom={appSettingsCurrencySearchTextAtom}
+        searchPlaceholder={t('common.search')}
+        emptyTitle={t('common.nothingFound')}
+        emptyDescription={t('changeCurrency.trySearchingByCurrencyName')}
       />
-      {Array.isNonEmptyArray(currenciesToDisplay) ? (
-        <CurrencyList
-          currenciesToDisplay={currenciesToDisplay}
-          renderItem={renderItem}
-        />
-      ) : (
-        <EmptyState
-          title={t('common.nothingFound')}
-          description={t('changeCurrency.trySearchingByCurrencyName')}
-        />
-      )}
     </Screen>
   )
 }

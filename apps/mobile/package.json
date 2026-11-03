@@ -73,7 +73,6 @@
     "expo-haptics": "~57.0.1",
     "expo-image-picker": "~57.0.12",
     "expo-installation-source": "^0.1.1",
-    "expo-linear-gradient": "~57.0.1",
     "expo-linking": "~57.0.7",
     "expo-localization": "~57.0.1",
     "expo-navigation-bar": "~57.0.2",

@@ -5,19 +5,16 @@ import {
   Copy,
   DetailsCard,
   Download,
+  QrCodeFrame,
   Screen,
-  ScrollView,
-  Stack,
   Typography,
-  useTheme,
   YStack,
 } from '@vexl-next/ui'
 import {useSetAtom} from 'jotai'
 import React from 'react'
-import {getTokens} from 'tamagui'
 import {type DonationsFlowScreenProps} from '../../navigationTypes'
 import {useTranslation} from '../../utils/localization/I18nProvider'
-import {SharableQrCode, type SharableQrCodeHandle} from '../SharableQrCode'
+import {useQrCodeSharing} from '../SharableQrCode'
 import {toastNotificationAtom} from '../ToastNotification/atom'
 import {
   DonationSummaryCard,
@@ -27,15 +24,12 @@ import {
 import {DonationDetailsNavigationBar} from './DonationDetailsNavigationBar'
 
 const QR_CODE_SIZE = 300
-const QR_CODE_BORDER_WIDTH = 2
 
 export function NewDonationDetails({
-  footerHeight,
   paymentLink,
   isLightning,
   summary,
 }: {
-  readonly footerHeight: number
   readonly paymentLink: string
   readonly isLightning: boolean
   readonly summary: DonationSummaryData
@@ -43,9 +37,7 @@ export function NewDonationDetails({
   const {t} = useTranslation()
   const navigation =
     useNavigation<DonationsFlowScreenProps<'DonationDetails'>['navigation']>()
-  const theme = useTheme()
-  const tokens = getTokens()
-  const qrCodeRef = React.useRef<SharableQrCodeHandle>(null)
+  const {getRef: getQrCodeRef, share: shareQrCode} = useQrCodeSharing()
   const setToastNotification = useSetAtom(toastNotificationAtom)
   const paymentLabel = isLightning
     ? t('offerForm.network.lightning')
@@ -53,6 +45,7 @@ export function NewDonationDetails({
 
   return (
     <Screen
+      scrollable
       navigationBar={
         <DonationDetailsNavigationBar title={t('donations.completePayment')} />
       }
@@ -62,80 +55,56 @@ export function NewDonationDetails({
         </Button>
       }
     >
-      <ScrollView
-        flex={1}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{
-          paddingBottom: footerHeight + tokens.space.$5.val,
-        }}
-      >
-        <YStack gap="$5">
-          <DonationSummaryCard summary={summary} />
+      <YStack gap="$5">
+        <DonationSummaryCard summary={summary} />
 
-          <DetailsCard>
-            <Stack
-              width={QR_CODE_SIZE + QR_CODE_BORDER_WIDTH * 2}
-              height={QR_CODE_SIZE + QR_CODE_BORDER_WIDTH * 2}
-              alignItems="center"
-              justifyContent="center"
-              backgroundColor="$white100"
-              borderColor="$white100"
-              borderRadius="$3"
-              borderWidth={QR_CODE_BORDER_WIDTH}
-              overflow="hidden"
-              alignSelf="center"
-            >
-              <SharableQrCode
-                ref={qrCodeRef}
-                size={QR_CODE_SIZE}
-                value={paymentLink}
-                logo={
-                  isLightning
-                    ? require('../images/lightningLogo.png')
-                    : require('../images/btcLogo.png')
-                }
-                logoSize={tokens.size.$11.val}
-                logoBackgroundColor={theme.gradientHelper.get()}
-                ecl="H"
-              />
-            </Stack>
-            <Button
-              size="small"
-              variant="secondary"
-              width="100%"
-              icon={Download}
-              onPress={() => {
-                qrCodeRef.current?.generateBase64File()
-              }}
-            >
-              {t('donations.downloadImage')}
-            </Button>
-          </DetailsCard>
+        <DetailsCard>
+          <QrCodeFrame
+            size={QR_CODE_SIZE}
+            value={paymentLink}
+            logo={
+              isLightning
+                ? require('../images/lightningLogo.png')
+                : require('../images/btcLogo.png')
+            }
+            ecl="H"
+            getRef={getQrCodeRef}
+            onPress={shareQrCode}
+          />
+          <Button
+            size="small"
+            variant="secondary"
+            width="100%"
+            icon={Download}
+            onPress={shareQrCode}
+          >
+            {t('donations.downloadImage')}
+          </Button>
+        </DetailsCard>
 
-          <DetailsCard>
-            <YStack gap="$2">
-              <Typography variant="micro" color="$foregroundSecondary">
-                {paymentLabel}
-              </Typography>
-              <Typography variant="descriptionBold" color="$foregroundPrimary">
-                {paymentLink}
-              </Typography>
-            </YStack>
-            <Button
-              size="small"
-              variant="secondary"
-              width="100%"
-              icon={Copy}
-              onPress={() => {
-                Clipboard.setString(paymentLink)
-                setToastNotification(t('donations.copiedToClipboard'))
-              }}
-            >
-              {t('common.copy')}
-            </Button>
-          </DetailsCard>
-        </YStack>
-      </ScrollView>
+        <DetailsCard>
+          <YStack gap="$2">
+            <Typography variant="micro" color="$foregroundSecondary">
+              {paymentLabel}
+            </Typography>
+            <Typography variant="descriptionBold" color="$foregroundPrimary">
+              {paymentLink}
+            </Typography>
+          </YStack>
+          <Button
+            size="small"
+            variant="secondary"
+            width="100%"
+            icon={Copy}
+            onPress={() => {
+              Clipboard.setString(paymentLink)
+              setToastNotification(t('donations.copiedToClipboard'))
+            }}
+          >
+            {t('common.copy')}
+          </Button>
+        </DetailsCard>
+      </YStack>
     </Screen>
   )
 }

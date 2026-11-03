@@ -12,18 +12,18 @@ import {
   SearchBar,
   SelectableItem,
   XmarkCancelClose,
+  useKeyboardAwareFooterListPadding,
 } from '@vexl-next/ui'
 import {Array} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react'
 import {type RootStackScreenProps} from '../../navigationTypes'
 import {useTranslation} from '../../utils/localization/I18nProvider'
-import {useKeyboardAwareFooterListPadding} from '../../utils/useKeyboardAwareFooterListPadding'
 import {
   changeCurrenciesToDisplayAtom,
-  type ChangeCurrencyConfig,
   changeCurrencyConfigAtom,
   changeCurrencySearchTextAtom,
+  type ChangeCurrencyConfig,
 } from './atoms'
 
 const CurrencyItem = React.memo(function CurrencyItem({

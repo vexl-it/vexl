@@ -1,23 +1,35 @@
 import {type OneNoteInState} from '@vexl-next/domain/src/general/notes'
-import {TEXT_AREA_MIN_HEIGHT, TwoToneCard, Typography} from '@vexl-next/ui'
+import {Note} from '@vexl-next/ui'
 import React from 'react'
-import {NoteInfoHeader} from './NoteInfoHeader'
+import {randomSeedFromNote} from '../../utils/RandomSeed'
+import {AnonymousAvatarOrClubImage} from '../AnonymousAvatar'
+import {useNoteDisplayData} from './useNoteDisplayData'
+
+const AVATAR_SIZE = 40
 
 interface Props {
   readonly note: OneNoteInState
 }
 
 export function NotePreview({note}: Props): React.JSX.Element {
+  const {tierLabel, commonFriendsText, trustedFriendsText, expiryText} =
+    useNoteDisplayData(note)
+
   return (
-    <TwoToneCard gap="$2">
-      <TwoToneCard.Header>
-        <NoteInfoHeader note={note} />
-      </TwoToneCard.Header>
-      <TwoToneCard.Content minHeight={TEXT_AREA_MIN_HEIGHT}>
-        <Typography variant="paragraph" color="$foregroundPrimary">
-          {note.noteInfo.publicPart.text}
-        </Typography>
-      </TwoToneCard.Content>
-    </TwoToneCard>
+    <Note
+      variant="preview"
+      avatar={
+        <AnonymousAvatarOrClubImage
+          grayScale={false}
+          customSize={AVATAR_SIZE}
+          seed={randomSeedFromNote(note)}
+        />
+      }
+      name={tierLabel}
+      commonFriends={commonFriendsText}
+      trustedFriends={trustedFriendsText}
+      expiration={expiryText}
+      message={note.noteInfo.publicPart.text}
+    />
   )
 }

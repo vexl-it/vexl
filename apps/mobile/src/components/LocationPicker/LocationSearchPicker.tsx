@@ -7,6 +7,7 @@ import {
   Screen,
   SearchBar,
   Typography,
+  useKeyboardAwareFooterListPadding,
 } from '@vexl-next/ui'
 import {ChevronLeft} from '@vexl-next/ui/src/icons'
 import {YStack} from '@vexl-next/ui/src/primitives'
@@ -19,7 +20,6 @@ import {debounce} from 'tamagui'
 import {type RootStackParamsList} from '../../navigationTypes'
 import atomKeyExtractor from '../../utils/atomUtils/atomKeyExtractor'
 import {useTranslation} from '../../utils/localization/I18nProvider'
-import {useKeyboardAwareFooterListPadding} from '../../utils/useKeyboardAwareFooterListPadding'
 import {
   LocationSearchMolecule,
   LocationSearchScope,

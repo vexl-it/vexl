@@ -1,7 +1,8 @@
-import {useScreenFooterHeight} from '@vexl-next/ui'
 import {useAtomValue} from 'jotai'
 import {useKeyboardState} from 'react-native-keyboard-controller'
 import {getTokens} from 'tamagui'
+
+import {useScreenFooterHeight} from './Screen'
 
 interface Options {
   readonly footerHeight?: number

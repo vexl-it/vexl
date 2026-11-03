@@ -1,9 +1,9 @@
 import {Array, pipe} from 'effect'
 import React from 'react'
-import {styled} from 'tamagui'
 
 import {PeopleUsers} from '../icons/PeopleUsers'
-import {Circle, XStack} from '../primitives'
+import {XStack} from '../primitives'
+import {DotSeparatedRow} from './DotSeparatedRow'
 import {IconLabel} from './IconLabel'
 import {TrustBadge} from './TrustBadge'
 import {Typography} from './Typography'
@@ -13,14 +13,6 @@ export interface CommonFriendsSummaryProps {
   readonly commonFriends?: string
   readonly trustedFriends?: string
 }
-
-const SummaryFrame = styled(XStack, {
-  name: 'CommonFriendsSummary',
-  gap: '$2',
-  alignItems: 'center',
-  flexShrink: 1,
-  minWidth: 0,
-})
 
 export function CommonFriendsSummary({
   clubNames = [],
@@ -83,22 +75,8 @@ export function CommonFriendsSummary({
   if (!Array.isNonEmptyArray(parts)) return null
 
   return (
-    <SummaryFrame>
-      {pipe(
-        parts,
-        Array.map((part, index) => (
-          <React.Fragment key={index}>
-            {index > 0 ? (
-              <Circle
-                size="$2"
-                backgroundColor="$foregroundSecondary"
-                flexShrink={0}
-              />
-            ) : null}
-            {part}
-          </React.Fragment>
-        ))
-      )}
-    </SummaryFrame>
+    <DotSeparatedRow flexShrink={1} minWidth={0}>
+      {parts}
+    </DotSeparatedRow>
   )
 }

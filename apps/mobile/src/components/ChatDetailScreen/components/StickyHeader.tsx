@@ -1,17 +1,10 @@
 import {useNavigation} from '@react-navigation/native'
-import {
-  InfoCircle,
-  NavButton,
-  Typography,
-  XmarkCancelClose,
-  XStack,
-  YStack,
-} from '@vexl-next/ui'
+import {ChatContextBar, InfoCircle, XmarkCancelClose} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
+import {Array, Option, pipe} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useMemo} from 'react'
 import {type GestureResponderEvent} from 'react-native'
-import {Stack} from 'tamagui'
 import {type RootStackScreenProps} from '../../../navigationTypes'
 import isNoteChatOrigin from '../../../state/chat/utils/isNoteChatOrigin'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
@@ -177,152 +170,59 @@ function StickyHeader(): React.ReactElement | null {
   }, [getCompactLabelForLocations, offer])
 
   const offerLanguageFlags = useMemo(() => {
-    if (!offer) return []
+    if (!offer) return null
 
-    const result: string[] = []
-
-    for (const language of offer.offerInfo.publicPart.spokenLanguages) {
-      const countryCode = languageToFlagMap[language]
-
-      if (countryCode) {
-        result.push(countryCodeToFlagEmoji(countryCode))
-      }
-    }
-
-    return result
+    return pipe(
+      offer.offerInfo.publicPart.spokenLanguages,
+      Array.filterMap((language) =>
+        Option.fromNullable(languageToFlagMap[language])
+      ),
+      Array.map(countryCodeToFlagEmoji),
+      Array.join(' ')
+    )
   }, [offer])
 
-  const offerMetadata = useMemo(() => {
-    const result: Array<{key: string; text: string}> = []
-
-    if (offerAmount) {
-      result.push({key: 'amount', text: `${t('offer.upTo')} ${offerAmount}`})
-    }
-    if (offerLocationTypeText) {
-      result.push({key: 'locationType', text: offerLocationTypeText})
-    }
-    if (offerCity) {
-      result.push({key: 'city', text: offerCity})
-    }
-    if (offerLanguageFlags.length > 0) {
-      result.push({key: 'languages', text: ''})
-    }
-
-    return result
-  }, [offerAmount, offerCity, offerLanguageFlags, offerLocationTypeText, t])
+  const offerMetadata = useMemo(
+    () =>
+      pipe(
+        [
+          offerAmount ? `${t('offer.upTo')} ${offerAmount}` : null,
+          offerLocationTypeText,
+          offerCity,
+          offerLanguageFlags,
+        ],
+        Array.filter((item): item is string => !!item)
+      ),
+    [offerAmount, offerCity, offerLanguageFlags, offerLocationTypeText, t]
+  )
 
   if (isNoteOrigin) {
     if (!note || !showInfoBar) return null
 
-    const noteStripTitle =
-      chat.origin.type === 'myNote'
-        ? t('notes.chat.usersResponseToNote')
-        : t('notes.chat.yourResponseToNote')
-
     return (
-      <XStack
-        justifyContent="space-between"
-        alignItems="center"
-        gap="$3"
-        py="$4"
-        px="$5"
-        backgroundColor="$backgroundSecondary"
+      <ChatContextBar
+        title={
+          chat.origin.type === 'myNote'
+            ? t('notes.chat.usersResponseToNote')
+            : t('notes.chat.yourResponseToNote')
+        }
+        subtitle={note.noteInfo.publicPart.text}
+        actionIcon={InfoCircle}
+        onActionPress={openNoteDetail}
         onPress={openNoteDetail}
-      >
-        <YStack flex={1} gap="$2">
-          <Typography color="$foregroundPrimary" variant="paragraphSmallBold">
-            {noteStripTitle}
-          </Typography>
-          <Typography
-            color="$foregroundSecondary"
-            variant="description"
-            numberOfLines={1}
-            ellipsizeMode="tail"
-          >
-            {note.noteInfo.publicPart.text}
-          </Typography>
-        </YStack>
-        <Stack>
-          <NavButton
-            variant="normal"
-            icon={InfoCircle}
-            onPress={openNoteDetail}
-          />
-        </Stack>
-      </XStack>
+      />
     )
   }
 
   if (!offer || !showInfoBar) return null
   return (
-    <XStack
-      justifyContent="space-between"
-      alignItems="center"
-      py="$4"
-      px="$5"
-      backgroundColor="$backgroundSecondary"
+    <ChatContextBar
+      title={offerTitle ?? undefined}
+      meta={offerMetadata}
+      actionIcon={XmarkCancelClose}
+      onActionPress={hideStickyHeader}
       onPress={openOfferDetail}
-    >
-      <YStack flex={1} gap="$2">
-        {offerTitle ? (
-          <XStack alignItems="center" flexWrap="wrap">
-            <Typography color="$foregroundPrimary" variant="paragraphSmallBold">
-              {offerTitle}
-            </Typography>
-          </XStack>
-        ) : null}
-        <XStack alignItems="center" gap="$2" flexWrap="wrap">
-          {offerMetadata.map((item, index) => {
-            if (item.key === 'languages') {
-              return (
-                <React.Fragment key={item.key}>
-                  {index > 0 ? (
-                    <Typography
-                      color="$foregroundSecondary"
-                      variant="description"
-                    >
-                      •
-                    </Typography>
-                  ) : null}
-                  {offerLanguageFlags.map((flag, flagIndex) => (
-                    <Typography
-                      key={`${flag}-${flagIndex}`}
-                      color="$foregroundSecondary"
-                      variant="description"
-                    >
-                      {flag}
-                    </Typography>
-                  ))}
-                </React.Fragment>
-              )
-            }
-
-            return (
-              <XStack key={item.key} alignItems="center" gap="$2">
-                {index > 0 ? (
-                  <Typography
-                    color="$foregroundSecondary"
-                    variant="description"
-                  >
-                    •
-                  </Typography>
-                ) : null}
-                <Typography color="$foregroundSecondary" variant="description">
-                  {item.text}
-                </Typography>
-              </XStack>
-            )
-          })}
-        </XStack>
-      </YStack>
-      <Stack>
-        <NavButton
-          variant="normal"
-          icon={XmarkCancelClose}
-          onPress={hideStickyHeader}
-        />
-      </Stack>
-    </XStack>
+    />
   )
 }
 

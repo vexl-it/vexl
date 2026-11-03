@@ -13,6 +13,7 @@ import {CalendarPickerScreen} from './CalendarPickerScreen'
 import {CardButtonScreen} from './CardButtonScreen'
 import {ChatBubbleScreen} from './ChatBubbleScreen'
 import {ChatComposerScreen} from './ChatComposerScreen'
+import {ChatContextBarScreen} from './ChatContextBarScreen'
 import {ChatEventCardScreen} from './ChatEventCardScreen'
 import {ChatMessageItemScreen} from './ChatMessageItemScreen'
 import {ChecklistCellScreen} from './ChecklistCellScreen'
@@ -34,6 +35,7 @@ import {DisclosureScreen} from './DisclosureScreen'
 import {DismissKeyboardOnPressOutsideScreen} from './DismissKeyboardOnPressOutsideScreen'
 import {DividerScreen} from './DividerScreen'
 import {DotScreen} from './DotScreen'
+import {DotSeparatedRowScreen} from './DotSeparatedRowScreen'
 import {DotTypingIndicatorScreen} from './DotTypingIndicatorScreen'
 import {EditRowScreen} from './EditRowScreen'
 import {EditStepScreen} from './EditStepScreen'
@@ -139,6 +141,7 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'Card Button', component: CardButtonScreen},
   {label: 'Chat Bubble', component: ChatBubbleScreen},
   {label: 'Chat Composer', component: ChatComposerScreen},
+  {label: 'Chat Context Bar', component: ChatContextBarScreen},
   {label: 'Chat Event Card', component: ChatEventCardScreen},
   {label: 'Chat Message Item', component: ChatMessageItemScreen},
   {label: 'Checklist Cell', component: ChecklistCellScreen},
@@ -163,6 +166,7 @@ export const screens: readonly ScreenEntry[] = [
   },
   {label: 'Divider', component: DividerScreen},
   {label: 'Dot', component: DotScreen},
+  {label: 'Dot Separated Row', component: DotSeparatedRowScreen},
   {label: 'Dot Typing Indicator', component: DotTypingIndicatorScreen},
   {label: 'Edit Row', component: EditRowScreen},
   {label: 'Edit Step', component: EditStepScreen},

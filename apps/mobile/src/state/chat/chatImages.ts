@@ -252,7 +252,7 @@ export const downloadNewChatImagesActionAtom = atom(
         ({isCancelled, ...args}) =>
           Effect.suspend(() =>
             isCancelled()
-              ? Effect.interrupt
+              ? Effect.void
               : set(ensureChatImageDownloadedActionAtom, args)
           ).pipe(
             Effect.tapErrorTag('ChatImageProcessingError', (e) =>
@@ -264,7 +264,9 @@ export const downloadNewChatImagesActionAtom = atom(
                 )
               })
             ),
-            Effect.ignore
+            // Unlike Effect.ignore, also keeps a cancelled download's
+            // interruption from stopping downloads of other chats.
+            Effect.exit
           ),
         {concurrency: 3, discard: true}
       ),

@@ -27,6 +27,7 @@ import {DividerScreen} from './DividerScreen'
 import {DotScreen} from './DotScreen'
 import {DotTypingIndicatorScreen} from './DotTypingIndicatorScreen'
 import {EditRowScreen} from './EditRowScreen'
+import {EditStepScreen} from './EditStepScreen'
 import {EmptyStateScreen} from './EmptyStateScreen'
 import {EventCardScreen} from './EventCardScreen'
 import {ExchangeScreen} from './ExchangeScreen'
@@ -140,6 +141,7 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'Dot', component: DotScreen},
   {label: 'Dot Typing Indicator', component: DotTypingIndicatorScreen},
   {label: 'Edit Row', component: EditRowScreen},
+  {label: 'Edit Step', component: EditStepScreen},
   {label: 'Empty State', component: EmptyStateScreen},
   {label: 'Event Card', component: EventCardScreen},
   {label: 'Exchange', component: ExchangeScreen},

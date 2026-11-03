@@ -73,6 +73,8 @@ export {Dot} from './Dot'
 export {DotTypingIndicator} from './DotTypingIndicator'
 export {EditRow} from './EditRow'
 export type {EditRowProps, EditRowState} from './EditRow'
+export {EditStep} from './EditStep'
+export type {EditStepProps} from './EditStep'
 export {EmptyState} from './EmptyState'
 export type {
   EmptyStateAction,

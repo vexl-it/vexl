@@ -1,15 +1,11 @@
 import {
-  KeyboardAvoidingView,
   NavigationBar,
   Screen,
-  SearchBar,
-  SelectableItem,
-  tokens,
+  SearchableSelectList,
   XmarkCancelClose,
 } from '@vexl-next/ui'
 import {atom, useAtomValue} from 'jotai'
-import React, {useCallback, useMemo, useState} from 'react'
-import {FlatList, Platform} from 'react-native'
+import React, {useMemo, useState} from 'react'
 import {getAllCountries, type ICountry} from 'react-native-country-select'
 import {useTranslation} from '../utils/localization/I18nProvider'
 
@@ -85,24 +81,16 @@ function getCountriesToDisplay(searchQuery: string): readonly ICountry[] {
   return [...popularCountries, ...sortCountries(otherCountries)]
 }
 
-function CountryPickerItem({
-  country,
-  onSelect,
-}: {
-  readonly country: ICountry
-  readonly onSelect: (country: ICountry) => void
-}): React.ReactElement {
-  const handleSelect = useCallback(() => {
-    onSelect(country)
-  }, [country, onSelect])
+function getCountryCode(country: ICountry): string {
+  return country.cca2
+}
 
-  return (
-    <SelectableItem
-      label={`${country.flag} ${getCountryName(country)}`}
-      note={country.idd.root}
-      onPress={handleSelect}
-    />
-  )
+function getCountryFlag(country: ICountry): string {
+  return country.flag
+}
+
+function getCountryDialCode(country: ICountry): string {
+  return country.idd.root
 }
 
 export default function CountryPickerScreenContent({
@@ -112,37 +100,9 @@ export default function CountryPickerScreenContent({
   const {t} = useTranslation()
   const [searchQueryAtom] = useState(() => atom(''))
   const searchQuery = useAtomValue(searchQueryAtom)
-  const countriesToDisplay = getCountriesToDisplay(searchQuery)
   const rightActions = useMemo(
     () => [{icon: XmarkCancelClose, onPress: onClose}],
     [onClose]
-  )
-
-  const renderItem = useCallback(
-    ({item}: {readonly item: ICountry}) => (
-      <CountryPickerItem country={item} onSelect={onSelect} />
-    ),
-    [onSelect]
-  )
-
-  const keyExtractor = useCallback((item: ICountry) => item.cca2, [])
-  const listBottomPadding =
-    tokens.space[8].val + (Platform.OS === 'android' ? tokens.size[11].val : 0)
-
-  const countryList = (
-    <FlatList
-      automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
-      contentContainerStyle={{
-        paddingBottom: listBottomPadding,
-        paddingTop: tokens.space[4].val,
-      }}
-      data={countriesToDisplay}
-      keyExtractor={keyExtractor}
-      keyboardShouldPersistTaps="handled"
-      renderItem={renderItem}
-      showsVerticalScrollIndicator={false}
-      style={{flex: 1}}
-    />
   )
 
   return (
@@ -156,12 +116,17 @@ export default function CountryPickerScreenContent({
       }
       safeAreasBackgroundColor="$backgroundPrimary"
     >
-      <SearchBar valueAtom={searchQueryAtom} placeholder={t('common.search')} />
-      {Platform.OS === 'android' ? (
-        <KeyboardAvoidingView>{countryList}</KeyboardAvoidingView>
-      ) : (
-        countryList
-      )}
+      <SearchableSelectList
+        items={getCountriesToDisplay(searchQuery)}
+        keyExtractor={getCountryCode}
+        getLabel={getCountryName}
+        getEmoji={getCountryFlag}
+        getPrefix={getCountryDialCode}
+        onSelect={onSelect}
+        searchValueAtom={searchQueryAtom}
+        searchPlaceholder={t('common.search')}
+        emptyTitle={t('common.nothingFound')}
+      />
     </Screen>
   )
 }

@@ -41,6 +41,7 @@ import {FriendLevelScreen} from './FriendLevelScreen'
 import {GraphicsScreen} from './GraphicsScreen'
 import {HighlightedTextScreen} from './HighlightedTextScreen'
 import {IconBoxScreen} from './IconBoxScreen'
+import {IconLabelScreen} from './IconLabelScreen'
 import {IconsScreen} from './IconsScreen'
 import {IconTagScreen} from './IconTagScreen'
 import {InfoBoxScreen} from './InfoBoxScreen'
@@ -157,6 +158,7 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'Graphics', component: GraphicsScreen},
   {label: 'Highlighted Text', component: HighlightedTextScreen},
   {label: 'Icon Box', component: IconBoxScreen},
+  {label: 'Icon Label', component: IconLabelScreen},
   {label: 'Icon Tag', component: IconTagScreen},
   {label: 'Icons', component: IconsScreen},
   {label: 'Info Box', component: InfoBoxScreen},

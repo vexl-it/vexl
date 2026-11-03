@@ -2,13 +2,10 @@ import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {type UserName} from '@vexl-next/domain/src/general/UserName.brand'
 import {
-  Circle,
   CommonFriendsSummary,
   IconTag,
-  PeopleUsers,
   TextTag,
   Typography,
-  useTheme,
   XStack,
   YStack,
 } from '@vexl-next/ui'
@@ -26,7 +23,11 @@ import {formatInteger} from '../utils/localization/formatting'
 import {formattingLocaleAtom} from '../utils/localization/formattingLocaleAtom'
 import {useTranslation} from '../utils/localization/I18nProvider'
 import {useTrustedFriendsText} from '../utils/localization/useTrustedFriendsText'
-import {getIconTagVariant, getIsOffering} from '../utils/offerHelpers'
+import {
+  getIconTagVariant,
+  getIsOffering,
+  getOfferIntentLabel,
+} from '../utils/offerHelpers'
 import {randomSeedFromOfferInfo} from '../utils/RandomSeed'
 import {AnonymousAvatarOrClubImage} from './AnonymousAvatar'
 import {ProfileImageAvatar} from './ProfileImageAvatar'
@@ -45,11 +46,9 @@ function OfferAuthorBanner({
   readonly clubIdsForAvatar?: readonly ClubUuid[]
 }): React.ReactElement {
   const {t} = useTranslation()
-  const theme = useTheme()
   const visibleCommonFriends = useVisibleCommonFriendsForOffer(offer.offerInfo)
   const commonFriendsCount = visibleCommonFriends.commonFriends.length
   const locale = useAtomValue(formattingLocaleAtom)
-  const localizedCommonFriendsCount = formatInteger(commonFriendsCount, locale)
   const clubsForOffer = useGetAllClubsForIds(
     offer.offerInfo.privatePart.clubIds
   )
@@ -92,18 +91,12 @@ function OfferAuthorBanner({
         ? t('clubs.multipleClubs')
         : undefined
 
-  const shouldDisplayClubImage = clubImageUrl && userImage?.type !== 'imageUri'
+  const showProfileImage =
+    !!userImage && (!clubImageUrl || userImage.type === 'imageUri')
 
   return (
     <XStack gap="$3" alignItems="flex-start">
-      {shouldDisplayClubImage ? (
-        <AnonymousAvatarOrClubImage
-          grayScale={grayAvatar ?? false}
-          size="$9"
-          seed={randomSeedFromOfferInfo(offer.offerInfo)}
-          clubImageUrl={clubImageUrl}
-        />
-      ) : userImage ? (
+      {showProfileImage ? (
         <ProfileImageAvatar
           grayscale={grayAvatar}
           image={userImage}
@@ -131,15 +124,7 @@ function OfferAuthorBanner({
           <XStack alignItems="center" gap="$1" flexShrink={0}>
             <TextTag
               variant={isOffering ? 'offer' : 'request'}
-              label={
-                isMine
-                  ? isOffering
-                    ? t('marketplace.iHave')
-                    : t('marketplace.iWant')
-                  : isOffering
-                    ? t('marketplace.has')
-                    : t('marketplace.wants')
-              }
+              label={getOfferIntentLabel({isMine, isOffering, t})}
             />
             <IconTag
               variant={getIconTagVariant(
@@ -148,65 +133,17 @@ function OfferAuthorBanner({
             />
           </XStack>
         </XStack>
-        {trustedFriendsText ? (
-          <CommonFriendsSummary
-            clubNames={clubLabel ? [clubLabel] : undefined}
-            commonFriends={t('offer.numberOfCommon', {
-              number: localizedCommonFriendsCount,
-            })}
-            trustedFriends={trustedFriendsText}
-          />
-        ) : clubLabel != null ? (
-          <XStack gap="$2" alignItems="center" flexShrink={1} minWidth={0}>
-            <Typography
-              variant="micro"
-              color="$foregroundSecondary"
-              numberOfLines={1}
-              flexShrink={1}
-              minWidth={0}
-            >
-              {clubLabel}
-            </Typography>
-            <Circle
-              size="$2"
-              backgroundColor={theme.foregroundSecondary.get()}
-            />
-            {!isMine && (
-              <XStack gap="$1" alignItems="center" flexShrink={1} minWidth={0}>
-                <PeopleUsers
-                  size={16}
-                  color={theme.foregroundSecondary.get()}
-                />
-                <Typography
-                  variant="micro"
-                  color="$foregroundSecondary"
-                  numberOfLines={1}
-                  flexShrink={1}
-                  minWidth={0}
-                >
-                  {t('offer.numberOfCommon', {
-                    number: localizedCommonFriendsCount,
-                  })}
-                </Typography>
-              </XStack>
-            )}
-          </XStack>
-        ) : !isMine ? (
-          <XStack alignItems="center" gap="$1" flexShrink={1} minWidth={0}>
-            <PeopleUsers size={16} color={theme.foregroundSecondary.get()} />
-            <Typography
-              variant="micro"
-              color="$foregroundSecondary"
-              numberOfLines={1}
-              flexShrink={1}
-              minWidth={0}
-            >
-              {t('offer.numberOfCommon', {
-                number: localizedCommonFriendsCount,
-              })}
-            </Typography>
-          </XStack>
-        ) : null}
+        <CommonFriendsSummary
+          clubNames={clubLabel ? [clubLabel] : undefined}
+          commonFriends={
+            isMine
+              ? undefined
+              : t('offer.numberOfCommon', {
+                  number: formatInteger(commonFriendsCount, locale),
+                })
+          }
+          trustedFriends={trustedFriendsText}
+        />
       </YStack>
     </XStack>
   )

@@ -33,6 +33,7 @@ import {
   getAmountLabelActionAtom,
   getIconTagVariant,
   getIsOffering,
+  getOfferIntentLabel,
   getOfferMarkBadge,
 } from '../utils/offerHelpers'
 import {offerLocationLabelsAtom} from '../utils/offerLocationLabelsAtom'
@@ -208,15 +209,7 @@ export default function OfferOnMarketplace({
           variant={
             shouldBeGrayscaled ? 'neutral' : isOffering ? 'offer' : 'request'
           }
-          label={
-            isMine
-              ? isOffering
-                ? t('marketplace.iHave')
-                : t('marketplace.iWant')
-              : isOffering
-                ? t('marketplace.has')
-                : t('marketplace.wants')
-          }
+          label={getOfferIntentLabel({isMine, isOffering, t})}
         />
       }
       iconTag={

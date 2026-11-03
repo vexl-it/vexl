@@ -141,11 +141,7 @@ function OfferDetailScrollContent({
       <YStack gap="$4">
         <OfferAuthorBanner offer={offer} />
 
-        <Typography
-          variant="description"
-          color="$foregroundPrimary"
-          lineHeight={20}
-        >
+        <Typography variant="description" color="$foregroundPrimary">
           {offer.offerInfo.publicPart.offerDescription}
         </Typography>
 

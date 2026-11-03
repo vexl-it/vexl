@@ -23,7 +23,6 @@ import {
 } from './chatImages'
 
 const mockFiles = new Map<string, Uint8Array>()
-const mockRequestChatImageDownload = jest.fn()
 const mockRequestChatImageUpload = jest.fn()
 const mockFetch = jest.fn()
 
@@ -92,9 +91,9 @@ jest.mock('@bam.tech/react-native-image-resizer', () => ({
   },
 }))
 jest.mock('../../api', () => ({
+  apiEnv: {chatImagesUrl: 'http://s3.test/chat-images'},
   apiAtom: jest.requireActual('jotai').atom({
     chat: {
-      requestChatImageDownload: () => mockRequestChatImageDownload(),
       requestChatImageUpload: (request: unknown) =>
         mockRequestChatImageUpload(request),
     },
@@ -117,11 +116,17 @@ const chatKeys = {
   inboxKey: generatePrivateKey().publicKeyPemBase64,
   otherSideKey: generatePrivateKey().publicKeyPemBase64,
 }
-const downloadUrl = 'http://s3.test/download'
+const downloadUrl = `http://s3.test/chat-images/${attachment.id}`
 const encryptedImage = aesGCMEncryptBytes({data: image, key})
 
 function s3Response(body: Uint8Array, status = 200): unknown {
   return {ok: status < 300, status, bytes: async () => body}
+}
+
+function pendingS3Response(): Deferred.Deferred<unknown> {
+  const response = Effect.runSync(Deferred.make<unknown>())
+  mockFetch.mockReturnValue(Effect.runPromise(Deferred.await(response)))
+  return response
 }
 
 function ensureDownloaded(
@@ -136,26 +141,23 @@ function ensureDownloaded(
 
 beforeEach(() => {
   mockFiles.clear()
-  mockRequestChatImageDownload.mockReset()
   mockRequestChatImageUpload.mockReset()
   mockFetch.mockReset()
-  mockRequestChatImageDownload.mockReturnValue(Effect.succeed({downloadUrl}))
 })
 
 it('downloads and decrypts the image once for concurrent callers', async () => {
-  const response = Effect.runSync(Deferred.make<{downloadUrl: string}>())
-  mockRequestChatImageDownload.mockReturnValue(Deferred.await(response))
-  mockFetch.mockResolvedValue(s3Response(encryptedImage))
+  const response = pendingS3Response()
   const store = createStore()
 
   const downloads = Promise.all([
     ensureDownloaded(store),
     ensureDownloaded(store),
   ])
-  await Effect.runPromise(Deferred.succeed(response, {downloadUrl}))
+  await Effect.runPromise(
+    Deferred.succeed(response, s3Response(encryptedImage))
+  )
   const [first, second] = await downloads
 
-  expect(mockRequestChatImageDownload).toHaveBeenCalledTimes(1)
   expect(mockFetch).toHaveBeenCalledTimes(1)
   expect(mockFetch).toHaveBeenCalledWith(
     downloadUrl,
@@ -198,9 +200,7 @@ it('retries a failed download on the next call', async () => {
 })
 
 it('does not store an image whose download finishes after cancelling', async () => {
-  const response = Effect.runSync(Deferred.make<{downloadUrl: string}>())
-  mockRequestChatImageDownload.mockReturnValue(Deferred.await(response))
-  mockFetch.mockResolvedValue(s3Response(encryptedImage))
+  const response = pendingS3Response()
 
   const download = Effect.runPromiseExit(
     createStore().set(ensureChatImageDownloadedActionAtom, {
@@ -209,7 +209,9 @@ it('does not store an image whose download finishes after cancelling', async () 
     })
   )
   cancelChatImageDownloads()
-  await Effect.runPromise(Deferred.succeed(response, {downloadUrl}))
+  await Effect.runPromise(
+    Deferred.succeed(response, s3Response(encryptedImage))
+  )
 
   expect(Exit.isInterrupted(await download)).toBe(true)
   expect(mockFiles.size).toBe(0)

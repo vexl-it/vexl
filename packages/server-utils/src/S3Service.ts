@@ -1,4 +1,4 @@
-import {GetObjectCommand, PutObjectCommand, S3Client} from '@aws-sdk/client-s3'
+import {PutObjectCommand, S3Client} from '@aws-sdk/client-s3'
 import {getSignedUrl} from '@aws-sdk/s3-request-presigner'
 import {Context, Effect, Layer, Schema} from 'effect'
 import {s3Config} from './commonConfigs'
@@ -22,10 +22,6 @@ export interface S3Operations {
     },
     S3Error
   >
-  generatePresignedDownloadUrl: (params: {
-    key: string
-    expiresIn: number
-  }) => Effect.Effect<string, S3Error>
 }
 
 export class S3Service extends Context.Tag('S3Service')<
@@ -46,36 +42,31 @@ export class S3Service extends Context.Tag('S3Service')<
         requestChecksumCalculation: 'WHEN_REQUIRED',
       })
 
-      // Spans carry no key: chat image keys must not end up in traces.
-      const presign = (
-        command: PutObjectCommand | GetObjectCommand,
-        expiresIn: number
-      ): Effect.Effect<string, S3Error> =>
-        Effect.tryPromise({
-          try: async () =>
-            await getSignedUrl(s3Client, command, {
-              expiresIn,
-              // The presigner leaves content-type unsigned by default.
-              signableHeaders: new Set(['content-type']),
-            }),
-          catch: (error) =>
-            new S3Error({
-              cause: error,
-              message: 'Failed to generate presigned URL',
-            }),
-        })
-
+      // The span carries no key: chat image keys must not end up in traces.
       const generatePresignedUploadUrl: S3Operations['generatePresignedUploadUrl'] =
         ({key, contentType, contentLength, expiresIn = 900}) =>
-          presign(
-            new PutObjectCommand({
-              Bucket: bucketName,
-              Key: key,
-              ContentType: contentType,
-              ContentLength: contentLength,
-            }),
-            expiresIn
-          ).pipe(
+          Effect.tryPromise({
+            try: async () =>
+              await getSignedUrl(
+                s3Client,
+                new PutObjectCommand({
+                  Bucket: bucketName,
+                  Key: key,
+                  ContentType: contentType,
+                  ContentLength: contentLength,
+                }),
+                {
+                  expiresIn,
+                  // The presigner leaves content-type unsigned by default.
+                  signableHeaders: new Set(['content-type']),
+                }
+              ),
+            catch: (error) =>
+              new S3Error({
+                cause: error,
+                message: 'Failed to generate presigned URL',
+              }),
+          }).pipe(
             Effect.map((presignedUrl) => ({
               presignedUrl,
               s3Key: key,
@@ -86,18 +77,7 @@ export class S3Service extends Context.Tag('S3Service')<
             })
           )
 
-      const generatePresignedDownloadUrl: S3Operations['generatePresignedDownloadUrl'] =
-        ({key, expiresIn}) =>
-          presign(
-            new GetObjectCommand({Bucket: bucketName, Key: key}),
-            expiresIn
-          ).pipe(
-            Effect.withSpan('S3 generatePresignedDownloadUrl', {
-              attributes: {expiresIn},
-            })
-          )
-
-      return {generatePresignedUploadUrl, generatePresignedDownloadUrl}
+      return {generatePresignedUploadUrl}
     })
   )
 }

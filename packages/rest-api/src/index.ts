@@ -24,6 +24,7 @@ export const EnvPreset = Schema.Struct({
   feedbackMs: ServiceUrl,
   contentMs: ServiceUrl,
   metrics: ServiceUrl,
+  chatImagesUrl: ServiceUrl,
 })
 export type EnvPreset = Schema.Schema.Type<typeof EnvPreset>
 
@@ -62,6 +63,9 @@ export const ENV_PRESETS: {stageEnv: EnvPreset; prodEnv: EnvPreset} = {
     feedbackMs: Schema.decodeSync(ServiceUrl)('https://stage-feedback.vexl.it'),
     contentMs: Schema.decodeSync(ServiceUrl)('https://stage-content.vexl.it'),
     metrics: Schema.decodeSync(ServiceUrl)('https://stage-metrics.vexl.it'),
+    chatImagesUrl: Schema.decodeSync(ServiceUrl)(
+      'https://stage-chat-images.vexl.it'
+    ),
   },
   prodEnv: {
     userMs: Schema.decodeSync(ServiceUrl)('https://user.vexl.it'),
@@ -78,6 +82,7 @@ export const ENV_PRESETS: {stageEnv: EnvPreset; prodEnv: EnvPreset} = {
     feedbackMs: Schema.decodeSync(ServiceUrl)('https://feedback.vexl.it'),
     contentMs: Schema.decodeSync(ServiceUrl)('https://content.vexl.it'),
     metrics: Schema.decodeSync(ServiceUrl)('https://metrics.vexl.it'),
+    chatImagesUrl: Schema.decodeSync(ServiceUrl)('https://chat-images.vexl.it'),
   },
 }
 export {PlatformName, UserSessionCredentials}

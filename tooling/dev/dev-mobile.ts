@@ -2,8 +2,8 @@
  * dev:mobile — build/run the Expo mobile app against a chosen backend.
  *
  * Reads the port map + mobile defaults from the committed dev.config.ts (the
- * single source of truth) and generates the ten `EXPO_PUBLIC_LOCAL_*_MS` service
- * URLs that apps/mobile/src/api/index.ts consumes, picking the right host for the
+ * single source of truth) and generates the `EXPO_PUBLIC_LOCAL_*` service and
+ * chat images URLs that apps/mobile/src/api/index.ts consumes, picking the right host for the
  * chosen target (iOS simulator → localhost, Android emulator → 10.0.2.2, physical
  * device → the machine's LAN IP). It then either just serves Metro, or also
  * prebuilds/builds the native binary, running the expo CLI in apps/mobile.
@@ -603,6 +603,10 @@ function generateEnv(options: CliOptions): GeneratedEnv {
   const ports = resolvePorts(devConfig.ports, overrideEnv)
   const defaultBasePort = ports.userService
 
+  const chatImagesUrl: readonly [string, string] = [
+    'EXPO_PUBLIC_LOCAL_CHAT_IMAGES_URL',
+    `http://${resolvedHost.host}:${ports.minioApi}/${devConfig.infra.minio.chatImagesBucket}`,
+  ]
   const serviceUrls = pipe(
     SERVICE_URL_MAP,
     Array.map(({envVar, portKey}) => {
@@ -616,7 +620,8 @@ function generateEnv(options: CliOptions): GeneratedEnv {
       const url = `http://${resolvedHost.host}:${port}`
       const pair: readonly [string, string] = [envVar, url]
       return pair
-    })
+    }),
+    Array.append(chatImagesUrl)
   )
 
   const vars: Record<string, string> = {ENV_PRESET: 'local'}

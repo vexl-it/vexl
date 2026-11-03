@@ -2,9 +2,10 @@
 
 Chat images are not embedded in chat messages. The sender encrypts the image,
 uploads the ciphertext to a private S3 bucket, and sends a small pointer in the
-E2E encrypted chat message. The app talks to S3 directly through short-lived
-presigned URLs. Chat-service only authorizes the request and signs the URL; it
-never handles the bytes, the key or the plaintext.
+E2E encrypted chat message. The app uploads straight to S3 through a
+short-lived presigned URL that chat-service signs, and downloads anonymously
+by id through CloudFront. Chat-service only authorizes uploads; it never
+handles the bytes, the key or the plaintext, and it never sees downloads.
 
 ## Flow
 
@@ -24,14 +25,15 @@ never handles the bytes, the key or the plaintext.
 4. The chat message carries `ChatImageAttachment`
    (`{id, key, width, height}`, `packages/domain/src/general/messaging.ts`).
    The key travels only inside the E2E encrypted message.
-5. The receiver calls `POST /api/v1/chat-images/download`
-   (`requestChatImageDownload`) with `{imageId}` in the body and gets
-   `{downloadUrl}`, a presigned GET valid for 5 minutes. Chat-service does not
-   check that the object exists. The receiver GETs the ciphertext and decrypts
-   it with `aesGCMDecryptBytes`. A 403 or 404 from S3 means the image expired
-   or was never uploaded; the app shows the retry state.
+5. The receiver GETs `${chatImagesUrl}/${id}`, where `chatImagesUrl` is the
+   environment's CloudFront domain from `ENV_PRESETS`
+   (`packages/rest-api/src/index.ts`, `https://chat-images.vexl.it` in prod),
+   and decrypts the ciphertext with `aesGCMDecryptBytes`. The id is validated
+   as a UUID, so a sender cannot point the receiver at another host or path. A
+   403 or 404 means the image expired or was never uploaded; the app shows the
+   retry state.
 
-Ciphertext is limited to `CHAT_IMAGE_MAX_BYTES` (5 MiB). Handlers live in
+Ciphertext is limited to `CHAT_IMAGE_MAX_BYTES` (5 MiB). The handler lives in
 `apps/chat-service/src/routes/images/`, signing in
 `packages/server-utils/src/S3Service.ts`, the app side in
 `apps/mobile/src/state/chat/chatImages.ts` (`expo/fetch`, binary bodies). The
@@ -46,18 +48,19 @@ S3 requests carry no Vexl session or common headers and no cookies.
   Chat-service must not be able to link a user identity (phone hash, user
   public key) to inboxes, and session headers on this endpoint would do exactly
   that.
-- The download request is unauthenticated. The random UUID is the capability,
-  and the rate limiting middleware limits calls per IP.
-- The image id goes in the request body to chat-service, never in its URL.
-  URLs end up in the HTTP request log, in trace attributes (`url.full`,
-  `url.query`) and in ingress access logs. With the id there, logs would show
-  which IPs fetched which object.
+- Downloads go to CloudFront without asking chat-service, so chat-service
+  never learns who fetched which image, or when. Anyone can fetch an object by
+  its id, but nobody can list them: the random UUID is the capability.
 - Chat-service does not log image ids, URLs or public keys, and the S3 signing
-  spans carry no object key.
-- Phones connect to S3 directly, so AWS sees client IPs and timing of every
-  upload and download. Presigned URLs contain the object key, so any S3 request
-  log would pair the uploader and downloaders of each image. Server access
-  logging and CloudTrail S3 data events must stay off for this bucket.
+  span carries no object key.
+- Phones connect to S3 and CloudFront directly, so AWS sees client IPs and
+  timing of every upload and download. Request URLs contain the object key, so
+  any request log would pair the uploader and downloaders of each image. S3
+  server access logging, CloudTrail S3 data events and CloudFront logging must
+  stay off, and the DNS records must not be proxied through Cloudflare.
+- Native iOS Sentry network breadcrumbs and network/file I/O spans are off
+  (`apps/mobile/src/utils/setupSentry.ts`). `expo/fetch` uses `NSURLSession`,
+  so they would record image URLs and attach them to error reports.
 
 ## Retention
 
@@ -72,16 +75,19 @@ whose message was already pulled stays in the bucket until the rule removes it.
 
 - `dev.config.ts` `infra.minio.chatImagesBucket` names the bucket
   (`vexl-chat-images`).
-- `minio-init` in `docker-compose.dev.yaml` creates it without anonymous access
-  and imports the lifecycle rule. `CHAT_IMAGES_EXPIRE_DAYS` comes from the
-  chat-service `MESSAGE_EXPIRATION_UPPER_LIMIT_DAYS` via
-  `tooling/dev/docker-env.ts`. `mc ilm import` replaces the whole lifecycle
-  config, so re-running init does not stack duplicate rules.
+- `minio-init` in `docker-compose.dev.yaml` creates it with anonymous
+  `s3:GetObject` only (no listing), standing in for CloudFront, and imports the
+  lifecycle rule. `CHAT_IMAGES_EXPIRE_DAYS` comes from the chat-service
+  `MESSAGE_EXPIRATION_UPPER_LIMIT_DAYS` via `tooling/dev/docker-env.ts`.
+  `mc ilm import` replaces the whole lifecycle config, so re-running init does
+  not stack duplicate rules.
 - `tooling/dev/services.ts` points chat-service at MinIO with that bucket. A
   presigned URL only works for the host it was signed for, so `S3_ENDPOINT` is
   the machine's LAN IP, reachable from the iOS simulator, the Android emulator
   and physical devices. MinIO listens on all interfaces. Without a LAN IP it
   falls back to `localhost` (iOS simulator only). See `tooling/dev/README.md`.
+- `pnpm dev:mobile` sets `EXPO_PUBLIC_LOCAL_CHAT_IMAGES_URL` to the MinIO
+  bucket URL on the same host as the other local service URLs.
 
 ## Production setup
 
@@ -90,17 +96,24 @@ sends images.
 
 1. Create a dedicated bucket per environment, e.g. `vexl-chat-images-stage`
    and `vexl-chat-images-prod`. Do not reuse the public resources bucket.
-2. Turn Block Public Access on (all four settings). No bucket policy that
-   grants anonymous or cross-account access.
-3. Set default encryption to SSE-S3.
-4. Keep server access logging and CloudTrail S3 data events for this bucket
-   off. Phones call S3 directly with the object key in the URL, so those logs
-   would record the requester IP per object key and pair the uploader and
-   downloaders of each image.
-5. Add a lifecycle rule for the whole bucket: expire current versions after
+2. Turn Block Public Access on (all four settings). The bucket stays private.
+3. Serve it through a CloudFront distribution with Origin Access Control on
+   `chat-images.vexl.it` (`stage-chat-images.vexl.it` for stage), like
+   `resources.vexl.it`. The bucket policy allows only that distribution
+   (`cloudfront.amazonaws.com` with its `AWS:SourceArn`) to call
+   `s3:GetObject`. No `s3:ListBucket`: S3 answers a missing key with 403, and
+   the app treats 403 and 404 the same. The app builds download URLs from
+   `ENV_PRESETS.*.chatImagesUrl`, so that must match the domain. Point the
+   domain at the distribution with a DNS-only (not proxied) Cloudflare record.
+4. Set default encryption to SSE-S3.
+5. Keep S3 server access logging, CloudTrail S3 data events and CloudFront
+   standard and real-time logging off. Phones call S3 and CloudFront with the
+   object key in the URL, so those logs would record the requester IP per
+   object key and pair the uploader and downloaders of each image.
+6. Add a lifecycle rule for the whole bucket: expire current versions after
    that environment's `MESSAGE_EXPIRATION_UPPER_LIMIT_DAYS`. Leave versioning
    off. If it is on, also expire noncurrent versions after 1 day.
-6. Give chat-service an IAM principal with only this policy. Presigned URLs
+7. Give chat-service an IAM principal with only this policy. Presigned URLs
    act with its permissions:
 
    ```json
@@ -109,23 +122,20 @@ sends images.
      "Statement": [
        {
          "Effect": "Allow",
-         "Action": ["s3:PutObject", "s3:GetObject"],
+         "Action": "s3:PutObject",
          "Resource": "arn:aws:s3:::vexl-chat-images-prod/*"
        }
      ]
    }
    ```
 
-   No `s3:ListBucket`: without it S3 answers a missing key with 403 instead of
-   404, and the app treats both the same.
-
-7. Set chat-service env:
+8. Set chat-service env:
 
    | Variable                                      | Value                                                      |
    | --------------------------------------------- | ---------------------------------------------------------- |
    | `S3_BUCKET_NAME`                              | the bucket from step 1                                     |
    | `AWS_REGION`                                  | bucket region (defaults to `eu-west-1`)                    |
-   | `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` | credentials of the step 6 principal, unless a role is used |
+   | `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` | credentials of the step 7 principal, unless a role is used |
    | `S3_ENDPOINT`, `S3_FORCE_PATH_STYLE`          | leave unset on AWS                                         |
 
-8. No CORS configuration is needed: the native apps are not browsers.
+9. No CORS configuration is needed: the native apps are not browsers.

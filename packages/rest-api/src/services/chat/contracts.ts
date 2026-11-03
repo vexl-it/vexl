@@ -251,15 +251,3 @@ export const RequestChatImageUploadResponse = Schema.Struct({
 })
 export type RequestChatImageUploadResponse =
   typeof RequestChatImageUploadResponse.Type
-
-export const RequestChatImageDownloadRequest = Schema.Struct({
-  imageId: ChatImageId,
-})
-export type RequestChatImageDownloadRequest =
-  typeof RequestChatImageDownloadRequest.Type
-
-export const RequestChatImageDownloadResponse = Schema.Struct({
-  downloadUrl: Schema.NonEmptyString,
-})
-export type RequestChatImageDownloadResponse =
-  typeof RequestChatImageDownloadResponse.Type

@@ -17,7 +17,7 @@ import {Array, Effect, type Exit, Option, pipe, Schema} from 'effect'
 import {File} from 'expo-file-system'
 import {fetch, type FetchRequestInit} from 'expo/fetch'
 import {atom} from 'jotai'
-import {apiAtom} from '../../api'
+import {apiAtom, apiEnv} from '../../api'
 import {type ChatKeys, getChatImagesDirectory} from '../../utils/fsDirectories'
 import reportError from '../../utils/reportError'
 import {ReadingFileError, resizeImage} from '../../utils/resizeImage'
@@ -42,15 +42,12 @@ export class ChatImageTransferError extends Schema.TaggedError<ChatImageTransfer
   cause: Schema.Unknown,
 }) {}
 
-type DownloadChatImageApiError = Effect.Effect.Error<
-  ReturnType<ChatApi['requestChatImageDownload']>
->
 type UploadChatImageApiError = Effect.Effect.Error<
   ReturnType<ChatApi['requestChatImageUpload']>
 >
 
-// Presigned S3 urls carry their own authorization: no Vexl headers, no cookies.
-function fetchPresignedUrl(
+// S3 requests carry no Vexl headers and no cookies.
+function fetchFromS3(
   url: string,
   init?: FetchRequestInit
 ): Effect.Effect<Uint8Array, ChatImageTransferError> {
@@ -130,10 +127,7 @@ function decryptChatImage(
   })
 }
 
-type ChatImageDownloadError =
-  | DownloadChatImageApiError
-  | ChatImageTransferError
-  | ChatImageProcessingError
+type ChatImageDownloadError = ChatImageTransferError | ChatImageProcessingError
 type ChatImageDownload = Promise<Exit.Exit<UriString, ChatImageDownloadError>>
 const inFlightDownloads = new Map<ChatImageId, ChatImageDownload>()
 let downloadsGeneration = 0
@@ -149,17 +143,14 @@ function interruptIfCancelledSince(generation: number): Effect.Effect<void> {
 }
 
 function startDownload({
-  api,
   attachment,
   chatKeys,
 }: {
-  api: ChatApi
   attachment: ChatImageAttachment
   chatKeys: ChatKeys
 }): ChatImageDownload {
   const generation = downloadsGeneration
-  const download = api.requestChatImageDownload({imageId: attachment.id}).pipe(
-    Effect.flatMap(({downloadUrl}) => fetchPresignedUrl(downloadUrl)),
+  const download = fetchFromS3(`${apiEnv.chatImagesUrl}/${attachment.id}`).pipe(
     Effect.flatMap((data) => decryptChatImage(data, attachment.key)),
     Effect.tap(() => interruptIfCancelledSince(generation)),
     Effect.flatMap((bytes) =>
@@ -189,7 +180,7 @@ function startDownload({
 export const ensureChatImageDownloadedActionAtom = atom(
   null,
   (
-    get,
+    _get,
     _set,
     {
       attachment,
@@ -202,7 +193,7 @@ export const ensureChatImageDownloadedActionAtom = atom(
         onNone: () => {
           const download =
             inFlightDownloads.get(attachment.id) ??
-            startDownload({api: get(apiAtom).chat, attachment, chatKeys})
+            startDownload({attachment, chatKeys})
           return Effect.flatten(Effect.promise(() => download))
         },
       })
@@ -299,7 +290,7 @@ export const uploadChatImageIfAnyActionAtom = atom(
         })
       )
       yield* _(
-        fetchPresignedUrl(uploadUrl, {
+        fetchFromS3(uploadUrl, {
           method: 'PUT',
           body: new Uint8Array(encrypted),
           headers: {'Content-Type': CHAT_IMAGE_CONTENT_TYPE},

@@ -54,6 +54,7 @@ function buildLocalEnvFromEnvVars(): EnvPreset | null {
   const feedbackMs = process.env.EXPO_PUBLIC_LOCAL_FEEDBACK_MS
   const contentMs = process.env.EXPO_PUBLIC_LOCAL_CONTENT_MS
   const metricsMs = process.env.EXPO_PUBLIC_LOCAL_METRICS_MS
+  const chatImagesUrl = process.env.EXPO_PUBLIC_LOCAL_CHAT_IMAGES_URL
 
   if (
     !userMs ||
@@ -65,7 +66,8 @@ function buildLocalEnvFromEnvVars(): EnvPreset | null {
     !btcExchangeRateMs ||
     !feedbackMs ||
     !contentMs ||
-    !metricsMs
+    !metricsMs ||
+    !chatImagesUrl
   ) {
     console.warn('Local env vars not fully configured, falling back to stage')
     return null
@@ -82,6 +84,7 @@ function buildLocalEnvFromEnvVars(): EnvPreset | null {
     feedbackMs: Schema.decodeSync(ServiceUrl)(feedbackMs),
     contentMs: Schema.decodeSync(ServiceUrl)(contentMs),
     metrics: Schema.decodeSync(ServiceUrl)(metricsMs),
+    chatImagesUrl: Schema.decodeSync(ServiceUrl)(chatImagesUrl),
   }
 }
 

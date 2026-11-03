@@ -54,17 +54,4 @@ describe('S3Service', () => {
       [...url.searchParams.keys()].some((key) => key.includes('checksum'))
     ).toBe(false)
   })
-
-  it('creates download urls with the given expiry', async () => {
-    const url = await presignedUrl(
-      S3Service.pipe(
-        Effect.flatMap((s3) =>
-          s3.generatePresignedDownloadUrl({key: 'object-key', expiresIn: 300})
-        )
-      )
-    )
-
-    expect(url.pathname).toBe('/bucket/object-key')
-    expect(url.searchParams.get('X-Amz-Expires')).toBe('300')
-  })
 })

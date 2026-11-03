@@ -13,6 +13,4 @@ export const mockedS3ServiceLayer = Layer.succeed(S3Service, {
       s3Key: key,
       expiresIn,
     }),
-  generatePresignedDownloadUrl: ({key}) =>
-    Effect.succeed(`https://s3.example.com/download?key=${key}`),
 })

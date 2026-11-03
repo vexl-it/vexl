@@ -15,6 +15,7 @@ import {ChecklistCellScreen} from './ChecklistCellScreen'
 import {ChipScreen} from './ChipScreen'
 import {ClubCardScreen} from './ClubCardScreen'
 import {ClubReachCardScreen} from './ClubReachCardScreen'
+import {CodeBlockScreen} from './CodeBlockScreen'
 import {CodeInputScreen} from './CodeInputScreen'
 import {CollapseScreen} from './CollapseScreen'
 import {CommonFriendsScreen} from './CommonFriendsScreen'
@@ -132,6 +133,7 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'Chip', component: ChipScreen},
   {label: 'Club Card', component: ClubCardScreen},
   {label: 'Club Reach Card', component: ClubReachCardScreen},
+  {label: 'Code Block', component: CodeBlockScreen},
   {label: 'Code Input', component: CodeInputScreen},
   {label: 'Collapse', component: CollapseScreen},
   {label: 'Common Friends', component: CommonFriendsScreen},

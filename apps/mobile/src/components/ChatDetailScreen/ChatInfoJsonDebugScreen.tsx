@@ -2,6 +2,7 @@ import Clipboard from '@react-native-clipboard/clipboard'
 import {
   ArrowLeft,
   Button,
+  CodeBlock,
   NavigationBar,
   Screen,
   Typography,
@@ -10,9 +11,6 @@ import {
 import {ScopeProvider, useMolecule} from 'bunshi/dist/react'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useMemo} from 'react'
-import {Text as RNText, ScrollView} from 'react-native'
-import {useSafeAreaInsets} from 'react-native-safe-area-context'
-import {Stack, getTokens, useTheme} from 'tamagui'
 import {type RootStackScreenProps} from '../../navigationTypes'
 import {focusChatWithMessagesByKeysAtom} from '../../state/chat/atoms/focusChatWithMessagesAtom'
 import {dummyChatWithMessages} from '../../state/chat/domain'
@@ -24,11 +22,6 @@ import useSafeGoBack from '../../utils/useSafeGoBack'
 import {toastNotificationAtom} from '../ToastNotification/atom'
 import {ChatScope, chatMolecule} from './atoms'
 
-const jsonTextStyle = {
-  fontFamily: 'monospace',
-  fontSize: getTokens().size.$3.val,
-}
-
 function ChatInfoJsonDebugContent({
   chatExists,
 }: {
@@ -36,8 +29,6 @@ function ChatInfoJsonDebugContent({
 }): React.ReactElement {
   useStatusBarStyleForScreen('secondary')
 
-  const {bottom} = useSafeAreaInsets()
-  const theme = useTheme()
   const {t} = useTranslation()
   const safeGoBack = useSafeGoBack()
   const {chatAtom} = useMolecule(chatMolecule)
@@ -59,61 +50,38 @@ function ChatInfoJsonDebugContent({
           }}
         />
       }
+      scrollable
     >
-      <ScrollView
-        bounces={false}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{
-          paddingHorizontal: getTokens().space.$5.val,
-          paddingTop: getTokens().space.$5.val,
-          paddingBottom: bottom + getTokens().space.$8.val,
-        }}
-      >
-        {!chatExists ? (
-          <Typography color="$foregroundPrimary" variant="paragraph">
-            Chat not found.
+      {!chatExists ? (
+        <Typography color="$foregroundPrimary" variant="paragraph">
+          Chat not found.
+        </Typography>
+      ) : (
+        <YStack gap="$4" pb="$8">
+          <Typography color="$foregroundSecondary" variant="paragraph">
+            CHAT INFO
           </Typography>
-        ) : (
-          <YStack gap="$4">
-            <Typography color="$foregroundSecondary" variant="paragraph">
-              CHAT INFO
-            </Typography>
-            <Stack
-              backgroundColor="$backgroundSecondary"
-              borderRadius="$5"
-              padding="$4"
-              gap="$4"
+          <YStack
+            backgroundColor="$backgroundSecondary"
+            borderRadius="$5"
+            padding="$4"
+            gap="$4"
+          >
+            <CodeBlock>{chatJson}</CodeBlock>
+            <Button
+              width="100%"
+              size="small"
+              variant="secondary"
+              onPress={() => {
+                Clipboard.setString(chatJson)
+                setToastNotification(t('common.copied'))
+              }}
             >
-              <Stack
-                backgroundColor="$backgroundTertiary"
-                borderRadius="$4"
-                padding="$3"
-              >
-                <RNText
-                  selectable
-                  style={[
-                    jsonTextStyle,
-                    {color: theme.foregroundPrimary.get()},
-                  ]}
-                >
-                  {chatJson}
-                </RNText>
-              </Stack>
-              <Button
-                width="100%"
-                size="small"
-                variant="secondary"
-                onPress={() => {
-                  Clipboard.setString(chatJson)
-                  setToastNotification(t('common.copied'))
-                }}
-              >
-                Copy
-              </Button>
-            </Stack>
+              Copy
+            </Button>
           </YStack>
-        )}
-      </ScrollView>
+        </YStack>
+      )}
     </Screen>
   )
 }

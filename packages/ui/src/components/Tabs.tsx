@@ -162,7 +162,7 @@ export function Tabs<T>({
         paddingRight={gap}
         paddingBottom={spaceTokens.$2.val + UNDERLINE_HEIGHT}
       >
-        {tabs.map((tab, index) => {
+        {Array.map(tabs, (tab, index) => {
           const isSelected = index === activeIndex
           return (
             <Stack

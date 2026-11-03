@@ -1,6 +1,7 @@
 import {createFont} from 'tamagui'
 
 // Typography from Figma — Vexl redesign DEV (node 593:39715)
+// Line-height tokens mirror the Typography variants below.
 //
 // Body font: TT Satoshi (Medium 500, DemiBold 600)
 // Heading font: Monument Extended (Regular 400, Bold 700)
@@ -26,8 +27,8 @@ export const bodyFont = createFont({
     2: 20,
     3: 22,
     4: 24,
-    5: 28,
-    6: 34,
+    5: 26,
+    6: 30,
     7: 52,
     true: 24,
   },
@@ -65,12 +66,12 @@ export const headingFont = createFont({
     true: 24,
   },
   lineHeight: {
-    1: 20,
-    2: 25,
-    3: 28, // Figma: 28px
-    4: 28, // Figma: 28px
-    5: 40, // Figma: 40px
-    6: 52, // Figma: 130%
+    1: 18,
+    2: 24,
+    3: 28,
+    4: 34,
+    5: 40,
+    6: 52,
     true: 28,
   },
   weight: {

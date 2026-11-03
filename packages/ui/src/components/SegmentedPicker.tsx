@@ -78,7 +78,7 @@ export function SegmentedPicker<T>({
           ]}
         />
       ) : null}
-      {tabs.map((tab) => {
+      {Array.map(tabs, (tab) => {
         const isSelected = tab.value === activeTab
         return (
           <SegmentFrame

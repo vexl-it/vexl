@@ -1,3 +1,4 @@
+import {Array} from 'effect'
 import React from 'react'
 import {styled} from 'tamagui'
 
@@ -25,10 +26,10 @@ export function Menu({children}: MenuProps): React.JSX.Element {
   return (
     <MenuContext.Provider value={true}>
       <MenuFrame>
-        {childArray.flatMap((child, index) =>
-          index < childArray.length - 1
-            ? [child, <Divider key={`divider-${String(index)}`} />]
-            : [child]
+        {Array.flatMap(childArray, (child, index) =>
+          index === 0
+            ? [child]
+            : [<Divider key={`divider-${String(index)}`} />, child]
         )}
       </MenuFrame>
     </MenuContext.Provider>

@@ -1,3 +1,4 @@
+import {Array, Option, pipe} from 'effect'
 import React, {useCallback, useEffect, useMemo, useRef} from 'react'
 import {type LayoutChangeEvent, StyleSheet} from 'react-native'
 import Animated, {
@@ -153,7 +154,12 @@ export function TabBar<T>({
   const hasInitialized = useRef(false)
 
   const activeIndex = useMemo(
-    () => tabs.findIndex((tab) => tab.value === activeTab),
+    () =>
+      pipe(
+        tabs,
+        Array.findFirstIndex((tab) => tab.value === activeTab),
+        Option.getOrElse(() => -1)
+      ),
     [tabs, activeTab]
   )
 
@@ -254,7 +260,7 @@ export function TabBar<T>({
       <Animated.View style={[styles.activePill, animatedPillStyle]}>
         <ActivePillFrame />
       </Animated.View>
-      {tabs.map((tab, index) => {
+      {Array.map(tabs, (tab, index) => {
         const isActive = tab.value === activeTab
         return (
           <TabFrame

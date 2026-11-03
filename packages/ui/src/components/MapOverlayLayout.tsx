@@ -65,7 +65,7 @@ export function MapOverlayLayout({
         ) : null}
         <Stack onLayout={onTopLayout}>{top}</Stack>
         <Stack pointerEvents="none" flex={1} />
-        <KeyboardStickyView pointerEvents="box-none">
+        <KeyboardStickyView style={{pointerEvents: 'box-none'}}>
           <Stack onLayout={onBottomLayout}>{bottom}</Stack>
           {fillSafeArea ? (
             <Stack

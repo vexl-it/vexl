@@ -104,7 +104,7 @@ export function PinchZoomHint({
   }))
 
   return (
-    <Animated.View pointerEvents="none" style={animatedStyle}>
+    <Animated.View style={[{pointerEvents: 'none'}, animatedStyle]}>
       <YStack
         pointerEvents="none"
         alignItems="center"

@@ -1,7 +1,11 @@
-import React from 'react'
+import React, {useId} from 'react'
 import type {ImageProps as RNImageProps} from 'react-native'
-import {SvgXml} from 'react-native-svg'
-import {FilterImage} from 'react-native-svg/filter-image'
+import Svg, {
+  FeColorMatrix,
+  Filter,
+  Image as SvgImage,
+  SvgXml,
+} from 'react-native-svg'
 import {getTokens, type ColorTokens} from 'tamagui'
 import {Stack} from '../primitives'
 import {TrustBadge} from './TrustBadge'
@@ -17,10 +21,6 @@ const NAMED_SIZE_TOKENS: Record<NamedAvatarSize, SizeToken> = {
   medium: '$10', // 48px
   large: '$12', // 64px
 }
-
-const GRAYSCALE_FILTER = [
-  {name: 'feColorMatrix', type: 'saturate', values: 0} as const,
-]
 
 function resolveSizeToken(size: AvatarSize): SizeToken {
   if (size === 'small' || size === 'medium' || size === 'large')
@@ -69,14 +69,24 @@ function AvatarContent({
   readonly px: number
   readonly grayscale: boolean
 }): React.JSX.Element {
+  const filterId = useId()
+
   if (source != null)
     return (
-      <FilterImage
-        source={source}
-        style={{width: px, height: px}}
-        resizeMode="cover"
-        filters={grayscale ? GRAYSCALE_FILTER : undefined}
-      />
+      <Svg width={px} height={px}>
+        {grayscale ? (
+          <Filter id={filterId}>
+            <FeColorMatrix type="saturate" values={0} />
+          </Filter>
+        ) : null}
+        <SvgImage
+          href={source}
+          width="100%"
+          height="100%"
+          preserveAspectRatio="xMidYMid slice"
+          filter={grayscale ? `url(#${filterId})` : undefined}
+        />
+      </Svg>
     )
 
   if (svgXml != null)

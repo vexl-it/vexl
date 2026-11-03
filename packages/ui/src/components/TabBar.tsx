@@ -1,5 +1,5 @@
 import React, {useCallback, useEffect, useMemo, useRef} from 'react'
-import type {LayoutChangeEvent} from 'react-native'
+import {type LayoutChangeEvent, StyleSheet} from 'react-native'
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -64,12 +64,14 @@ const IconPillFrame = styled(Stack, {
 
 const ActivePillFrame = styled(Stack, {
   name: 'TabBarActivePill',
-  position: 'absolute',
+  flex: 1,
   backgroundColor: '$navigationBackgroundHighlight',
   borderRadius: '$11',
 })
 
-const AnimatedActivePill = Animated.createAnimatedComponent(ActivePillFrame)
+const styles = StyleSheet.create({
+  activePill: {position: 'absolute'},
+})
 
 const ICON_POP_DURATION = 150
 const ICON_SETTLE_DURATION = 200
@@ -249,7 +251,9 @@ export function TabBar<T>({
         bottomInset ? bottomInset + getTokens().space.$2.val : '$2'
       }
     >
-      <AnimatedActivePill style={animatedPillStyle} />
+      <Animated.View style={[styles.activePill, animatedPillStyle]}>
+        <ActivePillFrame />
+      </Animated.View>
       {tabs.map((tab, index) => {
         const isActive = tab.value === activeTab
         return (

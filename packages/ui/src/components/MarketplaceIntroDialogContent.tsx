@@ -1,11 +1,11 @@
 import React from 'react'
+import {useThemeName} from 'tamagui'
 
 import {
   marketplaceIntroDialogGraphicDark,
   marketplaceIntroDialogGraphicLight,
 } from '../assets/marketplaceIntro'
 import {Image, YStack} from '../primitives'
-import {useVexlTheme} from '../provider/VexlThemeProvider'
 import {Typography} from './Typography'
 
 export interface MarketplaceIntroDialogContentProps {
@@ -15,11 +15,9 @@ export interface MarketplaceIntroDialogContentProps {
 export function MarketplaceIntroDialogContent({
   description,
 }: MarketplaceIntroDialogContentProps): React.JSX.Element {
-  const {resolvedTheme} = useVexlTheme()
-  const graphic =
-    resolvedTheme === 'light'
-      ? marketplaceIntroDialogGraphicLight
-      : marketplaceIntroDialogGraphicDark
+  const graphic = useThemeName().startsWith('dark')
+    ? marketplaceIntroDialogGraphicDark
+    : marketplaceIntroDialogGraphicLight
 
   return (
     <YStack gap="$5" width="100%">

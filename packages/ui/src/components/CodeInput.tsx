@@ -83,8 +83,8 @@ export function CodeInput({
         importantForAutofill="yes"
         editable={!disabled}
         caretHidden
-        pointerEvents="none"
         style={{
+          pointerEvents: 'none',
           position: 'absolute',
           width: '100%',
           height: size.$10.val,

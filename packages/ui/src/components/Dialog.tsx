@@ -2,7 +2,7 @@ import {Effect} from 'effect'
 import type {Atom, WritableAtom} from 'jotai'
 import {atom, useAtomValue} from 'jotai'
 import React, {useCallback, useEffect, useRef, useState} from 'react'
-import {Dimensions, Modal} from 'react-native'
+import {Dimensions, Modal, StyleSheet} from 'react-native'
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -64,6 +64,7 @@ const DialogViewport = styled(YStack, {
   paddingTop: '$5',
   paddingHorizontal: '$5',
   gap: '$3',
+  $sm: {width: '100%', maxWidth: 560, alignSelf: 'center'},
 })
 
 const DialogCard = styled(YStack, {
@@ -73,8 +74,6 @@ const DialogCard = styled(YStack, {
   padding: '$5',
   gap: '$5',
 })
-
-const AnimatedDialogBackdrop = Animated.createAnimatedComponent(DialogBackdrop)
 
 export interface DialogProps {
   readonly visible: boolean
@@ -155,7 +154,9 @@ export function Dialog({
 
   const content = (
     <Stack flex={1} justifyContent="flex-end">
-      <AnimatedDialogBackdrop style={backdropAnimatedStyle} onPress={onClose} />
+      <Animated.View style={[StyleSheet.absoluteFill, backdropAnimatedStyle]}>
+        <DialogBackdrop onPress={onClose} />
+      </Animated.View>
       <Animated.View style={contentAnimatedStyle}>
         <DialogViewport paddingBottom={bottomOffset}>
           <DialogCard>{children}</DialogCard>

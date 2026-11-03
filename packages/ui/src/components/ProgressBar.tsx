@@ -1,4 +1,5 @@
 import React, {useEffect, useRef, useState} from 'react'
+import {StyleSheet} from 'react-native'
 import Animated, {
   cancelAnimation,
   Easing,
@@ -13,15 +14,26 @@ import {Stack, XStack} from '../primitives'
 
 const ProgressFill = styled(Stack, {
   name: 'ProgressFill',
-  position: 'absolute',
-  left: 0,
-  top: 0,
-  bottom: 0,
+  flex: 1,
   backgroundColor: '$foregroundPrimary',
   borderRadius: '$11',
 })
 
-const AnimatedProgressFill = Animated.createAnimatedComponent(ProgressFill)
+const styles = StyleSheet.create({
+  fill: {position: 'absolute', left: 0, top: 0, bottom: 0},
+})
+
+function AnimatedProgressFill({
+  style,
+}: {
+  readonly style: React.ComponentProps<typeof Animated.View>['style']
+}): React.JSX.Element {
+  return (
+    <Animated.View style={[styles.fill, style]}>
+      <ProgressFill />
+    </Animated.View>
+  )
+}
 
 const ProgressTrack = styled(XStack, {
   name: 'ProgressBar',

@@ -1,5 +1,5 @@
 import React, {useCallback, useEffect, useMemo, useState} from 'react'
-import type {LayoutChangeEvent} from 'react-native'
+import {type LayoutChangeEvent, StyleSheet} from 'react-native'
 import {GestureDetector, type GestureType} from 'react-native-gesture-handler'
 import Animated, {
   type SharedValue,
@@ -58,7 +58,6 @@ const SliderTrack = styled(Stack, {
 
 const SliderActiveTrackFrame = styled(Stack, {
   name: 'SliderActiveTrack',
-  position: 'absolute',
   height: '$2',
   borderRadius: '$8',
   backgroundColor: '$accentYellowPrimary',
@@ -66,8 +65,6 @@ const SliderActiveTrackFrame = styled(Stack, {
 
 const SliderThumbFrame = styled(Stack, {
   name: 'SliderThumb',
-  position: 'absolute',
-  left: 0,
   width: '$9',
   height: '$9',
   borderRadius: '$7',
@@ -86,10 +83,10 @@ const SliderThumbInnerRing = styled(Stack, {
   backgroundColor: '$accentYellowPrimary',
 })
 
-const AnimatedActiveTrack = Animated.createAnimatedComponent(
-  SliderActiveTrackFrame
-)
-const AnimatedThumb = Animated.createAnimatedComponent(SliderThumbFrame)
+const styles = StyleSheet.create({
+  activeTrack: {position: 'absolute', pointerEvents: 'none'},
+  thumb: {position: 'absolute', left: 0, pointerEvents: 'none'},
+})
 
 export interface SliderLayout {
   readonly thumbSize: number
@@ -185,9 +182,11 @@ export function SliderThumb({
   }))
 
   return (
-    <AnimatedThumb pointerEvents="none" style={style}>
-      <SliderThumbInnerRing />
-    </AnimatedThumb>
+    <Animated.View style={[styles.thumb, style]}>
+      <SliderThumbFrame>
+        <SliderThumbInnerRing />
+      </SliderThumbFrame>
+    </Animated.View>
   )
 }
 
@@ -207,5 +206,9 @@ export function SliderActiveTrack({
     right: containerWidth.value - (to.value * usableWidth.value + halfThumb),
   }))
 
-  return <AnimatedActiveTrack pointerEvents="none" style={style} />
+  return (
+    <Animated.View style={[styles.activeTrack, style]}>
+      <SliderActiveTrackFrame />
+    </Animated.View>
+  )
 }

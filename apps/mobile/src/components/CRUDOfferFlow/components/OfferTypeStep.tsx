@@ -2,15 +2,17 @@ import {
   type ListingType,
   type OfferType,
 } from '@vexl-next/domain/src/general/offers'
-import {EditRow, RowButton} from '@vexl-next/ui'
-import {ArrowLeft, ArrowRight} from '@vexl-next/ui/src/icons'
-import type {IconProps} from '@vexl-next/ui/src/icons/types'
+import {
+  ArrowLeft,
+  ArrowRight,
+  EditStep,
+  RowButton,
+  type IconProps,
+} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {Array, pipe} from 'effect'
 import {useAtom, useAtomValue} from 'jotai'
 import React, {useCallback} from 'react'
-import Animated, {FadeIn, FadeOut} from 'react-native-reanimated'
-import {YStack} from 'tamagui'
 import {
   useTranslation,
   type TFunction,
@@ -54,41 +56,31 @@ function OfferTypeStep({
   const offerTypeOptions = getOfferTypeOptions(listingType)
 
   return (
-    <>
-      {active ? (
-        <EditRow state="initial" headline={t('offerForm.whatDoYouWantToDo')} />
-      ) : (
-        <EditRow
-          state="completed"
-          overline={t('offerForm.whatDoYouWantToDo')}
-          headline={offerTypeLabel}
-          onPress={onEdit}
-        />
+    <EditStep
+      active={active}
+      title={t('offerForm.whatDoYouWantToDo')}
+      value={offerTypeLabel}
+      gap="$3"
+      onEdit={onEdit}
+    >
+      {pipe(
+        offerTypeOptions,
+        Array.map(({icon, type}) => (
+          <RowButton
+            key={type}
+            label={getOfferTypeLabel({
+              listingType,
+              offerType: type,
+              t,
+            })}
+            icon={icon}
+            value={type}
+            selected={selectedOfferType === type}
+            onPress={handlePress}
+          />
+        ))
       )}
-      {active ? (
-        <Animated.View entering={FadeIn} exiting={FadeOut}>
-          <YStack gap="$3">
-            {pipe(
-              offerTypeOptions,
-              Array.map(({icon, type}) => (
-                <RowButton
-                  key={type}
-                  label={getOfferTypeLabel({
-                    listingType,
-                    offerType: type,
-                    t,
-                  })}
-                  icon={icon}
-                  value={type}
-                  selected={selectedOfferType === type}
-                  onPress={handlePress}
-                />
-              ))
-            )}
-          </YStack>
-        </Animated.View>
-      ) : null}
-    </>
+    </EditStep>
   )
 }
 

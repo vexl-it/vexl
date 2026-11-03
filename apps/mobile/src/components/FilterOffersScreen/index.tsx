@@ -19,6 +19,7 @@ import {useTranslation} from '../../utils/localization/I18nProvider'
 import {runAfterTwoAnimationFrames} from '../../utils/runAfterAnimationFrames'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import {useOpenChangeCurrency} from '../ChangeCurrency'
+import ClubSelectionList from '../ClubSelectionList'
 import DeferredContent from '../DeferredContent'
 import AmountOfTransaction from '../OfferForm/components/AmountOfTransaction'
 import FriendLevel from '../OfferForm/components/FriendLevel'
@@ -28,6 +29,7 @@ import {
   amountTopLimitForRangeInputAtom,
   btcPricesReadyForFilterAtom,
   clubsFilterEnabledAtom,
+  createSelectClubInFilterAtom,
   currencyAtom,
   initializeOffersFilterOnDisplayActionAtom,
   intendedConnectionLevelAtom,
@@ -36,7 +38,6 @@ import {
   updateCurrencyLimitsAtom,
 } from './atom'
 import BtcPriceInfo from './components/BtcPriceInfo'
-import ClubsSection from './components/ClubsSection'
 import FilterOffersFooter from './components/FilterOffersFooter'
 import LocationSection from './components/LocationSection'
 import LookingToSection from './components/LookingToSection'
@@ -236,7 +237,9 @@ function FilterOffersScreen(): React.ReactElement {
             trailing={<Switch valueAtom={clubsFilterEnabledAtom} />}
           />
           <Collapse expanded={clubsFilterEnabled}>
-            <ClubsSection />
+            <ClubSelectionList
+              createSelectClubAtom={createSelectClubInFilterAtom}
+            />
           </Collapse>
         </YStack>
       </DeferredContent>

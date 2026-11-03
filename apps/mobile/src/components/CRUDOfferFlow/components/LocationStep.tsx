@@ -7,19 +7,18 @@ import {
 import {longitudeDeltaToKilometers} from '@vexl-next/domain/src/utility/geoCoordinates'
 import {
   Button,
-  EditRow,
+  EditStep,
   InfoBox,
+  PlusAdd,
   RowButton,
   SegmentedPicker,
+  TrashBin,
+  YStack,
 } from '@vexl-next/ui'
-import {PlusAdd, TrashBin} from '@vexl-next/ui/src/icons'
-import type {IconProps} from '@vexl-next/ui/src/icons/types'
 import {useMolecule} from 'bunshi/dist/react'
 import {Effect} from 'effect'
 import {useAtom, useAtomValue, useSetAtom} from 'jotai'
 import React from 'react'
-import Animated, {FadeIn, FadeOut} from 'react-native-reanimated'
-import {YStack} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {formatDecimal} from '../../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../../utils/localization/formattingLocaleAtom'
@@ -28,54 +27,25 @@ import {globalDialogAtom} from '../../GlobalDialog'
 import {LocationPickerMolecule} from '../../LocationPicker/molecule'
 import {offerLocationToMapValueWithRadius} from '../../LocationPicker/utils'
 import {offerFormMolecule} from '../atoms/offerFormStateAtoms'
+import {type OfferFormStepProps} from '../offerSetupSteps'
 
-function useLocationTabs(listingType: ListingType | undefined): ReadonlyArray<{
-  readonly label: string
-  readonly value: LocationState
-}> {
+function useLocationStateLabels(
+  listingType: ListingType | undefined
+): Record<LocationState, string> {
   const {t} = useTranslation()
-  const isProduct = listingType === 'PRODUCT'
-  const isService = listingType === 'OTHER'
 
-  return [
-    {
-      label: isProduct
-        ? t('offerForm.pickup')
-        : isService
-          ? t('offerForm.onSite')
-          : t('offerForm.inPerson'),
-      value: 'IN_PERSON',
-    },
-    {
-      label: isProduct
-        ? t('offerForm.delivery')
-        : isService
-          ? t('offerForm.remote')
-          : t('offerForm.online'),
-      value: 'ONLINE',
-    },
-  ]
-}
-
-interface LocationStepProps {
-  readonly active: boolean
-  readonly onEdit: () => void
-  readonly onComplete: () => void
-  readonly ctaLabel?: string
-  readonly icon?: React.ComponentType<IconProps>
-  readonly overline?: string
-  readonly showInitialIcon?: boolean
+  if (listingType === 'PRODUCT')
+    return {IN_PERSON: t('offerForm.pickup'), ONLINE: t('offerForm.delivery')}
+  if (listingType === 'OTHER')
+    return {IN_PERSON: t('offerForm.onSite'), ONLINE: t('offerForm.remote')}
+  return {IN_PERSON: t('offerForm.inPerson'), ONLINE: t('offerForm.online')}
 }
 
 function LocationStep({
-  active,
-  onEdit,
   onComplete,
   ctaLabel,
-  icon,
-  overline,
-  showInitialIcon,
-}: LocationStepProps): React.ReactElement {
+  ...stepProps
+}: OfferFormStepProps): React.ReactElement {
   const {t} = useTranslation()
   const navigation = useNavigation()
   const locale = useAtomValue(formattingLocaleAtom)
@@ -100,10 +70,13 @@ function LocationStep({
   const showDialog = useSetAtom(globalDialogAtom)
 
   const isProduct = listingType === 'PRODUCT'
-  const isService = listingType === 'OTHER'
   const isOnline = locationState.includes('ONLINE')
   const activeTab: LocationState = isOnline ? 'ONLINE' : 'IN_PERSON'
-  const tabs = useLocationTabs(listingType)
+  const locationStateLabels = useLocationStateLabels(listingType)
+  const tabs = [
+    {label: locationStateLabels.IN_PERSON, value: 'IN_PERSON'},
+    {label: locationStateLabels.ONLINE, value: 'ONLINE'},
+  ] satisfies ReadonlyArray<{label: string; value: LocationState}>
 
   const hasLocations = location.length > 0
 
@@ -116,133 +89,99 @@ function LocationStep({
     })}`
   }
 
-  if (!active) {
-    if (isOnline) {
-      return (
-        <EditRow
-          state="completed"
-          icon={icon}
-          overline={overline ?? t('offerForm.setLocation')}
-          headline={
-            isProduct
-              ? t('offerForm.delivery')
-              : isService
-                ? t('offerForm.remote')
-                : t('offerForm.online')
-          }
-          onPress={onEdit}
-        />
-      )
-    }
-
-    const formatted = location.map(formatLocationWithRadius)
-    const remaining = formatted.length - 2
-    const headline = formatted.slice(0, 2).join('\n')
-
-    return (
-      <EditRow
-        state="completed"
-        icon={icon}
-        overline={overline ?? t('offerForm.setLocation')}
-        headline={headline}
-        headlineSuffix={remaining > 0 ? `+${remaining}` : undefined}
-        onPress={onEdit}
-      />
-    )
-  }
+  const formattedLocations = location.map(formatLocationWithRadius)
+  const hiddenLocationsCount = formattedLocations.length - 2
 
   return (
-    <Animated.View entering={FadeIn} exiting={FadeOut}>
-      <YStack>
-        <EditRow
-          state="initial"
-          headline={t('offerForm.setLocation')}
-          showInitialIcon={showInitialIcon}
-        />
-        <YStack gap="$5" paddingVertical="$5">
-          <SegmentedPicker
-            tabs={tabs}
-            activeTab={activeTab}
-            onTabPress={updateLocationState}
-          />
+    <EditStep
+      {...stepProps}
+      title={t('offerForm.setLocation')}
+      value={
+        isOnline
+          ? locationStateLabels.ONLINE
+          : formattedLocations.slice(0, 2).join('\n')
+      }
+      valueSuffix={
+        !isOnline && hiddenLocationsCount > 0
+          ? `+${hiddenLocationsCount}`
+          : undefined
+      }
+    >
+      <SegmentedPicker
+        tabs={tabs}
+        activeTab={activeTab}
+        onTabPress={updateLocationState}
+      />
 
-          {!isOnline ? (
-            <YStack gap="$3">
-              {location.map((loc) => {
-                const displayText = formatLocationWithRadius(loc)
-                return (
-                  <RowButton
-                    key={loc.placeId}
-                    label={displayText}
-                    onPress={() => {
-                      setSelectedMapValue(
-                        offerLocationToMapValueWithRadius(loc)
-                      )
-                      navigation.navigate('OfferLocationRadius', {
-                        randomizeLocation: true,
-                        editingLocationPlaceId: loc.placeId,
-                      })
-                    }}
-                    trailingAction={{
-                      icon: TrashBin,
-                      accessibilityLabel: t('common.delete'),
-                      onPress: () => {
-                        removeLocation(loc.placeId)
-                      },
-                    }}
-                  />
-                )
-              })}
-              {location.length < 3 ? (
-                <RowButton
-                  label={t('offerForm.addLocation')}
-                  icon={PlusAdd}
-                  onPress={() => {
-                    navigation.navigate('OfferLocationSearch', {
-                      randomizeLocation: true,
-                    })
-                  }}
-                />
-              ) : null}
-              {hasLocations ? (
-                <Button variant="primary" size="large" onPress={onComplete}>
-                  {ctaLabel ?? t('offerForm.next')}
-                </Button>
-              ) : null}
-            </YStack>
-          ) : (
-            <YStack gap="$5">
-              {isProduct ? (
-                <InfoBox>
-                  {t('offerForm.location.meetingInPersonSafer')}
-                </InfoBox>
-              ) : (
-                <InfoBox
-                  onPress={() => {
-                    void Effect.runPromise(
-                      showDialog({
-                        title: t(
-                          'offerForm.location.receivePaymentsSafely.title'
-                        ),
-                        subtitle: t(
-                          'offerForm.location.receivePaymentsSafely.description'
-                        ),
-                        positiveButtonText: t('common.gotIt'),
-                      })
-                    )
-                  }}
-                >
-                  {t('offerForm.location.onlineTradeWarning')}
-                </InfoBox>
-              )}
-              <Button variant="primary" size="large" onPress={onComplete}>
-                {ctaLabel ?? t('offerForm.next')}
-              </Button>
-            </YStack>
-          )}
+      {!isOnline ? (
+        <YStack gap="$3">
+          {location.map((loc) => {
+            const displayText = formatLocationWithRadius(loc)
+            return (
+              <RowButton
+                key={loc.placeId}
+                label={displayText}
+                onPress={() => {
+                  setSelectedMapValue(offerLocationToMapValueWithRadius(loc))
+                  navigation.navigate('OfferLocationRadius', {
+                    randomizeLocation: true,
+                    editingLocationPlaceId: loc.placeId,
+                  })
+                }}
+                trailingAction={{
+                  icon: TrashBin,
+                  accessibilityLabel: t('common.delete'),
+                  onPress: () => {
+                    removeLocation(loc.placeId)
+                  },
+                }}
+              />
+            )
+          })}
+          {location.length < 3 ? (
+            <RowButton
+              label={t('offerForm.addLocation')}
+              icon={PlusAdd}
+              onPress={() => {
+                navigation.navigate('OfferLocationSearch', {
+                  randomizeLocation: true,
+                })
+              }}
+            />
+          ) : null}
+          {hasLocations ? (
+            <Button variant="primary" size="large" onPress={onComplete}>
+              {ctaLabel ?? t('offerForm.next')}
+            </Button>
+          ) : null}
         </YStack>
-      </YStack>
-    </Animated.View>
+      ) : (
+        <YStack gap="$5">
+          {isProduct ? (
+            <InfoBox>{t('offerForm.location.meetingInPersonSafer')}</InfoBox>
+          ) : (
+            <InfoBox
+              onPress={() => {
+                void Effect.runPromise(
+                  showDialog({
+                    title: t('offerForm.location.receivePaymentsSafely.title'),
+                    subtitle: t(
+                      'offerForm.location.receivePaymentsSafely.description'
+                    ),
+                    positiveButtonText: t('common.gotIt'),
+                  })
+                )
+              }}
+            >
+              {t('offerForm.location.onlineTradeWarning')}
+            </InfoBox>
+          )}
+          <Button variant="primary" size="large" onPress={onComplete}>
+            {ctaLabel ?? t('offerForm.next')}
+          </Button>
+        </YStack>
+      )}
+    </EditStep>
   )
 }
 

@@ -1,9 +1,7 @@
-import {Button, EditRow, InfoBox, PriceRangeInput} from '@vexl-next/ui'
-import type {IconProps} from '@vexl-next/ui/src/icons/types'
+import {Button, EditStep, InfoBox, PriceRangeInput, Stack} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useMemo} from 'react'
-import {Stack, YStack} from 'tamagui'
 import {currencies} from '../../../utils/localization/currency'
 import {formatDecimal} from '../../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../../utils/localization/formattingLocaleAtom'
@@ -12,27 +10,14 @@ import {getOfferFeeLabel} from '../../../utils/offerAmountDetails'
 import BtcPriceInfo from '../../BtcPriceInfo'
 import {useOpenChangeCurrency} from '../../ChangeCurrency'
 import {offerFormMolecule} from '../atoms/offerFormStateAtoms'
+import {type OfferFormStepProps} from '../offerSetupSteps'
 import PremiumOptions from './PremiumOptions'
 
-interface AmountStepProps {
-  readonly active: boolean
-  readonly onEdit: () => void
-  readonly onComplete: () => void
-  readonly ctaLabel?: string
-  readonly icon?: React.ComponentType<IconProps>
-  readonly overline?: string
-  readonly showInitialIcon?: boolean
-}
-
 function AmountStep({
-  active,
-  onEdit,
   onComplete,
   ctaLabel,
-  icon,
-  overline,
-  showInitialIcon,
-}: AmountStepProps): React.ReactElement | null {
+  ...stepProps
+}: OfferFormStepProps): React.ReactElement {
   const {t} = useTranslation()
   const locale = useAtomValue(formattingLocaleAtom)
   const {
@@ -87,65 +72,49 @@ function AmountStep({
     [feeAmount, locale, t]
   )
 
-  if (!active) {
-    return (
-      <EditRow
-        state="completed"
-        icon={icon}
-        overline={overline ?? t('offerForm.selectAmount')}
-        headline={amountLabel}
-        subheadline={amountDetailsLabel}
-        onPress={onEdit}
-      />
-    )
-  }
-
   return (
-    <YStack>
-      <EditRow
-        state="initial"
-        headline={t('offerForm.selectAmount')}
-        showInitialIcon={showInitialIcon}
-      />
-      <YStack gap="$3" paddingVertical="$6">
-        {pricesLoading ? (
-          <InfoBox variant="naked" loading paddingHorizontal="$4">
-            {t('offerForm.loadingExchangeRate')}
-          </InfoBox>
-        ) : null}
-        <Stack
-          opacity={pricesLoading ? 0.5 : 1}
-          pointerEvents={pricesLoading ? 'none' : 'auto'}
-        >
-          <PriceRangeInput
-            minValueAtom={amountBottomLimitAtom}
-            maxValueAtom={amountTopLimitAtom}
-            currency={currencies[currency].code}
-            onCurrencyPress={handleCurrencyPress}
-            maxLimit={maxLimit}
-            locale={locale}
-          />
-        </Stack>
-        <BtcPriceInfo
-          btcPriceData={btcPriceData}
-          currency={currency}
-          isRefreshing={pricesLoading}
-          onRetry={retryBtcPrice}
-          showRetry={!pricesReady && !!btcPriceData}
+    <EditStep
+      {...stepProps}
+      title={t('offerForm.selectAmount')}
+      value={amountLabel}
+      details={amountDetailsLabel}
+      gap="$3"
+    >
+      {pricesLoading ? (
+        <InfoBox variant="naked" loading paddingHorizontal="$4">
+          {t('offerForm.loadingExchangeRate')}
+        </InfoBox>
+      ) : null}
+      <Stack
+        opacity={pricesLoading ? 0.5 : 1}
+        pointerEvents={pricesLoading ? 'none' : 'auto'}
+      >
+        <PriceRangeInput
+          minValueAtom={amountBottomLimitAtom}
+          maxValueAtom={amountTopLimitAtom}
+          currency={currencies[currency].code}
+          onCurrencyPress={handleCurrencyPress}
+          maxLimit={maxLimit}
+          locale={locale}
         />
-
-        <PremiumOptions amountMin={amountMin} amountMax={amountMax} />
-
-        <Button
-          variant="primary"
-          size="large"
-          disabled={!pricesReady}
-          onPress={onComplete}
-        >
-          {ctaLabel ?? t('offerForm.next')}
-        </Button>
-      </YStack>
-    </YStack>
+      </Stack>
+      <BtcPriceInfo
+        btcPriceData={btcPriceData}
+        currency={currency}
+        isRefreshing={pricesLoading}
+        onRetry={retryBtcPrice}
+        showRetry={!pricesReady && !!btcPriceData}
+      />
+      <PremiumOptions amountMin={amountMin} amountMax={amountMax} />
+      <Button
+        variant="primary"
+        size="large"
+        disabled={!pricesReady}
+        onPress={onComplete}
+      >
+        {ctaLabel ?? t('offerForm.next')}
+      </Button>
+    </EditStep>
   )
 }
 

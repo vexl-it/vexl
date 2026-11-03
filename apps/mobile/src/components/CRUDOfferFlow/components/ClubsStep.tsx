@@ -1,70 +1,44 @@
-import {useNavigation} from '@react-navigation/native'
-import {Button, EditRow} from '@vexl-next/ui'
-import {YStack} from '@vexl-next/ui/src/primitives'
+import {Button, EditStep} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
-import {Effect} from 'effect'
-import {useAtomValue, useSetAtom} from 'jotai'
+import {useAtomValue} from 'jotai'
 import React from 'react'
-import {type RootStackScreenProps} from '../../../navigationTypes'
 import {clubsWithMembersAtomsAtom} from '../../../state/clubs/atom/clubsWithMembersAtom'
-import atomKeyExtractor from '../../../utils/atomUtils/atomKeyExtractor'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
+import ClubSelectionList from '../../ClubSelectionList'
 import {offerFormMolecule} from '../atoms/offerFormStateAtoms'
-import ClubItem from './ClubItem'
 
-interface Props {
-  readonly onOfferCreated: () => void
+interface ClubsStepProps {
+  readonly ctaLabel: string
+  readonly onComplete: () => void
+  readonly showInitialIcon?: boolean
 }
 
-function ClubsStep({onOfferCreated}: Props): React.JSX.Element {
+function ClubsStep({
+  ctaLabel,
+  onComplete,
+  showInitialIcon,
+}: ClubsStepProps): React.JSX.Element {
   const {t} = useTranslation()
-  const navigation =
-    useNavigation<RootStackScreenProps<'CRUDOfferFlow'>['navigation']>()
-  const clubsWithMembersAtoms = useAtomValue(clubsWithMembersAtomsAtom)
-  const {createOfferActionAtom, createSelectClubAtom} =
-    useMolecule(offerFormMolecule)
-  const createOffer = useSetAtom(createOfferActionAtom)
+  const hasClubs = useAtomValue(clubsWithMembersAtomsAtom).length > 0
+  const {createSelectClubAtom} = useMolecule(offerFormMolecule)
+
+  const button = (
+    <Button variant="primary" size="large" onPress={onComplete}>
+      {ctaLabel}
+    </Button>
+  )
+
+  if (!hasClubs) return button
 
   return (
-    <YStack gap="$5">
-      {clubsWithMembersAtoms.length > 0 ? (
-        <YStack gap="$4">
-          <EditRow
-            state="initial"
-            headline={t('offerForm.publishToVexlClub')}
-          />
-          <YStack gap="$3">
-            {clubsWithMembersAtoms.map((clubWithMembersAtom) => (
-              <ClubItem
-                key={atomKeyExtractor(clubWithMembersAtom)}
-                clubWithMembersAtom={clubWithMembersAtom}
-                createSelectClubAtom={createSelectClubAtom}
-              />
-            ))}
-          </YStack>
-        </YStack>
-      ) : null}
-      <Button
-        variant="primary"
-        size="large"
-        onPress={() => {
-          void Effect.runPromise(createOffer()).then((success) => {
-            if (success) {
-              onOfferCreated()
-              navigation.popTo('InsideTabs', {
-                screen: 'Marketplace',
-                params: {
-                  initialTab: 'myOffers',
-                  tabSwitchRequestId: String(Date.now()),
-                },
-              })
-            }
-          })
-        }}
-      >
-        {t('offerForm.publishOffer')}
-      </Button>
-    </YStack>
+    <EditStep
+      active
+      title={t('offerForm.publishToVexlClub')}
+      showInitialIcon={showInitialIcon}
+    >
+      <ClubSelectionList createSelectClubAtom={createSelectClubAtom} />
+      {button}
+    </EditStep>
   )
 }
 

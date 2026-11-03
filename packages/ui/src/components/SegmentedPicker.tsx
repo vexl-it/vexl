@@ -1,9 +1,12 @@
+import {Array, Option, pipe} from 'effect'
 import React, {useCallback, useState} from 'react'
 import {type LayoutChangeEvent} from 'react-native'
 import Animated, {useAnimatedStyle, withTiming} from 'react-native-reanimated'
-import {styled, useTheme} from 'tamagui'
+import {getTokens, styled, useTheme} from 'tamagui'
 
-import {SizableText, Stack, XStack} from '../primitives'
+import {Stack, XStack} from '../primitives'
+import {type TabItem} from './Tabs'
+import {Typography} from './Typography'
 
 const SegmentedPickerFrame = styled(XStack, {
   name: 'SegmentedPickerFrame',
@@ -22,36 +25,8 @@ const SegmentFrame = styled(Stack, {
   paddingHorizontal: '$5',
 })
 
-const SegmentLabel = styled(SizableText, {
-  name: 'SegmentLabel',
-  fontFamily: '$body',
-  fontSize: '$4',
-  fontWeight: '500',
-  color: '$foregroundPrimary',
-  textAlign: 'center',
-  numberOfLines: 1,
-
-  variants: {
-    selected: {
-      true: {
-        fontWeight: '600',
-        color: '$accentHighlightPrimary',
-      },
-    },
-  } as const,
-
-  defaultVariants: {
-    selected: false,
-  },
-})
-
-export interface SegmentedPickerTab<T> {
-  readonly label: string
-  readonly value: T
-}
-
 export interface SegmentedPickerProps<T> {
-  readonly tabs: ReadonlyArray<SegmentedPickerTab<T>>
+  readonly tabs: ReadonlyArray<Omit<TabItem<T>, 'badge'>>
   readonly activeTab: T
   readonly onTabPress: (value: T) => void
 }
@@ -65,7 +40,11 @@ export function SegmentedPicker<T>({
 }: SegmentedPickerProps<T>): React.JSX.Element {
   const theme = useTheme()
   const [containerWidth, setContainerWidth] = useState(0)
-  const activeIndex = tabs.findIndex((tab) => tab.value === activeTab)
+  const activeIndex = pipe(
+    tabs,
+    Array.findFirstIndex((tab) => tab.value === activeTab),
+    Option.getOrElse(() => -1)
+  )
   const tabCount = tabs.length
   const tabWidth = tabCount > 0 ? containerWidth / tabCount : 0
 
@@ -92,7 +71,7 @@ export function SegmentedPicker<T>({
               top: 0,
               left: 0,
               bottom: 0,
-              borderRadius: 16,
+              borderRadius: getTokens().radius.$5.val,
               backgroundColor: theme.accentYellowSecondary.get(),
             },
             indicatorStyle,
@@ -108,7 +87,16 @@ export function SegmentedPicker<T>({
               onTabPress(tab.value)
             }}
           >
-            <SegmentLabel selected={isSelected}>{tab.label}</SegmentLabel>
+            <Typography
+              variant={isSelected ? 'paragraphDemibold' : 'paragraph'}
+              color={
+                isSelected ? '$accentHighlightPrimary' : '$foregroundPrimary'
+              }
+              textAlign="center"
+              numberOfLines={1}
+            >
+              {tab.label}
+            </Typography>
           </SegmentFrame>
         )
       })}

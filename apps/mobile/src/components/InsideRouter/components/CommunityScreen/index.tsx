@@ -4,7 +4,6 @@ import {
 } from '@react-navigation/material-top-tabs'
 import {Tabs, type TabItem} from '@vexl-next/ui'
 import React, {useCallback, useEffect, useMemo, useState} from 'react'
-import {getTokens} from 'tamagui'
 import {type CommunityParamsList} from '../../../../navigationTypes'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import {InsideScreen, InsideScreenListHeader} from '../InsideScreen'
@@ -15,7 +14,6 @@ import DiscoverScreen from './components/DiscoverScreen'
 import EventsScreen from './components/EventsScreen'
 
 const Tab = createMaterialTopTabNavigator<CommunityParamsList>()
-const TAB_CONTENT_PADDING_LEFT = getTokens().space.$5.val
 
 function toCommunityTab(tab: string | undefined): keyof CommunityParamsList {
   switch (tab) {
@@ -96,7 +94,7 @@ function CommunityTabBar({
       <Tabs
         tabs={tabs}
         activeTab={optimisticActiveTab}
-        contentPaddingLeft={TAB_CONTENT_PADDING_LEFT}
+        contentPaddingLeft="$5"
         onTabPress={handleTabPress}
       />
     </InsideScreenListHeader>

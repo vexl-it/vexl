@@ -2,17 +2,30 @@ import React from 'react'
 import {styled} from 'tamagui'
 
 import type {IconProps} from '../icons/types'
-import {SizableText, Stack, XStack, YStack} from '../primitives'
+import {Stack, XStack, YStack} from '../primitives'
 import {CommonFriendsSummary} from './CommonFriendsSummary'
 import {NavButton, type NavButtonVariant} from './NavButton'
 import {Typography} from './Typography'
 
-export interface NavigationBarAction {
-  readonly icon: React.ComponentType<IconProps>
+interface NavigationBarActionBase {
   readonly onPress: () => void
   readonly variant?: NavButtonVariant
   readonly disabled?: boolean
 }
+
+interface NavigationBarIconAction extends NavigationBarActionBase {
+  readonly icon: React.ComponentType<IconProps>
+  readonly label?: never
+}
+
+interface NavigationBarTextAction extends NavigationBarActionBase {
+  readonly label: string
+  readonly icon?: never
+}
+
+export type NavigationBarAction =
+  | NavigationBarIconAction
+  | NavigationBarTextAction
 
 const NavigationBarFrame = styled(Stack, {
   name: 'NavigationBar',
@@ -53,17 +66,6 @@ const BackCenterContainer = styled(YStack, {
   justifyContent: 'center',
   flex: 1,
   minWidth: 0,
-})
-
-const BackTitle = styled(SizableText, {
-  name: 'NavigationBarBackTitle',
-  fontFamily: '$body',
-  fontWeight: '600',
-  fontSize: '$5',
-  letterSpacing: '$5',
-  color: '$foregroundPrimary',
-  textAlign: 'center',
-  maxWidth: '100%',
 })
 
 const ChatBar = styled(XStack, {
@@ -116,29 +118,31 @@ export type NavigationBarProps = NavigationBarBackProps | NavigationBarChatProps
 
 export type NavigationBarStyle = NavigationBarProps['style']
 
-function HighlightedNavAction({
+function NavAction({
   action,
+  defaultVariant,
 }: {
   readonly action: NavigationBarAction
+  readonly defaultVariant: NavButtonVariant
 }): React.JSX.Element {
-  return (
-    <NavButton
-      variant={action.variant ?? 'highlighted'}
-      icon={action.icon}
-      onPress={action.onPress}
-      disabled={action.disabled}
-    />
-  )
-}
+  const variant = action.variant ?? defaultVariant
 
-function RightNavAction({
-  action,
-}: {
-  readonly action: NavigationBarAction
-}): React.JSX.Element {
+  if (action.label !== undefined) {
+    return (
+      <NavButton
+        type="text"
+        variant={variant}
+        onPress={action.onPress}
+        disabled={action.disabled}
+      >
+        {action.label}
+      </NavButton>
+    )
+  }
+
   return (
     <NavButton
-      variant={action.variant ?? 'normal'}
+      variant={variant}
       icon={action.icon}
       onPress={action.onPress}
       disabled={action.disabled}
@@ -153,26 +157,36 @@ export function NavigationBar(props: NavigationBarProps): React.JSX.Element {
         <BackBar>
           <BackSideContainer side="left">
             {props.leftAction ? (
-              <HighlightedNavAction action={props.leftAction} />
+              <NavAction
+                action={props.leftAction}
+                defaultVariant="highlighted"
+              />
             ) : null}
           </BackSideContainer>
           <BackCenterContainer pointerEvents="none">
             {props.title ? (
-              <BackTitle numberOfLines={1} ellipsizeMode="tail">
+              <Typography
+                variant="titlesSmall"
+                color="$foregroundPrimary"
+                textAlign="center"
+                maxWidth="100%"
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
                 {props.title}
-              </BackTitle>
+              </Typography>
             ) : null}
           </BackCenterContainer>
           <BackSideContainer side="right">
             {props.rightActions?.map((action, i) => (
-              <RightNavAction key={i} action={action} />
+              <NavAction key={i} action={action} defaultVariant="normal" />
             ))}
           </BackSideContainer>
         </BackBar>
       ) : (
         <ChatBar>
           {props.leftAction ? (
-            <HighlightedNavAction action={props.leftAction} />
+            <NavAction action={props.leftAction} defaultVariant="highlighted" />
           ) : null}
           <ChatPressableArea onPress={props.onPress}>
             {props.avatar}
@@ -192,7 +206,7 @@ export function NavigationBar(props: NavigationBarProps): React.JSX.Element {
             </ChatInfoColumn>
           </ChatPressableArea>
           {props.rightActions?.map((action, i) => (
-            <RightNavAction key={i} action={action} />
+            <NavAction key={i} action={action} defaultVariant="normal" />
           ))}
         </ChatBar>
       )}

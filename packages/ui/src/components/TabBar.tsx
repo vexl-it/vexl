@@ -9,7 +9,9 @@ import Animated, {
 import {getTokens, styled, useTheme} from 'tamagui'
 
 import type {IconProps} from '../icons/types'
-import {Circle, SizableText, Stack, XStack, YStack} from '../primitives'
+import {Stack, XStack, YStack} from '../primitives'
+import {Dot} from './Dot'
+import {Typography} from './Typography'
 
 const ANIMATION_DURATION = 250
 
@@ -269,26 +271,22 @@ export function TabBar<T>({
                 direction={isActive ? directionRef.current : 'none'}
               />
               {tab.badge ? (
-                <Circle
+                <Dot
                   position="absolute"
                   top="$2"
                   right="$5"
-                  size="$3"
                   backgroundColor="$accentYellowPrimary"
                 />
               ) : null}
             </IconPillFrame>
-            <SizableText
-              fontFamily="$body"
-              fontWeight="500"
-              fontSize="$2"
-              letterSpacing="$2"
+            <Typography
+              variant="description"
               color={
                 isActive ? '$accentHighlightPrimary' : '$foregroundSecondary'
               }
             >
               {tab.label}
-            </SizableText>
+            </Typography>
           </TabFrame>
         )
       })}

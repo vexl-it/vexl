@@ -6,6 +6,7 @@ import {CurrencyBitcoinCircle} from '../icons/CurrencyBitcoinCircle'
 import {Tools} from '../icons/Tools'
 import type {IconProps} from '../icons/types'
 import {XStack} from '../primitives'
+import {tagShapes} from './tagShapes'
 
 export type IconTagVariant = 'bitcoin' | 'product' | 'service'
 
@@ -21,10 +22,7 @@ const IconTagFrame = styled(XStack, {
   overflow: 'hidden',
   paddingHorizontal: '$2',
   paddingVertical: '$1',
-  borderTopLeftRadius: '$1',
-  borderTopRightRadius: '$4',
-  borderBottomLeftRadius: '$4',
-  borderBottomRightRadius: '$1',
+  ...tagShapes.right,
 
   variants: {
     variant: {

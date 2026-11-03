@@ -10,8 +10,9 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {getTokens, styled, useTheme} from 'tamagui'
 
 import type {IconProps} from '../icons/types'
-import {SizableText, Stack, XStack} from '../primitives'
+import {Stack, XStack} from '../primitives'
 import {Dot} from './Dot'
+import {Typography} from './Typography'
 
 export const navBarHeightAtom = atom(0)
 
@@ -42,16 +43,6 @@ const TitleArea = styled(XStack, {
   flex: 1,
   alignItems: 'center',
   paddingVertical: '$1',
-})
-
-const Title = styled(SizableText, {
-  name: 'AnimatedNavigationBarTitle',
-  fontFamily: '$body',
-  fontWeight: '600',
-  fontSize: '$5',
-  letterSpacing: '$5',
-  color: '$foregroundPrimary',
-  flex: 1,
 })
 
 const IconsArea = styled(XStack, {
@@ -137,7 +128,9 @@ export function AnimatedNavigationBar({
         <TitleArea>
           {title ? (
             <Animated.View style={titleAnimatedStyle}>
-              <Title>{title}</Title>
+              <Typography variant="titlesSmall" color="$foregroundPrimary">
+                {title}
+              </Typography>
             </Animated.View>
           ) : null}
         </TitleArea>

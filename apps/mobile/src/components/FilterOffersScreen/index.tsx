@@ -4,7 +4,7 @@ import {
   Collapse,
   Divider,
   InfoBox,
-  NavButton,
+  NavigationBar,
   Screen,
   SectionHeader,
   Stack,
@@ -83,32 +83,14 @@ function FilterOffersScreen(): React.ReactElement {
       noHorizontalPadding
       scrollable
       navigationBar={
-        <XStack
-          alignItems="center"
-          justifyContent="space-between"
-          paddingHorizontal="$5"
-          paddingVertical="$4"
-        >
-          <XStack flex={1} alignItems="center">
-            <NavButton
-              variant="highlighted"
-              icon={ChevronLeft}
-              onPress={safeGoBack}
-            />
-          </XStack>
-          <Typography
-            variant="titlesSmall"
-            color="$foregroundPrimary"
-            textAlign="center"
-          >
-            {t('filterOffers.filters')}
-          </Typography>
-          <XStack flex={1} justifyContent="flex-end">
-            <NavButton type="text" variant="normal" onPress={resetOfferForm}>
-              {t('filterOffers.clearAll')}
-            </NavButton>
-          </XStack>
-        </XStack>
+        <NavigationBar
+          style="back"
+          title={t('filterOffers.filters')}
+          leftAction={{icon: ChevronLeft, onPress: safeGoBack}}
+          rightActions={[
+            {label: t('filterOffers.clearAll'), onPress: resetOfferForm},
+          ]}
+        />
       }
       footer={<FilterOffersFooter onPress={handleSave} />}
     >

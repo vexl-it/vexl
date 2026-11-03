@@ -1,3 +1,4 @@
+import {Array, Option, pipe} from 'effect'
 import React, {useCallback, useEffect, useMemo, useRef} from 'react'
 import {ScrollView, StyleSheet, type LayoutChangeEvent} from 'react-native'
 import Animated, {
@@ -5,10 +6,11 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated'
-import {getTokens, useTheme} from 'tamagui'
+import {getTokens, useTheme, type SpaceTokens} from 'tamagui'
 
-import {SizableText, Stack, XStack} from '../primitives'
+import {Stack, XStack} from '../primitives'
 import {Dot} from './Dot'
+import {Typography} from './Typography'
 
 const UNDERLINE_HEIGHT = 3
 const ANIMATION_DURATION = 300
@@ -39,14 +41,14 @@ export interface TabsProps<T> {
   readonly activeTab: T
   readonly onTabPress: (value: T) => void
   readonly size?: 'small' | 'large'
-  readonly contentPaddingLeft?: number
+  readonly contentPaddingLeft?: SpaceTokens
 }
 
 export function Tabs<T>({
   tabs,
   activeTab,
   onTabPress,
-  contentPaddingLeft = 0,
+  contentPaddingLeft = '$0',
   size = 'large',
 }: TabsProps<T>): React.JSX.Element {
   const spaceTokens = getTokens().space
@@ -74,7 +76,12 @@ export function Tabs<T>({
   }))
 
   const activeIndex = useMemo(
-    () => tabs.findIndex((tab) => tab.value === activeTab),
+    () =>
+      pipe(
+        tabs,
+        Array.findFirstIndex((tab) => tab.value === activeTab),
+        Option.getOrElse(() => -1)
+      ),
     [tabs, activeTab]
   )
 
@@ -168,10 +175,16 @@ export function Tabs<T>({
               }}
             >
               <XStack gap="$1" alignItems="flex-start">
-                <SizableText
-                  fontFamily="$heading"
-                  fontSize={size === 'large' ? '$2' : '$1'}
-                  fontWeight={isSelected ? '700' : '400'}
+                <Typography
+                  variant={
+                    size === 'large'
+                      ? isSelected
+                        ? 'tabLargeBold'
+                        : 'tabLarge'
+                      : isSelected
+                        ? 'tabSmallBold'
+                        : 'tabSmall'
+                  }
                   color={
                     isSelected
                       ? '$accentHighlightPrimary'
@@ -179,7 +192,7 @@ export function Tabs<T>({
                   }
                 >
                   {tab.label}
-                </SizableText>
+                </Typography>
                 {tab.badge === true ? <Dot size="$3" marginTop="$1" /> : null}
               </XStack>
             </Stack>

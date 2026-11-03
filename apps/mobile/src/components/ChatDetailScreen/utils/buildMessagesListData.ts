@@ -46,7 +46,7 @@ export type MessagesListItem =
     }
 
 function messagesToListData(messages: MessageWithState[]): MessagesListItem[] {
-  const result = [] as MessagesListItem[]
+  const result: MessagesListItem[] = []
 
   let prevMessageTime: DateTime | null = null
 

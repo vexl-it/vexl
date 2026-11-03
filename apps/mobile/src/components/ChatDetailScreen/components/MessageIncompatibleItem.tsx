@@ -9,6 +9,7 @@ import {
   useTheme,
 } from '@vexl-next/ui'
 import React from 'react'
+import {getTokens} from 'tamagui'
 import {version} from '../../../utils/environment'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import openUrl from '../../../utils/openUrl'
@@ -36,7 +37,10 @@ export default function MessageIncompatibleItem({
         p="$3"
       >
         <XStack gap="$2" alignItems="center">
-          <InfoCircle size={18} color={theme.redForeground.get()} />
+          <InfoCircle
+            size={getTokens().size['$5.5'].val}
+            color={theme.redForeground.get()}
+          />
           <Typography variant="descriptionBold" color="$foregroundPrimary">
             {t('messages.incompatible.title')}
           </Typography>

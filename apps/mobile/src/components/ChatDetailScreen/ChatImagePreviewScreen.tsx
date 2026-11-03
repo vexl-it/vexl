@@ -25,7 +25,7 @@ export default function ChatImagePreviewScreen({
   return (
     <GestureHandlerRootView style={{flex: 1}}>
       <Stack f={1} bc="$backgroundPrimary">
-        <Stack pos="absolute" top={top} mt="$4" right="$4" zIndex={100}>
+        <Stack pos="absolute" top={top} mt="$4" right="$4" zIndex="$1">
           <NavButton
             variant="secondary"
             icon={XmarkCancelClose}

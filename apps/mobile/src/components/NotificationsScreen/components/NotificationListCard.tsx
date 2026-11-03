@@ -24,7 +24,8 @@ import {
 import {formattingLocaleAtom} from '../../../utils/localization/formattingLocaleAtom'
 import {cancelNotificationCenterRecordActionAtom} from '../state'
 import {type NotificationCenterRecord} from '../state/domain'
-import VexlAvatar from './VexlAvatar'
+
+const vexlAvatar: number = require('../images/avatar.png')
 
 interface CardDataBase {
   readonly name: string
@@ -100,7 +101,7 @@ function NotificationListCard({
       const actionLink = productNotification.actionLink
       const sharedCardData = {
         name: 'Vexl',
-        avatar: <VexlAvatar />,
+        avatar: <Avatar size="$9" source={vexlAvatar} />,
         category:
           productNotification.type === 'MARKETING'
             ? t('notificationsScreen.important')

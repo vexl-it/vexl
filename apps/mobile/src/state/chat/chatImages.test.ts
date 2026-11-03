@@ -18,6 +18,7 @@ import {Deferred, Effect, Either, Exit, Schema} from 'effect'
 import {createStore} from 'jotai'
 import {
   cancelChatImageTransfers,
+  deleteChatImageFiles,
   ensureChatImageDownloadedActionAtom,
   uploadChatImageIfAnyActionAtom,
 } from './chatImages'
@@ -209,6 +210,24 @@ it('does not store an image whose download finishes after cancelling', async () 
     })
   )
   cancelChatImageTransfers()
+  await Effect.runPromise(
+    Deferred.succeed(response, s3Response(encryptedImage))
+  )
+
+  expect(Exit.isInterrupted(await download)).toBe(true)
+  expect(mockFiles.size).toBe(0)
+})
+
+it('does not store an image whose download finishes after the chat is deleted', async () => {
+  const response = pendingS3Response()
+
+  const download = Effect.runPromiseExit(
+    createStore().set(ensureChatImageDownloadedActionAtom, {
+      attachment,
+      chatKeys,
+    })
+  )
+  deleteChatImageFiles({messages: [], chatKeys})
   await Effect.runPromise(
     Deferred.succeed(response, s3Response(encryptedImage))
   )

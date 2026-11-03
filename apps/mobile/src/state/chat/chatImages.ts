@@ -93,24 +93,50 @@ export function getDownloadedChatImageUri(
   )
 }
 
+let transfersGeneration = 0
+const chatTransfersGenerations = new Map<string, number>()
+
+function chatTransfersKey({inboxKey, otherSideKey}: ChatKeys): string {
+  return `${inboxKey}${otherSideKey}`
+}
+
+/** Tells whether the chat's transfers were cancelled since this call. */
+function cancelledSince(chatKeys: ChatKeys): () => boolean {
+  const key = chatTransfersKey(chatKeys)
+  const generation = transfersGeneration
+  const chatGeneration = chatTransfersGenerations.get(key)
+  return () =>
+    generation !== transfersGeneration ||
+    chatGeneration !== chatTransfersGenerations.get(key)
+}
+
 function writeChatImageFile({
   id,
   chatKeys,
+  isCancelled,
   write,
 }: {
   id: ChatImageId
   chatKeys: ChatKeys
+  isCancelled: () => boolean
   write: (file: File) => void
 }): Effect.Effect<UriString, ChatImageProcessingError> {
   return Effect.try({
+    // Checked in the same synchronous step as the write, so a cancellation
+    // cannot slip in between.
     try: () => {
+      if (isCancelled()) return Option.none()
       const file = Option.getOrThrow(getChatImageFile(id, chatKeys))
       file.parentDirectory.create({intermediates: true, idempotent: true})
       write(file)
-      return Schema.decodeSync(UriString)(file.uri)
+      return Option.some(Schema.decodeSync(UriString)(file.uri))
     },
     catch: (cause) => new ChatImageProcessingError({cause}),
-  })
+  }).pipe(
+    Effect.flatMap(
+      Option.match({onNone: () => Effect.interrupt, onSome: Effect.succeed})
+    )
+  )
 }
 
 function decryptChatImage(
@@ -130,7 +156,6 @@ function decryptChatImage(
 type ChatImageDownloadError = ChatImageTransferError | ChatImageProcessingError
 type ChatImageDownload = Promise<Exit.Exit<UriString, ChatImageDownloadError>>
 const inFlightDownloads = new Map<ChatImageId, ChatImageDownload>()
-let transfersGeneration = 0
 
 /**
  * Stops pending uploads and downloads from writing files, e.g. before logout
@@ -141,10 +166,6 @@ export function cancelChatImageTransfers(): void {
   inFlightDownloads.clear()
 }
 
-function interruptIfCancelledSince(generation: number): Effect.Effect<void> {
-  return generation === transfersGeneration ? Effect.void : Effect.interrupt
-}
-
 function startDownload({
   attachment,
   chatKeys,
@@ -152,14 +173,14 @@ function startDownload({
   attachment: ChatImageAttachment
   chatKeys: ChatKeys
 }): ChatImageDownload {
-  const generation = transfersGeneration
+  const isCancelled = cancelledSince(chatKeys)
   const download = fetchFromS3(`${apiEnv.chatImagesUrl}/${attachment.id}`).pipe(
     Effect.flatMap((data) => decryptChatImage(data, attachment.key)),
-    Effect.tap(() => interruptIfCancelledSince(generation)),
     Effect.flatMap((bytes) =>
       writeChatImageFile({
         id: attachment.id,
         chatKeys,
+        isCancelled,
         write: (file) => {
           // Write next to the target first so an interrupted write never
           // leaves a broken file that counts as downloaded.
@@ -216,22 +237,24 @@ export const downloadNewChatImagesActionAtom = atom(
       inboxKey: ChatKeys['inboxKey']
     }
   ): void => {
-    const generation = transfersGeneration
     pipe(
       messages,
       Array.filterMap(({message}) =>
         Option.map(
           Option.fromNullable(message.imageAttachment),
-          (attachment) => ({
-            attachment,
-            chatKeys: {inboxKey, otherSideKey: message.senderPublicKey},
-          })
+          (attachment) => {
+            const chatKeys = {inboxKey, otherSideKey: message.senderPublicKey}
+            return {attachment, chatKeys, isCancelled: cancelledSince(chatKeys)}
+          }
         )
       ),
       Effect.forEach(
-        (args) =>
-          interruptIfCancelledSince(generation).pipe(
-            Effect.zipRight(set(ensureChatImageDownloadedActionAtom, args)),
+        ({isCancelled, ...args}) =>
+          Effect.suspend(() =>
+            isCancelled()
+              ? Effect.interrupt
+              : set(ensureChatImageDownloadedActionAtom, args)
+          ).pipe(
             Effect.tapErrorTag('ChatImageProcessingError', (e) =>
               Effect.sync(() => {
                 reportError(
@@ -267,7 +290,8 @@ export const uploadChatImageIfAnyActionAtom = atom(
     if (message.messageType !== 'MESSAGE' || !image || message.imageAttachment)
       return Effect.succeed(message)
 
-    const generation = transfersGeneration
+    const chatKeys = getChatKeys(chat)
+    const isCancelled = cancelledSince(chatKeys)
     return Effect.gen(function* (_) {
       const resized = yield* _(
         resizeImage({
@@ -311,11 +335,11 @@ export const uploadChatImageIfAnyActionAtom = atom(
         Effect.mapError((cause) => new ChatImageProcessingError({cause}))
       )
 
-      yield* _(interruptIfCancelledSince(generation))
       yield* _(
         writeChatImageFile({
           id: imageId,
-          chatKeys: getChatKeys(chat),
+          chatKeys,
+          isCancelled,
           write: (file) => {
             resizedFile.moveSync(file)
           },
@@ -349,6 +373,12 @@ export function deleteChatImageFiles({
   }>
   chatKeys: ChatKeys
 }): void {
+  const key = chatTransfersKey(chatKeys)
+  chatTransfersGenerations.set(
+    key,
+    (chatTransfersGenerations.get(key) ?? 0) + 1
+  )
+
   pipe(
     messages,
     Array.flatMap(({message}) => [
@@ -358,12 +388,8 @@ export function deleteChatImageFiles({
     Array.filter(Predicate.isNotNullable),
     Array.forEach(({id}) => {
       Option.map(getChatImageFile(id, chatKeys), (file) => {
-        const deleteFiles = (): void => {
-          deleteFileIfExists(file)
-          deleteFileIfExists(new File(`${file.uri}.part`))
-        }
-        deleteFiles()
-        void inFlightDownloads.get(id)?.finally(deleteFiles)
+        deleteFileIfExists(file)
+        deleteFileIfExists(new File(`${file.uri}.part`))
       })
     })
   )

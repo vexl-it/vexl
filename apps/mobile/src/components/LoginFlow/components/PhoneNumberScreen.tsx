@@ -145,7 +145,7 @@ export default function PhoneNumberScreen({
           text={t('loginFlow.v2.phoneNumber.caption')}
         />
       }
-      action={{
+      primaryAction={{
         disabled: Option.isNone(phoneNumber),
         label: t('common.continue'),
         onPress: () => {
@@ -177,7 +177,7 @@ export default function PhoneNumberScreen({
             })
         },
       }}
-      scroll
+      scrollable
     >
       <YStack flex={1} gap="$10" justifyContent="flex-start" paddingTop="$11">
         <TitleBlock

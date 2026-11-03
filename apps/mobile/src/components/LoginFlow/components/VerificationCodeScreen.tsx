@@ -186,7 +186,7 @@ export default function VerificationCodeScreen({
 
   return (
     <LoginFlowScreen
-      action={{
+      primaryAction={{
         disabled: userCode.length !== 6 || submitInProgress || resendInProgress,
         label: t('common.continue'),
         onPress: () => {
@@ -225,7 +225,7 @@ export default function VerificationCodeScreen({
           </Typography>
         )
       }
-      scroll
+      scrollable
     >
       <YStack flex={1} justifyContent="center" gap="$10">
         <TitleBlock

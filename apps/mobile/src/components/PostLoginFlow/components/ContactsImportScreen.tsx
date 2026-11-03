@@ -2,15 +2,16 @@ import {ContactsGraphic, TitleBlock, YStack} from '@vexl-next/ui'
 import {Effect} from 'effect'
 import {useSetAtom} from 'jotai'
 import React, {useState} from 'react'
-import {Alert, useWindowDimensions} from 'react-native'
+import {Alert} from 'react-native'
 import {type PostLoginFlowStackScreenProps} from '../../../navigationTypes'
 import {resolveAllContactsAsSeenActionAtom} from '../../../state/contacts/atom/contactsStore'
 import {submitContactsActionAtom} from '../../../state/contacts/atom/submitContactsActionAtom'
 import {completePostLoginFlowScreenActionAtom} from '../../../state/postLoginOnboarding'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
+import useGraphicScale from '../../../utils/useGraphicScale'
+import LoginFlowScreen from '../../LoginFlow/components/LoginFlowScreen'
 import {showContactsAccessDeniedExplanationActionAtom} from '../atoms/showContactsAccesDeniedExplanationActionAtom'
 import {showNoContactsFoundExplanationActionAtom} from '../atoms/showNoContactsFoundExplanationActionAtom'
-import PostLoginFlowScreen from './PostLoginFlowScreen'
 
 type Props = PostLoginFlowStackScreenProps<'ContactsImport'>
 
@@ -18,9 +19,7 @@ export default function ContactsImportScreen({
   navigation,
 }: Props): React.ReactElement {
   const {t} = useTranslation()
-  const {width: windowWidth} = useWindowDimensions()
-  const availableWidth = windowWidth - 40
-  const graphicScale = Math.min(1, availableWidth / 184)
+  const graphicScale = useGraphicScale(184)
   const [contactsLoading, setContactsLoading] = useState(false)
   const submitContacts = useSetAtom(submitContactsActionAtom)
   const resolveAllContactsAsSeen = useSetAtom(
@@ -40,8 +39,8 @@ export default function ContactsImportScreen({
   }
 
   return (
-    <PostLoginFlowScreen
-      primaryButton={{
+    <LoginFlowScreen
+      primaryAction={{
         disabled: contactsLoading,
         label: t('postLoginFlow.v2.contactsImport.action'),
         onPress: () => {
@@ -81,7 +80,7 @@ export default function ContactsImportScreen({
             })
         },
       }}
-      secondaryButton={{
+      secondaryAction={{
         disabled: contactsLoading,
         label: t('postLoginFlow.v2.contactsImport.skip'),
         onPress: goNext,
@@ -100,6 +99,6 @@ export default function ContactsImportScreen({
           text={t('postLoginFlow.v2.contactsImport.text')}
         />
       </YStack>
-    </PostLoginFlowScreen>
+    </LoginFlowScreen>
   )
 }

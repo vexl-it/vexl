@@ -10,18 +10,16 @@ import {
 import {Effect} from 'effect'
 import {useSetAtom} from 'jotai'
 import React, {useCallback, useRef} from 'react'
-import {useWindowDimensions} from 'react-native'
 import {finishPostLoginFlowActionAtom} from '../../../state/postLoginOnboarding'
 import {sessionDataOrDummyAtom} from '../../../state/session'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
+import useGraphicScale from '../../../utils/useGraphicScale'
 import {useShowLoadingOverlay} from '../../LoadingOverlayProvider'
-import PostLoginFlowScreen from './PostLoginFlowScreen'
+import LoginFlowScreen from '../../LoginFlow/components/LoginFlowScreen'
 
 export default function UsageInfoScreen(): React.ReactElement {
   const {t} = useTranslation()
-  const {width: windowWidth} = useWindowDimensions()
-  const availableWidth = windowWidth - 40
-  const graphicScale = Math.min(1, availableWidth / 164)
+  const graphicScale = useGraphicScale(164)
   const finishPostLoginFlow = useSetAtom(finishPostLoginFlowActionAtom)
   const setSession = useSetAtom(sessionDataOrDummyAtom)
   const loadingOverlay = useShowLoadingOverlay()
@@ -55,22 +53,8 @@ export default function UsageInfoScreen(): React.ReactElement {
   }, [finish])
 
   return (
-    <PostLoginFlowScreen>
-      <YStack flex={1} justifyContent="space-between" paddingTop="$10" gap="$5">
-        <YStack f={1} gap="$7" alignItems="center" justifyContent="center">
-          <FaqWhatIsVexl
-            animate
-            height={164 * graphicScale}
-            width={164 * graphicScale}
-          />
-          <Typography
-            color="$foregroundPrimary"
-            textAlign="center"
-            variant="heading3"
-          >
-            {t('postLoginFlow.v2.usageInfo.title')}
-          </Typography>
-        </YStack>
+    <LoginFlowScreen
+      footer={
         <YStack gap="$3">
           <Selector
             icon={CurrencyBitcoinCircle}
@@ -88,7 +72,28 @@ export default function UsageInfoScreen(): React.ReactElement {
             onPress={finishAsLiquidityProvider}
           />
         </YStack>
+      }
+    >
+      <YStack
+        f={1}
+        gap="$7"
+        alignItems="center"
+        justifyContent="center"
+        paddingTop="$10"
+      >
+        <FaqWhatIsVexl
+          animate
+          height={164 * graphicScale}
+          width={164 * graphicScale}
+        />
+        <Typography
+          color="$foregroundPrimary"
+          textAlign="center"
+          variant="heading3"
+        >
+          {t('postLoginFlow.v2.usageInfo.title')}
+        </Typography>
       </YStack>
-    </PostLoginFlowScreen>
+    </LoginFlowScreen>
   )
 }

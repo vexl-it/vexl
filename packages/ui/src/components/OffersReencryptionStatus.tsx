@@ -42,7 +42,6 @@ export function OffersReencryptionStatus({
         px="$3"
         py="$3"
         borderRadius="$4"
-        textMt={0}
         aria-live="polite"
         aria-busy
       >

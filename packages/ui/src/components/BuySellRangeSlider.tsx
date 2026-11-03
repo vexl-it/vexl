@@ -191,7 +191,7 @@ export function BuySellRangeSlider({
 
   const bannerVariant: InfoBoxVariant =
     distanceFromCenter === 0
-      ? 'gray'
+      ? 'default'
       : distanceFromCenter <= quarterRange
         ? 'yellow'
         : 'pink'
@@ -232,7 +232,7 @@ export function BuySellRangeSlider({
           </XStack>
         ) : null}
       </Stack>
-      <InfoBox variant={bannerVariant} iconSize={24} p="$5" gap="$3" textMt={0}>
+      <InfoBox variant={bannerVariant} iconSize={24} p="$5" gap="$3">
         {infoText}
       </InfoBox>
     </YStack>

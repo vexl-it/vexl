@@ -1,7 +1,8 @@
 import React from 'react'
 import {styled} from 'tamagui'
 
-import {Stack, YStack} from '../primitives'
+import {YStack} from '../primitives'
+import {Divider} from './Divider'
 
 export const MenuContext = React.createContext(false)
 
@@ -12,13 +13,6 @@ const MenuFrame = styled(YStack, {
   paddingHorizontal: '$4',
   paddingVertical: '$5',
   gap: '$5',
-})
-
-const MenuDivider = styled(Stack, {
-  name: 'MenuDivider',
-  height: '$0.5',
-  alignSelf: 'stretch',
-  backgroundColor: '$backgroundTertiary',
 })
 
 export interface MenuProps {
@@ -33,7 +27,7 @@ export function Menu({children}: MenuProps): React.JSX.Element {
       <MenuFrame>
         {childArray.flatMap((child, index) =>
           index < childArray.length - 1
-            ? [child, <MenuDivider key={`divider-${String(index)}`} />]
+            ? [child, <Divider key={`divider-${String(index)}`} />]
             : [child]
         )}
       </MenuFrame>

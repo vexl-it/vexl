@@ -1,8 +1,6 @@
 import {useNavigation} from '@react-navigation/native'
 import {type LocationSuggestion} from '@vexl-next/rest-api/src/services/location/contracts'
 import {
-  Button,
-  Divider,
   EmptyState,
   LocationSuggestionRow,
   NavigationBar,
@@ -11,7 +9,7 @@ import {
   Typography,
 } from '@vexl-next/ui'
 import {ChevronLeft} from '@vexl-next/ui/src/icons'
-import {XStack, YStack} from '@vexl-next/ui/src/primitives'
+import {YStack} from '@vexl-next/ui/src/primitives'
 import {ScopeProvider, useMolecule} from 'bunshi/dist/react'
 import type {Atom} from 'jotai'
 import {atom, useAtomValue, useSetAtom} from 'jotai'

@@ -3,10 +3,8 @@ import {type LocationSuggestion} from '@vexl-next/rest-api/src/services/location
 import {
   ChevronLeft,
   EmptyState,
-  IconButton,
   LocationSuggestionRow,
   NavigationBar,
-  PinGeolocation,
   SearchBar,
   Typography,
   YStack,

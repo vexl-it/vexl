@@ -9,7 +9,6 @@ import {
   Stack,
   SwipeableRow,
   TrashBin,
-  Typography,
   useTheme,
   XmarkCancelClose,
   YStack,

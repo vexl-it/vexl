@@ -1,9 +1,7 @@
-import {Typography} from '@vexl-next/ui'
+import {Stack, Typography} from '@vexl-next/ui'
 import {Array as ArrayE, Effect, pipe} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
-import React, {useCallback, useEffect} from 'react'
-import {LayoutAnimation, Platform, UIManager} from 'react-native'
-import {Stack, useTheme} from 'tamagui'
+import React, {useCallback, useEffect, useState} from 'react'
 import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
 import {globalDialogAtom} from '../../../../../GlobalDialog'
 import {addDateAndTimeSuggestionsActionAtom} from '../../../../atoms/updatesToBeSentAtom'
@@ -20,7 +18,6 @@ import TimeOptionsPerDate from './components/TimeOptionsPerDate'
 
 function AddTimeOptionsScreen(): React.ReactElement {
   const {t} = useTranslation()
-  const theme = useTheme()
   const isThereAnyOutdatedDateTime = useAtomValue(
     isThereAnyOutdatedDateTimeAtom
   )
@@ -36,18 +33,9 @@ function AddTimeOptionsScreen(): React.ReactElement {
     addDateAndTimeSuggestionsActionAtom
   )
   const tradeChecklistExitNavigation = useTradeChecklistExitNavigation()
-  const [expandedDate, setExpandedDate] = React.useState<
+  const [expandedDate, setExpandedDate] = useState<
     (typeof uniqueAvailableDates)[number] | null
   >(null)
-
-  useEffect(() => {
-    if (
-      Platform.OS === 'android' &&
-      UIManager.setLayoutAnimationEnabledExperimental
-    ) {
-      UIManager.setLayoutAnimationEnabledExperimental(true)
-    }
-  }, [])
 
   useEffect(() => {
     if (uniqueAvailableDates.length === 0) {
@@ -59,18 +47,6 @@ function AddTimeOptionsScreen(): React.ReactElement {
       setExpandedDate(null)
     }
   }, [expandedDate, uniqueAvailableDates])
-
-  const animateExpandedDateChange = useCallback(
-    (
-      nextExpandedDate:
-        | ((currentExpandedDate: typeof expandedDate) => typeof expandedDate)
-        | typeof expandedDate
-    ) => {
-      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut)
-      setExpandedDate(nextExpandedDate)
-    },
-    []
-  )
 
   const onSavePress = useCallback(() => {
     if (!areAllAvailableDatesTimeSlotsSelected) {
@@ -121,7 +97,7 @@ function AddTimeOptionsScreen(): React.ReactElement {
             {t('tradeChecklist.time.description')}
           </Typography>
         </Stack>
-        <Stack gap="$3" backgroundColor={theme.backgroundPrimary.get()}>
+        <Stack gap="$3">
           {pipe(
             uniqueAvailableDates,
             ArrayE.map((date) => (
@@ -130,12 +106,12 @@ function AddTimeOptionsScreen(): React.ReactElement {
                 date={date}
                 expanded={expandedDate === date}
                 onExpand={() => {
-                  animateExpandedDateChange((currentExpandedDate) =>
+                  setExpandedDate((currentExpandedDate) =>
                     currentExpandedDate === date ? null : date
                   )
                 }}
                 onCollapse={() => {
-                  animateExpandedDateChange(null)
+                  setExpandedDate(null)
                 }}
               />
             ))

@@ -142,23 +142,18 @@ function TradeCalculator({
           }}
         />
         <CurrentBtcPrice
-          disabled={tradePriceType !== 'live'}
           currencyAtom={btcPriceCurrencyAtom}
           customBtcPriceAtom={
             tradePriceType !== 'live' ? tradeBtcPriceAtom : undefined
           }
           postRefreshActions={calculateFiatValueAfterBtcPriceRefresh}
-          showLastUpdatedAt={false}
-          col="$foregroundSecondary"
-          fos={12}
-          onPricePress={
+          onPress={
             isLivePriceType
               ? () => {
                   setLivePriceDialogVisible(true)
                 }
               : undefined
           }
-          textAlign="right"
           trailingElement={
             isLivePriceType ? (
               <InfoCircle color={theme.foregroundSecondary.get()} size={16} />

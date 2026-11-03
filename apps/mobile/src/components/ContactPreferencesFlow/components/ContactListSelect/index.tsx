@@ -35,7 +35,6 @@ function ContactsListSelect({
 }): React.ReactElement {
   const {t} = useTranslation()
   const {
-    areThereAnySelectedContactsAtom,
     areThereAnyContactsToDisplayForSelectedTabAtom,
     areAllContactsToDisplaySelectedAtom,
     contactsToDisplayCountAtom,

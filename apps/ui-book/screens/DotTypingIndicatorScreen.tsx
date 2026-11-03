@@ -1,9 +1,13 @@
-import {DotTypingIndicator, YStack} from '@vexl-next/ui'
+import {DotTypingIndicator, useTheme, YStack} from '@vexl-next/ui'
 import React from 'react'
 
-import {ComponentScreenLayout} from './ComponentScreenLayout'
+import {ComponentScreenLayout, DemoSection} from './ComponentScreenLayout'
 
-function Demos(): React.JSX.Element {
+function DemoFrame({
+  children,
+}: {
+  readonly children: React.ReactNode
+}): React.JSX.Element {
   return (
     <YStack
       alignSelf="center"
@@ -13,8 +17,30 @@ function Demos(): React.JSX.Element {
       alignItems="center"
       justifyContent="center"
     >
-      <DotTypingIndicator />
+      {children}
     </YStack>
+  )
+}
+
+function Demos(): React.JSX.Element {
+  const theme = useTheme()
+
+  return (
+    <>
+      <DemoSection title="Small (chat typing)">
+        <DemoFrame>
+          <DotTypingIndicator />
+        </DemoFrame>
+      </DemoSection>
+      <DemoSection title="Large accent (loading overlay)">
+        <DemoFrame>
+          <DotTypingIndicator
+            size="large"
+            color={theme.accentYellowPrimary.get()}
+          />
+        </DemoFrame>
+      </DemoSection>
+    </>
   )
 }
 

@@ -1,8 +1,9 @@
 import React from 'react'
-import {getTokens} from 'tamagui'
+import {getTokens, useTheme} from 'tamagui'
 
 import {Stack, YStack} from '../primitives'
 import {Backdrop} from './Backdrop'
+import {DotTypingIndicator} from './DotTypingIndicator'
 import {Loader} from './Loader'
 import {Typography} from './Typography'
 
@@ -42,6 +43,8 @@ export function LoadingOverlay({
   label,
   ...rest
 }: LoadingOverlayProps): React.JSX.Element | null {
+  const theme = useTheme()
+
   if (!visible) return null
 
   return (
@@ -58,14 +61,18 @@ export function LoadingOverlay({
       pointerEvents="auto"
       {...rest}
     >
-      <Backdrop variant="surface" />
-      <LoadingIndicator
-        label={label}
-        backgroundColor="$backgroundSecondary"
-        borderRadius="$5"
-        paddingHorizontal="$5"
-        paddingVertical="$4"
-      />
+      <Backdrop variant="dark" />
+      <YStack alignItems="center" gap="$6">
+        <DotTypingIndicator
+          size="large"
+          color={theme.accentYellowPrimary.get()}
+        />
+        {label !== undefined ? (
+          <Typography color="$white100" variant="paragraphSmallBold">
+            {label}
+          </Typography>
+        ) : null}
+      </YStack>
     </Stack>
   )
 }

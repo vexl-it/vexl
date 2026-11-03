@@ -1,9 +1,8 @@
 import React from 'react'
-import {Platform, Text} from 'react-native'
-import {useTheme} from 'tamagui'
+import {Platform} from 'react-native'
 
-import {bodyFont} from '../config/fonts'
 import {YStack} from '../primitives'
+import {Typography} from './Typography'
 
 const monospaceFontFamily = Platform.select({
   ios: 'Menlo',
@@ -19,25 +18,20 @@ export function CodeBlock({
   children,
   selectable = true,
 }: CodeBlockProps): React.JSX.Element {
-  const theme = useTheme()
-
   return (
     <YStack
       backgroundColor="$backgroundTertiary"
       borderRadius="$4"
       padding="$3"
     >
-      <Text
-        selectable={selectable}
-        style={{
-          color: theme.foregroundPrimary.get(),
-          fontFamily: monospaceFontFamily,
-          fontSize: bodyFont.size[1],
-          lineHeight: bodyFont.lineHeight[1],
-        }}
+      <Typography
+        variant="micro"
+        color="$foregroundPrimary"
+        fontFamily={monospaceFontFamily}
+        userSelect={selectable ? 'text' : 'none'}
       >
         {children}
-      </Text>
+      </Typography>
     </YStack>
   )
 }

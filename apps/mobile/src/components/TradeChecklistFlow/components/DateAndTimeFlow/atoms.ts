@@ -3,10 +3,10 @@ import {
   fromDateTime,
   UnixMilliseconds,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {type CalendarDateData} from '@vexl-next/ui'
 import {Array as ArrayE, pipe, Schema} from 'effect'
 import {atom, type WritableAtom} from 'jotai'
 import {DateTime, type DateTimeUnit} from 'luxon'
-import {type DateData} from 'react-native-calendars'
 import addToSortedArray from '../../../../utils/addToSortedArray'
 import {translationAtom} from '../../../../utils/localization/I18nProvider'
 import {globalDialogAtom} from '../../../GlobalDialog'
@@ -211,7 +211,7 @@ export function createIsTimeOptionSelectedAtom(
 
 export const handleAvailableDaysChangeActionAtom = atom(
   null,
-  (get, set, day: DateData) => {
+  (get, set, day: CalendarDateData) => {
     const dateTime = DateTime.fromObject({
       year: day.year,
       month: day.month,

@@ -1,9 +1,10 @@
 import React from 'react'
-import {styled, useTheme} from 'tamagui'
+import {getTokens, styled, useTheme} from 'tamagui'
 
 import type {IconProps} from '../icons/types'
-import {SizableText, XStack} from '../primitives'
+import {XStack} from '../primitives'
 import {Dot} from './Dot'
+import {Typography} from './Typography'
 
 const FilterTagFrame = styled(XStack, {
   name: 'FilterTag',
@@ -22,27 +23,6 @@ const FilterTagFrame = styled(XStack, {
     selected: {
       true: {
         backgroundColor: '$accentYellowSecondary',
-      },
-    },
-  } as const,
-
-  defaultVariants: {
-    selected: false,
-  },
-})
-
-const FilterTagLabel = styled(SizableText, {
-  name: 'FilterTagLabel',
-  fontFamily: '$body',
-  fontWeight: '500',
-  fontSize: '$3',
-  letterSpacing: '$3',
-  color: '$foregroundPrimary',
-
-  variants: {
-    selected: {
-      true: {
-        color: '$accentHighlightPrimary',
       },
     },
   } as const,
@@ -75,8 +55,13 @@ export function FilterTag({
 
   return (
     <FilterTagFrame selected={selected} {...rest}>
-      {Icon ? <Icon color={iconColor} size={16} /> : null}
-      <FilterTagLabel selected={selected}>{label}</FilterTagLabel>
+      {Icon ? <Icon color={iconColor} size={getTokens().size.$5.val} /> : null}
+      <Typography
+        variant="paragraphSmall"
+        color={selected ? '$accentHighlightPrimary' : '$foregroundPrimary'}
+      >
+        {label}
+      </Typography>
       {badge ? (
         <Dot position="absolute" top="$-1" right="$-1" size="$4" />
       ) : null}

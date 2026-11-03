@@ -1,8 +1,9 @@
 import React from 'react'
-import {styled, useTheme} from 'tamagui'
+import {getTokens, styled, useTheme} from 'tamagui'
 
 import {RadiobuttonCircleFilled} from '../icons'
-import {SizableText, XStack, YStack} from '../primitives'
+import {XStack, YStack} from '../primitives'
+import {Typography} from './Typography'
 
 const SelectableItemFrame = styled(XStack, {
   name: 'SelectableItem',
@@ -14,39 +15,6 @@ const SelectableItemFrame = styled(XStack, {
   pressStyle: {
     opacity: 0.6,
   },
-})
-
-const SelectableItemLabel = styled(SizableText, {
-  name: 'SelectableItemLabel',
-  fontFamily: '$body',
-  fontSize: '$4',
-  letterSpacing: '$4',
-
-  variants: {
-    selected: {
-      true: {
-        color: '$accentHighlightSecondary',
-        fontWeight: '600',
-      },
-      false: {
-        color: '$foregroundSecondary',
-        fontWeight: '500',
-      },
-    },
-  } as const,
-
-  defaultVariants: {
-    selected: false,
-  },
-})
-
-const SelectableItemNote = styled(SizableText, {
-  name: 'SelectableItemNote',
-  fontFamily: '$body',
-  fontSize: '$1',
-  letterSpacing: '$1',
-  fontWeight: '500',
-  color: '$foregroundTertiary',
 })
 
 type SelectableItemFrameProps = React.ComponentProps<typeof SelectableItemFrame>
@@ -73,13 +41,24 @@ export function SelectableItem({
   return (
     <SelectableItemFrame onPress={onPress} {...rest}>
       <YStack flex={1} gap="$2">
-        <SelectableItemLabel selected={selected}>{label}</SelectableItemLabel>
-        {note != null ? <SelectableItemNote>{note}</SelectableItemNote> : null}
+        <Typography
+          variant={selected ? 'paragraphDemibold' : 'paragraph'}
+          color={
+            selected ? '$accentHighlightSecondary' : '$foregroundSecondary'
+          }
+        >
+          {label}
+        </Typography>
+        {note != null ? (
+          <Typography variant="micro" color="$foregroundTertiary">
+            {note}
+          </Typography>
+        ) : null}
       </YStack>
       {selected ? (
         <RadiobuttonCircleFilled
           color={theme.accentHighlightSecondary.get()}
-          size={24}
+          size={getTokens().size.$7.val}
         />
       ) : null}
     </SelectableItemFrame>

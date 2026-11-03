@@ -12,7 +12,7 @@ import {atom, type Atom, useAtom, useAtomValue} from 'jotai'
 import {selectAtom, splitAtom} from 'jotai/utils'
 import React from 'react'
 import Animated from 'react-native-reanimated'
-import {Stack} from 'tamagui'
+import {getTokens, Stack} from 'tamagui'
 import messagingStateAtom from '../../../../../state/chat/atoms/messagingStateAtom'
 import compareMessages from '../../../../../state/chat/utils/compareMessages'
 import chatShouldBeVisible from '../../../../../state/chat/utils/isChatActive'
@@ -34,8 +34,9 @@ import usePixelsFromBottomWhereTabsEnd from '../../../utils'
 import {InsideScreenListHeader, useInsideScreenScroll} from '../../InsideScreen'
 import ChatListItem, {type ChatListData} from './ChatListItem'
 
-const ReanimatedFlashList: React.ComponentType<any> =
-  Animated.createAnimatedComponent(FlashList)
+const ReanimatedFlashList = Animated.createAnimatedComponent(
+  FlashList<Atom<ChatListData>>
+)
 
 const tagLabelsEquivalence = ReadonlyArray.getEquivalence<string>(
   (left, right) => left === right
@@ -252,12 +253,8 @@ function ChatsList(): React.ReactElement | null {
       maintainVisibleContentPosition={{disabled: true}}
       ListHeaderComponent={listHeaderComponent}
       ListEmptyComponent={listEmptyComponent}
-      ListEmptyComponentStyle={{
-        flex: 1,
-        justifyContent: 'center',
-      }}
       contentContainerStyle={{
-        paddingBottom: tabBarEndsAt + 25,
+        paddingBottom: tabBarEndsAt + getTokens().space.$7.val,
       }}
       onScroll={onScroll}
       scrollEventThrottle={16}

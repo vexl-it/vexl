@@ -8,6 +8,7 @@ import type {IconProps} from '../icons/types'
 import {XStack, YStack} from '../primitives'
 import {Dot} from './Dot'
 import {DotTypingIndicator} from './DotTypingIndicator'
+import {HighlightedText} from './HighlightedText'
 import {Typography} from './Typography'
 
 export type ChatMessageItemVariant =
@@ -19,8 +20,10 @@ export type ChatMessageItemVariant =
 export interface ChatMessageItemProps {
   readonly avatar: React.ReactNode
   readonly name: string
+  /** Highlights matches of this query in `name`. */
+  readonly highlightQuery?: string
   readonly message: string
-  readonly time: string
+  readonly time: React.ReactNode
   readonly unread?: boolean
   readonly variant?: ChatMessageItemVariant
   readonly icon?: React.ComponentType<IconProps>
@@ -57,6 +60,7 @@ const variantColor = {
 export function ChatMessageItem({
   avatar,
   name,
+  highlightQuery,
   message,
   time,
   unread = false,
@@ -83,14 +87,25 @@ export function ChatMessageItem({
       )}
       <YStack flex={1} gap="$1">
         <XStack alignItems="center" gap="$2">
-          <Typography
-            variant="paragraphSmall"
-            color="$foregroundPrimary"
-            numberOfLines={1}
-            flexShrink={1}
-          >
-            {name}
-          </Typography>
+          {highlightQuery !== undefined ? (
+            <HighlightedText
+              text={name}
+              query={highlightQuery}
+              variant="paragraphSmall"
+              color="$foregroundPrimary"
+              numberOfLines={1}
+              flexShrink={1}
+            />
+          ) : (
+            <Typography
+              variant="paragraphSmall"
+              color="$foregroundPrimary"
+              numberOfLines={1}
+              flexShrink={1}
+            >
+              {name}
+            </Typography>
+          )}
           {unread ? <Dot backgroundColor="$accentYellowPrimary" /> : null}
         </XStack>
         <XStack alignItems="center" gap="$3">

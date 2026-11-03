@@ -2,6 +2,7 @@ import {EmptyState} from '@vexl-next/ui'
 import {useAtomValue, type Atom} from 'jotai'
 import React, {useCallback} from 'react'
 import {FlatList} from 'react-native'
+import {getTokens} from 'tamagui'
 import atomKeyExtractor from '../../../utils/atomUtils/atomKeyExtractor'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {NotificationsAtomsAtom} from '../state'
@@ -40,8 +41,8 @@ function NotificationsList(): React.ReactElement {
       ListEmptyComponent={listEmptyComponent}
       contentContainerStyle={{
         flexGrow: 1,
-        paddingBottom: 24,
-        rowGap: 12,
+        paddingBottom: getTokens().space.$7.val,
+        rowGap: getTokens().space.$4.val,
       }}
     />
   )

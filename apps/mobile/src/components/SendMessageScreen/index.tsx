@@ -1,6 +1,7 @@
 import {CommonActions} from '@react-navigation/native'
 import {
   Button,
+  DismissKeyboardOnPressOutside,
   ChevronLeft,
   EmptyState,
   LabeledTextArea,
@@ -12,7 +13,7 @@ import {
 import {Array, Effect, Option} from 'effect'
 import {useSetAtom} from 'jotai'
 import React, {useCallback, useState} from 'react'
-import {Alert, Dimensions, Keyboard, Pressable} from 'react-native'
+import {Alert, Dimensions} from 'react-native'
 import {type RootStackScreenProps} from '../../navigationTypes'
 import {sendRequestHandleUIActionAtom} from '../../state/chat/atoms/sendRequestActionAtom'
 import {useSingleOffer} from '../../state/marketplace'
@@ -148,8 +149,8 @@ function SendMessageScreen({
         </Button>
       }
     >
-      <Pressable style={{flex: 1}} onPress={Keyboard.dismiss}>
-        <YStack gap="$5">
+      <DismissKeyboardOnPressOutside>
+        <YStack flex={1} gap="$5">
           <OfferAuthorBanner offer={offer.value} />
           <LabeledTextArea
             minHeight={Dimensions.get('window').height * 0.3}
@@ -158,7 +159,7 @@ function SendMessageScreen({
             onChangeText={setText}
           />
         </YStack>
-      </Pressable>
+      </DismissKeyboardOnPressOutside>
     </Screen>
   )
 }

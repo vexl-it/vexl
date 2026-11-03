@@ -1,5 +1,6 @@
 import {
   Button,
+  DismissKeyboardOnPressOutside,
   ChevronLeft,
   EmptyState,
   LabeledTextArea,
@@ -12,7 +13,7 @@ import {ScopeProvider, useMolecule} from 'bunshi/dist/react'
 import {Effect} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react'
-import {Dimensions, Keyboard, Pressable} from 'react-native'
+import {Dimensions} from 'react-native'
 import {type RootStackScreenProps} from '../../navigationTypes'
 import {focusChatWithMessagesByKeysAtom} from '../../state/chat/atoms/focusChatWithMessagesAtom'
 import {dummyChatWithMessages} from '../../state/chat/domain'
@@ -160,8 +161,8 @@ function DeclineChatRequestContent({
         </XStack>
       }
     >
-      <Pressable style={{flex: 1}} onPress={Keyboard.dismiss}>
-        <YStack gap="$5">
+      <DismissKeyboardOnPressOutside>
+        <YStack flex={1} gap="$5">
           <OfferAuthorBanner offer={offer} />
           <LabeledTextArea
             label={t('messages.stateYourReasonForRejection')}
@@ -172,7 +173,7 @@ function DeclineChatRequestContent({
             onChangeText={setText}
           />
         </YStack>
-      </Pressable>
+      </DismissKeyboardOnPressOutside>
     </Screen>
   )
 }

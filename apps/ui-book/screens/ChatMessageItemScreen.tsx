@@ -137,6 +137,16 @@ function ThemeGroup({
           time="Tue"
         />
 
+        <SectionLabel>Search result (highlightQuery)</SectionLabel>
+        <ChatMessageItem
+          onPress={() => {}}
+          avatar={<DemoAvatar2 />}
+          name="Direct friend"
+          highlightQuery="friend"
+          message="Hi, is this offer still active?"
+          time="2 hours ago"
+        />
+
         <SectionLabel>Typing</SectionLabel>
         <ChatMessageItem
           onPress={() => {}}

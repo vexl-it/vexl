@@ -1,16 +1,14 @@
 import {useNavigation} from '@react-navigation/native'
 import {
   BulletListMenu,
-  ChevronRight,
-  Circle,
   CommonFriendsSummary,
-  Divider,
   DocumentsFiles,
   EmptyState,
   EyeShut,
   FlagReport,
+  Menu,
+  MenuItem,
   NavigationBar,
-  PeopleUsers,
   Screen,
   TagLabel,
   TrashBin,
@@ -23,9 +21,7 @@ import {useMolecule} from 'bunshi/dist/react'
 import {Effect} from 'effect'
 import {useAtom, useAtomValue, useSetAtom} from 'jotai'
 import React, {useMemo} from 'react'
-import {Alert, ScrollView} from 'react-native'
-import {useSafeAreaInsets} from 'react-native-safe-area-context'
-import {Stack, getTokens, useTheme} from 'tamagui'
+import {Alert} from 'react-native'
 import {type RootStackScreenProps} from '../../../navigationTypes'
 import isNoteChatOrigin from '../../../state/chat/utils/isNoteChatOrigin'
 import {
@@ -65,7 +61,6 @@ function OtherSideInfoBanner({
   readonly trustedFriends?: string
 }): React.ReactElement {
   const {t} = useTranslation()
-  const theme = useTheme()
 
   return (
     <XStack alignItems="center" gap="$3">
@@ -78,95 +73,14 @@ function OtherSideInfoBanner({
         >
           {title}
         </Typography>
-        {trustedFriends ? (
-          <CommonFriendsSummary
-            clubNames={clubLabel ? [clubLabel] : undefined}
-            commonFriends={t('offer.numberOfCommon', {
-              number: commonConnectionsCount,
-            })}
-            trustedFriends={trustedFriends}
-          />
-        ) : (
-          <XStack gap="$2" alignItems="center">
-            {clubLabel != null ? (
-              <>
-                <Typography
-                  variant="micro"
-                  color="$foregroundSecondary"
-                  numberOfLines={1}
-                >
-                  {clubLabel}
-                </Typography>
-                <Circle
-                  size="$2"
-                  backgroundColor={theme.foregroundSecondary.get()}
-                />
-              </>
-            ) : null}
-            <XStack gap="$1" alignItems="center">
-              <PeopleUsers size={16} color={theme.foregroundSecondary.get()} />
-              <Typography
-                variant="micro"
-                color="$foregroundSecondary"
-                numberOfLines={1}
-              >
-                {t('offer.numberOfCommon', {number: commonConnectionsCount})}
-              </Typography>
-            </XStack>
-          </XStack>
-        )}
+        <CommonFriendsSummary
+          clubNames={clubLabel ? [clubLabel] : undefined}
+          commonFriends={t('offer.numberOfCommon', {
+            number: commonConnectionsCount,
+          })}
+          trustedFriends={trustedFriends}
+        />
       </YStack>
-    </XStack>
-  )
-}
-
-function ActionRow({
-  color,
-  icon: Icon,
-  label,
-  showChevron,
-  onPress,
-}: {
-  readonly color: 'foregroundPrimary' | 'redForeground'
-  readonly icon: React.ComponentType<{
-    readonly color?: string | undefined
-    readonly size?: number | undefined
-  }>
-  readonly label: string
-  showChevron?: boolean
-  readonly onPress: () => void
-}): React.ReactElement {
-  const theme = useTheme()
-  const tokens = getTokens()
-  const iconColor =
-    color === 'redForeground'
-      ? theme.redForeground.get()
-      : theme.foregroundSecondary.get()
-  const textColor =
-    color === 'redForeground'
-      ? theme.redForeground.get()
-      : theme.foregroundPrimary.get()
-
-  return (
-    <XStack
-      alignItems="center"
-      gap="$4"
-      py="$5"
-      pressStyle={{opacity: 0.7}}
-      onPress={onPress}
-    >
-      <Icon color={iconColor} size={tokens.size.$7.val} />
-      <Typography color={textColor} variant="paragraph">
-        {label}
-      </Typography>
-      {!!showChevron && (
-        <Stack flex={1} alignItems="flex-end">
-          <ChevronRight
-            color={theme.foregroundTertiary.get()}
-            size={tokens.size.$7.val}
-          />
-        </Stack>
-      )}
     </XStack>
   )
 }
@@ -180,7 +94,6 @@ export default function ChatInfoContent({
 
   const navigation =
     useNavigation<RootStackScreenProps<'ChatInfo'>['navigation']>()
-  const {bottom} = useSafeAreaInsets()
   const {t} = useTranslation()
   const localizeNumber = useSetAtom(localizedDecimalNumberActionAtom)
   const resetNavigationToMessagingScreen = useResetNavigationToMessagingScreen()
@@ -318,194 +231,150 @@ export default function ChatInfoContent({
           ]}
         />
       }
+      scrollable
     >
-      <ScrollView
-        bounces={false}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{
-          paddingBottom: bottom + getTokens().space.$8.val,
-        }}
-      >
-        <YStack gap="$8">
-          <YStack gap="$4">
-            {offer != null && otherSideIsOfferCreator ? (
-              <OfferAuthorBanner
-                offer={offer}
-                realUserName={otherSideRealUserName}
-                userImage={otherSideData.image}
-                grayAvatar={shouldGrayScaleAvatar}
-              />
-            ) : (
-              <OtherSideInfoBanner
-                title={connectionTitle}
-                userImage={otherSideData.image}
-                grayAvatar={shouldGrayScaleAvatar}
-                commonConnectionsCount={localizedCommonConnectionsCount}
-                clubLabel={otherSideClubLabel}
-                trustedFriends={trustedFriendsText}
-              />
-            )}
-            {trustedFriendsText ? (
-              <CommonFriends
-                commonConnectionsHashes={commonConnectionsHashes}
-                verifiedConnectionsHashes={verifiedConnectionsHashes}
-                otherSideClubs={otherSideClubs}
-                friendLevel={friendLevelInfo}
-                isMine={isMine}
-                otherSide={otherSide}
-              />
-            ) : null}
-          </YStack>
+      <YStack gap="$8" pb="$8">
+        <YStack gap="$4">
+          {offer != null && otherSideIsOfferCreator ? (
+            <OfferAuthorBanner
+              offer={offer}
+              realUserName={otherSideRealUserName}
+              userImage={otherSideData.image}
+              grayAvatar={shouldGrayScaleAvatar}
+            />
+          ) : (
+            <OtherSideInfoBanner
+              title={connectionTitle}
+              userImage={otherSideData.image}
+              grayAvatar={shouldGrayScaleAvatar}
+              commonConnectionsCount={localizedCommonConnectionsCount}
+              clubLabel={otherSideClubLabel}
+              trustedFriends={trustedFriendsText}
+            />
+          )}
+          {trustedFriendsText ? (
+            <CommonFriends
+              commonConnectionsHashes={commonConnectionsHashes}
+              verifiedConnectionsHashes={verifiedConnectionsHashes}
+              otherSideClubs={otherSideClubs}
+              friendLevel={friendLevelInfo}
+              isMine={isMine}
+              otherSide={otherSide}
+            />
+          ) : null}
+        </YStack>
 
-          <YStack
-            backgroundColor="$backgroundSecondary"
-            borderRadius="$5"
-            px="$5"
-          >
-            {showTradeChecklistAction ? (
-              <>
-                <ActionRow
-                  showChevron
-                  color="foregroundPrimary"
-                  icon={BulletListMenu}
-                  label={t('messages.tradeChecklist')}
-                  onPress={() => {
-                    if (!otherSideSupportsTradingChecklist) {
-                      Alert.alert(
-                        t('tradeChecklist.notSupportedByOtherSide.title'),
-                        t('tradeChecklist.notSupportedByOtherSide.body')
-                      )
-                      return
-                    }
-
-                    navigation.navigate('TradeChecklistFlow', {
-                      screen: 'AgreeOnTradeDetails',
-                      chatId,
-                      inboxKey,
-                    })
-                  }}
-                />
-                <Divider ml="$12" />
-              </>
-            ) : null}
-
-            {showExchangeDetailsAction ? (
-              <>
-                <ActionRow
-                  showChevron
-                  color="foregroundPrimary"
-                  icon={EyeShut}
-                  label={t('tradeChecklist.exchangeDetails.title')}
-                  onPress={openExchangeDetails}
-                />
-                <Divider ml="$12" />
-              </>
-            ) : null}
-
-            {showOfferDetailAction ? (
-              <>
-                <ActionRow
-                  showChevron
-                  color="foregroundPrimary"
-                  icon={DocumentsFiles}
-                  label={t('messages.offerDetail')}
-                  onPress={() => {
-                    navigation.navigate('ChatOfferDetail', {
-                      inboxKey,
-                      otherSideKey: chat.otherSide.publicKey,
-                    })
-                  }}
-                />
-                <Divider ml="$12" />
-              </>
-            ) : null}
-
-            <ActionRow
-              showChevron
-              color="foregroundPrimary"
-              icon={TagLabel}
-              label={t('messages.tags.action')}
+        <Menu>
+          {showTradeChecklistAction ? (
+            <MenuItem
+              icon={BulletListMenu}
+              label={t('messages.tradeChecklist')}
               onPress={() => {
-                navigation.navigate('ChatTags', {chatId})
+                if (!otherSideSupportsTradingChecklist) {
+                  Alert.alert(
+                    t('tradeChecklist.notSupportedByOtherSide.title'),
+                    t('tradeChecklist.notSupportedByOtherSide.body')
+                  )
+                  return
+                }
+
+                navigation.navigate('TradeChecklistFlow', {
+                  screen: 'AgreeOnTradeDetails',
+                  chatId,
+                  inboxKey,
+                })
               }}
             />
-          </YStack>
-
-          {showReceivedMessagesDebugAction ? (
-            <YStack
-              backgroundColor="$backgroundSecondary"
-              borderRadius="$5"
-              px="$5"
-            >
-              <ActionRow
-                showChevron
-                color="foregroundPrimary"
-                icon={DocumentsFiles}
-                label="Messages JSON"
-                onPress={() => {
-                  navigation.navigate('ChatReceivedMessagesDebug', {
-                    inboxKey,
-                    otherSideKey: chat.otherSide.publicKey,
-                  })
-                }}
-              />
-              <ActionRow
-                showChevron
-                color="foregroundPrimary"
-                icon={DocumentsFiles}
-                label={
-                  feedbackSubmitted
-                    ? 'set feedback not submitted'
-                    : 'set feedback submitted'
-                }
-                onPress={() => {
-                  setFeedbackSubmitted((prev) => !prev)
-                }}
-              />
-            </YStack>
           ) : null}
+          {showExchangeDetailsAction ? (
+            <MenuItem
+              icon={EyeShut}
+              label={t('tradeChecklist.exchangeDetails.title')}
+              onPress={openExchangeDetails}
+            />
+          ) : null}
+          {showOfferDetailAction ? (
+            <MenuItem
+              icon={DocumentsFiles}
+              label={t('messages.offerDetail')}
+              onPress={() => {
+                navigation.navigate('ChatOfferDetail', {
+                  inboxKey,
+                  otherSideKey: chat.otherSide.publicKey,
+                })
+              }}
+            />
+          ) : null}
+          <MenuItem
+            icon={TagLabel}
+            label={t('messages.tags.action')}
+            onPress={() => {
+              navigation.navigate('ChatTags', {chatId})
+            }}
+          />
+        </Menu>
 
-          <YStack
-            backgroundColor="$backgroundSecondary"
-            borderRadius="$5"
-            px="$5"
-          >
-            <ActionRow
-              color="redForeground"
-              icon={TrashBin}
-              label={t('messages.deleteConversation')}
+        {showReceivedMessagesDebugAction ? (
+          <Menu>
+            <MenuItem
+              icon={DocumentsFiles}
+              label="Messages JSON"
+              onPress={() => {
+                navigation.navigate('ChatReceivedMessagesDebug', {
+                  inboxKey,
+                  otherSideKey: chat.otherSide.publicKey,
+                })
+              }}
+            />
+            <MenuItem
+              icon={DocumentsFiles}
+              label={
+                feedbackSubmitted
+                  ? 'set feedback not submitted'
+                  : 'set feedback submitted'
+              }
+              onPress={() => {
+                setFeedbackSubmitted((prev) => !prev)
+              }}
+            />
+          </Menu>
+        ) : null}
+
+        <Menu>
+          <MenuItem
+            variant="danger"
+            showChevron={false}
+            icon={TrashBin}
+            label={t('messages.deleteConversation')}
+            onPress={() => {
+              void Effect.runPromise(
+                andThenExpectBooleanNoErrors((success) => {
+                  if (success) {
+                    resetNavigationToMessagingScreen()
+                  }
+                })(deleteChatWithUiFeedback({skipAsk: false}))
+              )
+            }}
+          />
+          {theirOfferAndNotReported && offer ? (
+            <MenuItem
+              variant="danger"
+              showChevron={false}
+              icon={FlagReport}
+              label={t('messages.reportOffer')}
               onPress={() => {
                 void Effect.runPromise(
                   andThenExpectBooleanNoErrors((success) => {
                     if (success) {
-                      resetNavigationToMessagingScreen()
+                      navigation.goBack()
                     }
-                  })(deleteChatWithUiFeedback({skipAsk: false}))
+                  })(reportOffer(offer))
                 )
               }}
             />
-            {theirOfferAndNotReported && offer ? <Divider ml="$12" /> : null}
-            {theirOfferAndNotReported && offer ? (
-              <>
-                <ActionRow
-                  color="redForeground"
-                  icon={FlagReport}
-                  label={t('messages.reportOffer')}
-                  onPress={() => {
-                    void Effect.runPromise(
-                      andThenExpectBooleanNoErrors((success) => {
-                        if (success) {
-                          navigation.goBack()
-                        }
-                      })(reportOffer(offer))
-                    )
-                  }}
-                />
-              </>
-            ) : null}
-          </YStack>
-        </YStack>
-      </ScrollView>
+          ) : null}
+        </Menu>
+      </YStack>
     </Screen>
   )
 }

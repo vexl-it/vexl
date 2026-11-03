@@ -1,22 +1,20 @@
 import {
   Button,
   EmptyState,
-  Input,
   NavigationBar,
   PlusAdd,
   Screen,
   SelectableItem,
   Stack,
   SwipeableRow,
+  TextField,
   TrashBin,
-  useTheme,
   XmarkCancelClose,
   YStack,
 } from '@vexl-next/ui'
 import {Array, Effect, pipe} from 'effect'
 import {
   atom,
-  useAtom,
   useAtomValue,
   useSetAtom,
   useStore,
@@ -47,32 +45,15 @@ function NewTagInput({
 }: {
   readonly valueAtom: PrimitiveAtom<string>
 }): React.ReactElement {
-  const [value, setValue] = useAtom(valueAtom)
-  const theme = useTheme()
-
   return (
-    <Stack
-      minHeight="$11"
-      borderRadius="$5"
-      borderWidth={1}
+    <TextField
+      autoFocus
+      valueAtom={valueAtom}
+      maxLength={CHAT_TAG_NAME_MAX_LENGTH}
+      placeholder=""
       borderColor="$accentYellowPrimary"
       backgroundColor="$backgroundPrimary"
-      px="$5"
-      jc="center"
-    >
-      <Input
-        unstyled
-        autoFocus
-        value={value}
-        maxLength={CHAT_TAG_NAME_MAX_LENGTH}
-        color="$foregroundPrimary"
-        fontFamily="$body"
-        fontSize="$4"
-        fontWeight="500"
-        selectionColor={theme.accentYellowPrimary.get()}
-        onChangeText={setValue}
-      />
-    </Stack>
+    />
   )
 }
 

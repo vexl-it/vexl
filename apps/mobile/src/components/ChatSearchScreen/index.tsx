@@ -64,7 +64,7 @@ function ChatSearchScreen(): React.ReactElement {
         </YStack>
         <YStack f={1} pt="$5" pb="$5">
           {trimmedQuery !== '' && chats.length > 0 ? (
-            <YStack gap="$2" mb="$5" px="$4">
+            <YStack gap="$2" mb="$5" px="$5">
               <Typography color="$foregroundPrimary" variant="titlesSmall">
                 {t('messages.search.sections.chats')}
               </Typography>

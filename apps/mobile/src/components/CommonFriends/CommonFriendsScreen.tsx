@@ -15,7 +15,7 @@ import {Array} from 'effect'
 import React, {memo, useCallback} from 'react'
 import {Pressable} from 'react-native'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
-import {Stack} from 'tamagui'
+import {getTokens, Stack} from 'tamagui'
 import {
   type CommonFriendsClub,
   type RootStackScreenProps,
@@ -197,7 +197,10 @@ function CommonFriendsScreen({
                 'commonFriends.trustedFriendsExplanation.title'
               )}
             >
-              <InfoCircle size={16} color={theme.foregroundTertiary.get()} />
+              <InfoCircle
+                size={getTokens().size.$5.val}
+                color={theme.foregroundTertiary.get()}
+              />
             </Pressable>
           ) : null}
         </XStack>

@@ -1,22 +1,17 @@
 import {useNavigation} from '@react-navigation/native'
 import {
-  Button,
   EmptyState,
   FlagReport,
+  MenuItem,
   NavigationBar,
   Screen,
-  Typography,
   XmarkCancelClose,
-  XStack,
   YStack,
 } from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {Effect} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React from 'react'
-import {ScrollView} from 'react-native'
-import {useSafeAreaInsets} from 'react-native-safe-area-context'
-import {getTokens, Stack, useTheme} from 'tamagui'
 import {useGetAllClubsForIds} from '../../../state/clubs/atom/clubsWithMembersAtom'
 import {reportNoteWithPromptActionAtom} from '../../../state/notes/atoms/reportNoteActionAtom'
 import {useStatusBarStyleForScreen} from '../../../state/statusBarStyleAtom'
@@ -33,8 +28,6 @@ export default function ChatNoteDetailContent({
 }): React.ReactElement {
   useStatusBarStyleForScreen('primary')
   const navigation = useNavigation()
-  const theme = useTheme()
-  const {bottom} = useSafeAreaInsets()
   const {t} = useTranslation()
   const otherSide = useCommonFriendsOtherSide()
   const reportNoteWithPrompt = useSetAtom(reportNoteWithPromptActionAtom)
@@ -109,62 +102,36 @@ export default function ChatNoteDetailContent({
           ]}
         />
       }
+      scrollable
     >
-      <ScrollView
-        bounces={false}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{
-          paddingBottom: bottom + getTokens().space.$8.val,
-        }}
-      >
-        <YStack gap="$5">
-          <NotePreview note={note} />
+      <YStack gap="$5" pb="$8">
+        <NotePreview note={note} />
 
-          <CommonFriends
-            commonConnectionsHashes={commonConnectionsHashes}
-            verifiedConnectionsHashes={verifiedConnectionsHashes}
-            otherSideClubs={otherSideClubs}
-            friendLevel={friendLevel}
-            isMine={isMine}
-            otherSide={otherSide}
+        <CommonFriends
+          commonConnectionsHashes={commonConnectionsHashes}
+          verifiedConnectionsHashes={verifiedConnectionsHashes}
+          otherSideClubs={otherSideClubs}
+          friendLevel={friendLevel}
+          isMine={isMine}
+          otherSide={otherSide}
+        />
+
+        {theirNoteAndNotReported ? (
+          <MenuItem
+            icon={FlagReport}
+            variant="danger"
+            showChevron={false}
+            label={t('notes.detail.reportNote')}
+            onPress={() => {
+              void Effect.runPromise(
+                reportNoteWithPrompt({noteId: note.noteInfo.noteId})
+              ).then((reported) => {
+                if (reported) navigation.goBack()
+              })
+            }}
           />
-
-          {theirNoteAndNotReported ? (
-            <Stack position="relative">
-              <Button
-                backgroundColor="$backgroundSecondary"
-                onPress={() => {
-                  void Effect.runPromise(
-                    reportNoteWithPrompt({noteId: note.noteInfo.noteId})
-                  ).then((reported) => {
-                    if (reported) navigation.goBack()
-                  })
-                }}
-              >
-                {' '}
-              </Button>
-              <XStack
-                alignItems="center"
-                gap="$3"
-                position="absolute"
-                top={0}
-                right="$5"
-                bottom={0}
-                left="$5"
-                pointerEvents="none"
-              >
-                <FlagReport
-                  color={theme.redForeground.get()}
-                  size={getTokens().size.$7.val}
-                />
-                <Typography color="$redForeground" variant="paragraph">
-                  {t('notes.detail.reportNote')}
-                </Typography>
-              </XStack>
-            </Stack>
-          ) : null}
-        </YStack>
-      </ScrollView>
+        ) : null}
+      </YStack>
     </Screen>
   )
 }

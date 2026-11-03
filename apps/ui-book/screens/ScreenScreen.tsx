@@ -6,6 +6,7 @@ import {
   SizableText,
   Stack,
   Theme,
+  TitleBlock,
   useScreenFooterHeight,
   XmarkCancelClose,
   YStack,
@@ -19,6 +20,8 @@ type ActiveExample =
   | 'backFooter-light'
   | 'scrollFooter-dark'
   | 'scrollFooter-light'
+  | 'reservedFooter-dark'
+  | 'reservedFooter-light'
   | null
 
 function BackStyleWithFooterExample({
@@ -147,6 +150,44 @@ function ScrollWithFooterExample({
   )
 }
 
+function ReservedFooterSpaceExample({
+  onBack,
+  theme,
+}: {
+  readonly onBack: () => void
+  readonly theme: 'light' | 'dark'
+}): React.JSX.Element {
+  return (
+    <Theme name={theme}>
+      <YStack flex={1}>
+        <Screen
+          navigationBar={null}
+          reserveFooterSpace
+          footer={
+            <YStack gap="$3">
+              <Button variant="primary" onPress={onBack}>
+                Continue
+              </Button>
+              <Button variant="secondary" onPress={onBack}>
+                Back to the list
+              </Button>
+            </YStack>
+          }
+        >
+          <YStack flex={1} justifyContent="center">
+            <TitleBlock
+              align="center"
+              size="large"
+              title="No navigation bar"
+              text="reserveFooterSpace centres this text above the footer instead of under it."
+            />
+          </YStack>
+        </Screen>
+      </YStack>
+    </Theme>
+  )
+}
+
 const examples: ReadonlyArray<{
   readonly key: ActiveExample & string
   readonly label: string
@@ -155,6 +196,14 @@ const examples: ReadonlyArray<{
   {key: 'backFooter-light', label: 'Back style with footer (light)'},
   {key: 'scrollFooter-dark', label: 'Scroll with footer (dark)'},
   {key: 'scrollFooter-light', label: 'Scroll with footer (light)'},
+  {
+    key: 'reservedFooter-dark',
+    label: 'No navigation bar, reserved footer space (dark)',
+  },
+  {
+    key: 'reservedFooter-light',
+    label: 'No navigation bar, reserved footer space (light)',
+  },
 ]
 
 function ActiveScreen({
@@ -166,6 +215,8 @@ function ActiveScreen({
 }): React.JSX.Element {
   const theme = active.endsWith('-light') ? 'light' : 'dark'
 
+  if (active.startsWith('reservedFooter'))
+    return <ReservedFooterSpaceExample onBack={onBack} theme={theme} />
   if (active.startsWith('scrollFooter'))
     return <ScrollWithFooterExample onBack={onBack} theme={theme} />
   return <BackStyleWithFooterExample onBack={onBack} theme={theme} />

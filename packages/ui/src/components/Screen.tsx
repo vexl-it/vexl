@@ -54,6 +54,8 @@ export interface ScreenProps {
   /** Hides the footer's bottom safe-area padding behind the keyboard, so the footer content sits directly on it. */
   readonly footerSitsOnKeyboard?: boolean
   readonly footerFrameProps?: StackProps
+  /** Ends non-scrollable content above the footer instead of under it. */
+  readonly reserveFooterSpace?: boolean
   readonly children: React.ReactNode
 }
 
@@ -68,6 +70,7 @@ export function Screen({
   footerAvoidsKeyboard = true,
   footerSitsOnKeyboard,
   footerFrameProps,
+  reserveFooterSpace,
 }: ScreenProps): React.JSX.Element {
   const insets = useSafeAreaInsets()
   const {footerHeightAtom} = useScreenFooterHeight()
@@ -78,11 +81,19 @@ export function Screen({
   const bottomInsetOutsideContent =
     scrollable || footerOwnsBottomInset ? 0 : insets.bottom
   const scrollViewBottomPadding = footer ? footerHeight : insets.bottom
+  const contentBottomPadding =
+    reserveFooterSpace && footer && !scrollable ? footerHeight : undefined
 
   const content = overlayNavigationBar ? (
-    <YStack flex={1}>{children}</YStack>
+    <YStack flex={1} paddingBottom={contentBottomPadding}>
+      {children}
+    </YStack>
   ) : (
-    <YStack flex={1} paddingHorizontal={noHorizontalPadding ? undefined : '$5'}>
+    <YStack
+      flex={1}
+      paddingHorizontal={noHorizontalPadding ? undefined : '$5'}
+      paddingBottom={contentBottomPadding}
+    >
       <Stack
         width="100%"
         paddingTop="$3"

@@ -1,8 +1,7 @@
 import {type IntendedConnectionLevel} from '@vexl-next/domain/src/general/offers'
-import {FriendLevel as UIFriendLevel} from '@vexl-next/ui'
+import {FriendLevel as UIFriendLevel, XStack} from '@vexl-next/ui'
 import {atom, useAtom, useAtomValue, type WritableAtom} from 'jotai'
 import React from 'react'
-import {XStack} from 'tamagui'
 import {
   translationAtom,
   useTranslation,

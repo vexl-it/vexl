@@ -1,10 +1,14 @@
 import {useNavigation} from '@react-navigation/native'
-import {RowButton, Typography} from '@vexl-next/ui'
-import {Calendar, XmarkCancelClose} from '@vexl-next/ui/src/icons'
+import {
+  Calendar,
+  RowButton,
+  Typography,
+  XmarkCancelClose,
+  YStack,
+} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback} from 'react'
-import {YStack} from 'tamagui'
 import {formatDate} from '../../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../../utils/localization/formattingLocaleAtom'
 import {useTranslation} from '../../../utils/localization/I18nProvider'

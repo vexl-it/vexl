@@ -1,5 +1,5 @@
 import {useFocusEffect} from '@react-navigation/native'
-import {LoadingOverlay, type TabItem, Tabs} from '@vexl-next/ui'
+import {LoadingOverlay, Stack, type TabItem, Tabs} from '@vexl-next/ui'
 import {Effect} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {
@@ -11,7 +11,6 @@ import React, {
   useState,
 } from 'react'
 import {type LayoutChangeEvent} from 'react-native'
-import {Stack} from 'tamagui'
 import {useAreOffersLoading} from '../../../../../state/marketplace'
 import {isMarketplaceNarrowingActiveAtom} from '../../../../../state/marketplace/atoms/filterAtoms'
 import {
@@ -36,7 +35,7 @@ import {useAppState} from '../../../../../utils/useAppState'
 import OffersList from '../../../../OffersList'
 import RetainedScene from '../../../../RetainedScene'
 import {InsideScreenListHeader, useInsideScreenScroll} from '../../InsideScreen'
-import {type MarketplaceTab} from '../index'
+import {type MarketplaceTab, useMarketplaceTabs} from '../useMarketplaceTabs'
 import AllOffersListHeader from './AllOffersListHeader'
 import FewFilteredOffersNotice, {
   shouldShowFewFilteredOffersNotice,
@@ -54,17 +53,6 @@ interface MarketplaceSceneProps {
   readonly onTabPress: (tab: MarketplaceTab) => void
   readonly scrollToTopRef: ScrollToTopRef
   readonly tabs: ReadonlyArray<TabItem<MarketplaceTab>>
-}
-
-function useTabs(): ReadonlyArray<TabItem<MarketplaceTab>> {
-  const {t} = useTranslation()
-  return useMemo(
-    () => [
-      {label: t('common.allOffers'), value: 'allOffers'},
-      {label: t('common.myOffers'), value: 'myOffers'},
-    ],
-    [t]
-  )
 }
 
 function MarketplaceListHeader({
@@ -382,7 +370,7 @@ function MarketplaceScreenContent({
   readonly scrollToTopRequestId: string | undefined
 }): React.ReactElement {
   const {scrollY} = useInsideScreenScroll()
-  const tabs = useTabs()
+  const tabs = useMarketplaceTabs()
   const allOffersScrollToTopRef = useRef<(() => void) | null>(null)
   const myOffersScrollToTopRef = useRef<(() => void) | null>(null)
   const [shouldMountInactiveScene, setShouldMountInactiveScene] =

@@ -1,5 +1,4 @@
-import {FilterTag, Typography} from '@vexl-next/ui'
-import {XStack, YStack} from '@vexl-next/ui/src/primitives'
+import {FilterTag, Typography, XStack, YStack} from '@vexl-next/ui'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React from 'react'
 import {marketplaceFilterBarFieldsAtom} from '../../../state/marketplace/atoms/filterAtoms'

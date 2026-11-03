@@ -1,7 +1,6 @@
-import {Button, Loader, type IconProps} from '@vexl-next/ui'
+import {Button, type IconProps, Loader, useTheme} from '@vexl-next/ui'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useEffect} from 'react'
-import {useTheme} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {formatInteger} from '../../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../../utils/localization/formattingLocaleAtom'

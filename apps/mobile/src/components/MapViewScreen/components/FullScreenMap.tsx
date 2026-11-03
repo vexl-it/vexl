@@ -1,5 +1,5 @@
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
-import {Stack} from '@vexl-next/ui/src/primitives'
+import {Stack} from '@vexl-next/ui'
 import {useSetAtom, useStore} from 'jotai'
 import React, {useCallback, useRef} from 'react'
 import {focusedOfferIdAtom} from '../../../state/marketplace/atoms/map/focusedOffer'

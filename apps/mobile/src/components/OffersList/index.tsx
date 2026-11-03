@@ -4,7 +4,7 @@ import {
   type FlashListRef,
   type ListRenderItemInfo,
 } from '@shopify/flash-list'
-import {RefreshControl, Stack, tokens} from '@vexl-next/ui'
+import {getTokens, RefreshControl, Stack} from '@vexl-next/ui'
 import {Array, Option, pipe} from 'effect'
 import React, {
   useCallback,
@@ -164,7 +164,7 @@ function OffersList({
 
   const contentContainerStyle = useMemo(
     () => ({
-      paddingBottom: bottomOffset + Number(tokens.space[5].val),
+      paddingBottom: bottomOffset + getTokens().space.$5.val,
       ...externalContentContainerStyle,
     }),
     [bottomOffset, externalContentContainerStyle]
@@ -459,7 +459,7 @@ function OffersList({
             />
           }
           ItemSeparatorComponent={itemSeparatorComponent}
-          progressViewOffset={20}
+          progressViewOffset={getTokens().space.$6.val}
           ListHeaderComponent={ListHeaderComponent}
           ListFooterComponent={listFooterComponent}
           ListEmptyComponent={ListEmptyComponent}

@@ -1,6 +1,6 @@
 import {useNavigation} from '@react-navigation/native'
 import {type OfferId} from '@vexl-next/domain/src/general/offers'
-import {FadeGradient, Stack} from '@vexl-next/ui'
+import {FadeGradient, getTokens, Stack} from '@vexl-next/ui'
 import {useAtomValue} from 'jotai'
 import React, {useCallback, useEffect} from 'react'
 import Animated, {
@@ -10,7 +10,6 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated'
-import {getTokens} from 'tamagui'
 import OfferOnMarketplace from '../../OfferOnMarketplace'
 import {mapViewSelectedOfferAtom} from '../atoms'
 

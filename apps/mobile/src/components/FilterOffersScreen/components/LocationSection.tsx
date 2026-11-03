@@ -1,7 +1,5 @@
 import {useNavigation} from '@react-navigation/native'
-import {RowButton, RowCheckbox} from '@vexl-next/ui'
-import {PlusAdd} from '@vexl-next/ui/src/icons'
-import {YStack} from '@vexl-next/ui/src/primitives'
+import {PlusAdd, RowButton, RowCheckbox, YStack} from '@vexl-next/ui'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback} from 'react'
 import {useTranslation} from '../../../utils/localization/I18nProvider'

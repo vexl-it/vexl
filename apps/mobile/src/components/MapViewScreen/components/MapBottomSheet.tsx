@@ -1,12 +1,18 @@
 import {useNavigation} from '@react-navigation/native'
 import {FlashList, type ListRenderItemInfo} from '@shopify/flash-list'
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
-import {EmptyState, LoadingIndicator} from '@vexl-next/ui'
-import {Stack, XStack, YStack} from '@vexl-next/ui/src/primitives'
+import {
+  EmptyState,
+  getTokens,
+  LoadingIndicator,
+  Stack,
+  XStack,
+  YStack,
+} from '@vexl-next/ui'
 import {useAtomValue, useSetAtom, type Atom} from 'jotai'
 import {splitAtom} from 'jotai/utils'
 import React, {useCallback, useEffect, useMemo, useState} from 'react'
-import {Dimensions, StyleSheet} from 'react-native'
+import {Dimensions} from 'react-native'
 import {Gesture, GestureDetector} from 'react-native-gesture-handler'
 import {useReanimatedKeyboardAnimation} from 'react-native-keyboard-controller'
 import Animated, {
@@ -19,7 +25,6 @@ import Animated, {
 } from 'react-native-reanimated'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {scheduleOnRN} from 'react-native-worklets'
-import {getTokens} from 'tamagui'
 import {isMarketplaceNarrowingActiveAtom} from '../../../state/marketplace/atoms/filterAtoms'
 import {
   filteredOffersForMapAtom,
@@ -37,7 +42,7 @@ import {selectMapViewOfferActionAtom} from '../atoms'
 const {height: DEFAULT_SCREEN_HEIGHT} = Dimensions.get('window')
 const tokens = getTokens()
 
-const HEADER_CONTENT_HEIGHT = 64
+const HEADER_CONTENT_HEIGHT = tokens.size.$12.val
 const HEADER_BOTTOM_GAP = tokens.space.$5.val
 const HEADER_HEIGHT = HEADER_CONTENT_HEIGHT + HEADER_BOTTOM_GAP
 const KEYBOARD_BOTTOM_GAP = tokens.space.$3.val
@@ -365,7 +370,7 @@ function MapBottomSheet({
       left={0}
       right={0}
       bottom={0}
-      zIndex={20}
+      zIndex="$1"
       borderTopLeftRadius="$9"
       borderTopRightRadius="$9"
       backgroundColor="$backgroundPrimary"
@@ -383,7 +388,10 @@ function MapBottomSheet({
         borderTopLeftRadius="$9"
         borderTopRightRadius="$9"
         backgroundColor="$backgroundPrimary"
-        style={[styles.shadowSurface, shadowProgressStyle]}
+        shadowColor="$black100"
+        shadowOffset={{width: 0, height: SHEET_SHADOW_OFFSET_Y}}
+        shadowRadius={SHEET_SHADOW_RADIUS}
+        style={shadowProgressStyle}
       />
       <Stack
         backgroundColor="$backgroundPrimary"
@@ -431,13 +439,5 @@ function MapBottomSheet({
     </AnimatedStack>
   )
 }
-
-const styles = StyleSheet.create({
-  shadowSurface: {
-    shadowColor: tokens.color.black100.val,
-    shadowOffset: {width: tokens.space.$0.val, height: SHEET_SHADOW_OFFSET_Y},
-    shadowRadius: SHEET_SHADOW_RADIUS,
-  },
-})
 
 export default MapBottomSheet

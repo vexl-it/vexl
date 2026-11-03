@@ -2,11 +2,11 @@ import {useNavigationState} from '@react-navigation/native'
 import {
   Button,
   ChevronLeft,
+  Image,
   InfoBox,
   NavigationBar,
   Screen,
   Stack,
-  Image as TamaguiImage,
   Typography,
   XmarkCancelClose,
   YStack,
@@ -21,10 +21,9 @@ import {
   editProfileIdentityNicknameAtom,
   saveEditProfileIdentityDraftActionAtom,
 } from '../atoms/editIdentityAtoms'
+import {IDENTITY_PHOTO_SIZE} from '../identityPhotoSize'
 
 type Props = EditIdentityStackScreenProps<'EditIdentitySummary'>
-
-const PHOTO_SIZE = 252
 
 function EditIdentitySummaryScreen({navigation}: Props): React.ReactElement {
   const {t} = useTranslation()
@@ -91,10 +90,10 @@ function EditIdentitySummaryScreen({navigation}: Props): React.ReactElement {
           {t('editProfileScreen.identitySummary.description')}
         </Typography>
         {imageUri ? (
-          <TamaguiImage
+          <Image
             borderRadius="$5"
-            height={PHOTO_SIZE}
-            width={PHOTO_SIZE}
+            height={IDENTITY_PHOTO_SIZE}
+            width={IDENTITY_PHOTO_SIZE}
             source={{uri: resolveLocalUri(imageUri)}}
           />
         ) : null}

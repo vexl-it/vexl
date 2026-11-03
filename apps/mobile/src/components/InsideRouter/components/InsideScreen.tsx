@@ -1,4 +1,8 @@
-import {navBarHeightAtom, OffersReencryptionStatus} from '@vexl-next/ui'
+import {
+  GraphicHeaderDecoration,
+  navBarHeightAtom,
+  OffersReencryptionStatus,
+} from '@vexl-next/ui'
 import {useAtomValue} from 'jotai'
 import React, {createContext, useContext, useMemo} from 'react'
 import {
@@ -10,7 +14,6 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {getTokens, Stack} from 'tamagui'
 import {offersReencryptionStartedAtAtom} from '../../../state/connections/atom/offersReencryptionStartedAtAtom'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
-import {GraphicHeaderDecoration} from '../../GraphicHeaderDecoration'
 import InsideNavigationBar from './InsideNavigationBar'
 
 interface InsideScreenScrollContextValue {

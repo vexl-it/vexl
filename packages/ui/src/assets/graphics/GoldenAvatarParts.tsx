@@ -1,11 +1,13 @@
 import React from 'react'
 import Svg, {Path, Rect} from 'react-native-svg'
 
-interface AvatarShapeProps {
+interface GoldenAvatarShapeProps {
   readonly color: string
 }
 
-export function AvatarShapeOne({color}: AvatarShapeProps): React.JSX.Element {
+export function GoldenAvatarShapeOne({
+  color,
+}: GoldenAvatarShapeProps): React.JSX.Element {
   return (
     <Svg width={150} height={150} viewBox="0 0 150 150" fill="none">
       <Path
@@ -16,7 +18,9 @@ export function AvatarShapeOne({color}: AvatarShapeProps): React.JSX.Element {
   )
 }
 
-export function AvatarShapeTwo({color}: AvatarShapeProps): React.JSX.Element {
+export function GoldenAvatarShapeTwo({
+  color,
+}: GoldenAvatarShapeProps): React.JSX.Element {
   return (
     <Svg width={150} height={150} viewBox="0 0 150 150" fill="none">
       <Path d="M15 51H63V99L15 51Z" fill={color} />
@@ -24,7 +28,9 @@ export function AvatarShapeTwo({color}: AvatarShapeProps): React.JSX.Element {
   )
 }
 
-export function AvatarShapeThree({color}: AvatarShapeProps): React.JSX.Element {
+export function GoldenAvatarShapeThree({
+  color,
+}: GoldenAvatarShapeProps): React.JSX.Element {
   return (
     <Svg width={150} height={150} viewBox="0 0 150 150" fill="none">
       <Path d="M123 87L75 135V87H123Z" fill={color} />
@@ -32,7 +38,9 @@ export function AvatarShapeThree({color}: AvatarShapeProps): React.JSX.Element {
   )
 }
 
-export function AvatarShapeFour({color}: AvatarShapeProps): React.JSX.Element {
+export function GoldenAvatarShapeFour({
+  color,
+}: GoldenAvatarShapeProps): React.JSX.Element {
   return (
     <Svg width={150} height={150} viewBox="0 0 150 150" fill="none">
       <Path d="M75 63V110.76H51L63 63H75Z" fill={color} />
@@ -40,7 +48,7 @@ export function AvatarShapeFour({color}: AvatarShapeProps): React.JSX.Element {
   )
 }
 
-export function AvatarGlasses({
+export function GoldenAvatarGlasses({
   lensColor,
 }: {
   readonly lensColor: string
@@ -68,7 +76,7 @@ export function AvatarGlasses({
   )
 }
 
-export function AvatarBackground(): React.JSX.Element {
+export function GoldenAvatarBackground(): React.JSX.Element {
   return (
     <Svg width={150} height={150} viewBox="0 0 150 150" fill="none">
       <Rect width={150} height={150} rx={20} fill="white" />
@@ -76,7 +84,7 @@ export function AvatarBackground(): React.JSX.Element {
   )
 }
 
-export function ShimmerStar(): React.JSX.Element {
+export function GoldenAvatarShimmerStar(): React.JSX.Element {
   return (
     <Svg width={54} height={54} viewBox="0 0 54 54" fill="none">
       <Path

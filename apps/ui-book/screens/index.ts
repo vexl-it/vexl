@@ -19,6 +19,7 @@ import {CollapseScreen} from './CollapseScreen'
 import {CommonFriendsScreen} from './CommonFriendsScreen'
 import {CommonFriendsSummaryScreen} from './CommonFriendsSummaryScreen'
 import {CopyFieldScreen} from './CopyFieldScreen'
+import {DecorativeGraphicsScreen} from './DecorativeGraphicsScreen'
 import {DialogScreen} from './DialogScreen'
 import {DisclosureScreen} from './DisclosureScreen'
 import {DismissKeyboardOnPressOutsideScreen} from './DismissKeyboardOnPressOutsideScreen'
@@ -62,6 +63,7 @@ import {NotificationCardScreen} from './NotificationCardScreen'
 import {OfferCardScreen} from './OfferCardScreen'
 import {OffersReencryptionStatusScreen} from './OffersReencryptionStatusScreen'
 import {PersonRowScreen} from './PersonRowScreen'
+import {PhotoPickerPlaceholderScreen} from './PhotoPickerPlaceholderScreen'
 import {PickerScreen} from './PickerScreen'
 import {PriceRangeInputScreen} from './PriceRangeInputScreen'
 import {ProgressBarScreen} from './ProgressBarScreen'
@@ -127,6 +129,7 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'Common Friends', component: CommonFriendsScreen},
   {label: 'Common Friends Summary', component: CommonFriendsSummaryScreen},
   {label: 'Copy Field', component: CopyFieldScreen},
+  {label: 'Decorative Graphics', component: DecorativeGraphicsScreen},
   {label: 'Dialog', component: DialogScreen},
   {label: 'Disclosure', component: DisclosureScreen},
   {
@@ -179,6 +182,10 @@ export const screens: readonly ScreenEntry[] = [
     component: OffersReencryptionStatusScreen,
   },
   {label: 'Person Row', component: PersonRowScreen},
+  {
+    label: 'Photo Picker Placeholder',
+    component: PhotoPickerPlaceholderScreen,
+  },
   {label: 'Picker', component: PickerScreen},
   {label: 'Price Range Input', component: PriceRangeInputScreen},
   {label: 'Progress Bar', component: ProgressBarScreen},

@@ -11,6 +11,16 @@ export {FaqStayAnonymous} from './FaqStayAnonymous'
 export {FaqWhatIsVexl} from './FaqWhatIsVexl'
 export {FullscreenWarningRedGraphic} from './FullscreenWarningRedGraphic'
 export {FullscreenWarningYellowGraphic} from './FullscreenWarningYellowGraphic'
+export {
+  GoldenAvatarBackground,
+  GoldenAvatarGlasses,
+  GoldenAvatarShapeFour,
+  GoldenAvatarShapeOne,
+  GoldenAvatarShapeThree,
+  GoldenAvatarShapeTwo,
+  GoldenAvatarShimmerStar,
+} from './GoldenAvatarParts'
+export {GraphicHeaderDecoration} from './GraphicHeaderDecoration'
 export {MyDonationsEmptyStateGraphic} from './MyDonationsEmptyStateGraphic'
 export {NotificationsGraphic} from './NotificationsGraphic'
 export {SellingGraphic} from './SellingGraphic'

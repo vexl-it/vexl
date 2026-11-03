@@ -1,7 +1,8 @@
-import {Stack} from '@vexl-next/ui'
 import React from 'react'
 import Svg, {Polygon} from 'react-native-svg'
 import {useTheme} from 'tamagui'
+
+import {Stack} from '../../primitives'
 
 const GRAPHIC_WIDTH = 156
 const GRAPHIC_HEIGHT = 145

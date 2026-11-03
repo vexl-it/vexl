@@ -42,6 +42,7 @@ function TypingIndication(): React.ReactElement | null {
       alignSelf="flex-start"
       mx="$5"
       mt="$2"
+      mb="$3"
       padding="$5"
       flex={1}
       alignItems="stretch"

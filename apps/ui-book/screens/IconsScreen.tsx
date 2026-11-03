@@ -1,5 +1,4 @@
 import {
-  // Icons
   AddUserPersonContact,
   ArchiveInbox,
   ArrowLeft,
@@ -7,12 +6,15 @@ import {
   ArrowsHorizontal,
   ArrowsVerticalSort,
   BellNotification,
+  BitcoinLogo,
   BoltElectric,
   Book,
   BoxProduct,
+  BubbleTip,
   BulletListMenu,
   Calendar,
   Camera,
+  CellPhoneDisabled,
   CellPhoneMobileDevice,
   ChatBubbles,
   CheckboxFilled,
@@ -35,6 +37,8 @@ import {
   ExchangeIcon,
   EyeOpen,
   EyeShut,
+  FavouriteStarNavIcon,
+  FileImport,
   FlagReport,
   Gift,
   GoldBricks,
@@ -44,6 +48,7 @@ import {
   InfoCircle,
   Kebab,
   Language,
+  LightningLogo,
   ListWriteDocument,
   Lock,
   LogConsole,
@@ -71,34 +76,47 @@ import {
   Refresh,
   RefreshArrowsRectangle,
   Rejected,
+  // Icons
+  Reply,
   SandWatch,
   ScreenCaptureShot,
   SearchMagnifyGlass,
   Send,
   Share,
   SignOut,
-  SizableText,
   Snowflake,
   SquareOutline,
   StarFilled,
   StarOutline,
   TagLabel,
   TelescopeExplore,
-  Theme,
   Toolbox,
   Tools,
   TrashBin,
   TuneSettings,
+  Typography,
   UnarchiveInbox,
   UserProfile,
+  useTheme,
   WardrobeFurniture,
+  XmarkCancelClose,
   XStack,
   XTwitter,
-  XmarkCancelClose,
   YStack,
 } from '@vexl-next/ui'
+import {Array, pipe} from 'effect'
 import React from 'react'
-import {ScrollView} from 'react-native'
+import {getTokens} from 'tamagui'
+
+import {ComponentScreenLayout} from './ComponentScreenLayout'
+
+function FavouriteStarOn(props: IconProps): React.JSX.Element {
+  return <FavouriteStarNavIcon {...props} isFavourite />
+}
+
+function FavouriteStarOff(props: IconProps): React.JSX.Element {
+  return <FavouriteStarNavIcon {...props} isFavourite={false} />
+}
 
 const allIcons: ReadonlyArray<{
   readonly label: string
@@ -195,68 +213,37 @@ const allIcons: ReadonlyArray<{
   {label: 'Share', Icon: Share},
   {label: 'Kebab', Icon: Kebab},
   {label: 'More', Icon: More},
+  {label: 'BitcoinLogo', Icon: BitcoinLogo},
+  {label: 'LightningLogo', Icon: LightningLogo},
+  {label: 'BubbleTip', Icon: BubbleTip},
+  {label: 'CellPhoneDisabled', Icon: CellPhoneDisabled},
+  {label: 'FileImport', Icon: FileImport},
+  {label: 'Reply', Icon: Reply},
+  {label: 'FavouriteStarNavIcon (favourite)', Icon: FavouriteStarOn},
+  {label: 'FavouriteStarNavIcon (not favourite)', Icon: FavouriteStarOff},
 ]
 
-function ThemedColumn({
-  theme,
-}: {
-  readonly theme: 'light' | 'dark'
-}): React.JSX.Element {
-  const color = theme === 'light' ? '#000' : '#FFF'
-  return (
-    <Theme name={theme}>
-      <YStack
-        gap="$4"
-        padding="$5"
-        backgroundColor="$backgroundPrimary"
-        borderRadius="$4"
-        flex={1}
-      >
-        <SizableText
-          fontFamily="$body"
-          fontWeight="600"
-          fontSize="$3"
-          color="$foregroundPrimary"
-        >
-          {theme.charAt(0).toUpperCase() + theme.slice(1)}
-        </SizableText>
+function Demos(): React.JSX.Element {
+  const theme = useTheme()
+  const color = theme.foregroundPrimary.get()
 
-        <YStack gap="$3">
-          {allIcons.map((entry) => (
-            <XStack key={entry.label} alignItems="center" gap="$3">
-              <entry.Icon size={24} color={color} />
-              <SizableText
-                fontFamily="$body"
-                fontWeight="500"
-                fontSize={14}
-                color="$foregroundTertiary"
-              >
-                {entry.label}
-              </SizableText>
-            </XStack>
-          ))}
-        </YStack>
-      </YStack>
-    </Theme>
+  return (
+    <YStack gap="$3">
+      {pipe(
+        allIcons,
+        Array.map((entry) => (
+          <XStack key={entry.label} alignItems="center" gap="$3">
+            <entry.Icon size={getTokens().size.$7.val} color={color} />
+            <Typography variant="description" color="$foregroundTertiary">
+              {entry.label}
+            </Typography>
+          </XStack>
+        ))
+      )}
+    </YStack>
   )
 }
 
 export function IconsScreen(): React.JSX.Element {
-  return (
-    <ScrollView style={{flex: 1}}>
-      <YStack padding="$5" gap="$4">
-        <SizableText
-          fontFamily="$heading"
-          fontWeight="700"
-          fontSize="$3"
-          color="$foregroundPrimary"
-        >
-          Icons
-        </SizableText>
-
-        <ThemedColumn theme="light" />
-        <ThemedColumn theme="dark" />
-      </YStack>
-    </ScrollView>
-  )
+  return <ComponentScreenLayout title="Icons" demos={Demos} />
 }

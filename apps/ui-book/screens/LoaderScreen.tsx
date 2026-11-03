@@ -1,4 +1,11 @@
-import {Loader, SizableText, Theme, XStack, YStack} from '@vexl-next/ui'
+import {
+  Loader,
+  SizableText,
+  Theme,
+  useTheme,
+  XStack,
+  YStack,
+} from '@vexl-next/ui'
 import React from 'react'
 import {ScrollView} from 'react-native'
 
@@ -17,6 +24,17 @@ function SectionLabel({
     >
       {children}
     </SizableText>
+  )
+}
+
+function CustomColorLoaders(): React.JSX.Element {
+  const theme = useTheme()
+
+  return (
+    <>
+      <Loader size="medium" color={theme.redForeground.get()} />
+      <Loader size="medium" color={theme.greenForeground.get()} />
+    </>
   )
 }
 
@@ -60,8 +78,7 @@ function ThemedColumn({
 
         <SectionLabel>Custom color</SectionLabel>
         <XStack gap="$4" alignItems="center">
-          <Loader size="medium" color="red" />
-          <Loader size="medium" color="#00CC88" />
+          <CustomColorLoaders />
         </XStack>
       </YStack>
     </Theme>

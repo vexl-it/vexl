@@ -15,6 +15,7 @@ import {
   SellingGraphic,
   SizableText,
   Stack,
+  Theme,
   useVexlTheme,
   VexlTextGraphic,
   XStack,
@@ -117,51 +118,55 @@ export function GraphicsScreen(): React.JSX.Element {
             </SizableText>
 
             <XStack gap="$4" flexWrap="wrap">
-              <YStack
-                gap="$2"
-                alignItems="center"
-                backgroundColor="#363636"
-                padding="$4"
-                borderRadius="$4"
-              >
-                <SizableText
-                  fontFamily="$body"
-                  fontWeight="500"
-                  fontSize={12}
-                  color="white"
+              <Theme name="dark">
+                <YStack
+                  gap="$2"
+                  alignItems="center"
+                  backgroundColor="$backgroundTertiary"
+                  padding="$4"
+                  borderRadius="$4"
                 >
-                  Dark
-                </SizableText>
-                <activeEntry.Component
-                  animate
-                  variant="dark"
-                  width={150}
-                  height={150}
-                />
-              </YStack>
+                  <SizableText
+                    fontFamily="$body"
+                    fontWeight="500"
+                    fontSize="$1"
+                    color="$foregroundPrimary"
+                  >
+                    Dark
+                  </SizableText>
+                  <activeEntry.Component
+                    animate
+                    variant="dark"
+                    width={150}
+                    height={150}
+                  />
+                </YStack>
+              </Theme>
 
-              <YStack
-                gap="$2"
-                alignItems="center"
-                backgroundColor="#efedf3"
-                padding="$4"
-                borderRadius="$4"
-              >
-                <SizableText
-                  fontFamily="$body"
-                  fontWeight="500"
-                  fontSize={12}
-                  color="black"
+              <Theme name="light">
+                <YStack
+                  gap="$2"
+                  alignItems="center"
+                  backgroundColor="$backgroundTertiary"
+                  padding="$4"
+                  borderRadius="$4"
                 >
-                  Light
-                </SizableText>
-                <activeEntry.Component
-                  animate
-                  variant="light"
-                  width={150}
-                  height={150}
-                />
-              </YStack>
+                  <SizableText
+                    fontFamily="$body"
+                    fontWeight="500"
+                    fontSize="$1"
+                    color="$foregroundPrimary"
+                  >
+                    Light
+                  </SizableText>
+                  <activeEntry.Component
+                    animate
+                    variant="light"
+                    width={150}
+                    height={150}
+                  />
+                </YStack>
+              </Theme>
             </XStack>
           </YStack>
         ) : null}

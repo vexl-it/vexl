@@ -36,6 +36,7 @@ import {FilterTagScreen} from './FilterTagScreen'
 import {FriendLevelScreen} from './FriendLevelScreen'
 import {GraphicsScreen} from './GraphicsScreen'
 import {HighlightedTextScreen} from './HighlightedTextScreen'
+import {IconBoxScreen} from './IconBoxScreen'
 import {IconsScreen} from './IconsScreen'
 import {IconTagScreen} from './IconTagScreen'
 import {InfoBoxScreen} from './InfoBoxScreen'
@@ -63,6 +64,8 @@ import {OffersReencryptionStatusScreen} from './OffersReencryptionStatusScreen'
 import {PersonRowScreen} from './PersonRowScreen'
 import {PickerScreen} from './PickerScreen'
 import {PriceRangeInputScreen} from './PriceRangeInputScreen'
+import {ProgressBarScreen} from './ProgressBarScreen'
+import {ProgressDialogScreen} from './ProgressDialogScreen'
 import {QrScannerOverlayScreen} from './QrScannerOverlayScreen'
 import {RadioGroupScreen} from './RadioGroupScreen'
 import {RangeSliderScreen} from './RangeSliderScreen'
@@ -94,6 +97,7 @@ import {TitleBlockScreen} from './TitleBlockScreen'
 import {ToastScreen} from './ToastScreen'
 import {TrustBadgeScreen} from './TrustBadgeScreen'
 import {TrustedFriendExplanationScreen} from './TrustedFriendExplanationScreen'
+import {TwoToneCardScreen} from './TwoToneCardScreen'
 import {TypographyScreen} from './TypographyScreen'
 
 export interface ScreenEntry {
@@ -141,6 +145,7 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'Friend Level', component: FriendLevelScreen},
   {label: 'Graphics', component: GraphicsScreen},
   {label: 'Highlighted Text', component: HighlightedTextScreen},
+  {label: 'Icon Box', component: IconBoxScreen},
   {label: 'Icon Tag', component: IconTagScreen},
   {label: 'Icons', component: IconsScreen},
   {label: 'Info Box', component: InfoBoxScreen},
@@ -174,6 +179,8 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'Person Row', component: PersonRowScreen},
   {label: 'Picker', component: PickerScreen},
   {label: 'Price Range Input', component: PriceRangeInputScreen},
+  {label: 'Progress Bar', component: ProgressBarScreen},
+  {label: 'Progress Dialog', component: ProgressDialogScreen},
   {label: 'QR Scanner Overlay', component: QrScannerOverlayScreen},
   {label: 'Radio Group', component: RadioGroupScreen},
   {label: 'Range Slider', component: RangeSliderScreen},
@@ -208,5 +215,6 @@ export const screens: readonly ScreenEntry[] = [
     label: 'Trusted Friend Explanation',
     component: TrustedFriendExplanationScreen,
   },
+  {label: 'Two Tone Card', component: TwoToneCardScreen},
   {label: 'Typography', component: TypographyScreen},
 ]

@@ -97,6 +97,14 @@ function ThemedColumn({
           rightActions={[{icon: TuneSettings, onPress: () => {}}]}
         />
 
+        <SectionLabel>{'  Back with text action'}</SectionLabel>
+        <NavigationBar
+          style="back"
+          title="Filters"
+          leftAction={{icon: ChevronLeft, onPress: () => {}}}
+          rightActions={[{label: 'Clear all', onPress: () => {}}]}
+        />
+
         <SectionLabel>{'  Chat'}</SectionLabel>
         <NavigationBar
           style="chat"

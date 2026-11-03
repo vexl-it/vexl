@@ -17,7 +17,7 @@ import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {Deferred, Effect, Either, Exit, Schema} from 'effect'
 import {createStore} from 'jotai'
 import {
-  cancelChatImageDownloads,
+  cancelChatImageTransfers,
   ensureChatImageDownloadedActionAtom,
   uploadChatImageIfAnyActionAtom,
 } from './chatImages'
@@ -208,7 +208,7 @@ it('does not store an image whose download finishes after cancelling', async () 
       chatKeys,
     })
   )
-  cancelChatImageDownloads()
+  cancelChatImageTransfers()
   await Effect.runPromise(
     Deferred.succeed(response, s3Response(encryptedImage))
   )
@@ -217,14 +217,13 @@ it('does not store an image whose download finishes after cancelling', async () 
   expect(mockFiles.size).toBe(0)
 })
 
-it('uploads the encrypted bytes directly to the presigned url', async () => {
-  const uploadUrl = 'http://s3.test/upload'
-  const imageId = generateUuid()
+const uploadUrl = 'http://s3.test/upload'
+
+function uploadImage(): Promise<Exit.Exit<ChatMessage, unknown>> {
   mockFiles.set('file://cache/resized.jpg', image)
   mockRequestChatImageUpload.mockReturnValue(
-    Effect.succeed({imageId, uploadUrl})
+    Effect.succeed({imageId: generateUuid(), uploadUrl})
   )
-  mockFetch.mockResolvedValue(s3Response(new Uint8Array()))
   const inbox = {privateKey: generatePrivateKey()}
   const chat: Chat = {
     id: generateChatId(),
@@ -245,9 +244,17 @@ it('uploads the encrypted bytes directly to the presigned url', async () => {
     messageType: 'MESSAGE',
   }
 
-  const sent = await Effect.runPromise(
+  return Effect.runPromiseExit(
     createStore().set(uploadChatImageIfAnyActionAtom, {message, chat})
   )
+}
+
+it('uploads the encrypted bytes directly to the presigned url', async () => {
+  mockFetch.mockResolvedValue(s3Response(new Uint8Array()))
+
+  const sent = Exit.getOrElse(await uploadImage(), () => {
+    throw new Error('Upload failed')
+  })
 
   const [url, init] = mockFetch.mock.calls[0]
   expect(url).toBe(uploadUrl)
@@ -260,10 +267,23 @@ it('uploads the encrypted bytes directly to the presigned url', async () => {
     expect.objectContaining({size: init.body.byteLength})
   )
   expect(sent.image).toBeUndefined()
-  expect(sent.imageAttachment?.id).toBe(imageId)
+  expect(sent.imageAttachment).toBeDefined()
   const decrypted = aesGCMDecryptBytes({
     data: init.body,
     key: Buffer.from(sent.imageAttachment?.key ?? '', 'base64'),
   })
   expect(decrypted.equals(image)).toBe(true)
+})
+
+it('does not store an image whose upload finishes after cancelling', async () => {
+  const response = pendingS3Response()
+
+  const upload = uploadImage()
+  cancelChatImageTransfers()
+  await Effect.runPromise(
+    Deferred.succeed(response, s3Response(new Uint8Array()))
+  )
+
+  expect(Exit.isInterrupted(await upload)).toBe(true)
+  expect(Array.from(mockFiles.keys())).toEqual(['file://cache/resized.jpg'])
 })

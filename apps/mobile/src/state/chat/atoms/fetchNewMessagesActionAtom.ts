@@ -235,8 +235,9 @@ function refreshInboxActionAtom(
           )
 
           if (otherErrors.length > 0) {
+            // Only tags: parse errors carry the decrypted message content.
             reportError('error', new Error('Error decrypting messages'), {
-              otherErrors,
+              otherErrors: Array.map(otherErrors, (e) => e._tag),
             })
           }
 

@@ -18,7 +18,7 @@ import {showDebugNotificationIfEnabled} from '../utils/notifications/showDebugNo
 import reportError from '../utils/reportError'
 import {waitForNextAnimationFrameEffect} from '../utils/runAfterAnimationFrames'
 import deleteAllInboxesActionAtom from './chat/atoms/deleteAllInboxesActionAtom'
-import {cancelChatImageDownloads} from './chat/chatImages'
+import {cancelChatImageTransfers} from './chat/chatImages'
 import {selectedChatTagFiltersAtom} from './chatTags/atoms'
 import {clubsToKeyHolderAtom} from './clubs/atom/clubsToKeyHolderV2Atom'
 import {clubsWithMembersAtom} from './clubs/atom/clubsWithMembersAtom'
@@ -196,7 +196,7 @@ export const logoutActionAtom = atom(null, async (get, set) => {
     await clearMmkvStorageAndEmptyAtoms()
 
     // files
-    cancelChatImageDownloads()
+    cancelChatImageTransfers()
     await failSilently(deleteAllFiles())
 
     // firebase token

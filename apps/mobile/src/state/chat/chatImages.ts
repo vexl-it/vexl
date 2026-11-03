@@ -13,7 +13,7 @@ import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {VersionString} from '@vexl-next/domain/src/utility/VersionString.brand'
 import {type ChatApi} from '@vexl-next/rest-api/src/services/chat'
 import {CHAT_IMAGE_CONTENT_TYPE} from '@vexl-next/rest-api/src/services/chat/contracts'
-import {Array, Effect, type Exit, Option, pipe, Schema} from 'effect'
+import {Array, Effect, type Exit, Option, pipe, Predicate, Schema} from 'effect'
 import {File} from 'expo-file-system'
 import {fetch, type FetchRequestInit} from 'expo/fetch'
 import {atom} from 'jotai'
@@ -130,16 +130,19 @@ function decryptChatImage(
 type ChatImageDownloadError = ChatImageTransferError | ChatImageProcessingError
 type ChatImageDownload = Promise<Exit.Exit<UriString, ChatImageDownloadError>>
 const inFlightDownloads = new Map<ChatImageId, ChatImageDownload>()
-let downloadsGeneration = 0
+let transfersGeneration = 0
 
-/** Stops pending downloads from writing files, e.g. before logout wipes them. */
-export function cancelChatImageDownloads(): void {
-  downloadsGeneration += 1
+/**
+ * Stops pending uploads and downloads from writing files, e.g. before logout
+ * wipes them.
+ */
+export function cancelChatImageTransfers(): void {
+  transfersGeneration += 1
   inFlightDownloads.clear()
 }
 
 function interruptIfCancelledSince(generation: number): Effect.Effect<void> {
-  return generation === downloadsGeneration ? Effect.void : Effect.interrupt
+  return generation === transfersGeneration ? Effect.void : Effect.interrupt
 }
 
 function startDownload({
@@ -149,7 +152,7 @@ function startDownload({
   attachment: ChatImageAttachment
   chatKeys: ChatKeys
 }): ChatImageDownload {
-  const generation = downloadsGeneration
+  const generation = transfersGeneration
   const download = fetchFromS3(`${apiEnv.chatImagesUrl}/${attachment.id}`).pipe(
     Effect.flatMap((data) => decryptChatImage(data, attachment.key)),
     Effect.tap(() => interruptIfCancelledSince(generation)),
@@ -213,7 +216,7 @@ export const downloadNewChatImagesActionAtom = atom(
       inboxKey: ChatKeys['inboxKey']
     }
   ): void => {
-    const generation = downloadsGeneration
+    const generation = transfersGeneration
     pipe(
       messages,
       Array.filterMap(({message}) =>
@@ -264,6 +267,7 @@ export const uploadChatImageIfAnyActionAtom = atom(
     if (message.messageType !== 'MESSAGE' || !image || message.imageAttachment)
       return Effect.succeed(message)
 
+    const generation = transfersGeneration
     return Effect.gen(function* (_) {
       const resized = yield* _(
         resizeImage({
@@ -307,6 +311,7 @@ export const uploadChatImageIfAnyActionAtom = atom(
         Effect.mapError((cause) => new ChatImageProcessingError({cause}))
       )
 
+      yield* _(interruptIfCancelledSince(generation))
       yield* _(
         writeChatImageFile({
           id: imageId,
@@ -339,20 +344,26 @@ export function deleteChatImageFiles({
   messages,
   chatKeys,
 }: {
-  messages: ReadonlyArray<{message: Pick<ChatMessage, 'imageAttachment'>}>
+  messages: ReadonlyArray<{
+    message: Pick<ChatMessage, 'imageAttachment' | 'repliedTo'>
+  }>
   chatKeys: ChatKeys
 }): void {
   pipe(
     messages,
-    Array.filterMap(({message}) =>
-      Option.fromNullable(message.imageAttachment)
-    ),
+    Array.flatMap(({message}) => [
+      message.imageAttachment,
+      message.repliedTo?.imageAttachment,
+    ]),
+    Array.filter(Predicate.isNotNullable),
     Array.forEach(({id}) => {
       Option.map(getChatImageFile(id, chatKeys), (file) => {
-        deleteFileIfExists(file)
-        void inFlightDownloads.get(id)?.finally(() => {
+        const deleteFiles = (): void => {
           deleteFileIfExists(file)
-        })
+          deleteFileIfExists(new File(`${file.uri}.part`))
+        }
+        deleteFiles()
+        void inFlightDownloads.get(id)?.finally(deleteFiles)
       })
     })
   )

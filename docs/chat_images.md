@@ -102,7 +102,10 @@ sends images.
    `resources.vexl.it`. The bucket policy allows only that distribution
    (`cloudfront.amazonaws.com` with its `AWS:SourceArn`) to call
    `s3:GetObject`. No `s3:ListBucket`: S3 answers a missing key with 403, and
-   the app treats 403 and 404 the same. The app builds download URLs from
+   the app treats 403 and 404 the same. Use the `Managed-CachingDisabled`
+   cache policy: an edge copy would outlive the lifecycle expiry, and its
+   `X-Cache`/`Age` headers would tell the sender when the receiver downloaded
+   the image. The app builds download URLs from
    `ENV_PRESETS.*.chatImagesUrl`, so that must match the domain. Point the
    domain at the distribution with a DNS-only (not proxied) Cloudflare record.
 4. Set default encryption to SSE-S3.

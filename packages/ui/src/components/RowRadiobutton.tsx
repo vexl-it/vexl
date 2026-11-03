@@ -1,6 +1,7 @@
 import React from 'react'
 import {RadioGroup as TamaguiRadioGroup, getTokens} from 'tamagui'
 
+import {disabledOpacity} from '../config/tokens'
 import {RadiobuttonCircleEmpty} from '../icons/RadiobuttonCircleEmpty'
 import {RadiobuttonCircleFilled} from '../icons/RadiobuttonCircleFilled'
 import {useRadioGroupSelectedValuePress, useRadioGroupValue} from './RadioGroup'
@@ -39,7 +40,11 @@ export function RowRadiobutton<T extends string>({
         if (selected) onSelectedValuePress?.(value)
       }}
     >
-      <SelectionRowFrame selected={selected} pressable={false}>
+      <SelectionRowFrame
+        selected={selected}
+        pressable={false}
+        opacity={disabled ? disabledOpacity : 1}
+      >
         <Indicator size={getTokens().size.$7.val} color={iconColor} />
         <SelectionRowText
           selected={selected}

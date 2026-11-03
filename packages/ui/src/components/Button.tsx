@@ -1,6 +1,7 @@
 import React from 'react'
 import {getTokens, styled, useTheme} from 'tamagui'
 
+import {disabledOpacity} from '../config/tokens'
 import type {IconProps} from '../icons/types'
 import {Stack} from '../primitives'
 import {Typography, type TypographyVariant} from './Typography'
@@ -140,7 +141,7 @@ export function Button({
 
   if (variant === 'link') {
     return (
-      <LinkFrame opacity={rest.disabled ? 0.4 : 1} {...rest}>
+      <LinkFrame opacity={rest.disabled ? disabledOpacity : 1} {...rest}>
         {Icon ? (
           <Icon color={theme[contentColor.link].get()} size={iconSize} />
         ) : null}

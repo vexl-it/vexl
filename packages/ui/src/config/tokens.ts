@@ -104,3 +104,6 @@ export const tokens = createTokens({
     5: 500,
   },
 })
+
+// Tamagui has no opacity tokens, so the shared disabled look lives here.
+export const disabledOpacity = 0.4

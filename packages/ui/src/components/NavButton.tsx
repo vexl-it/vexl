@@ -1,6 +1,7 @@
 import React from 'react'
 import {getTokens, styled, useTheme} from 'tamagui'
 
+import {disabledOpacity} from '../config/tokens'
 import type {IconProps} from '../icons/types'
 import {Stack} from '../primitives'
 import {Dot} from './Dot'
@@ -115,7 +116,7 @@ export function NavButton(props: NavButtonProps): React.JSX.Element {
         variant={variant}
         type="text"
         disabled={disabled}
-        opacity={disabled ? 0.4 : 1}
+        opacity={disabled ? disabledOpacity : 1}
         {...rest}
       >
         <Typography variant="paragraphSmallBold" color={`$${colorKey}`}>
@@ -138,7 +139,7 @@ export function NavButton(props: NavButtonProps): React.JSX.Element {
       variant={variant}
       type="icon"
       disabled={disabled}
-      opacity={disabled ? 0.4 : 1}
+      opacity={disabled ? disabledOpacity : 1}
       {...rest}
     >
       <Icon color={theme[colorKey].get()} size={getTokens().size.$7.val} />

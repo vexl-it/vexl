@@ -54,7 +54,7 @@ export function FilterTag({
     : theme.foregroundPrimary.get()
 
   return (
-    <FilterTagFrame selected={selected} {...rest}>
+    <FilterTagFrame {...rest} selected={selected}>
       {Icon ? <Icon color={iconColor} size={getTokens().size.$5.val} /> : null}
       <Typography
         variant="paragraphSmall"

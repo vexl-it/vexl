@@ -19,6 +19,7 @@ import {CollapseScreen} from './CollapseScreen'
 import {CommonFriendsScreen} from './CommonFriendsScreen'
 import {CommonFriendsSummaryScreen} from './CommonFriendsSummaryScreen'
 import {CopyFieldScreen} from './CopyFieldScreen'
+import {DateSlotsSummaryRowScreen} from './DateSlotsSummaryRowScreen'
 import {CountBadgeScreen} from './CountBadgeScreen'
 import {DecorativeGraphicsScreen} from './DecorativeGraphicsScreen'
 import {DialogScreen} from './DialogScreen'
@@ -70,6 +71,7 @@ import {PersonRowScreen} from './PersonRowScreen'
 import {PhotoPickerPlaceholderScreen} from './PhotoPickerPlaceholderScreen'
 import {PickerScreen} from './PickerScreen'
 import {PriceRangeInputScreen} from './PriceRangeInputScreen'
+import {PriceStatusRowScreen} from './PriceStatusRowScreen'
 import {ProgressBarScreen} from './ProgressBarScreen'
 import {ProgressDialogScreen} from './ProgressDialogScreen'
 import {QrCodeFrameScreen} from './QrCodeFrameScreen'
@@ -133,6 +135,7 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'Common Friends', component: CommonFriendsScreen},
   {label: 'Common Friends Summary', component: CommonFriendsSummaryScreen},
   {label: 'Copy Field', component: CopyFieldScreen},
+  {label: 'Date Slots Summary Row', component: DateSlotsSummaryRowScreen},
   {label: 'Count Badge', component: CountBadgeScreen},
   {label: 'Decorative Graphics', component: DecorativeGraphicsScreen},
   {label: 'Dialog', component: DialogScreen},
@@ -196,6 +199,7 @@ export const screens: readonly ScreenEntry[] = [
   },
   {label: 'Picker', component: PickerScreen},
   {label: 'Price Range Input', component: PriceRangeInputScreen},
+  {label: 'Price Status Row', component: PriceStatusRowScreen},
   {label: 'Progress Bar', component: ProgressBarScreen},
   {label: 'Progress Dialog', component: ProgressDialogScreen},
   {label: 'QR Code Frame', component: QrCodeFrameScreen},

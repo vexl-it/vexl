@@ -46,4 +46,6 @@ export const FieldInput = styled(Input, {
   fontSize: '$4',
   color: '$foregroundPrimary',
   padding: 0,
+  // The field frame is the visual focus target, so drop the browser's focus ring on web.
+  outlineStyle: 'none',
 })

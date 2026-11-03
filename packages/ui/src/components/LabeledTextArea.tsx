@@ -55,6 +55,7 @@ export function LabeledTextArea({
             backgroundColor="transparent"
             borderWidth={0}
             padding="$0"
+            focusVisibleStyle={{outlineStyle: 'none'}}
             {...typographyVariantStyles.paragraph}
             minHeight={minHeight}
             color="$foregroundPrimary"

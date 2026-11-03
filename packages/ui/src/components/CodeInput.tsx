@@ -1,8 +1,8 @@
 import {Array} from 'effect'
 import React, {useRef} from 'react'
-import {TextInput, type TextInputProps} from 'react-native'
-import {getTokens} from 'tamagui'
+import type {TextInput, TextInputProps} from 'react-native'
 import {Stack, XStack, YStack} from '../primitives'
+import {FieldInput} from './Field'
 import {Typography} from './Typography'
 
 export interface CodeInputProps {
@@ -60,7 +60,6 @@ export function CodeInput({
 }: CodeInputProps): React.JSX.Element {
   const ownInputRef = useRef<TextInput>(null)
   const ref = inputRef ?? ownInputRef
-  const {size, zIndex} = getTokens()
 
   return (
     <Stack
@@ -69,7 +68,7 @@ export function CodeInput({
         ref.current?.focus()
       }}
     >
-      <TextInput
+      <FieldInput
         ref={ref}
         value={value}
         onChangeText={(text) => {
@@ -83,14 +82,12 @@ export function CodeInput({
         importantForAutofill="yes"
         editable={!disabled}
         caretHidden
-        style={{
-          pointerEvents: 'none',
-          position: 'absolute',
-          width: '100%',
-          height: size.$10.val,
-          opacity: 0,
-          zIndex: zIndex.$5.val,
-        }}
+        pointerEvents="none"
+        position="absolute"
+        width="100%"
+        height="$10"
+        opacity={0}
+        zIndex="$5"
       />
       <XStack gap="$2" justifyContent="center">
         {Array.makeBy(length, (index) => (

@@ -1,63 +1,111 @@
-import {InfoBox, SizableText, Theme, YStack} from '@vexl-next/ui'
-import React from 'react'
-import {ScrollView} from 'react-native'
+import {
+  BellNotification,
+  InfoBox,
+  type InfoBoxVariant,
+  Typography,
+  YStack,
+} from '@vexl-next/ui'
+import {Array, pipe} from 'effect'
+import React, {useState} from 'react'
+
+import {ComponentScreenLayout} from './ComponentScreenLayout'
 
 const sampleText =
   "Waiting for the other party's response. You'll get a notification once they reply."
 
-function ThemedColumn({
-  theme,
-}: {
-  readonly theme: 'light' | 'dark'
-}): React.JSX.Element {
-  return (
-    <Theme name={theme}>
-      <YStack
-        gap="$4"
-        padding="$5"
-        backgroundColor="$backgroundPrimary"
-        borderRadius="$4"
-        flex={1}
-      >
-        <SizableText
-          fontFamily="$body"
-          fontWeight="600"
-          fontSize="$3"
-          color="$foregroundPrimary"
-        >
-          {theme.charAt(0).toUpperCase() + theme.slice(1)}
-        </SizableText>
+const longText =
+  'Your offers are encrypted for each of your contacts. When you import new contacts, Vexl re-encrypts your offers so the new contacts can see them too. This may take a while if you have many contacts, and the app needs to stay open until it finishes.'
 
-        <YStack gap="$3">
-          <InfoBox>{sampleText}</InfoBox>
-          <InfoBox variant="yellow">{sampleText}</InfoBox>
-          <InfoBox variant="pink">{sampleText}</InfoBox>
-          <InfoBox variant="tertiary">{sampleText}</InfoBox>
-          <InfoBox variant="naked">{sampleText}</InfoBox>
+const variants: readonly InfoBoxVariant[] = [
+  'default',
+  'yellow',
+  'pink',
+  'tertiary',
+  'error',
+  'naked',
+]
+
+const noop = (): void => {}
+
+function Label({children}: {readonly children: string}): React.JSX.Element {
+  return (
+    <Typography variant="description" color="$foregroundSecondary">
+      {children}
+    </Typography>
+  )
+}
+
+function Demos(): React.JSX.Element {
+  const [closed, setClosed] = useState(false)
+
+  return (
+    <YStack gap="$3">
+      <Label>Variants</Label>
+      {pipe(
+        variants,
+        Array.map((variant) => (
+          <InfoBox key={variant} variant={variant}>
+            {`${variant}: ${sampleText}`}
+          </InfoBox>
+        ))
+      )}
+
+      <Label>Custom icon</Label>
+      <InfoBox icon={BellNotification}>{sampleText}</InfoBox>
+
+      <Label>Loading</Label>
+      <InfoBox loading>Re-encrypting your offers...</InfoBox>
+
+      <Label>onPress (chevron)</Label>
+      <InfoBox onPress={noop}>Tap to learn more about trading safely.</InfoBox>
+
+      <Label>ReactNode children</Label>
+      <InfoBox variant="yellow">
+        <YStack gap="$1">
+          <Typography
+            variant="descriptionBold"
+            color="$accentHighlightSecondary"
+          >
+            Custom content
+          </Typography>
+          <Typography variant="description" color="$accentHighlightSecondary">
+            Non-string children are rendered as-is, so they control their own
+            styling.
+          </Typography>
         </YStack>
-      </YStack>
-    </Theme>
+      </InfoBox>
+
+      <Label>Action</Label>
+      <InfoBox action={{label: 'Import contacts', onPress: noop}}>
+        Import your contacts to see more offers.
+      </InfoBox>
+
+      <Label>onClose</Label>
+      {closed ? (
+        <InfoBox
+          variant="tertiary"
+          onPress={() => {
+            setClosed(false)
+          }}
+        >
+          Closed. Tap to show again.
+        </InfoBox>
+      ) : (
+        <InfoBox
+          onClose={() => {
+            setClosed(true)
+          }}
+        >
+          {sampleText}
+        </InfoBox>
+      )}
+
+      <Label>Long multi-line text</Label>
+      <InfoBox>{longText}</InfoBox>
+    </YStack>
   )
 }
 
 export function InfoBoxScreen(): React.JSX.Element {
-  return (
-    <ScrollView style={{flex: 1}}>
-      <YStack padding="$5" gap="$4">
-        <SizableText
-          fontFamily="$heading"
-          fontWeight="700"
-          fontSize="$3"
-          color="$foregroundPrimary"
-        >
-          Info Box
-        </SizableText>
-
-        <YStack gap="$3">
-          <ThemedColumn theme="light" />
-          <ThemedColumn theme="dark" />
-        </YStack>
-      </YStack>
-    </ScrollView>
-  )
+  return <ComponentScreenLayout title="Info Box" demos={Demos} />
 }

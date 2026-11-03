@@ -19,6 +19,7 @@ export const IconBox = styled(Stack, {
       highlight: {backgroundColor: '$navigationBackgroundHighlight'},
       accent: {backgroundColor: '$accentYellowSecondary'},
       green: {backgroundColor: '$greenForeground'},
+      red: {backgroundColor: '$redBackground'},
     },
   } as const,
 

@@ -33,6 +33,8 @@ export type {
   CalendarPickerProps,
 } from './CalendarPicker'
 export {CardButton} from './CardButton'
+export {ChatEventCard} from './ChatEventCard'
+export type {ChatEventCardProps} from './ChatEventCard'
 export {ChatMessageItem} from './ChatMessageItem'
 export type {
   ChatMessageItemProps,

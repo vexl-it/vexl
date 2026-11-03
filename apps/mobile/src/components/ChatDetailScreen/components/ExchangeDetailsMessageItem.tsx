@@ -1,5 +1,5 @@
 import {useNavigation} from '@react-navigation/native'
-import {Avatar, Button, Typography, XStack, YStack} from '@vexl-next/ui'
+import {Avatar, Button, ChatEventCard, XStack} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {Effect} from 'effect/index'
 import {useAtomValue, useStore} from 'jotai'
@@ -94,31 +94,17 @@ function DeclinedCard({event}: {event: RevealEvent}): React.ReactElement {
   const {t} = useTranslation()
 
   return (
-    <YStack mb="$4" mt="$4" mx="$4">
-      <YStack
-        alignItems="center"
-        backgroundColor="$backgroundSecondary"
-        borderRadius="$6"
-        gap="$1"
-        paddingHorizontal="$5"
-        paddingVertical="$4"
-        width="100%"
-      >
-        <Avatar size="$11" source={requestDeclinedAvatar} />
-        <Typography color="$foregroundPrimary" variant="paragraphDemibold">
-          {event.direction === 'received'
-            ? t('messages.exchangeDetails.theyDeclined')
-            : t('messages.exchangeDetails.youDeclined')}
-        </Typography>
-        <Typography
-          color="$foregroundSecondary"
-          textAlign="center"
-          variant="paragraphSmall"
-        >
-          {t('messages.exchangeDetails.nothingShared')}
-        </Typography>
-      </YStack>
-    </YStack>
+    <ChatEventCard
+      my="$4"
+      mx="$4"
+      image={<Avatar size="$11" source={requestDeclinedAvatar} />}
+      title={
+        event.direction === 'received'
+          ? t('messages.exchangeDetails.theyDeclined')
+          : t('messages.exchangeDetails.youDeclined')
+      }
+      description={t('messages.exchangeDetails.nothingShared')}
+    />
   )
 }
 

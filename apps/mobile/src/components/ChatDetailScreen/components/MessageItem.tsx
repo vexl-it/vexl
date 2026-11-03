@@ -1,8 +1,15 @@
-import {DotTypingIndicator, Rejected, Typography, useTheme} from '@vexl-next/ui'
+import {
+  ChatEventCard,
+  DotTypingIndicator,
+  IconBox,
+  Rejected,
+  Typography,
+  useTheme,
+} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue, type Atom} from 'jotai'
 import React, {useMemo} from 'react'
-import {Stack, XStack} from 'tamagui'
+import {getTokens, Stack, XStack} from 'tamagui'
 import {createIsOtherSideTypingAtom} from '../../../state/chat/atoms/typingIndication'
 import {formattingLocaleAtom} from '../../../utils/localization/formattingLocaleAtom'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
@@ -10,7 +17,6 @@ import {ProfileImageAvatar} from '../../ProfileImageAvatar'
 import {chatMolecule} from '../atoms'
 import {type MessagesListItem} from '../utils/buildMessagesListData'
 import formatChatTime from '../utils/formatChatTime'
-import {BigImageMessage} from './BigImageMessage'
 import {DisapproveMessagingMessage} from './DisapproveMessagingMessage'
 import ExchangeDetailsMessageItem from './ExchangeDetailsMessageItem'
 import {LastMessageTime} from './LastMessageTime'
@@ -91,21 +97,18 @@ function MessageItem({
       item.message.message.messageType === 'INBOX_DELETED'
     ) {
       return (
-        <BigImageMessage
+        <ChatEventCard
+          mx="$4"
           title={t('messages.messagePreviews.incoming.INBOX_DELETED', {
             them: t('common.otherSide'),
           })}
           image={
-            <Stack
-              width={80}
-              height={80}
-              backgroundColor="$redBackground"
-              alignItems="center"
-              justifyContent="center"
-              borderRadius="$4"
-            >
-              <Rejected size={35} color={theme.redForeground.get()} />
-            </Stack>
+            <IconBox tone="red" width="$13" height="$13" borderRadius="$4">
+              <Rejected
+                size={getTokens().size.$8.val}
+                color={theme.redForeground.get()}
+              />
+            </IconBox>
           }
         />
       )
@@ -123,7 +126,8 @@ function MessageItem({
     if (item.message.message.messageType === 'DELETE_CHAT') {
       return (
         <>
-          <BigImageMessage
+          <ChatEventCard
+            mx="$4"
             title={t(`messages.messagePreviews.${direction}.DELETE_CHAT`, {
               them: otherSideName,
             })}
@@ -142,7 +146,8 @@ function MessageItem({
     if (item.message.message.messageType === 'BLOCK_CHAT')
       return (
         <>
-          <BigImageMessage
+          <ChatEventCard
+            mx="$4"
             title={t(`messages.messagePreviews.${direction}.BLOCK_CHAT`, {
               them: t('common.otherSide'),
             })}
@@ -155,7 +160,8 @@ function MessageItem({
     if (item.message.message.messageType === 'INBOX_DELETED')
       return (
         <>
-          <BigImageMessage
+          <ChatEventCard
+            mx="$4"
             title={t(`messages.messagePreviews.${direction}.INBOX_DELETED`, {
               them: t('common.otherSide'),
             })}
@@ -214,7 +220,8 @@ function MessageItem({
     if (item.message.message.messageType === 'CANCEL_REQUEST_MESSAGING') {
       return (
         <>
-          <BigImageMessage
+          <ChatEventCard
+            mx="$4"
             title={t('messages.otherPartyCanceled')}
             image={<ProfileImageAvatar image={image} size="$11" grayscale />}
           />

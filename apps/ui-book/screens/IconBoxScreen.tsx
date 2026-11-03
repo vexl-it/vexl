@@ -20,6 +20,7 @@ const tones: ReadonlyArray<NonNullable<IconBoxProps['tone']>> = [
   'highlight',
   'accent',
   'green',
+  'red',
 ]
 
 function Demos(): React.JSX.Element {

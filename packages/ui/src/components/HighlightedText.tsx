@@ -1,3 +1,4 @@
+import {Array, pipe} from 'effect'
 import React, {Fragment} from 'react'
 
 import {
@@ -64,20 +65,23 @@ export function HighlightedText({
 }: HighlightedTextProps): React.JSX.Element {
   return (
     <Typography {...props}>
-      {splitByQuery(text, query).map((part, index) => (
-        <Fragment key={`${part.text}-${index}`}>
-          {part.highlighted ? (
-            <Typography
-              color={highlightColor}
-              variant={highlightVariant ?? props.variant}
-            >
-              {part.text}
-            </Typography>
-          ) : (
-            part.text
-          )}
-        </Fragment>
-      ))}
+      {pipe(
+        splitByQuery(text, query),
+        Array.map((part, index) => (
+          <Fragment key={`${part.text}-${index}`}>
+            {part.highlighted ? (
+              <Typography
+                color={highlightColor}
+                variant={highlightVariant ?? props.variant}
+              >
+                {part.text}
+              </Typography>
+            ) : (
+              part.text
+            )}
+          </Fragment>
+        ))
+      )}
     </Typography>
   )
 }

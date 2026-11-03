@@ -71,7 +71,11 @@ export {DotTypingIndicator} from './DotTypingIndicator'
 export {EditRow} from './EditRow'
 export type {EditRowProps, EditRowState} from './EditRow'
 export {EmptyState} from './EmptyState'
-export type {EmptyStateAction, EmptyStateProps} from './EmptyState'
+export type {
+  EmptyStateAction,
+  EmptyStateLink,
+  EmptyStateProps,
+} from './EmptyState'
 export {EventCard} from './EventCard'
 export type {
   EventCardAttendee,

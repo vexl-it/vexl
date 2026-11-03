@@ -5,6 +5,7 @@ import type {IconProps} from '../icons/types'
 import {YStack} from '../primitives'
 import {Button, type ButtonVariant} from './Button'
 import {TitleBlock} from './TitleBlock'
+import {Typography} from './Typography'
 
 export interface EmptyStateAction {
   readonly label: string
@@ -12,6 +13,11 @@ export interface EmptyStateAction {
   readonly variant?: ButtonVariant
   readonly icon?: React.ComponentType<IconProps>
   readonly disabled?: boolean
+}
+
+export interface EmptyStateLink {
+  readonly label: string
+  readonly onPress: () => void
 }
 
 export interface EmptyStateProps extends Omit<
@@ -24,6 +30,7 @@ export interface EmptyStateProps extends Omit<
   readonly icon?: React.ComponentType<IconProps>
   readonly action?: EmptyStateAction
   readonly secondaryAction?: EmptyStateAction
+  readonly link?: EmptyStateLink
   readonly fullscreen?: boolean
   readonly framed?: boolean
   readonly children?: React.ReactNode
@@ -57,6 +64,7 @@ export function EmptyState({
   icon: Icon,
   action,
   secondaryAction,
+  link,
   fullscreen = false,
   framed = false,
   children,
@@ -71,7 +79,7 @@ export function EmptyState({
       flex={fullscreen ? 1 : undefined}
       justifyContent={fullscreen ? 'center' : undefined}
       padding={framed ? '$5' : undefined}
-      paddingVertical={framed ? '$5' : fullscreen ? undefined : '$8'}
+      paddingVertical={framed || fullscreen ? undefined : '$8'}
       backgroundColor={framed ? '$backgroundSecondary' : undefined}
       borderRadius={framed ? '$5' : undefined}
       {...rest}
@@ -102,6 +110,16 @@ export function EmptyState({
             />
           ) : null}
         </YStack>
+      ) : null}
+      {link ? (
+        <Typography
+          role="button"
+          variant="micro"
+          color="$accentHighlightPrimary"
+          onPress={link.onPress}
+        >
+          {link.label}
+        </Typography>
       ) : null}
     </YStack>
   )

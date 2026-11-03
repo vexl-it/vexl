@@ -40,8 +40,7 @@ function ClubItem({
       selected={selected}
       avatar={
         <Avatar
-          size="small"
-          customSize={40}
+          size="$9"
           source={club.clubImageUrl ? {uri: club.clubImageUrl} : undefined}
         />
       }

@@ -30,7 +30,7 @@ import {getInternationalPhoneNumber} from '../../../../utils/getInternationalPho
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import resolveLocalUri from '../../../../utils/resolveLocalUri'
 import {AddToContactsButton} from '../../../ChatDetailScreen/components/RevealedInfoCard'
-import UserAvatar from '../../../UserAvatar'
+import {ProfileImageAvatar} from '../../../ProfileImageAvatar'
 import {
   availableDetailKeysAtom,
   canSubmitExchangeDetailsAtom,
@@ -182,10 +182,9 @@ function SharedProfile(): React.ReactElement | null {
           })
         }}
       >
-        <UserAvatar
-          userImage={otherSideImage}
-          width={SHARED_AVATAR_SIZE}
-          height={SHARED_AVATAR_SIZE}
+        <ProfileImageAvatar
+          image={otherSideImage}
+          customSize={SHARED_AVATAR_SIZE}
         />
       </TouchableOpacity>
       <YStack ai="center" gap="$1">

@@ -1,12 +1,12 @@
 import {useNavigation} from '@react-navigation/native'
-import {HighlightedText, Stack, Typography, XStack, YStack} from '@vexl-next/ui'
+import {HighlightedText, Typography, XStack, YStack} from '@vexl-next/ui'
 import React from 'react'
 import {TouchableOpacity} from 'react-native'
 import {type RootStackScreenProps} from '../../../navigationTypes'
 import {chatDetailRouteParams} from '../../../utils/chat/goToChatDetail'
 import unixMillisecondsToLocaleDateTime from '../../../utils/unixMillisecondsToLocaleDateTime'
 import FromNowComponent from '../../FromNowComponent'
-import UserAvatar from '../../UserAvatar'
+import {ProfileImageAvatar} from '../../ProfileImageAvatar'
 import {type SearchableChat} from '../state'
 
 function ChatSearchChatResultItem({
@@ -27,9 +27,7 @@ function ChatSearchChatResultItem({
       }}
     >
       <XStack py="$4" gap="$4" ai="center">
-        <Stack h="$9" w="$9">
-          <UserAvatar userImage={result.avatar} width={40} height={40} />
-        </Stack>
+        <ProfileImageAvatar image={result.avatar} size="$9" />
         <YStack f={1} gap="$1">
           <XStack gap="$3" ai="center">
             <HighlightedText

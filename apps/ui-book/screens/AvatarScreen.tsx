@@ -15,6 +15,9 @@ import {ScrollView} from 'react-native'
 
 const testAvatar = require('../assets/testAvatar.png') as number
 
+const SAMPLE_SVG_XML =
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><rect width="48" height="48" fill="#FCCD6C"/><circle cx="24" cy="20" r="9" fill="#EE675E"/><rect x="10" y="32" width="28" height="12" rx="6" fill="#455749"/></svg>'
+
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 const BasicAvatar = avatarsSvg[0]!
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -92,14 +95,17 @@ function ThemedColumn({
           </Avatar>
         </XStack>
 
-        <SectionLabel>Custom size (56px)</SectionLabel>
+        <SectionLabel>Token sizes ($9, $11, $13)</SectionLabel>
         <XStack gap="$3" alignItems="center">
-          <Avatar customSize={56}>
-            <ThemedIcon size={28} />
-          </Avatar>
-          <Avatar customSize={56} grayscale>
-            <ThemedIcon size={28} />
-          </Avatar>
+          <Avatar size="$9" source={testAvatar} />
+          <Avatar size="$11" source={testAvatar} />
+          <Avatar size="$13" source={testAvatar} />
+        </XStack>
+
+        <SectionLabel>SVG string (svgXml)</SectionLabel>
+        <XStack gap="$3" alignItems="center">
+          <Avatar size="medium" svgXml={SAMPLE_SVG_XML} />
+          <Avatar size="medium" svgXml={SAMPLE_SVG_XML} grayscale />
         </XStack>
 
         <SectionLabel>With image</SectionLabel>

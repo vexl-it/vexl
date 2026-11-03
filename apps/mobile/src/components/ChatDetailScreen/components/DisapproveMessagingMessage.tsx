@@ -5,7 +5,7 @@ import {YStack} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {formatInteger} from '../../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../../utils/localization/formattingLocaleAtom'
-import UserAvatar from '../../UserAvatar'
+import {ProfileImageAvatar} from '../../ProfileImageAvatar'
 import {chatMolecule} from '../atoms'
 import {type MessagesListItem} from '../utils/buildMessagesListData'
 import {LastMessageTime} from './LastMessageTime'
@@ -48,7 +48,7 @@ export function DisapproveMessagingMessage({
         mx="$5"
         alignItems="center"
       >
-        <UserAvatar height={48} width={48} userImage={image} grayScale={true} />
+        <ProfileImageAvatar image={image} size="medium" grayscale />
         <Typography color="$foregroundSecondary" variant="micro">
           {direction === 'incoming'
             ? t('messages.themDeclined')

@@ -29,7 +29,7 @@ import {useTrustedFriendsText} from '../utils/localization/useTrustedFriendsText
 import {getIconTagVariant, getIsOffering} from '../utils/offerHelpers'
 import {randomSeedFromOfferInfo} from '../utils/RandomSeed'
 import {AnonymousAvatarOrClubImage} from './AnonymousAvatar'
-import UserAvatar from './UserAvatar'
+import {ProfileImageAvatar} from './ProfileImageAvatar'
 
 function OfferAuthorBanner({
   offer,
@@ -40,7 +40,7 @@ function OfferAuthorBanner({
 }: {
   readonly offer: OneOfferInState
   readonly realUserName?: UserName
-  readonly userImage?: React.ComponentProps<typeof UserAvatar>['userImage']
+  readonly userImage?: React.ComponentProps<typeof ProfileImageAvatar>['image']
   readonly grayAvatar?: boolean
   readonly clubIdsForAvatar?: readonly ClubUuid[]
 }): React.ReactElement {
@@ -99,21 +99,20 @@ function OfferAuthorBanner({
       {shouldDisplayClubImage ? (
         <AnonymousAvatarOrClubImage
           grayScale={grayAvatar ?? false}
-          customSize={40}
+          size="$9"
           seed={randomSeedFromOfferInfo(offer.offerInfo)}
           clubImageUrl={clubImageUrl}
         />
       ) : userImage ? (
-        <UserAvatar
-          grayScale={grayAvatar}
-          userImage={userImage}
-          width={40}
-          height={40}
+        <ProfileImageAvatar
+          grayscale={grayAvatar}
+          image={userImage}
+          size="$9"
         />
       ) : (
         <AnonymousAvatarOrClubImage
           grayScale={grayAvatar ?? false}
-          customSize={40}
+          size="$9"
           seed={randomSeedFromOfferInfo(offer.offerInfo)}
           clubImageUrl={clubImageUrl}
         />

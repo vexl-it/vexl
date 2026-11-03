@@ -12,49 +12,18 @@ import {
 import {Effect, Option, Schema} from 'effect'
 import {useSetAtom} from 'jotai'
 import React from 'react'
-import {TouchableOpacity} from 'react-native'
-import {SvgXml} from 'react-native-svg'
+import {TouchableOpacity, type ImageSourcePropType} from 'react-native'
 import {useTheme} from 'tamagui'
 import {addContactWithUiFeedbackActionAtom} from '../../../state/contacts/atom/addContactWithUiFeedbackAtom'
 import {hashPhoneNumberE} from '../../../state/contacts/utils'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {reportErrorE} from '../../../utils/reportError'
-import resolveLocalUri from '../../../utils/resolveLocalUri'
-
-const revealAvatarSize = 80
-
-function RevealedInfoCardAvatar({
-  image,
-  onPress,
-}: {
-  image: RealLifeInfo['image']
-  onPress?: () => void
-}): React.JSX.Element {
-  const avatar =
-    image.type === 'imageUri' ? (
-      <Avatar
-        customSize={revealAvatarSize}
-        source={{uri: resolveLocalUri(image.imageUri)}}
-      />
-    ) : (
-      <Avatar customSize={revealAvatarSize}>
-        <SvgXml
-          width={revealAvatarSize}
-          height={revealAvatarSize}
-          xml={image.svgXml.xml}
-        />
-      </Avatar>
-    )
-
-  return onPress ? (
-    <TouchableOpacity onPress={onPress}>{avatar}</TouchableOpacity>
-  ) : (
-    avatar
-  )
-}
+import {ProfileImageAvatar} from '../../ProfileImageAvatar'
 
 interface SideInfo {
-  image: RealLifeInfo['image'] | {type: 'imageAsset'; source: any}
+  image:
+    | RealLifeInfo['image']
+    | {type: 'imageAsset'; source: ImageSourcePropType}
   name: string
   phoneNumber?: string
   onAvatarPress?: () => void
@@ -69,9 +38,11 @@ function RevealedInfoCardSide({
   return (
     <YStack alignItems="center" flex={1} gap="$2">
       {image.type === 'imageAsset' ? (
-        <Avatar customSize={revealAvatarSize} source={image.source} />
+        <Avatar size="$13" source={image.source} />
       ) : (
-        <RevealedInfoCardAvatar image={image} onPress={onAvatarPress} />
+        <TouchableOpacity disabled={!onAvatarPress} onPress={onAvatarPress}>
+          <ProfileImageAvatar image={image} size="$13" />
+        </TouchableOpacity>
       )}
       <YStack alignItems="center" gap="$1">
         <Typography

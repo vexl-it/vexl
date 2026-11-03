@@ -104,7 +104,7 @@ function DeclinedCard({event}: {event: RevealEvent}): React.ReactElement {
         paddingVertical="$4"
         width="100%"
       >
-        <Avatar customSize={56} source={requestDeclinedAvatar} />
+        <Avatar size="$11" source={requestDeclinedAvatar} />
         <Typography color="$foregroundPrimary" variant="paragraphDemibold">
           {event.direction === 'received'
             ? t('messages.exchangeDetails.theyDeclined')

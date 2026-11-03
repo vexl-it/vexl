@@ -31,13 +31,7 @@ function FilterClubItem({
       name={club.name}
       description={t('clubs.members', {membersCount})}
       selected={isSelected}
-      avatar={
-        <Avatar
-          size="small"
-          customSize={40}
-          source={{uri: club.clubImageUrl}}
-        />
-      }
+      avatar={<Avatar size="$9" source={{uri: club.clubImageUrl}} />}
       onPress={() => {
         setSelected(!isSelected)
       }}

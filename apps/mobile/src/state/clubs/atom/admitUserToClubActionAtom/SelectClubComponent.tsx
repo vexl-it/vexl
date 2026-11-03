@@ -66,8 +66,7 @@ export function SelectClubComponent({
                 selected={selectedClub.club.uuid === clubWithMembers.club.uuid}
                 avatar={
                   <Avatar
-                    size="small"
-                    customSize={40}
+                    size="$9"
                     source={{uri: clubWithMembers.club.clubImageUrl}}
                   />
                 }

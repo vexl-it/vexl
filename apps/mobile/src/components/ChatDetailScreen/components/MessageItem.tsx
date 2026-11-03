@@ -6,7 +6,7 @@ import {Stack, XStack} from 'tamagui'
 import {createIsOtherSideTypingAtom} from '../../../state/chat/atoms/typingIndication'
 import {formattingLocaleAtom} from '../../../utils/localization/formattingLocaleAtom'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
-import UserAvatar from '../../UserAvatar'
+import {ProfileImageAvatar} from '../../ProfileImageAvatar'
 import {chatMolecule} from '../atoms'
 import {type MessagesListItem} from '../utils/buildMessagesListData'
 import formatChatTime from '../utils/formatChatTime'
@@ -132,14 +132,7 @@ function MessageItem({
                 ? t('messages.youHaveChattedWithThisPartyBefore')
                 : undefined
             }
-            image={
-              <UserAvatar
-                height={56}
-                width={56}
-                userImage={image}
-                grayScale={true}
-              />
-            }
+            image={<ProfileImageAvatar image={image} size="$11" grayscale />}
           />
           {direction === 'incoming' && <OtherSideLeftVexlBot />}
         </>
@@ -153,14 +146,7 @@ function MessageItem({
             title={t(`messages.messagePreviews.${direction}.BLOCK_CHAT`, {
               them: t('common.otherSide'),
             })}
-            image={
-              <UserAvatar
-                height={56}
-                width={56}
-                userImage={image}
-                grayScale={true}
-              />
-            }
+            image={<ProfileImageAvatar image={image} size="$11" grayscale />}
           />
           <LastMessageTime message={item.message} />
         </>
@@ -173,14 +159,7 @@ function MessageItem({
             title={t(`messages.messagePreviews.${direction}.INBOX_DELETED`, {
               them: t('common.otherSide'),
             })}
-            image={
-              <UserAvatar
-                height={80}
-                width={80}
-                userImage={image}
-                grayScale={true}
-              />
-            }
+            image={<ProfileImageAvatar image={image} size="$13" grayscale />}
           />
           <LastMessageTime message={item.message} />
         </>
@@ -237,14 +216,7 @@ function MessageItem({
         <>
           <BigImageMessage
             title={t('messages.otherPartyCanceled')}
-            image={
-              <UserAvatar
-                height={56}
-                width={56}
-                userImage={image}
-                grayScale={true}
-              />
-            }
+            image={<ProfileImageAvatar image={image} size="$11" grayscale />}
           />
           <LastMessageTime message={item.message} />
         </>

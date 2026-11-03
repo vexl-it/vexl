@@ -2,12 +2,10 @@ import {FlashList} from '@shopify/flash-list'
 import {type FriendLevel} from '@vexl-next/domain/src/general/offers'
 import {
   EditRow,
-  Image,
   InfoCircle,
   NavigationBar,
   Screen,
   Typography,
-  UserImagePlaceholder,
   XStack,
   XmarkCancelClose,
   useTheme,
@@ -25,7 +23,7 @@ import {
 import {type StoredContactWithComputedValues} from '../../state/contacts/domain'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../utils/useSafeGoBack'
-import ContactPictureImage from '../ContactPictureImage'
+import {ContactAvatar} from '../ContactAvatar'
 import {
   useCommonFriendsListData,
   type ListItem,
@@ -52,13 +50,7 @@ function FriendListItem({
         trusted,
         trustBadgeRingColor: '$backgroundSecondary',
         children: (
-          <ContactPictureImage
-            width={40}
-            height={40}
-            objectFit="cover"
-            contactId={friend.info.nonUniqueContactId}
-            fallback={<UserImagePlaceholder size={40} />}
-          />
+          <ContactAvatar size="$9" contactId={friend.info.nonUniqueContactId} />
         ),
       }}
     />
@@ -80,24 +72,7 @@ function ClubListItem({
       headline={club.name}
       overline={t('commonFriends.club')}
       showEditButton={false}
-      avatar={{
-        children: (
-          <Stack
-            width={40}
-            height={40}
-            borderRadius="$3"
-            overflow="hidden"
-            backgroundColor="$accentYellowSecondary"
-          >
-            <Image
-              source={{uri: club.clubImageUrl}}
-              width="100%"
-              height="100%"
-              objectFit="cover"
-            />
-          </Stack>
-        ),
-      }}
+      avatar={{source: {uri: club.clubImageUrl}}}
     />
   )
 }
@@ -105,7 +80,7 @@ function ClubListItem({
 const MemoizedClubListItem = memo(ClubListItem)
 
 function ItemSeparator(): React.ReactElement {
-  return <Stack height={8} />
+  return <Stack height="$3" />
 }
 
 function keyExtractor(item: ListItem): string {

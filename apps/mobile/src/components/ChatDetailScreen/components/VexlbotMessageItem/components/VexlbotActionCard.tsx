@@ -3,6 +3,7 @@ import {
   Avatar,
   avatarsSvg,
   Button,
+  resolveSizePx,
   Stack,
   TextTag,
   Typography,
@@ -75,8 +76,8 @@ export default function VexlbotActionCard({
         padding="$4"
       >
         <XStack alignItems="center" flex={1} gap="$2">
-          <Avatar customSize={24}>
-            {BasicAvatar ? <BasicAvatar size={24} /> : null}
+          <Avatar size="$7">
+            {BasicAvatar ? <BasicAvatar size={resolveSizePx('$7')} /> : null}
           </Avatar>
           <XStack alignItems="center" gap="$0">
             <Typography

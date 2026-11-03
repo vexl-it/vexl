@@ -44,7 +44,7 @@ import useResetNavigationToMessagingScreen from '../../../utils/useResetNavigati
 import CommonFriends from '../../CommonFriends'
 import OfferAuthorBanner from '../../OfferAuthorBanner'
 import {reportOfferActionAtom} from '../../OfferDetailScreen/atoms'
-import UserAvatar from '../../UserAvatar'
+import {ProfileImageAvatar} from '../../ProfileImageAvatar'
 import {chatMolecule} from '../atoms'
 import {useCommonFriendsOtherSide} from '../utils/useCommonFriendsOtherSide'
 import useOpenExchangeDetails from './useOpenExchangeDetails'
@@ -58,7 +58,7 @@ function OtherSideInfoBanner({
   trustedFriends,
 }: {
   readonly title: string
-  readonly userImage: React.ComponentProps<typeof UserAvatar>['userImage']
+  readonly userImage: React.ComponentProps<typeof ProfileImageAvatar>['image']
   readonly grayAvatar: boolean
   readonly commonConnectionsCount: string | number
   readonly clubLabel?: string
@@ -69,12 +69,7 @@ function OtherSideInfoBanner({
 
   return (
     <XStack alignItems="center" gap="$3">
-      <UserAvatar
-        grayScale={grayAvatar}
-        userImage={userImage}
-        width={40}
-        height={40}
-      />
+      <ProfileImageAvatar grayscale={grayAvatar} image={userImage} size="$9" />
       <YStack gap="$2" flex={1} minWidth={0}>
         <Typography
           variant="descriptionBold"

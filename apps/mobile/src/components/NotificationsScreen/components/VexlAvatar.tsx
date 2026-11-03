@@ -4,7 +4,7 @@ import React from 'react'
 const vexlAvatar = require('../images/avatar.png') as number
 
 function VexlAvatar(): React.ReactElement {
-  return <Avatar size="small" customSize={36} source={vexlAvatar}></Avatar>
+  return <Avatar size="$9" source={vexlAvatar} />
 }
 
 export default VexlAvatar

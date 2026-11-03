@@ -3,6 +3,7 @@ import {
   type Event,
 } from '@vexl-next/rest-api/src/services/content/contracts'
 import {
+  Avatar,
   Banner,
   BlogCard,
   Calendar,
@@ -35,7 +36,6 @@ import {
 } from '../../../../../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../../../../../utils/localization/formattingLocaleAtom'
 import {blogsStateAtom, loadBlogsActionAtom} from '../BlogScreen/state'
-import ClubAvatar from '../ClubsScreen/components/ClubAvatar'
 import {loadEventsActionAtom, upcomingEventsAtom} from '../EventsScreen/state'
 
 const BULLET = '•'
@@ -172,7 +172,7 @@ function ClubItem({
   return (
     <HorizontalItem>
       <ClubCard
-        avatar={<ClubAvatar uri={club.clubImageUrl} />}
+        avatar={<Avatar size="$9" source={{uri: club.clubImageUrl}} />}
         name={club.name}
         subtitle={t('clubs.commonFriendsFormatted', {
           localizedString: formatInteger(members.length, locale),

@@ -1,5 +1,6 @@
 import {
   ArrowsHorizontal,
+  Avatar,
   PeopleUsers,
   SandWatch,
   Stack,
@@ -12,7 +13,6 @@ import {
 import {Option} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React from 'react'
-import {Image} from 'tamagui'
 import {type ClubWithMembers} from '../../../state/clubs/domain'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {formatDate, formatInteger} from '../../../utils/localization/formatting'
@@ -59,15 +59,7 @@ export function DetailHeader({
   return (
     <YStack gap="$6">
       <XStack gap="$3" alignItems="center">
-        <Stack
-          width={48}
-          height={48}
-          borderRadius="$3"
-          overflow="hidden"
-          backgroundColor="$accentYellowSecondary"
-        >
-          <Image source={{uri: club.clubImageUrl}} width="100%" height="100%" />
-        </Stack>
+        <Avatar size="medium" source={{uri: club.clubImageUrl}} />
         <YStack flex={1} gap="$1">
           <Typography
             variant="tabSmallBold"

@@ -1,4 +1,5 @@
 import {
+  Avatar,
   ClubCard,
   ClubReachCard,
   EmptyState,
@@ -24,7 +25,6 @@ import {useTranslation} from '../../../../../../../utils/localization/I18nProvid
 import {formatInteger} from '../../../../../../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../../../../../../utils/localization/formattingLocaleAtom'
 import {useShowReachExplanation} from '../../../../../../useShowReachExplanation'
-import ClubAvatar from './ClubAvatar'
 
 type Navigation = CommunityTabsScreenProps<'Clubs'>['navigation']
 
@@ -41,7 +41,7 @@ function ClubListItem({
 
   return (
     <ClubCard
-      avatar={<ClubAvatar uri={club.clubImageUrl} />}
+      avatar={<Avatar size="$9" source={{uri: club.clubImageUrl}} />}
       name={club.name}
       subtitle={t('clubs.commonFriendsFormatted', {
         localizedString: formatInteger(members.length, locale),

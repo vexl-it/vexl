@@ -1,8 +1,7 @@
-import {TrustedFriendExplanation, UserImagePlaceholder} from '@vexl-next/ui'
+import {TrustedFriendExplanation} from '@vexl-next/ui'
 import {Effect, Schema} from 'effect'
 import {atom} from 'jotai'
 import React from 'react'
-import {getTokens} from 'tamagui'
 import {type RootStackScreenProps} from '../../navigationTypes'
 import {type StoredContactWithComputedValues} from '../../state/contacts/domain'
 import {trustedFriendsEnabledAtom} from '../../state/deviceConfig'
@@ -10,9 +9,9 @@ import {userDataRealOrAnonymizedAtom} from '../../state/session/userDataAtoms'
 import {translationAtom} from '../../utils/localization/I18nProvider'
 import {RandomSeed} from '../../utils/RandomSeed'
 import {AnonymousAvatarOrClubImage} from '../AnonymousAvatar'
-import ContactPictureImage from '../ContactPictureImage'
+import {ContactAvatar} from '../ContactAvatar'
 import {globalDialogAtom} from '../GlobalDialog'
-import UserAvatar from '../UserAvatar'
+import {ProfileImageAvatar} from '../ProfileImageAvatar'
 
 const fallbackSeed = Schema.decodeSync(RandomSeed)('trusted-friend-explanation')
 
@@ -59,8 +58,6 @@ export const showTrustedFriendExplanationActionAtom = atom(
       },
     }[role]
 
-    const avatarSize = getTokens().size['$9.5'].val
-
     Effect.runFork(
       set(globalDialogAtom, {
         title: t('commonFriends.trustedFriendsExplanation.title'),
@@ -68,23 +65,17 @@ export const showTrustedFriendExplanationActionAtom = atom(
         children: React.createElement(TrustedFriendExplanation, {
           you: {
             label: t('common.you'),
-            avatar: React.createElement(UserAvatar, {
-              userImage: user.image,
-              width: avatarSize,
-              height: avatarSize,
+            avatar: React.createElement(ProfileImageAvatar, {
+              image: user.image,
+              size: '$9.5',
             }),
           },
           trustedFriend: {
             label: name,
             avatar: {
-              children: React.createElement(ContactPictureImage, {
-                width: avatarSize,
-                height: avatarSize,
-                objectFit: 'cover',
+              children: React.createElement(ContactAvatar, {
+                size: '$9.5',
                 contactId: friend.info.nonUniqueContactId,
-                fallback: React.createElement(UserImagePlaceholder, {
-                  size: avatarSize,
-                }),
               }),
             },
           },
@@ -93,7 +84,7 @@ export const showTrustedFriendExplanationActionAtom = atom(
             avatar: React.createElement(AnonymousAvatarOrClubImage, {
               seed: otherSide?.avatarSeed ?? fallbackSeed,
               clubImageUrl: otherSide?.clubImageUrl,
-              customSize: avatarSize,
+              customSize: '$9.5',
               grayScale: false,
             }),
           },

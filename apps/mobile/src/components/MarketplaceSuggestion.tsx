@@ -1,6 +1,8 @@
 import {
+  Avatar,
   BubbleTip,
   Button,
+  resolveSizePx,
   Stack,
   Typography,
   useTheme,
@@ -77,13 +79,13 @@ function MarketplaceSuggestion({
       </Stack>
       <XStack jc="space-between">
         <XStack f={1} mr="$2">
-          <Stack width={48} height={48} borderRadius="$3" overflow="hidden">
+          <Avatar size="medium">
             {goldenAvatarType ? (
-              <AvatarGolden1 size={48} />
+              <AvatarGolden1 size={resolveSizePx('medium')} />
             ) : (
-              <AvatarBasic1 size={48} />
+              <AvatarBasic1 size={resolveSizePx('medium')} />
             )}
-          </Stack>
+          </Avatar>
           <Stack fs={1} ml="$2" jc="center">
             <XStack fs={1} flexWrap="wrap">
               {origin ? (

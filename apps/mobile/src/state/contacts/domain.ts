@@ -19,7 +19,7 @@ export const ContactInfoE = Schema.Struct({
   // optional to not fail when migrating from older versions of vexl where this was not present
   // IMPORTANT: THIS IS NOT AN UNIQUE ID, contact can have multiple numbers for all those numbers this will be same
   // Use rawNumber for unique id (or normalized number)
-  // TODO make the contactId property required at ContactPictureImage, CommonFriendCell
+  // TODO make the contactId property required at ContactAvatar, CommonFriendCell
   nonUniqueContactId: Schema.optionalWith(NonUniqueContactIdE, {as: 'Option'}),
   numberToDisplay: Schema.String,
   rawNumber: Schema.String,

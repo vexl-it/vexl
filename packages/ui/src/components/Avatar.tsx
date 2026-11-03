@@ -1,18 +1,19 @@
 import React from 'react'
 import type {ImageProps as RNImageProps} from 'react-native'
+import {SvgXml} from 'react-native-svg'
 import {FilterImage} from 'react-native-svg/filter-image'
 import {getTokens, type ColorTokens} from 'tamagui'
-import {Stack, ZStack} from '../primitives'
+import {Stack} from '../primitives'
 import {TrustBadge} from './TrustBadge'
 
-export type AvatarSize = 'small' | 'medium' | 'large' | '$9'
-
 type SizeToken = keyof ReturnType<typeof getTokens>['size']
+type NamedAvatarSize = 'small' | 'medium' | 'large'
+
+export type AvatarSize = NamedAvatarSize | SizeToken
 export type AvatarCustomSize = number | SizeToken
 
-const SIZE_TOKEN_MAP: Record<AvatarSize, SizeToken> = {
+const NAMED_SIZE_TOKENS: Record<NamedAvatarSize, SizeToken> = {
   small: '$8', // 32px
-  $9: '$9', // 40px
   medium: '$10', // 48px
   large: '$12', // 64px
 }
@@ -21,22 +22,32 @@ const GRAYSCALE_FILTER = [
   {name: 'feColorMatrix', type: 'saturate', values: 0} as const,
 ]
 
-function resolveCustomSizePx(customSize: AvatarCustomSize): number {
-  if (typeof customSize === 'number') return customSize
-
-  return getTokens().size[customSize].val
+function resolveSizeToken(size: AvatarSize): SizeToken {
+  if (size === 'small' || size === 'medium' || size === 'large')
+    return NAMED_SIZE_TOKENS[size]
+  return size
 }
 
 export function resolveSizePx(
   size: AvatarSize,
   customSize?: AvatarCustomSize
 ): number {
-  if (customSize != null) return resolveCustomSizePx(customSize)
-  return getTokens().size[SIZE_TOKEN_MAP[size]].val
+  if (typeof customSize === 'number') return customSize
+  return getTokens().size[customSize ?? resolveSizeToken(size)].val
+}
+
+// SvgXml renders an opaque string, so the grayscale filter has to be injected into the markup itself.
+function grayscaleSvgXml(xml: string): string {
+  const svgOpeningTag = /<svg[^>]*>/.exec(xml)?.[0]
+  if (!svgOpeningTag) return xml
+
+  const content = xml.replace(svgOpeningTag, '').replace('</svg>', '')
+  return `${svgOpeningTag}<filter id="avatarGrayscale"><feColorMatrix type="saturate" values="0"/></filter><g filter="url(#avatarGrayscale)">${content}</g></svg>`
 }
 
 export interface AvatarProps {
   readonly source?: RNImageProps['source']
+  readonly svgXml?: string
   readonly children?: React.ReactNode
   readonly size?: AvatarSize
   readonly customSize?: AvatarCustomSize
@@ -45,8 +56,54 @@ export interface AvatarProps {
   readonly trustBadgeRingColor?: ColorTokens
 }
 
+function AvatarContent({
+  source,
+  svgXml,
+  children,
+  px,
+  grayscale,
+}: {
+  readonly source?: RNImageProps['source']
+  readonly svgXml?: string
+  readonly children?: React.ReactNode
+  readonly px: number
+  readonly grayscale: boolean
+}): React.JSX.Element {
+  if (source != null)
+    return (
+      <FilterImage
+        source={source}
+        style={{width: px, height: px}}
+        resizeMode="cover"
+        filters={grayscale ? GRAYSCALE_FILTER : undefined}
+      />
+    )
+
+  if (svgXml != null)
+    return (
+      <SvgXml
+        width={px}
+        height={px}
+        xml={grayscale ? grayscaleSvgXml(svgXml) : svgXml}
+      />
+    )
+
+  return (
+    <Stack
+      width={px}
+      height={px}
+      alignItems="center"
+      justifyContent="center"
+      opacity={grayscale ? 0.5 : 1}
+    >
+      {children}
+    </Stack>
+  )
+}
+
 export function Avatar({
   source,
+  svgXml,
   children,
   size = 'medium',
   customSize,
@@ -54,48 +111,26 @@ export function Avatar({
   trusted = false,
   trustBadgeRingColor = '$backgroundSecondary',
 }: AvatarProps): React.JSX.Element {
-  const dimension = customSize ?? SIZE_TOKEN_MAP[size]
-  const backgroundColor = grayscale ? '$black100' : '$backgroundSecondary'
-
   const px = resolveSizePx(size, customSize)
-  const avatar =
-    source != null ? (
-      <Stack
-        width={px}
-        height={px}
-        borderRadius="$2.5"
-        backgroundColor={backgroundColor}
-        overflow="hidden"
+
+  const avatar = (
+    <Stack
+      width={px}
+      height={px}
+      borderRadius="$2.5"
+      overflow="hidden"
+      backgroundColor={grayscale ? '$black100' : '$backgroundSecondary'}
+    >
+      <AvatarContent
+        source={source}
+        svgXml={svgXml}
+        px={px}
+        grayscale={grayscale}
       >
-        <FilterImage
-          source={source}
-          style={{width: px, height: px}}
-          resizeMode="cover"
-          filters={grayscale ? GRAYSCALE_FILTER : undefined}
-        />
-      </Stack>
-    ) : (
-      <ZStack
-        width={dimension}
-        height={dimension}
-        borderRadius="$2.5"
-        overflow="hidden"
-        backgroundColor={backgroundColor}
-      >
-        <Stack
-          position="absolute"
-          top={0}
-          left={0}
-          right={0}
-          bottom={0}
-          alignItems="center"
-          justifyContent="center"
-          opacity={grayscale ? 0.5 : 1}
-        >
-          {children}
-        </Stack>
-      </ZStack>
-    )
+        {children}
+      </AvatarContent>
+    </Stack>
+  )
 
   if (!trusted) return avatar
 
@@ -105,7 +140,7 @@ export function Avatar({
     -(0.3 * (largeBadge ? sizes.$5.val : sizes['$3.5'].val)) - sizes.$1.val
 
   return (
-    <Stack position="relative" width={dimension} height={dimension}>
+    <Stack position="relative" width={px} height={px}>
       {avatar}
       <Stack position="absolute" bottom={badgeOffset} right={badgeOffset}>
         <TrustBadge

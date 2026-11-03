@@ -25,7 +25,7 @@ import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {formattingLocaleAtom} from '../../../../../utils/localization/formattingLocaleAtom'
 import unixMillisecondsToLocaleDateTime from '../../../../../utils/unixMillisecondsToLocaleDateTime'
 import formatChatTime from '../../../../ChatDetailScreen/utils/formatChatTime'
-import UserAvatar from '../../../../UserAvatar'
+import {ProfileImageAvatar} from '../../../../ProfileImageAvatar'
 import {deleteChatFromListActionAtom} from '../atoms'
 import {getMessagePreviewText} from '../utils/getMessagePreviewText'
 import ChatListItemLeftSwipeActions from './ChatListItemLeftSwipeActions'
@@ -149,14 +149,11 @@ function ChatListItem({
         <Stack paddingHorizontal="$5" backgroundColor="$backgroundPrimary">
           <ChatMessageItem
             avatar={
-              <Stack h="$9" w="$9">
-                <UserAvatar
-                  grayScale={otherSideLeft}
-                  userImage={userAvatar}
-                  width={40}
-                  height={40}
-                />
-              </Stack>
+              <ProfileImageAvatar
+                grayscale={otherSideLeft}
+                image={userAvatar}
+                size="$9"
+              />
             }
             name={displayName}
             message={preview.text}

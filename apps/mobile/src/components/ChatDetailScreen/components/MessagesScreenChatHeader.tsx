@@ -12,7 +12,7 @@ import {useTrustedFriendsText} from '../../../utils/localization/useTrustedFrien
 import resolveLocalUri from '../../../utils/resolveLocalUri'
 import useSafeGoBack from '../../../utils/useSafeGoBack'
 import {showGoldenAvatarInfoModalActionAton} from '../../GoldenAvatar/atoms'
-import UserAvatar from '../../UserAvatar'
+import {ProfileImageAvatar} from '../../ProfileImageAvatar'
 import {chatMolecule} from '../atoms'
 import useChatHeaderRightActions from './useChatHeaderRightActions'
 
@@ -93,11 +93,10 @@ export function MessagesScreenChatHeader(): React.ReactElement {
                 showGoldenAvatarInfoModal()
             }}
           >
-            <UserAvatar
-              grayScale={shouldGrayScaleAvatar}
-              userImage={otherSideData.image}
-              width={40}
-              height={40}
+            <ProfileImageAvatar
+              grayscale={shouldGrayScaleAvatar}
+              image={otherSideData.image}
+              size="$9"
             />
           </TouchableOpacity>
         }

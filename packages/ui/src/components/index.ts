@@ -145,6 +145,8 @@ export type {
 } from './OfferCard'
 export {OffersReencryptionStatus} from './OffersReencryptionStatus'
 export type {OffersReencryptionStatusProps} from './OffersReencryptionStatus'
+export {PersonRow} from './PersonRow'
+export type {PersonRowProps} from './PersonRow'
 export {Picker} from './Picker'
 export type {PickerItem, PickerProps} from './Picker'
 export {PriceRangeInput, RangeSlider} from './PriceRangeInput'

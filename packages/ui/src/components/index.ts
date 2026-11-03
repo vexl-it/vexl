@@ -54,13 +54,13 @@ export {CommonFriendsSummary} from './CommonFriendsSummary'
 export type {CommonFriendsSummaryProps} from './CommonFriendsSummary'
 export {CopyField} from './CopyField'
 export type {CopyFieldProps} from './CopyField'
+export {CountBadge} from './CountBadge'
+export type {CountBadgeProps} from './CountBadge'
 export {DateSlotsSummaryRow} from './DateSlotsSummaryRow'
 export type {
   DateSlotsSummaryRowAction,
   DateSlotsSummaryRowProps,
 } from './DateSlotsSummaryRow'
-export {CountBadge} from './CountBadge'
-export type {CountBadgeProps} from './CountBadge'
 export {DetailsCard} from './DetailsCard'
 export {
   Dialog,

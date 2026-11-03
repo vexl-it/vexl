@@ -10,6 +10,7 @@ import React from 'react'
 import {ComponentScreenLayout, DemoSection} from './ComponentScreenLayout'
 
 const variants: readonly NavButtonVariant[] = [
+  'accent',
   'highlighted',
   'destructive',
   'normal',

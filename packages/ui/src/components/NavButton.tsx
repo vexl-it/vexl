@@ -8,6 +8,7 @@ import {Dot} from './Dot'
 import {Typography} from './Typography'
 
 export type NavButtonVariant =
+  | 'accent'
   | 'highlighted'
   | 'destructive'
   | 'normal'
@@ -50,6 +51,9 @@ const NavButtonFrame = styled(Stack, {
     },
 
     variant: {
+      accent: {
+        backgroundColor: '$accentYellowPrimary',
+      },
       highlighted: {
         backgroundColor: '$accentYellowSecondary',
       },
@@ -76,6 +80,7 @@ const NavButtonFrame = styled(Stack, {
 })
 
 const contentColor = {
+  accent: 'black100',
   highlighted: 'accentHighlightSecondary',
   destructive: 'white100',
   normal: 'foregroundPrimary',

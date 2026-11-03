@@ -108,7 +108,7 @@ export function ChatComposer({
         <Animated.View
           style={[{marginRight: getTokens().space.$2.val}, sendButtonStyle]}
         >
-          <NavButton icon={Send} onPress={onSend} />
+          <NavButton variant="accent" icon={Send} onPress={onSend} />
         </Animated.View>
       </XStack>
     </YStack>

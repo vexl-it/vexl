@@ -119,6 +119,17 @@ function CalendarDay({
         ? '$accentYellowPrimary'
         : '$foregroundPrimary'
 
+  const label = (
+    <Typography
+      allowFontScaling={false}
+      variant="description"
+      color={textColor}
+      textAlign="center"
+    >
+      {date?.day}
+    </Typography>
+  )
+
   return (
     <Stack
       role={isDisabled ? undefined : 'button'}
@@ -126,6 +137,8 @@ function CalendarDay({
       alignSelf="stretch"
       aspectRatio={1}
       padding="$0.5"
+      alignItems="center"
+      justifyContent="center"
       testID={testID}
       onLongPress={() => {
         onLongPress?.(date)
@@ -134,26 +147,23 @@ function CalendarDay({
         onPress?.(date)
       }}
     >
-      <Stack
-        flex={1}
-        alignItems="center"
-        justifyContent="center"
-        borderRadius={999}
-        backgroundColor={
-          isSelected
-            ? (marking?.selectedColor ?? theme.accentYellowPrimary.get())
-            : 'transparent'
-        }
-      >
-        <Typography
-          allowFontScaling={false}
-          variant="description"
-          color={textColor}
-          textAlign="center"
+      {/* A separate circle view: Android drops the radius when a live view's background changes from transparent. */}
+      {isSelected ? (
+        <Stack
+          flex={1}
+          alignSelf="stretch"
+          alignItems="center"
+          justifyContent="center"
+          borderRadius="50%"
+          backgroundColor={
+            marking?.selectedColor ?? theme.accentYellowPrimary.get()
+          }
         >
-          {date?.day}
-        </Typography>
-      </Stack>
+          {label}
+        </Stack>
+      ) : (
+        label
+      )}
     </Stack>
   )
 }

@@ -66,6 +66,28 @@ function Demos(): React.JSX.Element {
           />
         </YStack>
       </DemoSection>
+      <DemoSection title="Circle shape">
+        <YStack gap="$3">
+          <RowCheckbox
+            shape="circle"
+            label="Lightning"
+            description="Best for smaller amounts. Fast and cheap."
+            checked={checked.has('lightning')}
+            onCheckedChange={(v) => {
+              toggle('lightning', v)
+            }}
+          />
+          <RowCheckbox
+            shape="circle"
+            label="On-chain"
+            description="Best for larger amounts. Slower, but more secure."
+            checked={checked.has('onChain')}
+            onCheckedChange={(v) => {
+              toggle('onChain', v)
+            }}
+          />
+        </YStack>
+      </DemoSection>
       <DemoSection title="Compact">
         <RowCheckbox
           compact

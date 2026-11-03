@@ -5,7 +5,7 @@ import {CheckboxFilled} from '../icons/CheckboxFilled'
 import {PeopleUsers} from '../icons/PeopleUsers'
 import {XStack, YStack} from '../primitives'
 import {IconBox} from './IconBox'
-import {SelectionRowFrame, selectionRowColor} from './SelectionRow'
+import {SelectionRowFrame} from './SelectionRow'
 import {Typography} from './Typography'
 
 export interface SelectClubCellProps {
@@ -41,7 +41,7 @@ export function SelectClubCell({
       <YStack flex={1} justifyContent="center" gap="$1">
         <Typography
           variant="descriptionBold"
-          color={selectionRowColor(selected)}
+          color={selected ? '$accentHighlightSecondary' : '$foregroundPrimary'}
         >
           {name}
         </Typography>

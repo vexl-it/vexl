@@ -12,16 +12,16 @@ export const SelectionRowFrame = styled(FieldFrame, {
   pressable: true,
 })
 
-export function selectionRowColor(
+function selectionRowColor(
   selected: boolean
-): '$accentHighlightSecondary' | '$foregroundPrimary' {
-  return selected ? '$accentHighlightSecondary' : '$foregroundPrimary'
+): '$accentHighlightPrimary' | '$foregroundPrimary' {
+  return selected ? '$accentHighlightPrimary' : '$foregroundPrimary'
 }
 
 export function useSelectionRowIconColor(selected: boolean): string {
   const theme = useTheme()
   return selected
-    ? theme.accentHighlightSecondary.get()
+    ? theme.accentHighlightPrimary.get()
     : theme.foregroundPrimary.get()
 }
 
@@ -34,18 +34,15 @@ export function SelectionRowText({
   readonly label: string
   readonly description?: string
 }): React.JSX.Element {
+  const color = selectionRowColor(selected)
+
   return (
     <YStack flex={1} gap="$1">
-      <Typography variant="paragraph" color={selectionRowColor(selected)}>
+      <Typography variant="paragraph" color={color}>
         {label}
       </Typography>
       {description ? (
-        <Typography
-          variant="description"
-          color={
-            selected ? '$accentHighlightSecondary' : '$foregroundSecondary'
-          }
-        >
+        <Typography variant="description" color={color}>
           {description}
         </Typography>
       ) : null}

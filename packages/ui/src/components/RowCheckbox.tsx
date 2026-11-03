@@ -2,13 +2,26 @@ import React from 'react'
 import {Checkbox, getTokens, useTheme} from 'tamagui'
 
 import {CheckboxFilled} from '../icons/CheckboxFilled'
+import {RadiobuttonCircleEmpty} from '../icons/RadiobuttonCircleEmpty'
+import {RadiobuttonCircleFilled} from '../icons/RadiobuttonCircleFilled'
 import {SquareOutline} from '../icons/SquareOutline'
+import type {IconProps} from '../icons/types'
 import {
   SelectionRowFrame,
   SelectionRowText,
   useSelectionRowIconColor,
 } from './SelectionRow'
 import {Typography} from './Typography'
+
+type RowCheckboxShape = 'square' | 'circle'
+
+const indicators: Record<
+  RowCheckboxShape,
+  Record<'checked' | 'unchecked', React.ComponentType<IconProps>>
+> = {
+  square: {checked: CheckboxFilled, unchecked: SquareOutline},
+  circle: {checked: RadiobuttonCircleFilled, unchecked: RadiobuttonCircleEmpty},
+}
 
 type SelectionRowFrameProps = React.ComponentProps<typeof SelectionRowFrame>
 
@@ -30,6 +43,7 @@ export interface RowCheckboxProps extends Omit<
   readonly onCheckedChange?: (checked: boolean) => void
   /** Inline checkbox with a small label, without the row background. */
   readonly compact?: boolean
+  readonly shape?: RowCheckboxShape
 }
 
 export function RowCheckbox({
@@ -38,14 +52,17 @@ export function RowCheckbox({
   checked = false,
   onCheckedChange,
   compact = false,
+  shape = 'square',
   ...rest
 }: RowCheckboxProps): React.JSX.Element {
   const theme = useTheme()
   const rowIconColor = useSelectionRowIconColor(checked)
-  const iconColor =
-    compact && !checked ? theme.foregroundSecondary.get() : rowIconColor
+  const compactIconColor = checked
+    ? theme.accentHighlightSecondary.get()
+    : theme.foregroundSecondary.get()
+  const iconColor = compact ? compactIconColor : rowIconColor
   const iconSizeToken = compact ? '$5.5' : '$7'
-  const Indicator = checked ? CheckboxFilled : SquareOutline
+  const Indicator = indicators[shape][checked ? 'checked' : 'unchecked']
 
   return (
     <SelectionRowFrame

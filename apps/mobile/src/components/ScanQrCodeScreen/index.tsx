@@ -12,12 +12,7 @@ import {forceHideAskAreYouSureActionAtom} from '../GlobalDialog'
 
 type Props = RootStackScreenProps<'ScanQrCode'>
 
-const scannerStyle = {
-  // On android camera view will be resized to fit the whole camera preview. That will result in
-  // container not being filled all the way and that will result in border radius not visible
-  // so we need to scale it up a bit to always fill the whole container.
-  flex: 1,
-}
+const scannerStyle = {flex: 1}
 
 function ScanQrCodeScreen({navigation}: Props): React.ReactElement {
   const {t} = useTranslation()

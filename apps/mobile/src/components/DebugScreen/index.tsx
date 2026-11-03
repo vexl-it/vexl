@@ -28,11 +28,11 @@ import {
 } from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {FeedbackFormId} from '@vexl-next/rest-api/src/services/feedback/contracts'
 import {
+  Button,
   ChevronLeft,
   NavigationBar,
   Screen,
   Typography,
-  Button as UiButton,
   YStack,
 } from '@vexl-next/ui'
 import {
@@ -121,7 +121,6 @@ import {
   version,
   versionCode,
 } from '../../utils/environment'
-import {useTranslation} from '../../utils/localization/I18nProvider'
 import {getNotificationTokenE} from '../../utils/notifications'
 import {backgroundNotificationSocketStateAtom} from '../../utils/notifications/backgroundNotificationSocket'
 import {displayLocalNotification} from '../../utils/notifications/displayLocalNotification'
@@ -200,17 +199,6 @@ const EUROPE_DEBUG_LOCATIONS = [
   {name: 'Bucharest', latitude: 44.4268, longitude: 26.1025},
 ]
 
-type DebugButtonProps = Omit<
-  React.ComponentProps<typeof UiButton>,
-  'children'
-> & {
-  readonly text: string
-}
-
-function Button({text, ...props}: DebugButtonProps): React.JSX.Element {
-  return <UiButton {...props}>{text}</UiButton>
-}
-
 function DebugLabel({
   children,
   userSelect,
@@ -250,11 +238,12 @@ function PreviewChannelSection(): React.JSX.Element | null {
       <Button
         variant="primary"
         size="small"
-        text="Load latest main bundle"
         onPress={() => {
           Effect.runFork(loadPreviewChannel(MAIN_PREVIEW_CHANNEL))
         }}
-      />
+      >
+        Load latest main bundle
+      </Button>
       {!!(
         previewChannel.activeChannel !== null ||
         Updates.channel?.startsWith('pr-') ||
@@ -263,11 +252,12 @@ function PreviewChannelSection(): React.JSX.Element | null {
         <Button
           variant="primary"
           size="small"
-          text="Clear preview (back to staging channel)"
           onPress={() => {
             Effect.runFork(clearPreviewChannel())
           }}
-        />
+        >
+          Clear preview (back to staging channel)
+        </Button>
       )}
     </YStack>
   )
@@ -568,7 +558,6 @@ function DebugScreen(): React.ReactElement {
     useNavigation<RootStackScreenProps<'ChatDetail'>['navigation']>()
   const store = useStore()
   const session = useSessionAssumeLoggedIn()
-  const {t} = useTranslation()
 
   const setConnectionsState = useSetAtom(connectionStateAtom)
   const refreshMessaging = useSetAtom(fetchMessagesForAllInboxesAtom)
@@ -614,11 +603,14 @@ function DebugScreen(): React.ReactElement {
             onPress={() => {
               showTextDebugButton((old) => !old)
             }}
-            text={buttonText}
-          />
+          >
+            {buttonText}
+          </Button>
           <LanguagePicker />
           <DebugInfo />
-          <Button variant="secondary" text="back" onPress={safeGoBack} />
+          <Button variant="secondary" onPress={safeGoBack}>
+            back
+          </Button>
         </YStack>
       </Screen>
     )
@@ -634,7 +626,11 @@ function DebugScreen(): React.ReactElement {
           leftAction={{icon: ChevronLeft, onPress: safeGoBack}}
         />
       }
-      footer={<Button variant="secondary" text="back" onPress={safeGoBack} />}
+      footer={
+        <Button variant="secondary" onPress={safeGoBack}>
+          back
+        </Button>
+      }
     >
       <YStack gap="$4">
         <YStack gap="$3">
@@ -662,25 +658,26 @@ function DebugScreen(): React.ReactElement {
           <Button
             variant="primary"
             size="small"
-            text="Reset post-login flow progress"
             onPress={() => {
               resetPostLoginFlowProgress()
               Alert.alert('Post-login flow progress reset')
             }}
-          />
+          >
+            Reset post-login flow progress
+          </Button>
           <Button
             variant="primary"
             size="small"
-            text="Reset user identity"
             onPress={() => {
               resetUserIdentity(undefined)
               Alert.alert('User identity reset')
             }}
-          />
+          >
+            Reset user identity
+          </Button>
           <Button
             variant="primary"
             size="small"
-            text="Refresh offers and connections"
             onPress={() => {
               Effect.runFork(
                 Effect.gen(function* (_) {
@@ -692,20 +689,22 @@ function DebugScreen(): React.ReactElement {
                 })
               )
             }}
-          />
+          >
+            Refresh offers and connections
+          </Button>
           <Button
             variant="primary"
             size="small"
-            text="Print contacts"
             onPress={() => {
               const contacts = store.get(storedContactsAtom)
               console.log('Contacts: ', JSON.stringify(contacts, null, 2))
             }}
-          />
+          >
+            Print contacts
+          </Button>
           <Button
             variant="primary"
             size="small"
-            text="Simulate non fatal error Error A"
             onPress={() => {
               reportError(
                 'error',
@@ -716,11 +715,12 @@ function DebugScreen(): React.ReactElement {
                 }
               )
             }}
-          />
+          >
+            Simulate non fatal error Error A
+          </Button>
           <Button
             variant="primary"
             size="small"
-            text="Simulate non fatal error Error B"
             onPress={() => {
               reportError(
                 'error',
@@ -731,27 +731,30 @@ function DebugScreen(): React.ReactElement {
                 }
               )
             }}
-          />
+          >
+            Simulate non fatal error Error B
+          </Button>
           <Button
             variant="primary"
             size="small"
-            text="Simulate fatal error"
             onPress={() => {
               throw new Error(`Simulated fatal error`)
             }}
-          />
+          >
+            Simulate fatal error
+          </Button>
           <Button
             variant="primary"
             size="small"
-            text="Report offers without location"
             onPress={() => {
               store.set(reportOffersWithoutLocationActionAtom)
             }}
-          />
+          >
+            Report offers without location
+          </Button>
           <Button
             variant="primary"
             size="small"
-            text="Clear offers state"
             onPress={() => {
               store.set(offersStateAtom, {
                 lastUpdatedAt2: MINIMAL_DATE,
@@ -761,13 +764,14 @@ function DebugScreen(): React.ReactElement {
               })
               Alert.alert('Done')
             }}
-          />
+          >
+            Clear offers state
+          </Button>
           {isLocalEnvPreset ? (
             <>
               <Button
                 variant="primary"
                 size="small"
-                text="Seed perf: import 200 fake contacts"
                 onPress={() => {
                   if (!isLocalEnvPreset) {
                     Alert.alert('Only available on the local env preset')
@@ -836,11 +840,12 @@ function DebugScreen(): React.ReactElement {
                       )
                   )
                 }}
-              />
+              >
+                Seed perf: import 200 fake contacts
+              </Button>
               <Button
                 variant="primary"
                 size="small"
-                text="Seed perf: approve all chat requests"
                 onPress={() => {
                   if (!isLocalEnvPreset) {
                     Alert.alert('Only available on the local env preset')
@@ -942,13 +947,14 @@ function DebugScreen(): React.ReactElement {
                     )
                   )
                 }}
-              />
+              >
+                Seed perf: approve all chat requests
+              </Button>
             </>
           ) : null}
           <Button
             variant="primary"
             size="small"
-            text="Create 100 server debug offers around Europe"
             onPress={() => {
               if (packageName === 'it.vexl.next') {
                 Alert.alert('Not available in production')
@@ -1016,11 +1022,12 @@ function DebugScreen(): React.ReactElement {
                 Effect.runFork
               )
             }}
-          />
+          >
+            Create 100 server debug offers around Europe
+          </Button>
           <Button
             variant="primary"
             size="small"
-            text="Create filter test offers with different attributes"
             onPress={() => {
               if (packageName === 'it.vexl.next') {
                 Alert.alert('Not available in production')
@@ -1125,11 +1132,12 @@ function DebugScreen(): React.ReactElement {
                 Effect.runFork
               )
             }}
-          />
+          >
+            Create filter test offers with different attributes
+          </Button>
           <Button
             variant="primary"
             size="small"
-            text="Test get first page of offers and alert number"
             onPress={() => {
               void pipe(
                 effectToTaskEither(
@@ -1183,11 +1191,12 @@ function DebugScreen(): React.ReactElement {
                 )
               )()
             }}
-          />
+          >
+            Test get first page of offers and alert number
+          </Button>
           <Button
             variant="primary"
             size="small"
-            text="show not"
             onPress={() => {
               void (async () => {
                 await displayLocalNotification({
@@ -1200,22 +1209,24 @@ function DebugScreen(): React.ReactElement {
                 })
               })()
             }}
-          />
+          >
+            show not
+          </Button>
           <Button
             variant="primary"
             size="small"
-            text="cancel all not"
             onPress={() => {
               void (async () => {
                 await Notifications.dismissAllNotificationsAsync()
                 await Notifications.cancelAllScheduledNotificationsAsync()
               })()
             }}
-          />
+          >
+            cancel all not
+          </Button>
           <Button
             variant="primary"
             size="small"
-            text="print all not"
             onPress={() => {
               void (async () => {
                 const nots =
@@ -1223,11 +1234,12 @@ function DebugScreen(): React.ReactElement {
                 console.log(JSON.stringify(nots, null, 2))
               })()
             }}
-          />
+          >
+            print all not
+          </Button>
           <Button
             variant="primary"
             size="small"
-            text="Print contactOffersNextPageParamBase64"
             onPress={() => {
               Alert.alert(
                 'Last updated at',
@@ -1236,11 +1248,12 @@ function DebugScreen(): React.ReactElement {
                 )}, minimalDate: ${MINIMAL_DATE}`
               )
             }}
-          />
+          >
+            Print contactOffersNextPageParamBase64
+          </Button>
           <Button
             variant="primary"
             size="small"
-            text="Print clubOffersNextPageParamBase64"
             onPress={() => {
               Alert.alert(
                 'Last updated at',
@@ -1249,31 +1262,34 @@ function DebugScreen(): React.ReactElement {
                 )}, minimalDate: ${MINIMAL_DATE}`
               )
             }}
-          />
+          >
+            Print clubOffersNextPageParamBase64
+          </Button>
           <Button
             variant="primary"
             size="small"
-            text="Clear messaging state"
             onPress={() => {
               const userInbox: Inbox = {privateKey: session.privateKey}
 
               store.set(messagingStateAtom, [{inbox: userInbox, chats: []}])
               Alert.alert('Done')
             }}
-          />
+          >
+            Clear messaging state
+          </Button>
           <Button
             variant="primary"
             size="small"
-            text="Clear BTC price data state"
             onPress={() => {
               store.set(btcPriceDataAtom, {})
               Alert.alert('Done')
             }}
-          />
+          >
+            Clear BTC price data state
+          </Button>
           <Button
             variant="primary"
             size="small"
-            text="Refresh chat state"
             onPress={() => {
               pipe(
                 refreshMessaging(),
@@ -1283,11 +1299,12 @@ function DebugScreen(): React.ReactElement {
                 Effect.runFork
               )
             }}
-          />
+          >
+            Refresh chat state
+          </Button>
           <Button
             variant="primary"
             size="small"
-            text="Open missing chat detail"
             onPress={() => {
               navigation.navigate('ChatDetail', {
                 inboxKey: session.privateKey.publicKeyPemBase64,
@@ -1296,21 +1313,23 @@ function DebugScreen(): React.ReactElement {
                 ),
               })
             }}
-          />
+          >
+            Open missing chat detail
+          </Button>
           <Button
             variant="primary"
             size="small"
-            text="Simulate losing ownership info"
             onPress={() => {
               store.set(offersAtom, (o) =>
                 o.map((one) => ({...one, ownershipInfo: undefined}))
               )
             }}
-          />
+          >
+            Simulate losing ownership info
+          </Button>
           <Button
             variant="primary"
             size="small"
-            text="Refresh offers state"
             onPress={() => {
               void Effect.runPromise(
                 andThenExpectVoidNoErrors(() => {
@@ -1318,20 +1337,22 @@ function DebugScreen(): React.ReactElement {
                 })(refreshOffers())
               )
             }}
-          />
+          >
+            Refresh offers state
+          </Button>
           <Button
             variant="primary"
             size="small"
-            text="clear new contacts"
             onPress={() => {
               store.set(storedContactsAtom, [])
             }}
-          />
+          >
+            clear new contacts
+          </Button>
 
           <Button
             variant="primary"
             size="small"
-            text="Reconstruct user inbox"
             onPress={() => {
               store.set(messagingStateAtom, (old) => [
                 ...old.filter(
@@ -1347,43 +1368,47 @@ function DebugScreen(): React.ReactElement {
                 },
               ])
             }}
-          />
+          >
+            Reconstruct user inbox
+          </Button>
 
           <Button
             variant="primary"
             size="small"
-            text="Delete offer connections without offer"
             onPress={() => {
               store.set(deleteOrphanRecordsActionAtom)
             }}
-          />
+          >
+            Delete offer connections without offer
+          </Button>
 
           <Button
             variant="primary"
             size="small"
-            text="Print offer and chat state into console"
             onPress={() => {
               const offers = store.get(offersStateAtom)
               const messagingState = store.get(messagingStateAtom)
               const connectionState = store.get(offerToConnectionsAtom)
               console.log({offers, messagingState, connectionState})
             }}
-          />
+          >
+            Print offer and chat state into console
+          </Button>
 
           <Button
             variant="primary"
             size="small"
-            text="Print my offers into console"
             onPress={() => {
               const offers = store.get(myOffersAtom)
               console.log(JSON.stringify(offers, null, 2))
             }}
-          />
+          >
+            Print my offers into console
+          </Button>
 
           <Button
             variant="primary"
             size="small"
-            text="Delete user inbox"
             onPress={() =>
               deleteInbox(session.privateKey).pipe(
                 Effect.tap((result) => {
@@ -1396,12 +1421,13 @@ function DebugScreen(): React.ReactElement {
                 Effect.runFork
               )
             }
-          />
+          >
+            Delete user inbox
+          </Button>
 
           <Button
             variant="primary"
             size="small"
-            text="Delete all inboxes"
             onPress={() => {
               void pipe(
                 deleteAllInboxes(),
@@ -1414,12 +1440,13 @@ function DebugScreen(): React.ReactElement {
                 })
               )()
             }}
-          />
+          >
+            Delete all inboxes
+          </Button>
 
           <Button
             variant="primary"
             size="small"
-            text="Send version update to all chats"
             onPress={() => {
               Effect.runFork(
                 Effect.gen(function* (_) {
@@ -1438,44 +1465,48 @@ function DebugScreen(): React.ReactElement {
                 })
               )
             }}
-          />
+          >
+            Send version update to all chats
+          </Button>
 
           <Button
             variant="primary"
             size="small"
-            text="Update all offers connections"
             onPress={() => {
               Effect.runFork(updateConnections({isInBackground: false}))
             }}
-          />
+          >
+            Update all offers connections
+          </Button>
 
           <Button
             variant="primary"
             size="small"
-            text="Copy public key"
             // eslint-disable-next-line @typescript-eslint/no-misused-promises
             onPress={async () => {
               Clipboard.setString(
                 store.get(sessionDataOrDummyAtom).privateKey.publicKeyPemBase64
               )
             }}
-          />
+          >
+            Copy public key
+          </Button>
           <Button
             variant="primary"
             size="small"
-            text="Copy notification token"
             // eslint-disable-next-line @typescript-eslint/no-misused-promises
             onPress={async () => {
               Clipboard.setString(
                 (await Effect.runPromise(getNotificationTokenE())) ?? 'No token'
               )
             }}
-          />
+          >
+            Copy notification token
+          </Button>
 
           <Button
             variant="primary"
             size="small"
-            text="Print background tasks"
             // eslint-disable-next-line @typescript-eslint/no-misused-promises
             onPress={async () => {
               const registeredTasks =
@@ -1499,25 +1530,27 @@ function DebugScreen(): React.ReactElement {
                 ]
               )
             }}
-          />
+          >
+            Print background tasks
+          </Button>
 
           {/* Testing background tasks is only available in dev mode */}
           {!!__DEV__ && (
             <Button
               variant="primary"
               size="small"
-              text="Run test background tasks"
               // eslint-disable-next-line @typescript-eslint/no-misused-promises
               onPress={async () => {
                 await BackgroundTask.triggerTaskWorkerForTestingAsync()
               }}
-            />
+            >
+              Run test background tasks
+            </Button>
           )}
 
           <Button
             variant="primary"
             size="small"
-            text="Simulate offers deleted from server"
             onPress={() => {
               void effectToTaskEither(
                 store.get(apiAtom).offer.deleteOffer({
@@ -1534,12 +1567,13 @@ function DebugScreen(): React.ReactElement {
                   Alert.alert('Error', error.message)
                 })
             }}
-          />
+          >
+            Simulate offers deleted from server
+          </Button>
 
           <Button
             variant="primary"
             size="small"
-            text="Test dummy feedback request"
             onPress={() => {
               void effectToTaskEither(
                 store.get(apiAtom).feedback.submitFeedback({
@@ -1556,20 +1590,22 @@ function DebugScreen(): React.ReactElement {
                   Alert.alert('Error', error.message)
                 })
             }}
-          />
+          >
+            Test dummy feedback request
+          </Button>
           <Button
             variant="primary"
             size="small"
-            text="Toggle debug notifications"
             onPress={() => {
               setShowDebugNotifications(!getShowDebugNotifications())
               Alert.alert(getShowDebugNotifications() ? 'Enabled' : 'Disabled')
             }}
-          />
+          >
+            Toggle debug notifications
+          </Button>
           <Button
             variant="primary"
             size="small"
-            text="Simulate reach drop to 0"
             onPress={() => {
               setConnectionsState({
                 lastUpdate: Schema.decodeSync(UnixMilliseconds)(
@@ -1582,11 +1618,12 @@ function DebugScreen(): React.ReactElement {
               })
               Alert.alert('Done')
             }}
-          />
+          >
+            Simulate reach drop to 0
+          </Button>
           <Button
             variant="primary"
             size="small"
-            text="Show are you sure thing"
             onPress={() => {
               store
                 .set(askAreYouSureActionAtom, {
@@ -1603,11 +1640,12 @@ function DebugScreen(): React.ReactElement {
                 })
                 .pipe(Effect.runFork)
             }}
-          />
+          >
+            Show are you sure thing
+          </Button>
           <Button
             variant="primary"
             size="small"
-            text="Show installation source"
             onPress={() => {
               if (Platform.OS === 'android')
                 Alert.alert(getInstallationSource() ?? 'none')
@@ -1616,11 +1654,12 @@ function DebugScreen(): React.ReactElement {
                   `ios: ${isTestFlight ? 'TestFlight' : 'Not testflight'}`
                 )
             }}
-          />
+          >
+            Show installation source
+          </Button>
           <Button
             variant="primary"
             size="small"
-            text={`(Effect) Generate and measure decoding of ${NUMBER_OF_TEST_CONTACTS} contacts`}
             onPress={() => {
               Effect.gen(function* (_) {
                 const contacts = generateTestContacts()
@@ -1651,7 +1690,7 @@ function DebugScreen(): React.ReactElement {
                 Effect.runFork
               )
             }}
-          />
+          >{`(Effect) Generate and measure decoding of ${NUMBER_OF_TEST_CONTACTS} contacts`}</Button>
         </YStack>
         <SimulateMissingOfferInbox />
         <Preferences />

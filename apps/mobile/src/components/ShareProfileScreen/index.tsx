@@ -1,5 +1,6 @@
 import {
   Button,
+  getTokens,
   InfoBox,
   NavigationBar,
   PersonRow,
@@ -60,7 +61,9 @@ function ShareProfileScreen(): React.ReactElement {
   const theme = useTheme()
   const {width} = useWindowDimensions()
   const encodedUserDetailsUri = useAtomValue(encodedUserDetailsUriAtom)
-  const qrCodeSize = Math.min(width - 96, 360)
+  const {space} = getTokens()
+  const qrCodeFrameInset = 2 * (space.$5.val + space.$8.val)
+  const qrCodeSize = Math.min(width - qrCodeFrameInset, 360)
 
   return (
     <Screen

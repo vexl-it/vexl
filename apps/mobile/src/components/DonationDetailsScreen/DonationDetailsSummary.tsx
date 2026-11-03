@@ -1,6 +1,7 @@
 import {
   Copy,
   DetailsCard,
+  getTokens,
   KeyValueRow,
   Typography,
   useTheme,
@@ -63,7 +64,10 @@ export function DonationSummaryCard({
             pressStyle={{opacity: 0.7}}
             onPress={onCopyInvoiceId}
           >
-            <Copy size={18} color={theme.foregroundPrimary.get()} />
+            <Copy
+              size={getTokens().size['$5.5'].val}
+              color={theme.foregroundPrimary.get()}
+            />
             <Typography
               variant="descriptionBold"
               color="$foregroundPrimary"

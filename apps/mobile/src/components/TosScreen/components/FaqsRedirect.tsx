@@ -1,4 +1,11 @@
-import {Play, Stack, Typography, useTheme, XStack} from '@vexl-next/ui'
+import {
+  getTokens,
+  IconBox,
+  Play,
+  Typography,
+  useTheme,
+  XStack,
+} from '@vexl-next/ui'
 import React from 'react'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 
@@ -20,16 +27,12 @@ function FaqsRedirect({onPress}: Props): React.ReactElement {
       padding="$5"
       pressStyle={{opacity: 0.7}}
     >
-      <Stack
-        alignItems="center"
-        backgroundColor="$accentHighlightSecondary"
-        borderRadius="$3"
-        height="$9"
-        justifyContent="center"
-        width="$9"
-      >
-        <Play color={theme.backgroundPrimary.get()} size={20} />
-      </Stack>
+      <IconBox backgroundColor="$accentHighlightSecondary">
+        <Play
+          color={theme.backgroundPrimary.get()}
+          size={getTokens().size.$6.val}
+        />
+      </IconBox>
       <Typography color="$foregroundPrimary" pt="$2" variant="description">
         {t('termsOfUse.dontHaveTime2')}
       </Typography>

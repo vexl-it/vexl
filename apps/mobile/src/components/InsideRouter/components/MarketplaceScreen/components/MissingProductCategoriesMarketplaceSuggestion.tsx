@@ -1,11 +1,11 @@
 import {useNavigation} from '@react-navigation/native'
+import {Banner} from '@vexl-next/ui'
 import {Array, Option, pipe} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React from 'react'
 import {myProductOffersMissingCategoryAtom} from '../../../../../state/marketplace/atoms/myOffers'
 import {dismissMissingProductCategoriesInMarketplaceSuggestionActionAtom} from '../../../../../state/marketplace/atoms/offerSuggestionVisible'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
-import DismissableMarketplaceBanner from './DismissableMarketplaceBanner'
 
 function MissingProductCategoriesMarketplaceSuggestion({
   placement,
@@ -46,7 +46,8 @@ function MissingProductCategoriesMarketplaceSuggestion({
         : 'marketplace.missingProductCategoriesSuggestion.myOffersPrimaryButtonPlural'
 
   return (
-    <DismissableMarketplaceBanner
+    <Banner
+      dismissible
       color="pink"
       title={t('marketplace.missingProductCategoriesSuggestion.title')}
       description={t(descriptionKey, {count: affectedOffersCount})}

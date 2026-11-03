@@ -1,8 +1,8 @@
+import {Banner} from '@vexl-next/ui'
 import {useSetAtom} from 'jotai'
 import React from 'react'
 import {dismissImportContactsInMarketplaceSuggestionActionAtom} from '../../../../../state/marketplace/atoms/offerSuggestionVisible'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
-import DismissableMarketplaceBanner from './DismissableMarketplaceBanner'
 import useAddContactsFromMarketplaceAction from './useAddContactsFromMarketplaceAction'
 
 function ImportContactsMarketplaceSuggestion(): React.ReactElement {
@@ -13,7 +13,8 @@ function ImportContactsMarketplaceSuggestion(): React.ReactElement {
   const addContacts = useAddContactsFromMarketplaceAction()
 
   return (
-    <DismissableMarketplaceBanner
+    <Banner
+      dismissible
       color="pink"
       title={t('marketplace.importContactsSuggestion.title')}
       description={t('marketplace.importContactsSuggestion.description')}

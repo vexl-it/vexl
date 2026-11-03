@@ -1,9 +1,9 @@
+import {Banner} from '@vexl-next/ui'
 import {useSetAtom} from 'jotai'
 import React from 'react'
 import {Linking} from 'react-native'
 import {dismissEnableBackgroundRefreshInMarketplaceSuggestionActionAtom} from '../../../../../state/marketplace/atoms/offerSuggestionVisible'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
-import DismissableMarketplaceBanner from './DismissableMarketplaceBanner'
 
 function EnableBackgroundRefreshMarketplaceSuggestion(): React.ReactElement {
   const {t} = useTranslation()
@@ -12,7 +12,8 @@ function EnableBackgroundRefreshMarketplaceSuggestion(): React.ReactElement {
   )
 
   return (
-    <DismissableMarketplaceBanner
+    <Banner
+      dismissible
       color="pink"
       title={t('marketplace.enableBackgroundRefreshSuggestion.title')}
       description={t(

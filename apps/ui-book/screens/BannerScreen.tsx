@@ -1,5 +1,5 @@
-import {Banner, Image, SizableText, Theme, YStack} from '@vexl-next/ui'
-import React from 'react'
+import {Banner, Button, Image, SizableText, Theme, YStack} from '@vexl-next/ui'
+import React, {useState} from 'react'
 import {ScrollView} from 'react-native'
 
 const testBannerSource = require('../assets/testBanner.png') as number
@@ -28,6 +28,45 @@ function BannerImage(): React.JSX.Element {
       source={testBannerSource}
       style={{width: '100%', height: 98, borderRadius: 10}}
       objectFit="cover"
+    />
+  )
+}
+
+function DismissibleDemo(): React.JSX.Element {
+  const [visible, setVisible] = useState(true)
+
+  if (!visible) {
+    return (
+      <Button
+        size="small"
+        variant="secondary"
+        onPress={() => {
+          setVisible(true)
+        }}
+      >
+        Show again
+      </Button>
+    )
+  }
+
+  return (
+    <Banner
+      dismissible
+      color="pink"
+      title="Create your first offer"
+      description="The banner slides away before the action runs."
+      primaryButton={{
+        label: 'Create',
+        onPress: () => {
+          setVisible(false)
+        },
+      }}
+      secondaryButton={{
+        label: 'Dismiss',
+        onPress: () => {
+          setVisible(false)
+        },
+      }}
     />
   )
 }
@@ -89,6 +128,9 @@ function ThemeGroup({
           description="Like Vexl? Help us improve it. Donate some sound money."
           primaryButton={{label: 'Donate'}}
         />
+
+        <SectionLabel>Dismissible (press a button)</SectionLabel>
+        <DismissibleDemo />
       </YStack>
     </Theme>
   )

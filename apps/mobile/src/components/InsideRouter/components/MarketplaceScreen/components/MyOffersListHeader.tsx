@@ -1,7 +1,12 @@
-import {ArrowsVerticalSort, Button, Typography} from '@vexl-next/ui'
+import {
+  ArrowsVerticalSort,
+  Button,
+  Typography,
+  XStack,
+  YStack,
+} from '@vexl-next/ui'
 import {useAtom, useAtomValue} from 'jotai'
 import React, {useCallback} from 'react'
-import {Stack, XStack} from 'tamagui'
 import {
   myOffersCountAtom,
   selectedMyOffersSortingOptionAtom,
@@ -35,34 +40,30 @@ function MyOffersListHeader(): React.ReactElement | null {
   }
 
   return (
-    <Stack>
-      <Stack paddingHorizontal="$5">
-        <XStack
-          paddingTop="$7"
-          paddingBottom="$5"
-          paddingHorizontal="$2"
-          alignItems="center"
-          justifyContent="space-between"
+    <YStack paddingHorizontal="$5">
+      <XStack
+        paddingTop="$7"
+        paddingBottom="$5"
+        paddingHorizontal="$2"
+        alignItems="center"
+        justifyContent="space-between"
+      >
+        <Typography variant="description" color="$foregroundSecondary">
+          {t('marketplace.offersCountFormatted', {
+            localizedString: formatInteger(allOffersCount, locale),
+          })}
+        </Typography>
+        <Button
+          variant="link"
+          size="small"
+          icon={ArrowsVerticalSort}
+          onPress={toggleSorting}
         >
-          <Typography variant="description" color="$foregroundSecondary">
-            {t('marketplace.offersCountFormatted', {
-              localizedString: formatInteger(allOffersCount, locale),
-            })}
-          </Typography>
-          <Button
-            variant="link"
-            size="small"
-            icon={ArrowsVerticalSort}
-            onPress={toggleSorting}
-          >
-            {sortButtonLabel}
-          </Button>
-        </XStack>
-      </Stack>
-      <Stack gap="$6">
-        <ReencryptOffersSuggestion />
-      </Stack>
-    </Stack>
+          {sortButtonLabel}
+        </Button>
+      </XStack>
+      <ReencryptOffersSuggestion />
+    </YStack>
   )
 }
 

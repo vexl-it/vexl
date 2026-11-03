@@ -4,6 +4,7 @@ import {
   Button,
   Divider,
   NavigationBar,
+  PinchZoomHint,
   TextField,
   Typography,
 } from '@vexl-next/ui'
@@ -18,7 +19,6 @@ import {type MapValueWithRadius} from '../Map/brands'
 import MapLocationWithRadiusSelect, {
   type SelectedCoordinates,
 } from '../Map/components/MapLocationWithRadiusSelect'
-import PinchZoomHint from '../Map/components/PinchZoomHint'
 import {type GeocodingFailureKind} from '../Map/types'
 import {pragueCenterLocation} from '../Map/utils/pragueCenterLocation'
 import {LocationPickerMolecule} from './molecule'
@@ -240,6 +240,7 @@ export default function LocationRadiusPicker({
             paddingHorizontal="$5"
           >
             <PinchZoomHint
+              label={t('map.locationSelect.pinchToAdjustArea')}
               visible={isPinchHintVisible}
               onHidden={handlePinchHintHidden}
             />

@@ -5,6 +5,7 @@ import {AvatarScreen} from './AvatarScreen'
 import {BackdropScreen} from './BackdropScreen'
 import {BannerScreen} from './BannerScreen'
 import {BlogCardScreen} from './BlogCardScreen'
+import {BottomSheetPanelScreen} from './BottomSheetPanelScreen'
 import {ButtonScreen} from './ButtonScreen'
 import {BuySellRangeSliderScreen} from './BuySellRangeSliderScreen'
 import {CardButtonScreen} from './CardButtonScreen'
@@ -29,6 +30,7 @@ import {EmptyStateScreen} from './EmptyStateScreen'
 import {EventCardScreen} from './EventCardScreen'
 import {ExchangeScreen} from './ExchangeScreen'
 import {FabButtonScreen} from './FabButtonScreen'
+import {FadeGradientScreen} from './FadeGradientScreen'
 import {FilterBarScreen} from './FilterBarScreen'
 import {FilterTagScreen} from './FilterTagScreen'
 import {FriendLevelScreen} from './FriendLevelScreen'
@@ -46,6 +48,8 @@ import {LengthCounterScreen} from './LengthCounterScreen'
 import {LiveIndicatorScreen} from './LiveIndicatorScreen'
 import {LoadErrorStateScreen} from './LoadErrorStateScreen'
 import {LoaderScreen} from './LoaderScreen'
+import {LocationSuggestionRowScreen} from './LocationSuggestionRowScreen'
+import {MapOverlayScreen} from './MapOverlayScreen'
 import {LoadingOverlayScreen} from './LoadingOverlayScreen'
 import {MarketplaceEmptyLoaderScreen} from './MarketplaceEmptyLoaderScreen'
 import {MarketplaceIntroDialogContentScreen} from './MarketplaceIntroDialogContentScreen'
@@ -106,6 +110,7 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'Banner', component: BannerScreen},
   {label: 'Blog Card', component: BlogCardScreen},
   {label: 'Buy/Sell Range Slider', component: BuySellRangeSliderScreen},
+  {label: 'Bottom Sheet Panel', component: BottomSheetPanelScreen},
   {label: 'Button', component: ButtonScreen},
   {label: 'Card Button', component: CardButtonScreen},
   {label: 'Chat Message Item', component: ChatMessageItemScreen},
@@ -132,6 +137,7 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'Event Card', component: EventCardScreen},
   {label: 'Exchange', component: ExchangeScreen},
   {label: 'Fab Button', component: FabButtonScreen},
+  {label: 'Fade Gradient', component: FadeGradientScreen},
   {label: 'Filter Bar', component: FilterBarScreen},
   {label: 'Filter Tag', component: FilterTagScreen},
   {label: 'Friend Level', component: FriendLevelScreen},
@@ -148,6 +154,8 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'Length Counter', component: LengthCounterScreen},
   {label: 'Live Indicator', component: LiveIndicatorScreen},
   {label: 'Loader', component: LoaderScreen},
+  {label: 'Location Suggestion Row', component: LocationSuggestionRowScreen},
+  {label: 'Map Overlay', component: MapOverlayScreen},
   {label: 'Load Error State', component: LoadErrorStateScreen},
   {label: 'Loading Overlay', component: LoadingOverlayScreen},
   {label: 'Marketplace Empty Loader', component: MarketplaceEmptyLoaderScreen},

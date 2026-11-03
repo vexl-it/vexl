@@ -4,10 +4,11 @@ import {
 } from '@maplibre/maplibre-react-native'
 import {Latitude, Longitude} from '@vexl-next/domain/src/utility/geoCoordinates'
 import {
-  KeyboardStickyView,
+  MapLabelPill,
+  MapOverlayLayout,
+  MapPin,
+  mapPinTipTransform,
   Stack,
-  Typography,
-  YStack,
   useTheme,
 } from '@vexl-next/ui'
 import {Effect, Schema} from 'effect'
@@ -16,7 +17,6 @@ import {pipe} from 'fp-ts/lib/function'
 import {atom, useAtomValue, useSetAtom, type Atom} from 'jotai'
 import React, {useCallback, useEffect, useMemo} from 'react'
 import {type NativeSyntheticEvent} from 'react-native'
-import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {apiAtom} from '../../../api'
 import {createEffectAtomWithProgress} from '../../../utils/atomUtils/createEffectAtomWithProgress'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
@@ -31,7 +31,6 @@ import {
   type LatLng,
 } from '../types'
 import {mapValueToBounds} from '../utils/mapLibreRegion'
-import {MapPinAsset} from './MapSvgAssets'
 import VexlMap from './VexlMap'
 
 const MapCenterSchema = Schema.Tuple(Longitude, Latitude)
@@ -108,7 +107,7 @@ function useAtoms({
 
 type AtomValue<T> = T extends Atom<infer Value> ? Value : never
 
-function PickedLocationText({
+function PickedLocationPill({
   geocodingState,
 }: {
   geocodingState: AtomValue<
@@ -117,28 +116,20 @@ function PickedLocationText({
 }): React.ReactElement {
   const {t} = useTranslation()
 
-  if (geocodingState.state !== 'done')
-    return (
-      <Typography variant="micro" color="$foregroundPrimary">
-        {t('common.loading')}...
-      </Typography>
-    )
-
-  const color = E.isLeft(geocodingState.result)
-    ? '$redForeground'
-    : '$foregroundPrimary'
-  const text = pipe(
-    geocodingState.result,
-    E.match(
-      (l) => toCommonErrorMessage(l, t) ?? t('map.location.errors.notFound'),
-      (data) => data?.address ?? t('map.locationSelect.hint')
-    )
-  )
+  if (geocodingState.state !== 'done') return <MapLabelPill label="" loading />
 
   return (
-    <Typography variant="micro" textAlign="center" color={color}>
-      {text}
-    </Typography>
+    <MapLabelPill
+      error={E.isLeft(geocodingState.result)}
+      label={pipe(
+        geocodingState.result,
+        E.match(
+          (l) =>
+            toCommonErrorMessage(l, t) ?? t('map.location.errors.notFound'),
+          (data) => data?.address ?? t('map.locationSelect.hint')
+        )
+      )}
+    />
   )
 }
 
@@ -154,7 +145,6 @@ export default function MapLocationSelect({
   mapPadding,
   ...restProps
 }: Props): React.ReactElement {
-  const safeAreaInsets = useSafeAreaInsets()
   const theme = useTheme()
   const accentHighlightSecondary = theme.accentHighlightSecondary.get()
 
@@ -224,73 +214,19 @@ export default function MapLocationSelect({
         position="absolute"
         top="50%"
         left="50%"
-        transform={[{translateX: -70 / 2}, {translateY: (-70 / 3) * 2}]}
+        transform={mapPinTipTransform}
       >
-        <MapPinAsset color={accentHighlightSecondary} />
+        <MapPin color={accentHighlightSecondary} />
       </Stack>
-
-      <Stack
-        pointerEvents="none"
-        position="absolute"
-        top={0}
-        left={0}
-        right={0}
-        bottom={0}
-        h="100%"
-        w="100%"
-      >
-        <Stack flex={3}></Stack>
-        <Stack flex={2} p="$2">
-          {middleChildren ?? (
-            <Stack
-              paddingHorizontal="$4"
-              paddingVertical="$2"
-              borderRadius="$6"
-              alignSelf="center"
-              backgroundColor="$backgroundPrimary"
-            >
-              <PickedLocationText geocodingState={geocodingState} />
-            </Stack>
-          )}
-        </Stack>
-      </Stack>
-      <Stack
-        pointerEvents="box-none"
-        position="absolute"
-        top={0}
-        left={0}
-        right={0}
-        bottom={0}
-        h="100%"
-        w="100%"
-      >
-        <Stack
-          pointerEvents="box-none"
-          flex={1}
-          paddingLeft={safeAreaInsets.left}
-          paddingRight={safeAreaInsets.right}
-        >
-          <YStack>
-            <Stack
-              width="100%"
-              height={safeAreaInsets.top}
-              backgroundColor="$backgroundPrimary"
-            />
-            {topChildren}
-          </YStack>
-          <Stack pointerEvents="none" flex={1}></Stack>
-          <KeyboardStickyView pointerEvents="box-none">
-            <Stack>
-              {bottomChildren}
-              <Stack
-                width="100%"
-                height={safeAreaInsets.bottom}
-                backgroundColor="$backgroundPrimary"
-              />
-            </Stack>
-          </KeyboardStickyView>
-        </Stack>
-      </Stack>
+      <MapOverlayLayout
+        top={topChildren}
+        middle={
+          middleChildren ?? (
+            <PickedLocationPill geocodingState={geocodingState} />
+          )
+        }
+        bottom={bottomChildren}
+      />
     </Stack>
   )
 }

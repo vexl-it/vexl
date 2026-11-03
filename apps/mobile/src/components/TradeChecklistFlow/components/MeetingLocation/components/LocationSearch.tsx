@@ -4,16 +4,19 @@ import {
   ChevronLeft,
   EmptyState,
   IconButton,
+  LocationSuggestionRow,
+  NavigationBar,
   PinGeolocation,
   SearchBar,
   Typography,
+  YStack,
 } from '@vexl-next/ui'
 import {ScopeProvider, useMolecule} from 'bunshi/dist/react'
 import {type Atom, atom, useAtomValue, useSetAtom} from 'jotai'
 import React, {useEffect, useMemo} from 'react'
-import {FlatList, TouchableOpacity} from 'react-native'
+import {FlatList} from 'react-native'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
-import {Stack, XStack, YStack, useTheme} from 'tamagui'
+import {getTokens} from 'tamagui'
 import {type TradeChecklistStackScreenProps} from '../../../../../navigationTypes'
 import atomKeyExtractor from '../../../../../utils/atomUtils/atomKeyExtractor'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
@@ -48,37 +51,15 @@ function ResultItem({
   onPress: (locationData: LocationSuggestion) => void
 }): React.ReactElement {
   const locationData = useAtomValue(atom)
-  const theme = useTheme()
 
   return (
-    <TouchableOpacity
-      activeOpacity={0.7}
+    <LocationSuggestionRow
+      title={locationData.userData.suggestFirstRow}
+      subtitle={locationData.userData.suggestSecondRow}
       onPress={() => {
         onPress(locationData)
       }}
-    >
-      <XStack ai="flex-start" gap="$4" pt="$5">
-        <Stack pt="$1">
-          <PinGeolocation size={24} color={theme.foregroundPrimary.get()} />
-        </Stack>
-        <YStack
-          f={1}
-          gap="$2"
-          pb="$5"
-          borderBottomWidth={1}
-          borderBottomColor="$backgroundTertiary"
-        >
-          <Typography variant="paragraphSmall" color="$foregroundPrimary">
-            {locationData.userData.suggestFirstRow}
-          </Typography>
-          {locationData.userData.suggestSecondRow ? (
-            <Typography variant="description" color="$foregroundSecondary">
-              {locationData.userData.suggestSecondRow}
-            </Typography>
-          ) : null}
-        </YStack>
-      </XStack>
-    </TouchableOpacity>
+    />
   )
 }
 
@@ -86,7 +67,6 @@ function SearchScreenContent({
   navigation,
 }: SearchScreenContentProps): React.ReactElement {
   const {t} = useTranslation()
-  const theme = useTheme()
   const safeAreaInsets = useSafeAreaInsets()
   const localSearchTextAtom = useMemo(() => atom(''), [])
   const localSearchText = useAtomValue(localSearchTextAtom)
@@ -120,28 +100,12 @@ function SearchScreenContent({
       backgroundColor="$backgroundPrimary"
       pt={safeAreaInsets.top}
     >
-      <YStack px="$5" pb="$5" gap="$5">
-        <XStack ai="center">
-          <IconButton
-            backgroundColor="$accentYellowSecondary"
-            onPress={navigation.goBack}
-          >
-            <ChevronLeft
-              size={24}
-              color={theme.accentHighlightSecondary.get()}
-            />
-          </IconButton>
-          <Stack f={1} ai="center">
-            <Typography
-              variant="titlesSmall"
-              color="$foregroundPrimary"
-              textAlign="center"
-            >
-              {t('tradeChecklist.options.MEETING_LOCATION')}
-            </Typography>
-          </Stack>
-          <Stack width="$10" />
-        </XStack>
+      <NavigationBar
+        style="back"
+        title={t('tradeChecklist.options.MEETING_LOCATION')}
+        leftAction={{icon: ChevronLeft, onPress: navigation.goBack}}
+      />
+      <YStack px="$5" pb="$5">
         <SearchBar
           valueAtom={localSearchTextAtom}
           autoFocus
@@ -174,8 +138,8 @@ function SearchScreenContent({
           data={searchResultsAtoms}
           keyExtractor={atomKeyExtractor}
           contentContainerStyle={{
-            paddingHorizontal: 20,
-            paddingBottom: safeAreaInsets.bottom + 24,
+            paddingHorizontal: getTokens().space.$5.val,
+            paddingBottom: safeAreaInsets.bottom + getTokens().space.$7.val,
           }}
           renderItem={({item}) => (
             <ResultItem

@@ -1,21 +1,23 @@
 import {useNavigation} from '@react-navigation/native'
 import {type LocationSuggestion} from '@vexl-next/rest-api/src/services/location/contracts'
 import {
+  Button,
   Divider,
   EmptyState,
+  LocationSuggestionRow,
   NavigationBar,
   Screen,
   SearchBar,
   Typography,
 } from '@vexl-next/ui'
-import {ChevronLeft, PinGeolocation} from '@vexl-next/ui/src/icons'
-import {Stack, XStack, YStack} from '@vexl-next/ui/src/primitives'
+import {ChevronLeft} from '@vexl-next/ui/src/icons'
+import {XStack, YStack} from '@vexl-next/ui/src/primitives'
 import {ScopeProvider, useMolecule} from 'bunshi/dist/react'
 import type {Atom} from 'jotai'
 import {atom, useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useMemo, useRef, useState} from 'react'
 import {FlatList} from 'react-native'
-import {debounce, useTheme} from 'tamagui'
+import {debounce} from 'tamagui'
 import {type RootStackParamsList} from '../../navigationTypes'
 import atomKeyExtractor from '../../utils/atomUtils/atomKeyExtractor'
 import {useTranslation} from '../../utils/localization/I18nProvider'
@@ -145,33 +147,15 @@ function LocationResultItem({
   readonly onPress: (data: LocationSuggestion) => void
 }): React.JSX.Element {
   const data = useAtomValue(locationAtom)
-  const theme = useTheme()
 
   return (
-    <Stack
-      role="button"
+    <LocationSuggestionRow
+      title={data.userData.suggestFirstRow}
+      subtitle={data.userData.suggestSecondRow}
       onPress={() => {
         onPress(data)
       }}
-      pressStyle={{opacity: 0.7}}
-    >
-      <XStack gap="$5" alignItems="flex-start">
-        <Stack paddingTop="$1">
-          <PinGeolocation size={24} color={theme.foregroundPrimary.get()} />
-        </Stack>
-        <YStack flex={1} gap="$5">
-          <YStack gap="$1">
-            <Typography variant="paragraph" color="$foregroundPrimary">
-              {data.userData.suggestFirstRow}
-            </Typography>
-            <Typography variant="description" color="$foregroundSecondary">
-              {data.userData.suggestSecondRow}
-            </Typography>
-          </YStack>
-          <Divider />
-        </YStack>
-      </XStack>
-    </Stack>
+    />
   )
 }
 

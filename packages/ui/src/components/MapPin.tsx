@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useId} from 'react'
 import Svg, {
   Defs,
   Ellipse,
@@ -10,16 +10,25 @@ import Svg, {
   RadialGradient,
   Stop,
 } from 'react-native-svg'
+import type {IconProps} from '../icons/types'
 
-export function MapPinAsset({
+export const MAP_PIN_SIZE = 70
+
+/** Moves a pin placed at a map point so that its tip, not its corner, sits on the point. */
+export const mapPinTipTransform = [
+  {translateX: -MAP_PIN_SIZE / 2},
+  {translateY: (-MAP_PIN_SIZE * 2) / 3},
+]
+
+export function MapPin({
   color,
-  size = 70,
-}: {
-  color: string
-  size?: number
-}): React.ReactElement {
+  size = MAP_PIN_SIZE,
+  ...props
+}: IconProps): React.JSX.Element {
+  const shadowId = useId()
+
   return (
-    <Svg width={size} height={size} viewBox="0 0 68 65" fill="none">
+    <Svg width={size} height={size} viewBox="0 0 68 65" fill="none" {...props}>
       <Ellipse
         opacity={0.66}
         cx={34}
@@ -27,7 +36,7 @@ export function MapPinAsset({
         rx={22}
         ry={5.86667}
         fill="black"
-        filter="url(#pinShadow)"
+        filter={`url(#${shadowId})`}
       />
       <Path
         fillRule="evenodd"
@@ -37,7 +46,7 @@ export function MapPinAsset({
       />
       <Defs>
         <Filter
-          id="pinShadow"
+          id={shadowId}
           x={0.266666}
           y={29.4932}
           width={67.4667}
@@ -60,18 +69,24 @@ export function MapPinAsset({
   )
 }
 
-export function RadiusRingAsset({
+export function RadiusRing({
   color,
   size = 343,
-}: {
-  color: string
-  size?: number | string
-}): React.ReactElement {
+  ...props
+}: IconProps): React.JSX.Element {
+  const gradientId = useId()
+
   return (
-    <Svg width={size} height={size} viewBox="0 0 343 343" fill="none">
+    <Svg
+      width={size}
+      height={size}
+      viewBox="0 0 343 343"
+      fill="none"
+      {...props}
+    >
       <Path
         d="M343 171.5C343 266.217 266.217 343 171.5 343C76.7832 343 0 266.217 0 171.5C0 76.7832 76.7832 0 171.5 0C266.217 0 343 76.7832 343 171.5Z"
-        fill="url(#radiusGradient)"
+        fill={`url(#${gradientId})`}
       />
       <Path
         d="M342 171.5C342 265.665 265.665 342 171.5 342C77.3355 342 1 265.665 1 171.5C1 77.3355 77.3355 1 171.5 1C265.665 1 342 77.3355 342 171.5Z"
@@ -80,7 +95,7 @@ export function RadiusRingAsset({
       />
       <Defs>
         <RadialGradient
-          id="radiusGradient"
+          id={gradientId}
           cx={0}
           cy={0}
           r={1}

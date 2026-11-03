@@ -7,8 +7,6 @@ import {AnonymousAvatarOrClubImage} from '../AnonymousAvatar'
 import {useNoteChatNavigation} from './useNoteChatNavigation'
 import {useNoteDisplayData} from './useNoteDisplayData'
 
-const AVATAR_SIZE = 40
-
 interface Props {
   readonly note: OneNoteInState
   readonly messageNumberOfLines?: number
@@ -37,7 +35,7 @@ export function NoteCard({
       avatar={
         <AnonymousAvatarOrClubImage
           grayScale={isChatOpen}
-          customSize={AVATAR_SIZE}
+          size="$9"
           seed={randomSeedFromNote(note)}
         />
       }

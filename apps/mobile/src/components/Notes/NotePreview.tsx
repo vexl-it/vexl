@@ -5,8 +5,6 @@ import {randomSeedFromNote} from '../../utils/RandomSeed'
 import {AnonymousAvatarOrClubImage} from '../AnonymousAvatar'
 import {useNoteDisplayData} from './useNoteDisplayData'
 
-const AVATAR_SIZE = 40
-
 interface Props {
   readonly note: OneNoteInState
 }
@@ -21,7 +19,7 @@ export function NotePreview({note}: Props): React.JSX.Element {
       avatar={
         <AnonymousAvatarOrClubImage
           grayScale={false}
-          customSize={AVATAR_SIZE}
+          size="$9"
           seed={randomSeedFromNote(note)}
         />
       }

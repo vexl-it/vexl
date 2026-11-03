@@ -39,8 +39,6 @@ export function PhotoPickerPlaceholder({
         viewBox={`0 0 ${size} ${size}`}
       >
         <Rect
-          x={BORDER_WIDTH / 2}
-          y={BORDER_WIDTH / 2}
           width={size - BORDER_WIDTH}
           height={size - BORDER_WIDTH}
           rx={radius}
@@ -49,6 +47,7 @@ export function PhotoPickerPlaceholder({
           stroke={theme.foregroundTertiary.get()}
           strokeWidth={BORDER_WIDTH}
           strokeDasharray="6 6"
+          transform={`translate(${BORDER_WIDTH / 2} ${BORDER_WIDTH / 2})`}
         />
       </Svg>
       <Circle size="$13" backgroundColor="$accentYellowPrimary">

@@ -3,91 +3,44 @@ import {
   type Event,
 } from '@vexl-next/rest-api/src/services/content/contracts'
 import {
-  Avatar,
   Banner,
   BlogCard,
   Calendar,
-  ClubCard,
   ConferenceClub,
   EventCard,
+  getTokens,
   Image,
   PencilWriteEdit,
+  ScrollView,
   SectionHeader,
   Stack,
   YStack,
-  type EventCardAttendee,
 } from '@vexl-next/ui'
-import dayjs from 'dayjs'
 import {Array, Option, Order, pipe} from 'effect'
-import {useAtomValue, useSetAtom, type Atom} from 'jotai'
+import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useEffect, useMemo} from 'react'
 import {Linking} from 'react-native'
-import {ScrollView} from 'tamagui'
 import {type CommunityTabsScreenProps} from '../../../../../../navigationTypes'
 import {clubsWithMembersAtomsAtom} from '../../../../../../state/clubs/atom/clubsWithMembersAtom'
-import {type ClubWithMembers} from '../../../../../../state/clubs/domain'
 import atomKeyExtractor from '../../../../../../utils/atomUtils/atomKeyExtractor'
 import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
 import {
   formatDate,
-  formatInteger,
-  formatTime,
   type FormattingLocale,
 } from '../../../../../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../../../../../utils/localization/formattingLocaleAtom'
 import {blogsStateAtom, loadBlogsActionAtom} from '../BlogScreen/state'
+import ClubCardItem from '../ClubCardItem'
+import {
+  formatEventDate,
+  toEventCardAttendee,
+} from '../EventsScreen/eventCardContent'
 import {loadEventsActionAtom, upcomingEventsAtom} from '../EventsScreen/state'
 
-const BULLET = '•'
 const CARD_WIDTH = 296
 const BLOGS_LIMIT = 4
 
 type Props = CommunityTabsScreenProps<'Discover'>
-
-function formatEventDate(event: Event, locale: FormattingLocale): string {
-  const startDate = dayjs(event.startDate)
-  const formattedStartDate = formatDate(new Date(event.startDate), locale, {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-    year: startDate.isSame(dayjs(), 'year') ? undefined : 'numeric',
-  })
-  const formattedStartTime = formatTime(new Date(event.startDate), locale)
-
-  return Option.match(event.endDate, {
-    onNone: () => `${formattedStartDate} ${BULLET} ${formattedStartTime}`,
-    onSome: (endDate) => {
-      const formattedEndDate = dayjs(endDate)
-      const endDateValue = new Date(endDate)
-
-      if (formattedEndDate.isSame(startDate, 'day')) {
-        return `${formattedStartDate} ${BULLET} ${formattedStartTime}-${formatTime(endDateValue, locale)}`
-      }
-
-      return `${formattedStartDate} - ${formatDate(endDateValue, locale, {
-        weekday: 'short',
-        month: 'short',
-        day: 'numeric',
-      })}`
-    },
-  })
-}
-
-function toEventCardAttendee(
-  speaker: Event['speakers'][number]
-): EventCardAttendee {
-  return Option.match(speaker.imageUrl, {
-    onNone: () => ({
-      id: speaker.name,
-      name: speaker.name,
-    }),
-    onSome: (uri) => ({
-      id: speaker.name,
-      name: speaker.name,
-      avatarSource: {uri},
-    }),
-  })
-}
 
 function HorizontalItem({
   children,
@@ -112,8 +65,8 @@ function HorizontalRow({
       showsHorizontalScrollIndicator={false}
       marginHorizontal="$-5"
       contentContainerStyle={{
-        paddingLeft: 20,
-        paddingRight: 12,
+        paddingLeft: getTokens().space.$6.val,
+        paddingRight: getTokens().space.$4.val,
       }}
     >
       {children}
@@ -137,33 +90,6 @@ function EventItem({
         state="upcoming"
         onPress={() => {
           void Linking.openURL(event.link)
-        }}
-      />
-    </HorizontalItem>
-  )
-}
-
-function ClubItem({
-  atom,
-  navigation,
-}: {
-  readonly atom: Atom<ClubWithMembers>
-  readonly navigation: Props['navigation']
-}): React.JSX.Element {
-  const {club, members} = useAtomValue(atom)
-  const {t} = useTranslation()
-  const locale = useAtomValue(formattingLocaleAtom)
-
-  return (
-    <HorizontalItem>
-      <ClubCard
-        avatar={<Avatar size="$9" source={{uri: club.clubImageUrl}} />}
-        name={club.name}
-        subtitle={t('clubs.commonFriendsFormatted', {
-          localizedString: formatInteger(members.length, locale),
-        })}
-        onPress={() => {
-          navigation.navigate('ClubDetail', {clubUuid: club.uuid})
         }}
       />
     </HorizontalItem>
@@ -246,7 +172,7 @@ function DiscoverScreen({navigation}: Props): React.JSX.Element {
     <ScrollView
       flex={1}
       showsVerticalScrollIndicator={false}
-      contentContainerStyle={{paddingBottom: 24}}
+      contentContainerStyle={{paddingBottom: getTokens().space.$7.val}}
     >
       <YStack f={1} paddingHorizontal="$5" paddingTop="$6" gap="$6">
         {Array.isNonEmptyReadonlyArray(upcomingEvents) ? (
@@ -278,11 +204,9 @@ function DiscoverScreen({navigation}: Props): React.JSX.Element {
               {pipe(
                 clubsAtoms,
                 Array.map((clubAtom) => (
-                  <ClubItem
-                    key={atomKeyExtractor(clubAtom)}
-                    atom={clubAtom}
-                    navigation={navigation}
-                  />
+                  <HorizontalItem key={atomKeyExtractor(clubAtom)}>
+                    <ClubCardItem clubWithMembersAtom={clubAtom} />
+                  </HorizontalItem>
                 ))
               )}
             </HorizontalRow>

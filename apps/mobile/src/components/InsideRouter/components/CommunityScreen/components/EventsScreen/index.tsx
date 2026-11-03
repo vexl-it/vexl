@@ -4,20 +4,20 @@ import {
   Banner,
   CopyField,
   EventCard,
-  type EventCardAttendee,
+  getTokens,
   LoadErrorState,
   Stack,
   Typography,
 } from '@vexl-next/ui'
-import dayjs from 'dayjs'
 import {Array, Effect, Option, pipe} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useEffect, useMemo} from 'react'
 import {Linking} from 'react-native'
-import {getTokens} from 'tamagui'
 import {copyToClipboardWithToastActionAtom} from '../../../../../../utils/copyToClipboardWithToastActionAtom'
+import {formattingLocaleAtom} from '../../../../../../utils/localization/formattingLocaleAtom'
 import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
 import {globalDialogAtom} from '../../../../../GlobalDialog'
+import {formatEventDate, toEventCardAttendee} from './eventCardContent'
 import {
   createEventActionAtom,
   eventsStateAtom,
@@ -26,10 +26,6 @@ import {
   upcomingEventsAtom,
 } from './state'
 
-const DATE_FORMAT = 'ddd, MMM D'
-const DATE_FORMAT_YEAR = 'ddd, MMM D YYYY'
-const TIME_FORMAT = 'HH:mm'
-const BULLET = '•'
 const spaceTokens = getTokens().space
 
 type EventListItem =
@@ -52,44 +48,6 @@ type EventListItem =
       readonly id: string
       readonly title: string
     }
-
-function formatEventDate(event: Event): string {
-  const startDate = dayjs(event.startDate)
-  const dateFormat = !startDate.isSame(dayjs(), 'year')
-    ? DATE_FORMAT_YEAR
-    : DATE_FORMAT
-  const formattedStartDate = startDate.format(dateFormat)
-
-  return Option.match(event.endDate, {
-    onNone: () =>
-      `${formattedStartDate} ${BULLET} ${startDate.format(TIME_FORMAT)}`,
-    onSome: (endDate) => {
-      const formattedEndDate = dayjs(endDate)
-
-      if (formattedEndDate.isSame(startDate, 'day')) {
-        return `${formattedStartDate} ${BULLET} ${startDate.format(TIME_FORMAT)}-${formattedEndDate.format(TIME_FORMAT)}`
-      }
-
-      return `${formattedStartDate} - ${formattedEndDate.format(DATE_FORMAT)}`
-    },
-  })
-}
-
-function toEventCardAttendee(
-  speaker: Event['speakers'][number]
-): EventCardAttendee {
-  return Option.match(speaker.imageUrl, {
-    onNone: () => ({
-      id: speaker.name,
-      name: speaker.name,
-    }),
-    onSome: (uri) => ({
-      id: speaker.name,
-      name: speaker.name,
-      avatarSource: {uri},
-    }),
-  })
-}
 
 function MarketingEmailDialogContent(): React.JSX.Element {
   const {t} = useTranslation()
@@ -114,7 +72,11 @@ const EventItem = React.memo(function EventItem({
   readonly event: Event
   readonly state: 'upcoming' | 'past'
 }): React.JSX.Element {
-  const details = useMemo(() => [formatEventDate(event), event.venue], [event])
+  const locale = useAtomValue(formattingLocaleAtom)
+  const details = useMemo(
+    () => [formatEventDate(event, locale), event.venue],
+    [event, locale]
+  )
   const attendees = useMemo(
     () => pipe(event.speakers, Array.map(toEventCardAttendee)),
     [event.speakers]
@@ -295,7 +257,7 @@ function EventsScreen(): React.JSX.Element {
       ItemSeparatorComponent={Separator}
       showsVerticalScrollIndicator={false}
       contentContainerStyle={{
-        paddingBottom: 24,
+        paddingBottom: spaceTokens.$7.val,
         paddingHorizontal: spaceTokens.$5.val,
         paddingTop: spaceTokens.$6.val,
       }}

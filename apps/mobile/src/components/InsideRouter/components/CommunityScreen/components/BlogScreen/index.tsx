@@ -1,6 +1,6 @@
 import {FlashList} from '@shopify/flash-list'
 import {type BlogArticlePreview} from '@vexl-next/rest-api/src/services/content/contracts'
-import {BlogCard, LoadErrorState, Stack, tokens} from '@vexl-next/ui'
+import {BlogCard, getTokens, LoadErrorState, Stack} from '@vexl-next/ui'
 import {Option} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useEffect, useMemo} from 'react'
@@ -90,9 +90,9 @@ function BlogScreen(): React.JSX.Element {
       ItemSeparatorComponent={Separator}
       showsVerticalScrollIndicator={false}
       contentContainerStyle={{
-        paddingBottom: 24,
-        paddingHorizontal: tokens.space[5].val,
-        paddingTop: tokens.space[6].val,
+        paddingBottom: getTokens().space.$7.val,
+        paddingHorizontal: getTokens().space.$5.val,
+        paddingTop: getTokens().space.$6.val,
       }}
     />
   )

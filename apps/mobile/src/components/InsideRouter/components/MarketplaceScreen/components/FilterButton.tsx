@@ -1,5 +1,5 @@
 import {useNavigation} from '@react-navigation/native'
-import {IconButton, TuneSettings, useTheme} from '@vexl-next/ui'
+import {NavButton, TuneSettings} from '@vexl-next/ui'
 import {useAtomValue} from 'jotai'
 import React from 'react'
 import {isFilterActiveAtom} from '../../../../../state/marketplace/atoms/filterAtoms'
@@ -7,17 +7,16 @@ import {isFilterActiveAtom} from '../../../../../state/marketplace/atoms/filterA
 function FilterButton(): React.JSX.Element {
   const navigation = useNavigation()
   const isFilterActive = useAtomValue(isFilterActiveAtom)
-  const theme = useTheme()
 
   return (
-    <IconButton
-      showBadge={isFilterActive}
+    <NavButton
+      variant="secondary"
+      icon={TuneSettings}
+      badge={isFilterActive}
       onPress={() => {
         navigation.navigate('FilterOffers')
       }}
-    >
-      <TuneSettings size={24} color={theme.foregroundPrimary.get()} />
-    </IconButton>
+    />
   )
 }
 

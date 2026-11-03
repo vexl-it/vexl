@@ -1,10 +1,9 @@
-import {Button, EditRow, Typography} from '@vexl-next/ui'
+import {Button, EditRow, LabeledTextArea, YStack} from '@vexl-next/ui'
 import type {IconProps} from '@vexl-next/ui/src/icons/types'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtom} from 'jotai'
 import React from 'react'
 import Animated, {FadeIn, FadeOut} from 'react-native-reanimated'
-import {TextArea, YStack} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {offerFormMolecule} from '../atoms/offerFormStateAtoms'
 
@@ -56,36 +55,13 @@ function DescribeStep({
           showInitialIcon={showInitialIcon}
         />
         <YStack gap="$5" paddingVertical="$5">
-          <YStack
-            backgroundColor="$backgroundSecondary"
-            borderRadius="$3"
-            padding="$5"
-            gap="$3"
-          >
-            <TextArea
-              unstyled
-              verticalAlign="top"
-              maxLength={MAX_DESCRIPTION_LENGTH}
-              value={offerDescription}
-              onChangeText={setOfferDescription}
-              placeholder={t('offerForm.description.writeWhyPeopleShouldTake')}
-              placeholderTextColor="$foregroundTertiary"
-              selectionColor="$accentYellowPrimary"
-              fontFamily="$body"
-              fontWeight="500"
-              fontSize="$5"
-              lineHeight={24}
-              color="$foregroundPrimary"
-              paddingHorizontal={0}
-              paddingVertical={0}
-              minHeight={72}
-            />
-            <YStack alignItems="flex-end">
-              <Typography variant="micro" color="$foregroundSecondary">
-                {offerDescription.length}/{MAX_DESCRIPTION_LENGTH}
-              </Typography>
-            </YStack>
-          </YStack>
+          <LabeledTextArea
+            maxLength={MAX_DESCRIPTION_LENGTH}
+            value={offerDescription}
+            onChangeText={setOfferDescription}
+            placeholder={t('offerForm.description.writeWhyPeopleShouldTake')}
+            minHeight={72}
+          />
 
           {hasDescription ? (
             <Button variant="primary" size="large" onPress={onComplete}>

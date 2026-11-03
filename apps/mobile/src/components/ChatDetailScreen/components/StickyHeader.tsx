@@ -244,7 +244,7 @@ function StickyHeader(): React.ReactElement | null {
         </YStack>
         <Stack>
           <NavButton
-            variant="tetriary"
+            variant="normal"
             icon={InfoCircle}
             onPress={openNoteDetail}
           />
@@ -317,7 +317,7 @@ function StickyHeader(): React.ReactElement | null {
       </YStack>
       <Stack>
         <NavButton
-          variant="tetriary"
+          variant="normal"
           icon={XmarkCancelClose}
           onPress={hideStickyHeader}
         />

@@ -89,21 +89,6 @@ function toEventCardAttendee(
   })
 }
 
-function BlogImage({
-  mainImage,
-}: {
-  readonly mainImage: BlogArticlePreview['mainImage']
-}): React.JSX.Element {
-  return Option.match(mainImage, {
-    onNone: () => (
-      <Stack width="100%" height={162} backgroundColor="$backgroundTertiary" />
-    ),
-    onSome: (uri) => (
-      <Image source={{uri}} width="100%" height={162} objectFit="cover" />
-    ),
-  })
-}
-
 function HorizontalItem({
   children,
 }: {
@@ -195,7 +180,7 @@ function BlogItem({
   return (
     <HorizontalItem>
       <BlogCard
-        image={<BlogImage mainImage={item.mainImage} />}
+        imageUri={Option.getOrUndefined(item.mainImage)}
         title={item.title}
         description={Option.getOrElse(item.teaserText, () => '')}
         date={formatDate(new Date(item.publishedOn), locale, {

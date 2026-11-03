@@ -2,11 +2,9 @@ import {
   Button,
   ChevronLeft,
   EmptyState,
+  LabeledTextArea,
   NavigationBar,
   Screen,
-  Stack,
-  TextArea,
-  Typography,
   XStack,
   YStack,
 } from '@vexl-next/ui'
@@ -44,8 +42,7 @@ function DeclineChatRequestContent({
   const [text, setText] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const hasText = text.trim().length > 0
-  const hasReachedCharacterLimit = text.length >= MAX_DECLINE_REASON_LENGTH
-  const isSendDisabled = !hasText || hasReachedCharacterLimit || isSubmitting
+  const isSendDisabled = !hasText || isSubmitting
 
   useEffect(
     () => () => {
@@ -166,51 +163,14 @@ function DeclineChatRequestContent({
       <Pressable style={{flex: 1}} onPress={Keyboard.dismiss}>
         <YStack gap="$5">
           <OfferAuthorBanner offer={offer} />
-          <YStack gap="$2">
-            <Stack
-              backgroundColor="$backgroundTertiary"
-              px="$4"
-              py="$5"
-              borderRadius="$4"
-              borderBottomRightRadius="$2"
-              borderBottomLeftRadius="$2"
-            >
-              <Typography variant="descriptionBold" color="$foregroundPrimary">
-                {t('messages.stateYourReasonForRejection')}
-              </Typography>
-            </Stack>
-            <TextArea
-              height={Dimensions.get('window').height * 0.3}
-              backgroundColor="$backgroundSecondary"
-              borderRadius="$5"
-              py="$6"
-              px="$4"
-              borderTopRightRadius="$2"
-              borderTopLeftRadius="$2"
-              placeholder={t('messages.stateYourReasonForRejection')}
-              placeholderTextColor="$foregroundSecondary"
-              value={text}
-              onChangeText={setText}
-              fontFamily="$body"
-              fontSize="$5"
-              lineHeight={24}
-              fontWeight="500"
-              color="$foregroundPrimary"
-              verticalAlign="top"
-              borderWidth={0}
-            />
-            <Typography
-              variant="micro"
-              color={
-                hasReachedCharacterLimit
-                  ? '$redForeground'
-                  : '$foregroundSecondary'
-              }
-              textAlign="right"
-            >
-              {`${text.length}/${MAX_DECLINE_REASON_LENGTH}`}
-            </Typography>
-          </YStack>
+          <LabeledTextArea
+            label={t('messages.stateYourReasonForRejection')}
+            placeholder={t('messages.stateYourReasonForRejection')}
+            minHeight={Dimensions.get('window').height * 0.3}
+            maxLength={MAX_DECLINE_REASON_LENGTH}
+            value={text}
+            onChangeText={setText}
+          />
         </YStack>
       </Pressable>
     </Screen>

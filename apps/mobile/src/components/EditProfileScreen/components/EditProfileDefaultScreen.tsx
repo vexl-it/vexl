@@ -7,6 +7,7 @@ import {
   NavigationBar,
   PencilWriteEdit,
   Screen,
+  TwoToneCard,
   Typography,
   XStack,
   YStack,
@@ -38,32 +39,17 @@ function Card({
   children: React.ReactNode
 }): React.ReactElement {
   return (
-    <YStack gap="$0.5">
-      <YStack
-        backgroundColor="$backgroundTertiary"
-        padding="$5"
-        borderRadius="$5"
-        gap="$3"
-        borderBottomLeftRadius="$2"
-        borderBottomRightRadius="$2"
-      >
+    <TwoToneCard>
+      <TwoToneCard.Header padding="$5" gap="$3">
         <Typography variant="paragraphSmallBold" color="$foregroundPrimary">
           {title}
         </Typography>
         <Typography variant="description" color="$foregroundSecondary">
           {subtitle}
         </Typography>
-      </YStack>
-      <YStack
-        padding="$5"
-        backgroundColor="$backgroundSecondary"
-        borderRadius="$5"
-        borderTopLeftRadius="$2"
-        borderTopRightRadius="$2"
-      >
-        {children}
-      </YStack>
-    </YStack>
+      </TwoToneCard.Header>
+      <TwoToneCard.Content padding="$5">{children}</TwoToneCard.Content>
+    </TwoToneCard>
   )
 }
 

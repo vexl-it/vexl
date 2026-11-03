@@ -1,7 +1,7 @@
 import {
   avatarsGoldenGlassesAndBackgroundSvg,
   Button,
-  IconButton,
+  NavButton,
   Stack,
   Typography,
   useTheme,
@@ -262,9 +262,11 @@ function GoldenAvatar(): React.ReactElement | null {
         pt="$4"
         zIndex={1010}
       >
-        <IconButton onPress={forceHideGoldenAvatarAnimation}>
-          <XmarkCancelClose color={theme.foregroundPrimary.get()} size={24} />
-        </IconButton>
+        <NavButton
+          variant="secondary"
+          icon={XmarkCancelClose}
+          onPress={forceHideGoldenAvatarAnimation}
+        />
       </Stack>
       <Animated.View
         style={[

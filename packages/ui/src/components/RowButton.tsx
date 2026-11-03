@@ -1,34 +1,13 @@
 import React from 'react'
-import {styled, useTheme} from 'tamagui'
+import {type GestureResponderEvent} from 'react-native'
+import {getTokens, useTheme} from 'tamagui'
 
 import type {IconProps} from '../icons/types'
-import {XStack} from '../primitives'
+import {NavButton} from './NavButton'
+import {SelectionRowFrame} from './SelectionRow'
 import {Typography} from './Typography'
 
-const RowButtonFrame = styled(XStack, {
-  name: 'RowButton',
-  role: 'button',
-  alignItems: 'center',
-  gap: '$3',
-  height: '$11',
-  paddingHorizontal: '$5',
-  borderRadius: '$5',
-  backgroundColor: '$backgroundSecondary',
-
-  variants: {
-    selected: {
-      true: {
-        backgroundColor: '$accentYellowSecondary',
-      },
-    },
-  } as const,
-
-  defaultVariants: {
-    selected: false,
-  },
-})
-
-type RowButtonFrameProps = React.ComponentProps<typeof RowButtonFrame>
+type RowButtonFrameProps = React.ComponentProps<typeof SelectionRowFrame>
 export type RowButtonVariant = 'default' | 'red'
 
 interface RowButtonBaseProps extends Omit<
@@ -39,6 +18,14 @@ interface RowButtonBaseProps extends Omit<
   readonly selected?: boolean
   readonly icon?: React.ComponentType<IconProps>
   readonly variant?: RowButtonVariant
+  /** Secondary icon action on the right side of the row, e.g. remove. */
+  readonly trailingAction?: RowButtonTrailingAction
+}
+
+export interface RowButtonTrailingAction {
+  readonly icon: React.ComponentType<IconProps>
+  readonly onPress: () => void
+  readonly accessibilityLabel?: string
 }
 
 interface RowButtonWithValueProps<T> extends RowButtonBaseProps {
@@ -47,7 +34,7 @@ interface RowButtonWithValueProps<T> extends RowButtonBaseProps {
 }
 
 interface RowButtonWithoutValueProps extends RowButtonBaseProps {
-  readonly onPress: () => void
+  readonly onPress?: () => void
 }
 
 export type RowButtonProps<T = never> =
@@ -61,7 +48,13 @@ function hasValue<T>(
 }
 
 export function RowButton<T>(props: RowButtonProps<T>): React.JSX.Element {
-  const {label, selected = false, icon: Icon, variant = 'default'} = props
+  const {
+    label,
+    selected = false,
+    icon: Icon,
+    variant = 'default',
+    trailingAction,
+  } = props
   const theme = useTheme()
   const iconColor =
     variant === 'red'
@@ -75,23 +68,44 @@ export function RowButton<T>(props: RowButtonProps<T>): React.JSX.Element {
     if (hasValue(props)) {
       props.onPress(props.value)
     } else {
-      props.onPress()
+      props.onPress?.()
     }
+  }
+
+  const handleTrailingPress = (event: GestureResponderEvent): void => {
+    event.stopPropagation()
+    trailingAction?.onPress()
   }
 
   const frameProps = getFrameProps(props)
 
   return (
-    <RowButtonFrame {...frameProps} selected={selected} onPress={handlePress}>
-      {Icon ? <Icon color={iconColor} size={24} /> : null}
+    <SelectionRowFrame
+      role="button"
+      paddingVertical={trailingAction ? '$3' : undefined}
+      paddingRight={trailingAction ? '$3' : undefined}
+      {...frameProps}
+      selected={selected}
+      onPress={handlePress}
+    >
+      {Icon ? <Icon color={iconColor} size={getTokens().size.$7.val} /> : null}
       <Typography
         variant="paragraph"
         color={getLabelColor(variant, labelSelected)}
         flex={1}
+        numberOfLines={2}
       >
         {label}
       </Typography>
-    </RowButtonFrame>
+      {trailingAction ? (
+        <NavButton
+          variant="transparent"
+          icon={trailingAction.icon}
+          aria-label={trailingAction.accessibilityLabel}
+          onPress={handleTrailingPress}
+        />
+      ) : null}
+    </SelectionRowFrame>
   )
 }
 
@@ -106,10 +120,20 @@ function getLabelColor(
 
 function getFrameProps<T>(props: RowButtonProps<T>): RowButtonFrameProps {
   if (hasValue(props)) {
-    const {label, selected, icon, variant, value, onPress, ...rest} = props
+    const {
+      label,
+      selected,
+      icon,
+      variant,
+      trailingAction,
+      value,
+      onPress,
+      ...rest
+    } = props
     return rest
   }
 
-  const {label, selected, icon, variant, onPress, ...rest} = props
+  const {label, selected, icon, variant, trailingAction, onPress, ...rest} =
+    props
   return rest
 }

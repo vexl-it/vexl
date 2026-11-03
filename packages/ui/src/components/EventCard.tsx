@@ -6,10 +6,12 @@ import Svg, {
   Stop,
   LinearGradient as SvgLinearGradient,
 } from 'react-native-svg'
-import {getTokens, styled, useTheme} from 'tamagui'
+import {getTokens, useTheme} from 'tamagui'
 
-import {Circle, SizableText, Stack, XStack, YStack} from '../primitives'
+import {Circle, Stack, XStack} from '../primitives'
 import {Chip} from './Chip'
+import {TwoToneCard} from './TwoToneCard'
+import {Typography} from './Typography'
 
 export type EventCardState = 'upcoming' | 'past'
 
@@ -27,43 +29,6 @@ export interface EventCardProps {
   readonly onPress?: () => void
 }
 
-const CardFrame = styled(YStack, {
-  name: 'EventCard',
-  gap: '$0.5',
-
-  variants: {
-    pressable: {
-      true: {
-        pressStyle: {
-          opacity: 0.7,
-        },
-      },
-    },
-  } as const,
-})
-
-const HeaderFrame = styled(YStack, {
-  name: 'EventCardHeader',
-  backgroundColor: '$backgroundTertiary',
-  padding: '$4',
-  borderTopLeftRadius: '$5',
-  borderTopRightRadius: '$5',
-  borderBottomLeftRadius: '$2',
-  borderBottomRightRadius: '$2',
-})
-
-const ContentFrame = styled(YStack, {
-  name: 'EventCardContent',
-  backgroundColor: '$backgroundSecondary',
-  padding: '$4',
-  borderTopLeftRadius: '$2',
-  borderTopRightRadius: '$2',
-  borderBottomLeftRadius: '$5',
-  borderBottomRightRadius: '$5',
-  overflow: 'hidden',
-  gap: '$3',
-})
-
 export function EventCard({
   title,
   details,
@@ -73,52 +38,37 @@ export function EventCard({
 }: EventCardProps): React.JSX.Element {
   const theme = useTheme()
   const fadeGradientId = useId()
-  const isPressable = !!onPress
 
   const bgColor = theme.backgroundSecondary.get()
   const gradientWidth = getTokens().size.$12.val
 
-  const titleColor =
-    state === 'upcoming'
-      ? theme.foregroundPrimary.get()
-      : theme.foregroundSecondary.get()
-  const detailColor =
-    state === 'upcoming'
-      ? theme.foregroundSecondary.get()
-      : theme.foregroundTertiary.get()
+  const isUpcoming = state === 'upcoming'
+  const titleColor = isUpcoming ? '$foregroundPrimary' : '$foregroundSecondary'
+  const detailColor = isUpcoming
+    ? '$foregroundSecondary'
+    : '$foregroundTertiary'
 
   return (
-    <CardFrame pressable={isPressable} onPress={onPress}>
-      <HeaderFrame>
-        <SizableText
-          fontFamily="$heading"
-          fontWeight="700"
-          fontSize="$1"
-          letterSpacing="$1"
-          lineHeight="$1"
-          color={titleColor}
-        >
+    <TwoToneCard onPress={onPress}>
+      <TwoToneCard.Header>
+        <Typography variant="tabSmallBold" color={titleColor}>
           {title}
-        </SizableText>
-      </HeaderFrame>
-      <ContentFrame>
+        </Typography>
+      </TwoToneCard.Header>
+      <TwoToneCard.Content gap="$3">
         <XStack gap="$2" alignItems="center" flexWrap="wrap">
           {details.map((detail, index) => (
             <React.Fragment key={detail}>
               {index > 0 ? (
                 <Circle size="$2" backgroundColor={detailColor} />
               ) : null}
-              <SizableText
-                fontFamily="$body"
-                fontWeight="500"
-                fontSize="$1"
-                letterSpacing="$1"
-                lineHeight="$1"
+              <Typography
+                variant="micro"
                 color={detailColor}
                 flexShrink={index === details.length - 1 ? 1 : 0}
               >
                 {detail}
-              </SizableText>
+              </Typography>
             </React.Fragment>
           ))}
         </XStack>
@@ -163,7 +113,7 @@ export function EventCard({
             </Stack>
           </Stack>
         ) : null}
-      </ContentFrame>
-    </CardFrame>
+      </TwoToneCard.Content>
+    </TwoToneCard>
   )
 }

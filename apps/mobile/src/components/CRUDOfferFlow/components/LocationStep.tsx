@@ -12,7 +12,7 @@ import {
   RowButton,
   SegmentedPicker,
 } from '@vexl-next/ui'
-import {PlusAdd} from '@vexl-next/ui/src/icons'
+import {PlusAdd, TrashBin} from '@vexl-next/ui/src/icons'
 import type {IconProps} from '@vexl-next/ui/src/icons/types'
 import {useMolecule} from 'bunshi/dist/react'
 import {Effect} from 'effect'
@@ -28,7 +28,6 @@ import {globalDialogAtom} from '../../GlobalDialog'
 import {LocationPickerMolecule} from '../../LocationPicker/molecule'
 import {offerLocationToMapValueWithRadius} from '../../LocationPicker/utils'
 import {offerFormMolecule} from '../atoms/offerFormStateAtoms'
-import LocationRow from './LocationRow'
 
 function useLocationTabs(listingType: ListingType | undefined): ReadonlyArray<{
   readonly label: string
@@ -172,9 +171,9 @@ function LocationStep({
               {location.map((loc) => {
                 const displayText = formatLocationWithRadius(loc)
                 return (
-                  <LocationRow
+                  <RowButton
                     key={loc.placeId}
-                    text={displayText}
+                    label={displayText}
                     onPress={() => {
                       setSelectedMapValue(
                         offerLocationToMapValueWithRadius(loc)
@@ -184,8 +183,12 @@ function LocationStep({
                         editingLocationPlaceId: loc.placeId,
                       })
                     }}
-                    onRemove={() => {
-                      removeLocation(loc.placeId)
+                    trailingAction={{
+                      icon: TrashBin,
+                      accessibilityLabel: t('common.delete'),
+                      onPress: () => {
+                        removeLocation(loc.placeId)
+                      },
                     }}
                   />
                 )

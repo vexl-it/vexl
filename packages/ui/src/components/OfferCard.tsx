@@ -1,6 +1,6 @@
 import React, {useCallback} from 'react'
 import {type GestureResponderEvent} from 'react-native'
-import {getTokens, styled, useTheme} from 'tamagui'
+import {getTokens, useTheme} from 'tamagui'
 
 import {ArchiveInbox} from '../icons/ArchiveInbox'
 import {StarFilled} from '../icons/StarFilled'
@@ -9,6 +9,7 @@ import {Circle, Stack, XStack, YStack} from '../primitives'
 import {CardButton} from './CardButton'
 import {CommonFriendsSummary} from './CommonFriendsSummary'
 import {TextTag, type TextTagVariant} from './TextTag'
+import {TwoToneCard} from './TwoToneCard'
 import {Typography} from './Typography'
 
 export interface OfferCardActionButton {
@@ -43,43 +44,6 @@ export interface OfferCardProps {
   readonly onPress?: () => void
   readonly actionButton?: OfferCardActionButton
 }
-
-const CardFrame = styled(YStack, {
-  name: 'OfferCard',
-  gap: '$0.5',
-
-  variants: {
-    pressable: {
-      true: {
-        pressStyle: {
-          opacity: 0.7,
-        },
-      },
-    },
-  } as const,
-})
-
-const HeaderFrame = styled(YStack, {
-  name: 'OfferCardHeader',
-  backgroundColor: '$backgroundTertiary',
-  padding: '$4',
-  borderTopLeftRadius: '$5',
-  borderTopRightRadius: '$5',
-  borderBottomLeftRadius: '$2',
-  borderBottomRightRadius: '$2',
-})
-
-const ContentFrame = styled(YStack, {
-  name: 'OfferCardContent',
-  backgroundColor: '$backgroundSecondary',
-  padding: '$4',
-  borderTopLeftRadius: '$2',
-  borderTopRightRadius: '$2',
-  borderBottomLeftRadius: '$5',
-  borderBottomRightRadius: '$5',
-  overflow: 'hidden',
-  gap: '$3',
-})
 
 export function OfferCard({
   avatar,
@@ -120,8 +84,8 @@ export function OfferCard({
   )
 
   return (
-    <CardFrame pressable={!!onPress} onPress={onPress}>
-      <HeaderFrame position="relative">
+    <TwoToneCard onPress={onPress}>
+      <TwoToneCard.Header position="relative">
         {markBadge != null ? (
           <Stack
             position="absolute"
@@ -204,8 +168,8 @@ export function OfferCard({
             </XStack>
           </XStack>
         )}
-      </HeaderFrame>
-      <ContentFrame>
+      </TwoToneCard.Header>
+      <TwoToneCard.Content gap="$3">
         <YStack gap="$2">
           <Typography variant="tabSmall" color="$foregroundPrimary">
             {price}
@@ -275,7 +239,7 @@ export function OfferCard({
             {actionButton.label}
           </CardButton>
         ) : null}
-      </ContentFrame>
-    </CardFrame>
+      </TwoToneCard.Content>
+    </TwoToneCard>
   )
 }

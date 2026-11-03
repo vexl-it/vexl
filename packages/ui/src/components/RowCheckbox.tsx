@@ -1,82 +1,18 @@
 import React from 'react'
-import {Checkbox, styled, useTheme} from 'tamagui'
+import {Checkbox, getTokens} from 'tamagui'
 
 import {CheckboxFilled} from '../icons/CheckboxFilled'
 import {SquareOutline} from '../icons/SquareOutline'
-import {SizableText, XStack, YStack} from '../primitives'
+import {
+  SelectionRowFrame,
+  SelectionRowText,
+  useSelectionRowIconColor,
+} from './SelectionRow'
 
-const RowCheckboxFrame = styled(XStack, {
-  name: 'RowCheckbox',
-  role: 'button',
-  alignItems: 'center',
-  gap: '$3',
-  padding: '$5',
-  borderRadius: '$5',
-  backgroundColor: '$backgroundSecondary',
-
-  pressStyle: {
-    opacity: 0.7,
-  },
-
-  variants: {
-    selected: {
-      true: {
-        backgroundColor: '$accentYellowSecondary',
-      },
-    },
-  } as const,
-
-  defaultVariants: {
-    selected: false,
-  },
-})
-
-const RowCheckboxLabel = styled(SizableText, {
-  name: 'RowCheckboxLabel',
-  fontFamily: '$body',
-  fontWeight: '500',
-  fontSize: '$4',
-  letterSpacing: '$4',
-  color: '$foregroundPrimary',
-
-  variants: {
-    selected: {
-      true: {
-        color: '$accentHighlightSecondary',
-      },
-    },
-  } as const,
-
-  defaultVariants: {
-    selected: false,
-  },
-})
-
-const RowCheckboxDescription = styled(SizableText, {
-  name: 'RowCheckboxDescription',
-  fontFamily: '$body',
-  fontWeight: '500',
-  fontSize: '$1',
-  letterSpacing: '$1',
-  color: '$foregroundSecondary',
-
-  variants: {
-    selected: {
-      true: {
-        color: '$accentHighlightSecondary',
-      },
-    },
-  } as const,
-
-  defaultVariants: {
-    selected: false,
-  },
-})
-
-type RowCheckboxFrameProps = React.ComponentProps<typeof RowCheckboxFrame>
+type SelectionRowFrameProps = React.ComponentProps<typeof SelectionRowFrame>
 
 export interface RowCheckboxProps extends Omit<
-  RowCheckboxFrameProps,
+  SelectionRowFrameProps,
   'children' | 'selected'
 > {
   readonly label: string
@@ -92,13 +28,13 @@ export function RowCheckbox({
   onCheckedChange,
   ...rest
 }: RowCheckboxProps): React.JSX.Element {
-  const theme = useTheme()
-  const iconColor = checked
-    ? theme.accentHighlightSecondary.get()
-    : theme.foregroundPrimary.get()
+  const iconColor = useSelectionRowIconColor(checked)
+  const iconSize = getTokens().size.$7.val
+  const Indicator = checked ? CheckboxFilled : SquareOutline
 
   return (
-    <RowCheckboxFrame
+    <SelectionRowFrame
+      role="button"
       selected={checked}
       onPress={() => {
         onCheckedChange?.(!checked)
@@ -120,21 +56,14 @@ export function RowCheckbox({
         padding="$0"
       >
         <Checkbox.Indicator forceMount>
-          {checked ? (
-            <CheckboxFilled size={24} color={iconColor} />
-          ) : (
-            <SquareOutline size={24} color={iconColor} />
-          )}
+          <Indicator size={iconSize} color={iconColor} />
         </Checkbox.Indicator>
       </Checkbox>
-      <YStack flex={1} gap="$1">
-        <RowCheckboxLabel selected={checked}>{label}</RowCheckboxLabel>
-        {description ? (
-          <RowCheckboxDescription selected={checked}>
-            {description}
-          </RowCheckboxDescription>
-        ) : null}
-      </YStack>
-    </RowCheckboxFrame>
+      <SelectionRowText
+        selected={checked}
+        label={label}
+        description={description}
+      />
+    </SelectionRowFrame>
   )
 }

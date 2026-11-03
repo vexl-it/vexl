@@ -1,9 +1,8 @@
 import {useNavigation} from '@react-navigation/native'
-import {Circle, Typography, XStack, YStack} from '@vexl-next/ui'
+import {Circle, TwoToneCard, Typography, XStack} from '@vexl-next/ui'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {DateTime} from 'luxon'
 import React from 'react'
-import {styled} from 'tamagui'
 import {type DonationsFlowScreenProps} from '../../../../../navigationTypes'
 import {type MyDonation} from '../../../../../state/donations/domain'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
@@ -16,35 +15,6 @@ import {formattingLocaleAtom} from '../../../../../utils/localization/formatting
 import {localizedPriceActionAtom} from '../../../../../utils/localization/localizedNumbersAtoms'
 import {donationTitle, timestampToDateTime} from '../../../utils'
 import {DonationStatusTag} from '../../DonationStatusTag'
-
-const CardFrame = styled(YStack, {
-  name: 'DonationListItem',
-  gap: '$0.5',
-  pressStyle: {
-    opacity: 0.7,
-  },
-})
-
-const HeaderFrame = styled(YStack, {
-  name: 'DonationListItemHeader',
-  backgroundColor: '$backgroundTertiary',
-  padding: '$4',
-  borderTopLeftRadius: '$5',
-  borderTopRightRadius: '$5',
-  borderBottomLeftRadius: '$2',
-  borderBottomRightRadius: '$2',
-})
-
-const ContentFrame = styled(YStack, {
-  name: 'DonationListItemContent',
-  backgroundColor: '$backgroundSecondary',
-  padding: '$4',
-  borderTopLeftRadius: '$2',
-  borderTopRightRadius: '$2',
-  borderBottomLeftRadius: '$5',
-  borderBottomRightRadius: '$5',
-  overflow: 'hidden',
-})
 
 function expiresInText({
   expirationTime,
@@ -117,14 +87,14 @@ function DonationsListItem({
   const shouldShowExpiry = donation.status === 'New' && !!expiresIn
 
   return (
-    <CardFrame
+    <TwoToneCard
       onPress={() => {
         navigation.navigate('DonationDetails', {
           invoiceId: donation.invoiceId,
         })
       }}
     >
-      <HeaderFrame gap="$2">
+      <TwoToneCard.Header gap="$2">
         <XStack alignItems="flex-start" justifyContent="space-between" gap="$3">
           <Typography
             variant="descriptionBold"
@@ -159,13 +129,13 @@ function DonationsListItem({
             </>
           ) : null}
         </XStack>
-      </HeaderFrame>
-      <ContentFrame>
+      </TwoToneCard.Header>
+      <TwoToneCard.Content>
         <Typography variant="tabSmall" color="$foregroundPrimary">
           {localizedFiatAmount}
         </Typography>
-      </ContentFrame>
-    </CardFrame>
+      </TwoToneCard.Content>
+    </TwoToneCard>
   )
 }
 

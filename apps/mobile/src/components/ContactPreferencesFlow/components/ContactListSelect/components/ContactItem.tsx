@@ -1,11 +1,5 @@
 import {useNavigation} from '@react-navigation/native'
-import {
-  IconButton,
-  PencilWriteEdit,
-  PersonRow,
-  XStack,
-  useTheme,
-} from '@vexl-next/ui'
+import {NavButton, PencilWriteEdit, PersonRow, XStack} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue, type Atom} from 'jotai'
 import React from 'react'
@@ -27,7 +21,6 @@ function ContactItem({contactAtom}: Props): React.ReactElement {
       ContactPreferencesStackScreenProps<'ContactPreferencesList'>['navigation']
     >()
   const {selectContactAtom} = useMolecule(contactSelectMolecule)
-  const theme = useTheme()
   const {
     info: {nonUniqueContactId, name},
     computedValues: {normalizedNumber},
@@ -50,17 +43,16 @@ function ContactItem({contactAtom}: Props): React.ReactElement {
       subtitle={getInternationalPhoneNumber(normalizedNumber)}
       trailing={
         <XStack gap="$2" ai="center">
-          <IconButton
+          <NavButton
             testID="@contactItem/edit"
-            backgroundColor="$backgroundTertiary"
+            variant="normal"
+            icon={PencilWriteEdit}
             onPress={() => {
               navigation.navigate('AddNewContact', {
                 editContactNumber: normalizedNumber,
               })
             }}
-          >
-            <PencilWriteEdit size={24} color={theme.foregroundPrimary.get()} />
-          </IconButton>
+          />
           <IsSelectedSwitch contactNumber={normalizedNumber} />
         </XStack>
       }

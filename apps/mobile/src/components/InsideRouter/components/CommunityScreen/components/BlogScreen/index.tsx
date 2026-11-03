@@ -1,6 +1,6 @@
 import {FlashList} from '@shopify/flash-list'
 import {type BlogArticlePreview} from '@vexl-next/rest-api/src/services/content/contracts'
-import {BlogCard, Image, LoadErrorState, Stack, tokens} from '@vexl-next/ui'
+import {BlogCard, LoadErrorState, Stack, tokens} from '@vexl-next/ui'
 import {Option} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useEffect, useMemo} from 'react'
@@ -9,21 +9,6 @@ import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
 import {formatDate} from '../../../../../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../../../../../utils/localization/formattingLocaleAtom'
 import {blogsStateAtom, loadBlogsActionAtom} from './state'
-
-const BlogImage = React.memo(function BlogImage({
-  mainImage,
-}: {
-  readonly mainImage: BlogArticlePreview['mainImage']
-}): React.JSX.Element {
-  return Option.match(mainImage, {
-    onNone: () => (
-      <Stack width="100%" height={162} backgroundColor="$backgroundTertiary" />
-    ),
-    onSome: (uri) => (
-      <Image source={{uri}} width="100%" height={162} objectFit="cover" />
-    ),
-  })
-})
 
 const BlogItem = React.memo(function BlogItem({
   item,
@@ -45,7 +30,7 @@ const BlogItem = React.memo(function BlogItem({
 
   return (
     <BlogCard
-      image={<BlogImage mainImage={item.mainImage} />}
+      imageUri={Option.getOrUndefined(item.mainImage)}
       title={item.title}
       description={description}
       date={date}

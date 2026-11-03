@@ -5,6 +5,7 @@ import {type IconProps} from '../icons/types'
 import {XStack, YStack} from '../primitives'
 import {CardButton} from './CardButton'
 import {NoteMeta} from './NoteMeta'
+import {TwoToneCard} from './TwoToneCard'
 import {Typography} from './Typography'
 
 export interface NoteTag {
@@ -30,32 +31,6 @@ export interface NoteProps {
   readonly actionButton?: NoteActionButton
 }
 
-const CardFrame = styled(YStack, {
-  name: 'Note',
-  gap: '$0.5',
-
-  variants: {
-    pressable: {
-      true: {
-        pressStyle: {
-          opacity: 0.7,
-        },
-      },
-    },
-  } as const,
-})
-
-const InformationFrame = styled(YStack, {
-  name: 'NoteInformation',
-  backgroundColor: '$backgroundTertiary',
-  padding: '$4',
-  borderTopLeftRadius: '$5',
-  borderTopRightRadius: '$5',
-  borderBottomLeftRadius: '$2',
-  borderBottomRightRadius: '$2',
-  gap: '$4',
-})
-
 const TagFrame = styled(XStack, {
   name: 'NoteTag',
   alignItems: 'center',
@@ -65,18 +40,6 @@ const TagFrame = styled(XStack, {
 const HeaderFrame = styled(XStack, {
   name: 'NoteHeader',
   alignItems: 'center',
-  gap: '$3',
-})
-
-const ContentFrame = styled(YStack, {
-  name: 'NoteContent',
-  backgroundColor: '$backgroundSecondary',
-  padding: '$4',
-  borderTopLeftRadius: '$2',
-  borderTopRightRadius: '$2',
-  borderBottomLeftRadius: '$5',
-  borderBottomRightRadius: '$5',
-  overflow: 'hidden',
   gap: '$3',
 })
 
@@ -94,12 +57,11 @@ export function Note({
 }: NoteProps): React.JSX.Element {
   const theme = useTheme()
   const iconColor = theme.foregroundSecondary.get()
-  const isPressable = !!onPress
   const TagIcon = tag?.icon
 
   return (
-    <CardFrame pressable={isPressable} onPress={onPress}>
-      <InformationFrame>
+    <TwoToneCard onPress={onPress}>
+      <TwoToneCard.Header gap="$4">
         {tag ? (
           <TagFrame>
             {TagIcon ? <TagIcon size={16} color={iconColor} /> : null}
@@ -123,8 +85,8 @@ export function Note({
             />
           </YStack>
         </HeaderFrame>
-      </InformationFrame>
-      <ContentFrame>
+      </TwoToneCard.Header>
+      <TwoToneCard.Content gap="$3">
         <Typography
           variant="description"
           color="$foregroundSecondary"
@@ -138,7 +100,7 @@ export function Note({
             {actionButton.label}
           </CardButton>
         ) : null}
-      </ContentFrame>
-    </CardFrame>
+      </TwoToneCard.Content>
+    </TwoToneCard>
   )
 }

@@ -4,10 +4,10 @@ import {
 } from '@vexl-next/domain/src/general/messaging'
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {
+  NavButton,
   Send,
   Stack,
   Typography,
-  IconButton as UiIconButton,
   XStack,
   XmarkCancelClose,
   YStack,
@@ -206,20 +206,13 @@ function ChatTextInput(): React.ReactElement | null {
                 {truncate(replyToMessage.message.text, 100, '...')}
               </Typography>
             </YStack>
-            <UiIconButton
-              width="$9"
-              height="$9"
-              borderRadius="$3"
-              backgroundColor="transparent"
+            <NavButton
+              variant="transparent"
+              icon={XmarkCancelClose}
               onPress={() => {
                 setReplyToMessage(undefined)
               }}
-            >
-              <XmarkCancelClose
-                size={20}
-                color={theme.foregroundSecondary.get()}
-              />
-            </UiIconButton>
+            />
           </XStack>
         </Animated.View>
       )}
@@ -253,15 +246,7 @@ function ChatTextInput(): React.ReactElement | null {
               />
             </Stack>
             <Animated.View style={animatedStyle}>
-              <UiIconButton
-                width="$9"
-                height="$9"
-                borderRadius="$3"
-                backgroundColor="$accentYellowSecondary"
-                onPress={sendText}
-              >
-                <Send size={20} color={theme.accentHighlightPrimary.get()} />
-              </UiIconButton>
+              <NavButton icon={Send} onPress={sendText} />
             </Animated.View>
           </XStack>
         </Stack>

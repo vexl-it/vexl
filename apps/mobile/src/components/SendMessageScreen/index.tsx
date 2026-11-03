@@ -3,15 +3,15 @@ import {
   Button,
   ChevronLeft,
   EmptyState,
+  LabeledTextArea,
   NavigationBar,
   Screen,
-  TextArea,
   XmarkCancelClose,
   YStack,
 } from '@vexl-next/ui'
 import {Array, Effect, Option} from 'effect'
 import {useSetAtom} from 'jotai'
-import React, {useCallback, useRef, useState} from 'react'
+import React, {useCallback, useState} from 'react'
 import {Alert, Dimensions, Keyboard, Pressable} from 'react-native'
 import {type RootStackScreenProps} from '../../navigationTypes'
 import {sendRequestHandleUIActionAtom} from '../../state/chat/atoms/sendRequestActionAtom'
@@ -32,8 +32,8 @@ function SendMessageScreen({
   const {t} = useTranslation()
   const offer = useSingleOffer(offerId)
   const submitRequest = useSetAtom(sendRequestHandleUIActionAtom)
-  const textRef = useRef('')
-  const [hasText, setHasText] = useState(false)
+  const [text, setText] = useState('')
+  const hasText = text.trim().length > 0
 
   const handleClose = useCallback(() => {
     navigation.popToTop()
@@ -61,8 +61,7 @@ function SendMessageScreen({
   )
 
   const handleSend = useCallback(() => {
-    const text = textRef.current
-    if (!text.trim() || Option.isNone(offer)) return
+    if (!hasText || Option.isNone(offer)) return
 
     void Effect.runPromise(
       Effect.gen(function* (_) {
@@ -96,6 +95,8 @@ function SendMessageScreen({
       )
     )
   }, [
+    text,
+    hasText,
     offer,
     submitRequest,
     t,
@@ -150,26 +151,11 @@ function SendMessageScreen({
       <Pressable style={{flex: 1}} onPress={Keyboard.dismiss}>
         <YStack gap="$5">
           <OfferAuthorBanner offer={offer.value} />
-          <TextArea
-            height={Dimensions.get('window').height * 0.3}
-            backgroundColor="$backgroundTertiary"
-            borderRadius="$5"
-            padding="$6"
+          <LabeledTextArea
+            minHeight={Dimensions.get('window').height * 0.3}
             placeholder={t('offer.sendMessagePlaceholder')}
-            placeholderTextColor="$foregroundSecondary"
-            defaultValue=""
-            onChangeText={(val) => {
-              textRef.current = val
-              const nonEmpty = val.trim().length > 0
-              if (nonEmpty !== hasText) setHasText(nonEmpty)
-            }}
-            fontFamily="$body"
-            fontSize="$5"
-            lineHeight={24}
-            fontWeight="500"
-            color="$foregroundPrimary"
-            verticalAlign="top"
-            borderWidth={0}
+            value={text}
+            onChangeText={setText}
           />
         </YStack>
       </Pressable>

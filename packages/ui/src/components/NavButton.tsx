@@ -1,14 +1,17 @@
 import React from 'react'
-import {styled, useTheme} from 'tamagui'
+import {getTokens, styled, useTheme} from 'tamagui'
 
 import type {IconProps} from '../icons/types'
-import {SizableText, Stack} from '../primitives'
+import {Stack} from '../primitives'
+import {Dot} from './Dot'
+import {Typography} from './Typography'
 
 export type NavButtonVariant =
   | 'highlighted'
   | 'destructive'
   | 'normal'
-  | 'tetriary'
+  | 'secondary'
+  | 'transparent'
 
 const NavButtonFrame = styled(Stack, {
   name: 'NavButton',
@@ -16,6 +19,7 @@ const NavButtonFrame = styled(Stack, {
   alignItems: 'center',
   justifyContent: 'center',
   borderRadius: '$3',
+  overflow: 'visible',
 
   pressStyle: {
     opacity: 0.7,
@@ -45,8 +49,11 @@ const NavButtonFrame = styled(Stack, {
       normal: {
         backgroundColor: '$backgroundTertiary',
       },
-      tetriary: {
-        backgroundColor: '$backgroundTertiary',
+      secondary: {
+        backgroundColor: '$backgroundSecondary',
+      },
+      transparent: {
+        backgroundColor: 'transparent',
       },
     },
   } as const,
@@ -57,34 +64,13 @@ const NavButtonFrame = styled(Stack, {
   },
 })
 
-const NavButtonLabel = styled(SizableText, {
-  name: 'NavButtonLabel',
-  fontFamily: '$body',
-  fontWeight: '600',
-  fontSize: '$3',
-  letterSpacing: '$3',
-
-  variants: {
-    variant: {
-      highlighted: {
-        color: '$accentHighlightSecondary',
-      },
-      destructive: {
-        color: '$white100',
-      },
-      normal: {
-        color: '$foregroundPrimary',
-      },
-      tetriary: {
-        color: '$foregroundPrimary',
-      },
-    },
-  } as const,
-
-  defaultVariants: {
-    variant: 'highlighted',
-  },
-})
+const contentColor = {
+  highlighted: 'accentHighlightSecondary',
+  destructive: 'white100',
+  normal: 'foregroundPrimary',
+  secondary: 'foregroundPrimary',
+  transparent: 'foregroundPrimary',
+} as const satisfies Record<NavButtonVariant, string>
 
 type NavButtonFrameProps = React.ComponentProps<typeof NavButtonFrame>
 
@@ -99,6 +85,8 @@ type NavButtonBaseProps = Omit<
 interface NavButtonIconProps extends NavButtonBaseProps {
   readonly type?: 'icon'
   readonly icon: React.ComponentType<IconProps>
+  /** Shows a small accent dot in the top right corner. */
+  readonly badge?: boolean
 }
 
 interface NavButtonTextProps extends NavButtonBaseProps {
@@ -112,13 +100,7 @@ export function NavButton(props: NavButtonProps): React.JSX.Element {
   const theme = useTheme()
   const variant = props.variant ?? 'highlighted'
   const disabled = props.disabled ?? false
-
-  const iconColor =
-    variant === 'highlighted'
-      ? theme.accentHighlightSecondary.get()
-      : variant === 'destructive'
-        ? theme.white100.get()
-        : theme.foregroundPrimary.get()
+  const colorKey = contentColor[variant]
 
   if (props.type === 'text') {
     const {
@@ -136,7 +118,9 @@ export function NavButton(props: NavButtonProps): React.JSX.Element {
         opacity={disabled ? 0.4 : 1}
         {...rest}
       >
-        <NavButtonLabel variant={variant}>{children}</NavButtonLabel>
+        <Typography variant="paragraphSmallBold" color={`$${colorKey}`}>
+          {children}
+        </Typography>
       </NavButtonFrame>
     )
   }
@@ -145,6 +129,7 @@ export function NavButton(props: NavButtonProps): React.JSX.Element {
     type: _type,
     variant: _variant,
     disabled: _disabled,
+    badge = false,
     icon: Icon,
     ...rest
   } = props
@@ -156,7 +141,16 @@ export function NavButton(props: NavButtonProps): React.JSX.Element {
       opacity={disabled ? 0.4 : 1}
       {...rest}
     >
-      <Icon color={iconColor} size={24} />
+      <Icon color={theme[colorKey].get()} size={getTokens().size.$7.val} />
+      {badge ? (
+        <Dot
+          position="absolute"
+          top="$-2"
+          right="$-2"
+          size="$5"
+          backgroundColor="$accentYellowPrimary"
+        />
+      ) : null}
     </NavButtonFrame>
   )
 }

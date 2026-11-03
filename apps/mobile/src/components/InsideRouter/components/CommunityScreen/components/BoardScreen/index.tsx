@@ -14,7 +14,6 @@ import {
   Stack,
   Typography,
   YStack,
-  useTheme,
   type FilterBarItem,
 } from '@vexl-next/ui'
 import {Array, Effect, Option, Order, pipe} from 'effect'
@@ -127,7 +126,6 @@ function BoardComingSoon(): React.JSX.Element {
 
 function NotesBoard({navigation, route}: Props): React.JSX.Element {
   const {t} = useTranslation()
-  const theme = useTheme()
   const listRef = useRef<FlashListRef<BoardListItem>>(null)
 
   const othersNotes = useAtomValue(othersNotesAtom)
@@ -316,7 +314,7 @@ function NotesBoard({navigation, route}: Props): React.JSX.Element {
         position="absolute"
         bottom="$5"
         right="$5"
-        icon={<PlusAdd color={theme.black100.get()} size={24} />}
+        icon={PlusAdd}
         label={t('notes.board.newNote')}
         onPress={goToCreateNote}
       />

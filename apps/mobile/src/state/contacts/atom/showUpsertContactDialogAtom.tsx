@@ -3,7 +3,7 @@ import {type SvgStringOrImageUri} from '@vexl-next/domain/src/utility/SvgStringO
 import {toBasicError} from '@vexl-next/domain/src/utility/errors'
 import {
   CellPhoneMobileDevice,
-  IconButton,
+  NavButton,
   PencilWriteEdit,
   PersonRow,
   Selector,
@@ -16,7 +16,6 @@ import {Effect, Option} from 'effect'
 import {atom, useAtomValue, type SetStateAction, type WritableAtom} from 'jotai'
 import React from 'react'
 import {Keyboard} from 'react-native'
-import {useTheme} from 'tamagui'
 import {ContactAvatar} from '../../../components/ContactAvatar'
 import {globalDialogAtom} from '../../../components/GlobalDialog'
 import {ProfileImageAvatar} from '../../../components/ProfileImageAvatar'
@@ -120,7 +119,6 @@ function ContactExistsFromLinkDialogBody({
   saveToPhoneLabel: string
   editLabel: string
 }): React.JSX.Element {
-  const theme = useTheme()
   const [isEditingName, setIsEditingName] = React.useState(false)
   const currentContactName = useAtomValue(contactNameAtom)
   const previewName = currentContactName.trim() || fallbackContactName
@@ -137,18 +135,14 @@ function ContactExistsFromLinkDialogBody({
           profileImage={profileImage}
           rightElement={
             isEditingName ? null : (
-              <IconButton
+              <NavButton
                 aria-label={editLabel}
-                backgroundColor="$backgroundSecondary"
+                variant="secondary"
+                icon={PencilWriteEdit}
                 onPress={() => {
                   setIsEditingName(true)
                 }}
-              >
-                <PencilWriteEdit
-                  color={theme.foregroundPrimary.get()}
-                  size={20}
-                />
-              </IconButton>
+              />
             )
           }
         />

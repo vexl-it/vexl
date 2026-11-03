@@ -2,7 +2,7 @@ import {useNavigation, useRoute} from '@react-navigation/native'
 import {FabButton, PlusAdd, type TabItem} from '@vexl-next/ui'
 import {useAtomValue} from 'jotai'
 import React, {useCallback, useLayoutEffect, useMemo, useState} from 'react'
-import {Stack, useTheme} from 'tamagui'
+import {Stack} from 'tamagui'
 import {type InsideTabParamsList} from '../../../../navigationTypes'
 import {areThereAnyMyOffersAtom} from '../../../../state/marketplace/atoms/myOffers'
 import {areThereOffersToSeeInMarketplaceWithoutFiltersAtom} from '../../../../state/marketplace/atoms/offersToSeeInMarketplace'
@@ -31,7 +31,6 @@ function NewOfferFab({
 }): React.JSX.Element | null {
   const {t} = useTranslation()
   const navigation = useNavigation()
-  const theme = useTheme()
   const areThereOffersFromOthers = useAtomValue(
     areThereOffersToSeeInMarketplaceWithoutFiltersAtom
   )
@@ -53,7 +52,7 @@ function NewOfferFab({
   return (
     <Stack position="absolute" bottom="$4" right="$4" zIndex={2}>
       <FabButton
-        icon={<PlusAdd size={24} color={theme.black100.get()} />}
+        icon={PlusAdd}
         label={t('offerForm.myNewOffer')}
         onPress={navigateToNewOffer}
       />

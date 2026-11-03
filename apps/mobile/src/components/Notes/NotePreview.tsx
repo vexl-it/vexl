@@ -1,10 +1,5 @@
 import {type OneNoteInState} from '@vexl-next/domain/src/general/notes'
-import {
-  TwoToneContentFrame,
-  TwoToneHeaderFrame,
-  Typography,
-  YStack,
-} from '@vexl-next/ui'
+import {TEXT_AREA_MIN_HEIGHT, TwoToneCard, Typography} from '@vexl-next/ui'
 import React from 'react'
 import {NoteInfoHeader} from './NoteInfoHeader'
 
@@ -14,15 +9,15 @@ interface Props {
 
 export function NotePreview({note}: Props): React.JSX.Element {
   return (
-    <YStack gap="$2">
-      <TwoToneHeaderFrame>
+    <TwoToneCard gap="$2">
+      <TwoToneCard.Header>
         <NoteInfoHeader note={note} />
-      </TwoToneHeaderFrame>
-      <TwoToneContentFrame minHeight={140}>
+      </TwoToneCard.Header>
+      <TwoToneCard.Content minHeight={TEXT_AREA_MIN_HEIGHT}>
         <Typography variant="paragraph" color="$foregroundPrimary">
           {note.noteInfo.publicPart.text}
         </Typography>
-      </TwoToneContentFrame>
-    </YStack>
+      </TwoToneCard.Content>
+    </TwoToneCard>
   )
 }

@@ -6,6 +6,7 @@ import {PeopleUsers} from '../icons/PeopleUsers'
 import {Stack, XStack, YStack} from '../primitives'
 import {Avatar, type AvatarProps} from './Avatar'
 import {TrustBadge} from './TrustBadge'
+import {TwoToneCard} from './TwoToneCard'
 import {Typography} from './Typography'
 
 interface ExplanationNode {
@@ -37,13 +38,11 @@ const ExplanationFrame = styled(YStack, {
   width: '100%',
 })
 
-const ComparisonRow = styled(XStack, {
-  name: 'TrustedFriendExplanationComparison',
-  backgroundColor: '$backgroundTertiary',
-  padding: '$4',
+const comparisonRowProps = {
+  flexDirection: 'row',
   gap: '$4',
   alignItems: 'flex-start',
-})
+} as const
 
 function Node({label, avatar}: ExplanationNode): React.JSX.Element {
   return (
@@ -139,13 +138,8 @@ export function TrustedFriendExplanation({
           {caption}
         </Typography>
       </YStack>
-      <YStack gap="$1">
-        <ComparisonRow
-          borderTopLeftRadius="$4"
-          borderTopRightRadius="$4"
-          borderBottomLeftRadius="$2"
-          borderBottomRightRadius="$2"
-        >
+      <TwoToneCard>
+        <TwoToneCard.Header {...comparisonRowProps}>
           <PeopleUsers
             size={getTokens().size.$6.val}
             color={theme.foregroundSecondary.get()}
@@ -158,12 +152,10 @@ export function TrustedFriendExplanation({
               {commonFriendDescription}
             </Typography>
           </YStack>
-        </ComparisonRow>
-        <ComparisonRow
-          borderTopLeftRadius="$2"
-          borderTopRightRadius="$2"
-          borderBottomLeftRadius="$4"
-          borderBottomRightRadius="$4"
+        </TwoToneCard.Header>
+        <TwoToneCard.Content
+          {...comparisonRowProps}
+          backgroundColor="$backgroundTertiary"
         >
           <TrustBadge size="xlarge" />
           <YStack gap="$1" flex={1}>
@@ -174,8 +166,8 @@ export function TrustedFriendExplanation({
               {trustedFriendDescription}
             </Typography>
           </YStack>
-        </ComparisonRow>
-      </YStack>
+        </TwoToneCard.Content>
+      </TwoToneCard>
       <Typography variant="micro" color="$foregroundSecondary">
         {caution}
       </Typography>

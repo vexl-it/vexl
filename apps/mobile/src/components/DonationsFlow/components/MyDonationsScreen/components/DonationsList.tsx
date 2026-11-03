@@ -9,7 +9,6 @@ import {
   Tabs,
   Typography,
   YStack,
-  useTheme,
   type TabItem,
 } from '@vexl-next/ui'
 import {Array, Effect} from 'effect'
@@ -43,7 +42,6 @@ interface Props {
 
 function DonationsList({onDonatePress}: Props): React.ReactElement {
   const {t} = useTranslation()
-  const theme = useTheme()
   const tokens = getTokens()
   const myDonationsSorted = useAtomValue(myDonationsSortedAtom)
   const myDonationsRefreshing = useAtomValue(myDonationsRefreshingAtom)
@@ -131,7 +129,7 @@ function DonationsList({onDonatePress}: Props): React.ReactElement {
         }}
       >
         <FabButton
-          icon={<Gift size={24} color={theme.black100.get()} />}
+          icon={Gift}
           label={t('donationPrompt.donate')}
           onPress={onDonatePress}
         />

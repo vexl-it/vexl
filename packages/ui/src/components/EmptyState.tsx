@@ -93,7 +93,7 @@ export function EmptyState({
       ) : null}
       <TitleBlock
         align="center"
-        size={fullscreen ? 'large' : 'small'}
+        size="large"
         title={title}
         text={description}
       />

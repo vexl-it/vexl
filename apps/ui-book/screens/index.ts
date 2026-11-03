@@ -60,6 +60,7 @@ import {OffersReencryptionStatusScreen} from './OffersReencryptionStatusScreen'
 import {PersonRowScreen} from './PersonRowScreen'
 import {PickerScreen} from './PickerScreen'
 import {PriceRangeInputScreen} from './PriceRangeInputScreen'
+import {QrScannerOverlayScreen} from './QrScannerOverlayScreen'
 import {RadioGroupScreen} from './RadioGroupScreen'
 import {RadiusSliderScreen} from './RadiusSliderScreen'
 import {RangeSliderScreen} from './RangeSliderScreen'
@@ -165,6 +166,7 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'Person Row', component: PersonRowScreen},
   {label: 'Picker', component: PickerScreen},
   {label: 'Price Range Input', component: PriceRangeInputScreen},
+  {label: 'QR Scanner Overlay', component: QrScannerOverlayScreen},
   {label: 'Radio Group', component: RadioGroupScreen},
   {label: 'Range Slider', component: RangeSliderScreen},
   {label: 'Radius Slider', component: RadiusSliderScreen},

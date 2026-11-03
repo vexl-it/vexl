@@ -153,6 +153,16 @@ export {PriceRangeInput, RangeSlider} from './PriceRangeInput'
 export type {PriceRangeInputProps, RangeSliderProps} from './PriceRangeInput'
 export {ProgressDialog} from './ProgressDialog'
 export type {ProgressDialogProps, ProgressIndication} from './ProgressDialog'
+export {
+  CameraPermissionPrompt,
+  QrScannerOverlay,
+  getQrScannerLayout,
+} from './QrScannerOverlay'
+export type {
+  CameraPermissionPromptProps,
+  QrScannerLayout,
+  QrScannerOverlayProps,
+} from './QrScannerOverlay'
 export {RadioGroup} from './RadioGroup'
 export type {RadioGroupProps} from './RadioGroup'
 export {RadiusSlider} from './RadiusSlider'

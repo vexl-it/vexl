@@ -8,6 +8,7 @@ import {Typography} from './Typography'
 const SelectableItemFrame = styled(XStack, {
   name: 'SelectableItem',
   alignItems: 'center',
+  gap: '$3',
   paddingVertical: '$4',
   borderBottomWidth: 1,
   borderBottomColor: '$backgroundSecondary',
@@ -25,6 +26,8 @@ export interface SelectableItemProps extends Omit<
 > {
   readonly label: string
   readonly note?: string
+  readonly emoji?: string
+  readonly prefix?: string
   readonly selected?: boolean
   readonly onPress?: () => void
 }
@@ -32,6 +35,8 @@ export interface SelectableItemProps extends Omit<
 export function SelectableItem({
   label,
   note,
+  emoji,
+  prefix,
   selected = false,
   onPress,
   ...rest
@@ -40,6 +45,20 @@ export function SelectableItem({
 
   return (
     <SelectableItemFrame onPress={onPress} {...rest}>
+      {emoji != null ? (
+        <Typography variant="heading3" color="$foregroundPrimary">
+          {emoji}
+        </Typography>
+      ) : null}
+      {prefix != null ? (
+        <Typography
+          variant="paragraphSmall"
+          color="$foregroundSecondary"
+          minWidth="$11"
+        >
+          {prefix}
+        </Typography>
+      ) : null}
       <YStack flex={1} gap="$2">
         <Typography
           variant={selected ? 'paragraphDemibold' : 'paragraph'}

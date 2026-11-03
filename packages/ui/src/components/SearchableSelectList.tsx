@@ -13,6 +13,8 @@ export interface SearchableSelectListProps<T> {
   readonly keyExtractor: (item: T) => string
   readonly getLabel: (item: T) => string
   readonly getNote?: (item: T) => string
+  readonly getEmoji?: (item: T) => string
+  readonly getPrefix?: (item: T) => string
   readonly selectedKey?: string
   readonly onSelect: (item: T) => void
   readonly searchValueAtom: WritableAtom<string, [SetStateAction<string>], void>
@@ -26,6 +28,8 @@ export function SearchableSelectList<T>({
   keyExtractor,
   getLabel,
   getNote,
+  getEmoji,
+  getPrefix,
   selectedKey,
   onSelect,
   searchValueAtom,
@@ -40,13 +44,23 @@ export function SearchableSelectList<T>({
       <SelectableItem
         label={getLabel(item)}
         note={getNote?.(item)}
+        emoji={getEmoji?.(item)}
+        prefix={getPrefix?.(item)}
         selected={keyExtractor(item) === selectedKey}
         onPress={() => {
           onSelect(item)
         }}
       />
     ),
-    [getLabel, getNote, keyExtractor, onSelect, selectedKey]
+    [
+      getLabel,
+      getNote,
+      getEmoji,
+      getPrefix,
+      keyExtractor,
+      onSelect,
+      selectedKey,
+    ]
   )
 
   return (

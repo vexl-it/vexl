@@ -7,19 +7,24 @@ import {ComponentScreenLayout} from './ComponentScreenLayout'
 
 interface Currency {
   readonly code: string
+  readonly flag: string
   readonly name: string
 }
 
 const currencies: readonly Currency[] = [
-  {code: 'CZK', name: '🇨🇿 Czech koruna'},
-  {code: 'EUR', name: '🇪🇺 Euro'},
-  {code: 'GBP', name: '🇬🇧 British pound'},
-  {code: 'USD', name: '🇺🇸 US dollar'},
-  {code: 'CHF', name: '🇨🇭 Swiss franc'},
+  {code: 'CZK', flag: '🇨🇿', name: 'Czech koruna'},
+  {code: 'EUR', flag: '🇪🇺', name: 'Euro'},
+  {code: 'GBP', flag: '🇬🇧', name: 'British pound'},
+  {code: 'USD', flag: '🇺🇸', name: 'US dollar'},
+  {code: 'CHF', flag: '🇨🇭', name: 'Swiss franc'},
 ]
 
 function currencyCode(currency: Currency): string {
   return currency.code
+}
+
+function currencyFlag(currency: Currency): string {
+  return currency.flag
 }
 
 function currencyName(currency: Currency): string {
@@ -46,7 +51,8 @@ function Demos(): React.JSX.Element {
       items={items}
       keyExtractor={currencyCode}
       getLabel={currencyName}
-      getNote={currencyCode}
+      getEmoji={currencyFlag}
+      getPrefix={currencyCode}
       selectedKey={selectedCode}
       onSelect={(currency) => {
         setSelectedCode(currency.code)

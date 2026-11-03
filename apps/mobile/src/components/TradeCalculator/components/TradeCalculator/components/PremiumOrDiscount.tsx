@@ -1,4 +1,4 @@
-import {Selector, YStack} from '@vexl-next/ui'
+import {Selector, SwitchCard, YStack} from '@vexl-next/ui'
 import {useAtomValue} from 'jotai'
 import React from 'react'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
@@ -26,13 +26,14 @@ function PremiumOrDiscount({
 
   return (
     <YStack gap="$4">
-      <Selector
-        variant="switch"
-        label={t('tradeChecklist.calculateAmount.premiumOrDiscount')}
+      <SwitchCard
+        plain
+        title={t('tradeChecklist.calculateAmount.premiumOrDiscount')}
         valueAtom={premiumOrDiscountSwitchActionAtom}
       />
       {!!premiumOrDiscountEnabled && (
         <Selector
+          accent
           label={formatFeeAmount(feeAmount)}
           onPress={onPremiumOrDiscountPress}
         />

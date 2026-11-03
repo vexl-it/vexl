@@ -1,7 +1,7 @@
 import {
   Button,
-  DismissKeyboardOnPressOutside,
   ChevronLeft,
+  DismissKeyboardOnPressOutside,
   EmptyState,
   LabeledTextArea,
   NavigationBar,

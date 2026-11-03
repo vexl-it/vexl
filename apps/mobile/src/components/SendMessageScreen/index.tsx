@@ -1,8 +1,8 @@
 import {CommonActions} from '@react-navigation/native'
 import {
   Button,
-  DismissKeyboardOnPressOutside,
   ChevronLeft,
+  DismissKeyboardOnPressOutside,
   EmptyState,
   LabeledTextArea,
   NavigationBar,

@@ -8,7 +8,7 @@ import {useMolecule} from 'bunshi/dist/react'
 import {useAtom, useSetAtom} from 'jotai'
 import truncate from 'just-truncate'
 import React, {useCallback, useEffect, useRef, useState} from 'react'
-import {Platform, TextInput as RNTextInput} from 'react-native'
+import {Platform, type TextInput} from 'react-native'
 import {useSessionAssumeLoggedIn} from '../../../state/session'
 import {version} from '../../../utils/environment'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
@@ -28,7 +28,7 @@ function ChatTextInput(): React.ReactElement | null {
   const sendMessage = useSetAtom(sendMessageAtom)
   const session = useSessionAssumeLoggedIn()
   const {t} = useTranslation()
-  const textInputRef = useRef<RNTextInput>(null)
+  const textInputRef = useRef<TextInput>(null)
   const latestValueRef = useRef('')
   const pendingIosSendRef = useRef(false)
   const pendingIosSendTimeoutRef = useRef<

@@ -15,7 +15,7 @@ import {Array} from 'effect'
 import React, {memo, useCallback} from 'react'
 import {Pressable} from 'react-native'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
-import {getTokens, Stack} from 'tamagui'
+import {Stack, getTokens} from 'tamagui'
 import {
   type CommonFriendsClub,
   type RootStackScreenProps,

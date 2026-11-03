@@ -17,7 +17,6 @@ import {SizableText, Stack, XStack, YStack} from '../primitives'
 import {Button, type ButtonVariant} from './Button'
 import {KeyboardAvoidingView} from './KeyboardAvoidingView'
 
-const SCREEN_HEIGHT = Dimensions.get('window').height
 const ANIMATION_DURATION = 300
 const BACKDROP_OPACITY = 0.9
 const AUTO_DISMISS_MS = 2000
@@ -101,7 +100,7 @@ export function Dialog({
   const [mounted, setMounted] = useState(false)
 
   const backdropOpacity = useSharedValue(0)
-  const translateY = useSharedValue(SCREEN_HEIGHT)
+  const translateY = useSharedValue(Dimensions.get('window').height)
   const {bottom} = useSafeAreaInsets()
   const bottomOffset = bottom + getTokens().space.$8.val
 
@@ -120,7 +119,7 @@ export function Dialog({
     } else {
       backdropOpacity.value = withTiming(0, {duration: ANIMATION_DURATION})
       translateY.value = withTiming(
-        SCREEN_HEIGHT,
+        Dimensions.get('window').height,
         {duration: ANIMATION_DURATION, easing: Easing.in(Easing.cubic)},
         (finished) => {
           if (finished) {

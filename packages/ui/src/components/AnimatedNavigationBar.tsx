@@ -102,7 +102,8 @@ export function AnimatedNavigationBar({
   scrollY,
 }: AnimatedNavigationBarProps): React.JSX.Element {
   const theme = useTheme()
-  const backgroundSecondary = theme.backgroundSecondary.get()
+  // interpolateColor needs the raw color; .get() is a CSS variable on web
+  const backgroundSecondary = theme.backgroundSecondary.val
   const insets = useSafeAreaInsets()
   const setNavBarHeight = useSetAtom(navBarHeightAtom)
 

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useId} from 'react'
 import type {ImageProps as RNImageProps} from 'react-native'
 import Svg, {
   Defs,
@@ -72,6 +72,7 @@ export function EventCard({
   onPress,
 }: EventCardProps): React.JSX.Element {
   const theme = useTheme()
+  const fadeGradientId = useId()
   const isPressable = !!onPress
 
   const bgColor = theme.backgroundSecondary.get()
@@ -143,7 +144,7 @@ export function EventCard({
               <Svg width="100%" height="100%">
                 <Defs>
                   <SvgLinearGradient
-                    id="eventCardAttendeesFade"
+                    id={fadeGradientId}
                     x1="0"
                     y1="0"
                     x2="1"
@@ -156,7 +157,7 @@ export function EventCard({
                 <Rect
                   width="100%"
                   height="100%"
-                  fill="url(#eventCardAttendeesFade)"
+                  fill={`url(#${fadeGradientId})`}
                 />
               </Svg>
             </Stack>

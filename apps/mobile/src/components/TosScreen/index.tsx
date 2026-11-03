@@ -1,5 +1,7 @@
 import {
+  bodyFont,
   FilterTag,
+  getTokens,
   InfoBox,
   NavigationBar,
   Screen,
@@ -12,7 +14,7 @@ import {
 } from '@vexl-next/ui'
 import {useAtom} from 'jotai'
 import React, {useEffect, useRef, useState} from 'react'
-import {ScrollView, StyleSheet} from 'react-native'
+import {ScrollView} from 'react-native'
 import MarkdownDisplay from 'react-native-markdown-display'
 import {type RootStackScreenProps} from '../../navigationTypes'
 import {useTranslation} from '../../utils/localization/I18nProvider'
@@ -28,39 +30,40 @@ type Props = RootStackScreenProps<'TermsAndConditions'>
 
 function Markdown({children}: {readonly children: string}): React.ReactElement {
   const theme = useTheme()
+  const {face, size} = bodyFont
+  const headingColor = theme.foregroundPrimary.get()
 
   return (
     <MarkdownDisplay
       style={{
         body: {
           color: theme.foregroundSecondary.get(),
-          fontFamily: 'TTSatoshi500',
-          fontSize: 16,
-          lineHeight: 22,
+          fontFamily: face[500].normal,
+          fontSize: size[3],
         },
         heading1: {
-          color: theme.foregroundPrimary.get(),
-          fontFamily: 'TTSatoshi600',
-          fontSize: 24,
-          lineHeight: 32,
+          color: headingColor,
+          fontFamily: face[600].normal,
+          fontSize: size[6],
+          lineHeight: 30,
         },
         heading2: {
-          color: theme.foregroundPrimary.get(),
-          fontFamily: 'TTSatoshi600',
-          fontSize: 20,
-          lineHeight: 28,
-          marginTop: 40,
+          color: headingColor,
+          fontFamily: face[600].normal,
+          fontSize: size[5],
+          lineHeight: 26,
+          marginTop: getTokens().space.$9.val,
         },
         heading3: {
-          color: theme.foregroundPrimary.get(),
-          fontFamily: 'TTSatoshi600',
-          fontSize: 18,
+          color: headingColor,
+          fontFamily: face[600].normal,
+          fontSize: size[4],
           lineHeight: 24,
         },
         strong: {
-          color: theme.foregroundPrimary.get(),
-          fontFamily: 'TTSatoshi600',
-          fontSize: 16,
+          color: headingColor,
+          fontFamily: face[600].normal,
+          fontSize: size[3],
         },
       }}
     >
@@ -126,7 +129,7 @@ function TosScreen({route: {params}, navigation}: Props): React.ReactElement {
       <ScrollView
         ref={scrollViewRef}
         contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={{paddingBottom: getTokens().space.$7.val}}
       >
         {!isEnglish() && (
           <InfoBox
@@ -177,11 +180,5 @@ function TosScreen({route: {params}, navigation}: Props): React.ReactElement {
     </Screen>
   )
 }
-
-const styles = StyleSheet.create({
-  scrollContent: {
-    paddingBottom: 24,
-  },
-})
 
 export default TosScreen

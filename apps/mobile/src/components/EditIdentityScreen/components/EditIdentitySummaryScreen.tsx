@@ -5,12 +5,14 @@ import {
   InfoBox,
   NavigationBar,
   Screen,
+  Stack,
+  Image as TamaguiImage,
   Typography,
   XmarkCancelClose,
+  YStack,
 } from '@vexl-next/ui'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback} from 'react'
-import {Stack, Image as TamaguiImage, YStack} from 'tamagui'
 import {type EditIdentityStackScreenProps} from '../../../navigationTypes'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import resolveLocalUri from '../../../utils/resolveLocalUri'

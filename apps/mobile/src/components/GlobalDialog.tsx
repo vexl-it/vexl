@@ -5,43 +5,27 @@ import {
 import {
   createDialogAtom,
   DialogFromAtom,
-  Input,
+  getTokens,
   Stack,
+  TextField,
   Typography,
-  useTheme,
+  type TextFieldProps,
 } from '@vexl-next/ui'
 import {Effect, Either} from 'effect'
-import {atom, useAtom, type Atom, type WritableAtom} from 'jotai'
+import {atom, type Atom, type PrimitiveAtom, type WritableAtom} from 'jotai'
 import React from 'react'
 import {ImageUniversal, type ImageUniversalProps} from './Image'
 
 export const globalDialogAtom = createDialogAtom()
 
-type UiInputProps = React.ComponentProps<typeof Input>
 type DialogBackgroundColor = React.ComponentProps<
   typeof Stack
 >['backgroundColor']
 
-interface DialogTextInputProps extends Omit<
-  UiInputProps,
-  'autoFocus' | 'onChangeText' | 'value'
-> {
-  readonly icon?: unknown
-  readonly onClearPress?: () => void
-  readonly showClearButton?: boolean
-}
-
-function getUiInputProps({
-  icon: _icon,
-  onClearPress: _onClearPress,
-  showClearButton: _showClearButton,
-  ...inputProps
-}: DialogTextInputProps): Omit<
-  DialogTextInputProps,
-  'icon' | 'onClearPress' | 'showClearButton'
-> {
-  return inputProps
-}
+type DialogTextInputProps = Pick<
+  TextFieldProps,
+  'autoCapitalize' | 'autoCorrect' | 'keyboardType' | 'placeholder'
+>
 
 export interface StepWithText {
   type: 'StepWithText'
@@ -140,7 +124,7 @@ function DialogStepTextContent({
         <ImageUniversal
           width={140}
           height={140}
-          style={{borderRadius: 24}}
+          style={{borderRadius: getTokens().radius.$7.val}}
           source={step.imageSource}
         />
       )}
@@ -164,50 +148,22 @@ function createInputContent({
   valueAtom,
 }: {
   step: StepWithInput
-  valueAtom: WritableAtom<string, [string], void>
+  valueAtom: PrimitiveAtom<string>
 }): React.ReactElement {
-  function InputContent(): React.ReactElement {
-    const [value, setValue] = useAtom(valueAtom)
-    const theme = useTheme()
-    const textInputProps = getUiInputProps(step.textInputProps)
-
-    return (
-      <Stack gap="$3">
-        {!!step.subtitle && (
-          <Typography variant="paragraph" color="$foregroundPrimary">
-            {step.subtitle}
-          </Typography>
-        )}
-        <Stack
-          alignItems="center"
-          backgroundColor="$backgroundSecondary"
-          borderRadius="$5"
-          borderWidth={1}
-          borderColor="transparent"
-          minHeight="$11"
-          paddingHorizontal="$5"
-          justifyContent="center"
-        >
-          <Input
-            unstyled
-            alignSelf="stretch"
-            color="$foregroundPrimary"
-            fontFamily="$body"
-            fontSize="$4"
-            fontWeight="500"
-            placeholderTextColor={theme.foregroundTertiary.get()}
-            selectionColor={theme.accentYellowPrimary.get()}
-            autoFocus={step.autoFocus}
-            value={value}
-            onChangeText={setValue}
-            {...textInputProps}
-          />
-        </Stack>
-      </Stack>
-    )
-  }
-
-  return <InputContent />
+  return (
+    <Stack gap="$3">
+      {!!step.subtitle && (
+        <Typography variant="paragraph" color="$foregroundPrimary">
+          {step.subtitle}
+        </Typography>
+      )}
+      <TextField
+        valueAtom={valueAtom}
+        autoFocus={step.autoFocus}
+        {...step.textInputProps}
+      />
+    </Stack>
+  )
 }
 
 function stepTitle(step: Step): string | undefined {
@@ -225,7 +181,7 @@ function stepChildren({
   inputValueAtom,
 }: {
   step: Step
-  inputValueAtom: WritableAtom<string, [string], void> | undefined
+  inputValueAtom: PrimitiveAtom<string> | undefined
 }): React.ReactElement | null {
   if (step.type === 'StepWithChildren') {
     return React.createElement(

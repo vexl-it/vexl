@@ -1,5 +1,4 @@
-import {Loader} from '@vexl-next/ui'
-import {Stack} from '@vexl-next/ui/src/primitives'
+import {Loader, Stack} from '@vexl-next/ui'
 import React, {startTransition, useEffect, useState} from 'react'
 
 interface DeferredContentProps {

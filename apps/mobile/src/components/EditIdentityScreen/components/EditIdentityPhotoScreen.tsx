@@ -1,22 +1,20 @@
 import {
   Button,
   Camera,
+  getTokens,
   NavigationBar,
   Screen,
+  Stack,
+  Image as TamaguiImage,
   Typography,
+  useTheme,
   XmarkCancelClose,
+  YStack,
 } from '@vexl-next/ui'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback} from 'react'
 import {StyleSheet, TouchableOpacity} from 'react-native'
 import Svg, {Rect} from 'react-native-svg'
-import {
-  getTokens,
-  Stack,
-  Image as TamaguiImage,
-  useTheme,
-  YStack,
-} from 'tamagui'
 import {type EditIdentityStackScreenProps} from '../../../navigationTypes'
 import {selectImageActionAtom} from '../../../state/selectImageActionAtom'
 import {useTranslation} from '../../../utils/localization/I18nProvider'

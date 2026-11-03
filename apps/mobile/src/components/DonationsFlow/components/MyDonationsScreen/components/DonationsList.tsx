@@ -2,6 +2,7 @@ import {FlashList} from '@shopify/flash-list'
 import {
   EmptyState,
   FabButton,
+  getTokens,
   Gift,
   MyDonationsEmptyStateGraphic,
   RefreshControl,
@@ -14,7 +15,6 @@ import {
 import {Array, Effect} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useMemo, useState} from 'react'
-import {getTokens} from 'tamagui'
 import {myDonationsSortedAtom} from '../../../../../state/donations/atom'
 import {type MyDonation} from '../../../../../state/donations/domain'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'

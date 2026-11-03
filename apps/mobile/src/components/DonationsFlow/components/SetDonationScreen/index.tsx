@@ -1,12 +1,13 @@
 import {
   Button,
+  FilterTag,
+  getTokens,
   InfoBox,
   Input,
   NavigationBar,
   RadioGroup,
   RowRadiobutton,
   Screen,
-  Stack,
   Typography,
   useTheme,
   XmarkCancelClose,
@@ -16,7 +17,6 @@ import {
 import {Array, Effect, pipe} from 'effect'
 import {useAtom, useAtomValue, useSetAtom} from 'jotai'
 import React, {useEffect} from 'react'
-import {getTokens} from 'tamagui'
 import {type DonationsFlowScreenProps} from '../../../../navigationTypes'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import {localizedDecimalNumberActionAtom} from '../../../../utils/localization/localizedNumbersAtoms'
@@ -113,7 +113,7 @@ function SetDonationScreen({navigation}: Props): React.ReactElement {
         </Button>
       }
     >
-      <YStack gap="$5" paddingBottom="$13">
+      <YStack gap="$5">
         <YStack gap="$3">
           <Typography variant="paragraphSmall" color="$foregroundPrimary">
             {t('donations.setDonation.choosePaymentMethod')}
@@ -192,36 +192,18 @@ function SetDonationScreen({navigation}: Props): React.ReactElement {
             {pipe(
               PREDEFINED_DONATION_AMOUNTS,
               Array.map((amount) => (
-                <Stack
+                <FilterTag
                   key={amount}
+                  label={`${amount} €`}
+                  selected={selectedPredefinedDonationValue === amount}
                   flexBasis="45%"
                   flexGrow={1}
                   height="$10"
-                  alignItems="center"
-                  justifyContent="center"
-                  backgroundColor={
-                    selectedPredefinedDonationValue === amount
-                      ? '$accentYellowSecondary'
-                      : '$backgroundSecondary'
-                  }
-                  borderRadius="$3"
-                  pressStyle={{opacity: 0.7}}
                   onPress={() => {
                     setSelectedPredefinedDonationValue(amount)
                     setDonationAmount(undefined)
                   }}
-                >
-                  <Typography
-                    variant="paragraph"
-                    color={
-                      selectedPredefinedDonationValue === amount
-                        ? '$accentHighlightPrimary'
-                        : '$foregroundPrimary'
-                    }
-                  >
-                    {`${amount} €`}
-                  </Typography>
-                </Stack>
+                />
               ))
             )}
           </XStack>

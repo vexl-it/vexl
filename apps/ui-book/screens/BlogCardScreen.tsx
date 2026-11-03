@@ -1,12 +1,10 @@
 import {BlogCard, YStack} from '@vexl-next/ui'
+import {Asset} from 'expo-asset'
 import React from 'react'
-import {Image} from 'react-native'
 
 import {ComponentScreenLayout} from './ComponentScreenLayout'
 
-const testBlogUri = Image.resolveAssetSource(
-  require('../assets/testBlog.png')
-).uri
+const testBlogUri = Asset.fromModule(require('../assets/testBlog.png')).uri
 
 function Demos(): React.JSX.Element {
   return (

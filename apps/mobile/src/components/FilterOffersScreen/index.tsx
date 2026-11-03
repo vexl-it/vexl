@@ -101,7 +101,6 @@ function FilterOffersScreen(): React.ReactElement {
 
           <Divider marginVertical="$5" />
 
-          {/* Sort by */}
           <Typography
             variant="titlesSmall"
             color="$foregroundPrimary"
@@ -113,7 +112,6 @@ function FilterOffersScreen(): React.ReactElement {
 
           <Divider marginVertical="$5" />
 
-          {/* Show offers */}
           <Typography
             variant="titlesSmall"
             color="$foregroundPrimary"
@@ -127,7 +125,6 @@ function FilterOffersScreen(): React.ReactElement {
 
           <Divider marginVertical="$5" />
 
-          {/* Amount */}
           <SectionHeader
             paddingVertical="$3"
             title={t('offerForm.amountOfTransaction.amountOfTransaction')}
@@ -170,7 +167,6 @@ function FilterOffersScreen(): React.ReactElement {
 
           <Divider marginVertical="$5" />
 
-          {/* Location */}
           <Typography
             variant="titlesSmall"
             color="$foregroundPrimary"
@@ -182,7 +178,6 @@ function FilterOffersScreen(): React.ReactElement {
 
           <Divider marginVertical="$5" />
 
-          {/* Preferred language */}
           <Typography
             variant="titlesSmall"
             color="$foregroundPrimary"
@@ -198,7 +193,6 @@ function FilterOffersScreen(): React.ReactElement {
 
           <Divider marginVertical="$5" />
 
-          {/* Network */}
           <Typography
             variant="titlesSmall"
             color="$foregroundPrimary"
@@ -210,7 +204,6 @@ function FilterOffersScreen(): React.ReactElement {
 
           <Divider marginVertical="$5" />
 
-          {/* Connection */}
           <Typography
             variant="titlesSmall"
             color="$foregroundPrimary"
@@ -229,7 +222,6 @@ function FilterOffersScreen(): React.ReactElement {
 
           <Divider marginVertical="$5" />
 
-          {/* Show club offers */}
           <SectionHeader
             paddingVertical="$3"
             title={t('filterOffers.showClubOffers')}

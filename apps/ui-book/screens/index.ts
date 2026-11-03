@@ -5,6 +5,7 @@ import {AvatarScreen} from './AvatarScreen'
 import {BackdropScreen} from './BackdropScreen'
 import {BannerScreen} from './BannerScreen'
 import {BlogCardScreen} from './BlogCardScreen'
+import {BotMessageCardScreen} from './BotMessageCardScreen'
 import {BottomSheetPanelScreen} from './BottomSheetPanelScreen'
 import {ButtonScreen} from './ButtonScreen'
 import {BuySellRangeSliderScreen} from './BuySellRangeSliderScreen'
@@ -124,6 +125,7 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'Banner', component: BannerScreen},
   {label: 'Blog Card', component: BlogCardScreen},
   {label: 'Buy/Sell Range Slider', component: BuySellRangeSliderScreen},
+  {label: 'Bot Message Card', component: BotMessageCardScreen},
   {label: 'Bottom Sheet Panel', component: BottomSheetPanelScreen},
   {label: 'Button', component: ButtonScreen},
   {label: 'Calendar Picker', component: CalendarPickerScreen},

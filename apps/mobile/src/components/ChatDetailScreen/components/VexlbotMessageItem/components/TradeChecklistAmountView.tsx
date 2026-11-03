@@ -1,6 +1,6 @@
 import Clipboard from '@react-native-clipboard/clipboard'
 import {useNavigation} from '@react-navigation/native'
-import {Button, Copy, tokens, XStack, YStack} from '@vexl-next/ui'
+import {Button, Copy, XStack, YStack} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {Option} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
@@ -79,8 +79,6 @@ function TradeChecklistAmountView({message}: Props): React.ReactElement | null {
   })
 
   const toastContent = t('common.copied')
-  const copyActionGap = tokens.space[2].val
-  const copyActionMinWidth = tokens.size[13].val
 
   const onConfirmOrEditPress = useCallback(() => {
     navigation.navigate('TradeChecklistFlow', {
@@ -178,12 +176,12 @@ function TradeChecklistAmountView({message}: Props): React.ReactElement | null {
         >
           <YStack gap="$3">
             {latestAmountDataMessage.status === 'accepted' && (
-              <XStack flexWrap="wrap" gap={copyActionGap}>
+              <XStack flexWrap="wrap" gap="$2">
                 {!!message.message.tradeChecklistUpdate.amount.btcAmount && (
                   <Button
                     f={1}
                     icon={Copy}
-                    minWidth={copyActionMinWidth}
+                    minWidth="$13"
                     onPress={() => {
                       copyValueToClipboard(
                         `${message.message.tradeChecklistUpdate?.amount?.btcAmount}`
@@ -199,7 +197,7 @@ function TradeChecklistAmountView({message}: Props): React.ReactElement | null {
                   <Button
                     f={1}
                     icon={Copy}
-                    minWidth={copyActionMinWidth}
+                    minWidth="$13"
                     onPress={() => {
                       copyValueToClipboard(
                         `${Math.round(Number(message.message.tradeChecklistUpdate?.amount?.btcAmount) * SATOSHIS_IN_BTC)}`
@@ -215,7 +213,7 @@ function TradeChecklistAmountView({message}: Props): React.ReactElement | null {
                   <Button
                     f={1}
                     icon={Copy}
-                    minWidth={copyActionMinWidth}
+                    minWidth="$13"
                     onPress={() => {
                       copyValueToClipboard(`${roundedFiatAmount}`)
                     }}
@@ -230,7 +228,7 @@ function TradeChecklistAmountView({message}: Props): React.ReactElement | null {
             {!isMessageOutdated &&
               latestAmountDataMessage.by === 'them' &&
               latestAmountDataMessage.status === 'pending' && (
-                <XStack gap={copyActionGap}>
+                <XStack gap="$2">
                   <Button
                     disabled={!amountData?.received}
                     f={1}

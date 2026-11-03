@@ -101,6 +101,16 @@ function InteractiveGroup({
             }}
           />
         </YStack>
+
+        <SectionLabel>Compact</SectionLabel>
+        <RowCheckbox
+          compact
+          label="Don't show me this again"
+          checked={checked.has('compact')}
+          onCheckedChange={(v) => {
+            toggle('compact', v)
+          }}
+        />
       </YStack>
     </Theme>
   )

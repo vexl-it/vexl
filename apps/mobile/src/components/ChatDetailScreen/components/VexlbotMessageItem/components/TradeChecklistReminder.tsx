@@ -1,16 +1,8 @@
 import {useNavigation} from '@react-navigation/native'
-import {
-  CheckboxFilled,
-  SquareOutline,
-  Stack,
-  Typography,
-  XStack,
-  useTheme,
-} from '@vexl-next/ui'
+import {RowCheckbox} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtom, useAtomValue} from 'jotai'
 import React, {useState} from 'react'
-import {TouchableOpacity} from 'react-native'
 import {showVexlbotInitialMessageForAllChatsAtom} from '../../../../../state/chat/atoms/showVexlbotInitialMessageForAllChatsAtom'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {chatMolecule} from '../../../atoms'
@@ -19,7 +11,6 @@ import VexlbotActionCard from './VexlbotActionCard'
 function TradeChecklistReminder(): React.ReactElement | null {
   const {t} = useTranslation()
   const navigation = useNavigation()
-  const theme = useTheme()
   const [dontShowSwitchValue, setDontShowSwitchValue] = useState<boolean>(false)
 
   const {
@@ -57,7 +48,7 @@ function TradeChecklistReminder(): React.ReactElement | null {
 
   return (
     <VexlbotActionCard
-      buttonText={
+      buttonLabel={
         offerIsInPerson
           ? t('vexlbot.openTradeChecklist')
           : t('vexlbot.openTradeChecklistOnline')
@@ -68,11 +59,11 @@ function TradeChecklistReminder(): React.ReactElement | null {
           : 'vexlbot.initialWelcomeMessageOnline',
         {name: t('common.otherSide')}
       )}
-      onClosePress={() => {
+      onClose={() => {
         setShowVexlbotInitialMessageForCurrentChat(false)
         if (dontShowSwitchValue) setShowVexlbotInitialMessageForAllChats(false)
       }}
-      onPress={() => {
+      onButtonPress={() => {
         navigation.navigate('TradeChecklistFlow', {
           screen: 'AgreeOnTradeDetails',
           chatId,
@@ -80,30 +71,12 @@ function TradeChecklistReminder(): React.ReactElement | null {
         })
       }}
     >
-      <Stack gap="$4">
-        <TouchableOpacity
-          onPress={() => {
-            setDontShowSwitchValue(!dontShowSwitchValue)
-          }}
-        >
-          <XStack gap="$2" alignItems="center">
-            {dontShowSwitchValue ? (
-              <CheckboxFilled
-                size={18}
-                color={theme.accentHighlightSecondary.get()}
-              />
-            ) : (
-              <SquareOutline
-                size={18}
-                color={theme.foregroundSecondary.get()}
-              />
-            )}
-            <Typography variant="micro" color="$foregroundSecondary">
-              {t('common.dontShowMeThisAgain')}
-            </Typography>
-          </XStack>
-        </TouchableOpacity>
-      </Stack>
+      <RowCheckbox
+        compact
+        checked={dontShowSwitchValue}
+        onCheckedChange={setDontShowSwitchValue}
+        label={t('common.dontShowMeThisAgain')}
+      />
     </VexlbotActionCard>
   )
 }

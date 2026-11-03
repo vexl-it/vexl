@@ -35,7 +35,7 @@ function InactivityReminder({
     <VexlbotActionCard
       title={t('messages.inactivityReminder.title')}
       description={t('messages.inactivityReminder.subtitle')}
-      onClosePress={() => {
+      onClose={() => {
         dismissInactivityReminder({chatAtom: focusedChatAtom, messageId})
       }}
     >

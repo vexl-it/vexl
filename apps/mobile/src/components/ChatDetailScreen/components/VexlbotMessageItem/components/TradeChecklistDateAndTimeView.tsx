@@ -1,5 +1,5 @@
 import {useNavigation} from '@react-navigation/native'
-import {Button, Calendar, Typography, XStack, YStack} from '@vexl-next/ui'
+import {Button, Calendar} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {Array as ArrayE, Option, pipe} from 'effect'
 import {useAtomValue, useSetAtom, useStore} from 'jotai'
@@ -15,35 +15,6 @@ import VexlbotNextActionSuggestion from './VexlbotNextActionSuggestion'
 
 interface Props {
   message: ChatMessageWithState
-}
-
-function DateTimeDetails({
-  details,
-  textColor,
-}: {
-  readonly details: readonly string[]
-  readonly textColor: '$foregroundSecondary' | '$foregroundTertiary'
-}): React.JSX.Element {
-  const {t} = useTranslation()
-
-  return (
-    <YStack gap="$2">
-      {pipe(
-        details,
-        ArrayE.map((detail, index) => (
-          <XStack
-            key={`${detail}-${String(index)}`}
-            alignItems="center"
-            gap="$2"
-          >
-            <Typography color={textColor} flex={1} variant="description">
-              {detail}
-            </Typography>
-          </XStack>
-        ))
-      )}
-    </YStack>
-  )
 }
 
 export default function TradeChecklistDateAndTimeView({
@@ -88,24 +59,19 @@ export default function TradeChecklistDateAndTimeView({
             statusLabel={t('common.accepted')}
             statusVariant="waiting"
             title={t('vexlbot.yourMeetingIsOn')}
+            details={acceptedDetails}
           >
-            <YStack gap="$3">
-              <DateTimeDetails
-                details={acceptedDetails}
-                textColor="$foregroundSecondary"
-              />
-              <Button
-                icon={Calendar}
-                onPress={() => {
-                  void addEventToCalendar()()
-                }}
-                size="small"
-                variant="secondary"
-                width="100%"
-              >
-                {t('vexlbot.addEventToCalendar')}
-              </Button>
-            </YStack>
+            <Button
+              icon={Calendar}
+              onPress={() => {
+                void addEventToCalendar()()
+              }}
+              size="small"
+              variant="secondary"
+              width="100%"
+            >
+              {t('vexlbot.addEventToCalendar')}
+            </Button>
           </VexlbotActionCard>
           {Option.isSome(lastTradeChecklistMessage) &&
             lastTradeChecklistMessage.value.message.uuid ===
@@ -149,51 +115,34 @@ export default function TradeChecklistDateAndTimeView({
               ? t('vexlbot.confirmMeetingDate')
               : t('vexlbot.suggestedMeetingDate')
           }
+          description={
+            message.state === 'received'
+              ? t('vexlbot.picktimeOrSuggestYourOwn')
+              : undefined
+          }
+          details={detailLines}
+          muted={isMessageOutdated}
         >
-          <YStack gap="$2">
-            {message.state === 'received' && (
-              <Typography
-                color={
-                  isMessageOutdated
-                    ? '$foregroundTertiary'
-                    : '$foregroundSecondary'
-                }
-                flex={1}
-                variant="description"
-              >
-                {t('vexlbot.picktimeOrSuggestYourOwn')}
-              </Typography>
-            )}
-
-            <DateTimeDetails
-              details={detailLines}
-              textColor={
-                isMessageOutdated
-                  ? '$foregroundTertiary'
-                  : '$foregroundSecondary'
-              }
-            />
-            {message.state === 'received' && !isMessageOutdated ? (
-              <Button
-                onPress={() => {
-                  const chat = store.get(chatAtom)
-                  navigation.navigate('TradeChecklistFlow', {
-                    chatId: chat.id,
-                    inboxKey: chat.inbox.privateKey.publicKeyPemBase64,
-                    screen: 'PickDateFromSuggestions',
-                    params: {
-                      chosenDateTimes: suggestions,
-                    },
-                  })
-                }}
-                size="medium"
-                variant="secondary"
-                width="100%"
-              >
-                {t('common.respond')}
-              </Button>
-            ) : null}
-          </YStack>
+          {message.state === 'received' && !isMessageOutdated ? (
+            <Button
+              onPress={() => {
+                const chat = store.get(chatAtom)
+                navigation.navigate('TradeChecklistFlow', {
+                  chatId: chat.id,
+                  inboxKey: chat.inbox.privateKey.publicKeyPemBase64,
+                  screen: 'PickDateFromSuggestions',
+                  params: {
+                    chosenDateTimes: suggestions,
+                  },
+                })
+              }}
+              size="medium"
+              variant="secondary"
+              width="100%"
+            >
+              {t('common.respond')}
+            </Button>
+          ) : null}
         </VexlbotActionCard>
       )
     }

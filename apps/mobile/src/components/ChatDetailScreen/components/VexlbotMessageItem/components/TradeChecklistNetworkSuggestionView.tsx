@@ -28,9 +28,9 @@ function TradeChecklistNetworkSuggestionView(): React.ReactElement | null {
 
   return (
     <VexlbotActionCard
-      buttonText={t('tradeChecklist.options.SET_NETWORK')}
+      buttonLabel={t('tradeChecklist.options.SET_NETWORK')}
       description={t('vexlbot.agreeOnPreferredNetwork')}
-      onPress={() => {
+      onButtonPress={() => {
         navigation.navigate('TradeChecklistFlow', {
           screen: 'Network',
           chatId,

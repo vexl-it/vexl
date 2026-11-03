@@ -1,5 +1,6 @@
 import {Array} from 'effect'
 import React from 'react'
+import {Linking} from 'react-native'
 import Autolink from 'react-native-autolink'
 
 import {Image, Stack, XStack, YStack} from '../primitives'
@@ -70,6 +71,7 @@ export function ChatBubble({
 }: ChatBubbleProps): React.JSX.Element {
   const hasReactions = Array.isNonEmptyReadonlyArray(reactions)
   const textTopRadius = header ? '$2' : '$6'
+  const textColor = isMine ? '$black100' : '$foregroundPrimary'
 
   return (
     <Stack paddingBottom={hasReactions ? '$5' : undefined}>
@@ -129,8 +131,25 @@ export function ChatBubble({
           url
           component={Typography}
           variant="paragraph"
-          color={isMine ? '$black100' : '$foregroundPrimary'}
-          linkStyle={{textDecorationLine: 'underline'}}
+          color={textColor}
+          renderText={(segment, index) => (
+            <Typography key={index} variant="paragraph" color={textColor}>
+              {segment}
+            </Typography>
+          )}
+          renderLink={(segment, match, index) => (
+            <Typography
+              key={index}
+              variant="paragraph"
+              color={textColor}
+              textDecorationLine="underline"
+              onPress={() => {
+                void Linking.openURL(match.getAnchorHref())
+              }}
+            >
+              {segment}
+            </Typography>
+          )}
         />
       </Stack>
       {hasReactions ? (

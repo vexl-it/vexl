@@ -1,13 +1,14 @@
 import {
   Avatar,
   ChatEventCard,
+  getTokens,
   IconBox,
   Rejected,
+  UserImagePlaceholder,
   useTheme,
   YStack,
 } from '@vexl-next/ui'
 import React from 'react'
-import {getTokens} from 'tamagui'
 
 import {ComponentScreenLayout} from './ComponentScreenLayout'
 
@@ -28,7 +29,11 @@ function Demos(): React.JSX.Element {
         title="Them deleted their inbox"
       />
       <ChatEventCard
-        image={<Avatar size="$11" grayscale />}
+        image={
+          <Avatar size="$11" grayscale>
+            <UserImagePlaceholder size={getTokens().size.$11.val} />
+          </Avatar>
+        }
         title="You left the chat"
         description="You have chatted with this party before."
       />

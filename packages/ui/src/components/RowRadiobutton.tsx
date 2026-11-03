@@ -35,6 +35,9 @@ export function RowRadiobutton<T extends string>({
       value={value}
       disabled={disabled}
       unstyled
+      borderWidth={0}
+      padding={0}
+      backgroundColor="transparent"
       pressStyle={{opacity: 0.7}}
       onPress={() => {
         if (selected) onSelectedValuePress?.(value)

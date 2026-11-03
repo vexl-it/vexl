@@ -11,7 +11,7 @@ import Animated, {
 } from 'react-native-reanimated'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {scheduleOnRN} from 'react-native-worklets'
-import {getTokens, styled} from 'tamagui'
+import {getTokens, styled, Theme, useThemeName} from 'tamagui'
 
 import {SizableText, Stack, XStack, YStack} from '../primitives'
 import {Button, type ButtonVariant} from './Button'
@@ -97,6 +97,7 @@ export function Dialog({
   avoidKeyboard,
 }: DialogProps): React.JSX.Element | null {
   const [mounted, setMounted] = useState(false)
+  const themeName = useThemeName()
 
   const backdropOpacity = useSharedValue(0)
   const translateY = useSharedValue(Dimensions.get('window').height)
@@ -168,11 +169,14 @@ export function Dialog({
 
   return (
     <Modal transparent visible animationType="none" onRequestClose={onClose}>
-      {avoidKeyboard !== false ? (
-        <KeyboardAvoidingView>{content}</KeyboardAvoidingView>
-      ) : (
-        content
-      )}
+      {/* On web the modal portal leaves the DOM subtree that carries the theme class. */}
+      <Theme name={themeName} forceClassName>
+        {avoidKeyboard !== false ? (
+          <KeyboardAvoidingView>{content}</KeyboardAvoidingView>
+        ) : (
+          content
+        )}
+      </Theme>
     </Modal>
   )
 }

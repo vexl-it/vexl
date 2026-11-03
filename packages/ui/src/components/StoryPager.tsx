@@ -1,10 +1,6 @@
 import {Array} from 'effect'
-import React, {useState} from 'react'
-import {
-  Pressable,
-  useWindowDimensions,
-  type GestureResponderEvent,
-} from 'react-native'
+import React, {useRef, useState} from 'react'
+import {Pressable, type GestureResponderEvent, type View} from 'react-native'
 import {Stack, XStack} from '../primitives'
 import {Button} from './Button'
 import {Typography} from './Typography'
@@ -37,7 +33,7 @@ export function StoryPager({
   finishLabel,
   onFinish,
 }: StoryPagerProps): React.JSX.Element | null {
-  const {width: windowWidth} = useWindowDimensions()
+  const pressAreaRef = useRef<View>(null)
   const [page, setPage] = useState(initialPage)
   const pageContent = pages[page]
 
@@ -56,13 +52,20 @@ export function StoryPager({
   }
 
   const navigateByPressSide = (event: GestureResponderEvent): void => {
-    if (event.nativeEvent.pageX < windowWidth / 2) goBack()
-    else goNext()
+    const {pageX} = event.nativeEvent
+    pressAreaRef.current?.measureInWindow((x, _y, width) => {
+      if (pageX < x + width / 2) goBack()
+      else goNext()
+    })
   }
 
   return (
     <Stack flex={1}>
-      <Pressable onPress={navigateByPressSide} style={{flex: 1}}>
+      <Pressable
+        ref={pressAreaRef}
+        onPress={navigateByPressSide}
+        style={{flex: 1}}
+      >
         <Stack
           flex={1}
           backgroundColor="$backgroundTertiary"

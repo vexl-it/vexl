@@ -12,13 +12,28 @@ import React, {useMemo, useState} from 'react'
 
 import {ComponentScreenLayout} from './ComponentScreenLayout'
 
-function Demos(): React.JSX.Element {
-  const dialogAtom: DialogAtom = useMemo(() => createDialogAtom(), [])
-  const showDialog = useSetAtom(dialogAtom)
-
+function ExchangeDialogContent(): React.JSX.Element {
   const [btcValue, setBtcValue] = useState('0.00')
   const [btcUnit, setBtcUnit] = useState<BtcUnit>('BTC')
   const [fiatValue, setFiatValue] = useState('2448543')
+
+  return (
+    <Exchange
+      btcValue={btcValue}
+      btcUnit={btcUnit}
+      onBtcValueChange={setBtcValue}
+      onBtcUnitChange={setBtcUnit}
+      fiatValue={fiatValue}
+      fiatCurrency="CZK"
+      onFiatValueChange={setFiatValue}
+      onFiatCurrencyPress={() => {}}
+    />
+  )
+}
+
+function Demos(): React.JSX.Element {
+  const dialogAtom: DialogAtom = useMemo(() => createDialogAtom(), [])
+  const showDialog = useSetAtom(dialogAtom)
 
   return (
     <YStack gap="$4">
@@ -86,18 +101,7 @@ function Demos(): React.JSX.Element {
             showDialog({
               title: 'Set your own price',
               positiveButtonText: 'Save',
-              children: (
-                <Exchange
-                  btcValue={btcValue}
-                  btcUnit={btcUnit}
-                  onBtcValueChange={setBtcValue}
-                  onBtcUnitChange={setBtcUnit}
-                  fiatValue={fiatValue}
-                  fiatCurrency="CZK"
-                  onFiatValueChange={setFiatValue}
-                  onFiatCurrencyPress={() => {}}
-                />
-              ),
+              children: <ExchangeDialogContent />,
             })
           )
         }}

@@ -1,6 +1,5 @@
-import {Stack, Typography} from '@vexl-next/ui'
+import {Button, Stack, Typography} from '@vexl-next/ui'
 import React from 'react'
-import {TouchableOpacity} from 'react-native'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import openUrl from '../../../utils/openUrl'
 
@@ -33,15 +32,9 @@ function GoldenAvatarInfoModalContent({
           {t('goldenGlasses.goAndTryToFindYours')}
         </Typography>
       )}
-      <TouchableOpacity onPress={openUrl(t('common.communityUrl'))}>
-        <Typography
-          variant="paragraph"
-          color="$foregroundSecondary"
-          textDecorationLine="underline"
-        >
-          {t('common.communityUrl')}
-        </Typography>
-      </TouchableOpacity>
+      <Button variant="link" onPress={openUrl(t('common.communityUrl'))}>
+        {t('common.communityUrl')}
+      </Button>
     </Stack>
   )
 }

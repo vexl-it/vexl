@@ -1,7 +1,7 @@
-import {ArrowsVerticalSort, Typography} from '@vexl-next/ui'
+import {ArrowsVerticalSort, Button, Typography} from '@vexl-next/ui'
 import {useAtom, useAtomValue} from 'jotai'
 import React, {useCallback} from 'react'
-import {Stack, useTheme, XStack} from 'tamagui'
+import {Stack, XStack} from 'tamagui'
 import {
   myOffersCountAtom,
   selectedMyOffersSortingOptionAtom,
@@ -10,12 +10,10 @@ import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {formatInteger} from '../../../../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../../../../utils/localization/formattingLocaleAtom'
 import ReencryptOffersSuggestion from '../../../../ReencryptOffersSuggestion'
-import MarketplaceInlineButton from './MarketplaceInlineButton'
 
 function MyOffersListHeader(): React.ReactElement | null {
   const {t} = useTranslation()
   const locale = useAtomValue(formattingLocaleAtom)
-  const theme = useTheme()
   const allOffersCount = useAtomValue(myOffersCountAtom)
   const [sortingOption, setSortingOption] = useAtom(
     selectedMyOffersSortingOptionAtom
@@ -51,17 +49,14 @@ function MyOffersListHeader(): React.ReactElement | null {
               localizedString: formatInteger(allOffersCount, locale),
             })}
           </Typography>
-          <MarketplaceInlineButton
-            icon={
-              <ArrowsVerticalSort
-                size={18}
-                color={theme.accentHighlightPrimary.get()}
-              />
-            }
-            label={sortButtonLabel}
-            color={theme.accentHighlightPrimary.get()}
+          <Button
+            variant="link"
+            size="small"
+            icon={ArrowsVerticalSort}
             onPress={toggleSorting}
-          />
+          >
+            {sortButtonLabel}
+          </Button>
         </XStack>
       </Stack>
       <Stack gap="$6">

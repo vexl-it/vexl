@@ -5,7 +5,6 @@ import {
   LoadingOverlay,
   Stack,
   Typography,
-  useTheme,
   XStack,
   type TabItem,
 } from '@vexl-next/ui'
@@ -13,7 +12,7 @@ import {useMolecule} from 'bunshi/dist/react'
 import {Array} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useMemo} from 'react'
-import {Pressable, type LayoutChangeEvent} from 'react-native'
+import {type LayoutChangeEvent} from 'react-native'
 import {type ContactsFilter} from '../../../../state/contacts/domain'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import {useKeyboardAwareFooterListPadding} from '../../../../utils/useKeyboardAwareFooterListPadding'
@@ -47,7 +46,6 @@ function ContactsListSelect({
     shouldShowContactImportProgressDialogAtom,
     toggleAllContactsToDisplayActionAtom,
   } = useMolecule(contactSelectMolecule)
-  const theme = useTheme()
   const normalizedContacts = useContactListSelectLifecycle()
   const isBulkSelectionPreparing = useAtomValue(isBulkSelectionPreparingAtom)
   const isContactsPreparing = useAtomValue(isContactsPreparingAtom)
@@ -166,20 +164,14 @@ function ContactsListSelect({
               {t('account.contactsCount', {count: contactsToDisplayCount})}
             </Typography>
             {areThereAnyContactsToDisplayForSelectedTab ? (
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={bulkToggleLabel}
+              <Button
+                variant="link"
+                size="small"
                 disabled={isActivateAllButtonDisabled}
                 onPress={handleToggleAllContactsToDisplay}
               >
-                <Typography
-                  variant="descriptionBold"
-                  color={theme.accentHighlightPrimary.get()}
-                  opacity={isActivateAllButtonDisabled ? 0.45 : 1}
-                >
-                  {bulkToggleLabel}
-                </Typography>
-              </Pressable>
+                {bulkToggleLabel}
+              </Button>
             ) : null}
           </XStack>
           {shouldShowNewContactsBanner ? (

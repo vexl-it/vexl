@@ -1,4 +1,12 @@
-import {Button, PlusAdd, SizableText, Theme, YStack} from '@vexl-next/ui'
+import {
+  Button,
+  Map,
+  PlusAdd,
+  SizableText,
+  Theme,
+  XStack,
+  YStack,
+} from '@vexl-next/ui'
 import React from 'react'
 import {ScrollView} from 'react-native'
 
@@ -56,6 +64,18 @@ function ButtonVariants({
       <Button variant="disabled" size={size} onPress={() => {}}>
         Disabled
       </Button>
+
+      <XStack gap="$5" alignItems="center">
+        <Button variant="link" size={size} onPress={() => {}}>
+          Link
+        </Button>
+        <Button variant="link" icon={Map} size={size} onPress={() => {}}>
+          Link with icon
+        </Button>
+        <Button variant="link" size={size} disabled onPress={() => {}}>
+          Disabled link
+        </Button>
+      </XStack>
     </YStack>
   )
 }

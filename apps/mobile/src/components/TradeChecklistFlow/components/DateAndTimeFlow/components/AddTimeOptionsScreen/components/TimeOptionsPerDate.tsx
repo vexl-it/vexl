@@ -350,17 +350,13 @@ function TimeOptionsPerDate({
               </Typography>
             </YStack>
           ) : (
-            <TouchableOpacity
+            <Button
+              variant="link"
+              size="small"
               onPress={expanded ? onCollapse : onExpand}
-              activeOpacity={0.85}
             >
-              <Typography
-                variant="description"
-                color="$accentHighlightSecondary"
-              >
-                {expanded ? 'Hide time slots' : 'Add time slots'}
-              </Typography>
-            </TouchableOpacity>
+              {expanded ? 'Hide time slots' : 'Add time slots'}
+            </Button>
           )}
         </XStack>
       </TouchableOpacity>

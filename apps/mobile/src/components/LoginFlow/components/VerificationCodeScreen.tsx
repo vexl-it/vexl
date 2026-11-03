@@ -1,17 +1,12 @@
 import {useFocusEffect} from '@react-navigation/native'
 import {KeyHolder} from '@vexl-next/cryptography'
-import {CodeInput, TitleBlock, Typography, YStack} from '@vexl-next/ui'
+import {Button, CodeInput, TitleBlock, Typography, YStack} from '@vexl-next/ui'
 import {parsePhoneNumber} from 'awesome-phonenumber'
 import {Effect} from 'effect'
 import {useSetAtom} from 'jotai'
 import {DateTime} from 'luxon'
 import React, {useCallback, useMemo, useRef, useState} from 'react'
-import {
-  Keyboard,
-  Platform,
-  TouchableOpacity,
-  type TextInput,
-} from 'react-native'
+import {Keyboard, Platform, type TextInput} from 'react-native'
 import {type LoginFlowStackScreenProps} from '../../../navigationTypes'
 import {dismissKeyboardAndResolveOnLayoutUpdate} from '../../../utils/dismissKeyboardPromise'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
@@ -200,19 +195,15 @@ export default function VerificationCodeScreen({
       }}
       footer={
         countdownFinished ? (
-          <TouchableOpacity
+          <Button
+            variant="link"
+            size="medium"
+            alignSelf="center"
             disabled={resendInProgress}
             onPress={resendVerificationCode}
           >
-            <Typography
-              color="$foregroundSecondary"
-              textAlign="center"
-              textDecorationLine="underline"
-              variant="paragraphSmall"
-            >
-              {t('loginFlow.v2.verificationCode.retry')}
-            </Typography>
-          </TouchableOpacity>
+            {t('loginFlow.v2.verificationCode.retry')}
+          </Button>
         ) : (
           <Typography
             color="$foregroundSecondary"

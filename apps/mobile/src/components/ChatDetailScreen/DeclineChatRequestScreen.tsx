@@ -13,7 +13,7 @@ import {ScopeProvider, useMolecule} from 'bunshi/dist/react'
 import {Effect} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react'
-import {Dimensions} from 'react-native'
+import {useWindowDimensions} from 'react-native'
 import {type RootStackScreenProps} from '../../navigationTypes'
 import {focusChatWithMessagesByKeysAtom} from '../../state/chat/atoms/focusChatWithMessagesAtom'
 import {dummyChatWithMessages} from '../../state/chat/domain'
@@ -33,6 +33,7 @@ function DeclineChatRequestContent({
   readonly chatExists: boolean
 }): React.ReactElement {
   const {t} = useTranslation()
+  const {height: windowHeight} = useWindowDimensions()
   const safeGoBack = useSafeGoBack()
   const {offerForChatAtom, approveChatRequestActionAtom} =
     useMolecule(chatMolecule)
@@ -167,7 +168,7 @@ function DeclineChatRequestContent({
           <LabeledTextArea
             label={t('messages.stateYourReasonForRejection')}
             placeholder={t('messages.stateYourReasonForRejection')}
-            minHeight={Dimensions.get('window').height * 0.3}
+            minHeight={windowHeight * 0.3}
             maxLength={MAX_DECLINE_REASON_LENGTH}
             value={text}
             onChangeText={setText}

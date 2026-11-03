@@ -11,6 +11,8 @@ import {ButtonScreen} from './ButtonScreen'
 import {BuySellRangeSliderScreen} from './BuySellRangeSliderScreen'
 import {CalendarPickerScreen} from './CalendarPickerScreen'
 import {CardButtonScreen} from './CardButtonScreen'
+import {ChatBubbleScreen} from './ChatBubbleScreen'
+import {ChatComposerScreen} from './ChatComposerScreen'
 import {ChatEventCardScreen} from './ChatEventCardScreen'
 import {ChatMessageItemScreen} from './ChatMessageItemScreen'
 import {ChecklistCellScreen} from './ChecklistCellScreen'
@@ -85,6 +87,7 @@ import {RadioGroupScreen} from './RadioGroupScreen'
 import {RangeSliderScreen} from './RangeSliderScreen'
 import {ReachStatsScreen} from './ReachStatsScreen'
 import {RefreshControlScreen} from './RefreshControlScreen'
+import {ReplyPreviewScreen} from './ReplyPreviewScreen'
 import {RowButtonScreen} from './RowButtonScreen'
 import {RowCheckboxScreen} from './RowCheckboxScreen'
 import {RowRadiobuttonScreen} from './RowRadiobuttonScreen'
@@ -132,6 +135,8 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'Button', component: ButtonScreen},
   {label: 'Calendar Picker', component: CalendarPickerScreen},
   {label: 'Card Button', component: CardButtonScreen},
+  {label: 'Chat Bubble', component: ChatBubbleScreen},
+  {label: 'Chat Composer', component: ChatComposerScreen},
   {label: 'Chat Event Card', component: ChatEventCardScreen},
   {label: 'Chat Message Item', component: ChatMessageItemScreen},
   {label: 'Checklist Cell', component: ChecklistCellScreen},
@@ -218,6 +223,7 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'Range Slider', component: RangeSliderScreen},
   {label: 'Reach Stats', component: ReachStatsScreen},
   {label: 'Refresh Control', component: RefreshControlScreen},
+  {label: 'Reply Preview', component: ReplyPreviewScreen},
   {label: 'Row Button', component: RowButtonScreen},
   {label: 'Row Checkbox', component: RowCheckboxScreen},
   {label: 'Row Radiobutton', component: RowRadiobuttonScreen},

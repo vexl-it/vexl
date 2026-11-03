@@ -1,6 +1,6 @@
 import {
   ChatEventCard,
-  DotTypingIndicator,
+  ChatTypingBubble,
   IconBox,
   Rejected,
   Typography,
@@ -9,7 +9,7 @@ import {
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue, type Atom} from 'jotai'
 import React, {useMemo} from 'react'
-import {getTokens, Stack, XStack} from 'tamagui'
+import {getTokens, Stack} from 'tamagui'
 import {createIsOtherSideTypingAtom} from '../../../state/chat/atoms/typingIndication'
 import {formattingLocaleAtom} from '../../../utils/localization/formattingLocaleAtom'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
@@ -44,18 +44,9 @@ function TypingIndication(): React.ReactElement | null {
   if (!isTyping) return null
 
   return (
-    <XStack
-      alignSelf="flex-start"
-      mx="$5"
-      mt="$2"
-      padding="$5"
-      flex={1}
-      alignItems="stretch"
-      borderRadius="$6"
-      backgroundColor="$backgroundTertiary"
-    >
-      <DotTypingIndicator />
-    </XStack>
+    <Stack mx="$5" mt="$2">
+      <ChatTypingBubble />
+    </Stack>
   )
 }
 

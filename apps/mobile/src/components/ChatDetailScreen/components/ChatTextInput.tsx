@@ -3,27 +3,12 @@ import {
   type ChatMessage,
 } from '@vexl-next/domain/src/general/messaging'
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {
-  NavButton,
-  Send,
-  Stack,
-  Typography,
-  XStack,
-  XmarkCancelClose,
-  YStack,
-} from '@vexl-next/ui'
+import {ChatComposer} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
-import {useAtom, useAtomValue, useSetAtom} from 'jotai'
+import {useAtom, useSetAtom} from 'jotai'
 import truncate from 'just-truncate'
 import React, {useCallback, useEffect, useRef, useState} from 'react'
 import {Platform, TextInput as RNTextInput} from 'react-native'
-import Animated, {
-  SlideInDown,
-  SlideOutDown,
-  useAnimatedStyle,
-  withSpring,
-} from 'react-native-reanimated'
-import {useTheme} from 'tamagui'
 import {useSessionAssumeLoggedIn} from '../../../state/session'
 import {version} from '../../../utils/environment'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
@@ -37,12 +22,9 @@ const responseImagePreviewLimits = {width: 200, height: 100}
 const iosAutocorrectCommitDelayMs = 50
 
 function ChatTextInput(): React.ReactElement | null {
-  const theme = useTheme()
   const [value, setValue] = useState('')
-  const {sendMessageAtom, replyToMessageAtom, otherSideDataAtom} =
-    useMolecule(chatMolecule)
+  const {sendMessageAtom, replyToMessageAtom} = useMolecule(chatMolecule)
   const [replyToMessage, setReplyToMessage] = useAtom(replyToMessageAtom)
-  const otherSideData = useAtomValue(otherSideDataAtom)
   const sendMessage = useSetAtom(sendMessageAtom)
   const session = useSessionAssumeLoggedIn()
   const {t} = useTranslation()
@@ -62,13 +44,6 @@ function ChatTextInput(): React.ReactElement | null {
     if (!replyToMessage) return
     textInputRef.current?.focus()
   }, [replyToMessage])
-
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
-      marginRight: 5,
-      opacity: withSpring(value ? 1 : 0),
-    }
-  }, [value])
 
   const clearTextInput = useCallback(() => {
     textInputRef.current?.clear()
@@ -161,97 +136,32 @@ function ChatTextInput(): React.ReactElement | null {
 
   useEffect(() => clearPendingIosSendTimeout, [clearPendingIosSendTimeout])
 
-  const inputStyles = {
-    minHeight: 21,
-    maxHeight: 110,
-    paddingVertical: 0,
-    paddingHorizontal: 0,
-    color: theme.foregroundPrimary.get(),
-    fontFamily: 'TTSatoshi500',
-    fontSize: 16,
-  }
-
   return (
-    <YStack>
-      {!!replyToMessage && (
-        <Animated.View
-          entering={SlideInDown.duration(180)}
-          exiting={SlideOutDown.duration(180)}
-          style={{overflow: 'hidden'}}
-        >
-          <XStack
-            backgroundColor="$backgroundSecondary"
-            pt="$3"
-            pb="$3"
-            px="$6"
-            justifyContent="space-between"
-            alignItems="center"
-            gap="$2"
-          >
-            <YStack flex={1} gap="$2">
-              {!!replyToMessage.message.image && (
+    <ChatComposer
+      inputRef={textInputRef}
+      nativeID={CHAT_INPUT_NATIVE_ID}
+      value={value}
+      onChangeText={handleChangeText}
+      onSend={sendText}
+      placeholder={t('messages.typeSomething')}
+      reply={
+        replyToMessage
+          ? {
+              label: t('common.replyTo'),
+              text: truncate(replyToMessage.message.text, 100, '...'),
+              image: replyToMessage.message.image ? (
                 <UriImageWithSizeLimits
                   uri={replyToMessage.message.image}
                   limits={responseImagePreviewLimits}
                 />
-              )}
-              <Typography color="$foregroundSecondary" variant="micro">
-                {t('common.replyTo')}
-              </Typography>
-              <Typography
-                color="$foregroundPrimary"
-                variant="description"
-                marginTop="$1"
-              >
-                {truncate(replyToMessage.message.text, 100, '...')}
-              </Typography>
-            </YStack>
-            <NavButton
-              variant="transparent"
-              icon={XmarkCancelClose}
-              onPress={() => {
+              ) : undefined,
+              onDismiss: () => {
                 setReplyToMessage(undefined)
-              }}
-            />
-          </XStack>
-        </Animated.View>
-      )}
-      <XStack
-        backgroundColor="$backgroundSecondary"
-        gap="$3"
-        alignItems="flex-end"
-      >
-        <Stack flex={1}>
-          <XStack
-            alignItems="center"
-            gap="$3"
-            my="$3"
-            mx="$4"
-            px="$6"
-            py="$3"
-            borderRadius="$9"
-            backgroundColor="$backgroundOnBar"
-          >
-            <Stack flex={1} justifyContent="center">
-              <RNTextInput
-                ref={textInputRef}
-                nativeID={CHAT_INPUT_NATIVE_ID}
-                multiline
-                value={value}
-                onChangeText={handleChangeText}
-                style={inputStyles}
-                placeholder={t('messages.typeSomething')}
-                placeholderTextColor={theme.foregroundTertiary.get()}
-                selectionColor={theme.accentHighlightPrimary.get()}
-              />
-            </Stack>
-            <Animated.View style={animatedStyle}>
-              <NavButton icon={Send} onPress={sendText} />
-            </Animated.View>
-          </XStack>
-        </Stack>
-      </XStack>
-    </YStack>
+              },
+            }
+          : undefined
+      }
+    />
   )
 }
 

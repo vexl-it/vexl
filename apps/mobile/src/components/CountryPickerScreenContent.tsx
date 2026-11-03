@@ -1,16 +1,13 @@
 import {
-  Input,
   KeyboardAvoidingView,
   NavigationBar,
   Screen,
-  SearchMagnifyGlass,
+  SearchBar,
+  SelectableItem,
   tokens,
-  Typography,
-  useTheme,
   XmarkCancelClose,
-  XStack,
-  YStack,
 } from '@vexl-next/ui'
+import {atom, useAtomValue} from 'jotai'
 import React, {useCallback, useMemo, useState} from 'react'
 import {FlatList, Platform} from 'react-native'
 import {getAllCountries, type ICountry} from 'react-native-country-select'
@@ -100,35 +97,11 @@ function CountryPickerItem({
   }, [country, onSelect])
 
   return (
-    <XStack
-      alignItems="center"
-      borderBottomColor="$backgroundTertiary"
-      borderBottomWidth={1}
-      gap="$3"
-      minHeight="$11"
+    <SelectableItem
+      label={`${country.flag} ${getCountryName(country)}`}
+      note={country.idd.root}
       onPress={handleSelect}
-      pressStyle={{opacity: 0.7}}
-      width="100%"
-    >
-      <Typography color="$foregroundPrimary" variant="heading3">
-        {country.flag}
-      </Typography>
-      <Typography
-        color="$foregroundSecondary"
-        minWidth={tokens.size[11].val}
-        variant="paragraphSmall"
-      >
-        {country.idd.root}
-      </Typography>
-      <Typography
-        color="$foregroundPrimary"
-        flex={1}
-        numberOfLines={1}
-        variant="paragraph"
-      >
-        {getCountryName(country)}
-      </Typography>
-    </XStack>
+    />
   )
 }
 
@@ -137,8 +110,8 @@ export default function CountryPickerScreenContent({
   onSelect,
 }: Props): React.ReactElement {
   const {t} = useTranslation()
-  const [searchQuery, setSearchQuery] = useState('')
-  const theme = useTheme()
+  const [searchQueryAtom] = useState(() => atom(''))
+  const searchQuery = useAtomValue(searchQueryAtom)
   const countriesToDisplay = getCountriesToDisplay(searchQuery)
   const rightActions = useMemo(
     () => [{icon: XmarkCancelClose, onPress: onClose}],
@@ -161,8 +134,7 @@ export default function CountryPickerScreenContent({
       automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
       contentContainerStyle={{
         paddingBottom: listBottomPadding,
-        paddingHorizontal: tokens.space[5].val,
-        paddingTop: tokens.space[5].val,
+        paddingTop: tokens.space[4].val,
       }}
       data={countriesToDisplay}
       keyExtractor={keyExtractor}
@@ -175,7 +147,6 @@ export default function CountryPickerScreenContent({
 
   return (
     <Screen
-      noHorizontalPadding
       navigationBar={
         <NavigationBar
           style="back"
@@ -185,42 +156,12 @@ export default function CountryPickerScreenContent({
       }
       safeAreasBackgroundColor="$backgroundPrimary"
     >
-      <YStack backgroundColor="$backgroundPrimary" flex={1}>
-        <XStack
-          alignItems="center"
-          backgroundColor="$backgroundSecondary"
-          borderRadius="$9"
-          gap="$3"
-          height="$11"
-          marginHorizontal="$5"
-          paddingHorizontal="$5"
-        >
-          <SearchMagnifyGlass
-            color={theme.foregroundPrimary.get()}
-            size={tokens.size[7].val}
-          />
-          <Input
-            unstyled
-            autoCorrect={false}
-            color="$foregroundPrimary"
-            flex={1}
-            fontFamily="$body"
-            fontSize="$5"
-            fontWeight="500"
-            onChangeText={setSearchQuery}
-            padding={0}
-            placeholder={t('common.search')}
-            placeholderTextColor={theme.foregroundSecondary.get()}
-            selectionColor={theme.accentYellowPrimary.get()}
-            value={searchQuery}
-          />
-        </XStack>
-        {Platform.OS === 'android' ? (
-          <KeyboardAvoidingView>{countryList}</KeyboardAvoidingView>
-        ) : (
-          countryList
-        )}
-      </YStack>
+      <SearchBar valueAtom={searchQueryAtom} placeholder={t('common.search')} />
+      {Platform.OS === 'android' ? (
+        <KeyboardAvoidingView>{countryList}</KeyboardAvoidingView>
+      ) : (
+        countryList
+      )}
     </Screen>
   )
 }

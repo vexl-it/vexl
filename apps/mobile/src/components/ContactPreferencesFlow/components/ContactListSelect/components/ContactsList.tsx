@@ -33,7 +33,7 @@ function ContactsList({
   keyboardBottomSpacerHeight,
 }: Props): React.ReactElement {
   const listFooterComponent = React.useCallback(
-    () => <Stack h={keyboardBottomSpacerHeight + 16} />,
+    () => <Stack h={keyboardBottomSpacerHeight} mb="$5" />,
     [keyboardBottomSpacerHeight]
   )
   const listEmptyComponent = React.useCallback(

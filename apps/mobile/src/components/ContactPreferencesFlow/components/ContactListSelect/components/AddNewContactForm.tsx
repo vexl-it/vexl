@@ -5,11 +5,11 @@ import {
   CellPhoneMobileDevice,
   ChevronDown,
   DismissKeyboardOnPressOutside,
-  Input,
+  FieldFrame,
   KeyboardStickyView,
   LoadingOverlay,
-  Stack,
-  Switch,
+  Selector,
+  TextField,
   Typography,
   XStack,
   YStack,
@@ -20,7 +20,7 @@ import {useMolecule} from 'bunshi/dist/react'
 import {Effect, Option} from 'effect'
 import {atom, useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useEffect, useRef, useState} from 'react'
-import {Platform, type LayoutChangeEvent} from 'react-native'
+import {Platform, type LayoutChangeEvent, type TextInput} from 'react-native'
 import {getCountryByCca2} from 'react-native-country-select'
 import {type ContactPreferencesStackScreenProps} from '../../../../../navigationTypes'
 import {type StoredContactWithComputedValues} from '../../../../../state/contacts/domain'
@@ -102,7 +102,7 @@ export default function AddNewContactForm({
           .regionCode
   const footerHeightRef = useRef(0)
   const [footerHeight, setFooterHeight] = useState(0)
-  const phoneNumberInputRef = useRef<React.ComponentRef<typeof Input>>(null)
+  const phoneNumberInputRef = useRef<TextInput>(null)
   const [phoneNumber, setPhoneNumber] = useState(initialPhoneNumber)
   const [contactName, setContactName] = useState(initialContactName)
   const [isSavingContact, setIsSavingContact] = useState(false)
@@ -272,20 +272,16 @@ export default function AddNewContactForm({
         >
           <YStack gap="$2">
             <XStack gap="$3" width="100%">
-              <XStack
-                alignItems="center"
-                backgroundColor="$backgroundSecondary"
-                borderRadius="$5"
+              <FieldFrame
+                pressable
+                role="button"
+                alignSelf="auto"
                 gap="$2"
-                height="$11"
-                justifyContent="center"
                 onPress={() => {
                   runAfterKeyboardDismiss(() => {
                     navigation.navigate('AddNewContactCountryPicker')
                   })
                 }}
-                paddingHorizontal="$5"
-                pressStyle={{opacity: 0.8}}
               >
                 <Typography color="$accentHighlightPrimary" variant="paragraph">
                   {callingCode}
@@ -294,35 +290,19 @@ export default function AddNewContactForm({
                   color={theme.accentHighlightPrimary.get()}
                   size={24}
                 />
-              </XStack>
-              <XStack
-                alignItems="center"
-                backgroundColor="$backgroundSecondary"
-                borderRadius="$5"
+              </FieldFrame>
+              <TextField
+                ref={phoneNumberInputRef}
                 flex={1}
-                height="$11"
-                paddingHorizontal="$5"
-              >
-                <Input
-                  ref={phoneNumberInputRef}
-                  unstyled
-                  autoFocus={Platform.OS === 'android'}
-                  autoComplete="tel"
-                  color="$foregroundPrimary"
-                  flex={1}
-                  fontFamily="$body"
-                  fontSize="$4"
-                  fontWeight="500"
-                  keyboardType="phone-pad"
-                  onChangeText={setPhoneNumber}
-                  placeholder={t(
-                    'contactPreferences.addContactManually.phoneNumber'
-                  )}
-                  placeholderTextColor={theme.foregroundTertiary.get()}
-                  selectionColor={theme.accentYellowPrimary.get()}
-                  value={phoneNumber}
-                />
-              </XStack>
+                autoFocus={Platform.OS === 'android'}
+                autoComplete="tel"
+                keyboardType="phone-pad"
+                value={phoneNumber}
+                onChangeText={setPhoneNumber}
+                placeholder={t(
+                  'contactPreferences.addContactManually.phoneNumber'
+                )}
+              />
             </XStack>
             {shouldShowPhoneNumberError ? (
               <Typography
@@ -334,54 +314,21 @@ export default function AddNewContactForm({
               </Typography>
             ) : null}
           </YStack>
-          <XStack
-            alignItems="center"
-            backgroundColor="$backgroundSecondary"
-            borderRadius="$5"
-            height="$11"
-            paddingHorizontal="$5"
-          >
-            <Input
-              unstyled
-              autoComplete="name"
-              color="$foregroundPrimary"
-              flex={1}
-              fontFamily="$body"
-              fontSize="$4"
-              fontWeight="500"
-              onChangeText={setContactName}
-              placeholder={t('contactPreferences.addContactManually.name')}
-              placeholderTextColor={theme.foregroundTertiary.get()}
-              returnKeyType="done"
-              selectionColor={theme.accentYellowPrimary.get()}
-              submitBehavior="blurAndSubmit"
-              value={contactName}
-            />
-          </XStack>
+          <TextField
+            autoComplete="name"
+            returnKeyType="done"
+            submitBehavior="blurAndSubmit"
+            value={contactName}
+            onChangeText={setContactName}
+            placeholder={t('contactPreferences.addContactManually.name')}
+          />
           {!isEditingContact ? (
-            <XStack
-              alignItems="center"
-              backgroundColor="$backgroundSecondary"
-              borderRadius="$5"
-              gap="$4"
-              height="$12"
-              paddingHorizontal="$4"
-            >
-              <CellPhoneMobileDevice
-                color={theme.foregroundPrimary.get()}
-                size={24}
-              />
-              <Typography
-                color="$foregroundPrimary"
-                flex={1}
-                variant="paragraphSmall"
-              >
-                {t('addContactDialog.alsoSaveToYourPhone')}
-              </Typography>
-              <Stack alignSelf="center" justifyContent="center">
-                <Switch valueAtom={saveToPhoneAtom} />
-              </Stack>
-            </XStack>
+            <Selector
+              variant="switch"
+              icon={CellPhoneMobileDevice}
+              label={t('addContactDialog.alsoSaveToYourPhone')}
+              valueAtom={saveToPhoneAtom}
+            />
           ) : null}
         </YStack>
         <KeyboardStickyView

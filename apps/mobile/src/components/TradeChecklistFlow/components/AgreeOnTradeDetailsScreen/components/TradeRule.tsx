@@ -13,8 +13,8 @@ function TradeRule({ruleNumber, title}: Props): React.ReactElement {
       <Stack
         ai="center"
         jc="center"
-        h={40}
-        w={40}
+        h="$9"
+        w="$9"
         flexShrink={0}
         bc="$backgroundSecondary"
         br="$3"

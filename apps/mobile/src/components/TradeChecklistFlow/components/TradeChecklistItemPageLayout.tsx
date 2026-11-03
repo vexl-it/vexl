@@ -20,7 +20,7 @@ export function TradeChecklistItemPageLayout({
   children,
 }: {
   header?: {
-    title: string
+    title?: string
     onBackPress?: () => void
     rightActions?: readonly NavigationBarAction[]
   }

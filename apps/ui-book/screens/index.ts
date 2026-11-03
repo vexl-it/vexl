@@ -24,6 +24,7 @@ import {CodeInputScreen} from './CodeInputScreen'
 import {CollapseScreen} from './CollapseScreen'
 import {CommonFriendsScreen} from './CommonFriendsScreen'
 import {CommonFriendsSummaryScreen} from './CommonFriendsSummaryScreen'
+import {ContextMenuScreen} from './ContextMenuScreen'
 import {CopyFieldScreen} from './CopyFieldScreen'
 import {CountBadgeScreen} from './CountBadgeScreen'
 import {DateSlotsSummaryRowScreen} from './DateSlotsSummaryRowScreen'
@@ -86,6 +87,7 @@ import {QrScannerOverlayScreen} from './QrScannerOverlayScreen'
 import {RadioGroupScreen} from './RadioGroupScreen'
 import {RangeSliderScreen} from './RangeSliderScreen'
 import {ReachStatsScreen} from './ReachStatsScreen'
+import {ReactionBarScreen} from './ReactionBarScreen'
 import {RefreshControlScreen} from './RefreshControlScreen'
 import {ReplyPreviewScreen} from './ReplyPreviewScreen'
 import {RowButtonScreen} from './RowButtonScreen'
@@ -148,6 +150,7 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'Collapse', component: CollapseScreen},
   {label: 'Common Friends', component: CommonFriendsScreen},
   {label: 'Common Friends Summary', component: CommonFriendsSummaryScreen},
+  {label: 'Context Menu', component: ContextMenuScreen},
   {label: 'Copy Field', component: CopyFieldScreen},
   {label: 'Date Slots Summary Row', component: DateSlotsSummaryRowScreen},
   {label: 'Count Badge', component: CountBadgeScreen},
@@ -222,6 +225,7 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'Radio Group', component: RadioGroupScreen},
   {label: 'Range Slider', component: RangeSliderScreen},
   {label: 'Reach Stats', component: ReachStatsScreen},
+  {label: 'Reaction Bar', component: ReactionBarScreen},
   {label: 'Refresh Control', component: RefreshControlScreen},
   {label: 'Reply Preview', component: ReplyPreviewScreen},
   {label: 'Row Button', component: RowButtonScreen},

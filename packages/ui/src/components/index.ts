@@ -62,6 +62,13 @@ export {CommonFriends} from './CommonFriends'
 export type {CommonFriend, CommonFriendsProps} from './CommonFriends'
 export {CommonFriendsSummary} from './CommonFriendsSummary'
 export type {CommonFriendsSummaryProps} from './CommonFriendsSummary'
+export {
+  CONTEXT_MENU_WIDTH,
+  ContextMenu,
+  ContextMenuItem,
+  contextMenuHeight,
+} from './ContextMenu'
+export type {ContextMenuItemProps, ContextMenuProps} from './ContextMenu'
 export {CopyField} from './CopyField'
 export type {CopyFieldProps} from './CopyField'
 export {CountBadge} from './CountBadge'
@@ -223,6 +230,8 @@ export {RadioGroup} from './RadioGroup'
 export type {RadioGroupProps} from './RadioGroup'
 export {ReachStats} from './ReachStats'
 export type {ReachStatsProps, ReachStatsStep} from './ReachStats'
+export {REACTION_BAR_HEIGHT, ReactionBar, reactionBarWidth} from './ReactionBar'
+export type {ReactionBarProps} from './ReactionBar'
 export {RefreshControl} from './RefreshControl'
 export type {RefreshControlProps} from './RefreshControl'
 export {ReplyPreview} from './ReplyPreview'

@@ -9,12 +9,18 @@ Adding a new preview screen requires two changes:
 1. Create `screens/<ComponentName>Screen.tsx` showing all variants in light and dark themes side-by-side (wrap each column in `<Theme name="light">` / `<Theme name="dark">`).
 2. Add an entry to the `screens` array in `screens/index.ts`.
 
+Web:
+
+- `pnpm --filter @vexl-next/ui-book web` starts Expo web (default http://localhost:8081). `expo export --platform web` builds a static site.
+- Fonts load through `useVexlFonts.web.ts`; `Alert.alert` shows as a toast on web (react-native-web's Alert does nothing).
+
 Gotchas:
 
 - The `tamagui.config.ts` at project root re-exports from `@vexl-next/ui` — this is needed for the Babel plugin. It requires an `eslint-disable` for `no-restricted-exports` (default export).
 - When a preview needs a concrete color string for icons, SVG props, React Native props, gradients, or other non-token props, read it with `const theme = useTheme()` and call `.get()` (e.g. `theme.foregroundPrimary.get()`). Do not use `.val` for theme colors and do not read element colors from `getTokens().color`.
-- Metro is configured to resolve from the monorepo root (`watchFolders` + `nodeModulesPaths` in `metro.config.js`). Native modules used by workspace packages (e.g. `react-native-svg`, `react-native-reanimated` from `@vexl-next/ui`) must be pinned in `metro.config.js` `resolveRequest` alongside `react` and `react-native` to prevent duplicate instances — otherwise the copy in the workspace's `node_modules` won't have native bindings registered. The resolver uses `startsWith` matching so subpath imports (e.g. `react-native-svg/filter-image`) are also pinned to the app's single copy.
-- React version **must** match the renderer bundled inside `react-native` (e.g. RN 0.81.5 bundles renderer 19.1.0, so `react` must be 19.1.0). A mismatch causes an "Incompatible React versions" runtime error.
+- Metro uses the default Expo config: the hoisted pnpm linker keeps one copy of each native module, so no resolver pinning is needed.
+- `react` and `react-dom` **must** match the renderer bundled inside `react-native`. A mismatch causes an "Incompatible React versions" runtime error.
+- `@tamagui/babel-plugin` is a native-only extractor, so `babel.config.js` skips it on web via `api.caller`.
 - The `react-native-reanimated/plugin` Babel plugin must be listed **last** in `babel.config.js` (required by reanimated).
 - The lint script covers all files (`'**/*.{js,ts,tsx,jsx,cjs,mjs}'`), not just `src/` — there is no `src/` directory.
 - Use `React.JSX.Element` return type (not bare `JSX.Element`).

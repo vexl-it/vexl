@@ -5,7 +5,16 @@ const enableSentry = !__DEV__
 
 console.debug(enableSentry ? 'Sentry enabled' : 'Sentry disabled')
 
+// Untyped sentry-cocoa options, forwarded to native as is. Native NSURLSession
+// breadcrumbs and spans would record chat image ids and presigned S3 URLs.
+const disabledNativeIosTracking = {
+  enableNetworkBreadcrumbs: false,
+  enableNetworkTracking: false,
+  enableFileIOTracing: false,
+}
+
 Sentry.init({
+  ...disabledNativeIosTracking,
   dsn: enableSentry
     ? 'https://ce9886ea24e501f0b85a593e91cb6358@o4504456911585280.ingest.sentry.io/4506554312097792'
     : '',

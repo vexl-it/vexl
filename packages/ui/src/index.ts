@@ -31,4 +31,9 @@ export * from './assets/marketplaceLoader'
 export * from './assets/marketplaceMapPins'
 
 // Fonts
-export {vexlFonts} from './assets/fonts'
+export {
+  getVexlFontFaceCss,
+  vexlFontFaces,
+  vexlFonts,
+  type VexlFontFace,
+} from './assets/fonts'

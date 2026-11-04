@@ -80,7 +80,7 @@ describe('Check for inactive club members', () => {
         )
         const membersDb = yield* _(ClubMembersDbService)
         const inactiveAt = new Date(Date.now() - 31 * 24 * 60 * 60 * 1000)
-        const activeAt = new Date()
+        const activeAt = new Date(Date.now() - 24 * 60 * 60 * 1000)
 
         yield* _(
           [

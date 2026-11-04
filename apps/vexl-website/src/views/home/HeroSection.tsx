@@ -6,6 +6,12 @@ import React from 'react'
 import {DownloadCta} from '../../components/DownloadCta'
 import {useLocale} from '../../components/LocaleProvider'
 
+// Positions match the avatar tiles around the phone on the old site
+const heroAvatars = [
+  {src: '/images/hero-avatar-1.webp', left: '7%', top: '33%'},
+  {src: '/images/hero-avatar-2.webp', left: '65%', top: '60%'},
+] as const
+
 export function HeroSection(): React.JSX.Element {
   const {t} = useLocale()
   return (
@@ -46,6 +52,26 @@ export function HeroSection(): React.JSX.Element {
           sizes="(min-width: 1024px) 400px, 70vw"
           style={{width: 'auto', height: '115%', objectFit: 'contain'}}
         />
+        {heroAvatars.map((avatar) => (
+          <YStack
+            key={avatar.src}
+            aria-hidden
+            position="absolute"
+            left={avatar.left}
+            top={avatar.top}
+            width="24%"
+            maxWidth={140}
+          >
+            <Image
+              src={avatar.src}
+              alt=""
+              width={277}
+              height={277}
+              sizes="140px"
+              style={{width: '100%', height: 'auto'}}
+            />
+          </YStack>
+        ))}
       </XStack>
     </PageSection>
   )

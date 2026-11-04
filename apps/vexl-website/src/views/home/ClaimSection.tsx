@@ -4,6 +4,7 @@ import {PageSection, Typography, YStack} from '@vexl-next/ui'
 import Image from 'next/image'
 import React from 'react'
 import {useLocale} from '../../components/LocaleProvider'
+import {ScrollRevealText} from '../../components/ScrollRevealText'
 
 export function ClaimSection(): React.JSX.Element {
   const {t} = useLocale()
@@ -24,9 +25,7 @@ export function ClaimSection(): React.JSX.Element {
           {t.home.claim.eyebrow}
         </Typography>
       </YStack>
-      <Typography tag="h2" variant="display" color="$foregroundSecondary">
-        {t.home.claim.title}
-      </Typography>
+      <ScrollRevealText>{t.home.claim.title}</ScrollRevealText>
     </PageSection>
   )
 }

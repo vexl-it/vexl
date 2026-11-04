@@ -16,6 +16,7 @@ import Image from 'next/image'
 import React from 'react'
 import {useTheme} from 'tamagui'
 import {useLocale} from '../../components/LocaleProvider'
+import {FallingOfferCards} from './FallingOfferCards'
 
 const featureIcons = {
   friends: PeopleUsers,
@@ -66,7 +67,7 @@ export function FeaturesSection(): React.JSX.Element {
 
   return (
     <PageSection>
-      <OfferCardsStrip />
+      <FallingOfferCards fallback={<OfferCardsStrip />} />
       <YStack
         gap="$5"
         $md={{flexDirection: 'row', flexWrap: 'wrap'}}

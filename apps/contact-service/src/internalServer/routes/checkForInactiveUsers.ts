@@ -16,7 +16,7 @@ export const checkForInactiveUsers = Effect.gen(function* (_) {
   )
   const lastActiveBefore = dayjs()
     .startOf('day')
-    .subtract(clubMemberExpirationAfterDaysOfInactivity)
+    .subtract(clubMemberExpirationAfterDaysOfInactivity, 'days')
 
   const deletedMembers = yield* _(
     ClubMembersDbService,

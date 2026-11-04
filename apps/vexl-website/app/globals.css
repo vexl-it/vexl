@@ -52,6 +52,16 @@ a:focus-visible {
   }
 }
 
+/* Below 375px long words like Czech "Obchodujte" don't fit the big
+   headings. :root matches the specificity of Tamagui's atomic classes. */
+@media (max-width: 374px) {
+  :root h1.font_heading,
+  :root h2.font_heading {
+    font-size: 10vw;
+    line-height: 1.15;
+  }
+}
+
 /* Read by screen readers, not shown */
 .vexl-visually-hidden {
   position: absolute;

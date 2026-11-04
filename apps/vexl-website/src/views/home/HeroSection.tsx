@@ -77,9 +77,20 @@ function MarketplaceMock(): React.JSX.Element {
                 })}
                 // The walkthrough's script is about the first offer only
                 onPress={(event) => {
+                  const opensElsewhere =
+                    event.button !== 0 ||
+                    event.metaKey ||
+                    event.ctrlKey ||
+                    event.shiftKey ||
+                    event.altKey
+                  if (opensElsewhere) return
                   // The walkthrough scrolls once its new step has rendered
                   event.preventDefault()
-                  window.history.pushState(null, '', event.currentTarget.href)
+                  window.history.replaceState(
+                    null,
+                    '',
+                    event.currentTarget.href
+                  )
                   window.dispatchEvent(
                     new CustomEvent(OPEN_DEMO_EVENT, {
                       detail:

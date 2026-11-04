@@ -18,9 +18,9 @@ export function BottomCtaSection(): React.JSX.Element {
         borderRadius="$8"
         backgroundColor="$accentYellowPrimary"
         $md={{padding: '$12'}}
-        $lg={{flexDirection: 'row', alignItems: 'center'}}
+        $xl={{flexDirection: 'row', alignItems: 'center'}}
       >
-        <YStack flex={1} gap="$5" $lg={{flexBasis: 0}}>
+        <YStack flex={1} gap="$5" $xl={{flexBasis: 0}}>
           <Typography tag="h2" variant="display" color="$black100">
             {t.home.cta.title}
           </Typography>
@@ -28,17 +28,17 @@ export function BottomCtaSection(): React.JSX.Element {
             {t.home.cta.text}
           </Typography>
         </YStack>
-        <YStack gap="$7" $lg={{alignItems: 'flex-end'}}>
+        <YStack gap="$7" $xl={{alignItems: 'flex-end'}}>
           <XStack aria-hidden>
             {crowd.map((index) => (
               <YStack
                 key={index}
-                marginLeft={index === 0 ? 0 : -16}
+                marginLeft={index === 0 ? 0 : -24}
                 borderRadius="$11"
                 borderWidth={3}
                 borderColor="$accentYellowPrimary"
               >
-                <DemoAvatar index={index} size={64} />
+                <DemoAvatar index={index} size={56} />
               </YStack>
             ))}
           </XStack>

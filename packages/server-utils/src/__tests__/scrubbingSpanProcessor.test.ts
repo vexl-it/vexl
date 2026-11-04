@@ -11,13 +11,16 @@ import {
   InMemorySpanExporter,
   SimpleSpanProcessor,
 } from '@opentelemetry/sdk-trace-base'
-import {Effect, Layer} from 'effect'
+import {Array, Effect, Layer, pipe, Record, String} from 'effect'
 import {scrubbingSpanProcessor} from '../scrubbingSpanProcessor'
 
 const exporter = new InMemorySpanExporter()
 
 const TestServerLive = HttpRouter.empty.pipe(
-  HttpRouter.get('/offers', HttpServerResponse.empty()),
+  HttpRouter.get(
+    '/offers',
+    HttpServerResponse.empty({headers: {'x-session-secret': 'secret'}})
+  ),
   HttpServer.serve(),
   Layer.provideMerge(NodeHttpServer.layerTest)
 )
@@ -52,16 +55,19 @@ describe('scrubbingSpanProcessor', () => {
 
     expect(spans).toHaveLength(2)
 
-    spans.forEach((span) => {
-      const attributeNames = Object.keys(span.attributes)
-      const headerValues = attributeNames
-        .filter((name) => name.startsWith('http.request.header.'))
-        .map((name) => span.attributes[name])
+    Array.forEach(spans, (span) => {
+      const attributeNames = Record.keys(span.attributes)
+      const headerAttributes = pipe(
+        span.attributes,
+        Record.filter((_, name) => String.includes('.header.')(name))
+      )
 
       expect(attributeNames).not.toContain('url.full')
       expect(attributeNames).not.toContain('url.query')
       expect(attributeNames).toContain('url.path')
-      expect(headerValues).toEqual(['42'])
+      expect(headerAttributes).toEqual({
+        'http.request.header.client-version': '42',
+      })
     })
   })
 })

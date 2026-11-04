@@ -14,7 +14,8 @@ import {
   YStack,
 } from '@vexl-next/ui'
 import {Array, pipe} from 'effect'
-import React, {useRef, useState} from 'react'
+import React, {useEffect, useRef, useState} from 'react'
+import {focusFirstControl} from '../../../components/focusFirstControl'
 import {useLocale} from '../../../components/LocaleProvider'
 import {NativeButton} from '../../../components/NativeButton'
 import {DemoAvatar, RevealedAvatar} from './DemoAvatar'
@@ -180,31 +181,35 @@ function ChatBody({
   )
 }
 
-type RevealChoice = 'undecided' | 'declined'
+export type RevealChoice = 'undecided' | 'revealed' | 'declined'
+
+/** Moves keyboard focus here when the control that had it disappeared. */
+function useTakeOrphanedFocus(): React.RefObject<HTMLDivElement | null> {
+  const ref = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (document.activeElement === document.body) focusFirstControl(ref.current)
+  }, [])
+  return ref
+}
 
 function RevealRequestCard({
-  onReveal,
+  onChoose,
 }: {
-  readonly onReveal: () => void
+  readonly onChoose: (choice: RevealChoice) => void
 }): React.JSX.Element {
   const {t} = useLocale()
   const screens = t.home.trade.screens
-  const [choice, setChoice] = useState<RevealChoice>('undecided')
-
-  if (choice === 'declined')
-    return (
-      <YStack className="vexl-enter">
-        <BotMessageCard
-          senderLabel={screens.vexlbot}
-          title={screens.declined}
-          description={screens.nothingRevealed}
-          muted
-        />
-      </YStack>
-    )
+  const focusRef = useTakeOrphanedFocus()
 
   return (
-    <YStack className="vexl-enter">
+    <YStack
+      ref={focusRef}
+      role="group"
+      tabIndex={-1}
+      aria-label={screens.theyWant}
+      outlineStyle="none"
+      className="vexl-enter"
+    >
       <BotMessageCard
         senderLabel={screens.vexlbot}
         statusLabel={screens.reactionRequired}
@@ -217,12 +222,18 @@ function RevealRequestCard({
             size="medium"
             variant="secondary"
             onPress={() => {
-              setChoice('declined')
+              onChoose('declined')
             }}
           >
             {screens.noThanks}
           </Button>
-          <Button flex={1} size="medium" onPress={onReveal}>
+          <Button
+            flex={1}
+            size="medium"
+            onPress={() => {
+              onChoose('revealed')
+            }}
+          >
             {screens.agree}
           </Button>
         </XStack>
@@ -231,10 +242,42 @@ function RevealRequestCard({
   )
 }
 
-export function ChatScreen({
-  onReveal,
+/** The conversation so far, shared by the chat and reveal screens. */
+function ChatHistory({
+  replied,
 }: {
-  readonly onReveal: () => void
+  readonly replied: boolean
+}): React.JSX.Element {
+  const {t} = useLocale()
+  const screens = t.home.trade.screens
+  return (
+    <>
+      <ChatBubble
+        text={screens.firstMessage}
+        isMine
+        header={{label: screens.requestHeader}}
+      />
+      <BotMessageCard
+        senderLabel={screens.vexlbot}
+        statusLabel={screens.accepted}
+        statusVariant="accepted"
+        title={screens.requestAccepted}
+      />
+      <ChatBubble text={screens.theirReply} isMine={false} />
+      {replied ? (
+        <>
+          <Message text={screens.quickReply} isMine />
+          <Message text={screens.theirFollowUp} isMine={false} />
+        </>
+      ) : null}
+    </>
+  )
+}
+
+export function ChatScreen({
+  onChoose,
+}: {
+  readonly onChoose: (choice: RevealChoice) => void
 }): React.JSX.Element {
   const {t} = useLocale()
   const screens = t.home.trade.screens
@@ -244,21 +287,8 @@ export function ChatScreen({
     <YStack flex={1}>
       <ChatHeader revealed={false} />
       <ChatBody>
-        <Message text={screens.firstMessage} isMine />
-        <BotMessageCard
-          senderLabel={screens.vexlbot}
-          statusLabel={screens.accepted}
-          statusVariant="accepted"
-          title={screens.requestAccepted}
-        />
-        <Message text={screens.theirReply} isMine={false} />
-        {replied ? (
-          <>
-            <Message text={screens.quickReply} isMine />
-            <Message text={screens.theirFollowUp} isMine={false} />
-            <RevealRequestCard onReveal={onReveal} />
-          </>
-        ) : null}
+        <ChatHistory replied={replied} />
+        {replied ? <RevealRequestCard onChoose={onChoose} /> : null}
       </ChatBody>
       {replied ? null : (
         <YStack padding="$3">
@@ -276,43 +306,78 @@ export function ChatScreen({
   )
 }
 
-export function RevealScreen(): React.JSX.Element {
+function RevealedCard(): React.JSX.Element {
+  const {t} = useLocale()
+  const screens = t.home.trade.screens
+  return (
+    <ExchangeRevealCard
+      title={screens.revealed}
+      description={screens.bothRevealed}
+      leftSide={{
+        avatar: (
+          <RevealedAvatar
+            name={screens.you}
+            size={64}
+            backgroundColor="$greenBackground"
+          />
+        ),
+        name: screens.you,
+      }}
+      rightSide={{
+        avatar: (
+          <RevealedAvatar
+            name={screens.theirName}
+            size={64}
+            backgroundColor="$pinkBackground"
+          />
+        ),
+        name: screens.theirName,
+      }}
+    />
+  )
+}
+
+export function RevealScreen({
+  choice,
+  onChoose,
+}: {
+  readonly choice: RevealChoice
+  readonly onChoose: (choice: RevealChoice) => void
+}): React.JSX.Element {
   const {t} = useLocale()
   const screens = t.home.trade.screens
 
   return (
     <YStack flex={1}>
-      <ChatHeader revealed />
+      <ChatHeader revealed={choice === 'revealed'} />
       <ChatBody>
-        <ChatBubble text={screens.quickReply} isMine />
-        <ChatBubble text={screens.theirFollowUp} isMine={false} />
-        <YStack className="vexl-enter">
-          <ExchangeRevealCard
-            title={screens.revealed}
-            description={screens.bothRevealed}
-            leftSide={{
-              avatar: (
-                <RevealedAvatar
-                  name={screens.you}
-                  size={64}
-                  backgroundColor="$greenBackground"
+        <ChatHistory replied />
+        {choice === 'undecided' ? (
+          <RevealRequestCard onChoose={onChoose} />
+        ) : (
+          <>
+            <YStack className="vexl-enter">
+              {choice === 'revealed' ? (
+                <RevealedCard />
+              ) : (
+                <BotMessageCard
+                  senderLabel={screens.vexlbot}
+                  title={screens.declined}
+                  description={screens.nothingRevealed}
+                  muted
                 />
-              ),
-              name: screens.you,
-            }}
-            rightSide={{
-              avatar: (
-                <RevealedAvatar
-                  name={screens.theirName}
-                  size={64}
-                  backgroundColor="$pinkBackground"
-                />
-              ),
-              name: screens.theirName,
-            }}
-          />
-        </YStack>
-        <Message text={screens.lastMessage} isMine={false} />
+              )}
+            </YStack>
+            <Message
+              text={
+                choice === 'revealed'
+                  ? screens.lastMessage
+                  : screens.anonymousLastMessage
+              }
+              isMine={false}
+            />
+          </>
+        )}
       </ChatBody>
     </YStack>
   )

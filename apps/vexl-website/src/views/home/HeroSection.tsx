@@ -25,7 +25,7 @@ type Side = 'buy' | 'sell'
 const offerSideFor = {buy: 'sell', sell: 'buy'} as const
 
 function MarketplaceMock(): React.JSX.Element {
-  const {t} = useLocale()
+  const {t, path} = useLocale()
   const mock = t.home.mock
   const [sides, setSides] = useState<ReadonlySet<Side>>(new Set(['buy']))
   const visibleOffers = pipe(
@@ -64,9 +64,15 @@ function MarketplaceMock(): React.JSX.Element {
         <ScrollView flex={1} contentContainerStyle={{flexGrow: 1}}>
           <YStack gap="$3" paddingHorizontal="$3" paddingBottom="$3">
             {visibleOffers.map((offer, i) => (
-              <YStack key={offer.id} className="vexl-enter">
-                <DemoOfferCard offer={offer} avatar={i % 2 === 0 ? 0 : 2} />
-              </YStack>
+              <SiteLink key={offer.id} href={`${path('/')}#how-it-works`}>
+                <YStack
+                  role="none"
+                  className="vexl-enter"
+                  pressStyle={{opacity: 0.7}}
+                >
+                  <DemoOfferCard offer={offer} avatar={i % 2 === 0 ? 0 : 2} />
+                </YStack>
+              </SiteLink>
             ))}
           </YStack>
         </ScrollView>

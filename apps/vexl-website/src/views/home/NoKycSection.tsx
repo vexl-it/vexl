@@ -23,19 +23,15 @@ import {useLocale} from '../../components/LocaleProvider'
 
 const STRIKE_STAGGER_MS = 140
 
+// Vexl asks for a phone number too, so that one isn't struck through
 const exchangeAsks = [
-  {key: 'name', icon: UserProfile},
-  {key: 'phone', icon: PhoneCall},
-  {key: 'selfie', icon: Camera},
-  {key: 'card', icon: EuroCurrency},
-  {key: 'address', icon: PinGeolocation},
-  {key: 'email', icon: Send},
-  {key: 'bank', icon: MoneyBankNotes},
-] as const
-
-const vexlAsks = [
-  {key: 'nickname', icon: UserProfile},
-  {key: 'phone', icon: PhoneCall},
+  {key: 'name', icon: UserProfile, vexlAsksToo: false},
+  {key: 'phone', icon: PhoneCall, vexlAsksToo: true},
+  {key: 'selfie', icon: Camera, vexlAsksToo: false},
+  {key: 'card', icon: EuroCurrency, vexlAsksToo: false},
+  {key: 'address', icon: PinGeolocation, vexlAsksToo: false},
+  {key: 'email', icon: Send, vexlAsksToo: false},
+  {key: 'bank', icon: MoneyBankNotes, vexlAsksToo: false},
 ] as const
 
 /** True once the element has scrolled into view. */
@@ -115,7 +111,7 @@ export function NoKycSection(): React.JSX.Element {
             {copy.exchangeTitle}
           </Typography>
           <YStack tag="ul" gap="$4" margin={0} padding={0}>
-            {exchangeAsks.map(({key, icon}, i) => (
+            {exchangeAsks.map(({key, icon, vexlAsksToo}, i) => (
               <YStack key={key} position="relative" alignSelf="flex-start">
                 <AskRow
                   icon={icon}
@@ -123,17 +119,19 @@ export function NoKycSection(): React.JSX.Element {
                   iconColor={theme.foregroundTertiary.get()}
                   textColor="$foregroundSecondary"
                 />
-                <YStack
-                  aria-hidden
-                  className="vexl-strike-line"
-                  position="absolute"
-                  left={0}
-                  right={0}
-                  top="50%"
-                  height={2}
-                  backgroundColor="$redLight"
-                  style={{transitionDelay: `${i * STRIKE_STAGGER_MS}ms`}}
-                />
+                {vexlAsksToo ? null : (
+                  <YStack
+                    aria-hidden
+                    className="vexl-strike-line"
+                    position="absolute"
+                    left={0}
+                    right={0}
+                    top="50%"
+                    height={2}
+                    backgroundColor="$redLight"
+                    style={{transitionDelay: `${i * STRIKE_STAGGER_MS}ms`}}
+                  />
+                )}
               </YStack>
             ))}
           </YStack>
@@ -149,16 +147,13 @@ export function NoKycSection(): React.JSX.Element {
           <Typography variant="paragraphSmallBold" color="$black100">
             {copy.vexlTitle}
           </Typography>
-          <YStack tag="ul" gap="$4" margin={0} padding={0}>
-            {vexlAsks.map(({key, icon}) => (
-              <AskRow
-                key={key}
-                icon={icon}
-                label={copy.vexlAsks[key]}
-                iconColor={tokens.color.black100.val}
-                textColor="$black100"
-              />
-            ))}
+          <YStack tag="ul" margin={0} padding={0}>
+            <AskRow
+              icon={PhoneCall}
+              label={copy.vexlAsk}
+              iconColor={tokens.color.black100.val}
+              textColor="$black100"
+            />
           </YStack>
           <XStack flex={1} alignItems="flex-end" gap="$4">
             <YStack flex={1}>

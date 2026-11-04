@@ -176,6 +176,7 @@ export const en = {
         friends: ['Anna', 'Marek'],
         sendRequest: 'Send request',
         requestAccepted: 'Your request was accepted.',
+        requestHeader: 'Your request',
         firstMessage: 'Hi! Is your offer still on? I’d like to buy €300 worth.',
         theirReply: 'It is. I can do Thursday at a café near the main station.',
         quickReply: 'Thursday works for me.',
@@ -190,15 +191,17 @@ export const en = {
         declined: 'You declined to reveal',
         nothingRevealed: 'No new details were revealed. You can keep chatting.',
         revealed: 'Identities revealed',
-        bothRevealed: 'You both revealed: name',
+        bothRevealed: 'You both revealed your names.',
         you: 'You',
         theirName: 'Jana',
+        anonymousLastMessage:
+          'No problem, names can wait. See you Thursday. Cash first, then I send the bitcoin.',
         lastMessage: 'See you Thursday. Cash first, then I send the bitcoin.',
       },
     },
     noKyc: {
       title: 'No ID. No selfie. No bank account.',
-      text: 'Exchanges usually want all of this before you can buy. Vexl asks for a nickname and a phone number.',
+      text: 'Exchanges usually want all of this before you can buy. Vexl asks for a phone number, and it stays private unless you choose to share it.',
       exchangeTitle: 'A typical exchange asks for',
       exchangeAsks: {
         name: 'Full name',
@@ -210,7 +213,7 @@ export const en = {
         bank: 'Bank account',
       },
       vexlTitle: 'Vexl asks for',
-      vexlAsks: {nickname: 'A nickname', phone: 'A phone number'},
+      vexlAsk: 'A phone number',
       message: "That's it. You're buying bitcoin, not an island.",
     },
     community: {

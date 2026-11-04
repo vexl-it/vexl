@@ -6,12 +6,14 @@ import {useLocale} from '../../components/LocaleProvider'
 import {NativeButton} from '../../components/NativeButton'
 import {PhoneFrame} from '../../components/PhoneFrame'
 import {SiteLink} from '../../components/SiteLink'
+import {focusFirstControl} from '../../components/focusFirstControl'
 import {formatMessage} from '../../i18n/locales'
 import {
   ChatScreen,
   FriendsScreen,
   OfferScreen,
   RevealScreen,
+  type RevealChoice,
 } from './mock/TradeScreens'
 
 const steps = ['offer', 'friends', 'chat', 'reveal'] as const
@@ -98,6 +100,7 @@ export function TradeSection(): React.JSX.Element {
   const [step, setStep] = useState<Step>('offer')
   // Bumped on restart so the screens drop their own state
   const [run, setRun] = useState(0)
+  const [revealChoice, setRevealChoice] = useState<RevealChoice>('undecided')
   const screenRef = useRef<HTMLDivElement>(null)
   const shownStep = useRef(step)
   const stepIndex = steps.indexOf(step)
@@ -106,13 +109,15 @@ export function TradeSection(): React.JSX.Element {
   useEffect(() => {
     if (shownStep.current === step) return
     shownStep.current = step
-    if (document.activeElement === document.body) screenRef.current?.focus()
+    if (document.activeElement === document.body)
+      focusFirstControl(screenRef.current)
   }, [step])
 
   const nextStep = steps[stepIndex + 1]
 
   const restart = (): void => {
     setRun((value) => value + 1)
+    setRevealChoice('undecided')
     setStep('offer')
   }
 
@@ -136,12 +141,13 @@ export function TradeSection(): React.JSX.Element {
     ),
     chat: (
       <ChatScreen
-        onReveal={() => {
+        onChoose={(choice) => {
+          setRevealChoice(choice)
           setStep('reveal')
         }}
       />
     ),
-    reveal: <RevealScreen />,
+    reveal: <RevealScreen choice={revealChoice} onChoose={setRevealChoice} />,
   }[step]
 
   const stepTitle = copy.steps[step].title
@@ -180,6 +186,7 @@ export function TradeSection(): React.JSX.Element {
         <XStack
           alignItems="center"
           justifyContent="space-between"
+          flexWrap="wrap"
           gap="$5"
           paddingHorizontal="$5"
         >
@@ -236,15 +243,17 @@ export function TradeSection(): React.JSX.Element {
       <XStack
         flex={1}
         justifyContent="center"
-        paddingVertical="$7"
+        paddingVertical="$5"
         borderRadius="$8"
         backgroundColor="$backgroundSecondary"
+        $md={{paddingVertical: '$7'}}
         $lg={{flexBasis: 0}}
       >
         <PhoneFrame label={t.home.mock.label}>
           <YStack
             key={`${step}-${run}`}
             ref={screenRef}
+            role="group"
             tabIndex={-1}
             aria-label={stepTitle}
             flex={1}

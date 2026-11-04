@@ -16,7 +16,7 @@ const fontFaceCss = getVexlFontFaceCss(({source}) => String(source))
 function useKeyboardPressForRoleButtons(): void {
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent): void => {
-      if (event.key !== 'Enter' && event.key !== ' ') return
+      if (event.repeat || (event.key !== 'Enter' && event.key !== ' ')) return
       const target = event.target
       if (
         !(target instanceof HTMLElement) ||

@@ -177,6 +177,7 @@ export const cs: Messages = {
         friends: ['Anna', 'Marek'],
         sendRequest: 'Odeslat žádost',
         requestAccepted: 'Vaše žádost byla přijata.',
+        requestHeader: 'Vaše žádost',
         firstMessage:
           'Ahoj! Platí ještě nabídka? Mám zájem o bitcoin za 7 000 Kč.',
         theirReply: 'Platí. Můžu ve čtvrtek v kavárně u hlavního nádraží.',
@@ -192,15 +193,17 @@ export const cs: Messages = {
         declined: 'Odhalení jste odmítli',
         nothingRevealed: 'Žádné nové údaje se neodhalily. Můžete dál chatovat.',
         revealed: 'Identity odhaleny',
-        bothRevealed: 'Oba jste odhalili: jméno',
+        bothRevealed: 'Oba jste odhalili svá jména.',
         you: 'Vy',
         theirName: 'Jana',
+        anonymousLastMessage:
+          'V pohodě, jména počkají. Tak ve čtvrtek. Nejdřív hotovost, pak pošlu bitcoin.',
         lastMessage: 'Tak ve čtvrtek. Nejdřív hotovost, pak pošlu bitcoin.',
       },
     },
     noKyc: {
       title: 'Žádný doklad. Žádné selfie. Žádný bankovní účet.',
-      text: 'Směnárny tohle všechno obvykle chtějí, než vůbec můžete nakoupit. Vexl chce přezdívku a telefonní číslo.',
+      text: 'Směnárny tohle všechno obvykle chtějí, než vůbec můžete nakoupit. Vexl chce telefonní číslo a to zůstane soukromé, dokud se nerozhodnete ho sdílet.',
       exchangeTitle: 'Běžná směnárna chce',
       exchangeAsks: {
         name: 'Celé jméno',
@@ -212,7 +215,7 @@ export const cs: Messages = {
         bank: 'Bankovní účet',
       },
       vexlTitle: 'Vexl chce',
-      vexlAsks: {nickname: 'Přezdívku', phone: 'Telefonní číslo'},
+      vexlAsk: 'Telefonní číslo',
       message: 'To je vše. Kupujete bitcoin, ne ostrov.',
     },
     community: {

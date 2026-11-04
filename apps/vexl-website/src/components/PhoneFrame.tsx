@@ -6,6 +6,8 @@ import {Theme} from 'tamagui'
 
 const SCREEN_WIDTH = 320
 const SCREEN_HEIGHT = 620
+// Shorter on phones, so the step text above stays in view while tapping
+const SMALL_SCREEN_HEIGHT = 540
 
 /** App-sized screen in a phone bezel, always in the app's dark theme. */
 export function PhoneFrame({
@@ -41,7 +43,8 @@ export function PhoneFrame({
         <Theme name="dark">
           <YStack
             width={SCREEN_WIDTH}
-            height={SCREEN_HEIGHT}
+            height={SMALL_SCREEN_HEIGHT}
+            $lg={{height: SCREEN_HEIGHT}}
             borderRadius="$9"
             overflow="hidden"
             backgroundColor="$backgroundPrimary"

@@ -36,6 +36,14 @@ export const getClubInfo = HttpApiBuilder.handler(
             vexlNotificationToken: req.payload.vexlNotificationToken.value,
           })
         )
+      } else {
+        yield* _(
+          membersDb.updateLastRefreshedAt({
+            id: member.clubId,
+            publicKey: member.publicKey,
+            lastRefreshedAt: new Date(),
+          })
+        )
       }
 
       const club = yield* _(

@@ -24,7 +24,7 @@ html {
 }
 
 .vexl-pulse {
-  animation: vexl-pulse 1800ms ease-in-out infinite;
+  animation: vexl-pulse 1800ms ease-in-out 3;
 }
 
 /* Exchange asks get struck through one by one once the list scrolls in */

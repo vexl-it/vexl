@@ -147,24 +147,27 @@ export function NoKycSection(): React.JSX.Element {
           <Typography variant="paragraphSmallBold" color="$black100">
             {copy.vexlTitle}
           </Typography>
-          <YStack tag="ul" margin={0} padding={0}>
-            <AskRow
-              icon={PhoneCall}
-              label={copy.vexlAsk}
-              iconColor={tokens.color.black100.val}
-              textColor="$black100"
-            />
-          </YStack>
-          <XStack flex={1} alignItems="flex-end" gap="$4">
-            <YStack flex={1}>
+          <XStack flex={1} alignItems="center" gap="$5">
+            <YStack flex={1} gap="$5">
+              <XStack alignItems="center" gap="$3">
+                <YStack flexShrink={0}>
+                  <PhoneCall size={32} color={tokens.color.black100.val} />
+                </YStack>
+                <Typography tag="p" variant="heading2" color="$black100">
+                  {copy.vexlAsk}
+                </Typography>
+              </XStack>
               <ChatBubble text={copy.message} isMine={false} />
             </YStack>
-            <Image
-              src="/images/kyc-avatar.webp"
-              alt=""
-              width={90}
-              height={120}
-            />
+            <YStack width={72} flexShrink={0} $lg={{width: 120}}>
+              <Image
+                src="/images/kyc-avatar.webp"
+                alt=""
+                width={120}
+                height={160}
+                style={{width: '100%', height: 'auto'}}
+              />
+            </YStack>
           </XStack>
         </YStack>
       </YStack>

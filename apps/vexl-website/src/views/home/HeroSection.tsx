@@ -18,6 +18,7 @@ import {useLocale} from '../../components/LocaleProvider'
 import {PhoneFrame} from '../../components/PhoneFrame'
 import {SiteLink} from '../../components/SiteLink'
 import {DemoOfferCard} from './mock/DemoOfferCard'
+import {OPEN_DEMO_OFFER_EVENT} from './TradeSection'
 
 type Side = 'buy' | 'sell'
 
@@ -64,7 +65,18 @@ function MarketplaceMock(): React.JSX.Element {
         <ScrollView flex={1} contentContainerStyle={{flexGrow: 1}}>
           <YStack gap="$3" paddingHorizontal="$3" paddingBottom="$3">
             {visibleOffers.map((offer, i) => (
-              <SiteLink key={offer.id} href={`${path('/')}#how-it-works`}>
+              <SiteLink
+                key={offer.id}
+                href={`${path('/')}#how-it-works`}
+                // The walkthrough's script is about the first offer only
+                onPress={
+                  offer.id === mock.offers[0]?.id
+                    ? () => {
+                        window.dispatchEvent(new Event(OPEN_DEMO_OFFER_EVENT))
+                      }
+                    : undefined
+                }
+              >
                 <YStack
                   role="none"
                   className="vexl-enter"

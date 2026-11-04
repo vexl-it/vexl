@@ -98,8 +98,10 @@ export function FriendsScreen({
           {screens.connection}
         </Typography>
         <CommonFriends
-          label={screens.commonFriends}
-          trustedLabel={screens.trustedLabel}
+          label={featured?.commonFriends ?? ''}
+          trustedLabel={
+            featured && 'trusted' in featured ? featured.trusted : undefined
+          }
           friends={pipe(
             screens.friends,
             Array.map((name, i) => ({id: name, name, trusted: i === 0}))
@@ -183,12 +185,17 @@ function ChatBody({
 
 export type RevealChoice = 'undecided' | 'revealed' | 'declined'
 
-/** Moves keyboard focus here when the control that had it disappeared. */
-function useTakeOrphanedFocus(): React.RefObject<HTMLDivElement | null> {
+/**
+ * Moves keyboard focus here when the control that had it disappeared, on
+ * mount and whenever `shownFor` changes.
+ */
+function useTakeOrphanedFocus(
+  shownFor?: string
+): React.RefObject<HTMLDivElement | null> {
   const ref = useRef<HTMLDivElement>(null)
   useEffect(() => {
     if (document.activeElement === document.body) focusFirstControl(ref.current)
-  }, [])
+  }, [shownFor])
   return ref
 }
 
@@ -346,6 +353,7 @@ export function RevealScreen({
 }): React.JSX.Element {
   const {t} = useLocale()
   const screens = t.home.trade.screens
+  const outcomeFocusRef = useTakeOrphanedFocus(choice)
 
   return (
     <YStack flex={1}>
@@ -356,7 +364,16 @@ export function RevealScreen({
           <RevealRequestCard onChoose={onChoose} />
         ) : (
           <>
-            <YStack className="vexl-enter">
+            <YStack
+              ref={outcomeFocusRef}
+              role="group"
+              tabIndex={-1}
+              aria-label={
+                choice === 'revealed' ? screens.revealed : screens.declined
+              }
+              outlineStyle="none"
+              className="vexl-enter"
+            >
               {choice === 'revealed' ? (
                 <RevealedCard />
               ) : (

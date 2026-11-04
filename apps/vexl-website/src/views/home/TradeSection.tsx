@@ -17,6 +17,9 @@ import {
 } from './mock/TradeScreens'
 
 const steps = ['offer', 'friends', 'chat', 'reveal'] as const
+
+/** Sent by the hero, so tapping an offer there opens it in the walkthrough. */
+export const OPEN_DEMO_OFFER_EVENT = 'vexl:open-demo-offer'
 type Step = (typeof steps)[number]
 
 function StepNumber({
@@ -113,7 +116,24 @@ export function TradeSection(): React.JSX.Element {
       focusFirstControl(screenRef.current)
   }, [step])
 
+  useEffect(() => {
+    const openOffer = (): void => {
+      setRevealChoice('undecided')
+      setStep('friends')
+    }
+    window.addEventListener(OPEN_DEMO_OFFER_EVENT, openOffer)
+    return () => {
+      window.removeEventListener(OPEN_DEMO_OFFER_EVENT, openOffer)
+    }
+  }, [])
+
   const nextStep = steps[stepIndex + 1]
+
+  // A decision only exists on the reveal step; leaving it starts the chat over
+  const goTo = (target: Step): void => {
+    if (target !== 'reveal') setRevealChoice('undecided')
+    setStep(target)
+  }
 
   const restart = (): void => {
     setRun((value) => value + 1)
@@ -132,7 +152,7 @@ export function TradeSection(): React.JSX.Element {
     friends: (
       <FriendsScreen
         onBack={() => {
-          setStep('offer')
+          goTo('offer')
         }}
         onRequest={() => {
           setStep('chat')
@@ -151,11 +171,73 @@ export function TradeSection(): React.JSX.Element {
   }[step]
 
   const stepTitle = copy.steps[step].title
+  const outcome =
+    step === 'reveal' && revealChoice !== 'undecided'
+      ? copy.screens[revealChoice === 'revealed' ? 'revealed' : 'declined']
+      : undefined
+
+  // Desktop shows these under the steps, phones under the mock
+  const controls = (
+    <XStack
+      alignItems="center"
+      justifyContent="space-between"
+      flexWrap="wrap"
+      gap="$5"
+      paddingHorizontal="$5"
+    >
+      <XStack gap="$2" $lg={{display: 'none'}}>
+        {steps.map((key, i) => (
+          <NativeButton
+            key={key}
+            label={copy.steps[key].title}
+            current={key === step ? 'step' : undefined}
+            onPress={() => {
+              goTo(key)
+            }}
+            borderRadius="$11"
+          >
+            <StepNumber number={i + 1} active={key === step} />
+          </NativeButton>
+        ))}
+      </XStack>
+      <Typography
+        display="none"
+        $lg={{display: 'flex'}}
+        variant="description"
+        color="$foregroundTertiary"
+      >
+        {formatMessage(copy.stepOf, {
+          step: stepIndex + 1,
+          total: steps.length,
+        })}
+      </Typography>
+      {/* One button stays mounted here, so keyboard focus survives the last step */}
+      <XStack gap="$3">
+        <Button
+          size="medium"
+          variant="secondary"
+          onPress={() => {
+            if (nextStep) goTo(nextStep)
+            else restart()
+          }}
+        >
+          {nextStep ? copy.next : copy.restart}
+        </Button>
+        {nextStep ? null : (
+          <SiteLink href={path('/download')}>
+            <Button role="none" size="medium">
+              {t.downloadVexl}
+            </Button>
+          </SiteLink>
+        )}
+      </XStack>
+    </XStack>
+  )
 
   return (
     <PageSection
       id="how-it-works"
-      $lg={{flexDirection: 'row', alignItems: 'center', gap: '$9'}}
+      $lg={{flexDirection: 'row', alignItems: 'flex-start', gap: '$9'}}
     >
       <YStack flex={1} gap="$7" $lg={{flexBasis: 0}}>
         <YStack gap="$4">
@@ -178,67 +260,14 @@ export function TradeSection(): React.JSX.Element {
               text={copy.steps[key].text}
               active={key === step}
               onPress={() => {
-                setStep(key)
+                goTo(key)
               }}
             />
           ))}
         </YStack>
-        <XStack
-          alignItems="center"
-          justifyContent="space-between"
-          flexWrap="wrap"
-          gap="$5"
-          paddingHorizontal="$5"
-        >
-          <XStack gap="$2" $lg={{display: 'none'}}>
-            {steps.map((key, i) => (
-              <NativeButton
-                key={key}
-                label={copy.steps[key].title}
-                current={key === step ? 'step' : undefined}
-                onPress={() => {
-                  setStep(key)
-                }}
-                borderRadius="$11"
-              >
-                <StepNumber number={i + 1} active={key === step} />
-              </NativeButton>
-            ))}
-          </XStack>
-          <Typography
-            display="none"
-            $lg={{display: 'flex'}}
-            variant="description"
-            color="$foregroundTertiary"
-          >
-            {formatMessage(copy.stepOf, {
-              step: stepIndex + 1,
-              total: steps.length,
-            })}
-          </Typography>
-          {nextStep ? (
-            <Button
-              size="medium"
-              variant="secondary"
-              onPress={() => {
-                setStep(nextStep)
-              }}
-            >
-              {copy.next}
-            </Button>
-          ) : (
-            <XStack gap="$3">
-              <Button size="medium" variant="secondary" onPress={restart}>
-                {copy.restart}
-              </Button>
-              <SiteLink href={path('/download')}>
-                <Button role="none" size="medium">
-                  {t.downloadVexl}
-                </Button>
-              </SiteLink>
-            </XStack>
-          )}
-        </XStack>
+        <YStack display="none" $lg={{display: 'flex'}}>
+          {controls}
+        </YStack>
       </YStack>
       <XStack
         flex={1}
@@ -269,13 +298,17 @@ export function TradeSection(): React.JSX.Element {
           aria-live="polite"
           className="vexl-visually-hidden"
         >
-          {formatMessage(copy.stepAnnouncement, {
-            step: stepIndex + 1,
-            total: steps.length,
-            title: stepTitle,
-          })}
+          {[
+            formatMessage(copy.stepAnnouncement, {
+              step: stepIndex + 1,
+              total: steps.length,
+              title: stepTitle,
+            }),
+            outcome,
+          ].join(outcome ? '. ' : '')}
         </Typography>
       </XStack>
+      <YStack $lg={{display: 'none'}}>{controls}</YStack>
     </PageSection>
   )
 }

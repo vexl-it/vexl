@@ -3,9 +3,9 @@ import {type Messages} from './en'
 export const cs: Messages = {
   meta: {
     home: {
-      title: 'Soukromé P2P obchodování bitcoinu | Vexl',
+      title: 'Obchodujte bitcoin soukromě, peer-to-peer | Vexl',
       description:
-        'Vexl je mobilní aplikace, která svým uživatelům poskytuje jednoduchý, dostupný a bezpečný způsob jak obchodovat bitcoin tak, jak bylo zamýšleno - p2p a bez KYC.',
+        'Kupujte a prodávejte bitcoin peer-to-peer s přáteli a přáteli přátel. Bez KYC, bez prostředníků, s end-to-end šifrovaným chatem. Otevřený kód, neziskový projekt.',
     },
     download: {
       title: 'Stáhněte si Vexl | Aplikace pro iPhone i Android',
@@ -125,7 +125,7 @@ export const cs: Messages = {
           side: 'buy',
           direct: false,
           price: '2 500 – 12 000 Kč',
-          description: 'Každý měsíc nakupuji bitcoin. Hotově nebo převodem.',
+          description: 'Každý měsíc nakupuji bitcoin za hotovost.',
           place: 'Ostrava',
           commonFriends: '3 společní přátelé',
         },
@@ -170,10 +170,8 @@ export const cs: Messages = {
         tapHint: 'Klepněte na nabídku a otevřete ji.',
         offerTitle: 'Nabídka',
         back: 'Zpět',
-        commonFriends: 'Společní přátelé',
         connection:
           'Možná se přímo neznáte, ale spojují vás tito společní přátelé.',
-        trustedLabel: 'Důvěryhodný',
         friends: ['Anna', 'Marek'],
         sendRequest: 'Odeslat žádost',
         requestAccepted: 'Vaše žádost byla přijata.',

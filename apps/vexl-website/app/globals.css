@@ -38,6 +38,14 @@ html {
   transform: scaleX(1);
 }
 
+/* Phones show the mock smaller, so the step text, the mock, and its
+   controls fit one screen, like a scaled-down app screenshot */
+@media (max-width: 1023px) {
+  .vexl-phone {
+    zoom: 0.85;
+  }
+}
+
 /* Read by screen readers, not shown */
 .vexl-visually-hidden {
   position: absolute;

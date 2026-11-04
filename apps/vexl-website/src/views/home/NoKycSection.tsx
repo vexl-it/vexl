@@ -14,7 +14,6 @@ import {
   UserProfile,
   XStack,
   YStack,
-  type IconProps,
 } from '@vexl-next/ui'
 import Image from 'next/image'
 import React, {useEffect, useRef, useState} from 'react'
@@ -59,27 +58,6 @@ function useSeen<T extends Element>(): [React.RefObject<T | null>, boolean] {
   return [ref, seen]
 }
 
-function AskRow({
-  icon: Icon,
-  label,
-  iconColor,
-  textColor,
-}: {
-  readonly icon: React.ComponentType<IconProps>
-  readonly label: string
-  readonly iconColor: string
-  readonly textColor: '$foregroundSecondary' | '$black100'
-}): React.JSX.Element {
-  return (
-    <XStack tag="li" alignItems="center" gap="$4">
-      <Icon size={24} color={iconColor} />
-      <Typography variant="paragraphSmall" color={textColor}>
-        {label}
-      </Typography>
-    </XStack>
-  )
-}
-
 export function NoKycSection(): React.JSX.Element {
   const {t} = useLocale()
   const theme = useTheme()
@@ -111,14 +89,22 @@ export function NoKycSection(): React.JSX.Element {
             {copy.exchangeTitle}
           </Typography>
           <YStack tag="ul" gap="$4" margin={0} padding={0}>
-            {exchangeAsks.map(({key, icon, vexlAsksToo}, i) => (
-              <YStack key={key} position="relative" alignSelf="flex-start">
-                <AskRow
-                  icon={icon}
-                  label={copy.exchangeAsks[key]}
-                  iconColor={theme.foregroundTertiary.get()}
-                  textColor="$foregroundSecondary"
-                />
+            {exchangeAsks.map(({key, icon: Icon, vexlAsksToo}, i) => (
+              <XStack
+                key={key}
+                tag="li"
+                position="relative"
+                alignSelf="flex-start"
+                alignItems="center"
+                gap="$4"
+              >
+                <Icon size={24} color={theme.foregroundTertiary.get()} />
+                <Typography
+                  variant="paragraphSmall"
+                  color="$foregroundSecondary"
+                >
+                  {copy.exchangeAsks[key]}
+                </Typography>
                 {vexlAsksToo ? null : (
                   <YStack
                     aria-hidden
@@ -132,7 +118,7 @@ export function NoKycSection(): React.JSX.Element {
                     style={{transitionDelay: `${i * STRIKE_STAGGER_MS}ms`}}
                   />
                 )}
-              </YStack>
+              </XStack>
             ))}
           </YStack>
         </YStack>
@@ -147,16 +133,16 @@ export function NoKycSection(): React.JSX.Element {
           <Typography variant="paragraphSmallBold" color="$black100">
             {copy.vexlTitle}
           </Typography>
-          <XStack flex={1} alignItems="center" gap="$5">
-            <YStack flex={1} gap="$5">
-              <XStack alignItems="center" gap="$3">
-                <YStack flexShrink={0}>
-                  <PhoneCall size={32} color={tokens.color.black100.val} />
-                </YStack>
-                <Typography tag="p" variant="heading2" color="$black100">
-                  {copy.vexlAsk}
-                </Typography>
-              </XStack>
+          <XStack alignItems="center" gap="$3">
+            <YStack flexShrink={0}>
+              <PhoneCall size={32} color={tokens.color.black100.val} />
+            </YStack>
+            <Typography tag="p" variant="heading2" color="$black100">
+              {copy.vexlAsk}
+            </Typography>
+          </XStack>
+          <XStack flex={1} alignItems="flex-end" gap="$4">
+            <YStack flex={1}>
               <ChatBubble text={copy.message} isMine={false} />
             </YStack>
             <YStack width={72} flexShrink={0} $lg={{width: 120}}>

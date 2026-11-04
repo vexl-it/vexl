@@ -17,7 +17,7 @@ import {Array, pipe} from 'effect'
 import React, {useEffect, useRef, useState} from 'react'
 import {focusFirstControl} from '../../../components/focusFirstControl'
 import {useLocale} from '../../../components/LocaleProvider'
-import {NativeButton} from '../../../components/NativeButton'
+import {focusRing, NativeButton} from '../../../components/NativeButton'
 import {DemoAvatar, RevealedAvatar} from './DemoAvatar'
 import {DemoOfferCard} from './DemoOfferCard'
 
@@ -214,7 +214,7 @@ function RevealRequestCard({
       role="group"
       tabIndex={-1}
       aria-label={screens.theyWant}
-      outlineStyle="none"
+      focusVisibleStyle={focusRing}
       className="vexl-enter"
     >
       <BotMessageCard
@@ -371,7 +371,7 @@ export function RevealScreen({
               aria-label={
                 choice === 'revealed' ? screens.revealed : screens.declined
               }
-              outlineStyle="none"
+              focusVisibleStyle={focusRing}
               className="vexl-enter"
             >
               {choice === 'revealed' ? (

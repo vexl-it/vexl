@@ -1,9 +1,10 @@
 'use client'
 
 import {Button, PageSection, Typography, XStack, YStack} from '@vexl-next/ui'
+import {media} from '@vexl-next/ui/src/config/media'
 import React, {useEffect, useRef, useState} from 'react'
 import {useLocale} from '../../components/LocaleProvider'
-import {NativeButton} from '../../components/NativeButton'
+import {focusRing, NativeButton} from '../../components/NativeButton'
 import {PhoneFrame} from '../../components/PhoneFrame'
 import {SiteLink} from '../../components/SiteLink'
 import {focusFirstControl} from '../../components/focusFirstControl'
@@ -18,8 +19,16 @@ import {
 
 const steps = ['offer', 'friends', 'chat', 'reveal'] as const
 
-/** Sent by the hero, so tapping an offer there opens it in the walkthrough. */
-export const OPEN_DEMO_OFFER_EVENT = 'vexl:open-demo-offer'
+/**
+ * Sent by the hero's offers. Its detail is 'friends' for the featured offer,
+ * which the walkthrough opens; other offers start the walkthrough over.
+ */
+export const OPEN_DEMO_EVENT = 'vexl:open-demo'
+
+// Sticky header height plus a little air, as in globals.css scroll-margin-top
+const HEADER_OFFSET = 88
+// For browsers without the scrollend event
+const SCROLL_SETTLE_MS = 900
 type Step = (typeof steps)[number]
 
 function StepNumber({
@@ -105,6 +114,7 @@ export function TradeSection(): React.JSX.Element {
   const [run, setRun] = useState(0)
   const [revealChoice, setRevealChoice] = useState<RevealChoice>('undecided')
   const screenRef = useRef<HTMLDivElement>(null)
+  const stepsRef = useRef<HTMLDivElement>(null)
   const shownStep = useRef(step)
   const stepIndex = steps.indexOf(step)
 
@@ -117,13 +127,32 @@ export function TradeSection(): React.JSX.Element {
   }, [step])
 
   useEffect(() => {
-    const openOffer = (): void => {
+    const open = (event: Event): void => {
+      const featured =
+        event instanceof CustomEvent && event.detail === 'friends'
+      setRun((value) => value + 1)
       setRevealChoice('undecided')
-      setStep('friends')
+      setStep(featured ? 'friends' : 'offer')
+      // Phones show the step text right above the mock: once the link's own
+      // scroll to the section heading ends, move on to the step text
+      if (!window.matchMedia(`(min-width: ${media.lg.minWidth}px)`).matches) {
+        const showStepCard = (): void => {
+          clearTimeout(fallback)
+          window.removeEventListener('scrollend', showStepCard)
+          const card = stepsRef.current?.querySelector('[aria-current="step"]')
+          if (!card) return
+          window.scrollTo({
+            top:
+              card.getBoundingClientRect().top + window.scrollY - HEADER_OFFSET,
+          })
+        }
+        const fallback = setTimeout(showStepCard, SCROLL_SETTLE_MS)
+        window.addEventListener('scrollend', showStepCard)
+      }
     }
-    window.addEventListener(OPEN_DEMO_OFFER_EVENT, openOffer)
+    window.addEventListener(OPEN_DEMO_EVENT, open)
     return () => {
-      window.removeEventListener(OPEN_DEMO_OFFER_EVENT, openOffer)
+      window.removeEventListener(OPEN_DEMO_EVENT, open)
     }
   }, [])
 
@@ -237,7 +266,12 @@ export function TradeSection(): React.JSX.Element {
   return (
     <PageSection
       id="how-it-works"
-      $lg={{flexDirection: 'row', alignItems: 'flex-start', gap: '$9'}}
+      $lg={{
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        gap: '$9',
+        paddingTop: '$9',
+      }}
     >
       <YStack flex={1} gap="$7" $lg={{flexBasis: 0}}>
         <YStack gap="$4">
@@ -251,7 +285,7 @@ export function TradeSection(): React.JSX.Element {
             {copy.text}
           </Typography>
         </YStack>
-        <YStack gap="$2">
+        <YStack ref={stepsRef} gap="$2">
           {steps.map((key, i) => (
             <StepItem
               key={key}
@@ -287,7 +321,7 @@ export function TradeSection(): React.JSX.Element {
             aria-label={stepTitle}
             flex={1}
             className="vexl-enter"
-            outlineStyle="none"
+            focusVisibleStyle={focusRing}
           >
             {screen}
           </YStack>

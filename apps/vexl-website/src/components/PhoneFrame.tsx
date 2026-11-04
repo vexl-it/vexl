@@ -5,7 +5,8 @@ import React from 'react'
 import {Theme} from 'tamagui'
 
 const SCREEN_WIDTH = 320
-const SCREEN_HEIGHT = 620
+// Fits laptop screens like 1366x768 together with the sticky header
+const SCREEN_HEIGHT = 'min(620px, max(480px, calc(100svh - 240px)))'
 // Shorter on phones, so the step text above stays in view while tapping
 const SMALL_SCREEN_HEIGHT = 480
 
@@ -18,7 +19,7 @@ export function PhoneFrame({
   readonly children: React.ReactNode
 }): React.JSX.Element {
   return (
-    <YStack alignItems="center" gap="$4" flexShrink={0}>
+    <YStack alignItems="center" gap="$4" flexShrink={0} className="vexl-phone">
       <XStack
         aria-hidden
         paddingHorizontal="$4"

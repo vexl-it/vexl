@@ -9,7 +9,7 @@ import {
   XStack,
   YStack,
 } from '@vexl-next/ui'
-import {Array, pipe} from 'effect'
+import {Array, Option, pipe} from 'effect'
 import Image from 'next/image'
 import React, {useState} from 'react'
 import {useTheme} from 'tamagui'
@@ -18,9 +18,11 @@ import {useLocale} from '../../components/LocaleProvider'
 import {PhoneFrame} from '../../components/PhoneFrame'
 import {SiteLink} from '../../components/SiteLink'
 import {DemoOfferCard} from './mock/DemoOfferCard'
-import {OPEN_DEMO_OFFER_EVENT} from './TradeSection'
+import {OPEN_DEMO_EVENT} from './TradeSection'
 
 type Side = 'buy' | 'sell'
+
+const heroAvatars = [0, 2, 1] as const
 
 // Buying shows the offers of people who sell, and the other way round
 const offerSideFor = {buy: 'sell', sell: 'buy'} as const
@@ -28,17 +30,10 @@ const offerSideFor = {buy: 'sell', sell: 'buy'} as const
 function MarketplaceMock(): React.JSX.Element {
   const {t, path} = useLocale()
   const mock = t.home.mock
-  const [sides, setSides] = useState<ReadonlySet<Side>>(new Set(['buy']))
+  const [side, setSide] = useState<Side>('buy')
   const visibleOffers = pipe(
     mock.offers,
-    Array.filter(
-      (offer) =>
-        sides.size === 0 ||
-        pipe(
-          [...sides],
-          Array.some((side) => offerSideFor[side] === offer.side)
-        )
-    )
+    Array.filter((offer) => offer.side === offerSideFor[side])
   )
 
   return (
@@ -58,8 +53,15 @@ function MarketplaceMock(): React.JSX.Element {
               {label: mock.buy, value: 'buy'},
               {label: mock.sell, value: 'sell'},
             ]}
-            selectedValues={sides}
-            onSelectedValuesChange={setSides}
+            selectedValues={new Set([side])}
+            // One side is always shown, like the app's buy/sell switch
+            onSelectedValuesChange={(values) => {
+              const picked = pipe(
+                [...values],
+                Array.findFirst((value) => value !== side)
+              )
+              if (Option.isSome(picked)) setSide(picked.value)
+            }}
           />
         </YStack>
         <ScrollView flex={1} contentContainerStyle={{flexGrow: 1}}>
@@ -69,20 +71,24 @@ function MarketplaceMock(): React.JSX.Element {
                 key={offer.id}
                 href={`${path('/')}#how-it-works`}
                 // The walkthrough's script is about the first offer only
-                onPress={
-                  offer.id === mock.offers[0]?.id
-                    ? () => {
-                        window.dispatchEvent(new Event(OPEN_DEMO_OFFER_EVENT))
-                      }
-                    : undefined
-                }
+                onPress={() => {
+                  window.dispatchEvent(
+                    new CustomEvent(OPEN_DEMO_EVENT, {
+                      detail:
+                        offer.id === mock.offers[0]?.id ? 'friends' : 'offer',
+                    })
+                  )
+                }}
               >
                 <YStack
                   role="none"
                   className="vexl-enter"
                   pressStyle={{opacity: 0.7}}
                 >
-                  <DemoOfferCard offer={offer} avatar={i % 2 === 0 ? 0 : 2} />
+                  <DemoOfferCard
+                    offer={offer}
+                    avatar={heroAvatars[i % heroAvatars.length] ?? 0}
+                  />
                 </YStack>
               </SiteLink>
             ))}

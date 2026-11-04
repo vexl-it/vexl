@@ -138,6 +138,16 @@ export const cs: Messages = {
           place: 'Plzeň',
           commonFriends: '1 společný přítel',
         },
+        {
+          id: 'market',
+          side: 'sell',
+          direct: false,
+          price: '2 500 – 15 000 Kč',
+          description:
+            'Každý měsíc prodám kousek. Hodí se mi sobotní farmářské trhy.',
+          place: 'Olomouc',
+          commonFriends: '4 společní přátelé',
+        },
       ],
     },
     trade: {
@@ -163,7 +173,7 @@ export const cs: Messages = {
         },
         reveal: {
           title: 'Odhalte se, až budete připraveni',
-          text: 'Oba odhalíte stejné údaje, a jen pokud oba souhlasíte. Odhalení nejde vzít zpět. Pak se sejděte osobně: nejdřív peníze, potom bitcoin.',
+          text: 'Jen když oba souhlasíte, a nejde to vzít zpět. Pak se sejděte osobně: nejdřív peníze, potom bitcoin.',
         },
       },
       screens: {
@@ -224,7 +234,7 @@ export const cs: Messages = {
     },
     trust: {
       eyebrow: 'Bez svobody transakcí nemáme žádná další práva.',
-      title: 'Otevřeně. Neziskově.',
+      title: 'Otevřený kód. Neziskový projekt.',
       text: 'Nemusíte nám věřit. Ověřte si to sami.',
       openSource: {
         title: 'Open source',

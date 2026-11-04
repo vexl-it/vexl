@@ -3,6 +3,13 @@
 import {YStack} from '@vexl-next/ui'
 import React from 'react'
 
+export const focusRing = {
+  outlineWidth: 2,
+  outlineStyle: 'solid',
+  outlineColor: '$accentYellowPrimary',
+  outlineOffset: 2,
+} as const
+
 /** A real <button>, so keyboard and screen readers work, around any visual. */
 export function NativeButton({
   onPress,
@@ -27,12 +34,7 @@ export function NativeButton({
       backgroundColor="$transparent"
       // Buttons center their text by default; the visuals inside set their own
       style={{textAlign: 'left'}}
-      focusVisibleStyle={{
-        outlineWidth: 2,
-        outlineStyle: 'solid',
-        outlineColor: '$accentYellowPrimary',
-        outlineOffset: 2,
-      }}
+      focusVisibleStyle={focusRing}
       {...rest}
     >
       {children}

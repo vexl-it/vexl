@@ -137,6 +137,16 @@ export const en = {
           place: 'Lisbon',
           commonFriends: '1 common friend',
         },
+        {
+          id: 'market',
+          side: 'sell',
+          direct: false,
+          price: '€100 – €600',
+          description:
+            'Selling a little every month. Saturday farmers market works for me.',
+          place: 'Bratislava',
+          commonFriends: '4 common friends',
+        },
       ],
     },
     trade: {
@@ -162,7 +172,7 @@ export const en = {
         },
         reveal: {
           title: 'Reveal yourselves when you’re ready',
-          text: 'You both reveal the same details, and only if you both agree. Once revealed, it can’t be taken back. Then meet in person: money first, bitcoin second.',
+          text: 'Only if you both agree, and there’s no taking it back. Then meet in person: money first, bitcoin second.',
         },
       },
       screens: {

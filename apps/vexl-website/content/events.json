@@ -1,0 +1,458 @@
+[
+  {
+    "date": "2026-10-02",
+    "name": "Watch Out Bitcoin!",
+    "url": "https://wobitcoin.org",
+    "location": "Espacio Pablo VI, Madrid, Spain 🇪🇸",
+    "time": "9:00–20:00"
+  },
+  {
+    "date": "2026-09-25",
+    "name": "BTCHEL2026",
+    "url": "https://btchel.com",
+    "location": "Kaapelitehdas, Helsinki 🇫🇮",
+    "time": "9:00–18:00"
+  },
+  {
+    "date": "2026-09-19",
+    "name": "Blocktrainer Event 2026",
+    "url": "https://www.blocktrainer.de",
+    "location": "MMC Studios Köln GmbH, 1 Am Coloneum, Köln, Nordrhein-Westfalen 50829, Germany 🇩🇪",
+    "time": "10:00–22:00"
+  },
+  {
+    "date": "2026-09-11",
+    "name": "Chaincamp 2026",
+    "url": "https://www.chaincamp.cz/",
+    "location": "Aula VŠB, Ostrava 🇨🇿",
+    "speakers": "Viliam, Cotsoor",
+    "time": "9:00–18:00"
+  },
+  {
+    "date": "2026-08-29",
+    "name": "BTheChange Glasgow 2026",
+    "url": "https://www.bthechange.net",
+    "location": "University of Glasgow, Scotland G12 8QQ, United Kingdom 🇬🇧",
+    "time": "9:00–18:00"
+  },
+  {
+    "date": "2026-06-11",
+    "name": "BTCPrague 2026",
+    "url": "https://btcprague.com/",
+    "location": "PVA Expo, Praha 🇨🇿",
+    "speakers": "Viliam, Cotsoor",
+    "time": "9:00–18:00"
+  },
+  {
+    "date": "2026-05-29",
+    "name": "Barcelona Cyphers Conference",
+    "url": "https://www.bcc8333.xyz/",
+    "location": "La Salle Campus, Barcelona 🇪🇸",
+    "speakers": "Viliam",
+    "time": "9:00–15:00"
+  },
+  {
+    "date": "2026-05-23",
+    "name": "Pizza Day Olomouc",
+    "url": "https://x.com/PizzaDayOlomouc/status/2054180448545198500?s=20",
+    "location": "Sál Obecního úřadu, Hněvotín 🇨🇿",
+    "speakers": "Cotsoor",
+    "time": "13:00–19:00"
+  },
+  {
+    "date": "2026-05-16",
+    "name": "CryptoByte 2026",
+    "url": "https://x.com/vexl/status/2054832115942875584?s=20",
+    "location": "Technická univerzita, Liberec 🇨🇿",
+    "speakers": "Michal Cotsoor",
+    "time": "9:30–18:00"
+  },
+  {
+    "date": "2026-02-21",
+    "name": "Bitcoin Bristol / Satoshi Ciders",
+    "url": "https://x.com/BitcoinBRS/status/2014315619512938716?s=20",
+    "location": "The Old Fish Market, Bristol 🇬🇧",
+    "time": "18:15–23:00"
+  },
+  {
+    "date": "2026-01-21",
+    "name": "44. Bitcoin Ljubljana meetup ft. Vexl",
+    "url": "https://www.meetup.com/bitcoin-ljubljana/events/312861004/",
+    "location": "Kavarna Sputnik, Ljubljana 🇸🇮",
+    "speakers": "Grafton",
+    "time": "19:00–21:00"
+  },
+  {
+    "date": "2026-01-21",
+    "name": "Satoshi Ciders Bitcoin Bristol",
+    "url": "https://x.com/BitcoinBRS/status/2003046924589666536?s=20",
+    "location": "The Mardyke Pub, Bristol 🇬🇧",
+    "time": "18:15–22:00"
+  },
+  {
+    "date": "2026-01-21",
+    "name": "Meetup SK21 Bratislava",
+    "url": "https://pay.dvadsatjeden.org/plugins/57mRp5UXikVtSBK3uMsbzY4p1NRSiMJVxsiWEsJpsiKA/ticket/public/event/3c03fc39-ea21-4416-948c-c15455329194/summary",
+    "location": "Piváreň Lagúna, Bratislava 🇸🇰",
+    "speakers": "Cotsoor",
+    "time": "18:00–21:00"
+  },
+  {
+    "date": "2025-12-12",
+    "name": "The Sat Market",
+    "url": "https://www.bitcoinsatmarket.com/",
+    "location": "White Diamond Conference Center, Calgary, Alberta 🇨🇦",
+    "time": "16:00–21:00"
+  },
+  {
+    "date": "2025-11-25",
+    "name": "Vexl meetup",
+    "url": "https://pay.satoshilabs.com/apps/4MbkQ3heqHzEzZCAxNs1rPX8z4cK/crowdfund",
+    "location": "VILA Štvanice, Praha 🇨🇿",
+    "speakers": "Lea, Stick, Slush",
+    "time": "18:00–22:30"
+  },
+  {
+    "date": "2025-11-22",
+    "name": "Bitfest 2025",
+    "url": "https://bitfest.uk/#bitfest",
+    "location": "Pendulum Hotel, Manchester 🇬🇧",
+    "speakers": "Marco",
+    "time": "11:00–17:00"
+  },
+  {
+    "date": "2025-11-13",
+    "name": "Bitcoin Amsterdam",
+    "url": "https://www.bitcoin.amsterdam/",
+    "location": "Sugarfactory, Amsterdam 🇳🇱",
+    "speakers": "Grafton",
+    "time": "9:30–17:00"
+  },
+  {
+    "date": "2025-11-08",
+    "name": "Northern Rivers Honeybadger Network ft. Vexl",
+    "url": "https://www.meetup.com/en-AU/bitcoin-byron-bay/events/wjrhttyhcpblb/",
+    "location": "1/5 Wollongbar, Byron Bay 🇦🇺",
+    "time": "13:00–16:00"
+  },
+  {
+    "date": "2025-10-24",
+    "name": "Come acquistare P2P at Spazio21",
+    "url": "https://x.com/midimarcus/status/1979212009213194317?s=46",
+    "location": "Asilo Ciani, Viale Carlo Cattaneo 5, Lugano 🇨🇭",
+    "speakers": "Marco",
+    "time": "12:00–13:00"
+  },
+  {
+    "date": "2025-10-18",
+    "name": "BTC Balkans 2025",
+    "url": "https://www.btcbalkans.com/",
+    "location": "Inter Expo Center, bul. Tsarigradsko shose, Sofia 🇧🇬",
+    "time": "9:00–20:30"
+  },
+  {
+    "date": "2025-10-09",
+    "name": "3. BitcoinForum",
+    "url": "https://bitcoinforum.bayern/",
+    "location": "Volksbank Raiffeisenbank Bayern Mitte eG, Ingolstadt 🇩🇪",
+    "speakers": "Grafton",
+    "time": "9:00–18:00"
+  },
+  {
+    "date": "2025-09-20",
+    "name": "Chaincamp 2025",
+    "url": "https://www.chaincamp.cz/",
+    "location": "Aula VŠB, Ostrava 🇨🇿",
+    "time": "8:30–18:30"
+  },
+  {
+    "date": "2025-09-13",
+    "name": "BitcoinWalk Köln",
+    "url": "https://bitcoinwalk.org/koeln/",
+    "location": "Köln 🇩🇪",
+    "time": "10:00–13:00"
+  },
+  {
+    "date": "2025-09-13",
+    "name": "CryptoVestiBull 2025",
+    "url": "https://crypto-vestibull.sk/",
+    "location": "Dom Odborov, Žilina 🇸🇰",
+    "time": "8:45–17:30"
+  },
+  {
+    "date": "2025-08-15",
+    "name": "BTCHEL 2025",
+    "url": "https://x.com/satsdisco/status/1958489453984366678",
+    "location": "Kulttuuritehdas Korjaamo, Helsinky 🇫🇮",
+    "speakers": "Grafton",
+    "time": "9:00–18:00"
+  },
+  {
+    "date": "2025-08-07",
+    "name": "BTC++ Riga",
+    "url": "https://btcplusplus.dev/",
+    "location": "National Library, Riga 🇱🇻",
+    "speakers": "David",
+    "time": "21:00–18:00"
+  },
+  {
+    "date": "2025-07-24",
+    "name": "Zitadelle 2025",
+    "url": "https://x.com/vexl/status/1949803471957377078",
+    "location": "Thüringen 🇩🇪",
+    "speakers": "Grafton",
+    "time": "9:00–16:00"
+  },
+  {
+    "date": "2025-06-19",
+    "name": "BTC Prague 2025",
+    "url": "https://btcprague.com/program/#",
+    "location": "PVA Expo, Praha 🇨🇿",
+    "speakers": "Grafton, Lea, Viliam",
+    "time": "9:10–18:10"
+  },
+  {
+    "date": "2025-06-16",
+    "name": "Satoshi Square Bangkok",
+    "url": "https://www.meetup.com/bangkok-satoshi-square/events/308083378/",
+    "location": "Carmina Modern, Bangkok 🇹🇭",
+    "time": "18:30–22:00"
+  },
+  {
+    "date": "2025-06-02",
+    "name": "Vexl at Satoshi Square Bangkok",
+    "url": "https://www.meetup.com/th-TH/bangkok-satoshi-square/events/bllrqtyhcjbdb/",
+    "location": "TBD, Bangkok 🇹🇭",
+    "time": "18:30–21:00"
+  },
+  {
+    "date": "2025-05-24",
+    "name": "Pizza Day Olomouc",
+    "url": "https://x.com/vexl/status/1925192068986556841",
+    "location": "Gymnázium Hejčín, Olomouc 🇨🇿",
+    "speakers": "Viliam",
+    "time": "13:00–19:00"
+  },
+  {
+    "date": "2025-05-24",
+    "name": "Bitcoin Ireland",
+    "url": "https://bitcoinireland.eu/",
+    "location": "Dublin 🇮🇪",
+    "speakers": "Grafton",
+    "time": "9:00–18:00"
+  },
+  {
+    "date": "2025-05-22",
+    "name": "Bitcoin Pizza Day BitPolito",
+    "url": "https://x.com/bitpolito/status/1920123392889442730",
+    "location": "Cheers Birreria-Bistrot, Torino 🇮🇹",
+    "time": "15:30–22:30"
+  },
+  {
+    "date": "2025-05-20",
+    "name": "Escondido Bitcoin Meetup",
+    "url": "https://lu.ma/pyfkbcvo?locale=cs",
+    "location": "Black Plague Purgatory Lounge, Escondido CA 🇺🇸",
+    "time": "18:00–20:30"
+  },
+  {
+    "date": "2025-05-17",
+    "name": "Pop-up Bitcoin Dance Watch Party",
+    "url": "https://www.youtube.com/watch?v=OOu7lQUqLY4",
+    "location": "Bitcoin Arusha 🇹🇿",
+    "time": "19:00–20:30"
+  },
+  {
+    "date": "2025-05-15",
+    "name": "Frankfurt Vexl Club",
+    "url": "https://btcffm.org/",
+    "location": "Massif Central Cafe, Frankfurt 🇩🇪",
+    "time": "18:30–21:00"
+  },
+  {
+    "date": "2025-05-10",
+    "name": "Vexl workshop - Bitcare Forum 25'",
+    "url": "https://bitcareforum.it/",
+    "location": "Camera di Commercio di Brescia, Brescia 🇮🇹",
+    "speakers": "Marco",
+    "time": "15:50–"
+  },
+  {
+    "date": "2025-05-10",
+    "name": "Windhoek Vexl Club",
+    "url": "https://x.com/EasySats_/status/1917171028477808996",
+    "location": "The Wolfshack, Windhoek 🇳🇦",
+    "speakers": "Okin",
+    "time": "12:00–14:00"
+  },
+  {
+    "date": "2025-05-10",
+    "name": "Bitcare Forum 25'",
+    "url": "https://x.com/vexl/status/1919778254086373515",
+    "location": "Camera di Commercio di Brescia, Brescia 🇮🇹",
+    "speakers": "Marco",
+    "time": "9:00–18:00"
+  },
+  {
+    "date": "2025-05-08",
+    "name": "Bournemouth Beach Bitcoin Meetup",
+    "url": "https://public.theorangepillapp.com/event/67c0ad702eba98971e311fa9",
+    "location": "Chaplin's & The Cellar Bar, Bournemouth 🇬🇧",
+    "time": "18:30–21:00"
+  },
+  {
+    "date": "2025-04-10",
+    "name": "Bournemouth Beach Bitcoin Meetup",
+    "url": "https://public.theorangepillapp.com/event/67c0ad702eba98971e311fa9",
+    "location": "Chaplin's & The Cellar Bar, Bournemouth 🇬🇧",
+    "time": "18:30–21:00"
+  },
+  {
+    "date": "2025-03-28",
+    "name": "Vienna Vexl Club",
+    "url": "https://www.meetup.com/bitcoin-austria/",
+    "location": "Das Delicious Restaurant, Vienna 🇦🇹",
+    "speakers": "Grafton",
+    "time": "18:30–22:00"
+  },
+  {
+    "date": "2025-03-26",
+    "name": "Düsseldorf Vexl Club",
+    "url": "https://portal.einundzwanzig.space/de/meetup/meetup-events/l/1836?l=de",
+    "location": "TBD, Düsseldorf 🇩🇪",
+    "time": "19:00–21:00"
+  },
+  {
+    "date": "2025-03-22",
+    "name": "Trier Vexl Club",
+    "url": "https://portal.einundzwanzig.space/de/meetup/meetup-events/l/2146?l=de",
+    "location": "Radis Stacks, Trier 🇩🇪",
+    "speakers": "No speaker",
+    "time": "18:00–20:00"
+  },
+  {
+    "date": "2025-03-20",
+    "name": "Frankfurt Vexl Club",
+    "url": "https://btcffm.org/",
+    "location": "Zentrale Co-Working-Space, Frankfurt 🇩🇪",
+    "speakers": "No speaker",
+    "time": "18:15–21:00"
+  },
+  {
+    "date": "2025-03-19",
+    "name": "London Vexl Club",
+    "url": "https://www.meetup.com/bitcoinology/events/306634537/",
+    "location": "Cyphermunk House, London 🇬🇧",
+    "time": "18:30–20:30"
+  },
+  {
+    "date": "2025-03-16",
+    "name": "Zimbabwe Vexl Club",
+    "url": "https://lu.ma/3y3zp2sj",
+    "location": "Bulawayo Club, Bulawayo 🇿🇼",
+    "time": "10:30–12:30"
+  },
+  {
+    "date": "2025-03-08",
+    "name": "Vexl meetup #21 ft. Les Femmes Orange",
+    "url": "https://x.com/lesfemmesorange/status/1884506353349095899",
+    "location": "MaibornWolff GmbH, Munich 🇩🇪",
+    "speakers": "Bri",
+    "time": "14:00–17:00"
+  },
+  {
+    "date": "2025-03-07",
+    "name": "Aschaffenburg Vexl Club",
+    "url": "https://portal.einundzwanzig.space/de/meetup/meetup-events/l/2145?l=de",
+    "location": "Mainhatten in Mainaschaff, Aschaffenburg 🇩🇪",
+    "time": "18:30–20:00"
+  },
+  {
+    "date": "2025-03-06",
+    "name": "Berlin Vexl Club",
+    "url": "https://www.meetup.com/bitcoin-lab-berlin/events/305714710/",
+    "location": "Friedel Richter Restaurant, Berlin 🇩🇪",
+    "speakers": "C. and Jeff",
+    "time": "19:00–21:00"
+  },
+  {
+    "date": "2025-02-01",
+    "name": "Vexl meetup #20 ft. EasySats",
+    "url": "https://x.com/EasySats_/status/1880995469389914222",
+    "location": "The Wolfshack, Windhoek 🇳🇦",
+    "speakers": "Josef, Okin",
+    "time": "12:00–14:00"
+  },
+  {
+    "date": "2025-01-30",
+    "name": "Vexl meetup #19 ft. Bitcoin & Coffee",
+    "url": "https://www.meetup.com/bitcoinprivilege/events/305545944/?_xtd=gqFyqTM3MDM3ODAxN6Fwo2FwaQ%253D%253D&from=ref",
+    "location": "FUNK Coffee Bar, Vancouver 🇨🇦",
+    "speakers": "Michael",
+    "time": "16:15–18:30"
+  },
+  {
+    "date": "2025-01-24",
+    "name": "Vexl Demo - Adopting Bitcoin Cape Town",
+    "url": "https://x.com/JosefTetek/status/1882763724601414083",
+    "location": "Workshop17 Watershed–btrust room, Cape Town 🇿🇦",
+    "speakers": "Okin",
+    "time": "13:55–14:25"
+  },
+  {
+    "date": "2025-01-10",
+    "name": "Vexl meetup #18 ft. SatoshiSpritz Padua",
+    "url": "https://x.com/midimarcus/status/1877016751688364411?s=46",
+    "location": "Geo Caffé, Padua 🇮🇹",
+    "speakers": "Marco",
+    "time": "20:00–23:00"
+  },
+  {
+    "date": "2024-12-13",
+    "name": "Vexl in Kenya",
+    "url": "https://x.com/ekepaul_/status/1866760131423375422?s=46",
+    "location": "Nairobi 🇰🇪",
+    "speakers": "Josef, Okin, Paul",
+    "time": "14:00–"
+  },
+  {
+    "date": "2024-11-30",
+    "name": "Vexl meetup #17 ft. AmityAge",
+    "url": "https://x.com/amityage/status/1863231066573549817?s=46",
+    "location": "Roatan 🇭🇳",
+    "speakers": "Dušky",
+    "time": "18:00–"
+  },
+  {
+    "date": "2024-11-28",
+    "name": "Vexl meetup #16 ft. SatoshiSpritz Torino",
+    "url": "https://x.com/vexl/status/1862070716604063815?s=46",
+    "location": "Cheers, Turin 🇮🇹",
+    "speakers": "Marco",
+    "time": "19:45–"
+  },
+  {
+    "date": "2024-11-12",
+    "name": "Vexl meetup #15 ft. Bitcoin Paraguay",
+    "url": "https://lu.ma/hbn1naj3?tk=z9Mykf",
+    "location": "JazzCube, Asunción 🇵🇾",
+    "speakers": "Josef",
+    "time": "19:00–23:00"
+  },
+  {
+    "date": "2024-10-26",
+    "name": "Vexl workshop - Lugano's Spazio 21",
+    "url": "https://x.com/midimarcus/status/1847707450398630370",
+    "location": "Asilo Ciani, Lugano 🇨🇭",
+    "speakers": "Marco",
+    "time": "12:00–14:30"
+  },
+  {
+    "date": "2024-10-25",
+    "name": "Vexl workshop - Lugano's Spazio 21",
+    "url": "https://x.com/midimarcus/status/1847707450398630370",
+    "location": "Asilo Ciani, Lugano 🇨🇭",
+    "speakers": "Marco",
+    "time": "14:30–16:00"
+  }
+]

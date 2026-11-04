@@ -4,6 +4,7 @@ import React from 'react'
 import {ComponentScreenLayout} from './ComponentScreenLayout'
 
 const variantLabels = {
+  display: 'Display',
   heading1: 'Heading 1',
   presBody: 'Pres Body',
   heading2: 'Heading 2',

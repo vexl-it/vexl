@@ -49,7 +49,11 @@ const components: Components = {
   p: ({children}) => <MdParagraph>{children}</MdParagraph>,
   a: ({href, children}) => <MdLink href={href}>{children}</MdLink>,
   ul: ({children}) => <MdList ordered={false}>{children}</MdList>,
-  ol: ({children}) => <MdList ordered>{children}</MdList>,
+  ol: ({start, children}) => (
+    <MdList ordered start={start}>
+      {children}
+    </MdList>
+  ),
   li: ({children}) => <MdListItem>{children}</MdListItem>,
   blockquote: ({children}) => <MdQuote>{children}</MdQuote>,
   img: ({src, alt}) => (

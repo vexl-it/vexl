@@ -17,6 +17,7 @@ import {
 } from './commonConfigs'
 import {devToolsLayer} from './devToolsLayer'
 import {makeMemoryDebugLayer} from './makeMemoryDebugLayer'
+import {scrubbingSpanProcessor} from './scrubbingSpanProcessor'
 import {sentryLayer} from './sentry'
 
 const stringifyCircular = (
@@ -82,13 +83,14 @@ const NodeSdkLive = Effect.gen(function* (_) {
     Effect.tap((metricsConfiguration) =>
       Effect.logInfo('Configuring span processor', metricsConfiguration)
     ),
-    Effect.map(
-      (otlpTraceExporterUrl) =>
+    Effect.map((otlpTraceExporterUrl) =>
+      scrubbingSpanProcessor(
         new BatchSpanProcessor(
           new OTLPTraceExporter({
             url: otlpTraceExporterUrl,
           })
         )
+      )
     ),
     Effect.catchTag('NoSuchElementException', (e) =>
       Effect.zipRight(

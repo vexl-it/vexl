@@ -25,10 +25,6 @@ const steps = ['offer', 'friends', 'chat', 'reveal'] as const
  */
 export const OPEN_DEMO_EVENT = 'vexl:open-demo'
 
-// Sticky header height plus a little air, as in globals.css scroll-margin-top
-const HEADER_OFFSET = 88
-// For browsers without the scrollend event
-const SCROLL_SETTLE_MS = 900
 type Step = (typeof steps)[number]
 
 function StepNumber({
@@ -115,6 +111,7 @@ export function TradeSection(): React.JSX.Element {
   const [revealChoice, setRevealChoice] = useState<RevealChoice>('undecided')
   const screenRef = useRef<HTMLDivElement>(null)
   const stepsRef = useRef<HTMLDivElement>(null)
+  const sectionRef = useRef<HTMLDivElement>(null)
   const shownStep = useRef(step)
   const stepIndex = steps.indexOf(step)
 
@@ -133,22 +130,16 @@ export function TradeSection(): React.JSX.Element {
       setRun((value) => value + 1)
       setRevealChoice('undecided')
       setStep(featured ? 'friends' : 'offer')
-      // Phones show the step text right above the mock: once the link's own
-      // scroll to the section heading ends, move on to the step text
-      if (!window.matchMedia(`(min-width: ${media.lg.minWidth}px)`).matches) {
-        const showStepCard = (): void => {
-          clearTimeout(fallback)
-          window.removeEventListener('scrollend', showStepCard)
-          const card = stepsRef.current?.querySelector('[aria-current="step"]')
-          if (!card) return
-          window.scrollTo({
-            top:
-              card.getBoundingClientRect().top + window.scrollY - HEADER_OFFSET,
-          })
-        }
-        const fallback = setTimeout(showStepCard, SCROLL_SETTLE_MS)
-        window.addEventListener('scrollend', showStepCard)
-      }
+      // The hero link leaves scrolling and focus to us. Once the new step has
+      // rendered, show the step text on phones and the whole section elsewhere
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          const wide = window.matchMedia(`(min-width: ${media.lg.minWidth}px)`)
+          const target = wide.matches ? sectionRef.current : stepsRef.current
+          target?.scrollIntoView({block: 'start'})
+          focusFirstControl(screenRef.current)
+        })
+      })
     }
     window.addEventListener(OPEN_DEMO_EVENT, open)
     return () => {
@@ -214,7 +205,12 @@ export function TradeSection(): React.JSX.Element {
       gap="$5"
       paddingHorizontal="$5"
     >
-      <XStack gap="$2" $lg={{display: 'none'}}>
+      {/* On the last step Start over replaces them, so the actions fit */}
+      <XStack
+        gap="$2"
+        display={nextStep ? 'flex' : 'none'}
+        $lg={{display: 'none'}}
+      >
         {steps.map((key, i) => (
           <NativeButton
             key={key}
@@ -265,7 +261,9 @@ export function TradeSection(): React.JSX.Element {
 
   return (
     <PageSection
+      ref={sectionRef}
       id="how-it-works"
+      gap="$5"
       $lg={{
         flexDirection: 'row',
         alignItems: 'flex-start',
@@ -285,7 +283,9 @@ export function TradeSection(): React.JSX.Element {
             {copy.text}
           </Typography>
         </YStack>
-        <YStack ref={stepsRef} gap="$2">
+        {/* Phones show only the active step here; the id gives it the
+            header's scroll margin */}
+        <YStack ref={stepsRef} id="trade-steps" gap="$2">
           {steps.map((key, i) => (
             <StepItem
               key={key}

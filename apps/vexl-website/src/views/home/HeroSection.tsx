@@ -17,6 +17,7 @@ import {DownloadCta} from '../../components/DownloadCta'
 import {useLocale} from '../../components/LocaleProvider'
 import {PhoneFrame} from '../../components/PhoneFrame'
 import {SiteLink} from '../../components/SiteLink'
+import {formatMessage} from '../../i18n/locales'
 import {DemoOfferCard} from './mock/DemoOfferCard'
 import {OPEN_DEMO_EVENT} from './TradeSection'
 
@@ -70,8 +71,15 @@ function MarketplaceMock(): React.JSX.Element {
               <SiteLink
                 key={offer.id}
                 href={`${path('/')}#how-it-works`}
+                label={formatMessage(mock.openInDemo, {
+                  price: offer.price,
+                  place: offer.place,
+                })}
                 // The walkthrough's script is about the first offer only
-                onPress={() => {
+                onPress={(event) => {
+                  // The walkthrough scrolls once its new step has rendered
+                  event.preventDefault()
+                  window.history.pushState(null, '', event.currentTarget.href)
                   window.dispatchEvent(
                     new CustomEvent(OPEN_DEMO_EVENT, {
                       detail:

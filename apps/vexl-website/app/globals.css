@@ -6,6 +6,12 @@ html {
   scroll-margin-top: 88px;
 }
 
+a:focus-visible {
+  outline: 2px solid var(--accentYellowPrimary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
 @keyframes vexl-enter {
   from {
     opacity: 0;

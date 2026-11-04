@@ -100,6 +100,7 @@ export const cs: Messages = {
       friendOfFriend: 'Přítel přítele',
       directFriend: 'Přímý přítel',
       cash: 'Hotovost',
+      openInDemo: '{price}, {place}. Vyzkoušejte v ukázce',
       offers: [
         {
           id: 'coffee',
@@ -147,6 +148,16 @@ export const cs: Messages = {
             'Každý měsíc prodám kousek. Hodí se mi sobotní farmářské trhy.',
           place: 'Olomouc',
           commonFriends: '4 společní přátelé',
+        },
+        {
+          id: 'weekly',
+          side: 'buy',
+          direct: false,
+          price: '800 – 4 000 Kč',
+          description:
+            'Spořím: každý týden koupím trochu bitcoinu za hotovost.',
+          place: 'Liberec',
+          commonFriends: '2 společní přátelé',
         },
       ],
     },

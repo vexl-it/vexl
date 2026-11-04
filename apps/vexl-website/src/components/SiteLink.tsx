@@ -14,7 +14,7 @@ export interface SiteLinkProps {
   readonly inline?: boolean
   readonly fill?: boolean
   readonly current?: boolean
-  readonly onPress?: () => void
+  readonly onPress?: (event: React.MouseEvent<HTMLAnchorElement>) => void
 }
 
 export function SiteLink({

@@ -33,13 +33,14 @@ export function OfferScreen({
 
   return (
     <YStack gap="$5" paddingTop="$7" paddingHorizontal="$3">
-      <Typography
-        variant="heading3"
-        color="$foregroundPrimary"
-        paddingHorizontal="$2"
-      >
-        {t.home.mock.marketplace}
-      </Typography>
+      <YStack gap="$2" paddingHorizontal="$2">
+        <Typography variant="heading3" color="$foregroundPrimary">
+          {t.home.mock.marketplace}
+        </Typography>
+        <Typography variant="description" color="$accentYellowPrimary">
+          {t.home.trade.screens.tapHint}
+        </Typography>
+      </YStack>
       {featured ? (
         <NativeButton
           onPress={onOpenOffer}
@@ -55,13 +56,6 @@ export function OfferScreen({
           <DemoOfferCard offer={other} avatar={2} />
         </YStack>
       ) : null}
-      <Typography
-        variant="description"
-        color="$accentYellowPrimary"
-        textAlign="center"
-      >
-        {t.home.trade.screens.tapHint}
-      </Typography>
     </YStack>
   )
 }

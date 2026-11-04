@@ -98,6 +98,7 @@ export const en = {
       friendOfFriend: 'Friend of a friend',
       directFriend: 'Direct friend',
       cash: 'Cash',
+      openInDemo: '{price}, {place}. Try it in the demo',
       offers: [
         {
           id: 'coffee',
@@ -146,6 +147,16 @@ export const en = {
             'Selling a little every month. Saturday farmers market works for me.',
           place: 'Bratislava',
           commonFriends: '4 common friends',
+        },
+        {
+          id: 'weekly',
+          side: 'buy',
+          direct: false,
+          price: '€30 – €150',
+          description:
+            'Saving up: buying a little bitcoin every week, for cash.',
+          place: 'Kraków',
+          commonFriends: '2 common friends',
         },
       ],
     },

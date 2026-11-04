@@ -125,11 +125,9 @@ export function HeroSection(): React.JSX.Element {
   return (
     <PageSection
       paddingTop="$7"
-      $lg={{paddingTop: '$9'}}
-      // Two columns only once the headline column fits Czech "Obchodujte"
-      $xl={{flexDirection: 'row', alignItems: 'center'}}
+      $lg={{flexDirection: 'row', alignItems: 'center', paddingTop: '$9'}}
     >
-      <YStack flex={1} gap="$7" $xl={{flexBasis: 0, flexGrow: 1.3}}>
+      <YStack flex={1} gap="$7" $lg={{flexBasis: 0, flexGrow: 1.3}}>
         <Image src="/images/glasses-white.webp" alt="" width={56} height={25} />
         <Typography tag="h1" variant="display" color="$foregroundPrimary">
           {t.home.hero.title}
@@ -167,7 +165,7 @@ export function HeroSection(): React.JSX.Element {
         paddingVertical="$9"
         borderRadius="$8"
         backgroundColor="$accentYellowPrimary"
-        $xl={{flexBasis: 0}}
+        $lg={{flexBasis: 0}}
       >
         <MarketplaceMock />
       </XStack>

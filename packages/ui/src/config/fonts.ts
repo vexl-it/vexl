@@ -109,7 +109,14 @@ export const typographyVariantStyles = {
     letterSpacing: -1,
     // Long words like Czech "Obchodujte" must not split mid-word
     wordWrap: 'normal',
+    // Tablets put display headlines beside other content, so they step up
+    // in between; 56px still fits Czech "Obchodujte" in half of 1024px
     $lg: {
+      fontSize: 56,
+      lineHeight: 60,
+      letterSpacing: -2,
+    },
+    $xl: {
       fontSize: '$7',
       lineHeight: 76,
       letterSpacing: -2,

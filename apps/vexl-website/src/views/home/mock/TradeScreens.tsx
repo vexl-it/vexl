@@ -126,11 +126,7 @@ function ChatHeader({
       avatar={
         revealed ? (
           <YStack className="vexl-enter">
-            <RevealedAvatar
-              name={t.home.trade.screens.theirName}
-              size={40}
-              backgroundColor="$pinkBackground"
-            />
+            <RevealedAvatar who="them" size={40} />
           </YStack>
         ) : (
           <DemoAvatar index={ANONYMOUS_AVATAR} size={40} />
@@ -315,23 +311,11 @@ function RevealedCard(): React.JSX.Element {
       title={screens.revealed}
       description={screens.bothRevealed}
       leftSide={{
-        avatar: (
-          <RevealedAvatar
-            name={screens.you}
-            size={64}
-            backgroundColor="$greenBackground"
-          />
-        ),
+        avatar: <RevealedAvatar who="you" size={64} />,
         name: screens.you,
       }}
       rightSide={{
-        avatar: (
-          <RevealedAvatar
-            name={screens.theirName}
-            size={64}
-            backgroundColor="$pinkBackground"
-          />
-        ),
+        avatar: <RevealedAvatar who="them" size={64} />,
         name: screens.theirName,
       }}
     />

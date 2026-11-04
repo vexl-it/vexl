@@ -199,7 +199,7 @@ export const en = {
         firstMessage: 'Hi! Is your offer still on? I’d like to buy €300 worth.',
         theirReply: 'It is. I can do Thursday at a café near the main station.',
         quickReply: 'Thursday works for me.',
-        theirFollowUp: 'Great. Want to reveal names before we meet?',
+        theirFollowUp: 'Great. Want to reveal names and photos before we meet?',
         vexlbot: 'Vexlbot',
         accepted: 'Accepted',
         reactionRequired: 'Reaction required',

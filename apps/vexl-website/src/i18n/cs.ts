@@ -201,7 +201,7 @@ export const cs: Messages = {
           'Ahoj! Platí ještě nabídka? Mám zájem o bitcoin za 7 000 Kč.',
         theirReply: 'Platí. Můžu ve čtvrtek v kavárně u hlavního nádraží.',
         quickReply: 'Čtvrtek mi sedí.',
-        theirFollowUp: 'Super. Odhalíme si před schůzkou jména?',
+        theirFollowUp: 'Super. Odhalíme si před schůzkou jména a fotky?',
         vexlbot: 'Vexlbot',
         accepted: 'Přijato',
         reactionRequired: 'Vyžadována reakce',

@@ -52,12 +52,13 @@ a:focus-visible {
   }
 }
 
-/* Below 375px long words like Czech "Obchodujte" don't fit the big
-   headings. :root matches the specificity of Tamagui's atomic classes. */
-@media (max-width: 374px) {
-  :root h1.font_heading,
-  :root h2.font_heading {
-    font-size: 10vw;
+/* On phones the 40px headlines can't fit long Czech words like
+   "podporovateli", so they shrink with the viewport. _fos-f-size-6 is
+   Tamagui's class for that size; :root matches its specificity. */
+@media (max-width: 439px) {
+  :root h1._fos-f-size-6,
+  :root h2._fos-f-size-6 {
+    font-size: min(40px, 9vw);
     line-height: 1.15;
   }
 }

@@ -32,7 +32,8 @@ export function DemoAvatar({
   )
 }
 
-// Free Unsplash photos (Vitaly Gariev), self-hosted; the people are made up
+// Free Unsplash License photos by Vitaly Gariev (unsplash.com/photos/4HNK1yce-Vg
+// and /ui2jwKpbcBU), self-hosted; the people in the demo are made up
 const revealedPhotos = {
   you: '/images/demo-you.webp',
   them: '/images/demo-jana.webp',

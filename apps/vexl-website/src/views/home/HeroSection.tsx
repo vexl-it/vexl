@@ -1,19 +1,78 @@
 'use client'
 
-import {PageSection, Typography, XStack, YStack} from '@vexl-next/ui'
+import {
+  ChevronDown,
+  FilterBar,
+  PageSection,
+  Typography,
+  XStack,
+  YStack,
+} from '@vexl-next/ui'
+import {Array, pipe} from 'effect'
 import Image from 'next/image'
-import React from 'react'
+import React, {useState} from 'react'
+import {useTheme} from 'tamagui'
 import {DownloadCta} from '../../components/DownloadCta'
 import {useLocale} from '../../components/LocaleProvider'
+import {PhoneFrame} from '../../components/PhoneFrame'
+import {SiteLink} from '../../components/SiteLink'
+import {DemoOfferCard} from './mock/DemoOfferCard'
 
-// Positions match the avatar tiles around the phone on the old site
-const heroAvatars = [
-  {src: '/images/hero-avatar-1.webp', left: '7%', top: '33%'},
-  {src: '/images/hero-avatar-2.webp', left: '65%', top: '60%'},
-] as const
+type Side = 'buy' | 'sell'
+
+// Buying shows the offers of people who sell, and the other way round
+const offerSideFor = {buy: 'sell', sell: 'buy'} as const
+
+function MarketplaceMock(): React.JSX.Element {
+  const {t} = useLocale()
+  const mock = t.home.mock
+  const [sides, setSides] = useState<ReadonlySet<Side>>(new Set())
+  const visibleOffers = pipe(
+    mock.offers,
+    Array.filter(
+      (offer) =>
+        sides.size === 0 ||
+        pipe(
+          [...sides],
+          Array.some((side) => offerSideFor[side] === offer.side)
+        )
+    )
+  )
+
+  return (
+    <PhoneFrame label={mock.label}>
+      <YStack gap="$5" paddingTop="$7">
+        <Typography
+          variant="heading3"
+          color="$foregroundPrimary"
+          paddingHorizontal="$5"
+        >
+          {mock.marketplace}
+        </Typography>
+        <FilterBar<Side>
+          items={[
+            {label: mock.buy, value: 'buy'},
+            {label: mock.sell, value: 'sell'},
+          ]}
+          selectedValues={sides}
+          onSelectedValuesChange={setSides}
+        />
+        <YStack gap="$3" paddingHorizontal="$3">
+          {visibleOffers.map((offer, i) => (
+            <YStack key={offer.id} className="vexl-enter">
+              <DemoOfferCard offer={offer} avatar={i % 2 === 0 ? 0 : 2} />
+            </YStack>
+          ))}
+        </YStack>
+      </YStack>
+    </PhoneFrame>
+  )
+}
 
 export function HeroSection(): React.JSX.Element {
-  const {t} = useLocale()
+  const {t, path} = useLocale()
+  const theme = useTheme()
+
   return (
     <PageSection
       paddingTop="$7"
@@ -31,47 +90,37 @@ export function HeroSection(): React.JSX.Element {
         >
           {t.home.hero.text}
         </Typography>
-        <DownloadCta />
+        <XStack alignItems="center" gap="$8" flexWrap="wrap">
+          <DownloadCta />
+          <SiteLink href={`${path('/')}#how-it-works`}>
+            <XStack
+              role="none"
+              alignItems="center"
+              gap="$2"
+              hoverStyle={{opacity: 0.7}}
+            >
+              <Typography
+                variant="paragraphSmallBold"
+                color="$foregroundPrimary"
+              >
+                {t.home.hero.howItWorks}
+              </Typography>
+              <ChevronDown size={20} color={theme.accentYellowPrimary.get()} />
+            </XStack>
+          </SiteLink>
+        </XStack>
       </YStack>
       <XStack
         flex={1}
-        backgroundColor="$accentYellowPrimary"
-        borderRadius="$8"
         justifyContent="center"
         paddingTop="$9"
+        borderRadius="$8"
+        backgroundColor="$accentYellowPrimary"
         overflow="hidden"
-        height={420}
-        $lg={{height: 600, flexBasis: 0}}
+        height={560}
+        $lg={{flexBasis: 0, height: 640}}
       >
-        <Image
-          src="/images/hero-phone.webp"
-          alt=""
-          width={1080}
-          height={1699}
-          priority
-          sizes="(min-width: 1024px) 400px, 70vw"
-          style={{width: 'auto', height: '115%', objectFit: 'contain'}}
-        />
-        {heroAvatars.map((avatar) => (
-          <YStack
-            key={avatar.src}
-            aria-hidden
-            position="absolute"
-            left={avatar.left}
-            top={avatar.top}
-            width="24%"
-            maxWidth={140}
-          >
-            <Image
-              src={avatar.src}
-              alt=""
-              width={277}
-              height={277}
-              sizes="140px"
-              style={{width: '100%', height: 'auto'}}
-            />
-          </YStack>
-        ))}
+        <MarketplaceMock />
       </XStack>
     </PageSection>
   )

@@ -15,32 +15,52 @@ import Image from 'next/image'
 import {usePathname} from 'next/navigation'
 import React, {useState} from 'react'
 import {useTheme} from 'tamagui'
-import {externalLinks} from '../config/links'
 import {locales, localizedPath, otherLocale} from '../i18n/locales'
 import {useLocale} from './LocaleProvider'
 import {SiteLink} from './SiteLink'
 
-function useNavItems(): ReadonlyArray<{
+interface NavItem {
   readonly label: string
   readonly href: string
-}> {
-  const {t, path} = useLocale()
-  return [
-    {label: t.nav.community, href: path('/community')},
-    {label: t.nav.blog, href: path('/blog')},
-    {label: t.nav.faq, href: path('/faq')},
-    {label: t.nav.foundation, href: externalLinks.foundation},
-    {label: t.nav.leaderboard, href: externalLinks.leaderboard},
-  ]
+  readonly current: boolean
 }
 
 // Prerendering sees the internal /en route, the browser the public URL
 const localePrefix = new RegExp(`^/(${locales.join('|')})(?=/|$)`)
 
+function usePathWithoutLocale(): string {
+  return usePathname().replace(localePrefix, '') || '/'
+}
+
+function useNavItems(): readonly NavItem[] {
+  const {t, path} = useLocale()
+  const pathWithoutLocale = usePathWithoutLocale()
+  // A blog post lives under /post, so it highlights the blog too
+  const section = pathWithoutLocale.startsWith('/post/')
+    ? '/blog'
+    : pathWithoutLocale
+  const isIn = (prefix: string): boolean =>
+    section === prefix || section.startsWith(`${prefix}/`)
+
+  return [
+    {
+      label: t.nav.howItWorks,
+      href: `${path('/')}#how-it-works`,
+      current: false,
+    },
+    {
+      label: t.nav.community,
+      href: path('/community'),
+      current: isIn('/community'),
+    },
+    {label: t.nav.blog, href: path('/blog'), current: isIn('/blog')},
+    {label: t.nav.faq, href: path('/faq'), current: isIn('/faq')},
+  ]
+}
+
 function useOtherLanguageHref(): string {
   const {locale} = useLocale()
-  const pathWithoutLocale = usePathname().replace(localePrefix, '') || '/'
-  return localizedPath(otherLocale(locale), pathWithoutLocale)
+  return localizedPath(otherLocale(locale), usePathWithoutLocale())
 }
 
 function LanguageLink(): React.JSX.Element {
@@ -101,10 +121,12 @@ export function SiteHeader(): React.JSX.Element {
         </SiteLink>
         <XStack tag="nav" display="none" gap="$7" $lg={{display: 'flex'}}>
           {navItems.map((item) => (
-            <SiteLink key={item.href} href={item.href}>
+            <SiteLink key={item.href} href={item.href} current={item.current}>
               <Typography
                 variant="paragraphSmallBold"
-                color="$foregroundPrimary"
+                color={
+                  item.current ? '$accentYellowPrimary' : '$foregroundPrimary'
+                }
                 hoverStyle={{color: '$accentYellowPrimary'}}
               >
                 {item.label}
@@ -141,8 +163,13 @@ export function SiteHeader(): React.JSX.Element {
           $lg={{display: 'none'}}
         >
           {navItems.map((item) => (
-            <SiteLink key={item.href} href={item.href}>
-              <Typography variant="titlesSmall" color="$foregroundPrimary">
+            <SiteLink key={item.href} href={item.href} current={item.current}>
+              <Typography
+                variant="titlesSmall"
+                color={
+                  item.current ? '$accentYellowPrimary' : '$foregroundPrimary'
+                }
+              >
                 {item.label}
               </Typography>
             </SiteLink>

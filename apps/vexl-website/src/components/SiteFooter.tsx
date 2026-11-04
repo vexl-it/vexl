@@ -1,111 +1,68 @@
 'use client'
 
 import {
-  ArrowRight,
-  Book,
-  FlagReport,
+  Divider,
   PAGE_SECTION_MAX_WIDTH,
   Typography,
   XStack,
-  XTwitter,
   YStack,
-  type IconProps,
 } from '@vexl-next/ui'
 import Image from 'next/image'
 import React from 'react'
-import {useTheme} from 'tamagui'
 import {externalLinks} from '../config/links'
 import {formatMessage} from '../i18n/locales'
 import {useLocale} from './LocaleProvider'
 import {SiteLink} from './SiteLink'
 
-const ICON_SIZE = 28
-
-function ImageIcon({src}: {readonly src: string}): React.JSX.Element {
-  return (
-    <Image
-      src={src}
-      alt=""
-      width={ICON_SIZE}
-      height={ICON_SIZE}
-      style={{objectFit: 'contain'}}
-    />
-  )
+interface FooterLink {
+  readonly label: string
+  readonly href: string
 }
 
-function UiIcon({
-  icon: Icon,
-}: {
-  readonly icon: React.ComponentType<IconProps>
-}): React.JSX.Element {
-  const theme = useTheme()
-  return <Icon size={ICON_SIZE} color={theme.foregroundPrimary.get()} />
-}
-
-function FooterCard({
-  href,
-  icon,
+function FooterColumn({
   title,
   children,
 }: {
-  readonly href?: string
-  readonly icon: React.ReactNode
   readonly title: string
   readonly children: React.ReactNode
 }): React.JSX.Element {
-  const theme = useTheme()
-  const card = (
-    <YStack
-      role="none"
-      flex={1}
-      minWidth={200}
-      minHeight={200}
-      justifyContent="space-between"
-      gap="$5"
-      padding="$5"
-      borderRadius="$5"
-      backgroundColor="$backgroundSecondary"
-      hoverStyle={href ? {backgroundColor: '$backgroundTertiary'} : undefined}
-    >
-      {icon}
-      <YStack gap="$2">
-        <XStack alignItems="center" gap="$2">
-          <Typography variant="paragraphDemibold" color="$foregroundPrimary">
-            {title}
-          </Typography>
-          {href ? (
-            <ArrowRight size={18} color={theme.foregroundSecondary.get()} />
-          ) : null}
-        </XStack>
-        {children}
-      </YStack>
-    </YStack>
-  )
-  return href ? (
-    <SiteLink href={href} fill>
-      {card}
-    </SiteLink>
-  ) : (
-    <YStack flex={1} minWidth={200} $md={{flexBasis: 0}}>
-      {card}
+  return (
+    <YStack tag="nav" aria-label={title} gap="$4" minWidth={140}>
+      <Typography variant="paragraphSmallBold" color="$foregroundPrimary">
+        {title}
+      </Typography>
+      {children}
     </YStack>
   )
 }
 
-function FooterText({
-  children,
+function FooterLinks({
+  title,
+  links,
 }: {
-  readonly children: React.ReactNode
+  readonly title: string
+  readonly links: readonly FooterLink[]
 }): React.JSX.Element {
   return (
-    <Typography variant="description" color="$foregroundSecondary">
-      {children}
-    </Typography>
+    <FooterColumn title={title}>
+      {links.map((link) => (
+        <SiteLink key={link.href} href={link.href}>
+          <Typography
+            variant="paragraphSmall"
+            color="$foregroundSecondary"
+            hoverStyle={{color: '$foregroundPrimary'}}
+          >
+            {link.label}
+          </Typography>
+        </SiteLink>
+      ))}
+    </FooterColumn>
   )
 }
 
 export function SiteFooter(): React.JSX.Element {
   const {t, path} = useLocale()
+  const copy = t.footer
 
   return (
     <YStack
@@ -113,58 +70,78 @@ export function SiteFooter(): React.JSX.Element {
       width="100%"
       maxWidth={PAGE_SECTION_MAX_WIDTH}
       alignSelf="center"
-      gap="$7"
+      gap="$9"
       paddingHorizontal="$5"
-      paddingVertical="$9"
+      paddingTop="$10"
+      paddingBottom="$9"
       $lg={{paddingHorizontal: '$9'}}
     >
-      <YStack
-        gap="$3"
-        $md={{flexDirection: 'row', flexWrap: 'wrap'}}
-        $xl={{flexWrap: 'nowrap'}}
-      >
-        <FooterCard
-          href={externalLinks.youtube}
-          icon={<ImageIcon src="/images/social-youtube.svg" />}
-          title={t.footer.youtube.title}
-        >
-          <FooterText>{t.footer.youtube.text}</FooterText>
-        </FooterCard>
-        <FooterCard
-          href={externalLinks.x}
-          icon={<UiIcon icon={XTwitter} />}
-          title={t.footer.x.title}
-        >
-          <FooterText>{t.footer.x.text}</FooterText>
-        </FooterCard>
-        <FooterCard
-          href={externalLinks.nostr}
-          icon={<ImageIcon src="/images/social-nostr.webp" />}
-          title={t.footer.nostr.title}
-        >
-          <FooterText>{t.footer.nostr.text}</FooterText>
-        </FooterCard>
-        <FooterCard
-          href={externalLinks.brandManual}
-          icon={<UiIcon icon={Book} />}
-          title={t.footer.brand.title}
-        >
-          <FooterText>{t.footer.brand.text}</FooterText>
-        </FooterCard>
-        <FooterCard
-          icon={<UiIcon icon={FlagReport} />}
-          title={t.footer.contact.title}
-        >
-          <YStack>
-            {t.footer.contact.lines.map((line) => (
-              <FooterText key={line}>{line}</FooterText>
-            ))}
-            <SiteLink href={externalLinks.supportEmail} inline>
-              <FooterText>{t.footer.contact.email}</FooterText>
+      <YStack gap="$9" $lg={{flexDirection: 'row'}}>
+        <YStack gap="$5" maxWidth={320} $lg={{flex: 1}}>
+          <Image
+            src="/images/vexl-logo.webp"
+            alt="Vexl"
+            width={98}
+            height={30}
+          />
+          <Typography variant="paragraphSmall" color="$foregroundSecondary">
+            {copy.tagline}
+          </Typography>
+        </YStack>
+        <XStack flexWrap="wrap" gap="$9" rowGap="$8" $lg={{flex: 2}}>
+          <FooterLinks
+            title={copy.explore}
+            links={[
+              {label: t.nav.download, href: path('/download')},
+              {label: t.nav.howItWorks, href: `${path('/')}#how-it-works`},
+              {label: t.nav.community, href: path('/community')},
+              {label: t.nav.blog, href: path('/blog')},
+              {label: t.nav.faq, href: path('/faq')},
+            ]}
+          />
+          <FooterLinks
+            title={copy.about}
+            links={[
+              {label: copy.foundation, href: externalLinks.foundation},
+              {label: copy.github, href: externalLinks.github},
+              {label: copy.audit, href: path('/audit')},
+              {label: copy.leaderboard, href: externalLinks.leaderboard},
+              {label: copy.brand, href: externalLinks.brandManual},
+            ]}
+          />
+          <FooterLinks
+            title={copy.follow}
+            links={[
+              {label: copy.youtube, href: externalLinks.youtube},
+              {label: copy.x, href: externalLinks.x},
+              {label: copy.nostr, href: externalLinks.nostr},
+            ]}
+          />
+          <FooterColumn title={copy.contact.title}>
+            <YStack gap="$1">
+              {copy.contact.lines.map((line) => (
+                <Typography
+                  key={line}
+                  variant="paragraphSmall"
+                  color="$foregroundSecondary"
+                >
+                  {line}
+                </Typography>
+              ))}
+            </YStack>
+            <SiteLink href={externalLinks.supportEmail}>
+              <Typography
+                variant="paragraphSmall"
+                color="$foregroundPrimary"
+                hoverStyle={{color: '$accentYellowPrimary'}}
+              >
+                {copy.contact.email}
+              </Typography>
             </SiteLink>
-          </YStack>
-        </FooterCard>
+          </FooterColumn>
+        </XStack>
       </YStack>
+      <Divider />
       <XStack
         alignItems="center"
         justifyContent="space-between"
@@ -174,15 +151,15 @@ export function SiteFooter(): React.JSX.Element {
         <SiteLink href={path('/terms-privacy')}>
           <Typography
             variant="description"
-            color="$foregroundPrimary"
-            hoverStyle={{opacity: 0.7}}
+            color="$foregroundSecondary"
+            hoverStyle={{color: '$foregroundPrimary'}}
           >
-            {t.footer.terms}
+            {copy.terms}
           </Typography>
         </SiteLink>
         <Image src="/images/glasses-white.webp" alt="" width={44} height={20} />
         <Typography variant="description" color="$foregroundSecondary">
-          {formatMessage(t.footer.rights, {year: new Date().getFullYear()})}
+          {formatMessage(copy.rights, {year: new Date().getFullYear()})}
         </Typography>
       </XStack>
     </YStack>

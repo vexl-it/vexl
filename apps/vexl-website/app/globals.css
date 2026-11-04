@@ -1,0 +1,54 @@
+html {
+  scroll-behavior: smooth;
+}
+
+[id] {
+  scroll-margin-top: 88px;
+}
+
+@keyframes vexl-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+.vexl-enter {
+  animation: vexl-enter 280ms ease-out both;
+}
+
+@keyframes vexl-pulse {
+  50% {
+    box-shadow: 0 0 0 6px rgba(252, 205, 108, 0.25);
+  }
+}
+
+.vexl-pulse {
+  animation: vexl-pulse 1800ms ease-in-out infinite;
+}
+
+/* Exchange asks get struck through one by one once the list scrolls in */
+.vexl-strike-line {
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 360ms ease-out;
+}
+
+.vexl-in-view .vexl-strike-line {
+  transform: scaleX(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .vexl-enter,
+  .vexl-pulse {
+    animation: none;
+  }
+
+  .vexl-strike-line {
+    transition: none;
+  }
+}

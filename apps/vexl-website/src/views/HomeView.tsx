@@ -2,24 +2,20 @@
 
 import React from 'react'
 import {BottomCtaSection} from './home/BottomCtaSection'
-import {ClaimSection} from './home/ClaimSection'
-import {FeaturesSection} from './home/FeaturesSection'
-import {FoundationSection} from './home/FoundationSection'
+import {CommunitySection} from './home/CommunitySection'
 import {HeroSection} from './home/HeroSection'
-import {HowItWorksSection} from './home/HowItWorksSection'
 import {NoKycSection} from './home/NoKycSection'
-import {OpenSourceSection} from './home/OpenSourceSection'
+import {TradeSection} from './home/TradeSection'
+import {TrustSection} from './home/TrustSection'
 
 export function HomeView(): React.JSX.Element {
   return (
     <>
       <HeroSection />
-      <HowItWorksSection />
-      <FeaturesSection />
+      <TradeSection />
       <NoKycSection />
-      <OpenSourceSection />
-      <ClaimSection />
-      <FoundationSection />
+      <TrustSection />
+      <CommunitySection />
       <BottomCtaSection />
     </>
   )

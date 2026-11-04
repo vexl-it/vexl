@@ -1,7 +1,6 @@
 'use client'
 
 import {
-  Button,
   Camera,
   ChatBubble,
   EuroCurrency,
@@ -18,10 +17,11 @@ import {
   type IconProps,
 } from '@vexl-next/ui'
 import Image from 'next/image'
-import React from 'react'
+import React, {useEffect, useRef, useState} from 'react'
 import {useTheme} from 'tamagui'
 import {useLocale} from '../../components/LocaleProvider'
-import {SiteLink} from '../../components/SiteLink'
+
+const STRIKE_STAGGER_MS = 140
 
 const exchangeAsks = [
   {key: 'name', icon: UserProfile},
@@ -38,6 +38,31 @@ const vexlAsks = [
   {key: 'phone', icon: PhoneCall},
 ] as const
 
+/** True once the element has scrolled into view. */
+function useSeen<T extends Element>(): [React.RefObject<T | null>, boolean] {
+  const ref = useRef<T>(null)
+  const [seen, setSeen] = useState(false)
+
+  useEffect(() => {
+    const element = ref.current
+    if (!element) return
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry?.isIntersecting) return
+        setSeen(true)
+        observer.disconnect()
+      },
+      {threshold: 0.4}
+    )
+    observer.observe(element)
+    return () => {
+      observer.disconnect()
+    }
+  }, [])
+
+  return [ref, seen]
+}
+
 function AskRow({
   icon: Icon,
   label,
@@ -50,7 +75,7 @@ function AskRow({
   readonly textColor: '$foregroundSecondary' | '$black100'
 }): React.JSX.Element {
   return (
-    <XStack alignItems="center" gap="$4">
+    <XStack tag="li" alignItems="center" gap="$4">
       <Icon size={24} color={iconColor} />
       <Typography variant="paragraphSmall" color={textColor}>
         {label}
@@ -60,77 +85,92 @@ function AskRow({
 }
 
 export function NoKycSection(): React.JSX.Element {
-  const {t, path} = useLocale()
+  const {t} = useLocale()
   const theme = useTheme()
   const copy = t.home.noKyc
+  const [listRef, listSeen] = useSeen<HTMLDivElement>()
 
   return (
     <PageSection>
-      <Typography
-        tag="h2"
-        variant="display"
-        color="$foregroundPrimary"
-        textAlign="center"
-      >
-        {copy.title}
-      </Typography>
-      <YStack
-        gap="$5"
-        alignItems="stretch"
-        $md={{flexDirection: 'row', alignItems: 'center'}}
-      >
+      <YStack gap="$5" maxWidth={820}>
+        <Typography tag="h2" variant="display" color="$foregroundPrimary">
+          {copy.title}
+        </Typography>
+        <Typography variant="paragraph" color="$foregroundSecondary">
+          {copy.text}
+        </Typography>
+      </YStack>
+      <YStack gap="$5" $md={{flexDirection: 'row'}}>
         <YStack
+          ref={listRef}
+          className={listSeen ? 'vexl-in-view' : undefined}
           flex={1}
-          gap="$4"
+          gap="$5"
           padding="$7"
-          borderRadius="$5"
+          borderRadius="$8"
           backgroundColor="$backgroundSecondary"
+          $md={{flexBasis: 0}}
         >
           <Typography variant="paragraphSmallBold" color="$foregroundPrimary">
-            {copy.everyExchange}
+            {copy.exchangeTitle}
           </Typography>
-          {exchangeAsks.map(({key, icon}) => (
-            <AskRow
-              key={key}
-              icon={icon}
-              label={copy.exchangeAsks[key]}
-              iconColor={theme.foregroundTertiary.get()}
-              textColor="$foregroundSecondary"
-            />
-          ))}
+          <YStack tag="ul" gap="$4" margin={0} padding={0}>
+            {exchangeAsks.map(({key, icon}, i) => (
+              <YStack key={key} position="relative" alignSelf="flex-start">
+                <AskRow
+                  icon={icon}
+                  label={copy.exchangeAsks[key]}
+                  iconColor={theme.foregroundTertiary.get()}
+                  textColor="$foregroundSecondary"
+                />
+                <YStack
+                  aria-hidden
+                  className="vexl-strike-line"
+                  position="absolute"
+                  left={0}
+                  right={0}
+                  top="50%"
+                  height={2}
+                  backgroundColor="$redLight"
+                  style={{transitionDelay: `${i * STRIKE_STAGGER_MS}ms`}}
+                />
+              </YStack>
+            ))}
+          </YStack>
         </YStack>
         <YStack
           flex={1}
-          gap="$4"
+          gap="$5"
           padding="$7"
-          borderRadius="$5"
-          backgroundColor="$white100"
-          theme="light"
+          borderRadius="$8"
+          backgroundColor="$accentYellowPrimary"
+          $md={{flexBasis: 0}}
         >
-          <Typography variant="heading3" color="$black100">
-            vexl:
+          <Typography variant="paragraphSmallBold" color="$black100">
+            {copy.vexlTitle}
           </Typography>
-          {vexlAsks.map(({key, icon}) => (
-            <AskRow
-              key={key}
-              icon={icon}
-              label={copy.vexlAsks[key]}
-              iconColor={tokens.color.black100.val}
-              textColor="$black100"
-            />
-          ))}
-          <XStack justifyContent="flex-end">
+          <YStack tag="ul" gap="$4" margin={0} padding={0}>
+            {vexlAsks.map(({key, icon}) => (
+              <AskRow
+                key={key}
+                icon={icon}
+                label={copy.vexlAsks[key]}
+                iconColor={tokens.color.black100.val}
+                textColor="$black100"
+              />
+            ))}
+          </YStack>
+          <XStack flex={1} alignItems="flex-end" gap="$4">
+            <YStack flex={1}>
+              <ChatBubble text={copy.message} isMine={false} />
+            </YStack>
             <Image
               src="/images/kyc-avatar.webp"
               alt=""
-              width={120}
-              height={160}
+              width={90}
+              height={120}
             />
           </XStack>
-          <ChatBubble text={copy.message} isMine={false} />
-          <SiteLink href={path('/download')}>
-            <Button role="none">{t.downloadVexl}</Button>
-          </SiteLink>
         </YStack>
       </YStack>
     </PageSection>

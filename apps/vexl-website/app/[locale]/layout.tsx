@@ -7,6 +7,7 @@ import {SiteHeader} from '../../src/components/SiteHeader'
 import {TamaguiRoot} from '../../src/components/TamaguiRoot'
 import {locales} from '../../src/i18n/locales'
 import {resolveLocale} from '../../src/pageParams'
+import '../globals.css'
 
 export const dynamicParams = false
 

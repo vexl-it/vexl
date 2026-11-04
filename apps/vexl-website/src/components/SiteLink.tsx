@@ -14,6 +14,7 @@ export interface SiteLinkProps {
   readonly inline?: boolean
   readonly fill?: boolean
   readonly current?: boolean
+  readonly onPress?: () => void
 }
 
 export function SiteLink({
@@ -23,6 +24,7 @@ export function SiteLink({
   inline = false,
   fill = false,
   current = false,
+  onPress,
 }: SiteLinkProps): React.JSX.Element {
   const external = isExternal(href)
   return (
@@ -30,6 +32,7 @@ export function SiteLink({
       href={href}
       aria-label={label}
       aria-current={current ? 'page' : undefined}
+      onClick={onPress}
       target={external ? '_blank' : undefined}
       rel={external ? 'noopener noreferrer' : undefined}
       prefetch={false}

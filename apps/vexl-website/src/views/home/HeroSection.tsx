@@ -4,6 +4,7 @@ import {
   ChevronDown,
   FilterBar,
   PageSection,
+  ScrollView,
   Typography,
   XStack,
   YStack,
@@ -26,7 +27,7 @@ const offerSideFor = {buy: 'sell', sell: 'buy'} as const
 function MarketplaceMock(): React.JSX.Element {
   const {t} = useLocale()
   const mock = t.home.mock
-  const [sides, setSides] = useState<ReadonlySet<Side>>(new Set())
+  const [sides, setSides] = useState<ReadonlySet<Side>>(new Set(['buy']))
   const visibleOffers = pipe(
     mock.offers,
     Array.filter(
@@ -41,7 +42,7 @@ function MarketplaceMock(): React.JSX.Element {
 
   return (
     <PhoneFrame label={mock.label}>
-      <YStack gap="$5" paddingTop="$7">
+      <YStack flex={1} gap="$5" paddingTop="$7">
         <Typography
           variant="heading3"
           color="$foregroundPrimary"
@@ -49,21 +50,26 @@ function MarketplaceMock(): React.JSX.Element {
         >
           {mock.marketplace}
         </Typography>
-        <FilterBar<Side>
-          items={[
-            {label: mock.buy, value: 'buy'},
-            {label: mock.sell, value: 'sell'},
-          ]}
-          selectedValues={sides}
-          onSelectedValuesChange={setSides}
-        />
-        <YStack gap="$3" paddingHorizontal="$3">
-          {visibleOffers.map((offer, i) => (
-            <YStack key={offer.id} className="vexl-enter">
-              <DemoOfferCard offer={offer} avatar={i % 2 === 0 ? 0 : 2} />
-            </YStack>
-          ))}
+        {/* The filter scrolls sideways; without this it also grows tall */}
+        <YStack flexGrow={0}>
+          <FilterBar<Side>
+            items={[
+              {label: mock.buy, value: 'buy'},
+              {label: mock.sell, value: 'sell'},
+            ]}
+            selectedValues={sides}
+            onSelectedValuesChange={setSides}
+          />
         </YStack>
+        <ScrollView flex={1} contentContainerStyle={{flexGrow: 1}}>
+          <YStack gap="$3" paddingHorizontal="$3" paddingBottom="$3">
+            {visibleOffers.map((offer, i) => (
+              <YStack key={offer.id} className="vexl-enter">
+                <DemoOfferCard offer={offer} avatar={i % 2 === 0 ? 0 : 2} />
+              </YStack>
+            ))}
+          </YStack>
+        </ScrollView>
       </YStack>
     </PhoneFrame>
   )
@@ -76,9 +82,11 @@ export function HeroSection(): React.JSX.Element {
   return (
     <PageSection
       paddingTop="$7"
-      $lg={{flexDirection: 'row', alignItems: 'center', paddingTop: '$9'}}
+      $lg={{paddingTop: '$9'}}
+      // Two columns only once the headline column fits Czech "Obchodujte"
+      $xl={{flexDirection: 'row', alignItems: 'center'}}
     >
-      <YStack flex={1} gap="$7" $lg={{flexBasis: 0}}>
+      <YStack flex={1} gap="$7" $xl={{flexBasis: 0, flexGrow: 1.3}}>
         <Image src="/images/glasses-white.webp" alt="" width={56} height={25} />
         <Typography tag="h1" variant="display" color="$foregroundPrimary">
           {t.home.hero.title}
@@ -113,12 +121,10 @@ export function HeroSection(): React.JSX.Element {
       <XStack
         flex={1}
         justifyContent="center"
-        paddingTop="$9"
+        paddingVertical="$9"
         borderRadius="$8"
         backgroundColor="$accentYellowPrimary"
-        overflow="hidden"
-        height={560}
-        $lg={{flexBasis: 0, height: 640}}
+        $xl={{flexBasis: 0}}
       >
         <MarketplaceMock />
       </XStack>

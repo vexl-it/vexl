@@ -3,7 +3,7 @@ import {type Messages} from './en'
 export const cs: Messages = {
   meta: {
     home: {
-      title: 'Soukromé P2P obchodování Bitcoinu | Vexl',
+      title: 'Soukromé P2P obchodování bitcoinu | Vexl',
       description:
         'Vexl je mobilní aplikace, která svým uživatelům poskytuje jednoduchý, dostupný a bezpečný způsob jak obchodovat bitcoin tak, jak bylo zamýšleno - p2p a bez KYC.',
     },
@@ -91,7 +91,7 @@ export const cs: Messages = {
       howItWorks: 'Jak to funguje',
     },
     mock: {
-      label: 'Ukázka aplikace Vexl. Všechny osoby jsou smyšlené.',
+      label: 'Interaktivní ukázka. Lidé jsou smyšlení.',
       marketplace: 'Tržiště',
       buy: 'Koupit',
       sell: 'Prodat',
@@ -106,7 +106,7 @@ export const cs: Messages = {
           side: 'sell',
           direct: false,
           price: '5 000 – 25 000 Kč',
-          description: 'Prodám bitcoin za hotovost. Rád se potkám u kávy.',
+          description: 'Prodám bitcoin za hotovost. Klidně se potkáme u kávy.',
           place: 'Praha',
           commonFriends: '2 společní přátelé',
           trusted: '1 důvěryhodný',
@@ -116,7 +116,7 @@ export const cs: Messages = {
           side: 'sell',
           direct: true,
           price: '1 000 – 8 000 Kč',
-          description: 'I malé částky. Poprvé? Vším vás provedu.',
+          description: 'I malé částky. Poprvé? Se vším vás provedu.',
           place: 'Brno',
           commonFriends: '5 společných přátel',
         },
@@ -147,6 +147,7 @@ export const cs: Messages = {
       stepOf: 'Krok {step} z {total}',
       next: 'Další krok',
       restart: 'Začít znovu',
+      stepAnnouncement: 'Krok {step} z {total}: {title}',
       steps: {
         offer: {
           title: 'Najděte nabídku ve své síti',
@@ -154,11 +155,11 @@ export const cs: Messages = {
         },
         friends: {
           title: 'Podívejte se, koho máte společného',
-          text: 'U každé nabídky vidíte společné přátele, takže se můžete poptat, než odpovíte. Kontakty zůstávají ve vašem telefonu. Vexl je nevidí.',
+          text: 'U každé nabídky vidíte společné přátele, takže se můžete poptat, než odpovíte. Vexl nevidí, kdo jsou vaše kontakty.',
         },
         chat: {
           title: 'Nejdřív chat. Rozhodnutí později.',
-          text: 'Zprávy jsou šifrované end-to-end. Domluvte se na částce, místě a čase. Pro druhou stranu jste pořád jen avatar.',
+          text: 'Jakmile druhá strana přijme vaši žádost, můžete chatovat. Zprávy jsou šifrované end-to-end a pro druhou stranu jste pořád jen avatar. Chcete se odhalit? Rozhodnete vy.',
         },
         reveal: {
           title: 'Odhalte se, až budete připraveni',
@@ -174,19 +175,24 @@ export const cs: Messages = {
           'Možná se přímo neznáte, ale spojují vás tito společní přátelé.',
         trustedLabel: 'Důvěryhodný',
         friends: ['Anna', 'Marek'],
-        sendMessage: 'Napsat zprávu',
-        firstMessage: 'Ahoj! Platí ještě nabídka? Koupil bych za 7 000 Kč.',
+        sendRequest: 'Odeslat žádost',
+        requestAccepted: 'Vaše žádost byla přijata.',
+        firstMessage:
+          'Ahoj! Platí ještě nabídka? Mám zájem o bitcoin za 7 000 Kč.',
         theirReply: 'Platí. Můžu ve čtvrtek v kavárně u hlavního nádraží.',
         quickReply: 'Čtvrtek mi sedí.',
         theirFollowUp: 'Super. Odhalíme si před schůzkou jména?',
-        reveal: 'Odhalit identity',
         vexlbot: 'Vexlbot',
-        pending: 'Čeká se',
-        youAsked: 'Požádali jste o odhalení identit',
-        detailsHidden:
-          'Vaše údaje zůstanou skryté, dokud druhá strana nesouhlasí.',
+        accepted: 'Přijato',
+        reactionRequired: 'Vyžadována reakce',
+        theyWant: 'Druhá strana chce odhalit identity',
+        sameDetails: 'Buď odhalíte jména oba, nebo nikdo.',
+        noThanks: 'Ne, díky',
+        agree: 'Odhalit',
+        declined: 'Odhalení jste odmítli',
+        nothingRevealed: 'Žádné nové údaje se neodhalily. Můžete dál chatovat.',
         revealed: 'Identity odhaleny',
-        bothRevealed: 'Oba jste odhalili: jméno, fotku',
+        bothRevealed: 'Oba jste odhalili: jméno',
         you: 'Vy',
         theirName: 'Jana',
         lastMessage: 'Tak ve čtvrtek. Nejdřív hotovost, pak pošlu bitcoin.',
@@ -230,7 +236,7 @@ export const cs: Messages = {
         action: 'Přečíst audit',
       },
       foundation: {
-        title: 'Neziskově',
+        title: 'Nadační fond',
         text: 'Vexl tvoří Nadační fond Vexl společně se všemi, kdo chtějí svobodný a otevřený finanční svět.',
         action: 'Poznat nadační fond',
       },

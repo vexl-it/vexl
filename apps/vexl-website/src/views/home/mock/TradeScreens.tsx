@@ -8,19 +8,19 @@ import {
   CommonFriends,
   ExchangeRevealCard,
   NavigationBar,
+  ScrollView,
   Typography,
+  XStack,
   YStack,
 } from '@vexl-next/ui'
 import {Array, pipe} from 'effect'
-import React, {useEffect, useState} from 'react'
+import React, {useRef, useState} from 'react'
 import {useLocale} from '../../../components/LocaleProvider'
 import {NativeButton} from '../../../components/NativeButton'
-import {DemoAvatar} from './DemoAvatar'
+import {DemoAvatar, RevealedAvatar} from './DemoAvatar'
 import {DemoOfferCard} from './DemoOfferCard'
 
-const REVEAL_ANSWER_DELAY_MS = 1600
 const ANONYMOUS_AVATAR = 0
-const REVEALED_AVATAR = 4
 
 export function OfferScreen({
   onOpenOffer,
@@ -67,10 +67,10 @@ export function OfferScreen({
 
 export function FriendsScreen({
   onBack,
-  onMessage,
+  onRequest,
 }: {
   readonly onBack: () => void
-  readonly onMessage: () => void
+  readonly onRequest: () => void
 }): React.JSX.Element {
   const {t} = useLocale()
   const screens = t.home.trade.screens
@@ -81,7 +81,11 @@ export function FriendsScreen({
       <NavigationBar
         style="back"
         title={screens.offerTitle}
-        leftAction={{icon: ArrowLeft, onPress: onBack}}
+        leftAction={{
+          icon: ArrowLeft,
+          onPress: onBack,
+          accessibilityLabel: screens.back,
+        }}
       />
       <YStack flex={1} gap="$5" paddingHorizontal="$3" paddingTop="$3">
         {featured ? <DemoOfferCard offer={featured} avatar={0} /> : null}
@@ -102,7 +106,7 @@ export function FriendsScreen({
         />
       </YStack>
       <YStack padding="$3">
-        <Button onPress={onMessage}>{screens.sendMessage}</Button>
+        <Button onPress={onRequest}>{screens.sendRequest}</Button>
       </YStack>
     </YStack>
   )
@@ -123,10 +127,17 @@ function ChatHeader({
       }
       subtitle={featured?.commonFriends}
       avatar={
-        <DemoAvatar
-          index={revealed ? REVEALED_AVATAR : ANONYMOUS_AVATAR}
-          size={40}
-        />
+        revealed ? (
+          <YStack className="vexl-enter">
+            <RevealedAvatar
+              name={t.home.trade.screens.theirName}
+              size={40}
+              backgroundColor="$pinkBackground"
+            />
+          </YStack>
+        ) : (
+          <DemoAvatar index={ANONYMOUS_AVATAR} size={40} />
+        )
       }
     />
   )
@@ -146,6 +157,80 @@ function Message({
   )
 }
 
+/** Scrolls to the latest message, like a chat does. */
+function ChatBody({
+  children,
+}: {
+  readonly children: React.ReactNode
+}): React.JSX.Element {
+  const scrollRef = useRef<React.ComponentRef<typeof ScrollView>>(null)
+  return (
+    <ScrollView
+      ref={scrollRef}
+      flex={1}
+      contentContainerStyle={{flexGrow: 1, justifyContent: 'flex-end'}}
+      onContentSizeChange={() => {
+        scrollRef.current?.scrollToEnd({animated: false})
+      }}
+    >
+      <YStack gap="$3" padding="$3">
+        {children}
+      </YStack>
+    </ScrollView>
+  )
+}
+
+type RevealChoice = 'undecided' | 'declined'
+
+function RevealRequestCard({
+  onReveal,
+}: {
+  readonly onReveal: () => void
+}): React.JSX.Element {
+  const {t} = useLocale()
+  const screens = t.home.trade.screens
+  const [choice, setChoice] = useState<RevealChoice>('undecided')
+
+  if (choice === 'declined')
+    return (
+      <YStack className="vexl-enter">
+        <BotMessageCard
+          senderLabel={screens.vexlbot}
+          title={screens.declined}
+          description={screens.nothingRevealed}
+          muted
+        />
+      </YStack>
+    )
+
+  return (
+    <YStack className="vexl-enter">
+      <BotMessageCard
+        senderLabel={screens.vexlbot}
+        statusLabel={screens.reactionRequired}
+        title={screens.theyWant}
+        details={[screens.sameDetails]}
+      >
+        <XStack gap="$3" width="100%">
+          <Button
+            flex={1}
+            size="medium"
+            variant="secondary"
+            onPress={() => {
+              setChoice('declined')
+            }}
+          >
+            {screens.noThanks}
+          </Button>
+          <Button flex={1} size="medium" onPress={onReveal}>
+            {screens.agree}
+          </Button>
+        </XStack>
+      </BotMessageCard>
+    </YStack>
+  )
+}
+
 export function ChatScreen({
   onReveal,
 }: {
@@ -158,20 +243,25 @@ export function ChatScreen({
   return (
     <YStack flex={1}>
       <ChatHeader revealed={false} />
-      <YStack flex={1} justifyContent="flex-end" gap="$3" padding="$3">
+      <ChatBody>
         <Message text={screens.firstMessage} isMine />
+        <BotMessageCard
+          senderLabel={screens.vexlbot}
+          statusLabel={screens.accepted}
+          statusVariant="accepted"
+          title={screens.requestAccepted}
+        />
         <Message text={screens.theirReply} isMine={false} />
         {replied ? (
           <>
             <Message text={screens.quickReply} isMine />
             <Message text={screens.theirFollowUp} isMine={false} />
+            <RevealRequestCard onReveal={onReveal} />
           </>
         ) : null}
-      </YStack>
-      <YStack padding="$3">
-        {replied ? (
-          <Button onPress={onReveal}>{screens.reveal}</Button>
-        ) : (
+      </ChatBody>
+      {replied ? null : (
+        <YStack padding="$3">
           <Button
             variant="secondary"
             onPress={() => {
@@ -180,8 +270,8 @@ export function ChatScreen({
           >
             {screens.quickReply}
           </Button>
-        )}
-      </YStack>
+        </YStack>
+      )}
     </YStack>
   )
 }
@@ -189,52 +279,41 @@ export function ChatScreen({
 export function RevealScreen(): React.JSX.Element {
   const {t} = useLocale()
   const screens = t.home.trade.screens
-  const [agreed, setAgreed] = useState(false)
-
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      setAgreed(true)
-    }, REVEAL_ANSWER_DELAY_MS)
-    return () => {
-      clearTimeout(timeout)
-    }
-  }, [])
 
   return (
     <YStack flex={1}>
-      <ChatHeader revealed={agreed} />
-      <YStack flex={1} justifyContent="flex-end" gap="$3" padding="$3">
+      <ChatHeader revealed />
+      <ChatBody>
         <ChatBubble text={screens.quickReply} isMine />
         <ChatBubble text={screens.theirFollowUp} isMine={false} />
-        {agreed ? (
-          <>
-            <YStack className="vexl-enter">
-              <ExchangeRevealCard
-                title={screens.revealed}
-                description={screens.bothRevealed}
-                leftSide={{
-                  avatar: <DemoAvatar index={3} size={64} />,
-                  name: screens.you,
-                }}
-                rightSide={{
-                  avatar: <DemoAvatar index={REVEALED_AVATAR} size={64} />,
-                  name: screens.theirName,
-                }}
-              />
-            </YStack>
-            <Message text={screens.lastMessage} isMine={false} />
-          </>
-        ) : (
-          <YStack className="vexl-enter">
-            <BotMessageCard
-              senderLabel={screens.vexlbot}
-              statusLabel={screens.pending}
-              title={screens.youAsked}
-              details={[screens.detailsHidden]}
-            />
-          </YStack>
-        )}
-      </YStack>
+        <YStack className="vexl-enter">
+          <ExchangeRevealCard
+            title={screens.revealed}
+            description={screens.bothRevealed}
+            leftSide={{
+              avatar: (
+                <RevealedAvatar
+                  name={screens.you}
+                  size={64}
+                  backgroundColor="$greenBackground"
+                />
+              ),
+              name: screens.you,
+            }}
+            rightSide={{
+              avatar: (
+                <RevealedAvatar
+                  name={screens.theirName}
+                  size={64}
+                  backgroundColor="$pinkBackground"
+                />
+              ),
+              name: screens.theirName,
+            }}
+          />
+        </YStack>
+        <Message text={screens.lastMessage} isMine={false} />
+      </ChatBody>
     </YStack>
   )
 }

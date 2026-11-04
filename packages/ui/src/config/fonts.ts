@@ -107,6 +107,8 @@ export const typographyVariantStyles = {
     fontWeight: '400',
     lineHeight: 52,
     letterSpacing: -1,
+    // Long words like Czech "Obchodujte" must not split mid-word
+    wordWrap: 'normal',
     $lg: {
       fontSize: '$7',
       lineHeight: 76,

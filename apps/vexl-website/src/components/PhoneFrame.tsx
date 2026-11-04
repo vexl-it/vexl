@@ -1,6 +1,6 @@
 'use client'
 
-import {YStack} from '@vexl-next/ui'
+import {Typography, XStack, YStack} from '@vexl-next/ui'
 import React from 'react'
 import {Theme} from 'tamagui'
 
@@ -16,28 +16,40 @@ export function PhoneFrame({
   readonly children: React.ReactNode
 }): React.JSX.Element {
   return (
-    <YStack
-      role="group"
-      aria-label={label}
-      flexShrink={0}
-      padding="$3"
-      borderRadius="$11"
-      backgroundColor="$black100"
-      borderWidth={1}
-      borderColor="$backgroundTertiary"
-      boxShadow="0 32px 64px rgba(0, 0, 0, 0.35)"
-    >
-      <Theme name="dark">
-        <YStack
-          width={SCREEN_WIDTH}
-          height={SCREEN_HEIGHT}
-          borderRadius="$9"
-          overflow="hidden"
-          backgroundColor="$backgroundPrimary"
-        >
-          {children}
-        </YStack>
-      </Theme>
+    <YStack alignItems="center" gap="$4" flexShrink={0}>
+      <XStack
+        aria-hidden
+        paddingHorizontal="$4"
+        paddingVertical="$2"
+        borderRadius="$11"
+        backgroundColor="$black100"
+      >
+        <Typography variant="description" color="$white100">
+          {label}
+        </Typography>
+      </XStack>
+      <YStack
+        role="group"
+        aria-label={label}
+        padding="$3"
+        borderRadius="$11"
+        backgroundColor="$black100"
+        borderWidth={1}
+        borderColor="$backgroundTertiary"
+        boxShadow="0 32px 64px rgba(0, 0, 0, 0.35)"
+      >
+        <Theme name="dark">
+          <YStack
+            width={SCREEN_WIDTH}
+            height={SCREEN_HEIGHT}
+            borderRadius="$9"
+            overflow="hidden"
+            backgroundColor="$backgroundPrimary"
+          >
+            {children}
+          </YStack>
+        </Theme>
+      </YStack>
     </YStack>
   )
 }

@@ -1,7 +1,7 @@
 export const en = {
   meta: {
     home: {
-      title: 'Trade Bitcoin Privately P2P | Vexl',
+      title: 'Trade bitcoin privately, peer-to-peer | Vexl',
       description:
         'Buy and sell bitcoin peer-to-peer with friends and friends of friends. No KYC, no middlemen, end-to-end encrypted chat. Open source and non-profit.',
     },
@@ -89,7 +89,7 @@ export const en = {
       howItWorks: 'See how it works',
     },
     mock: {
-      label: 'Example of the Vexl app. Everyone in it is made up.',
+      label: 'Interactive demo. The people are made up.',
       marketplace: 'Marketplace',
       buy: 'Buy',
       sell: 'Sell',
@@ -146,6 +146,7 @@ export const en = {
       stepOf: 'Step {step} of {total}',
       next: 'Next step',
       restart: 'Start over',
+      stepAnnouncement: 'Step {step} of {total}: {title}',
       steps: {
         offer: {
           title: 'Find an offer in your network',
@@ -153,11 +154,11 @@ export const en = {
         },
         friends: {
           title: 'See who you have in common',
-          text: 'Every offer shows your common friends, so you can ask around before you reply. Your contacts stay on your phone. Vexl can’t see them.',
+          text: 'Every offer shows your common friends, so you can ask around before you reply. Vexl can’t see who your contacts are.',
         },
         chat: {
           title: 'Chat first. Decide later.',
-          text: 'Messages are end-to-end encrypted. Agree on the amount, the place, and the time. To the other person, you’re still just an avatar.',
+          text: 'Once they accept your request, you can chat. Messages are end-to-end encrypted, and to them you’re still just an avatar. Want to reveal yourselves? You decide.',
         },
         reveal: {
           title: 'Reveal yourselves when you’re ready',
@@ -173,18 +174,23 @@ export const en = {
           'You may not know each other directly, but you’re connected through these friends.',
         trustedLabel: 'Trusted',
         friends: ['Anna', 'Marek'],
-        sendMessage: 'Send a message',
+        sendRequest: 'Send request',
+        requestAccepted: 'Your request was accepted.',
         firstMessage: 'Hi! Is your offer still on? I’d like to buy €300 worth.',
         theirReply: 'It is. I can do Thursday at a café near the main station.',
         quickReply: 'Thursday works for me.',
         theirFollowUp: 'Great. Want to reveal names before we meet?',
-        reveal: 'Reveal identities',
         vexlbot: 'Vexlbot',
-        pending: 'Pending',
-        youAsked: 'You asked to reveal identities',
-        detailsHidden: 'Your details stay hidden until they agree.',
+        accepted: 'Accepted',
+        reactionRequired: 'Reaction required',
+        theyWant: 'They want to reveal identities',
+        sameDetails: 'You both reveal your names, or nobody does.',
+        noThanks: 'No, thanks',
+        agree: 'Reveal',
+        declined: 'You declined to reveal',
+        nothingRevealed: 'No new details were revealed. You can keep chatting.',
         revealed: 'Identities revealed',
-        bothRevealed: 'You both revealed: name, photo',
+        bothRevealed: 'You both revealed: name',
         you: 'You',
         theirName: 'Jana',
         lastMessage: 'See you Thursday. Cash first, then I send the bitcoin.',

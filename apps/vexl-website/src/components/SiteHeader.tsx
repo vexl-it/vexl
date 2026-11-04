@@ -163,7 +163,15 @@ export function SiteHeader(): React.JSX.Element {
           $lg={{display: 'none'}}
         >
           {navItems.map((item) => (
-            <SiteLink key={item.href} href={item.href} current={item.current}>
+            <SiteLink
+              key={item.href}
+              href={item.href}
+              current={item.current}
+              // Same-page anchors don't change the pathname that closes the menu
+              onPress={() => {
+                setMenuOpenedAt(null)
+              }}
+            >
               <Typography
                 variant="titlesSmall"
                 color={

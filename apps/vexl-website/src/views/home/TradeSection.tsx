@@ -1,10 +1,11 @@
 'use client'
 
 import {Button, PageSection, Typography, XStack, YStack} from '@vexl-next/ui'
-import React, {useState} from 'react'
+import React, {useEffect, useRef, useState} from 'react'
 import {useLocale} from '../../components/LocaleProvider'
 import {NativeButton} from '../../components/NativeButton'
 import {PhoneFrame} from '../../components/PhoneFrame'
+import {SiteLink} from '../../components/SiteLink'
 import {formatMessage} from '../../i18n/locales'
 import {
   ChatScreen,
@@ -15,6 +16,32 @@ import {
 
 const steps = ['offer', 'friends', 'chat', 'reveal'] as const
 type Step = (typeof steps)[number]
+
+function StepNumber({
+  number,
+  active,
+}: {
+  readonly number: number
+  readonly active: boolean
+}): React.JSX.Element {
+  return (
+    <YStack
+      width="$8"
+      height="$8"
+      borderRadius="$11"
+      alignItems="center"
+      justifyContent="center"
+      backgroundColor={active ? '$accentYellowPrimary' : '$backgroundTertiary'}
+    >
+      <Typography
+        variant="paragraphSmallBold"
+        color={active ? '$black100' : '$foregroundSecondary'}
+      >
+        {number}
+      </Typography>
+    </YStack>
+  )
+}
 
 function StepItem({
   number,
@@ -37,25 +64,12 @@ function StepItem({
       borderRadius="$5"
       backgroundColor={active ? '$backgroundSecondary' : '$transparent'}
       hoverStyle={{backgroundColor: '$backgroundSecondary'}}
+      // Phones show only the current step, next to the phone mock
+      display={active ? 'flex' : 'none'}
+      $lg={{display: 'flex'}}
     >
       <XStack gap="$4">
-        <YStack
-          width="$8"
-          height="$8"
-          borderRadius="$11"
-          alignItems="center"
-          justifyContent="center"
-          backgroundColor={
-            active ? '$accentYellowPrimary' : '$backgroundTertiary'
-          }
-        >
-          <Typography
-            variant="paragraphSmallBold"
-            color={active ? '$black100' : '$foregroundSecondary'}
-          >
-            {number}
-          </Typography>
-        </YStack>
+        <StepNumber number={number} active={active} />
         <YStack flex={1} gap="$3" paddingTop="$1">
           <Typography
             variant="titlesSmall"
@@ -79,12 +93,22 @@ function StepItem({
 }
 
 export function TradeSection(): React.JSX.Element {
-  const {t} = useLocale()
+  const {t, path} = useLocale()
   const copy = t.home.trade
   const [step, setStep] = useState<Step>('offer')
   // Bumped on restart so the screens drop their own state
   const [run, setRun] = useState(0)
+  const screenRef = useRef<HTMLDivElement>(null)
+  const shownStep = useRef(step)
   const stepIndex = steps.indexOf(step)
+
+  // A tap inside the phone swaps its screen and drops the focused control
+  useEffect(() => {
+    if (shownStep.current === step) return
+    shownStep.current = step
+    if (document.activeElement === document.body) screenRef.current?.focus()
+  }, [step])
+
   const nextStep = steps[stepIndex + 1]
 
   const restart = (): void => {
@@ -105,7 +129,7 @@ export function TradeSection(): React.JSX.Element {
         onBack={() => {
           setStep('offer')
         }}
-        onMessage={() => {
+        onRequest={() => {
           setStep('chat')
         }}
       />
@@ -120,35 +144,26 @@ export function TradeSection(): React.JSX.Element {
     reveal: <RevealScreen />,
   }[step]
 
+  const stepTitle = copy.steps[step].title
+
   return (
-    <PageSection id="how-it-works">
-      <YStack gap="$4" maxWidth={760}>
-        <Typography variant="paragraphSmallBold" color="$accentYellowPrimary">
-          {copy.eyebrow}
-        </Typography>
-        <Typography tag="h2" variant="display" color="$foregroundPrimary">
-          {copy.title}
-        </Typography>
-        <Typography variant="paragraph" color="$foregroundSecondary">
-          {copy.text}
-        </Typography>
-      </YStack>
-      <YStack gap="$7" $lg={{flexDirection: 'row-reverse', gap: '$9'}}>
-        <XStack
-          flex={1}
-          justifyContent="center"
-          paddingVertical="$9"
-          borderRadius="$8"
-          backgroundColor="$backgroundSecondary"
-          $lg={{flexBasis: 0}}
-        >
-          <PhoneFrame label={t.home.mock.label}>
-            <YStack key={`${step}-${run}`} flex={1} className="vexl-enter">
-              {screen}
-            </YStack>
-          </PhoneFrame>
-        </XStack>
-        <YStack flex={1} gap="$2" justifyContent="center" $lg={{flexBasis: 0}}>
+    <PageSection
+      id="how-it-works"
+      $lg={{flexDirection: 'row', alignItems: 'center', gap: '$9'}}
+    >
+      <YStack flex={1} gap="$7" $lg={{flexBasis: 0}}>
+        <YStack gap="$4">
+          <Typography variant="paragraphSmallBold" color="$accentYellowPrimary">
+            {copy.eyebrow}
+          </Typography>
+          <Typography tag="h2" variant="heading1" color="$foregroundPrimary">
+            {copy.title}
+          </Typography>
+          <Typography variant="paragraph" color="$foregroundSecondary">
+            {copy.text}
+          </Typography>
+        </YStack>
+        <YStack gap="$2">
           {steps.map((key, i) => (
             <StepItem
               key={key}
@@ -161,37 +176,97 @@ export function TradeSection(): React.JSX.Element {
               }}
             />
           ))}
-          <XStack
-            alignItems="center"
-            justifyContent="space-between"
-            gap="$5"
-            paddingTop="$5"
-            paddingHorizontal="$5"
-          >
-            <Typography variant="description" color="$foregroundTertiary">
-              {formatMessage(copy.stepOf, {
-                step: stepIndex + 1,
-                total: steps.length,
-              })}
-            </Typography>
-            {nextStep ? (
-              <Button
-                size="medium"
-                variant="secondary"
+        </YStack>
+        <XStack
+          alignItems="center"
+          justifyContent="space-between"
+          gap="$5"
+          paddingHorizontal="$5"
+        >
+          <XStack gap="$2" $lg={{display: 'none'}}>
+            {steps.map((key, i) => (
+              <NativeButton
+                key={key}
+                label={copy.steps[key].title}
+                current={key === step ? 'step' : undefined}
                 onPress={() => {
-                  setStep(nextStep)
+                  setStep(key)
                 }}
+                borderRadius="$11"
               >
-                {copy.next}
-              </Button>
-            ) : (
+                <StepNumber number={i + 1} active={key === step} />
+              </NativeButton>
+            ))}
+          </XStack>
+          <Typography
+            display="none"
+            $lg={{display: 'flex'}}
+            variant="description"
+            color="$foregroundTertiary"
+          >
+            {formatMessage(copy.stepOf, {
+              step: stepIndex + 1,
+              total: steps.length,
+            })}
+          </Typography>
+          {nextStep ? (
+            <Button
+              size="medium"
+              variant="secondary"
+              onPress={() => {
+                setStep(nextStep)
+              }}
+            >
+              {copy.next}
+            </Button>
+          ) : (
+            <XStack gap="$3">
               <Button size="medium" variant="secondary" onPress={restart}>
                 {copy.restart}
               </Button>
-            )}
-          </XStack>
-        </YStack>
+              <SiteLink href={path('/download')}>
+                <Button role="none" size="medium">
+                  {t.downloadVexl}
+                </Button>
+              </SiteLink>
+            </XStack>
+          )}
+        </XStack>
       </YStack>
+      <XStack
+        flex={1}
+        justifyContent="center"
+        paddingVertical="$7"
+        borderRadius="$8"
+        backgroundColor="$backgroundSecondary"
+        $lg={{flexBasis: 0}}
+      >
+        <PhoneFrame label={t.home.mock.label}>
+          <YStack
+            key={`${step}-${run}`}
+            ref={screenRef}
+            tabIndex={-1}
+            aria-label={stepTitle}
+            flex={1}
+            className="vexl-enter"
+            outlineStyle="none"
+          >
+            {screen}
+          </YStack>
+        </PhoneFrame>
+        <Typography
+          variant="description"
+          color="$foregroundPrimary"
+          aria-live="polite"
+          className="vexl-visually-hidden"
+        >
+          {formatMessage(copy.stepAnnouncement, {
+            step: stepIndex + 1,
+            total: steps.length,
+            title: stepTitle,
+          })}
+        </Typography>
+      </XStack>
     </PageSection>
   )
 }

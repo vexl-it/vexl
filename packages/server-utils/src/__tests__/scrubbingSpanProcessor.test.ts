@@ -11,7 +11,7 @@ import {
   InMemorySpanExporter,
   SimpleSpanProcessor,
 } from '@opentelemetry/sdk-trace-base'
-import {Array, Effect, Layer, pipe, Record, String} from 'effect'
+import {Array, Effect, Layer, pipe, String} from 'effect'
 import {scrubbingSpanProcessor} from '../scrubbingSpanProcessor'
 
 const exporter = new InMemorySpanExporter()
@@ -56,18 +56,18 @@ describe('scrubbingSpanProcessor', () => {
     expect(spans).toHaveLength(2)
 
     Array.forEach(spans, (span) => {
-      const attributeNames = Record.keys(span.attributes)
+      const attributeNames = Object.keys(span.attributes)
       const headerAttributes = pipe(
-        span.attributes,
-        Record.filter((_, name) => String.includes('.header.')(name))
+        Object.entries(span.attributes),
+        Array.filter(([name]) => String.includes('.header.')(name))
       )
 
       expect(attributeNames).not.toContain('url.full')
       expect(attributeNames).not.toContain('url.query')
       expect(attributeNames).toContain('url.path')
-      expect(headerAttributes).toEqual({
-        'http.request.header.client-version': '42',
-      })
+      expect(headerAttributes).toEqual([
+        ['http.request.header.client-version', '42'],
+      ])
     })
   })
 })

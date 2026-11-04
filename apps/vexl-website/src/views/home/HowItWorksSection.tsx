@@ -58,7 +58,7 @@ export function HowItWorksSection(): React.JSX.Element {
       <YStack
         gap="$5"
         $md={{flexDirection: 'row', flexWrap: 'wrap'}}
-        $lg={{flexWrap: 'nowrap'}}
+        $xl={{flexWrap: 'nowrap'}}
       >
         {(['contacts', 'offers', 'chat', 'trade'] as const).map(
           (key, index) => {

@@ -1,4 +1,3 @@
-import {getVexlFontFaceCss} from '@vexl-next/ui/src/assets/fonts'
 import {colors} from '@vexl-next/ui/src/config/tokens'
 import Script from 'next/script'
 import React from 'react'
@@ -8,9 +7,6 @@ import {SiteHeader} from '../../src/components/SiteHeader'
 import {TamaguiRoot} from '../../src/components/TamaguiRoot'
 import {locales} from '../../src/i18n/locales'
 import {resolveLocale} from '../../src/pageParams'
-
-// The bundler emits each font file and replaces its require() with the file URL.
-const fontFaceCss = getVexlFontFaceCss(({source}) => String(source))
 
 export const dynamicParams = false
 
@@ -29,9 +25,6 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale}>
-      <head>
-        <style dangerouslySetInnerHTML={{__html: fontFaceCss}} />
-      </head>
       <body style={{margin: 0, backgroundColor: colors.black100}}>
         <TamaguiRoot>
           <LocaleProvider locale={locale}>

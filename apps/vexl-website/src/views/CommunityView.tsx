@@ -76,12 +76,17 @@ function EventRow({
       <YStack flex={1} minWidth={200}>
         {event.url ? <SiteLink href={event.url}>{name}</SiteLink> : name}
       </YStack>
-      <XStack gap="$2" flexWrap="wrap">
+      <XStack gap="$2" flexWrap="wrap" maxWidth="100%">
         {pipe(
           [event.speakers, event.location, event.time],
           Array.filter((detail): detail is string => detail !== undefined),
           Array.map((detail) => (
-            <TextTag key={detail} label={detail} variant="neutral" />
+            <TextTag
+              key={detail}
+              label={detail}
+              variant="neutral"
+              maxWidth="100%"
+            />
           ))
         )}
       </XStack>

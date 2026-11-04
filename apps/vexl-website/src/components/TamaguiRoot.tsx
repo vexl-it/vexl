@@ -1,10 +1,13 @@
 'use client'
 
-import {config, YStack} from '@vexl-next/ui'
+import {config, getVexlFontFaceCss, YStack} from '@vexl-next/ui'
 import {useServerInsertedHTML} from 'next/navigation'
 import React from 'react'
 import {StyleSheet} from 'react-native-web'
 import {TamaguiProvider} from 'tamagui'
+
+// The bundler emits each font file and replaces its require() with the file URL.
+const fontFaceCss = getVexlFontFaceCss(({source}) => String(source))
 
 export function TamaguiRoot({
   children,
@@ -26,6 +29,9 @@ export function TamaguiRoot({
 
   return (
     <TamaguiProvider config={config} defaultTheme="dark">
+      <style href="vexl-fonts" precedence="default">
+        {fontFaceCss}
+      </style>
       <YStack minHeight="100vh" backgroundColor="$backgroundPrimary">
         {children}
       </YStack>

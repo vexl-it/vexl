@@ -16,7 +16,7 @@ import {usePathname} from 'next/navigation'
 import React, {useState} from 'react'
 import {useTheme} from 'tamagui'
 import {externalLinks} from '../config/links'
-import {localizedPath, otherLocale} from '../i18n/locales'
+import {locales, localizedPath, otherLocale} from '../i18n/locales'
 import {useLocale} from './LocaleProvider'
 import {SiteLink} from './SiteLink'
 
@@ -34,13 +34,12 @@ function useNavItems(): ReadonlyArray<{
   ]
 }
 
+// Prerendering sees the internal /en route, the browser the public URL
+const localePrefix = new RegExp(`^/(${locales.join('|')})(?=/|$)`)
+
 function useOtherLanguageHref(): string {
   const {locale} = useLocale()
-  const pathname = usePathname()
-  const pathWithoutLocale =
-    locale === 'en'
-      ? pathname
-      : pathname.replace(/^\/[a-z]{2}(?=\/|$)/, '') || '/'
+  const pathWithoutLocale = usePathname().replace(localePrefix, '') || '/'
   return localizedPath(otherLocale(locale), pathWithoutLocale)
 }
 

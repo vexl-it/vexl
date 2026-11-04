@@ -70,7 +70,7 @@ export function FeaturesSection(): React.JSX.Element {
       <YStack
         gap="$5"
         $md={{flexDirection: 'row', flexWrap: 'wrap'}}
-        $lg={{flexWrap: 'nowrap'}}
+        $xl={{flexWrap: 'nowrap'}}
       >
         {(['friends', 'marketplace', 'noData', 'anonymisation'] as const).map(
           (key) => {

@@ -86,7 +86,7 @@ function FooterCard({
       {card}
     </SiteLink>
   ) : (
-    <YStack flex={1} $md={{flexBasis: 0}}>
+    <YStack flex={1} minWidth={200} $md={{flexBasis: 0}}>
       {card}
     </YStack>
   )
@@ -121,7 +121,7 @@ export function SiteFooter(): React.JSX.Element {
       <YStack
         gap="$3"
         $md={{flexDirection: 'row', flexWrap: 'wrap'}}
-        $lg={{flexWrap: 'nowrap'}}
+        $xl={{flexWrap: 'nowrap'}}
       >
         <FooterCard
           href={externalLinks.youtube}

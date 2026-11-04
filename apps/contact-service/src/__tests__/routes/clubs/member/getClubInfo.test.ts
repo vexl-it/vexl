@@ -166,6 +166,43 @@ describe('Get club info', () => {
     )
   })
 
+  it('Updates last_refreshed_at when no vexl notification token is provided', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const app = yield* _(NodeTestingApp)
+        const sql = yield* _(SqlClient.SqlClient)
+
+        yield* _(sql`
+          UPDATE club_member
+          SET
+            last_refreshed_at = now() - interval '100 DAY'
+          WHERE
+            public_key = ${userKey.publicKeyPemBase64}
+        `)
+
+        yield* _(
+          app.ClubsMember.getClubInfo({
+            payload: {
+              ...(yield* _(generateAndSignChallenge(userKey))),
+              vexlNotificationToken: Option.none(),
+            },
+          })
+        )
+
+        const data = yield* _(sql`
+          SELECT
+            *
+          FROM
+            club_member
+          WHERE
+            public_key = ${userKey.publicKeyPemBase64}
+            AND last_refreshed_at > now() - interval '1 MINUTE'
+        `)
+        expect(data.length).toBe(1)
+      })
+    )
+  })
+
   it('Should return 404 when club is inactive', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {

@@ -5,7 +5,7 @@ export const cs: Messages = {
     home: {
       title: 'Obchodujte bitcoin soukromě, peer-to-peer | Vexl',
       description:
-        'Kupujte a prodávejte bitcoin peer-to-peer s přáteli a přáteli přátel. Bez KYC, bez prostředníků, s end-to-end šifrovaným chatem. Otevřený kód, neziskový projekt.',
+        'Kupujte a prodávejte bitcoin peer-to-peer s přáteli a přáteli přátel. Bez KYC, bez prostředníků, s end-to-end šifrovaným chatem. Otevřený kód.',
     },
     download: {
       title: 'Stáhněte si Vexl | Aplikace pro iPhone i Android',
@@ -19,7 +19,8 @@ export const cs: Messages = {
     },
     faq: {
       title: 'Nejčastější dotazy – Vexl App',
-      description: 'Vše, co jste chtěli vědět o aplikaci Vexl.',
+      description:
+        'Odpovědi o soukromí, poplatcích, nabídkách a obchodování ve Vexlu.',
     },
     community: {
       title: 'Vexl - Komunitní události | Bitcoinová setkání a konference',
@@ -87,7 +88,7 @@ export const cs: Messages = {
   home: {
     hero: {
       title: 'Obchodujte bitcoin soukromě.',
-      text: 'Kupujte a prodávejte bitcoin s přáteli a přáteli přátel. Bez ověřování totožnosti, bez prostředníků. Zůstáváte v anonymitě, dokud se sami nerozhodnete jinak.',
+      text: 'Kupujte a prodávejte bitcoin s lidmi z kontaktů ve vašem telefonu a s jejich přáteli. Bez ověřování totožnosti, bez prostředníků. Zůstáváte v anonymitě, dokud se sami nerozhodnete jinak.',
       howItWorks: 'Jak to funguje',
     },
     mock: {
@@ -226,7 +227,7 @@ export const cs: Messages = {
     },
     trust: {
       eyebrow: 'Bez svobody transakcí nemáme žádná další práva.',
-      title: 'Otevřený kód. Neziskový projekt.',
+      title: 'Vyvíjeno otevřeně.',
       text: 'Nemusíte nám věřit. Ověřte si to sami.',
       teamPhoto:
         'Tým Vexlu na BTC Prague před stánkem s nápisem No middlemen. No KYC. Peer-to-peer.',
@@ -241,8 +242,8 @@ export const cs: Messages = {
         action: 'Přečíst audit',
       },
       foundation: {
-        title: 'Nadační fond',
-        text: 'Vexl tvoří Nadační fond Vexl společně se všemi, kdo chtějí svobodný a otevřený finanční svět.',
+        title: 'Nadační fond Vexl',
+        text: 'Vexl vám přináší Nadační fond Vexl, který spolupracuje se všemi, kdo chtějí svobodný a otevřený finanční svět.',
         action: 'Poznat nadační fond',
       },
     },
@@ -279,7 +280,7 @@ export const cs: Messages = {
         },
         install: {
           title: 'Nainstalujte Vexl',
-          text: 'Nainstalujte Vexl z Freedom Storu. Ten pocit? To je svoboda — a je zase vaše.',
+          text: 'Otevřete Freedom Store v AltStoru a nainstalujte Vexl. Aktualizace pak přicházejí odtamtud jako u jiných aplikací.',
         },
       },
       outsideEu: 'Tento návod je pro iPhony v EU. Jste mimo EU?',

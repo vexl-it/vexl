@@ -3,7 +3,7 @@ export const en = {
     home: {
       title: 'Trade bitcoin privately, peer-to-peer | Vexl',
       description:
-        'Buy and sell bitcoin peer-to-peer with friends and friends of friends. No KYC, no middlemen, end-to-end encrypted chat. Open source and non-profit.',
+        'Buy and sell bitcoin peer-to-peer with friends and friends of friends. No KYC, no middlemen, end-to-end encrypted chat. Open source.',
     },
     download: {
       title: 'Download Vexl | Get the app on iPhone or Android',
@@ -17,7 +17,7 @@ export const en = {
     },
     faq: {
       title: 'Frequently Asked Questions - Vexl App',
-      description: 'All you wanted know about the Vexl App.',
+      description: 'Answers about privacy, fees, offers, and trading on Vexl.',
     },
     community: {
       title: 'Vexl Community Events | Bitcoin Meetups & Conferences',
@@ -85,7 +85,7 @@ export const en = {
   home: {
     hero: {
       title: 'Trade bitcoin privately.',
-      text: 'Buy and sell bitcoin with friends and friends of friends. No ID checks, no middlemen. You stay anonymous until you choose otherwise.',
+      text: 'Buy and sell bitcoin with people from your phone contacts and their friends. No ID checks, no middlemen. You stay anonymous until you choose otherwise.',
       howItWorks: 'See how it works',
     },
     mock: {
@@ -225,7 +225,7 @@ export const en = {
     },
     trust: {
       eyebrow: 'Without freedom to transact, we have no other rights.',
-      title: 'Built in the open. Not for profit.',
+      title: 'Built in the open.',
       text: 'Don’t take our word for it. Check for yourself.',
       teamPhoto:
         'The Vexl team at BTC Prague, in front of a booth that says No middlemen. No KYC. Peer-to-peer.',
@@ -240,8 +240,8 @@ export const en = {
         action: 'Read the audit',
       },
       foundation: {
-        title: 'Non-profit',
-        text: 'Vexl is built by the Vexl Foundation, with everyone who wants a free and open financial world.',
+        title: 'Vexl Foundation',
+        text: 'Vexl is brought to you by the Vexl Foundation, which works with everyone who wants a free and open financial world.',
         action: 'Meet the Foundation',
       },
     },
@@ -277,7 +277,7 @@ export const en = {
         },
         install: {
           title: 'Install Vexl',
-          text: 'Install Vexl from the Freedom Store. That feeling? It’s freedom — and it’s yours again.',
+          text: 'Open Freedom Store in AltStore and install Vexl. It updates from there, like any other app.',
         },
       },
       outsideEu: 'These steps are for iPhones in the EU. Outside the EU?',

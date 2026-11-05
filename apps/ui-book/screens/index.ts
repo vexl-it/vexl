@@ -48,6 +48,7 @@ import {NotificationCardScreen} from './NotificationCardScreen'
 import {OfferCardScreen} from './OfferCardScreen'
 import {OffersReencryptionStatusScreen} from './OffersReencryptionStatusScreen'
 import {PickerScreen} from './PickerScreen'
+import {PopoverMenuScreen} from './PopoverMenuScreen'
 import {PriceRangeInputScreen} from './PriceRangeInputScreen'
 import {RadioGroupScreen} from './RadioGroupScreen'
 import {RadiusSliderScreen} from './RadiusSliderScreen'
@@ -137,6 +138,7 @@ export const screens: readonly ScreenEntry[] = [
     component: OffersReencryptionStatusScreen,
   },
   {label: 'Picker', component: PickerScreen},
+  {label: 'Popover Menu', component: PopoverMenuScreen},
   {label: 'Price Range Input', component: PriceRangeInputScreen},
   {label: 'Radio Group', component: RadioGroupScreen},
   {label: 'Range Slider', component: RangeSliderScreen},

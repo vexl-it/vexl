@@ -49,6 +49,7 @@ export const en = {
     community: 'Community',
     blog: 'Blog',
     faq: 'FAQ',
+    foundation: 'Foundation',
     download: 'Download',
     otherLanguage: 'Česky',
     openMenu: 'Open menu',

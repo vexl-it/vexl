@@ -15,6 +15,7 @@ import Image from 'next/image'
 import {usePathname} from 'next/navigation'
 import React, {useState} from 'react'
 import {useTheme} from 'tamagui'
+import {externalLinks} from '../config/links'
 import {locales, localizedPath, otherLocale} from '../i18n/locales'
 import {useLocale} from './LocaleProvider'
 import {SiteLink} from './SiteLink'
@@ -55,6 +56,7 @@ function useNavItems(): readonly NavItem[] {
     },
     {label: t.nav.blog, href: path('/blog'), current: isIn('/blog')},
     {label: t.nav.faq, href: path('/faq'), current: isIn('/faq')},
+    {label: t.nav.foundation, href: externalLinks.foundation, current: false},
   ]
 }
 

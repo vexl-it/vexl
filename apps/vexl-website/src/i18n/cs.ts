@@ -52,6 +52,7 @@ export const cs: Messages = {
     community: 'Komunita',
     blog: 'Blog',
     faq: 'Nejčastější dotazy',
+    foundation: 'Nadační fond',
     download: 'Stáhnout',
     otherLanguage: 'English',
     openMenu: 'Otevřít menu',

@@ -2,8 +2,8 @@ import Clipboard from '@react-native-clipboard/clipboard'
 import {ReactionEmoji} from '@vexl-next/domain/src/general/messaging'
 import {
   Copy,
-  POPOVER_MENU_ITEM_HEIGHT,
-  POPOVER_MENU_PADDING,
+  getPopoverMenuHeight,
+  POPOVER_MENU_WIDTH,
   POPOVER_SHADOW,
   PopoverMenu,
   PopoverMenuItem,
@@ -52,10 +52,7 @@ const REACTION_BAR_WIDTH =
   REACTION_SIZE * QUICK_REACTIONS.length + REACTION_BAR_PADDING * 2
 const GAP = tokens.space[3].val
 const SCREEN_PADDING = tokens.space[5].val
-const MENU_WIDTH = tokens.size[13].val * 2.5
-const MENU_ITEMS_COUNT = 2
-const MENU_HEIGHT =
-  POPOVER_MENU_ITEM_HEIGHT * MENU_ITEMS_COUNT + POPOVER_MENU_PADDING * 2
+const MENU_HEIGHT = getPopoverMenuHeight(2)
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max)
@@ -103,7 +100,7 @@ function computePlacement({
     reactionBarTop: bubbleTop - GAP - REACTION_BAR_HEIGHT,
     reactionBarLeft: alignedToBubble(REACTION_BAR_WIDTH),
     menuTop: bubbleTop + bubbleHeight + GAP,
-    menuLeft: alignedToBubble(MENU_WIDTH),
+    menuLeft: alignedToBubble(POPOVER_MENU_WIDTH),
   }
 }
 
@@ -310,7 +307,6 @@ function MessageActionsOverlay(): React.ReactElement | null {
             position: 'absolute',
             top: placement.menuTop,
             left: placement.menuLeft,
-            width: MENU_WIDTH,
             transformOrigin: `${isMine ? 'right' : 'left'} top`,
           },
           menuStyle,

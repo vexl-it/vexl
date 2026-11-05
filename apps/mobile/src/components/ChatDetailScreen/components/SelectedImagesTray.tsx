@@ -8,6 +8,7 @@ import Animated, {
   LinearTransition,
 } from 'react-native-reanimated'
 import {type SelectedImage} from '../../../utils/imagePickers'
+import {useTranslation} from '../../../utils/localization/I18nProvider'
 import ChatImage from './ChatImage'
 
 function SelectedImagesTray({
@@ -18,6 +19,7 @@ function SelectedImagesTray({
   onRemove: (image: SelectedImage) => void
 }): React.ReactElement {
   const theme = useTheme()
+  const {t} = useTranslation()
 
   return (
     <ScrollView
@@ -26,8 +28,8 @@ function SelectedImagesTray({
       keyboardShouldPersistTaps="handled"
       contentContainerStyle={{
         gap: tokens.space[3].val,
-        paddingHorizontal: tokens.space[3].val,
-        paddingTop: tokens.space[3].val,
+        paddingHorizontal: tokens.space[4].val,
+        paddingTop: tokens.space[4].val,
       }}
     >
       {Array.map(images, (image) => (
@@ -40,6 +42,7 @@ function SelectedImagesTray({
           <ChatImage variant="thumbnail" image={image.uri} />
           <Stack
             role="button"
+            aria-label={t('messages.removeImage')}
             position="absolute"
             top="$2"
             right="$2"

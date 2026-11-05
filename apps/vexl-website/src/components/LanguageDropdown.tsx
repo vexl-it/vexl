@@ -11,11 +11,14 @@ const languages = [
 export function LanguageDropdown({
   locale,
   path,
+  alternatePaths = {},
   light,
   mobile = false,
 }: {
   readonly locale: Locale
   readonly path: string
+  /** Where a language's link goes when the page has no version in it. */
+  readonly alternatePaths?: Partial<Record<Locale, string>>
   readonly light: boolean
   /** The copy that lives inside the collapsible menu. */
   readonly mobile?: boolean
@@ -91,7 +94,10 @@ export function LanguageDropdown({
                 >
                   <a
                     hrefLang={language.locale}
-                    href={localizedPath(language.locale, path)}
+                    href={localizedPath(
+                      language.locale,
+                      alternatePaths[language.locale] ?? path
+                    )}
                     {...(current ? {'aria-current': 'page'} : {})}
                     className={`${withModifiers('link')}${current ? ' w--current' : ''}`}
                   >

@@ -72,18 +72,20 @@ export function Navbar({
       }
     }
     const closeOnEscape = (event: KeyboardEvent): void => {
-      if (event.key === 'Escape') setMenu('closing')
+      if (event.key !== 'Escape') return
+      setMenu('closing')
+      navRef.current?.querySelector<HTMLElement>('.w-nav-button')?.focus()
     }
     const media = window.matchMedia(COLLAPSE_QUERY)
     const closeOnDesktop = (): void => {
       if (!media.matches) setMenu('closed')
     }
     window.addEventListener('click', closeOnOutsideClick, true)
-    document.addEventListener('keydown', closeOnEscape)
+    window.addEventListener('keydown', closeOnEscape)
     media.addEventListener('change', closeOnDesktop)
     return () => {
       window.removeEventListener('click', closeOnOutsideClick, true)
-      document.removeEventListener('keydown', closeOnEscape)
+      window.removeEventListener('keydown', closeOnEscape)
       media.removeEventListener('change', closeOnDesktop)
     }
   }, [menu])
@@ -190,6 +192,9 @@ export function Navbar({
             aria-expanded={menu === 'open'}
             onClick={toggleMenu}
             onKeyDown={(event) => {
+              // Like webflow.js, arrows on the button don't scroll the page
+              if (event.key === 'ArrowDown' || event.key === 'ArrowUp')
+                event.preventDefault()
               if (event.key === 'Enter' || event.key === ' ') {
                 event.preventDefault()
                 toggleMenu()

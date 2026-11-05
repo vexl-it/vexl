@@ -134,6 +134,8 @@ export default function sendMessagesActionAtom(
       message: ChatMessage
     ): Effect.Effect<Option.Option<ChatMessageWithState>> =>
       set(uploadChatImageIfAnyActionAtom, {message, chat}).pipe(
+        // A hanging request would otherwise hold back every later send.
+        Effect.timeout(SEND_TIMEOUT),
         Effect.flatMap((preparedMessage) =>
           // The chat may have been deleted while the image was uploading.
           !Array.isNonEmptyReadonlyArray(stillSending([message]))
@@ -146,6 +148,7 @@ export default function sendMessagesActionAtom(
                 notificationApi: api.notification,
                 theirNotificationToken: chat.otherSideVexlToken,
               }).pipe(
+                Effect.timeout(SEND_TIMEOUT),
                 Effect.map(
                   (serverMessage): ChatMessageWithState => ({
                     state: 'sent',
@@ -176,8 +179,6 @@ export default function sendMessagesActionAtom(
                 Effect.asSome
               )
         ),
-        // A hanging request would otherwise hold back every later send.
-        Effect.timeout(SEND_TIMEOUT),
         Effect.catchAll((error) =>
           Array.isNonEmptyReadonlyArray(stillSending([message]))
             ? Effect.succeedSome<ChatMessageWithState>({

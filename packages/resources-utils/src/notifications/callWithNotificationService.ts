@@ -3,8 +3,7 @@ import {type NotificationApi} from '@vexl-next/rest-api/src/services/notificatio
 import {Duration, Effect} from 'effect'
 import reportErrorFromResourcesUtils from '../reportErrorFromResourcesUtils'
 
-// The message is already delivered, so a hanging notification must not hold
-// the caller back.
+// Bounds the background notification request, so it cannot hang forever.
 const NOTIFICATION_TIMEOUT = Duration.seconds(30)
 
 interface NotificationArgs {
@@ -34,21 +33,28 @@ export function callWithNotificationService<
         return result
       }
 
+      // The message is already delivered, so the caller does not wait for
+      // the best effort notification.
       yield* _(
-        notificationApi.issueNotification({
-          notificationToken,
-          sendNewChatMessageNotification: sendSystemNotification,
-        })
-      ).pipe(
-        Effect.timeout(NOTIFICATION_TIMEOUT),
-        Effect.catchAll((e) => {
-          reportErrorFromResourcesUtils(
-            'warn',
-            new Error('Error issuing notificiation'),
-            {e}
-          )
-          return Effect.succeed(result)
-        })
+        Effect.forkDaemon(
+          notificationApi
+            .issueNotification({
+              notificationToken,
+              sendNewChatMessageNotification: sendSystemNotification,
+            })
+            .pipe(
+              Effect.timeout(NOTIFICATION_TIMEOUT),
+              Effect.catchAll((e) =>
+                Effect.sync(() => {
+                  reportErrorFromResourcesUtils(
+                    'warn',
+                    new Error('Error issuing notificiation'),
+                    {e}
+                  )
+                })
+              )
+            )
+        )
       )
 
       return result

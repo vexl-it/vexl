@@ -62,12 +62,15 @@ export function useChatOverlayTransition({
   return {progress, close}
 }
 
+/** Closes the overlay on tap. `blurred: false` keeps the chat fully visible. */
 export function ChatOverlayScrim({
   progress,
   onPress,
+  blurred = true,
 }: {
   progress: SharedValue<number>
   onPress: () => void
+  blurred?: boolean
 }): React.ReactElement {
   const theme = useTheme()
   const {t} = useTranslation()
@@ -81,7 +84,7 @@ export function ChatOverlayScrim({
         aria-label={t('common.close')}
         onPress={onPress}
       >
-        {Platform.OS === 'ios' && (
+        {!!blurred && Platform.OS === 'ios' && (
           <BlurView
             style={StyleSheet.absoluteFill}
             blurType="light"
@@ -89,11 +92,13 @@ export function ChatOverlayScrim({
             reducedTransparencyFallbackColor={theme.backgroundSecondary.get()}
           />
         )}
-        <Stack
-          style={StyleSheet.absoluteFill}
-          backgroundColor="$backgroundSecondary"
-          opacity={Platform.OS === 'ios' ? 0.4 : 0.9}
-        />
+        {!!blurred && (
+          <Stack
+            style={StyleSheet.absoluteFill}
+            backgroundColor="$backgroundSecondary"
+            opacity={Platform.OS === 'ios' ? 0.4 : 0.9}
+          />
+        )}
       </Pressable>
     </Reanimated.View>
   )

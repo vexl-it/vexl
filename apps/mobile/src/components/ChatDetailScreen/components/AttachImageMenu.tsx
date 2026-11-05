@@ -91,7 +91,7 @@ function AttachImageMenu(): React.ReactElement | null {
 
   return (
     <Stack style={StyleSheet.absoluteFill}>
-      <ChatOverlayScrim progress={progress} onPress={close} />
+      <ChatOverlayScrim progress={progress} onPress={close} blurred={false} />
       <Reanimated.View
         style={[
           {

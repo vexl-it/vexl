@@ -92,7 +92,7 @@ export function HeroSection(): React.JSX.Element {
             <Button role="none">{t.downloadVexl}</Button>
           </SiteLink>
           <SiteLink href={`${path('/')}#how-it-works`}>
-            <Button role="none" variant="secondary" icon={ChevronDown}>
+            <Button role="none" variant="link" icon={ChevronDown}>
               {t.home.hero.howItWorks}
             </Button>
           </SiteLink>

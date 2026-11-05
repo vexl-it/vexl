@@ -1,4 +1,5 @@
 import {colors} from '@vexl-next/ui/src/config/tokens'
+import {type Viewport} from 'next'
 import Script from 'next/script'
 import React from 'react'
 import {LocaleProvider} from '../../src/components/LocaleProvider'
@@ -10,6 +11,11 @@ import {resolveLocale} from '../../src/pageParams'
 import '../globals.css'
 
 export const dynamicParams = false
+
+export const viewport: Viewport = {
+  themeColor: colors.white100,
+  colorScheme: 'light',
+}
 
 export function generateStaticParams(): Array<{locale: string}> {
   return locales.map((locale) => ({locale}))

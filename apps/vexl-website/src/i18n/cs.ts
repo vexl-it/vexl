@@ -109,8 +109,8 @@ export const cs: Messages = {
           price: '5 000 – 25 000 Kč',
           description: 'Prodám bitcoin za hotovost. Klidně se potkáme u kávy.',
           place: 'Praha',
-          commonFriends: '2 společní přátelé',
-          trusted: '1 důvěryhodný přítel',
+          commonFriends: '2 společní',
+          trusted: '1 důvěryhodný',
         },
         {
           id: 'savings',
@@ -331,6 +331,7 @@ export const cs: Messages = {
       'Zatím nejsou ohlášené žádné další akce. Tady jsme byli doposud.',
     pastTitle: 'Proběhlé události',
     showOlder: 'Zobrazit starší události',
+    speakers: 'Řečníci: {names}',
     host: {
       title: 'Uspořádejte vlastní akci',
       text: 'Meetupy jsou místo, kde zazáříme. Pomůžeme vám s propagací, školením, balíčky merche i řečníky.',

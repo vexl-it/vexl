@@ -183,7 +183,9 @@ export function SiteHeader(): React.JSX.Element {
               <Typography
                 variant="heading3"
                 color={
-                  item.current ? '$foregroundPrimary' : '$foregroundSecondary'
+                  item.current
+                    ? '$accentHighlightSecondary'
+                    : '$foregroundPrimary'
                 }
               >
                 {item.label}

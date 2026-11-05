@@ -123,7 +123,7 @@ function StepCard({
         gap="$3"
         padding="$7"
         paddingTop="$5"
-        $xl={{justifyContent: 'flex-end', paddingTop: '$7'}}
+        $xl={{paddingTop: '$7'}}
       >
         <Typography variant="titlesSmall" color={textColor} opacity={0.5}>
           {number}
@@ -165,7 +165,7 @@ export function HowItWorksSection(): React.JSX.Element {
         flexWrap="wrap"
         gap="$5"
       >
-        <Typography variant="description" color="$foregroundTertiary">
+        <Typography variant="description" color="$foregroundSecondary">
           {copy.caption}
         </Typography>
         <DownloadCta />

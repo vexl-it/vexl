@@ -17,6 +17,7 @@ import {SiteLink} from '../components/SiteLink'
 import {externalLinks} from '../config/links'
 import {type CommunityEvent, type CommunityEvents} from '../content/events'
 import {formatDate} from '../formatDate'
+import {formatMessage} from '../i18n/locales'
 
 const EVENTS_PAGE_SIZE = 8
 
@@ -25,7 +26,7 @@ function EventItem({
 }: {
   readonly event: CommunityEvent
 }): React.JSX.Element {
-  const {locale} = useLocale()
+  const {t, locale} = useLocale()
   const card = (
     <EventCard
       title={event.name}
@@ -37,9 +38,10 @@ function EventItem({
             year: 'numeric',
           }),
           event.location,
-          event.speakers,
+          event.speakers &&
+            formatMessage(t.community.speakers, {names: event.speakers}),
         ],
-        Array.filter((detail): detail is string => detail !== undefined)
+        Array.filter((detail): detail is string => Boolean(detail))
       )}
     />
   )
@@ -103,7 +105,7 @@ function HostEventSection(): React.JSX.Element {
         backgroundColor="$backgroundSecondary"
         $md={{flexDirection: 'row', alignItems: 'center', padding: '$10'}}
       >
-        <YStack flex={1} gap="$5" alignItems="flex-start" flexBasis={0}>
+        <YStack gap="$5" alignItems="flex-start" $md={{flex: 1, flexBasis: 0}}>
           <Typography tag="h2" variant="heading1" color="$foregroundPrimary">
             {copy.title}
           </Typography>

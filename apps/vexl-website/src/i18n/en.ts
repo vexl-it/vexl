@@ -329,6 +329,7 @@ export const en = {
       'No upcoming events announced yet. This is where we’ve been so far.',
     pastTitle: 'Past events',
     showOlder: 'Show older events',
+    speakers: 'Speakers: {names}',
     host: {
       title: 'Host your own event',
       text: 'Meetups are where we shine. We help with promotion, training, merch packs, and guest speakers.',

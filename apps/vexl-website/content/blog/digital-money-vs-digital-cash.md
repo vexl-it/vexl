@@ -2,7 +2,7 @@
 title: 'Digital Money vs. Digital Cash'
 date: 2025-07-23
 author: 'Vexl Team'
-summary: "“Everyone has the right to own property alone as well as in association with\nOthers.” – UN Convention on Human Rights, Article 17(1)"
+summary: '“Everyone has the right to own property alone as well as in association with others.” – UN Convention on Human Rights, Article 17(1)'
 image: '/blog/digital-money-vs-digital-cash/ragexvexl-blogheader-06.webp'
 ---
 

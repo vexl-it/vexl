@@ -55,7 +55,8 @@ export const en = {
     closeMenu: 'Close menu',
   },
   footer: {
-    tagline: "Vexl can't see your contacts, your chats, or your trades.",
+    tagline:
+      'Vexl can’t read your chats, and never holds your money or your bitcoin.',
     explore: 'Vexl',
     about: 'About',
     foundation: 'Vexl Foundation',
@@ -167,7 +168,7 @@ export const en = {
       steps: {
         contacts: {
           title: 'Add your contacts',
-          text: 'Vexl uses your phone contacts to connect you with friends and friends of friends. Vexl can’t see who your contacts are.',
+          text: 'Vexl uses your phone contacts to connect you with friends and friends of friends. Their numbers leave your phone only as hashes, never in plain text.',
         },
         offer: {
           title: 'Find an offer',
@@ -179,7 +180,7 @@ export const en = {
         },
         trade: {
           title: 'Meet and trade',
-          text: 'Reveal names and photos only if you both agree. Then meet: cash first, bitcoin second. Vexl never touches either.',
+          text: 'Reveal names and photos only if you both agree. Then meet and swap. Vexl never touches the cash or the bitcoin.',
         },
       },
       mocks: {
@@ -345,13 +346,13 @@ export const en = {
       title: 'From our events',
     },
     photos: {
-      booth:
-        'The Vexl booth at BTC Prague, with a Trade Bitcoin privately banner',
+      signCowboy:
+        'A visitor in a cowboy hat and a Vexl team member with a Privacy matters sign',
       wave: 'A speaker waving from the Vexl stage',
-      panel:
-        'A panel on the Vexl stage, with a Privacy matters hoodie in front',
+      conversation: 'Two people deep in conversation at the Vexl tent',
       crowd: 'Visitors at the Vexl booth under its canopy',
-      signSuit: 'A visitor and a Vexl team member with a Privacy matters sign',
+      signMerch:
+        'Two people with a Privacy matters sign in front of a merch stand',
       flyers: 'The Vexl team handing out flyers',
       wristband: 'Vexl wristbands and a Privacy is not a crime button',
       teamBacks:
@@ -397,7 +398,7 @@ export const en = {
     title: 'Page not found',
     text: 'The page you are looking for does not exist.',
     home: 'Go to homepage',
-    photo: 'A visitor in a mask holding an I love Vexl sign',
+    photo: 'A visitor holding an I love Vexl sign and blowing a kiss',
   },
 }
 

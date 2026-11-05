@@ -42,7 +42,7 @@ export async function generateMetadata(props: PostParams): Promise<Metadata> {
   const locale = await resolveLocale(props)
   const post = Option.getOrElse(await loadPost(props), () => notFound())
   return pageMetadata(locale, 'blog', `/post/${post.slug}`, {
-    title: `${post.title} - Blog │ Vexl`,
+    title: `${post.title} | Vexl`,
     description: post.summary || post.title,
     image: post.image,
   })

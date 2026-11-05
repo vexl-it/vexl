@@ -25,21 +25,6 @@ export const photos = {
     width: 2000,
     height: 1600,
   },
-  booth: {
-    src: '/images/photos/booth-trade-bitcoin-privately-banner.webp',
-    width: 2000,
-    height: 1336,
-  },
-  panel: {
-    src: '/images/photos/stage-panel-privacy-matters-hoodie.webp',
-    width: 2000,
-    height: 1336,
-  },
-  signSuit: {
-    src: '/images/photos/people-privacy-matters-sign-suit.webp',
-    width: 1600,
-    height: 2000,
-  },
   wave: {
     src: '/images/photos/stage-physical-gatherings-wave.webp',
     width: 1600,
@@ -59,6 +44,26 @@ export const photos = {
     src: '/images/photos/team-handing-out-flyers.webp',
     width: 2000,
     height: 1600,
+  },
+  signCowboy: {
+    src: '/images/photos/people-privacy-matters-cowboy-hat.webp',
+    width: 2000,
+    height: 1600,
+  },
+  conversation: {
+    src: '/images/photos/people-conversation-vexl-tent.webp',
+    width: 1600,
+    height: 2000,
+  },
+  signMerch: {
+    src: '/images/photos/people-privacy-matters-merch-store.webp',
+    width: 2000,
+    height: 1600,
+  },
+  blownKiss: {
+    src: '/images/photos/people-i-love-vexl-blown-kiss.webp',
+    width: 1600,
+    height: 2000,
   },
 } as const
 

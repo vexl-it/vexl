@@ -10,7 +10,7 @@ import {
 } from '@vexl-next/ui'
 import Image from 'next/image'
 import React from 'react'
-import {useTheme} from 'tamagui'
+import {Theme, useTheme} from 'tamagui'
 import {useLocale} from './LocaleProvider'
 import {SiteLink} from './SiteLink'
 
@@ -51,11 +51,17 @@ export function DownloadCta({
           />
         </YStack>
       </XStack>
-      <XStack $lg={{display: 'none'}}>
-        <Button role="none" variant={tone === 'dark' ? 'primary' : 'secondary'}>
-          {t.downloadVexl}
-        </Button>
-      </XStack>
+      {/* The light theme's tertiary button is black, for the yellow bands */}
+      <Theme name={tone}>
+        <XStack $lg={{display: 'none'}}>
+          <Button
+            role="none"
+            variant={tone === 'dark' ? 'primary' : 'tertiary'}
+          >
+            {t.downloadVexl}
+          </Button>
+        </XStack>
+      </Theme>
     </SiteLink>
   )
 }

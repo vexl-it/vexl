@@ -28,15 +28,12 @@ const EVENTS_PAGE_SIZE = 8
 
 function EventItem({
   event,
-  state,
 }: {
   readonly event: CommunityEvent
-  readonly state: 'upcoming' | 'past'
 }): React.JSX.Element {
   const {locale} = useLocale()
   const card = (
     <EventCard
-      state={state}
       title={event.name}
       details={pipe(
         [
@@ -61,19 +58,13 @@ function EventItem({
 
 function EventList({
   events,
-  state,
 }: {
   readonly events: readonly CommunityEvent[]
-  readonly state: 'upcoming' | 'past'
 }): React.JSX.Element {
   return (
     <XStack flexWrap="wrap" gap="$3">
       {events.map((event) => (
-        <EventItem
-          key={`${event.date}-${event.name}`}
-          event={event}
-          state={state}
-        />
+        <EventItem key={`${event.date}-${event.name}`} event={event} />
       ))}
     </XStack>
   )
@@ -88,7 +79,7 @@ function PastEvents({
   const [visible, setVisible] = useState(EVENTS_PAGE_SIZE)
   return (
     <YStack gap="$3">
-      <EventList events={events.slice(0, visible)} state="past" />
+      <EventList events={events.slice(0, visible)} />
       {visible < events.length ? (
         <XStack justifyContent="center" paddingTop="$3">
           <Button
@@ -134,14 +125,18 @@ function HostEventSection(): React.JSX.Element {
         <Typography variant="paragraph" color="$foregroundSecondary">
           {copy.host.text}
         </Typography>
-        <SiteLink href={externalLinks.meetupKit}>
-          <Button role="none">{copy.host.materials}</Button>
-        </SiteLink>
-        <SiteLink href={externalLinks.marketingEmail}>
-          <Button role="none" variant="tertiary" size="medium">
-            {copy.host.email}
-          </Button>
-        </SiteLink>
+        <XStack gap="$3" flexWrap="wrap">
+          <SiteLink href={externalLinks.meetupKit}>
+            <Button role="none" size="medium">
+              {copy.host.materials}
+            </Button>
+          </SiteLink>
+          <SiteLink href={externalLinks.marketingEmail}>
+            <Button role="none" variant="tertiary" size="medium">
+              {copy.host.email}
+            </Button>
+          </SiteLink>
+        </XStack>
       </YStack>
       <YStack flex={1} gap="$5">
         <Typography tag="h3" variant="heading3" color="$foregroundPrimary">
@@ -214,8 +209,8 @@ export function CommunityView({
         </XStack>
         <XStack width="100%" gap="$4" height={240} $md={{height: 420}}>
           <Photo
-            photo="booth"
-            alt={copy.photos.booth}
+            photo="signCowboy"
+            alt={copy.photos.signCowboy}
             sizes="(min-width: 1200px) 520px, 50vw"
             flex={1.6}
           />
@@ -227,8 +222,8 @@ export function CommunityView({
           />
           <YStack display="none" $md={{display: 'flex'}} flex={1.2}>
             <Photo
-              photo="panel"
-              alt={copy.photos.panel}
+              photo="conversation"
+              alt={copy.photos.conversation}
               sizes="(min-width: 1200px) 380px, 30vw"
               flex={1}
             />
@@ -242,7 +237,7 @@ export function CommunityView({
             <Typography tag="h2" variant="heading2" color="$foregroundPrimary">
               {copy.upcomingTitle}
             </Typography>
-            <EventList events={events.upcoming} state="upcoming" />
+            <EventList events={events.upcoming} />
           </YStack>
         ) : null}
         <YStack gap="$5">
@@ -274,8 +269,8 @@ export function CommunityView({
             flex={1}
           />
           <Photo
-            photo="signSuit"
-            alt={copy.photos.signSuit}
+            photo="signMerch"
+            alt={copy.photos.signMerch}
             sizes="(min-width: 1200px) 560px, 50vw"
             flex={1}
           />

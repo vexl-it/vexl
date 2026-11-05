@@ -40,6 +40,7 @@ export function CommunitySection(): React.JSX.Element {
         <Photo
           photo="talk"
           alt={copy.photos.talk}
+          focus="30% center"
           sizes="(min-width: 1024px) 420px, 60vw"
           flex={1.4}
         />

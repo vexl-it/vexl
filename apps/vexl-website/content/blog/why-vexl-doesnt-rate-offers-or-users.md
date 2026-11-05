@@ -2,7 +2,7 @@
 title: 'Why Vexl doesn’t rate offers or users?'
 date: 2025-04-28
 author: 'Vexl Team'
-summary: "Why We Don’t Rate Users — Trust Isn’t a Number, It’s Personal\nMost platforms are built on ratings, stars, and reviews. It’s the first thing you see"
+summary: 'Most platforms are built on ratings, stars, and reviews. Vexl isn’t, because trust isn’t a number. It comes from the people you know.'
 image: '/blog/why-vexl-doesnt-rate-offers-or-users/vexl-connection-graph-2.webp'
 ---
 

@@ -83,12 +83,14 @@ export function TrustSection(): React.JSX.Element {
           {copy.text}
         </Typography>
       </YStack>
-      <Photo
-        photo="team"
-        alt={copy.teamPhoto}
-        sizes="(min-width: 1200px) 1120px, 100vw"
-        aspectRatio={2.2}
-      />
+      <YStack aspectRatio={4 / 3} $md={{aspectRatio: 2.2}}>
+        <Photo
+          photo="team"
+          alt={copy.teamPhoto}
+          sizes="(min-width: 1200px) 1120px, 100vw"
+          flex={1}
+        />
+      </YStack>
       <YStack gap="$5" $md={{flexDirection: 'row'}}>
         <TrustTile
           href={externalLinks.github}

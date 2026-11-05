@@ -58,7 +58,7 @@ export const cs: Messages = {
     closeMenu: 'Zavřít menu',
   },
   footer: {
-    tagline: 'Vexl nevidí vaše kontakty, chaty ani obchody.',
+    tagline: 'Vexl nečte vaše chaty a nikdy nedrží vaše peníze ani bitcoin.',
     explore: 'Vexl',
     about: 'O nás',
     foundation: 'Nadační fond Vexl',
@@ -169,7 +169,7 @@ export const cs: Messages = {
       steps: {
         contacts: {
           title: 'Přidejte své kontakty',
-          text: 'Vexl vás podle kontaktů v telefonu propojí s přáteli a přáteli přátel. Vexl nevidí, kdo jsou vaše kontakty.',
+          text: 'Vexl vás podle kontaktů v telefonu propojí s přáteli a přáteli přátel. Jejich čísla opouštějí váš telefon jen jako hashe, nikdy v čitelné podobě.',
         },
         offer: {
           title: 'Najděte nabídku',
@@ -181,7 +181,7 @@ export const cs: Messages = {
         },
         trade: {
           title: 'Sejděte se a obchodujte',
-          text: 'Jména a fotky si odhalíte, jen když oba souhlasíte. Pak se sejdete: nejdřív hotovost, potom bitcoin. Vexl nesahá ani na jedno.',
+          text: 'Jména a fotky si odhalíte, jen když oba souhlasíte. Pak se sejdete a obchod uzavřete. Vexl nesahá na hotovost ani na bitcoin.',
         },
       },
       mocks: {
@@ -243,7 +243,7 @@ export const cs: Messages = {
       },
       foundation: {
         title: 'Nadační fond Vexl',
-        text: 'Vexl vám přináší Nadační fond Vexl, který spolupracuje se všemi, kdo chtějí svobodný a otevřený finanční svět.',
+        text: 'Za Vexlem stojí Nadační fond Vexl, který spolupracuje se všemi, kdo chtějí svobodný a otevřený finanční svět.',
         action: 'Poznat nadační fond',
       },
     },
@@ -348,11 +348,12 @@ export const cs: Messages = {
       title: 'Z našich akcí',
     },
     photos: {
-      booth: 'Stánek Vexlu na BTC Prague s bannerem Trade Bitcoin privately',
+      signCowboy:
+        'Návštěvnice v kovbojském klobouku a člen týmu Vexl s cedulí Privacy matters',
       wave: 'Řečník mává z pódia Vexlu',
-      panel: 'Panelová diskuse na pódiu Vexlu, vepředu mikina Privacy matters',
+      conversation: 'Dva lidé zabraní do rozhovoru ve stanu Vexlu',
       crowd: 'Návštěvníci u stánku Vexlu pod jeho přístřeškem',
-      signSuit: 'Návštěvník a člen týmu Vexl s cedulí Privacy matters',
+      signMerch: 'Dva lidé s cedulí Privacy matters před stánkem s merchem',
       flyers: 'Tým Vexlu rozdává letáky',
       wristband: 'Náramky Vexl a placka Privacy is not a crime',
       teamBacks: 'Tým Vexlu zezadu v tričkách Protecting privacy since 2022',
@@ -397,6 +398,6 @@ export const cs: Messages = {
     title: 'Stránka nenalezena',
     text: 'Stránka, kterou hledáte, neexistuje.',
     home: 'Přejít na hlavní stránku',
-    photo: 'Návštěvník v masce drží ceduli I love Vexl',
+    photo: 'Návštěvnice drží ceduli I love Vexl a posílá vzdušný polibek',
   },
 }

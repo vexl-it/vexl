@@ -2,7 +2,7 @@
 title: 'So what is Vexl anyway?'
 date: 2024-09-11
 author: 'Vexl Team'
-summary: "It's an app where you can easily buy and sell Bitcoin so you can replace all those centralized KYC exchanges cluttering your phone. It's a marketplace"
+summary: "It's an app where you can easily buy and sell Bitcoin so you can replace all those centralized KYC exchanges cluttering your phone."
 image: '/blog/so-what-is-vexl-anyway/icon_art.webp'
 ---
 

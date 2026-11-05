@@ -11,7 +11,7 @@ export function NotFoundView(): React.JSX.Element {
   return (
     <PageSection alignItems="center" minHeight="60vh" justifyContent="center">
       <YStack width="100%" maxWidth={360}>
-        <Photo photo="mask" alt={t.notFound.photo} sizes="360px" />
+        <Photo photo="blownKiss" alt={t.notFound.photo} sizes="360px" />
       </YStack>
       <TitleBlock
         title={t.notFound.title}

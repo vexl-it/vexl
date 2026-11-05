@@ -13,6 +13,7 @@ export function Photo({
   aspectRatio,
   flex,
   priority,
+  focus = 'center',
 }: {
   readonly photo: PhotoKey
   readonly alt: string
@@ -20,6 +21,8 @@ export function Photo({
   readonly aspectRatio?: number
   readonly flex?: number
   readonly priority?: boolean
+  /** CSS object-position, so narrow crops keep the subject in frame. */
+  readonly focus?: string
 }): React.JSX.Element {
   const {src, width, height} = photos[photo]
   return (
@@ -36,7 +39,7 @@ export function Photo({
         fill
         sizes={sizes}
         priority={priority}
-        style={{objectFit: 'cover'}}
+        style={{objectFit: 'cover', objectPosition: focus}}
       />
     </YStack>
   )

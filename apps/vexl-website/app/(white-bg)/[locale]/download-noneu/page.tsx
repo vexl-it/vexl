@@ -1,9 +1,9 @@
+import {downloadNonEu} from '@/src/i18n/download'
+import {pageMetadata} from '@/src/metadata'
+import {resolveLocale, type LocaleParams} from '@/src/pageParams'
+import {DownloadPage} from '@/src/views/download/DownloadPage'
 import {type Metadata} from 'next'
 import React from 'react'
-import {downloadNonEu} from '../../../../src/i18n/download'
-import {pageMetadata} from '../../../../src/metadata'
-import {resolveLocale, type LocaleParams} from '../../../../src/pageParams'
-import {DownloadPage} from '../../../../src/views/download/DownloadPage'
 
 const jsonLd = {
   '@context': 'https://schema.org',

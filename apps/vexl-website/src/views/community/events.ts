@@ -1,5 +1,6 @@
-import {Array, Order, pipe, Schema} from 'effect'
+import {Array, Option, Order, pipe, Schema} from 'effect'
 import {readContentFile} from '../../content/files'
+import {type Locale} from '../../i18n/locales'
 
 const CommunityEvent = Schema.Struct({
   /** `YYYY-MM-DD` */
@@ -11,9 +12,18 @@ const CommunityEvent = Schema.Struct({
   speakers: Schema.optional(Schema.String),
   location: Schema.String,
   start: Schema.String,
+  /** Empty or missing hides the end time. */
   end: Schema.optional(Schema.String),
 })
 export type CommunityEvent = typeof CommunityEvent.Type
+
+const EventEntry = Schema.Struct({
+  ...CommunityEvent.fields,
+  /** Czech overrides: `false` leaves the event out, an object replaces fields. */
+  cs: Schema.optional(
+    Schema.Union(Schema.Literal(false), Schema.partial(CommunityEvent))
+  ),
+})
 
 const PAGE_SIZE = 5
 
@@ -23,15 +33,25 @@ const byDate = Order.mapInput(
 )
 
 /** Upcoming and past as of the build. */
-function splitEvents(): {
+function localizedEvents(locale: Locale): readonly CommunityEvent[] {
+  return pipe(
+    Schema.decodeUnknownSync(Schema.parseJson(Schema.Array(EventEntry)))(
+      readContentFile('events.json')
+    ),
+    Array.filterMap(({cs, ...event}) => {
+      if (locale !== 'cs' || cs === undefined) return Option.some(event)
+      return cs === false ? Option.none() : Option.some({...event, ...cs})
+    })
+  )
+}
+
+function splitEvents(locale: Locale): {
   readonly upcoming: readonly CommunityEvent[]
   readonly past: readonly CommunityEvent[]
 } {
   const today = new Date().toISOString().slice(0, 10)
   const [past, upcoming] = Array.partition(
-    Schema.decodeUnknownSync(Schema.parseJson(Schema.Array(CommunityEvent)))(
-      readContentFile('events.json')
-    ),
+    localizedEvents(locale),
     (event) => event.date >= today
   )
   return {
@@ -40,8 +60,8 @@ function splitEvents(): {
   }
 }
 
-export function pastEventsPageCount(): number {
-  return Math.max(1, Math.ceil(splitEvents().past.length / PAGE_SIZE))
+export function pastEventsPageCount(locale: Locale): number {
+  return Math.max(1, Math.ceil(splitEvents(locale).past.length / PAGE_SIZE))
 }
 
 export function communityPagePath(page: number): string {
@@ -56,8 +76,8 @@ export interface EventsPage {
 }
 
 /** Upcoming events soonest first, then one page of past events newest first. */
-export function eventsPage(page: number): EventsPage {
-  const {upcoming, past} = splitEvents()
+export function eventsPage(locale: Locale, page: number): EventsPage {
+  const {upcoming, past} = splitEvents(locale)
   return {
     upcoming,
     past: pipe(past, Array.drop((page - 1) * PAGE_SIZE), Array.take(PAGE_SIZE)),

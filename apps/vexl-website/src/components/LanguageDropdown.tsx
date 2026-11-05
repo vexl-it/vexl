@@ -48,11 +48,34 @@ export function LanguageDropdown({
     setOpen((value) => !value)
   }
 
+  // webflow.js dropdown keys: arrows move through the languages, Escape closes
+  const onKeyDown = (event: React.KeyboardEvent): void => {
+    const toggleElement =
+      ref.current?.querySelector<HTMLElement>('.w-dropdown-toggle')
+    const links = Array.from(
+      ref.current?.querySelectorAll<HTMLElement>('.w-dropdown-list a') ?? []
+    )
+    if (event.key === 'Escape') {
+      setOpen(false)
+      toggleElement?.focus()
+      return
+    }
+    if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return
+    event.preventDefault()
+    const step = event.key === 'ArrowDown' ? 1 : -1
+    const current = links.findIndex((link) => link === document.activeElement)
+    const next = Math.min(Math.max(current + step, 0), links.length - 1)
+    setOpen(true)
+    // The list is display:none until it opens
+    requestAnimationFrame(() => links[next]?.focus())
+  }
+
   return (
     <div
       ref={ref}
       className={`${withModifiers('navbar_link language')} w-dropdown`}
       style={open ? {zIndex: 901} : undefined}
+      onKeyDown={onKeyDown}
     >
       <div
         className={`dropdown-toggle w-dropdown-toggle${openClass}`}

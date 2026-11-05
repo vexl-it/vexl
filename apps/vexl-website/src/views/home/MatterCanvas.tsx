@@ -1,15 +1,7 @@
 'use client'
 
 import {Array, pipe} from 'effect'
-import {
-  Bodies,
-  Composite,
-  Engine,
-  Mouse,
-  MouseConstraint,
-  Render,
-  Runner,
-} from 'matter-js'
+import {Bodies, Composite, Engine, Render, Runner} from 'matter-js'
 import React, {useEffect, useRef} from 'react'
 
 const TEXTURES = [
@@ -54,14 +46,7 @@ function buildScene(canvas: HTMLCanvasElement): Scene {
     render: {fillStyle: 'transparent', strokeStyle: 'transparent'},
   })
 
-  const mouse = Mouse.create(render.canvas)
-  const mouseConstraint = MouseConstraint.create(engine, {
-    mouse,
-    constraint: {stiffness: 0.2, render: {visible: false}},
-  })
-  render.mouse = mouse
-
-  Composite.add(engine.world, [ground, mouseConstraint])
+  Composite.add(engine.world, ground)
 
   Render.run(render)
   Runner.run(runner, engine)

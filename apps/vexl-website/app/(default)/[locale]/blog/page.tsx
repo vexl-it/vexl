@@ -1,10 +1,7 @@
+import {type LocaleParams, resolveLocale} from '@/src/pageParams'
+import {BlogIndex, blogIndexMetadata} from '@/src/views/blog/BlogIndex'
 import {type Metadata} from 'next'
 import React from 'react'
-import {type LocaleParams, resolveLocale} from '../../../../src/pageParams'
-import {
-  BlogIndex,
-  blogIndexMetadata,
-} from '../../../../src/views/blog/BlogIndex'
 
 export async function generateMetadata(props: LocaleParams): Promise<Metadata> {
   return blogIndexMetadata(await resolveLocale(props), 1)

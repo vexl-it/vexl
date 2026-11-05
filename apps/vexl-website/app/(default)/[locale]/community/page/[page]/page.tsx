@@ -1,12 +1,13 @@
-import {Array, pipe} from 'effect'
-import {type Metadata} from 'next'
-import React from 'react'
-import {resolveLocale} from '../../../../../../src/pageParams'
+import {toLocale} from '@/src/i18n/locales'
+import {resolveLocale} from '@/src/pageParams'
 import {
   CommunityPage,
   communityMetadata,
-} from '../../../../../../src/views/community/CommunityPage'
-import {pastEventsPageCount} from '../../../../../../src/views/community/events'
+} from '@/src/views/community/CommunityPage'
+import {pastEventsPageCount} from '@/src/views/community/events'
+import {Array, Option, pipe} from 'effect'
+import {type Metadata} from 'next'
+import React from 'react'
 
 interface Props {
   readonly params: Promise<{locale: string; page: string}>
@@ -15,11 +16,22 @@ interface Props {
 export const dynamicParams = false
 
 /** Pages after the first; the first one is /community. */
-export function generateStaticParams(): Array<{page: string}> {
+export function generateStaticParams({
+  params,
+}: {
+  readonly params: {locale: string}
+}): Array<{page: string}> {
   return pipe(
-    Array.range(1, pastEventsPageCount()),
-    Array.filter((page) => page > 1),
-    Array.map((page) => ({page: String(page)}))
+    toLocale(params.locale),
+    Option.match({
+      onNone: () => [],
+      onSome: (locale) =>
+        pipe(
+          Array.range(1, pastEventsPageCount(locale)),
+          Array.filter((page) => page > 1),
+          Array.map((page) => ({page: String(page)}))
+        ),
+    })
   )
 }
 

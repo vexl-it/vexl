@@ -1,6 +1,6 @@
+import {SiteDocument} from '@/src/components/SiteDocument'
+import {generateLocaleParams, resolveLocale} from '@/src/pageParams'
 import React from 'react'
-import {SiteDocument} from '../../../src/components/SiteDocument'
-import {generateLocaleParams, resolveLocale} from '../../../src/pageParams'
 
 export const dynamicParams = false
 export const generateStaticParams = generateLocaleParams

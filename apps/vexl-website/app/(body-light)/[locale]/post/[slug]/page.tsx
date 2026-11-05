@@ -1,30 +1,25 @@
-import {Array, Option, pipe} from 'effect'
-import {type Metadata} from 'next'
-import {notFound} from 'next/navigation'
-import React from 'react'
-import {Footer} from '../../../../../src/components/Footer'
-import {GlobalStyles} from '../../../../../src/components/GlobalStyles'
-import {Navbar} from '../../../../../src/components/Navbar'
+import {Footer} from '@/src/components/Footer'
+import {GlobalStyles} from '@/src/components/GlobalStyles'
+import {Navbar} from '@/src/components/Navbar'
 import {
   type BlogPost,
   blogPosts,
   findBlogPost,
   formatBlogDate,
   relatedBlogPosts,
-} from '../../../../../src/content/blog'
-import {renderRichText} from '../../../../../src/content/blogRichText'
-import {blog} from '../../../../../src/i18n/blog'
-import {
-  type Locale,
-  locales,
-  localizedPath,
-  toLocale,
-} from '../../../../../src/i18n/locales'
-import {pageMetadata} from '../../../../../src/metadata'
-import {resolveLocale} from '../../../../../src/pageParams'
-import {BlogCard} from '../../../../../src/views/blog/BlogCard'
-import {TocLink} from '../../../../../src/views/blog/TocLink'
-import '../../../../../src/views/blog/blogPost.css'
+} from '@/src/content/blog'
+import {renderRichText} from '@/src/content/blogRichText'
+import {blog} from '@/src/i18n/blog'
+import {type Locale, locales, localizedPath, toLocale} from '@/src/i18n/locales'
+import {pageMetadata} from '@/src/metadata'
+import {resolveLocale} from '@/src/pageParams'
+import {BlogCard} from '@/src/views/blog/BlogCard'
+import '@/src/views/blog/blogPost.css'
+import {TocLink} from '@/src/views/blog/TocLink'
+import {Array, Option, pipe} from 'effect'
+import {type Metadata} from 'next'
+import {notFound} from 'next/navigation'
+import React from 'react'
 
 interface Props {
   readonly params: Promise<{locale: string; slug: string}>
@@ -61,29 +56,14 @@ async function resolvePost(
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const {locale, post} = await resolvePost(props)
   const path = `/post/${post.slug}`
-  const metadata = pageMetadata({
+  return pageMetadata({
     locale,
     path,
     title: `${post.title}${blog[locale].postTitleSuffix}`,
     description: post.title,
     image: Option.getOrUndefined(post.image)?.src,
+    publishedLocales: post.locales,
   })
-  return {
-    ...metadata,
-    // Webflow only links the locales the post is published in
-    alternates: {
-      ...metadata.alternates,
-      languages: {
-        'x-default': path,
-        ...Object.fromEntries(
-          Array.map(post.locales, (other) => [
-            other,
-            localizedPath(other, path),
-          ])
-        ),
-      },
-    },
-  }
 }
 
 // Webflow sends a language's link to its homepage when the post isn't in it

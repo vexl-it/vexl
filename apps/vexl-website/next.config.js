@@ -2,6 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   agentRules: false,
+  poweredByHeader: false,
   output: 'standalone',
   // English is served from the root, other locales from their prefix
   rewrites: async () => [

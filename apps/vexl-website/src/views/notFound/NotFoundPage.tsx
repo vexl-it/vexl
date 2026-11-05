@@ -8,12 +8,12 @@ import {notFound} from '../../i18n/notFound'
 export function NotFoundPage(): React.JSX.Element {
   const [locale, setLocale] = useState(defaultLocale)
   useEffect(() => {
-    setLocale(
-      Option.getOrElse(
-        toLocale(window.location.pathname.split('/')[1] ?? ''),
-        () => defaultLocale
-      )
+    const pathLocale = Option.getOrElse(
+      toLocale(window.location.pathname.split('/')[1] ?? ''),
+      () => defaultLocale
     )
+    document.documentElement.lang = pathLocale
+    setLocale(pathLocale)
   }, [])
   const t = notFound[locale]
   const home = localizedPath(locale, '/')

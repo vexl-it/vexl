@@ -1,12 +1,12 @@
+import {GlobalStyles} from '@/src/components/GlobalStyles'
+import {readContentFile} from '@/src/content/files'
+import {termsPrivacy} from '@/src/i18n/termsPrivacy'
+import {pageMetadata} from '@/src/metadata'
+import {resolveLocale, type LocaleParams} from '@/src/pageParams'
+import {OldNav} from '@/src/views/oldNav/OldNav'
 import {Array, pipe} from 'effect'
 import {type Metadata} from 'next'
 import React from 'react'
-import {GlobalStyles} from '../../../../src/components/GlobalStyles'
-import {readContentFile} from '../../../../src/content/files'
-import {termsPrivacy} from '../../../../src/i18n/termsPrivacy'
-import {pageMetadata} from '../../../../src/metadata'
-import {resolveLocale, type LocaleParams} from '../../../../src/pageParams'
-import {OldNav} from '../../../../src/views/oldNav/OldNav'
 
 const legalHtml = (document: string): {__html: string} => ({
   __html: readContentFile('terms-privacy', `${document}.html`),

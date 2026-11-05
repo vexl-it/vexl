@@ -1,6 +1,6 @@
 import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {type NotificationApi} from '@vexl-next/rest-api/src/services/notification'
-import {Effect, Schema} from 'effect'
+import {Deferred, Effect, Schema} from 'effect'
 import {callWithNotificationService} from './callWithNotificationService'
 
 jest.mock('../reportErrorFromResourcesUtils', () => ({
@@ -12,7 +12,8 @@ const sentMessage = {notificationHandled: false, receivedByServerAt: 500}
 
 describe('callWithNotificationService', () => {
   it('returns the delivered result without waiting for the notification', async () => {
-    const issueNotification = jest.fn(() => Effect.never)
+    const notificationAnswer = Effect.runSync(Deferred.make<never>())
+    const issueNotification = jest.fn(() => Deferred.await(notificationAnswer))
     const hangingNotificationApi: Pick<NotificationApi, 'issueNotification'> = {
       issueNotification,
     }
@@ -32,5 +33,7 @@ describe('callWithNotificationService', () => {
 
     expect(result).toBe(sentMessage)
     expect(issueNotification).toHaveBeenCalledTimes(1)
+    // Ends the background notification so it does not outlive the test.
+    await Effect.runPromise(Deferred.interrupt(notificationAnswer))
   })
 })

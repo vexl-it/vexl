@@ -134,6 +134,7 @@ function MessagesList({
     })
     if (targetMessageIndex === undefined) return
 
+    isFollowingEndRef.current = false
     runAfterAnimationFrame(() => {
       void listRef.current?.scrollToIndex({
         animated: false,

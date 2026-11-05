@@ -10,6 +10,7 @@ import Reanimated, {
   type SharedValue,
 } from 'react-native-reanimated'
 import {scheduleOnRN} from 'react-native-worklets'
+import {useTranslation} from '../../../utils/localization/I18nProvider'
 
 export const OVERLAY_OPEN_SPRING = {damping: 20, stiffness: 260, mass: 0.8}
 const CLOSE_DURATION_MS = 160
@@ -69,11 +70,17 @@ export function ChatOverlayScrim({
   onPress: () => void
 }): React.ReactElement {
   const theme = useTheme()
+  const {t} = useTranslation()
   const scrimStyle = useAnimatedStyle(() => ({opacity: progress.value}))
 
   return (
     <Reanimated.View style={[StyleSheet.absoluteFill, scrimStyle]}>
-      <Pressable style={StyleSheet.absoluteFill} onPress={onPress}>
+      <Pressable
+        style={StyleSheet.absoluteFill}
+        role="button"
+        aria-label={t('common.close')}
+        onPress={onPress}
+      >
         {Platform.OS === 'ios' && (
           <BlurView
             style={StyleSheet.absoluteFill}

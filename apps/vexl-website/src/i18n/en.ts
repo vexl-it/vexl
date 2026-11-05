@@ -219,7 +219,7 @@ export const en = {
       text: 'Meetups, talks, and pub quizzes, run by people who use Vexl. Find one near you, or host your own.',
       action: 'Explore the community',
       photos: {
-        talk: 'A talk on the Vexl stage at BTC Prague, under a banner that says No middlemen. No KYC.',
+        talk: 'A talk on the Vexl stage at BTC Prague, in front of a Trade Bitcoin privately banner',
         sign: 'Two people laughing behind a yellow Privacy matters sign',
         mask: 'A visitor in a mask holding an I love Vexl sign',
       },
@@ -266,14 +266,14 @@ export const en = {
       steps: {
         altStore: {
           title: 'Get AltStore Pal',
-          text: 'AltStore is an alternative app platform that lets you securely download and update our app outside the App Store — helping you take back your freedom to install the apps you want.',
+          text: 'AltStore is an app store for iPhones in the EU. It installs and updates Vexl outside the App Store.',
           emphasis: 'Return here after downloading.',
           action: 'Get AltStore Pal',
         },
         freedomStore: {
           title: 'Add Freedom Store',
-          text: 'Freedom Store lets you install apps Apple won’t. Add it as a source in AltStore to take back control of your device and access Bitcoin and freedom tech apps without App Store gatekeepers.',
-          emphasis: 'Tap the button below, then install Vexl from there.',
+          text: 'Freedom Store is where Vexl lives inside AltStore. Add it as a source.',
+          emphasis: 'Tap the button below on your iPhone.',
           action: 'Add the Freedom Store source',
         },
         install: {
@@ -331,16 +331,9 @@ export const en = {
     showOlder: 'Show older events',
     host: {
       title: 'Host your own event',
-      text: 'Meetups are where we shine. We’ve got your back every step of the way.',
-      materials: 'Download materials',
-      email: 'Email us at marketing@vexl.it',
-    },
-    support: {
-      title: 'How we’ll support you',
-      promo: 'Promotional support',
-      training: 'Training and resources',
-      merch: 'Merch packs',
-      speakers: 'Guest speakers',
+      text: 'Meetups are where we shine. We help with promotion, training, merch packs, and guest speakers.',
+      materials: 'Download the meetup kit',
+      email: 'Email marketing@vexl.it',
     },
     gallery: {
       title: 'From our events',

@@ -30,7 +30,7 @@ export function BlogPostView({
     <>
       <PageSection maxWidth={800} gap="$5">
         <SiteLink href={path('/blog')}>
-          <Typography variant="paragraphSmallBold" color="$accentYellowPrimary">
+          <Typography variant="paragraphSmallBold" color="$foregroundSecondary">
             {t.blog.back}
           </Typography>
         </SiteLink>

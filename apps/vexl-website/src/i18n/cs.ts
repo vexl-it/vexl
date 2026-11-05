@@ -110,7 +110,7 @@ export const cs: Messages = {
           description: 'Prodám bitcoin za hotovost. Klidně se potkáme u kávy.',
           place: 'Praha',
           commonFriends: '2 společní přátelé',
-          trusted: '1 důvěryhodný',
+          trusted: '1 důvěryhodný přítel',
         },
         {
           id: 'savings',
@@ -220,7 +220,7 @@ export const cs: Messages = {
       text: 'Meetupy, přednášky a hospodské kvízy, které pořádají lidé, kteří používají Vexl. Najděte nějaký ve svém okolí, nebo uspořádejte vlastní.',
       action: 'Prozkoumat komunitu',
       photos: {
-        talk: 'Přednáška na pódiu Vexlu na BTC Prague pod nápisem No middlemen. No KYC.',
+        talk: 'Přednáška na pódiu Vexlu na BTC Prague před bannerem Trade Bitcoin privately',
         sign: 'Dva lidé se smějí za žlutou cedulí Privacy matters',
         mask: 'Návštěvník v masce drží ceduli I love Vexl',
       },
@@ -268,14 +268,14 @@ export const cs: Messages = {
       steps: {
         altStore: {
           title: 'Stáhněte si AltStore Pal',
-          text: 'AltStore je alternativní obchod s aplikacemi, přes který si naši aplikaci bezpečně stáhnete a aktualizujete mimo App Store. Vrátíte si tak svobodu instalovat aplikace, jaké chcete.',
+          text: 'AltStore je obchod s aplikacemi pro iPhony v EU. Nainstaluje a aktualizuje Vexl mimo App Store.',
           emphasis: 'Po stažení se sem vraťte.',
           action: 'Stáhnout AltStore Pal',
         },
         freedomStore: {
           title: 'Přidejte Freedom Store',
-          text: 'Freedom Store vám umožní instalovat aplikace, které Apple nepovolí. Přidejte ho v AltStoru jako zdroj, vezměte si zpět kontrolu nad svým zařízením a získejte přístup k Bitcoinovým a svobodným aplikacím bez strážců App Storu.',
-          emphasis: 'Klepněte na tlačítko níže a nainstalujte Vexl odtamtud.',
+          text: 'Ve Freedom Storu najdete Vexl uvnitř AltStoru. Přidejte ho jako zdroj.',
+          emphasis: 'Klepněte na tlačítko níže na svém iPhonu.',
           action: 'Přidat zdroj Freedom Store',
         },
         install: {
@@ -333,16 +333,9 @@ export const cs: Messages = {
     showOlder: 'Zobrazit starší události',
     host: {
       title: 'Uspořádejte vlastní akci',
-      text: 'Meetupy jsou místo, kde zazáříme. Jsme tu pro vás!',
-      materials: 'Materiály ke stažení',
-      email: 'Napište nám na marketing@vexl.it',
-    },
-    support: {
-      title: 'Jak vás podpoříme',
-      promo: 'Propagace',
-      training: 'Školení a zdroje',
-      merch: 'Balíčky merche',
-      speakers: 'Vexl řečníci',
+      text: 'Meetupy jsou místo, kde zazáříme. Pomůžeme vám s propagací, školením, balíčky merche i řečníky.',
+      materials: 'Stáhnout meetup kit',
+      email: 'Napsat na marketing@vexl.it',
     },
     gallery: {
       title: 'Z našich akcí',

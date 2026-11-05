@@ -24,7 +24,7 @@ export function TableOfContents({
           <Typography
             variant="paragraphSmall"
             color="$foregroundPrimary"
-            hoverStyle={{color: '$accentYellowPrimary'}}
+            hoverStyle={{color: '$accentHighlightSecondary'}}
           >
             {heading.text}
           </Typography>

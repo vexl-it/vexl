@@ -13,6 +13,7 @@ import {
 import React from 'react'
 import {Theme} from 'tamagui'
 import {DownloadCta} from '../../components/DownloadCta'
+import {Eyebrow} from '../../components/Eyebrow'
 import {useLocale} from '../../components/LocaleProvider'
 import {RevealedAvatar} from './mock/DemoAvatar'
 import {DemoOfferCard} from './mock/DemoOfferCard'
@@ -145,9 +146,7 @@ export function HowItWorksSection(): React.JSX.Element {
   return (
     <PageSection id="how-it-works" $lg={{paddingTop: '$9'}}>
       <YStack gap="$4" maxWidth={720}>
-        <Typography variant="paragraphSmallBold" color="$accentYellowPrimary">
-          {copy.eyebrow}
-        </Typography>
+        <Eyebrow>{copy.eyebrow}</Eyebrow>
         <Typography tag="h2" variant="heading1" color="$foregroundPrimary">
           {copy.title}
         </Typography>

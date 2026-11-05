@@ -36,7 +36,7 @@ export function FaqView({
               <Typography
                 variant="paragraphSmallBold"
                 color="$foregroundPrimary"
-                hoverStyle={{color: '$accentYellowPrimary'}}
+                hoverStyle={{color: '$accentHighlightSecondary'}}
               >
                 {category.title}
               </Typography>

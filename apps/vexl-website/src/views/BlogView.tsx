@@ -82,7 +82,7 @@ function FeaturedPost({
           >
             {post.summary}
           </Typography>
-          <Typography variant="description" color="$accentYellowPrimary">
+          <Typography variant="description" color="$foregroundSecondary">
             {formatDate(locale, post.date)}
           </Typography>
         </YStack>

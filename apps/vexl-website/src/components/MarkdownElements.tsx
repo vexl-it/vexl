@@ -51,7 +51,7 @@ export function MdLink({
     <SiteLink href={href.startsWith('/') ? path(href) : href} inline>
       <Typography
         variant="paragraph"
-        color="$accentYellowPrimary"
+        color="$foregroundPrimary"
         fontSize="inherit"
       >
         {children}

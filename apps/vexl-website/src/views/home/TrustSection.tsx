@@ -14,6 +14,7 @@ import {
 } from '@vexl-next/ui'
 import React from 'react'
 import {useTheme} from 'tamagui'
+import {Eyebrow} from '../../components/Eyebrow'
 import {useLocale} from '../../components/LocaleProvider'
 import {Photo} from '../../components/Photo'
 import {SiteLink} from '../../components/SiteLink'
@@ -59,7 +60,7 @@ function TrustTile({
           <Typography variant="paragraphSmallBold" color="$foregroundPrimary">
             {action}
           </Typography>
-          <ArrowRight size={18} color={theme.accentYellowPrimary.get()} />
+          <ArrowRight size={18} color={theme.foregroundPrimary.get()} />
         </XStack>
       </YStack>
     </SiteLink>
@@ -73,9 +74,7 @@ export function TrustSection(): React.JSX.Element {
   return (
     <PageSection>
       <YStack gap="$5" maxWidth={820}>
-        <Typography variant="paragraphSmallBold" color="$accentYellowPrimary">
-          {copy.eyebrow}
-        </Typography>
+        <Eyebrow>{copy.eyebrow}</Eyebrow>
         <Typography tag="h2" variant="display" color="$foregroundPrimary">
           {copy.title}
         </Typography>
@@ -83,12 +82,13 @@ export function TrustSection(): React.JSX.Element {
           {copy.text}
         </Typography>
       </YStack>
-      <YStack aspectRatio={4 / 3} $md={{aspectRatio: 2.2}}>
+      <YStack aspectRatio={4 / 3} $md={{aspectRatio: 1.9}}>
         <Photo
           photo="team"
           alt={copy.teamPhoto}
           sizes="(min-width: 1200px) 1120px, 100vw"
           flex={1}
+          focus="50% 25%"
         />
       </YStack>
       <YStack gap="$5" $md={{flexDirection: 'row'}}>

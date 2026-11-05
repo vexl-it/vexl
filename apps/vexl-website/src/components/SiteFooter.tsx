@@ -9,6 +9,7 @@ import {
 } from '@vexl-next/ui'
 import Image from 'next/image'
 import React from 'react'
+import {Theme} from 'tamagui'
 import {externalLinks} from '../config/links'
 import {formatMessage} from '../i18n/locales'
 import {useLocale} from './LocaleProvider'
@@ -65,103 +66,111 @@ export function SiteFooter(): React.JSX.Element {
   const copy = t.footer
 
   return (
-    <YStack
-      tag="footer"
-      width="100%"
-      maxWidth={PAGE_SECTION_MAX_WIDTH}
-      alignSelf="center"
-      gap="$9"
-      paddingHorizontal="$5"
-      paddingTop="$10"
-      paddingBottom="$9"
-      $lg={{paddingHorizontal: '$9'}}
-    >
-      <YStack gap="$9" $lg={{flexDirection: 'row'}}>
-        <YStack gap="$5" maxWidth={320} $lg={{flex: 1}}>
-          <Image
-            src="/images/vexl-logo.webp"
-            alt="Vexl"
-            width={98}
-            height={30}
-          />
-          <Typography variant="paragraphSmall" color="$foregroundSecondary">
-            {copy.tagline}
-          </Typography>
-        </YStack>
-        <XStack flexWrap="wrap" gap="$9" rowGap="$8" $lg={{flex: 2}}>
-          <FooterLinks
-            title={copy.explore}
-            links={[
-              {label: t.nav.download, href: path('/download')},
-              {label: t.nav.howItWorks, href: `${path('/')}#how-it-works`},
-              {label: t.nav.community, href: path('/community')},
-              {label: t.nav.blog, href: path('/blog')},
-              {label: t.nav.faq, href: path('/faq')},
-            ]}
-          />
-          <FooterLinks
-            title={copy.about}
-            links={[
-              {label: copy.foundation, href: externalLinks.foundation},
-              {label: copy.github, href: externalLinks.github},
-              {label: copy.audit, href: path('/audit')},
-              {label: copy.leaderboard, href: externalLinks.leaderboard},
-              {label: copy.brand, href: externalLinks.brandManual},
-            ]}
-          />
-          <FooterLinks
-            title={copy.follow}
-            links={[
-              {label: copy.youtube, href: externalLinks.youtube},
-              {label: copy.x, href: externalLinks.x},
-              {label: copy.nostr, href: externalLinks.nostr},
-            ]}
-          />
-          <FooterColumn title={copy.contact.title}>
-            <YStack gap="$1">
-              {copy.contact.lines.map((line) => (
-                <Typography
-                  key={line}
-                  variant="paragraphSmall"
-                  color="$foregroundSecondary"
-                >
-                  {line}
-                </Typography>
-              ))}
+    <Theme name="dark">
+      <YStack tag="footer" backgroundColor="$backgroundPrimary">
+        <YStack
+          width="100%"
+          maxWidth={PAGE_SECTION_MAX_WIDTH}
+          alignSelf="center"
+          gap="$9"
+          paddingHorizontal="$5"
+          paddingTop="$10"
+          paddingBottom="$9"
+          $lg={{paddingHorizontal: '$9'}}
+        >
+          <YStack gap="$9" $lg={{flexDirection: 'row'}}>
+            <YStack gap="$5" maxWidth={320} $lg={{flex: 1}}>
+              <Image
+                src="/images/vexl-logo.webp"
+                alt="Vexl"
+                width={98}
+                height={30}
+              />
+              <Typography variant="paragraphSmall" color="$foregroundSecondary">
+                {copy.tagline}
+              </Typography>
             </YStack>
-            <SiteLink href={externalLinks.supportEmail}>
+            <XStack flexWrap="wrap" gap="$9" rowGap="$8" $lg={{flex: 2}}>
+              <FooterLinks
+                title={copy.explore}
+                links={[
+                  {label: t.nav.download, href: path('/download')},
+                  {label: t.nav.howItWorks, href: `${path('/')}#how-it-works`},
+                  {label: t.nav.community, href: path('/community')},
+                  {label: t.nav.blog, href: path('/blog')},
+                  {label: t.nav.faq, href: path('/faq')},
+                ]}
+              />
+              <FooterLinks
+                title={copy.about}
+                links={[
+                  {label: copy.foundation, href: externalLinks.foundation},
+                  {label: copy.github, href: externalLinks.github},
+                  {label: copy.audit, href: path('/audit')},
+                  {label: copy.leaderboard, href: externalLinks.leaderboard},
+                  {label: copy.brand, href: externalLinks.brandManual},
+                ]}
+              />
+              <FooterLinks
+                title={copy.follow}
+                links={[
+                  {label: copy.youtube, href: externalLinks.youtube},
+                  {label: copy.x, href: externalLinks.x},
+                  {label: copy.nostr, href: externalLinks.nostr},
+                ]}
+              />
+              <FooterColumn title={copy.contact.title}>
+                <YStack gap="$1">
+                  {copy.contact.lines.map((line) => (
+                    <Typography
+                      key={line}
+                      variant="paragraphSmall"
+                      color="$foregroundSecondary"
+                    >
+                      {line}
+                    </Typography>
+                  ))}
+                </YStack>
+                <SiteLink href={externalLinks.supportEmail}>
+                  <Typography
+                    variant="paragraphSmall"
+                    color="$foregroundPrimary"
+                    hoverStyle={{color: '$foregroundSecondary'}}
+                  >
+                    {copy.contact.email}
+                  </Typography>
+                </SiteLink>
+              </FooterColumn>
+            </XStack>
+          </YStack>
+          <Divider />
+          <XStack
+            alignItems="center"
+            justifyContent="space-between"
+            gap="$5"
+            flexWrap="wrap"
+          >
+            <SiteLink href={path('/terms-privacy')}>
               <Typography
-                variant="paragraphSmall"
-                color="$foregroundPrimary"
-                hoverStyle={{color: '$accentYellowPrimary'}}
+                variant="description"
+                color="$foregroundSecondary"
+                hoverStyle={{color: '$foregroundPrimary'}}
               >
-                {copy.contact.email}
+                {copy.terms}
               </Typography>
             </SiteLink>
-          </FooterColumn>
-        </XStack>
+            <Image
+              src="/images/glasses-white.webp"
+              alt=""
+              width={44}
+              height={20}
+            />
+            <Typography variant="description" color="$foregroundSecondary">
+              {formatMessage(copy.rights, {year: new Date().getFullYear()})}
+            </Typography>
+          </XStack>
+        </YStack>
       </YStack>
-      <Divider />
-      <XStack
-        alignItems="center"
-        justifyContent="space-between"
-        gap="$5"
-        flexWrap="wrap"
-      >
-        <SiteLink href={path('/terms-privacy')}>
-          <Typography
-            variant="description"
-            color="$foregroundSecondary"
-            hoverStyle={{color: '$foregroundPrimary'}}
-          >
-            {copy.terms}
-          </Typography>
-        </SiteLink>
-        <Image src="/images/glasses-white.webp" alt="" width={44} height={20} />
-        <Typography variant="description" color="$foregroundSecondary">
-          {formatMessage(copy.rights, {year: new Date().getFullYear()})}
-        </Typography>
-      </XStack>
-    </YStack>
+    </Theme>
   )
 }

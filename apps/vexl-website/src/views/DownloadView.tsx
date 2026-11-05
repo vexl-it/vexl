@@ -5,6 +5,7 @@ import {
   Button,
   LinkTile,
   PageSection,
+  QrCodeFrame,
   QuestionmarkCircle,
   Typography,
   XStack,
@@ -302,14 +303,7 @@ export function DownloadView({
           borderRadius="$5"
           backgroundColor="$backgroundSecondary"
         >
-          <YStack backgroundColor="$white100" padding="$2" borderRadius="$3">
-            <Image
-              src="/images/download-qr.webp"
-              alt=""
-              width={104}
-              height={104}
-            />
-          </YStack>
+          <QrCodeFrame value={externalLinks.downloadPage} size={104} />
           <YStack gap="$2" maxWidth={160}>
             <Typography variant="paragraphSmallBold" color="$foregroundPrimary">
               {copy.qrTitle}
@@ -354,7 +348,8 @@ export function DownloadView({
           <SiteLink href={regionSwitch.href}>
             <Typography
               variant="paragraphSmallBold"
-              color="$accentYellowPrimary"
+              color="$foregroundPrimary"
+              textDecorationLine="underline"
             >
               {regionSwitch.label}
             </Typography>

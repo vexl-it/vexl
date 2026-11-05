@@ -11,9 +11,9 @@ export const photos = {
     height: 1336,
   },
   talk: {
-    src: '/images/photos/stage-no-middlemen-no-kyc-talk.webp',
-    width: 2000,
-    height: 1600,
+    src: '/images/photos/stage-trade-bitcoin-privately-talk.webp',
+    width: 1600,
+    height: 2000,
   },
   signLaughing: {
     src: '/images/photos/people-privacy-matters-laughing.webp',

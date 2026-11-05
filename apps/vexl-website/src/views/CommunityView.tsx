@@ -1,22 +1,16 @@
 'use client'
 
 import {
-  BoxProduct,
   Button,
-  DiplomaAsset,
   EventCard,
-  IconBox,
-  MegaphoneNotifications,
-  Microphone,
   PageSection,
   Typography,
   XStack,
   YStack,
-  type IconProps,
 } from '@vexl-next/ui'
 import {Array, pipe} from 'effect'
 import React, {useState} from 'react'
-import {useTheme} from 'tamagui'
+import {Eyebrow} from '../components/Eyebrow'
 import {useLocale} from '../components/LocaleProvider'
 import {Photo} from '../components/Photo'
 import {SiteLink} from '../components/SiteLink'
@@ -97,69 +91,46 @@ function PastEvents({
   )
 }
 
-const supportItems = [
-  {key: 'promo', icon: MegaphoneNotifications, tone: 'red'},
-  {key: 'training', icon: DiplomaAsset, tone: 'highlight'},
-  {key: 'merch', icon: BoxProduct, tone: 'accent'},
-  {key: 'speakers', icon: Microphone, tone: 'green'},
-] as const satisfies ReadonlyArray<{
-  readonly key: string
-  readonly icon: React.ComponentType<IconProps>
-  readonly tone: 'red' | 'highlight' | 'accent' | 'green'
-}>
-
 function HostEventSection(): React.JSX.Element {
   const {t} = useLocale()
-  const theme = useTheme()
-  const copy = t.community
+  const copy = t.community.host
   return (
-    <PageSection
-      id="host-event"
-      style={{scrollMarginTop: 96}}
-      $md={{flexDirection: 'row'}}
-    >
-      <YStack flex={1} gap="$5" alignItems="flex-start">
-        <Typography tag="h2" variant="heading1" color="$foregroundPrimary">
-          {copy.host.title}
-        </Typography>
-        <Typography variant="paragraph" color="$foregroundSecondary">
-          {copy.host.text}
-        </Typography>
-        <XStack gap="$3" flexWrap="wrap">
-          <SiteLink href={externalLinks.meetupKit}>
-            <Button role="none" size="medium">
-              {copy.host.materials}
-            </Button>
-          </SiteLink>
-          <SiteLink href={externalLinks.marketingEmail}>
-            <Button role="none" variant="tertiary" size="medium">
-              {copy.host.email}
-            </Button>
-          </SiteLink>
-        </XStack>
-      </YStack>
-      <YStack flex={1} gap="$5">
-        <Typography tag="h3" variant="heading3" color="$foregroundPrimary">
-          {copy.support.title}
-        </Typography>
-        <XStack flexWrap="wrap" gap="$5">
-          {supportItems.map(({key, icon: Icon, tone}) => (
-            <XStack
-              key={key}
-              alignItems="center"
-              gap="$4"
-              width="45%"
-              minWidth={200}
-            >
-              <IconBox tone={tone}>
-                <Icon size={24} color={theme.foregroundPrimary.get()} />
-              </IconBox>
-              <Typography variant="paragraphSmall" color="$foregroundPrimary">
-                {copy.support[key]}
-              </Typography>
-            </XStack>
-          ))}
-        </XStack>
+    <PageSection id="host-event" style={{scrollMarginTop: 96}}>
+      <YStack
+        gap="$7"
+        padding="$7"
+        borderRadius="$8"
+        backgroundColor="$backgroundSecondary"
+        $md={{flexDirection: 'row', alignItems: 'center', padding: '$10'}}
+      >
+        <YStack flex={1} gap="$5" alignItems="flex-start" flexBasis={0}>
+          <Typography tag="h2" variant="heading1" color="$foregroundPrimary">
+            {copy.title}
+          </Typography>
+          <Typography variant="paragraph" color="$foregroundSecondary">
+            {copy.text}
+          </Typography>
+          <XStack gap="$3" flexWrap="wrap" alignItems="center">
+            <SiteLink href={externalLinks.meetupKit}>
+              <Button role="none" size="medium">
+                {copy.materials}
+              </Button>
+            </SiteLink>
+            <SiteLink href={externalLinks.marketingEmail}>
+              <Button role="none" size="medium" variant="secondary">
+                {copy.email}
+              </Button>
+            </SiteLink>
+          </XStack>
+        </YStack>
+        <YStack height={260} $md={{flex: 1, flexBasis: 0, height: 340}}>
+          <Photo
+            photo="flyers"
+            alt={t.community.photos.flyers}
+            sizes="(min-width: 768px) 480px, 100vw"
+            flex={1}
+          />
+        </YStack>
       </YStack>
     </PageSection>
   )
@@ -176,9 +147,7 @@ export function CommunityView({
   return (
     <>
       <PageSection alignItems="center">
-        <Typography variant="paragraphSmallBold" color="$accentYellowPrimary">
-          {copy.eyebrow}
-        </Typography>
+        <Eyebrow center>{copy.eyebrow}</Eyebrow>
         <Typography
           tag="h1"
           variant="display"
@@ -198,7 +167,9 @@ export function CommunityView({
         <XStack gap="$3" flexWrap="wrap" justifyContent="center">
           <SiteLink href="#events">
             <Button role="none" size="medium">
-              {copy.browseEvents}
+              {Array.isNonEmptyReadonlyArray(events.upcoming)
+                ? copy.browseEvents
+                : copy.pastTitle}
             </Button>
           </SiteLink>
           <SiteLink href="#host-event">
@@ -217,6 +188,7 @@ export function CommunityView({
           <Photo
             photo="wave"
             alt={copy.photos.wave}
+            focus="65% 30%"
             sizes="(min-width: 1200px) 280px, 25vw"
             flex={0.8}
           />
@@ -277,25 +249,17 @@ export function CommunityView({
         </XStack>
         <XStack gap="$4" height={220} $md={{height: 360}}>
           <Photo
-            photo="flyers"
-            alt={copy.photos.flyers}
-            sizes="(min-width: 1200px) 370px, 33vw"
+            photo="wristband"
+            alt={copy.photos.wristband}
+            sizes="(min-width: 1200px) 560px, 50vw"
             flex={1}
           />
           <Photo
-            photo="wristband"
-            alt={copy.photos.wristband}
-            sizes="(min-width: 1200px) 370px, 33vw"
+            photo="teamBacks"
+            alt={copy.photos.teamBacks}
+            sizes="(min-width: 1200px) 560px, 50vw"
             flex={1}
           />
-          <YStack display="none" $md={{display: 'flex'}} flex={1}>
-            <Photo
-              photo="teamBacks"
-              alt={copy.photos.teamBacks}
-              sizes="(min-width: 1200px) 370px, 33vw"
-              flex={1}
-            />
-          </YStack>
         </XStack>
       </PageSection>
     </>

@@ -26,7 +26,7 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale}>
-      <body style={{margin: 0, backgroundColor: colors.black100}}>
+      <body style={{margin: 0, backgroundColor: colors.white100}}>
         <TamaguiRoot>
           <LocaleProvider locale={locale}>
             <SiteHeader />

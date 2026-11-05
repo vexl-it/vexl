@@ -25,7 +25,7 @@ export function BottomCta(): React.JSX.Element {
             {t.home.cta.text}
           </Typography>
         </YStack>
-        <DownloadCta tone="light" />
+        <DownloadCta onYellow />
       </YStack>
     </PageSection>
   )

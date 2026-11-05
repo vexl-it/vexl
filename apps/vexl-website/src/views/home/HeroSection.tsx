@@ -1,6 +1,7 @@
 'use client'
 
 import {
+  Button,
   ChevronDown,
   FadeGradient,
   FilterBar,
@@ -12,8 +13,6 @@ import {
 import {Array, pipe} from 'effect'
 import Image from 'next/image'
 import React from 'react'
-import {useTheme} from 'tamagui'
-import {DownloadCta} from '../../components/DownloadCta'
 import {useLocale} from '../../components/LocaleProvider'
 import {PhoneFrame} from '../../components/PhoneFrame'
 import {SiteLink} from '../../components/SiteLink'
@@ -70,7 +69,6 @@ function MarketplaceMock(): React.JSX.Element {
 
 export function HeroSection(): React.JSX.Element {
   const {t, path} = useLocale()
-  const theme = useTheme()
 
   return (
     <PageSection
@@ -78,7 +76,7 @@ export function HeroSection(): React.JSX.Element {
       $lg={{flexDirection: 'row', alignItems: 'center', paddingTop: '$9'}}
     >
       <YStack flex={1} gap="$7" $lg={{flexBasis: 0, flexGrow: 1.3}}>
-        <Image src="/images/glasses-white.webp" alt="" width={56} height={25} />
+        <Image src="/images/glasses-black.webp" alt="" width={56} height={25} />
         <Typography tag="h1" variant="display" color="$foregroundPrimary">
           {t.home.hero.title}
         </Typography>
@@ -89,23 +87,14 @@ export function HeroSection(): React.JSX.Element {
         >
           {t.home.hero.text}
         </Typography>
-        <XStack alignItems="center" gap="$8" flexWrap="wrap">
-          <DownloadCta />
+        <XStack alignItems="center" gap="$3" flexWrap="wrap">
+          <SiteLink href={path('/download')}>
+            <Button role="none">{t.downloadVexl}</Button>
+          </SiteLink>
           <SiteLink href={`${path('/')}#how-it-works`}>
-            <XStack
-              role="none"
-              alignItems="center"
-              gap="$2"
-              hoverStyle={{opacity: 0.7}}
-            >
-              <Typography
-                variant="paragraphSmallBold"
-                color="$foregroundPrimary"
-              >
-                {t.home.hero.howItWorks}
-              </Typography>
-              <ChevronDown size={20} color={theme.accentYellowPrimary.get()} />
-            </XStack>
+            <Button role="none" variant="secondary" icon={ChevronDown}>
+              {t.home.hero.howItWorks}
+            </Button>
           </SiteLink>
         </XStack>
       </YStack>

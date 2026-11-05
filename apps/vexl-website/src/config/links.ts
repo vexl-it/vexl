@@ -1,4 +1,6 @@
 export const externalLinks = {
+  // What the QR codes open, so phones land on the live site
+  downloadPage: 'https://vexl.it/download',
   foundation: 'https://vexl.foundation/',
   leaderboard: 'https://dashboard.vexl.it',
   github: 'https://github.com/vexl-it',

@@ -7,20 +7,9 @@ html {
 }
 
 a:focus-visible {
-  outline: 2px solid var(--accentYellowPrimary);
+  outline: 2px solid var(--foregroundPrimary);
   outline-offset: 2px;
   border-radius: 4px;
-}
-
-/* Exchange asks get struck through one by one once the list scrolls in */
-.vexl-strike-line {
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 360ms ease-out;
-}
-
-.vexl-in-view .vexl-strike-line {
-  transform: scaleX(1);
 }
 
 /* Phones show the mock smaller, like a scaled-down app screenshot */
@@ -45,9 +34,5 @@ a:focus-visible {
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
-  }
-
-  .vexl-strike-line {
-    transition: none;
   }
 }

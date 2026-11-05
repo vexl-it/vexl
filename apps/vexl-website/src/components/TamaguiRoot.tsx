@@ -54,7 +54,7 @@ export function TamaguiRoot({
   })
 
   return (
-    <TamaguiProvider config={config} defaultTheme="dark">
+    <TamaguiProvider config={config} defaultTheme="light">
       <style href="vexl-fonts" precedence="default">
         {fontFaceCss}
       </style>

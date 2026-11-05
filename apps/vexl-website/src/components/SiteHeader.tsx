@@ -112,7 +112,7 @@ export function SiteHeader(): React.JSX.Element {
       >
         <SiteLink href={path('/')} label="Vexl">
           <Image
-            src="/images/vexl-logo.webp"
+            src="/images/vexl-logo-black.webp"
             alt="Vexl"
             width={98}
             height={30}
@@ -125,9 +125,9 @@ export function SiteHeader(): React.JSX.Element {
               <Typography
                 variant="paragraphSmallBold"
                 color={
-                  item.current ? '$accentYellowPrimary' : '$foregroundPrimary'
+                  item.current ? '$foregroundPrimary' : '$foregroundSecondary'
                 }
-                hoverStyle={{color: '$accentYellowPrimary'}}
+                hoverStyle={{color: '$foregroundPrimary'}}
               >
                 {item.label}
               </Typography>
@@ -183,7 +183,7 @@ export function SiteHeader(): React.JSX.Element {
               <Typography
                 variant="heading3"
                 color={
-                  item.current ? '$accentYellowPrimary' : '$foregroundPrimary'
+                  item.current ? '$foregroundPrimary' : '$foregroundSecondary'
                 }
               >
                 {item.label}

@@ -1,28 +1,20 @@
 'use client'
 
-import {
-  ArrowRight,
-  Button,
-  tokens,
-  Typography,
-  XStack,
-  YStack,
-} from '@vexl-next/ui'
-import Image from 'next/image'
+import {Button, QrCodeFrame, Typography, XStack, YStack} from '@vexl-next/ui'
 import React from 'react'
-import {Theme, useTheme} from 'tamagui'
+import {externalLinks} from '../config/links'
 import {useLocale} from './LocaleProvider'
 import {SiteLink} from './SiteLink'
 
+const QR_SIZE = 88
+
 /** QR code on wide screens, a download button on phones. */
 export function DownloadCta({
-  tone = 'dark',
+  onYellow = false,
 }: {
-  readonly tone?: 'dark' | 'light'
+  readonly onYellow?: boolean
 }): React.JSX.Element {
   const {t, path} = useLocale()
-  const theme = useTheme()
-  const textColor = tone === 'dark' ? '$foregroundPrimary' : '$black100'
 
   return (
     <SiteLink href={path('/download')}>
@@ -34,34 +26,28 @@ export function DownloadCta({
         hoverStyle={{opacity: 0.8}}
         $lg={{display: 'flex'}}
       >
-        <YStack backgroundColor="$white100" padding="$2" borderRadius="$3">
-          <Image src="/images/download-qr.webp" alt="" width={88} height={88} />
+        <YStack
+          padding="$2"
+          borderRadius="$4"
+          borderWidth={onYellow ? 0 : 1}
+          borderColor="$backgroundTertiary"
+          backgroundColor="$white100"
+        >
+          <QrCodeFrame value={externalLinks.downloadPage} size={QR_SIZE} />
         </YStack>
-        <YStack gap="$3" maxWidth={180}>
-          <Typography variant="paragraphSmallBold" color={textColor}>
-            {t.scanToDownload}
-          </Typography>
-          <ArrowRight
-            size={24}
-            color={
-              tone === 'dark'
-                ? theme.accentYellowPrimary.get()
-                : tokens.color.black100.val
-            }
-          />
-        </YStack>
+        <Typography
+          variant="paragraphSmallBold"
+          color={onYellow ? '$black100' : '$foregroundPrimary'}
+          maxWidth={160}
+        >
+          {t.scanToDownload}
+        </Typography>
       </XStack>
-      {/* The light theme's tertiary button is black, for the yellow bands */}
-      <Theme name={tone}>
-        <XStack $lg={{display: 'none'}}>
-          <Button
-            role="none"
-            variant={tone === 'dark' ? 'primary' : 'tertiary'}
-          >
-            {t.downloadVexl}
-          </Button>
-        </XStack>
-      </Theme>
+      <XStack $lg={{display: 'none'}}>
+        <Button role="none" variant={onYellow ? 'tertiary' : 'primary'}>
+          {t.downloadVexl}
+        </Button>
+      </XStack>
     </SiteLink>
   )
 }

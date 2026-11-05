@@ -15,11 +15,11 @@ export function PageHero({
 }): React.JSX.Element {
   return (
     <YStack alignItems="center" gap="$5">
-      <Image src="/images/glasses-yellow.webp" alt="" width={46} height={22} />
+      <Image src="/images/glasses-black.webp" alt="" width={46} height={22} />
       <Typography
         tag="h1"
         variant="display"
-        color="$accentYellowPrimary"
+        color="$foregroundPrimary"
         textAlign="center"
       >
         {title}

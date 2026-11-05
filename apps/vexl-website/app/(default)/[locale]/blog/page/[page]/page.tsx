@@ -1,13 +1,10 @@
+import {blogPageCount} from '@/src/content/blog'
+import {toLocale} from '@/src/i18n/locales'
+import {resolveLocale} from '@/src/pageParams'
+import {BlogIndex, blogIndexMetadata} from '@/src/views/blog/BlogIndex'
 import {Array, Option, pipe} from 'effect'
 import {type Metadata} from 'next'
 import React from 'react'
-import {blogPageCount} from '../../../../../../src/content/blog'
-import {toLocale} from '../../../../../../src/i18n/locales'
-import {resolveLocale} from '../../../../../../src/pageParams'
-import {
-  BlogIndex,
-  blogIndexMetadata,
-} from '../../../../../../src/views/blog/BlogIndex'
 
 interface Props {
   readonly params: Promise<{locale: string; page: string}>

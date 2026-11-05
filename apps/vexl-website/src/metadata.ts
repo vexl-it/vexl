@@ -12,6 +12,7 @@ export function pageMetadata({
   title,
   description,
   image = DEFAULT_OG_IMAGE,
+  publishedLocales = locales,
 }: {
   readonly locale: Locale
   /** Path without the locale prefix, e.g. `/faq`. */
@@ -19,6 +20,8 @@ export function pageMetadata({
   readonly title: string
   readonly description?: string
   readonly image?: string
+  /** The locales this page exists in; only those get an hreflang link. */
+  readonly publishedLocales?: readonly Locale[]
 }): Metadata {
   return {
     metadataBase: new URL(SITE_URL),
@@ -33,7 +36,7 @@ export function pageMetadata({
       languages: {
         'x-default': path,
         ...Object.fromEntries(
-          locales.map((other) => [other, localizedPath(other, path)])
+          publishedLocales.map((other) => [other, localizedPath(other, path)])
         ),
       },
       types: {'application/rss+xml': '/post/rss.xml'},

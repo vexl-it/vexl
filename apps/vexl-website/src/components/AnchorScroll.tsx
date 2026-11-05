@@ -17,6 +17,17 @@ function easeInOutCubic(progress: number): number {
     : (progress - 1) * (2 * progress - 2) ** 2 + 1
 }
 
+// Webflow keeps the target below a fixed header that sits directly in <body>
+function fixedHeaderHeight(): number {
+  const header = document.querySelector(
+    'header, body > .header, body > .w-nav:not([data-no-scroll])'
+  )
+  return header instanceof HTMLElement &&
+    getComputedStyle(header).position === 'fixed'
+    ? header.offsetHeight
+    : 0
+}
+
 function animateScrollTo(to: number): void {
   const from = window.scrollY
   if (from === to) return
@@ -44,7 +55,9 @@ function onClick(event: MouseEvent): void {
   if (!target) return
   event.preventDefault()
   if (location.hash !== link.hash) history.pushState(null, '', link.hash)
-  animateScrollTo(target.getBoundingClientRect().top + window.scrollY)
+  animateScrollTo(
+    target.getBoundingClientRect().top + window.scrollY - fixedHeaderHeight()
+  )
 }
 
 export function AnchorScroll(): null {

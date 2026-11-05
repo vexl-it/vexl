@@ -1,10 +1,10 @@
-import {type Metadata} from 'next'
-import React from 'react'
-import {resolveLocale, type LocaleParams} from '../../../../src/pageParams'
+import {resolveLocale, type LocaleParams} from '@/src/pageParams'
 import {
   CommunityPage,
   communityMetadata,
-} from '../../../../src/views/community/CommunityPage'
+} from '@/src/views/community/CommunityPage'
+import {type Metadata} from 'next'
+import React from 'react'
 
 export async function generateMetadata(props: LocaleParams): Promise<Metadata> {
   return communityMetadata(await resolveLocale(props), 1)

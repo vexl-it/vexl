@@ -1,6 +1,6 @@
+import {type BlogPost, blogPostsByDate} from '@/src/content/blog'
+import {SITE_URL} from '@/src/metadata'
 import {Array, Option, pipe} from 'effect'
-import {type BlogPost, blogPostsByDate} from '../../../../../src/content/blog'
-import {SITE_URL} from '../../../../../src/metadata'
 
 export const dynamic = 'force-static'
 export const dynamicParams = false

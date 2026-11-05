@@ -64,7 +64,7 @@ export function CommunityPage({
   readonly page: number
 }): React.JSX.Element {
   const t = community[locale]
-  const events = eventsPage(page)
+  const events = eventsPage(locale, page)
   const href = (target: number): string =>
     localizedPath(locale, communityPagePath(target))
   return (

@@ -60,22 +60,30 @@ export function Navbar({
 
   useEffect(() => {
     if (menu !== 'open') return
+    // Like Webflow's overlay, a click outside the menu only closes it
     const closeOnOutsideClick = (event: MouseEvent): void => {
       if (
         event.target instanceof Node &&
         !menuRef.current?.contains(event.target) &&
         !navRef.current?.querySelector('.w-nav-button')?.contains(event.target)
-      )
+      ) {
+        event.stopPropagation()
         setMenu('closing')
+      }
+    }
+    const closeOnEscape = (event: KeyboardEvent): void => {
+      if (event.key === 'Escape') setMenu('closing')
     }
     const media = window.matchMedia(COLLAPSE_QUERY)
     const closeOnDesktop = (): void => {
       if (!media.matches) setMenu('closed')
     }
-    document.addEventListener('click', closeOnOutsideClick)
+    window.addEventListener('click', closeOnOutsideClick, true)
+    document.addEventListener('keydown', closeOnEscape)
     media.addEventListener('change', closeOnDesktop)
     return () => {
-      document.removeEventListener('click', closeOnOutsideClick)
+      window.removeEventListener('click', closeOnOutsideClick, true)
+      document.removeEventListener('keydown', closeOnEscape)
       media.removeEventListener('change', closeOnDesktop)
     }
   }, [menu])
@@ -173,7 +181,7 @@ export function Navbar({
             </a>
           )}
           <div
-            className={`${withLight('menu-button')} w-nav-button${isMenuShown ? ' w--open' : ''}`}
+            className={`${withLight('menu-button')} w-nav-button${menu === 'open' ? ' w--open' : ''}`}
             data-animated-icon={light ? undefined : ''}
             aria-label="menu"
             role="button"

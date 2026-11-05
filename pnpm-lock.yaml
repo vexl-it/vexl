@@ -1542,9 +1542,6 @@ importers:
 
   apps/vexl-website:
     dependencies:
-      '@splidejs/splide':
-        specifier: 3.2.2
-        version: 3.2.2
       effect:
         specifier: ^3.20.0
         version: 3.21.4
@@ -1579,6 +1576,9 @@ importers:
         specifier: ^0.3.4
         version: 0.3.4
     devDependencies:
+      '@types/hast':
+        specifier: ^3.0.4
+        version: 3.0.5
       '@types/matter-js':
         specifier: ^0.20.2
         version: 0.20.2
@@ -5710,9 +5710,6 @@ packages:
   '@smithy/util-utf8@2.3.0':
     resolution: {integrity: sha512-R8Rdn8Hy72KKcebgLiv8jQcQkXoLMOGGv5uI1/k0l+snqkOzQ1R0ChUBCxWMlBsFMekWjq0wRudIweFs7sKT5A==}
     engines: {node: '>=14.0.0'}
-
-  '@splidejs/splide@3.2.2':
-    resolution: {integrity: sha512-FRYPlQLPmCiO3GzHg8Y8wAm2Aqg8IT0ScSVCw/pxbQ9wFZviCYkon3WaHBFtewSp8n8+GmdHr3HgH2th+Pr8hQ==}
 
   '@standard-schema/spec@1.1.0':
     resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
@@ -16768,8 +16765,6 @@ snapshots:
     dependencies:
       '@smithy/util-buffer-from': 2.2.0
       tslib: 2.8.1
-
-  '@splidejs/splide@3.2.2': {}
 
   '@standard-schema/spec@1.1.0': {}
 

@@ -1,4 +1,4 @@
-import {Option} from 'effect'
+import {Array, Option} from 'effect'
 import {type Metadata} from 'next'
 import React from 'react'
 import {Footer} from '../../components/Footer'
@@ -6,7 +6,7 @@ import {GlobalStyles} from '../../components/GlobalStyles'
 import {Navbar} from '../../components/Navbar'
 import {blogPage, blogPageCount, featuredBlogPost} from '../../content/blog'
 import {blog} from '../../i18n/blog'
-import {type Locale, localizedPath} from '../../i18n/locales'
+import {type Locale, locales, localizedPath} from '../../i18n/locales'
 import {pageMetadata} from '../../metadata'
 import {BlogCard} from './BlogCard'
 
@@ -22,6 +22,10 @@ export function blogIndexMetadata(locale: Locale, page: number): Metadata {
     path: blogPagePath(page),
     title: t.metaTitle,
     description: t.metaDescription,
+    publishedLocales: Array.filter(
+      locales,
+      (other) => page <= blogPageCount(other)
+    ),
   })
 }
 

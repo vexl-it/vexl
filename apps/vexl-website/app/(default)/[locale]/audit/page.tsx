@@ -1,10 +1,10 @@
+import {GlobalStyles} from '@/src/components/GlobalStyles'
+import {audit} from '@/src/i18n/audit'
+import {pageMetadata} from '@/src/metadata'
+import {resolveLocale, type LocaleParams} from '@/src/pageParams'
+import {OldNav} from '@/src/views/oldNav/OldNav'
 import {type Metadata} from 'next'
 import React from 'react'
-import {GlobalStyles} from '../../../../src/components/GlobalStyles'
-import {audit} from '../../../../src/i18n/audit'
-import {pageMetadata} from '../../../../src/metadata'
-import {resolveLocale, type LocaleParams} from '../../../../src/pageParams'
-import {OldNav} from '../../../../src/views/oldNav/OldNav'
 
 export async function generateMetadata(props: LocaleParams): Promise<Metadata> {
   const locale = await resolveLocale(props)

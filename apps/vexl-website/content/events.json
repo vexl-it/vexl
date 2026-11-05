@@ -430,7 +430,8 @@
     "speakers": "C. and Jeff",
     "location": "Friedel Richter Restaurant, Berlin 🇩🇪",
     "start": "19:00",
-    "end": "21:00"
+    "end": "21:00",
+    "cs": false
   },
   {
     "date": "2025-02-01",
@@ -466,7 +467,10 @@
     "speakers": "Marco",
     "location": "Geo Caffé, Padua 🇮🇹",
     "start": "20:00",
-    "end": "23:00"
+    "end": "23:00",
+    "cs": {
+      "end": ""
+    }
   },
   {
     "date": "2024-12-13",

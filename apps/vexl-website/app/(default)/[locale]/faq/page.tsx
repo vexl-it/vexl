@@ -1,20 +1,20 @@
+import {Footer} from '@/src/components/Footer'
+import {GlobalStyles} from '@/src/components/GlobalStyles'
+import {Navbar} from '@/src/components/Navbar'
+import {faq} from '@/src/i18n/faq'
+import {pageMetadata} from '@/src/metadata'
+import {resolveLocale, type LocaleParams} from '@/src/pageParams'
+import {FaqAccordion, FaqCard} from '@/src/views/faq/FaqAccordion'
+import {
+  faqSections,
+  markdownToPlainText,
+  type FaqSectionContent,
+} from '@/src/views/faq/faqContent'
 import {Array, pipe} from 'effect'
 import {type Metadata} from 'next'
 import React from 'react'
 import Markdown from 'react-markdown'
 import rehypeRaw from 'rehype-raw'
-import {Footer} from '../../../../src/components/Footer'
-import {GlobalStyles} from '../../../../src/components/GlobalStyles'
-import {Navbar} from '../../../../src/components/Navbar'
-import {faq} from '../../../../src/i18n/faq'
-import {pageMetadata} from '../../../../src/metadata'
-import {resolveLocale, type LocaleParams} from '../../../../src/pageParams'
-import {FaqAccordion, FaqCard} from '../../../../src/views/faq/FaqAccordion'
-import {
-  faqSections,
-  markdownToPlainText,
-  type FaqSectionContent,
-} from '../../../../src/views/faq/faqContent'
 
 export async function generateMetadata(props: LocaleParams): Promise<Metadata> {
   const locale = await resolveLocale(props)

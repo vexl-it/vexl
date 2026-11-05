@@ -8,6 +8,7 @@ import {
   ChatBubbles,
   FabButton,
   FilterBar,
+  GraphicHeaderDecoration,
   Map,
   MathCalculate,
   NavButton,
@@ -39,6 +40,9 @@ const heroAvatars = [0, 2, 1] as const
 /**
  * The app's marketplace tab, put together from the same components and
  * strings the app uses (apps/mobile MarketplaceScreen), with example offers.
+ * The labels in `home.mock.app` copy packages/localization keys (common.*,
+ * marketplaceFilter.*, marketplace.*, offerForm.myNewOffer, tabBar.*); the
+ * full locale files are too big to ship to the browser.
  */
 export function MarketplaceScreen(): React.JSX.Element {
   const {t} = useLocale()
@@ -54,6 +58,7 @@ export function MarketplaceScreen(): React.JSX.Element {
   return (
     <SafeAreaProvider initialMetrics={noInsets}>
       <YStack flex={1} backgroundColor="$backgroundPrimary">
+        <GraphicHeaderDecoration />
         <AnimatedNavigationBar
           scrollY={scrollY}
           rightActions={[
@@ -70,27 +75,31 @@ export function MarketplaceScreen(): React.JSX.Element {
             ]}
             activeTab="all"
             onTabPress={noop}
+            // The app's large tabs scroll sideways; a picture can't, so both fit
+            size="small"
           />
         </YStack>
-        <YStack gap="$4" paddingTop="$7" paddingBottom="$5">
-          <FilterBar
-            items={pipe(
-              app.filters,
-              Array.map((label) => ({label, value: label}))
-            )}
-            selectedValues={new Set([app.filters[0]])}
-            onSelectedValuesChange={noop}
-            containerStyle={{marginLeft: '$5'}}
-          />
-          <XStack gap="$3" paddingHorizontal="$5">
-            <SearchBar
-              variant="dummy"
-              placeholder={app.search}
-              onPress={noop}
-              flex={1}
+        <YStack paddingTop="$7" paddingBottom="$5">
+          <YStack gap="$4" paddingBottom="$7">
+            <FilterBar
+              items={pipe(
+                app.filters,
+                Array.map((label) => ({label, value: label}))
+              )}
+              selectedValues={new Set([app.filters[0]])}
+              onSelectedValuesChange={noop}
+              containerStyle={{marginLeft: '$5'}}
             />
-            <NavButton variant="secondary" size="large" icon={TuneSettings} />
-          </XStack>
+            <XStack gap="$3" paddingHorizontal="$5">
+              <SearchBar
+                variant="dummy"
+                placeholder={app.search}
+                onPress={noop}
+                flex={1}
+              />
+              <NavButton variant="secondary" size="large" icon={TuneSettings} />
+            </XStack>
+          </YStack>
           <XStack
             alignItems="center"
             justifyContent="space-between"
@@ -104,7 +113,7 @@ export function MarketplaceScreen(): React.JSX.Element {
             </Button>
           </XStack>
         </YStack>
-        <YStack flex={1} gap="$3" overflow="hidden">
+        <YStack flex={1} gap="$5" overflow="hidden">
           <Typography
             variant="titlesSmall"
             color="$foregroundPrimary"

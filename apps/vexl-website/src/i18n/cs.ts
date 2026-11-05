@@ -242,7 +242,7 @@ export const cs: Messages = {
     },
     trust: {
       title: 'Vyvíjeno otevřeně.',
-      text: 'Nemusíte nám věřit. Ověřte si to sami.',
+      text: 'Bez svobody transakcí nemáme žádná další práva. Nemusíte nám věřit. Ověřte si to sami.',
       teamPhoto:
         'Tým Vexlu na BTC Prague před stánkem s nápisem No middlemen. No KYC. Peer-to-peer.',
       openSource: {

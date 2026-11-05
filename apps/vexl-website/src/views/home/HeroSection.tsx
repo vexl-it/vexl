@@ -19,10 +19,18 @@ function HeroPhone(): React.JSX.Element {
   const {t} = useLocale()
   return (
     <PhoneFrame label={t.home.mock.label}>
-      {/* A picture of the app; the page's own actions are the buttons */}
-      <YStack flex={1} pointerEvents="none">
+      {/* A picture of the app: nothing inside takes clicks or focus */}
+      <div
+        inert
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          flex: 1,
+          minHeight: 0,
+        }}
+      >
         <MarketplaceScreen />
-      </YStack>
+      </div>
     </PhoneFrame>
   )
 }

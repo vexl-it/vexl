@@ -241,7 +241,7 @@ export const en = {
     },
     trust: {
       title: 'Built in the open.',
-      text: 'Don’t take our word for it. Check for yourself.',
+      text: 'Without freedom to transact, we have no other rights. Don’t take our word for it. Check for yourself.',
       teamPhoto:
         'The Vexl team at BTC Prague, in front of a booth that says No middlemen. No KYC. Peer-to-peer.',
       openSource: {

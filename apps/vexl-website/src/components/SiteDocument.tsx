@@ -3,6 +3,7 @@ import React from 'react'
 import {type Locale} from '../i18n/locales'
 import '../styles/site.css'
 import '../styles/webflow.css'
+import {AnchorScroll} from './AnchorScroll'
 
 /** The `<html>` shell every page shares; Webflow styles pages through the body class. */
 export function SiteDocument({
@@ -18,6 +19,7 @@ export function SiteDocument({
     <html lang={locale}>
       <body className={bodyClassName}>
         {children}
+        <AnchorScroll />
         <Script
           src="https://cdn.usefathom.com/script.js"
           data-site="DSCYZACS"

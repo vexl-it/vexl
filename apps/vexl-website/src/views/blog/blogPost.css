@@ -1,0 +1,227 @@
+/* The blog post template's custom <head> code on Webflow, scoped to the article body */
+/* ==========================================================================
+   Blog rich text · vexl.it · návrh C (Figma Vexl | Design, node 3383:2)
+   Kde: Blog Posts Template → Page settings → Custom code → Inside <head>.
+   Proč custom code: Webflow nativně neumí stylovat ::before (tečky v seznamech)
+   a třída .text-rich-text se může používat i jinde. Vše je proto scopované
+   na .blog-rich-text-wrapper .w-richtext = jen tělo článku, nic jiného.
+   Čísla:
+   - TT Satoshi je na webu nahraný jen v řezech 500 a 600 → bold = 600 (700 by
+     prohlížeč jen uměle ztučnil).
+   - Sloupec 720 px textu = cca 70 znaků při 18 px. Padding 31 px = stejný
+     odsazený okraj jako obsah bílé karty nad článkem (měřeno: card padding 31.1).
+   - Line-height bez jednotek → stejné řádkování při jakékoli velikosti textu
+     (bod 4 zadání: divné výšky řádků).
+   - Žlutá #fccd6c = Vexl yellow, bílá #fff na pozadí stránky #f2f2f2.
+   ========================================================================== */
+
+/* 1 · Sloupec textu */
+.blog-rich-text-wrapper .w-richtext {
+  max-width: 782px; /* 720 text + 2 × 31 padding */
+  padding: 0 31px;
+  box-sizing: border-box;
+  color: #333;
+}
+
+/* 2 · Odstavce */
+.blog-rich-text-wrapper .w-richtext p {
+  font:
+    500 18px/1.55 'TT Satoshi',
+    sans-serif;
+  margin: 0 0 20px;
+}
+.blog-rich-text-wrapper .w-richtext strong {
+  font-weight: 600;
+  color: #000;
+}
+
+/* 3 · Nadpisy v TT Satoshi místo Monument (bod 2 zadání).
+   strong uvnitř nadpisu dědí font nadpisu, ne Monument. */
+.blog-rich-text-wrapper .w-richtext :is(h2, h3, h4, h5, h6),
+.blog-rich-text-wrapper .w-richtext :is(h2, h3, h4, h5, h6) strong {
+  font-family: 'TT Satoshi', sans-serif;
+  font-weight: 600;
+  color: #000;
+  font-size: inherit;
+  line-height: inherit;
+}
+.blog-rich-text-wrapper .w-richtext h2 {
+  font-size: 32px;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  margin: 56px 0 16px;
+}
+.blog-rich-text-wrapper .w-richtext h3 {
+  font-size: 24px;
+  line-height: 1.33;
+  margin: 40px 0 12px;
+}
+.blog-rich-text-wrapper .w-richtext h4 {
+  font-size: 22px;
+  line-height: 1.36;
+  margin: 32px 0 8px;
+}
+/* H5/H6: ve 25 starších článcích se používají jako podnadpisy (~50×),
+   proto zůstávají podnadpisy. Stupnice 32/24/22/20/18: každý nadpis o stupeň
+   menší než vyšší (článek how-to-do-p2p: H4 sekce > H5 podsekce), nejmenší H6
+   = velikost textu 18 px, odlišený jen řezem 600 (článek o novém CEO má H6
+   jako hlavní mezititulky, menší než text by se ztrácely).
+   Bubliny viz blok 6 (opt-in). */
+.blog-rich-text-wrapper .w-richtext h5 {
+  font-size: 20px;
+  line-height: 1.4;
+  margin: 28px 0 8px;
+}
+.blog-rich-text-wrapper .w-richtext h6 {
+  font-size: 18px;
+  line-height: 1.45;
+  margin: 28px 0 8px;
+}
+
+/* 4 · Odkazy */
+.blog-rich-text-wrapper .w-richtext a {
+  color: #000;
+  text-decoration: underline 2px #fccd6c;
+  text-underline-offset: 4px;
+}
+
+/* 5 · Seznamy v bílém boxu, text ne bold (bod 3 + 5 zadání) */
+.blog-rich-text-wrapper .w-richtext :is(ul, ol) {
+  background: #fff;
+  border-radius: 24px;
+  padding: 28px 31px;
+  margin: 12px -31px 32px; /* box sahá na šířku bílé karty nad článkem,
+                                  text uvnitř boxu lícuje s textem článku */
+  list-style: none;
+  font:
+    500 18px/1.55 'TT Satoshi',
+    sans-serif;
+  color: #333;
+}
+.blog-rich-text-wrapper .w-richtext li {
+  position: relative;
+  padding-left: 24px;
+  margin: 0 0 12px;
+}
+.blog-rich-text-wrapper .w-richtext li:last-child {
+  margin-bottom: 0;
+}
+/* Starší články dělají mezery mezi body přes <br><br> na konci položky.
+   Audit 25 článků: <br> uvnitř li je vždy jen na konci → bezpečně skrýt. */
+.blog-rich-text-wrapper .w-richtext li br {
+  display: none;
+}
+.blog-rich-text-wrapper .w-richtext ul li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: calc(0.775em - 4px);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #fccd6c;
+}
+.blog-rich-text-wrapper .w-richtext ol {
+  counter-reset: n;
+}
+.blog-rich-text-wrapper .w-richtext ol li {
+  counter-increment: n;
+  padding-left: 32px;
+}
+.blog-rich-text-wrapper .w-richtext ol li::before {
+  content: counter(n) '.';
+  position: absolute;
+  left: 0;
+  font-weight: 600;
+  color: #000;
+}
+
+/* 6 · Highlight bubliny (bod 1 zadání) · OPT-IN per článek.
+   CMS Blog Posts → přepínač "Highlight bubbles". Zapnuto: H5 = bílá bublina,
+   H6 = žlutá bublina. Vypnuto (default, všech 25 starých článků): podnadpisy.
+   Mechanika: ve wrapperu je skrytý marker .blog-highlights-off s podmíněnou
+   viditelností "Highlight bubbles is not set". Webflow mu u zapnutých článků
+   přidá .w-condition-invisible. Marker bez podmínky = bubliny vypnuté všude,
+   takže chyba v nastavení nikdy nerozbije staré články.
+   Prohlížeč bez :has() bubliny nezobrazí, H5/H6 zůstanou podnadpisy. */
+.blog-rich-text-wrapper:not(
+    :has(> .blog-highlights-off:not(.w-condition-invisible))
+  )
+  .w-richtext
+  :is(h5, h6) {
+  font:
+    600 20px/1.5 'TT Satoshi',
+    sans-serif;
+  padding: 28px 31px;
+  border-radius: 24px;
+  margin: 12px -31px 32px;
+}
+.blog-rich-text-wrapper:not(
+    :has(> .blog-highlights-off:not(.w-condition-invisible))
+  )
+  .w-richtext
+  h5 {
+  background: #fff;
+}
+.blog-rich-text-wrapper:not(
+    :has(> .blog-highlights-off:not(.w-condition-invisible))
+  )
+  .w-richtext
+  h6 {
+  background: #fccd6c;
+}
+
+/* 7 · Mobil (≤767 px = Webflow breakpoint small) */
+@media (max-width: 767px) {
+  /* karta je na mobilu 8 px od kraje a její obsah na 25 px → text taky na 25 */
+  .blog-rich-text-wrapper .w-richtext {
+    padding: 0 17px;
+  }
+  .blog-rich-text-wrapper .w-richtext :is(p, ul, ol) {
+    font-size: 16px;
+    line-height: 1.6;
+  }
+  .blog-rich-text-wrapper .w-richtext p {
+    margin-bottom: 16px;
+  }
+  .blog-rich-text-wrapper .w-richtext h2 {
+    font-size: 24px;
+    line-height: 1.33;
+    margin: 40px 0 12px;
+  }
+  .blog-rich-text-wrapper .w-richtext h3 {
+    font-size: 22px;
+    line-height: 1.36;
+    margin: 32px 0 10px;
+  }
+  .blog-rich-text-wrapper .w-richtext h4 {
+    font-size: 20px;
+    line-height: 1.4;
+    margin: 28px 0 8px;
+  }
+  .blog-rich-text-wrapper .w-richtext h5 {
+    font-size: 18px;
+    line-height: 1.45;
+    margin: 24px 0 8px;
+  }
+  .blog-rich-text-wrapper .w-richtext h6 {
+    font-size: 16px;
+    line-height: 1.5;
+    margin: 24px 0 8px;
+  }
+  .blog-rich-text-wrapper .w-richtext :is(ul, ol) {
+    padding: 20px 17px;
+    border-radius: 20px;
+    margin: 8px -17px 24px;
+  }
+  .blog-rich-text-wrapper:not(
+      :has(> .blog-highlights-off:not(.w-condition-invisible))
+    )
+    .w-richtext
+    :is(h5, h6) {
+    font-size: 17px;
+    padding: 20px 17px;
+    border-radius: 20px;
+    margin: 8px -17px 24px;
+  }
+}

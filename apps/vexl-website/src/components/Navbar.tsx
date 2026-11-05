@@ -15,11 +15,14 @@ type MenuState = 'closed' | 'open' | 'closing'
 export function Navbar({
   locale,
   path,
+  alternatePaths,
   variant = 'dark',
 }: {
   readonly locale: Locale
   /** The current page's path without the locale prefix, e.g. `/faq`. */
   readonly path: string
+  /** Where a language's link goes when the page has no version in it. */
+  readonly alternatePaths?: Partial<Record<Locale, string>>
   readonly variant?: 'dark' | 'light'
 }): React.JSX.Element {
   const t = chrome[locale]
@@ -122,7 +125,13 @@ export function Navbar({
       >
         {t.leaderboard}
       </a>
-      <LanguageDropdown locale={locale} path={path} light={light} mobile />
+      <LanguageDropdown
+        locale={locale}
+        path={path}
+        alternatePaths={alternatePaths}
+        light={light}
+        mobile
+      />
     </nav>
   )
 
@@ -149,7 +158,12 @@ export function Navbar({
         </a>
         <div className="div-block-60">{isMenuShown ? null : navMenu}</div>
         <div className="div-block-59">
-          <LanguageDropdown locale={locale} path={path} light={light} />
+          <LanguageDropdown
+            locale={locale}
+            path={path}
+            alternatePaths={alternatePaths}
+            light={light}
+          />
           {light ? null : (
             <a
               href={href('/download')}

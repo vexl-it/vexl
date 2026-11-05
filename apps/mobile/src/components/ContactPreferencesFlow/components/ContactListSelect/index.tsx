@@ -2,9 +2,10 @@ import {
   Banner,
   Button,
   KeyboardStickyView,
+  LoadingOverlay,
   Stack,
   Typography,
-  useTheme,
+  useKeyboardAwareFooterListPadding,
   XStack,
   type TabItem,
 } from '@vexl-next/ui'
@@ -12,11 +13,9 @@ import {useMolecule} from 'bunshi/dist/react'
 import {Array} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useMemo} from 'react'
-import {Pressable, type LayoutChangeEvent} from 'react-native'
+import {type LayoutChangeEvent} from 'react-native'
 import {type ContactsFilter} from '../../../../state/contacts/domain'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
-import {useKeyboardAwareFooterListPadding} from '../../../../utils/useKeyboardAwareFooterListPadding'
-import PreparingContactsOverlay from '../PreparingContactsOverlay'
 import {contactSelectMolecule} from './atom'
 import ContactsAccessPrivilegesInfoBanner from './components/ContactsAccessPrivilegesInfoBanner'
 import ContactsFilterBar from './components/ContactsFilterBar'
@@ -36,7 +35,6 @@ function ContactsListSelect({
 }): React.ReactElement {
   const {t} = useTranslation()
   const {
-    areThereAnySelectedContactsAtom,
     areThereAnyContactsToDisplayForSelectedTabAtom,
     areAllContactsToDisplaySelectedAtom,
     contactsToDisplayCountAtom,
@@ -47,7 +45,6 @@ function ContactsListSelect({
     shouldShowContactImportProgressDialogAtom,
     toggleAllContactsToDisplayActionAtom,
   } = useMolecule(contactSelectMolecule)
-  const theme = useTheme()
   const normalizedContacts = useContactListSelectLifecycle()
   const isBulkSelectionPreparing = useAtomValue(isBulkSelectionPreparingAtom)
   const isContactsPreparing = useAtomValue(isContactsPreparingAtom)
@@ -166,20 +163,14 @@ function ContactsListSelect({
               {t('account.contactsCount', {count: contactsToDisplayCount})}
             </Typography>
             {areThereAnyContactsToDisplayForSelectedTab ? (
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={bulkToggleLabel}
+              <Button
+                variant="link"
+                size="small"
                 disabled={isActivateAllButtonDisabled}
                 onPress={handleToggleAllContactsToDisplay}
               >
-                <Typography
-                  variant="descriptionBold"
-                  color={theme.accentHighlightPrimary.get()}
-                  opacity={isActivateAllButtonDisabled ? 0.45 : 1}
-                >
-                  {bulkToggleLabel}
-                </Typography>
-              </Pressable>
+                {bulkToggleLabel}
+              </Button>
             ) : null}
           </XStack>
           {shouldShowNewContactsBanner ? (
@@ -216,9 +207,9 @@ function ContactsListSelect({
           <FilteredContacts
             keyboardBottomSpacerHeight={keyboardBottomSpacerHeight}
           />
-          <PreparingContactsOverlay
+          <LoadingOverlay
             visible={isContactsSearchPreparing || isBulkSelectionPreparing}
-            zIndex={10}
+            label={t('contacts.preparingContacts')}
           />
         </Stack>
       </Stack>
@@ -245,10 +236,10 @@ function ContactsListSelect({
           </Button>
         </Stack>
       </KeyboardStickyView>
-      <PreparingContactsOverlay
-        labelKey="contacts.processingContacts"
+      <LoadingOverlay
         visible={shouldShowSubmittingContactsOverlay}
-        zIndex={20}
+        label={t('contacts.processingContacts')}
+        zIndex="$2"
       />
     </Stack>
   )

@@ -3,9 +3,7 @@ import {
   ChevronLeft,
   NavigationBar,
   Screen,
-  Switch,
-  Typography,
-  XStack,
+  SwitchCard,
   YStack,
 } from '@vexl-next/ui'
 import {Array, Effect, pipe} from 'effect'
@@ -50,41 +48,6 @@ const notificationPreferencesToShow: readonly NotificationPreference[] = [
   'inactivityWarnings',
   'newOfferInMarketplace',
 ]
-
-function PreferenceCard({
-  title,
-  description,
-  atom: valueAtom,
-}: Omit<PreferenceContent, 'id'>): React.ReactElement {
-  return (
-    <XStack
-      alignItems="center"
-      backgroundColor="$backgroundSecondary"
-      borderRadius="$5"
-      gap="$3"
-      justifyContent="center"
-      padding="$5"
-    >
-      <YStack flex={1} gap="$2">
-        <Typography
-          color="$foregroundPrimary"
-          letterSpacing={0}
-          variant="paragraph"
-        >
-          {title}
-        </Typography>
-        <Typography
-          color="$foregroundSecondary"
-          letterSpacing={0}
-          variant="micro"
-        >
-          {description}
-        </Typography>
-      </YStack>
-      <Switch aria-label={title} valueAtom={valueAtom} />
-    </XStack>
-  )
-}
 
 function NotificationSettingsScreen(): React.ReactElement {
   const {t} = useTranslation()
@@ -156,8 +119,8 @@ function NotificationSettingsScreen(): React.ReactElement {
       <YStack flex={1} paddingHorizontal="$3" paddingTop="$4">
         <YStack gap="$5">
           {Platform.OS === 'android' ? (
-            <PreferenceCard
-              atom={backgroundNotificationSocketEnabledAtom}
+            <SwitchCard
+              valueAtom={backgroundNotificationSocketEnabledAtom}
               description={t('notifications.backgroundSocket.body')}
               title={t('notifications.backgroundSocket.title')}
             />
@@ -178,9 +141,9 @@ function NotificationSettingsScreen(): React.ReactElement {
           {pipe(
             contents,
             Array.map((one) => (
-              <PreferenceCard
+              <SwitchCard
                 key={one.id}
-                atom={one.atom}
+                valueAtom={one.atom}
                 description={one.description}
                 title={one.title}
               />

@@ -3,8 +3,10 @@ import {styled, useTheme} from 'tamagui'
 
 import {ArrowsVerticalSort} from '../icons/ArrowsVerticalSort'
 import {ChevronDown} from '../icons/ChevronDown'
-import {Input, SizableText, Stack, XStack, YStack} from '../primitives'
+import {Stack, XStack, YStack} from '../primitives'
+import {FieldFrame, FieldInput} from './Field'
 import {Loader} from './Loader'
+import {Typography} from './Typography'
 import {
   localizeDecimalInput,
   normalizeLocalizedDecimalInput,
@@ -56,40 +58,6 @@ export interface ExchangeProps {
   /** BCP 47 locale for Intl number formatting (default "en-US") */
   readonly locale?: string
 }
-
-const FieldFrame = styled(XStack, {
-  name: 'ExchangeFieldFrame',
-  alignItems: 'center',
-  alignSelf: 'stretch',
-  backgroundColor: '$backgroundSecondary',
-  borderRadius: '$5',
-  height: '$11',
-  paddingHorizontal: '$5',
-  paddingVertical: '$4',
-  gap: '$5',
-  borderWidth: 1,
-  borderColor: 'transparent',
-
-  variants: {
-    highlighted: {
-      true: {
-        borderColor: '$accentHighlightSecondary',
-      },
-    },
-  },
-})
-
-const FieldInput = styled(Input, {
-  name: 'ExchangeFieldInput',
-  unstyled: true,
-  flex: 1,
-  fontFamily: '$body',
-  fontWeight: '500',
-  fontSize: '$4',
-  color: '$foregroundPrimary',
-  textAlign: 'right',
-  padding: 0,
-})
 
 const CurrencyButton = styled(XStack, {
   name: 'ExchangeCurrencyButton',
@@ -197,31 +165,22 @@ export function Exchange({
   }, [onFiatBlur])
 
   const btcField = (
-    <FieldFrame highlighted={(btcFocused && btcEditable) || undefined}>
+    <FieldFrame gap="$5" highlighted={(btcFocused && btcEditable) || undefined}>
       {btcEditable ? (
         <CurrencyButton onPress={toggleBtcUnit}>
-          <SizableText
-            fontFamily="$body"
-            fontSize="$4"
-            fontWeight="500"
-            color="$foregroundPrimary"
-          >
+          <Typography variant="paragraph" color="$foregroundPrimary">
             {btcUnit}
-          </SizableText>
+          </Typography>
           <ChevronDown size={24} color={theme.foregroundPrimary.get()} />
         </CurrencyButton>
       ) : (
-        <SizableText
-          fontFamily="$body"
-          fontSize="$4"
-          fontWeight="500"
-          color="$foregroundPrimary"
-        >
+        <Typography variant="paragraph" color="$foregroundPrimary">
           BTC
-        </SizableText>
+        </Typography>
       )}
       {btcEditable ? (
         <FieldInput
+          textAlign="right"
           value={btcDisplayValue}
           onChangeText={(value) => {
             onBtcValueChange?.(normalizeLocalizedDecimalInput(value, locale))
@@ -234,34 +193,27 @@ export function Exchange({
           onBlur={handleBtcBlur}
         />
       ) : (
-        <SizableText
+        <Typography
           flex={1}
-          fontFamily="$body"
-          fontSize="$4"
-          fontWeight="500"
+          variant="paragraph"
           color="$foregroundTertiary"
           textAlign="right"
         >
           {btcDisplayValue || '0.00'}
-        </SizableText>
+        </Typography>
       )}
     </FieldFrame>
   )
 
   const fiatField = (
-    <FieldFrame highlighted={fiatFocused || undefined}>
+    <FieldFrame gap="$5" highlighted={fiatFocused || undefined}>
       <CurrencyButton
         onPress={fiatCurrencyEditable ? onFiatCurrencyPress : undefined}
         role={fiatCurrencyEditable ? 'button' : undefined}
       >
-        <SizableText
-          fontFamily="$body"
-          fontSize="$4"
-          fontWeight="500"
-          color="$foregroundPrimary"
-        >
+        <Typography variant="paragraph" color="$foregroundPrimary">
           {fiatCurrency}
-        </SizableText>
+        </Typography>
         {fiatCurrencyEditable ? (
           <ChevronDown size={24} color={theme.foregroundPrimary.get()} />
         ) : null}
@@ -272,6 +224,7 @@ export function Exchange({
         </Stack>
       ) : (
         <FieldInput
+          textAlign="right"
           autoFocus={fiatAutoFocus}
           value={fiatDisplayValue}
           onChangeText={(value) => {

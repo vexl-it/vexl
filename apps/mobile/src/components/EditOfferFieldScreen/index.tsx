@@ -1,26 +1,17 @@
-import {
-  Button,
-  EditRow,
-  NavigationBar,
-  Screen,
-  XmarkCancelClose,
-} from '@vexl-next/ui'
+import {NavigationBar, Screen, XmarkCancelClose, YStack} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {Effect} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useLayoutEffect} from 'react'
-import {YStack} from 'tamagui'
 import {type RootStackScreenProps} from '../../navigationTypes'
-import {clubsWithMembersAtomsAtom} from '../../state/clubs/atom/clubsWithMembersAtom'
-import atomKeyExtractor from '../../utils/atomUtils/atomKeyExtractor'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import usePreventDiscardChangesWithConfirmation from '../../utils/usePreventDiscardChangesWithConfirmation'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import {offerFormMolecule} from '../CRUDOfferFlow/atoms/offerFormStateAtoms'
 import AmountStep from '../CRUDOfferFlow/components/AmountStep'
-import ClubItem from '../CRUDOfferFlow/components/ClubItem'
+import ClubsStep from '../CRUDOfferFlow/components/ClubsStep'
 import DescribeStep from '../CRUDOfferFlow/components/DescribeStep'
-import ExpirationOptions from '../CRUDOfferFlow/components/ExpirationOptions'
+import FriendLevelStep from '../CRUDOfferFlow/components/FriendLevelStep'
 import LanguageStep from '../CRUDOfferFlow/components/LanguageStep'
 import LocationStep from '../CRUDOfferFlow/components/LocationStep'
 import NetworkStep from '../CRUDOfferFlow/components/NetworkStep'
@@ -28,7 +19,6 @@ import PriceUpToStep from '../CRUDOfferFlow/components/PriceUpToStep'
 import ProductCategoryStep from '../CRUDOfferFlow/components/ProductCategoryStep'
 import {type EditableOfferField} from '../CRUDOfferFlow/offerSetupSteps'
 import {globalDialogAtom} from '../GlobalDialog'
-import FriendLevel from '../OfferForm/components/FriendLevel'
 
 type Props = RootStackScreenProps<'EditOfferField'>
 
@@ -72,8 +62,6 @@ function EditOfferFieldScreen({
     offerDescriptionAtom,
     spokenLanguagesAtom,
     checkAmountExceedsLimitAndShowDialogActionAtom,
-    intendedConnectionLevelAtom,
-    createSelectClubAtom,
     discardLocationIfNotInPersonActionAtom,
     commitFieldChangesActionAtom,
     discardFieldChangesActionAtom,
@@ -89,7 +77,6 @@ function EditOfferFieldScreen({
   const offerDescription = useAtomValue(offerDescriptionAtom)
   const spokenLanguages = useAtomValue(spokenLanguagesAtom)
   const hasStepUnsavedChanges = useAtomValue(fieldHasUnsavedChangesAtoms[field])
-  const clubsWithMembersAtoms = useAtomValue(clubsWithMembersAtomsAtom)
   const discardLocationIfNotInPerson = useSetAtom(
     discardLocationIfNotInPersonActionAtom
   )
@@ -245,7 +232,6 @@ function EditOfferFieldScreen({
 
   const saveLabel = t('common.save')
   const showInitialIcon = false
-  const noop = useCallback(() => {}, [])
 
   return (
     <Screen
@@ -263,7 +249,6 @@ function EditOfferFieldScreen({
           listingType === 'BITCOIN' ? (
             <AmountStep
               active
-              onEdit={noop}
               onComplete={handleComplete}
               ctaLabel={saveLabel}
               showInitialIcon={showInitialIcon}
@@ -271,7 +256,6 @@ function EditOfferFieldScreen({
           ) : (
             <PriceUpToStep
               active
-              onEdit={noop}
               onComplete={handleComplete}
               ctaLabel={saveLabel}
               showInitialIcon={showInitialIcon}
@@ -281,7 +265,6 @@ function EditOfferFieldScreen({
         {field === 'location' ? (
           <LocationStep
             active
-            onEdit={noop}
             onComplete={handleLocationComplete}
             ctaLabel={saveLabel}
             showInitialIcon={showInitialIcon}
@@ -290,7 +273,6 @@ function EditOfferFieldScreen({
         {field === 'network' ? (
           <NetworkStep
             active
-            onEdit={noop}
             onComplete={handleComplete}
             ctaLabel={saveLabel}
             showInitialIcon={showInitialIcon}
@@ -299,7 +281,6 @@ function EditOfferFieldScreen({
         {field === 'describe' ? (
           <DescribeStep
             active
-            onEdit={noop}
             onComplete={handleComplete}
             ctaLabel={saveLabel}
             showInitialIcon={showInitialIcon}
@@ -308,7 +289,6 @@ function EditOfferFieldScreen({
         {field === 'language' ? (
           <LanguageStep
             active
-            onEdit={noop}
             onComplete={handleComplete}
             ctaLabel={saveLabel}
             showInitialIcon={showInitialIcon}
@@ -317,53 +297,26 @@ function EditOfferFieldScreen({
         {field === 'productCategory' ? (
           <ProductCategoryStep
             active
-            onEdit={noop}
             onComplete={handleComplete}
             ctaLabel={saveLabel}
             showInitialIcon={showInitialIcon}
           />
         ) : null}
         {field === 'friendLevel' ? (
-          <YStack>
-            <EditRow
-              state="initial"
-              headline={t('offerForm.whoCanSeeYourOffer')}
-              showInitialIcon={showInitialIcon}
-            />
-            <YStack gap="$5" paddingVertical="$5">
-              <FriendLevel
-                hideSubtitle
-                intendedConnectionLevelAtom={intendedConnectionLevelAtom}
-              />
-              <ExpirationOptions />
-              <Button variant="primary" size="large" onPress={handleComplete}>
-                {t('common.save')}
-              </Button>
-            </YStack>
-          </YStack>
+          <FriendLevelStep
+            active
+            hideSubtitle
+            onComplete={handleComplete}
+            ctaLabel={saveLabel}
+            showInitialIcon={showInitialIcon}
+          />
         ) : null}
         {field === 'clubs' ? (
-          <YStack>
-            <EditRow
-              state="initial"
-              headline={t('offerForm.publishToVexlClub')}
-              showInitialIcon={showInitialIcon}
-            />
-            <YStack gap="$5" paddingVertical="$5">
-              <YStack gap="$3">
-                {clubsWithMembersAtoms.map((clubWithMembersAtom) => (
-                  <ClubItem
-                    key={atomKeyExtractor(clubWithMembersAtom)}
-                    clubWithMembersAtom={clubWithMembersAtom}
-                    createSelectClubAtom={createSelectClubAtom}
-                  />
-                ))}
-              </YStack>
-              <Button variant="primary" size="large" onPress={handleComplete}>
-                {t('common.save')}
-              </Button>
-            </YStack>
-          </YStack>
+          <ClubsStep
+            onComplete={handleComplete}
+            ctaLabel={saveLabel}
+            showInitialIcon={showInitialIcon}
+          />
         ) : null}
       </YStack>
     </Screen>

@@ -1,61 +1,18 @@
-import {
-  Avatar,
-  NotificationCard,
-  SizableText,
-  TextTag,
-  Theme,
-  YStack,
-} from '@vexl-next/ui'
+import {Avatar, NotificationCard, TextTag} from '@vexl-next/ui'
 import React from 'react'
-import {ScrollView} from 'react-native'
+
+import {ComponentScreenLayout, DemoSection} from './ComponentScreenLayout'
 
 const vexlAvatarSource = require('../assets/vexlAvatar.png') as number
-
-function SectionLabel({
-  children,
-}: {
-  readonly children: string
-}): React.JSX.Element {
-  return (
-    <SizableText
-      fontFamily="$body"
-      fontWeight="600"
-      fontSize="$2"
-      color="$foregroundSecondary"
-      paddingTop="$3"
-    >
-      {children}
-    </SizableText>
-  )
-}
 
 function VexlAvatar(): React.JSX.Element {
   return <Avatar source={vexlAvatarSource} size="small" customSize={36} />
 }
 
-function ThemeGroup({
-  theme,
-}: {
-  readonly theme: 'light' | 'dark'
-}): React.JSX.Element {
+function Demos(): React.JSX.Element {
   return (
-    <Theme name={theme}>
-      <YStack
-        gap="$4"
-        padding="$5"
-        backgroundColor="$backgroundPrimary"
-        borderRadius="$4"
-      >
-        <SizableText
-          fontFamily="$body"
-          fontWeight="600"
-          fontSize="$3"
-          color="$foregroundPrimary"
-        >
-          {theme.charAt(0).toUpperCase() + theme.slice(1)}
-        </SizableText>
-
-        <SectionLabel>Default</SectionLabel>
+    <>
+      <DemoSection title="Default">
         <NotificationCard
           avatar={<VexlAvatar />}
           name="Vexl"
@@ -63,8 +20,8 @@ function ThemeGroup({
           category="System"
           message='From permissionless to permissioned. This week, we explore how quickly "your money" turns into theirs.'
         />
-
-        <SectionLabel>With New tag</SectionLabel>
+      </DemoSection>
+      <DemoSection title="With New tag">
         <NotificationCard
           avatar={<VexlAvatar />}
           name="Vexl"
@@ -73,8 +30,8 @@ function ThemeGroup({
           message='From permissionless to permissioned. This week, we explore how quickly "your money" turns into theirs.'
           tag={<TextTag variant="new" label="New" />}
         />
-
-        <SectionLabel>Pressable</SectionLabel>
+      </DemoSection>
+      <DemoSection title="Pressable">
         <NotificationCard
           avatar={<VexlAvatar />}
           name="Vexl"
@@ -84,8 +41,8 @@ function ThemeGroup({
           tag={<TextTag variant="new" label="New" />}
           onPress={() => {}}
         />
-
-        <SectionLabel>With children</SectionLabel>
+      </DemoSection>
+      <DemoSection title="With children">
         <NotificationCard
           avatar={<VexlAvatar />}
           name="Vexl"
@@ -95,27 +52,11 @@ function ThemeGroup({
         >
           <TextTag variant="waiting" label="Nearby" />
         </NotificationCard>
-      </YStack>
-    </Theme>
+      </DemoSection>
+    </>
   )
 }
 
 export function NotificationCardScreen(): React.JSX.Element {
-  return (
-    <ScrollView style={{flex: 1}}>
-      <YStack padding="$5" gap="$4">
-        <SizableText
-          fontFamily="$heading"
-          fontWeight="700"
-          fontSize="$3"
-          color="$foregroundPrimary"
-        >
-          Notification Card
-        </SizableText>
-
-        <ThemeGroup theme="light" />
-        <ThemeGroup theme="dark" />
-      </YStack>
-    </ScrollView>
-  )
+  return <ComponentScreenLayout title="Notification Card" demos={Demos} />
 }

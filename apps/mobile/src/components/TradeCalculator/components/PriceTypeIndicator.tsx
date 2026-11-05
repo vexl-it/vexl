@@ -1,4 +1,5 @@
 import {
+  LiveIndicator,
   Snowflake,
   Typography,
   UserProfile,
@@ -8,7 +9,6 @@ import {
 import {useAtomValue} from 'jotai'
 import React from 'react'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
-import {AnimatedLiveIndicator} from '../../AnimatedLiveIndicator'
 import {tradePriceTypeAtom} from '../atoms'
 
 interface Props extends React.ComponentProps<typeof XStack> {
@@ -46,7 +46,7 @@ function PriceTypeIndicator({
   return (
     <XStack ai="center" gap="$2" {...props}>
       {!tradePriceType || tradePriceType === 'live' ? (
-        <AnimatedLiveIndicator
+        <LiveIndicator
           color={
             displayInGrayColor
               ? '$foregroundSecondary'

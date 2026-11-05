@@ -1,15 +1,12 @@
+import {InfoBox} from '@vexl-next/ui'
 import {Effect} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React from 'react'
-import {type YStackProps} from 'tamagui'
 import {areThereMissingOffersOnServerAtom} from '../../state/marketplace/atoms/offersMissingOnServer'
 import {useTranslation} from '../../utils/localization/I18nProvider'
-import MarketplaceSuggestion from '../MarketplaceSuggestion'
 import {reencryptOffersWithModalActionAtom} from './atoms'
 
-export default function ReencryptOffersSuggestion(
-  props: YStackProps
-): React.ReactElement | null {
+export default function ReencryptOffersSuggestion(): React.ReactElement | null {
   const {t} = useTranslation()
   const areThereMissingOffersOnServer = useAtomValue(
     areThereMissingOffersOnServerAtom
@@ -19,14 +16,16 @@ export default function ReencryptOffersSuggestion(
   if (!areThereMissingOffersOnServer) return null
 
   return (
-    <MarketplaceSuggestion
-      buttonText={t('reuploadOffers.suggestionCell.button')}
-      onButtonPress={() => {
-        Effect.runFork(reencryptMissingOffers())
+    <InfoBox
+      variant="error"
+      action={{
+        label: t('reuploadOffers.suggestionCell.button'),
+        onPress: () => {
+          Effect.runFork(reencryptMissingOffers())
+        },
       }}
-      type="warning"
-      text={t('reuploadOffers.suggestionCell.title')}
-      {...props}
-    />
+    >
+      {t('reuploadOffers.suggestionCell.title')}
+    </InfoBox>
   )
 }

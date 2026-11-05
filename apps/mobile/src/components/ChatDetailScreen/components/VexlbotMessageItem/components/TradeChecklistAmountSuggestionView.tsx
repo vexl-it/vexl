@@ -21,9 +21,9 @@ function TradeChecklistAmountSuggestionView(): React.ReactElement | null {
 
   return (
     <VexlbotActionCard
-      buttonText={t('tradeChecklist.options.CALCULATE_AMOUNT')}
+      buttonLabel={t('tradeChecklist.options.CALCULATE_AMOUNT')}
       description={t('vexlbot.agreeOnPreferredAmount')}
-      onPress={() => {
+      onButtonPress={() => {
         navigation.navigate('TradeChecklistFlow', {
           screen: 'CalculateAmount',
           chatId,

@@ -1,11 +1,12 @@
 import React from 'react'
-import {styled, useTheme} from 'tamagui'
+import {getTokens, styled, useTheme} from 'tamagui'
 
 import {ChevronRight} from '../icons/ChevronRight'
 import {ClockTime} from '../icons/ClockTime'
-import {RadiobuttonCircleFilled} from '../icons/RadiobuttonCircleFilled'
 import type {IconProps} from '../icons/types'
-import {SizableText, Stack, XStack, YStack} from '../primitives'
+import {XStack, YStack} from '../primitives'
+import {CompletedIconBox, IconBox} from './IconBox'
+import {Typography} from './Typography'
 
 export type ChecklistCellState = 'initial' | 'pending' | 'completed'
 
@@ -30,36 +31,6 @@ const ChecklistCellFrame = styled(XStack, {
   } as const,
 })
 
-const IconBox = styled(Stack, {
-  name: 'ChecklistCellIconBox',
-  width: '$9',
-  height: '$9',
-  borderRadius: '$3',
-  alignItems: 'center',
-  justifyContent: 'center',
-})
-
-const HeadlineText = styled(SizableText, {
-  name: 'ChecklistCellHeadline',
-  fontFamily: '$body',
-  fontWeight: '600',
-  fontSize: '$2',
-  letterSpacing: '$2',
-  lineHeight: '$2',
-  color: '$foregroundPrimary',
-})
-
-const SubtitleText = styled(SizableText, {
-  name: 'ChecklistCellSubtitle',
-  fontFamily: '$body',
-  fontWeight: '500',
-  fontSize: '$1',
-  letterSpacing: '$1',
-  lineHeight: '$1',
-  color: '$foregroundSecondary',
-  numberOfLines: 1,
-})
-
 export interface ChecklistCellProps {
   readonly state: ChecklistCellState
   readonly headline: string
@@ -82,36 +53,31 @@ export function ChecklistCell({
   const theme = useTheme()
   const isPressable = !disabled && (pressable ?? state !== 'completed')
 
-  const iconBoxBg = (() => {
+  const iconSize = getTokens().size.$7.val
+
+  const leadingIcon = (() => {
     switch (state) {
       case 'completed':
-        return theme.greenForeground.get()
+        return <CompletedIconBox />
       case 'pending':
-        return theme.navigationBackgroundHighlight.get()
+        return (
+          <IconBox tone="highlight">
+            <ClockTime
+              color={theme.accentHighlightSecondary.get()}
+              size={iconSize}
+            />
+          </IconBox>
+        )
       case 'initial':
-        return theme.backgroundTertiary.get()
+        return (
+          <IconBox tone="tertiary">
+            {Icon ? (
+              <Icon color={theme.foregroundPrimary.get()} size={iconSize} />
+            ) : null}
+          </IconBox>
+        )
     }
   })()
-
-  const renderIcon = (): React.JSX.Element | null => {
-    switch (state) {
-      case 'completed':
-        return (
-          <RadiobuttonCircleFilled
-            color={theme.backgroundSecondary.get()}
-            size={24}
-          />
-        )
-      case 'pending':
-        return (
-          <ClockTime color={theme.accentHighlightSecondary.get()} size={24} />
-        )
-      case 'initial':
-        return Icon ? (
-          <Icon color={theme.foregroundPrimary.get()} size={24} />
-        ) : null
-    }
-  }
 
   return (
     <ChecklistCellFrame
@@ -119,13 +85,23 @@ export function ChecklistCell({
       onPress={isPressable ? onPress : undefined}
       opacity={1}
     >
-      <IconBox backgroundColor={iconBoxBg}>{renderIcon()}</IconBox>
+      {leadingIcon}
       <YStack flex={1} gap="$2">
-        <HeadlineText>{headline}</HeadlineText>
-        {subtitle ? <SubtitleText>{subtitle}</SubtitleText> : null}
+        <Typography variant="descriptionBold" color="$foregroundPrimary">
+          {headline}
+        </Typography>
+        {subtitle ? (
+          <Typography
+            variant="micro"
+            color="$foregroundSecondary"
+            numberOfLines={1}
+          >
+            {subtitle}
+          </Typography>
+        ) : null}
       </YStack>
       {isPressable ? (
-        <ChevronRight color={theme.foregroundSecondary.get()} size={24} />
+        <ChevronRight color={theme.foregroundSecondary.get()} size={iconSize} />
       ) : null}
     </ChecklistCellFrame>
   )

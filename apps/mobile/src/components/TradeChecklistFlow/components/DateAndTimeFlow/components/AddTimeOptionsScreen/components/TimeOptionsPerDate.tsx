@@ -1,12 +1,19 @@
 import {type AvailableDateTimeOption} from '@vexl-next/domain/src/general/tradeChecklist'
 import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {Button, Switch, Typography} from '@vexl-next/ui'
+import {
+  Button,
+  Collapse,
+  DateSlotsSummaryRow,
+  FilterTag,
+  Switch,
+  Typography,
+  XStack,
+  YStack,
+} from '@vexl-next/ui'
 import {Array as ArrayE, pipe, Schema} from 'effect'
 import {atom, useAtom, useAtomValue} from 'jotai'
 import {DateTime} from 'luxon'
 import React, {useEffect, useMemo, useState} from 'react'
-import {Animated, Easing, TouchableOpacity} from 'react-native'
-import {Stack, useTheme, XStack, YStack} from 'tamagui'
 import {useTranslation} from '../../../../../../../utils/localization/I18nProvider'
 import {
   formatDate,
@@ -154,43 +161,6 @@ function replaceEntriesForDates({
   )
 }
 
-function TimeSlotChip({
-  label,
-  selected,
-  onPress,
-}: {
-  label: string
-  selected: boolean
-  onPress: () => void
-}): React.ReactElement {
-  const theme = useTheme()
-
-  return (
-    <TouchableOpacity onPress={onPress} activeOpacity={0.8}>
-      <Stack
-        minWidth={72}
-        paddingHorizontal="$5"
-        paddingVertical="$4"
-        borderRadius="$3"
-        backgroundColor={
-          selected
-            ? theme.accentYellowPrimary.get()
-            : theme.backgroundTertiary.get()
-        }
-        alignItems="center"
-        justifyContent="center"
-      >
-        <Typography
-          variant="paragraphSmall"
-          color={selected ? '$black100' : '$foregroundSecondary'}
-        >
-          {label}
-        </Typography>
-      </Stack>
-    </TouchableOpacity>
-  )
-}
-
 function TimeOptionsPerDate({
   date,
   expanded,
@@ -206,13 +176,7 @@ function TimeOptionsPerDate({
   const applyToAllAtom = useMemo(() => atom(false), [])
   const [applyToAllDates, setApplyToAllDates] = useAtom(applyToAllAtom)
   const [draftSlots, setDraftSlots] = useState<UnixMilliseconds[]>([])
-  const [shouldRenderExpandedContent, setShouldRenderExpandedContent] =
-    useState(expanded)
-  const [expandedContentHeight, setExpandedContentHeight] = useState(1)
-  const animationProgress = React.useRef(
-    new Animated.Value(expanded ? 1 : 0)
-  ).current
-
+  const [wasExpanded, setWasExpanded] = useState(expanded)
   const savedSlots = useMemo(
     () =>
       pipe(
@@ -238,21 +202,8 @@ function TimeOptionsPerDate({
   }, [expanded, savedSlots, setApplyToAllDates])
 
   useEffect(() => {
-    if (expanded) {
-      setShouldRenderExpandedContent(true)
-    }
-
-    Animated.timing(animationProgress, {
-      toValue: expanded ? 1 : 0,
-      duration: 220,
-      easing: Easing.out(Easing.cubic),
-      useNativeDriver: false,
-    }).start(({finished}) => {
-      if (finished && !expanded) {
-        setShouldRenderExpandedContent(false)
-      }
-    })
-  }, [animationProgress, expanded])
+    if (expanded) setWasExpanded(true)
+  }, [expanded])
 
   const selectedLabels = useMemo(
     () =>
@@ -262,6 +213,8 @@ function TimeOptionsPerDate({
       ),
     [locale, savedSlots]
   )
+
+  const showSavedSlots = selectedLabels.length > 0 && !expanded
 
   const onSlotPress = (slot: UnixMilliseconds): void => {
     setDraftSlots((previousSlots) => {
@@ -295,88 +248,25 @@ function TimeOptionsPerDate({
     onCollapse()
   }
 
-  const animatedExpandedStyle = {
-    maxHeight: animationProgress.interpolate({
-      inputRange: [0, 1],
-      outputRange: [0, expandedContentHeight],
-    }),
-    opacity: animationProgress.interpolate({
-      inputRange: [0, 1],
-      outputRange: [0, 1],
-    }),
-    transform: [
-      {
-        translateY: animationProgress.interpolate({
-          inputRange: [0, 1],
-          outputRange: [-8, 0],
-        }),
-      },
-    ],
-    overflow: 'hidden' as const,
-  }
-
   return (
-    <Stack
-      backgroundColor="$backgroundSecondary"
-      borderRadius="$5"
-      paddingHorizontal="$4"
-      paddingVertical="$4"
-      gap="$4"
+    <DateSlotsSummaryRow
+      weekday={weekday}
+      label={label}
+      caption={showSavedSlots ? 'time slots' : undefined}
+      value={showSavedSlots ? selectedLabels.join(', ') : undefined}
+      action={
+        showSavedSlots
+          ? undefined
+          : {
+              label: expanded ? 'Hide time slots' : 'Add time slots',
+              onPress: expanded ? onCollapse : onExpand,
+            }
+      }
+      onPress={expanded ? undefined : onExpand}
     >
-      <TouchableOpacity
-        onPress={expanded ? undefined : onExpand}
-        activeOpacity={expanded ? 1 : 0.85}
-      >
-        <XStack alignItems="center" justifyContent="space-between" gap="$3">
-          <YStack gap="$3" flex={1}>
-            <Typography variant="micro" color="$foregroundSecondary">
-              {weekday}
-            </Typography>
-            <Typography variant="paragraphSmall" color="$foregroundPrimary">
-              {label}
-            </Typography>
-          </YStack>
-          {selectedLabels.length > 0 && !expanded ? (
-            <YStack alignItems="flex-end" gap="$2" maxWidth="45%">
-              <Typography variant="micro" color="$foregroundSecondary">
-                time slots
-              </Typography>
-              <Typography
-                variant="descriptionBold"
-                color="$accentHighlightSecondary"
-                textAlign="right"
-              >
-                {selectedLabels.join(', ')}
-              </Typography>
-            </YStack>
-          ) : (
-            <TouchableOpacity
-              onPress={expanded ? onCollapse : onExpand}
-              activeOpacity={0.85}
-            >
-              <Typography
-                variant="description"
-                color="$accentHighlightSecondary"
-              >
-                {expanded ? 'Hide time slots' : 'Add time slots'}
-              </Typography>
-            </TouchableOpacity>
-          )}
-        </XStack>
-      </TouchableOpacity>
-
-      {shouldRenderExpandedContent ? (
-        <Animated.View style={animatedExpandedStyle}>
-          <Stack
-            gap="$5"
-            paddingTop="$5"
-            onLayout={(event) => {
-              const nextHeight = Math.ceil(event.nativeEvent.layout.height)
-              if (nextHeight !== expandedContentHeight) {
-                setExpandedContentHeight(nextHeight)
-              }
-            }}
-          >
+      <Collapse expanded={expanded}>
+        {wasExpanded ? (
+          <YStack gap="$5" paddingTop="$7">
             {pipe(
               slotSections,
               ArrayE.map((section) => (
@@ -387,19 +277,24 @@ function TimeOptionsPerDate({
                   >
                     {section.title}
                   </Typography>
-                  <XStack flexWrap="wrap" gap="$3" rowGap="$3">
+                  <XStack flexWrap="wrap" gap="$3">
                     {pipe(
                       section.slots,
-                      ArrayE.map((slot) => (
-                        <TimeSlotChip
-                          key={slot}
-                          label={getSlotLabel(slot, locale)}
-                          selected={draftSlots.includes(slot)}
-                          onPress={() => {
-                            onSlotPress(slot)
-                          }}
-                        />
-                      ))
+                      ArrayE.map((slot) => {
+                        const selected = draftSlots.includes(slot)
+                        return (
+                          <FilterTag
+                            key={slot}
+                            label={getSlotLabel(slot, locale)}
+                            selected={selected}
+                            backgroundColor="$backgroundTertiary"
+                            minWidth="$12.5"
+                            onPress={() => {
+                              onSlotPress(slot)
+                            }}
+                          />
+                        )
+                      })
                     )}
                   </XStack>
                 </YStack>
@@ -419,10 +314,10 @@ function TimeOptionsPerDate({
             <Button size="medium" variant="primary" onPress={onSavePress}>
               {t('common.save')}
             </Button>
-          </Stack>
-        </Animated.View>
-      ) : null}
-    </Stack>
+          </YStack>
+        ) : null}
+      </Collapse>
+    </DateSlotsSummaryRow>
   )
 }
 

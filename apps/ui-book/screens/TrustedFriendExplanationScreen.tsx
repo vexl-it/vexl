@@ -5,12 +5,16 @@ import {
   TrustedFriendExplanation,
   Typography,
   UserImagePlaceholder,
-  VexlThemeProvider,
-  XStack,
-  YStack,
 } from '@vexl-next/ui'
 import React, {useState} from 'react'
-import {ScrollView} from 'react-native'
+
+import {ComponentScreenLayout, DemoSection} from './ComponentScreenLayout'
+
+const placeholderAvatar = (
+  <Avatar customSize={44}>
+    <UserImagePlaceholder size={44} />
+  </Avatar>
+)
 
 function Example({
   role,
@@ -21,26 +25,12 @@ function Example({
 }): React.JSX.Element {
   return (
     <TrustedFriendExplanation
-      you={{
-        label: 'You',
-        avatar: (
-          <Avatar customSize={44}>
-            <UserImagePlaceholder size={44} />
-          </Avatar>
-        ),
-      }}
+      you={{label: 'You', avatar: placeholderAvatar}}
       trustedFriend={{
         label: 'Jana',
         avatar: {children: <UserImagePlaceholder size={44} />},
       }}
-      otherSide={{
-        label: role,
-        avatar: (
-          <Avatar customSize={44}>
-            <UserImagePlaceholder size={44} />
-          </Avatar>
-        ),
-      }}
+      otherSide={{label: role, avatar: placeholderAvatar}}
       caption={
         german
           ? 'Du und die andere Person habt Jana beide in euren Kontakten gespeichert, und Jana hat euch ebenfalls beide in ihren Kontakten gespeichert.'
@@ -55,27 +45,21 @@ function Example({
   )
 }
 
-function ThemeDemo({
-  theme,
-}: {
-  readonly theme: 'light' | 'dark'
-}): React.JSX.Element {
+function Demos(): React.JSX.Element {
   const [visible, setVisible] = useState(false)
+
   return (
-    <VexlThemeProvider defaultMode={theme}>
-      <YStack
-        width={343}
-        padding="$5"
-        gap="$5"
-        borderRadius="$5"
-        backgroundColor="$backgroundSecondary"
-      >
-        <Typography variant="titlesSmall" color="$foregroundPrimary">
-          {theme}
-        </Typography>
+    <>
+      <DemoSection title="Seller">
         <Example role="Seller" />
+      </DemoSection>
+      <DemoSection title="Buyer">
         <Example role="Buyer" />
+      </DemoSection>
+      <DemoSection title="Other person (long German caption)">
         <Example role="Other person" german />
+      </DemoSection>
+      <DemoSection title="In a dialog">
         <Button
           onPress={() => {
             setVisible(true)
@@ -83,46 +67,34 @@ function ThemeDemo({
         >
           Open dialog
         </Button>
-        <Dialog
-          visible={visible}
-          onClose={() => {
-            setVisible(false)
-          }}
-          footer={
-            <Button
-              flex={1}
-              onPress={() => {
-                setVisible(false)
-              }}
-            >
-              Got it
-            </Button>
-          }
-        >
-          <Typography variant="titlesSmall" color="$foregroundPrimary">
-            What&apos;s a trusted friend?
-          </Typography>
-          <Example role="Seller" />
-        </Dialog>
-      </YStack>
-    </VexlThemeProvider>
+      </DemoSection>
+      <Dialog
+        visible={visible}
+        onClose={() => {
+          setVisible(false)
+        }}
+        footer={
+          <Button
+            flex={1}
+            onPress={() => {
+              setVisible(false)
+            }}
+          >
+            Got it
+          </Button>
+        }
+      >
+        <Typography variant="titlesSmall" color="$foregroundPrimary">
+          What&apos;s a trusted friend?
+        </Typography>
+        <Example role="Seller" />
+      </Dialog>
+    </>
   )
 }
 
 export function TrustedFriendExplanationScreen(): React.JSX.Element {
   return (
-    <ScrollView horizontal>
-      <ScrollView>
-        <YStack padding="$5" gap="$5">
-          <Typography variant="tabLargeBold" color="$foregroundPrimary">
-            Trusted Friend Explanation
-          </Typography>
-          <XStack gap="$3">
-            <ThemeDemo theme="light" />
-            <ThemeDemo theme="dark" />
-          </XStack>
-        </YStack>
-      </ScrollView>
-    </ScrollView>
+    <ComponentScreenLayout title="Trusted Friend Explanation" demos={Demos} />
   )
 }

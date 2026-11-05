@@ -4,7 +4,7 @@ import {
   type FlashListRef,
   type ListRenderItemInfo,
 } from '@shopify/flash-list'
-import {Stack, tokens, useTheme} from '@vexl-next/ui'
+import {getTokens, RefreshControl, Stack} from '@vexl-next/ui'
 import {Array, Option, pipe} from 'effect'
 import React, {
   useCallback,
@@ -14,7 +14,7 @@ import React, {
   useRef,
   useState,
 } from 'react'
-import {RefreshControl, type View, type ViewProps} from 'react-native'
+import {type View, type ViewProps} from 'react-native'
 import Animated, {
   LinearTransition,
   type AnimatedProps,
@@ -161,12 +161,10 @@ function OffersList({
   // and the queue would stall for the lifetime of the list.
   const [listChangeGeneration, setListChangeGeneration] = useState(0)
   const [exitingItemKey, setExitingItemKey] = useState<string | null>(null)
-  const theme = useTheme()
-  const refreshIndicatorColor = theme.foregroundSecondary.get()
 
   const contentContainerStyle = useMemo(
     () => ({
-      paddingBottom: bottomOffset + Number(tokens.space[5].val),
+      paddingBottom: bottomOffset + getTokens().space.$5.val,
       ...externalContentContainerStyle,
     }),
     [bottomOffset, externalContentContainerStyle]
@@ -454,17 +452,14 @@ function OffersList({
       >
         <ReanimatedFlashList
           ref={animatedFlashListRef}
-          indicatorStyle="white"
           refreshControl={
             <RefreshControl
-              colors={[refreshIndicatorColor]}
               refreshing={refreshing ?? false}
               onRefresh={onRefresh ?? (() => {})}
-              tintColor={refreshIndicatorColor}
             />
           }
           ItemSeparatorComponent={itemSeparatorComponent}
-          progressViewOffset={20}
+          progressViewOffset={getTokens().space.$6.val}
           ListHeaderComponent={ListHeaderComponent}
           ListFooterComponent={listFooterComponent}
           ListEmptyComponent={ListEmptyComponent}

@@ -8,12 +8,12 @@ import {
   MoneyBankNotes,
   PeopleUsers,
   PinGeolocation,
-  SizableText,
-  Theme,
   YStack,
 } from '@vexl-next/ui'
 import React, {useCallback} from 'react'
-import {Alert, ScrollView} from 'react-native'
+import {Alert} from 'react-native'
+
+import {ComponentScreenLayout, DemoSection} from './ComponentScreenLayout'
 
 const testAvatar = require('../assets/testAvatar.png') as number
 
@@ -22,51 +22,14 @@ const BasicAvatar = avatarsSvg[0]!
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 const GoldenAvatar = avatarsGoldenGlassesAndBackgroundSvg[0]!
 
-function SectionLabel({
-  children,
-}: {
-  readonly children: string
-}): React.JSX.Element {
-  return (
-    <SizableText
-      fontFamily="$body"
-      fontWeight="600"
-      fontSize="$2"
-      color="$foregroundSecondary"
-      paddingTop="$3"
-    >
-      {children}
-    </SizableText>
-  )
-}
-
-function ThemeGroup({
-  theme,
-}: {
-  readonly theme: 'light' | 'dark'
-}): React.JSX.Element {
+function Demos(): React.JSX.Element {
   const handlePress = useCallback((label: string) => {
     Alert.alert('Pressed', label)
   }, [])
 
   return (
-    <Theme name={theme}>
-      <YStack
-        gap="$4"
-        padding="$5"
-        backgroundColor="$backgroundPrimary"
-        borderRadius="$4"
-      >
-        <SizableText
-          fontFamily="$body"
-          fontWeight="600"
-          fontSize="$3"
-          color="$foregroundPrimary"
-        >
-          {theme.charAt(0).toUpperCase() + theme.slice(1)}
-        </SizableText>
-
-        <SectionLabel>Initial</SectionLabel>
+    <>
+      <DemoSection title="Initial">
         <YStack gap="$3">
           <EditRow
             state="initial"
@@ -83,8 +46,9 @@ function ThemeGroup({
             }}
           />
         </YStack>
+      </DemoSection>
 
-        <SectionLabel>Initial + Optional</SectionLabel>
+      <DemoSection title="Initial + Optional">
         <YStack gap="$3">
           <EditRow
             state="initial"
@@ -103,8 +67,9 @@ function ThemeGroup({
             }}
           />
         </YStack>
+      </DemoSection>
 
-        <SectionLabel>Editing (with custom icons)</SectionLabel>
+      <DemoSection title="Editing (with custom icons)">
         <YStack gap="$3">
           <EditRow
             state="editing"
@@ -161,8 +126,9 @@ function ThemeGroup({
             }}
           />
         </YStack>
+      </DemoSection>
 
-        <SectionLabel>Headline Truncation (max 2 lines)</SectionLabel>
+      <DemoSection title="Headline Truncation (max 2 lines)">
         <YStack gap="$3">
           <EditRow
             state="editing"
@@ -182,8 +148,9 @@ function ThemeGroup({
             }}
           />
         </YStack>
+      </DemoSection>
 
-        <SectionLabel>Completed</SectionLabel>
+      <DemoSection title="Completed">
         <YStack gap="$3">
           <EditRow
             state="completed"
@@ -202,8 +169,9 @@ function ThemeGroup({
             }}
           />
         </YStack>
+      </DemoSection>
 
-        <SectionLabel>Profile (with image)</SectionLabel>
+      <DemoSection title="Profile (with image)">
         <YStack gap="$3">
           <EditRow
             state="profile"
@@ -224,16 +192,18 @@ function ThemeGroup({
             }}
           />
         </YStack>
+      </DemoSection>
 
-        <SectionLabel>Profile, trusted</SectionLabel>
+      <DemoSection title="Profile, trusted">
         <EditRow
           state="profile"
           overline="Contact"
           headline="Jana Nováková"
           avatar={{source: testAvatar, trusted: true}}
         />
+      </DemoSection>
 
-        <SectionLabel>Profile (with SVG avatar)</SectionLabel>
+      <DemoSection title="Profile (with SVG avatar)">
         <YStack gap="$3">
           <EditRow
             state="profile"
@@ -263,27 +233,11 @@ function ThemeGroup({
             }}
           />
         </YStack>
-      </YStack>
-    </Theme>
+      </DemoSection>
+    </>
   )
 }
 
 export function EditRowScreen(): React.JSX.Element {
-  return (
-    <ScrollView style={{flex: 1}}>
-      <YStack padding="$5" gap="$4">
-        <SizableText
-          fontFamily="$heading"
-          fontWeight="700"
-          fontSize="$3"
-          color="$foregroundPrimary"
-        >
-          Edit Row
-        </SizableText>
-
-        <ThemeGroup theme="light" />
-        <ThemeGroup theme="dark" />
-      </YStack>
-    </ScrollView>
-  )
+  return <ComponentScreenLayout title="Edit Row" demos={Demos} />
 }

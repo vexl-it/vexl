@@ -1,8 +1,8 @@
+import {Banner} from '@vexl-next/ui'
 import {useSetAtom} from 'jotai'
 import React from 'react'
 import {dismissEnableNotificationsInMarketplaceSuggestionActionAtom} from '../../../../../state/marketplace/atoms/offerSuggestionVisible'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
-import DismissableMarketplaceBanner from './DismissableMarketplaceBanner'
 import useEnableNotificationsFromMarketplaceAction from './useEnableNotificationsFromMarketplaceAction'
 
 function EnableNotificationsMarketplaceSuggestion(): React.ReactElement {
@@ -13,7 +13,8 @@ function EnableNotificationsMarketplaceSuggestion(): React.ReactElement {
   )
 
   return (
-    <DismissableMarketplaceBanner
+    <Banner
+      dismissible
       color="pink"
       title={t('marketplace.enableNotificationsSuggestion.title')}
       description={t('marketplace.enableNotificationsSuggestion.description')}

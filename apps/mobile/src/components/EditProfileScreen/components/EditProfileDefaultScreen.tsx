@@ -1,22 +1,25 @@
 import {
   Avatar,
+  AvatarBasic1,
   Banner,
   CellPhoneMobileDevice,
   ChatBubbles,
   ChevronLeft,
+  getTokens,
+  NavButton,
   NavigationBar,
   PencilWriteEdit,
+  resolveSizePx,
   Screen,
+  TwoToneCard,
   Typography,
+  useTheme,
   XStack,
   YStack,
 } from '@vexl-next/ui'
-import {AvatarBasic1} from '@vexl-next/ui/src/assets/anonymousAvatars/AvatarBasic1'
 import {Array, pipe} from 'effect'
 import {useAtomValue} from 'jotai'
 import React from 'react'
-import {TouchableOpacity} from 'react-native'
-import {useTheme} from 'tamagui'
 import {type EditProfileStackScreenProps} from '../../../navigationTypes'
 import {
   realUserDataAtom,
@@ -38,32 +41,17 @@ function Card({
   children: React.ReactNode
 }): React.ReactElement {
   return (
-    <YStack gap="$0.5">
-      <YStack
-        backgroundColor="$backgroundTertiary"
-        padding="$5"
-        borderRadius="$5"
-        gap="$3"
-        borderBottomLeftRadius="$2"
-        borderBottomRightRadius="$2"
-      >
+    <TwoToneCard>
+      <TwoToneCard.Header padding="$5" gap="$3">
         <Typography variant="paragraphSmallBold" color="$foregroundPrimary">
           {title}
         </Typography>
         <Typography variant="description" color="$foregroundSecondary">
           {subtitle}
         </Typography>
-      </YStack>
-      <YStack
-        padding="$5"
-        backgroundColor="$backgroundSecondary"
-        borderRadius="$5"
-        borderTopLeftRadius="$2"
-        borderTopRightRadius="$2"
-      >
-        {children}
-      </YStack>
-    </YStack>
+      </TwoToneCard.Header>
+      <TwoToneCard.Content padding="$5">{children}</TwoToneCard.Content>
+    </TwoToneCard>
   )
 }
 
@@ -73,6 +61,7 @@ function EditProfileDefaultScreen({
   const goBack = useSafeGoBack()
   const {t} = useTranslation()
   const theme = useTheme()
+  const iconSize = getTokens().size.$7.val
   const phoneNumber = useAtomValue(userPhoneNumberAtom)
   const realUserData = useAtomValue(realUserDataAtom)
   const spokenLanguages = useAtomValue(lastUsedOfferSpokenLanguagesAtom)
@@ -111,7 +100,7 @@ function EditProfileDefaultScreen({
                 />
               ) : (
                 <Avatar size="$9">
-                  <AvatarBasic1 size={40} />
+                  <AvatarBasic1 size={resolveSizePx('$9')} />
                 </Avatar>
               )}
               <Typography
@@ -122,26 +111,13 @@ function EditProfileDefaultScreen({
                 {realUserData.userName ??
                   t('editProfileScreen.identity.photoFallback')}
               </Typography>
-              <TouchableOpacity
+              <NavButton
+                variant="normal"
+                icon={PencilWriteEdit}
                 onPress={() => {
                   navigation.navigate('EditIdentity')
                 }}
-                activeOpacity={0.7}
-              >
-                <YStack
-                  backgroundColor="$backgroundTertiary"
-                  width="$9"
-                  height="$9"
-                  borderRadius="$3"
-                  alignItems="center"
-                  justifyContent="center"
-                >
-                  <PencilWriteEdit
-                    size={24}
-                    color={theme.foregroundPrimary.get()}
-                  />
-                </YStack>
-              </TouchableOpacity>
+              />
             </XStack>
           </Card>
         ) : (
@@ -163,7 +139,7 @@ function EditProfileDefaultScreen({
         >
           <XStack alignItems="center" gap="$3">
             <Avatar size="small">
-              <AvatarBasic1 size={32} />
+              <AvatarBasic1 size={resolveSizePx('small')} />
             </Avatar>
             <Typography variant="descriptionBold" color="$foregroundPrimary">
               {t('offer.directFriend')}
@@ -176,7 +152,7 @@ function EditProfileDefaultScreen({
         >
           <XStack alignItems="center" gap="$3">
             <CellPhoneMobileDevice
-              size={24}
+              size={iconSize}
               color={theme.foregroundSecondary.get()}
             />
             <Typography variant="descriptionBold" color="$foregroundPrimary">
@@ -189,7 +165,10 @@ function EditProfileDefaultScreen({
           subtitle={t('editProfileScreen.spokenLanguages.subtitle')}
         >
           <XStack alignItems="center" gap="$3">
-            <ChatBubbles size={24} color={theme.foregroundSecondary.get()} />
+            <ChatBubbles
+              size={iconSize}
+              color={theme.foregroundSecondary.get()}
+            />
             <Typography
               variant="descriptionBold"
               color="$foregroundPrimary"
@@ -197,26 +176,13 @@ function EditProfileDefaultScreen({
             >
               {spokenLanguagesText}
             </Typography>
-            <TouchableOpacity
+            <NavButton
+              variant="normal"
+              icon={PencilWriteEdit}
               onPress={() => {
                 navigation.navigate('EditProfileSpokenLanguages')
               }}
-              activeOpacity={0.7}
-            >
-              <YStack
-                backgroundColor="$backgroundTertiary"
-                width="$9"
-                height="$9"
-                borderRadius="$3"
-                alignItems="center"
-                justifyContent="center"
-              >
-                <PencilWriteEdit
-                  size={24}
-                  color={theme.foregroundPrimary.get()}
-                />
-              </YStack>
-            </TouchableOpacity>
+            />
           </XStack>
         </Card>
       </YStack>

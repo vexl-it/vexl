@@ -3,8 +3,9 @@ import {
   ArchiveInbox,
   Button,
   ConferenceClub,
+  EmptyState,
   FlagReport,
-  InfoCircle,
+  InfoBox,
   Menu,
   MenuItem,
   NavigationBar,
@@ -13,9 +14,7 @@ import {
   Typography,
   UnarchiveInbox,
   useScreenFooterHeight,
-  useTheme,
   XmarkCancelClose,
-  XStack,
   YStack,
 } from '@vexl-next/ui'
 import {Effect, Option} from 'effect'
@@ -67,27 +66,11 @@ function Footer({
   readonly onSendMessage: () => void
 }): React.ReactElement {
   const {t} = useTranslation()
-  const theme = useTheme()
 
   if (state.type === 'activeChat') {
     return (
       <YStack gap="$2">
-        <XStack
-          backgroundColor="$backgroundSecondary"
-          borderRadius="$3"
-          padding="$4"
-          alignItems="center"
-          gap="$2"
-        >
-          <InfoCircle size={18} color={theme.foregroundSecondary.get()} />
-          <Typography
-            variant="description"
-            color="$foregroundSecondary"
-            flex={1}
-          >
-            {t('offer.interactedRecently')}
-          </Typography>
-        </XStack>
+        <InfoBox>{t('offer.interactedRecently')}</InfoBox>
         <Button variant="secondary" onPress={state.onOpenChat}>
           {t('offer.openChat')}
         </Button>
@@ -98,18 +81,7 @@ function Footer({
   if (state.type === 'waitingToRerequestAgain') {
     return (
       <YStack gap="$2">
-        <XStack
-          backgroundColor="$pinkBackground"
-          borderRadius="$3"
-          padding="$4"
-          alignItems="center"
-          gap="$2"
-        >
-          <InfoCircle size={18} color={theme.foregroundPrimary.get()} />
-          <Typography variant="description" color="$foregroundPrimary" flex={1}>
-            {state.noteText}
-          </Typography>
-        </XStack>
+        <InfoBox variant="pink">{state.noteText}</InfoBox>
         <Button variant="disabled" onPress={onSendMessage} disabled>
           {t('common.sendAMessage')}
         </Button>
@@ -119,18 +91,7 @@ function Footer({
 
   return (
     <YStack gap="$2">
-      <XStack
-        backgroundColor="$backgroundSecondary"
-        borderRadius="$3"
-        padding="$4"
-        alignItems="center"
-        gap="$2"
-      >
-        <InfoCircle size={18} color={theme.foregroundSecondary.get()} />
-        <Typography variant="description" color="$foregroundSecondary" flex={1}>
-          {state.noteText}
-        </Typography>
-      </XStack>
+      <InfoBox>{state.noteText}</InfoBox>
       <Button variant="primary" onPress={onSendMessage}>
         {t('common.sendAMessage')}
       </Button>
@@ -152,7 +113,6 @@ function OfferDetailScrollContent({
   readonly onNoCommonFriendsPress: () => void
 }): React.ReactElement {
   const {t} = useTranslation()
-  const theme = useTheme()
   const {footerHeightAtom} = useScreenFooterHeight()
   const footerHeight = useAtomValue(footerHeightAtom)
   const visibleCommonFriends = useVisibleCommonFriendsForOffer(offer.offerInfo)
@@ -181,11 +141,7 @@ function OfferDetailScrollContent({
       <YStack gap="$4">
         <OfferAuthorBanner offer={offer} />
 
-        <Typography
-          variant="description"
-          color="$foregroundPrimary"
-          lineHeight={20}
-        >
+        <Typography variant="description" color="$foregroundPrimary">
           {offer.offerInfo.publicPart.offerDescription}
         </Typography>
 
@@ -211,28 +167,14 @@ function OfferDetailScrollContent({
             }}
           />
         ) : (
-          <XStack
-            backgroundColor="$backgroundSecondary"
-            borderRadius="$5"
-            padding="$5"
-            gap="$1"
-            alignItems="center"
+          <InfoBox
+            icon={isClubOffer ? ConferenceClub : PeopleUsers}
             onPress={onNoCommonFriendsPress}
           >
-            {isClubOffer ? (
-              <ConferenceClub
-                size={18}
-                color={theme.foregroundSecondary.get()}
-              />
-            ) : (
-              <PeopleUsers size={18} color={theme.foregroundSecondary.get()} />
-            )}
-            <Typography variant="micro" color="$foregroundSecondary" flex={1}>
-              {isClubOffer
-                ? t('offer.clubOfferExplanation')
-                : t('offer.noCommonFriendsExplanation')}
-            </Typography>
-          </XStack>
+            {isClubOffer
+              ? t('offer.clubOfferExplanation')
+              : t('offer.noCommonFriendsExplanation')}
+          </InfoBox>
         )}
 
         <Menu>
@@ -407,18 +349,15 @@ function OfferDetailScreen({
   if (Option.isNone(offer)) {
     return (
       <Screen navigationBar={navigationBar}>
-        <YStack flex={1} alignItems="center" justifyContent="center" gap="$5">
-          <Typography
-            variant="titlesSmall"
-            color="$foregroundPrimary"
-            textAlign="center"
-          >
-            {t('offer.offerNotFound')}
-          </Typography>
-          <Button variant="primary" onPress={safeGoBack} width="100%">
-            {t('common.back')}
-          </Button>
-        </YStack>
+        <EmptyState
+          fullscreen
+          title={t('offer.offerNotFound')}
+          action={{
+            label: t('common.back'),
+            onPress: safeGoBack,
+            variant: 'primary',
+          }}
+        />
       </Screen>
     )
   }

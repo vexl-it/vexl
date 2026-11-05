@@ -1,58 +1,25 @@
-import {
-  productCategoryOptions,
-  type ProductCategory,
-} from '@vexl-next/domain/src/general/offers'
-import {Button, EditRow, FilterTag} from '@vexl-next/ui'
-import {
-  BoltElectric,
-  BoxProduct,
-  CherriesFoodFruit,
-  GoldBricks,
-  More,
-} from '@vexl-next/ui/src/icons'
-import type {IconProps} from '@vexl-next/ui/src/icons/types'
+import {productCategoryOptions} from '@vexl-next/domain/src/general/offers'
+import {Button, EditStep, FilterTag, XStack} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {Array, Option, pipe} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React from 'react'
-import Animated, {FadeIn, FadeOut} from 'react-native-reanimated'
-import {XStack, YStack} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
+import {productCategoryIcons} from '../../../utils/productCategoryIcons'
 import {offerFormMolecule} from '../atoms/offerFormStateAtoms'
+import {type OfferFormStepProps} from '../offerSetupSteps'
 
-const productCategoryIcons: Record<
-  ProductCategory,
-  React.ComponentType<IconProps>
-> = {
-  PRECIOUS_METALS: GoldBricks,
-  PRODUCE: CherriesFoodFruit,
-  ELECTRONICS: BoltElectric,
-  ASSETS: BoxProduct,
-  OTHERS: More,
-}
-
-interface ProductCategoryStepProps {
-  readonly active: boolean
-  readonly onEdit: () => void
-  readonly onComplete: () => void
-  readonly ctaLabel?: string
-  readonly icon?: React.ComponentType<IconProps>
+interface ProductCategoryStepProps extends OfferFormStepProps {
   readonly missing?: boolean
   readonly missingHeadline?: string
-  readonly overline?: string
-  readonly showInitialIcon?: boolean
 }
 
 function ProductCategoryStep({
-  active,
-  onEdit,
   onComplete,
   ctaLabel,
-  icon,
   missing = false,
   missingHeadline,
-  overline,
-  showInitialIcon,
+  ...stepProps
 }: ProductCategoryStepProps): React.ReactElement {
   const {t} = useTranslation()
   const {productCategoriesAtom, selectProductCategoryActionAtom} =
@@ -60,84 +27,49 @@ function ProductCategoryStep({
   const productCategories = useAtomValue(productCategoriesAtom)
   const selectProductCategory = useSetAtom(selectProductCategoryActionAtom)
 
-  const selectedCategoryOption = pipe(
+  const selectedCategory = pipe(
     Option.fromNullable(productCategories),
-    Option.flatMap(Array.head)
+    Option.flatMap(Array.head),
+    Option.getOrUndefined
   )
-  const hasSelection = Option.isSome(selectedCategoryOption)
-  const showMissingState = missing && !hasSelection
-  const headline = pipe(
-    selectedCategoryOption,
-    Option.match({
-      onNone: () =>
-        showMissingState
-          ? (missingHeadline ?? t('offerForm.selectTypeOfProduct'))
-          : t('offerForm.selectTypeOfProduct'),
-      onSome: (category) => t(`filterOffers.productCategory.${category}`),
-    })
-  )
-
-  if (!active) {
-    const row = (
-      <EditRow
-        state="completed"
-        icon={icon}
-        overline={
-          overline ??
-          (hasSelection ? t('offerForm.selectTypeOfProduct') : undefined)
-        }
-        headline={headline}
-        headlineColor={
-          showMissingState ? '$accentHighlightSecondary' : '$foregroundPrimary'
-        }
-        onPress={onEdit}
-      />
-    )
-
-    return showMissingState ? (
-      <YStack borderWidth={1} borderColor="$accentHighlightSecondary" br="$5">
-        {row}
-      </YStack>
-    ) : (
-      row
-    )
-  }
+  const showMissingState = missing && !selectedCategory
+  const title = t('offerForm.selectTypeOfProduct')
 
   return (
-    <>
-      <EditRow
-        state="initial"
-        headline={t('offerForm.selectTypeOfProduct')}
-        showInitialIcon={showInitialIcon}
-      />
-      <Animated.View entering={FadeIn} exiting={FadeOut}>
-        <YStack gap="$5" paddingVertical="$5">
-          <XStack flexWrap="wrap" gap="$3">
-            {productCategoryOptions.map((category) => (
-              <FilterTag
-                key={category}
-                label={t(`filterOffers.productCategory.${category}`)}
-                icon={productCategoryIcons[category]}
-                selected={
-                  Option.getOrUndefined(selectedCategoryOption) === category
-                }
-                onPress={() => {
-                  selectProductCategory(category)
-                }}
-              />
-            ))}
-          </XStack>
-          <Button
-            variant="primary"
-            size="large"
-            disabled={!hasSelection}
-            onPress={onComplete}
-          >
-            {ctaLabel ?? t('offerForm.next')}
-          </Button>
-        </YStack>
-      </Animated.View>
-    </>
+    <EditStep
+      {...stepProps}
+      title={title}
+      value={
+        selectedCategory
+          ? t(`filterOffers.productCategory.${selectedCategory}`)
+          : showMissingState
+            ? (missingHeadline ?? title)
+            : title
+      }
+      invalid={showMissingState}
+    >
+      <XStack flexWrap="wrap" gap="$3">
+        {productCategoryOptions.map((category) => (
+          <FilterTag
+            key={category}
+            label={t(`filterOffers.productCategory.${category}`)}
+            icon={productCategoryIcons[category]}
+            selected={selectedCategory === category}
+            onPress={() => {
+              selectProductCategory(category)
+            }}
+          />
+        ))}
+      </XStack>
+      <Button
+        variant="primary"
+        size="large"
+        disabled={!selectedCategory}
+        onPress={onComplete}
+      >
+        {ctaLabel ?? t('offerForm.next')}
+      </Button>
+    </EditStep>
   )
 }
 

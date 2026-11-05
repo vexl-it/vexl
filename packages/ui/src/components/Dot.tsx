@@ -1,11 +1,12 @@
 import React from 'react'
 import {styled} from 'tamagui'
 
-import {Circle, SizableText} from '../primitives'
+import {Circle} from '../primitives'
+import {Typography} from './Typography'
 
 const DotFrame = styled(Circle, {
   name: 'Dot',
-  backgroundColor: '$pinkBright100',
+  backgroundColor: '$pinkLight',
   alignItems: 'center',
   justifyContent: 'center',
 
@@ -32,22 +33,16 @@ interface DotProps extends Omit<DotFrameProps, 'variant' | 'children'> {
   readonly count?: number
 }
 
-const DotLabel = styled(SizableText, {
-  name: 'DotLabel',
-  fontFamily: '$body',
-  fontWeight: '500',
-  fontSize: '$1',
-  letterSpacing: '$1',
-  color: '$black100',
-  textAlign: 'center',
-})
-
 export function Dot({count, variant, ...rest}: DotProps): React.JSX.Element {
   const resolvedVariant = count !== undefined ? 'number' : (variant ?? 'small')
 
   return (
     <DotFrame variant={resolvedVariant} {...rest}>
-      {count !== undefined ? <DotLabel>{count}</DotLabel> : null}
+      {count !== undefined ? (
+        <Typography variant="micro" color="$black100" textAlign="center">
+          {count}
+        </Typography>
+      ) : null}
     </DotFrame>
   )
 }

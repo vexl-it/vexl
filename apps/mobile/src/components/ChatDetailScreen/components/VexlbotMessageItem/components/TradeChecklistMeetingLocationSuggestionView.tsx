@@ -24,9 +24,9 @@ function TradeChecklistMeetingLocationSuggestionView(): React.ReactElement | nul
 
   return (
     <VexlbotActionCard
-      buttonText={t('vexlbot.setMeetingLocation')}
+      buttonLabel={t('vexlbot.setMeetingLocation')}
       description={t('vexlbot.agreeOnPreferredLocation')}
-      onPress={() => {
+      onButtonPress={() => {
         navigation.navigate('TradeChecklistFlow', {
           screen: 'LocationSearch',
           chatId,

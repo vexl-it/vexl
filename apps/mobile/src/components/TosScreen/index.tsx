@@ -1,8 +1,8 @@
 import {
-  Button,
+  bodyFont,
   FilterTag,
-  InfoCircle,
-  NavButton,
+  getTokens,
+  InfoBox,
   NavigationBar,
   Screen,
   Stack,
@@ -14,7 +14,7 @@ import {
 } from '@vexl-next/ui'
 import {useAtom} from 'jotai'
 import React, {useEffect, useRef, useState} from 'react'
-import {ScrollView, StyleSheet} from 'react-native'
+import {ScrollView} from 'react-native'
 import MarkdownDisplay from 'react-native-markdown-display'
 import {type RootStackScreenProps} from '../../navigationTypes'
 import {useTranslation} from '../../utils/localization/I18nProvider'
@@ -28,98 +28,42 @@ const TOS_LINK = 'https://vexl.it/terms-privacy'
 
 type Props = RootStackScreenProps<'TermsAndConditions'>
 
-interface NoticeProps {
-  readonly actionButtonText?: string
-  readonly children: React.ReactNode
-  readonly onActionPress?: () => void
-  readonly onClose?: () => void
-  readonly variant?: 'default' | 'yellow'
-}
-
-function Notice({
-  actionButtonText,
-  children,
-  onActionPress,
-  onClose,
-  variant = 'default',
-}: NoticeProps): React.ReactElement {
-  const theme = useTheme()
-  const backgroundColor =
-    variant === 'yellow' ? '$accentYellowSecondary' : '$backgroundSecondary'
-  const foregroundColor =
-    variant === 'yellow'
-      ? theme.accentHighlightPrimary.get()
-      : theme.foregroundSecondary.get()
-  const textColor =
-    variant === 'yellow' ? '$accentHighlightPrimary' : '$foregroundSecondary'
-
-  return (
-    <YStack backgroundColor={backgroundColor} borderRadius="$4" gap="$4" p="$4">
-      <XStack alignItems="center" gap="$4">
-        <InfoCircle color={foregroundColor} size={18} />
-        <YStack flex={1} gap="$1">
-          {typeof children === 'string' ? (
-            <Typography color={textColor} variant="description">
-              {children}
-            </Typography>
-          ) : (
-            children
-          )}
-        </YStack>
-        {onClose ? (
-          <NavButton
-            icon={XmarkCancelClose}
-            onPress={onClose}
-            variant="normal"
-            width="$7"
-            height="$7"
-          />
-        ) : null}
-      </XStack>
-      {onActionPress && actionButtonText ? (
-        <Button onPress={onActionPress} size="medium" variant="secondary">
-          {actionButtonText}
-        </Button>
-      ) : null}
-    </YStack>
-  )
-}
-
 function Markdown({children}: {readonly children: string}): React.ReactElement {
   const theme = useTheme()
+  const {face, size} = bodyFont
+  const headingColor = theme.foregroundPrimary.get()
 
   return (
     <MarkdownDisplay
       style={{
         body: {
           color: theme.foregroundSecondary.get(),
-          fontFamily: 'TTSatoshi500',
-          fontSize: 16,
-          lineHeight: 22,
+          fontFamily: face[500].normal,
+          fontSize: size[3],
         },
         heading1: {
-          color: theme.foregroundPrimary.get(),
-          fontFamily: 'TTSatoshi600',
-          fontSize: 24,
-          lineHeight: 32,
+          color: headingColor,
+          fontFamily: face[600].normal,
+          fontSize: size[6],
+          lineHeight: 30,
         },
         heading2: {
-          color: theme.foregroundPrimary.get(),
-          fontFamily: 'TTSatoshi600',
-          fontSize: 20,
-          lineHeight: 28,
-          marginTop: 40,
+          color: headingColor,
+          fontFamily: face[600].normal,
+          fontSize: size[5],
+          lineHeight: 26,
+          marginTop: getTokens().space.$9.val,
         },
         heading3: {
-          color: theme.foregroundPrimary.get(),
-          fontFamily: 'TTSatoshi600',
-          fontSize: 18,
+          color: headingColor,
+          fontFamily: face[600].normal,
+          fontSize: size[4],
           lineHeight: 24,
         },
         strong: {
-          color: theme.foregroundPrimary.get(),
-          fontFamily: 'TTSatoshi600',
-          fontSize: 16,
+          color: headingColor,
+          fontFamily: face[600].normal,
+          fontSize: size[3],
         },
       }}
     >
@@ -185,22 +129,21 @@ function TosScreen({route: {params}, navigation}: Props): React.ReactElement {
       <ScrollView
         ref={scrollViewRef}
         contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={{paddingBottom: getTokens().space.$7.val}}
       >
         {!isEnglish() && (
-          <Notice
-            actionButtonText={t('common.continue')}
-            onActionPress={openUrl(TOS_LINK)}
+          <InfoBox
+            action={{label: t('common.continue'), onPress: openUrl(TOS_LINK)}}
           >
             {t('termsOfUse.cautiousNoticeAboutMachineTranslation')}
-          </Notice>
+          </InfoBox>
         )}
         {activeTab === 'termsOfUse' ? (
           <Markdown>{t('termsOfUseMD')}</Markdown>
         ) : activeTab === 'privacyPolicy' ? (
           <Stack mt={showTosSummaryForAlreadyLoggedInUser ? '$4' : '$0'}>
             {!!showTosSummaryForAlreadyLoggedInUser && (
-              <Notice
+              <InfoBox
                 variant="yellow"
                 onClose={() => {
                   setShowTosSummaryForAlreadyLoggedInUser(false)
@@ -208,25 +151,25 @@ function TosScreen({route: {params}, navigation}: Props): React.ReactElement {
               >
                 <YStack gap="$1">
                   <Typography
-                    color="$accentHighlightPrimary"
+                    color="$accentHighlightSecondary"
                     variant="paragraphDemibold"
                   >
                     {t('privacyPolicy.whatsNew')}
                   </Typography>
                   <Typography
-                    color="$accentHighlightPrimary"
+                    color="$accentHighlightSecondary"
                     variant="description"
                   >
                     {t('privacyPolicy.analyticsAdded')}
                   </Typography>
                   <Typography
-                    color="$accentHighlightPrimary"
+                    color="$accentHighlightSecondary"
                     variant="description"
                   >
                     {t('privacyPolicy.consentOfFutureCahngesRemoved')}
                   </Typography>
                 </YStack>
-              </Notice>
+              </InfoBox>
             )}
             <Markdown>{t('privacyPolicyMD')}</Markdown>
           </Stack>
@@ -237,11 +180,5 @@ function TosScreen({route: {params}, navigation}: Props): React.ReactElement {
     </Screen>
   )
 }
-
-const styles = StyleSheet.create({
-  scrollContent: {
-    paddingBottom: 24,
-  },
-})
 
 export default TosScreen

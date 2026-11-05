@@ -4,11 +4,11 @@ import {getTokens, styled, useTheme} from 'tamagui'
 
 import {PencilWriteEdit} from '../icons/PencilWriteEdit'
 import {QuestionmarkCircle} from '../icons/QuestionmarkCircle'
-import {RadiobuttonCircleFilled} from '../icons/RadiobuttonCircleFilled'
 import type {IconProps} from '../icons/types'
-import {Stack, XStack, YStack} from '../primitives'
+import {XStack, YStack} from '../primitives'
 import type {AvatarProps} from './Avatar'
 import {Avatar} from './Avatar'
+import {CompletedIconBox, IconBox} from './IconBox'
 import {Typography, type TypographyProps} from './Typography'
 
 export type EditRowState = 'initial' | 'editing' | 'completed' | 'profile'
@@ -38,23 +38,6 @@ const EditRowFrame = styled(XStack, {
           opacity: 0.7,
         },
       },
-    },
-  } as const,
-})
-
-const IconBox = styled(Stack, {
-  name: 'EditRowIconBox',
-  width: '$9',
-  height: '$9',
-  borderRadius: '$3',
-  alignItems: 'center',
-  justifyContent: 'center',
-
-  variants: {
-    tone: {
-      tertiary: {backgroundColor: '$backgroundTertiary'},
-      secondary: {backgroundColor: '$backgroundSecondary'},
-      green: {backgroundColor: '$greenForeground'},
     },
   } as const,
 })
@@ -159,7 +142,7 @@ export function EditRow({
   const icon = 'icon' in rest ? rest.icon : undefined
   const avatar = 'avatar' in rest ? rest.avatar : undefined
   const theme = useTheme()
-  const iconBoxSize = getTokens().size.$9.val
+  const sizes = getTokens().size
 
   const isInitial = state === 'initial'
   const isProfile = state === 'profile'
@@ -167,34 +150,31 @@ export function EditRow({
 
   const foregroundColor = theme.foregroundPrimary.get()
 
-  const iconBoxTone: 'tertiary' | 'secondary' | 'green' = (() => {
-    switch (state) {
-      case 'completed':
-        return Icon ? 'tertiary' : 'green'
-      case 'editing':
-      case 'profile':
-        return 'tertiary'
-      case 'initial':
-        return 'secondary'
-    }
-  })()
+  const iconSize = sizes.$7.val
 
   const leadingIcon = (() => {
     switch (state) {
       case 'completed':
         return Icon ? (
-          <Icon color={foregroundColor} size={24} />
+          <IconBox tone="tertiary">
+            <Icon color={foregroundColor} size={iconSize} />
+          </IconBox>
         ) : (
-          <RadiobuttonCircleFilled
-            color={theme.backgroundSecondary.get()}
-            size={24}
-          />
+          <CompletedIconBox />
         )
       case 'editing':
       case 'profile':
-        return Icon ? <Icon color={foregroundColor} size={24} /> : null
+        return (
+          <IconBox tone="tertiary">
+            {Icon ? <Icon color={foregroundColor} size={iconSize} /> : null}
+          </IconBox>
+        )
       case 'initial':
-        return <QuestionmarkCircle color={foregroundColor} size={24} />
+        return (
+          <IconBox tone="secondary">
+            <QuestionmarkCircle color={foregroundColor} size={iconSize} />
+          </IconBox>
+        )
     }
   })()
   const showLeadingIcon = isProfile || !isInitial || showInitialIcon
@@ -211,9 +191,9 @@ export function EditRow({
     >
       {showLeadingIcon ? (
         isProfile && avatar ? (
-          <Avatar customSize={iconBoxSize} {...avatar} />
+          <Avatar customSize={sizes.$9.val} {...avatar} />
         ) : (
-          <IconBox tone={iconBoxTone}>{leadingIcon}</IconBox>
+          leadingIcon
         )
       ) : null}
       <YStack
@@ -264,7 +244,7 @@ export function EditRow({
       ) : null}
       {showEditButton ? (
         <IconBox tone="tertiary">
-          <PencilWriteEdit color={foregroundColor} size={24} />
+          <PencilWriteEdit color={foregroundColor} size={iconSize} />
         </IconBox>
       ) : null}
     </EditRowFrame>

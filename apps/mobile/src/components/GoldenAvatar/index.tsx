@@ -1,7 +1,14 @@
 import {
   avatarsGoldenGlassesAndBackgroundSvg,
   Button,
-  IconButton,
+  GoldenAvatarBackground,
+  GoldenAvatarGlasses,
+  GoldenAvatarShapeFour,
+  GoldenAvatarShapeOne,
+  GoldenAvatarShapeThree,
+  GoldenAvatarShapeTwo,
+  GoldenAvatarShimmerStar,
+  NavButton,
   Stack,
   Typography,
   useTheme,
@@ -23,15 +30,6 @@ import Animated, {
 } from 'react-native-reanimated'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {useTranslation} from '../../utils/localization/I18nProvider'
-import {
-  AvatarBackground,
-  AvatarGlasses,
-  AvatarShapeFour,
-  AvatarShapeOne,
-  AvatarShapeThree,
-  AvatarShapeTwo,
-  ShimmerStar,
-} from './components/GoldenAvatarAnimationAssets'
 
 export const showGoldenAvatarAnimationAtom = atom(false)
 
@@ -262,9 +260,11 @@ function GoldenAvatar(): React.ReactElement | null {
         pt="$4"
         zIndex={1010}
       >
-        <IconButton onPress={forceHideGoldenAvatarAnimation}>
-          <XmarkCancelClose color={theme.foregroundPrimary.get()} size={24} />
-        </IconButton>
+        <NavButton
+          variant="secondary"
+          icon={XmarkCancelClose}
+          onPress={forceHideGoldenAvatarAnimation}
+        />
       </Stack>
       <Animated.View
         style={[
@@ -295,7 +295,7 @@ function GoldenAvatar(): React.ReactElement | null {
               shapeOneTranslateAnimation,
             ]}
           >
-            <AvatarShapeOne color={avatarShapeOneColor} />
+            <GoldenAvatarShapeOne color={avatarShapeOneColor} />
           </Animated.View>
           <Animated.View
             style={[
@@ -303,7 +303,7 @@ function GoldenAvatar(): React.ReactElement | null {
               shapeTwoTranslateAnimation,
             ]}
           >
-            <AvatarShapeTwo color={avatarShapeTwoColor} />
+            <GoldenAvatarShapeTwo color={avatarShapeTwoColor} />
           </Animated.View>
           <Animated.View
             style={[
@@ -311,7 +311,7 @@ function GoldenAvatar(): React.ReactElement | null {
               shapeThreeTranslateAnimation,
             ]}
           >
-            <AvatarShapeThree color={avatarShapeThreeColor} />
+            <GoldenAvatarShapeThree color={avatarShapeThreeColor} />
           </Animated.View>
           <Animated.View
             style={[
@@ -319,7 +319,7 @@ function GoldenAvatar(): React.ReactElement | null {
               shapeFourTranslateAnimation,
             ]}
           >
-            <AvatarShapeFour color={avatarShapeFourColor} />
+            <GoldenAvatarShapeFour color={avatarShapeFourColor} />
           </Animated.View>
           <Animated.View
             style={[
@@ -327,7 +327,7 @@ function GoldenAvatar(): React.ReactElement | null {
               glassesTranslateAnimation,
             ]}
           >
-            <AvatarGlasses lensColor={avatarLensColor} />
+            <GoldenAvatarGlasses lensColor={avatarLensColor} />
           </Animated.View>
           <Animated.View
             style={[
@@ -335,7 +335,7 @@ function GoldenAvatar(): React.ReactElement | null {
               avatarBackgroundOpacityAnimation,
             ]}
           >
-            <AvatarBackground />
+            <GoldenAvatarBackground />
           </Animated.View>
         </Animated.View>
         <Animated.View
@@ -352,7 +352,7 @@ function GoldenAvatar(): React.ReactElement | null {
             starScaleAnimation,
           ]}
         >
-          <ShimmerStar />
+          <GoldenAvatarShimmerStar />
         </Animated.View>
       </Stack>
       <Stack mt="$4" zIndex={1001} gap="$2">

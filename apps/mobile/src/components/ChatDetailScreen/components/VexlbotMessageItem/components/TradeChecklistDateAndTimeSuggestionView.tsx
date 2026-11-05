@@ -25,9 +25,9 @@ function TradeChecklistDateAndTimeSuggestionView(): React.ReactElement | null {
 
   return (
     <VexlbotActionCard
-      buttonText={t('vexlbot.setDateAndTime')}
+      buttonLabel={t('vexlbot.setDateAndTime')}
       description={t('vexlbot.agreeOnPreferredDateAndTime')}
-      onPress={() => {
+      onButtonPress={() => {
         navigation.navigate('TradeChecklistFlow', {
           screen: 'ChooseAvailableDays',
           chatId,

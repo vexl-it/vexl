@@ -1,7 +1,6 @@
-import {Typography} from '@vexl-next/ui'
+import {Stack, Typography} from '@vexl-next/ui'
 import {useAtomValue} from 'jotai'
 import React from 'react'
-import {Stack} from 'tamagui'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {formatInteger} from '../../../../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../../../../utils/localization/formattingLocaleAtom'

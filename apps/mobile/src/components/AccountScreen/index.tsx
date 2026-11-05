@@ -40,7 +40,6 @@ function AccountScreen({navigation}: Props): React.ReactElement {
         <UserBanner />
         <ActionSteps />
         <AccountReachStats />
-        {/*<AccountStats />*/}
         <Menus />
         <VersionInfo />
       </YStack>

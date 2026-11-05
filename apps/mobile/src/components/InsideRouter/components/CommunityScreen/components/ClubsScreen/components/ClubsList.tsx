@@ -1,58 +1,31 @@
 import {
-  Button,
-  ClubCard,
   ClubReachCard,
+  EmptyState,
+  getTokens,
+  RefreshControl,
   Stack,
-  Typography,
-  useTheme,
   YStack,
 } from '@vexl-next/ui'
 import {Effect, pipe} from 'effect'
 import {isNonEmptyArray} from 'effect/Array'
-import {type Atom, useAtomValue, useSetAtom} from 'jotai'
+import {useAtomValue, useSetAtom} from 'jotai'
 import React from 'react'
-import {FlatList, RefreshControl} from 'react-native'
+import {FlatList} from 'react-native'
 import {type CommunityTabsScreenProps} from '../../../../../../../navigationTypes'
 import {
   clubsWithMembersAtomsAtom,
   clubsWithMembersLoadingStateAtom,
 } from '../../../../../../../state/clubs/atom/clubsWithMembersAtom'
 import {syncAllClubsHandleStateWhenNotFoundActionAtom} from '../../../../../../../state/clubs/atom/refreshClubsActionAtom'
-import {type ClubWithMembers} from '../../../../../../../state/clubs/domain'
 import {clubsConnectionsReachAtom} from '../../../../../../../state/connections/atom/connectionStateAtom'
 import atomKeyExtractor from '../../../../../../../utils/atomUtils/atomKeyExtractor'
 import {useTranslation} from '../../../../../../../utils/localization/I18nProvider'
 import {formatInteger} from '../../../../../../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../../../../../../utils/localization/formattingLocaleAtom'
 import {useShowReachExplanation} from '../../../../../../useShowReachExplanation'
-import ClubAvatar from './ClubAvatar'
+import ClubCardItem from '../../ClubCardItem'
 
 type Navigation = CommunityTabsScreenProps<'Clubs'>['navigation']
-
-function ClubListItem({
-  atom,
-  navigation,
-}: {
-  readonly atom: Atom<ClubWithMembers>
-  readonly navigation: Navigation
-}): React.ReactElement {
-  const {club, members} = useAtomValue(atom)
-  const {t} = useTranslation()
-  const locale = useAtomValue(formattingLocaleAtom)
-
-  return (
-    <ClubCard
-      avatar={<ClubAvatar uri={club.clubImageUrl} />}
-      name={club.name}
-      subtitle={t('clubs.commonFriendsFormatted', {
-        localizedString: formatInteger(members.length, locale),
-      })}
-      onPress={() => {
-        navigation.navigate('ClubDetail', {clubUuid: club.uuid})
-      }}
-    />
-  )
-}
 
 function EmptyClubs({
   onJoinPress,
@@ -64,37 +37,12 @@ function EmptyClubs({
   const {t} = useTranslation()
 
   return (
-    <YStack flex={1} alignItems="center" paddingTop="$8" gap="$5">
-      <Typography
-        variant="heading3"
-        color="$foregroundPrimary"
-        textAlign="center"
-      >
-        {t('clubs.joinYourFirstClub')}
-      </Typography>
-      <Typography
-        variant="description"
-        color="$foregroundSecondary"
-        textAlign="center"
-      >
-        {t('clubs.joinYourFirstClubDescription')}
-      </Typography>
-      <Button
-        size="small"
-        variant="tertiary"
-        onPress={onJoinPress}
-        width="100%"
-      >
-        {t('clubs.joinNewClub')}
-      </Button>
-      <Typography
-        variant="micro"
-        color="$accentHighlightPrimary"
-        onPress={onInfoPress}
-      >
-        {t('suggestion.whatAreClubs')}
-      </Typography>
-    </YStack>
+    <EmptyState
+      title={t('clubs.joinYourFirstClub')}
+      description={t('clubs.joinYourFirstClubDescription')}
+      action={{label: t('clubs.joinNewClub'), onPress: onJoinPress}}
+      link={{label: t('suggestion.whatAreClubs'), onPress: onInfoPress}}
+    />
   )
 }
 
@@ -133,7 +81,6 @@ export function ClubsList({
   const clubsAtoms = useAtomValue(clubsWithMembersAtomsAtom)
   const clubsLoading =
     useAtomValue(clubsWithMembersLoadingStateAtom).state === 'loading'
-  const theme = useTheme()
 
   const handleJoinPress = (): void => {
     navigation.navigate('JoinClubFlow', {
@@ -155,14 +102,12 @@ export function ClubsList({
           onInfoPress={handleInfoPress}
         />
       }
-      renderItem={({item}) => (
-        <ClubListItem atom={item} navigation={navigation} />
-      )}
+      renderItem={({item}) => <ClubCardItem clubWithMembersAtom={item} />}
       keyExtractor={atomKeyExtractor}
       showsVerticalScrollIndicator={false}
       contentContainerStyle={{
         flexGrow: 1,
-        paddingBottom: 24,
+        paddingBottom: getTokens().space.$7.val,
       }}
       refreshControl={
         <RefreshControl
@@ -170,7 +115,6 @@ export function ClubsList({
           onRefresh={() => {
             pipe(syncAllClubsHandleStateWhenNotFound(), Effect.runFork)
           }}
-          tintColor={theme.foregroundSecondary.get()}
         />
       }
       ListFooterComponent={

@@ -2,7 +2,7 @@ import {Effect} from 'effect'
 import type {Atom, WritableAtom} from 'jotai'
 import {atom, useAtomValue} from 'jotai'
 import React, {useCallback, useEffect, useRef, useState} from 'react'
-import {Dimensions, Modal} from 'react-native'
+import {Dimensions, Modal, StyleSheet} from 'react-native'
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -11,13 +11,12 @@ import Animated, {
 } from 'react-native-reanimated'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {scheduleOnRN} from 'react-native-worklets'
-import {getTokens, styled} from 'tamagui'
+import {getTokens, styled, Theme, useThemeName} from 'tamagui'
 
 import {SizableText, Stack, XStack, YStack} from '../primitives'
 import {Button, type ButtonVariant} from './Button'
 import {KeyboardAvoidingView} from './KeyboardAvoidingView'
 
-const SCREEN_HEIGHT = Dimensions.get('window').height
 const ANIMATION_DURATION = 300
 const BACKDROP_OPACITY = 0.9
 const AUTO_DISMISS_MS = 2000
@@ -65,6 +64,7 @@ const DialogViewport = styled(YStack, {
   paddingTop: '$5',
   paddingHorizontal: '$5',
   gap: '$3',
+  $sm: {width: '100%', maxWidth: 560, alignSelf: 'center'},
 })
 
 const DialogCard = styled(YStack, {
@@ -74,8 +74,6 @@ const DialogCard = styled(YStack, {
   padding: '$5',
   gap: '$5',
 })
-
-const AnimatedDialogBackdrop = Animated.createAnimatedComponent(DialogBackdrop)
 
 export interface DialogProps {
   readonly visible: boolean
@@ -99,9 +97,10 @@ export function Dialog({
   avoidKeyboard,
 }: DialogProps): React.JSX.Element | null {
   const [mounted, setMounted] = useState(false)
+  const themeName = useThemeName()
 
   const backdropOpacity = useSharedValue(0)
-  const translateY = useSharedValue(SCREEN_HEIGHT)
+  const translateY = useSharedValue(Dimensions.get('window').height)
   const {bottom} = useSafeAreaInsets()
   const bottomOffset = bottom + getTokens().space.$8.val
 
@@ -120,7 +119,7 @@ export function Dialog({
     } else {
       backdropOpacity.value = withTiming(0, {duration: ANIMATION_DURATION})
       translateY.value = withTiming(
-        SCREEN_HEIGHT,
+        Dimensions.get('window').height,
         {duration: ANIMATION_DURATION, easing: Easing.in(Easing.cubic)},
         (finished) => {
           if (finished) {
@@ -156,7 +155,9 @@ export function Dialog({
 
   const content = (
     <Stack flex={1} justifyContent="flex-end">
-      <AnimatedDialogBackdrop style={backdropAnimatedStyle} onPress={onClose} />
+      <Animated.View style={[StyleSheet.absoluteFill, backdropAnimatedStyle]}>
+        <DialogBackdrop onPress={onClose} />
+      </Animated.View>
       <Animated.View style={contentAnimatedStyle}>
         <DialogViewport paddingBottom={bottomOffset}>
           <DialogCard>{children}</DialogCard>
@@ -168,11 +169,14 @@ export function Dialog({
 
   return (
     <Modal transparent visible animationType="none" onRequestClose={onClose}>
-      {avoidKeyboard !== false ? (
-        <KeyboardAvoidingView>{content}</KeyboardAvoidingView>
-      ) : (
-        content
-      )}
+      {/* On web the modal portal leaves the DOM subtree that carries the theme class. */}
+      <Theme name={themeName} forceClassName>
+        {avoidKeyboard !== false ? (
+          <KeyboardAvoidingView>{content}</KeyboardAvoidingView>
+        ) : (
+          content
+        )}
+      </Theme>
     </Modal>
   )
 }

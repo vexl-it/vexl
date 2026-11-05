@@ -1,6 +1,5 @@
 import {BtcNetwork} from '@vexl-next/domain/src/general/offers'
-import {RadioGroup, RowRadiobutton} from '@vexl-next/ui'
-import {YStack} from '@vexl-next/ui/src/primitives'
+import {RadioGroup, RowRadiobutton, YStack} from '@vexl-next/ui'
 import {Array, Option, pipe} from 'effect'
 import {useAtom} from 'jotai'
 import React from 'react'

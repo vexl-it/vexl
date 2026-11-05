@@ -1,5 +1,5 @@
 import React, {useCallback, useEffect, useMemo, useRef} from 'react'
-import {Gesture, GestureDetector, Pressable} from 'react-native-gesture-handler'
+import {Gesture, GestureDetector} from 'react-native-gesture-handler'
 import Swipeable, {
   type SwipeableMethods,
 } from 'react-native-gesture-handler/ReanimatedSwipeable'
@@ -8,21 +8,17 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withTiming,
-  type SharedValue,
 } from 'react-native-reanimated'
 import {scheduleOnRN} from 'react-native-worklets'
-import {getTokens, useTheme} from 'tamagui'
+import {getTokens} from 'tamagui'
 
 import {ArchiveInbox} from '../icons/ArchiveInbox'
 import {StarFilled} from '../icons/StarFilled'
 import {StarOutline} from '../icons/StarOutline'
 import {UnarchiveInbox} from '../icons/UnarchiveInbox'
-import type {IconProps} from '../icons/types'
-import {Stack, YStack} from '../primitives'
 import {type OfferCardMarkBadge} from './OfferCard'
-import {Typography} from './Typography'
+import {SwipeActionPanel} from './SwipeableRow'
 
-const PANEL_WIDTH = 86
 const PANEL_GAP = getTokens().space.$5.val
 // Dragging past this distance commits the action on release. Shorter swipes
 // reveal the action, which commits when tapped.
@@ -68,99 +64,6 @@ export interface SwipeableOfferCardProps {
   readonly children: React.ReactNode
 }
 
-type SwipeSide = 'left' | 'right'
-
-function SwipeActionPanel({
-  side,
-  variant,
-  icon,
-  iconColor,
-  label,
-  translation,
-  onPress,
-}: {
-  readonly side: SwipeSide
-  readonly variant: 'accent' | 'normal'
-  readonly icon: React.ComponentType<IconProps>
-  readonly iconColor: string
-  readonly label: string
-  readonly translation: SharedValue<number>
-  readonly onPress: () => void
-}): React.JSX.Element {
-  const Icon = icon
-  // The action renderer keeps its measured width while the card closes.
-  // Clip the panel to the revealed area so it is not painted underneath the
-  // card after the gap is covered.
-  const clipStyle = useAnimatedStyle(() => ({
-    width: Math.max(0, Math.abs(translation.get()) - PANEL_GAP),
-  }))
-
-  // The panel stretches with the drag so it fills the revealed area up to the
-  // gap before the card.
-  const panelStyle = useAnimatedStyle(() => ({
-    width: Math.max(PANEL_WIDTH, Math.abs(translation.get()) - PANEL_GAP),
-  }))
-
-  return (
-    <Stack width={PANEL_WIDTH + PANEL_GAP}>
-      <Animated.View
-        style={[
-          {
-            position: 'absolute',
-            top: 0,
-            bottom: 0,
-            overflow: 'hidden',
-            ...(side === 'left' ? {left: 0} : {right: 0}),
-          },
-          clipStyle,
-        ]}
-      >
-        <Animated.View
-          style={[
-            {
-              position: 'absolute',
-              top: 0,
-              bottom: 0,
-              ...(side === 'left' ? {left: 0} : {right: 0}),
-            },
-            panelStyle,
-          ]}
-        >
-          <Pressable style={{flex: 1}} onPress={onPress}>
-            <YStack
-              flex={1}
-              alignItems="center"
-              justifyContent="center"
-              gap="$1"
-              borderRadius="$5"
-              backgroundColor={
-                variant === 'accent'
-                  ? '$accentYellowSecondary'
-                  : '$backgroundTertiary'
-              }
-            >
-              <Icon size={24} color={iconColor} />
-              <Typography
-                variant="descriptionBold"
-                alignSelf="center"
-                width={PANEL_WIDTH}
-                textAlign="center"
-                color={
-                  variant === 'accent'
-                    ? '$accentHighlightPrimary'
-                    : '$foregroundPrimary'
-                }
-              >
-                {label}
-              </Typography>
-            </YStack>
-          </Pressable>
-        </Animated.View>
-      </Animated.View>
-    </Stack>
-  )
-}
-
 export function SwipeableOfferCard({
   offerId,
   mark,
@@ -169,7 +72,6 @@ export function SwipeableOfferCard({
   onExitAnimationStart,
   children,
 }: SwipeableOfferCardProps): React.JSX.Element {
-  const theme = useTheme()
   const swipeableRef = useRef<SwipeableMethods>(null)
   const committedRef = useRef(false)
   const cardHeightRef = useRef(0)
@@ -327,16 +229,15 @@ export function SwipeableOfferCard({
         <Swipeable
           key={offerId}
           ref={swipeableRef}
-          friction={1}
-          overshootFriction={1}
           simultaneousWithExternalGesture={observerPan}
           renderLeftActions={(_, translation) => (
             <SwipeActionPanel
               side="left"
+              gap={PANEL_GAP}
+              rounded
               variant="accent"
               translation={translation}
               icon={isFavourite ? StarOutline : StarFilled}
-              iconColor={theme.accentHighlightPrimary.get()}
               label={isFavourite ? labels.removeFavourite : labels.favourite}
               onPress={() => {
                 commit('favourite')
@@ -346,10 +247,11 @@ export function SwipeableOfferCard({
           renderRightActions={(_, translation) => (
             <SwipeActionPanel
               side="right"
-              variant="normal"
+              gap={PANEL_GAP}
+              rounded
+              variant="neutral"
               translation={translation}
               icon={isArchived ? UnarchiveInbox : ArchiveInbox}
-              iconColor={theme.foregroundPrimary.get()}
               label={isArchived ? labels.unarchive : labels.archive}
               onPress={() => {
                 commit('archived')

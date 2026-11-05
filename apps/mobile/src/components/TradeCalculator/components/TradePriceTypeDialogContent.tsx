@@ -1,5 +1,5 @@
 import {type TradePriceType} from '@vexl-next/domain/src/general/tradeChecklist'
-import {SelectableItem, Separator, YStack} from '@vexl-next/ui'
+import {Divider, SelectableItem, YStack} from '@vexl-next/ui'
 import {useAtom, type PrimitiveAtom} from 'jotai'
 import React from 'react'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
@@ -30,7 +30,7 @@ function TradePriceTypeDialogContent({
           setSelectedTradePriceType('live')
         }}
       />
-      <Separator borderColor="$backgroundTertiary" />
+      <Divider />
       <SelectableItem
         label={t('tradeCalculator.freezeCurrentMarketPrice')}
         selected={selectedTradePriceType === 'frozen'}
@@ -38,7 +38,7 @@ function TradePriceTypeDialogContent({
           setSelectedTradePriceType('frozen')
         }}
       />
-      <Separator borderColor="$backgroundTertiary" />
+      <Divider />
       <SelectableItem
         label={t('tradeChecklist.calculateAmount.setYourOwnPrice')}
         selected={selectedTradePriceType === 'your'}

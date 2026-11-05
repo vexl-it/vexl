@@ -1,9 +1,8 @@
 import {useNavigation} from '@react-navigation/native'
-import {Loader, Map, Typography} from '@vexl-next/ui'
+import {Button, InfoBox, Map, Stack, XStack} from '@vexl-next/ui'
 import {isNone} from 'fp-ts/Option'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback} from 'react'
-import {Stack, useTheme, XStack} from 'tamagui'
 import {useOffersLoadingError} from '../../../../../state/marketplace'
 import {refocusMapActionAtom} from '../../../../../state/marketplace/atoms/map/focusedOffer'
 import {areThereOffersToSeeInMarketplaceWithoutFiltersAtom} from '../../../../../state/marketplace/atoms/offersToSeeInMarketplace'
@@ -12,7 +11,6 @@ import ErrorListHeader from '../../../../ErrorListHeader'
 import EmptyList from './EmptyList'
 import FilterButton from './FilterButton'
 import FilterTagBar from './FilterTagBar'
-import MarketplaceInlineButton from './MarketplaceInlineButton'
 import SearchOffers from './SearchOffers'
 import TotalOffersCount from './TotalOffersCount'
 
@@ -32,7 +30,6 @@ function AllOffersListHeader({
   onFilterChangeStart,
 }: Props): React.ReactElement {
   const {t} = useTranslation()
-  const theme = useTheme()
   const navigation = useNavigation()
   const error = useOffersLoadingError()
   const areThereOffersToSeeInMarketplaceWithoutFilters = useAtomValue(
@@ -74,29 +71,20 @@ function AllOffersListHeader({
           <Stack paddingHorizontal="$5">
             <XStack ai="center" jc="space-between">
               {isOffersLoaderVisible ? (
-                <XStack alignItems="center" gap="$2" marginVertical="$2">
-                  <Typography
-                    color="$foregroundSecondary"
-                    variant="description"
-                  >
-                    {t('marketplace.loadingOffers')}
-                  </Typography>
-                  <Loader
-                    color={theme.foregroundSecondary.get()}
-                    size="small"
-                  />
-                </XStack>
+                <InfoBox variant="naked" loading marginVertical="$2">
+                  {t('marketplace.loadingOffers')}
+                </InfoBox>
               ) : (
                 <TotalOffersCount filteredOffersCount={filteredOffersCount} />
               )}
-              <MarketplaceInlineButton
-                icon={
-                  <Map size={18} color={theme.accentHighlightPrimary.get()} />
-                }
-                label={t('marketplace.showOnMap')}
-                color={theme.accentHighlightPrimary.get()}
+              <Button
+                variant="link"
+                size="small"
+                icon={Map}
                 onPress={handleShowOnMap}
-              />
+              >
+                {t('marketplace.showOnMap')}
+              </Button>
             </XStack>
           </Stack>
         ) : (

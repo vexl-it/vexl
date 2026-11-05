@@ -1,5 +1,5 @@
 import {type ObjectionType} from '@vexl-next/domain/src/general/feedback'
-import {Stack, Typography} from '@vexl-next/ui'
+import {FilterTag} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtom} from 'jotai'
 import React, {useMemo} from 'react'
@@ -22,23 +22,16 @@ function ObjectionCell({objection}: Props): React.ReactElement {
   )
 
   return (
-    <Stack
+    <FilterTag
+      label={t(`feedback.objection.${objection}`)}
+      selected={isSelected}
+      backgroundColor={
+        isSelected ? '$accentYellowSecondary' : '$backgroundTertiary'
+      }
       onPress={() => {
         select(!isSelected)
       }}
-      p="$4"
-      py="$3"
-      br="$5"
-      bc={isSelected ? '$accentYellowSecondary' : '$backgroundTertiary'}
-    >
-      <Typography
-        lineHeight="100%"
-        variant="descriptionBold"
-        color={isSelected ? '$accentHighlightPrimary' : '$foregroundPrimary'}
-      >
-        {t(`feedback.objection.${objection}`)}
-      </Typography>
-    </Stack>
+    />
   )
 }
 

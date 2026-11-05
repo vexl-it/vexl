@@ -1,171 +1,96 @@
 import {
-  BuyingGraphic,
-  ContactsGraphic,
-  FaqAnonymizationNotice,
-  FaqAnonymousCounterpart,
-  FaqDesigned,
-  FaqNoRatings,
-  FaqNotifications,
-  FaqOpenSource,
-  FaqStayAnonymous,
-  FaqWhatIsVexl,
-  FullscreenWarningRedGraphic,
-  FullscreenWarningYellowGraphic,
-  NotificationsGraphic,
-  SellingGraphic,
-  SizableText,
-  Stack,
-  useVexlTheme,
-  VexlTextGraphic,
+  DonationThanksHeartGraphic,
+  MyDonationsEmptyStateGraphic,
+  Typography,
   XStack,
   YStack,
 } from '@vexl-next/ui'
-import React, {useState} from 'react'
-import {ScrollView} from 'react-native'
+import * as graphicsModule from '@vexl-next/ui/src/assets/graphics'
+import {Array, pipe, Record} from 'effect'
+import React from 'react'
 
-const graphics = [
-  {label: 'BuyingGraphic', Component: BuyingGraphic},
-  {label: 'SellingGraphic', Component: SellingGraphic},
-  {label: 'ContactsGraphic', Component: ContactsGraphic},
-  {label: 'NotificationsGraphic', Component: NotificationsGraphic},
-  {label: 'VexlTextGraphic', Component: VexlTextGraphic},
-  {label: 'FaqWhatIsVexl', Component: FaqWhatIsVexl},
-  {label: 'FaqAnonymizationNotice', Component: FaqAnonymizationNotice},
-  {label: 'FaqAnonymousCounterpart', Component: FaqAnonymousCounterpart},
-  {label: 'FaqOpenSource', Component: FaqOpenSource},
-  {label: 'FaqStayAnonymous', Component: FaqStayAnonymous},
-  {label: 'FaqDesigned', Component: FaqDesigned},
-  {label: 'FaqNotifications', Component: FaqNotifications},
-  {label: 'FaqNoRatings', Component: FaqNoRatings},
-  {
-    label: 'FullscreenWarningRedGraphic',
-    Component: FullscreenWarningRedGraphic,
-  },
-  {
-    label: 'FullscreenWarningYellowGraphic',
-    Component: FullscreenWarningYellowGraphic,
-  },
-] as const
+import {ComponentScreenLayout, DemoSection} from './ComponentScreenLayout'
+
+const GRAPHIC_SIZE = 120
+
+// Static graphics are listed below; decorative parts have their own screen.
+// Everything else must accept the animated graphic props.
+const {
+  DonationThanksHeartGraphic: _donationThanksHeart,
+  MyDonationsEmptyStateGraphic: _myDonationsEmptyState,
+  GoldenAvatarBackground: _goldenAvatarBackground,
+  GoldenAvatarGlasses: _goldenAvatarGlasses,
+  GoldenAvatarShapeFour: _goldenAvatarShapeFour,
+  GoldenAvatarShapeOne: _goldenAvatarShapeOne,
+  GoldenAvatarShapeThree: _goldenAvatarShapeThree,
+  GoldenAvatarShapeTwo: _goldenAvatarShapeTwo,
+  GoldenAvatarShimmerStar: _goldenAvatarShimmerStar,
+  GraphicHeaderDecoration: _graphicHeaderDecoration,
+  ...animatedGraphics
+} = graphicsModule
+
+function GraphicTile({
+  label,
+  children,
+}: {
+  readonly label: string
+  readonly children: React.ReactNode
+}): React.JSX.Element {
+  return (
+    <YStack alignItems="center" gap="$2">
+      <YStack
+        width={GRAPHIC_SIZE}
+        height={GRAPHIC_SIZE}
+        alignItems="center"
+        justifyContent="center"
+      >
+        {children}
+      </YStack>
+      <Typography
+        variant="micro"
+        color="$foregroundSecondary"
+        textAlign="center"
+        maxWidth={GRAPHIC_SIZE}
+      >
+        {label}
+      </Typography>
+    </YStack>
+  )
+}
+
+function Demos(): React.JSX.Element {
+  return (
+    <>
+      <DemoSection title="Animated (tap to replay)">
+        <XStack flexWrap="wrap" gap="$4" rowGap="$5">
+          {pipe(
+            Record.toEntries(animatedGraphics),
+            Array.map(([label, Graphic]) => (
+              <GraphicTile key={label} label={label}>
+                <Graphic animate width={GRAPHIC_SIZE} height={GRAPHIC_SIZE} />
+              </GraphicTile>
+            ))
+          )}
+        </XStack>
+      </DemoSection>
+
+      <DemoSection title="Static">
+        <XStack flexWrap="wrap" gap="$4" rowGap="$5">
+          <GraphicTile label="DonationThanksHeartGraphic">
+            <DonationThanksHeartGraphic />
+          </GraphicTile>
+          <GraphicTile label="MyDonationsEmptyStateGraphic">
+            <MyDonationsEmptyStateGraphic
+              width={GRAPHIC_SIZE}
+              height={GRAPHIC_SIZE}
+            />
+          </GraphicTile>
+        </XStack>
+      </DemoSection>
+    </>
+  )
+}
 
 export function GraphicsScreen(): React.JSX.Element {
-  const {resolvedTheme} = useVexlTheme()
-  const [activeGraphic, setActiveGraphic] = useState<string | null>(null)
-
-  const activeEntry = graphics.find((g) => g.label === activeGraphic)
-
-  return (
-    <ScrollView style={{flex: 1}}>
-      <YStack padding="$5" gap="$4">
-        <SizableText
-          fontFamily="$heading"
-          fontWeight="700"
-          fontSize="$3"
-          color="$foregroundPrimary"
-        >
-          Graphics
-        </SizableText>
-        <SizableText
-          fontFamily="$body"
-          fontWeight="400"
-          fontSize={14}
-          color="$foregroundSecondary"
-        >
-          Tap a button to preview the graphic. Current theme: {resolvedTheme}
-        </SizableText>
-
-        <XStack flexWrap="wrap" gap="$3">
-          {graphics.map((entry) => (
-            <Stack
-              key={entry.label}
-              onPress={() => {
-                setActiveGraphic(
-                  activeGraphic === entry.label ? null : entry.label
-                )
-              }}
-              backgroundColor={
-                activeGraphic === entry.label
-                  ? '$backgroundTertiary'
-                  : '$backgroundSecondary'
-              }
-              paddingVertical="$3"
-              paddingHorizontal="$4"
-              borderRadius="$2.5"
-              borderWidth={activeGraphic === entry.label ? 2 : 0}
-              borderColor="$foregroundSecondary"
-            >
-              <SizableText
-                fontFamily="$body"
-                fontWeight="600"
-                fontSize={13}
-                color="$foregroundPrimary"
-              >
-                {entry.label}
-              </SizableText>
-            </Stack>
-          ))}
-        </XStack>
-
-        {activeEntry ? (
-          <YStack gap="$4" paddingTop="$3">
-            <SizableText
-              fontFamily="$heading"
-              fontWeight="700"
-              fontSize={16}
-              color="$foregroundPrimary"
-            >
-              {activeEntry.label}
-            </SizableText>
-
-            <XStack gap="$4" flexWrap="wrap">
-              <YStack
-                gap="$2"
-                alignItems="center"
-                backgroundColor="#363636"
-                padding="$4"
-                borderRadius="$4"
-              >
-                <SizableText
-                  fontFamily="$body"
-                  fontWeight="500"
-                  fontSize={12}
-                  color="white"
-                >
-                  Dark
-                </SizableText>
-                <activeEntry.Component
-                  animate
-                  variant="dark"
-                  width={150}
-                  height={150}
-                />
-              </YStack>
-
-              <YStack
-                gap="$2"
-                alignItems="center"
-                backgroundColor="#efedf3"
-                padding="$4"
-                borderRadius="$4"
-              >
-                <SizableText
-                  fontFamily="$body"
-                  fontWeight="500"
-                  fontSize={12}
-                  color="black"
-                >
-                  Light
-                </SizableText>
-                <activeEntry.Component
-                  animate
-                  variant="light"
-                  width={150}
-                  height={150}
-                />
-              </YStack>
-            </XStack>
-          </YStack>
-        ) : null}
-      </YStack>
-    </ScrollView>
-  )
+  return <ComponentScreenLayout title="Graphics" demos={Demos} />
 }

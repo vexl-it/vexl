@@ -1,6 +1,5 @@
 import {type Sort} from '@vexl-next/domain/src/general/offers'
-import {Picker, type PickerItem} from '@vexl-next/ui'
-import {ArrowsVerticalSort} from '@vexl-next/ui/src/icons'
+import {ArrowsVerticalSort, Picker, type PickerItem} from '@vexl-next/ui'
 import {useAtom} from 'jotai'
 import React, {useMemo} from 'react'
 import {useTranslation} from '../../../utils/localization/I18nProvider'

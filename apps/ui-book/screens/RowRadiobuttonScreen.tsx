@@ -1,7 +1,7 @@
-import {RadioGroup, RowRadiobutton, SizableText, YStack} from '@vexl-next/ui'
+import {RadioGroup, RowRadiobutton} from '@vexl-next/ui'
 import React, {useState} from 'react'
-import {ScrollView} from 'react-native'
-import {Theme} from 'tamagui'
+
+import {ComponentScreenLayout} from './ComponentScreenLayout'
 
 type RowRadiobuttonDemoValue = 'option1' | 'option2' | 'option3'
 
@@ -11,69 +11,31 @@ const rowRadiobuttonDemoValues: readonly RowRadiobuttonDemoValue[] = [
   'option3',
 ]
 
-export function RowRadiobuttonScreen(): React.JSX.Element {
+function Demos(): React.JSX.Element {
   const [value, setValue] = useState<RowRadiobuttonDemoValue>('option1')
-  const [darkValue, setDarkValue] = useState<RowRadiobuttonDemoValue>('option1')
 
   return (
-    <ScrollView
-      style={{flex: 1, backgroundColor: '#F5F3ED'}}
-      contentContainerStyle={{padding: 16, gap: 16}}
+    <RadioGroup
+      allowedValues={rowRadiobuttonDemoValues}
+      value={value}
+      onValueChange={setValue}
+      gap="$3"
     >
-      <SizableText fontWeight="600" fontSize="$5">
-        Row Radiobutton
-      </SizableText>
-
-      <RadioGroup
-        allowedValues={rowRadiobuttonDemoValues}
-        value={value}
-        onValueChange={setValue}
-        gap="$3"
-      >
-        <RowRadiobutton
-          value="option1"
-          label="Option 1"
-          description="Description for the first option"
-        />
-        <RowRadiobutton
-          value="option2"
-          label="Option 2"
-          description="Description for the second option"
-        />
-        <RowRadiobutton value="option3" label="Option 3 (no description)" />
-      </RadioGroup>
-
-      <Theme name="dark">
-        <YStack
-          padding="$5"
-          gap="$5"
-          backgroundColor="$backgroundPrimary"
-          borderRadius="$5"
-        >
-          <SizableText fontWeight="600" fontSize="$5">
-            Dark Mode
-          </SizableText>
-
-          <RadioGroup
-            allowedValues={rowRadiobuttonDemoValues}
-            value={darkValue}
-            onValueChange={setDarkValue}
-            gap="$3"
-          >
-            <RowRadiobutton
-              value="option1"
-              label="Option 1"
-              description="Description for the first option"
-            />
-            <RowRadiobutton
-              value="option2"
-              label="Option 2"
-              description="Description for the second option"
-            />
-            <RowRadiobutton value="option3" label="Option 3 (no description)" />
-          </RadioGroup>
-        </YStack>
-      </Theme>
-    </ScrollView>
+      <RowRadiobutton
+        value="option1"
+        label="Option 1"
+        description="Description for the first option"
+      />
+      <RowRadiobutton
+        value="option2"
+        label="Option 2"
+        description="Description for the second option"
+      />
+      <RowRadiobutton value="option3" label="Option 3 (no description)" />
+    </RadioGroup>
   )
+}
+
+export function RowRadiobuttonScreen(): React.JSX.Element {
+  return <ComponentScreenLayout title="Row Radiobutton" demos={Demos} />
 }

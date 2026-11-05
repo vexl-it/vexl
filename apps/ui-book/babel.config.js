@@ -1,18 +1,23 @@
 process.env.TAMAGUI_TARGET = 'native'
 
 module.exports = function (api) {
-  api.cache(true)
+  // @tamagui/babel-plugin only extracts for native
+  const isWeb = api.caller((caller) => caller?.platform === 'web')
   return {
     presets: ['babel-preset-expo'],
     plugins: [
-      [
-        '@tamagui/babel-plugin',
-        {
-          components: ['@vexl-next/ui', 'tamagui'],
-          config: './tamagui.config.ts',
-          logTimings: true,
-        },
-      ],
+      ...(isWeb
+        ? []
+        : [
+            [
+              '@tamagui/babel-plugin',
+              {
+                components: ['@vexl-next/ui', 'tamagui'],
+                config: './tamagui.config.ts',
+                logTimings: true,
+              },
+            ],
+          ]),
       'react-native-reanimated/plugin',
     ],
   }

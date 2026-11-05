@@ -1,4 +1,12 @@
-import React from 'react'
+import React, {useState} from 'react'
+import {useWindowDimensions} from 'react-native'
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated'
+import {scheduleOnRN} from 'react-native-worklets'
 import {styled} from 'tamagui'
 
 import {Stack, XStack, YStack} from '../primitives'
@@ -19,7 +27,11 @@ export interface BannerProps {
   readonly image?: React.ReactNode
   readonly primaryButton?: BannerButton
   readonly secondaryButton?: BannerButton
+  /** Button presses slide the banner out and call `onPress` once it is gone. */
+  readonly dismissible?: boolean
 }
+
+const DISMISS_ANIMATION_DURATION_MS = 350
 
 const BannerFrame = styled(YStack, {
   name: 'Banner',
@@ -58,41 +70,68 @@ export function Banner({
   image,
   primaryButton,
   secondaryButton,
+  dismissible = false,
 }: BannerProps): React.JSX.Element {
+  const {width} = useWindowDimensions()
+  const dismissProgress = useSharedValue(0)
+  const [dismissing, setDismissing] = useState(false)
+  const dismissStyle = useAnimatedStyle(() => ({
+    opacity: 1 - dismissProgress.value,
+    transform: [{translateX: -width * dismissProgress.value}],
+  }))
+
+  const handlePress = (onPress?: () => void) => (): void => {
+    if (!dismissible) {
+      onPress?.()
+      return
+    }
+    if (dismissing) return
+
+    setDismissing(true)
+    dismissProgress.value = withTiming(
+      1,
+      {
+        duration: DISMISS_ANIMATION_DURATION_MS,
+        easing: Easing.out(Easing.cubic),
+      },
+      (finished) => {
+        if (finished && onPress) scheduleOnRN(onPress)
+      }
+    )
+  }
+
   return (
-    <BannerFrame color={color}>
-      {image != null ? <ImageFrame>{image}</ImageFrame> : null}
-      <YStack gap="$3">
-        <Typography variant="tabSmallBold" color="$foregroundPrimary">
-          {title}
-        </Typography>
-        <Typography variant="description" color="$foregroundSecondary">
-          {description}
-        </Typography>
-        {primaryButton != null || secondaryButton != null ? (
-          <XStack gap="$3">
-            {primaryButton != null ? (
-              <CardButton
-                height={36}
-                paddingVertical="$0"
-                onPress={primaryButton.onPress}
-              >
-                {primaryButton.label}
-              </CardButton>
-            ) : null}
-            {secondaryButton != null ? (
-              <CardButton
-                type="text"
-                height={36}
-                paddingVertical="$0"
-                onPress={secondaryButton.onPress}
-              >
-                {secondaryButton.label}
-              </CardButton>
-            ) : null}
-          </XStack>
-        ) : null}
-      </YStack>
-    </BannerFrame>
+    <Animated.View
+      style={[{pointerEvents: dismissing ? 'none' : 'auto'}, dismissStyle]}
+    >
+      <BannerFrame color={color}>
+        {image != null ? <ImageFrame>{image}</ImageFrame> : null}
+        <YStack gap="$3">
+          <Typography variant="tabSmallBold" color="$foregroundPrimary">
+            {title}
+          </Typography>
+          <Typography variant="description" color="$foregroundSecondary">
+            {description}
+          </Typography>
+          {primaryButton != null || secondaryButton != null ? (
+            <XStack gap="$3">
+              {primaryButton != null ? (
+                <CardButton onPress={handlePress(primaryButton.onPress)}>
+                  {primaryButton.label}
+                </CardButton>
+              ) : null}
+              {secondaryButton != null ? (
+                <CardButton
+                  type="text"
+                  onPress={handlePress(secondaryButton.onPress)}
+                >
+                  {secondaryButton.label}
+                </CardButton>
+              ) : null}
+            </XStack>
+          ) : null}
+        </YStack>
+      </BannerFrame>
+    </Animated.View>
   )
 }

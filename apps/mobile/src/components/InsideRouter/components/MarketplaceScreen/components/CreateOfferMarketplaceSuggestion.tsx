@@ -1,9 +1,9 @@
 import {useNavigation} from '@react-navigation/native'
+import {Banner} from '@vexl-next/ui'
 import {useSetAtom} from 'jotai'
 import React from 'react'
 import {dismissCreateOfferInMarketplaceSuggestionActionAtom} from '../../../../../state/marketplace/atoms/offerSuggestionVisible'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
-import DismissableMarketplaceBanner from './DismissableMarketplaceBanner'
 
 function CreateOfferMarketplaceSuggestion(): React.ReactElement {
   const {t} = useTranslation()
@@ -13,7 +13,8 @@ function CreateOfferMarketplaceSuggestion(): React.ReactElement {
   )
 
   return (
-    <DismissableMarketplaceBanner
+    <Banner
+      dismissible
       color="pink"
       title={t('marketplace.createOfferSuggestion.title')}
       description={t('marketplace.createOfferSuggestion.description')}

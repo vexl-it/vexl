@@ -1,11 +1,10 @@
-import {Typography} from '@vexl-next/ui'
+import {ChatEventCard} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue, type Atom} from 'jotai'
-import {YStack} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {formatInteger} from '../../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../../utils/localization/formattingLocaleAtom'
-import UserAvatar from '../../UserAvatar'
+import {ProfileImageAvatar} from '../../ProfileImageAvatar'
 import {chatMolecule} from '../atoms'
 import {type MessagesListItem} from '../utils/buildMessagesListData'
 import {LastMessageTime} from './LastMessageTime'
@@ -39,22 +38,16 @@ export function DisapproveMessagingMessage({
   return (
     <>
       <TextMessage hideLastMessageTime messageAtom={itemAtom} />
-      <YStack
-        backgroundColor="$backgroundSecondary"
-        borderRadius="$5"
+      <ChatEventCard
         mt="$4"
-        py="$5"
-        gap="$3"
-        mx="$5"
-        alignItems="center"
-      >
-        <UserAvatar height={48} width={48} userImage={image} grayScale={true} />
-        <Typography color="$foregroundSecondary" variant="micro">
-          {direction === 'incoming'
+        mx="$4"
+        image={<ProfileImageAvatar image={image} size="medium" grayscale />}
+        description={
+          direction === 'incoming'
             ? t('messages.themDeclined')
-            : t('messages.youDeclined')}
-        </Typography>
-      </YStack>
+            : t('messages.youDeclined')
+        }
+      />
       <LastMessageTime message={item.message} />
       {direction === 'incoming' && (
         <VexlbotActionCard

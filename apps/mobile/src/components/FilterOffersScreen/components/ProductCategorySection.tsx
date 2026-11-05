@@ -2,35 +2,22 @@ import {
   type ProductCategory,
   productCategoryOptions,
 } from '@vexl-next/domain/src/general/offers'
-import {FilterTag, Typography} from '@vexl-next/ui'
 import {
-  BoltElectric,
-  BoxProduct,
-  CherriesFoodFruit,
-  GoldBricks,
-  More,
-} from '@vexl-next/ui/src/icons'
-import type {IconProps} from '@vexl-next/ui/src/icons/types'
-import {Separator, XStack, YStack} from '@vexl-next/ui/src/primitives'
+  Collapse,
+  Divider,
+  FilterTag,
+  Typography,
+  XStack,
+  YStack,
+} from '@vexl-next/ui'
 import {useAtom, useAtomValue} from 'jotai'
 import React from 'react'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
+import {productCategoryIcons} from '../../../utils/productCategoryIcons'
 import {
   isProductFilterActiveAtom,
   isThisProductCategorySelectedAtomFamily,
 } from '../atom'
-import AnimatedCollapse from './AnimatedCollapse'
-
-const productCategoryIcons: Record<
-  ProductCategory,
-  React.ComponentType<IconProps>
-> = {
-  PRECIOUS_METALS: GoldBricks,
-  PRODUCE: CherriesFoodFruit,
-  ELECTRONICS: BoltElectric,
-  ASSETS: BoxProduct,
-  OTHERS: More,
-}
 
 function ProductCategoryTag({
   category,
@@ -59,9 +46,9 @@ function ProductCategorySection(): React.JSX.Element {
   const isProductFilterActive = useAtomValue(isProductFilterActiveAtom)
 
   return (
-    <AnimatedCollapse expanded={isProductFilterActive}>
+    <Collapse expanded={isProductFilterActive}>
       <YStack>
-        <Separator marginVertical="$5" borderColor="$backgroundTertiary" />
+        <Divider marginVertical="$5" />
         <Typography
           variant="titlesSmall"
           color="$foregroundPrimary"
@@ -75,7 +62,7 @@ function ProductCategorySection(): React.JSX.Element {
           ))}
         </XStack>
       </YStack>
-    </AnimatedCollapse>
+    </Collapse>
   )
 }
 

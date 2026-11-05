@@ -28,6 +28,7 @@ import Reanimated, {
   withTiming,
 } from 'react-native-reanimated'
 import {scheduleOnRN} from 'react-native-worklets'
+import {getTokens} from 'tamagui'
 import {type RootStackScreenProps} from '../../../navigationTypes'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import resolveLocalUri from '../../../utils/resolveLocalUri'
@@ -264,7 +265,10 @@ function TextMessage({
         >
           {message.state === 'sendingError' && (
             <Pressable style={{alignSelf: 'flex-end'}} onPress={onPressResend}>
-              <Rejected color={theme.redForeground.get()} size={24} />
+              <Rejected
+                color={theme.redForeground.get()}
+                size={getTokens().size.$7.val}
+              />
             </Pressable>
           )}
           <View
@@ -295,7 +299,10 @@ function TextMessage({
                   justifyContent="center"
                   backgroundColor="$backgroundSecondary"
                 >
-                  <Reply size={18} color={theme.foregroundPrimary.get()} />
+                  <Reply
+                    size={getTokens().size['$5.5'].val}
+                    color={theme.foregroundPrimary.get()}
+                  />
                 </Stack>
               </Reanimated.View>
               <GestureDetector

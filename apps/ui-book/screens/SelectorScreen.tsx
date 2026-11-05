@@ -3,95 +3,53 @@ import {
   Lock,
   ScreenCaptureShot,
   Selector,
-  SizableText,
-  Theme,
   TuneSettings,
   UserProfile,
   YStack,
 } from '@vexl-next/ui'
 import {atom} from 'jotai'
-import React, {useCallback, useMemo} from 'react'
-import {Alert, ScrollView} from 'react-native'
+import React, {useState} from 'react'
+import {Alert} from 'react-native'
 
-function SectionLabel({
-  children,
-}: {
-  readonly children: string
-}): React.JSX.Element {
-  return (
-    <SizableText
-      fontFamily="$body"
-      fontWeight="600"
-      fontSize="$2"
-      color="$foregroundSecondary"
-      paddingTop="$3"
-    >
-      {children}
-    </SizableText>
-  )
-}
+import {ComponentScreenLayout, DemoSection} from './ComponentScreenLayout'
 
-function ThemeGroup({
-  theme,
-}: {
-  readonly theme: 'light' | 'dark'
-}): React.JSX.Element {
-  const screenCaptureAtom = useMemo(() => atom(false), [])
-  const notificationsAtom = useMemo(() => atom(true), [])
+const actions = [
+  {label: 'Profile', icon: UserProfile},
+  {label: 'Settings', icon: TuneSettings},
+  {label: 'Security', icon: Lock},
+  {label: 'No icon', icon: undefined},
+]
 
-  const handlePress = useCallback((label: string) => {
-    Alert.alert('Pressed', label)
-  }, [])
+function Demos(): React.JSX.Element {
+  const [screenCaptureAtom] = useState(() => atom(false))
+  const [notificationsAtom] = useState(() => atom(true))
 
   return (
-    <Theme name={theme}>
-      <YStack
-        gap="$4"
-        padding="$5"
-        backgroundColor="$backgroundPrimary"
-        borderRadius="$4"
-      >
-        <SizableText
-          fontFamily="$body"
-          fontWeight="600"
-          fontSize="$3"
-          color="$foregroundPrimary"
-        >
-          {theme.charAt(0).toUpperCase() + theme.slice(1)}
-        </SizableText>
-
-        <SectionLabel>Action (with chevron)</SectionLabel>
+    <>
+      <DemoSection title="Action (with chevron)">
         <YStack gap="$3">
-          <Selector
-            label="Profile"
-            icon={UserProfile}
-            onPress={() => {
-              handlePress('Profile')
-            }}
-          />
-          <Selector
-            label="Settings"
-            icon={TuneSettings}
-            onPress={() => {
-              handlePress('Settings')
-            }}
-          />
-          <Selector
-            label="Security"
-            icon={Lock}
-            onPress={() => {
-              handlePress('Security')
-            }}
-          />
-          <Selector
-            label="No icon"
-            onPress={() => {
-              handlePress('No icon')
-            }}
-          />
+          {actions.map((action) => (
+            <Selector
+              key={action.label}
+              label={action.label}
+              icon={action.icon}
+              onPress={() => {
+                Alert.alert('Pressed', action.label)
+              }}
+            />
+          ))}
         </YStack>
-
-        <SectionLabel>Switch (with toggle)</SectionLabel>
+      </DemoSection>
+      <DemoSection title="Accent (chosen value)">
+        <Selector
+          accent
+          label="+ 2 %"
+          onPress={() => {
+            Alert.alert('Pressed', 'Accent')
+          }}
+        />
+      </DemoSection>
+      <DemoSection title="Switch (with toggle)">
         <YStack gap="$3">
           <Selector
             variant="switch"
@@ -106,27 +64,11 @@ function ThemeGroup({
             valueAtom={notificationsAtom}
           />
         </YStack>
-      </YStack>
-    </Theme>
+      </DemoSection>
+    </>
   )
 }
 
 export function SelectorScreen(): React.JSX.Element {
-  return (
-    <ScrollView style={{flex: 1}}>
-      <YStack padding="$5" gap="$4">
-        <SizableText
-          fontFamily="$heading"
-          fontWeight="700"
-          fontSize="$3"
-          color="$foregroundPrimary"
-        >
-          Selector
-        </SizableText>
-
-        <ThemeGroup theme="light" />
-        <ThemeGroup theme="dark" />
-      </YStack>
-    </ScrollView>
-  )
+  return <ComponentScreenLayout title="Selector" demos={Demos} />
 }

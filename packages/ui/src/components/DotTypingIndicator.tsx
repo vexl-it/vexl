@@ -1,3 +1,4 @@
+import {Array, pipe} from 'effect'
 import React, {useEffect} from 'react'
 import Animated, {
   Easing,
@@ -69,33 +70,40 @@ function AnimatedDot({
   )
 }
 
-export function DotTypingIndicator(): React.JSX.Element {
+export type DotTypingIndicatorSize = 'small' | 'large'
+
+export interface DotTypingIndicatorProps {
+  readonly size?: DotTypingIndicatorSize
+  readonly color?: string
+}
+
+const dotSizeToken = {
+  small: '$3',
+  large: '$4',
+} as const satisfies Record<DotTypingIndicatorSize, string>
+
+export function DotTypingIndicator({
+  size = 'small',
+  color,
+}: DotTypingIndicatorProps): React.JSX.Element {
   const theme = useTheme()
-  const sizeTokens = getTokens().size
-  const dotSize = sizeTokens.$3.val
-  const bounceHeight = dotSize
-  const color = theme.foregroundPrimary.get()
+  const dotSize = getTokens().size[dotSizeToken[size]].val
+  const resolvedColor = color ?? theme.foregroundPrimary.get()
 
   return (
     <XStack alignItems="flex-end" gap="$2">
-      <AnimatedDot
-        delay={0}
-        color={color}
-        dotSize={dotSize}
-        bounceHeight={bounceHeight}
-      />
-      <AnimatedDot
-        delay={STAGGER_DELAY}
-        color={color}
-        dotSize={dotSize}
-        bounceHeight={bounceHeight}
-      />
-      <AnimatedDot
-        delay={STAGGER_DELAY * 2}
-        color={color}
-        dotSize={dotSize}
-        bounceHeight={bounceHeight}
-      />
+      {pipe(
+        [0, STAGGER_DELAY, STAGGER_DELAY * 2],
+        Array.map((delay) => (
+          <AnimatedDot
+            key={delay}
+            delay={delay}
+            color={resolvedColor}
+            dotSize={dotSize}
+            bounceHeight={dotSize}
+          />
+        ))
+      )}
     </XStack>
   )
 }

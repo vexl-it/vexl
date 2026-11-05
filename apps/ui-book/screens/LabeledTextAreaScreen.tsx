@@ -6,6 +6,7 @@ import {ComponentScreenLayout} from './ComponentScreenLayout'
 function Demos(): React.JSX.Element {
   const [description, setDescription] = useState('')
   const [note, setNote] = useState('Meet near the main entrance.')
+  const [message, setMessage] = useState('')
 
   return (
     <YStack gap="$5">
@@ -20,6 +21,13 @@ function Demos(): React.JSX.Element {
         label="Private note"
         value={note}
         onChangeText={setNote}
+        minHeight={96}
+      />
+      <LabeledTextArea
+        value={message}
+        onChangeText={setMessage}
+        placeholder="Without label"
+        maxLength={200}
         minHeight={96}
       />
     </YStack>

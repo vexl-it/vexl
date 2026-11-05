@@ -1,5 +1,5 @@
 import {FlashList} from '@shopify/flash-list'
-import {Separator, Stack} from '@vexl-next/ui'
+import {Divider, Stack} from '@vexl-next/ui'
 import {type Atom} from 'jotai'
 import React from 'react'
 import {type StoredContactWithComputedValues} from '../../../../../state/contacts/domain'
@@ -24,7 +24,7 @@ function renderItem({
 }
 
 function ItemSeparatorComponent(): React.ReactElement {
-  return <Separator borderColor="$backgroundTertiary" />
+  return <Divider />
 }
 
 function ContactsList({
@@ -33,7 +33,7 @@ function ContactsList({
   keyboardBottomSpacerHeight,
 }: Props): React.ReactElement {
   const listFooterComponent = React.useCallback(
-    () => <Stack h={keyboardBottomSpacerHeight + 16} />,
+    () => <Stack h={keyboardBottomSpacerHeight} mb="$5" />,
     [keyboardBottomSpacerHeight]
   )
   const listEmptyComponent = React.useCallback(

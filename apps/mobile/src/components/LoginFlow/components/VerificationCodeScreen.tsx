@@ -1,13 +1,12 @@
 import {useFocusEffect} from '@react-navigation/native'
 import {KeyHolder} from '@vexl-next/cryptography'
-import {Typography, XStack, YStack} from '@vexl-next/ui'
+import {Button, CodeInput, TitleBlock, Typography, YStack} from '@vexl-next/ui'
 import {parsePhoneNumber} from 'awesome-phonenumber'
 import {Effect} from 'effect'
 import {useSetAtom} from 'jotai'
 import {DateTime} from 'luxon'
 import React, {useCallback, useMemo, useRef, useState} from 'react'
-import {Keyboard, Platform, TextInput, TouchableOpacity} from 'react-native'
-import {getTokens} from 'tamagui'
+import {Keyboard, Platform, type TextInput} from 'react-native'
 import {type LoginFlowStackScreenProps} from '../../../navigationTypes'
 import {dismissKeyboardAndResolveOnLayoutUpdate} from '../../../utils/dismissKeyboardPromise'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
@@ -18,33 +17,9 @@ import {initPhoneVerificationAtom} from '../api/initPhoneVerificationAtom'
 import {verifyPhoneNumberAtom} from '../api/verifyPhoneNumberAtom'
 import {finishLoginActionAtom} from '../atoms/finishLoginActionAtom'
 import Countdown from './Countdown'
-import LoginFlowScreen, {LoginFlowTitle} from './LoginFlowScreen'
+import LoginFlowScreen from './LoginFlowScreen'
 
 type Props = LoginFlowStackScreenProps<'VerificationCode'>
-const codeBoxHeight = 48
-
-function CodeBox({
-  value,
-}: {
-  readonly value: string | undefined
-}): React.ReactElement {
-  return (
-    <YStack
-      alignItems="center"
-      borderColor="$backgroundHighlight"
-      borderRadius="$3"
-      borderWidth={1}
-      height={codeBoxHeight}
-      justifyContent="center"
-      width={50}
-    >
-      <Typography color="$foregroundPrimary" variant="paragraph">
-        {value ?? ''}
-      </Typography>
-    </YStack>
-  )
-}
-
 export default function VerificationCodeScreen({
   route: {
     params: {phoneNumber, initPhoneVerificationResponse},
@@ -211,7 +186,7 @@ export default function VerificationCodeScreen({
 
   return (
     <LoginFlowScreen
-      action={{
+      primaryAction={{
         disabled: userCode.length !== 6 || submitInProgress || resendInProgress,
         label: t('common.continue'),
         onPress: () => {
@@ -220,19 +195,15 @@ export default function VerificationCodeScreen({
       }}
       footer={
         countdownFinished ? (
-          <TouchableOpacity
+          <Button
+            variant="link"
+            size="medium"
+            alignSelf="center"
             disabled={resendInProgress}
             onPress={resendVerificationCode}
           >
-            <Typography
-              color="$foregroundSecondary"
-              textAlign="center"
-              textDecorationLine="underline"
-              variant="paragraphSmall"
-            >
-              {t('loginFlow.v2.verificationCode.retry')}
-            </Typography>
-          </TouchableOpacity>
+            {t('loginFlow.v2.verificationCode.retry')}
+          </Button>
         ) : (
           <Typography
             color="$foregroundSecondary"
@@ -254,72 +225,42 @@ export default function VerificationCodeScreen({
           </Typography>
         )
       }
-      scroll
+      scrollable
     >
       <YStack flex={1} justifyContent="center" gap="$10">
-        <YStack alignItems="center" gap="$4">
-          <LoginFlowTitle>
-            {t('loginFlow.v2.verificationCode.title')}
-          </LoginFlowTitle>
-          <Typography color="$foregroundSecondary" variant="paragraphSmall">
-            {t('loginFlow.v2.verificationCode.text')}{' '}
-            <Typography
-              color="$foregroundSecondary"
-              onPress={showPhoneNumberConfirmationDialog}
-              pressStyle={{opacity: 0.8}}
-              textDecorationLine="underline"
-              variant="paragraphSmall"
-            >
-              {internationalPhoneNumber}
-            </Typography>
-            .
-          </Typography>
-        </YStack>
-        <TouchableOpacity
-          activeOpacity={1}
-          onPress={() => {
-            inputRef.current?.focus()
+        <TitleBlock
+          align="center"
+          size="large"
+          title={t('loginFlow.v2.verificationCode.title')}
+          text={
+            <>
+              {t('loginFlow.v2.verificationCode.text')}{' '}
+              <Typography
+                color="$foregroundSecondary"
+                onPress={showPhoneNumberConfirmationDialog}
+                pressStyle={{opacity: 0.8}}
+                textDecorationLine="underline"
+                variant="paragraphSmall"
+              >
+                {internationalPhoneNumber}
+              </Typography>
+              .
+            </>
+          }
+        />
+        <CodeInput
+          length={6}
+          value={userCode}
+          onChangeText={(code) => {
+            setErrorMessage(undefined)
+            setUserCode(code)
+            submitVerificationCode(code)
           }}
-        >
-          <YStack>
-            <TextInput
-              autoComplete={
-                Platform.OS === 'android' ? 'sms-otp' : 'one-time-code'
-              }
-              autoFocus
-              caretHidden
-              editable={!submitInProgress && !resendInProgress}
-              importantForAutofill="yes"
-              keyboardType="number-pad"
-              maxLength={6}
-              onChangeText={(value) => {
-                const code = value.replace(/\D/g, '').substring(0, 6)
-                setErrorMessage(undefined)
-                setUserCode(code)
-                submitVerificationCode(code)
-              }}
-              pointerEvents="none"
-              ref={inputRef}
-              style={{
-                height: codeBoxHeight,
-                opacity: 0,
-                position: 'absolute',
-                width: '100%',
-                zIndex: getTokens().zIndex.$5.val,
-              }}
-              textContentType="oneTimeCode"
-              value={userCode}
-            />
-            <XStack gap="$2" justifyContent="center">
-              <CodeBox value={userCode.charAt(0)} />
-              <CodeBox value={userCode.charAt(1)} />
-              <CodeBox value={userCode.charAt(2)} />
-              <CodeBox value={userCode.charAt(3)} />
-              <CodeBox value={userCode.charAt(4)} />
-              <CodeBox value={userCode.charAt(5)} />
-            </XStack>
-          </YStack>
-        </TouchableOpacity>
+          disabled={submitInProgress || resendInProgress}
+          autoComplete={Platform.OS === 'android' ? 'sms-otp' : 'one-time-code'}
+          textContentType="oneTimeCode"
+          inputRef={inputRef}
+        />
         {errorMessage != null ? (
           <Typography
             color="$redForeground"

@@ -1,8 +1,17 @@
-import {Button, ChevronLeft, IconButton, Typography} from '@vexl-next/ui'
-import {LinearGradient} from 'expo-linear-gradient'
+import {
+  BottomSheetPanel,
+  Button,
+  ChevronLeft,
+  FadeGradient,
+  MapLabelPill,
+  NavigationBar,
+  Stack,
+  Typography,
+  XStack,
+  YStack,
+} from '@vexl-next/ui'
 import {useSetAtom} from 'jotai'
 import React from 'react'
-import {Stack, XStack, YStack, useTheme} from 'tamagui'
 import {type TradeChecklistStackScreenProps} from '../../../../../navigationTypes'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import MapSingleLocationDisplay from '../../../../Map/components/MapSingleLocationDisplay'
@@ -22,7 +31,6 @@ export default function LocationMapPreview({
   const stageLocation = useSetAtom(addMeetingLocationActionAtom)
   const tradeChecklistExitNavigation = useTradeChecklistExitNavigation()
   const {t} = useTranslation()
-  const theme = useTheme()
   const noteText =
     selectedLocation.note ?? `${t('tradeChecklist.location.addNote')}...`
 
@@ -37,46 +45,15 @@ export default function LocationMapPreview({
       mapPadding={{top: 220, bottom: 220, left: 0, right: 0}}
       topChildren={
         <YStack>
-          <YStack backgroundColor="$backgroundPrimary" pb="$5">
-            <XStack px="$5" pt="$4" ai="center">
-              <IconButton
-                backgroundColor="$accentYellowSecondary"
-                onPress={navigation.goBack}
-              >
-                <ChevronLeft
-                  size={24}
-                  color={theme.accentHighlightSecondary.get()}
-                />
-              </IconButton>
-              <Stack f={1} ai="center">
-                <Typography
-                  variant="titlesSmall"
-                  color="$foregroundPrimary"
-                  textAlign="center"
-                >
-                  {t('tradeChecklist.options.MEETING_LOCATION')}
-                </Typography>
-              </Stack>
-              <Stack width="$10" />
-            </XStack>
+          <YStack backgroundColor="$backgroundPrimary">
+            <NavigationBar
+              style="back"
+              title={t('tradeChecklist.options.MEETING_LOCATION')}
+              leftAction={{icon: ChevronLeft, onPress: navigation.goBack}}
+            />
           </YStack>
           <Stack position="relative" height={addressFieldHeight}>
-            <Stack
-              position="absolute"
-              top={0}
-              left={0}
-              right={0}
-              bottom={0}
-              pointerEvents="none"
-            >
-              <LinearGradient
-                colors={[
-                  theme.backgroundPrimary.get(),
-                  theme.gradientHelper.get(),
-                ]}
-                style={{flex: 1}}
-              />
-            </Stack>
+            <FadeGradient solidEdge="top" />
             <XStack
               mx="$5"
               px="$4"
@@ -111,35 +88,10 @@ export default function LocationMapPreview({
         </YStack>
       }
       middleChildren={
-        <YStack
-          px="$4"
-          py="$3"
-          borderRadius="$5"
-          alignSelf="center"
-          backgroundColor="$accentHighlightPrimary"
-        >
-          <Typography
-            variant="description"
-            color="$backgroundPrimary"
-            textAlign="center"
-            lineHeight="100%"
-          >
-            {selectedLocation.address}
-          </Typography>
-        </YStack>
+        <MapLabelPill variant="highlight" label={selectedLocation.address} />
       }
       bottomChildren={
-        <YStack
-          mb="0"
-          px="$5"
-          pt="$5"
-          pb="$5"
-          gap="$4"
-          backgroundColor="$backgroundPrimary"
-          borderRadius="$8"
-          borderBottomLeftRadius={0}
-          borderBottomRightRadius={0}
-        >
+        <BottomSheetPanel>
           {!!noteText && (
             <YStack gap="$2">
               <Typography
@@ -161,7 +113,7 @@ export default function LocationMapPreview({
             </YStack>
           )}
           <Button onPress={submit}>{t('common.accept')}</Button>
-        </YStack>
+        </BottomSheetPanel>
       }
       value={selectedLocation}
     />

@@ -1,7 +1,6 @@
 import {useNavigation} from '@react-navigation/native'
-import {Button, Typography} from '@vexl-next/ui'
+import {EmptyState} from '@vexl-next/ui'
 import React, {useCallback} from 'react'
-import {Stack} from 'tamagui'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 
 function MyOffersEmptyList(): React.ReactElement {
@@ -13,25 +12,15 @@ function MyOffersEmptyList(): React.ReactElement {
   }, [navigation])
 
   return (
-    <Stack paddingTop="$10" paddingHorizontal="$5" gap="$7">
-      <Typography
-        variant="heading3"
-        color="$foregroundPrimary"
-        textAlign="center"
-      >
-        {t('marketplace.postYourFirstOffer')}
-      </Typography>
-      <Typography
-        variant="description"
-        color="$foregroundSecondary"
-        textAlign="center"
-      >
-        {t('marketplace.createOfferDescription')}
-      </Typography>
-      <Button variant="tertiary" size="small" onPress={onCreateOfferPress}>
-        {t('marketplace.createNewOffer')}
-      </Button>
-    </Stack>
+    <EmptyState
+      paddingHorizontal="$5"
+      title={t('marketplace.postYourFirstOffer')}
+      description={t('marketplace.createOfferDescription')}
+      action={{
+        label: t('marketplace.createNewOffer'),
+        onPress: onCreateOfferPress,
+      }}
+    />
   )
 }
 

@@ -4,8 +4,9 @@ import {getTokens, useTheme} from 'tamagui'
 
 import {InfoCircle} from '../icons'
 import type {IconProps} from '../icons/types'
-import {SizableText, Stack, XStack, YStack} from '../primitives'
+import {Stack, XStack, YStack} from '../primitives'
 import {Button} from './Button'
+import {Typography} from './Typography'
 import {getReachPressProps} from './getReachPressProps'
 
 export interface ReachStatsStep {
@@ -57,26 +58,17 @@ export function ReachStats({
           {...getReachPressProps(onReachPress, accessibilityLabel)}
         >
           <YStack gap="$3" alignSelf="stretch">
-            <SizableText
-              fontFamily="$body"
-              fontSize="$2"
-              fontWeight="500"
-              letterSpacing="$2"
-              color="$foregroundSecondary"
-            >
+            <Typography variant="description" color="$foregroundSecondary">
               {subtitle}
-            </SizableText>
+            </Typography>
             <XStack ai="center" gap="$2">
-              <SizableText
-                fontFamily="$heading"
-                fontSize="$2"
-                fontWeight="700"
-                letterSpacing="$2"
+              <Typography
+                variant="tabLargeBold"
                 color="$foregroundPrimary"
                 flexShrink={1}
               >
                 {headline}
-              </SizableText>
+              </Typography>
               {!!onReachPress && (
                 <InfoCircle size={stepIconSize} color={defaultIconColor} />
               )}
@@ -107,26 +99,14 @@ export function ReachStats({
                       alignSelf="stretch"
                     />
                     <YStack gap="$0">
-                      <SizableText
-                        fontFamily="$body"
-                        fontSize="$1"
-                        fontWeight="500"
-                        letterSpacing="$1"
-                        color={textColor}
-                      >
+                      <Typography variant="micro" color={textColor}>
                         {step.label}
-                      </SizableText>
+                      </Typography>
                       <XStack gap="$1" alignItems="center">
                         <Icon size={stepIconSize} color={iconColor} />
-                        <SizableText
-                          fontFamily="$body"
-                          fontSize="$1"
-                          fontWeight="500"
-                          letterSpacing="$1"
-                          color={textColor}
-                        >
+                        <Typography variant="micro" color={textColor}>
                           {step.range}
-                        </SizableText>
+                        </Typography>
                       </XStack>
                     </YStack>
                   </YStack>

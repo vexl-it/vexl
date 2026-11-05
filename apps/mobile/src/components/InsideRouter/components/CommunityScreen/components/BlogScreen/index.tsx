@@ -1,15 +1,6 @@
 import {FlashList} from '@shopify/flash-list'
 import {type BlogArticlePreview} from '@vexl-next/rest-api/src/services/content/contracts'
-import {
-  BlogCard,
-  Button,
-  Image,
-  Loader,
-  Stack,
-  tokens,
-  Typography,
-  YStack,
-} from '@vexl-next/ui'
+import {BlogCard, getTokens, LoadErrorState, Stack} from '@vexl-next/ui'
 import {Option} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useEffect, useMemo} from 'react'
@@ -18,21 +9,6 @@ import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
 import {formatDate} from '../../../../../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../../../../../utils/localization/formattingLocaleAtom'
 import {blogsStateAtom, loadBlogsActionAtom} from './state'
-
-const BlogImage = React.memo(function BlogImage({
-  mainImage,
-}: {
-  readonly mainImage: BlogArticlePreview['mainImage']
-}): React.JSX.Element {
-  return Option.match(mainImage, {
-    onNone: () => (
-      <Stack width="100%" height={162} backgroundColor="$backgroundTertiary" />
-    ),
-    onSome: (uri) => (
-      <Image source={{uri}} width="100%" height={162} objectFit="cover" />
-    ),
-  })
-})
 
 const BlogItem = React.memo(function BlogItem({
   item,
@@ -54,7 +30,7 @@ const BlogItem = React.memo(function BlogItem({
 
   return (
     <BlogCard
-      image={<BlogImage mainImage={item.mainImage} />}
+      imageUri={Option.getOrUndefined(item.mainImage)}
       title={item.title}
       description={description}
       date={date}
@@ -92,30 +68,17 @@ function BlogScreen(): React.JSX.Element {
 
   if (Option.isNone(data)) {
     return (
-      <YStack flex={1} paddingHorizontal="$5" paddingTop="$6" gap="$5">
-        {!!loading && (
-          <Stack paddingVertical="$5">
-            <Loader size="large" />
-          </Stack>
-        )}
-
-        {Option.isSome(error) && (
-          <YStack gap="$4" alignItems="flex-start">
-            <Typography variant="paragraphSmall" color="$foregroundPrimary">
-              {t('common.somethingWentWrong')}
-            </Typography>
-            <Button
-              size="small"
-              variant="primary"
-              onPress={() => {
-                void loadBlogs()
-              }}
-            >
-              {t('common.tryAgain')}
-            </Button>
-          </YStack>
-        )}
-      </YStack>
+      <LoadErrorState
+        paddingHorizontal="$5"
+        loading={loading}
+        errorMessage={
+          Option.isSome(error) ? t('common.somethingWentWrong') : undefined
+        }
+        retryLabel={t('common.tryAgain')}
+        onRetry={() => {
+          void loadBlogs()
+        }}
+      />
     )
   }
 
@@ -127,9 +90,9 @@ function BlogScreen(): React.JSX.Element {
       ItemSeparatorComponent={Separator}
       showsVerticalScrollIndicator={false}
       contentContainerStyle={{
-        paddingBottom: 24,
-        paddingHorizontal: tokens.space[5].val,
-        paddingTop: tokens.space[6].val,
+        paddingBottom: getTokens().space.$7.val,
+        paddingHorizontal: getTokens().space.$5.val,
+        paddingTop: getTokens().space.$6.val,
       }}
     />
   )

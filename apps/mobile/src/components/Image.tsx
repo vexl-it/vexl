@@ -1,19 +1,14 @@
 import {SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
 import {type SvgStringOrImageUri} from '@vexl-next/domain/src/utility/SvgStringOrImageUri.brand'
-import {Option, Schema} from 'effect/index'
+import {Option, Schema} from 'effect'
 import React from 'react'
 import {
   Image as RNImage,
   type ImageSourcePropType,
   type ImageStyle,
-  type ImageProps as RNImageProps,
   type StyleProp,
 } from 'react-native'
-import {SvgXml, type XmlProps} from 'react-native-svg'
-
-export function isSvgString(something: unknown): something is SvgString {
-  return Option.isSome(Schema.decodeUnknownOption(SvgString)(something))
-}
+import {SvgXml} from 'react-native-svg'
 
 export function stringToSvgStringRuntimeError(s: string): SvgString {
   const parseResult = Schema.decodeUnknownOption(SvgString)({xml: s})
@@ -23,22 +18,6 @@ export function stringToSvgStringRuntimeError(s: string): SvgString {
   throw Error(
     `Trying to convert string to SvgString but string is not valid SvgString. String: ${s}`
   )
-}
-
-export type Props = (
-  | RNImageProps
-  | (Omit<XmlProps, 'xml'> & {source: SvgString})
-) & {
-  grayScale?: boolean
-}
-export default function Image({source, ...props}: Props): React.ReactElement {
-  if (isSvgString(source)) {
-    // @ts-expect-error for some reasons onClick is passed and causes crash
-    const {onClick, ...xmlProps} = props as XmlProps
-    return <SvgXml {...xmlProps} xml={source.xml} />
-  }
-  const imageProps = props as RNImageProps
-  return <RNImage {...imageProps} source={source} />
 }
 
 export type ImageUniversalSourcePropType =
@@ -52,7 +31,6 @@ export interface ImageUniversalProps {
   style?: StyleProp<ImageStyle>
 }
 
-// TODO remove Image and use this one
 export function ImageUniversal({
   source,
   ...rest
@@ -65,5 +43,3 @@ export function ImageUniversal({
     return <RNImage {...rest} source={source.image} />
   }
 }
-
-export type ImageProps = Props

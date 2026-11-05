@@ -1,7 +1,9 @@
 import React from 'react'
-import {styled} from 'tamagui'
+import {getTokens, styled, useTheme} from 'tamagui'
 
-import {SizableText, Stack} from '../primitives'
+import type {IconProps} from '../icons/types'
+import {Stack} from '../primitives'
+import {Typography} from './Typography'
 
 const FabButtonFrame = styled(Stack, {
   name: 'FabButton',
@@ -17,33 +19,39 @@ const FabButtonFrame = styled(Stack, {
   pressStyle: {
     opacity: 0.7,
   },
-})
 
-const FabButtonLabel = styled(SizableText, {
-  name: 'FabButtonLabel',
-  fontFamily: '$body',
-  fontWeight: '600',
-  fontSize: '$5',
-  letterSpacing: '$5',
-  color: '$black100',
+  variants: {
+    floating: {
+      true: {
+        position: 'absolute',
+        bottom: '$5',
+        right: '$5',
+      },
+    },
+  } as const,
 })
 
 type FabButtonFrameProps = React.ComponentProps<typeof FabButtonFrame>
 
 interface FabButtonProps extends Omit<FabButtonFrameProps, 'children'> {
-  readonly icon: React.ReactNode
+  readonly icon: React.ComponentType<IconProps>
   readonly label: string
 }
 
 export function FabButton({
-  icon,
+  icon: Icon,
   label,
   ...rest
 }: FabButtonProps): React.JSX.Element {
+  const theme = useTheme()
+
   return (
     <FabButtonFrame {...rest}>
-      {icon}
-      <FabButtonLabel>{label}</FabButtonLabel>
+      {/* intentionally not theme-switching - black on the yellow accent in both themes */}
+      <Icon color={theme.black100.get()} size={getTokens().size.$7.val} />
+      <Typography variant="titlesSmall" color="$black100">
+        {label}
+      </Typography>
     </FabButtonFrame>
   )
 }

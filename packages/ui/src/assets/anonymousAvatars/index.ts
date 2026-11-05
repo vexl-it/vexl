@@ -119,3 +119,5 @@ export const avatarsGoldenGlassesAndBackgroundSvg = [
   AvatarGolden26,
   AvatarGolden27,
 ]
+
+export {AvatarBasic1}

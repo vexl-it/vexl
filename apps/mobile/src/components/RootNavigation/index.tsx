@@ -67,7 +67,6 @@ import SendMessageScreen from '../SendMessageScreen'
 import SendMessageToNoteScreen from '../SendMessageToNoteScreen'
 import ShareProfileScreen from '../ShareProfileScreen'
 import TaskRegistryOverviewScreen from '../TaskRegistryOverviewScreen'
-import TodoScreen from '../TodoScreen'
 import TosScreen from '../TosScreen'
 import TradeCalculatorRouter from '../TradeCalculatorRouter'
 import TradeChecklistFlow from '../TradeChecklistFlow'
@@ -125,7 +124,6 @@ function RootNavigation(): React.ReactElement {
         ) : (
           <Stack.Group>
             <Stack.Screen name="InsideTabs" component={InsideScreen} />
-            <Stack.Screen name="TodoScreen" component={TodoScreen} />
             <Stack.Screen name="PostLoginFlow" component={PostLoginFlow} />
             <Stack.Screen name="OfferDetail" component={OfferDetailScreen} />
             <Stack.Screen

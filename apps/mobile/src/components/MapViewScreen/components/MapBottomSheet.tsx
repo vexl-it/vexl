@@ -1,12 +1,18 @@
 import {useNavigation} from '@react-navigation/native'
 import {FlashList, type ListRenderItemInfo} from '@shopify/flash-list'
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
-import {Button, Loader, Typography} from '@vexl-next/ui'
-import {Stack, XStack, YStack} from '@vexl-next/ui/src/primitives'
+import {
+  EmptyState,
+  getTokens,
+  LoadingIndicator,
+  Stack,
+  XStack,
+  YStack,
+} from '@vexl-next/ui'
 import {useAtomValue, useSetAtom, type Atom} from 'jotai'
 import {splitAtom} from 'jotai/utils'
 import React, {useCallback, useEffect, useMemo, useState} from 'react'
-import {Dimensions, StyleSheet} from 'react-native'
+import {Dimensions} from 'react-native'
 import {Gesture, GestureDetector} from 'react-native-gesture-handler'
 import {useReanimatedKeyboardAnimation} from 'react-native-keyboard-controller'
 import Animated, {
@@ -19,7 +25,6 @@ import Animated, {
 } from 'react-native-reanimated'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {scheduleOnRN} from 'react-native-worklets'
-import {getTokens} from 'tamagui'
 import {isMarketplaceNarrowingActiveAtom} from '../../../state/marketplace/atoms/filterAtoms'
 import {
   filteredOffersForMapAtom,
@@ -37,7 +42,7 @@ import {selectMapViewOfferActionAtom} from '../atoms'
 const {height: DEFAULT_SCREEN_HEIGHT} = Dimensions.get('window')
 const tokens = getTokens()
 
-const HEADER_CONTENT_HEIGHT = 64
+const HEADER_CONTENT_HEIGHT = tokens.size.$12.val
 const HEADER_BOTTOM_GAP = tokens.space.$5.val
 const HEADER_HEIGHT = HEADER_CONTENT_HEIGHT + HEADER_BOTTOM_GAP
 const KEYBOARD_BOTTOM_GAP = tokens.space.$3.val
@@ -87,18 +92,12 @@ function OffersListLoader(): React.JSX.Element {
   const {t} = useTranslation()
 
   return (
-    <YStack
+    <LoadingIndicator
       flex={1}
-      alignItems="center"
       justifyContent="center"
-      gap="$3"
       paddingVertical="$8"
-    >
-      <Loader size="medium" />
-      <Typography color="$foregroundPrimary" variant="paragraphSmall">
-        {t('marketplace.loadingOffers')}
-      </Typography>
-    </YStack>
+      label={t('marketplace.loadingOffers')}
+    />
   )
 }
 
@@ -111,30 +110,15 @@ function OffersListEmptyState(): React.JSX.Element {
   }, [navigation])
 
   return (
-    <YStack alignItems="center" gap="$4" paddingTop="$6" paddingHorizontal="$5">
-      <Typography
-        color="$foregroundPrimary"
-        textAlign="center"
-        variant="heading3"
-      >
-        {t('marketplace.noOffersYet')}
-      </Typography>
-      <Typography
-        color="$foregroundSecondary"
-        textAlign="center"
-        variant="description"
-      >
-        {t('marketplace.tryAdjustingMapOrClearingFilters')}
-      </Typography>
-      <Button
-        variant="tertiary"
-        size="small"
-        onPress={handleEditFiltersPress}
-        width="100%"
-      >
-        {t('marketplace.editFilters')}
-      </Button>
-    </YStack>
+    <EmptyState
+      paddingHorizontal="$5"
+      title={t('marketplace.noOffersYet')}
+      description={t('marketplace.tryAdjustingMapOrClearingFilters')}
+      action={{
+        label: t('marketplace.editFilters'),
+        onPress: handleEditFiltersPress,
+      }}
+    />
   )
 }
 
@@ -386,7 +370,7 @@ function MapBottomSheet({
       left={0}
       right={0}
       bottom={0}
-      zIndex={20}
+      zIndex="$1"
       borderTopLeftRadius="$9"
       borderTopRightRadius="$9"
       backgroundColor="$backgroundPrimary"
@@ -404,7 +388,10 @@ function MapBottomSheet({
         borderTopLeftRadius="$9"
         borderTopRightRadius="$9"
         backgroundColor="$backgroundPrimary"
-        style={[styles.shadowSurface, shadowProgressStyle]}
+        shadowColor="$black100"
+        shadowOffset={{width: 0, height: SHEET_SHADOW_OFFSET_Y}}
+        shadowRadius={SHEET_SHADOW_RADIUS}
+        style={shadowProgressStyle}
       />
       <Stack
         backgroundColor="$backgroundPrimary"
@@ -452,13 +439,5 @@ function MapBottomSheet({
     </AnimatedStack>
   )
 }
-
-const styles = StyleSheet.create({
-  shadowSurface: {
-    shadowColor: tokens.color.black100.val,
-    shadowOffset: {width: tokens.space.$0.val, height: SHEET_SHADOW_OFFSET_Y},
-    shadowRadius: SHEET_SHADOW_RADIUS,
-  },
-})
 
 export default MapBottomSheet

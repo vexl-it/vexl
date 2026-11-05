@@ -6,13 +6,16 @@ import {
 import {
   Latitude,
   Longitude,
-  Radius,
   longitudeDeltaToKilometers,
+  Radius,
 } from '@vexl-next/domain/src/utility/geoCoordinates'
 import {
-  KeyboardStickyView,
+  MapLabelPill,
+  MapOverlayLayout,
+  MapPin,
+  mapPinTipTransform,
+  RadiusRing,
   Stack,
-  Typography,
   tokens,
   useTheme,
 } from '@vexl-next/ui'
@@ -43,7 +46,6 @@ import {
   calculateLongitudeRadiusDelta,
   calculateRingDiameter,
 } from './MapLocationWithRadiusSelect.geometry'
-import {MapPinAsset, RadiusRingAsset} from './MapSvgAssets'
 import VexlMap from './VexlMap'
 
 type Props = React.ComponentProps<typeof Stack> & {
@@ -165,7 +167,7 @@ function useAtoms({
   }, [initialSelectedMapState, onCoordinatesChange, onGeocodingFailed, onPick])
 }
 
-function PickedLocationText({
+function PickedLocationPill({
   selectedRegionRadiusAtom,
   geocodedRegionAtom,
   serviceErrorMessage,
@@ -180,47 +182,23 @@ function PickedLocationText({
   const {t} = useTranslation()
   const radius = useAtomValue(selectedRegionRadiusAtom)
 
-  return geocodingState.state !== 'done' ? (
-    <Typography variant="micro" color="$foregroundPrimary">
-      {t('common.loading')}...
-    </Typography>
-  ) : (
-    <React.Fragment>
-      <Typography
-        variant="micro"
-        textAlign="center"
-        color={
-          E.isLeft(geocodingState.result)
-            ? '$redForeground'
-            : '$foregroundPrimary'
-        }
-      >
-        {pipe(
-          geocodingState.result,
-          E.match(
-            (error) =>
-              error._tag === 'LocationNotFoundError'
-                ? t('map.location.errors.notFound')
-                : (serviceErrorMessage ??
-                  t('map.location.errors.serviceError')),
-            (data) => data?.address ?? t('map.locationSelect.hint')
-          )
-        )}
-      </Typography>
-      <Typography
-        variant="micro"
-        textAlign="center"
-        color={
-          E.isLeft(geocodingState.result)
-            ? '$redForeground'
-            : '$foregroundPrimary'
-        }
-      >
-        {t('map.locationSelect.radius', {
-          radius,
-        })}
-      </Typography>
-    </React.Fragment>
+  if (geocodingState.state !== 'done') return <MapLabelPill label="" loading />
+
+  return (
+    <MapLabelPill
+      error={E.isLeft(geocodingState.result)}
+      label={pipe(
+        geocodingState.result,
+        E.match(
+          (error) =>
+            error._tag === 'LocationNotFoundError'
+              ? t('map.location.errors.notFound')
+              : (serviceErrorMessage ?? t('map.location.errors.serviceError')),
+          (data) => data?.address ?? t('map.locationSelect.hint')
+        )
+      )}
+      detail={t('map.locationSelect.radius', {radius})}
+    />
   )
 }
 
@@ -400,78 +378,37 @@ export default function MapLocationWithRadiusSelect({
             position="absolute"
             top={selectionFrame.centerY}
             left={selectionFrame.centerX}
-            transform={[{translateX: -70 / 2}, {translateY: (-70 / 3) * 2}]}
+            transform={mapPinTipTransform}
           >
-            <MapPinAsset color={accentHighlightSecondary} />
+            <MapPin color={accentHighlightSecondary} />
           </Stack>
 
           <Stack
             pointerEvents="none"
             position="absolute"
-            justifyContent="center"
-            alignItems="center"
             top={selectionFrame.centerY - ringDiameter / 2}
             left={selectionFrame.centerX - ringDiameter / 2}
-            width={ringDiameter}
-            height={ringDiameter}
           >
-            <RadiusRingAsset color={accentHighlightSecondary} size="100%" />
+            <RadiusRing color={accentHighlightSecondary} size={ringDiameter} />
           </Stack>
         </React.Fragment>
       ) : null}
 
-      <Stack
-        pointerEvents="none"
-        position="absolute"
-        top={0}
-        left={0}
-        right={0}
-        bottom={0}
-        h="100%"
-        w="100%"
-      >
-        <Stack height={selectionFrame.y + selectionFrame.height / 2}></Stack>
-        <Stack p="$2">
-          <Stack
-            paddingHorizontal="$4"
-            paddingVertical="$2"
-            borderRadius="$6"
-            alignSelf="center"
-            backgroundColor="$backgroundPrimary"
-          >
-            <PickedLocationText
-              geocodedRegionAtom={atoms.getGeocodedRegionAtom}
-              selectedRegionRadiusAtom={atoms.selectedRegionRadiusAtom}
-              serviceErrorMessage={serviceErrorMessage}
-            />
-          </Stack>
-        </Stack>
-      </Stack>
-      <Stack
-        pointerEvents="box-none"
-        position="absolute"
-        top={0}
-        left={0}
-        right={0}
-        bottom={0}
-        h="100%"
-        w="100%"
-      >
-        <Stack
-          pointerEvents="box-none"
-          flex={1}
-          paddingTop={safeAreaInsets.top}
-          paddingBottom={safeAreaInsets.bottom}
-          paddingLeft={safeAreaInsets.left}
-          paddingRight={safeAreaInsets.right}
-        >
-          <Stack onLayout={handleTopOverlayLayout}>{topChildren}</Stack>
-          <Stack pointerEvents="none" flex={1}></Stack>
-          <KeyboardStickyView pointerEvents="box-none">
-            <Stack onLayout={handleBottomOverlayLayout}>{bottomChildren}</Stack>
-          </KeyboardStickyView>
-        </Stack>
-      </Stack>
+      <MapOverlayLayout
+        fillSafeArea={false}
+        top={topChildren}
+        onTopLayout={handleTopOverlayLayout}
+        middle={
+          <PickedLocationPill
+            geocodedRegionAtom={atoms.getGeocodedRegionAtom}
+            selectedRegionRadiusAtom={atoms.selectedRegionRadiusAtom}
+            serviceErrorMessage={serviceErrorMessage}
+          />
+        }
+        middleOffset={selectionFrame.y + selectionFrame.height / 2}
+        bottom={bottomChildren}
+        onBottomLayout={handleBottomOverlayLayout}
+      />
     </Stack>
   )
 }

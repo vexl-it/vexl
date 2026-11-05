@@ -1,13 +1,12 @@
-import {BuySellRangeSlider, Typography} from '@vexl-next/ui'
+import {Typography, YStack} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtom, useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useMemo} from 'react'
-import {XStack, YStack} from 'tamagui'
 import {currencies} from '../../../utils/localization/currency'
 import {formatDecimal} from '../../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../../utils/localization/formattingLocaleAtom'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
-import {getInfoText, SLIDER_THRESHOLD} from '../../../utils/premiumOrDiscount'
+import PremiumOrDiscountSlider from '../../PremiumOrDiscountSlider'
 import {offerFormMolecule} from '../atoms/offerFormStateAtoms'
 import MoreOptions from './MoreOptions'
 
@@ -35,13 +34,6 @@ function PremiumOptions({amountMin, amountMax}: Props): React.JSX.Element {
     },
     [setFeeAmount, setFeeState]
   )
-
-  const priceTagText =
-    feeAmount === 0
-      ? t('offerForm.premiumOrDiscount.marketPrice')
-      : `${feeAmount > 0 ? '+' : ''}${feeAmount} %`
-
-  const infoText = getInfoText(feeAmount, isBuy, t)
 
   const amountText = useMemo(() => {
     const multiplier = 1 + feeAmount / 100
@@ -74,40 +66,10 @@ function PremiumOptions({amountMin, amountMax}: Props): React.JSX.Element {
           </Typography>
         </YStack>
 
-        <XStack alignItems="center" justifyContent="space-between">
-          <Typography variant="paragraphDemibold" color="$foregroundPrimary">
-            {isBuy
-              ? t('offerForm.premiumOrDiscount.youBuyBtcFor')
-              : t('offerForm.premiumOrDiscount.youSellBtcFor')}
-          </Typography>
-          <XStack
-            backgroundColor="$backgroundSecondary"
-            paddingHorizontal="$4"
-            paddingVertical="$3"
-            borderRadius="$3"
-          >
-            <Typography variant="paragraphSmall" color="$foregroundPrimary">
-              {priceTagText}
-            </Typography>
-          </XStack>
-        </XStack>
-
-        <BuySellRangeSlider
-          leftLabel={
-            isBuy
-              ? t('offerForm.premiumOrDiscount.buyCheaply')
-              : t('offerForm.premiumOrDiscount.sellFaster')
-          }
-          rightLabel={
-            isBuy
-              ? t('offerForm.premiumOrDiscount.buyFaster')
-              : t('offerForm.premiumOrDiscount.earnMore')
-          }
-          minPercentage={-SLIDER_THRESHOLD}
-          maxPercentage={SLIDER_THRESHOLD}
-          percentage={feeAmount}
-          onPercentageChange={handlePercentageChange}
-          infoText={infoText}
+        <PremiumOrDiscountSlider
+          feeAmount={feeAmount}
+          onFeeAmountChange={handlePercentageChange}
+          isBuy={isBuy}
           amountText={amountText}
         />
       </YStack>

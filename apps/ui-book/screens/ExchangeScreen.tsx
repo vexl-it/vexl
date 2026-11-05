@@ -1,8 +1,10 @@
-import {Exchange, SizableText, YStack, type BtcUnit} from '@vexl-next/ui'
+import {Exchange, type BtcUnit} from '@vexl-next/ui'
 import React, {useCallback, useState} from 'react'
-import {Alert, ScrollView} from 'react-native'
+import {Alert} from 'react-native'
 
-export function ExchangeScreen(): React.JSX.Element {
+import {ComponentScreenLayout, DemoSection} from './ComponentScreenLayout'
+
+function Demos(): React.JSX.Element {
   const [btcValue, setBtcValue] = useState('')
   const [btcUnit, setBtcUnit] = useState<BtcUnit>('SATS')
   const [fiatValue, setFiatValue] = useState('')
@@ -14,24 +16,8 @@ export function ExchangeScreen(): React.JSX.Element {
   }, [])
 
   return (
-    <ScrollView>
-      <YStack
-        flex={1}
-        padding="$5"
-        gap="$7"
-        backgroundColor="$backgroundPrimary"
-      >
-        <SizableText fontWeight="600" fontSize="$5">
-          Exchange
-        </SizableText>
-
-        <SizableText
-          fontWeight="500"
-          fontSize="$2"
-          color="$foregroundSecondary"
-        >
-          Both inputs editable (cs-CZ locale)
-        </SizableText>
+    <>
+      <DemoSection title="Both inputs editable (cs-CZ locale)">
         <Exchange
           btcValue={btcValue}
           btcUnit={btcUnit}
@@ -43,14 +29,9 @@ export function ExchangeScreen(): React.JSX.Element {
           onFiatCurrencyPress={handleFiatCurrencyPress}
           locale="cs-CZ"
         />
+      </DemoSection>
 
-        <SizableText
-          fontWeight="500"
-          fontSize="$2"
-          color="$foregroundSecondary"
-        >
-          BTC read-only — fixed &quot;1 BTC&quot; (en-US locale)
-        </SizableText>
+      <DemoSection title='BTC read-only — fixed "1 BTC" (en-US locale)'>
         <Exchange
           btcValue="1"
           btcUnit="BTC"
@@ -62,7 +43,11 @@ export function ExchangeScreen(): React.JSX.Element {
           onFiatCurrencyPress={handleFiatCurrencyPress}
           locale="en-US"
         />
-      </YStack>
-    </ScrollView>
+      </DemoSection>
+    </>
   )
+}
+
+export function ExchangeScreen(): React.JSX.Element {
+  return <ComponentScreenLayout title="Exchange" demos={Demos} />
 }

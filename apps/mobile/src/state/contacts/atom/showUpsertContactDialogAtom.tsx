@@ -2,16 +2,13 @@ import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumbe
 import {type SvgStringOrImageUri} from '@vexl-next/domain/src/utility/SvgStringOrImageUri.brand'
 import {toBasicError} from '@vexl-next/domain/src/utility/errors'
 import {
-  Avatar,
   CellPhoneMobileDevice,
-  IconButton,
+  NavButton,
   PencilWriteEdit,
+  PersonRow,
   Selector,
-  Stack,
   TextField,
   Typography,
-  UserImagePlaceholder,
-  XStack,
   YStack,
 } from '@vexl-next/ui'
 import {parsePhoneNumber} from 'awesome-phonenumber'
@@ -19,12 +16,10 @@ import {Effect, Option} from 'effect'
 import {atom, useAtomValue, type SetStateAction, type WritableAtom} from 'jotai'
 import React from 'react'
 import {Keyboard} from 'react-native'
-import {SvgXml} from 'react-native-svg'
-import {useTheme} from 'tamagui'
-import ContactPictureImage from '../../../components/ContactPictureImage'
+import {ContactAvatar} from '../../../components/ContactAvatar'
 import {globalDialogAtom} from '../../../components/GlobalDialog'
+import {ProfileImageAvatar} from '../../../components/ProfileImageAvatar'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
-import resolveLocalUri from '../../../utils/resolveLocalUri'
 import {type NonUniqueContactId} from '../domain'
 
 type StringAtom = WritableAtom<string, [SetStateAction<string>], void>
@@ -124,7 +119,6 @@ function ContactExistsFromLinkDialogBody({
   saveToPhoneLabel: string
   editLabel: string
 }): React.JSX.Element {
-  const theme = useTheme()
   const [isEditingName, setIsEditingName] = React.useState(false)
   const currentContactName = useAtomValue(contactNameAtom)
   const previewName = currentContactName.trim() || fallbackContactName
@@ -141,18 +135,14 @@ function ContactExistsFromLinkDialogBody({
           profileImage={profileImage}
           rightElement={
             isEditingName ? null : (
-              <IconButton
+              <NavButton
                 aria-label={editLabel}
-                backgroundColor="$backgroundSecondary"
+                variant="secondary"
+                icon={PencilWriteEdit}
                 onPress={() => {
                   setIsEditingName(true)
                 }}
-              >
-                <PencilWriteEdit
-                  color={theme.foregroundPrimary.get()}
-                  size={20}
-                />
-              </IconButton>
+              />
             )
           }
         />
@@ -195,74 +185,21 @@ export function UpsertContactDialogContactRow({
   readonly rightElement?: React.ReactNode
 }): React.JSX.Element {
   return (
-    <XStack
-      alignItems="center"
-      gap="$3"
-      padding="$3"
-      borderRadius="$5"
-      backgroundColor="$backgroundPrimary"
-    >
-      <Stack>
-        <UpsertContactDialogAvatar
-          phoneContactId={phoneContactId}
-          profileImage={profileImage}
-        />
-      </Stack>
-      <YStack flex={1} gap="$2" minWidth={0}>
-        <Typography
-          color="$foregroundPrimary"
-          numberOfLines={1}
-          variant="descriptionBold"
-        >
-          {contactName}
-        </Typography>
-        <Typography
-          color="$foregroundSecondary"
-          numberOfLines={1}
-          variant="micro"
-        >
-          {contactNumber}
-        </Typography>
-      </YStack>
-      {rightElement != null ? (
-        <Stack flexShrink={0}>{rightElement}</Stack>
-      ) : null}
-    </XStack>
-  )
-}
-
-function UpsertContactDialogAvatar({
-  phoneContactId,
-  profileImage,
-}: {
-  phoneContactId?: Option.Option<NonUniqueContactId>
-  profileImage?: SvgStringOrImageUri
-}): React.JSX.Element {
-  if (profileImage?.type === 'imageUri') {
-    return (
-      <Avatar
-        customSize={40}
-        source={{uri: resolveLocalUri(profileImage.imageUri)}}
-      />
-    )
-  }
-
-  if (profileImage?.type === 'svgXml') {
-    return (
-      <Avatar size="medium">
-        <SvgXml height={48} width={48} xml={profileImage.svgXml.xml} />
-      </Avatar>
-    )
-  }
-
-  return (
-    <ContactPictureImage
-      contactId={phoneContactId ?? Option.none()}
-      width={48}
-      height={48}
-      br="$5"
-      objectFit="cover"
-      fallback={<UserImagePlaceholder size={48} />}
+    <PersonRow
+      background="primary"
+      avatar={
+        profileImage ? (
+          <ProfileImageAvatar image={profileImage} size="$9" />
+        ) : (
+          <ContactAvatar
+            contactId={phoneContactId ?? Option.none()}
+            size="$9"
+          />
+        )
+      }
+      title={contactName}
+      subtitle={contactNumber}
+      trailing={rightElement}
     />
   )
 }

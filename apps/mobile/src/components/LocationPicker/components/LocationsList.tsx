@@ -1,10 +1,9 @@
 import {type OfferLocation} from '@vexl-next/domain/src/general/offers'
 import {longitudeDeltaToKilometers} from '@vexl-next/domain/src/utility/geoCoordinates'
-import {Typography, useTheme, XmarkCancelClose, XStack} from '@vexl-next/ui'
+import {RowButton, XmarkCancelClose} from '@vexl-next/ui'
 import {Array, pipe} from 'effect'
 import {useAtomValue} from 'jotai'
 import React from 'react'
-import {TouchableOpacity} from 'react-native'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {formatDecimal} from '../../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../../utils/localization/formattingLocaleAtom'
@@ -20,7 +19,6 @@ function LocationsList({
   onLocationRemove,
 }: Props): React.ReactElement[] | null {
   const {t} = useTranslation()
-  const theme = useTheme()
   const locale = useAtomValue(formattingLocaleAtom)
   const {getFullLabel} = useAtomValue(offerLocationLabelsAtom)
 
@@ -28,46 +26,25 @@ function LocationsList({
     ? pipe(
         locations,
         Array.map((loc) => (
-          <XStack
+          <RowButton
             key={loc.placeId}
-            f={1}
-            br="$3"
-            bc="$backgroundSecondary"
-            p="$4"
-            ai="center"
-            jc="space-between"
-            gap="$3"
             mb="$1"
-          >
-            <Typography
-              variant="paragraph"
-              color="$foregroundPrimary"
-              numberOfLines={2}
-              ellipsizeMode="tail"
-              flexShrink={1}
-            >
-              {getFullLabel(loc)}
-              {' - '}
-              {t('map.locationSelect.radius', {
-                radius: formatDecimal(
-                  Math.round(
-                    longitudeDeltaToKilometers(loc.radius, loc.latitude) * 10
-                  ) / 10,
-                  locale
-                ),
-              })}
-            </Typography>
-            <TouchableOpacity
-              onPress={() => {
+            label={`${getFullLabel(loc)} - ${t('map.locationSelect.radius', {
+              radius: formatDecimal(
+                Math.round(
+                  longitudeDeltaToKilometers(loc.radius, loc.latitude) * 10
+                ) / 10,
+                locale
+              ),
+            })}`}
+            trailingAction={{
+              icon: XmarkCancelClose,
+              accessibilityLabel: t('common.delete'),
+              onPress: () => {
                 onLocationRemove(loc)
-              }}
-            >
-              <XmarkCancelClose
-                size={24}
-                color={theme.foregroundPrimary.get()}
-              />
-            </TouchableOpacity>
-          </XStack>
+              },
+            }}
+          />
         ))
       )
     : null

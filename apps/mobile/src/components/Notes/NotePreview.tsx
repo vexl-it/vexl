@@ -1,28 +1,33 @@
 import {type OneNoteInState} from '@vexl-next/domain/src/general/notes'
-import {
-  TwoToneContentFrame,
-  TwoToneHeaderFrame,
-  Typography,
-  YStack,
-} from '@vexl-next/ui'
+import {Note} from '@vexl-next/ui'
 import React from 'react'
-import {NoteInfoHeader} from './NoteInfoHeader'
+import {randomSeedFromNote} from '../../utils/RandomSeed'
+import {AnonymousAvatarOrClubImage} from '../AnonymousAvatar'
+import {useNoteDisplayData} from './useNoteDisplayData'
 
 interface Props {
   readonly note: OneNoteInState
 }
 
 export function NotePreview({note}: Props): React.JSX.Element {
+  const {tierLabel, commonFriendsText, trustedFriendsText, expiryText} =
+    useNoteDisplayData(note)
+
   return (
-    <YStack gap="$2">
-      <TwoToneHeaderFrame>
-        <NoteInfoHeader note={note} />
-      </TwoToneHeaderFrame>
-      <TwoToneContentFrame minHeight={140}>
-        <Typography variant="paragraph" color="$foregroundPrimary">
-          {note.noteInfo.publicPart.text}
-        </Typography>
-      </TwoToneContentFrame>
-    </YStack>
+    <Note
+      variant="preview"
+      avatar={
+        <AnonymousAvatarOrClubImage
+          grayScale={false}
+          size="$9"
+          seed={randomSeedFromNote(note)}
+        />
+      }
+      name={tierLabel}
+      commonFriends={commonFriendsText}
+      trustedFriends={trustedFriendsText}
+      expiration={expiryText}
+      message={note.noteInfo.publicPart.text}
+    />
   )
 }

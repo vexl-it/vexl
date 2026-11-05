@@ -1,5 +1,12 @@
 import {POSITIVE_STAR_RATING_THRESHOLD} from '@vexl-next/domain/src/general/feedback'
-import {EyeShut, Stack, Typography, useTheme, XStack} from '@vexl-next/ui'
+import {
+  EyeShut,
+  getTokens,
+  Stack,
+  Typography,
+  useTheme,
+  XStack,
+} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue} from 'jotai'
 import React, {useMemo} from 'react'
@@ -58,7 +65,10 @@ function FeedbackBannerContent(): React.ReactElement {
       </Stack>
       {!feedbackFlowFinished && (
         <XStack ai="center" jc="center" gap="$1">
-          <EyeShut size={24} color={theme.foregroundSecondary.get()} />
+          <EyeShut
+            size={getTokens().size.$7.val}
+            color={theme.foregroundSecondary.get()}
+          />
           <Typography variant="description" color="$foregroundSecondary">
             {t('messages.yourAnswerIsAnonymous')}
           </Typography>

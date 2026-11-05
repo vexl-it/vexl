@@ -1,8 +1,7 @@
 import {useNavigation, useRoute} from '@react-navigation/native'
-import {FabButton, PlusAdd, type TabItem} from '@vexl-next/ui'
+import {FabButton, PlusAdd} from '@vexl-next/ui'
 import {useAtomValue} from 'jotai'
-import React, {useCallback, useLayoutEffect, useMemo, useState} from 'react'
-import {Stack, useTheme} from 'tamagui'
+import React, {useCallback, useLayoutEffect, useState} from 'react'
 import {type InsideTabParamsList} from '../../../../navigationTypes'
 import {areThereAnyMyOffersAtom} from '../../../../state/marketplace/atoms/myOffers'
 import {areThereOffersToSeeInMarketplaceWithoutFiltersAtom} from '../../../../state/marketplace/atoms/offersToSeeInMarketplace'
@@ -10,19 +9,7 @@ import {newOfferButtonVisibleOnLoadingMarketplaceAtom} from '../../../../state/m
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import {InsideScreen} from '../InsideScreen'
 import MarketplaceScreenContent from './components/MarketplaceScreenContent'
-
-export type MarketplaceTab = 'allOffers' | 'myOffers'
-
-function useTabs(): ReadonlyArray<TabItem<MarketplaceTab>> {
-  const {t} = useTranslation()
-  return useMemo(
-    () => [
-      {label: t('common.allOffers'), value: 'allOffers'},
-      {label: t('common.myOffers'), value: 'myOffers'},
-    ],
-    [t]
-  )
-}
+import {type MarketplaceTab, useMarketplaceTabs} from './useMarketplaceTabs'
 
 function NewOfferFab({
   activeTab,
@@ -31,7 +18,6 @@ function NewOfferFab({
 }): React.JSX.Element | null {
   const {t} = useTranslation()
   const navigation = useNavigation()
-  const theme = useTheme()
   const areThereOffersFromOthers = useAtomValue(
     areThereOffersToSeeInMarketplaceWithoutFiltersAtom
   )
@@ -51,13 +37,13 @@ function NewOfferFab({
   if (!showFab) return null
 
   return (
-    <Stack position="absolute" bottom="$4" right="$4" zIndex={2}>
-      <FabButton
-        icon={<PlusAdd size={24} color={theme.black100.get()} />}
-        label={t('offerForm.myNewOffer')}
-        onPress={navigateToNewOffer}
-      />
-    </Stack>
+    <FabButton
+      floating
+      zIndex={2}
+      icon={PlusAdd}
+      label={t('offerForm.myNewOffer')}
+      onPress={navigateToNewOffer}
+    />
   )
 }
 
@@ -70,7 +56,7 @@ function MarketplaceScreen(): React.ReactElement {
   const [activeTab, setActiveTab] = useState<MarketplaceTab>(
     route.params?.initialTab ?? 'allOffers'
   )
-  const tabs = useTabs()
+  const tabs = useMarketplaceTabs()
   const title = tabs.find((tab) => tab.value === activeTab)?.label ?? ''
 
   useLayoutEffect(() => {

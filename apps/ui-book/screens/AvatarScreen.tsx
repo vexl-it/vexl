@@ -2,8 +2,6 @@ import {
   Avatar,
   avatarsGoldenGlassesAndBackgroundSvg,
   avatarsSvg,
-  SizableText,
-  Theme,
   UserImagePlaceholder,
   UserProfile,
   useTheme,
@@ -11,62 +9,38 @@ import {
   YStack,
 } from '@vexl-next/ui'
 import React from 'react'
-import {ScrollView} from 'react-native'
+import {ComponentScreenLayout, DemoSection} from './ComponentScreenLayout'
 
 const testAvatar = require('../assets/testAvatar.png') as number
+
+const SAMPLE_SVG_XML =
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><rect width="48" height="48" fill="#FCCD6C"/><circle cx="24" cy="20" r="9" fill="#EE675E"/><rect x="10" y="32" width="28" height="12" rx="6" fill="#455749"/></svg>'
 
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 const BasicAvatar = avatarsSvg[0]!
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 const GoldenAvatar = avatarsGoldenGlassesAndBackgroundSvg[0]!
 
-function ThemedIcon({size}: {readonly size: number}): React.JSX.Element {
-  const theme = useTheme()
-  return <UserProfile size={size} color={theme.foregroundPrimary.get()} />
-}
-
-function SectionLabel({
-  children,
+function ThemedIcon({
+  size,
+  onDark = false,
 }: {
-  readonly children: string
+  readonly size: number
+  readonly onDark?: boolean
 }): React.JSX.Element {
+  const theme = useTheme()
   return (
-    <SizableText
-      fontFamily="$body"
-      fontWeight="600"
-      fontSize="$2"
-      color="$foregroundSecondary"
-      paddingTop="$3"
-    >
-      {children}
-    </SizableText>
+    <UserProfile
+      size={size}
+      color={onDark ? theme.white100.get() : theme.foregroundPrimary.get()}
+    />
   )
 }
 
-function ThemedColumn({
-  theme,
-}: {
-  readonly theme: 'light' | 'dark'
-}): React.JSX.Element {
+function Demos(): React.JSX.Element {
   return (
-    <Theme name={theme}>
-      <YStack
-        gap="$7"
-        padding="$5"
-        backgroundColor="$backgroundPrimary"
-        borderRadius="$4"
-        flex={1}
-      >
-        <SizableText
-          fontFamily="$body"
-          fontWeight="600"
-          fontSize="$3"
-          color="$foregroundPrimary"
-        >
-          {theme.charAt(0).toUpperCase() + theme.slice(1)}
-        </SizableText>
-
-        <SectionLabel>Sizes (with icon)</SectionLabel>
+    <YStack gap="$5">
+      <DemoSection title="Sizes (with icon)">
         <XStack gap="$3" alignItems="center">
           <Avatar size="small">
             <ThemedIcon size={16} />
@@ -78,37 +52,45 @@ function ThemedColumn({
             <ThemedIcon size={32} />
           </Avatar>
         </XStack>
+      </DemoSection>
 
-        <SectionLabel>Grayscale</SectionLabel>
+      <DemoSection title="Grayscale">
         <XStack gap="$3" alignItems="center">
           <Avatar size="small" grayscale>
-            <ThemedIcon size={16} />
+            <ThemedIcon size={16} onDark />
           </Avatar>
           <Avatar size="medium" grayscale>
-            <ThemedIcon size={24} />
+            <ThemedIcon size={24} onDark />
           </Avatar>
           <Avatar size="large" grayscale>
-            <ThemedIcon size={32} />
+            <ThemedIcon size={32} onDark />
           </Avatar>
         </XStack>
+      </DemoSection>
 
-        <SectionLabel>Custom size (56px)</SectionLabel>
+      <DemoSection title="Token sizes ($9, $11, $13)">
         <XStack gap="$3" alignItems="center">
-          <Avatar customSize={56}>
-            <ThemedIcon size={28} />
-          </Avatar>
-          <Avatar customSize={56} grayscale>
-            <ThemedIcon size={28} />
-          </Avatar>
+          <Avatar size="$9" source={testAvatar} />
+          <Avatar size="$11" source={testAvatar} />
+          <Avatar size="$13" source={testAvatar} />
         </XStack>
+      </DemoSection>
 
-        <SectionLabel>With image</SectionLabel>
+      <DemoSection title="SVG string (svgXml)">
+        <XStack gap="$3" alignItems="center">
+          <Avatar size="medium" svgXml={SAMPLE_SVG_XML} />
+          <Avatar size="medium" svgXml={SAMPLE_SVG_XML} grayscale />
+        </XStack>
+      </DemoSection>
+
+      <DemoSection title="With image">
         <XStack gap="$3" alignItems="center">
           <Avatar size="medium" source={testAvatar} />
           <Avatar size="medium" source={testAvatar} grayscale />
         </XStack>
+      </DemoSection>
 
-        <SectionLabel>With SVG avatar</SectionLabel>
+      <DemoSection title="With SVG avatar">
         <XStack gap="$3" alignItems="center">
           <Avatar size="small">
             <BasicAvatar size={32} />
@@ -120,8 +102,9 @@ function ThemedColumn({
             <BasicAvatar size={64} />
           </Avatar>
         </XStack>
+      </DemoSection>
 
-        <SectionLabel>With SVG avatar (grayscale)</SectionLabel>
+      <DemoSection title="With SVG avatar (grayscale)">
         <XStack gap="$3" alignItems="center" flexWrap="wrap">
           <Avatar size="small">
             <BasicAvatar size={32} grayscale />
@@ -136,8 +119,9 @@ function ThemedColumn({
             <GoldenAvatar size={48} grayscale />
           </Avatar>
         </XStack>
+      </DemoSection>
 
-        <SectionLabel>Placeholder (no image)</SectionLabel>
+      <DemoSection title="Placeholder (no image)">
         <XStack gap="$3" alignItems="center">
           <Avatar size="small">
             <UserImagePlaceholder size={32} />
@@ -149,8 +133,9 @@ function ThemedColumn({
             <UserImagePlaceholder size={64} />
           </Avatar>
         </XStack>
+      </DemoSection>
 
-        <SectionLabel>Trusted</SectionLabel>
+      <DemoSection title="Trusted">
         <YStack gap="$5">
           <XStack
             gap="$5"
@@ -201,43 +186,27 @@ function ThemedColumn({
             </Avatar>
           </XStack>
         </YStack>
+      </DemoSection>
 
-        <SectionLabel>Anonymous Avatars</SectionLabel>
+      <DemoSection title="Anonymous Avatars">
         <XStack gap="$2" flexWrap="wrap">
           {avatarsSvg.map((AvatarComponent, i) => (
             <AvatarComponent key={i} size={48} />
           ))}
         </XStack>
+      </DemoSection>
 
-        <SectionLabel>Golden Avatars</SectionLabel>
+      <DemoSection title="Golden Avatars">
         <XStack gap="$2" flexWrap="wrap">
           {avatarsGoldenGlassesAndBackgroundSvg.map((AvatarComponent, i) => (
             <AvatarComponent key={i} size={48} />
           ))}
         </XStack>
-      </YStack>
-    </Theme>
+      </DemoSection>
+    </YStack>
   )
 }
 
 export function AvatarScreen(): React.JSX.Element {
-  return (
-    <ScrollView style={{flex: 1}}>
-      <YStack padding="$5" gap="$4">
-        <SizableText
-          fontFamily="$heading"
-          fontWeight="700"
-          fontSize="$3"
-          color="$foregroundPrimary"
-        >
-          Avatar
-        </SizableText>
-
-        <XStack gap="$3">
-          <ThemedColumn theme="light" />
-          <ThemedColumn theme="dark" />
-        </XStack>
-      </YStack>
-    </ScrollView>
-  )
+  return <ComponentScreenLayout title="Avatar" demos={Demos} />
 }

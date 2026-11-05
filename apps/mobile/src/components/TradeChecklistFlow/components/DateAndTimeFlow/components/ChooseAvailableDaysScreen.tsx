@@ -1,11 +1,15 @@
 import {useNavigation, type NavigationProp} from '@react-navigation/native'
 import {type UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {Stack, Typography, useTheme} from '@vexl-next/ui'
+import {
+  Stack,
+  Typography,
+  useTheme,
+  type CalendarMarkedDates,
+} from '@vexl-next/ui'
 import {Array, pipe} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {DateTime} from 'luxon'
 import React, {useEffect, useMemo} from 'react'
-import {type MarkedDates} from 'react-native-calendars/src/types'
 import {
   type TradeChecklistStackParamsList,
   type TradeChecklistStackScreenProps,
@@ -40,27 +44,30 @@ function ChooseAvailableDaysScreen({
     handleAvailableDaysChangeActionAtom
   )
 
-  const markedDates: MarkedDates = useMemo(
+  const markedDates: CalendarMarkedDates = useMemo(
     () =>
       pipe(
         uniqueAvailableDates,
-        Array.reduce({}, (result: MarkedDates, date: UnixMilliseconds) => {
-          return {
-            ...result,
-            [unixMillisecondsToLocaleDateTime(date).toFormat(
-              REACT_NATIVE_CALENDARS_DATE_FORMAT
-            )]: {
-              selected: true,
-              marked: true,
-              selectedColor:
-                unixMillisecondsToLocaleDateTime(date)
-                  .startOf('day')
-                  .toMillis() < DateTime.now().startOf('day').toMillis()
-                  ? theme.backgroundHighlight.get()
-                  : theme.accentYellowPrimary.get(),
-            },
+        Array.reduce(
+          {},
+          (result: CalendarMarkedDates, date: UnixMilliseconds) => {
+            return {
+              ...result,
+              [unixMillisecondsToLocaleDateTime(date).toFormat(
+                REACT_NATIVE_CALENDARS_DATE_FORMAT
+              )]: {
+                selected: true,
+                marked: true,
+                selectedColor:
+                  unixMillisecondsToLocaleDateTime(date)
+                    .startOf('day')
+                    .toMillis() < DateTime.now().startOf('day').toMillis()
+                    ? theme.backgroundHighlight.get()
+                    : theme.accentYellowPrimary.get(),
+              },
+            }
           }
-        })
+        )
       ),
     [theme, uniqueAvailableDates]
   )

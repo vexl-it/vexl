@@ -1,29 +1,26 @@
 import {
   Button,
-  Input,
+  EmptyState,
   NavigationBar,
   PlusAdd,
   Screen,
   SelectableItem,
   Stack,
-  Typography,
-  useTheme,
+  SwipeableRow,
+  TextField,
+  TrashBin,
   XmarkCancelClose,
   YStack,
 } from '@vexl-next/ui'
 import {Array, Effect, pipe} from 'effect'
 import {
   atom,
-  useAtom,
   useAtomValue,
   useSetAtom,
   useStore,
   type PrimitiveAtom,
 } from 'jotai'
-import React, {useCallback, useRef, useState} from 'react'
-import Swipeable, {
-  type SwipeableMethods,
-} from 'react-native-gesture-handler/ReanimatedSwipeable'
+import React, {useCallback, useState} from 'react'
 import {type RootStackScreenProps} from '../../navigationTypes'
 import {
   addChatTagActionAtom,
@@ -42,39 +39,21 @@ import {
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import {globalDialogAtom} from '../GlobalDialog'
-import ChatListItemRightSwipeActions from '../InsideRouter/components/MessagesScreen/components/ChatListItemRightSwipeActions'
 
 function NewTagInput({
   valueAtom,
 }: {
   readonly valueAtom: PrimitiveAtom<string>
 }): React.ReactElement {
-  const [value, setValue] = useAtom(valueAtom)
-  const theme = useTheme()
-
   return (
-    <Stack
-      minHeight="$11"
-      borderRadius="$5"
-      borderWidth={1}
+    <TextField
+      autoFocus
+      valueAtom={valueAtom}
+      maxLength={CHAT_TAG_NAME_MAX_LENGTH}
+      placeholder=""
       borderColor="$accentYellowPrimary"
       backgroundColor="$backgroundPrimary"
-      px="$5"
-      jc="center"
-    >
-      <Input
-        unstyled
-        autoFocus
-        value={value}
-        maxLength={CHAT_TAG_NAME_MAX_LENGTH}
-        color="$foregroundPrimary"
-        fontFamily="$body"
-        fontSize="$4"
-        fontWeight="500"
-        selectionColor={theme.accentYellowPrimary.get()}
-        onChangeText={setValue}
-      />
-    </Stack>
+    />
   )
 }
 
@@ -89,19 +68,16 @@ function TagSelectionRow({
   readonly onSelectedChange: () => void
   readonly onDelete: () => void
 }): React.ReactElement {
-  const swipeableRef = useRef<SwipeableMethods>(null)
+  const {t} = useTranslation()
 
   return (
-    <Swipeable
-      ref={swipeableRef}
-      renderRightActions={() => (
-        <ChatListItemRightSwipeActions
-          onPress={() => {
-            swipeableRef.current?.close()
-            onDelete()
-          }}
-        />
-      )}
+    <SwipeableRow
+      rightAction={{
+        icon: TrashBin,
+        label: t('common.delete'),
+        variant: 'destructive',
+        onPress: onDelete,
+      }}
     >
       <Stack backgroundColor="$backgroundPrimary">
         <SelectableItem
@@ -111,7 +87,7 @@ function TagSelectionRow({
           onPress={onSelectedChange}
         />
       </Stack>
-    </Swipeable>
+    </SwipeableRow>
   )
 }
 
@@ -243,18 +219,15 @@ function ChatTagsScreen({route}: Props): React.ReactElement {
           )}
         </YStack>
       ) : (
-        <YStack px="$5" pt="$8" gap="$6" ai="center">
-          <Typography
-            color="$foregroundPrimary"
-            variant="heading2"
-            textAlign="center"
-          >
-            {t('messages.tags.empty')}
-          </Typography>
-          <Button size="small" width="100%" onPress={showNewTagDialog}>
-            {t('messages.tags.addTag')}
-          </Button>
-        </YStack>
+        <EmptyState
+          px="$5"
+          title={t('messages.tags.empty')}
+          action={{
+            label: t('messages.tags.addTag'),
+            onPress: showNewTagDialog,
+            variant: 'primary',
+          }}
+        />
       )}
     </Screen>
   )

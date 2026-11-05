@@ -1,24 +1,7 @@
-import {Button, PlusAdd, SizableText, Theme, YStack} from '@vexl-next/ui'
+import {Button, Map, PlusAdd, XStack, YStack} from '@vexl-next/ui'
 import React from 'react'
-import {ScrollView} from 'react-native'
 
-function SectionLabel({
-  children,
-}: {
-  readonly children: string
-}): React.JSX.Element {
-  return (
-    <SizableText
-      fontFamily="$body"
-      fontWeight="600"
-      fontSize="$2"
-      color="$foregroundSecondary"
-      paddingTop="$3"
-    >
-      {children}
-    </SizableText>
-  )
-}
+import {ComponentScreenLayout, DemoSection} from './ComponentScreenLayout'
 
 function ButtonVariants({
   size,
@@ -26,11 +9,7 @@ function ButtonVariants({
   readonly size: 'large' | 'medium' | 'small'
 }): React.JSX.Element {
   return (
-    <YStack gap="$3" width="100%">
-      <SectionLabel>
-        {size.charAt(0).toUpperCase() + size.slice(1)}
-      </SectionLabel>
-
+    <DemoSection title={size.charAt(0).toUpperCase() + size.slice(1)}>
       <Button variant="primary" size={size} onPress={() => {}}>
         Primary
       </Button>
@@ -56,59 +35,32 @@ function ButtonVariants({
       <Button variant="disabled" size={size} onPress={() => {}}>
         Disabled
       </Button>
+
+      <XStack gap="$5" alignItems="center" flexWrap="wrap">
+        <Button variant="link" size={size} onPress={() => {}}>
+          Link
+        </Button>
+        <Button variant="link" icon={Map} size={size} onPress={() => {}}>
+          Link with icon
+        </Button>
+        <Button variant="link" size={size} disabled onPress={() => {}}>
+          Disabled link
+        </Button>
+      </XStack>
+    </DemoSection>
+  )
+}
+
+function Demos(): React.JSX.Element {
+  return (
+    <YStack gap="$5">
+      <ButtonVariants size="large" />
+      <ButtonVariants size="medium" />
+      <ButtonVariants size="small" />
     </YStack>
   )
 }
 
-function ThemedColumn({
-  theme,
-}: {
-  readonly theme: 'light' | 'dark'
-}): React.JSX.Element {
-  return (
-    <Theme name={theme}>
-      <YStack
-        gap="$4"
-        padding="$5"
-        backgroundColor="$backgroundPrimary"
-        borderRadius="$4"
-        flex={1}
-      >
-        <SizableText
-          fontFamily="$body"
-          fontWeight="600"
-          fontSize="$3"
-          color="$foregroundPrimary"
-        >
-          {theme.charAt(0).toUpperCase() + theme.slice(1)}
-        </SizableText>
-
-        <ButtonVariants size="large" />
-        <ButtonVariants size="medium" />
-        <ButtonVariants size="small" />
-      </YStack>
-    </Theme>
-  )
-}
-
 export function ButtonScreen(): React.JSX.Element {
-  return (
-    <ScrollView style={{flex: 1}}>
-      <YStack padding="$5" gap="$4">
-        <SizableText
-          fontFamily="$heading"
-          fontWeight="700"
-          fontSize="$3"
-          color="$foregroundPrimary"
-        >
-          Buttons
-        </SizableText>
-
-        <YStack gap="$3">
-          <ThemedColumn theme="light" />
-          <ThemedColumn theme="dark" />
-        </YStack>
-      </YStack>
-    </ScrollView>
-  )
+  return <ComponentScreenLayout title="Button" demos={Demos} />
 }

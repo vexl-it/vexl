@@ -1,6 +1,13 @@
 import {useNavigation} from '@react-navigation/native'
 import {calculateViewportRadius} from '@vexl-next/domain/src/utility/geoCoordinates'
-import {Button, NavigationBar, TextField, Typography} from '@vexl-next/ui'
+import {
+  Button,
+  Divider,
+  NavigationBar,
+  PinchZoomHint,
+  TextField,
+  Typography,
+} from '@vexl-next/ui'
 import {ChevronLeft} from '@vexl-next/ui/src/icons'
 import {Stack, XStack, YStack} from '@vexl-next/ui/src/primitives'
 import {useMolecule} from 'bunshi/dist/react'
@@ -12,7 +19,6 @@ import {type MapValueWithRadius} from '../Map/brands'
 import MapLocationWithRadiusSelect, {
   type SelectedCoordinates,
 } from '../Map/components/MapLocationWithRadiusSelect'
-import PinchZoomHint from '../Map/components/PinchZoomHint'
 import {type GeocodingFailureKind} from '../Map/types'
 import {pragueCenterLocation} from '../Map/utils/pragueCenterLocation'
 import {LocationPickerMolecule} from './molecule'
@@ -159,7 +165,7 @@ export default function LocationRadiusPicker({
             },
           }}
         />
-        <Stack height={1} backgroundColor="$backgroundPrimary" />
+        <Divider />
         <XStack paddingHorizontal="$5" paddingVertical="$5" alignItems="center">
           <Typography
             variant="micro"
@@ -234,6 +240,7 @@ export default function LocationRadiusPicker({
             paddingHorizontal="$5"
           >
             <PinchZoomHint
+              label={t('map.locationSelect.pinchToAdjustArea')}
               visible={isPinchHintVisible}
               onHidden={handlePinchHintHidden}
             />

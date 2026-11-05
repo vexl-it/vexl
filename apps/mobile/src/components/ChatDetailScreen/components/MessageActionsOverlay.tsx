@@ -2,14 +2,18 @@ import Clipboard from '@react-native-clipboard/clipboard'
 import {BlurView} from '@react-native-community/blur'
 import {ReactionEmoji} from '@vexl-next/domain/src/general/messaging'
 import {
+  CONTEXT_MENU_WIDTH,
+  ContextMenu,
+  contextMenuHeight,
+  ContextMenuItem,
   Copy,
+  REACTION_BAR_HEIGHT,
+  ReactionBar,
+  reactionBarWidth,
   Reply,
   Stack,
   tokens,
-  Typography,
   useTheme,
-  XStack,
-  type IconProps,
 } from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {Array, Effect, Schema} from 'effect'
@@ -25,13 +29,11 @@ import {
 } from 'react-native'
 import {useKeyboardState} from 'react-native-keyboard-controller'
 import Reanimated, {
-  Extrapolation,
   interpolate,
   useAnimatedStyle,
   useSharedValue,
   withSpring,
   withTiming,
-  type SharedValue,
 } from 'react-native-reanimated'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {scheduleOnRN} from 'react-native-worklets'
@@ -46,21 +48,12 @@ const QUICK_REACTIONS = Array.map(
   ['❤️', '👍', '👎', '😂', '😮', '😢'],
   (emoji) => Schema.decodeSync(ReactionEmoji)(emoji)
 )
-const REACTION_SIZE = tokens.size[9].val
-const REACTION_BAR_PADDING = tokens.space[2].val
-const REACTION_BAR_HEIGHT = REACTION_SIZE + REACTION_BAR_PADDING * 2
-const REACTION_BAR_WIDTH =
-  REACTION_SIZE * QUICK_REACTIONS.length + REACTION_BAR_PADDING * 2
+const REACTION_BAR_WIDTH = reactionBarWidth(QUICK_REACTIONS.length)
 const GAP = tokens.space[3].val
 const SCREEN_PADDING = tokens.space[5].val
-const MENU_WIDTH = tokens.size[13].val * 2.5
-const MENU_ITEM_HEIGHT = tokens.size[10].val
-const MENU_PADDING = tokens.space[2].val
-const MENU_ITEMS_COUNT = 2
-const MENU_HEIGHT = MENU_ITEM_HEIGHT * MENU_ITEMS_COUNT + MENU_PADDING * 2
+const MENU_HEIGHT = contextMenuHeight(2)
 const OPEN_SPRING = {damping: 20, stiffness: 260, mass: 0.8}
 const CLOSE_DURATION_MS = 160
-const SURFACE_SHADOW = '0 4px 16px rgba(0, 0, 0, 0.12)'
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max)
@@ -108,89 +101,8 @@ function computePlacement({
     reactionBarTop: bubbleTop - GAP - REACTION_BAR_HEIGHT,
     reactionBarLeft: alignedToBubble(REACTION_BAR_WIDTH),
     menuTop: bubbleTop + bubbleHeight + GAP,
-    menuLeft: alignedToBubble(MENU_WIDTH),
+    menuLeft: alignedToBubble(CONTEXT_MENU_WIDTH),
   }
-}
-
-function QuickReaction({
-  emoji,
-  index,
-  isSelected,
-  progress,
-  onPress,
-}: {
-  emoji: ReactionEmoji
-  index: number
-  isSelected: boolean
-  progress: SharedValue<number>
-  onPress: (emoji: ReactionEmoji) => void
-}): React.ReactElement {
-  const staggeredStyle = useAnimatedStyle(() => {
-    const start = index * 0.06
-    return {
-      transform: [
-        {
-          scale: interpolate(
-            progress.value,
-            [start, start + 0.5],
-            [0.4, 1],
-            Extrapolation.CLAMP
-          ),
-        },
-      ],
-    }
-  })
-
-  return (
-    <Reanimated.View style={staggeredStyle}>
-      <Stack
-        role="button"
-        width={REACTION_SIZE}
-        height={REACTION_SIZE}
-        borderRadius={REACTION_SIZE}
-        alignItems="center"
-        justifyContent="center"
-        backgroundColor={isSelected ? '$backgroundHighlight' : undefined}
-        pressStyle={{scale: 1.2}}
-        onPress={() => {
-          onPress(emoji)
-        }}
-      >
-        <Typography variant="heading3" color="$foregroundPrimary">
-          {emoji}
-        </Typography>
-      </Stack>
-    </Reanimated.View>
-  )
-}
-
-function MenuItem({
-  icon: Icon,
-  label,
-  onPress,
-}: {
-  icon: React.ComponentType<IconProps>
-  label: string
-  onPress: () => void
-}): React.ReactElement {
-  const theme = useTheme()
-
-  return (
-    <XStack
-      role="button"
-      height={MENU_ITEM_HEIGHT}
-      alignItems="center"
-      gap="$4"
-      px="$5"
-      pressStyle={{backgroundColor: '$backgroundSecondary'}}
-      onPress={onPress}
-    >
-      <Icon size={20} color={theme.foregroundPrimary.get()} />
-      <Typography variant="paragraph" color="$foregroundPrimary">
-        {label}
-      </Typography>
-    </XStack>
-  )
 }
 
 function MessageActionsOverlay(): React.ReactElement | null {
@@ -360,23 +272,12 @@ function MessageActionsOverlay(): React.ReactElement | null {
             reactionBarStyle,
           ]}
         >
-          <XStack
-            p={REACTION_BAR_PADDING}
-            borderRadius={REACTION_BAR_HEIGHT}
-            backgroundColor="$backgroundOnBar"
-            boxShadow={SURFACE_SHADOW}
-          >
-            {Array.map(QUICK_REACTIONS, (emoji, index) => (
-              <QuickReaction
-                key={emoji}
-                emoji={emoji}
-                index={index}
-                isSelected={messageReactions?.mine === emoji}
-                progress={progress}
-                onPress={react}
-              />
-            ))}
-          </XStack>
+          <ReactionBar
+            emojis={QUICK_REACTIONS}
+            selected={messageReactions?.mine}
+            progress={progress}
+            onSelect={react}
+          />
         </Reanimated.View>
       )}
       <Reanimated.View
@@ -385,20 +286,13 @@ function MessageActionsOverlay(): React.ReactElement | null {
             position: 'absolute',
             top: placement.menuTop,
             left: placement.menuLeft,
-            width: MENU_WIDTH,
             transformOrigin: `${isMine ? 'right' : 'left'} top`,
           },
           menuStyle,
         ]}
       >
-        <Stack
-          py={MENU_PADDING}
-          borderRadius="$6"
-          overflow="hidden"
-          backgroundColor="$backgroundOnBar"
-          boxShadow={SURFACE_SHADOW}
-        >
-          <MenuItem
+        <ContextMenu>
+          <ContextMenuItem
             icon={Reply}
             label={t('common.reply')}
             onPress={() => {
@@ -406,7 +300,7 @@ function MessageActionsOverlay(): React.ReactElement | null {
               close()
             }}
           />
-          <MenuItem
+          <ContextMenuItem
             icon={Copy}
             label={t('common.copy')}
             onPress={() => {
@@ -415,7 +309,7 @@ function MessageActionsOverlay(): React.ReactElement | null {
               close()
             }}
           />
-        </Stack>
+        </ContextMenu>
       </Reanimated.View>
     </Stack>
   )

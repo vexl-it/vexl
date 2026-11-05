@@ -1,5 +1,5 @@
 import {ImageZoom} from '@likashefqet/react-native-image-zoom'
-import {IconButton, XmarkCancelClose} from '@vexl-next/ui'
+import {NavButton, XmarkCancelClose} from '@vexl-next/ui'
 import React from 'react'
 import {useWindowDimensions} from 'react-native'
 import {GestureHandlerRootView} from 'react-native-gesture-handler'
@@ -25,10 +25,12 @@ export default function ChatImagePreviewScreen({
   return (
     <GestureHandlerRootView style={{flex: 1}}>
       <Stack f={1} bc="$backgroundPrimary">
-        <Stack pos="absolute" top={top} mt="$4" right="$4" zIndex={100}>
-          <IconButton onPress={safeGoBack}>
-            <XmarkCancelClose />
-          </IconButton>
+        <Stack pos="absolute" top={top} mt="$4" right="$4" zIndex="$1">
+          <NavButton
+            variant="secondary"
+            icon={XmarkCancelClose}
+            onPress={safeGoBack}
+          />
         </Stack>
         <Stack f={1} ai="center" jc="center">
           <ImageZoom

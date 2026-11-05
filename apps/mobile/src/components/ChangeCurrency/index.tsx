@@ -6,25 +6,24 @@ import {
 } from '@vexl-next/domain/src/general/currency.brand'
 import {
   Button,
+  EmptyState,
   NavigationBar,
   Screen,
   SearchBar,
   SelectableItem,
-  Stack,
-  Typography,
   XmarkCancelClose,
+  useKeyboardAwareFooterListPadding,
 } from '@vexl-next/ui'
 import {Array} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react'
 import {type RootStackScreenProps} from '../../navigationTypes'
 import {useTranslation} from '../../utils/localization/I18nProvider'
-import {useKeyboardAwareFooterListPadding} from '../../utils/useKeyboardAwareFooterListPadding'
 import {
   changeCurrenciesToDisplayAtom,
-  type ChangeCurrencyConfig,
   changeCurrencyConfigAtom,
   changeCurrencySearchTextAtom,
+  type ChangeCurrencyConfig,
 } from './atoms'
 
 const CurrencyItem = React.memo(function CurrencyItem({
@@ -137,18 +136,10 @@ function ChangeCurrencyContent({
           renderItem={renderItem}
         />
       ) : (
-        <Stack ai="center" gap="$4" p="$6">
-          <Typography variant="heading3" ta="center" color="$foregroundPrimary">
-            {t('common.nothingFound')}
-          </Typography>
-          <Typography
-            variant="description"
-            ta="center"
-            color="$foregroundSecondary"
-          >
-            {t('changeCurrency.trySearchingByCurrencyName')}
-          </Typography>
-        </Stack>
+        <EmptyState
+          title={t('common.nothingFound')}
+          description={t('changeCurrency.trySearchingByCurrencyName')}
+        />
       )}
     </Screen>
   )

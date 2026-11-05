@@ -1,13 +1,11 @@
 import {useNavigation} from '@react-navigation/native'
-import {Typography, XStack, YStack} from '@vexl-next/ui'
+import {HighlightedText, Typography, XStack, YStack} from '@vexl-next/ui'
 import React from 'react'
-import {TouchableOpacity} from 'react-native'
 import {type RootStackScreenProps} from '../../../navigationTypes'
 import {chatDetailRouteParams} from '../../../utils/chat/goToChatDetail'
 import unixMillisecondsToLocaleDateTime from '../../../utils/unixMillisecondsToLocaleDateTime'
 import FromNowComponent from '../../FromNowComponent'
 import {type SearchMessageResult} from '../state'
-import HighlightedText from './HighlightedText'
 
 function ChatSearchMessageResultItem({
   result,
@@ -21,7 +19,11 @@ function ChatSearchMessageResultItem({
   const date = unixMillisecondsToLocaleDateTime(result.messageTime)
 
   return (
-    <TouchableOpacity
+    <YStack
+      py="$4"
+      gap="$2"
+      role="button"
+      pressStyle={{opacity: 0.7}}
       onPress={() => {
         navigation.navigate('ChatDetail', {
           ...chatDetailRouteParams(result.chat.chat),
@@ -29,32 +31,30 @@ function ChatSearchMessageResultItem({
         })
       }}
     >
-      <YStack py="$4" gap="$2">
-        <XStack gap="$3" ai="center">
-          <Typography
-            color="$foregroundPrimary"
-            variant="paragraphSmall"
-            f={1}
-            numberOfLines={1}
-          >
-            {result.chat.displayName}
+      <XStack gap="$3" ai="center">
+        <Typography
+          color="$foregroundPrimary"
+          variant="paragraphSmall"
+          f={1}
+          numberOfLines={1}
+        >
+          {result.chat.displayName}
+        </Typography>
+        {date.isValid ? (
+          <Typography color="$foregroundSecondary" variant="description">
+            <FromNowComponent date={date} />
           </Typography>
-          {date.isValid ? (
-            <Typography color="$foregroundSecondary" variant="description">
-              <FromNowComponent date={date} />
-            </Typography>
-          ) : null}
-        </XStack>
-        <HighlightedText
-          text={result.messageText}
-          query={query}
-          color="$foregroundSecondary"
-          variant="description"
-          highlightVariant="descriptionBold"
-          numberOfLines={3}
-        />
-      </YStack>
-    </TouchableOpacity>
+        ) : null}
+      </XStack>
+      <HighlightedText
+        text={result.messageText}
+        query={query}
+        color="$foregroundSecondary"
+        variant="description"
+        highlightVariant="descriptionBold"
+        numberOfLines={3}
+      />
+    </YStack>
   )
 }
 

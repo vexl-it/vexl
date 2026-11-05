@@ -1,15 +1,7 @@
-import type {ReactNode} from 'react'
-import React, {useCallback, useEffect, useId, useState} from 'react'
-import Animated, {
-  Easing,
-  interpolate,
-  useAnimatedProps,
-  useSharedValue,
-  withDelay,
-  withSequence,
-  withTiming,
-} from 'react-native-reanimated'
+import React, {useId} from 'react'
 import Svg, {Defs, G, LinearGradient, Path, Rect, Stop} from 'react-native-svg'
+import {AnimatedSvgPart} from './AnimatedSvgPart'
+import {ReplayOnPress} from './ReplayOnPress'
 import {useResolvedGraphicVariant} from './useResolvedGraphicVariant'
 
 interface Props {
@@ -18,63 +10,6 @@ interface Props {
   readonly height?: number
   readonly animate?: boolean
   readonly disableReplayOnPress?: boolean
-}
-
-const AnimatedGroup = Animated.createAnimatedComponent(G)
-
-const POP_DELAY = 90
-const POP_IN_DURATION = 190
-const POP_SETTLE_DURATION = 130
-
-function AnimatedSvgPart({
-  animate,
-  index,
-  trigger,
-  originX,
-  originY,
-  children,
-}: {
-  readonly animate: boolean
-  readonly index: number
-  readonly trigger: number
-  readonly originX: number
-  readonly originY: number
-  readonly children: ReactNode
-}): React.JSX.Element {
-  const progress = useSharedValue(animate ? 0 : 1)
-
-  useEffect(() => {
-    if (!animate) {
-      progress.value = 1
-      return
-    }
-
-    progress.value = 0
-    progress.value = withDelay(
-      index * POP_DELAY,
-      withSequence(
-        withTiming(0.82, {
-          duration: POP_IN_DURATION,
-          easing: Easing.out(Easing.cubic),
-        }),
-        withTiming(1, {
-          duration: POP_SETTLE_DURATION,
-          easing: Easing.out(Easing.quad),
-        })
-      )
-    )
-  }, [animate, index, progress, trigger])
-
-  const animatedProps = useAnimatedProps(() => {
-    const scale = interpolate(progress.value, [0, 0.82, 1], [0.5, 1.12, 1])
-
-    return {
-      opacity: progress.value,
-      transform: `translate(${originX} ${originY}) scale(${scale}) translate(${-originX} ${-originY})`,
-    }
-  })
-
-  return <AnimatedGroup animatedProps={animatedProps}>{children}</AnimatedGroup>
 }
 
 interface ContentProps {
@@ -105,26 +40,32 @@ export function FaqWhatIsVexl({
 }: Props): React.JSX.Element {
   const resolvedVariant = useResolvedGraphicVariant(variant)
   const uid = useId()
-  const [animationTrigger, setAnimationTrigger] = useState(0)
-  const retriggerAnimation = useCallback(() => {
-    if (animate) setAnimationTrigger((current) => current + 1)
-  }, [animate])
 
   return (
-    <Svg
+    <ReplayOnPress
+      animate={animate}
+      disabled={disableReplayOnPress}
       width={width}
       height={height}
-      viewBox="0 0 169.828 220"
-      fill="none"
-      onPress={
-        animate && !disableReplayOnPress ? retriggerAnimation : undefined
-      }
     >
-      {resolvedVariant === 'dark' ? (
-        <DarkContent animate={animate} trigger={animationTrigger} />
-      ) : (
-        <LightContent animate={animate} trigger={animationTrigger} uid={uid} />
+      {(animationTrigger) => (
+        <Svg
+          width={width}
+          height={height}
+          viewBox="0 0 169.828 220"
+          fill="none"
+        >
+          {resolvedVariant === 'dark' ? (
+            <DarkContent animate={animate} trigger={animationTrigger} />
+          ) : (
+            <LightContent
+              animate={animate}
+              trigger={animationTrigger}
+              uid={uid}
+            />
+          )}
+        </Svg>
       )}
-    </Svg>
+    </ReplayOnPress>
   )
 }

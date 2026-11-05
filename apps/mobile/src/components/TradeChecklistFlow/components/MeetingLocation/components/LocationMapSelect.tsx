@@ -1,18 +1,19 @@
 import {type GetGeocodedCoordinatesResponse} from '@vexl-next/rest-api/src/services/location/contracts'
 import {
+  BottomSheetPanel,
   Button,
   ChevronLeft,
-  IconButton,
-  Loader,
+  FadeGradient,
+  MapLabelPill,
+  NavigationBar,
   SearchBar,
+  Stack,
   TextField,
-  Typography,
+  YStack,
 } from '@vexl-next/ui'
-import {LinearGradient} from 'expo-linear-gradient'
 import {atom, useAtom, useSetAtom} from 'jotai'
 import React, {useCallback, useEffect, useMemo, useState} from 'react'
 import Animated, {FadeOut} from 'react-native-reanimated'
-import {Stack, XStack, YStack, useTheme} from 'tamagui'
 import {type TradeChecklistStackScreenProps} from '../../../../../navigationTypes'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import MapLocationSelect from '../../../../Map/components/MapLocationSelect'
@@ -30,7 +31,6 @@ export default function LocationMapSelect({
   route,
 }: Props): React.ReactElement {
   const {t} = useTranslation()
-  const theme = useTheme()
   const tradeChecklistExitNavigation = useTradeChecklistExitNavigation()
   const stageMeetingLocation = useSetAtom(addMeetingLocationActionAtom)
 
@@ -100,46 +100,15 @@ export default function LocationMapSelect({
       }}
       topChildren={
         <YStack>
-          <YStack backgroundColor="$backgroundPrimary" pb="$5">
-            <XStack px="$5" pt="$4" ai="center">
-              <IconButton
-                backgroundColor="$accentYellowSecondary"
-                onPress={navigation.goBack}
-              >
-                <ChevronLeft
-                  size={24}
-                  color={theme.accentHighlightSecondary.get()}
-                />
-              </IconButton>
-              <Stack f={1} ai="center">
-                <Typography
-                  variant="titlesSmall"
-                  color="$foregroundPrimary"
-                  textAlign="center"
-                >
-                  {t('tradeChecklist.options.MEETING_LOCATION')}
-                </Typography>
-              </Stack>
-              <Stack width="$10" />
-            </XStack>
+          <YStack backgroundColor="$backgroundPrimary">
+            <NavigationBar
+              style="back"
+              title={t('tradeChecklist.options.MEETING_LOCATION')}
+              leftAction={{icon: ChevronLeft, onPress: navigation.goBack}}
+            />
           </YStack>
           <Stack position="relative" height={searchBarHeight}>
-            <Stack
-              position="absolute"
-              top={0}
-              left={0}
-              right={0}
-              bottom={0}
-              pointerEvents="none"
-            >
-              <LinearGradient
-                colors={[
-                  theme.backgroundPrimary.get(),
-                  theme.gradientHelper.get(),
-                ]}
-                style={{flex: 1}}
-              />
-            </Stack>
+            <FadeGradient solidEdge="top" />
             <YStack px="$5">
               <SearchBar
                 variant="dummy"
@@ -156,64 +125,28 @@ export default function LocationMapSelect({
         <YStack alignSelf="center" gap="$2" maxWidth="70%">
           {!hasMapMoved ? (
             <Animated.View exiting={FadeOut.duration(180)}>
-              <YStack
-                px="$4"
-                py="$3"
-                borderRadius="$5"
-                alignSelf="center"
-                backgroundColor="$accentHighlightPrimary"
-              >
-                <Typography
-                  variant="description"
-                  color="$backgroundPrimary"
-                  textAlign="center"
-                  lineHeight="100%"
-                >
-                  {t('map.locationSelect.hint')}
-                </Typography>
-              </YStack>
+              <MapLabelPill
+                variant="highlight"
+                label={t('map.locationSelect.hint')}
+              />
             </Animated.View>
           ) : null}
-          <YStack
-            px="$4"
-            py="$3"
-            borderRadius="$5"
-            alignSelf="center"
-            backgroundColor="$accentHighlightPrimary"
-          >
-            {isGeocodingInProgress ? (
-              <Loader size="small" color={theme.backgroundPrimary.get()} />
-            ) : (
-              <Typography
-                variant="description"
-                color={
-                  showGeocodingFailure ? '$redForeground' : '$backgroundPrimary'
-                }
-                textAlign="center"
-                lineHeight="100%"
-              >
-                {showGeocodingFailure
-                  ? geocodingFailure === 'serviceError'
-                    ? t('tradeChecklist.location.geocodingUnavailable')
-                    : t('map.location.errors.notFound')
-                  : (pickedValue?.address ?? initialValue.address)}
-              </Typography>
-            )}
-          </YStack>
+          <MapLabelPill
+            variant="highlight"
+            loading={isGeocodingInProgress}
+            error={showGeocodingFailure}
+            label={
+              showGeocodingFailure
+                ? geocodingFailure === 'serviceError'
+                  ? t('tradeChecklist.location.geocodingUnavailable')
+                  : t('map.location.errors.notFound')
+                : (pickedValue?.address ?? initialValue.address)
+            }
+          />
         </YStack>
       }
       bottomChildren={
-        <YStack
-          mb="0"
-          px="$5"
-          pt="$5"
-          pb="$5"
-          gap="$4"
-          backgroundColor="$backgroundPrimary"
-          borderRadius="$8"
-          borderBottomLeftRadius={0}
-          borderBottomRightRadius={0}
-        >
+        <BottomSheetPanel>
           <TextField
             valueAtom={noteAtom}
             placeholder={`${t('tradeChecklist.location.addNote')}...`}
@@ -227,7 +160,7 @@ export default function LocationMapSelect({
           >
             {t('common.save')}
           </Button>
-        </YStack>
+        </BottomSheetPanel>
       }
     />
   )

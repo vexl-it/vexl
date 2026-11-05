@@ -2,6 +2,7 @@ import {useNavigation} from '@react-navigation/native'
 import {
   ArchiveInbox,
   CellPhoneMobileDevice,
+  CopyField,
   DocumentsFiles,
   Gift,
   Help,
@@ -22,11 +23,11 @@ import {importedContactsCountAtom} from '../../state/contacts/atom/contactsStore
 import {vexlOnlyContactsCountAtom} from '../../state/contacts/atom/vexlOnlyContactsAtoms'
 import {useLogout} from '../../state/useLogout'
 import {contactSupportActionAtom} from '../../utils/contactSupportActionAtom'
+import {copyToClipboardWithToastActionAtom} from '../../utils/copyToClipboardWithToastActionAtom'
 import {useTranslation as useTranslations} from '../../utils/localization/I18nProvider'
 import {formatDecimal} from '../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../utils/localization/formattingLocaleAtom'
 import openUrl from '../../utils/openUrl'
-import ContactUsDialogContent from '../AppSettingsScreen/components/ContactUsDialogContent'
 import {globalDialogAtom} from '../GlobalDialog'
 import DeleteAccountConfirmationDialogContent from './components/DeleteAccountConfirmationDialogContent'
 
@@ -54,6 +55,7 @@ export function useContent(): AccountMenus {
   const locale = useAtomValue(formattingLocaleAtom)
   const showDialog = useSetAtom(globalDialogAtom)
   const contactSupport = useSetAtom(contactSupportActionAtom)
+  const copyToClipboard = useSetAtom(copyToClipboardWithToastActionAtom)
   const logout = useLogout()
   return useMemo((): AccountMenus => {
     const contactsCount = t('account.contactsCountFormatted', {
@@ -164,7 +166,16 @@ export function useContent(): AccountMenus {
                       subtitle: t('account.contactUsSubtitle'),
                       positiveButtonText: t('account.openMailApp'),
                       negativeButtonText: t('common.close'),
-                      children: <ContactUsDialogContent />,
+                      children: (
+                        <CopyField
+                          backgroundColor="$backgroundPrimary"
+                          value={t('settings.items.supportEmail')}
+                          copyAccessibilityLabel={t('common.copy')}
+                          onCopy={() => {
+                            copyToClipboard(t('settings.items.supportEmail'))
+                          }}
+                        />
+                      ),
                     })
                   )
 
@@ -228,6 +239,7 @@ export function useContent(): AccountMenus {
     ] as const
   }, [
     contactSupport,
+    copyToClipboard,
     locale,
     logout,
     navigation,

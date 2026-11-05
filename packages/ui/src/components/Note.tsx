@@ -4,7 +4,9 @@ import {styled, useTheme} from 'tamagui'
 import {type IconProps} from '../icons/types'
 import {XStack, YStack} from '../primitives'
 import {CardButton} from './CardButton'
+import {TEXT_AREA_MIN_HEIGHT} from './LabeledTextArea'
 import {NoteMeta} from './NoteMeta'
+import {TwoToneCard} from './TwoToneCard'
 import {Typography} from './Typography'
 
 export interface NoteTag {
@@ -18,6 +20,8 @@ export interface NoteActionButton {
 }
 
 export interface NoteProps {
+  /** `preview` shows the full message in a larger font, e.g. above a reply input. */
+  readonly variant?: 'card' | 'preview'
   readonly avatar: React.ReactNode
   readonly name?: string
   readonly commonFriends?: string
@@ -29,32 +33,6 @@ export interface NoteProps {
   readonly onPress?: () => void
   readonly actionButton?: NoteActionButton
 }
-
-const CardFrame = styled(YStack, {
-  name: 'Note',
-  gap: '$0.5',
-
-  variants: {
-    pressable: {
-      true: {
-        pressStyle: {
-          opacity: 0.7,
-        },
-      },
-    },
-  } as const,
-})
-
-const InformationFrame = styled(YStack, {
-  name: 'NoteInformation',
-  backgroundColor: '$backgroundTertiary',
-  padding: '$4',
-  borderTopLeftRadius: '$5',
-  borderTopRightRadius: '$5',
-  borderBottomLeftRadius: '$2',
-  borderBottomRightRadius: '$2',
-  gap: '$4',
-})
 
 const TagFrame = styled(XStack, {
   name: 'NoteTag',
@@ -68,19 +46,8 @@ const HeaderFrame = styled(XStack, {
   gap: '$3',
 })
 
-const ContentFrame = styled(YStack, {
-  name: 'NoteContent',
-  backgroundColor: '$backgroundSecondary',
-  padding: '$4',
-  borderTopLeftRadius: '$2',
-  borderTopRightRadius: '$2',
-  borderBottomLeftRadius: '$5',
-  borderBottomRightRadius: '$5',
-  overflow: 'hidden',
-  gap: '$3',
-})
-
 export function Note({
+  variant = 'card',
   avatar,
   name,
   commonFriends,
@@ -94,12 +61,12 @@ export function Note({
 }: NoteProps): React.JSX.Element {
   const theme = useTheme()
   const iconColor = theme.foregroundSecondary.get()
-  const isPressable = !!onPress
   const TagIcon = tag?.icon
+  const isPreview = variant === 'preview'
 
   return (
-    <CardFrame pressable={isPressable} onPress={onPress}>
-      <InformationFrame>
+    <TwoToneCard onPress={onPress}>
+      <TwoToneCard.Header gap="$4">
         {tag ? (
           <TagFrame>
             {TagIcon ? <TagIcon size={16} color={iconColor} /> : null}
@@ -123,11 +90,14 @@ export function Note({
             />
           </YStack>
         </HeaderFrame>
-      </InformationFrame>
-      <ContentFrame>
+      </TwoToneCard.Header>
+      <TwoToneCard.Content
+        gap="$3"
+        minHeight={isPreview ? TEXT_AREA_MIN_HEIGHT : undefined}
+      >
         <Typography
-          variant="description"
-          color="$foregroundSecondary"
+          variant={isPreview ? 'paragraph' : 'description'}
+          color={isPreview ? '$foregroundPrimary' : '$foregroundSecondary'}
           numberOfLines={messageNumberOfLines}
           ellipsizeMode={messageNumberOfLines ? 'tail' : undefined}
         >
@@ -138,7 +108,7 @@ export function Note({
             {actionButton.label}
           </CardButton>
         ) : null}
-      </ContentFrame>
-    </CardFrame>
+      </TwoToneCard.Content>
+    </TwoToneCard>
   )
 }

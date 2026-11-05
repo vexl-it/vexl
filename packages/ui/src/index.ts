@@ -2,7 +2,7 @@
 export {bodyFont, headingFont} from './config/fonts'
 export {config, config as tamaguiConfig} from './config/tamagui.config'
 export {darkTheme, lightTheme} from './config/themes'
-export {tokens} from './config/tokens'
+export {disabledOpacity, tokens} from './config/tokens'
 export type {AppConfig} from './config/types'
 
 // Provider
@@ -28,7 +28,11 @@ export {UserImagePlaceholder} from './assets/UserImagePlaceholder'
 export * from './assets/graphics'
 export * from './assets/marketplaceIntro'
 export * from './assets/marketplaceLoader'
-export * from './assets/marketplaceMapPins'
 
 // Fonts
-export {vexlFonts} from './assets/fonts'
+export {
+  getVexlFontFaceCss,
+  vexlFontFaces,
+  vexlFonts,
+  type VexlFontFace,
+} from './assets/fonts'

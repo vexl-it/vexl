@@ -63,7 +63,7 @@ export function MyDonationsEmptyStateGraphic({
         <G transform="translate(136 219)">
           <Bitcoin />
         </G>
-        <Path d="M0 136H327V240H0V136Z" fill={theme.backgroundPrimary.val} />
+        <Path d="M0 136H327V240H0V136Z" fill={theme.backgroundPrimary.get()} />
         <G transform="translate(80.97 136)">
           <Path d="M5.26277e-06 1.39612e-06C5.26277e-06 1.39612e-06 37.3842 4.66435e-06 83.5 8.69592e-06C129.616 1.27275e-05 167 1.59957e-05 167 1.59957e-05L83.5 84L5.26277e-06 1.39612e-06Z" fill="#FBA8ED" />
         </G>

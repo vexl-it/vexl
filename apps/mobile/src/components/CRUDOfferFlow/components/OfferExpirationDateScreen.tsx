@@ -1,14 +1,19 @@
 import {useNavigation} from '@react-navigation/native'
 import {JSDateString} from '@vexl-next/domain/src/utility/JSDateString.brand'
-import {Button, NavigationBar, Screen, Typography} from '@vexl-next/ui'
-import {ChevronLeft} from '@vexl-next/ui/src/icons'
+import {
+  Button,
+  ChevronLeft,
+  NavigationBar,
+  Screen,
+  Stack,
+  Typography,
+} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {Schema} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {DateTime} from 'luxon'
 import React, {useMemo, useState} from 'react'
 import {type MarkedDates} from 'react-native-calendars/src/types'
-import {Stack} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import Calendar, {REACT_NATIVE_CALENDARS_DATE_FORMAT} from '../../Calendar'
 import {offerFormMolecule} from '../atoms/offerFormStateAtoms'

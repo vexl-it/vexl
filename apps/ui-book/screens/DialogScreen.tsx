@@ -4,28 +4,39 @@ import {
   createDialogAtom,
   DialogFromAtom,
   Exchange,
-  ScrollView,
-  SizableText,
-  Theme,
   YStack,
 } from '@vexl-next/ui'
 import {Effect} from 'effect'
 import {useSetAtom} from 'jotai'
 import React, {useMemo, useState} from 'react'
 
-function DialogDemos({
-  dialogAtom,
-}: {
-  readonly dialogAtom: DialogAtom
-}): React.JSX.Element {
-  const showDialog = useSetAtom(dialogAtom)
+import {ComponentScreenLayout} from './ComponentScreenLayout'
 
+function ExchangeDialogContent(): React.JSX.Element {
   const [btcValue, setBtcValue] = useState('0.00')
   const [btcUnit, setBtcUnit] = useState<BtcUnit>('BTC')
   const [fiatValue, setFiatValue] = useState('2448543')
 
   return (
-    <>
+    <Exchange
+      btcValue={btcValue}
+      btcUnit={btcUnit}
+      onBtcValueChange={setBtcValue}
+      onBtcUnitChange={setBtcUnit}
+      fiatValue={fiatValue}
+      fiatCurrency="CZK"
+      onFiatValueChange={setFiatValue}
+      onFiatCurrencyPress={() => {}}
+    />
+  )
+}
+
+function Demos(): React.JSX.Element {
+  const dialogAtom: DialogAtom = useMemo(() => createDialogAtom(), [])
+  const showDialog = useSetAtom(dialogAtom)
+
+  return (
+    <YStack gap="$4">
       <Button
         variant="primary"
         size="medium"
@@ -90,18 +101,7 @@ function DialogDemos({
             showDialog({
               title: 'Set your own price',
               positiveButtonText: 'Save',
-              children: (
-                <Exchange
-                  btcValue={btcValue}
-                  btcUnit={btcUnit}
-                  onBtcValueChange={setBtcValue}
-                  onBtcUnitChange={setBtcUnit}
-                  fiatValue={fiatValue}
-                  fiatCurrency="CZK"
-                  onFiatValueChange={setFiatValue}
-                  onFiatCurrencyPress={() => {}}
-                />
-              ),
+              children: <ExchangeDialogContent />,
             })
           )
         }}
@@ -110,47 +110,10 @@ function DialogDemos({
       </Button>
 
       <DialogFromAtom dialogAtom={dialogAtom} />
-    </>
+    </YStack>
   )
 }
 
 export function DialogScreen(): React.JSX.Element {
-  const dialogAtom = useMemo(() => createDialogAtom(), [])
-  const darkDialogAtom = useMemo(() => createDialogAtom(), [])
-
-  return (
-    <ScrollView contentContainerStyle={{flexGrow: 1}}>
-      <YStack
-        flex={1}
-        padding="$5"
-        gap="$4"
-        backgroundColor="$backgroundPrimary"
-      >
-        <SizableText fontFamily="$body" fontWeight="600" fontSize="$5">
-          Light mode
-        </SizableText>
-        <DialogDemos dialogAtom={dialogAtom} />
-
-        <Theme name="dark">
-          <YStack
-            gap="$4"
-            backgroundColor="$backgroundPrimary"
-            padding="$5"
-            borderRadius="$5"
-            marginTop="$4"
-          >
-            <SizableText
-              fontFamily="$body"
-              fontWeight="600"
-              fontSize="$5"
-              color="$foregroundPrimary"
-            >
-              Dark mode
-            </SizableText>
-            <DialogDemos dialogAtom={darkDialogAtom} />
-          </YStack>
-        </Theme>
-      </YStack>
-    </ScrollView>
-  )
+  return <ComponentScreenLayout title="Dialog" demos={Demos} />
 }

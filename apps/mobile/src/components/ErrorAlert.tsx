@@ -1,8 +1,9 @@
 import Clipboard from '@react-native-clipboard/clipboard'
-import {Button, Stack, Typography} from '@vexl-next/ui'
-import {atom, getDefaultStore, useAtomValue, useSetAtom} from 'jotai'
+import {createDialogAtom, DialogFromAtom} from '@vexl-next/ui'
+import {Effect} from 'effect'
+import {getDefaultStore} from 'jotai'
 import React from 'react'
-import {useTranslation} from '../utils/localization/I18nProvider'
+import {translationAtom} from '../utils/localization/I18nProvider'
 import {toastNotificationAtom} from './ToastNotification/atom'
 
 interface ErrorAlertProps {
@@ -11,78 +12,36 @@ interface ErrorAlertProps {
   error?: unknown
 }
 
-const errorAlertAtom = atom<ErrorAlertProps | null>(null)
+const errorDialogAtom = createDialogAtom()
 
 export function showErrorAlert(props: ErrorAlertProps | null): void {
   const store = getDefaultStore()
-  store.set(errorAlertAtom, props)
+  if (props == null) {
+    store.set(errorDialogAtom, null)
+    return
+  }
+
+  const {t} = store.get(translationAtom)
+  Effect.runFork(
+    store
+      .set(errorDialogAtom, {
+        title: props.title,
+        subtitle: props.description,
+        positiveButtonText: t('common.copyErrorToClipboard'),
+        negativeButtonText: t('common.close'),
+      })
+      .pipe(
+        Effect.tap((copyPressed) => {
+          if (!copyPressed) return
+          Clipboard.setString(JSON.stringify(props.error, null, 2))
+          store.set(toastNotificationAtom, t('common.copied'))
+        })
+      )
+  )
 }
 
-function ErrorAlert(): React.ReactElement | null {
-  const {t} = useTranslation()
-  const errorAlert = useAtomValue(errorAlertAtom)
-  const setToastNotification = useSetAtom(toastNotificationAtom)
-
-  if (!errorAlert) return null
-
-  return (
-    <Stack
-      pos="absolute"
-      ai="center"
-      jc="center"
-      top={0}
-      left={0}
-      right={0}
-      bottom={0}
-      zIndex="$5"
-    >
-      <Stack
-        pos="absolute"
-        top={0}
-        left={0}
-        right={0}
-        bottom={0}
-        backgroundColor="$black100"
-        opacity={0.9}
-      />
-      <Stack bc="$backgroundPrimary" maxWidth="80%" br="$4" p="$4">
-        <Stack gap="$2" bc="$backgroundSecondary" br="$4" p="$4" mb="$4">
-          <Typography variant="heading3" color="$foregroundPrimary">
-            {errorAlert.title}
-          </Typography>
-        </Stack>
-        {!!errorAlert.description && (
-          <Typography variant="paragraphSmall" color="$foregroundSecondary">
-            {errorAlert.description}
-          </Typography>
-        )}
-        <Stack gap="$2" mt="$4">
-          <Button
-            alignSelf="stretch"
-            size="small"
-            variant="secondary"
-            onPress={() => {
-              Clipboard.setString(JSON.stringify(errorAlert.error, null, 2))
-              setToastNotification(t('common.copied'))
-              showErrorAlert(null)
-            }}
-          >
-            {t('common.copyErrorToClipboard')}
-          </Button>
-          <Button
-            alignSelf="stretch"
-            size="small"
-            variant="secondary"
-            onPress={() => {
-              showErrorAlert(null)
-            }}
-          >
-            {t('common.close')}
-          </Button>
-        </Stack>
-      </Stack>
-    </Stack>
-  )
+function ErrorAlert(): React.ReactElement {
+  return <DialogFromAtom dialogAtom={errorDialogAtom} />
 }
 
 export default ErrorAlert

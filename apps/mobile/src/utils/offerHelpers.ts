@@ -10,7 +10,7 @@ import {atom} from 'jotai'
 import {formatFullCurrencyAmount} from './localization/currency'
 import formatSpokenLanguages from './localization/formatSpokenLanguages'
 import {formattingLocaleAtom} from './localization/formattingLocaleAtom'
-import {translationAtom} from './localization/I18nProvider'
+import {translationAtom, type TFunction} from './localization/I18nProvider'
 import {getUserFacingOfferType} from './offerTypeSemantics'
 
 export {
@@ -24,6 +24,20 @@ export function getIsOffering(
   offerType: OfferType
 ): boolean {
   return getUserFacingOfferType({listingType, offerType}) === 'SELL'
+}
+
+export function getOfferIntentLabel({
+  isMine,
+  isOffering,
+  t,
+}: {
+  readonly isMine: boolean
+  readonly isOffering: boolean
+  readonly t: TFunction
+}): string {
+  if (isMine)
+    return isOffering ? t('marketplace.iHave') : t('marketplace.iWant')
+  return isOffering ? t('marketplace.has') : t('marketplace.wants')
 }
 
 export function getIconTagVariant(

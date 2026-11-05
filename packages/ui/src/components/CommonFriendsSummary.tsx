@@ -1,9 +1,10 @@
 import {Array, pipe} from 'effect'
 import React from 'react'
-import {getTokens, styled, useTheme} from 'tamagui'
 
 import {PeopleUsers} from '../icons/PeopleUsers'
-import {Circle, XStack} from '../primitives'
+import {XStack} from '../primitives'
+import {DotSeparatedRow} from './DotSeparatedRow'
+import {IconLabel} from './IconLabel'
 import {TrustBadge} from './TrustBadge'
 import {Typography} from './Typography'
 
@@ -13,20 +14,11 @@ export interface CommonFriendsSummaryProps {
   readonly trustedFriends?: string
 }
 
-const SummaryFrame = styled(XStack, {
-  name: 'CommonFriendsSummary',
-  gap: '$2',
-  alignItems: 'center',
-  flexShrink: 1,
-  minWidth: 0,
-})
-
 export function CommonFriendsSummary({
   clubNames = [],
   commonFriends,
   trustedFriends,
 }: CommonFriendsSummaryProps): React.JSX.Element | null {
-  const theme = useTheme()
   const clubs = pipe(
     clubNames,
     Array.filter((name) => name.length > 0)
@@ -51,27 +43,12 @@ export function CommonFriendsSummary({
 
   if (commonFriends)
     parts.push(
-      <XStack
+      <IconLabel
         key="common"
-        gap="$1"
-        alignItems="center"
+        icon={PeopleUsers}
+        label={commonFriends}
         flexShrink={countsShrink}
-        minWidth={0}
-      >
-        <PeopleUsers
-          size={getTokens().size.$5.val}
-          color={theme.foregroundSecondary.get()}
-        />
-        <Typography
-          variant="micro"
-          color="$foregroundSecondary"
-          numberOfLines={1}
-          ellipsizeMode="tail"
-          flexShrink={1}
-        >
-          {commonFriends}
-        </Typography>
-      </XStack>
+      />
     )
   if (trustedFriends)
     parts.push(
@@ -98,22 +75,8 @@ export function CommonFriendsSummary({
   if (!Array.isNonEmptyArray(parts)) return null
 
   return (
-    <SummaryFrame>
-      {pipe(
-        parts,
-        Array.map((part, index) => (
-          <React.Fragment key={index}>
-            {index > 0 ? (
-              <Circle
-                size="$2"
-                backgroundColor="$foregroundSecondary"
-                flexShrink={0}
-              />
-            ) : null}
-            {part}
-          </React.Fragment>
-        ))
-      )}
-    </SummaryFrame>
+    <DotSeparatedRow flexShrink={1} minWidth={0}>
+      {parts}
+    </DotSeparatedRow>
   )
 }

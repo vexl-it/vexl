@@ -1,7 +1,6 @@
-import {ProgressDialog} from '@vexl-next/ui'
+import {ProgressDialog, Theme, useVexlTheme} from '@vexl-next/ui'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useEffect, useState} from 'react'
-import {Theme, useThemeName} from 'tamagui'
 import {
   progressModalNativeModalUpAtom,
   uploadingProgressModalDataAtom,
@@ -11,7 +10,7 @@ function UploadingOfferProgressModal(): React.JSX.Element {
   const data = useAtomValue(uploadingProgressModalDataAtom)
   const setNativeModalUp = useSetAtom(progressModalNativeModalUpAtom)
   const shown = data.mode === 'shown'
-  const themeName = useThemeName()
+  const {resolvedTheme: themeName} = useVexlTheme()
   const [appearance, setAppearance] = useState({shown, themeName})
 
   // Clearing account preferences must not change a dialog already on screen.

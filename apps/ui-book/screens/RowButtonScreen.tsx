@@ -1,138 +1,107 @@
 import {
   BellNotification,
+  Calendar,
   CurrencyBitcoinCircle,
-  HomeHomemade,
-  Lock,
   PinGeolocation,
   RowButton,
-  SizableText,
-  Theme,
+  TrashBin,
   UserProfile,
-  YStack,
+  XmarkCancelClose,
 } from '@vexl-next/ui'
+import {Array, pipe} from 'effect'
 import React, {useState} from 'react'
-import {ScrollView} from 'react-native'
 
-function SectionLabel({
-  children,
-}: {
-  readonly children: string
-}): React.JSX.Element {
-  return (
-    <SizableText
-      fontFamily="$body"
-      fontWeight="600"
-      fontSize="$2"
-      color="$foregroundSecondary"
-      paddingTop="$3"
-    >
-      {children}
-    </SizableText>
-  )
-}
+import {ComponentScreenLayout, DemoSection} from './ComponentScreenLayout'
 
-function InteractiveGroup({
-  theme,
-}: {
-  readonly theme: 'light' | 'dark'
-}): React.JSX.Element {
+const toggleRows = [
+  {value: 'profile', label: 'Profile', icon: UserProfile},
+  {value: 'notif', label: 'Notifications', icon: BellNotification},
+  {value: 'btc', label: 'Bitcoin', icon: CurrencyBitcoinCircle},
+] as const
+
+function Demos(): React.JSX.Element {
   const [selected, setSelected] = useState<ReadonlySet<string>>(new Set())
+  const [hasDate, setHasDate] = useState(true)
+  const [locations, setLocations] = useState<readonly string[]>([
+    'Prague 7, radius 2 km',
+    'Holešovice 238/8, Prague 7, Czech Republic - radius 10 km',
+  ])
 
   const toggle = (key: string): void => {
     setSelected((prev) => {
       const next = new Set(prev)
-      if (next.has(key)) {
-        next.delete(key)
-      } else {
-        next.add(key)
-      }
+      if (next.has(key)) next.delete(key)
+      else next.add(key)
       return next
     })
   }
 
   return (
-    <Theme name={theme}>
-      <YStack
-        gap="$4"
-        padding="$5"
-        backgroundColor="$backgroundPrimary"
-        borderRadius="$4"
-      >
-        <SizableText
-          fontFamily="$body"
-          fontWeight="600"
-          fontSize="$3"
-          color="$foregroundPrimary"
-        >
-          {theme.charAt(0).toUpperCase() + theme.slice(1)}
-        </SizableText>
-
-        <SectionLabel>Tap to toggle</SectionLabel>
-        <YStack gap="$3">
-          <RowButton
-            label="Home"
-            icon={HomeHomemade}
-            value="home"
-            selected={selected.has('home')}
-            onPress={toggle}
-          />
-          <RowButton
-            label="Profile"
-            icon={UserProfile}
-            value="profile"
-            selected={selected.has('profile')}
-            onPress={toggle}
-          />
-          <RowButton
-            label="Notifications"
-            icon={BellNotification}
-            value="notif"
-            selected={selected.has('notif')}
-            onPress={toggle}
-          />
-          <RowButton
-            label="Bitcoin"
-            icon={CurrencyBitcoinCircle}
-            value="btc"
-            selected={selected.has('btc')}
-            onPress={toggle}
-          />
-          <RowButton
-            label="Location"
-            icon={PinGeolocation}
-            value="loc"
-            selected={selected.has('loc')}
-            onPress={toggle}
-          />
-          <RowButton
-            label="Security"
-            icon={Lock}
-            value="lock"
-            selected={selected.has('lock')}
-            onPress={toggle}
-          />
-        </YStack>
-      </YStack>
-    </Theme>
+    <>
+      <DemoSection title="Tap to toggle">
+        {pipe(
+          toggleRows,
+          Array.map((row) => (
+            <RowButton
+              key={row.value}
+              label={row.label}
+              icon={row.icon}
+              value={row.value}
+              selected={selected.has(row.value)}
+              onPress={toggle}
+            />
+          ))
+        )}
+      </DemoSection>
+      <DemoSection title="Red variant">
+        <RowButton
+          label="Delete"
+          icon={TrashBin}
+          variant="red"
+          onPress={() => {}}
+        />
+      </DemoSection>
+      <DemoSection title="Trailing action">
+        <RowButton
+          label={hasDate ? 'Friday, 23 July 2027' : 'Select date'}
+          icon={Calendar}
+          onPress={() => {
+            setHasDate(true)
+          }}
+          trailingAction={
+            hasDate
+              ? {
+                  icon: XmarkCancelClose,
+                  accessibilityLabel: 'Clear',
+                  onPress: () => {
+                    setHasDate(false)
+                  },
+                }
+              : undefined
+          }
+        />
+        {pipe(
+          locations,
+          Array.map((location) => (
+            <RowButton
+              key={location}
+              label={location}
+              icon={PinGeolocation}
+              trailingAction={{
+                icon: TrashBin,
+                accessibilityLabel: 'Remove',
+                onPress: () => {
+                  setLocations(Array.filter((l) => l !== location))
+                },
+              }}
+            />
+          ))
+        )}
+      </DemoSection>
+    </>
   )
 }
 
 export function RowButtonScreen(): React.JSX.Element {
-  return (
-    <ScrollView style={{flex: 1}}>
-      <YStack padding="$5" gap="$4">
-        <SizableText
-          fontFamily="$heading"
-          fontWeight="700"
-          fontSize="$3"
-          color="$foregroundPrimary"
-        >
-          Row Button
-        </SizableText>
-
-        <InteractiveGroup theme="light" />
-        <InteractiveGroup theme="dark" />
-      </YStack>
-    </ScrollView>
-  )
+  return <ComponentScreenLayout title="Row Button" demos={Demos} />
 }

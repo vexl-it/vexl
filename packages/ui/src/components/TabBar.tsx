@@ -1,5 +1,6 @@
+import {Array, Option, pipe} from 'effect'
 import React, {useCallback, useEffect, useMemo, useRef} from 'react'
-import type {LayoutChangeEvent} from 'react-native'
+import {type LayoutChangeEvent, StyleSheet} from 'react-native'
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -9,7 +10,9 @@ import Animated, {
 import {getTokens, styled, useTheme} from 'tamagui'
 
 import type {IconProps} from '../icons/types'
-import {Circle, SizableText, Stack, XStack, YStack} from '../primitives'
+import {Stack, XStack, YStack} from '../primitives'
+import {Dot} from './Dot'
+import {Typography} from './Typography'
 
 const ANIMATION_DURATION = 250
 
@@ -62,12 +65,14 @@ const IconPillFrame = styled(Stack, {
 
 const ActivePillFrame = styled(Stack, {
   name: 'TabBarActivePill',
-  position: 'absolute',
+  flex: 1,
   backgroundColor: '$navigationBackgroundHighlight',
   borderRadius: '$11',
 })
 
-const AnimatedActivePill = Animated.createAnimatedComponent(ActivePillFrame)
+const styles = StyleSheet.create({
+  activePill: {position: 'absolute'},
+})
 
 const ICON_POP_DURATION = 150
 const ICON_SETTLE_DURATION = 200
@@ -149,7 +154,12 @@ export function TabBar<T>({
   const hasInitialized = useRef(false)
 
   const activeIndex = useMemo(
-    () => tabs.findIndex((tab) => tab.value === activeTab),
+    () =>
+      pipe(
+        tabs,
+        Array.findFirstIndex((tab) => tab.value === activeTab),
+        Option.getOrElse(() => -1)
+      ),
     [tabs, activeTab]
   )
 
@@ -247,8 +257,10 @@ export function TabBar<T>({
         bottomInset ? bottomInset + getTokens().space.$2.val : '$2'
       }
     >
-      <AnimatedActivePill style={animatedPillStyle} />
-      {tabs.map((tab, index) => {
+      <Animated.View style={[styles.activePill, animatedPillStyle]}>
+        <ActivePillFrame />
+      </Animated.View>
+      {Array.map(tabs, (tab, index) => {
         const isActive = tab.value === activeTab
         return (
           <TabFrame
@@ -269,26 +281,22 @@ export function TabBar<T>({
                 direction={isActive ? directionRef.current : 'none'}
               />
               {tab.badge ? (
-                <Circle
+                <Dot
                   position="absolute"
                   top="$2"
                   right="$5"
-                  size="$3"
                   backgroundColor="$accentYellowPrimary"
                 />
               ) : null}
             </IconPillFrame>
-            <SizableText
-              fontFamily="$body"
-              fontWeight="500"
-              fontSize="$2"
-              letterSpacing="$2"
+            <Typography
+              variant="description"
               color={
                 isActive ? '$accentHighlightPrimary' : '$foregroundSecondary'
               }
             >
               {tab.label}
-            </SizableText>
+            </Typography>
           </TabFrame>
         )
       })}

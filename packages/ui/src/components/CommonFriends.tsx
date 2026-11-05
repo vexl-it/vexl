@@ -1,5 +1,5 @@
 import {Array, pipe} from 'effect'
-import React from 'react'
+import React, {useId} from 'react'
 import type {ImageProps as RNImageProps} from 'react-native'
 import Svg, {
   Defs,
@@ -45,6 +45,7 @@ export function CommonFriends({
   onPress,
 }: CommonFriendsProps): React.JSX.Element {
   const theme = useTheme()
+  const fadeGradientId = useId()
 
   const bgColor = theme.backgroundSecondary.get()
   const chevronColor = theme.foregroundSecondary.get()
@@ -55,11 +56,7 @@ export function CommonFriends({
   return (
     <CommonFriendsFrame onPress={onPress}>
       <YStack px="$5" py="$4" gap="$3">
-        <Typography
-          variant="micro"
-          color="$foregroundSecondary"
-          letterSpacing={0}
-        >
+        <Typography variant="micro" color="$foregroundSecondary">
           {trustedLabel ? `${label} · ${trustedLabel}` : label}
         </Typography>
         <XStack gap={gap} alignItems="center" overflow="hidden">
@@ -86,18 +83,12 @@ export function CommonFriends({
       >
         <Svg width="100%" height="100%">
           <Defs>
-            <SvgLinearGradient
-              id="commonFriendsFade"
-              x1="0"
-              y1="0"
-              x2="1"
-              y2="0"
-            >
+            <SvgLinearGradient id={fadeGradientId} x1="0" y1="0" x2="1" y2="0">
               <Stop offset="0" stopColor={bgColor} stopOpacity="0" />
               <Stop offset="0.4" stopColor={bgColor} stopOpacity="1" />
             </SvgLinearGradient>
           </Defs>
-          <Rect width="100%" height="100%" fill="url(#commonFriendsFade)" />
+          <Rect width="100%" height="100%" fill={`url(#${fadeGradientId})`} />
         </Svg>
       </Stack>
       <Stack

@@ -1,21 +1,18 @@
 import {useNavigation} from '@react-navigation/native'
 import {
-  Button,
+  EmptyState,
   FlagReport,
+  MenuItem,
   NavigationBar,
   Screen,
   Typography,
   XmarkCancelClose,
-  XStack,
   YStack,
 } from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {Effect} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React from 'react'
-import {ScrollView} from 'react-native'
-import {useSafeAreaInsets} from 'react-native-safe-area-context'
-import {getTokens, Stack, useTheme} from 'tamagui'
 import {useGetAllClubsForIds} from '../../../state/clubs/atom/clubsWithMembersAtom'
 import {useStatusBarStyleForScreen} from '../../../state/statusBarStyleAtom'
 import {andThenExpectBooleanNoErrors} from '../../../utils/andThenExpectNoErrors'
@@ -34,8 +31,6 @@ export default function ChatOfferDetailContent({
 }): React.ReactElement {
   useStatusBarStyleForScreen('primary')
   const navigation = useNavigation()
-  const theme = useTheme()
-  const {bottom} = useSafeAreaInsets()
   const {t} = useTranslation()
   const otherSide = useCommonFriendsOtherSide()
   const reportOffer = useSetAtom(reportOfferActionAtom)
@@ -82,22 +77,17 @@ export default function ChatOfferDetailContent({
           />
         }
       >
-        <YStack flex={1} justifyContent="center" gap="$5">
-          <Typography
-            color="$foregroundPrimary"
-            textAlign="center"
-            variant="paragraph"
-          >
-            {t('offer.offerNotFound')}
-          </Typography>
-          <Button
-            onPress={() => {
+        <EmptyState
+          fullscreen
+          title={t('offer.offerNotFound')}
+          action={{
+            label: t('common.back'),
+            onPress: () => {
               navigation.goBack()
-            }}
-          >
-            {t('common.back')}
-          </Button>
-        </YStack>
+            },
+            variant: 'primary',
+          }}
+        />
       </Screen>
     )
   }
@@ -118,76 +108,50 @@ export default function ChatOfferDetailContent({
           ]}
         />
       }
+      scrollable
     >
-      <ScrollView
-        bounces={false}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{
-          paddingBottom: bottom + getTokens().space.$8.val,
-        }}
-      >
-        <YStack gap="$5">
-          <OfferAuthorBanner
-            offer={offer}
-            realUserName={chat.otherSide.realLifeInfo?.userName}
-            userImage={otherSideData.image}
-            grayAvatar={shouldGrayScaleAvatar}
-            clubIdsForAvatar={otherSideClubsIds ?? []}
+      <YStack gap="$5" pb="$8">
+        <OfferAuthorBanner
+          offer={offer}
+          realUserName={chat.otherSide.realLifeInfo?.userName}
+          userImage={otherSideData.image}
+          grayAvatar={shouldGrayScaleAvatar}
+          clubIdsForAvatar={otherSideClubsIds ?? []}
+        />
+
+        <Typography color="$foregroundPrimary" variant="description">
+          {offer.offerInfo.publicPart.offerDescription}
+        </Typography>
+
+        <OfferPropertiesCard offer={offer} />
+
+        <CommonFriends
+          commonConnectionsHashes={commonConnectionsHashes}
+          verifiedConnectionsHashes={verifiedConnectionsHashes}
+          otherSideClubs={otherSideClubs}
+          friendLevel={friendLevel}
+          isMine={isMine}
+          otherSide={otherSide}
+        />
+
+        {theirOfferAndNotReported ? (
+          <MenuItem
+            icon={FlagReport}
+            variant="danger"
+            showChevron={false}
+            label={t('messages.reportOffer')}
+            onPress={() => {
+              void Effect.runPromise(
+                andThenExpectBooleanNoErrors((success) => {
+                  if (success) {
+                    navigation.goBack()
+                  }
+                })(reportOffer(offer))
+              )
+            }}
           />
-
-          <Typography color="$foregroundPrimary" variant="description">
-            {offer.offerInfo.publicPart.offerDescription}
-          </Typography>
-
-          <OfferPropertiesCard offer={offer} />
-
-          <CommonFriends
-            commonConnectionsHashes={commonConnectionsHashes}
-            verifiedConnectionsHashes={verifiedConnectionsHashes}
-            otherSideClubs={otherSideClubs}
-            friendLevel={friendLevel}
-            isMine={isMine}
-            otherSide={otherSide}
-          />
-
-          {theirOfferAndNotReported ? (
-            <Stack position="relative">
-              <Button
-                backgroundColor="$backgroundSecondary"
-                onPress={() => {
-                  void Effect.runPromise(
-                    andThenExpectBooleanNoErrors((success) => {
-                      if (success) {
-                        navigation.goBack()
-                      }
-                    })(reportOffer(offer))
-                  )
-                }}
-              >
-                {' '}
-              </Button>
-              <XStack
-                alignItems="center"
-                gap="$3"
-                position="absolute"
-                top={0}
-                right="$5"
-                bottom={0}
-                left="$5"
-                pointerEvents="none"
-              >
-                <FlagReport
-                  color={theme.redForeground.get()}
-                  size={getTokens().size.$7.val}
-                />
-                <Typography color="$redForeground" variant="paragraph">
-                  {t('messages.reportOffer')}
-                </Typography>
-              </XStack>
-            </Stack>
-          ) : null}
-        </YStack>
-      </ScrollView>
+        ) : null}
+      </YStack>
     </Screen>
   )
 }

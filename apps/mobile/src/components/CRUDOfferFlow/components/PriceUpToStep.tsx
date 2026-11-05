@@ -1,17 +1,8 @@
-import {
-  Button,
-  EditRow,
-  Exchange,
-  Loader,
-  Typography,
-  type BtcUnit,
-} from '@vexl-next/ui'
-import type {IconProps} from '@vexl-next/ui/src/icons/types'
+import {Button, EditStep, Exchange, InfoBox, type BtcUnit} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {Effect} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useState} from 'react'
-import {XStack, YStack} from 'tamagui'
 import {SATOSHIS_IN_BTC} from '../../../state/currentBtcPriceAtoms'
 import {currencies} from '../../../utils/localization/currency'
 import {
@@ -24,6 +15,7 @@ import {parseDecimalInput} from '../../../utils/normalizeDecimalInput'
 import BtcPriceInfo from '../../BtcPriceInfo'
 import {useOpenChangeCurrency} from '../../ChangeCurrency'
 import {offerFormMolecule} from '../atoms/offerFormStateAtoms'
+import {type OfferFormStepProps} from '../offerSetupSteps'
 
 function satsToDisplayValue(satsValue: number, btcUnit: BtcUnit): string {
   if (!satsValue) return ''
@@ -52,25 +44,11 @@ function formatFiatAmount(
   return `${formatDecimal(amount, locale, {maximumFractionDigits: 0})} ${currencyCode}`
 }
 
-interface PriceUpToStepProps {
-  readonly active: boolean
-  readonly onEdit: () => void
-  readonly onComplete: () => void
-  readonly ctaLabel?: string
-  readonly icon?: React.ComponentType<IconProps>
-  readonly overline?: string
-  readonly showInitialIcon?: boolean
-}
-
 function PriceUpToStep({
-  active,
-  onEdit,
   onComplete,
   ctaLabel,
-  icon,
-  overline,
-  showInitialIcon,
-}: PriceUpToStepProps): React.ReactElement | null {
+  ...stepProps
+}: OfferFormStepProps): React.ReactElement {
   const {t} = useTranslation()
   const locale = useAtomValue(formattingLocaleAtom)
   const {
@@ -112,22 +90,6 @@ function PriceUpToStep({
   )
   const currencyCode = currencies[currency].code
 
-  if (!active) {
-    const completedHeadline = amountBottomLimit
-      ? formatFiatAmount(amountBottomLimit, currencyCode, locale)
-      : ''
-
-    return (
-      <EditRow
-        state="completed"
-        icon={icon}
-        overline={overline ?? t('offerForm.priceUpTo')}
-        headline={completedHeadline}
-        onPress={onEdit}
-      />
-    )
-  }
-
   const btcValue = btcInputDraft ?? satsToDisplayValue(satsValue, btcUnit)
   const fiatValue = amountBottomLimit ? String(amountBottomLimit) : ''
 
@@ -135,77 +97,76 @@ function PriceUpToStep({
   const nextDisabled = !hasPriceInput || !pricesReady
 
   return (
-    <YStack>
-      <EditRow
-        state="initial"
-        headline={t('offerForm.priceUpTo')}
-        showInitialIcon={showInitialIcon}
+    <EditStep
+      {...stepProps}
+      title={t('offerForm.priceUpTo')}
+      value={
+        amountBottomLimit
+          ? formatFiatAmount(amountBottomLimit, currencyCode, locale)
+          : ''
+      }
+      gap="$3"
+    >
+      <Exchange
+        btcValue={btcValue}
+        btcUnit={btcUnit}
+        onBtcUnitChange={(unit) => {
+          setBtcInputDraft(undefined)
+          setBtcUnit(unit)
+        }}
+        onToggleBtcUnit={() => {
+          setBtcInputDraft(undefined)
+          setBtcUnit((prev) => (prev === 'BTC' ? 'SATS' : 'BTC'))
+        }}
+        onBtcValueChange={(value) => {
+          setBtcInputDraft(value)
+          const satsString = displayValueToSatsString(value, btcUnit)
+          if (satsString !== null) calculateFiatOnSatsChange(satsString)
+        }}
+        fiatValue={fiatValue}
+        fiatCurrency={currencyCode}
+        onFiatValueChange={(value) => {
+          setBtcInputDraft(undefined)
+          calculateSatsOnFiatChange(value)
+        }}
+        onFiatCurrencyPress={() => {
+          openChangeCurrency({
+            selectedCurrencyCode: currency,
+            onSave: changePriceCurrency,
+          })
+        }}
+        locale={locale}
       />
-      <YStack gap="$3" paddingVertical="$6">
-        <Exchange
-          btcValue={btcValue}
-          btcUnit={btcUnit}
-          onBtcUnitChange={(unit) => {
-            setBtcInputDraft(undefined)
-            setBtcUnit(unit)
-          }}
-          onToggleBtcUnit={() => {
-            setBtcInputDraft(undefined)
-            setBtcUnit((prev) => (prev === 'BTC' ? 'SATS' : 'BTC'))
-          }}
-          onBtcValueChange={(value) => {
-            setBtcInputDraft(value)
-            const satsString = displayValueToSatsString(value, btcUnit)
-            if (satsString !== null) calculateFiatOnSatsChange(satsString)
-          }}
-          fiatValue={fiatValue}
-          fiatCurrency={currencyCode}
-          onFiatValueChange={(value) => {
-            setBtcInputDraft(undefined)
-            calculateSatsOnFiatChange(value)
-          }}
-          onFiatCurrencyPress={() => {
-            openChangeCurrency({
-              selectedCurrencyCode: currency,
-              onSave: changePriceCurrency,
+      <BtcPriceInfo
+        btcPriceData={btcPriceData}
+        currency={currency}
+        isRefreshing={pricesLoading}
+        onRetry={retryBtcPrice}
+        showRetry={!pricesReady && !!btcPriceData}
+      />
+
+      {pricesLoading ? (
+        <InfoBox variant="naked" loading paddingHorizontal="$4">
+          {t('offerForm.loadingExchangeRate')}
+        </InfoBox>
+      ) : null}
+
+      <Button
+        variant="primary"
+        size="large"
+        disabled={nextDisabled}
+        onPress={() => {
+          void Effect.runPromise(
+            Effect.gen(function* (_) {
+              const ok = yield* _(checkAmountExceedsLimit())
+              if (ok) onComplete?.()
             })
-          }}
-          locale={locale}
-        />
-        <BtcPriceInfo
-          btcPriceData={btcPriceData}
-          currency={currency}
-          isRefreshing={pricesLoading}
-          onRetry={retryBtcPrice}
-          showRetry={!pricesReady && !!btcPriceData}
-        />
-
-        {pricesLoading ? (
-          <XStack alignItems="center" gap="$3" paddingHorizontal="$4">
-            <Loader size="small" />
-            <Typography variant="description" color="$foregroundSecondary">
-              {t('offerForm.loadingExchangeRate')}
-            </Typography>
-          </XStack>
-        ) : null}
-
-        <Button
-          variant="primary"
-          size="large"
-          disabled={nextDisabled}
-          onPress={() => {
-            void Effect.runPromise(
-              Effect.gen(function* (_) {
-                const ok = yield* _(checkAmountExceedsLimit())
-                if (ok) onComplete()
-              })
-            )
-          }}
-        >
-          {ctaLabel ?? t('offerForm.next')}
-        </Button>
-      </YStack>
-    </YStack>
+          )
+        }}
+      >
+        {ctaLabel ?? t('offerForm.next')}
+      </Button>
+    </EditStep>
   )
 }
 

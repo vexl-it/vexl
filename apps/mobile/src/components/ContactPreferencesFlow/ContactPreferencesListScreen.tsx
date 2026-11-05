@@ -1,6 +1,7 @@
 import {
   AddUserPersonContact,
   ChevronLeft,
+  LoadingOverlay,
   NavigationBar,
   Screen,
   Stack,
@@ -15,7 +16,6 @@ import {useTranslation} from '../../utils/localization/I18nProvider'
 import {runAfterAnimationFrame} from '../../utils/runAfterAnimationFrames'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import ContactsListSelect from './components/ContactListSelect'
-import PreparingContactsOverlay from './components/PreparingContactsOverlay'
 
 type Props = ContactPreferencesStackScreenProps<'ContactPreferencesList'>
 
@@ -70,6 +70,7 @@ function ContactPreferencesListScreen({
   navigation,
   route: {params},
 }: Props): React.ReactElement {
+  const {t} = useTranslation()
   const loadingContactsFromDevice = useAtomValue(loadingContactsFromDeviceAtom)
   const [shouldRenderContactsContent, setShouldRenderContactsContent] =
     useState(false)
@@ -104,7 +105,10 @@ function ContactPreferencesListScreen({
             onReady={handleContactsContentReady}
           />
         ) : null}
-        <PreparingContactsOverlay visible={isContactPreferencesLoading} />
+        <LoadingOverlay
+          visible={isContactPreferencesLoading}
+          label={t('contacts.preparingContacts')}
+        />
       </Stack>
     </Screen>
   )

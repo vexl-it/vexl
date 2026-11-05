@@ -1,30 +1,25 @@
 import {
   FaqStayAnonymous,
   Stack,
+  TitleBlock,
   Typography,
   VexlTextGraphic,
   YStack,
 } from '@vexl-next/ui'
 import {useSetAtom} from 'jotai'
 import React, {useEffect} from 'react'
-import {useWindowDimensions} from 'react-native'
 import {type LoginFlowStackScreenProps} from '../../../navigationTypes'
 import clearMmkvStorageAndEmptyAtoms from '../../../utils/clearMmkvStorageAndEmptyAtoms'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {showTosSummaryForAlreadyLoggedInUserAtom} from '../../../utils/preferences'
-import LoginFlowScreen, {
-  LoginFlowCentered,
-  LoginFlowText,
-  LoginFlowTitle,
-} from './LoginFlowScreen'
+import useGraphicScale from '../../../utils/useGraphicScale'
+import LoginFlowScreen, {LoginFlowCentered} from './LoginFlowScreen'
 
 type Props = LoginFlowStackScreenProps<'Intro1'>
 
 export default function Intro1Screen({navigation}: Props): React.ReactElement {
   const {t} = useTranslation()
-  const {width: windowWidth} = useWindowDimensions()
-  const availableWidth = windowWidth - 40
-  const faqGraphicScale = Math.min(1, availableWidth / 330)
+  const faqGraphicScale = useGraphicScale(330)
   const setShowTosSummaryForAlreadyLoggedInUser = useSetAtom(
     showTosSummaryForAlreadyLoggedInUserAtom
   )
@@ -35,7 +30,7 @@ export default function Intro1Screen({navigation}: Props): React.ReactElement {
 
   return (
     <LoginFlowScreen
-      action={{
+      primaryAction={{
         label: t('loginFlow.v2.intro1.action'),
         onPress: () => {
           void clearMmkvStorageAndEmptyAtoms().then(() => {
@@ -76,10 +71,12 @@ export default function Intro1Screen({navigation}: Props): React.ReactElement {
             height={236 * faqGraphicScale}
             width={330 * faqGraphicScale}
           />
-          <YStack gap="$4" width="100%">
-            <LoginFlowTitle>{t('loginFlow.v2.intro1.title')}</LoginFlowTitle>
-            <LoginFlowText>{t('loginFlow.v2.intro1.text')}</LoginFlowText>
-          </YStack>
+          <TitleBlock
+            align="center"
+            size="large"
+            title={t('loginFlow.v2.intro1.title')}
+            text={t('loginFlow.v2.intro1.text')}
+          />
         </YStack>
       </LoginFlowCentered>
     </LoginFlowScreen>

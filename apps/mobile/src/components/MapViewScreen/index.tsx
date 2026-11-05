@@ -1,18 +1,23 @@
 import {useFocusEffect, useNavigation} from '@react-navigation/native'
-import {NavigationBar, type NavigationBarAction} from '@vexl-next/ui'
-import {ChevronLeft, TuneSettings} from '@vexl-next/ui/src/icons'
-import {Stack, YStack} from '@vexl-next/ui/src/primitives'
+import {
+  ChevronLeft,
+  getTokens,
+  LoadingOverlay,
+  NavigationBar,
+  type NavigationBarAction,
+  Stack,
+  TuneSettings,
+  YStack,
+} from '@vexl-next/ui'
 import {useAtomValue, useSetAtom, useStore} from 'jotai'
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react'
 import {Dimensions, type LayoutChangeEvent} from 'react-native'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
-import {getTokens} from 'tamagui'
 import {isFilterActiveAtom} from '../../state/marketplace/atoms/filterAtoms'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import FilterTagBar from '../InsideRouter/components/MarketplaceScreen/components/FilterTagBar'
 import {type EdgePadding} from '../Map/types'
-import MarketplaceLoadingOverlay from '../MarketplaceLoadingOverlay'
 import {
   clearMapViewSelectionActionAtom,
   fitMapViewToAllPinsActionAtom,
@@ -212,7 +217,7 @@ function MapViewScreen(): React.JSX.Element {
         shouldRenderOffers={shouldRenderOffers}
       />
       <SelectedOfferCard selectedOfferId={selectedOfferId} />
-      <MarketplaceLoadingOverlay
+      <LoadingOverlay
         label={t('marketplace.loadingMap')}
         visible={isMapLoading || !shouldRenderMap}
       />

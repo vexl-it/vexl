@@ -1,68 +1,66 @@
-import {SizableText, TextTag, Theme, XStack, YStack} from '@vexl-next/ui'
+import {IconTag, TextTag, type TextTagVariant, XStack} from '@vexl-next/ui'
+import {Array, pipe} from 'effect'
 import React from 'react'
-import {ScrollView} from 'react-native'
 
-function ThemedColumn({
-  theme,
+import {ComponentScreenLayout, DemoSection} from './ComponentScreenLayout'
+
+const regularVariants: readonly TextTagVariant[] = [
+  'offer',
+  'request',
+  'neutral',
+  'approved',
+  'waiting',
+  'new',
+  'paused',
+  'set',
+  'accepted',
+  'waitingForConfirmation',
+  'outdated',
+]
+
+const statusVariants: readonly TextTagVariant[] = [
+  'warning',
+  'success',
+  'expired',
+  'failed',
+]
+
+function TagRow({
+  variants,
 }: {
-  readonly theme: 'light' | 'dark'
+  readonly variants: readonly TextTagVariant[]
 }): React.JSX.Element {
   return (
-    <Theme name={theme}>
-      <YStack
-        gap="$4"
-        padding="$5"
-        backgroundColor="$backgroundPrimary"
-        borderRadius="$4"
-        flex={1}
-      >
-        <SizableText
-          fontFamily="$body"
-          fontWeight="600"
-          fontSize="$3"
-          color="$foregroundPrimary"
-        >
-          {theme.charAt(0).toUpperCase() + theme.slice(1)}
-        </SizableText>
+    <XStack gap="$2" flexWrap="wrap">
+      {pipe(
+        variants,
+        Array.map((variant) => (
+          <TextTag key={variant} variant={variant} label={variant} />
+        ))
+      )}
+    </XStack>
+  )
+}
 
-        <XStack flexWrap="wrap" gap="$3">
-          <TextTag variant="offer" label="Offer" />
-          <TextTag variant="request" label="Request" />
-          <TextTag variant="approved" label="Approved" />
-          <TextTag variant="waiting" label="Waiting" />
-          <TextTag variant="new" label="New" />
-          <TextTag variant="paused" label="Paused" />
-          <TextTag variant="set" label="Set" />
-          <TextTag variant="accepted" label="Accepted" />
-          <TextTag
-            variant="waitingForConfirmation"
-            label="Waiting for confirmation"
-          />
-          <TextTag variant="outdated" label="Outdated" />
+function Demos(): React.JSX.Element {
+  return (
+    <>
+      <DemoSection title="Regular">
+        <TagRow variants={regularVariants} />
+      </DemoSection>
+      <DemoSection title="Next to an IconTag (offer card header)">
+        <XStack gap="$1" alignItems="center">
+          <TextTag variant="offer" label="I have" />
+          <IconTag variant="bitcoin" />
         </XStack>
-      </YStack>
-    </Theme>
+      </DemoSection>
+      <DemoSection title="Status (e.g. donation status)">
+        <TagRow variants={statusVariants} />
+      </DemoSection>
+    </>
   )
 }
 
 export function TextTagScreen(): React.JSX.Element {
-  return (
-    <ScrollView style={{flex: 1}}>
-      <YStack padding="$5" gap="$4">
-        <SizableText
-          fontFamily="$heading"
-          fontWeight="700"
-          fontSize="$3"
-          color="$foregroundPrimary"
-        >
-          Text Tag
-        </SizableText>
-
-        <XStack gap="$3">
-          <ThemedColumn theme="light" />
-          <ThemedColumn theme="dark" />
-        </XStack>
-      </YStack>
-    </ScrollView>
-  )
+  return <ComponentScreenLayout title="Text Tag" demos={Demos} />
 }

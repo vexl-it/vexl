@@ -1,7 +1,12 @@
-import {ArrowsVerticalSort, Typography} from '@vexl-next/ui'
+import {
+  ArrowsVerticalSort,
+  Button,
+  Typography,
+  XStack,
+  YStack,
+} from '@vexl-next/ui'
 import {useAtom, useAtomValue} from 'jotai'
 import React, {useCallback} from 'react'
-import {Stack, useTheme, XStack} from 'tamagui'
 import {
   myOffersCountAtom,
   selectedMyOffersSortingOptionAtom,
@@ -10,12 +15,10 @@ import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {formatInteger} from '../../../../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../../../../utils/localization/formattingLocaleAtom'
 import ReencryptOffersSuggestion from '../../../../ReencryptOffersSuggestion'
-import MarketplaceInlineButton from './MarketplaceInlineButton'
 
 function MyOffersListHeader(): React.ReactElement | null {
   const {t} = useTranslation()
   const locale = useAtomValue(formattingLocaleAtom)
-  const theme = useTheme()
   const allOffersCount = useAtomValue(myOffersCountAtom)
   const [sortingOption, setSortingOption] = useAtom(
     selectedMyOffersSortingOptionAtom
@@ -37,37 +40,30 @@ function MyOffersListHeader(): React.ReactElement | null {
   }
 
   return (
-    <Stack>
-      <Stack paddingHorizontal="$5">
-        <XStack
-          paddingTop="$7"
-          paddingBottom="$5"
-          paddingHorizontal="$2"
-          alignItems="center"
-          justifyContent="space-between"
+    <YStack paddingHorizontal="$5">
+      <XStack
+        paddingTop="$7"
+        paddingBottom="$5"
+        paddingHorizontal="$2"
+        alignItems="center"
+        justifyContent="space-between"
+      >
+        <Typography variant="description" color="$foregroundSecondary">
+          {t('marketplace.offersCountFormatted', {
+            localizedString: formatInteger(allOffersCount, locale),
+          })}
+        </Typography>
+        <Button
+          variant="link"
+          size="small"
+          icon={ArrowsVerticalSort}
+          onPress={toggleSorting}
         >
-          <Typography variant="description" color="$foregroundSecondary">
-            {t('marketplace.offersCountFormatted', {
-              localizedString: formatInteger(allOffersCount, locale),
-            })}
-          </Typography>
-          <MarketplaceInlineButton
-            icon={
-              <ArrowsVerticalSort
-                size={18}
-                color={theme.accentHighlightPrimary.get()}
-              />
-            }
-            label={sortButtonLabel}
-            color={theme.accentHighlightPrimary.get()}
-            onPress={toggleSorting}
-          />
-        </XStack>
-      </Stack>
-      <Stack gap="$6">
-        <ReencryptOffersSuggestion />
-      </Stack>
-    </Stack>
+          {sortButtonLabel}
+        </Button>
+      </XStack>
+      <ReencryptOffersSuggestion />
+    </YStack>
   )
 }
 

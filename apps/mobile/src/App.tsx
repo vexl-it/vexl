@@ -3,7 +3,7 @@ import {
   DefaultTheme,
   NavigationContainer,
 } from '@react-navigation/native'
-import {useVexlTheme} from '@vexl-next/ui'
+import {bodyFont, useTheme, useVexlTheme} from '@vexl-next/ui'
 import {NavigationBar} from 'expo-navigation-bar'
 import {StatusBar} from 'expo-status-bar'
 import React from 'react'
@@ -11,7 +11,6 @@ import {Platform} from 'react-native'
 import {GestureHandlerRootView} from 'react-native-gesture-handler'
 import {KeyboardProvider} from 'react-native-keyboard-controller'
 import {SafeAreaProvider} from 'react-native-safe-area-context'
-import {useTheme} from 'tamagui'
 import AnimatedSplashScreen from './AnimatedSplashScreen'
 import BadgeCountManager from './components/BadgeCountManager'
 import DisableLogBoxForTests from './components/DisableLogBoxForTests'
@@ -63,25 +62,25 @@ function App(): React.ReactElement {
             dark: isDarkTheme,
             colors: {
               ...navigationTheme.colors,
-              primary: theme.background?.get(),
+              primary: theme.accentYellowPrimary.get(),
               background: theme.backgroundPrimary.get(),
-              text: theme.color?.get(),
+              text: theme.foregroundPrimary.get(),
             },
             fonts: {
               regular: {
-                fontFamily: 'TTSatoshi400',
+                fontFamily: bodyFont.face[400].normal,
                 fontWeight: '400',
               },
               medium: {
-                fontFamily: 'TTSatoshi500',
+                fontFamily: bodyFont.face[500].normal,
                 fontWeight: '500',
               },
               bold: {
-                fontFamily: 'TTSatoshi600',
+                fontFamily: bodyFont.face[600].normal,
                 fontWeight: '600',
               },
               heavy: {
-                fontFamily: 'TTSatoshi700',
+                fontFamily: bodyFont.face[700].normal,
                 fontWeight: '700',
               },
             },

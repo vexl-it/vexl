@@ -1,6 +1,5 @@
 import {type FilterBarItem} from '@vexl-next/ui'
 import {Array, Either, Record, Schema, pipe} from 'effect'
-import {type ReadonlyArray} from 'effect/Array'
 import {atom, type Atom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'

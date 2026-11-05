@@ -3,6 +3,7 @@ import {useNavigation} from '@react-navigation/native'
 import {
   ArrowLeft,
   Button,
+  CodeBlock,
   NavigationBar,
   Screen,
   Typography,
@@ -12,9 +13,6 @@ import {ScopeProvider, useMolecule} from 'bunshi/dist/react'
 import {Array, pipe} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useMemo} from 'react'
-import {Text as RNText, ScrollView} from 'react-native'
-import {useSafeAreaInsets} from 'react-native-safe-area-context'
-import {Stack, getTokens, useTheme} from 'tamagui'
 import {type RootStackScreenProps} from '../../navigationTypes'
 import {focusChatWithMessagesByKeysAtom} from '../../state/chat/atoms/focusChatWithMessagesAtom'
 import {dummyChatWithMessages} from '../../state/chat/domain'
@@ -27,11 +25,6 @@ import useSafeGoBack from '../../utils/useSafeGoBack'
 import {toastNotificationAtom} from '../ToastNotification/atom'
 import {ChatScope, chatMolecule} from './atoms'
 
-const jsonTextStyle = {
-  fontFamily: 'monospace',
-  fontSize: getTokens().size.$3.val,
-}
-
 function ChatReceivedMessagesDebugContent({
   chatExists,
   inboxKey,
@@ -43,8 +36,6 @@ function ChatReceivedMessagesDebugContent({
 }): React.ReactElement {
   useStatusBarStyleForScreen('secondary')
 
-  const {bottom} = useSafeAreaInsets()
-  const theme = useTheme()
   const navigation =
     useNavigation<
       RootStackScreenProps<'ChatReceivedMessagesDebug'>['navigation']
@@ -82,110 +73,84 @@ function ChatReceivedMessagesDebugContent({
           }}
         />
       }
+      scrollable
     >
-      <ScrollView
-        bounces={false}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{
-          paddingHorizontal: getTokens().space.$5.val,
-          paddingTop: getTokens().space.$5.val,
-          paddingBottom: bottom + getTokens().space.$8.val,
-        }}
-      >
-        {!chatExists ? (
-          <Typography color="$foregroundPrimary" variant="paragraph">
-            Chat not found.
-          </Typography>
-        ) : (
-          <YStack gap="$4">
-            <Button
-              width="100%"
-              size="small"
-              variant="secondary"
-              onPress={() => {
-                navigation.navigate('ChatInfoJsonDebug', {
-                  inboxKey,
-                  otherSideKey,
-                })
-              }}
-            >
-              Chat info JSON
-            </Button>
-            <Button
-              width="100%"
-              size="small"
-              variant="secondary"
-              onPress={() => {
-                Clipboard.setString(messageHistoryJson)
-                setToastNotification(t('common.copied'))
-              }}
-            >
-              Copy message history
-            </Button>
-            <Typography color="$foregroundSecondary" variant="paragraph">
-              Showing {messagesToDisplay.length} message
-              {messagesToDisplay.length === 1 ? '' : 's'} for this chat.
-            </Typography>
-            {pipe(
-              messagesToDisplay,
-              Array.map((message, index) => {
-                const messageJson = JSON.stringify(message, null, 2)
-                const directionPrefix =
-                  message.state === 'received' ||
-                  message.state === 'receivedButRequiresNewerVersion'
-                    ? 'RECEIVED'
-                    : 'SEND'
-                const messageDescription = `${directionPrefix} ${message.message.messageType} ${
-                  message.message.text ?? ''
-                }`
-
-                return (
-                  <YStack
-                    key={message.message.uuid}
-                    backgroundColor="$backgroundSecondary"
-                    borderRadius="$5"
-                    padding="$4"
-                    gap="$4"
-                  >
-                    <Typography
-                      color="$foregroundSecondary"
-                      variant="paragraph"
-                    >
-                      {messageDescription}
-                    </Typography>
-                    <Stack
-                      backgroundColor="$backgroundTertiary"
-                      borderRadius="$4"
-                      padding="$3"
-                    >
-                      <RNText
-                        selectable
-                        style={[
-                          jsonTextStyle,
-                          {color: theme.foregroundPrimary.get()},
-                        ]}
-                      >
-                        {messageJson}
-                      </RNText>
-                    </Stack>
-                    <Button
-                      width="100%"
-                      size="small"
-                      variant="secondary"
-                      onPress={() => {
-                        Clipboard.setString(messageJson)
-                        setToastNotification(t('common.copied'))
-                      }}
-                    >
-                      Copy
-                    </Button>
-                  </YStack>
-                )
+      {!chatExists ? (
+        <Typography color="$foregroundPrimary" variant="paragraph">
+          Chat not found.
+        </Typography>
+      ) : (
+        <YStack gap="$4" pb="$8">
+          <Button
+            width="100%"
+            size="small"
+            variant="secondary"
+            onPress={() => {
+              navigation.navigate('ChatInfoJsonDebug', {
+                inboxKey,
+                otherSideKey,
               })
-            )}
-          </YStack>
-        )}
-      </ScrollView>
+            }}
+          >
+            Chat info JSON
+          </Button>
+          <Button
+            width="100%"
+            size="small"
+            variant="secondary"
+            onPress={() => {
+              Clipboard.setString(messageHistoryJson)
+              setToastNotification(t('common.copied'))
+            }}
+          >
+            Copy message history
+          </Button>
+          <Typography color="$foregroundSecondary" variant="paragraph">
+            Showing {messagesToDisplay.length} message
+            {messagesToDisplay.length === 1 ? '' : 's'} for this chat.
+          </Typography>
+          {pipe(
+            messagesToDisplay,
+            Array.map((message, index) => {
+              const messageJson = JSON.stringify(message, null, 2)
+              const directionPrefix =
+                message.state === 'received' ||
+                message.state === 'receivedButRequiresNewerVersion'
+                  ? 'RECEIVED'
+                  : 'SEND'
+              const messageDescription = `${directionPrefix} ${message.message.messageType} ${
+                message.message.text ?? ''
+              }`
+
+              return (
+                <YStack
+                  key={message.message.uuid}
+                  backgroundColor="$backgroundSecondary"
+                  borderRadius="$5"
+                  padding="$4"
+                  gap="$4"
+                >
+                  <Typography color="$foregroundSecondary" variant="paragraph">
+                    {messageDescription}
+                  </Typography>
+                  <CodeBlock>{messageJson}</CodeBlock>
+                  <Button
+                    width="100%"
+                    size="small"
+                    variant="secondary"
+                    onPress={() => {
+                      Clipboard.setString(messageJson)
+                      setToastNotification(t('common.copied'))
+                    }}
+                  >
+                    Copy
+                  </Button>
+                </YStack>
+              )
+            })
+          )}
+        </YStack>
+      )}
     </Screen>
   )
 }

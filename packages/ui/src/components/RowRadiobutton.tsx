@@ -1,52 +1,15 @@
 import React from 'react'
-import {RadioGroup as TamaguiRadioGroup, styled, useTheme} from 'tamagui'
+import {RadioGroup as TamaguiRadioGroup, getTokens} from 'tamagui'
 
+import {disabledOpacity} from '../config/tokens'
 import {RadiobuttonCircleEmpty} from '../icons/RadiobuttonCircleEmpty'
 import {RadiobuttonCircleFilled} from '../icons/RadiobuttonCircleFilled'
-import {SizableText, XStack, YStack} from '../primitives'
 import {useRadioGroupSelectedValuePress, useRadioGroupValue} from './RadioGroup'
-
-const RowRadiobuttonLabel = styled(SizableText, {
-  name: 'RowRadiobuttonLabel',
-  fontFamily: '$body',
-  fontWeight: '500',
-  fontSize: '$4',
-  letterSpacing: '$4',
-  color: '$foregroundPrimary',
-
-  variants: {
-    selected: {
-      true: {
-        color: '$accentHighlightPrimary',
-      },
-    },
-  } as const,
-
-  defaultVariants: {
-    selected: false,
-  },
-})
-
-const RowRadiobuttonDescription = styled(SizableText, {
-  name: 'RowRadiobuttonDescription',
-  fontFamily: '$body',
-  fontWeight: '500',
-  fontSize: '$2',
-  letterSpacing: '$2',
-  color: '$foregroundPrimary',
-
-  variants: {
-    selected: {
-      true: {
-        color: '$accentHighlightPrimary',
-      },
-    },
-  } as const,
-
-  defaultVariants: {
-    selected: false,
-  },
-})
+import {
+  SelectionRowFrame,
+  SelectionRowText,
+  useSelectionRowIconColor,
+} from './SelectionRow'
 
 export interface RowRadiobuttonProps<T extends string = string> {
   readonly value: T
@@ -64,44 +27,34 @@ export function RowRadiobutton<T extends string>({
   const radioGroupValue = useRadioGroupValue()
   const onSelectedValuePress = useRadioGroupSelectedValuePress()
   const selected = radioGroupValue === value
-  const theme = useTheme()
-  const iconColor = selected
-    ? theme.accentHighlightPrimary.get()
-    : theme.foregroundPrimary.get()
+  const iconColor = useSelectionRowIconColor(selected)
+  const Indicator = selected ? RadiobuttonCircleFilled : RadiobuttonCircleEmpty
 
   return (
     <TamaguiRadioGroup.Item
       value={value}
       disabled={disabled}
       unstyled
-      backgroundColor={
-        selected ? '$accentYellowSecondary' : '$backgroundSecondary'
-      }
-      padding="$5"
-      borderRadius="$5"
-      gap="$3"
+      borderWidth={0}
+      padding={0}
+      backgroundColor="transparent"
       pressStyle={{opacity: 0.7}}
       onPress={() => {
         if (selected) onSelectedValuePress?.(value)
       }}
     >
-      <XStack gap="$3" alignItems="center">
-        {selected ? (
-          <RadiobuttonCircleFilled size={24} color={iconColor} />
-        ) : (
-          <RadiobuttonCircleEmpty size={24} color={iconColor} />
-        )}
-        <RowRadiobuttonLabel selected={selected} flex={1}>
-          {label}
-        </RowRadiobuttonLabel>
-      </XStack>
-      {description ? (
-        <YStack paddingLeft="$8">
-          <RowRadiobuttonDescription selected={selected}>
-            {description}
-          </RowRadiobuttonDescription>
-        </YStack>
-      ) : null}
+      <SelectionRowFrame
+        selected={selected}
+        pressable={false}
+        opacity={disabled ? disabledOpacity : 1}
+      >
+        <Indicator size={getTokens().size.$7.val} color={iconColor} />
+        <SelectionRowText
+          selected={selected}
+          label={label}
+          description={description}
+        />
+      </SelectionRowFrame>
     </TamaguiRadioGroup.Item>
   )
 }

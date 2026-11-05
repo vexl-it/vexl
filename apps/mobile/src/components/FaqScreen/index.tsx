@@ -1,20 +1,11 @@
 import {
-  Button,
   NavigationBar,
   Screen,
-  Stack,
-  Typography,
-  XStack,
+  StoryPager,
   XmarkCancelClose,
 } from '@vexl-next/ui'
 import {Array, Option, pipe} from 'effect'
-import React, {useState} from 'react'
-import {
-  Pressable,
-  TouchableWithoutFeedback,
-  useWindowDimensions,
-  type GestureResponderEvent,
-} from 'react-native'
+import React from 'react'
 import {type RootStackScreenProps} from '../../navigationTypes'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../utils/useSafeGoBack'
@@ -35,41 +26,10 @@ function getInitialPage(
   )
 }
 
-function FaqsScreen({route: {params}}: Props): React.ReactElement | null {
+function FaqsScreen({route: {params}}: Props): React.ReactElement {
   const {t} = useTranslation()
   const safeGoBack = useSafeGoBack()
   const content = useContent()
-  const {width: windowWidth} = useWindowDimensions()
-  const [page, setPage] = useState<number>(() =>
-    getInitialPage(content, params?.pageType)
-  )
-  const pageContent = content[page]
-
-  if (!pageContent) return null
-
-  const Graphic = pageContent.graphic
-  const isLastPage = page === content.length - 1
-  const isFirstPage = page === 0
-
-  const goBack = (): void => {
-    if (page === 0) safeGoBack()
-    else setPage((currentPage) => currentPage - 1)
-  }
-
-  const goNext = (): void => {
-    if (isLastPage) safeGoBack()
-    else setPage((currentPage) => currentPage + 1)
-  }
-
-  const navigateContent = (event: GestureResponderEvent): void => {
-    const isPressOnLeftHalf = event.nativeEvent.pageX < windowWidth / 2
-
-    if (isPressOnLeftHalf) {
-      if (!isFirstPage) setPage((currentPage) => currentPage - 1)
-    } else if (!isLastPage) {
-      setPage((currentPage) => currentPage + 1)
-    }
-  }
 
   return (
     <Screen
@@ -81,81 +41,14 @@ function FaqsScreen({route: {params}}: Props): React.ReactElement | null {
         />
       }
     >
-      <Stack flex={1}>
-        <Pressable onPress={navigateContent} style={{flex: 1}}>
-          <Stack
-            flex={1}
-            backgroundColor="$backgroundTertiary"
-            borderRadius="$4"
-            overflow="hidden"
-            paddingHorizontal="$5"
-            paddingTop="$4"
-            paddingBottom="$6"
-          >
-            <XStack gap="$2">
-              {pipe(
-                content,
-                Array.map((_, index) => (
-                  <TouchableWithoutFeedback
-                    hitSlop={5}
-                    key={index}
-                    onPress={() => {
-                      setPage(index)
-                    }}
-                  >
-                    <Stack
-                      backgroundColor={
-                        index <= page
-                          ? '$foregroundPrimary'
-                          : '$foregroundTertiary'
-                      }
-                      borderRadius="$11"
-                      flex={1}
-                      height="$2"
-                      opacity={index <= page ? 1 : 0.55}
-                    />
-                  </TouchableWithoutFeedback>
-                ))
-              )}
-            </XStack>
-
-            <Stack
-              alignItems="center"
-              flex={1}
-              justifyContent="center"
-              minHeight={250}
-            >
-              <Graphic animate disableReplayOnPress />
-            </Stack>
-
-            <Stack gap="$3">
-              <Typography
-                color="$foregroundPrimary"
-                letterSpacing={0}
-                fontWeight={700}
-                variant="heading3"
-                maxWidth={280}
-              >
-                {pageContent.title}
-              </Typography>
-              <Typography color="$foregroundSecondary" variant="paragraphSmall">
-                {pageContent.text}
-              </Typography>
-            </Stack>
-          </Stack>
-        </Pressable>
-
-        <XStack gap="$3" paddingVertical="$3">
-          {!isFirstPage ? (
-            <Button flex={1} onPress={goBack} variant="secondary">
-              {t('common.back')}
-            </Button>
-          ) : null}
-          <Button flex={1} onPress={goNext} variant="primary">
-            {t(isLastPage ? 'common.done' : 'common.next')}
-          </Button>
-        </XStack>
-      </Stack>
+      <StoryPager
+        pages={content}
+        initialPage={getInitialPage(content, params?.pageType)}
+        backLabel={t('common.back')}
+        nextLabel={t('common.next')}
+        finishLabel={t('common.done')}
+        onFinish={safeGoBack}
+      />
     </Screen>
   )
 }

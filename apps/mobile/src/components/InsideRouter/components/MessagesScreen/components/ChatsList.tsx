@@ -1,18 +1,18 @@
 import {useNavigation} from '@react-navigation/native'
 import {FlashList} from '@shopify/flash-list'
 import {
+  EmptyState,
   FilterBar,
   type FilterBarItem,
   SearchBar,
   TagLabel,
-  Typography,
 } from '@vexl-next/ui'
 import {Option, pipe, Array as ReadonlyArray} from 'effect'
 import {atom, type Atom, useAtom, useAtomValue} from 'jotai'
 import {selectAtom, splitAtom} from 'jotai/utils'
 import React from 'react'
 import Animated from 'react-native-reanimated'
-import {Stack} from 'tamagui'
+import {getTokens, Stack} from 'tamagui'
 import messagingStateAtom from '../../../../../state/chat/atoms/messagingStateAtom'
 import compareMessages from '../../../../../state/chat/utils/compareMessages'
 import chatShouldBeVisible from '../../../../../state/chat/utils/isChatActive'
@@ -30,13 +30,13 @@ import {
 } from '../../../../../state/chatTags/domain'
 import atomKeyExtractor from '../../../../../utils/atomUtils/atomKeyExtractor'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
-import EmptyListWrapper from '../../../../EmptyListWrapper'
 import usePixelsFromBottomWhereTabsEnd from '../../../utils'
 import {InsideScreenListHeader, useInsideScreenScroll} from '../../InsideScreen'
 import ChatListItem, {type ChatListData} from './ChatListItem'
 
-const ReanimatedFlashList: React.ComponentType<any> =
-  Animated.createAnimatedComponent(FlashList)
+const ReanimatedFlashList = Animated.createAnimatedComponent(
+  FlashList<Atom<ChatListData>>
+)
 
 const tagLabelsEquivalence = ReadonlyArray.getEquivalence<string>(
   (left, right) => left === right
@@ -230,34 +230,19 @@ function ChatsList(): React.ReactElement | null {
 
   const listEmptyComponent =
     selectedTagIds.size > 0 ? null : (
-      <EmptyListWrapper
-        horizontalPadding
-        inScrollView
-        buttonText={t('messages.seeMarketplace')}
-        onButtonPress={() => {
-          navigation.navigate('InsideTabs', {
-            screen: 'Marketplace',
-          })
+      <EmptyState
+        px="$5"
+        title={t('messages.youDontHaveAnyOpenChats')}
+        description={t('messages.startConversationByReactingToOffer')}
+        action={{
+          label: t('messages.seeMarketplace'),
+          onPress: () => {
+            navigation.navigate('InsideTabs', {
+              screen: 'Marketplace',
+            })
+          },
         }}
-      >
-        <Stack gap="$5" pt="$5">
-          <Typography
-            color="$foregroundPrimary"
-            variant="heading3"
-            textAlign="center"
-          >
-            {t('messages.youDontHaveAnyOpenChats')}
-          </Typography>
-          <Typography
-            color="$foregroundSecondary"
-            variant="description"
-            textAlign="center"
-            ta="center"
-          >
-            {t('messages.startConversationByReactingToOffer')}
-          </Typography>
-        </Stack>
-      </EmptyListWrapper>
+      />
     )
 
   return (
@@ -268,12 +253,8 @@ function ChatsList(): React.ReactElement | null {
       maintainVisibleContentPosition={{disabled: true}}
       ListHeaderComponent={listHeaderComponent}
       ListEmptyComponent={listEmptyComponent}
-      ListEmptyComponentStyle={{
-        flex: 1,
-        justifyContent: 'center',
-      }}
       contentContainerStyle={{
-        paddingBottom: tabBarEndsAt + 25,
+        paddingBottom: tabBarEndsAt + getTokens().space.$7.val,
       }}
       onScroll={onScroll}
       scrollEventThrottle={16}

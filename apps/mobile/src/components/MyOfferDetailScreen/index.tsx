@@ -1,33 +1,32 @@
 import {useFocusEffect} from '@react-navigation/native'
 import {
+  BoxProduct,
   Button,
+  ChatBubbles,
+  ChevronLeft,
+  ConferenceClub,
   EditRow,
+  EmptyState,
+  ListWriteDocument,
+  MoneyBankNotes,
   NavigationBar,
+  OfferHandCash,
   Pause,
+  PeopleUsers,
+  PinGeolocation,
   Play,
   Screen,
   TextTag,
   TrashBin,
   Typography,
+  XStack,
+  YStack,
 } from '@vexl-next/ui'
-import {
-  BoxProduct,
-  ChatBubbles,
-  ChevronLeft,
-  ConferenceClub,
-  ListWriteDocument,
-  MoneyBankNotes,
-  OfferHandCash,
-  PeopleUsers,
-  PinGeolocation,
-} from '@vexl-next/ui/src/icons'
 import {useMolecule} from 'bunshi/dist/react'
 import {Array, Effect, Number, Option, pipe} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useLayoutEffect, useMemo} from 'react'
 import {BackHandler} from 'react-native'
-import {useSafeAreaInsets} from 'react-native-safe-area-context'
-import {getTokens, ScrollView, XStack, YStack} from 'tamagui'
 import {type RootStackScreenProps} from '../../navigationTypes'
 import {
   clubsWithMembersAtom,
@@ -40,18 +39,17 @@ import {isOfferExpired} from '../../utils/isOfferExpired'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import {formatInteger} from '../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../utils/localization/formattingLocaleAtom'
-import {getOfferExpirationLabel} from '../../utils/offerAmountDetails'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import {offerFormMolecule} from '../CRUDOfferFlow/atoms/offerFormStateAtoms'
 import AmountStep from '../CRUDOfferFlow/components/AmountStep'
 import DescribeStep from '../CRUDOfferFlow/components/DescribeStep'
+import FriendLevelStep from '../CRUDOfferFlow/components/FriendLevelStep'
 import LanguageStep from '../CRUDOfferFlow/components/LanguageStep'
 import LocationStep from '../CRUDOfferFlow/components/LocationStep'
 import NetworkStep from '../CRUDOfferFlow/components/NetworkStep'
 import PriceUpToStep from '../CRUDOfferFlow/components/PriceUpToStep'
 import ProductCategoryStep from '../CRUDOfferFlow/components/ProductCategoryStep'
 import {type EditableOfferField} from '../CRUDOfferFlow/offerSetupSteps'
-import {useFriendLevelLabels} from '../CRUDOfferFlow/useFriendLevelLabels'
 
 type Props = RootStackScreenProps<'MyOfferDetail'>
 
@@ -64,7 +62,6 @@ function MyOfferDetailScreen({
   const {t} = useTranslation()
   const locale = useAtomValue(formattingLocaleAtom)
   const safeGoBack = useSafeGoBack()
-  const insets = useSafeAreaInsets()
   const offerOption = useSingleOffer(offerId)
 
   const {
@@ -77,7 +74,6 @@ function MyOfferDetailScreen({
     showUnpublishedChangesDialogActionAtom,
     listingTypeAtom,
     offerTitleAtom,
-    expirationDateAtom,
     selectedClubsUuidsAtom,
   } = useMolecule(offerFormMolecule)
   const setOfferForm = useSetAtom(setOfferFormActionAtom)
@@ -93,7 +89,6 @@ function MyOfferDetailScreen({
   )
   const listingType = useAtomValue(listingTypeAtom)
   const offerTitle = useAtomValue(offerTitleAtom)
-  const expirationDate = useAtomValue(expirationDateAtom)
   const selectedClubsUuids = useAtomValue(selectedClubsUuidsAtom)
   const selectedClubNames = useGetAllClubsNamesForIds(selectedClubsUuids)
   const allClubsWithMembers = useAtomValue(clubsWithMembersAtom)
@@ -139,13 +134,6 @@ function MyOfferDetailScreen({
     [navigation, offerId]
   )
 
-  const friendLevelLabels = useFriendLevelLabels()
-  const expirationLabel = getOfferExpirationLabel({
-    expirationDate,
-    locale,
-    t,
-  })
-
   const hasSelectedClubs = Array.isNonEmptyArray(selectedClubNames)
   const clubsReach = pipe(
     allClubsWithMembers,
@@ -164,18 +152,15 @@ function MyOfferDetailScreen({
           />
         }
       >
-        <YStack flex={1} alignItems="center" justifyContent="center" gap="$5">
-          <Typography
-            variant="titlesSmall"
-            color="$foregroundPrimary"
-            textAlign="center"
-          >
-            {t('offer.offerNotFound')}
-          </Typography>
-          <Button variant="primary" onPress={safeGoBack} width="100%">
-            {t('common.back')}
-          </Button>
-        </YStack>
+        <EmptyState
+          fullscreen
+          title={t('offer.offerNotFound')}
+          action={{
+            label: t('common.back'),
+            onPress: safeGoBack,
+            variant: 'primary',
+          }}
+        />
       </Screen>
     )
   }
@@ -199,6 +184,7 @@ function MyOfferDetailScreen({
 
   return (
     <Screen
+      scrollable
       navigationBar={
         <NavigationBar
           style="back"
@@ -237,143 +223,127 @@ function MyOfferDetailScreen({
         />
       }
     >
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{
-          paddingBottom: insets.bottom + getTokens().space.$5.val,
-        }}
-      >
-        <YStack gap="$5">
-          <XStack alignItems="center" gap="$5" paddingVertical="$4">
-            <Typography
-              variant="paragraphDemibold"
-              color="$foregroundPrimary"
-              flex={1}
-            >
-              {offerTitle}
-            </Typography>
-            <TextTag variant={offerStatusVariant} label={offerStatusLabel} />
-          </XStack>
+      <YStack gap="$5" paddingBottom="$5">
+        <XStack alignItems="center" gap="$5" paddingVertical="$4">
+          <Typography
+            variant="paragraphDemibold"
+            color="$foregroundPrimary"
+            flex={1}
+          >
+            {offerTitle}
+          </Typography>
+          <TextTag variant={offerStatusVariant} label={offerStatusLabel} />
+        </XStack>
 
-          {listingType === 'PRODUCT' ? (
-            <ProductCategoryStep
-              active={false}
-              icon={BoxProduct}
-              missing={isMissingProductCategory}
-              missingHeadline={t('editOffer.categoryRequired')}
-              overline={t('editOffer.detail.productCategory')}
-              onEdit={() => {
-                navigateToEdit('productCategory')
-              }}
-              onComplete={() => {}}
-            />
-          ) : null}
-          {listingType === 'BITCOIN' ? (
-            <AmountStep
-              active={false}
-              icon={MoneyBankNotes}
-              overline={t('editOffer.detail.amount')}
-              onEdit={() => {
-                navigateToEdit('amount')
-              }}
-              onComplete={() => {}}
-            />
-          ) : (
-            <PriceUpToStep
-              active={false}
-              icon={MoneyBankNotes}
-              overline={t('editOffer.detail.amount')}
-              onEdit={() => {
-                navigateToEdit('amount')
-              }}
-              onComplete={() => {}}
-            />
-          )}
-          <LocationStep
+        {listingType === 'PRODUCT' ? (
+          <ProductCategoryStep
             active={false}
-            icon={PinGeolocation}
-            overline={t('editOffer.detail.location')}
+            icon={BoxProduct}
+            missing={isMissingProductCategory}
+            missingHeadline={t('editOffer.categoryRequired')}
+            overline={t('editOffer.detail.productCategory')}
             onEdit={() => {
-              navigateToEdit('location')
+              navigateToEdit('productCategory')
             }}
-            onComplete={() => {}}
           />
-          <NetworkStep
+        ) : null}
+        {listingType === 'BITCOIN' ? (
+          <AmountStep
             active={false}
-            icon={OfferHandCash}
-            overline={t('editOffer.detail.paymentDetails')}
+            icon={MoneyBankNotes}
+            overline={t('editOffer.detail.amount')}
             onEdit={() => {
-              navigateToEdit('network')
+              navigateToEdit('amount')
             }}
-            onComplete={() => {}}
           />
-          <DescribeStep
+        ) : (
+          <PriceUpToStep
             active={false}
-            icon={ListWriteDocument}
-            overline={t('editOffer.detail.offerDescription')}
+            icon={MoneyBankNotes}
+            overline={t('editOffer.detail.amount')}
             onEdit={() => {
-              navigateToEdit('describe')
+              navigateToEdit('amount')
             }}
-            onComplete={() => {}}
           />
-          <LanguageStep
-            active={false}
-            icon={ChatBubbles}
-            overline={t('editOffer.detail.offerLanguage')}
-            onEdit={() => {
-              navigateToEdit('language')
-            }}
-            onComplete={() => {}}
-          />
+        )}
+        <LocationStep
+          active={false}
+          icon={PinGeolocation}
+          overline={t('editOffer.detail.location')}
+          onEdit={() => {
+            navigateToEdit('location')
+          }}
+        />
+        <NetworkStep
+          active={false}
+          icon={OfferHandCash}
+          overline={t('editOffer.detail.paymentDetails')}
+          onEdit={() => {
+            navigateToEdit('network')
+          }}
+        />
+        <DescribeStep
+          active={false}
+          icon={ListWriteDocument}
+          overline={t('editOffer.detail.offerDescription')}
+          onEdit={() => {
+            navigateToEdit('describe')
+          }}
+        />
+        <LanguageStep
+          active={false}
+          icon={ChatBubbles}
+          overline={t('editOffer.detail.offerLanguage')}
+          onEdit={() => {
+            navigateToEdit('language')
+          }}
+        />
+        <FriendLevelStep
+          active={false}
+          icon={PeopleUsers}
+          overline={t('editOffer.detail.whoCanSeeYourOffer')}
+          onEdit={() => {
+            navigateToEdit('friendLevel')
+          }}
+        />
+        {allClubsWithMembers.length > 0 ? (
           <EditRow
             state="completed"
-            icon={PeopleUsers}
-            overline={t('editOffer.detail.whoCanSeeYourOffer')}
-            headline={friendLevelLabels.headline}
-            subheadline={[friendLevelLabels.reachLabel, expirationLabel]}
+            icon={ConferenceClub}
+            overline={t('editOffer.detail.publishToVexlClub')}
+            headline={
+              hasSelectedClubs
+                ? selectedClubNames.join(', ')
+                : t('editOffer.noClubsSelected')
+            }
+            subheadline={
+              hasSelectedClubs
+                ? t('offerForm.friendLevel.reachPeopleFormatted', {
+                    localizedString: formatInteger(clubsReach, locale),
+                  })
+                : undefined
+            }
             onPress={() => {
-              navigateToEdit('friendLevel')
+              navigateToEdit('clubs')
             }}
           />
-          {allClubsWithMembers.length > 0 ? (
-            <EditRow
-              state="completed"
-              icon={ConferenceClub}
-              overline={t('editOffer.detail.publishToVexlClub')}
-              headline={
-                hasSelectedClubs
-                  ? selectedClubNames.join(', ')
-                  : t('editOffer.noClubsSelected')
-              }
-              subheadline={
-                hasSelectedClubs
-                  ? t('offerForm.friendLevel.reachPeopleFormatted', {
-                      localizedString: formatInteger(clubsReach, locale),
-                    })
-                  : undefined
-              }
-              onPress={() => {
-                navigateToEdit('clubs')
-              }}
-            />
-          ) : null}
-          {hasUnsavedChanges ? (
-            <Button
-              variant="primary"
-              size="medium"
-              onPress={() => {
-                void Effect.runPromise(
-                  Effect.andThen(publishChanges(), (success) => {
-                    if (success) safeGoBack()
-                  })
-                )
-              }}
-            >
-              {t('editOffer.publishChanges')}
-            </Button>
-          ) : null}
-        </YStack>
-      </ScrollView>
+        ) : null}
+        {hasUnsavedChanges ? (
+          <Button
+            variant="primary"
+            size="medium"
+            onPress={() => {
+              void Effect.runPromise(
+                Effect.andThen(publishChanges(), (success) => {
+                  if (success) safeGoBack()
+                })
+              )
+            }}
+          >
+            {t('editOffer.publishChanges')}
+          </Button>
+        ) : null}
+      </YStack>
     </Screen>
   )
 }

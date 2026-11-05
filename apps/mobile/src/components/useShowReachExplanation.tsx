@@ -1,4 +1,4 @@
-import {Separator, Typography, XStack, YStack} from '@vexl-next/ui'
+import {Divider, KeyValueRow, YStack} from '@vexl-next/ui'
 import {Effect} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback} from 'react'
@@ -12,47 +12,30 @@ import {formatInteger} from '../utils/localization/formatting'
 import {formattingLocaleAtom} from '../utils/localization/formattingLocaleAtom'
 import {globalDialogAtom} from './GlobalDialog'
 
-function ReachRow({
-  label,
-  count,
-}: {
-  readonly label: string
-  readonly count: number
-}): React.JSX.Element {
-  const locale = useAtomValue(formattingLocaleAtom)
-
-  return (
-    <XStack ai="center" jc="space-between" gap="$4">
-      <Typography variant="paragraph" color="$foregroundSecondary" f={1}>
-        {label}
-      </Typography>
-      <Typography variant="paragraphDemibold" color="$foregroundPrimary">
-        {formatInteger(count, locale)}
-      </Typography>
-    </XStack>
-  )
-}
-
 function ReachExplanation(): React.JSX.Element {
   const {t} = useTranslation()
   const contactsReach = useAtomValue(fistAndSecondLevelConnectionsReachAtom)
   const clubsReach = useAtomValue(clubsConnectionsReachAtom)
   const totalReach = useAtomValue(reachNumberAtom)
+  const locale = useAtomValue(formattingLocaleAtom)
 
   return (
     <YStack gap="$3">
-      <ReachRow
+      <KeyValueRow
+        size="medium"
         label={t('account.reachExplanation.contacts')}
-        count={contactsReach}
+        value={formatInteger(contactsReach, locale)}
       />
-      <ReachRow
+      <KeyValueRow
+        size="medium"
         label={t('account.reachExplanation.clubs')}
-        count={clubsReach}
+        value={formatInteger(clubsReach, locale)}
       />
-      <Separator borderColor="$backgroundTertiary" />
-      <ReachRow
+      <Divider />
+      <KeyValueRow
+        size="medium"
         label={t('account.reachExplanation.total')}
-        count={totalReach}
+        value={formatInteger(totalReach, locale)}
       />
     </YStack>
   )

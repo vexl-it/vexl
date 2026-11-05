@@ -11,7 +11,8 @@ import Animated, {
 import {scheduleOnRN} from 'react-native-worklets'
 import {styled} from 'tamagui'
 
-import {SizableText, Stack} from '../primitives'
+import {Stack} from '../primitives'
+import {Typography} from './Typography'
 
 const DISPLAY_DURATION = 3000
 const ANIMATION_DURATION = 300
@@ -36,26 +37,21 @@ const ToastPill = styled(Stack, {
   justifyContent: 'center',
 })
 
-const ToastLabel = styled(SizableText, {
-  name: 'ToastLabel',
-  fontFamily: '$body',
-  fontWeight: '600',
-  fontSize: '$2',
-  letterSpacing: '$2',
-  color: '$backgroundPrimary',
-  textAlign: 'center',
-})
-
-const ToastDescription = styled(SizableText, {
-  name: 'ToastDescription',
-  fontFamily: '$body',
-  fontWeight: '500',
-  fontSize: '$1',
-  letterSpacing: '$1',
-  color: '$backgroundPrimary',
-  opacity: 0.8,
-  textAlign: 'center',
-})
+function ToastLabel({
+  children,
+}: {
+  readonly children?: string
+}): React.JSX.Element {
+  return (
+    <Typography
+      variant="descriptionBold"
+      color="$backgroundPrimary"
+      textAlign="center"
+    >
+      {children}
+    </Typography>
+  )
+}
 
 /**
  * A toast can either be a plain single-line message (backwards compatible) or
@@ -189,9 +185,14 @@ export function Toast({
                 {normalizeToastMessage(displayedMessage).title}
               </ToastLabel>
               {normalizeToastMessage(displayedMessage).description ? (
-                <ToastDescription>
+                <Typography
+                  variant="micro"
+                  color="$backgroundPrimary"
+                  opacity={0.8}
+                  textAlign="center"
+                >
                   {normalizeToastMessage(displayedMessage).description}
-                </ToastDescription>
+                </Typography>
               ) : null}
             </>
           ) : (

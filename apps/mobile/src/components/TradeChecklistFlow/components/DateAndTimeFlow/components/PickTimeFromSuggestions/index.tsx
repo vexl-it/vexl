@@ -1,22 +1,16 @@
 import {type AvailableDateTimeOption} from '@vexl-next/domain/src/general/tradeChecklist'
 import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {
-  RadiobuttonCircleEmpty,
-  RadiobuttonCircleFilled,
+  RadioGroup,
+  RowRadiobutton,
   Typography,
-  XStack,
   XmarkCancelClose,
   YStack,
-  tokens,
-  useTheme,
 } from '@vexl-next/ui'
-import {Schema} from 'effect/index'
-import {useAtomValue, useSetAtom, type Atom} from 'jotai'
-import {type DateTime} from 'luxon'
-import React, {useCallback} from 'react'
-import {FlatList, TouchableOpacity} from 'react-native'
+import {Array, Option, pipe, Schema} from 'effect'
+import {useAtomValue, useSetAtom} from 'jotai'
+import React, {useCallback, useMemo, useState} from 'react'
 import type {TradeChecklistStackScreenProps} from '../../../../../../navigationTypes'
-import atomKeyExtractor from '../../../../../../utils/atomUtils/atomKeyExtractor'
 import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
 import {
   formatDate,
@@ -27,8 +21,7 @@ import unixMillisecondsToLocaleDateTime from '../../../../../../utils/unixMillis
 import {saveDateTimePickActionAtom} from '../../../../atoms/updatesToBeSentAtom'
 import {useTradeChecklistExitNavigation} from '../../../../useTradeChecklistExitNavigation'
 import {TradeChecklistItemPageLayout} from '../../../TradeChecklistItemPageLayout'
-import {type Item as TimeOptionItem} from '../OptionsList'
-import {useState} from './state'
+import {generateTimeOptions} from './timeOptions'
 
 type Props = TradeChecklistStackScreenProps<'PickTimeFromSuggestions'>
 
@@ -44,58 +37,6 @@ function getPickedDateLabel(
   })
 }
 
-function TimeSuggestionCard({
-  itemAtom,
-  onPress,
-}: {
-  itemAtom: Atom<TimeOptionItem<DateTime>>
-  onPress: (item: DateTime) => void
-}): React.ReactElement {
-  const item = useAtomValue(itemAtom)
-  const theme = useTheme()
-  const itemColor = item.outdated
-    ? theme.foregroundTertiary.get()
-    : item.selected
-      ? theme.accentHighlightPrimary.get()
-      : theme.foregroundPrimary.get()
-
-  return (
-    <TouchableOpacity
-      disabled={item.outdated}
-      activeOpacity={0.85}
-      onPress={() => {
-        onPress(item.data)
-      }}
-    >
-      <XStack
-        alignItems="center"
-        gap="$4"
-        backgroundColor={
-          item.selected
-            ? theme.accentYellowSecondary.get()
-            : theme.backgroundSecondary.get()
-        }
-        borderRadius="$5"
-        paddingHorizontal="$5"
-        paddingVertical="$5"
-        opacity={item.outdated ? 0.5 : 1}
-      >
-        {item.selected ? (
-          <RadiobuttonCircleFilled
-            color={itemColor}
-            size={tokens.size[7].val}
-          />
-        ) : (
-          <RadiobuttonCircleEmpty color={itemColor} size={tokens.size[7].val} />
-        )}
-        <Typography variant="paragraph" color={itemColor}>
-          {item.title}
-        </Typography>
-      </XStack>
-    </TouchableOpacity>
-  )
-}
-
 function PickTimeFromSuggestions({
   navigation,
   route: {
@@ -103,34 +44,40 @@ function PickTimeFromSuggestions({
   },
 }: Props): React.ReactElement {
   const {t} = useTranslation()
-  const theme = useTheme()
   const locale = useAtomValue(formattingLocaleAtom)
 
   const tradeChecklistExitNavigation = useTradeChecklistExitNavigation()
-  const {selectItem, selectedItem, itemsAtoms} = useState(
-    chosenDateTimes,
-    pickedOption
+  const options = useMemo(
+    () => generateTimeOptions(chosenDateTimes, pickedOption, locale),
+    [chosenDateTimes, pickedOption, locale]
+  )
+  const optionKeys = useMemo(
+    () =>
+      pipe(
+        options,
+        Array.map((option) => option.key)
+      ),
+    [options]
+  )
+  const [selectedKey, setSelectedKey] = useState<string>()
+  const selectedOption = pipe(
+    options,
+    Array.findFirst((option) => option.key === selectedKey),
+    Option.getOrUndefined
   )
   const saveDateTimePick = useSetAtom(saveDateTimePickActionAtom)
 
-  const onItemPress = useCallback(
-    (item: DateTime) => {
-      selectItem(item)
-    },
-    [selectItem]
-  )
-
   const onFooterButtonPress = useCallback(() => {
-    if (!selectedItem) return
+    if (!selectedOption) return
 
     saveDateTimePick({
       dateTime: Schema.decodeSync(UnixMilliseconds)(
-        selectedItem.data.toMillis()
+        selectedOption.data.toMillis()
       ),
     })
 
     tradeChecklistExitNavigation()
-  }, [saveDateTimePick, selectedItem, tradeChecklistExitNavigation])
+  }, [saveDateTimePick, selectedOption, tradeChecklistExitNavigation])
 
   return (
     <TradeChecklistItemPageLayout
@@ -147,33 +94,38 @@ function PickTimeFromSuggestions({
       }}
       bottomButton={{
         text: t('common.accept'),
-        disabled: !selectedItem,
+        disabled: !selectedOption,
         onPress: onFooterButtonPress,
         variant: 'secondary',
       }}
-      scrollable={false}
     >
       <YStack flex={1} gap="$7">
         <Typography
           variant="titlesSmall"
-          color={theme.foregroundPrimary.get()}
+          color="$foregroundPrimary"
           textAlign="center"
           marginTop="$4"
         >
           {getPickedDateLabel(pickedOption.date, locale)}
         </Typography>
-        <FlatList
-          data={itemsAtoms}
-          keyExtractor={atomKeyExtractor}
-          renderItem={({item}) => (
-            <TimeSuggestionCard itemAtom={item} onPress={onItemPress} />
+        <RadioGroup
+          allowedValues={optionKeys}
+          value={selectedKey}
+          onValueChange={setSelectedKey}
+          gap="$4"
+        >
+          {pipe(
+            options,
+            Array.map((option) => (
+              <RowRadiobutton
+                key={option.key}
+                value={option.key}
+                label={option.title}
+                disabled={option.outdated}
+              />
+            ))
           )}
-          ItemSeparatorComponent={() => <YStack h="$4" />}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{
-            paddingBottom: tokens.space[4].val,
-          }}
-        />
+        </RadioGroup>
       </YStack>
     </TradeChecklistItemPageLayout>
   )

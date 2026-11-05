@@ -1,13 +1,9 @@
 import {useFocusEffect} from '@react-navigation/native'
-import {FlashList} from '@shopify/flash-list'
 import {
   Button,
   NavigationBar,
   Screen,
-  SearchBar,
-  SelectableItem,
-  Stack,
-  Typography,
+  SearchableSelectList,
   XmarkCancelClose,
 } from '@vexl-next/ui'
 import {Array, Option, pipe} from 'effect'
@@ -17,7 +13,6 @@ import {type AppSettingsStackScreenProps} from '../../../navigationTypes'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {setAppLanguageActionAtom} from '../../../utils/localization/setAppLanguageActionAtom'
 import {appLanguageFromPreferencesAtom} from '../../../utils/preferences'
-import {useKeyboardAwareFooterListPadding} from '../../../utils/useKeyboardAwareFooterListPadding'
 import {
   appSettingsLanguagesAtom,
   appSettingsLanguageSearchTextAtom,
@@ -38,30 +33,6 @@ function toAppSettingsLanguage(
     availableLanguages,
     Array.findFirst((supportedLanguage) => supportedLanguage === language),
     Option.getOrElse(() => defaultLanguage)
-  )
-}
-
-function LanguageList({
-  languagesToDisplay,
-  renderItem,
-}: {
-  readonly languagesToDisplay: readonly AppSettingsLanguage[]
-  readonly renderItem: (props: {
-    readonly item: AppSettingsLanguage
-  }) => React.ReactElement
-}): React.ReactElement {
-  const listPaddingBottom = useKeyboardAwareFooterListPadding()
-
-  return (
-    <FlashList
-      data={languagesToDisplay}
-      renderItem={renderItem}
-      keyExtractor={(item) => item}
-      showsVerticalScrollIndicator={false}
-      contentContainerStyle={{
-        paddingBottom: listPaddingBottom,
-      }}
-    />
   )
 }
 
@@ -95,19 +66,10 @@ function AppSettingsLanguageScreen({
     }, [availableLanguages, appLanguagePreference, setSearchText])
   )
 
-  const renderItem = useCallback(
-    ({item}: {readonly item: AppSettingsLanguage}) => (
-      <SelectableItem
-        label={`${getAppSettingsLanguageFlag(
-          item
-        )} ${getAppSettingsLanguageLabel(item, t)}`}
-        selected={item === tempSelection}
-        onPress={() => {
-          setTempSelection(item)
-        }}
-      />
-    ),
-    [t, tempSelection]
+  const getLabel = useCallback(
+    (item: AppSettingsLanguage) =>
+      `${getAppSettingsLanguageFlag(item)} ${getAppSettingsLanguageLabel(item, t)}`,
+    [t]
   )
 
   return (
@@ -126,27 +88,16 @@ function AppSettingsLanguageScreen({
       }
       footer={<Button onPress={save}>{t('common.save')}</Button>}
     >
-      <SearchBar
-        valueAtom={appSettingsLanguageSearchTextAtom}
-        placeholder={t('common.search')}
-        marginBottom="$4"
+      <SearchableSelectList
+        items={languagesToDisplay}
+        keyExtractor={String}
+        getLabel={getLabel}
+        selectedKey={tempSelection}
+        onSelect={setTempSelection}
+        searchValueAtom={appSettingsLanguageSearchTextAtom}
+        searchPlaceholder={t('common.search')}
+        emptyTitle={t('common.nothingFound')}
       />
-      {Array.isNonEmptyArray(languagesToDisplay) ? (
-        <LanguageList
-          languagesToDisplay={languagesToDisplay}
-          renderItem={renderItem}
-        />
-      ) : (
-        <Stack alignItems="center" gap="$4" padding="$6">
-          <Typography
-            variant="heading3"
-            textAlign="center"
-            color="$foregroundPrimary"
-          >
-            {t('common.nothingFound')}
-          </Typography>
-        </Stack>
-      )}
     </Screen>
   )
 }

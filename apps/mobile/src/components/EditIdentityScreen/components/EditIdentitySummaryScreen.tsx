@@ -2,15 +2,17 @@ import {useNavigationState} from '@react-navigation/native'
 import {
   Button,
   ChevronLeft,
+  Image,
   InfoBox,
   NavigationBar,
   Screen,
+  Stack,
   Typography,
   XmarkCancelClose,
+  YStack,
 } from '@vexl-next/ui'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback} from 'react'
-import {Stack, Image as TamaguiImage, YStack} from 'tamagui'
 import {type EditIdentityStackScreenProps} from '../../../navigationTypes'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import resolveLocalUri from '../../../utils/resolveLocalUri'
@@ -19,10 +21,9 @@ import {
   editProfileIdentityNicknameAtom,
   saveEditProfileIdentityDraftActionAtom,
 } from '../atoms/editIdentityAtoms'
+import {IDENTITY_PHOTO_SIZE} from '../identityPhotoSize'
 
 type Props = EditIdentityStackScreenProps<'EditIdentitySummary'>
-
-const PHOTO_SIZE = 252
 
 function EditIdentitySummaryScreen({navigation}: Props): React.ReactElement {
   const {t} = useTranslation()
@@ -89,10 +90,10 @@ function EditIdentitySummaryScreen({navigation}: Props): React.ReactElement {
           {t('editProfileScreen.identitySummary.description')}
         </Typography>
         {imageUri ? (
-          <TamaguiImage
+          <Image
             borderRadius="$5"
-            height={PHOTO_SIZE}
-            width={PHOTO_SIZE}
+            height={IDENTITY_PHOTO_SIZE}
+            width={IDENTITY_PHOTO_SIZE}
             source={{uri: resolveLocalUri(imageUri)}}
           />
         ) : null}

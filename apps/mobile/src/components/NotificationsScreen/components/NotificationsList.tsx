@@ -1,7 +1,8 @@
-import {Typography, YStack} from '@vexl-next/ui'
+import {EmptyState} from '@vexl-next/ui'
 import {useAtomValue, type Atom} from 'jotai'
 import React, {useCallback} from 'react'
 import {FlatList} from 'react-native'
+import {getTokens} from 'tamagui'
 import atomKeyExtractor from '../../../utils/atomUtils/atomKeyExtractor'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {NotificationsAtomsAtom} from '../state'
@@ -22,24 +23,11 @@ function NotificationsList(): React.ReactElement {
 
   const listEmptyComponent = useCallback(
     () => (
-      <YStack flex={1} py="$5" alignItems="center">
-        <YStack maxWidth="350" gap="$4">
-          <Typography
-            variant="heading3"
-            color="$foregroundPrimary"
-            textAlign="center"
-          >
-            {t('notificationsScreen.noNotifications.title')}
-          </Typography>
-          <Typography
-            variant="paragraph"
-            color="$foregroundSecondary"
-            textAlign="center"
-          >
-            {t('notificationsScreen.noNotifications.description')}
-          </Typography>
-        </YStack>
-      </YStack>
+      <EmptyState
+        px="$5"
+        title={t('notificationsScreen.noNotifications.title')}
+        description={t('notificationsScreen.noNotifications.description')}
+      />
     ),
     [t]
   )
@@ -53,8 +41,8 @@ function NotificationsList(): React.ReactElement {
       ListEmptyComponent={listEmptyComponent}
       contentContainerStyle={{
         flexGrow: 1,
-        paddingBottom: 24,
-        rowGap: 12,
+        paddingBottom: getTokens().space.$7.val,
+        rowGap: getTokens().space.$4.val,
       }}
     />
   )

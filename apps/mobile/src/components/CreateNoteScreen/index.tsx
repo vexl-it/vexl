@@ -9,16 +9,13 @@ import {
   RowRadiobutton,
   SandWatch,
   Screen,
-  Typography,
-  XStack,
+  SectionHeader,
   XmarkCancelClose,
   YStack,
-  useTheme,
 } from '@vexl-next/ui'
 import {Effect} from 'effect'
 import {useSetAtom} from 'jotai'
 import React, {useCallback, useState} from 'react'
-import {getTokens} from 'tamagui'
 import {type RootStackScreenProps} from '../../navigationTypes'
 import {postNoteActionAtom} from '../../state/notes/atoms/postNoteActionAtom'
 import {useTranslation} from '../../utils/localization/I18nProvider'
@@ -36,7 +33,6 @@ export default function CreateNoteScreen({
   navigation,
 }: Props): React.JSX.Element {
   const {t} = useTranslation()
-  const theme = useTheme()
   const goBack = useSafeGoBack()
   const postNote = useSetAtom(postNoteActionAtom)
   const showDialog = useSetAtom(globalDialogAtom)
@@ -49,8 +45,6 @@ export default function CreateNoteScreen({
   const trimmedText = text.trim()
   const canPost = trimmedText.length > 0 && !isPosting
   const hasChanges = text.length > 0 || expiresValue !== '7' || allowRepost
-
-  const iconSize = getTokens().size.$7.val
 
   const confirmDiscardNote = useCallback(
     (): Promise<boolean> =>
@@ -123,12 +117,11 @@ export default function CreateNoteScreen({
         />
 
         <YStack gap="$3">
-          <XStack alignItems="center" gap="$2" py="$3">
-            <SandWatch color={theme.foregroundPrimary.get()} size={iconSize} />
-            <Typography variant="paragraphSmallBold" color="$foregroundPrimary">
-              {t('notes.create.expires')}
-            </Typography>
-          </XStack>
+          <SectionHeader
+            py="$3"
+            icon={SandWatch}
+            title={t('notes.create.expires')}
+          />
           <RadioGroup
             allowedValues={EXPIRES_VALUES}
             value={expiresValue}
@@ -148,15 +141,11 @@ export default function CreateNoteScreen({
         </YStack>
 
         <YStack gap="$3">
-          <XStack alignItems="center" gap="$2" py="$3">
-            <RefreshArrowsRectangle
-              color={theme.foregroundPrimary.get()}
-              size={iconSize}
-            />
-            <Typography variant="paragraphSmallBold" color="$foregroundPrimary">
-              {t('notes.create.repost')}
-            </Typography>
-          </XStack>
+          <SectionHeader
+            py="$3"
+            icon={RefreshArrowsRectangle}
+            title={t('notes.create.repost')}
+          />
           <RowCheckbox
             label={t('notes.create.allowRepost')}
             description={t('notes.create.allowRepostDescription')}

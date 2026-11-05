@@ -1,24 +1,25 @@
 import {useNavigation} from '@react-navigation/native'
 import {type LocationSuggestion} from '@vexl-next/rest-api/src/services/location/contracts'
 import {
-  Button,
+  EmptyState,
+  LocationSuggestionRow,
   NavigationBar,
   Screen,
   SearchBar,
   Typography,
+  useKeyboardAwareFooterListPadding,
 } from '@vexl-next/ui'
-import {ChevronLeft, PinGeolocation} from '@vexl-next/ui/src/icons'
-import {Stack, XStack, YStack} from '@vexl-next/ui/src/primitives'
+import {ChevronLeft} from '@vexl-next/ui/src/icons'
+import {YStack} from '@vexl-next/ui/src/primitives'
 import {ScopeProvider, useMolecule} from 'bunshi/dist/react'
 import type {Atom} from 'jotai'
 import {atom, useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useMemo, useRef, useState} from 'react'
 import {FlatList} from 'react-native'
-import {debounce, useTheme} from 'tamagui'
+import {debounce} from 'tamagui'
 import {type RootStackParamsList} from '../../navigationTypes'
 import atomKeyExtractor from '../../utils/atomUtils/atomKeyExtractor'
 import {useTranslation} from '../../utils/localization/I18nProvider'
-import {useKeyboardAwareFooterListPadding} from '../../utils/useKeyboardAwareFooterListPadding'
 import {
   LocationSearchMolecule,
   LocationSearchScope,
@@ -108,47 +109,20 @@ function LocationSearchContent({
           {t('common.loading')}...
         </Typography>
       ) : error != null ? (
-        <YStack
-          alignItems="center"
-          gap="$5"
-          paddingHorizontal="$5"
-          paddingTop="$10"
-        >
-          <Typography
-            variant="paragraph"
-            color="$foregroundSecondary"
-            textAlign="center"
-          >
-            {t('offerForm.location.searchError')}
-          </Typography>
-          <XStack gap="$3" alignSelf="stretch">
-            <Button
-              flex={1}
-              variant="primary"
-              size="medium"
-              onPress={handleRetry}
-            >
-              {t('common.tryAgain')}
-            </Button>
-            <Button
-              flex={1}
-              variant="secondary"
-              size="medium"
-              onPress={onPickOnMap}
-            >
-              {t('offerForm.location.pickOnMap')}
-            </Button>
-          </XStack>
-        </YStack>
+        <EmptyState
+          description={t('offerForm.location.searchError')}
+          action={{
+            label: t('common.tryAgain'),
+            onPress: handleRetry,
+            variant: 'primary',
+          }}
+          secondaryAction={{
+            label: t('offerForm.location.pickOnMap'),
+            onPress: onPickOnMap,
+          }}
+        />
       ) : searchResultsAtoms.length === 0 ? (
-        <Typography
-          variant="paragraph"
-          color="$foregroundSecondary"
-          textAlign="center"
-          paddingTop="$10"
-        >
-          {t('common.noResults')}
-        </Typography>
+        <EmptyState description={t('common.noResults')} />
       ) : (
         <FlatList
           showsVerticalScrollIndicator={false}
@@ -171,33 +145,15 @@ function LocationResultItem({
   readonly onPress: (data: LocationSuggestion) => void
 }): React.JSX.Element {
   const data = useAtomValue(locationAtom)
-  const theme = useTheme()
 
   return (
-    <Stack
-      role="button"
+    <LocationSuggestionRow
+      title={data.userData.suggestFirstRow}
+      subtitle={data.userData.suggestSecondRow}
       onPress={() => {
         onPress(data)
       }}
-      pressStyle={{opacity: 0.7}}
-    >
-      <XStack gap="$5" alignItems="flex-start">
-        <Stack paddingTop="$1">
-          <PinGeolocation size={24} color={theme.foregroundPrimary.get()} />
-        </Stack>
-        <YStack flex={1} gap="$5">
-          <YStack gap="$1">
-            <Typography variant="paragraph" color="$foregroundPrimary">
-              {data.userData.suggestFirstRow}
-            </Typography>
-            <Typography variant="description" color="$foregroundSecondary">
-              {data.userData.suggestSecondRow}
-            </Typography>
-          </YStack>
-          <Stack height={1} backgroundColor="$backgroundHighlight" />
-        </YStack>
-      </XStack>
-    </Stack>
+    />
   )
 }
 

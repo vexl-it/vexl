@@ -1,11 +1,9 @@
 import {useIsFocused, useNavigation} from '@react-navigation/native'
 import {
-  Button,
+  Divider,
+  EmptyState,
   FaqStayAnonymous,
   MarketplaceEmptyLoader,
-  Stack,
-  Typography,
-  XStack,
   YStack,
 } from '@vexl-next/ui'
 import {Effect, Option} from 'effect/index'
@@ -183,7 +181,7 @@ function useEmptyListVariants(): EmptyListVariant {
 function EmptyList(): React.ReactElement {
   const {t} = useTranslation()
   const emptyListHeading = useEmptyListHeading()
-  const emptyListVariant = useEmptyListVariants()
+  const {primaryAction, secondaryAction} = useEmptyListVariants()
   const shouldShowLoadingOffers = useAtomValue(shouldShowLoadingOffersAtom)
   const refreshOffers = useSetAtom(refreshOffersActionAtom)
   const setNewOfferButtonVisibleOnLoadingMarketplace = useSetAtom(
@@ -275,61 +273,30 @@ function EmptyList(): React.ReactElement {
   }
 
   return (
-    <YStack gap="$6" ai="center" paddingHorizontal="$5">
-      <Stack ai="center" jc="center">
-        <FaqStayAnonymous variant="dark" width={253} height={179} />
-      </Stack>
-      <Typography
-        variant="heading3"
-        color="$foregroundPrimary"
-        ta="center"
-        py="$2"
-      >
-        {emptyListHeading}
-      </Typography>
-      <YStack gap="$4" ai="center" w="100%">
-        <Typography
-          variant="description"
-          color="$foregroundSecondary"
-          ta="center"
-        >
-          {emptyListVariant.primaryAction.description}
-        </Typography>
-        <Button
-          variant="primary"
-          size="small"
-          onPress={emptyListVariant.primaryAction.onButtonPress}
-          width="100%"
-        >
-          {emptyListVariant.primaryAction.buttonText}
-        </Button>
-      </YStack>
-      {!!emptyListVariant.secondaryAction && (
+    <YStack gap="$6" paddingHorizontal="$5">
+      <EmptyState
+        paddingVertical="$0"
+        graphic={<FaqStayAnonymous variant="dark" width={253} height={179} />}
+        title={emptyListHeading}
+        description={primaryAction.description}
+        action={{
+          label: primaryAction.buttonText,
+          onPress: primaryAction.onButtonPress,
+          variant: 'primary',
+        }}
+      />
+      {!!secondaryAction && (
         <>
-          <XStack ai="center" gap="$2" w="100%">
-            <Stack f={1} h={1} bc="$foregroundSecondary" />
-            <Typography variant="description" color="$foregroundSecondary">
-              {t('common.or')}
-            </Typography>
-            <Stack f={1} h={1} bc="$foregroundSecondary" />
-          </XStack>
-          <YStack gap="$4" ai="center" w="100%">
-            <Typography
-              variant="description"
-              color="$foregroundSecondary"
-              ta="center"
-            >
-              {emptyListVariant.secondaryAction.description}
-            </Typography>
-            <Button
-              variant="secondary"
-              size="small"
-              onPress={emptyListVariant.secondaryAction.onButtonPress}
-              width="100%"
-            >
-              {emptyListVariant.secondaryAction.buttonText}
-            </Button>
-          </YStack>
+          <Divider label={t('common.or')} />
+          <EmptyState
+            paddingVertical="$0"
+            description={secondaryAction.description}
+            action={{
+              label: secondaryAction.buttonText,
+              onPress: secondaryAction.onButtonPress,
+              variant: 'secondary',
+            }}
+          />
         </>
       )}
     </YStack>

@@ -1,0 +1,1 @@
+export const IDENTITY_PHOTO_SIZE = 256

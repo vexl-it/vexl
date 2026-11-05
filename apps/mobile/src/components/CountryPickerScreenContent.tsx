@@ -1,18 +1,11 @@
 import {
-  Input,
-  KeyboardAvoidingView,
   NavigationBar,
   Screen,
-  SearchMagnifyGlass,
-  tokens,
-  Typography,
-  useTheme,
+  SearchableSelectList,
   XmarkCancelClose,
-  XStack,
-  YStack,
 } from '@vexl-next/ui'
-import React, {useCallback, useMemo, useState} from 'react'
-import {FlatList, Platform} from 'react-native'
+import {atom, useAtomValue} from 'jotai'
+import React, {useMemo, useState} from 'react'
 import {getAllCountries, type ICountry} from 'react-native-country-select'
 import {useTranslation} from '../utils/localization/I18nProvider'
 
@@ -88,48 +81,16 @@ function getCountriesToDisplay(searchQuery: string): readonly ICountry[] {
   return [...popularCountries, ...sortCountries(otherCountries)]
 }
 
-function CountryPickerItem({
-  country,
-  onSelect,
-}: {
-  readonly country: ICountry
-  readonly onSelect: (country: ICountry) => void
-}): React.ReactElement {
-  const handleSelect = useCallback(() => {
-    onSelect(country)
-  }, [country, onSelect])
+function getCountryCode(country: ICountry): string {
+  return country.cca2
+}
 
-  return (
-    <XStack
-      alignItems="center"
-      borderBottomColor="$backgroundTertiary"
-      borderBottomWidth={1}
-      gap="$3"
-      minHeight="$11"
-      onPress={handleSelect}
-      pressStyle={{opacity: 0.7}}
-      width="100%"
-    >
-      <Typography color="$foregroundPrimary" variant="heading3">
-        {country.flag}
-      </Typography>
-      <Typography
-        color="$foregroundSecondary"
-        minWidth={tokens.size[11].val}
-        variant="paragraphSmall"
-      >
-        {country.idd.root}
-      </Typography>
-      <Typography
-        color="$foregroundPrimary"
-        flex={1}
-        numberOfLines={1}
-        variant="paragraph"
-      >
-        {getCountryName(country)}
-      </Typography>
-    </XStack>
-  )
+function getCountryFlag(country: ICountry): string {
+  return country.flag
+}
+
+function getCountryDialCode(country: ICountry): string {
+  return country.idd.root
 }
 
 export default function CountryPickerScreenContent({
@@ -137,45 +98,15 @@ export default function CountryPickerScreenContent({
   onSelect,
 }: Props): React.ReactElement {
   const {t} = useTranslation()
-  const [searchQuery, setSearchQuery] = useState('')
-  const theme = useTheme()
-  const countriesToDisplay = getCountriesToDisplay(searchQuery)
+  const [searchQueryAtom] = useState(() => atom(''))
+  const searchQuery = useAtomValue(searchQueryAtom)
   const rightActions = useMemo(
     () => [{icon: XmarkCancelClose, onPress: onClose}],
     [onClose]
   )
 
-  const renderItem = useCallback(
-    ({item}: {readonly item: ICountry}) => (
-      <CountryPickerItem country={item} onSelect={onSelect} />
-    ),
-    [onSelect]
-  )
-
-  const keyExtractor = useCallback((item: ICountry) => item.cca2, [])
-  const listBottomPadding =
-    tokens.space[8].val + (Platform.OS === 'android' ? tokens.size[11].val : 0)
-
-  const countryList = (
-    <FlatList
-      automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
-      contentContainerStyle={{
-        paddingBottom: listBottomPadding,
-        paddingHorizontal: tokens.space[5].val,
-        paddingTop: tokens.space[5].val,
-      }}
-      data={countriesToDisplay}
-      keyExtractor={keyExtractor}
-      keyboardShouldPersistTaps="handled"
-      renderItem={renderItem}
-      showsVerticalScrollIndicator={false}
-      style={{flex: 1}}
-    />
-  )
-
   return (
     <Screen
-      noHorizontalPadding
       navigationBar={
         <NavigationBar
           style="back"
@@ -185,42 +116,17 @@ export default function CountryPickerScreenContent({
       }
       safeAreasBackgroundColor="$backgroundPrimary"
     >
-      <YStack backgroundColor="$backgroundPrimary" flex={1}>
-        <XStack
-          alignItems="center"
-          backgroundColor="$backgroundSecondary"
-          borderRadius="$9"
-          gap="$3"
-          height="$11"
-          marginHorizontal="$5"
-          paddingHorizontal="$5"
-        >
-          <SearchMagnifyGlass
-            color={theme.foregroundPrimary.get()}
-            size={tokens.size[7].val}
-          />
-          <Input
-            unstyled
-            autoCorrect={false}
-            color="$foregroundPrimary"
-            flex={1}
-            fontFamily="$body"
-            fontSize="$5"
-            fontWeight="500"
-            onChangeText={setSearchQuery}
-            padding={0}
-            placeholder={t('common.search')}
-            placeholderTextColor={theme.foregroundSecondary.get()}
-            selectionColor={theme.accentYellowPrimary.get()}
-            value={searchQuery}
-          />
-        </XStack>
-        {Platform.OS === 'android' ? (
-          <KeyboardAvoidingView>{countryList}</KeyboardAvoidingView>
-        ) : (
-          countryList
-        )}
-      </YStack>
+      <SearchableSelectList
+        items={getCountriesToDisplay(searchQuery)}
+        keyExtractor={getCountryCode}
+        getLabel={getCountryName}
+        getEmoji={getCountryFlag}
+        getPrefix={getCountryDialCode}
+        onSelect={onSelect}
+        searchValueAtom={searchQueryAtom}
+        searchPlaceholder={t('common.search')}
+        emptyTitle={t('common.nothingFound')}
+      />
     </Screen>
   )
 }

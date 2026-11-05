@@ -1,4 +1,11 @@
-import {Button, Dialog, Exchange, InfoCircle, Typography} from '@vexl-next/ui'
+import {
+  Button,
+  Dialog,
+  Exchange,
+  InfoCircle,
+  LiveIndicator,
+  Typography,
+} from '@vexl-next/ui'
 import {Effect} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useState} from 'react'
@@ -7,7 +14,6 @@ import {dismissKeyboardAndResolveOnLayoutUpdate} from '../../../../utils/dismiss
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import {formatDecimal} from '../../../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../../../utils/localization/formattingLocaleAtom'
-import {AnimatedLiveIndicator} from '../../../AnimatedLiveIndicator'
 import {useOpenChangeCurrency} from '../../../ChangeCurrency'
 import CurrentBtcPrice from '../../../CurrentBtcPrice'
 import {globalDialogAtom} from '../../../GlobalDialog'
@@ -136,23 +142,18 @@ function TradeCalculator({
           }}
         />
         <CurrentBtcPrice
-          disabled={tradePriceType !== 'live'}
           currencyAtom={btcPriceCurrencyAtom}
           customBtcPriceAtom={
             tradePriceType !== 'live' ? tradeBtcPriceAtom : undefined
           }
           postRefreshActions={calculateFiatValueAfterBtcPriceRefresh}
-          showLastUpdatedAt={false}
-          col="$foregroundSecondary"
-          fos={12}
-          onPricePress={
+          onPress={
             isLivePriceType
               ? () => {
                   setLivePriceDialogVisible(true)
                 }
               : undefined
           }
-          textAlign="right"
           trailingElement={
             isLivePriceType ? (
               <InfoCircle color={theme.foregroundSecondary.get()} size={16} />
@@ -229,7 +230,7 @@ function TradeCalculator({
             br="$2"
             p="$2"
           >
-            <AnimatedLiveIndicator color="$accentYellowPrimary" />
+            <LiveIndicator />
             <Typography variant="micro" color="$accentHighlightPrimary">
               {t('tradeCalculator.liveMarketPrice')}
             </Typography>

@@ -1,226 +1,181 @@
 import {
+  ChevronLeft,
+  DuoToneContrastTheme,
+  NavButton,
   SearchBar,
-  SizableText,
   Stack,
   Toast,
+  Typography,
   useVexlTheme,
-  vexlFonts,
   VexlThemeProvider,
   XStack,
   YStack,
 } from '@vexl-next/ui'
-import {useFonts} from 'expo-font'
-import {atom} from 'jotai'
+import {Array, Option, pipe} from 'effect'
+import {atom, getDefaultStore, useAtomValue} from 'jotai'
 
 import {StatusBar} from 'expo-status-bar'
-import React, {useEffect, useMemo, useRef, useState} from 'react'
-import {
-  ScrollView,
-  type NativeScrollEvent,
-  type NativeSyntheticEvent,
-} from 'react-native'
+import React from 'react'
+import {Alert, Platform, ScrollView} from 'react-native'
 import {GestureHandlerRootView} from 'react-native-gesture-handler'
 import {KeyboardProvider} from 'react-native-keyboard-controller'
-import {SafeAreaProvider} from 'react-native-safe-area-context'
+import {
+  SafeAreaProvider,
+  useSafeAreaInsets,
+} from 'react-native-safe-area-context'
+import {useMedia} from 'tamagui'
 import {toastAtom} from './state/toastAtom'
+import {useScreenRoute} from './useScreenRoute'
+import {useVexlFonts} from './useVexlFonts'
 
-import {screens, type ScreenEntry} from './screens'
+import {screens} from './screens'
 
-function ScreenNav(): React.JSX.Element {
-  const {resolvedTheme, toggle} = useVexlTheme()
-  const [activeScreen, setActiveScreen] = useState<ScreenEntry | null>(null)
-  const [searchQuery, setSearchQuery] = useState('')
-  const catalogScrollViewRef = useRef<ScrollView | null>(null)
-  const catalogScrollOffsetRef = useRef(0)
-  const shouldRestoreCatalogScrollRef = useRef(false)
+const SIDEBAR_WIDTH = 300
 
-  const searchAtom = useMemo(
-    () =>
-      atom(
-        () => searchQuery,
-        (_get, _set, update: React.SetStateAction<string>) => {
-          setSearchQuery((previousValue) =>
-            typeof update === 'function' ? update(previousValue) : update
-          )
-        }
-      ),
-    [searchQuery]
-  )
-
-  const normalizedSearchQuery = searchQuery.trim().toLowerCase()
-  const filteredScreens = useMemo(
-    () =>
-      screens.filter((entry) =>
-        entry.label.toLowerCase().includes(normalizedSearchQuery)
-      ),
-    [normalizedSearchQuery]
-  )
-
-  useEffect(() => {
-    if (!shouldRestoreCatalogScrollRef.current || activeScreen !== null) return
-
-    const restoreScrollTimeout = setTimeout(() => {
-      catalogScrollViewRef.current?.scrollTo({
-        animated: false,
-        y: catalogScrollOffsetRef.current,
-      })
-      shouldRestoreCatalogScrollRef.current = false
-    }, 0)
-
-    return () => {
-      clearTimeout(restoreScrollTimeout)
-    }
-  }, [activeScreen])
-
-  const handleCatalogScroll = (
-    event: NativeSyntheticEvent<NativeScrollEvent>
-  ): void => {
-    catalogScrollOffsetRef.current = event.nativeEvent.contentOffset.y
+// react-native-web's Alert.alert is a no-op
+if (Platform.OS === 'web') {
+  Alert.alert = (title, message) => {
+    getDefaultStore().set(toastAtom, {title, description: message})
   }
+}
 
-  if (activeScreen !== null) {
-    const ActiveScreen = activeScreen.component
+const searchAtom = atom('')
 
-    return (
-      <YStack flex={1} backgroundColor="$backgroundPrimary">
-        <XStack
-          paddingTop="$12"
-          paddingHorizontal="$5"
-          paddingBottom="$4"
-          backgroundColor="$backgroundSecondary"
-          alignItems="center"
-          gap="$3"
-        >
-          <Stack
-            onPress={() => {
-              shouldRestoreCatalogScrollRef.current = true
-              setActiveScreen(null)
-            }}
-            paddingVertical="$2"
-            paddingHorizontal="$3"
-            backgroundColor="$backgroundTertiary"
-            borderRadius="$2.5"
-          >
-            <SizableText
-              fontFamily="$body"
-              fontWeight="600"
-              fontSize={14}
-              color="$foregroundPrimary"
-            >
-              Back
-            </SizableText>
-          </Stack>
-          <SizableText
-            fontFamily="$heading"
-            fontWeight="700"
-            fontSize={18}
-            color="$foregroundPrimary"
-          >
-            {activeScreen.label}
-          </SizableText>
-        </XStack>
-        <ActiveScreen />
-        <StatusBar style={resolvedTheme === 'dark' ? 'light' : 'dark'} />
-      </YStack>
-    )
-  }
+function Catalog({
+  activeLabel,
+  onSelect,
+}: {
+  readonly activeLabel: string | null
+  readonly onSelect: (label: string) => void
+}): React.JSX.Element {
+  const searchQuery = useAtomValue(searchAtom).trim().toLowerCase()
+  const filteredScreens = Array.filter(screens, (entry) =>
+    entry.label.toLowerCase().includes(searchQuery)
+  )
 
   return (
     <YStack flex={1} backgroundColor="$backgroundPrimary">
-      <YStack
-        paddingTop="$13"
-        paddingHorizontal="$5"
-        paddingBottom="$5"
-        backgroundColor="$backgroundSecondary"
-        gap="$2"
-      >
-        <SizableText
-          fontFamily="$heading"
-          fontWeight="700"
-          fontSize={28}
-          color="$foregroundPrimary"
-        >
-          Vexl UI
-        </SizableText>
-        <Stack
-          onPress={toggle}
-          alignSelf="flex-start"
-          paddingVertical="$2"
-          paddingHorizontal="$3"
-          backgroundColor="$backgroundTertiary"
-          borderRadius="$2.5"
-        >
-          <SizableText
-            fontFamily="$body"
-            fontWeight="500"
-            fontSize={14}
-            color="$foregroundSecondary"
-          >
-            Toggle theme ({resolvedTheme})
-          </SizableText>
-        </Stack>
+      <YStack paddingHorizontal="$5" paddingBottom="$4">
         <SearchBar
           valueAtom={searchAtom}
           placeholder="Search components"
           autoFocus={false}
         />
       </YStack>
-
-      <ScrollView
-        ref={catalogScrollViewRef}
-        style={{flex: 1}}
-        onScroll={handleCatalogScroll}
-        scrollEventThrottle={16}
-      >
-        <YStack padding="$5" gap="$3">
-          {filteredScreens.map((entry) => (
+      <ScrollView>
+        <YStack paddingHorizontal="$5" paddingBottom="$5" gap="$2">
+          {Array.map(filteredScreens, (entry) => (
             <Stack
               key={entry.label}
+              role="link"
               onPress={() => {
-                setActiveScreen(entry)
+                onSelect(entry.label)
               }}
-              backgroundColor="$backgroundSecondary"
-              paddingVertical="$5"
+              backgroundColor={
+                entry.label === activeLabel
+                  ? '$accentYellowSecondary'
+                  : '$backgroundSecondary'
+              }
+              hoverStyle={{opacity: 0.8}}
+              pressStyle={{opacity: 0.7}}
+              paddingVertical="$4"
               paddingHorizontal="$5"
               borderRadius="$4"
             >
-              <SizableText
-                fontFamily="$body"
-                fontWeight="600"
-                fontSize={16}
-                color="$foregroundPrimary"
+              <Typography
+                variant="paragraphSmallBold"
+                color={
+                  entry.label === activeLabel
+                    ? '$accentHighlightSecondary'
+                    : '$foregroundPrimary'
+                }
               >
                 {entry.label}
-              </SizableText>
+              </Typography>
             </Stack>
           ))}
-          {filteredScreens.length === 0 ? (
-            <YStack
-              backgroundColor="$backgroundSecondary"
-              paddingVertical="$6"
-              paddingHorizontal="$5"
-              borderRadius="$4"
-            >
-              <SizableText
-                fontFamily="$body"
-                fontWeight="600"
-                fontSize={16}
+          {!Array.isNonEmptyArray(filteredScreens) ? (
+            <YStack gap="$2" paddingVertical="$5">
+              <Typography
+                variant="paragraphSmallBold"
                 color="$foregroundPrimary"
               >
                 No components found
-              </SizableText>
-              <SizableText
-                fontFamily="$body"
-                fontWeight="500"
-                fontSize={14}
-                color="$foregroundSecondary"
-              >
+              </Typography>
+              <Typography variant="description" color="$foregroundSecondary">
                 Try a different search term.
-              </SizableText>
+              </Typography>
             </YStack>
           ) : null}
         </YStack>
       </ScrollView>
+    </YStack>
+  )
+}
+
+function ScreenNav(): React.JSX.Element {
+  const {resolvedTheme, toggle} = useVexlTheme()
+  const insets = useSafeAreaInsets()
+  const isWide = useMedia().lg
+  const [activeLabel, navigate] = useScreenRoute()
+  const ActiveScreen = pipe(
+    screens,
+    Array.findFirst((entry) => entry.label === activeLabel),
+    Option.map((entry) => entry.component),
+    Option.getOrUndefined
+  )
+  const showCatalog = isWide || ActiveScreen === undefined
+
+  return (
+    <YStack flex={1} backgroundColor="$backgroundPrimary">
+      <XStack
+        marginTop={insets.top}
+        paddingHorizontal="$5"
+        paddingVertical="$4"
+        alignItems="center"
+        gap="$3"
+      >
+        {!isWide && ActiveScreen !== undefined ? (
+          <NavButton
+            icon={ChevronLeft}
+            variant="normal"
+            aria-label="Back to components"
+            onPress={() => {
+              navigate(null)
+            }}
+          />
+        ) : null}
+        <Typography variant="tabLargeBold" color="$foregroundPrimary" flex={1}>
+          Vexl UI
+        </Typography>
+        <NavButton
+          icon={DuoToneContrastTheme}
+          variant="normal"
+          aria-label={`Switch to ${resolvedTheme === 'dark' ? 'light' : 'dark'} theme`}
+          onPress={toggle}
+        />
+      </XStack>
+
+      <XStack flex={1}>
+        {/* Hidden instead of unmounted so the catalog keeps its scroll position. */}
+        <YStack
+          display={showCatalog ? 'flex' : 'none'}
+          width={isWide ? SIDEBAR_WIDTH : '100%'}
+        >
+          <Catalog activeLabel={activeLabel} onSelect={navigate} />
+        </YStack>
+        {ActiveScreen !== undefined ? (
+          <YStack flex={1}>
+            <ActiveScreen key={activeLabel} />
+          </YStack>
+        ) : isWide ? (
+          <YStack flex={1} alignItems="center" justifyContent="center">
+            <Typography variant="paragraph" color="$foregroundSecondary">
+              Pick a component from the list.
+            </Typography>
+          </YStack>
+        ) : null}
+      </XStack>
 
       <StatusBar style={resolvedTheme === 'dark' ? 'light' : 'dark'} />
     </YStack>
@@ -228,7 +183,7 @@ function ScreenNav(): React.JSX.Element {
 }
 
 export default function App(): React.JSX.Element {
-  const [fontsLoaded] = useFonts(vexlFonts)
+  const fontsLoaded = useVexlFonts()
 
   if (!fontsLoaded) {
     return <></>

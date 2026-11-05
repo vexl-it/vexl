@@ -1,6 +1,6 @@
 import React from 'react'
 import type {ImageProps as RNImageProps} from 'react-native'
-import {styled} from 'tamagui'
+import {getTokens, styled} from 'tamagui'
 
 import {UserImagePlaceholder} from '../assets/UserImagePlaceholder'
 import {XStack} from '../primitives'
@@ -12,8 +12,6 @@ export interface ChipProps {
   readonly trusted?: boolean
   readonly avatarSource?: RNImageProps['source']
 }
-
-const AVATAR_SIZE = 16
 
 const ChipFrame = styled(XStack, {
   name: 'Chip',
@@ -44,15 +42,17 @@ export function Chip({
   avatarSource,
   trusted = false,
 }: ChipProps): React.JSX.Element {
+  const avatarSize = getTokens().size.$5.val
+
   return (
     <ChipFrame trusted={trusted}>
       <Avatar
         source={avatarSource}
-        customSize={AVATAR_SIZE}
+        customSize={avatarSize}
         trusted={trusted}
         trustBadgeRingColor="$accentYellowSecondary"
       >
-        <UserImagePlaceholder size={AVATAR_SIZE} />
+        <UserImagePlaceholder size={avatarSize} />
       </Avatar>
       <Typography
         variant="micro"

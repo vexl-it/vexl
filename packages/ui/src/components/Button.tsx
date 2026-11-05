@@ -1,8 +1,10 @@
 import React from 'react'
-import {styled, useTheme} from 'tamagui'
+import {getTokens, styled, useTheme} from 'tamagui'
 
+import {disabledOpacity} from '../config/tokens'
 import type {IconProps} from '../icons/types'
-import {SizableText, Stack} from '../primitives'
+import {Stack} from '../primitives'
+import {Typography, type TypographyVariant} from './Typography'
 
 export type ButtonVariant =
   | 'primary'
@@ -10,6 +12,8 @@ export type ButtonVariant =
   | 'destructive'
   | 'tertiary'
   | 'disabled'
+  /** Text-only button without a background, for inline links. */
+  | 'link'
 type ButtonSize = 'large' | 'medium' | 'small'
 
 const ButtonFrame = styled(Stack, {
@@ -70,57 +74,54 @@ const ButtonFrame = styled(Stack, {
   },
 })
 
-const ButtonLabel = styled(SizableText, {
-  name: 'ButtonText',
-  fontFamily: '$body',
-  fontWeight: '600',
-  flexShrink: 1,
-  textAlign: 'center',
+const LinkFrame = styled(Stack, {
+  name: 'ButtonLink',
+  role: 'button',
+  flexDirection: 'row',
+  alignItems: 'center',
+  gap: '$2',
 
-  variants: {
-    size: {
-      large: {
-        fontSize: '$5',
-        letterSpacing: '$5',
-      },
-      medium: {
-        fontSize: '$2',
-        letterSpacing: '$2',
-      },
-      small: {
-        fontSize: '$2',
-        letterSpacing: '$2',
-      },
-    },
-
-    variant: {
-      primary: {
-        color: '$black100',
-      },
-      secondary: {
-        color: '$accentHighlightPrimary',
-      },
-      destructive: {
-        color: '$white100',
-      },
-      tertiary: {
-        color: '$backgroundPrimary',
-      },
-      disabled: {
-        color: '$foregroundTertiary',
-      },
-    },
-  } as const,
-
-  defaultVariants: {
-    size: 'large',
-    variant: 'primary',
+  pressStyle: {
+    opacity: 0.7,
   },
 })
 
+const contentColor = {
+  primary: 'black100',
+  secondary: 'accentHighlightPrimary',
+  destructive: 'white100',
+  tertiary: 'backgroundPrimary',
+  disabled: 'foregroundTertiary',
+  link: 'accentHighlightPrimary',
+} as const satisfies Record<ButtonVariant, string>
+
+const labelVariant = {
+  large: 'titlesSmall',
+  medium: 'descriptionBold',
+  small: 'descriptionBold',
+} as const satisfies Record<ButtonSize, TypographyVariant>
+
+const linkLabelVariant = {
+  large: 'paragraphDemibold',
+  medium: 'paragraphSmallBold',
+  small: 'descriptionBold',
+} as const satisfies Record<ButtonSize, TypographyVariant>
+
+const iconSizeToken = {
+  large: '$7',
+  medium: '$6',
+  small: '$5.5',
+} as const satisfies Record<
+  ButtonSize,
+  keyof ReturnType<typeof getTokens>['size']
+>
+
 type ButtonFrameProps = React.ComponentProps<typeof ButtonFrame>
 
-interface ButtonProps extends Omit<ButtonFrameProps, 'children'> {
+interface ButtonProps extends Omit<
+  ButtonFrameProps,
+  'children' | 'variant' | 'size'
+> {
   readonly children: string
   readonly icon?: React.ComponentType<IconProps>
   readonly variant?: ButtonVariant
@@ -135,31 +136,43 @@ export function Button({
   ...rest
 }: ButtonProps): React.JSX.Element {
   const theme = useTheme()
-  const variantOrDisabled: ButtonVariant = rest.disabled ? 'disabled' : variant
-  const iconColor =
-    variantOrDisabled === 'primary'
-      ? theme.black100.get()
-      : variantOrDisabled === 'secondary'
-        ? theme.accentHighlightPrimary.get()
-        : variantOrDisabled === 'destructive'
-          ? theme.white100.get()
-          : variantOrDisabled === 'tertiary'
-            ? theme.backgroundPrimary.get()
-            : theme.foregroundTertiary.get()
-  const iconSize = size === 'large' ? 24 : size === 'medium' ? 20 : 18
+  const iconSize = getTokens().size[iconSizeToken[size]].val
+  const colorKey = contentColor[rest.disabled ? 'disabled' : variant]
+
+  if (variant === 'link') {
+    return (
+      <LinkFrame opacity={rest.disabled ? disabledOpacity : 1} {...rest}>
+        {Icon ? (
+          <Icon color={theme[contentColor.link].get()} size={iconSize} />
+        ) : null}
+        <Typography
+          variant={linkLabelVariant[size]}
+          color={`$${contentColor.link}`}
+        >
+          {children}
+        </Typography>
+      </LinkFrame>
+    )
+  }
 
   return (
-    <ButtonFrame variant={variantOrDisabled} size={size} {...rest}>
-      {Icon ? <Icon color={iconColor} size={iconSize} /> : null}
-      <ButtonLabel
-        variant={variantOrDisabled}
-        size={size}
+    <ButtonFrame
+      variant={rest.disabled ? 'disabled' : variant}
+      size={size}
+      {...rest}
+    >
+      {Icon ? <Icon color={theme[colorKey].get()} size={iconSize} /> : null}
+      <Typography
+        variant={labelVariant[size]}
+        color={`$${colorKey}`}
+        flexShrink={1}
+        textAlign="center"
         numberOfLines={1}
         adjustsFontSizeToFit
         minimumFontScale={0.7}
       >
         {children}
-      </ButtonLabel>
+      </Typography>
     </ButtonFrame>
   )
 }

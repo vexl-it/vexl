@@ -1,17 +1,9 @@
 import {useNavigation} from '@react-navigation/native'
-import {
-  Avatar,
-  CardButton,
-  tokens,
-  Typography,
-  XStack,
-  YStack,
-} from '@vexl-next/ui'
+import {CardButton, PersonRow, tokens, XStack} from '@vexl-next/ui'
 import {parsePhoneNumber} from 'awesome-phonenumber'
 import {useAtomValue} from 'jotai'
 import React, {useCallback, useMemo} from 'react'
 import {Pressable} from 'react-native'
-import {SvgXml} from 'react-native-svg'
 import {type RootStackScreenProps} from '../../../navigationTypes'
 import {
   anonymizedUserDataAtom,
@@ -19,7 +11,7 @@ import {
   userPhoneNumberAtom,
 } from '../../../state/session/userDataAtoms'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
-import resolveLocalUri from '../../../utils/resolveLocalUri'
+import {ProfileImageAvatar} from '../../ProfileImageAvatar'
 
 function UserBanner(): React.ReactElement {
   const realUserData = useAtomValue(realUserDataAtom)
@@ -46,53 +38,31 @@ function UserBanner(): React.ReactElement {
   }, [navigation])
 
   return (
-    <XStack alignItems="center" gap="$3" paddingVertical="$4">
-      <Pressable
-        accessibilityLabel={t('editProfileScreen.title')}
-        accessibilityRole="button"
-        hitSlop={tokens.space[2].val}
-        onPress={handleEditPress}
-      >
-        {profileImage.type === 'svgXml' ? (
-          <Avatar size="$9">
-            <SvgXml
-              width={tokens.size[9].val}
-              height={tokens.size[9].val}
-              xml={profileImage.svgXml.xml}
-            />
-          </Avatar>
-        ) : (
-          <Avatar
-            size="$9"
-            source={{uri: resolveLocalUri(profileImage.imageUri)}}
-          />
-        )}
-      </Pressable>
-      <YStack flex={1} minWidth={0} gap="$2">
-        <Typography
-          variant="paragraphSmallBold"
-          color="$foregroundPrimary"
-          numberOfLines={1}
+    <PersonRow
+      size="large"
+      avatar={
+        <Pressable
+          accessibilityLabel={t('editProfileScreen.title')}
+          accessibilityRole="button"
+          hitSlop={tokens.space[2].val}
+          onPress={handleEditPress}
         >
-          {displayName}
-        </Typography>
-        <Typography
-          variant="micro"
-          color="$foregroundSecondary"
-          numberOfLines={1}
-        >
-          {formattedPhoneNumber}
-        </Typography>
-      </YStack>
-      <XStack gap="$3">
-        <CardButton contrast onPress={handleSharePress}>
-          {t('common.share')}
-        </CardButton>
-        <CardButton contrast onPress={handleEditPress}>
-          {t('common.edit')}
-        </CardButton>
-      </XStack>
-    </XStack>
+          <ProfileImageAvatar image={profileImage} size="$9" />
+        </Pressable>
+      }
+      title={displayName}
+      subtitle={formattedPhoneNumber}
+      trailing={
+        <XStack gap="$3">
+          <CardButton contrast onPress={handleSharePress}>
+            {t('common.share')}
+          </CardButton>
+          <CardButton contrast onPress={handleEditPress}>
+            {t('common.edit')}
+          </CardButton>
+        </XStack>
+      }
+    />
   )
 }
 

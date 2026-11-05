@@ -4,7 +4,7 @@ import {
   NavigationBar,
   Screen,
   Stack,
-  Switch,
+  SwitchCard,
   Typography,
   XStack,
 } from '@vexl-next/ui'
@@ -95,41 +95,15 @@ function AppLogsScreen(): React.ReactElement {
       }
     >
       <Stack flex={1} gap="$5">
-        <XStack
-          alignItems="center"
+        <SwitchCard
           backgroundColor="$backgroundTertiary"
-          borderRadius="$5"
-          gap="$4"
-          justifyContent="space-between"
-          padding="$5"
-        >
-          <Stack flex={1} gap="$2">
-            <Typography
-              color="$foregroundPrimary"
-              letterSpacing={0}
-              variant="paragraph"
-            >
-              {t('AppLogs.enable')}
-            </Typography>
-            <Typography
-              color="$foregroundSecondary"
-              letterSpacing={0}
-              variant="micro"
-            >
-              {t('AppLogs.warningShort')}
-            </Typography>
-          </Stack>
-          <Stack alignItems="center">
-            <Switch valueAtom={appLogsEnabledAtom} />
-          </Stack>
-        </XStack>
+          title={t('AppLogs.enable')}
+          description={t('AppLogs.warningShort')}
+          valueAtom={appLogsEnabledAtom}
+        />
 
         {isAppLogsEmpty ? null : (
-          <Typography
-            color="$foregroundPrimary"
-            letterSpacing={0}
-            variant="paragraphDemibold"
-          >
+          <Typography color="$foregroundPrimary" variant="paragraphDemibold">
             {t('AppLogs.logs')}
           </Typography>
         )}

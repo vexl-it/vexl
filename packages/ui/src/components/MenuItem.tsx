@@ -1,10 +1,11 @@
 import React from 'react'
-import {styled, useTheme} from 'tamagui'
+import {getTokens, styled, useTheme} from 'tamagui'
 
 import {ChevronRight} from '../icons/ChevronRight'
 import type {IconProps} from '../icons/types'
-import {SizableText, XStack, YStack} from '../primitives'
+import {XStack, YStack} from '../primitives'
 import {MenuContext} from './Menu'
+import {Typography} from './Typography'
 
 const MenuItemFrame = styled(XStack, {
   name: 'MenuItem',
@@ -32,47 +33,6 @@ const MenuItemFrame = styled(XStack, {
   } as const,
 })
 
-const MenuItemLabel = styled(SizableText, {
-  name: 'MenuItemLabel',
-  fontFamily: '$body',
-  fontWeight: '500',
-  fontSize: '$4',
-  letterSpacing: '$4',
-  lineHeight: '$4',
-  color: '$foregroundPrimary',
-
-  variants: {
-    variant: {
-      default: {},
-      danger: {color: '$redForeground'},
-    },
-  } as const,
-
-  defaultVariants: {
-    variant: 'default',
-  },
-})
-
-const MenuItemNote = styled(SizableText, {
-  name: 'MenuItemNote',
-  fontFamily: '$body',
-  fontWeight: '500',
-  fontSize: '$1',
-  letterSpacing: '$1',
-  color: '$foregroundSecondary',
-
-  variants: {
-    variant: {
-      default: {},
-      danger: {color: '$redForeground'},
-    },
-  } as const,
-
-  defaultVariants: {
-    variant: 'default',
-  },
-})
-
 export type MenuItemVariant = 'default' | 'danger'
 
 export interface MenuItemProps {
@@ -97,24 +57,38 @@ export function MenuItem({
   const inMenu = React.useContext(MenuContext)
   const theme = useTheme()
 
-  const iconColor =
-    variant === 'danger'
-      ? theme.redForeground.get()
-      : theme.foregroundPrimary.get()
-  const chevronColor =
-    variant === 'danger'
-      ? theme.redForeground.get()
-      : theme.foregroundSecondary.get()
+  const isDanger = variant === 'danger'
+  const iconSize = getTokens().size.$7.val
+  const iconColor = isDanger
+    ? theme.redForeground.get()
+    : theme.foregroundPrimary.get()
+  const chevronColor = isDanger
+    ? theme.redForeground.get()
+    : theme.foregroundSecondary.get()
 
   return (
     <MenuItemFrame contained={inMenu} onPress={onPress}>
-      {Icon ? <Icon color={iconColor} size={24} /> : null}
+      {Icon ? <Icon color={iconColor} size={iconSize} /> : null}
       <YStack flex={1} gap="$1" justifyContent="center">
-        <MenuItemLabel variant={variant}>{label}</MenuItemLabel>
-        {note ? <MenuItemNote variant={variant}>{note}</MenuItemNote> : null}
+        <Typography
+          variant="paragraph"
+          color={isDanger ? '$redForeground' : '$foregroundPrimary'}
+        >
+          {label}
+        </Typography>
+        {note ? (
+          <Typography
+            variant="micro"
+            color={isDanger ? '$redForeground' : '$foregroundSecondary'}
+          >
+            {note}
+          </Typography>
+        ) : null}
       </YStack>
       {tag ?? null}
-      {showChevron ? <ChevronRight color={chevronColor} size={24} /> : null}
+      {showChevron ? (
+        <ChevronRight color={chevronColor} size={iconSize} />
+      ) : null}
     </MenuItemFrame>
   )
 }

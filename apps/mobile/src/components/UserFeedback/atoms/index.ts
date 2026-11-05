@@ -48,20 +48,6 @@ export const feedbackMolecule = molecule((getMolecule, getScope) => {
     o.prop('finished')
   )
 
-  function createIsStarSelectedAtom(
-    starOrderNumber: number
-  ): WritableAtom<boolean, [SetStateAction<boolean>], void> {
-    return atom(
-      (get) => get(starRatingAtom) >= starOrderNumber,
-      (get, set) => {
-        const starRating = get(starRatingAtom)
-        if (starOrderNumber !== starRating) {
-          set(starRatingAtom, starOrderNumber)
-        }
-      }
-    )
-  }
-
   function createIsObjectionSelectedAtom(
     objection: ObjectionType
   ): WritableAtom<boolean, [SetStateAction<boolean>], void> {
@@ -171,7 +157,6 @@ export const feedbackMolecule = molecule((getMolecule, getScope) => {
   return {
     feedbackAtom,
     starRatingAtom,
-    createIsStarSelectedAtom,
     selectedObjectionsAtom,
     createIsObjectionSelectedAtom,
     formIdAtom,

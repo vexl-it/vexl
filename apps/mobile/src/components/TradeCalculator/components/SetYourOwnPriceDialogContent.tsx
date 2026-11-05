@@ -77,7 +77,7 @@ function SetYourOwnPriceDialogContent({
         showSwapControl={false}
         locale={locale}
       />
-      <InfoBox variant="yellow" p="$4" textMt={0}>
+      <InfoBox variant="yellow" p="$4">
         {comparisonInfoText}
       </InfoBox>
     </YStack>

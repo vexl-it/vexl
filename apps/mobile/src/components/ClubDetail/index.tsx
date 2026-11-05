@@ -1,12 +1,12 @@
 import {
   Button,
   ChevronLeft,
+  EmptyState,
   Menu,
   MenuItem,
   NavigationBar,
   Screen,
   SignOut,
-  Typography,
   YStack,
 } from '@vexl-next/ui'
 import {Effect, Option} from 'effect'
@@ -69,14 +69,15 @@ function ClubDetail({
     >
       {Option.match(club, {
         onNone: () => (
-          <YStack flex={1} alignItems="center" justifyContent="center" gap="$5">
-            <Typography variant="paragraph" color="$foregroundPrimary">
-              {t('common.nothingFound')}
-            </Typography>
-            <Button variant="primary" onPress={navigation.goBack}>
-              {t('common.goBack')}
-            </Button>
-          </YStack>
+          <EmptyState
+            fullscreen
+            title={t('common.nothingFound')}
+            action={{
+              label: t('common.goBack'),
+              onPress: navigation.goBack,
+              variant: 'primary',
+            }}
+          />
         ),
         onSome: (clubWithMembers) => (
           <YStack flex={1} gap="$5">

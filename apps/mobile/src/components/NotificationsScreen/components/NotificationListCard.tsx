@@ -1,14 +1,19 @@
 import {useNavigation} from '@react-navigation/native'
 import {type UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {Avatar, Button, NotificationCard, Stack, TextTag} from '@vexl-next/ui'
+import {
+  Avatar,
+  Button,
+  NotificationCard,
+  Stack,
+  SwipeableRow,
+  TextTag,
+  TrashBin,
+} from '@vexl-next/ui'
 import dayjs from 'dayjs'
 import {Match} from 'effect/index'
 import {useAtomValue, useSetAtom, type Atom} from 'jotai'
-import React, {useRef} from 'react'
+import React from 'react'
 import {Linking} from 'react-native'
-import Swipeable, {
-  type SwipeableMethods,
-} from 'react-native-gesture-handler/ReanimatedSwipeable'
 import {type RootStackScreenProps} from '../../../navigationTypes'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {
@@ -19,8 +24,8 @@ import {
 import {formattingLocaleAtom} from '../../../utils/localization/formattingLocaleAtom'
 import {cancelNotificationCenterRecordActionAtom} from '../state'
 import {type NotificationCenterRecord} from '../state/domain'
-import NotificationListCardRightSwipeActions from './NotificationListCardRightSwipeActions'
-import VexlAvatar from './VexlAvatar'
+
+const vexlAvatar: number = require('../images/avatar.png')
 
 interface CardDataBase {
   readonly name: string
@@ -80,7 +85,6 @@ function NotificationListCard({
 }: {
   readonly notificationAtom: Atom<NotificationCenterRecord>
 }): React.ReactElement | null {
-  const swipeableRef = useRef<SwipeableMethods>(null)
   const notification = useAtomValue(notificationAtom)
   const cancelNotificationCenterRecord = useSetAtom(
     cancelNotificationCenterRecordActionAtom
@@ -97,7 +101,7 @@ function NotificationListCard({
       const actionLink = productNotification.actionLink
       const sharedCardData = {
         name: 'Vexl',
-        avatar: <VexlAvatar />,
+        avatar: <Avatar size="$9" source={vexlAvatar} />,
         category:
           productNotification.type === 'MARKETING'
             ? t('notificationsScreen.important')
@@ -146,23 +150,19 @@ function NotificationListCard({
   )
 
   return (
-    <Stack>
-      <Swipeable
-        ref={swipeableRef}
-        renderRightActions={() => (
-          <NotificationListCardRightSwipeActions
-            onPress={() => {
-              cancelNotificationCenterRecord(notification.id)
-              swipeableRef.current?.close()
-            }}
-          />
-        )}
+    <Stack marginHorizontal="$5">
+      <SwipeableRow
+        rounded
+        rightAction={{
+          icon: TrashBin,
+          label: t('common.delete'),
+          variant: 'destructive',
+          onPress: () => {
+            cancelNotificationCenterRecord(notification.id)
+          },
+        }}
       >
-        <Stack
-          marginHorizontal="$5"
-          backgroundColor="$backgroundPrimary"
-          borderRadius="$5"
-        >
+        <Stack backgroundColor="$backgroundPrimary" borderRadius="$5">
           <NotificationCard
             avatar={cardData.avatar}
             name={cardData.name}
@@ -187,7 +187,7 @@ function NotificationListCard({
             ) : null}
           </NotificationCard>
         </Stack>
-      </Swipeable>
+      </SwipeableRow>
     </Stack>
   )
 }

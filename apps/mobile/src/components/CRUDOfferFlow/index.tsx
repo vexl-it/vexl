@@ -1,31 +1,30 @@
 import {useNavigation, usePreventRemove} from '@react-navigation/native'
-import {Button, EditRow, Loader, NavigationBar, Screen} from '@vexl-next/ui'
-import {XmarkCancelClose} from '@vexl-next/ui/src/icons'
+import {
+  getTokens,
+  KeyboardAwareScrollView,
+  Loader,
+  NavigationBar,
+  Screen,
+  Stack,
+  XmarkCancelClose,
+  YStack,
+  type KeyboardAwareScrollViewRef,
+} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {Effect} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react'
 import {type LayoutChangeEvent} from 'react-native'
-import {
-  KeyboardAwareScrollView,
-  type KeyboardAwareScrollViewRef,
-} from 'react-native-keyboard-controller'
-import Animated, {FadeIn, FadeOut} from 'react-native-reanimated'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
-import {getTokens, Stack, YStack} from 'tamagui'
 import {type RootStackScreenProps} from '../../navigationTypes'
 import {useTranslation} from '../../utils/localization/I18nProvider'
-import {formattingLocaleAtom} from '../../utils/localization/formattingLocaleAtom'
-import {getOfferExpirationLabel} from '../../utils/offerAmountDetails'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import {globalDialogAtom} from '../GlobalDialog'
-import FriendLevel from '../OfferForm/components/FriendLevel'
-import numberOfFriendsAtom from './atoms/numberOfFriendsAtom'
 import {offerFormMolecule} from './atoms/offerFormStateAtoms'
 import AmountStep from './components/AmountStep'
 import ClubsStep from './components/ClubsStep'
 import DescribeStep from './components/DescribeStep'
-import ExpirationOptions from './components/ExpirationOptions'
+import FriendLevelStep from './components/FriendLevelStep'
 import LanguageStep from './components/LanguageStep'
 import ListingTypeStep from './components/ListingTypeStep'
 import LocationStep from './components/LocationStep'
@@ -34,28 +33,24 @@ import OfferTypeStep from './components/OfferTypeStep'
 import PriceUpToStep from './components/PriceUpToStep'
 import ProductCategoryStep from './components/ProductCategoryStep'
 import {type OfferSetupStep} from './offerSetupSteps'
-import {useFriendLevelLabels} from './useFriendLevelLabels'
 
 function CRUDOfferFlow(): React.ReactElement {
   const {t} = useTranslation()
-  const locale = useAtomValue(formattingLocaleAtom)
   const navigation =
     useNavigation<RootStackScreenProps<'CRUDOfferFlow'>['navigation']>()
   const safeGoBack = useSafeGoBack()
   const {
     offerTypeAtom,
     listingTypeAtom,
-    expirationDateAtom,
     initializeValuesForOfferFormActionAtom,
-    intendedConnectionLevelAtom,
     resetOfferFormActionAtom,
     discardLocationIfNotInPersonActionAtom,
+    createOfferActionAtom,
   } = useMolecule(offerFormMolecule)
   const offerType = useAtomValue(offerTypeAtom)
   const listingType = useAtomValue(listingTypeAtom)
-  const expirationDate = useAtomValue(expirationDateAtom)
-  const numberOfFriends = useAtomValue(numberOfFriendsAtom)
   const showDialog = useSetAtom(globalDialogAtom)
+  const createOffer = useSetAtom(createOfferActionAtom)
   const initializeValuesForOfferForm = useSetAtom(
     initializeValuesForOfferFormActionAtom
   )
@@ -116,14 +111,6 @@ function CRUDOfferFlow(): React.ReactElement {
       if (step === activeStep) scrollToActiveStep()
     }
 
-  const friendLevelLabels = useFriendLevelLabels()
-  const areFriendLevelCountsLoading = numberOfFriends.state === 'loading'
-  const expirationLabel = getOfferExpirationLabel({
-    expirationDate,
-    locale,
-    t,
-  })
-
   const confirmDiscardNewOffer = useCallback(
     () =>
       Effect.gen(function* (_) {
@@ -163,9 +150,19 @@ function CRUDOfferFlow(): React.ReactElement {
     [safeGoBack]
   )
 
-  const onOfferCreated = useCallback(() => {
-    skipExitConfirmationRef.current = true
-  }, [])
+  const publishOffer = useCallback(() => {
+    void Effect.runPromise(createOffer()).then((success) => {
+      if (!success) return
+      skipExitConfirmationRef.current = true
+      navigation.popTo('InsideTabs', {
+        screen: 'Marketplace',
+        params: {
+          initialTab: 'myOffers',
+          tabSwitchRequestId: String(Date.now()),
+        },
+      })
+    })
+  }, [createOffer, navigation])
 
   return (
     <Screen
@@ -331,57 +328,28 @@ function CRUDOfferFlow(): React.ReactElement {
                 scrollToActiveStep()
               }}
             >
-              <Animated.View entering={FadeIn} exiting={FadeOut}>
-                <YStack>
-                  {activeStep === 'friendLevel' ? (
-                    <EditRow
-                      state="initial"
-                      headline={t('offerForm.whoCanSeeYourOffer')}
+              <FriendLevelStep
+                active={activeStep === 'friendLevel'}
+                contentLoading={!heavyContentReady}
+                onEdit={() => {
+                  setActiveStep('friendLevel')
+                }}
+                onComplete={() => {
+                  setActiveStep('clubs')
+                }}
+              />
+              {activeStep === 'clubs' ? (
+                <YStack paddingTop="$5">
+                  {heavyContentReady ? (
+                    <ClubsStep
+                      ctaLabel={t('offerForm.publishOffer')}
+                      onComplete={publishOffer}
                     />
                   ) : (
-                    <EditRow
-                      state="completed"
-                      overline={t('offerForm.whoCanSeeYourOffer')}
-                      headline={friendLevelLabels.headline}
-                      subheadline={[
-                        friendLevelLabels.reachLabel,
-                        expirationLabel,
-                      ]}
-                      onPress={() => {
-                        setActiveStep('friendLevel')
-                      }}
-                    />
-                  )}
-                  {!heavyContentReady ? (
-                    <YStack paddingVertical="$5" alignItems="center">
-                      <Loader size="large" />
-                    </YStack>
-                  ) : activeStep === 'friendLevel' ? (
-                    <YStack gap="$5" paddingVertical="$5">
-                      <FriendLevel
-                        intendedConnectionLevelAtom={
-                          intendedConnectionLevelAtom
-                        }
-                      />
-                      <ExpirationOptions />
-                      <Button
-                        variant="primary"
-                        size="large"
-                        disabled={areFriendLevelCountsLoading}
-                        onPress={() => {
-                          setActiveStep('clubs')
-                        }}
-                      >
-                        {t('offerForm.next')}
-                      </Button>
-                    </YStack>
-                  ) : (
-                    <YStack gap="$5" paddingTop="$5">
-                      <ClubsStep onOfferCreated={onOfferCreated} />
-                    </YStack>
+                    <Loader size="large" />
                   )}
                 </YStack>
-              </Animated.View>
+              ) : null}
             </Stack>
           ) : null}
         </YStack>

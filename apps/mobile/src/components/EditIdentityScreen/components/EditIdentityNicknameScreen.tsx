@@ -5,6 +5,7 @@ import {
   ChevronLeft,
   NavigationBar,
   Screen,
+  Stack,
   TextField,
   Typography,
   XmarkCancelClose,
@@ -12,7 +13,6 @@ import {
 import {Option, Schema} from 'effect/index'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback} from 'react'
-import {Stack} from 'tamagui'
 import {type EditIdentityStackScreenProps} from '../../../navigationTypes'
 import {invalidUsernameUIFeedbackAtom} from '../../../state/session/userDataAtoms'
 import {useTranslation} from '../../../utils/localization/I18nProvider'

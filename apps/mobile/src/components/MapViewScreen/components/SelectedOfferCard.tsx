@@ -1,7 +1,6 @@
 import {useNavigation} from '@react-navigation/native'
 import {type OfferId} from '@vexl-next/domain/src/general/offers'
-import {Stack} from '@vexl-next/ui/src/primitives'
-import {LinearGradient} from 'expo-linear-gradient'
+import {FadeGradient, getTokens, Stack} from '@vexl-next/ui'
 import {useAtomValue} from 'jotai'
 import React, {useCallback, useEffect} from 'react'
 import Animated, {
@@ -11,7 +10,6 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated'
-import {getTokens, useTheme} from 'tamagui'
 import OfferOnMarketplace from '../../OfferOnMarketplace'
 import {mapViewSelectedOfferAtom} from '../atoms'
 
@@ -28,7 +26,6 @@ interface Props {
 
 function SelectedOfferCard({selectedOfferId}: Props): React.JSX.Element | null {
   const navigation = useNavigation()
-  const theme = useTheme()
   const selectedOffer = useAtomValue(mapViewSelectedOfferAtom)
   const selectedOfferToRender =
     selectedOffer?.offerInfo.offerId === selectedOfferId ? selectedOffer : null
@@ -70,20 +67,7 @@ function SelectedOfferCard({selectedOfferId}: Props): React.JSX.Element | null {
       paddingBottom={FOCUSED_CARD_BOTTOM_OFFSET}
       style={containerStyle}
     >
-      <LinearGradient
-        colors={[theme.gradientHelper.get(), theme.backgroundPrimary.get()]}
-        start={{x: 0, y: 0}}
-        end={{x: 0, y: 1}}
-        locations={[0, 0.7]}
-        style={{
-          position: 'absolute',
-          left: 0,
-          right: 0,
-          bottom: 0,
-          top: 0,
-        }}
-        pointerEvents="none"
-      />
+      <FadeGradient solidEdge="bottom" solidFraction={0.3} />
       <Stack paddingHorizontal="$5">
         <Animated.View
           key={selectedOfferToRender.offerInfo.offerId}

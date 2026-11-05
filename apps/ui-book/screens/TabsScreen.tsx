@@ -1,6 +1,7 @@
-import {SizableText, Tabs, Theme, YStack} from '@vexl-next/ui'
-import React, {useCallback, useState} from 'react'
-import {ScrollView} from 'react-native'
+import {Tabs} from '@vexl-next/ui'
+import React, {useState} from 'react'
+
+import {ComponentScreenLayout, DemoSection} from './ComponentScreenLayout'
 
 const largeTwoTabs = [
   {label: 'Offers', value: 'offers'},
@@ -24,122 +25,47 @@ const scrollableTabs = [
   {label: 'Recommended', value: 'recommended'},
 ] as const
 
-function SectionLabel({
-  children,
-}: {
-  readonly children: string
-}): React.JSX.Element {
-  return (
-    <SizableText
-      fontFamily="$body"
-      fontWeight="600"
-      fontSize="$2"
-      color="$foregroundSecondary"
-      paddingTop="$3"
-    >
-      {children}
-    </SizableText>
-  )
-}
+type TabValue<T extends ReadonlyArray<{readonly value: string}>> =
+  T[number]['value']
 
-type ScrollableTabValue =
-  | 'featured'
-  | 'nearby'
-  | 'recent'
-  | 'popular'
-  | 'trending'
-  | 'recommended'
-
-function ThemedColumn({
-  theme,
-}: {
-  readonly theme: 'light' | 'dark'
-}): React.JSX.Element {
-  const [largeActive, setLargeActive] = useState<'offers' | 'messages'>(
-    'offers'
-  )
-  const [smallActive, setSmallActive] = useState<
-    'all' | 'buy' | 'sell' | 'saved' | 'drafts'
-  >('all')
+function Demos(): React.JSX.Element {
+  const [largeActive, setLargeActive] =
+    useState<TabValue<typeof largeTwoTabs>>('offers')
+  const [smallActive, setSmallActive] =
+    useState<TabValue<typeof smallFiveTabs>>('all')
   const [scrollableActive, setScrollableActive] =
-    useState<ScrollableTabValue>('featured')
-
-  const handleLargePress = useCallback((value: 'offers' | 'messages') => {
-    setLargeActive(value)
-  }, [])
-
-  const handleSmallPress = useCallback(
-    (value: 'all' | 'buy' | 'sell' | 'saved' | 'drafts') => {
-      setSmallActive(value)
-    },
-    []
-  )
-
-  const handleScrollablePress = useCallback((value: ScrollableTabValue) => {
-    setScrollableActive(value)
-  }, [])
+    useState<TabValue<typeof scrollableTabs>>('featured')
 
   return (
-    <Theme name={theme}>
-      <YStack
-        gap="$5"
-        padding="$5"
-        backgroundColor="$backgroundPrimary"
-        borderRadius="$4"
-      >
-        <SizableText
-          fontFamily="$body"
-          fontWeight="600"
-          fontSize="$3"
-          color="$foregroundPrimary"
-        >
-          {theme.charAt(0).toUpperCase() + theme.slice(1)}
-        </SizableText>
-
-        <SectionLabel>Large (2 items)</SectionLabel>
+    <>
+      <DemoSection title="Large (2 items)">
         <Tabs
           tabs={largeTwoTabs}
           activeTab={largeActive}
-          onTabPress={handleLargePress}
+          onTabPress={setLargeActive}
           size="large"
         />
-
-        <SectionLabel>Small (5 items)</SectionLabel>
+      </DemoSection>
+      <DemoSection title="Small (5 items)">
         <Tabs
           tabs={smallFiveTabs}
           activeTab={smallActive}
-          onTabPress={handleSmallPress}
+          onTabPress={setSmallActive}
           size="small"
         />
-
-        <SectionLabel>Scrollable (overflow)</SectionLabel>
+      </DemoSection>
+      <DemoSection title="Scrollable (overflow)">
         <Tabs
           tabs={scrollableTabs}
           activeTab={scrollableActive}
-          onTabPress={handleScrollablePress}
+          onTabPress={setScrollableActive}
           size="large"
         />
-      </YStack>
-    </Theme>
+      </DemoSection>
+    </>
   )
 }
 
 export function TabsScreen(): React.JSX.Element {
-  return (
-    <ScrollView style={{flex: 1}}>
-      <YStack padding="$5" gap="$4">
-        <SizableText
-          fontFamily="$heading"
-          fontWeight="700"
-          fontSize="$3"
-          color="$foregroundPrimary"
-        >
-          Tabs
-        </SizableText>
-
-        <ThemedColumn theme="light" />
-        <ThemedColumn theme="dark" />
-      </YStack>
-    </ScrollView>
-  )
+  return <ComponentScreenLayout title="Tabs" demos={Demos} />
 }

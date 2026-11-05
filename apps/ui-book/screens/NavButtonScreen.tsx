@@ -1,109 +1,91 @@
-import {NavButton, SizableText, Theme, XStack, YStack} from '@vexl-next/ui'
-import {BellNotification} from '@vexl-next/ui/src/icons/BellNotification'
+import {
+  BellNotification,
+  NavButton,
+  type NavButtonVariant,
+  XStack,
+} from '@vexl-next/ui'
+import {Array, pipe} from 'effect'
 import React from 'react'
-import {ScrollView} from 'react-native'
 
-function SectionLabel({
-  children,
-}: {
-  readonly children: string
-}): React.JSX.Element {
+import {ComponentScreenLayout, DemoSection} from './ComponentScreenLayout'
+
+const variants: readonly NavButtonVariant[] = [
+  'accent',
+  'highlighted',
+  'destructive',
+  'normal',
+  'secondary',
+  'transparent',
+]
+
+function Demos(): React.JSX.Element {
   return (
-    <SizableText
-      fontFamily="$body"
-      fontWeight="600"
-      fontSize="$2"
-      color="$foregroundSecondary"
-      paddingTop="$3"
-    >
-      {children}
-    </SizableText>
-  )
-}
-
-function ThemedColumn({
-  theme,
-}: {
-  readonly theme: 'light' | 'dark'
-}): React.JSX.Element {
-  return (
-    <Theme name={theme}>
-      <YStack
-        gap="$4"
-        padding="$5"
-        backgroundColor="$backgroundPrimary"
-        borderRadius="$4"
-        flex={1}
-      >
-        <SizableText
-          fontFamily="$body"
-          fontWeight="600"
-          fontSize="$3"
-          color="$foregroundPrimary"
-        >
-          {theme.charAt(0).toUpperCase() + theme.slice(1)}
-        </SizableText>
-
-        <SectionLabel>Icon type</SectionLabel>
-
+    <>
+      <DemoSection title="Icon type">
+        <XStack gap="$3" flexWrap="wrap">
+          {pipe(
+            variants,
+            Array.map((variant) => (
+              <NavButton
+                key={variant}
+                variant={variant}
+                icon={BellNotification}
+                onPress={() => {}}
+              />
+            ))
+          )}
+        </XStack>
+      </DemoSection>
+      <DemoSection title="With badge / disabled">
         <XStack gap="$3">
           <NavButton
-            variant="highlighted"
+            variant="secondary"
             icon={BellNotification}
+            badge
             onPress={() => {}}
           />
-
+          <NavButton icon={BellNotification} disabled onPress={() => {}} />
+        </XStack>
+      </DemoSection>
+      <DemoSection title="Large size (next to a SearchBar)">
+        <XStack gap="$3">
           <NavButton
-            variant="destructive"
+            variant="secondary"
+            size="large"
             icon={BellNotification}
             onPress={() => {}}
           />
-
           <NavButton
             variant="normal"
-            icon={BellNotification}
+            size="large"
+            type="text"
             onPress={() => {}}
-          />
+          >
+            Label
+          </NavButton>
         </XStack>
-
-        <SectionLabel>Text type</SectionLabel>
-
+      </DemoSection>
+      <DemoSection title="Text type">
         <XStack gap="$3" flexWrap="wrap">
-          <NavButton variant="highlighted" type="text" onPress={() => {}}>
-            Label
-          </NavButton>
-
-          <NavButton variant="destructive" type="text" onPress={() => {}}>
-            Label
-          </NavButton>
-
-          <NavButton variant="normal" type="text" onPress={() => {}}>
-            Label
-          </NavButton>
+          {pipe(
+            variants,
+            Array.map((variant) => (
+              <NavButton
+                key={variant}
+                variant={variant}
+                type="text"
+                onPress={() => {}}
+              >
+                Label
+              </NavButton>
+            ))
+          )}
         </XStack>
-      </YStack>
-    </Theme>
+      </DemoSection>
+    </>
   )
 }
 
 export function NavButtonScreen(): React.JSX.Element {
-  return (
-    <ScrollView style={{flex: 1}}>
-      <YStack padding="$5" gap="$4">
-        <SizableText
-          fontFamily="$heading"
-          fontWeight="700"
-          fontSize="$3"
-          color="$foregroundPrimary"
-        >
-          Nav Button
-        </SizableText>
-
-        <XStack gap="$3">
-          <ThemedColumn theme="light" />
-          <ThemedColumn theme="dark" />
-        </XStack>
-      </YStack>
-    </ScrollView>
-  )
+  return <ComponentScreenLayout title="Nav Button" demos={Demos} />
 }

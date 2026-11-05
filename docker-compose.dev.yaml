@@ -75,7 +75,9 @@ services:
       start_period: 5s
 
   minio:
-    image: minio/minio:RELEASE.2025-09-07T16-13-09Z
+    # MinIO stopped publishing images. Silo is its maintained community fork:
+    # same server, env, console and on-disk format.
+    image: pgsty/silo:RELEASE.2026-10-26T00-00-00Z
     container_name: vexl-minio
     command: ["server", "/data", "--console-address", ":9001"]
     environment:
@@ -90,7 +92,7 @@ services:
       - minio_data:/data
 
   minio-init:
-    image: minio/mc:RELEASE.2025-08-13T08-35-41Z
+    image: pgsty/mc:RELEASE.2026-10-26T00-00-00Z
     container_name: vexl-minio-init
     # One-shot bucket setup. Kept behind a profile so `up --wait` does not include
     # it (--wait treats an exited container, even code 0, as a failure). The

@@ -80,11 +80,9 @@ export function NoKycSection(): React.JSX.Element {
           <Typography variant="paragraphSmallBold" color="$black100">
             {copy.vexlTitle}
           </Typography>
-          <XStack alignItems="center" gap="$3">
-            <YStack flexShrink={0}>
-              <PhoneCall size={32} color={tokens.color.black100.val} />
-            </YStack>
-            <Typography tag="p" variant="heading2" color="$black100">
+          <XStack alignItems="center" gap="$4">
+            <PhoneCall size={24} color={tokens.color.black100.val} />
+            <Typography variant="paragraphSmall" color="$black100">
               {copy.vexlAsk}
             </Typography>
           </XStack>

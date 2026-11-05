@@ -184,20 +184,20 @@ export const cs: Messages = {
       text: 'Mezi vámi a tím, s kým obchodujete, nestojí žádná firma. Takhle probíhá obchod na obrazovkách z aplikace. Lidé jsou smyšlení.',
       steps: {
         contacts: {
-          title: 'Přidejte své kontakty',
-          text: 'Vexl vás podle kontaktů v telefonu propojí s přáteli a přáteli přátel. Jejich čísla opouštějí váš telefon jen jako hashe, nikdy v čitelné podobě.',
+          title: 'Přidejte své kontakty bezpečně',
+          text: 'Vytvořte si svou důvěryhodnou síť a objevujte nabídky od přátel a přátel přátel.',
         },
         offer: {
-          title: 'Najděte nabídku',
-          text: 'U nabídky vidíte částku, místo a kolik máte společných přátel. Jména zůstávají skrytá.',
+          title: 'Procházejte nebo přidávejte nabídky',
+          text: 'Vexl funguje jako soukromé tržiště. Procházejte nebo přidávejte nabídky a vyberte si, s kým se chcete spojit.',
         },
         chat: {
-          title: 'Pište si anonymně',
-          text: 'Pošlete žádost. Jakmile ji druhá strana přijme, domluvíte se v chatu šifrovaném end-to-end.',
+          title: 'Chatujte anonymně',
+          text: 'Odešlete nebo přijměte žádost na základě nabídky. Chatujte anonymně, dokud se nerozhodnete odhalit svou identitu.',
         },
         trade: {
-          title: 'Sejděte se a obchodujte',
-          text: 'Jména a fotky si odhalíte, jen když oba souhlasíte. Pak se sejdete a obchod uzavřete. Vexl nesahá na hotovost ani na bitcoin.',
+          title: 'Sejděte se a obchodujte soukromě',
+          text: 'Dohodněte se na podrobnostech, sejděte se osobně a vyměňte si soukromě. Vexl nikdy nespravuje vaše peníze ani nesleduje vaše nákupy.',
         },
       },
       mocks: {

@@ -183,20 +183,20 @@ export const en = {
       text: 'No company sits between you and the person you trade with. This is how a trade works, in the app’s own screens. The people are made up.',
       steps: {
         contacts: {
-          title: 'Add your contacts',
-          text: 'Vexl uses your phone contacts to connect you with friends and friends of friends. Their numbers leave your phone only as hashes, never in plain text.',
+          title: 'Add your contacts securely',
+          text: 'Create your trusted network and discover offers from friends, and friends of friends.',
         },
         offer: {
-          title: 'Find an offer',
-          text: 'Offers show the amount, the place, and how many friends you share. Names stay hidden.',
+          title: 'Browse or add offers',
+          text: 'Vexl works as a private marketplace. Browse or add offers and choose who you want to connect with.',
         },
         chat: {
           title: 'Chat anonymously',
-          text: 'Send a request. Once it’s accepted, agree on the details in an end-to-end encrypted chat.',
+          text: 'Send or receive request based on an offer. Chat anonymously until you decide to reveal your identity.',
         },
         trade: {
-          title: 'Meet and trade',
-          text: 'Reveal names and photos only if you both agree. Then meet and swap. Vexl never touches the cash or the bitcoin.',
+          title: 'Meet & trade privately',
+          text: 'Agree on the details, meet in person, and exchange privately. Vexl never handles your money or tracks your purchases.',
         },
       },
       mocks: {

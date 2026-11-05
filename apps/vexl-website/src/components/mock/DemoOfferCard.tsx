@@ -2,8 +2,8 @@
 
 import {IconTag, OfferCard, TextTag} from '@vexl-next/ui'
 import React from 'react'
-import {useLocale} from '../../../components/LocaleProvider'
-import {type Messages} from '../../../i18n/en'
+import {type Messages} from '../../i18n/en'
+import {useLocale} from '../LocaleProvider'
 import {DemoAvatar, type DemoAvatarIndex} from './DemoAvatar'
 
 export type DemoOffer = Messages['home']['mock']['offers'][number]

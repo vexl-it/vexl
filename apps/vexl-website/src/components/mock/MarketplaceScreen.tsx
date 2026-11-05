@@ -27,7 +27,7 @@ import {Array, pipe} from 'effect'
 import React from 'react'
 import {useSharedValue} from 'react-native-reanimated'
 import {SafeAreaProvider} from 'react-native-safe-area-context'
-import {useLocale} from '../../../components/LocaleProvider'
+import {useLocale} from '../LocaleProvider'
 import {DemoOfferCard} from './DemoOfferCard'
 
 const noop = (): void => {}

@@ -17,6 +17,7 @@ import {
 } from '@vexl-next/ui'
 import Image from 'next/image'
 import React from 'react'
+import Svg, {Path} from 'react-native-svg'
 import {useTheme} from 'tamagui'
 import {useLocale} from '../../components/LocaleProvider'
 
@@ -90,6 +91,15 @@ export function NoKycSection(): React.JSX.Element {
           <XStack flex={1} alignItems="flex-end" gap="$4">
             <YStack flex={1}>
               <ChatBubble text={copy.message} isMine={false} />
+              {/* The bubble's tail points at the avatar, who is saying it */}
+              <YStack position="absolute" right={-12} bottom="$5">
+                <Svg width={14} height={20} viewBox="0 0 14 20">
+                  <Path
+                    d="M0 0 L14 10 L0 20 Z"
+                    fill={theme.backgroundTertiary.get()}
+                  />
+                </Svg>
+              </YStack>
             </YStack>
             <YStack width={72} flexShrink={0} $lg={{width: 120}}>
               <Image

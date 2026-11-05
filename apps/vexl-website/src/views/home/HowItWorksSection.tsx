@@ -13,8 +13,8 @@ import {
 import React from 'react'
 import {Theme} from 'tamagui'
 import {useLocale} from '../../components/LocaleProvider'
-import {RevealedAvatar} from './mock/DemoAvatar'
-import {DemoOfferCard} from './mock/DemoOfferCard'
+import {RevealedAvatar} from '../../components/mock/DemoAvatar'
+import {DemoOfferCard} from '../../components/mock/DemoOfferCard'
 
 function ContactsMock(): React.JSX.Element {
   const {t} = useLocale()

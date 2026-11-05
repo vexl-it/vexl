@@ -10,30 +10,9 @@ import {
 } from '@vexl-next/ui'
 import Image from 'next/image'
 import React from 'react'
+import {AppPreview} from '../../components/AppPreview'
 import {useLocale} from '../../components/LocaleProvider'
-import {PhoneFrame} from '../../components/PhoneFrame'
 import {SiteLink} from '../../components/SiteLink'
-import {MarketplaceScreen} from './mock/MarketplaceScreen'
-
-function HeroPhone(): React.JSX.Element {
-  const {t} = useLocale()
-  return (
-    <PhoneFrame label={t.home.mock.label}>
-      {/* A picture of the app: nothing inside takes clicks or focus */}
-      <div
-        inert
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          flex: 1,
-          minHeight: 0,
-        }}
-      >
-        <MarketplaceScreen />
-      </div>
-    </PhoneFrame>
-  )
-}
 
 export function HeroSection(): React.JSX.Element {
   const {t, path} = useLocale()
@@ -74,7 +53,7 @@ export function HeroSection(): React.JSX.Element {
         backgroundColor="$accentYellowPrimary"
         $lg={{flexBasis: 0}}
       >
-        <HeroPhone />
+        <AppPreview />
       </XStack>
     </PageSection>
   )

@@ -28,7 +28,7 @@ function fixedHeaderHeight(): number {
     : 0
 }
 
-function animateScrollTo(to: number): void {
+function animateScrollTo(to: number, onDone: () => void): void {
   const from = window.scrollY
   if (from === to) return
   const duration = scrollDuration(to - from)
@@ -42,8 +42,18 @@ function animateScrollTo(to: number): void {
         : from + (to - from) * easeInOutCubic(elapsed / duration)
     )
     if (elapsed <= duration) requestAnimationFrame(step)
+    else onDone()
   }
   requestAnimationFrame(step)
+}
+
+// webflow.js then hands keyboard focus to the target without scrolling, so
+// the next Tab continues inside the section
+function focusWithoutScroll(target: HTMLElement): void {
+  const tabIndex = target.getAttribute('tabindex')
+  if (tabIndex === null) target.setAttribute('tabindex', '-1')
+  target.focus({preventScroll: true})
+  if (tabIndex === null) target.removeAttribute('tabindex')
 }
 
 function onClick(event: MouseEvent): void {
@@ -56,7 +66,10 @@ function onClick(event: MouseEvent): void {
   event.preventDefault()
   if (location.hash !== link.hash) history.pushState(null, '', link.hash)
   animateScrollTo(
-    target.getBoundingClientRect().top + window.scrollY - fixedHeaderHeight()
+    target.getBoundingClientRect().top + window.scrollY - fixedHeaderHeight(),
+    () => {
+      focusWithoutScroll(target)
+    }
   )
 }
 

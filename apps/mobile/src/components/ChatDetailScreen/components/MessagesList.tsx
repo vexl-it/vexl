@@ -67,29 +67,34 @@ function MessagesList({
     latestMessage.message.state !== 'received'
   const previousLatestMessageKeyRef = useRef(latestMessageKey)
 
-  // Layout effects run before native layout reports the new content size,
-  // so the decision is made while isEndVisibleRef still describes the old content.
-  useLayoutEffect(() => {
-    if (previousLatestMessageKeyRef.current === latestMessageKey) return
-    previousLatestMessageKeyRef.current = latestMessageKey
-    if (isLatestMessageMine || isEndVisibleRef.current)
-      isFollowingEndRef.current = true
-  }, [isLatestMessageMine, latestMessageKey])
-
-  useLayoutEffect(() => {
-    if (isOtherSideTyping && isEndVisibleRef.current) {
-      isFollowingEndRef.current = true
-    }
-  }, [isOtherSideTyping])
-
   // Keeps following the end until the user scrolls, because messages keep
   // growing after they are added, e.g. when an image loads.
   // FlashList's own scrollToEnd ignores the keyboard contentInset
   // added by KeyboardChatScrollView, so scroll the native view instead.
   const scrollToEndIfFollowing = useCallback(() => {
     if (!isFollowingEndRef.current) return
-    listRef.current?.getNativeScrollRef()?.scrollToEnd({animated: true})
+    runAfterAnimationFrame(() => {
+      if (!isFollowingEndRef.current) return
+      listRef.current?.getNativeScrollRef()?.scrollToEnd({animated: true})
+    })
   }, [])
+
+  // Layout effects run before native layout reports the new content size,
+  // so the decision is made while isEndVisibleRef still describes the old content.
+  useLayoutEffect(() => {
+    if (previousLatestMessageKeyRef.current === latestMessageKey) return
+    previousLatestMessageKeyRef.current = latestMessageKey
+    if (isLatestMessageMine || isEndVisibleRef.current) {
+      isFollowingEndRef.current = true
+      scrollToEndIfFollowing()
+    }
+  }, [isLatestMessageMine, latestMessageKey, scrollToEndIfFollowing])
+
+  useLayoutEffect(() => {
+    if (isOtherSideTyping && isEndVisibleRef.current) {
+      isFollowingEndRef.current = true
+    }
+  }, [isOtherSideTyping])
 
   const stopFollowingEnd = useCallback(() => {
     isFollowingEndRef.current = false
@@ -180,6 +185,7 @@ function MessagesList({
         keyExtractor={atomKeyExtractor}
         maintainVisibleContentPosition={maintainVisibleContentPosition}
         onLoad={onLoad}
+        onCommitLayoutEffect={scrollToEndIfFollowing}
         onScrollBeginDrag={stopFollowingEnd}
         renderItem={renderItem}
         renderScrollComponent={renderScrollComponent}

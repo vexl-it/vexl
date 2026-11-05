@@ -26,7 +26,7 @@ a:focus-visible {
 @media (max-width: 439px) {
   :root h1.font_heading._fos-f-size-6,
   :root h2.font_heading._fos-f-size-6 {
-    font-size: min(40px, 9vw);
+    font-size: min(40px, 8vw);
     line-height: 1.15;
   }
 }

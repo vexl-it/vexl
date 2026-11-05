@@ -1,8 +1,9 @@
 'use client'
 
-import {Array, Option, pipe} from 'effect'
+import {Array, pipe} from 'effect'
 import React, {useEffect, useRef, useState} from 'react'
 import {type Locale, localizedPath} from '../i18n/locales'
+import {rovingFocusIndex} from './rovingFocus'
 
 const languages = [
   {locale: 'en', label: 'English'},
@@ -15,6 +16,7 @@ export function LanguageDropdown({
   alternatePaths = {},
   light,
   mobile = false,
+  menuOpen = false,
 }: {
   readonly locale: Locale
   readonly path: string
@@ -23,8 +25,15 @@ export function LanguageDropdown({
   readonly light: boolean
   /** The copy that lives inside the collapsible menu. */
   readonly mobile?: boolean
+  /** Whether the navbar's mobile menu is open; the list closes with it. */
+  readonly menuOpen?: boolean
 }): React.JSX.Element {
   const [open, setOpen] = useState(false)
+  const [wasMenuOpen, setWasMenuOpen] = useState(menuOpen)
+  if (menuOpen !== wasMenuOpen) {
+    setWasMenuOpen(menuOpen)
+    if (!menuOpen) setOpen(false)
+  }
   const ref = useRef<HTMLDivElement>(null)
   const modifiers = [mobile ? 'mobile' : '', light ? 'is-light' : '']
     .filter(Boolean)
@@ -68,19 +77,7 @@ export function LanguageDropdown({
       ref.current?.querySelectorAll<HTMLElement>('.w-dropdown-list a') ?? [],
       Array.fromIterable
     )
-    const current = pipe(
-      links,
-      Array.findFirstIndex((link) => link === document.activeElement),
-      Option.getOrElse(() => -1)
-    )
-    const target = {
-      Home: 0,
-      End: links.length - 1,
-      ArrowLeft: current - 1,
-      ArrowUp: current - 1,
-      ArrowRight: Math.min(links.length - 1, current + 1),
-      ArrowDown: Math.min(links.length - 1, current + 1),
-    }[event.key]
+    const target = rovingFocusIndex(event.key, links)
     if (target === undefined) return
     event.preventDefault()
     links[target]?.focus()

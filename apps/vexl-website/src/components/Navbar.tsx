@@ -1,10 +1,11 @@
 'use client'
 
-import {Array, Option, pipe} from 'effect'
+import {Array, pipe} from 'effect'
 import React, {useEffect, useLayoutEffect, useRef, useState} from 'react'
 import {chrome} from '../i18n/chrome'
 import {type Locale, localizedPath} from '../i18n/locales'
 import {LanguageDropdown} from './LanguageDropdown'
+import {rovingFocusIndex} from './rovingFocus'
 
 // Webflow's data-collapse="medium" breakpoint
 const COLLAPSE_QUERY = '(max-width: 991px)'
@@ -124,25 +125,15 @@ export function Navbar({
 
   const onNavKeyDown = (event: React.KeyboardEvent): void => {
     if (menu !== 'open') return
-    const links = menuLinks()
-    const current = pipe(
-      links,
-      Array.findFirstIndex((link) => link === document.activeElement),
-      Option.getOrElse(() => -1)
-    )
-    const target = {
-      Home: 0,
-      End: links.length - 1,
-      ArrowLeft: current - 1,
-      ArrowUp: current - 1,
-      ArrowRight: Math.min(links.length - 1, current + 1),
-      ArrowDown: Math.min(links.length - 1, current + 1),
-    }[event.key]
     if (event.key === 'Escape') {
       setMenu('closing')
       navRef.current?.querySelector<HTMLElement>('.w-nav-button')?.focus()
-    } else if (target === undefined) return
-    else links[target]?.focus()
+    } else {
+      const links = menuLinks()
+      const target = rovingFocusIndex(event.key, links)
+      if (target === undefined) return
+      links[target]?.focus()
+    }
     event.preventDefault()
     event.stopPropagation()
   }
@@ -227,6 +218,7 @@ export function Navbar({
             path={path}
             alternatePaths={alternatePaths}
             light={light}
+            menuOpen={menu === 'open'}
           />
           {light ? null : (
             <a

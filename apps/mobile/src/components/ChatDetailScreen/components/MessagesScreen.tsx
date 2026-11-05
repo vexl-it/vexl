@@ -11,6 +11,7 @@ import {useStatusBarStyleForScreen} from '../../../state/statusBarStyleAtom'
 import * as fromChatAtoms from '../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {useAppState} from '../../../utils/useAppState'
 import {chatMolecule} from '../atoms'
+import AttachImageMenu from './AttachImageMenu'
 import {ChatActionButtons} from './ChatActionButtons'
 import ChatTextInput from './ChatTextInput'
 import MarkAsReadWhenRendered from './MarkAsReadWhenRendered'
@@ -85,6 +86,7 @@ function MessagesScreen({
         </Stack>
       </Screen>
       <MessageActionsOverlay />
+      <AttachImageMenu />
     </>
   )
 }

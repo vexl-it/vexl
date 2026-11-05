@@ -35,7 +35,7 @@ import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import {globalDialogAtom} from '../../GlobalDialog'
 import {toastNotificationAtom} from '../../ToastNotification/atom'
-import {chatMolecule, type MessageLayout} from '../atoms'
+import {chatMolecule, type WindowLayout} from '../atoms'
 import {LastMessageTime} from './LastMessageTime'
 import MessageBubble, {PRESSED_BUBBLE_SCALE} from './MessageBubble'
 import {type MessagesListItem} from './MessageItem'
@@ -61,7 +61,7 @@ function TextMessage({
   const theme = useTheme()
   const messageItem = useAtomValue(messageAtom)
   const {
-    sendMessageAtom,
+    sendMessagesAtom,
     replyToMessageAtom,
     messageActionsSelectionAtom,
     reactionsAtom,
@@ -69,11 +69,11 @@ function TextMessage({
   const navigation =
     useNavigation<RootStackScreenProps<'ChatDetail'>['navigation']>()
   const bubbleRef = useAnimatedRef<Reanimated.View>()
-  const bubbleLayout = useSharedValue<MessageLayout | null>(null)
+  const bubbleLayout = useSharedValue<WindowLayout | null>(null)
   const pressScale = useSharedValue(1)
   const swipeTranslateX = useSharedValue(0)
   const shouldTriggerReplyFromSwipe = useSharedValue(false)
-  const sendMessage = useSetAtom(sendMessageAtom)
+  const sendMessages = useSetAtom(sendMessagesAtom)
   const showGlobalDialog = useSetAtom(globalDialogAtom)
   const {t} = useTranslation()
   const setReplyToMessage = useSetAtom(replyToMessageAtom)
@@ -106,12 +106,14 @@ function TextMessage({
       messageItem.type === 'message' &&
       messageItem.message.state === 'sendingError'
     ) {
-      sendMessage({
-        ...messageItem.message.message,
-        time: unixMillisecondsNow(),
-      })
+      sendMessages([
+        {
+          ...messageItem.message.message,
+          time: unixMillisecondsNow(),
+        },
+      ])
     }
-  }, [sendMessage, messageItem])
+  }, [sendMessages, messageItem])
 
   const replyToThisMessage = useCallback(() => {
     if (messageItem.type !== 'message') return
@@ -119,7 +121,7 @@ function TextMessage({
   }, [messageItem, setReplyToMessage])
 
   const openMessageActions = useCallback(
-    (layout: MessageLayout) => {
+    (layout: WindowLayout) => {
       if (messageItem.type !== 'message') return
       setMessageActionsSelection({message: messageItem.message, layout})
     },

@@ -1,6 +1,6 @@
 import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
-import {Effect, Schema} from 'effect'
+import {Array, Effect, Schema} from 'effect'
 import * as FileSystem from 'expo-file-system'
 import * as ImagePicker from 'expo-image-picker'
 import {PROFILE_PICTURE_DIRECTORY} from './fsDirectories'
@@ -60,11 +60,12 @@ export function moveImageToInternalDirectory({
   })
 }
 
-export function getImageFromGalleryAndTryToResolveThePermissionsAlongTheWay({
-  aspect,
-}: {
-  aspect?: [number, number] | undefined
-}): Effect.Effect<SelectedImage, ImagePickerError> {
+function pickImagesFromGalleryAndTryToResolveThePermissionsAlongTheWay(
+  options: Pick<
+    ImagePicker.ImagePickerOptions,
+    'allowsEditing' | 'aspect' | 'allowsMultipleSelection' | 'selectionLimit'
+  >
+): Effect.Effect<Array.NonEmptyReadonlyArray<SelectedImage>, ImagePickerError> {
   return Effect.tryPromise(async () => {
     const libraryPermissions =
       await ImagePicker.getMediaLibraryPermissionsAsync()
@@ -89,33 +90,32 @@ export function getImageFromGalleryAndTryToResolveThePermissionsAlongTheWay({
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
+      ...options,
       mediaTypes: ['images'],
-      allowsEditing: aspect !== undefined,
-      aspect,
+      orderedSelection: true,
       quality: 1,
-      allowsMultipleSelection: false,
     })
 
     if (result.canceled)
       return Effect.fail(new ImagePickerError({reason: 'NothingSelected'}))
 
-    const selectedImage = result.assets?.[0]
+    const selectedImages = Array.map(result.assets, (asset) =>
+      Schema.decodeSync(SelectedImage)({
+        uri: Schema.decodeSync(UriString)(asset.uri),
+        width: asset.width,
+        height: asset.height,
+      })
+    )
 
-    if (!selectedImage?.uri)
+    if (!Array.isNonEmptyReadonlyArray(selectedImages))
       return Effect.fail(
         new ImagePickerError({
           reason: 'UnknownError',
-          error: new Error('Uri of the selected image is null'),
+          error: new Error('No image was returned by the picker'),
         })
       )
 
-    return Effect.succeed(
-      Schema.decodeSync(SelectedImage)({
-        uri: Schema.decodeSync(UriString)(selectedImage.uri),
-        width: selectedImage.width,
-        height: selectedImage.height,
-      })
-    )
+    return Effect.succeed(selectedImages)
   }).pipe(
     Effect.catchTag('UnknownException', (e) =>
       Effect.fail(
@@ -127,6 +127,32 @@ export function getImageFromGalleryAndTryToResolveThePermissionsAlongTheWay({
     ),
     Effect.flatten
   )
+}
+
+export function getImageFromGalleryAndTryToResolveThePermissionsAlongTheWay({
+  aspect,
+}: {
+  aspect?: [number, number] | undefined
+}): Effect.Effect<SelectedImage, ImagePickerError> {
+  return pickImagesFromGalleryAndTryToResolveThePermissionsAlongTheWay({
+    allowsEditing: aspect !== undefined,
+    aspect,
+    allowsMultipleSelection: false,
+  }).pipe(Effect.map(Array.headNonEmpty))
+}
+
+export function getImagesFromGalleryAndTryToResolveThePermissionsAlongTheWay({
+  selectionLimit,
+}: {
+  selectionLimit: number
+}): Effect.Effect<
+  Array.NonEmptyReadonlyArray<SelectedImage>,
+  ImagePickerError
+> {
+  return pickImagesFromGalleryAndTryToResolveThePermissionsAlongTheWay({
+    allowsMultipleSelection: true,
+    selectionLimit,
+  })
 }
 
 export function getImageFromCameraAndTryToResolveThePermissionsAlongTheWay({

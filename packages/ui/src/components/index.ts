@@ -124,6 +124,14 @@ export {Picker} from './Picker'
 export type {PickerItem, PickerProps} from './Picker'
 export {PriceRangeInput, RangeSlider} from './PriceRangeInput'
 export type {PriceRangeInputProps, RangeSliderProps} from './PriceRangeInput'
+export {
+  POPOVER_MENU_ITEM_HEIGHT,
+  POPOVER_MENU_PADDING,
+  POPOVER_SHADOW,
+  PopoverMenu,
+  PopoverMenuItem,
+} from './PopoverMenu'
+export type {PopoverMenuItemProps} from './PopoverMenu'
 export {ProgressDialog} from './ProgressDialog'
 export type {ProgressDialogProps, ProgressIndication} from './ProgressDialog'
 export {RadioGroup} from './RadioGroup'

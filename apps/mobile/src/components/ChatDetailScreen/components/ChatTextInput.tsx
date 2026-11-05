@@ -2,10 +2,13 @@ import {
   generateChatMessageId,
   type ChatMessage,
 } from '@vexl-next/domain/src/general/messaging'
-import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {
+  UnixMilliseconds,
+  unixMillisecondsNow,
+} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {
-  Camera,
+  PlusAdd,
   Send,
   Stack,
   Typography,
@@ -15,11 +18,11 @@ import {
   YStack,
 } from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
-import {Effect} from 'effect'
-import {useAtom, useSetAtom} from 'jotai'
+import {Array, Schema} from 'effect'
+import {useAtom, useSetAtom, useStore} from 'jotai'
 import truncate from 'just-truncate'
 import React, {useCallback, useEffect, useRef, useState} from 'react'
-import {Alert, Platform, TextInput as RNTextInput} from 'react-native'
+import {Platform, TextInput as RNTextInput, type View} from 'react-native'
 import Animated, {
   SlideInDown,
   SlideOutDown,
@@ -28,19 +31,13 @@ import Animated, {
 import {useTheme} from 'tamagui'
 import {useSessionAssumeLoggedIn} from '../../../state/session'
 import {version} from '../../../utils/environment'
-import {
-  getImageFromCameraAndTryToResolveThePermissionsAlongTheWay,
-  getImageFromGalleryAndTryToResolveThePermissionsAlongTheWay,
-  type ImagePickerError,
-  type SelectedImage,
-} from '../../../utils/imagePickers'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {checkNotificationPermissionsAndAskIfPossibleTEActionAtom} from '../../../utils/notifications/checkAndAskForPermissionsActionAtom'
-import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
-import {showErrorAlert} from '../../ErrorAlert'
 import {chatMolecule} from '../atoms'
+import {MAX_SELECTED_IMAGES} from './AttachImageMenu'
 import ChatImage from './ChatImage'
 import {CHAT_INPUT_NATIVE_ID} from './MessagesList'
+import SelectedImagesTray from './SelectedImagesTray'
 import {usePeriodicTypingIndication} from './usePeriodicTypingIndication'
 
 const iosAutocorrectCommitDelayMs = 50
@@ -48,12 +45,21 @@ const iosAutocorrectCommitDelayMs = 50
 function ChatTextInput(): React.ReactElement | null {
   const theme = useTheme()
   const [value, setValue] = useState('')
-  const {sendMessageAtom, replyToMessageAtom} = useMolecule(chatMolecule)
+  const {
+    sendMessagesAtom,
+    replyToMessageAtom,
+    selectedImagesAtom,
+    attachImageMenuAnchorAtom,
+  } = useMolecule(chatMolecule)
   const [replyToMessage, setReplyToMessage] = useAtom(replyToMessageAtom)
-  const sendMessage = useSetAtom(sendMessageAtom)
+  const [selectedImages, setSelectedImages] = useAtom(selectedImagesAtom)
+  const setAttachImageMenuAnchor = useSetAtom(attachImageMenuAnchorAtom)
+  const sendMessages = useSetAtom(sendMessagesAtom)
+  const store = useStore()
   const session = useSessionAssumeLoggedIn()
   const {t} = useTranslation()
   const textInputRef = useRef<RNTextInput>(null)
+  const attachButtonRef = useRef<View>(null)
   const latestValueRef = useRef('')
   const pendingIosSendRef = useRef(false)
   const pendingIosSendTimeoutRef = useRef<
@@ -64,6 +70,9 @@ function ChatTextInput(): React.ReactElement | null {
   )
 
   usePeriodicTypingIndication(!!value.trim())
+  const hasDraft =
+    !!value.trim() || Array.isNonEmptyReadonlyArray(selectedImages)
+  const canAttachMoreImages = selectedImages.length < MAX_SELECTED_IMAGES
 
   useEffect(() => {
     if (!replyToMessage) return
@@ -83,101 +92,81 @@ function ChatTextInput(): React.ReactElement | null {
     }
   }, [])
 
-  const sendChatMessage = useCallback(
-    ({text, image}: {text: string; image?: UriString}) => {
-      const message: ChatMessage = {
-        text,
-        image,
-        myVersion: version,
-        time: unixMillisecondsNow(),
-        uuid: generateChatMessageId(),
-        repliedTo: replyToMessage
-          ? {
-              text: truncate(replyToMessage.message.text, 100, '...'),
-              messageAuthor:
-                replyToMessage.state === 'received' ? 'them' : 'me',
-              imageAttachment: replyToMessage.message.imageAttachment,
-            }
-          : undefined,
-        messageType: 'MESSAGE',
-        senderPublicKey: session.privateKey.publicKeyPemBase64,
-      }
+  const sendChatMessages = useCallback(
+    (
+      contents: Array.NonEmptyReadonlyArray<{text: string; image?: UriString}>
+    ) => {
+      const time = unixMillisecondsNow()
+      const messages = Array.map(
+        contents,
+        ({text, image}, index): ChatMessage => ({
+          text,
+          image,
+          myVersion: version,
+          // Keeps the order of messages sent within the same millisecond.
+          time: Schema.decodeSync(UnixMilliseconds)(time + index),
+          uuid: generateChatMessageId(),
+          repliedTo:
+            replyToMessage && index === 0
+              ? {
+                  text: truncate(replyToMessage.message.text, 100, '...'),
+                  messageAuthor:
+                    replyToMessage.state === 'received' ? 'them' : 'me',
+                  imageAttachment: replyToMessage.message.imageAttachment,
+                }
+              : undefined,
+          messageType: 'MESSAGE',
+          senderPublicKey: session.privateKey.publicKeyPemBase64,
+        })
+      )
       setReplyToMessage(undefined)
 
-      sendMessage(message)
+      sendMessages(messages)
       void checkNotificationsAndAskIfPossible()()
     },
     [
       replyToMessage,
       session.privateKey.publicKeyPemBase64,
       setReplyToMessage,
-      sendMessage,
+      sendMessages,
       checkNotificationsAndAskIfPossible,
     ]
   )
 
-  const sendTextImmediately = useCallback(
-    (text: string): boolean => {
-      if (!text.trim()) return false
-
-      clearTextInput()
-      sendChatMessage({text})
-      return true
-    },
-    [clearTextInput, sendChatMessage]
+  const hasDraftToSend = useCallback(
+    (): boolean =>
+      !!latestValueRef.current.trim() ||
+      Array.isNonEmptyReadonlyArray(store.get(selectedImagesAtom)),
+    [selectedImagesAtom, store]
   )
 
-  const pickAndSendImage = useCallback(
-    (pickImage: Effect.Effect<SelectedImage, ImagePickerError>) => {
-      void pickImage.pipe(
-        Effect.match({
-          onSuccess: ({uri}) => {
-            sendChatMessage({text: '', image: uri})
-          },
-          onFailure: (e) => {
-            if (e.reason === 'NothingSelected') return
-            showErrorAlert({
-              title: t('common.somethingWentWrong'),
-              description:
-                toCommonErrorMessage(e, t) ??
-                t('common.somethingWentWrongDescription'),
-              error: e,
-            })
-          },
-        }),
-        Effect.runPromise
-      )
-    },
-    [sendChatMessage, t]
-  )
+  const sendDraftImmediately = useCallback(() => {
+    const text = latestValueRef.current
+    const contents = Array.appendAll(
+      Array.map(store.get(selectedImagesAtom), ({uri}) => ({
+        text: '',
+        image: uri,
+      })),
+      text.trim() ? [{text}] : []
+    )
+    if (!Array.isNonEmptyReadonlyArray(contents)) return
 
-  const selectImageSource = useCallback(() => {
-    Alert.alert(t('loginFlow.photo.selectSource'), undefined, [
-      {
-        text: t('loginFlow.photo.gallery'),
-        onPress: () => {
-          pickAndSendImage(
-            getImageFromGalleryAndTryToResolveThePermissionsAlongTheWay({})
-          )
-        },
-      },
-      {
-        text: t('loginFlow.photo.camera'),
-        onPress: () => {
-          pickAndSendImage(
-            getImageFromCameraAndTryToResolveThePermissionsAlongTheWay({})
-          )
-        },
-      },
-      {text: t('common.cancel'), style: 'cancel'},
-    ])
-  }, [pickAndSendImage, t])
+    clearTextInput()
+    store.set(selectedImagesAtom, [])
+    sendChatMessages(contents)
+  }, [clearTextInput, selectedImagesAtom, sendChatMessages, store])
+
+  const openAttachImageMenu = useCallback(() => {
+    attachButtonRef.current?.measureInWindow((x, y, width, height) => {
+      setAttachImageMenuAnchor({x, y, width, height})
+    })
+  }, [setAttachImageMenuAnchor])
 
   const sendLatestText = useCallback(() => {
     clearPendingIosSendTimeout()
     pendingIosSendRef.current = false
-    sendTextImmediately(latestValueRef.current)
-  }, [clearPendingIosSendTimeout, sendTextImmediately])
+    sendDraftImmediately()
+  }, [clearPendingIosSendTimeout, sendDraftImmediately])
 
   const scheduleIosSend = useCallback(
     (delayMs: number) => {
@@ -199,8 +188,8 @@ function ChatTextInput(): React.ReactElement | null {
     [scheduleIosSend]
   )
 
-  const sendText = useCallback(() => {
-    if (!latestValueRef.current.trim() || pendingIosSendRef.current) return
+  const sendDraft = useCallback(() => {
+    if (!hasDraftToSend() || pendingIosSendRef.current) return
 
     if (Platform.OS === 'ios') {
       pendingIosSendRef.current = true
@@ -208,8 +197,8 @@ function ChatTextInput(): React.ReactElement | null {
       return
     }
 
-    sendTextImmediately(latestValueRef.current)
-  }, [scheduleIosSend, sendTextImmediately])
+    sendDraftImmediately()
+  }, [hasDraftToSend, scheduleIosSend, sendDraftImmediately])
 
   useEffect(() => clearPendingIosSendTimeout, [clearPendingIosSendTimeout])
 
@@ -279,18 +268,33 @@ function ChatTextInput(): React.ReactElement | null {
         gap="$3"
         alignItems="flex-end"
       >
-        <Stack flex={1}>
-          <XStack
-            alignItems="center"
-            gap="$3"
-            my="$3"
-            mx="$4"
-            px="$6"
-            py="$3"
-            borderRadius="$9"
-            backgroundColor="$backgroundOnBar"
-          >
-            <Stack flex={1} justifyContent="center">
+        <YStack
+          flex={1}
+          my="$3"
+          mx="$4"
+          borderRadius="$9"
+          backgroundColor="$backgroundOnBar"
+        >
+          {Array.isNonEmptyReadonlyArray(selectedImages) && (
+            <SelectedImagesTray
+              images={selectedImages}
+              onRemove={(image) => {
+                setSelectedImages(Array.filter((one) => one !== image))
+              }}
+            />
+          )}
+          <XStack alignItems="center" gap="$2" p="$3">
+            <Stack ref={attachButtonRef} collapsable={false}>
+              <UiIconButton
+                backgroundColor="transparent"
+                disabled={!canAttachMoreImages}
+                opacity={canAttachMoreImages ? 1 : 0.4}
+                onPress={openAttachImageMenu}
+              >
+                <PlusAdd size={24} color={theme.foregroundSecondary.get()} />
+              </UiIconButton>
+            </Stack>
+            <Stack flex={1} justifyContent="center" pr={hasDraft ? 0 : '$4'}>
               <RNTextInput
                 ref={textInputRef}
                 nativeID={CHAT_INPUT_NATIVE_ID}
@@ -303,25 +307,18 @@ function ChatTextInput(): React.ReactElement | null {
                 selectionColor={theme.accentHighlightPrimary.get()}
               />
             </Stack>
-            <Animated.View key={value ? 'send' : 'camera'} entering={ZoomIn}>
-              {value ? (
+            {!!hasDraft && (
+              <Animated.View entering={ZoomIn}>
                 <UiIconButton
                   backgroundColor="$accentYellowSecondary"
-                  onPress={sendText}
+                  onPress={sendDraft}
                 >
                   <Send size={20} color={theme.accentHighlightPrimary.get()} />
                 </UiIconButton>
-              ) : (
-                <UiIconButton
-                  backgroundColor="transparent"
-                  onPress={selectImageSource}
-                >
-                  <Camera size={24} color={theme.foregroundSecondary.get()} />
-                </UiIconButton>
-              )}
-            </Animated.View>
+              </Animated.View>
+            )}
           </XStack>
-        </Stack>
+        </YStack>
       </XStack>
     </YStack>
   )

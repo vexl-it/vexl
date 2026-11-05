@@ -8,7 +8,7 @@ import {
   UnixMilliseconds,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import sendMessage from '@vexl-next/resources-utils/src/chat/sendMessage'
-import {Array, Effect, Option, pipe, Schema} from 'effect'
+import {Array, Duration, Effect, Option, pipe, Schema} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
 import showDonationPromptGiveLoveActionAtom, {
@@ -31,6 +31,8 @@ type SendingError = Extract<
   ChatMessageWithState,
   {state: 'sendingError'}
 >['error']
+
+const SEND_TIMEOUT = Duration.minutes(2)
 
 // Later sends and retries in a chat wait for its earlier batches, also when
 // the chat screen is opened again in the meantime.
@@ -174,6 +176,8 @@ export default function sendMessagesActionAtom(
                 Effect.asSome
               )
         ),
+        // A hanging request would otherwise hold back every later send.
+        Effect.timeout(SEND_TIMEOUT),
         Effect.catchAll((error) =>
           Array.isNonEmptyReadonlyArray(stillSending([message]))
             ? Effect.succeedSome<ChatMessageWithState>({

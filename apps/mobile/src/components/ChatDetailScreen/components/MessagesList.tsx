@@ -52,7 +52,7 @@ function MessagesList({
   const footerHeight = useAtomValue(footerHeightAtom)
   const listRef = useRef<FlashListRef<Atom<MessagesListItem>>>(null)
   const isEndVisibleRef = useRef(true)
-  const shouldScrollToEndRef = useRef(false)
+  const isFollowingEndRef = useRef(false)
   const listHeightRef = useRef(0)
 
   const latestMessage = pipe(
@@ -72,22 +72,27 @@ function MessagesList({
   useLayoutEffect(() => {
     if (previousLatestMessageKeyRef.current === latestMessageKey) return
     previousLatestMessageKeyRef.current = latestMessageKey
-    shouldScrollToEndRef.current =
-      isLatestMessageMine || isEndVisibleRef.current
+    if (isLatestMessageMine || isEndVisibleRef.current)
+      isFollowingEndRef.current = true
   }, [isLatestMessageMine, latestMessageKey])
 
   useLayoutEffect(() => {
     if (isOtherSideTyping && isEndVisibleRef.current) {
-      shouldScrollToEndRef.current = true
+      isFollowingEndRef.current = true
     }
   }, [isOtherSideTyping])
 
+  // Keeps following the end until the user scrolls, because messages keep
+  // growing after they are added, e.g. when an image loads.
   // FlashList's own scrollToEnd ignores the keyboard contentInset
   // added by KeyboardChatScrollView, so scroll the native view instead.
-  const scrollToEndIfPending = useCallback(() => {
-    if (!shouldScrollToEndRef.current) return
-    shouldScrollToEndRef.current = false
+  const scrollToEndIfFollowing = useCallback(() => {
+    if (!isFollowingEndRef.current) return
     listRef.current?.getNativeScrollRef()?.scrollToEnd({animated: true})
+  }, [])
+
+  const stopFollowingEnd = useCallback(() => {
+    isFollowingEndRef.current = false
   }, [])
 
   const onEndVisible = useCallback((visible: boolean) => {
@@ -148,7 +153,7 @@ function MessagesList({
         }}
         onContentSizeChange={(width, height) => {
           props.onContentSizeChange?.(width, height)
-          scrollToEndIfPending()
+          scrollToEndIfFollowing()
         }}
       />
     ),
@@ -156,7 +161,7 @@ function MessagesList({
       insets.bottom,
       keepBottomEdgeWhenShrunk,
       onEndVisible,
-      scrollToEndIfPending,
+      scrollToEndIfFollowing,
     ]
   )
 
@@ -175,6 +180,7 @@ function MessagesList({
         keyExtractor={atomKeyExtractor}
         maintainVisibleContentPosition={maintainVisibleContentPosition}
         onLoad={onLoad}
+        onScrollBeginDrag={stopFollowingEnd}
         renderItem={renderItem}
         renderScrollComponent={renderScrollComponent}
         // FlashList bottom-aligns short lists to its own height, so it must not reach under the footer.

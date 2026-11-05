@@ -1,28 +1,24 @@
 import Clipboard from '@react-native-clipboard/clipboard'
-import {BlurView} from '@react-native-community/blur'
 import {ReactionEmoji} from '@vexl-next/domain/src/general/messaging'
 import {
   Copy,
+  POPOVER_MENU_ITEM_HEIGHT,
+  POPOVER_MENU_PADDING,
+  POPOVER_SHADOW,
+  PopoverMenu,
+  PopoverMenuItem,
   Reply,
   Stack,
   tokens,
   Typography,
-  useTheme,
   XStack,
-  type IconProps,
 } from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {Array, Effect, Schema} from 'effect'
 import {impactAsync, ImpactFeedbackStyle} from 'expo-haptics'
 import {useAtom, useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useEffect} from 'react'
-import {
-  BackHandler,
-  Platform,
-  Pressable,
-  StyleSheet,
-  useWindowDimensions,
-} from 'react-native'
+import {StyleSheet, useWindowDimensions} from 'react-native'
 import {useKeyboardState} from 'react-native-keyboard-controller'
 import Reanimated, {
   Extrapolation,
@@ -30,16 +26,19 @@ import Reanimated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
-  withTiming,
   type SharedValue,
 } from 'react-native-reanimated'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
-import {scheduleOnRN} from 'react-native-worklets'
 import {canReactToMessage} from '../../../state/chat/atoms/sendReactionActionAtom'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import reportError from '../../../utils/reportError'
 import {toastNotificationAtom} from '../../ToastNotification/atom'
-import {chatMolecule, type MessageLayout} from '../atoms'
+import {chatMolecule, type WindowLayout} from '../atoms'
+import {
+  ChatOverlayScrim,
+  OVERLAY_OPEN_SPRING,
+  useChatOverlayTransition,
+} from './ChatOverlay'
 import MessageBubble, {PRESSED_BUBBLE_SCALE} from './MessageBubble'
 
 const QUICK_REACTIONS = Array.map(
@@ -54,13 +53,9 @@ const REACTION_BAR_WIDTH =
 const GAP = tokens.space[3].val
 const SCREEN_PADDING = tokens.space[5].val
 const MENU_WIDTH = tokens.size[13].val * 2.5
-const MENU_ITEM_HEIGHT = tokens.size[10].val
-const MENU_PADDING = tokens.space[2].val
 const MENU_ITEMS_COUNT = 2
-const MENU_HEIGHT = MENU_ITEM_HEIGHT * MENU_ITEMS_COUNT + MENU_PADDING * 2
-const OPEN_SPRING = {damping: 20, stiffness: 260, mass: 0.8}
-const CLOSE_DURATION_MS = 160
-const SURFACE_SHADOW = '0 4px 16px rgba(0, 0, 0, 0.12)'
+const MENU_HEIGHT =
+  POPOVER_MENU_ITEM_HEIGHT * MENU_ITEMS_COUNT + POPOVER_MENU_PADDING * 2
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max)
@@ -74,7 +69,7 @@ function computePlacement({
   insetTop,
   bottomLimit,
 }: {
-  layout: MessageLayout
+  layout: WindowLayout
   isMine: boolean
   showReactions: boolean
   windowWidth: number
@@ -164,37 +159,7 @@ function QuickReaction({
   )
 }
 
-function MenuItem({
-  icon: Icon,
-  label,
-  onPress,
-}: {
-  icon: React.ComponentType<IconProps>
-  label: string
-  onPress: () => void
-}): React.ReactElement {
-  const theme = useTheme()
-
-  return (
-    <XStack
-      role="button"
-      height={MENU_ITEM_HEIGHT}
-      alignItems="center"
-      gap="$4"
-      px="$5"
-      pressStyle={{backgroundColor: '$backgroundSecondary'}}
-      onPress={onPress}
-    >
-      <Icon size={20} color={theme.foregroundPrimary.get()} />
-      <Typography variant="paragraph" color="$foregroundPrimary">
-        {label}
-      </Typography>
-    </XStack>
-  )
-}
-
 function MessageActionsOverlay(): React.ReactElement | null {
-  const theme = useTheme()
   const {t} = useTranslation()
   const insets = useSafeAreaInsets()
   const {width: windowWidth, height: windowHeight} = useWindowDimensions()
@@ -212,7 +177,6 @@ function MessageActionsOverlay(): React.ReactElement | null {
   const canSendReactions = useAtomValue(canSendReactionsAtom)
   const sendReaction = useSetAtom(sendReactionAtom)
   const setToastNotification = useSetAtom(toastNotificationAtom)
-  const progress = useSharedValue(0)
   const bubbleScale = useSharedValue(PRESSED_BUBBLE_SCALE)
   const layout = selection?.layout
   const isMine = selection?.message.state !== 'received'
@@ -230,44 +194,21 @@ function MessageActionsOverlay(): React.ReactElement | null {
     })
   const bubbleOffsetY = layout && placement ? layout.y - placement.bubbleTop : 0
 
-  useEffect(() => {
-    if (!selection) return
-    void impactAsync(ImpactFeedbackStyle.Medium)
-    progress.value = 0
-    bubbleScale.value = PRESSED_BUBBLE_SCALE
-    progress.value = withSpring(1, OPEN_SPRING)
-    bubbleScale.value = withSpring(1, OPEN_SPRING)
-  }, [bubbleScale, progress, selection])
-
   const clearSelection = useCallback(() => {
     setSelection(null)
   }, [setSelection])
 
-  const close = useCallback(() => {
-    progress.value = withTiming(
-      0,
-      {duration: CLOSE_DURATION_MS},
-      (finished) => {
-        if (finished) scheduleOnRN(clearSelection)
-      }
-    )
-  }, [clearSelection, progress])
+  const {progress, close} = useChatOverlayTransition({
+    isOpen: !!selection,
+    onClosed: clearSelection,
+  })
 
   useEffect(() => {
     if (!selection) return
-    const subscription = BackHandler.addEventListener(
-      'hardwareBackPress',
-      () => {
-        close()
-        return true
-      }
-    )
-    return () => {
-      subscription.remove()
-    }
-  }, [close, selection])
-
-  const scrimStyle = useAnimatedStyle(() => ({opacity: progress.value}))
+    void impactAsync(ImpactFeedbackStyle.Medium)
+    bubbleScale.value = PRESSED_BUBBLE_SCALE
+    bubbleScale.value = withSpring(1, OVERLAY_OPEN_SPRING)
+  }, [bubbleScale, selection])
 
   const bubbleStyle = useAnimatedStyle(() => ({
     transform: [
@@ -315,23 +256,7 @@ function MessageActionsOverlay(): React.ReactElement | null {
 
   return (
     <Stack style={StyleSheet.absoluteFill}>
-      <Reanimated.View style={[StyleSheet.absoluteFill, scrimStyle]}>
-        <Pressable style={StyleSheet.absoluteFill} onPress={close}>
-          {Platform.OS === 'ios' && (
-            <BlurView
-              style={StyleSheet.absoluteFill}
-              blurType="light"
-              blurAmount={12}
-              reducedTransparencyFallbackColor={theme.backgroundSecondary.get()}
-            />
-          )}
-          <Stack
-            style={StyleSheet.absoluteFill}
-            backgroundColor="$backgroundSecondary"
-            opacity={Platform.OS === 'ios' ? 0.4 : 0.9}
-          />
-        </Pressable>
-      </Reanimated.View>
+      <ChatOverlayScrim progress={progress} onPress={close} />
       <Reanimated.View
         pointerEvents="none"
         style={[
@@ -364,7 +289,7 @@ function MessageActionsOverlay(): React.ReactElement | null {
             p={REACTION_BAR_PADDING}
             borderRadius={REACTION_BAR_HEIGHT}
             backgroundColor="$backgroundOnBar"
-            boxShadow={SURFACE_SHADOW}
+            boxShadow={POPOVER_SHADOW}
           >
             {Array.map(QUICK_REACTIONS, (emoji, index) => (
               <QuickReaction
@@ -391,14 +316,8 @@ function MessageActionsOverlay(): React.ReactElement | null {
           menuStyle,
         ]}
       >
-        <Stack
-          py={MENU_PADDING}
-          borderRadius="$6"
-          overflow="hidden"
-          backgroundColor="$backgroundOnBar"
-          boxShadow={SURFACE_SHADOW}
-        >
-          <MenuItem
+        <PopoverMenu>
+          <PopoverMenuItem
             icon={Reply}
             label={t('common.reply')}
             onPress={() => {
@@ -406,7 +325,7 @@ function MessageActionsOverlay(): React.ReactElement | null {
               close()
             }}
           />
-          <MenuItem
+          <PopoverMenuItem
             icon={Copy}
             label={t('common.copy')}
             onPress={() => {
@@ -415,7 +334,7 @@ function MessageActionsOverlay(): React.ReactElement | null {
               close()
             }}
           />
-        </Stack>
+        </PopoverMenu>
       </Reanimated.View>
     </Stack>
   )

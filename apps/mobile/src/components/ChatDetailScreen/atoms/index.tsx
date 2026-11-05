@@ -8,12 +8,7 @@ import {createScope, molecule} from 'bunshi/dist/react'
 import {Array, Effect, Either, HashSet, Option, pipe} from 'effect'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
-import {
-  atom,
-  type PrimitiveAtom,
-  type SetStateAction,
-  type WritableAtom,
-} from 'jotai'
+import {atom, type SetStateAction, type WritableAtom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {selectAtom, splitAtom} from 'jotai/utils'
 import {DateTime} from 'luxon'
@@ -28,7 +23,7 @@ import deleteChatActionAtom from '../../../state/chat/atoms/deleteChatActionAtom
 import {focusWasDeniedAtom} from '../../../state/chat/atoms/focusDenyRequestMessageAtom'
 import focusOtherSideLeftAtom from '../../../state/chat/atoms/focusOtherSideLeftAtom'
 import selectOtherSideDataAtom from '../../../state/chat/atoms/selectOtherSideDataAtom'
-import sendMessageActionAtom from '../../../state/chat/atoms/sendMessageActionAtom'
+import sendMessagesActionAtom from '../../../state/chat/atoms/sendMessagesActionAtom'
 import sendReactionActionAtom, {
   otherSideSupportsReactions,
 } from '../../../state/chat/atoms/sendReactionActionAtom'
@@ -82,11 +77,7 @@ export const ApprovalStatusMessage = {
   disapproved: 'disapproved',
 } as const
 
-export type ExtraToSend =
-  | {type: 'image'; image: SelectedImage}
-  | {type: 'reply'; message: ChatMessageWithState}
-
-export interface MessageLayout {
+export interface WindowLayout {
   readonly x: number
   readonly y: number
   readonly width: number
@@ -95,7 +86,7 @@ export interface MessageLayout {
 
 export interface MessageActionsSelection {
   readonly message: ChatMessageWithState
-  readonly layout: MessageLayout
+  readonly layout: WindowLayout
 }
 
 export const ChatScope = createScope<
@@ -559,28 +550,9 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     )
   })
 
-  const selectedExtraToSendAtom = atom<ExtraToSend | undefined>(undefined)
-  const replyToMessageAtom: PrimitiveAtom<ChatMessageWithState | undefined> =
-    atom(
-      (get) => {
-        const extra = get(selectedExtraToSendAtom)
-        if (extra?.type === 'reply') return extra.message
-        return undefined
-      },
-      (
-        get,
-        set,
-        messageSetStateAction: SetStateAction<ChatMessageWithState | undefined>
-      ) => {
-        const newValue = getValueFromSetStateActionOfAtom(
-          messageSetStateAction
-        )(() => get(replyToMessageAtom))
-        set(
-          selectedExtraToSendAtom,
-          newValue ? {type: 'reply', message: newValue} : undefined
-        )
-      }
-    )
+  const replyToMessageAtom = atom<ChatMessageWithState | undefined>(undefined)
+  const selectedImagesAtom = atom<readonly SelectedImage[]>([])
+  const attachImageMenuAnchorAtom = atom<WindowLayout | null>(null)
 
   const messageActionsSelectionAtom = atom<MessageActionsSelection | null>(null)
 
@@ -877,7 +849,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     messagesAtom,
     offerForChatAtom,
     noteForChatAtom,
-    sendMessageAtom: sendMessageActionAtom(chatWithMessagesAtom),
+    sendMessagesAtom: sendMessagesActionAtom(chatWithMessagesAtom),
     sendReactionAtom: sendReactionActionAtom(chatWithMessagesAtom),
     reactionsAtom,
     canSendReactionsAtom,
@@ -891,6 +863,8 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     friendLevelInfoAtom,
     isMyChatOriginAtom,
     replyToMessageAtom,
+    selectedImagesAtom,
+    attachImageMenuAnchorAtom,
     messageActionsSelectionAtom,
     theirOfferAndNotReportedAtom,
     requestStateAtom: createRequestStateAtom(chatWithMessagesAtom),

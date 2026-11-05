@@ -52,7 +52,7 @@ function SelectedImagesTray({
             alignItems="center"
             justifyContent="center"
             backgroundColor="$foregroundPrimary"
-            hitSlop={tokens.space[3].val}
+            hitSlop={tokens.space[4].val}
             pressStyle={{opacity: 0.7}}
             onPress={() => {
               onRemove(image)

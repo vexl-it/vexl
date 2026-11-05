@@ -263,8 +263,7 @@ export const cs: Messages = {
       },
     },
     cta: {
-      title: 'Bitcoin, jak byl zamýšlen.',
-      text: 'Peer-to-peer, mezi lidmi. Bez dokladů.',
+      title: 'Vexl is quick.\nBuy Bitcoin today.',
     },
   },
   download: {

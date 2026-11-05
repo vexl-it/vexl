@@ -48,14 +48,9 @@ export function BottomCta(): React.JSX.Element {
             width={56}
             height={25}
           />
-          <YStack gap="$5">
-            <Typography tag="h2" variant="display" color="$black100">
-              {t.home.cta.title}
-            </Typography>
-            <Typography variant="paragraph" color="$black100">
-              {t.home.cta.text}
-            </Typography>
-          </YStack>
+          <Typography tag="h2" variant="heading1" color="$black100">
+            {t.home.cta.title}
+          </Typography>
           <DownloadCta onYellow />
         </YStack>
       </YStack>

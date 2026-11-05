@@ -262,8 +262,7 @@ export const en = {
       },
     },
     cta: {
-      title: 'Bitcoin as it was intended.',
-      text: 'Peer-to-peer, between people. No ID required.',
+      title: 'Vexl is quick.\nBuy Bitcoin today.',
     },
   },
   download: {

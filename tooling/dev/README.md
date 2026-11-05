@@ -4,6 +4,8 @@ Scripts for running the local dev stack (`dev-backend.ts`, `dev-infra.ts`, `dev-
 
 ## Chat images (MinIO)
 
+MinIO no longer publishes Docker images, so `docker-compose.dev.yaml` runs [Silo](https://github.com/pgsty/silo), its maintained community fork (`pgsty/silo` and `pgsty/mc`). The API, env vars, console and volume format are unchanged.
+
 The app uploads and downloads chat images straight to MinIO using URLs presigned by chat-service. A presigned URL is bound to the host it was signed for, so `services.ts` sets chat-service's `S3_ENDPOINT` to the machine's LAN IP (`lanIp.ts`, the same detection `dev-mobile.ts` uses for physical devices). That address works from the iOS simulator, the Android emulator and physical devices on the same network. Caveats:
 
 - If detection picks the wrong interface (VPN, Docker bridge), set `DEV_LAN_IP=<ip>` in `.env.local` or the shell. It overrides the detection for both chat-service and `dev:mobile`.

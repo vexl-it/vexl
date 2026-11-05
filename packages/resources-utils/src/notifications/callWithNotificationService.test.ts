@@ -11,30 +11,26 @@ jest.mock('../reportErrorFromResourcesUtils', () => ({
 const sentMessage = {notificationHandled: false, receivedByServerAt: 500}
 
 describe('callWithNotificationService', () => {
-  it('returns the delivered result when the notification request hangs', async () => {
-    jest.useFakeTimers()
-    try {
-      const hangingNotificationApi: Pick<NotificationApi, 'issueNotification'> =
-        {issueNotification: () => Effect.never}
-
-      const call = Effect.runPromise(
-        callWithNotificationService(
-          (_: {notificationServiceReady: boolean}) =>
-            Effect.succeed(sentMessage),
-          {}
-        )({
-          notificationToken: Schema.decodeSync(VexlNotificationToken)(
-            'vexl_nt_test'
-          ),
-          notificationApi: hangingNotificationApi,
-          sendSystemNotification: true,
-        })
-      )
-
-      await jest.advanceTimersByTimeAsync(30_000)
-      await expect(call).resolves.toBe(sentMessage)
-    } finally {
-      jest.useRealTimers()
+  it('returns the delivered result without waiting for the notification', async () => {
+    const issueNotification = jest.fn(() => Effect.never)
+    const hangingNotificationApi: Pick<NotificationApi, 'issueNotification'> = {
+      issueNotification,
     }
+
+    const result = await Effect.runPromise(
+      callWithNotificationService(
+        (_: {notificationServiceReady: boolean}) => Effect.succeed(sentMessage),
+        {}
+      )({
+        notificationToken: Schema.decodeSync(VexlNotificationToken)(
+          'vexl_nt_test'
+        ),
+        notificationApi: hangingNotificationApi,
+        sendSystemNotification: true,
+      }).pipe(Effect.timeout('1 second'))
+    )
+
+    expect(result).toBe(sentMessage)
+    expect(issueNotification).toHaveBeenCalledTimes(1)
   })
 })

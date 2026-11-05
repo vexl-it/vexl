@@ -1,8 +1,7 @@
 import {
   Camera,
+  getPopoverMenuHeight,
   ImagePhoto,
-  POPOVER_MENU_ITEM_HEIGHT,
-  POPOVER_MENU_PADDING,
   PopoverMenu,
   PopoverMenuItem,
   Stack,
@@ -10,7 +9,7 @@ import {
 } from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {Array, Effect} from 'effect'
-import {useAtom} from 'jotai'
+import {useAtom, useSetAtom} from 'jotai'
 import React, {useCallback} from 'react'
 import {StyleSheet} from 'react-native'
 import Reanimated, {
@@ -26,14 +25,12 @@ import {
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import {showErrorAlert} from '../../ErrorAlert'
-import {chatMolecule} from '../atoms'
+import {toastNotificationAtom} from '../../ToastNotification/atom'
+import {chatMolecule, MAX_SELECTED_IMAGES} from '../atoms'
 import {ChatOverlayScrim, useChatOverlayTransition} from './ChatOverlay'
 
-export const MAX_SELECTED_IMAGES = 10
-
 const GAP = tokens.space[3].val
-const MENU_WIDTH = tokens.size[13].val * 2.5
-const MENU_HEIGHT = POPOVER_MENU_ITEM_HEIGHT * 2 + POPOVER_MENU_PADDING * 2
+const MENU_HEIGHT = getPopoverMenuHeight(2)
 
 function AttachImageMenu(): React.ReactElement | null {
   const {t} = useTranslation()
@@ -41,6 +38,7 @@ function AttachImageMenu(): React.ReactElement | null {
     useMolecule(chatMolecule)
   const [anchor, setAnchor] = useAtom(attachImageMenuAnchorAtom)
   const [selectedImages, setSelectedImages] = useAtom(selectedImagesAtom)
+  const setToastNotification = useSetAtom(toastNotificationAtom)
 
   const clearAnchor = useCallback(() => {
     setAnchor(null)
@@ -65,9 +63,12 @@ function AttachImageMenu(): React.ReactElement | null {
     void pick.pipe(
       Effect.match({
         onSuccess: (images) => {
-          setSelectedImages((previous) =>
-            Array.take(Array.appendAll(previous, images), MAX_SELECTED_IMAGES)
-          )
+          const allImages = Array.appendAll(selectedImages, images)
+          if (allImages.length > MAX_SELECTED_IMAGES)
+            setToastNotification(
+              t('messages.imagesLimit', {count: MAX_SELECTED_IMAGES})
+            )
+          setSelectedImages(Array.take(allImages, MAX_SELECTED_IMAGES))
         },
         onFailure: (e) => {
           if (e.reason === 'NothingSelected') return
@@ -93,7 +94,6 @@ function AttachImageMenu(): React.ReactElement | null {
             position: 'absolute',
             top: anchor.y - GAP - MENU_HEIGHT,
             left: anchor.x,
-            width: MENU_WIDTH,
             transformOrigin: 'left bottom',
           },
           menuStyle,

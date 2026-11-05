@@ -13,8 +13,8 @@ import {
   Stack,
   Typography,
   IconButton as UiIconButton,
-  XStack,
   XmarkCancelClose,
+  XStack,
   YStack,
 } from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
@@ -33,8 +33,8 @@ import {useSessionAssumeLoggedIn} from '../../../state/session'
 import {version} from '../../../utils/environment'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {checkNotificationPermissionsAndAskIfPossibleTEActionAtom} from '../../../utils/notifications/checkAndAskForPermissionsActionAtom'
-import {chatMolecule} from '../atoms'
-import {MAX_SELECTED_IMAGES} from './AttachImageMenu'
+import {toastNotificationAtom} from '../../ToastNotification/atom'
+import {chatMolecule, MAX_SELECTED_IMAGES} from '../atoms'
 import ChatImage from './ChatImage'
 import {CHAT_INPUT_NATIVE_ID} from './MessagesList'
 import SelectedImagesTray from './SelectedImagesTray'
@@ -54,6 +54,7 @@ function ChatTextInput(): React.ReactElement | null {
   const [replyToMessage, setReplyToMessage] = useAtom(replyToMessageAtom)
   const [selectedImages, setSelectedImages] = useAtom(selectedImagesAtom)
   const setAttachImageMenuAnchor = useSetAtom(attachImageMenuAnchorAtom)
+  const setToastNotification = useSetAtom(toastNotificationAtom)
   const sendMessages = useSetAtom(sendMessagesAtom)
   const store = useStore()
   const session = useSessionAssumeLoggedIn()
@@ -72,7 +73,6 @@ function ChatTextInput(): React.ReactElement | null {
   usePeriodicTypingIndication(!!value.trim())
   const hasDraft =
     !!value.trim() || Array.isNonEmptyReadonlyArray(selectedImages)
-  const canAttachMoreImages = selectedImages.length < MAX_SELECTED_IMAGES
 
   useEffect(() => {
     if (!replyToMessage) return
@@ -157,10 +157,22 @@ function ChatTextInput(): React.ReactElement | null {
   }, [clearTextInput, selectedImagesAtom, sendChatMessages, store])
 
   const openAttachImageMenu = useCallback(() => {
+    if (store.get(selectedImagesAtom).length >= MAX_SELECTED_IMAGES) {
+      setToastNotification(
+        t('messages.imagesLimit', {count: MAX_SELECTED_IMAGES})
+      )
+      return
+    }
     attachButtonRef.current?.measureInWindow((x, y, width, height) => {
       setAttachImageMenuAnchor({x, y, width, height})
     })
-  }, [setAttachImageMenuAnchor])
+  }, [
+    selectedImagesAtom,
+    setAttachImageMenuAnchor,
+    setToastNotification,
+    store,
+    t,
+  ])
 
   const sendLatestText = useCallback(() => {
     clearPendingIosSendTimeout()
@@ -287,8 +299,7 @@ function ChatTextInput(): React.ReactElement | null {
             <Stack ref={attachButtonRef} collapsable={false}>
               <UiIconButton
                 backgroundColor="transparent"
-                disabled={!canAttachMoreImages}
-                opacity={canAttachMoreImages ? 1 : 0.4}
+                aria-label={t('messages.attachImages')}
                 onPress={openAttachImageMenu}
               >
                 <PlusAdd size={24} color={theme.foregroundSecondary.get()} />
@@ -311,6 +322,7 @@ function ChatTextInput(): React.ReactElement | null {
               <Animated.View entering={ZoomIn}>
                 <UiIconButton
                   backgroundColor="$accentYellowSecondary"
+                  aria-label={t('common.send')}
                   onPress={sendDraft}
                 >
                   <Send size={20} color={theme.accentHighlightPrimary.get()} />

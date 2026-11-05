@@ -77,6 +77,8 @@ export const ApprovalStatusMessage = {
   disapproved: 'disapproved',
 } as const
 
+export const MAX_SELECTED_IMAGES = 10
+
 export interface WindowLayout {
   readonly x: number
   readonly y: number

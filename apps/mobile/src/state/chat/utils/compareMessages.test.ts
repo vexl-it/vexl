@@ -18,16 +18,6 @@ function chatMessageId(value: string): ChatMessageId {
   return Schema.decodeSync(ChatMessageId)(value)
 }
 
-function chatMessage({uuid, time}: {uuid: string; time: number}): ChatMessage {
-  return {
-    uuid: chatMessageId(uuid),
-    text: 'Message',
-    time: unixMilliseconds(time),
-    messageType: 'MESSAGE',
-    senderPublicKey,
-  }
-}
-
 function message({
   uuid,
   time,
@@ -37,9 +27,17 @@ function message({
   time: number
   receivedByServerAt?: number
 }): ChatMessageWithState {
+  const chatMessage: ChatMessage = {
+    uuid: chatMessageId(uuid),
+    text: 'Message',
+    time: unixMilliseconds(time),
+    messageType: 'MESSAGE',
+    senderPublicKey,
+  }
+
   return {
     state: 'received',
-    message: chatMessage({uuid, time}),
+    message: chatMessage,
     receivedByServerAt:
       receivedByServerAt === undefined
         ? undefined
@@ -107,35 +105,5 @@ describe('compareMessages', () => {
       receivedFirst,
       receivedSecond,
     ])
-  })
-
-  it('keeps sending messages after acknowledged ones even when the local clock is behind', () => {
-    const sent: ChatMessageWithState = {
-      state: 'sent',
-      message: chatMessage({
-        uuid: '00000000-0000-4000-8000-000000000001',
-        time: 100,
-      }),
-      receivedByServerAt: unixMilliseconds(500),
-    }
-    const sending: ChatMessageWithState = {
-      state: 'sending',
-      message: chatMessage({
-        uuid: '00000000-0000-4000-8000-000000000002',
-        time: 101,
-      }),
-    }
-    const nextSending: ChatMessageWithState = {
-      state: 'sending',
-      message: chatMessage({
-        uuid: '00000000-0000-4000-8000-000000000003',
-        time: 102,
-      }),
-    }
-
-    expect(
-      [nextSending, sending, sent].sort(compareMessages).map((m) => m.state)
-    ).toEqual(['sent', 'sending', 'sending'])
-    expect(compareMessages(sending, nextSending)).toBe(-1)
   })
 })

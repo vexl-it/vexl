@@ -7,12 +7,19 @@ import {Stack, XStack} from '../primitives'
 import {Typography} from './Typography'
 
 export const POPOVER_SHADOW = '0 4px 16px rgba(0, 0, 0, 0.12)'
-export const POPOVER_MENU_ITEM_HEIGHT = tokens.size[10].val
-export const POPOVER_MENU_PADDING = tokens.space[2].val
+export const POPOVER_MENU_WIDTH = tokens.size[13].val * 2.5
+const POPOVER_MENU_ITEM_HEIGHT = tokens.size[10].val
+const POPOVER_MENU_PADDING = tokens.space[2].val
+
+/** Lets callers place the menu before it is laid out. */
+export function getPopoverMenuHeight(itemsCount: number): number {
+  return POPOVER_MENU_ITEM_HEIGHT * itemsCount + POPOVER_MENU_PADDING * 2
+}
 
 /** Floating menu surface for actions shown over a dimmed screen. */
 export const PopoverMenu = styled(Stack, {
   name: 'PopoverMenu',
+  width: POPOVER_MENU_WIDTH,
   paddingVertical: POPOVER_MENU_PADDING,
   borderRadius: '$6',
   overflow: 'hidden',

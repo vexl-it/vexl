@@ -12,8 +12,6 @@ import {
 import React, {useCallback} from 'react'
 import {Alert, ScrollView} from 'react-native'
 
-const MENU_WIDTH = 200
-
 function ThemeGroup({
   theme,
 }: {
@@ -40,7 +38,7 @@ function ThemeGroup({
           {theme.charAt(0).toUpperCase() + theme.slice(1)}
         </SizableText>
 
-        <PopoverMenu width={MENU_WIDTH}>
+        <PopoverMenu>
           <PopoverMenuItem
             icon={Camera}
             label="Camera"
@@ -57,7 +55,7 @@ function ThemeGroup({
           />
         </PopoverMenu>
 
-        <PopoverMenu width={MENU_WIDTH}>
+        <PopoverMenu>
           <PopoverMenuItem
             icon={Reply}
             label="Reply"

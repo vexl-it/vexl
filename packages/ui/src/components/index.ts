@@ -123,11 +123,11 @@ export type {OffersReencryptionStatusProps} from './OffersReencryptionStatus'
 export {Picker} from './Picker'
 export type {PickerItem, PickerProps} from './Picker'
 export {
-  POPOVER_MENU_ITEM_HEIGHT,
-  POPOVER_MENU_PADDING,
+  POPOVER_MENU_WIDTH,
   POPOVER_SHADOW,
   PopoverMenu,
   PopoverMenuItem,
+  getPopoverMenuHeight,
 } from './PopoverMenu'
 export type {PopoverMenuItemProps} from './PopoverMenu'
 export {PriceRangeInput, RangeSlider} from './PriceRangeInput'

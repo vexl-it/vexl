@@ -1,5 +1,6 @@
 'use client'
 
+import {Array, Option, pipe} from 'effect'
 import React, {useEffect, useRef, useState} from 'react'
 import {type Locale, localizedPath} from '../i18n/locales'
 
@@ -48,26 +49,31 @@ export function LanguageDropdown({
     setOpen((value) => !value)
   }
 
-  // webflow.js dropdown keys: arrows move through the languages, Escape closes
+  // webflow.js dropdown keys: only while open, arrows walk the languages and
+  // Escape closes the list without reaching the mobile menu's handler
   const onKeyDown = (event: React.KeyboardEvent): void => {
+    if (!['Escape', 'ArrowDown', 'ArrowUp'].includes(event.key)) return
+    if (event.key !== 'Escape') event.preventDefault()
+    if (!open) return
+    event.stopPropagation()
     const toggleElement =
       ref.current?.querySelector<HTMLElement>('.w-dropdown-toggle')
-    const links = Array.from(
-      ref.current?.querySelectorAll<HTMLElement>('.w-dropdown-list a') ?? []
-    )
     if (event.key === 'Escape') {
       setOpen(false)
       toggleElement?.focus()
       return
     }
-    if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return
-    event.preventDefault()
+    const links = pipe(
+      ref.current?.querySelectorAll<HTMLElement>('.w-dropdown-list a') ?? [],
+      Array.fromIterable
+    )
+    const current = pipe(
+      links,
+      Array.findFirstIndex((link) => link === document.activeElement),
+      Option.getOrElse(() => -1)
+    )
     const step = event.key === 'ArrowDown' ? 1 : -1
-    const current = links.findIndex((link) => link === document.activeElement)
-    const next = Math.min(Math.max(current + step, 0), links.length - 1)
-    setOpen(true)
-    // The list is display:none until it opens
-    requestAnimationFrame(() => links[next]?.focus())
+    links[Math.min(Math.max(current + step, 0), links.length - 1)]?.focus()
   }
 
   return (

@@ -49,18 +49,19 @@ export function LanguageDropdown({
     setOpen((value) => !value)
   }
 
-  // webflow.js dropdown keys: only while open, arrows walk the languages and
-  // Escape closes the list without reaching the mobile menu's handler
+  // webflow.js dropdown keys. Closed, arrows stay on the toggle (the page may
+  // still scroll). Open, arrows walk the languages and keep bubbling, so in the
+  // mobile menu the navbar moves on to its links; Escape closes only the list.
   const onKeyDown = (event: React.KeyboardEvent): void => {
-    if (!['Escape', 'ArrowDown', 'ArrowUp'].includes(event.key)) return
-    if (event.key !== 'Escape') event.preventDefault()
-    if (!open) return
-    event.stopPropagation()
-    const toggleElement =
-      ref.current?.querySelector<HTMLElement>('.w-dropdown-toggle')
+    if (!open) {
+      if (event.key === 'ArrowDown' || event.key === 'ArrowUp')
+        event.stopPropagation()
+      return
+    }
     if (event.key === 'Escape') {
+      event.stopPropagation()
       setOpen(false)
-      toggleElement?.focus()
+      ref.current?.querySelector<HTMLElement>('.w-dropdown-toggle')?.focus()
       return
     }
     const links = pipe(
@@ -72,8 +73,17 @@ export function LanguageDropdown({
       Array.findFirstIndex((link) => link === document.activeElement),
       Option.getOrElse(() => -1)
     )
-    const step = event.key === 'ArrowDown' ? 1 : -1
-    links[Math.min(Math.max(current + step, 0), links.length - 1)]?.focus()
+    const target = {
+      Home: 0,
+      End: links.length - 1,
+      ArrowLeft: current - 1,
+      ArrowUp: current - 1,
+      ArrowRight: Math.min(links.length - 1, current + 1),
+      ArrowDown: Math.min(links.length - 1, current + 1),
+    }[event.key]
+    if (target === undefined) return
+    event.preventDefault()
+    links[target]?.focus()
   }
 
   return (

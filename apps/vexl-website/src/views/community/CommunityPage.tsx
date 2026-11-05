@@ -94,7 +94,10 @@ export function CommunityPage({
             </div>
           </div>
         </section>
-        <div className="w-layout-blockcontainer container-7 events w-container">
+        <div
+          id="Events"
+          className="w-layout-blockcontainer container-7 events w-container"
+        >
           <h2 className="heading-3">{t.upcomingEvents}</h2>
           <EventList events={events.upcoming} emptyText={t.noEvents} />
           <h2 className="heading-3">{t.pastEvents}</h2>

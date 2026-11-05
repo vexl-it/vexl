@@ -4,6 +4,7 @@ import GithubSlugger from 'github-slugger'
 export interface MarkdownHeading {
   readonly id: string
   readonly text: string
+  readonly depth: number
 }
 
 const stripInlineMarkdown = (text: string): string =>
@@ -20,12 +21,15 @@ export function getMarkdownHeadings(
   return pipe(
     markdown.split('\n'),
     Array.filterMap((line) => {
-      const match = /^#{1,6} (.+)$/.exec(line)
-      return match?.[1] === undefined
+      const match = /^(#{1,6}) (.+)$/.exec(line)
+      return match?.[1] === undefined || match[2] === undefined
         ? Option.none()
-        : Option.some(stripInlineMarkdown(match[1]))
+        : Option.some({
+            depth: match[1].length,
+            text: stripInlineMarkdown(match[2]),
+          })
     }),
-    Array.filter((text) => text.length > 0),
-    Array.map((text) => ({id: slugger.slug(text), text}))
+    Array.filter(({text}) => text.length > 0),
+    Array.map(({depth, text}) => ({id: slugger.slug(text), text, depth}))
   )
 }

@@ -2,7 +2,7 @@
 title: 'Updates from the Vexl Italian Community'
 date: 2025-01-10
 author: 'Vexl Team'
-summary: 'How to get involved in something awesome; Author: Marco Giorgetti; In June 2023, I attended BTCPrague and roamed around the expo area, stopping by'
+summary: 'How to get involved in something awesome; Author: Marco Giorgetti; In June 2023, I attended BTCPrague and roamed around the expo area, stopping by…'
 image: '/blog/updates-from-the-vexl-italian-community/sni-mek-obrazovky-2024-12-19-v-14.38.58.webp'
 ---
 

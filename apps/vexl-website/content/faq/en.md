@@ -82,9 +82,9 @@ Simply delete your account via the app. Everything will be lost forever - no tra
 
 You can't. Once you log out of the platform, you can't access your offers, contacts, nor messages again. We strongly advise against keeping any valuable information on Vexl - the app was designed as a platform for connecting you to a counterparty in a secure way - not for storing your secrets.
 
-### Has Vexl had a security Audit?
+### Has Vexl had a security audit?
 
-Yes! You can see the result of an independent audit [here](/audit).
+Yes. In 2022, the security firm Citadelo tested the first version of the app and its servers. [See what they found and download the report](/audit).
 
 ### What if I find a security vulnerability?
 
@@ -146,7 +146,7 @@ For example, if you want to sell 1 bitcoin for $60,000, you can set a price trig
 
 This feature can be useful for sellers who want to wait for a certain price before selling or for buyers who are waiting for the price to drop before buying.
 
-### What does is mean 1st degree and 2nd degree contacts?
+### What do 1st degree and 2nd degree contacts mean?
 
 When creating an offer on Vexl, you can choose the friend level for your offer, deciding who will see it. If you want to trade only with friends, select "1st degree." If you want to use your wider social network, choose "2nd degree," which will show the offer to friends and friends of friends.
 
@@ -183,14 +183,6 @@ If the transaction is conducted online, the buyer and seller will communicate th
 ### Is there escrow?
 
 No, Vexl does not offer an escrow service.
-
-### Why doesn’t Vexl rate users or offers in the marketplace?
-
-Because ratings don’t build trust, people do.
-
-Other platforms use ratings because they don’t have a better way to measure trust. We do. We believe trust should come from the people in your life, not some random star rating that can be faked, bought, or manipulated. You can rely on Vexl because of your real-world social graph (web of trust) - You see offers from people connected to you through mutual contacts — friends, friends of friends, or trusted connections — based on real relationships.
-
-Another reason are privacy concerns: Vexl does not want to keep a database or active and well-rated users: we don’t know anything about you or your activity on the platform, and we want to keep it that way.
 
 ### Can I choose a region not a town if there are a small amount of offers in my town?
 

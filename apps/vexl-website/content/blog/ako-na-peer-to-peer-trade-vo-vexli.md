@@ -2,15 +2,13 @@
 title: 'Ako na peer-to-peer trade vo Vexli?'
 date: 2024-06-13
 author: 'Vexl Team'
-summary: 'Vexl je predovšetkým sociálna sieť. Narozdiel od ostatných populárnych platforiem, táto je ale peer-to-peer a nepchá nos tam, kde nemá čo hľadať:'
+summary: 'Vexl je predovšetkým sociálna sieť. Narozdiel od ostatných populárnych platforiem, táto je ale peer-to-peer a nepchá nos tam, kde nemá čo hľadať…'
 image: '/blog/ako-na-peer-to-peer-trade-vo-vexli/0-0g9xmkoyc4b13fkw.webp'
 ---
 
 Vexl je predovšetkým sociálna sieť. Narozdiel od ostatných populárnych platforiem, táto je ale peer-to-peer a nepchá nos tam, kde nemá čo hľadať: medzi teba a tvojich známych.
 
 Ctíme si súkromie našich používateľov a nikoho v sieti neidentifikujeme, neanalyzujeme jeho správanie, nemonetizujeme jeho dáta a hlavne — nijakým spôsobom nevieme a nechceme vstúpiť do jednotlivých obchodov, ktoré sa cez Vexl odohrávajú.
-
-![](/blog/ako-na-peer-to-peer-trade-vo-vexli/0-0g9xmkoyc4b13fkw.webp)
 
 Toto samozrejme presúva zodpovednosť za to, čo sa na Vexli deje, na každého jedného z nás i na našu protistranu. Poďme si zhrnúť základné princípy, ako predísť mrzeniu, keď sa prepojenie na Vexli nepodarí tak, ako si si to predstavoval.
 

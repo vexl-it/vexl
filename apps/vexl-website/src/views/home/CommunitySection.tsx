@@ -1,9 +1,9 @@
 'use client'
 
-import {Button, PageSection, Typography, YStack} from '@vexl-next/ui'
-import Image from 'next/image'
+import {Button, PageSection, Typography, XStack, YStack} from '@vexl-next/ui'
 import React from 'react'
 import {useLocale} from '../../components/LocaleProvider'
+import {Photo} from '../../components/Photo'
 import {SiteLink} from '../../components/SiteLink'
 
 export function CommunitySection(): React.JSX.Element {
@@ -16,7 +16,7 @@ export function CommunitySection(): React.JSX.Element {
         flex={1}
         gap="$5"
         alignItems="flex-start"
-        $lg={{flexBasis: 0, maxWidth: 440}}
+        $lg={{flexBasis: 0, maxWidth: 400}}
       >
         <Typography tag="h2" variant="heading1" color="$foregroundPrimary">
           {copy.title}
@@ -25,21 +25,39 @@ export function CommunitySection(): React.JSX.Element {
           {copy.text}
         </Typography>
         <SiteLink href={path('/community')}>
-          <Button role="none" size="medium" variant="secondary">
+          <Button role="none" size="medium" variant="tertiary">
             {copy.action}
           </Button>
         </SiteLink>
       </YStack>
-      <YStack flex={1} borderRadius="$8" overflow="hidden" $lg={{flexBasis: 0}}>
-        <Image
-          src="/images/community-gallery.webp"
-          alt={copy.imageAlt}
-          width={2000}
-          height={1050}
-          sizes="(min-width: 1024px) 680px, 100vw"
-          style={{width: '100%', height: 'auto'}}
+      <XStack
+        flex={1}
+        gap="$4"
+        height={320}
+        $md={{height: 440}}
+        $lg={{flexBasis: 0, flexGrow: 1.6}}
+      >
+        <Photo
+          photo="talk"
+          alt={copy.photos.talk}
+          sizes="(min-width: 1024px) 420px, 60vw"
+          flex={1.4}
         />
-      </YStack>
+        <YStack flex={1} gap="$4">
+          <Photo
+            photo="signLaughing"
+            alt={copy.photos.sign}
+            sizes="(min-width: 1024px) 300px, 40vw"
+            flex={1}
+          />
+          <Photo
+            photo="mask"
+            alt={copy.photos.mask}
+            sizes="(min-width: 1024px) 300px, 40vw"
+            flex={1}
+          />
+        </YStack>
+      </XStack>
     </PageSection>
   )
 }

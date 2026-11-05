@@ -24,8 +24,6 @@ Okrem toho je narozdiel od starej appky Vexl 2.0 dostupný globálne. Možno sa 
 
 Dokončite dohody v starej aplikácii, uzavrite chaty, vymažte účet a pôvodný Vexl odinštalujte. Následne jednoducho nájdite v appstore (prípadne v TestFlight) Vexl 2.0 a nainštalujte si ten. Pozor, vaše dáta sa medzi aplikáciami neprenášajú! Vo Vexl 2.0 budete začínať s čistým štítom.
 
-![](/blog/prestavame-podporovat-prvu-verziu-vexlu/1-ve3hm8fdammdwtg0xerldw.webp)
-
 #### Čo ak budem naďalej používať len starú aplikáciu?
 
 Starú aplikáciu už nebudeme podporovať. To znamená, že nebudeme venovať pozornosť chybám reportovaným nášmu supportu, ani vám nebudeme pomáhať v prípade nejakého technického problému.

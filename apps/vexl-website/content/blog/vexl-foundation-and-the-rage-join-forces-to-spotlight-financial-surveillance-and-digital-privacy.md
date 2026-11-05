@@ -2,7 +2,7 @@
 title: 'Vexl Foundation and The Rage Join Forces to Spotlight Financial Surveillance and Digital Privacy'
 date: 2025-06-17
 author: 'Vexl Team'
-summary: 'Prague, Czech Republic – The Vexl Foundation is proud to announce a new collaboration with The Rage, a leading independent publication covering'
+summary: 'Prague, Czech Republic – The Vexl Foundation is proud to announce a new collaboration with The Rage, a leading independent publication covering…'
 image: '/blog/vexl-foundation-and-the-rage-join-forces-to-spotlight-financial-surveillance-and-digital-privacy/ragexvexl-twitter-post-01.webp'
 ---
 

@@ -2,7 +2,7 @@
 title: 'Už je to tady! Vexl otvára marketplace'
 date: 2024-06-12
 author: 'Vexl Team'
-summary: 'Takmer presne pred rokom sme ukončili produktový výskum toho, čo komunita ľudí so záujmom o bitcoin očakáva od riešenia, ktoré by im umožnilo obchodov'
+summary: 'Takmer presne pred rokom sme ukončili produktový výskum toho, čo komunita ľudí so záujmom o bitcoin očakáva od riešenia, ktoré by im umožnilo obchodov…'
 image: '/blog/uz-je-to-tady-vexl-otvara-marketplace/1-wblhuo-kg8texfutkmugcq.webp'
 ---
 

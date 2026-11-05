@@ -157,9 +157,17 @@ export function SiteHeader(): React.JSX.Element {
       {menuOpen ? (
         <YStack
           tag="nav"
-          gap="$5"
+          position="absolute"
+          top="100%"
+          left={0}
+          right={0}
+          height="100svh"
+          gap="$7"
           paddingHorizontal="$5"
-          paddingBottom="$7"
+          paddingTop="$8"
+          borderTopWidth={1}
+          borderColor="$backgroundTertiary"
+          backgroundColor="$backgroundPrimary"
           $lg={{display: 'none'}}
         >
           {navItems.map((item) => (
@@ -173,7 +181,7 @@ export function SiteHeader(): React.JSX.Element {
               }}
             >
               <Typography
-                variant="titlesSmall"
+                variant="heading3"
                 color={
                   item.current ? '$accentYellowPrimary' : '$foregroundPrimary'
                 }

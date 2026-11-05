@@ -2,7 +2,7 @@
 title: 'Apple: Using cash is “clearly reckless”'
 date: 2024-06-13
 author: 'Vexl Team'
-summary: 'At the Vexl Foundation, we sponsor projects that promote and enable personal and financial freedoms and self-determination. Bitcoin is the ultimate'
+summary: 'At the Vexl Foundation, we sponsor projects that promote and enable personal and financial freedoms and self-determination. Bitcoin is the ultimate…'
 image: '/blog/apple-using-cash-is-clearly-reckless/1-chyl2xblyix7dv8jd6zk4a.webp'
 ---
 
@@ -31,8 +31,6 @@ No, it didn’t.
 #### “Clearly reckless”
 
 Last week we received clarification of our rejection, stating that the **_app encourages reckless activity. Specifically, the exchange of currencies in person._**
-
-![](/blog/apple-using-cash-is-clearly-reckless/1-chyl2xblyix7dv8jd6zk4a.webp)
 
 We went through the linked guidelines several times, but still cannot wrap our minds around what we are exactly guilty of doing here.
 

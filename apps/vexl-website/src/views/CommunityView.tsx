@@ -1,95 +1,80 @@
 'use client'
 
 import {
-  ArrowRight,
   BoxProduct,
   Button,
   DiplomaAsset,
+  EventCard,
   IconBox,
   MegaphoneNotifications,
   Microphone,
   PageSection,
-  TextTag,
   Typography,
   XStack,
   YStack,
   type IconProps,
 } from '@vexl-next/ui'
 import {Array, pipe} from 'effect'
-import Image from 'next/image'
 import React, {useState} from 'react'
 import {useTheme} from 'tamagui'
 import {useLocale} from '../components/LocaleProvider'
+import {Photo} from '../components/Photo'
 import {SiteLink} from '../components/SiteLink'
 import {externalLinks} from '../config/links'
 import {type CommunityEvent, type CommunityEvents} from '../content/events'
 import {formatDate} from '../formatDate'
 
-const EVENTS_PAGE_SIZE = 5
+const EVENTS_PAGE_SIZE = 8
 
-function EventDate({date}: {readonly date: string}): React.JSX.Element {
+function EventItem({
+  event,
+  state,
+}: {
+  readonly event: CommunityEvent
+  readonly state: 'upcoming' | 'past'
+}): React.JSX.Element {
   const {locale} = useLocale()
-  const formatted = formatDate(locale, date, {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  })
+  const card = (
+    <EventCard
+      state={state}
+      title={event.name}
+      details={pipe(
+        [
+          formatDate(locale, event.date, {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+          }),
+          event.location,
+          event.speakers,
+        ],
+        Array.filter((detail): detail is string => detail !== undefined)
+      )}
+    />
+  )
   return (
-    <Typography
-      variant="description"
-      color="$foregroundSecondary"
-      minWidth={130}
-    >
-      {formatted}
-    </Typography>
+    <YStack width="100%" $md={{width: 'calc(50% - 6px)'}}>
+      {event.url ? <SiteLink href={event.url}>{card}</SiteLink> : card}
+    </YStack>
   )
 }
 
-function EventRow({
-  event,
+function EventList({
+  events,
+  state,
 }: {
-  readonly event: CommunityEvent
+  readonly events: readonly CommunityEvent[]
+  readonly state: 'upcoming' | 'past'
 }): React.JSX.Element {
-  const theme = useTheme()
-  const name = (
-    <XStack alignItems="center" gap="$2">
-      <Typography variant="paragraphSmallBold" color="$foregroundPrimary">
-        {event.name}
-      </Typography>
-      {event.url ? (
-        <ArrowRight size={16} color={theme.foregroundSecondary.get()} />
-      ) : null}
-    </XStack>
-  )
   return (
-    <XStack
-      alignItems="center"
-      gap="$4"
-      flexWrap="wrap"
-      paddingHorizontal="$5"
-      paddingVertical="$4"
-      borderRadius="$4"
-      backgroundColor="$backgroundSecondary"
-    >
-      <EventDate date={event.date} />
-      <YStack flex={1} minWidth={200}>
-        {event.url ? <SiteLink href={event.url}>{name}</SiteLink> : name}
-      </YStack>
-      <XStack gap="$2" flexWrap="wrap" maxWidth="100%">
-        {pipe(
-          [event.speakers, event.location, event.time],
-          Array.filter((detail): detail is string => detail !== undefined),
-          Array.map((detail) => (
-            <TextTag
-              key={detail}
-              label={detail}
-              variant="neutral"
-              maxWidth="100%"
-            />
-          ))
-        )}
-      </XStack>
+    <XStack flexWrap="wrap" gap="$3">
+      {events.map((event) => (
+        <EventItem
+          key={`${event.date}-${event.name}`}
+          event={event}
+          state={state}
+        />
+      ))}
     </XStack>
   )
 }
@@ -103,9 +88,7 @@ function PastEvents({
   const [visible, setVisible] = useState(EVENTS_PAGE_SIZE)
   return (
     <YStack gap="$3">
-      {events.slice(0, visible).map((event) => (
-        <EventRow key={`${event.date}-${event.name}`} event={event} />
-      ))}
+      <EventList events={events.slice(0, visible)} state="past" />
       {visible < events.length ? (
         <XStack justifyContent="center" paddingTop="$3">
           <Button
@@ -155,7 +138,7 @@ function HostEventSection(): React.JSX.Element {
           <Button role="none">{copy.host.materials}</Button>
         </SiteLink>
         <SiteLink href={externalLinks.marketingEmail}>
-          <Button role="none" variant="secondary" size="medium">
+          <Button role="none" variant="tertiary" size="medium">
             {copy.host.email}
           </Button>
         </SiteLink>
@@ -198,7 +181,7 @@ export function CommunityView({
   return (
     <>
       <PageSection alignItems="center">
-        <Typography variant="paragraphSmallBold" color="$pinkLight">
+        <Typography variant="paragraphSmallBold" color="$accentYellowPrimary">
           {copy.eyebrow}
         </Typography>
         <Typography
@@ -213,6 +196,7 @@ export function CommunityView({
           variant="paragraph"
           color="$foregroundSecondary"
           textAlign="center"
+          maxWidth={600}
         >
           {copy.text}
         </Typography>
@@ -223,57 +207,101 @@ export function CommunityView({
             </Button>
           </SiteLink>
           <SiteLink href="#host-event">
-            <Button role="none" size="medium" variant="secondary">
+            <Button role="none" size="medium" variant="tertiary">
               {copy.hostEvent}
             </Button>
           </SiteLink>
         </XStack>
+        <XStack width="100%" gap="$4" height={240} $md={{height: 420}}>
+          <Photo
+            photo="booth"
+            alt={copy.photos.booth}
+            sizes="(min-width: 1200px) 520px, 50vw"
+            flex={1.6}
+          />
+          <Photo
+            photo="wave"
+            alt={copy.photos.wave}
+            sizes="(min-width: 1200px) 280px, 25vw"
+            flex={0.8}
+          />
+          <YStack display="none" $md={{display: 'flex'}} flex={1.2}>
+            <Photo
+              photo="panel"
+              alt={copy.photos.panel}
+              sizes="(min-width: 1200px) 380px, 30vw"
+              flex={1}
+            />
+          </YStack>
+        </XStack>
       </PageSection>
 
       <PageSection id="events" style={{scrollMarginTop: 96}}>
-        <YStack gap="$4">
-          <Typography tag="h2" variant="heading2" color="$foregroundPrimary">
-            {copy.upcomingTitle}
-          </Typography>
-          {Array.isNonEmptyReadonlyArray(events.upcoming) ? (
-            <YStack gap="$3">
-              {events.upcoming.map((event) => (
-                <EventRow key={`${event.date}-${event.name}`} event={event} />
-              ))}
-            </YStack>
-          ) : (
-            <Typography variant="paragraphSmall" color="$foregroundSecondary">
-              {copy.noUpcoming}
+        {Array.isNonEmptyReadonlyArray(events.upcoming) ? (
+          <YStack gap="$5">
+            <Typography tag="h2" variant="heading2" color="$foregroundPrimary">
+              {copy.upcomingTitle}
             </Typography>
-          )}
-        </YStack>
-        <YStack gap="$4">
-          <Typography tag="h2" variant="heading2" color="$foregroundPrimary">
-            {copy.pastTitle}
-          </Typography>
+            <EventList events={events.upcoming} state="upcoming" />
+          </YStack>
+        ) : null}
+        <YStack gap="$5">
+          <YStack gap="$3">
+            <Typography tag="h2" variant="heading2" color="$foregroundPrimary">
+              {copy.pastTitle}
+            </Typography>
+            {Array.isNonEmptyReadonlyArray(events.upcoming) ? null : (
+              <Typography variant="paragraph" color="$foregroundSecondary">
+                {copy.noUpcoming}
+              </Typography>
+            )}
+          </YStack>
           <PastEvents events={events.past} />
         </YStack>
       </PageSection>
 
       <HostEventSection />
 
-      <PageSection alignItems="center">
-        <Typography
-          tag="h2"
-          variant="display"
-          color="$foregroundPrimary"
-          textAlign="center"
-        >
+      <PageSection>
+        <Typography tag="h2" variant="heading1" color="$foregroundPrimary">
           {copy.gallery.title}
         </Typography>
-        <Image
-          src="/images/community-gallery.webp"
-          alt={copy.gallery.alt}
-          width={2000}
-          height={1050}
-          sizes="(min-width: 1200px) 1120px, 100vw"
-          style={{width: '100%', height: 'auto'}}
-        />
+        <XStack gap="$4" height={220} $md={{height: 360}}>
+          <Photo
+            photo="crowd"
+            alt={copy.photos.crowd}
+            sizes="(min-width: 1200px) 560px, 50vw"
+            flex={1}
+          />
+          <Photo
+            photo="signSuit"
+            alt={copy.photos.signSuit}
+            sizes="(min-width: 1200px) 560px, 50vw"
+            flex={1}
+          />
+        </XStack>
+        <XStack gap="$4" height={220} $md={{height: 360}}>
+          <Photo
+            photo="flyers"
+            alt={copy.photos.flyers}
+            sizes="(min-width: 1200px) 370px, 33vw"
+            flex={1}
+          />
+          <Photo
+            photo="wristband"
+            alt={copy.photos.wristband}
+            sizes="(min-width: 1200px) 370px, 33vw"
+            flex={1}
+          />
+          <YStack display="none" $md={{display: 'flex'}} flex={1}>
+            <Photo
+              photo="teamBacks"
+              alt={copy.photos.teamBacks}
+              sizes="(min-width: 1200px) 370px, 33vw"
+              flex={1}
+            />
+          </YStack>
+        </XStack>
       </PageSection>
     </>
   )

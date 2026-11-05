@@ -2,7 +2,7 @@
 title: 'Vexl Foundation Challenges Apple, Launches Freedom Store - Its Own Mobile App Marketplace'
 date: 2025-06-20
 author: 'Vexl Team'
-summary: 'Prague, June 20.6. 2025 - Czech startup Vexl and Vexl Foundation, both part of the SatoshiLabs group, are launching their own digital mobile app'
+summary: 'Prague, June 20.6. 2025 - Czech startup Vexl and Vexl Foundation, both part of the SatoshiLabs group, are launching their own digital mobile app…'
 image: '/blog/vexl-foundation-challenges-apple-launches-freedom-store---its-own-mobile-app-marketplace/frame-kopie-3-.webp'
 ---
 

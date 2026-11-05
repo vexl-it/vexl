@@ -4,13 +4,11 @@ import {
   ArrowRight,
   Button,
   LinkTile,
-  Lock,
   PageSection,
   QuestionmarkCircle,
   Typography,
   XStack,
   YStack,
-  type IconProps,
 } from '@vexl-next/ui'
 import Image from 'next/image'
 import React from 'react'
@@ -19,16 +17,7 @@ import {useLocale} from '../components/LocaleProvider'
 import {SiteLink} from '../components/SiteLink'
 import {externalLinks} from '../config/links'
 
-type PlatformIcon =
-  | {readonly image: string}
-  | {readonly icon: React.ComponentType<IconProps>}
-
-function CardIcon({
-  platform,
-}: {
-  readonly platform: PlatformIcon
-}): React.JSX.Element {
-  const theme = useTheme()
+function CardIcon({logo}: {readonly logo: string}): React.JSX.Element {
   return (
     <YStack
       width="$9"
@@ -38,25 +27,21 @@ function CardIcon({
       alignItems="center"
       justifyContent="center"
     >
-      {'image' in platform ? (
-        <Image src={platform.image} alt="" width={20} height={20} />
-      ) : (
-        <platform.icon size={20} color={theme.foregroundPrimary.get()} />
-      )}
+      <Image src={logo} alt="" width={20} height={20} />
     </YStack>
   )
 }
 
 function DownloadCard({
   id,
-  platform,
+  logo,
   title,
   subtitle,
   action,
   children,
 }: {
   readonly id?: string
-  readonly platform: PlatformIcon
+  readonly logo: string
   readonly title: string
   readonly subtitle: string
   readonly action?: React.ReactNode
@@ -73,7 +58,7 @@ function DownloadCard({
       $md={{padding: '$7'}}
     >
       <XStack alignItems="center" gap="$4" flexWrap="wrap">
-        <CardIcon platform={platform} />
+        <CardIcon logo={logo} />
         <YStack flex={1} minWidth={200} gap="$1">
           <Typography tag="h2" variant="titles" color="$foregroundPrimary">
             {title}
@@ -299,9 +284,42 @@ export function DownloadView({
 
   return (
     <PageSection maxWidth={960} gap="$5">
-      <Typography tag="h1" variant="display" color="$foregroundPrimary">
-        {variant === 'eu' ? copy.title : copy.nonEuTitle}
-      </Typography>
+      <XStack alignItems="center" justifyContent="space-between" gap="$7">
+        <YStack flex={1} gap="$5">
+          <Typography tag="h1" variant="display" color="$foregroundPrimary">
+            {variant === 'eu' ? copy.title : copy.nonEuTitle}
+          </Typography>
+          <Typography variant="paragraph" color="$foregroundSecondary">
+            {copy.intro}
+          </Typography>
+        </YStack>
+        <XStack
+          display="none"
+          $lg={{display: 'flex'}}
+          alignItems="center"
+          gap="$5"
+          padding="$5"
+          borderRadius="$5"
+          backgroundColor="$backgroundSecondary"
+        >
+          <YStack backgroundColor="$white100" padding="$2" borderRadius="$3">
+            <Image
+              src="/images/download-qr.webp"
+              alt=""
+              width={104}
+              height={104}
+            />
+          </YStack>
+          <YStack gap="$2" maxWidth={160}>
+            <Typography variant="paragraphSmallBold" color="$foregroundPrimary">
+              {copy.qrTitle}
+            </Typography>
+            <Typography variant="description" color="$foregroundSecondary">
+              {copy.qrText}
+            </Typography>
+          </YStack>
+        </XStack>
+      </XStack>
       <XStack gap="$3" flexWrap="wrap">
         <PlatformChip
           href="#iphone"
@@ -317,19 +335,16 @@ export function DownloadView({
 
       <DownloadCard
         id="iphone"
-        platform={{image: '/images/platform-apple.svg'}}
+        logo="/images/platform-apple.svg"
         title={iosCopy.title}
         subtitle={iosCopy.subtitle}
       >
-        {iosSteps.map((step, index) => (
-          <StepRow key={step.title} number={index + 1} step={step} />
-        ))}
         <XStack
           alignItems="center"
           gap="$3"
-          paddingTop="$5"
-          borderTopWidth={1}
-          borderColor="$backgroundTertiary"
+          padding="$4"
+          borderRadius="$4"
+          backgroundColor="$backgroundTertiary"
           flexWrap="wrap"
         >
           <QuestionmarkCircle size={20} color={theme.foregroundPrimary.get()} />
@@ -345,11 +360,14 @@ export function DownloadView({
             </Typography>
           </SiteLink>
         </XStack>
+        {iosSteps.map((step, index) => (
+          <StepRow key={step.title} number={index + 1} step={step} />
+        ))}
       </DownloadCard>
 
       <DownloadCard
         id="android"
-        platform={{image: '/images/platform-android.svg'}}
+        logo="/images/platform-android.svg"
         title={copy.androidCard.title}
         subtitle={copy.androidCard.subtitle}
         action={
@@ -361,7 +379,7 @@ export function DownloadView({
       />
 
       <DownloadCard
-        platform={{image: '/images/platform-android.svg'}}
+        logo="/images/platform-android.svg"
         title={copy.alternatives.title}
         subtitle={copy.alternatives.subtitle}
       >
@@ -396,12 +414,6 @@ export function DownloadView({
           />
         </OptionGroup>
       </DownloadCard>
-
-      <DownloadCard
-        platform={{icon: Lock}}
-        title={copy.freedom.title}
-        subtitle={copy.freedom.text}
-      />
     </PageSection>
   )
 }

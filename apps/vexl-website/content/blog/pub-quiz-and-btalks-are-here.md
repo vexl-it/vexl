@@ -2,7 +2,7 @@
 title: 'PU₿ QUIZ and ₿TALKS Are Here!'
 date: 2025-02-10
 author: 'Vexl Team'
-summary: '10.2.2025 – Vexl is thrilled to launch PU₿ QUIZ and ₿TALKS, the ultimate meetup cards for Bitcoiners. Designed to bring energy, inspiration, and'
+summary: '10.2.2025 – Vexl is thrilled to launch PU₿ QUIZ and ₿TALKS, the ultimate meetup cards for Bitcoiners. Designed to bring energy, inspiration, and…'
 image: '/blog/pub-quiz-and-btalks-are-here/golden-avatar-1.webp'
 ---
 

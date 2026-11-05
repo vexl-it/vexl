@@ -15,8 +15,6 @@ _In our last article, we covered how the attempt to fight financial crime often 
 _– Universal Declaration of Human Rights, Article 2   
 _
 
-![](/blog/economic-sanctions-and-collateral-damage/ragexvexl-blogheader-03.webp)
-
 Almost 10 years ago, I met Mottomorashi Hinin, a Russian going by a Japanese name, in an anarchist bar.
 
 He was introduced to Bitcoin in 2012, and has since been making a living helping out with various hacking projects. Over beers, he said something to me that resonates to this day. Fiat money, he said, was really just “weaponized spreadsheets”. “How else do you explain that I cannot get a bank account just because I was born in the wrong country.”

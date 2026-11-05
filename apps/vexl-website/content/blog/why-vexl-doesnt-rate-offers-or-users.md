@@ -14,8 +14,6 @@ Vexl is a **peer-to-peer bitcoin app** that lets you trade with people you know 
 
 Here’s why **you won’t see stars or public reviews on Vexl — and why we think that’s the right way to do it**.
 
-![](/blog/why-vexl-doesnt-rate-offers-or-users/vexl-connection-graph-2.webp)
-
 ##### **Trust isn’t a number. It’s people.**
 
 Imagine you’re in a new city and looking for a place to eat. The top-rated restaurant might not even serve food you like. High ratings don’t always mean it’s right for _you_.

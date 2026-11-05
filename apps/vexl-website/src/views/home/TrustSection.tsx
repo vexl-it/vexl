@@ -15,6 +15,7 @@ import {
 import React from 'react'
 import {useTheme} from 'tamagui'
 import {useLocale} from '../../components/LocaleProvider'
+import {Photo} from '../../components/Photo'
 import {SiteLink} from '../../components/SiteLink'
 import {externalLinks} from '../../config/links'
 
@@ -82,6 +83,12 @@ export function TrustSection(): React.JSX.Element {
           {copy.text}
         </Typography>
       </YStack>
+      <Photo
+        photo="team"
+        alt={copy.teamPhoto}
+        sizes="(min-width: 1200px) 1120px, 100vw"
+        aspectRatio={2.2}
+      />
       <YStack gap="$5" $md={{flexDirection: 'row'}}>
         <TrustTile
           href={externalLinks.github}

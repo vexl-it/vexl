@@ -86,7 +86,7 @@ Nabízená oznámení na mobilních platformách používají Firebase Cloud Mes
 
 ### Má Vexl bezpečnostní audit?
 
-Ano! Výsledek nezávislého auditu si můžeš prohlédnout [zde](/audit).
+Ano. V roce 2022 bezpečnostní firma Citadelo otestovala první verzi aplikace a její servery. [Podívej se, co našla, a stáhni si zprávu](/audit).
 
 ### Co když najdu bezpečnostní chybu?
 
@@ -183,14 +183,6 @@ Pokud transakce probíhá online, komunikují spolu kupující a prodávající 
 ### Existuje zde escrow?
 
 Ne, společnost Vexl nenabízí službu úschovy.
-
-### Proč Vexl nepoužívá hodnocení uživatelů ani nabídek na tržišti?
-
-Protože důvěru nevytváří rating hvězdičky, ale lidé.
-
-Jiné platformy používají hodnocení, protože nemají lepší způsob, jak měřit důvěru. My ano. Věříme, že důvěra by měla vycházet z lidí ve tvém životě, ne z náhodného počtu hvězdiček, které si někdo může koupit, zfalšovat nebo zmanipulovat. Na Vexl se můžeš spolehnout, díky své skutečné sociální síti (web of trust) — můžeš vidět nabídky od lidí, kteří jsou s tebou propojeni přes společné kontakty — přátele, přátele přátel, nebo důvěryhodné kontakty — na základě opravdových vztahů.
-
-Dalším důvodem je soukromí: Vexl nechce uchovávat žádnou databázi aktivních nebo dobře hodnocených uživatelů. Nevíme o tobě ani o tom, co na Vexlu děláš — a chceme, aby to tak zůstalo.
 
 ### Mohu si vybrat region, nikoli město, pokud je v mém městě málo nabídek?
 

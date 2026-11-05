@@ -2,44 +2,37 @@
 
 import {
   ChevronDown,
+  FadeGradient,
   FilterBar,
   PageSection,
-  ScrollView,
   Typography,
   XStack,
   YStack,
 } from '@vexl-next/ui'
-import {Array, Option, pipe} from 'effect'
+import {Array, pipe} from 'effect'
 import Image from 'next/image'
-import React, {useState} from 'react'
+import React from 'react'
 import {useTheme} from 'tamagui'
 import {DownloadCta} from '../../components/DownloadCta'
 import {useLocale} from '../../components/LocaleProvider'
 import {PhoneFrame} from '../../components/PhoneFrame'
 import {SiteLink} from '../../components/SiteLink'
-import {formatMessage} from '../../i18n/locales'
 import {DemoOfferCard} from './mock/DemoOfferCard'
-import {OPEN_DEMO_EVENT} from './TradeSection'
-
-type Side = 'buy' | 'sell'
 
 const heroAvatars = [0, 2, 1] as const
 
-// Buying shows the offers of people who sell, and the other way round
-const offerSideFor = {buy: 'sell', sell: 'buy'} as const
-
 function MarketplaceMock(): React.JSX.Element {
-  const {t, path} = useLocale()
+  const {t} = useLocale()
   const mock = t.home.mock
-  const [side, setSide] = useState<Side>('buy')
-  const visibleOffers = pipe(
+  // Buying shows the offers of people who sell
+  const sellOffers = pipe(
     mock.offers,
-    Array.filter((offer) => offer.side === offerSideFor[side])
+    Array.filter((offer) => offer.side === 'sell')
   )
 
   return (
     <PhoneFrame label={mock.label}>
-      <YStack flex={1} gap="$5" paddingTop="$7">
+      <YStack flex={1} gap="$5" paddingTop="$7" pointerEvents="none">
         <Typography
           variant="heading3"
           color="$foregroundPrimary"
@@ -47,72 +40,29 @@ function MarketplaceMock(): React.JSX.Element {
         >
           {mock.marketplace}
         </Typography>
-        {/* The filter scrolls sideways; without this it also grows tall */}
-        <YStack flexGrow={0}>
-          <FilterBar<Side>
+        {/* The filter scrolls sideways; without this it collapses */}
+        <YStack flexShrink={0}>
+          <FilterBar
             items={[
               {label: mock.buy, value: 'buy'},
               {label: mock.sell, value: 'sell'},
             ]}
-            selectedValues={new Set([side])}
-            // One side is always shown, like the app's buy/sell switch
-            onSelectedValuesChange={(values) => {
-              const picked = pipe(
-                [...values],
-                Array.findFirst((value) => value !== side)
-              )
-              if (Option.isSome(picked)) setSide(picked.value)
-            }}
+            selectedValues={new Set(['buy'])}
+            onSelectedValuesChange={() => {}}
           />
         </YStack>
-        <ScrollView flex={1} contentContainerStyle={{flexGrow: 1}}>
-          <YStack gap="$3" paddingHorizontal="$3" paddingBottom="$3">
-            {visibleOffers.map((offer, i) => (
-              <SiteLink
-                key={offer.id}
-                href={`${path('/')}#how-it-works`}
-                label={formatMessage(mock.openInDemo, {
-                  price: offer.price,
-                  place: offer.place,
-                })}
-                // The walkthrough's script is about the first offer only
-                onPress={(event) => {
-                  const opensElsewhere =
-                    event.button !== 0 ||
-                    event.metaKey ||
-                    event.ctrlKey ||
-                    event.shiftKey ||
-                    event.altKey
-                  if (opensElsewhere) return
-                  // The walkthrough scrolls once its new step has rendered
-                  event.preventDefault()
-                  window.history.replaceState(
-                    null,
-                    '',
-                    event.currentTarget.href
-                  )
-                  window.dispatchEvent(
-                    new CustomEvent(OPEN_DEMO_EVENT, {
-                      detail:
-                        offer.id === mock.offers[0]?.id ? 'friends' : 'offer',
-                    })
-                  )
-                }}
-              >
-                <YStack
-                  role="none"
-                  className="vexl-enter"
-                  pressStyle={{opacity: 0.7}}
-                >
-                  <DemoOfferCard
-                    offer={offer}
-                    avatar={heroAvatars[i % heroAvatars.length] ?? 0}
-                  />
-                </YStack>
-              </SiteLink>
-            ))}
-          </YStack>
-        </ScrollView>
+        <YStack gap="$3" paddingHorizontal="$3">
+          {sellOffers.map((offer, i) => (
+            <DemoOfferCard
+              key={offer.id}
+              offer={offer}
+              avatar={heroAvatars[i % heroAvatars.length] ?? 0}
+            />
+          ))}
+        </YStack>
+        <YStack position="absolute" left={0} right={0} bottom={0} height={120}>
+          <FadeGradient solidEdge="bottom" />
+        </YStack>
       </YStack>
     </PhoneFrame>
   )

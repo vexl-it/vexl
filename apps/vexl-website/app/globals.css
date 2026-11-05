@@ -12,27 +12,6 @@ a:focus-visible {
   border-radius: 4px;
 }
 
-@keyframes vexl-enter {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-}
-
-.vexl-enter {
-  animation: vexl-enter 280ms ease-out both;
-}
-
-@keyframes vexl-pulse {
-  50% {
-    box-shadow: 0 0 0 6px rgba(252, 205, 108, 0.25);
-  }
-}
-
-.vexl-pulse {
-  animation: vexl-pulse 1800ms ease-in-out 3;
-}
-
 /* Exchange asks get struck through one by one once the list scrolls in */
 .vexl-strike-line {
   transform: scaleX(0);
@@ -44,8 +23,7 @@ a:focus-visible {
   transform: scaleX(1);
 }
 
-/* Phones show the mock smaller, so the step text, the mock, and its
-   controls fit one screen, like a scaled-down app screenshot */
+/* Phones show the mock smaller, like a scaled-down app screenshot */
 @media (max-width: 1023px) {
   .vexl-phone {
     zoom: 0.85;
@@ -54,33 +32,19 @@ a:focus-visible {
 
 /* On phones the 40px headlines can't fit long Czech words like
    "podporovateli", so they shrink with the viewport. _fos-f-size-6 is
-   Tamagui's class for that size; :root matches its specificity. */
+   Tamagui's class for that size in the heading font; :root matches its
+   specificity. */
 @media (max-width: 439px) {
-  :root h1._fos-f-size-6,
-  :root h2._fos-f-size-6 {
+  :root h1.font_heading._fos-f-size-6,
+  :root h2.font_heading._fos-f-size-6 {
     font-size: min(40px, 9vw);
     line-height: 1.15;
   }
 }
 
-/* Read by screen readers, not shown */
-.vexl-visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
-
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
-  }
-
-  .vexl-enter,
-  .vexl-pulse {
-    animation: none;
   }
 
   .vexl-strike-line {

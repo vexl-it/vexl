@@ -91,7 +91,7 @@ export const cs: Messages = {
       howItWorks: 'Jak to funguje',
     },
     mock: {
-      label: 'Interaktivní ukázka. Lidé jsou smyšlení.',
+      label: 'Ukázkové nabídky. Lidé jsou smyšlení.',
       marketplace: 'Tržiště',
       buy: 'Koupit',
       sell: 'Prodat',
@@ -100,7 +100,6 @@ export const cs: Messages = {
       friendOfFriend: 'Přítel přítele',
       directFriend: 'Přímý přítel',
       cash: 'Hotovost',
-      openInDemo: '{price}, {place}. Vyzkoušejte v ukázce',
       offers: [
         {
           id: 'coffee',
@@ -161,62 +160,40 @@ export const cs: Messages = {
         },
       ],
     },
-    trade: {
+    howItWorks: {
       eyebrow: 'Jak to funguje',
-      title: 'Jeden obchod od začátku do konce.',
-      text: 'Proklikejte si obchod tak, jak probíhá v aplikaci.',
-      stepOf: 'Krok {step} z {total}',
-      next: 'Další krok',
-      restart: 'Začít znovu',
-      stepAnnouncement: 'Krok {step} z {total}: {title}',
+      title: 'Vaše kontakty jsou tržiště.',
+      text: 'Mezi vámi a tím, s kým obchodujete, nestojí žádná firma. Takhle probíhá obchod.',
+      caption: 'Obrazovky z aplikace. Lidé jsou smyšlení.',
       steps: {
-        offer: {
-          title: 'Najděte nabídku ve své síti',
-          text: 'Nabídky přicházejí od přátel a přátel přátel. Vidíte cenu, místo a jak jste propojení. Jména zůstávají skrytá.',
+        contacts: {
+          title: 'Přidejte své kontakty',
+          text: 'Vexl vás podle kontaktů v telefonu propojí s přáteli a přáteli přátel. Vexl nevidí, kdo jsou vaše kontakty.',
         },
-        friends: {
-          title: 'Podívejte se, koho máte společného',
-          text: 'U každé nabídky vidíte společné přátele, takže se můžete poptat, než odpovíte. Vexl nevidí, kdo jsou vaše kontakty.',
+        offer: {
+          title: 'Najděte nabídku',
+          text: 'U nabídky vidíte částku, místo a kolik máte společných přátel. Jména zůstávají skrytá.',
         },
         chat: {
-          title: 'Nejdřív chat. Rozhodnutí později.',
-          text: 'Jakmile druhá strana přijme vaši žádost, můžete chatovat. Zprávy jsou šifrované end-to-end a pro druhou stranu jste pořád jen avatar. Chcete se odhalit? Rozhodnete vy.',
+          title: 'Pište si anonymně',
+          text: 'Pošlete žádost. Jakmile ji druhá strana přijme, domluvíte se v chatu šifrovaném end-to-end.',
         },
-        reveal: {
-          title: 'Odhalte se, až budete připraveni',
-          text: 'Jen když oba souhlasíte, a nejde to vzít zpět. Pak se sejděte osobně: nejdřív peníze, potom bitcoin.',
+        trade: {
+          title: 'Sejděte se a obchodujte',
+          text: 'Jména a fotky si odhalíte, jen když oba souhlasíte. Pak se sejdete: nejdřív hotovost, potom bitcoin. Vexl nesahá ani na jedno.',
         },
       },
-      screens: {
-        tapHint: 'Klepněte na nabídku a otevřete ji.',
-        offerTitle: 'Nabídka',
-        back: 'Zpět',
-        connection:
-          'Možná se přímo neznáte, ale spojují vás tito společní přátelé.',
-        friends: ['Anna', 'Marek'],
-        sendRequest: 'Odeslat žádost',
-        requestAccepted: 'Vaše žádost byla přijata.',
+      mocks: {
+        friendsOfFriends: 'Přátelé přátel',
         requestHeader: 'Vaše žádost',
-        firstMessage:
-          'Ahoj! Platí ještě nabídka? Mám zájem o bitcoin za 7 000 Kč.',
-        theirReply: 'Platí. Můžu ve čtvrtek v kavárně u hlavního nádraží.',
-        quickReply: 'Čtvrtek mi sedí.',
-        theirFollowUp: 'Super. Odhalíme si před schůzkou jména a fotky?',
+        request: 'Ahoj! Platí ještě nabídka? Mám zájem o bitcoin za 7 000 Kč.',
         vexlbot: 'Vexlbot',
         accepted: 'Přijato',
-        reactionRequired: 'Vyžadována reakce',
-        theyWant: 'Druhá strana chce odhalit identity',
-        sameDetails: 'Jméno a fotku odhalíte buď oba, nebo nikdo.',
-        noThanks: 'Ne, díky',
-        agree: 'Odhalit',
-        declined: 'Odhalení jste odmítli',
-        nothingRevealed: 'Žádné nové údaje se neodhalily. Můžete dál chatovat.',
+        requestAccepted: 'Vaše žádost byla přijata.',
+        reply: 'Platí. Ve čtvrtek v kavárně u hlavního nádraží?',
         revealed: 'Identity odhaleny',
-        bothRevealed: 'Oba jste odhalili svá jména a fotky.',
         you: 'Vy',
         theirName: 'Jana',
-        anonymousLastMessage:
-          'V pohodě, jména počkají. Tak ve čtvrtek. Nejdřív hotovost, pak pošlu bitcoin.',
         lastMessage: 'Tak ve čtvrtek. Nejdřív hotovost, pak pošlu bitcoin.',
       },
     },
@@ -241,20 +218,26 @@ export const cs: Messages = {
       title: 'Bitcoin začíná u lidí.',
       text: 'Meetupy, přednášky a hospodské kvízy, které pořádají lidé, kteří používají Vexl. Najděte nějaký ve svém okolí, nebo uspořádejte vlastní.',
       action: 'Prozkoumat komunitu',
-      imageAlt: 'Fotky z meetupů a konferencí Vexlu',
+      photos: {
+        talk: 'Přednáška na pódiu Vexlu na BTC Prague pod nápisem No middlemen. No KYC.',
+        sign: 'Dva lidé se smějí za žlutou cedulí Privacy matters',
+        mask: 'Návštěvník v masce drží ceduli I love Vexl',
+      },
     },
     trust: {
       eyebrow: 'Bez svobody transakcí nemáme žádná další práva.',
       title: 'Otevřený kód. Neziskový projekt.',
       text: 'Nemusíte nám věřit. Ověřte si to sami.',
+      teamPhoto:
+        'Tým Vexlu na BTC Prague před stánkem s nápisem No middlemen. No KYC. Peer-to-peer.',
       openSource: {
         title: 'Open source',
-        text: 'Aplikace i servery jsou veřejně na GitHubu. Kód si může přečíst kdokoli.',
+        text: 'Aplikace i servery jsou na GitHubu pod github.com/vexl-it. Kód si může přečíst kdokoli.',
         action: 'Přečíst kód',
       },
       audit: {
-        title: 'Nezávislý audit',
-        text: 'Aplikaci testovali externí bezpečnostní experti. Jejich zpráva je veřejná.',
+        title: 'Bezpečnostní audit',
+        text: 'Firma Citadelo v roce 2022 otestovala první verzi aplikace a její servery. Zpráva je veřejná.',
         action: 'Přečíst audit',
       },
       foundation: {
@@ -270,12 +253,17 @@ export const cs: Messages = {
   },
   download: {
     title: 'Stáhněte si aplikaci Vexl',
-    nonEuTitle: 'Stažení mimo EU',
+    nonEuTitle: 'Vexl mimo EU',
+    intro:
+      'Na Androidu máte Vexl na jedno klepnutí v Google Play. Na iPhonu v App Storu není, takže to dá pár kroků navíc.',
+    qrTitle: 'Jste na počítači?',
+    qrText:
+      'Naskenujte kód fotoaparátem v telefonu a otevřete tuto stránku tam.',
     iphone: 'iPhone',
     android: 'Android',
     ios: {
       title: 'iOS (iPhone)',
-      subtitle: '3 jednoduché kroky – nejdřív si přečtěte návod',
+      subtitle: 'Tři kroky. Než začnete, přečtěte si je.',
       steps: {
         altStore: {
           title: 'Stáhněte si AltStore Pal',
@@ -286,7 +274,7 @@ export const cs: Messages = {
         freedomStore: {
           title: 'Přidejte Freedom Store',
           text: 'Freedom Store vám umožní instalovat aplikace, které Apple nepovolí. Přidejte ho v AltStoru jako zdroj, vezměte si zpět kontrolu nad svým zařízením a získejte přístup k Bitcoinovým a svobodným aplikacím bez strážců App Storu.',
-          emphasis: 'Klepněte na tlačítko vpravo a nainstalujte Vexl odtamtud.',
+          emphasis: 'Klepněte na tlačítko níže a nainstalujte Vexl odtamtud.',
           action: 'Přidat zdroj Freedom Store',
         },
         install: {
@@ -294,12 +282,12 @@ export const cs: Messages = {
           text: 'Nainstalujte Vexl z Freedom Storu. Ten pocit? To je svoboda — a je zase vaše.',
         },
       },
-      outsideEu: 'Jste mimo EU?',
-      viewInstructions: 'Zobrazit návod',
+      outsideEu: 'Tento návod je pro iPhony v EU. Jste mimo EU?',
+      viewInstructions: 'Zobrazit návod mimo EU',
     },
     iosNonEu: {
       title: 'iOS (iPhone)',
-      subtitle: '2 jednoduché kroky – nejdřív si přečtěte návod',
+      subtitle: 'Dva kroky. Než začnete, přečtěte si je.',
       steps: {
         testFlight: {
           title: 'Stáhněte si TestFlight z App Storu',
@@ -312,7 +300,7 @@ export const cs: Messages = {
           action: 'Stáhnout Vexl',
         },
       },
-      inEu: 'Jste v EU?',
+      inEu: 'Tento návod je pro iPhony mimo EU. Jste v EU?',
       viewEuInstructions: 'Zobrazit návod pro EU',
     },
     androidCard: {
@@ -321,28 +309,25 @@ export const cs: Messages = {
       googlePlay: 'Stáhnout z Google Play',
     },
     alternatives: {
-      title: 'Další možnosti',
-      subtitle: 'Chcete alternativu k Obchodu Play?',
+      title: 'Android bez Google Play',
+      subtitle: 'Chcete jiný obchod s aplikacemi, nebo žádný?',
       storesTitle: 'Jiné obchody s aplikacemi',
       storesText: 'Vyberte si jednu z těchto možností.',
       otherWaysTitle: 'Další způsoby instalace',
       otherWaysText:
         'Můžete použít i APK z GitHubu. Doporučujeme ho instalovat přes Obtainium, abyste dostávali aktualizace.',
     },
-    freedom: {
-      title: 'Vaše svoboda. Vaše volba.',
-      text: 'Vexl je soukromý a bez KYC.',
-    },
   },
   faq: {title: 'Nejčastější dotazy'},
   community: {
     eyebrow: 'Komunita',
-    title: 'Spojte se s Vexl podporovateli',
-    text: 'Připojte se k nám a spoluvytvářejte diskrétní Bitcoin komunity.',
+    title: 'Poznejte lidi, kteří za obchody stojí.',
+    text: 'Meetupy, přednášky a hospodské kvízy, které pořádají lidé používající Vexl. Přijďte na jeden, nebo uspořádejte vlastní.',
     browseEvents: 'Prohlížet události',
-    hostEvent: 'Pořádat akci',
+    hostEvent: 'Uspořádat akci',
     upcomingTitle: 'Nadcházející události',
-    noUpcoming: 'Zatím žádné události',
+    noUpcoming:
+      'Zatím nejsou ohlášené žádné další akce. Tady jsme byli doposud.',
     pastTitle: 'Proběhlé události',
     showOlder: 'Zobrazit starší události',
     host: {
@@ -352,15 +337,24 @@ export const cs: Messages = {
       email: 'Napište nám na marketing@vexl.it',
     },
     support: {
-      title: 'Jak vás podpoříme?',
+      title: 'Jak vás podpoříme',
       promo: 'Propagace',
       training: 'Školení a zdroje',
       merch: 'Balíčky merche',
       speakers: 'Vexl řečníci',
     },
     gallery: {
-      title: 'Již proběhlé Vexl události',
-      alt: 'Fotky z proběhlých Vexl meetupů a konferencí',
+      title: 'Z našich akcí',
+    },
+    photos: {
+      booth: 'Stánek Vexlu na BTC Prague s bannerem Trade Bitcoin privately',
+      wave: 'Řečník mává z pódia Vexlu',
+      panel: 'Panelová diskuse na pódiu Vexlu, vepředu mikina Privacy matters',
+      crowd: 'Návštěvníci u stánku Vexlu pod jeho přístřeškem',
+      signSuit: 'Návštěvník a člen týmu Vexl s cedulí Privacy matters',
+      flyers: 'Tým Vexlu rozdává letáky',
+      wristband: 'Náramky Vexl a placka Privacy is not a crime',
+      teamBacks: 'Tým Vexlu zezadu v tričkách Protecting privacy since 2022',
     },
   },
   blog: {
@@ -369,7 +363,6 @@ export const cs: Messages = {
     back: '← Zpět na blog',
     publishedBy: 'Publikováno od {author}',
     readingTime: '{minutes} min. čtení',
-    summary: 'Souhrn',
     tableOfContents: 'Obsah',
     related: 'Další články',
     englishOnly: 'Tento článek je dostupný pouze v angličtině.',
@@ -377,11 +370,32 @@ export const cs: Messages = {
   terms: {
     title: 'Podmínky a ochrana osobních údajů',
     englishOnly: 'Tyto dokumenty jsou dostupné pouze v angličtině.',
+    onThisPage: 'Na této stránce',
   },
-  audit: {title: 'Získejte audit.', download: 'Stáhnout audit'},
+  audit: {
+    title: 'Bezpečnostní audit',
+    text: 'V roce 2022 se bezpečnostní firma Citadelo pokusila prolomit první verzi Vexlu. Celá zpráva je veřejná.',
+    facts: {
+      by: {label: 'Testoval', value: 'Citadelo'},
+      when: {label: 'Kdy', value: '1.–11. srpna 2022'},
+      scope: {
+        label: 'Co',
+        value: 'Vexl 1.1.0 pro Android a iOS a kód jeho serverů',
+      },
+      method: {label: 'Metodika', value: 'OWASP Mobile Top 10'},
+      findings: {
+        label: 'Nálezy',
+        value: '5 středních, 4 nízké, 7 poznámek. Žádný vysoký ani kritický.',
+      },
+    },
+    note: 'Aplikace se od auditu hodně změnila. Její kód je veřejný, takže si aktuální verzi může ověřit kdokoli.',
+    download: 'Stáhnout zprávu (PDF)',
+    code: 'Přečíst kód',
+  },
   notFound: {
     title: 'Stránka nenalezena',
     text: 'Stránka, kterou hledáte, neexistuje.',
     home: 'Přejít na hlavní stránku',
+    photo: 'Návštěvník v masce drží ceduli I love Vexl',
   },
 }

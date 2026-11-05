@@ -2,7 +2,7 @@
 title: 'Understanding Vexl: Security, Privacy, and Building a Web of Trust'
 date: 2026-05-21
 author: 'Vexl Team'
-summary: 'In the wake of never ending discussion, I thought it was high time we talked about why Vexl prefers phone numbers to usernames (or any other'
+summary: 'In the wake of never ending discussion, I thought it was high time we talked about why Vexl prefers phone numbers to usernames (or any other…'
 image: '/blog/understanding-vexl-security-privacy-and-building-a-web-of-trust/1-silj3diugjbqffkicvw3oa.webp'
 featured: true
 ---
@@ -24,8 +24,6 @@ Vexl solves this problem by providing a platform where these parties could _disc
 Once you join Vexl, you almost immediately gain an access to a marketplace full of offers. So far nothing special: there is a ton of marketplaces out there. What is different?
 
 In our marketplace you can access only offers from your contacts and contacts of their contacts. All of them are anonymized — you don’t know who is the author of the offer, but you see how many contacts you have in common **and who these people are. You might not know directly who you are dealing with, but you see the social circle you are moving within.** If you think about it for a moment, it is ingenious — we managed to bring real-world reputation to an app.
-
-![](/blog/understanding-vexl-security-privacy-and-building-a-web-of-trust/1-silj3diugjbqffkicvw3oa.webp)
 
 #####
 

@@ -7,10 +7,9 @@ import {Theme} from 'tamagui'
 const SCREEN_WIDTH = 320
 // Fits laptop screens like 1366x768 together with the sticky header
 const SCREEN_HEIGHT = 'min(620px, max(480px, calc(100svh - 240px)))'
-// Shorter on phones, so the step text above stays in view while tapping
 const SMALL_SCREEN_HEIGHT = 480
 
-/** App-sized screen in a phone bezel, always in the app's dark theme. */
+/** A picture of an app screen in a phone bezel, in the app's dark theme. */
 export function PhoneFrame({
   label,
   children,
@@ -20,19 +19,8 @@ export function PhoneFrame({
 }): React.JSX.Element {
   return (
     <YStack alignItems="center" gap="$4" flexShrink={0} className="vexl-phone">
-      <XStack
-        aria-hidden
-        paddingHorizontal="$4"
-        paddingVertical="$2"
-        borderRadius="$11"
-        backgroundColor="$black100"
-      >
-        <Typography variant="description" color="$white100">
-          {label}
-        </Typography>
-      </XStack>
       <YStack
-        role="group"
+        role="img"
         aria-label={label}
         padding="$3"
         borderRadius="$11"
@@ -54,6 +42,17 @@ export function PhoneFrame({
           </YStack>
         </Theme>
       </YStack>
+      <XStack
+        aria-hidden
+        paddingHorizontal="$4"
+        paddingVertical="$2"
+        borderRadius="$11"
+        backgroundColor="$black100"
+      >
+        <Typography variant="description" color="$white100">
+          {label}
+        </Typography>
+      </XStack>
     </YStack>
   )
 }

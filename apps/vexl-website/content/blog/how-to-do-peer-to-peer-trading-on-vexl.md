@@ -2,7 +2,7 @@
 title: 'How to do peer-to-peer trading on Vexl?'
 date: 2024-06-13
 author: 'Vexl Team'
-summary: 'Vexl is primarily a social network. Unlike other popular platforms, this one is peer-to-peer and doesn’t stick its nose where it doesn’t belong:'
+summary: 'Vexl is primarily a social network. Unlike other popular platforms, this one is peer-to-peer and doesn’t stick its nose where it doesn’t belong…'
 image: '/blog/how-to-do-peer-to-peer-trading-on-vexl/0-0g9xmkoyc4b13fkw.webp'
 ---
 

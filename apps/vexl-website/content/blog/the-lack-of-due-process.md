@@ -2,15 +2,13 @@
 title: 'The Lack of Due Process'
 date: 2025-06-17
 author: 'Vexl Team'
-summary: 'In our last three articles, we discussed the impacts of anti-money laundering frameworks such as sanctions and KYC on the right to be free from'
+summary: 'In our last three articles, we discussed the impacts of anti-money laundering frameworks such as sanctions and KYC on the right to be free from…'
 image: '/blog/the-lack-of-due-process/ragexvexl-blogheader-04.webp'
 ---
 
 #### 04: The Lack of Due Process
 
 In our last three articles, we discussed the impacts of anti-money laundering frameworks such as sanctions and KYC on the right to be free from discrimination and the right to free expression. Today, we’ll cover what you can do if you’ve been unfairly targeted by AML.
-
-![](/blog/the-lack-of-due-process/ragexvexl-blogheader-04.webp)
 
 > _“Everyone is entitled in full equality to a fair and public hearing by an independent and impartial tribunal, in the determination of his rights and obligations and of any criminal charge against him.”_
 

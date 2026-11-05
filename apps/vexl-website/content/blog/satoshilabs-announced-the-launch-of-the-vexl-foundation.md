@@ -2,7 +2,7 @@
 title: 'SatoshiLabs Announced the Launch of the Vexl Foundation'
 date: 2024-06-13
 author: 'Vexl Team'
-summary: '8th June, Prague — SatoshiLabs, the pioneering innovator behind the world’s first hardware wallet, Trezor, today introduced the Vexl Foundation at'
+summary: '8th June, Prague — SatoshiLabs, the pioneering innovator behind the world’s first hardware wallet, Trezor, today introduced the Vexl Foundation at…'
 image: '/blog/satoshilabs-announced-the-launch-of-the-vexl-foundation/69287c26e343e85de7c542a9_img_6371.webp'
 ---
 

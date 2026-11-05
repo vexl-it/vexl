@@ -89,7 +89,7 @@ export const en = {
       howItWorks: 'See how it works',
     },
     mock: {
-      label: 'Interactive demo. The people are made up.',
+      label: 'Example offers. The people are made up.',
       marketplace: 'Marketplace',
       buy: 'Buy',
       sell: 'Sell',
@@ -98,7 +98,6 @@ export const en = {
       friendOfFriend: 'Friend of a friend',
       directFriend: 'Direct friend',
       cash: 'Cash',
-      openInDemo: '{price}, {place}. Try it in the demo',
       offers: [
         {
           id: 'coffee',
@@ -160,61 +159,40 @@ export const en = {
         },
       ],
     },
-    trade: {
+    howItWorks: {
       eyebrow: 'How it works',
-      title: 'One trade, start to finish.',
-      text: 'Tap through a trade the way it happens in the app.',
-      stepOf: 'Step {step} of {total}',
-      next: 'Next step',
-      restart: 'Start over',
-      stepAnnouncement: 'Step {step} of {total}: {title}',
+      title: 'Your contacts are the marketplace.',
+      text: 'No company sits between you and the person you trade with. This is how a trade works.',
+      caption: 'Screens from the app. The people are made up.',
       steps: {
-        offer: {
-          title: 'Find an offer in your network',
-          text: 'Offers come from friends and friends of friends. You see the price, the place, and how you’re connected. Names stay hidden.',
+        contacts: {
+          title: 'Add your contacts',
+          text: 'Vexl uses your phone contacts to connect you with friends and friends of friends. Vexl can’t see who your contacts are.',
         },
-        friends: {
-          title: 'See who you have in common',
-          text: 'Every offer shows your common friends, so you can ask around before you reply. Vexl can’t see who your contacts are.',
+        offer: {
+          title: 'Find an offer',
+          text: 'Offers show the amount, the place, and how many friends you share. Names stay hidden.',
         },
         chat: {
-          title: 'Chat first. Decide later.',
-          text: 'Once they accept your request, you can chat. Messages are end-to-end encrypted, and to them you’re still just an avatar. Want to reveal yourselves? You decide.',
+          title: 'Chat anonymously',
+          text: 'Send a request. Once it’s accepted, agree on the details in an end-to-end encrypted chat.',
         },
-        reveal: {
-          title: 'Reveal yourselves when you’re ready',
-          text: 'Only if you both agree, and there’s no taking it back. Then meet in person: money first, bitcoin second.',
+        trade: {
+          title: 'Meet and trade',
+          text: 'Reveal names and photos only if you both agree. Then meet: cash first, bitcoin second. Vexl never touches either.',
         },
       },
-      screens: {
-        tapHint: 'Tap the offer to open it.',
-        offerTitle: 'Offer',
-        back: 'Back',
-        connection:
-          'You may not know each other directly, but you’re connected through these friends.',
-        friends: ['Anna', 'Marek'],
-        sendRequest: 'Send request',
-        requestAccepted: 'Your request was accepted.',
+      mocks: {
+        friendsOfFriends: 'Friends of friends',
         requestHeader: 'Your request',
-        firstMessage: 'Hi! Is your offer still on? I’d like to buy €300 worth.',
-        theirReply: 'It is. I can do Thursday at a café near the main station.',
-        quickReply: 'Thursday works for me.',
-        theirFollowUp: 'Great. Want to reveal names and photos before we meet?',
+        request: 'Hi! Is your offer still on? I’d like to buy €300 worth.',
         vexlbot: 'Vexlbot',
         accepted: 'Accepted',
-        reactionRequired: 'Reaction required',
-        theyWant: 'They want to reveal identities',
-        sameDetails: 'You both reveal your name and photo, or nobody does.',
-        noThanks: 'No, thanks',
-        agree: 'Reveal',
-        declined: 'You declined to reveal',
-        nothingRevealed: 'No new details were revealed. You can keep chatting.',
+        requestAccepted: 'Your request was accepted.',
+        reply: 'It is. Thursday at a café near the main station?',
         revealed: 'Identities revealed',
-        bothRevealed: 'You both revealed your names and photos.',
         you: 'You',
         theirName: 'Jana',
-        anonymousLastMessage:
-          'No problem, names can wait. See you Thursday. Cash first, then I send the bitcoin.',
         lastMessage: 'See you Thursday. Cash first, then I send the bitcoin.',
       },
     },
@@ -239,20 +217,26 @@ export const en = {
       title: 'Bitcoin starts with people.',
       text: 'Meetups, talks, and pub quizzes, run by people who use Vexl. Find one near you, or host your own.',
       action: 'Explore the community',
-      imageAlt: 'Photos from Vexl meetups and conferences',
+      photos: {
+        talk: 'A talk on the Vexl stage at BTC Prague, under a banner that says No middlemen. No KYC.',
+        sign: 'Two people laughing behind a yellow Privacy matters sign',
+        mask: 'A visitor in a mask holding an I love Vexl sign',
+      },
     },
     trust: {
       eyebrow: 'Without freedom to transact, we have no other rights.',
       title: 'Built in the open. Not for profit.',
       text: 'Don’t take our word for it. Check for yourself.',
+      teamPhoto:
+        'The Vexl team at BTC Prague, in front of a booth that says No middlemen. No KYC. Peer-to-peer.',
       openSource: {
         title: 'Open source',
-        text: 'The app and the servers are public on GitHub. Anyone can read the code.',
+        text: 'The app and the servers are on GitHub under github.com/vexl-it. Anyone can read the code.',
         action: 'Read the code',
       },
       audit: {
-        title: 'Independently audited',
-        text: 'Outside security experts tested the app. Their report is public.',
+        title: 'Security audit',
+        text: 'Citadelo tested the first version of the app and its servers in 2022. Their report is public.',
         action: 'Read the audit',
       },
       foundation: {
@@ -268,12 +252,16 @@ export const en = {
   },
   download: {
     title: 'Get the Vexl app',
-    nonEuTitle: 'Non-EU download',
+    nonEuTitle: 'Get Vexl outside the EU',
+    intro:
+      'On Android, Vexl is one tap away on Google Play. On iPhone, it isn’t in the App Store, so it takes a few more steps.',
+    qrTitle: 'On a computer?',
+    qrText: 'Scan this with your phone’s camera to open this page there.',
     iphone: 'iPhone',
     android: 'Android',
     ios: {
       title: 'iOS (iPhone)',
-      subtitle: '3 easy steps – please read instructions first',
+      subtitle: 'Three steps. Read them before you start.',
       steps: {
         altStore: {
           title: 'Get AltStore Pal',
@@ -284,20 +272,20 @@ export const en = {
         freedomStore: {
           title: 'Add Freedom Store',
           text: 'Freedom Store lets you install apps Apple won’t. Add it as a source in AltStore to take back control of your device and access Bitcoin and freedom tech apps without App Store gatekeepers.',
-          emphasis: 'Tap the button on the right and install Vexl from there.',
-          action: 'Add Freedomstore source',
+          emphasis: 'Tap the button below, then install Vexl from there.',
+          action: 'Add the Freedom Store source',
         },
         install: {
           title: 'Install Vexl',
           text: 'Install Vexl from the Freedom Store. That feeling? It’s freedom — and it’s yours again.',
         },
       },
-      outsideEu: 'Outside the EU?',
-      viewInstructions: 'View instructions',
+      outsideEu: 'These steps are for iPhones in the EU. Outside the EU?',
+      viewInstructions: 'See those instructions',
     },
     iosNonEu: {
       title: 'iOS (iPhone)',
-      subtitle: '2 easy steps – please read instructions first',
+      subtitle: 'Two steps. Read them before you start.',
       steps: {
         testFlight: {
           title: 'Download TestFlight from the App Store',
@@ -310,8 +298,8 @@ export const en = {
           action: 'Download Vexl',
         },
       },
-      inEu: 'In the EU?',
-      viewEuInstructions: 'View EU instructions',
+      inEu: 'These steps are for iPhones outside the EU. In the EU?',
+      viewEuInstructions: 'See the EU instructions',
     },
     androidCard: {
       title: 'Android',
@@ -319,28 +307,25 @@ export const en = {
       googlePlay: 'Get it on Google Play',
     },
     alternatives: {
-      title: 'Alternative Options',
-      subtitle: 'Prefer an alternative to the Play Store?',
+      title: 'Android without Google Play',
+      subtitle: 'Prefer another app store, or no store at all?',
       storesTitle: 'Other app stores',
       storesText: 'Choose one of the following options.',
       otherWaysTitle: 'Other ways to install',
       otherWaysText:
         'You can also use the APK from GitHub. We recommend installing it via Obtainium to receive updates.',
     },
-    freedom: {
-      title: 'Your freedom. Your choice.',
-      text: 'Vexl is private and non-KYC.',
-    },
   },
   faq: {title: 'Frequently Asked Questions'},
   community: {
     eyebrow: 'Community',
-    title: 'Connect with Vexl friends',
-    text: 'Join us and co-create open source, discreet Bitcoin community.',
+    title: 'Meet the people behind the trades.',
+    text: 'Meetups, talks, and pub quizzes, run by people who use Vexl. Come to one, or host your own.',
     browseEvents: 'Browse events',
-    hostEvent: 'Host event',
+    hostEvent: 'Host an event',
     upcomingTitle: 'Upcoming events',
-    noUpcoming: 'No events yet',
+    noUpcoming:
+      'No upcoming events announced yet. This is where we’ve been so far.',
     pastTitle: 'Past events',
     showOlder: 'Show older events',
     host: {
@@ -350,15 +335,27 @@ export const en = {
       email: 'Email us at marketing@vexl.it',
     },
     support: {
-      title: "How we'll support you?",
+      title: 'How we’ll support you',
       promo: 'Promotional support',
       training: 'Training and resources',
       merch: 'Merch packs',
       speakers: 'Guest speakers',
     },
     gallery: {
-      title: 'Past Vexl events',
-      alt: 'Photos from past Vexl meetups and conferences',
+      title: 'From our events',
+    },
+    photos: {
+      booth:
+        'The Vexl booth at BTC Prague, with a Trade Bitcoin privately banner',
+      wave: 'A speaker waving from the Vexl stage',
+      panel:
+        'A panel on the Vexl stage, with a Privacy matters hoodie in front',
+      crowd: 'Visitors at the Vexl booth under its canopy',
+      signSuit: 'A visitor and a Vexl team member with a Privacy matters sign',
+      flyers: 'The Vexl team handing out flyers',
+      wristband: 'Vexl wristbands and a Privacy is not a crime button',
+      teamBacks:
+        'The Vexl team from behind, in Protecting privacy since 2022 shirts',
     },
   },
   blog: {
@@ -367,7 +364,6 @@ export const en = {
     back: '← Back to Blog',
     publishedBy: 'Published by {author}',
     readingTime: '{minutes} min. read',
-    summary: 'Summary',
     tableOfContents: 'Table of contents',
     related: 'Related Articles',
     englishOnly: 'This article is available in English only.',
@@ -375,12 +371,33 @@ export const en = {
   terms: {
     title: 'Terms & Privacy',
     englishOnly: 'These documents are available in English only.',
+    onThisPage: 'On this page',
   },
-  audit: {title: 'Get the audit.', download: 'Download Audit'},
+  audit: {
+    title: 'Security audit',
+    text: 'In 2022, the security firm Citadelo tried to break into the first version of Vexl. Their full report is public.',
+    facts: {
+      by: {label: 'Tested by', value: 'Citadelo'},
+      when: {label: 'When', value: '1–11 August 2022'},
+      scope: {
+        label: 'What',
+        value: 'Vexl 1.1.0 for Android and iOS, and the code of its servers',
+      },
+      method: {label: 'Method', value: 'OWASP Mobile Top 10'},
+      findings: {
+        label: 'Findings',
+        value: '5 medium, 4 low, 7 notes. None high or critical.',
+      },
+    },
+    note: 'The app has changed a lot since this audit. Its code is public, so anyone can check the current version.',
+    download: 'Download the report (PDF)',
+    code: 'Read the code',
+  },
   notFound: {
     title: 'Page not found',
     text: 'The page you are looking for does not exist.',
     home: 'Go to homepage',
+    photo: 'A visitor in a mask holding an I love Vexl sign',
   },
 }
 

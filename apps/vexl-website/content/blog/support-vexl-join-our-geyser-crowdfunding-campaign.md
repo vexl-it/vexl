@@ -2,7 +2,7 @@
 title: 'Support Vexl: Join Our Geyser Crowdfunding Campaign'
 date: 2024-10-21
 author: 'Vexl Team'
-summary: 'Hello fellow Vexslaks,We’ve launched our crowdfunding page on Geyser, and we need your help. Vexl is all about making bitcoin simple: peer-to-peer,'
+summary: 'Hello fellow Vexslaks,We’ve launched our crowdfunding page on Geyser, and we need your help. Vexl is all about making bitcoin simple: peer-to-peer…'
 image: '/blog/support-vexl-join-our-geyser-crowdfunding-campaign/vexl-xmas.webp'
 ---
 

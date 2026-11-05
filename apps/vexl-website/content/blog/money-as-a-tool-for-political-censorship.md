@@ -2,7 +2,7 @@
 title: 'Money As A Tool For Political Censorship'
 date: 2025-06-23
 author: 'Vexl Team'
-summary: '“This right includes freedom to hold opinions without interference and to seek, receive and impart information and ideas through any media and'
+summary: '“This right includes freedom to hold opinions without interference and to seek, receive and impart information and ideas through any media and…'
 image: '/blog/money-as-a-tool-for-political-censorship/ragexvexl-blogheader-05.webp'
 ---
 

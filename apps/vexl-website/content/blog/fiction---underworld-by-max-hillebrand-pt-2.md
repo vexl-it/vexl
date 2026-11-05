@@ -2,7 +2,7 @@
 title: 'FICTION - Underworld by Max Hillebrand pt. 2'
 date: 2026-01-26
 author: 'Vexl Team'
-summary: 'Fabian lay back in his single bed. He followed the personalized invite link Scott had generated. It must have been strange, he thought, when space was'
+summary: 'Fabian lay back in his single bed. He followed the personalized invite link Scott had generated. It must have been strange, he thought, when space was…'
 image: '/blog/fiction---underworld-by-max-hillebrand-pt-2/chatgpt-image-dec-1-2025-06_36_34-pm.webp'
 ---
 

@@ -1,22 +1,22 @@
 'use client'
 
 import React from 'react'
-import {BottomCtaSection} from './home/BottomCtaSection'
+import {BottomCta} from '../components/BottomCta'
 import {CommunitySection} from './home/CommunitySection'
 import {HeroSection} from './home/HeroSection'
+import {HowItWorksSection} from './home/HowItWorksSection'
 import {NoKycSection} from './home/NoKycSection'
-import {TradeSection} from './home/TradeSection'
 import {TrustSection} from './home/TrustSection'
 
 export function HomeView(): React.JSX.Element {
   return (
     <>
       <HeroSection />
-      <TradeSection />
+      <HowItWorksSection />
       <NoKycSection />
       <TrustSection />
       <CommunitySection />
-      <BottomCtaSection />
+      <BottomCta />
     </>
   )
 }

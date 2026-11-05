@@ -2,7 +2,7 @@
 title: 'The Myth Of Financial Inclusion'
 date: 2025-06-10
 author: 'Vexl Team'
-summary: '“All human beings are born free and equal in dignity and rights. They are endowed with reason and conscience and should act towards one another in a'
+summary: '“All human beings are born free and equal in dignity and rights. They are endowed with reason and conscience and should act towards one another in a…'
 image: '/blog/the-myth-of-financial-inclusion/ragexvexl-blogheader-02.webp'
 ---
 
@@ -12,8 +12,6 @@ image: '/blog/the-myth-of-financial-inclusion/ragexvexl-blogheader-02.webp'
 
 _– Universal Declaration of Human Rights, Article 1  
 _
-
-![](/blog/the-myth-of-financial-inclusion/ragexvexl-blogheader-02.webp)
 
 A few years ago, I met a man called Karl. I’d see him almost every day, selling newspapers on the street for change, camping out in front of my local supermarket. At some point, we struck up a conversation. He told me that he used to be a dog trainer, “before everything, you know.” Since I am always looking for dog sitters, and Karl is always looking for money, we decided to give it a shot: Karl would watch my dog when I went to the gym, and I paid him in return.
 

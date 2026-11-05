@@ -53,11 +53,12 @@ S3 requests carry no Vexl session or common headers and no cookies.
   its id, but nobody can list them: the random UUID is the capability.
 - Chat-service does not log image ids, URLs or public keys, and the S3 signing
   span carries no object key.
-- Phones connect to S3 and CloudFront directly, so AWS sees client IPs and
-  timing of every upload and download. Request URLs contain the object key, so
-  any request log would pair the uploader and downloaders of each image. S3
-  server access logging, CloudTrail S3 data events and CloudFront logging must
-  stay off.
+- Phones upload to S3 directly and download through Cloudflare, which forwards
+  the client IP to CloudFront in `CF-Connecting-IP` and `X-Forwarded-For`. AWS
+  sees client IPs and timing of every upload and download. Request URLs contain
+  the object key, so any request log would pair the uploader and downloaders of
+  each image. S3 server access logging, CloudTrail S3 data events and
+  CloudFront logging must stay off.
 - The image domains are proxied through Cloudflare, like the chat API.
   Cloudflare already sees sender and receiver inbox keys and IPs on
   `sendMessage` and `retrieveMessages`, so image downloads add only ciphertext

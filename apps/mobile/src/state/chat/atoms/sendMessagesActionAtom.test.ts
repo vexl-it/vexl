@@ -241,4 +241,25 @@ describe('sendMessagesActionAtom', () => {
     await settleSend(2, {receivedByServerAt: time(700)})
     expect(shown()).toEqual(['a:sent', 'b:sent', 'text:sent'])
   })
+
+  it('fails a send that never answers so later sends can go', async () => {
+    jest.useFakeTimers()
+    try {
+      const {send, shown} = setup()
+      send([chatMessage('a', 100), chatMessage('b', 101)])
+      send([chatMessage('text', 102)])
+      await jest.advanceTimersByTimeAsync(0)
+      expect(mockSends).toHaveLength(1)
+
+      await jest.advanceTimersByTimeAsync(2 * 60 * 1000)
+      expect(mockSends).toHaveLength(2)
+      expect(shown()).toEqual([
+        'a:sendingError',
+        'b:sendingError',
+        'text:sending',
+      ])
+    } finally {
+      jest.useRealTimers()
+    }
+  })
 })

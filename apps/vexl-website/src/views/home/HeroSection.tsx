@@ -3,65 +3,25 @@
 import {
   Button,
   ChevronDown,
-  FadeGradient,
-  FilterBar,
   PageSection,
   Typography,
   XStack,
   YStack,
 } from '@vexl-next/ui'
-import {Array, pipe} from 'effect'
 import Image from 'next/image'
 import React from 'react'
 import {useLocale} from '../../components/LocaleProvider'
 import {PhoneFrame} from '../../components/PhoneFrame'
 import {SiteLink} from '../../components/SiteLink'
-import {DemoOfferCard} from './mock/DemoOfferCard'
+import {MarketplaceScreen} from './mock/MarketplaceScreen'
 
-const heroAvatars = [0, 2, 1] as const
-
-function MarketplaceMock(): React.JSX.Element {
+function HeroPhone(): React.JSX.Element {
   const {t} = useLocale()
-  const mock = t.home.mock
-  // Buying shows the offers of people who sell
-  const sellOffers = pipe(
-    mock.offers,
-    Array.filter((offer) => offer.side === 'sell')
-  )
-
   return (
-    <PhoneFrame label={mock.label}>
-      <YStack flex={1} gap="$5" paddingTop="$7" pointerEvents="none">
-        <Typography
-          variant="heading3"
-          color="$foregroundPrimary"
-          paddingHorizontal="$5"
-        >
-          {mock.marketplace}
-        </Typography>
-        {/* The filter scrolls sideways; without this it collapses */}
-        <YStack flexShrink={0}>
-          <FilterBar
-            items={[
-              {label: mock.buy, value: 'buy'},
-              {label: mock.sell, value: 'sell'},
-            ]}
-            selectedValues={new Set(['buy'])}
-            onSelectedValuesChange={() => {}}
-          />
-        </YStack>
-        <YStack gap="$3" paddingHorizontal="$3">
-          {sellOffers.map((offer, i) => (
-            <DemoOfferCard
-              key={offer.id}
-              offer={offer}
-              avatar={heroAvatars[i % heroAvatars.length] ?? 0}
-            />
-          ))}
-        </YStack>
-        <YStack position="absolute" left={0} right={0} bottom={0} height={120}>
-          <FadeGradient solidEdge="bottom" />
-        </YStack>
+    <PhoneFrame label={t.home.mock.label}>
+      {/* A picture of the app; the page's own actions are the buttons */}
+      <YStack flex={1} pointerEvents="none">
+        <MarketplaceScreen />
       </YStack>
     </PhoneFrame>
   )
@@ -106,7 +66,7 @@ export function HeroSection(): React.JSX.Element {
         backgroundColor="$accentYellowPrimary"
         $lg={{flexBasis: 0}}
       >
-        <MarketplaceMock />
+        <HeroPhone />
       </XStack>
     </PageSection>
   )

@@ -14,7 +14,6 @@ import {
 } from '@vexl-next/ui'
 import React from 'react'
 import {useTheme} from 'tamagui'
-import {Eyebrow} from '../../components/Eyebrow'
 import {useLocale} from '../../components/LocaleProvider'
 import {Photo} from '../../components/Photo'
 import {SiteLink} from '../../components/SiteLink'
@@ -74,7 +73,6 @@ export function TrustSection(): React.JSX.Element {
   return (
     <PageSection>
       <YStack gap="$5" maxWidth={820}>
-        <Eyebrow>{copy.eyebrow}</Eyebrow>
         <Typography tag="h2" variant="display" color="$foregroundPrimary">
           {copy.title}
         </Typography>

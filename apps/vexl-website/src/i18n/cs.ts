@@ -93,9 +93,26 @@ export const cs: Messages = {
     },
     mock: {
       label: 'Ukázkové nabídky. Lidé jsou smyšlení.',
-      marketplace: 'Tržiště',
-      buy: 'Koupit',
-      sell: 'Prodat',
+      app: {
+        allOffers: 'Všechny nabídky',
+        myOffers: 'Moje nabídky',
+        filters: [
+          'Koupit BTC',
+          'Prodat BTC',
+          'Koupit produkt',
+          'Prodat produkt',
+          'Nabídnout službu',
+          'Najmout službu',
+        ],
+        search: 'Hledat',
+        offersCount: '70 nabídek',
+        showOnMap: 'Zobrazit na mapě',
+        browseOffers: 'Procházet nabídky',
+        newOffer: 'Nová nabídka',
+        marketplace: 'Tržiště',
+        chats: 'Chaty',
+        community: 'Komunita',
+      },
       has: 'Má',
       wants: 'Chce',
       friendOfFriend: 'Přítel přítele',
@@ -162,10 +179,8 @@ export const cs: Messages = {
       ],
     },
     howItWorks: {
-      eyebrow: 'Jak to funguje',
       title: 'Vaše kontakty jsou tržiště.',
-      text: 'Mezi vámi a tím, s kým obchodujete, nestojí žádná firma. Takhle probíhá obchod.',
-      caption: 'Obrazovky z aplikace. Lidé jsou smyšlení.',
+      text: 'Mezi vámi a tím, s kým obchodujete, nestojí žádná firma. Takhle probíhá obchod na obrazovkách z aplikace. Lidé jsou smyšlení.',
       steps: {
         contacts: {
           title: 'Přidejte své kontakty',
@@ -226,7 +241,6 @@ export const cs: Messages = {
       },
     },
     trust: {
-      eyebrow: 'Bez svobody transakcí nemáme žádná další práva.',
       title: 'Vyvíjeno otevřeně.',
       text: 'Nemusíte nám věřit. Ověřte si to sami.',
       teamPhoto:
@@ -321,7 +335,6 @@ export const cs: Messages = {
   },
   faq: {title: 'Nejčastější dotazy'},
   community: {
-    eyebrow: 'Komunita',
     title: 'Poznejte lidi, kteří za obchody stojí.',
     text: 'Meetupy, přednášky a hospodské kvízy, které pořádají lidé používající Vexl. Přijďte na jeden, nebo uspořádejte vlastní.',
     browseEvents: 'Prohlížet události',

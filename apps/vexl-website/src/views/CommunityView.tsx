@@ -10,7 +10,6 @@ import {
 } from '@vexl-next/ui'
 import {Array, pipe} from 'effect'
 import React, {useState} from 'react'
-import {Eyebrow} from '../components/Eyebrow'
 import {useLocale} from '../components/LocaleProvider'
 import {Photo} from '../components/Photo'
 import {SiteLink} from '../components/SiteLink'
@@ -149,7 +148,6 @@ export function CommunityView({
   return (
     <>
       <PageSection alignItems="center">
-        <Eyebrow center>{copy.eyebrow}</Eyebrow>
         <Typography
           tag="h1"
           variant="display"

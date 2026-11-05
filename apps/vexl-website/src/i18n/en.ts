@@ -91,9 +91,26 @@ export const en = {
     },
     mock: {
       label: 'Example offers. The people are made up.',
-      marketplace: 'Marketplace',
-      buy: 'Buy',
-      sell: 'Sell',
+      app: {
+        allOffers: 'All offers',
+        myOffers: 'My offers',
+        filters: [
+          'Buy BTC',
+          'Sell BTC',
+          'Buy product',
+          'Sell product',
+          'Provide service',
+          'Hire service',
+        ],
+        search: 'Search',
+        offersCount: '70 offers',
+        showOnMap: 'Show on map',
+        browseOffers: 'Browse offers',
+        newOffer: 'New offer',
+        marketplace: 'Marketplace',
+        chats: 'Chats',
+        community: 'Community',
+      },
       has: 'Has',
       wants: 'Wants',
       friendOfFriend: 'Friend of a friend',
@@ -161,10 +178,8 @@ export const en = {
       ],
     },
     howItWorks: {
-      eyebrow: 'How it works',
       title: 'Your contacts are the marketplace.',
-      text: 'No company sits between you and the person you trade with. This is how a trade works.',
-      caption: 'Screens from the app. The people are made up.',
+      text: 'No company sits between you and the person you trade with. This is how a trade works, in the app’s own screens. The people are made up.',
       steps: {
         contacts: {
           title: 'Add your contacts',
@@ -225,7 +240,6 @@ export const en = {
       },
     },
     trust: {
-      eyebrow: 'Without freedom to transact, we have no other rights.',
       title: 'Built in the open.',
       text: 'Don’t take our word for it. Check for yourself.',
       teamPhoto:
@@ -319,7 +333,6 @@ export const en = {
   },
   faq: {title: 'Frequently Asked Questions'},
   community: {
-    eyebrow: 'Community',
     title: 'Meet the people behind the trades.',
     text: 'Meetups, talks, and pub quizzes, run by people who use Vexl. Come to one, or host your own.',
     browseEvents: 'Browse events',

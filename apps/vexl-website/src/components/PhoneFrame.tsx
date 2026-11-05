@@ -1,13 +1,14 @@
 'use client'
 
-import {Typography, XStack, YStack} from '@vexl-next/ui'
+import {Typography, YStack} from '@vexl-next/ui'
 import React from 'react'
 import {Theme} from 'tamagui'
 
-const SCREEN_WIDTH = 320
+// An iPhone's width in points, so app screens lay out like on a phone
+const SCREEN_WIDTH = 375
 // Fits laptop screens like 1366x768 together with the sticky header
-const SCREEN_HEIGHT = 'min(620px, max(480px, calc(100svh - 240px)))'
-const SMALL_SCREEN_HEIGHT = 480
+const SCREEN_HEIGHT = 'min(720px, max(560px, calc(100svh - 200px)))'
+const SMALL_SCREEN_HEIGHT = 640
 
 /** A picture of an app screen in a phone bezel, in the app's dark theme. */
 export function PhoneFrame({
@@ -42,17 +43,9 @@ export function PhoneFrame({
           </YStack>
         </Theme>
       </YStack>
-      <XStack
-        aria-hidden
-        paddingHorizontal="$4"
-        paddingVertical="$2"
-        borderRadius="$11"
-        backgroundColor="$black100"
-      >
-        <Typography variant="description" color="$white100">
-          {label}
-        </Typography>
-      </XStack>
+      <Typography aria-hidden variant="description" color="$black100">
+        {label}
+      </Typography>
     </YStack>
   )
 }

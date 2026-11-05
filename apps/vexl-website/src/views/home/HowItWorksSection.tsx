@@ -12,8 +12,6 @@ import {
 } from '@vexl-next/ui'
 import React from 'react'
 import {Theme} from 'tamagui'
-import {DownloadCta} from '../../components/DownloadCta'
-import {Eyebrow} from '../../components/Eyebrow'
 import {useLocale} from '../../components/LocaleProvider'
 import {RevealedAvatar} from './mock/DemoAvatar'
 import {DemoOfferCard} from './mock/DemoOfferCard'
@@ -78,8 +76,8 @@ function RevealMock(): React.JSX.Element {
 
 const steps = [
   {key: 'contacts', color: '$greenLight', theme: 'light', Mock: ContactsMock},
-  {key: 'offer', color: '$pinkLight', theme: 'light', Mock: OfferMock},
-  {key: 'chat', color: '$yellow100', theme: 'light', Mock: ChatMock},
+  {key: 'offer', color: '$yellow100', theme: 'light', Mock: OfferMock},
+  {key: 'chat', color: '$pinkLight', theme: 'light', Mock: ChatMock},
   {key: 'trade', color: '$greenDark', theme: 'dark', Mock: RevealMock},
 ] as const
 
@@ -146,7 +144,6 @@ export function HowItWorksSection(): React.JSX.Element {
   return (
     <PageSection id="how-it-works" $lg={{paddingTop: '$9'}}>
       <YStack gap="$4" maxWidth={720}>
-        <Eyebrow>{copy.eyebrow}</Eyebrow>
         <Typography tag="h2" variant="heading1" color="$foregroundPrimary">
           {copy.title}
         </Typography>
@@ -158,17 +155,6 @@ export function HowItWorksSection(): React.JSX.Element {
         {steps.map((step, i) => (
           <StepCard key={step.key} number={i + 1} step={step} />
         ))}
-      </XStack>
-      <XStack
-        alignItems="center"
-        justifyContent="space-between"
-        flexWrap="wrap"
-        gap="$5"
-      >
-        <Typography variant="description" color="$foregroundSecondary">
-          {copy.caption}
-        </Typography>
-        <DownloadCta />
       </XStack>
     </PageSection>
   )

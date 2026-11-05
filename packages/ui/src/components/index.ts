@@ -122,8 +122,6 @@ export {OffersReencryptionStatus} from './OffersReencryptionStatus'
 export type {OffersReencryptionStatusProps} from './OffersReencryptionStatus'
 export {Picker} from './Picker'
 export type {PickerItem, PickerProps} from './Picker'
-export {PriceRangeInput, RangeSlider} from './PriceRangeInput'
-export type {PriceRangeInputProps, RangeSliderProps} from './PriceRangeInput'
 export {
   POPOVER_MENU_ITEM_HEIGHT,
   POPOVER_MENU_PADDING,
@@ -132,6 +130,8 @@ export {
   PopoverMenuItem,
 } from './PopoverMenu'
 export type {PopoverMenuItemProps} from './PopoverMenu'
+export {PriceRangeInput, RangeSlider} from './PriceRangeInput'
+export type {PriceRangeInputProps, RangeSliderProps} from './PriceRangeInput'
 export {ProgressDialog} from './ProgressDialog'
 export type {ProgressDialogProps, ProgressIndication} from './ProgressDialog'
 export {RadioGroup} from './RadioGroup'

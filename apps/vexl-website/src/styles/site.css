@@ -1,0 +1,57 @@
+/* Custom code from the Webflow site <head>, shared by every page */
+.matter-js-canvas {
+  display: block;
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  overflow: hidden;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+}
+
+.line {
+  position: relative;
+}
+.line-mask {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background-color: black;
+  opacity: 0.65;
+  height: 100%;
+  width: 100%;
+  z-index: 2;
+}
+
+/* Webflow IX2 "Menu Open" / "Menu Out" on the dark navbar's menu button */
+[data-animated-icon] .top,
+[data-animated-icon] .bot {
+  transition:
+    rotate 500ms cubic-bezier(0.76, 0, 0.24, 1),
+    translate 500ms cubic-bezier(0.25, 1, 0.5, 1) 500ms;
+}
+[data-animated-icon] .mid {
+  transition: opacity 500ms cubic-bezier(0.25, 1, 0.5, 1) 500ms;
+}
+[data-animated-icon].w--open .top,
+[data-animated-icon].w--open .bot {
+  transition:
+    translate 500ms cubic-bezier(0.25, 1, 0.5, 1),
+    rotate 500ms cubic-bezier(0.25, 1, 0.5, 1) 800ms;
+}
+[data-animated-icon].w--open .top {
+  translate: 0 10px;
+  rotate: 45deg;
+}
+[data-animated-icon].w--open .bot {
+  translate: 0 -10px;
+  rotate: -45deg;
+}
+[data-animated-icon].w--open .mid {
+  opacity: 0;
+  transition: opacity 500ms ease;
+}

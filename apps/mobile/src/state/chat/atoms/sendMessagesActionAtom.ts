@@ -59,7 +59,24 @@ export default function sendMessagesActionAtom(
       set(chatWithMessagesAtom, addMessageToChat({state: 'sending', message}))
     }
 
-    Array.forEach(messages, showAsSending)
+    // Each message goes after the latest one in the chat, even when the
+    // client clock is behind the server time other messages are ordered by.
+    const [, queuedMessages] = Array.mapAccum(
+      messages,
+      pipe(
+        Array.last(get(chatWithMessagesAtom).messages),
+        Option.map((last) => last.receivedByServerAt ?? last.message.time),
+        Option.getOrElse(() => 0)
+      ),
+      (previousTime, message) => {
+        const time = Math.max(message.time, previousTime + 1)
+        return [
+          time,
+          {...message, time: Schema.decodeSync(UnixMilliseconds)(time)},
+        ]
+      }
+    )
+    Array.forEach(queuedMessages, showAsSending)
 
     const chatWithMessages = get(chatWithMessagesAtom)
     const {chat} = chatWithMessages
@@ -158,11 +175,13 @@ export default function sendMessagesActionAtom(
               )
         ),
         Effect.catchAll((error) =>
-          Effect.succeedSome<ChatMessageWithState>({
-            state: 'sendingError',
-            error,
-            message,
-          })
+          Array.isNonEmptyReadonlyArray(stillSending([message]))
+            ? Effect.succeedSome<ChatMessageWithState>({
+                state: 'sendingError',
+                error,
+                message,
+              })
+            : Effect.succeedNone
         )
       )
 
@@ -205,7 +224,7 @@ export default function sendMessagesActionAtom(
     runWhenIdleWithTimeout(
       () => {
         Effect.runFork(
-          getSendQueue(chat.id).withPermits(1)(sendInOrder(messages))
+          getSendQueue(chat.id).withPermits(1)(sendInOrder(queuedMessages))
         )
       },
       {timeout: 500}

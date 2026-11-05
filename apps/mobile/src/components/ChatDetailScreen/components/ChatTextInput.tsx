@@ -2,10 +2,7 @@ import {
   generateChatMessageId,
   type ChatMessage,
 } from '@vexl-next/domain/src/general/messaging'
-import {
-  UnixMilliseconds,
-  unixMillisecondsNow,
-} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {
   PlusAdd,
@@ -18,7 +15,7 @@ import {
   YStack,
 } from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
-import {Array, Schema} from 'effect'
+import {Array} from 'effect'
 import {useAtom, useSetAtom, useStore} from 'jotai'
 import truncate from 'just-truncate'
 import React, {useCallback, useEffect, useRef, useState} from 'react'
@@ -103,8 +100,7 @@ function ChatTextInput(): React.ReactElement | null {
           text,
           image,
           myVersion: version,
-          // Keeps the order of messages sent within the same millisecond.
-          time: Schema.decodeSync(UnixMilliseconds)(time + index),
+          time,
           uuid: generateChatMessageId(),
           repliedTo:
             replyToMessage && index === 0

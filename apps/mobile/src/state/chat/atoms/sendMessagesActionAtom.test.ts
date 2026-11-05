@@ -200,6 +200,21 @@ describe('sendMessagesActionAtom', () => {
     expect(mockSends).toHaveLength(1)
   })
 
+  it('keeps a later send after the batch when the client clock is behind', async () => {
+    const {send, shown} = setup()
+    send([chatMessage('a', 100), chatMessage('b', 101)])
+    await flush()
+
+    await settleSend(0, {receivedByServerAt: time(500)})
+    send([chatMessage('text', 200)])
+    expect(shown()).toEqual(['a:sent', 'b:sending', 'text:sending'])
+
+    await settleSend(1, {receivedByServerAt: time(600)})
+    expect(shown()).toEqual(['a:sent', 'b:sent', 'text:sending'])
+    await settleSend(2, {receivedByServerAt: time(700)})
+    expect(shown()).toEqual(['a:sent', 'b:sent', 'text:sent'])
+  })
+
   it('stops the batch with one notice when the other side deleted the inbox', async () => {
     const {send, shown} = setup()
     send([chatMessage('a', 100), chatMessage('b', 101)])

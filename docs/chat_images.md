@@ -57,7 +57,11 @@ S3 requests carry no Vexl session or common headers and no cookies.
   timing of every upload and download. Request URLs contain the object key, so
   any request log would pair the uploader and downloaders of each image. S3
   server access logging, CloudTrail S3 data events and CloudFront logging must
-  stay off, and the DNS records must not be proxied through Cloudflare.
+  stay off.
+- The image domains are proxied through Cloudflare, like the chat API.
+  Cloudflare already sees sender and receiver inbox keys and IPs on
+  `sendMessage` and `retrieveMessages`, so image downloads add only ciphertext
+  sizes and download timing. Cloudflare must not cache the images.
 - Native iOS Sentry network breadcrumbs and network/file I/O spans are off
   (`apps/mobile/src/utils/setupSentry.ts`). `expo/fetch` uses `NSURLSession`,
   so they would record image URLs and attach them to error reports.
@@ -107,7 +111,8 @@ sends images.
    `X-Cache`/`Age` headers would tell the sender when the receiver downloaded
    the image. The app builds download URLs from
    `ENV_PRESETS.*.chatImagesUrl`, so that must match the domain. Point the
-   domain at the distribution with a DNS-only (not proxied) Cloudflare record.
+   domain at the distribution with a proxied Cloudflare record and no
+   Cloudflare cache rule for it, so responses stay `cf-cache-status: DYNAMIC`.
 4. Set default encryption to SSE-S3.
 5. Keep S3 server access logging, CloudTrail S3 data events and CloudFront
    standard and real-time logging off. Phones call S3 and CloudFront with the

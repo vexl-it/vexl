@@ -1,11 +1,15 @@
 import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {type NotificationApi} from '@vexl-next/rest-api/src/services/notification'
-import {Effect} from 'effect'
+import {Duration, Effect} from 'effect'
 import reportErrorFromResourcesUtils from '../reportErrorFromResourcesUtils'
+
+// The message is already delivered, so a hanging notification must not hold
+// the caller back.
+const NOTIFICATION_TIMEOUT = Duration.seconds(30)
 
 interface NotificationArgs {
   notificationToken?: VexlNotificationToken | undefined
-  notificationApi: NotificationApi
+  notificationApi: Pick<NotificationApi, 'issueNotification'>
   sendSystemNotification: boolean
 }
 
@@ -36,6 +40,7 @@ export function callWithNotificationService<
           sendNewChatMessageNotification: sendSystemNotification,
         })
       ).pipe(
+        Effect.timeout(NOTIFICATION_TIMEOUT),
         Effect.catchAll((e) => {
           reportErrorFromResourcesUtils(
             'warn',

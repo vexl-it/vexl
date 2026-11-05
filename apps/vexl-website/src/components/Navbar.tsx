@@ -1,5 +1,6 @@
 'use client'
 
+import {Array, Option, pipe} from 'effect'
 import React, {useEffect, useLayoutEffect, useRef, useState} from 'react'
 import {chrome} from '../i18n/chrome'
 import {type Locale, localizedPath} from '../i18n/locales'
@@ -9,6 +10,17 @@ import {LanguageDropdown} from './LanguageDropdown'
 const COLLAPSE_QUERY = '(max-width: 991px)'
 // Webflow's data-duration="400" with "ease" easing
 const MENU_TRANSITION = 'transform 400ms ease'
+
+// The keys webflow.js handles on the menu button
+const BUTTON_KEYS = [
+  'Enter',
+  ' ',
+  'Escape',
+  'ArrowRight',
+  'ArrowDown',
+  'Home',
+  'End',
+]
 
 type MenuState = 'closed' | 'open' | 'closing'
 
@@ -71,27 +83,68 @@ export function Navbar({
         setMenu('closing')
       }
     }
-    const closeOnEscape = (event: KeyboardEvent): void => {
-      if (event.key !== 'Escape') return
-      setMenu('closing')
-      navRef.current?.querySelector<HTMLElement>('.w-nav-button')?.focus()
-    }
     const media = window.matchMedia(COLLAPSE_QUERY)
     const closeOnDesktop = (): void => {
       if (!media.matches) setMenu('closed')
     }
     window.addEventListener('click', closeOnOutsideClick, true)
-    window.addEventListener('keydown', closeOnEscape)
     media.addEventListener('change', closeOnDesktop)
     return () => {
       window.removeEventListener('click', closeOnOutsideClick, true)
-      window.removeEventListener('keydown', closeOnEscape)
       media.removeEventListener('change', closeOnDesktop)
     }
   }, [menu])
 
   const toggleMenu = (): void => {
     setMenu((state) => (state === 'open' ? 'closing' : 'open'))
+  }
+
+  // webflow.js navbar keys: the button opens the menu and jumps into it, and
+  // inside the open menu arrows, Home and End walk the links
+  const menuLinks = (): HTMLElement[] =>
+    pipe(
+      navRef.current?.querySelectorAll<HTMLElement>(
+        '.w-nav-menu .w-nav-link'
+      ) ?? [],
+      Array.fromIterable
+    )
+
+  const onButtonKeyDown = (event: React.KeyboardEvent): void => {
+    if (!Array.contains(BUTTON_KEYS, event.key)) return
+    event.preventDefault()
+    event.stopPropagation()
+    if (event.key === 'Enter' || event.key === ' ') toggleMenu()
+    else if (event.key === 'Escape') {
+      if (menu === 'open') setMenu('closing')
+    } else if (menu === 'open') {
+      const links = menuLinks()
+      links[event.key === 'End' ? links.length - 1 : 0]?.focus()
+    }
+  }
+
+  const onNavKeyDown = (event: React.KeyboardEvent): void => {
+    if (menu !== 'open') return
+    const links = menuLinks()
+    const current = pipe(
+      links,
+      Array.findFirstIndex((link) => link === document.activeElement),
+      Option.getOrElse(() => -1)
+    )
+    const target = {
+      Home: 0,
+      End: links.length - 1,
+      ArrowLeft: current - 1,
+      ArrowUp: current - 1,
+      ArrowRight: Math.min(links.length - 1, current + 1),
+      ArrowDown: Math.min(links.length - 1, current + 1),
+    }[event.key]
+    if (event.key === 'Escape') {
+      setMenu('closing')
+      navRef.current?.querySelector<HTMLElement>('.w-nav-button')?.focus()
+    } else if (target === undefined) return
+    else links[target]?.focus()
+    event.preventDefault()
+    event.stopPropagation()
   }
 
   const navLinkClass = (href: string): string =>
@@ -152,6 +205,7 @@ export function Navbar({
       data-collapse="medium"
       role="banner"
       className={`${withLight('navbar-2')} w-nav`}
+      onKeyDown={onNavKeyDown}
     >
       <div className="container container-navbar w-container">
         <a
@@ -191,15 +245,7 @@ export function Navbar({
             aria-haspopup="menu"
             aria-expanded={menu === 'open'}
             onClick={toggleMenu}
-            onKeyDown={(event) => {
-              // Like webflow.js, arrows on the button don't scroll the page
-              if (event.key === 'ArrowDown' || event.key === 'ArrowUp')
-                event.preventDefault()
-              if (event.key === 'Enter' || event.key === ' ') {
-                event.preventDefault()
-                toggleMenu()
-              }
-            }}
+            onKeyDown={onButtonKeyDown}
           >
             <div className="icon-3 w-icon-nav-menu" />
             <div className="menu_wrapper">

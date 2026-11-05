@@ -9,7 +9,7 @@ import {
 } from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {Array, Effect} from 'effect'
-import {useAtom, useSetAtom} from 'jotai'
+import {useAtom, useSetAtom, useStore} from 'jotai'
 import React, {useCallback} from 'react'
 import {StyleSheet} from 'react-native'
 import Reanimated, {
@@ -39,6 +39,7 @@ function AttachImageMenu(): React.ReactElement | null {
   const [anchor, setAnchor] = useAtom(attachImageMenuAnchorAtom)
   const [selectedImages, setSelectedImages] = useAtom(selectedImagesAtom)
   const setToastNotification = useSetAtom(toastNotificationAtom)
+  const store = useStore()
 
   const clearAnchor = useCallback(() => {
     setAnchor(null)
@@ -63,7 +64,10 @@ function AttachImageMenu(): React.ReactElement | null {
     void pick.pipe(
       Effect.match({
         onSuccess: (images) => {
-          const allImages = Array.appendAll(selectedImages, images)
+          const allImages = Array.appendAll(
+            store.get(selectedImagesAtom),
+            images
+          )
           if (allImages.length > MAX_SELECTED_IMAGES)
             setToastNotification(
               t('messages.imagesLimit', {count: MAX_SELECTED_IMAGES})

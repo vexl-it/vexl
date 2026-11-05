@@ -75,6 +75,9 @@ function chatMessage(text: string, at: number): ChatMessage {
 
 function setup(): {
   send: (messages: Array.NonEmptyReadonlyArray<ChatMessage>) => void
+  sendFromReopenedChat: (
+    messages: Array.NonEmptyReadonlyArray<ChatMessage>
+  ) => void
   shown: () => string[]
   deleteMessages: () => void
 } {
@@ -106,10 +109,14 @@ function setup(): {
     reactions: {},
   })
   const sendMessagesAtom = sendMessagesActionAtom(chatAtom)
+  const reopenedChatSendMessagesAtom = sendMessagesActionAtom(chatAtom)
 
   return {
     send: (messages) => {
       store.set(sendMessagesAtom, messages)
+    },
+    sendFromReopenedChat: (messages) => {
+      store.set(reopenedChatSendMessagesAtom, messages)
     },
     shown: () =>
       Array.map(
@@ -128,14 +135,16 @@ async function flush(): Promise<void> {
 
 async function settleSend(
   index: number,
-  outcome: ServerMessage | 'fail'
+  outcome: ServerMessage | 'fail' | 'inboxDeleted'
 ): Promise<void> {
   const send = mockSends[index]
   if (!send) throw new Error(`send ${index} was not started`)
   await Effect.runPromise(
     outcome === 'fail'
       ? Deferred.fail(send, {_tag: 'NetworkError'})
-      : Deferred.succeed(send, outcome)
+      : outcome === 'inboxDeleted'
+        ? Deferred.fail(send, {_tag: 'ReceiverInboxDoesNotExistError'})
+        : Deferred.succeed(send, outcome)
   )
   await flush()
 }
@@ -174,7 +183,9 @@ describe('sendMessagesActionAtom', () => {
     expect(mockSends).toHaveLength(1)
 
     await settleSend(0, {receivedByServerAt: time(500)})
+    expect(shown()).toEqual(['a:sent', 'b:sending', 'text:sending'])
     await settleSend(1, {receivedByServerAt: time(600)})
+    expect(shown()).toEqual(['a:sent', 'b:sent', 'text:sending'])
     await settleSend(2, {receivedByServerAt: time(700)})
     expect(shown()).toEqual(['a:sent', 'b:sent', 'text:sent'])
   })
@@ -187,5 +198,32 @@ describe('sendMessagesActionAtom', () => {
     deleteMessages()
     await settleSend(0, {receivedByServerAt: time(500)})
     expect(mockSends).toHaveLength(1)
+  })
+
+  it('stops the batch with one notice when the other side deleted the inbox', async () => {
+    const {send, shown} = setup()
+    send([chatMessage('a', 100), chatMessage('b', 101)])
+    await flush()
+
+    await settleSend(0, 'inboxDeleted')
+    expect(mockSends).toHaveLength(1)
+    expect(shown()).toEqual([
+      'a:sendingError',
+      'b:sendingError',
+      'Inbox deleted:received',
+    ])
+  })
+
+  it('keeps sends from a reopened chat behind the running batch', async () => {
+    const {send, sendFromReopenedChat, shown} = setup()
+    send([chatMessage('a', 100), chatMessage('b', 101)])
+    sendFromReopenedChat([chatMessage('text', 102)])
+    await flush()
+    expect(mockSends).toHaveLength(1)
+
+    await settleSend(0, {receivedByServerAt: time(500)})
+    await settleSend(1, {receivedByServerAt: time(600)})
+    await settleSend(2, {receivedByServerAt: time(700)})
+    expect(shown()).toEqual(['a:sent', 'b:sent', 'text:sent'])
   })
 })

@@ -1,0 +1,55 @@
+{
+  "name": "vexl-website",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --webpack",
+    "build": "next build --webpack",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint app src",
+    "lint:fix": "eslint app src --fix",
+    "format": "prettier --check \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json,css}\"",
+    "format:fix": "prettier --write \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json,css}\""
+  },
+  "dependencies": {
+    "@vexl-next/ui": "0.0.0",
+    "effect": "^3.20.0",
+    "github-slugger": "^2.0.0",
+    "gray-matter": "^4.0.3",
+    "jotai": "^2.15.0",
+    "next": "^16.4.1",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "react-markdown": "^10.1.0",
+    "react-native": "0.86.2",
+    "react-native-gesture-handler": "~2.32.0",
+    "react-native-keyboard-controller": "1.21.9",
+    "react-native-reanimated": "4.5.1",
+    "react-native-safe-area-context": "~5.7.0",
+    "react-native-svg": "15.15.4",
+    "react-native-web": "^0.21.2",
+    "react-native-worklets": "0.10.1",
+    "rehype-slug": "^6.0.0",
+    "remark-gfm": "^4.0.1",
+    "tamagui": "^1.137.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.12.9",
+    "@babel/plugin-syntax-typescript": "^7.29.7",
+    "@types/node": "^22.10.5",
+    "@types/react": "~19.2.14",
+    "@types/react-dom": "~19.2.3",
+    "@vexl-next/eslint-config": "0.0.0",
+    "@vexl-next/prettier-config": "0.0.0",
+    "@vexl-next/tsconfig": "0.0.0",
+    "babel-loader": "^9.2.1",
+    "eslint": "^9.20.0",
+    "prettier": "^3.3.2",
+    "typescript": "~6.0.3"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "prettier": "@vexl-next/prettier-config"
+}

@@ -10,8 +10,8 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated'
 import {scheduleOnRN} from 'react-native-worklets'
-import {getTokens} from 'tamagui'
 
+import {tokens} from '../config/tokens'
 import {ArchiveInbox} from '../icons/ArchiveInbox'
 import {StarFilled} from '../icons/StarFilled'
 import {StarOutline} from '../icons/StarOutline'
@@ -19,12 +19,12 @@ import {UnarchiveInbox} from '../icons/UnarchiveInbox'
 import {type OfferCardMarkBadge} from './OfferCard'
 import {SwipeActionPanel} from './SwipeableRow'
 
-const PANEL_GAP = getTokens().space.$5.val
+const PANEL_GAP = tokens.space[5].val
 // Dragging past this distance commits the action on release. Shorter swipes
 // reveal the action, which commits when tapped.
 const FULL_SWIPE_COMMIT_DISTANCE = 180
 // Vertical gap between list rows (matches the list's ItemSeparatorComponent).
-const LIST_ROW_GAP = getTokens().space.$5.val
+const LIST_ROW_GAP = tokens.space[5].val
 // Approximate settle time of the swipeable's closing spring. The exit slide
 // waits it out so the card visibly returns to its resting position first.
 const CLOSE_SETTLE_DURATION_MS = 250

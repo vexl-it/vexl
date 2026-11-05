@@ -16,6 +16,7 @@ interface NavigationBarActionBase {
 interface NavigationBarIconAction extends NavigationBarActionBase {
   readonly icon: React.ComponentType<IconProps>
   readonly label?: never
+  readonly accessibilityLabel?: string
 }
 
 interface NavigationBarTextAction extends NavigationBarActionBase {
@@ -135,6 +136,7 @@ function NavAction({
       icon={action.icon}
       onPress={action.onPress}
       disabled={action.disabled}
+      aria-label={action.accessibilityLabel}
     />
   )
 }

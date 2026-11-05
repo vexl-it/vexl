@@ -60,6 +60,7 @@ import {KeyboardAvoidingViewScreen} from './KeyboardAvoidingViewScreen'
 import {KeyValueRowScreen} from './KeyValueRowScreen'
 import {LabeledTextAreaScreen} from './LabeledTextAreaScreen'
 import {LengthCounterScreen} from './LengthCounterScreen'
+import {LinkTileScreen} from './LinkTileScreen'
 import {LiveIndicatorScreen} from './LiveIndicatorScreen'
 import {LoadErrorStateScreen} from './LoadErrorStateScreen'
 import {LoaderScreen} from './LoaderScreen'
@@ -77,6 +78,7 @@ import {NoteScreen} from './NoteScreen'
 import {NotificationCardScreen} from './NotificationCardScreen'
 import {OfferCardScreen} from './OfferCardScreen'
 import {OffersReencryptionStatusScreen} from './OffersReencryptionStatusScreen'
+import {PageSectionScreen} from './PageSectionScreen'
 import {PersonRowScreen} from './PersonRowScreen'
 import {PhotoPickerPlaceholderScreen} from './PhotoPickerPlaceholderScreen'
 import {PickerScreen} from './PickerScreen'
@@ -191,6 +193,7 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'Key Value Row', component: KeyValueRowScreen},
   {label: 'Labeled Text Area', component: LabeledTextAreaScreen},
   {label: 'Length Counter', component: LengthCounterScreen},
+  {label: 'Link Tile', component: LinkTileScreen},
   {label: 'Live Indicator', component: LiveIndicatorScreen},
   {label: 'Loader', component: LoaderScreen},
   {label: 'Location Suggestion Row', component: LocationSuggestionRowScreen},
@@ -214,6 +217,7 @@ export const screens: readonly ScreenEntry[] = [
     label: 'Offers Reencryption Status',
     component: OffersReencryptionStatusScreen,
   },
+  {label: 'Page Section', component: PageSectionScreen},
   {label: 'Person Row', component: PersonRowScreen},
   {
     label: 'Photo Picker Placeholder',

@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "type": "module",
   "main": "src/index",
+  "sideEffects": false,
   "scripts": {
     "clean": "rimraf .turbo node_modules",
     "lint": "eslint .",

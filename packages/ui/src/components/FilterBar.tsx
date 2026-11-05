@@ -72,6 +72,8 @@ export function FilterBar<T>({
       if (!layout || !scrollViewRef.current) return
 
       const viewWidth = scrollViewWidth.current
+      // Tags can lay out before the scroll view does; nothing to reveal yet
+      if (viewWidth === 0) return
       const offset = scrollOffset.current
       const tagLeft = layout.x
       const tagRight = layout.x + layout.width

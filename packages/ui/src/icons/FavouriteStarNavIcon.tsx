@@ -7,8 +7,9 @@ import Animated, {
   withSequence,
   withTiming,
 } from 'react-native-reanimated'
-import {getTokens, Stack, useTheme} from 'tamagui'
+import {Stack, useTheme} from 'tamagui'
 
+import {tokens} from '../config/tokens'
 import {StarFilled} from './StarFilled'
 import {StarOutline} from './StarOutline'
 import {type IconProps} from './types'
@@ -17,9 +18,8 @@ const EASING = Easing.bezier(0.25, 0.25, 0.75, 0.75)
 const OUTLINE_SCALE_OUT = 9.491476694742838
 const FILLED_SCALE_IN_START = 7.083432515462239
 const FILLED_SCALE_OUT = 5.864198048909504
-const tokens = getTokens()
-const DEFAULT_ICON_SIZE = tokens.size.$7.val
-const ANIMATION_SIZE = tokens.size.$9.val
+const DEFAULT_ICON_SIZE = tokens.size[7].val
+const ANIMATION_SIZE = tokens.size[9].val
 
 export interface FavouriteStarNavIconProps extends IconProps {
   readonly isFavourite: boolean

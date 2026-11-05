@@ -1,0 +1,60 @@
+# syntax=docker/dockerfile:1
+# Optimized multi-stage build for the vexl.it website.
+# Mirrors the backend pipeline: turbo prune -> cacheable install -> build -> slim runner.
+
+# --- Pruner stage -----------------------------------------------------------
+# Produces a minimal, deterministic subset of the monorepo for this app:
+#   /app/out/json -> only the package.json manifests (cacheable install input)
+#   /app/out/full -> full source of the pruned package set
+#   /app/out/pnpm-lock.yaml -> lockfile scoped to the pruned set
+FROM node:24 AS pruner
+ARG TURBO_VERSION=2.10.0
+WORKDIR /app
+COPY . .
+# node_modules is in .dockerignore, so install turbo globally to run prune.
+RUN npm install -g turbo@${TURBO_VERSION}
+RUN turbo prune vexl-website --docker
+
+# --- Builder stage ----------------------------------------------------------
+FROM node:24-alpine AS builder
+WORKDIR /app
+
+# Install layer: depends only on the manifests, the lockfile and patch files.
+# Source-only changes do NOT invalidate this layer.
+COPY --from=pruner /app/out/json/ ./
+COPY --from=pruner /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
+COPY --from=pruner /app/patches ./patches
+RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
+    corepack enable && \
+    pnpm config set store-dir /pnpm/store && \
+    pnpm install --frozen-lockfile
+
+# Build layer: full source of the pruned set.
+COPY --from=pruner /app/out/full/ ./
+RUN pnpm --filter vexl-website build
+
+# Copy static assets INTO the standalone folder (not included by default).
+WORKDIR /app/apps/vexl-website
+RUN mkdir -p .next/standalone/apps/vexl-website/.next && cp -r .next/static .next/standalone/apps/vexl-website/.next/
+RUN if [ -d "public" ]; then cp -r public .next/standalone/apps/vexl-website/; fi
+
+# --- Runner stage -----------------------------------------------------------
+# Next.js standalone output already bundles a minimal traced node_modules.
+FROM node:24-alpine AS runner
+WORKDIR /app
+
+ARG SERVICE_VERSION
+ARG ENVIRONMENT
+
+ENV NODE_ENV=production
+ENV SERVICE_VERSION=${SERVICE_VERSION}
+ENV SERVICE_NAME="Vexl Website - ${ENVIRONMENT}"
+ENV PORT=3000
+
+COPY --chown=node:node --from=builder /app/apps/vexl-website/.next/standalone ./
+
+EXPOSE 3000
+
+USER node
+
+CMD ["node", "apps/vexl-website/server.js"]

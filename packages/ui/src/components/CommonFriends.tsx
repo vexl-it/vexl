@@ -33,9 +33,6 @@ const CommonFriendsFrame = styled(Stack, {
   backgroundColor: '$backgroundSecondary',
   borderRadius: '$5',
   overflow: 'hidden',
-  pressStyle: {
-    opacity: 0.7,
-  },
 })
 
 export function CommonFriends({
@@ -54,7 +51,10 @@ export function CommonFriends({
   const gap = getTokens().space.$3.val
 
   return (
-    <CommonFriendsFrame onPress={onPress}>
+    <CommonFriendsFrame
+      onPress={onPress}
+      pressStyle={onPress ? {opacity: 0.7} : undefined}
+    >
       <YStack px="$5" py="$4" gap="$3">
         <Typography variant="micro" color="$foregroundSecondary">
           {trustedLabel ? `${label} · ${trustedLabel}` : label}
@@ -91,16 +91,18 @@ export function CommonFriends({
           <Rect width="100%" height="100%" fill={`url(#${fadeGradientId})`} />
         </Svg>
       </Stack>
-      <Stack
-        position="absolute"
-        right="$3"
-        top={0}
-        bottom={0}
-        justifyContent="center"
-        pointerEvents="none"
-      >
-        <ChevronRight size={24} color={chevronColor} />
-      </Stack>
+      {onPress ? (
+        <Stack
+          position="absolute"
+          right="$3"
+          top={0}
+          bottom={0}
+          justifyContent="center"
+          pointerEvents="none"
+        >
+          <ChevronRight size={24} color={chevronColor} />
+        </Stack>
+      ) : null}
     </CommonFriendsFrame>
   )
 }

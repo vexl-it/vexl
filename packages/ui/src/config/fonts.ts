@@ -8,7 +8,7 @@ import {createFont} from 'tamagui'
 //
 // Size keys map to Figma styles:
 //   Body:    1=Micro 2=Description 3=ParagraphSmall 4=Paragraph 5=TitlesSmall 6=Titles 7=PresBody
-//   Heading: 1=TabSmall 2=TabLarge 3=Heading3 4=GraphPrice 5=Heading2 6=Heading1
+//   Heading: 1=TabSmall 2=TabLarge 3=Heading3 4=GraphPrice 5=Heading2 6=Heading1 7=Display
 
 export const bodyFont = createFont({
   family: 'TTSatoshi',
@@ -63,6 +63,7 @@ export const headingFont = createFont({
     4: 28, // Graph Price
     5: 32, // Heading 2
     6: 40, // Heading 1
+    7: 72, // Display (website headlines)
     true: 24,
   },
   lineHeight: {
@@ -72,6 +73,7 @@ export const headingFont = createFont({
     4: 34,
     5: 40,
     6: 52,
+    7: 76,
     true: 28,
   },
   weight: {
@@ -85,6 +87,7 @@ export const headingFont = createFont({
     4: -1, // Graph Price: -1px
     5: -1, // Heading 2: -1px
     6: -1, // Heading 1: -1px
+    7: -2, // Display: -2px
     true: -1,
   },
   face: {
@@ -97,6 +100,28 @@ export const headingFont = createFont({
 // These start from the Figma spec, but heading-like variants use practical
 // multiline-safe line heights instead of strict 100% / auto values.
 export const typographyVariantStyles = {
+  // Website headline: Heading 1 on phones, grows on wide screens
+  display: {
+    fontFamily: '$heading',
+    fontSize: '$6',
+    fontWeight: '400',
+    lineHeight: 52,
+    letterSpacing: -1,
+    // Long words like Czech "Obchodujte" must not split mid-word
+    wordWrap: 'normal',
+    // Tablets put display headlines beside other content, so they step up
+    // in between; 56px still fits Czech "Obchodujte" in half of 1024px
+    $lg: {
+      fontSize: 56,
+      lineHeight: 60,
+      letterSpacing: -2,
+    },
+    $xl: {
+      fontSize: '$7',
+      lineHeight: 76,
+      letterSpacing: -2,
+    },
+  },
   heading1: {
     fontFamily: '$heading',
     fontSize: '$6',

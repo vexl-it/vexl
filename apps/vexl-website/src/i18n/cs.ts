@@ -88,8 +88,8 @@ export const cs: Messages = {
   downloadVexl: 'Stáhnout Vexl',
   home: {
     hero: {
-      title: 'Obchodujte bitcoin soukromě.',
-      text: 'Kupujte a prodávejte bitcoin s lidmi z kontaktů ve vašem telefonu a s jejich přáteli. Bez ověřování totožnosti, bez prostředníků. Zůstáváte v anonymitě, dokud se sami nerozhodnete jinak.',
+      title: 'Bitcoin obchod soukromě',
+      text: 'Vexl je mobilní aplikace, která svým uživatelům poskytuje jednoduchý, dostupný a bezpečný způsob jak obchodovat bitcoin tak, jak bylo zamýšleno - peer-to-peer a bez KYC.',
       howItWorks: 'Jak to funguje',
     },
     mock: {

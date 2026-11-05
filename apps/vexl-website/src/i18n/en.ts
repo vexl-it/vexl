@@ -87,7 +87,7 @@ export const en = {
   home: {
     hero: {
       title: 'Trade bitcoin privately.',
-      text: 'Buy and sell bitcoin with people from your phone contacts and their friends. No ID checks, no middlemen. You stay anonymous until you choose otherwise.',
+      text: 'Vexl is a mobile app that gives users an easy and safe way to trade Bitcoin peer-to-peer, without KYC.',
       howItWorks: 'See how it works',
     },
     mock: {

@@ -73,6 +73,13 @@ const serviceNameOf = (name: string): string =>
 const httpUrl = (ctx: EnvContext, portKey: string): string =>
   `http://${ctx.cfg.infra.host}:${ctx.ports[portKey]}`
 
+/** Reachable from simulators, emulators and other devices on the network. */
+const lanHost = (ctx: EnvContext): string =>
+  Option.getOrElse(detectLanIp(), () => ctx.cfg.infra.host)
+
+const lanMinioUrl = (ctx: EnvContext): string =>
+  `http://${lanHost(ctx)}:${ctx.ports.minioApi}`
+
 export const dbEnv = (
   ctx: EnvContext,
   dbName: string
@@ -211,7 +218,7 @@ export const SERVICES: readonly RunnableApp[] = [
       ...stringifyValues(sc.chatService),
       ...s3Env(ctx, ctx.cfg.infra.minio.chatImagesBucket),
       // Only used to sign URLs the app calls directly, so devices must reach it.
-      S3_ENDPOINT: `http://${Option.getOrElse(detectLanIp(), () => ctx.cfg.infra.host)}:${ctx.ports.minioApi}`,
+      S3_ENDPOINT: lanMinioUrl(ctx),
     }),
   },
   {
@@ -326,7 +333,11 @@ export const WEB_APPS: readonly RunnableApp[] = [
       CONTENT_INTERNAL_SERVER_URL: httpUrl(ctx, 'contentServiceInternal'),
       CONTENT_API_INTERNAL_URL: httpUrl(ctx, 'contentService'),
       ...s3Env(ctx),
-      RESOURCES_BASE_URL: `${httpUrl(ctx, 'minioApi')}/${ctx.cfg.infra.minio.bucket}`,
+      // Browsers upload to and load images from MinIO directly, and other
+      // devices on the network can open the dev server.
+      S3_ENDPOINT: lanMinioUrl(ctx),
+      RESOURCES_BASE_URL: `${lanMinioUrl(ctx)}/${ctx.cfg.infra.minio.bucket}`,
+      DEV_LAN_IP: lanHost(ctx),
     }),
   },
   {

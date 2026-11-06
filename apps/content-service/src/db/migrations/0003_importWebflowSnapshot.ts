@@ -1,6 +1,6 @@
 import {SqlClient} from '@effect/sql'
 import {Effect} from 'effect'
-import webflowSnapshot from '../../cmsImport/webflowSnapshot.json'
+import webflowSnapshot from './webflowSnapshot.json'
 
 // Plain SQL over the encoded snapshot so later changes to the app's mappers
 // or schemas can't break this migration. Idempotent: existing ids are kept.

@@ -33,6 +33,7 @@ import remove_duplicate_users_by_hash_and_add_unique_constraint from './migratio
 import dedupe_notification_tokens from './migrations/0029_dedupe_notification_tokens'
 import add_inactivity_notification_tracking_to_users from './migrations/0030_add_inactivity_notification_tracking_to_users'
 import cascade_delete_invitation_links_with_creator from './migrations/0031_cascade_delete_invitation_links_with_creator'
+import drop_legacy_notification_token_columns from './migrations/0032_drop_legacy_notification_token_columns'
 
 const migrations = [
   {
@@ -190,6 +191,11 @@ const migrations = [
     id: 31,
     name: 'cascade_delete_invitation_links_with_creator',
     migrationEffect: cascade_delete_invitation_links_with_creator,
+  },
+  {
+    id: 32,
+    name: 'drop_legacy_notification_token_columns',
+    migrationEffect: drop_legacy_notification_token_columns,
   },
 ] as const
 

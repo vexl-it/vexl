@@ -43,7 +43,6 @@ export const keyDerivationCountersAtom = atom((get) =>
   get(keyDerivationCountersStorage.atom)
 )
 
-// Raises the counters to at least the given values, never lowers them.
 export const raiseKeyDerivationCountersActionAtom = atom(
   null,
   (_, set, minimal: KeyDerivationCounters) => {

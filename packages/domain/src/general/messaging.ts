@@ -22,7 +22,6 @@ import {
 import {FriendLevel, GoldenAvatarType, OfferId, OneOfferInState} from './offers'
 import {TradeChecklistUpdate} from './tradeChecklist'
 
-// Message types the chat-service sees in plaintext on send.
 export const ServerVisibleMessageType = Schema.Literal(
   'MESSAGE',
   'REQUEST_REVEAL',

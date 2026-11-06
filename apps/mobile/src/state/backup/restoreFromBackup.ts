@@ -137,10 +137,15 @@ const scanRestorableKeysActionAtom = atom(
       const api = get(apiAtom)
       const [inboxes, clubs] = yield* Effect.all(
         [
-          scanInboxes({masterSeed: session.masterSeed, chatApi: api.chat}),
+          scanInboxes({
+            masterSeed: session.masterSeed,
+            chatApi: api.chat,
+            scanAtLeastTo: backup.derivationCounters?.nextInboxIndex,
+          }),
           scanClubs({
             masterSeed: session.masterSeed,
             findClubUuid: findClubUuidOfMember(api.contact),
+            scanAtLeastTo: backup.derivationCounters?.nextClubIndex,
           }),
         ],
         {concurrency: 'unbounded'}

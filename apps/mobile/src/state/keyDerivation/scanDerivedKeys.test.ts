@@ -50,7 +50,7 @@ const scanIndexes = (
   )
 
 describe('scanDerivedKeys', () => {
-  it('scans whole batches until a batch has no hit and continues a margin after the last hit', async () => {
+  it('scans whole batches until two in a row have no hit and continues a margin after the last hit', async () => {
     const probedBatches: number[][] = []
 
     const result = await scanIndexes([0, 3, 7, 8], probedBatches)
@@ -60,8 +60,35 @@ describe('scanDerivedKeys', () => {
       [4, 5, 6, 7],
       [8, 9, 10, 11],
       [12, 13, 14, 15],
+      [16, 17, 18, 19],
     ])
     expect(result).toEqual({found: [0, 3, 7, 8], nextIndex: 12})
+  })
+
+  it('scans past a whole batch of unused indexes', async () => {
+    expect(await scanIndexes([0, 9])).toEqual({found: [0, 9], nextIndex: 13})
+  })
+
+  it('scans at least to the counters of the backup and never hands out an index below them', async () => {
+    const probedBatches: number[][] = []
+    const result = await Effect.runPromise(
+      scanDerivedKeys({
+        batchSize: 4,
+        margin: 3,
+        scanAtLeastTo: 30,
+        derive: (i) => Effect.succeed(i),
+        findExisting: (batch) =>
+          Effect.sync(() => {
+            probedBatches.push([...batch])
+            return Array.map(batch, (i) =>
+              i === 0 || i === 25 ? Option.some(i) : Option.none()
+            )
+          }),
+      })
+    )
+
+    expect(result).toEqual({found: [0, 25], nextIndex: 30})
+    expect(probedBatches.at(-1)).toEqual([32, 33, 34, 35])
   })
 
   it('starts after the margin when nothing is found', async () => {
@@ -126,7 +153,7 @@ describe('scanInboxes', () => {
 
     const result = await Effect.runPromise(scanInboxes({masterSeed, chatApi}))
 
-    expect(checkInboxesExist).toHaveBeenCalledTimes(3)
+    expect(checkInboxesExist).toHaveBeenCalledTimes(4)
     for (const [request] of checkInboxesExist.mock.calls)
       expect(request.publicKeys).toHaveLength(INBOX_SCAN_BATCH_SIZE)
     expect(checkInboxesExist.mock.calls[0]?.[0].publicKeys[0]).toBe(
@@ -144,7 +171,7 @@ class FakeNetworkError extends Schema.TaggedError<FakeNetworkError>(
 )('FakeNetworkError', {}) {}
 
 describe('scanClubs', () => {
-  it('restores clubs the derived keys are members of and stops after a batch of misses', async () => {
+  it('restores clubs the derived keys are members of and stops after two batches of misses', async () => {
     const [firstClub, secondClub, unreachableClub] = Array.makeBy(3, () =>
       generateClubUuid()
     )
@@ -176,7 +203,7 @@ describe('scanClubs', () => {
       scanClubs({masterSeed, findClubUuid})
     )
 
-    expect(findClubUuid).toHaveBeenCalledTimes(3 * CLUB_SCAN_BATCH_SIZE)
+    expect(findClubUuid).toHaveBeenCalledTimes(4 * CLUB_SCAN_BATCH_SIZE)
     expect(Array.map(result.found, (one) => one.clubUuid)).toEqual([
       firstClub,
       secondClub,

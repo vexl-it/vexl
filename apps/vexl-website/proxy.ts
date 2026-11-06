@@ -5,6 +5,8 @@ import {type Locale} from './src/i18n/locales'
 import {parseListPage} from './src/pageParams'
 import {loadEvents, pastEventsPageCount} from './src/views/community/events'
 
+// Not '/404': Vercel serves a rewrite to the 404 page with status 200
+const UNMATCHED_PATH = '/_unmatched'
 const CONTENT_PATH = /^(?:\/(cs))?\/(post|blog\/page|community\/page)\/([^/]+)$/
 
 async function contentExists(pathname: string): Promise<boolean> {
@@ -34,7 +36,7 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
   )
   return exists
     ? NextResponse.next()
-    : NextResponse.rewrite(new URL('/404', request.url))
+    : NextResponse.rewrite(new URL(UNMATCHED_PATH, request.url))
 }
 
 export const config = {

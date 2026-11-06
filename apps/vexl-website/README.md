@@ -22,9 +22,6 @@ Against the public content-service:
 CONTENT_SERVICE_URL=https://content.vexl.it pnpm --filter vexl-website dev
 ```
 
-Production content-service serves `/content/website/*` only from the backend
-release after #2818, so use the local stack until then.
-
 ```sh
 pnpm --filter vexl-website build   # no content-service needed
 CONTENT_SERVICE_URL=... pnpm --filter vexl-website start

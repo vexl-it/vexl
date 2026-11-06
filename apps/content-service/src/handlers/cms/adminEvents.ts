@@ -15,8 +15,23 @@ import {ContentInternalApiSpecification} from '@vexl-next/rest-api/src/services/
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {Effect, Schema} from 'effect'
 import {EventsDbService} from '../../db/EventsDbService'
-import {validateAdminToken} from '../validateAdminToken'
+import {validateCmsToken} from '../validateAdminToken'
 import {orNotFound} from './orNotFound'
+
+export const listEventsHandler = HttpApiBuilder.handler(
+  ContentInternalApiSpecification,
+  'Cms',
+  'listEvents',
+  (req) =>
+    Effect.gen(function* (_) {
+      yield* _(validateCmsToken(req.headers[HEADER_ADMIN_TOKEN]))
+      const events = yield* _(
+        EventsDbService,
+        Effect.flatMap((db) => db.listAllEvents)
+      )
+      return {events}
+    }).pipe(Effect.withSpan('listEvents'), makeEndpointEffect)
+)
 
 export const createEventHandler = HttpApiBuilder.handler(
   ContentInternalApiSpecification,
@@ -24,7 +39,7 @@ export const createEventHandler = HttpApiBuilder.handler(
   'createEvent',
   (req) =>
     Effect.gen(function* (_) {
-      yield* _(validateAdminToken(req.headers[HEADER_ADMIN_TOKEN]))
+      yield* _(validateCmsToken(req.headers[HEADER_ADMIN_TOKEN]))
       const event: CmsEvent = {
         ...req.payload,
         id: Schema.decodeSync(EventId)(generateUuid()),
@@ -44,7 +59,7 @@ export const updateEventHandler = HttpApiBuilder.handler(
   'updateEvent',
   (req) =>
     Effect.gen(function* (_) {
-      yield* _(validateAdminToken(req.headers[HEADER_ADMIN_TOKEN]))
+      yield* _(validateCmsToken(req.headers[HEADER_ADMIN_TOKEN]))
       return yield* _(
         EventsDbService,
         Effect.flatMap((db) =>
@@ -65,7 +80,7 @@ const setEventStatus = (
   EventsDbService
 > =>
   Effect.gen(function* (_) {
-    yield* _(validateAdminToken(adminToken))
+    yield* _(validateCmsToken(adminToken))
     return yield* _(
       EventsDbService,
       Effect.flatMap((db) => db.setEventStatus({id, status})),
@@ -94,7 +109,7 @@ export const deleteEventHandler = HttpApiBuilder.handler(
   'deleteEvent',
   (req) =>
     Effect.gen(function* (_) {
-      yield* _(validateAdminToken(req.headers[HEADER_ADMIN_TOKEN]))
+      yield* _(validateCmsToken(req.headers[HEADER_ADMIN_TOKEN]))
       yield* _(
         EventsDbService,
         Effect.flatMap((db) => db.deleteEvent(req.path.id)),

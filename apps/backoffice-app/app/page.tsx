@@ -1,6 +1,10 @@
 'use client'
 
-import {getAdminToken} from '@/src/services/adminTokenService'
+import {
+  getAdminToken,
+  getRole,
+  homePathForRole,
+} from '@/src/services/adminTokenService'
 import {useRouter} from 'next/navigation'
 import {useEffect} from 'react'
 
@@ -12,7 +16,7 @@ export default function HomePage() {
     if (!token) {
       router.push('/login')
     } else {
-      router.push('/clubs')
+      router.push(homePathForRole(getRole()))
     }
   }, [router])
 

@@ -23,6 +23,7 @@ export interface EventsDbOperations {
     id: EventId
   ) => Effect.Effect<Option.Option<unknown>, UnexpectedServerError>
   listPublishedEvents: Effect.Effect<readonly CmsEvent[], UnexpectedServerError>
+  listAllEvents: Effect.Effect<readonly CmsEvent[], UnexpectedServerError>
 }
 
 export class EventsDbService extends Context.Tag('EventsDbService')<
@@ -71,6 +72,19 @@ export class EventsDbService extends Context.Tag('EventsDbService')<
             events
           WHERE
             status = 'published'
+          ORDER BY
+            start_date DESC
+        `,
+      })
+
+      const listAllEvents = SqlSchema.findAll({
+        Request: Schema.Void,
+        Result: EventDbRecord,
+        execute: () => sql`
+          SELECT
+            *
+          FROM
+            events
           ORDER BY
             start_date DESC
         `,
@@ -150,6 +164,11 @@ export class EventsDbService extends Context.Tag('EventsDbService')<
             'Error in listPublishedEvents query'
           ),
           Effect.withSpan('listPublishedEvents query')
+        ),
+        listAllEvents: listAllEvents().pipe(
+          Effect.map(Array.map(eventFromDbRecord)),
+          UnexpectedServerError.wrapErrors('Error in listAllEvents query'),
+          Effect.withSpan('listAllEvents query')
         ),
       }
     })

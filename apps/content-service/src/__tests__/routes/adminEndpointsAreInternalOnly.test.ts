@@ -4,7 +4,6 @@ import {Effect} from 'effect'
 import {runPromiseInMockedEnvironment} from '../utils/runPromiseInMockedEnvironment'
 
 const ADMIN_PATHS = [
-  '/content/clear-cache',
   '/content/vexl-product-notifications/admin',
   '/content/admin/blog-posts',
   '/content/admin/events',
@@ -28,7 +27,7 @@ describe('Internal endpoints', () => {
       Effect.gen(function* (_) {
         const internalClient = yield* _(InternalServerTestClient)
         const response = yield* _(
-          internalClient.post('/content/clear-cache', {
+          internalClient.get('/content/admin/blog-posts', {
             headers: {'x-admin-token': 'bad-token'},
           })
         )

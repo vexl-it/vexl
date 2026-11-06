@@ -244,6 +244,8 @@ export const serviceConstants = {
   },
   contentService: {
     ADMIN_TOKEN_HASH: "7yYOmqPGc68kDReiZgSANhqOCB0f/soqXtDjIZ/BhWc=",
+    // sha256 of the dev content editor token "editor". Non-secret dev value.
+    CONTENT_EDITOR_TOKEN_HASH: "FVPMYv8kYETGg6YeID5lVBmQ5/zUr5RD0iuVV+zJrFQ=",
     FORCE_UPDATE_FOR_VERSION_AND_LOWER: 0,
     APP_IN_MAINTENANCE_MODE: false,
     TRUSTED_FRIENDS_ENABLED: false,
@@ -251,6 +253,7 @@ export const serviceConstants = {
   },
   backofficeApp: {
     ADMIN_TOKEN_HASH: "7yYOmqPGc68kDReiZgSANhqOCB0f/soqXtDjIZ/BhWc=",
+    CONTENT_EDITOR_TOKEN_HASH: "FVPMYv8kYETGg6YeID5lVBmQ5/zUr5RD0iuVV+zJrFQ=",
   },
 };
 

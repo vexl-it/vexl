@@ -1,20 +1,28 @@
 'use client'
 
-import {clearAdminToken} from '@/src/services/adminTokenService'
-import {Array} from 'effect'
+import {clearAdminToken, getRole} from '@/src/services/adminTokenService'
+import {Array, pipe} from 'effect'
 import Link from 'next/link'
 import {usePathname, useRouter} from 'next/navigation'
+import {useEffect, useState} from 'react'
+
+const CONTENT_EDITOR_PATHS = ['/blog-posts', '/events']
 
 export function BackofficeLayout({children}: {children: React.ReactNode}) {
   const pathname = usePathname()
   const router = useRouter()
+  // localStorage is only readable after hydration.
+  const [isContentEditor, setIsContentEditor] = useState(false)
+  useEffect(() => {
+    setIsContentEditor(getRole() === 'contentEditor')
+  }, [])
 
   const handleLogout = () => {
     clearAdminToken()
     router.push('/login')
   }
 
-  const navigation = [
+  const allNavigation = [
     {name: 'Clubs List', href: '/clubs', current: pathname === '/clubs'},
     {
       name: 'Create Club',
@@ -41,7 +49,23 @@ export function BackofficeLayout({children}: {children: React.ReactNode}) {
       href: '/short-links',
       current: pathname.startsWith('/short-links'),
     },
+    {
+      name: 'Blog posts',
+      href: '/blog-posts',
+      current: pathname.startsWith('/blog-posts'),
+    },
+    {
+      name: 'Events',
+      href: '/events',
+      current: pathname.startsWith('/events'),
+    },
   ]
+  const navigation = isContentEditor
+    ? pipe(
+        allNavigation,
+        Array.filter((item) => Array.contains(CONTENT_EDITOR_PATHS, item.href))
+      )
+    : allNavigation
 
   return (
     <div className="min-h-screen bg-gray-50">

@@ -1,9 +1,6 @@
 import {unixMillisecondsFromNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {MapStylesResponse} from '@vexl-next/rest-api/src/services/content/contracts'
-import {
-  type RedisError,
-  RedisService,
-} from '@vexl-next/server-utils/src/RedisService'
+import {RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {Context, Effect, Layer, type Option} from 'effect'
 
 const MAP_STYLES_REDIS_KEY = 'CONTENT:mapStyles'
@@ -13,8 +10,6 @@ export interface CacheOperations {
   saveMapStylesToCacheForked: (data: MapStylesResponse) => Effect.Effect<void>
 
   getMapStylesFromRedis: Effect.Effect<Option.Option<MapStylesResponse>>
-
-  clearCache: Effect.Effect<void, RedisError>
 }
 
 export class CacheService extends Context.Tag('CacheService')<
@@ -42,8 +37,6 @@ export class CacheService extends Context.Tag('CacheService')<
               Effect.ignore
             ),
         getMapStylesFromRedis,
-
-        clearCache: redisService.delete(MAP_STYLES_REDIS_KEY),
       }
     })
   )

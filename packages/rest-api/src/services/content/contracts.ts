@@ -49,26 +49,20 @@ export const BlogsArticlesResponse = Schema.Struct({
 })
 export type BlogsArticlesResponse = typeof BlogsArticlesResponse.Type
 
-export const PublishedBlogPostsResponse = Schema.Struct({
+export const BlogPostsResponse = Schema.Struct({
   blogPosts: Schema.Array(BlogPost),
 })
-export type PublishedBlogPostsResponse = typeof PublishedBlogPostsResponse.Type
+export type BlogPostsResponse = typeof BlogPostsResponse.Type
 
-export const PublishedEventsResponse = Schema.Struct({
+export const CmsEventsResponse = Schema.Struct({
   events: Schema.Array(CmsEvent),
 })
-export type PublishedEventsResponse = typeof PublishedEventsResponse.Type
+export type CmsEventsResponse = typeof CmsEventsResponse.Type
 
 export class BlogSlugTakenError extends Schema.TaggedError<BlogSlugTakenError>(
   'BlogSlugTakenError'
 )('BlogSlugTakenError', {
   status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
-}) {}
-
-export class InvalidTokenError extends Schema.TaggedError<InvalidTokenError>(
-  'InvalidTokenError'
-)('InvalidTokenError', {
-  status: Schema.optionalWith(Schema.Literal(401), {default: () => 401}),
 }) {}
 
 export class InvalidContentAdminTokenError extends Schema.TaggedError<InvalidContentAdminTokenError>(

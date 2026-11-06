@@ -1,30 +1,46 @@
 'use client'
 
-import {setAdminToken} from '@/src/services/adminTokenService'
+import {requestJson} from '@/src/services/adminFetch'
+import {
+  BackofficeRole,
+  homePathForRole,
+  setSession,
+} from '@/src/services/adminTokenService'
+import {Schema} from 'effect'
 import {useRouter} from 'next/navigation'
 import {useState} from 'react'
+
+const SessionResponse = Schema.Struct({role: BackofficeRole})
+
+const fetchRole = async (token: string): Promise<BackofficeRole> => {
+  const response = await requestJson<unknown>('/api/admin/session', {
+    method: 'GET',
+    headers: {'x-admin-token': token},
+  })
+  return Schema.decodeUnknownSync(SessionResponse)(response).role
+}
 
 export default function LoginPage() {
   const [token, setToken] = useState('')
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
 
-  const handleSubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault()
     setError(null)
 
-    if (!token.trim()) {
+    const trimmedToken = token.trim()
+    if (!trimmedToken) {
       setError('Admin token is required')
       return
     }
 
     try {
-      setAdminToken(token.trim())
-      router.push('/clubs')
+      const role = await fetchRole(trimmedToken)
+      setSession(trimmedToken, role)
+      router.push(homePathForRole(role))
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : 'Failed to save admin token'
-      )
+      setError(err instanceof Error ? err.message : 'Failed to sign in')
     }
   }
 

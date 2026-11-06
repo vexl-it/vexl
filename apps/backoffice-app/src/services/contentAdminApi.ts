@@ -18,6 +18,18 @@ export const makeContentAdminClient = () =>
     Effect.provide(FetchHttpClient.layer)
   )
 
+export const makeCmsAdminClient = () =>
+  HttpApiClient.make(ContentInternalApiSpecification, {
+    baseUrl: '/api/proxy/content-internal',
+  }).pipe(
+    Effect.map((client) => client.Cms),
+    Effect.provide(FetchHttpClient.layer)
+  )
+
+export type CmsAdminClient = Effect.Effect.Success<
+  ReturnType<typeof makeCmsAdminClient>
+>
+
 export const makeContentClient = () =>
   HttpApiClient.make(ContentApiSpecification, {
     baseUrl: '/api/proxy/content',

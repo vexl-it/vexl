@@ -11,6 +11,10 @@ export const backofficeDatabaseConfig = Config.all({
 
 export const adminTokenHashConfig = Config.string('ADMIN_TOKEN_HASH')
 
+export const contentEditorTokenHashConfig = Config.string(
+  'CONTENT_EDITOR_TOKEN_HASH'
+)
+
 export const slideshowS3Config = Config.all({
   region: Config.string('AWS_REGION').pipe(Config.withDefault('eu-west-1')),
   bucketName: Config.string('S3_BUCKET_NAME'),

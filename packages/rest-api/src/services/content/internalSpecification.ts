@@ -15,21 +15,14 @@ import {Schema} from 'effect'
 import {AdminTokenHeaders} from '../../adminTokenHeaders'
 import {NoContentResponse} from '../../NoContentResponse.brand'
 import {
+  BlogPostsResponse,
   BlogSlugTakenError,
+  CmsEventsResponse,
   CreateVexlProductNotificationRequest,
   DuplicateVexlProductNotificationUuidError,
   InvalidContentAdminTokenError,
-  InvalidTokenError,
   VexlProductNotificationResponse,
 } from './contracts'
-
-export const ClearEventsCacheEndpoint = HttpApiEndpoint.post(
-  'clearCache',
-  '/content/clear-cache'
-)
-  .setHeaders(AdminTokenHeaders)
-  .addError(InvalidTokenError, {status: 401})
-  .addSuccess(NoContentResponse)
 
 export const CreateVexlProductNotificationEndpoint = HttpApiEndpoint.post(
   'createVexlProductNotification',
@@ -43,6 +36,14 @@ export const CreateVexlProductNotificationEndpoint = HttpApiEndpoint.post(
 
 const BlogPostPath = Schema.Struct({id: BlogId})
 const EventPath = Schema.Struct({id: EventId})
+
+export const ListBlogPostsEndpoint = HttpApiEndpoint.get(
+  'listBlogPosts',
+  '/content/admin/blog-posts'
+)
+  .setHeaders(AdminTokenHeaders)
+  .addSuccess(BlogPostsResponse)
+  .addError(InvalidContentAdminTokenError, {status: 401})
 
 export const CreateBlogPostEndpoint = HttpApiEndpoint.post(
   'createBlogPost',
@@ -92,6 +93,14 @@ export const DeleteBlogPostEndpoint = HttpApiEndpoint.del(
   .addSuccess(NoContentResponse)
   .addError(InvalidContentAdminTokenError, {status: 401})
 
+export const ListEventsEndpoint = HttpApiEndpoint.get(
+  'listEvents',
+  '/content/admin/events'
+)
+  .setHeaders(AdminTokenHeaders)
+  .addSuccess(CmsEventsResponse)
+  .addError(InvalidContentAdminTokenError, {status: 401})
+
 export const CreateEventEndpoint = HttpApiEndpoint.post(
   'createEvent',
   '/content/admin/events'
@@ -139,12 +148,13 @@ export const DeleteEventEndpoint = HttpApiEndpoint.del(
   .addError(InvalidContentAdminTokenError, {status: 401})
 
 const CmsApiGroup = HttpApiGroup.make('Cms')
-  .add(ClearEventsCacheEndpoint)
+  .add(ListBlogPostsEndpoint)
   .add(CreateBlogPostEndpoint)
   .add(UpdateBlogPostEndpoint)
   .add(PublishBlogPostEndpoint)
   .add(UnpublishBlogPostEndpoint)
   .add(DeleteBlogPostEndpoint)
+  .add(ListEventsEndpoint)
   .add(CreateEventEndpoint)
   .add(UpdateEventEndpoint)
   .add(PublishEventEndpoint)

@@ -15,8 +15,23 @@ import {ContentInternalApiSpecification} from '@vexl-next/rest-api/src/services/
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {Effect, Option, Schema} from 'effect'
 import {BlogPostsDbService} from '../../db/BlogPostsDbService'
-import {validateAdminToken} from '../validateAdminToken'
+import {validateCmsToken} from '../validateAdminToken'
 import {orNotFound} from './orNotFound'
+
+export const listBlogPostsHandler = HttpApiBuilder.handler(
+  ContentInternalApiSpecification,
+  'Cms',
+  'listBlogPosts',
+  (req) =>
+    Effect.gen(function* (_) {
+      yield* _(validateCmsToken(req.headers[HEADER_ADMIN_TOKEN]))
+      const blogPosts = yield* _(
+        BlogPostsDbService,
+        Effect.flatMap((db) => db.listAllBlogPosts)
+      )
+      return {blogPosts}
+    }).pipe(Effect.withSpan('listBlogPosts'), makeEndpointEffect)
+)
 
 export const createBlogPostHandler = HttpApiBuilder.handler(
   ContentInternalApiSpecification,
@@ -24,7 +39,7 @@ export const createBlogPostHandler = HttpApiBuilder.handler(
   'createBlogPost',
   (req) =>
     Effect.gen(function* (_) {
-      yield* _(validateAdminToken(req.headers[HEADER_ADMIN_TOKEN]))
+      yield* _(validateCmsToken(req.headers[HEADER_ADMIN_TOKEN]))
       const post: BlogPost = {
         ...req.payload,
         cs: Option.some(req.payload.cs),
@@ -46,7 +61,7 @@ export const updateBlogPostHandler = HttpApiBuilder.handler(
   'updateBlogPost',
   (req) =>
     Effect.gen(function* (_) {
-      yield* _(validateAdminToken(req.headers[HEADER_ADMIN_TOKEN]))
+      yield* _(validateCmsToken(req.headers[HEADER_ADMIN_TOKEN]))
       return yield* _(
         BlogPostsDbService,
         Effect.flatMap((db) =>
@@ -67,7 +82,7 @@ const setBlogPostStatus = (
   BlogPostsDbService
 > =>
   Effect.gen(function* (_) {
-    yield* _(validateAdminToken(adminToken))
+    yield* _(validateCmsToken(adminToken))
     return yield* _(
       BlogPostsDbService,
       Effect.flatMap((db) => db.setBlogPostStatus({id, status})),
@@ -97,7 +112,7 @@ export const deleteBlogPostHandler = HttpApiBuilder.handler(
   'deleteBlogPost',
   (req) =>
     Effect.gen(function* (_) {
-      yield* _(validateAdminToken(req.headers[HEADER_ADMIN_TOKEN]))
+      yield* _(validateCmsToken(req.headers[HEADER_ADMIN_TOKEN]))
       yield* _(
         BlogPostsDbService,
         Effect.flatMap((db) => db.deleteBlogPost(req.path.id)),

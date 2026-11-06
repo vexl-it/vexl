@@ -47,6 +47,7 @@ export interface BlogPostsDbOperations {
     readonly BlogPost[],
     UnexpectedServerError
   >
+  listAllBlogPosts: Effect.Effect<readonly BlogPost[], UnexpectedServerError>
 }
 
 export class BlogPostsDbService extends Context.Tag('BlogPostsDbService')<
@@ -100,6 +101,19 @@ export class BlogPostsDbService extends Context.Tag('BlogPostsDbService')<
         `,
       })
 
+      const listAllBlogPosts = SqlSchema.findAll({
+        Request: Schema.Void,
+        Result: BlogPostDbRecord,
+        execute: () => sql`
+          SELECT
+            *
+          FROM
+            blog_posts
+          ORDER BY
+            created_at DESC
+        `,
+      })
+
       return {
         insertBlogPost: (post) =>
           sql`
@@ -146,6 +160,11 @@ export class BlogPostsDbService extends Context.Tag('BlogPostsDbService')<
             'Error in listPublishedBlogPosts query'
           ),
           Effect.withSpan('listPublishedBlogPosts query')
+        ),
+        listAllBlogPosts: listAllBlogPosts().pipe(
+          Effect.map(Array.map(blogPostFromDbRecord)),
+          UnexpectedServerError.wrapErrors('Error in listAllBlogPosts query'),
+          Effect.withSpan('listAllBlogPosts query')
         ),
       }
     })

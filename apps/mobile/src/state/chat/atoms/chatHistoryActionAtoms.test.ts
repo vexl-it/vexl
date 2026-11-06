@@ -8,7 +8,10 @@ import {
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {VersionString} from '@vexl-next/domain/src/utility/VersionString.brand'
 import sendMessage from '@vexl-next/resources-utils/src/chat/sendMessage'
-import {createRequestHistoryMessage} from '@vexl-next/resources-utils/src/chat/utils/chatHistory'
+import {
+  CHAT_HISTORY_MINIMAL_REQUIRED_VERSION,
+  createRequestHistoryMessage,
+} from '@vexl-next/resources-utils/src/chat/utils/chatHistory'
 import {Effect, HashSet, Schema} from 'effect'
 import {createStore} from 'jotai'
 import {type ChatWithMessages, type InboxInState} from '../domain'
@@ -102,6 +105,16 @@ function chat(fields: Partial<ChatWithMessages> = {}): ChatWithMessages {
   }
 }
 
+function recoveringChat(
+  otherSideVersion = CHAT_HISTORY_MINIMAL_REQUIRED_VERSION
+): ChatWithMessages {
+  const pending = chat({
+    restoredFromBackup: true,
+    recoveryStartedAt: unixMillisecondsNow(),
+  })
+  return {...pending, chat: {...pending.chat, otherSideVersion}}
+}
+
 function sentMessages(): ChatMessage[] {
   return sendMessageMock.mock.calls.map(([args]) => args.message)
 }
@@ -119,10 +132,7 @@ describe('chat history requests and answers', () => {
   })
 
   it('asks a pending sender for history without minting a token', async () => {
-    const pending = chat({
-      restoredFromBackup: true,
-      recoveryStartedAt: unixMillisecondsNow(),
-    })
+    const pending = recoveringChat()
     const store = storeWith({
       inbox: {privateKey: myKey},
       chats: [],
@@ -142,6 +152,24 @@ describe('chat history requests and answers', () => {
       store.get(messagingStateAtom)[0]?.pendingRecoveryChats?.[0]
         ?.historyRequestedAt
     ).toBeDefined()
+  })
+
+  it('keeps a pending chat hidden without asking an app too old to answer', async () => {
+    const store = storeWith({
+      inbox: {privateKey: myKey},
+      chats: [],
+      pendingRecoveryChats: [
+        recoveringChat(Schema.decodeSync(VersionString)('26.9.5')),
+      ],
+    })
+    await Effect.runPromise(
+      store.set(processPendingRecoveryChatsActionAtom, myKey.publicKeyPemBase64)
+    )
+
+    expect(sentMessages()).toEqual([])
+    expect(store.get(messagingStateAtom)[0]?.pendingRecoveryChats).toHaveLength(
+      1
+    )
   })
 
   it('answers a request with history carrying a fresh token', async () => {

@@ -17,8 +17,24 @@ function holdMessages(
   chat: ChatWithMessages,
   incoming: readonly ChatMessageWithState[]
 ): ChatWithMessages {
+  const reportedVersion = pipe(
+    incoming,
+    Array.findLast(
+      (one) =>
+        one.state === 'received' ||
+        one.state === 'receivedButRequiresNewerVersion'
+    ),
+    Option.flatMapNullable((one) => one.message.myVersion),
+    Option.getOrUndefined
+  )
+
   return {
     ...chat,
+    // Tells when the other side's app can answer a history request.
+    chat: {
+      ...chat.chat,
+      otherSideVersion: reportedVersion ?? chat.chat.otherSideVersion,
+    },
     messages: pipe(
       incoming,
       Array.filter((one) => !isHiddenMetadataMessage(one)),

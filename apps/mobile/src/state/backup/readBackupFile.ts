@@ -7,7 +7,7 @@ import {getDocumentAsync} from 'expo-document-picker'
 import {File} from 'expo-file-system'
 
 // Generous: legacy keys of a long-time user are a few hundred kB at most.
-const MAX_BACKUP_FILE_SIZE_BYTES = 5 * 1024 * 1024
+export const MAX_BACKUP_FILE_SIZE_BYTES = 5 * 1024 * 1024
 
 export class InvalidBackupFileError extends Schema.TaggedError<InvalidBackupFileError>(
   'InvalidBackupFileError'

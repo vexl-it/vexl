@@ -7,7 +7,7 @@ import {
 } from '@/src/services/contentAdminApi'
 import {Effect, Either} from 'effect'
 import {useRouter} from 'next/navigation'
-import {useCallback} from 'react'
+import {useCallback, useState} from 'react'
 
 const useAdminToken = (): (() => string) => {
   const router = useRouter()
@@ -45,10 +45,23 @@ export function useCms() {
   )
 }
 
-export function useCmsImageUpload(): (file: File) => Promise<string> {
+/** `uploading` stays true while any upload started here is in flight. */
+export function useCmsImageUpload(): {
+  readonly uploadImage: (file: File) => Promise<string>
+  readonly uploading: boolean
+} {
   const requireToken = useAdminToken()
-  return useCallback(
-    (file: File) => uploadCmsImage(requireToken(), file),
+  const [pendingCount, setPendingCount] = useState(0)
+  const uploadImage = useCallback(
+    async (file: File) => {
+      setPendingCount((count) => count + 1)
+      try {
+        return await uploadCmsImage(requireToken(), file)
+      } finally {
+        setPendingCount((count) => count - 1)
+      }
+    },
     [requireToken]
   )
+  return {uploadImage, uploading: pendingCount > 0}
 }

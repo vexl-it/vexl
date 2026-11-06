@@ -137,7 +137,7 @@ export function BlogPostForm({
   onUnpublish,
 }: Props) {
   const formRef = useRef<HTMLFormElement | null>(null)
-  const uploadImage = useCmsImageUpload()
+  const {uploadImage, uploading} = useCmsImageUpload()
   const [draft, setDraft] = useState(() => draftFromPost(item))
   const [validationError, setValidationError] = useState<string | null>(null)
   const status: CmsStatus = item?.status ?? 'draft'
@@ -273,7 +273,7 @@ export function BlogPostForm({
 
       <CmsFormFooter
         status={status}
-        saving={saving}
+        saving={saving || uploading}
         error={validationError ?? error}
         success={success}
         onSave={handleSave}

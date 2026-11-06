@@ -68,22 +68,15 @@ export function useCmsItem<
   const save = (input: Input, publish: boolean): Promise<void> =>
     withFeedback(
       async () => {
-        if (item === null) {
-          const created = await cms((client, headers) =>
-            resource.create(client, headers, input)
-          )
-          try {
-            if (publish) await setStatus(created.id, 'published')
-          } finally {
-            router.replace(`${resource.path}/${created.id}/edit`)
-          }
-          return
-        }
-
-        const updated = await cms((client, headers) =>
-          resource.update(client, headers, item.id, input)
+        // Kept even if publishing fails, so a retry updates instead of creating.
+        const saved = await cms((client, headers) =>
+          item === null
+            ? resource.create(client, headers, input)
+            : resource.update(client, headers, item.id, input)
         )
-        setItem(publish ? await setStatus(updated.id, 'published') : updated)
+        setItem(saved)
+        if (publish) setItem(await setStatus(saved.id, 'published'))
+        if (id === null) router.replace(`${resource.path}/${saved.id}/edit`)
       },
       publish ? 'Saved and published' : 'Saved'
     )

@@ -27,8 +27,9 @@ async function contentExists(pathname: string): Promise<boolean> {
 }
 
 /**
- * Every response gets the security headers, and every page a fresh CSP nonce,
- * which is also why every page renders per request.
+ * Every response the proxy sees gets the security headers (config redirects
+ * run before it), and every page a fresh CSP nonce, which is also why every
+ * page renders per request.
  *
  * Next only sends real 404 HTML for URLs no route matches; a request-time
  * page that calls notFound() gets a JS-only shell. So unknown posts and page

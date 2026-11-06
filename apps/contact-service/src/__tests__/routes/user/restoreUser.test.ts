@@ -7,12 +7,16 @@ import {
   type LoginSessionId,
 } from '@vexl-next/domain/src/general/LoginSessionId.brand'
 import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
-import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {
+  UnixMilliseconds,
+  unixMillisecondsNow,
+} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {
   ecdsaSignE,
   type CryptoError,
 } from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {
+  InvalidLoginSessionProofError,
   LoggedInOnAnotherDeviceError,
   loginSessionProofMessage,
   UserNotFoundError,
@@ -283,6 +287,87 @@ describe('Login session and restore user', () => {
           restoreUser(backedUpKeys, generateLoginSessionId())
         )
         expectErrorResponse(UserNotFoundError)(restored)
+      })
+    )
+  })
+})
+
+describe('Login session proof', () => {
+  afterEach(async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const sql = yield* _(SqlClient.SqlClient)
+        yield* _(sql`DELETE FROM user_contact`)
+        yield* _(sql`DELETE FROM users`)
+      })
+    )
+  })
+
+  const elevenMinutesAgo = (): UnixMilliseconds =>
+    Schema.decodeSync(UnixMilliseconds)(unixMillisecondsNow() - 11 * 60 * 1000)
+  const noProof: ProofOf = () => Effect.succeed(undefined)
+
+  it.each([
+    ['missing', (): ProofOf => noProof],
+    ['by another key', (): ProofOf => signedBy(generatePrivateKey())],
+    ['stale', (keys: KeyPair): ProofOf => signedBy(keys, elevenMinutesAgo())],
+  ])(
+    'Rejects a login session id with a %s proof on createUser and refreshUser',
+    async (_, proofOf) => {
+      await runPromiseInMockedEnvironment(
+        Effect.gen(function* (_) {
+          const keys = generatePrivateKey()
+          const loginSessionId = generateLoginSessionId()
+
+          const created = yield* _(
+            createUserEither(keys, loginSessionId, proofOf(keys))
+          )
+          expectErrorResponse(InvalidLoginSessionProofError)(created)
+
+          yield* _(createUser(keys))
+          const refreshed = yield* _(
+            refreshUser(keys, loginSessionId, proofOf(keys))
+          )
+          expectErrorResponse(InvalidLoginSessionProofError)(refreshed)
+          const {row} = yield* _(findUserRow)
+          expect(row).toHaveProperty('loginSessionId', null)
+        })
+      )
+    }
+  )
+
+  it.each([
+    ['by another key', (): ProofOf => signedBy(generatePrivateKey())],
+    ['stale', (keys: KeyPair): ProofOf => signedBy(keys, elevenMinutesAgo())],
+  ])(
+    'Rejects restoreUser with a proof %s and keeps the old login session',
+    async (_, proofOf) => {
+      await runPromiseInMockedEnvironment(
+        Effect.gen(function* (_) {
+          const keys = generatePrivateKey()
+          const oldDeviceSession = generateLoginSessionId()
+          yield* _(createUser(keys, oldDeviceSession))
+
+          const restored = yield* _(
+            restoreUser(keys, generateLoginSessionId(), proofOf(keys))
+          )
+          expectErrorResponse(InvalidLoginSessionProofError)(restored)
+          const {row} = yield* _(findUserRow)
+          expect(row).toHaveProperty('loginSessionId', oldDeviceSession)
+        })
+      )
+    }
+  )
+
+  it('Keeps old clients without a login session id working without a proof', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const keys = generatePrivateKey()
+        const created = yield* _(createUserEither(keys, undefined, noProof))
+        expect(created._tag).toBe('Right')
+
+        const refreshed = yield* _(refreshUser(keys, undefined, noProof))
+        expect(refreshed._tag).toBe('Right')
       })
     )
   })

@@ -649,7 +649,7 @@ describe('filterIncomingMessages on an inbox restored from a backup', () => {
     expect(filter(inboxState(inboxKey), [message])).toEqual([])
   })
 
-  it.each([
+  it.each<ChatMessage['messageType']>([
     'DELETE_CHAT',
     'BLOCK_CHAT',
     'INBOX_DELETED',
@@ -659,7 +659,7 @@ describe('filterIncomingMessages on an inbox restored from a backup', () => {
     'HISTORY',
     'FCM_CYPHER_UPDATE',
     'MESSAGE_READ',
-  ] as const)('does not recover a chat from %s', (messageType) => {
+  ])('does not recover a chat from %s', (messageType) => {
     const message = receivedMessage({
       messageType,
       senderPublicKey: senderKey.publicKeyPemBase64,

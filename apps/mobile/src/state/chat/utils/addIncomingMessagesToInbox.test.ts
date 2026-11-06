@@ -123,6 +123,7 @@ function receive(
       messages,
       blockedSenders: [],
       rerequestLimitDays: 7,
+      now: at(5),
     }),
     createNewChats,
     expectedRecoveryProof: () => validProof,

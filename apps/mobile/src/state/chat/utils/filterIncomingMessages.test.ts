@@ -34,6 +34,8 @@ function timestamp(value: number): UnixMillisecondsType {
   return Schema.decodeSync(UnixMilliseconds)(value)
 }
 
+const now = timestamp(Date.UTC(2026, 0, 3))
+
 function receivedMessage({
   messageType,
   senderPublicKey,
@@ -140,6 +142,7 @@ describe('filterIncomingMessages', () => {
         messages: [request, regularMessage],
         blockedSenders: [],
         rerequestLimitDays: 7,
+        now,
       })
     ).toEqual([request])
   })
@@ -173,6 +176,7 @@ describe('filterIncomingMessages', () => {
         messages: [duplicateRequest, cancellation],
         blockedSenders: [],
         rerequestLimitDays: 7,
+        now,
       })
     ).toEqual([cancellation])
   })
@@ -206,6 +210,7 @@ describe('filterIncomingMessages', () => {
         messages: [approval, regularMessage],
         blockedSenders: [],
         rerequestLimitDays: 7,
+        now,
       })
     ).toEqual([approval, regularMessage])
   })
@@ -246,6 +251,7 @@ describe('filterIncomingMessages', () => {
         messages: [tooEarly],
         blockedSenders: [],
         rerequestLimitDays: 7,
+        now,
       })
     ).toEqual([])
     expect(
@@ -254,6 +260,7 @@ describe('filterIncomingMessages', () => {
         messages: [allowed],
         blockedSenders: [],
         rerequestLimitDays: 7,
+        now,
       })
     ).toEqual([allowed])
   })
@@ -296,6 +303,7 @@ describe('filterIncomingMessages', () => {
         messages: [regularMessage, cancellation, duplicateApproval],
         blockedSenders: [],
         rerequestLimitDays: 7,
+        now,
       })
     ).toEqual([regularMessage])
   })
@@ -330,6 +338,7 @@ describe('filterIncomingMessages', () => {
         messages: [placeholder(timestamp(Date.UTC(2026, 0, 2)))],
         blockedSenders: [],
         rerequestLimitDays: 7,
+        now,
       })
     ).toHaveLength(1)
 
@@ -349,6 +358,7 @@ describe('filterIncomingMessages', () => {
         messages: [placeholder(timestamp(Date.UTC(2026, 0, 2)))],
         blockedSenders: [],
         rerequestLimitDays: 7,
+        now,
       })
     ).toHaveLength(1)
 
@@ -371,6 +381,7 @@ describe('filterIncomingMessages', () => {
         messages: [placeholder(timestamp(Date.UTC(2026, 0, 2)))],
         blockedSenders: [],
         rerequestLimitDays: 7,
+        now,
       })
     ).toEqual([])
   })
@@ -403,6 +414,7 @@ describe('filterIncomingMessages', () => {
         messages: [request],
         blockedSenders: [blockedSender],
         rerequestLimitDays: 7,
+        now,
       })
     ).toEqual([])
     expect(
@@ -445,6 +457,7 @@ describe('filterIncomingMessages', () => {
         messages: [cancellation, messageAfterCancellation],
         blockedSenders: [],
         rerequestLimitDays: 7,
+        now,
       })
     ).toEqual([cancellation])
   })
@@ -480,6 +493,7 @@ describe('filterIncomingMessages', () => {
         messages: [cancellation],
         blockedSenders: [],
         rerequestLimitDays: 7,
+        now,
       })
     ).toEqual([])
   })
@@ -515,6 +529,7 @@ describe('filterIncomingMessages', () => {
         messages: [approval, regularMessage],
         blockedSenders: [],
         rerequestLimitDays: 7,
+        now,
       })
     ).toEqual([])
   })
@@ -555,6 +570,7 @@ describe('filterIncomingMessages', () => {
           messages: [newRequest],
           blockedSenders: [],
           rerequestLimitDays: 7,
+          now,
         })
       ).toEqual([])
     }
@@ -577,6 +593,7 @@ describe('filterIncomingMessages', () => {
         messages: [request],
         blockedSenders: [blockedSender],
         rerequestLimitDays: 7,
+        now,
       })
     ).toEqual([request])
   })
@@ -612,6 +629,7 @@ describe('filterIncomingMessages on an inbox restored from a backup', () => {
   const restoredInbox: InboxInState = {
     ...inboxState(inboxKey),
     restoredFromBackup: true,
+    restoredAt: now,
   }
 
   function filter(
@@ -623,6 +641,7 @@ describe('filterIncomingMessages on an inbox restored from a backup', () => {
       messages,
       blockedSenders: [],
       rerequestLimitDays: 7,
+      now,
     })
   }
 
@@ -638,6 +657,23 @@ describe('filterIncomingMessages on an inbox restored from a backup', () => {
     })
 
     expect(filter(restoredInbox, [first, second])).toEqual([first, second])
+  })
+
+  it('drops messages of unknown senders once the restore is 30 days old', () => {
+    const message = receivedMessage({
+      messageType: 'MESSAGE',
+      senderPublicKey: senderKey.publicKeyPemBase64,
+    })
+
+    expect(
+      filterIncomingMessages({
+        inbox: restoredInbox,
+        messages: [message],
+        blockedSenders: [],
+        rerequestLimitDays: 7,
+        now: timestamp(now + 30 * 24 * 60 * 60 * 1000),
+      })
+    ).toEqual([])
   })
 
   it('still drops messages of unknown senders on regular inboxes', () => {

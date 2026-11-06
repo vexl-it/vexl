@@ -29,6 +29,7 @@ import {
   isRestoredInboxInGracePeriod,
   messagesToShareAsHistory,
   newlyRecoveredChats,
+  recordHistoryRequest,
   restoredMessagesFromHistory,
   startedSupportingChatRecovery,
 } from './chatRecovery'
@@ -164,6 +165,38 @@ describe('restored chat state', () => {
   })
 
   it('lists pending recovery chats that still need a history request', () => {
+    const pendingWith = (otherSideKey: PrivateKeyHolder): ChatWithMessages => {
+      const pending = chat({
+        inboxKey: myKey,
+        otherSideKey,
+        messages: [],
+        restoredFromBackup: true,
+      })
+      return {...pending, chat: {...pending.chat, otherSideVersion: version}}
+    }
+    const asked = pendingWith(theirKey)
+    const neverAsked = pendingWith(generatePrivateKey())
+    const inbox = {
+      inbox: {privateKey: myKey},
+      chats: [],
+      pendingRecoveryChats: [asked, neverAsked],
+      historyRequestedAt: {[theirKey.publicKeyPemBase64]: at(20)},
+    }
+
+    expect(
+      chatsWaitingForHistoryRequest({
+        inbox,
+        now: Schema.decodeSync(UnixMilliseconds)(at(20) + 30 * 60 * 1000),
+      })
+    ).toEqual([neverAsked])
+    // The request or its answer got lost, so it is asked again.
+    expect(chatsWaitingForHistoryRequest({inbox, now: at(21)})).toEqual([
+      asked,
+      neverAsked,
+    ])
+  })
+
+  it('asks a sender at most once an hour, also across re-created pending chats', () => {
     const pending = chat({
       inboxKey: myKey,
       otherSideKey: theirKey,
@@ -174,24 +207,26 @@ describe('restored chat state', () => {
       ...pending,
       chat: {...pending.chat, otherSideVersion: version},
     }
-    const requested = {...waiting, historyRequestedAt: at(20)}
-    const inbox = {
-      inbox: {privateKey: myKey},
-      chats: [waiting],
-      pendingRecoveryChats: [waiting, requested],
-    }
+    const requested = recordHistoryRequest({
+      inbox: {
+        inbox: {privateKey: myKey},
+        chats: [],
+        pendingRecoveryChats: [waiting],
+      },
+      sender: theirKey.publicKeyPemBase64,
+      now: at(20),
+    })
+    expect(requested.pendingRecoveryChats?.[0]?.historyRequestedAt).toBe(at(20))
 
+    // Its chat was dropped and the sender wrote again.
+    const recreated = {...requested, pendingRecoveryChats: [waiting]}
+    const soon = Schema.decodeSync(UnixMilliseconds)(at(20) + 30 * 60 * 1000)
     expect(
-      chatsWaitingForHistoryRequest({
-        inbox,
-        now: Schema.decodeSync(UnixMilliseconds)(at(20) + 30 * 60 * 1000),
-      })
+      chatsWaitingForHistoryRequest({inbox: recreated, now: soon})
+    ).toEqual([])
+    expect(
+      chatsWaitingForHistoryRequest({inbox: recreated, now: at(21)})
     ).toEqual([waiting])
-    // The request or its answer got lost, so it is asked again.
-    expect(chatsWaitingForHistoryRequest({inbox, now: at(21)})).toEqual([
-      waiting,
-      requested,
-    ])
   })
 
   it('asks for history only once the other side runs an app that can answer', () => {

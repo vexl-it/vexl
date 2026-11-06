@@ -5,6 +5,7 @@ import {
 import {type NewChatMessageNoticeNotificationData} from '@vexl-next/domain/src/general/notifications'
 import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
+import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import retrieveMessages, {
   type ApiErrorRetrievingMessages,
   type RetrievedChatMessage,
@@ -260,6 +261,7 @@ function refreshInboxActionAtom(
             messages,
             blockedSenders: get(blockedChatSendersAtom),
             rerequestLimitDays: get(offerRerequestLimitDaysAtom),
+            now: unixMillisecondsNow(),
           })
         ),
         TE.chainW(

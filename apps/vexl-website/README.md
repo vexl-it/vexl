@@ -46,8 +46,7 @@ Weglot translated.
 - **Body classes.** Webflow styles some pages through the `<body>` class, so
   each route group is its own root layout: `(default)` has no class,
   `(white-bg)` is the download pages, `(body-light)` is blog posts.
-  `app/layout.tsx` only exists so unknown URLs get the prerendered
-  `app/not-found.tsx`.
+  `app/layout.tsx` only exists so unknown URLs get `app/not-found.tsx`.
 - **Shared pieces.** `src/components/` holds the navbar, language dropdown,
   footer, the `global-styles` embed some pages include, and the smooth anchor
   scrolling webflow.js used to do.
@@ -61,6 +60,11 @@ Weglot translated.
   in the browser under `/cs`. Next sends a JS-only shell when a request-time
   page calls `notFound()`, so `proxy.ts` rewrites unknown post slugs and page
   numbers to an unmatched URL before they reach their route.
+- **Content Security Policy.** `proxy.ts` sends the policy from
+  `src/contentSecurityPolicy.ts` with a fresh nonce on every page, and Next
+  puts the nonce on its inline scripts. That's why every page renders per
+  request. Scripts, images, frames and connections to any other origin are
+  blocked, so a new third-party embed needs an entry there.
 
 ## Content
 
@@ -111,8 +115,3 @@ To change copy:
 The editor and its save action only exist under `next dev`; `next build`
 leaves them out. Adding or removing keys, and the page structure around the
 copy, is a code change. The PR workflow for copy edits comes in a separate PR.
-
-## Analytics
-
-Fathom (cookieless) is the only third-party script. It only reports from
-`vexl.it` (`data-included-domains`), so previews and local runs send nothing.

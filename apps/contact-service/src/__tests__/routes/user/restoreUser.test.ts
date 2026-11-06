@@ -303,14 +303,16 @@ describe('Login session proof', () => {
     )
   })
 
-  const elevenMinutesAgo = (): UnixMilliseconds =>
-    Schema.decodeSync(UnixMilliseconds)(unixMillisecondsNow() - 11 * 60 * 1000)
+  const hoursAgo = (hours: number): UnixMilliseconds =>
+    Schema.decodeSync(UnixMilliseconds)(
+      unixMillisecondsNow() - hours * 60 * 60 * 1000
+    )
   const noProof: ProofOf = () => Effect.succeed(undefined)
 
   it.each([
     ['missing', (): ProofOf => noProof],
     ['by another key', (): ProofOf => signedBy(generatePrivateKey())],
-    ['stale', (keys: KeyPair): ProofOf => signedBy(keys, elevenMinutesAgo())],
+    ['stale', (keys: KeyPair): ProofOf => signedBy(keys, hoursAgo(25))],
   ])(
     'Rejects a login session id with a %s proof on createUser and refreshUser',
     async (_, proofOf) => {
@@ -338,7 +340,7 @@ describe('Login session proof', () => {
 
   it.each([
     ['by another key', (): ProofOf => signedBy(generatePrivateKey())],
-    ['stale', (keys: KeyPair): ProofOf => signedBy(keys, elevenMinutesAgo())],
+    ['stale', (keys: KeyPair): ProofOf => signedBy(keys, hoursAgo(25))],
   ])(
     'Rejects restoreUser with a proof %s and keeps the old login session',
     async (_, proofOf) => {
@@ -446,6 +448,54 @@ describe('Login session proof', () => {
       })
     )
   })
+
+  it('Accepts proofs from a phone whose clock is two hours off', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const keys = generatePrivateKey()
+        const created = yield* _(
+          createUserEither(
+            keys,
+            generateLoginSessionId(),
+            signedBy(keys, hoursAgo(2))
+          )
+        )
+        expect(created._tag).toBe('Right')
+
+        const restored = yield* _(
+          restoreUser(
+            keys,
+            generateLoginSessionId(),
+            signedBy(keys, hoursAgo(-2))
+          )
+        )
+        expect(restored._tag).toBe('Right')
+      })
+    )
+  })
+
+  it.each([
+    ['stale', (keys: KeyPair): ProofOf => signedBy(keys, hoursAgo(25))],
+    ['by another key', (): ProofOf => signedBy(generatePrivateKey())],
+  ])(
+    'Refreshes a user keeping its login session even with a %s proof',
+    async (_, proofOf) => {
+      await runPromiseInMockedEnvironment(
+        Effect.gen(function* (_) {
+          const keys = generatePrivateKey()
+          const loginSessionId = generateLoginSessionId()
+          yield* _(createUser(keys, loginSessionId))
+
+          const refreshed = yield* _(
+            refreshUser(keys, loginSessionId, proofOf(keys))
+          )
+          expect(refreshed._tag).toBe('Right')
+          const {row} = yield* _(findUserRow)
+          expect(row).toHaveProperty('loginSessionId', loginSessionId)
+        })
+      )
+    }
+  )
 
   it('Keeps old clients without a login session id working without a proof', async () => {
     await runPromiseInMockedEnvironment(

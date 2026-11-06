@@ -3,10 +3,15 @@ import {type PublicKeyV2} from '@vexl-next/cryptography/src/KeyHolder/brandsV2'
 import {type UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {type LoginSessionId} from '@vexl-next/domain/src/general/LoginSessionId.brand'
 import {CurrentSecurity} from '@vexl-next/rest-api/src/apiSecurity'
-import {LoggedInOnAnotherDeviceError} from '@vexl-next/rest-api/src/services/contact/contracts'
+import {
+  type InvalidLoginSessionProofError,
+  LoggedInOnAnotherDeviceError,
+  type LoginSessionProof,
+} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {commonMetricAttributesFromHeaders} from '@vexl-next/server-utils/src/metrics/commonMetricAttributesFromHeaders'
+import {type RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import dayjs from 'dayjs'
 import {Array, Effect, Option} from 'effect'
@@ -21,7 +26,10 @@ import {reportUserReactivated, reportUserRefresh} from '../../metrics'
 import {serverHashPhoneNumber} from '../../utils/serverHashContact'
 import {withUserActionRedisLock} from '../../utils/withUserActionRedisLock'
 import {notifyOthersAboutNewUserForked} from '../contacts/utils/notifyOthersAboutNewUser'
-import {ensureLoginSessionProof} from './utils/ensureLoginSessionProof'
+import {
+  ensureLoginSessionProof,
+  useUpLoginSessionProof,
+} from './utils/ensureLoginSessionProof'
 import {
   findUserOrFail,
   refreshUserRecord,
@@ -63,27 +71,39 @@ const ensureSameLoginSession = ({
   security,
   stored,
   received,
+  loginSessionProof,
 }: {
   security: UserSecurity
   stored: Option.Option<LoginSessionId>
   received: Option.Option<LoginSessionId>
+  loginSessionProof: LoginSessionProof | undefined
 }): Effect.Effect<
   void,
-  LoggedInOnAnotherDeviceError | UnexpectedServerError,
-  UserDbService
+  | LoggedInOnAnotherDeviceError
+  | InvalidLoginSessionProofError
+  | UnexpectedServerError,
+  UserDbService | RedisService
 > => {
   if (Option.isNone(received)) return Effect.void
+  const proof = {
+    publicKey: security.publicKey,
+    loginSessionId: received.value,
+    loginSessionProof,
+  }
   if (Option.isSome(stored))
     return stored.value === received.value
-      ? Effect.void
+      ? useUpLoginSessionProof(proof)
       : Effect.fail(new LoggedInOnAnotherDeviceError())
 
-  return Effect.flatMap(UserDbService, (userDb) =>
-    userDb.updateLoginSessionId({
-      publicKey: security.publicKey,
-      hash: security.serverHash,
-      loginSessionId: received.value,
-    })
+  return Effect.zipRight(
+    ensureLoginSessionProof(proof),
+    Effect.flatMap(UserDbService, (userDb) =>
+      userDb.updateLoginSessionId({
+        publicKey: security.publicKey,
+        hash: security.serverHash,
+        loginSessionId: received.value,
+      })
+    )
   )
 }
 
@@ -96,13 +116,6 @@ export const refreshUser = HttpApiBuilder.handler(
       Effect.bind('serverHash', (s) => serverHashPhoneNumber(s.hash)),
       Effect.flatMap((security) =>
         Effect.gen(function* (_) {
-          yield* _(
-            ensureLoginSessionProof({
-              publicKey: security.publicKey,
-              loginSessionId: req.payload.loginSessionId,
-              loginSessionProof: req.payload.loginSessionProof,
-            })
-          )
           const commonMetricAttributes = commonMetricAttributesFromHeaders(
             req.headers
           )
@@ -121,6 +134,7 @@ export const refreshUser = HttpApiBuilder.handler(
               security,
               stored: existingUser.loginSessionId,
               received: Option.fromNullable(req.payload.loginSessionId),
+              loginSessionProof: req.payload.loginSessionProof,
             })
           )
 

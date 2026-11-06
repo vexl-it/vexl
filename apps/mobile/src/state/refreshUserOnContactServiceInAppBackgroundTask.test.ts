@@ -1,12 +1,15 @@
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {LoggedInOnAnotherDeviceError} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {Effect} from 'effect'
+import {getDefaultStore} from 'jotai'
 import {registerInAppLoadingTask} from '../utils/inAppLoadingTasks'
 import {executeTasksWithDependencies} from '../utils/inAppLoadingTasks/atoms'
 import {ensureSessionNotificationTokenExistsTaskId} from './notifications/ensureSessionNotificationTokenExistsTask'
 import {
   afterRefreshUserUnlessAccountMoved,
+  refreshUserOnContactService,
   refreshUserOnContactServiceInAppBackgroundTaskId,
+  unlessAccountMoved,
 } from './refreshUserOnContactServiceInAppBackgroundTask'
 
 const mockRefreshUser = jest.fn()
@@ -105,4 +108,28 @@ it('still pulls messages when the contact service fails', async () => {
   await resume()
 
   expect(pullMessages).toHaveBeenCalled()
+})
+
+it('keeps notification pulls from running until the account check says it stayed', async () => {
+  const store = getDefaultStore()
+  const pullOnNotification = (): Promise<unknown> =>
+    Effect.runPromise(unlessAccountMoved(store.get, Effect.sync(pullMessages)))
+
+  mockRefreshUser.mockReturnValue(Effect.void)
+  await Effect.runPromise(refreshUserOnContactService(store))
+  await pullOnNotification()
+  expect(pullMessages).toHaveBeenCalledTimes(1)
+
+  mockRefreshUser.mockReturnValue(
+    Effect.fail(new LoggedInOnAnotherDeviceError()).pipe(
+      Effect.delay('10 millis')
+    )
+  )
+  const movedCheck = Effect.runPromise(
+    Effect.either(refreshUserOnContactService(store))
+  )
+  await pullOnNotification()
+  await movedCheck
+
+  expect(pullMessages).toHaveBeenCalledTimes(1)
 })

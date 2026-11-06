@@ -14,6 +14,13 @@ jest.mock('../../notifications/vexlTokenToKeyHolderAtom', () => ({
       token === 'vexl_nt_known' ? mockKnownKey : undefined
     ),
 }))
+jest.mock('../../refreshUserOnContactServiceInAppBackgroundTask', () => {
+  const {Effect, Option} = jest.requireActual('effect')
+  return {
+    unlessAccountMoved: (_: unknown, pull: unknown) =>
+      Effect.map(pull, Option.some),
+  }
+})
 jest.mock('./fetchNewMessagesActionAtom', () => {
   const {atom} = jest.requireActual('jotai')
   const {Effect} = jest.requireActual('effect')

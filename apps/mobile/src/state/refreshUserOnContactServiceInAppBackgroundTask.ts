@@ -1,5 +1,6 @@
 import {type LoggedInOnAnotherDeviceError} from '@vexl-next/rest-api/src/services/contact/contracts'
-import {Effect, Match, Option} from 'effect/index'
+import {Effect, Exit, Fiber, Match, Option} from 'effect/index'
+import {atom, type Getter} from 'jotai'
 import {type Store} from 'jotai/vanilla/store'
 import {apiAtom} from '../api'
 import {
@@ -14,11 +15,7 @@ import {clearDeviceAfterLoginOnAnotherDeviceActionAtom} from './resetLocalDataAc
 import {sessionDataOrDummyAtom} from './session'
 import {logoutActionAtom} from './useLogout'
 
-/**
- * Also tells whether the account still lives on this device. When it moved to
- * another device, this device is cleared and the effect fails.
- */
-export const refreshUserOnContactService = (
+const checkAccountOnContactService = (
   store: Store
 ): Effect.Effect<void, LoggedInOnAnotherDeviceError> =>
   Effect.gen(function* (_) {
@@ -151,6 +148,39 @@ export const refreshUserOnContactService = (
         },
       })
     )
+  })
+
+const latestAccountCheckAtom = atom<
+  Option.Option<Fiber.RuntimeFiber<void, LoggedInOnAnotherDeviceError>>
+>(Option.none())
+
+/**
+ * Also tells whether the account still lives on this device. When it moved to
+ * another device, this device is cleared and the effect fails.
+ */
+export const refreshUserOnContactService = (
+  store: Store
+): Effect.Effect<void, LoggedInOnAnotherDeviceError> =>
+  Effect.gen(function* () {
+    const check = yield* Effect.forkDaemon(checkAccountOnContactService(store))
+    store.set(latestAccountCheckAtom, Option.some(check))
+    return yield* Fiber.join(check)
+  })
+
+/**
+ * `afterRefreshUserUnlessAccountMoved` for pulls that don't run as resume
+ * tasks, like the ones a notification starts: waits for a running check and
+ * skips the pull when the account moved to another device.
+ */
+export const unlessAccountMoved = <A, E, R>(
+  get: Getter,
+  pull: Effect.Effect<A, E, R>
+): Effect.Effect<Option.Option<A>, E, R> =>
+  Effect.gen(function* () {
+    const check = get(latestAccountCheckAtom)
+    if (Option.isSome(check) && Exit.isFailure(yield* Fiber.await(check.value)))
+      return Option.none()
+    return Option.some(yield* pull)
   })
 
 export const refreshUserOnContactServiceInAppBackgroundTaskId =

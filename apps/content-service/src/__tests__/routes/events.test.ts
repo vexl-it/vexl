@@ -39,29 +39,34 @@ describe('events', () => {
       Effect.gen(function* (_) {
         const app = yield* _(NodeTestingApp)
         const {events} = yield* _(app.Cms.getEvents({}))
-        const event = events.find((one) => one.name === 'Watch Out Bitcoin!')
+        const event = Array.findFirst(
+          events,
+          (one) => one.name === 'Watch Out Bitcoin!'
+        )
 
-        expect(event).toEqual({
-          id: '6aabfec2d6eeb85c6ac94932',
-          name: 'Watch Out Bitcoin!',
-          venue: 'Espacio Pablo VI, Madrid, Spain 🇪🇸',
-          link: 'https://wobitcoin.org',
-          startDate: new Date('2026-10-02T07:00:00.000Z'),
-          endDate: Option.some(new Date('2026-10-04T18:00:00.000Z')),
-          goldenGlasses: false,
-          speakers: [
-            {
-              name: 'Zenx',
-              linkToSocials: Option.none(),
-              imageUrl: Option.none(),
-            },
-            {
-              name: 'Natalia',
-              linkToSocials: Option.none(),
-              imageUrl: Option.none(),
-            },
-          ],
-        })
+        expect(event).toEqual(
+          Option.some({
+            id: '6aabfec2d6eeb85c6ac94932',
+            name: 'Watch Out Bitcoin!',
+            venue: 'Espacio Pablo VI, Madrid, Spain 🇪🇸',
+            link: 'https://wobitcoin.org',
+            startDate: new Date('2026-10-02T07:00:00.000Z'),
+            endDate: Option.some(new Date('2026-10-04T18:00:00.000Z')),
+            goldenGlasses: false,
+            speakers: [
+              {
+                name: 'Zenx',
+                linkToSocials: Option.none(),
+                imageUrl: Option.none(),
+              },
+              {
+                name: 'Natalia',
+                linkToSocials: Option.none(),
+                imageUrl: Option.none(),
+              },
+            ],
+          })
+        )
       })
     )
   })

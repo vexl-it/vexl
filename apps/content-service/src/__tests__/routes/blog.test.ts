@@ -39,21 +39,24 @@ describe('blog posts', () => {
       Effect.gen(function* (_) {
         const app = yield* _(NodeTestingApp)
         const {articles} = yield* _(app.Cms.getBlogArticles({}))
-        const article = articles.find(
+        const article = Array.findFirst(
+          articles,
           (one) => one.slug === 'so-what-is-vexl-anyway'
         )
 
-        expect(article).toEqual({
-          id: '66cf2c02c759d4f4c55f3f27',
-          slug: 'so-what-is-vexl-anyway',
-          title: 'So what is Vexl anyway?',
-          link: 'https://vexl.it/post/so-what-is-vexl-anyway',
-          publishedOn: new Date('2024-09-11T12:20:34.428Z'),
-          teaserText: expect.anything(),
-          mainImage: Option.some(
-            'https://resources.vexl.it/content/cms/66cf1f68e3db4ee9a8a5d63c.png'
-          ),
-        })
+        expect(article).toEqual(
+          Option.some({
+            id: '66cf2c02c759d4f4c55f3f27',
+            slug: 'so-what-is-vexl-anyway',
+            title: 'So what is Vexl anyway?',
+            link: 'https://vexl.it/post/so-what-is-vexl-anyway',
+            publishedOn: new Date('2024-09-11T12:20:34.428Z'),
+            teaserText: expect.anything(),
+            mainImage: Option.some(
+              'https://resources.vexl.it/content/cms/66cf1f68e3db4ee9a8a5d63c.png'
+            ),
+          })
+        )
       })
     )
   })

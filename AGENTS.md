@@ -23,6 +23,7 @@ When changing any UI / UX in the mobile app or in the ui package you must read @
 
 - apps/-\*service - backend services
 - apps/mobile - Expo mobile app
+- apps/vexl-website - the vexl.it marketing site (Next.js); non-developers change it through the `updating-website` skill
 - packages/server-utils - shared utilities for backend services
 - packages/ui - shared UI components and themes for mobile app
 - packages/domain - shared domain logic, types, schemas, and similar for both backend and mobile app

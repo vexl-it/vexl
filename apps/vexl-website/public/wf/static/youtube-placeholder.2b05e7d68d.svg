@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="560px" height="315px" viewBox="0 0 560 315" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 51.2 (57519) - http://www.bohemiancoding.com/sketch -->
+    <title>youtube-placeholder</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="youtube-placeholder" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <rect id="Rectangle-3" fill="#E0E0E0" fill-rule="nonzero" x="0" y="0" width="560" height="315"></rect>
+        <path d="M270,172 L270,142 L297,157 L270,172 Z M319.850705,123.149548 C311.896443,121 280,121 280,121 C280,121 248.103557,121 240.149295,123.149548 C235.760977,124.332323 232.304568,127.817355 231.131568,132.243032 C229,140.264065 229,157 229,157 C229,157 229,173.735355 231.131568,181.756968 C232.304568,186.182645 235.760977,189.667677 240.149295,190.851032 C248.103557,193 280,193 280,193 C280,193 311.896443,193 319.850705,190.851032 C324.239023,189.667677 327.695432,186.182645 328.868432,181.756968 C331,173.735355 331,157 331,157 C331,157 331,140.264065 328.868432,132.243032 C327.695432,127.817355 324.239023,124.332323 319.850705,123.149548 Z" id="Fill-1" fill="#C2C2C2"></path>
+    </g>
+</svg>

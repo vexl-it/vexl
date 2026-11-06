@@ -1,0 +1,56 @@
+{
+  "name": "vexl-website",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --webpack",
+    "dev:prod-data": "CONTENT_SERVICE_URL=https://content.vexl.it next dev --webpack",
+    "build": "next build --webpack",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint app src scripts proxy.ts",
+    "lint:fix": "eslint app src scripts proxy.ts --fix",
+    "format": "prettier --check \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json,css}\"",
+    "format:fix": "prettier --write \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json,css}\"",
+    "test": "vitest run",
+    "setup": "scripts/setup.sh",
+    "screenshots": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/screenshots.ts",
+    "publish-screenshots": "scripts/publish-screenshots.sh"
+  },
+  "dependencies": {
+    "@effect/platform": "^0.93.6",
+    "@vexl-next/domain": "0.0.0",
+    "@vexl-next/rest-api": "0.0.0",
+    "effect": "^3.20.0",
+    "gsap": "^3.15.1",
+    "hast-util-to-jsx-runtime": "^2.3.7",
+    "matter-js": "^0.20.0",
+    "next": "^16.4.1",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "rehype-parse": "^9.0.1",
+    "rehype-sanitize": "^6.0.0",
+    "split-type": "^0.3.4",
+    "unified": "^11.0.5"
+  },
+  "devDependencies": {
+    "@types/hast": "^3.0.4",
+    "@types/matter-js": "^0.20.2",
+    "@types/node": "^22.10.5",
+    "@types/react": "~19.2.14",
+    "@types/react-dom": "~19.2.3",
+    "@vexl-next/eslint-config": "0.0.0",
+    "@vexl-next/prettier-config": "0.0.0",
+    "@vexl-next/tsconfig": "0.0.0",
+    "eslint": "^9.20.0",
+    "hast-util-to-html": "^9.0.5",
+    "playwright": "^1.64.1",
+    "prettier": "^3.3.2",
+    "typescript": "~6.0.3",
+    "vitest": "^4.1.11"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "prettier": "@vexl-next/prettier-config"
+}

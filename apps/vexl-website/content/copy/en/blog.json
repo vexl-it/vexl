@@ -1,0 +1,20 @@
+{
+  "meta.title": "Blog - Vexl",
+  "meta.description": "Why we built Vexl, how peer-to-peer Bitcoin trading works, and what a world without KYC looks like in practice.",
+  "meta.postTitleSuffix": " - Blog │ Vexl",
+  "hero.heading": "Blog",
+  "hero.subtitle": "Why we built Vexl, how peer-to-peer Bitcoin trading works, and what a world without KYC looks like in practice.",
+  "pagination.label": "List",
+  "pagination.previous": "Previous",
+  "pagination.previousLabel": "Previous Page",
+  "pagination.next": "Next",
+  "pagination.nextLabel": "Next Page",
+  "post.backToBlog": "← Back to Blog",
+  "post.publishedBy": "Published by Vexl Team",
+  "post.minRead": " min. read",
+  "post.summary": "Summary",
+  "post.tableOfContents": "Table of contents",
+  "post.relatedArticles": "Related Articles",
+  "rss.title": "Vexl blog",
+  "rss.description": "Rss Channel vexl blog"
+}

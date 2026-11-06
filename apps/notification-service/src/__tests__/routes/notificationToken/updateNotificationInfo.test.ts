@@ -39,6 +39,18 @@ const validMarketingVexlToken = Schema.decodeSync(VexlNotificationToken)(
   'vexl_nt_marketing'
 )
 
+const accountMovedAwareHeaders = makeCommonHeaders({
+  platform: 'ANDROID',
+  versionCode: Schema.decodeSync(VersionCode)(261100200),
+  semver: Schema.decodeSync(VersionString)('26.11.2'),
+  appSource: validAppSource,
+  language: 'en',
+  isDeveloper: false,
+  deviceModel: Option.none(),
+  osVersion: Option.none(),
+  prefix: Option.none(),
+})
+
 const validPrefix = Schema.decodeSync(CountryPrefix)(420)
 const updatedPrefix = Schema.decodeSync(CountryPrefix)(1)
 
@@ -501,7 +513,7 @@ describe('UpdateNotificationInfo', () => {
         const created = yield* _(
           app.NotificationTokenGroup.CreateNotificationSecret({
             payload: {expoNotificationToken: validExpoToken},
-            headers: validHeaders,
+            headers: accountMovedAwareHeaders,
           })
         )
 
@@ -511,7 +523,7 @@ describe('UpdateNotificationInfo', () => {
               secret: created.secret,
               expoNotificationToken: validExpoTokenUpdate,
             },
-            headers: validHeaders,
+            headers: accountMovedAwareHeaders,
           })
         )
 
@@ -534,7 +546,7 @@ describe('UpdateNotificationInfo', () => {
     )
   })
 
-  it('Should not nudge anyone when the expo token stays the same', async () => {
+  it('Should not nudge an app too old to tell a moved account from a login elsewhere', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const app = yield* _(NodeTestingApp)
@@ -550,9 +562,37 @@ describe('UpdateNotificationInfo', () => {
           app.NotificationTokenGroup.updateNoficationInfo({
             payload: {
               secret: created.secret,
-              expoNotificationToken: validExpoToken,
+              expoNotificationToken: validExpoTokenUpdate,
             },
             headers: validHeaders,
+          })
+        )
+
+        expect(sentExpoNotifications).toEqual([])
+        expect(sentSocketNotices).toEqual([])
+      })
+    )
+  })
+
+  it('Should not nudge anyone when the expo token stays the same', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const app = yield* _(NodeTestingApp)
+
+        const created = yield* _(
+          app.NotificationTokenGroup.CreateNotificationSecret({
+            payload: {expoNotificationToken: validExpoToken},
+            headers: accountMovedAwareHeaders,
+          })
+        )
+
+        yield* _(
+          app.NotificationTokenGroup.updateNoficationInfo({
+            payload: {
+              secret: created.secret,
+              expoNotificationToken: validExpoToken,
+            },
+            headers: accountMovedAwareHeaders,
           })
         )
 

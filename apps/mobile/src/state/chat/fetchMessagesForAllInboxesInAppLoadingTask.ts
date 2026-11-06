@@ -1,4 +1,5 @@
 import {registerInAppLoadingTask} from '../../utils/inAppLoadingTasks'
+import {afterRefreshUserUnlessAccountMoved} from '../refreshUserOnContactServiceInAppBackgroundTask'
 import fetchMessagesForAllInboxesAtom from './atoms/fetchNewMessagesActionAtom'
 
 export const fetchMessagesForAllInboxesInAppLoadingTaskId =
@@ -8,5 +9,6 @@ export const fetchMessagesForAllInboxesInAppLoadingTaskId =
       requiresUserLoggedIn: true,
       runOn: 'resume',
     },
+    dependsOn: [afterRefreshUserUnlessAccountMoved],
     task: (store) => store.set(fetchMessagesForAllInboxesAtom),
   })

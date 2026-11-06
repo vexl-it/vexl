@@ -2,7 +2,10 @@ import {
   type PrivateKeyHolder,
   type PublicKeyPemBase64,
 } from '@vexl-next/cryptography/src/KeyHolder'
-import {type ChatMessage} from '@vexl-next/domain/src/general/messaging'
+import {
+  toServerVisibleMessageType,
+  type ChatMessage,
+} from '@vexl-next/domain/src/general/messaging'
 import {toError, type BasicError} from '@vexl-next/domain/src/utility/errors'
 import {type SignedChallenge} from '@vexl-next/rest-api/src/challenges/contracts'
 import {type ChatApi} from '@vexl-next/rest-api/src/services/chat'
@@ -54,7 +57,7 @@ function createMessageInBatch({
     ),
     TE.map(({encryptedMessage, encryptedPreview}) => ({
       message: encryptedMessage,
-      messageType: message.messageType,
+      messageType: toServerVisibleMessageType(message.messageType),
       messagePreview: encryptedPreview,
       receiverPublicKey,
     }))

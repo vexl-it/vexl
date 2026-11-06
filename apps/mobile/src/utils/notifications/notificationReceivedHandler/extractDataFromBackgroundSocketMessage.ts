@@ -62,6 +62,7 @@ const toNotificationData = (
       return Option.some(
         new UserLoginOnDifferentDeviceNotificationData({
           trackingId: Option.some(message.trackingId),
+          accountMoved: message.accountMoved,
         })
       )
     case 'ClubFlaggedNoticeMessage':

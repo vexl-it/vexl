@@ -1,5 +1,5 @@
 import {type OfferId} from '@vexl-next/domain/src/general/offers'
-import {type Effect} from 'effect'
+import {Effect} from 'effect'
 import {deepEqual} from 'fast-equals'
 import {atom, type Atom, type PrimitiveAtom, type WritableAtom} from 'jotai'
 import {singleOfferAtom} from '../../../state/marketplace/atoms/offersState'
@@ -32,17 +32,17 @@ export function createOfferFormLifecycleAtoms({
   committedFormAtom,
   editedOfferIdAtom,
   offerActiveAtom,
-  calculateSatsValueOnFiatValueChangeActionAtom,
+  initializeSatsValueFromBtcPriceActionAtom,
   initializeAmountTopLimitFromBtcPriceActionAtom,
 }: {
   workingFormAtom: PrimitiveAtom<OfferFormState>
   committedFormAtom: PrimitiveAtom<OfferFormState>
   editedOfferIdAtom: PrimitiveAtom<OfferId | undefined>
   offerActiveAtom: PrimitiveAtom<boolean>
-  calculateSatsValueOnFiatValueChangeActionAtom: WritableAtom<
+  initializeSatsValueFromBtcPriceActionAtom: WritableAtom<
     null,
-    [string],
-    void
+    [],
+    Effect.Effect<void>
   >
   initializeAmountTopLimitFromBtcPriceActionAtom: WritableAtom<
     null,
@@ -60,11 +60,8 @@ export function createOfferFormLifecycleAtoms({
       set(editedOfferIdAtom, offer.offerInfo.offerId)
       set(workingFormAtom, initialFormState)
       set(committedFormAtom, initialFormState)
-      set(
-        calculateSatsValueOnFiatValueChangeActionAtom,
-        String(offer.offerInfo.publicPart.amountBottomLimit)
-      )
       set(offerActiveAtom, offer.offerInfo.publicPart.active)
+      void Effect.runPromise(set(initializeSatsValueFromBtcPriceActionAtom))
     }
   )
 

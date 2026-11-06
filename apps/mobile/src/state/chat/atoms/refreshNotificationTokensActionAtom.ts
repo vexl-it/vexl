@@ -18,9 +18,10 @@ import {pipe} from 'fp-ts/lib/function'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
 import {version} from '../../../utils/environment'
-import reportError from '../../../utils/reportError'
+import reportError, {type LogLvl} from '../../../utils/reportError'
 import {generateAndRegisterVexlTokenActionAtom} from '../../notifications/actions/generateVexlTokenActionAtom'
 import {type ChatWithMessages} from '../domain'
+import {myChatRecoveryProofToShare} from '../utils/myChatRecoveryProof'
 import focusChatByInboxKeyAndSenderKey from './focusChatByInboxKeyAndSenderKey'
 import {updateMyNotificationTokenInfoInChat} from './updateMyNotificationTokenInfoInChat'
 
@@ -43,80 +44,97 @@ function createFcmCypherUpdateMessage(
   }
 }
 
+export const sendMessageWithMyVexlTokenActionAtom = atom(
+  null,
+  (
+    get,
+    set,
+    {
+      chatWithMessages,
+      createMessage,
+      failure = {lvl: 'error', message: 'Error while refreshing fcm cypher'},
+    }: {
+      chatWithMessages: ChatWithMessages
+      createMessage: (
+        vexlToken: VexlNotificationToken | undefined
+      ) => ChatMessage
+      failure?: {lvl: LogLvl; message: string}
+    }
+  ): T.Task<boolean> =>
+    pipe(
+      T.Do,
+      T.map((o) => {
+        console.info(
+          `🔥 Refresh notifications tokens',  'Refreshing chat with Id ${chatWithMessages.chat.id}`
+        )
+        return o
+      }),
+      T.bind('vexlNotificationToken', () =>
+        effectToTask(
+          set(generateAndRegisterVexlTokenActionAtom, {
+            keyHolder: chatWithMessages.chat.inbox.privateKey,
+          }).pipe(Effect.option)
+        )
+      ),
+      T.bind('messageToSend', ({vexlNotificationToken}) =>
+        T.of(createMessage(Option.getOrUndefined(vexlNotificationToken)))
+      ),
+      TE.fromTask,
+      TE.bind('sentMessage', ({messageToSend}) =>
+        effectToTaskEither(
+          sendMessage({
+            api: get(apiAtom).chat,
+            senderKeypair: chatWithMessages.chat.inbox.privateKey,
+            receiverPublicKey: chatWithMessages.chat.otherSide.publicKey,
+            message: messageToSend,
+            notificationApi: get(apiAtom).notification,
+            theirNotificationToken: chatWithMessages.chat.otherSideVexlToken,
+            recoveryProof: myChatRecoveryProofToShare(get, chatWithMessages),
+          })
+        )
+      ),
+      TE.map(({vexlNotificationToken}) => {
+        const chatAtom = focusChatByInboxKeyAndSenderKey({
+          inboxKey: chatWithMessages.chat.inbox.privateKey.publicKeyPemBase64,
+          senderKey: chatWithMessages.chat.otherSide.publicKey,
+        })
+        set(
+          chatAtom,
+          updateMyNotificationTokenInfoInChat(
+            Option.getOrUndefined(vexlNotificationToken)
+          )
+        )
+      }),
+      TE.matchW(
+        (e) => {
+          reportError(failure.lvl, new Error(failure.message), {e})
+          console.warn(
+            `🔥 Refresh notifications tokens',  'Refreshing chat with Id ${chatWithMessages.chat.id}`,
+            `Error refreshing ${e._tag}`
+          )
+          return false
+        },
+        () => {
+          console.info(
+            `🔥 Refresh notifications tokens',  'Refreshing chat with Id ${chatWithMessages.chat.id}`,
+            'success'
+          )
+          return true
+        }
+      )
+    )
+)
+
 export const sendFcmCypherUpdateMessageActionAtom = atom(
   null,
-  (get, set): ((chatWithMessages: ChatWithMessages) => T.Task<boolean>) => {
-    return (chatWithMessages) => {
-      return pipe(
-        T.Do,
-        T.map((o) => {
-          console.info(
-            `🔥 Refresh notifications tokens',  'Refreshing chat with Id ${chatWithMessages.chat.id}`
-          )
-          return o
-        }),
-        T.bind('vexlNotificationToken', () =>
-          effectToTask(
-            set(generateAndRegisterVexlTokenActionAtom, {
-              keyHolder: chatWithMessages.chat.inbox.privateKey,
-            }).pipe(Effect.option)
-          )
-        ),
-        T.bind('messageToSend', ({vexlNotificationToken}) =>
-          T.of(
-            createFcmCypherUpdateMessage(
-              chatWithMessages.chat.inbox.privateKey.publicKeyPemBase64,
-              Option.getOrUndefined(vexlNotificationToken)
-            )
-          )
-        ),
-        TE.fromTask,
-        TE.bind('sentMessage', ({messageToSend}) =>
-          effectToTaskEither(
-            sendMessage({
-              api: get(apiAtom).chat,
-              senderKeypair: chatWithMessages.chat.inbox.privateKey,
-              receiverPublicKey: chatWithMessages.chat.otherSide.publicKey,
-              message: messageToSend,
-              notificationApi: get(apiAtom).notification,
-              theirNotificationToken: chatWithMessages.chat.otherSideVexlToken,
-            })
-          )
-        ),
-        TE.map(({vexlNotificationToken}) => {
-          const chatAtom = focusChatByInboxKeyAndSenderKey({
-            inboxKey: chatWithMessages.chat.inbox.privateKey.publicKeyPemBase64,
-            senderKey: chatWithMessages.chat.otherSide.publicKey,
-          })
-          set(
-            chatAtom,
-            updateMyNotificationTokenInfoInChat(
-              Option.getOrUndefined(vexlNotificationToken)
-            )
-          )
-        }),
-        TE.matchW(
-          (e) => {
-            reportError(
-              'error',
-              new Error('Error while refreshing fcm cypher'),
-              {e}
-            )
-            console.warn(
-              `🔥 Refresh notifications tokens',  'Refreshing chat with Id ${chatWithMessages.chat.id}`,
-              `Error refreshing ${e._tag}`
-            )
-            return false
-          },
-          () => {
-            console.info(
-              `🔥 Refresh notifications tokens',  'Refreshing chat with Id ${chatWithMessages.chat.id}`,
-              'success'
-            )
-            return true
-          }
-        )
-      )
-    }
-  }
+  (get, set): ((chatWithMessages: ChatWithMessages) => T.Task<boolean>) =>
+    (chatWithMessages) =>
+      set(sendMessageWithMyVexlTokenActionAtom, {
+        chatWithMessages,
+        createMessage: (vexlToken) =>
+          createFcmCypherUpdateMessage(
+            chatWithMessages.chat.inbox.privateKey.publicKeyPemBase64,
+            vexlToken
+          ),
+      })
 )

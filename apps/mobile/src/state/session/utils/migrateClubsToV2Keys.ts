@@ -31,6 +31,8 @@ export const migrateClubsToV2Keys = (
       clubUuids,
       Array.map(([clubUuid, oldKeypair]) =>
         Effect.gen(function* (_) {
+          // Stays random: it's paired with a legacy (random) V1 key, so the
+          // whole entry is exported as a legacy club key in the backup.
           const keypairV2 = yield* _(generateV2KeyPair())
           yield* _(
             contactApi.setPublicKeyV2({

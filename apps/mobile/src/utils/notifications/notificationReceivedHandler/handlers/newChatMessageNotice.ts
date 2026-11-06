@@ -8,9 +8,8 @@ import {getDefaultStore} from 'jotai'
 import {AppState} from 'react-native'
 import {areNotificationsEnabledE} from '../..'
 import {apiAtom} from '../../../../api'
-import {fetchAndStoreMessagesForInboxHandleNotificationsActionAtom} from '../../../../state/chat/atoms/fetchNewMessagesActionAtom'
-import {getKeyHolderForVexlTokenActionAtom} from '../../../../state/notifications/vexlTokenToKeyHolderAtom'
-import reportError, {reportErrorE} from '../../../reportError'
+import {fetchMessagesForNotifiedInboxActionAtom} from '../../../../state/chat/atoms/fetchMessagesForNotifiedInboxActionAtom'
+import {reportErrorE} from '../../../reportError'
 
 const processChatNotificationProcessed = (
   notificationTrackingId: NotificationTrackingId,
@@ -153,24 +152,11 @@ export function handleNewChatMessageNoticeNotification(
     // Disable for now
     // if (notificationData.includesSystemNotification) return false
 
-    const inboxForToken = store.set(
-      getKeyHolderForVexlTokenActionAtom,
-      notificationData.targetToken
-    )
-    if (!inboxForToken) {
-      reportError(
-        'warn',
-        new Error(
-          'Error decrypting notification - unable to find private key for token'
-        )
-      )
-      return
-    }
-
     yield* _(
-      store.set(fetchAndStoreMessagesForInboxHandleNotificationsActionAtom, {
-        key: inboxForToken.publicKeyPemBase64,
-      })
+      store.set(
+        fetchMessagesForNotifiedInboxActionAtom,
+        notificationData.targetToken
+      )
     )
   })
 }

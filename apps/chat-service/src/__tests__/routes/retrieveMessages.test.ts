@@ -5,7 +5,7 @@ import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {
   MessageCypher,
-  MessageType,
+  ServerVisibleMessageType,
 } from '@vexl-next/domain/src/general/messaging'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {type SendMessageRequest} from '@vexl-next/rest-api/src/services/chat/contracts'
@@ -168,7 +168,7 @@ describe('Retrieve messages', () => {
             message: Schema.decodeSync(MessageCypher)(
               'messageRetrievedWithoutPull'
             ),
-            messageType: Schema.decodeSync(MessageType)('MESSAGE'),
+            messageType: Schema.decodeSync(ServerVisibleMessageType)('MESSAGE'),
             receiverPublicKey: user1.mainKeyPair.publicKeyPemBase64,
           })
         )) satisfies SendMessageRequest
@@ -251,7 +251,7 @@ describe('Retrieve messages', () => {
         const messageToSend = (yield* _(
           user2.inbox1.addChallenge({
             message: Schema.decodeSync(MessageCypher)('messageRetrievedByNse'),
-            messageType: Schema.decodeSync(MessageType)('MESSAGE'),
+            messageType: Schema.decodeSync(ServerVisibleMessageType)('MESSAGE'),
             receiverPublicKey: user1.mainKeyPair.publicKeyPemBase64,
           })
         )) satisfies SendMessageRequest

@@ -53,11 +53,13 @@ import {
   LeaveClubRequest,
   ListClubLinksRequest,
   ListClubLinksResponse,
+  LoggedInOnAnotherDeviceError,
   MemberAlreadyInClubError,
   RefreshUserRequest,
   ReportClubLimitReachedError,
   ReportClubRequest,
   ReportClubResponse,
+  RestoreUserRequest,
   SetPublicKeyV2Request,
   UserExistsResponse,
   UserIsNotModeratorError,
@@ -91,6 +93,18 @@ export const RefreshUserEndpoint = HttpApiEndpoint.post(
   .setHeaders(CommonAndSecurityHeaders)
   .middleware(ServerSecurityMiddleware)
   .setPayload(RefreshUserRequest)
+  .addSuccess(NoContentResponse)
+  .addError(UserNotFoundError, {status: 404})
+  .addError(LoggedInOnAnotherDeviceError, {status: 409})
+  .annotate(MaxExpectedDailyCall, 1)
+
+export const RestoreUserEndpoint = HttpApiEndpoint.post(
+  'restoreUser',
+  '/api/v1/users/restore'
+)
+  .setHeaders(CommonAndSecurityHeaders)
+  .middleware(ServerSecurityMiddleware)
+  .setPayload(RestoreUserRequest)
   .addSuccess(NoContentResponse)
   .addError(UserNotFoundError, {status: 404})
   .annotate(MaxExpectedDailyCall, 1)
@@ -290,6 +304,7 @@ const UserApiGroup = HttpApiGroup.make('User')
   .add(CheckUserExistsEndpoint)
   .add(CreateUserEndpoint)
   .add(RefreshUserEndpoint)
+  .add(RestoreUserEndpoint)
   .add(UpdateNotificationTokenEndpoint)
   .add(DeleteUserEndpoint)
   .add(EraseUserFromNetworkEndpoint)

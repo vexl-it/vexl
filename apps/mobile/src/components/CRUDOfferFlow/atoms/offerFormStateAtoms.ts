@@ -113,8 +113,8 @@ export const offerFormMolecule = molecule(() => {
     committedFormAtom,
     editedOfferIdAtom,
     offerActiveAtom,
-    calculateSatsValueOnFiatValueChangeActionAtom:
-      priceAtoms.calculateSatsValueOnFiatValueChangeActionAtom,
+    initializeSatsValueFromBtcPriceActionAtom:
+      priceAtoms.initializeSatsValueFromBtcPriceActionAtom,
     initializeAmountTopLimitFromBtcPriceActionAtom:
       priceAtoms.initializeAmountTopLimitFromBtcPriceActionAtom,
   })

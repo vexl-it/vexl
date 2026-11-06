@@ -2,6 +2,8 @@ import {KeyHolder} from '@vexl-next/cryptography'
 import {type KeyPairV2} from '@vexl-next/cryptography/src/KeyHolder'
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
+import {LoginSessionId} from '@vexl-next/domain/src/general/LoginSessionId.brand'
+import {MasterSeed} from '@vexl-next/domain/src/general/MasterSeed.brand'
 import {type CryptoBoxSignature} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {type EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/EcdsaSignature.brand'
 import {Schema} from 'effect/index'
@@ -32,4 +34,8 @@ export const dummySession: SessionV2 = {
   phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733733733'),
   version: 1,
   isLiquidityProvider: false,
+  masterSeed: Schema.decodeSync(MasterSeed)('00'.repeat(32)),
+  loginSessionId: Schema.decodeSync(LoginSessionId)(
+    '00000000-0000-4000-8000-000000000000'
+  ),
 }

@@ -6,6 +6,7 @@ import {
   Gift,
   Help,
   type IconProps,
+  Lock,
   LogConsole,
   MegaphoneNotifications,
   type MenuItemProps,
@@ -95,6 +96,13 @@ export function useContent(): AccountMenus {
             icon: CellPhoneMobileDevice,
             onPress: () => {
               navigation.navigate('AppSettings')
+            },
+          },
+          {
+            label: t('account.accountBackup'),
+            icon: Lock,
+            onPress: () => {
+              navigation.navigate('AccountBackup')
             },
           },
           {

@@ -176,6 +176,9 @@ export type RootStackParamsList = {
 
   VexlOnlyContacts: undefined
 
+  AccountBackup: undefined
+  AccountBackupPin: undefined
+
   NotificationSettings: undefined
 
   Notifications: undefined
@@ -296,6 +299,7 @@ export type LoginStackParamsList = {
     readonly phoneNumber: E164PhoneNumber
     readonly initPhoneVerificationResponse: InitPhoneVerificationResponse
   }
+  RestoreFromBackup: undefined
 }
 
 export type LoginStackScreenProps<T extends keyof LoginStackParamsList> =
@@ -308,12 +312,17 @@ export type LoginStackScreenProps<T extends keyof LoginStackParamsList> =
 export type LoginFlowStackParamsList = {
   Intro1: undefined
   Intro2: undefined
-  PhoneNumber: undefined
+  PhoneNumber: {readonly restore?: boolean} | undefined
   CountryPicker: undefined
   VerificationCode: {
     readonly phoneNumber: E164PhoneNumber
     readonly initPhoneVerificationResponse: InitPhoneVerificationResponse
+    readonly restore?: boolean
   }
+  RestoreIntro: undefined
+  RestoreWrongPhoneNumber: undefined
+  RestorePin: undefined
+  RestoreFromBackup: undefined
 }
 
 export type LoginFlowStackScreenProps<
@@ -325,6 +334,7 @@ export type LoginFlowStackScreenProps<
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type PostLoginFlowStackParamsList = {
+  RestoredAccountInfo: undefined
   ContactsImport: undefined
   NotificationSetup: undefined
   UsageInfo: undefined

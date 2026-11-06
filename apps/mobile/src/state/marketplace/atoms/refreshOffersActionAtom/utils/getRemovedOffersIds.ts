@@ -1,4 +1,4 @@
-import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
+import {type ClubKeys, type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {
   type OfferId,
   type OneOfferInState,
@@ -6,7 +6,6 @@ import {
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
 import {Array, Effect, Option, pipe, Record} from 'effect'
 import reportError from '../../../../../utils/reportError'
-import {type ClubKeys} from '../../../../clubs/atom/clubsToKeyHolderV2Atom'
 
 export const getRemovedOffersIds = ({
   storedOffers,

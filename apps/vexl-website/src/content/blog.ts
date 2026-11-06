@@ -9,7 +9,6 @@ export interface BlogPost {
   readonly date: Date
   readonly summary: string
   readonly imageUrl: Option.Option<string>
-  /** Shown above the list on the blog page instead of in it. */
   readonly featured: boolean
   /** HTML from the CMS; render it through `renderRichText`. */
   readonly body: string
@@ -57,15 +56,20 @@ export function findBlogPost(
   return Array.findFirst(posts, (post) => post.slug === slug)
 }
 
-/** The blog list, without the featured post. */
-export function listedBlogPosts(posts: readonly BlogPost[]): BlogPost[] {
-  return Array.filter(posts, (post) => !post.featured)
-}
-
+/** The newest featured post; older featured posts stay in the list. */
 export function featuredBlogPost(
   posts: readonly BlogPost[]
 ): Option.Option<BlogPost> {
   return Array.findFirst(posts, (post) => post.featured)
+}
+
+/** The blog list, without the featured post. */
+export function listedBlogPosts(posts: readonly BlogPost[]): BlogPost[] {
+  const featured = featuredBlogPost(posts)
+  return Array.filter(
+    posts,
+    (post) => !Option.exists(featured, ({slug}) => slug === post.slug)
+  )
 }
 
 export function blogPageCount(posts: readonly BlogPost[]): number {

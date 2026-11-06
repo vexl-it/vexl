@@ -32,12 +32,18 @@ import {sessionAtom} from '../session'
 import {notificationSecretForBackup} from './backupNotificationSecret'
 import {userDataForBackup} from './backupUserData'
 import {createBackupFile} from './createBackupFile'
+import {MAX_BACKUP_FILE_SIZE_BYTES} from './readBackupFile'
 
 class AccountBackupExportError extends Schema.TaggedError<AccountBackupExportError>(
   'AccountBackupExportError'
 )('AccountBackupExportError', {
   cause: Schema.Unknown,
 }) {}
+
+// A file a restore would refuse to read must never be handed to the user.
+class AccountBackupTooLargeError extends Schema.TaggedError<AccountBackupTooLargeError>(
+  'AccountBackupTooLargeError'
+)('AccountBackupTooLargeError', {}) {}
 
 export const backupFileName = (date: DateTime): string =>
   `${date.toFormat('yyyy-MM-dd')}.${BACKUP_FILE_EXTENSION}`
@@ -152,6 +158,11 @@ export const exportAccountBackupActionAtom = atom(
         encryptBackupFile({backup, pin, publicKey})
       ),
       Effect.flatMap(Schema.encode(EncryptedBackupFileFromJson)),
+      // The encoded file is ASCII (JSON with base64), so length is its size.
+      Effect.filterOrFail(
+        (content) => content.length <= MAX_BACKUP_FILE_SIZE_BYTES,
+        () => new AccountBackupTooLargeError()
+      ),
       set(withLoadingOverlayAtom),
       Effect.flatMap((content) => {
         const fileName = backupFileName(DateTime.now())

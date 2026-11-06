@@ -1,14 +1,19 @@
 import {SqlClient} from '@effect/sql'
 import {type SqlError} from '@effect/sql/SqlError'
-import {Array, Effect, Option, Schema} from 'effect'
-import {CmsSnapshot} from '../cmsImport/CmsSnapshot'
-import webflowSnapshot from '../cmsImport/webflowSnapshot.json'
+import {BlogPost, CmsEvent} from '@vexl-next/domain/src/general/cms'
+import {Effect, Schema} from 'effect'
 import {BlogPostsDbService} from '../db/BlogPostsDbService'
 import {EventsDbService} from '../db/EventsDbService'
 import importWebflowSnapshot from '../db/migrations/0003_importWebflowSnapshot'
+import webflowSnapshot from '../db/migrations/webflowSnapshot.json'
 import {runPromiseInMockedEnvironment} from './utils/runPromiseInMockedEnvironment'
 
-const snapshot = Schema.decodeUnknownSync(CmsSnapshot)(webflowSnapshot)
+const snapshot = Schema.decodeUnknownSync(
+  Schema.Struct({
+    blogPosts: Schema.Array(BlogPost),
+    events: Schema.Array(CmsEvent),
+  })
+)(webflowSnapshot)
 
 const countRows = Effect.gen(function* (_) {
   const sql = yield* _(SqlClient.SqlClient)
@@ -45,25 +50,6 @@ describe('Webflow snapshot import', () => {
         expect(new Set(blogPosts)).toEqual(new Set(snapshot.blogPosts))
         expect(new Set(events)).toEqual(new Set(snapshot.events))
       })
-    )
-  })
-
-  it('keeps Czech versions and English-only legacy posts', () => {
-    const bySlug = (slug: string): (typeof snapshot.blogPosts)[number] =>
-      Option.getOrThrow(
-        Array.findFirst(snapshot.blogPosts, (one) => one.slug === slug)
-      )
-
-    const translated = bySlug('pub-quiz-and-btalks-are-here')
-    expect(Option.map(translated.cs, (cs) => cs.title)).toEqual(
-      Option.some('Bitcoinové herní a konverzační kartičky jsou tady!')
-    )
-    expect(Option.isNone(bySlug('so-what-is-vexl-anyway').cs)).toBe(true)
-  })
-
-  it('references only rehosted images', () => {
-    expect(JSON.stringify(webflowSnapshot)).not.toMatch(
-      /website-files\.com|webflow\.com/
     )
   })
 

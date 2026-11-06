@@ -276,10 +276,6 @@ export const SERVICES: readonly RunnableApp[] = [
     needs: {db: dbn.content, redis: false, s3: false},
     run: tsxService('src/index.ts'),
     secretKeys: [
-      'WEBFLOW_TOKEN',
-      'WEBFLOW_EVENTS_COLLECTION_ID',
-      'WEBFLOW_SPEAKERS_COLLECTION_ID',
-      'WEBFLOW_BLOG_COLLECTION_ID',
       'CLEAR_CACHE_TOKEN_HASH',
       'BTC_PAY_SERVER_URL',
       'BTC_PAY_SERVER_API_KEY',
@@ -290,10 +286,6 @@ export const SERVICES: readonly RunnableApp[] = [
       ...stringifyValues(sc.contentService),
       INTERNAL_SERVER_PORT: String(ctx.ports.contentServiceInternal),
       // Optional integrations — empty by default, set in .env.local to enable.
-      WEBFLOW_TOKEN: '',
-      WEBFLOW_EVENTS_COLLECTION_ID: '',
-      WEBFLOW_SPEAKERS_COLLECTION_ID: '',
-      WEBFLOW_BLOG_COLLECTION_ID: '',
       CLEAR_CACHE_TOKEN_HASH: '',
       BTC_PAY_SERVER_URL: '',
       BTC_PAY_SERVER_API_KEY: '',

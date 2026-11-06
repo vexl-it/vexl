@@ -17,6 +17,7 @@ import {
 import {Array, Effect, HashSet, pipe, Record, Struct} from 'effect'
 import {type SessionV2} from '../../brands/Session.brand'
 import {type KeyDerivationCounters} from '../keyDerivation'
+import {deriveWithBreaks} from '../keyDerivation/scanDerivedKeys'
 
 const derivedPublicKeys = <A>(
   count: KeyDerivationIndex,
@@ -26,7 +27,7 @@ const derivedPublicKeys = <A>(
   pipe(
     // Array.makeBy always creates at least one element.
     count === 0 ? [] : Array.makeBy(count, (i) => KeyDerivationIndex.make(i)),
-    Effect.forEach(derive),
+    (indexes) => deriveWithBreaks(indexes, derive),
     Effect.map((derived) =>
       HashSet.fromIterable(Array.map(derived, toPublicKey))
     )

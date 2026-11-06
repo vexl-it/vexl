@@ -52,6 +52,20 @@ All backend metrics are documented in docs/backend_stats.md. When you add, remov
 
 Backend errors are reported to Sentry via a shared logger hook — see docs/backend_sentry.md. Logging at error/fatal level IS the reporting API: use it only for unexpected errors that someone should look at; log expected or user-caused failures at warning or below. Never log tokens, keys, hashes, phone numbers, redis keys/values, or payloads — not even at error level.
 
+## Cursor Cloud specific instructions
+
+Cloud Agents boot with Node 24.22.2 on `/usr/local/bin` and pnpm 11.9.0 (corepack, from the root `packageManager` field). Some shells still resolve `node` to `/exec-daemon/node` (v22). If `node -v` is not 24, run `export PATH="/usr/local/bin:$PATH"` before install, typecheck, or tests.
+
+`start` launches Docker, `pnpm dev:backend --detach-infra`, an Android emulator named `vexl`, and Metro via `pnpm dev:mobile -p android`. The backend is Postgres, the separate geocoding Postgres, Redis, MinIO, Grafana/Loki/Tempo, the ten services, backoffice (`http://localhost:3011`), the account-deletion site (`http://localhost:3012`), and the metrics dashboard (`http://localhost:5173`, IPv6 localhost). Service health is `http://127.0.0.1:8001` through `8010`. Metro is `http://127.0.0.1:8081`. Startup logs are `/tmp/cursor/start-user/start-user.log`. The Android SDK is `/opt/android-sdk` (`ANDROID_HOME`).
+
+The emulator is API 36, x86_64, with KVM. The dev client is already installed on that AVD. Open it from the dev-launcher entry for Metro (`10.0.2.2:8081` or the host address Metro prints). A native rebuild is `pnpm dev:mobile -p android --build` and is not part of boot. iOS is not available here.
+
+Local phone login uses the dummy code `222222` from `dev.config.ts` and does not send SMS. The local backoffice admin token is `dev`; the content-editor token is `editor`.
+
+`apps/web-app` has no local backend preset. With `BE_ENV` unset it calls the stage backend, so do not submit account deletion from that site. The Gradle daemon and the emulator together are tight on a 15GB VM; do not run a native rebuild while the emulator is up.
+
+If MinIO bucket setup times out, container-to-container traffic is being dropped. Re-apply `sudo iptables-legacy -P FORWARD ACCEPT` (the start script already does this on boot).
+
 ## Verification
 
 IMPORTANT -- Verification steps (do this to verify your code changes. Not all bugs / errors will be caught by CI, but the most obvious ones will):

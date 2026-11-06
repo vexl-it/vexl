@@ -1,4 +1,4 @@
-import Script from 'next/script'
+import {connection} from 'next/server'
 import React from 'react'
 import {copyPages} from '../copy/copyFiles'
 import {type Locale} from '../i18n/locales'
@@ -19,8 +19,12 @@ async function DevCopyEditor(): Promise<React.ReactNode> {
   return null
 }
 
-/** The `<html>` shell every page shares; Webflow styles pages through the body class. */
-export function SiteDocument({
+/**
+ * The `<html>` shell every page shares; Webflow styles pages through the body
+ * class. Pages render per request so their scripts carry the request's CSP
+ * nonce (see `proxy.ts`).
+ */
+export async function SiteDocument({
   locale,
   bodyClassName,
   children,
@@ -28,19 +32,14 @@ export function SiteDocument({
   readonly locale: Locale
   readonly bodyClassName?: string
   readonly children: React.ReactNode
-}): React.JSX.Element {
+}): Promise<React.JSX.Element> {
+  await connection()
   return (
     <html lang={locale}>
       <body className={bodyClassName}>
         {children}
         <AnchorScroll />
         <DevCopyEditor />
-        <Script
-          src="https://cdn.usefathom.com/script.js"
-          data-site="DSCYZACS"
-          data-included-domains="vexl.it"
-          strategy="afterInteractive"
-        />
       </body>
     </html>
   )

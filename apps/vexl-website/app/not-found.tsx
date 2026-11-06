@@ -18,8 +18,8 @@ function notFoundCopy(locale: Locale): NotFoundCopy {
   }
 }
 
-// Every unknown URL lands here, prerendered once, so it can't know the locale
-// on the server; NotFoundPage switches to Czech in the browser under /cs.
+// Every unknown URL lands here without params, so it can't know the locale on
+// the server; NotFoundPage switches to Czech in the browser under /cs.
 export default function NotFound(): React.JSX.Element {
   return (
     <SiteDocument locale="en">

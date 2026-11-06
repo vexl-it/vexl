@@ -1,6 +1,7 @@
 import {Option} from 'effect'
 import {NextResponse, type NextRequest} from 'next/server'
 import {blogPageCount, blogPosts, findBlogPost} from './src/content/blog'
+import {contentSecurityPolicy} from './src/contentSecurityPolicy'
 import {type Locale} from './src/i18n/locales'
 import {parseListPage} from './src/pageParams'
 import {loadEvents, pastEventsPageCount} from './src/views/community/events'
@@ -11,6 +12,7 @@ const CONTENT_PATH = /^(?:\/(cs))?\/(post|blog\/page|community\/page)\/([^/]+)$/
 
 async function contentExists(pathname: string): Promise<boolean> {
   const [, cs, kind, param = ''] = CONTENT_PATH.exec(pathname) ?? []
+  if (kind === undefined) return true
   const locale: Locale = cs === undefined ? 'en' : 'cs'
   if (kind === 'post' && param === 'rss.xml') return locale === 'en'
   if (kind === 'post')
@@ -25,27 +27,29 @@ async function contentExists(pathname: string): Promise<boolean> {
 }
 
 /**
+ * Every page gets a fresh CSP nonce, which is also why every page renders per
+ * request.
+ *
  * Next only sends real 404 HTML for URLs no route matches; a request-time
  * page that calls notFound() gets a JS-only shell. So unknown posts and page
  * numbers are rewritten to an unmatched URL before they reach their route.
  */
 export async function proxy(request: NextRequest): Promise<NextResponse> {
+  const csp = contentSecurityPolicy(btoa(crypto.randomUUID()))
+  const headers = new Headers(request.headers)
+  headers.set('Content-Security-Policy', csp)
+  const forwarded = {request: {headers}}
   const exists = await contentExists(request.nextUrl.pathname).catch(
     // Content-service is down: let the page fail and report it
     () => true
   )
-  return exists
-    ? NextResponse.next()
-    : NextResponse.rewrite(new URL(UNMATCHED_PATH, request.url))
+  const response = exists
+    ? NextResponse.next(forwarded)
+    : NextResponse.rewrite(new URL(UNMATCHED_PATH, request.url), forwarded)
+  response.headers.set('Content-Security-Policy', csp)
+  return response
 }
 
 export const config = {
-  matcher: [
-    '/post/:slug',
-    '/cs/post/:slug',
-    '/blog/page/:page',
-    '/cs/blog/page/:page',
-    '/community/page/:page',
-    '/cs/community/page/:page',
-  ],
+  matcher: ['/((?!_next/static|_next/image|wf/).*)'],
 }

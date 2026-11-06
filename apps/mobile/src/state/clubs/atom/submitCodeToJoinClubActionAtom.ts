@@ -24,7 +24,7 @@ import {formatInteger} from '../../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../../utils/localization/formattingLocaleAtom'
 import reportError from '../../../utils/reportError'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
-import {createClubKeysActionAtom} from '../../keyDerivation'
+import {nextClubKeysActionAtom} from '../../keyDerivation'
 import {myActiveOffersAtom} from '../../marketplace/atoms/myOffers'
 import {updateOfferActionAtom} from '../../marketplace/atoms/updateOfferActionAtom'
 import {generateVexlTokenActionAtom} from '../../notifications/actions/generateVexlTokenActionAtom'
@@ -366,7 +366,7 @@ export const submitCodeToJoinClubActionAtom = atom(
         yield* _(Effect.fail(new MemberAlreadyInClubError()))
       }
 
-      const clubKeys = yield* _(set(createClubKeysActionAtom))
+      const {keys: clubKeys, allocate} = yield* _(set(nextClubKeysActionAtom))
 
       set(clubsToKeyHolderAtom, (prevState) => ({
         ...prevState,
@@ -375,6 +375,7 @@ export const submitCodeToJoinClubActionAtom = atom(
 
       const vexlNotificationToken = yield* _(set(generateVexlTokenActionAtom))
 
+      yield* _(allocate)
       const {clubInfoForUser} = yield* _(
         api.contact
           .joinClub({

@@ -3,7 +3,7 @@ import {Effect, Option} from 'effect'
 import {atom} from 'jotai'
 import {Share} from 'react-native'
 import {addKeyToWaitingForAdmissionActionAtom} from '../../../state/clubs/atom/clubsToKeyHolderV2Atom'
-import {createClubKeysActionAtom} from '../../../state/keyDerivation'
+import {nextClubKeysActionAtom} from '../../../state/keyDerivation'
 import {generateVexlTokenActionAtom} from '../../../state/notifications/actions/generateVexlTokenActionAtom'
 import {createClubAdmitionRequestLink} from '../../../utils/deepLinks/createLinks'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
@@ -17,7 +17,7 @@ export const showClubAccessDialogActionAtom = atom(null, (get, set) => {
   const {t} = get(translationAtom)
 
   return Effect.gen(function* (_) {
-    const clubKeys = yield* _(set(createClubKeysActionAtom))
+    const {keys: clubKeys, allocate} = yield* _(set(nextClubKeysActionAtom))
     const langCode = t('localeName')
 
     const vexlNotificationToken = yield* _(set(generateVexlTokenActionAtom))
@@ -49,6 +49,7 @@ export const showClubAccessDialogActionAtom = atom(null, (get, set) => {
 
     if (!confirmed) return
 
+    yield* _(allocate)
     set(addKeyToWaitingForAdmissionActionAtom, clubKeys)
 
     yield* _(

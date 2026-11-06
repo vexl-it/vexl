@@ -8,9 +8,13 @@ MinIO no longer publishes Docker images, so `docker-compose.dev.yaml` runs [Silo
 
 The app uploads and downloads chat images straight to MinIO using URLs presigned by chat-service. A presigned URL is bound to the host it was signed for, so `services.ts` sets chat-service's `S3_ENDPOINT` to the machine's LAN IP (`lanIp.ts`, the same detection `dev-mobile.ts` uses for physical devices). That address works from the iOS simulator, the Android emulator and physical devices on the same network. Caveats:
 
-- If detection picks the wrong interface (VPN, Docker bridge), set `DEV_LAN_IP=<ip>` in `.env.local` or the shell. It overrides the detection for both chat-service and `dev:mobile`.
+- If detection picks the wrong interface (VPN, Docker bridge), set `DEV_LAN_IP=<ip>` in `.env.local` or the shell. It overrides the detection for chat-service, backoffice-app and `dev:mobile`.
 - Without a LAN IPv4 it falls back to `localhost`, which only the iOS simulator can reach.
 - The IP is read when chat-service starts. After switching networks, restart `pnpm dev:backend`.
+
+## Backoffice from another device
+
+Open `http://<LAN IP>:3011` (the IP `lanIp.ts` detects). `services.ts` points backoffice-app's MinIO upload and image URLs at the LAN IP and passes it as `DEV_LAN_IP`, which `next.config.js` adds to `allowedDevOrigins` so `next dev` serves that origin. Plain HTTP to a LAN IP is not a secure context, so browsers omit `crypto.randomUUID`; `instrumentation-client.ts` fills it in during development only.
 
 ## Places DB seeding
 

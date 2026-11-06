@@ -16,6 +16,9 @@ const nextConfig = {
   reactStrictMode: true,
   output: 'standalone',
 
+  // `next dev` only: lets other devices on the network load the dev server.
+  allowedDevOrigins: process.env.DEV_LAN_IP ? [process.env.DEV_LAN_IP] : [],
+
   // Keep the Postgres driver stack (used server-side only, via @effect/sql-pg in
   // instrumentation/migrations) out of the *production* bundle so it is traced
   // into the standalone output and loaded from node_modules at runtime.

@@ -7,7 +7,7 @@ import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifica
 import {Array, HashMap, Option} from 'effect'
 import {atom} from 'jotai'
 import messagingStateAtom from '../chat/atoms/messagingStateAtom'
-import {type InboxInState} from '../chat/domain'
+import {type ChatWithMessages, type InboxInState} from '../chat/domain'
 import {myOffersAtom} from '../marketplace/atoms/myOffers'
 import {myNotesAtom} from '../notes/atoms/notesState'
 import {registerVexlTokenActionAtom} from '../notifications/vexlTokenToKeyHolderAtom'
@@ -69,10 +69,8 @@ export const linkRestoredInboxesToMyOffersAndNotesActionAtom = atom(
     const linkInbox = (
       one: InboxInState,
       {link, origin}: OwnResource
-    ): InboxInState => ({
-      ...one,
-      inbox: {...one.inbox, ...link},
-      chats: Array.map(one.chats, (chat) => ({
+    ): InboxInState => {
+      const linkChat = (chat: ChatWithMessages): ChatWithMessages => ({
         ...chat,
         chat: {
           ...chat.chat,
@@ -80,8 +78,17 @@ export const linkRestoredInboxesToMyOffersAndNotesActionAtom = atom(
           origin:
             chat.chat.origin.type === 'unknown' ? origin : chat.chat.origin,
         },
-      })),
-    })
+      })
+
+      return {
+        ...one,
+        inbox: {...one.inbox, ...link},
+        chats: Array.map(one.chats, linkChat),
+        pendingRecoveryChats:
+          one.pendingRecoveryChats &&
+          Array.map(one.pendingRecoveryChats, linkChat),
+      }
+    }
 
     const newlyLinked = Array.filterMap(messagingState, (one) =>
       Option.map(ownResourceOf(one), (resource) => ({one, resource}))

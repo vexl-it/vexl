@@ -1,5 +1,4 @@
 import {SqlClient, SqlSchema} from '@effect/sql'
-import {type SqlError} from '@effect/sql/SqlError'
 import {
   CmsStatus,
   EventId,
@@ -9,42 +8,6 @@ import {
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {Array, Context, Effect, flow, Layer, Option, Schema} from 'effect'
 import {eventContentColumns, EventDbRecord, eventFromDbRecord} from './domain'
-
-/** Keeps the existing row when the id is already there. */
-export const createInsertEventIfMissing = Effect.map(
-  SqlClient.SqlClient,
-  (sql) =>
-    (event: CmsEvent): Effect.Effect<void, SqlError> => {
-      const columns = eventContentColumns(event)
-      return sql`
-        INSERT INTO
-          events (
-            id,
-            status,
-            name,
-            venue,
-            link,
-            start_date,
-            end_date,
-            golden_glasses,
-            speakers
-          )
-        VALUES
-          (
-            ${event.id},
-            ${event.status},
-            ${columns.name},
-            ${columns.venue},
-            ${columns.link},
-            ${columns.startDate},
-            ${columns.endDate},
-            ${columns.goldenGlasses},
-            ${columns.speakersJson}::jsonb
-          )
-        ON CONFLICT (id) DO NOTHING
-      `
-    }
-)
 
 export interface EventsDbOperations {
   insertEvent: (event: CmsEvent) => Effect.Effect<void, UnexpectedServerError>
@@ -70,7 +33,6 @@ export class EventsDbService extends Context.Tag('EventsDbService')<
     EventsDbService,
     Effect.gen(function* (_) {
       const sql = yield* _(SqlClient.SqlClient)
-      const insertEventIfMissing = yield* _(createInsertEventIfMissing)
 
       const setEventStatus = SqlSchema.findOne({
         Request: Schema.Struct({id: EventId, status: CmsStatus}),
@@ -115,11 +77,38 @@ export class EventsDbService extends Context.Tag('EventsDbService')<
       })
 
       return {
-        insertEvent: flow(
-          insertEventIfMissing,
-          UnexpectedServerError.wrapErrors('Error in insertEvent query'),
-          Effect.withSpan('insertEvent query')
-        ),
+        insertEvent: (event) => {
+          const columns = eventContentColumns(event)
+          return sql`
+            INSERT INTO
+              events (
+                id,
+                status,
+                name,
+                venue,
+                link,
+                start_date,
+                end_date,
+                golden_glasses,
+                speakers
+              )
+            VALUES
+              (
+                ${event.id},
+                ${event.status},
+                ${columns.name},
+                ${columns.venue},
+                ${columns.link},
+                ${columns.startDate},
+                ${columns.endDate},
+                ${columns.goldenGlasses},
+                ${columns.speakersJson}::jsonb
+              )
+          `.pipe(
+            UnexpectedServerError.wrapErrors('Error in insertEvent query'),
+            Effect.withSpan('insertEvent query')
+          )
+        },
         updateEvent: ({id, input}) => {
           const columns = eventContentColumns(input)
           return sql`

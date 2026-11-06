@@ -1,9 +1,11 @@
 import {SqlClient} from '@effect/sql'
+import {type SqlError} from '@effect/sql/SqlError'
 import {Array, Effect, Option, Schema} from 'effect'
-import {CmsSnapshot, importCmsSnapshot} from '../cmsImport/importCmsSnapshot'
+import {CmsSnapshot} from '../cmsImport/CmsSnapshot'
 import webflowSnapshot from '../cmsImport/webflowSnapshot.json'
 import {BlogPostsDbService} from '../db/BlogPostsDbService'
 import {EventsDbService} from '../db/EventsDbService'
+import importWebflowSnapshot from '../db/migrations/0003_importWebflowSnapshot'
 import {runPromiseInMockedEnvironment} from './utils/runPromiseInMockedEnvironment'
 
 const snapshot = Schema.decodeUnknownSync(CmsSnapshot)(webflowSnapshot)
@@ -70,29 +72,38 @@ describe('Webflow snapshot import', () => {
       Effect.gen(function* (_) {
         const sql = yield* _(SqlClient.SqlClient)
         const [first] = snapshot.blogPosts
-        yield* _(sql`
+        const setTitle = (
+          title: string
+        ): Effect.Effect<unknown, SqlError> => sql`
           UPDATE blog_posts
           SET
-            title_en = 'Edited'
+            title_en = ${title}
           WHERE
             id = ${first.id}
-        `)
-        const before = yield* _(countRows)
+        `
 
-        yield* _(importCmsSnapshot)
+        yield* _(
+          Effect.gen(function* (_) {
+            yield* _(setTitle('Edited'))
+            const before = yield* _(countRows)
 
-        expect(yield* _(countRows)).toEqual(before)
-        const [row] = yield* _(sql<{
-          titleEn: string
-        }>`
-          SELECT
-            title_en
-          FROM
-            blog_posts
-          WHERE
-            id = ${first.id}
-        `)
-        expect(row.titleEn).toEqual('Edited')
+            yield* _(importWebflowSnapshot)
+
+            expect(yield* _(countRows)).toEqual(before)
+            const [row] = yield* _(sql<{
+              titleEn: string
+            }>`
+              SELECT
+                title_en
+              FROM
+                blog_posts
+              WHERE
+                id = ${first.id}
+            `)
+            expect(row.titleEn).toEqual('Edited')
+          }),
+          Effect.ensuring(Effect.orDie(setTitle(first.en.title)))
+        )
       })
     )
   })

@@ -18,7 +18,7 @@ import {marked} from 'marked'
 import {execFileSync} from 'node:child_process'
 import {writeFileSync} from 'node:fs'
 import {join} from 'node:path'
-import {CmsSnapshot} from './importCmsSnapshot'
+import {CmsSnapshot} from './CmsSnapshot'
 
 const BLOG_COLLECTION_ID = '665e29df489d9ea047ef6c0c'
 const EVENTS_COLLECTION_ID = '677fdfdaffac39a81e41b693'

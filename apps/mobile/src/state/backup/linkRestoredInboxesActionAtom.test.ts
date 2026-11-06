@@ -99,6 +99,27 @@ describe('linkRestoredInboxesToMyOffersAndNotesActionAtom', () => {
     expect(untouchedInbox).toBe(otherInbox)
   })
 
+  it('links chats still waiting for their history, so they keep the origin once recovered', () => {
+    store.set(messagingStateAtom, [
+      {
+        ...restoredInbox(offerKey),
+        chats: [],
+        pendingRecoveryChats: [recoveredChat(offerKey)],
+      },
+    ])
+
+    store.set(linkRestoredInboxesToMyOffersAndNotesActionAtom)
+
+    const pendingChat =
+      store.get(messagingStateAtom)[0]?.pendingRecoveryChats?.[0]
+    expect(pendingChat?.chat.inbox.offerId).toBe(offerId)
+    expect(pendingChat?.chat.origin).toEqual({
+      type: 'myOffer',
+      offerId,
+      offer: mockMyOffer,
+    })
+  })
+
   it('maps the tokens of own offers and notes to their restored inboxes', () => {
     store.set(messagingStateAtom, [
       restoredInbox(offerKey),

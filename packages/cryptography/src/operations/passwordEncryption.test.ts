@@ -1,9 +1,11 @@
+import crypto from 'node:crypto'
 import {
   decryptWithPassword,
   encryptWithPassword,
   InvalidPasswordCypherError,
   WrongPasswordError,
 } from './passwordEncryption'
+import pbkdf2 from './pbkdf2Promise'
 
 describe('password encryption', () => {
   const password = '123456'
@@ -39,5 +41,36 @@ describe('password encryption', () => {
     await expect(
       decryptWithPassword({data: 'c2hvcnQ=', password})
     ).rejects.toBeInstanceOf(InvalidPasswordCypherError)
+  })
+
+  it('Should decrypt a cypher written with the node crypto AES-GCM layout', async () => {
+    const salt = crypto.randomBytes(16)
+    const iv = crypto.randomBytes(12)
+    const key = await pbkdf2(password, salt, 600_000, 32, 'sha256')
+    const cipher = crypto.createCipheriv('aes-256-gcm', key, iv)
+    const encrypted = Buffer.concat([
+      cipher.update('data', 'utf8'),
+      cipher.final(),
+    ])
+    const cypher = Buffer.concat([
+      salt,
+      iv,
+      cipher.getAuthTag(),
+      encrypted,
+    ]).toString('base64')
+
+    expect(await decryptWithPassword({data: cypher, password})).toEqual('data')
+  })
+
+  it('Should fail with WrongPasswordError for a tampered auth tag', async () => {
+    const bytes = Buffer.from(
+      await encryptWithPassword({data: 'data', password}),
+      'base64'
+    )
+    bytes[16 + 12] = (bytes[16 + 12] ?? 0) ^ 1
+
+    await expect(
+      decryptWithPassword({data: bytes.toString('base64'), password})
+    ).rejects.toBeInstanceOf(WrongPasswordError)
   })
 })

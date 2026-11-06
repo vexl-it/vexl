@@ -13,7 +13,12 @@ import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {ServerSecurityMiddlewareLive} from '@vexl-next/server-utils/src/serverSecurity'
 import {Layer} from 'effect'
-import {cryptoConfig, healthServerPortConfig, redisUrl} from './configs'
+import {
+  backupHmacKeyConfig,
+  cryptoConfig,
+  healthServerPortConfig,
+  redisUrl,
+} from './configs'
 import DbLayer from './db/layer'
 import {reportMetricsLayer} from './metrics'
 import {getBackupKeyPairHandler} from './routes/backup/getBackupKeyPair'
@@ -103,6 +108,8 @@ export const ApiServerLive = HttpApiBuilder.serve(HttpMiddleware.logger).pipe(
 
 export const HttpServerLive = Layer.mergeAll(
   ApiServerLive,
+  // Fails the start instead of the first backup request.
+  Layer.effectDiscard(backupHmacKeyConfig),
   reportMetricsLayer,
   healthServerLayer({port: healthServerPortConfig})
 ).pipe(

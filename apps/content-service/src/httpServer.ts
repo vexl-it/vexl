@@ -16,9 +16,11 @@ import {RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {Layer} from 'effect'
 import {cryptoConfig, healthServerPortConfig} from './configs'
+import {BlogPostsDbService} from './db/BlogPostsDbService'
+import {EventsDbService} from './db/EventsDbService'
 import DbLayer from './db/layer'
 import {VexlProductNotificationsDbService} from './db/VexlProductNotificationsDbService'
-import {getBlogsHandler} from './handlers/blog'
+import {getBlogsHandler, getPublishedBlogPostsHandler} from './handlers/blog'
 import {createInvoiceHandler} from './handlers/donations/createInvoice'
 import {getInvoiceHandler} from './handlers/donations/getInvoice'
 import {getVexlProductNotificationsHandler} from './handlers/vexlProductNotifications/getVexlProductNotifications'
@@ -26,7 +28,7 @@ import {getVexlProductNotificationsHandler} from './handlers/vexlProductNotifica
 import {getInvoiceStatusTypeHandler} from './handlers/donations/getInvoiceStatusType'
 import {updateInvoiceStateWebhook} from './handlers/donations/updateInvoiceStateWebhook'
 import {UpdateInvoiceStateWebhookService} from './handlers/donations/UpdateInvoiceStateWebhookService'
-import {getEventsHandler} from './handlers/events'
+import {getEventsHandler, getPublishedEventsHandler} from './handlers/events'
 import {getDeviceConfigHandler} from './handlers/getDeviceConfig'
 import {getMapStylesHandler} from './handlers/getMapStyles'
 import {newsAndAnonouncementsHandler} from './handlers/getNewsAndAnnonuncements'
@@ -34,7 +36,6 @@ import {internalServerLive} from './internalServer'
 import {CacheService} from './utils/cache'
 import {BtcPayServerService} from './utils/donations'
 import {MapStylesService} from './utils/mapStyles'
-import {WebflowCmsService} from './utils/webflowCms'
 
 const CmsApiGroupLive = HttpApiBuilder.group(
   ContentApiSpecification,
@@ -43,6 +44,8 @@ const CmsApiGroupLive = HttpApiBuilder.group(
     h
       .handle('getEvents', getEventsHandler)
       .handle('getBlogArticles', getBlogsHandler)
+      .handle('getPublishedBlogPosts', getPublishedBlogPostsHandler)
+      .handle('getPublishedEvents', getPublishedEventsHandler)
 )
 
 const NewsAndAnnouncementsApiGroupLive = HttpApiBuilder.group(
@@ -106,7 +109,8 @@ export const HttpServerLive = Layer.mergeAll(
 ).pipe(
   Layer.provideMerge(ServerCrypto.layer(cryptoConfig)),
   Layer.provideMerge(RateLimitingService.Live),
-  Layer.provideMerge(WebflowCmsService.Live),
+  Layer.provideMerge(BlogPostsDbService.Live),
+  Layer.provideMerge(EventsDbService.Live),
   Layer.provideMerge(MapStylesService.Live),
   Layer.provideMerge(CacheService.Live),
   Layer.provideMerge(DbLayer),

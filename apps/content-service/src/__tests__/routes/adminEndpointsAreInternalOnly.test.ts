@@ -6,6 +6,8 @@ import {runPromiseInMockedEnvironment} from '../utils/runPromiseInMockedEnvironm
 const ADMIN_PATHS = [
   '/content/clear-cache',
   '/content/vexl-product-notifications/admin',
+  '/content/admin/blog-posts',
+  '/content/admin/events',
 ]
 
 describe('Internal endpoints', () => {

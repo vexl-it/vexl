@@ -1,4 +1,12 @@
 import {
+  BlogId,
+  BlogPost,
+  BlogSlug,
+  CmsEvent,
+  EventId,
+  Speaker,
+} from '@vexl-next/domain/src/general/cms'
+import {
   VexlProductNotification,
   VexlProductNotificationUuid,
 } from '@vexl-next/domain/src/general/vexlProductNotification'
@@ -7,16 +15,6 @@ import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.b
 import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {Uuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {Schema} from 'effect'
-
-export const Speaker = Schema.Struct({
-  name: Schema.String,
-  linkToSocials: Schema.optionalWith(Schema.String, {as: 'Option'}),
-  imageUrl: Schema.optionalWith(Schema.String, {as: 'Option'}),
-})
-export type Speaker = typeof Speaker.Type
-
-export const EventId = Schema.String.pipe(Schema.brand('EventId'))
-export type EventId = typeof EventId.Type
 
 export const Event = Schema.Struct({
   id: EventId,
@@ -35,12 +33,6 @@ export const EventsResponse = Schema.Struct({
 })
 export type EventsResponse = typeof EventsResponse.Type
 
-export const BlogId = Schema.String.pipe(Schema.brand('BlogId'))
-export type BlogId = typeof BlogId.Type
-
-export const BlogSlug = Schema.String.pipe(Schema.brand('BlogSlug'))
-export type BlogSlug = typeof BlogSlug.Type
-
 export const BlogArticlePreview = Schema.Struct({
   id: BlogId,
   title: Schema.String,
@@ -56,6 +48,22 @@ export const BlogsArticlesResponse = Schema.Struct({
   articles: Schema.Array(BlogArticlePreview),
 })
 export type BlogsArticlesResponse = typeof BlogsArticlesResponse.Type
+
+export const PublishedBlogPostsResponse = Schema.Struct({
+  blogPosts: Schema.Array(BlogPost),
+})
+export type PublishedBlogPostsResponse = typeof PublishedBlogPostsResponse.Type
+
+export const PublishedEventsResponse = Schema.Struct({
+  events: Schema.Array(CmsEvent),
+})
+export type PublishedEventsResponse = typeof PublishedEventsResponse.Type
+
+export class BlogSlugTakenError extends Schema.TaggedError<BlogSlugTakenError>(
+  'BlogSlugTakenError'
+)('BlogSlugTakenError', {
+  status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
+}) {}
 
 export class InvalidTokenError extends Schema.TaggedError<InvalidTokenError>(
   'InvalidTokenError'

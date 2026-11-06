@@ -25,6 +25,8 @@ import {
 import {type Job} from 'bullmq'
 import {Console, Effect, Layer, ManagedRuntime, type Scope} from 'effect'
 import {cryptoConfig} from '../../configs'
+import {BlogPostsDbService} from '../../db/BlogPostsDbService'
+import {EventsDbService} from '../../db/EventsDbService'
 import {VexlProductNotificationsDbService} from '../../db/VexlProductNotificationsDbService'
 import DbLayer from '../../db/layer'
 import {UpdateInvoiceStateWebhookService} from '../../handlers/donations/UpdateInvoiceStateWebhookService'
@@ -33,11 +35,9 @@ import {ContentInternalApiLive} from '../../internalServer'
 import {type CacheService} from '../../utils/cache'
 import {type BtcPayServerService} from '../../utils/donations'
 import {type MapStylesService} from '../../utils/mapStyles'
-import {type WebflowCmsService} from '../../utils/webflowCms'
 import {mockedBtcPayServerService} from './mockedBtcPayServerService'
 import {mockedCacheService} from './mockedCacheService'
 import {mockedMapStylesService} from './mockedMapStylesService'
-import {mockedWebflowCmsService} from './mockedWebflowCmsService'
 
 export type MockedContexts =
   | RedisService
@@ -47,7 +47,8 @@ export type MockedContexts =
   | MetricsClientService
   | UpdateInvoiceStateWebhookService
   | CacheService
-  | WebflowCmsService
+  | BlogPostsDbService
+  | EventsDbService
   | MapStylesService
   | BtcPayServerService
   | HttpClient
@@ -95,6 +96,8 @@ const context = Layer.empty.pipe(
   Layer.provideMerge(TestRequestHeaders.Live),
   Layer.provideMerge(universalContext),
   Layer.provideMerge(VexlProductNotificationsDbService.Live),
+  Layer.provideMerge(BlogPostsDbService.Live),
+  Layer.provideMerge(EventsDbService.Live),
   Layer.provideMerge(mockedEnqueueVexlProductNotificationLayer),
   Layer.provideMerge(DbLayer),
   Layer.provideMerge(UpdateInvoiceStateWebhookService.Live),
@@ -103,7 +106,6 @@ const context = Layer.empty.pipe(
   Layer.provideMerge(mockedBtcPayServerService),
   Layer.provideMerge(mockedCacheService),
   Layer.provideMerge(mockedMapStylesService),
-  Layer.provideMerge(mockedWebflowCmsService),
   Layer.provideMerge(NodeContext.layer)
 )
 

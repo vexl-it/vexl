@@ -2,10 +2,26 @@
 
 import {Option} from 'effect'
 import React, {useEffect, useState} from 'react'
-import {defaultLocale, localizedPath, toLocale} from '../../i18n/locales'
-import {notFound} from '../../i18n/notFound'
+import {
+  defaultLocale,
+  type Locale,
+  localizedPath,
+  toLocale,
+} from '../../i18n/locales'
 
-export function NotFoundPage(): React.JSX.Element {
+export interface NotFoundCopy {
+  readonly title: string
+  readonly description: string
+  readonly heading: React.ReactNode
+  readonly subtitle: React.ReactNode
+  readonly home: React.ReactNode
+}
+
+export function NotFoundPage({
+  copy,
+}: {
+  readonly copy: Record<Locale, NotFoundCopy>
+}): React.JSX.Element {
   const [locale, setLocale] = useState(defaultLocale)
   useEffect(() => {
     const pathLocale = Option.getOrElse(
@@ -15,12 +31,12 @@ export function NotFoundPage(): React.JSX.Element {
     document.documentElement.lang = pathLocale
     setLocale(pathLocale)
   }, [])
-  const t = notFound[locale]
+  const t = copy[locale]
   const home = localizedPath(locale, '/')
   return (
     <div className="utility-page-wrap">
-      <title>{t.metaTitle}</title>
-      <meta name="description" content={t.metaDescription} />
+      <title>{t.title}</title>
+      <meta name="description" content={t.description} />
       <div className="utility-page-content">
         <div className="glasses-wrapper">
           <img

@@ -1,12 +1,8 @@
 import React from 'react'
-import {type HomeMessages} from '../../i18n/home'
+import {type PageCopy} from '../../copy/pageCopy'
 import {LineRevealHeading} from './LineRevealHeading'
 
-export function Claim({
-  t,
-}: {
-  readonly t: HomeMessages['claim']
-}): React.JSX.Element {
+export function Claim({t}: {readonly t: PageCopy<'home'>}): React.JSX.Element {
   return (
     <div className="section is-claim">
       <div className="container is-claim">
@@ -20,13 +16,9 @@ export function Claim({
               className="glasses-image"
             />
           </div>
-          <h6 className="h6 is-yellow">
-            {t.miniclaim[0]}
-            <br />
-            {t.miniclaim[1]}
-          </h6>
+          <h6 className="h6 is-yellow">{t('claim.miniclaim')}</h6>
         </div>
-        <LineRevealHeading text={t.headline} />
+        <LineRevealHeading>{t('claim.headline')}</LineRevealHeading>
       </div>
     </div>
   )

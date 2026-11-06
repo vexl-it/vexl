@@ -1,24 +1,24 @@
 import React from 'react'
-import {type HomeMessages} from '../../i18n/home'
+import {type PageCopy} from '../../copy/pageCopy'
 
 export function OpenSource({
   t,
 }: {
-  readonly t: HomeMessages['openSource']
+  readonly t: PageCopy<'home'>
 }): React.JSX.Element {
   return (
     <div className="section is-open-source">
       <div className="container is-open-source">
         <div className="open-source_wrapper">
           <div className="open-source_claim_wrap">
-            <h3 className="h3 is-open-source">{t.headline}</h3>
+            <h3 className="h3 is-open-source">{t('openSource.headline')}</h3>
             <a
               href="https://github.com/vexl-it"
               target="_blank"
               rel="noreferrer"
               className="button round is-github w-inline-block"
             >
-              <p className="p is-shuffle no-margin">GitHub</p>
+              <p className="p is-shuffle no-margin">{t('openSource.github')}</p>
             </a>
           </div>
           <div className="open-source_images_wrap">
@@ -33,7 +33,7 @@ export function OpenSource({
                 className="open-source_chat_img"
               />
               <p className="open-source-text">
-                {t.text}
+                {t('openSource.text')}
                 <br />
                 <br />
               </p>

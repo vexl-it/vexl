@@ -1,12 +1,14 @@
 import React from 'react'
-import {bottomHero} from '../../i18n/home'
+import {type PageCopy} from '../../copy/pageCopy'
 import {type Locale, localizedPath} from '../../i18n/locales'
 import {QrDownload} from './QrDownload'
 
 export function BottomHero({
   locale,
+  t,
 }: {
   readonly locale: Locale
+  readonly t: PageCopy<'home'>
 }): React.JSX.Element {
   return (
     <div className="section is-bottom-hero">
@@ -35,16 +37,14 @@ export function BottomHero({
                 />
               </div>
               <h3 className="h3 is-black is-bottom-hero">
-                {bottomHero.headline[0]}
-                <br />
-                {bottomHero.headline[1]}
+                {t('bottomHero.headline')}
               </h3>
               <QrDownload
                 isYellow={false}
-                scanToDownload={bottomHero.scanToDownload}
+                scanToDownload={t('bottomHero.scanToDownload')}
                 arrowHref={localizedPath(locale, '/download-old2')}
                 buttonClassName="white"
-                buttonText={bottomHero.downloadButton}
+                buttonText={t('bottomHero.downloadButton')}
               />
             </div>
           </div>

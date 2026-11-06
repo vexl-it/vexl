@@ -87,7 +87,7 @@ describe('key derivation counters', () => {
     expect(storedCounters()).toEqual({nextInboxIndex: 2, nextClubIndex: 0})
   })
 
-  it('allocates a club index only once its keys are used', async () => {
+  it('allocates a club index only once its keys are shown or used', async () => {
     const cancelled = await Effect.runPromise(store.set(nextClubKeysActionAtom))
     const used = await Effect.runPromise(store.set(nextClubKeysActionAtom))
     expect(used.keys).toEqual(cancelled.keys)

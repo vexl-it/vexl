@@ -190,8 +190,8 @@ export const createInboxPrivateKeyActionAtom = atom(
 
 export interface NextClubKeys {
   readonly keys: ClubKeys
-  // Call right before the keys leave this device. Until then a cancelled or
-  // failed attempt leaves no gap that a restore scan would have to cross.
+  // Call right before the keys are shown or leave this device. Until then a
+  // cancelled or failed attempt leaves no gap a restore scan has to cross.
   readonly allocate: Effect.Effect<void>
 }
 

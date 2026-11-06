@@ -29,6 +29,9 @@ export const showClubAccessDialogActionAtom = atom(null, (get, set) => {
       publicKeyV2: clubKeys.keyPair.publicKey,
     })
 
+    // A moderator can scan the QR code even if the dialog is closed later, so
+    // a shown key is never handed out again.
+    yield* _(allocate)
     const confirmed = yield* _(
       set(globalDialogAtom, {
         title: t('clubs.requestClubAccess'),
@@ -49,7 +52,6 @@ export const showClubAccessDialogActionAtom = atom(null, (get, set) => {
 
     if (!confirmed) return
 
-    yield* _(allocate)
     set(addKeyToWaitingForAdmissionActionAtom, clubKeys)
 
     yield* _(

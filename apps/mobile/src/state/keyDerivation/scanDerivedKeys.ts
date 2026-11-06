@@ -14,8 +14,8 @@ import {MAX_PUBLIC_KEYS_IN_CHECK_INBOXES_EXIST_REQUEST} from '@vexl-next/rest-ap
 import {type ContactApi} from '@vexl-next/rest-api/src/services/contact'
 import {Array, Effect, HashSet, Option, pipe} from 'effect'
 
-// A scan stops after a whole batch of unused indexes. The counter continues a
-// margin smaller than the batch past the last used index, so a key allocated
+// A scan stops after two whole batches of unused indexes. The counter continues
+// a margin smaller than a batch past the last used index, so a key allocated
 // after a restore is always found by the next one.
 export const INBOX_SCAN_BATCH_SIZE =
   MAX_PUBLIC_KEYS_IN_CHECK_INBOXES_EXIST_REQUEST
@@ -48,26 +48,37 @@ export const deriveWithBreaks = <K>(
     Effect.map(Array.flatten)
   )
 
-// Derives keys in consecutive batches and stops after a batch without a hit.
+const EMPTY_BATCHES_TO_STOP = 2
+
+// Derives keys in consecutive batches and stops after `EMPTY_BATCHES_TO_STOP`
+// batches in a row without a hit, but not before `scanAtLeastTo`.
 // `findExisting` answers for each key of the batch, in order.
 export const scanDerivedKeys = <K, A, E>({
   batchSize,
   margin,
+  scanAtLeastTo = 0,
   derive,
   findExisting,
 }: {
   batchSize: number
   margin: number
+  scanAtLeastTo?: number
   derive: (index: KeyDerivationIndex) => Effect.Effect<K, CryptoError>
   findExisting: (
     batch: readonly K[]
   ) => Effect.Effect<ReadonlyArray<Option.Option<A>>, E>
 }): Effect.Effect<ScanResult<A>, E | CryptoError> => {
-  const scanFrom = (
-    start: number,
-    found: readonly A[],
+  const scanFrom = ({
+    start,
+    found,
+    nextIndex,
+    emptyBatches,
+  }: {
+    start: number
+    found: readonly A[]
     nextIndex: number
-  ): Effect.Effect<ScanResult<A>, E | CryptoError> =>
+    emptyBatches: number
+  }): Effect.Effect<ScanResult<A>, E | CryptoError> =>
     pipe(
       Array.makeBy(batchSize, (i) => KeyDerivationIndex.make(start + i)),
       (indexes) => deriveWithBreaks(indexes, derive),
@@ -77,30 +88,43 @@ export const scanDerivedKeys = <K, A, E>({
           Array.findLastIndex(answers, Option.isSome),
           Option.match({
             onNone: () =>
-              Effect.succeed({
-                found,
-                nextIndex: KeyDerivationIndex.make(nextIndex),
-              }),
+              emptyBatches + 1 >= EMPTY_BATCHES_TO_STOP &&
+              start + batchSize >= scanAtLeastTo
+                ? Effect.succeed({
+                    found,
+                    nextIndex: KeyDerivationIndex.make(
+                      Math.max(nextIndex, scanAtLeastTo)
+                    ),
+                  })
+                : scanFrom({
+                    start: start + batchSize,
+                    found,
+                    nextIndex,
+                    emptyBatches: emptyBatches + 1,
+                  }),
             onSome: (lastHit) =>
-              scanFrom(
-                start + batchSize,
-                [...found, ...Array.getSomes(answers)],
-                start + lastHit + 1 + margin
-              ),
+              scanFrom({
+                start: start + batchSize,
+                found: [...found, ...Array.getSomes(answers)],
+                nextIndex: start + lastHit + 1 + margin,
+                emptyBatches: 0,
+              }),
           })
         )
       )
     )
 
-  return scanFrom(0, [], margin)
+  return scanFrom({start: 0, found: [], nextIndex: margin, emptyBatches: 0})
 }
 
 export const scanInboxes = ({
   masterSeed,
   chatApi,
+  scanAtLeastTo,
 }: {
   masterSeed: MasterSeed
   chatApi: Pick<ChatApi, 'checkInboxesExist'>
+  scanAtLeastTo?: number
 }): Effect.Effect<
   ScanResult<PrivateKeyHolder>,
   Effect.Effect.Error<ReturnType<ChatApi['checkInboxesExist']>> | CryptoError
@@ -108,6 +132,7 @@ export const scanInboxes = ({
   scanDerivedKeys({
     batchSize: INBOX_SCAN_BATCH_SIZE,
     margin: INBOX_COUNTER_MARGIN,
+    scanAtLeastTo,
     derive: (index) => deriveInboxPrivateKey(masterSeed, index),
     findExisting: (keys) =>
       chatApi
@@ -151,13 +176,16 @@ export const findClubUuidOfMember =
 export const scanClubs = <E>({
   masterSeed,
   findClubUuid,
+  scanAtLeastTo,
 }: {
   masterSeed: MasterSeed
   findClubUuid: (keys: ClubKeys) => Effect.Effect<Option.Option<ClubUuid>, E>
+  scanAtLeastTo?: number
 }): Effect.Effect<ScanResult<FoundClub>, E | CryptoError> =>
   scanDerivedKeys({
     batchSize: CLUB_SCAN_BATCH_SIZE,
     margin: CLUB_COUNTER_MARGIN,
+    scanAtLeastTo,
     derive: (index) => deriveClubKeys(masterSeed, index),
     findExisting: (batch) =>
       pipe(

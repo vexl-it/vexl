@@ -148,9 +148,9 @@ describe('key derivation counters', () => {
       ])
     )
 
-    // One recovery for both: a batch with the hit and the empty one after it.
-    expect(mockCheckInboxesExist).toHaveBeenCalledTimes(2)
-    expect(mockGetClubInfo).toHaveBeenCalledTimes(20)
+    // One recovery for both: a batch with the hit and two empty ones after it.
+    expect(mockCheckInboxesExist).toHaveBeenCalledTimes(3)
+    expect(mockGetClubInfo).toHaveBeenCalledTimes(40)
     expect(allocated).toEqual(expect.arrayContaining(expected))
     // The club counter was already higher in memory and is never lowered.
     expect(storedCounters()).toEqual({nextInboxIndex: 106, nextClubIndex: 40})

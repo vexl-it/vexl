@@ -94,6 +94,7 @@ export const createBackupFile = ({
       ),
       legacyClubKeys: Record.filter(clubs, isLegacyClubKey),
       notificationSecret,
+      derivationCounters: counters,
       legacyClubKeysWaitingForAdmission: Array.filter(
         clubKeysWaitingForAdmission,
         isLegacyClubKey

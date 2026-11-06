@@ -13,7 +13,7 @@ import {
   deriveClubKeys,
   deriveInboxPrivateKey,
 } from '@vexl-next/resources-utils/src/keyDerivation/keyFactory'
-import {Effect, Schema} from 'effect'
+import {Effect, Schema, Struct} from 'effect'
 import {type SessionV2} from '../../brands/Session.brand'
 import {dummySession} from '../session/dummySesssion'
 import {createBackupFile} from './createBackupFile'
@@ -85,10 +85,17 @@ describe('createBackupFile', () => {
       legacyInboxKeys: [legacyInbox, inboxAboveCounter],
       legacyClubKeys: {[legacyClubUuid]: legacyClub},
       legacyClubKeysWaitingForAdmission: [legacyWaitingClub],
+      derivationCounters: {nextInboxIndex: 2, nextClubIndex: 2},
     })
 
     const json = Schema.encodeSync(BackupFileFromJson)(backupFile)
     expect(Schema.decodeSync(BackupFileFromJson)(json)).toEqual(backupFile)
+    const exportedByEarlyBuilds = Struct.omit(backupFile, 'derivationCounters')
+    expect(
+      Schema.decodeSync(BackupFileFromJson)(
+        Schema.encodeSync(BackupFileFromJson)(exportedByEarlyBuilds)
+      )
+    ).toEqual(exportedByEarlyBuilds)
     expect(json).not.toContain(dummySession.loginSessionId)
   })
 })

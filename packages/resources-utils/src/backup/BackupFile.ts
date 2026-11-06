@@ -11,7 +11,10 @@ import {
 } from '@vexl-next/cryptography/src/operations/passwordEncryption'
 import {ClubKeys, ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
-import {MasterSeed} from '@vexl-next/domain/src/general/MasterSeed.brand'
+import {
+  KeyDerivationIndex,
+  MasterSeed,
+} from '@vexl-next/domain/src/general/MasterSeed.brand'
 import {VexlNotificationTokenSecret} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {UserName} from '@vexl-next/domain/src/general/UserName.brand'
 import {Base64String} from '@vexl-next/domain/src/utility/Base64String.brand'
@@ -60,6 +63,14 @@ export const BackupFile = Schema.Struct({
   legacyClubKeysWaitingForAdmission: Schema.Array(ClubKeys),
   // Missing when the device had no secret when exporting.
   notificationSecret: Schema.optional(BackupNotificationSecret),
+  // The counters when exporting. A restore scans at least this far and never
+  // hands out an index below them again. Missing in backups of early builds.
+  derivationCounters: Schema.optional(
+    Schema.Struct({
+      nextInboxIndex: KeyDerivationIndex,
+      nextClubIndex: KeyDerivationIndex,
+    })
+  ),
 })
 export type BackupFile = typeof BackupFile.Type
 

@@ -35,7 +35,7 @@ export interface ScanResult<A> {
 
 // Effect yields on microtasks, which never let React Native render. A timer
 // break before every few keys keeps the UI responsive while they are derived.
-const deriveWithBreaks = <K>(
+export const deriveWithBreaks = <K>(
   indexes: readonly KeyDerivationIndex[],
   derive: (index: KeyDerivationIndex) => Effect.Effect<K, CryptoError>
 ): Effect.Effect<K[], CryptoError> =>

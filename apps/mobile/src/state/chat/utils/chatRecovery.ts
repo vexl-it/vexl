@@ -1,3 +1,4 @@
+import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {type ChatRecoveryProof} from '@vexl-next/domain/src/general/messaging'
 import {type UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {
@@ -9,7 +10,7 @@ import {
   chatHistoryToMessages,
   type ChatMessageWithDirection,
 } from '@vexl-next/resources-utils/src/chat/utils/chatHistory'
-import {Array, Option, pipe} from 'effect'
+import {Array, Option, pipe, Record} from 'effect'
 import {
   type ChatMessageWithState,
   type ChatWithMessages,
@@ -137,9 +138,45 @@ export function chatsWaitingForHistoryRequest({
     (chat) =>
       // An older app can't answer, it would only show an "update" placeholder.
       supportsChatRecovery(chat.chat.otherSideVersion) &&
-      (!chat.historyRequestedAt ||
-        now >= chat.historyRequestedAt + HISTORY_REQUEST_RETRY_AFTER_MS)
+      !isHistoryRequestRecent({
+        requestedAt: inbox.historyRequestedAt?.[chat.chat.otherSide.publicKey],
+        now,
+      })
   )
+}
+
+const isHistoryRequestRecent = ({
+  requestedAt,
+  now,
+}: {
+  requestedAt: UnixMilliseconds | undefined
+  now: UnixMilliseconds
+}): boolean =>
+  !!requestedAt && now < requestedAt + HISTORY_REQUEST_RETRY_AFTER_MS
+
+export function recordHistoryRequest({
+  inbox,
+  sender,
+  now,
+}: {
+  inbox: InboxInState
+  sender: PublicKeyPemBase64
+  now: UnixMilliseconds
+}): InboxInState {
+  return {
+    ...inbox,
+    historyRequestedAt: {
+      ...Record.filter(inbox.historyRequestedAt ?? {}, (requestedAt) =>
+        isHistoryRequestRecent({requestedAt, now})
+      ),
+      [sender]: now,
+    },
+    pendingRecoveryChats: Array.map(inbox.pendingRecoveryChats ?? [], (one) =>
+      one.chat.otherSide.publicKey === sender
+        ? {...one, historyRequestedAt: now}
+        : one
+    ),
+  }
 }
 
 export function supportsChatRecovery(

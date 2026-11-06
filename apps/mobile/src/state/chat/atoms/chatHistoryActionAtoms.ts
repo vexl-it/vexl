@@ -22,6 +22,7 @@ import {
   chatsWaitingForHistoryRequest,
   isPendingRecoveryChatExpired,
   messagesToShareAsHistory,
+  recordHistoryRequest,
 } from '../utils/chatRecovery'
 import messagingStateAtom from './messagingStateAtom'
 import {sendMessageWithMyVexlTokenActionAtom} from './refreshNotificationTokensActionAtom'
@@ -109,15 +110,18 @@ export const processPendingRecoveryChatsActionAtom = atom(
           set(sendHistoryRequestActionAtom, chat).pipe(
             Effect.map((sent) => {
               if (!sent) return
-              set(updatePendingRecoveryChatsActionAtom, {
-                inboxKey,
-                update: (chats) =>
-                  Array.map(chats, (one) =>
-                    one.chat.id === chat.chat.id
-                      ? {...one, historyRequestedAt: unixMillisecondsNow()}
-                      : one
-                  ),
-              })
+              set(
+                messagingStateAtom,
+                Array.map((inbox) =>
+                  inbox.inbox.privateKey.publicKeyPemBase64 === inboxKey
+                    ? recordHistoryRequest({
+                        inbox,
+                        sender: chat.chat.otherSide.publicKey,
+                        now: unixMillisecondsNow(),
+                      })
+                    : inbox
+                )
+              )
             })
           )
         ),

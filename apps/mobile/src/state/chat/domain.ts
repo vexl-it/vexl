@@ -171,6 +171,11 @@ export const InboxInState = Schema.Struct({
   // Chats recovered from senders not yet proven to be real chat partners.
   // Hidden from everything else until their history arrives.
   pendingRecoveryChats: Schema.optional(Schema.Array(ChatWithMessages)),
+  // Per sender, so a sender dropped and re-creating its pending chat can't
+  // make this device send history requests any more often.
+  historyRequestedAt: Schema.optional(
+    Schema.Record({key: PublicKeyPemBase64, value: UnixMilliseconds})
+  ),
 })
 export type InboxInState = typeof InboxInState.Type
 

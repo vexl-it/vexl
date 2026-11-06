@@ -1,5 +1,5 @@
+import {gcm} from '@noble/ciphers/aes.js'
 import {Schema} from 'effect'
-import {CYPHER_ALGORITHM} from '../constants'
 import {getCrypto} from '../getCrypto'
 import pbkdf2 from './pbkdf2Promise'
 
@@ -37,20 +37,13 @@ export async function encryptWithPassword({
   const salt = crypto.randomBytes(SALT_LENGTH)
   const iv = crypto.randomBytes(IV_LENGTH)
 
-  const cipher = crypto.createCipheriv(
-    CYPHER_ALGORITHM,
-    await deriveKey(password, salt),
-    iv
+  const sealed = gcm(await deriveKey(password, salt), iv).encrypt(
+    Buffer.from(data, 'utf8')
   )
-  // react-native-quick-crypto returns ArrayBuffers, Buffer.from normalizes them
-  const encrypted = Buffer.concat([
-    Buffer.from(cipher.update(data, 'utf8')),
-    Buffer.from(cipher.final()),
-  ])
+  const encrypted = sealed.subarray(0, sealed.length - AUTH_TAG_LENGTH)
+  const authTag = sealed.subarray(sealed.length - AUTH_TAG_LENGTH)
 
-  return Buffer.concat([salt, iv, cipher.getAuthTag(), encrypted]).toString(
-    'base64'
-  )
+  return Buffer.concat([salt, iv, authTag, encrypted]).toString('base64')
 }
 
 /**
@@ -71,18 +64,14 @@ export async function decryptWithPassword({
   const iv = bytes.subarray(SALT_LENGTH, SALT_LENGTH + IV_LENGTH)
   const authTag = bytes.subarray(SALT_LENGTH + IV_LENGTH, HEADER_LENGTH)
 
-  const decipher = getCrypto().createDecipheriv(
-    CYPHER_ALGORITHM,
-    await deriveKey(password, salt),
-    iv
-  )
-  decipher.setAuthTag(authTag)
+  const key = await deriveKey(password, salt)
 
   try {
-    return Buffer.concat([
-      Buffer.from(decipher.update(bytes.subarray(HEADER_LENGTH))),
-      Buffer.from(decipher.final()),
-    ]).toString('utf8')
+    return Buffer.from(
+      gcm(key, iv).decrypt(
+        Buffer.concat([bytes.subarray(HEADER_LENGTH), authTag])
+      )
+    ).toString('utf8')
   } catch {
     throw new WrongPasswordError()
   }

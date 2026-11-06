@@ -3,7 +3,8 @@ import {PgClient} from '@effect/sql-pg'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {VexlProductNotification} from '@vexl-next/domain/src/general/vexlProductNotification'
 import {DuplicateVexlProductNotificationUuidError} from '@vexl-next/rest-api/src/services/content/contracts'
-import {Effect, flow, Option, Schema} from 'effect'
+import {Effect, flow, Schema} from 'effect'
+import {isUniqueViolation} from '../../isUniqueViolation'
 import {
   VexlProductNotificationDbRecord,
   vexlProductNotificationFromDbRecord,
@@ -14,12 +15,6 @@ export const InsertVexlProductNotificationParams = Schema.Struct({
 })
 export type InsertVexlProductNotificationParams =
   typeof InsertVexlProductNotificationParams.Type
-
-const PgErrorCause = Schema.Struct({
-  code: Schema.String,
-  constraint: Schema.String,
-  detail: Schema.optional(Schema.String),
-})
 
 export const createInsertVexlProductNotification = Effect.gen(function* (_) {
   const sql = yield* _(PgClient.PgClient)
@@ -73,13 +68,9 @@ export const createInsertVexlProductNotification = Effect.gen(function* (_) {
         never,
         DuplicateVexlProductNotificationUuidError | UnexpectedServerError
       > => {
-        const cause = Schema.decodeUnknownOption(PgErrorCause)(e.cause)
-
         if (
           e._tag === 'SqlError' &&
-          Option.isSome(cause) &&
-          cause.value.code === '23505' &&
-          cause.value.constraint === 'vexl_product_notifications_uuid_key'
+          isUniqueViolation(e, 'vexl_product_notifications_uuid_key')
         ) {
           return Effect.fail(new DuplicateVexlProductNotificationUuidError())
         }

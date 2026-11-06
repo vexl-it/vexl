@@ -3,12 +3,24 @@ import {loadMigrationsFromEffect} from '@vexl-next/server-utils/src/loadMigratio
 import {Effect, Layer, String} from 'effect'
 import {databaseConfig} from '../configs'
 import initialMigration from './migrations/0001_initial'
+import cmsMigration from './migrations/0002_cms'
+import importWebflowSnapshotMigration from './migrations/0003_importWebflowSnapshot'
 
 const migrations = [
   {
     id: 1,
     name: 'initial',
     migrationEffect: initialMigration,
+  },
+  {
+    id: 2,
+    name: 'cms',
+    migrationEffect: cmsMigration,
+  },
+  {
+    id: 3,
+    name: 'importWebflowSnapshot',
+    migrationEffect: importWebflowSnapshotMigration,
   },
 ]
 

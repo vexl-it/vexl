@@ -7,7 +7,7 @@ import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import {Effect} from 'effect'
 import {VexlProductNotificationsDbService} from '../../db/VexlProductNotificationsDbService'
-import {validateAdminToken} from './validateAdminToken'
+import {validateAdminToken} from '../validateAdminToken'
 
 export const createVexlProductNotificationHandler = HttpApiBuilder.handler(
   ContentInternalApiSpecification,

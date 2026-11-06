@@ -28,6 +28,8 @@ import {
   InvoiceNotFoundError,
   MapStylesResponse,
   NewsAndAnnouncementsResponse,
+  PublishedBlogPostsResponse,
+  PublishedEventsResponse,
   UpdateInvoiceWebhookError,
 } from './contracts'
 
@@ -45,9 +47,25 @@ export const GetBlogArticlesEndpoint = HttpApiEndpoint.get(
   .addSuccess(BlogsArticlesResponse)
   .annotate(MaxExpectedDailyCall, 100)
 
+export const GetPublishedBlogPostsEndpoint = HttpApiEndpoint.get(
+  'getPublishedBlogPosts',
+  '/content/website/blog-posts'
+)
+  .addSuccess(PublishedBlogPostsResponse)
+  .annotate(MaxExpectedDailyCall, 1000)
+
+export const GetPublishedEventsEndpoint = HttpApiEndpoint.get(
+  'getPublishedEvents',
+  '/content/website/events'
+)
+  .addSuccess(PublishedEventsResponse)
+  .annotate(MaxExpectedDailyCall, 1000)
+
 const CmsContentApiGroup = HttpApiGroup.make('Cms')
   .add(GetEventsEndpoint)
   .add(GetBlogArticlesEndpoint)
+  .add(GetPublishedBlogPostsEndpoint)
+  .add(GetPublishedEventsEndpoint)
 
 export const NewsAndAnonouncementsEndpoint = HttpApiEndpoint.get(
   'getNewsAndAnnouncements',

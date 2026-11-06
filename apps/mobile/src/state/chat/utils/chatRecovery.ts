@@ -135,12 +135,16 @@ export function chatsWaitingForHistoryRequest({
   return Array.filter(
     inbox.pendingRecoveryChats ?? [],
     (chat) =>
-      !chat.historyRequestedAt ||
-      now >= chat.historyRequestedAt + HISTORY_REQUEST_RETRY_AFTER_MS
+      // An older app can't answer, it would only show an "update" placeholder.
+      supportsChatRecovery(chat.chat.otherSideVersion) &&
+      (!chat.historyRequestedAt ||
+        now >= chat.historyRequestedAt + HISTORY_REQUEST_RETRY_AFTER_MS)
   )
 }
 
-function supportsChatRecovery(version: VersionString | undefined): boolean {
+export function supportsChatRecovery(
+  version: VersionString | undefined
+): boolean {
   return (
     !!version && compare(version)('>=', CHAT_HISTORY_MINIMAL_REQUIRED_VERSION)
   )

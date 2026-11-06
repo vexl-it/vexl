@@ -34,6 +34,7 @@ import {
 } from './chatRecovery'
 import isChatOpen from './isChatOpen'
 import {getChatState} from './offerStates'
+import settlePendingRecoveryChats from './settlePendingRecoveryChats'
 
 jest.mock('./scheduleTradeReminderIfNeeded', () => ({
   scheduleTradeReminderIfNeeded: () => (chat: ChatWithMessages) => chat,
@@ -163,12 +164,16 @@ describe('restored chat state', () => {
   })
 
   it('lists pending recovery chats that still need a history request', () => {
-    const waiting = chat({
+    const pending = chat({
       inboxKey: myKey,
       otherSideKey: theirKey,
       messages: [],
       restoredFromBackup: true,
     })
+    const waiting = {
+      ...pending,
+      chat: {...pending.chat, otherSideVersion: version},
+    }
     const requested = {...waiting, historyRequestedAt: at(20)}
     const inbox = {
       inbox: {privateKey: myKey},
@@ -187,6 +192,43 @@ describe('restored chat state', () => {
       waiting,
       requested,
     ])
+  })
+
+  it('asks for history only once the other side runs an app that can answer', () => {
+    const pending = chat({
+      inboxKey: myKey,
+      otherSideKey: theirKey,
+      messages: [received(message(theirKey, {time: at(1)}))],
+      restoredFromBackup: true,
+    })
+    const fromOldApp = {
+      ...pending,
+      chat: {
+        ...pending.chat,
+        otherSideVersion: Schema.decodeSync(VersionString)('26.9.5'),
+      },
+    }
+    const waiting = (one: ChatWithMessages): readonly ChatWithMessages[] =>
+      chatsWaitingForHistoryRequest({
+        inbox: {
+          inbox: {privateKey: myKey},
+          chats: [],
+          pendingRecoveryChats: [one],
+        },
+        now: at(2),
+      })
+    expect(waiting(fromOldApp)).toEqual([])
+
+    const {pending: [updated] = []} = settlePendingRecoveryChats({
+      chats: [fromOldApp],
+      incoming: [
+        received(message(theirKey, {time: at(2), myVersion: version})),
+      ],
+      expectedRecoveryProof: () => recoveryProof,
+    })
+
+    expect(updated?.chat.otherSideVersion).toBe(version)
+    expect(updated && waiting(updated)).toHaveLength(1)
   })
 
   it('drops a pending recovery chat 30 days after the recovery started', () => {

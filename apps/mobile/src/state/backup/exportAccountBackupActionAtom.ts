@@ -129,20 +129,24 @@ export const exportAccountBackupActionAtom = atom(
 
     return Effect.all({
       publicKey: get(apiAtom).user.getBackupPublicKey(),
-      backup: createBackupFile({
-        session: session.session,
-        counters: get(keyDerivationCountersAtom),
-        inboxKeys: Array.map(
-          get(messagingStateAtom),
-          (one) => one.inbox.privateKey
-        ),
-        clubs,
-        clubKeysWaitingForAdmission: waitingForAdmission,
-        realUserData: userDataForBackup(session.session.realUserData),
-        notificationSecret: notificationSecretForBackup(
-          get(vexlNotificationTokenAtom)
-        ),
-      }),
+      backup: Effect.flatMap(
+        userDataForBackup(session.session.realUserData),
+        (realUserData) =>
+          createBackupFile({
+            session: session.session,
+            counters: get(keyDerivationCountersAtom),
+            inboxKeys: Array.map(
+              get(messagingStateAtom),
+              (one) => one.inbox.privateKey
+            ),
+            clubs,
+            clubKeysWaitingForAdmission: waitingForAdmission,
+            realUserData,
+            notificationSecret: notificationSecretForBackup(
+              get(vexlNotificationTokenAtom)
+            ),
+          })
+      ),
     }).pipe(
       Effect.flatMap(({publicKey: {publicKey}, backup}) =>
         encryptBackupFile({backup, pin, publicKey})

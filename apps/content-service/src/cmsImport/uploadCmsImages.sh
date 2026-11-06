@@ -18,6 +18,11 @@ while IFS=$'\t' read -r source key; do
   echo "uploaded $key"
 done < "$manifest"
 
+failed=0
 while IFS=$'\t' read -r _ key; do
-  curl -fsS -o /dev/null "https://resources.vexl.it/$key" || echo "NOT SERVED: $key"
+  if ! curl -fsS -o /dev/null "https://resources.vexl.it/$key"; then
+    echo "NOT SERVED: $key"
+    failed=1
+  fi
 done < "$manifest"
+exit "$failed"

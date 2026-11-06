@@ -1,5 +1,5 @@
 import {SqlClient} from '@effect/sql'
-import {Effect, Option, Schema} from 'effect'
+import {Array, Effect, Option, Schema} from 'effect'
 import {CmsSnapshot, importCmsSnapshot} from '../cmsImport/importCmsSnapshot'
 import webflowSnapshot from '../cmsImport/webflowSnapshot.json'
 import {BlogPostsDbService} from '../db/BlogPostsDbService'
@@ -47,11 +47,10 @@ describe('Webflow snapshot import', () => {
   })
 
   it('keeps Czech versions and English-only legacy posts', () => {
-    const bySlug = (slug: string): (typeof snapshot.blogPosts)[number] => {
-      const post = snapshot.blogPosts.find((one) => one.slug === slug)
-      if (!post) throw new Error(`Missing ${slug}`)
-      return post
-    }
+    const bySlug = (slug: string): (typeof snapshot.blogPosts)[number] =>
+      Option.getOrThrow(
+        Array.findFirst(snapshot.blogPosts, (one) => one.slug === slug)
+      )
 
     const translated = bySlug('pub-quiz-and-btalks-are-here')
     expect(Option.map(translated.cs, (cs) => cs.title)).toEqual(

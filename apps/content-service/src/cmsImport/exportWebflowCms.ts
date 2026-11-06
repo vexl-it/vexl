@@ -271,8 +271,8 @@ const program = Effect.gen(function* (_) {
           featured: fields['featured-article'] ?? false,
           imageUrl: yield* _(
             Option.fromNullable(fields['main-image']?.url),
-            Effect.flatMap(rehostUrl),
-            Effect.option
+            Option.map(rehostUrl),
+            Effect.transposeOption
           ),
           publishedAt: item.lastPublished,
           createdAt: item.createdOn,

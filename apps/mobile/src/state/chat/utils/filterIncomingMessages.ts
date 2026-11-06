@@ -29,6 +29,8 @@ interface SenderFilterState {
   readonly receivedMessageSinceOpen: boolean
   // Restored inbox without a chat with this sender yet
   readonly canRecoverChat: boolean
+  // Recovered chat waiting for its history
+  readonly hasPendingRecoveryChat: boolean
   // Recovered chat waiting for the history we asked for
   readonly awaitsHistory: boolean
 }
@@ -93,7 +95,9 @@ function shouldAcceptForState({
         startsChatRecovery(incomingMessage)) ||
       (state.awaitsHistory &&
         incomingMessage?.state === 'received' &&
-        messageType === 'HISTORY')
+        messageType === 'HISTORY') ||
+      // Tells when the other side's app can answer a history request
+      (state.hasPendingRecoveryChat && messageType === 'VERSION_UPDATE')
     )
   }
 
@@ -182,20 +186,20 @@ function getInitialSenderState(
     Option.getOrUndefined
   )
 
+  const pendingChat = Array.findFirst(
+    inbox.pendingRecoveryChats ?? [],
+    (pending) => pending.chat.otherSide.publicKey === senderPublicKey
+  )
+
   return {
     senderPublicKey,
     chatState: chat ? getChatState(chat) : undefined,
     lastTerminalMessage: findLastTerminalMessage(chat),
     receivedMessageSinceOpen: hasReceivedMessageSinceOpen(chat),
     canRecoverChat: isRestoredInboxInGracePeriod({inbox, now}) && !chat,
+    hasPendingRecoveryChat: !chat && Option.isSome(pendingChat),
     awaitsHistory:
-      !chat &&
-      Array.some(
-        inbox.pendingRecoveryChats ?? [],
-        (pending) =>
-          pending.chat.otherSide.publicKey === senderPublicKey &&
-          !!pending.historyRequestedAt
-      ),
+      !chat && Option.exists(pendingChat, (one) => !!one.historyRequestedAt),
   }
 }
 

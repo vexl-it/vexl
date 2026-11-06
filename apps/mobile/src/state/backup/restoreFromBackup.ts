@@ -49,6 +49,9 @@ import {syncVexlNotificationTokensActionAtom} from '../notifications/actions/syn
 import {vexlNotificationTokenAtom} from '../notifications/vexlNotificationTokenAtom'
 import {postLoginFlowCompletedScreensAtom} from '../postLoginOnboarding'
 import {sessionAtom} from '../session'
+import writeSessionToStorage, {
+  type SessionWriteError,
+} from '../session/utils/writeSessionToStorage'
 import {restoredNotificationSecretState} from './backupNotificationSecret'
 import {clearBackupToRestoreActionAtom} from './backupToRestore'
 import {restoredUserData} from './backupUserData'
@@ -193,55 +196,59 @@ const commitRestoredAccountActionAtom = atom(
       // None when a new secret was minted instead.
       takenOverSecret: Option.Option<VexlNotificationTokenSecret>
     }
-  ) => {
-    // Before the session exists, so nothing can allocate a key from stale counters.
-    set(raiseKeyDerivationCountersActionAtom, counters)
+  ): Effect.Effect<void, SessionWriteError> =>
+    Effect.gen(function* () {
+      // Before the session exists, so nothing can allocate a key from stale counters.
+      set(raiseKeyDerivationCountersActionAtom, counters)
 
-    if (Option.isSome(takenOverSecret)) {
-      set(
-        vexlNotificationTokenAtom,
-        restoredNotificationSecretState(takenOverSecret.value)
+      if (Option.isSome(takenOverSecret)) {
+        set(
+          vexlNotificationTokenAtom,
+          restoredNotificationSecretState(takenOverSecret.value)
+        )
+        vexlNotificationTokenAtom.flushNow()
+      }
+
+      set(messagingStateAtom, (state) => withRestoredInboxes(state, inboxKeys))
+      messagingStateAtomStorageAtom.flushNow()
+      set(clubsKeyHolderStorageAtom, clubKeys)
+      clubsKeyHolderStorageAtom.flushNow()
+
+      // The server-side user, inbox and profile choice already exist. Contacts
+      // import and notifications stay, contacts give back the local names.
+      set(postLoginFlowCompletedScreensAtom, ['usageInfo'])
+      set(showCheckUpdatedPrivacyPolicySuggestionAtom, false)
+      // A returning user knows the marketplace.
+      set(showMarketplaceIntroDialogAtom, false)
+      set(showRestoredAccountInfoAtom, true)
+
+      // restoreUser already replaced the old device, so a session that can't be
+      // stored must fail the restore instead of logging out later.
+      yield* writeSessionToStorage(session)
+      set(sessionAtom, O.some(session))
+      set(defaultCurrencyBaseOnCountryCodeActionAtom)
+
+      // Own offers and notes come back with ownership, which links them to
+      // their restored inboxes. Don't wait for the marketplace screen.
+      // Without the old secret, own offers still point to the old device.
+      Effect.runFork(
+        Effect.all(
+          [
+            set(refreshOffersActionAtom).pipe(
+              Effect.zipRight(
+                Option.isNone(takenOverSecret)
+                  ? set(updateOfferNotificationTokensActionAtom, {
+                      regenerateAll: true,
+                    })
+                  : Effect.void
+              )
+            ),
+            set(refreshNotesActionAtom),
+          ],
+          {concurrency: 'unbounded'}
+        )
       )
-      vexlNotificationTokenAtom.flushNow()
-    }
-
-    set(messagingStateAtom, (state) => withRestoredInboxes(state, inboxKeys))
-    messagingStateAtomStorageAtom.flushNow()
-    set(clubsKeyHolderStorageAtom, clubKeys)
-    clubsKeyHolderStorageAtom.flushNow()
-
-    // The server-side user, inbox and profile choice already exist. Contacts
-    // import and notifications stay, contacts give back the local names.
-    set(postLoginFlowCompletedScreensAtom, ['usageInfo'])
-    set(showCheckUpdatedPrivacyPolicySuggestionAtom, false)
-    // A returning user knows the marketplace.
-    set(showMarketplaceIntroDialogAtom, false)
-    set(showRestoredAccountInfoAtom, true)
-
-    set(sessionAtom, O.some(session))
-    set(defaultCurrencyBaseOnCountryCodeActionAtom)
-
-    // Own offers and notes come back with ownership, which links them to
-    // their restored inboxes. Don't wait for the marketplace screen.
-    // Without the old secret, own offers still point to the old device.
-    Effect.runFork(
-      Effect.all(
-        [
-          set(refreshOffersActionAtom).pipe(
-            Effect.zipRight(
-              Option.isNone(takenOverSecret)
-                ? set(updateOfferNotificationTokensActionAtom, {
-                    regenerateAll: true,
-                  })
-                : Effect.void
-            )
-          ),
-          set(refreshNotesActionAtom),
-        ],
-        {concurrency: 'unbounded'}
-      )
-    )
-  }
+    })
 )
 
 const restoreUserActionAtom = atom(null, (get, _, session: SessionV2) =>
@@ -324,7 +331,7 @@ const restoreAccountActionAtom = atom(null, (get, set, backup: BackupFile) =>
       const session = {...backupSession, sessionNotificationToken}
       yield* set(restoreUserActionAtom, session)
 
-      set(commitRestoredAccountActionAtom, {
+      yield* set(commitRestoredAccountActionAtom, {
         account: withSession(session),
         takenOverSecret: Option.some(secret),
       })
@@ -349,7 +356,7 @@ const restoreAccountActionAtom = atom(null, (get, set, backup: BackupFile) =>
       return session
     }).pipe(Effect.tapError(() => set(discardVexlSecretActionAtom)))
 
-    set(commitRestoredAccountActionAtom, {
+    yield* set(commitRestoredAccountActionAtom, {
       account: withSession(session),
       takenOverSecret: Option.none(),
     })

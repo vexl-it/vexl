@@ -96,7 +96,9 @@ export class BlogPostsDbService extends Context.Tag('BlogPostsDbService')<
             blog_posts
           WHERE
             status = 'published'
+            AND published_at <= now()
           ORDER BY
+            published_at DESC,
             created_at DESC
         `,
       })
@@ -110,6 +112,7 @@ export class BlogPostsDbService extends Context.Tag('BlogPostsDbService')<
           FROM
             blog_posts
           ORDER BY
+            published_at DESC,
             created_at DESC
         `,
       })

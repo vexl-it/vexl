@@ -6,7 +6,7 @@ import {
   InvalidContentAdminTokenError,
 } from '@vexl-next/rest-api/src/services/content/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
-import {Array, Effect, Option, Schema} from 'effect'
+import {Array, Effect, Option, Order, Schema} from 'effect'
 import {NodeTestingApp, NodeTestingInternalApp} from '../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../utils/runPromiseInMockedEnvironment'
 
@@ -110,6 +110,48 @@ describe('blog posts', () => {
             Effect.either
           )
         )
+      })
+    )
+  })
+
+  it('lists posts newest published first', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const app = yield* _(NodeTestingApp)
+        const internalApp = yield* _(NodeTestingInternalApp)
+        const {blogPosts} = yield* _(app.Cms.getPublishedBlogPosts({}))
+        const {blogPosts: editorPosts} = yield* _(
+          internalApp.Cms.listBlogPosts({headers})
+        )
+
+        for (const posts of [blogPosts, editorPosts]) {
+          const dates = Array.map(posts, (one) => one.publishedAt.getTime())
+          expect(dates).toEqual(Array.sort(dates, Order.reverse(Order.number)))
+        }
+      })
+    )
+  })
+
+  it('hides scheduled posts until their publish date', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const internalApp = yield* _(NodeTestingInternalApp)
+        const scheduled = yield* _(
+          internalApp.Cms.createBlogPost({
+            headers,
+            payload: {
+              ...makeInput('scheduled'),
+              publishedAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+            },
+          })
+        )
+        yield* _(
+          internalApp.Cms.publishBlogPost({headers, path: {id: scheduled.id}})
+        )
+
+        expect(yield* _(publicSlugs)).not.toContain('scheduled')
+        const {blogPosts} = yield* _(internalApp.Cms.listBlogPosts({headers}))
+        expect(Array.map(blogPosts, (one) => one.slug)).toContain('scheduled')
       })
     )
   })

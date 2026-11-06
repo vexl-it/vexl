@@ -359,6 +359,94 @@ describe('Login session proof', () => {
     }
   )
 
+  const captured =
+    (proof: LoginSessionProof): ProofOf =>
+    () =>
+      Effect.succeed(proof)
+  const signNow = (
+    keys: KeyPair,
+    loginSessionId: LoginSessionId
+  ): Effect.Effect<LoginSessionProof, CryptoError> =>
+    signedBy(keys)(loginSessionId).pipe(
+      Effect.flatMap(Effect.fromNullable),
+      Effect.orDie
+    )
+
+  it('Rejects a proof replayed to restoreUser after another device restored', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const keys = generatePrivateKey()
+        const deviceASession = generateLoginSessionId()
+        yield* _(createUser(keys, deviceASession))
+        const deviceAProof = yield* _(signNow(keys, deviceASession))
+        const refreshed = yield* _(
+          refreshUser(keys, deviceASession, captured(deviceAProof))
+        )
+        expect(refreshed._tag).toBe('Right')
+
+        const deviceBSession = generateLoginSessionId()
+        const restored = yield* _(restoreUser(keys, deviceBSession))
+        expect(restored._tag).toBe('Right')
+
+        const replayed = yield* _(
+          restoreUser(keys, deviceASession, captured(deviceAProof))
+        )
+        expectErrorResponse(InvalidLoginSessionProofError)(replayed)
+        const {row} = yield* _(findUserRow)
+        expect(row).toHaveProperty('loginSessionId', deviceBSession)
+      })
+    )
+  })
+
+  it('Accepts a proof only once on the same route', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const keys = generatePrivateKey()
+        yield* _(createUser(keys, generateLoginSessionId()))
+        const restoredSession = generateLoginSessionId()
+        const proof = yield* _(signNow(keys, restoredSession))
+
+        const first = yield* _(
+          restoreUser(keys, restoredSession, captured(proof))
+        )
+        expect(first._tag).toBe('Right')
+        const second = yield* _(
+          restoreUser(keys, restoredSession, captured(proof))
+        )
+        expectErrorResponse(InvalidLoginSessionProofError)(second)
+      })
+    )
+  })
+
+  it('Rejects a replayed proof adopting a login session on a row without one', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const sql = yield* _(SqlClient.SqlClient)
+        const keys = generatePrivateKey()
+        yield* _(createUser(keys))
+        const loginSessionId = generateLoginSessionId()
+        const proof = yield* _(signNow(keys, loginSessionId))
+        const adopted = yield* _(
+          refreshUser(keys, loginSessionId, captured(proof))
+        )
+        expect(adopted._tag).toBe('Right')
+        // As after a later login of a client without login sessions
+        yield* _(sql`
+          UPDATE users
+          SET
+            login_session_id = NULL
+        `)
+
+        const replayed = yield* _(
+          refreshUser(keys, loginSessionId, captured(proof))
+        )
+        expectErrorResponse(InvalidLoginSessionProofError)(replayed)
+        const {row} = yield* _(findUserRow)
+        expect(row).toHaveProperty('loginSessionId', null)
+      })
+    )
+  })
+
   it('Keeps old clients without a login session id working without a proof', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {

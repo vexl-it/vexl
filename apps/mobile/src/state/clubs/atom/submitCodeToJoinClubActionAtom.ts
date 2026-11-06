@@ -24,7 +24,7 @@ import {formatInteger} from '../../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../../utils/localization/formattingLocaleAtom'
 import reportError from '../../../utils/reportError'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
-import {nextClubKeysActionAtom} from '../../keyDerivation'
+import {createClubKeysActionAtom} from '../../keyDerivation'
 import {myActiveOffersAtom} from '../../marketplace/atoms/myOffers'
 import {updateOfferActionAtom} from '../../marketplace/atoms/updateOfferActionAtom'
 import {generateVexlTokenActionAtom} from '../../notifications/actions/generateVexlTokenActionAtom'
@@ -366,10 +366,9 @@ export const submitCodeToJoinClubActionAtom = atom(
         yield* _(Effect.fail(new MemberAlreadyInClubError()))
       }
 
-      const {keys: clubKeys, allocate} = yield* _(set(nextClubKeysActionAtom))
+      const clubKeys = yield* _(set(createClubKeysActionAtom))
       const vexlNotificationToken = yield* _(set(generateVexlTokenActionAtom))
 
-      yield* _(allocate)
       set(clubsToKeyHolderAtom, (prevState) => ({
         ...prevState,
         [club.club.uuid]: clubKeys,

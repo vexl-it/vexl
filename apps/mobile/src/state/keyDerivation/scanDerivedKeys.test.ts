@@ -13,7 +13,7 @@ import {
   deriveInboxPrivateKey,
 } from '@vexl-next/resources-utils/src/keyDerivation/keyFactory'
 import {type ChatApi} from '@vexl-next/rest-api/src/services/chat'
-import {Array, Data, Effect, Exit, Option, Schema} from 'effect'
+import {Array, Effect, Exit, Option, Schema} from 'effect'
 import {
   CLUB_SCAN_BATCH_SIZE,
   INBOX_SCAN_BATCH_SIZE,
@@ -139,7 +139,9 @@ describe('scanInboxes', () => {
   })
 })
 
-class FakeNetworkError extends Data.TaggedError('FakeNetworkError') {}
+class FakeNetworkError extends Schema.TaggedError<FakeNetworkError>(
+  'FakeNetworkError'
+)('FakeNetworkError', {}) {}
 
 describe('scanClubs', () => {
   it('restores clubs the derived keys are members of and stops after a batch of misses', async () => {

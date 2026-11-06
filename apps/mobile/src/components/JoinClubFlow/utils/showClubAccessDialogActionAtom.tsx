@@ -3,7 +3,7 @@ import {Effect, Option} from 'effect'
 import {atom} from 'jotai'
 import {Share} from 'react-native'
 import {addKeyToWaitingForAdmissionActionAtom} from '../../../state/clubs/atom/clubsToKeyHolderV2Atom'
-import {nextClubKeysActionAtom} from '../../../state/keyDerivation'
+import {createClubKeysActionAtom} from '../../../state/keyDerivation'
 import {generateVexlTokenActionAtom} from '../../../state/notifications/actions/generateVexlTokenActionAtom'
 import {createClubAdmitionRequestLink} from '../../../utils/deepLinks/createLinks'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
@@ -17,7 +17,7 @@ export const showClubAccessDialogActionAtom = atom(null, (get, set) => {
   const {t} = get(translationAtom)
 
   return Effect.gen(function* (_) {
-    const {keys: clubKeys, allocate} = yield* _(set(nextClubKeysActionAtom))
+    const clubKeys = yield* _(set(createClubKeysActionAtom))
     const langCode = t('localeName')
 
     const vexlNotificationToken = yield* _(set(generateVexlTokenActionAtom))
@@ -29,9 +29,6 @@ export const showClubAccessDialogActionAtom = atom(null, (get, set) => {
       publicKeyV2: clubKeys.keyPair.publicKey,
     })
 
-    // A moderator can scan the QR code even if the dialog is closed later, so
-    // a shown key is never handed out again.
-    yield* _(allocate)
     const confirmed = yield* _(
       set(globalDialogAtom, {
         title: t('clubs.requestClubAccess'),

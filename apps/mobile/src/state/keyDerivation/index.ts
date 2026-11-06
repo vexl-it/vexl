@@ -188,35 +188,21 @@ export const createInboxPrivateKeyActionAtom = atom(
     })
 )
 
-export interface NextClubKeys {
-  readonly keys: ClubKeys
-  // Call right before the keys are shown or leave this device. Until then a
-  // cancelled or failed attempt leaves no gap a restore scan has to cross.
-  readonly allocate: Effect.Effect<void>
-}
-
-export const nextClubKeysActionAtom = atom(
+export const createClubKeysActionAtom = atom(
   null,
   (
     get,
     set
   ): Effect.Effect<
-    NextClubKeys,
+    ClubKeys,
     CryptoError | KeyDerivationCountersRecoveryError
   > =>
     Effect.gen(function* () {
       const masterSeed = yield* loggedInMasterSeed(get)
-      yield* set(ensureKeyDerivationCountersActionAtom)
-      const index = get(keyDerivationCountersStorage.atom).nextClubIndex
-      return {
-        keys: yield* deriveClubKeys(masterSeed, index),
-        allocate: Effect.sync(() => {
-          set(raiseKeyDerivationCountersActionAtom, {
-            nextInboxIndex: KeyDerivationIndex.make(0),
-            nextClubIndex: KeyDerivationIndex.make(index + 1),
-          })
-        }),
-      }
+      return yield* deriveClubKeys(
+        masterSeed,
+        yield* set(allocateIndexActionAtom, 'nextClubIndex')
+      )
     })
 )
 

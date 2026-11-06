@@ -1,14 +1,10 @@
-const isDev = process.env.NODE_ENV === 'development'
+// React uses eval in dev to rebuild server error stacks
+const devEval = process.env.NODE_ENV === 'development' ? " 'unsafe-eval'" : ''
 
-/**
- * The site only talks to our own origins. Next finds the nonce in the
- * request's policy and puts it on its inline scripts.
- */
-export function contentSecurityPolicy(nonce: string): string {
-  return [
+const policy = (scriptSources: string): string =>
+  [
     "default-src 'self'",
-    // React uses eval in dev to rebuild server error stacks
-    `script-src 'self' 'nonce-${nonce}'${isDev ? " 'unsafe-eval'" : ''}`,
+    `script-src ${scriptSources}${devEval}`,
     // The global-styles embed, React style props and the CMS's figure widths
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' https://resources.vexl.it",
@@ -21,4 +17,22 @@ export function contentSecurityPolicy(nonce: string): string {
     "form-action 'self'",
     "frame-ancestors 'none'",
   ].join('; ')
+
+/**
+ * The site only talks to our own origins. Browsers enforce both policies:
+ * the nonce one only lets inline scripts with the nonce run, and the static
+ * one only lets scripts load from our origin. A nonce alone would allow any
+ * origin, because next/script puts it on every `<Script>`.
+ */
+export function contentSecurityPolicies(nonce: string): {
+  /** What Next reads the nonce from to put it on its inline scripts. */
+  readonly withNonce: string
+  /** Both policies in one header value. */
+  readonly enforced: string
+} {
+  const withNonce = policy(`'self' 'nonce-${nonce}'`)
+  return {
+    withNonce,
+    enforced: `${withNonce}, ${policy("'self' 'unsafe-inline'")}`,
+  }
 }

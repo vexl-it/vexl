@@ -60,11 +60,13 @@ Weglot translated.
   in the browser under `/cs`. Next sends a JS-only shell when a request-time
   page calls `notFound()`, so `proxy.ts` rewrites unknown post slugs and page
   numbers to an unmatched URL before they reach their route.
-- **Content Security Policy.** `proxy.ts` sends the policy from
-  `src/contentSecurityPolicy.ts` with a fresh nonce on every page, and Next
-  puts the nonce on its inline scripts. That's why every page renders per
-  request. Scripts, images, frames and connections to any other origin are
-  blocked, so a new third-party embed needs an entry there.
+- **Content Security Policy.** `proxy.ts` runs on every request and sends
+  the two policies from `src/contentSecurityPolicy.ts`. One carries a fresh
+  nonce, which Next puts on its inline scripts, so every page renders per
+  request. The other only allows scripts from our origin, because Next puts
+  the nonce on external `<Script>`s too. Scripts, images, frames and
+  connections to any other origin are blocked, so a new third-party embed
+  needs an entry there.
 
 ## Content
 

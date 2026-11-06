@@ -552,6 +552,20 @@ describe('merging received history', () => {
     )
   })
 
+  it('keeps history messages a clock running a few minutes ahead dated after the request', () => {
+    const skewed = message(myKey, {
+      time: Schema.decodeSync(UnixMilliseconds)(at(11) + 2 * 60 * 1000),
+      text: 'skewed',
+    })
+    const [merged] = addMessagesToChats([restoredChat()])([
+      historyFromTheirCopy([...theirCopy, received(skewed)]),
+    ])
+
+    expect(merged?.messages.map((one) => one.message.uuid)).toContain(
+      skewed.uuid
+    )
+  })
+
   it('derives the chat state from the history', () => {
     const [merged] = addMessagesToChats([restoredChat()])([
       historyFromTheirCopy([sent(request)]),

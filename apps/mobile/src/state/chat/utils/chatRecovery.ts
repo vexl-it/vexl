@@ -287,9 +287,13 @@ export function consumesHistory({
   )
 }
 
+// The other side's clock may run ahead of ours.
+const HISTORY_CLOCK_SKEW_MS = 5 * 60 * 1000
+
 /**
  * Messages rebuilt from the HISTORY in `incoming`, see `consumesHistory`.
- * Messages dated after our request and messages we already have are dropped.
+ * Messages dated after our request (give or take clock skew) and messages we
+ * already have are dropped.
  */
 export function restoredMessagesFromHistory({
   chat,
@@ -322,7 +326,8 @@ export function restoredMessagesFromHistory({
     Array.dedupeWith((a, b) => a.message.uuid === b.message.uuid),
     Array.filter(
       (one) =>
-        !knownIds.has(one.message.uuid) && one.message.time <= requestedAt
+        !knownIds.has(one.message.uuid) &&
+        one.message.time <= requestedAt + HISTORY_CLOCK_SKEW_MS
     ),
     Array.map(
       ({state, message}): ChatMessageWithState =>

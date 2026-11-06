@@ -4,16 +4,6 @@ const nextConfig = {
   agentRules: false,
   poweredByHeader: false,
   output: 'standalone',
-  // The Content-Security-Policy needs a per-request nonce, so proxy.ts sets it
-  headers: async () => [
-    {
-      source: '/:path*',
-      headers: [
-        {key: 'X-Content-Type-Options', value: 'nosniff'},
-        {key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin'},
-      ],
-    },
-  ],
   // English is served from the root, other locales from their prefix
   rewrites: async () => [
     {source: '/', destination: '/en'},

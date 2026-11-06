@@ -18,7 +18,10 @@ export function Claim({t}: {readonly t: PageCopy<'home'>}): React.JSX.Element {
           </div>
           <h6 className="h6 is-yellow">{t('claim.miniclaim')}</h6>
         </div>
-        <LineRevealHeading>{t('claim.headline')}</LineRevealHeading>
+        {/* SplitType keeps the text it split, so new copy needs a fresh heading */}
+        <LineRevealHeading key={t.raw('claim.headline')}>
+          {t('claim.headline')}
+        </LineRevealHeading>
       </div>
     </div>
   )

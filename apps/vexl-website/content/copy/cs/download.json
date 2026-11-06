@@ -1,6 +1,9 @@
 {
   "eu.meta.title": "Download Vexl | Get the app on iPhone or Android",
   "eu.meta.description": "Get Vexl on your phone. One tap on Android, three steps on iPhone. No KYC, no accounts, no App Store gatekeepers.",
+  "eu.meta.structuredData.name": "Download Vexl",
+  "eu.meta.structuredData.appDescription": "Open, private Bitcoin trading app built for Bitcoiners",
+  "eu.meta.structuredData.features": "No KYC required\nNo accounts needed\nPrivate Bitcoin trading\nAvailable outside App Store via AltStore\nOpen source",
   "eu.heading": "Get the Vexl app",
   "eu.iphone.subtitle": "3 easy steps – please read instructions first",
   "eu.iphone.altStore.title": "Get AltStore Pal",
@@ -19,6 +22,8 @@
   "eu.otherStores.subtitle": "Choose one of the following options.",
   "nonEu.meta.title": "Get the Vexl app outside the EU",
   "nonEu.meta.description": "Install Vexl on iPhone via TestFlight, or on Android from Google Play and alternative stores.",
+  "nonEu.meta.structuredData.name": "Get the Vexl app outside the EU",
+  "nonEu.meta.structuredData.appDescription": "Vexl is open, private, and built for Bitcoiners.",
   "nonEu.heading": "Non-EU\ndownload",
   "nonEu.iphone.subtitle": "2 easy steps – please read instructions first",
   "nonEu.iphone.testFlight.title": "Download TestFlight from the App Store",

@@ -20,17 +20,20 @@ export const loginSessionWithProof = (
 ): Effect.Effect<
   {loginSessionId: LoginSessionId; loginSessionProof: LoginSessionProof},
   CryptoError
-> => {
-  const signedAt = unixMillisecondsNow()
-  return ecdsaSignE(session.privateKey.privateKeyPemBase64)(
-    loginSessionProofMessage({
-      loginSessionId: session.loginSessionId,
-      signedAt,
-    })
-  ).pipe(
-    Effect.map((signature) => ({
-      loginSessionId: session.loginSessionId,
-      loginSessionProof: {signedAt, signature},
-    }))
-  )
-}
+> =>
+  // Signed when run, so a retried request carries a new proof: contact-service
+  // accepts each one only once.
+  Effect.suspend(() => {
+    const signedAt = unixMillisecondsNow()
+    return ecdsaSignE(session.privateKey.privateKeyPemBase64)(
+      loginSessionProofMessage({
+        loginSessionId: session.loginSessionId,
+        signedAt,
+      })
+    ).pipe(
+      Effect.map((signature) => ({
+        loginSessionId: session.loginSessionId,
+        loginSessionProof: {signedAt, signature},
+      }))
+    )
+  })

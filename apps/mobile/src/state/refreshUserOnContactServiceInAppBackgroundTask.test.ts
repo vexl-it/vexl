@@ -1,5 +1,8 @@
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
-import {LoggedInOnAnotherDeviceError} from '@vexl-next/rest-api/src/services/contact/contracts'
+import {
+  InvalidLoginSessionProofError,
+  LoggedInOnAnotherDeviceError,
+} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {Effect} from 'effect'
 import {getDefaultStore} from 'jotai'
 import {registerInAppLoadingTask} from '../utils/inAppLoadingTasks'
@@ -105,6 +108,17 @@ it('pulls messages after a successful refresh', async () => {
 
   await resume()
 
+  expect(pullMessages).toHaveBeenCalled()
+})
+
+it('keeps the device when contact-service rejects its login session proof', async () => {
+  mockRefreshUser.mockReturnValue(
+    Effect.fail(new InvalidLoginSessionProofError())
+  )
+
+  await resume()
+
+  expect(mockClearDevice).not.toHaveBeenCalled()
   expect(pullMessages).toHaveBeenCalled()
 })
 

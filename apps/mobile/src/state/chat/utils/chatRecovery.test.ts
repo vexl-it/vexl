@@ -170,14 +170,23 @@ describe('restored chat state', () => {
       restoredFromBackup: true,
     })
     const requested = {...waiting, historyRequestedAt: at(20)}
+    const inbox = {
+      inbox: {privateKey: myKey},
+      chats: [waiting],
+      pendingRecoveryChats: [waiting, requested],
+    }
 
     expect(
       chatsWaitingForHistoryRequest({
-        inbox: {privateKey: myKey},
-        chats: [waiting],
-        pendingRecoveryChats: [waiting, requested],
+        inbox,
+        now: Schema.decodeSync(UnixMilliseconds)(at(20) + 30 * 60 * 1000),
       })
     ).toEqual([waiting])
+    // The request or its answer got lost, so it is asked again.
+    expect(chatsWaitingForHistoryRequest({inbox, now: at(21)})).toEqual([
+      waiting,
+      requested,
+    ])
   })
 
   it('drops a pending recovery chat 30 days after the recovery started', () => {

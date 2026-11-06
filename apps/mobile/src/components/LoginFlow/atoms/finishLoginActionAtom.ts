@@ -19,6 +19,7 @@ import {defaultCurrencyBaseOnCountryCodeActionAtom} from '../../../state/default
 import {initializeKeyDerivationCountersActionAtom} from '../../../state/keyDerivation'
 import {createVexlSecretAndSessionTokenActionAtom} from '../../../state/notifications/actions/createVexlSecretAndSessionTokenActionAtom'
 import {sessionAtom} from '../../../state/session'
+import {loginSessionWithProof} from '../../../state/session/loginSession'
 import {upgradeSession} from '../../../state/session/upgradeSession'
 import {
   appSource,
@@ -62,7 +63,7 @@ const handleUserCreationActionAtom = atom(
         vexlNotificationToken: Option.fromNullable(
           session.sessionNotificationToken
         ),
-        loginSessionId: session.loginSessionId,
+        ...(yield* loginSessionWithProof(session)),
       })
 
       const leftToWait = TARGET_TIME_MILLISECONDS - (Date.now() - startedAt)

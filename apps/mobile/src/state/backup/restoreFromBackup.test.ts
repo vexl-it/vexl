@@ -281,6 +281,10 @@ describe('restore from backup', () => {
     const {session} = sessionHolder
     expect(mockRestoreUser).toHaveBeenCalledWith({
       loginSessionId: session.loginSessionId,
+      loginSessionProof: {
+        signedAt: expect.any(Number),
+        signature: expect.any(String),
+      },
       vexlNotificationToken: Option.some(sessionNotificationToken),
     })
     expect(session).toEqual({

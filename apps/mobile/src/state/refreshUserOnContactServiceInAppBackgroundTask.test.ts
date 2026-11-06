@@ -24,7 +24,13 @@ jest.mock('../api', () => {
 jest.mock('./session', () => {
   const {atom} = jest.requireActual('jotai')
   return {
-    sessionDataOrDummyAtom: atom({sessionNotificationToken: 'vexl_nt_test'}),
+    sessionDataOrDummyAtom: atom({
+      sessionNotificationToken: 'vexl_nt_test',
+      loginSessionId: '0f9b2597-217d-4f8d-9de6-ef7239662359',
+      privateKey: jest
+        .requireActual('@vexl-next/cryptography/src/KeyHolder')
+        .generatePrivateKey(),
+    }),
     sessionNotificationTokenAtom: atom(undefined),
   }
 })

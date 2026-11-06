@@ -17,6 +17,7 @@ import {ConnectionLevel, OfferId} from '@vexl-next/domain/src/general/offers'
 import {SERVER_HASH_PREFIX} from '@vexl-next/domain/src/general/ServerHashedNumber'
 import {ServerToClientHashedNumber} from '@vexl-next/domain/src/general/ServerToClientHashedNumber'
 import {ShortLivedTokenForErasingUserOnContactService} from '@vexl-next/domain/src/general/ShortLivedTokenForErasingUserOnContactService'
+import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {BooleanFromString} from '@vexl-next/generic-utils/src/effect-helpers/BooleanFromString'
 import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/EcdsaSignature.brand'
 import {Schema, String} from 'effect'
@@ -79,6 +80,31 @@ export class LoggedInOnAnotherDeviceError extends Schema.TaggedError<LoggedInOnA
   status: Schema.optionalWith(Schema.Literal(409), {default: () => 409}),
 }) {}
 
+export class InvalidLoginSessionProofError extends Schema.TaggedError<InvalidLoginSessionProofError>(
+  'InvalidLoginSessionProofError'
+)('InvalidLoginSessionProofError', {
+  status: Schema.optionalWith(Schema.Literal(403), {default: () => 403}),
+}) {}
+
+/**
+ * Session headers can be replayed, so a request setting the login session id
+ * also proves it holds the session private key: an ECDSA signature by the
+ * session's V1 key over `loginSessionProofMessage`.
+ */
+export const LoginSessionProof = Schema.Struct({
+  signedAt: UnixMilliseconds,
+  signature: EcdsaSignature,
+})
+export type LoginSessionProof = typeof LoginSessionProof.Type
+
+export const loginSessionProofMessage = ({
+  loginSessionId,
+  signedAt,
+}: {
+  loginSessionId: LoginSessionId
+  signedAt: UnixMilliseconds
+}): string => `vexl-login-session-v1:${loginSessionId}:${signedAt}`
+
 export const CreateUserRequest = Schema.Struct({
   vexlNotificationToken: Schema.optionalWith(VexlNotificationToken, {
     as: 'Option',
@@ -90,6 +116,8 @@ export const CreateUserRequest = Schema.Struct({
   }),
   // Optional for backward compatibility with clients older than 26.11.2
   loginSessionId: Schema.optional(LoginSessionId),
+  // Required with loginSessionId
+  loginSessionProof: Schema.optional(LoginSessionProof),
 })
 export type CreateUserRequest = Schema.Schema.Type<typeof CreateUserRequest>
 
@@ -100,11 +128,14 @@ export const RefreshUserRequest = Schema.Struct({
   }),
   // Optional for backward compatibility with clients older than 26.11.2
   loginSessionId: Schema.optional(LoginSessionId),
+  // Required with loginSessionId
+  loginSessionProof: Schema.optional(LoginSessionProof),
 })
 export type RefreshUserRequest = Schema.Schema.Type<typeof RefreshUserRequest>
 
 export const RestoreUserRequest = Schema.Struct({
   loginSessionId: LoginSessionId,
+  loginSessionProof: LoginSessionProof,
   vexlNotificationToken: Schema.optionalWith(VexlNotificationToken, {
     as: 'Option',
   }),

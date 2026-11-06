@@ -7,9 +7,16 @@ import {
   type LoginSessionId,
 } from '@vexl-next/domain/src/general/LoginSessionId.brand'
 import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
+import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {
+  ecdsaSignE,
+  type CryptoError,
+} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {
   LoggedInOnAnotherDeviceError,
+  loginSessionProofMessage,
   UserNotFoundError,
+  type LoginSessionProof,
 } from '@vexl-next/rest-api/src/services/contact/contracts'
 import {hashPhoneNumber} from '@vexl-next/server-utils/src/generateUserAuthData'
 import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
@@ -40,49 +47,95 @@ const loginAs = (keys: KeyPair) =>
     return makeTestCommonAndSecurityHeaders(authHeaders)
   })
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-const createUser = (keys: KeyPair, loginSessionId?: LoginSessionId) =>
+type ProofOf = (
+  loginSessionId: LoginSessionId
+) => Effect.Effect<LoginSessionProof | undefined, CryptoError>
+
+const signedBy =
+  (keys: KeyPair, signedAt = unixMillisecondsNow()): ProofOf =>
+  (loginSessionId) =>
+    ecdsaSignE(keys.privateKeyPemBase64)(
+      loginSessionProofMessage({loginSessionId, signedAt})
+    ).pipe(Effect.map((signature) => ({signedAt, signature})))
+
+const proofFor = (
+  loginSessionId: LoginSessionId | undefined,
+  proofOf: ProofOf
+): Effect.Effect<LoginSessionProof | undefined, CryptoError> =>
+  loginSessionId === undefined
+    ? Effect.succeed(undefined)
+    : proofOf(loginSessionId)
+
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
+const createUserEither = (
+  keys: KeyPair,
+  loginSessionId?: LoginSessionId,
+  proofOf: ProofOf = signedBy(keys)
+) =>
   Effect.gen(function* (_) {
     const app = yield* _(NodeTestingApp)
     const headers = yield* _(loginAs(keys))
-    yield* _(
+    const loginSessionProof = yield* _(proofFor(loginSessionId, proofOf))
+    return yield* _(
       app.User.createUser({
         payload: {
           vexlNotificationToken: Option.some(oldDeviceToken),
           publicKeyV2: Option.none(),
           loginSessionId,
+          loginSessionProof,
         },
         headers,
-      })
+      }),
+      Effect.as(headers),
+      Effect.either
     )
-    return headers
   })
+/* eslint-enable @typescript-eslint/explicit-function-return-type */
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-const refreshUser = (keys: KeyPair, loginSessionId?: LoginSessionId) =>
+const createUser = (keys: KeyPair, loginSessionId?: LoginSessionId) =>
+  Effect.flatten(createUserEither(keys, loginSessionId))
+
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
+const refreshUser = (
+  keys: KeyPair,
+  loginSessionId?: LoginSessionId,
+  proofOf: ProofOf = signedBy(keys)
+) =>
   Effect.gen(function* (_) {
     const app = yield* _(NodeTestingApp)
+    const loginSessionProof = yield* _(proofFor(loginSessionId, proofOf))
     return yield* _(
       app.User.refreshUser({
         payload: {
           offersAlive: true,
           vexlNotificationToken: Option.none(),
           loginSessionId,
+          loginSessionProof,
         },
         headers: yield* _(loginAs(keys)),
       }),
       Effect.either
     )
   })
+/* eslint-enable @typescript-eslint/explicit-function-return-type */
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-const restoreUser = (keys: KeyPair, loginSessionId: LoginSessionId) =>
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
+const restoreUser = (
+  keys: KeyPair,
+  loginSessionId: LoginSessionId,
+  proofOf: ProofOf = signedBy(keys)
+) =>
   Effect.gen(function* (_) {
     const app = yield* _(NodeTestingApp)
+    const loginSessionProof = yield* _(proofOf(loginSessionId))
+    if (!loginSessionProof)
+      return yield* _(Effect.dieMessage('restoreUser needs a proof'))
     return yield* _(
       app.User.restoreUser({
         payload: {
           loginSessionId,
+          loginSessionProof,
           vexlNotificationToken: Option.some(newDeviceToken),
         },
         headers: yield* _(loginAs(keys)),
@@ -90,6 +143,7 @@ const restoreUser = (keys: KeyPair, loginSessionId: LoginSessionId) =>
       Effect.either
     )
   })
+/* eslint-enable @typescript-eslint/explicit-function-return-type */
 
 const findUserRow = Effect.gen(function* (_) {
   const sql = yield* _(SqlClient.SqlClient)

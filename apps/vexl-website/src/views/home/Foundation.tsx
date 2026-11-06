@@ -1,11 +1,11 @@
 import React from 'react'
 import {ArrowIcon} from '../../components/ArrowIcon'
-import {type HomeMessages} from '../../i18n/home'
+import {type PageCopy} from '../../copy/pageCopy'
 
 export function Foundation({
   t,
 }: {
-  readonly t: HomeMessages['foundation']
+  readonly t: PageCopy<'home'>
 }): React.JSX.Element {
   return (
     <div className="section is-satoshi">
@@ -21,9 +21,9 @@ export function Foundation({
             />
           </div>
           <div className="satoshi-box_content">
-            <h3 className="h3">{t.headline}</h3>
+            <h3 className="h3">{t('foundation.headline')}</h3>
             <p className="p">
-              {t.text}
+              {t('foundation.text')}
               <br />
             </p>
           </div>

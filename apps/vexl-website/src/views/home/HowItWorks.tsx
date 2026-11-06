@@ -1,6 +1,6 @@
 import {Array, pipe} from 'effect'
 import React from 'react'
-import {type HomeMessages} from '../../i18n/home'
+import {type PageCopy} from '../../copy/pageCopy'
 
 const steps = [
   {
@@ -32,7 +32,7 @@ const steps = [
     imageClassName: 'how-it-works-img',
   },
 ] satisfies ReadonlyArray<{
-  key: Exclude<keyof HomeMessages['howItWorks'], 'headline'>
+  key: 'contacts' | 'offers' | 'chat' | 'meet'
   cardClassName: string
   image: string
   imageClassName: string
@@ -41,13 +41,13 @@ const steps = [
 export function HowItWorks({
   t,
 }: {
-  readonly t: HomeMessages['howItWorks']
+  readonly t: PageCopy<'home'>
 }): React.JSX.Element {
   return (
     <section className="section">
       <div className="container is-base-pading is-how-it-works is-how-it-works-v2">
         <div className="large-title-wrapper">
-          <h2 className="h2">{t.headline}</h2>
+          <h2 className="h2">{t('howItWorks.headline')}</h2>
         </div>
         <div className="cards-wrap is-how-it-works">
           {pipe(
@@ -66,9 +66,11 @@ export function HowItWorks({
                 <div className="card-content_wrap">
                   <div className="card-title_wrap">
                     <h5 className="h6 is-number">{`${index + 1}.`}</h5>
-                    <h5 className="h6">{t[key].title}</h5>
+                    <h5 className="h6">{t(`howItWorks.${key}.title`)}</h5>
                   </div>
-                  <p className="text-card-small">{t[key].text}</p>
+                  <p className="text-card-small">
+                    {t(`howItWorks.${key}.text`)}
+                  </p>
                 </div>
               </div>
             ))

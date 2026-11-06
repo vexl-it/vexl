@@ -5,16 +5,16 @@ import {AppStoreIcon} from './AppStoreIcon'
 /** The QR code with an arrow link (desktop) and the download button (mobile). */
 export function QrDownload({
   isYellow,
-  scanToDownload: [scanLine1, scanLine2],
+  scanToDownload,
   arrowHref,
   buttonClassName,
   buttonText,
 }: {
   readonly isYellow: boolean
-  readonly scanToDownload: readonly [string, string]
+  readonly scanToDownload: React.ReactNode
   readonly arrowHref: string
   readonly buttonClassName: string
-  readonly buttonText: string
+  readonly buttonText: React.ReactNode
 }): React.JSX.Element {
   return (
     <>
@@ -32,9 +32,7 @@ export function QrDownload({
         </div>
         <div className="qr-code_text">
           <p className={isYellow ? 'p-large is-yellow' : 'p-large is-black'}>
-            {scanLine1}
-            <br />
-            {scanLine2}
+            {scanToDownload}
           </p>
           <a href={arrowHref} className="qr-code_download_arrow w-inline-block">
             <ArrowIcon className={isYellow ? 'is-yellow' : ''} />

@@ -1,10 +1,10 @@
 import React from 'react'
+import {pageCopy} from '../../copy/pageCopy'
 import {type Locale, localizedPath} from '../../i18n/locales'
-import {oldNav} from '../../i18n/oldNav'
 
 /** The header the older pages (audit, terms) still use instead of the Navbar. */
 export function OldNav({locale}: {readonly locale: Locale}): React.JSX.Element {
-  const t = oldNav[locale]
+  const t = pageCopy(locale, 'shared')
   return (
     <nav className="nav">
       <div className="container is-nav">
@@ -24,13 +24,13 @@ export function OldNav({locale}: {readonly locale: Locale}): React.JSX.Element {
             href={localizedPath(locale, '/download')}
             className="button meetups w-button"
           >
-            {t.meetups}
+            {t('oldNav.meetups')}
           </a>
           <a
             href="https://vexl.it/download"
             className="button download w-button"
           >
-            {t.download}
+            {t('oldNav.download')}
           </a>
         </div>
       </div>

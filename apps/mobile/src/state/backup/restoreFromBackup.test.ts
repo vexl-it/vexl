@@ -42,7 +42,9 @@ import {
   startRestoreFromBackupActionAtom,
 } from './restoreFromBackup'
 
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import * as SecureStore from 'expo-secure-store'
+import {SESSION_KEY} from '../session/utils/writeSessionToStorage'
 
 jest.mock('react-native-mmkv')
 jest.mock('@react-native-async-storage/async-storage', () => ({
@@ -383,6 +385,22 @@ describe('restore from backup', () => {
       failure: 'unknown',
     })
     expect(store.get(sessionHolderAtom).state).toBe('loggedOut')
+    expect(store.get(messagingStateAtom)).toEqual([])
+    expect(store.get(showRestoredAccountInfoAtom)).toBe(false)
+  })
+
+  it('stores the restored session once', async () => {
+    const {backup} = await setUp()
+    mockRestoreUser.mockReturnValue(Effect.void)
+    jest.mocked(AsyncStorage.setItem).mockClear()
+
+    await Effect.runPromise(store.set(startRestoreFromBackupActionAtom, backup))
+
+    expect(
+      jest
+        .mocked(AsyncStorage.setItem)
+        .mock.calls.filter(([key]) => key === SESSION_KEY)
+    ).toHaveLength(1)
   })
 
   describe('with the old notification secret in the backup', () => {

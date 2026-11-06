@@ -111,5 +111,5 @@ export const ensureLoginSessionProof = ({
  */
 export const useUpLoginSessionProof = (
   input: ProofInput
-): Effect.Effect<void, never, RedisService> =>
-  Effect.ignore(useLoginSessionProof(input))
+): Effect.Effect<void, UnexpectedServerError, RedisService> =>
+  Effect.asVoid(useLoginSessionProof(input))

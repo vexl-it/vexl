@@ -1,5 +1,6 @@
 import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
+import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {
@@ -23,10 +24,15 @@ import {
   type LoginSessionProof,
 } from '@vexl-next/rest-api/src/services/contact/contracts'
 import {hashPhoneNumber} from '@vexl-next/server-utils/src/generateUserAuthData'
+import {
+  RedisError,
+  RedisService,
+} from '@vexl-next/server-utils/src/RedisService'
 import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
-import {Effect, Option, Schema} from 'effect'
+import {Effect, Either, Option, Schema} from 'effect'
+import {useUpLoginSessionProof} from '../../../routes/user/utils/ensureLoginSessionProof'
 import {serverHashPhoneNumber} from '../../../utils/serverHashContact'
 import {NodeTestingApp} from '../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../utils/runPromiseInMockedEnvironment'
@@ -396,6 +402,33 @@ describe('Login session proof', () => {
         expectErrorResponse(InvalidLoginSessionProofError)(replayed)
         const {row} = yield* _(findUserRow)
         expect(row).toHaveProperty('loginSessionId', deviceBSession)
+      })
+    )
+  })
+
+  it('Fails a matching refresh when its proof cannot be used up', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const keys = generatePrivateKey()
+        const session = generateLoginSessionId()
+        const redis = yield* _(RedisService)
+
+        const result = yield* _(
+          useUpLoginSessionProof({
+            publicKey: keys.publicKeyPemBase64,
+            loginSessionId: session,
+            loginSessionProof: yield* _(signNow(keys, session)),
+          }).pipe(
+            Effect.provideService(RedisService, {
+              ...redis,
+              setIfNotExists: () => () =>
+                Effect.fail(new RedisError({cause: 'down'})),
+            }),
+            Effect.either
+          )
+        )
+
+        expect(result).toEqual(Either.left(expect.any(UnexpectedServerError)))
       })
     )
   })

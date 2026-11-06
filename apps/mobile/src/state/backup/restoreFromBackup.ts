@@ -10,7 +10,6 @@ import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMillisecond
 import {type BackupFile} from '@vexl-next/resources-utils/src/backup/BackupFile'
 import {GenerateNotificationTokenRequest} from '@vexl-next/rest-api/src/services/notification/contract'
 import {Array, Effect, Option, pipe, Record, Schema} from 'effect'
-import * as O from 'fp-ts/Option'
 import {atom} from 'jotai'
 import {apiAtom} from '../../api'
 import {contactApiForSession} from '../../api/contactApiForSession'
@@ -48,7 +47,7 @@ import {invalidateVexlSecretActionAtom} from '../notifications/actions/invalidat
 import {syncVexlNotificationTokensActionAtom} from '../notifications/actions/syncVexlNotificationTokensActionAtom'
 import {vexlNotificationTokenAtom} from '../notifications/vexlNotificationTokenAtom'
 import {postLoginFlowCompletedScreensAtom} from '../postLoginOnboarding'
-import {sessionAtom} from '../session'
+import {sessionHolderAtom} from '../session'
 import writeSessionToStorage, {
   type SessionWriteError,
 } from '../session/utils/writeSessionToStorage'
@@ -198,6 +197,10 @@ const commitRestoredAccountActionAtom = atom(
     }
   ): Effect.Effect<void, SessionWriteError> =>
     Effect.gen(function* () {
+      // restoreUser already replaced the old device, so a session that can't be
+      // stored fails the restore before anything else is kept.
+      yield* writeSessionToStorage(session)
+
       // Before the session exists, so nothing can allocate a key from stale counters.
       set(raiseKeyDerivationCountersActionAtom, counters)
 
@@ -222,10 +225,8 @@ const commitRestoredAccountActionAtom = atom(
       set(showMarketplaceIntroDialogAtom, false)
       set(showRestoredAccountInfoAtom, true)
 
-      // restoreUser already replaced the old device, so a session that can't be
-      // stored must fail the restore instead of logging out later.
-      yield* writeSessionToStorage(session)
-      set(sessionAtom, O.some(session))
+      // Already stored above, so not through sessionAtom, which stores it again.
+      set(sessionHolderAtom, {state: 'loggedIn', session})
       set(defaultCurrencyBaseOnCountryCodeActionAtom)
 
       // Own offers and notes come back with ownership, which links them to

@@ -4,7 +4,12 @@ import React from 'react'
 import {Footer} from '../../components/Footer'
 import {GlobalStyles} from '../../components/GlobalStyles'
 import {Navbar} from '../../components/Navbar'
-import {blogPage, blogPageCount, featuredBlogPost} from '../../content/blog'
+import {
+  blogPage,
+  blogPageCount,
+  blogPosts,
+  featuredBlogPost,
+} from '../../content/blog'
 import {blog} from '../../i18n/blog'
 import {type Locale, locales, localizedPath} from '../../i18n/locales'
 import {pageMetadata} from '../../metadata'
@@ -15,8 +20,14 @@ export function blogPagePath(page: number): string {
   return page === 1 ? '/blog' : `/blog/page/${page}`
 }
 
-export function blogIndexMetadata(locale: Locale, page: number): Metadata {
+export async function blogIndexMetadata(
+  locale: Locale,
+  page: number
+): Promise<Metadata> {
   const t = blog[locale]
+  const pageCounts = await Promise.all(
+    Array.map(locales, async (other) => blogPageCount(await blogPosts(other)))
+  )
   return pageMetadata({
     locale,
     path: blogPagePath(page),
@@ -24,7 +35,7 @@ export function blogIndexMetadata(locale: Locale, page: number): Metadata {
     description: t.metaDescription,
     publishedLocales: Array.filter(
       locales,
-      (other) => page <= blogPageCount(other)
+      (_, index) => page <= (pageCounts[index] ?? 0)
     ),
   })
 }
@@ -32,9 +43,11 @@ export function blogIndexMetadata(locale: Locale, page: number): Metadata {
 function Pagination({
   locale,
   page,
+  pageCount,
 }: {
   readonly locale: Locale
   readonly page: number
+  readonly pageCount: number
 }): React.JSX.Element {
   const t = blog[locale]
   const href = (target: number): string =>
@@ -69,7 +82,7 @@ function Pagination({
           <div className="w-inline-block">{t.previous}</div>
         </a>
       )}
-      {page < blogPageCount(locale) && (
+      {page < pageCount && (
         <a
           href={href(page + 1)}
           aria-label="Next Page"
@@ -97,14 +110,15 @@ function Pagination({
   )
 }
 
-export function BlogIndex({
+export async function BlogIndex({
   locale,
   page,
 }: {
   readonly locale: Locale
   readonly page: number
-}): React.JSX.Element {
+}): Promise<React.JSX.Element> {
   const t = blog[locale]
+  const posts = await blogPosts(locale)
   return (
     <div className="page-wrapper">
       <Navbar locale={locale} path="/blog" />
@@ -131,7 +145,7 @@ export function BlogIndex({
           <div className="w-layout-vflex container is-large-gap">
             <div className="collection-list-wrapper w-dyn-list">
               <div role="list" className="collection-list w-dyn-items">
-                {Option.match(featuredBlogPost(locale), {
+                {Option.match(featuredBlogPost(posts), {
                   onNone: () => null,
                   onSome: (post) => (
                     <BlogCard locale={locale} post={post} featured />
@@ -146,11 +160,15 @@ export function BlogIndex({
             </div>
             <div className="collection-list-wrapper w-dyn-list">
               <div role="list" className="collection-list is-blog w-dyn-items">
-                {blogPage(locale, page).map((post) => (
+                {blogPage(posts, page).map((post) => (
                   <BlogCard key={post.slug} locale={locale} post={post} />
                 ))}
               </div>
-              <Pagination locale={locale} page={page} />
+              <Pagination
+                locale={locale}
+                page={page}
+                pageCount={blogPageCount(posts)}
+              />
             </div>
           </div>
         </section>

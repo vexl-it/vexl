@@ -1,6 +1,6 @@
 import {localized} from './locales'
 
-/** Copy of the blog list and the post pages. Post content lives in content/blog. */
+/** Copy of the blog list and the post pages. Posts come from content-service. */
 export const blog = localized({
   en: {
     metaTitle: 'Blog - Vexl',
@@ -18,8 +18,6 @@ export const blog = localized({
     summary: 'Summary',
     tableOfContents: 'Table of contents',
     relatedArticles: 'Related Articles',
-    // Webflow computed a different `sizes` for each locale's page
-    mainImageSizes: '100vw',
   },
   cs: {
     metaTitle: 'Blog - Vexl',
@@ -37,6 +35,5 @@ export const blog = localized({
     summary: 'Souhrn',
     tableOfContents: 'Table of contents',
     relatedArticles: 'Další články',
-    mainImageSizes: '(max-width: 767px) 100vw, (max-width: 991px) 727px, 939px',
   },
 })

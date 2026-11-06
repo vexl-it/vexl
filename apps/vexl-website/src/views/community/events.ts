@@ -1,83 +1,53 @@
-import {Array, Option, Order, pipe, Schema} from 'effect'
-import {readContentFile} from '../../content/files'
-import {type Locale} from '../../i18n/locales'
-
-const CommunityEvent = Schema.Struct({
-  /** `YYYY-MM-DD` */
-  date: Schema.String.pipe(Schema.pattern(/^\d{4}-\d{2}-\d{2}$/)),
-  name: Schema.String,
-  url: Schema.String,
-  /** The Vexl glasses before the name. */
-  showGlasses: Schema.optional(Schema.Boolean),
-  speakers: Schema.optional(Schema.String),
-  location: Schema.String,
-  start: Schema.String,
-  /** Empty or missing hides the end time. */
-  end: Schema.optional(Schema.String),
-})
-export type CommunityEvent = typeof CommunityEvent.Type
-
-const EventEntry = Schema.Struct({
-  ...CommunityEvent.fields,
-  /** Czech overrides: `false` leaves the event out, an object replaces fields. */
-  cs: Schema.optional(
-    Schema.Union(Schema.Literal(false), Schema.partial(CommunityEvent))
-  ),
-})
+import {type CmsEvent} from '@vexl-next/domain/src/general/cms'
+import {Array, Order, pipe} from 'effect'
+import {loadPublishedEvents} from '../../content/contentService'
 
 const PAGE_SIZE = 5
+/** The CMS stores instants; the live site showed them in Prague time. */
+const TIME_ZONE = 'Europe/Prague'
 
-const byDate = Order.mapInput(
-  Order.string,
-  (event: CommunityEvent) => event.date
-)
+const byStart = Order.mapInput(Order.Date, (event: CmsEvent) => event.startDate)
 
-/** Upcoming and past as of the build. */
-function localizedEvents(locale: Locale): readonly CommunityEvent[] {
-  return pipe(
-    Schema.decodeUnknownSync(Schema.parseJson(Schema.Array(EventEntry)))(
-      readContentFile('events.json')
-    ),
-    Array.filterMap(({cs, ...event}) => {
-      if (locale !== 'cs' || cs === undefined) return Option.some(event)
-      return cs === false ? Option.none() : Option.some({...event, ...cs})
-    })
-  )
-}
+/** `YYYY-MM-DD` in Prague. */
+const pragueDay = (date: Date): string =>
+  date.toLocaleDateString('en-CA', {timeZone: TIME_ZONE})
 
-function splitEvents(locale: Locale): {
-  readonly upcoming: readonly CommunityEvent[]
-  readonly past: readonly CommunityEvent[]
-} {
-  const today = new Date().toISOString().slice(0, 10)
-  const [past, upcoming] = Array.partition(
-    localizedEvents(locale),
-    (event) => event.date >= today
-  )
-  return {
-    upcoming: Array.sort(upcoming, byDate),
-    past: Array.sort(past, Order.reverse(byDate)),
-  }
-}
-
-export function pastEventsPageCount(locale: Locale): number {
-  return Math.max(1, Math.ceil(splitEvents(locale).past.length / PAGE_SIZE))
+export function pastEventsPageCount(past: readonly CmsEvent[]): number {
+  return Math.max(1, Math.ceil(past.length / PAGE_SIZE))
 }
 
 export function communityPagePath(page: number): string {
   return page === 1 ? '/community' : `/community/page/${page}`
 }
 
+export interface Events {
+  /** Soonest first; events starting today count as upcoming. */
+  readonly upcoming: readonly CmsEvent[]
+  /** Newest first. */
+  readonly past: readonly CmsEvent[]
+}
+
+export async function loadEvents(): Promise<Events> {
+  const today = pragueDay(new Date())
+  const [past, upcoming] = Array.partition(
+    await loadPublishedEvents(),
+    (event) => pragueDay(event.startDate) >= today
+  )
+  return {
+    upcoming: Array.sort(upcoming, byStart),
+    past: Array.sort(past, Order.reverse(byStart)),
+  }
+}
+
 export interface EventsPage {
-  readonly upcoming: readonly CommunityEvent[]
-  readonly past: readonly CommunityEvent[]
+  readonly upcoming: readonly CmsEvent[]
+  readonly past: readonly CmsEvent[]
   readonly previousPage?: number
   readonly nextPage?: number
 }
 
-/** Upcoming events soonest first, then one page of past events newest first. */
-export function eventsPage(locale: Locale, page: number): EventsPage {
-  const {upcoming, past} = splitEvents(locale)
+/** Upcoming events, then one page of past events. */
+export function eventsPage({upcoming, past}: Events, page: number): EventsPage {
   return {
     upcoming,
     past: pipe(past, Array.drop((page - 1) * PAGE_SIZE), Array.take(PAGE_SIZE)),
@@ -87,17 +57,25 @@ export function eventsPage(locale: Locale, page: number): EventsPage {
 }
 
 /** Webflow's date fields: `Fri`, `Oct`, `02`. */
-export function formatEventDate(date: string): {
+export function formatEventDate(date: Date): {
   readonly weekday: string
   readonly month: string
   readonly day: string
 } {
-  const parsed = new Date(`${date}T00:00:00Z`)
   const part = (options: Intl.DateTimeFormatOptions): string =>
-    parsed.toLocaleDateString('en-US', {...options, timeZone: 'UTC'})
+    date.toLocaleDateString('en-US', {...options, timeZone: TIME_ZONE})
   return {
     weekday: part({weekday: 'short'}),
     month: part({month: 'short'}),
     day: part({day: '2-digit'}),
   }
+}
+
+/** `9:00` */
+export function formatEventTime(date: Date): string {
+  return date.toLocaleTimeString('cs-CZ', {
+    hour: 'numeric',
+    minute: '2-digit',
+    timeZone: TIME_ZONE,
+  })
 }

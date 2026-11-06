@@ -10,7 +10,7 @@ import {
 } from '@/src/content/blog'
 import {renderRichText} from '@/src/content/blogRichText'
 import {blog} from '@/src/i18n/blog'
-import {type Locale, locales, localizedPath, toLocale} from '@/src/i18n/locales'
+import {type Locale, locales, localizedPath} from '@/src/i18n/locales'
 import {pageMetadata} from '@/src/metadata'
 import {resolveLocale} from '@/src/pageParams'
 import {BlogCard} from '@/src/views/blog/BlogCard'
@@ -25,31 +25,20 @@ interface Props {
   readonly params: Promise<{locale: string; slug: string}>
 }
 
-export const dynamicParams = false
+export const dynamic = 'force-dynamic'
 
-export function generateStaticParams({
-  params,
-}: {
-  readonly params: {locale: string}
-}): Array<{slug: string}> {
-  return pipe(
-    toLocale(params.locale),
-    Option.match({
-      onNone: () => [],
-      onSome: (locale) =>
-        Array.map(blogPosts(locale), (post) => ({slug: post.slug})),
-    })
-  )
-}
-
-async function resolvePost(
-  props: Props
-): Promise<{locale: Locale; post: BlogPost}> {
+async function resolvePost(props: Props): Promise<{
+  locale: Locale
+  post: BlogPost
+  posts: readonly BlogPost[]
+}> {
   const locale = await resolveLocale(props)
+  const posts = await blogPosts(locale)
   const {slug} = await props.params
-  return Option.match(findBlogPost(locale, slug), {
+  return Option.match(findBlogPost(posts, slug), {
+    // proxy.ts already sent unknown posts to the 404 page
     onNone: () => notFound(),
-    onSome: (post) => ({locale, post}),
+    onSome: (post) => ({locale, post, posts}),
   })
 }
 
@@ -61,7 +50,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     path,
     title: `${post.title}${blog[locale].postTitleSuffix}`,
     description: post.title,
-    image: Option.getOrUndefined(post.image)?.src,
+    image: Option.getOrUndefined(post.imageUrl),
     publishedLocales: post.locales,
   })
 }
@@ -81,10 +70,10 @@ function missingLocalesGoHome(
 export default async function PostPage(
   props: Props
 ): Promise<React.JSX.Element> {
-  const {locale, post} = await resolvePost(props)
+  const {locale, post, posts} = await resolvePost(props)
   const t = blog[locale]
   const article = renderRichText(post.body)
-  const image = Option.getOrUndefined(post.image)
+  const imageUrl = Option.getOrUndefined(post.imageUrl)
   return (
     <div className="page-wrapper">
       <Navbar
@@ -122,13 +111,11 @@ export default async function PostPage(
                     </div>
                   </div>
                 </div>
-                {image ? (
+                {imageUrl ? (
                   <img
-                    src={image.src}
+                    src={imageUrl}
                     loading="lazy"
                     alt=""
-                    sizes={image.srcSet ? t.mainImageSizes : undefined}
-                    srcSet={image.srcSet}
                     className="blog-main-image"
                   />
                 ) : null}
@@ -175,7 +162,7 @@ export default async function PostPage(
             <h2>{t.relatedArticles}</h2>
             <div className="collection-list-wrapper w-dyn-list">
               <div role="list" className="collection-list is-blog w-dyn-items">
-                {relatedBlogPosts(locale, post.slug).map((related) => (
+                {relatedBlogPosts(posts, post.slug).map((related) => (
                   <BlogCard key={related.slug} locale={locale} post={related} />
                 ))}
               </div>

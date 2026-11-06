@@ -16,7 +16,6 @@ export function BlogCard({
   readonly featured?: boolean
 }): React.JSX.Element {
   const variant = featured ? ` ${FEATURED}` : ''
-  const image = Option.getOrUndefined(post.image)
   return (
     <div role="listitem" className="collection-item is-blog w-dyn-item">
       <a
@@ -25,12 +24,8 @@ export function BlogCard({
       >
         <img
           loading="lazy"
-          src={image?.src}
+          src={Option.getOrUndefined(post.imageUrl)}
           alt=""
-          sizes={
-            image?.srcSet ? '(max-width: 1919px) 100vw, 1920px' : undefined
-          }
-          srcSet={image?.srcSet}
           className={`div-block-14${variant}`}
         />
         <div className="div-block-33">

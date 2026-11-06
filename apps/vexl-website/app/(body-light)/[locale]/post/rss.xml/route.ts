@@ -1,14 +1,9 @@
-import {type BlogPost, blogPostsByDate} from '@/src/content/blog'
+import {type BlogPost, blogPosts} from '@/src/content/blog'
 import {SITE_URL} from '@/src/metadata'
 import {Array, Option, pipe} from 'effect'
 
-export const dynamic = 'force-static'
-export const dynamicParams = false
-
-// Webflow only publishes the English feed
-export function generateStaticParams(): Array<{locale: string}> {
-  return [{locale: 'en'}]
-}
+// English only, like Webflow; proxy.ts sends /cs/post/rss.xml to the 404 page
+export const dynamic = 'force-dynamic'
 
 const escapeXml = (text: string): string =>
   text
@@ -20,18 +15,18 @@ const escapeXml = (text: string): string =>
 
 function item(post: BlogPost): string {
   const link = `${SITE_URL}/post/${post.slug}`
-  const media = Option.match(post.image, {
+  const media = Option.match(post.imageUrl, {
     onNone: () => '',
-    onSome: (image) => {
-      const url = escapeXml(encodeURI(`${SITE_URL}${image.src}`))
+    onSome: (imageUrl) => {
+      const url = escapeXml(imageUrl)
       return `<media:content url="${url}" medium="image"/><media:thumbnail url="${url}"/>`
     },
   })
   return `<item><title>${escapeXml(post.title)}</title><link>${link}</link><guid>${link}</guid><description>${escapeXml(post.summary)}</description><pubDate>${post.date.toUTCString()}</pubDate>${media}</item>`
 }
 
-export function GET(): Response {
-  const posts = blogPostsByDate('en')
+export async function GET(): Promise<Response> {
+  const posts = await blogPosts('en')
   const updated = pipe(
     Array.head(posts),
     Option.map((post) => post.date),

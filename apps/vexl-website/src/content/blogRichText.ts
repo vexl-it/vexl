@@ -1,9 +1,9 @@
 import {Array, Order, pipe} from 'effect'
-import {type Element, type Nodes, type Root} from 'hast'
+import {type Nodes, type Root} from 'hast'
+import {toJsxRuntime} from 'hast-util-to-jsx-runtime'
 import {type ReactElement} from 'react'
-import Markdown from 'react-markdown'
-import rehypeRaw from 'rehype-raw'
-import remarkGfm from 'remark-gfm'
+import {Fragment, jsx, jsxs} from 'react/jsx-runtime'
+import {elements, sanitizePostHtml} from './sanitizePostHtml'
 
 export interface TocEntry {
   readonly id: string
@@ -23,15 +23,6 @@ const BLOCKS = new Set(['p', 'li', 'blockquote', 'figure', 'figcaption', 'div'])
 
 const isWhitespace = (node: Nodes): boolean =>
   node.type === 'text' && node.value.trim() === ''
-
-function elements(node: Root | Element): Element[] {
-  return pipe(
-    node.children,
-    Array.flatMap((child) =>
-      child.type === 'element' ? [child, ...elements(child)] : []
-    )
-  )
-}
 
 function textContent(node: Nodes): string {
   if (node.type === 'text') return node.value
@@ -61,9 +52,9 @@ function readingMinutes(tree: Root): number {
 }
 
 /**
- * Brings markdown output in line with Webflow's rich text: no whitespace
- * between blocks, `role="list"` on lists, and `toc-N` ids on the headings the
- * table of contents links to.
+ * Brings the HTML in line with Webflow's rich text: no whitespace between
+ * blocks, `role="list"` on lists, and `toc-N` ids on the headings the table
+ * of contents links to.
  */
 function analyze(tree: Root): Omit<RichText, 'content'> {
   tree.children = Array.filter(tree.children, (child) => !isWhitespace(child))
@@ -94,18 +85,14 @@ function analyze(tree: Root): Omit<RichText, 'content'> {
   return {toc, readingMinutes: readingMinutes(tree)}
 }
 
-export function renderRichText(markdown: string): RichText {
-  let result: Omit<RichText, 'content'> = {toc: [], readingMinutes: 1}
-  // Markdown renders synchronously, so the plugin has run when it returns.
-  const content = Markdown({
-    children: markdown,
-    remarkPlugins: [remarkGfm],
-    rehypePlugins: [
-      rehypeRaw,
-      () => (tree: Root) => {
-        result = analyze(tree)
-      },
-    ],
+export function renderRichText(html: string): RichText {
+  const tree = sanitizePostHtml(html)
+  const result = analyze(tree)
+  const content = toJsxRuntime(tree, {
+    Fragment,
+    jsx,
+    jsxs,
+    ignoreInvalidStyle: true,
   })
   return {content, ...result}
 }

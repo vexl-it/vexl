@@ -6,7 +6,3 @@ const contentDir = path.join(process.cwd(), 'content')
 export function readContentFile(...segments: readonly string[]): string {
   return fs.readFileSync(path.join(contentDir, ...segments), 'utf8')
 }
-
-export function listContentFiles(...segments: readonly string[]): string[] {
-  return fs.readdirSync(path.join(contentDir, ...segments))
-}

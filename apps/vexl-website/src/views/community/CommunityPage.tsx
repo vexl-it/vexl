@@ -1,14 +1,13 @@
-import {Array} from 'effect'
 import {type Metadata} from 'next'
 import React from 'react'
 import {Footer} from '../../components/Footer'
 import {GlobalStyles} from '../../components/GlobalStyles'
 import {Navbar} from '../../components/Navbar'
 import {community} from '../../i18n/community'
-import {type Locale, locales, localizedPath} from '../../i18n/locales'
+import {type Locale, localizedPath} from '../../i18n/locales'
 import {pageMetadata} from '../../metadata'
 import {EventList} from './EventList'
-import {communityPagePath, eventsPage, pastEventsPageCount} from './events'
+import {communityPagePath, type Events, eventsPage} from './events'
 
 export function communityMetadata(locale: Locale, page: number): Metadata {
   return pageMetadata({
@@ -17,10 +16,6 @@ export function communityMetadata(locale: Locale, page: number): Metadata {
     title: community[locale].metaTitle,
     description: community[locale].metaDescription,
     image: '/wf/6685518811a45b0613823a21_Community_page.jpg',
-    publishedLocales: Array.filter(
-      locales,
-      (other) => page <= pastEventsPageCount(other)
-    ),
   })
 }
 
@@ -63,13 +58,15 @@ const supportRows = [
 /** `page` is the page of past events. */
 export function CommunityPage({
   locale,
+  events: allEvents,
   page,
 }: {
   readonly locale: Locale
+  readonly events: Events
   readonly page: number
 }): React.JSX.Element {
   const t = community[locale]
-  const events = eventsPage(locale, page)
+  const events = eventsPage(allEvents, page)
   const href = (target: number): string =>
     localizedPath(locale, communityPagePath(target))
   return (

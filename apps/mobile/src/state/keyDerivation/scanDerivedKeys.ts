@@ -87,9 +87,11 @@ export const scanDerivedKeys = <K, A, E>({
         pipe(
           Array.findLastIndex(answers, Option.isSome),
           Option.match({
-            onNone: () =>
-              emptyBatches + 1 >= EMPTY_BATCHES_TO_STOP &&
-              start + batchSize >= scanAtLeastTo
+            onNone: () => {
+              // Batches below the floor can't end the scan.
+              const emptyBatchesInRow =
+                start >= scanAtLeastTo ? emptyBatches + 1 : 0
+              return emptyBatchesInRow >= EMPTY_BATCHES_TO_STOP
                 ? Effect.succeed({
                     found,
                     nextIndex: KeyDerivationIndex.make(
@@ -100,8 +102,9 @@ export const scanDerivedKeys = <K, A, E>({
                     start: start + batchSize,
                     found,
                     nextIndex,
-                    emptyBatches: emptyBatches + 1,
-                  }),
+                    emptyBatches: emptyBatchesInRow,
+                  })
+            },
             onSome: (lastHit) =>
               scanFrom({
                 start: start + batchSize,

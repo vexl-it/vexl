@@ -88,7 +88,7 @@ describe('scanDerivedKeys', () => {
     )
 
     expect(result).toEqual({found: [0, 25], nextIndex: 30})
-    expect(probedBatches.at(-1)).toEqual([32, 33, 34, 35])
+    expect(probedBatches.at(-1)).toEqual([36, 37, 38, 39])
   })
 
   it('starts after the margin when nothing is found', async () => {
@@ -132,6 +132,25 @@ describe('scanDerivedKeys', () => {
     await scan
 
     expect(events.indexOf('timer')).toBeLessThan(events.indexOf('derive 9'))
+  })
+
+  it('finds a key at the floor when every index below it is unused', async () => {
+    const result = await Effect.runPromise(
+      scanDerivedKeys({
+        batchSize: 200,
+        margin: 100,
+        scanAtLeastTo: 400,
+        derive: (i) => Effect.succeed(i),
+        findExisting: (batch) =>
+          Effect.succeed(
+            Array.map(batch, (i) =>
+              i === 400 ? Option.some(i) : Option.none()
+            )
+          ),
+      })
+    )
+
+    expect(result).toEqual({found: [400], nextIndex: 501})
   })
 })
 

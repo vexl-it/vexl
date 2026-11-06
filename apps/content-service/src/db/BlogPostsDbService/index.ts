@@ -25,17 +25,6 @@ const mapWriteError = (
     ? new BlogSlugTakenError()
     : new UnexpectedServerError({status: 500, cause: e})
 
-/** Keeps the existing row when the id is already there. */
-export const createInsertBlogPostIfMissing = Effect.map(
-  SqlClient.SqlClient,
-  (sql) =>
-    (post: BlogPost): Effect.Effect<void, SqlError> => sql`
-      INSERT INTO
-        blog_posts ${sql.insert(blogPostToDbRecord(post))}
-      ON CONFLICT (id) DO NOTHING
-    `
-)
-
 export interface BlogPostsDbOperations {
   insertBlogPost: (
     post: BlogPost
@@ -68,7 +57,6 @@ export class BlogPostsDbService extends Context.Tag('BlogPostsDbService')<
     BlogPostsDbService,
     Effect.gen(function* (_) {
       const sql = yield* _(SqlClient.SqlClient)
-      const insertBlogPostIfMissing = yield* _(createInsertBlogPostIfMissing)
 
       const setBlogPostStatus = SqlSchema.findOne({
         Request: Schema.Struct({id: BlogId, status: CmsStatus}),
@@ -113,11 +101,14 @@ export class BlogPostsDbService extends Context.Tag('BlogPostsDbService')<
       })
 
       return {
-        insertBlogPost: flow(
-          insertBlogPostIfMissing,
-          Effect.mapError(mapWriteError),
-          Effect.withSpan('insertBlogPost query')
-        ),
+        insertBlogPost: (post) =>
+          sql`
+            INSERT INTO
+              blog_posts ${sql.insert(blogPostToDbRecord(post))}
+          `.pipe(
+            Effect.mapError(mapWriteError),
+            Effect.withSpan('insertBlogPost query')
+          ),
         updateBlogPost: ({id, input}) =>
           sql`
             UPDATE blog_posts

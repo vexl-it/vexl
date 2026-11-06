@@ -118,12 +118,25 @@ export function newlyRecoveredChats({
   )
 }
 
-export function chatsWaitingForHistoryRequest(
+// A lost request or answer is never retried by the other side.
+const HISTORY_REQUEST_RETRY_AFTER_MS = 60 * 60 * 1000
+
+/**
+ * Pending recovery chats to ask for their history: never asked, or asked long
+ * enough ago that the answer is not coming.
+ */
+export function chatsWaitingForHistoryRequest({
+  inbox,
+  now,
+}: {
   inbox: InboxInState
-): readonly ChatWithMessages[] {
+  now: UnixMilliseconds
+}): readonly ChatWithMessages[] {
   return Array.filter(
     inbox.pendingRecoveryChats ?? [],
-    (chat) => !chat.historyRequestedAt
+    (chat) =>
+      !chat.historyRequestedAt ||
+      now >= chat.historyRequestedAt + HISTORY_REQUEST_RETRY_AFTER_MS
   )
 }
 

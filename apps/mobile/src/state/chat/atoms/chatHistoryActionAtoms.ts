@@ -103,7 +103,7 @@ export const processPendingRecoveryChatsActionAtom = atom(
         ),
         Option.match({
           onNone: () => [],
-          onSome: chatsWaitingForHistoryRequest,
+          onSome: (inbox) => chatsWaitingForHistoryRequest({inbox, now}),
         }),
         Array.map((chat) =>
           set(sendHistoryRequestActionAtom, chat).pipe(

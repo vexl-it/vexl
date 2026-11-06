@@ -42,6 +42,10 @@ import {
   type UpdateInactivityNotificationSentParams,
 } from './queries/createUpdateInactivityNotificationSent'
 import {
+  createUpdateLoginSessionId,
+  type UpdateLoginSessionIdParams,
+} from './queries/createUpdateLoginSessionId'
+import {
   createUpdatePublicKeyV2,
   type UpdatePublicKeyV2Params,
 } from './queries/createUpdatePublicKeyV2'
@@ -113,6 +117,10 @@ export interface UserDbOperations {
     args: UpdateRefreshUserParams
   ) => Effect.Effect<void, UnexpectedServerError>
 
+  updateLoginSessionId: (
+    args: UpdateLoginSessionIdParams
+  ) => Effect.Effect<void, UnexpectedServerError>
+
   updateUserInitialImportDone: (
     args: UpdateUserInitialImportDoneParams
   ) => Effect.Effect<void, UnexpectedServerError>
@@ -145,6 +153,7 @@ export class UserDbService extends Context.Tag('UserDbService')<
         createDeleteUserByPublicKeyAndHash
       )
       const updateRefreshUser = yield* _(createUpdateRefreshUser)
+      const updateLoginSessionId = yield* _(createUpdateLoginSessionId)
 
       const findVexlNotificationTokensOfUsersWhoDirectlyImportedHash = yield* _(
         createFindVexlNotificationTokensOfUsersWhoDirectlyImportedHash
@@ -180,6 +189,7 @@ export class UserDbService extends Context.Tag('UserDbService')<
         findUserByPublicKeyAndHash,
         deleteUserByPublicKeyAndHash,
         updateRefreshUser,
+        updateLoginSessionId,
         findVexlNotificationTokensOfUsersWhoDirectlyImportedHash,
         findVexlNotificationTokensOfUsersWhoHaveHashAsSecondLevelContact,
         findUsersToNotifyAboutInactivity,

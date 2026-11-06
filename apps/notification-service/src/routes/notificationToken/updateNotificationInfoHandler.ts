@@ -1,9 +1,15 @@
 import {HttpApiBuilder} from '@effect/platform/index'
+import {UserLoginOnDifferentDeviceNotificationData} from '@vexl-next/domain/src/general/notifications'
+import {type VexlNotificationTokenSecret} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
+import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {MissingCommonHeadersError} from '@vexl-next/rest-api/src/services/notification/contract'
 import {NotificationApiSpecification} from '@vexl-next/rest-api/src/services/notification/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {Effect, Option} from 'effect'
+import {NotificationSocketMessaging} from '../../services/NotificationSocketMessaging'
+import {UserLoginOnDifferentDeviceNoticeSendTask} from '../../services/NotificationSocketMessaging/domain'
 import {NotificationTokensDb} from '../../services/NotificationTokensDb'
+import {ExpoClientService} from '../../services/PushNotificationService/services/ExpoClientService'
 
 export const updateNotificationInfoHandler = HttpApiBuilder.handler(
   NotificationApiSpecification,
@@ -28,8 +34,9 @@ export const updateNotificationInfoHandler = HttpApiBuilder.handler(
         const clientPrefix = Option.getOrNull(headers.prefixOrNone)
 
         const db = yield* NotificationTokensDb
+        const previous = yield* db.findSecretBySecretValue(payload.secret)
 
-        yield* db.updateClientInfo({
+        const updated = yield* db.updateClientInfo({
           secretToken: payload.secret,
           expoNotificationToken: payload.expoNotificationToken ?? null,
           systemVexlToken: payload.systemVexlToken ?? null,
@@ -41,6 +48,71 @@ export const updateNotificationInfoHandler = HttpApiBuilder.handler(
           clientPrefix,
           backgroundSocketEnabled: payload.backgroundSocketEnabled ?? false,
         })
+
+        if (
+          Option.isSome(previous) &&
+          previous.value.expoNotificationToken !== updated.expoNotificationToken
+        ) {
+          yield* nudgeDevicesToCheckTheirSession({
+            secret: updated.secret,
+            previousExpoToken: previous.value.expoNotificationToken,
+          })
+        }
       })
     )
 )
+
+/**
+ * A restore on another device takes over the secret, which changes its expo
+ * token. The replaced device would only notice on its next resume, so it is
+ * asked to check right away - over its old push token and over any open
+ * stream. A device that wasn't replaced finds nothing.
+ */
+const nudgeDevicesToCheckTheirSession = ({
+  secret,
+  previousExpoToken,
+}: {
+  secret: VexlNotificationTokenSecret
+  previousExpoToken: ExpoNotificationToken | null
+}): Effect.Effect<
+  void,
+  never,
+  NotificationSocketMessaging | ExpoClientService
+> =>
+  Effect.gen(function* (_) {
+    const socketMessaging = yield* _(NotificationSocketMessaging)
+    yield* _(
+      socketMessaging.sendNotice(
+        new UserLoginOnDifferentDeviceNoticeSendTask({
+          notificationToken: secret,
+          accountMoved: true,
+        })
+      ),
+      Effect.catchTag('NoActiveSocketConnectionsError', () => Effect.void),
+      Effect.catchAll((e) =>
+        Effect.logWarning(
+          'Failed to nudge open streams about a moved account',
+          e
+        )
+      )
+    )
+
+    if (previousExpoToken === null) return
+    // The secret now points at the new device, so the old push token is
+    // addressed directly.
+    const expoClient = yield* _(ExpoClientService)
+    yield* _(
+      expoClient.sendNotification([
+        {
+          token: previousExpoToken,
+          data: new UserLoginOnDifferentDeviceNotificationData({
+            trackingId: Option.none(),
+            accountMoved: true,
+          }).toData(),
+        },
+      ]),
+      Effect.catchAll((e) =>
+        Effect.logWarning('Failed to nudge the replaced device', e)
+      )
+    )
+  })

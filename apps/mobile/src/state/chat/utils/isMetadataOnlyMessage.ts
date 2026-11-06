@@ -5,6 +5,8 @@ const METADATA_ONLY_MESSAGE_TYPES = new Set<string>([
   'FCM_CYPHER_UPDATE',
   'MESSAGE_READ',
   'REACTION',
+  'REQUEST_HISTORY',
+  'HISTORY',
 ])
 
 /**
@@ -15,4 +17,14 @@ export default function isMetadataOnlyMessage(
   message: ChatMessageWithState
 ): boolean {
   return METADATA_ONLY_MESSAGE_TYPES.has(message.message.messageType)
+}
+
+export function isHiddenMetadataMessage(
+  message: ChatMessageWithState
+): boolean {
+  return (
+    isMetadataOnlyMessage(message) &&
+    (message.state === 'receivedButRequiresNewerVersion' ||
+      !message.message.forceShow)
+  )
 }

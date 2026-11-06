@@ -88,20 +88,26 @@ function publicKeyToCurve25519(publicKeyV2: PublicKeyV2): Uint8Array {
   return sodium.crypto_sign_ed25519_pk_to_curve25519(ed25519PublicKey)
 }
 
+function toKeyPairV2(keypair: {
+  publicKey: Uint8Array
+  privateKey: Uint8Array
+}): KeyPairV2 {
+  return Schema.decodeSync(KeyPairV2)({
+    publicKey: `${PUBLIC_KEY_V2_PREFIX}${sodium.to_base64(keypair.publicKey)}`,
+    privateKey: `${PRIVATE_KEY_V2_PREFIX}${sodium.to_base64(keypair.privateKey)}`,
+  })
+}
+
 export async function generateKeyPair(): Promise<KeyPairV2> {
   await ensureSodiumReady()
+  return toKeyPairV2(sodium.crypto_sign_keypair())
+}
 
-  const keypair = sodium.crypto_sign_keypair()
-
-  const publicKey = `${PUBLIC_KEY_V2_PREFIX}${sodium.to_base64(keypair.publicKey)}`
-  const privateKey = `${
-    PRIVATE_KEY_V2_PREFIX
-  }${sodium.to_base64(keypair.privateKey)}`
-
-  return Schema.decodeSync(KeyPairV2)({
-    publicKey,
-    privateKey,
-  })
+export async function generateKeyPairFromSeed(
+  seed: Uint8Array
+): Promise<KeyPairV2> {
+  await ensureSodiumReady()
+  return toKeyPairV2(sodium.crypto_sign_seed_keypair(seed))
 }
 
 export async function derivePubKey(

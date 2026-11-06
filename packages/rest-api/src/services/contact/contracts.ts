@@ -11,6 +11,7 @@ import {
   ClubUuid,
 } from '@vexl-next/domain/src/general/clubs'
 import {HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
+import {LoginSessionId} from '@vexl-next/domain/src/general/LoginSessionId.brand'
 import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {ConnectionLevel, OfferId} from '@vexl-next/domain/src/general/offers'
 import {SERVER_HASH_PREFIX} from '@vexl-next/domain/src/general/ServerHashedNumber'
@@ -72,6 +73,12 @@ export class UserNotFoundError extends Schema.TaggedError<UserNotFoundError>(
   }),
 }) {}
 
+export class LoggedInOnAnotherDeviceError extends Schema.TaggedError<LoggedInOnAnotherDeviceError>(
+  'LoggedInOnAnotherDeviceError'
+)('LoggedInOnAnotherDeviceError', {
+  status: Schema.optionalWith(Schema.Literal(409), {default: () => 409}),
+}) {}
+
 export const CreateUserRequest = Schema.Struct({
   vexlNotificationToken: Schema.optionalWith(VexlNotificationToken, {
     as: 'Option',
@@ -81,6 +88,8 @@ export const CreateUserRequest = Schema.Struct({
   publicKeyV2: Schema.optionalWith(PublicKeyV2, {
     as: 'Option',
   }),
+  // Optional for backward compatibility with clients older than 26.11.2
+  loginSessionId: Schema.optional(LoginSessionId),
 })
 export type CreateUserRequest = Schema.Schema.Type<typeof CreateUserRequest>
 
@@ -89,8 +98,18 @@ export const RefreshUserRequest = Schema.Struct({
   vexlNotificationToken: Schema.optionalWith(VexlNotificationToken, {
     as: 'Option',
   }),
+  // Optional for backward compatibility with clients older than 26.11.2
+  loginSessionId: Schema.optional(LoginSessionId),
 })
 export type RefreshUserRequest = Schema.Schema.Type<typeof RefreshUserRequest>
+
+export const RestoreUserRequest = Schema.Struct({
+  loginSessionId: LoginSessionId,
+  vexlNotificationToken: Schema.optionalWith(VexlNotificationToken, {
+    as: 'Option',
+  }),
+})
+export type RestoreUserRequest = typeof RestoreUserRequest.Type
 
 const ClientHashedPhoneNumber = HashedPhoneNumber.pipe(
   Schema.filter((hash) => !String.startsWith(SERVER_HASH_PREFIX)(hash), {

@@ -6,6 +6,7 @@ import {
 import {
   generateChatMessageId,
   type ChatMessage,
+  type ChatRecoveryProof,
 } from '@vexl-next/domain/src/general/messaging'
 import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {
@@ -64,6 +65,7 @@ export default function confirmMessagingRequest({
   myVexlToken,
   theirNotificationToken,
   notificationApi,
+  recoveryProof,
 }: {
   text: string
   fromKeypair: PrivateKeyHolder
@@ -74,6 +76,7 @@ export default function confirmMessagingRequest({
   myVexlToken?: VexlNotificationToken
   theirNotificationToken?: VexlNotificationToken | undefined
   notificationApi: NotificationApi
+  recoveryProof?: ChatRecoveryProof | undefined
 }): Effect.Effect<
   SentConfirmMessagingRequest,
   | ApiConfirmMessagingRequest
@@ -98,6 +101,7 @@ export default function confirmMessagingRequest({
         senderKeypair: fromKeypair,
         theirNotificationToken,
         notificationApi,
+        recoveryProof,
       })
     )
 

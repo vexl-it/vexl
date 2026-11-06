@@ -19,5 +19,6 @@ export default function isChatOpen(chat: ChatWithMessages): boolean {
     .reverse()
     .find((messageType) => significantMessageTypes.includes(messageType))
 
+  if (!significantMessageType) return !!chat.restoredFromBackup
   return significantMessageType === 'APPROVE_MESSAGING'
 }

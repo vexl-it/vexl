@@ -8,7 +8,10 @@ import {
 } from 'jotai'
 import React, {useMemo} from 'react'
 import {createMaxAmountForCurrencyAtom} from '../../../../state/currentBtcPriceAtoms'
-import {currencies} from '../../../../utils/localization/currency'
+import {
+  currencies,
+  MAX_AMOUNT_EUR,
+} from '../../../../utils/localization/currency'
 import {formattingLocaleAtom} from '../../../../utils/localization/formattingLocaleAtom'
 
 interface Props {
@@ -42,7 +45,7 @@ function AmountOfTransaction({
       maxValueAtom={amountTopLimitAtom}
       currency={currencies[currency].code}
       onCurrencyPress={onCurrencyPress ?? (() => {})}
-      maxLimit={maxLimit}
+      maxLimit={maxLimit ?? MAX_AMOUNT_EUR}
       maxLabel={maxLabel}
       locale={locale}
     />

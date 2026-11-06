@@ -6,8 +6,8 @@ import {
 } from '@vexl-next/cryptography/src/KeyHolder'
 import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {
-  generateNoteRepostId,
   type NoteId,
+  type NoteRepostId,
   type NoteRepostInfo,
 } from '@vexl-next/domain/src/general/notes'
 import {type SymmetricKey} from '@vexl-next/domain/src/general/offers'
@@ -45,6 +45,7 @@ export default function repostNote({
   offerApi,
   contactApi,
   noteId,
+  repostId,
   symmetricKey,
   ownerKeyPair,
   ownerKeyPairV2,
@@ -53,6 +54,7 @@ export default function repostNote({
   offerApi: OfferApi
   contactApi: ContactApi
   noteId: NoteId
+  repostId: NoteRepostId
   symmetricKey: SymmetricKey
   ownerKeyPair: PrivateKeyHolder
   ownerKeyPairV2: KeyPairV2
@@ -67,8 +69,6 @@ export default function repostNote({
   | NotePrivatePartEncryptionError
 > {
   return Effect.gen(function* (_) {
-    const repostId = generateNoteRepostId()
-
     const connectionsInfo = yield* _(
       fetchContactsForOffer({
         contactApi,

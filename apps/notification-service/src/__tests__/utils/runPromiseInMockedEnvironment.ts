@@ -32,9 +32,18 @@ import {generateNotificationTokenHandler} from '../../routes/notificationToken/g
 import {invalidateNotificationSecretHandler} from '../../routes/notificationToken/invalidateNotificationSecretHandler'
 import {invalidateNotificationTokenHandler} from '../../routes/notificationToken/invalidateNotificationTokenHandler'
 import {updateNotificationInfoHandler} from '../../routes/notificationToken/updateNotificationInfoHandler'
+import {NotificationSocketMessaging} from '../../services/NotificationSocketMessaging'
+import {
+  NoActiveSocketConnectionsError,
+  type SendMessageTask,
+} from '../../services/NotificationSocketMessaging/domain'
 import {NotificationTokensDb} from '../../services/NotificationTokensDb'
 import {PendingBatchedNotificationsDb} from '../../services/PendingBatchedNotificationsDb'
 import {PosgressDbLive} from '../../services/PostgressDb'
+import {
+  ExpoClientService,
+  type NotificationToSend,
+} from '../../services/PushNotificationService/services/ExpoClientService'
 
 export type MockedContexts =
   | RedisService
@@ -149,12 +158,36 @@ const mockedEnqueueUserNotificationLayer = Layer.succeed(
   }
 )
 
+export const sentSocketNotices: SendMessageTask[] = []
+export const sentExpoNotifications: NotificationToSend[] = []
+
+const mockedExpoClientLayer = Layer.succeed(ExpoClientService, {
+  sendNotification: (notifications) => {
+    sentExpoNotifications.push(...notifications)
+    return Effect.void
+  },
+})
+
+const mockedNotificationSocketMessagingLayer = Layer.succeed(
+  NotificationSocketMessaging,
+  {
+    sendNewChatMessageNotice: () => new NoActiveSocketConnectionsError(),
+    sendStreamOnlyChatMessage: () => new NoActiveSocketConnectionsError(),
+    sendNotice: (task) => {
+      sentSocketNotices.push(task)
+      return Effect.void
+    },
+  }
+)
+
 const dbServiceLayers = Layer.mergeAll(
   NotificationTokensDb.Live,
   PendingBatchedNotificationsDb.Live
 ).pipe(
   Layer.provideMerge(PosgressDbLive),
-  Layer.provideMerge(mockedEnqueueUserNotificationLayer)
+  Layer.provideMerge(mockedEnqueueUserNotificationLayer),
+  Layer.provideMerge(mockedNotificationSocketMessagingLayer),
+  Layer.provideMerge(mockedExpoClientLayer)
 )
 
 const context = Layer.empty.pipe(
@@ -204,5 +237,7 @@ export const runPromiseInMockedEnvironment = async (
 
 beforeEach(() => {
   enqueuedUserNotifications.length = 0
+  sentSocketNotices.length = 0
+  sentExpoNotifications.length = 0
   failedUserNotificationTokens.clear()
 })

@@ -31,7 +31,7 @@ const deleteIfExists = (
       return false
     }
 
-    yield* _(Effect.log('Removing existing user from database', user.value))
+    yield* _(Effect.log('Removing existing user from database'))
 
     yield* _(contactDb.deleteContactsByHashFrom(user.value.hash))
     yield* _(
@@ -88,6 +88,7 @@ export const createUser = HttpApiBuilder.handler(
               platform: req.headers.clientPlatformOrNone,
               appSource: req.headers.appSourceOrNone,
               publicKeyV2: security.publicKeyV2,
+              loginSessionId: Option.fromNullable(req.payload.loginSessionId),
             })
           )
           return {}

@@ -29,6 +29,7 @@ import {updateTradeChecklistState} from '../../tradeChecklist/utils'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 import {addMessagesToChat} from '../utils/addMessageToChat'
 import addRealLifeInfoToChat from '../utils/addRealLifeInfoToChat'
+import {myChatRecoveryProofToShare} from '../utils/myChatRecoveryProof'
 import {replaceIdentityImageFileUriWithBase64} from '../utils/replaceIdentityImageFileUriWithBase64'
 
 const MINIMAL_REQUIRED_VERSION = Schema.decodeSync(VersionString)('1.25.0')
@@ -98,6 +99,10 @@ export default function createSubmitChecklistUpdateActionAtom(
                 notificationApi: api.notification,
                 theirNotificationToken:
                   chatWithMessages.chat.otherSideVexlToken,
+                recoveryProof: myChatRecoveryProofToShare(
+                  get,
+                  chatWithMessages
+                ),
               })
             ),
             Effect.map((serverMessage) => ({message, serverMessage}))

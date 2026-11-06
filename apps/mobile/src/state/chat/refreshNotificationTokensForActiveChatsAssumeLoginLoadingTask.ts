@@ -3,6 +3,7 @@ import {Array, Effect, flow, pipe} from 'effect/index'
 import {registerInAppLoadingTask} from '../../utils/inAppLoadingTasks'
 import {showDebugNotificationIfEnabled} from '../../utils/notifications/showDebugNotificationIfEnabled'
 import {ensureVexlSecretExistsTaskId} from '../notifications/ensureVexlSecretExistsTask'
+import {afterRefreshUserUnlessAccountMoved} from '../refreshUserOnContactServiceInAppBackgroundTask'
 import allChatsAtom from './atoms/allChatsAtom'
 import {sendFcmCypherUpdateMessageActionAtom} from './atoms/refreshNotificationTokensActionAtom'
 import {type ChatWithMessages} from './domain'
@@ -20,7 +21,10 @@ export const refreshNotificationTokensForActiveChatsAssumeLoginLoadingTaskId =
       requiresUserLoggedIn: true,
       runOn: 'resume',
     },
-    dependsOn: [{id: ensureVexlSecretExistsTaskId}],
+    dependsOn: [
+      {id: ensureVexlSecretExistsTaskId},
+      afterRefreshUserUnlessAccountMoved,
+    ],
     task: (store) =>
       Effect.gen(function* (_) {
         console.info(

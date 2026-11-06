@@ -2,12 +2,15 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import {KeyHolder, aes} from '@vexl-next/cryptography'
 import {KeyPairV2 as KeyPairV2Schema} from '@vexl-next/cryptography/src/KeyHolder/brandsV2'
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {LoginSessionId} from '@vexl-next/domain/src/general/LoginSessionId.brand'
+import {MasterSeed} from '@vexl-next/domain/src/general/MasterSeed.brand'
 import {VexlAuthHeader} from '@vexl-next/rest-api/src/VexlAuthHeader'
 import {Effect, Schema} from 'effect/index'
 import * as SecretStore from 'expo-secure-store'
 import {getDefaultStore} from 'jotai'
 import {sessionHolderAtom} from '.'
 import {
+  type LegacySessionV2,
   type Session,
   type SessionV2,
   Session as SessionSchema,
@@ -33,6 +36,8 @@ import {
 } from './utils/writeSessionToStorage'
 
 const mockPublicKeyV2 = 'V2_PUB_mock-public-key'
+const mockMasterSeed = 'ab'.repeat(32)
+const mockLoginSessionId = '7c9e6679-7425-40de-944b-e07fc1f90ae7'
 const mockPrivateKeyV2 = 'V2_PRIV_mock-private-key'
 const mockCryptoBoxSignatureSuffix = 'mock-cryptobox-signature'
 const mockVexlAuthSignature = `CBSig-${mockCryptoBoxSignatureSuffix}`
@@ -80,6 +85,39 @@ jest.mock('../../utils/reportError', () => {
 
 jest.mock('react-native-mmkv')
 
+// Persisting the counters records a critical MMKV key in AsyncStorage, which
+// would skew the storage read counts asserted below.
+jest.mock('../keyDerivation', () => {
+  const {atom} = jest.requireActual('jotai')
+  return {initializeKeyDerivationCountersActionAtom: atom(null, () => {})}
+})
+
+jest.mock('@vexl-next/domain/src/general/MasterSeed.brand', () => {
+  const {Schema} = jest.requireActual('effect/index')
+  const actual = jest.requireActual(
+    '@vexl-next/domain/src/general/MasterSeed.brand'
+  )
+  return {
+    ...actual,
+    generateMasterSeed: jest.fn(() =>
+      Schema.decodeSync(actual.MasterSeed)(mockMasterSeed)
+    ),
+  }
+})
+
+jest.mock('@vexl-next/domain/src/general/LoginSessionId.brand', () => {
+  const {Schema} = jest.requireActual('effect/index')
+  const actual = jest.requireActual(
+    '@vexl-next/domain/src/general/LoginSessionId.brand'
+  )
+  return {
+    ...actual,
+    generateLoginSessionId: jest.fn(() =>
+      Schema.decodeSync(actual.LoginSessionId)(mockLoginSessionId)
+    ),
+  }
+})
+
 jest.mock('../../utils/localization/I18nProvider', () => {
   const {atom: createAtom} = jest.requireActual('jotai')
 
@@ -116,6 +154,12 @@ jest.mock('@vexl-next/cryptography/src/operations/cryptobox', () => {
   return {
     ...jest.requireActual('@vexl-next/cryptography/src/operations/cryptobox'),
     generateKeyPair: jest.fn(async () =>
+      Schema.decodeSync(KeyPairV2)({
+        publicKey: mockPublicKeyV2,
+        privateKey: mockPrivateKeyV2,
+      })
+    ),
+    generateKeyPairFromSeed: jest.fn(async () =>
       Schema.decodeSync(KeyPairV2)({
         publicKey: mockPublicKeyV2,
         privateKey: mockPrivateKeyV2,
@@ -207,6 +251,8 @@ function withExpectedSessionUpgrades(session: Session): SessionV2 {
       vexlAuthHeader: createMockVexlAuthHeader(session.sessionCredentials.hash),
     },
     isLiquidityProvider: false,
+    masterSeed: Schema.decodeSync(MasterSeed)(mockMasterSeed),
+    loginSessionId: Schema.decodeSync(LoginSessionId)(mockLoginSessionId),
   }
 }
 
@@ -499,6 +545,52 @@ describe('loadSession', () => {
       SECRET_TOKEN_KEY_V2
     )
     expect(secretStoreSetItemAsyncMock).not.toHaveBeenCalled()
+  })
+
+  it('adds a master seed and login session id to a V2 session stored without them and persists it', async () => {
+    const {
+      masterSeed: _masterSeed,
+      loginSessionId: _loginSessionId,
+      ...legacySession
+    } = buildLoggedInSession(dummySession.version + 3)
+    const storedSession: LegacySessionV2 = legacySession
+    const {encryptedSession, secretToken} =
+      encryptSessionForStorage(storedSession)
+
+    asyncStorageGetItemMock.mockResolvedValueOnce(encryptedSession)
+    secretStoreGetItemAsyncMock.mockResolvedValueOnce(secretToken)
+
+    const result = await Effect.runPromise(loadSession({forceReload: false}))
+
+    expect(result.sessionLoaded).toBe(true)
+    expect(getDefaultStore().get(sessionHolderAtom)).toEqual({
+      state: 'loggedIn',
+      session: withExpectedSessionUpgrades(storedSession),
+    })
+    expect(AsyncStorage.setItem).toHaveBeenCalledWith(
+      SESSION_KEY,
+      expect.any(String)
+    )
+  })
+
+  it('keeps the stored master seed of an up-to-date session without rewriting it', async () => {
+    const storedSession: SessionV2 = {
+      ...buildLoggedInSession(dummySession.version + 6),
+      masterSeed: Schema.decodeSync(MasterSeed)('cd'.repeat(32)),
+    }
+    const {encryptedSession, secretToken} =
+      encryptSessionForStorage(storedSession)
+
+    asyncStorageGetItemMock.mockResolvedValueOnce(encryptedSession)
+    secretStoreGetItemAsyncMock.mockResolvedValueOnce(secretToken)
+
+    await Effect.runPromise(loadSession({forceReload: false}))
+
+    expect(getDefaultStore().get(sessionHolderAtom)).toEqual({
+      state: 'loggedIn',
+      session: storedSession,
+    })
+    expect(AsyncStorage.setItem).not.toHaveBeenCalled()
   })
 
   it('falls back to legacy secret storage and backfills v2 key', async () => {

@@ -11,6 +11,7 @@ import {type LoginFlowStackScreenProps} from '../../../navigationTypes'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import LoginFlowScreen, {
   LoginFlowCentered,
+  LoginFlowLink,
   LoginFlowText,
   LoginFlowTitle,
 } from './LoginFlowScreen'
@@ -27,11 +28,19 @@ export default function Intro2Screen({navigation}: Props): React.ReactElement {
     <LoginFlowScreen
       disableHorizontalPaddingForChildren
       action={{
-        label: t('common.continue'),
+        label: t('loginFlow.v2.intro2.action'),
         onPress: () => {
           navigation.navigate('PhoneNumber')
         },
       }}
+      footer={
+        <LoginFlowLink
+          label={t('loginFlow.v2.intro2.restoreAction')}
+          onPress={() => {
+            navigation.navigate('RestoreIntro')
+          }}
+        />
+      }
     >
       <LoginFlowCentered>
         <YStack f={1} justifyContent="space-around">

@@ -16,6 +16,7 @@ export default function removeSensitiveData(string: string): string {
     session.phoneNumber,
     session.privateKey.privateKeyPemBase64,
     session.keyPairV2.privateKey,
+    session.masterSeed,
   ].filter((one) => Boolean(one.trim()))
 
   const userName = session.realUserData?.userName

@@ -22,6 +22,7 @@ import {generateAndRegisterVexlTokenActionAtom} from '../../notifications/action
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 import addMessageToChat from '../utils/addMessageToChat'
 import createAccountDeletedMessage from '../utils/createAccountDeletedMessage'
+import {myChatRecoveryProof} from '../utils/myChatRecoveryProof'
 import {resetTradeChecklist} from '../utils/resetData'
 import {updateMyNotificationTokenInfoInChat} from './updateMyNotificationTokenInfoInChat'
 
@@ -77,6 +78,8 @@ const acceptMessagingRequestAtom = atom(
             toPublicKey: chat.otherSide.publicKey,
             myVersion: version,
             myVexlToken: vexlToken,
+            // Approving makes them a real chat partner
+            recoveryProof: approve ? myChatRecoveryProof(get, chat) : undefined,
           })
         )
       ),

@@ -271,3 +271,35 @@ it('restores ownership from the owner payload without retaining foreign sources'
     intendedClubs: [clubB],
   })
 })
+
+it('restores ownership of a new own offer whose owner payload has no friend level', () => {
+  const ownOffer = makeOffer({
+    adminId,
+    intendedConnectionLevel: 'ALL',
+    intendedClubs: [],
+    friendLevel: [],
+    clubIds: [],
+    commonFriends: [],
+    verifiedCommonFriends: [],
+  })
+  const [merged] = mergeIncomingOffersToState({
+    storedOffers: [],
+    incomingOffers: [ownOffer],
+    removedOffersIds: noRemovals,
+  })
+  expect(merged?.ownershipInfo).toEqual({
+    adminId,
+    intendedConnectionLevel: 'ALL',
+    intendedClubs: [],
+  })
+})
+
+it('still drops new foreign offers without any friend level', () => {
+  expect(
+    mergeIncomingOffersToState({
+      storedOffers: [],
+      incomingOffers: [makeOffer({friendLevel: [], clubIds: []})],
+      removedOffersIds: noRemovals,
+    })
+  ).toEqual([])
+})

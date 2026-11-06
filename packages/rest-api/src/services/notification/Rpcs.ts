@@ -92,6 +92,7 @@ export class UserLoginOnDifferentDeviceNoticeMessage extends Schema.TaggedClass<
 )('UserLoginOnDifferentDeviceNoticeMessage', {
   sentAt: UnixMilliseconds,
   trackingId: NotificationTrackingId,
+  accountMoved: Schema.optionalWith(Schema.Boolean, {default: () => false}),
 }) {}
 
 export class ClubFlaggedNoticeMessage extends Schema.TaggedClass<ClubFlaggedNoticeMessage>(

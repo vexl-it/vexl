@@ -7,6 +7,7 @@ import {Effect} from 'effect'
 import {UserDbService} from '../../db/UserDbService'
 import {serverHashPhoneNumber} from '../../utils/serverHashContact'
 import {withUserActionRedisLock} from '../../utils/withUserActionRedisLock'
+import {ensureLoginSessionProof} from './utils/ensureLoginSessionProof'
 import {findUserOrFail, refreshUserRecord} from './utils/refreshUserRecord'
 
 // Unlike createUser, keeps the user row and their imported contacts.
@@ -19,6 +20,13 @@ export const restoreUser = HttpApiBuilder.handler(
       Effect.bind('serverHash', (s) => serverHashPhoneNumber(s.hash)),
       Effect.flatMap((security) =>
         Effect.gen(function* (_) {
+          yield* _(
+            ensureLoginSessionProof({
+              publicKey: security.publicKey,
+              loginSessionId: req.payload.loginSessionId,
+              loginSessionProof: req.payload.loginSessionProof,
+            })
+          )
           const userDb = yield* _(UserDbService)
           yield* _(findUserOrFail(security))
 

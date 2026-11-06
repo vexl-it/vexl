@@ -21,6 +21,7 @@ import {reportUserReactivated, reportUserRefresh} from '../../metrics'
 import {serverHashPhoneNumber} from '../../utils/serverHashContact'
 import {withUserActionRedisLock} from '../../utils/withUserActionRedisLock'
 import {notifyOthersAboutNewUserForked} from '../contacts/utils/notifyOthersAboutNewUser'
+import {ensureLoginSessionProof} from './utils/ensureLoginSessionProof'
 import {
   findUserOrFail,
   refreshUserRecord,
@@ -95,6 +96,13 @@ export const refreshUser = HttpApiBuilder.handler(
       Effect.bind('serverHash', (s) => serverHashPhoneNumber(s.hash)),
       Effect.flatMap((security) =>
         Effect.gen(function* (_) {
+          yield* _(
+            ensureLoginSessionProof({
+              publicKey: security.publicKey,
+              loginSessionId: req.payload.loginSessionId,
+              loginSessionProof: req.payload.loginSessionProof,
+            })
+          )
           const commonMetricAttributes = commonMetricAttributesFromHeaders(
             req.headers
           )

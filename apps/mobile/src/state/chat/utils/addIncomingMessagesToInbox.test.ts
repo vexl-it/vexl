@@ -189,6 +189,40 @@ describe('recovering a chat on a restored inbox', () => {
     ])
   })
 
+  it('raises the version of a pending chat from a version update, so its history can be asked for', () => {
+    const update = received(
+      message(theirKey, {
+        time: at(4),
+        text: '',
+        messageType: 'VERSION_UPDATE',
+        myVersion: version,
+      })
+    )
+    const {updatedInbox, visibleMessages} = receive(pendingInbox(), [update])
+
+    expect(updatedInbox.chats).toEqual([])
+    expect(visibleMessages).toEqual([])
+    expect(updatedInbox.pendingRecoveryChats).toHaveLength(1)
+    expect(updatedInbox.pendingRecoveryChats?.[0]?.chat.otherSideVersion).toBe(
+      version
+    )
+  })
+
+  it('does not start a pending chat from a version update alone', () => {
+    const update = received(
+      message(theirKey, {
+        time: at(4),
+        text: '',
+        messageType: 'VERSION_UPDATE',
+        myVersion: version,
+      })
+    )
+
+    expect(
+      receive(restoredInbox, [update]).updatedInbox.pendingRecoveryChats
+    ).toEqual([])
+  })
+
   it('ignores a history it did not ask for', () => {
     const notRequested = receive(restoredInbox, [strangerMessage]).updatedInbox
     const {updatedInbox, visibleMessages} = receive(notRequested, [

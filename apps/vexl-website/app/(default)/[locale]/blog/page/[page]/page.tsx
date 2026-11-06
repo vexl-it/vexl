@@ -1,8 +1,7 @@
-import {blogPageCount} from '@/src/content/blog'
-import {toLocale} from '@/src/i18n/locales'
-import {resolveLocale} from '@/src/pageParams'
+import {blogPageCount, blogPosts} from '@/src/content/blog'
+import {type Locale} from '@/src/i18n/locales'
+import {resolveListPage, resolveLocale} from '@/src/pageParams'
 import {BlogIndex, blogIndexMetadata} from '@/src/views/blog/BlogIndex'
-import {Array, Option, pipe} from 'effect'
 import {type Metadata} from 'next'
 import React from 'react'
 
@@ -10,42 +9,27 @@ interface Props {
   readonly params: Promise<{locale: string; page: string}>
 }
 
-export const dynamicParams = false
+export const dynamic = 'force-dynamic'
 
-/** Pages after the first; the first one is /blog. */
-export function generateStaticParams({
-  params,
-}: {
-  readonly params: {locale: string}
-}): Array<{page: string}> {
-  return pipe(
-    toLocale(params.locale),
-    Option.match({
-      onNone: () => [],
-      onSome: (locale) =>
-        pipe(
-          Array.range(1, blogPageCount(locale)),
-          Array.filter((page) => page > 1),
-          Array.map((page) => ({page: String(page)}))
-        ),
-    })
-  )
+async function resolvePage(
+  props: Props
+): Promise<{locale: Locale; page: number}> {
+  const locale = await resolveLocale(props)
+  const posts = await blogPosts(locale)
+  return {
+    locale,
+    page: resolveListPage((await props.params).page, blogPageCount(posts)),
+  }
 }
 
-const resolvePage = async (props: Props): Promise<number> =>
-  Number((await props.params).page)
-
 export async function generateMetadata(props: Props): Promise<Metadata> {
-  return blogIndexMetadata(await resolveLocale(props), await resolvePage(props))
+  const {locale, page} = await resolvePage(props)
+  return await blogIndexMetadata(locale, page)
 }
 
 export default async function BlogListPage(
   props: Props
 ): Promise<React.JSX.Element> {
-  return (
-    <BlogIndex
-      locale={await resolveLocale(props)}
-      page={await resolvePage(props)}
-    />
-  )
+  const {locale, page} = await resolvePage(props)
+  return <BlogIndex locale={locale} page={page} />
 }

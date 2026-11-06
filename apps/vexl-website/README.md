@@ -6,14 +6,34 @@ Webflow's exported CSS (`src/styles/webflow.css`), vendored as is.
 
 ## Run
 
+Blog posts and community events come from content-service, so the site needs
+`CONTENT_SERVICE_URL` at runtime. The build doesn't call it.
+
+Against the local stack (`tooling/dev`):
+
 ```sh
-pnpm --filter vexl-website dev     # http://localhost:3000
-pnpm --filter vexl-website build   # every page is prerendered
-pnpm --filter vexl-website start
+pnpm dev:backend --only content-service   # http://localhost:3009
+CONTENT_SERVICE_URL=http://localhost:3009 pnpm --filter vexl-website dev
+```
+
+Against the public content-service:
+
+```sh
+CONTENT_SERVICE_URL=https://content.vexl.it pnpm --filter vexl-website dev
+```
+
+Production content-service serves `/content/website/*` only from the backend
+release after #2818, so use the local stack until then.
+
+```sh
+pnpm --filter vexl-website build   # no content-service needed
+CONTENT_SERVICE_URL=... pnpm --filter vexl-website start
+pnpm --filter vexl-website test    # post HTML sanitizer
 ```
 
 The Docker image (`apps/vexl-website/Dockerfile`) runs the standalone Next.js
-server on port 3000.
+server on port 3000. In the cluster, set
+`CONTENT_SERVICE_URL=http://content.vexl.svc.cluster.local:3000`.
 
 ## Languages
 
@@ -42,18 +62,25 @@ which Weglot translated.
 - **Links** are plain `<a>` tags, so every navigation is a full page load like
   on Webflow.
 - **404.** Every unknown URL lands on `app/not-found.tsx`. It switches to Czech
-  in the browser under `/cs`.
+  in the browser under `/cs`. Next sends a JS-only shell when a request-time
+  page calls `notFound()`, so `proxy.ts` rewrites unknown post slugs and page
+  numbers to an unmatched URL before they reach their route.
 
 ## Content
 
-- `content/blog/<slug>.md`: one post per file. The frontmatter (validated in
-  `src/content/blog.ts`) holds the listing order and the locales the post is
-  published in. Post images are in `public/wf/cms/`.
+- **Blog posts and events** come from content-service's public
+  `/content/website/blog-posts` and `/content/website/events` endpoints
+  (`src/content/contentService.ts`), edited in the backoffice. Responses are
+  cached in memory for a minute. Posts are listed newest first by
+  `publishedAt`, and a post is on the Czech site when it has Czech content.
+  Events starting today or later (Prague time) are upcoming.
+- **Post bodies** are HTML. `src/content/sanitizePostHtml.ts` parses them and
+  keeps only an allowlist of tags and attributes before they are rendered,
+  because anyone with an editor token can store any HTML.
 - `content/faq/<locale>.md`: `## Section {#id}`, then `### Question` cards.
-- `content/events.json`: community events. Events dated on or after the build
-  date are listed as upcoming, so rebuild to move them to past.
 - `content/terms-privacy/*.html`: the legal documents.
-- `public/wf/`: every image, font and PDF from the Webflow CDN.
+- `public/wf/`: every image, font and PDF from the Webflow CDN. Post and event
+  images are on `https://resources.vexl.it`.
 
 The old Webflow pagination URLs (`/blog?27a9a69d_page=2`,
 `/community?534aadfb_page=2`) redirect to `/blog/page/2` and

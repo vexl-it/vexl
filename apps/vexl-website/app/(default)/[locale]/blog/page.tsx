@@ -3,8 +3,10 @@ import {BlogIndex, blogIndexMetadata} from '@/src/views/blog/BlogIndex'
 import {type Metadata} from 'next'
 import React from 'react'
 
+export const dynamic = 'force-dynamic'
+
 export async function generateMetadata(props: LocaleParams): Promise<Metadata> {
-  return blogIndexMetadata(await resolveLocale(props), 1)
+  return await blogIndexMetadata(await resolveLocale(props), 1)
 }
 
 export default async function BlogPage(

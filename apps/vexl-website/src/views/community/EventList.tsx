@@ -1,12 +1,15 @@
+import {type CmsEvent} from '@vexl-next/domain/src/general/cms'
+import {Array, Option, pipe} from 'effect'
 import React from 'react'
-import {type CommunityEvent, formatEventDate} from './events'
+import {formatEventDate, formatEventTime} from './events'
 
-function EventItem({
-  event,
-}: {
-  readonly event: CommunityEvent
-}): React.JSX.Element {
-  const {weekday, month, day} = formatEventDate(event.date)
+function EventItem({event}: {readonly event: CmsEvent}): React.JSX.Element {
+  const {weekday, month, day} = formatEventDate(event.startDate)
+  const speakers = pipe(
+    event.speakers,
+    Array.map((speaker) => speaker.name),
+    Array.join(', ')
+  )
   return (
     <div role="listitem" className="w-dyn-item">
       <div className="past_event">
@@ -20,10 +23,10 @@ function EventItem({
             <div className="info-event-past">{day}</div>
           </div>
           <a
-            href={event.url}
+            href={event.link}
             className="date-place-upcomming name-and-link w-inline-block"
           >
-            {event.showGlasses ? (
+            {event.goldenGlasses ? (
               <img
                 src="/wf/67c6d9feb725232e1f3b3f16_Group-687.png"
                 loading="lazy"
@@ -44,22 +47,29 @@ function EventItem({
         </div>
         <div className="div-block-50">
           <div className="div-block-49">
-            {event.speakers ? (
+            {speakers ? (
               <div className="info-past">
-                <div className="event-past-text">{event.speakers}</div>
+                <div className="event-past-text">{speakers}</div>
               </div>
             ) : null}
             <div className="info-past">
-              <div className="event-past-text">{event.location}</div>
+              <div className="event-past-text">{event.venue}</div>
             </div>
             <div className="info-past">
-              <div className="event-past-text">{event.start}</div>
-              {event.end ? (
-                <>
-                  <div className="event-past-text spacer">-</div>
-                  <div className="event-past-text">{event.end}</div>
-                </>
-              ) : null}
+              <div className="event-past-text">
+                {formatEventTime(event.startDate)}
+              </div>
+              {Option.match(event.endDate, {
+                onNone: () => null,
+                onSome: (endDate) => (
+                  <>
+                    <div className="event-past-text spacer">-</div>
+                    <div className="event-past-text">
+                      {formatEventTime(endDate)}
+                    </div>
+                  </>
+                ),
+              })}
             </div>
           </div>
         </div>
@@ -80,7 +90,7 @@ export function EventList({
   previous,
   next,
 }: {
-  readonly events: readonly CommunityEvent[]
+  readonly events: readonly CmsEvent[]
   readonly emptyText: string
   readonly previous?: PageLink
   readonly next?: PageLink
@@ -90,7 +100,7 @@ export function EventList({
       {events.length > 0 ? (
         <div role="list" className="w-dyn-items">
           {events.map((event) => (
-            <EventItem key={`${event.date} ${event.name}`} event={event} />
+            <EventItem key={event.id} event={event} />
           ))}
         </div>
       ) : (

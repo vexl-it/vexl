@@ -367,15 +367,13 @@ export const submitCodeToJoinClubActionAtom = atom(
       }
 
       const {keys: clubKeys, allocate} = yield* _(set(nextClubKeysActionAtom))
+      const vexlNotificationToken = yield* _(set(generateVexlTokenActionAtom))
 
+      yield* _(allocate)
       set(clubsToKeyHolderAtom, (prevState) => ({
         ...prevState,
         [club.club.uuid]: clubKeys,
       }))
-
-      const vexlNotificationToken = yield* _(set(generateVexlTokenActionAtom))
-
-      yield* _(allocate)
       const {clubInfoForUser} = yield* _(
         api.contact
           .joinClub({
@@ -386,7 +384,7 @@ export const submitCodeToJoinClubActionAtom = atom(
             keyPairV2: clubKeys.keyPair,
           })
           .pipe(
-            Effect.tapError(() =>
+            Effect.onError(() =>
               Effect.sync(() => {
                 set(clubsToKeyHolderAtom, Struct.omit(club.club.uuid))
               })

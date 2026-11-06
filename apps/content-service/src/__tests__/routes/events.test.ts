@@ -120,4 +120,29 @@ describe('events', () => {
       })
     )
   })
+
+  it('lists drafts and published events for editors', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const internalApp = yield* _(NodeTestingInternalApp)
+        const draft = yield* _(
+          internalApp.Cms.createEvent({
+            headers,
+            payload: {...input, name: 'Listed draft'},
+          })
+        )
+        const {events} = yield* _(internalApp.Cms.listEvents({headers}))
+
+        expect(Array.findFirst(events, (one) => one.id === draft.id)).toEqual(
+          Option.some(draft)
+        )
+        expect(
+          Array.findFirst(
+            events,
+            (one) => one.name === 'Watch Out Bitcoin!'
+          ).pipe(Option.map((one) => one.status))
+        ).toEqual(Option.some('published'))
+      })
+    )
+  })
 })

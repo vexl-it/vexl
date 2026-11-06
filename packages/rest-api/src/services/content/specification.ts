@@ -11,7 +11,9 @@ import {MaxExpectedDailyCall} from '../../MaxExpectedDailyCountAnnotation'
 import {NoContentResponse} from '../../NoContentResponse.brand'
 import {RateLimitingMiddleware} from '../../rateLimititing'
 import {
+  BlogPostsResponse,
   BlogsArticlesResponse,
+  CmsEventsResponse,
   CreateInvoiceError,
   CreateInvoiceRequest,
   CreateInvoiceResponse,
@@ -28,8 +30,6 @@ import {
   InvoiceNotFoundError,
   MapStylesResponse,
   NewsAndAnnouncementsResponse,
-  PublishedBlogPostsResponse,
-  PublishedEventsResponse,
   UpdateInvoiceWebhookError,
 } from './contracts'
 
@@ -51,14 +51,14 @@ export const GetPublishedBlogPostsEndpoint = HttpApiEndpoint.get(
   'getPublishedBlogPosts',
   '/content/website/blog-posts'
 )
-  .addSuccess(PublishedBlogPostsResponse)
+  .addSuccess(BlogPostsResponse)
   .annotate(MaxExpectedDailyCall, 1000)
 
 export const GetPublishedEventsEndpoint = HttpApiEndpoint.get(
   'getPublishedEvents',
   '/content/website/events'
 )
-  .addSuccess(PublishedEventsResponse)
+  .addSuccess(CmsEventsResponse)
   .annotate(MaxExpectedDailyCall, 1000)
 
 const CmsContentApiGroup = HttpApiGroup.make('Cms')

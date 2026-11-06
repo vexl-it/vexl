@@ -114,6 +114,31 @@ describe('blog posts', () => {
     )
   })
 
+  it('lists drafts and published posts for editors', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const internalApp = yield* _(NodeTestingInternalApp)
+        const draft = yield* _(
+          internalApp.Cms.createBlogPost({
+            headers,
+            payload: makeInput('listed-draft'),
+          })
+        )
+        const {blogPosts} = yield* _(internalApp.Cms.listBlogPosts({headers}))
+
+        expect(
+          Array.findFirst(blogPosts, (one) => one.id === draft.id)
+        ).toEqual(Option.some({...draft, createdAt: expect.any(Date)}))
+        expect(
+          Array.findFirst(
+            blogPosts,
+            (one) => one.slug === 'so-what-is-vexl-anyway'
+          ).pipe(Option.map((one) => one.status))
+        ).toEqual(Option.some('published'))
+      })
+    )
+  })
+
   it('rejects a taken slug', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {

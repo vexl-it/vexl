@@ -2,9 +2,11 @@ import {Schema} from 'effect'
 import {jsonHeaders, requestJson, requestNoContent} from '../adminFetch'
 import {
   RequestUploadResponse as RequestUploadResponseSchema,
+  type RequestUploadResponse,
+} from '../uploadToPresignedUrl'
+import {
   type CreateSlideshowRequest,
   type RequestUploadRequest,
-  type RequestUploadResponse,
   type SlideshowListResponse,
   type SlideshowResponse,
   type UpdateSlideshowRequest,

@@ -1,7 +1,8 @@
+import {type BackofficeRole} from '@/src/services/adminTokenService'
 import {type ConfigError, Effect, Schema} from 'effect'
 import {type NextRequest} from 'next/server'
 import {createHash, timingSafeEqual} from 'node:crypto'
-import {adminTokenHashConfig} from './config'
+import {adminTokenHashConfig, contentEditorTokenHashConfig} from './config'
 
 export class MissingAdminTokenError extends Schema.TaggedError<MissingAdminTokenError>(
   'MissingAdminTokenError'
@@ -27,14 +28,15 @@ const timingSafeStringEqual = (left: string, right: string): boolean => {
   return timingSafeEqual(leftBuffer, rightBuffer)
 }
 
-export const validateAdminToken = (
-  adminToken: string | null
+export const resolveRequestRole = (
+  request: NextRequest
 ): Effect.Effect<
-  boolean,
+  BackofficeRole,
   MissingAdminTokenError | InvalidAdminTokenError | ConfigError.ConfigError
 > =>
   Effect.gen(function* (_) {
-    if (!adminToken) {
+    const token = request.headers.get('x-admin-token')
+    if (!token) {
       return yield* _(
         Effect.fail(
           new MissingAdminTokenError({message: 'Missing admin token'})
@@ -42,23 +44,20 @@ export const validateAdminToken = (
       )
     }
 
-    const correctHash = yield* _(adminTokenHashConfig)
-    const computedHash = hashSha256(adminToken)
-
-    if (!timingSafeStringEqual(correctHash, computedHash)) {
-      return yield* _(
-        Effect.fail(
-          new InvalidAdminTokenError({message: 'Invalid admin token'})
-        )
+    const computedHash = hashSha256(token)
+    if (timingSafeStringEqual(yield* _(adminTokenHashConfig), computedHash)) {
+      return 'admin'
+    }
+    if (
+      timingSafeStringEqual(
+        yield* _(contentEditorTokenHashConfig),
+        computedHash
       )
+    ) {
+      return 'contentEditor'
     }
 
-    return true
+    return yield* _(
+      Effect.fail(new InvalidAdminTokenError({message: 'Invalid admin token'}))
+    )
   })
-
-export const validateAdminRequest = (
-  request: NextRequest
-): Effect.Effect<
-  boolean,
-  MissingAdminTokenError | InvalidAdminTokenError | ConfigError.ConfigError
-> => validateAdminToken(request.headers.get('x-admin-token'))

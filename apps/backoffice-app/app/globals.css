@@ -1,1 +1,32 @@
 @import 'tailwindcss';
+
+/* Rich text in the blog post editor and preview. */
+.cms-content h2 {
+  @apply mt-6 mb-2 text-2xl font-bold;
+}
+.cms-content h3 {
+  @apply mt-5 mb-2 text-xl font-bold;
+}
+.cms-content h4,
+.cms-content h5,
+.cms-content h6 {
+  @apply mt-4 mb-2 text-lg font-semibold;
+}
+.cms-content p {
+  @apply my-2;
+}
+.cms-content ul {
+  @apply my-2 list-disc pl-6;
+}
+.cms-content ol {
+  @apply my-2 list-decimal pl-6;
+}
+.cms-content blockquote {
+  @apply my-3 border-l-4 border-gray-300 pl-4 text-gray-600 italic;
+}
+.cms-content a {
+  @apply text-indigo-600 underline;
+}
+.cms-content img {
+  @apply my-3 max-w-full rounded;
+}

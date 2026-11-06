@@ -276,7 +276,6 @@ export const SERVICES: readonly RunnableApp[] = [
     needs: {db: dbn.content, redis: false, s3: false},
     run: tsxService('src/index.ts'),
     secretKeys: [
-      'CLEAR_CACHE_TOKEN_HASH',
       'BTC_PAY_SERVER_URL',
       'BTC_PAY_SERVER_API_KEY',
       'BTC_PAY_SERVER_STORE_ID',
@@ -286,7 +285,6 @@ export const SERVICES: readonly RunnableApp[] = [
       ...stringifyValues(sc.contentService),
       INTERNAL_SERVER_PORT: String(ctx.ports.contentServiceInternal),
       // Optional integrations — empty by default, set in .env.local to enable.
-      CLEAR_CACHE_TOKEN_HASH: '',
       BTC_PAY_SERVER_URL: '',
       BTC_PAY_SERVER_API_KEY: '',
       BTC_PAY_SERVER_STORE_ID: '',
@@ -323,6 +321,7 @@ export const WEB_APPS: readonly RunnableApp[] = [
       PORT: String(ctx.ports.backofficeApp),
       ...dbEnv(ctx, dbn.backoffice),
       ADMIN_TOKEN_HASH: sc.backofficeApp.ADMIN_TOKEN_HASH,
+      CONTENT_EDITOR_TOKEN_HASH: sc.backofficeApp.CONTENT_EDITOR_TOKEN_HASH,
       CONTACT_INTERNAL_SERVER_URL: httpUrl(ctx, 'contactServiceInternal'),
       CONTENT_INTERNAL_SERVER_URL: httpUrl(ctx, 'contentServiceInternal'),
       CONTENT_API_INTERNAL_URL: httpUrl(ctx, 'contentService'),

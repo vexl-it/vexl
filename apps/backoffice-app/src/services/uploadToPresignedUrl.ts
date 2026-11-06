@@ -1,3 +1,15 @@
+import {Schema} from 'effect'
+import {HttpUrl} from './urlSchemas'
+
+export const RequestUploadResponse = Schema.Struct({
+  presignedUrl: Schema.NonEmptyString,
+  assetUrl: HttpUrl,
+  s3Key: Schema.NonEmptyString,
+  contentType: Schema.NonEmptyString,
+  expiresIn: Schema.Int,
+})
+export type RequestUploadResponse = typeof RequestUploadResponse.Type
+
 interface UploadToPresignedUrlInput {
   readonly presignedUrl: string
   readonly contentType: string

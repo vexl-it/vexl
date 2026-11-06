@@ -4,10 +4,10 @@ import {makeInternalApiServer} from '@vexl-next/server-utils/src/InternalServer'
 import {internalServerPortConfig} from '@vexl-next/server-utils/src/commonConfigs'
 import {Layer} from 'effect'
 import {VexlProductNotificationsDbService} from '../db/VexlProductNotificationsDbService'
-import {clearCacheHandler} from '../handlers/clearCache'
 import {
   createBlogPostHandler,
   deleteBlogPostHandler,
+  listBlogPostsHandler,
   publishBlogPostHandler,
   unpublishBlogPostHandler,
   updateBlogPostHandler,
@@ -15,6 +15,7 @@ import {
 import {
   createEventHandler,
   deleteEventHandler,
+  listEventsHandler,
   publishEventHandler,
   unpublishEventHandler,
   updateEventHandler,
@@ -26,12 +27,13 @@ const CmsApiGroupLive = HttpApiBuilder.group(
   'Cms',
   (h) =>
     h
-      .handle('clearCache', clearCacheHandler)
+      .handle('listBlogPosts', listBlogPostsHandler)
       .handle('createBlogPost', createBlogPostHandler)
       .handle('updateBlogPost', updateBlogPostHandler)
       .handle('publishBlogPost', publishBlogPostHandler)
       .handle('unpublishBlogPost', unpublishBlogPostHandler)
       .handle('deleteBlogPost', deleteBlogPostHandler)
+      .handle('listEvents', listEventsHandler)
       .handle('createEvent', createEventHandler)
       .handle('updateEvent', updateEventHandler)
       .handle('publishEvent', publishEventHandler)

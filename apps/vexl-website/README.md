@@ -16,11 +16,14 @@ pnpm dev:backend --only content-service   # http://localhost:3009
 CONTENT_SERVICE_URL=http://localhost:3009 pnpm --filter vexl-website dev
 ```
 
-Against the public content-service:
+Against the production content-service (no backend needed):
 
 ```sh
-CONTENT_SERVICE_URL=https://content.vexl.it pnpm --filter vexl-website dev
+pnpm --filter vexl-website dev:prod-data
 ```
+
+On a new machine or cloud environment, `scripts/setup.sh` installs only the
+website's part of the monorepo and the browser the `screenshots` script uses.
 
 ```sh
 pnpm --filter vexl-website build   # no content-service needed
@@ -100,8 +103,7 @@ same keys. A value may use `**bold**`, `*italic*`, `[text](https://…)` (also
 
 To change copy:
 
-1. Start the site: `CONTENT_SERVICE_URL=https://content.vexl.it pnpm --filter vexl-website dev`,
-   then open <http://localhost:3000>.
+1. Start the site with `pnpm --filter vexl-website dev:prod-data`, then open <http://localhost:3000>.
 2. Click **Edit copy** in the bottom-right corner. Editable text gets an
    outline when you hover it. Alt-click uses the page as usual, e.g. to open an
    FAQ answer.
@@ -112,8 +114,9 @@ To change copy:
    them under **Page meta**. The same list shows unsaved edits and everything
    you saved in this tab.
 5. Check what changed with `git diff apps/vexl-website/content/copy`, then
-   commit and open a PR.
+   commit and open a PR. Without git, ask an agent to open it: the
+   `updating-website` skill takes it from there.
 
 The editor and its save action only exist under `next dev`; `next build`
 leaves them out. Adding or removing keys, and the page structure around the
-copy, is a code change. The PR workflow for copy edits comes in a separate PR.
+copy, is a code change.

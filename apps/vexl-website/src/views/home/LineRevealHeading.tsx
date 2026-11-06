@@ -37,9 +37,9 @@ function splitAndAnimate(heading: HTMLElement): () => void {
 }
 
 export function LineRevealHeading({
-  text,
+  children,
 }: {
-  readonly text: string
+  readonly children: React.ReactNode
 }): React.JSX.Element {
   const headingRef = useRef<HTMLHeadingElement>(null)
 
@@ -74,7 +74,7 @@ export function LineRevealHeading({
 
   return (
     <h2 ref={headingRef} className="h2 split-type">
-      {text}
+      {children}
     </h2>
   )
 }

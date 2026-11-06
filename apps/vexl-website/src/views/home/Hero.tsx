@@ -1,15 +1,39 @@
 import React from 'react'
-import {type HomeMessages} from '../../i18n/home'
+import {type PageCopy} from '../../copy/pageCopy'
 import {type Locale, localizedPath} from '../../i18n/locales'
 import {QrDownload} from './QrDownload'
+
+interface PhoneImage {
+  readonly src: string
+  readonly srcSet?: string
+  readonly sizes?: string
+  readonly width?: number
+  readonly loading?: 'lazy'
+}
+
+// The live Czech page still shows the older screenshot
+const phoneImages: Record<Locale, PhoneImage> = {
+  en: {
+    src: '/wf/6a1049661859ee47d0bf75d5_hp_hero.webp',
+    sizes: '(max-width: 1919px) 100vw, 1400px',
+    width: 1479,
+    srcSet:
+      '/wf/6a1049661859ee47d0bf75d5_hp_hero-p-500.webp 500w, /wf/6a1049661859ee47d0bf75d5_hp_hero-p-800.webp 800w, /wf/6a1049661859ee47d0bf75d5_hp_hero-p-1080.webp 1080w, /wf/6a1049661859ee47d0bf75d5_hp_hero.webp 1089w',
+  },
+  cs: {
+    src: '/wf/66e2cc20b9c4af13f929b651_Frame-2-kopie-2-.png',
+    loading: 'lazy',
+  },
+}
 
 export function Hero({
   locale,
   t,
 }: {
   readonly locale: Locale
-  readonly t: HomeMessages['hero']
+  readonly t: PageCopy<'home'>
 }): React.JSX.Element {
+  const phoneImage = phoneImages[locale]
   return (
     <div className="section is-hero is-homepage">
       <div className="container is-hero">
@@ -19,18 +43,18 @@ export function Hero({
               src="/wf/62fb7130b9491eced45079f8_sunglasses.webp"
               loading="lazy"
               width="97.5"
-              alt="Vexl glasses"
+              {...t.attr('alt', 'hero.glassesAlt')}
               className="glasses-image"
             />
           </div>
-          <h1 className="h2 is-hero">{t.headline}</h1>
-          <p className="p is-hero">{t.text}</p>
+          <h1 className="h2 is-hero">{t('hero.headline')}</h1>
+          <p className="p is-hero">{t('hero.text')}</p>
           <QrDownload
             isYellow
-            scanToDownload={t.scanToDownload}
+            scanToDownload={t('hero.scanToDownload')}
             arrowHref={localizedPath(locale, '/download')}
             buttonClassName="pink"
-            buttonText={t.downloadButton}
+            buttonText={t('hero.downloadButton')}
           />
         </div>
         <div className="hero-right">
@@ -50,12 +74,12 @@ export function Hero({
               className="hero-vexlak"
             />
             <img
-              src={t.phoneImage.src}
-              loading={t.phoneImage.loading}
-              sizes={t.phoneImage.sizes}
-              width={t.phoneImage.width}
+              src={phoneImage.src}
+              loading={phoneImage.loading}
+              sizes={phoneImage.sizes}
+              width={phoneImage.width}
               alt=""
-              srcSet={t.phoneImage.srcSet}
+              srcSet={phoneImage.srcSet}
               className="hero-phone"
             />
           </div>

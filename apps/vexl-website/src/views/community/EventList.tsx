@@ -1,6 +1,7 @@
 import {type CmsEvent} from '@vexl-next/domain/src/general/cms'
 import {Array, Option, pipe} from 'effect'
 import React from 'react'
+import {type PageCopy} from '../../copy/pageCopy'
 import {formatEventDate, formatEventTime} from './events'
 
 function EventItem({event}: {readonly event: CmsEvent}): React.JSX.Element {
@@ -78,22 +79,17 @@ function EventItem({event}: {readonly event: CmsEvent}): React.JSX.Element {
   )
 }
 
-interface PageLink {
-  readonly href: string
-  readonly label: string
-}
-
 /** A Webflow CMS list of events with its empty state and pagination. */
 export function EventList({
   events,
-  emptyText,
-  previous,
-  next,
+  t,
+  previousHref,
+  nextHref,
 }: {
   readonly events: readonly CmsEvent[]
-  readonly emptyText: string
-  readonly previous?: PageLink
-  readonly next?: PageLink
+  readonly t: PageCopy<'community'>
+  readonly previousHref?: string
+  readonly nextHref?: string
 }): React.JSX.Element {
   return (
     <div className="w-dyn-list">
@@ -105,27 +101,33 @@ export function EventList({
         </div>
       ) : (
         <div className="empty-state-2 w-dyn-empty">
-          <div className="text-block-14">{emptyText}</div>
+          <div className="text-block-14">{t('events.empty')}</div>
         </div>
       )}
-      <div role="navigation" aria-label="List" className="w-pagination-wrapper">
-        {previous ? (
+      <div
+        role="navigation"
+        {...t.attr('aria-label', 'events.paginationLabel')}
+        className="w-pagination-wrapper"
+      >
+        {previousHref ? (
           <a
-            href={previous.href}
-            aria-label="Previous Page"
+            href={previousHref}
+            {...t.attr('aria-label', 'events.previousPageLabel')}
             className="w-pagination-previous previous-2"
           >
-            <div className="text-block-16 w-inline-block">{previous.label}</div>
+            <div className="text-block-16 w-inline-block">
+              {t('events.showNewer')}
+            </div>
           </a>
         ) : null}
-        {next ? (
+        {nextHref ? (
           <a
-            href={next.href}
-            aria-label="Next Page"
+            href={nextHref}
+            {...t.attr('aria-label', 'events.nextPageLabel')}
             className="w-pagination-next next-2"
           >
             <div className="text-block-15 w-inline-block">
-              {next.label}
+              {t('events.showOlder')}
               <br />
             </div>
           </a>

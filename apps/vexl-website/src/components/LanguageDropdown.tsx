@@ -2,19 +2,15 @@
 
 import {Array, pipe} from 'effect'
 import React, {useEffect, useRef, useState} from 'react'
-import {type Locale, localizedPath} from '../i18n/locales'
+import {type Locale, locales, localizedPath} from '../i18n/locales'
 import {rovingFocusIndex} from './rovingFocus'
-
-const languages = [
-  {locale: 'en', label: 'English'},
-  {locale: 'cs', label: 'Czech'},
-] as const
 
 export function LanguageDropdown({
   locale,
   path,
   alternatePaths = {},
   light,
+  labels,
   mobile = false,
   menuOpen = false,
 }: {
@@ -23,6 +19,7 @@ export function LanguageDropdown({
   /** Where a language's link goes when the page has no version in it. */
   readonly alternatePaths?: Partial<Record<Locale, string>>
   readonly light: boolean
+  readonly labels: Record<Locale, React.ReactNode>
   /** The copy that lives inside the collapsible menu. */
   readonly mobile?: boolean
   /** Whether the navbar's mobile menu is open; the list closes with it. */
@@ -120,24 +117,24 @@ export function LanguageDropdown({
       <nav className={`dropdown-list w-dropdown-list${openClass}`}>
         <div className="locales-wrapper w-locales-list">
           <div role="list" className="locales-list w-locales-items">
-            {languages.map((language) => {
-              const current = language.locale === locale
+            {locales.map((language) => {
+              const current = language === locale
               return (
                 <div
-                  key={language.locale}
+                  key={language}
                   role="listitem"
                   className={`${mobile ? 'locale ' : ''}w-locales-item`}
                 >
                   <a
-                    hrefLang={language.locale}
+                    hrefLang={language}
                     href={localizedPath(
-                      language.locale,
-                      alternatePaths[language.locale] ?? path
+                      language,
+                      alternatePaths[language] ?? path
                     )}
                     {...(current ? {'aria-current': 'page'} : {})}
                     className={`${withModifiers('link')}${current ? ' w--current' : ''}`}
                   >
-                    {language.label}
+                    {labels[language]}
                   </a>
                 </div>
               )

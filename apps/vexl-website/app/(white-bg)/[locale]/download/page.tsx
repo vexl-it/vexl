@@ -1,7 +1,7 @@
-import {download} from '@/src/i18n/download'
+import {pageCopy} from '@/src/copy/pageCopy'
 import {pageMetadata} from '@/src/metadata'
 import {resolveLocale, type LocaleParams} from '@/src/pageParams'
-import {DownloadPage} from '@/src/views/download/DownloadPage'
+import {DownloadPage, euDownload} from '@/src/views/download/DownloadPage'
 import {type Metadata} from 'next'
 import React from 'react'
 
@@ -38,12 +38,12 @@ const jsonLd = {
 
 export async function generateMetadata(props: LocaleParams): Promise<Metadata> {
   const locale = await resolveLocale(props)
-  const t = download[locale]
+  const t = pageCopy(locale, 'download')
   return pageMetadata({
     locale,
-    path: '/download',
-    title: t.metaTitle,
-    description: t.metaDescription,
+    path: euDownload.path,
+    title: t.text('eu.meta.title'),
+    description: t.text('eu.meta.description'),
   })
 }
 
@@ -54,9 +54,8 @@ export default async function Download(
   return (
     <DownloadPage
       locale={locale}
-      path="/download"
-      otherPath="/download-noneu"
-      t={download[locale]}
+      variant={euDownload}
+      t={pageCopy(locale, 'download')}
       jsonLd={jsonLd}
     />
   )

@@ -1,6 +1,6 @@
 import {Array, pipe} from 'effect'
 import React from 'react'
-import {type HomeMessages} from '../../i18n/home'
+import {type PageCopy} from '../../copy/pageCopy'
 
 const features = [
   {
@@ -25,7 +25,7 @@ const features = [
     icon: '/wf/6a267dac3ea5da7eb9af64d8_vexl-icon-4.svg',
   },
 ] satisfies ReadonlyArray<{
-  key: keyof HomeMessages['features']
+  key: 'friends' | 'marketplace' | 'noData' | 'anonymisation'
   cardClassName: string
   icon: string
 }>
@@ -33,7 +33,7 @@ const features = [
 export function Features({
   t,
 }: {
-  readonly t: HomeMessages['features']
+  readonly t: PageCopy<'home'>
 }): React.JSX.Element {
   return (
     <section className="section">
@@ -54,9 +54,9 @@ export function Features({
                 </div>
                 <div className="card-content_wrap is-basic-content">
                   <div className="card-title_wrap">
-                    <h5 className="h6">{t[key].title}</h5>
+                    <h5 className="h6">{t(`features.${key}.title`)}</h5>
                   </div>
-                  <p className="text-card-small">{t[key].text}</p>
+                  <p className="text-card-small">{t(`features.${key}.text`)}</p>
                 </div>
               </div>
             ))

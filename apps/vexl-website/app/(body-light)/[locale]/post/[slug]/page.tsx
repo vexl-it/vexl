@@ -9,7 +9,7 @@ import {
   relatedBlogPosts,
 } from '@/src/content/blog'
 import {renderRichText} from '@/src/content/blogRichText'
-import {blog} from '@/src/i18n/blog'
+import {pageCopy} from '@/src/copy/pageCopy'
 import {type Locale, locales, localizedPath} from '@/src/i18n/locales'
 import {pageMetadata} from '@/src/metadata'
 import {resolveLocale} from '@/src/pageParams'
@@ -48,7 +48,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   return pageMetadata({
     locale,
     path,
-    title: `${post.title}${blog[locale].postTitleSuffix}`,
+    title: `${post.title}${pageCopy(locale, 'blog').text('meta.postTitleSuffix')}`,
     description: post.title,
     image: Option.getOrUndefined(post.imageUrl),
     publishedLocales: post.locales,
@@ -71,7 +71,7 @@ export default async function PostPage(
   props: Props
 ): Promise<React.JSX.Element> {
   const {locale, post, posts} = await resolvePost(props)
-  const t = blog[locale]
+  const t = pageCopy(locale, 'blog')
   const article = renderRichText(post.body)
   const imageUrl = Option.getOrUndefined(post.imageUrl)
   return (
@@ -92,12 +92,14 @@ export default async function PostPage(
                   href={localizedPath(locale, '/blog')}
                   className="button-text w-inline-block"
                 >
-                  <div>{t.backToBlog}</div>
+                  <div>{t('post.backToBlog')}</div>
                 </a>
                 <h1 className="blog-main-title">{post.title}</h1>
                 <div className="blog-info-card">
                   <div className="blog-info-author-wrapper">
-                    <div className="blog-info-text">{t.publishedBy}</div>
+                    <div className="blog-info-text">
+                      {t('post.publishedBy')}
+                    </div>
                   </div>
                   <div className="blog-info-addon-wrapper">
                     <div className="blog-info-text">
@@ -107,7 +109,7 @@ export default async function PostPage(
                       <div data-reading-time="true" className="blog-info-text">
                         {article.readingMinutes}
                       </div>
-                      <div className="blog-info-text">{t.minRead}</div>
+                      <div className="blog-info-text">{t('post.minRead')}</div>
                     </div>
                   </div>
                 </div>
@@ -126,7 +128,7 @@ export default async function PostPage(
                     alt=""
                     className="blog-summary-img"
                   />
-                  <div className="title-xs">{t.summary}</div>
+                  <div className="title-xs">{t('post.summary')}</div>
                 </div>
                 <div className="blog-perex">{post.summary}</div>
                 <div
@@ -138,7 +140,9 @@ export default async function PostPage(
                       : {display: 'none'}
                   }
                 >
-                  <div className="blog-info-text">{t.tableOfContents}</div>
+                  <div className="blog-info-text">
+                    {t('post.tableOfContents')}
+                  </div>
                   {article.toc.map((entry) => (
                     <TocLink key={entry.id} id={entry.id} indent={entry.indent}>
                       {entry.text}
@@ -159,7 +163,7 @@ export default async function PostPage(
       <div className="background-dark">
         <section className="section is-blog-related">
           <div className="w-layout-vflex container is-large-gap">
-            <h2>{t.relatedArticles}</h2>
+            <h2>{t('post.relatedArticles')}</h2>
             <div className="collection-list-wrapper w-dyn-list">
               <div role="list" className="collection-list is-blog w-dyn-items">
                 {relatedBlogPosts(posts, post.slug).map((related) => (

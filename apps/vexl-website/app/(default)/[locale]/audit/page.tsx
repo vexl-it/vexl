@@ -1,5 +1,5 @@
 import {GlobalStyles} from '@/src/components/GlobalStyles'
-import {audit} from '@/src/i18n/audit'
+import {pageCopy} from '@/src/copy/pageCopy'
 import {pageMetadata} from '@/src/metadata'
 import {resolveLocale, type LocaleParams} from '@/src/pageParams'
 import {OldNav} from '@/src/views/oldNav/OldNav'
@@ -8,11 +8,12 @@ import React from 'react'
 
 export async function generateMetadata(props: LocaleParams): Promise<Metadata> {
   const locale = await resolveLocale(props)
+  const t = pageCopy(locale, 'audit')
   return pageMetadata({
     locale,
     path: '/audit',
-    title: audit[locale].metaTitle,
-    description: audit[locale].metaDescription,
+    title: t.text('meta.title'),
+    description: t.text('meta.description'),
   })
 }
 
@@ -20,7 +21,7 @@ export default async function Audit(
   props: LocaleParams
 ): Promise<React.JSX.Element> {
   const locale = await resolveLocale(props)
-  const t = audit[locale]
+  const t = pageCopy(locale, 'audit')
   return (
     <div className="page-wrapper download">
       <GlobalStyles />
@@ -28,13 +29,13 @@ export default async function Audit(
         <div className="section is-audit-hero">
           <div className="container is-hero-download">
             <div className="glassses is-hero-download" />
-            <h1 className="h1 hero">{t.heading}</h1>
+            <h1 className="h1 hero">{t('heading')}</h1>
             <div>
               <a
                 href="/wf/631613baa8feb4226708b522_Vexl_mobile_app_pentest_report.pdf"
                 className="secondary-button"
               >
-                {t.download}
+                {t('download')}
               </a>
             </div>
           </div>

@@ -10,7 +10,7 @@ import {
   blogPosts,
   featuredBlogPost,
 } from '../../content/blog'
-import {blog} from '../../i18n/blog'
+import {type PageCopy, pageCopy} from '../../copy/pageCopy'
 import {type Locale, locales, localizedPath} from '../../i18n/locales'
 import {pageMetadata} from '../../metadata'
 import {BlogCard} from './BlogCard'
@@ -24,15 +24,15 @@ export async function blogIndexMetadata(
   locale: Locale,
   page: number
 ): Promise<Metadata> {
-  const t = blog[locale]
+  const t = pageCopy(locale, 'blog')
   const pageCounts = await Promise.all(
     Array.map(locales, async (other) => blogPageCount(await blogPosts(other)))
   )
   return pageMetadata({
     locale,
     path: blogPagePath(page),
-    title: t.metaTitle,
-    description: t.metaDescription,
+    title: t.text('meta.title'),
+    description: t.text('meta.description'),
     publishedLocales: Array.filter(
       locales,
       (_, index) => page <= (pageCounts[index] ?? 0)
@@ -44,24 +44,25 @@ function Pagination({
   locale,
   page,
   pageCount,
+  t,
 }: {
   readonly locale: Locale
   readonly page: number
   readonly pageCount: number
+  readonly t: PageCopy<'blog'>
 }): React.JSX.Element {
-  const t = blog[locale]
   const href = (target: number): string =>
     localizedPath(locale, blogPagePath(target))
   return (
     <div
       role="navigation"
-      aria-label="List"
+      {...t.attr('aria-label', 'pagination.label')}
       className="w-pagination-wrapper pagination"
     >
       {page > 1 && (
         <a
           href={href(page - 1)}
-          aria-label="Previous Page"
+          {...t.attr('aria-label', 'pagination.previousLabel')}
           className="w-pagination-previous primary-button is-button-pagination"
         >
           <svg
@@ -79,16 +80,16 @@ function Pagination({
               d="M8 10L4 6l4-4"
             />
           </svg>
-          <div className="w-inline-block">{t.previous}</div>
+          <div className="w-inline-block">{t('pagination.previous')}</div>
         </a>
       )}
       {page < pageCount && (
         <a
           href={href(page + 1)}
-          aria-label="Next Page"
+          {...t.attr('aria-label', 'pagination.nextLabel')}
           className="w-pagination-next primary-button is-button-pagination"
         >
-          <div className="w-inline-block">{t.next}</div>
+          <div className="w-inline-block">{t('pagination.next')}</div>
           <svg
             className="w-pagination-next-icon"
             height="12px"
@@ -117,7 +118,7 @@ export async function BlogIndex({
   readonly locale: Locale
   readonly page: number
 }): Promise<React.JSX.Element> {
-  const t = blog[locale]
+  const t = pageCopy(locale, 'blog')
   const posts = await blogPosts(locale)
   return (
     <div className="page-wrapper">
@@ -136,8 +137,8 @@ export async function BlogIndex({
                   className="glasses-image"
                 />
               </div>
-              <h1 className="h1 blog">{t.heading}</h1>
-              <div className="text-subtitle">{t.subtitle}</div>
+              <h1 className="h1 blog">{t('hero.heading')}</h1>
+              <div className="text-subtitle">{t('hero.subtitle')}</div>
             </div>
           </div>
         </section>
@@ -154,7 +155,7 @@ export async function BlogIndex({
               </div>
               <div
                 role="navigation"
-                aria-label="List"
+                {...t.attr('aria-label', 'pagination.label')}
                 className="w-pagination-wrapper pagination"
               />
             </div>
@@ -168,6 +169,7 @@ export async function BlogIndex({
                 locale={locale}
                 page={page}
                 pageCount={blogPageCount(posts)}
+                t={t}
               />
             </div>
           </div>

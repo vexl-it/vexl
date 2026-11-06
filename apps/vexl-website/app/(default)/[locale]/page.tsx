@@ -1,7 +1,7 @@
 import {Footer} from '@/src/components/Footer'
 import {GlobalStyles} from '@/src/components/GlobalStyles'
 import {Navbar} from '@/src/components/Navbar'
-import {home} from '@/src/i18n/home'
+import {pageCopy} from '@/src/copy/pageCopy'
 import {pageMetadata} from '@/src/metadata'
 import {type LocaleParams, resolveLocale} from '@/src/pageParams'
 import {BottomHero} from '@/src/views/home/BottomHero'
@@ -18,12 +18,12 @@ import React from 'react'
 
 export async function generateMetadata(props: LocaleParams): Promise<Metadata> {
   const locale = await resolveLocale(props)
-  const t = home[locale]
+  const t = pageCopy(locale, 'home')
   return pageMetadata({
     locale,
     path: '/',
-    title: t.title,
-    description: t.description,
+    title: t.text('meta.title'),
+    description: t.text('meta.description'),
   })
 }
 
@@ -31,22 +31,22 @@ export default async function HomePage(
   props: LocaleParams
 ): Promise<React.JSX.Element> {
   const locale = await resolveLocale(props)
-  const t = home[locale]
+  const t = pageCopy(locale, 'home')
   return (
     <div className="page-wrapper">
       <GlobalStyles />
       <Navbar locale={locale} path="/" />
       <div className="main-wrapper">
         <div className="w-embed" />
-        <Hero locale={locale} t={t.hero} />
-        <HowItWorks t={t.howItWorks} />
+        <Hero locale={locale} t={t} />
+        <HowItWorks t={t} />
         <PhysicsSection />
-        <Features t={t.features} />
-        <NoKyc locale={locale} t={t.noKyc} />
-        <OpenSource t={t.openSource} />
-        <Claim t={t.claim} />
-        <Foundation t={t.foundation} />
-        <BottomHero locale={locale} />
+        <Features t={t} />
+        <NoKyc locale={locale} t={t} />
+        <OpenSource t={t} />
+        <Claim t={t} />
+        <Foundation t={t} />
+        <BottomHero locale={locale} t={t} />
         <Footer locale={locale} />
       </div>
     </div>

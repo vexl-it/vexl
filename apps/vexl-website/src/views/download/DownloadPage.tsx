@@ -1,26 +1,117 @@
 import {Array, pipe} from 'effect'
 import React from 'react'
 import {Navbar} from '../../components/Navbar'
-import {type DownloadMessages, type DownloadStep} from '../../i18n/download'
+import {type CopyKey} from '../../copy/copyFiles'
+import {type PageCopy} from '../../copy/pageCopy'
 import {type Locale, localizedPath} from '../../i18n/locales'
 
 const APPLE_ICON = '/wf/6a917998c8224d0aa7569ea8_Frame.svg'
 const ANDROID_ICON = '/wf/6a9179987948ae5f7cef2753_Frame-1.svg'
 const ARROW_ICON = '/wf/63075f2debbfaae31f41c786_arrow-top-right.png'
 
+type Key = CopyKey<'download'>
+
+interface DownloadStep {
+  readonly title: Key
+  readonly text: Key
+  /** Shorter text shown on phones instead of `text`. */
+  readonly mobileText?: Key
+  readonly action?: {
+    readonly label: Key
+    readonly href: string
+    readonly newTab: boolean
+  }
+}
+
+export interface DownloadVariant {
+  readonly path: string
+  /** The page the iPhone card's footer links to. */
+  readonly otherPath: string
+  readonly heading: Key
+  readonly iphoneSubtitle: Key
+  readonly steps: readonly DownloadStep[]
+  readonly footText: Key
+  readonly footLink: Key
+  readonly otherStoresSubtitle: Key
+}
+
+export const euDownload: DownloadVariant = {
+  path: '/download',
+  otherPath: '/download-noneu',
+  heading: 'eu.heading',
+  iphoneSubtitle: 'eu.iphone.subtitle',
+  steps: [
+    {
+      title: 'eu.iphone.altStore.title',
+      text: 'eu.iphone.altStore.text',
+      mobileText: 'eu.iphone.altStore.mobileText',
+      action: {
+        label: 'eu.iphone.altStore.button',
+        href: 'https://altstore.io/download',
+        newTab: true,
+      },
+    },
+    {
+      title: 'eu.iphone.freedomStore.title',
+      text: 'eu.iphone.freedomStore.text',
+      mobileText: 'eu.iphone.freedomStore.mobileText',
+      action: {
+        label: 'eu.iphone.freedomStore.button',
+        href: 'altstore-pal://source?url=https://source.freedomstore.io/',
+        newTab: false,
+      },
+    },
+    {
+      title: 'eu.iphone.install.title',
+      text: 'eu.iphone.install.text',
+      mobileText: 'eu.iphone.install.mobileText',
+    },
+  ],
+  footText: 'eu.iphone.footText',
+  footLink: 'eu.iphone.footLink',
+  otherStoresSubtitle: 'eu.otherStores.subtitle',
+}
+
+export const nonEuDownload: DownloadVariant = {
+  path: '/download-noneu',
+  otherPath: '/download',
+  heading: 'nonEu.heading',
+  iphoneSubtitle: 'nonEu.iphone.subtitle',
+  steps: [
+    {
+      title: 'nonEu.iphone.testFlight.title',
+      text: 'nonEu.iphone.testFlight.text',
+      action: {
+        label: 'nonEu.iphone.testFlight.button',
+        href: 'https://apps.apple.com/us/app/testflight/id899247664?mt=8',
+        newTab: true,
+      },
+    },
+    {
+      title: 'nonEu.iphone.vexl.title',
+      text: 'nonEu.iphone.vexl.text',
+      action: {
+        label: 'nonEu.iphone.vexl.button',
+        href: 'https://testflight.apple.com/join/SuPp5FF2',
+        newTab: true,
+      },
+    },
+  ],
+  footText: 'nonEu.iphone.footText',
+  footLink: 'nonEu.iphone.footLink',
+  otherStoresSubtitle: 'nonEu.otherStores.subtitle',
+}
+
 /** The `/download` and `/download-noneu` pages: they differ in the iPhone card only. */
 export function DownloadPage({
   locale,
-  path,
-  otherPath,
+  variant: page,
   t,
   jsonLd,
 }: {
   readonly locale: Locale
-  readonly path: string
-  /** The page the iPhone card's footer links to. */
-  readonly otherPath: string
-  readonly t: DownloadMessages
+  readonly variant: DownloadVariant
+  readonly t: PageCopy<'download'>
   readonly jsonLd: object
 }): React.JSX.Element {
   return (
@@ -31,29 +122,19 @@ export function DownloadPage({
           __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c'),
         }}
       />
-      <Navbar locale={locale} path={path} variant="light" />
+      <Navbar locale={locale} path={page.path} variant="light" />
       <div className="dlp_page">
         <section className="dlp_hero">
           <div className="dlp_wrap">
-            <h1 className="heading-5">
-              {pipe(
-                t.heading,
-                Array.map((line, index) => (
-                  <React.Fragment key={line}>
-                    {index > 0 ? <br /> : null}
-                    {line}
-                  </React.Fragment>
-                ))
-              )}
-            </h1>
+            <h1 className="heading-5">{t(page.heading)}</h1>
             <div className="dlp_fork">
               <a href="#iphone" className="button dlp_fork-btn w-inline-block">
                 <img src={APPLE_ICON} alt="" className="dlp_icon" />
-                iPhone
+                {t('fork.iphone')}
               </a>
               <a href="#android" className="button dlp_fork-btn w-inline-block">
                 <img src={ANDROID_ICON} alt="" className="dlp_icon" />
-                Android
+                {t('fork.android')}
               </a>
             </div>
           </div>
@@ -64,13 +145,13 @@ export function DownloadPage({
               <CardHead
                 className="dlp_card-head ios"
                 icon={APPLE_ICON}
-                title={t.iphoneTitle}
-                subtitle={t.iphoneSubtitle}
+                title={t('iphone.title')}
+                subtitle={t(page.iphoneSubtitle)}
               />
               {pipe(
-                t.steps,
+                page.steps,
                 Array.map((step, index) => (
-                  <Step key={step.title} number={index + 1} step={step} />
+                  <Step key={step.title} number={index + 1} step={step} t={t} />
                 ))
               )}
               <div className="dlp_card-foot">
@@ -79,9 +160,12 @@ export function DownloadPage({
                   alt=""
                   className="dlp_badge-in"
                 />
-                <p className="p dlp_foot-text">{t.footText}</p>
-                <a href={localizedPath(locale, otherPath)} className="dlp_link">
-                  {t.footLink}
+                <p className="p dlp_foot-text">{t(page.footText)}</p>
+                <a
+                  href={localizedPath(locale, page.otherPath)}
+                  className="dlp_link"
+                >
+                  {t(page.footLink)}
                 </a>
               </div>
             </div>
@@ -89,8 +173,8 @@ export function DownloadPage({
               <CardHead
                 className="dlp_card-head"
                 icon={ANDROID_ICON}
-                title={t.android}
-                subtitle={t.androidSubtitle}
+                title={t('android.title')}
+                subtitle={t('android.subtitle')}
               >
                 <a
                   rel="noopener noreferrer"
@@ -98,7 +182,7 @@ export function DownloadPage({
                   target="_blank"
                   className="button dlp_btn-primary is-inline w-inline-block"
                 >
-                  {t.googlePlay}
+                  {t('android.googlePlay')}
                   <img src={ARROW_ICON} alt="" className="dlp_chev" />
                 </a>
               </CardHead>
@@ -107,39 +191,39 @@ export function DownloadPage({
               <CardHead
                 className="dlp_card-head"
                 icon={ANDROID_ICON}
-                title={t.alternatives}
-                subtitle={t.alternativesSubtitle}
+                title={t('alternatives.title')}
+                subtitle={t('alternatives.subtitle')}
               />
               <div className="dlp_group">
-                <h3 className="p dlp_group-h">{t.otherStores}</h3>
-                <p className="p dlp_group-sub">{t.otherStoresSubtitle}</p>
+                <h3 className="p dlp_group-h">{t('otherStores.title')}</h3>
+                <p className="p dlp_group-sub">{t(page.otherStoresSubtitle)}</p>
                 <div className="dlp_btn-row">
                   <OutlineButton
                     href="https://auroraoss.com/"
                     icon="/wf/6a9179987948ae5f7cef275a_Frame-2.svg"
-                    label="Aurora Store"
+                    label={t('otherStores.aurora')}
                   />
                   <OutlineButton
                     href="https://zapstore.dev/"
                     icon="/wf/6a9179981e58162ad78749d4_Frame-3.svg"
-                    label="Zapstore"
+                    label={t('otherStores.zapstore')}
                   />
                 </div>
               </div>
               <div className="dlp_group">
-                <h3 className="p dlp_group-h">{t.otherWays}</h3>
-                <p className="p dlp_group-sub">{t.otherWaysSubtitle}</p>
+                <h3 className="p dlp_group-h">{t('otherWays.title')}</h3>
+                <p className="p dlp_group-sub">{t('otherWays.subtitle')}</p>
                 <div className="dlp_btn-row">
                   <OutlineButton
                     href="https://github.com/vexl-it/vexl/releases/latest"
                     icon="/wf/6a917998fc16da1b70d061dd_Frame-4.svg"
-                    label="GitHub Releases (APK)"
+                    label={t('otherWays.github')}
                   />
                   <img src={ARROW_ICON} alt="" className="dlp_chain" />
                   <OutlineButton
                     href="https://obtainium.imranr.dev/"
                     icon="/wf/6a9179985295d2083ce7cb5a_Frame-5.svg"
-                    label="Obtainium"
+                    label={t('otherWays.obtainium')}
                   />
                 </div>
               </div>
@@ -154,8 +238,10 @@ export function DownloadPage({
                   />
                 </div>
                 <div className="dlp_card-titles">
-                  <h2 className="h2 dlp_card-title is-title-sm">{t.freedom}</h2>
-                  <p className="p dlp_card-sub">{t.freedomSubtitle}</p>
+                  <h2 className="h2 dlp_card-title is-title-sm">
+                    {t('freedom.title')}
+                  </h2>
+                  <p className="p dlp_card-sub">{t('freedom.subtitle')}</p>
                 </div>
               </div>
             </div>
@@ -175,8 +261,8 @@ function CardHead({
 }: {
   readonly className: string
   readonly icon: string
-  readonly title: string
-  readonly subtitle: string
+  readonly title: React.ReactNode
+  readonly subtitle: React.ReactNode
   readonly children?: React.ReactNode
 }): React.JSX.Element {
   return (
@@ -196,33 +282,24 @@ function CardHead({
 function Step({
   number,
   step,
+  t,
 }: {
   readonly number: number
   readonly step: DownloadStep
+  readonly t: PageCopy<'download'>
 }): React.JSX.Element {
-  const copy = (
-    <>
-      {step.copy}
-      {step.emphasis ? (
-        <>
-          {' '}
-          <strong>{step.emphasis}</strong>
-        </>
-      ) : null}
-    </>
-  )
   return (
     <div className="dlp_step">
       <div className="dlp_step-num">{number}</div>
       <div className="dlp_step-text">
-        <h3 className="p dlp_step-title">{step.title}</h3>
-        {step.mobileCopy ? (
+        <h3 className="p dlp_step-title">{t(step.title)}</h3>
+        {step.mobileText ? (
           <>
-            <p className="p dlp_step-copy dlp_desk-only">{copy}</p>
-            <p className="p dlp_step-copy dlp_mob-only">{step.mobileCopy}</p>
+            <p className="p dlp_step-copy dlp_desk-only">{t(step.text)}</p>
+            <p className="p dlp_step-copy dlp_mob-only">{t(step.mobileText)}</p>
           </>
         ) : (
-          <p className="p dlp_step-copy">{copy}</p>
+          <p className="p dlp_step-copy">{t(step.text)}</p>
         )}
       </div>
       {step.action ? (
@@ -234,7 +311,7 @@ function Step({
               ? {rel: 'noopener noreferrer', target: '_blank'}
               : {})}
           >
-            {step.action.label}
+            {t(step.action.label)}
             <img src={ARROW_ICON} alt="" className="dlp_chev" />
           </a>
         </div>
@@ -250,7 +327,7 @@ function OutlineButton({
 }: {
   readonly href: string
   readonly icon: string
-  readonly label: string
+  readonly label: React.ReactNode
 }): React.JSX.Element {
   return (
     <a

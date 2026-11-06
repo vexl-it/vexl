@@ -1,0 +1,150 @@
+/* The `next dev` copy editor. Builds never include this file. */
+
+html[data-copy-editing] [data-copy-hover] {
+  outline: 2px dashed #ff3ea5;
+  outline-offset: 2px;
+  cursor: pointer;
+}
+
+.vexl-copy-editor {
+  position: fixed;
+  z-index: 2147483000;
+  box-sizing: border-box;
+  color: #111;
+  font:
+    14px/1.4 system-ui,
+    sans-serif;
+  letter-spacing: normal;
+  text-align: left;
+  text-transform: none;
+}
+
+.vexl-copy-editor * {
+  box-sizing: border-box;
+  font: inherit;
+}
+
+.vexl-copy-editor button {
+  padding: 6px 12px;
+  border: 1px solid #111;
+  border-radius: 6px;
+  background: #fff;
+  color: #111;
+  cursor: pointer;
+}
+
+.vexl-copy-editor button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.vexl-copy-editor__toolbar {
+  right: 16px;
+  bottom: 16px;
+  display: flex;
+  gap: 8px;
+}
+
+.vexl-copy-editor__toolbar button[aria-pressed='true'] {
+  background: #ff3ea5;
+  color: #fff;
+}
+
+.vexl-copy-editor__panel,
+.vexl-copy-editor__list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  overflow: auto;
+  background: #fff;
+  box-shadow: 0 8px 32px rgb(0 0 0 / 35%);
+  border-radius: 8px;
+}
+
+.vexl-copy-editor__panel {
+  top: 16px;
+  right: 16px;
+  bottom: 72px;
+  width: min(720px, calc(100vw - 32px));
+}
+
+.vexl-copy-editor__list {
+  right: 16px;
+  bottom: 72px;
+  width: min(420px, calc(100vw - 32px));
+  max-height: calc(100vh - 88px);
+}
+
+.vexl-copy-editor__list h3 {
+  margin: 0 0 4px;
+  font-weight: 600;
+}
+
+.vexl-copy-editor__list ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.vexl-copy-editor__list li button {
+  width: 100%;
+  margin-bottom: 4px;
+  border-color: #ccc;
+  text-align: left;
+  word-break: break-all;
+}
+
+.vexl-copy-editor__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.vexl-copy-editor__header code {
+  font-family: ui-monospace, monospace;
+  word-break: break-all;
+}
+
+.vexl-copy-editor__locales {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.vexl-copy-editor__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-weight: 600;
+}
+
+.vexl-copy-editor__field textarea {
+  width: 100%;
+  min-height: 80px;
+  padding: 8px;
+  border: 1px solid #999;
+  border-radius: 6px;
+  background: #fff;
+  color: #111;
+  font-weight: 400;
+  resize: vertical;
+}
+
+.vexl-copy-editor__hint {
+  margin: 0;
+  color: #555;
+}
+
+.vexl-copy-editor__error {
+  margin: 0;
+  color: #c00;
+  font-style: normal;
+  font-weight: 400;
+}
+
+.vexl-copy-editor__actions {
+  display: flex;
+  gap: 8px;
+}

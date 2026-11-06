@@ -13,6 +13,7 @@ import {ensureSessionNotificationTokenExistsTaskId} from './notifications/ensure
 import {forgetVexlSecretLocally} from './notifications/vexlNotificationTokenAtom'
 import {clearDeviceAfterLoginOnAnotherDeviceActionAtom} from './resetLocalDataActionAtom'
 import {sessionDataOrDummyAtom} from './session'
+import {loginSessionWithProof} from './session/loginSession'
 import {logoutActionAtom} from './useLogout'
 
 const checkAccountOnContactService = (
@@ -26,11 +27,14 @@ const checkAccountOnContactService = (
     )
 
     yield* _(
-      store.get(apiAtom).contact.refreshUser({
-        offersAlive: true,
-        vexlNotificationToken: sessionNotificationToken,
-        loginSessionId: session.loginSessionId,
-      }),
+      loginSessionWithProof(session),
+      Effect.flatMap((loginSession) =>
+        store.get(apiAtom).contact.refreshUser({
+          offersAlive: true,
+          vexlNotificationToken: sessionNotificationToken,
+          ...loginSession,
+        })
+      ),
       Effect.matchEffect({
         onFailure: (e) => {
           Match.value(e).pipe(

@@ -48,6 +48,7 @@ import {syncVexlNotificationTokensActionAtom} from '../notifications/actions/syn
 import {vexlNotificationTokenAtom} from '../notifications/vexlNotificationTokenAtom'
 import {postLoginFlowCompletedScreensAtom} from '../postLoginOnboarding'
 import {sessionHolderAtom} from '../session'
+import {loginSessionWithProof} from '../session/loginSession'
 import writeSessionToStorage, {
   type SessionWriteError,
 } from '../session/utils/writeSessionToStorage'
@@ -259,12 +260,14 @@ const commitRestoredAccountActionAtom = atom(
 
 const restoreUserActionAtom = atom(null, (get, _, session: SessionV2) =>
   // Never createUser here - it would wipe the user's contacts on the server.
-  contactApiForSession(get, session).restoreUser({
-    loginSessionId: session.loginSessionId,
-    vexlNotificationToken: Option.fromNullable(
-      session.sessionNotificationToken
-    ),
-  })
+  Effect.flatMap(loginSessionWithProof(session), (loginSession) =>
+    contactApiForSession(get, session).restoreUser({
+      ...loginSession,
+      vexlNotificationToken: Option.fromNullable(
+        session.sessionNotificationToken
+      ),
+    })
+  )
 )
 
 interface SecretToTakeOver {

@@ -47,6 +47,7 @@ import {
   ImportContactsRequest,
   ImportContactsResponse,
   InitialImportContactsQuotaReachedError,
+  InvalidLoginSessionProofError,
   InviteCodeNotFoundError,
   JoinClubRequest,
   JoinClubResponse,
@@ -84,6 +85,7 @@ export const CreateUserEndpoint = HttpApiEndpoint.post(
   .middleware(ServerSecurityMiddleware)
   .setPayload(CreateUserRequest)
   .addSuccess(NoContentResponse, {status: 201})
+  .addError(InvalidLoginSessionProofError, {status: 403})
   .annotate(MaxExpectedDailyCall, 1)
 
 export const RefreshUserEndpoint = HttpApiEndpoint.post(
@@ -96,6 +98,7 @@ export const RefreshUserEndpoint = HttpApiEndpoint.post(
   .addSuccess(NoContentResponse)
   .addError(UserNotFoundError, {status: 404})
   .addError(LoggedInOnAnotherDeviceError, {status: 409})
+  .addError(InvalidLoginSessionProofError, {status: 403})
   .annotate(MaxExpectedDailyCall, 1)
 
 export const RestoreUserEndpoint = HttpApiEndpoint.post(
@@ -107,6 +110,7 @@ export const RestoreUserEndpoint = HttpApiEndpoint.post(
   .setPayload(RestoreUserRequest)
   .addSuccess(NoContentResponse)
   .addError(UserNotFoundError, {status: 404})
+  .addError(InvalidLoginSessionProofError, {status: 403})
   .annotate(MaxExpectedDailyCall, 1)
 
 // No-op kept so clients up to 26.9.5, which call it when their Expo token

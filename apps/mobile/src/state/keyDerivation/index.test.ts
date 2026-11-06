@@ -4,14 +4,17 @@ import {
   KeyDerivationIndex,
   MasterSeed,
 } from '@vexl-next/domain/src/general/MasterSeed.brand'
-import {deriveInboxPrivateKey} from '@vexl-next/resources-utils/src/keyDerivation/keyFactory'
+import {
+  deriveClubKeys,
+  deriveInboxPrivateKey,
+} from '@vexl-next/resources-utils/src/keyDerivation/keyFactory'
 import {Array, Effect, Exit, Schema} from 'effect'
 import {getDefaultStore} from 'jotai'
 import {
-  createClubKeysActionAtom,
   createInboxPrivateKeyActionAtom,
   initializeKeyDerivationCountersActionAtom,
   keyDerivationCountersAtom,
+  nextClubKeysActionAtom,
   raiseKeyDerivationCountersActionAtom,
 } from '.'
 import {KEY_DERIVATION_COUNTERS_MMKV_KEY} from '../../utils/mmkv/criticalMmkvKeys'
@@ -82,9 +85,21 @@ describe('key derivation counters', () => {
       await Effect.runPromise(deriveInboxPrivateKey(masterSeed, index(1)))
     )
     expect(storedCounters()).toEqual({nextInboxIndex: 2, nextClubIndex: 0})
+  })
 
-    await Effect.runPromise(store.set(createClubKeysActionAtom))
-    expect(storedCounters()).toEqual({nextInboxIndex: 2, nextClubIndex: 1})
+  it('allocates a club index only once its keys are used', async () => {
+    const cancelled = await Effect.runPromise(store.set(nextClubKeysActionAtom))
+    const used = await Effect.runPromise(store.set(nextClubKeysActionAtom))
+    expect(used.keys).toEqual(cancelled.keys)
+    expect(store.get(keyDerivationCountersAtom).nextClubIndex).toBe(0)
+
+    await Effect.runPromise(used.allocate)
+    const next = await Effect.runPromise(store.set(nextClubKeysActionAtom))
+
+    expect(store.get(keyDerivationCountersAtom).nextClubIndex).toBe(1)
+    expect(next.keys).toEqual(
+      await Effect.runPromise(deriveClubKeys(masterSeed, index(1)))
+    )
   })
 
   it('only raises counters', () => {

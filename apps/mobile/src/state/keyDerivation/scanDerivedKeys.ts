@@ -20,7 +20,8 @@ import {Array, Effect, HashSet, Option, pipe} from 'effect'
 export const INBOX_SCAN_BATCH_SIZE =
   MAX_PUBLIC_KEYS_IN_CHECK_INBOXES_EXIST_REQUEST
 const INBOX_COUNTER_MARGIN = 100
-// Failed club joins burn indexes, so a batch has to span a run of them.
+// A join whose request failed still burns its index, so a batch has to span
+// a run of them.
 export const CLUB_SCAN_BATCH_SIZE = 20
 const CLUB_COUNTER_MARGIN = 10
 const CLUB_SCAN_CONCURRENCY = 5

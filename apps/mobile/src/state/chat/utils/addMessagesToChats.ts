@@ -70,18 +70,20 @@ export default function addMessagesToChats(
           [...messagesToAddToThisChat, ...restoredMessages],
           compareMessages
         )
-        const receivedMessages = incomingMessages.filter(
+        const receivedMessages = Array.filter(
+          incomingMessages,
           (one) => one.state === 'received'
         )
 
-        const messages = incomingMessages.reduce(
+        const messages = Array.reduce(
+          incomingMessages,
+          oneChat.messages,
           (originalList, newMessage) =>
             addToSortedArray(
               originalList,
               compareMessages,
               areMessagesEqual
-            )(newMessage),
-          oneChat.messages
+            )(newMessage)
         )
 
         const identityRevealMessage = receivedMessages
@@ -131,7 +133,10 @@ export default function addMessagesToChats(
             otherSideRecoveryProof:
               latestRecoveryProof(messagesToAddToThisChat) ??
               oneChat.otherSideRecoveryProof,
-            messages: messages.filter((one) => !isHiddenMetadataMessage(one)),
+            messages: Array.filter(
+              messages,
+              (one) => !isHiddenMetadataMessage(one)
+            ),
             reactions: applyReceivedReactions(
               oneChat.reactions,
               messagesToAddToThisChat
@@ -139,13 +144,14 @@ export default function addMessagesToChats(
             // Restored history lands before updates we already applied
             tradeChecklist: isHistoryMerged
               ? tradeChecklistFromMessages(messages)
-              : tradeChecklistUpdates.reduce(
+              : Array.reduce(
+                  tradeChecklistUpdates,
+                  oneChat.tradeChecklist,
                   (acc, update) =>
                     updateTradeChecklistState(acc)({
                       update,
                       direction: 'received',
-                    }),
-                  oneChat.tradeChecklist
+                    })
                 ),
             chat: {
               ...oneChat.chat,

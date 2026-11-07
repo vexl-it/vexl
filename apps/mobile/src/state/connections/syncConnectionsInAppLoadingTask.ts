@@ -5,12 +5,14 @@ import {
 } from '../../utils/inAppLoadingTasks'
 import {checkForClubsAdmissionActionAtom} from '../clubs/atom/checkForClubsAdmissionActionAtom'
 import {syncAllClubsHandleStateWhenNotFoundActionAtom} from '../clubs/atom/refreshClubsActionAtom'
+import {afterRefreshUserUnlessAccountMoved} from '../refreshUserOnContactServiceInAppBackgroundTask'
 import {checkUserNeedsToImportContactsAndReencryptOffersActionAtom} from './atom/checkUserNeedsToImportAndReencryptOffersActionAtom'
 import {updateAndReencryptAllConnectionsActionAtom} from './atom/updateAndReencryptAllConnectionsActionAtom'
 
 export const syncConnectionsInAppTaskId = registerInAppLoadingTask({
   name: 'syncConnections',
   runAfterOtherTasks: true,
+  dependsOn: [afterRefreshUserUnlessAccountMoved],
   requirements: {
     requiresUserLoggedIn: true,
     runOn: 'resume',

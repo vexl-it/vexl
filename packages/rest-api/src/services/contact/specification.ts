@@ -47,17 +47,20 @@ import {
   ImportContactsRequest,
   ImportContactsResponse,
   InitialImportContactsQuotaReachedError,
+  InvalidLoginSessionProofError,
   InviteCodeNotFoundError,
   JoinClubRequest,
   JoinClubResponse,
   LeaveClubRequest,
   ListClubLinksRequest,
   ListClubLinksResponse,
+  LoggedInOnAnotherDeviceError,
   MemberAlreadyInClubError,
   RefreshUserRequest,
   ReportClubLimitReachedError,
   ReportClubRequest,
   ReportClubResponse,
+  RestoreUserRequest,
   SetPublicKeyV2Request,
   UserExistsResponse,
   UserIsNotModeratorError,
@@ -82,6 +85,7 @@ export const CreateUserEndpoint = HttpApiEndpoint.post(
   .middleware(ServerSecurityMiddleware)
   .setPayload(CreateUserRequest)
   .addSuccess(NoContentResponse, {status: 201})
+  .addError(InvalidLoginSessionProofError, {status: 403})
   .annotate(MaxExpectedDailyCall, 1)
 
 export const RefreshUserEndpoint = HttpApiEndpoint.post(
@@ -93,6 +97,20 @@ export const RefreshUserEndpoint = HttpApiEndpoint.post(
   .setPayload(RefreshUserRequest)
   .addSuccess(NoContentResponse)
   .addError(UserNotFoundError, {status: 404})
+  .addError(LoggedInOnAnotherDeviceError, {status: 409})
+  .addError(InvalidLoginSessionProofError, {status: 403})
+  .annotate(MaxExpectedDailyCall, 1)
+
+export const RestoreUserEndpoint = HttpApiEndpoint.post(
+  'restoreUser',
+  '/api/v1/users/restore'
+)
+  .setHeaders(CommonAndSecurityHeaders)
+  .middleware(ServerSecurityMiddleware)
+  .setPayload(RestoreUserRequest)
+  .addSuccess(NoContentResponse)
+  .addError(UserNotFoundError, {status: 404})
+  .addError(InvalidLoginSessionProofError, {status: 403})
   .annotate(MaxExpectedDailyCall, 1)
 
 // No-op kept so clients up to 26.9.5, which call it when their Expo token
@@ -290,6 +308,7 @@ const UserApiGroup = HttpApiGroup.make('User')
   .add(CheckUserExistsEndpoint)
   .add(CreateUserEndpoint)
   .add(RefreshUserEndpoint)
+  .add(RestoreUserEndpoint)
   .add(UpdateNotificationTokenEndpoint)
   .add(DeleteUserEndpoint)
   .add(EraseUserFromNetworkEndpoint)

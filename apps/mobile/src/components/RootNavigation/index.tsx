@@ -15,6 +15,8 @@ import {useHideInnactivityReminderNotificationsOnResume} from '../../utils/notif
 import {useSyncConversationShortcuts} from '../../utils/notifications/conversationShortcuts'
 import {useConsumeNotificationStream} from '../../utils/notifications/useConsumeNotificationStream'
 import {showTextDebugButtonAtom} from '../../utils/preferences'
+import AccountBackupScreen from '../AccountBackupScreen'
+import AccountBackupPinScreen from '../AccountBackupScreen/AccountBackupPinScreen'
 import AccountScreen from '../AccountScreen'
 import AppLogsScreen from '../AppLogsScreen'
 import AppSettingsScreen from '../AppSettingsScreen'
@@ -231,6 +233,14 @@ function RootNavigation(): React.ReactElement {
             <Stack.Screen
               name="VexlOnlyContacts"
               component={VexlOnlyContactsScreen}
+            />
+            <Stack.Screen
+              name="AccountBackup"
+              component={AccountBackupScreen}
+            />
+            <Stack.Screen
+              name="AccountBackupPin"
+              component={AccountBackupPinScreen}
             />
             <Stack.Screen name="DonationsFlow" component={DonationsFlow} />
             {/* <Stack.Screen

@@ -44,6 +44,7 @@ import {OfflineNotificationBuffer} from './services/OfflineNotificationBuffer'
 import {PendingBatchedNotificationsDb} from './services/PendingBatchedNotificationsDb'
 import {PosgressDbLive} from './services/PostgressDb'
 import {ProcessVexlProductNotificationWorker} from './services/ProcessVexlProductNotificationWorker'
+import {ExpoClientService} from './services/PushNotificationService/services/ExpoClientService'
 import {ThrottledPushNotificationService} from './services/ThrottledPushNotificationService'
 import {processThrottledNotificationsWorker} from './services/ThrottledPushNotificationService/services/ThrottledNotificationMq'
 import {VexlProductNotificationBatchWorkerLayer} from './services/VexlProductNotificationBatchWorker'
@@ -119,6 +120,7 @@ export const HttpServerLive = Layer.mergeAll(
   Layer.provide(ScheduleUserNotificationProducerLayer),
   Layer.provide(NotificationSocketMessaging.Live),
   Layer.provide(ThrottledPushNotificationService.Live),
+  Layer.provide(ExpoClientService.Live),
   Layer.provide(OfflineNotificationBuffer.Live),
   Layer.provide(NotificationMetricsService.Live),
   Layer.provide(NotificationTokensDb.Live),

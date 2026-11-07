@@ -5,9 +5,20 @@ import * as ecdsa from './operations/ecdsa'
 import * as ecies from './operations/ecies'
 import * as eciesLegacy from './operations/eciesLegacy'
 import * as hmac from './operations/hmac'
+import * as keyDerivation from './operations/keyDerivation'
 import * as sha from './operations/sha'
 
-export {KeyHolder, aes, cryptobox, ecdsa, ecies, eciesLegacy, hmac, sha}
+export {
+  KeyHolder,
+  aes,
+  cryptobox,
+  ecdsa,
+  ecies,
+  eciesLegacy,
+  hmac,
+  keyDerivation,
+  sha,
+}
 
 // Re-export V2 key types for direct import
 export {PublicKeyV2} from './KeyHolder/brandsV2'

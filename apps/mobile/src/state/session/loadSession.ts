@@ -1,4 +1,6 @@
 import {FetchHttpClient} from '@effect/platform/index'
+import {generateLoginSessionId} from '@vexl-next/domain/src/general/LoginSessionId.brand'
+import {generateMasterSeed} from '@vexl-next/domain/src/general/MasterSeed.brand'
 import {contact, offer} from '@vexl-next/rest-api'
 import {Cause, Data, Effect, Either, Option, Schema} from 'effect/index'
 import {getDefaultStore} from 'jotai'
@@ -6,8 +8,11 @@ import {sessionHolderAtom} from '.'
 import {apiEnv} from '../../api'
 import {
   isSessionV1,
+  isSessionV2,
   sanityCheckSessionV2,
+  type LegacySessionV2,
   type Session,
+  type SessionV1,
   type SessionV2,
 } from '../../brands/Session.brand'
 import {
@@ -23,6 +28,7 @@ import {showDebugNotificationIfEnabled} from '../../utils/notifications/showDebu
 import {isDeveloperAtom} from '../../utils/preferences'
 import {reportErrorE} from '../../utils/reportError'
 import {clearPersistentDataAboutReachAndImportedContactsActionAtom} from '../connections/atom/reachNumberWithoutClubsConnectionsMmkvAtom'
+import {initializeKeyDerivationCountersActionAtom} from '../keyDerivation'
 import {upgradeSession, type UpgradeSessionError} from './upgradeSession'
 import {migrateClubsToV2Keys} from './utils/migrateClubsToV2Keys'
 import {migrateOwnerPrivatePartsToV2Keys} from './utils/migrateOwnerPrivatePartsToV2Keys'
@@ -177,16 +183,29 @@ function joinInFlightLoad(
   })
 }
 
-const ensureV2SessionIfNotCreateAndWrite = (
-  session: Session
+const upgradeLegacyV2SessionAndWrite = (
+  session: LegacySessionV2
+): Effect.Effect<SessionV2, SessionWriteError> =>
+  Effect.gen(function* () {
+    const upgradedSession = {
+      ...session,
+      masterSeed: generateMasterSeed(),
+      loginSessionId: generateLoginSessionId(),
+    }
+    yield* writeSessionToStorage(upgradedSession)
+    getDefaultStore().set(initializeKeyDerivationCountersActionAtom)
+    return upgradedSession
+  })
+
+const upgradeV1SessionAndWrite = (
+  session: SessionV1
 ): Effect.Effect<SessionV2, UpgradeSessionError | SessionWriteError, never> =>
   Effect.gen(function* () {
-    if (!isSessionV1(session)) return session
-
-    const upgradedSession = yield* upgradeSession(session)
+    const upgradedSession = yield* upgradeSession(session, generateMasterSeed())
     yield* writeSessionToStorage(upgradedSession)
 
     const store = getDefaultStore()
+    store.set(initializeKeyDerivationCountersActionAtom)
     const commonApiArgs = {
       platform,
       clientVersion: versionCode,
@@ -229,6 +248,14 @@ const ensureV2SessionIfNotCreateAndWrite = (
     return upgradedSession
   })
 
+const ensureCurrentSessionIfNotUpgradeAndWrite = (
+  session: Session
+): Effect.Effect<SessionV2, UpgradeSessionError | SessionWriteError> => {
+  if (isSessionV2(session)) return Effect.succeed(session)
+  if (isSessionV1(session)) return upgradeV1SessionAndWrite(session)
+  return upgradeLegacyV2SessionAndWrite(session)
+}
+
 function performSessionLoad(): Effect.Effect<LoadSessionResult> {
   return Effect.gen(function* () {
     const store = getDefaultStore()
@@ -263,7 +290,7 @@ function performSessionLoad(): Effect.Effect<LoadSessionResult> {
       return sessionNotLoadedResult(loadingError)
     }
 
-    const session = yield* ensureV2SessionIfNotCreateAndWrite(
+    const session = yield* ensureCurrentSessionIfNotUpgradeAndWrite(
       readSessionResult.right
     )
 

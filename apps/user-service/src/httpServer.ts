@@ -13,9 +13,16 @@ import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {ServerSecurityMiddlewareLive} from '@vexl-next/server-utils/src/serverSecurity'
 import {Layer} from 'effect'
-import {cryptoConfig, healthServerPortConfig, redisUrl} from './configs'
+import {
+  backupHmacKeyConfig,
+  cryptoConfig,
+  healthServerPortConfig,
+  redisUrl,
+} from './configs'
 import DbLayer from './db/layer'
 import {reportMetricsLayer} from './metrics'
+import {getBackupKeyPairHandler} from './routes/backup/getBackupKeyPair'
+import {getBackupPublicKeyHandler} from './routes/backup/getBackupPublicKey'
 import {initEraseUserEndpoint} from './routes/eraseUser/handlers/initEraseUser'
 import {verifyAndEraseUser} from './routes/eraseUser/handlers/verifyAndEraseUser'
 import {generateLoginChallengeHandler} from './routes/generateLoginChallenge'
@@ -73,10 +80,20 @@ const UpgradeAuthApiGroupLive = HttpApiBuilder.group(
       .handle('submitUpgradeAuth', submitUpgradeAuthHandler)
 )
 
+const BackupApiGroupLive = HttpApiBuilder.group(
+  UserApiSpecification,
+  'Backup',
+  (h) =>
+    h
+      .handle('getBackupPublicKey', getBackupPublicKeyHandler)
+      .handle('getBackupKeyPair', getBackupKeyPairHandler)
+)
+
 export const UserApiLive = HttpApiBuilder.api(UserApiSpecification).pipe(
   Layer.provide(LoginApiGroupLive),
   Layer.provide(EraseUserApiGroupLive),
   Layer.provide(UpgradeAuthApiGroupLive),
+  Layer.provide(BackupApiGroupLive),
   Layer.provide(RootApiGroupLive),
   Layer.provide(rateLimitingMiddlewareLayer(UserApiSpecification)),
   Layer.provide(ServerSecurityMiddlewareLive)
@@ -91,6 +108,8 @@ export const ApiServerLive = HttpApiBuilder.serve(HttpMiddleware.logger).pipe(
 
 export const HttpServerLive = Layer.mergeAll(
   ApiServerLive,
+  // Fails the start instead of the first backup request.
+  Layer.effectDiscard(backupHmacKeyConfig),
   reportMetricsLayer,
   healthServerLayer({port: healthServerPortConfig})
 ).pipe(

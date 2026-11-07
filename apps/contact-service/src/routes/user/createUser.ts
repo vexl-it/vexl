@@ -13,6 +13,7 @@ import {UserDbService} from '../../db/UserDbService'
 import {reportUserLoggedIn} from '../../metrics'
 import {serverHashPhoneNumber} from '../../utils/serverHashContact'
 import {withUserActionRedisLock} from '../../utils/withUserActionRedisLock'
+import {ensureLoginSessionProof} from './utils/ensureLoginSessionProof'
 
 const deleteIfExists = (
   hash: ServerHashedNumber
@@ -31,7 +32,7 @@ const deleteIfExists = (
       return false
     }
 
-    yield* _(Effect.log('Removing existing user from database', user.value))
+    yield* _(Effect.log('Removing existing user from database'))
 
     yield* _(contactDb.deleteContactsByHashFrom(user.value.hash))
     yield* _(
@@ -52,6 +53,13 @@ export const createUser = HttpApiBuilder.handler(
       Effect.bind('serverHash', (s) => serverHashPhoneNumber(s.hash)),
       Effect.flatMap((security) =>
         Effect.gen(function* (_) {
+          yield* _(
+            ensureLoginSessionProof({
+              publicKey: security.publicKey,
+              loginSessionId: req.payload.loginSessionId,
+              loginSessionProof: req.payload.loginSessionProof,
+            })
+          )
           const userDb = yield* _(UserDbService)
           const numberExists = yield* _(deleteIfExists(security.serverHash))
           const vexlNotificationToken = req.payload.vexlNotificationToken
@@ -88,6 +96,7 @@ export const createUser = HttpApiBuilder.handler(
               platform: req.headers.clientPlatformOrNone,
               appSource: req.headers.appSourceOrNone,
               publicKeyV2: security.publicKeyV2,
+              loginSessionId: Option.fromNullable(req.payload.loginSessionId),
             })
           )
           return {}

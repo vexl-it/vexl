@@ -1,6 +1,7 @@
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {PublicKeyV2} from '@vexl-next/cryptography/src/KeyHolder/brandsV2'
 import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
+import {LoginSessionId} from '@vexl-next/domain/src/general/LoginSessionId.brand'
 import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {ServerHashedNumber} from '@vexl-next/domain/src/general/ServerHashedNumber'
 import {PlatformName} from '@vexl-next/domain/src/utility/PlatformName'
@@ -51,5 +52,9 @@ export class UserRecord extends Schema.Class<UserRecord>('UserRecord')({
   }),
   numberOfInactivityNotificationsSent: Schema.optionalWith(Schema.Number, {
     default: () => 0,
+  }),
+  loginSessionId: Schema.optionalWith(LoginSessionId, {
+    as: 'Option',
+    nullable: true,
   }),
 }) {}

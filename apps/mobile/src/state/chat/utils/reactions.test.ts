@@ -15,6 +15,10 @@ import {applyReceivedReactions, setMyReaction} from './reactions'
 jest.mock('../../../utils/localization/I18nProvider', () => ({
   getCurrentLocale: () => 'en-US',
 }))
+jest.mock('../../../utils/reportError', () => ({
+  __esModule: true,
+  default: jest.fn(),
+}))
 jest.mock('./scheduleTradeReminderIfNeeded', () => ({
   scheduleTradeReminderIfNeeded: () => (chat: unknown) => chat,
 }))

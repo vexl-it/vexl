@@ -3,7 +3,9 @@ import {
   type PublicKeyPemBase64,
 } from '@vexl-next/cryptography/src/KeyHolder'
 import {
+  toServerVisibleMessageType,
   type ChatMessage,
+  type ChatRecoveryProof,
   type ServerMessage,
 } from '@vexl-next/domain/src/general/messaging'
 import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
@@ -39,6 +41,8 @@ type HANDLED_MESSAGE_TYPES =
   | 'VERSION_UPDATE'
   | 'MESSAGE_READ'
   | 'REACTION'
+  | 'REQUEST_HISTORY'
+  | 'HISTORY'
 
 const sendSystemNotification = ({
   messageType,
@@ -49,7 +53,9 @@ const sendSystemNotification = ({
   if (
     messageType === 'FCM_CYPHER_UPDATE' ||
     messageType === 'VERSION_UPDATE' ||
-    messageType === 'MESSAGE_READ'
+    messageType === 'MESSAGE_READ' ||
+    messageType === 'REQUEST_HISTORY' ||
+    messageType === 'HISTORY'
   )
     return false
 
@@ -70,6 +76,7 @@ export default function sendMessage({
   senderKeypair,
   theirNotificationToken,
   notificationApi,
+  recoveryProof,
 }: {
   api: ChatApi
   receiverPublicKey: PublicKeyPemBase64
@@ -77,6 +84,8 @@ export default function sendMessage({
   senderKeypair: PrivateKeyHolder
   theirNotificationToken?: VexlNotificationToken | undefined
   notificationApi: NotificationApi
+  // Goes only over the wire, never into the stored message
+  recoveryProof?: ChatRecoveryProof | undefined
 }): Effect.Effect<
   ServerMessage,
   | ErrorEncryptingMessage
@@ -98,7 +107,9 @@ export default function sendMessage({
     }
 
     const encryptedMessage = yield* _(
-      taskEitherToEffect(messageToNetwork(receiverPublicKey)(message))
+      taskEitherToEffect(
+        messageToNetwork(receiverPublicKey)({...message, recoveryProof})
+      )
     )
     const encryptedPreview = yield* _(
       taskEitherToEffect(messagePreviewToNetwork(receiverPublicKey)(message))
@@ -108,7 +119,7 @@ export default function sendMessage({
       callWithNotificationService(api.sendMessage, {
         message: encryptedMessage,
         messagePreview: encryptedPreview,
-        messageType: message.messageType,
+        messageType: toServerVisibleMessageType(message.messageType),
         receiverPublicKey,
         senderPublicKey: senderKeypair.publicKeyPemBase64,
         keyPair: senderKeypair,

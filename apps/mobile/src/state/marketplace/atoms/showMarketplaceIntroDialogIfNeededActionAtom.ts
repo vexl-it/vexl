@@ -5,6 +5,7 @@ import React from 'react'
 import {globalDialogAtom} from '../../../components/GlobalDialog'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import {showMarketplaceIntroDialogAtom} from '../../../utils/preferences'
+import {postLoginFlowFinishedAtom} from '../../postLoginOnboarding'
 import {areThereOffersToSeeInMarketplaceWithoutFiltersAtom} from './offersToSeeInMarketplace'
 
 export const showMarketplaceIntroDialogIfNeededActionAtom = atom(
@@ -15,7 +16,12 @@ export const showMarketplaceIntroDialogIfNeededActionAtom = atom(
       areThereOffersToSeeInMarketplaceWithoutFiltersAtom
     )
 
-    if (!shouldShowMarketplaceIntroDialog || !areThereOffersWithoutFilters) {
+    // The marketplace mounts behind the post-login flow right after login.
+    if (
+      !shouldShowMarketplaceIntroDialog ||
+      !areThereOffersWithoutFilters ||
+      !get(postLoginFlowFinishedAtom)
+    ) {
       return Effect.succeed(false)
     }
 

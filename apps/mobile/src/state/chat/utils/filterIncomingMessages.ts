@@ -1,4 +1,8 @@
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
+import {
+  unixMillisecondsNow,
+  type UnixMilliseconds,
+} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {Array, Option, pipe} from 'effect'
 import {type BlockedChatSender} from '../blockedChatSender'
 import {
@@ -6,6 +10,7 @@ import {
   type ChatWithMessages,
   type InboxInState,
 } from '../domain'
+import {isRestoredInboxInGracePeriod, startsChatRecovery} from './chatRecovery'
 import compareMessages from './compareMessages'
 import {
   getChatState,
@@ -22,6 +27,12 @@ interface SenderFilterState {
   readonly chatState: ChatState | undefined
   readonly lastTerminalMessage: ChatMessageWithState | undefined
   readonly receivedMessageSinceOpen: boolean
+  // Restored inbox without a chat with this sender yet
+  readonly canRecoverChat: boolean
+  // Recovered chat waiting for its history
+  readonly hasPendingRecoveryChat: boolean
+  // Recovered chat waiting for the history we asked for
+  readonly awaitsHistory: boolean
 }
 
 const terminalChatStates: readonly ChatState[] = [
@@ -78,7 +89,15 @@ function shouldAcceptForState({
   if (!state.chatState) {
     return (
       messageType === 'REQUEST_MESSAGING' ||
-      incomingMessage?.state === 'receivedButRequiresNewerVersion'
+      incomingMessage?.state === 'receivedButRequiresNewerVersion' ||
+      (state.canRecoverChat &&
+        !!incomingMessage &&
+        startsChatRecovery(incomingMessage)) ||
+      (state.awaitsHistory &&
+        incomingMessage?.state === 'received' &&
+        messageType === 'HISTORY') ||
+      // Tells when the other side's app can answer a history request
+      (state.hasPendingRecoveryChat && messageType === 'VERSION_UPDATE')
     )
   }
 
@@ -156,7 +175,8 @@ function hasReceivedMessageSinceOpen(
 
 function getInitialSenderState(
   inbox: InboxInState,
-  senderPublicKey: PublicKeyPemBase64
+  senderPublicKey: PublicKeyPemBase64,
+  now: UnixMilliseconds
 ): SenderFilterState {
   const chat = pipe(
     inbox.chats,
@@ -166,18 +186,34 @@ function getInitialSenderState(
     Option.getOrUndefined
   )
 
+  const pendingChat = Array.findFirst(
+    inbox.pendingRecoveryChats ?? [],
+    (pending) => pending.chat.otherSide.publicKey === senderPublicKey
+  )
+
   return {
     senderPublicKey,
     chatState: chat ? getChatState(chat) : undefined,
     lastTerminalMessage: findLastTerminalMessage(chat),
     receivedMessageSinceOpen: hasReceivedMessageSinceOpen(chat),
+    canRecoverChat: isRestoredInboxInGracePeriod({inbox, now}) && !chat,
+    hasPendingRecoveryChat: !chat && Option.isSome(pendingChat),
+    awaitsHistory:
+      !chat && Option.exists(pendingChat, (one) => !!one.historyRequestedAt),
   }
 }
 
 function updateSenderState(
-  state: SenderFilterState,
+  previousState: SenderFilterState,
   message: ChatMessageWithState
 ): SenderFilterState {
+  const state: SenderFilterState =
+    !previousState.chatState &&
+    previousState.canRecoverChat &&
+    startsChatRecovery(message)
+      ? {...previousState, chatState: 'chatOpen'}
+      : previousState
+
   if (message.state === 'receivedButRequiresNewerVersion') {
     return state.chatState ? state : {...state, chatState: 'requestedByThem'}
   }
@@ -220,11 +256,13 @@ export function filterIncomingMessages({
   messages,
   blockedSenders,
   rerequestLimitDays,
+  now,
 }: {
   inbox: InboxInState
   messages: readonly ChatMessageWithState[]
   blockedSenders: readonly BlockedChatSender[]
   rerequestLimitDays: number
+  now: UnixMilliseconds
 }): ChatMessageWithState[] {
   const initial: {
     accepted: ChatMessageWithState[]
@@ -256,7 +294,9 @@ export function filterIncomingMessages({
       const state = pipe(
         existingStateIndex,
         Option.flatMap((index) => Array.get(accumulator.senderStates, index)),
-        Option.getOrElse(() => getInitialSenderState(inbox, senderPublicKey))
+        Option.getOrElse(() =>
+          getInitialSenderState(inbox, senderPublicKey, now)
+        )
       )
 
       if (
@@ -305,7 +345,7 @@ export function shouldAcceptIncomingStreamOnlyMessage({
   return shouldAcceptForState({
     messageType: 'STREAM_ONLY',
     incomingMessage: undefined,
-    state: getInitialSenderState(inbox, senderPublicKey),
+    state: getInitialSenderState(inbox, senderPublicKey, unixMillisecondsNow()),
     rerequestLimitDays: 0,
   })
 }

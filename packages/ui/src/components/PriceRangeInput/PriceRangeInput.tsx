@@ -147,13 +147,37 @@ export function PriceRangeInput({
     }
   }, [minValue, maxValue, maxLimit, setMinValue, setMaxValue])
 
-  const handleMinChange = useCallback((text: string) => {
-    setMinText(text.replace(/[^0-9]/g, ''))
-  }, [])
+  // Clamped against the other field, which an edit never moves.
+  const clampMin = useCallback(
+    (num: number) => Math.max(0, Math.min(num, maxValue, maxLimit)),
+    [maxValue, maxLimit]
+  )
+  const clampMax = useCallback(
+    (num: number) => Math.min(maxLimit, Math.max(num, minValue, 0)),
+    [minValue, maxLimit]
+  )
 
-  const handleMaxChange = useCallback((text: string) => {
-    setMaxText(text.replace(/[^0-9]/g, ''))
-  }, [])
+  // Values are committed while typing: dismissing the keyboard with Android
+  // Back keeps the input focused, so the blur may never come before a save.
+  const handleMinChange = useCallback(
+    (text: string) => {
+      const digits = text.replace(/[^0-9]/g, '')
+      setMinText(digits)
+      const num = parseInt(digits, 10)
+      if (!isNaN(num)) setMinValue(clampMin(num))
+    },
+    [clampMin, setMinValue]
+  )
+
+  const handleMaxChange = useCallback(
+    (text: string) => {
+      const digits = text.replace(/[^0-9]/g, '')
+      setMaxText(digits)
+      const num = parseInt(digits, 10)
+      if (!isNaN(num)) setMaxValue(clampMax(num))
+    },
+    [clampMax, setMaxValue]
+  )
 
   const handleMinFocus = useCallback(() => {
     minFocusRef.current = true
@@ -164,13 +188,13 @@ export function PriceRangeInput({
     minFocusRef.current = false
     const num = parseInt(minText, 10)
     if (!isNaN(num)) {
-      const clamped = Math.max(0, Math.min(num, maxValue, maxLimit))
+      const clamped = clampMin(num)
       setMinValue(clamped)
       setMinText(formatInteger(clamped, locale))
     } else {
       setMinText(formatInteger(minValue, locale))
     }
-  }, [minText, minValue, maxValue, maxLimit, locale, setMinValue])
+  }, [minText, minValue, clampMin, locale, setMinValue])
 
   const handleMaxFocus = useCallback(() => {
     maxFocusRef.current = true
@@ -181,7 +205,7 @@ export function PriceRangeInput({
     maxFocusRef.current = false
     const num = parseInt(maxText, 10)
     if (!isNaN(num)) {
-      const clamped = Math.min(maxLimit, Math.max(num, minValue, 0))
+      const clamped = clampMax(num)
       setMaxValue(clamped)
       setMaxText(
         maxLabel != null && clamped >= maxLimit
@@ -195,7 +219,7 @@ export function PriceRangeInput({
           : formatInteger(maxValue, locale)
       )
     }
-  }, [maxText, minValue, maxValue, maxLimit, maxLabel, locale, setMaxValue])
+  }, [maxText, clampMax, maxValue, maxLimit, maxLabel, locale, setMaxValue])
 
   const chevronColor = theme.accentHighlightPrimary.get()
 

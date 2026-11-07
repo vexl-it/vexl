@@ -1,6 +1,8 @@
 import {KeyHolder} from '@vexl-next/cryptography'
 import {KeyPairV2} from '@vexl-next/cryptography/src/KeyHolder/brandsV2'
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {LoginSessionId} from '@vexl-next/domain/src/general/LoginSessionId.brand'
+import {MasterSeed} from '@vexl-next/domain/src/general/MasterSeed.brand'
 import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {UserNameAndUriAvatar} from '@vexl-next/domain/src/general/UserNameAndAvatar.brand'
 import {
@@ -9,7 +11,8 @@ import {
 } from '@vexl-next/rest-api/src/UserSessionCredentials.brand'
 import {Schema} from 'effect'
 
-export const SessionV2 = Schema.Struct({
+// Stored by app versions before the master seed and login session id were introduced.
+export const LegacySessionV2 = Schema.Struct({
   version: Schema.Int.pipe(Schema.greaterThanOrEqualTo(0)),
   realUserData: Schema.optional(UserNameAndUriAvatar),
   phoneNumber: E164PhoneNumber,
@@ -20,6 +23,13 @@ export const SessionV2 = Schema.Struct({
   isLiquidityProvider: Schema.optionalWith(Schema.Boolean, {
     default: () => false,
   }),
+})
+export type LegacySessionV2 = typeof LegacySessionV2.Type
+
+export const SessionV2 = Schema.Struct({
+  ...LegacySessionV2.fields,
+  masterSeed: MasterSeed,
+  loginSessionId: LoginSessionId,
 })
 export type SessionV2 = typeof SessionV2.Type
 
@@ -51,5 +61,5 @@ export const sanityCheckSessionV2 = (session: SessionV2): boolean => {
   )
 }
 
-export const Session = Schema.Union(SessionV2, SessionV1)
+export const Session = Schema.Union(SessionV2, LegacySessionV2, SessionV1)
 export type Session = typeof Session.Type

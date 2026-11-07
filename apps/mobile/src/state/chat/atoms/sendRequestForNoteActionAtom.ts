@@ -12,6 +12,7 @@ import reportError from '../../../utils/reportError'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import {generateAndRegisterVexlTokenActionAtom} from '../../notifications/actions/generateVexlTokenActionAtom'
 import {upsertInboxOnBeAndLocallyActionAtom} from '../hooks/useCreateInbox'
+import {myRecoveryProof} from '../utils/myChatRecoveryProof'
 import {version} from './../../../utils/environment'
 import upsertChatForTheirNoteActionAtom from './upsertChatForTheirNoteActionAtom'
 
@@ -51,6 +52,10 @@ const sendRequestForNoteActionAtom = atom(
           verifiedCommonFriends:
             note.noteInfo.privatePart.verifiedCommonFriends,
           friendLevel: note.noteInfo.privatePart.friendLevel,
+          recoveryProof: myRecoveryProof(get, {
+            myPublicKey: inbox.privateKey.publicKeyPemBase64,
+            otherSidePublicKey: note.noteInfo.publicPart.notePublicKey,
+          }),
         })
       )
 

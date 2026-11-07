@@ -32,6 +32,7 @@ import {
   type ListClubLinksRequest,
   type RefreshUserRequest,
   type ReportClubRequest,
+  type RestoreUserRequest,
   type SetPublicKeyV2Request,
 } from './contracts'
 import {ContactApiSpecification} from './specification'
@@ -119,6 +120,10 @@ export function api({
       refreshUser: (body: RefreshUserRequest) =>
         withSecurityHeaders((headers) =>
           client.User.refreshUser({payload: body, headers})
+        ),
+      restoreUser: (body: RestoreUserRequest) =>
+        withSecurityHeaders((headers) =>
+          client.User.restoreUser({payload: body, headers})
         ),
       deleteUser: () =>
         withSecurityHeaders((headers) => client.User.deleteUser({headers})),

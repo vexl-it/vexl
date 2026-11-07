@@ -29,6 +29,7 @@ import {requestChatImageUpload} from './routes/images/requestChatImageUpload'
 import {approveRequest} from './routes/inbox/approveReqest'
 import {blockInbox} from './routes/inbox/blockInbox'
 import {cancelRequest, cancelRequestV2} from './routes/inbox/cancelRequest'
+import {checkInboxesExist} from './routes/inbox/checkInboxesExist'
 import {createInbox} from './routes/inbox/createInbox'
 import {deleteInbox} from './routes/inbox/deleteInbox'
 import {deleteInboxes} from './routes/inbox/deleteInboxes'
@@ -59,6 +60,7 @@ const InboxesApiGroupLive = HttpApiBuilder.group(
     h
       .handle('updateInbox', updateInbox)
       .handle('createInbox', createInbox)
+      .handle('checkInboxesExist', checkInboxesExist)
       .handle('deleteInbox', deleteInbox)
       .handle('blockInbox', blockInbox)
       .handle('requestApproval', requestApproval)

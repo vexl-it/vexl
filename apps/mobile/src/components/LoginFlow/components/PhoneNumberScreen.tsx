@@ -12,6 +12,7 @@ import {
   runAfterKeyboardDismiss,
 } from '../../../utils/dismissKeyboardPromise'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
+import InlineErrorText from '../../InlineErrorText'
 import {useShowLoadingOverlay} from '../../LoadingOverlayProvider'
 import {initPhoneVerificationAtom} from '../api/initPhoneVerificationAtom'
 import {selectedCountryCodeAtom} from '../atoms/selectedCountryCodeAtom'
@@ -45,8 +46,10 @@ function NumberGroup({
 
 export default function PhoneNumberScreen({
   navigation,
+  route,
 }: Props): React.ReactElement {
   const {t} = useTranslation()
+  const restore = route.params?.restore === true
   const inputRef = useRef<TextInput>(null)
   const [selectedCountry, setSelectedCountry] = useState<ICountry | undefined>(
     DEFAULT_COUNTRY
@@ -158,6 +161,7 @@ export default function PhoneNumberScreen({
               navigation.navigate('VerificationCode', {
                 phoneNumber: phoneNumber.value,
                 initPhoneVerificationResponse: result,
+                restore,
               })
             })
             .catch((error: unknown) => {
@@ -177,8 +181,16 @@ export default function PhoneNumberScreen({
     >
       <YStack flex={1} gap="$10" justifyContent="flex-start" paddingTop="$11">
         <YStack gap="$4" width="100%">
-          <LoginFlowTitle>{t('loginFlow.v2.phoneNumber.title')}</LoginFlowTitle>
-          <LoginFlowText>{t('loginFlow.v2.phoneNumber.text')}</LoginFlowText>
+          <LoginFlowTitle>
+            {restore
+              ? t('loginFlow.restoreFromBackup.phoneNumber.title')
+              : t('loginFlow.v2.phoneNumber.title')}
+          </LoginFlowTitle>
+          <LoginFlowText>
+            {restore
+              ? t('loginFlow.restoreFromBackup.phoneNumber.text')
+              : t('loginFlow.v2.phoneNumber.text')}
+          </LoginFlowText>
         </YStack>
         <YStack alignItems="center" gap="$3" width="100%">
           <XStack
@@ -243,15 +255,7 @@ export default function PhoneNumberScreen({
               {phoneNumberGroupElements}
             </XStack>
           </XStack>
-          {errorMessage != null ? (
-            <Typography
-              color="$redForeground"
-              textAlign="center"
-              variant="paragraphSmall"
-            >
-              {errorMessage}
-            </Typography>
-          ) : null}
+          <InlineErrorText>{errorMessage}</InlineErrorText>
         </YStack>
       </YStack>
     </LoginFlowScreen>

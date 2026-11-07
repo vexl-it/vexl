@@ -8,6 +8,7 @@ import {markMarketplaceReadyNotificationFlowAsCompletedIfOffersAreVisibleActionA
 import {refreshLastSeenOffersActionAtom} from '../../../../utils/newOffersNotificationBackgroundTask/store'
 import reportError from '../../../../utils/reportError'
 import {startBenchmark} from '../../../ActionBenchmarks'
+import {linkRestoredInboxesToMyOffersAndNotesActionAtom} from '../../../backup/linkRestoredInboxesActionAtom'
 import {clubsToKeyHolderAtom} from '../../../clubs/atom/clubsToKeyHolderV2Atom'
 import {updateOffersIdsForClubStateActionAtom} from '../../../clubs/atom/clubsWithMembersAtom'
 import {sessionDataOrDummyAtom} from '../../../session'
@@ -117,6 +118,7 @@ export const refreshOffersActionAtom = atom(
       if (mergedOffers !== offersBeforeMerge) {
         set(offersStateAtom, (old) => ({...old, offers: mergedOffers}))
         set(reportOffersWithoutLocationActionAtom)
+        set(linkRestoredInboxesToMyOffersAndNotesActionAtom)
       }
       set(anyMarketplaceSuggestionDismissedInThisSessionAtom, false)
 

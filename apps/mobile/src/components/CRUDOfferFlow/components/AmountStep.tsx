@@ -122,19 +122,22 @@ function AmountStep({
             </Typography>
           </XStack>
         ) : null}
-        <Stack
-          opacity={pricesLoading ? 0.5 : 1}
-          pointerEvents={pricesLoading ? 'none' : 'auto'}
-        >
-          <PriceRangeInput
-            minValueAtom={amountBottomLimitAtom}
-            maxValueAtom={amountTopLimitAtom}
-            currency={currencies[currency].code}
-            onCurrencyPress={handleCurrencyPress}
-            maxLimit={maxLimit}
-            locale={locale}
-          />
-        </Stack>
+        {/* The input clamps the amounts to maxLimit, so it waits for the real one. */}
+        {maxLimit !== undefined ? (
+          <Stack
+            opacity={pricesLoading ? 0.5 : 1}
+            pointerEvents={pricesLoading ? 'none' : 'auto'}
+          >
+            <PriceRangeInput
+              minValueAtom={amountBottomLimitAtom}
+              maxValueAtom={amountTopLimitAtom}
+              currency={currencies[currency].code}
+              onCurrencyPress={handleCurrencyPress}
+              maxLimit={maxLimit}
+              locale={locale}
+            />
+          </Stack>
+        ) : null}
         <BtcPriceInfo
           btcPriceData={btcPriceData}
           currency={currency}

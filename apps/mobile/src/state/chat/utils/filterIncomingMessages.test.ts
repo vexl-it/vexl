@@ -34,6 +34,8 @@ function timestamp(value: number): UnixMillisecondsType {
   return Schema.decodeSync(UnixMilliseconds)(value)
 }
 
+const now = timestamp(Date.UTC(2026, 0, 3))
+
 function receivedMessage({
   messageType,
   senderPublicKey,
@@ -140,6 +142,7 @@ describe('filterIncomingMessages', () => {
         messages: [request, regularMessage],
         blockedSenders: [],
         rerequestLimitDays: 7,
+        now,
       })
     ).toEqual([request])
   })
@@ -173,6 +176,7 @@ describe('filterIncomingMessages', () => {
         messages: [duplicateRequest, cancellation],
         blockedSenders: [],
         rerequestLimitDays: 7,
+        now,
       })
     ).toEqual([cancellation])
   })
@@ -206,6 +210,7 @@ describe('filterIncomingMessages', () => {
         messages: [approval, regularMessage],
         blockedSenders: [],
         rerequestLimitDays: 7,
+        now,
       })
     ).toEqual([approval, regularMessage])
   })
@@ -246,6 +251,7 @@ describe('filterIncomingMessages', () => {
         messages: [tooEarly],
         blockedSenders: [],
         rerequestLimitDays: 7,
+        now,
       })
     ).toEqual([])
     expect(
@@ -254,6 +260,7 @@ describe('filterIncomingMessages', () => {
         messages: [allowed],
         blockedSenders: [],
         rerequestLimitDays: 7,
+        now,
       })
     ).toEqual([allowed])
   })
@@ -296,6 +303,7 @@ describe('filterIncomingMessages', () => {
         messages: [regularMessage, cancellation, duplicateApproval],
         blockedSenders: [],
         rerequestLimitDays: 7,
+        now,
       })
     ).toEqual([regularMessage])
   })
@@ -330,6 +338,7 @@ describe('filterIncomingMessages', () => {
         messages: [placeholder(timestamp(Date.UTC(2026, 0, 2)))],
         blockedSenders: [],
         rerequestLimitDays: 7,
+        now,
       })
     ).toHaveLength(1)
 
@@ -349,6 +358,7 @@ describe('filterIncomingMessages', () => {
         messages: [placeholder(timestamp(Date.UTC(2026, 0, 2)))],
         blockedSenders: [],
         rerequestLimitDays: 7,
+        now,
       })
     ).toHaveLength(1)
 
@@ -371,6 +381,7 @@ describe('filterIncomingMessages', () => {
         messages: [placeholder(timestamp(Date.UTC(2026, 0, 2)))],
         blockedSenders: [],
         rerequestLimitDays: 7,
+        now,
       })
     ).toEqual([])
   })
@@ -403,6 +414,7 @@ describe('filterIncomingMessages', () => {
         messages: [request],
         blockedSenders: [blockedSender],
         rerequestLimitDays: 7,
+        now,
       })
     ).toEqual([])
     expect(
@@ -445,6 +457,7 @@ describe('filterIncomingMessages', () => {
         messages: [cancellation, messageAfterCancellation],
         blockedSenders: [],
         rerequestLimitDays: 7,
+        now,
       })
     ).toEqual([cancellation])
   })
@@ -480,6 +493,7 @@ describe('filterIncomingMessages', () => {
         messages: [cancellation],
         blockedSenders: [],
         rerequestLimitDays: 7,
+        now,
       })
     ).toEqual([])
   })
@@ -515,6 +529,7 @@ describe('filterIncomingMessages', () => {
         messages: [approval, regularMessage],
         blockedSenders: [],
         rerequestLimitDays: 7,
+        now,
       })
     ).toEqual([])
   })
@@ -555,6 +570,7 @@ describe('filterIncomingMessages', () => {
           messages: [newRequest],
           blockedSenders: [],
           rerequestLimitDays: 7,
+          now,
         })
       ).toEqual([])
     }
@@ -577,6 +593,7 @@ describe('filterIncomingMessages', () => {
         messages: [request],
         blockedSenders: [blockedSender],
         rerequestLimitDays: 7,
+        now,
       })
     ).toEqual([request])
   })
@@ -603,5 +620,158 @@ describe('filterIncomingMessages', () => {
         blockedSenders: [],
       })
     ).toBe(true)
+  })
+})
+
+describe('filterIncomingMessages on an inbox restored from a backup', () => {
+  const inboxKey = generatePrivateKey()
+  const senderKey = generatePrivateKey()
+  const restoredInbox: InboxInState = {
+    ...inboxState(inboxKey),
+    restoredFromBackup: true,
+    restoredAt: now,
+  }
+
+  function filter(
+    inbox: InboxInState,
+    messages: ChatMessageWithState[]
+  ): ChatMessageWithState[] {
+    return filterIncomingMessages({
+      inbox,
+      messages,
+      blockedSenders: [],
+      rerequestLimitDays: 7,
+      now,
+    })
+  }
+
+  it('recovers the chat from a regular message of an unknown sender', () => {
+    const first = receivedMessage({
+      messageType: 'MESSAGE',
+      senderPublicKey: senderKey.publicKeyPemBase64,
+    })
+    const second = receivedMessage({
+      messageType: 'TRADE_CHECKLIST_UPDATE',
+      senderPublicKey: senderKey.publicKeyPemBase64,
+      time: timestamp(Date.UTC(2026, 0, 2)),
+    })
+
+    expect(filter(restoredInbox, [first, second])).toEqual([first, second])
+  })
+
+  it('drops messages of unknown senders once the restore is 30 days old', () => {
+    const message = receivedMessage({
+      messageType: 'MESSAGE',
+      senderPublicKey: senderKey.publicKeyPemBase64,
+    })
+
+    expect(
+      filterIncomingMessages({
+        inbox: restoredInbox,
+        messages: [message],
+        blockedSenders: [],
+        rerequestLimitDays: 7,
+        now: timestamp(now + 30 * 24 * 60 * 60 * 1000),
+      })
+    ).toEqual([])
+  })
+
+  it('still drops messages of unknown senders on regular inboxes', () => {
+    const message = receivedMessage({
+      messageType: 'MESSAGE',
+      senderPublicKey: senderKey.publicKeyPemBase64,
+    })
+
+    expect(filter(inboxState(inboxKey), [message])).toEqual([])
+  })
+
+  it.each<ChatMessage['messageType']>([
+    'DELETE_CHAT',
+    'BLOCK_CHAT',
+    'INBOX_DELETED',
+    'DISAPPROVE_MESSAGING',
+    'CANCEL_REQUEST_MESSAGING',
+    'REQUEST_HISTORY',
+    'HISTORY',
+    'FCM_CYPHER_UPDATE',
+    'MESSAGE_READ',
+  ])('does not recover a chat from %s', (messageType) => {
+    const message = receivedMessage({
+      messageType,
+      senderPublicKey: senderKey.publicKeyPemBase64,
+    })
+
+    expect(filter(restoredInbox, [message])).toEqual([])
+  })
+
+  it('handles a request from an unknown sender as a new request', () => {
+    const request = receivedMessage({
+      messageType: 'REQUEST_MESSAGING',
+      senderPublicKey: senderKey.publicKeyPemBase64,
+    })
+    const regularMessage = receivedMessage({
+      messageType: 'MESSAGE',
+      senderPublicKey: senderKey.publicKeyPemBase64,
+      time: timestamp(Date.UTC(2026, 0, 2)),
+    })
+
+    expect(filter(restoredInbox, [request, regularMessage])).toEqual([request])
+  })
+
+  it('accepts only a requested history from a pending recovery sender', () => {
+    const history = receivedMessage({
+      messageType: 'HISTORY',
+      senderPublicKey: senderKey.publicKeyPemBase64,
+    })
+    const pendingChat: ChatWithMessages = {
+      ...chatWithMessages({
+        inboxKey,
+        senderPublicKey: senderKey.publicKeyPemBase64,
+        messages: [],
+      }),
+      restoredFromBackup: true,
+    }
+
+    expect(
+      filter({...restoredInbox, pendingRecoveryChats: [pendingChat]}, [history])
+    ).toEqual([])
+    expect(
+      filter(
+        {
+          ...restoredInbox,
+          pendingRecoveryChats: [
+            {...pendingChat, historyRequestedAt: timestamp(1)},
+          ],
+        },
+        [history]
+      )
+    ).toEqual([history])
+  })
+
+  it('accepts history messages in a recovered chat', () => {
+    const regularMessage = receivedMessage({
+      messageType: 'MESSAGE',
+      senderPublicKey: senderKey.publicKeyPemBase64,
+    })
+    const history = receivedMessage({
+      messageType: 'HISTORY',
+      senderPublicKey: senderKey.publicKeyPemBase64,
+      time: timestamp(Date.UTC(2026, 0, 2)),
+    })
+    const inbox: InboxInState = {
+      ...inboxState(inboxKey, [
+        {
+          ...chatWithMessages({
+            inboxKey,
+            senderPublicKey: senderKey.publicKeyPemBase64,
+            messages: [regularMessage],
+          }),
+          restoredFromBackup: true,
+        },
+      ]),
+      restoredFromBackup: true,
+    }
+
+    expect(filter(inbox, [history])).toEqual([history])
   })
 })

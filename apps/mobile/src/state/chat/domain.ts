@@ -8,6 +8,7 @@ import {
   ChatMessage,
   ChatMessageId,
   ChatMessageRequiringNewerVersion,
+  ChatRecoveryProof,
   generateChatId,
   Inbox,
   ReactionEmoji,
@@ -43,10 +44,15 @@ export class ErrorInboxAlreadyExists extends Schema.TaggedError<ErrorInboxAlread
   cause: Schema.Unknown,
 }) {}
 
+// Rebuilt from the other side's HISTORY after a backup restore. The other side
+// could have altered it, so it is shown above a "restored" divider.
+const restored = Schema.optional(Schema.Boolean)
+
 export const ReceivedMessage = Schema.Struct({
   state: Schema.Literal('received'),
   message: ChatMessage,
   receivedByServerAt: Schema.optional(UnixMilliseconds),
+  restored,
 })
 
 export const ReceivedButRequiresNewerVersionMessage = Schema.Struct({
@@ -65,6 +71,7 @@ export const SentMessage = Schema.Struct({
   state: Schema.Literal('sent'),
   message: ChatMessage,
   receivedByServerAt: Schema.optional(UnixMilliseconds),
+  restored,
 })
 
 export const SendingErrorMessage = Schema.Struct({
@@ -141,12 +148,34 @@ export const ChatWithMessages = Schema.Struct({
     default: () => false,
   }),
   reactions: Schema.optionalWith(ChatReactions, {default: () => ({})}),
+  // Recovered after a backup restore from a message of the other side. Kept
+  // in `pendingRecoveryChats` until its history proves the other side is a
+  // real chat partner, then counts as open until its history says otherwise.
+  restoredFromBackup: Schema.optional(Schema.Boolean),
+  // Local time the pending recovery started, see `isPendingRecoveryChatExpired`
+  recoveryStartedAt: Schema.optional(UnixMilliseconds),
+  // History is accepted once, and only messages from before the request
+  historyRequestedAt: Schema.optional(UnixMilliseconds),
+  historyMerged: Schema.optional(Schema.Boolean),
+  // Sent back in HISTORY if the other side restores its account
+  otherSideRecoveryProof: Schema.optional(ChatRecoveryProof),
 })
 export type ChatWithMessages = typeof ChatWithMessages.Type
 
 export const InboxInState = Schema.Struct({
   inbox: Inbox,
   chats: Schema.Array(ChatWithMessages).pipe(Schema.mutable),
+  // Registered by a backup restore: chats are recovered from the other side.
+  restoredFromBackup: Schema.optional(Schema.Boolean),
+  restoredAt: Schema.optional(UnixMilliseconds),
+  // Chats recovered from senders not yet proven to be real chat partners.
+  // Hidden from everything else until their history arrives.
+  pendingRecoveryChats: Schema.optional(Schema.Array(ChatWithMessages)),
+  // Per sender, so a sender dropped and re-creating its pending chat can't
+  // make this device send history requests any more often.
+  historyRequestedAt: Schema.optional(
+    Schema.Record({key: PublicKeyPemBase64, value: UnixMilliseconds})
+  ),
 })
 export type InboxInState = typeof InboxInState.Type
 

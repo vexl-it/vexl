@@ -79,22 +79,39 @@ export const askToResolveContactsRemovedFromPhoneActionAtom = atom(
       )
       if (numbersToRemove.size === 0) return
 
+      const activeNumbers = new Set(
+        pipe(
+          get(normalizedContactsAtom),
+          Array.filter((contact) => contact.flags.imported),
+          Array.map((contact) => contact.computedValues.normalizedNumber)
+        )
+      )
       const result = yield* _(
         set(submitContactsActionAtom, {
           normalizeAndImportAll: false,
           numbersToImport: pipe(
-            get(normalizedContactsAtom),
-            Array.filter((contact) => contact.flags.imported),
-            Array.map((contact) => contact.computedValues.normalizedNumber),
+            Array.fromIterable(activeNumbers),
             Array.filter((number) => !numbersToRemove.has(number))
           ),
           showOfferReencryptionDialog: true,
         })
       )
-      if (result !== 'success') return
+      if (result !== 'success') {
+        // A failed replace marks contacts inactive even though the server
+        // still has them - restore them so the user is asked again
+        set(storedContactsAtom, (prev) =>
+          Array.map(prev, (contact) =>
+            hasNumberIn(activeNumbers)(contact)
+              ? {...contact, flags: {...contact.flags, imported: true}}
+              : contact
+          )
+        )
+        return
+      }
 
+      const isPendingRemoval = hasNumberIn(numbersToRemove)
       set(storedContactsAtom, (prev) =>
-        Array.filter(prev, (contact) => !hasNumberIn(numbersToRemove)(contact))
+        Array.filter(prev, (contact) => !isPendingRemoval(contact))
       )
     })
 )

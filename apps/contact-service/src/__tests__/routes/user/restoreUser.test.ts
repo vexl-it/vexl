@@ -30,10 +30,15 @@ import {
 } from '@vexl-next/server-utils/src/RedisService'
 import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
+import {mockedReportMetric} from '@vexl-next/server-utils/src/tests/mockedMetricsClientService'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Either, Option, Schema} from 'effect'
 import {useUpLoginSessionProof} from '../../../routes/user/utils/ensureLoginSessionProof'
 import {serverHashPhoneNumber} from '../../../utils/serverHashContact'
+import {
+  clearEnqueuedNotifications,
+  getEnqueuedNotifications,
+} from '../../utils/mockEnqueueUserNotification'
 import {NodeTestingApp} from '../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../utils/runPromiseInMockedEnvironment'
 import {makeTestCommonAndSecurityHeaders} from '../contacts/utils'
@@ -278,6 +283,84 @@ describe('Login session and restore user', () => {
 
         const newDeviceRefresh = yield* _(refreshUser(keys, newDeviceSession))
         expect(newDeviceRefresh._tag).toBe('Right')
+      })
+    )
+  })
+
+  it('Notifies contacts when an inactive user restores', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const app = yield* _(NodeTestingApp)
+        const sql = yield* _(SqlClient.SqlClient)
+        const contactPhoneNumber =
+          Schema.decodeSync(E164PhoneNumber)('+420733333398')
+        const contactToken = Schema.decodeSync(VexlNotificationToken)(
+          'vexl_nt_restore_contact'
+        )
+        const contactAuthHeaders = yield* _(
+          createDummyAuthHeadersForUser({
+            phoneNumber: contactPhoneNumber,
+            publicKey: generatePrivateKey().publicKeyPemBase64,
+          })
+        )
+        const contactHeaders =
+          makeTestCommonAndSecurityHeaders(contactAuthHeaders)
+        yield* _(setAuthHeaders(contactAuthHeaders))
+        yield* _(
+          app.User.createUser({
+            payload: {
+              vexlNotificationToken: Option.some(contactToken),
+              publicKeyV2: Option.none(),
+            },
+            headers: contactHeaders,
+          })
+        )
+        yield* _(
+          app.Contact.importContacts({
+            payload: {
+              contacts: [yield* _(hashPhoneNumber(phoneNumber))],
+              replace: true,
+            },
+            headers: contactHeaders,
+          })
+        )
+
+        const keys = generatePrivateKey()
+        const headers = yield* _(createUser(keys, generateLoginSessionId()))
+        yield* _(
+          app.Contact.importContacts({
+            payload: {
+              contacts: [yield* _(hashPhoneNumber(contactPhoneNumber))],
+              replace: true,
+            },
+            headers,
+          })
+        )
+        yield* _(sql`
+          UPDATE users
+          SET
+            refreshed_at = CURRENT_DATE - 180
+          WHERE
+            public_key = ${keys.publicKeyPemBase64}
+        `)
+
+        yield* _(clearEnqueuedNotifications)
+        mockedReportMetric.mockClear()
+        const restored = yield* _(restoreUser(keys, generateLoginSessionId()))
+        expect(restored._tag).toBe('Right')
+        yield* _(Effect.sleep(200))
+
+        expect(mockedReportMetric).toHaveBeenCalledWith(
+          expect.objectContaining({name: 'USER_REACTIVATED'})
+        )
+        const notifications = yield* _(getEnqueuedNotifications)
+        expect(
+          notifications.filter(
+            (one) =>
+              one.task._tag === 'NewUserNotificationMqEntry' &&
+              one.task.token === contactToken
+          )
+        ).not.toHaveLength(0)
       })
     )
   })

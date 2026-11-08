@@ -34,7 +34,7 @@ These are referred to as *common* in the tables below.
 | --- | --- | --- | --- |
 | `USER_LOGGED_IN` | Increment | common + `countryPrefix`, `numberExists` | User registers with the contact service right after login. `numberExists` is true when a user with the same phone number already existed (login from a new device / re-login without account deletion). |
 | `USER_REFRESH` | Increment | common | User refresh endpoint is called (app foregrounded / periodic refresh). |
-| `USER_REACTIVATED` | Increment | common + `daysInactive` (int), `remindersReceived` (int), `daysSinceLastReminder` (int or `none`) | A returning user refreshes after being inactive longer than `CONTACT_CONSIDERED_AS_EXPIRED_FOR_METRICS_AFTER_DAYS` (default 30), or after having received at least one inactivity reminder (so reminder-driven returns below the window are counted too). |
+| `USER_REACTIVATED` | Increment | common + `daysInactive` (int), `remindersReceived` (int), `daysSinceLastReminder` (int or `none`) | A returning user refreshes, or restores from a backup, after being inactive longer than `CONTACT_CONSIDERED_AS_EXPIRED_FOR_METRICS_AFTER_DAYS` (default 30), or after having received at least one inactivity reminder (so reminder-driven returns below the window are counted too). |
 | `COUNT_OF_UNIQUE_USERS` | Total | — | Gauge, hourly (`REPORT_GAUGES_CRON`); users that have imported at least one contact. |
 | `COUNT_OF_UNIQUE_CONTACTS` | Total | — | Gauge, hourly (`REPORT_GAUGES_CRON`); distinct imported contacts. |
 | `COUNT_OF_INACTIVE_USERS` | Total | — | Reported by the user-inactivity notification job; users whose `refreshed_at` is older than the inactivity threshold (or null). |

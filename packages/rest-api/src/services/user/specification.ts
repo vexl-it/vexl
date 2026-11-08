@@ -211,7 +211,7 @@ export const GetBackupKeyPairEndpoint = HttpApiEndpoint.post(
   .addError(InvalidVerificationIdError, {status: 400})
   .addError(UnableToVerifySmsCodeError, {status: 400})
   .addError(InvalidVerificationError, {status: 400})
-  .annotate(MaxExpectedDailyCall, 100)
+  .annotate(MaxExpectedDailyCall, 10)
 
 const BackupGroup = HttpApiGroup.make('Backup')
   .add(GetBackupPublicKeyEndpoint)

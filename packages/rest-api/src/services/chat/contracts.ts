@@ -233,10 +233,15 @@ export type SendMessagesResponse = typeof SendMessagesResponse.Type
 
 export const MAX_PUBLIC_KEYS_IN_CHECK_INBOXES_EXIST_REQUEST = 200
 
+// Real inbox keys are about 230 characters.
+const MAX_PUBLIC_KEY_LENGTH_IN_CHECK_INBOXES_EXIST_REQUEST = 500
+
 export const CheckInboxesExistRequest = Schema.Struct({
-  publicKeys: Schema.Array(PublicKeyPemBase64).pipe(
-    Schema.maxItems(MAX_PUBLIC_KEYS_IN_CHECK_INBOXES_EXIST_REQUEST)
-  ),
+  publicKeys: Schema.Array(
+    PublicKeyPemBase64.pipe(
+      Schema.maxLength(MAX_PUBLIC_KEY_LENGTH_IN_CHECK_INBOXES_EXIST_REQUEST)
+    )
+  ).pipe(Schema.maxItems(MAX_PUBLIC_KEYS_IN_CHECK_INBOXES_EXIST_REQUEST)),
 })
 export type CheckInboxesExistRequest = typeof CheckInboxesExistRequest.Type
 

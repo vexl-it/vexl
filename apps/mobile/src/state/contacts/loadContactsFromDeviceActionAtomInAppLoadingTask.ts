@@ -4,6 +4,7 @@ import {
   InAppLoadingTaskError,
   registerInAppLoadingTask,
 } from '../../utils/inAppLoadingTasks'
+import {askToResolveContactsRemovedFromPhoneActionAtom} from './atom/askToResolveContactsRemovedFromPhoneActionAtom'
 import loadAndNormalizeContactsFromDeviceActionAtom from './atom/loadAndNormalizeContactsFromDeviceActionAtom'
 import {areContactsPermissionsAlreadyGranted} from './utils'
 
@@ -38,6 +39,13 @@ export const loadContactsFromDeviceActionAtomInAppLoadingTaskId =
                 })
               )
             })
+          )
+        )
+
+        // Waits for the user's answer, so it must not hold up the loading task
+        yield* _(
+          Effect.forkDaemon(
+            store.set(askToResolveContactsRemovedFromPhoneActionAtom)
           )
         )
       }),

@@ -1,7 +1,12 @@
-import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {Array, Effect, Option, pipe} from 'effect'
 import {getPermissionsAsync} from 'expo-contacts'
 import {atom} from 'jotai'
+import {
+  canDetectContactsRemovedFromPhone,
+  createIsOnDevice,
+  type DeviceContactsSnapshot,
+  syncStoredContactsWithDevice,
+} from '../deviceContactsSync'
 import {type ContactInfo, type StoredContactWithComputedValues} from '../domain'
 import {
   areContactsPermissionsAlreadyGranted,
@@ -9,16 +14,6 @@ import {
   UnknownContactsError,
 } from '../utils'
 import {normalizedContactsAtom, storedContactsAtom} from './contactsStore'
-
-export interface DeviceContactsSnapshot {
-  readonly rawNumbers: ReadonlySet<string>
-  /**
-   * False when contacts access is "limited" (iOS) - the visible contacts are
-   * only a subset of the address book, so absence from `rawNumbers` does not
-   * prove a contact is missing from the phone.
-   */
-  readonly isComplete: boolean
-}
 
 /**
  * Contacts currently present in the device address book. Session only -
@@ -38,8 +33,8 @@ export const setDeviceContactsSnapshotFromContactsActionAtom = atom(
       catch: (e) => new UnknownContactsError({cause: e}),
     }).pipe(
       Effect.map((permissions) => permissions.accessPrivileges !== 'limited'),
-      // if we can't tell, assume full access - the safer default for display
-      Effect.catchAll(() => Effect.succeed(true)),
+      // if we can't tell, assume limited access so no contact gets removed
+      Effect.catchAll(() => Effect.succeed(false)),
       Effect.map((isComplete) => {
         set(deviceContactsSnapshotAtom, {
           rawNumbers: new Set(
@@ -74,66 +69,60 @@ export const refreshDeviceContactsSnapshotActionAtom = atom(null, (get, set) =>
   )
 )
 
-export interface NormalizedNumbersOnDevice {
-  readonly normalizedNumbers: ReadonlySet<E164PhoneNumber>
-  readonly isComplete: boolean
-}
+const isOnDeviceAtom = atom(
+  (get): ((contact: StoredContactWithComputedValues) => boolean) => {
+    const snapshot = get(deviceContactsSnapshotAtom)
+    if (snapshot === undefined) return () => false
 
-/**
- * Normalized numbers of stored contacts that are currently present in the
- * device address book. `undefined` when device contacts are not available.
- */
-export const normalizedNumbersOnDeviceAtom = atom(
-  (get): NormalizedNumbersOnDevice | undefined => {
-    const deviceContactsSnapshot = get(deviceContactsSnapshotAtom)
-    if (deviceContactsSnapshot === undefined) return undefined
-
-    return {
-      isComplete: deviceContactsSnapshot.isComplete,
-      normalizedNumbers: new Set(
-        pipe(
-          get(storedContactsAtom),
-          Array.filter((contact) =>
-            deviceContactsSnapshot.rawNumbers.has(contact.info.rawNumber)
-          ),
-          Array.filterMap((contact) =>
-            contact.computedValues.pipe(
-              Option.map((computedValues) => computedValues.normalizedNumber)
-            )
-          )
-        )
-      ),
-    }
+    const isOnDevice = createIsOnDevice(
+      get(storedContactsAtom),
+      snapshot.rawNumbers
+    )
+    return (contact) =>
+      isOnDevice(
+        contact.info.rawNumber,
+        Option.some(contact.computedValues.normalizedNumber)
+      )
   }
 )
 
-export function isVexlOnlyContact(
-  contact: StoredContactWithComputedValues,
-  numbersOnDevice: NormalizedNumbersOnDevice | undefined
-): boolean {
-  // Without access to the device address book fall back to the manual flag
-  if (numbersOnDevice === undefined) return contact.flags.importedManually
-
-  const isOnDevice = numbersOnDevice.normalizedNumbers.has(
-    contact.computedValues.normalizedNumber
+export const syncStoredContactsWithDeviceActionAtom = atom(null, (get, set) => {
+  const snapshot = get(deviceContactsSnapshotAtom)
+  set(storedContactsAtom, (prev) =>
+    syncStoredContactsWithDevice(prev, snapshot)
   )
+})
 
-  // With limited access we only see a subset of the address book, so treat
-  // only manually added contacts as Vexl-only to avoid flagging phone
-  // contacts outside the granted subset.
-  if (!numbersOnDevice.isComplete)
-    return contact.flags.importedManually && !isOnDevice
+/**
+ * Phone contacts that are active in the network but no longer in the phone.
+ */
+export const contactsRemovedFromPhoneAtom = atom(
+  (get): StoredContactWithComputedValues[] => {
+    if (!canDetectContactsRemovedFromPhone(get(deviceContactsSnapshotAtom)))
+      return []
 
-  return !isOnDevice
-}
+    const isOnDevice = get(isOnDeviceAtom)
+    return pipe(
+      get(normalizedContactsAtom),
+      Array.filter(
+        (contact) =>
+          contact.flags.imported &&
+          !contact.flags.importedManually &&
+          !isOnDevice(contact)
+      )
+    )
+  }
+)
 
 export const vexlOnlyContactsAtom = atom(
   (get): StoredContactWithComputedValues[] => {
-    const numbersOnDevice = get(normalizedNumbersOnDeviceAtom)
+    const isOnDevice = get(isOnDeviceAtom)
 
     return pipe(
       get(normalizedContactsAtom),
-      Array.filter((contact) => isVexlOnlyContact(contact, numbersOnDevice))
+      Array.filter(
+        (contact) => contact.flags.importedManually && !isOnDevice(contact)
+      )
     )
   }
 )

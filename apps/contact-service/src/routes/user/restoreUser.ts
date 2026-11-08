@@ -8,7 +8,11 @@ import {UserDbService} from '../../db/UserDbService'
 import {serverHashPhoneNumber} from '../../utils/serverHashContact'
 import {withUserActionRedisLock} from '../../utils/withUserActionRedisLock'
 import {ensureLoginSessionProof} from './utils/ensureLoginSessionProof'
-import {findUserOrFail, refreshUserRecord} from './utils/refreshUserRecord'
+import {
+  findUserOrFail,
+  notifyContactsAboutReturnedUser,
+  refreshUserRecord,
+} from './utils/refreshUserRecord'
 
 // Unlike createUser, keeps the user row and their imported contacts.
 export const restoreUser = HttpApiBuilder.handler(
@@ -28,13 +32,14 @@ export const restoreUser = HttpApiBuilder.handler(
             })
           )
           const userDb = yield* _(UserDbService)
-          yield* _(findUserOrFail(security))
+          const existingUser = yield* _(findUserOrFail(security))
 
-          yield* _(
+          const refreshedUser = yield* _(
             refreshUserRecord({
               security,
               headers: req.headers,
               vexlNotificationToken: req.payload.vexlNotificationToken,
+              existingUser,
             })
           )
 
@@ -45,8 +50,13 @@ export const restoreUser = HttpApiBuilder.handler(
               loginSessionId: req.payload.loginSessionId,
             })
           )
-          return {}
-        }).pipe(withDbTransaction, withUserActionRedisLock(security.hash))
+          return refreshedUser
+        }).pipe(
+          withDbTransaction,
+          withUserActionRedisLock(security.hash),
+          Effect.tap(notifyContactsAboutReturnedUser),
+          Effect.as({})
+        )
       ),
       makeEndpointEffect
     )

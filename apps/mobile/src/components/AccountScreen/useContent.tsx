@@ -27,6 +27,7 @@ import {useTranslation as useTranslations} from '../../utils/localization/I18nPr
 import {formatDecimal} from '../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../utils/localization/formattingLocaleAtom'
 import openUrl from '../../utils/openUrl'
+import {backupEnabledAtom} from '../../utils/versionService/atoms'
 import ContactUsDialogContent from '../AppSettingsScreen/components/ContactUsDialogContent'
 import {globalDialogAtom} from '../GlobalDialog'
 import DeleteAccountConfirmationDialogContent from './components/DeleteAccountConfirmationDialogContent'
@@ -56,6 +57,7 @@ export function useContent(): AccountMenus {
   const showDialog = useSetAtom(globalDialogAtom)
   const contactSupport = useSetAtom(contactSupportActionAtom)
   const logout = useLogout()
+  const backupEnabled = useAtomValue(backupEnabledAtom)
   return useMemo((): AccountMenus => {
     const contactsCount = t('account.contactsCountFormatted', {
       localizedString: formatDecimal(numberOfContacts, locale),
@@ -98,13 +100,17 @@ export function useContent(): AccountMenus {
               navigation.navigate('AppSettings')
             },
           },
-          {
-            label: t('account.accountBackup'),
-            icon: Lock,
-            onPress: () => {
-              navigation.navigate('AccountBackup')
-            },
-          },
+          ...(backupEnabled
+            ? [
+                {
+                  label: t('account.accountBackup'),
+                  icon: Lock,
+                  onPress: () => {
+                    navigation.navigate('AccountBackup')
+                  },
+                },
+              ]
+            : []),
           {
             label: t('account.notificationSettings'),
             icon: MegaphoneNotifications,
@@ -235,6 +241,7 @@ export function useContent(): AccountMenus {
       },
     ] as const
   }, [
+    backupEnabled,
     contactSupport,
     locale,
     logout,

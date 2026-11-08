@@ -2,7 +2,7 @@ import {HttpApiBuilder} from '@effect/platform/index'
 import {UserApiSpecification} from '@vexl-next/rest-api/src/services/user/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {Effect, Option} from 'effect'
-import {rerequestLimitDaysConfig} from '../configs'
+import {backupEnabledConfig, rerequestLimitDaysConfig} from '../configs'
 
 export const getVersionServiceInfoHandler = HttpApiBuilder.handler(
   UserApiSpecification,
@@ -15,6 +15,7 @@ export const getVersionServiceInfoHandler = HttpApiBuilder.handler(
         requestForceUpdate: false,
         maintenanceUntil: Option.none(),
         offerRerequestLimitDays: rerequestLimitDays,
+        backupEnabled: yield* _(backupEnabledConfig),
       }
     }).pipe(makeEndpointEffect)
 )

@@ -260,6 +260,7 @@ export const GetVersionServiceInfoResponse = Schema.Struct({
     }),
     {as: 'Option'}
   ),
+  backupEnabled: Schema.optionalWith(Schema.Boolean, {default: () => false}),
 })
 
 export const EraseUserVerificationId = Schema.String.pipe(

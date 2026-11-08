@@ -104,6 +104,9 @@ export const Preferences = Schema.Struct({
   showNotesBoardIntroSheet: Schema.optionalWith(Schema.Boolean, {
     default: () => true,
   }),
+  enableBackupDevMode: Schema.optionalWith(Schema.Boolean, {
+    default: () => false,
+  }),
   notesBoardEnabled: Schema.optionalWith(Schema.Boolean, {
     default: () => false,
   }),

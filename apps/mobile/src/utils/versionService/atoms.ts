@@ -9,6 +9,12 @@ export const versionServiceAtom = atom<VersionServiceState>(
   VERSION_SERVICE_STATE_DEFAULT_VALUE
 )
 
+export const backupEnabledAtom = atom(
+  (get) =>
+    get(versionServiceAtom).backupEnabled ||
+    get(preferencesAtom).enableBackupDevMode
+)
+
 export const offerRerequestLimitDaysAtom = atom((get) => {
   const disableRerequestLimit = get(preferencesAtom).disableOfferRerequestLimit
 

@@ -8,4 +8,5 @@ export const VERSION_SERVICE_STATE_DEFAULT_VALUE: VersionServiceState = {
   requestForceUpdate: false,
   offerRerequestLimitDays: 2,
   maintenanceUntil: Option.none(),
+  backupEnabled: false,
 }

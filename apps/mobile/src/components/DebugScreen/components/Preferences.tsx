@@ -12,6 +12,7 @@ const preferencesToEdit = [
   'showOfferDetail',
   'runTasksInParallel',
   'notesBoardEnabled',
+  'enableBackupDevMode',
 ] as const
 
 type PreferenceKey = (typeof preferencesToEdit)[number]

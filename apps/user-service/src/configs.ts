@@ -87,6 +87,10 @@ export const rerequestLimitDaysConfig = Config.number(
   })
 )
 
+export const backupEnabledConfig = Config.boolean('BACKUP_ENABLED').pipe(
+  Config.withDefault(false)
+)
+
 export const reportGaugesCronConfig = Config.string('REPORT_GAUGES_CRON').pipe(
   Config.withDefault('0 * * * *')
 )

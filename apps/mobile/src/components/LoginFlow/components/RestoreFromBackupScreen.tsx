@@ -1,5 +1,5 @@
 import {usePreventRemove} from '@react-navigation/native'
-import {Button, Loader, Screen, Typography, YStack} from '@vexl-next/ui'
+import {Button, Loader, Screen, ScreenHeading, YStack} from '@vexl-next/ui'
 import {useAtomValue} from 'jotai'
 import React from 'react'
 import {type LoginFlowStackScreenProps} from '../../../navigationTypes'
@@ -11,22 +11,6 @@ import {useTranslation} from '../../../utils/localization/I18nProvider'
 
 type Props = LoginFlowStackScreenProps<'RestoreFromBackup'>
 
-function Title({children}: {readonly children: string}): React.ReactElement {
-  return (
-    <Typography color="$foregroundPrimary" variant="heading3">
-      {children}
-    </Typography>
-  )
-}
-
-function Text({children}: {readonly children: string}): React.ReactElement {
-  return (
-    <Typography color="$foregroundSecondary" variant="paragraphSmall">
-      {children}
-    </Typography>
-  )
-}
-
 function RestoringContent(): React.ReactElement {
   const {t} = useTranslation()
 
@@ -34,22 +18,10 @@ function RestoringContent(): React.ReactElement {
     <Screen navigationBar={null}>
       <YStack alignItems="center" flex={1} gap="$5" justifyContent="center">
         <Loader size="large" />
-        <YStack alignItems="center" gap="$3">
-          <Typography
-            color="$foregroundPrimary"
-            textAlign="center"
-            variant="heading3"
-          >
-            {t('loginFlow.restoreFromBackup.restoring.title')}
-          </Typography>
-          <Typography
-            color="$foregroundSecondary"
-            textAlign="center"
-            variant="paragraphSmall"
-          >
-            {t('loginFlow.restoreFromBackup.restoring.text')}
-          </Typography>
-        </YStack>
+        <ScreenHeading
+          title={t('loginFlow.restoreFromBackup.restoring.title')}
+          text={t('loginFlow.restoreFromBackup.restoring.text')}
+        />
       </YStack>
     </Screen>
   )
@@ -79,25 +51,21 @@ function FailedContent({
         )
       }
     >
-      <YStack gap="$3" paddingTop="$10">
+      <YStack paddingTop="$10">
         {failure === 'backupNoLongerValid' ? (
-          <>
-            <Title>
-              {t('loginFlow.restoreFromBackup.failed.noLongerValid.title')}
-            </Title>
-            <Text>
-              {t('loginFlow.restoreFromBackup.failed.noLongerValid.text')}
-            </Text>
-          </>
+          <ScreenHeading
+            title={t('loginFlow.restoreFromBackup.failed.noLongerValid.title')}
+            text={t('loginFlow.restoreFromBackup.failed.noLongerValid.text')}
+          />
         ) : (
-          <>
-            <Title>{t('loginFlow.restoreFromBackup.failed.title')}</Title>
-            <Text>
-              {failure === 'offline'
+          <ScreenHeading
+            title={t('loginFlow.restoreFromBackup.failed.title')}
+            text={
+              failure === 'offline'
                 ? t('common.NetworkError')
-                : t('loginFlow.restoreFromBackup.failed.unknown')}
-            </Text>
-          </>
+                : t('loginFlow.restoreFromBackup.failed.unknown')
+            }
+          />
         )}
       </YStack>
     </Screen>

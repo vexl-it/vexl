@@ -8,8 +8,8 @@ import {
   Lock,
   NavigationBar,
   Screen,
+  ScreenHeading,
   Stack,
-  Typography,
   YStack,
 } from '@vexl-next/ui'
 import {useSetAtom} from 'jotai'
@@ -55,14 +55,10 @@ export default function RestoreIntroScreen({
         <Stack alignItems="center">
           <AccountBackupGraphic animate height={171} width={147} />
         </Stack>
-        <YStack gap="$3">
-          <Typography color="$foregroundPrimary" variant="heading3">
-            {t('loginFlow.restoreFromBackup.intro.title')}
-          </Typography>
-          <Typography color="$foregroundSecondary" variant="paragraphSmall">
-            {t('loginFlow.restoreFromBackup.intro.text')}
-          </Typography>
-        </YStack>
+        <ScreenHeading
+          title={t('loginFlow.restoreFromBackup.intro.title')}
+          text={t('loginFlow.restoreFromBackup.intro.text')}
+        />
         <YStack gap="$4">
           <InfoPoint icon={CellPhoneMobileDevice}>
             {t('loginFlow.restoreFromBackup.intro.phoneNumber')}

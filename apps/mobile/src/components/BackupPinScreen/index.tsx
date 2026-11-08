@@ -5,7 +5,7 @@ import {
   CodeInput,
   NavigationBar,
   Screen,
-  Typography,
+  ScreenHeading,
   YStack,
 } from '@vexl-next/ui'
 import {Option, Schema} from 'effect'
@@ -75,14 +75,7 @@ export default function BackupPinScreen({
       }
     >
       <YStack gap="$7" paddingVertical="$5">
-        <YStack gap="$3">
-          <Typography color="$foregroundPrimary" variant="heading3">
-            {title}
-          </Typography>
-          <Typography color="$foregroundSecondary" variant="paragraphSmall">
-            {text}
-          </Typography>
-        </YStack>
+        <ScreenHeading title={title} text={text} />
         <CodeInput
           editable={!busy}
           maxLength={8}

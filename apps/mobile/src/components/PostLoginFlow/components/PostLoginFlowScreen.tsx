@@ -1,4 +1,4 @@
-import {Button, Typography, YStack} from '@vexl-next/ui'
+import {Button, YStack} from '@vexl-next/ui'
 import React, {type ReactNode} from 'react'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 
@@ -54,33 +54,6 @@ export default function PostLoginFlowScreen({
           </Button>
         )}
       </YStack>
-    </YStack>
-  )
-}
-
-export function PostLoginFlowCopy({
-  text,
-  title,
-}: {
-  readonly text: string
-  readonly title: string
-}): React.ReactElement {
-  return (
-    <YStack alignItems="center" gap="$4" width="100%">
-      <Typography
-        color="$foregroundPrimary"
-        textAlign="center"
-        variant="heading3"
-      >
-        {title}
-      </Typography>
-      <Typography
-        color="$foregroundSecondary"
-        textAlign="center"
-        variant="paragraphSmall"
-      >
-        {text}
-      </Typography>
     </YStack>
   )
 }

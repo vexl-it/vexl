@@ -6,6 +6,7 @@ import {
   RestoredAccountGraphic,
   SandWatch,
   Screen,
+  ScreenHeading,
   YStack,
 } from '@vexl-next/ui'
 import {useSetAtom} from 'jotai'
@@ -13,7 +14,6 @@ import React from 'react'
 import {type PostLoginFlowStackScreenProps} from '../../../navigationTypes'
 import {showRestoredAccountInfoAtom} from '../../../state/backup/restoreFromBackup'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
-import {PostLoginFlowCopy} from './PostLoginFlowScreen'
 
 type Props = PostLoginFlowStackScreenProps<'RestoredAccountInfo'>
 
@@ -41,7 +41,7 @@ export default function RestoredAccountInfoScreen({
       <YStack flex={1} justifyContent="center" gap="$8" paddingVertical="$5">
         <YStack alignItems="center" gap="$9">
           <RestoredAccountGraphic animate height={163} width={160} />
-          <PostLoginFlowCopy
+          <ScreenHeading
             title={t('loginFlow.restoreFromBackup.restored.title')}
             text={t('loginFlow.restoreFromBackup.restored.text')}
           />

@@ -406,6 +406,33 @@ describe('Login session proof', () => {
     )
   })
 
+  it('Rejects a proof from a refresh kicked out by another device', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const keys = generatePrivateKey()
+        const deviceASession = generateLoginSessionId()
+        yield* _(createUser(keys, deviceASession))
+
+        const deviceBSession = generateLoginSessionId()
+        const restored = yield* _(restoreUser(keys, deviceBSession))
+        expect(restored._tag).toBe('Right')
+
+        const deviceAProof = yield* _(signNow(keys, deviceASession))
+        const kickedOut = yield* _(
+          refreshUser(keys, deviceASession, captured(deviceAProof))
+        )
+        expectErrorResponse(LoggedInOnAnotherDeviceError)(kickedOut)
+
+        const replayed = yield* _(
+          restoreUser(keys, deviceASession, captured(deviceAProof))
+        )
+        expectErrorResponse(InvalidLoginSessionProofError)(replayed)
+        const {row} = yield* _(findUserRow)
+        expect(row).toHaveProperty('loginSessionId', deviceBSession)
+      })
+    )
+  })
+
   it('Fails a matching refresh when its proof cannot be used up', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {

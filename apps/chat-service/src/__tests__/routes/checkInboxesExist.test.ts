@@ -1,5 +1,6 @@
 import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
+import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {MAX_PUBLIC_KEYS_IN_CHECK_INBOXES_EXIST_REQUEST} from '@vexl-next/rest-api/src/services/chat/contracts'
 import {Array, Effect, Schema} from 'effect'
@@ -100,6 +101,28 @@ describe('Check inboxes exist', () => {
                 missingInbox.publicKeyPemBase64,
                 MAX_PUBLIC_KEYS_IN_CHECK_INBOXES_EXIST_REQUEST + 1
               ),
+            },
+            headers,
+          }),
+          Effect.either
+        )
+
+        expect(response._tag).toBe('Left')
+      })
+    )
+  })
+
+  it('Rejects requests with an oversized public key', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const client = yield* _(NodeTestingApp)
+
+        const response = yield* _(
+          client.Inboxes.checkInboxesExist({
+            payload: {
+              publicKeys: [
+                Schema.decodeSync(PublicKeyPemBase64)('a'.repeat(501)),
+              ],
             },
             headers,
           }),

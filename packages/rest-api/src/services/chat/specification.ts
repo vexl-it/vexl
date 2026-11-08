@@ -90,7 +90,7 @@ export const CheckInboxesExistEndpoint = HttpApiEndpoint.post(
   .setHeaders(CommonHeaders)
   .setPayload(CheckInboxesExistRequest)
   .addSuccess(CheckInboxesExistResponse)
-  .annotate(MaxExpectedDailyCall, 100)
+  .annotate(MaxExpectedDailyCall, 10)
 
 export const DeleteInboxEndpoint = HttpApiEndpoint.del(
   'deleteInbox',

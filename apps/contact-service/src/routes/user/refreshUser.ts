@@ -93,7 +93,10 @@ const ensureSameLoginSession = ({
   if (Option.isSome(stored))
     return stored.value === received.value
       ? useUpLoginSessionProof(proof)
-      : Effect.fail(new LoggedInOnAnotherDeviceError())
+      : Effect.zipRight(
+          useUpLoginSessionProof(proof),
+          Effect.fail(new LoggedInOnAnotherDeviceError())
+        )
 
   return Effect.zipRight(
     ensureLoginSessionProof(proof),

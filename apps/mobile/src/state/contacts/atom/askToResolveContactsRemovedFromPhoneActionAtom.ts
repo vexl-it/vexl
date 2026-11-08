@@ -6,12 +6,10 @@ import {globalDialogAtom} from '../../../components/GlobalDialog'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import {type StoredContact} from '../domain'
 import {normalizedContactsAtom, storedContactsAtom} from './contactsStore'
+import loadAndNormalizeContactsFromDeviceActionAtom from './loadAndNormalizeContactsFromDeviceActionAtom'
 import {SelectContactsToKeepInVexlComponent} from './SelectContactsToKeepInVexlComponent'
 import {submitContactsActionAtom} from './submitContactsActionAtom'
-import {
-  contactsRemovedFromPhoneAtom,
-  refreshDeviceContactsSnapshotActionAtom,
-} from './vexlOnlyContactsAtoms'
+import {contactsRemovedFromPhoneAtom} from './vexlOnlyContactsAtoms'
 
 function hasNumberIn(
   numbers: ReadonlySet<E164PhoneNumber>
@@ -63,7 +61,12 @@ export const askToResolveContactsRemovedFromPhoneActionAtom = atom(
       )
 
       // The dialog can stay open while the user edits the address book
-      yield* _(set(refreshDeviceContactsSnapshotActionAtom))
+      const addressBookReloaded = yield* _(
+        set(loadAndNormalizeContactsFromDeviceActionAtom),
+        Effect.match({onFailure: () => false, onSuccess: () => true})
+      )
+      if (!addressBookReloaded) return
+
       const shownNumbers = new Set(
         Array.map(
           removedContacts,

@@ -8,7 +8,10 @@ import {type StoredContact} from '../domain'
 import {normalizedContactsAtom, storedContactsAtom} from './contactsStore'
 import {SelectContactsToKeepInVexlComponent} from './SelectContactsToKeepInVexlComponent'
 import {submitContactsActionAtom} from './submitContactsActionAtom'
-import {contactsRemovedFromPhoneAtom} from './vexlOnlyContactsAtoms'
+import {
+  contactsRemovedFromPhoneAtom,
+  refreshDeviceContactsSnapshotActionAtom,
+} from './vexlOnlyContactsAtoms'
 
 function hasNumberIn(
   numbers: ReadonlySet<E164PhoneNumber>
@@ -59,11 +62,19 @@ export const askToResolveContactsRemovedFromPhoneActionAtom = atom(
         )
       )
 
+      // The dialog can stay open while the user edits the address book
+      yield* _(set(refreshDeviceContactsSnapshotActionAtom))
+      const shownNumbers = new Set(
+        Array.map(
+          removedContacts,
+          (contact) => contact.computedValues.normalizedNumber
+        )
+      )
       const numbersToRemove = new Set(
         pipe(
-          removedContacts,
+          get(contactsRemovedFromPhoneAtom),
           Array.map((contact) => contact.computedValues.normalizedNumber),
-          Array.filter((number) => !numbersToKeep.has(number))
+          Array.filter((number) => shownNumbers.has(number))
         )
       )
       if (numbersToRemove.size === 0) return

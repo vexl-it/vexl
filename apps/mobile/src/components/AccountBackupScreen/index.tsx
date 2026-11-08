@@ -9,8 +9,8 @@ import {
   QuestionmarkCircle,
   RefreshArrowsRectangle,
   Screen,
+  ScreenHeading,
   Stack,
-  Typography,
   YStack,
 } from '@vexl-next/ui'
 import React from 'react'
@@ -50,14 +50,10 @@ export default function AccountBackupScreen({
         <Stack alignItems="center">
           <AccountBackupGraphic animate height={171} width={147} />
         </Stack>
-        <YStack gap="$3">
-          <Typography color="$foregroundPrimary" variant="heading3">
-            {t('accountBackup.heading')}
-          </Typography>
-          <Typography color="$foregroundSecondary" variant="paragraphSmall">
-            {t('accountBackup.description')}
-          </Typography>
-        </YStack>
+        <ScreenHeading
+          title={t('accountBackup.heading')}
+          text={t('accountBackup.description')}
+        />
         <InfoBox variant="pink">{t('accountBackup.warning')}</InfoBox>
         <YStack gap="$4">
           <InfoPoint icon={Lock}>{t('accountBackup.storeSafely')}</InfoPoint>

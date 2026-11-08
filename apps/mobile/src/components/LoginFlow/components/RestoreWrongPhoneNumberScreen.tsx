@@ -3,7 +3,7 @@ import {
   ChevronLeft,
   NavigationBar,
   Screen,
-  Typography,
+  ScreenHeading,
   YStack,
 } from '@vexl-next/ui'
 import {Option} from 'effect'
@@ -72,13 +72,11 @@ export default function RestoreWrongPhoneNumberScreen({
         </YStack>
       }
     >
-      <YStack gap="$3" paddingVertical="$5">
-        <Typography color="$foregroundPrimary" variant="heading3">
-          {t('loginFlow.restoreFromBackup.wrongPhoneNumber.title')}
-        </Typography>
-        <Typography color="$foregroundSecondary" variant="paragraphSmall">
-          {t('loginFlow.restoreFromBackup.wrongPhoneNumber.text')}
-        </Typography>
+      <YStack paddingVertical="$5">
+        <ScreenHeading
+          title={t('loginFlow.restoreFromBackup.wrongPhoneNumber.title')}
+          text={t('loginFlow.restoreFromBackup.wrongPhoneNumber.text')}
+        />
       </YStack>
     </Screen>
   )

@@ -1,49 +1,35 @@
 import {Array, Effect, Option, pipe} from 'effect'
-import {getPermissionsAsync} from 'expo-contacts'
 import {atom} from 'jotai'
 import {
   canDetectContactsRemovedFromPhone,
   createIsOnDevice,
-  type DeviceContactsSnapshot,
   syncStoredContactsWithDevice,
 } from '../deviceContactsSync'
 import {type ContactInfo, type StoredContactWithComputedValues} from '../domain'
 import {
   areContactsPermissionsAlreadyGranted,
   getContactsAndTryToResolveThePermissionsAlongTheWay,
-  UnknownContactsError,
 } from '../utils'
 import {normalizedContactsAtom, storedContactsAtom} from './contactsStore'
 
 /**
- * Contacts currently present in the device address book. Session only -
+ * Raw numbers of the device address book entries Vexl can read. Session only -
  * refreshed on app start (loadContactsFromDeviceActionAtom) and whenever the
  * contact preferences screen gains focus. `undefined` means the device
  * contacts could not be read (permissions).
  */
-export const deviceContactsSnapshotAtom = atom<
-  DeviceContactsSnapshot | undefined
->(undefined)
+export const deviceContactsSnapshotAtom = atom<ReadonlySet<string> | undefined>(
+  undefined
+)
 
 export const setDeviceContactsSnapshotFromContactsActionAtom = atom(
   null,
-  (get, set, contactsFromDevice: readonly ContactInfo[]) =>
-    Effect.tryPromise({
-      try: async () => await getPermissionsAsync(),
-      catch: (e) => new UnknownContactsError({cause: e}),
-    }).pipe(
-      Effect.map((permissions) => permissions.accessPrivileges !== 'limited'),
-      // if we can't tell, assume limited access so no contact gets removed
-      Effect.catchAll(() => Effect.succeed(false)),
-      Effect.map((isComplete) => {
-        set(deviceContactsSnapshotAtom, {
-          rawNumbers: new Set(
-            Array.map(contactsFromDevice, (one) => one.rawNumber)
-          ),
-          isComplete,
-        })
-      })
+  (get, set, contactsFromDevice: readonly ContactInfo[]) => {
+    set(
+      deviceContactsSnapshotAtom,
+      new Set(Array.map(contactsFromDevice, (one) => one.rawNumber))
     )
+  }
 )
 
 export const refreshDeviceContactsSnapshotActionAtom = atom(null, (get, set) =>
@@ -57,9 +43,7 @@ export const refreshDeviceContactsSnapshotActionAtom = atom(null, (get, set) =>
     const contactsFromDevice = yield* _(
       getContactsAndTryToResolveThePermissionsAlongTheWay()
     )
-    yield* _(
-      set(setDeviceContactsSnapshotFromContactsActionAtom, contactsFromDevice)
-    )
+    set(setDeviceContactsSnapshotFromContactsActionAtom, contactsFromDevice)
   }).pipe(
     Effect.catchAll(() =>
       Effect.sync(() => {
@@ -74,10 +58,7 @@ const isOnDeviceAtom = atom(
     const snapshot = get(deviceContactsSnapshotAtom)
     if (snapshot === undefined) return () => false
 
-    const isOnDevice = createIsOnDevice(
-      get(storedContactsAtom),
-      snapshot.rawNumbers
-    )
+    const isOnDevice = createIsOnDevice(get(storedContactsAtom), snapshot)
     return (contact) =>
       isOnDevice(
         contact.info.rawNumber,
@@ -90,6 +71,18 @@ export const syncStoredContactsWithDeviceActionAtom = atom(null, (get, set) => {
   const snapshot = get(deviceContactsSnapshotAtom)
   set(storedContactsAtom, (prev) =>
     syncStoredContactsWithDevice(prev, snapshot)
+  )
+})
+
+/**
+ * Normalized numbers of stored contacts currently in the phone.
+ */
+export const numbersInPhoneAtom = atom((get) => {
+  const isOnDevice = get(isOnDeviceAtom)
+  return pipe(
+    get(normalizedContactsAtom),
+    Array.filter(isOnDevice),
+    Array.map((contact) => contact.computedValues.normalizedNumber)
   )
 })
 

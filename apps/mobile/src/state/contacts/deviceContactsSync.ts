@@ -2,25 +2,41 @@ import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumbe
 import {Array, Option, pipe} from 'effect'
 import {type StoredContact} from './domain'
 
-export interface DeviceContactsSnapshot {
-  readonly rawNumbers: ReadonlySet<string>
-  /**
-   * False when contacts access is "limited" (iOS) - the visible contacts are
-   * only a subset of the address book, so absence from `rawNumbers` does not
-   * prove a contact is missing from the phone.
-   */
-  readonly isComplete: boolean
+export function canDetectContactsRemovedFromPhone(
+  rawNumbersOnDevice: ReadonlySet<string> | undefined
+): rawNumbersOnDevice is ReadonlySet<string> {
+  // An empty read can be a glitch (e.g. iCloud contacts still syncing)
+  return rawNumbersOnDevice !== undefined && rawNumbersOnDevice.size > 0
 }
 
-export function canDetectContactsRemovedFromPhone(
-  snapshot: DeviceContactsSnapshot | undefined
-): snapshot is DeviceContactsSnapshot {
-  // An empty read can be a glitch (e.g. iCloud contacts still syncing)
-  return (
-    snapshot !== undefined &&
-    snapshot.isComplete &&
-    snapshot.rawNumbers.size > 0
+const MIN_NUMBERS_REMOVED_AT_ONCE_LIMIT = 10
+
+/**
+ * Only numbers that were in the phone at the last sync are removed, so the
+ * first sync after an update removes nothing. When too many are missing at
+ * once the read is likely incomplete (e.g. contacts still syncing after a phone
+ * restore), so nothing is removed.
+ */
+export function selectNumbersToRemove({
+  numbersRemovedFromPhone,
+  numbersInPhoneAtLastSync,
+  activeContactsCount,
+}: {
+  readonly numbersRemovedFromPhone: readonly E164PhoneNumber[]
+  readonly numbersInPhoneAtLastSync: readonly E164PhoneNumber[] | undefined
+  readonly activeContactsCount: number
+}): readonly E164PhoneNumber[] {
+  if (numbersInPhoneAtLastSync === undefined) return []
+
+  const wasInPhone = new Set(numbersInPhoneAtLastSync)
+  const numbersToRemove = Array.filter(numbersRemovedFromPhone, (number) =>
+    wasInPhone.has(number)
   )
+  const limit = Math.max(
+    MIN_NUMBERS_REMOVED_AT_ONCE_LIMIT,
+    activeContactsCount / 10
+  )
+  return numbersToRemove.length > limit ? [] : numbersToRemove
 }
 
 /**
@@ -52,17 +68,18 @@ export function createIsOnDevice(
 /**
  * Makes stored contacts follow the device address book: contacts found in
  * the phone become phone contacts, and phone contacts deleted from the phone
- * are dropped unless they are active in the network - those wait for the user
- * to decide (contactsRemovedFromPhoneAtom). Returns the same array when
- * nothing changes.
+ * are dropped unless they are active in the network - those are removed from
+ * the network first (removeContactsDeletedFromPhoneActionAtom). Returns the
+ * same array when nothing changes.
  */
 export function syncStoredContactsWithDevice(
   storedContacts: StoredContact[],
-  snapshot: DeviceContactsSnapshot | undefined
+  rawNumbersOnDevice: ReadonlySet<string> | undefined
 ): StoredContact[] {
-  if (!canDetectContactsRemovedFromPhone(snapshot)) return storedContacts
+  if (!canDetectContactsRemovedFromPhone(rawNumbersOnDevice))
+    return storedContacts
 
-  const isOnDevice = createIsOnDevice(storedContacts, snapshot.rawNumbers)
+  const isOnDevice = createIsOnDevice(storedContacts, rawNumbersOnDevice)
   let someContactChanged = false
 
   const syncedContacts = pipe(

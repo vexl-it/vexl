@@ -16,9 +16,7 @@ const loadContactsFromDeviceActionAtom = atom(null, (get, set) => {
     const contactsFromDevice = yield* _(
       getContactsAndTryToResolveThePermissionsAlongTheWay()
     )
-    yield* _(
-      set(setDeviceContactsSnapshotFromContactsActionAtom, contactsFromDevice)
-    )
+    set(setDeviceContactsSnapshotFromContactsActionAtom, contactsFromDevice)
 
     // Read the store only after the last await - anything written to it while we
     // were suspended must not be overwritten by a stale snapshot.

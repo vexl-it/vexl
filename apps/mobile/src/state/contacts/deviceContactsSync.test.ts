@@ -1,7 +1,10 @@
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {Option, Schema} from 'effect'
-import {syncStoredContactsWithDevice} from './deviceContactsSync'
+import {
+  selectNumbersToRemove,
+  syncStoredContactsWithDevice,
+} from './deviceContactsSync'
 import {type StoredContact} from './domain'
 
 function contact({
@@ -65,10 +68,10 @@ const deviceRawNumbers = new Set([
 
 describe('syncStoredContactsWithDevice', () => {
   it('drops inactive deleted contacts, keeps active and Vexl ones and turns contacts on the phone into phone contacts', () => {
-    const result = syncStoredContactsWithDevice(storedContacts, {
-      rawNumbers: deviceRawNumbers,
-      isComplete: true,
-    })
+    const result = syncStoredContactsWithDevice(
+      storedContacts,
+      deviceRawNumbers
+    )
 
     expect(result.map((one) => one.info.rawNumber)).toEqual([
       onPhone.info.rawNumber,
@@ -85,18 +88,67 @@ describe('syncStoredContactsWithDevice', () => {
     ).toBe(false)
   })
 
-  it('changes nothing when the address book is only partly visible or empty', () => {
+  it('changes nothing when the address book read is empty', () => {
+    expect(syncStoredContactsWithDevice(storedContacts, new Set())).toBe(
+      storedContacts
+    )
+  })
+})
+
+const number = (i: number): E164PhoneNumber =>
+  Schema.decodeSync(E164PhoneNumber)(`+42077700${String(i).padStart(4, '0')}`)
+
+const numbers = (count: number): E164PhoneNumber[] =>
+  Array.from({length: count}, (_, i) => number(i))
+
+describe('selectNumbersToRemove', () => {
+  const inPhoneBefore = number(0)
+  const neverInPhone = number(1)
+
+  it('removes only numbers that were in the phone at the last sync', () => {
     expect(
-      syncStoredContactsWithDevice(storedContacts, {
-        rawNumbers: deviceRawNumbers,
-        isComplete: false,
+      selectNumbersToRemove({
+        numbersRemovedFromPhone: [inPhoneBefore, neverInPhone],
+        numbersInPhoneAtLastSync: [inPhoneBefore],
+        activeContactsCount: 100,
       })
-    ).toBe(storedContacts)
+    ).toEqual([inPhoneBefore])
+  })
+
+  it('removes nothing on the first sync', () => {
     expect(
-      syncStoredContactsWithDevice(storedContacts, {
-        rawNumbers: new Set(),
-        isComplete: true,
+      selectNumbersToRemove({
+        numbersRemovedFromPhone: [inPhoneBefore],
+        numbersInPhoneAtLastSync: undefined,
+        activeContactsCount: 100,
       })
-    ).toBe(storedContacts)
+    ).toEqual([])
+  })
+
+  it('removes nothing when too many contacts are missing at once', () => {
+    const allNumbers = numbers(500)
+    const missing = allNumbers.slice(0, 51)
+
+    expect(
+      selectNumbersToRemove({
+        numbersRemovedFromPhone: missing,
+        numbersInPhoneAtLastSync: allNumbers,
+        activeContactsCount: 500,
+      })
+    ).toEqual([])
+    expect(
+      selectNumbersToRemove({
+        numbersRemovedFromPhone: missing.slice(0, 50),
+        numbersInPhoneAtLastSync: allNumbers,
+        activeContactsCount: 500,
+      })
+    ).toHaveLength(50)
+    expect(
+      selectNumbersToRemove({
+        numbersRemovedFromPhone: allNumbers.slice(0, 10),
+        numbersInPhoneAtLastSync: allNumbers,
+        activeContactsCount: 20,
+      })
+    ).toHaveLength(10)
   })
 })

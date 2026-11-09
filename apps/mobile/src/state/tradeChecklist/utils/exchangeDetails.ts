@@ -372,6 +372,22 @@ export function isResponse(reveal: RevealUpdate): boolean {
   )
 }
 
+// Answered requests and phone updates merged into their identity card show nothing.
+export function isRevealMessageWithoutCard(
+  chat: ChatReveals,
+  message: ChatMessageWithState
+): boolean {
+  if (!revealFromMessage(message)) return false
+
+  const event = revealEventForMessage(chat, message)
+  if (!event) return true
+
+  return (
+    !isResponse(event.reveal) &&
+    !isAnyDetailSelected(stillPendingDetails(chat, event))
+  )
+}
+
 export function pendingRequestFromThem(
   chat: ChatReveals
 ): ExchangeDetailsSelection {

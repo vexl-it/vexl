@@ -41,3 +41,16 @@ export function toE164PhoneNumber(
   }
   return Option.none()
 }
+
+const SHORTEST_NATIONAL_NUMBER_DIGITS = 7
+
+/**
+ * Digits of the number without the country code (e.g. 777123456 for
+ * +420777123456). Falls back to the last digits when the number doesn't parse.
+ */
+export function toNationalSignificantNumber(number: E164PhoneNumber): string {
+  return (
+    parsePhoneNumber(number).number?.significant ??
+    number.slice(-SHORTEST_NATIONAL_NUMBER_DIGITS)
+  )
+}

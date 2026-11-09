@@ -281,6 +281,7 @@ describe('findNumbersMissingFromPhone with an extension', () => {
     `${phoneNumber(0)}-12`,
     `${phoneNumber(0)} (99)`,
     `${phoneNumber(0)}/12`,
+    '777 000 000 kl. 12',
   ])(
     'does not count a number as missing while %s is in the phone',
     (rawNumber) => {

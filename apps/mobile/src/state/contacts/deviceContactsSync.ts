@@ -1,4 +1,7 @@
-import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {
+  type E164PhoneNumber,
+  toNationalSignificantNumber,
+} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {Array, Option, pipe} from 'effect'
 import {needsNormalization, type StoredContact} from './domain'
 
@@ -88,11 +91,9 @@ function isEveryDeviceNumberResolved(
   })
 }
 
-const COMPARED_TRAILING_DIGITS = 8
-
 /**
  * Whether a number is in the phone: a stored contact on the device has it, or
- * an address book entry contains its last digits - the same number written
+ * an address book entry contains its national number - the same number written
  * with a trunk zero, an extension or other text that changes how it parses.
  */
 export function createIsInPhone(
@@ -104,11 +105,13 @@ export function createIsInPhone(
     Array.fromIterable(rawNumbersOnDevice),
     (rawNumber) => rawNumber.replace(/\D/g, '')
   )
-  return (number) =>
-    numbersInPhone.has(number) ||
-    Array.some(digitsInPhone, (digits) =>
-      digits.includes(number.slice(-COMPARED_TRAILING_DIGITS))
+  return (number) => {
+    if (numbersInPhone.has(number)) return true
+    const nationalNumber = toNationalSignificantNumber(number)
+    return Array.some(digitsInPhone, (digits) =>
+      digits.includes(nationalNumber)
     )
+  }
 }
 
 const MIN_MISSING_NUMBERS_LIMIT = 10

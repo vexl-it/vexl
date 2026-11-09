@@ -1,7 +1,6 @@
 import {Array, Effect, Option, pipe} from 'effect'
 import {atom} from 'jotai'
 import {
-  canDetectContactsRemovedFromPhone,
   createIsOnDevice,
   syncStoredContactsWithDevice,
 } from '../deviceContactsSync'
@@ -10,7 +9,11 @@ import {
   areContactsPermissionsAlreadyGranted,
   getContactsAndTryToResolveThePermissionsAlongTheWay,
 } from '../utils'
-import {normalizedContactsAtom, storedContactsAtom} from './contactsStore'
+import {
+  normalizedContactsAtom,
+  numbersInPhoneAtLastSyncAtom,
+  storedContactsAtom,
+} from './contactsStore'
 
 /**
  * Raw numbers of the device address book entries Vexl can read. Session only -
@@ -69,43 +72,11 @@ const isOnDeviceAtom = atom(
 
 export const syncStoredContactsWithDeviceActionAtom = atom(null, (get, set) => {
   const snapshot = get(deviceContactsSnapshotAtom)
+  const numbersInPhoneAtLastSync = get(numbersInPhoneAtLastSyncAtom)
   set(storedContactsAtom, (prev) =>
-    syncStoredContactsWithDevice(prev, snapshot)
+    syncStoredContactsWithDevice(prev, snapshot, numbersInPhoneAtLastSync)
   )
 })
-
-/**
- * Normalized numbers of stored contacts currently in the phone.
- */
-export const numbersInPhoneAtom = atom((get) => {
-  const isOnDevice = get(isOnDeviceAtom)
-  return pipe(
-    get(normalizedContactsAtom),
-    Array.filter(isOnDevice),
-    Array.map((contact) => contact.computedValues.normalizedNumber)
-  )
-})
-
-/**
- * Phone contacts that are active in the network but no longer in the phone.
- */
-export const contactsRemovedFromPhoneAtom = atom(
-  (get): StoredContactWithComputedValues[] => {
-    if (!canDetectContactsRemovedFromPhone(get(deviceContactsSnapshotAtom)))
-      return []
-
-    const isOnDevice = get(isOnDeviceAtom)
-    return pipe(
-      get(normalizedContactsAtom),
-      Array.filter(
-        (contact) =>
-          contact.flags.imported &&
-          !contact.flags.importedManually &&
-          !isOnDevice(contact)
-      )
-    )
-  }
-)
 
 export const vexlOnlyContactsAtom = atom(
   (get): StoredContactWithComputedValues[] => {

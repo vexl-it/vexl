@@ -8,7 +8,9 @@ import {displayLocalNotification} from '../../../utils/notifications/displayLoca
 import {getDefaultChannel} from '../../../utils/notifications/notificationChannels'
 import {
   canDetectContactsRemovedFromPhone,
-  selectNumbersToRemove,
+  findNumbersDeletedFromPhone,
+  findNumbersInPhone,
+  findNumbersToRemoveFromNetwork,
 } from '../deviceContactsSync'
 import {type StoredContact} from '../domain'
 import {
@@ -17,11 +19,7 @@ import {
   storedContactsAtom,
 } from './contactsStore'
 import {submitContactsActionAtom} from './submitContactsActionAtom'
-import {
-  contactsRemovedFromPhoneAtom,
-  deviceContactsSnapshotAtom,
-  numbersInPhoneAtom,
-} from './vexlOnlyContactsAtoms'
+import {deviceContactsSnapshotAtom} from './vexlOnlyContactsAtoms'
 
 function hasNumberIn(
   numbers: ReadonlySet<E164PhoneNumber>
@@ -36,11 +34,12 @@ const sameNumbers = Array.getEquivalence(Equivalence.string)
 
 const rememberNumbersInPhoneActionAtom = atom(
   null,
-  (get, set, numbersInPhone: readonly E164PhoneNumber[]) => {
+  (get, set, numbersInPhone: ReadonlySet<E164PhoneNumber>) => {
+    const numbers = Array.fromIterable(numbersInPhone)
     const previous = get(numbersInPhoneAtLastSyncAtom)
     // Skip the write so the whole contacts store is not persisted again
-    if (previous !== undefined && sameNumbers(previous, numbersInPhone)) return
-    set(numbersInPhoneAtLastSyncAtom, numbersInPhone)
+    if (previous !== undefined && sameNumbers(previous, numbers)) return
+    set(numbersInPhoneAtLastSyncAtom, numbers)
   }
 )
 
@@ -71,8 +70,27 @@ export const removeContactsDeletedFromPhoneActionAtom = atom(
   null,
   (get, set): Effect.Effect<void> =>
     Effect.gen(function* (_) {
-      if (!canDetectContactsRemovedFromPhone(get(deviceContactsSnapshotAtom)))
+      const rawNumbersOnDevice = get(deviceContactsSnapshotAtom)
+      if (!canDetectContactsRemovedFromPhone(rawNumbersOnDevice)) return
+
+      const storedContacts = get(storedContactsAtom)
+      const numbersDeletedFromPhone = findNumbersDeletedFromPhone({
+        storedContacts,
+        rawNumbersOnDevice,
+        numbersInPhoneAtLastSync: get(numbersInPhoneAtLastSyncAtom),
+      })
+      const numbersToRemove = findNumbersToRemoveFromNetwork(
+        storedContacts,
+        numbersDeletedFromPhone
+      )
+      const numbersInPhone = findNumbersInPhone(
+        storedContacts,
+        rawNumbersOnDevice
+      )
+      if (numbersToRemove.size === 0) {
+        set(rememberNumbersInPhoneActionAtom, numbersInPhone)
         return
+      }
 
       const activeNumbers = new Set(
         pipe(
@@ -81,22 +99,6 @@ export const removeContactsDeletedFromPhoneActionAtom = atom(
           Array.map((contact) => contact.computedValues.normalizedNumber)
         )
       )
-      const numbersToRemove = new Set(
-        selectNumbersToRemove({
-          numbersRemovedFromPhone: Array.map(
-            get(contactsRemovedFromPhoneAtom),
-            (contact) => contact.computedValues.normalizedNumber
-          ),
-          numbersInPhoneAtLastSync: get(numbersInPhoneAtLastSyncAtom),
-          activeContactsCount: activeNumbers.size,
-        })
-      )
-      const numbersInPhone = get(numbersInPhoneAtom)
-      if (numbersToRemove.size === 0) {
-        set(rememberNumbersInPhoneActionAtom, numbersInPhone)
-        return
-      }
-
       const result = yield* _(
         set(submitContactsActionAtom, {
           normalizeAndImportAll: false,

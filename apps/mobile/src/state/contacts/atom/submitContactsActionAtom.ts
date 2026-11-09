@@ -58,6 +58,7 @@ type SubmitContactsActionParams = {
   readonly showOfferReencryptionDialog: boolean
   readonly manageLoadingOverlay?: boolean
   readonly showContactImportProgressDialog?: boolean
+  readonly showErrorAlerts?: boolean
 } & ContactsImportSource
 
 type SubmitContactsResult =
@@ -786,12 +787,16 @@ export const submitContactsActionAtom = atom(
           enabled: showContactImportProgressDialog,
         })
 
+        const alert = (message: string): void => {
+          if (params.showErrorAlerts ?? true) Alert.alert(message)
+        }
+
         if (e._tag === 'InitialImportContactsQuotaReachedError') {
-          Alert.alert(t('contacts.initialImportContactsQuotaReachedError'))
+          alert(t('contacts.initialImportContactsQuotaReachedError'))
           return Effect.void
         }
         if (e._tag === 'ImportContactsQuotaReachedError') {
-          Alert.alert(t('contacts.importContactsQuotaReachedError'))
+          alert(t('contacts.importContactsQuotaReachedError'))
           return Effect.void
         }
         if (e._tag !== 'ContactsPermissionsNotGrantedError') {
@@ -801,9 +806,7 @@ export const submitContactsActionAtom = atom(
         }
 
         if (e._tag !== 'ContactsPermissionsNotGrantedError')
-          Alert.alert(
-            toCommonErrorMessage(e, t) ?? t('common.somethingWentWrong')
-          )
+          alert(toCommonErrorMessage(e, t) ?? t('common.somethingWentWrong'))
 
         return Effect.void
       }),

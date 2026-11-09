@@ -4,8 +4,8 @@ import {
   InAppLoadingTaskError,
   registerInAppLoadingTask,
 } from '../../utils/inAppLoadingTasks'
-import {askToResolveContactsRemovedFromPhoneActionAtom} from './atom/askToResolveContactsRemovedFromPhoneActionAtom'
 import loadAndNormalizeContactsFromDeviceActionAtom from './atom/loadAndNormalizeContactsFromDeviceActionAtom'
+import {removeContactsDeletedFromPhoneActionAtom} from './atom/removeContactsDeletedFromPhoneActionAtom'
 import {areContactsPermissionsAlreadyGranted} from './utils'
 
 export const loadContactsFromDeviceActionAtomInAppLoadingTaskId =
@@ -25,11 +25,11 @@ export const loadContactsFromDeviceActionAtomInAppLoadingTaskId =
 
         if (!contactsPermissionsAlreadyGranted) return
 
-        yield* _(
+        const contactsLoaded = yield* _(
           store.set(loadAndNormalizeContactsFromDeviceActionAtom).pipe(
             Effect.catchAll((error) => {
               if (error._tag === 'UnknownContactsError') {
-                return Effect.succeed(true)
+                return Effect.succeed(false)
               }
 
               return Effect.fail(
@@ -42,11 +42,7 @@ export const loadContactsFromDeviceActionAtomInAppLoadingTaskId =
           )
         )
 
-        // Waits for the user's answer, so it must not hold up the loading task
-        yield* _(
-          Effect.forkDaemon(
-            store.set(askToResolveContactsRemovedFromPhoneActionAtom)
-          )
-        )
+        if (contactsLoaded)
+          yield* _(store.set(removeContactsDeletedFromPhoneActionAtom))
       }),
   })

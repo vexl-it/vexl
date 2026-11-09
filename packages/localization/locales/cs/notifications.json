@@ -76,6 +76,8 @@
   "notifications.CLUB_DEACTIVATED.FLAGGED.body": "Klub {{name}} byl deaktivován kvůli nevhodnému obsahu.",
   "notifications.CLUB_DEACTIVATED.OTHER.title": "Klub byl deaktivován",
   "notifications.CLUB_DEACTIVATED.OTHER.body": "Klub {{name}} byl deaktivován.",
+  "notifications.CONTACTS_REMOVED_FROM_PHONE.title": "Kontakty smazané z telefonu",
+  "notifications.CONTACTS_REMOVED_FROM_PHONE.body": "Všimli jsme si, že sis z telefonu smazal pár kontaktů, tak jsme je odebrali i z tvé Vexl sítě. Tvoje nabídky a dosah jsou aktualizované.",
   "notifications.groupNotificationRequest.subtitle": "Máš nové žádosti u svých nabídek",
   "notifications.groupNotificationRequest.title": "Nové žádosti",
   "notifications.createOfferPrompt.title": "Vytvoř svou nabídku",

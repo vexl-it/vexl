@@ -76,6 +76,8 @@
   "notifications.CLUB_DEACTIVATED.FLAGGED.body": "{{name}} foi removido devido a conteúdo inapropriado.",
   "notifications.CLUB_DEACTIVATED.OTHER.title": "Clube desativado",
   "notifications.CLUB_DEACTIVATED.OTHER.body": "{{name}} já não está ativo.",
+  "notifications.CONTACTS_REMOVED_FROM_PHONE.title": "Contactos removidos do teu telemóvel",
+  "notifications.CONTACTS_REMOVED_FROM_PHONE.body": "Reparámos que apagaste alguns contactos do teu telemóvel, por isso também os removemos da tua rede Vexl. As tuas ofertas e o teu alcance estão atualizados.",
   "notifications.groupNotificationRequest.subtitle": "Você tem novos pedidos para as suas ofertas",
   "notifications.groupNotificationRequest.title": "New requests",
   "notifications.createOfferPrompt.title": "Criar a sua oferta",

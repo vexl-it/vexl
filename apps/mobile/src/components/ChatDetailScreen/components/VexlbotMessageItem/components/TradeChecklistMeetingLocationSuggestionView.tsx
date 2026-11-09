@@ -24,6 +24,7 @@ function TradeChecklistMeetingLocationSuggestionView(): React.ReactElement | nul
 
   return (
     <VexlbotActionCard
+      mt="$2"
       buttonText={t('vexlbot.setMeetingLocation')}
       description={t('vexlbot.agreeOnPreferredLocation')}
       onPress={() => {

@@ -84,7 +84,7 @@ export default function TradeChecklistDateAndTimeView({
       return (
         <>
           <VexlbotActionCard
-            mb="$2"
+            mt="$2"
             statusLabel={t('common.accepted')}
             statusVariant="waiting"
             title={t('vexlbot.yourMeetingIsOn')}
@@ -139,7 +139,6 @@ export default function TradeChecklistDateAndTimeView({
       return (
         <VexlbotActionCard
           mt="$2"
-          mb="$2"
           statusLabel={isMessageOutdated ? t('common.outdated') : pendingLabel}
           statusVariant={
             isMessageOutdated ? 'outdated' : 'waitingForConfirmation'

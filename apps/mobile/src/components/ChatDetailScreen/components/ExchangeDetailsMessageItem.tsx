@@ -94,7 +94,7 @@ function DeclinedCard({event}: {event: RevealEvent}): React.ReactElement {
   const {t} = useTranslation()
 
   return (
-    <YStack mb="$4" mt="$4" mx="$4">
+    <YStack mt="$4" mx="$4">
       <YStack
         alignItems="center"
         backgroundColor="$backgroundSecondary"

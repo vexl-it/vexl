@@ -70,7 +70,7 @@ function TradeChecklistNetworkView({
     return (
       <>
         <VexlbotActionCard
-          mb="$2"
+          mt="$2"
           description={description}
           statusLabel={isMessageOutdated ? t('common.outdated') : undefined}
           statusVariant="outdated"

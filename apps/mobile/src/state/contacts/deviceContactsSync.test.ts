@@ -340,6 +340,34 @@ describe('findNumbersMissingFromPhone with a short national number', () => {
   )
 })
 
+describe('findNumbersMissingFromPhone with a national prefix', () => {
+  it('does not count +5491123456789 as missing while it is in the phone in the old national format', () => {
+    const contacts = [
+      ...phoneContacts(3),
+      contact({rawNumber: '+5491123456789'}),
+    ]
+    const nationalFormat = contact({
+      rawNumber: '011 15 2345-6789 ext. 12',
+      normalized: false,
+      invalidNumber: 'invalid',
+    })
+
+    expect(
+      findNumbersMissingFromPhone({
+        storedContacts: [...contacts, nationalFormat],
+        rawNumbersOnDevice: rawNumbersOf([
+          ...contacts.slice(0, 3),
+          nationalFormat,
+        ]),
+        lastSync: {
+          numbersInPhone: contacts.map(numberOf),
+          numbersMissing: contacts.map(numberOf),
+        },
+      })
+    ).toEqual(Option.some({missing: new Set(), deleted: new Set()}))
+  })
+})
+
 describe('keepPhoneSyncState', () => {
   const first = contact({rawNumber: phoneNumber(0)})
   const second = contact({rawNumber: phoneNumber(1)})

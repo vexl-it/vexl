@@ -91,10 +91,13 @@ function isEveryDeviceNumberResolved(
   })
 }
 
+const COMPARED_NATIONAL_DIGITS = 8
+
 /**
  * Whether a number is in the phone: a stored contact on the device has it, or
- * an address book entry contains its national number - the same number written
- * with a trunk zero, an extension or other text that changes how it parses.
+ * an address book entry contains the last digits of its national number - the
+ * same number written with a trunk zero, a national prefix, an extension or
+ * other text that changes how it parses.
  */
 export function createIsInPhone(
   storedContacts: readonly StoredContact[],
@@ -107,9 +110,11 @@ export function createIsInPhone(
   )
   return (number) => {
     if (numbersInPhone.has(number)) return true
-    const nationalNumber = toNationalSignificantNumber(number)
+    const subscriberDigits = toNationalSignificantNumber(number).slice(
+      -COMPARED_NATIONAL_DIGITS
+    )
     return Array.some(digitsInPhone, (digits) =>
-      digits.includes(nationalNumber)
+      digits.includes(subscriberDigits)
     )
   }
 }

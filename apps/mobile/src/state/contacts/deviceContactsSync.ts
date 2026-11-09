@@ -88,6 +88,31 @@ function isEveryDeviceNumberResolved(
   })
 }
 
+const MIN_UNPARSED_DIGITS = 6
+
+/**
+ * An address book entry Vexl can't parse may still be a remembered number in
+ * an unusual format, so a number ending with its digits counts as in the phone.
+ */
+function createIsMaybeUnparsedInPhone(
+  storedContacts: readonly StoredContact[],
+  rawNumbersOnDevice: ReadonlySet<string>
+): (number: E164PhoneNumber) => boolean {
+  const unparsedDigits = pipe(
+    storedContacts,
+    Array.filter(
+      (contact) =>
+        rawNumbersOnDevice.has(contact.info.rawNumber) &&
+        Option.isNone(contact.computedValues)
+    ),
+    Array.map((contact) =>
+      contact.info.rawNumber.replace(/\D/g, '').replace(/^0+/, '')
+    ),
+    Array.filter((digits) => digits.length >= MIN_UNPARSED_DIGITS)
+  )
+  return (number) => Array.some(unparsedDigits, (one) => number.endsWith(one))
+}
+
 const MIN_MISSING_NUMBERS_LIMIT = 10
 
 /**
@@ -115,9 +140,13 @@ export function findNumbersMissingFromPhone({
     return Option.none()
 
   const numbersInPhone = findNumbersInPhone(storedContacts, rawNumbersOnDevice)
+  const isMaybeUnparsedInPhone = createIsMaybeUnparsedInPhone(
+    storedContacts,
+    rawNumbersOnDevice
+  )
   const missing = Array.filter(
     lastSync.numbersInPhone,
-    (number) => !numbersInPhone.has(number)
+    (number) => !numbersInPhone.has(number) && !isMaybeUnparsedInPhone(number)
   )
   const limit = Math.max(
     MIN_MISSING_NUMBERS_LIMIT,

@@ -19,12 +19,14 @@ function contact({
   imported = false,
   importedManually = false,
   normalized = true,
+  invalidNumber = normalized ? 'valid' : 'notTriedYet',
 }: {
   readonly rawNumber: string
   readonly normalizedNumber?: string
   readonly imported?: boolean
   readonly importedManually?: boolean
   readonly normalized?: boolean
+  readonly invalidNumber?: StoredContact['flags']['invalidNumber']
 }): StoredContact {
   return {
     info: {
@@ -47,7 +49,7 @@ function contact({
       seen: true,
       imported,
       importedManually,
-      invalidNumber: normalized ? 'valid' : 'notTriedYet',
+      invalidNumber,
     },
   }
 }
@@ -247,6 +249,29 @@ describe('findNumbersMissingFromPhone', () => {
         lastSync: allInPhone,
       })
     ).toEqual(Option.none())
+  })
+})
+
+describe('findNumbersMissingFromPhone with unparsable entries', () => {
+  it('does not count a number as missing while an unparsable entry has its digits', () => {
+    const contacts = phoneContacts(4)
+    const reformatted = contact({
+      rawNumber: '+420 777\u2011000\u2011000',
+      normalized: false,
+      invalidNumber: 'invalid',
+    })
+    const lastSync = {
+      numbersInPhone: contacts.map(numberOf),
+      numbersMissing: contacts.map(numberOf),
+    }
+
+    expect(
+      findNumbersMissingFromPhone({
+        storedContacts: [...contacts, reformatted],
+        rawNumbersOnDevice: rawNumbersOf([...contacts.slice(1), reformatted]),
+        lastSync,
+      })
+    ).toEqual(Option.some({missing: new Set(), deleted: new Set()}))
   })
 })
 

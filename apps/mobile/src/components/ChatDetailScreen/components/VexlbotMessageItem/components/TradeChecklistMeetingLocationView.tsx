@@ -114,7 +114,7 @@ export default function TradeChecklistMeetingLocationView({
       return (
         <>
           <VexlbotActionCard
-            mb="$2"
+            mt="$2"
             title={t('tradeChecklist.options.MEETING_LOCATION')}
             description={cardText.description}
             details={cardText.details}
@@ -187,7 +187,7 @@ export default function TradeChecklistMeetingLocationView({
 
     return (
       <VexlbotActionCard
-        mb="$2"
+        mt="$2"
         description={cardText.description}
         details={cardText.details}
         statusLabel={isMessageOutdated ? t('common.outdated') : pendingLabel}

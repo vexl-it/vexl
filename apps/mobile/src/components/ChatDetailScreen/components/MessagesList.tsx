@@ -15,6 +15,7 @@ import {
   KeyboardGestureArea,
 } from 'react-native-keyboard-controller'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
+import {getTokens} from 'tamagui'
 import {createIsOtherSideTypingAtom} from '../../../state/chat/atoms/typingIndication'
 import atomKeyExtractor from '../../../utils/atomUtils/atomKeyExtractor'
 import {runAfterAnimationFrame} from '../../../utils/runAfterAnimationFrames'
@@ -180,6 +181,7 @@ function MessagesList({
     >
       <FlashList
         ref={listRef}
+        contentContainerStyle={{paddingBottom: getTokens().space.$5.val}}
         data={dataAtoms}
         drawDistance={windowHeight}
         getItemType={getItemType}

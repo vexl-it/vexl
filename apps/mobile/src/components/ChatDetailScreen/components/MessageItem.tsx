@@ -48,7 +48,6 @@ function TypingIndication(): React.ReactElement | null {
       alignSelf="flex-start"
       mx="$5"
       mt="$2"
-      mb="$3"
       padding="$5"
       flex={1}
       alignItems="stretch"
@@ -290,7 +289,7 @@ function MessageItem({
   if (item.type === 'space') return <Stack h="$5" />
   if (item.type === 'restoredDivider')
     return (
-      <Stack mx="$5" my="$5">
+      <Stack mx="$5" mt="$5">
         <LabeledDivider label={t('messages.restoredMessagesDivider')} />
       </Stack>
     )

@@ -5,7 +5,7 @@ import VexlbotActionCard from './VexlbotActionCard'
 function TradeChecklistAllSetView(): React.ReactElement | null {
   const {t} = useTranslation()
 
-  return <VexlbotActionCard title={t('vexlbot.allSetForTheMeeting')} />
+  return <VexlbotActionCard mt="$2" title={t('vexlbot.allSetForTheMeeting')} />
 }
 
 export default TradeChecklistAllSetView

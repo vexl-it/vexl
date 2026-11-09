@@ -275,6 +275,28 @@ describe('findNumbersMissingFromPhone with unparsable entries', () => {
   })
 })
 
+describe('findNumbersMissingFromPhone with an extension', () => {
+  it('does not count a number as missing while an entry has it with an extension', () => {
+    const contacts = phoneContacts(4)
+    const withExtension = contact({
+      rawNumber: `${phoneNumber(0)},1234`,
+      normalized: false,
+      invalidNumber: 'invalid',
+    })
+
+    expect(
+      findNumbersMissingFromPhone({
+        storedContacts: [...contacts, withExtension],
+        rawNumbersOnDevice: rawNumbersOf([...contacts.slice(1), withExtension]),
+        lastSync: {
+          numbersInPhone: contacts.map(numberOf),
+          numbersMissing: contacts.map(numberOf),
+        },
+      })
+    ).toEqual(Option.some({missing: new Set(), deleted: new Set()}))
+  })
+})
+
 describe('keepPhoneSyncState', () => {
   it('adds newly seen numbers and keeps the rest', () => {
     const first = toE164(phoneNumber(0))

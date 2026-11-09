@@ -105,8 +105,13 @@ function createIsMaybeUnparsedInPhone(
         rawNumbersOnDevice.has(contact.info.rawNumber) &&
         Option.isNone(contact.computedValues)
     ),
-    Array.map((contact) =>
-      contact.info.rawNumber.replace(/\D/g, '').replace(/^0+/, '')
+    Array.map(
+      (contact) =>
+        // Digits before any pause, wait or extension part, without trunk zeros
+        contact.info.rawNumber
+          .split(/ext|[,;#xpw]/i)[0]
+          ?.replace(/\D/g, '')
+          .replace(/^0+/, '') ?? ''
     ),
     Array.filter((digits) => digits.length >= MIN_UNPARSED_DIGITS)
   )

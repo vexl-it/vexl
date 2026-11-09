@@ -1,0 +1,83 @@
+diff --git a/android/src/main/java/com/reactnativepagerview/NestedScrollableHost.kt b/android/src/main/java/com/reactnativepagerview/NestedScrollableHost.kt
+index 87b58d0f61d9955059cd43a78823fa9e9ea223b6..397715fef2e827a641569326df1cf17564da09d7 100644
+--- a/android/src/main/java/com/reactnativepagerview/NestedScrollableHost.kt
++++ b/android/src/main/java/com/reactnativepagerview/NestedScrollableHost.kt
+@@ -1,10 +1,12 @@
+ package com.reactnativepagerview
+ 
+ import android.content.Context
++import android.graphics.Rect
+ import android.util.AttributeSet
+ import android.view.MotionEvent
+ import android.view.View
+ import android.view.ViewConfiguration
++import android.view.ViewGroup
+ import android.widget.FrameLayout
+ import androidx.viewpager2.widget.ViewPager2
+ import androidx.viewpager2.widget.ViewPager2.ORIENTATION_HORIZONTAL
+@@ -28,6 +30,9 @@ class NestedScrollableHost : FrameLayout {
+   private var touchSlop = 0
+   private var initialX = 0f
+   private var initialY = 0f
++  private var initialRawX = 0f
++  private var initialRawY = 0f
++  private var isNestedHorizontalScrollResolved = false
+   private var nativeGestureStarted: Boolean = false
+   private val parentViewPager: ViewPager2?
+     get() {
+@@ -64,10 +69,16 @@ class NestedScrollableHost : FrameLayout {
+     if (e.action == MotionEvent.ACTION_DOWN) {
+       initialX = e.x
+       initialY = e.y
++      initialRawX = e.rawX
++      initialRawY = e.rawY
++      isNestedHorizontalScrollResolved = false
+       if (orientation != null) {
+         parent.requestDisallowInterceptTouchEvent(true)
+       }
+     } else if (e.action == MotionEvent.ACTION_MOVE) {
++      if (!isNestedHorizontalScrollResolved) {
++        letNestedHorizontalScrollWin(e)
++      }
+       val dx = e.x - initialX
+       val dy = e.y - initialY
+       val isVpHorizontal = orientation == ORIENTATION_HORIZONTAL
+@@ -98,6 +109,38 @@ class NestedScrollableHost : FrameLayout {
+     }
+   }
+ 
++  // ViewPager2 checks only whether the whole page scrolls, so a swipe that passed its paging
++  // slop within one move event turned the page instead of scrolling a horizontal list in it.
++  private fun letNestedHorizontalScrollWin(e: MotionEvent) {
++    val dx = e.rawX - initialRawX
++    val dy = e.rawY - initialRawY
++    if (dx.absoluteValue < touchSlop && dy.absoluteValue < touchSlop) return
++
++    isNestedHorizontalScrollResolved = true
++    val viewPager = child as? ViewPager2 ?: return
++    if (viewPager.orientation != ORIENTATION_HORIZONTAL || dy.absoluteValue > dx.absoluteValue) return
++
++    val pages = viewPager.getChildAt(0) as? ViewGroup ?: return
++    pages.childrenTopFirst()
++      .firstNotNullOfOrNull { findHorizontalScrollableAtTouch(it, -dx.sign.toInt()) }
++      ?.parent
++      ?.requestDisallowInterceptTouchEvent(true)
++  }
++
++  private fun findHorizontalScrollableAtTouch(view: View, direction: Int): View? {
++    val rect = Rect()
++    if (!view.isShown || !view.getGlobalVisibleRect(rect) ||
++      !rect.contains(initialRawX.toInt(), initialRawY.toInt())) {
++      return null
++    }
++    return (view as? ViewGroup)?.childrenTopFirst()
++      ?.firstNotNullOfOrNull { findHorizontalScrollableAtTouch(it, direction) }
++      ?: view.takeIf { it.canScrollHorizontally(direction) }
++  }
++
++  private fun ViewGroup.childrenTopFirst(): List<View> =
++    (childCount - 1 downTo 0).map(::getChildAt)
++
+   override fun onTouchEvent(e: MotionEvent): Boolean {
+     if (e.actionMasked == MotionEvent.ACTION_UP) {
+       if (nativeGestureStarted) {

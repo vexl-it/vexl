@@ -3,6 +3,7 @@ import {
   generateChatId,
   generateChatMessageId,
   type ChatMessage,
+  type MessageType,
 } from '@vexl-next/domain/src/general/messaging'
 import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {VersionString} from '@vexl-next/domain/src/utility/VersionString.brand'
@@ -38,6 +39,7 @@ jest.mock('../chatImages', () => {
     ),
   }
 })
+let mockDonationPromptShows = 0
 jest.mock(
   '../../../components/DonationPrompt/atoms/showDonationPromptGiveLoveActionAtom',
   () => {
@@ -45,7 +47,10 @@ jest.mock(
     const {Effect} = jest.requireActual('effect')
     return {
       __esModule: true,
-      default: atom(null, () => Effect.void),
+      default: atom(null, () => {
+        mockDonationPromptShows++
+        return Effect.void
+      }),
       DONATION_PROMPT_CHAT_MESSAGES_THRESHOLD_COUNT: 10,
     }
   }
@@ -63,12 +68,16 @@ function time(value: number): UnixMilliseconds {
 
 const senderKey = generatePrivateKey()
 
-function chatMessage(text: string, at: number): ChatMessage {
+function chatMessage(
+  text: string,
+  at: number,
+  messageType: MessageType = 'MESSAGE'
+): ChatMessage {
   return {
     uuid: generateChatMessageId(),
     text,
     time: time(at),
-    messageType: 'MESSAGE',
+    messageType,
     senderPublicKey: senderKey.publicKeyPemBase64,
   }
 }
@@ -82,6 +91,7 @@ function setup(): {
   deleteMessages: () => void
 } {
   mockSends.length = 0
+  mockDonationPromptShows = 0
   const store = createStore()
   const chatAtom = atom<ChatWithMessages>({
     chat: {
@@ -261,5 +271,30 @@ describe('sendMessagesActionAtom', () => {
     } finally {
       jest.useRealTimers()
     }
+  })
+
+  it('counts only chat messages towards the donation prompt', async () => {
+    const {send} = setup()
+    const settleAll = async (from: number, count: number): Promise<void> => {
+      for (let i = from; i < from + count; i++)
+        await settleSend(i, {receivedByServerAt: time(1000 + i)})
+    }
+
+    send(
+      Array.append(
+        Array.makeBy(10, (i) =>
+          chatMessage('', 100 + i, 'TRADE_CHECKLIST_UPDATE')
+        ),
+        chatMessage('a', 200)
+      )
+    )
+    await flush()
+    await settleAll(0, 11)
+    expect(mockDonationPromptShows).toBe(0)
+
+    send(Array.makeBy(10, (i) => chatMessage('b', 300 + i)))
+    await flush()
+    await settleAll(11, 10)
+    expect(mockDonationPromptShows).toBeGreaterThan(0)
   })
 })

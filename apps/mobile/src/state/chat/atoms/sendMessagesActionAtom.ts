@@ -82,7 +82,10 @@ export default function sendMessagesActionAtom(
 
     const chatWithMessages = get(chatWithMessagesAtom)
     const {chat} = chatWithMessages
-    const numberOfMessagesInChat = chatWithMessages.messages.length
+    const numberOfMessagesInChat = Array.countBy(
+      chatWithMessages.messages,
+      (one) => one.message.messageType === 'MESSAGE'
+    )
 
     const sendingMessages = (): readonly ChatMessage[] =>
       Array.filterMap(get(chatWithMessagesAtom).messages, (one) =>

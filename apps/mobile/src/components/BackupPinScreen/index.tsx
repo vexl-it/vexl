@@ -74,7 +74,7 @@ export default function BackupPinScreen({
         </YStack>
       }
     >
-      <YStack gap="$7" paddingVertical="$5">
+      <YStack flex={1} justifyContent="center" gap="$7" paddingVertical="$5">
         <ScreenHeading title={title} text={text} />
         <CodeInput
           editable={!busy}

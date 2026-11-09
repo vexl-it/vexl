@@ -72,7 +72,7 @@ export default function RestoreWrongPhoneNumberScreen({
         </YStack>
       }
     >
-      <YStack paddingVertical="$5">
+      <YStack flex={1} justifyContent="center" paddingVertical="$5">
         <ScreenHeading
           title={t('loginFlow.restoreFromBackup.wrongPhoneNumber.title')}
           text={t('loginFlow.restoreFromBackup.wrongPhoneNumber.text')}

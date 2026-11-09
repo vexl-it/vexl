@@ -1,8 +1,8 @@
 /**
- * Regression tests for the onboarding contact import flow (fresh device).
- * Runs the REAL pipeline - loadContactsFromDevice -> normalize -> plan ->
- * import -> update imported flags -> persist - with only device IO, network
- * and UI mocked.
+ * Regression tests for the onboarding contact import flow (fresh device) and
+ * for removing contacts deleted from the phone on resume. Runs the REAL
+ * pipeline - loadContactsFromDevice -> normalize -> plan -> import -> update
+ * imported flags -> persist - with only device IO, network and UI mocked.
  */
 import {Effect} from 'effect'
 import {createStore} from 'jotai'
@@ -41,7 +41,7 @@ jest.mock('expo-contacts', () => ({
   })),
 }))
 
-const mockDeviceContactsState = {count: 42}
+const mockDeviceContactsState = {count: 42, deleted: new Set<number>()}
 
 jest.mock('../getDeviceContactsFromSystem', () => ({
   getDeviceContactsFromSystem: jest.fn(async () =>
@@ -53,7 +53,7 @@ jest.mock('../getDeviceContactsFromSystem', () => ({
       phoneNumbers: [
         {label: 'mobile', number: `+420601${String(100 + i).padStart(6, '0')}`},
       ],
-    }))
+    })).filter((_, i) => !mockDeviceContactsState.deleted.has(i))
   ),
 }))
 
@@ -227,10 +227,35 @@ jest.mock('../../../api', () => {
   }
 })
 
+const mockShownNotifications: string[] = []
+
+jest.mock('../../../utils/notifications/displayLocalNotification', () => ({
+  displayLocalNotification: jest.fn(
+    async ({content}: {content: {title: string}}) => {
+      mockShownNotifications.push(content.title)
+    }
+  ),
+}))
+
+jest.mock('../../../utils/notifications/notificationChannels', () => ({
+  getDefaultChannel: jest.fn(async () => 'default'),
+}))
+
+jest.mock('../../../components/NotificationsScreen/state', () => {
+  const {atom} = jest.requireActual('jotai')
+  return {addNotificationToCenterActionAtom: atom(null, () => {})}
+})
+
 // eslint-disable-next-line import/first
-import {importedContactsCountAtom, storedContactsAtom} from './contactsStore'
+import {
+  importedContactsCountAtom,
+  numbersInPhoneAtLastSyncAtom,
+  storedContactsAtom,
+} from './contactsStore'
 // eslint-disable-next-line import/first
 import loadAndNormalizeContactsFromDeviceActionAtom from './loadAndNormalizeContactsFromDeviceActionAtom'
+// eslint-disable-next-line import/first
+import {removeContactsDeletedFromPhoneActionAtom} from './removeContactsDeletedFromPhoneActionAtom'
 // eslint-disable-next-line import/first
 import {submitContactsActionAtom} from './submitContactsActionAtom'
 
@@ -385,5 +410,95 @@ describe('Onboarding contact import (fresh device)', () => {
     expect(result).toEqual('noContactsSelected')
     expect(store.get(importedContactsCountAtom)).toEqual(0)
     expect(mockImportContacts).not.toHaveBeenCalled()
+  })
+})
+
+describe('Removing contacts deleted from the phone on resume', () => {
+  const resume = async (
+    store: ReturnType<typeof createStore>
+  ): Promise<void> => {
+    await Effect.runPromise(
+      store.set(loadAndNormalizeContactsFromDeviceActionAtom)
+    )
+    await Effect.runPromise(store.set(removeContactsDeletedFromPhoneActionAtom))
+  }
+
+  const importAllContacts = async (): Promise<
+    ReturnType<typeof createStore>
+  > => {
+    const store = createStore()
+    await Effect.runPromise(
+      store.set(submitContactsActionAtom, onboardingSubmitParams)
+    )
+    mockImportContacts.mockClear()
+    return store
+  }
+
+  const replaceCalls = (): Array<{replace: boolean; count: number}> =>
+    mockImportContacts.mock.calls.map(([request]) => ({
+      replace: request.replace,
+      count: request.contacts.length,
+    }))
+
+  beforeEach(() => {
+    const {storage} = jest.requireActual('../../../utils/mmkv/effectMmkv')
+    storage._storage.clearAll()
+    mockFrameState.realistic = false
+    mockDeviceContactsState.count = 20
+    mockDeviceContactsState.deleted = new Set()
+    mockShownNotifications.length = 0
+  })
+
+  it('only records numbers on the first sync, then removes a contact deleted from the phone', async () => {
+    const store = await importAllContacts()
+
+    // Deleted before the first sync after updating - never seen, never removed
+    mockDeviceContactsState.deleted = new Set([0])
+    await resume(store)
+    expect(mockImportContacts).not.toHaveBeenCalled()
+    expect(store.get(importedContactsCountAtom)).toEqual(20)
+    expect(store.get(numbersInPhoneAtLastSyncAtom)).toHaveLength(19)
+
+    mockDeviceContactsState.deleted = new Set([0, 1])
+    await resume(store)
+    expect(replaceCalls()).toEqual([{replace: true, count: 19}])
+    expect(store.get(importedContactsCountAtom)).toEqual(19)
+    expect(
+      store
+        .get(storedContactsAtom)
+        .some((contact) => contact.info.rawNumber === '+420601000101')
+    ).toBe(false)
+    expect(mockShownNotifications).toEqual([
+      'notifications.CONTACTS_REMOVED_FROM_PHONE.title',
+    ])
+  })
+
+  it('keeps the contact when the update fails and removes it on the next resume', async () => {
+    const store = await importAllContacts()
+    await resume(store)
+
+    mockDeviceContactsState.deleted = new Set([0])
+    mockImportContacts.mockImplementationOnce(() =>
+      Effect.fail(new Error('offline'))
+    )
+    await resume(store)
+    expect(store.get(importedContactsCountAtom)).toEqual(20)
+    expect(mockShownNotifications).toEqual([])
+
+    await resume(store)
+    expect(store.get(importedContactsCountAtom)).toEqual(19)
+    expect(mockShownNotifications).toHaveLength(1)
+  })
+
+  it('removes nothing when most of the address book is missing from a read', async () => {
+    const store = await importAllContacts()
+    await resume(store)
+
+    mockDeviceContactsState.deleted = new Set([
+      0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+    ])
+    await resume(store)
+    expect(mockImportContacts).not.toHaveBeenCalled()
+    expect(store.get(importedContactsCountAtom)).toEqual(20)
   })
 })

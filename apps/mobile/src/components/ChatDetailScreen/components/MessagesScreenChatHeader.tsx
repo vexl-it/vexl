@@ -50,11 +50,13 @@ export function MessagesScreenChatHeader(): React.ReactElement {
   )
   const rightActions = useChatHeaderRightActions()
 
-  const noImageUri =
-    otherSideData.image.type === 'imageUri' && !otherSideData.image.imageUri
-  const noGoldenAvatarType =
-    !otherSideGoldenAvatarType ||
-    (!offer?.ownershipInfo && !offer?.offerInfo.publicPart.goldenAvatarType)
+  const imageUri =
+    otherSideData.image.type === 'imageUri'
+      ? otherSideData.image.imageUri
+      : undefined
+  const hasGoldenAvatar =
+    !!otherSideGoldenAvatarType ||
+    (!offer?.ownershipInfo && !!offer?.offerInfo.publicPart.goldenAvatarType)
 
   return (
     <Stack
@@ -79,18 +81,13 @@ export function MessagesScreenChatHeader(): React.ReactElement {
         leftAction={{icon: ChevronLeft, onPress: safeGoBack}}
         avatar={
           <TouchableOpacity
-            disabled={noImageUri || noGoldenAvatarType}
+            disabled={!imageUri && !hasGoldenAvatar}
             onPress={() => {
-              if (otherSideData.image.type === 'imageUri')
+              if (imageUri)
                 navigation.navigate('ChatImagePreview', {
-                  imageUri: resolveLocalUri(otherSideData.image.imageUri),
+                  imageUri: resolveLocalUri(imageUri),
                 })
-              else if (
-                !!otherSideGoldenAvatarType ||
-                (!offer?.ownershipInfo &&
-                  offer?.offerInfo.publicPart.goldenAvatarType)
-              )
-                showGoldenAvatarInfoModal()
+              else showGoldenAvatarInfoModal()
             }}
           >
             <UserAvatar

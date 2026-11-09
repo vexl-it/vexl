@@ -10,7 +10,7 @@ import {askAreYouSureActionAtom} from '../../GlobalDialog'
 import DonationPrompt from '../components/DonationPrompt'
 import {donationPromptCooldownPassed, hasRecentDonation} from './stateAtoms'
 
-export const DONATION_PROMPT_CHAT_MESSAGES_THRESHOLD_COUNT = 10
+export const DONATION_PROMPT_CHAT_MESSAGES_THRESHOLD_COUNT = 15
 
 const showDonationPromptGiveLoveActionAtom = atom(
   null,

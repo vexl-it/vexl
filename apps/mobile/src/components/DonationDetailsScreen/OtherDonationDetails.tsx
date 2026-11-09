@@ -1,4 +1,4 @@
-import {Button, Screen} from '@vexl-next/ui'
+import {Button, Screen, ScreenFooterSpacer} from '@vexl-next/ui'
 import {ScrollView, Stack, YStack} from '@vexl-next/ui/src/primitives'
 import {Effect} from 'effect'
 import {useSetAtom} from 'jotai'
@@ -15,13 +15,11 @@ import {
 import {DonationDetailsNavigationBar} from './DonationDetailsNavigationBar'
 
 export function OtherDonationDetails({
-  footerHeight,
   summary,
   paymentMethod,
   paymentLink,
   status,
 }: {
-  readonly footerHeight: number
   readonly summary: DonationSummaryData
   readonly paymentMethod: React.ComponentProps<
     typeof BtcInvoiceStatus
@@ -65,7 +63,7 @@ export function OtherDonationDetails({
         flex={1}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
-          paddingBottom: footerHeight + tokens.space.$5.val,
+          paddingBottom: tokens.space.$5.val,
         }}
       >
         <YStack gap="$5">
@@ -78,6 +76,7 @@ export function OtherDonationDetails({
             />
           </Stack>
         </YStack>
+        <ScreenFooterSpacer />
       </ScrollView>
     </Screen>
   )

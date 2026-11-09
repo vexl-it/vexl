@@ -5,6 +5,7 @@ import {
   Copy,
   Download,
   Screen,
+  ScreenFooterSpacer,
   Typography,
   useTheme,
 } from '@vexl-next/ui'
@@ -28,12 +29,10 @@ const QR_CODE_SIZE = 300
 const QR_CODE_BORDER_WIDTH = 2
 
 export function NewDonationDetails({
-  footerHeight,
   paymentLink,
   isLightning,
   summary,
 }: {
-  readonly footerHeight: number
   readonly paymentLink: string
   readonly isLightning: boolean
   readonly summary: DonationSummaryData
@@ -64,7 +63,7 @@ export function NewDonationDetails({
         flex={1}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
-          paddingBottom: footerHeight + tokens.space.$5.val,
+          paddingBottom: tokens.space.$5.val,
         }}
       >
         <YStack gap="$5">
@@ -133,6 +132,7 @@ export function NewDonationDetails({
             </Button>
           </Card>
         </YStack>
+        <ScreenFooterSpacer />
       </ScrollView>
     </Screen>
   )

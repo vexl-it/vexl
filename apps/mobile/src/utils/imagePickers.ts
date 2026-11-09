@@ -67,28 +67,6 @@ function pickImagesFromGalleryAndTryToResolveThePermissionsAlongTheWay(
   >
 ): Effect.Effect<Array.NonEmptyReadonlyArray<SelectedImage>, ImagePickerError> {
   return Effect.tryPromise(async () => {
-    const libraryPermissions =
-      await ImagePicker.getMediaLibraryPermissionsAsync()
-
-    if (!libraryPermissions.granted && !libraryPermissions.canAskAgain) {
-      return Effect.fail(
-        new ImagePickerError({
-          reason: 'PermissionsNotGranted',
-        })
-      )
-    }
-
-    if (!libraryPermissions.granted) {
-      const permissionsResult =
-        await ImagePicker.requestMediaLibraryPermissionsAsync()
-      if (!permissionsResult.granted)
-        return Effect.fail(
-          new ImagePickerError({
-            reason: 'PermissionsNotGranted',
-          })
-        )
-    }
-
     const result = await ImagePicker.launchImageLibraryAsync({
       ...options,
       mediaTypes: ['images'],

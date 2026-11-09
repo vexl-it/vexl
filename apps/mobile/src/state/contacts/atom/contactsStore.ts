@@ -22,11 +22,8 @@ export const contactsStoreAtom = atomWithParsedMmkvStorage(
         default: () => false,
       }
     ),
-    lastPhoneSync: Schema.optional(
-      Schema.Struct({
-        numbersInPhone: Schema.Array(E164PhoneNumberUnsafe),
-        numbersMissing: Schema.Array(E164PhoneNumberUnsafe),
-      })
+    numbersInPhoneAtLastSync: Schema.optional(
+      Schema.Array(E164PhoneNumberUnsafe)
     ),
   })
 )
@@ -40,8 +37,8 @@ export const needsFullContactsReplaceAfterContactEditAtom = focusAtom(
   (o) => o.prop('needsFullContactsReplaceAfterContactEdit')
 )
 
-export const lastPhoneSyncAtom = focusAtom(contactsStoreAtom, (o) =>
-  o.prop('lastPhoneSync')
+export const numbersInPhoneAtLastSyncAtom = focusAtom(contactsStoreAtom, (o) =>
+  o.prop('numbersInPhoneAtLastSync')
 )
 
 export const newPhoneContactsToReviewRawNumbersAtom = atom((get) =>

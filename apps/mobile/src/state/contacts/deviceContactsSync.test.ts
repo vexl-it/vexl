@@ -2,11 +2,9 @@ import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.bra
 import {HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {Option, Schema} from 'effect'
 import {
-  findNumbersInPhone,
-  findNumbersMissingFromPhone,
+  addNumbersInPhone,
+  findNumbersDeletedFromPhone,
   findNumbersToRemoveFromNetwork,
-  keepPhoneSyncState,
-  nextPhoneSyncState,
   syncStoredContactsWithDevice,
 } from './deviceContactsSync'
 import {type StoredContact} from './domain'
@@ -98,22 +96,19 @@ describe('syncStoredContactsWithDevice', () => {
     vexlContactSavedToPhone,
     sameNumberOnPhone,
   ])
-  const lastSync = {
-    numbersInPhone: [
-      onPhone,
-      deletedInactive,
-      deletedActive,
-      vexlContactSavedToPhone,
-      sameNumberOnPhone,
-    ].map(numberOf),
-    numbersMissing: [deletedInactive, deletedActive].map(numberOf),
-  }
+  const numbersInPhoneAtLastSync = [
+    onPhone,
+    deletedInactive,
+    deletedActive,
+    vexlContactSavedToPhone,
+    sameNumberOnPhone,
+  ].map(numberOf)
 
   it('drops inactive contacts deleted from the phone, keeps the rest and turns contacts on the phone into phone contacts', () => {
     const result = syncStoredContactsWithDevice(
       storedContacts,
       deviceRawNumbers,
-      lastSync
+      numbersInPhoneAtLastSync
     )
 
     expect(result).toEqual([
@@ -130,13 +125,7 @@ describe('syncStoredContactsWithDevice', () => {
     ])
   })
 
-  it('drops nothing missing for the first time or on the first sync', () => {
-    expect(
-      syncStoredContactsWithDevice(storedContacts, deviceRawNumbers, {
-        ...lastSync,
-        numbersMissing: [],
-      })
-    ).toContain(deletedInactive)
+  it('drops nothing on the first sync', () => {
     expect(
       syncStoredContactsWithDevice(storedContacts, deviceRawNumbers, undefined)
     ).toContain(deletedInactive)
@@ -144,84 +133,46 @@ describe('syncStoredContactsWithDevice', () => {
 
   it('changes nothing when the address book read is empty', () => {
     expect(
-      syncStoredContactsWithDevice(storedContacts, new Set(), lastSync)
+      syncStoredContactsWithDevice(
+        storedContacts,
+        new Set(),
+        numbersInPhoneAtLastSync
+      )
     ).toBe(storedContacts)
   })
 })
 
-describe('findNumbersMissingFromPhone', () => {
+describe('findNumbersDeletedFromPhone', () => {
   const contacts = phoneContacts(100)
-  const allInPhone = {
-    numbersInPhone: contacts.map(numberOf),
-    numbersMissing: [],
-  }
+  const numbersInPhoneAtLastSync = contacts.map(numberOf)
   const withoutFirst = rawNumbersOf(contacts.slice(1))
 
-  it('counts a number as deleted once it is missing on two syncs in a row', () => {
-    const firstSync = findNumbersMissingFromPhone({
-      storedContacts: contacts,
-      rawNumbersOnDevice: withoutFirst,
-      lastSync: allInPhone,
-    })
-    const missingFirst = new Set(contacts.slice(0, 1).map(numberOf))
-    expect(firstSync).toEqual(
-      Option.some({missing: missingFirst, deleted: new Set()})
-    )
-
-    const afterFirstSync = nextPhoneSyncState(
-      findNumbersInPhone(contacts, withoutFirst),
-      Option.getOrThrow(firstSync)
-    )
+  it('returns numbers that were in the phone at the last sync and are gone now', () => {
     expect(
-      findNumbersMissingFromPhone({
+      findNumbersDeletedFromPhone({
         storedContacts: contacts,
         rawNumbersOnDevice: withoutFirst,
-        lastSync: afterFirstSync,
+        numbersInPhoneAtLastSync,
       })
-    ).toEqual(Option.some({missing: missingFirst, deleted: missingFirst}))
-  })
-
-  it('forgets a missing number that comes back', () => {
-    const afterFirstSync = nextPhoneSyncState(
-      findNumbersInPhone(contacts, withoutFirst),
-      Option.getOrThrow(
-        findNumbersMissingFromPhone({
-          storedContacts: contacts,
-          rawNumbersOnDevice: withoutFirst,
-          lastSync: allInPhone,
-        })
-      )
-    )
-    const back = findNumbersMissingFromPhone({
-      storedContacts: contacts,
-      rawNumbersOnDevice: rawNumbersOf(contacts),
-      lastSync: afterFirstSync,
-    })
-
-    expect(
-      nextPhoneSyncState(
-        findNumbersInPhone(contacts, rawNumbersOf(contacts)),
-        Option.getOrThrow(back)
-      ).numbersMissing
-    ).toEqual([])
+    ).toEqual(Option.some(new Set(contacts.slice(0, 1).map(numberOf))))
   })
 
   it("can't tell on the first sync", () => {
     expect(
-      findNumbersMissingFromPhone({
+      findNumbersDeletedFromPhone({
         storedContacts: contacts,
         rawNumbersOnDevice: withoutFirst,
-        lastSync: undefined,
+        numbersInPhoneAtLastSync: undefined,
       })
     ).toEqual(Option.none())
   })
 
   it("can't tell when too many numbers are missing at once", () => {
     expect(
-      findNumbersMissingFromPhone({
+      findNumbersDeletedFromPhone({
         storedContacts: contacts,
         rawNumbersOnDevice: rawNumbersOf(contacts.slice(11)),
-        lastSync: allInPhone,
+        numbersInPhoneAtLastSync,
       })
     ).toEqual(Option.none())
   })
@@ -233,90 +184,39 @@ describe('findNumbersMissingFromPhone', () => {
     })
 
     expect(
-      findNumbersMissingFromPhone({
+      findNumbersDeletedFromPhone({
         storedContacts: [...contacts, reformattedNotNormalized],
         rawNumbersOnDevice: rawNumbersOf([
           ...contacts.slice(1),
           reformattedNotNormalized,
         ]),
-        lastSync: allInPhone,
+        numbersInPhoneAtLastSync,
       })
     ).toEqual(Option.none())
     expect(
-      findNumbersMissingFromPhone({
+      findNumbersDeletedFromPhone({
         storedContacts: contacts,
         rawNumbersOnDevice: new Set([...withoutFirst, '777 000 0000']),
-        lastSync: allInPhone,
+        numbersInPhoneAtLastSync,
       })
     ).toEqual(Option.none())
   })
-})
 
-describe('findNumbersMissingFromPhone with unparsable entries', () => {
-  it('does not count a number as missing while an unparsable entry has its digits', () => {
-    const contacts = phoneContacts(4)
-    const reformatted = contact({
-      rawNumber: '+420 777\u2011000\u2011000',
-      normalized: false,
-      invalidNumber: 'invalid',
-    })
-    const lastSync = {
-      numbersInPhone: contacts.map(numberOf),
-      numbersMissing: contacts.map(numberOf),
-    }
-
-    expect(
-      findNumbersMissingFromPhone({
-        storedContacts: [...contacts, reformatted],
-        rawNumbersOnDevice: rawNumbersOf([...contacts.slice(1), reformatted]),
-        lastSync,
-      })
-    ).toEqual(Option.some({missing: new Set(), deleted: new Set()}))
-  })
-})
-
-describe('findNumbersMissingFromPhone with an extension', () => {
   it.each([
-    `Work: ${phoneNumber(0)},1234`,
-    `${phoneNumber(0)}-12`,
-    `${phoneNumber(0)} (99)`,
-    `${phoneNumber(0)}/12`,
-    '777 000 000 kl. 12',
+    [phoneNumber(0), '+420 777\u2011000\u2011000'],
+    [phoneNumber(0), `Work: ${phoneNumber(0)},1234`],
+    [phoneNumber(0), `${phoneNumber(0)}-12`],
+    [phoneNumber(0), `${phoneNumber(0)} (99)`],
+    [phoneNumber(0), `${phoneNumber(0)}/12`],
+    [phoneNumber(0), '777 000 000 kl. 12'],
+    ['+3546123456', '612 3456-12'],
+    ['+3546123456', '+354 (0)612 3456'],
+    ['+5491123456789', '011 15 2345-6789 ext. 12'],
   ])(
-    'does not count a number as missing while %s is in the phone',
-    (rawNumber) => {
-      const contacts = phoneContacts(4)
-      const withExtension = contact({
-        rawNumber,
-        normalized: false,
-        invalidNumber: 'invalid',
-      })
-
-      expect(
-        findNumbersMissingFromPhone({
-          storedContacts: [...contacts, withExtension],
-          rawNumbersOnDevice: rawNumbersOf([
-            ...contacts.slice(1),
-            withExtension,
-          ]),
-          lastSync: {
-            numbersInPhone: contacts.map(numberOf),
-            numbersMissing: contacts.map(numberOf),
-          },
-        })
-      ).toEqual(Option.some({missing: new Set(), deleted: new Set()}))
-    }
-  )
-})
-
-describe('findNumbersMissingFromPhone with a short national number', () => {
-  it.each(['612 3456-12', '+354 (0)612 3456'])(
-    'does not count +3546123456 as missing while %s is in the phone',
-    (rawNumber) => {
-      const contacts = [
-        ...phoneContacts(3),
-        contact({rawNumber: '+3546123456'}),
-      ]
+    'does not count %s as deleted while %s is in the phone',
+    (number, rawNumber) => {
+      const others = phoneContacts(4).slice(1)
+      const remembered = [...others, contact({rawNumber: number})]
       const reformatted = contact({
         rawNumber,
         normalized: false,
@@ -324,86 +224,27 @@ describe('findNumbersMissingFromPhone with a short national number', () => {
       })
 
       expect(
-        findNumbersMissingFromPhone({
-          storedContacts: [...contacts, reformatted],
-          rawNumbersOnDevice: rawNumbersOf([
-            ...contacts.slice(0, 3),
-            reformatted,
-          ]),
-          lastSync: {
-            numbersInPhone: contacts.map(numberOf),
-            numbersMissing: contacts.map(numberOf),
-          },
+        findNumbersDeletedFromPhone({
+          storedContacts: [...remembered, reformatted],
+          rawNumbersOnDevice: rawNumbersOf([...others, reformatted]),
+          numbersInPhoneAtLastSync: remembered.map(numberOf),
         })
-      ).toEqual(Option.some({missing: new Set(), deleted: new Set()}))
+      ).toEqual(Option.some(new Set()))
     }
   )
 })
 
-describe('findNumbersMissingFromPhone with a national prefix', () => {
-  it('does not count +5491123456789 as missing while it is in the phone in the old national format', () => {
-    const contacts = [
-      ...phoneContacts(3),
-      contact({rawNumber: '+5491123456789'}),
-    ]
-    const nationalFormat = contact({
-      rawNumber: '011 15 2345-6789 ext. 12',
-      normalized: false,
-      invalidNumber: 'invalid',
-    })
-
-    expect(
-      findNumbersMissingFromPhone({
-        storedContacts: [...contacts, nationalFormat],
-        rawNumbersOnDevice: rawNumbersOf([
-          ...contacts.slice(0, 3),
-          nationalFormat,
-        ]),
-        lastSync: {
-          numbersInPhone: contacts.map(numberOf),
-          numbersMissing: contacts.map(numberOf),
-        },
-      })
-    ).toEqual(Option.some({missing: new Set(), deleted: new Set()}))
-  })
-})
-
-describe('keepPhoneSyncState', () => {
-  const first = contact({rawNumber: phoneNumber(0)})
-  const second = contact({rawNumber: phoneNumber(1)})
-  const firstNumber = toE164(phoneNumber(0))
-  const lastSync = {
-    numbersInPhone: [firstNumber],
-    numbersMissing: [firstNumber],
-  }
-
+describe('addNumbersInPhone', () => {
   it('adds newly seen numbers and keeps the rest', () => {
-    expect(
-      keepPhoneSyncState(lastSync, [first, second], rawNumbersOf([second]))
-    ).toEqual({
-      numbersInPhone: [firstNumber, toE164(phoneNumber(1))],
-      numbersMissing: [firstNumber],
-    })
-  })
-
-  it('forgets a missing number that is back in the phone, even in a format Vexl cannot parse', () => {
-    const withTrunkZero = contact({
-      rawNumber: '+420 (0)777 000 000',
-      normalized: false,
-      invalidNumber: 'invalid',
-    })
+    const second = contact({rawNumber: phoneNumber(1)})
 
     expect(
-      keepPhoneSyncState(lastSync, [first], rawNumbersOf([first]))
-        .numbersMissing
-    ).toEqual([])
-    expect(
-      keepPhoneSyncState(
-        lastSync,
-        [first, withTrunkZero],
-        rawNumbersOf([withTrunkZero])
-      ).numbersMissing
-    ).toEqual([])
+      addNumbersInPhone(
+        [toE164(phoneNumber(0))],
+        [second],
+        rawNumbersOf([second])
+      )
+    ).toEqual([toE164(phoneNumber(0)), toE164(phoneNumber(1))])
   })
 })
 

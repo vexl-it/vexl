@@ -1,9 +1,7 @@
 import {Array, Effect, Option, pipe} from 'effect'
 import {atom} from 'jotai'
 import {
-  canDetectContactsRemovedFromPhone,
   createIsOnDevice,
-  keepPhoneSyncState,
   syncStoredContactsWithDevice,
 } from '../deviceContactsSync'
 import {type ContactInfo, type StoredContactWithComputedValues} from '../domain'
@@ -12,8 +10,8 @@ import {
   getContactsAndTryToResolveThePermissionsAlongTheWay,
 } from '../utils'
 import {
-  lastPhoneSyncAtom,
   normalizedContactsAtom,
+  numbersInPhoneAtLastSyncAtom,
   storedContactsAtom,
 } from './contactsStore'
 
@@ -88,19 +86,10 @@ const isOnDeviceAtom = atom(
 
 export const syncStoredContactsWithDeviceActionAtom = atom(null, (get, set) => {
   const snapshot = get(loadedDeviceContactsSnapshotAtom)
-  const lastSync = get(lastPhoneSyncAtom)
+  const numbersInPhoneAtLastSync = get(numbersInPhoneAtLastSyncAtom)
   set(storedContactsAtom, (prev) =>
-    syncStoredContactsWithDevice(prev, snapshot, lastSync)
+    syncStoredContactsWithDevice(prev, snapshot, numbersInPhoneAtLastSync)
   )
-  if (lastSync !== undefined && canDetectContactsRemovedFromPhone(snapshot)) {
-    const keptSync = keepPhoneSyncState(
-      lastSync,
-      get(storedContactsAtom),
-      snapshot
-    )
-    if (keptSync.numbersMissing.length < lastSync.numbersMissing.length)
-      set(lastPhoneSyncAtom, keptSync)
-  }
 })
 
 export const vexlOnlyContactsAtom = atom(

@@ -15,6 +15,7 @@ import {
 import {Array, Option, pipe} from 'effect'
 import {useAtomValue} from 'jotai'
 import React from 'react'
+import {TouchableOpacity} from 'react-native'
 import {
   smallestClubForIdsAtom,
   useGetAllClubsForIds,
@@ -37,12 +38,14 @@ function OfferAuthorBanner({
   userImage,
   grayAvatar,
   clubIdsForAvatar,
+  onAvatarPress,
 }: {
   readonly offer: OneOfferInState
   readonly realUserName?: UserName
   readonly userImage?: React.ComponentProps<typeof UserAvatar>['userImage']
   readonly grayAvatar?: boolean
   readonly clubIdsForAvatar?: readonly ClubUuid[]
+  readonly onAvatarPress?: () => void
 }): React.ReactElement {
   const {t} = useTranslation()
   const theme = useTheme()
@@ -96,28 +99,30 @@ function OfferAuthorBanner({
 
   return (
     <XStack gap="$3" alignItems="flex-start">
-      {shouldDisplayClubImage ? (
-        <AnonymousAvatarOrClubImage
-          grayScale={grayAvatar ?? false}
-          customSize={40}
-          seed={randomSeedFromOfferInfo(offer.offerInfo)}
-          clubImageUrl={clubImageUrl}
-        />
-      ) : userImage ? (
-        <UserAvatar
-          grayScale={grayAvatar}
-          userImage={userImage}
-          width={40}
-          height={40}
-        />
-      ) : (
-        <AnonymousAvatarOrClubImage
-          grayScale={grayAvatar ?? false}
-          customSize={40}
-          seed={randomSeedFromOfferInfo(offer.offerInfo)}
-          clubImageUrl={clubImageUrl}
-        />
-      )}
+      <TouchableOpacity disabled={!onAvatarPress} onPress={onAvatarPress}>
+        {shouldDisplayClubImage ? (
+          <AnonymousAvatarOrClubImage
+            grayScale={grayAvatar ?? false}
+            customSize={40}
+            seed={randomSeedFromOfferInfo(offer.offerInfo)}
+            clubImageUrl={clubImageUrl}
+          />
+        ) : userImage ? (
+          <UserAvatar
+            grayScale={grayAvatar}
+            userImage={userImage}
+            width={40}
+            height={40}
+          />
+        ) : (
+          <AnonymousAvatarOrClubImage
+            grayScale={grayAvatar ?? false}
+            customSize={40}
+            seed={randomSeedFromOfferInfo(offer.offerInfo)}
+            clubImageUrl={clubImageUrl}
+          />
+        )}
+      </TouchableOpacity>
       <YStack flex={1} minWidth={0}>
         <XStack alignItems="center" justifyContent="space-between">
           <Typography

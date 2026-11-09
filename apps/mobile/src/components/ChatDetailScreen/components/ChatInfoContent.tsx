@@ -22,7 +22,7 @@ import {useMolecule} from 'bunshi/dist/react'
 import {Effect} from 'effect'
 import {useAtom, useAtomValue, useSetAtom} from 'jotai'
 import React, {useMemo} from 'react'
-import {Alert, ScrollView} from 'react-native'
+import {Alert, ScrollView, TouchableOpacity} from 'react-native'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {Stack, getTokens, useTheme} from 'tamagui'
 import {type RootStackScreenProps} from '../../../navigationTypes'
@@ -47,6 +47,7 @@ import UserAvatar from '../../UserAvatar'
 import {chatMolecule} from '../atoms'
 import {useCommonFriendsOtherSide} from '../utils/useCommonFriendsOtherSide'
 import useOpenExchangeDetails from './useOpenExchangeDetails'
+import useOtherSideAvatarPress from './useOtherSideAvatarPress'
 
 function SectionSeparator(): React.ReactElement {
   return <Stack height="$0.5" backgroundColor="$backgroundTertiary" ml="$12" />
@@ -69,15 +70,18 @@ function OtherSideInfoBanner({
 }): React.ReactElement {
   const {t} = useTranslation()
   const theme = useTheme()
+  const onAvatarPress = useOtherSideAvatarPress()
 
   return (
     <XStack alignItems="center" gap="$3">
-      <UserAvatar
-        grayScale={grayAvatar}
-        userImage={userImage}
-        width={40}
-        height={40}
-      />
+      <TouchableOpacity disabled={!onAvatarPress} onPress={onAvatarPress}>
+        <UserAvatar
+          grayScale={grayAvatar}
+          userImage={userImage}
+          width={40}
+          height={40}
+        />
+      </TouchableOpacity>
       <YStack gap="$2" flex={1} minWidth={0}>
         <Typography
           variant="descriptionBold"
@@ -242,6 +246,7 @@ export default function ChatInfoContent({
   const inboxKey = useAtomValue(publicKeyPemBase64Atom)
   const theirOfferAndNotReported = useAtomValue(theirOfferAndNotReportedAtom)
   const openExchangeDetails = useOpenExchangeDetails()
+  const onAvatarPress = useOtherSideAvatarPress()
   const localizedCommonConnectionsCount = localizeNumber({
     number: commonConnectionsCount,
   })
@@ -347,6 +352,7 @@ export default function ChatInfoContent({
                 realUserName={otherSideRealUserName}
                 userImage={otherSideData.image}
                 grayAvatar={shouldGrayScaleAvatar}
+                onAvatarPress={onAvatarPress}
               />
             ) : (
               <OtherSideInfoBanner

@@ -1,7 +1,7 @@
 import {useNavigation} from '@react-navigation/native'
 import {ChevronLeft, NavigationBar, Stack} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
-import {useAtomValue, useSetAtom} from 'jotai'
+import {useAtomValue} from 'jotai'
 import {TouchableOpacity} from 'react-native'
 import {type RootStackScreenProps} from '../../../navigationTypes'
 import {getOtherSideRealNameOrFriendLevel} from '../../../utils/chat/getOtherSideFriendLevel'
@@ -9,12 +9,11 @@ import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {formatInteger} from '../../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../../utils/localization/formattingLocaleAtom'
 import {useTrustedFriendsText} from '../../../utils/localization/useTrustedFriendsText'
-import resolveLocalUri from '../../../utils/resolveLocalUri'
 import useSafeGoBack from '../../../utils/useSafeGoBack'
-import {showGoldenAvatarInfoModalActionAton} from '../../GoldenAvatar/atoms'
 import UserAvatar from '../../UserAvatar'
 import {chatMolecule} from '../atoms'
 import useChatHeaderRightActions from './useChatHeaderRightActions'
+import useOtherSideAvatarPress from './useOtherSideAvatarPress'
 
 export function MessagesScreenChatHeader(): React.ReactElement {
   const safeGoBack = useSafeGoBack()
@@ -30,7 +29,6 @@ export function MessagesScreenChatHeader(): React.ReactElement {
     friendLevelInfoAtom,
     offerForChatAtom,
     otherSideDataAtom,
-    otherSideGoldenAvatarTypeAtom,
     publicKeyPemBase64Atom,
     shouldGrayScaleAvatarAtom,
   } = useMolecule(chatMolecule)
@@ -43,20 +41,9 @@ export function MessagesScreenChatHeader(): React.ReactElement {
   const inboxKey = useAtomValue(publicKeyPemBase64Atom)
   const offer = useAtomValue(offerForChatAtom)
   const otherSideData = useAtomValue(otherSideDataAtom)
-  const otherSideGoldenAvatarType = useAtomValue(otherSideGoldenAvatarTypeAtom)
   const shouldGrayScaleAvatar = useAtomValue(shouldGrayScaleAvatarAtom)
-  const showGoldenAvatarInfoModal = useSetAtom(
-    showGoldenAvatarInfoModalActionAton
-  )
   const rightActions = useChatHeaderRightActions()
-
-  const imageUri =
-    otherSideData.image.type === 'imageUri'
-      ? otherSideData.image.imageUri
-      : undefined
-  const hasGoldenAvatar =
-    !!otherSideGoldenAvatarType ||
-    (!offer?.ownershipInfo && !!offer?.offerInfo.publicPart.goldenAvatarType)
+  const onAvatarPress = useOtherSideAvatarPress()
 
   return (
     <Stack
@@ -80,16 +67,7 @@ export function MessagesScreenChatHeader(): React.ReactElement {
         })}
         leftAction={{icon: ChevronLeft, onPress: safeGoBack}}
         avatar={
-          <TouchableOpacity
-            disabled={!imageUri && !hasGoldenAvatar}
-            onPress={() => {
-              if (imageUri)
-                navigation.navigate('ChatImagePreview', {
-                  imageUri: resolveLocalUri(imageUri),
-                })
-              else showGoldenAvatarInfoModal()
-            }}
-          >
+          <TouchableOpacity disabled={!onAvatarPress} onPress={onAvatarPress}>
             <UserAvatar
               grayScale={shouldGrayScaleAvatar}
               userImage={otherSideData.image}

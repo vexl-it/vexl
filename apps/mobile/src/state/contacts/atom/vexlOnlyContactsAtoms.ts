@@ -28,13 +28,27 @@ export const deviceContactsSnapshotAtom = atom<ReadonlySet<string> | undefined>(
   undefined
 )
 
+/**
+ * Raw numbers from the last full contacts load, which also stored and
+ * normalized them. Removal decisions use only this read, never a display
+ * refresh.
+ */
+export const loadedDeviceContactsSnapshotAtom = atom<
+  ReadonlySet<string> | undefined
+>(undefined)
+
 export const setDeviceContactsSnapshotFromContactsActionAtom = atom(
   null,
-  (get, set, contactsFromDevice: readonly ContactInfo[]) => {
-    set(
-      deviceContactsSnapshotAtom,
-      new Set(Array.map(contactsFromDevice, (one) => one.rawNumber))
+  (
+    get,
+    set,
+    contactsFromDevice: readonly ContactInfo[]
+  ): ReadonlySet<string> => {
+    const rawNumbersOnDevice = new Set(
+      Array.map(contactsFromDevice, (one) => one.rawNumber)
     )
+    set(deviceContactsSnapshotAtom, rawNumbersOnDevice)
+    return rawNumbersOnDevice
   }
 )
 
@@ -74,7 +88,7 @@ const isOnDeviceAtom = atom(
 )
 
 export const syncStoredContactsWithDeviceActionAtom = atom(null, (get, set) => {
-  const snapshot = get(deviceContactsSnapshotAtom)
+  const snapshot = get(loadedDeviceContactsSnapshotAtom)
   const lastSync = get(lastPhoneSyncAtom)
   set(storedContactsAtom, (prev) =>
     syncStoredContactsWithDevice(prev, snapshot, lastSync)

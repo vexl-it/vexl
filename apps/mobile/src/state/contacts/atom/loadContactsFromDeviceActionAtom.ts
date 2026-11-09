@@ -5,7 +5,10 @@ import {effectWithEnsuredBenchmark} from '../../ActionBenchmarks'
 import {ContactInfoE, type ContactInfo, type StoredContact} from '../domain'
 import {getContactsAndTryToResolveThePermissionsAlongTheWay} from '../utils'
 import {storedContactsAtom} from './contactsStore'
-import {setDeviceContactsSnapshotFromContactsActionAtom} from './vexlOnlyContactsAtoms'
+import {
+  loadedDeviceContactsSnapshotAtom,
+  setDeviceContactsSnapshotFromContactsActionAtom,
+} from './vexlOnlyContactsAtoms'
 
 const contactInfoEquivalence = Schema.equivalence(ContactInfoE)
 
@@ -16,7 +19,10 @@ const loadContactsFromDeviceActionAtom = atom(null, (get, set) => {
     const contactsFromDevice = yield* _(
       getContactsAndTryToResolveThePermissionsAlongTheWay()
     )
-    set(setDeviceContactsSnapshotFromContactsActionAtom, contactsFromDevice)
+    set(
+      loadedDeviceContactsSnapshotAtom,
+      set(setDeviceContactsSnapshotFromContactsActionAtom, contactsFromDevice)
+    )
 
     // Read the store only after the last await - anything written to it while we
     // were suspended must not be overwritten by a stale snapshot.

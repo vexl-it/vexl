@@ -17,9 +17,13 @@ import {
   type PhoneSyncState,
 } from '../deviceContactsSync'
 import {type StoredContact} from '../domain'
-import {lastPhoneSyncAtom, storedContactsAtom} from './contactsStore'
+import {
+  lastPhoneSyncAtom,
+  needsFullContactsReplaceAfterContactEditAtom,
+  storedContactsAtom,
+} from './contactsStore'
 import {submitContactsActionAtom} from './submitContactsActionAtom'
-import {deviceContactsSnapshotAtom} from './vexlOnlyContactsAtoms'
+import {loadedDeviceContactsSnapshotAtom} from './vexlOnlyContactsAtoms'
 
 function hasNumberIn(
   numbers: ReadonlySet<E164PhoneNumber>
@@ -82,7 +86,7 @@ export const removeContactsDeletedFromPhoneActionAtom = atom(
   null,
   (get, set): Effect.Effect<void> =>
     Effect.gen(function* (_) {
-      const rawNumbersOnDevice = get(deviceContactsSnapshotAtom)
+      const rawNumbersOnDevice = get(loadedDeviceContactsSnapshotAtom)
       if (
         !canDetectContactsRemovedFromPhone(rawNumbersOnDevice) ||
         rawNumbersOnDevice === get(lastProcessedDeviceContactsSnapshotAtom)
@@ -114,7 +118,9 @@ export const removeContactsDeletedFromPhoneActionAtom = atom(
       )
       if (
         Option.isNone(missingFromPhone) ||
-        Option.isNone(maybeNumbersToRemove)
+        Option.isNone(maybeNumbersToRemove) ||
+        // The pending replace after a number edit must go first
+        get(needsFullContactsReplaceAfterContactEditAtom)
       ) {
         keepLastSync()
         return

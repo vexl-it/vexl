@@ -9,7 +9,7 @@ import {
   type TabItem,
 } from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
-import {Array} from 'effect'
+import {Array, pipe} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useMemo} from 'react'
 import {Pressable, type LayoutChangeEvent} from 'react-native'
@@ -126,6 +126,14 @@ function ContactsListSelect({
     ],
     [newContactsToDisplayCount, t]
   )
+  const contactsFilters = useMemo(
+    () =>
+      pipe(
+        contactsFilterItems,
+        Array.map((item) => item.value)
+      ),
+    [contactsFilterItems]
+  )
 
   if (shouldShowEmptyContactsState) {
     return <ContactsListEmpty variant="emptyContacts" />
@@ -214,6 +222,8 @@ function ContactsListSelect({
             keyboardDismissMode/keyboardShouldPersistTaps in ContactsList. */}
         <Stack f={1} pos="relative">
           <FilteredContacts
+            filters={contactsFilters}
+            onFilterChange={setSelectedFilter}
             keyboardBottomSpacerHeight={keyboardBottomSpacerHeight}
           />
           <PreparingContactsOverlay

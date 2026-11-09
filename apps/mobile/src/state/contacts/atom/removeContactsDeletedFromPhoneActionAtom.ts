@@ -103,7 +103,7 @@ export const removeContactsDeletedFromPhoneActionAtom = atom(
       const keepLastSync = (): void => {
         set(
           rememberPhoneSyncActionAtom,
-          keepPhoneSyncState(lastSync, numbersInPhone)
+          keepPhoneSyncState(lastSync, storedContacts, rawNumbersOnDevice)
         )
       }
 

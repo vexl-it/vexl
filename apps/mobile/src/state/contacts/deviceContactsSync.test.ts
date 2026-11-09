@@ -298,25 +298,41 @@ describe('findNumbersMissingFromPhone with an extension', () => {
 })
 
 describe('keepPhoneSyncState', () => {
-  it('adds newly seen numbers and keeps the rest', () => {
-    const first = toE164(phoneNumber(0))
-    const second = toE164(phoneNumber(1))
-    const lastSync = {numbersInPhone: [first], numbersMissing: [first]}
+  const first = contact({rawNumber: phoneNumber(0)})
+  const second = contact({rawNumber: phoneNumber(1)})
+  const firstNumber = toE164(phoneNumber(0))
+  const lastSync = {
+    numbersInPhone: [firstNumber],
+    numbersMissing: [firstNumber],
+  }
 
-    expect(keepPhoneSyncState(lastSync, new Set([second]))).toEqual({
-      numbersInPhone: [first, second],
-      numbersMissing: [first],
+  it('adds newly seen numbers and keeps the rest', () => {
+    expect(
+      keepPhoneSyncState(lastSync, [first, second], rawNumbersOf([second]))
+    ).toEqual({
+      numbersInPhone: [firstNumber, toE164(phoneNumber(1))],
+      numbersMissing: [firstNumber],
     })
   })
 
-  it('forgets a missing number that is back in the phone', () => {
-    const first = toE164(phoneNumber(0))
-    const lastSync = {numbersInPhone: [first], numbersMissing: [first]}
-
-    expect(keepPhoneSyncState(lastSync, new Set([first]))).toEqual({
-      numbersInPhone: [first],
-      numbersMissing: [],
+  it('forgets a missing number that is back in the phone, even in a format Vexl cannot parse', () => {
+    const withTrunkZero = contact({
+      rawNumber: '+420 (0)777 000 000',
+      normalized: false,
+      invalidNumber: 'invalid',
     })
+
+    expect(
+      keepPhoneSyncState(lastSync, [first], rawNumbersOf([first]))
+        .numbersMissing
+    ).toEqual([])
+    expect(
+      keepPhoneSyncState(
+        lastSync,
+        [first, withTrunkZero],
+        rawNumbersOf([withTrunkZero])
+      ).numbersMissing
+    ).toEqual([])
   })
 })
 

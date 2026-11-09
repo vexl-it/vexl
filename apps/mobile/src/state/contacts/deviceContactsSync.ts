@@ -88,34 +88,38 @@ function isEveryDeviceNumberResolved(
   })
 }
 
-const MIN_UNPARSED_DIGITS = 6
+const COMPARED_UNPARSED_DIGITS = 6
 
 /**
- * An address book entry Vexl can't parse may still be a remembered number in
- * an unusual format, so a number ending with its digits counts as in the phone.
+ * Whether a number is in the phone. An address book entry Vexl can't parse may
+ * still be the number in an unusual format, so a number ending with the last
+ * digits of such an entry (before any pause, wait or extension part) counts
+ * too.
  */
-function createIsMaybeUnparsedInPhone(
+export function createIsInPhone(
   storedContacts: readonly StoredContact[],
   rawNumbersOnDevice: ReadonlySet<string>
 ): (number: E164PhoneNumber) => boolean {
-  const unparsedDigits = pipe(
+  const numbersInPhone = findNumbersInPhone(storedContacts, rawNumbersOnDevice)
+  const unparsedEndings = pipe(
     storedContacts,
     Array.filter(
       (contact) =>
         rawNumbersOnDevice.has(contact.info.rawNumber) &&
         Option.isNone(contact.computedValues)
     ),
-    Array.map(
-      (contact) =>
-        // Digits before any pause, wait or extension part, without trunk zeros
-        contact.info.rawNumber
-          .split(/ext|[,;#xpw]/i)[0]
-          ?.replace(/\D/g, '')
-          .replace(/^0+/, '') ?? ''
+    Array.map((contact) =>
+      (contact.info.rawNumber.split(/ext|[,;#xpw]/i)[0] ?? '').replace(
+        /\D/g,
+        ''
+      )
     ),
-    Array.filter((digits) => digits.length >= MIN_UNPARSED_DIGITS)
+    Array.filter((digits) => digits.length >= COMPARED_UNPARSED_DIGITS),
+    Array.map((digits) => digits.slice(-COMPARED_UNPARSED_DIGITS))
   )
-  return (number) => Array.some(unparsedDigits, (one) => number.endsWith(one))
+  return (number) =>
+    numbersInPhone.has(number) ||
+    Array.some(unparsedEndings, (ending) => number.endsWith(ending))
 }
 
 const MIN_MISSING_NUMBERS_LIMIT = 10
@@ -144,14 +148,10 @@ export function findNumbersMissingFromPhone({
   )
     return Option.none()
 
-  const numbersInPhone = findNumbersInPhone(storedContacts, rawNumbersOnDevice)
-  const isMaybeUnparsedInPhone = createIsMaybeUnparsedInPhone(
-    storedContacts,
-    rawNumbersOnDevice
-  )
+  const isInPhone = createIsInPhone(storedContacts, rawNumbersOnDevice)
   const missing = Array.filter(
     lastSync.numbersInPhone,
-    (number) => !numbersInPhone.has(number) && !isMaybeUnparsedInPhone(number)
+    (number) => !isInPhone(number)
   )
   const limit = Math.max(
     MIN_MISSING_NUMBERS_LIMIT,
@@ -175,15 +175,20 @@ export function findNumbersMissingFromPhone({
  */
 export function keepPhoneSyncState(
   lastSync: PhoneSyncState | undefined,
-  numbersInPhone: ReadonlySet<E164PhoneNumber>
+  storedContacts: readonly StoredContact[],
+  rawNumbersOnDevice: ReadonlySet<string>
 ): PhoneSyncState {
+  const isInPhone = createIsInPhone(storedContacts, rawNumbersOnDevice)
   return {
     numbersInPhone: Array.fromIterable(
-      new Set([...(lastSync?.numbersInPhone ?? []), ...numbersInPhone])
+      new Set([
+        ...(lastSync?.numbersInPhone ?? []),
+        ...findNumbersInPhone(storedContacts, rawNumbersOnDevice),
+      ])
     ),
     numbersMissing: Array.filter(
       lastSync?.numbersMissing ?? [],
-      (number) => !numbersInPhone.has(number)
+      (number) => !isInPhone(number)
     ),
   }
 }

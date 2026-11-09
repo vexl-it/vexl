@@ -3,7 +3,6 @@ import {atom} from 'jotai'
 import {
   canDetectContactsRemovedFromPhone,
   createIsOnDevice,
-  findNumbersInPhone,
   keepPhoneSyncState,
   syncStoredContactsWithDevice,
 } from '../deviceContactsSync'
@@ -94,9 +93,13 @@ export const syncStoredContactsWithDeviceActionAtom = atom(null, (get, set) => {
     syncStoredContactsWithDevice(prev, snapshot, lastSync)
   )
   if (lastSync !== undefined && canDetectContactsRemovedFromPhone(snapshot)) {
-    const numbersInPhone = findNumbersInPhone(get(storedContactsAtom), snapshot)
-    if (Array.some(lastSync.numbersMissing, (one) => numbersInPhone.has(one)))
-      set(lastPhoneSyncAtom, keepPhoneSyncState(lastSync, numbersInPhone))
+    const keptSync = keepPhoneSyncState(
+      lastSync,
+      get(storedContactsAtom),
+      snapshot
+    )
+    if (keptSync.numbersMissing.length < lastSync.numbersMissing.length)
+      set(lastPhoneSyncAtom, keptSync)
   }
 })
 

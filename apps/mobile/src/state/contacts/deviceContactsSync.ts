@@ -93,8 +93,8 @@ const COMPARED_UNPARSED_DIGITS = 6
 /**
  * Whether a number is in the phone. An address book entry Vexl can't parse may
  * still be the number in an unusual format, so a number ending with the last
- * digits of such an entry (before any pause, wait or extension part) counts
- * too.
+ * digits of such an entry (after any text prefix, before any pause, wait or
+ * extension part) counts too.
  */
 export function createIsInPhone(
   storedContacts: readonly StoredContact[],
@@ -109,10 +109,10 @@ export function createIsInPhone(
         Option.isNone(contact.computedValues)
     ),
     Array.map((contact) =>
-      (contact.info.rawNumber.split(/ext|[,;#xpw]/i)[0] ?? '').replace(
-        /\D/g,
+      (
+        contact.info.rawNumber.replace(/^\D*/, '').split(/ext|[,;#xpw]/i)[0] ??
         ''
-      )
+      ).replace(/\D/g, '')
     ),
     Array.filter((digits) => digits.length >= COMPARED_UNPARSED_DIGITS),
     Array.map((digits) => digits.slice(-COMPARED_UNPARSED_DIGITS))

@@ -279,7 +279,7 @@ describe('findNumbersMissingFromPhone with an extension', () => {
   it('does not count a number as missing while an entry has it with an extension', () => {
     const contacts = phoneContacts(4)
     const withExtension = contact({
-      rawNumber: `${phoneNumber(0)},1234`,
+      rawNumber: `Work: ${phoneNumber(0)},1234`,
       normalized: false,
       invalidNumber: 'invalid',
     })

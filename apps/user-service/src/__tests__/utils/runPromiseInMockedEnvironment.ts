@@ -16,6 +16,7 @@ import {cryptoConfig} from '../../configs'
 import {type LoggedInUsersDbService} from '../../db/loggedInUsersDb'
 import {UserApiLive} from '../../httpServer'
 import {VerificationStateDbService} from '../../routes/login/db/verificationStateDb'
+import {type PreludeService} from '../../utils/prelude'
 import {mockedPreludeClient} from './mockedPreludeClient'
 import {mockedTurnstileClient} from './mockedTurnstileClient'
 import {mockedUsersDbService} from './mockedUsersDbService'
@@ -29,6 +30,8 @@ export type MockedContexts =
   | HttpClient
   | TestRequestHeaders
   | RateLimitingService
+  | VerificationStateDbService
+  | PreludeService
 
 const universalContext = Layer.mergeAll(
   mockedRedisLayer,

@@ -10,10 +10,11 @@ export const getBackupKeyPairHandler = HttpApiBuilder.handler(
   'Backup',
   'getBackupKeyPair',
   (req) =>
-    Effect.gen(function* (_) {
-      const verification = yield* _(consumePhoneVerification(req.payload))
-      const keyPair = yield* _(deriveBackupKeyPair(verification.phoneNumber))
-
-      return {keyPair}
-    }).pipe(Effect.withSpan('getBackupKeyPairHandler'), makeEndpointEffect)
+    consumePhoneVerification(req.payload, (verification) =>
+      deriveBackupKeyPair(verification.phoneNumber)
+    ).pipe(
+      Effect.map((keyPair) => ({keyPair})),
+      Effect.withSpan('getBackupKeyPairHandler'),
+      makeEndpointEffect
+    )
 )

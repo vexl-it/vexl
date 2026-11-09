@@ -40,7 +40,11 @@ export const mockedRedisLayer = Layer.effect(
       )
 
     const toReturn: RedisOperations = {
-      delete: (key: string) => Ref.update(state, HashMap.remove(key)),
+      delete: (key: string) =>
+        Ref.modify(state, (hm) => [
+          valueExists(hm, key),
+          HashMap.remove(hm, key),
+        ]),
       exists: (key: string) =>
         Ref.get(state).pipe(Effect.map((hm) => valueExists(hm, key))),
 

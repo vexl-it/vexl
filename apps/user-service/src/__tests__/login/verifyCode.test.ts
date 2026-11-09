@@ -1,4 +1,5 @@
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
+import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {
@@ -10,12 +11,13 @@ import {
 } from '@vexl-next/rest-api/src/services/user/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {Effect, Schema} from 'effect'
-import {NodeTestingApp} from '../utils/NodeTestingApp'
+import {consumePhoneVerification} from '../../routes/login/utils/consumePhoneVerification'
 import {generateAndSignChallenge} from '../utils/loginChalenge'
 import {
   checkVerificationMock,
   createVerificationMock,
 } from '../utils/mockedPreludeClient'
+import {NodeTestingApp} from '../utils/NodeTestingApp'
 import {
   disposeRuntime,
   runPromiseInMockedEnvironment,
@@ -117,6 +119,34 @@ describe('Verify code', () => {
         )
 
         expectErrorResponse(VerifyCodeErrors)(replayResponse)
+      })
+    )
+  })
+
+  it('Should keep the verification usable when the request fails after the code check', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const client = yield* _(NodeTestingApp)
+        const {verificationId} = yield* _(initVerification)
+        const payload = {id: verificationId, code: '123456'}
+
+        const error = yield* _(
+          consumePhoneVerification(payload, () =>
+            Effect.fail(new UnexpectedServerError({status: 500}))
+          ),
+          Effect.flip
+        )
+        expect(error._tag).toEqual('UnexpectedServerError')
+
+        const checkResponse = yield* _(
+          client.Login.verifyCode({
+            payload: {
+              ...payload,
+              userPublicKey: generatePrivateKey().publicKeyPemBase64,
+            },
+          })
+        )
+        expect(checkResponse.challenge).toBeDefined()
       })
     )
   })

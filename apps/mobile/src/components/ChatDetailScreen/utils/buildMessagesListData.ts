@@ -22,7 +22,6 @@ export type MessagesListItem =
     }
   | {
       type: 'message'
-      time: DateTime
       message: ChatMessageWithState
       isLatest: boolean
       key: string
@@ -62,45 +61,37 @@ function messagesToListData(
 ): MessagesListItem[] {
   const result = [] as MessagesListItem[]
 
-  let prevMessageTime: DateTime | null = null
+  let prevMessageMillis: number | null = null
 
   for (let i = messages.length - 1; i >= 0; i--) {
     const message = messages[i]
     if (!message) continue
-    const messageTime = unixMillisecondsToLocaleDateTime(
-      getMessageTime(message)
-    )
+    const messageMillis = getMessageTime(message)
+    const timeItem: () => MessagesListItem = () => ({
+      type: 'time',
+      time: unixMillisecondsToLocaleDateTime(messageMillis),
+      key: `time-${getUniqueKey(message)}`,
+    })
 
-    if (i === messages.length - 1) {
-      result.push({
-        type: 'time',
-        time: messageTime,
-        key: `time-${getUniqueKey(message)}`,
-      })
-    }
+    if (i === messages.length - 1) result.push(timeItem())
 
-    const minutesDiff = prevMessageTime
-      ? messageTime.diff(prevMessageTime, 'minutes').minutes
-      : 0
+    const minutesDiff =
+      prevMessageMillis === null
+        ? 0
+        : (messageMillis - prevMessageMillis) / 60_000
 
-    if (prevMessageTime && minutesDiff > 10) {
-      result.push({
-        type: 'time',
-        time: messageTime,
-        key: `time-${getUniqueKey(message)}`,
-      })
-      prevMessageTime = messageTime
-    } else if (prevMessageTime && minutesDiff > 1) {
+    if (minutesDiff > 10) {
+      result.push(timeItem())
+    } else if (minutesDiff > 1) {
       result.push({
         type: 'space',
         key: `space-${getUniqueKey(message)}`,
       })
     }
-    prevMessageTime = messageTime
+    prevMessageMillis = messageMillis
 
     result.push({
       type: 'message',
-      time: messageTime,
       message: message.message,
       isLatest: i === 0,
       key: `message-${getUniqueKey(message)}`,

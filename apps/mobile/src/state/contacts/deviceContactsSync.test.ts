@@ -1,6 +1,6 @@
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
-import {Option, Schema} from 'effect'
+import {Array, Option, pipe, Schema} from 'effect'
 import {
   addNumbersInPhone,
   findNumbersDeletedFromPhone,
@@ -59,10 +59,10 @@ const phoneNumber = (i: number): string =>
   `+42077700${String(i).padStart(4, '0')}`
 
 const phoneContacts = (count: number): StoredContact[] =>
-  Array.from({length: count}, (_, i) => contact({rawNumber: phoneNumber(i)}))
+  Array.makeBy(count, (i) => contact({rawNumber: phoneNumber(i)}))
 
 const rawNumbersOf = (contacts: readonly StoredContact[]): Set<string> =>
-  new Set(contacts.map((one) => one.info.rawNumber))
+  new Set(Array.map(contacts, (one) => one.info.rawNumber))
 
 describe('syncStoredContactsWithDevice', () => {
   const onPhone = contact({rawNumber: '+420777111001', imported: true})
@@ -96,13 +96,16 @@ describe('syncStoredContactsWithDevice', () => {
     vexlContactSavedToPhone,
     sameNumberOnPhone,
   ])
-  const numbersInPhoneAtLastSync = [
-    onPhone,
-    deletedInactive,
-    deletedActive,
-    vexlContactSavedToPhone,
-    sameNumberOnPhone,
-  ].map(numberOf)
+  const numbersInPhoneAtLastSync = Array.map(
+    [
+      onPhone,
+      deletedInactive,
+      deletedActive,
+      vexlContactSavedToPhone,
+      sameNumberOnPhone,
+    ],
+    numberOf
+  )
 
   it('drops inactive contacts deleted from the phone, keeps the rest and turns contacts on the phone into phone contacts', () => {
     const result = syncStoredContactsWithDevice(
@@ -144,8 +147,8 @@ describe('syncStoredContactsWithDevice', () => {
 
 describe('findNumbersDeletedFromPhone', () => {
   const contacts = phoneContacts(100)
-  const numbersInPhoneAtLastSync = contacts.map(numberOf)
-  const withoutFirst = rawNumbersOf(contacts.slice(1))
+  const numbersInPhoneAtLastSync = Array.map(contacts, numberOf)
+  const withoutFirst = rawNumbersOf(Array.drop(contacts, 1))
 
   it('returns numbers that were in the phone at the last sync and are gone now', () => {
     expect(
@@ -154,7 +157,9 @@ describe('findNumbersDeletedFromPhone', () => {
         rawNumbersOnDevice: withoutFirst,
         numbersInPhoneAtLastSync,
       })
-    ).toEqual(Option.some(new Set(contacts.slice(0, 1).map(numberOf))))
+    ).toEqual(
+      Option.some(new Set(pipe(contacts, Array.take(1), Array.map(numberOf))))
+    )
   })
 
   it("can't tell on the first sync", () => {
@@ -171,7 +176,7 @@ describe('findNumbersDeletedFromPhone', () => {
     expect(
       findNumbersDeletedFromPhone({
         storedContacts: contacts,
-        rawNumbersOnDevice: rawNumbersOf(contacts.slice(11)),
+        rawNumbersOnDevice: rawNumbersOf(Array.drop(contacts, 11)),
         numbersInPhoneAtLastSync,
       })
     ).toEqual(Option.none())
@@ -187,7 +192,7 @@ describe('findNumbersDeletedFromPhone', () => {
       findNumbersDeletedFromPhone({
         storedContacts: [...contacts, reformattedNotNormalized],
         rawNumbersOnDevice: rawNumbersOf([
-          ...contacts.slice(1),
+          ...Array.drop(contacts, 1),
           reformattedNotNormalized,
         ]),
         numbersInPhoneAtLastSync,
@@ -215,7 +220,7 @@ describe('findNumbersDeletedFromPhone', () => {
   ])(
     'does not count %s as deleted while %s is in the phone',
     (number, rawNumber) => {
-      const others = phoneContacts(4).slice(1)
+      const others = Array.drop(phoneContacts(4), 1)
       const remembered = [...others, contact({rawNumber: number})]
       const reformatted = contact({
         rawNumber,
@@ -227,7 +232,7 @@ describe('findNumbersDeletedFromPhone', () => {
         findNumbersDeletedFromPhone({
           storedContacts: [...remembered, reformatted],
           rawNumbersOnDevice: rawNumbersOf([...others, reformatted]),
-          numbersInPhoneAtLastSync: remembered.map(numberOf),
+          numbersInPhoneAtLastSync: Array.map(remembered, numberOf),
         })
       ).toEqual(Option.some(new Set()))
     }
@@ -271,21 +276,23 @@ describe('findNumbersToRemoveFromNetwork', () => {
   })
 
   it('removes nothing when more than half of the active phone contacts would go', () => {
-    const addedInVexl = ['+420777999998', '+420777999999'].map((rawNumber) =>
-      contact({rawNumber, imported: true, importedManually: true})
+    const addedInVexl = Array.map(
+      ['+420777999998', '+420777999999'],
+      (rawNumber) =>
+        contact({rawNumber, imported: true, importedManually: true})
     )
 
     expect(
       findNumbersToRemoveFromNetwork(
         [...active, ...addedInVexl],
-        new Set([first, second, third].map(numberOf))
+        new Set(Array.map([first, second, third], numberOf))
       )
     ).toEqual(Option.none())
     expect(
       findNumbersToRemoveFromNetwork(
         active,
-        new Set([first, second].map(numberOf))
+        new Set(Array.map([first, second], numberOf))
       )
-    ).toEqual(Option.some(new Set([first, second].map(numberOf))))
+    ).toEqual(Option.some(new Set(Array.map([first, second], numberOf))))
   })
 })

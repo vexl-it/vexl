@@ -4,7 +4,7 @@
  * pipeline - loadContactsFromDevice -> normalize -> plan -> import -> update
  * imported flags -> persist - with only device IO, network and UI mocked.
  */
-import {Effect} from 'effect'
+import {Array, Effect} from 'effect'
 import {createStore} from 'jotai'
 
 jest.mock('react-native-mmkv')
@@ -43,19 +43,31 @@ jest.mock('expo-contacts', () => ({
 
 const mockDeviceContactsState = {count: 42, deleted: new Set<number>()}
 
-jest.mock('../getDeviceContactsFromSystem', () => ({
-  getDeviceContactsFromSystem: jest.fn(async () =>
-    Array.from({length: mockDeviceContactsState.count}, (_, i) => ({
-      id: `contact-${i}`,
-      firstName: `First${i}`,
-      lastName: `Last${i}`,
-      name: `First${i} Last${i}`,
-      phoneNumbers: [
-        {label: 'mobile', number: `+420601${String(100 + i).padStart(6, '0')}`},
-      ],
-    })).filter((_, i) => !mockDeviceContactsState.deleted.has(i))
-  ),
-}))
+jest.mock('../getDeviceContactsFromSystem', () => {
+  const {Array: EffectArray} = jest.requireActual('effect')
+  return {
+    getDeviceContactsFromSystem: jest.fn(async () =>
+      EffectArray.filter(
+        globalThis.Array.from(
+          {length: mockDeviceContactsState.count},
+          (_: unknown, i: number) => ({
+            id: `contact-${i}`,
+            firstName: `First${i}`,
+            lastName: `Last${i}`,
+            name: `First${i} Last${i}`,
+            phoneNumbers: [
+              {
+                label: 'mobile',
+                number: `+420601${String(100 + i).padStart(6, '0')}`,
+              },
+            ],
+          })
+        ),
+        (_: unknown, i: number) => !mockDeviceContactsState.deleted.has(i)
+      )
+    ),
+  }
+})
 
 jest.mock('../../../utils/localization/I18nProvider', () => {
   const {atom} = jest.requireActual('jotai')
@@ -435,7 +447,7 @@ describe('Removing contacts deleted from the phone on resume', () => {
   }
 
   const replaceCalls = (): Array<{replace: boolean; count: number}> =>
-    mockImportContacts.mock.calls.map(([request]) => ({
+    Array.map(mockImportContacts.mock.calls, ([request]) => ({
       replace: request.replace,
       count: request.contacts.length,
     }))
@@ -464,9 +476,10 @@ describe('Removing contacts deleted from the phone on resume', () => {
     expect(replaceCalls()).toEqual([{replace: true, count: 19}])
     expect(store.get(importedContactsCountAtom)).toEqual(19)
     expect(
-      store
-        .get(storedContactsAtom)
-        .some((contact) => contact.info.rawNumber === '+420601000101')
+      Array.some(
+        store.get(storedContactsAtom),
+        (contact) => contact.info.rawNumber === '+420601000101'
+      )
     ).toBe(false)
     expect(mockShownNotifications).toEqual([
       'notifications.CONTACTS_REMOVED_FROM_PHONE.title',

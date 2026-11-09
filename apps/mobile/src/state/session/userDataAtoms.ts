@@ -49,8 +49,8 @@ export const realUserImageAtom = atom(
 )
 
 export const areRealUserDataSet = atom((get) => {
-  const {userName} = get(realUserDataAtom) ?? {}
-  return !!userName
+  const {userName, image} = get(realUserDataAtom) ?? {}
+  return !!userName || !!image
 })
 
 export const shouldShowAccountIdentityDotAtom = atom(

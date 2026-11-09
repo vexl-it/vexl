@@ -261,6 +261,16 @@ describe('keepPhoneSyncState', () => {
       numbersMissing: [first],
     })
   })
+
+  it('forgets a missing number that is back in the phone', () => {
+    const first = toE164(phoneNumber(0))
+    const lastSync = {numbersInPhone: [first], numbersMissing: [first]}
+
+    expect(keepPhoneSyncState(lastSync, new Set([first]))).toEqual({
+      numbersInPhone: [first],
+      numbersMissing: [],
+    })
+  })
 })
 
 describe('findNumbersToRemoveFromNetwork', () => {

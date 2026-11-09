@@ -24,6 +24,12 @@ function numbersOf(
   )
 }
 
+export function findActiveNumbers(
+  storedContacts: readonly StoredContact[]
+): ReadonlySet<E164PhoneNumber> {
+  return numbersOf(storedContacts, (contact) => contact.flags.imported)
+}
+
 /**
  * Normalized numbers of stored contacts whose raw number is in the address
  * book.
@@ -130,7 +136,8 @@ export function findNumbersMissingFromPhone({
 
 /**
  * State after a sync that removed nothing: newly seen numbers are added, the
- * rest is kept so nothing missing is forgotten.
+ * rest is kept so nothing missing is forgotten. Numbers back in the phone are
+ * no longer missing.
  */
 export function keepPhoneSyncState(
   lastSync: PhoneSyncState | undefined,
@@ -140,7 +147,10 @@ export function keepPhoneSyncState(
     numbersInPhone: Array.fromIterable(
       new Set([...(lastSync?.numbersInPhone ?? []), ...numbersInPhone])
     ),
-    numbersMissing: lastSync?.numbersMissing ?? [],
+    numbersMissing: Array.filter(
+      lastSync?.numbersMissing ?? [],
+      (number) => !numbersInPhone.has(number)
+    ),
   }
 }
 
@@ -177,9 +187,7 @@ export function findNumbersToRemoveFromNetwork(
     (contact) => contact.flags.importedManually
   )
   const activePhoneNumbers = Array.filter(
-    Array.fromIterable(
-      numbersOf(storedContacts, (contact) => contact.flags.imported)
-    ),
+    Array.fromIterable(findActiveNumbers(storedContacts)),
     (number) => !numbersAddedInVexl.has(number)
   )
   const numbersToRemove = Array.filter(activePhoneNumbers, (number) =>

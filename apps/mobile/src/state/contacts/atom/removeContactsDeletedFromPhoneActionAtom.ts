@@ -8,6 +8,7 @@ import {displayLocalNotification} from '../../../utils/notifications/displayLoca
 import {getDefaultChannel} from '../../../utils/notifications/notificationChannels'
 import {
   canDetectContactsRemovedFromPhone,
+  findActiveNumbers,
   findNumbersInPhone,
   findNumbersMissingFromPhone,
   findNumbersToRemoveFromNetwork,
@@ -16,11 +17,7 @@ import {
   type PhoneSyncState,
 } from '../deviceContactsSync'
 import {type StoredContact} from '../domain'
-import {
-  lastPhoneSyncAtom,
-  normalizedContactsAtom,
-  storedContactsAtom,
-} from './contactsStore'
+import {lastPhoneSyncAtom, storedContactsAtom} from './contactsStore'
 import {submitContactsActionAtom} from './submitContactsActionAtom'
 import {deviceContactsSnapshotAtom} from './vexlOnlyContactsAtoms'
 
@@ -119,13 +116,7 @@ export const removeContactsDeletedFromPhoneActionAtom = atom(
         return
       }
 
-      const activeNumbers = new Set(
-        pipe(
-          get(normalizedContactsAtom),
-          Array.filter((contact) => contact.flags.imported),
-          Array.map((contact) => contact.computedValues.normalizedNumber)
-        )
-      )
+      const activeNumbers = findActiveNumbers(storedContacts)
       const result = yield* _(
         set(submitContactsActionAtom, {
           normalizeAndImportAll: false,

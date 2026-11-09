@@ -98,7 +98,6 @@ export default {
     'infoPlist': {
       'UIBackgroundModes': ['fetch', 'remote-notification', 'processing'],
       'LSApplicationQueriesSchemes': ['itms-apps'],
-      'BGTaskSchedulerPermittedIdentifiers': ['com.transistorsoft.fetch'],
       'CFBundleAllowMixedLocalizations': true,
       'NSLocationWhenInUseUsageDescription':
         'Vexl needs access to you location to show your position on the map. Location will never be share with anyone (even ourselves).',
@@ -193,6 +192,14 @@ export default {
     blockedPermissions: [
       'android.permission.READ_MEDIA_IMAGES',
       'android.permission.READ_MEDIA_VIDEO',
+      'android.permission.READ_EXTERNAL_STORAGE',
+      'android.permission.SYSTEM_ALERT_WINDOW',
+      'android.permission.ACCESS_FINE_LOCATION',
+      'android.permission.ACCESS_COARSE_LOCATION',
+      'android.permission.ACCESS_WIFI_STATE',
+      'android.permission.USE_BIOMETRIC',
+      'android.permission.USE_FINGERPRINT',
+      'com.google.android.finsky.permission.BIND_GET_INSTALL_REFERRER_SERVICE',
     ],
   },
   'locales': {

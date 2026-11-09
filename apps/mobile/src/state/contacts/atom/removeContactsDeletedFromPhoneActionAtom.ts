@@ -8,14 +8,17 @@ import {displayLocalNotification} from '../../../utils/notifications/displayLoca
 import {getDefaultChannel} from '../../../utils/notifications/notificationChannels'
 import {
   canDetectContactsRemovedFromPhone,
-  findNumbersDeletedFromPhone,
   findNumbersInPhone,
+  findNumbersMissingFromPhone,
   findNumbersToRemoveFromNetwork,
+  keepPhoneSyncState,
+  nextPhoneSyncState,
+  type PhoneSyncState,
 } from '../deviceContactsSync'
 import {type StoredContact} from '../domain'
 import {
+  lastPhoneSyncAtom,
   normalizedContactsAtom,
-  numbersInPhoneAtLastSyncAtom,
   storedContactsAtom,
 } from './contactsStore'
 import {submitContactsActionAtom} from './submitContactsActionAtom'
@@ -32,28 +35,18 @@ function hasNumberIn(
 
 const sameNumbers = Array.getEquivalence(Equivalence.string)
 
-const rememberNumbersInPhoneActionAtom = atom(
+const rememberPhoneSyncActionAtom = atom(
   null,
-  (get, set, numbersInPhone: ReadonlySet<E164PhoneNumber>) => {
-    const numbers = Array.fromIterable(numbersInPhone)
-    const previous = get(numbersInPhoneAtLastSyncAtom)
+  (get, set, phoneSync: PhoneSyncState) => {
+    const previous = get(lastPhoneSyncAtom)
     // Skip the write so the whole contacts store is not persisted again
-    if (previous !== undefined && sameNumbers(previous, numbers)) return
-    set(numbersInPhoneAtLastSyncAtom, numbers)
-  }
-)
-
-/**
- * After a run that removed nothing, numbers missing from the phone must stay
- * remembered so a later read can't treat them as never seen.
- */
-const addNumbersInPhoneActionAtom = atom(
-  null,
-  (get, set, numbersInPhone: ReadonlySet<E164PhoneNumber>) => {
-    set(
-      rememberNumbersInPhoneActionAtom,
-      new Set([...(get(numbersInPhoneAtLastSyncAtom) ?? []), ...numbersInPhone])
+    if (
+      previous !== undefined &&
+      sameNumbers(previous.numbersInPhone, phoneSync.numbersInPhone) &&
+      sameNumbers(previous.numbersMissing, phoneSync.numbersMissing)
     )
+      return
+    set(lastPhoneSyncAtom, phoneSync)
   }
 )
 
@@ -88,30 +81,41 @@ export const removeContactsDeletedFromPhoneActionAtom = atom(
       if (!canDetectContactsRemovedFromPhone(rawNumbersOnDevice)) return
 
       const storedContacts = get(storedContactsAtom)
+      const lastSync = get(lastPhoneSyncAtom)
       const numbersInPhone = findNumbersInPhone(
         storedContacts,
         rawNumbersOnDevice
       )
-      const maybeNumbersToRemove = pipe(
-        findNumbersDeletedFromPhone({
-          storedContacts,
-          rawNumbersOnDevice,
-          numbersInPhoneAtLastSync: get(numbersInPhoneAtLastSyncAtom),
-        }),
-        Option.flatMap((numbersDeletedFromPhone) =>
-          findNumbersToRemoveFromNetwork(
-            storedContacts,
-            numbersDeletedFromPhone
-          )
+      const keepLastSync = (): void => {
+        set(
+          rememberPhoneSyncActionAtom,
+          keepPhoneSyncState(lastSync, numbersInPhone)
         )
+      }
+
+      const missingFromPhone = findNumbersMissingFromPhone({
+        storedContacts,
+        rawNumbersOnDevice,
+        lastSync,
+      })
+      const maybeNumbersToRemove = Option.flatMap(
+        missingFromPhone,
+        ({deleted}) => findNumbersToRemoveFromNetwork(storedContacts, deleted)
       )
-      if (Option.isNone(maybeNumbersToRemove)) {
-        set(addNumbersInPhoneActionAtom, numbersInPhone)
+      if (
+        Option.isNone(missingFromPhone) ||
+        Option.isNone(maybeNumbersToRemove)
+      ) {
+        keepLastSync()
         return
       }
+      const nextSync = nextPhoneSyncState(
+        numbersInPhone,
+        missingFromPhone.value
+      )
       const numbersToRemove = maybeNumbersToRemove.value
       if (numbersToRemove.size === 0) {
-        set(rememberNumbersInPhoneActionAtom, numbersInPhone)
+        set(rememberPhoneSyncActionAtom, nextSync)
         return
       }
 
@@ -144,7 +148,7 @@ export const removeContactsDeletedFromPhoneActionAtom = atom(
               : contact
           )
         )
-        set(addNumbersInPhoneActionAtom, numbersInPhone)
+        keepLastSync()
         return
       }
 
@@ -152,7 +156,7 @@ export const removeContactsDeletedFromPhoneActionAtom = atom(
       set(storedContactsAtom, (prev) =>
         Array.filter(prev, (contact) => !isRemoved(contact))
       )
-      set(rememberNumbersInPhoneActionAtom, numbersInPhone)
+      set(rememberPhoneSyncActionAtom, nextSync)
       yield* _(set(notifyContactsRemovedFromPhoneActionAtom))
     })
 )

@@ -55,48 +55,111 @@ export function createIsOnDevice(
     Option.exists(normalizedNumber, (one) => numbersInPhone.has(one))
 }
 
+/**
+ * What the last trusted sync saw: numbers in the phone, and numbers that were
+ * missing for the first time (removed only if still missing on the next sync).
+ */
+export interface PhoneSyncState {
+  readonly numbersInPhone: readonly E164PhoneNumber[]
+  readonly numbersMissing: readonly E164PhoneNumber[]
+}
+
+export interface NumbersMissingFromPhone {
+  readonly missing: ReadonlySet<E164PhoneNumber>
+  readonly deleted: ReadonlySet<E164PhoneNumber>
+}
+
+function isEveryDeviceNumberResolved(
+  storedContacts: readonly StoredContact[],
+  rawNumbersOnDevice: ReadonlySet<string>
+): boolean {
+  const storedByRawNumber = new Map(
+    Array.map(storedContacts, (contact) => [contact.info.rawNumber, contact])
+  )
+  return Array.every(Array.fromIterable(rawNumbersOnDevice), (rawNumber) => {
+    const contact = storedByRawNumber.get(rawNumber)
+    return contact !== undefined && !needsNormalization(contact)
+  })
+}
+
 const MIN_MISSING_NUMBERS_LIMIT = 10
 
 /**
- * Numbers that were in the phone at the last sync and are gone now. None when
- * the read can't be trusted: on the first sync after an update, when it is
- * empty, while some address book entries are not normalized yet (they can be
- * a saved number in a new format), or when too many numbers are missing at
- * once (e.g. contacts still syncing after a phone restore).
+ * Numbers that were in the phone at the last sync and are gone now. They count
+ * as deleted once missing on two syncs in a row. None when the read can't be
+ * trusted: on the first sync after an update, when it is empty, while some
+ * address book entries are not stored and normalized yet (they can be a saved
+ * number in a new format), or when too many numbers are missing at once (e.g.
+ * contacts still syncing after a phone restore).
  */
-export function findNumbersDeletedFromPhone({
+export function findNumbersMissingFromPhone({
   storedContacts,
   rawNumbersOnDevice,
-  numbersInPhoneAtLastSync,
+  lastSync,
 }: {
   readonly storedContacts: readonly StoredContact[]
   readonly rawNumbersOnDevice: ReadonlySet<string> | undefined
-  readonly numbersInPhoneAtLastSync: readonly E164PhoneNumber[] | undefined
-}): Option.Option<ReadonlySet<E164PhoneNumber>> {
+  readonly lastSync: PhoneSyncState | undefined
+}): Option.Option<NumbersMissingFromPhone> {
   if (
     !canDetectContactsRemovedFromPhone(rawNumbersOnDevice) ||
-    numbersInPhoneAtLastSync === undefined ||
-    Array.some(
-      storedContacts,
-      (contact) =>
-        rawNumbersOnDevice.has(contact.info.rawNumber) &&
-        needsNormalization(contact)
-    )
+    lastSync === undefined ||
+    !isEveryDeviceNumberResolved(storedContacts, rawNumbersOnDevice)
   )
     return Option.none()
 
   const numbersInPhone = findNumbersInPhone(storedContacts, rawNumbersOnDevice)
-  const missingNumbers = Array.filter(
-    numbersInPhoneAtLastSync,
+  const missing = Array.filter(
+    lastSync.numbersInPhone,
     (number) => !numbersInPhone.has(number)
   )
   const limit = Math.max(
     MIN_MISSING_NUMBERS_LIMIT,
-    numbersInPhoneAtLastSync.length / 10
+    lastSync.numbersInPhone.length / 10
   )
-  return missingNumbers.length > limit
-    ? Option.none()
-    : Option.some(new Set(missingNumbers))
+  if (missing.length > limit) return Option.none()
+
+  const missingAtLastSync = new Set(lastSync.numbersMissing)
+  return Option.some({
+    missing: new Set(missing),
+    deleted: new Set(
+      Array.filter(missing, (number) => missingAtLastSync.has(number))
+    ),
+  })
+}
+
+/**
+ * State after a sync that removed nothing: newly seen numbers are added, the
+ * rest is kept so nothing missing is forgotten.
+ */
+export function keepPhoneSyncState(
+  lastSync: PhoneSyncState | undefined,
+  numbersInPhone: ReadonlySet<E164PhoneNumber>
+): PhoneSyncState {
+  return {
+    numbersInPhone: Array.fromIterable(
+      new Set([...(lastSync?.numbersInPhone ?? []), ...numbersInPhone])
+    ),
+    numbersMissing: lastSync?.numbersMissing ?? [],
+  }
+}
+
+/**
+ * State after a sync that handled the deleted numbers: numbers missing for the
+ * first time stay remembered to be confirmed on the next sync.
+ */
+export function nextPhoneSyncState(
+  numbersInPhone: ReadonlySet<E164PhoneNumber>,
+  {missing, deleted}: NumbersMissingFromPhone
+): PhoneSyncState {
+  const missingForFirstTime = Array.filter(
+    Array.fromIterable(missing),
+    (number) => !deleted.has(number)
+  )
+  return {
+    numbersInPhone: [...numbersInPhone, ...missingForFirstTime],
+    numbersMissing: missingForFirstTime,
+  }
 }
 
 /**
@@ -137,19 +200,18 @@ export function findNumbersToRemoveFromNetwork(
 export function syncStoredContactsWithDevice(
   storedContacts: StoredContact[],
   rawNumbersOnDevice: ReadonlySet<string> | undefined,
-  numbersInPhoneAtLastSync: readonly E164PhoneNumber[] | undefined
+  lastSync: PhoneSyncState | undefined
 ): StoredContact[] {
   if (!canDetectContactsRemovedFromPhone(rawNumbersOnDevice))
     return storedContacts
 
   const isOnDevice = createIsOnDevice(storedContacts, rawNumbersOnDevice)
-  const numbersDeletedFromPhone = Option.getOrElse(
-    findNumbersDeletedFromPhone({
-      storedContacts,
-      rawNumbersOnDevice,
-      numbersInPhoneAtLastSync,
-    }),
-    () => new Set<E164PhoneNumber>()
+  const numbersDeletedFromPhone = pipe(
+    findNumbersMissingFromPhone({storedContacts, rawNumbersOnDevice, lastSync}),
+    Option.match({
+      onNone: () => new Set<E164PhoneNumber>(),
+      onSome: ({deleted}) => deleted,
+    })
   )
   let someContactChanged = false
 

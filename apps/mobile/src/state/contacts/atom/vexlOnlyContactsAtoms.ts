@@ -10,8 +10,8 @@ import {
   getContactsAndTryToResolveThePermissionsAlongTheWay,
 } from '../utils'
 import {
+  lastPhoneSyncAtom,
   normalizedContactsAtom,
-  numbersInPhoneAtLastSyncAtom,
   storedContactsAtom,
 } from './contactsStore'
 
@@ -72,9 +72,9 @@ const isOnDeviceAtom = atom(
 
 export const syncStoredContactsWithDeviceActionAtom = atom(null, (get, set) => {
   const snapshot = get(deviceContactsSnapshotAtom)
-  const numbersInPhoneAtLastSync = get(numbersInPhoneAtLastSyncAtom)
+  const lastSync = get(lastPhoneSyncAtom)
   set(storedContactsAtom, (prev) =>
-    syncStoredContactsWithDevice(prev, snapshot, numbersInPhoneAtLastSync)
+    syncStoredContactsWithDevice(prev, snapshot, lastSync)
   )
 })
 

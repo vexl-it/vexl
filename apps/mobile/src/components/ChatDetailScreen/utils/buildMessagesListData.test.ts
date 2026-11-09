@@ -1,7 +1,7 @@
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {generateChatMessageId} from '@vexl-next/domain/src/general/messaging'
 import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {HashSet, Schema} from 'effect'
+import {Array, HashSet, Schema, pipe} from 'effect'
 import {type ChatMessageWithState} from '../../../state/chat/domain'
 import {createEmptyTradeChecklistInState} from '../../../state/tradeChecklist/domain'
 import buildMessagesListData from './buildMessagesListData'
@@ -78,11 +78,14 @@ it('separates messages by the time that passed between them', () => {
   )
 
   expect(
-    items.map((item) => {
-      if (item.type === 'message') return item.message.message.text
-      if (item.type === 'time') return item.time.toMillis()
-      return item.type
-    })
+    pipe(
+      items,
+      Array.map((item) => {
+        if (item.type === 'message') return item.message.message.text
+        if (item.type === 'time') return item.time.toMillis()
+        return item.type
+      })
+    )
   ).toEqual([
     Date.UTC(2026, 0, 1, 12, 0),
     'a',

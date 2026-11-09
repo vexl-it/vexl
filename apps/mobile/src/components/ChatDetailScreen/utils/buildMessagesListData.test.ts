@@ -1,9 +1,16 @@
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
+import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {generateChatMessageId} from '@vexl-next/domain/src/general/messaging'
+import {
+  type RevealStatus,
+  type TradeChecklistUpdate,
+} from '@vexl-next/domain/src/general/tradeChecklist'
+import {UserName} from '@vexl-next/domain/src/general/UserName.brand'
 import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {Array, HashSet, Schema, pipe} from 'effect'
+import {Array, HashSet, Option, Schema, pipe} from 'effect'
 import {type ChatMessageWithState} from '../../../state/chat/domain'
 import {createEmptyTradeChecklistInState} from '../../../state/tradeChecklist/domain'
+import {revealEventForMessage} from '../../../state/tradeChecklist/utils/exchangeDetails'
 import buildMessagesListData from './buildMessagesListData'
 
 jest.mock('../../../utils/localization/I18nProvider', () => ({
@@ -42,11 +49,7 @@ function message({
 }
 
 function listShape(messages: ChatMessageWithState[]): string[] {
-  return buildMessagesListData(
-    messages,
-    HashSet.empty(),
-    createEmptyTradeChecklistInState()
-  )
+  return buildMessagesListData(messages, HashSet.empty())
     .filter(
       (item) => item.type === 'message' || item.type === 'restoredDivider'
     )
@@ -73,8 +76,7 @@ it('separates messages by the time that passed between them', () => {
       message({text: 'c', minute: 3}),
       message({text: 'd', minute: 20}),
     ],
-    HashSet.empty(),
-    createEmptyTradeChecklistInState()
+    HashSet.empty()
   )
 
   expect(
@@ -105,4 +107,99 @@ it('shows no divider in chats without restored messages', () => {
       message({text: 'b', minute: 1}),
     ])
   ).not.toContain('divider')
+})
+
+function revealMessage({
+  state,
+  minute,
+  status,
+  group,
+}: {
+  state: 'sent' | 'received'
+  minute: number
+  status: RevealStatus
+  group: 'identity' | 'contact'
+}): ChatMessageWithState {
+  const time = Schema.decodeSync(UnixMilliseconds)(
+    Date.UTC(2026, 0, 1, 12, minute)
+  )
+  const tradeChecklistUpdate: TradeChecklistUpdate =
+    group === 'identity'
+      ? {
+          identity: {
+            status,
+            deanonymizedUser: {name: Schema.decodeSync(UserName)('Dave')},
+            timestamp: time,
+          },
+        }
+      : {
+          contact: {
+            status,
+            fullPhoneNumber:
+              Schema.decodeSync(E164PhoneNumber)('+420777777777'),
+            timestamp: time,
+          },
+        }
+
+  return {
+    state,
+    message: {
+      uuid: generateChatMessageId(),
+      text: 'Checklist updated',
+      messageType: 'TRADE_CHECKLIST_UPDATE',
+      tradeChecklistUpdate,
+      senderPublicKey: sender.publicKeyPemBase64,
+      time,
+    },
+  }
+}
+
+it('shows an identity and phone exchange after both are approved', () => {
+  const messages = [
+    revealMessage({
+      state: 'sent',
+      minute: 0,
+      status: 'REQUEST_REVEAL',
+      group: 'identity',
+    }),
+    revealMessage({
+      state: 'sent',
+      minute: 0,
+      status: 'REQUEST_REVEAL',
+      group: 'contact',
+    }),
+    revealMessage({
+      state: 'received',
+      minute: 1,
+      status: 'APPROVE_REVEAL',
+      group: 'identity',
+    }),
+    revealMessage({
+      state: 'received',
+      minute: 1,
+      status: 'APPROVE_REVEAL',
+      group: 'contact',
+    }),
+  ]
+  const chat = {messages, tradeChecklist: createEmptyTradeChecklistInState()}
+
+  const renderedReveals = pipe(
+    buildMessagesListData(messages, HashSet.empty()),
+    Array.filterMap((item) =>
+      item.type === 'message'
+        ? Option.fromNullable(revealEventForMessage(chat, item.message))
+        : Option.none()
+    ),
+    Array.map((event) => ({
+      direction: event.direction,
+      identity: event.reveal.identity?.status,
+      contact: event.reveal.contact?.status,
+    }))
+  )
+
+  expect(renderedReveals).toContainEqual({
+    direction: 'received',
+    identity: 'APPROVE_REVEAL',
+    contact: 'APPROVE_REVEAL',
+  })
 })

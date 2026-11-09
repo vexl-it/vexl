@@ -4,6 +4,8 @@ import {
   type ChatMessageWithState,
   type ChatWithMessages,
 } from '../../../state/chat/domain'
+import {type TradeChecklistInState} from '../../../state/tradeChecklist/domain'
+import {isRevealMessageWithoutCard} from '../../../state/tradeChecklist/utils/exchangeDetails'
 import unixMillisecondsToLocaleDateTime from '../../../utils/unixMillisecondsToLocaleDateTime'
 import {type TradingChecklistSuggestion} from '../components/VexlbotMessageItem/domain'
 import {
@@ -111,11 +113,16 @@ const filterHiddenMessagesIds =
 
 export default function buildMessagesListData(
   messages: ChatMessageWithState[],
-  hiddenMessagesIds: ChatWithMessages['hiddenMessagesIds']
+  hiddenMessagesIds: ChatWithMessages['hiddenMessagesIds'],
+  tradeChecklist: TradeChecklistInState
 ): MessagesListItem[] {
   const visibleMessages = pipe(
     messages,
     Array.filter(filterHiddenMessagesIds(hiddenMessagesIds)),
+    Array.filter(
+      (message) =>
+        !isRevealMessageWithoutCard({messages, tradeChecklist}, message)
+    ),
     Array.map(
       (message): MessageWithState => ({
         type: 'message',

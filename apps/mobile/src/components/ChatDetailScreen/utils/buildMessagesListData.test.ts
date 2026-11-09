@@ -49,7 +49,11 @@ function message({
 }
 
 function listShape(messages: ChatMessageWithState[]): string[] {
-  return buildMessagesListData(messages, HashSet.empty())
+  return buildMessagesListData(
+    messages,
+    HashSet.empty(),
+    createEmptyTradeChecklistInState()
+  )
     .filter(
       (item) => item.type === 'message' || item.type === 'restoredDivider'
     )
@@ -76,7 +80,8 @@ it('separates messages by the time that passed between them', () => {
       message({text: 'c', minute: 3}),
       message({text: 'd', minute: 20}),
     ],
-    HashSet.empty()
+    HashSet.empty(),
+    createEmptyTradeChecklistInState()
   )
 
   expect(
@@ -184,7 +189,7 @@ it('shows an identity and phone exchange after both are approved', () => {
   const chat = {messages, tradeChecklist: createEmptyTradeChecklistInState()}
 
   const renderedReveals = pipe(
-    buildMessagesListData(messages, HashSet.empty()),
+    buildMessagesListData(messages, HashSet.empty(), chat.tradeChecklist),
     Array.filterMap((item) =>
       item.type === 'message'
         ? Option.fromNullable(revealEventForMessage(chat, item.message))
@@ -197,9 +202,11 @@ it('shows an identity and phone exchange after both are approved', () => {
     }))
   )
 
-  expect(renderedReveals).toContainEqual({
-    direction: 'received',
-    identity: 'APPROVE_REVEAL',
-    contact: 'APPROVE_REVEAL',
-  })
+  expect(renderedReveals).toEqual([
+    {
+      direction: 'received',
+      identity: 'APPROVE_REVEAL',
+      contact: 'APPROVE_REVEAL',
+    },
+  ])
 })

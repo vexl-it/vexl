@@ -166,7 +166,11 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
 
   const messagesListDataAtom = atom((get) => {
     const items = pipe(
-      buildMessagesListData(get(messagesAtom), get(hiddenMessagesIdsAtom)),
+      buildMessagesListData(
+        get(messagesAtom),
+        get(hiddenMessagesIdsAtom),
+        get(tradeChecklistAtom)
+      ),
       (nextItems) => {
         const previousItemsByKey = new Map(
           pipe(

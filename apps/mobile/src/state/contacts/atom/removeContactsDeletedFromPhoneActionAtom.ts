@@ -32,6 +32,14 @@ function hasNumberIn(
 
 const sameNumbers = Array.getEquivalence(Equivalence.string)
 
+/**
+ * Each address book read counts as one sync, so overlapping runs on the same
+ * read can't confirm a missing number on their own. Compared by reference.
+ */
+const lastProcessedDeviceContactsSnapshotAtom = atom<
+  ReadonlySet<string> | undefined
+>(undefined)
+
 const rememberPhoneSyncActionAtom = atom(
   null,
   (get, set, phoneSync: PhoneSyncState) => {
@@ -75,7 +83,12 @@ export const removeContactsDeletedFromPhoneActionAtom = atom(
   (get, set): Effect.Effect<void> =>
     Effect.gen(function* (_) {
       const rawNumbersOnDevice = get(deviceContactsSnapshotAtom)
-      if (!canDetectContactsRemovedFromPhone(rawNumbersOnDevice)) return
+      if (
+        !canDetectContactsRemovedFromPhone(rawNumbersOnDevice) ||
+        rawNumbersOnDevice === get(lastProcessedDeviceContactsSnapshotAtom)
+      )
+        return
+      set(lastProcessedDeviceContactsSnapshotAtom, rawNumbersOnDevice)
 
       const storedContacts = get(storedContactsAtom)
       const lastSync = get(lastPhoneSyncAtom)

@@ -88,38 +88,27 @@ function isEveryDeviceNumberResolved(
   })
 }
 
-const COMPARED_UNPARSED_DIGITS = 6
+const COMPARED_TRAILING_DIGITS = 8
 
 /**
- * Whether a number is in the phone. An address book entry Vexl can't parse may
- * still be the number in an unusual format, so a number ending with the last
- * digits of such an entry (after any text prefix, before any pause, wait or
- * extension part) counts too.
+ * Whether a number is in the phone: a stored contact on the device has it, or
+ * an address book entry contains its last digits - the same number written
+ * with a trunk zero, an extension or other text that changes how it parses.
  */
 export function createIsInPhone(
   storedContacts: readonly StoredContact[],
   rawNumbersOnDevice: ReadonlySet<string>
 ): (number: E164PhoneNumber) => boolean {
   const numbersInPhone = findNumbersInPhone(storedContacts, rawNumbersOnDevice)
-  const unparsedEndings = pipe(
-    storedContacts,
-    Array.filter(
-      (contact) =>
-        rawNumbersOnDevice.has(contact.info.rawNumber) &&
-        Option.isNone(contact.computedValues)
-    ),
-    Array.map((contact) =>
-      (
-        contact.info.rawNumber.replace(/^\D*/, '').split(/ext|[,;#xpw]/i)[0] ??
-        ''
-      ).replace(/\D/g, '')
-    ),
-    Array.filter((digits) => digits.length >= COMPARED_UNPARSED_DIGITS),
-    Array.map((digits) => digits.slice(-COMPARED_UNPARSED_DIGITS))
+  const digitsInPhone = Array.map(
+    Array.fromIterable(rawNumbersOnDevice),
+    (rawNumber) => rawNumber.replace(/\D/g, '')
   )
   return (number) =>
     numbersInPhone.has(number) ||
-    Array.some(unparsedEndings, (ending) => number.endsWith(ending))
+    Array.some(digitsInPhone, (digits) =>
+      digits.includes(number.slice(-COMPARED_TRAILING_DIGITS))
+    )
 }
 
 const MIN_MISSING_NUMBERS_LIMIT = 10

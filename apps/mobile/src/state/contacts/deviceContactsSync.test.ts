@@ -276,25 +276,36 @@ describe('findNumbersMissingFromPhone with unparsable entries', () => {
 })
 
 describe('findNumbersMissingFromPhone with an extension', () => {
-  it('does not count a number as missing while an entry has it with an extension', () => {
-    const contacts = phoneContacts(4)
-    const withExtension = contact({
-      rawNumber: `Work: ${phoneNumber(0)},1234`,
-      normalized: false,
-      invalidNumber: 'invalid',
-    })
-
-    expect(
-      findNumbersMissingFromPhone({
-        storedContacts: [...contacts, withExtension],
-        rawNumbersOnDevice: rawNumbersOf([...contacts.slice(1), withExtension]),
-        lastSync: {
-          numbersInPhone: contacts.map(numberOf),
-          numbersMissing: contacts.map(numberOf),
-        },
+  it.each([
+    `Work: ${phoneNumber(0)},1234`,
+    `${phoneNumber(0)}-12`,
+    `${phoneNumber(0)} (99)`,
+    `${phoneNumber(0)}/12`,
+  ])(
+    'does not count a number as missing while %s is in the phone',
+    (rawNumber) => {
+      const contacts = phoneContacts(4)
+      const withExtension = contact({
+        rawNumber,
+        normalized: false,
+        invalidNumber: 'invalid',
       })
-    ).toEqual(Option.some({missing: new Set(), deleted: new Set()}))
-  })
+
+      expect(
+        findNumbersMissingFromPhone({
+          storedContacts: [...contacts, withExtension],
+          rawNumbersOnDevice: rawNumbersOf([
+            ...contacts.slice(1),
+            withExtension,
+          ]),
+          lastSync: {
+            numbersInPhone: contacts.map(numberOf),
+            numbersMissing: contacts.map(numberOf),
+          },
+        })
+      ).toEqual(Option.some({missing: new Set(), deleted: new Set()}))
+    }
+  )
 })
 
 describe('keepPhoneSyncState', () => {

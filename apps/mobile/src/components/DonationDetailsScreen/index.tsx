@@ -4,7 +4,6 @@ import {
   NavigationBar,
   Screen,
   Typography,
-  useScreenFooterHeight,
   YStack,
 } from '@vexl-next/ui'
 import {Effect, Fiber} from 'effect'
@@ -39,8 +38,6 @@ function DonationDetailsScreen({
 }: Props): React.ReactElement {
   const {t} = useTranslation()
   const locale = useAtomValue(formattingLocaleAtom)
-  const {footerHeightAtom} = useScreenFooterHeight()
-  const footerHeight = useAtomValue(footerHeightAtom)
   const mySingleDonation = useAtomValue(
     useMemo(() => singleDonationAtom(invoiceId), [invoiceId])
   )
@@ -135,14 +132,12 @@ function DonationDetailsScreen({
   }
   return status === 'New' ? (
     <NewDonationDetails
-      footerHeight={footerHeight}
       paymentLink={paymentLink}
       isLightning={isLightning}
       summary={summary}
     />
   ) : status === 'Expired' ? (
     <ExpiredDonationDetails
-      footerHeight={footerHeight}
       title={title}
       donation={mySingleDonation}
       paymentLink={paymentLink}
@@ -152,7 +147,6 @@ function DonationDetailsScreen({
     />
   ) : status === 'Invalid' ? (
     <InvalidDonationDetails
-      footerHeight={footerHeight}
       title={title}
       donation={mySingleDonation}
       summary={summary}
@@ -160,14 +154,12 @@ function DonationDetailsScreen({
     />
   ) : status === 'Settled' ? (
     <SettledDonationDetails
-      footerHeight={footerHeight}
       title={title}
       summary={summary}
       paidAt={createdAt}
     />
   ) : (
     <OtherDonationDetails
-      footerHeight={footerHeight}
       summary={summary}
       paymentMethod={paymentMethod}
       paymentLink={paymentLink}

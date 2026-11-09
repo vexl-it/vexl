@@ -1,6 +1,13 @@
 import Clipboard from '@react-native-clipboard/clipboard'
 import {useNavigation} from '@react-navigation/native'
-import {Button, Rejected, Screen, Typography, useTheme} from '@vexl-next/ui'
+import {
+  Button,
+  Rejected,
+  Screen,
+  ScreenFooterSpacer,
+  Typography,
+  useTheme,
+} from '@vexl-next/ui'
 import {ScrollView, Stack, YStack} from '@vexl-next/ui/src/primitives'
 import {Effect} from 'effect'
 import {useSetAtom} from 'jotai'
@@ -26,7 +33,6 @@ const EXPIRED_QR_CODE_CONTENT_SIZE =
   EXPIRED_QR_CODE_SIZE - EXPIRED_QR_CODE_BORDER_WIDTH * 2
 
 export function ExpiredDonationDetails({
-  footerHeight,
   title,
   donation,
   paymentLink,
@@ -34,7 +40,6 @@ export function ExpiredDonationDetails({
   summary,
   expiredAt,
 }: {
-  readonly footerHeight: number
   readonly title: string
   readonly donation: MyDonation | undefined
   readonly paymentLink: string
@@ -75,7 +80,7 @@ export function ExpiredDonationDetails({
         flex={1}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
-          paddingBottom: footerHeight + tokens.space.$5.val,
+          paddingBottom: tokens.space.$5.val,
         }}
       >
         <YStack gap="$5">
@@ -149,6 +154,7 @@ export function ExpiredDonationDetails({
             </Stack>
           </YStack>
         </YStack>
+        <ScreenFooterSpacer />
       </ScrollView>
     </Screen>
   )

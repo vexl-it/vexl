@@ -14,12 +14,10 @@ import {
 import {DonationDetailTitleRow} from './DonationDetailTitleRow'
 
 export function SettledDonationDetails({
-  footerHeight,
   title,
   summary,
   paidAt,
 }: {
-  readonly footerHeight: number
   readonly title: string
   readonly summary: DonationSummaryData
   readonly paidAt: string
@@ -38,7 +36,7 @@ export function SettledDonationDetails({
         flex={1}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
-          paddingBottom: footerHeight + tokens.space.$5.val,
+          paddingBottom: tokens.space.$5.val,
         }}
       >
         <YStack gap="$5">

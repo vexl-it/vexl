@@ -1,4 +1,4 @@
-import {atom, useSetAtom} from 'jotai'
+import {atom, useAtomValue, useSetAtom} from 'jotai'
 import React, {useContext} from 'react'
 import {
   KeyboardAwareScrollView,
@@ -43,6 +43,12 @@ const OverlayNavigationBarFrame = styled(Stack, {
   zIndex: 1,
 })
 
+/** Reserves the height of the enclosing Screen's footer, e.g. at the end of scroll content. */
+export function ScreenFooterSpacer(): React.JSX.Element {
+  const {footerHeightAtom} = useScreenFooterHeight()
+  return <Stack height={useAtomValue(footerHeightAtom)} />
+}
+
 export interface ScreenProps {
   readonly navigationBar: React.ReactNode
   readonly overlayNavigationBar?: boolean
@@ -70,7 +76,7 @@ export function Screen({
   footerFrameProps,
 }: ScreenProps): React.JSX.Element {
   const insets = useSafeAreaInsets()
-  const {footerHeightAtom} = useScreenFooterHeight()
+  const [footerHeightAtom] = React.useState(() => atom(0))
   const setFooterHeight = useSetAtom(footerHeightAtom)
   const [footerHeight, setLocalFooterHeight] = React.useState(0)
   const footerHeightRef = React.useRef(0)

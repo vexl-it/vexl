@@ -1,6 +1,13 @@
 import Clipboard from '@react-native-clipboard/clipboard'
 import {useNavigation} from '@react-navigation/native'
-import {Button, Rejected, Screen, Typography, useTheme} from '@vexl-next/ui'
+import {
+  Button,
+  Rejected,
+  Screen,
+  ScreenFooterSpacer,
+  Typography,
+  useTheme,
+} from '@vexl-next/ui'
 import {ScrollView, YStack} from '@vexl-next/ui/src/primitives'
 import {Effect} from 'effect'
 import {useSetAtom} from 'jotai'
@@ -19,13 +26,11 @@ import {
 import {DonationDetailTitleRow} from './DonationDetailTitleRow'
 
 export function InvalidDonationDetails({
-  footerHeight,
   title,
   donation,
   summary,
   expiredAt,
 }: {
-  readonly footerHeight: number
   readonly title: string
   readonly donation: MyDonation | undefined
   readonly summary: DonationSummaryData
@@ -64,7 +69,7 @@ export function InvalidDonationDetails({
         flex={1}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
-          paddingBottom: footerHeight + tokens.space.$5.val,
+          paddingBottom: tokens.space.$5.val,
         }}
       >
         <YStack gap="$5">
@@ -112,6 +117,7 @@ export function InvalidDonationDetails({
             }}
           />
         </YStack>
+        <ScreenFooterSpacer />
       </ScrollView>
     </Screen>
   )

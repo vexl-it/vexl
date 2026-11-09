@@ -5,9 +5,9 @@ import {
   BuySellRangeSlider,
   NavigationBar,
   Screen,
+  ScreenFooterSpacer,
   SegmentedPicker,
   Typography,
-  useScreenFooterHeight,
 } from '@vexl-next/ui'
 import {XmarkCancelClose} from '@vexl-next/ui/src/icons'
 import {ScrollView, XStack, YStack} from '@vexl-next/ui/src/primitives'
@@ -48,13 +48,11 @@ function PremiumOrDiscountScreen(): React.ReactElement {
   const {t} = useTranslation()
   const locale = useAtomValue(formattingLocaleAtom)
   const goBack = useSafeGoBack()
-  const {footerHeightAtom} = useScreenFooterHeight()
 
   const offerType = useAtomValue(offerTypeAtom)
   const setOfferType = useSetAtom(offerTypeAtom)
   const feeAmount = useAtomValue(feeAmountAtom)
   const fiatValueNumber = useAtomValue(fiatValueNumberAtom)
-  const footerHeight = useAtomValue(footerHeightAtom)
   const fiatCurrency = useAtomValue(btcPriceCurrencyAtom)
   const applyFeeOnFeeChange = useSetAtom(applyFeeOnFeeChangeActionAtom)
   const [tempFeeAmount, setTempFeeAmount] = useAtom(tempFeeAmountAtom)
@@ -126,11 +124,7 @@ function PremiumOrDiscountScreen(): React.ReactElement {
         </Button>
       }
     >
-      <ScrollView
-        f={1}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{paddingBottom: footerHeight}}
-      >
+      <ScrollView f={1} showsVerticalScrollIndicator={false}>
         <YStack gap="$7">
           <SegmentedPicker
             tabs={tabs}
@@ -181,6 +175,7 @@ function PremiumOrDiscountScreen(): React.ReactElement {
             />
           </YStack>
         </YStack>
+        <ScreenFooterSpacer />
       </ScrollView>
     </Screen>
   )

@@ -309,6 +309,37 @@ describe('findNumbersMissingFromPhone with an extension', () => {
   )
 })
 
+describe('findNumbersMissingFromPhone with a short national number', () => {
+  it.each(['612 3456-12', '+354 (0)612 3456'])(
+    'does not count +3546123456 as missing while %s is in the phone',
+    (rawNumber) => {
+      const contacts = [
+        ...phoneContacts(3),
+        contact({rawNumber: '+3546123456'}),
+      ]
+      const reformatted = contact({
+        rawNumber,
+        normalized: false,
+        invalidNumber: 'invalid',
+      })
+
+      expect(
+        findNumbersMissingFromPhone({
+          storedContacts: [...contacts, reformatted],
+          rawNumbersOnDevice: rawNumbersOf([
+            ...contacts.slice(0, 3),
+            reformatted,
+          ]),
+          lastSync: {
+            numbersInPhone: contacts.map(numberOf),
+            numbersMissing: contacts.map(numberOf),
+          },
+        })
+      ).toEqual(Option.some({missing: new Set(), deleted: new Set()}))
+    }
+  )
+})
+
 describe('keepPhoneSyncState', () => {
   const first = contact({rawNumber: phoneNumber(0)})
   const second = contact({rawNumber: phoneNumber(1)})

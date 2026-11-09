@@ -51,7 +51,7 @@ export default function RestoreIntroScreen({
         </YStack>
       }
     >
-      <YStack gap="$7" paddingBottom="$5">
+      <YStack flex={1} justifyContent="center" gap="$7" paddingVertical="$5">
         <Stack alignItems="center">
           <AccountBackupGraphic animate height={171} width={147} />
         </Stack>

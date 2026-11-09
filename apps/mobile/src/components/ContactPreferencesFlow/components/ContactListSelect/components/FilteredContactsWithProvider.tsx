@@ -1,13 +1,22 @@
 import {Stack} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
+import {Array, Option, pipe} from 'effect'
 import {useAtomValue, useSetAtom, type Atom} from 'jotai'
-import React, {useEffect, useState} from 'react'
-import {type StoredContactWithComputedValues} from '../../../../../state/contacts/domain'
+import React, {useCallback, useEffect, useRef, useState} from 'react'
+import {
+  ScrollView,
+  useWindowDimensions,
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
+} from 'react-native'
+import {
+  type ContactsFilter,
+  type StoredContactWithComputedValues,
+} from '../../../../../state/contacts/domain'
 import {
   runAfterAnimationFrame,
   runAfterTwoAnimationFrames,
 } from '../../../../../utils/runAfterAnimationFrames'
-import RetainedScene from '../../../../RetainedScene'
 import {contactSelectMolecule} from '../atom'
 import ContactsList from './ContactsList'
 
@@ -37,9 +46,26 @@ const ContactsListScene = React.memo(function ContactsListScene({
   )
 })
 
+const PAGE_SNAP_TOLERANCE = 0.01
+
+function getSettledPageIndex(
+  offsetX: number,
+  pageWidth: number
+): number | undefined {
+  const page = offsetX / pageWidth
+  const pageIndex = Math.round(page)
+  return Math.abs(page - pageIndex) <= PAGE_SNAP_TOLERANCE
+    ? pageIndex
+    : undefined
+}
+
 function FilteredContacts({
+  filters,
+  onFilterChange,
   keyboardBottomSpacerHeight,
 }: {
+  readonly filters: readonly ContactsFilter[]
+  readonly onFilterChange: (filter: ContactsFilter) => void
   readonly keyboardBottomSpacerHeight: number
 }): React.ReactElement {
   const {
@@ -58,6 +84,15 @@ function FilteredContacts({
   const setReadyContactsQuery = useSetAtom(readyContactsQueryAtom)
   const [shouldMountInactiveScenes, setShouldMountInactiveScenes] =
     useState(false)
+  const {width: pageWidth} = useWindowDimensions()
+  const scrollViewRef = useRef<ScrollView>(null)
+  const settledOffsetXRef = useRef(0)
+  const selectedOffsetX =
+    pipe(
+      filters,
+      Array.findFirstIndex((filter) => filter === contactsFilter),
+      Option.getOrElse(() => 0)
+    ) * pageWidth
 
   useEffect(() => {
     return runAfterAnimationFrame(() => {
@@ -71,50 +106,88 @@ function FilteredContacts({
     })
   }, [])
 
+  useEffect(() => {
+    if (settledOffsetXRef.current === selectedOffsetX) return
+
+    settledOffsetXRef.current = selectedOffsetX
+    scrollViewRef.current?.scrollTo({x: selectedOffsetX, animated: false})
+  }, [selectedOffsetX])
+
+  const handleScrollSettled = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      const offsetX = event.nativeEvent.contentOffset.x
+      const pageIndex = getSettledPageIndex(offsetX, pageWidth)
+      if (pageIndex === undefined) return
+
+      const filter = filters[pageIndex]
+      if (filter === undefined) return
+
+      settledOffsetXRef.current = pageIndex * pageWidth
+      onFilterChange(filter)
+    },
+    [filters, onFilterChange, pageWidth]
+  )
+
+  const handleScrollEndDrag = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      // A moving release keeps paging and settles in onMomentumScrollEnd.
+      if (event.nativeEvent.velocity?.x !== 0) return
+
+      handleScrollSettled(event)
+    },
+    [handleScrollSettled]
+  )
+
+  const contactsAtomByFilter = {
+    all: allContactsToDisplayAtomsAtom,
+    new: newContactsToDisplayAtomsAtom,
+    submitted: submittedContactsToDisplayAtomsAtom,
+    nonSubmitted: nonSubmittedContactsToDisplayAtomsAtom,
+  } satisfies Record<ContactsFilter, unknown>
+
   const emptyVariant =
     searchText.trim().length === 0
       ? 'noContactsInSelectedFilter'
       : 'noMatchingContacts'
 
   return (
-    <Stack f={1} pos="relative">
-      {contactsFilter === 'all' || shouldMountInactiveScenes ? (
-        <RetainedScene isActive={contactsFilter === 'all'}>
-          <ContactsListScene
-            contactsAtom={allContactsToDisplayAtomsAtom}
-            emptyVariant={emptyVariant}
-            keyboardBottomSpacerHeight={keyboardBottomSpacerHeight}
-          />
-        </RetainedScene>
-      ) : null}
-      {contactsFilter === 'new' || shouldMountInactiveScenes ? (
-        <RetainedScene isActive={contactsFilter === 'new'}>
-          <ContactsListScene
-            contactsAtom={newContactsToDisplayAtomsAtom}
-            emptyVariant={emptyVariant}
-            keyboardBottomSpacerHeight={keyboardBottomSpacerHeight}
-          />
-        </RetainedScene>
-      ) : null}
-      {contactsFilter === 'submitted' || shouldMountInactiveScenes ? (
-        <RetainedScene isActive={contactsFilter === 'submitted'}>
-          <ContactsListScene
-            contactsAtom={submittedContactsToDisplayAtomsAtom}
-            emptyVariant={emptyVariant}
-            keyboardBottomSpacerHeight={keyboardBottomSpacerHeight}
-          />
-        </RetainedScene>
-      ) : null}
-      {contactsFilter === 'nonSubmitted' || shouldMountInactiveScenes ? (
-        <RetainedScene isActive={contactsFilter === 'nonSubmitted'}>
-          <ContactsListScene
-            contactsAtom={nonSubmittedContactsToDisplayAtomsAtom}
-            emptyVariant={emptyVariant}
-            keyboardBottomSpacerHeight={keyboardBottomSpacerHeight}
-          />
-        </RetainedScene>
-      ) : null}
-    </Stack>
+    <ScrollView
+      ref={scrollViewRef}
+      horizontal
+      pagingEnabled
+      bounces={false}
+      overScrollMode="never"
+      showsHorizontalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled"
+      onScrollEndDrag={handleScrollEndDrag}
+      onMomentumScrollEnd={handleScrollSettled}
+    >
+      {pipe(
+        filters,
+        Array.map((filter) => {
+          const isActive = filter === contactsFilter
+
+          return (
+            <Stack
+              key={filter}
+              width={pageWidth}
+              aria-hidden={!isActive}
+              importantForAccessibility={
+                isActive ? 'auto' : 'no-hide-descendants'
+              }
+            >
+              {isActive || shouldMountInactiveScenes ? (
+                <ContactsListScene
+                  contactsAtom={contactsAtomByFilter[filter]}
+                  emptyVariant={emptyVariant}
+                  keyboardBottomSpacerHeight={keyboardBottomSpacerHeight}
+                />
+              ) : null}
+            </Stack>
+          )
+        })
+      )}
+    </ScrollView>
   )
 }
 

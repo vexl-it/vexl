@@ -108,7 +108,8 @@ export interface RedisOperations {
     value: A
   ) => Effect.Effect<boolean, ParseResult.ParseError | RedisError, R>
 
-  delete: (key: string) => Effect.Effect<void, RedisError, never>
+  /** Resolves to `true` only for the one caller that actually removed the key. */
+  delete: (key: string) => Effect.Effect<boolean, RedisError, never>
   withLock: <A, E, R>(
     program: Effect.Effect<A, E, R>
   ) => (
@@ -284,14 +285,10 @@ export class RedisService extends Context.Tag('RedisService')<
           })
         )
 
-      const deleteKey = (key: string): Effect.Effect<void, RedisError> =>
-        // eslint-disable-next-line @typescript-eslint/no-invalid-void-type
-        Effect.async<void, RedisError>((cb) => {
-          void redisClient.del(key, (err) => {
-            if (err) {
-              cb(Effect.fail(new RedisError({cause: err})))
-            } else cb(Effect.succeed(Effect.void))
-          })
+      const deleteKey = (key: string): Effect.Effect<boolean, RedisError> =>
+        Effect.tryPromise({
+          try: async () => (await redisClient.del(key)) === 1,
+          catch: (e) => new RedisError({cause: e}),
         }).pipe(Effect.withSpan('Redis delete'))
 
       const insertToSet = (

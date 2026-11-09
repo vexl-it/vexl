@@ -23,9 +23,10 @@ interface VerificationStateDbOperations {
     PhoneVerificationState,
     VerificationNotFoundError | UnexpectedServerError
   >
-  deletePhoneVerificationState: (
-    state: PhoneNumberVerificationId
-  ) => Effect.Effect<void, UnexpectedServerError>
+  /** Deletes the state, failing with `VerificationNotFoundError` for every caller but the one that deleted it. */
+  claimPhoneVerificationState: (
+    id: PhoneNumberVerificationId
+  ) => Effect.Effect<void, VerificationNotFoundError | UnexpectedServerError>
 
   storeChallengeVerificationState: (
     state: ChallengeVerificationState
@@ -59,11 +60,7 @@ export class VerificationStateDbService extends Context.Tag(
           storeVerificationState(
             `${PHONE_VERIFICATION_STATE_PREFIX}${state.id}`,
             state,
-            {
-              expiresAt: unixMillisecondsFromNow(
-                VERIFICATION_EXPIRES_AFTER_MILIS
-              ),
-            }
+            {expiresAt: state.expiresAt}
           ).pipe(
             Effect.catchAll((e) =>
               Effect.zipLeft(
@@ -135,17 +132,22 @@ export class VerificationStateDbService extends Context.Tag(
               )
             })
           ),
-        deletePhoneVerificationState: (id) =>
+        claimPhoneVerificationState: (id) =>
           redis.delete(`${PHONE_VERIFICATION_STATE_PREFIX}${id}`).pipe(
-            Effect.catchAll((e) => {
-              return Effect.zipLeft(
+            Effect.catchAll((e) =>
+              Effect.zipRight(
                 Effect.logError(
-                  'Error while storing phone verification state',
+                  'Error while deleting phone verification state',
                   e
                 ),
                 Effect.fail(new UnexpectedServerError({status: 500}))
               )
-            })
+            ),
+            Effect.filterOrFail(
+              (deleted) => deleted,
+              () => new VerificationNotFoundError({status: 404, code: '100104'})
+            ),
+            Effect.asVoid
           ),
       }
       return toReturn

@@ -4,7 +4,6 @@ import {UserApiSpecification} from '@vexl-next/rest-api/src/services/user/specif
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {Effect} from 'effect'
 import {VerificationStateDbService} from '../db/verificationStateDb'
-import {type ChallengeVerificationState} from '../domain'
 import {consumePhoneVerification} from '../utils/consumePhoneVerification'
 import {generateVerificationChallenge} from '../utils/generateVerificationChallenge'
 
@@ -15,21 +14,20 @@ export const verifyCodeHandler = HttpApiBuilder.handler(
   (req) =>
     Effect.gen(function* (_) {
       const loginDb = yield* _(VerificationStateDbService)
-      const loginData = yield* _(consumePhoneVerification(req.payload))
+      const challenge = yield* _(generateVerificationChallenge())
 
-      const verificationState = {
-        publicKey: req.payload.userPublicKey,
-        phoneNumber: loginData.phoneNumber,
-        expiresAt: loginData.expiresAt,
-        countryPrefix: loginData.countryPrefix,
-        challenge: yield* _(generateVerificationChallenge()),
-      } satisfies ChallengeVerificationState
+      yield* _(
+        consumePhoneVerification(req.payload, (loginData) =>
+          loginDb.storeChallengeVerificationState({
+            publicKey: req.payload.userPublicKey,
+            phoneNumber: loginData.phoneNumber,
+            expiresAt: loginData.expiresAt,
+            countryPrefix: loginData.countryPrefix,
+            challenge,
+          })
+        )
+      )
 
-      yield* _(loginDb.storeChallengeVerificationState(verificationState))
-
-      return new VerifyPhoneNumberResponse({
-        challenge: verificationState.challenge,
-        phoneVerified: true,
-      })
+      return new VerifyPhoneNumberResponse({challenge, phoneVerified: true})
     }).pipe(Effect.withSpan('verifyCodeHandler'), makeEndpointEffect)
 )

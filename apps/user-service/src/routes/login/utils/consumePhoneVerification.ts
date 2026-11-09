@@ -10,19 +10,22 @@ import {checkVerification} from '../../../utils/smsVerificationUtils'
 import {VerificationStateDbService} from '../db/verificationStateDb'
 import {type PhoneVerificationState} from '../domain'
 
-export const consumePhoneVerification = ({
-  id,
-  code,
-}: {
-  id: PhoneNumberVerificationId
-  code: string
-}): Effect.Effect<
-  PhoneVerificationState,
+/**
+ * Checks the code, claims the verification so concurrent requests with the
+ * same code fail, and runs `use`. If `use` fails, the verification is put back
+ * so the user can retry without requesting a new code.
+ */
+export const consumePhoneVerification = <A, E, R>(
+  {id, code}: {id: PhoneNumberVerificationId; code: string},
+  use: (verification: PhoneVerificationState) => Effect.Effect<A, E, R>
+): Effect.Effect<
+  A,
+  | E
   | UnableToVerifySmsCodeError
   | VerificationNotFoundError
   | UnexpectedServerError
   | ConfigError.ConfigError,
-  VerificationStateDbService | PreludeService
+  R | VerificationStateDbService | PreludeService
 > =>
   Effect.gen(function* (_) {
     const verificationDb = yield* _(VerificationStateDbService)
@@ -43,6 +46,11 @@ export const consumePhoneVerification = ({
       yield* _(checkVerification({sid: verification.sid, code}))
     }
 
-    yield* _(verificationDb.deletePhoneVerificationState(id))
-    return verification
+    yield* _(verificationDb.claimPhoneVerificationState(id))
+    return yield* _(
+      use(verification),
+      Effect.onError(() =>
+        Effect.ignore(verificationDb.storePhoneVerificationState(verification))
+      )
+    )
   })

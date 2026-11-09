@@ -12,7 +12,7 @@ import {
 } from '@vexl-next/rest-api/src/services/user/contracts'
 import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
-import {Effect, pipe, Schema} from 'effect'
+import {Array, Effect, Either, pipe, Schema} from 'effect'
 import {makeTestCommonAndSecurityHeaders} from '../utils/createTestCommonAndSecurityHeaders'
 import {generateAndSignChallenge} from '../utils/loginChalenge'
 import {checkVerificationMock} from '../utils/mockedPreludeClient'
@@ -189,6 +189,53 @@ describe('backup keys', () => {
             }),
             Effect.either
           )
+        )
+
+        const {keyPair} = yield* _(
+          client.Backup.getBackupKeyPair({
+            payload: {id: verificationId, code: '123456'},
+          })
+        )
+        expect(keyPair.privateKey).toBeDefined()
+      })
+    )
+  })
+
+  it('lets only one of concurrent requests with the same code through', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const client = yield* _(NodeTestingApp)
+        const {verificationId} = yield* _(initVerification(phoneNumber))
+        const payload = {id: verificationId, code: '123456'}
+
+        // Delay the code check so both requests read the state before either claims it.
+        const slowValidCheck = (): ReturnType<typeof checkVerificationMock> =>
+          Effect.delay(Effect.succeed('valid'), '50 millis')
+        checkVerificationMock
+          .mockImplementationOnce(slowValidCheck)
+          .mockImplementationOnce(slowValidCheck)
+
+        const [backupResult, loginResult] = yield* _(
+          Effect.all(
+            [
+              Effect.either(client.Backup.getBackupKeyPair({payload})),
+              Effect.either(
+                client.Login.verifyCode({
+                  payload: {
+                    ...payload,
+                    userPublicKey: generatePrivateKey().publicKeyPemBase64,
+                  },
+                })
+              ),
+            ],
+            {concurrency: 'unbounded'}
+          )
+        )
+
+        expect(checkVerificationMock).toHaveBeenCalledTimes(2)
+        expect(Array.getRights([backupResult, loginResult])).toHaveLength(1)
+        expectErrorResponse(VerificationNotFoundError)(
+          Either.isLeft(backupResult) ? backupResult : loginResult
         )
       })
     )

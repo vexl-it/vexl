@@ -120,12 +120,12 @@ function FilteredContacts({
       if (pageIndex === undefined) return
 
       const filter = filters[pageIndex]
-      if (filter === undefined) return
+      if (filter === undefined || filter === contactsFilter) return
 
       settledOffsetXRef.current = pageIndex * pageWidth
       onFilterChange(filter)
     },
-    [filters, onFilterChange, pageWidth]
+    [contactsFilter, filters, onFilterChange, pageWidth]
   )
 
   const handleScrollEndDrag = useCallback(

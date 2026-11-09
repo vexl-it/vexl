@@ -43,6 +43,20 @@ const rememberNumbersInPhoneActionAtom = atom(
   }
 )
 
+/**
+ * After a run that removed nothing, numbers missing from the phone must stay
+ * remembered so a later read can't treat them as never seen.
+ */
+const addNumbersInPhoneActionAtom = atom(
+  null,
+  (get, set, numbersInPhone: ReadonlySet<E164PhoneNumber>) => {
+    set(
+      rememberNumbersInPhoneActionAtom,
+      new Set([...(get(numbersInPhoneAtLastSyncAtom) ?? []), ...numbersInPhone])
+    )
+  }
+)
+
 const notifyContactsRemovedFromPhoneActionAtom = atom(null, (get, set) => {
   const {t} = get(translationAtom)
   set(addNotificationToCenterActionAtom, {
@@ -74,19 +88,28 @@ export const removeContactsDeletedFromPhoneActionAtom = atom(
       if (!canDetectContactsRemovedFromPhone(rawNumbersOnDevice)) return
 
       const storedContacts = get(storedContactsAtom)
-      const numbersDeletedFromPhone = findNumbersDeletedFromPhone({
-        storedContacts,
-        rawNumbersOnDevice,
-        numbersInPhoneAtLastSync: get(numbersInPhoneAtLastSyncAtom),
-      })
-      const numbersToRemove = findNumbersToRemoveFromNetwork(
-        storedContacts,
-        numbersDeletedFromPhone
-      )
       const numbersInPhone = findNumbersInPhone(
         storedContacts,
         rawNumbersOnDevice
       )
+      const maybeNumbersToRemove = pipe(
+        findNumbersDeletedFromPhone({
+          storedContacts,
+          rawNumbersOnDevice,
+          numbersInPhoneAtLastSync: get(numbersInPhoneAtLastSyncAtom),
+        }),
+        Option.flatMap((numbersDeletedFromPhone) =>
+          findNumbersToRemoveFromNetwork(
+            storedContacts,
+            numbersDeletedFromPhone
+          )
+        )
+      )
+      if (Option.isNone(maybeNumbersToRemove)) {
+        set(addNumbersInPhoneActionAtom, numbersInPhone)
+        return
+      }
+      const numbersToRemove = maybeNumbersToRemove.value
       if (numbersToRemove.size === 0) {
         set(rememberNumbersInPhoneActionAtom, numbersInPhone)
         return
@@ -121,6 +144,7 @@ export const removeContactsDeletedFromPhoneActionAtom = atom(
               : contact
           )
         )
+        set(addNumbersInPhoneActionAtom, numbersInPhone)
         return
       }
 

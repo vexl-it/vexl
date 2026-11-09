@@ -157,30 +157,30 @@ describe('findNumbersDeletedFromPhone', () => {
         rawNumbersOnDevice: rawNumbersOf(contacts.slice(10)),
         numbersInPhoneAtLastSync,
       })
-    ).toEqual(new Set(deleted.map(numberOf)))
+    ).toEqual(Option.some(new Set(deleted.map(numberOf))))
   })
 
-  it('returns nothing on the first sync', () => {
+  it("can't tell on the first sync", () => {
     expect(
       findNumbersDeletedFromPhone({
         storedContacts: contacts,
         rawNumbersOnDevice: rawNumbersOf(contacts.slice(1)),
         numbersInPhoneAtLastSync: undefined,
-      }).size
-    ).toBe(0)
+      })
+    ).toEqual(Option.none())
   })
 
-  it('returns nothing when too many numbers are missing at once', () => {
+  it("can't tell when too many numbers are missing at once", () => {
     expect(
       findNumbersDeletedFromPhone({
         storedContacts: contacts,
         rawNumbersOnDevice: rawNumbersOf(contacts.slice(11)),
         numbersInPhoneAtLastSync,
-      }).size
-    ).toBe(0)
+      })
+    ).toEqual(Option.none())
   })
 
-  it('returns nothing while an address book entry is not normalized yet', () => {
+  it("can't tell while an address book entry is not normalized yet", () => {
     const reformattedNotNormalized = contact({
       rawNumber: '777 000 0000',
       normalized: false,
@@ -194,8 +194,8 @@ describe('findNumbersDeletedFromPhone', () => {
           reformattedNotNormalized,
         ]),
         numbersInPhoneAtLastSync,
-      }).size
-    ).toBe(0)
+      })
+    ).toEqual(Option.none())
   })
 })
 
@@ -218,21 +218,25 @@ describe('findNumbersToRemoveFromNetwork', () => {
         [...active, addedInVexlDuplicate],
         new Set([numberOf(first), numberOf(second)])
       )
-    ).toEqual(new Set([numberOf(first)]))
+    ).toEqual(Option.some(new Set([numberOf(first)])))
   })
 
-  it('removes nothing when more than half of the network would go', () => {
+  it('removes nothing when more than half of the active phone contacts would go', () => {
+    const addedInVexl = ['+420777999998', '+420777999999'].map((rawNumber) =>
+      contact({rawNumber, imported: true, importedManually: true})
+    )
+
     expect(
       findNumbersToRemoveFromNetwork(
-        active,
+        [...active, ...addedInVexl],
         new Set([first, second, third].map(numberOf))
-      ).size
-    ).toBe(0)
+      )
+    ).toEqual(Option.none())
     expect(
       findNumbersToRemoveFromNetwork(
         active,
         new Set([first, second].map(numberOf))
-      ).size
-    ).toBe(2)
+      )
+    ).toEqual(Option.some(new Set([first, second].map(numberOf))))
   })
 })

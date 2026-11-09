@@ -58,7 +58,7 @@ export function createIsOnDevice(
 const MIN_MISSING_NUMBERS_LIMIT = 10
 
 /**
- * Numbers that were in the phone at the last sync and are gone now. Empty when
+ * Numbers that were in the phone at the last sync and are gone now. None when
  * the read can't be trusted: on the first sync after an update, when it is
  * empty, while some address book entries are not normalized yet (they can be
  * a saved number in a new format), or when too many numbers are missing at
@@ -72,7 +72,7 @@ export function findNumbersDeletedFromPhone({
   readonly storedContacts: readonly StoredContact[]
   readonly rawNumbersOnDevice: ReadonlySet<string> | undefined
   readonly numbersInPhoneAtLastSync: readonly E164PhoneNumber[] | undefined
-}): ReadonlySet<E164PhoneNumber> {
+}): Option.Option<ReadonlySet<E164PhoneNumber>> {
   if (
     !canDetectContactsRemovedFromPhone(rawNumbersOnDevice) ||
     numbersInPhoneAtLastSync === undefined ||
@@ -83,7 +83,7 @@ export function findNumbersDeletedFromPhone({
         needsNormalization(contact)
     )
   )
-    return new Set()
+    return Option.none()
 
   const numbersInPhone = findNumbersInPhone(storedContacts, rawNumbersOnDevice)
   const missingNumbers = Array.filter(
@@ -94,35 +94,37 @@ export function findNumbersDeletedFromPhone({
     MIN_MISSING_NUMBERS_LIMIT,
     numbersInPhoneAtLastSync.length / 10
   )
-  return new Set(missingNumbers.length > limit ? [] : missingNumbers)
+  return missingNumbers.length > limit
+    ? Option.none()
+    : Option.some(new Set(missingNumbers))
 }
 
 /**
  * Active numbers to remove from the network. A number is kept while any of its
- * contacts was added in Vexl. Nothing is removed when it would take out more
- * than half of the network - that is more likely a bad read than the user
+ * contacts was added in Vexl. None when it would take out more than half of
+ * the active phone contacts - that is more likely a bad read than the user
  * deleting contacts.
  */
 export function findNumbersToRemoveFromNetwork(
   storedContacts: readonly StoredContact[],
   numbersDeletedFromPhone: ReadonlySet<E164PhoneNumber>
-): ReadonlySet<E164PhoneNumber> {
-  const activeNumbers = numbersOf(
-    storedContacts,
-    (contact) => contact.flags.imported
-  )
+): Option.Option<ReadonlySet<E164PhoneNumber>> {
   const numbersAddedInVexl = numbersOf(
     storedContacts,
     (contact) => contact.flags.importedManually
   )
-  const numbersToRemove = Array.filter(
-    Array.fromIterable(activeNumbers),
-    (number) =>
-      numbersDeletedFromPhone.has(number) && !numbersAddedInVexl.has(number)
+  const activePhoneNumbers = Array.filter(
+    Array.fromIterable(
+      numbersOf(storedContacts, (contact) => contact.flags.imported)
+    ),
+    (number) => !numbersAddedInVexl.has(number)
   )
-  return new Set(
-    numbersToRemove.length * 2 > activeNumbers.size ? [] : numbersToRemove
+  const numbersToRemove = Array.filter(activePhoneNumbers, (number) =>
+    numbersDeletedFromPhone.has(number)
   )
+  return numbersToRemove.length * 2 > activePhoneNumbers.length
+    ? Option.none()
+    : Option.some(new Set(numbersToRemove))
 }
 
 /**
@@ -141,11 +143,14 @@ export function syncStoredContactsWithDevice(
     return storedContacts
 
   const isOnDevice = createIsOnDevice(storedContacts, rawNumbersOnDevice)
-  const numbersDeletedFromPhone = findNumbersDeletedFromPhone({
-    storedContacts,
-    rawNumbersOnDevice,
-    numbersInPhoneAtLastSync,
-  })
+  const numbersDeletedFromPhone = Option.getOrElse(
+    findNumbersDeletedFromPhone({
+      storedContacts,
+      rawNumbersOnDevice,
+      numbersInPhoneAtLastSync,
+    }),
+    () => new Set<E164PhoneNumber>()
+  )
   let someContactChanged = false
 
   const syncedContacts = pipe(

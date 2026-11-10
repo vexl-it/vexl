@@ -14,7 +14,7 @@
     "format:fix": "prettier --write \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json,css}\""
   },
   "dependencies": {
-    "@effect/platform": "^0.93.6",
+    "@effect/platform": "^0.97.1",
     "@sentry/nextjs": "^10.75.2",
     "@vexl-next/cryptography": "0.0.0",
     "@vexl-next/domain": "0.0.0",

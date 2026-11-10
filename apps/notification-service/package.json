@@ -29,7 +29,7 @@
   "prettier": "@vexl-next/prettier-config",
   "dependencies": {
     "@effect/experimental": "^0.57.11",
-    "@effect/platform": "^0.93.6",
+    "@effect/platform": "^0.97.1",
     "@effect/platform-node": "^0.103.0",
     "@effect/rpc": "^0.72.2",
     "@effect/sql": "^0.48.6",

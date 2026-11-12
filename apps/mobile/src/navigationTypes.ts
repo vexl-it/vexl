@@ -27,6 +27,7 @@ import {
 } from '@vexl-next/domain/src/general/tradeChecklist'
 import {type UserName} from '@vexl-next/domain/src/general/UserName.brand'
 import {type RealLifeInfo} from '@vexl-next/domain/src/general/UserNameAndAvatar.brand'
+import {type SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
 import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {type InvoiceId} from '@vexl-next/rest-api/src/services/content/contracts'
 import {
@@ -103,9 +104,7 @@ export type RootStackParamsList = {
     inboxKey: PublicKeyPemBase64
   }
 
-  ChatImagePreview: {
-    imageUri: UriString
-  }
+  ChatImagePreview: {imageUri: UriString} | {svgXml: SvgString}
 
   ChatReceivedMessagesDebug: {
     otherSideKey: PublicKeyPemBase64

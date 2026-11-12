@@ -67,7 +67,7 @@ export function MessagesScreenChatHeader(): React.ReactElement {
         })}
         leftAction={{icon: ChevronLeft, onPress: safeGoBack}}
         avatar={
-          <TouchableOpacity disabled={!onAvatarPress} onPress={onAvatarPress}>
+          <TouchableOpacity onPress={onAvatarPress}>
             <UserAvatar
               grayScale={shouldGrayScaleAvatar}
               userImage={otherSideData.image}

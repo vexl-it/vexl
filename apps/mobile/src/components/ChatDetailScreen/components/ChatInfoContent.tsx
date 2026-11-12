@@ -74,7 +74,7 @@ function OtherSideInfoBanner({
 
   return (
     <XStack alignItems="center" gap="$3">
-      <TouchableOpacity disabled={!onAvatarPress} onPress={onAvatarPress}>
+      <TouchableOpacity onPress={onAvatarPress}>
         <UserAvatar
           grayScale={grayAvatar}
           userImage={userImage}

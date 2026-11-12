@@ -6,8 +6,7 @@ import resolveLocalUri from '../../../utils/resolveLocalUri'
 import {showGoldenAvatarInfoModalActionAton} from '../../GoldenAvatar/atoms'
 import {chatMolecule} from '../atoms'
 
-/** Returns undefined when the other side's avatar has nothing to open. */
-export default function useOtherSideAvatarPress(): (() => void) | undefined {
+export default function useOtherSideAvatarPress(): () => void {
   const navigation =
     useNavigation<RootStackScreenProps<'ChatDetail'>['navigation']>()
   const {offerForChatAtom, otherSideDataAtom, otherSideGoldenAvatarTypeAtom} =
@@ -19,20 +18,19 @@ export default function useOtherSideAvatarPress(): (() => void) | undefined {
     showGoldenAvatarInfoModalActionAton
   )
 
-  const imageUri =
-    otherSideData.image.type === 'imageUri'
-      ? otherSideData.image.imageUri
-      : undefined
+  const image = otherSideData.image
   const hasGoldenAvatar =
     !!otherSideGoldenAvatarType ||
     (!offer?.ownershipInfo && !!offer?.offerInfo.publicPart.goldenAvatarType)
 
-  if (imageUri)
+  if (image.type === 'imageUri')
     return () => {
       navigation.navigate('ChatImagePreview', {
-        imageUri: resolveLocalUri(imageUri),
+        imageUri: resolveLocalUri(image.imageUri),
       })
     }
   if (hasGoldenAvatar) return showGoldenAvatarInfoModal
-  return undefined
+  return () => {
+    navigation.navigate('ChatImagePreview', {svgXml: image.svgXml})
+  }
 }

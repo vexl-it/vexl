@@ -39,7 +39,7 @@ export const createFindFirstLevelContactsPublicKeysByHashFromPaginated =
       Result: FindFirstLevelContactsPublicKeysByHashFromPaginatedResult,
       execute: (params) => sql`
         SELECT
-          MAX(users.id) AS user_id,
+          users.id AS user_id,
           users.public_key,
           users.public_key_v2
         FROM
@@ -57,10 +57,11 @@ export const createFindFirstLevelContactsPublicKeysByHashFromPaginated =
           }),
         ])}
         GROUP BY
+          users.id,
           users.public_key,
           users.public_key_v2
         ORDER BY
-          MAX(users.id) ASC
+          users.id ASC
         LIMIT
           ${params.limit}
       `,

@@ -4,7 +4,6 @@ import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {ServerHashedNumber} from '@vexl-next/domain/src/general/ServerHashedNumber'
 import {Effect, flow, Schema} from 'effect'
-import {createIsNotOwnerAccountFragment} from '../../utils/createIsNotOwnerAccountFragment'
 
 export const FindVexlNotificationTokensOfUsersWhoDirectlyImportedHashParams =
   Schema.Struct({
@@ -38,11 +37,6 @@ export const createFindVexlNotificationTokensOfUsersWhoDirectlyImportedHash =
           (u.vexl_notification_token IS NOT NULL)
           AND uc.hash_to = ${params.userHash}
           AND ${sql.in('u.hash', params.importedHashes)}
-          AND ${createIsNotOwnerAccountFragment({
-          usersTable: sql`u`,
-          ownerHash: params.userHash,
-          sql,
-        })}
       `,
     })
 

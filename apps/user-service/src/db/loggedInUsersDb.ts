@@ -3,7 +3,7 @@ import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {PublicKeyV2} from '@vexl-next/cryptography/src/KeyHolder/brandsV2'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
-import {Context, Effect, flow, Layer, Option, Schema} from 'effect'
+import {Context, Effect, flow, Layer, Schema} from 'effect'
 
 const UserRecordId = Schema.String.pipe(Schema.brand('UserRecordId'))
 export type UserRecordId = Schema.Schema.Type<typeof UserRecordId>
@@ -28,10 +28,7 @@ const UpdatePublicKeyV2Input = Schema.Struct({
 type UpdatePublicKeyV2Input = Schema.Schema.Type<typeof UpdatePublicKeyV2Input>
 
 export interface LoggedInUsersDbOperations {
-  /** False when the key is already registered, under another phone number. */
-  insertUserIfNew: (
-    input: UserInsert
-  ) => Effect.Effect<boolean, UnexpectedServerError>
+  insertUser: (input: UserInsert) => Effect.Effect<void, UnexpectedServerError>
   updatePublicKeyV2: (
     input: UpdatePublicKeyV2Input
   ) => Effect.Effect<void, UnexpectedServerError>
@@ -48,17 +45,17 @@ export class LoggedInUsersDbService extends Context.Tag(
     Effect.gen(function* (_) {
       const sql = yield* _(SqlClient.SqlClient)
 
-      const insertUserIfNewQuery = SqlSchema.findOne({
-        Request: UserInsert,
-        Result: Schema.Struct({id: UserRecordId}),
-        execute: (request) => sql`
-          INSERT INTO
-            users ${sql.insert(request)}
-          ON CONFLICT (public_key) DO NOTHING
-          RETURNING
-            id
-        `,
-      })
+      const insertUserResolver = yield* _(
+        SqlResolver.void('insertUser', {
+          Request: UserInsert,
+          execute: (requests) => {
+            return sql`
+              INSERT INTO
+                users ${sql.insert(requests)}
+            `
+          },
+        })
+      )
 
       const deleteUserResolver = yield* _(
         SqlResolver.void('deleteUser', {
@@ -85,9 +82,8 @@ export class LoggedInUsersDbService extends Context.Tag(
       })
 
       return {
-        insertUserIfNew: flow(
-          insertUserIfNewQuery,
-          Effect.map(Option.isSome),
+        insertUser: flow(
+          insertUserResolver.execute,
           UnexpectedServerError.wrapErrors('Error while inserting user')
         ),
         updatePublicKeyV2: flow(

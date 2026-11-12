@@ -6,7 +6,6 @@ import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {ServerHashedNumber} from '@vexl-next/domain/src/general/ServerHashedNumber'
 import {Effect, flow, Schema} from 'effect'
 import {createIsAllowedSharedContactHashFragment} from '../../utils/createIsAllowedSharedContactHashFragment'
-import {createIsNotOwnerAccountFragment} from '../../utils/createIsNotOwnerAccountFragment'
 
 export const FindCommonFriendsPaginatedParams = Schema.Struct({
   ownerHash: ServerHashedNumber,
@@ -33,8 +32,6 @@ export const createFindCommonFriendsByOwnerHashAndPublicKeysPaginated =
   Effect.gen(function* (_) {
     const sql = yield* _(PgClient.PgClient)
 
-    // The page cursor goes to HAVING: in WHERE it would drop a public key's
-    // older rows, and with them some of its common and verified friends.
     const query = SqlSchema.findAll({
       Request: FindCommonFriendsPaginatedParams,
       Result: FindCommonFriendsPaginatedResult,
@@ -63,6 +60,7 @@ export const createFindCommonFriendsByOwnerHashAndPublicKeysPaginated =
         WHERE
           ${sql.and([
           sql`my_contact.hash_from = ${hash.ownerHash}`,
+          sql`imported_my_contact.id > ${hash.userContactId}`,
           sql.or([
             sql.in('other_side.public_key', hash.publicKeys),
             sql.in('other_side.public_key_v2', hash.publicKeysV2),
@@ -72,17 +70,10 @@ export const createFindCommonFriendsByOwnerHashAndPublicKeysPaginated =
             publicImportCountThreshold: hash.publicImportCountThreshold,
             sql,
           }),
-          createIsNotOwnerAccountFragment({
-            usersTable: sql`other_side`,
-            ownerHash: hash.ownerHash,
-            sql,
-          }),
         ])}
         GROUP BY
           other_side.public_key,
           other_side.public_key_v2
-        HAVING
-          MAX(imported_my_contact.id) > ${hash.userContactId}
         ORDER BY
           MAX(imported_my_contact.id) ASC
         LIMIT

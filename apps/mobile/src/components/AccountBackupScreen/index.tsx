@@ -2,7 +2,6 @@ import {
   AccountBackupGraphic,
   Button,
   ChevronLeft,
-  InfoBox,
   InfoList,
   InfoListItem,
   NavigationBar,
@@ -52,8 +51,11 @@ export default function AccountBackupScreen({
           title={t('accountBackup.heading')}
           text={t('accountBackup.description')}
         />
-        <InfoBox variant="pink">{t('accountBackup.warning')}</InfoBox>
         <InfoList>
+          <InfoListItem
+            title={t('accountBackup.whatYouNeed.title')}
+            note={t('accountBackup.whatYouNeed.text')}
+          />
           <InfoListItem
             title={t('accountBackup.storeSafely.title')}
             note={t('accountBackup.storeSafely.text')}

@@ -92,6 +92,36 @@ it('prefers a direct part of any number over reposts', () => {
   })
 })
 
+it('shows the friends of every number on a newly received note', () => {
+  const [merged] = mergeIncomingNotesToState({
+    storedNotes: [],
+    incomingNotes: [
+      {
+        identity: mainIdentity,
+        noteInfo: makeNote({
+          commonFriends: [hash('a')],
+          verifiedCommonFriends: [hash('a')],
+        }),
+      },
+      {
+        identity: extraIdentity,
+        noteInfo: makeNote({
+          friendLevel: ['FIRST_DEGREE'],
+          commonFriends: [hash('b')],
+        }),
+      },
+    ],
+    removedNoteIds: [],
+    mainIdentity,
+  })
+
+  expect(merged?.noteInfo.privatePart).toMatchObject({
+    friendLevel: ['SECOND_DEGREE', 'FIRST_DEGREE'],
+    commonFriends: [hash('a'), hash('b')],
+    verifiedCommonFriends: [hash('a')],
+  })
+})
+
 it('drops a note only once no number has a private part for it', () => {
   const noteId = legacyStored.noteInfo.noteId
   const [withBoth] = mergeIncomingNotesToState({

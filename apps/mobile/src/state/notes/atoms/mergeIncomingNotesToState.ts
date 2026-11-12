@@ -149,7 +149,11 @@ export const mergeIncomingNotesToState = ({
       const adminId = noteInfo.privatePart.adminId
       return adminId
         ? {noteInfo, flags: {reported: false}, ownershipInfo: {adminId}}
-        : {noteInfo, flags: {reported: false}, socialPartsByIdentity}
+        : {
+            noteInfo: withSocialParts(noteInfo, socialPartsByIdentity),
+            flags: {reported: false},
+            socialPartsByIdentity,
+          }
     })
   )
 

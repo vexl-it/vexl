@@ -67,7 +67,7 @@
   "loginFlow.restoreFromBackup.restored.title": "おかえりなさい！",
   "loginFlow.restoreFromBackup.restored.text": "オファーもVexl Clubsも、もう戻っています。",
   "loginFlow.restoreFromBackup.restored.chatsText": "チャットは、相手がVexlを開くと戻ります。",
-  "loginFlow.restoreFromBackup.restored.dividerText": "以前のメッセージは相手のコピーから届き、区切り線の上に表示されます。",
+  "loginFlow.restoreFromBackup.restored.messagesText": "以前のメッセージは相手のコピーから届きます。",
   "loginFlow.restoreFromBackup.restored.contactsText": "連絡先をインポートすると、名前がまた表示されます。",
   "loginFlow.restoreFromBackup.failed.title": "アカウントを復元できませんでした",
   "loginFlow.restoreFromBackup.failed.unknown": "問題が発生しました。少し待ってから、もう一度試してね。",

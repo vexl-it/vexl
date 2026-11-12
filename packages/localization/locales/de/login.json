@@ -67,7 +67,7 @@
   "loginFlow.restoreFromBackup.restored.title": "Du bist zurück!",
   "loginFlow.restoreFromBackup.restored.text": "Deine Angebote und Vexl Clubs sind schon da.",
   "loginFlow.restoreFromBackup.restored.chatsText": "Chats kommen zurück, sobald die andere Person Vexl öffnet.",
-  "loginFlow.restoreFromBackup.restored.dividerText": "Alte Nachrichten stammen aus deren Kopie und stehen über einer Trennlinie.",
+  "loginFlow.restoreFromBackup.restored.messagesText": "Alte Nachrichten stammen aus ihrer Kopie.",
   "loginFlow.restoreFromBackup.restored.contactsText": "Importiere als Nächstes deine Kontakte, um die Namen wieder zu sehen.",
   "loginFlow.restoreFromBackup.failed.title": "Dein Account ließ sich nicht wiederherstellen",
   "loginFlow.restoreFromBackup.failed.unknown": "Etwas ist schiefgelaufen. Versuch es gleich noch mal.",

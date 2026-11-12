@@ -4,15 +4,10 @@ import {styled, useTheme} from 'tamagui'
 import {ChevronRight} from '../icons/ChevronRight'
 import {RadiobuttonCircleEmpty} from '../icons/RadiobuttonCircleEmpty'
 import {RadiobuttonCircleFilled} from '../icons/RadiobuttonCircleFilled'
-import {SizableText, Stack, XStack, YStack} from '../primitives'
+import {Stack, XStack, YStack} from '../primitives'
+import {InfoList, InfoListItem} from './InfoList'
 
-export const StepperCheckContainer = styled(YStack, {
-  name: 'StepperCheckContainer',
-  backgroundColor: '$backgroundSecondary',
-  paddingHorizontal: '$4',
-  paddingVertical: '$5',
-  borderRadius: '$5',
-})
+export const StepperCheckContainer = InfoList
 
 const StepperCheckFrame = styled(XStack, {
   name: 'StepperCheck',
@@ -28,26 +23,6 @@ const StepperCheckFrame = styled(XStack, {
       },
     },
   } as const,
-})
-
-const LabelText = styled(SizableText, {
-  name: 'StepperCheckLabel',
-  fontFamily: '$body',
-  fontWeight: '500',
-  fontSize: '$4',
-  letterSpacing: '$4',
-  lineHeight: '$4',
-  color: '$foregroundPrimary',
-})
-
-const NoteText = styled(SizableText, {
-  name: 'StepperCheckNote',
-  fontFamily: '$body',
-  fontWeight: '500',
-  fontSize: '$1',
-  letterSpacing: '$1',
-  lineHeight: '$1',
-  color: '$foregroundSecondary',
 })
 
 export interface StepperCheckProps {
@@ -102,9 +77,8 @@ export function StepperCheck({
           />
         ) : null}
       </YStack>
-      <YStack flex={1} paddingVertical="$3" gap="$1">
-        <LabelText>{label}</LabelText>
-        {note ? <NoteText>{note}</NoteText> : null}
+      <YStack flex={1}>
+        <InfoListItem title={label} note={note} />
       </YStack>
       {isPressable ? <ChevronRight color={chevronColor} size={24} /> : null}
     </StepperCheckFrame>

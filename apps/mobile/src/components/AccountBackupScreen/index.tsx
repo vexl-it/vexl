@@ -3,11 +3,9 @@ import {
   Button,
   ChevronLeft,
   InfoBox,
-  InfoPoint,
-  Lock,
+  InfoList,
+  InfoListItem,
   NavigationBar,
-  QuestionmarkCircle,
-  RefreshArrowsRectangle,
   Screen,
   ScreenHeading,
   Stack,
@@ -55,15 +53,20 @@ export default function AccountBackupScreen({
           text={t('accountBackup.description')}
         />
         <InfoBox variant="pink">{t('accountBackup.warning')}</InfoBox>
-        <YStack gap="$4">
-          <InfoPoint icon={Lock}>{t('accountBackup.storeSafely')}</InfoPoint>
-          <InfoPoint icon={QuestionmarkCircle}>
-            {t('accountBackup.forgotPin')}
-          </InfoPoint>
-          <InfoPoint icon={RefreshArrowsRectangle}>
-            {t('accountBackup.onlyOnce')}
-          </InfoPoint>
-        </YStack>
+        <InfoList>
+          <InfoListItem
+            title={t('accountBackup.storeSafely.title')}
+            note={t('accountBackup.storeSafely.text')}
+          />
+          <InfoListItem
+            title={t('accountBackup.forgotPin.title')}
+            note={t('accountBackup.forgotPin.text')}
+          />
+          <InfoListItem
+            title={t('accountBackup.onlyOnce.title')}
+            note={t('accountBackup.onlyOnce.text')}
+          />
+        </InfoList>
       </YStack>
     </Screen>
   )

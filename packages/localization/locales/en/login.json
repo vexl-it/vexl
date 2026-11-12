@@ -59,7 +59,7 @@
   "loginFlow.restoreFromBackup.wrongPhoneNumber.chooseAnotherFile": "Choose another file",
   "loginFlow.restoreFromBackup.wrongPhoneNumber.useAnotherNumber": "Use another phone number",
   "loginFlow.restoreFromBackup.pin.title": "Enter your backup PIN",
-  "loginFlow.restoreFromBackup.pin.text": "The 4 to 8 digits you chose when you made this backup.",
+  "loginFlow.restoreFromBackup.pin.text": "The 4 digits you chose when you made this backup.",
   "loginFlow.restoreFromBackup.pin.restore": "Restore account",
   "loginFlow.restoreFromBackup.pin.wrongPin": "That PIN doesn’t open this backup. Try again.",
   "loginFlow.restoreFromBackup.restoring.title": "Bringing your account back",

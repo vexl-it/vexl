@@ -159,7 +159,7 @@
   "accountBackup.saveToDeviceButton": "Guardar no dispositivo",
   "accountBackup.savedToDevice": "Ficheiro de backup guardado",
   "accountBackup.pin.title": "Escolhe um PIN para o backup",
-  "accountBackup.pin.text": "Usa 4 a 8 dígitos de que te vais lembrar. Ninguém o pode recuperar por ti, nem nós.",
+  "accountBackup.pin.text": "Usa 4 dígitos de que te vais lembrar. Ninguém o pode recuperar por ti, nem nós.",
   "accountBackup.pin.confirmTitle": "Introduz o PIN outra vez",
   "accountBackup.pin.confirmText": "Só para confirmar que é o que querias.",
   "accountBackup.pin.mismatch": "Os PINs não coincidem. Tenta novamente.",

@@ -59,7 +59,7 @@
   "loginFlow.restoreFromBackup.wrongPhoneNumber.chooseAnotherFile": "別のファイルを選ぶ",
   "loginFlow.restoreFromBackup.wrongPhoneNumber.useAnotherNumber": "別の電話番号を使う",
   "loginFlow.restoreFromBackup.pin.title": "バックアップのPINを入力",
-  "loginFlow.restoreFromBackup.pin.text": "このバックアップを作ったときに決めた4〜8桁の数字です。",
+  "loginFlow.restoreFromBackup.pin.text": "このバックアップを作ったときに決めた4桁の数字です。",
   "loginFlow.restoreFromBackup.pin.restore": "アカウントを復元",
   "loginFlow.restoreFromBackup.pin.wrongPin": "そのPINではこのバックアップを開けません。もう一度試してね。",
   "loginFlow.restoreFromBackup.restoring.title": "アカウントを復元しています",

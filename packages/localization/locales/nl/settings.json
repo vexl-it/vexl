@@ -158,7 +158,7 @@
   "accountBackup.saveToDeviceButton": "Opslaan op apparaat",
   "accountBackup.savedToDevice": "Back-upbestand opgeslagen",
   "accountBackup.pin.title": "Kies een back-uppincode",
-  "accountBackup.pin.text": "Gebruik 4 tot 8 cijfers die je onthoudt. Niemand kan hem voor je terughalen, ook wij niet.",
+  "accountBackup.pin.text": "Gebruik 4 cijfers die je onthoudt. Niemand kan hem voor je terughalen, ook wij niet.",
   "accountBackup.pin.confirmTitle": "Vul de pincode nog een keer in",
   "accountBackup.pin.confirmText": "Even checken of het de pincode is die je bedoelde.",
   "accountBackup.pin.mismatch": "De pincodes komen niet overeen. Probeer het opnieuw.",

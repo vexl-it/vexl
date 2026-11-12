@@ -158,7 +158,7 @@
   "accountBackup.saveToDeviceButton": "保存到设备",
   "accountBackup.savedToDevice": "备份文件已保存",
   "accountBackup.pin.title": "设置备份 PIN 码",
-  "accountBackup.pin.text": "使用你记得住的 4 到 8 位数字。没人能帮你找回它，包括我们。",
+  "accountBackup.pin.text": "使用你记得住的 4 位数字。没人能帮你找回它，包括我们。",
   "accountBackup.pin.confirmTitle": "再次输入 PIN 码",
   "accountBackup.pin.confirmText": "只是确认一下这是你想设的那个。",
   "accountBackup.pin.mismatch": "两次输入的 PIN 码不一致。再试一次。",

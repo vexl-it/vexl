@@ -78,7 +78,7 @@ describe('backup file encryption', () => {
       Effect.either(
         decryptBackupFile({
           file,
-          pin: Schema.decodeSync(BackupPin)('12345678'),
+          pin: Schema.decodeSync(BackupPin)('4321'),
           keyPair,
         })
       )
@@ -138,7 +138,7 @@ describe('backup file encryption', () => {
     ).toBe(true)
   })
 
-  it.each(['123', '123456789', '12a4', ''])('rejects PIN %p', (value) => {
+  it.each(['123', '12345', '12a4', ''])('rejects PIN %p', (value) => {
     expect(Schema.is(BackupPin)(value)).toBe(false)
   })
 })

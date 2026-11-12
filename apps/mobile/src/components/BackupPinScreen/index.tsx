@@ -78,8 +78,7 @@ export default function BackupPinScreen({
         <ScreenHeading title={title} text={text} />
         <CodeInput
           editable={!busy}
-          maxLength={8}
-          minLength={4}
+          maxLength={4}
           onChangeText={onPinChange}
           secure
           value={pin}

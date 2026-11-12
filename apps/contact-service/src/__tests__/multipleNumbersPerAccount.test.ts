@@ -211,6 +211,62 @@ describe('one account with several phone numbers', () => {
     )
   })
 
+  it('keeps a push token only on the number of the account that set it last', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const app = yield* _(NodeTestingApp)
+        const main = yield* _(generateKeysAndHasheForNumber('+420733600001'))
+        const extra = yield* _(generateAnotherNumber(main, '+420733600002'))
+        const someoneElse = yield* _(
+          generateKeysAndHasheForNumber('+420733600003')
+        )
+        yield* _(createUserOnNetwork(main))
+        yield* _(createUserOnNetwork(extra))
+        yield* _(createUserOnNetwork(someoneElse))
+
+        const refreshWithToken = (
+          user: DummyUser,
+          token: string
+        ): TestEffect<unknown> =>
+          Effect.zipRight(
+            setAuthHeaders(user.authHeaders),
+            app.User.refreshUser({
+              payload: {
+                offersAlive: true,
+                vexlNotificationToken: Option.some(
+                  Schema.decodeSync(VexlNotificationToken)(token)
+                ),
+              },
+              headers: makeTestCommonAndSecurityHeaders(user.authHeaders),
+            })
+          )
+        const tokensOf = (
+          users: DummyUser[]
+        ): TestEffect<ReadonlyArray<string | null | undefined>> =>
+          Effect.forEach(users, (user) =>
+            Effect.map(
+              findUserRow(user.serverHashedNumber),
+              ([row]) => row?.vexlNotificationToken
+            )
+          )
+
+        yield* _(refreshWithToken(extra, 'vexl_nt_extra'))
+        expect(yield* _(tokensOf([main, extra, someoneElse]))).toEqual([
+          null,
+          'vexl_nt_extra',
+          'vexl_nt_+420733600003',
+        ])
+
+        yield* _(refreshWithToken(main, 'vexl_nt_main'))
+        expect(yield* _(tokensOf([main, extra, someoneElse]))).toEqual([
+          'vexl_nt_main',
+          null,
+          'vexl_nt_+420733600003',
+        ])
+      })
+    )
+  })
+
   it('returns the account once to a contact who saved both numbers, and never to itself', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {

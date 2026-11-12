@@ -7,13 +7,17 @@ import {
   unixMillisecondsNow,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
-import {FETCH_CONNECTIONS_PAGE_SIZE} from '@vexl-next/resources-utils/src/offers/utils/fetchContactsForOffer'
+import {
+  FETCH_CONNECTIONS_PAGE_SIZE,
+  fetchCommonConnections,
+} from '@vexl-next/resources-utils/src/offers/utils/fetchContactsForOffer'
 import fetchAllPaginatedData from '@vexl-next/rest-api/src/fetchAllPaginatedData'
 import {type ContactApi} from '@vexl-next/rest-api/src/services/contact'
 import {Array, Effect, HashMap, Number, Option, Schema} from 'effect'
 import {pipe} from 'fp-ts/function'
 import {atom, type Atom} from 'jotai'
 import {apiAtom} from '../../../api'
+import {contactApisAtom} from '../../../api/contactApiForSession'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
 import deduplicate from '../../../utils/deduplicate'
 import {
@@ -182,43 +186,12 @@ export const fetchConnectionsActionAtom = atom(
         set(ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom)
       )
 
-      const commonConnectionsData = yield* _(
-        fetchAllPaginatedData({
-          fetchEffectToRun: (nextPageToken) =>
-            api.contact.fetchCommonConnectionsPaginated({
-              publicKeys,
-              limit: FETCH_CONNECTIONS_PAGE_SIZE,
-              nextPageToken,
-            }),
+      const {commonFriends, verifiedFriends} = yield* _(
+        fetchCommonConnections({
+          contactApis: get(contactApisAtom),
+          publicKeys,
+          serverToClientHashesToHashedPhoneNumbersMap,
         })
-      )
-
-      const commonFriends = pipe(
-        commonConnectionsData,
-        Array.map(
-          (one) =>
-            [
-              one.publicKey,
-              Array.filterMap(one.common.hashes, (hash) =>
-                HashMap.get(serverToClientHashesToHashedPhoneNumbersMap, hash)
-              ),
-            ] as const
-        ),
-        HashMap.fromIterable
-      )
-
-      const verifiedFriends = pipe(
-        commonConnectionsData,
-        Array.map(
-          (one) =>
-            [
-              one.publicKey,
-              Array.filterMap(one.common.verifiedHashes, (hash) =>
-                HashMap.get(serverToClientHashesToHashedPhoneNumbersMap, hash)
-              ),
-            ] as const
-        ),
-        HashMap.fromIterable
       )
 
       const lastUpdate = updateStarted

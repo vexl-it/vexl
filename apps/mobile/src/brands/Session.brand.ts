@@ -9,7 +9,7 @@ import {
   UserSessionCredentials,
   UserSessionCredentialsV2,
 } from '@vexl-next/rest-api/src/UserSessionCredentials.brand'
-import {Schema} from 'effect'
+import {Array, Schema} from 'effect'
 
 // Stored by app versions before the master seed and login session id were introduced.
 export const LegacySessionV2 = Schema.Struct({
@@ -26,10 +26,19 @@ export const LegacySessionV2 = Schema.Struct({
 })
 export type LegacySessionV2 = typeof LegacySessionV2.Type
 
+// A phone number of the account with the credentials contact-service knows it by
+export const SessionPhoneNumber = Schema.Struct({
+  phoneNumber: E164PhoneNumber,
+  sessionCredentials: UserSessionCredentialsV2,
+})
+export type SessionPhoneNumber = typeof SessionPhoneNumber.Type
+
 export const SessionV2 = Schema.Struct({
   ...LegacySessionV2.fields,
   masterSeed: MasterSeed,
   loginSessionId: LoginSessionId,
+  // `phoneNumber` + `sessionCredentials` are the main number
+  extraPhoneNumbers: Schema.optional(Schema.Array(SessionPhoneNumber)),
 })
 export type SessionV2 = typeof SessionV2.Type
 
@@ -47,19 +56,22 @@ export const SessionV1 = Schema.Struct({
 export type SessionV1 = typeof SessionV1.Type
 export const isSessionV1 = Schema.is(SessionV1)
 
-export const sanityCheckSessionV2 = (session: SessionV2): boolean => {
-  return (
-    // Hash should be the same for V1 and V2
-    session.sessionCredentials.hash ===
-      session.sessionCredentials.vexlAuthHeader.data.hash &&
-    // Vexl pub header should match the pub key v2
-    session.keyPairV2.publicKey ===
-      session.sessionCredentials.vexlAuthHeader.data.pk &&
-    // The old pub key should match the key in old session credentials
-    session.sessionCredentials.publicKey ===
-      session.privateKey.publicKeyPemBase64
+const areCredentialsOfSession = (
+  session: SessionV2,
+  credentials: SessionPhoneNumber['sessionCredentials']
+): boolean =>
+  // Hash should be the same for V1 and V2
+  credentials.hash === credentials.vexlAuthHeader.data.hash &&
+  // Vexl pub header should match the pub key v2
+  session.keyPairV2.publicKey === credentials.vexlAuthHeader.data.pk &&
+  // The old pub key should match the key in old session credentials
+  credentials.publicKey === session.privateKey.publicKeyPemBase64
+
+export const sanityCheckSessionV2 = (session: SessionV2): boolean =>
+  areCredentialsOfSession(session, session.sessionCredentials) &&
+  Array.every(session.extraPhoneNumbers ?? [], (one) =>
+    areCredentialsOfSession(session, one.sessionCredentials)
   )
-}
 
 export const Session = Schema.Union(SessionV2, LegacySessionV2, SessionV1)
 export type Session = typeof Session.Type

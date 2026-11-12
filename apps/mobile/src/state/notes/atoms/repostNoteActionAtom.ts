@@ -8,6 +8,7 @@ import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
 import {Array, Effect} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
+import {contactApisAtom} from '../../../api/contactApiForSession'
 import reportError from '../../../utils/reportError'
 import {
   deleteRepostToConnectionsActionAtom,
@@ -56,7 +57,7 @@ export const repostNoteActionAtom = atom<
     const {repostInfo, encryptionErrors, connections} = yield* _(
       repostNote({
         offerApi: api.offer,
-        contactApi: api.contact,
+        contactApis: get(contactApisAtom),
         noteId,
         repostId: yield* _(set(noteRepostIdActionAtom, noteId)),
         symmetricKey: note.noteInfo.privatePart.symmetricKey,

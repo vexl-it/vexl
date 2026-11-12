@@ -5,7 +5,6 @@ import {IsoDatetimeString} from '@vexl-next/domain/src/utility/IsoDatetimeString
 import {Array, Effect, HashMap, HashSet, Ref, Schema, pipe} from 'effect'
 import {atom} from 'jotai'
 import {Alert} from 'react-native'
-import {apiAtom} from '../../../api'
 import {loadingOverlayDisplayedAtom} from '../../../components/LoadingOverlayProvider'
 import {
   offerProgressModalActionAtoms,
@@ -43,6 +42,7 @@ import {
   normalizedContactsAtom,
   storedContactsAtom,
 } from './contactsStore'
+import {importContactsForAllPhoneNumbersActionAtom} from './importContactsForAllPhoneNumbersActionAtom'
 import loadAndNormalizeContactsFromDeviceActionAtom from './loadAndNormalizeContactsFromDeviceActionAtom'
 
 type ContactsImportSource =
@@ -60,7 +60,7 @@ type SubmitContactsActionParams = {
   readonly showContactImportProgressDialog?: boolean
 } & ContactsImportSource
 
-type SubmitContactsResult =
+export type SubmitContactsResult =
   | 'success'
   | 'noContactsSelected'
   | 'permissionsNotGranted'
@@ -430,7 +430,6 @@ const importContactsAndUpdateStoredContactsActionAtom = atom(
       readonly showContactImportProgressDialog: boolean
     }
   ) => {
-    const contactApi = get(apiAtom).contact
     const {t} = get(translationAtom)
 
     return Effect.gen(function* (_) {
@@ -458,7 +457,7 @@ const importContactsAndUpdateStoredContactsActionAtom = atom(
 
       if (totalContactsToImport === 0 && !doIncrementalUpdate) {
         yield* _(
-          contactApi.importContacts({
+          set(importContactsForAllPhoneNumbersActionAtom, {
             contacts: [],
             replace: true,
           })
@@ -472,60 +471,54 @@ const importContactsAndUpdateStoredContactsActionAtom = atom(
           Effect.forEach(
             (chunkToImport, i) => {
               const replace = i === 0 && !doIncrementalUpdate
-              return contactApi
-                .importContacts({
-                  contacts: pipe(
-                    chunkToImport,
-                    Array.map((one) => one.computedValues.hash)
-                  ),
-                  replace,
-                })
-                .pipe(
-                  Effect.tap((response) =>
-                    Ref.update(
-                      hashedPhoneNumberToServerToClientHashRef,
-                      (ref) =>
-                        pipe(
-                          response.phoneNumberHashesToServerToClientHash,
-                          Array.reduce(
-                            HashMap.empty<
-                              HashedPhoneNumber,
-                              ServerToClientHashedNumber
-                            >(),
-                            (map, {hashedNumber, serverToClientHash}) =>
-                              HashMap.set(map, hashedNumber, serverToClientHash)
-                          ),
-                          (addition) => HashMap.union(addition, ref)
-                        )
+              return set(importContactsForAllPhoneNumbersActionAtom, {
+                contacts: pipe(
+                  chunkToImport,
+                  Array.map((one) => one.computedValues.hash)
+                ),
+                replace,
+              }).pipe(
+                Effect.tap((response) =>
+                  Ref.update(hashedPhoneNumberToServerToClientHashRef, (ref) =>
+                    pipe(
+                      response.phoneNumberHashesToServerToClientHash,
+                      Array.reduce(
+                        HashMap.empty<
+                          HashedPhoneNumber,
+                          ServerToClientHashedNumber
+                        >(),
+                        (map, {hashedNumber, serverToClientHash}) =>
+                          HashMap.set(map, hashedNumber, serverToClientHash)
+                      ),
+                      (addition) => HashMap.union(addition, ref)
                     )
-                  ),
-                  Effect.zipLeft(
-                    Ref.update(
-                      importedNumbersSoFarRef,
-                      HashSet.union(
-                        pipe(
-                          chunkToImport,
-                          Array.map(
-                            (one) => one.computedValues.normalizedNumber
-                          )
-                        )
+                  )
+                ),
+                Effect.zipLeft(
+                  Ref.update(
+                    importedNumbersSoFarRef,
+                    HashSet.union(
+                      pipe(
+                        chunkToImport,
+                        Array.map((one) => one.computedValues.normalizedNumber)
                       )
                     )
-                  ),
-                  Effect.tap(() =>
-                    Effect.sync(() => {
-                      set(showContactImportCountProgressActionAtom, {
-                        enabled: showContactImportProgressDialog,
-                        title: t('contacts.importProgress.titleAddingContacts'),
-                        processed: Math.min(
-                          (i + 1) * CONTACT_IMPORT_BATCH_SIZE,
-                          totalContactsToImport
-                        ),
-                        total: totalContactsToImport,
-                      })
-                    })
                   )
+                ),
+                Effect.tap(() =>
+                  Effect.sync(() => {
+                    set(showContactImportCountProgressActionAtom, {
+                      enabled: showContactImportProgressDialog,
+                      title: t('contacts.importProgress.titleAddingContacts'),
+                      processed: Math.min(
+                        (i + 1) * CONTACT_IMPORT_BATCH_SIZE,
+                        totalContactsToImport
+                      ),
+                      total: totalContactsToImport,
+                    })
+                  })
                 )
+              )
             },
             {discard: true}
           ),

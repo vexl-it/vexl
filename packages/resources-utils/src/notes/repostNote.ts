@@ -43,7 +43,7 @@ export interface RepostNoteResult {
 
 export default function repostNote({
   offerApi,
-  contactApi,
+  contactApis,
   noteId,
   repostId,
   symmetricKey,
@@ -52,7 +52,8 @@ export default function repostNote({
   serverToClientHashesToHashedPhoneNumbersMap,
 }: {
   offerApi: OfferApi
-  contactApi: ContactApi
+  // One per phone number of the account, the main number first
+  contactApis: Array.NonEmptyReadonlyArray<ContactApi>
   noteId: NoteId
   repostId: NoteRepostId
   symmetricKey: SymmetricKey
@@ -71,7 +72,7 @@ export default function repostNote({
   return Effect.gen(function* (_) {
     const connectionsInfo = yield* _(
       fetchContactsForOffer({
-        contactApi,
+        contactApis,
         intendedConnectionLevel: 'ALL',
         intendedClubs: {},
         serverToClientHashesToHashedPhoneNumbersMap,

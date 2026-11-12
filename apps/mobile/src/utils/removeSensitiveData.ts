@@ -1,4 +1,5 @@
 import {captureException} from '@sentry/react-native'
+import {Array} from 'effect'
 import {getDefaultStore} from 'jotai'
 import {sessionDataOrDummyAtom} from '../state/session'
 import {
@@ -17,6 +18,11 @@ export default function removeSensitiveData(string: string): string {
     session.privateKey.privateKeyPemBase64,
     session.keyPairV2.privateKey,
     session.masterSeed,
+    ...Array.flatMap(session.extraPhoneNumbers ?? [], (one) => [
+      one.phoneNumber,
+      one.sessionCredentials.hash,
+      one.sessionCredentials.signature,
+    ]),
   ].filter((one) => Boolean(one.trim()))
 
   const userName = session.realUserData?.userName

@@ -1,7 +1,5 @@
 import {HttpApiBuilder} from '@effect/platform/index'
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
-import {type CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
-import {type UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {
   ecdsaVerifyE,
   type EcdsaSignature,
@@ -19,16 +17,6 @@ import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect
 import {Effect} from 'effect'
 import {LoggedInUsersDbService} from '../../../db/loggedInUsersDb'
 import {VerificationStateDbService} from '../db/verificationStateDb'
-
-const insertUserIntoDb = (
-  userPublicKey: PublicKeyPemBase64,
-  countryPrefix: CountryPrefix
-): Effect.Effect<void, UnexpectedServerError, LoggedInUsersDbService> =>
-  LoggedInUsersDbService.pipe(
-    Effect.flatMap((userDb) =>
-      userDb.insertUser({publicKey: userPublicKey, countryPrefix})
-    )
-  )
 
 const verifySignature = (
   signature: EcdsaSignature,
@@ -76,13 +64,22 @@ export const verifyChallengeHandler = HttpApiBuilder.handler(
         )
       )
 
-      yield* _(insertUserIntoDb(userPublicKey, verificationState.countryPrefix))
-      yield* _(
-        DashboardReportsService,
-        Effect.flatMap((dashboardReportsService) =>
-          dashboardReportsService.reportNewUserCreated()
+      const isNewUser = yield* _(
+        LoggedInUsersDbService,
+        Effect.flatMap((usersDb) =>
+          usersDb.insertUserIfNew({
+            publicKey: userPublicKey,
+            countryPrefix: verificationState.countryPrefix,
+          })
         )
       )
+      if (isNewUser)
+        yield* _(
+          DashboardReportsService,
+          Effect.flatMap((dashboardReportsService) =>
+            dashboardReportsService.reportNewUserCreated()
+          )
+        )
       yield* _(
         loginDb.deleteChallengeVerificationState(req.payload.userPublicKey)
       )

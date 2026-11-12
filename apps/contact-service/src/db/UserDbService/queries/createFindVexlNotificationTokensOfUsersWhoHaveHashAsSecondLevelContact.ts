@@ -5,6 +5,7 @@ import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications
 import {ServerHashedNumber} from '@vexl-next/domain/src/general/ServerHashedNumber'
 import {Effect, flow, Schema} from 'effect'
 import {createIsInAllowedSharedContactHashesFragment} from '../../utils/createIsAllowedSharedContactHashFragment'
+import {createIsNotOwnerAccountFragment} from '../../utils/createIsNotOwnerAccountFragment'
 
 export const createFindVexlNotificationTokensOfUsersWhoHaveHashAsSecondLevelContactParams =
   Schema.Struct({
@@ -49,7 +50,11 @@ export const createFindVexlNotificationTokensOfUsersWhoHaveHashAsSecondLevelCont
           AND (
             second_degree_friend.vexl_notification_token IS NOT NULL
           )
-          AND second_degree_friend.hash != ${params.ownerHash}
+          AND ${createIsNotOwnerAccountFragment({
+          usersTable: sql`second_degree_friend`,
+          ownerHash: params.ownerHash,
+          sql,
+        })}
       `,
     })
 

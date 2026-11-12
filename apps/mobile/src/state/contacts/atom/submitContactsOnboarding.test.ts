@@ -228,7 +228,12 @@ jest.mock('../../../api/contactApiForSession', () => {
 })
 
 // eslint-disable-next-line import/first
-import {importedContactsCountAtom, storedContactsAtom} from './contactsStore'
+import {
+  importedContactsAtom,
+  importedContactsCountAtom,
+  needsFullContactsReplaceAfterContactEditAtom,
+  storedContactsAtom,
+} from './contactsStore'
 // eslint-disable-next-line import/first
 import loadAndNormalizeContactsFromDeviceActionAtom from './loadAndNormalizeContactsFromDeviceActionAtom'
 // eslint-disable-next-line import/first
@@ -385,5 +390,37 @@ describe('Onboarding contact import (fresh device)', () => {
     expect(result).toEqual('noContactsSelected')
     expect(store.get(importedContactsCountAtom)).toEqual(0)
     expect(mockImportContacts).not.toHaveBeenCalled()
+  })
+})
+
+describe('Failed full replace', () => {
+  it('keeps the selection when the full replace stays pending', async () => {
+    mockFrameState.realistic = false
+    mockDeviceContactsState.count = 5
+    const store = createStore()
+    await Effect.runPromise(
+      store.set(submitContactsActionAtom, onboardingSubmitParams)
+    )
+    const selectedNumbers = store
+      .get(importedContactsAtom)
+      .map((one) => one.computedValues.normalizedNumber)
+
+    // Like after adding a phone number: resync everything under all numbers
+    store.set(needsFullContactsReplaceAfterContactEditAtom, true)
+    mockImportContacts.mockImplementationOnce(() =>
+      Effect.fail({_tag: 'NetworkError'})
+    )
+    const result = await Effect.runPromise(
+      store.set(submitContactsActionAtom, {
+        normalizeAndImportAll: false,
+        numbersToImport: selectedNumbers,
+        showOfferReencryptionDialog: false,
+        manageLoadingOverlay: false,
+      })
+    )
+
+    expect(result).toEqual('otherError')
+    expect(store.get(needsFullContactsReplaceAfterContactEditAtom)).toBe(true)
+    expect(store.get(importedContactsCountAtom)).toEqual(5)
   })
 })

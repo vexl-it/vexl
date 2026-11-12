@@ -13,7 +13,10 @@ import {
 } from 'effect/index'
 import {atom, type Getter} from 'jotai'
 import {type Store} from 'jotai/vanilla/store'
-import {phoneNumberContactApisAtom} from '../api/contactApiForSession'
+import {
+  contactApiForSession,
+  phoneNumberContactApisAtom,
+} from '../api/contactApiForSession'
 import {type SessionV2} from '../brands/Session.brand'
 import {
   InAppLoadingTaskError,
@@ -55,6 +58,24 @@ export const refreshPhoneNumberOnContactService = ({
       })
     )
   )
+
+/**
+ * Dropping the main number promotes the first extra one, which takes over the
+ * notification token.
+ */
+export const refreshPromotedMainPhoneNumber = (
+  get: Getter,
+  sessionBeforeDrop: SessionV2
+): Effect.Effect<void> => {
+  const session = get(sessionDataOrDummyAtom)
+  if (session.phoneNumber === sessionBeforeDrop.phoneNumber) return Effect.void
+
+  return refreshPhoneNumberOnContactService({
+    session,
+    contactApi: contactApiForSession(get, session),
+    isMainPhoneNumber: true,
+  }).pipe(Effect.ignore)
+}
 
 type RefreshPhoneNumberError = Effect.Effect.Error<
   ReturnType<typeof refreshPhoneNumberOnContactService>
@@ -201,6 +222,7 @@ const checkAccountOnContactService = (
       if (Either.isRight(dropped)) {
         console.log('🦋 🚨 Some phone numbers not found. Dropping them.')
         store.set(addLostPhoneNumbersToNoticeActionAtom, lostPhoneNumbers)
+        yield* _(refreshPromotedMainPhoneNumber(store.get, session))
       } else {
         console.log('🦋 🚨 User to refresh not found. Logging out')
         void store.set(logoutActionAtom)

@@ -28,6 +28,10 @@ jest.mock('../api/contactApiForSession', () => {
   const withExtraNumberAtom = atom(false)
   return {
     withExtraNumberAtom,
+    // Only called for the extra number promoted to main
+    contactApiForSession: () => ({
+      refreshUser: (request: unknown) => mockRefreshExtraNumber(request),
+    }),
     phoneNumberContactApisAtom: atom((get: Getter) => [
       {
         phoneNumber: '+420733733733',
@@ -74,6 +78,7 @@ jest.mock('./session', () => {
   const {atom} = jest.requireActual('jotai')
   return {
     sessionDataOrDummyAtom: atom({
+      phoneNumber: '+420733733733',
       sessionNotificationToken: 'vexl_nt_test',
       loginSessionId: '0f9b2597-217d-4f8d-9de6-ef7239662359',
       privateKey: jest
@@ -247,6 +252,33 @@ describe('with an extra phone number', () => {
     ])
     expect(mockLogout).not.toHaveBeenCalled()
     expect(pullMessages).toHaveBeenCalled()
+  })
+
+  it('hands the notification token to the extra number when the main one is lost', async () => {
+    const store = getDefaultStore()
+    const {sessionDataOrDummyAtom} = jest.requireMock<{
+      sessionDataOrDummyAtom: PrimitiveAtom<{phoneNumber: string}>
+    }>('./session')
+    const sessionBefore = store.get(sessionDataOrDummyAtom)
+    mockRefreshUser.mockReturnValue(Effect.fail(new UserNotFoundError()))
+    mockRefreshExtraNumber.mockReturnValue(Effect.void)
+    mockDropPhoneNumbers.mockImplementationOnce(() => {
+      store.set(sessionDataOrDummyAtom, {
+        ...sessionBefore,
+        phoneNumber: '+420777777777',
+      })
+      return Either.right(undefined)
+    })
+
+    await resume()
+    store.set(sessionDataOrDummyAtom, sessionBefore)
+
+    expect(mockDropPhoneNumbers).toHaveBeenCalledWith(['+420733733733'])
+    expect(mockRefreshExtraNumber).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        vexlNotificationToken: Option.some('vexl_nt_test'),
+      })
+    )
   })
 
   it('logs out when every number is gone', async () => {

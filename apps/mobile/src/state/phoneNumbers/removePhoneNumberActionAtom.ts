@@ -35,10 +35,7 @@ export const removePhoneNumberActionAtom = atom(
       // user-service keeps one row per key, this one is the number's own. It
       // goes first: deleting it again on a retry is harmless, while the
       // number's refresh fails once its contact-service row is gone.
-      yield* _(
-        userApi.deleteUser(),
-        Effect.zipRight(contactApi.deleteUser())
-      )
+      yield* _(userApi.deleteUser(), Effect.zipRight(contactApi.deleteUser()))
 
       yield* _(set(dropPhoneNumbersFromSessionActionAtom, [phoneNumber]))
       yield* _(set(updateAndReencryptAllConnectionsActionAtom, {}))

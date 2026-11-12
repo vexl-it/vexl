@@ -6,7 +6,10 @@ import {
 import {Array, Effect, Option, Schema, Struct} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../api'
-import {contactApiForPhoneNumber} from '../../api/contactApiForSession'
+import {
+  contactApiForPhoneNumber,
+  userApiForPhoneNumber,
+} from '../../api/contactApiForSession'
 import {
   type ExtraSessionPhoneNumber,
   type SessionV2,
@@ -135,6 +138,23 @@ export const verifyPhoneNumberToAddActionAtom = atom(
 )
 
 /**
+ * For a verified number that won't be added: its key is registered on
+ * user-service (and maybe contact-service) and nobody would ever remove it.
+ * Best effort, the key is never used again either way.
+ */
+export const discardVerifiedPhoneNumberActionAtom = atom(
+  null,
+  (get, _set, verified: ExtraSessionPhoneNumber): Effect.Effect<void> =>
+    Effect.all(
+      [
+        Effect.ignore(userApiForPhoneNumber(get, verified).deleteUser()),
+        Effect.ignore(contactApiForPhoneNumber(get, verified).deleteUser()),
+      ],
+      {concurrency: 'unbounded', discard: true}
+    )
+)
+
+/**
  * Step 3 of adding a phone number, after the user confirmed: registers the
  * number on contact-service (replacing an account it may have), stores it in
  * the session and imports contacts under it. The number stays added when the
@@ -145,13 +165,15 @@ export const addVerifiedPhoneNumberActionAtom = atom(
   (get, set, verified: ExtraSessionPhoneNumber) =>
     Effect.gen(function* (_) {
       const session = get(sessionDataOrDummyAtom)
-      yield* _(ensureNotInAccount(session, verified.phoneNumber))
 
       yield* _(
-        loginSessionWithProof({
-          loginSessionId: session.loginSessionId,
-          privateKey: verified.privateKey,
-        }),
+        ensureNotInAccount(session, verified.phoneNumber),
+        Effect.zipRight(
+          loginSessionWithProof({
+            loginSessionId: session.loginSessionId,
+            privateKey: verified.privateKey,
+          })
+        ),
         Effect.flatMap((loginSession) =>
           contactApiForPhoneNumber(get, verified).createUser({
             publicKeyV2: Option.none(),
@@ -159,6 +181,9 @@ export const addVerifiedPhoneNumberActionAtom = atom(
             vexlNotificationToken: Option.none(),
             ...loginSession,
           })
+        ),
+        Effect.tapError(() =>
+          set(discardVerifiedPhoneNumberActionAtom, verified)
         ),
         set(withLoadingOverlayAtom)
       )

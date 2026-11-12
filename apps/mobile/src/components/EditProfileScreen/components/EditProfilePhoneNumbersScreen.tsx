@@ -32,7 +32,6 @@ function EditProfilePhoneNumbersScreen({
   const removePhoneNumber = useSetAtom(
     removePhoneNumberWithUiFeedbackActionAtom
   )
-  const canRemove = phoneNumbers.length > 1
 
   return (
     <Screen
@@ -57,9 +56,14 @@ function EditProfilePhoneNumbersScreen({
       }
     >
       <YStack gap="$5" paddingTop="$4">
-        <Typography variant="description" color="$foregroundSecondary">
-          {t('editProfileScreen.phoneNumbers.description')}
-        </Typography>
+        <YStack gap="$2">
+          <Typography variant="description" color="$foregroundSecondary">
+            {t('editProfileScreen.phoneNumbers.description')}
+          </Typography>
+          <Typography variant="description" color="$foregroundSecondary">
+            {t('editProfileScreen.phoneNumbers.mainCannotBeRemoved')}
+          </Typography>
+        </YStack>
         <YStack gap="$3">
           {pipe(
             phoneNumbers,
@@ -90,7 +94,7 @@ function EditProfilePhoneNumbersScreen({
                   />
                 ) : null}
                 <XStack flex={1} />
-                {canRemove ? (
+                {index > 0 ? (
                   <IconButton
                     aria-label={t(
                       'editProfileScreen.phoneNumbers.remove.button'

@@ -3,16 +3,16 @@ import {
   type InitPhoneVerificationResponse,
   type PhoneNumberVerificationId,
 } from '@vexl-next/rest-api/src/services/user/contracts'
-import {Array, Effect, Option} from 'effect'
+import {Effect} from 'effect'
 import {atom} from 'jotai'
 import {
   addVerifiedPhoneNumberActionAtom,
+  discardVerifiedPhoneNumberActionAtom,
   startPhoneNumberVerificationActionAtom,
   verifyPhoneNumberToAddActionAtom,
   type VerifiedPhoneNumber,
 } from '../../state/phoneNumbers/addPhoneNumberActionAtoms'
 import {removePhoneNumberActionAtom} from '../../state/phoneNumbers/removePhoneNumberActionAtom'
-import {userPhoneNumbersAtom} from '../../state/session/userDataAtoms'
 import {getInternationalPhoneNumber} from '../../utils/getInternationalPhoneNumber'
 import {translationAtom} from '../../utils/localization/I18nProvider'
 import reportError from '../../utils/reportError'
@@ -30,6 +30,8 @@ const errorMessageActionAtom = atom(
     const {t} = get(translationAtom)
     if (error._tag === 'PhoneNumberAlreadyInAccountError')
       return t('editProfileScreen.addPhoneNumber.errors.alreadyInAccount')
+    if (error._tag === 'CannotRemoveMainPhoneNumberError')
+      return t('editProfileScreen.phoneNumbers.mainCannotBeRemoved')
 
     if (!isTransportRequestError(error))
       reportError('error', new Error(context), {e: error})
@@ -100,24 +102,13 @@ export const removePhoneNumberWithUiFeedbackActionAtom = atom(
   (get, set, phoneNumber: E164PhoneNumber): Effect.Effect<void> =>
     Effect.gen(function* (_) {
       const {t} = get(translationAtom)
-      const [mainPhoneNumber, ...extraPhoneNumbers] = get(userPhoneNumbersAtom)
-      const nextMainPhoneNumber = Array.head(extraPhoneNumbers)
-      const formattedPhoneNumber = getInternationalPhoneNumber(phoneNumber)
 
       const confirmed = yield* _(
         set(globalDialogAtom, {
           title: t('editProfileScreen.phoneNumbers.remove.title', {
-            phoneNumber: formattedPhoneNumber,
+            phoneNumber: getInternationalPhoneNumber(phoneNumber),
           }),
-          subtitle:
-            phoneNumber === mainPhoneNumber &&
-            Option.isSome(nextMainPhoneNumber)
-              ? t('editProfileScreen.phoneNumbers.remove.textMain', {
-                  nextPhoneNumber: getInternationalPhoneNumber(
-                    nextMainPhoneNumber.value
-                  ),
-                })
-              : t('editProfileScreen.phoneNumbers.remove.text'),
+          subtitle: t('editProfileScreen.phoneNumbers.remove.text'),
           positiveButtonText: t('editProfileScreen.phoneNumbers.remove.button'),
           positiveButtonVariant: 'destructive',
           negativeButtonText: t('common.cancel'),
@@ -165,7 +156,13 @@ export const addVerifiedPhoneNumberWithUiFeedbackActionAtom = atom(
             negativeButtonText: t('common.cancel'),
           })
         )
-        if (!confirmed) return
+        if (!confirmed) {
+          yield* _(
+            set(discardVerifiedPhoneNumberActionAtom, verified),
+            Effect.forkDaemon
+          )
+          return
+        }
       }
 
       yield* _(

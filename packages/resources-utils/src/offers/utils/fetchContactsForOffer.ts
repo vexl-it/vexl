@@ -138,19 +138,54 @@ export function fetchCommonConnections({
   )
 }
 
+export type OwnPublicKeys = ReadonlyArray<PublicKeyPemBase64 | PublicKeyV2>
+
+/**
+ * Every phone number of the user has its own key and imports the same
+ * contacts, so the other numbers come back as the user's own connections.
+ *
+ * @param ownPublicKeys keys of all phone numbers of the user, never connections
+ */
+export function fetchMyConnections({
+  contactApi,
+  level,
+  ownPublicKeys,
+}: {
+  contactApi: Pick<ContactApi, 'fetchMyContactsPaginated'>
+  level: 'FIRST' | 'SECOND'
+  ownPublicKeys: OwnPublicKeys
+}): Effect.Effect<
+  Array<PublicKeyPemBase64 | PublicKeyV2>,
+  Effect.Effect.Error<ReturnType<ContactApi['fetchMyContactsPaginated']>>
+> {
+  return fetchAllPaginatedData({
+    fetchEffectToRun: (nextPageToken) =>
+      contactApi.fetchMyContactsPaginated({
+        level,
+        limit: FETCH_CONNECTIONS_PAGE_SIZE,
+        nextPageToken,
+      }),
+  }).pipe(
+    Effect.map(Array.filter((one) => !Array.contains(ownPublicKeys, one)))
+  )
+}
+
 /**
  * First and second level connections come from the main number only: every
  * number imports the same contacts. Common connections come from every number.
  *
  * @param contactApis one per phone number of the account, the main number first
+ * @param ownPublicKeys keys of all phone numbers of the user, never connections
  */
 export default function fetchContactsForOffer({
   contactApis,
+  ownPublicKeys,
   intendedConnectionLevel,
   intendedClubs,
   serverToClientHashesToHashedPhoneNumbersMap,
 }: {
   contactApis: Array.NonEmptyReadonlyArray<ContactApi>
+  ownPublicKeys: OwnPublicKeys
   intendedConnectionLevel: IntendedConnectionLevel
   serverToClientHashesToHashedPhoneNumbersMap: HashMap.HashMap<
     ServerToClientHashedNumber,
@@ -165,28 +200,14 @@ export default function fetchContactsForOffer({
 
   return Effect.gen(function* (_) {
     const firstDegreeConnections = yield* _(
-      fetchAllPaginatedData({
-        fetchEffectToRun: (nextPageToken) =>
-          contactApi.fetchMyContactsPaginated({
-            level: 'FIRST',
-            limit: FETCH_CONNECTIONS_PAGE_SIZE,
-            nextPageToken,
-          }),
-      })
+      fetchMyConnections({contactApi, level: 'FIRST', ownPublicKeys})
     )
 
     const secondDegreeConnections =
       intendedConnectionLevel === 'FIRST'
         ? []
         : yield* _(
-            fetchAllPaginatedData({
-              fetchEffectToRun: (nextPageToken) =>
-                contactApi.fetchMyContactsPaginated({
-                  level: 'SECOND',
-                  limit: FETCH_CONNECTIONS_PAGE_SIZE,
-                  nextPageToken,
-                }),
-            })
+            fetchMyConnections({contactApi, level: 'SECOND', ownPublicKeys})
           )
 
     const {commonFriends, verifiedFriends} = yield* _(

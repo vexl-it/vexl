@@ -1,3 +1,4 @@
+import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {CurrencyCode} from '@vexl-next/domain/src/general/currency.brand'
 import {
@@ -45,7 +46,12 @@ export const OffersState = Schema.Struct({
   lastUpdatedAt2: Schema.optionalWith(IsoDatetimeString, {
     default: () => MINIMAL_DATE,
   }),
+  // Of the main phone number
   contactOffersNextPageParam: Schema.optional(Base64String),
+  // Of every extra phone number, by its identity key
+  extraIdentitiesContactOffersNextPageParam: Schema.optional(
+    Schema.Record({key: PublicKeyPemBase64, value: Base64String})
+  ),
   clubOffersNextPageParam: Schema.optionalWith(
     Schema.Record({key: ClubUuid, value: Base64String}),
     {default: () => ({})}

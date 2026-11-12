@@ -3,12 +3,12 @@ import {
   type InitPhoneVerificationResponse,
   type PhoneNumberVerificationId,
 } from '@vexl-next/rest-api/src/services/user/contracts'
-import {Array, Effect, Option, Schema} from 'effect'
+import {Array, Effect, Option, Schema, Struct} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../api'
 import {contactApiForPhoneNumber} from '../../api/contactApiForSession'
 import {
-  type SessionPhoneNumber,
+  type ExtraSessionPhoneNumber,
   type SessionV2,
 } from '../../brands/Session.brand'
 import {initPhoneVerificationAtom} from '../../components/LoginFlow/api/initPhoneVerificationAtom'
@@ -21,6 +21,7 @@ import {
   submitContactsActionAtom,
   type SubmitContactsResult,
 } from '../contacts/atom/submitContactsActionAtom'
+import {createPhoneNumberKeysActionAtom} from '../keyDerivation'
 import {sessionDataOrDummyAtom} from '../session'
 import {loginSessionWithProof} from '../session/loginSession'
 import {
@@ -49,7 +50,7 @@ export class CreateUserForPhoneNumberError extends Schema.TaggedError<CreateUser
   'CreateUserForPhoneNumberError'
 )('CreateUserForPhoneNumberError', {cause: Schema.Unknown}) {}
 
-export interface VerifiedPhoneNumber extends SessionPhoneNumber {
+export interface VerifiedPhoneNumber extends ExtraSessionPhoneNumber {
   // Adding the number replaces that account, warn the user first
   readonly hasExistingVexlAccount: boolean
 }
@@ -85,8 +86,10 @@ export const startPhoneNumberVerificationActionAtom = atom(
 )
 
 /**
- * Step 2 of adding a phone number: verifies the SMS code with the account's
- * key and gets credentials for the number. Nothing is stored yet.
+ * Step 2 of adding a phone number: derives a new key pair for the number,
+ * verifies the SMS code with it and gets credentials for the number. Nothing
+ * is stored in the session yet. Every attempt uses a new key, an index whose
+ * key may have reached user-service is never handed out again.
  */
 export const verifyPhoneNumberToAddActionAtom = atom(
   null,
@@ -109,14 +112,18 @@ export const verifyPhoneNumberToAddActionAtom = atom(
     | VerifyPhoneNumberToAddError
   > =>
     Effect.gen(function* (_) {
-      const session = get(sessionDataOrDummyAtom)
-      yield* _(ensureNotInAccount(session, phoneNumber))
+      yield* _(ensureNotInAccount(get(sessionDataOrDummyAtom), phoneNumber))
+
+      const keys = yield* _(
+        set(createPhoneNumberKeysActionAtom),
+        Effect.mapError((cause) => new VerifyPhoneNumberToAddError({cause}))
+      )
 
       const {challenge} = yield* _(
         set(verifyPhoneNumberAtom, {
           code,
           id: verificationId,
-          userPublicKey: session.privateKey.publicKeyPemBase64,
+          userPublicKey: keys.privateKey.publicKeyPemBase64,
         }),
         Effect.mapError((message) => new VerificationCodeError({message}))
       )
@@ -124,14 +131,14 @@ export const verifyPhoneNumberToAddActionAtom = atom(
       return yield* _(
         verifyLoginChallenge({
           userApi: get(apiAtom).user,
-          privateKey: session.privateKey,
+          privateKey: keys.privateKey,
           challenge,
         }),
         Effect.flatMap((credentials) =>
-          upgradeSessionCredentials(credentials, session.keyPairV2)
+          upgradeSessionCredentials(credentials, keys.keyPairV2)
         ),
         Effect.flatMap((sessionCredentials) => {
-          const verified = {phoneNumber, sessionCredentials}
+          const verified = {...keys, phoneNumber, sessionCredentials}
           return contactApiForPhoneNumber(get, verified)
             .checkUserExists({notifyExistingUserAboutLogin: true})
             .pipe(
@@ -157,7 +164,7 @@ export const addVerifiedPhoneNumberActionAtom = atom(
   (
     get,
     set,
-    verified: SessionPhoneNumber
+    verified: ExtraSessionPhoneNumber
   ): Effect.Effect<
     SubmitContactsResult,
     PhoneNumberAlreadyInAccountError | CreateUserForPhoneNumberError
@@ -167,7 +174,10 @@ export const addVerifiedPhoneNumberActionAtom = atom(
       yield* _(ensureNotInAccount(session, verified.phoneNumber))
 
       yield* _(
-        loginSessionWithProof(session),
+        loginSessionWithProof({
+          loginSessionId: session.loginSessionId,
+          privateKey: verified.privateKey,
+        }),
         Effect.flatMap((loginSession) =>
           contactApiForPhoneNumber(get, verified).createUser({
             publicKeyV2: Option.none(),
@@ -181,7 +191,19 @@ export const addVerifiedPhoneNumberActionAtom = atom(
 
       set(
         sessionDataOrDummyAtom,
-        yield* _(addPhoneNumberToSession(get(sessionDataOrDummyAtom), verified))
+        yield* _(
+          addPhoneNumberToSession(
+            get(sessionDataOrDummyAtom),
+            Struct.pick(
+              verified,
+              'phoneNumber',
+              'sessionCredentials',
+              'privateKey',
+              'keyPairV2',
+              'keyDerivationIndex'
+            )
+          )
+        )
       )
       // The new number has no contacts on contact-service yet
       set(needsFullContactsReplaceAfterContactEditAtom, true)

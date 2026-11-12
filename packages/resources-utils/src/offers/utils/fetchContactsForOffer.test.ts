@@ -1,10 +1,14 @@
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
+import {PublicKeyV2} from '@vexl-next/cryptography/src/KeyHolder/brandsV2'
 import {
   SERVER_TO_CLIENT_HASHED_NUMBER_PREFIX,
   ServerToClientHashedNumber,
 } from '@vexl-next/domain/src/general/ServerToClientHashedNumber'
-import {Array, Schema} from 'effect'
-import {mergeCommonConnections} from './fetchContactsForOffer'
+import {Array, Effect, Schema} from 'effect'
+import {
+  fetchMyConnections,
+  mergeCommonConnections,
+} from './fetchContactsForOffer'
 
 const publicKey = Schema.decodeSync(PublicKeyPemBase64)
 const hashes = (...values: string[]): ServerToClientHashedNumber[] =>
@@ -47,4 +51,36 @@ it('keeps a single number unchanged', () => {
   ]
 
   expect(mergeCommonConnections([connections])).toEqual(connections)
+})
+
+it("filters the user's own phone numbers' keys out of connections", async () => {
+  const myExtraNumberV1 = publicKey('my-extra-number')
+  const myExtraNumberV2 = Schema.decodeSync(PublicKeyV2)('V2_PUB_my-extra')
+  const carol = Schema.decodeSync(PublicKeyV2)('V2_PUB_carol')
+  const firstPage = {
+    items: [alice, myExtraNumberV1],
+    nextPageToken: 'next',
+    hasNext: true,
+  }
+  const lastPage = {
+    items: [myExtraNumberV2, carol, bob],
+    nextPageToken: null,
+    hasNext: false,
+  }
+
+  const connections = await Effect.runPromise(
+    fetchMyConnections({
+      contactApi: {
+        fetchMyContactsPaginated: ({nextPageToken}) =>
+          Effect.succeed({
+            ...(nextPageToken === 'next' ? lastPage : firstPage),
+            limit: 2,
+          }),
+      },
+      level: 'SECOND',
+      ownPublicKeys: [myExtraNumberV1, myExtraNumberV2],
+    })
+  )
+
+  expect(connections).toEqual([alice, carol, bob])
 })

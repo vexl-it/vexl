@@ -1,6 +1,11 @@
+import {
+  type PublicKeyPemBase64,
+  type PublicKeyV2,
+} from '@vexl-next/cryptography/src/KeyHolder'
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {Array, Either, Schema} from 'effect'
 import {
+  type ExtraSessionPhoneNumber,
   type SessionPhoneNumber,
   type SessionV2,
 } from '../../brands/Session.brand'
@@ -13,22 +18,46 @@ export class PhoneNumberNotInAccountError extends Schema.TaggedError<PhoneNumber
   'PhoneNumberNotInAccountError'
 )('PhoneNumberNotInAccountError', {}) {}
 
-export class CannotRemoveLastPhoneNumberError extends Schema.TaggedError<CannotRemoveLastPhoneNumberError>(
-  'CannotRemoveLastPhoneNumberError'
-)('CannotRemoveLastPhoneNumberError', {}) {}
+// The main number carries the account key
+export class CannotRemoveMainPhoneNumberError extends Schema.TaggedError<CannotRemoveMainPhoneNumberError>(
+  'CannotRemoveMainPhoneNumberError'
+)('CannotRemoveMainPhoneNumberError', {}) {}
+
+export const mainPhoneNumberOfSession = (
+  session: SessionV2
+): SessionPhoneNumber => ({
+  phoneNumber: session.phoneNumber,
+  sessionCredentials: session.sessionCredentials,
+  privateKey: session.privateKey,
+  keyPairV2: session.keyPairV2,
+})
 
 /**
- * All phone numbers of the account, the main number first.
+ * All phone numbers of the account, the main number first. Each number is a
+ * separate identity on the servers, with its own keys.
  */
 export const phoneNumbersOfSession = (
   session: SessionV2
 ): Array.NonEmptyReadonlyArray<SessionPhoneNumber> => [
-  {
-    phoneNumber: session.phoneNumber,
-    sessionCredentials: session.sessionCredentials,
-  },
+  mainPhoneNumberOfSession(session),
   ...(session.extraPhoneNumbers ?? []),
 ]
+
+/**
+ * V1 and V2 public keys of every phone number of the account. They must never
+ * be treated as someone else's.
+ */
+export const ownPublicKeysOfSession = (
+  session: SessionV2
+): ReadonlyArray<PublicKeyPemBase64 | PublicKeyV2> =>
+  Array.flatMap(phoneNumbersOfSession(session), (one) => [
+    one.privateKey.publicKeyPemBase64,
+    one.keyPairV2.publicKey,
+  ])
+
+export const identityKeyOfPhoneNumber = (
+  phoneNumber: Pick<SessionPhoneNumber, 'privateKey'>
+): PublicKeyPemBase64 => phoneNumber.privateKey.publicKeyPemBase64
 
 export const sessionHasPhoneNumber = (
   session: SessionV2,
@@ -39,48 +68,34 @@ export const sessionHasPhoneNumber = (
     (one) => one.phoneNumber === phoneNumber
   )
 
-const withPhoneNumbers = (
-  session: SessionV2,
-  [main, ...extraPhoneNumbers]: Array.NonEmptyReadonlyArray<SessionPhoneNumber>
-): SessionV2 => ({
-  ...session,
-  phoneNumber: main.phoneNumber,
-  sessionCredentials: main.sessionCredentials,
-  extraPhoneNumbers,
-})
-
 export const addPhoneNumberToSession = (
   session: SessionV2,
-  toAdd: SessionPhoneNumber
+  toAdd: ExtraSessionPhoneNumber
 ): Either.Either<SessionV2, PhoneNumberAlreadyInAccountError> =>
   sessionHasPhoneNumber(session, toAdd.phoneNumber)
     ? Either.left(new PhoneNumberAlreadyInAccountError())
-    : Either.right(
-        withPhoneNumbers(
-          session,
-          Array.append(phoneNumbersOfSession(session), toAdd)
-        )
-      )
+    : Either.right({
+        ...session,
+        extraPhoneNumbers: Array.append(session.extraPhoneNumbers ?? [], toAdd),
+      })
 
-/**
- * Removing the main number promotes the first remaining one to main.
- */
 export const removePhoneNumbersFromSession = (
   session: SessionV2,
   toRemove: readonly E164PhoneNumber[]
 ): Either.Either<
   SessionV2,
-  PhoneNumberNotInAccountError | CannotRemoveLastPhoneNumberError
+  PhoneNumberNotInAccountError | CannotRemoveMainPhoneNumberError
 > => {
   if (!Array.every(toRemove, (one) => sessionHasPhoneNumber(session, one)))
     return Either.left(new PhoneNumberNotInAccountError())
+  if (Array.contains(toRemove, session.phoneNumber))
+    return Either.left(new CannotRemoveMainPhoneNumberError())
 
-  const remaining = Array.filter(
-    phoneNumbersOfSession(session),
-    (one) => !Array.contains(toRemove, one.phoneNumber)
-  )
-
-  return Array.isNonEmptyReadonlyArray(remaining)
-    ? Either.right(withPhoneNumbers(session, remaining))
-    : Either.left(new CannotRemoveLastPhoneNumberError())
+  return Either.right({
+    ...session,
+    extraPhoneNumbers: Array.filter(
+      session.extraPhoneNumbers ?? [],
+      (one) => !Array.contains(toRemove, one.phoneNumber)
+    ),
+  })
 }

@@ -1,9 +1,8 @@
-import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {Array, Effect, Option, pipe, Record} from 'effect'
 import {atom, useSetAtom} from 'jotai'
 import {useCallback} from 'react'
 import {apiAtom} from '../api'
-import {contactApisAtom} from '../api/contactApiForSession'
+import {phoneNumberApisAtom} from '../api/contactApiForSession'
 import {offerProgressModalActionAtoms} from '../components/UploadingOfferProgressModal/atoms'
 import {translationAtom} from '../utils/localization/I18nProvider'
 import {formatInteger} from '../utils/localization/formatting'
@@ -156,19 +155,20 @@ export const logoutActionAtom = atom(null, async (get, set) => {
       stepLabel: t('account.deleteAccountProgress.deletingAccountData'),
     })
 
-    // contact service
+    // contact service and user service, every phone number has a user in both
     await failSilently(
       Effect.runPromise(
         Effect.forEach(
-          get(contactApisAtom),
-          (contactApi) => Effect.ignore(contactApi.deleteUser()),
+          get(phoneNumberApisAtom),
+          ({contactApi, userApi}) =>
+            Effect.all([
+              Effect.ignore(contactApi.deleteUser()),
+              Effect.ignore(userApi.deleteUser()),
+            ]),
           {concurrency: 'unbounded', discard: true}
         )
       )
     )
-
-    // User service
-    await failSilently(effectToTaskEither(get(apiAtom).user.deleteUser())())
 
     // Invalidate vexl notification secret on server (before clearing local storage)
     await failSilently(Effect.runPromise(set(invalidateVexlSecretActionAtom)))

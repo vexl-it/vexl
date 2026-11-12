@@ -20,6 +20,7 @@ import {Array, Effect, Either, type HashMap, pipe, Schema} from 'effect'
 import {PRIVATE_PARTS_BATCH_SIZE} from '../offers/privatePartsUploadBatchSize'
 import fetchContactsForOffer, {
   type ApiErrorFetchingContactsForOffer,
+  type OwnPublicKeys,
 } from '../offers/utils/fetchContactsForOffer'
 import {
   encryptNotePrivatePart,
@@ -44,6 +45,7 @@ export interface RepostNoteResult {
 export default function repostNote({
   offerApi,
   contactApis,
+  ownPublicKeys,
   noteId,
   repostId,
   symmetricKey,
@@ -54,6 +56,7 @@ export default function repostNote({
   offerApi: OfferApi
   // One per phone number of the account, the main number first
   contactApis: Array.NonEmptyReadonlyArray<ContactApi>
+  ownPublicKeys: OwnPublicKeys
   noteId: NoteId
   repostId: NoteRepostId
   symmetricKey: SymmetricKey
@@ -73,6 +76,7 @@ export default function repostNote({
     const connectionsInfo = yield* _(
       fetchContactsForOffer({
         contactApis,
+        ownPublicKeys,
         intendedConnectionLevel: 'ALL',
         intendedClubs: {},
         serverToClientHashesToHashedPhoneNumbersMap,

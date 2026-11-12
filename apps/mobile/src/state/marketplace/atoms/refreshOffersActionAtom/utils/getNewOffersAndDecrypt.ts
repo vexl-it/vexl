@@ -11,7 +11,6 @@ import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
 import {Array, Effect, flow} from 'effect'
 import {atom} from 'jotai'
 import {NotOfferFromContactNetworkError} from '../../../domain'
-import {contactOffersNextPageParamAtom} from '../../offersState'
 
 const OFFERS_PAGE_LIMIT = 30
 
@@ -32,13 +31,14 @@ const validateOfferIsFromContactNetwork = (offerInfo: OfferInfo): boolean => {
 export const getNewContactNetworkOffersAndDecryptPaginatedActionAtom = atom(
   null,
   (
-    get,
-    set,
+    _get,
+    _set,
     {
       offersApi,
       keyPair,
       keyPairV2,
       lastPrivatePartIdBase64,
+      storeNextPageToken,
     }: {
       /**
        * Offers API instance. Already handles auth for us.
@@ -53,6 +53,7 @@ export const getNewContactNetworkOffersAndDecryptPaginatedActionAtom = atom(
        * Only offers with ids that were not previously fetched will be fetched.
        */
       lastPrivatePartIdBase64?: Base64String
+      storeNextPageToken?: (nextPageToken: string) => void
     }
   ) => {
     return Effect.gen(function* (_) {
@@ -63,9 +64,7 @@ export const getNewContactNetworkOffersAndDecryptPaginatedActionAtom = atom(
               nextPageToken: nextPageToken ?? lastPrivatePartIdBase64,
               limit: OFFERS_PAGE_LIMIT,
             }),
-          storeNextPageToken: (nextPageToken) => {
-            set(contactOffersNextPageParamAtom, nextPageToken)
-          },
+          storeNextPageToken,
         })
       )
 

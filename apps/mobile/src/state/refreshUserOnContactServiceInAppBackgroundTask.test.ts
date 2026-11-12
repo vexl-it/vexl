@@ -1,10 +1,15 @@
+import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
+import {ecdsaVerify} from '@vexl-next/cryptography/src/operations/ecdsa'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
+import {LoginSessionId} from '@vexl-next/domain/src/general/LoginSessionId.brand'
 import {
   InvalidLoginSessionProofError,
   LoggedInOnAnotherDeviceError,
+  LoginSessionProof,
+  loginSessionProofMessage,
   UserNotFoundError,
 } from '@vexl-next/rest-api/src/services/contact/contracts'
-import {Effect, Either, Option} from 'effect'
+import {Effect, Either, Option, Schema} from 'effect'
 import {getDefaultStore, type Getter, type PrimitiveAtom} from 'jotai'
 import {registerInAppLoadingTask} from '../utils/inAppLoadingTasks'
 import {executeTasksWithDependencies} from '../utils/inAppLoadingTasks/atoms'
@@ -18,6 +23,7 @@ import {
 
 const mockRefreshUser = jest.fn()
 const mockRefreshExtraNumber = jest.fn()
+const mockDeleteExtraNumberUser = jest.fn(() => Effect.void)
 const mockClearDevice = jest.fn()
 const mockLogout = jest.fn()
 const mockDropPhoneNumbers = jest.fn()
@@ -25,12 +31,19 @@ const mockAddLostPhoneNumbersToNotice = jest.fn()
 
 jest.mock('../api/contactApiForSession', () => {
   const {atom} = jest.requireActual('jotai')
+  const {generatePrivateKey} = jest.requireActual(
+    '@vexl-next/cryptography/src/KeyHolder'
+  )
+  const mainKey = generatePrivateKey()
+  const extraKey = generatePrivateKey()
   const withExtraNumberAtom = atom(false)
   return {
+    mainKey,
+    extraKey,
     withExtraNumberAtom,
-    phoneNumberContactApisAtom: atom((get: Getter) => [
+    phoneNumberApisAtom: atom((get: Getter) => [
       {
-        phoneNumber: '+420733733733',
+        phoneNumber: {phoneNumber: '+420733733733', privateKey: mainKey},
         contactApi: {
           refreshUser: (request: unknown) => mockRefreshUser(request),
         },
@@ -38,11 +51,12 @@ jest.mock('../api/contactApiForSession', () => {
       ...(get(withExtraNumberAtom)
         ? [
             {
-              phoneNumber: '+420777777777',
+              phoneNumber: {phoneNumber: '+420777777777', privateKey: extraKey},
               contactApi: {
                 refreshUser: (request: unknown) =>
                   mockRefreshExtraNumber(request),
               },
+              userApi: {deleteUser: () => mockDeleteExtraNumberUser()},
             },
           ]
         : []),
@@ -74,11 +88,9 @@ jest.mock('./session', () => {
   const {atom} = jest.requireActual('jotai')
   return {
     sessionDataOrDummyAtom: atom({
+      phoneNumber: '+420733733733',
       sessionNotificationToken: 'vexl_nt_test',
       loginSessionId: '0f9b2597-217d-4f8d-9de6-ef7239662359',
-      privateKey: jest
-        .requireActual('@vexl-next/cryptography/src/KeyHolder')
-        .generatePrivateKey(),
     }),
     sessionNotificationTokenAtom: atom(undefined),
   }
@@ -235,6 +247,41 @@ describe('with an extra phone number', () => {
     expect(pullMessages).toHaveBeenCalled()
   })
 
+  it("signs each number's login session proof with that number's own key", async () => {
+    mockRefreshUser.mockReturnValue(Effect.void)
+    mockRefreshExtraNumber.mockReturnValue(Effect.void)
+    const {mainKey, extraKey} = jest.requireMock<{
+      mainKey: PrivateKeyHolder
+      extraKey: PrivateKeyHolder
+    }>('../api/contactApiForSession')
+
+    await resume()
+
+    const isSignedBy = (request: unknown, key: PrivateKeyHolder): boolean => {
+      const {loginSessionId, loginSessionProof} = Schema.decodeUnknownSync(
+        Schema.Struct({
+          loginSessionId: LoginSessionId,
+          loginSessionProof: LoginSessionProof,
+        })
+      )(request)
+      return ecdsaVerify({
+        challenge: loginSessionProofMessage({
+          loginSessionId,
+          signedAt: loginSessionProof.signedAt,
+        }),
+        signature: loginSessionProof.signature,
+        pubKey: key.publicKeyPemBase64,
+      })
+    }
+    expect(isSignedBy(mockRefreshUser.mock.calls[0][0], mainKey)).toBe(true)
+    expect(isSignedBy(mockRefreshExtraNumber.mock.calls[0][0], extraKey)).toBe(
+      true
+    )
+    expect(isSignedBy(mockRefreshExtraNumber.mock.calls[0][0], mainKey)).toBe(
+      false
+    )
+  })
+
   it('drops a number someone logged in with elsewhere and keeps the account', async () => {
     mockRefreshUser.mockReturnValue(Effect.void)
     mockRefreshExtraNumber.mockReturnValue(Effect.fail(new UserNotFoundError()))
@@ -245,18 +292,19 @@ describe('with an extra phone number', () => {
     expect(mockAddLostPhoneNumbersToNotice).toHaveBeenCalledWith([
       '+420777777777',
     ])
+    expect(mockDeleteExtraNumberUser).toHaveBeenCalled()
     expect(mockLogout).not.toHaveBeenCalled()
     expect(pullMessages).toHaveBeenCalled()
   })
 
-  it('logs out when every number is gone', async () => {
+  it('logs out when the main number is gone, even if extra numbers remain', async () => {
     mockRefreshUser.mockReturnValue(Effect.fail(new UserNotFoundError()))
-    mockRefreshExtraNumber.mockReturnValue(Effect.fail(new UserNotFoundError()))
-    mockDropPhoneNumbers.mockReturnValue(Either.left('last number'))
+    mockRefreshExtraNumber.mockReturnValue(Effect.void)
 
     await resume()
 
     expect(mockLogout).toHaveBeenCalled()
+    expect(mockDropPhoneNumbers).not.toHaveBeenCalled()
     expect(mockAddLostPhoneNumbersToNotice).not.toHaveBeenCalled()
   })
 

@@ -65,6 +65,19 @@ export const deriveClubKeys = (
     oldKeyPair: derivePrivateKeyHolderE(masterSeed, `club/${index}`),
   })
 
+// Keys of an extra phone number of the account, see the mobile session
+export const derivePhoneNumberKeys = (
+  masterSeed: MasterSeed,
+  index: KeyDerivationIndex
+): Effect.Effect<
+  {privateKey: PrivateKeyHolder; keyPairV2: KeyPairV2},
+  CryptoError
+> =>
+  Effect.all({
+    privateKey: derivePrivateKeyHolderE(masterSeed, `phoneNumber/${index}`),
+    keyPairV2: deriveKeyPairV2E(masterSeed, `phoneNumber/${index}`),
+  })
+
 // Formats the derived bytes as an RFC 4122 v4 UUID.
 export const deriveNoteRepostId = (
   masterSeed: MasterSeed,

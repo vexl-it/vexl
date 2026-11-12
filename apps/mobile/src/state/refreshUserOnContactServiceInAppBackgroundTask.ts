@@ -13,8 +13,8 @@ import {
 } from 'effect/index'
 import {atom, type Getter} from 'jotai'
 import {type Store} from 'jotai/vanilla/store'
-import {phoneNumberContactApisAtom} from '../api/contactApiForSession'
-import {type SessionV2} from '../brands/Session.brand'
+import {phoneNumberApisAtom} from '../api/contactApiForSession'
+import {type SessionPhoneNumber, type SessionV2} from '../brands/Session.brand'
 import {
   InAppLoadingTaskError,
   registerInAppLoadingTask,
@@ -32,25 +32,29 @@ import {logoutActionAtom} from './useLogout'
 
 export const refreshPhoneNumberOnContactService = ({
   session,
+  phoneNumber,
   contactApi,
-  isMainPhoneNumber,
 }: {
   session: SessionV2
+  phoneNumber: SessionPhoneNumber
   contactApi: ContactApi
-  isMainPhoneNumber: boolean
 }): Effect.Effect<
   void,
   CryptoError | Effect.Effect.Error<ReturnType<ContactApi['refreshUser']>>
 > =>
-  loginSessionWithProof(session).pipe(
+  loginSessionWithProof({
+    loginSessionId: session.loginSessionId,
+    privateKey: phoneNumber.privateKey,
+  }).pipe(
     Effect.flatMap((loginSession) =>
       contactApi.refreshUser({
         offersAlive: true,
         // Only the main number gets pushes, a token on every number would
         // double them
-        vexlNotificationToken: isMainPhoneNumber
-          ? Option.fromNullable(session.sessionNotificationToken)
-          : Option.none(),
+        vexlNotificationToken:
+          phoneNumber.phoneNumber === session.phoneNumber
+            ? Option.fromNullable(session.sessionNotificationToken)
+            : Option.none(),
         ...loginSession,
       })
     )
@@ -153,17 +157,21 @@ const checkAccountOnContactService = (
   Effect.gen(function* (_) {
     const session = store.get(sessionDataOrDummyAtom)
 
+    const phoneNumberApis = store.get(phoneNumberApisAtom)
     const failures = yield* _(
       Effect.forEach(
-        store.get(phoneNumberContactApisAtom),
-        ({phoneNumber, contactApi}, i) =>
+        phoneNumberApis,
+        ({phoneNumber, contactApi}) =>
           refreshPhoneNumberOnContactService({
             session,
+            phoneNumber,
             contactApi,
-            isMainPhoneNumber: i === 0,
           }).pipe(
             Effect.flip,
-            Effect.map((error) => ({phoneNumber, error})),
+            Effect.map((error) => ({
+              phoneNumber: phoneNumber.phoneNumber,
+              error,
+            })),
             Effect.option
           ),
         {concurrency: 'unbounded'}
@@ -193,18 +201,30 @@ const checkAccountOnContactService = (
       Array.filter(({error}) => error._tag === 'UserNotFoundError'),
       Array.map(({phoneNumber}) => phoneNumber)
     )
-    if (Array.isNonEmptyArray(lostPhoneNumbers)) {
-      const dropped = store.set(
-        dropPhoneNumbersFromSessionActionAtom,
-        lostPhoneNumbers
+    if (Array.contains(lostPhoneNumbers, session.phoneNumber)) {
+      // The main number carries the account key, the account is gone
+      console.log('🦋 🚨 User to refresh not found. Logging out')
+      void store.set(logoutActionAtom)
+    } else if (
+      Array.isNonEmptyArray(lostPhoneNumbers) &&
+      Either.isRight(
+        store.set(dropPhoneNumbersFromSessionActionAtom, lostPhoneNumbers)
       )
-      if (Either.isRight(dropped)) {
-        console.log('🦋 🚨 Some phone numbers not found. Dropping them.')
-        store.set(addLostPhoneNumbersToNoticeActionAtom, lostPhoneNumbers)
-      } else {
-        console.log('🦋 🚨 User to refresh not found. Logging out')
-        void store.set(logoutActionAtom)
-      }
+    ) {
+      console.log('🦋 🚨 Some phone numbers not found. Dropping them.')
+      store.set(addLostPhoneNumbersToNoticeActionAtom, lostPhoneNumbers)
+      // Their user-service rows still exist under this device's keys
+      yield* _(
+        Effect.forEach(
+          phoneNumberApis,
+          ({phoneNumber, userApi}) =>
+            Array.contains(lostPhoneNumbers, phoneNumber.phoneNumber)
+              ? Effect.ignore(userApi.deleteUser())
+              : Effect.void,
+          {discard: true}
+        ),
+        Effect.forkDaemon
+      )
     }
 
     Array.forEach(failures, ({error}) => {

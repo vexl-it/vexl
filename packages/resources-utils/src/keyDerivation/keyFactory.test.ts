@@ -31,6 +31,7 @@ import {
   deriveIdentityPrivateKey,
   deriveInboxPrivateKey,
   deriveNoteRepostId,
+  derivePhoneNumberKeys,
 } from './keyFactory'
 
 const index = Schema.decodeSync(KeyDerivationIndex)
@@ -46,6 +47,8 @@ interface DerivedKeys {
   inbox1: PrivateKeyHolder
   club0: ClubKeys
   club1: ClubKeys
+  phoneNumber0: {privateKey: PrivateKeyHolder; keyPairV2: KeyPairV2}
+  phoneNumber1: {privateKey: PrivateKeyHolder; keyPairV2: KeyPairV2}
 }
 
 const deriveAll = async (masterSeed: MasterSeed): Promise<DerivedKeys> =>
@@ -57,6 +60,8 @@ const deriveAll = async (masterSeed: MasterSeed): Promise<DerivedKeys> =>
       inbox1: deriveInboxPrivateKey(masterSeed, index(1)),
       club0: deriveClubKeys(masterSeed, index(0)),
       club1: deriveClubKeys(masterSeed, index(1)),
+      phoneNumber0: derivePhoneNumberKeys(masterSeed, index(0)),
+      phoneNumber1: derivePhoneNumberKeys(masterSeed, index(1)),
     })
   )
 
@@ -82,6 +87,10 @@ describe('key factory', () => {
       keys.club0.keyPair.publicKey,
       keys.club1.oldKeyPair.publicKeyPemBase64,
       keys.club1.keyPair.publicKey,
+      keys.phoneNumber0.privateKey.publicKeyPemBase64,
+      keys.phoneNumber0.keyPairV2.publicKey,
+      keys.phoneNumber1.privateKey.publicKeyPemBase64,
+      keys.phoneNumber1.keyPairV2.publicKey,
       otherSeedKeys.identityV1.publicKeyPemBase64,
       otherSeedKeys.identityV2.publicKey,
       otherSeedKeys.inbox0.publicKeyPemBase64,
@@ -127,9 +136,13 @@ describe('key factory', () => {
   })
 
   it('derives V1 keys that work with ecies and ecdsa', async () => {
-    const {inbox0, club0} = await deriveAll(generateMasterSeed())
+    const {inbox0, club0, phoneNumber0} = await deriveAll(generateMasterSeed())
 
-    for (const keyHolder of [inbox0, club0.oldKeyPair]) {
+    for (const keyHolder of [
+      inbox0,
+      club0.oldKeyPair,
+      phoneNumber0.privateKey,
+    ]) {
       const cipher = await eciesGTMEncrypt({
         publicKey: keyHolder.publicKeyPemBase64,
         data: 'hello',
@@ -156,9 +169,10 @@ describe('key factory', () => {
   })
 
   it('derives V2 keypairs that work with cryptobox seal and sign', async () => {
-    const {identityV2, club0} = await deriveAll(generateMasterSeed())
+    const {identityV2, club0, phoneNumber0} =
+      await deriveAll(generateMasterSeed())
 
-    for (const keyPair of [identityV2, club0.keyPair]) {
+    for (const keyPair of [identityV2, club0.keyPair, phoneNumber0.keyPairV2]) {
       expect(
         await unseal(await seal('hello', keyPair.publicKey), keyPair)
       ).toBe('hello')

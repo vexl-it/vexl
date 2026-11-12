@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import {captureException} from '@sentry/react-native'
-import {Array, Effect} from 'effect/index'
+import {Effect} from 'effect/index'
 import * as SecretStorage from 'expo-secure-store'
 import * as O from 'fp-ts/Option'
 import {
@@ -11,7 +11,10 @@ import {
   type WritableAtom,
 } from 'jotai'
 import {focusAtom} from 'jotai-optics'
-import {type SessionV2} from '../../brands/Session.brand'
+import {
+  sensitiveValuesOfSession,
+  type SessionV2,
+} from '../../brands/Session.brand'
 import getValueFromSetStateActionOfAtom from '../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 import {
   makeErrorJsonWithRemovedSensitiveData,
@@ -29,25 +32,11 @@ import writeSessionToStorage, {
 // duplicated code but we can not remove cyclic dependency otherwise
 // --------------
 function removeSensitiveData(string: string): string {
-  const session = getDefaultStore().get(sessionDataOrDummyAtom)
-  const toReplace = [
-    session.sessionCredentials.signature,
-    session.sessionCredentials.hash,
-    session.sessionCredentials.publicKey,
-    session.phoneNumber,
-    session.privateKey.privateKeyPemBase64,
-    session.masterSeed,
-    ...Array.flatMap(session.extraPhoneNumbers ?? [], (one) => [
-      one.phoneNumber,
-      one.sessionCredentials.hash,
-      one.sessionCredentials.signature,
-    ]),
-    // Strip V2 key material if present
-    ...(session.keyPairV2
-      ? [session.keyPairV2.publicKey, session.keyPairV2.privateKey]
-      : []),
-  ]
-  return replaceAll(string, toReplace, '[[stripped]]')
+  return replaceAll(
+    string,
+    sensitiveValuesOfSession(getDefaultStore().get(sessionDataOrDummyAtom)),
+    '[[stripped]]'
+  )
 }
 
 function toJsonWithRemovedSensitiveData(object: any): string {

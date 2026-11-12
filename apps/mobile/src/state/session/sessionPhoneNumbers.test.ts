@@ -1,50 +1,61 @@
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
-import {HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {Array, Either, Schema} from 'effect'
-import {
-  type SessionPhoneNumber,
-  type SessionV2,
-} from '../../brands/Session.brand'
+import {type SessionV2} from '../../brands/Session.brand'
 import {dummySession} from './dummySesssion'
+import {makeExtraPhoneNumber} from './extraPhoneNumber.testUtils'
 import {
   addPhoneNumberToSession,
+  mainPhoneNumberOfSession,
+  ownPublicKeysOfSession,
   phoneNumbersOfSession,
   removePhoneNumbersFromSession,
 } from './sessionPhoneNumbers'
 
-const phoneNumber = (number: string, hash: string): SessionPhoneNumber => ({
-  phoneNumber: Schema.decodeSync(E164PhoneNumber)(number),
-  sessionCredentials: {
-    ...dummySession.sessionCredentials,
-    hash: Schema.decodeSync(HashedPhoneNumber)(hash),
-  },
+const second = makeExtraPhoneNumber({
+  phoneNumber: '+420777777777',
+  hash: 'second',
+  index: 0,
+})
+const third = makeExtraPhoneNumber({
+  phoneNumber: '+421905123456',
+  hash: 'third',
+  index: 1,
 })
 
-const main = phoneNumber('+420733733733', 'main')
-const second = phoneNumber('+420777777777', 'second')
-const third = phoneNumber('+421905123456', 'third')
-
-const session: SessionV2 = {
-  ...dummySession,
-  phoneNumber: main.phoneNumber,
-  sessionCredentials: main.sessionCredentials,
-  extraPhoneNumbers: [second, third],
-}
+const session: SessionV2 = {...dummySession, extraPhoneNumbers: [second, third]}
+const main = mainPhoneNumberOfSession(session)
 
 const numbersOf = (result: Either.Either<SessionV2, unknown>): string[] =>
   Array.map(phoneNumbersOfSession(Either.getOrThrow(result)), (one) =>
     String(one.phoneNumber)
   )
 
-it('lists the main number first', () => {
+it('lists the main number with the session keys first', () => {
   expect(phoneNumbersOfSession(session)).toEqual([main, second, third])
+  expect(main.privateKey).toBe(session.privateKey)
+  expect(main.keyPairV2).toBe(session.keyPairV2)
   expect(
     phoneNumbersOfSession({...session, extraPhoneNumbers: undefined})
   ).toEqual([main])
 })
 
+it('lists V1 and V2 keys of every number as own keys', () => {
+  expect(ownPublicKeysOfSession(session)).toEqual([
+    session.privateKey.publicKeyPemBase64,
+    session.keyPairV2.publicKey,
+    second.privateKey.publicKeyPemBase64,
+    second.keyPairV2.publicKey,
+    third.privateKey.publicKeyPemBase64,
+    third.keyPairV2.publicKey,
+  ])
+})
+
 it('adds a number after the existing ones', () => {
-  const fourth = phoneNumber('+420602602602', 'fourth')
+  const fourth = makeExtraPhoneNumber({
+    phoneNumber: '+420602602602',
+    hash: 'fourth',
+    index: 2,
+  })
   expect(numbersOf(addPhoneNumberToSession(session, fourth))).toEqual([
     main.phoneNumber,
     second.phoneNumber,
@@ -54,40 +65,37 @@ it('adds a number after the existing ones', () => {
 })
 
 it('rejects a number the account already has', () => {
-  const result = addPhoneNumberToSession(session, third)
-  expect(Either.isLeft(result) && result.left._tag).toBe(
-    'PhoneNumberAlreadyInAccountError'
-  )
+  for (const existing of [
+    third,
+    {...third, phoneNumber: session.phoneNumber},
+  ]) {
+    const result = addPhoneNumberToSession(session, existing)
+    expect(Either.isLeft(result) && result.left._tag).toBe(
+      'PhoneNumberAlreadyInAccountError'
+    )
+  }
 })
 
 it('removes an extra number and keeps the main one', () => {
   const result = Either.getOrThrow(
     removePhoneNumbersFromSession(session, [second.phoneNumber])
   )
-  expect(result.phoneNumber).toBe(main.phoneNumber)
-  expect(result.sessionCredentials).toBe(main.sessionCredentials)
-  expect(result.extraPhoneNumbers).toEqual([third])
-})
-
-it('promotes the first extra number when the main one is removed', () => {
-  const result = Either.getOrThrow(
-    removePhoneNumbersFromSession(session, [main.phoneNumber])
-  )
-  expect(result.phoneNumber).toBe(second.phoneNumber)
-  expect(result.sessionCredentials).toBe(second.sessionCredentials)
-  expect(result.extraPhoneNumbers).toEqual([third])
+  expect(result.phoneNumber).toBe(session.phoneNumber)
+  expect(result.sessionCredentials).toBe(session.sessionCredentials)
   expect(result.privateKey).toBe(session.privateKey)
+  expect(result.extraPhoneNumbers).toEqual([third])
 })
 
-it('never removes the last number', () => {
-  const result = removePhoneNumbersFromSession(session, [
-    main.phoneNumber,
-    second.phoneNumber,
-    third.phoneNumber,
-  ])
-  expect(Either.isLeft(result) && result.left._tag).toBe(
-    'CannotRemoveLastPhoneNumberError'
-  )
+it('never removes the main number, it carries the account key', () => {
+  for (const toRemove of [
+    [session.phoneNumber],
+    [second.phoneNumber, session.phoneNumber],
+  ]) {
+    const result = removePhoneNumbersFromSession(session, toRemove)
+    expect(Either.isLeft(result) && result.left._tag).toBe(
+      'CannotRemoveMainPhoneNumberError'
+    )
+  }
 })
 
 it('refuses to remove a number the account does not have', () => {

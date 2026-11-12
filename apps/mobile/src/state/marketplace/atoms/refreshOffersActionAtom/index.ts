@@ -1,9 +1,11 @@
+import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {type OfferId} from '@vexl-next/domain/src/general/offers'
-import {Array, Effect, Record, pipe} from 'effect'
+import {Array, Effect} from 'effect'
 import {atom} from 'jotai'
 import {AppState} from 'react-native'
 import {apiAtom} from '../../../../api'
+import {phoneNumberApisAtom} from '../../../../api/contactApiForSession'
 import {markMarketplaceReadyNotificationFlowAsCompletedIfOffersAreVisibleActionAtom} from '../../../../utils/marketplaceReadyNotification/store'
 import {refreshLastSeenOffersActionAtom} from '../../../../utils/newOffersNotificationBackgroundTask/store'
 import reportError from '../../../../utils/reportError'
@@ -11,14 +13,17 @@ import {startBenchmark} from '../../../ActionBenchmarks'
 import {linkRestoredInboxesToMyOffersAndNotesActionAtom} from '../../../backup/linkRestoredInboxesActionAtom'
 import {clubsToKeyHolderAtom} from '../../../clubs/atom/clubsToKeyHolderV2Atom'
 import {updateOffersIdsForClubStateActionAtom} from '../../../clubs/atom/clubsWithMembersAtom'
-import {sessionDataOrDummyAtom} from '../../../session'
+import {identityKeyOfPhoneNumber} from '../../../session/sessionPhoneNumbers'
 import {ensureMyOffersHaveOwnershipInfoUploadedInPrivatepayloadForOwner} from '../ensureMyOffersHaveOwnershipInfoUploadedInPrivatepayloadForOwner'
 import {loadingStateAtom} from '../loadingState'
 import {anyMarketplaceSuggestionDismissedInThisSessionAtom} from '../offerSuggestionVisible'
 import {offersAtom, offersStateAtom} from '../offersState'
 import {reportOffersWithoutLocationActionAtom} from '../offersToSeeInMarketplace'
-import {combineIncomingOffers} from './utils/combineIncomingOffers'
-import {fetchOffersReportErrorsActionAtom} from './utils/fetchOffersReportErrorsActionAtom'
+import {toIncomingOffers} from './utils/combineIncomingOffers'
+import {
+  fetchOffersReportErrorsActionAtom,
+  type OffersIdentity,
+} from './utils/fetchOffersReportErrorsActionAtom'
 import {getRemovedOffersIds} from './utils/getRemovedOffersIds'
 import {mergeIncomingOffersToState} from './utils/mergeIncomingOffersToState'
 
@@ -29,7 +34,10 @@ const REMOVED_OFFERS_RECONCILIATION_INTERVAL_MS = 10 * 60 * 1000
 const lastRemovedOffersReconciliationAtAtom = atom(0)
 
 const NO_REMOVED_OFFERS: {
-  removedContactOfferIds: readonly OfferId[]
+  removedContactOfferIds: ReadonlyArray<{
+    identity: PublicKeyPemBase64
+    removedIds: readonly OfferId[]
+  }>
   removedClubsOfferIdsToClubUuid: ReadonlyArray<{
     clubUuid: ClubUuid
     removedIds: readonly OfferId[]
@@ -41,7 +49,15 @@ export const refreshOffersActionAtom = atom(
   (get, set, options?: {readonly forceRemovedOffersReconciliation?: boolean}) =>
     Effect.gen(function* (_) {
       const api = get(apiAtom)
-      const session = get(sessionDataOrDummyAtom)
+      const [mainIdentity, ...extraIdentities] = Array.map(
+        get(phoneNumberApisAtom),
+        ({phoneNumber, offerApi}): OffersIdentity => ({
+          identity: identityKeyOfPhoneNumber(phoneNumber),
+          offersApi: offerApi,
+          keyPair: phoneNumber.privateKey,
+          keyPairV2: phoneNumber.keyPairV2,
+        })
+      )
       const myStoredClubs = get(clubsToKeyHolderAtom)
 
       const endBenchmark = startBenchmark('Refresh offers')
@@ -54,9 +70,8 @@ export const refreshOffersActionAtom = atom(
 
       const {clubs: newClubsOffers, contact: newContactOffers} = yield* _(
         set(fetchOffersReportErrorsActionAtom, {
-          offersApi: api.offer,
-          contactNetworkKeyPair: session.privateKey,
-          contactNetworkKeyPairV2: session.keyPairV2,
+          mainIdentity,
+          extraIdentities,
           clubs: myStoredClubs,
         })
       )
@@ -78,6 +93,8 @@ export const refreshOffersActionAtom = atom(
         shouldReconcileRemovedOffers
           ? getRemovedOffersIds({
               offersApi: api.offer,
+              contactOffersApis: [mainIdentity, ...extraIdentities],
+              mainIdentity: mainIdentity.identity,
               storedOffers,
               storedClubs: myStoredClubs,
             }).pipe(
@@ -94,12 +111,10 @@ export const refreshOffersActionAtom = atom(
           : Effect.succeed(NO_REMOVED_OFFERS)
       )
 
-      const incomingOffers = pipe(
-        [...newContactOffers, ...newClubsOffers],
-        Array.groupBy((one) => one.offerId),
-        Record.values,
-        Array.filterMap(combineIncomingOffers)
-      )
+      const incomingOffers = toIncomingOffers({
+        contactOffers: newContactOffers,
+        clubOffers: newClubsOffers,
+      })
 
       // Read fresh state right before merging to ensure no offers
       // written while fetching are lost.
@@ -111,6 +126,7 @@ export const refreshOffersActionAtom = atom(
           clubs: removedClubsOfferIdsToClubUuid,
           contacts: removedContactOfferIds,
         },
+        mainIdentity: mainIdentity.identity,
       })
 
       // Skip the state write (and the full persisted-blob rewrite + derived-atom

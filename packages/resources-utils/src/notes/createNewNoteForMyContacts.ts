@@ -21,6 +21,7 @@ import {type OfferEncryptionProgress} from '../offers/OfferEncryptionProgress'
 import fetchContactsForOffer, {
   type ApiErrorFetchingContactsForOffer,
   type ConnectionsInfoForOffer,
+  type OwnPublicKeys,
 } from '../offers/utils/fetchContactsForOffer'
 import generateSymmetricKey, {
   type SymmetricKeyGenerationError,
@@ -56,6 +57,7 @@ export interface CreateNoteResult {
 export default function createNewNoteForMyContacts({
   offerApi,
   contactApis,
+  ownPublicKeys,
   publicPart,
   ownerKeyPair,
   ownerKeyPairV2,
@@ -68,6 +70,7 @@ export default function createNewNoteForMyContacts({
   offerApi: OfferApi
   // One per phone number of the account, the main number first
   contactApis: Array.NonEmptyReadonlyArray<ContactApi>
+  ownPublicKeys: OwnPublicKeys
   publicPart: NotePublicPart
   ownerKeyPair: PrivateKeyHolder
   ownerKeyPairV2: KeyPairV2
@@ -104,6 +107,7 @@ export default function createNewNoteForMyContacts({
     const connectionsInfo = yield* _(
       fetchContactsForOffer({
         contactApis,
+        ownPublicKeys,
         intendedConnectionLevel: 'ALL',
         intendedClubs: {},
         serverToClientHashesToHashedPhoneNumbersMap,

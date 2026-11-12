@@ -34,6 +34,7 @@ import {type PrivatePartEncryptionError} from './utils/encryptPrivatePart'
 import {
   type ApiErrorFetchingContactsForOffer,
   type ConnectionsInfoForOffer,
+  type OwnPublicKeys,
 } from './utils/fetchContactsForOffer'
 import generateSymmetricKey, {
   type SymmetricKeyGenerationError,
@@ -56,6 +57,7 @@ export interface CreateOfferResult {
 export default function createNewOfferForMyContacts({
   offerApi,
   contactApis,
+  ownPublicKeys,
   publicPart,
   ownerKeyPair,
   ownerKeyPairV2,
@@ -70,6 +72,7 @@ export default function createNewOfferForMyContacts({
   offerApi: OfferApi
   // One per phone number of the account, the main number first
   contactApis: Array.NonEmptyReadonlyArray<ContactApi>
+  ownPublicKeys: OwnPublicKeys
   publicPart: OfferPublicPart
   ownerKeyPair: PrivateKeyHolder
   ownerKeyPairV2: KeyPairV2
@@ -115,6 +118,7 @@ export default function createNewOfferForMyContacts({
         symmetricKey,
         intendedConnectionLevel,
         contactApis,
+        ownPublicKeys,
         ownerCredentials: ownerKeyPair,
         ownerKeyPairV2,
         intendedClubs,

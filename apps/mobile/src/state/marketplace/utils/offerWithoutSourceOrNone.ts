@@ -7,19 +7,17 @@ import {Array, Option} from 'effect'
 
 export function offerWithoutSourceOrNone(
   offer: OneOfferInState,
-  removedFromClubs: ClubUuid[],
-  removedFromContacts: boolean
+  removedFromClubs: readonly ClubUuid[]
 ): Option.Option<OneOfferInState> {
   const remainingClubIds = Array.difference(
     offer.offerInfo.privatePart.clubIds,
     removedFromClubs
   )
-  const friendLevelsToRemove: FriendLevel[] = [
-    ...(Array.isEmptyArray(remainingClubIds) ? ['CLUB' as const] : []),
-    ...(removedFromContacts
-      ? ['FIRST_DEGREE' as const, 'SECOND_DEGREE' as const]
-      : []),
-  ]
+  const friendLevelsToRemove: FriendLevel[] = Array.isEmptyArray(
+    remainingClubIds
+  )
+    ? ['CLUB']
+    : []
   const remainingFriendLevels = Array.difference(
     offer.offerInfo.privatePart.friendLevel,
     friendLevelsToRemove
@@ -36,12 +34,6 @@ export function offerWithoutSourceOrNone(
         ...offer.offerInfo.privatePart,
         clubIds: remainingClubIds,
         friendLevel: remainingFriendLevels,
-        commonFriends: removedFromContacts
-          ? []
-          : offer.offerInfo.privatePart.commonFriends,
-        verifiedCommonFriends: removedFromContacts
-          ? []
-          : offer.offerInfo.privatePart.verifiedCommonFriends,
       },
     },
   } satisfies OneOfferInState)

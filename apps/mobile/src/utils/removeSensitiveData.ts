@@ -1,6 +1,6 @@
 import {captureException} from '@sentry/react-native'
-import {Array} from 'effect'
 import {getDefaultStore} from 'jotai'
+import {sensitiveValuesOfSession} from '../brands/Session.brand'
 import {sessionDataOrDummyAtom} from '../state/session'
 import {
   makeErrorJsonWithRemovedSensitiveData,
@@ -9,27 +9,11 @@ import {
 import {replaceAll} from './replaceAll'
 
 export default function removeSensitiveData(string: string): string {
-  const session = getDefaultStore().get(sessionDataOrDummyAtom)
-  const toReplace: string[] = [
-    session.sessionCredentials.signature,
-    session.sessionCredentials.hash,
-    session.sessionCredentials.publicKey,
-    session.phoneNumber,
-    session.privateKey.privateKeyPemBase64,
-    session.keyPairV2.privateKey,
-    session.masterSeed,
-    ...Array.flatMap(session.extraPhoneNumbers ?? [], (one) => [
-      one.phoneNumber,
-      one.sessionCredentials.hash,
-      one.sessionCredentials.signature,
-    ]),
-  ].filter((one) => Boolean(one.trim()))
-
-  const userName = session.realUserData?.userName
-
-  if (userName) toReplace.push(userName)
-
-  return replaceAll(string, toReplace, '[[stripped]]')
+  return replaceAll(
+    string,
+    sensitiveValuesOfSession(getDefaultStore().get(sessionDataOrDummyAtom)),
+    '[[stripped]]'
+  )
 }
 
 export function toJsonWithRemovedSensitiveData(object: any): string {

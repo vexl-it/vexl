@@ -7,12 +7,14 @@ import {
 import {
   deriveClubKeys,
   deriveInboxPrivateKey,
+  derivePhoneNumberKeys,
 } from '@vexl-next/resources-utils/src/keyDerivation/keyFactory'
 import {Array, Effect, Exit, Schema} from 'effect'
 import {getDefaultStore} from 'jotai'
 import {
   createClubKeysActionAtom,
   createInboxPrivateKeyActionAtom,
+  createPhoneNumberKeysActionAtom,
   initializeKeyDerivationCountersActionAtom,
   keyDerivationCountersAtom,
   raiseKeyDerivationCountersActionAtom,
@@ -159,5 +161,51 @@ describe('key derivation counters', () => {
     expect(allocated).toEqual(expect.arrayContaining(expected))
     // The club counter was already higher in memory and is never lowered.
     expect(storedCounters()).toEqual({nextInboxIndex: 106, nextClubIndex: 40})
+  })
+
+  it('never reuses a phone number key index', async () => {
+    const first = await Effect.runPromise(
+      store.set(createPhoneNumberKeysActionAtom)
+    )
+    const second = await Effect.runPromise(
+      store.set(createPhoneNumberKeysActionAtom)
+    )
+
+    expect(first.keyDerivationIndex).toBe(0)
+    expect(second.keyDerivationIndex).toBe(1)
+    expect(first.privateKey).toEqual(
+      (await Effect.runPromise(derivePhoneNumberKeys(masterSeed, index(0))))
+        .privateKey
+    )
+    expect(storedCounters()).toMatchObject({nextPhoneNumberIndex: 2})
+  })
+
+  it('skips phone number indexes still used in the session when the counter was lost', async () => {
+    storage._storage.remove(KEY_DERIVATION_COUNTERS_MMKV_KEY)
+    const extra = await Effect.runPromise(
+      derivePhoneNumberKeys(masterSeed, index(7))
+    )
+    store.set(sessionHolderAtom, {
+      state: 'loggedIn',
+      session: {
+        ...dummySession,
+        masterSeed,
+        extraPhoneNumbers: [
+          {
+            ...extra,
+            phoneNumber: dummySession.phoneNumber,
+            sessionCredentials: dummySession.sessionCredentials,
+            keyDerivationIndex: index(7),
+          },
+        ],
+      },
+    })
+
+    const allocated = await Effect.runPromise(
+      store.set(createPhoneNumberKeysActionAtom)
+    )
+
+    expect(allocated.keyDerivationIndex).toBe(8)
+    expect(store.get(keyDerivationCountersAtom).nextPhoneNumberIndex).toBe(9)
   })
 })

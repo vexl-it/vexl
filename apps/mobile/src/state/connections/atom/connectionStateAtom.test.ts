@@ -39,6 +39,7 @@ jest.mock('../../../api/contactApiForSession', () => {
   }>('../../../api')
   return {
     contactApisAtom: atom((get: Getter) => [get(apiAtom).contact]),
+    ownPublicKeysAtom: atom([]),
   }
 })
 jest.mock('../../clubs/atom/clubsWithMembersAtom', () => {

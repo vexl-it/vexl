@@ -1,8 +1,8 @@
-import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {Schema} from 'effect'
 import {type SessionV2} from '../../../brands/Session.brand'
 import {dummySession} from '../../session/dummySesssion'
+import {makeExtraPhoneNumber} from '../../session/extraPhoneNumber.testUtils'
 import {withoutOwnPhoneNumbers} from './contactImportUtils'
 
 const hash = Schema.decodeSync(HashedPhoneNumber)
@@ -11,13 +11,11 @@ const session: SessionV2 = {
   ...dummySession,
   sessionCredentials: {...dummySession.sessionCredentials, hash: hash('main')},
   extraPhoneNumbers: [
-    {
-      phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420777777777'),
-      sessionCredentials: {
-        ...dummySession.sessionCredentials,
-        hash: hash('extra'),
-      },
-    },
+    makeExtraPhoneNumber({
+      phoneNumber: '+420777777777',
+      hash: 'extra',
+      index: 0,
+    }),
   ],
 }
 

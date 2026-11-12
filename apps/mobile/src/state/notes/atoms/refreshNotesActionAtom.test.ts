@@ -34,9 +34,20 @@ jest.mock('../../../api', () => {
     }),
   }
 })
-jest.mock('../../session', () => {
+jest.mock('../../../api/contactApiForSession', () => {
   const {atom} = jest.requireActual('jotai')
-  return {sessionDataOrDummyAtom: atom({privateKey: {}, keyPairV2: {}})}
+  const {apiAtom} = jest.requireMock('../../../api')
+  return {
+    phoneNumberApisAtom: atom((get: (a: unknown) => {offer: unknown}) => [
+      {
+        phoneNumber: {
+          privateKey: {publicKeyPemBase64: 'main-identity'},
+          keyPairV2: {},
+        },
+        offerApi: get(apiAtom).offer,
+      },
+    ]),
+  }
 })
 jest.mock('../../../utils/reportError', () => ({
   __esModule: true,
@@ -118,7 +129,18 @@ it('commits the cursor together with the decrypted notes', async () => {
     limit: 30,
   })
   expect(store.get(notesStateAtom).notes).toEqual([
-    {noteInfo: note, flags: {reported: false}},
+    {
+      noteInfo: note,
+      flags: {reported: false},
+      socialPartsByIdentity: {
+        'main-identity': {
+          friendLevel: ['FIRST_DEGREE'],
+          commonFriends: [],
+          verifiedCommonFriends: [],
+          viaRepost: false,
+        },
+      },
+    },
   ])
   expect(store.get(notesStateAtom).notesNextPageParam).toBe(nextCursor)
 })

@@ -97,6 +97,24 @@ export const FriendLevel = Schema.Literal(
 )
 export type FriendLevel = typeof FriendLevel.Type
 
+// How one phone number of the user (each has its own key) is connected to the
+// author of an offer or note it received.
+export const IdentitySocialPart = Schema.Struct({
+  friendLevel: Schema.Array(FriendLevel),
+  commonFriends: Schema.Array(HashedPhoneNumber),
+  verifiedCommonFriends: Schema.Array(HashedPhoneNumber),
+  // Notes only
+  viaRepost: Schema.optional(Schema.Boolean),
+})
+export type IdentitySocialPart = typeof IdentitySocialPart.Type
+
+// Keyed by the V1 public key of the user's phone number that received it
+export const SocialPartsByIdentity = Schema.Record({
+  key: PublicKeyPemBase64,
+  value: IdentitySocialPart,
+})
+export type SocialPartsByIdentity = typeof SocialPartsByIdentity.Type
+
 export const ActivePriceState = Schema.Literal(
   'NONE',
   'PRICE_IS_BELOW',
@@ -294,6 +312,9 @@ export const OneOfferInState = Schema.Struct({
   offerInfo: OfferInfo,
   flags: OfferFlags,
   ownershipInfo: Schema.optional(OwnershipInfo),
+  // The contact part of `offerInfo.privatePart` is their union. Missing on
+  // offers stored before, those came to the main phone number only.
+  socialPartsByIdentity: Schema.optional(SocialPartsByIdentity),
 })
 export type OneOfferInState = typeof OneOfferInState.Type
 

@@ -1,17 +1,12 @@
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {Array, Effect, Schema} from 'effect'
 import {atom} from 'jotai'
-import {
-  contactApiForPhoneNumber,
-  contactApiForSession,
-} from '../../api/contactApiForSession'
+import {phoneNumberApisAtom} from '../../api/contactApiForSession'
 import {updateAndReencryptAllConnectionsActionAtom} from '../connections/atom/updateAndReencryptAllConnectionsActionAtom'
-import {refreshPhoneNumberOnContactService} from '../refreshUserOnContactServiceInAppBackgroundTask'
 import {sessionDataOrDummyAtom} from '../session'
 import {
-  type CannotRemoveLastPhoneNumberError,
+  type CannotRemoveMainPhoneNumberError,
   PhoneNumberNotInAccountError,
-  phoneNumbersOfSession,
   removePhoneNumbersFromSession,
 } from '../session/sessionPhoneNumbers'
 import {dropPhoneNumbersFromSessionActionAtom} from './dropPhoneNumbersFromSessionActionAtom'
@@ -21,9 +16,8 @@ export class DeleteUserForPhoneNumberError extends Schema.TaggedError<DeleteUser
 )('DeleteUserForPhoneNumberError', {cause: Schema.Unknown}) {}
 
 /**
- * Removes the number from contact-service and from the session. Removing the
- * main number promotes the first extra one, which then takes over the
- * notification token.
+ * Removes an extra number from contact-service, user-service and the session.
+ * The main number carries the account key and can't be removed.
  */
 export const removePhoneNumberActionAtom = atom(
   null,
@@ -34,39 +28,34 @@ export const removePhoneNumberActionAtom = atom(
   ): Effect.Effect<
     void,
     | PhoneNumberNotInAccountError
-    | CannotRemoveLastPhoneNumberError
+    | CannotRemoveMainPhoneNumberError
     | DeleteUserForPhoneNumberError
   > =>
     Effect.gen(function* (_) {
-      const session = get(sessionDataOrDummyAtom)
       // Fails before touching the server when the number can't be removed
-      yield* _(removePhoneNumbersFromSession(session, [phoneNumber]))
+      yield* _(
+        removePhoneNumbersFromSession(get(sessionDataOrDummyAtom), [
+          phoneNumber,
+        ])
+      )
 
-      const toRemove = yield* _(
+      const {contactApi, userApi} = yield* _(
         Array.findFirst(
-          phoneNumbersOfSession(session),
-          (one) => one.phoneNumber === phoneNumber
+          get(phoneNumberApisAtom),
+          (one) => one.phoneNumber.phoneNumber === phoneNumber
         ),
         Effect.mapError(() => new PhoneNumberNotInAccountError())
       )
+      // user-service keeps one row per key, this one is the number's own. It
+      // goes first: deleting it again on a retry is harmless, while the
+      // number's refresh fails once its contact-service row is gone.
       yield* _(
-        contactApiForPhoneNumber(get, toRemove).deleteUser(),
+        userApi.deleteUser(),
+        Effect.zipRight(contactApi.deleteUser()),
         Effect.mapError((cause) => new DeleteUserForPhoneNumberError({cause}))
       )
 
       yield* _(set(dropPhoneNumbersFromSessionActionAtom, [phoneNumber]))
-
-      const updatedSession = get(sessionDataOrDummyAtom)
-      if (updatedSession.phoneNumber !== session.phoneNumber)
-        yield* _(
-          refreshPhoneNumberOnContactService({
-            session: updatedSession,
-            contactApi: contactApiForSession(get, updatedSession),
-            isMainPhoneNumber: true,
-          }),
-          Effect.ignore
-        )
-
       yield* _(set(updateAndReencryptAllConnectionsActionAtom, {}))
     })
 )

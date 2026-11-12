@@ -8,7 +8,10 @@ import {type OfferEncryptionProgress} from '@vexl-next/resources-utils/src/offer
 import {Effect, Schema} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
-import {contactApisAtom} from '../../../api/contactApiForSession'
+import {
+  contactApisAtom,
+  ownPublicKeysAtom,
+} from '../../../api/contactApiForSession'
 import {version} from '../../../utils/environment'
 import reportError from '../../../utils/reportError'
 import {upsertInboxOnBeAndLocallyActionAtom} from '../../chat/hooks/useCreateInbox'
@@ -67,6 +70,7 @@ export const createNoteActionAtom = atom(
         createNewNoteForMyContacts({
           offerApi: api.offer,
           contactApis: get(contactApisAtom),
+          ownPublicKeys: get(ownPublicKeysAtom),
           noteId,
           expiresAt,
           publicPart: {

@@ -39,6 +39,7 @@ function OfferAuthorBanner({
   grayAvatar,
   clubIdsForAvatar,
   onAvatarPress,
+  onCommonFriendsPress,
 }: {
   readonly offer: OneOfferInState
   readonly realUserName?: UserName
@@ -46,6 +47,7 @@ function OfferAuthorBanner({
   readonly grayAvatar?: boolean
   readonly clubIdsForAvatar?: readonly ClubUuid[]
   readonly onAvatarPress?: () => void
+  readonly onCommonFriendsPress?: () => void
 }): React.ReactElement {
   const {t} = useTranslation()
   const theme = useTheme()
@@ -154,65 +156,75 @@ function OfferAuthorBanner({
             />
           </XStack>
         </XStack>
-        {trustedFriendsText ? (
-          <CommonFriendsSummary
-            clubNames={clubLabel ? [clubLabel] : undefined}
-            commonFriends={t('offer.numberOfCommon', {
-              number: localizedCommonFriendsCount,
-            })}
-            trustedFriends={trustedFriendsText}
-          />
-        ) : clubLabel != null ? (
-          <XStack gap="$2" alignItems="center" flexShrink={1} minWidth={0}>
-            <Typography
-              variant="micro"
-              color="$foregroundSecondary"
-              numberOfLines={1}
-              flexShrink={1}
-              minWidth={0}
-            >
-              {clubLabel}
-            </Typography>
-            <Circle
-              size="$2"
-              backgroundColor={theme.foregroundSecondary.get()}
+        <TouchableOpacity
+          disabled={!onCommonFriendsPress}
+          onPress={onCommonFriendsPress}
+        >
+          {trustedFriendsText ? (
+            <CommonFriendsSummary
+              clubNames={clubLabel ? [clubLabel] : undefined}
+              commonFriends={t('offer.numberOfCommon', {
+                number: localizedCommonFriendsCount,
+              })}
+              trustedFriends={trustedFriendsText}
             />
-            {!isMine && (
-              <XStack gap="$1" alignItems="center" flexShrink={1} minWidth={0}>
-                <PeopleUsers
-                  size={16}
-                  color={theme.foregroundSecondary.get()}
-                />
-                <Typography
-                  variant="micro"
-                  color="$foregroundSecondary"
-                  numberOfLines={1}
+          ) : clubLabel != null ? (
+            <XStack gap="$2" alignItems="center" flexShrink={1} minWidth={0}>
+              <Typography
+                variant="micro"
+                color="$foregroundSecondary"
+                numberOfLines={1}
+                flexShrink={1}
+                minWidth={0}
+              >
+                {clubLabel}
+              </Typography>
+              <Circle
+                size="$2"
+                backgroundColor={theme.foregroundSecondary.get()}
+              />
+              {!isMine && (
+                <XStack
+                  gap="$1"
+                  alignItems="center"
                   flexShrink={1}
                   minWidth={0}
                 >
-                  {t('offer.numberOfCommon', {
-                    number: localizedCommonFriendsCount,
-                  })}
-                </Typography>
-              </XStack>
-            )}
-          </XStack>
-        ) : !isMine ? (
-          <XStack alignItems="center" gap="$1" flexShrink={1} minWidth={0}>
-            <PeopleUsers size={16} color={theme.foregroundSecondary.get()} />
-            <Typography
-              variant="micro"
-              color="$foregroundSecondary"
-              numberOfLines={1}
-              flexShrink={1}
-              minWidth={0}
-            >
-              {t('offer.numberOfCommon', {
-                number: localizedCommonFriendsCount,
-              })}
-            </Typography>
-          </XStack>
-        ) : null}
+                  <PeopleUsers
+                    size={16}
+                    color={theme.foregroundSecondary.get()}
+                  />
+                  <Typography
+                    variant="micro"
+                    color="$foregroundSecondary"
+                    numberOfLines={1}
+                    flexShrink={1}
+                    minWidth={0}
+                  >
+                    {t('offer.numberOfCommon', {
+                      number: localizedCommonFriendsCount,
+                    })}
+                  </Typography>
+                </XStack>
+              )}
+            </XStack>
+          ) : !isMine ? (
+            <XStack alignItems="center" gap="$1" flexShrink={1} minWidth={0}>
+              <PeopleUsers size={16} color={theme.foregroundSecondary.get()} />
+              <Typography
+                variant="micro"
+                color="$foregroundSecondary"
+                numberOfLines={1}
+                flexShrink={1}
+                minWidth={0}
+              >
+                {t('offer.numberOfCommon', {
+                  number: localizedCommonFriendsCount,
+                })}
+              </Typography>
+            </XStack>
+          ) : null}
+        </TouchableOpacity>
       </YStack>
     </XStack>
   )

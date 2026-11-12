@@ -46,6 +46,7 @@ import {reportOfferActionAtom} from '../../OfferDetailScreen/atoms'
 import UserAvatar from '../../UserAvatar'
 import {chatMolecule} from '../atoms'
 import {useCommonFriendsOtherSide} from '../utils/useCommonFriendsOtherSide'
+import {useOpenCommonFriends} from '../utils/useOpenCommonFriends'
 import useOpenExchangeDetails from './useOpenExchangeDetails'
 import useOtherSideAvatarPress from './useOtherSideAvatarPress'
 
@@ -71,6 +72,7 @@ function OtherSideInfoBanner({
   const {t} = useTranslation()
   const theme = useTheme()
   const onAvatarPress = useOtherSideAvatarPress()
+  const openCommonFriends = useOpenCommonFriends()
 
   return (
     <XStack alignItems="center" gap="$3">
@@ -90,43 +92,48 @@ function OtherSideInfoBanner({
         >
           {title}
         </Typography>
-        {trustedFriends ? (
-          <CommonFriendsSummary
-            clubNames={clubLabel ? [clubLabel] : undefined}
-            commonFriends={t('offer.numberOfCommon', {
-              number: commonConnectionsCount,
-            })}
-            trustedFriends={trustedFriends}
-          />
-        ) : (
-          <XStack gap="$2" alignItems="center">
-            {clubLabel != null ? (
-              <>
+        <TouchableOpacity onPress={openCommonFriends}>
+          {trustedFriends ? (
+            <CommonFriendsSummary
+              clubNames={clubLabel ? [clubLabel] : undefined}
+              commonFriends={t('offer.numberOfCommon', {
+                number: commonConnectionsCount,
+              })}
+              trustedFriends={trustedFriends}
+            />
+          ) : (
+            <XStack gap="$2" alignItems="center">
+              {clubLabel != null ? (
+                <>
+                  <Typography
+                    variant="micro"
+                    color="$foregroundSecondary"
+                    numberOfLines={1}
+                  >
+                    {clubLabel}
+                  </Typography>
+                  <Circle
+                    size="$2"
+                    backgroundColor={theme.foregroundSecondary.get()}
+                  />
+                </>
+              ) : null}
+              <XStack gap="$1" alignItems="center">
+                <PeopleUsers
+                  size={16}
+                  color={theme.foregroundSecondary.get()}
+                />
                 <Typography
                   variant="micro"
                   color="$foregroundSecondary"
                   numberOfLines={1}
                 >
-                  {clubLabel}
+                  {t('offer.numberOfCommon', {number: commonConnectionsCount})}
                 </Typography>
-                <Circle
-                  size="$2"
-                  backgroundColor={theme.foregroundSecondary.get()}
-                />
-              </>
-            ) : null}
-            <XStack gap="$1" alignItems="center">
-              <PeopleUsers size={16} color={theme.foregroundSecondary.get()} />
-              <Typography
-                variant="micro"
-                color="$foregroundSecondary"
-                numberOfLines={1}
-              >
-                {t('offer.numberOfCommon', {number: commonConnectionsCount})}
-              </Typography>
+              </XStack>
             </XStack>
-          </XStack>
-        )}
+          )}
+        </TouchableOpacity>
       </YStack>
     </XStack>
   )
@@ -247,6 +254,7 @@ export default function ChatInfoContent({
   const theirOfferAndNotReported = useAtomValue(theirOfferAndNotReportedAtom)
   const openExchangeDetails = useOpenExchangeDetails()
   const onAvatarPress = useOtherSideAvatarPress()
+  const openCommonFriends = useOpenCommonFriends()
   const localizedCommonConnectionsCount = localizeNumber({
     number: commonConnectionsCount,
   })
@@ -353,6 +361,7 @@ export default function ChatInfoContent({
                 userImage={otherSideData.image}
                 grayAvatar={shouldGrayScaleAvatar}
                 onAvatarPress={onAvatarPress}
+                onCommonFriendsPress={openCommonFriends}
               />
             ) : (
               <OtherSideInfoBanner

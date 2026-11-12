@@ -1,5 +1,5 @@
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
-import {Array, Effect, Schema} from 'effect'
+import {Array, Effect} from 'effect'
 import {atom} from 'jotai'
 import {
   contactApiForPhoneNumber,
@@ -9,16 +9,11 @@ import {updateAndReencryptAllConnectionsActionAtom} from '../connections/atom/up
 import {refreshPhoneNumberOnContactService} from '../refreshUserOnContactServiceInAppBackgroundTask'
 import {sessionDataOrDummyAtom} from '../session'
 import {
-  type CannotRemoveLastPhoneNumberError,
   PhoneNumberNotInAccountError,
   phoneNumbersOfSession,
   removePhoneNumbersFromSession,
 } from '../session/sessionPhoneNumbers'
 import {dropPhoneNumbersFromSessionActionAtom} from './dropPhoneNumbersFromSessionActionAtom'
-
-export class DeleteUserForPhoneNumberError extends Schema.TaggedError<DeleteUserForPhoneNumberError>(
-  'DeleteUserForPhoneNumberError'
-)('DeleteUserForPhoneNumberError', {cause: Schema.Unknown}) {}
 
 /**
  * Removes the number from contact-service and from the session. Removing the
@@ -27,16 +22,7 @@ export class DeleteUserForPhoneNumberError extends Schema.TaggedError<DeleteUser
  */
 export const removePhoneNumberActionAtom = atom(
   null,
-  (
-    get,
-    set,
-    phoneNumber: E164PhoneNumber
-  ): Effect.Effect<
-    void,
-    | PhoneNumberNotInAccountError
-    | CannotRemoveLastPhoneNumberError
-    | DeleteUserForPhoneNumberError
-  > =>
+  (get, set, phoneNumber: E164PhoneNumber) =>
     Effect.gen(function* (_) {
       const session = get(sessionDataOrDummyAtom)
       // Fails before touching the server when the number can't be removed
@@ -49,10 +35,7 @@ export const removePhoneNumberActionAtom = atom(
         ),
         Effect.mapError(() => new PhoneNumberNotInAccountError())
       )
-      yield* _(
-        contactApiForPhoneNumber(get, toRemove).deleteUser(),
-        Effect.mapError((cause) => new DeleteUserForPhoneNumberError({cause}))
-      )
+      yield* _(contactApiForPhoneNumber(get, toRemove).deleteUser())
 
       yield* _(set(dropPhoneNumbersFromSessionActionAtom, [phoneNumber]))
 

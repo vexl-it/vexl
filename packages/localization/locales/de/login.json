@@ -4,6 +4,8 @@
   "errorGettingSession.contactSupport": "Problem melden",
   "loggedInOnAnotherDevice.title": "Dein Account ist auf ein anderes Handy umgezogen",
   "loggedInOnAnotherDevice.text": "Dein Vexl-Account wurde auf einem anderen Handy wiederhergestellt, deshalb haben wir ihn von diesem Handy gelöscht. Warst du das nicht? Dann hat vielleicht jemand deine Backup-Datei. Melde dich mit deiner Telefonnummer neu an, um frisch zu starten.",
+  "loggedInOnAnotherDevice.phoneNumberRemoved.title": "Telefonnummer entfernt",
+  "loggedInOnAnotherDevice.phoneNumberRemoved.text": "Jemand hat sich auf einem anderen Handy mit {{phoneNumber}} bei Vexl angemeldet, deshalb haben wir sie aus deinem Account entfernt. Deine anderen Nummern funktionieren weiter.",
   "loginFlow.start.termsOfUse": "Nutzungsbedingungen",
   "loginFlow.name.nameValidationError": "Der Name sollte mindestens 1 Zeichen und maximal 25 Zeichen lang sein.",
   "loginFlow.photo.selectSource": "Wähle die Quelle deines Bildes",

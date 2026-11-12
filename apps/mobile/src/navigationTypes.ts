@@ -219,6 +219,13 @@ export type CommunityTabsScreenProps<T extends keyof CommunityParamsList> =
 export type EditProfileStackParamsList = {
   EditProfileDefault: undefined
   EditProfileSpokenLanguages: undefined
+  EditProfilePhoneNumbers: undefined
+  AddPhoneNumber: undefined
+  AddPhoneNumberCountryPicker: undefined
+  AddPhoneNumberVerificationCode: {
+    readonly phoneNumber: E164PhoneNumber
+    readonly initPhoneVerificationResponse: InitPhoneVerificationResponse
+  }
 }
 
 export type EditProfileStackScreenProps<

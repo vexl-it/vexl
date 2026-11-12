@@ -6,11 +6,10 @@ import {useCallback} from 'react'
 import {type RootStackScreenProps} from '../../../navigationTypes'
 import {type ChatMessageWithState} from '../../../state/chat/domain'
 import isNoteChatOrigin from '../../../state/chat/utils/isNoteChatOrigin'
-import {useGetAllClubsForIds} from '../../../state/clubs/atom/clubsWithMembersAtom'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {useTrustedFriendsText} from '../../../utils/localization/useTrustedFriendsText'
 import {chatMolecule} from '../atoms'
-import {useCommonFriendsOtherSide} from '../utils/useCommonFriendsOtherSide'
+import {useOpenCommonFriends} from '../utils/useOpenCommonFriends'
 import VexlbotActionCard from './VexlbotMessageItem/components/VexlbotActionCard'
 
 export function VexlBotRequestHelp({
@@ -19,33 +18,21 @@ export function VexlBotRequestHelp({
   message: ChatMessageWithState
 }): React.ReactElement | null {
   const {t} = useTranslation()
-  const otherSide = useCommonFriendsOtherSide()
   const navigation =
     useNavigation<RootStackScreenProps<'ChatDetail'>['navigation']>()
   const {
     chatAtom,
     trustedConnectionsCountAtom,
-    commonConnectionsHashesAtom,
     publicKeyPemBase64Atom,
     chatStateAtom,
-    verifiedConnectionsHashesAtom,
     canBeRerequestedAtom,
-    otherSideClubsIdsAtom,
-    friendLevelInfoAtom,
-    isMyChatOriginAtom,
   } = useMolecule(chatMolecule)
   const trustedFriendsText = useTrustedFriendsText(
     useAtomValue(trustedConnectionsCountAtom)
   )
   const chat = useAtomValue(chatAtom)
   const inboxKey = useAtomValue(publicKeyPemBase64Atom)
-  const commonConnectionsHashes = useAtomValue(commonConnectionsHashesAtom)
-  const verifiedConnectionsHashes = useAtomValue(verifiedConnectionsHashesAtom)
-  const otherSideClubsIds = useAtomValue(otherSideClubsIdsAtom)
-  const otherSideClubs = useGetAllClubsForIds(otherSideClubsIds ?? [])
   const canBeRerequested = useAtomValue(canBeRerequestedAtom)
-  const friendLevel = useAtomValue(friendLevelInfoAtom)
-  const isMine = useAtomValue(isMyChatOriginAtom)
   const chatState = useAtomValue(chatStateAtom)
 
   const handleOfferDetailsPress = useCallback(() => {
@@ -62,24 +49,7 @@ export function VexlBotRequestHelp({
     })
   }, [chat.otherSide.publicKey, inboxKey, navigation])
 
-  const handleCommonFriendsPress = useCallback(() => {
-    navigation.navigate('CommonFriends', {
-      contactsHashes: commonConnectionsHashes,
-      verifiedHashes: verifiedConnectionsHashes,
-      clubs: otherSideClubs,
-      friendLevel,
-      isMine,
-      otherSide,
-    })
-  }, [
-    commonConnectionsHashes,
-    friendLevel,
-    isMine,
-    navigation,
-    otherSideClubs,
-    otherSide,
-    verifiedConnectionsHashes,
-  ])
+  const handleCommonFriendsPress = useOpenCommonFriends()
 
   const isNoteChat = isNoteChatOrigin(chat.origin)
 

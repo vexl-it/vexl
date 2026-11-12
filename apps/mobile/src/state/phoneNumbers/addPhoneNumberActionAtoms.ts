@@ -139,19 +139,14 @@ export const verifyPhoneNumberToAddActionAtom = atom(
 
 /**
  * For a verified number that won't be added: its key is registered on
- * user-service (and maybe contact-service) and nobody would ever remove it.
- * Best effort, the key is never used again either way.
+ * user-service and nobody would ever remove it. Best effort, the key is never
+ * used again either way. Never contact-service: its `deleteUser` wipes the
+ * contacts of whoever holds the number there, here another account.
  */
 export const discardVerifiedPhoneNumberActionAtom = atom(
   null,
   (get, _set, verified: ExtraSessionPhoneNumber): Effect.Effect<void> =>
-    Effect.all(
-      [
-        Effect.ignore(userApiForPhoneNumber(get, verified).deleteUser()),
-        Effect.ignore(contactApiForPhoneNumber(get, verified).deleteUser()),
-      ],
-      {concurrency: 'unbounded', discard: true}
-    )
+    Effect.ignore(userApiForPhoneNumber(get, verified).deleteUser())
 )
 
 /**

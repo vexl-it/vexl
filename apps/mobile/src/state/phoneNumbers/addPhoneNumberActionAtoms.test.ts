@@ -78,15 +78,16 @@ beforeEach(() => {
 })
 
 describe('discardVerifiedPhoneNumberActionAtom', () => {
-  it("deletes the number's rows with its own credentials and ignores failures", async () => {
-    mockDeleteContactUser.mockReturnValueOnce(Effect.fail(new Error('gone')))
+  it("deletes only the new key's user-service row and ignores failures", async () => {
+    mockDeleteUser.mockReturnValueOnce(Effect.fail(new Error('gone')))
 
     await Effect.runPromise(
       createStore().set(discardVerifiedPhoneNumberActionAtom, verified)
     )
 
     expect(mockDeleteUser).toHaveBeenCalledWith(verified)
-    expect(mockDeleteContactUser).toHaveBeenCalledWith(verified)
+    // contact-service deletes the contacts of whoever holds the number there
+    expect(mockDeleteContactUser).not.toHaveBeenCalled()
   })
 })
 
@@ -113,7 +114,7 @@ describe('addVerifiedPhoneNumberActionAtom', () => {
 
     expect(Exit.isFailure(exit)).toBe(true)
     expect(mockDeleteUser).toHaveBeenCalledWith(verified)
-    expect(mockDeleteContactUser).toHaveBeenCalledWith(verified)
+    expect(mockDeleteContactUser).not.toHaveBeenCalled()
     expect(sessionOf(store).extraPhoneNumbers).toBeUndefined()
     expect(mockSubmitContacts).not.toHaveBeenCalled()
   })

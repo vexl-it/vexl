@@ -1,16 +1,17 @@
+import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {
   BACKUP_FILE_EXTENSION,
   encryptBackupFile,
   EncryptedBackupFileFromJson,
   type BackupPin,
 } from '@vexl-next/resources-utils/src/backup/BackupFile'
-import {Array, Effect, Option, Schema} from 'effect'
+import {Array, Effect, Option, pipe, Schema} from 'effect'
 import {Directory, File} from 'expo-file-system'
 import {shareAsync} from 'expo-sharing'
 import {atom} from 'jotai'
 import {DateTime} from 'luxon'
 import {Platform} from 'react-native'
-import {apiAtom} from '../../api'
+import {userApiForPhoneNumber} from '../../api/userApiForPhoneNumber'
 import {showErrorAlert} from '../../components/ErrorAlert'
 import {withLoadingOverlayAtom} from '../../components/LoadingOverlayProvider'
 import {toastNotificationAtom} from '../../components/ToastNotification/atom'
@@ -29,6 +30,7 @@ import {clubsKeyHolderStorageAtom} from '../clubs/atom/clubsToKeyHolderV2Atom'
 import {keyDerivationCountersAtom} from '../keyDerivation'
 import {vexlNotificationTokenAtom} from '../notifications/vexlNotificationTokenAtom'
 import {sessionAtom} from '../session'
+import {phoneNumbersOfSession} from '../session/sessionPhoneNumbers'
 import {notificationSecretForBackup} from './backupNotificationSecret'
 import {userDataForBackup} from './backupUserData'
 import {createBackupFile} from './createBackupFile'
@@ -120,12 +122,26 @@ const saveBackupFileToPickedDirectory = (
 
 export type AccountBackupDestination = 'device' | 'share'
 
+// The chosen number was removed from the account while the user was choosing.
+class BackupPhoneNumberNotInAccountError extends Schema.TaggedError<BackupPhoneNumberNotInAccountError>(
+  'BackupPhoneNumberNotInAccountError'
+)('BackupPhoneNumberNotInAccountError', {}) {}
+
 export const exportAccountBackupActionAtom = atom(
   null,
   (
     get,
     set,
-    {pin, destination}: {pin: BackupPin; destination: AccountBackupDestination}
+    {
+      pin,
+      destination,
+      phoneNumber,
+    }: {
+      pin: BackupPin
+      destination: AccountBackupDestination
+      // Its SMS code unlocks the backup.
+      phoneNumber: E164PhoneNumber
+    }
   ): Effect.Effect<boolean> => {
     const {t} = get(translationAtom)
     const session = get(sessionAtom)
@@ -134,7 +150,14 @@ export const exportAccountBackupActionAtom = atom(
     const {data: clubs, waitingForAdmission} = get(clubsKeyHolderStorageAtom)
 
     return Effect.all({
-      publicKey: get(apiAtom).user.getBackupPublicKey(),
+      publicKey: pipe(
+        phoneNumbersOfSession(session.session),
+        Array.findFirst((one) => one.phoneNumber === phoneNumber),
+        Effect.mapError(() => new BackupPhoneNumberNotInAccountError()),
+        Effect.flatMap((one) =>
+          userApiForPhoneNumber(get, one).getBackupPublicKey()
+        )
+      ),
       backup: Effect.flatMap(
         userDataForBackup(session.session.realUserData),
         (realUserData) =>

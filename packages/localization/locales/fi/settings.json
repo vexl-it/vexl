@@ -61,8 +61,6 @@
   "editProfileScreen.addIdentity.button": "Lisää henkilöllisyys",
   "editProfileScreen.vexlAlias.title": "Vexl-aliaksesi",
   "editProfileScreen.vexlAlias.subtitle": "Näin muut näkevät sinut. Oikea henkilöllisyytesi pysyy piilossa, kunnes päätät paljastaa sen.",
-  "editProfileScreen.phoneNumber.title": "Puhelinnumero",
-  "editProfileScreen.phoneNumber.subtitle": "Puhelinnumerosi pysyy yksityisenä. Kukaan ei näe sitä, ellet jaa sitä.",
   "editProfileScreen.spokenLanguages.title": "Kielet, joita puhut",
   "editProfileScreen.spokenLanguages.subtitle": "Kerro muille, millä kielillä kaupankäynti tuntuu sinusta luontevalta.",
   "editProfileScreen.identityPhoto.title": "Lisää kuva",

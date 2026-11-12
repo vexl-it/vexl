@@ -4,6 +4,8 @@
   "errorGettingSession.contactSupport": "Kontaktovat podporu",
   "loggedInOnAnotherDevice.title": "Tvůj účet se přesunul do jiného telefonu",
   "loggedInOnAnotherDevice.text": "Tvůj účet ve Vexlu se obnovil v jiném telefonu, takže jsme ho z tohohle smazali. Nebyl jsi to ty? Někdo možná má tvůj záložní soubor. Přihlas se znovu svým telefonním číslem a začni nanovo.",
+  "loggedInOnAnotherDevice.phoneNumberRemoved.title": "Telefonní číslo odebráno",
+  "loggedInOnAnotherDevice.phoneNumberRemoved.text": "Někdo se na jiném telefonu přihlásil do Vexlu s číslem {{phoneNumber}}, takže jsme ho z tvého účtu odebrali. Tvoje ostatní čísla fungují dál.",
   "loginFlow.start.termsOfUse": "podmínkami užití",
   "loginFlow.name.nameValidationError": "Tvoje jméno by mělo být dostatečně dlouhé, aby si ho nezapamatovala zlatá rybka, ale zároveň dostatečně krátké, aby se vešlo na kousek papíru v koláčku štěstí - řekněme mezi 1 a 25 znaky.",
   "loginFlow.photo.selectSource": "Vyber si, odkud chceš obrázek nahrát",

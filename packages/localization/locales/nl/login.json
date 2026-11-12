@@ -4,6 +4,8 @@
   "errorGettingSession.contactSupport": "Support contacteren",
   "loggedInOnAnotherDevice.title": "Je account is verhuisd naar een andere telefoon",
   "loggedInOnAnotherDevice.text": "Je Vexl-account is op een andere telefoon hersteld, dus we hebben het van deze telefoon gewist. Was jij dit niet? Dan heeft iemand misschien je back-upbestand. Log opnieuw in met je telefoonnummer om opnieuw te beginnen.",
+  "loggedInOnAnotherDevice.phoneNumberRemoved.title": "Telefoonnummer verwijderd",
+  "loggedInOnAnotherDevice.phoneNumberRemoved.text": "Iemand is op een andere telefoon met {{phoneNumber}} ingelogd op Vexl, dus we hebben het uit je account gehaald. Je andere nummers werken gewoon.",
   "loginFlow.start.termsOfUse": "Gebruikersvoorwaarden",
   "loginFlow.name.nameValidationError": "Uw naam moet lang genoeg zijn om het geheugen van een goudvis te verslaan, maar kort genoeg om in een gelukskoekje te passen - laten we zeggen ergens tussen de 1 en 25 tekens.",
   "loginFlow.photo.selectSource": "Kies de bron van uw afbeelding",

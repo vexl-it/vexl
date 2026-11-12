@@ -4,6 +4,8 @@
   "errorGettingSession.contactSupport": "Segnala un problema",
   "loggedInOnAnotherDevice.title": "Il tuo account è passato su un altro telefono",
   "loggedInOnAnotherDevice.text": "Il tuo account Vexl è stato ripristinato su un altro telefono, quindi l'abbiamo cancellato da questo. Non sei stato tu? Qualcuno potrebbe avere il tuo file di backup. Accedi di nuovo con il tuo numero di telefono per ripartire da zero.",
+  "loggedInOnAnotherDevice.phoneNumberRemoved.title": "Numero rimosso",
+  "loggedInOnAnotherDevice.phoneNumberRemoved.text": "Qualcuno ha effettuato l'accesso a Vexl con {{phoneNumber}} su un altro telefono, quindi l'abbiamo rimosso dal tuo account. Gli altri tuoi numeri funzionano come prima.",
   "loginFlow.start.termsOfUse": "Condizioni d'uso",
   "loginFlow.name.nameValidationError": "Il nome deve essere lungo almeno 1 carattere e al massimo 25.",
   "loginFlow.photo.selectSource": "Seleziona la fonte dell'immagine",

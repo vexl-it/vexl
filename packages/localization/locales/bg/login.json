@@ -4,6 +4,8 @@
   "errorGettingSession.contactSupport": "Свържи се с поддръжката",
   "loggedInOnAnotherDevice.title": "Акаунтът ти е преместен на друг телефон",
   "loggedInOnAnotherDevice.text": "Акаунтът ти във Vexl беше възстановен на друг телефон, затова го изтрихме от този. Не беше ти? Възможно е някой да има файла ти с резервно копие. Влез отново с телефонния си номер, за да започнеш начисто.",
+  "loggedInOnAnotherDevice.phoneNumberRemoved.title": "Телефонният номер е премахнат",
+  "loggedInOnAnotherDevice.phoneNumberRemoved.text": "Някой влезе във Vexl с {{phoneNumber}} от друг телефон, затова го премахнахме от акаунта ти. Другите ти номера работят както преди.",
   "loginFlow.start.termsOfUse": "Условия за ползване",
   "loginFlow.name.nameValidationError": "Вашето име трябва да е достатъчно дълго, за да победи паметта на златна рибка, но достатъчно кратко, за да се побере в бисквитка с късмети – да речем някъде между 1 и 25 знака.",
   "loginFlow.photo.selectSource": "Изберете източник на вашето изображение",

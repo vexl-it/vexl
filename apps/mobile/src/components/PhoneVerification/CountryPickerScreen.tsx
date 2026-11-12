@@ -1,11 +1,12 @@
 import {useSetAtom} from 'jotai'
 import React, {useCallback} from 'react'
 import {type ICountry} from 'react-native-country-select'
-import {type LoginFlowStackScreenProps} from '../../../navigationTypes'
-import CountryPickerScreenContent from '../../CountryPickerScreenContent'
-import {selectedCountryCodeAtom} from '../atoms/selectedCountryCodeAtom'
+import CountryPickerScreenContent from '../CountryPickerScreenContent'
+import {selectedCountryCodeAtom} from './selectedCountryCodeAtom'
 
-type Props = LoginFlowStackScreenProps<'CountryPicker'>
+interface Props {
+  readonly navigation: {readonly goBack: () => void}
+}
 
 export default function CountryPickerScreen({
   navigation,

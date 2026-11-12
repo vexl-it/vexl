@@ -213,17 +213,17 @@ const mockImportContacts = jest.fn(
   }
 )
 
-jest.mock('../../../api', () => {
+jest.mock('../../../api/contactApiForSession', () => {
   const {atom} = jest.requireActual('jotai')
   return {
-    apiAtom: atom({
-      contact: {
+    contactApisAtom: atom([
+      {
         importContacts: (request: {
           contacts: readonly string[]
           replace: boolean
         }) => mockImportContacts(request),
       },
-    }),
+    ]),
   }
 })
 

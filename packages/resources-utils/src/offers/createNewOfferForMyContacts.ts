@@ -20,7 +20,7 @@ import {
 import {type ServerToClientHashedNumber} from '@vexl-next/domain/src/general/ServerToClientHashedNumber'
 import {type ContactApi} from '@vexl-next/rest-api/src/services/contact'
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
-import {Effect, type HashMap} from 'effect'
+import {type Array, Effect, type HashMap} from 'effect'
 import decryptOffer, {
   type DecryptingOfferError,
   type NonCompatibleOfferVersionError,
@@ -55,7 +55,7 @@ export interface CreateOfferResult {
 
 export default function createNewOfferForMyContacts({
   offerApi,
-  contactApi,
+  contactApis,
   publicPart,
   ownerKeyPair,
   ownerKeyPairV2,
@@ -68,7 +68,8 @@ export default function createNewOfferForMyContacts({
   adminId: existingAdminId,
 }: {
   offerApi: OfferApi
-  contactApi: ContactApi
+  // One per phone number of the account, the main number first
+  contactApis: Array.NonEmptyReadonlyArray<ContactApi>
   publicPart: OfferPublicPart
   ownerKeyPair: PrivateKeyHolder
   ownerKeyPairV2: KeyPairV2
@@ -113,7 +114,7 @@ export default function createNewOfferForMyContacts({
       fetchInfoAndGeneratePrivatePayloads({
         symmetricKey,
         intendedConnectionLevel,
-        contactApi,
+        contactApis,
         ownerCredentials: ownerKeyPair,
         ownerKeyPairV2,
         intendedClubs,

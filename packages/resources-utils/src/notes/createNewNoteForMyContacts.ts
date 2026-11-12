@@ -55,7 +55,7 @@ export interface CreateNoteResult {
 
 export default function createNewNoteForMyContacts({
   offerApi,
-  contactApi,
+  contactApis,
   publicPart,
   ownerKeyPair,
   ownerKeyPairV2,
@@ -66,7 +66,8 @@ export default function createNewNoteForMyContacts({
   onProgress,
 }: {
   offerApi: OfferApi
-  contactApi: ContactApi
+  // One per phone number of the account, the main number first
+  contactApis: Array.NonEmptyReadonlyArray<ContactApi>
   publicPart: NotePublicPart
   ownerKeyPair: PrivateKeyHolder
   ownerKeyPairV2: KeyPairV2
@@ -102,7 +103,7 @@ export default function createNewNoteForMyContacts({
     if (onProgress) onProgress({type: 'FETCHING_CONTACTS'})
     const connectionsInfo = yield* _(
       fetchContactsForOffer({
-        contactApi,
+        contactApis,
         intendedConnectionLevel: 'ALL',
         intendedClubs: {},
         serverToClientHashesToHashedPhoneNumbersMap,

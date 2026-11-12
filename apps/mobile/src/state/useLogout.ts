@@ -3,6 +3,7 @@ import {Array, Effect, Option, pipe, Record} from 'effect'
 import {atom, useSetAtom} from 'jotai'
 import {useCallback} from 'react'
 import {apiAtom} from '../api'
+import {contactApisAtom} from '../api/contactApiForSession'
 import {offerProgressModalActionAtoms} from '../components/UploadingOfferProgressModal/atoms'
 import {translationAtom} from '../utils/localization/I18nProvider'
 import {formatInteger} from '../utils/localization/formatting'
@@ -156,7 +157,15 @@ export const logoutActionAtom = atom(null, async (get, set) => {
     })
 
     // contact service
-    await failSilently(effectToTaskEither(get(apiAtom).contact.deleteUser())())
+    await failSilently(
+      Effect.runPromise(
+        Effect.forEach(
+          get(contactApisAtom),
+          (contactApi) => Effect.ignore(contactApi.deleteUser()),
+          {concurrency: 'unbounded', discard: true}
+        )
+      )
+    )
 
     // User service
     await failSilently(effectToTaskEither(get(apiAtom).user.deleteUser())())

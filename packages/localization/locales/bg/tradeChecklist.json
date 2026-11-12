@@ -31,6 +31,8 @@
   "tradeChecklist.exchangeDetails.nickname": "Псевдоним",
   "tradeChecklist.exchangeDetails.nicknameNotSet": "Включи, за да зададеш",
   "tradeChecklist.exchangeDetails.phoneNumber": "Телефонен номер",
+  "tradeChecklist.exchangeDetails.phoneNumberToReveal.title": "Кой номер да разкриеш?",
+  "tradeChecklist.exchangeDetails.phoneNumberToReveal.text": "Псевдонимът се разкрива заедно с цифри от този номер. Пълният номер е отделен избор.",
   "tradeChecklist.exchangeDetails.photo": "Профилна снимка",
   "tradeChecklist.exchangeDetails.noPhotoYet": "Все още няма снимка",
   "tradeChecklist.exchangeDetails.choosePhoto": "Избери снимка",

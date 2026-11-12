@@ -31,6 +31,8 @@
   "tradeChecklist.exchangeDetails.nickname": "Surnom",
   "tradeChecklist.exchangeDetails.nicknameNotSet": "Active pour définir",
   "tradeChecklist.exchangeDetails.phoneNumber": "Numéro de téléphone",
+  "tradeChecklist.exchangeDetails.phoneNumberToReveal.title": "Quel numéro révéler ?",
+  "tradeChecklist.exchangeDetails.phoneNumberToReveal.text": "Ton surnom est accompagné de chiffres de ce numéro. Le numéro complet est un choix à part.",
   "tradeChecklist.exchangeDetails.photo": "Photo de profil",
   "tradeChecklist.exchangeDetails.noPhotoYet": "Pas encore de photo",
   "tradeChecklist.exchangeDetails.choosePhoto": "Choisir une photo",

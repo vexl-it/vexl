@@ -46,6 +46,8 @@
   "qrScanner.grantPermissions": "Toestemming verlenen",
   "qrScanner.grantPermissionsInSettings": "Kan geen toestemming vragen. Om de QR scanner te gebruiken open de instellingen en laat Vexl de camera gebruiken.",
   "qrScanner.openSettings": "Instellingen openen",
+  "shareProfile.phoneNumber.title": "Welk nummer delen?",
+  "shareProfile.phoneNumber.text": "Wie je QR-code scant, krijgt dit nummer.",
   "feedback.objection.APP": "App",
   "feedback.objection.PROCESS": "Verwerken",
   "feedback.objection.RESPONDING_TIME": "Reactie tijd",

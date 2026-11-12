@@ -31,6 +31,8 @@
   "tradeChecklist.exchangeDetails.nickname": "Alcunha",
   "tradeChecklist.exchangeDetails.nicknameNotSet": "Ativa para definir",
   "tradeChecklist.exchangeDetails.phoneNumber": "Número de telefone",
+  "tradeChecklist.exchangeDetails.phoneNumberToReveal.title": "Que número revelar?",
+  "tradeChecklist.exchangeDetails.phoneNumberToReveal.text": "A alcunha vai acompanhada de dígitos deste número. O número completo é uma escolha à parte.",
   "tradeChecklist.exchangeDetails.photo": "Foto de perfil",
   "tradeChecklist.exchangeDetails.noPhotoYet": "Ainda sem foto",
   "tradeChecklist.exchangeDetails.choosePhoto": "Escolher uma foto",

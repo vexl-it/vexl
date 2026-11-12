@@ -31,6 +31,8 @@
   "tradeChecklist.exchangeDetails.nickname": "Jina la utani",
   "tradeChecklist.exchangeDetails.nicknameNotSet": "Washa ili kuweka",
   "tradeChecklist.exchangeDetails.phoneNumber": "Nambari ya simu",
+  "tradeChecklist.exchangeDetails.phoneNumberToReveal.title": "Ufichue nambari ipi?",
+  "tradeChecklist.exchangeDetails.phoneNumberToReveal.text": "Jina la utani huambatana na tarakimu za nambari hii. Nambari kamili ni chaguo tofauti.",
   "tradeChecklist.exchangeDetails.photo": "Picha ya wasifu",
   "tradeChecklist.exchangeDetails.noPhotoYet": "Bado hakuna picha",
   "tradeChecklist.exchangeDetails.choosePhoto": "Chagua picha",

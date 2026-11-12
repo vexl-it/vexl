@@ -99,3 +99,14 @@ export const removePhoneNumbersFromSession = (
     ),
   })
 }
+
+/**
+ * The picked number while it is still in the account, otherwise the main one.
+ */
+export const pickedPhoneNumberOrMain = (
+  accountPhoneNumbers: Array.NonEmptyReadonlyArray<E164PhoneNumber>,
+  picked: E164PhoneNumber | undefined
+): E164PhoneNumber =>
+  picked !== undefined && Array.contains(accountPhoneNumbers, picked)
+    ? picked
+    : Array.headNonEmpty(accountPhoneNumbers)

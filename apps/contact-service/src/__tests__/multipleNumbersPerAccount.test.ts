@@ -295,11 +295,12 @@ describe('one account with several phone numbers', () => {
         ])
 
         for (const myNumber of [main, extra]) {
-          for (const level of ['FIRST', 'SECOND'] as const) {
-            expect(yield* _(fetchAllMyContacts(myNumber, level))).not.toContain(
-              main.keys.publicKeyPemBase64
-            )
-          }
+          expect(yield* _(fetchAllMyContacts(myNumber, 'FIRST'))).not.toContain(
+            main.keys.publicKeyPemBase64
+          )
+          expect(
+            yield* _(fetchAllMyContacts(myNumber, 'SECOND'))
+          ).not.toContain(main.keys.publicKeyPemBase64)
           const common = yield* _(
             fetchAllCommonConnections(myNumber, [
               main.keys.publicKeyPemBase64,

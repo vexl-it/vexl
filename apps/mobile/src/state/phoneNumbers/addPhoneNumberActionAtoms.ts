@@ -11,16 +11,14 @@ import {
   type ExtraSessionPhoneNumber,
   type SessionV2,
 } from '../../brands/Session.brand'
+import {withLoadingOverlayAtom} from '../../components/LoadingOverlayProvider'
 import {initPhoneVerificationAtom} from '../../components/LoginFlow/api/initPhoneVerificationAtom'
 import {verifyPhoneNumberAtom} from '../../components/LoginFlow/api/verifyPhoneNumberAtom'
 import {
   importedContactsAtom,
   needsFullContactsReplaceAfterContactEditAtom,
 } from '../contacts/atom/contactsStore'
-import {
-  submitContactsActionAtom,
-  type SubmitContactsResult,
-} from '../contacts/atom/submitContactsActionAtom'
+import {submitContactsActionAtom} from '../contacts/atom/submitContactsActionAtom'
 import {createPhoneNumberKeysActionAtom} from '../keyDerivation'
 import {sessionDataOrDummyAtom} from '../session'
 import {loginSessionWithProof} from '../session/loginSession'
@@ -41,14 +39,6 @@ export class SendVerificationSmsError extends Schema.TaggedError<SendVerificatio
 export class VerificationCodeError extends Schema.TaggedError<VerificationCodeError>(
   'VerificationCodeError'
 )('VerificationCodeError', {message: Schema.String}) {}
-
-export class VerifyPhoneNumberToAddError extends Schema.TaggedError<VerifyPhoneNumberToAddError>(
-  'VerifyPhoneNumberToAddError'
-)('VerifyPhoneNumberToAddError', {cause: Schema.Unknown}) {}
-
-export class CreateUserForPhoneNumberError extends Schema.TaggedError<CreateUserForPhoneNumberError>(
-  'CreateUserForPhoneNumberError'
-)('CreateUserForPhoneNumberError', {cause: Schema.Unknown}) {}
 
 export interface VerifiedPhoneNumber extends ExtraSessionPhoneNumber {
   // Adding the number replaces that account, warn the user first
@@ -105,19 +95,11 @@ export const verifyPhoneNumberToAddActionAtom = atom(
       verificationId: PhoneNumberVerificationId
       code: string
     }
-  ): Effect.Effect<
-    VerifiedPhoneNumber,
-    | PhoneNumberAlreadyInAccountError
-    | VerificationCodeError
-    | VerifyPhoneNumberToAddError
-  > =>
+  ) =>
     Effect.gen(function* (_) {
       yield* _(ensureNotInAccount(get(sessionDataOrDummyAtom), phoneNumber))
 
-      const keys = yield* _(
-        set(createPhoneNumberKeysActionAtom),
-        Effect.mapError((cause) => new VerifyPhoneNumberToAddError({cause}))
-      )
+      const keys = yield* _(set(createPhoneNumberKeysActionAtom))
 
       const {challenge} = yield* _(
         set(verifyPhoneNumberAtom, {
@@ -147,8 +129,7 @@ export const verifyPhoneNumberToAddActionAtom = atom(
                 hasExistingVexlAccount: exists,
               }))
             )
-        }),
-        Effect.mapError((cause) => new VerifyPhoneNumberToAddError({cause}))
+        })
       )
     })
 )
@@ -161,14 +142,7 @@ export const verifyPhoneNumberToAddActionAtom = atom(
  */
 export const addVerifiedPhoneNumberActionAtom = atom(
   null,
-  (
-    get,
-    set,
-    verified: ExtraSessionPhoneNumber
-  ): Effect.Effect<
-    SubmitContactsResult,
-    PhoneNumberAlreadyInAccountError | CreateUserForPhoneNumberError
-  > =>
+  (get, set, verified: ExtraSessionPhoneNumber) =>
     Effect.gen(function* (_) {
       const session = get(sessionDataOrDummyAtom)
       yield* _(ensureNotInAccount(session, verified.phoneNumber))
@@ -186,7 +160,7 @@ export const addVerifiedPhoneNumberActionAtom = atom(
             ...loginSession,
           })
         ),
-        Effect.mapError((cause) => new CreateUserForPhoneNumberError({cause}))
+        set(withLoadingOverlayAtom)
       )
 
       set(

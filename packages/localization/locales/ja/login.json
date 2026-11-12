@@ -4,6 +4,8 @@
   "errorGettingSession.contactSupport": "お問い合わせ",
   "loggedInOnAnotherDevice.title": "アカウントが別のスマホに移りました",
   "loggedInOnAnotherDevice.text": "あなたのVexlアカウントが別のスマホで復元されたため、このスマホからは削除しました。心当たりがない場合は、誰かがあなたのバックアップファイルを持っているかもしれません。電話番号でもう一度ログインして、最初からやり直してください。",
+  "loggedInOnAnotherDevice.phoneNumberRemoved.title": "電話番号を削除しました",
+  "loggedInOnAnotherDevice.phoneNumberRemoved.text": "誰かが別のスマホで{{phoneNumber}}を使ってVexlにログインしたため、この番号をあなたのアカウントから削除しました。ほかの番号はこれまでどおり使えます。",
   "loginFlow.start.termsOfUse": "利用規約",
   "loginFlow.name.nameValidationError": "あなたの名前は1〜25文字の長さである必要があります。短すぎず、長すぎない、ちょうど良い長さにしましょう。",
   "loginFlow.photo.selectSource": "画像のソースを選択",

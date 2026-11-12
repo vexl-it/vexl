@@ -1,19 +1,14 @@
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
-import {Array, Effect, Schema} from 'effect'
+import {Array, Effect} from 'effect'
 import {atom} from 'jotai'
 import {phoneNumberApisAtom} from '../../api/contactApiForSession'
 import {updateAndReencryptAllConnectionsActionAtom} from '../connections/atom/updateAndReencryptAllConnectionsActionAtom'
 import {sessionDataOrDummyAtom} from '../session'
 import {
-  type CannotRemoveMainPhoneNumberError,
   PhoneNumberNotInAccountError,
   removePhoneNumbersFromSession,
 } from '../session/sessionPhoneNumbers'
 import {dropPhoneNumbersFromSessionActionAtom} from './dropPhoneNumbersFromSessionActionAtom'
-
-export class DeleteUserForPhoneNumberError extends Schema.TaggedError<DeleteUserForPhoneNumberError>(
-  'DeleteUserForPhoneNumberError'
-)('DeleteUserForPhoneNumberError', {cause: Schema.Unknown}) {}
 
 /**
  * Removes an extra number from contact-service, user-service and the session.
@@ -21,16 +16,7 @@ export class DeleteUserForPhoneNumberError extends Schema.TaggedError<DeleteUser
  */
 export const removePhoneNumberActionAtom = atom(
   null,
-  (
-    get,
-    set,
-    phoneNumber: E164PhoneNumber
-  ): Effect.Effect<
-    void,
-    | PhoneNumberNotInAccountError
-    | CannotRemoveMainPhoneNumberError
-    | DeleteUserForPhoneNumberError
-  > =>
+  (get, set, phoneNumber: E164PhoneNumber) =>
     Effect.gen(function* (_) {
       // Fails before touching the server when the number can't be removed
       yield* _(
@@ -51,8 +37,7 @@ export const removePhoneNumberActionAtom = atom(
       // number's refresh fails once its contact-service row is gone.
       yield* _(
         userApi.deleteUser(),
-        Effect.zipRight(contactApi.deleteUser()),
-        Effect.mapError((cause) => new DeleteUserForPhoneNumberError({cause}))
+        Effect.zipRight(contactApi.deleteUser())
       )
 
       yield* _(set(dropPhoneNumbersFromSessionActionAtom, [phoneNumber]))

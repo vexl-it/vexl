@@ -7,9 +7,8 @@ import {
   XStack,
   YStack,
 } from '@vexl-next/ui'
-import {parsePhoneNumber} from 'awesome-phonenumber'
 import {useAtomValue} from 'jotai'
-import React, {useCallback, useMemo} from 'react'
+import React, {useCallback} from 'react'
 import {Pressable} from 'react-native'
 import {SvgXml} from 'react-native-svg'
 import {type RootStackScreenProps} from '../../../navigationTypes'
@@ -18,6 +17,7 @@ import {
   realUserDataAtom,
   userPhoneNumberAtom,
 } from '../../../state/session/userDataAtoms'
+import {getInternationalPhoneNumber} from '../../../utils/getInternationalPhoneNumber'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import resolveLocalUri from '../../../utils/resolveLocalUri'
 
@@ -31,12 +31,6 @@ function UserBanner(): React.ReactElement {
 
   const displayName = realUserData?.userName ?? t('common.anonymous')
   const profileImage = realUserData?.image ?? anonymizedUserData.image
-  const formattedPhoneNumber = useMemo(
-    () =>
-      parsePhoneNumber(userPhoneNumber).number?.international ??
-      userPhoneNumber,
-    [userPhoneNumber]
-  )
 
   const handleSharePress = useCallback(() => {
     navigation.navigate('ShareProfile')
@@ -81,7 +75,7 @@ function UserBanner(): React.ReactElement {
           color="$foregroundSecondary"
           numberOfLines={1}
         >
-          {formattedPhoneNumber}
+          {getInternationalPhoneNumber(userPhoneNumber)}
         </Typography>
       </YStack>
       <XStack gap="$3">

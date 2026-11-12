@@ -61,8 +61,6 @@
   "editProfileScreen.addIdentity.button": "Tambah identitas",
   "editProfileScreen.vexlAlias.title": "Alias vexl-mu",
   "editProfileScreen.vexlAlias.subtitle": "Begini orang lain melihatmu. Identitas aslimu tetap tersembunyi sampai kamu memilih untuk mengungkapkannya.",
-  "editProfileScreen.phoneNumber.title": "Nomor telepon",
-  "editProfileScreen.phoneNumber.subtitle": "Nomor teleponmu tetap privat. Tidak ada yang melihatnya kecuali kamu membagikannya.",
   "editProfileScreen.spokenLanguages.title": "Bahasa yang kamu gunakan",
   "editProfileScreen.spokenLanguages.subtitle": "Beri tahu orang lain bahasa apa yang nyaman kamu gunakan untuk trade.",
   "editProfileScreen.identityPhoto.title": "Tambah foto",

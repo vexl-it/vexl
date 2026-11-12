@@ -61,8 +61,6 @@
   "editProfileScreen.addIdentity.button": "Kimlik ekle",
   "editProfileScreen.vexlAlias.title": "Vexl takma adın",
   "editProfileScreen.vexlAlias.subtitle": "Başkaları seni böyle görür. Açıklamayı seçene kadar gerçek kimliğin gizli kalır.",
-  "editProfileScreen.phoneNumber.title": "Telefon numarası",
-  "editProfileScreen.phoneNumber.subtitle": "Telefon numaran gizli kalır. Sen paylaşmadıkça kimse görmez.",
   "editProfileScreen.spokenLanguages.title": "Konuştuğun diller",
   "editProfileScreen.spokenLanguages.subtitle": "Hangi dillerde rahatça takas yapabildiğini başkalarına göster.",
   "editProfileScreen.identityPhoto.title": "Fotoğraf ekle",

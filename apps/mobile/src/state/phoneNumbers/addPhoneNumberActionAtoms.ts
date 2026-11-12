@@ -8,6 +8,7 @@ import {atom} from 'jotai'
 import {apiAtom} from '../../api'
 import {
   contactApiForPhoneNumber,
+  type PhoneNumberWithCredentials,
   userApiForPhoneNumber,
 } from '../../api/contactApiForSession'
 import {
@@ -79,6 +80,18 @@ export const startPhoneNumberVerificationActionAtom = atom(
 )
 
 /**
+ * For a verified number that won't be added: its key is registered on
+ * user-service and nobody would ever remove it. Best effort, the key is never
+ * used again either way. Never contact-service: its `deleteUser` wipes the
+ * contacts of whoever holds the number there, here another account.
+ */
+export const discardVerifiedPhoneNumberActionAtom = atom(
+  null,
+  (get, _set, verified: PhoneNumberWithCredentials): Effect.Effect<void> =>
+    Effect.ignore(userApiForPhoneNumber(get, verified).deleteUser())
+)
+
+/**
  * Step 2 of adding a phone number: derives a new key pair for the number,
  * verifies the SMS code with it and gets credentials for the number. Nothing
  * is stored in the session yet. Every attempt uses a new key, an index whose
@@ -120,33 +133,28 @@ export const verifyPhoneNumberToAddActionAtom = atom(
           challenge,
         }),
         Effect.flatMap((credentials) =>
-          upgradeSessionCredentials(credentials, keys.keyPairV2)
-        ),
-        Effect.flatMap((sessionCredentials) => {
-          const verified = {...keys, phoneNumber, sessionCredentials}
-          return contactApiForPhoneNumber(get, verified)
-            .checkUserExists({notifyExistingUserAboutLogin: true})
-            .pipe(
-              Effect.map(({exists}) => ({
-                ...verified,
-                hasExistingVexlAccount: exists,
-              }))
+          upgradeSessionCredentials(credentials, keys.keyPairV2).pipe(
+            Effect.flatMap((sessionCredentials) => {
+              const verified = {...keys, phoneNumber, sessionCredentials}
+              return contactApiForPhoneNumber(get, verified)
+                .checkUserExists({notifyExistingUserAboutLogin: true})
+                .pipe(
+                  Effect.map(({exists}) => ({
+                    ...verified,
+                    hasExistingVexlAccount: exists,
+                  }))
+                )
+            }),
+            Effect.tapError(() =>
+              set(discardVerifiedPhoneNumberActionAtom, {
+                phoneNumber,
+                sessionCredentials: credentials,
+              })
             )
-        })
+          )
+        )
       )
     })
-)
-
-/**
- * For a verified number that won't be added: its key is registered on
- * user-service and nobody would ever remove it. Best effort, the key is never
- * used again either way. Never contact-service: its `deleteUser` wipes the
- * contacts of whoever holds the number there, here another account.
- */
-export const discardVerifiedPhoneNumberActionAtom = atom(
-  null,
-  (get, _set, verified: ExtraSessionPhoneNumber): Effect.Effect<void> =>
-    Effect.ignore(userApiForPhoneNumber(get, verified).deleteUser())
 )
 
 /**

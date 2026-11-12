@@ -1,3 +1,4 @@
+import {PhoneNumberVerificationId} from '@vexl-next/rest-api/src/services/user/contracts'
 import {Effect, Exit} from 'effect'
 import {createStore, type Getter} from 'jotai'
 import {type SessionPhoneNumber} from '../../brands/Session.brand'
@@ -6,6 +7,7 @@ import {makeExtraPhoneNumber} from '../session/extraPhoneNumber.testUtils'
 import {
   addVerifiedPhoneNumberActionAtom,
   discardVerifiedPhoneNumberActionAtom,
+  verifyPhoneNumberToAddActionAtom,
 } from './addPhoneNumberActionAtoms'
 
 const mockCreateUser = jest.fn((): Effect.Effect<void, Error> => Effect.void)
@@ -22,7 +24,10 @@ jest.mock('../session', () => {
   const {dummySession} = jest.requireActual('../session/dummySesssion')
   return {sessionDataOrDummyAtom: atom(dummySession)}
 })
-jest.mock('../../api', () => ({}))
+jest.mock('../../api', () => {
+  const {atom} = jest.requireActual('jotai')
+  return {apiAtom: atom({user: {}})}
+})
 jest.mock('../../api/contactApiForSession', () => ({
   contactApiForPhoneNumber: (_: Getter, phoneNumber: SessionPhoneNumber) => ({
     createUser: () => mockCreateUser(),
@@ -42,10 +47,33 @@ jest.mock(
   '../../components/LoginFlow/api/initPhoneVerificationAtom',
   () => ({})
 )
-jest.mock('../../components/LoginFlow/api/verifyPhoneNumberAtom', () => ({}))
-jest.mock('../keyDerivation', () => ({}))
-jest.mock('../session/upgradeSession', () => ({}))
-jest.mock('../session/verifyLoginChallenge', () => ({}))
+jest.mock('../../components/LoginFlow/api/verifyPhoneNumberAtom', () => {
+  const {atom} = jest.requireActual('jotai')
+  const {Effect} = jest.requireActual('effect')
+  return {
+    verifyPhoneNumberAtom: atom(null, () =>
+      Effect.succeed({challenge: 'challenge'})
+    ),
+  }
+})
+jest.mock('../keyDerivation', () => {
+  const {atom} = jest.requireActual('jotai')
+  const {Effect} = jest.requireActual('effect')
+  return {
+    createPhoneNumberKeysActionAtom: atom(null, () =>
+      Effect.succeed(mockVerified)
+    ),
+  }
+})
+jest.mock('../session/upgradeSession', () => ({
+  upgradeSessionCredentials: () => mockUpgradeSessionCredentials(),
+}))
+jest.mock('../session/verifyLoginChallenge', () => {
+  const {Effect} = jest.requireActual('effect')
+  return {
+    verifyLoginChallenge: () => Effect.succeed(mockVerified.sessionCredentials),
+  }
+})
 jest.mock('../contacts/atom/contactsStore', () => {
   const {atom} = jest.requireActual('jotai')
   return {
@@ -65,6 +93,10 @@ const verified = makeExtraPhoneNumber({
   hash: 'new-hash',
   index: 3,
 })
+const mockVerified = verified
+const mockUpgradeSessionCredentials = jest.fn(
+  (): Effect.Effect<unknown, Error> => Effect.fail(new Error('offline'))
+)
 
 const sessionOf = (
   store: ReturnType<typeof createStore>
@@ -87,6 +119,27 @@ describe('discardVerifiedPhoneNumberActionAtom', () => {
 
     expect(mockDeleteUser).toHaveBeenCalledWith(verified)
     // contact-service deletes the contacts of whoever holds the number there
+    expect(mockDeleteContactUser).not.toHaveBeenCalled()
+  })
+})
+
+describe('verifyPhoneNumberToAddActionAtom', () => {
+  it("deletes the new key's user-service row when the auth upgrade fails", async () => {
+    const exit = await Effect.runPromiseExit(
+      createStore().set(verifyPhoneNumberToAddActionAtom, {
+        phoneNumber: verified.phoneNumber,
+        verificationId: PhoneNumberVerificationId.make(1),
+        code: '123456',
+      })
+    )
+
+    expect(Exit.isFailure(exit)).toBe(true)
+    expect(mockDeleteUser).toHaveBeenCalledWith(
+      expect.objectContaining({
+        phoneNumber: verified.phoneNumber,
+        sessionCredentials: verified.sessionCredentials,
+      })
+    )
     expect(mockDeleteContactUser).not.toHaveBeenCalled()
   })
 })

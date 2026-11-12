@@ -1,7 +1,9 @@
 import {FetchHttpClient} from '@effect/platform/index'
 import {countryPrefixFromNumber} from '@vexl-next/domain/src/general/CountryPrefix.brand'
+import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {contact, offer, user} from '@vexl-next/rest-api/src'
 import {type ServiceUrl} from '@vexl-next/rest-api/src/ServiceUrl.brand'
+import {type UserSessionCredentials} from '@vexl-next/rest-api/src/UserSessionCredentials.brand'
 import {type ContactApi} from '@vexl-next/rest-api/src/services/contact'
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
 import {type UserApi} from '@vexl-next/rest-api/src/services/user'
@@ -25,13 +27,19 @@ import {
 import {translationAtom} from '../utils/localization/I18nProvider'
 import {isDeveloperAtom} from '../utils/preferences'
 
+// V1 credentials are enough for user-service, e.g. before the auth upgrade
+export interface PhoneNumberWithCredentials {
+  readonly phoneNumber: E164PhoneNumber
+  readonly sessionCredentials: UserSessionCredentials
+}
+
 /**
  * Every phone number of the account is a separate user on the servers, with
  * its own keys, credentials and country prefix.
  */
 const apiParamsForPhoneNumber = (
   get: Getter,
-  {phoneNumber, sessionCredentials}: SessionPhoneNumber,
+  {phoneNumber, sessionCredentials}: PhoneNumberWithCredentials,
   url: ServiceUrl
 ): Parameters<typeof offer.api>[0] => ({
   platform,
@@ -69,7 +77,7 @@ export const offerApiForPhoneNumber = (
 
 export const userApiForPhoneNumber = (
   get: Getter,
-  phoneNumber: SessionPhoneNumber
+  phoneNumber: PhoneNumberWithCredentials
 ): UserApi =>
   user
     .api(apiParamsForPhoneNumber(get, phoneNumber, apiEnv.userMs))

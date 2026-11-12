@@ -46,6 +46,8 @@
   "qrScanner.grantPermissions": "授予权限",
   "qrScanner.grantPermissionsInSettings": "无法请求权限。要使用二维码扫描器，请打开设置并允许 Vexl 使用摄像头。",
   "qrScanner.openSettings": "打开设置",
+  "shareProfile.phoneNumber.title": "分享哪个号码？",
+  "shareProfile.phoneNumber.text": "扫描你二维码的人会得到这个号码。",
   "feedback.objection.APP": "应用程序",
   "feedback.objection.PROCESS": "流程",
   "feedback.objection.RESPONDING_TIME": "回复时间",

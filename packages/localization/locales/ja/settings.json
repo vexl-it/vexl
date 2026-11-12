@@ -46,6 +46,8 @@
   "qrScanner.grantPermissions": "アクセス権限を付与する",
   "qrScanner.grantPermissionsInSettings": "許可を求めることができません。QRスキャナを使用するには設定を開き、Vexlがカメラを使用することを許可してください。",
   "qrScanner.openSettings": "設定を開く",
+  "shareProfile.phoneNumber.title": "どの番号を共有する？",
+  "shareProfile.phoneNumber.text": "QRコードをスキャンした人には、この番号が届きます。",
   "feedback.objection.APP": "アプリ",
   "feedback.objection.PROCESS": "プロセス",
   "feedback.objection.RESPONDING_TIME": "返信時間",

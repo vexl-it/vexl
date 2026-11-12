@@ -46,6 +46,8 @@
   "qrScanner.grantPermissions": "Získat oprávnění",
   "qrScanner.grantPermissionsInSettings": "Oprávnění nebylo možné získat. Chceš-li naskenovat QR kód, otevři nastavení a povol Vexlu používání fotoaparátu.",
   "qrScanner.openSettings": "Otevřít nastavení",
+  "shareProfile.phoneNumber.title": "Které číslo sdílet?",
+  "shareProfile.phoneNumber.text": "Kdo naskenuje tvůj QR kód, dostane tohle číslo.",
   "feedback.objection.APP": "Aplikace",
   "feedback.objection.PROCESS": "Proces",
   "feedback.objection.RESPONDING_TIME": "Doba odezvy",

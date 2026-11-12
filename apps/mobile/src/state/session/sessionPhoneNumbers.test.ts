@@ -9,6 +9,7 @@ import {dummySession} from './dummySesssion'
 import {
   addPhoneNumberToSession,
   phoneNumbersOfSession,
+  pickedPhoneNumberOrMain,
   removePhoneNumbersFromSession,
 } from './sessionPhoneNumbers'
 
@@ -97,4 +98,26 @@ it('refuses to remove a number the account does not have', () => {
   expect(Either.isLeft(result) && result.left._tag).toBe(
     'PhoneNumberNotInAccountError'
   )
+})
+
+describe('pickedPhoneNumberOrMain', () => {
+  const accountPhoneNumbers = Array.make(main.phoneNumber, second.phoneNumber)
+
+  it('keeps the picked number while it is in the account', () => {
+    expect(
+      pickedPhoneNumberOrMain(accountPhoneNumbers, second.phoneNumber)
+    ).toBe(second.phoneNumber)
+  })
+
+  it('falls back to the main number when nothing is picked', () => {
+    expect(pickedPhoneNumberOrMain(accountPhoneNumbers, undefined)).toBe(
+      main.phoneNumber
+    )
+  })
+
+  it('falls back to the main number when the picked one was removed', () => {
+    expect(
+      pickedPhoneNumberOrMain(accountPhoneNumbers, third.phoneNumber)
+    ).toBe(main.phoneNumber)
+  })
 })

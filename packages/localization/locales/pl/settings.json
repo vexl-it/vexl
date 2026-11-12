@@ -46,6 +46,8 @@
   "qrScanner.grantPermissions": "Nadaj uprawnienia",
   "qrScanner.grantPermissionsInSettings": "Nie można poprosić o uprawnienia. Aby użyć skanera QR otwórz ustawienia i zezwól Vexl na użycie aparatu.",
   "qrScanner.openSettings": "Otwórz ustawienia",
+  "shareProfile.phoneNumber.title": "Który numer udostępnić?",
+  "shareProfile.phoneNumber.text": "Każdy, kto zeskanuje twój kod QR, dostanie ten numer.",
   "feedback.objection.APP": "Aplikacja",
   "feedback.objection.PROCESS": "Proces",
   "feedback.objection.RESPONDING_TIME": "Czas odpowiedzi",

@@ -1,14 +1,20 @@
+import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {type Chat} from '@vexl-next/domain/src/general/messaging'
 import {
   type ContactRevealChatMessage,
   type IdentityRevealChatMessage,
+  type RevealStatus,
 } from '@vexl-next/domain/src/general/tradeChecklist'
+import {type UserName} from '@vexl-next/domain/src/general/UserName.brand'
+import {type UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {
   compare,
   VersionString,
 } from '@vexl-next/domain/src/utility/VersionString.brand'
 import {Array, Option, pipe, Schema} from 'effect/index'
 import {type ChatMessageWithState} from '../../chat/domain'
+import anonymizePhoneNumber from '../../chat/utils/anonymizePhoneNumber'
 import {type TradeChecklistInState} from '../domain'
 
 export const EXCHANGE_DETAIL_KEYS = [
@@ -88,6 +94,54 @@ export function selectionFromReveal({
       contact.status !== 'DISAPPROVE_REVEAL' &&
       !!contact.fullPhoneNumber,
   }
+}
+
+function answerStatus(requested: boolean): RevealStatus {
+  return requested ? 'APPROVE_REVEAL' : 'REQUEST_REVEAL'
+}
+
+// The nickname carries the partial form of the same number the contact
+// reveal carries in full.
+export function revealFromSelection({
+  selection,
+  requested,
+  name,
+  photo,
+  phoneNumber,
+  timestamp,
+}: {
+  selection: ExchangeDetailsSelection
+  requested: ExchangeDetailsSelection
+  name: UserName | undefined
+  photo: UriString | undefined
+  phoneNumber: E164PhoneNumber
+  timestamp: UnixMilliseconds
+}): RevealUpdate {
+  const identityRequested = requested.nickname || requested.photo
+  const identity: IdentityRevealChatMessage | undefined =
+    selection.nickname || selection.photo
+      ? {
+          status: answerStatus(identityRequested),
+          deanonymizedUser: name
+            ? {name, partialPhoneNumber: anonymizePhoneNumber(phoneNumber)}
+            : undefined,
+          image: photo,
+          timestamp,
+        }
+      : identityRequested
+        ? {status: 'DISAPPROVE_REVEAL', timestamp}
+        : undefined
+  const contact: ContactRevealChatMessage | undefined = selection.phoneNumber
+    ? {
+        status: answerStatus(requested.phoneNumber),
+        fullPhoneNumber: phoneNumber,
+        timestamp,
+      }
+    : requested.phoneNumber
+      ? {status: 'DISAPPROVE_REVEAL', timestamp}
+      : undefined
+
+  return {identity, contact}
 }
 
 // Details the other side has revealed to me so far.
@@ -452,4 +506,98 @@ export function exchangedDetails({
     mine: onlyExchanged(selectionFromReveal(sent)),
     theirs: onlyExchanged(selectionFromReveal(received)),
   }
+}
+
+function partialPhoneNumberOf(
+  identity: IdentityRevealChatMessage | undefined
+): string | undefined {
+  return (
+    identity?.deanonymizedUser?.partialPhoneNumber ??
+    identity?.partialPhoneNumber
+  )
+}
+
+// Reveals I sent in this chat, the latest first. Checklist state stands in
+// for messages that are gone, but only when not looking at a point in time.
+function sentRevealsLatestFirst(
+  chat: ChatReveals,
+  until?: number
+): RevealUpdate[] {
+  const fromMessages = pipe(
+    chat.messages,
+    Array.filterMap((message, order) =>
+      message.state === 'sent' && (until === undefined || order <= until)
+        ? Option.fromNullable(revealFromMessage(message))
+        : Option.none()
+    ),
+    Array.reverse
+  )
+  if (until !== undefined) return fromMessages
+
+  return Array.append(fromMessages, {
+    identity: chat.tradeChecklist.identity.sent ?? undefined,
+    contact: chat.tradeChecklist.contact.sent ?? undefined,
+  })
+}
+
+function revealsPhoneNumber(
+  reveal: RevealUpdate,
+  phoneNumber: E164PhoneNumber
+): boolean {
+  return (
+    reveal.contact?.fullPhoneNumber === phoneNumber ||
+    partialPhoneNumberOf(reveal.identity) === anonymizePhoneNumber(phoneNumber)
+  )
+}
+
+// The account number the draft or an earlier reveal in this chat carries, so
+// one chat keeps getting the same number. The main number otherwise.
+export function defaultPhoneNumberToReveal({
+  accountPhoneNumbers,
+  chat,
+  draft,
+}: {
+  accountPhoneNumbers: Array.NonEmptyReadonlyArray<E164PhoneNumber>
+  chat: ChatReveals
+  draft: RevealUpdate
+}): E164PhoneNumber {
+  return pipe(
+    [draft, ...sentRevealsLatestFirst(chat)],
+    Array.findFirst((reveal) =>
+      Array.findFirst(accountPhoneNumbers, (phoneNumber) =>
+        revealsPhoneNumber(reveal, phoneNumber)
+      )
+    ),
+    Option.getOrElse(() => Array.headNonEmpty(accountPhoneNumbers))
+  )
+}
+
+export interface RevealedPhoneNumber {
+  readonly full?: E164PhoneNumber
+  readonly partial?: string
+}
+
+// The number I had revealed by the time of this event, read from the sent
+// messages, so it stays right after the number leaves the account.
+export function myRevealedPhoneNumberForEvent(
+  chat: ChatReveals,
+  event: RevealEvent
+): RevealedPhoneNumber {
+  const reveals = sentRevealsLatestFirst(chat, event.order)
+  const full = pipe(
+    reveals,
+    Array.findFirst((reveal) =>
+      Option.fromNullable(reveal.contact?.fullPhoneNumber)
+    ),
+    Option.getOrUndefined
+  )
+  const partial = pipe(
+    reveals,
+    Array.findFirst((reveal) =>
+      Option.fromNullable(partialPhoneNumberOf(reveal.identity))
+    ),
+    Option.getOrUndefined
+  )
+
+  return {full, partial: partial ?? (full && anonymizePhoneNumber(full))}
 }

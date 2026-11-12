@@ -12,13 +12,13 @@ import {
   XStack,
   YStack,
 } from '@vexl-next/ui'
-import {useAtomValue, useSetAtom} from 'jotai'
+import {useAtom, useAtomValue, useSetAtom} from 'jotai'
 import React from 'react'
 import {TouchableOpacity} from 'react-native'
 import {type TradeChecklistStackScreenProps} from '../../../../navigationTypes'
 import anonymizePhoneNumber from '../../../../state/chat/utils/anonymizePhoneNumber'
 import {selectImageActionAtom} from '../../../../state/selectImageActionAtom'
-import {sessionDataOrDummyAtom} from '../../../../state/session'
+import {userPhoneNumbersAtom} from '../../../../state/session/userDataAtoms'
 import {otherSideDataAtom} from '../../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {
   isAnyDetailSelected,
@@ -29,6 +29,7 @@ import {getInternationalPhoneNumber} from '../../../../utils/getInternationalPho
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import resolveLocalUri from '../../../../utils/resolveLocalUri'
 import {AddToContactsButton} from '../../../ChatDetailScreen/components/RevealedInfoCard'
+import {PhoneNumberPicker} from '../../../PhoneNumberPicker'
 import UserAvatar from '../../../UserAvatar'
 import {
   availableDetailKeysAtom,
@@ -36,6 +37,7 @@ import {
   detailsSharedByThemAtom,
   exchangeDetailsModeAtom,
   exchangeDetailsNicknameAtom,
+  exchangeDetailsPhoneNumberAtom,
   exchangeDetailsPhotoUriAtom,
   exchangeDetailsSelectionAtom,
   pendingSentDetailsAtom,
@@ -54,7 +56,7 @@ const SHARED_AVATAR_SIZE = 144
 
 function NicknameRow(): React.ReactElement {
   const {t} = useTranslation()
-  const {phoneNumber} = useAtomValue(sessionDataOrDummyAtom)
+  const phoneNumber = useAtomValue(exchangeDetailsPhoneNumberAtom)
   const selected = useAtomValue(exchangeDetailsSelectionAtom).nickname
   const nickname = useAtomValue(exchangeDetailsNicknameAtom).trim()
   const toggle = useSetAtom(toggleExchangeDetailActionAtom)
@@ -82,7 +84,7 @@ function NicknameRow(): React.ReactElement {
 
 function PhoneNumberRow(): React.ReactElement {
   const {t} = useTranslation()
-  const {phoneNumber} = useAtomValue(sessionDataOrDummyAtom)
+  const phoneNumber = useAtomValue(exchangeDetailsPhoneNumberAtom)
   const selected = useAtomValue(exchangeDetailsSelectionAtom).phoneNumber
   const toggle = useSetAtom(toggleExchangeDetailActionAtom)
 
@@ -153,6 +155,27 @@ const ROWS: Record<ExchangeDetailKey, () => React.ReactElement> = {
   nickname: NicknameRow,
   phoneNumber: PhoneNumberRow,
   photo: PhotoRow,
+}
+
+function PhoneNumberToRevealPicker(): React.ReactElement | null {
+  const {t} = useTranslation()
+  const phoneNumbers = useAtomValue(userPhoneNumbersAtom)
+  const [phoneNumber, setPhoneNumber] = useAtom(exchangeDetailsPhoneNumberAtom)
+  const {nickname, phoneNumber: phoneNumberSelected} = useAtomValue(
+    exchangeDetailsSelectionAtom
+  )
+
+  if (!nickname && !phoneNumberSelected) return null
+
+  return (
+    <PhoneNumberPicker
+      phoneNumbers={phoneNumbers}
+      value={phoneNumber}
+      onValueChange={setPhoneNumber}
+      title={t('tradeChecklist.exchangeDetails.phoneNumberToReveal.title')}
+      text={t('tradeChecklist.exchangeDetails.phoneNumberToReveal.text')}
+    />
+  )
 }
 
 function SharedProfile(): React.ReactElement | null {
@@ -322,6 +345,7 @@ function ExchangeDetailsScreen(): React.ReactElement {
                 return <Row key={key} />
               })}
             </YStack>
+            <PhoneNumberToRevealPicker />
             {mode === 'respond' ? <DiffersFromRequestNotice /> : null}
             <Disclosure
               title={t('tradeChecklist.exchangeDetails.howSharingWorksTitle')}

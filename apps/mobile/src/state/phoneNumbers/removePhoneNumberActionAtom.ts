@@ -1,12 +1,9 @@
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {Array, Effect} from 'effect'
 import {atom} from 'jotai'
-import {
-  contactApiForPhoneNumber,
-  contactApiForSession,
-} from '../../api/contactApiForSession'
+import {contactApiForPhoneNumber} from '../../api/contactApiForSession'
 import {updateAndReencryptAllConnectionsActionAtom} from '../connections/atom/updateAndReencryptAllConnectionsActionAtom'
-import {refreshPhoneNumberOnContactService} from '../refreshUserOnContactServiceInAppBackgroundTask'
+import {refreshPromotedMainPhoneNumber} from '../refreshUserOnContactServiceInAppBackgroundTask'
 import {sessionDataOrDummyAtom} from '../session'
 import {
   PhoneNumberNotInAccountError,
@@ -39,16 +36,7 @@ export const removePhoneNumberActionAtom = atom(
 
       yield* _(set(dropPhoneNumbersFromSessionActionAtom, [phoneNumber]))
 
-      const updatedSession = get(sessionDataOrDummyAtom)
-      if (updatedSession.phoneNumber !== session.phoneNumber)
-        yield* _(
-          refreshPhoneNumberOnContactService({
-            session: updatedSession,
-            contactApi: contactApiForSession(get, updatedSession),
-            isMainPhoneNumber: true,
-          }),
-          Effect.ignore
-        )
+      yield* _(refreshPromotedMainPhoneNumber(get, session))
 
       yield* _(set(updateAndReencryptAllConnectionsActionAtom, {}))
     })

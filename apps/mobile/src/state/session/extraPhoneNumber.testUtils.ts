@@ -2,7 +2,7 @@ import {KeyHolder} from '@vexl-next/cryptography'
 import {KeyPairV2} from '@vexl-next/cryptography/src/KeyHolder/brandsV2'
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
-import {KeyDerivationIndex} from '@vexl-next/domain/src/general/MasterSeed.brand'
+import {generateKeyDerivationId} from '@vexl-next/domain/src/general/MasterSeed.brand'
 import {Schema} from 'effect'
 import {type ExtraSessionPhoneNumber} from '../../brands/Session.brand'
 import {dummySession} from './dummySesssion'
@@ -30,7 +30,7 @@ export const makeExtraPhoneNumber = ({
     phoneNumber: Schema.decodeSync(E164PhoneNumber)(phoneNumber),
     privateKey,
     keyPairV2,
-    keyDerivationIndex: KeyDerivationIndex.make(index),
+    keyDerivationId: generateKeyDerivationId(),
     sessionCredentials: {
       publicKey: privateKey.publicKeyPemBase64,
       hash: hashedPhoneNumber,

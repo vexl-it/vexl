@@ -19,6 +19,7 @@ import {
 import {type ClubKeys} from '@vexl-next/domain/src/general/clubs'
 import {
   generateMasterSeed,
+  KeyDerivationId,
   KeyDerivationIndex,
   MasterSeed,
 } from '@vexl-next/domain/src/general/MasterSeed.brand'
@@ -35,6 +36,12 @@ import {
 } from './keyFactory'
 
 const index = Schema.decodeSync(KeyDerivationIndex)
+const phoneNumberKeyId0 = Schema.decodeSync(KeyDerivationId)(
+  '0f8fad5b-d9cb-469f-a165-70867728950e'
+)
+const phoneNumberKeyId1 = Schema.decodeSync(KeyDerivationId)(
+  '7c9e6679-7425-40de-944b-e07fc1f90ae7'
+)
 const noteId = Schema.decodeSync(NoteId)('7c9e6679-7425-40de-944b-e07fc1f90ae7')
 const fixedSeed = Schema.decodeSync(MasterSeed)(
   '000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f'
@@ -60,8 +67,8 @@ const deriveAll = async (masterSeed: MasterSeed): Promise<DerivedKeys> =>
       inbox1: deriveInboxPrivateKey(masterSeed, index(1)),
       club0: deriveClubKeys(masterSeed, index(0)),
       club1: deriveClubKeys(masterSeed, index(1)),
-      phoneNumber0: derivePhoneNumberKeys(masterSeed, index(0)),
-      phoneNumber1: derivePhoneNumberKeys(masterSeed, index(1)),
+      phoneNumber0: derivePhoneNumberKeys(masterSeed, phoneNumberKeyId0),
+      phoneNumber1: derivePhoneNumberKeys(masterSeed, phoneNumberKeyId1),
     })
   )
 

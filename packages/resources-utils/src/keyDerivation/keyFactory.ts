@@ -12,6 +12,7 @@ import {
 import {type ClubKeys} from '@vexl-next/domain/src/general/clubs'
 import {
   masterSeedToBytes,
+  type KeyDerivationId,
   type KeyDerivationIndex,
   type MasterSeed,
 } from '@vexl-next/domain/src/general/MasterSeed.brand'
@@ -68,14 +69,14 @@ export const deriveClubKeys = (
 // Keys of an extra phone number of the account, see the mobile session
 export const derivePhoneNumberKeys = (
   masterSeed: MasterSeed,
-  index: KeyDerivationIndex
+  id: KeyDerivationId
 ): Effect.Effect<
   {privateKey: PrivateKeyHolder; keyPairV2: KeyPairV2},
   CryptoError
 > =>
   Effect.all({
-    privateKey: derivePrivateKeyHolderE(masterSeed, `phoneNumber/${index}`),
-    keyPairV2: deriveKeyPairV2E(masterSeed, `phoneNumber/${index}`),
+    privateKey: derivePrivateKeyHolderE(masterSeed, `phoneNumber/${id}`),
+    keyPairV2: deriveKeyPairV2E(masterSeed, `phoneNumber/${id}`),
   })
 
 // Formats the derived bytes as an RFC 4122 v4 UUID.

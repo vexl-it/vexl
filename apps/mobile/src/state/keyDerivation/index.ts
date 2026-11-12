@@ -4,6 +4,8 @@ import {
 } from '@vexl-next/cryptography/src/KeyHolder'
 import {type ClubKeys} from '@vexl-next/domain/src/general/clubs'
 import {
+  generateKeyDerivationId,
+  type KeyDerivationId,
   KeyDerivationIndex,
   type MasterSeed,
 } from '@vexl-next/domain/src/general/MasterSeed.brand'
@@ -18,7 +20,7 @@ import {
   deriveNoteRepostId,
   derivePhoneNumberKeys,
 } from '@vexl-next/resources-utils/src/keyDerivation/keyFactory'
-import {Array, Effect, Either, Fiber, Option, Schema} from 'effect'
+import {Effect, Either, Fiber, Option, Schema} from 'effect'
 import {atom, type Getter} from 'jotai'
 import {apiAtom} from '../../api'
 import {atomWithParsedMmkvStorageWithImmediateSaveOption} from '../../utils/atomUtils/atomWithParsedMmkvStorage'
@@ -30,8 +32,6 @@ import {findClubUuidOfMember, scanClubs, scanInboxes} from './scanDerivedKeys'
 export const KeyDerivationCounters = Schema.Struct({
   nextInboxIndex: KeyDerivationIndex,
   nextClubIndex: KeyDerivationIndex,
-  // Missing until the first extra phone number is added
-  nextPhoneNumberIndex: Schema.optional(KeyDerivationIndex),
 })
 export type KeyDerivationCounters = typeof KeyDerivationCounters.Type
 
@@ -59,16 +59,6 @@ export const raiseKeyDerivationCountersActionAtom = atom(
       nextClubIndex: KeyDerivationIndex.make(
         Math.max(current.nextClubIndex, minimal.nextClubIndex)
       ),
-      nextPhoneNumberIndex:
-        current.nextPhoneNumberIndex === undefined ||
-        minimal.nextPhoneNumberIndex === undefined
-          ? (current.nextPhoneNumberIndex ?? minimal.nextPhoneNumberIndex)
-          : KeyDerivationIndex.make(
-              Math.max(
-                current.nextPhoneNumberIndex,
-                minimal.nextPhoneNumberIndex
-              )
-            ),
     }))
   }
 )
@@ -171,20 +161,12 @@ const allocateIndexActionAtom = atom(
   (
     get,
     set,
-    {
-      counter,
-      atLeast = 0,
-    }: {
-      counter: keyof KeyDerivationCounters
-      atLeast?: number
-    }
+    counter: keyof KeyDerivationCounters
   ): Effect.Effect<KeyDerivationIndex, KeyDerivationCountersRecoveryError> =>
     set(ensureKeyDerivationCountersActionAtom).pipe(
       Effect.map(() => {
         const counters = get(keyDerivationCountersStorage.atom)
-        const index = KeyDerivationIndex.make(
-          Math.max(counters[counter] ?? 0, atLeast)
-        )
+        const index = counters[counter]
         set(keyDerivationCountersStorage.setAndSaveImmediatelyAtom, {
           ...counters,
           [counter]: KeyDerivationIndex.make(index + 1),
@@ -207,7 +189,7 @@ export const createInboxPrivateKeyActionAtom = atom(
       const masterSeed = yield* loggedInMasterSeed(get)
       return yield* deriveInboxPrivateKey(
         masterSeed,
-        yield* set(allocateIndexActionAtom, {counter: 'nextInboxIndex'})
+        yield* set(allocateIndexActionAtom, 'nextInboxIndex')
       )
     })
 )
@@ -225,44 +207,29 @@ export const createClubKeysActionAtom = atom(
       const masterSeed = yield* loggedInMasterSeed(get)
       return yield* deriveClubKeys(
         masterSeed,
-        yield* set(allocateIndexActionAtom, {counter: 'nextClubIndex'})
+        yield* set(allocateIndexActionAtom, 'nextClubIndex')
       )
     })
 )
 
-/**
- * Keys for a new extra phone number. The counter is not recovered from the
- * server, so indexes of numbers still in the session are skipped too.
- */
+// Keys for a new extra phone number, never the keys of an earlier one
 export const createPhoneNumberKeysActionAtom = atom(
   null,
   (
-    get,
-    set
+    get
   ): Effect.Effect<
     {
-      keyDerivationIndex: KeyDerivationIndex
+      keyDerivationId: KeyDerivationId
       privateKey: PrivateKeyHolder
       keyPairV2: KeyPairV2
     },
-    CryptoError | KeyDerivationCountersRecoveryError
+    CryptoError
   > =>
     Effect.gen(function* () {
       const masterSeed = yield* loggedInMasterSeed(get)
-      const session = get(sessionAtom)
-      const usedIndexes =
-        session.state === 'loggedIn'
-          ? Array.map(
-              session.session.extraPhoneNumbers ?? [],
-              (one) => one.keyDerivationIndex
-            )
-          : []
-      const keyDerivationIndex = yield* set(allocateIndexActionAtom, {
-        counter: 'nextPhoneNumberIndex',
-        atLeast: Math.max(-1, ...usedIndexes) + 1,
-      })
-      const keys = yield* derivePhoneNumberKeys(masterSeed, keyDerivationIndex)
-      return {keyDerivationIndex, ...keys}
+      const keyDerivationId = generateKeyDerivationId()
+      const keys = yield* derivePhoneNumberKeys(masterSeed, keyDerivationId)
+      return {keyDerivationId, ...keys}
     })
 )
 

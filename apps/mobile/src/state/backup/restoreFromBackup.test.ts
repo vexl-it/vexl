@@ -614,7 +614,6 @@ describe('restore from backup', () => {
         derivationCounters: {
           nextInboxIndex: index(0),
           nextClubIndex: index(0),
-          nextPhoneNumberIndex: index(2),
         },
       }
     }
@@ -696,8 +695,6 @@ describe('restore from backup', () => {
       expect(store.get(restoredAccountInfoAtom)).toEqual(
         Option.some({notRestoredPhoneNumbers: []})
       )
-      // Past the highest index in the backup, not just its counter.
-      expect(store.get(keyDerivationCountersAtom).nextPhoneNumberIndex).toBe(5)
       expect(mockDeleteUserOnUserService).not.toHaveBeenCalled()
     })
 
@@ -721,8 +718,6 @@ describe('restore from backup', () => {
         second.phoneNumber
       )
       expect(mockDeleteUserOnUserService).toHaveBeenCalledTimes(1)
-      // The dropped number's key may still be registered on user-service.
-      expect(store.get(keyDerivationCountersAtom).nextPhoneNumberIndex).toBe(5)
     })
 
     it('reports a backup the server no longer knows when the main number is gone, even with extra numbers left', async () => {

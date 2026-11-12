@@ -3,7 +3,7 @@ import {KeyPairV2} from '@vexl-next/cryptography/src/KeyHolder/brandsV2'
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {LoginSessionId} from '@vexl-next/domain/src/general/LoginSessionId.brand'
 import {
-  KeyDerivationIndex,
+  KeyDerivationId,
   MasterSeed,
 } from '@vexl-next/domain/src/general/MasterSeed.brand'
 import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
@@ -39,10 +39,10 @@ export const SessionPhoneNumber = Schema.Struct({
 })
 export type SessionPhoneNumber = typeof SessionPhoneNumber.Type
 
-// Keys of an extra number are derived from the master seed at this index
+// Keys of an extra number are derived from the master seed with this id
 export const ExtraSessionPhoneNumber = Schema.Struct({
   ...SessionPhoneNumber.fields,
-  keyDerivationIndex: KeyDerivationIndex,
+  keyDerivationId: KeyDerivationId,
 })
 export type ExtraSessionPhoneNumber = typeof ExtraSessionPhoneNumber.Type
 

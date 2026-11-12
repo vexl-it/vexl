@@ -94,8 +94,8 @@ export const discardVerifiedPhoneNumberActionAtom = atom(
 /**
  * Step 2 of adding a phone number: derives a new key pair for the number,
  * verifies the SMS code with it and gets credentials for the number. Nothing
- * is stored in the session yet. Every attempt uses a new key, an index whose
- * key may have reached user-service is never handed out again.
+ * is stored in the session yet. Every attempt uses a new key: one that reached
+ * user-service can never be registered there again.
  */
 export const verifyPhoneNumberToAddActionAtom = atom(
   null,
@@ -202,7 +202,7 @@ export const addVerifiedPhoneNumberActionAtom = atom(
               'sessionCredentials',
               'privateKey',
               'keyPairV2',
-              'keyDerivationIndex'
+              'keyDerivationId'
             )
           )
         )

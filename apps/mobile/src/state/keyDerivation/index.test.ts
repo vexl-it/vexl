@@ -10,7 +10,7 @@ import {
   derivePhoneNumberKeys,
 } from '@vexl-next/resources-utils/src/keyDerivation/keyFactory'
 import {Array, Effect, Exit, Schema} from 'effect'
-import {getDefaultStore} from 'jotai'
+import {createStore, getDefaultStore} from 'jotai'
 import {
   createClubKeysActionAtom,
   createInboxPrivateKeyActionAtom,
@@ -163,49 +163,29 @@ describe('key derivation counters', () => {
     expect(storedCounters()).toEqual({nextInboxIndex: 106, nextClubIndex: 40})
   })
 
-  it('never reuses a phone number key index', async () => {
+  it('derives every phone number key from a new random id, whatever the counters say', async () => {
     const first = await Effect.runPromise(
       store.set(createPhoneNumberKeysActionAtom)
     )
-    const second = await Effect.runPromise(
-      store.set(createPhoneNumberKeysActionAtom)
-    )
-
-    expect(first.keyDerivationIndex).toBe(0)
-    expect(second.keyDerivationIndex).toBe(1)
-    expect(first.privateKey).toEqual(
-      (await Effect.runPromise(derivePhoneNumberKeys(masterSeed, index(0))))
-        .privateKey
-    )
-    expect(storedCounters()).toMatchObject({nextPhoneNumberIndex: 2})
-  })
-
-  it('skips phone number indexes still used in the session when the counter was lost', async () => {
+    // A fresh device restoring a backup made before `first` existed
     storage._storage.remove(KEY_DERIVATION_COUNTERS_MMKV_KEY)
-    const extra = await Effect.runPromise(
-      derivePhoneNumberKeys(masterSeed, index(7))
-    )
-    store.set(sessionHolderAtom, {
+    const freshDevice = createStore()
+    freshDevice.set(sessionHolderAtom, {
       state: 'loggedIn',
-      session: {
-        ...dummySession,
-        masterSeed,
-        extraPhoneNumbers: [
-          {
-            ...extra,
-            phoneNumber: dummySession.phoneNumber,
-            sessionCredentials: dummySession.sessionCredentials,
-            keyDerivationIndex: index(7),
-          },
-        ],
-      },
+      session: {...dummySession, masterSeed},
     })
-
-    const allocated = await Effect.runPromise(
-      store.set(createPhoneNumberKeysActionAtom)
+    freshDevice.set(initializeKeyDerivationCountersActionAtom)
+    const second = await Effect.runPromise(
+      freshDevice.set(createPhoneNumberKeysActionAtom)
     )
 
-    expect(allocated.keyDerivationIndex).toBe(8)
-    expect(store.get(keyDerivationCountersAtom).nextPhoneNumberIndex).toBe(9)
+    expect(second.privateKey).not.toEqual(first.privateKey)
+    expect(second.keyDerivationId).not.toBe(first.keyDerivationId)
+    expect(first).toEqual({
+      keyDerivationId: first.keyDerivationId,
+      ...(await Effect.runPromise(
+        derivePhoneNumberKeys(masterSeed, first.keyDerivationId)
+      )),
+    })
   })
 })

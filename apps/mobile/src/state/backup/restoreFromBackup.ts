@@ -2,7 +2,6 @@ import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
 import {type ClubKeys, type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {generateLoginSessionId} from '@vexl-next/domain/src/general/LoginSessionId.brand'
-import {KeyDerivationIndex} from '@vexl-next/domain/src/general/MasterSeed.brand'
 import {
   type VexlNotificationToken,
   type VexlNotificationTokenSecret,
@@ -141,25 +140,6 @@ export const withRestoredInboxes = (
   return [...messagingState, ...restoredInboxes]
 }
 
-// Past every index the backup knows, also of numbers that won't be restored:
-// user-service may still hold their keys, and a key registers there only once.
-export const nextPhoneNumberIndexAfter = (
-  backup: BackupFile
-): KeyDerivationIndex | undefined =>
-  pipe(
-    backup.session.extraPhoneNumbers ?? [],
-    Array.map((one) => one.keyDerivationIndex + 1),
-    Array.appendAll(
-      Option.toArray(
-        Option.fromNullable(backup.derivationCounters?.nextPhoneNumberIndex)
-      )
-    ),
-    Array.match({
-      onEmpty: () => undefined,
-      onNonEmpty: (indexes) => KeyDerivationIndex.make(Math.max(...indexes)),
-    })
-  )
-
 // Read-only on the server, so a failure here leaves the account untouched.
 const scanRestorableKeysActionAtom = atom(
   null,
@@ -193,7 +173,6 @@ const scanRestorableKeysActionAtom = atom(
         counters: {
           nextInboxIndex: inboxes.nextIndex,
           nextClubIndex: clubs.nextIndex,
-          nextPhoneNumberIndex: nextPhoneNumberIndexAfter(backup),
         },
       } satisfies RestoredAccount
     })

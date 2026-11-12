@@ -100,7 +100,7 @@ describe('createBackupFile', () => {
     expect(json).not.toContain(dummySession.loginSessionId)
   })
 
-  it('exports every phone number with its own keys, and the counter', async () => {
+  it('exports every phone number with its own keys', async () => {
     const extraPhoneNumbers = [
       makeExtraPhoneNumber({
         phoneNumber: '+420777777777',
@@ -116,7 +116,6 @@ describe('createBackupFile', () => {
     const counters = {
       nextInboxIndex: index(0),
       nextClubIndex: index(0),
-      nextPhoneNumberIndex: index(3),
     }
 
     const backupFile = await Effect.runPromise(

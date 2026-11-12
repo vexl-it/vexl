@@ -2,7 +2,7 @@ import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumbe
 import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {type ServerToClientHashedNumber} from '@vexl-next/domain/src/general/ServerToClientHashedNumber'
 import {IsoDatetimeString} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
-import {Array, Effect, HashMap, HashSet, Ref, Schema, pipe} from 'effect'
+import {Array, Effect, Exit, HashMap, HashSet, Ref, Schema, pipe} from 'effect'
 import {atom} from 'jotai'
 import {Alert} from 'react-native'
 import {loadingOverlayDisplayedAtom} from '../../../components/LoadingOverlayProvider'
@@ -522,7 +522,7 @@ const importContactsAndUpdateStoredContactsActionAtom = atom(
             },
             {discard: true}
           ),
-          Effect.ensuring(
+          Effect.onExit((exit) =>
             Effect.all({
               importedNumbers: Ref.get(importedNumbersSoFarRef),
               hashedNumbersToServerClientHash: Ref.get(
@@ -532,7 +532,12 @@ const importContactsAndUpdateStoredContactsActionAtom = atom(
               Effect.flatMap((importedContactsData) =>
                 set(updateStoredContactsAfterImportActionAtom, {
                   ...importedContactsData,
-                  doIncrementalUpdate,
+                  // A failed import with a full replace still pending keeps
+                  // the selection, the next import sends all of it again
+                  doIncrementalUpdate:
+                    doIncrementalUpdate ||
+                    (Exit.isFailure(exit) &&
+                      get(needsFullContactsReplaceAfterContactEditAtom)),
                   showContactImportProgressDialog,
                 })
               )

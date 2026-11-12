@@ -346,6 +346,21 @@ describe('phone number of a multi-number account', () => {
     ).toBe(extra)
   })
 
+  it('prefers the full number over a nickname mask shared by two numbers', () => {
+    const lookalike = Schema.decodeUnknownSync(E164PhoneNumber)('+420777222733')
+
+    expect(
+      defaultPhoneNumberToReveal({
+        accountPhoneNumbers: Array.make(main, lookalike),
+        chat: chatWith([]),
+        draft: {
+          identity: identityWith(lookalike, 1),
+          contact: contactWith(lookalike, 1),
+        },
+      })
+    ).toBe(lookalike)
+  })
+
   it('defaults to the main number when the sent one left the account', () => {
     const chat = chatWith([
       message('sent', {contact: contactWith(removed, 1)}, 1),

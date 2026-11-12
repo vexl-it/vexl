@@ -45,16 +45,23 @@ export const BackupNotificationSecret = Schema.Struct({
 })
 export type BackupNotificationSecret = typeof BackupNotificationSecret.Type
 
-const BackupPhoneNumber = Schema.Struct({
+// An extra number is its own identity, with keys derived from the master
+// seed at `keyDerivationIndex`.
+const BackupExtraPhoneNumber = Schema.Struct({
   phoneNumber: E164PhoneNumber,
   sessionCredentials: UserSessionCredentialsV2,
+  privateKey: PrivateKeyHolder,
+  keyPairV2: KeyPairV2,
+  keyDerivationIndex: KeyDerivationIndex,
 })
 
-// `phoneNumber` + `sessionCredentials` are the main number. Older app versions
-// ignore `extraPhoneNumbers` and restore only the main number.
+// `phoneNumber`, `sessionCredentials` and the keys are the main number, which
+// carries the account. Older app versions ignore `extraPhoneNumbers` and
+// restore only the main number.
 export const BackupSession = Schema.Struct({
-  ...BackupPhoneNumber.fields,
-  extraPhoneNumbers: Schema.optional(Schema.Array(BackupPhoneNumber)),
+  phoneNumber: E164PhoneNumber,
+  sessionCredentials: UserSessionCredentialsV2,
+  extraPhoneNumbers: Schema.optional(Schema.Array(BackupExtraPhoneNumber)),
   privateKey: PrivateKeyHolder,
   keyPairV2: KeyPairV2,
   isLiquidityProvider: Schema.Boolean,
@@ -76,6 +83,8 @@ export const BackupFile = Schema.Struct({
     Schema.Struct({
       nextInboxIndex: KeyDerivationIndex,
       nextClubIndex: KeyDerivationIndex,
+      // Missing when no extra phone number was ever added.
+      nextPhoneNumberIndex: Schema.optional(KeyDerivationIndex),
     })
   ),
 })

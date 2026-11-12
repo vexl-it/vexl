@@ -1,5 +1,6 @@
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {generateKeyPair} from '@vexl-next/cryptography/src/operations/cryptobox'
+import {ecdsaVerify} from '@vexl-next/cryptography/src/operations/ecdsa'
 import {
   generateClubUuid,
   type ClubKeys,
@@ -9,8 +10,7 @@ import {
   NotFoundError,
   UnexpectedServerError,
 } from '@vexl-next/domain/src/general/commonErrors'
-import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
-import {HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
+import {LoginSessionId} from '@vexl-next/domain/src/general/LoginSessionId.brand'
 import {
   KeyDerivationIndex,
   MasterSeed,
@@ -25,7 +25,11 @@ import {
   deriveClubKeys,
   deriveInboxPrivateKey,
 } from '@vexl-next/resources-utils/src/keyDerivation/keyFactory'
-import {UserNotFoundError} from '@vexl-next/rest-api/src/services/contact/contracts'
+import {
+  LoginSessionProof,
+  loginSessionProofMessage,
+  UserNotFoundError,
+} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {Array, Effect, Option, Schema} from 'effect'
 import {getDefaultStore} from 'jotai'
 import {
@@ -41,6 +45,7 @@ import {vexlTokenToKeyHolderAtom} from '../notifications/vexlTokenToKeyHolderAto
 import {postLoginFlowCompletedScreensAtom} from '../postLoginOnboarding'
 import {sessionHolderAtom} from '../session'
 import {dummySession} from '../session/dummySesssion'
+import {makeExtraPhoneNumber} from '../session/extraPhoneNumber.testUtils'
 import {backupFileToRestoreAtom, backupKeyPairAtom} from './backupToRestore'
 import {
   restoredAccountInfoAtom,
@@ -103,6 +108,7 @@ jest.mock('../notifications/actions/invalidateVexlSecretActionAtom', () => ({
 
 const mockRestoreUser = jest.fn()
 const mockCreateUser = jest.fn()
+const mockDeleteUserOnUserService = jest.fn()
 jest.mock('../../api/contactApiForSession', () => ({
   contactApiForPhoneNumber: (
     _: unknown,
@@ -110,6 +116,15 @@ jest.mock('../../api/contactApiForSession', () => ({
   ) => ({
     restoreUser: (request: unknown) => mockRestoreUser(request, phoneNumber),
     createUser: mockCreateUser,
+  }),
+  userApiForPhoneNumber: (
+    _: unknown,
+    {phoneNumber}: {phoneNumber: string}
+  ) => ({
+    deleteUser: () =>
+      jest
+        .requireActual('effect')
+        .Effect.sync(() => mockDeleteUserOnUserService(phoneNumber)),
   }),
 }))
 
@@ -580,32 +595,27 @@ describe('restore from backup', () => {
   })
 
   describe('with several phone numbers', () => {
-    const extraPhoneNumber = (
-      phoneNumber: string,
-      hash: string
-    ): SessionPhoneNumber => {
-      const credentials = dummySession.sessionCredentials
-      const hashedPhoneNumber = Schema.decodeSync(HashedPhoneNumber)(hash)
-      return {
-        phoneNumber: Schema.decodeSync(E164PhoneNumber)(phoneNumber),
-        sessionCredentials: {
-          ...credentials,
-          hash: hashedPhoneNumber,
-          vexlAuthHeader: {
-            ...credentials.vexlAuthHeader,
-            data: {...credentials.vexlAuthHeader.data, hash: hashedPhoneNumber},
-          },
-        },
-      }
-    }
-    const second = extraPhoneNumber('+420777777777', 'second')
-    const third = extraPhoneNumber('+421905123456', 'third')
+    const second = makeExtraPhoneNumber({
+      phoneNumber: '+420777777777',
+      hash: 'second',
+      index: 0,
+    })
+    const third = makeExtraPhoneNumber({
+      phoneNumber: '+421905123456',
+      hash: 'third',
+      index: 4,
+    })
 
     const withExtraNumbers = async (): Promise<BackupFile> => {
       const {backup} = await setUp()
       return {
         ...backup,
         session: {...backup.session, extraPhoneNumbers: [second, third]},
+        derivationCounters: {
+          nextInboxIndex: index(0),
+          nextClubIndex: index(0),
+          nextPhoneNumberIndex: index(2),
+        },
       }
     }
 
@@ -639,7 +649,27 @@ describe('restore from backup', () => {
         })
       )
 
-    it('restores every number one after another, the notification token only on the main one', async () => {
+    const isSignedBy = (
+      request: unknown,
+      key: SessionPhoneNumber['privateKey']
+    ): boolean => {
+      const {loginSessionId, loginSessionProof} = Schema.decodeUnknownSync(
+        Schema.Struct({
+          loginSessionId: LoginSessionId,
+          loginSessionProof: LoginSessionProof,
+        })
+      )(request)
+      return ecdsaVerify({
+        challenge: loginSessionProofMessage({
+          loginSessionId,
+          signedAt: loginSessionProof.signedAt,
+        }),
+        signature: loginSessionProof.signature,
+        pubKey: key.publicKeyPemBase64,
+      })
+    }
+
+    it("restores every number with a proof signed by that number's own key, the notification token only on the main one", async () => {
       const backup = await withExtraNumbers()
       restoreUserAnswers({})
 
@@ -655,13 +685,23 @@ describe('restore from backup', () => {
         {phoneNumber: second.phoneNumber, vexlNotificationToken: Option.none()},
         {phoneNumber: third.phoneNumber, vexlNotificationToken: Option.none()},
       ])
+      const [[mainRequest], [secondRequest], [thirdRequest]] =
+        mockRestoreUser.mock.calls
+      expect(isSignedBy(mainRequest, backup.session.privateKey)).toBe(true)
+      expect(isSignedBy(secondRequest, second.privateKey)).toBe(true)
+      expect(isSignedBy(thirdRequest, third.privateKey)).toBe(true)
+      expect(isSignedBy(secondRequest, backup.session.privateKey)).toBe(false)
+
       expect(restoredSession().extraPhoneNumbers).toEqual([second, third])
       expect(store.get(restoredAccountInfoAtom)).toEqual(
         Option.some({notRestoredPhoneNumbers: []})
       )
+      // Past the highest index in the backup, not just its counter.
+      expect(store.get(keyDerivationCountersAtom).nextPhoneNumberIndex).toBe(5)
+      expect(mockDeleteUserOnUserService).not.toHaveBeenCalled()
     })
 
-    it('drops an extra number contact-service no longer knows', async () => {
+    it('drops an extra number contact-service no longer knows and deletes its user-service row', async () => {
       const backup = await withExtraNumbers()
       restoreUserAnswers({
         [second.phoneNumber]: Effect.fail(new UserNotFoundError()),
@@ -677,9 +717,15 @@ describe('restore from backup', () => {
       expect(store.get(restoredAccountInfoAtom)).toEqual(
         Option.some({notRestoredPhoneNumbers: [second.phoneNumber]})
       )
+      expect(mockDeleteUserOnUserService).toHaveBeenCalledWith(
+        second.phoneNumber
+      )
+      expect(mockDeleteUserOnUserService).toHaveBeenCalledTimes(1)
+      // The dropped number's key may still be registered on user-service.
+      expect(store.get(keyDerivationCountersAtom).nextPhoneNumberIndex).toBe(5)
     })
 
-    it('promotes the next number and gives it the notification token when the main one is gone', async () => {
+    it('reports a backup the server no longer knows when the main number is gone, even with extra numbers left', async () => {
       const backup = await withExtraNumbers()
       restoreUserAnswers({
         [backup.session.phoneNumber]: Effect.fail(new UserNotFoundError()),
@@ -694,37 +740,16 @@ describe('restore from backup', () => {
           phoneNumber: backup.session.phoneNumber,
           vexlNotificationToken: Option.some(sessionNotificationToken),
         },
-        {
-          phoneNumber: second.phoneNumber,
-          vexlNotificationToken: Option.some(sessionNotificationToken),
-        },
-        {phoneNumber: third.phoneNumber, vexlNotificationToken: Option.none()},
       ])
-      const session = restoredSession()
-      expect(session.phoneNumber).toBe(second.phoneNumber)
-      expect(session.sessionCredentials).toEqual(second.sessionCredentials)
-      expect(session.extraPhoneNumbers).toEqual([third])
-      expect(store.get(restoredAccountInfoAtom)).toEqual(
-        Option.some({notRestoredPhoneNumbers: [backup.session.phoneNumber]})
-      )
-    })
-
-    it('reports a backup the server no longer knows when no number is left', async () => {
-      const backup = await withExtraNumbers()
-      mockRestoreUser.mockReturnValue(Effect.fail(new UserNotFoundError()))
-
-      await Effect.runPromise(
-        store.set(startRestoreFromBackupActionAtom, backup)
-      )
-
-      expect(mockRestoreUser).toHaveBeenCalledTimes(3)
       expect(store.get(restoreFromBackupStateAtom)).toEqual({
         state: 'failed',
         failure: 'backupNoLongerValid',
       })
       expect(mockDiscardSecret).toHaveBeenCalledTimes(1)
       expect(store.get(sessionHolderAtom).state).toBe('loggedOut')
+      expect(store.get(messagingStateAtom)).toEqual([])
       expect(store.get(restoredAccountInfoAtom)).toEqual(Option.none())
+      expect(mockDeleteUserOnUserService).not.toHaveBeenCalled()
     })
 
     it('keeps nothing when a number fails and restores all of them when tried again', async () => {
@@ -747,6 +772,7 @@ describe('restore from backup', () => {
       expect(store.get(messagingStateAtom)).toEqual([])
       expect(store.get(restoredAccountInfoAtom)).toEqual(Option.none())
       expect(mockDiscardSecret).toHaveBeenCalledTimes(1)
+      expect(mockRefreshOffers).not.toHaveBeenCalled()
       const [[firstAttempt]] = mockRestoreUser.mock.calls
 
       mockRestoreUser.mockClear()

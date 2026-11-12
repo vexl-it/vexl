@@ -4,8 +4,6 @@ import {
   type ClubKeys,
   generateClubUuid,
 } from '@vexl-next/domain/src/general/clubs'
-import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
-import {HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {
   KeyDerivationIndex,
   MasterSeed,
@@ -18,6 +16,7 @@ import {
 import {Effect, Schema, Struct} from 'effect'
 import {type SessionV2} from '../../brands/Session.brand'
 import {dummySession} from '../session/dummySesssion'
+import {makeExtraPhoneNumber} from '../session/extraPhoneNumber.testUtils'
 import {createBackupFile} from './createBackupFile'
 
 jest.mock('react-native-mmkv')
@@ -101,21 +100,29 @@ describe('createBackupFile', () => {
     expect(json).not.toContain(dummySession.loginSessionId)
   })
 
-  it('exports every phone number of the account', async () => {
+  it('exports every phone number with its own keys, and the counter', async () => {
     const extraPhoneNumbers = [
-      {
-        phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420777777777'),
-        sessionCredentials: {
-          ...session.sessionCredentials,
-          hash: Schema.decodeSync(HashedPhoneNumber)('second'),
-        },
-      },
+      makeExtraPhoneNumber({
+        phoneNumber: '+420777777777',
+        hash: 'second',
+        index: 0,
+      }),
+      makeExtraPhoneNumber({
+        phoneNumber: '+421905123456',
+        hash: 'third',
+        index: 2,
+      }),
     ]
+    const counters = {
+      nextInboxIndex: index(0),
+      nextClubIndex: index(0),
+      nextPhoneNumberIndex: index(3),
+    }
 
     const backupFile = await Effect.runPromise(
       createBackupFile({
         session: {...session, extraPhoneNumbers},
-        counters: {nextInboxIndex: index(0), nextClubIndex: index(0)},
+        counters,
         inboxKeys: [],
         clubs: {},
         clubKeysWaitingForAdmission: [],
@@ -124,5 +131,11 @@ describe('createBackupFile', () => {
 
     expect(backupFile.session.phoneNumber).toBe(session.phoneNumber)
     expect(backupFile.session.extraPhoneNumbers).toEqual(extraPhoneNumbers)
+    expect(backupFile.derivationCounters).toEqual(counters)
+    expect(
+      Schema.decodeSync(BackupFileFromJson)(
+        Schema.encodeSync(BackupFileFromJson)(backupFile)
+      )
+    ).toEqual(backupFile)
   })
 })

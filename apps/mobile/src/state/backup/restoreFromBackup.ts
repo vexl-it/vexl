@@ -2,6 +2,7 @@ import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
 import {type ClubKeys, type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {generateLoginSessionId} from '@vexl-next/domain/src/general/LoginSessionId.brand'
+import {KeyDerivationIndex} from '@vexl-next/domain/src/general/MasterSeed.brand'
 import {
   type VexlNotificationToken,
   type VexlNotificationTokenSecret,
@@ -9,14 +10,17 @@ import {
 import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {type BackupFile} from '@vexl-next/resources-utils/src/backup/BackupFile'
-import {UserNotFoundError} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {GenerateNotificationTokenRequest} from '@vexl-next/rest-api/src/services/notification/contract'
-import {Array, Effect, Option, pipe, Record, Schema} from 'effect'
+import {Array, Effect, Either, Option, pipe, Record, Schema} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../api'
-import {contactApiForPhoneNumber} from '../../api/contactApiForSession'
+import {
+  contactApiForPhoneNumber,
+  userApiForPhoneNumber,
+} from '../../api/contactApiForSession'
 import {
   sanityCheckSessionV2,
+  type ExtraSessionPhoneNumber,
   type SessionPhoneNumber,
   type SessionV2,
 } from '../../brands/Session.brand'
@@ -55,10 +59,7 @@ import {vexlNotificationTokenAtom} from '../notifications/vexlNotificationTokenA
 import {postLoginFlowCompletedScreensAtom} from '../postLoginOnboarding'
 import {sessionHolderAtom} from '../session'
 import {loginSessionWithProof} from '../session/loginSession'
-import {
-  phoneNumbersOfSession,
-  removePhoneNumbersFromSession,
-} from '../session/sessionPhoneNumbers'
+import {mainPhoneNumberOfSession} from '../session/sessionPhoneNumbers'
 import writeSessionToStorage, {
   type SessionWriteError,
 } from '../session/utils/writeSessionToStorage'
@@ -140,6 +141,25 @@ export const withRestoredInboxes = (
   return [...messagingState, ...restoredInboxes]
 }
 
+// Past every index the backup knows, also of numbers that won't be restored:
+// user-service may still hold their keys, and a key registers there only once.
+export const nextPhoneNumberIndexAfter = (
+  backup: BackupFile
+): KeyDerivationIndex | undefined =>
+  pipe(
+    backup.session.extraPhoneNumbers ?? [],
+    Array.map((one) => one.keyDerivationIndex + 1),
+    Array.appendAll(
+      Option.toArray(
+        Option.fromNullable(backup.derivationCounters?.nextPhoneNumberIndex)
+      )
+    ),
+    Array.match({
+      onEmpty: () => undefined,
+      onNonEmpty: (indexes) => KeyDerivationIndex.make(Math.max(...indexes)),
+    })
+  )
+
 // Read-only on the server, so a failure here leaves the account untouched.
 const scanRestorableKeysActionAtom = atom(
   null,
@@ -173,6 +193,7 @@ const scanRestorableKeysActionAtom = atom(
         counters: {
           nextInboxIndex: inboxes.nextIndex,
           nextClubIndex: clubs.nextIndex,
+          nextPhoneNumberIndex: nextPhoneNumberIndexAfter(backup),
         },
       } satisfies RestoredAccount
     })
@@ -218,7 +239,7 @@ const commitRestoredAccountActionAtom = atom(
       account: RestoredAccount
       // None when a new secret was minted instead.
       takenOverSecret: Option.Option<VexlNotificationTokenSecret>
-      notRestoredPhoneNumbers: readonly E164PhoneNumber[]
+      notRestoredPhoneNumbers: readonly ExtraSessionPhoneNumber[]
     }
   ): Effect.Effect<void, SessionWriteError> =>
     Effect.gen(function* () {
@@ -248,14 +269,33 @@ const commitRestoredAccountActionAtom = atom(
       set(showCheckUpdatedPrivacyPolicySuggestionAtom, false)
       // A returning user knows the marketplace.
       set(showMarketplaceIntroDialogAtom, false)
-      set(restoredAccountInfoAtom, Option.some({notRestoredPhoneNumbers}))
+      set(
+        restoredAccountInfoAtom,
+        Option.some({
+          notRestoredPhoneNumbers: Array.map(
+            notRestoredPhoneNumbers,
+            (one) => one.phoneNumber
+          ),
+        })
+      )
 
       // Already stored above, so not through sessionAtom, which stores it again.
       set(sessionHolderAtom, {state: 'loggedIn', session})
       set(defaultCurrencyBaseOnCountryCodeActionAtom)
 
+      // Someone else may have verified these numbers since, leaving their
+      // user-service rows under this account's keys behind.
+      Effect.runFork(
+        Effect.forEach(
+          notRestoredPhoneNumbers,
+          (one) => Effect.ignore(userApiForPhoneNumber(get, one).deleteUser()),
+          {discard: true}
+        )
+      )
+
       // Own offers and notes come back with ownership, which links them to
-      // their restored inboxes. Don't wait for the marketplace screen.
+      // their restored inboxes, for every restored number. Don't wait for the
+      // marketplace screen.
       // Without the old secret, own offers still point to the old device.
       Effect.runFork(
         Effect.all(
@@ -278,59 +318,73 @@ const commitRestoredAccountActionAtom = atom(
 )
 
 interface RestoredUser {
-  // Without the numbers contact-service no longer knows.
+  // Without the extra numbers contact-service no longer knows.
   readonly session: SessionV2
-  readonly notRestoredPhoneNumbers: readonly E164PhoneNumber[]
+  readonly notRestoredPhoneNumbers: readonly ExtraSessionPhoneNumber[]
 }
 
-// One number after another, so each proof gets its own signing time: a proof
-// is accepted once per public key, and all numbers share the key.
-// A failure leaves the numbers restored so far pointing to a login session
-// nobody holds. Trying again restores all of them under a new one.
-const restoreUserActionAtom = atom(null, (get, _, session: SessionV2) =>
+const restorePhoneNumberActionAtom = atom(
+  null,
+  (
+    get,
+    _,
+    {
+      session,
+      phoneNumber,
+      vexlNotificationToken,
+    }: {
+      session: SessionV2
+      phoneNumber: SessionPhoneNumber
+      vexlNotificationToken: Option.Option<VexlNotificationToken>
+    }
+  ) =>
+    loginSessionWithProof({
+      loginSessionId: session.loginSessionId,
+      privateKey: phoneNumber.privateKey,
+    }).pipe(
+      Effect.flatMap((loginSession) =>
+        // Never createUser here - it would wipe the user's contacts on the server.
+        contactApiForPhoneNumber(get, phoneNumber).restoreUser({
+          ...loginSession,
+          vexlNotificationToken,
+        })
+      )
+    )
+)
+
+// The main number goes first and carries the account: when contact-service no
+// longer knows it, the backup is no longer valid. Extra numbers it no longer
+// knows are left out. A failure leaves the numbers restored so far pointing to
+// a login session nobody holds. Trying again restores all of them under a new one.
+const restoreUserActionAtom = atom(null, (_, set, session: SessionV2) =>
   Effect.gen(function* () {
-    const {restored, notRestored} = yield* Effect.reduce(
-      phoneNumbersOfSession(session),
-      {
-        restored: Array.empty<SessionPhoneNumber>(),
-        notRestored: Array.empty<E164PhoneNumber>(),
-      },
-      (result, phoneNumber) =>
-        loginSessionWithProof(session).pipe(
-          Effect.flatMap((loginSession) =>
-            // Never createUser here - it would wipe the user's contacts on the server.
-            contactApiForPhoneNumber(get, phoneNumber).restoreUser({
-              ...loginSession,
-              // Only the main number, which is the first one restored, gets pushes.
-              vexlNotificationToken: Array.isNonEmptyReadonlyArray(
-                result.restored
-              )
-                ? Option.none()
-                : Option.fromNullable(session.sessionNotificationToken),
-            })
-          ),
-          Effect.as({
-            ...result,
-            restored: Array.append(result.restored, phoneNumber),
-          }),
+    yield* set(restorePhoneNumberActionAtom, {
+      session,
+      phoneNumber: mainPhoneNumberOfSession(session),
+      // Only the main number gets pushes.
+      vexlNotificationToken: Option.fromNullable(
+        session.sessionNotificationToken
+      ),
+    })
+
+    const [notRestored, restored] = Array.separate(
+      yield* Effect.forEach(session.extraPhoneNumbers ?? [], (phoneNumber) =>
+        set(restorePhoneNumberActionAtom, {
+          session,
+          phoneNumber,
+          vexlNotificationToken: Option.none(),
+        }).pipe(
+          Effect.as(Either.right(phoneNumber)),
           Effect.catchTag('UserNotFoundError', () =>
-            Effect.succeed({
-              ...result,
-              notRestored: Array.append(
-                result.notRestored,
-                phoneNumber.phoneNumber
-              ),
-            })
+            Effect.succeed(Either.left(phoneNumber))
           )
         )
+      )
     )
-
-    if (!Array.isNonEmptyReadonlyArray(restored))
-      return yield* new UserNotFoundError()
 
     return {
       session: Array.isNonEmptyReadonlyArray(notRestored)
-        ? yield* removePhoneNumbersFromSession(session, notRestored)
+        ? {...session, extraPhoneNumbers: restored}
         : session,
       notRestoredPhoneNumbers: notRestored,
     } satisfies RestoredUser

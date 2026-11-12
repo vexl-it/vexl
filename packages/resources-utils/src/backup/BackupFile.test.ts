@@ -65,30 +65,44 @@ describe('backup file encryption', () => {
     expect(decrypted).toEqual(backup)
   })
 
-  it('round-trips the extra phone numbers', async () => {
+  it('round-trips the extra phone numbers with their own keys and the counter', async () => {
     const backup = await makeBackup()
-    const extraPhoneNumber = (phoneNumber: string, hash: string): unknown => ({
-      phoneNumber,
-      sessionCredentials: {
-        ...backup.session.sessionCredentials,
-        hash,
-        vexlAuthHeader: {
-          ...backup.session.sessionCredentials.vexlAuthHeader,
-          data: {
-            ...backup.session.sessionCredentials.vexlAuthHeader.data,
-            hash,
+    const extraPhoneNumber = async (
+      phoneNumber: string,
+      hash: string,
+      keyDerivationIndex: number
+    ): Promise<unknown> => {
+      const privateKey = generatePrivateKey()
+      const keyPairV2 = await generateKeyPair()
+      return {
+        phoneNumber,
+        privateKey,
+        keyPairV2,
+        keyDerivationIndex,
+        sessionCredentials: {
+          publicKey: privateKey.publicKeyPemBase64,
+          hash,
+          signature: 'signature',
+          vexlAuthHeader: {
+            data: {hash, pk: keyPairV2.publicKey},
+            signature: 'CBSig-signature',
           },
         },
-      },
-    })
+      }
+    }
     const withExtraNumbers = Schema.validateSync(BackupFile)({
       ...backup,
       session: {
         ...backup.session,
         extraPhoneNumbers: [
-          extraPhoneNumber('+420777777777', 'second'),
-          extraPhoneNumber('+421905123456', 'third'),
+          await extraPhoneNumber('+420777777777', 'second', 0),
+          await extraPhoneNumber('+421905123456', 'third', 2),
         ],
+      },
+      derivationCounters: {
+        nextInboxIndex: 0,
+        nextClubIndex: 0,
+        nextPhoneNumberIndex: 3,
       },
     })
     const keyPair = await generateKeyPair()
@@ -103,6 +117,7 @@ describe('backup file encryption', () => {
 
     expect(decrypted).toEqual(withExtraNumbers)
     expect(decrypted.session.extraPhoneNumbers).toHaveLength(2)
+    expect(decrypted.derivationCounters?.nextPhoneNumberIndex).toBe(3)
   })
 
   it('decodes a backup made before accounts had several numbers', async () => {
@@ -113,6 +128,21 @@ describe('backup file encryption', () => {
     const decoded = Schema.decodeSync(BackupFileFromJson)(json)
     expect(decoded).toEqual(backup)
     expect(decoded.session.extraPhoneNumbers).toBeUndefined()
+  })
+
+  it('decodes counters made before extra phone numbers existed', async () => {
+    const backup = Schema.validateSync(BackupFile)({
+      ...(await makeBackup()),
+      derivationCounters: {nextInboxIndex: 3, nextClubIndex: 1},
+    })
+
+    const decoded = Schema.decodeSync(BackupFileFromJson)(
+      Schema.encodeSync(BackupFileFromJson)(backup)
+    )
+    expect(decoded.derivationCounters).toEqual({
+      nextInboxIndex: 3,
+      nextClubIndex: 1,
+    })
   })
 
   it('fails with BackupFileWrongPinError for a wrong PIN', async () => {

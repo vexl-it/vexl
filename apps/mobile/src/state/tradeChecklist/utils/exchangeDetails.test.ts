@@ -346,6 +346,18 @@ describe('phone number of a multi-number account', () => {
     ).toBe(extra)
   })
 
+  it('prefers the nickname number of the draft over an earlier full number', () => {
+    const chat = chatWith([message('sent', {contact: contactWith(main, 1)}, 1)])
+
+    expect(
+      defaultPhoneNumberToReveal({
+        accountPhoneNumbers,
+        chat,
+        draft: {identity: identityWith(extra, 2)},
+      })
+    ).toBe(extra)
+  })
+
   it('prefers the full number over a nickname mask shared by two numbers', () => {
     const lookalike = Schema.decodeUnknownSync(E164PhoneNumber)('+420777222733')
 

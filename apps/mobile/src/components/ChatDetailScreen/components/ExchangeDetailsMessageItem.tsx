@@ -16,6 +16,7 @@ import {
   exchangedDetailsForEvent,
   isAnyDetailSelected,
   isResponse,
+  myRevealedPhoneNumberForEvent,
   revealEventForMessage,
   selectionsEqual,
   stillPendingDetails,
@@ -132,9 +133,11 @@ function OutcomeCard({event}: {event: RevealEvent}): React.ReactElement {
   const otherSideImage = otherSideData.image
   const myRealLifeInfo = useAtomValue(userDataRealOrAnonymizedAtom)
   const myAnonymousInfo = useAtomValue(anonymizedUserDataAtom)
-  const myPhoneNumber = useAtomValue(userPhoneNumberAtom)
+  const myMainPhoneNumber = useAtomValue(userPhoneNumberAtom)
 
   const {mine, theirs} = exchangedDetailsForEvent(chat, event)
+  // Falls back to the main number when no sent message carries one.
+  const myRevealedPhoneNumber = myRevealedPhoneNumberForEvent(chat, event)
   const theirFullPhoneNumber = theirs.phoneNumber
     ? otherSideData.fullPhoneNumber
     : undefined
@@ -168,8 +171,11 @@ function OutcomeCard({event}: {event: RevealEvent}): React.ReactElement {
           ? myRealLifeInfo.userName
           : myAnonymousInfo.userName,
         phoneNumber: mine.phoneNumber
-          ? getInternationalPhoneNumber(myPhoneNumber)
-          : anonymizePhoneNumber(myPhoneNumber),
+          ? getInternationalPhoneNumber(
+              myRevealedPhoneNumber.full ?? myMainPhoneNumber
+            )
+          : (myRevealedPhoneNumber.partial ??
+            anonymizePhoneNumber(myMainPhoneNumber)),
       }}
       rightSide={{
         image: otherSideData.image,

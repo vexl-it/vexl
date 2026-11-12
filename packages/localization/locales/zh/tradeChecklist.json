@@ -31,6 +31,8 @@
   "tradeChecklist.exchangeDetails.nickname": "昵称",
   "tradeChecklist.exchangeDetails.nicknameNotSet": "开启以设置",
   "tradeChecklist.exchangeDetails.phoneNumber": "手机号码",
+  "tradeChecklist.exchangeDetails.phoneNumberToReveal.title": "公开哪个号码？",
+  "tradeChecklist.exchangeDetails.phoneNumberToReveal.text": "昵称会附带这个号码的部分数字。完整号码需要单独选择。",
   "tradeChecklist.exchangeDetails.photo": "头像",
   "tradeChecklist.exchangeDetails.noPhotoYet": "还没有照片",
   "tradeChecklist.exchangeDetails.choosePhoto": "选择照片",

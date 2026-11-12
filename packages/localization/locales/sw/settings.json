@@ -46,6 +46,8 @@
   "qrScanner.grantPermissions": "Toa ruhusa",
   "qrScanner.grantPermissionsInSettings": "Haiwezi kuomba ruhusa. Ili kutumia skana ya QR fungua mipangilio na ruhusu Vexl kutumia kamera.",
   "qrScanner.openSettings": "Fungua mipangilio",
+  "shareProfile.phoneNumber.title": "Ushiriki nambari ipi?",
+  "shareProfile.phoneNumber.text": "Yeyote atakayeskani msimbo wako wa QR atapata nambari hii.",
   "feedback.objection.APP": "Programu",
   "feedback.objection.PROCESS": "Mchakato",
   "feedback.objection.RESPONDING_TIME": "Wakati wa kujibu",

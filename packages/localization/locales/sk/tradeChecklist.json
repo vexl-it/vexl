@@ -31,6 +31,8 @@
   "tradeChecklist.exchangeDetails.nickname": "Prezývka",
   "tradeChecklist.exchangeDetails.nicknameNotSet": "Zapni a nastav",
   "tradeChecklist.exchangeDetails.phoneNumber": "Telefónne číslo",
+  "tradeChecklist.exchangeDetails.phoneNumberToReveal.title": "Ktoré číslo odhaliť?",
+  "tradeChecklist.exchangeDetails.phoneNumberToReveal.text": "S prezývkou sa odhalia aj číslice tohto čísla. Celé číslo je samostatná voľba.",
   "tradeChecklist.exchangeDetails.photo": "Profilová fotka",
   "tradeChecklist.exchangeDetails.noPhotoYet": "Zatiaľ bez fotky",
   "tradeChecklist.exchangeDetails.choosePhoto": "Vybrať fotku",

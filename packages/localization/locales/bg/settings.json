@@ -46,6 +46,8 @@
   "qrScanner.grantPermissions": "Даване на разрешения",
   "qrScanner.grantPermissionsInSettings": "Не мога да поискам разрешения. За да използвате QR скенер, отворете настройките и позволете на Vexl да използва камерата.",
   "qrScanner.openSettings": "Отваряне на настройки",
+  "shareProfile.phoneNumber.title": "Кой номер да споделиш?",
+  "shareProfile.phoneNumber.text": "Всеки, който сканира твоя QR код, получава този номер.",
   "feedback.objection.APP": "Приложение",
   "feedback.objection.PROCESS": "Процес",
   "feedback.objection.RESPONDING_TIME": "Време за отговор",

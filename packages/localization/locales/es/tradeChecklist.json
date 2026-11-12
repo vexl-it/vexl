@@ -31,6 +31,8 @@
   "tradeChecklist.exchangeDetails.nickname": "Apodo",
   "tradeChecklist.exchangeDetails.nicknameNotSet": "Activa para definir",
   "tradeChecklist.exchangeDetails.phoneNumber": "Número de teléfono",
+  "tradeChecklist.exchangeDetails.phoneNumberToReveal.title": "¿Qué número revelar?",
+  "tradeChecklist.exchangeDetails.phoneNumberToReveal.text": "El apodo va acompañado de dígitos de este número. El número completo es una opción aparte.",
   "tradeChecklist.exchangeDetails.photo": "Foto de perfil",
   "tradeChecklist.exchangeDetails.noPhotoYet": "Aún no hay foto",
   "tradeChecklist.exchangeDetails.choosePhoto": "Elegir una foto",

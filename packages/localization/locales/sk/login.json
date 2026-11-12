@@ -67,7 +67,7 @@
   "loginFlow.restoreFromBackup.restored.title": "Si späť!",
   "loginFlow.restoreFromBackup.restored.text": "Tvoje ponuky a Vexl Clubs už sú tu.",
   "loginFlow.restoreFromBackup.restored.chatsText": "Chaty sa vrátia, keď druhá strana otvorí Vexl.",
-  "loginFlow.restoreFromBackup.restored.dividerText": "Staré správy pochádzajú z kópie druhej strany a sú nad oddeľovačom.",
+  "loginFlow.restoreFromBackup.restored.messagesText": "Staré správy pochádzajú z kópie druhej strany.",
   "loginFlow.restoreFromBackup.restored.contactsText": "Naimportuj kontakty, nech zase vidíš mená.",
   "loginFlow.restoreFromBackup.failed.title": "Účet sa nepodarilo obnoviť",
   "loginFlow.restoreFromBackup.failed.unknown": "Niečo sa pokazilo. Skús to o chvíľu znova.",

@@ -51,7 +51,7 @@ export default function RestoredAccountInfoScreen({
             {t('loginFlow.restoreFromBackup.restored.chatsText')}
           </InfoPoint>
           <InfoPoint icon={ChatBubbles}>
-            {t('loginFlow.restoreFromBackup.restored.dividerText')}
+            {t('loginFlow.restoreFromBackup.restored.messagesText')}
           </InfoPoint>
           <InfoPoint icon={PeopleUsers}>
             {t('loginFlow.restoreFromBackup.restored.contactsText')}

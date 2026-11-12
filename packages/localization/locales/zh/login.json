@@ -67,7 +67,7 @@
   "loginFlow.restoreFromBackup.restored.title": "你回来了！",
   "loginFlow.restoreFromBackup.restored.text": "你的出价和 Vexl Clubs 都已经在这里了。",
   "loginFlow.restoreFromBackup.restored.chatsText": "对方打开 Vexl 后，聊天就会回来。",
-  "loginFlow.restoreFromBackup.restored.dividerText": "旧消息来自对方的副本，显示在分隔线上方。",
+  "loginFlow.restoreFromBackup.restored.messagesText": "旧消息来自对方的副本。",
   "loginFlow.restoreFromBackup.restored.contactsText": "导入联系人，就能再次看到名字。",
   "loginFlow.restoreFromBackup.failed.title": "无法恢复你的账户",
   "loginFlow.restoreFromBackup.failed.unknown": "出了点问题。稍后再试一次吧。",

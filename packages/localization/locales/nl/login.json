@@ -67,7 +67,7 @@
   "loginFlow.restoreFromBackup.restored.title": "Je bent terug!",
   "loginFlow.restoreFromBackup.restored.text": "Je aanbiedingen en Vexl Clubs staan er al.",
   "loginFlow.restoreFromBackup.restored.chatsText": "Chats komen terug zodra de ander Vexl opent.",
-  "loginFlow.restoreFromBackup.restored.dividerText": "Oude berichten komen uit de kopie van de ander en staan boven een scheidingslijn.",
+  "loginFlow.restoreFromBackup.restored.messagesText": "Oude berichten komen uit de kopie van de ander.",
   "loginFlow.restoreFromBackup.restored.contactsText": "Importeer je contacten om de namen weer te zien.",
   "loginFlow.restoreFromBackup.failed.title": "We konden je account niet herstellen",
   "loginFlow.restoreFromBackup.failed.unknown": "Er ging iets mis. Probeer het zo nog eens.",

@@ -67,7 +67,7 @@
   "loginFlow.restoreFromBackup.restored.title": "Отново си тук!",
   "loginFlow.restoreFromBackup.restored.text": "Офертите ти и Vexl Clubs вече са тук.",
   "loginFlow.restoreFromBackup.restored.chatsText": "Чатовете се връщат, щом събеседникът ти отвори Vexl.",
-  "loginFlow.restoreFromBackup.restored.dividerText": "Старите съобщения идват от копието на събеседника и са над разделителна линия.",
+  "loginFlow.restoreFromBackup.restored.messagesText": "Старите съобщения идват от копието на събеседника.",
   "loginFlow.restoreFromBackup.restored.contactsText": "Импортирай контактите си, за да виждаш отново имената.",
   "loginFlow.restoreFromBackup.failed.title": "Не успяхме да възстановим акаунта ти",
   "loginFlow.restoreFromBackup.failed.unknown": "Нещо се обърка. Опитай отново след малко.",

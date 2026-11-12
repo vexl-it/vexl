@@ -359,4 +359,39 @@ describe('one account with several phone numbers', () => {
       })
     )
   })
+
+  it('notifies the account once when a new user saved only its extra number', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const main = yield* _(generateKeysAndHasheForNumber('+420733500001'))
+        const extra = yield* _(generateAnotherNumber(main, '+420733500002'))
+        const newUser = yield* _(generateKeysAndHasheForNumber('+420733500003'))
+
+        yield* _(createAndImportUsersFromNetwork(main, [newUser]))
+        yield* _(createAndImportUsersFromNetwork(extra, [newUser]))
+        yield* _(createUserOnNetwork(newUser))
+
+        // Let the notifications forked by the imports above finish
+        yield* _(Effect.sleep(200))
+        yield* _(clearEnqueuedNotifications)
+        const notificationService = yield* _(UserNotificationService)
+        yield* _(
+          notificationService.notifyOthersAboutNewUser(
+            [extra.serverHashedNumber],
+            newUser.serverHashedNumber
+          )
+        )
+
+        const notifiedTokens = pipe(
+          yield* _(getEnqueuedNotifications),
+          Array.map((one) => one.task.token)
+        )
+        expect(notifiedTokens).toEqual([
+          Schema.encodeSync(VexlNotificationToken)(
+            Option.getOrThrow(main.vexlNotificationToken)
+          ),
+        ])
+      })
+    )
+  })
 })

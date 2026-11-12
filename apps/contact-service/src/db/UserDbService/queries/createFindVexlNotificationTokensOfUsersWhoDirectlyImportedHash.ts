@@ -30,12 +30,15 @@ export const createFindVexlNotificationTokensOfUsersWhoDirectlyImportedHash =
       Result: FindVexlNotificationTokensOfUsersWhoDirectlyImportedHashResult,
       execute: (params) => sql`
         SELECT DISTINCT
-          u.vexl_notification_token
+          account_token_holder.vexl_notification_token
         FROM
           users u
           JOIN user_contact uc ON u.hash = uc.hash_from
+          JOIN users account_token_holder ON account_token_holder.public_key = u.public_key
         WHERE
-          (u.vexl_notification_token IS NOT NULL)
+          (
+            account_token_holder.vexl_notification_token IS NOT NULL
+          )
           AND uc.hash_to = ${params.userHash}
           AND ${sql.in('u.hash', params.importedHashes)}
           AND ${createIsNotOwnerAccountFragment({

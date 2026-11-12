@@ -542,7 +542,8 @@ function sentRevealsLatestFirst(
 
 // The account number the draft or an earlier reveal in this chat carries, so
 // one chat keeps getting the same number. The main number otherwise. Two
-// numbers can share the nickname mask, so a full number wins over a mask.
+// numbers can share the nickname mask, so a full number wins over a mask,
+// but only within the draft or within the history: the draft always wins.
 export function defaultPhoneNumberToReveal({
   accountPhoneNumbers,
   chat,
@@ -552,30 +553,38 @@ export function defaultPhoneNumberToReveal({
   chat: ChatReveals
   draft: RevealUpdate
 }): E164PhoneNumber {
-  const reveals = [draft, ...sentRevealsLatestFirst(chat)]
-  const firstRevealedAccountNumber = (
-    revealsNumber: (
-      reveal: RevealUpdate,
-      phoneNumber: E164PhoneNumber
-    ) => boolean
-  ): Option.Option<E164PhoneNumber> =>
-    Array.findFirst(reveals, (reveal) =>
-      Array.findFirst(accountPhoneNumbers, (phoneNumber) =>
-        revealsNumber(reveal, phoneNumber)
+  const revealedAccountNumber = (
+    reveals: readonly RevealUpdate[]
+  ): Option.Option<E164PhoneNumber> => {
+    const firstRevealedAccountNumber = (
+      revealsNumber: (
+        reveal: RevealUpdate,
+        phoneNumber: E164PhoneNumber
+      ) => boolean
+    ): Option.Option<E164PhoneNumber> =>
+      Array.findFirst(reveals, (reveal) =>
+        Array.findFirst(accountPhoneNumbers, (phoneNumber) =>
+          revealsNumber(reveal, phoneNumber)
+        )
+      )
+
+    return pipe(
+      firstRevealedAccountNumber(
+        (reveal, phoneNumber) => reveal.contact?.fullPhoneNumber === phoneNumber
+      ),
+      Option.orElse(() =>
+        firstRevealedAccountNumber(
+          (reveal, phoneNumber) =>
+            partialPhoneNumberOf(reveal.identity) ===
+            anonymizePhoneNumber(phoneNumber)
+        )
       )
     )
+  }
 
   return pipe(
-    firstRevealedAccountNumber(
-      (reveal, phoneNumber) => reveal.contact?.fullPhoneNumber === phoneNumber
-    ),
-    Option.orElse(() =>
-      firstRevealedAccountNumber(
-        (reveal, phoneNumber) =>
-          partialPhoneNumberOf(reveal.identity) ===
-          anonymizePhoneNumber(phoneNumber)
-      )
-    ),
+    revealedAccountNumber([draft]),
+    Option.orElse(() => revealedAccountNumber(sentRevealsLatestFirst(chat))),
     Option.getOrElse(() => Array.headNonEmpty(accountPhoneNumbers))
   )
 }

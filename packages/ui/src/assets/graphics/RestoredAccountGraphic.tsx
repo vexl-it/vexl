@@ -2,6 +2,7 @@ import React, {useCallback, useState} from 'react'
 import Svg, {Circle, G, Path, Rect} from 'react-native-svg'
 
 import {AnimatedSvgPart} from './AnimatedSvgPart'
+import {Sunglasses} from './Sunglasses'
 
 interface Props {
   readonly width?: number
@@ -89,16 +90,7 @@ export function RestoredAccountGraphic({
         >
           <Path d="M26 76A22 22 0 0 0 26 120Z" fill="#FCCD6C" />
           <Path d="M26 76A22 22 0 0 1 26 120Z" fill="#EEB338" />
-          <Rect
-            width="52"
-            height="4.4"
-            fill="black"
-            transform="translate(2, 91.8)"
-          />
-          <Path d="M10.64 87.64A9 9 0 0 0 23.36 100.36Z" fill="black" />
-          <Path d="M10.64 87.64A9 9 0 0 1 23.36 100.36Z" fill="#333333" />
-          <Path d="M32.64 87.64A9 9 0 0 0 45.36 100.36Z" fill="black" />
-          <Path d="M32.64 87.64A9 9 0 0 1 45.36 100.36Z" fill="#333333" />
+          <Sunglasses centerX={28} centerY={94} lensRadius={10} />
         </AnimatedSvgPart>
         <AnimatedSvgPart
           animate={animate}

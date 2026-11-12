@@ -165,6 +165,8 @@
   "accountBackup.title": "Záloha účtu",
   "accountBackup.heading": "Tvoj účet v jednom súbore",
   "accountBackup.description": "Presuň sa na nový telefón alebo sa vráť späť, keď o tento prídeš.",
+  "accountBackup.phoneNumber.title": "Ktoré číslo zálohu odomkne?",
+  "accountBackup.phoneNumber.text": "Pri obnovení ti na toto číslo pošleme kód. Ostatné čísla sa vrátia spolu s účtom.",
   "accountBackup.whatYouNeed.title": "Čo budeš potrebovať",
   "accountBackup.whatYouNeed.text": "Toto telefónne číslo, súbor a tvoj PIN.",
   "accountBackup.storeSafely.title": "Nechaj si to pre seba",

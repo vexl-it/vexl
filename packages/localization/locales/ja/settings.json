@@ -163,6 +163,8 @@
   "accountBackup.title": "アカウントのバックアップ",
   "accountBackup.heading": "アカウントを1つのファイルに",
   "accountBackup.description": "新しいスマホへの移行や、このスマホをなくしたときの復帰に使えます。",
+  "accountBackup.phoneNumber.title": "バックアップを開く番号はどれ？",
+  "accountBackup.phoneNumber.text": "復元するときは、この番号にコードを送ります。ほかの番号はアカウントと一緒に戻ります。",
   "accountBackup.whatYouNeed.title": "必要なもの",
   "accountBackup.whatYouNeed.text": "この電話番号、ファイル、PIN。",
   "accountBackup.storeSafely.title": "自分だけで保管",

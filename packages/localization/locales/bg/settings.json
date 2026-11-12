@@ -163,6 +163,8 @@
   "accountBackup.title": "Резервно копие на акаунта",
   "accountBackup.heading": "Акаунтът ти в един файл",
   "accountBackup.description": "Премести се на нов телефон или влез отново, ако изгубиш този.",
+  "accountBackup.phoneNumber.title": "Кой номер отключва копието?",
+  "accountBackup.phoneNumber.text": "При възстановяване ще ти изпратим код на този номер. Другите ти номера се връщат заедно с акаунта.",
   "accountBackup.whatYouNeed.title": "Какво ти трябва",
   "accountBackup.whatYouNeed.text": "Този телефонен номер, файлът и ПИН кодът ти.",
   "accountBackup.storeSafely.title": "Пази го в тайна",

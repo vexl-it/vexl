@@ -163,6 +163,8 @@
   "accountBackup.title": "Back-up van account",
   "accountBackup.heading": "Je account in één bestand",
   "accountBackup.description": "Verhuis naar een nieuwe telefoon, of kom weer binnen als je deze kwijtraakt.",
+  "accountBackup.phoneNumber.title": "Welk nummer ontgrendelt de back-up?",
+  "accountBackup.phoneNumber.text": "Bij het herstellen sturen we een code naar dit nummer. Je andere nummers komen mee terug met je account.",
   "accountBackup.whatYouNeed.title": "Wat je nodig hebt",
   "accountBackup.whatYouNeed.text": "Dit telefoonnummer, het bestand en je pincode.",
   "accountBackup.storeSafely.title": "Houd het voor jezelf",

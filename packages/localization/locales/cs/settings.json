@@ -165,6 +165,8 @@
   "accountBackup.title": "Záloha účtu",
   "accountBackup.heading": "Tvůj účet v jednom souboru",
   "accountBackup.description": "Přesuň Vexl do nového telefonu, nebo se vrať zpátky, když o tenhle přijdeš.",
+  "accountBackup.phoneNumber.title": "Které číslo zálohu odemkne?",
+  "accountBackup.phoneNumber.text": "Při obnovení ti na tohle číslo pošleme kód. Ostatní čísla se vrátí spolu s účtem.",
   "accountBackup.whatYouNeed.title": "Co budeš potřebovat",
   "accountBackup.whatYouNeed.text": "Tohle telefonní číslo, soubor a tvůj PIN.",
   "accountBackup.storeSafely.title": "Nech si to pro sebe",

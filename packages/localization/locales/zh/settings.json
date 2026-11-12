@@ -163,6 +163,8 @@
   "accountBackup.title": "账户备份",
   "accountBackup.heading": "你的账户，就在一个文件里",
   "accountBackup.description": "用它换到新手机，或在丢了这部手机时找回账户。",
+  "accountBackup.phoneNumber.title": "用哪个号码解锁备份？",
+  "accountBackup.phoneNumber.text": "恢复时，我们会向这个号码发送验证码。你的其他号码会随账户一起恢复。",
   "accountBackup.whatYouNeed.title": "你需要准备的",
   "accountBackup.whatYouNeed.text": "这个手机号、文件和你的 PIN 码。",
   "accountBackup.storeSafely.title": "只留给自己",

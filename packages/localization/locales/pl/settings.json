@@ -165,6 +165,8 @@
   "accountBackup.title": "Kopia zapasowa konta",
   "accountBackup.heading": "Twoje konto w jednym pliku",
   "accountBackup.description": "Przenieś się na nowy telefon albo wróć do konta, jeśli zgubisz ten.",
+  "accountBackup.phoneNumber.title": "Który numer odblokuje kopię?",
+  "accountBackup.phoneNumber.text": "Przy przywracaniu wyślemy kod na ten numer. Pozostałe numery wrócą razem z kontem.",
   "accountBackup.whatYouNeed.title": "Czego potrzebujesz",
   "accountBackup.whatYouNeed.text": "Ten numer telefonu, plik i twój PIN.",
   "accountBackup.storeSafely.title": "Zachowaj to dla siebie",

@@ -164,6 +164,8 @@
   "accountBackup.title": "Sauvegarde du compte",
   "accountBackup.heading": "Ton compte dans un seul fichier",
   "accountBackup.description": "Passe sur un nouveau téléphone, ou retrouve ton compte si tu perds celui-ci.",
+  "accountBackup.phoneNumber.title": "Quel numéro déverrouille la sauvegarde ?",
+  "accountBackup.phoneNumber.text": "Lors de la restauration, on t’enverra un code sur ce numéro. Tes autres numéros reviennent avec le compte.",
   "accountBackup.whatYouNeed.title": "Ce qu'il te faut",
   "accountBackup.whatYouNeed.text": "Ce numéro de téléphone, le fichier et ton code PIN.",
   "accountBackup.storeSafely.title": "Garde-le pour toi",

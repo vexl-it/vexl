@@ -163,6 +163,8 @@
   "accountBackup.title": "Nakala rudufu ya akaunti",
   "accountBackup.heading": "Akaunti yako katika faili moja",
   "accountBackup.description": "Hamia kwenye simu mpya, au rudi ndani ukipoteza simu hii.",
+  "accountBackup.phoneNumber.title": "Nambari ipi inafungua nakala rudufu?",
+  "accountBackup.phoneNumber.text": "Ukirejesha, tutatuma msimbo kwa nambari hii. Nambari zako nyingine zinarudi pamoja na akaunti.",
   "accountBackup.whatYouNeed.title": "Utakachohitaji",
   "accountBackup.whatYouNeed.text": "Namba hii ya simu, faili, na PIN yako.",
   "accountBackup.storeSafely.title": "Iweke siri",

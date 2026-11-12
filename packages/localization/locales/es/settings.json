@@ -164,6 +164,8 @@
   "accountBackup.title": "Copia de seguridad de la cuenta",
   "accountBackup.heading": "Tu cuenta en un solo archivo",
   "accountBackup.description": "Pásate a un teléfono nuevo o vuelve a entrar si pierdes este.",
+  "accountBackup.phoneNumber.title": "¿Qué número desbloquea la copia?",
+  "accountBackup.phoneNumber.text": "Al restaurar, te enviaremos un código a este número. Tus otros números vuelven con la cuenta.",
   "accountBackup.whatYouNeed.title": "Lo que necesitarás",
   "accountBackup.whatYouNeed.text": "Este número de teléfono, el archivo y tu PIN.",
   "accountBackup.storeSafely.title": "Mantenlo en privado",

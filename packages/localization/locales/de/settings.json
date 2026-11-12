@@ -163,6 +163,8 @@
   "accountBackup.title": "Account-Backup",
   "accountBackup.heading": "Dein Account in einer Datei",
   "accountBackup.description": "Zieh auf ein neues Handy um oder komm wieder rein, falls du dieses verlierst.",
+  "accountBackup.phoneNumber.title": "Welche Nummer entsperrt das Backup?",
+  "accountBackup.phoneNumber.text": "Beim Wiederherstellen schicken wir dir einen Code an diese Nummer. Deine anderen Nummern kommen mit dem Account zurück.",
   "accountBackup.whatYouNeed.title": "Was du brauchst",
   "accountBackup.whatYouNeed.text": "Diese Telefonnummer, die Datei und deine PIN.",
   "accountBackup.storeSafely.title": "Behalt es für dich",

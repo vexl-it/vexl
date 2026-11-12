@@ -15,6 +15,9 @@ type Props = RootStackScreenProps<'AccountBackupPin'>
 
 export default function AccountBackupPinScreen({
   navigation,
+  route: {
+    params: {phoneNumber},
+  },
 }: Props): React.ReactElement {
   const {t} = useTranslation()
   const exportAccountBackup = useSetAtom(exportAccountBackupActionAtom)
@@ -54,7 +57,7 @@ export default function AccountBackupPinScreen({
 
     setExporting(true)
     void Effect.runPromise(
-      exportAccountBackup({pin: chosenPin.value, destination})
+      exportAccountBackup({pin: chosenPin.value, destination, phoneNumber})
     ).then((exported) => {
       setExporting(false)
       if (exported) navigation.goBack()

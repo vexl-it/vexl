@@ -158,7 +158,7 @@
   "accountBackup.saveToDeviceButton": "Запази на устройството",
   "accountBackup.savedToDevice": "Файлът с резервното копие е запазен",
   "accountBackup.pin.title": "Избери ПИН код за резервното копие",
-  "accountBackup.pin.text": "Използвай от 4 до 8 цифри, които ще запомниш. Никой не може да го възстанови вместо теб, дори ние.",
+  "accountBackup.pin.text": "Използвай 4 цифри, които ще запомниш. Никой не може да го възстанови вместо теб, дори ние.",
   "accountBackup.pin.confirmTitle": "Въведи ПИН кода отново",
   "accountBackup.pin.confirmText": "Само за да сме сигурни, че е този, който искаше.",
   "accountBackup.pin.mismatch": "ПИН кодовете не съвпадат. Опитай отново.",

@@ -158,7 +158,7 @@
   "accountBackup.saveToDeviceButton": "Hifadhi kwenye kifaa",
   "accountBackup.savedToDevice": "Faili ya nakala rudufu imehifadhiwa",
   "accountBackup.pin.title": "Chagua PIN ya nakala rudufu",
-  "accountBackup.pin.text": "Tumia tarakimu 4 hadi 8 utakazozikumbuka. Hakuna anayeweza kuirejesha kwa niaba yako, hata sisi.",
+  "accountBackup.pin.text": "Tumia tarakimu 4 utakazozikumbuka. Hakuna anayeweza kuirejesha kwa niaba yako, hata sisi.",
   "accountBackup.pin.confirmTitle": "Weka PIN tena",
   "accountBackup.pin.confirmText": "Ili tu kuhakikisha ndiyo uliyokusudia.",
   "accountBackup.pin.mismatch": "PIN hazilingani. Jaribu tena.",

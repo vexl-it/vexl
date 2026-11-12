@@ -158,7 +158,7 @@
   "accountBackup.saveToDeviceButton": "デバイスに保存",
   "accountBackup.savedToDevice": "バックアップファイルを保存しました",
   "accountBackup.pin.title": "バックアップ用のPINを設定",
-  "accountBackup.pin.text": "忘れない4〜8桁の数字にしてください。PINは誰にも復元できません。私たちにもです。",
+  "accountBackup.pin.text": "忘れない4桁の数字にしてください。PINは誰にも復元できません。私たちにもです。",
   "accountBackup.pin.confirmTitle": "もう一度PINを入力",
   "accountBackup.pin.confirmText": "念のため、意図したPINか確認します。",
   "accountBackup.pin.mismatch": "PINが一致しません。もう一度試してください。",

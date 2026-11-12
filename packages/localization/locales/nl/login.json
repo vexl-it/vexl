@@ -59,7 +59,7 @@
   "loginFlow.restoreFromBackup.wrongPhoneNumber.chooseAnotherFile": "Ander bestand kiezen",
   "loginFlow.restoreFromBackup.wrongPhoneNumber.useAnotherNumber": "Ander telefoonnummer gebruiken",
   "loginFlow.restoreFromBackup.pin.title": "Vul je back-uppincode in",
-  "loginFlow.restoreFromBackup.pin.text": "De 4 tot 8 cijfers die je koos toen je deze back-up maakte.",
+  "loginFlow.restoreFromBackup.pin.text": "De 4 cijfers die je koos toen je deze back-up maakte.",
   "loginFlow.restoreFromBackup.pin.restore": "Account herstellen",
   "loginFlow.restoreFromBackup.pin.wrongPin": "Met die pincode gaat deze back-up niet open. Probeer het opnieuw.",
   "loginFlow.restoreFromBackup.restoring.title": "We halen je account terug",

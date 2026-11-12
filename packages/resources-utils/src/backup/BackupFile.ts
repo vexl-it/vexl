@@ -77,7 +77,7 @@ export type BackupFile = typeof BackupFile.Type
 export const BackupFileFromJson = Schema.parseJson(BackupFile)
 
 export const BackupPin = Schema.String.pipe(
-  Schema.pattern(/^\d{4,8}$/),
+  Schema.pattern(/^\d{4}$/),
   Schema.brand('BackupPin')
 )
 export type BackupPin = typeof BackupPin.Type

@@ -158,7 +158,7 @@
   "accountBackup.saveToDeviceButton": "Save to device",
   "accountBackup.savedToDevice": "Backup file saved",
   "accountBackup.pin.title": "Choose a backup PIN",
-  "accountBackup.pin.text": "Use 4 to 8 digits you’ll remember. Nobody can recover it for you, not even us.",
+  "accountBackup.pin.text": "Use 4 digits you’ll remember. Nobody can recover it for you, not even us.",
   "accountBackup.pin.confirmTitle": "Enter the PIN again",
   "accountBackup.pin.confirmText": "Just to make sure it’s the one you meant.",
   "accountBackup.pin.mismatch": "The PINs don’t match. Try again.",

@@ -160,7 +160,7 @@
   "accountBackup.saveToDeviceButton": "Uložit do zařízení",
   "accountBackup.savedToDevice": "Záložní soubor uložen",
   "accountBackup.pin.title": "Zvol si PIN k záloze",
-  "accountBackup.pin.text": "Použij 4 až 8 číslic, které si zapamatuješ. Nikdo ti ho nedokáže obnovit, ani my.",
+  "accountBackup.pin.text": "Použij 4 číslice, které si zapamatuješ. Nikdo ti ho nedokáže obnovit, ani my.",
   "accountBackup.pin.confirmTitle": "Zadej PIN ještě jednou",
   "accountBackup.pin.confirmText": "Jen ať máme jistotu, že je to ten správný.",
   "accountBackup.pin.mismatch": "PIN kódy se neshodují. Zkus to znovu.",

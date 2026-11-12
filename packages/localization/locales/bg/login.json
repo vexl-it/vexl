@@ -59,7 +59,7 @@
   "loginFlow.restoreFromBackup.wrongPhoneNumber.chooseAnotherFile": "Избери друг файл",
   "loginFlow.restoreFromBackup.wrongPhoneNumber.useAnotherNumber": "Използвай друг телефонен номер",
   "loginFlow.restoreFromBackup.pin.title": "Въведи ПИН кода на резервното копие",
-  "loginFlow.restoreFromBackup.pin.text": "Между 4 и 8 цифри, които избра, когато направи това копие.",
+  "loginFlow.restoreFromBackup.pin.text": "Четирите цифри, които избра, когато направи това копие.",
   "loginFlow.restoreFromBackup.pin.restore": "Възстанови акаунта",
   "loginFlow.restoreFromBackup.pin.wrongPin": "Този ПИН код не отваря това резервно копие. Опитай отново.",
   "loginFlow.restoreFromBackup.restoring.title": "Връщаме акаунта ти",

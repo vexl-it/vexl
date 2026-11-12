@@ -59,7 +59,7 @@
   "loginFlow.restoreFromBackup.wrongPhoneNumber.chooseAnotherFile": "选择其他文件",
   "loginFlow.restoreFromBackup.wrongPhoneNumber.useAnotherNumber": "使用其他手机号",
   "loginFlow.restoreFromBackup.pin.title": "输入备份 PIN 码",
-  "loginFlow.restoreFromBackup.pin.text": "你创建这个备份时设置的 4 到 8 位数字。",
+  "loginFlow.restoreFromBackup.pin.text": "你创建这个备份时设置的 4 位数字。",
   "loginFlow.restoreFromBackup.pin.restore": "恢复账户",
   "loginFlow.restoreFromBackup.pin.wrongPin": "这个 PIN 码打不开这个备份。再试一次。",
   "loginFlow.restoreFromBackup.restoring.title": "正在找回你的账户",

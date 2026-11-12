@@ -59,7 +59,7 @@
   "loginFlow.restoreFromBackup.wrongPhoneNumber.chooseAnotherFile": "Chagua faili nyingine",
   "loginFlow.restoreFromBackup.wrongPhoneNumber.useAnotherNumber": "Tumia nambari nyingine ya simu",
   "loginFlow.restoreFromBackup.pin.title": "Weka PIN ya nakala rudufu yako",
-  "loginFlow.restoreFromBackup.pin.text": "Tarakimu 4 hadi 8 ulizochagua ulipotengeneza nakala rudufu hii.",
+  "loginFlow.restoreFromBackup.pin.text": "Tarakimu 4 ulizochagua ulipotengeneza nakala rudufu hii.",
   "loginFlow.restoreFromBackup.pin.restore": "Rejesha akaunti",
   "loginFlow.restoreFromBackup.pin.wrongPin": "PIN hiyo haifungui nakala rudufu hii. Jaribu tena.",
   "loginFlow.restoreFromBackup.restoring.title": "Tunarudisha akaunti yako",

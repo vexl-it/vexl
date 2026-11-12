@@ -59,7 +59,7 @@
   "loginFlow.restoreFromBackup.wrongPhoneNumber.chooseAnotherFile": "Vybrat jiný soubor",
   "loginFlow.restoreFromBackup.wrongPhoneNumber.useAnotherNumber": "Použít jiné telefonní číslo",
   "loginFlow.restoreFromBackup.pin.title": "Zadej PIN k záloze",
-  "loginFlow.restoreFromBackup.pin.text": "4 až 8 číslic, které sis zvolil při vytváření téhle zálohy.",
+  "loginFlow.restoreFromBackup.pin.text": "4 číslice, které sis zvolil při vytváření téhle zálohy.",
   "loginFlow.restoreFromBackup.pin.restore": "Obnovit účet",
   "loginFlow.restoreFromBackup.pin.wrongPin": "Tenhle PIN zálohu neotevře. Zkus to znovu.",
   "loginFlow.restoreFromBackup.restoring.title": "Vracíme ti tvůj účet",

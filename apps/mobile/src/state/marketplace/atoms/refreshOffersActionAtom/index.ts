@@ -112,7 +112,7 @@ export const refreshOffersActionAtom = atom(
       )
 
       const incomingOffers = toIncomingOffers({
-        contactOffers: newContactOffers,
+        contactOffers: newContactOffers.offers,
         clubOffers: newClubsOffers,
       })
 
@@ -136,6 +136,7 @@ export const refreshOffersActionAtom = atom(
         set(reportOffersWithoutLocationActionAtom)
         set(linkRestoredInboxesToMyOffersAndNotesActionAtom)
       }
+      newContactOffers.commitNextPageTokens()
       set(anyMarketplaceSuggestionDismissedInThisSessionAtom, false)
 
       yield* _(

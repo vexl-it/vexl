@@ -11,6 +11,7 @@ import {
 } from '@vexl-next/resources-utils/src/offers/decryptOffer'
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
 import {Array, Effect, Either, Option, pipe, Record} from 'effect'
+import {constVoid} from 'effect/Function'
 import {atom} from 'jotai'
 import reportError from '../../../../../utils/reportError'
 import {
@@ -78,6 +79,11 @@ const filterAndReportDecryptionErrors = (
   )
 }
 
+interface ContactOffersOfIdentity {
+  readonly offers: readonly OfferForIdentity[]
+  readonly commitNextPageToken: () => void
+}
+
 export interface OffersIdentity {
   readonly identity: PublicKeyPemBase64
   readonly offersApi: OfferApi
@@ -117,18 +123,28 @@ export const fetchOffersReportErrorsActionAtom = atom(
     }: OffersIdentity & {
       lastPrivatePartIdBase64: string | undefined
       storeNextPageToken: (nextPageToken: string) => void
-    }): Effect.Effect<readonly OfferForIdentity[], ApiErrorFetchingOffers> =>
-      pipe(
-        set(getNewContactNetworkOffersAndDecryptPaginatedActionAtom, {
-          offersApi,
-          keyPair,
-          keyPairV2,
-          lastPrivatePartIdBase64,
-          storeNextPageToken,
-        }),
-        Effect.map(filterAndReportDecryptionErrors),
-        Effect.map(Array.map((offerInfo) => ({identity, offerInfo})))
-      )
+    }): Effect.Effect<ContactOffersOfIdentity, ApiErrorFetchingOffers> =>
+      Effect.gen(function* (_) {
+        let nextPageToken: string | undefined
+        const offers = yield* _(
+          set(getNewContactNetworkOffersAndDecryptPaginatedActionAtom, {
+            offersApi,
+            keyPair,
+            keyPairV2,
+            lastPrivatePartIdBase64,
+            storeNextPageToken: (token) => {
+              nextPageToken = token
+            },
+          }),
+          Effect.map(filterAndReportDecryptionErrors)
+        )
+        return {
+          offers: Array.map(offers, (offerInfo) => ({identity, offerInfo})),
+          commitNextPageToken: () => {
+            if (nextPageToken) storeNextPageToken(nextPageToken)
+          },
+        }
+      })
 
     return Effect.all({
       contact: Effect.all(
@@ -152,9 +168,13 @@ export const fetchOffersReportErrorsActionAtom = atom(
               },
             }).pipe(
               // Owner parts are encrypted for the main number only
-              Effect.map(
-                Array.filter(({offerInfo}) => !offerInfo.privatePart.adminId)
-              ),
+              Effect.map((result) => ({
+                ...result,
+                offers: Array.filter(
+                  result.offers,
+                  ({offerInfo}) => !offerInfo.privatePart.adminId
+                ),
+              })),
               // One number failing must not hold back the others
               Effect.catchAll((e) => {
                 reportError(
@@ -162,13 +182,26 @@ export const fetchOffersReportErrorsActionAtom = atom(
                   new Error('Error fetching offers of an extra phone number'),
                   {e}
                 )
-                return Effect.succeed([])
+                return Effect.succeed({
+                  offers: [],
+                  commitNextPageToken: constVoid,
+                })
               })
             )
           ),
         ],
         {concurrency: 'unbounded'}
-      ).pipe(Effect.map(Array.flatten)),
+      ).pipe(
+        Effect.map((results) => ({
+          offers: Array.flatMap(results, (one) => one.offers),
+          // Only once the offers are merged, a failed refresh must not skip them
+          commitNextPageTokens: () => {
+            Array.forEach(results, (one) => {
+              one.commitNextPageToken()
+            })
+          },
+        }))
+      ),
 
       clubs: pipe(
         Record.toEntries(clubs),

@@ -3,6 +3,7 @@ import {Effect, Option, Schema} from 'effect'
 import {useSetAtom} from 'jotai'
 import React, {useState} from 'react'
 import {Platform} from 'react-native'
+import {KeyboardController} from 'react-native-keyboard-controller'
 import {type RootStackScreenProps} from '../../navigationTypes'
 import {
   exportAccountBackupActionAtom,
@@ -47,6 +48,7 @@ export default function AccountBackupPinScreen({
     destination: AccountBackupDestination
   ): void => {
     if (confirmedPin !== chosenPin.value) {
+      void KeyboardController.dismiss()
       setErrorMessage(t('accountBackup.pin.mismatch'))
       setPin('')
       return

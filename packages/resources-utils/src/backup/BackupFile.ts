@@ -45,9 +45,16 @@ export const BackupNotificationSecret = Schema.Struct({
 })
 export type BackupNotificationSecret = typeof BackupNotificationSecret.Type
 
-export const BackupSession = Schema.Struct({
+const BackupPhoneNumber = Schema.Struct({
   phoneNumber: E164PhoneNumber,
   sessionCredentials: UserSessionCredentialsV2,
+})
+
+// `phoneNumber` + `sessionCredentials` are the main number. Older app versions
+// ignore `extraPhoneNumbers` and restore only the main number.
+export const BackupSession = Schema.Struct({
+  ...BackupPhoneNumber.fields,
+  extraPhoneNumbers: Schema.optional(Schema.Array(BackupPhoneNumber)),
   privateKey: PrivateKeyHolder,
   keyPairV2: KeyPairV2,
   isLiquidityProvider: Schema.Boolean,

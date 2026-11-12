@@ -74,6 +74,7 @@ export const createBackupFile = ({
           session,
           'phoneNumber',
           'sessionCredentials',
+          'extraPhoneNumbers',
           'privateKey',
           'keyPairV2',
           'isLiquidityProvider'

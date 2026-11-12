@@ -451,4 +451,29 @@ describe('one account with several phone numbers', () => {
       })
     )
   })
+
+  it('keeps the contacts of whoever holds the number now when a stale device deletes it', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const app = yield* _(NodeTestingApp)
+        const holder = yield* _(generateKeysAndHasheForNumber('+420733700001'))
+        const staleDevice = yield* _(
+          generateKeysAndHasheForNumber('+420733700001')
+        )
+        const friend = yield* _(generateKeysAndHasheForNumber('+420733700002'))
+
+        yield* _(createAndImportUsersFromNetwork(holder, [friend]))
+
+        yield* _(setAuthHeaders(staleDevice.authHeaders))
+        yield* _(
+          app.User.deleteUser({
+            headers: makeTestCommonAndSecurityHeaders(staleDevice.authHeaders),
+          })
+        )
+
+        expect(yield* _(findUserRow(holder.serverHashedNumber))).toHaveLength(1)
+        expect(yield* _(countContactsOf(holder.serverHashedNumber))).toBe(1)
+      })
+    )
+  })
 })

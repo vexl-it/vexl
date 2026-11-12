@@ -17,7 +17,11 @@ import {
   socialPartOf,
   storedSocialPartsByIdentity,
 } from '../../phoneNumbers/socialPartsByIdentity'
-import {identityKeyOfPhoneNumber} from '../../session/sessionPhoneNumbers'
+import {sessionDataOrDummyAtom} from '../../session'
+import {
+  identityKeyOfPhoneNumber,
+  onlyIdentitiesOfSession,
+} from '../../session/sessionPhoneNumbers'
 import {
   mergeIncomingNotesToState,
   type NoteForIdentity,
@@ -187,12 +191,16 @@ const runRefreshNotesActionAtom = atom(null, (get, set) =>
       )
     )
 
+    const extraResultsOfSession = onlyIdentitiesOfSession(
+      get(sessionDataOrDummyAtom),
+      extraResults
+    )
     set(notesStateAtom, (old) => ({
       ...old,
       // Committed together with the notes so a failed refresh cannot skip them.
       notesNextPageParam: mainResult.nextCursor,
       extraIdentitiesNotesNextPageParam: pipe(
-        extraResults,
+        extraResultsOfSession,
         Array.filterMap(({identity, nextCursor}) =>
           nextCursor === undefined
             ? Option.none()
@@ -206,7 +214,7 @@ const runRefreshNotesActionAtom = atom(null, (get, set) =>
       notes: mergeIncomingNotesToState({
         incomingNotes: [
           ...mainResult.notes,
-          ...Array.flatMap(extraResults, (one) => one.notes),
+          ...Array.flatMap(extraResultsOfSession, (one) => one.notes),
         ],
         storedNotes: old.notes,
         removedNoteIds,

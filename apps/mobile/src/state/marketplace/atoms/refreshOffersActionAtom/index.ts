@@ -13,7 +13,11 @@ import {startBenchmark} from '../../../ActionBenchmarks'
 import {linkRestoredInboxesToMyOffersAndNotesActionAtom} from '../../../backup/linkRestoredInboxesActionAtom'
 import {clubsToKeyHolderAtom} from '../../../clubs/atom/clubsToKeyHolderV2Atom'
 import {updateOffersIdsForClubStateActionAtom} from '../../../clubs/atom/clubsWithMembersAtom'
-import {identityKeyOfPhoneNumber} from '../../../session/sessionPhoneNumbers'
+import {sessionDataOrDummyAtom} from '../../../session'
+import {
+  identityKeyOfPhoneNumber,
+  onlyIdentitiesOfSession,
+} from '../../../session/sessionPhoneNumbers'
 import {ensureMyOffersHaveOwnershipInfoUploadedInPrivatepayloadForOwner} from '../ensureMyOffersHaveOwnershipInfoUploadedInPrivatepayloadForOwner'
 import {loadingStateAtom} from '../loadingState'
 import {anyMarketplaceSuggestionDismissedInThisSessionAtom} from '../offerSuggestionVisible'
@@ -111,8 +115,15 @@ export const refreshOffersActionAtom = atom(
           : Effect.succeed(NO_REMOVED_OFFERS)
       )
 
+      const contactOffersOfSession = onlyIdentitiesOfSession(
+        get(sessionDataOrDummyAtom),
+        newContactOffers
+      )
       const incomingOffers = toIncomingOffers({
-        contactOffers: newContactOffers.offers,
+        contactOffers: Array.flatMap(
+          contactOffersOfSession,
+          (one) => one.offers
+        ),
         clubOffers: newClubsOffers,
       })
 
@@ -136,7 +147,10 @@ export const refreshOffersActionAtom = atom(
         set(reportOffersWithoutLocationActionAtom)
         set(linkRestoredInboxesToMyOffersAndNotesActionAtom)
       }
-      newContactOffers.commitNextPageTokens()
+      // Only once the offers are merged, a failed refresh must not skip them
+      Array.forEach(contactOffersOfSession, (one) => {
+        one.commitNextPageToken()
+      })
       set(anyMarketplaceSuggestionDismissedInThisSessionAtom, false)
 
       yield* _(

@@ -1,11 +1,17 @@
+import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {Array, Either, Schema} from 'effect'
-import {type SessionV2} from '../../brands/Session.brand'
+import {
+  type SessionPhoneNumber,
+  type SessionV2,
+} from '../../brands/Session.brand'
 import {dummySession} from './dummySesssion'
 import {makeExtraPhoneNumber} from './extraPhoneNumber.testUtils'
 import {
   addPhoneNumberToSession,
+  identityKeyOfPhoneNumber,
   mainPhoneNumberOfSession,
+  onlyIdentitiesOfSession,
   ownPublicKeysOfSession,
   phoneNumbersOfSession,
   pickedPhoneNumberOrMain,
@@ -106,6 +112,22 @@ it('refuses to remove a number the account does not have', () => {
   expect(Either.isLeft(result) && result.left._tag).toBe(
     'PhoneNumberNotInAccountError'
   )
+})
+
+it('keeps only results of identities still in the session', () => {
+  const resultOf = (
+    phoneNumber: Pick<SessionPhoneNumber, 'privateKey'>
+  ): {identity: PublicKeyPemBase64} => ({
+    identity: identityKeyOfPhoneNumber(phoneNumber),
+  })
+
+  expect(
+    onlyIdentitiesOfSession({...session, extraPhoneNumbers: [third]}, [
+      resultOf(main),
+      resultOf(second),
+      resultOf(third),
+    ])
+  ).toEqual([resultOf(main), resultOf(third)])
 })
 
 describe('pickedPhoneNumberOrMain', () => {

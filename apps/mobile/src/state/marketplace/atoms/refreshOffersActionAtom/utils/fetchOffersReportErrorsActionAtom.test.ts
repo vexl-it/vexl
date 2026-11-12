@@ -1,6 +1,6 @@
 import {KeyHolder} from '@vexl-next/cryptography'
 import {KeyPairV2} from '@vexl-next/cryptography/src/KeyHolder/brandsV2'
-import {Effect, Exit, Schema} from 'effect'
+import {Array, Effect, Exit, Schema} from 'effect'
 import {createStore} from 'jotai'
 import {apiAtom} from '../../../../../api'
 import {
@@ -107,7 +107,9 @@ it('stores the cursors of every identity once committed', async () => {
   )
   expect(store.get(contactOffersNextPageParamAtom)).toBeUndefined()
 
-  contact.commitNextPageTokens()
+  Array.forEach(contact, (one) => {
+    one.commitNextPageToken()
+  })
 
   expect(store.get(contactOffersNextPageParamAtom)).toBe('next-page')
   expect(store.get(extraIdentitiesContactOffersNextPageParamAtom)).toEqual({

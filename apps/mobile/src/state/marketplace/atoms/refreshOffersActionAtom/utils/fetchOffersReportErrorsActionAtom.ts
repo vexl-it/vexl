@@ -80,6 +80,7 @@ const filterAndReportDecryptionErrors = (
 }
 
 interface ContactOffersOfIdentity {
+  readonly identity: PublicKeyPemBase64
   readonly offers: readonly OfferForIdentity[]
   readonly commitNextPageToken: () => void
 }
@@ -139,6 +140,7 @@ export const fetchOffersReportErrorsActionAtom = atom(
           Effect.map(filterAndReportDecryptionErrors)
         )
         return {
+          identity,
           offers: Array.map(offers, (offerInfo) => ({identity, offerInfo})),
           commitNextPageToken: () => {
             if (nextPageToken) storeNextPageToken(nextPageToken)
@@ -183,6 +185,7 @@ export const fetchOffersReportErrorsActionAtom = atom(
                   {e}
                 )
                 return Effect.succeed({
+                  identity: extra.identity,
                   offers: [],
                   commitNextPageToken: constVoid,
                 })
@@ -191,16 +194,6 @@ export const fetchOffersReportErrorsActionAtom = atom(
           ),
         ],
         {concurrency: 'unbounded'}
-      ).pipe(
-        Effect.map((results) => ({
-          offers: Array.flatMap(results, (one) => one.offers),
-          // Only once the offers are merged, a failed refresh must not skip them
-          commitNextPageTokens: () => {
-            Array.forEach(results, (one) => {
-              one.commitNextPageToken()
-            })
-          },
-        }))
       ),
 
       clubs: pipe(

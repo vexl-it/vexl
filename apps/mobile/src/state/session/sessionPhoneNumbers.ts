@@ -59,6 +59,25 @@ export const identityKeyOfPhoneNumber = (
   phoneNumber: Pick<SessionPhoneNumber, 'privateKey'>
 ): PublicKeyPemBase64 => phoneNumber.privateKey.publicKeyPemBase64
 
+/**
+ * Drops results of identities no longer in the account. A number removed while
+ * a refresh was fetching for it must not come back with that refresh.
+ */
+export const onlyIdentitiesOfSession = <
+  T extends {readonly identity: PublicKeyPemBase64},
+>(
+  session: SessionV2,
+  results: readonly T[]
+): T[] => {
+  const identities = Array.map(
+    phoneNumbersOfSession(session),
+    identityKeyOfPhoneNumber
+  )
+  return Array.filter(results, ({identity}) =>
+    Array.contains(identities, identity)
+  )
+}
+
 export const sessionHasPhoneNumber = (
   session: SessionV2,
   phoneNumber: E164PhoneNumber

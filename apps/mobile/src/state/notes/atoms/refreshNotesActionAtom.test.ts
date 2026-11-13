@@ -1,4 +1,4 @@
-import {NoteInfo} from '@vexl-next/domain/src/general/notes'
+import {NoteId, NoteInfo} from '@vexl-next/domain/src/general/notes'
 import {Base64String} from '@vexl-next/domain/src/utility/Base64String.brand'
 import decryptNote, {
   DecryptingNoteError,
@@ -8,6 +8,10 @@ import {ServerNote} from '@vexl-next/rest-api/src/services/offer/notesContracts'
 import {Effect, Schema} from 'effect'
 import {createStore} from 'jotai'
 import {apiAtom} from '../../../api'
+import {sessionDataOrDummyAtom} from '../../session'
+import {dummySession} from '../../session/dummySesssion'
+import {makeExtraPhoneNumber} from '../../session/extraPhoneNumber.testUtils'
+import {identityKeyOfPhoneNumber} from '../../session/sessionPhoneNumbers'
 import {notesStateAtom} from './notesState'
 import {refreshNotesActionAtom} from './refreshNotesActionAtom'
 
@@ -36,7 +40,28 @@ jest.mock('../../../api', () => {
 })
 jest.mock('../../session', () => {
   const {atom} = jest.requireActual('jotai')
-  return {sessionDataOrDummyAtom: atom({privateKey: {}, keyPairV2: {}})}
+  const {dummySession} = jest.requireActual('../../session/dummySesssion')
+  return {
+    sessionDataOrDummyAtom: atom({...dummySession, extraPhoneNumbers: []}),
+  }
+})
+jest.mock('../../../api/contactApiForSession', () => {
+  const {atom} = jest.requireActual('jotai')
+  const {apiAtom} = jest.requireMock('../../../api')
+  const {sessionDataOrDummyAtom} = jest.requireMock('../../session')
+  const {phoneNumbersOfSession} = jest.requireActual(
+    '../../session/sessionPhoneNumbers'
+  )
+  return {
+    phoneNumberApisAtom: atom((get: (a: unknown) => {offer: unknown}) =>
+      phoneNumbersOfSession(get(sessionDataOrDummyAtom)).map(
+        (phoneNumber: unknown, index: number) => ({
+          phoneNumber,
+          offerApi: index === 0 ? get(apiAtom).offer : mockExtraOfferApi,
+        })
+      )
+    ),
+  }
 })
 jest.mock('../../../utils/reportError', () => ({
   __esModule: true,
@@ -45,6 +70,17 @@ jest.mock('../../../utils/reportError', () => ({
 jest.mock('../../backup/linkRestoredInboxesActionAtom', () => {
   const {atom} = jest.requireActual('jotai')
   return {linkRestoredInboxesToMyOffersAndNotesActionAtom: atom(null, () => {})}
+})
+
+const mockExtraOfferApi = {
+  getNotesForMeModifiedOrCreatedAfterPaginated: jest.fn(),
+  getRemovedNotes: jest.fn(),
+}
+const mainIdentity = identityKeyOfPhoneNumber(dummySession)
+const extraPhoneNumber = makeExtraPhoneNumber({
+  phoneNumber: '+420777777777',
+  hash: 'extra-hash',
+  index: 0,
 })
 
 const previousCursor = Schema.decodeSync(Base64String)('cHJldmlvdXM=')
@@ -118,7 +154,18 @@ it('commits the cursor together with the decrypted notes', async () => {
     limit: 30,
   })
   expect(store.get(notesStateAtom).notes).toEqual([
-    {noteInfo: note, flags: {reported: false}},
+    {
+      noteInfo: note,
+      flags: {reported: false},
+      socialPartsByIdentity: {
+        [mainIdentity]: {
+          friendLevel: ['FIRST_DEGREE'],
+          commonFriends: [],
+          verifiedCommonFriends: [],
+          viaRepost: false,
+        },
+      },
+    },
   ])
   expect(store.get(notesStateAtom).notesNextPageParam).toBe(nextCursor)
 })
@@ -137,4 +184,50 @@ it('advances the cursor past a note that cannot be decrypted', async () => {
   await Effect.runPromise(store.set(refreshNotesActionAtom))
   expect(store.get(notesStateAtom).notes).toEqual([])
   expect(store.get(notesStateAtom).notesNextPageParam).toBe(nextCursor)
+})
+
+it('drops what a number removed during the refresh fetched', async () => {
+  const {store} = setup()
+  store.set(sessionDataOrDummyAtom, (old) => ({
+    ...old,
+    extraPhoneNumbers: [extraPhoneNumber],
+  }))
+  const extraNote = {
+    ...note,
+    noteId: Schema.decodeSync(NoteId)('4b0c1c8e-2a35-4b8e-8c1d-6f8f1b0e9a77'),
+  }
+  jest
+    .mocked(decryptNote)
+    .mockImplementation(
+      (privateKey) => () =>
+        Effect.succeed(
+          privateKey === extraPhoneNumber.privateKey ? extraNote : note
+        )
+    )
+  mockExtraOfferApi.getNotesForMeModifiedOrCreatedAfterPaginated.mockReturnValue(
+    Effect.sync(() => {
+      store.set(sessionDataOrDummyAtom, (old) => ({
+        ...old,
+        extraPhoneNumbers: [],
+      }))
+      return {
+        items: [serverNote],
+        nextPageToken: nextCursor,
+        hasNext: false,
+        limit: 30,
+      }
+    })
+  )
+  mockExtraOfferApi.getRemovedNotes.mockReturnValue(
+    Effect.succeed({noteIds: []})
+  )
+
+  await Effect.runPromise(store.set(refreshNotesActionAtom))
+
+  expect(
+    store.get(notesStateAtom).notes.map((one) => one.noteInfo.noteId)
+  ).toEqual([note.noteId])
+  expect(store.get(notesStateAtom).extraIdentitiesNotesNextPageParam).toEqual(
+    {}
+  )
 })

@@ -1,6 +1,11 @@
-import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
+import {
+  type KeyPairV2,
+  type PrivateKeyHolder,
+} from '@vexl-next/cryptography/src/KeyHolder'
 import {type ClubKeys} from '@vexl-next/domain/src/general/clubs'
 import {
+  generateKeyDerivationId,
+  type KeyDerivationId,
   KeyDerivationIndex,
   type MasterSeed,
 } from '@vexl-next/domain/src/general/MasterSeed.brand'
@@ -13,6 +18,7 @@ import {
   deriveClubKeys,
   deriveInboxPrivateKey,
   deriveNoteRepostId,
+  derivePhoneNumberKeys,
 } from '@vexl-next/resources-utils/src/keyDerivation/keyFactory'
 import {Effect, Either, Fiber, Option, Schema} from 'effect'
 import {atom, type Getter} from 'jotai'
@@ -203,6 +209,27 @@ export const createClubKeysActionAtom = atom(
         masterSeed,
         yield* set(allocateIndexActionAtom, 'nextClubIndex')
       )
+    })
+)
+
+// Keys for a new extra phone number, never the keys of an earlier one
+export const createPhoneNumberKeysActionAtom = atom(
+  null,
+  (
+    get
+  ): Effect.Effect<
+    {
+      keyDerivationId: KeyDerivationId
+      privateKey: PrivateKeyHolder
+      keyPairV2: KeyPairV2
+    },
+    CryptoError
+  > =>
+    Effect.gen(function* () {
+      const masterSeed = yield* loggedInMasterSeed(get)
+      const keyDerivationId = generateKeyDerivationId()
+      const keys = yield* derivePhoneNumberKeys(masterSeed, keyDerivationId)
+      return {keyDerivationId, ...keys}
     })
 )
 

@@ -12,6 +12,7 @@ import {
 import {ClubKeys, ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {
+  KeyDerivationId,
   KeyDerivationIndex,
   MasterSeed,
 } from '@vexl-next/domain/src/general/MasterSeed.brand'
@@ -45,9 +46,23 @@ export const BackupNotificationSecret = Schema.Struct({
 })
 export type BackupNotificationSecret = typeof BackupNotificationSecret.Type
 
+// An extra number is its own identity, with keys derived from the master
+// seed at `keyDerivationId`.
+const BackupExtraPhoneNumber = Schema.Struct({
+  phoneNumber: E164PhoneNumber,
+  sessionCredentials: UserSessionCredentialsV2,
+  privateKey: PrivateKeyHolder,
+  keyPairV2: KeyPairV2,
+  keyDerivationId: KeyDerivationId,
+})
+
+// `phoneNumber`, `sessionCredentials` and the keys are the main number, which
+// carries the account. Older app versions ignore `extraPhoneNumbers` and
+// restore only the main number.
 export const BackupSession = Schema.Struct({
   phoneNumber: E164PhoneNumber,
   sessionCredentials: UserSessionCredentialsV2,
+  extraPhoneNumbers: Schema.optional(Schema.Array(BackupExtraPhoneNumber)),
   privateKey: PrivateKeyHolder,
   keyPairV2: KeyPairV2,
   isLiquidityProvider: Schema.Boolean,

@@ -7,7 +7,7 @@ import {UnixMilliseconds} from '../utility/UnixMilliseconds.brand'
 import {VersionString} from '../utility/VersionString.brand'
 import {HashedPhoneNumber} from './HashedPhoneNumber.brand'
 import {VexlNotificationToken} from './notifications/VexlNotificationToken'
-import {FriendLevel, SymmetricKey} from './offers'
+import {FriendLevel, SocialPartsByIdentity, SymmetricKey} from './offers'
 
 export const NoteId = Schema.UUID.pipe(Schema.brand('NoteId'))
 export type NoteId = typeof NoteId.Type
@@ -88,6 +88,9 @@ export const OneNoteInState = Schema.Struct({
   flags: NoteFlags,
   ownershipInfo: Schema.optional(NoteOwnershipInfo),
   repostInfo: Schema.optional(NoteRepostInfo),
+  // The social part of `noteInfo.privatePart` is their union. Missing on notes
+  // stored before, those came to the main phone number only.
+  socialPartsByIdentity: Schema.optional(SocialPartsByIdentity),
 })
 export type OneNoteInState = typeof OneNoteInState.Type
 

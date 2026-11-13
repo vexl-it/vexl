@@ -31,6 +31,8 @@
   "tradeChecklist.exchangeDetails.nickname": "Spitzname",
   "tradeChecklist.exchangeDetails.nicknameNotSet": "Zum Festlegen einschalten",
   "tradeChecklist.exchangeDetails.phoneNumber": "Telefonnummer",
+  "tradeChecklist.exchangeDetails.phoneNumberToReveal.title": "Welche Nummer offenlegen?",
+  "tradeChecklist.exchangeDetails.phoneNumberToReveal.text": "Mit dem Spitznamen werden Ziffern dieser Nummer offengelegt. Die vollständige Nummer ist eine eigene Wahl.",
   "tradeChecklist.exchangeDetails.photo": "Profilfoto",
   "tradeChecklist.exchangeDetails.noPhotoYet": "Noch kein Foto",
   "tradeChecklist.exchangeDetails.choosePhoto": "Foto auswählen",

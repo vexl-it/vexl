@@ -1,19 +1,15 @@
+import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {UserName} from '@vexl-next/domain/src/general/UserName.brand'
-import {
-  type ContactRevealChatMessage,
-  type IdentityRevealChatMessage,
-  type RevealStatus,
-} from '@vexl-next/domain/src/general/tradeChecklist'
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {Array, Option, pipe, Schema} from 'effect/index'
 import {atom} from 'jotai'
-import anonymizePhoneNumber from '../../../state/chat/utils/anonymizePhoneNumber'
-import {sessionDataOrDummyAtom} from '../../../state/session'
+import {pickedPhoneNumberOrMain} from '../../../state/session/sessionPhoneNumbers'
 import {
   invalidUsernameUIFeedbackAtom,
   realUserImageAtom,
   realUserNameAtom,
+  userPhoneNumbersAtom,
 } from '../../../state/session/userDataAtoms'
 import {chatWithMessagesAtom} from '../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {
@@ -21,6 +17,7 @@ import {
   updatesToBeSentAtom,
 } from '../../../state/tradeChecklist/atoms/updatesToBeSentAtom'
 import {
+  defaultPhoneNumberToReveal,
   detailsSharedByThem,
   EXCHANGE_DETAIL_KEYS,
   isAnyDetailSelected,
@@ -28,6 +25,7 @@ import {
   otherSideSupportsPhotoOnlyExchange,
   pendingRequest,
   pendingRequestFromThem,
+  revealFromSelection,
   selectionFromReveal,
   type ExchangeDetailKey,
   type ExchangeDetailsSelection,
@@ -39,6 +37,19 @@ export const exchangeDetailsSelectionAtom =
 export const exchangeDetailsNicknameAtom = atom<string>('')
 export const exchangeDetailsPhotoUriAtom = atom<UriString | undefined>(
   undefined
+)
+const pickedPhoneNumberAtom = atom<E164PhoneNumber | undefined>(undefined)
+
+// One number for both the nickname's partial number and the full number.
+export const exchangeDetailsPhoneNumberAtom = atom(
+  (get) =>
+    pickedPhoneNumberOrMain(
+      get(userPhoneNumbersAtom),
+      get(pickedPhoneNumberAtom)
+    ),
+  (_get, set, phoneNumber: E164PhoneNumber) => {
+    set(pickedPhoneNumberAtom, phoneNumber)
+  }
 )
 
 export const requestedDetailsAtom = atom((get) =>
@@ -127,6 +138,14 @@ export const prepareExchangeDetailsDraftActionAtom = atom(null, (get, set) => {
 
   set(exchangeDetailsSelectionAtom, draftedSelection)
   set(
+    pickedPhoneNumberAtom,
+    defaultPhoneNumberToReveal({
+      accountPhoneNumbers: get(userPhoneNumbersAtom),
+      chat: get(chatWithMessagesAtom),
+      draft: updates,
+    })
+  )
+  set(
     exchangeDetailsNicknameAtom,
     updates.identity?.deanonymizedUser?.name ?? get(realUserNameAtom) ?? ''
   )
@@ -141,6 +160,7 @@ export const discardExchangeDetailsDraftActionAtom = atom(null, (_get, set) => {
   set(exchangeDetailsSelectionAtom, NO_DETAILS_SELECTED)
   set(exchangeDetailsNicknameAtom, '')
   set(exchangeDetailsPhotoUriAtom, undefined)
+  set(pickedPhoneNumberAtom, undefined)
 })
 
 // The draft must be restored from `updatesToBeSentAtom` before it is cleared,
@@ -153,17 +173,10 @@ export const restoreExchangeDetailsDraftAfterFailedSubmitActionAtom = atom(
   }
 )
 
-function answerStatus(requested: boolean): RevealStatus {
-  return requested ? 'APPROVE_REVEAL' : 'REQUEST_REVEAL'
-}
-
 export const saveExchangeDetailsDraftActionAtom = atom(
   null,
   (get, set): boolean => {
     const selection = get(exchangeDetailsSelectionAtom)
-    const requested = get(requestedDetailsAtom)
-    const {phoneNumber} = get(sessionDataOrDummyAtom)
-    const timestamp = unixMillisecondsNow()
 
     const name = selection.nickname
       ? Schema.decodeUnknownOption(UserName)(
@@ -179,32 +192,14 @@ export const saveExchangeDetailsDraftActionAtom = atom(
     if (Option.isSome(name)) set(realUserNameAtom, name.value)
     if (photo) set(realUserImageAtom, {type: 'imageUri', imageUri: photo})
 
-    const identityRequested = requested.nickname || requested.photo
-    const identity: IdentityRevealChatMessage | undefined =
-      selection.nickname || selection.photo
-        ? {
-            status: answerStatus(identityRequested),
-            deanonymizedUser: Option.isSome(name)
-              ? {
-                  name: name.value,
-                  partialPhoneNumber: anonymizePhoneNumber(phoneNumber),
-                }
-              : undefined,
-            image: photo,
-            timestamp,
-          }
-        : identityRequested
-          ? {status: 'DISAPPROVE_REVEAL', timestamp}
-          : undefined
-    const contact: ContactRevealChatMessage | undefined = selection.phoneNumber
-      ? {
-          status: answerStatus(requested.phoneNumber),
-          fullPhoneNumber: phoneNumber,
-          timestamp,
-        }
-      : requested.phoneNumber
-        ? {status: 'DISAPPROVE_REVEAL', timestamp}
-        : undefined
+    const {identity, contact} = revealFromSelection({
+      selection,
+      requested: get(requestedDetailsAtom),
+      name: Option.getOrUndefined(name),
+      photo,
+      phoneNumber: get(exchangeDetailsPhoneNumberAtom),
+      timestamp: unixMillisecondsNow(),
+    })
 
     set(
       updatesToBeSentAtom,

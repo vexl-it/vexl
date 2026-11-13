@@ -1,123 +1,56 @@
+import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {
   type NoteId,
-  type NoteInfo,
   type OneNoteInState,
 } from '@vexl-next/domain/src/general/notes'
 import {isoNow} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import decryptNote from '@vexl-next/resources-utils/src/notes/decryptNote'
 import fetchAllPaginatedData from '@vexl-next/rest-api/src/fetchAllPaginatedData'
-import {Array, Effect, Either, Fiber, Option, pipe} from 'effect'
+import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
+import {Array, Effect, Either, Fiber, Option, pipe, Record} from 'effect'
 import {atom} from 'jotai'
-import {apiAtom} from '../../../api'
+import {phoneNumberApisAtom} from '../../../api/contactApiForSession'
+import {type SessionPhoneNumber} from '../../../brands/Session.brand'
 import reportError from '../../../utils/reportError'
 import {linkRestoredInboxesToMyOffersAndNotesActionAtom} from '../../backup/linkRestoredInboxesActionAtom'
+import {
+  socialPartOf,
+  storedSocialPartsByIdentity,
+} from '../../phoneNumbers/socialPartsByIdentity'
 import {sessionDataOrDummyAtom} from '../../session'
+import {
+  identityKeyOfPhoneNumber,
+  onlyIdentitiesOfSession,
+} from '../../session/sessionPhoneNumbers'
+import {
+  mergeIncomingNotesToState,
+  type NoteForIdentity,
+} from './mergeIncomingNotesToState'
 import {notesAtom, notesNextPageParamAtom, notesStateAtom} from './notesState'
 
 const NOTES_PAGE_LIMIT = 30
-const EXPIRY_PURGE_GRACE_MS = 24 * 60 * 60 * 1000
 
-// The server returns one entry per private part, so the same note can appear
-// multiple times (delivered directly and via one or more reposts). Prefer the
-// non-repost part so a direct trust tier / common friends are shown.
-const dedupeIncomingNotesByNoteId = (
-  notes: readonly NoteInfo[]
-): readonly NoteInfo[] =>
-  pipe(
-    notes,
-    Array.groupBy((one) => one.noteId),
-    (grouped) => Object.values(grouped),
-    Array.filterMap((group) =>
-      pipe(
-        Array.findFirst(group, (one) => !one.privatePart.viaRepost),
-        Option.orElse(() => Array.head(group))
-      )
-    )
-  )
-
-const mergeIncomingNotesToState = ({
-  incomingNotes,
-  storedNotes,
-  removedNoteIds,
+const fetchNotesOfPhoneNumber = ({
+  phoneNumber,
+  offerApi,
+  cursor,
 }: {
-  incomingNotes: readonly NoteInfo[]
-  storedNotes: readonly OneNoteInState[]
-  removedNoteIds: readonly NoteId[]
-}): OneNoteInState[] =>
-  pipe(
-    Array.union(
-      Array.map(incomingNotes, (one) => one.noteId),
-      Array.map(storedNotes, (one) => one.noteInfo.noteId)
-    ),
-    Array.filterMap((noteId) => {
-      const incomingO = Array.findFirst(
-        incomingNotes,
-        (one) => one.noteId === noteId
-      )
-      const inStateO = Array.findFirst(
-        storedNotes,
-        (one) => one.noteInfo.noteId === noteId
-      )
-
-      // Keep my own notes untouched - they are managed locally.
-      if (
-        inStateO.pipe(
-          Option.flatMapNullable((one) => one.ownershipInfo?.adminId),
-          Option.isSome
-        )
-      ) {
-        return inStateO
-      }
-
-      // Preserve local flags / repostInfo across refreshes.
-      if (Option.isSome(inStateO) && Option.isSome(incomingO)) {
-        return Option.some({
-          ...inStateO.value,
-          noteInfo: incomingO.value,
-        } satisfies OneNoteInState)
-      }
-
-      if (Option.isSome(incomingO)) {
-        // The owner's private payload carries the adminId, so ownership can be
-        // restored even without local state (reinstall / another device).
-        const adminId = incomingO.value.privatePart.adminId
-        return Option.some({
-          noteInfo: incomingO.value,
-          flags: {reported: false},
-          ...(adminId ? {ownershipInfo: {adminId}} : {}),
-        } satisfies OneNoteInState)
-      }
-
-      return inStateO
-    }),
-    // Drop removed notes (but never my own - they may still be re-uploaded).
-    Array.filter(
-      (one) =>
-        !!one.ownershipInfo?.adminId ||
-        !Array.contains(removedNoteIds, one.noteInfo.noteId)
-    ),
-    // Purge notes (incl. my own) long after expiry so storage does not grow
-    // forever. The UI already hides expired notes at render time; the grace
-    // period only guards against device clock skew.
-    Array.filter(
-      (one) => one.noteInfo.expiresAt > Date.now() - EXPIRY_PURGE_GRACE_MS
-    )
-  )
-
-const runRefreshNotesActionAtom = atom(null, (get, set) =>
+  phoneNumber: SessionPhoneNumber
+  offerApi: OfferApi
+  cursor: string | undefined
+}): Effect.Effect<
+  {notes: readonly NoteForIdentity[]; nextCursor: string | undefined},
+  Effect.Effect.Error<
+    ReturnType<OfferApi['getNotesForMeModifiedOrCreatedAfterPaginated']>
+  >
+> =>
   Effect.gen(function* (_) {
-    const api = get(apiAtom)
-    const session = get(sessionDataOrDummyAtom)
-    const updateStartedAt = isoNow()
-    const storedNotes = get(notesAtom)
-    const initialCursor = get(notesNextPageParamAtom)
-    let nextCursor = initialCursor
-
+    let nextCursor = cursor
     const serverNotes = yield* _(
       fetchAllPaginatedData({
         fetchEffectToRun: (nextPageToken) =>
-          api.offer.getNotesForMeModifiedOrCreatedAfterPaginated({
-            nextPageToken: nextPageToken ?? initialCursor,
+          offerApi.getNotesForMeModifiedOrCreatedAfterPaginated({
+            nextPageToken: nextPageToken ?? cursor,
             limit: NOTES_PAGE_LIMIT,
           }),
         storeNextPageToken: (nextPageToken) => {
@@ -130,53 +63,162 @@ const runRefreshNotesActionAtom = atom(null, (get, set) =>
       serverNotes,
       Array.map((serverNote) =>
         Effect.either(
-          decryptNote(session.privateKey, session.keyPairV2)(serverNote)
+          decryptNote(phoneNumber.privateKey, phoneNumber.keyPairV2)(serverNote)
         )
       ),
       Effect.all
     )
 
-    const incomingNotes = pipe(
-      decryptResults,
-      Array.filterMap((result) => {
-        if (Either.isRight(result)) return Option.some(result.right)
-        if (result.left._tag === 'DecryptingNoteError') {
-          reportError('error', new Error('Error while decrypting note'), {
-            error: result.left,
-          })
-        }
-        return Option.none()
-      }),
-      dedupeIncomingNotesByNoteId
-    )
+    const identity = identityKeyOfPhoneNumber(phoneNumber)
+    const notes = Array.filterMap(decryptResults, (result) => {
+      if (Either.isRight(result))
+        return Option.some({identity, noteInfo: result.right})
+      if (result.left._tag === 'DecryptingNoteError') {
+        reportError('error', new Error('Error while decrypting note'), {
+          error: result.left,
+        })
+      }
+      return Option.none()
+    })
 
-    // Sync deletions / expiry for notes not owned by me.
-    const knownForeignNoteIds = pipe(
-      storedNotes,
-      Array.filter((one) => !one.ownershipInfo?.adminId),
-      Array.map((one) => one.noteInfo.noteId)
+    return {notes, nextCursor}
+  })
+
+const getRemovedNoteIdsOfPhoneNumber = ({
+  phoneNumber,
+  offerApi,
+  storedNotes,
+  mainIdentity,
+}: {
+  phoneNumber: SessionPhoneNumber
+  offerApi: OfferApi
+  storedNotes: readonly OneNoteInState[]
+  mainIdentity: PublicKeyPemBase64
+}): Effect.Effect<{
+  identity: PublicKeyPemBase64
+  removedIds: readonly NoteId[]
+}> => {
+  const identity = identityKeyOfPhoneNumber(phoneNumber)
+  // Only notes this number received, not owned by me
+  const knownForeignNoteIds = pipe(
+    storedNotes,
+    Array.filter(
+      (one) =>
+        !one.ownershipInfo?.adminId &&
+        Record.has(
+          storedSocialPartsByIdentity({
+            socialPartsByIdentity: one.socialPartsByIdentity,
+            legacyPart: Option.some(socialPartOf(one.noteInfo.privatePart)),
+            mainIdentity,
+          }),
+          identity
+        )
+    ),
+    Array.map((one) => one.noteInfo.noteId)
+  )
+
+  return pipe(
+    Array.isNonEmptyReadonlyArray(knownForeignNoteIds)
+      ? offerApi
+          .getRemovedNotes({noteIds: knownForeignNoteIds})
+          .pipe(Effect.map((res) => res.noteIds))
+      : Effect.succeed<readonly NoteId[]>([]),
+    Effect.catchAll((e) => {
+      reportError('error', new Error('Error fetching removed notes'), {e})
+      return Effect.succeed<readonly NoteId[]>([])
+    }),
+    Effect.map((removedIds) => ({identity, removedIds}))
+  )
+}
+
+const runRefreshNotesActionAtom = atom(null, (get, set) =>
+  Effect.gen(function* (_) {
+    const updateStartedAt = isoNow()
+    const storedNotes = get(notesAtom)
+    const [main, ...extras] = get(phoneNumberApisAtom)
+    const mainIdentity = identityKeyOfPhoneNumber(main.phoneNumber)
+    const extraCursors = get(notesStateAtom).extraIdentitiesNotesNextPageParam
+
+    const mainResult = yield* _(
+      fetchNotesOfPhoneNumber({
+        ...main,
+        cursor: get(notesNextPageParamAtom),
+      })
+    )
+    const extraResults = yield* _(
+      Effect.forEach(
+        extras,
+        (extra) => {
+          const identity = identityKeyOfPhoneNumber(extra.phoneNumber)
+          return fetchNotesOfPhoneNumber({
+            ...extra,
+            cursor: extraCursors?.[identity],
+          }).pipe(
+            Effect.map(({notes, nextCursor}) => ({
+              identity,
+              nextCursor,
+              // Owner parts are encrypted for the main number only
+              notes: Array.filter(
+                notes,
+                ({noteInfo}) => !noteInfo.privatePart.adminId
+              ),
+            })),
+            // One number failing must not hold back the others
+            Effect.catchAll((e) => {
+              reportError(
+                'warn',
+                new Error('Error fetching notes of an extra phone number'),
+                {e}
+              )
+              return Effect.succeed({
+                identity,
+                nextCursor: extraCursors?.[identity],
+                notes: [],
+              })
+            })
+          )
+        },
+        {concurrency: 'unbounded'}
+      )
     )
 
     const removedNoteIds = yield* _(
-      Array.isNonEmptyReadonlyArray(knownForeignNoteIds)
-        ? api.offer
-            .getRemovedNotes({noteIds: knownForeignNoteIds})
-            .pipe(Effect.map((res) => res.noteIds))
-        : Effect.succeed<readonly NoteId[]>([]),
-      Effect.catchAll((e) => {
-        reportError('error', new Error('Error fetching removed notes'), {e})
-        return Effect.succeed<readonly NoteId[]>([])
-      })
+      Effect.forEach(
+        [main, ...extras],
+        (one) =>
+          getRemovedNoteIdsOfPhoneNumber({...one, storedNotes, mainIdentity}),
+        {concurrency: 'unbounded'}
+      )
     )
 
+    const extraResultsOfSession = onlyIdentitiesOfSession(
+      get(sessionDataOrDummyAtom),
+      extraResults
+    )
     set(notesStateAtom, (old) => ({
       ...old,
       // Committed together with the notes so a failed refresh cannot skip them.
-      notesNextPageParam: nextCursor,
+      notesNextPageParam: mainResult.nextCursor,
+      extraIdentitiesNotesNextPageParam: pipe(
+        extraResultsOfSession,
+        Array.filterMap(({identity, nextCursor}) =>
+          nextCursor === undefined
+            ? Option.none()
+            : Option.some([identity, nextCursor] satisfies [
+                PublicKeyPemBase64,
+                string,
+              ])
+        ),
+        Record.fromEntries
+      ),
       notes: mergeIncomingNotesToState({
-        incomingNotes,
+        incomingNotes: [
+          ...mainResult.notes,
+          ...Array.flatMap(extraResultsOfSession, (one) => one.notes),
+        ],
         storedNotes: old.notes,
         removedNoteIds,
+        mainIdentity,
       }),
       lastUpdatedAt: updateStartedAt,
     }))

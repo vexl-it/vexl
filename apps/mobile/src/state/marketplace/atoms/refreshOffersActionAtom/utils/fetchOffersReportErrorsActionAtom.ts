@@ -1,6 +1,7 @@
 import {
   type KeyPairV2,
   type PrivateKeyHolder,
+  type PublicKeyPemBase64,
 } from '@vexl-next/cryptography/src/KeyHolder'
 import {type ClubKeys, type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {type OfferInfo} from '@vexl-next/domain/src/general/offers'
@@ -10,13 +11,19 @@ import {
 } from '@vexl-next/resources-utils/src/offers/decryptOffer'
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
 import {Array, Effect, Either, Option, pipe, Record} from 'effect'
+import {constVoid} from 'effect/Function'
 import {atom} from 'jotai'
 import reportError from '../../../../../utils/reportError'
-import {type NotOfferFromContactNetworkError} from '../../../domain'
+import {
+  type ApiErrorFetchingOffers,
+  type NotOfferFromContactNetworkError,
+} from '../../../domain'
 import {
   clubOffersNextPageParamAtom,
   contactOffersNextPageParamAtom,
+  extraIdentitiesContactOffersNextPageParamAtom,
 } from '../../offersState'
+import {type OfferForIdentity} from './combineIncomingOffers'
 import {
   getNewClubsOffersAndDecryptPaginatedActionAtom,
   type NotOfferForExpectedClubError,
@@ -72,42 +79,128 @@ const filterAndReportDecryptionErrors = (
   )
 }
 
+interface ContactOffersOfIdentity {
+  readonly identity: PublicKeyPemBase64
+  readonly offers: readonly OfferForIdentity[]
+  readonly commitNextPageToken: () => void
+}
+
+export interface OffersIdentity {
+  readonly identity: PublicKeyPemBase64
+  readonly offersApi: OfferApi
+  readonly keyPair: PrivateKeyHolder
+  readonly keyPairV2: KeyPairV2
+}
+
+/**
+ * Contact offers come to every phone number of the user, each decrypted with
+ * that number's keys. Offers of the user come to the main number only.
+ */
 export const fetchOffersReportErrorsActionAtom = atom(
   null,
   (
     get,
     set,
     {
-      offersApi,
-      contactNetworkKeyPair,
-      contactNetworkKeyPairV2,
+      mainIdentity,
+      extraIdentities,
       clubs,
     }: {
-      offersApi: OfferApi
-      contactNetworkKeyPair: PrivateKeyHolder
-      contactNetworkKeyPairV2: KeyPairV2
+      mainIdentity: OffersIdentity
+      extraIdentities: readonly OffersIdentity[]
       clubs: Record<ClubUuid, ClubKeys>
     }
   ) => {
-    const contactOffersNextPageParam = get(contactOffersNextPageParamAtom)
     const clubOffersNextPageParam = get(clubOffersNextPageParamAtom)
+    const extraCursors = get(extraIdentitiesContactOffersNextPageParamAtom)
+
+    const fetchForIdentity = ({
+      identity,
+      offersApi,
+      keyPair,
+      keyPairV2,
+      lastPrivatePartIdBase64,
+      storeNextPageToken,
+    }: OffersIdentity & {
+      lastPrivatePartIdBase64: string | undefined
+      storeNextPageToken: (nextPageToken: string) => void
+    }): Effect.Effect<ContactOffersOfIdentity, ApiErrorFetchingOffers> =>
+      Effect.gen(function* (_) {
+        let nextPageToken: string | undefined
+        const offers = yield* _(
+          set(getNewContactNetworkOffersAndDecryptPaginatedActionAtom, {
+            offersApi,
+            keyPair,
+            keyPairV2,
+            lastPrivatePartIdBase64,
+            storeNextPageToken: (token) => {
+              nextPageToken = token
+            },
+          }),
+          Effect.map(filterAndReportDecryptionErrors)
+        )
+        return {
+          identity,
+          offers: Array.map(offers, (offerInfo) => ({identity, offerInfo})),
+          commitNextPageToken: () => {
+            if (nextPageToken) storeNextPageToken(nextPageToken)
+          },
+        }
+      })
 
     return Effect.all({
-      contact: pipe(
-        set(getNewContactNetworkOffersAndDecryptPaginatedActionAtom, {
-          offersApi,
-          keyPair: contactNetworkKeyPair,
-          keyPairV2: contactNetworkKeyPairV2,
-          lastPrivatePartIdBase64: contactOffersNextPageParam,
-        }),
-        Effect.map(filterAndReportDecryptionErrors)
+      contact: Effect.all(
+        [
+          fetchForIdentity({
+            ...mainIdentity,
+            lastPrivatePartIdBase64: get(contactOffersNextPageParamAtom),
+            storeNextPageToken: (nextPageToken) => {
+              set(contactOffersNextPageParamAtom, nextPageToken)
+            },
+          }),
+          ...Array.map(extraIdentities, (extra) =>
+            fetchForIdentity({
+              ...extra,
+              lastPrivatePartIdBase64: extraCursors?.[extra.identity],
+              storeNextPageToken: (nextPageToken) => {
+                set(extraIdentitiesContactOffersNextPageParamAtom, (prev) => ({
+                  ...prev,
+                  [extra.identity]: nextPageToken,
+                }))
+              },
+            }).pipe(
+              // Owner parts are encrypted for the main number only
+              Effect.map((result) => ({
+                ...result,
+                offers: Array.filter(
+                  result.offers,
+                  ({offerInfo}) => !offerInfo.privatePart.adminId
+                ),
+              })),
+              // One number failing must not hold back the others
+              Effect.catchAll((e) => {
+                reportError(
+                  'warn',
+                  new Error('Error fetching offers of an extra phone number'),
+                  {e}
+                )
+                return Effect.succeed({
+                  identity: extra.identity,
+                  offers: [],
+                  commitNextPageToken: constVoid,
+                })
+              })
+            )
+          ),
+        ],
+        {concurrency: 'unbounded'}
       ),
 
       clubs: pipe(
         Record.toEntries(clubs),
         Array.map(([clubUuid, keyPair]) =>
           set(getNewClubsOffersAndDecryptPaginatedActionAtom, {
-            offersApi,
+            offersApi: mainIdentity.offersApi,
             keyPair,
             clubUuid,
             lastPrivatePartIdBase64: pipe(

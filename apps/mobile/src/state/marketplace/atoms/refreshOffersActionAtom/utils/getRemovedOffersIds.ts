@@ -1,3 +1,4 @@
+import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {type ClubKeys, type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {
   type OfferId,
@@ -6,17 +7,36 @@ import {
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
 import {Array, Effect, Option, pipe, Record} from 'effect'
 import reportError from '../../../../../utils/reportError'
+import {
+  contactSocialPartOf,
+  storedSocialPartsByIdentity,
+} from '../../../../phoneNumbers/socialPartsByIdentity'
 
+/**
+ * Asks each identity only about the offers it received. An offer is gone from
+ * contacts once no identity has a private part for it anymore.
+ */
 export const getRemovedOffersIds = ({
   storedOffers,
   offersApi,
+  contactOffersApis,
+  mainIdentity,
   storedClubs,
 }: {
   storedOffers: OneOfferInState[]
+  // For club offers
   offersApi: OfferApi
+  contactOffersApis: ReadonlyArray<{
+    identity: PublicKeyPemBase64
+    offersApi: OfferApi
+  }>
+  mainIdentity: PublicKeyPemBase64
   storedClubs: Record<ClubUuid, ClubKeys>
 }): Effect.Effect<{
-  removedContactOfferIds: readonly OfferId[]
+  removedContactOfferIds: ReadonlyArray<{
+    identity: PublicKeyPemBase64
+    removedIds: readonly OfferId[]
+  }>
   removedClubsOfferIdsToClubUuid: ReadonlyArray<{
     clubUuid: ClubUuid
     removedIds: readonly OfferId[]
@@ -25,18 +45,25 @@ export const getRemovedOffersIds = ({
   // avoid recording a failed reconciliation as successful.
   succeeded: boolean
 }> => {
-  const savedContactOffersIds = pipe(
-    Array.filter(
-      storedOffers,
-      (oneOffer) =>
-        !oneOffer.ownershipInfo?.adminId && // Not my offers
-        Array.intersection(oneOffer.offerInfo.privatePart.friendLevel, [
-          'FIRST_DEGREE',
-          'SECOND_DEGREE',
-        ]).length > 0
-    ),
-    Array.map((o) => o.offerInfo.offerId)
+  const foreignOffers = Array.filter(
+    storedOffers,
+    (oneOffer) => !oneOffer.ownershipInfo?.adminId // Not my offers
   )
+  const savedContactOffersIdsOf = (identity: PublicKeyPemBase64): OfferId[] =>
+    pipe(
+      foreignOffers,
+      Array.filter((oneOffer) =>
+        Record.has(
+          storedSocialPartsByIdentity({
+            socialPartsByIdentity: oneOffer.socialPartsByIdentity,
+            legacyPart: contactSocialPartOf(oneOffer.offerInfo.privatePart),
+            mainIdentity,
+          }),
+          identity
+        )
+      ),
+      Array.map((o) => o.offerInfo.offerId)
+    )
 
   const clubOffersIds = pipe(
     storedClubs,
@@ -60,18 +87,27 @@ export const getRemovedOffersIds = ({
   // Each check is turned into an Option: None marks a swallowed failure so the
   // overall `succeeded` flag can tell an empty-because-successful result apart
   // from an empty-because-failed one.
-  const removedContactOffers = pipe(
-    Array.isNonEmptyArray(savedContactOffersIds)
-      ? offersApi
-          .getRemovedOffers({offerIds: savedContactOffersIds})
-          .pipe(Effect.map((one) => one.offerIds))
-      : Effect.succeed<readonly OfferId[]>([]),
-    Effect.tapError((e) =>
-      Effect.sync(() => {
-        reportError('error', new Error('Error fetching removed offers'), {e})
-      })
-    ),
-    Effect.option
+  const removedContactOffers = Effect.all(
+    Array.map(contactOffersApis, ({identity, offersApi}) => {
+      const savedContactOffersIds = savedContactOffersIdsOf(identity)
+      return pipe(
+        Array.isNonEmptyArray(savedContactOffersIds)
+          ? offersApi
+              .getRemovedOffers({offerIds: savedContactOffersIds})
+              .pipe(Effect.map((one) => one.offerIds))
+          : Effect.succeed<readonly OfferId[]>([]),
+        Effect.map((removedIds) => ({identity, removedIds})),
+        Effect.tapError((e) =>
+          Effect.sync(() => {
+            reportError('error', new Error('Error fetching removed offers'), {
+              e,
+            })
+          })
+        ),
+        Effect.option
+      )
+    }),
+    {concurrency: 'unbounded'}
   )
 
   const removedClubsOffers = pipe(
@@ -99,12 +135,11 @@ export const getRemovedOffersIds = ({
     clubs: removedClubsOffers,
   }).pipe(
     Effect.map(({contact, clubs}) => ({
-      removedContactOfferIds: Option.getOrElse(
-        contact,
-        (): readonly OfferId[] => []
-      ),
+      removedContactOfferIds: Array.getSomes(contact),
       removedClubsOfferIdsToClubUuid: Array.getSomes(clubs),
-      succeeded: Option.isSome(contact) && Array.every(clubs, Option.isSome),
+      succeeded:
+        Array.every(contact, Option.isSome) &&
+        Array.every(clubs, Option.isSome),
     }))
   )
 }

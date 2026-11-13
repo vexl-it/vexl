@@ -61,8 +61,6 @@
   "editProfileScreen.addIdentity.button": "افزودن هویت",
   "editProfileScreen.vexlAlias.title": "نام مستعار vexl تو",
   "editProfileScreen.vexlAlias.subtitle": "دیگران تو رو این‌طوری می‌بینن. هویت واقعی‌ات پنهان می‌مونه تا وقتی خودت تصمیم بگیری آشکارش کنی.",
-  "editProfileScreen.phoneNumber.title": "شماره تلفن",
-  "editProfileScreen.phoneNumber.subtitle": "شماره تلفنت خصوصی می‌مونه. هیچ‌کس نمی‌بینتش مگر اینکه خودت به اشتراکش بذاری.",
   "editProfileScreen.spokenLanguages.title": "زبان‌هایی که صحبت می‌کنی",
   "editProfileScreen.spokenLanguages.subtitle": "به بقیه بگو با چه زبان‌هایی برای معامله راحتی.",
   "editProfileScreen.identityPhoto.title": "افزودن عکس",

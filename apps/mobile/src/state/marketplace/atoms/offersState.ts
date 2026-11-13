@@ -48,6 +48,11 @@ export const contactOffersNextPageParamAtom = focusAtom(
   (optic) => optic.prop('contactOffersNextPageParam')
 )
 
+export const extraIdentitiesContactOffersNextPageParamAtom = focusAtom(
+  offersStateAtom,
+  (optic) => optic.prop('extraIdentitiesContactOffersNextPageParam')
+)
+
 export const clubOffersNextPageParamAtom = focusAtom(offersStateAtom, (optic) =>
   optic.prop('clubOffersNextPageParam')
 )
@@ -131,9 +136,7 @@ export const updateOrFilterOffersFromDeletedClubsActionAtom = atom(
   (get, set, deletedClubs: Array.NonEmptyArray<ClubUuid>) => {
     set(
       offersAtom,
-      Array.filterMap((offer) =>
-        offerWithoutSourceOrNone(offer, deletedClubs, false)
-      )
+      Array.filterMap((offer) => offerWithoutSourceOrNone(offer, deletedClubs))
     )
   }
 )

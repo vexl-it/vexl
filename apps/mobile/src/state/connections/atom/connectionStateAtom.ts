@@ -1,5 +1,3 @@
-import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
-import {type PublicKeyV2} from '@vexl-next/cryptography/src/KeyHolder/brandsV2'
 import {type ChatUserIdentity} from '@vexl-next/domain/src/general/messaging'
 import {type NotificationTrackingId} from '@vexl-next/domain/src/general/NotificationTrackingId.brand'
 import {
@@ -7,13 +5,18 @@ import {
   unixMillisecondsNow,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
-import {FETCH_CONNECTIONS_PAGE_SIZE} from '@vexl-next/resources-utils/src/offers/utils/fetchContactsForOffer'
-import fetchAllPaginatedData from '@vexl-next/rest-api/src/fetchAllPaginatedData'
-import {type ContactApi} from '@vexl-next/rest-api/src/services/contact'
+import {
+  fetchCommonConnections,
+  fetchMyConnections,
+} from '@vexl-next/resources-utils/src/offers/utils/fetchContactsForOffer'
 import {Array, Effect, HashMap, Number, Option, Schema} from 'effect'
 import {pipe} from 'fp-ts/function'
 import {atom, type Atom} from 'jotai'
 import {apiAtom} from '../../../api'
+import {
+  contactApisAtom,
+  ownPublicKeysAtom,
+} from '../../../api/contactApiForSession'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
 import deduplicate from '../../../utils/deduplicate'
 import {
@@ -57,23 +60,6 @@ function firstAndSecondLevelConnections<T>(
   return deduplicate([...firstLevel, ...secondLevel])
 }
 
-function fetchContacts(
-  level: 'FIRST' | 'SECOND',
-  api: ContactApi
-): Effect.Effect<
-  Array<PublicKeyPemBase64 | PublicKeyV2>,
-  Effect.Effect.Error<ReturnType<ContactApi['fetchMyContactsPaginated']>>
-> {
-  return fetchAllPaginatedData({
-    fetchEffectToRun: (nextPageToken) =>
-      api.fetchMyContactsPaginated({
-        level,
-        limit: FETCH_CONNECTIONS_PAGE_SIZE,
-        nextPageToken,
-      }),
-  })
-}
-
 export const fetchConnectionsActionAtom = atom(
   null,
   (get, set, notificationTrackingId?: NotificationTrackingId) => {
@@ -83,11 +69,20 @@ export const fetchConnectionsActionAtom = atom(
       console.log('🦋 Refreshing connections state')
       const updateStarted = unixMillisecondsNow()
 
+      const ownPublicKeys = get(ownPublicKeysAtom)
       const {firstLevel, secondLevel} = yield* _(
         Effect.all(
           {
-            firstLevel: fetchContacts('FIRST', api.contact),
-            secondLevel: fetchContacts('SECOND', api.contact),
+            firstLevel: fetchMyConnections({
+              contactApi: api.contact,
+              level: 'FIRST',
+              ownPublicKeys,
+            }),
+            secondLevel: fetchMyConnections({
+              contactApi: api.contact,
+              level: 'SECOND',
+              ownPublicKeys,
+            }),
           },
           {concurrency: 'unbounded'}
         )
@@ -182,43 +177,12 @@ export const fetchConnectionsActionAtom = atom(
         set(ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom)
       )
 
-      const commonConnectionsData = yield* _(
-        fetchAllPaginatedData({
-          fetchEffectToRun: (nextPageToken) =>
-            api.contact.fetchCommonConnectionsPaginated({
-              publicKeys,
-              limit: FETCH_CONNECTIONS_PAGE_SIZE,
-              nextPageToken,
-            }),
+      const {commonFriends, verifiedFriends} = yield* _(
+        fetchCommonConnections({
+          contactApis: get(contactApisAtom),
+          publicKeys,
+          serverToClientHashesToHashedPhoneNumbersMap,
         })
-      )
-
-      const commonFriends = pipe(
-        commonConnectionsData,
-        Array.map(
-          (one) =>
-            [
-              one.publicKey,
-              Array.filterMap(one.common.hashes, (hash) =>
-                HashMap.get(serverToClientHashesToHashedPhoneNumbersMap, hash)
-              ),
-            ] as const
-        ),
-        HashMap.fromIterable
-      )
-
-      const verifiedFriends = pipe(
-        commonConnectionsData,
-        Array.map(
-          (one) =>
-            [
-              one.publicKey,
-              Array.filterMap(one.common.verifiedHashes, (hash) =>
-                HashMap.get(serverToClientHashesToHashedPhoneNumbersMap, hash)
-              ),
-            ] as const
-        ),
-        HashMap.fromIterable
       )
 
       const lastUpdate = updateStarted

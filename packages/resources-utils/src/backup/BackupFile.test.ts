@@ -1,8 +1,10 @@
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {generateKeyPair} from '@vexl-next/cryptography/src/operations/cryptobox'
+import {generateKeyDerivationId} from '@vexl-next/domain/src/general/MasterSeed.brand'
 import {Effect, Either, Schema} from 'effect'
 import {
   BackupFile,
+  BackupFileFromJson,
   BackupPin,
   decryptBackupFile,
   encryptBackupFile,
@@ -62,6 +64,80 @@ describe('backup file encryption', () => {
       )
     )
     expect(decrypted).toEqual(backup)
+  })
+
+  it('round-trips the extra phone numbers with their own keys', async () => {
+    const backup = await makeBackup()
+    const extraPhoneNumber = async (
+      phoneNumber: string,
+      hash: string
+    ): Promise<unknown> => {
+      const privateKey = generatePrivateKey()
+      const keyPairV2 = await generateKeyPair()
+      return {
+        phoneNumber,
+        privateKey,
+        keyPairV2,
+        keyDerivationId: generateKeyDerivationId(),
+        sessionCredentials: {
+          publicKey: privateKey.publicKeyPemBase64,
+          hash,
+          signature: 'signature',
+          vexlAuthHeader: {
+            data: {hash, pk: keyPairV2.publicKey},
+            signature: 'CBSig-signature',
+          },
+        },
+      }
+    }
+    const withExtraNumbers = Schema.validateSync(BackupFile)({
+      ...backup,
+      session: {
+        ...backup.session,
+        extraPhoneNumbers: [
+          await extraPhoneNumber('+420777777777', 'second'),
+          await extraPhoneNumber('+421905123456', 'third'),
+        ],
+      },
+    })
+    const keyPair = await generateKeyPair()
+
+    const decrypted = await Effect.runPromise(
+      encryptBackupFile({
+        backup: withExtraNumbers,
+        pin,
+        publicKey: keyPair.publicKey,
+      }).pipe(Effect.flatMap((file) => decryptBackupFile({file, pin, keyPair})))
+    )
+
+    expect(decrypted).toEqual(withExtraNumbers)
+    expect(decrypted.session.extraPhoneNumbers).toHaveLength(2)
+  })
+
+  it('decodes a backup made before accounts had several numbers', async () => {
+    const backup = await makeBackup()
+    const json = Schema.encodeSync(BackupFileFromJson)(backup)
+
+    expect(json).not.toContain('extraPhoneNumbers')
+    const decoded = Schema.decodeSync(BackupFileFromJson)(json)
+    expect(decoded).toEqual(backup)
+    expect(decoded.session.extraPhoneNumbers).toBeUndefined()
+  })
+
+  it('ignores the phone number counter of earlier builds', async () => {
+    const json = Schema.encodeSync(BackupFileFromJson)(
+      Schema.validateSync(BackupFile)({
+        ...(await makeBackup()),
+        derivationCounters: {nextInboxIndex: 3, nextClubIndex: 1},
+      })
+    ).replace('"nextClubIndex":1', '"nextClubIndex":1,"nextPhoneNumberIndex":2')
+    expect(json).toContain('nextPhoneNumberIndex')
+
+    const decoded = Schema.decodeSync(BackupFileFromJson)(json)
+    expect(decoded.derivationCounters).toEqual({
+      nextInboxIndex: 3,
+      nextClubIndex: 1,
+    })
   })
 
   it('fails with BackupFileWrongPinError for a wrong PIN', async () => {

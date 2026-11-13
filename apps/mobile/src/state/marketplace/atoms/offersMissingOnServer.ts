@@ -12,6 +12,10 @@ import {Array, Effect, Option, Record, Schema} from 'effect'
 import {pipe} from 'fp-ts/lib/function'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
+import {
+  contactApisAtom,
+  ownPublicKeysAtom,
+} from '../../../api/contactApiForSession'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
 import getCountryPrefix from '../../../utils/getCountryCode'
 import reportError from '../../../utils/reportError'
@@ -104,7 +108,8 @@ const reencryptOneOfferActionAtom = atom(
       return yield* _(
         createNewOfferForMyContacts({
           offerApi: api.offer,
-          contactApi: api.contact,
+          contactApis: get(contactApisAtom),
+          ownPublicKeys: get(ownPublicKeysAtom),
           publicPart: offer.offerInfo.publicPart,
           countryPrefix: getCountryPrefix(session.phoneNumber),
           serverToClientHashesToHashedPhoneNumbersMap,

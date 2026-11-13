@@ -19,7 +19,7 @@ import {useTheme} from 'tamagui'
 import {type EditProfileStackScreenProps} from '../../../navigationTypes'
 import {
   realUserDataAtom,
-  userPhoneNumberAtom,
+  userPhoneNumbersAtom,
 } from '../../../state/session/userDataAtoms'
 import {getInternationalPhoneNumber} from '../../../utils/getInternationalPhoneNumber'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
@@ -67,13 +67,36 @@ function Card({
   )
 }
 
+function EditButton({
+  onPress,
+}: {
+  readonly onPress: () => void
+}): React.ReactElement {
+  const theme = useTheme()
+
+  return (
+    <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
+      <YStack
+        backgroundColor="$backgroundTertiary"
+        width="$9"
+        height="$9"
+        borderRadius="$3"
+        alignItems="center"
+        justifyContent="center"
+      >
+        <PencilWriteEdit size={24} color={theme.foregroundPrimary.get()} />
+      </YStack>
+    </TouchableOpacity>
+  )
+}
+
 function EditProfileDefaultScreen({
   navigation,
 }: EditProfileStackScreenProps<'EditProfileDefault'>): React.ReactElement {
   const goBack = useSafeGoBack()
   const {t} = useTranslation()
   const theme = useTheme()
-  const phoneNumber = useAtomValue(userPhoneNumberAtom)
+  const phoneNumbers = useAtomValue(userPhoneNumbersAtom)
   const realUserData = useAtomValue(realUserDataAtom)
   const spokenLanguages = useAtomValue(lastUsedOfferSpokenLanguagesAtom)
   const spokenLanguagesText = pipe(
@@ -122,26 +145,11 @@ function EditProfileDefaultScreen({
                 {realUserData.userName ??
                   t('editProfileScreen.identity.photoFallback')}
               </Typography>
-              <TouchableOpacity
+              <EditButton
                 onPress={() => {
                   navigation.navigate('EditIdentity')
                 }}
-                activeOpacity={0.7}
-              >
-                <YStack
-                  backgroundColor="$backgroundTertiary"
-                  width="$9"
-                  height="$9"
-                  borderRadius="$3"
-                  alignItems="center"
-                  justifyContent="center"
-                >
-                  <PencilWriteEdit
-                    size={24}
-                    color={theme.foregroundPrimary.get()}
-                  />
-                </YStack>
-              </TouchableOpacity>
+              />
             </XStack>
           </Card>
         ) : (
@@ -161,17 +169,33 @@ function EditProfileDefaultScreen({
           </XStack>
         </Card>
         <Card
-          title={t('editProfileScreen.phoneNumber.title')}
-          subtitle={t('editProfileScreen.phoneNumber.subtitle')}
+          title={t('editProfileScreen.phoneNumbers.title')}
+          subtitle={t('editProfileScreen.phoneNumbers.subtitle')}
         >
           <XStack alignItems="center" gap="$3">
             <CellPhoneMobileDevice
               size={24}
               color={theme.foregroundSecondary.get()}
             />
-            <Typography variant="descriptionBold" color="$foregroundPrimary">
-              {getInternationalPhoneNumber(phoneNumber)}
-            </Typography>
+            <YStack flex={1} gap="$2">
+              {pipe(
+                phoneNumbers,
+                Array.map((phoneNumber) => (
+                  <Typography
+                    key={phoneNumber}
+                    variant="descriptionBold"
+                    color="$foregroundPrimary"
+                  >
+                    {getInternationalPhoneNumber(phoneNumber)}
+                  </Typography>
+                ))
+              )}
+            </YStack>
+            <EditButton
+              onPress={() => {
+                navigation.navigate('EditProfilePhoneNumbers')
+              }}
+            />
           </XStack>
         </Card>
         <Card
@@ -187,26 +211,11 @@ function EditProfileDefaultScreen({
             >
               {spokenLanguagesText}
             </Typography>
-            <TouchableOpacity
+            <EditButton
               onPress={() => {
                 navigation.navigate('EditProfileSpokenLanguages')
               }}
-              activeOpacity={0.7}
-            >
-              <YStack
-                backgroundColor="$backgroundTertiary"
-                width="$9"
-                height="$9"
-                borderRadius="$3"
-                alignItems="center"
-                justifyContent="center"
-              >
-                <PencilWriteEdit
-                  size={24}
-                  color={theme.foregroundPrimary.get()}
-                />
-              </YStack>
-            </TouchableOpacity>
+            />
           </XStack>
         </Card>
       </YStack>

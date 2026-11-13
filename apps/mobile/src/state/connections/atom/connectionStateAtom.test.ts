@@ -4,7 +4,7 @@ import {
 } from '@vexl-next/cryptography/src/KeyHolder'
 import {ServerToClientHashedNumber} from '@vexl-next/domain/src/general/ServerToClientHashedNumber'
 import {Effect, HashMap, Option, Schema} from 'effect'
-import {createStore} from 'jotai'
+import {createStore, type Atom, type Getter} from 'jotai'
 import {apiAtom} from '../../../api'
 import {ConnectionsState} from '../domain'
 import connectionStateAtom, {
@@ -30,6 +30,16 @@ jest.mock('../../../api', () => {
         fetchCommonConnectionsPaginated: jest.fn(),
       },
     }),
+  }
+})
+jest.mock('../../../api/contactApiForSession', () => {
+  const {atom} = jest.requireActual('jotai')
+  const {apiAtom} = jest.requireMock<{
+    apiAtom: Atom<{contact: unknown}>
+  }>('../../../api')
+  return {
+    contactApisAtom: atom((get: Getter) => [get(apiAtom).contact]),
+    ownPublicKeysAtom: atom([]),
   }
 })
 jest.mock('../../clubs/atom/clubsWithMembersAtom', () => {

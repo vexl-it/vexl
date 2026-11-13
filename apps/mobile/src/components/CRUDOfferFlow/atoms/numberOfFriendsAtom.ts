@@ -1,8 +1,8 @@
-import {FETCH_CONNECTIONS_PAGE_SIZE} from '@vexl-next/resources-utils/src/offers/utils/fetchContactsForOffer'
-import fetchAllPaginatedData from '@vexl-next/rest-api/src/fetchAllPaginatedData'
+import {fetchMyConnections} from '@vexl-next/resources-utils/src/offers/utils/fetchContactsForOffer'
 import {Array, Effect, Schema} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
+import {ownPublicKeysAtom} from '../../../api/contactApiForSession'
 
 const NumberOfFriendsAtomState = Schema.Union(
   Schema.Struct({
@@ -39,25 +39,20 @@ const numberOfFriendsAtom = atom(
     const api = get(apiAtom)
 
     return Effect.gen(function* (_) {
+      const ownPublicKeys = get(ownPublicKeysAtom)
       const firstLevelConnections = yield* _(
-        fetchAllPaginatedData({
-          fetchEffectToRun: (nextPageToken) =>
-            api.contact.fetchMyContactsPaginated({
-              level: 'FIRST',
-              limit: FETCH_CONNECTIONS_PAGE_SIZE,
-              nextPageToken,
-            }),
+        fetchMyConnections({
+          contactApi: api.contact,
+          level: 'FIRST',
+          ownPublicKeys,
         })
       )
 
       const secondLevelConnections = yield* _(
-        fetchAllPaginatedData({
-          fetchEffectToRun: (nextPageToken) =>
-            api.contact.fetchMyContactsPaginated({
-              level: 'SECOND',
-              limit: FETCH_CONNECTIONS_PAGE_SIZE,
-              nextPageToken,
-            }),
+        fetchMyConnections({
+          contactApi: api.contact,
+          level: 'SECOND',
+          ownPublicKeys,
         })
       )
 

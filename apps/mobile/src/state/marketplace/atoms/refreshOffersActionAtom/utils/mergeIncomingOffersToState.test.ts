@@ -1,3 +1,5 @@
+import {KeyHolder} from '@vexl-next/cryptography'
+import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {
@@ -6,8 +8,10 @@ import {
   type OfferPrivatePart,
   type OneOfferInState,
 } from '@vexl-next/domain/src/general/offers'
-import {Schema} from 'effect'
-import {mergeIncomingOffersToState} from './mergeIncomingOffersToState'
+import {Option, Record, Schema} from 'effect'
+import {contactSocialPartOf} from '../../../../phoneNumbers/socialPartsByIdentity'
+import {type IncomingOffer} from './combineIncomingOffers'
+import {mergeIncomingOffersToState as merge} from './mergeIncomingOffersToState'
 
 const clubA = Schema.decodeSync(ClubUuid)(
   '00000000-0000-4000-8000-000000000001'
@@ -76,6 +80,28 @@ const clubUpdate = makeOffer({
 })
 const noRemovals = {contacts: [], clubs: []}
 
+const mainIdentity = KeyHolder.generatePrivateKey().publicKeyPemBase64
+const extraIdentity = KeyHolder.generatePrivateKey().publicKeyPemBase64
+
+// Received by one identity: its contact part is that identity's view
+const incoming = (
+  offerInfo: OfferInfo,
+  identity: PublicKeyPemBase64 = mainIdentity
+): IncomingOffer => ({
+  offerInfo,
+  socialPartsByIdentity: Option.match(
+    contactSocialPartOf(offerInfo.privatePart),
+    {
+      onNone: () => Record.empty(),
+      onSome: (part) => Record.singleton(identity, part),
+    }
+  ),
+})
+
+const mergeIncomingOffersToState = (
+  args: Omit<Parameters<typeof merge>[0], 'mainIdentity'>
+): ReturnType<typeof merge> => merge({...args, mainIdentity})
+
 it.each([{commonFriends: [newFriend]}, {commonFriends: []}])(
   'preserves clubs while replacing social fields with $commonFriends',
   ({commonFriends}) => {
@@ -85,7 +111,7 @@ it.each([{commonFriends: [newFriend]}, {commonFriends: []}])(
     }
     const result = mergeIncomingOffersToState({
       storedOffers: [storedOffer],
-      incomingOffers: [incomingOffer],
+      incomingOffers: [incoming(incomingOffer)],
       removedOffersIds: noRemovals,
     })
 
@@ -110,7 +136,7 @@ it.each([{commonFriends: [newFriend]}, {commonFriends: []}])(
 it('preserves social fields and other clubs on a club-only update', () => {
   const result = mergeIncomingOffersToState({
     storedOffers: [storedOffer],
-    incomingOffers: [clubUpdate],
+    incomingOffers: [incoming(clubUpdate)],
     removedOffersIds: noRemovals,
   })
 
@@ -127,11 +153,13 @@ it('replaces social fields in a mixed update without losing unchanged clubs', ()
   const result = mergeIncomingOffersToState({
     storedOffers: [storedOffer],
     incomingOffers: [
-      makeOffer({
-        ...socialUpdate.privatePart,
-        friendLevel: ['FIRST_DEGREE', 'CLUB'],
-        clubIds: [clubB],
-      }),
+      incoming(
+        makeOffer({
+          ...socialUpdate.privatePart,
+          friendLevel: ['FIRST_DEGREE', 'CLUB'],
+          clubIds: [clubB],
+        })
+      ),
     ],
     removedOffersIds: noRemovals,
   })
@@ -145,13 +173,13 @@ it('replaces social fields in a mixed update without losing unchanged clubs', ()
 })
 
 it('does not duplicate clubs when their copy is refreshed', () => {
-  const incoming = makeOffer({
+  const incomingClubCopy = makeOffer({
     ...clubUpdate.privatePart,
     clubIds: [clubA],
   })
   const result = mergeIncomingOffersToState({
     storedOffers: [storedOffer],
-    incomingOffers: [incoming],
+    incomingOffers: [incoming(incomingClubCopy)],
     removedOffersIds: noRemovals,
   })
   expect(result[0]?.offerInfo.privatePart.clubIds).toEqual([clubA])
@@ -159,7 +187,7 @@ it('does not duplicate clubs when their copy is refreshed', () => {
 
 it.each([
   {update: 'none', incomingOffers: []},
-  {update: 'social', incomingOffers: [socialUpdate]},
+  {update: 'social', incomingOffers: [incoming(socialUpdate)]},
 ])('honors club removal with a $update update', ({incomingOffers}) => {
   const result = mergeIncomingOffersToState({
     storedOffers: [storedOffer],
@@ -175,7 +203,7 @@ it.each([
 
 it.each([
   {update: 'none', incomingOffers: []},
-  {update: 'club', incomingOffers: [clubUpdate]},
+  {update: 'club', incomingOffers: [incoming(clubUpdate)]},
 ])(
   'clears revoked social information with a $update update',
   ({incomingOffers}) => {
@@ -183,7 +211,12 @@ it.each([
       storedOffers: [storedOffer],
       incomingOffers,
       removedOffersIds: {
-        contacts: [storedOffer.offerInfo.offerId],
+        contacts: [
+          {
+            identity: mainIdentity,
+            removedIds: [storedOffer.offerInfo.offerId],
+          },
+        ],
         clubs: [],
       },
     })
@@ -202,7 +235,12 @@ it('removes an offer after its last source is revoked', () => {
       storedOffers: [storedOffer],
       incomingOffers: [],
       removedOffersIds: {
-        contacts: [storedOffer.offerInfo.offerId],
+        contacts: [
+          {
+            identity: mainIdentity,
+            removedIds: [storedOffer.offerInfo.offerId],
+          },
+        ],
         clubs: [{clubUuid: clubA, removedIds: [storedOffer.offerInfo.offerId]}],
       },
     })
@@ -223,7 +261,7 @@ it('preserves references on an empty refresh', () => {
 it('adds a new offer without inventing other sources', () => {
   const result = mergeIncomingOffersToState({
     storedOffers: [],
-    incomingOffers: [clubUpdate],
+    incomingOffers: [incoming(clubUpdate)],
     removedOffersIds: noRemovals,
   })
   expect(result[0]?.offerInfo).toBe(clubUpdate)
@@ -240,9 +278,11 @@ it('leaves owned offers untouched', () => {
   }
   const result = mergeIncomingOffersToState({
     storedOffers: [ownedOffer],
-    incomingOffers: [socialUpdate],
+    incomingOffers: [incoming(socialUpdate)],
     removedOffersIds: {
-      contacts: [ownedOffer.offerInfo.offerId],
+      contacts: [
+        {identity: mainIdentity, removedIds: [ownedOffer.offerInfo.offerId]},
+      ],
       clubs: [{clubUuid: clubA, removedIds: [ownedOffer.offerInfo.offerId]}],
     },
   })
@@ -261,7 +301,7 @@ it('restores ownership from the owner payload without retaining foreign sources'
   })
   const result = mergeIncomingOffersToState({
     storedOffers: [storedOffer],
-    incomingOffers: [incomingOffer],
+    incomingOffers: [incoming(incomingOffer)],
     removedOffersIds: noRemovals,
   })
   expect(result[0]?.offerInfo).toBe(incomingOffer)
@@ -284,7 +324,7 @@ it('restores ownership of a new own offer whose owner payload has no friend leve
   })
   const [merged] = mergeIncomingOffersToState({
     storedOffers: [],
-    incomingOffers: [ownOffer],
+    incomingOffers: [incoming(ownOffer)],
     removedOffersIds: noRemovals,
   })
   expect(merged?.ownershipInfo).toEqual({
@@ -298,8 +338,125 @@ it('still drops new foreign offers without any friend level', () => {
   expect(
     mergeIncomingOffersToState({
       storedOffers: [],
-      incomingOffers: [makeOffer({friendLevel: [], clubIds: []})],
+      incomingOffers: [incoming(makeOffer({friendLevel: [], clubIds: []}))],
       removedOffersIds: noRemovals,
     })
   ).toEqual([])
+})
+
+describe('with several phone numbers, each with its own key', () => {
+  const extraFriend = Schema.decodeSync(HashedPhoneNumber)('extra-friend')
+
+  it('keeps what the main number knows when a part for an extra number arrives alone', () => {
+    const [merged] = mergeIncomingOffersToState({
+      storedOffers: [storedOffer],
+      incomingOffers: [
+        incoming(
+          makeOffer({
+            friendLevel: ['FIRST_DEGREE'],
+            clubIds: [],
+            commonFriends: [extraFriend],
+            verifiedCommonFriends: [extraFriend],
+          }),
+          extraIdentity
+        ),
+      ],
+      removedOffersIds: noRemovals,
+    })
+
+    expect(merged?.offerInfo.privatePart).toMatchObject({
+      friendLevel: ['SECOND_DEGREE', 'FIRST_DEGREE', 'CLUB'],
+      clubIds: [clubA],
+      commonFriends: [oldFriend, extraFriend],
+      verifiedCommonFriends: [oldFriend, extraFriend],
+    })
+    expect(merged?.socialPartsByIdentity).toEqual({
+      [mainIdentity]: {
+        friendLevel: ['SECOND_DEGREE'],
+        commonFriends: [oldFriend],
+        verifiedCommonFriends: [oldFriend],
+      },
+      [extraIdentity]: {
+        friendLevel: ['FIRST_DEGREE'],
+        commonFriends: [extraFriend],
+        verifiedCommonFriends: [extraFriend],
+      },
+    })
+  })
+
+  it("replaces only the updated number's view", () => {
+    const [withBoth] = mergeIncomingOffersToState({
+      storedOffers: [storedOffer],
+      incomingOffers: [
+        incoming(
+          makeOffer({
+            friendLevel: ['SECOND_DEGREE'],
+            clubIds: [],
+            commonFriends: [extraFriend],
+            verifiedCommonFriends: [],
+          }),
+          extraIdentity
+        ),
+      ],
+      removedOffersIds: noRemovals,
+    })
+    if (!withBoth) throw new Error('Offer expected')
+
+    const [merged] = mergeIncomingOffersToState({
+      storedOffers: [withBoth],
+      incomingOffers: [incoming(socialUpdate)],
+      removedOffersIds: noRemovals,
+    })
+
+    expect(merged?.offerInfo.privatePart).toMatchObject({
+      friendLevel: ['FIRST_DEGREE', 'SECOND_DEGREE', 'CLUB'],
+      commonFriends: [newFriend, extraFriend],
+      verifiedCommonFriends: [],
+    })
+  })
+
+  it('keeps an offer while another number still has a private part for it', () => {
+    const contactOnly: OneOfferInState = {
+      offerInfo: makeOffer({friendLevel: ['SECOND_DEGREE'], clubIds: []}),
+      flags: {reported: false},
+      socialPartsByIdentity: {
+        [mainIdentity]: {
+          friendLevel: ['SECOND_DEGREE'],
+          commonFriends: [oldFriend],
+          verifiedCommonFriends: [oldFriend],
+        },
+        [extraIdentity]: {
+          friendLevel: ['FIRST_DEGREE'],
+          commonFriends: [extraFriend],
+          verifiedCommonFriends: [],
+        },
+      },
+    }
+    const removedFor = (
+      identity: PublicKeyPemBase64
+    ): Parameters<typeof merge>[0]['removedOffersIds'] => ({
+      clubs: [],
+      contacts: [{identity, removedIds: [contactOnly.offerInfo.offerId]}],
+    })
+
+    const [stillThere] = mergeIncomingOffersToState({
+      storedOffers: [contactOnly],
+      incomingOffers: [],
+      removedOffersIds: removedFor(mainIdentity),
+    })
+    expect(stillThere?.offerInfo.privatePart).toMatchObject({
+      friendLevel: ['FIRST_DEGREE'],
+      commonFriends: [extraFriend],
+      verifiedCommonFriends: [],
+    })
+    if (!stillThere) throw new Error('Offer expected')
+
+    expect(
+      mergeIncomingOffersToState({
+        storedOffers: [stillThere],
+        incomingOffers: [],
+        removedOffersIds: removedFor(extraIdentity),
+      })
+    ).toEqual([])
+  })
 })

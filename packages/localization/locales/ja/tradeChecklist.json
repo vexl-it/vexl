@@ -31,6 +31,8 @@
   "tradeChecklist.exchangeDetails.nickname": "ニックネーム",
   "tradeChecklist.exchangeDetails.nicknameNotSet": "オンにして設定",
   "tradeChecklist.exchangeDetails.phoneNumber": "電話番号",
+  "tradeChecklist.exchangeDetails.phoneNumberToReveal.title": "どの番号を公開する？",
+  "tradeChecklist.exchangeDetails.phoneNumberToReveal.text": "ニックネームには、この番号の一部の数字が付きます。電話番号全体は別に選べます。",
   "tradeChecklist.exchangeDetails.photo": "プロフィール写真",
   "tradeChecklist.exchangeDetails.noPhotoYet": "写真はまだありません",
   "tradeChecklist.exchangeDetails.choosePhoto": "写真を選ぶ",

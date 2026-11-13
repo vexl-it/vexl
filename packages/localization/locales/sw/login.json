@@ -46,7 +46,7 @@
   "loginFlow.restoreFromBackup.errors.unsupportedVersion": "Nakala rudufu hii imetoka kwenye toleo jipya zaidi la Vexl. Sasisha programu na ujaribu tena.",
   "loginFlow.restoreFromBackup.errors.corrupted": "Faili hii imeharibika. Jaribu nakala nyingine.",
   "loginFlow.restoreFromBackup.intro.title": "Rejesha akaunti yako",
-  "loginFlow.restoreFromBackup.intro.text": "Utahitaji:",
+  "loginFlow.restoreFromBackup.intro.text": "Kuwa na vitu hivi vitatu tayari.",
   "loginFlow.restoreFromBackup.intro.phoneNumber.title": "Nambari yako ya simu",
   "loginFlow.restoreFromBackup.intro.phoneNumber.text": "Ile uliyokuwa nayo ulipotengeneza nakala rudufu.",
   "loginFlow.restoreFromBackup.intro.file.title": "Faili yako ya nakala rudufu",

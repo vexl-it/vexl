@@ -46,7 +46,7 @@
   "loginFlow.restoreFromBackup.errors.unsupportedVersion": "このバックアップは新しいバージョンのVexlで作られています。アプリをアップデートして、もう一度試してね。",
   "loginFlow.restoreFromBackup.errors.corrupted": "このファイルは破損しています。別のコピーで試してね。",
   "loginFlow.restoreFromBackup.intro.title": "アカウントを復元",
-  "loginFlow.restoreFromBackup.intro.text": "必要なもの：",
+  "loginFlow.restoreFromBackup.intro.text": "この3つを用意してください。",
   "loginFlow.restoreFromBackup.intro.phoneNumber.title": "電話番号",
   "loginFlow.restoreFromBackup.intro.phoneNumber.text": "バックアップを作ったときの番号です。",
   "loginFlow.restoreFromBackup.intro.file.title": "バックアップファイル",

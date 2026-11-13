@@ -52,7 +52,9 @@ function toChatHistoryMessage({
   const isChatMessage = messageType === 'MESSAGE'
   // Chat images sent before attachments existed only as files on the device
   const imageUnavailable =
-    isChatMessage && !!message.image && !message.imageAttachment
+    isChatMessage &&
+    (!!message.imageUnavailable ||
+      (!!message.image && !message.imageAttachment))
   if (
     isChatMessage &&
     !message.text.trim() &&

@@ -270,24 +270,46 @@ function withoutRevealPhoto(message: ChatMessage): ChatMessage {
   }
 }
 
+function revealTime(message: ChatMessage): number {
+  return message.tradeChecklistUpdate?.identity?.timestamp ?? message.time
+}
+
+function isRevealRequest(message: ChatMessage): boolean {
+  return (
+    message.messageType === 'REQUEST_REVEAL' ||
+    message.tradeChecklistUpdate?.identity?.status === 'REQUEST_REVEAL'
+  )
+}
+
 /**
- * Reveal photos are shared only once both sides revealed their identity, so
- * no one can get a photo back that was declined or is still waiting.
+ * Reveal photos are shared only from the latest reveal both sides agreed to,
+ * so no one can get a photo back that was declined or is still waiting.
  */
 export function messagesToShareAsHistory(
   chat: ChatWithMessages
 ): ChatMessageWithDirection[] {
-  const identityShared = getIdentityRevealStatus(chat) === 'shared'
-  return Array.filterMap(chat.messages, (one) =>
-    one.state === 'received' || one.state === 'sent'
-      ? Option.some({
-          state: one.state,
-          message: identityShared
-            ? one.message
-            : withoutRevealPhoto(one.message),
-        })
+  const delivered = Array.filterMap(chat.messages, ({state, message}) =>
+    state === 'received' || state === 'sent'
+      ? Option.some({state, message})
       : Option.none()
   )
+  const photosSince =
+    getIdentityRevealStatus(chat) === 'shared'
+      ? pipe(
+          delivered,
+          Array.map(({message}) => message),
+          Array.filter(isRevealRequest),
+          Array.map(revealTime),
+          Array.reduce(0, (latest, time) => Math.max(latest, time))
+        )
+      : Infinity
+  return Array.map(delivered, ({state, message}) => ({
+    state,
+    message:
+      revealTime(message) >= photosSince
+        ? message
+        : withoutRevealPhoto(message),
+  }))
 }
 
 function isHistory(message: ChatMessageWithState): boolean {

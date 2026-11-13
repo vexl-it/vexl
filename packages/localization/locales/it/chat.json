@@ -84,6 +84,7 @@
   "messages.imagesLimit_one": "Puoi inviare fino a {{count}} immagine alla volta",
   "messages.imagesLimit_many": "Puoi inviare fino a {{count}} immagini alla volta",
   "messages.imagesLimit_other": "Puoi inviare fino a {{count}} immagini alla volta",
+  "messages.imageUnavailable": "L'immagine non è più disponibile",
   "messages.deleteChatQuestion": "Cancellare la chat?",
   "messages.deleteChatExplanation1": "Hai finito di scambiare? Chiudere la chat significa che la conversazione verrà eliminata in modo permanente.",
   "messages.deleteChatExplanation2": "Si tratta di un passaggio definitivo; confermate ancora una volta questa azione per cancellare la chat.",

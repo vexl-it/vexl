@@ -82,6 +82,7 @@
   "messages.attachImages": "添加图片",
   "messages.removeImage": "移除图片",
   "messages.imagesLimit_other": "一次最多可发送 {{count}} 张图片",
+  "messages.imageUnavailable": "图片已不可用",
   "messages.deleteChatQuestion": "是否要删除聊天？",
   "messages.deleteChatExplanation1": "您的交易结束了吗？关闭聊天意味着您的对话将被永久删除。",
   "messages.deleteChatExplanation2": "这是不可逆转的。您想要删除此聊天吗？",

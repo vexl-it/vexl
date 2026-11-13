@@ -83,6 +83,7 @@
   "messages.removeImage": "Remove image",
   "messages.imagesLimit_one": "You can send up to {{count}} image at once",
   "messages.imagesLimit_other": "You can send up to {{count}} images at once",
+  "messages.imageUnavailable": "Image is no longer available",
   "messages.deleteChatQuestion": "Delete chat?",
   "messages.deleteChatExplanation1": "Are you done trading? Closing the chat means that your conversation will be permanently deleted.",
   "messages.deleteChatExplanation2": "This is irreversible. Do you want to delete this chat?",

@@ -18,7 +18,7 @@ import {
   createHistoryMessage,
   createRequestHistoryMessage,
 } from '@vexl-next/resources-utils/src/chat/utils/chatHistory'
-import {HashSet, Schema} from 'effect'
+import {Array, HashSet, Schema} from 'effect'
 import {
   type ChatMessageWithState,
   type ChatWithMessages,
@@ -463,9 +463,12 @@ describe('answering history requests', () => {
 
   it('shares reveal photos only once both identities were revealed', () => {
     const revealPhotos = (messages: ChatMessageWithState[]): unknown[] =>
-      messagesToShareAsHistory(
-        chat({inboxKey: myKey, otherSideKey: requester, messages})
-      ).map(({message}) => message.tradeChecklistUpdate?.identity?.image)
+      Array.map(
+        messagesToShareAsHistory(
+          chat({inboxKey: myKey, otherSideKey: requester, messages})
+        ),
+        ({message}) => message.tradeChecklistUpdate?.identity?.image
+      )
     const myRequest = sent(identityReveal(myKey, 1, 'REQUEST_REVEAL'))
 
     expect(
@@ -489,6 +492,13 @@ describe('answering history requests', () => {
         received(identityReveal(requester, 4, 'APPROVE_REVEAL')),
       ])
     ).toEqual([undefined, undefined, photo, photo])
+    // Their clock is behind ours
+    expect(
+      revealPhotos([
+        sent(identityReveal(myKey, 3, 'REQUEST_REVEAL')),
+        received(identityReveal(requester, 2, 'APPROVE_REVEAL')),
+      ])
+    ).toEqual([photo, photo])
   })
 
   it('keeps a chat image of a message when photos are left out', () => {

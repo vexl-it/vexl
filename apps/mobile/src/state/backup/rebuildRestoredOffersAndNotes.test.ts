@@ -130,6 +130,11 @@ const myNote = (n: number, expiresAt: number): unknown => ({
   flags: {reported: false},
   noteInfo: {noteId: `note-${n}`, publicPart: {text: `note ${n}`}, expiresAt},
 })
+const recreatedNote = (n: number): unknown => ({
+  ownershipInfo: {adminId: `note-admin-${n}`},
+  flags: {reported: false},
+  noteInfo: {noteId: `note-${n}`, recreated: true},
+})
 
 describe('rebuild of restored offers and notes', () => {
   beforeEach(() => {
@@ -143,7 +148,10 @@ describe('rebuild of restored offers and notes', () => {
     )
     store.set(mockMyOffersAtom, [myOffer(1), myOffer(2)])
     store.set(needsFullContactsReplaceAfterContactEditAtom, false)
-    store.set(restoredOffersAndNotesNeedRebuildAtom, {needsRebuild: true})
+    store.set(restoredOffersAndNotesNeedRebuildAtom, {
+      needsRebuild: true,
+      notesToRecreate: [],
+    })
     mockRefreshOffers.mockReturnValue(true)
     mockRefreshNotesSucceeds.mockReturnValue(true)
     store.set(mockNotesAtom, [])
@@ -165,7 +173,10 @@ describe('rebuild of restored offers and notes', () => {
   })
 
   it('does nothing without a restore', async () => {
-    store.set(restoredOffersAndNotesNeedRebuildAtom, {needsRebuild: false})
+    store.set(restoredOffersAndNotesNeedRebuildAtom, {
+      needsRebuild: false,
+      notesToRecreate: [],
+    })
 
     const result = await Effect.runPromise(
       store.set(rebuildRestoredOffersAndNotesActionAtom)
@@ -241,19 +252,37 @@ describe('rebuild of restored offers and notes', () => {
       Math.min(...mockCreateNote.mock.invocationCallOrder)
     ).toBeGreaterThan(Math.max(...mockDeleteNote.mock.invocationCallOrder))
     expect(store.get(mockNotesAtom)).toEqual([
-      {
-        ownershipInfo: {adminId: 'note-admin-1'},
-        flags: {reported: false},
-        noteInfo: {noteId: 'note-1', recreated: true},
-      },
       myNote(2, now - 60_000),
+      recreatedNote(1),
     ])
     expect(mockUpsertNoteConnections).toHaveBeenCalledWith({
       adminId: 'note-admin-1',
     })
-    expect(store.get(restoredOffersAndNotesNeedRebuildAtom).needsRebuild).toBe(
-      false
-    )
+    expect(store.get(restoredOffersAndNotesNeedRebuildAtom)).toEqual({
+      needsRebuild: false,
+      notesToRecreate: [],
+    })
+  })
+
+  it('keeps a note whose recreation failed and recreates it on the retry', async () => {
+    store.set(mockNotesAtom, [myNote(1, Date.now() + 60_000)])
+    mockCreateNote.mockReturnValueOnce(Effect.fail(new Error('offline')))
+
+    await expect(
+      Effect.runPromise(store.set(rebuildRestoredOffersAndNotesActionAtom))
+    ).rejects.toThrow()
+    // The note sync drops the note the server no longer has.
+    store.set(mockNotesAtom, [])
+    await Effect.runPromise(store.set(rebuildRestoredOffersAndNotesActionAtom))
+
+    expect(mockRefreshOffers).toHaveBeenCalledTimes(1)
+    expect(mockDeleteOffer).toHaveBeenCalledTimes(1)
+    expect(mockCreateNote).toHaveBeenCalledTimes(2)
+    expect(store.get(mockNotesAtom)).toEqual([recreatedNote(1)])
+    expect(store.get(restoredOffersAndNotesNeedRebuildAtom)).toEqual({
+      needsRebuild: false,
+      notesToRecreate: [],
+    })
   })
 
   it('stays pending when deleting the offers fails', async () => {

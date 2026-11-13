@@ -332,6 +332,7 @@ describe('restore from backup', () => {
     expect(store.get(needsFullContactsReplaceAfterContactEditAtom)).toBe(true)
     expect(store.get(restoredOffersAndNotesNeedRebuildAtom)).toEqual({
       needsRebuild: true,
+      notesToRecreate: [],
     })
     expect(store.get(showRestoredAccountInfoAtom)).toBe(true)
     expect(store.get(showMarketplaceIntroDialogAtom)).toBe(false)

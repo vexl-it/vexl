@@ -230,7 +230,10 @@ const commitRestoredAccountActionAtom = atom(
       // import replaces the old phone's ones on the server.
       set(postLoginFlowCompletedScreensAtom, ['usageInfo'])
       set(needsFullContactsReplaceAfterContactEditAtom, true)
-      set(restoredOffersAndNotesNeedRebuildAtom, {needsRebuild: true})
+      set(restoredOffersAndNotesNeedRebuildAtom, {
+        needsRebuild: true,
+        notesToRecreate: [],
+      })
       set(showCheckUpdatedPrivacyPolicySuggestionAtom, false)
       // A returning user knows the marketplace.
       set(showMarketplaceIntroDialogAtom, false)

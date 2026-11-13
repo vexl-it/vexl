@@ -1,11 +1,9 @@
 import {
   AccountBackupGraphic,
   Button,
-  CellPhoneMobileDevice,
   ChevronLeft,
-  DocumentsFiles,
-  InfoPoint,
-  Lock,
+  InfoList,
+  InfoListItem,
   NavigationBar,
   Screen,
   ScreenHeading,
@@ -59,17 +57,20 @@ export default function RestoreIntroScreen({
           title={t('loginFlow.restoreFromBackup.intro.title')}
           text={t('loginFlow.restoreFromBackup.intro.text')}
         />
-        <YStack gap="$4">
-          <InfoPoint icon={CellPhoneMobileDevice}>
-            {t('loginFlow.restoreFromBackup.intro.phoneNumber')}
-          </InfoPoint>
-          <InfoPoint icon={DocumentsFiles}>
-            {t('loginFlow.restoreFromBackup.intro.file')}
-          </InfoPoint>
-          <InfoPoint icon={Lock}>
-            {t('loginFlow.restoreFromBackup.intro.pin')}
-          </InfoPoint>
-        </YStack>
+        <InfoList>
+          <InfoListItem
+            title={t('loginFlow.restoreFromBackup.intro.phoneNumber.title')}
+            note={t('loginFlow.restoreFromBackup.intro.phoneNumber.text')}
+          />
+          <InfoListItem
+            title={t('loginFlow.restoreFromBackup.intro.file.title')}
+            note={t('loginFlow.restoreFromBackup.intro.file.text')}
+          />
+          <InfoListItem
+            title={t('loginFlow.restoreFromBackup.intro.pin.title')}
+            note={t('loginFlow.restoreFromBackup.intro.pin.text')}
+          />
+        </InfoList>
       </YStack>
     </Screen>
   )

@@ -1,10 +1,8 @@
 import {
   Button,
-  ChatBubbles,
-  InfoPoint,
-  PeopleUsers,
+  InfoList,
+  InfoListItem,
   RestoredAccountGraphic,
-  SandWatch,
   Screen,
   ScreenHeading,
   YStack,
@@ -46,17 +44,20 @@ export default function RestoredAccountInfoScreen({
             text={t('loginFlow.restoreFromBackup.restored.text')}
           />
         </YStack>
-        <YStack gap="$4">
-          <InfoPoint icon={SandWatch}>
-            {t('loginFlow.restoreFromBackup.restored.chatsText')}
-          </InfoPoint>
-          <InfoPoint icon={ChatBubbles}>
-            {t('loginFlow.restoreFromBackup.restored.messagesText')}
-          </InfoPoint>
-          <InfoPoint icon={PeopleUsers}>
-            {t('loginFlow.restoreFromBackup.restored.contactsText')}
-          </InfoPoint>
-        </YStack>
+        <InfoList>
+          <InfoListItem
+            title={t('loginFlow.restoreFromBackup.restored.chats.title')}
+            note={t('loginFlow.restoreFromBackup.restored.chats.text')}
+          />
+          <InfoListItem
+            title={t('loginFlow.restoreFromBackup.restored.messages.title')}
+            note={t('loginFlow.restoreFromBackup.restored.messages.text')}
+          />
+          <InfoListItem
+            title={t('loginFlow.restoreFromBackup.restored.contacts.title')}
+            note={t('loginFlow.restoreFromBackup.restored.contacts.text')}
+          />
+        </InfoList>
       </YStack>
     </Screen>
   )

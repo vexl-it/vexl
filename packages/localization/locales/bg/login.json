@@ -72,7 +72,7 @@
   "loginFlow.restoreFromBackup.restored.chats.title": "Чатовете се връщат, щом ти пишат",
   "loginFlow.restoreFromBackup.restored.chats.text": "Щом събеседникът ти пише, чатът се връща с цялата история.",
   "loginFlow.restoreFromBackup.restored.contacts.title": "Импортирай контактите си",
-  "loginFlow.restoreFromBackup.restored.contacts.text": "Не бяха възстановени. Импортирай ги, за да си върнеш обхвата.",
+  "loginFlow.restoreFromBackup.restored.contacts.text": "Импортирай ги, за да си върнеш обхвата.",
   "loginFlow.restoreFromBackup.failed.title": "Не успяхме да възстановим акаунта ти",
   "loginFlow.restoreFromBackup.failed.unknown": "Нещо се обърка. Опитай отново след малко.",
   "loginFlow.restoreFromBackup.failed.noLongerValid.title": "Това резервно копие вече не работи",

@@ -2,7 +2,10 @@ import {
   MyNoteInState,
   type NoteAdminId,
 } from '@vexl-next/domain/src/general/notes'
-import {type MyOfferInState} from '@vexl-next/domain/src/general/offers'
+import {
+  OfferId,
+  type MyOfferInState,
+} from '@vexl-next/domain/src/general/offers'
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import createNewNoteForMyContacts from '@vexl-next/resources-utils/src/notes/createNewNoteForMyContacts'
 import {Array, Effect, Schema} from 'effect'
@@ -14,7 +17,10 @@ import {
   noteConnectionUpdatesSemaphoreAtom,
   upsertNoteToConnectionsActionAtom,
 } from '../connections/atom/noteToConnectionsAtom'
-import {needsFullContactsReplaceAfterContactEditAtom} from '../contacts/atom/contactsStore'
+import {
+  needsFullContactsReplaceAfterContactEditAtom,
+  storedContactsAtom,
+} from '../contacts/atom/contactsStore'
 import {ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom} from '../contacts/atom/ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom'
 import {myOffersAtom} from '../marketplace/atoms/myOffers'
 import {refreshOffersActionAtom} from '../marketplace/atoms/refreshOffersActionAtom'
@@ -27,7 +33,7 @@ import {sessionDataOrDummyAtom} from '../session'
 // so they keep reaching the old phone's network until they are recreated.
 export const restoredOffersAndNotesNeedRebuildAtom = atomWithParsedMmkvStorage(
   'restoredOffersAndNotesNeedRebuild',
-  {needsRebuild: false, notesToRecreate: []},
+  {needsRebuild: false, notesToRecreate: [], offerIdsToReupload: []},
   Schema.Struct({
     needsRebuild: Schema.Boolean,
     // Kept until recreated: once deleted on the server, the note sync drops
@@ -35,7 +41,24 @@ export const restoredOffersAndNotesNeedRebuildAtom = atomWithParsedMmkvStorage(
     notesToRecreate: Schema.optionalWith(Schema.Array(MyNoteInState), {
       default: () => [],
     }),
+    // Deleted on the server, kept until reuploaded.
+    offerIdsToReupload: Schema.optionalWith(Schema.Array(OfferId), {
+      default: () => [],
+    }),
   })
+)
+
+export const forgetReuploadedRestoredOfferActionAtom = atom(
+  null,
+  (get, set, offerId: OfferId) => {
+    set(restoredOffersAndNotesNeedRebuildAtom, (old) => ({
+      ...old,
+      offerIdsToReupload: Array.filter(
+        old.offerIdsToReupload,
+        (one) => one !== offerId
+      ),
+    }))
+  }
 )
 
 export class RestoredOffersAndNotesNotFetchedError extends Schema.TaggedError<RestoredOffersAndNotesNotFetchedError>(
@@ -43,7 +66,7 @@ export class RestoredOffersAndNotesNotFetchedError extends Schema.TaggedError<Re
 )('RestoredOffersAndNotesNotFetchedError', {}) {}
 
 // After a restore the server still has the old phone's contacts. Skipping the
-// import must not keep them.
+// import must not keep them, nor contacts a failed import got through.
 export const discardOldPhoneContactsActionAtom = atom(null, (get, set) => {
   if (!get(needsFullContactsReplaceAfterContactEditAtom)) return Effect.void
 
@@ -51,6 +74,10 @@ export const discardOldPhoneContactsActionAtom = atom(null, (get, set) => {
     .contact.importContacts({contacts: [], replace: true})
     .pipe(
       Effect.tap(() => {
+        set(
+          storedContactsAtom,
+          Array.map((one) => ({...one, flags: {...one.flags, imported: false}}))
+        )
         set(needsFullContactsReplaceAfterContactEditAtom, false)
       }),
       Effect.asVoid
@@ -157,25 +184,27 @@ const deleteRestoredOffersAndPickNotesActionAtom = atom(null, (get, set) =>
     set(restoredOffersAndNotesNeedRebuildAtom, {
       needsRebuild: false,
       notesToRecreate: get(myNotesAtom),
+      offerIdsToReupload: Array.map(offers, (one) => one.offerInfo.offerId),
     })
-    return offers
   })
 )
 
 const rebuildInProgressAtom = atom(false)
 
-// Returns the restored offers for the reupload, and recreates the notes right
-// away.
+// Returns the restored offers waiting for the reupload, and recreates the
+// notes right away.
 export const rebuildRestoredOffersAndNotesActionAtom = atom(
   null,
   (get, set) => {
-    const {needsRebuild, notesToRecreate} = get(
+    const {needsRebuild, notesToRecreate, offerIdsToReupload} = get(
       restoredOffersAndNotesNeedRebuildAtom
     )
     // Before the contacts are replaced, recreating would share everything with
     // the old network again.
     if (
-      (!needsRebuild && !Array.isNonEmptyReadonlyArray(notesToRecreate)) ||
+      (!needsRebuild &&
+        !Array.isNonEmptyReadonlyArray(notesToRecreate) &&
+        !Array.isNonEmptyReadonlyArray(offerIdsToReupload)) ||
       get(needsFullContactsReplaceAfterContactEditAtom) ||
       get(rebuildInProgressAtom)
     )
@@ -183,9 +212,8 @@ export const rebuildRestoredOffersAndNotesActionAtom = atom(
     set(rebuildInProgressAtom, true)
 
     return Effect.gen(function* (_) {
-      const offers = needsRebuild
-        ? yield* _(set(deleteRestoredOffersAndPickNotesActionAtom))
-        : []
+      if (needsRebuild)
+        yield* _(set(deleteRestoredOffersAndPickNotesActionAtom))
 
       const now = unixMillisecondsNow()
       set(restoredOffersAndNotesNeedRebuildAtom, (old) => ({
@@ -214,6 +242,20 @@ export const rebuildRestoredOffersAndNotesActionAtom = atom(
             )
         )
       )
+
+      // Offers the user deleted meanwhile are no longer waiting.
+      const offers: readonly MyOfferInState[] = Array.filter(
+        get(myOffersAtom),
+        (one) =>
+          Array.contains(
+            get(restoredOffersAndNotesNeedRebuildAtom).offerIdsToReupload,
+            one.offerInfo.offerId
+          )
+      )
+      set(restoredOffersAndNotesNeedRebuildAtom, (old) => ({
+        ...old,
+        offerIdsToReupload: Array.map(offers, (one) => one.offerInfo.offerId),
+      }))
       return offers
     }).pipe(
       Effect.ensuring(

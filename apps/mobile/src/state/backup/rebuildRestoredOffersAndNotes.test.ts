@@ -1,10 +1,12 @@
 import {NoteAdminId} from '@vexl-next/domain/src/general/notes'
+import {OfferId} from '@vexl-next/domain/src/general/offers'
 import {Effect, HashMap, Option, Schema} from 'effect'
 import {atom, getDefaultStore} from 'jotai'
 import {needsFullContactsReplaceAfterContactEditAtom} from '../contacts/atom/contactsStore'
 import {
   discardOldPhoneContactsActionAtom,
   forgetNotesToRecreateActionAtom,
+  forgetReuploadedRestoredOfferActionAtom,
   rebuildRestoredOffersAndNotesActionAtom,
   restoredOffersAndNotesNeedRebuildAtom,
 } from './rebuildRestoredOffersAndNotes'
@@ -36,11 +38,23 @@ jest.mock('../session', () => ({
     .requireActual('jotai')
     .atom(() => ({privateKey: 'v1', keyPairV2: 'v2'})),
 }))
-jest.mock('../contacts/atom/contactsStore', () => ({
-  needsFullContactsReplaceAfterContactEditAtom: jest
-    .requireActual('jotai')
-    .atom(false),
-}))
+const mockStoredContactsAtom = atom<unknown>([])
+jest.mock('../contacts/atom/contactsStore', () => {
+  const {atom} = jest.requireActual('jotai')
+  return {
+    needsFullContactsReplaceAfterContactEditAtom: atom(false),
+    storedContactsAtom: atom(
+      (get: (a: unknown) => unknown) => get(mockStoredContactsAtom),
+      (
+        get: (a: unknown) => unknown,
+        set: (a: unknown, v: unknown) => void,
+        update: (old: unknown) => unknown
+      ) => {
+        set(mockStoredContactsAtom, update(get(mockStoredContactsAtom)))
+      }
+    ),
+  }
+})
 jest.mock(
   '../contacts/atom/ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom',
   () => ({
@@ -158,6 +172,7 @@ describe('rebuild of restored offers and notes', () => {
     store.set(restoredOffersAndNotesNeedRebuildAtom, {
       needsRebuild: true,
       notesToRecreate: [],
+      offerIdsToReupload: [],
     })
     mockRefreshOffers.mockReturnValue(true)
     mockRefreshNotesSucceeds.mockReturnValue(true)
@@ -183,6 +198,7 @@ describe('rebuild of restored offers and notes', () => {
     store.set(restoredOffersAndNotesNeedRebuildAtom, {
       needsRebuild: false,
       notesToRecreate: [],
+      offerIdsToReupload: [],
     })
 
     const result = await Effect.runPromise(
@@ -268,6 +284,7 @@ describe('rebuild of restored offers and notes', () => {
     expect(store.get(restoredOffersAndNotesNeedRebuildAtom)).toEqual({
       needsRebuild: false,
       notesToRecreate: [],
+      offerIdsToReupload: ['offer-1', 'offer-2'],
     })
   })
 
@@ -290,11 +307,12 @@ describe('rebuild of restored offers and notes', () => {
     )
     // The note sync drops the note the server no longer has.
     store.set(mockNotesAtom, [])
+    // The offers weren't reuploaded yet, so they are handed over again.
     expect(
       await Effect.runPromise(
         store.set(rebuildRestoredOffersAndNotesActionAtom)
       )
-    ).toEqual([])
+    ).toEqual([myOffer(1), myOffer(2)])
 
     expect(mockRefreshOffers).toHaveBeenCalledTimes(1)
     expect(mockDeleteOffer).toHaveBeenCalledTimes(1)
@@ -303,7 +321,37 @@ describe('rebuild of restored offers and notes', () => {
     expect(store.get(restoredOffersAndNotesNeedRebuildAtom)).toEqual({
       needsRebuild: false,
       notesToRecreate: [],
+      offerIdsToReupload: ['offer-1', 'offer-2'],
     })
+  })
+
+  it('keeps handing over the offers until each is reuploaded', async () => {
+    await Effect.runPromise(store.set(rebuildRestoredOffersAndNotesActionAtom))
+    store.set(
+      forgetReuploadedRestoredOfferActionAtom,
+      Schema.decodeSync(OfferId)('offer-1')
+    )
+
+    expect(
+      await Effect.runPromise(
+        store.set(rebuildRestoredOffersAndNotesActionAtom)
+      )
+    ).toEqual([myOffer(2)])
+    // Gone from the phone, so no longer waiting.
+    store.set(mockMyOffersAtom, [myOffer(1)])
+    expect(
+      await Effect.runPromise(
+        store.set(rebuildRestoredOffersAndNotesActionAtom)
+      )
+    ).toEqual([])
+    expect(
+      await Effect.runPromise(
+        store.set(rebuildRestoredOffersAndNotesActionAtom)
+      )
+    ).toEqual([])
+
+    expect(mockRefreshOffers).toHaveBeenCalledTimes(1)
+    expect(mockDeleteOffer).toHaveBeenCalledTimes(1)
   })
 
   it('stays pending when deleting the offers fails', async () => {
@@ -345,6 +393,7 @@ describe('a restored note the user deletes', () => {
     store.set(restoredOffersAndNotesNeedRebuildAtom, {
       needsRebuild: true,
       notesToRecreate: [],
+      offerIdsToReupload: [],
     })
   })
 
@@ -392,6 +441,21 @@ describe('discarding the old phone contacts', () => {
       replace: true,
     })
     expect(store.get(needsFullContactsReplaceAfterContactEditAtom)).toBe(false)
+  })
+
+  it('unmarks contacts a failed import got through, so the next import sends them again', async () => {
+    store.set(needsFullContactsReplaceAfterContactEditAtom, true)
+    store.set(mockStoredContactsAtom, [
+      {id: 1, flags: {seen: true, imported: true}},
+      {id: 2, flags: {seen: false, imported: false}},
+    ])
+
+    await Effect.runPromise(store.set(discardOldPhoneContactsActionAtom))
+
+    expect(store.get(mockStoredContactsAtom)).toEqual([
+      {id: 1, flags: {seen: true, imported: false}},
+      {id: 2, flags: {seen: false, imported: false}},
+    ])
   })
 
   it('leaves the server contacts alone otherwise', async () => {

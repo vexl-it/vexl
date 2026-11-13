@@ -72,7 +72,7 @@
   "loginFlow.restoreFromBackup.restored.chats.title": "Gumzo hurudi wanapokuandikia",
   "loginFlow.restoreFromBackup.restored.chats.text": "Mtu uliyezungumza naye akikutumia ujumbe, gumzo hurudi pamoja na historia yake.",
   "loginFlow.restoreFromBackup.restored.contacts.title": "Leta anwani zako",
-  "loginFlow.restoreFromBackup.restored.contacts.text": "Hazikurejeshwa. Zilete ili urudishe ufikiaji wako.",
+  "loginFlow.restoreFromBackup.restored.contacts.text": "Zilete ili urudishe ufikiaji wako.",
   "loginFlow.restoreFromBackup.failed.title": "Hatukuweza kurejesha akaunti yako",
   "loginFlow.restoreFromBackup.failed.unknown": "Kuna kitu kimeharibika. Jaribu tena baada ya muda mfupi.",
   "loginFlow.restoreFromBackup.failed.noLongerValid.title": "Nakala rudufu hii haifanyi kazi tena",

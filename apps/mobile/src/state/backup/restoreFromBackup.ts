@@ -233,6 +233,7 @@ const commitRestoredAccountActionAtom = atom(
       set(restoredOffersAndNotesNeedRebuildAtom, {
         needsRebuild: true,
         notesToRecreate: [],
+        offerIdsToReupload: [],
       })
       set(showCheckUpdatedPrivacyPolicySuggestionAtom, false)
       // A returning user knows the marketplace.

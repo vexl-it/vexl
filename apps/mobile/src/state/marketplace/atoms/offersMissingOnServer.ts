@@ -15,6 +15,7 @@ import {apiAtom} from '../../../api'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
 import getCountryPrefix from '../../../utils/getCountryCode'
 import reportError from '../../../utils/reportError'
+import {forgetReuploadedRestoredOfferActionAtom} from '../../backup/rebuildRestoredOffersAndNotes'
 import {clubsToKeyHolderAtom} from '../../clubs/atom/clubsToKeyHolderV2Atom'
 import {
   deleteOfferToConnectionsAtom,
@@ -154,6 +155,7 @@ const reencryptOneOfferActionAtom = atom(
             symmetricKey: r.symmetricKey,
           })
           set(unmarkOfferAsMissingActionAtom, offer.offerInfo.offerId)
+          set(forgetReuploadedRestoredOfferActionAtom, offer.offerInfo.offerId)
 
           return recreatedOffer
         })

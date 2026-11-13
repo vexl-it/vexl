@@ -179,7 +179,7 @@ export default function PhoneNumberScreen({
       }}
       scroll
     >
-      <YStack flex={1} gap="$10" justifyContent="flex-start" paddingTop="$11">
+      <YStack flex={1} gap="$10" justifyContent="center">
         <YStack gap="$4" width="100%">
           <LoginFlowTitle>
             {restore

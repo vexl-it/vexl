@@ -8,13 +8,17 @@ import {
 } from '@vexl-next/domain/src/general/offers'
 import {type OfferEncryptionProgress} from '@vexl-next/resources-utils/src/offers/OfferEncryptionProgress'
 import createNewOfferForMyContacts from '@vexl-next/resources-utils/src/offers/createNewOfferForMyContacts'
-import {Array, Effect, Option, Record, Schema} from 'effect'
+import {Array, Effect, HashSet, Option, Record, Schema} from 'effect'
 import {pipe} from 'fp-ts/lib/function'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
 import getCountryPrefix from '../../../utils/getCountryCode'
 import reportError from '../../../utils/reportError'
+import {
+  forgetReuploadedRestoredOfferActionAtom,
+  restoredOffersAndNotesNeedRebuildAtom,
+} from '../../backup/rebuildRestoredOffersAndNotes'
 import {clubsToKeyHolderAtom} from '../../clubs/atom/clubsToKeyHolderV2Atom'
 import {
   deleteOfferToConnectionsAtom,
@@ -154,12 +158,68 @@ const reencryptOneOfferActionAtom = atom(
             symmetricKey: r.symmetricKey,
           })
           set(unmarkOfferAsMissingActionAtom, offer.offerInfo.offerId)
+          set(forgetReuploadedRestoredOfferActionAtom, offer.offerInfo.offerId)
 
           return recreatedOffer
         })
       )
     })
   }
+)
+
+const offerIdsBeingReuploadedAtom = atom(HashSet.empty<OfferId>())
+
+// Uploads the offer as it is now, and only while it still waits for a
+// reupload: the user may have edited or deleted it, or another reupload (the
+// restore's, the suggestion's) may be on it or done with it.
+const reuploadCurrentOfferActionAtom = atom(
+  null,
+  (
+    get,
+    set,
+    {
+      offerId,
+      onProgress,
+    }: {
+      offerId: OfferId
+      onProgress: (p: OfferEncryptionProgress) => void
+    }
+  ) =>
+    Effect.suspend(() => {
+      const current = Array.findFirst(
+        get(myOffersAtom),
+        (one) => one.offerInfo.offerId === offerId
+      )
+      const stillWaiting =
+        Array.contains(
+          get(offersMissingOnServerStorageAtom).offerIds,
+          offerId
+        ) ||
+        Array.contains(
+          get(restoredOffersAndNotesNeedRebuildAtom).offerIdsToReupload,
+          offerId
+        )
+      if (
+        Option.isNone(current) ||
+        !stillWaiting ||
+        HashSet.has(get(offerIdsBeingReuploadedAtom), offerId)
+      )
+        return Effect.succeedNone
+      set(offerIdsBeingReuploadedAtom, HashSet.add(offerId))
+
+      return set(reencryptOneOfferActionAtom, {
+        offer: current.value,
+        onProgress,
+      }).pipe(
+        Effect.either,
+        Effect.map(Option.some),
+        Effect.ensuring(
+          Effect.sync(() => {
+            set(offerIdsBeingReuploadedAtom, HashSet.remove(offerId))
+          })
+        )
+      )
+    })
 )
 
 export const reencryptSingleOfferMissingOnServerWhenEditingActionAtom = atom(
@@ -226,35 +286,35 @@ export const reencryptOffersMissingOnServerActionAtom = atom(
     set,
     {
       onProgress,
+      offers,
     }: {
       onProgress?: (a: {
         offerEncryptionProgress: OfferEncryptionProgress
         processingIndex: number
         totalToProcess: number
       }) => void
+      offers?: readonly MyOfferInState[]
     }
   ) => {
-    const offersToReupload = get(offersMissingOnServerAtom)
+    const offersToReupload = offers ?? get(offersMissingOnServerAtom)
 
     return pipe(
       offersToReupload,
       Array.map((one, index) =>
-        pipe(
-          set(reencryptOneOfferActionAtom, {
-            offer: one,
-            onProgress: (progress) => {
-              if (onProgress)
-                onProgress({
-                  offerEncryptionProgress: progress,
-                  processingIndex: index,
-                  totalToProcess: offersToReupload.length,
-                })
-            },
-          }),
-          Effect.either
-        )
+        set(reuploadCurrentOfferActionAtom, {
+          offerId: one.offerInfo.offerId,
+          onProgress: (progress) => {
+            if (onProgress)
+              onProgress({
+                offerEncryptionProgress: progress,
+                processingIndex: index,
+                totalToProcess: offersToReupload.length,
+              })
+          },
+        })
       ),
       Effect.all,
+      Effect.map(Array.getSomes),
       Effect.map((results) => {
         const errors = Array.getLefts(results)
         if (errors.length > 0)

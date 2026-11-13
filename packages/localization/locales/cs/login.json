@@ -72,7 +72,7 @@
   "loginFlow.restoreFromBackup.restored.chats.title": "Chaty se vrátí, až ti napíšou",
   "loginFlow.restoreFromBackup.restored.chats.text": "Jakmile ti druhá strana napíše, chat se vrátí i s historií.",
   "loginFlow.restoreFromBackup.restored.contacts.title": "Naimportuj si kontakty",
-  "loginFlow.restoreFromBackup.restored.contacts.text": "Pak zase uvidíš jména svých přátel.",
+  "loginFlow.restoreFromBackup.restored.contacts.text": "Naimportuj je, ať máš zpátky svůj dosah.",
   "loginFlow.restoreFromBackup.failed.title": "Účet se nepodařilo obnovit",
   "loginFlow.restoreFromBackup.failed.unknown": "Něco se pokazilo. Zkus to za chvilku znovu.",
   "loginFlow.restoreFromBackup.failed.noLongerValid.title": "Tahle záloha už nefunguje",

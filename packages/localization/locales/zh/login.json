@@ -72,7 +72,7 @@
   "loginFlow.restoreFromBackup.restored.chats.title": "对方发消息后，聊天就会回来",
   "loginFlow.restoreFromBackup.restored.chats.text": "对方给你发消息后，聊天会连同历史记录一起回来。",
   "loginFlow.restoreFromBackup.restored.contacts.title": "导入你的联系人",
-  "loginFlow.restoreFromBackup.restored.contacts.text": "之后你就能再看到朋友的名字了。",
+  "loginFlow.restoreFromBackup.restored.contacts.text": "导入后就能找回你的触达范围。",
   "loginFlow.restoreFromBackup.failed.title": "无法恢复你的账户",
   "loginFlow.restoreFromBackup.failed.unknown": "出了点问题。稍后再试一次吧。",
   "loginFlow.restoreFromBackup.failed.noLongerValid.title": "这个备份已经失效",

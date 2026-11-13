@@ -1,6 +1,7 @@
 import {
   Button,
   ChatBubbles,
+  InfoBox,
   InfoPoint,
   PeopleUsers,
   RestoredAccountGraphic,
@@ -9,10 +10,12 @@ import {
   ScreenHeading,
   YStack,
 } from '@vexl-next/ui'
-import {useSetAtom} from 'jotai'
+import {Array, Option, pipe} from 'effect'
+import {useAtom} from 'jotai'
 import React from 'react'
 import {type PostLoginFlowStackScreenProps} from '../../../navigationTypes'
-import {showRestoredAccountInfoAtom} from '../../../state/backup/restoreFromBackup'
+import {restoredAccountInfoAtom} from '../../../state/backup/restoreFromBackup'
+import {getInternationalPhoneNumber} from '../../../utils/getInternationalPhoneNumber'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 
 type Props = PostLoginFlowStackScreenProps<'RestoredAccountInfo'>
@@ -21,7 +24,13 @@ export default function RestoredAccountInfoScreen({
   navigation,
 }: Props): React.ReactElement {
   const {t} = useTranslation()
-  const setShowRestoredAccountInfo = useSetAtom(showRestoredAccountInfoAtom)
+  const [restoredAccountInfo, setRestoredAccountInfo] = useAtom(
+    restoredAccountInfoAtom
+  )
+  const notRestoredPhoneNumbers = Option.match(restoredAccountInfo, {
+    onNone: () => [],
+    onSome: (info) => info.notRestoredPhoneNumbers,
+  })
 
   return (
     <Screen
@@ -30,7 +39,7 @@ export default function RestoredAccountInfoScreen({
       footer={
         <Button
           onPress={() => {
-            setShowRestoredAccountInfo(false)
+            setRestoredAccountInfo(Option.none())
             navigation.replace('ContactsImport')
           }}
         >
@@ -46,6 +55,18 @@ export default function RestoredAccountInfoScreen({
             text={t('loginFlow.restoreFromBackup.restored.text')}
           />
         </YStack>
+        {Array.isNonEmptyReadonlyArray(notRestoredPhoneNumbers) ? (
+          <InfoBox variant="pink">
+            {t('loginFlow.restoreFromBackup.restored.notRestoredPhoneNumbers', {
+              count: notRestoredPhoneNumbers.length,
+              phoneNumbers: pipe(
+                notRestoredPhoneNumbers,
+                Array.map(getInternationalPhoneNumber),
+                Array.join(', ')
+              ),
+            })}
+          </InfoBox>
+        ) : null}
         <YStack gap="$4">
           <InfoPoint icon={SandWatch}>
             {t('loginFlow.restoreFromBackup.restored.chatsText')}

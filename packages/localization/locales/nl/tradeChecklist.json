@@ -31,6 +31,8 @@
   "tradeChecklist.exchangeDetails.nickname": "Bijnaam",
   "tradeChecklist.exchangeDetails.nicknameNotSet": "Zet aan om in te stellen",
   "tradeChecklist.exchangeDetails.phoneNumber": "Telefoonnummer",
+  "tradeChecklist.exchangeDetails.phoneNumberToReveal.title": "Welk nummer onthullen?",
+  "tradeChecklist.exchangeDetails.phoneNumberToReveal.text": "Bij je bijnaam horen cijfers van dit nummer. Het volledige nummer is een aparte keuze.",
   "tradeChecklist.exchangeDetails.photo": "Profielfoto",
   "tradeChecklist.exchangeDetails.noPhotoYet": "Nog geen foto",
   "tradeChecklist.exchangeDetails.choosePhoto": "Kies een foto",

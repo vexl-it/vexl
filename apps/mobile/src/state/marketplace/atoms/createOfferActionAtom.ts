@@ -25,6 +25,7 @@ import {type SymmetricKeyGenerationError} from '@vexl-next/resources-utils/src/o
 import {Array, Effect, Option, Record, pipe} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
+import {contactApisAtom} from '../../../api/contactApiForSession'
 import getCountryPrefix from '../../../utils/getCountryCode'
 import reportError from '../../../utils/reportError'
 import {incrementPostedOffersActionAtom} from '../../accountStatsAtom'
@@ -100,7 +101,7 @@ export const createOfferActionAtom = atom<
         publicPart: publicPayloadWithNotificationToken,
         countryPrefix: getCountryPrefix(session.phoneNumber),
         serverToClientHashesToHashedPhoneNumbersMap,
-        contactApi: api.contact,
+        contactApis: get(contactApisAtom),
         intendedConnectionLevel,
         ownerKeyPair: session.privateKey,
         ownerKeyPairV2: session.keyPairV2,

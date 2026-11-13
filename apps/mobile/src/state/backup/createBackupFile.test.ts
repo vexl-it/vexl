@@ -4,6 +4,8 @@ import {
   type ClubKeys,
   generateClubUuid,
 } from '@vexl-next/domain/src/general/clubs'
+import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {
   KeyDerivationIndex,
   MasterSeed,
@@ -97,5 +99,30 @@ describe('createBackupFile', () => {
       )
     ).toEqual(exportedByEarlyBuilds)
     expect(json).not.toContain(dummySession.loginSessionId)
+  })
+
+  it('exports every phone number of the account', async () => {
+    const extraPhoneNumbers = [
+      {
+        phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420777777777'),
+        sessionCredentials: {
+          ...session.sessionCredentials,
+          hash: Schema.decodeSync(HashedPhoneNumber)('second'),
+        },
+      },
+    ]
+
+    const backupFile = await Effect.runPromise(
+      createBackupFile({
+        session: {...session, extraPhoneNumbers},
+        counters: {nextInboxIndex: index(0), nextClubIndex: index(0)},
+        inboxKeys: [],
+        clubs: {},
+        clubKeysWaitingForAdmission: [],
+      })
+    )
+
+    expect(backupFile.session.phoneNumber).toBe(session.phoneNumber)
+    expect(backupFile.session.extraPhoneNumbers).toEqual(extraPhoneNumbers)
   })
 })

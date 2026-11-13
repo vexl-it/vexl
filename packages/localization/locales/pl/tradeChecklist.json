@@ -31,6 +31,8 @@
   "tradeChecklist.exchangeDetails.nickname": "Pseudonim",
   "tradeChecklist.exchangeDetails.nicknameNotSet": "Włącz, aby ustawić",
   "tradeChecklist.exchangeDetails.phoneNumber": "Numer telefonu",
+  "tradeChecklist.exchangeDetails.phoneNumberToReveal.title": "Który numer ujawnić?",
+  "tradeChecklist.exchangeDetails.phoneNumberToReveal.text": "Pseudonim jest ujawniany razem z cyframi tego numeru. Pełny numer to osobny wybór.",
   "tradeChecklist.exchangeDetails.photo": "Zdjęcie profilowe",
   "tradeChecklist.exchangeDetails.noPhotoYet": "Brak zdjęcia",
   "tradeChecklist.exchangeDetails.choosePhoto": "Wybierz zdjęcie",

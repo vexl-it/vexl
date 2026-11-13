@@ -2,9 +2,10 @@ import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {
   InvalidLoginSessionProofError,
   LoggedInOnAnotherDeviceError,
+  UserNotFoundError,
 } from '@vexl-next/rest-api/src/services/contact/contracts'
-import {Effect} from 'effect'
-import {getDefaultStore} from 'jotai'
+import {Effect, Either, Option} from 'effect'
+import {getDefaultStore, type Getter, type PrimitiveAtom} from 'jotai'
 import {registerInAppLoadingTask} from '../utils/inAppLoadingTasks'
 import {executeTasksWithDependencies} from '../utils/inAppLoadingTasks/atoms'
 import {ensureSessionNotificationTokenExistsTaskId} from './notifications/ensureSessionNotificationTokenExistsTask'
@@ -16,18 +17,68 @@ import {
 } from './refreshUserOnContactServiceInAppBackgroundTask'
 
 const mockRefreshUser = jest.fn()
+const mockRefreshExtraNumber = jest.fn()
 const mockClearDevice = jest.fn()
+const mockLogout = jest.fn()
+const mockDropPhoneNumbers = jest.fn()
+const mockAddLostPhoneNumbersToNotice = jest.fn()
 
-jest.mock('../api', () => {
+jest.mock('../api/contactApiForSession', () => {
+  const {atom} = jest.requireActual('jotai')
+  const withExtraNumberAtom = atom(false)
+  return {
+    withExtraNumberAtom,
+    // Only called for the extra number promoted to main
+    contactApiForSession: () => ({
+      refreshUser: (request: unknown) => mockRefreshExtraNumber(request),
+    }),
+    phoneNumberContactApisAtom: atom((get: Getter) => [
+      {
+        phoneNumber: '+420733733733',
+        contactApi: {
+          refreshUser: (request: unknown) => mockRefreshUser(request),
+        },
+      },
+      ...(get(withExtraNumberAtom)
+        ? [
+            {
+              phoneNumber: '+420777777777',
+              contactApi: {
+                refreshUser: (request: unknown) =>
+                  mockRefreshExtraNumber(request),
+              },
+            },
+          ]
+        : []),
+    ]),
+  }
+})
+jest.mock('./phoneNumbers/dropPhoneNumbersFromSessionActionAtom', () => {
   const {atom} = jest.requireActual('jotai')
   return {
-    apiAtom: atom({contact: {refreshUser: () => mockRefreshUser()}}),
+    dropPhoneNumbersFromSessionActionAtom: atom(
+      null,
+      (_get: unknown, _set: unknown, phoneNumbers: unknown) =>
+        mockDropPhoneNumbers(phoneNumbers)
+    ),
+  }
+})
+jest.mock('./phoneNumbers/lostPhoneNumbersNotice', () => {
+  const {atom} = jest.requireActual('jotai')
+  return {
+    addLostPhoneNumbersToNoticeActionAtom: atom(
+      null,
+      (_get: unknown, _set: unknown, phoneNumbers: unknown) => {
+        mockAddLostPhoneNumbersToNotice(phoneNumbers)
+      }
+    ),
   }
 })
 jest.mock('./session', () => {
   const {atom} = jest.requireActual('jotai')
   return {
     sessionDataOrDummyAtom: atom({
+      phoneNumber: '+420733733733',
       sessionNotificationToken: 'vexl_nt_test',
       loginSessionId: '0f9b2597-217d-4f8d-9de6-ef7239662359',
       privateKey: jest
@@ -47,7 +98,11 @@ jest.mock('./resetLocalDataActionAtom', () => {
 })
 jest.mock('./useLogout', () => {
   const {atom} = jest.requireActual('jotai')
-  return {logoutActionAtom: atom(null, () => undefined)}
+  return {
+    logoutActionAtom: atom(null, () => {
+      mockLogout()
+    }),
+  }
 })
 jest.mock('./notifications/vexlNotificationTokenAtom', () => ({
   forgetVexlSecretLocally: jest.fn(),
@@ -78,6 +133,13 @@ const pullMessagesTaskId = registerInAppLoadingTask({
   task: () => Effect.sync(pullMessages),
 })
 
+function setWithExtraNumber(withExtraNumber: boolean): void {
+  const {withExtraNumberAtom} = jest.requireMock<{
+    withExtraNumberAtom: PrimitiveAtom<boolean>
+  }>('../api/contactApiForSession')
+  getDefaultStore().set(withExtraNumberAtom, withExtraNumber)
+}
+
 async function resume(): Promise<void> {
   await Effect.runPromise(
     executeTasksWithDependencies([
@@ -90,6 +152,7 @@ async function resume(): Promise<void> {
 
 beforeEach(() => {
   jest.clearAllMocks()
+  setWithExtraNumber(false)
 })
 
 it('keeps a device whose account moved away from pulling messages', async () => {
@@ -152,4 +215,92 @@ it('keeps notification pulls from running until the account check says it stayed
   await movedCheck
 
   expect(pullMessages).toHaveBeenCalledTimes(1)
+})
+
+describe('with an extra phone number', () => {
+  beforeEach(() => {
+    setWithExtraNumber(true)
+    mockDropPhoneNumbers.mockReturnValue(Either.right(undefined))
+  })
+
+  it('refreshes every number and sends the notification token with the main one only', async () => {
+    mockRefreshUser.mockReturnValue(Effect.void)
+    mockRefreshExtraNumber.mockReturnValue(Effect.void)
+
+    await resume()
+
+    expect(mockRefreshUser).toHaveBeenCalledWith(
+      expect.objectContaining({
+        vexlNotificationToken: Option.some('vexl_nt_test'),
+      })
+    )
+    expect(mockRefreshExtraNumber).toHaveBeenCalledWith(
+      expect.objectContaining({vexlNotificationToken: Option.none()})
+    )
+    expect(pullMessages).toHaveBeenCalled()
+  })
+
+  it('drops a number someone logged in with elsewhere and keeps the account', async () => {
+    mockRefreshUser.mockReturnValue(Effect.void)
+    mockRefreshExtraNumber.mockReturnValue(Effect.fail(new UserNotFoundError()))
+
+    await resume()
+
+    expect(mockDropPhoneNumbers).toHaveBeenCalledWith(['+420777777777'])
+    expect(mockAddLostPhoneNumbersToNotice).toHaveBeenCalledWith([
+      '+420777777777',
+    ])
+    expect(mockLogout).not.toHaveBeenCalled()
+    expect(pullMessages).toHaveBeenCalled()
+  })
+
+  it('hands the notification token to the extra number when the main one is lost', async () => {
+    const store = getDefaultStore()
+    const {sessionDataOrDummyAtom} = jest.requireMock<{
+      sessionDataOrDummyAtom: PrimitiveAtom<{phoneNumber: string}>
+    }>('./session')
+    const sessionBefore = store.get(sessionDataOrDummyAtom)
+    mockRefreshUser.mockReturnValue(Effect.fail(new UserNotFoundError()))
+    mockRefreshExtraNumber.mockReturnValue(Effect.void)
+    mockDropPhoneNumbers.mockImplementationOnce(() => {
+      store.set(sessionDataOrDummyAtom, {
+        ...sessionBefore,
+        phoneNumber: '+420777777777',
+      })
+      return Either.right(undefined)
+    })
+
+    await resume()
+    store.set(sessionDataOrDummyAtom, sessionBefore)
+
+    expect(mockDropPhoneNumbers).toHaveBeenCalledWith(['+420733733733'])
+    expect(mockRefreshExtraNumber).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        vexlNotificationToken: Option.some('vexl_nt_test'),
+      })
+    )
+  })
+
+  it('logs out when every number is gone', async () => {
+    mockRefreshUser.mockReturnValue(Effect.fail(new UserNotFoundError()))
+    mockRefreshExtraNumber.mockReturnValue(Effect.fail(new UserNotFoundError()))
+    mockDropPhoneNumbers.mockReturnValue(Either.left('last number'))
+
+    await resume()
+
+    expect(mockLogout).toHaveBeenCalled()
+    expect(mockAddLostPhoneNumbersToNotice).not.toHaveBeenCalled()
+  })
+
+  it('clears the device when the account moved, whichever number reports it', async () => {
+    mockRefreshUser.mockReturnValue(Effect.void)
+    mockRefreshExtraNumber.mockReturnValue(
+      Effect.fail(new LoggedInOnAnotherDeviceError())
+    )
+
+    await resume()
+
+    expect(mockClearDevice).toHaveBeenCalled()
+    expect(pullMessages).not.toHaveBeenCalled()
+  })
 })

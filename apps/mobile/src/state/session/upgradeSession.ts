@@ -5,11 +5,16 @@ import {type MasterSeed} from '@vexl-next/domain/src/general/MasterSeed.brand'
 import {cryptoBoxSign} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {deriveIdentityKeyPairV2} from '@vexl-next/resources-utils/src/keyDerivation/keyFactory'
 import {user} from '@vexl-next/rest-api/src'
+import {type UserSessionCredentials} from '@vexl-next/rest-api/src/UserSessionCredentials.brand'
 import {type VexlAuthHeader} from '@vexl-next/rest-api/src/VexlAuthHeader'
 import {Effect, Schema} from 'effect'
 import {getDefaultStore} from 'jotai'
 import {apiEnv, platform} from '../../api'
-import {type SessionV1, type SessionV2} from '../../brands/Session.brand'
+import {
+  type SessionPhoneNumber,
+  type SessionV1,
+  type SessionV2,
+} from '../../brands/Session.brand'
 import {
   appSource,
   deviceModel,
@@ -28,7 +33,7 @@ export class UpgradeSessionError extends Schema.TaggedError<UpgradeSessionError>
 }) {}
 
 function fetchVexlAuthHeaderFromServer(
-  session: SessionV1,
+  credentials: UserSessionCredentials,
   keysV2: KeyPairV2
 ): Effect.Effect<VexlAuthHeader, UpgradeSessionError> {
   return Effect.gen(function* (_) {
@@ -40,7 +45,7 @@ function fetchVexlAuthHeaderFromServer(
         clientVersion: versionCode,
         clientSemver: version,
         url: apiEnv.userMs,
-        getUserSessionCredentials: () => session.sessionCredentials,
+        getUserSessionCredentials: () => credentials,
         appSource,
         language: store.get(translationAtom).t('localeName'),
         isDeveloper: store.get(isDeveloperAtom),
@@ -97,6 +102,20 @@ function fetchVexlAuthHeaderFromServer(
   }).pipe(Effect.provide(FetchHttpClient.layer))
 }
 
+/**
+ * Adds the VexlAuth header for `keysV2` to V1 credentials of a phone number.
+ */
+export const upgradeSessionCredentials = (
+  credentials: UserSessionCredentials,
+  keysV2: KeyPairV2
+): Effect.Effect<
+  SessionPhoneNumber['sessionCredentials'],
+  UpgradeSessionError
+> =>
+  fetchVexlAuthHeaderFromServer(credentials, keysV2).pipe(
+    Effect.map((vexlAuthHeader) => ({...credentials, vexlAuthHeader}))
+  )
+
 export const upgradeSession = (
   session: SessionV1,
   masterSeed: MasterSeed
@@ -113,17 +132,14 @@ export const upgradeSession = (
       )
     )
 
-    const vexlAuthHeader = yield* _(
-      fetchVexlAuthHeaderFromServer(session, v2Keys)
+    const sessionCredentials = yield* _(
+      upgradeSessionCredentials(session.sessionCredentials, v2Keys)
     )
 
     return {
       ...session,
       keyPairV2: v2Keys,
-      sessionCredentials: {
-        ...session.sessionCredentials,
-        vexlAuthHeader,
-      },
+      sessionCredentials,
       isLiquidityProvider: false,
       masterSeed,
       loginSessionId: generateLoginSessionId(),

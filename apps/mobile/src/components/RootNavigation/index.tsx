@@ -6,6 +6,7 @@ import {useAtomValue} from 'jotai'
 import React, {memo} from 'react'
 import {type RootStackParamsList} from '../../navigationTypes'
 import {useManageTypingIndications} from '../../state/chat/atoms/typingIndication'
+import {useShowLostPhoneNumbersNotice} from '../../state/phoneNumbers/lostPhoneNumbersNotice'
 import {useIsUserLoggedIn} from '../../state/session'
 import useHandleNotificationOpen from '../../state/useHandleNotificationOpen'
 import {useSetupBackgroundTask} from '../../utils/backgroundTask'
@@ -103,6 +104,8 @@ function LoggedInHookGroup(): null {
   useHandleUniversalAndAppLinks()
 
   useManageTypingIndications()
+
+  useShowLostPhoneNumbersNotice()
 
   return null
 }

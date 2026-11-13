@@ -25,7 +25,12 @@ export const createClearVexlNotificationTokenHeldByOtherUsers = Effect.gen(
         SET
           vexl_notification_token = NULL
         WHERE
-          vexl_notification_token = ${params.token}
+          (
+            vexl_notification_token = ${params.token}
+            -- Only one number of an account gets pushes
+            OR public_key = ${params.publicKey}
+          )
+          AND vexl_notification_token IS NOT NULL
           AND NOT (
             public_key = ${params.publicKey}
             AND hash = ${params.hash}

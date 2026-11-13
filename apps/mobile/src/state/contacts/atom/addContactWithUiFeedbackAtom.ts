@@ -2,7 +2,6 @@ import {type SvgStringOrImageUri} from '@vexl-next/domain/src/utility/SvgStringO
 import {Array, Effect, Option} from 'effect'
 import {atom} from 'jotai'
 import {Alert} from 'react-native'
-import {apiAtom} from '../../../api'
 import {showErrorAlert} from '../../../components/ErrorAlert'
 import {globalDialogAtom} from '../../../components/GlobalDialog'
 import {loadingOverlayDisplayedAtom} from '../../../components/LoadingOverlayProvider'
@@ -21,6 +20,7 @@ import {
 import {areContactsPermissionsGranted} from '../utils'
 import {addContactToPhoneActionAtom} from './addContactToPhoneWithUIFeedbackAtom'
 import {importedContactsAtom, storedContactsAtom} from './contactsStore'
+import {importContactsForAllPhoneNumbersActionAtom} from './importContactsForAllPhoneNumbersActionAtom'
 import {showUpsertContactDialogAtom} from './showUpsertContactDialogAtom'
 
 const editExistingContactActionAtom: ActionAtomType<
@@ -103,12 +103,10 @@ const importContactActionAtom = atom(
   null,
   (get, set, newContact: StoredContactWithComputedValues) => {
     return Effect.gen(function* (_) {
-      const contactApi = get(apiAtom).contact
-
       set(loadingOverlayDisplayedAtom, true)
 
       const response = yield* _(
-        contactApi.importContacts({
+        set(importContactsForAllPhoneNumbersActionAtom, {
           contacts: [newContact.computedValues.hash],
           replace: false,
         })

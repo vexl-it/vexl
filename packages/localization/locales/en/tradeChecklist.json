@@ -31,6 +31,8 @@
   "tradeChecklist.exchangeDetails.nickname": "Nickname",
   "tradeChecklist.exchangeDetails.nicknameNotSet": "Toggle to set",
   "tradeChecklist.exchangeDetails.phoneNumber": "Phone number",
+  "tradeChecklist.exchangeDetails.phoneNumberToReveal.title": "Which number to reveal?",
+  "tradeChecklist.exchangeDetails.phoneNumberToReveal.text": "Your nickname comes with digits of this number. The full number is a separate choice.",
   "tradeChecklist.exchangeDetails.photo": "Profile photo",
   "tradeChecklist.exchangeDetails.noPhotoYet": "No photo yet",
   "tradeChecklist.exchangeDetails.choosePhoto": "Choose a photo",

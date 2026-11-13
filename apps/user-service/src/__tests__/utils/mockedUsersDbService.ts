@@ -12,8 +12,13 @@ const mockedClientEffect = Effect.gen(function* (_) {
     Ref.make<HashMap.HashMap<PublicKeyPemBase64, UserInsert>>(HashMap.empty())
   )
 
-  const insertUser = jest.fn<LoggedInUsersDbOperations['insertUser']>((user) =>
-    Ref.update(ref, HashMap.set(user.publicKey, user))
+  const insertUserIfNew = jest.fn<LoggedInUsersDbOperations['insertUserIfNew']>(
+    (user) =>
+      Ref.modify(ref, (users) =>
+        HashMap.has(users, user.publicKey)
+          ? [false, users]
+          : [true, HashMap.set(users, user.publicKey, user)]
+      )
   )
 
   const updatePublicKeyV2 = jest.fn<
@@ -25,7 +30,7 @@ const mockedClientEffect = Effect.gen(function* (_) {
   )
 
   return {
-    insertUser,
+    insertUserIfNew,
     updatePublicKeyV2,
     deleteUser,
   }

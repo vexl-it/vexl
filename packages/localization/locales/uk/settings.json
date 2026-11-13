@@ -61,8 +61,6 @@
   "editProfileScreen.addIdentity.button": "Додати особу",
   "editProfileScreen.vexlAlias.title": "Твій псевдонім vexl",
   "editProfileScreen.vexlAlias.subtitle": "Так тебе бачать інші. Твоя справжня особа залишається прихованою, доки ти сам не вирішиш її розкрити.",
-  "editProfileScreen.phoneNumber.title": "Номер телефону",
-  "editProfileScreen.phoneNumber.subtitle": "Твій номер телефону залишається приватним. Ніхто його не бачить, якщо ти сам ним не поділишся.",
   "editProfileScreen.spokenLanguages.title": "Мови, якими ти говориш",
   "editProfileScreen.spokenLanguages.subtitle": "Дай іншим знати, якими мовами тобі зручно торгувати.",
   "editProfileScreen.identityPhoto.title": "Додати фото",

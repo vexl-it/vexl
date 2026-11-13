@@ -1,6 +1,7 @@
 import {type ChatImageAttachment} from '@vexl-next/domain/src/general/messaging'
 import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {
+  ImagePhoto,
   Loader,
   Refresh,
   Stack,
@@ -17,6 +18,7 @@ import {
   ensureChatImageDownloadedActionAtom,
   getChatKeys,
   getDownloadedChatImageUri,
+  isChatImageGone,
 } from '../../../state/chat/chatImages'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import resolveLocalUri from '../../../utils/resolveLocalUri'
@@ -28,6 +30,7 @@ type ChatImageState =
   | {type: 'loading'}
   | {type: 'loaded'; uri: UriString}
   | {type: 'failed'}
+  | {type: 'unavailable'}
 
 interface ChatImageProps {
   variant: 'message' | 'thumbnail'
@@ -82,6 +85,16 @@ function ChatImageContent({
         </Pressable>
       )}
       {state.type === 'loading' && <Loader />}
+      {state.type === 'unavailable' && (
+        <YStack alignItems="center" gap="$2" padding="$3">
+          <ImagePhoto size={24} color={theme.foregroundSecondary.get()} />
+          {!isThumbnail && (
+            <Typography variant="description" color="$foregroundSecondary">
+              {t('messages.imageUnavailable')}
+            </Typography>
+          )}
+        </YStack>
+      )}
       {state.type === 'failed' && (
         <Pressable onPress={onRetry}>
           <YStack alignItems="center" gap="$2" padding="$3">
@@ -128,7 +141,9 @@ function AttachmentImage({
     }).pipe(
       Effect.match({
         onSuccess: (uri): ChatImageState => ({type: 'loaded', uri}),
-        onFailure: (): ChatImageState => ({type: 'failed'}),
+        onFailure: (e): ChatImageState => ({
+          type: isChatImageGone(e) ? 'unavailable' : 'failed',
+        }),
       }),
       Effect.map(setState),
       Effect.runFork
@@ -161,10 +176,12 @@ function AttachmentImage({
 export default function ChatImage({
   image,
   imageAttachment,
+  imageUnavailable,
   ...props
 }: ChatImageProps & {
   image?: UriString | undefined
   imageAttachment?: ChatImageAttachment | undefined
+  imageUnavailable?: boolean | undefined
 }): React.ReactElement | null {
   if (imageAttachment)
     return (
@@ -183,6 +200,9 @@ export default function ChatImage({
         state={{type: 'loaded', uri: resolveLocalUri(image)}}
       />
     )
+
+  if (imageUnavailable)
+    return <ChatImageContent {...props} state={{type: 'unavailable'}} />
 
   return null
 }

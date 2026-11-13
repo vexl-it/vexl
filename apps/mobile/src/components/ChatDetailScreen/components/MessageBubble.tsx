@@ -149,6 +149,7 @@ function MessageBubble({
             variant="message"
             image={message.message.image}
             imageAttachment={message.message.imageAttachment}
+            imageUnavailable={message.message.imageUnavailable}
             onPress={onImagePressed}
           />
         </Stack>

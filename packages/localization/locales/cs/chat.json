@@ -85,6 +85,7 @@
   "messages.imagesLimit_few": "Najednou můžeš poslat až {{count}} obrázky",
   "messages.imagesLimit_many": "Najednou můžeš poslat až {{count}} obrázku",
   "messages.imagesLimit_other": "Najednou můžeš poslat až {{count}} obrázků",
+  "messages.imageUnavailable": "Obrázek už není k dispozici",
   "messages.deleteChatQuestion": "Smazat chat?",
   "messages.deleteChatExplanation1": "Ukončil jsi obchod? Zavřením chatu bude tato konverzace trvale smazána.",
   "messages.deleteChatExplanation2": "Tenhle krok je nevratný. Chceš tenhle chat smazat?",

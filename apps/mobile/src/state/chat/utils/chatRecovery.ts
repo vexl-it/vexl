@@ -1,5 +1,8 @@
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
-import {type ChatRecoveryProof} from '@vexl-next/domain/src/general/messaging'
+import {
+  type ChatMessage,
+  type ChatRecoveryProof,
+} from '@vexl-next/domain/src/general/messaging'
 import {type UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {
   compare,
@@ -11,6 +14,7 @@ import {
   type ChatMessageWithDirection,
 } from '@vexl-next/resources-utils/src/chat/utils/chatHistory'
 import {Array, Option, pipe, Record} from 'effect'
+import getIdentityRevealStatus from '../../tradeChecklist/utils/getIdentityRevealStatus'
 import {
   type ChatMessageWithState,
   type ChatWithMessages,
@@ -252,12 +256,36 @@ export function latestRecoveryProof(
   )
 }
 
+function withoutRevealPhoto(message: ChatMessage): ChatMessage {
+  const identity = message.tradeChecklistUpdate?.identity
+  return {
+    ...message,
+    image: message.messageType === 'MESSAGE' ? message.image : undefined,
+    tradeChecklistUpdate: identity
+      ? {
+          ...message.tradeChecklistUpdate,
+          identity: {...identity, image: undefined},
+        }
+      : message.tradeChecklistUpdate,
+  }
+}
+
+/**
+ * Reveal photos are shared only once both sides revealed their identity, so
+ * no one can get a photo back that was declined or is still waiting.
+ */
 export function messagesToShareAsHistory(
   chat: ChatWithMessages
 ): ChatMessageWithDirection[] {
+  const identityShared = getIdentityRevealStatus(chat) === 'shared'
   return Array.filterMap(chat.messages, (one) =>
     one.state === 'received' || one.state === 'sent'
-      ? Option.some({state: one.state, message: one.message})
+      ? Option.some({
+          state: one.state,
+          message: identityShared
+            ? one.message
+            : withoutRevealPhoto(one.message),
+        })
       : Option.none()
   )
 }

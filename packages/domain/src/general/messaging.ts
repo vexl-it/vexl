@@ -143,8 +143,9 @@ export const ChatHistoryMessageType = MessageType.pipe(
 export type ChatHistoryMessageType = typeof ChatHistoryMessageType.Type
 
 /**
- * One message of a chat as stored by the sender of a HISTORY message. Images
- * are never included. `author` is relative to the HISTORY sender.
+ * One message of a chat as stored by the sender of a HISTORY message. Chat
+ * images travel as their original attachments, revealed identity photos as
+ * base64 data uris. `author` is relative to the HISTORY sender.
  */
 export const ChatHistoryMessage = Schema.Struct({
   uuid: ChatMessageId,
@@ -152,9 +153,11 @@ export const ChatHistoryMessage = Schema.Struct({
   messageType: ChatHistoryMessageType,
   text: Schema.String,
   time: UnixMilliseconds,
-  repliedTo: Schema.optional(
-    RepliedToData.pipe(Schema.omit('imageAttachment'))
-  ),
+  imageAttachment: Schema.optional(ChatImageAttachment),
+  // Photo of a reveal sent before the trade checklist
+  image: Schema.optional(UriString),
+  imageUnavailable: Schema.optional(Schema.Boolean),
+  repliedTo: Schema.optional(RepliedToData),
   tradeChecklistUpdate: Schema.optional(TradeChecklistUpdate),
   deanonymizedUser: Schema.optional(DeanonymizedUser),
 })
@@ -218,6 +221,8 @@ export const ChatMessage = Schema.Struct({
    */
   image: Schema.optional(UriString),
   imageAttachment: Schema.optional(ChatImageAttachment),
+  // Local-only. A restored chat image that exists only on the other device.
+  imageUnavailable: Schema.optional(Schema.Boolean),
   repliedTo: Schema.optional(RepliedToData),
   tradeChecklistUpdate: Schema.optional(TradeChecklistUpdate),
   reaction: Schema.optional(MessageReaction),
@@ -361,6 +366,7 @@ export const ChatMessageRequiringNewerVersion = Schema.Struct({
   deanonymizedUser: Schema.optional(Schema.Undefined),
   image: Schema.optional(Schema.Undefined),
   imageAttachment: Schema.optional(Schema.Undefined),
+  imageUnavailable: Schema.optional(Schema.Undefined),
   myVexlToken: Schema.optional(VexlNotificationToken),
   commonFriends: Schema.optional(Schema.Array(HashedPhoneNumber)),
   verifiedCommonFriends: Schema.optional(Schema.Array(HashedPhoneNumber)),

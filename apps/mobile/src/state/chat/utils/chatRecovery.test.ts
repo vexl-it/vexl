@@ -481,6 +481,14 @@ describe('answering history requests', () => {
         received(identityReveal(requester, 2, 'DISAPPROVE_REVEAL')),
       ])
     ).toEqual([undefined, undefined])
+    expect(
+      revealPhotos([
+        myRequest,
+        received(identityReveal(requester, 2, 'DISAPPROVE_REVEAL')),
+        sent(identityReveal(myKey, 3, 'REQUEST_REVEAL')),
+        received(identityReveal(requester, 4, 'APPROVE_REVEAL')),
+      ])
+    ).toEqual([undefined, undefined, photo, photo])
   })
 
   it('keeps a chat image of a message when photos are left out', () => {

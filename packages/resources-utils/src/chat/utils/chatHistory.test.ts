@@ -90,6 +90,7 @@ it('rebuilds chat history on the other side with flipped direction and images', 
   })
   const imageOnly = chatMessage({text: '', imageAttachment})
   const legacyImageOnly = chatMessage({text: '', image})
+  const restoredImageOnly = chatMessage({text: '', imageUnavailable: true})
 
   const messages: ChatMessageWithDirection[] = [
     {state: 'sent', message: sentByHistorySender},
@@ -98,6 +99,7 @@ it('rebuilds chat history on the other side with flipped direction and images', 
     {state: 'received', message: legacyIdentityReveal},
     {state: 'sent', message: imageOnly},
     {state: 'sent', message: legacyImageOnly},
+    {state: 'sent', message: restoredImageOnly},
     {state: 'sent', message: chatMessage({text: ' '})},
     {state: 'sent', message: chatMessage({messageType: 'MESSAGE_READ'})},
   ]
@@ -128,6 +130,7 @@ it('rebuilds chat history on the other side with flipped direction and images', 
     ['sent', legacyIdentityReveal.uuid],
     ['received', imageOnly.uuid],
     ['received', legacyImageOnly.uuid],
+    ['received', restoredImageOnly.uuid],
   ])
   expect(rebuilt[0]?.message).toMatchObject({
     senderPublicKey: historySender.publicKeyPemBase64,
@@ -149,6 +152,7 @@ it('rebuilds chat history on the other side with flipped direction and images', 
   expect(rebuilt[4]?.message.imageAttachment).toEqual(imageAttachment)
   expect(rebuilt[5]?.message).toMatchObject({imageUnavailable: true})
   expect(rebuilt[5]?.message.image).toBeUndefined()
+  expect(rebuilt[6]?.message).toMatchObject({imageUnavailable: true})
 })
 
 it('shows HISTORY as requiring a newer version on older clients', () => {

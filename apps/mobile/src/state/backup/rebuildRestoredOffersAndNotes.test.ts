@@ -46,7 +46,7 @@ jest.mock(
       ),
   })
 )
-const mockRefreshOffers = jest.fn()
+const mockRefreshOffers = jest.fn(() => true)
 jest.mock('../marketplace/atoms/refreshOffersActionAtom', () => ({
   refreshOffersActionAtom: jest
     .requireActual('jotai')
@@ -58,7 +58,6 @@ jest.mock('../marketplace/atoms/refreshOffersActionAtom', () => ({
 const mockNotesUpdatedAtAtom = atom(0)
 const mockNotesAtom = atom<unknown>([])
 const mockMyOffersAtom = atom<unknown>([])
-const mockOffersLoadingStateAtom = atom('success')
 const mockRefreshNotesSucceeds = jest.fn(() => true)
 jest.mock('../notes/atoms/refreshNotesActionAtom', () => ({
   refreshNotesActionAtom: jest
@@ -69,13 +68,6 @@ jest.mock('../notes/atoms/refreshNotesActionAtom', () => ({
           set(mockNotesUpdatedAtAtom, (n: number) => n + 1)
       })
     ),
-}))
-jest.mock('../marketplace/atoms/loadingState', () => ({
-  loadingStateAtom: jest
-    .requireActual('jotai')
-    .atom((get: (a: unknown) => unknown) => ({
-      state: get(mockOffersLoadingStateAtom),
-    })),
 }))
 jest.mock('../marketplace/atoms/myOffers', () => ({
   myOffersAtom: jest
@@ -152,7 +144,7 @@ describe('rebuild of restored offers and notes', () => {
     store.set(mockMyOffersAtom, [myOffer(1), myOffer(2)])
     store.set(needsFullContactsReplaceAfterContactEditAtom, false)
     store.set(restoredOffersAndNotesNeedRebuildAtom, {needsRebuild: true})
-    store.set(mockOffersLoadingStateAtom, 'success')
+    mockRefreshOffers.mockReturnValue(true)
     mockRefreshNotesSucceeds.mockReturnValue(true)
     store.set(mockNotesAtom, [])
   })
@@ -184,12 +176,7 @@ describe('rebuild of restored offers and notes', () => {
   })
 
   it.each([
-    [
-      'offers',
-      () => {
-        store.set(mockOffersLoadingStateAtom, 'error')
-      },
-    ],
+    ['offers', () => mockRefreshOffers.mockReturnValue(false)],
     ['notes', () => mockRefreshNotesSucceeds.mockReturnValue(false)],
   ])(
     'stays pending when the %s could not be fetched',

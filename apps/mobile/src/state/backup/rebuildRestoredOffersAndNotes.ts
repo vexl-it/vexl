@@ -12,7 +12,6 @@ import {
 } from '../connections/atom/noteToConnectionsAtom'
 import {needsFullContactsReplaceAfterContactEditAtom} from '../contacts/atom/contactsStore'
 import {ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom} from '../contacts/atom/ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom'
-import {loadingStateAtom} from '../marketplace/atoms/loadingState'
 import {myOffersAtom} from '../marketplace/atoms/myOffers'
 import {refreshOffersActionAtom} from '../marketplace/atoms/refreshOffersActionAtom'
 import {noteConnectionsOf} from '../notes/atoms/createNoteActionAtom'
@@ -103,12 +102,12 @@ export const rebuildRestoredOffersAndNotesActionAtom = atom(
 
     return Effect.gen(function* (_) {
       // The restore only started fetching them, and both refreshes swallow
-      // their errors. Missing ones would never be rebuilt.
+      // their errors. Offers or notes missed now would never be rebuilt.
       const notesUpdatedBefore = get(notesStateAtom).lastUpdatedAt
-      yield* _(set(refreshOffersActionAtom))
+      const offersFetched = yield* _(set(refreshOffersActionAtom))
       yield* _(set(refreshNotesActionAtom))
       if (
-        get(loadingStateAtom).state !== 'success' ||
+        !offersFetched ||
         get(notesStateAtom).lastUpdatedAt === notesUpdatedBefore
       )
         return yield* _(new RestoredOffersAndNotesNotFetchedError())

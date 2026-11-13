@@ -3,6 +3,7 @@ import {
   type ChatMessage,
   type ChatRecoveryProof,
 } from '@vexl-next/domain/src/general/messaging'
+import {RevealStatus} from '@vexl-next/domain/src/general/tradeChecklist'
 import {type UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {
   compare,
@@ -13,8 +14,7 @@ import {
   chatHistoryToMessages,
   type ChatMessageWithDirection,
 } from '@vexl-next/resources-utils/src/chat/utils/chatHistory'
-import {Array, Option, pipe, Record} from 'effect'
-import getIdentityRevealStatus from '../../tradeChecklist/utils/getIdentityRevealStatus'
+import {Array, Option, pipe, Record, Schema} from 'effect'
 import {
   type ChatMessageWithState,
   type ChatWithMessages,
@@ -270,20 +270,18 @@ function withoutRevealPhoto(message: ChatMessage): ChatMessage {
   }
 }
 
-function revealTime(message: ChatMessage): number {
-  return message.tradeChecklistUpdate?.identity?.timestamp ?? message.time
-}
+const isRevealStatus = Schema.is(RevealStatus)
 
-function isRevealRequest(message: ChatMessage): boolean {
-  return (
-    message.messageType === 'REQUEST_REVEAL' ||
-    message.tradeChecklistUpdate?.identity?.status === 'REQUEST_REVEAL'
-  )
+function revealStatus(message: ChatMessage): RevealStatus | undefined {
+  const status =
+    message.tradeChecklistUpdate?.identity?.status ?? message.messageType
+  return isRevealStatus(status) ? status : undefined
 }
 
 /**
- * Reveal photos are shared only from the latest reveal both sides agreed to,
- * so no one can get a photo back that was declined or is still waiting.
+ * Reveal photos are shared only from the latest reveal request, once it was
+ * approved, so no one can get a photo back that was declined or is still
+ * waiting. Message order decides as the clocks of the two phones may differ.
  */
 export function messagesToShareAsHistory(
   chat: ChatWithMessages
@@ -293,22 +291,22 @@ export function messagesToShareAsHistory(
       ? Option.some({state, message})
       : Option.none()
   )
-  const photosSince =
-    getIdentityRevealStatus(chat) === 'shared'
-      ? pipe(
+  const approved = pipe(
+    Array.findLast(delivered, ({message}) => !!revealStatus(message)),
+    Option.exists(({message}) => revealStatus(message) === 'APPROVE_REVEAL')
+  )
+  const photosFrom = approved
+    ? pipe(
+        Array.findLastIndex(
           delivered,
-          Array.map(({message}) => message),
-          Array.filter(isRevealRequest),
-          Array.map(revealTime),
-          Array.reduce(0, (latest, time) => Math.max(latest, time))
-        )
-      : Infinity
-  return Array.map(delivered, ({state, message}) => ({
+          ({message}) => revealStatus(message) === 'REQUEST_REVEAL'
+        ),
+        Option.getOrElse(() => 0)
+      )
+    : Infinity
+  return Array.map(delivered, ({state, message}, index) => ({
     state,
-    message:
-      revealTime(message) >= photosSince
-        ? message
-        : withoutRevealPhoto(message),
+    message: index >= photosFrom ? message : withoutRevealPhoto(message),
   }))
 }
 

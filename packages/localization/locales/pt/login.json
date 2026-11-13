@@ -46,7 +46,7 @@
   "loginFlow.restoreFromBackup.errors.unsupportedVersion": "Este backup vem de uma versão mais recente do Vexl. Atualiza a app e tenta novamente.",
   "loginFlow.restoreFromBackup.errors.corrupted": "Este ficheiro está danificado. Experimenta outra cópia.",
   "loginFlow.restoreFromBackup.intro.title": "Restaura a tua conta",
-  "loginFlow.restoreFromBackup.intro.text": "Vais precisar de:",
+  "loginFlow.restoreFromBackup.intro.text": "Tem estas três coisas à mão.",
   "loginFlow.restoreFromBackup.intro.phoneNumber.title": "O teu número de telefone",
   "loginFlow.restoreFromBackup.intro.phoneNumber.text": "O que tinhas quando fizeste o backup.",
   "loginFlow.restoreFromBackup.intro.file.title": "O teu ficheiro de backup",

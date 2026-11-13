@@ -46,7 +46,7 @@
   "loginFlow.restoreFromBackup.errors.unsupportedVersion": "Това резервно копие е от по-нова версия на Vexl. Обнови приложението и опитай отново.",
   "loginFlow.restoreFromBackup.errors.corrupted": "Този файл е повреден. Опитай с друго копие.",
   "loginFlow.restoreFromBackup.intro.title": "Възстанови акаунта си",
-  "loginFlow.restoreFromBackup.intro.text": "Ще ти трябват:",
+  "loginFlow.restoreFromBackup.intro.text": "Приготви тези три неща.",
   "loginFlow.restoreFromBackup.intro.phoneNumber.title": "Телефонният ти номер",
   "loginFlow.restoreFromBackup.intro.phoneNumber.text": "Номерът, който имаше, когато направи копието.",
   "loginFlow.restoreFromBackup.intro.file.title": "Файлът с резервното копие",

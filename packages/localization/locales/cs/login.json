@@ -46,7 +46,7 @@
   "loginFlow.restoreFromBackup.errors.unsupportedVersion": "Tahle záloha pochází z novější verze Vexlu. Aktualizuj aplikaci a zkus to znovu.",
   "loginFlow.restoreFromBackup.errors.corrupted": "Tenhle soubor je poškozený. Zkus jinou kopii.",
   "loginFlow.restoreFromBackup.intro.title": "Obnov svůj účet",
-  "loginFlow.restoreFromBackup.intro.text": "Budeš potřebovat:",
+  "loginFlow.restoreFromBackup.intro.text": "Připrav si tyhle tři věci.",
   "loginFlow.restoreFromBackup.intro.phoneNumber.title": "Tvoje telefonní číslo",
   "loginFlow.restoreFromBackup.intro.phoneNumber.text": "To, které jsi měl při vytváření zálohy.",
   "loginFlow.restoreFromBackup.intro.file.title": "Tvůj záložní soubor",

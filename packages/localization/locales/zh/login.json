@@ -46,7 +46,7 @@
   "loginFlow.restoreFromBackup.errors.unsupportedVersion": "这个备份来自更新版本的 Vexl。请更新应用后重试。",
   "loginFlow.restoreFromBackup.errors.corrupted": "这个文件已损坏。试试另一份副本。",
   "loginFlow.restoreFromBackup.intro.title": "恢复你的账户",
-  "loginFlow.restoreFromBackup.intro.text": "你需要：",
+  "loginFlow.restoreFromBackup.intro.text": "请准备好以下三样东西。",
   "loginFlow.restoreFromBackup.intro.phoneNumber.title": "你的手机号",
   "loginFlow.restoreFromBackup.intro.phoneNumber.text": "创建备份时你使用的号码。",
   "loginFlow.restoreFromBackup.intro.file.title": "你的备份文件",

@@ -8,7 +8,7 @@ import {
 } from '@vexl-next/domain/src/general/offers'
 import {type OfferEncryptionProgress} from '@vexl-next/resources-utils/src/offers/OfferEncryptionProgress'
 import createNewOfferForMyContacts from '@vexl-next/resources-utils/src/offers/createNewOfferForMyContacts'
-import {Array, Effect, Option, Record, Schema} from 'effect'
+import {Array, Effect, HashSet, Option, Record, Schema} from 'effect'
 import {pipe} from 'fp-ts/lib/function'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
@@ -164,6 +164,50 @@ const reencryptOneOfferActionAtom = atom(
   }
 )
 
+const offerIdsBeingReuploadedAtom = atom(HashSet.empty<OfferId>())
+
+// Uploads the offer as it is now: the user may have edited or deleted it, or
+// another reupload (the restore's, the suggestion's) may already be on it.
+const reuploadCurrentOfferActionAtom = atom(
+  null,
+  (
+    get,
+    set,
+    {
+      offerId,
+      onProgress,
+    }: {
+      offerId: OfferId
+      onProgress: (p: OfferEncryptionProgress) => void
+    }
+  ) =>
+    Effect.suspend(() => {
+      const current = Array.findFirst(
+        get(myOffersAtom),
+        (one) => one.offerInfo.offerId === offerId
+      )
+      if (
+        Option.isNone(current) ||
+        HashSet.has(get(offerIdsBeingReuploadedAtom), offerId)
+      )
+        return Effect.succeedNone
+      set(offerIdsBeingReuploadedAtom, HashSet.add(offerId))
+
+      return set(reencryptOneOfferActionAtom, {
+        offer: current.value,
+        onProgress,
+      }).pipe(
+        Effect.either,
+        Effect.map(Option.some),
+        Effect.ensuring(
+          Effect.sync(() => {
+            set(offerIdsBeingReuploadedAtom, HashSet.remove(offerId))
+          })
+        )
+      )
+    })
+)
+
 export const reencryptSingleOfferMissingOnServerWhenEditingActionAtom = atom(
   null,
   (
@@ -243,35 +287,17 @@ export const reencryptOffersMissingOnServerActionAtom = atom(
     return pipe(
       offersToReupload,
       Array.map((one, index) =>
-        // Uploads the offer as it is now: the user may have edited or deleted
-        // it while earlier ones were uploading.
-        Effect.suspend(() =>
-          Option.match(
-            Array.findFirst(
-              get(myOffersAtom),
-              (current) => current.offerInfo.offerId === one.offerInfo.offerId
-            ),
-            {
-              onNone: () => Effect.succeedNone,
-              onSome: (current) =>
-                pipe(
-                  set(reencryptOneOfferActionAtom, {
-                    offer: current,
-                    onProgress: (progress) => {
-                      if (onProgress)
-                        onProgress({
-                          offerEncryptionProgress: progress,
-                          processingIndex: index,
-                          totalToProcess: offersToReupload.length,
-                        })
-                    },
-                  }),
-                  Effect.either,
-                  Effect.map(Option.some)
-                ),
-            }
-          )
-        )
+        set(reuploadCurrentOfferActionAtom, {
+          offerId: one.offerInfo.offerId,
+          onProgress: (progress) => {
+            if (onProgress)
+              onProgress({
+                offerEncryptionProgress: progress,
+                processingIndex: index,
+                totalToProcess: offersToReupload.length,
+              })
+          },
+        })
       ),
       Effect.all,
       Effect.map(Array.getSomes),

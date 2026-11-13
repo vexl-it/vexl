@@ -51,7 +51,7 @@ function FailedContent({
         )
       }
     >
-      <YStack paddingTop="$10">
+      <YStack flex={1} justifyContent="center" paddingVertical="$5">
         {failure === 'backupNoLongerValid' ? (
           <ScreenHeading
             title={t('loginFlow.restoreFromBackup.failed.noLongerValid.title')}

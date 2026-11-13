@@ -14,6 +14,11 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
 }))
 jest.mock('@sentry/react-native', () => ({captureException: jest.fn()}))
 jest.mock('url-join', () => jest.fn((...parts: string[]) => parts.join('/')))
+const mockReportError = jest.fn()
+jest.mock('../../utils/reportError', () => ({
+  __esModule: true,
+  default: (...args: unknown[]) => mockReportError(...args),
+}))
 
 const mockDeleteOffer = jest.fn()
 const mockDeleteNote = jest.fn()
@@ -264,16 +269,30 @@ describe('rebuild of restored offers and notes', () => {
     })
   })
 
-  it('keeps a note whose recreation failed and recreates it on the retry', async () => {
+  it('still hands over the offers when a note fails, and recreates the note on the retry', async () => {
     store.set(mockNotesAtom, [myNote(1, Date.now() + 60_000)])
     mockCreateNote.mockReturnValueOnce(Effect.fail(new Error('offline')))
 
-    await expect(
-      Effect.runPromise(store.set(rebuildRestoredOffersAndNotesActionAtom))
-    ).rejects.toThrow()
+    expect(
+      await Effect.runPromise(
+        store.set(rebuildRestoredOffersAndNotesActionAtom)
+      )
+    ).toEqual([myOffer(1), myOffer(2)])
+    expect(
+      store.get(restoredOffersAndNotesNeedRebuildAtom).notesToRecreate
+    ).toHaveLength(1)
+    expect(mockReportError).toHaveBeenCalledWith(
+      'error',
+      new Error('Error recreating a restored note'),
+      expect.anything()
+    )
     // The note sync drops the note the server no longer has.
     store.set(mockNotesAtom, [])
-    await Effect.runPromise(store.set(rebuildRestoredOffersAndNotesActionAtom))
+    expect(
+      await Effect.runPromise(
+        store.set(rebuildRestoredOffersAndNotesActionAtom)
+      )
+    ).toEqual([])
 
     expect(mockRefreshOffers).toHaveBeenCalledTimes(1)
     expect(mockDeleteOffer).toHaveBeenCalledTimes(1)

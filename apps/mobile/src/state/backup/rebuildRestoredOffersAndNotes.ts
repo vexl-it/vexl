@@ -6,6 +6,7 @@ import {Array, Effect, Schema} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../api'
 import {atomWithParsedMmkvStorage} from '../../utils/atomUtils/atomWithParsedMmkvStorage'
+import reportError from '../../utils/reportError'
 import {
   noteConnectionUpdatesSemaphoreAtom,
   upsertNoteToConnectionsActionAtom,
@@ -155,19 +156,32 @@ export const rebuildRestoredOffersAndNotesActionAtom = atom(
         : []
 
       const now = unixMillisecondsNow()
+      set(restoredOffersAndNotesNeedRebuildAtom, (old) => ({
+        ...old,
+        notesToRecreate: Array.filter(
+          old.notesToRecreate,
+          (one) => one.noteInfo.expiresAt > now
+        ),
+      }))
+      // A note that fails stays for the retry and must not hold back the
+      // offers' reupload.
       yield* _(
         Effect.forEach(
           get(restoredOffersAndNotesNeedRebuildAtom).notesToRecreate,
           (note) =>
-            note.noteInfo.expiresAt > now
-              ? set(recreateNoteActionAtom, note)
-              : Effect.void
+            set(recreateNoteActionAtom, note).pipe(
+              Effect.catchAll((e) =>
+                Effect.sync(() => {
+                  reportError(
+                    'error',
+                    new Error('Error recreating a restored note'),
+                    {e}
+                  )
+                })
+              )
+            )
         )
       )
-      set(restoredOffersAndNotesNeedRebuildAtom, {
-        needsRebuild: false,
-        notesToRecreate: [],
-      })
       return offers
     }).pipe(
       Effect.ensuring(

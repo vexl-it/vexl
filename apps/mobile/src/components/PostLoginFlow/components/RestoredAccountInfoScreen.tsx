@@ -50,10 +50,6 @@ export default function RestoredAccountInfoScreen({
             note={t('loginFlow.restoreFromBackup.restored.chats.text')}
           />
           <InfoListItem
-            title={t('loginFlow.restoreFromBackup.restored.messages.title')}
-            note={t('loginFlow.restoreFromBackup.restored.messages.text')}
-          />
-          <InfoListItem
             title={t('loginFlow.restoreFromBackup.restored.contacts.title')}
             note={t('loginFlow.restoreFromBackup.restored.contacts.text')}
           />

@@ -1,4 +1,4 @@
-import {Effect} from 'effect'
+import {Array, Effect} from 'effect'
 import {
   InAppLoadingTaskError,
   registerInAppLoadingTask,
@@ -15,9 +15,9 @@ registerInAppLoadingTask({
   },
   task: (store) =>
     store.set(rebuildRestoredOffersAndNotesActionAtom).pipe(
-      Effect.flatMap((offersWaitForReupload) =>
-        offersWaitForReupload
-          ? store.set(reencryptOffersMissingOnServerActionAtom, {})
+      Effect.flatMap((offers) =>
+        Array.isNonEmptyReadonlyArray(offers)
+          ? store.set(reencryptOffersMissingOnServerActionAtom, {offers})
           : Effect.void
       ),
       Effect.asVoid,

@@ -226,15 +226,17 @@ export const reencryptOffersMissingOnServerActionAtom = atom(
     set,
     {
       onProgress,
+      offers,
     }: {
       onProgress?: (a: {
         offerEncryptionProgress: OfferEncryptionProgress
         processingIndex: number
         totalToProcess: number
       }) => void
+      offers?: readonly MyOfferInState[]
     }
   ) => {
-    const offersToReupload = get(offersMissingOnServerAtom)
+    const offersToReupload = offers ?? get(offersMissingOnServerAtom)
 
     return pipe(
       offersToReupload,

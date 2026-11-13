@@ -1,5 +1,5 @@
-import {Effect, HashMap} from 'effect'
-import {getDefaultStore} from 'jotai'
+import {Effect, HashMap, Option} from 'effect'
+import {atom, getDefaultStore} from 'jotai'
 import {needsFullContactsReplaceAfterContactEditAtom} from '../contacts/atom/contactsStore'
 import {
   discardOldPhoneContactsActionAtom,
@@ -54,37 +54,51 @@ jest.mock('../marketplace/atoms/refreshOffersActionAtom', () => ({
       jest.requireActual('effect').Effect.sync(mockRefreshOffers)
     ),
 }))
+// Fixture state. Atoms, so the code under test sees every change.
+const mockNotesUpdatedAtAtom = atom(0)
+const mockNotesAtom = atom<unknown>([])
+const mockMyOffersAtom = atom<unknown>([])
+const mockOffersLoadingStateAtom = atom('success')
+const mockRefreshNotesSucceeds = jest.fn(() => true)
 jest.mock('../notes/atoms/refreshNotesActionAtom', () => ({
   refreshNotesActionAtom: jest
     .requireActual('jotai')
-    .atom(null, () => jest.requireActual('effect').Effect.void),
+    .atom(null, (_: unknown, set: (a: unknown, u: unknown) => void) =>
+      jest.requireActual('effect').Effect.sync(() => {
+        if (mockRefreshNotesSucceeds())
+          set(mockNotesUpdatedAtAtom, (n: number) => n + 1)
+      })
+    ),
 }))
-const mockMyOffers = jest.fn((): unknown[] => [])
+jest.mock('../marketplace/atoms/loadingState', () => ({
+  loadingStateAtom: jest
+    .requireActual('jotai')
+    .atom((get: (a: unknown) => unknown) => ({
+      state: get(mockOffersLoadingStateAtom),
+    })),
+}))
 jest.mock('../marketplace/atoms/myOffers', () => ({
-  myOffersAtom: jest.requireActual('jotai').atom(() => mockMyOffers()),
-}))
-// Stand-ins for persisted state the rebuild reads and updates.
-// The rebuild only ever writes them with updater functions.
-let mockMissingOffers: unknown = {}
-let mockNotes: unknown = []
-jest.mock('../marketplace/atoms/offersMissingOnServer', () => ({
-  offersMissingOnServerStorageAtom: jest.requireActual('jotai').atom(
-    () => mockMissingOffers,
-    (_: unknown, __: unknown, update: (old: unknown) => unknown) => {
-      mockMissingOffers = update(mockMissingOffers)
-    }
-  ),
+  myOffersAtom: jest
+    .requireActual('jotai')
+    .atom((get: (a: unknown) => unknown) => get(mockMyOffersAtom)),
 }))
 jest.mock('../notes/atoms/notesState', () => {
   const {atom} = jest.requireActual('jotai')
   return {
     notesAtom: atom(
-      () => mockNotes,
-      (_: unknown, __: unknown, update: (old: unknown) => unknown) => {
-        mockNotes = update(mockNotes)
+      (get: (a: unknown) => unknown) => get(mockNotesAtom),
+      (
+        get: (a: unknown) => unknown,
+        set: (a: unknown, v: unknown) => void,
+        update: (old: unknown) => unknown
+      ) => {
+        set(mockNotesAtom, update(get(mockNotesAtom)))
       }
     ),
-    myNotesAtom: atom(() => mockNotes),
+    myNotesAtom: atom((get: (a: unknown) => unknown) => get(mockNotesAtom)),
+    notesStateAtom: atom((get: (a: unknown) => unknown) => ({
+      lastUpdatedAt: get(mockNotesUpdatedAtAtom),
+    })),
   }
 })
 jest.mock('../notes/atoms/createNoteActionAtom', () => ({
@@ -93,7 +107,11 @@ jest.mock('../notes/atoms/createNoteActionAtom', () => ({
   }),
 }))
 const mockUpsertNoteConnections = jest.fn()
+const mockNoteSyncSemaphore = Effect.unsafeMakeSemaphore(1)
 jest.mock('../connections/atom/noteToConnectionsAtom', () => ({
+  noteConnectionUpdatesSemaphoreAtom: jest
+    .requireActual('jotai')
+    .atom(() => mockNoteSyncSemaphore),
   upsertNoteToConnectionsActionAtom: jest
     .requireActual('jotai')
     .atom(null, (_: unknown, __: unknown, record: unknown) => {
@@ -131,11 +149,12 @@ describe('rebuild of restored offers and notes', () => {
       ({adminId, noteId}: {adminId: string; noteId: string}) =>
         Effect.succeed({adminId, noteInfo: {noteId, recreated: true}})
     )
-    mockMyOffers.mockReturnValue([myOffer(1), myOffer(2)])
+    store.set(mockMyOffersAtom, [myOffer(1), myOffer(2)])
     store.set(needsFullContactsReplaceAfterContactEditAtom, false)
     store.set(restoredOffersAndNotesNeedRebuildAtom, {needsRebuild: true})
-    mockMissingOffers = {offerIds: ['already-missing']}
-    mockNotes = []
+    store.set(mockOffersLoadingStateAtom, 'success')
+    mockRefreshNotesSucceeds.mockReturnValue(true)
+    store.set(mockNotesAtom, [])
   })
 
   it('waits until the old phone contacts are replaced', async () => {
@@ -145,7 +164,7 @@ describe('rebuild of restored offers and notes', () => {
       store.set(rebuildRestoredOffersAndNotesActionAtom)
     )
 
-    expect(result).toBe(false)
+    expect(result).toEqual([])
     expect(mockRefreshOffers).not.toHaveBeenCalled()
     expect(mockDeleteOffer).not.toHaveBeenCalled()
     expect(store.get(restoredOffersAndNotesNeedRebuildAtom).needsRebuild).toBe(
@@ -160,25 +179,63 @@ describe('rebuild of restored offers and notes', () => {
       store.set(rebuildRestoredOffersAndNotesActionAtom)
     )
 
-    expect(result).toBe(false)
+    expect(result).toEqual([])
     expect(mockDeleteOffer).not.toHaveBeenCalled()
+  })
+
+  it.each([
+    [
+      'offers',
+      () => {
+        store.set(mockOffersLoadingStateAtom, 'error')
+      },
+    ],
+    ['notes', () => mockRefreshNotesSucceeds.mockReturnValue(false)],
+  ])(
+    'stays pending when the %s could not be fetched',
+    async (_, failRefresh) => {
+      failRefresh()
+
+      await expect(
+        Effect.runPromise(store.set(rebuildRestoredOffersAndNotesActionAtom))
+      ).rejects.toThrow()
+
+      expect(mockDeleteOffer).not.toHaveBeenCalled()
+      expect(
+        store.get(restoredOffersAndNotesNeedRebuildAtom).needsRebuild
+      ).toBe(true)
+    }
+  )
+
+  it('keeps the note sync out while a note is recreated', async () => {
+    store.set(mockNotesAtom, [myNote(1, Date.now() + 60_000)])
+    mockCreateNote.mockImplementation(
+      ({adminId, noteId}: {adminId: string; noteId: string}) =>
+        Effect.gen(function* () {
+          const syncCouldRun =
+            yield* mockNoteSyncSemaphore.withPermitsIfAvailable(1)(Effect.void)
+          expect(Option.isNone(syncCouldRun)).toBe(true)
+          return {adminId, noteInfo: {noteId}}
+        })
+    )
+
+    await Effect.runPromise(store.set(rebuildRestoredOffersAndNotesActionAtom))
+
+    expect(mockCreateNote).toHaveBeenCalledTimes(1)
   })
 
   it('deletes the offers for a reupload, recreates live notes under the same ids and finishes', async () => {
     const now = Date.now()
-    mockNotes = [myNote(1, now + 60_000), myNote(2, now - 60_000)]
+    store.set(mockNotesAtom, [myNote(1, now + 60_000), myNote(2, now - 60_000)])
 
     const result = await Effect.runPromise(
       store.set(rebuildRestoredOffersAndNotesActionAtom)
     )
 
-    expect(result).toBe(true)
+    expect(result).toEqual([myOffer(1), myOffer(2)])
     expect(mockRefreshOffers).toHaveBeenCalled()
     expect(mockDeleteOffer).toHaveBeenCalledWith({
       adminIds: ['admin-1', 'admin-2'],
-    })
-    expect(mockMissingOffers).toEqual({
-      offerIds: ['already-missing', 'offer-1', 'offer-2'],
     })
 
     expect(mockDeleteNote).toHaveBeenCalledTimes(1)
@@ -196,7 +253,7 @@ describe('rebuild of restored offers and notes', () => {
     expect(
       Math.min(...mockCreateNote.mock.invocationCallOrder)
     ).toBeGreaterThan(Math.max(...mockDeleteNote.mock.invocationCallOrder))
-    expect(mockNotes).toEqual([
+    expect(store.get(mockNotesAtom)).toEqual([
       {
         ownershipInfo: {adminId: 'note-admin-1'},
         flags: {reported: false},
@@ -219,7 +276,6 @@ describe('rebuild of restored offers and notes', () => {
       Effect.runPromise(store.set(rebuildRestoredOffersAndNotesActionAtom))
     ).rejects.toThrow()
 
-    expect(mockMissingOffers).toEqual({offerIds: ['already-missing']})
     expect(store.get(restoredOffersAndNotesNeedRebuildAtom).needsRebuild).toBe(
       true
     )

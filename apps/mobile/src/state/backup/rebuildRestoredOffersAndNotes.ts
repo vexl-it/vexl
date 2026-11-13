@@ -1,18 +1,22 @@
 import {type MyNoteInState} from '@vexl-next/domain/src/general/notes'
+import {type MyOfferInState} from '@vexl-next/domain/src/general/offers'
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import createNewNoteForMyContacts from '@vexl-next/resources-utils/src/notes/createNewNoteForMyContacts'
 import {Array, Effect, Schema} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../api'
 import {atomWithParsedMmkvStorage} from '../../utils/atomUtils/atomWithParsedMmkvStorage'
-import {upsertNoteToConnectionsActionAtom} from '../connections/atom/noteToConnectionsAtom'
+import {
+  noteConnectionUpdatesSemaphoreAtom,
+  upsertNoteToConnectionsActionAtom,
+} from '../connections/atom/noteToConnectionsAtom'
 import {needsFullContactsReplaceAfterContactEditAtom} from '../contacts/atom/contactsStore'
 import {ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom} from '../contacts/atom/ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom'
+import {loadingStateAtom} from '../marketplace/atoms/loadingState'
 import {myOffersAtom} from '../marketplace/atoms/myOffers'
-import {offersMissingOnServerStorageAtom} from '../marketplace/atoms/offersMissingOnServer'
 import {refreshOffersActionAtom} from '../marketplace/atoms/refreshOffersActionAtom'
 import {noteConnectionsOf} from '../notes/atoms/createNoteActionAtom'
-import {myNotesAtom, notesAtom} from '../notes/atoms/notesState'
+import {myNotesAtom, notesAtom, notesStateAtom} from '../notes/atoms/notesState'
 import {refreshNotesActionAtom} from '../notes/atoms/refreshNotesActionAtom'
 import {sessionDataOrDummyAtom} from '../session'
 
@@ -23,6 +27,10 @@ export const restoredOffersAndNotesNeedRebuildAtom = atomWithParsedMmkvStorage(
   {needsRebuild: false},
   Schema.Struct({needsRebuild: Schema.Boolean})
 )
+
+export class RestoredOffersAndNotesNotFetchedError extends Schema.TaggedError<RestoredOffersAndNotesNotFetchedError>(
+  'RestoredOffersAndNotesNotFetchedError'
+)('RestoredOffersAndNotesNotFetchedError', {}) {}
 
 // After a restore the server still has the old phone's contacts. Skipping the
 // import must not keep them.
@@ -70,13 +78,16 @@ const recreateNoteActionAtom = atom(null, (get, set, note: MyNoteInState) =>
       )
     )
     set(upsertNoteToConnectionsActionAtom, noteConnectionsOf(result))
-  })
+  }).pipe(
+    // A note sync in between would get a 404 and drop the note from the phone.
+    get(noteConnectionUpdatesSemaphoreAtom).withPermits(1)
+  )
 )
 
 const rebuildInProgressAtom = atom(false)
 
-// Deletes the restored offers so they wait for a reupload, and recreates the
-// notes right away. Returns whether any offers wait for the reupload.
+// Deletes the restored offers and returns them for the reupload, and recreates
+// the notes right away.
 export const rebuildRestoredOffersAndNotesActionAtom = atom(
   null,
   (get, set) => {
@@ -87,27 +98,28 @@ export const rebuildRestoredOffersAndNotesActionAtom = atom(
       get(needsFullContactsReplaceAfterContactEditAtom) ||
       get(rebuildInProgressAtom)
     )
-      return Effect.succeed(false)
+      return Effect.succeed<readonly MyOfferInState[]>([])
     set(rebuildInProgressAtom, true)
 
     return Effect.gen(function* (_) {
-      // The restore only started fetching them.
+      // The restore only started fetching them, and both refreshes swallow
+      // their errors. Missing ones would never be rebuilt.
+      const notesUpdatedBefore = get(notesStateAtom).lastUpdatedAt
       yield* _(set(refreshOffersActionAtom))
       yield* _(set(refreshNotesActionAtom))
+      if (
+        get(loadingStateAtom).state !== 'success' ||
+        get(notesStateAtom).lastUpdatedAt === notesUpdatedBefore
+      )
+        return yield* _(new RestoredOffersAndNotesNotFetchedError())
 
-      const offers = get(myOffersAtom)
-      if (Array.isNonEmptyArray(offers)) {
+      const offers: readonly MyOfferInState[] = get(myOffersAtom)
+      if (Array.isNonEmptyReadonlyArray(offers)) {
         yield* _(
           get(apiAtom).offer.deleteOffer({
             adminIds: Array.map(offers, (one) => one.ownershipInfo.adminId),
           })
         )
-        set(offersMissingOnServerStorageAtom, (old) => ({
-          offerIds: Array.union(
-            old.offerIds,
-            Array.map(offers, (one) => one.offerInfo.offerId)
-          ),
-        }))
       }
 
       const now = unixMillisecondsNow()
@@ -119,7 +131,7 @@ export const rebuildRestoredOffersAndNotesActionAtom = atom(
       )
 
       set(restoredOffersAndNotesNeedRebuildAtom, {needsRebuild: false})
-      return Array.isNonEmptyArray(offers)
+      return offers
     }).pipe(
       Effect.ensuring(
         Effect.sync(() => {

@@ -28,7 +28,10 @@ import {
   clubsKeyHolderStorageAtom,
   type ClubsToKeyHolderV2,
 } from '../clubs/atom/clubsToKeyHolderV2Atom'
-import {needsFullContactsReplaceAfterContactEditAtom} from '../contacts/atom/contactsStore'
+import {
+  contactsStoreAtom,
+  needsFullContactsReplaceAfterContactEditAtom,
+} from '../contacts/atom/contactsStore'
 import {defaultCurrencyBaseOnCountryCodeActionAtom} from '../defaultCurrencyBaseOnCountryCodeActionAtom'
 import {
   raiseKeyDerivationCountersActionAtom,
@@ -230,11 +233,13 @@ const commitRestoredAccountActionAtom = atom(
       // import replaces the old phone's ones on the server.
       set(postLoginFlowCompletedScreensAtom, ['usageInfo'])
       set(needsFullContactsReplaceAfterContactEditAtom, true)
+      contactsStoreAtom.flushNow()
       set(restoredOffersAndNotesNeedRebuildAtom, {
         needsRebuild: true,
         notesToRecreate: [],
         offerIdsToReupload: [],
       })
+      restoredOffersAndNotesNeedRebuildAtom.flushNow()
       set(showCheckUpdatedPrivacyPolicySuggestionAtom, false)
       // A returning user knows the marketplace.
       set(showMarketplaceIntroDialogAtom, false)

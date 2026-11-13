@@ -243,22 +243,29 @@ export const reencryptOffersMissingOnServerActionAtom = atom(
     return pipe(
       offersToReupload,
       Array.map((one, index) =>
-        pipe(
-          set(reencryptOneOfferActionAtom, {
-            offer: one,
-            onProgress: (progress) => {
-              if (onProgress)
-                onProgress({
-                  offerEncryptionProgress: progress,
-                  processingIndex: index,
-                  totalToProcess: offersToReupload.length,
-                })
-            },
-          }),
-          Effect.either
+        // The user may have deleted it while earlier ones were uploading.
+        Effect.suspend(() =>
+          get(singleOfferAtom(one.offerInfo.offerId))
+            ? pipe(
+                set(reencryptOneOfferActionAtom, {
+                  offer: one,
+                  onProgress: (progress) => {
+                    if (onProgress)
+                      onProgress({
+                        offerEncryptionProgress: progress,
+                        processingIndex: index,
+                        totalToProcess: offersToReupload.length,
+                      })
+                  },
+                }),
+                Effect.either,
+                Effect.map(Option.some)
+              )
+            : Effect.succeedNone
         )
       ),
       Effect.all,
+      Effect.map(Array.getSomes),
       Effect.map((results) => {
         const errors = Array.getLefts(results)
         if (errors.length > 0)

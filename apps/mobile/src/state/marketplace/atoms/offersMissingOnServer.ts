@@ -15,7 +15,10 @@ import {apiAtom} from '../../../api'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
 import getCountryPrefix from '../../../utils/getCountryCode'
 import reportError from '../../../utils/reportError'
-import {forgetReuploadedRestoredOfferActionAtom} from '../../backup/rebuildRestoredOffersAndNotes'
+import {
+  forgetReuploadedRestoredOfferActionAtom,
+  restoredOffersAndNotesNeedRebuildAtom,
+} from '../../backup/rebuildRestoredOffersAndNotes'
 import {clubsToKeyHolderAtom} from '../../clubs/atom/clubsToKeyHolderV2Atom'
 import {
   deleteOfferToConnectionsAtom,
@@ -166,8 +169,9 @@ const reencryptOneOfferActionAtom = atom(
 
 const offerIdsBeingReuploadedAtom = atom(HashSet.empty<OfferId>())
 
-// Uploads the offer as it is now: the user may have edited or deleted it, or
-// another reupload (the restore's, the suggestion's) may already be on it.
+// Uploads the offer as it is now, and only while it still waits for a
+// reupload: the user may have edited or deleted it, or another reupload (the
+// restore's, the suggestion's) may be on it or done with it.
 const reuploadCurrentOfferActionAtom = atom(
   null,
   (
@@ -186,8 +190,18 @@ const reuploadCurrentOfferActionAtom = atom(
         get(myOffersAtom),
         (one) => one.offerInfo.offerId === offerId
       )
+      const stillWaiting =
+        Array.contains(
+          get(offersMissingOnServerStorageAtom).offerIds,
+          offerId
+        ) ||
+        Array.contains(
+          get(restoredOffersAndNotesNeedRebuildAtom).offerIdsToReupload,
+          offerId
+        )
       if (
         Option.isNone(current) ||
+        !stillWaiting ||
         HashSet.has(get(offerIdsBeingReuploadedAtom), offerId)
       )
         return Effect.succeedNone

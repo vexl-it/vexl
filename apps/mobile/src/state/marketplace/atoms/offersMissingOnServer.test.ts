@@ -2,8 +2,10 @@ import {OfferId} from '@vexl-next/domain/src/general/offers'
 import {Deferred, Effect, Fiber, Schema} from 'effect'
 import {atom, getDefaultStore} from 'jotai'
 import {
+  offersMissingOnServerAtom,
   offersMissingOnServerStorageAtom,
   reencryptOffersMissingOnServerActionAtom,
+  unmarkOfferAsMissingActionAtom,
 } from './offersMissingOnServer'
 
 jest.mock('react-native-mmkv')
@@ -55,6 +57,9 @@ jest.mock('../../backup/rebuildRestoredOffersAndNotes', () => ({
   forgetReuploadedRestoredOfferActionAtom: jest
     .requireActual('jotai')
     .atom(null, () => {}),
+  restoredOffersAndNotesNeedRebuildAtom: jest
+    .requireActual('jotai')
+    .atom({offerIdsToReupload: []}),
 }))
 const mockMyOffersAtom = atom<unknown>([])
 jest.mock('./myOffers', () => ({
@@ -86,6 +91,10 @@ const offer = {
 }
 
 describe('reencryptOffersMissingOnServerActionAtom', () => {
+  beforeEach(() => {
+    mockCreateOffer.mockReset()
+  })
+
   it('uploads an offer once when two reuploads overlap', async () => {
     store.set(mockMyOffersAtom, [offer])
     store.set(offersMissingOnServerStorageAtom, {
@@ -122,5 +131,22 @@ describe('reencryptOffersMissingOnServerActionAtom', () => {
     expect(mockCreateOffer).toHaveBeenCalledTimes(1)
     expect(second.reuploaded).toEqual([])
     expect(firstResult.reuploaded).toHaveLength(1)
+  })
+
+  it('skips an offer another reupload finished after the list was taken', async () => {
+    store.set(mockMyOffersAtom, [offer])
+    const offerId = Schema.decodeSync(OfferId)('offer-1')
+    store.set(offersMissingOnServerStorageAtom, {offerIds: [offerId]})
+    const [stale] = store.get(offersMissingOnServerAtom)
+    if (!stale) throw new Error('Offer not missing')
+    // Another reupload succeeded meanwhile and unmarked it.
+    store.set(unmarkOfferAsMissingActionAtom, offerId)
+
+    const result = await Effect.runPromise(
+      store.set(reencryptOffersMissingOnServerActionAtom, {offers: [stale]})
+    )
+
+    expect(mockCreateOffer).not.toHaveBeenCalled()
+    expect(result.reuploaded).toEqual([])
   })
 })

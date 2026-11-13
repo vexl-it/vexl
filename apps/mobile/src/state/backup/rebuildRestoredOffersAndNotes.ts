@@ -191,11 +191,18 @@ const deleteRestoredOffersAndPickNotesActionAtom = atom(null, (get, set) =>
 
 const rebuildInProgressAtom = atom(false)
 
-// Returns the restored offers waiting for the reupload, and recreates the
-// notes right away.
+// Recreates the restored notes and hands the offers still waiting to
+// `reupload`. Both run under one guard, so a second run can't upload an offer
+// twice.
 export const rebuildRestoredOffersAndNotesActionAtom = atom(
   null,
-  (get, set) => {
+  (
+    get,
+    set,
+    reupload: (
+      offers: readonly MyOfferInState[]
+    ) => Effect.Effect<unknown, unknown>
+  ) => {
     const {needsRebuild, notesToRecreate, offerIdsToReupload} = get(
       restoredOffersAndNotesNeedRebuildAtom
     )
@@ -256,6 +263,7 @@ export const rebuildRestoredOffersAndNotesActionAtom = atom(
         ...old,
         offerIdsToReupload: Array.map(offers, (one) => one.offerInfo.offerId),
       }))
+      if (Array.isNonEmptyReadonlyArray(offers)) yield* _(reupload(offers))
       return offers
     }).pipe(
       Effect.ensuring(

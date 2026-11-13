@@ -141,6 +141,7 @@ jest.mock(
 )
 
 const store = getDefaultStore()
+const mockReupload = jest.fn((_: readonly unknown[]) => Effect.void)
 
 const myOffer = (n: number): unknown => ({
   ownershipInfo: {adminId: `admin-${n}`},
@@ -183,7 +184,7 @@ describe('rebuild of restored offers and notes', () => {
     store.set(needsFullContactsReplaceAfterContactEditAtom, true)
 
     const result = await Effect.runPromise(
-      store.set(rebuildRestoredOffersAndNotesActionAtom)
+      store.set(rebuildRestoredOffersAndNotesActionAtom, mockReupload)
     )
 
     expect(result).toEqual([])
@@ -202,7 +203,7 @@ describe('rebuild of restored offers and notes', () => {
     })
 
     const result = await Effect.runPromise(
-      store.set(rebuildRestoredOffersAndNotesActionAtom)
+      store.set(rebuildRestoredOffersAndNotesActionAtom, mockReupload)
     )
 
     expect(result).toEqual([])
@@ -218,7 +219,9 @@ describe('rebuild of restored offers and notes', () => {
       failRefresh()
 
       await expect(
-        Effect.runPromise(store.set(rebuildRestoredOffersAndNotesActionAtom))
+        Effect.runPromise(
+          store.set(rebuildRestoredOffersAndNotesActionAtom, mockReupload)
+        )
       ).rejects.toThrow()
 
       expect(mockDeleteOffer).not.toHaveBeenCalled()
@@ -240,7 +243,9 @@ describe('rebuild of restored offers and notes', () => {
         })
     )
 
-    await Effect.runPromise(store.set(rebuildRestoredOffersAndNotesActionAtom))
+    await Effect.runPromise(
+      store.set(rebuildRestoredOffersAndNotesActionAtom, mockReupload)
+    )
 
     expect(mockCreateNote).toHaveBeenCalledTimes(1)
   })
@@ -250,10 +255,11 @@ describe('rebuild of restored offers and notes', () => {
     store.set(mockNotesAtom, [myNote(1, now + 60_000), myNote(2, now - 60_000)])
 
     const result = await Effect.runPromise(
-      store.set(rebuildRestoredOffersAndNotesActionAtom)
+      store.set(rebuildRestoredOffersAndNotesActionAtom, mockReupload)
     )
 
     expect(result).toEqual([myOffer(1), myOffer(2)])
+    expect(mockReupload).toHaveBeenCalledWith([myOffer(1), myOffer(2)])
     expect(mockRefreshOffers).toHaveBeenCalled()
     expect(mockDeleteOffer).toHaveBeenCalledWith({
       adminIds: ['admin-1', 'admin-2'],
@@ -294,7 +300,7 @@ describe('rebuild of restored offers and notes', () => {
 
     expect(
       await Effect.runPromise(
-        store.set(rebuildRestoredOffersAndNotesActionAtom)
+        store.set(rebuildRestoredOffersAndNotesActionAtom, mockReupload)
       )
     ).toEqual([myOffer(1), myOffer(2)])
     expect(
@@ -310,7 +316,7 @@ describe('rebuild of restored offers and notes', () => {
     // The offers weren't reuploaded yet, so they are handed over again.
     expect(
       await Effect.runPromise(
-        store.set(rebuildRestoredOffersAndNotesActionAtom)
+        store.set(rebuildRestoredOffersAndNotesActionAtom, mockReupload)
       )
     ).toEqual([myOffer(1), myOffer(2)])
 
@@ -325,8 +331,28 @@ describe('rebuild of restored offers and notes', () => {
     })
   })
 
+  it('does nothing while an earlier run is still reuploading', async () => {
+    let secondRun: readonly unknown[] | undefined
+    mockReupload.mockImplementationOnce(() =>
+      Effect.promise(async () => {
+        secondRun = await Effect.runPromise(
+          store.set(rebuildRestoredOffersAndNotesActionAtom, mockReupload)
+        )
+      })
+    )
+
+    await Effect.runPromise(
+      store.set(rebuildRestoredOffersAndNotesActionAtom, mockReupload)
+    )
+
+    expect(secondRun).toEqual([])
+    expect(mockReupload).toHaveBeenCalledTimes(1)
+  })
+
   it('keeps handing over the offers until each is reuploaded', async () => {
-    await Effect.runPromise(store.set(rebuildRestoredOffersAndNotesActionAtom))
+    await Effect.runPromise(
+      store.set(rebuildRestoredOffersAndNotesActionAtom, mockReupload)
+    )
     store.set(
       forgetReuploadedRestoredOfferActionAtom,
       Schema.decodeSync(OfferId)('offer-1')
@@ -334,19 +360,19 @@ describe('rebuild of restored offers and notes', () => {
 
     expect(
       await Effect.runPromise(
-        store.set(rebuildRestoredOffersAndNotesActionAtom)
+        store.set(rebuildRestoredOffersAndNotesActionAtom, mockReupload)
       )
     ).toEqual([myOffer(2)])
     // Gone from the phone, so no longer waiting.
     store.set(mockMyOffersAtom, [myOffer(1)])
     expect(
       await Effect.runPromise(
-        store.set(rebuildRestoredOffersAndNotesActionAtom)
+        store.set(rebuildRestoredOffersAndNotesActionAtom, mockReupload)
       )
     ).toEqual([])
     expect(
       await Effect.runPromise(
-        store.set(rebuildRestoredOffersAndNotesActionAtom)
+        store.set(rebuildRestoredOffersAndNotesActionAtom, mockReupload)
       )
     ).toEqual([])
 
@@ -358,7 +384,9 @@ describe('rebuild of restored offers and notes', () => {
     mockDeleteOffer.mockReturnValue(Effect.fail(new Error('offline')))
 
     await expect(
-      Effect.runPromise(store.set(rebuildRestoredOffersAndNotesActionAtom))
+      Effect.runPromise(
+        store.set(rebuildRestoredOffersAndNotesActionAtom, mockReupload)
+      )
     ).rejects.toThrow()
 
     expect(store.get(restoredOffersAndNotesNeedRebuildAtom).needsRebuild).toBe(
@@ -399,10 +427,14 @@ describe('a restored note the user deletes', () => {
 
   it('is not recreated on the retry after the user deleted it', async () => {
     mockCreateNote.mockReturnValueOnce(Effect.fail(new Error('offline')))
-    await Effect.runPromise(store.set(rebuildRestoredOffersAndNotesActionAtom))
+    await Effect.runPromise(
+      store.set(rebuildRestoredOffersAndNotesActionAtom, mockReupload)
+    )
 
     store.set(forgetNotesToRecreateActionAtom, [adminId])
-    await Effect.runPromise(store.set(rebuildRestoredOffersAndNotesActionAtom))
+    await Effect.runPromise(
+      store.set(rebuildRestoredOffersAndNotesActionAtom, mockReupload)
+    )
 
     expect(mockCreateNote).toHaveBeenCalledTimes(1)
   })
@@ -415,7 +447,9 @@ describe('a restored note the user deletes', () => {
       })
     )
 
-    await Effect.runPromise(store.set(rebuildRestoredOffersAndNotesActionAtom))
+    await Effect.runPromise(
+      store.set(rebuildRestoredOffersAndNotesActionAtom, mockReupload)
+    )
 
     expect(mockDeleteNote).toHaveBeenCalledTimes(2)
     expect(mockUpsertNoteConnections).not.toHaveBeenCalled()

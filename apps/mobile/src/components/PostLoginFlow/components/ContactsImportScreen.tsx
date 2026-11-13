@@ -1,5 +1,5 @@
 import {ContactsGraphic, ScreenHeading, YStack} from '@vexl-next/ui'
-import {Array, Effect} from 'effect'
+import {Effect} from 'effect'
 import {useSetAtom} from 'jotai'
 import React, {useState} from 'react'
 import {Alert, useWindowDimensions} from 'react-native'
@@ -50,12 +50,7 @@ export default function ContactsImportScreen({
   const goNext = async (): Promise<void> => {
     await Effect.runPromise(discardOldPhoneContacts())
     Effect.runFork(
-      rebuildRestoredOffersAndNotes().pipe(
-        Effect.flatMap((offers) =>
-          Array.isNonEmptyReadonlyArray(offers)
-            ? reencryptOffersWithModal(offers)
-            : Effect.void
-        ),
+      rebuildRestoredOffersAndNotes(reencryptOffersWithModal).pipe(
         Effect.catchAll((e) =>
           Effect.sync(() => {
             reportError(

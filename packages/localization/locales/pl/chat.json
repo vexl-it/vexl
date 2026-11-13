@@ -85,6 +85,7 @@
   "messages.imagesLimit_few": "Naraz możesz wysłać maksymalnie {{count}} zdjęcia",
   "messages.imagesLimit_many": "Naraz możesz wysłać maksymalnie {{count}} zdjęć",
   "messages.imagesLimit_other": "Naraz możesz wysłać maksymalnie {{count}} zdjęcia",
+  "messages.imageUnavailable": "Zdjęcie nie jest już dostępne",
   "messages.deleteChatQuestion": "Usunąć czat?",
   "messages.deleteChatExplanation1": "Czy skończyłeś handel? Zamknięcie czatu oznacza, że konwersacja zostanie trwale usunięta.",
   "messages.deleteChatExplanation2": "To jest nieodwracalne. Czy chcesz usunąć ten czat?",

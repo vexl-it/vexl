@@ -24,6 +24,7 @@ import {
   messagesToShareAsHistory,
   recordHistoryRequest,
 } from '../utils/chatRecovery'
+import {replaceRevealPhotosWithBase64} from '../utils/replaceIdentityImageFileUriWithBase64'
 import messagingStateAtom from './messagingStateAtom'
 import {sendMessageWithMyVexlTokenActionAtom} from './refreshNotificationTokensActionAtom'
 
@@ -141,20 +142,30 @@ const sendHistoryActionAtom = atom(
       historyRecoveryProof,
     }: {chat: ChatWithMessages; historyRecoveryProof: ChatRecoveryProof}
   ): Effect.Effect<void> =>
-    taskToEffect(
-      set(sendMessageWithMyVexlTokenActionAtom, {
-        chatWithMessages: chat,
-        createMessage: (myVexlToken) =>
-          createHistoryMessage({
-            senderPublicKey: chat.chat.inbox.privateKey.publicKeyPemBase64,
-            myVersion: version,
-            messages: messagesToShareAsHistory(chat),
-            historyRecoveryProof,
-            myVexlToken,
-          }),
-        failure: {lvl: 'warn', message: 'Error sending chat history'},
-      })
-    ).pipe(Effect.asVoid)
+    Effect.forEach(messagesToShareAsHistory(chat), ({state, message}) =>
+      Effect.map(replaceRevealPhotosWithBase64(message), (message) => ({
+        state,
+        message,
+      }))
+    ).pipe(
+      Effect.flatMap((messages) =>
+        taskToEffect(
+          set(sendMessageWithMyVexlTokenActionAtom, {
+            chatWithMessages: chat,
+            createMessage: (myVexlToken) =>
+              createHistoryMessage({
+                senderPublicKey: chat.chat.inbox.privateKey.publicKeyPemBase64,
+                myVersion: version,
+                messages,
+                historyRecoveryProof,
+                myVexlToken,
+              }),
+            failure: {lvl: 'warn', message: 'Error sending chat history'},
+          })
+        )
+      ),
+      Effect.asVoid
+    )
 )
 
 export const answerHistoryRequestsActionAtom = atom(

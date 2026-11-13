@@ -1,13 +1,20 @@
 import {type ChatMessage} from '@vexl-next/domain/src/general/messaging'
 
-export function hasChatImage(
-  message: Pick<ChatMessage, 'image' | 'imageAttachment'>
-): boolean {
-  return message.image !== undefined || message.imageAttachment !== undefined
+type ChatImageFields = Pick<
+  ChatMessage,
+  'image' | 'imageAttachment' | 'imageUnavailable'
+>
+
+export function hasChatImage(message: ChatImageFields): boolean {
+  return (
+    message.image !== undefined ||
+    message.imageAttachment !== undefined ||
+    !!message.imageUnavailable
+  )
 }
 
 export function isImageOnlyMessage(
-  message: Pick<ChatMessage, 'text' | 'image' | 'imageAttachment'>
+  message: ChatImageFields & Pick<ChatMessage, 'text'>
 ): boolean {
   return message.text.trim() === '' && hasChatImage(message)
 }

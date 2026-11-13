@@ -1,9 +1,12 @@
-import {MyNoteInState} from '@vexl-next/domain/src/general/notes'
+import {
+  MyNoteInState,
+  type NoteAdminId,
+} from '@vexl-next/domain/src/general/notes'
 import {type MyOfferInState} from '@vexl-next/domain/src/general/offers'
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import createNewNoteForMyContacts from '@vexl-next/resources-utils/src/notes/createNewNoteForMyContacts'
 import {Array, Effect, Schema} from 'effect'
-import {atom} from 'jotai'
+import {atom, type Atom} from 'jotai'
 import {apiAtom} from '../../api'
 import {atomWithParsedMmkvStorage} from '../../utils/atomUtils/atomWithParsedMmkvStorage'
 import reportError from '../../utils/reportError'
@@ -54,10 +57,34 @@ export const discardOldPhoneContactsActionAtom = atom(null, (get, set) => {
     )
 })
 
+// A note the user deleted meanwhile must not come back.
+export const forgetNotesToRecreateActionAtom = atom(
+  null,
+  (get, set, adminIds: readonly NoteAdminId[]) => {
+    set(restoredOffersAndNotesNeedRebuildAtom, (old) => ({
+      ...old,
+      notesToRecreate: Array.filter(
+        old.notesToRecreate,
+        (one) => !Array.contains(adminIds, one.ownershipInfo.adminId)
+      ),
+    }))
+  }
+)
+
+const isNoteToRecreateAtom = (note: MyNoteInState): Atom<boolean> =>
+  atom((get) =>
+    Array.some(
+      get(restoredOffersAndNotesNeedRebuildAtom).notesToRecreate,
+      (one) => one.noteInfo.noteId === note.noteInfo.noteId
+    )
+  )
+
 const recreateNoteActionAtom = atom(null, (get, set, note: MyNoteInState) =>
   Effect.gen(function* (_) {
     const api = get(apiAtom)
     const session = get(sessionDataOrDummyAtom)
+    const isNoteToRecreate = isNoteToRecreateAtom(note)
+    if (!get(isNoteToRecreate)) return
 
     yield* _(api.offer.deleteNote({adminIds: [note.ownershipInfo.adminId]}))
     const result = yield* _(
@@ -75,6 +102,11 @@ const recreateNoteActionAtom = atom(null, (get, set, note: MyNoteInState) =>
         ),
       })
     )
+
+    if (!get(isNoteToRecreate)) {
+      yield* _(api.offer.deleteNote({adminIds: [note.ownershipInfo.adminId]}))
+      return
+    }
 
     const recreated = {...note, noteInfo: result.noteInfo}
     set(notesAtom, (notes) => [

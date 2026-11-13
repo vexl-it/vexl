@@ -1,8 +1,10 @@
-import {Effect, HashMap, Option} from 'effect'
+import {NoteAdminId} from '@vexl-next/domain/src/general/notes'
+import {Effect, HashMap, Option, Schema} from 'effect'
 import {atom, getDefaultStore} from 'jotai'
 import {needsFullContactsReplaceAfterContactEditAtom} from '../contacts/atom/contactsStore'
 import {
   discardOldPhoneContactsActionAtom,
+  forgetNotesToRecreateActionAtom,
   rebuildRestoredOffersAndNotesActionAtom,
   restoredOffersAndNotesNeedRebuildAtom,
 } from './rebuildRestoredOffersAndNotes'
@@ -314,6 +316,61 @@ describe('rebuild of restored offers and notes', () => {
     expect(store.get(restoredOffersAndNotesNeedRebuildAtom).needsRebuild).toBe(
       true
     )
+  })
+})
+
+describe('a restored note the user deletes', () => {
+  const adminId = Schema.decodeSync(NoteAdminId)(
+    '6f1c2b8e-4c1d-4f7e-9a2b-3c4d5e6f7a8b'
+  )
+  const note = {
+    ownershipInfo: {adminId},
+    flags: {reported: false},
+    noteInfo: {
+      noteId: 'note-x',
+      publicPart: {},
+      expiresAt: Date.now() + 60_000,
+    },
+  }
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockRefreshOffers.mockReturnValue(true)
+    mockRefreshNotesSucceeds.mockReturnValue(true)
+    mockDeleteOffer.mockReturnValue(Effect.void)
+    mockDeleteNote.mockReturnValue(Effect.void)
+    store.set(mockMyOffersAtom, [])
+    store.set(mockNotesAtom, [note])
+    store.set(needsFullContactsReplaceAfterContactEditAtom, false)
+    store.set(restoredOffersAndNotesNeedRebuildAtom, {
+      needsRebuild: true,
+      notesToRecreate: [],
+    })
+  })
+
+  it('is not recreated on the retry after the user deleted it', async () => {
+    mockCreateNote.mockReturnValueOnce(Effect.fail(new Error('offline')))
+    await Effect.runPromise(store.set(rebuildRestoredOffersAndNotesActionAtom))
+
+    store.set(forgetNotesToRecreateActionAtom, [adminId])
+    await Effect.runPromise(store.set(rebuildRestoredOffersAndNotesActionAtom))
+
+    expect(mockCreateNote).toHaveBeenCalledTimes(1)
+  })
+
+  it('is deleted again when the user deleted it during its recreation', async () => {
+    mockCreateNote.mockImplementation(() =>
+      Effect.sync(() => {
+        store.set(forgetNotesToRecreateActionAtom, [adminId])
+        return {adminId, noteInfo: {noteId: 'note-x'}}
+      })
+    )
+
+    await Effect.runPromise(store.set(rebuildRestoredOffersAndNotesActionAtom))
+
+    expect(mockDeleteNote).toHaveBeenCalledTimes(2)
+    expect(mockUpsertNoteConnections).not.toHaveBeenCalled()
+    expect(store.get(mockNotesAtom)).toEqual([note])
   })
 })
 

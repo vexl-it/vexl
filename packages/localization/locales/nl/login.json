@@ -72,7 +72,7 @@
   "loginFlow.restoreFromBackup.restored.chats.title": "Chats komen terug zodra iemand je schrijft",
   "loginFlow.restoreFromBackup.restored.chats.text": "Zodra de ander je een bericht stuurt, komt de chat terug met de hele geschiedenis.",
   "loginFlow.restoreFromBackup.restored.contacts.title": "Importeer je contacten",
-  "loginFlow.restoreFromBackup.restored.contacts.text": "Dan zie je de namen van je vrienden weer.",
+  "loginFlow.restoreFromBackup.restored.contacts.text": "Ze zijn niet hersteld. Importeer ze om je bereik terug te krijgen.",
   "loginFlow.restoreFromBackup.failed.title": "We konden je account niet herstellen",
   "loginFlow.restoreFromBackup.failed.unknown": "Er ging iets mis. Probeer het zo nog eens.",
   "loginFlow.restoreFromBackup.failed.noLongerValid.title": "Deze back-up werkt niet meer",

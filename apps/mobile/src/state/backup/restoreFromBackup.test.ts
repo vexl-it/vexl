@@ -29,6 +29,7 @@ import {getDefaultStore} from 'jotai'
 import {showMarketplaceIntroDialogAtom} from '../../utils/preferences'
 import messagingStateAtom from '../chat/atoms/messagingStateAtom'
 import {clubsKeyHolderStorageAtom} from '../clubs/atom/clubsToKeyHolderV2Atom'
+import {needsFullContactsReplaceAfterContactEditAtom} from '../contacts/atom/contactsStore'
 import {keyDerivationCountersAtom} from '../keyDerivation'
 import {vexlNotificationTokenAtom} from '../notifications/vexlNotificationTokenAtom'
 import {vexlTokenToKeyHolderAtom} from '../notifications/vexlTokenToKeyHolderAtom'
@@ -36,6 +37,7 @@ import {postLoginFlowCompletedScreensAtom} from '../postLoginOnboarding'
 import {sessionHolderAtom} from '../session'
 import {dummySession} from '../session/dummySesssion'
 import {backupFileToRestoreAtom, backupKeyPairAtom} from './backupToRestore'
+import {restoredOffersAndNotesNeedRebuildAtom} from './rebuildRestoredOffersAndNotes'
 import {
   restoreFromBackupStateAtom,
   showRestoredAccountInfoAtom,
@@ -325,6 +327,12 @@ describe('restore from backup', () => {
       nextClubIndex: 1 + 1 + 10,
     })
     expect(store.get(postLoginFlowCompletedScreensAtom)).toEqual(['usageInfo'])
+    // The import replaces the old phone's contacts, then everything is
+    // recreated for the new network.
+    expect(store.get(needsFullContactsReplaceAfterContactEditAtom)).toBe(true)
+    expect(store.get(restoredOffersAndNotesNeedRebuildAtom)).toEqual({
+      needsRebuild: true,
+    })
     expect(store.get(showRestoredAccountInfoAtom)).toBe(true)
     expect(store.get(showMarketplaceIntroDialogAtom)).toBe(false)
     expect(mockRefreshOffers).toHaveBeenCalled()

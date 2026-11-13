@@ -8,6 +8,7 @@ import {executeTasksWithDependencies, taskRegistryAtom} from './index'
 // tasks
 import '../../components/FullscreenWarningScreen/loadNewsAndAnnouncementsInAppLoadingTask'
 import '../../components/Map/state/loadMapStylesInAppLoadingTask'
+import '../../state/backup/rebuildRestoredOffersAndNotesInAppLoadingTask'
 import '../../state/chat/checkAndDeleteEmptyInboxesWithoutOfferInAppLoadingTask'
 import '../../state/chat/checkAndReportCurrentVersionToChatsInAppLoadingTask'
 import '../../state/chat/checkInactiveChatsInAppLoadingTask'

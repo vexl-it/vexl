@@ -9,13 +9,16 @@ import {
   type ChatMessage,
 } from '@vexl-next/domain/src/general/messaging'
 import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
+import {type RevealStatus} from '@vexl-next/domain/src/general/tradeChecklist'
+import {UserName} from '@vexl-next/domain/src/general/UserName.brand'
 import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {VersionString} from '@vexl-next/domain/src/utility/VersionString.brand'
 import {
   createHistoryMessage,
   createRequestHistoryMessage,
 } from '@vexl-next/resources-utils/src/chat/utils/chatHistory'
-import {HashSet, Schema} from 'effect'
+import {Array, HashSet, Schema} from 'effect'
 import {
   type ChatMessageWithState,
   type ChatWithMessages,
@@ -126,6 +129,29 @@ function chat({
     reactions: {},
     restoredFromBackup,
   }
+}
+
+const photo = Schema.decodeSync(UriString)('data:image/jpeg;base64,aGVsbG8=')
+
+function identityReveal(
+  key: PrivateKeyHolder,
+  day: number,
+  status: RevealStatus
+): ChatMessage {
+  return message(key, {
+    time: at(day),
+    messageType: 'TRADE_CHECKLIST_UPDATE',
+    tradeChecklistUpdate: {
+      identity: {
+        status,
+        timestamp: at(day),
+        image: photo,
+        deanonymizedUser: {
+          name: Schema.decodeSync(UserName)(key === myKey ? 'Me' : 'Satoshi'),
+        },
+      },
+    },
+  })
 }
 
 // What the other side (`theirKey`) sends after we restored our account
@@ -435,6 +461,60 @@ describe('answering history requests', () => {
     ])
   })
 
+  it('shares reveal photos only once both identities were revealed', () => {
+    const revealPhotos = (messages: ChatMessageWithState[]): unknown[] =>
+      Array.map(
+        messagesToShareAsHistory(
+          chat({inboxKey: myKey, otherSideKey: requester, messages})
+        ),
+        ({message}) => message.tradeChecklistUpdate?.identity?.image
+      )
+    const myRequest = sent(identityReveal(myKey, 1, 'REQUEST_REVEAL'))
+
+    expect(
+      revealPhotos([
+        myRequest,
+        received(identityReveal(requester, 2, 'APPROVE_REVEAL')),
+      ])
+    ).toEqual([photo, photo])
+    expect(revealPhotos([myRequest])).toEqual([undefined])
+    expect(
+      revealPhotos([
+        myRequest,
+        received(identityReveal(requester, 2, 'DISAPPROVE_REVEAL')),
+      ])
+    ).toEqual([undefined, undefined])
+    expect(
+      revealPhotos([
+        myRequest,
+        received(identityReveal(requester, 2, 'DISAPPROVE_REVEAL')),
+        sent(identityReveal(myKey, 3, 'REQUEST_REVEAL')),
+        received(identityReveal(requester, 4, 'APPROVE_REVEAL')),
+      ])
+    ).toEqual([undefined, undefined, photo, photo])
+    // Their clock is behind ours
+    expect(
+      revealPhotos([
+        sent(identityReveal(myKey, 3, 'REQUEST_REVEAL')),
+        received(identityReveal(requester, 2, 'APPROVE_REVEAL')),
+      ])
+    ).toEqual([photo, photo])
+  })
+
+  it('keeps a chat image of a message when photos are left out', () => {
+    const legacyImage = sent(message(myKey, {time: at(1), image: photo}))
+
+    expect(
+      messagesToShareAsHistory(
+        chat({
+          inboxKey: myKey,
+          otherSideKey: requester,
+          messages: [legacyImage],
+        })
+      )[0]?.message.image
+    ).toBe(photo)
+  })
+
   it('keeps notifying the token it had when a history is requested', () => {
     const oldToken = Schema.decodeSync(VexlNotificationToken)(
       'vexl_nt_before_restore'
@@ -583,6 +663,22 @@ describe('merging received history', () => {
         incoming: [historyFromTheirCopy(theirCopy)],
       })
     ).toEqual([])
+  })
+
+  it('restores the revealed identity of the other side', () => {
+    const [merged] = addMessagesToChats([restoredChat()])([
+      historyFromTheirCopy([
+        ...theirCopy,
+        sent(identityReveal(theirKey, 5, 'REQUEST_REVEAL')),
+        received(identityReveal(myKey, 6, 'APPROVE_REVEAL')),
+      ]),
+    ])
+
+    expect(merged?.chat.otherSide.realLifeInfo).toMatchObject({
+      userName: 'Satoshi',
+      image: {type: 'imageUri', imageUri: photo},
+    })
+    expect(merged?.tradeChecklist.identity.sent?.image).toBe(photo)
   })
 
   it('rebuilds the trade checklist in chronological order', () => {

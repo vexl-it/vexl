@@ -7,10 +7,9 @@ import {
   type ChatRecoveryProof,
 } from '@vexl-next/domain/src/general/messaging'
 import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
-import {type TradeChecklistUpdate} from '@vexl-next/domain/src/general/tradeChecklist'
 import {now} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {VersionString} from '@vexl-next/domain/src/utility/VersionString.brand'
-import {Array, Option, Schema, Struct, pipe} from 'effect'
+import {Array, Option, Schema, pipe} from 'effect'
 
 export const CHAT_HISTORY_MINIMAL_REQUIRED_VERSION =
   Schema.decodeSync(VersionString)('26.11.2')
@@ -42,20 +41,27 @@ export function createRequestHistoryMessage({
 
 const isChatHistoryMessageType = Schema.is(ChatHistoryMessageType)
 
-function withoutImages(
-  update: TradeChecklistUpdate | undefined
-): TradeChecklistUpdate | undefined {
-  if (!update?.identity) return update
-  return {...update, identity: Struct.omit(update.identity, 'image')}
-}
-
+// Expects reveal photos as data uris, or left out when not to be shared.
 function toChatHistoryMessage({
   state,
   message,
 }: ChatMessageWithDirection): Option.Option<ChatHistoryMessage> {
   const {messageType} = message
   if (!isChatHistoryMessageType(messageType)) return Option.none()
-  if (messageType === 'MESSAGE' && !message.text.trim()) return Option.none()
+
+  const isChatMessage = messageType === 'MESSAGE'
+  // Chat images sent before attachments existed only as files on the device
+  const imageUnavailable =
+    isChatMessage &&
+    (!!message.imageUnavailable ||
+      (!!message.image && !message.imageAttachment))
+  if (
+    isChatMessage &&
+    !message.text.trim() &&
+    !message.imageAttachment &&
+    !imageUnavailable
+  )
+    return Option.none()
 
   return Option.some({
     uuid: message.uuid,
@@ -63,9 +69,11 @@ function toChatHistoryMessage({
     messageType,
     text: message.text,
     time: message.time,
-    repliedTo:
-      message.repliedTo && Struct.omit(message.repliedTo, 'imageAttachment'),
-    tradeChecklistUpdate: withoutImages(message.tradeChecklistUpdate),
+    imageAttachment: message.imageAttachment,
+    image: isChatMessage ? undefined : message.image,
+    imageUnavailable: imageUnavailable || undefined,
+    repliedTo: message.repliedTo,
+    tradeChecklistUpdate: message.tradeChecklistUpdate,
     deanonymizedUser: message.deanonymizedUser,
   })
 }

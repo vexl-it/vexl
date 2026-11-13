@@ -30,8 +30,14 @@ handles the bytes, the key or the plaintext, and it never sees downloads.
    (`packages/rest-api/src/index.ts`, `https://chat-images.vexl.it` in prod),
    and decrypts the ciphertext with `aesGCMDecryptBytes`. The id is validated
    as a UUID, so a sender cannot point the receiver at another host or path. A
-   403 or 404 means the image expired or was never uploaded; the app shows the
-   retry state.
+   403 or 404 means the image expired or was never uploaded; the app shows it
+   as no longer available. Other failures show the retry state.
+
+After a backup restore, the other side's chat history carries each image's
+original `ChatImageAttachment`, so the restored device downloads it like any
+received image until the bucket's lifecycle rule removes it. Chat images sent
+before attachments existed only as files on the devices and are shown as no
+longer available.
 
 Ciphertext is limited to `CHAT_IMAGE_MAX_BYTES` (5 MiB). The handler lives in
 `apps/chat-service/src/routes/images/`, signing in

@@ -1,5 +1,9 @@
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
-import {type ChatRecoveryProof} from '@vexl-next/domain/src/general/messaging'
+import {
+  type ChatMessage,
+  type ChatRecoveryProof,
+} from '@vexl-next/domain/src/general/messaging'
+import {RevealStatus} from '@vexl-next/domain/src/general/tradeChecklist'
 import {type UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {
   compare,
@@ -10,7 +14,7 @@ import {
   chatHistoryToMessages,
   type ChatMessageWithDirection,
 } from '@vexl-next/resources-utils/src/chat/utils/chatHistory'
-import {Array, Option, pipe, Record} from 'effect'
+import {Array, Option, pipe, Record, Schema} from 'effect'
 import {
   type ChatMessageWithState,
   type ChatWithMessages,
@@ -252,14 +256,58 @@ export function latestRecoveryProof(
   )
 }
 
+function withoutRevealPhoto(message: ChatMessage): ChatMessage {
+  const identity = message.tradeChecklistUpdate?.identity
+  return {
+    ...message,
+    image: message.messageType === 'MESSAGE' ? message.image : undefined,
+    tradeChecklistUpdate: identity
+      ? {
+          ...message.tradeChecklistUpdate,
+          identity: {...identity, image: undefined},
+        }
+      : message.tradeChecklistUpdate,
+  }
+}
+
+const isRevealStatus = Schema.is(RevealStatus)
+
+function revealStatus(message: ChatMessage): RevealStatus | undefined {
+  const status =
+    message.tradeChecklistUpdate?.identity?.status ?? message.messageType
+  return isRevealStatus(status) ? status : undefined
+}
+
+/**
+ * Reveal photos are shared only from the latest reveal request, once it was
+ * approved, so no one can get a photo back that was declined or is still
+ * waiting. Message order decides as the clocks of the two phones may differ.
+ */
 export function messagesToShareAsHistory(
   chat: ChatWithMessages
 ): ChatMessageWithDirection[] {
-  return Array.filterMap(chat.messages, (one) =>
-    one.state === 'received' || one.state === 'sent'
-      ? Option.some({state: one.state, message: one.message})
+  const delivered = Array.filterMap(chat.messages, ({state, message}) =>
+    state === 'received' || state === 'sent'
+      ? Option.some({state, message})
       : Option.none()
   )
+  const approved = pipe(
+    Array.findLast(delivered, ({message}) => !!revealStatus(message)),
+    Option.exists(({message}) => revealStatus(message) === 'APPROVE_REVEAL')
+  )
+  const photosFrom = approved
+    ? pipe(
+        Array.findLastIndex(
+          delivered,
+          ({message}) => revealStatus(message) === 'REQUEST_REVEAL'
+        ),
+        Option.getOrElse(() => 0)
+      )
+    : Infinity
+  return Array.map(delivered, ({state, message}, index) => ({
+    state,
+    message: index >= photosFrom ? message : withoutRevealPhoto(message),
+  }))
 }
 
 function isHistory(message: ChatMessageWithState): boolean {

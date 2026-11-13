@@ -65,10 +65,9 @@ const sendAndReceive = (message: ChatMessage): ChatMessage => {
   return parsed.right
 }
 
-it('rebuilds chat history on the other side with flipped direction and no images', () => {
+it('rebuilds chat history on the other side with flipped direction and images', () => {
   const sentByHistorySender = chatMessage({
     text: 'mine',
-    image,
     imageAttachment,
     repliedTo: {text: 'earlier', messageAuthor: 'them', imageAttachment},
   })
@@ -77,19 +76,31 @@ it('rebuilds chat history on the other side with flipped direction and no images
     senderPublicKey: historyReceiver.publicKeyPemBase64,
   })
   const identityReveal = chatMessage({
-    messageType: 'APPROVE_REVEAL',
+    messageType: 'TRADE_CHECKLIST_UPDATE',
     text: '',
-    deanonymizedUser: {name: Schema.decodeSync(UserName)('Satoshi')},
     tradeChecklistUpdate: {
       identity: {timestamp: now(), status: 'APPROVE_REVEAL', image},
     },
   })
+  const legacyIdentityReveal = chatMessage({
+    messageType: 'APPROVE_REVEAL',
+    text: '',
+    image,
+    deanonymizedUser: {name: Schema.decodeSync(UserName)('Satoshi')},
+  })
+  const imageOnly = chatMessage({text: '', imageAttachment})
+  const legacyImageOnly = chatMessage({text: '', image})
+  const restoredImageOnly = chatMessage({text: '', imageUnavailable: true})
 
   const messages: ChatMessageWithDirection[] = [
     {state: 'sent', message: sentByHistorySender},
     {state: 'received', message: receivedByHistorySender},
     {state: 'sent', message: identityReveal},
-    {state: 'sent', message: chatMessage({text: '', image})},
+    {state: 'received', message: legacyIdentityReveal},
+    {state: 'sent', message: imageOnly},
+    {state: 'sent', message: legacyImageOnly},
+    {state: 'sent', message: restoredImageOnly},
+    {state: 'sent', message: chatMessage({text: ' '})},
     {state: 'sent', message: chatMessage({messageType: 'MESSAGE_READ'})},
   ]
 
@@ -116,25 +127,32 @@ it('rebuilds chat history on the other side with flipped direction and no images
     ['received', sentByHistorySender.uuid],
     ['sent', receivedByHistorySender.uuid],
     ['received', identityReveal.uuid],
+    ['sent', legacyIdentityReveal.uuid],
+    ['received', imageOnly.uuid],
+    ['received', legacyImageOnly.uuid],
+    ['received', restoredImageOnly.uuid],
   ])
   expect(rebuilt[0]?.message).toMatchObject({
     senderPublicKey: historySender.publicKeyPemBase64,
     text: 'mine',
-    repliedTo: {text: 'earlier', messageAuthor: 'them'},
+    imageAttachment,
+    repliedTo: {text: 'earlier', messageAuthor: 'them', imageAttachment},
   })
-  expect(rebuilt[0]?.message.image).toBeUndefined()
-  expect(rebuilt[0]?.message.imageAttachment).toBeUndefined()
-  expect(rebuilt[0]?.message.repliedTo?.imageAttachment).toBeUndefined()
   expect(rebuilt[1]?.message.senderPublicKey).toBe(
     historyReceiver.publicKeyPemBase64
   )
-  expect(rebuilt[2]?.message.deanonymizedUser?.name).toBe('Satoshi')
   expect(rebuilt[2]?.message.tradeChecklistUpdate?.identity).toMatchObject({
     status: 'APPROVE_REVEAL',
+    image,
   })
-  expect(
-    rebuilt[2]?.message.tradeChecklistUpdate?.identity?.image
-  ).toBeUndefined()
+  expect(rebuilt[3]?.message).toMatchObject({
+    image,
+    deanonymizedUser: {name: 'Satoshi'},
+  })
+  expect(rebuilt[4]?.message.imageAttachment).toEqual(imageAttachment)
+  expect(rebuilt[5]?.message).toMatchObject({imageUnavailable: true})
+  expect(rebuilt[5]?.message.image).toBeUndefined()
+  expect(rebuilt[6]?.message).toMatchObject({imageUnavailable: true})
 })
 
 it('shows HISTORY as requiring a newer version on older clients', () => {

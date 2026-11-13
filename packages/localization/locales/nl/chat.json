@@ -83,6 +83,7 @@
   "messages.removeImage": "Afbeelding weghalen",
   "messages.imagesLimit_one": "Je kunt maximaal {{count}} afbeelding tegelijk versturen",
   "messages.imagesLimit_other": "Je kunt maximaal {{count}} afbeeldingen tegelijk versturen",
+  "messages.imageUnavailable": "De afbeelding is niet meer beschikbaar",
   "messages.deleteChatQuestion": "Chat verwijderen?",
   "messages.deleteChatExplanation1": "Ben je klaar met handelen? Sluiten van de chat betekent dat je gesprek permanent zal worden verwijderd.",
   "messages.deleteChatExplanation2": "Dit is onomkeerbaar. Wil je deze chat verwijderen?",

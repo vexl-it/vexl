@@ -40,7 +40,16 @@ export class ChatImageTransferError extends Schema.TaggedError<ChatImageTransfer
   'ChatImageTransferError'
 )('ChatImageTransferError', {
   cause: Schema.Unknown,
+  status: Schema.optional(Schema.Number),
 }) {}
+
+// S3 answers a missing key with 403 as nobody may list the bucket.
+export function isChatImageGone(error: ChatImageDownloadError): boolean {
+  return (
+    error._tag === 'ChatImageTransferError' &&
+    (error.status === 403 || error.status === 404)
+  )
+}
 
 type UploadChatImageApiError = Effect.Effect.Error<
   ReturnType<ChatApi['requestChatImageUpload']>
@@ -58,10 +67,17 @@ function fetchFromS3(
         credentials: 'omit',
         signal,
       })
-      if (!response.ok) throw new Error(`S3 responded ${response.status}`)
+      if (!response.ok)
+        throw new ChatImageTransferError({
+          cause: new Error(`S3 responded ${response.status}`),
+          status: response.status,
+        })
       return await response.bytes()
     },
-    catch: (cause) => new ChatImageTransferError({cause}),
+    catch: (cause) =>
+      cause instanceof ChatImageTransferError
+        ? cause
+        : new ChatImageTransferError({cause}),
   })
 }
 

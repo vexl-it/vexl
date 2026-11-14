@@ -39,6 +39,9 @@ export const generateNotificationCenterRecordId = (
         `clubDeactivation_${d.pubKey}_${d.clubInfo.uuid}`
       )
     ),
+    Match.tag('ContactsRemovedFromPhoneNotificationData', (d) =>
+      NotificationCenterRecordId.make(`contactsRemovedFromPhone_${d.removedAt}`)
+    ),
     Match.exhaustive
   )
 
@@ -87,6 +90,12 @@ export const addNotificationToCenterActionAtom = atom(
       Match.tag('ClubDeactivationNotificationData', (d) => ({
         id: idToInsert,
         date: unixMillisecondsNow(),
+        data: d,
+        status: initialStatus,
+      })),
+      Match.tag('ContactsRemovedFromPhoneNotificationData', (d) => ({
+        id: idToInsert,
+        date: d.removedAt,
         data: d,
         status: initialStatus,
       })),

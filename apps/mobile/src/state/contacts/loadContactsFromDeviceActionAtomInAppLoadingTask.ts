@@ -5,6 +5,7 @@ import {
   registerInAppLoadingTask,
 } from '../../utils/inAppLoadingTasks'
 import loadAndNormalizeContactsFromDeviceActionAtom from './atom/loadAndNormalizeContactsFromDeviceActionAtom'
+import {removeContactsDeletedFromPhoneActionAtom} from './atom/removeContactsDeletedFromPhoneActionAtom'
 import {areContactsPermissionsAlreadyGranted} from './utils'
 
 export const loadContactsFromDeviceActionAtomInAppLoadingTaskId =
@@ -24,11 +25,11 @@ export const loadContactsFromDeviceActionAtomInAppLoadingTaskId =
 
         if (!contactsPermissionsAlreadyGranted) return
 
-        yield* _(
+        const contactsLoaded = yield* _(
           store.set(loadAndNormalizeContactsFromDeviceActionAtom).pipe(
             Effect.catchAll((error) => {
               if (error._tag === 'UnknownContactsError') {
-                return Effect.succeed(true)
+                return Effect.succeed(false)
               }
 
               return Effect.fail(
@@ -40,5 +41,8 @@ export const loadContactsFromDeviceActionAtomInAppLoadingTaskId =
             })
           )
         )
+
+        if (contactsLoaded)
+          yield* _(store.set(removeContactsDeletedFromPhoneActionAtom))
       }),
   })

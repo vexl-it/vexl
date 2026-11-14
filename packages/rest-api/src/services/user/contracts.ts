@@ -250,6 +250,15 @@ export const VerifyChallengeInput = Schema.Struct({
 
 export type VerifyChallengeInput = typeof VerifyChallengeInput.Type
 
+export const QuickConnectPingCooldownStepsMinutes = Schema.NonEmptyArray(
+  Schema.Int.pipe(Schema.positive())
+)
+export type QuickConnectPingCooldownStepsMinutes =
+  typeof QuickConnectPingCooldownStepsMinutes.Type
+
+export const DEFAULT_QUICK_CONNECT_PING_COOLDOWN_STEPS_MINUTES: QuickConnectPingCooldownStepsMinutes =
+  [2, 10, 30, 60]
+
 export const GetVersionServiceInfoResponse = Schema.Struct({
   requestForceUpdate: Schema.Boolean,
   offerRerequestLimitDays: Schema.Int.pipe(Schema.greaterThanOrEqualTo(0)),
@@ -261,6 +270,10 @@ export const GetVersionServiceInfoResponse = Schema.Struct({
     {as: 'Option'}
   ),
   backupEnabled: Schema.optionalWith(Schema.Boolean, {default: () => false}),
+  quickConnectPingCooldownStepsMinutes: Schema.optionalWith(
+    QuickConnectPingCooldownStepsMinutes,
+    {default: () => DEFAULT_QUICK_CONNECT_PING_COOLDOWN_STEPS_MINUTES}
+  ),
 })
 
 export const EraseUserVerificationId = Schema.String.pipe(

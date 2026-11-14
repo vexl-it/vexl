@@ -340,5 +340,7 @@
   "progressBar.PREPARING_ENCRYPTED_OFFER_DETAILS": "Verschlüsselte Angebotsdetails vorbereiten",
   "progressBar.SENDING_OFFER_TO_NETWORK": "Angebot hochladen",
   "progressBar.DONE": "Fertig",
-  "offerDetail.offerDetail": "Angebotsdetail"
+  "offerDetail.offerDetail": "Angebotsdetail",
+  "quickOffers.switch.label": "Schnelle Trades annehmen",
+  "quickOffers.switch.note": "Freunde und Freunde von Freunden können dich um einen schnellen Trade bitten. Sie sehen, ob du kaufen oder verkaufen willst, aber keinen Betrag und keinen Ort. Du kannst das jederzeit ausschalten."
 }

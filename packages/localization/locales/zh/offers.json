@@ -340,5 +340,7 @@
   "progressBar.PREPARING_ENCRYPTED_OFFER_DETAILS": "正在准备加密的报价详情",
   "progressBar.SENDING_OFFER_TO_NETWORK": "正在上传报价",
   "progressBar.DONE": "完成",
-  "offerDetail.offerDetail": "出价详情"
+  "offerDetail.offerDetail": "出价详情",
+  "quickOffers.switch.label": "接受快速交易",
+  "quickOffers.switch.note": "朋友和朋友的朋友可以向你发起快速交易。他们能看到你想买还是想卖，但看不到金额和地点。你可以随时关闭。"
 }

@@ -1,3 +1,4 @@
+import {type TradingIntent} from '@vexl-next/domain/src/general/quickOffers'
 import {Array, Effect, Option, Schema} from 'effect'
 import {pipe} from 'fp-ts/lib/function'
 import {atom, useAtomValue} from 'jotai'
@@ -10,6 +11,7 @@ import reportError from '../utils/reportError'
 import {upsertInboxOnBeAndLocallyActionAtom} from './chat/hooks/useCreateInbox'
 import {importedContactsCountAtom} from './contacts/atom/contactsStore'
 import {notificationsEnabledAtom} from './notifications/areNotificationsEnabledAtom'
+import {reconcileQuickOffersActionAtom} from './quickOffers/reconcileQuickOffersActionAtom'
 import {sessionDataOrDummyAtom} from './session'
 
 const PostLoginFlowCompletedScreen = Schema.Literal(
@@ -41,7 +43,14 @@ export const postLoginFlowCompletedScreensAtom = focusAtom(
 )
 
 export const postLoginFlowEffectiveCompletedScreensAtom = atom((get) => {
-  const completedScreens = get(postLoginFlowCompletedScreensAtom)
+  // Users from before quick offers have no answer stored yet and see the usage
+  // screen once more.
+  const usageInfoAnswered =
+    get(sessionDataOrDummyAtom).tradingIntent !== undefined
+  const completedScreens = pipe(
+    get(postLoginFlowCompletedScreensAtom),
+    Array.filter((screen) => usageInfoAnswered || screen !== 'usageInfo')
+  )
   const importedContactsCount = get(importedContactsCountAtom)
   const notificationsEnabled = get(notificationsEnabledAtom)
   const contactImportScreens: readonly PostLoginFlowCompletedScreen[] =
@@ -105,6 +114,34 @@ export const finishPostLoginFlowActionAtom = atom(null, (get, set) => {
     })
   )
 })
+
+export const submitUsageInfoActionAtom = atom(
+  null,
+  (
+    get,
+    set,
+    {
+      tradingIntent,
+      quickOffersEnabled,
+    }: {
+      readonly tradingIntent: TradingIntent
+      readonly quickOffersEnabled: boolean
+    }
+  ): Effect.Effect<void> => {
+    set(sessionDataOrDummyAtom, (session) => ({
+      ...session,
+      tradingIntent,
+      quickOffersEnabled,
+      isLiquidityProvider:
+        session.isLiquidityProvider || tradingIntent === 'BOTH',
+    }))
+    Effect.runFork(set(reconcileQuickOffersActionAtom))
+
+    // Users who finished the flow before only had this answer missing.
+    if (get(postLoginFlowFinishedAtom)) return Effect.void
+    return set(finishPostLoginFlowActionAtom)
+  }
+)
 
 export function useIsPostLoginFinished(): boolean {
   return useAtomValue(postLoginFlowFinishedAtom)

@@ -76,7 +76,9 @@ export const createBackupFile = ({
           'sessionCredentials',
           'privateKey',
           'keyPairV2',
-          'isLiquidityProvider'
+          'isLiquidityProvider',
+          'tradingIntent',
+          'quickOffersEnabled'
         ),
         realUserData,
       },

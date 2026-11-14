@@ -136,6 +136,7 @@ export default function createNewOfferForMyContacts({
           offerType: publicPart.offerType,
           adminId,
           offerId,
+          isQuickOffer: publicPart.isQuickOffer,
         },
       })
     )

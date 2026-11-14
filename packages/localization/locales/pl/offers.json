@@ -340,5 +340,7 @@
   "progressBar.PREPARING_ENCRYPTED_OFFER_DETAILS": "Przygotowywanie zaszyfrowanych szczegółów oferty",
   "progressBar.SENDING_OFFER_TO_NETWORK": "Wysyłam ofertę",
   "progressBar.DONE": "Gotowe",
-  "offerDetail.offerDetail": "Szczegóły oferty"
+  "offerDetail.offerDetail": "Szczegóły oferty",
+  "quickOffers.switch.label": "Przyjmuj szybkie transakcje",
+  "quickOffers.switch.note": "Znajomi i znajomi znajomych mogą poprosić cię o szybką transakcję. Widzą, czy chcesz kupić, czy sprzedać, ale bez kwoty i lokalizacji. Możesz to wyłączyć w każdej chwili."
 }

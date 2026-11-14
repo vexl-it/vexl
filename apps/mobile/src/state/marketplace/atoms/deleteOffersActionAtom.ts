@@ -14,7 +14,6 @@ export const deleteOffersActionAtom = atom<
 >(null, (get, set, params) => {
   const {adminIds: adminIdsToDelete} = params
   const api = get(apiAtom)
-  const offers = get(offersAtom)
 
   return Effect.gen(function* (_) {
     yield* _(api.offer.deleteOffer({adminIds: adminIdsToDelete}))
@@ -27,8 +26,8 @@ export const deleteOffersActionAtom = atom<
     }))
 
     // Delete offers
-    set(
-      offersAtom,
+    // Fresh state, offers may have changed while the request was running.
+    set(offersAtom, (offers) =>
       offers.filter(
         (o) =>
           !o.ownershipInfo?.adminId ||

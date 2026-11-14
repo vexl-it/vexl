@@ -340,5 +340,7 @@
   "progressBar.PREPARING_ENCRYPTED_OFFER_DETAILS": "Подготвяне на шифрованите данни за офертата",
   "progressBar.SENDING_OFFER_TO_NETWORK": "Качване на оферта",
   "progressBar.DONE": "Готово",
-  "offerDetail.offerDetail": "Детайли за офертата"
+  "offerDetail.offerDetail": "Детайли за офертата",
+  "quickOffers.switch.label": "Приемай бързи сделки",
+  "quickOffers.switch.note": "Приятели и приятели на приятели могат да те помолят за бърза сделка. Виждат дали искаш да купиш или да продадеш, но не и сума или място. Можеш да го изключиш по всяко време."
 }

@@ -128,8 +128,10 @@ export const createOfferActionAtom = atom<
     }
 
     set(offersAtom, (oldState) => [...oldState, createdOffer])
-    set(postedFirstOfferAtom, true)
-    set(incrementPostedOffersActionAtom)
+    if (!payloadPublic.isQuickOffer) {
+      set(postedFirstOfferAtom, true)
+      set(incrementPostedOffersActionAtom)
+    }
 
     set(upsertOfferToConnectionsActionAtom, {
       pendingConnectionsToRefresh: [],

@@ -340,5 +340,7 @@
   "progressBar.PREPARING_ENCRYPTED_OFFER_DETAILS": "Inatayarisha maelezo ya ofa yaliyosimbwa kwa njia fiche",
   "progressBar.SENDING_OFFER_TO_NETWORK": "Inapakia ofa",
   "progressBar.DONE": "Imemalizika",
-  "offerDetail.offerDetail": "Maelezo ya ofa"
+  "offerDetail.offerDetail": "Maelezo ya ofa",
+  "quickOffers.switch.label": "Kubali biashara za haraka",
+  "quickOffers.switch.note": "Marafiki na marafiki wa marafiki wanaweza kukuomba biashara ya haraka. Wanaona kama unataka kununua au kuuza, lakini si kiasi wala mahali. Unaweza kuzima hili wakati wowote."
 }

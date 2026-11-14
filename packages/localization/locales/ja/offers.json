@@ -340,5 +340,7 @@
   "progressBar.PREPARING_ENCRYPTED_OFFER_DETAILS": "暗号化されたオファー詳細を準備中",
   "progressBar.SENDING_OFFER_TO_NETWORK": "オファーをアップロード中",
   "progressBar.DONE": "完了",
-  "offerDetail.offerDetail": "オファー詳細"
+  "offerDetail.offerDetail": "オファー詳細",
+  "quickOffers.switch.label": "クイック取引を受け付ける",
+  "quickOffers.switch.note": "友達や友達の友達から、クイック取引をお願いされることがあります。相手に見えるのは買いたいか売りたいかだけで、金額や場所は見えません。いつでもオフにできます。"
 }

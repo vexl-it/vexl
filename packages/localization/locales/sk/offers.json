@@ -340,5 +340,7 @@
   "progressBar.PREPARING_ENCRYPTED_OFFER_DETAILS": "Pripravujeme šifrované údaje ponuky",
   "progressBar.SENDING_OFFER_TO_NETWORK": "Odosielanie ponuky",
   "progressBar.DONE": "Hotovo",
-  "offerDetail.offerDetail": "Detail ponuky"
+  "offerDetail.offerDetail": "Detail ponuky",
+  "quickOffers.switch.label": "Prijímať rýchle obchody",
+  "quickOffers.switch.note": "Priatelia a priatelia priateľov ťa môžu požiadať o rýchly obchod. Uvidia, či chceš kúpiť, alebo predať, ale žiadnu sumu ani miesto. Vypnúť to môžeš kedykoľvek."
 }

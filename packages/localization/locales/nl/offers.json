@@ -340,5 +340,7 @@
   "progressBar.PREPARING_ENCRYPTED_OFFER_DETAILS": "Versleutelde aanbodgegevens voorbereiden",
   "progressBar.SENDING_OFFER_TO_NETWORK": "Aanbieding uploaden",
   "progressBar.DONE": "Gereed",
-  "offerDetail.offerDetail": "Aanbiedingsdetail"
+  "offerDetail.offerDetail": "Aanbiedingsdetail",
+  "quickOffers.switch.label": "Snelle trades accepteren",
+  "quickOffers.switch.note": "Vrienden en vrienden van vrienden kunnen je om een snelle trade vragen. Ze zien of je wilt kopen of verkopen, maar geen bedrag of locatie. Je kunt dit altijd uitzetten."
 }

@@ -340,5 +340,7 @@
   "progressBar.PREPARING_ENCRYPTED_OFFER_DETAILS": "Preparing encrypted offer details",
   "progressBar.SENDING_OFFER_TO_NETWORK": "Uploading offer",
   "progressBar.DONE": "Done",
-  "offerDetail.offerDetail": "Offer detail"
+  "offerDetail.offerDetail": "Offer detail",
+  "quickOffers.switch.label": "Open to quick trades",
+  "quickOffers.switch.note": "Friends and friends of friends can ask you for a quick trade. They see whether you want to buy or sell, but no amount or location. You can turn this off anytime."
 }

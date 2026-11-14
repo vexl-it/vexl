@@ -24,6 +24,7 @@ import '../../state/notes/refreshNotesInAppLoadingTask'
 import '../../state/notifications/ensureVexlSecretExistsTask'
 import '../../state/notifications/refreshVexlTokenMetadataTask'
 import '../../state/notifications/removeLegacyNotificationStorageInAppLoadingTask'
+import '../../state/quickOffers/reconcileQuickOffersInAppLoadingTask'
 import '../../state/refreshOffersAndEnsureInboxesInAppLoadingTask'
 import '../../state/refreshUserOnContactServiceInAppBackgroundTask'
 

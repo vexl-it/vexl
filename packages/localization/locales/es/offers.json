@@ -340,5 +340,7 @@
   "progressBar.PREPARING_ENCRYPTED_OFFER_DETAILS": "Preparando los detalles cifrados de la oferta",
   "progressBar.SENDING_OFFER_TO_NETWORK": "Cargando la oferta",
   "progressBar.DONE": "Hecho",
-  "offerDetail.offerDetail": "Detalle de la oferta"
+  "offerDetail.offerDetail": "Detalle de la oferta",
+  "quickOffers.switch.label": "Aceptar intercambios rápidos",
+  "quickOffers.switch.note": "Amigos y amigos de amigos pueden pedirte un intercambio rápido. Ven si quieres comprar o vender, pero ni la cantidad ni el lugar. Puedes desactivarlo cuando quieras."
 }

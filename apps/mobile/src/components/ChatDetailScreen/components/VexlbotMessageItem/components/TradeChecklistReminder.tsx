@@ -13,6 +13,7 @@ import React, {useState} from 'react'
 import {TouchableOpacity} from 'react-native'
 import {showVexlbotInitialMessageForAllChatsAtom} from '../../../../../state/chat/atoms/showVexlbotInitialMessageForAllChatsAtom'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
+import {canTradeInPerson} from '../../../../../utils/offerHelpers'
 import {chatMolecule} from '../../../atoms'
 import VexlbotActionCard from './VexlbotActionCard'
 
@@ -52,8 +53,7 @@ function TradeChecklistReminder(): React.ReactElement | null {
   )
     return null
 
-  const offerIsInPerson =
-    offerForChat?.offerInfo.publicPart.locationState.includes('IN_PERSON')
+  const offerIsInPerson = canTradeInPerson(offerForChat ?? undefined)
 
   return (
     <VexlbotActionCard

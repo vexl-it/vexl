@@ -4,6 +4,7 @@ import React from 'react'
 import {Stack, YStack} from 'tamagui'
 import * as fromChatAtoms from '../../../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
+import {canTradeInPerson} from '../../../../../utils/offerHelpers'
 import openUrl from '../../../../../utils/openUrl'
 import AnonymizationNotice from '../../AnonymizationNotice'
 import CalculateAmountCell from './CalculateAmountCell'
@@ -39,11 +40,7 @@ function OnlineOrInPersonTrade(): React.ReactElement {
     </Stack>
   )
 
-  if (
-    !offerForTradeChecklist?.offerInfo.publicPart.locationState.includes(
-      'IN_PERSON'
-    )
-  ) {
+  if (!canTradeInPerson(offerForTradeChecklist)) {
     return (
       <YStack gap="$6" f={1}>
         {top}

@@ -14,6 +14,7 @@ import {type GestureResponderEvent} from 'react-native'
 import {Stack} from 'tamagui'
 import {type RootStackScreenProps} from '../../../navigationTypes'
 import isNoteChatOrigin from '../../../state/chat/utils/isNoteChatOrigin'
+import {formatQuickConnectAmount} from '../../../state/quickConnect/quickConnectRequestText'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {formatFullCurrencyAmount} from '../../../utils/localization/currency'
 import {formattingLocaleAtom} from '../../../utils/localization/formattingLocaleAtom'
@@ -101,12 +102,16 @@ function StickyHeader(): React.ReactElement | null {
     noteForChatAtom,
     publicKeyPemBase64Atom,
     showInfoBarAtom,
+    quickOfferTypeForChatAtom,
+    quickConnectAmountAtom,
   } = useMolecule(chatMolecule)
   const chat = useAtomValue(chatAtom)
   const offer = useAtomValue(offerForChatAtom)
   const note = useAtomValue(noteForChatAtom)
   const inboxKey = useAtomValue(publicKeyPemBase64Atom)
   const showInfoBar = useAtomValue(showInfoBarAtom)
+  const isQuickOfferChat = useAtomValue(quickOfferTypeForChatAtom) !== undefined
+  const quickConnectAmount = useAtomValue(quickConnectAmountAtom)
   const currentLocale = useAtomValue(formattingLocaleAtom)
   const {getCompactLabelForLocations} = useAtomValue(offerLocationLabelsAtom)
   const setShowInfoBar = useSetAtom(showInfoBarAtom)
@@ -195,6 +200,17 @@ function StickyHeader(): React.ReactElement | null {
   const offerMetadata = useMemo(() => {
     const result: Array<{key: string; text: string}> = []
 
+    // A quick offer has no amount, location or languages, only the request.
+    if (isQuickOfferChat) {
+      result.push({key: 'quick', text: t('chatDetail.quickConnect.label')})
+      if (quickConnectAmount)
+        result.push({
+          key: 'amount',
+          text: formatQuickConnectAmount(quickConnectAmount, currentLocale),
+        })
+      return result
+    }
+
     if (offerAmount) {
       result.push({key: 'amount', text: `${t('offer.upTo')} ${offerAmount}`})
     }
@@ -209,7 +225,16 @@ function StickyHeader(): React.ReactElement | null {
     }
 
     return result
-  }, [offerAmount, offerCity, offerLanguageFlags, offerLocationTypeText, t])
+  }, [
+    currentLocale,
+    isQuickOfferChat,
+    offerAmount,
+    offerCity,
+    offerLanguageFlags,
+    offerLocationTypeText,
+    quickConnectAmount,
+    t,
+  ])
 
   if (isNoteOrigin) {
     if (!note || !showInfoBar) return null
@@ -261,7 +286,7 @@ function StickyHeader(): React.ReactElement | null {
       py="$4"
       px="$5"
       backgroundColor="$backgroundSecondary"
-      onPress={openOfferDetail}
+      onPress={isQuickOfferChat ? undefined : openOfferDetail}
     >
       <YStack flex={1} gap="$2">
         {offerTitle ? (

@@ -170,6 +170,11 @@
   "chatDetail.offerTitle.theirs.sellProduct": "对方正在出售一件商品",
   "chatDetail.offerTitle.theirs.buyOther": "对方想要别的东西",
   "chatDetail.offerTitle.theirs.sellOther": "对方正在提供别的东西",
+  "chatDetail.quickConnect.label": "快速交易",
+  "chatDetail.quickConnect.request.buy": "你好，我想通过快速交易买入比特币。",
+  "chatDetail.quickConnect.request.sell": "你好，我想通过快速交易卖出比特币。",
+  "chatDetail.quickConnect.amount": "金额：{{amount}}",
+  "chatDetail.quickConnect.receiverDescription": "你网络中有人向你发起了快速交易。回复前先看看你们的共同好友。",
   "messages.fallbackMessage.body": "点击查看。",
   "messages.fallbackMessage.title": "Vexl 有新消息"
 }

@@ -35,6 +35,7 @@ export const getClubOffersForMeModifiedOrCreatedAfterPaginated =
             lastOfferChangeCounter,
             lastPrivatePartId,
             limit,
+            includeQuickOffers: false,
           })
         )
 

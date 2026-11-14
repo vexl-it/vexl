@@ -11,6 +11,7 @@ import {
 import {IdNumeric} from '@vexl-next/domain/src/utility/IdNumeric'
 import {IsoDatetimeString} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {BooleanFromString} from '@vexl-next/generic-utils/src/effect-helpers/BooleanFromString'
 import {Schema} from 'effect'
 import {RequestBaseWithChallenge} from '../../challenges/contracts'
 import {NoContentResponse} from '../../NoContentResponse.brand'
@@ -52,7 +53,10 @@ export const GetClubOffersForMeRequest = Schema.Struct({
 export type GetClubOffersForMeRequest = typeof GetClubOffersForMeRequest.Type
 
 export const GetOffersForMeCreatedOrModifiedAfterPaginatedRequest =
-  PageRequestMeta
+  Schema.Struct({
+    ...PageRequestMeta.fields,
+    includeQuickOffers: Schema.optional(BooleanFromString),
+  })
 export type GetOffersForMeCreatedOrModifiedAfterPaginatedRequest =
   typeof GetOffersForMeCreatedOrModifiedAfterPaginatedRequest.Type
 
@@ -83,6 +87,7 @@ export const CreateNewOfferRequest = Schema.Struct({
   countryPrefix: CountryPrefix,
   adminId: OfferAdminId,
   offerId: Schema.optional(OfferId),
+  isQuickOffer: Schema.optional(Schema.Boolean),
 })
 export type CreateNewOfferRequest = typeof CreateNewOfferRequest.Type
 

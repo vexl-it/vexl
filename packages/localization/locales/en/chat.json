@@ -171,6 +171,11 @@
   "chatDetail.offerTitle.theirs.sellProduct": "They're selling a product",
   "chatDetail.offerTitle.theirs.buyOther": "They want something else",
   "chatDetail.offerTitle.theirs.sellOther": "They're offering something else",
+  "chatDetail.quickConnect.label": "Quick trade",
+  "chatDetail.quickConnect.request.buy": "Hi, I'd like to buy bitcoin through a quick trade.",
+  "chatDetail.quickConnect.request.sell": "Hi, I'd like to sell bitcoin through a quick trade.",
+  "chatDetail.quickConnect.amount": "Amount: {{amount}}.",
+  "chatDetail.quickConnect.receiverDescription": "Someone from your network asked you for a quick trade. Check your common friends before you reply.",
   "messages.fallbackMessage.body": "Tap to read it.",
   "messages.fallbackMessage.title": "New message in Vexl"
 }

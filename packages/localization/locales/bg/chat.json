@@ -171,6 +171,11 @@
   "chatDetail.offerTitle.theirs.sellProduct": "Продава продукт",
   "chatDetail.offerTitle.theirs.buyOther": "Иска нещо друго",
   "chatDetail.offerTitle.theirs.sellOther": "Предлага нещо друго",
+  "chatDetail.quickConnect.label": "Бърза сделка",
+  "chatDetail.quickConnect.request.buy": "Здравей, искам да купя биткойн чрез бърза сделка.",
+  "chatDetail.quickConnect.request.sell": "Здравей, искам да продам биткойн чрез бърза сделка.",
+  "chatDetail.quickConnect.amount": "Сума: {{amount}}.",
+  "chatDetail.quickConnect.receiverDescription": "Някой от мрежата ти те помоли за бърза сделка. Виж общите ви приятели, преди да отговориш.",
   "messages.fallbackMessage.body": "Докосни, за да го прочетеш.",
   "messages.fallbackMessage.title": "Ново съобщение в Vexl"
 }

@@ -211,6 +211,7 @@ export const OfferPublicPart = Schema.Struct({
   authorClientVersion: Schema.optional(VersionString),
   goldenAvatarType: Schema.optional(GoldenAvatarType),
   byLiquidityProvider: Schema.optional(Schema.Boolean),
+  isQuickOffer: Schema.optional(Schema.Boolean),
 })
 export type OfferPublicPart = typeof OfferPublicPart.Type
 

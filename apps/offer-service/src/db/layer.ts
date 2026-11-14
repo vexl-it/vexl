@@ -10,6 +10,7 @@ import removeUnusedTables from './migrations/0005_remove_unused_tables'
 import dropChallengeTable from './migrations/0006_drop_challenge_table'
 import addOfferChangeCounter from './migrations/0007_add_offer_change_counter'
 import createNotesTables from './migrations/0008_create_notes_tables'
+import addIsQuickOfferOnOfferPublic from './migrations/0009_add_is_quick_offer_on_offer_public'
 
 const migrations = [
   {
@@ -51,6 +52,11 @@ const migrations = [
     id: 8,
     name: 'Create notes tables',
     migrationEffect: createNotesTables,
+  },
+  {
+    id: 9,
+    name: 'Add is_quick_offer on offer_public',
+    migrationEffect: addIsQuickOfferOnOfferPublic,
   },
 ] as const
 

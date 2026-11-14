@@ -6,6 +6,7 @@ import {
   OfferId,
   type OfferPublicPart,
 } from '@vexl-next/domain/src/general/offers'
+import {isQuickOffer} from '@vexl-next/domain/src/general/quickOffers'
 import {type OfferEncryptionProgress} from '@vexl-next/resources-utils/src/offers/OfferEncryptionProgress'
 import createNewOfferForMyContacts from '@vexl-next/resources-utils/src/offers/createNewOfferForMyContacts'
 import {Array, Effect, Option, Record, Schema} from 'effect'
@@ -55,9 +56,11 @@ export const offersMissingOnServerAtom = atom(
   }
 )
 
-export const areThereMissingOffersOnServerAtom = atom((get) => {
-  return get(offersMissingOnServerStorageAtom).offerIds.length > 0
-})
+// Quick offers come back without asking, see
+// reuploadQuickOffersMissingOnServerActionAtom.
+export const areThereMissingOffersOnServerAtom = atom((get) =>
+  Array.some(get(offersMissingOnServerAtom), (offer) => !isQuickOffer(offer))
+)
 
 const reencryptOneOfferActionAtom = atom(
   null,
@@ -269,4 +272,25 @@ export const reencryptOffersMissingOnServerActionAtom = atom(
       })
     )
   }
+)
+
+// Quick offers are managed by the app, so they are re-uploaded without asking
+// the user, who never saw them as offers.
+export const reuploadQuickOffersMissingOnServerActionAtom = atom(
+  null,
+  (get, set) =>
+    Effect.forEach(
+      Array.filter(get(offersMissingOnServerAtom), isQuickOffer),
+      (offer) =>
+        set(reencryptOneOfferActionAtom, {offer, onProgress: () => {}}).pipe(
+          Effect.catchAll((e) =>
+            Effect.sync(() => {
+              reportError('warn', new Error('Error re-uploading quick offer'), {
+                e,
+              })
+            })
+          )
+        ),
+      {discard: true}
+    )
 )

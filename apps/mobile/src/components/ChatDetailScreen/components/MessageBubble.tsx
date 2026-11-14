@@ -1,6 +1,8 @@
 import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {Stack, Typography, useTheme, XStack, YStack} from '@vexl-next/ui'
+import {useMolecule} from 'bunshi/dist/react'
 import {Array} from 'effect'
+import {useAtomValue} from 'jotai'
 import React from 'react'
 import {StyleSheet} from 'react-native'
 import Autolink from 'react-native-autolink'
@@ -12,7 +14,10 @@ import {
   hasChatImage,
   isImageOnlyMessage,
 } from '../../../state/chat/utils/chatImageMessage'
+import {quickConnectRequestText} from '../../../state/quickConnect/quickConnectRequestText'
+import {formattingLocaleAtom} from '../../../utils/localization/formattingLocaleAtom'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
+import {chatMolecule} from '../atoms'
 import ChatImage from './ChatImage'
 
 export const PRESSED_BUBBLE_SCALE = 0.96
@@ -84,9 +89,27 @@ function MessageBubble({
   const hasReactions = !!reactions?.mine || !!reactions?.theirs
   const hasImage = hasChatImage(message.message)
 
+  const isRequest = message.message.messageType === 'REQUEST_MESSAGING'
   const isSpecialMessage =
-    message.message.messageType === 'REQUEST_MESSAGING' ||
-    message.message.messageType === 'DISAPPROVE_MESSAGING'
+    isRequest || message.message.messageType === 'DISAPPROVE_MESSAGING'
+  const {quickOfferTypeForChatAtom} = useMolecule(chatMolecule)
+  const quickOfferType = useAtomValue(quickOfferTypeForChatAtom)
+  const locale = useAtomValue(formattingLocaleAtom)
+  const isQuickConnectRequest = isRequest && quickOfferType !== undefined
+  // A quick connect request carries no text of its own, so it is written in
+  // the reader's language.
+  const text =
+    isQuickConnectRequest && !message.message.text
+      ? quickConnectRequestText({
+          quickOfferType,
+          amount:
+            'quickConnectAmount' in message.message
+              ? message.message.quickConnectAmount
+              : undefined,
+          locale,
+          t,
+        })
+      : message.message.text
 
   return (
     <Stack pb={hasReactions ? '$5' : undefined}>
@@ -137,9 +160,11 @@ function MessageBubble({
           gap="$2"
         >
           <Typography color="$foregroundSecondary" variant="micro">
-            {message.message.messageType === 'REQUEST_MESSAGING'
-              ? t('messages.requestedWith')
-              : t('messages.declinedWith')}
+            {isQuickConnectRequest
+              ? t('chatDetail.quickConnect.label')
+              : isRequest
+                ? t('messages.requestedWith')
+                : t('messages.declinedWith')}
           </Typography>
         </XStack>
       )}
@@ -168,7 +193,7 @@ function MessageBubble({
           pt="$4"
         >
           <Autolink
-            text={message.message.text}
+            text={text}
             url
             linkStyle={[
               style.link,

@@ -8,7 +8,10 @@ import {
   KeyDerivationIndex,
   MasterSeed,
 } from '@vexl-next/domain/src/general/MasterSeed.brand'
-import {BackupFileFromJson} from '@vexl-next/resources-utils/src/backup/BackupFile'
+import {
+  BackupFile,
+  BackupFileFromJson,
+} from '@vexl-next/resources-utils/src/backup/BackupFile'
 import {
   deriveClubKeys,
   deriveInboxPrivateKey,
@@ -22,7 +25,7 @@ jest.mock('react-native-mmkv')
 
 const masterSeed = Schema.decodeSync(MasterSeed)('11'.repeat(32))
 const index = KeyDerivationIndex.make
-const session: SessionV2 = {...dummySession, masterSeed}
+const session: SessionV2 = {...dummySession, masterSeed, tradingIntent: 'BOTH'}
 
 const randomClubKeys = async (): Promise<ClubKeys> => ({
   keyPair: await generateKeyPair(),
@@ -78,6 +81,8 @@ describe('createBackupFile', () => {
         privateKey: session.privateKey,
         keyPairV2: session.keyPairV2,
         isLiquidityProvider: session.isLiquidityProvider,
+        tradingIntent: session.tradingIntent,
+        quickOffersEnabled: session.quickOffersEnabled,
       },
       masterSeed,
       // A derived key above the counter can't be told apart from a random
@@ -97,5 +102,21 @@ describe('createBackupFile', () => {
       )
     ).toEqual(exportedByEarlyBuilds)
     expect(json).not.toContain(dummySession.loginSessionId)
+
+    const {
+      tradingIntent: _tradingIntent,
+      quickOffersEnabled: _quickOffersEnabled,
+      ...sessionExportedBeforeQuickOffers
+    } = Schema.encodeSync(BackupFile)(backupFile).session
+    expect(
+      Schema.decodeSync(BackupFile)({
+        ...Schema.encodeSync(BackupFile)(backupFile),
+        session: sessionExportedBeforeQuickOffers,
+      }).session
+    ).toEqual({
+      ...backupFile.session,
+      tradingIntent: undefined,
+      quickOffersEnabled: true,
+    })
   })
 })

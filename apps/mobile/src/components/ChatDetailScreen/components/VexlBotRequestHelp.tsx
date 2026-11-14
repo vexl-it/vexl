@@ -26,6 +26,7 @@ export function VexlBotRequestHelp({
     publicKeyPemBase64Atom,
     chatStateAtom,
     canBeRerequestedAtom,
+    quickOfferTypeForChatAtom,
   } = useMolecule(chatMolecule)
   const trustedFriendsText = useTrustedFriendsText(
     useAtomValue(trustedConnectionsCountAtom)
@@ -34,6 +35,7 @@ export function VexlBotRequestHelp({
   const inboxKey = useAtomValue(publicKeyPemBase64Atom)
   const canBeRerequested = useAtomValue(canBeRerequestedAtom)
   const chatState = useAtomValue(chatStateAtom)
+  const isQuickOfferChat = useAtomValue(quickOfferTypeForChatAtom) !== undefined
 
   const handleOfferDetailsPress = useCallback(() => {
     navigation.navigate('ChatOfferDetail', {
@@ -105,32 +107,36 @@ export function VexlBotRequestHelp({
         <VexlbotActionCard
           title={t('messages.vexlBot.welcomeToTheTradeChat.title')}
           description={
-            isMyNoteChat
-              ? t(
-                  trustedFriendsText
-                    ? 'notes.chat.welcomeReceiverDescriptionWithTrusted'
-                    : 'notes.chat.welcomeReceiverDescription'
-                )
-              : t(
-                  trustedFriendsText
-                    ? 'messages.vexlBot.welcomeToTheTradeChat.receiverDescriptionWithTrusted'
-                    : 'messages.vexlBot.welcomeToTheTradeChat.receiverDescription'
-                )
+            isQuickOfferChat
+              ? t('chatDetail.quickConnect.receiverDescription')
+              : isMyNoteChat
+                ? t(
+                    trustedFriendsText
+                      ? 'notes.chat.welcomeReceiverDescriptionWithTrusted'
+                      : 'notes.chat.welcomeReceiverDescription'
+                  )
+                : t(
+                    trustedFriendsText
+                      ? 'messages.vexlBot.welcomeToTheTradeChat.receiverDescriptionWithTrusted'
+                      : 'messages.vexlBot.welcomeToTheTradeChat.receiverDescription'
+                  )
           }
         >
           <XStack gap="$3">
-            <Button
-              f={1}
-              variant="secondary"
-              size="medium"
-              onPress={
-                isMyNoteChat ? handleNoteDetailPress : handleOfferDetailsPress
-              }
-            >
-              {isMyNoteChat
-                ? t('notes.chat.noteDetail')
-                : t('common.offerDetails')}
-            </Button>
+            {!isQuickOfferChat && (
+              <Button
+                f={1}
+                variant="secondary"
+                size="medium"
+                onPress={
+                  isMyNoteChat ? handleNoteDetailPress : handleOfferDetailsPress
+                }
+              >
+                {isMyNoteChat
+                  ? t('notes.chat.noteDetail')
+                  : t('common.offerDetails')}
+              </Button>
+            )}
 
             <Button
               f={1}

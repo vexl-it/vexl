@@ -18,7 +18,10 @@ import {effectWithEnsuredBenchmark} from './ActionBenchmarks'
 import {inboxesAtom} from './chat/atoms/messagingStateAtom'
 import {upsertInboxOnBeAndLocallyActionAtom} from './chat/hooks/useCreateInbox'
 import {myOffersAtom} from './marketplace/atoms/myOffers'
-import {offersMissingOnServerAtom} from './marketplace/atoms/offersMissingOnServer'
+import {
+  offersMissingOnServerAtom,
+  reuploadQuickOffersMissingOnServerActionAtom,
+} from './marketplace/atoms/offersMissingOnServer'
 import {updateOfferActionAtom} from './marketplace/atoms/updateOfferActionAtom'
 
 const refreshOffersActionAtom = atom(null, (get, set) => {
@@ -49,6 +52,7 @@ const refreshOffersActionAtom = atom(null, (get, set) => {
     )
 
     set(offersMissingOnServerAtom, offerIdsNotOnServer)
+    yield* _(set(reuploadQuickOffersMissingOnServerActionAtom))
 
     console.info(`🦋 Offers refreshed`)
   }).pipe(

@@ -171,6 +171,11 @@
   "chatDetail.offerTitle.theirs.sellProduct": "Anauza bidhaa",
   "chatDetail.offerTitle.theirs.buyOther": "Anataka kitu kingine",
   "chatDetail.offerTitle.theirs.sellOther": "Anatoa kitu kingine",
+  "chatDetail.quickConnect.label": "Biashara ya haraka",
+  "chatDetail.quickConnect.request.buy": "Habari, ningependa kununua bitcoin kupitia biashara ya haraka.",
+  "chatDetail.quickConnect.request.sell": "Habari, ningependa kuuza bitcoin kupitia biashara ya haraka.",
+  "chatDetail.quickConnect.amount": "Kiasi: {{amount}}.",
+  "chatDetail.quickConnect.receiverDescription": "Mtu kutoka mtandao wako amekuomba biashara ya haraka. Angalia marafiki wenu wa pamoja kabla ya kujibu.",
   "messages.fallbackMessage.body": "Gusa ili kuisoma.",
   "messages.fallbackMessage.title": "Ujumbe mpya kwenye Vexl"
 }

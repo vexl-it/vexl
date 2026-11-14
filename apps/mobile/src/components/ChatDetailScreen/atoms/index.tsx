@@ -1,5 +1,6 @@
 import {type ChatMessageId} from '@vexl-next/domain/src/general/messaging'
 import {type FriendLevel} from '@vexl-next/domain/src/general/offers'
+import {isQuickOffer} from '@vexl-next/domain/src/general/quickOffers'
 import {
   effectToTaskEither,
   taskEitherToEffect,
@@ -126,6 +127,28 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     const origin = get(chatAtom)?.origin
     return origin ? get(offerForChatOriginAtom(origin)) : null
   })
+
+  const quickOfferTypeForChatAtom = atom((get) => {
+    const offer = get(offerForChatAtom)
+    return offer && isQuickOffer(offer)
+      ? offer.offerInfo.publicPart.offerType
+      : undefined
+  })
+
+  const quickConnectAmountAtom = atom((get) =>
+    pipe(
+      get(messagesAtom),
+      Array.findLast(
+        (message) => message.message.messageType === 'REQUEST_MESSAGING'
+      ),
+      Option.flatMapNullable((message) =>
+        'quickConnectAmount' in message.message
+          ? message.message.quickConnectAmount
+          : undefined
+      ),
+      Option.getOrUndefined
+    )
+  )
 
   const noteForChatAtom = atom((get) => {
     const origin = get(chatAtom)?.origin
@@ -850,6 +873,8 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     trustedConnectionsCountAtom,
     messagesAtom,
     offerForChatAtom,
+    quickOfferTypeForChatAtom,
+    quickConnectAmountAtom,
     noteForChatAtom,
     sendMessagesAtom: sendMessagesActionAtom(chatWithMessagesAtom),
     sendReactionAtom: sendReactionActionAtom(chatWithMessagesAtom),

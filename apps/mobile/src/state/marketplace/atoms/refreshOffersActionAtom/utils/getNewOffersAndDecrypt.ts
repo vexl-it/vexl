@@ -62,6 +62,7 @@ export const getNewContactNetworkOffersAndDecryptPaginatedActionAtom = atom(
             offersApi.getOffersForMeModifiedOrCreatedAfterPaginated({
               nextPageToken: nextPageToken ?? lastPrivatePartIdBase64,
               limit: OFFERS_PAGE_LIMIT,
+              includeQuickOffers: true,
             }),
           storeNextPageToken: (nextPageToken) => {
             set(contactOffersNextPageParamAtom, nextPageToken)

@@ -340,5 +340,22 @@
   "progressBar.PREPARING_ENCRYPTED_OFFER_DETAILS": "A preparar os detalhes encriptados da oferta",
   "progressBar.SENDING_OFFER_TO_NETWORK": "Carregar oferta",
   "progressBar.DONE": "Concluído",
-  "offerDetail.offerDetail": "Detalhe da oferta"
+  "offerDetail.offerDetail": "Detalhe da oferta",
+  "quickOffers.switch.label": "Aceitar trocas rápidas",
+  "quickOffers.switch.note": "Amigos e amigos de amigos podem pedir-te uma troca rápida. Veem se queres comprar ou vender, mas nenhum valor nem local. Podes desligar isto a qualquer momento.",
+  "quickConnect.title": "Troca rápida",
+  "quickConnect.description": "Pede uma troca rápida a alguém da tua rede. Não precisas de oferta.",
+  "quickConnect.screen.description.buy": "Vamos perguntar a alguém da tua rede que quer vender bitcoin. Recebes uma notificação quando responder.",
+  "quickConnect.screen.description.sell": "Vamos perguntar a alguém da tua rede que quer comprar bitcoin. Recebes uma notificação quando responder.",
+  "quickConnect.amount.label": "Valor (opcional)",
+  "quickConnect.send": "Pedir uma troca rápida",
+  "quickConnect.noMatch.buy": "Neste momento ninguém na tua rede quer vender bitcoin.",
+  "quickConnect.noMatch.sell": "Neste momento ninguém na tua rede quer comprar bitcoin.",
+  "quickConnect.createOfferHint": "Publica uma oferta para que as pessoas da tua rede te encontrem.",
+  "quickConnect.status.asked_one": "Pediste a alguém com {{count}} amigo em comum.",
+  "quickConnect.status.asked_many": "Pediste a alguém com {{count}} amigos em comum.",
+  "quickConnect.status.asked_other": "Pediste a alguém com {{count}} amigos em comum.",
+  "quickConnect.status.askedSomeone": "Pediste a alguém da tua rede.",
+  "quickConnect.status.nextIn": "Podes pedir a outra pessoa daqui a {{time}}.",
+  "quickConnect.status.noReply": "Ainda ninguém respondeu. Publica uma oferta para que mais pessoas te encontrem."
 }

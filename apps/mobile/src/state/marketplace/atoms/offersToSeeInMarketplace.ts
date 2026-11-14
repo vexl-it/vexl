@@ -6,7 +6,7 @@ import {isDeveloperAtom} from '../../../utils/preferences'
 import reportError from '../../../utils/reportError'
 import {importedContactsHashesAtom} from '../../contacts/atom/contactsStore'
 import {deriveVisibleCommonFriendsForOffer} from '../utils/visibleCommonFriends'
-import {offersAtom} from './offersState'
+import {classicOffersAtom, offersAtom} from './offersState'
 
 export function alertAndReportInPersonOffersWithoutLocation(
   offers: OfferInfo[],
@@ -50,7 +50,7 @@ export const offersToSeeInMarketplaceAtom = atom((get) => {
   const isDeveloper = get(isDeveloperAtom)
 
   const offersWithListingType = pipe(
-    get(offersAtom),
+    get(classicOffersAtom),
     Array.filter((one) => !!one.offerInfo.publicPart.listingType)
   )
   alertAndReportInPersonOffersWithoutLocation(

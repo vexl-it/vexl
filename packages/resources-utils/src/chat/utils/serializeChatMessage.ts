@@ -61,6 +61,7 @@ export default function serializeChatMessage(
       commonFriends: message.commonFriends,
       verifiedCommonFriends: message.verifiedCommonFriends,
       friendLevel: message.friendLevel,
+      quickConnectAmount: message.quickConnectAmount,
       history: message.history,
       recoveryProof: message.recoveryProof,
       historyRecoveryProof: message.historyRecoveryProof,

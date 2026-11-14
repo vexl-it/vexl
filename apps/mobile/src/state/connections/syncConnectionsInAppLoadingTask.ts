@@ -5,6 +5,7 @@ import {
 } from '../../utils/inAppLoadingTasks'
 import {checkForClubsAdmissionActionAtom} from '../clubs/atom/checkForClubsAdmissionActionAtom'
 import {syncAllClubsHandleStateWhenNotFoundActionAtom} from '../clubs/atom/refreshClubsActionAtom'
+import {reconcileQuickOffersActionAtom} from '../quickOffers/reconcileQuickOffersActionAtom'
 import {afterRefreshUserUnlessAccountMoved} from '../refreshUserOnContactServiceInAppBackgroundTask'
 import {checkUserNeedsToImportContactsAndReencryptOffersActionAtom} from './atom/checkUserNeedsToImportAndReencryptOffersActionAtom'
 import {updateAndReencryptAllConnectionsActionAtom} from './atom/updateAndReencryptAllConnectionsActionAtom'
@@ -29,11 +30,14 @@ export const syncConnectionsInAppTaskId = registerInAppLoadingTask({
       const checkUserNeedsToImportContactsAndReencryptOffers = store.set(
         checkUserNeedsToImportContactsAndReencryptOffersActionAtom
       )
+      // Publishes quick offers that could not be published without connections.
+      const reconcileQuickOffers = store.set(reconcileQuickOffersActionAtom)
 
       yield* _(
         checkForClubAdmissions,
         Effect.andThen(syncClubs),
         Effect.andThen(updateConnections),
+        Effect.andThen(reconcileQuickOffers),
         Effect.andThen(checkUserNeedsToImportContactsAndReencryptOffers)
       )
     }),

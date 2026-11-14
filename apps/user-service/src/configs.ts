@@ -1,5 +1,9 @@
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
+import {
+  DEFAULT_QUICK_CONNECT_PING_COOLDOWN_STEPS_MINUTES,
+  QuickConnectPingCooldownStepsMinutes,
+} from '@vexl-next/rest-api/src/services/user/contracts'
 import {Config, ConfigError, Effect, Either, Schema, String} from 'effect'
 
 export {
@@ -89,6 +93,23 @@ export const rerequestLimitDaysConfig = Config.number(
 
 export const backupEnabledConfig = Config.boolean('BACKUP_ENABLED').pipe(
   Config.withDefault(false)
+)
+
+export const quickConnectPingCooldownStepsMinutesConfig = Config.array(
+  Config.integer(),
+  'QUICK_CONNECT_PING_COOLDOWN_STEPS_MINUTES'
+).pipe(
+  Config.withDefault(DEFAULT_QUICK_CONNECT_PING_COOLDOWN_STEPS_MINUTES),
+  Config.mapOrFail((v) =>
+    Either.mapLeft(
+      Schema.decodeUnknownEither(QuickConnectPingCooldownStepsMinutes)(v),
+      (e) =>
+        ConfigError.InvalidData(
+          ['QUICK_CONNECT_PING_COOLDOWN_STEPS_MINUTES'],
+          e.message
+        )
+    )
+  )
 )
 
 export const reportGaugesCronConfig = Config.string('REPORT_GAUGES_CRON').pipe(

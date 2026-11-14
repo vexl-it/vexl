@@ -174,7 +174,7 @@
   "chatDetail.quickConnect.label": "Schneller Trade",
   "chatDetail.quickConnect.request.buy": "Hi, ich würde gern Bitcoin über einen schnellen Trade kaufen.",
   "chatDetail.quickConnect.request.sell": "Hi, ich würde gern Bitcoin über einen schnellen Trade verkaufen.",
-  "chatDetail.quickConnect.amount": "Betrag: {{amount}}",
+  "chatDetail.quickConnect.amount": "Betrag: {{amount}}.",
   "chatDetail.quickConnect.receiverDescription": "Jemand aus deinem Netzwerk fragt dich nach einem schnellen Trade. Schau dir eure gemeinsamen Freunde an, bevor du antwortest.",
   "messages.fallbackMessage.body": "Tippe, um sie zu lesen.",
   "messages.fallbackMessage.title": "Neue Nachricht in Vexl"

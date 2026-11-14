@@ -173,7 +173,7 @@
   "chatDetail.quickConnect.label": "クイック取引",
   "chatDetail.quickConnect.request.buy": "こんにちは、クイック取引でビットコインを買いたいです。",
   "chatDetail.quickConnect.request.sell": "こんにちは、クイック取引でビットコインを売りたいです。",
-  "chatDetail.quickConnect.amount": "金額：{{amount}}",
+  "chatDetail.quickConnect.amount": "金額：{{amount}}。",
   "chatDetail.quickConnect.receiverDescription": "ネットワーク内の誰かからクイック取引のお願いが届きました。返事をする前に共通の友達を確認しましょう。",
   "messages.fallbackMessage.body": "タップして読む",
   "messages.fallbackMessage.title": "Vexl の新しいメッセージ"

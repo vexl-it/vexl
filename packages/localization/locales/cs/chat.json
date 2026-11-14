@@ -176,7 +176,7 @@
   "chatDetail.quickConnect.label": "Rychlý obchod",
   "chatDetail.quickConnect.request.buy": "Ahoj, chci koupit bitcoin přes rychlý obchod.",
   "chatDetail.quickConnect.request.sell": "Ahoj, chci prodat bitcoin přes rychlý obchod.",
-  "chatDetail.quickConnect.amount": "Částka: {{amount}}",
+  "chatDetail.quickConnect.amount": "Částka: {{amount}}.",
   "chatDetail.quickConnect.receiverDescription": "Někdo z tvé sítě tě požádal o rychlý obchod. Než odpovíš, podívej se na společné přátele.",
   "messages.fallbackMessage.body": "Klepni a přečti si ji.",
   "messages.fallbackMessage.title": "Nová zpráva ve Vexlu"

@@ -175,7 +175,7 @@
   "chatDetail.quickConnect.label": "Échange rapide",
   "chatDetail.quickConnect.request.buy": "Salut, j'aimerais acheter du bitcoin via un échange rapide.",
   "chatDetail.quickConnect.request.sell": "Salut, j'aimerais vendre du bitcoin via un échange rapide.",
-  "chatDetail.quickConnect.amount": "Montant : {{amount}}",
+  "chatDetail.quickConnect.amount": "Montant : {{amount}}.",
   "chatDetail.quickConnect.receiverDescription": "Quelqu'un de ton réseau te propose un échange rapide. Regarde vos amis en commun avant de répondre.",
   "messages.fallbackMessage.body": "Appuie pour le lire.",
   "messages.fallbackMessage.title": "Nouveau message sur Vexl"

@@ -342,5 +342,18 @@
   "progressBar.DONE": "Gereed",
   "offerDetail.offerDetail": "Aanbiedingsdetail",
   "quickOffers.switch.label": "Snelle trades accepteren",
-  "quickOffers.switch.note": "Vrienden en vrienden van vrienden kunnen je om een snelle trade vragen. Ze zien of je wilt kopen of verkopen, maar geen bedrag of locatie. Je kunt dit altijd uitzetten."
+  "quickOffers.switch.note": "Vrienden en vrienden van vrienden kunnen je om een snelle trade vragen. Ze zien of je wilt kopen of verkopen, maar geen bedrag of locatie. Je kunt dit altijd uitzetten.",
+  "quickConnect.title": "Snelle trade",
+  "quickConnect.description": "Vraag iemand uit je netwerk om een snelle trade. Geen aanbieding nodig.",
+  "quickConnect.screen.description.buy": "We vragen iemand uit je netwerk die bitcoin wil verkopen. Je krijgt een melding zodra diegene reageert.",
+  "quickConnect.screen.description.sell": "We vragen iemand uit je netwerk die bitcoin wil kopen. Je krijgt een melding zodra diegene reageert.",
+  "quickConnect.amount.label": "Bedrag (optioneel)",
+  "quickConnect.send": "Vraag om een snelle trade",
+  "quickConnect.noMatch.buy": "Op dit moment wil niemand in je netwerk bitcoin verkopen.",
+  "quickConnect.noMatch.sell": "Op dit moment wil niemand in je netwerk bitcoin kopen.",
+  "quickConnect.createOfferHint": "Plaats een aanbieding zodat mensen in je netwerk je kunnen vinden.",
+  "quickConnect.status.asked_one": "Je hebt iemand gevraagd met {{count}} gemeenschappelijke vriend.",
+  "quickConnect.status.asked_other": "Je hebt iemand gevraagd met {{count}} gemeenschappelijke vrienden.",
+  "quickConnect.status.nextIn": "Je kunt over {{time}} iemand anders vragen.",
+  "quickConnect.status.noReply": "Nog niemand heeft gereageerd. Plaats een aanbieding zodat meer mensen je kunnen vinden."
 }

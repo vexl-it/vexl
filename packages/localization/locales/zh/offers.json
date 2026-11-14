@@ -342,5 +342,17 @@
   "progressBar.DONE": "完成",
   "offerDetail.offerDetail": "出价详情",
   "quickOffers.switch.label": "接受快速交易",
-  "quickOffers.switch.note": "朋友和朋友的朋友可以向你发起快速交易。他们能看到你想买还是想卖，但看不到金额和地点。你可以随时关闭。"
+  "quickOffers.switch.note": "朋友和朋友的朋友可以向你发起快速交易。他们能看到你想买还是想卖，但看不到金额和地点。你可以随时关闭。",
+  "quickConnect.title": "快速交易",
+  "quickConnect.description": "向你网络中的人发起快速交易，无需发布报价。",
+  "quickConnect.screen.description.buy": "我们会询问你网络中想卖出比特币的人。对方回复时你会收到通知。",
+  "quickConnect.screen.description.sell": "我们会询问你网络中想买入比特币的人。对方回复时你会收到通知。",
+  "quickConnect.amount.label": "金额（可选）",
+  "quickConnect.send": "发起快速交易",
+  "quickConnect.noMatch.buy": "目前你的网络中没有人想卖出比特币。",
+  "quickConnect.noMatch.sell": "目前你的网络中没有人想买入比特币。",
+  "quickConnect.createOfferHint": "发布一个报价，让你网络中的人能找到你。",
+  "quickConnect.status.asked_other": "你已向一位与你有 {{count}} 个共同好友的人发起请求。",
+  "quickConnect.status.nextIn": "{{time}} 后你可以再问其他人。",
+  "quickConnect.status.noReply": "还没有人回复。发布一个报价，让更多人找到你。"
 }

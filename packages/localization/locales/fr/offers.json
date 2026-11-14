@@ -342,5 +342,19 @@
   "progressBar.DONE": "Terminé",
   "offerDetail.offerDetail": "Détail de l'offre",
   "quickOffers.switch.label": "Accepter les échanges rapides",
-  "quickOffers.switch.note": "Tes amis et amis d'amis peuvent te proposer un échange rapide. Ils voient si tu veux acheter ou vendre, mais ni montant ni lieu. Tu peux désactiver ça à tout moment."
+  "quickOffers.switch.note": "Tes amis et amis d'amis peuvent te proposer un échange rapide. Ils voient si tu veux acheter ou vendre, mais ni montant ni lieu. Tu peux désactiver ça à tout moment.",
+  "quickConnect.title": "Échange rapide",
+  "quickConnect.description": "Demande un échange rapide à quelqu'un de ton réseau. Pas besoin d'offre.",
+  "quickConnect.screen.description.buy": "On va demander à quelqu'un de ton réseau qui veut vendre du bitcoin. Tu recevras une notification dès qu'il répond.",
+  "quickConnect.screen.description.sell": "On va demander à quelqu'un de ton réseau qui veut acheter du bitcoin. Tu recevras une notification dès qu'il répond.",
+  "quickConnect.amount.label": "Montant (facultatif)",
+  "quickConnect.send": "Demander un échange rapide",
+  "quickConnect.noMatch.buy": "Personne dans ton réseau ne veut vendre de bitcoin pour l'instant.",
+  "quickConnect.noMatch.sell": "Personne dans ton réseau ne veut acheter de bitcoin pour l'instant.",
+  "quickConnect.createOfferHint": "Publie une offre pour que les gens de ton réseau puissent te trouver.",
+  "quickConnect.status.asked_one": "Tu as fait ta demande à quelqu'un avec {{count}} ami en commun.",
+  "quickConnect.status.asked_many": "Tu as fait ta demande à quelqu'un avec {{count}} amis en commun.",
+  "quickConnect.status.asked_other": "Tu as fait ta demande à quelqu'un avec {{count}} amis en commun.",
+  "quickConnect.status.nextIn": "Tu pourras demander à quelqu'un d'autre dans {{time}}.",
+  "quickConnect.status.noReply": "Personne n'a encore répondu. Publie une offre pour que plus de gens te trouvent."
 }

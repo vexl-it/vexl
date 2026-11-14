@@ -342,5 +342,19 @@
   "progressBar.DONE": "Fatto",
   "offerDetail.offerDetail": "Dettaglio offerta",
   "quickOffers.switch.label": "Accetta scambi rapidi",
-  "quickOffers.switch.note": "Amici e amici di amici possono chiederti uno scambio rapido. Vedono se vuoi comprare o vendere, ma nessun importo né luogo. Puoi disattivarlo quando vuoi."
+  "quickOffers.switch.note": "Amici e amici di amici possono chiederti uno scambio rapido. Vedono se vuoi comprare o vendere, ma nessun importo né luogo. Puoi disattivarlo quando vuoi.",
+  "quickConnect.title": "Scambio rapido",
+  "quickConnect.description": "Chiedi uno scambio rapido a qualcuno della tua rete. Non serve un'offerta.",
+  "quickConnect.screen.description.buy": "Chiederemo a qualcuno della tua rete che vuole vendere bitcoin. Riceverai una notifica quando risponde.",
+  "quickConnect.screen.description.sell": "Chiederemo a qualcuno della tua rete che vuole comprare bitcoin. Riceverai una notifica quando risponde.",
+  "quickConnect.amount.label": "Importo (facoltativo)",
+  "quickConnect.send": "Chiedi uno scambio rapido",
+  "quickConnect.noMatch.buy": "Al momento nessuno nella tua rete vuole vendere bitcoin.",
+  "quickConnect.noMatch.sell": "Al momento nessuno nella tua rete vuole comprare bitcoin.",
+  "quickConnect.createOfferHint": "Pubblica un'offerta così le persone della tua rete possono trovarti.",
+  "quickConnect.status.asked_one": "Hai chiesto a qualcuno con {{count}} amico in comune.",
+  "quickConnect.status.asked_many": "Hai chiesto a qualcuno con {{count}} amici in comune.",
+  "quickConnect.status.asked_other": "Hai chiesto a qualcuno con {{count}} amici in comune.",
+  "quickConnect.status.nextIn": "Potrai chiedere a qualcun altro tra {{time}}.",
+  "quickConnect.status.noReply": "Nessuno ha ancora risposto. Pubblica un'offerta così più persone possono trovarti."
 }

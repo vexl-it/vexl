@@ -94,6 +94,7 @@ export interface TextFieldProps extends Omit<
   readonly placeholder?: string
   readonly autoFocus?: boolean
   readonly maxLength?: number
+  readonly keyboardType?: React.ComponentProps<typeof Input>['keyboardType']
   readonly backgroundColor?: TextFieldFrameProps['backgroundColor']
   readonly showClear?: boolean
   readonly onCheckmarkPress?: () => void
@@ -108,6 +109,7 @@ export function TextField({
   placeholder = 'Input',
   autoFocus,
   maxLength,
+  keyboardType,
   backgroundColor = '$backgroundSecondary',
   showClear,
   onCheckmarkPress,
@@ -153,6 +155,7 @@ export function TextField({
         selectionColor={theme.accentYellowPrimary.get()}
         autoFocus={autoFocus}
         maxLength={maxLength}
+        keyboardType={keyboardType}
         onFocus={handleFocus}
         onBlur={handleBlur}
       />

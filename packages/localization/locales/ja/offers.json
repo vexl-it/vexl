@@ -342,5 +342,17 @@
   "progressBar.DONE": "完了",
   "offerDetail.offerDetail": "オファー詳細",
   "quickOffers.switch.label": "クイック取引を受け付ける",
-  "quickOffers.switch.note": "友達や友達の友達から、クイック取引をお願いされることがあります。相手に見えるのは買いたいか売りたいかだけで、金額や場所は見えません。いつでもオフにできます。"
+  "quickOffers.switch.note": "友達や友達の友達から、クイック取引をお願いされることがあります。相手に見えるのは買いたいか売りたいかだけで、金額や場所は見えません。いつでもオフにできます。",
+  "quickConnect.title": "クイック取引",
+  "quickConnect.description": "ネットワークの誰かにクイック取引をお願いしよう。オファーは不要です。",
+  "quickConnect.screen.description.buy": "ビットコインを売りたい、ネットワーク内の誰かに声をかけます。返事が来たら通知が届きます。",
+  "quickConnect.screen.description.sell": "ビットコインを買いたい、ネットワーク内の誰かに声をかけます。返事が来たら通知が届きます。",
+  "quickConnect.amount.label": "金額（任意）",
+  "quickConnect.send": "クイック取引をお願いする",
+  "quickConnect.noMatch.buy": "今、ネットワーク内にビットコインを売りたい人はいません。",
+  "quickConnect.noMatch.sell": "今、ネットワーク内にビットコインを買いたい人はいません。",
+  "quickConnect.createOfferHint": "オファーを出すと、ネットワークの人があなたを見つけられます。",
+  "quickConnect.status.asked_other": "共通の友達が{{count}}人いる人にお願いしました。",
+  "quickConnect.status.nextIn": "{{time}}後に別の人にお願いできます。",
+  "quickConnect.status.noReply": "まだ誰からも返事がありません。オファーを出すと、もっと多くの人に見つけてもらえます。"
 }

@@ -342,5 +342,18 @@
   "progressBar.DONE": "Done",
   "offerDetail.offerDetail": "Offer detail",
   "quickOffers.switch.label": "Open to quick trades",
-  "quickOffers.switch.note": "Friends and friends of friends can ask you for a quick trade. They see whether you want to buy or sell, but no amount or location. You can turn this off anytime."
+  "quickOffers.switch.note": "Friends and friends of friends can ask you for a quick trade. They see whether you want to buy or sell, but no amount or location. You can turn this off anytime.",
+  "quickConnect.title": "Quick trade",
+  "quickConnect.description": "Ask someone from your network for a quick trade. No offer needed.",
+  "quickConnect.screen.description.buy": "We'll ask someone from your network who wants to sell bitcoin. You'll get a notification when they reply.",
+  "quickConnect.screen.description.sell": "We'll ask someone from your network who wants to buy bitcoin. You'll get a notification when they reply.",
+  "quickConnect.amount.label": "Amount (optional)",
+  "quickConnect.send": "Ask for a quick trade",
+  "quickConnect.noMatch.buy": "Nobody in your network wants to sell bitcoin right now.",
+  "quickConnect.noMatch.sell": "Nobody in your network wants to buy bitcoin right now.",
+  "quickConnect.createOfferHint": "Post an offer so people in your network can find you.",
+  "quickConnect.status.asked_one": "You asked someone with {{count}} common friend.",
+  "quickConnect.status.asked_other": "You asked someone with {{count}} common friends.",
+  "quickConnect.status.nextIn": "You can ask someone else in {{time}}.",
+  "quickConnect.status.noReply": "Nobody has replied yet. Post an offer so more people can find you."
 }

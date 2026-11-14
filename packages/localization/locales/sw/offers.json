@@ -342,5 +342,18 @@
   "progressBar.DONE": "Imemalizika",
   "offerDetail.offerDetail": "Maelezo ya ofa",
   "quickOffers.switch.label": "Kubali biashara za haraka",
-  "quickOffers.switch.note": "Marafiki na marafiki wa marafiki wanaweza kukuomba biashara ya haraka. Wanaona kama unataka kununua au kuuza, lakini si kiasi wala mahali. Unaweza kuzima hili wakati wowote."
+  "quickOffers.switch.note": "Marafiki na marafiki wa marafiki wanaweza kukuomba biashara ya haraka. Wanaona kama unataka kununua au kuuza, lakini si kiasi wala mahali. Unaweza kuzima hili wakati wowote.",
+  "quickConnect.title": "Biashara ya haraka",
+  "quickConnect.description": "Muombe mtu kutoka mtandao wako biashara ya haraka. Huhitaji ofa.",
+  "quickConnect.screen.description.buy": "Tutamuuliza mtu kutoka mtandao wako anayetaka kuuza bitcoin. Utapata arifa akijibu.",
+  "quickConnect.screen.description.sell": "Tutamuuliza mtu kutoka mtandao wako anayetaka kununua bitcoin. Utapata arifa akijibu.",
+  "quickConnect.amount.label": "Kiasi (si lazima)",
+  "quickConnect.send": "Omba biashara ya haraka",
+  "quickConnect.noMatch.buy": "Kwa sasa hakuna mtu kwenye mtandao wako anayetaka kuuza bitcoin.",
+  "quickConnect.noMatch.sell": "Kwa sasa hakuna mtu kwenye mtandao wako anayetaka kununua bitcoin.",
+  "quickConnect.createOfferHint": "Chapisha ofa ili watu kwenye mtandao wako wakupate.",
+  "quickConnect.status.asked_one": "Umemuuliza mtu mwenye rafiki {{count}} wa pamoja nawe.",
+  "quickConnect.status.asked_other": "Umemuuliza mtu mwenye marafiki {{count}} wa pamoja nawe.",
+  "quickConnect.status.nextIn": "Unaweza kumuuliza mtu mwingine baada ya {{time}}.",
+  "quickConnect.status.noReply": "Bado hakuna aliyejibu. Chapisha ofa ili watu wengi zaidi wakupate."
 }

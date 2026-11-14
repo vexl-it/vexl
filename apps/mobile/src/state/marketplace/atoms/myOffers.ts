@@ -5,6 +5,7 @@ import {
   type OfferAdminId,
   type Sort,
 } from '@vexl-next/domain/src/general/offers'
+import {isQuickOffer} from '@vexl-next/domain/src/general/quickOffers'
 import updateOwnerPrivatePayload from '@vexl-next/resources-utils/src/offers/updateOwnerPrivatePayload'
 import {Array, Effect, Schema, pipe} from 'effect'
 import {atom} from 'jotai'
@@ -28,16 +29,25 @@ export const myOffersAtom = focusAtom(offersAtom, (optic) =>
   )
 )
 
-export const myOffersCountAtom = atom((get) => get(myOffersAtom).length)
+// All my offers above get the offer machinery (refresh, re-encryption, inboxes,
+// deletion). Only the classic ones are shown to me as offers.
+export const myClassicOffersAtom = atom((get) =>
+  Array.filter(get(myOffersAtom), (offer) => !isQuickOffer(offer))
+)
 
-export const areThereAnyMyOffersAtom = atom((get) => {
-  const myOffers = get(myOffersAtom)
-  return myOffers.length > 0
-})
+export const myQuickOffersAtom = atom((get) =>
+  Array.filter(get(myOffersAtom), isQuickOffer)
+)
+
+export const myOffersCountAtom = atom((get) => get(myClassicOffersAtom).length)
+
+export const areThereAnyMyOffersAtom = atom((get) =>
+  Array.isNonEmptyArray(get(myClassicOffersAtom))
+)
 
 export const myOffersSortedAtom = atom((get) => {
   const sortingOptions = get(selectedMyOffersSortingOptionAtom)
-  const myOffers = get(myOffersAtom)
+  const myOffers = get(myClassicOffersAtom)
 
   return sortOffers(
     myOffers,
@@ -123,12 +133,15 @@ export const myOffersListDataAtom = atom((get): OffersListItemData[] => {
   return items
 })
 
-export const myActiveOffersAtom = focusAtom(myOffersAtom, (optic) =>
-  optic.filter((myOffer) => myOffer.offerInfo.publicPart.active)
+export const myActiveOffersAtom = atom((get) =>
+  Array.filter(
+    get(myClassicOffersAtom),
+    (myOffer) => myOffer.offerInfo.publicPart.active
+  )
 )
 
 export const myProductOffersMissingCategoryAtom = atom((get) =>
-  pipe(get(myOffersAtom), Array.filter(isProductOfferMissingCategory))
+  pipe(get(myClassicOffersAtom), Array.filter(isProductOfferMissingCategory))
 )
 
 const accountActionStepsStorageAtom = atomWithParsedMmkvStorage(

@@ -756,7 +756,7 @@ function DebugScreen(): React.ReactElement {
               store.set(offersStateAtom, {
                 lastUpdatedAt2: MINIMAL_DATE,
                 offers: [],
-                contactOffersNextPageParam: undefined,
+                contactOffersNextPageParam2: undefined,
                 clubOffersNextPageParam: {},
               })
               Alert.alert('Done')

@@ -354,6 +354,7 @@
   "quickConnect.createOfferHint": "Chapisha ofa ili watu kwenye mtandao wako wakupate.",
   "quickConnect.status.asked_one": "Umemuuliza mtu mwenye rafiki {{count}} wa pamoja nawe.",
   "quickConnect.status.asked_other": "Umemuuliza mtu mwenye marafiki {{count}} wa pamoja nawe.",
+  "quickConnect.status.askedSomeone": "Umemuuliza mtu kutoka mtandao wako.",
   "quickConnect.status.nextIn": "Unaweza kumuuliza mtu mwingine baada ya {{time}}.",
   "quickConnect.status.noReply": "Bado hakuna aliyejibu. Chapisha ofa ili watu wengi zaidi wakupate."
 }

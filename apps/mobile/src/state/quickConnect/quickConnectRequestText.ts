@@ -43,3 +43,32 @@ export function quickConnectRequestText({
     amount: formatQuickConnectAmount(amount, locale),
   })}`
 }
+
+// Direct contacts may share nobody, "0 common friends" reads like a warning.
+export function quickConnectAskedText({
+  commonFriendsCount,
+  t,
+}: {
+  readonly commonFriendsCount: number
+  readonly t: TFunction
+}): string {
+  return commonFriendsCount === 0
+    ? t('quickConnect.status.askedSomeone')
+    : t('quickConnect.status.asked', {count: commonFriendsCount})
+}
+
+export function quickConnectRequestNotificationBody({
+  request,
+  commonFriendsCount,
+  t,
+}: {
+  readonly request: string
+  readonly commonFriendsCount: number
+  readonly t: TFunction
+}): string {
+  if (commonFriendsCount === 0) return request
+
+  return `${request} ${t('notifications.REQUEST_MESSAGING.commonFriends', {
+    count: commonFriendsCount,
+  })}`
+}

@@ -353,6 +353,7 @@
   "quickConnect.noMatch.sell": "目前你的网络中没有人想买入比特币。",
   "quickConnect.createOfferHint": "发布一个报价，让你网络中的人能找到你。",
   "quickConnect.status.asked_other": "你已向一位与你有 {{count}} 个共同好友的人发起请求。",
+  "quickConnect.status.askedSomeone": "你已向你网络中的一个人发起请求。",
   "quickConnect.status.nextIn": "{{time}} 后你可以再问其他人。",
   "quickConnect.status.noReply": "还没有人回复。发布一个报价，让更多人找到你。"
 }

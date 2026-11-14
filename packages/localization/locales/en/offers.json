@@ -354,6 +354,7 @@
   "quickConnect.createOfferHint": "Post an offer so people in your network can find you.",
   "quickConnect.status.asked_one": "You asked someone with {{count}} common friend.",
   "quickConnect.status.asked_other": "You asked someone with {{count}} common friends.",
+  "quickConnect.status.askedSomeone": "You asked someone from your network.",
   "quickConnect.status.nextIn": "You can ask someone else in {{time}}.",
   "quickConnect.status.noReply": "Nobody has replied yet. Post an offer so more people can find you."
 }

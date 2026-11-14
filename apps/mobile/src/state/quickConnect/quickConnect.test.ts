@@ -5,6 +5,7 @@ import {
 import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {type QuickConnectPingCooldownStepsMinutes} from '@vexl-next/rest-api/src/services/user/contracts'
 import {Array, Option, pipe, Schema} from 'effect'
+import {type TFunction} from '../../utils/localization/I18nProvider'
 import {
   activePings,
   hasUsedAllCooldownSteps,
@@ -12,6 +13,10 @@ import {
   recordPing,
   type QuickConnectPings,
 } from './quickConnectCooldown'
+import {
+  quickConnectAskedText,
+  quickConnectRequestNotificationBody,
+} from './quickConnectRequestText'
 import {
   pickQuickConnectTarget,
   rankQuickConnectCandidates,
@@ -211,5 +216,36 @@ describe('quick connect cooldown', () => {
       })
     expect(suggests(pingAt([0, 2, 12]))).toBe(false)
     expect(suggests(pingAt([0, 2, 12, 42]))).toBe(true)
+  })
+})
+
+describe('quick connect common friends wording', () => {
+  const t: TFunction = (key, options) =>
+    options?.count === undefined ? key : `${key}:${options.count}`
+
+  it('leaves the count out when there are no common friends', () => {
+    expect(quickConnectAskedText({commonFriendsCount: 0, t})).toBe(
+      'quickConnect.status.askedSomeone'
+    )
+    expect(
+      quickConnectRequestNotificationBody({
+        request: 'request',
+        commonFriendsCount: 0,
+        t,
+      })
+    ).toBe('request')
+  })
+
+  it('mentions the count when there are common friends', () => {
+    expect(quickConnectAskedText({commonFriendsCount: 2, t})).toBe(
+      'quickConnect.status.asked:2'
+    )
+    expect(
+      quickConnectRequestNotificationBody({
+        request: 'request',
+        commonFriendsCount: 1,
+        t,
+      })
+    ).toBe('request notifications.REQUEST_MESSAGING.commonFriends:1')
   })
 })

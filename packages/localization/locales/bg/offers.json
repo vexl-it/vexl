@@ -354,6 +354,7 @@
   "quickConnect.createOfferHint": "Публикувай оферта, за да те намерят хората от мрежата ти.",
   "quickConnect.status.asked_one": "Попита човек, с когото имате {{count}} общ приятел.",
   "quickConnect.status.asked_other": "Попита човек, с когото имате {{count}} общи приятели.",
+  "quickConnect.status.askedSomeone": "Попита човек от твоята мрежа.",
   "quickConnect.status.nextIn": "Можеш да попиташ някой друг след {{time}}.",
   "quickConnect.status.noReply": "Още никой не е отговорил. Публикувай оферта, за да те намерят повече хора."
 }

@@ -356,6 +356,7 @@
   "quickConnect.status.asked_few": "Žádost odešla někomu, s kým máš {{count}} společné přátele.",
   "quickConnect.status.asked_many": "Žádost odešla někomu, s kým máš {{count}} společného přítele.",
   "quickConnect.status.asked_other": "Žádost odešla někomu, s kým máš {{count}} společných přátel.",
+  "quickConnect.status.askedSomeone": "Žádost odešla někomu z tvé sítě.",
   "quickConnect.status.nextIn": "Dalšího člověka můžeš požádat za {{time}}.",
   "quickConnect.status.noReply": "Zatím nikdo neodpověděl. Zveřejni nabídku, ať tě najde víc lidí."
 }

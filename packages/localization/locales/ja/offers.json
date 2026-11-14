@@ -353,6 +353,7 @@
   "quickConnect.noMatch.sell": "今、ネットワーク内にビットコインを買いたい人はいません。",
   "quickConnect.createOfferHint": "オファーを出すと、ネットワークの人があなたを見つけられます。",
   "quickConnect.status.asked_other": "共通の友達が{{count}}人いる人にお願いしました。",
+  "quickConnect.status.askedSomeone": "ネットワーク内の人にお願いしました。",
   "quickConnect.status.nextIn": "{{time}}後に別の人にお願いできます。",
   "quickConnect.status.noReply": "まだ誰からも返事がありません。オファーを出すと、もっと多くの人に見つけてもらえます。"
 }

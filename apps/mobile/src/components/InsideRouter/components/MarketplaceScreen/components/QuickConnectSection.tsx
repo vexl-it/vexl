@@ -3,6 +3,7 @@ import {type OfferType} from '@vexl-next/domain/src/general/offers'
 import {Button, Typography, XStack, YStack} from '@vexl-next/ui'
 import {Option} from 'effect'
 import React from 'react'
+import {quickConnectAskedText} from '../../../../../state/quickConnect/quickConnectRequestText'
 import {useQuickConnectStatus} from '../../../../../state/quickConnect/useQuickConnectStatus'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 
@@ -42,8 +43,9 @@ function QuickConnectSection(): React.ReactElement {
           ),
           onSome: ({secondsLeft, lastTargetCommonFriendsCount}) => (
             <Typography variant="description" color="$foregroundSecondary">
-              {`${t('quickConnect.status.asked', {
-                count: lastTargetCommonFriendsCount,
+              {`${quickConnectAskedText({
+                commonFriendsCount: lastTargetCommonFriendsCount,
+                t,
               })} ${t('quickConnect.status.nextIn', {
                 time: formatCountdown(secondsLeft),
               })}`}

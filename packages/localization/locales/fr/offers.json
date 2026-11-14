@@ -355,6 +355,7 @@
   "quickConnect.status.asked_one": "Tu as fait ta demande à quelqu'un avec {{count}} ami en commun.",
   "quickConnect.status.asked_many": "Tu as fait ta demande à quelqu'un avec {{count}} amis en commun.",
   "quickConnect.status.asked_other": "Tu as fait ta demande à quelqu'un avec {{count}} amis en commun.",
+  "quickConnect.status.askedSomeone": "Tu as fait ta demande à quelqu'un de ton réseau.",
   "quickConnect.status.nextIn": "Tu pourras demander à quelqu'un d'autre dans {{time}}.",
   "quickConnect.status.noReply": "Personne n'a encore répondu. Publie une offre pour que plus de gens te trouvent."
 }

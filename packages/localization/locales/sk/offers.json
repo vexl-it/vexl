@@ -356,6 +356,7 @@
   "quickConnect.status.asked_few": "Žiadosť odišla niekomu, s kým máš {{count}} spoločných priateľov.",
   "quickConnect.status.asked_many": "Žiadosť odišla niekomu, s kým máš {{count}} spoločného priateľa.",
   "quickConnect.status.asked_other": "Žiadosť odišla niekomu, s kým máš {{count}} spoločných priateľov.",
+  "quickConnect.status.askedSomeone": "Žiadosť odišla niekomu z tvojej siete.",
   "quickConnect.status.nextIn": "Ďalšieho človeka môžeš požiadať o {{time}}.",
   "quickConnect.status.noReply": "Zatiaľ nikto neodpovedal. Zverejni ponuku, nech ťa nájde viac ľudí."
 }

@@ -30,7 +30,10 @@ import {isImageOnlyMessage} from '../../state/chat/utils/chatImageMessage'
 import {importedContactsHashesAtom} from '../../state/contacts/atom/contactsStore'
 import {offerForChatOriginAtom} from '../../state/marketplace/atoms/offersState'
 import {deriveVisibleCommonFriendsForChat} from '../../state/marketplace/utils/visibleCommonFriends'
-import {quickConnectRequestText} from '../../state/quickConnect/quickConnectRequestText'
+import {
+  quickConnectRequestNotificationBody,
+  quickConnectRequestText,
+} from '../../state/quickConnect/quickConnectRequestText'
 import {createOpenChatLink} from '../deepLinks/createLinks'
 import {formattingLocaleAtom} from '../localization/formattingLocaleAtom'
 import {translationAtom, type TFunction} from '../localization/I18nProvider'
@@ -186,9 +189,11 @@ function quickConnectRequestNotification({
 
   return {
     title: t('notifications.REQUEST_MESSAGING.quickConnectTitle'),
-    body: `${request} ${t('notifications.REQUEST_MESSAGING.commonFriends', {
-      count: commonFriendsCount,
-    })}`,
+    body: quickConnectRequestNotificationBody({
+      request,
+      commonFriendsCount,
+      t,
+    }),
   }
 }
 

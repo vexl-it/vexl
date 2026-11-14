@@ -354,6 +354,7 @@
   "quickConnect.createOfferHint": "Erstell ein Angebot, damit dich Leute aus deinem Netzwerk finden.",
   "quickConnect.status.asked_one": "Du hast jemanden mit {{count}} gemeinsamen Freund gefragt.",
   "quickConnect.status.asked_other": "Du hast jemanden mit {{count}} gemeinsamen Freunden gefragt.",
+  "quickConnect.status.askedSomeone": "Du hast jemanden aus deinem Netzwerk gefragt.",
   "quickConnect.status.nextIn": "Du kannst in {{time}} jemand anderen fragen.",
   "quickConnect.status.noReply": "Noch hat niemand geantwortet. Erstell ein Angebot, damit dich mehr Leute finden."
 }

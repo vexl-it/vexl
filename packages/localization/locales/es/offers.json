@@ -355,6 +355,7 @@
   "quickConnect.status.asked_one": "Se lo pediste a alguien con {{count}} amigo en común.",
   "quickConnect.status.asked_many": "Se lo pediste a alguien con {{count}} amigos en común.",
   "quickConnect.status.asked_other": "Se lo pediste a alguien con {{count}} amigos en común.",
+  "quickConnect.status.askedSomeone": "Se lo pediste a alguien de tu red.",
   "quickConnect.status.nextIn": "Podrás pedírselo a otra persona en {{time}}.",
   "quickConnect.status.noReply": "Nadie ha respondido todavía. Publica una oferta para que más gente te encuentre."
 }

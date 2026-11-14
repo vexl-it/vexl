@@ -21,7 +21,7 @@
   "dependencies": {
     "@bacons/apple-targets": "~4.0.7",
     "@bam.tech/react-native-image-resizer": "^3.0.5",
-    "@effect/platform": "^0.93.6",
+    "@effect/platform": "^0.97.1",
     "@effect/rpc": "^0.72.2",
     "@likashefqet/react-native-image-zoom": "^4.3.0",
     "@maplibre/maplibre-react-native": "11.3.6",

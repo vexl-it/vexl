@@ -80,6 +80,11 @@ function QuickConnectScreen({
         Effect.match({
           onSuccess: safeGoBack,
           onFailure: (error) => {
+            // The marketplace shows the countdown.
+            if (error._tag === 'QuickConnectCooldownError') {
+              safeGoBack()
+              return
+            }
             showErrorAlert({
               title: toCommonErrorMessage(error, t) ?? t('common.unknownError'),
               error,

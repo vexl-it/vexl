@@ -22,7 +22,11 @@ import {canChatBeRequested} from '../chat/utils/offerStates'
 import {importedContactsHashesAtom} from '../contacts/atom/contactsStore'
 import {deriveVisibleCommonFriendsForOffer} from '../marketplace/utils/visibleCommonFriends'
 import {othersQuickOffersByTypeAtom} from '../quickOffers/atoms'
-import {QuickConnectPings, recordPing} from './quickConnectCooldown'
+import {
+  nextPingAllowedAt,
+  QuickConnectPings,
+  recordPing,
+} from './quickConnectCooldown'
 import {
   pickQuickConnectTarget,
   rankQuickConnectCandidates,
@@ -32,6 +36,10 @@ import {
 export class NoQuickConnectTargetError extends Schema.TaggedError<NoQuickConnectTargetError>(
   'NoQuickConnectTargetError'
 )('NoQuickConnectTargetError', {}) {}
+
+export class QuickConnectCooldownError extends Schema.TaggedError<QuickConnectCooldownError>(
+  'QuickConnectCooldownError'
+)('QuickConnectCooldownError', {}) {}
 
 const quickConnectPingsStorageAtom = atomWithParsedMmkvStorage(
   'quickConnectPings',
@@ -113,6 +121,12 @@ export const quickConnectCandidatesAtom = atom(
   }
 )
 
+const sendQuickConnectPingSemaphoreAtom = atom(() =>
+  Effect.unsafeMakeSemaphore(1)
+)
+
+// Runs are serialized so an overlapping send sees the ping recorded by the
+// previous one and is stopped by the cooldown.
 export const sendQuickConnectPingActionAtom = atom(
   null,
   (
@@ -124,6 +138,14 @@ export const sendQuickConnectPingActionAtom = atom(
     }: {readonly iWant: OfferType; readonly amount?: QuickConnectAmount}
   ) =>
     Effect.gen(function* (_) {
+      const isCoolingDown = Option.isSome(
+        nextPingAllowedAt({
+          ...get(quickConnectCooldownInputsAtom),
+          now: unixMillisecondsNow(),
+        })
+      )
+      if (isCoolingDown) return yield* _(new QuickConnectCooldownError())
+
       const target = yield* _(
         pickQuickConnectTarget(
           get(quickConnectCandidatesAtom)[iWant],
@@ -151,5 +173,5 @@ export const sendQuickConnectPingActionAtom = atom(
       })
 
       return chat
-    })
+    }).pipe(get(sendQuickConnectPingSemaphoreAtom).withPermits(1))
 )

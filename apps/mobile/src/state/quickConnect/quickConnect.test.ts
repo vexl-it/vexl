@@ -4,8 +4,11 @@ import {
 } from '@vexl-next/domain/src/general/offers'
 import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {type QuickConnectPingCooldownStepsMinutes} from '@vexl-next/rest-api/src/services/user/contracts'
-import {Array, Option, pipe, Schema} from 'effect'
+import {Array, Effect, Either, Option, pipe, Schema} from 'effect'
+import {createStore} from 'jotai'
 import {type TFunction} from '../../utils/localization/I18nProvider'
+import {offersAtom} from '../marketplace/atoms/offersState'
+import {sendQuickConnectPingActionAtom} from './atoms'
 import {
   activePings,
   hasUsedAllCooldownSteps,
@@ -21,6 +24,27 @@ import {
   pickQuickConnectTarget,
   rankQuickConnectCandidates,
 } from './selectQuickConnectTarget'
+
+jest.mock('react-native-mmkv')
+
+jest.mock('@react-native-async-storage/async-storage', () => ({
+  __esModule: true,
+  default: {},
+}))
+
+const mockSendRequest = jest.fn()
+
+jest.mock('../chat/atoms/sendRequestActionAtom', () => {
+  const {atom} = jest.requireActual('jotai')
+  const {Effect} = jest.requireActual('effect')
+  return {
+    sendRequestHandleUIActionAtom: atom(
+      null,
+      (_get: unknown, _set: unknown, params: unknown) =>
+        Effect.promise(async () => mockSendRequest(params))
+    ),
+  }
+})
 
 const offerPublicKey =
   'LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUZZd0VBWUhLb1pJemowQ0FRWUZLNEVFQUFvRFFnQUVUTlhndG9GMVRBNVVrVWZ4YWFBbHp4cDBRSFlwZS8yVApFSk1nQXR0d0tabnZBZFBUVUNXdCtweGhpWGUzNDNlbjNndHI5OHZoS1pZSGc4VGRQT3JHMEE9PQotLS0tLUVORCBQVUJMSUMgS0VZLS0tLS0K'
@@ -247,5 +271,32 @@ describe('quick connect common friends wording', () => {
         t,
       })
     ).toBe('request notifications.REQUEST_MESSAGING.commonFriends:1')
+  })
+})
+
+describe('sendQuickConnectPingActionAtom', () => {
+  it('sends one request for overlapping sends and none during the cooldown', async () => {
+    mockSendRequest.mockImplementation(
+      async () => await new Promise((resolve) => setTimeout(resolve, 10))
+    )
+    const store = createStore()
+    store.set(offersAtom, [offer({id: 'a'}), offer({id: 'b'})])
+    const send = Effect.either(
+      store.set(sendQuickConnectPingActionAtom, {iWant: 'BUY'})
+    )
+
+    const [first, second] = await Effect.runPromise(
+      Effect.all([send, send], {concurrency: 'unbounded'})
+    )
+    const third = await Effect.runPromise(send)
+
+    expect(mockSendRequest).toHaveBeenCalledTimes(1)
+    expect(Either.isRight(first)).toBe(true)
+    expect(Either.flip(second)).toEqual(
+      Either.right(expect.objectContaining({_tag: 'QuickConnectCooldownError'}))
+    )
+    expect(Either.flip(third)).toEqual(
+      Either.right(expect.objectContaining({_tag: 'QuickConnectCooldownError'}))
+    )
   })
 })

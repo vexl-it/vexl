@@ -1,0 +1,20 @@
+{
+  "meta.title": "Blog - Vexl",
+  "meta.description": "Proč jsme vytvořili Vexl, jak funguje peer-to-peer obchodování s Bitcoinem a jak v praxi vypadá svět bez KYC.",
+  "meta.postTitleSuffix": " - Blog │ Vexl",
+  "hero.heading": "Blog",
+  "hero.subtitle": "Why we built Vexl, how peer-to-peer Bitcoin trading works, and what a world without KYC looks like in practice.",
+  "pagination.label": "List",
+  "pagination.previous": "Previous",
+  "pagination.previousLabel": "Previous Page",
+  "pagination.next": "Next",
+  "pagination.nextLabel": "Next Page",
+  "post.backToBlog": "← Zpět na blog",
+  "post.publishedBy": "Publikováno od Vexl Team",
+  "post.minRead": " min. čtení",
+  "post.summary": "Souhrn",
+  "post.tableOfContents": "Table of contents",
+  "post.relatedArticles": "Další články",
+  "rss.title": "Vexl blog",
+  "rss.description": "Rss Channel vexl blog"
+}

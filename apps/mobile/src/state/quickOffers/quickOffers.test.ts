@@ -317,6 +317,36 @@ describe('reconcileQuickOffersActionAtom', () => {
     expect(mockCreateOffer).not.toHaveBeenCalled()
   })
 
+  it('does nothing when broadcasting is off and nothing is published', async () => {
+    store.set(sessionHolderAtom, {
+      state: 'loggedIn',
+      session: {
+        ...dummySession,
+        tradingIntent: 'BOTH',
+        quickOffersEnabled: false,
+      },
+    })
+
+    await Effect.runPromise(store.set(reconcileQuickOffersActionAtom))
+
+    expect(mockCreateOffer).not.toHaveBeenCalled()
+    expect(mockDeleteOffers).not.toHaveBeenCalled()
+  })
+
+  it('publishes on a later run once connections exist', async () => {
+    mockCreateOffer
+      .mockRejectedValueOnce(new Error('no connections yet'))
+      .mockRejectedValueOnce(new Error('no connections yet'))
+    await Effect.runPromise(store.set(reconcileQuickOffersActionAtom))
+    expect(store.get(myQuickOffersAtom)).toEqual([])
+
+    await Effect.runPromise(store.set(reconcileQuickOffersActionAtom))
+    await Effect.runPromise(store.set(reconcileQuickOffersActionAtom))
+
+    expect(mockCreateOffer).toHaveBeenCalledTimes(4)
+    expect(store.get(myQuickOffersAtom)).toHaveLength(2)
+  })
+
   it('keeps going when a creation fails', async () => {
     mockCreateOffer.mockRejectedValueOnce(new Error('offline'))
 

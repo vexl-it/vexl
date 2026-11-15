@@ -12,6 +12,7 @@ import {Array, Effect, Option, pipe} from 'effect'
 import {useAtomValue, useSetAtom, useStore} from 'jotai'
 import React, {useState} from 'react'
 import {TouchableOpacity} from 'react-native'
+import {getTokens} from 'tamagui'
 import {type TradeChecklistStackScreenProps} from '../../../../navigationTypes'
 import {type StoredContactWithComputedValues} from '../../../../state/contacts/domain'
 import * as fromChatAtoms from '../../../../state/tradeChecklist/atoms/fromChatAtoms'
@@ -119,12 +120,12 @@ function FriendsSection({
                   isSelected ? (
                     <RadiobuttonCircleFilled
                       color={theme.accentHighlightPrimary.get()}
-                      size={24}
+                      size={getTokens().size.$7.val}
                     />
                   ) : (
                     <RadiobuttonCircleEmpty
                       color={theme.foregroundPrimary.get()}
-                      size={24}
+                      size={getTokens().size.$7.val}
                     />
                   )
                 }

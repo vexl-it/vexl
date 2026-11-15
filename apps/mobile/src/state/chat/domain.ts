@@ -128,7 +128,8 @@ export type ChatReactions = typeof ChatReactions.Type
 // What I did in a friend check outside of the chat. Never sent, so the other
 // person can't learn that a friend refused to vouch for them.
 export const FriendCheckLocalState = Schema.Struct({
-  contacted: Schema.optional(Schema.Boolean),
+  // The phrase I gave the friend. Two requests sent at once can change it.
+  contactedWithPhrase: Schema.optional(Schema.String),
   refusal: Schema.optional(
     Schema.Literal('doesNotKnowThem', 'neverHeardFromThem')
   ),

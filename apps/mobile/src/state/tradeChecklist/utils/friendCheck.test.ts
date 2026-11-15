@@ -120,8 +120,8 @@ describe('friendChecksFromChat', () => {
   })
 
   it('picks the same phrase on both phones when both ask at once', () => {
-    const mine = {phraseSeed: 7, timestamp: 20}
-    const theirs = {phraseSeed: 9, timestamp: 10}
+    const mine = {phraseSeed: 7, timestamp: 10}
+    const theirs = {phraseSeed: 9, timestamp: 20}
     const onMyPhone = friendChecksFromChat({
       messages: [request('sent', tom, mine), request('received', tom, theirs)],
     })
@@ -138,12 +138,33 @@ describe('friendChecksFromChat', () => {
     expect(Array.map(onMyPhone, (check) => check.startedBy)).toEqual(['them'])
   })
 
+  it('picks the same phrase when the sender lost its first request', () => {
+    const lost = {phraseSeed: 7, timestamp: 10}
+    const retry = {phraseSeed: 9, timestamp: 20}
+    const onSenderPhone = friendChecksFromChat({
+      messages: [request('sent', tom, retry)],
+    })
+    const onReceiverPhone = friendChecksFromChat({
+      messages: [
+        request('received', tom, lost),
+        request('received', tom, retry),
+      ],
+    })
+
+    expect(Array.map(onSenderPhone, (check) => check.phrase)).toEqual([
+      friendCheckPhrase(9),
+    ])
+    expect(Array.map(onReceiverPhone, (check) => check.phrase)).toEqual([
+      friendCheckPhrase(9),
+    ])
+  })
+
   it('asks me to contact the friend again when the phrase I sent lost', () => {
     expect(
       statuses(
         [
-          request('sent', tom, {phraseSeed: 7, timestamp: 20}),
-          request('received', tom, {phraseSeed: 9, timestamp: 10}),
+          request('sent', tom, {phraseSeed: 7, timestamp: 10}),
+          request('received', tom, {phraseSeed: 9, timestamp: 20}),
         ],
         {[tom]: {contactedWithPhrase: friendCheckPhrase(7)}}
       )

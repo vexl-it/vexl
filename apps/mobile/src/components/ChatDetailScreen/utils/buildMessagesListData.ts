@@ -6,6 +6,10 @@ import {
 } from '../../../state/chat/domain'
 import {type TradeChecklistInState} from '../../../state/tradeChecklist/domain'
 import {isRevealMessageWithoutCard} from '../../../state/tradeChecklist/utils/exchangeDetails'
+import {
+  isFriendCheckMessage,
+  type FriendCheck,
+} from '../../../state/tradeChecklist/utils/friendCheck'
 import unixMillisecondsToLocaleDateTime from '../../../utils/unixMillisecondsToLocaleDateTime'
 import {type TradingChecklistSuggestion} from '../components/VexlbotMessageItem/domain'
 import {
@@ -47,6 +51,15 @@ export type MessagesListItem =
       type: 'restoredDivider'
       key: string
     }
+  | {
+      type: 'friendCheckPrompt'
+      key: string
+    }
+
+const FRIEND_CHECK_PROMPT: MessagesListItem = {
+  type: 'friendCheckPrompt',
+  key: 'friendCheckPrompt',
+}
 
 function isRestored(message: ChatMessageWithState): boolean {
   return (
@@ -114,14 +127,24 @@ const filterHiddenMessagesIds =
 export default function buildMessagesListData(
   messages: ChatMessageWithState[],
   hiddenMessagesIds: ChatWithMessages['hiddenMessagesIds'],
-  tradeChecklist: TradeChecklistInState
+  tradeChecklist: TradeChecklistInState,
+  friendChecks: readonly FriendCheck[]
 ): MessagesListItem[] {
+  const friendCheckCards = new Set(
+    Array.map(friendChecks, (check) => check.requestMessageId)
+  )
   const visibleMessages = pipe(
     messages,
     Array.filter(filterHiddenMessagesIds(hiddenMessagesIds)),
     Array.filter(
       (message) =>
         !isRevealMessageWithoutCard({messages, tradeChecklist}, message)
+    ),
+    // A friend check is one card that changes as the check goes on
+    Array.filter(
+      (message) =>
+        !isFriendCheckMessage(message) ||
+        friendCheckCards.has(message.message.uuid)
     ),
     Array.map(
       (message): MessageWithState => ({
@@ -137,8 +160,43 @@ export default function buildMessagesListData(
     Option.getOrUndefined
   )
 
-  return messagesToListData(
-    Array.reverse(visibleMessages),
-    lastRestoredMessageKey
+  return withFriendCheckPrompt(
+    messagesToListData(Array.reverse(visibleMessages), lastRestoredMessageKey),
+    messages,
+    visibleMessages
+  )
+}
+
+// The prompt belongs right after the chat was opened. The message that opened
+// it can be hidden, so the prompt is placed before the next visible message.
+function withFriendCheckPrompt(
+  items: MessagesListItem[],
+  messages: ChatMessageWithState[],
+  visibleMessages: MessageWithState[]
+): MessagesListItem[] {
+  const visibleKeys = new Set(Array.map(visibleMessages, getUniqueKey))
+
+  return pipe(
+    messages,
+    Array.findFirstIndex(
+      (one) => one.message.messageType === 'APPROVE_MESSAGING'
+    ),
+    Option.map((chatOpenedIndex) =>
+      pipe(
+        Array.drop(messages, chatOpenedIndex + 1),
+        Array.findFirst((one) => visibleKeys.has(one.message.uuid)),
+        Option.flatMap((next) =>
+          Array.findFirstIndex(items, (item) =>
+            item.key.endsWith(`-${next.message.uuid}`)
+          )
+        ),
+        // The last item is the typing indicator
+        Option.getOrElse(() => items.length - 1)
+      )
+    ),
+    Option.flatMap((index) =>
+      Array.insertAt(items, index, FRIEND_CHECK_PROMPT)
+    ),
+    Option.getOrElse(() => items)
   )
 }

@@ -2,6 +2,7 @@ import {
   generatePrivateKey,
   PublicKeyPemBase64,
 } from '@vexl-next/cryptography/src/KeyHolder'
+import {HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {
   Chat,
   ChatId,
@@ -124,6 +125,16 @@ export const ChatReactions = Schema.Record({
 })
 export type ChatReactions = typeof ChatReactions.Type
 
+// What I did in a friend check outside of the chat. Never sent, so the other
+// person can't learn that a friend refused to vouch for them.
+export const FriendCheckLocalState = Schema.Struct({
+  contacted: Schema.optional(Schema.Boolean),
+  refusal: Schema.optional(
+    Schema.Literal('doesNotKnowThem', 'neverHeardFromThem')
+  ),
+})
+export type FriendCheckLocalState = typeof FriendCheckLocalState.Type
+
 export const ChatWithMessages = Schema.Struct({
   chat: Chat,
   messages: Schema.Array(ChatMessageWithState).pipe(Schema.mutable),
@@ -148,6 +159,9 @@ export const ChatWithMessages = Schema.Struct({
     default: () => false,
   }),
   reactions: Schema.optionalWith(ChatReactions, {default: () => ({})}),
+  friendChecks: Schema.optional(
+    Schema.Record({key: HashedPhoneNumber, value: FriendCheckLocalState})
+  ),
   // Recovered after a backup restore from a message of the other side. Kept
   // in `pendingRecoveryChats` until its history proves the other side is a
   // real chat partner, then counts as open until its history says otherwise.

@@ -8,6 +8,7 @@ import openUrl from '../../../../../utils/openUrl'
 import AnonymizationNotice from '../../AnonymizationNotice'
 import CalculateAmountCell from './CalculateAmountCell'
 import DateAndTimeCell from './DateAndTimeCell'
+import FriendCheckCell from './FriendCheckCell'
 import MeetingLocationCell from './MeetingLocationCell'
 import RevealIdentityCell from './RevealIdentityCell'
 import SetNetworkCell from './SetNetworkCell'
@@ -27,6 +28,9 @@ function SectionTitle({
 function OnlineOrInPersonTrade(): React.ReactElement {
   const {t} = useTranslation()
   const offerForTradeChecklist = useAtomValue(fromChatAtoms.originOfferAtom)
+  const friendCheckAvailable = useAtomValue(
+    fromChatAtoms.friendCheckAvailableAtom
+  )
 
   const top = (
     <Stack gap="$3">
@@ -82,6 +86,7 @@ function OnlineOrInPersonTrade(): React.ReactElement {
           />
         </Stack>
         <Stack gap="$2">
+          {friendCheckAvailable ? <FriendCheckCell /> : null}
           <CalculateAmountCell />
           <RevealIdentityCell />
         </Stack>
@@ -93,6 +98,13 @@ function OnlineOrInPersonTrade(): React.ReactElement {
   return (
     <YStack gap="$6" f={1}>
       {top}
+
+      {friendCheckAvailable ? (
+        <Stack gap="$3">
+          <SectionTitle>{t('tradeChecklist.safety')}</SectionTitle>
+          <FriendCheckCell />
+        </Stack>
+      ) : null}
 
       <Stack gap="$3">
         <SectionTitle>{t('tradeChecklist.meetingDetail')}</SectionTitle>

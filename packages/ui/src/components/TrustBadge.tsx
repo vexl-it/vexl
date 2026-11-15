@@ -6,9 +6,12 @@ import {Stack} from '../primitives'
 
 export type TrustBadgeSize = 'small' | 'medium' | 'large' | 'xlarge'
 
+export type TrustBadgeTone = 'trusted' | 'vouched'
+
 export interface TrustBadgeProps {
   readonly size?: TrustBadgeSize
   readonly ringColor?: ColorTokens
+  readonly tone?: TrustBadgeTone
 }
 
 const BadgeFrame = styled(Stack, {
@@ -33,23 +36,27 @@ const TICK_TO_CIRCLE_RATIO = 0.75
 export function TrustBadge({
   size = 'medium',
   ringColor,
+  tone = 'trusted',
 }: TrustBadgeProps): React.JSX.Element {
   const theme = useTheme()
   const {size: sizes} = getTokens()
   const circle = sizes[CIRCLE_SIZE_TOKENS[size]].val
   const ring = ringColor ? 2 * sizes.$1.val : 0
   // The black tick on the yellow accent intentionally does not theme-switch.
-  const black = theme.black100.get()
+  const tick =
+    tone === 'vouched' ? theme.backgroundSecondary.get() : theme.black100.get()
   const badge = (
     <BadgeFrame
       width={circle}
       height={circle}
-      backgroundColor="$accentYellowPrimary"
+      backgroundColor={
+        tone === 'vouched' ? '$greenForeground' : '$accentYellowPrimary'
+      }
     >
       <Checkmark
         size={circle * TICK_TO_CIRCLE_RATIO}
-        color={black}
-        stroke={black}
+        color={tick}
+        stroke={tick}
         strokeWidth={1.5}
         strokeLinejoin="round"
       />

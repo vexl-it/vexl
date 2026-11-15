@@ -106,6 +106,7 @@ interface NavigationBarChatProps {
   readonly name: string
   readonly subtitle?: string
   readonly trustedFriends?: string
+  readonly vouchedFriends?: string
   readonly avatar?: React.ReactNode
   readonly leftAction?: NavigationBarAction
   readonly rightActions?: readonly NavigationBarAction[]
@@ -188,6 +189,7 @@ export function NavigationBar(props: NavigationBarProps): React.JSX.Element {
               <CommonFriendsSummary
                 commonFriends={props.subtitle}
                 trustedFriends={props.trustedFriends}
+                vouchedFriends={props.vouchedFriends}
               />
             </ChatInfoColumn>
           </ChatPressableArea>

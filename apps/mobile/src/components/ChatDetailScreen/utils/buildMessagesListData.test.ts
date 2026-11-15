@@ -1,6 +1,10 @@
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
-import {generateChatMessageId} from '@vexl-next/domain/src/general/messaging'
+import {HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
+import {
+  generateChatMessageId,
+  type MessageType,
+} from '@vexl-next/domain/src/general/messaging'
 import {
   type RevealStatus,
   type TradeChecklistUpdate,
@@ -11,6 +15,7 @@ import {Array, HashSet, Option, Schema, pipe} from 'effect'
 import {type ChatMessageWithState} from '../../../state/chat/domain'
 import {createEmptyTradeChecklistInState} from '../../../state/tradeChecklist/domain'
 import {revealEventForMessage} from '../../../state/tradeChecklist/utils/exchangeDetails'
+import {friendChecksFromChat} from '../../../state/tradeChecklist/utils/friendCheck'
 import buildMessagesListData from './buildMessagesListData'
 
 jest.mock('../../../utils/localization/I18nProvider', () => ({
@@ -28,10 +33,14 @@ function message({
   text,
   minute,
   restored,
+  messageType = 'MESSAGE',
+  tradeChecklistUpdate,
 }: {
   text: string
   minute: number
   restored?: boolean
+  messageType?: MessageType
+  tradeChecklistUpdate?: TradeChecklistUpdate
 }): ChatMessageWithState {
   return {
     state: 'received',
@@ -39,7 +48,8 @@ function message({
     message: {
       uuid: generateChatMessageId(),
       text,
-      messageType: 'MESSAGE',
+      messageType,
+      tradeChecklistUpdate,
       senderPublicKey: sender.publicKeyPemBase64,
       time: Schema.decodeSync(UnixMilliseconds)(
         Date.UTC(2026, 0, 1, 12, minute)
@@ -48,11 +58,16 @@ function message({
   }
 }
 
+function chatOpened(minute: number): ChatMessageWithState {
+  return message({text: 'opened', minute, messageType: 'APPROVE_MESSAGING'})
+}
+
 function listShape(messages: ChatMessageWithState[]): string[] {
   return buildMessagesListData(
     messages,
     HashSet.empty(),
-    createEmptyTradeChecklistInState()
+    createEmptyTradeChecklistInState(),
+    []
   )
     .filter(
       (item) => item.type === 'message' || item.type === 'restoredDivider'
@@ -81,7 +96,8 @@ it('separates messages by the time that passed between them', () => {
       message({text: 'd', minute: 20}),
     ],
     HashSet.empty(),
-    createEmptyTradeChecklistInState()
+    createEmptyTradeChecklistInState(),
+    []
   )
 
   expect(
@@ -189,7 +205,7 @@ it('shows an identity and phone exchange after both are approved', () => {
   const chat = {messages, tradeChecklist: createEmptyTradeChecklistInState()}
 
   const renderedReveals = pipe(
-    buildMessagesListData(messages, HashSet.empty(), chat.tradeChecklist),
+    buildMessagesListData(messages, HashSet.empty(), chat.tradeChecklist, []),
     Array.filterMap((item) =>
       item.type === 'message'
         ? Option.fromNullable(revealEventForMessage(chat, item.message))
@@ -209,4 +225,110 @@ it('shows an identity and phone exchange after both are approved', () => {
       contact: 'APPROVE_REVEAL',
     },
   ])
+})
+
+describe('friend check', () => {
+  const friend = Schema.decodeSync(HashedPhoneNumber)('friend')
+
+  function friendCheckMessage(
+    minute: number,
+    status: 'REQUEST' | 'VOUCHED'
+  ): ChatMessageWithState {
+    return message({
+      text: status,
+      minute,
+      messageType: 'TRADE_CHECKLIST_UPDATE',
+      tradeChecklistUpdate: {
+        friendCheck: {
+          friend,
+          status,
+          phraseSeed: status === 'REQUEST' ? 1 : undefined,
+          timestamp: Schema.decodeSync(UnixMilliseconds)(minute),
+        },
+      },
+    })
+  }
+
+  function texts(
+    messages: ChatMessageWithState[],
+    hidden: HashSet.HashSet<
+      ChatMessageWithState['message']['uuid']
+    > = HashSet.empty()
+  ): string[] {
+    return pipe(
+      buildMessagesListData(
+        messages,
+        hidden,
+        createEmptyTradeChecklistInState(),
+        friendChecksFromChat({messages})
+      ),
+      Array.filterMap((item) => {
+        if (item.type === 'message')
+          return Option.some(item.message.message.text)
+        if (item.type === 'friendCheckPrompt') return Option.some('prompt')
+        return Option.none()
+      })
+    )
+  }
+
+  it('shows one card per check', () => {
+    expect(
+      texts([
+        message({text: 'hi', minute: 0}),
+        friendCheckMessage(1, 'REQUEST'),
+        friendCheckMessage(2, 'VOUCHED'),
+      ])
+    ).toEqual(['hi', 'REQUEST'])
+  })
+
+  it('hides checks about people who are not my common friends', () => {
+    const messages = [friendCheckMessage(1, 'REQUEST')]
+
+    expect(
+      pipe(
+        buildMessagesListData(
+          messages,
+          HashSet.empty(),
+          createEmptyTradeChecklistInState(),
+          []
+        ),
+        Array.filter((item) => item.type === 'message')
+      )
+    ).toEqual([])
+  })
+
+  it('places the prompt right after the chat was opened', () => {
+    expect(
+      texts([
+        message({text: 'request', minute: 0}),
+        chatOpened(1),
+        message({text: 'hi', minute: 2}),
+      ])
+    ).toEqual(['request', 'opened', 'prompt', 'hi'])
+  })
+
+  it('keeps the prompt in place when the opening message is hidden', () => {
+    const opened = chatOpened(1)
+
+    expect(
+      texts(
+        [
+          message({text: 'request', minute: 0}),
+          opened,
+          message({text: 'hi', minute: 2}),
+        ],
+        HashSet.make(opened.message.uuid)
+      )
+    ).toEqual(['request', 'prompt', 'hi'])
+    expect(
+      texts(
+        [message({text: 'request', minute: 0}), opened],
+        HashSet.make(opened.message.uuid)
+      )
+    ).toEqual(['request', 'prompt'])
+  })
+
+  it('shows no prompt before the chat is opened', () => {
+    expect(texts([message({text: 'request', minute: 0})])).toEqual(['request'])
+  })
 })

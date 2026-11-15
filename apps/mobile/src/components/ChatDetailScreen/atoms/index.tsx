@@ -17,6 +17,8 @@ import acceptMessagingRequestAtom from '../../../state/chat/atoms/acceptMessagin
 import cancelRequestActionAtomHandleUI from '../../../state/chat/atoms/cancelRequestActionAtomHandleUI'
 import createCanChatBeRerequestedAtom from '../../../state/chat/atoms/createCanBeRerequestedAtom'
 import {createCanSendMessagesAtom} from '../../../state/chat/atoms/createCanSendMessagesAtom'
+import {createCommonConnectionsAtoms} from '../../../state/chat/atoms/createCommonConnectionsAtoms'
+import {createFriendCheckAtoms} from '../../../state/chat/atoms/createFriendCheckAtoms'
 import {createOtherSideSupportsTradingChecklistAtom} from '../../../state/chat/atoms/createOtherSideSupportTradingChecklistAtom'
 import {createRequestStateAtom} from '../../../state/chat/atoms/createRequestStateAtom'
 import deleteChatActionAtom from '../../../state/chat/atoms/deleteChatActionAtom'
@@ -35,17 +37,11 @@ import {
 } from '../../../state/chat/domain'
 import isNoteChatOrigin from '../../../state/chat/utils/isNoteChatOrigin'
 import {getChatState} from '../../../state/chat/utils/offerStates'
-import {importedContactsHashesAtom} from '../../../state/contacts/atom/contactsStore'
 import {createBtcPriceForCurrencyAtom} from '../../../state/currentBtcPriceAtoms'
-import {offerForChatOriginAtom} from '../../../state/marketplace/atoms/offersState'
-import {
-  deriveVisibleCommonFriendsForChat,
-  deriveVisibleCommonFriendsForOffer,
-} from '../../../state/marketplace/utils/visibleCommonFriends'
-import {noteForChatOriginAtom} from '../../../state/notes/atoms/notesState'
 import * as amount from '../../../state/tradeChecklist/utils/amount'
 import {getLatestAmountDataMessage} from '../../../state/tradeChecklist/utils/amount'
 import * as dateAndTime from '../../../state/tradeChecklist/utils/dateAndTime'
+import {isFriendCheckMessage} from '../../../state/tradeChecklist/utils/friendCheck'
 import getContactRevealStatus from '../../../state/tradeChecklist/utils/getContactRevealStatus'
 import getIdentityRevealStatus from '../../../state/tradeChecklist/utils/getIdentityRevealStatus'
 import * as MeetingLocation from '../../../state/tradeChecklist/utils/location'
@@ -122,15 +118,13 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     (o) => o?.messages ?? []
   )
 
-  const offerForChatAtom = atom((get) => {
-    const origin = get(chatAtom)?.origin
-    return origin ? get(offerForChatOriginAtom(origin)) : null
-  })
-
-  const noteForChatAtom = atom((get) => {
-    const origin = get(chatAtom)?.origin
-    return origin ? get(noteForChatOriginAtom(origin)) : undefined
-  })
+  const {
+    offerForChatAtom,
+    noteForChatAtom,
+    requestMessageAtom,
+    commonConnectionsHashesAtom,
+    verifiedConnectionsHashesAtom,
+  } = createCommonConnectionsAtoms(chatWithMessagesAtom)
 
   const tradeChecklistAtom = focusAtom(chatWithMessagesAtom, (o) =>
     o.prop('tradeChecklist')
@@ -164,12 +158,18 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
   // the keyed splitAtom below (and FlashList rows) stable across updates.
   let previousMessagesListData: MessagesListItem[] = []
 
+  const friendCheckAtoms = createFriendCheckAtoms({
+    chatWithMessagesAtom,
+    commonConnectionsHashesAtom,
+  })
+
   const messagesListDataAtom = atom((get) => {
     const items = pipe(
       buildMessagesListData(
         get(messagesAtom),
         get(hiddenMessagesIdsAtom),
-        get(tradeChecklistAtom)
+        get(tradeChecklistAtom),
+        get(friendCheckAtoms.friendChecksAtom)
       ),
       (nextItems) => {
         const previousItemsByKey = new Map(
@@ -226,17 +226,6 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     o.prop('inbox').prop('privateKey').prop('publicKeyPemBase64')
   )
 
-  const requestMessageAtom = atom((get) =>
-    pipe(
-      get(messagesAtom),
-      Array.findFirst(
-        (message) =>
-          message.state === 'received' &&
-          message.message.messageType === 'REQUEST_MESSAGING'
-      )
-    )
-  )
-
   const friendLevelForMyOfferAtom = atom(
     (get) =>
       pipe(
@@ -245,95 +234,6 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
         Option.getOrElse(() => [] as const)
       ) ?? []
   )
-
-  const commonConnectionsHashesAtom = atom((get) => {
-    const offer = get(offerForChatAtom)
-    const importedContactsHashes = get(importedContactsHashesAtom)
-    const requestMessage = get(requestMessageAtom)
-    const commonFriendsForMyOffer = pipe(
-      requestMessage,
-      Option.flatMap((message) =>
-        Option.fromNullable(message.message.commonFriends)
-      ),
-      Option.getOrElse(() => [])
-    )
-    const verifiedCommonFriendsForMyOffer = pipe(
-      requestMessage,
-      Option.flatMap((message) =>
-        Option.fromNullable(message.message.verifiedCommonFriends)
-      ),
-      Option.getOrElse(() => [])
-    )
-
-    if (!offer) {
-      const note = get(noteForChatAtom)
-      if (!note) return []
-
-      // My note - the responder sent their common friends in the request
-      // message. Their note - common friends are in the note's private part.
-      return deriveVisibleCommonFriendsForChat({
-        commonFriends: note.ownershipInfo
-          ? commonFriendsForMyOffer
-          : note.noteInfo.privatePart.commonFriends,
-        verifiedCommonFriends: note.ownershipInfo
-          ? verifiedCommonFriendsForMyOffer
-          : note.noteInfo.privatePart.verifiedCommonFriends,
-        importedContactsHashes,
-      }).commonFriends
-    }
-
-    if (offer.ownershipInfo) {
-      return deriveVisibleCommonFriendsForChat({
-        commonFriends: commonFriendsForMyOffer,
-        verifiedCommonFriends: verifiedCommonFriendsForMyOffer,
-        importedContactsHashes,
-      }).commonFriends
-    }
-
-    return deriveVisibleCommonFriendsForOffer({
-      offerInfo: offer.offerInfo,
-      importedContactsHashes,
-    }).commonFriends
-  })
-
-  const verifiedConnectionsHashesAtom = atom((get) => {
-    const offer = get(offerForChatAtom)
-    const commonConnectionsHashes = get(commonConnectionsHashesAtom)
-    const importedContactsHashes = get(importedContactsHashesAtom)
-    const verifiedCommonFriendsForMyOffer = pipe(
-      get(requestMessageAtom),
-      Option.flatMap((message) =>
-        Option.fromNullable(message.message.verifiedCommonFriends)
-      ),
-      Option.getOrElse(() => [])
-    )
-
-    if (!offer) {
-      const note = get(noteForChatAtom)
-      if (!note) return []
-
-      return deriveVisibleCommonFriendsForChat({
-        commonFriends: commonConnectionsHashes,
-        verifiedCommonFriends: note.ownershipInfo
-          ? verifiedCommonFriendsForMyOffer
-          : note.noteInfo.privatePart.verifiedCommonFriends,
-        importedContactsHashes,
-      }).verifiedCommonFriends
-    }
-
-    if (offer.ownershipInfo) {
-      return deriveVisibleCommonFriendsForChat({
-        commonFriends: commonConnectionsHashes,
-        verifiedCommonFriends: verifiedCommonFriendsForMyOffer,
-        importedContactsHashes,
-      }).verifiedCommonFriends
-    }
-
-    return deriveVisibleCommonFriendsForOffer({
-      offerInfo: offer.offerInfo,
-      importedContactsHashes,
-    }).verifiedCommonFriends
-  })
 
   const trustedConnectionsCountAtom = selectAtom(
     verifiedConnectionsHashesAtom,
@@ -442,7 +342,9 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
   const lastTradeChecklistMessageAtom = selectAtom(
     messagesAtom,
     Array.findLast(
-      (message) => message.message.messageType === 'TRADE_CHECKLIST_UPDATE'
+      (message) =>
+        message.message.messageType === 'TRADE_CHECKLIST_UPDATE' &&
+        !isFriendCheckMessage(message)
     )
   )
 
@@ -842,6 +744,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
   )
 
   return {
+    ...friendCheckAtoms,
     chatAtom,
     chatWithMessagesAtom,
     commonConnectionsHashesAtom,

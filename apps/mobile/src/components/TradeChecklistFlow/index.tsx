@@ -19,6 +19,7 @@ import ChooseAvailableDaysScreen from './components/DateAndTimeFlow/components/C
 import PickDateFromSuggestionsScreen from './components/DateAndTimeFlow/components/PickDateFromSuggestionsScreen'
 import PickTimeFromSuggestions from './components/DateAndTimeFlow/components/PickTimeFromSuggestions'
 import ExchangeDetailsScreen from './components/ExchangeDetailsFlow/ExchangeDetailsScreen'
+import FriendCheckScreen from './components/FriendCheckFlow/FriendCheckScreen'
 import LocationMapPreview from './components/MeetingLocation/components/LocationMapPreview'
 import LocationMapSelect from './components/MeetingLocation/components/LocationMapSelect'
 import LocationSearch from './components/MeetingLocation/components/LocationSearch'
@@ -69,6 +70,10 @@ export default function TradeChecklistFlow({
         <StackNavigator.Screen
           name="ExchangeDetails"
           component={ExchangeDetailsScreen}
+        />
+        <StackNavigator.Screen
+          name="FriendCheck"
+          component={FriendCheckScreen}
         />
         <StackNavigator.Screen
           name="ChooseAvailableDays"

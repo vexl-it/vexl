@@ -7,6 +7,7 @@ import {generateUuid} from '../utility/Uuid.brand'
 import {CurrencyCode} from './currency.brand'
 import {DeanonymizedUser} from './DeanonymizedUser'
 import {E164PhoneNumber} from './E164PhoneNumber.brand'
+import {HashedPhoneNumber} from './HashedPhoneNumber.brand'
 import {BtcNetwork, LocationPlaceId} from './offers'
 import {UserName} from './UserName.brand'
 
@@ -168,6 +169,17 @@ export const MeetingLocationChatMessage = Schema.Struct({
 })
 export type MeetingLocationChatMessage = typeof MeetingLocationChatMessage.Type
 
+// Asks a common friend to vouch for both sides. `friend` is the same hash
+// both sides hold in the common friends of the offer, never a plain number.
+export const FriendCheckChatMessage = Schema.Struct({
+  ...TradeChecklistMessageBase.fields,
+  friend: HashedPhoneNumber,
+  status: Schema.Literal('REQUEST', 'VOUCHED'),
+  // Sent with a request. Both sides derive the same code phrase from it.
+  phraseSeed: Schema.optional(Schema.Int.pipe(Schema.nonNegative())),
+})
+export type FriendCheckChatMessage = typeof FriendCheckChatMessage.Type
+
 export const TradeChecklistUpdate = Schema.Struct({
   dateAndTime: Schema.optional(DateTimeChatMessage),
   location: Schema.optional(MeetingLocationChatMessage),
@@ -175,5 +187,6 @@ export const TradeChecklistUpdate = Schema.Struct({
   network: Schema.optional(NetworkChatMessage),
   identity: Schema.optional(IdentityRevealChatMessage),
   contact: Schema.optional(ContactRevealChatMessage),
+  friendCheck: Schema.optional(FriendCheckChatMessage),
 })
 export type TradeChecklistUpdate = typeof TradeChecklistUpdate.Type

@@ -64,15 +64,17 @@ describe('friendChecksFromChat', () => {
   })
 
   it('is pending once I contacted the friend', () => {
-    expect(statuses([request('sent')], {[tom]: {contacted: true}})).toEqual([
-      'pending',
-    ])
+    expect(
+      statuses([request('sent')], {
+        [tom]: {contactedWithPhrase: friendCheckPhrase(3)},
+      })
+    ).toEqual(['pending'])
   })
 
   it('waits for me again when the other side vouched first', () => {
     expect(
       statuses([request('sent'), vouched('received')], {
-        [tom]: {contacted: true},
+        [tom]: {contactedWithPhrase: friendCheckPhrase(3)},
       })
     ).toEqual(['waitingForMe'])
   })
@@ -92,7 +94,10 @@ describe('friendChecksFromChat', () => {
   it('is not vouched when my friend refused, whatever the other side says', () => {
     expect(
       statuses([request('sent'), vouched('received')], {
-        [tom]: {contacted: true, refusal: 'doesNotKnowThem'},
+        [tom]: {
+          contactedWithPhrase: friendCheckPhrase(3),
+          refusal: 'doesNotKnowThem',
+        },
       })
     ).toEqual(['notVouched'])
   })
@@ -131,6 +136,18 @@ describe('friendChecksFromChat', () => {
       friendCheckPhrase(9),
     ])
     expect(Array.map(onMyPhone, (check) => check.startedBy)).toEqual(['them'])
+  })
+
+  it('asks me to contact the friend again when the phrase I sent lost', () => {
+    expect(
+      statuses(
+        [
+          request('sent', tom, {phraseSeed: 7, timestamp: 20}),
+          request('received', tom, {phraseSeed: 9, timestamp: 10}),
+        ],
+        {[tom]: {contactedWithPhrase: friendCheckPhrase(7)}}
+      )
+    ).toEqual(['waitingForMe'])
   })
 })
 

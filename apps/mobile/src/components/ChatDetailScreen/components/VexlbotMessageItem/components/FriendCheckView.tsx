@@ -114,7 +114,10 @@ function FriendCheckCard({
   const tag = statusTag(check.status, t)
 
   const markContacted = (): void => {
-    updateLocalState({friend: check.friend, update: {contacted: true}})
+    updateLocalState({
+      friend: check.friend,
+      update: {contactedWithPhrase: check.phrase},
+    })
   }
   const messageFriend = (): void => {
     void Share.share({

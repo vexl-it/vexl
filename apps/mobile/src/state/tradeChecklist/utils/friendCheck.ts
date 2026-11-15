@@ -191,8 +191,9 @@ export function friendChecksFromChat({
             event.update.status === 'VOUCHED' && event.direction === direction
         )
       const localState = localStates[request.update.friend]
+      const phrase = friendCheckPhrase(request.phraseSeed)
       const state = {
-        contacted: !!localState?.contacted,
+        contacted: localState?.contactedWithPhrase === phrase,
         refusal: localState?.refusal,
         vouchedByMe: hasVouched('sent'),
       }
@@ -200,7 +201,7 @@ export function friendChecksFromChat({
       return Option.some({
         ...state,
         friend: request.update.friend,
-        phrase: friendCheckPhrase(request.phraseSeed),
+        phrase,
         requestMessageId: request.messageId,
         startedBy: request.direction === 'sent' ? 'me' : 'them',
         status: statusOf({...state, vouchedByThem: hasVouched('received')}),

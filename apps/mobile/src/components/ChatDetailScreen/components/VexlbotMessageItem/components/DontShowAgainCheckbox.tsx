@@ -21,6 +21,8 @@ export default function DontShowAgainCheckbox({
 
   return (
     <TouchableOpacity
+      accessibilityRole="checkbox"
+      accessibilityState={{checked}}
       onPress={() => {
         onChange(!checked)
       }}

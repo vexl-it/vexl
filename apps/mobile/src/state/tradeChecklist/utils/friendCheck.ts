@@ -137,9 +137,10 @@ export function isFriendCheckMessage(message: ChatMessageWithState): boolean {
   return Option.isSome(eventFromMessage(message))
 }
 
-// Both sides can ask the same friend at the same moment. They have to end up
-// with one phrase, so the winner is picked by what the requests carry and not
-// by the order each phone stored them in.
+// One friend can get several requests: both sides ask at the same moment, or
+// a request is sent again after its response got lost. Both phones have to end
+// up with one phrase, so the winner is picked by what the requests carry. The
+// latest one wins, because a sender never sees its own lost request.
 const byRequestContent: Order.Order<FriendCheckRequest> = Order.combine(
   Order.mapInput(Order.number, (one) => one.update.timestamp),
   Order.mapInput(Order.number, (one) => one.phraseSeed)
@@ -183,7 +184,7 @@ export function friendChecksFromChat({
       )
       if (!Array.isNonEmptyArray(requests)) return Option.none()
 
-      const request = Array.min(requests, byRequestContent)
+      const request = Array.max(requests, byRequestContent)
       const hasVouched = (direction: FriendCheckEvent['direction']): boolean =>
         Array.some(
           events,

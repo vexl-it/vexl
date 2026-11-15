@@ -399,6 +399,7 @@ export type DonationsFlowScreenProps<T extends keyof DonationsFlowParamsList> =
 export type TradeChecklistStackParamsList = {
   AgreeOnTradeDetails: undefined
   ExchangeDetails: undefined
+  FriendCheck: undefined
   ChooseAvailableDays: {
     readonly chosenDateTimes: AvailableDateTimeOption[] | undefined
   }

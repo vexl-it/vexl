@@ -11,6 +11,8 @@ export interface CommonFriendsSummaryProps {
   readonly clubNames?: readonly string[]
   readonly commonFriends?: string
   readonly trustedFriends?: string
+  // Friends who vouched for the other person. Shown instead of trusted friends.
+  readonly vouchedFriends?: string
 }
 
 const SummaryFrame = styled(XStack, {
@@ -25,6 +27,7 @@ export function CommonFriendsSummary({
   clubNames = [],
   commonFriends,
   trustedFriends,
+  vouchedFriends,
 }: CommonFriendsSummaryProps): React.JSX.Element | null {
   const theme = useTheme()
   const clubs = pipe(
@@ -73,7 +76,8 @@ export function CommonFriendsSummary({
         </Typography>
       </XStack>
     )
-  if (trustedFriends)
+  const badgeText = vouchedFriends ?? trustedFriends
+  if (badgeText)
     parts.push(
       <XStack
         key="trusted"
@@ -82,15 +86,18 @@ export function CommonFriendsSummary({
         flexShrink={countsShrink}
         minWidth={0}
       >
-        <TrustBadge size="medium" />
+        <TrustBadge
+          size="medium"
+          tone={vouchedFriends ? 'vouched' : 'trusted'}
+        />
         <Typography
           variant="micro"
-          color="$foregroundSecondary"
+          color={vouchedFriends ? '$greenForeground' : '$foregroundSecondary'}
           numberOfLines={1}
           ellipsizeMode="tail"
           flexShrink={1}
         >
-          {trustedFriends}
+          {badgeText}
         </Typography>
       </XStack>
     )

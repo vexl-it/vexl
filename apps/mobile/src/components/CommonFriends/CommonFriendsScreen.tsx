@@ -7,12 +7,10 @@ import {
   NavigationBar,
   Screen,
   Typography,
-  UserImagePlaceholder,
   XStack,
   XmarkCancelClose,
   useTheme,
 } from '@vexl-next/ui'
-import {parsePhoneNumber} from 'awesome-phonenumber'
 import {Array} from 'effect'
 import React, {memo, useCallback} from 'react'
 import {Pressable} from 'react-native'
@@ -22,50 +20,13 @@ import {
   type CommonFriendsClub,
   type RootStackScreenProps,
 } from '../../navigationTypes'
-import {type StoredContactWithComputedValues} from '../../state/contacts/domain'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../utils/useSafeGoBack'
-import ContactPictureImage from '../ContactPictureImage'
+import CommonFriendRow from './CommonFriendRow'
 import {
   useCommonFriendsListData,
   type ListItem,
 } from './useCommonFriendsListData'
-
-function FriendListItem({
-  friend,
-  trusted,
-}: {
-  readonly friend: StoredContactWithComputedValues
-  readonly trusted: boolean
-}): React.ReactElement {
-  const internationalNumber = parsePhoneNumber(
-    friend.computedValues.normalizedNumber
-  ).number?.international
-
-  return (
-    <EditRow
-      state="profile"
-      headline={friend.info.name}
-      overline={internationalNumber ?? friend.computedValues.normalizedNumber}
-      showEditButton={false}
-      avatar={{
-        trusted,
-        trustBadgeRingColor: '$backgroundSecondary',
-        children: (
-          <ContactPictureImage
-            width={40}
-            height={40}
-            objectFit="cover"
-            contactId={friend.info.nonUniqueContactId}
-            fallback={<UserImagePlaceholder size={40} />}
-          />
-        ),
-      }}
-    />
-  )
-}
-
-const MemoizedFriendListItem = memo(FriendListItem)
 
 function ClubListItem({
   club,
@@ -199,9 +160,7 @@ function CommonFriendsScreen({
   const renderItem = useCallback(
     ({item}: {item: ListItem}) => {
       if (item.type === 'friend') {
-        return (
-          <MemoizedFriendListItem friend={item.friend} trusted={item.trusted} />
-        )
+        return <CommonFriendRow friend={item.friend} trusted={item.trusted} />
       }
 
       if (item.type === 'club') {

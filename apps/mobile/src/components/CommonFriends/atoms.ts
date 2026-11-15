@@ -13,6 +13,7 @@ import {AnonymousAvatarOrClubImage} from '../AnonymousAvatar'
 import ContactPictureImage from '../ContactPictureImage'
 import {globalDialogAtom} from '../GlobalDialog'
 import UserAvatar from '../UserAvatar'
+import {friendFirstName} from './friendFirstName'
 
 const fallbackSeed = Schema.decodeSync(RandomSeed)('trusted-friend-explanation')
 
@@ -33,7 +34,7 @@ export const showTrustedFriendExplanationActionAtom = atom(
 
     const {t} = get(translationAtom)
     const user = get(userDataRealOrAnonymizedAtom)
-    const name = friend.info.name.trim().split(/\s+/)[0] || friend.info.name
+    const name = friendFirstName(friend)
     const role = otherSide?.role ?? 'otherSide'
     const roleCopy = {
       seller: {

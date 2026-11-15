@@ -6,6 +6,8 @@ import {focusAtom} from 'jotai-optics'
 import focusChatWithMessagesAtom from '../../../state/chat/atoms/focusChatWithMessagesAtom'
 import type {FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
 import valueOrDefaultAtom from '../../../utils/atomUtils/valueOrDefaultAtom'
+import {createCommonConnectionsAtoms} from '../../chat/atoms/createCommonConnectionsAtoms'
+import {createFriendCheckAtoms} from '../../chat/atoms/createFriendCheckAtoms'
 import {getOtherSideData} from '../../chat/atoms/selectOtherSideDataAtom'
 import type {ChatIds, ChatWithMessages} from '../../chat/domain'
 import {dummyChatWithMessages} from '../../chat/domain'
@@ -57,6 +59,15 @@ export const tradeChecklistIdentityDataAtom = atom(
 export const tradeChecklistContactDataAtom = atom(
   (get) => get(tradeChecklistDataAtom).contact
 )
+
+export const {commonConnectionsHashesAtom, verifiedConnectionsHashesAtom} =
+  createCommonConnectionsAtoms(chatWithMessagesAtom)
+
+export const {
+  friendCheckAvailableAtom,
+  friendChecksAtom,
+  startFriendCheckActionAtom,
+} = createFriendCheckAtoms({chatWithMessagesAtom, commonConnectionsHashesAtom})
 
 const chatOriginAtom = focusAtom(chatWithMessagesAtom, (p) =>
   p.prop('chat').prop('origin')

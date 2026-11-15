@@ -21,6 +21,14 @@ jest.mock('../../chat/atoms/focusChatWithMessagesAtom', () => {
   }
 })
 
+jest.mock('../../chat/atoms/createCommonConnectionsAtoms', () => ({
+  createCommonConnectionsAtoms: () => ({}),
+}))
+
+jest.mock('../../chat/atoms/createFriendCheckAtoms', () => ({
+  createFriendCheckAtoms: () => ({}),
+}))
+
 jest.mock('../../chat/domain', () => ({
   dummyChatWithMessages: {
     chat: {id: 'dummy-chat'},

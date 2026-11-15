@@ -1,6 +1,7 @@
 import {useNavigation} from '@react-navigation/native'
 import {ChevronLeft, NavigationBar, Stack} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
+import {Array, pipe} from 'effect'
 import {useAtomValue} from 'jotai'
 import {TouchableOpacity} from 'react-native'
 import {type RootStackScreenProps} from '../../../navigationTypes'
@@ -26,6 +27,7 @@ export function MessagesScreenChatHeader(): React.ReactElement {
     chatAtom,
     commonConnectionsCountAtom,
     trustedConnectionsCountAtom,
+    friendChecksAtom,
     friendLevelInfoAtom,
     offerForChatAtom,
     otherSideDataAtom,
@@ -34,6 +36,11 @@ export function MessagesScreenChatHeader(): React.ReactElement {
   } = useMolecule(chatMolecule)
   const trustedFriendsText = useTrustedFriendsText(
     useAtomValue(trustedConnectionsCountAtom)
+  )
+  const vouchedCount = pipe(
+    useAtomValue(friendChecksAtom),
+    Array.filter((check) => check.vouchedByMe),
+    Array.length
   )
   const chat = useAtomValue(chatAtom)
   const commonConnectionsCount = useAtomValue(commonConnectionsCountAtom)
@@ -62,6 +69,14 @@ export function MessagesScreenChatHeader(): React.ReactElement {
           }) ?? otherSideData.userName
         }
         trustedFriends={trustedFriendsText}
+        vouchedFriends={
+          vouchedCount > 0
+            ? t('tradeChecklist.friendCheck.vouchedCount', {
+                count: vouchedCount,
+                localizedString: formatInteger(vouchedCount, locale),
+              })
+            : undefined
+        }
         subtitle={t('offer.numberOfCommon', {
           number: formatInteger(commonConnectionsCount, locale),
         })}

@@ -4,6 +4,7 @@ import {
   type OfferType,
   type OneOfferInState,
 } from '@vexl-next/domain/src/general/offers'
+import {isQuickOffer} from '@vexl-next/domain/src/general/quickOffers'
 import {type IconTagVariant, type OfferCardMarkBadge} from '@vexl-next/ui'
 import {Array, pipe} from 'effect'
 import {atom} from 'jotai'
@@ -32,6 +33,15 @@ export function getIconTagVariant(
   if (listingType === 'PRODUCT') return 'product'
   if (listingType === 'OTHER') return 'service'
   return 'bitcoin'
+}
+
+// A quick offer leaves the way to trade open, so meeting in person is too.
+export function canTradeInPerson(offer: OneOfferInState | undefined): boolean {
+  return (
+    !!offer &&
+    (offer.offerInfo.publicPart.locationState.includes('IN_PERSON') ||
+      isQuickOffer(offer))
+  )
 }
 
 export function getOfferMarkBadge(

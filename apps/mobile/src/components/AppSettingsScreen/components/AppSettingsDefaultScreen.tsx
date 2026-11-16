@@ -12,8 +12,10 @@ import {
 } from '@vexl-next/ui'
 import React from 'react'
 import {type AppSettingsStackScreenProps} from '../../../navigationTypes'
+import {quickOffersEnabledAtom} from '../../../state/quickOffers/atoms'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../../utils/useSafeGoBack'
+import QuickOffersSwitch from '../../QuickOffersSwitch'
 import {allowScreenshotsAtom} from '../atoms'
 
 function AppSettingsDefaultScreen({
@@ -64,6 +66,7 @@ function AppSettingsDefaultScreen({
           showChevron={false}
           tag={<Switch valueAtom={allowScreenshotsAtom} />}
         />
+        <QuickOffersSwitch valueAtom={quickOffersEnabledAtom} />
       </YStack>
     </Screen>
   )

@@ -1,4 +1,5 @@
 import {useNavigation} from '@react-navigation/native'
+import {isQuickOffer} from '@vexl-next/domain/src/general/quickOffers'
 import {
   BulletListMenu,
   Button,
@@ -263,7 +264,8 @@ export default function ChatInfoContent({
     !listingTypeIsOther &&
     !isNoteChatOrigin(chat.origin)
   const showExchangeDetailsAction = useAtomValue(canSendMessagesAtom)
-  const showOfferDetailAction = !!offer
+  // A quick offer has no details beyond buy or sell.
+  const showOfferDetailAction = !!offer && !isQuickOffer(offer)
   const showReceivedMessagesDebugAction = !!enableHiddenFeatures || isDeveloper
   const otherSideIsOfferCreator =
     offer != null &&

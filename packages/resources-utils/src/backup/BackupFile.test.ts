@@ -29,6 +29,7 @@ const makeBackup = async (): Promise<BackupFile> => {
       privateKey,
       keyPairV2,
       isLiquidityProvider: false,
+      quickOffersEnabled: true,
       realUserData: {
         userName: 'Satoshi',
         image: {

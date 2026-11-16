@@ -7,6 +7,7 @@ import {
   type OfferId,
   type OneOfferInState,
 } from '@vexl-next/domain/src/general/offers'
+import {isQuickOffer} from '@vexl-next/domain/src/general/quickOffers'
 import {MINIMAL_DATE} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import {Array, Record} from 'effect'
 import {pipe} from 'fp-ts/lib/function'
@@ -24,7 +25,7 @@ export const OFFERS_STORAGE_KEY = 'offers'
 export const offersStateAtom = atomWithParsedMmkvStorage(
   OFFERS_STORAGE_KEY,
   {
-    contactOffersNextPageParam: undefined,
+    contactOffersNextPageParam2: undefined,
     clubOffersNextPageParam: {},
     offers: [],
     lastUpdatedAt2: MINIMAL_DATE,
@@ -35,8 +36,13 @@ export const offersAtom = focusAtom(offersStateAtom, (optic) =>
   optic.prop('offers')
 )
 
+// Quick offers live in the same state but are never listed with classic offers.
+export const classicOffersAtom = atom((get) =>
+  Array.filter(get(offersAtom), (offer) => !isQuickOffer(offer))
+)
+
 export const areThereAnyStoredOffersAtom = atom((get) =>
-  Array.isNonEmptyReadonlyArray(get(offersAtom))
+  Array.isNonEmptyReadonlyArray(get(classicOffersAtom))
 )
 
 export const offersIdsAtom = focusAtom(offersAtom, (optic) =>
@@ -45,7 +51,7 @@ export const offersIdsAtom = focusAtom(offersAtom, (optic) =>
 
 export const contactOffersNextPageParamAtom = focusAtom(
   offersStateAtom,
-  (optic) => optic.prop('contactOffersNextPageParam')
+  (optic) => optic.prop('contactOffersNextPageParam2')
 )
 
 export const clubOffersNextPageParamAtom = focusAtom(offersStateAtom, (optic) =>

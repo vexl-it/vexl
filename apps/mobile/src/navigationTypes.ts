@@ -18,6 +18,7 @@ import {
   type FriendLevel,
   type LocationPlaceId,
   type OfferId,
+  type OfferType,
 } from '@vexl-next/domain/src/general/offers'
 import {
   type AmountData,
@@ -83,6 +84,8 @@ export type RootStackParamsList = {
   OfferDetail: {offerId: OfferId}
 
   SendMessage: {offerId: OfferId; mode?: 'request' | 'rerequest'}
+
+  QuickConnect: {iWant: OfferType}
 
   CreateNote: undefined
   NoteDetail: {noteId: NoteId}

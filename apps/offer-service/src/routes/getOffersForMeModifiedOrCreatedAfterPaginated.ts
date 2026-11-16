@@ -35,6 +35,7 @@ export const getOffersForMeModifiedOrCreatedAfterPaginated =
             lastOfferChangeCounter,
             lastPrivatePartId,
             limit: increasedLimit,
+            includeQuickOffers: req.urlParams.includeQuickOffers ?? false,
           })
         )
 

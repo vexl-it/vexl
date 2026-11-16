@@ -24,6 +24,7 @@ export const sendOfferToNetworkBatchPrivateParts = ({
     countryPrefix: CountryPrefix
     adminId: OfferAdminId
     offerId: OfferId
+    isQuickOffer?: boolean
   }
 }): ReturnType<OfferApi['createNewOffer']> =>
   Effect.gen(function* (_) {
@@ -42,6 +43,7 @@ export const sendOfferToNetworkBatchPrivateParts = ({
         offerType: offerData.offerType,
         adminId: offerData.adminId,
         offerId: offerData.offerId,
+        isQuickOffer: offerData.isQuickOffer,
       })
     )
 

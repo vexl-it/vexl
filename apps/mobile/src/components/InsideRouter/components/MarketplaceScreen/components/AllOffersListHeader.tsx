@@ -13,6 +13,7 @@ import EmptyList from './EmptyList'
 import FilterButton from './FilterButton'
 import FilterTagBar from './FilterTagBar'
 import MarketplaceInlineButton from './MarketplaceInlineButton'
+import QuickConnectSection from './QuickConnectSection'
 import SearchOffers from './SearchOffers'
 import TotalOffersCount from './TotalOffersCount'
 
@@ -69,6 +70,7 @@ function AllOffersListHeader({
   if (isNone(error))
     return (
       <Stack paddingTop="$7" paddingBottom="$5">
+        <QuickConnectSection />
         {!!areThereOffersToSeeInMarketplaceWithoutFilters && topControls}
         {areThereOffersToSeeInMarketplaceWithoutFilters ? (
           <Stack paddingHorizontal="$5">
@@ -107,6 +109,7 @@ function AllOffersListHeader({
 
   return (
     <Stack>
+      <QuickConnectSection />
       {topControls}
       <ErrorListHeader mt="$6" error={error.value} />
     </Stack>

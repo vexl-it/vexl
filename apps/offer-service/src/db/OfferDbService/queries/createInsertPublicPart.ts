@@ -17,6 +17,7 @@ export const InsertPublicPartRequest = Schema.Struct({
   offerType: OfferType,
   payloadPublic: PublicPayloadEncrypted,
   countryPrefix: CountryPrefix,
+  isQuickOffer: Schema.Boolean,
 })
 export type InsertPublicPartRequest = typeof InsertPublicPartRequest.Type
 

@@ -16,6 +16,8 @@
   "notifications.REQUEST_MESSAGING.title": "新規要請",
   "notifications.REQUEST_MESSAGING.noteTitle": "あなたのノートへの新しい返信",
   "notifications.REQUEST_MESSAGING.body": "新しい要求が届きました。",
+  "notifications.REQUEST_MESSAGING.quickConnectTitle": "クイック取引のリクエスト",
+  "notifications.REQUEST_MESSAGING.commonFriends_other": "共通の友達が{{count}}人います。",
   "notifications.APPROVE_MESSAGING.title": "要請が承認されました。",
   "notifications.APPROVE_MESSAGING.body": "要求が承認されました",
   "notifications.TRADE_CHECKLIST_UPDATE.title": "{{them}}",

@@ -34,6 +34,7 @@ export const dummySession: SessionV2 = {
   phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733733733'),
   version: 1,
   isLiquidityProvider: false,
+  quickOffersEnabled: true,
   masterSeed: Schema.decodeSync(MasterSeed)('00'.repeat(32)),
   loginSessionId: Schema.decodeSync(LoginSessionId)(
     '00000000-0000-4000-8000-000000000000'

@@ -1,4 +1,5 @@
 import {useNavigation} from '@react-navigation/native'
+import {isQuickOffer} from '@vexl-next/domain/src/general/quickOffers'
 import {
   ChatMessageItem,
   Stack,
@@ -19,6 +20,7 @@ import {
 import isNoteChatOrigin from '../../../../../state/chat/utils/isNoteChatOrigin'
 import {useOfferForChatOrigin} from '../../../../../state/marketplace'
 import {noteForChatOriginAtom} from '../../../../../state/notes/atoms/notesState'
+import {quickConnectRequestText} from '../../../../../state/quickConnect/quickConnectRequestText'
 import {getOtherSideRealNameOrFriendLevel} from '../../../../../utils/chat/getOtherSideFriendLevel'
 import {chatDetailRouteParams} from '../../../../../utils/chat/goToChatDetail'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
@@ -102,20 +104,34 @@ function ChatListItem({
       t,
     }) ?? userName
   const isNoteChat = isNoteChatOrigin(chatInfo.origin)
+  const isRequest = lastMessage.message.messageType === 'REQUEST_MESSAGING'
   const preview: {text: string; variant?: ChatMessageItemVariant} =
-    isNoteChat && lastMessage.message.messageType === 'REQUEST_MESSAGING'
+    isRequest && offer && isQuickOffer(offer)
       ? {
-          text:
-            chatInfo.origin.type === 'myNote'
-              ? t('notes.chat.respondedToYourNote')
-              : t('notes.chat.respondedToTheirNote'),
+          text: quickConnectRequestText({
+            quickOfferType: offer.offerInfo.publicPart.offerType,
+            amount:
+              'quickConnectAmount' in lastMessage.message
+                ? lastMessage.message.quickConnectAmount
+                : undefined,
+            locale,
+            t,
+          }),
           variant: 'highlighted',
         }
-      : getMessagePreviewText({
-          messageWithState: lastMessage,
-          name: userName,
-          t,
-        })
+      : isNoteChat && isRequest
+        ? {
+            text:
+              chatInfo.origin.type === 'myNote'
+                ? t('notes.chat.respondedToYourNote')
+                : t('notes.chat.respondedToTheirNote'),
+            variant: 'highlighted',
+          }
+        : getMessagePreviewText({
+            messageWithState: lastMessage,
+            name: userName,
+            t,
+          })
   const time = formatChatTime(
     unixMillisecondsToLocaleDateTime(lastMessage.message.time),
     locale

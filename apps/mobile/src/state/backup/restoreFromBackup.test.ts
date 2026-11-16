@@ -190,6 +190,8 @@ const setUp = async (): Promise<{
       privateKey: dummySession.privateKey,
       keyPairV2: dummySession.keyPairV2,
       isLiquidityProvider: true,
+      tradingIntent: 'SELL',
+      quickOffersEnabled: false,
       realUserData: {userName: Schema.decodeSync(UserName)('Satoshi')},
     },
     masterSeed,

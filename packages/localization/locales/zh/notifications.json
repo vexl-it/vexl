@@ -16,6 +16,8 @@
   "notifications.REQUEST_MESSAGING.title": "新的请求！",
   "notifications.REQUEST_MESSAGING.noteTitle": "你的帖子有新回复",
   "notifications.REQUEST_MESSAGING.body": "您已收到一个新的请求。",
+  "notifications.REQUEST_MESSAGING.quickConnectTitle": "快速交易请求",
+  "notifications.REQUEST_MESSAGING.commonFriends_other": "你们有 {{count}} 个共同好友。",
   "notifications.APPROVE_MESSAGING.title": "请求已被批准！",
   "notifications.APPROVE_MESSAGING.body": "您的请求已被批准。",
   "notifications.TRADE_CHECKLIST_UPDATE.title": "{{them}}",

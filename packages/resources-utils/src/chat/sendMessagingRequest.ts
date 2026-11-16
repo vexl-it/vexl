@@ -14,6 +14,7 @@ import {
   type FriendLevel,
   type GoldenAvatarType,
 } from '@vexl-next/domain/src/general/offers'
+import {type QuickConnectAmount} from '@vexl-next/domain/src/general/quickOffers'
 import {
   now,
   type UnixMilliseconds,
@@ -36,6 +37,7 @@ function createRequestChatMessage({
   commonFriends,
   verifiedCommonFriends,
   friendLevel,
+  quickConnectAmount,
 }: {
   text: string
   myVexlToken?: VexlNotificationToken
@@ -46,6 +48,7 @@ function createRequestChatMessage({
   commonFriends?: readonly HashedPhoneNumber[]
   verifiedCommonFriends?: readonly HashedPhoneNumber[]
   friendLevel?: readonly FriendLevel[]
+  quickConnectAmount?: QuickConnectAmount
 }): ChatMessage {
   return {
     uuid: generateChatMessageId(),
@@ -60,6 +63,7 @@ function createRequestChatMessage({
     commonFriends,
     verifiedCommonFriends,
     friendLevel,
+    quickConnectAmount,
   }
 }
 
@@ -84,6 +88,7 @@ export function sendMessagingRequest({
   commonFriends,
   verifiedCommonFriends,
   friendLevel,
+  quickConnectAmount,
   recoveryProof,
 }: {
   text: string
@@ -99,6 +104,7 @@ export function sendMessagingRequest({
   commonFriends?: readonly HashedPhoneNumber[]
   verifiedCommonFriends?: readonly HashedPhoneNumber[]
   friendLevel?: readonly FriendLevel[]
+  quickConnectAmount?: QuickConnectAmount
   // I chose to contact them, so they may hold it
   recoveryProof?: ChatRecoveryProof | undefined
 }): Effect.Effect<
@@ -119,6 +125,7 @@ export function sendMessagingRequest({
       commonFriends,
       verifiedCommonFriends,
       friendLevel,
+      quickConnectAmount,
     })
 
     const serverMessage = yield* _(

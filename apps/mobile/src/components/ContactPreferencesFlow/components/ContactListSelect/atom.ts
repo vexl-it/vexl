@@ -33,7 +33,7 @@ import {
   areContactsPermissionsGranted,
   hashPhoneNumberE,
 } from '../../../../state/contacts/utils'
-import {myOffersAtom} from '../../../../state/marketplace/atoms/myOffers'
+import {myClassicOffersAtom} from '../../../../state/marketplace/atoms/myOffers'
 import getValueFromSetStateActionOfAtom from '../../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 import {translationAtom} from '../../../../utils/localization/I18nProvider'
 import {
@@ -440,7 +440,7 @@ export const contactSelectMolecule = molecule((_, getScope) => {
   const confirmSubmitHidingOffersActionAtom = atom(
     null,
     (get, set): Effect.Effect<boolean> => {
-      const myOffers = get(myOffersAtom)
+      const myOffers = get(myClassicOffersAtom)
       const removesAllContacts =
         get(selectedNumbersAtom).size === 0 &&
         get(importedContactsCountAtom) > 0

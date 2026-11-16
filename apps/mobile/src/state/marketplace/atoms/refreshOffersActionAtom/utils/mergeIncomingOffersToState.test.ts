@@ -2,6 +2,7 @@ import {ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {
   OfferAdminId,
+  OfferId,
   OfferInfo,
   type OfferPrivatePart,
   type OneOfferInState,
@@ -302,4 +303,41 @@ it('still drops new foreign offers without any friend level', () => {
       removedOffersIds: noRemovals,
     })
   ).toEqual([])
+})
+
+it('re-syncing every offer from the start adds the missed ones without duplicating the rest', () => {
+  const storedOffers: OneOfferInState[] = [
+    {offerInfo: socialUpdate, flags: {reported: true}},
+    {
+      offerInfo: {...socialUpdate, offerId: OfferId.make('own')},
+      flags: {reported: false},
+      ownershipInfo: {
+        adminId,
+        intendedClubs: [],
+        intendedConnectionLevel: 'ALL',
+      },
+    },
+  ]
+  const missedQuickOffer: OfferInfo = {
+    ...socialUpdate,
+    offerId: OfferId.make('quick'),
+    publicPart: {...socialUpdate.publicPart, isQuickOffer: true},
+  }
+
+  const result = mergeIncomingOffersToState({
+    storedOffers,
+    incomingOffers: [
+      ...storedOffers.map((one) => one.offerInfo),
+      missedQuickOffer,
+    ],
+    removedOffersIds: noRemovals,
+  })
+
+  expect(result.map((one) => one.offerInfo.offerId)).toEqual([
+    'offer',
+    'own',
+    'quick',
+  ])
+  expect(result[0]?.flags).toBe(storedOffers[0]?.flags)
+  expect(result[1]).toBe(storedOffers[1])
 })

@@ -125,6 +125,7 @@ export const upgradeSession = (
         vexlAuthHeader,
       },
       isLiquidityProvider: false,
+      quickOffersEnabled: true,
       masterSeed,
       loginSessionId: generateLoginSessionId(),
     }

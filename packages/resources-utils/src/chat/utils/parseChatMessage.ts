@@ -162,6 +162,7 @@ export function chatMessagePayloadToChatMessage(
     commonFriends: payload.commonFriends,
     verifiedCommonFriends: payload.verifiedCommonFriends,
     friendLevel: payload.friendLevel,
+    quickConnectAmount: payload.quickConnectAmount,
     history: payload.history,
     recoveryProof: payload.recoveryProof,
     historyRecoveryProof: payload.historyRecoveryProof,

@@ -16,6 +16,7 @@ import {
   MasterSeed,
 } from '@vexl-next/domain/src/general/MasterSeed.brand'
 import {VexlNotificationTokenSecret} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
+import {TradingIntent} from '@vexl-next/domain/src/general/quickOffers'
 import {UserName} from '@vexl-next/domain/src/general/UserName.brand'
 import {Base64String} from '@vexl-next/domain/src/utility/Base64String.brand'
 import {CryptoError} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
@@ -51,6 +52,11 @@ export const BackupSession = Schema.Struct({
   privateKey: PrivateKeyHolder,
   keyPairV2: KeyPairV2,
   isLiquidityProvider: Schema.Boolean,
+  // Missing in backups made before quick offers.
+  tradingIntent: Schema.optional(TradingIntent),
+  quickOffersEnabled: Schema.optionalWith(Schema.Boolean, {
+    default: () => true,
+  }),
   realUserData: Schema.optional(BackupUserData),
 })
 export type BackupSession = typeof BackupSession.Type

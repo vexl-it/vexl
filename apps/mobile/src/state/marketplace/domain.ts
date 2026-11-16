@@ -45,7 +45,9 @@ export const OffersState = Schema.Struct({
   lastUpdatedAt2: Schema.optionalWith(IsoDatetimeString, {
     default: () => MINIMAL_DATE,
   }),
-  contactOffersNextPageParam: Schema.optional(Base64String),
+  // Renamed when the client started asking for quick offers. The position
+  // stored before had already skipped them, so the sync starts over once.
+  contactOffersNextPageParam2: Schema.optional(Base64String),
   clubOffersNextPageParam: Schema.optionalWith(
     Schema.Record({key: ClubUuid, value: Base64String}),
     {default: () => ({})}

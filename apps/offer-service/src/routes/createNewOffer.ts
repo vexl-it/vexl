@@ -18,8 +18,10 @@ export const createNewOffer = HttpApiBuilder.handler(
   OfferApiSpecification,
   'root',
   'createNewOffer',
-  (req) =>
-    Effect.gen(function* (_) {
+  (req) => {
+    const isQuickOffer = req.payload.isQuickOffer ?? false
+
+    return Effect.gen(function* (_) {
       const security = yield* _(CurrentSecurity)
       const offerDb = yield* _(OfferDbService)
 
@@ -32,6 +34,7 @@ export const createNewOffer = HttpApiBuilder.handler(
           offerId: req.payload.offerId ?? newOfferId(),
           offerType: req.payload.offerType,
           payloadPublic: req.payload.payloadPublic,
+          isQuickOffer,
         })
       )
 
@@ -83,6 +86,7 @@ export const createNewOffer = HttpApiBuilder.handler(
         reportOfferCreated({
           countryPrefix: req.payload.countryPrefix,
           offerType: req.payload.offerType,
+          isQuickOffer,
           commonMetricAttributes: commonMetricAttributesFromHeaders(
             req.headers
           ),
@@ -90,4 +94,5 @@ export const createNewOffer = HttpApiBuilder.handler(
       ),
       makeEndpointEffect
     )
+  }
 )

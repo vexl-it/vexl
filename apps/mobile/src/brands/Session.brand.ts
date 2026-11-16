@@ -4,6 +4,7 @@ import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.bra
 import {LoginSessionId} from '@vexl-next/domain/src/general/LoginSessionId.brand'
 import {MasterSeed} from '@vexl-next/domain/src/general/MasterSeed.brand'
 import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
+import {TradingIntent} from '@vexl-next/domain/src/general/quickOffers'
 import {UserNameAndUriAvatar} from '@vexl-next/domain/src/general/UserNameAndAvatar.brand'
 import {
   UserSessionCredentials,
@@ -22,6 +23,11 @@ export const LegacySessionV2 = Schema.Struct({
   keyPairV2: KeyPairV2,
   isLiquidityProvider: Schema.optionalWith(Schema.Boolean, {
     default: () => false,
+  }),
+  // Not asked yet when missing.
+  tradingIntent: Schema.optional(TradingIntent),
+  quickOffersEnabled: Schema.optionalWith(Schema.Boolean, {
+    default: () => true,
   }),
 })
 export type LegacySessionV2 = typeof LegacySessionV2.Type

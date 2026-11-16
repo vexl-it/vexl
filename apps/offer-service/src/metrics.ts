@@ -71,10 +71,12 @@ export const reportOfferModified = (
 export const reportOfferCreated = ({
   countryPrefix,
   offerType,
+  isQuickOffer,
   commonMetricAttributes,
 }: {
   countryPrefix: CountryPrefix
   offerType: OfferType
+  isQuickOffer: boolean
   commonMetricAttributes: CommonMetricAttributes
 }): Effect.Effect<void, never, MetricsClientService> =>
   reportMetricForked(
@@ -82,7 +84,12 @@ export const reportOfferCreated = ({
       uuid: generateUuid(),
       timestamp: new Date(),
       name: OFFER_CREATED,
-      attributes: {...commonMetricAttributes, countryPrefix, offerType},
+      attributes: {
+        ...commonMetricAttributes,
+        countryPrefix,
+        offerType,
+        isQuickOffer,
+      },
     })
   )
 

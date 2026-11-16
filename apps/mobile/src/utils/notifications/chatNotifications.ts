@@ -1,13 +1,14 @@
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {type Chat} from '@vexl-next/domain/src/general/messaging'
 import {ChatNotificationData} from '@vexl-next/domain/src/general/notifications'
+import {isQuickOffer} from '@vexl-next/domain/src/general/quickOffers'
 import {
-  type AndroidConversationAvatar,
-  type AndroidConversationData,
-  type AndroidConversationMessage,
   androidNotificationGroupData,
   decodeAndroidConversationData,
   decodeAndroidNotificationGroupData,
+  type AndroidConversationAvatar,
+  type AndroidConversationData,
+  type AndroidConversationMessage,
 } from '@vexl-next/expo-android-notification-presentation/src'
 import {Array, Option, pipe} from 'effect'
 import {
@@ -22,11 +23,20 @@ import {Platform} from 'react-native'
 import {getOtherSideData} from '../../state/chat/atoms/selectOtherSideDataAtom'
 import {
   type ChatMessageWithState,
+  type ChatWithMessages,
   type InboxInState,
 } from '../../state/chat/domain'
 import {isImageOnlyMessage} from '../../state/chat/utils/chatImageMessage'
+import {importedContactsHashesAtom} from '../../state/contacts/atom/contactsStore'
+import {offerForChatOriginAtom} from '../../state/marketplace/atoms/offersState'
+import {deriveVisibleCommonFriendsForChat} from '../../state/marketplace/utils/visibleCommonFriends'
+import {
+  quickConnectRequestNotificationBody,
+  quickConnectRequestText,
+} from '../../state/quickConnect/quickConnectRequestText'
 import {createOpenChatLink} from '../deepLinks/createLinks'
-import {translationAtom} from '../localization/I18nProvider'
+import {formattingLocaleAtom} from '../localization/formattingLocaleAtom'
+import {translationAtom, type TFunction} from '../localization/I18nProvider'
 import {useAppState} from '../useAppState'
 import {conversationId, toAndroidAvatar} from './conversationShortcuts'
 import {displayLocalNotification} from './displayLocalNotification'
@@ -147,6 +157,46 @@ async function showAndroidConversationNotification({
   })
 }
 
+// Someone answered my quick offer: say what they want, with the amount and
+// how many friends we share, in my language.
+function quickConnectRequestNotification({
+  newMessage,
+  chat,
+  t,
+}: {
+  newMessage: ChatMessageWithState
+  chat: ChatWithMessages | undefined
+  t: TFunction
+}): {title: string; body: string} | undefined {
+  const message = newMessage.message
+  if (!chat || message.messageType !== 'REQUEST_MESSAGING') return undefined
+
+  const store = getDefaultStore()
+  const offer = store.get(offerForChatOriginAtom(chat.chat.origin))
+  if (!offer?.ownershipInfo || !isQuickOffer(offer)) return undefined
+
+  const commonFriendsCount = deriveVisibleCommonFriendsForChat({
+    commonFriends: message.commonFriends,
+    verifiedCommonFriends: message.verifiedCommonFriends,
+    importedContactsHashes: store.get(importedContactsHashesAtom),
+  }).commonFriends.length
+  const request = quickConnectRequestText({
+    quickOfferType: offer.offerInfo.publicPart.offerType,
+    amount: message.quickConnectAmount,
+    locale: store.get(formattingLocaleAtom),
+    t,
+  })
+
+  return {
+    title: t('notifications.REQUEST_MESSAGING.quickConnectTitle'),
+    body: quickConnectRequestNotificationBody({
+      request,
+      commonFriendsCount,
+      t,
+    }),
+  }
+}
+
 export async function showChatNotification({
   newMessage,
   inbox,
@@ -252,14 +302,21 @@ export async function showChatNotification({
     ...(isRequest ? androidNotificationGroupData({groupId}) : {}),
   }
 
-  const title =
-    type === 'MESSAGE' || type === 'REACTION'
+  const quickConnectRequest = quickConnectRequestNotification({
+    newMessage,
+    chat,
+    t,
+  })
+  const title = quickConnectRequest
+    ? quickConnectRequest.title
+    : type === 'MESSAGE' || type === 'REACTION'
       ? (userName ?? t(`notifications.${type}.title`, {them: ''}))
       : isRequest && chat?.chat.origin.type === 'myNote'
         ? t('notifications.REQUEST_MESSAGING.noteTitle', {them: userName ?? ''})
         : t(`notifications.${type}.title`, {them: userName ?? ''})
-  const body =
-    type === 'REACTION'
+  const body = quickConnectRequest
+    ? quickConnectRequest.body
+    : type === 'REACTION'
       ? t('notifications.REACTION.body', {emoji: reactionEmoji})
       : (messageText ?? t(`notifications.${type}.body`, {them: userName ?? ''}))
 

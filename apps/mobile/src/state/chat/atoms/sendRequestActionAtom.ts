@@ -1,4 +1,5 @@
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
+import {type QuickConnectAmount} from '@vexl-next/domain/src/general/quickOffers'
 import {sendMessagingRequest} from '@vexl-next/resources-utils/src/chat/sendMessagingRequest'
 import {Array, Effect, Record} from 'effect'
 import {pipe} from 'fp-ts/function'
@@ -18,13 +19,15 @@ import {myRecoveryProof} from '../utils/myChatRecoveryProof'
 import {version} from './../../../utils/environment'
 import upsertChatForTheirOfferActionAtom from './upsertChatForTheirOfferActionAtom'
 
+interface SendRequestParams {
+  readonly text: string
+  readonly originOffer: OneOfferInState
+  readonly quickConnectAmount?: QuickConnectAmount
+}
+
 const sendRequestActionAtom = atom(
   null,
-  (
-    get,
-    set,
-    {text, originOffer}: {text: string; originOffer: OneOfferInState}
-  ) =>
+  (get, set, {text, originOffer, quickConnectAmount}: SendRequestParams) =>
     Effect.gen(function* (_) {
       const api = get(apiAtom)
       const goldenAvatarType = get(goldenAvatarTypeAtom)
@@ -65,6 +68,7 @@ const sendRequestActionAtom = atom(
           verifiedCommonFriends:
             originOffer.offerInfo.privatePart.verifiedCommonFriends,
           friendLevel: originOffer.offerInfo.privatePart.friendLevel,
+          quickConnectAmount,
           recoveryProof: myRecoveryProof(get, {
             myPublicKey: inbox.privateKey.publicKeyPemBase64,
             otherSidePublicKey: originOffer.offerInfo.publicPart.offerPublicKey,
@@ -87,17 +91,13 @@ const sendRequestActionAtom = atom(
 
 export const sendRequestHandleUIActionAtom = atom(
   null,
-  (
-    get,
-    set,
-    {text, originOffer}: {text: string; originOffer: OneOfferInState}
-  ) =>
+  (get, set, params: SendRequestParams) =>
     Effect.gen(function* (_) {
       const {t} = get(translationAtom)
       yield* _(set(checkNotificationPermissionsAndAskIfPossibleActionAtom))
 
       return yield* _(
-        set(sendRequestActionAtom, {text, originOffer}),
+        set(sendRequestActionAtom, params),
         // TODO handle errors
         Effect.tapError((e) =>
           Effect.sync(() => {

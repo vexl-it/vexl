@@ -340,5 +340,21 @@
   "progressBar.PREPARING_ENCRYPTED_OFFER_DETAILS": "Verschlüsselte Angebotsdetails vorbereiten",
   "progressBar.SENDING_OFFER_TO_NETWORK": "Angebot hochladen",
   "progressBar.DONE": "Fertig",
-  "offerDetail.offerDetail": "Angebotsdetail"
+  "offerDetail.offerDetail": "Angebotsdetail",
+  "quickOffers.switch.label": "Schnelle Trades annehmen",
+  "quickOffers.switch.note": "Freunde und Freunde von Freunden können dich um einen schnellen Trade bitten. Sie sehen, ob du kaufen oder verkaufen willst, aber keinen Betrag und keinen Ort. Du kannst das jederzeit ausschalten.",
+  "quickConnect.title": "Schneller Trade",
+  "quickConnect.description": "Frag jemanden aus deinem Netzwerk nach einem schnellen Trade. Ganz ohne Angebot.",
+  "quickConnect.screen.description.buy": "Wir fragen jemanden aus deinem Netzwerk, der Bitcoin verkaufen will. Du bekommst eine Benachrichtigung, sobald die Person antwortet.",
+  "quickConnect.screen.description.sell": "Wir fragen jemanden aus deinem Netzwerk, der Bitcoin kaufen will. Du bekommst eine Benachrichtigung, sobald die Person antwortet.",
+  "quickConnect.amount.label": "Betrag (optional)",
+  "quickConnect.send": "Um schnellen Trade bitten",
+  "quickConnect.noMatch.buy": "Gerade will niemand aus deinem Netzwerk Bitcoin verkaufen.",
+  "quickConnect.noMatch.sell": "Gerade will niemand aus deinem Netzwerk Bitcoin kaufen.",
+  "quickConnect.createOfferHint": "Erstell ein Angebot, damit dich Leute aus deinem Netzwerk finden.",
+  "quickConnect.status.asked_one": "Du hast jemanden mit {{count}} gemeinsamen Freund gefragt.",
+  "quickConnect.status.asked_other": "Du hast jemanden mit {{count}} gemeinsamen Freunden gefragt.",
+  "quickConnect.status.askedSomeone": "Du hast jemanden aus deinem Netzwerk gefragt.",
+  "quickConnect.status.nextIn": "Du kannst in {{time}} jemand anderen fragen.",
+  "quickConnect.status.noReply": "Noch hat niemand geantwortet. Erstell ein Angebot, damit dich mehr Leute finden."
 }

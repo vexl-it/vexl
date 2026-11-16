@@ -23,6 +23,7 @@ export const QueryOffersPaginatedRequest = Schema.Struct({
   lastOfferChangeCounter: OfferChangeCounter,
   lastPrivatePartId: PrivatePartRecordId,
   limit: Schema.Int,
+  includeQuickOffers: Schema.Boolean,
 })
 export type QueryOffersPaginatedRequest = Schema.Schema.Type<
   typeof QueryOffersPaginatedRequest
@@ -64,6 +65,9 @@ export const createQueryOffersForUserPaginated = Effect.gen(function* (_) {
         ]),
         offerNotExpired(sql, expirationPeriodDays),
         offerNotFlagged(sql, offerReportFilter),
+        ...(params.includeQuickOffers
+          ? []
+          : [sql`offer_public.is_quick_offer = FALSE`]),
       ])}
         ) offers_for_user
       WHERE

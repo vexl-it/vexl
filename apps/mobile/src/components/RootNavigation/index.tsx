@@ -64,6 +64,7 @@ import NotificationSettingsScreen from '../NotificationSettingsScreen'
 import NotificationsScreen from '../NotificationsScreen'
 import OfferDetailScreen from '../OfferDetailScreen'
 import PostLoginFlow from '../PostLoginFlow'
+import QuickConnectScreen from '../QuickConnectScreen'
 import ScanQrCodeScreen from '../ScanQrCodeScreen'
 import SendMessageScreen from '../SendMessageScreen'
 import SendMessageToNoteScreen from '../SendMessageToNoteScreen'
@@ -139,6 +140,7 @@ function RootNavigation(): React.ReactElement {
               component={EditOfferFieldScreen}
             />
             <Stack.Screen name="SendMessage" component={SendMessageScreen} />
+            <Stack.Screen name="QuickConnect" component={QuickConnectScreen} />
             <Stack.Screen name="CreateNote" component={CreateNoteScreen} />
             <Stack.Screen name="NoteDetail" component={NoteDetailScreen} />
             <Stack.Screen

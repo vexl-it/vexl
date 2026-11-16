@@ -172,6 +172,11 @@
   "chatDetail.offerTitle.theirs.sellProduct": "A outra pessoa está a vender um produto",
   "chatDetail.offerTitle.theirs.buyOther": "A outra pessoa quer outra coisa",
   "chatDetail.offerTitle.theirs.sellOther": "A outra pessoa está a oferecer outra coisa",
+  "chatDetail.quickConnect.label": "Troca rápida",
+  "chatDetail.quickConnect.request.buy": "Olá, gostava de comprar bitcoin com uma troca rápida.",
+  "chatDetail.quickConnect.request.sell": "Olá, gostava de vender bitcoin com uma troca rápida.",
+  "chatDetail.quickConnect.amount": "Valor: {{amount}}.",
+  "chatDetail.quickConnect.receiverDescription": "Alguém da tua rede pediu-te uma troca rápida. Vê os vossos amigos em comum antes de responder.",
   "messages.fallbackMessage.body": "Toca para ler.",
   "messages.fallbackMessage.title": "Nova mensagem em Vexl"
 }

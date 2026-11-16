@@ -171,6 +171,11 @@
   "chatDetail.offerTitle.theirs.sellProduct": "De ander verkoopt een product",
   "chatDetail.offerTitle.theirs.buyOther": "De ander wil iets anders",
   "chatDetail.offerTitle.theirs.sellOther": "De ander biedt iets anders aan",
+  "chatDetail.quickConnect.label": "Snelle trade",
+  "chatDetail.quickConnect.request.buy": "Hoi, ik wil graag bitcoin kopen via een snelle trade.",
+  "chatDetail.quickConnect.request.sell": "Hoi, ik wil graag bitcoin verkopen via een snelle trade.",
+  "chatDetail.quickConnect.amount": "Bedrag: {{amount}}.",
+  "chatDetail.quickConnect.receiverDescription": "Iemand uit je netwerk vraagt je om een snelle trade. Bekijk jullie gemeenschappelijke vrienden voordat je reageert.",
   "messages.fallbackMessage.body": "Tik om het te lezen.",
   "messages.fallbackMessage.title": "Nieuw bericht in Vexl"
 }

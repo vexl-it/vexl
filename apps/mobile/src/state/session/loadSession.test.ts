@@ -251,6 +251,7 @@ function withExpectedSessionUpgrades(session: Session): SessionV2 {
       vexlAuthHeader: createMockVexlAuthHeader(session.sessionCredentials.hash),
     },
     isLiquidityProvider: false,
+    quickOffersEnabled: true,
     masterSeed: Schema.decodeSync(MasterSeed)(mockMasterSeed),
     loginSessionId: Schema.decodeSync(LoginSessionId)(mockLoginSessionId),
   }

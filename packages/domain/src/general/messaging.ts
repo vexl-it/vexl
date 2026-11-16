@@ -20,6 +20,7 @@ import {
   VexlNotificationToken,
 } from './notifications/VexlNotificationToken'
 import {FriendLevel, GoldenAvatarType, OfferId, OneOfferInState} from './offers'
+import {QuickConnectAmount} from './quickOffers'
 import {TradeChecklistUpdate} from './tradeChecklist'
 
 export const ServerVisibleMessageType = Schema.Literal(
@@ -187,6 +188,7 @@ export const ChatMessagePayload = Schema.Struct({
   commonFriends: Schema.optional(Schema.Array(HashedPhoneNumber)),
   verifiedCommonFriends: Schema.optional(Schema.Array(HashedPhoneNumber)),
   friendLevel: Schema.optional(Schema.Array(FriendLevel)),
+  quickConnectAmount: Schema.optional(QuickConnectAmount),
   history: Schema.optional(Schema.Array(ChatHistoryMessage)),
   recoveryProof: Schema.optional(ChatRecoveryProof),
   historyRecoveryProof: Schema.optional(ChatRecoveryProof),
@@ -229,6 +231,8 @@ export const ChatMessage = Schema.Struct({
   commonFriends: Schema.optional(Schema.Array(HashedPhoneNumber)),
   verifiedCommonFriends: Schema.optional(Schema.Array(HashedPhoneNumber)),
   friendLevel: Schema.optional(Schema.Array(FriendLevel)),
+  // Used only for `REQUEST_MESSAGING` sent through quick connect
+  quickConnectAmount: Schema.optional(QuickConnectAmount),
   // Used only for messages of type `HISTORY`
   history: Schema.optional(Schema.Array(ChatHistoryMessage)),
   // The sender's proof for this chat

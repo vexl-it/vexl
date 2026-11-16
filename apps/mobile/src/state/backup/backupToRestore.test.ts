@@ -24,6 +24,7 @@ const backup: BackupFile = {
     privateKey: dummySession.privateKey,
     keyPairV2: dummySession.keyPairV2,
     isLiquidityProvider: false,
+    quickOffersEnabled: true,
   },
   masterSeed: Schema.decodeSync(MasterSeed)('44'.repeat(32)),
   legacyInboxKeys: [],

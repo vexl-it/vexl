@@ -29,7 +29,7 @@
     "@vexl-next/rest-api": "0.0.0",
     "effect": "^3.20.0",
     "ioredis": "^5.4.1",
-    "next": "^16.4.1",
+    "next": "^16.4.5",
     "qrcode.react": "^4.2.0",
     "react": "19.2.3",
     "react-dom": "19.2.3",

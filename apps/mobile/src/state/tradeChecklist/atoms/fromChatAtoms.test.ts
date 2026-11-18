@@ -25,8 +25,8 @@ jest.mock('../../chat/atoms/createCommonConnectionsAtoms', () => ({
   createCommonConnectionsAtoms: () => ({}),
 }))
 
-jest.mock('../../chat/atoms/createFriendCheckAtoms', () => ({
-  createFriendCheckAtoms: () => ({}),
+jest.mock('../../chat/atoms/createFriendCheckAvailableAtom', () => ({
+  createFriendCheckAvailableAtom: () => ({}),
 }))
 
 jest.mock('../../chat/domain', () => ({

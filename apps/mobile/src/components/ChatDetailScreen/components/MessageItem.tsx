@@ -25,7 +25,6 @@ import {OtherSideLeftVexlBot} from './OtherSideLeftVexlBot'
 import TextMessage from './TextMessage'
 import VexlBotMessageItem from './VexlbotMessageItem'
 import FriendCheckPrompt from './VexlbotMessageItem/components/FriendCheckPrompt'
-import FriendCheckView from './VexlbotMessageItem/components/FriendCheckView'
 import InactivityReminder from './VexlbotMessageItem/components/InactivityReminder'
 import TradeChecklistAmountView from './VexlbotMessageItem/components/TradeChecklistAmountView'
 import TradeChecklistDateAndTimeView from './VexlbotMessageItem/components/TradeChecklistDateAndTimeView'
@@ -228,9 +227,6 @@ function MessageItem({
       }
       if (item.message.message.tradeChecklistUpdate?.network) {
         return <TradeChecklistNetworkView message={item.message} />
-      }
-      if (item.message.message.tradeChecklistUpdate?.friendCheck) {
-        return <FriendCheckView message={item.message} />
       }
       return null
     }

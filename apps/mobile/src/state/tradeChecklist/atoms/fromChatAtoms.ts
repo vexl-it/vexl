@@ -7,12 +7,13 @@ import focusChatWithMessagesAtom from '../../../state/chat/atoms/focusChatWithMe
 import type {FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
 import valueOrDefaultAtom from '../../../utils/atomUtils/valueOrDefaultAtom'
 import {createCommonConnectionsAtoms} from '../../chat/atoms/createCommonConnectionsAtoms'
-import {createFriendCheckAtoms} from '../../chat/atoms/createFriendCheckAtoms'
+import {createFriendCheckAvailableAtom} from '../../chat/atoms/createFriendCheckAvailableAtom'
 import {getOtherSideData} from '../../chat/atoms/selectOtherSideDataAtom'
 import type {ChatIds, ChatWithMessages} from '../../chat/domain'
 import {dummyChatWithMessages} from '../../chat/domain'
 import {offerForChatOriginAtom} from '../../marketplace/atoms/offersState'
 import {getLatestAmountDataMessage} from '../utils/amount'
+import {friendCheckSubject} from '../utils/friendCheck'
 import {clearUpdatesToBeSentActionAtom} from './updatesToBeSentAtom'
 
 export const parentChatAtomAtom = atom<FocusAtomType<ChatWithMessages>>(
@@ -63,11 +64,14 @@ export const tradeChecklistContactDataAtom = atom(
 export const {commonConnectionsHashesAtom, verifiedConnectionsHashesAtom} =
   createCommonConnectionsAtoms(chatWithMessagesAtom)
 
-export const {
-  friendCheckAvailableAtom,
-  friendChecksAtom,
-  startFriendCheckActionAtom,
-} = createFriendCheckAtoms({chatWithMessagesAtom, commonConnectionsHashesAtom})
+export const friendCheckAvailableAtom = createFriendCheckAvailableAtom({
+  chatWithMessagesAtom,
+  commonConnectionsHashesAtom,
+})
+
+export const friendCheckSubjectAtom = atom((get) =>
+  friendCheckSubject(get(chatWithMessagesAtom).chat)
+)
 
 const chatOriginAtom = focusAtom(chatWithMessagesAtom, (p) =>
   p.prop('chat').prop('origin')

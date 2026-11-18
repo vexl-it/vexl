@@ -18,7 +18,7 @@ import cancelRequestActionAtomHandleUI from '../../../state/chat/atoms/cancelReq
 import createCanChatBeRerequestedAtom from '../../../state/chat/atoms/createCanBeRerequestedAtom'
 import {createCanSendMessagesAtom} from '../../../state/chat/atoms/createCanSendMessagesAtom'
 import {createCommonConnectionsAtoms} from '../../../state/chat/atoms/createCommonConnectionsAtoms'
-import {createFriendCheckAtoms} from '../../../state/chat/atoms/createFriendCheckAtoms'
+import {createFriendCheckAvailableAtom} from '../../../state/chat/atoms/createFriendCheckAvailableAtom'
 import {createOtherSideSupportsTradingChecklistAtom} from '../../../state/chat/atoms/createOtherSideSupportTradingChecklistAtom'
 import {createRequestStateAtom} from '../../../state/chat/atoms/createRequestStateAtom'
 import deleteChatActionAtom from '../../../state/chat/atoms/deleteChatActionAtom'
@@ -41,7 +41,7 @@ import {createBtcPriceForCurrencyAtom} from '../../../state/currentBtcPriceAtoms
 import * as amount from '../../../state/tradeChecklist/utils/amount'
 import {getLatestAmountDataMessage} from '../../../state/tradeChecklist/utils/amount'
 import * as dateAndTime from '../../../state/tradeChecklist/utils/dateAndTime'
-import {isFriendCheckMessage} from '../../../state/tradeChecklist/utils/friendCheck'
+import {firstRevealOfThem} from '../../../state/tradeChecklist/utils/friendCheck'
 import getContactRevealStatus from '../../../state/tradeChecklist/utils/getContactRevealStatus'
 import getIdentityRevealStatus from '../../../state/tradeChecklist/utils/getIdentityRevealStatus'
 import * as MeetingLocation from '../../../state/tradeChecklist/utils/location'
@@ -158,18 +158,12 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
   // the keyed splitAtom below (and FlashList rows) stable across updates.
   let previousMessagesListData: MessagesListItem[] = []
 
-  const friendCheckAtoms = createFriendCheckAtoms({
-    chatWithMessagesAtom,
-    commonConnectionsHashesAtom,
-  })
-
   const messagesListDataAtom = atom((get) => {
     const items = pipe(
       buildMessagesListData(
         get(messagesAtom),
         get(hiddenMessagesIdsAtom),
-        get(tradeChecklistAtom),
-        get(friendCheckAtoms.friendChecksAtom)
+        get(tradeChecklistAtom)
       ),
       (nextItems) => {
         const previousItemsByKey = new Map(
@@ -342,9 +336,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
   const lastTradeChecklistMessageAtom = selectAtom(
     messagesAtom,
     Array.findLast(
-      (message) =>
-        message.message.messageType === 'TRADE_CHECKLIST_UPDATE' &&
-        !isFriendCheckMessage(message)
+      (message) => message.message.messageType === 'TRADE_CHECKLIST_UPDATE'
     )
   )
 
@@ -743,8 +735,18 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     }
   )
 
+  const friendCheckAvailableAtom = createFriendCheckAvailableAtom({
+    chatWithMessagesAtom,
+    commonConnectionsHashesAtom,
+  })
+
+  const firstRevealOfThemAtom = atom((get) =>
+    firstRevealOfThem(get(chatWithMessagesAtom))
+  )
+
   return {
-    ...friendCheckAtoms,
+    friendCheckAvailableAtom,
+    firstRevealOfThemAtom,
     chatAtom,
     chatWithMessagesAtom,
     commonConnectionsHashesAtom,

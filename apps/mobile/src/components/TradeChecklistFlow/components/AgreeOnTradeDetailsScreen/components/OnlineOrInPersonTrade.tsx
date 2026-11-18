@@ -31,6 +31,7 @@ function OnlineOrInPersonTrade(): React.ReactElement {
   const friendCheckAvailable = useAtomValue(
     fromChatAtoms.friendCheckAvailableAtom
   )
+  const friendCheckCell = friendCheckAvailable ? <FriendCheckCell /> : null
 
   const top = (
     <Stack gap="$3">
@@ -86,9 +87,9 @@ function OnlineOrInPersonTrade(): React.ReactElement {
           />
         </Stack>
         <Stack gap="$2">
-          {friendCheckAvailable ? <FriendCheckCell /> : null}
           <CalculateAmountCell />
           <RevealIdentityCell />
+          {friendCheckCell}
         </Stack>
         <AnonymizationNotice />
       </YStack>
@@ -99,12 +100,13 @@ function OnlineOrInPersonTrade(): React.ReactElement {
     <YStack gap="$6" f={1}>
       {top}
 
-      {friendCheckAvailable ? (
-        <Stack gap="$3">
-          <SectionTitle>{t('tradeChecklist.safety')}</SectionTitle>
-          <FriendCheckCell />
+      <Stack gap="$3">
+        <SectionTitle>{t('tradeChecklist.safety')}</SectionTitle>
+        <Stack gap="$2">
+          <RevealIdentityCell />
+          {friendCheckCell}
         </Stack>
-      ) : null}
+      </Stack>
 
       <Stack gap="$3">
         <SectionTitle>{t('tradeChecklist.meetingDetail')}</SectionTitle>
@@ -119,13 +121,6 @@ function OnlineOrInPersonTrade(): React.ReactElement {
         <Stack gap="$2">
           <CalculateAmountCell />
           <SetNetworkCell />
-        </Stack>
-      </Stack>
-
-      <Stack gap="$3">
-        <SectionTitle>{t('tradeChecklist.privacy')}</SectionTitle>
-        <Stack gap="$2">
-          <RevealIdentityCell />
         </Stack>
       </Stack>
     </YStack>

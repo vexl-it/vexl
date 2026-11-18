@@ -1,19 +1,16 @@
 import {EditRow, UserImagePlaceholder} from '@vexl-next/ui'
 import {parsePhoneNumber} from 'awesome-phonenumber'
 import React from 'react'
-import {type ColorTokens} from 'tamagui'
 import {type StoredContactWithComputedValues} from '../../state/contacts/domain'
 import ContactPictureImage from '../ContactPictureImage'
 
 function CommonFriendRow({
   friend,
   trusted = false,
-  backgroundColor = '$backgroundSecondary',
   trailing,
 }: {
   readonly friend: StoredContactWithComputedValues
   readonly trusted?: boolean
-  readonly backgroundColor?: ColorTokens
   readonly trailing?: React.ReactNode
 }): React.ReactElement {
   const internationalNumber = parsePhoneNumber(
@@ -26,11 +23,10 @@ function CommonFriendRow({
       headline={friend.info.name}
       overline={internationalNumber ?? friend.computedValues.normalizedNumber}
       showEditButton={false}
-      backgroundColor={backgroundColor}
       trailing={trailing}
       avatar={{
         trusted,
-        trustBadgeRingColor: backgroundColor,
+        trustBadgeRingColor: '$backgroundSecondary',
         children: (
           <ContactPictureImage
             width={40}

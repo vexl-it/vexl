@@ -1,6 +1,6 @@
 import {Button} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
-import {Array, Schema} from 'effect'
+import {Schema} from 'effect'
 import {useAtom, useAtomValue} from 'jotai'
 import React, {useMemo, useState} from 'react'
 import {showFriendCheckPromptAtom} from '../../../../../state/chat/atoms/showFriendCheckPromptAtom'
@@ -15,10 +15,9 @@ const PROMPT_ID = Schema.decodeSync(ChatTransientMessageId)('friendCheckPrompt')
 
 export default function FriendCheckPrompt(): React.ReactElement | null {
   const {t} = useTranslation()
-  const {createHideMessageAtom, friendCheckAvailableAtom, friendChecksAtom} =
+  const {createHideMessageAtom, friendCheckAvailableAtom} =
     useMolecule(chatMolecule)
   const friendCheckAvailable = useAtomValue(friendCheckAvailableAtom)
-  const friendChecks = useAtomValue(friendChecksAtom)
   const [showPrompt, setShowPrompt] = useAtom(showFriendCheckPromptAtom)
   const [hiddenInThisChat, setHiddenInThisChat] = useAtom(
     useMemo(() => createHideMessageAtom(PROMPT_ID), [createHideMessageAtom])
@@ -26,13 +25,7 @@ export default function FriendCheckPrompt(): React.ReactElement | null {
   const [dontShowAgain, setDontShowAgain] = useState(false)
   const openFriendCheck = useOpenFriendCheck()
 
-  if (
-    !friendCheckAvailable ||
-    !showPrompt ||
-    hiddenInThisChat ||
-    Array.isNonEmptyReadonlyArray(friendChecks)
-  )
-    return null
+  if (!friendCheckAvailable || !showPrompt || hiddenInThisChat) return null
 
   return (
     <VexlbotActionCard

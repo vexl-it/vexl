@@ -17,7 +17,7 @@ import {
   type ChatReveals,
 } from './exchangeDetails'
 
-export const FRIEND_CHECK_PROMPT_AFTER_MESSAGES = 7
+const FRIEND_CHECK_PROMPT_AFTER_MESSAGES = 7
 
 function isTextMessage(message: ChatMessageWithState): boolean {
   return (

@@ -11,7 +11,6 @@ import {Array, Option, Schema, pipe} from 'effect'
 import {createInstance} from 'i18next'
 import {type ChatMessageWithState} from '../../chat/domain'
 import {
-  FRIEND_CHECK_PROMPT_AFTER_MESSAGES,
   friendCheckMessage,
   friendCheckPromptAnchor,
   type FriendCheckSubject,
@@ -60,7 +59,6 @@ function anchorText(messages: ChatMessageWithState[]): string | undefined {
 
 describe('friend check prompt', () => {
   it('waits for seven text messages from both sides together', () => {
-    expect(FRIEND_CHECK_PROMPT_AFTER_MESSAGES).toBe(7)
     expect(anchorText(texts(6))).toBeUndefined()
     expect(anchorText(texts(7))).toBe('7')
     expect(anchorText(texts(12))).toBe('7')

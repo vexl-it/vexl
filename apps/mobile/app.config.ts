@@ -1,4 +1,4 @@
-const VERSION_CODE = 261100300
+const VERSION_CODE = 261100301
 const VERSION = '26.11.3'
 const ENV_PRESET = process.env.ENV_PRESET
 const IS_LOCAL_ENV = ENV_PRESET === 'local'
@@ -325,6 +325,7 @@ export default {
       : []),
     './expo-plugins/android-eas-signing-plugin.js',
     './expo-plugins/android-manifest-nfc-action-plugin.js',
+    './expo-plugins/android-manifest-optional-portrait-plugin.js',
     'expo-font',
     'expo-sharing',
     'expo-status-bar',

@@ -6,6 +6,7 @@ import {
   Typography,
   YStack,
 } from '@vexl-next/ui'
+import {Array, pipe} from 'effect'
 import {useSetAtom} from 'jotai'
 import React from 'react'
 import {type TradeChecklistStackScreenProps} from '../../../../navigationTypes'
@@ -61,15 +62,18 @@ export default function RevealIdentityFirst({
           </Typography>
         </YStack>
         <YStack gap="$2">
-          {points.map((point) => (
-            <ChecklistCell
-              key={point.headline}
-              state="initial"
-              pressable={false}
-              subtitleNumberOfLines={0}
-              {...point}
-            />
-          ))}
+          {pipe(
+            points,
+            Array.map((point) => (
+              <ChecklistCell
+                key={point.headline}
+                state="initial"
+                pressable={false}
+                subtitleNumberOfLines={0}
+                {...point}
+              />
+            ))
+          )}
         </YStack>
       </YStack>
     </TradeChecklistItemPageLayout>

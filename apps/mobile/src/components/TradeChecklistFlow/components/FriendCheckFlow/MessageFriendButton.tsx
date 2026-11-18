@@ -32,6 +32,9 @@ export default function MessageFriendButton({
   const [visible, setVisible] = useState(false)
   const [message, setMessage] = useState('')
   const canSend = message.trim().length > 0
+  const title = t('tradeChecklist.friendCheck.messageDialog.title', {
+    name: friendName,
+  })
 
   const close = (): void => {
     setVisible(false)
@@ -74,13 +77,10 @@ export default function MessageFriendButton({
           </>
         }
       >
-        <DialogTitle>
-          {t('tradeChecklist.friendCheck.messageDialog.title', {
-            name: friendName,
-          })}
-        </DialogTitle>
+        <DialogTitle>{title}</DialogTitle>
         <YStack gap="$2">
           <TextArea
+            aria-label={title}
             minHeight={MESSAGE_MIN_HEIGHT}
             backgroundColor="$backgroundTertiary"
             borderRadius="$5"
@@ -90,7 +90,6 @@ export default function MessageFriendButton({
             fontFamily="$body"
             fontSize="$3"
             lineHeight={24}
-            multiline
             onChangeText={setMessage}
             value={message}
             verticalAlign="top"

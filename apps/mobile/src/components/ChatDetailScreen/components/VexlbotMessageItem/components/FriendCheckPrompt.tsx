@@ -24,6 +24,9 @@ export default function FriendCheckPrompt(): React.ReactElement | null {
   )
   const [dontShowAgain, setDontShowAgain] = useState(false)
   const openFriendCheck = useOpenFriendCheck()
+  const saveDontShowAgain = (): void => {
+    if (dontShowAgain) setShowPrompt(false)
+  }
 
   if (!friendCheckAvailable || !showPrompt || hiddenInThisChat) return null
 
@@ -34,10 +37,17 @@ export default function FriendCheckPrompt(): React.ReactElement | null {
       description={t('tradeChecklist.friendCheck.prompt.description')}
       onClosePress={() => {
         setHiddenInThisChat(true)
-        if (dontShowAgain) setShowPrompt(false)
+        saveDontShowAgain()
       }}
     >
-      <Button onPress={openFriendCheck} size="medium" variant="primary">
+      <Button
+        onPress={() => {
+          saveDontShowAgain()
+          openFriendCheck()
+        }}
+        size="medium"
+        variant="primary"
+      >
         {t('tradeChecklist.friendCheck.title')}
       </Button>
       <DontShowAgainCheckbox

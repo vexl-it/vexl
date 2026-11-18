@@ -2,7 +2,6 @@ import {
   IconButton,
   InfoBox,
   PhoneCall,
-  Share as ShareIcon,
   Typography,
   XStack,
   YStack,
@@ -11,13 +10,9 @@ import {
 import {Array, pipe} from 'effect'
 import {useAtomValue} from 'jotai'
 import React from 'react'
-import {Share} from 'react-native'
 import {type StoredContactWithComputedValues} from '../../../../state/contacts/domain'
 import * as fromChatAtoms from '../../../../state/tradeChecklist/atoms/fromChatAtoms'
-import {
-  friendCheckMessage,
-  type FriendCheckSubject,
-} from '../../../../state/tradeChecklist/utils/friendCheck'
+import {type FriendCheckSubject} from '../../../../state/tradeChecklist/utils/friendCheck'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import openUrl from '../../../../utils/openUrl'
 import CommonFriendRow from '../../../CommonFriends/CommonFriendRow'
@@ -25,6 +20,7 @@ import {friendFirstName} from '../../../CommonFriends/friendFirstName'
 import {useCommonFriends} from '../../../CommonFriends/useCommonFriends'
 import {TradeChecklistItemPageLayout} from '../TradeChecklistItemPageLayout'
 import IdentityCard from './IdentityCard'
+import MessageFriendButton from './MessageFriendButton'
 
 const ICON_SIZE = 20
 
@@ -48,22 +44,7 @@ function FriendActions({
       >
         <PhoneCall color={theme.foregroundPrimary.get()} size={ICON_SIZE} />
       </IconButton>
-      <IconButton
-        aria-label={t('tradeChecklist.friendCheck.messageFriend', {
-          name,
-        })}
-        backgroundColor="$accentYellowSecondary"
-        onPress={() => {
-          void Share.share({
-            message: friendCheckMessage({t, friend: name, subject}),
-          })
-        }}
-      >
-        <ShareIcon
-          color={theme.accentHighlightSecondary.get()}
-          size={ICON_SIZE}
-        />
-      </IconButton>
+      <MessageFriendButton friendName={name} subject={subject} />
     </XStack>
   )
 }

@@ -1,7 +1,7 @@
 import {useNavigation} from '@react-navigation/native'
 import {Avatar, Button, Typography, XStack, YStack} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
-import {Effect} from 'effect/index'
+import {Effect, Option} from 'effect/index'
 import {useAtomValue, useStore} from 'jotai'
 import React from 'react'
 import {type RootStackScreenProps} from '../../../navigationTypes'
@@ -30,6 +30,7 @@ import {formatSelectedDetails} from '../../TradeChecklistFlow/components/Exchang
 import {chatMolecule} from '../atoms'
 import RevealedInfoCard from './RevealedInfoCard'
 import useOpenExchangeDetails from './useOpenExchangeDetails'
+import FriendCheckSuggestion from './VexlbotMessageItem/components/FriendCheckSuggestion'
 import VexlbotActionCard from './VexlbotMessageItem/components/VexlbotActionCard'
 
 const requestDeclinedAvatar = require('./images/requestDeclined.png')
@@ -195,8 +196,10 @@ function ExchangeDetailsMessageItem({
 }: {
   message: ChatMessageWithState
 }): React.ReactElement | null {
-  const {chatWithMessagesAtom} = useMolecule(chatMolecule)
+  const {chatWithMessagesAtom, firstRevealOfThemAtom} =
+    useMolecule(chatMolecule)
   const chat = useAtomValue(chatWithMessagesAtom)
+  const firstRevealOfThem = useAtomValue(firstRevealOfThemAtom)
   const event = revealEventForMessage(chat, message)
 
   if (!event) return null
@@ -208,6 +211,9 @@ function ExchangeDetailsMessageItem({
       {isResponse(event.reveal) ? <OutcomeCard event={event} /> : null}
       {isAnyDetailSelected(pending) ? (
         <RequestCard event={event} pending={pending} />
+      ) : null}
+      {Option.contains(firstRevealOfThem, message.message.uuid) ? (
+        <FriendCheckSuggestion kind="afterReveal" />
       ) : null}
     </>
   )

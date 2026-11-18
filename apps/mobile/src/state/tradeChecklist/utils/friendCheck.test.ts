@@ -1,181 +1,149 @@
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
-import {HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
-import {generateChatMessageId} from '@vexl-next/domain/src/general/messaging'
-import {type FriendCheckChatMessage} from '@vexl-next/domain/src/general/tradeChecklist'
+import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {
+  generateChatMessageId,
+  type MessageType,
+} from '@vexl-next/domain/src/general/messaging'
 import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {Array, Schema} from 'effect'
+import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
+import {appLocaleCatalogs} from '@vexl-next/localization/src/translations'
+import {Array, Option, Schema, pipe} from 'effect'
+import {createInstance} from 'i18next'
 import {type ChatMessageWithState} from '../../chat/domain'
-import {friendCheckPhrase, friendChecksFromChat} from './friendCheck'
+import {
+  FRIEND_CHECK_PROMPT_AFTER_MESSAGES,
+  friendCheckMessage,
+  friendCheckPromptAnchor,
+  type FriendCheckSubject,
+} from './friendCheck'
 
 const sender = generatePrivateKey()
-const tom = Schema.decodeSync(HashedPhoneNumber)('tom')
-const kate = Schema.decodeSync(HashedPhoneNumber)('kate')
 
-function friendCheckMessage(
-  state: 'sent' | 'received',
-  friendCheck: Omit<FriendCheckChatMessage, 'timestamp'> & {timestamp?: number}
+function message(
+  text: string,
+  {
+    state = 'received',
+    messageType = 'MESSAGE',
+    image,
+  }: {
+    state?: 'received' | 'sent' | 'sending'
+    messageType?: MessageType
+    image?: UriString
+  } = {}
 ): ChatMessageWithState {
-  const time = Schema.decodeSync(UnixMilliseconds)(friendCheck.timestamp ?? 1)
   return {
     state,
     message: {
       uuid: generateChatMessageId(),
-      text: 'Checklist updated',
-      messageType: 'TRADE_CHECKLIST_UPDATE',
+      text,
+      messageType,
+      image,
       senderPublicKey: sender.publicKeyPemBase64,
-      time,
-      tradeChecklistUpdate: {friendCheck: {...friendCheck, timestamp: time}},
+      time: Schema.decodeSync(UnixMilliseconds)(0),
     },
   }
 }
 
-const request = (
-  state: 'sent' | 'received',
-  friend = tom,
-  rest: {phraseSeed?: number; timestamp?: number} = {}
-): ChatMessageWithState =>
-  friendCheckMessage(state, {
-    friend,
-    status: 'REQUEST',
-    phraseSeed: 3,
-    ...rest,
-  })
-
-const vouched = (
-  state: 'sent' | 'received',
-  friend = tom
-): ChatMessageWithState =>
-  friendCheckMessage(state, {friend, status: 'VOUCHED'})
-
-function statuses(
-  messages: ChatMessageWithState[],
-  friendChecks?: Parameters<typeof friendChecksFromChat>[0]['friendChecks']
-): string[] {
-  return Array.map(
-    friendChecksFromChat({messages, friendChecks}),
-    (check) => check.status
+function texts(count: number): ChatMessageWithState[] {
+  return Array.makeBy(count, (i) =>
+    message(String(i + 1), {state: i % 2 === 0 ? 'received' : 'sent'})
   )
 }
 
-describe('friendChecksFromChat', () => {
-  it('waits for me until I contact the friend', () => {
-    expect(statuses([request('sent')])).toEqual(['waitingForMe'])
-    expect(statuses([request('received')])).toEqual(['waitingForMe'])
+function anchorText(messages: ChatMessageWithState[]): string | undefined {
+  return pipe(
+    friendCheckPromptAnchor(messages),
+    Option.map((one) => one.message.text),
+    Option.getOrUndefined
+  )
+}
+
+describe('friend check prompt', () => {
+  it('waits for seven text messages from both sides together', () => {
+    expect(FRIEND_CHECK_PROMPT_AFTER_MESSAGES).toBe(7)
+    expect(anchorText(texts(6))).toBeUndefined()
+    expect(anchorText(texts(7))).toBe('7')
+    expect(anchorText(texts(12))).toBe('7')
   })
 
-  it('is pending once I contacted the friend', () => {
+  it('counts only ordinary text messages', () => {
     expect(
-      statuses([request('sent')], {
-        [tom]: {contactedWithPhrase: friendCheckPhrase(3)},
-      })
-    ).toEqual(['pending'])
-  })
-
-  it('waits for me again when the other side vouched first', () => {
-    expect(
-      statuses([request('sent'), vouched('received')], {
-        [tom]: {contactedWithPhrase: friendCheckPhrase(3)},
-      })
-    ).toEqual(['waitingForMe'])
-  })
-
-  it('waits for them after only I vouched', () => {
-    expect(statuses([request('received'), vouched('sent')])).toEqual([
-      'waitingForThem',
-    ])
-  })
-
-  it('is vouched once both sides vouched', () => {
-    expect(
-      statuses([request('sent'), vouched('sent'), vouched('received')])
-    ).toEqual(['vouched'])
-  })
-
-  it('is not vouched when my friend refused, whatever the other side says', () => {
-    expect(
-      statuses([request('sent'), vouched('received')], {
-        [tom]: {
-          contactedWithPhrase: friendCheckPhrase(3),
-          refusal: 'doesNotKnowThem',
-        },
-      })
-    ).toEqual(['notVouched'])
-  })
-
-  it('keeps one check per friend', () => {
-    const checks = friendChecksFromChat({
-      messages: [request('sent', tom), request('received', kate)],
-    })
-
-    expect(
-      Array.map(checks, (check) => [check.friend, check.startedBy])
-    ).toEqual([
-      [tom, 'me'],
-      [kate, 'them'],
-    ])
-  })
-
-  it('ignores a vouch for a friend nobody asked about', () => {
-    expect(statuses([vouched('received')])).toEqual([])
-  })
-
-  it('picks the same phrase on both phones when both ask at once', () => {
-    const mine = {phraseSeed: 7, timestamp: 10}
-    const theirs = {phraseSeed: 9, timestamp: 20}
-    const onMyPhone = friendChecksFromChat({
-      messages: [request('sent', tom, mine), request('received', tom, theirs)],
-    })
-    const onTheirPhone = friendChecksFromChat({
-      messages: [request('sent', tom, theirs), request('received', tom, mine)],
-    })
-
-    expect(Array.map(onMyPhone, (check) => check.phrase)).toEqual([
-      friendCheckPhrase(9),
-    ])
-    expect(Array.map(onTheirPhone, (check) => check.phrase)).toEqual([
-      friendCheckPhrase(9),
-    ])
-    expect(Array.map(onMyPhone, (check) => check.startedBy)).toEqual(['them'])
-  })
-
-  it('picks the same phrase when the sender lost its first request', () => {
-    const lost = {phraseSeed: 7, timestamp: 10}
-    const retry = {phraseSeed: 9, timestamp: 20}
-    const onSenderPhone = friendChecksFromChat({
-      messages: [request('sent', tom, retry)],
-    })
-    const onReceiverPhone = friendChecksFromChat({
-      messages: [
-        request('received', tom, lost),
-        request('received', tom, retry),
-      ],
-    })
-
-    expect(Array.map(onSenderPhone, (check) => check.phrase)).toEqual([
-      friendCheckPhrase(9),
-    ])
-    expect(Array.map(onReceiverPhone, (check) => check.phrase)).toEqual([
-      friendCheckPhrase(9),
-    ])
-  })
-
-  it('asks me to contact the friend again when the phrase I sent lost', () => {
-    expect(
-      statuses(
-        [
-          request('sent', tom, {phraseSeed: 7, timestamp: 10}),
-          request('received', tom, {phraseSeed: 9, timestamp: 20}),
-        ],
-        {[tom]: {contactedWithPhrase: friendCheckPhrase(7)}}
-      )
-    ).toEqual(['waitingForMe'])
+      anchorText([
+        message('request', {messageType: 'REQUEST_MESSAGING'}),
+        message('approve', {messageType: 'APPROVE_MESSAGING'}),
+        message('checklist', {messageType: 'TRADE_CHECKLIST_UPDATE'}),
+        message('photo', {
+          image: Schema.decodeSync(UriString)('file:///photo.jpg'),
+        }),
+        message('unsent', {state: 'sending'}),
+        ...texts(6),
+      ])
+    ).toBeUndefined()
   })
 })
 
-describe('friendCheckPhrase', () => {
-  it('turns a seed into a stable phrase', () => {
-    expect(friendCheckPhrase(0)).toBe('pink elephant')
-    expect(friendCheckPhrase(33)).toBe('blue fish')
-    expect(friendCheckPhrase(512)).toBe(friendCheckPhrase(0))
+describe('friend check message', () => {
+  const i18n = createInstance({
+    resources: {en: {translation: appLocaleCatalogs.en}},
+    lng: 'en',
+    keySeparator: false,
+    nsSeparator: false,
+    interpolation: {escapeValue: false},
+    initAsync: false,
+    showSupportNotice: false,
+  })
+  void i18n.init()
+  const t = (key: string, options?: Record<string, unknown>): string =>
+    i18n.t(key, options ?? {})
+
+  const fullPhoneNumber = Schema.decodeSync(E164PhoneNumber)('+420608204117')
+  const ask = (subject: FriendCheckSubject): string =>
+    friendCheckMessage({t, friend: 'Tomáš', subject})
+
+  it('names the nickname and full number', () => {
+    expect(ask({nickname: 'Pavel', fullPhoneNumber})).toBe(
+      'Hi Tomáš, do you know Pavel, +420 608 204 117? We’re about to meet and I think you two know each other. Is Pavel someone I can trust?'
+    )
+  })
+
+  it('uses the last digits that come with a nickname', () => {
+    expect(
+      ask({nickname: 'Pavel', partialPhoneNumber: '+420 ****** 117'})
+    ).toBe(
+      'Hi Tomáš, do you know Pavel (phone number ending 117)? We’re about to meet and I think you two know each other. Is Pavel someone I can trust?'
+    )
+  })
+
+  it('names only the nickname when no digits came with it', () => {
+    expect(ask({nickname: 'Pavel'})).toBe(
+      'Hi Tomáš, do you know Pavel? We’re about to meet and I think you two know each other. Is Pavel someone I can trust?'
+    )
+  })
+
+  it('asks whose number it is when only the number is revealed', () => {
+    expect(ask({fullPhoneNumber})).toBe(
+      'Hi Tomáš, do you know whose number +420 608 204 117 is? We’re about to meet and I think you two know each other. Is it someone I can trust?'
+    )
+  })
+
+  it('offers to send a photo when only the photo is revealed', () => {
+    expect(ask({})).toBe(
+      'Hi Tomáš, I’m about to meet someone I think you know. Can I send you a photo and ask whether you know this person?'
+    )
+  })
+
+  it('never mentions Vexl, bitcoin or trading', () => {
+    pipe(
+      [
+        {nickname: 'Pavel', fullPhoneNumber},
+        {nickname: 'Pavel', partialPhoneNumber: '+420 ****** 117'},
+        {nickname: 'Pavel'},
+        {fullPhoneNumber},
+        {},
+      ],
+      Array.forEach((subject) => {
+        expect(ask(subject)).not.toMatch(/vexl|bitcoin|btc|trad/i)
+      })
+    )
   })
 })

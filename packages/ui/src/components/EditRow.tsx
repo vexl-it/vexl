@@ -1,6 +1,6 @@
 import {Array, pipe} from 'effect'
 import React from 'react'
-import {getTokens, styled, useTheme, type ColorTokens} from 'tamagui'
+import {getTokens, styled, useTheme} from 'tamagui'
 
 import {PencilWriteEdit} from '../icons/PencilWriteEdit'
 import {QuestionmarkCircle} from '../icons/QuestionmarkCircle'
@@ -78,7 +78,6 @@ interface EditRowBaseProps {
   readonly headlineColor?: TypographyProps['color']
   readonly showEditButton?: boolean
   readonly showInitialIcon?: boolean
-  readonly backgroundColor?: ColorTokens
   readonly trailing?: React.ReactNode
   readonly onPress?: () => void
 }
@@ -155,7 +154,6 @@ export function EditRow({
   headlineColor = '$foregroundPrimary',
   showEditButton = state !== 'initial',
   showInitialIcon = true,
-  backgroundColor,
   trailing,
   onPress,
   ...rest
@@ -210,8 +208,6 @@ export function EditRow({
   return (
     <EditRowFrame
       frameType={isInitial ? 'transparent' : 'filled'}
-      // An undefined color would replace the one the frame type sets
-      {...(backgroundColor ? {backgroundColor} : {})}
       pressable={showEditButton}
       onPress={showEditButton ? onPress : undefined}
     >

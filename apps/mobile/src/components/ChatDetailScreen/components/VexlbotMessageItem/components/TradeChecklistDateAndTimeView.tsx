@@ -10,7 +10,7 @@ import * as dateAndTime from '../../../../../state/tradeChecklist/utils/dateAndT
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {formattingLocaleAtom} from '../../../../../utils/localization/formattingLocaleAtom'
 import {chatMolecule} from '../../../atoms'
-import FriendCheckMeetingReminder from './FriendCheckMeetingReminder'
+import FriendCheckSuggestion from './FriendCheckSuggestion'
 import VexlbotActionCard from './VexlbotActionCard'
 import VexlbotNextActionSuggestion from './VexlbotNextActionSuggestion'
 
@@ -108,7 +108,7 @@ export default function TradeChecklistDateAndTimeView({
               </Button>
             </YStack>
           </VexlbotActionCard>
-          <FriendCheckMeetingReminder />
+          <FriendCheckSuggestion kind="beforeMeeting" />
           {Option.isSome(lastTradeChecklistMessage) &&
             lastTradeChecklistMessage.value.message.uuid ===
               message.message.uuid && <VexlbotNextActionSuggestion />}

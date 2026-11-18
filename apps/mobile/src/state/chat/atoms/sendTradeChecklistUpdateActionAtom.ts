@@ -24,8 +24,8 @@ import {type ActionAtomType} from '../../../utils/atomUtils/ActionAtomType'
 import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
 import {version} from '../../../utils/environment'
 import removeFile from '../../../utils/removeFile'
+import {tradeChecklistDataAtom} from '../../tradeChecklist/atoms/fromChatAtoms'
 import {updateTradeChecklistState} from '../../tradeChecklist/utils'
-import {MINIMAL_VERSION_FOR_FRIEND_CHECK} from '../../tradeChecklist/utils/friendCheck'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 import {addMessagesToChat} from '../utils/addMessageToChat'
 import addRealLifeInfoToChat from '../utils/addRealLifeInfoToChat'
@@ -57,6 +57,7 @@ export default function createSubmitChecklistUpdateActionAtom(
   return atom(null, (get, set, update: TradeChecklistUpdate) => {
     const api = get(apiAtom)
     const chatWithMessages = get(chatWithMessagesAtom)
+    const tradeChecklistData = get(tradeChecklistDataAtom)
 
     return Effect.gen(function* (_) {
       const updateKeys = Struct.keys(update)
@@ -82,10 +83,7 @@ export default function createSubmitChecklistUpdateActionAtom(
         uuid: generateChatMessageId(),
         myVersion: version,
         senderPublicKey: chatWithMessages.chat.otherSide.publicKey,
-        minimalRequiredVersion:
-          key === 'friendCheck'
-            ? MINIMAL_VERSION_FOR_FRIEND_CHECK
-            : MINIMAL_REQUIRED_VERSION,
+        minimalRequiredVersion: MINIMAL_REQUIRED_VERSION,
       }))
 
       const sentMessages = yield* _(
@@ -127,11 +125,9 @@ export default function createSubmitChecklistUpdateActionAtom(
 
       if (
         update.identity?.status === 'DISAPPROVE_REVEAL' &&
-        chatWithMessages.tradeChecklist.identity.received?.image
+        tradeChecklistData.identity.received?.image
       ) {
-        void removeFile(
-          chatWithMessages.tradeChecklist.identity.received.image
-        )()
+        void removeFile(tradeChecklistData.identity.received.image)()
       }
 
       set(

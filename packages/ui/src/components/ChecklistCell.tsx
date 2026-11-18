@@ -57,13 +57,13 @@ const SubtitleText = styled(SizableText, {
   letterSpacing: '$1',
   lineHeight: '$1',
   color: '$foregroundSecondary',
-  numberOfLines: 1,
 })
 
 export interface ChecklistCellProps {
   readonly state: ChecklistCellState
   readonly headline: string
   readonly subtitle?: string
+  readonly subtitleNumberOfLines?: number
   readonly icon?: React.ComponentType<IconProps>
   readonly disabled?: boolean
   readonly pressable?: boolean
@@ -74,6 +74,7 @@ export function ChecklistCell({
   state,
   headline,
   subtitle,
+  subtitleNumberOfLines = 1,
   icon: Icon,
   disabled = false,
   pressable,
@@ -122,7 +123,11 @@ export function ChecklistCell({
       <IconBox backgroundColor={iconBoxBg}>{renderIcon()}</IconBox>
       <YStack flex={1} gap="$2">
         <HeadlineText>{headline}</HeadlineText>
-        {subtitle ? <SubtitleText>{subtitle}</SubtitleText> : null}
+        {subtitle ? (
+          <SubtitleText numberOfLines={subtitleNumberOfLines}>
+            {subtitle}
+          </SubtitleText>
+        ) : null}
       </YStack>
       {isPressable ? (
         <ChevronRight color={theme.foregroundSecondary.get()} size={24} />

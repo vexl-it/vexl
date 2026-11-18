@@ -108,7 +108,9 @@ export default function TradeChecklistDateAndTimeView({
               </Button>
             </YStack>
           </VexlbotActionCard>
-          <FriendCheckSuggestion kind="beforeMeeting" />
+          {pick.dateTime > DateTime.now().toMillis() ? (
+            <FriendCheckSuggestion kind="beforeMeeting" />
+          ) : null}
           {Option.isSome(lastTradeChecklistMessage) &&
             lastTradeChecklistMessage.value.message.uuid ===
               message.message.uuid && <VexlbotNextActionSuggestion />}

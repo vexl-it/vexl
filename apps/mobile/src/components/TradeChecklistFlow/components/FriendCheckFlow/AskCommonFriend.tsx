@@ -40,7 +40,10 @@ function FriendActions({
       <IconButton
         aria-label={t('tradeChecklist.friendCheck.callFriend', {name})}
         backgroundColor="$backgroundTertiary"
-        onPress={openUrl(`tel:${friend.computedValues.normalizedNumber}`)}
+        onPress={openUrl(
+          `tel:${friend.computedValues.normalizedNumber}`,
+          friend.computedValues.normalizedNumber
+        )}
       >
         <PhoneCall color={theme.foregroundPrimary.get()} size={ICON_SIZE} />
       </IconButton>

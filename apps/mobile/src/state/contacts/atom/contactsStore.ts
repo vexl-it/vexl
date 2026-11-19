@@ -1,4 +1,7 @@
-import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {
+  type E164PhoneNumber,
+  E164PhoneNumberUnsafe,
+} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {IsoDatetimeString} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import {Array, Option, pipe, Schema} from 'effect'
 import {atom} from 'jotai'
@@ -19,6 +22,9 @@ export const contactsStoreAtom = atomWithParsedMmkvStorage(
         default: () => false,
       }
     ),
+    numbersInPhoneAtLastSync: Schema.optional(
+      Schema.Array(E164PhoneNumberUnsafe)
+    ),
   })
 )
 
@@ -29,6 +35,10 @@ export const storedContactsAtom = focusAtom(contactsStoreAtom, (o) =>
 export const needsFullContactsReplaceAfterContactEditAtom = focusAtom(
   contactsStoreAtom,
   (o) => o.prop('needsFullContactsReplaceAfterContactEdit')
+)
+
+export const numbersInPhoneAtLastSyncAtom = focusAtom(contactsStoreAtom, (o) =>
+  o.prop('numbersInPhoneAtLastSync')
 )
 
 export const newPhoneContactsToReviewRawNumbersAtom = atom((get) =>

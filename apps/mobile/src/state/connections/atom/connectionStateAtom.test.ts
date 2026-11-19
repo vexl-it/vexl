@@ -53,10 +53,6 @@ jest.mock(
     }
   }
 )
-jest.mock('../../../utils/notifications', () => {
-  const {Effect} = jest.requireActual('effect')
-  return {getNotificationTokenE: () => Effect.succeed(null)}
-})
 jest.mock(
   '../../../utils/notifications/showDebugNotificationIfEnabled',
   () => ({showDebugNotificationIfEnabled: jest.fn()})
@@ -153,6 +149,21 @@ it('fails when a previously large graph comes back empty', async () => {
   ).not.toHaveBeenCalled()
   expect(store.get(connectionStateAtom)).toBe(previous)
   expect(store.get(unexpectedReachDropDetectedAtom)).toBe(true)
+})
+
+it('accepts an empty graph despite the stored reach when asked to', async () => {
+  const store = createStore()
+  store.set(persistentDataAboutReachAndImportedContactsAtom, {
+    reach: 60,
+    numberOfImportedContacts: 5,
+  })
+  mockGraph(store, {firstLevel: [], secondLevel: []})
+  const next = await Effect.runPromise(
+    store.set(fetchConnectionsActionAtom, {acceptEmptyGraph: true})
+  )
+  expect(next.firstLevel).toEqual([])
+  expect(next.secondLevel).toEqual([])
+  expect(store.get(unexpectedReachDropDetectedAtom)).toBe(false)
 })
 
 it('accepts an empty graph for a user who never had reach', async () => {

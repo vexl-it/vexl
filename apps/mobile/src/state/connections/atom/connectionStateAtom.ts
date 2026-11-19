@@ -1,27 +1,21 @@
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {type PublicKeyV2} from '@vexl-next/cryptography/src/KeyHolder/brandsV2'
 import {type ChatUserIdentity} from '@vexl-next/domain/src/general/messaging'
-import {type NotificationTrackingId} from '@vexl-next/domain/src/general/NotificationTrackingId.brand'
 import {
   UnixMilliseconds0,
   unixMillisecondsNow,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {FETCH_CONNECTIONS_PAGE_SIZE} from '@vexl-next/resources-utils/src/offers/utils/fetchContactsForOffer'
 import fetchAllPaginatedData from '@vexl-next/rest-api/src/fetchAllPaginatedData'
 import {type ContactApi} from '@vexl-next/rest-api/src/services/contact'
-import {Array, Effect, HashMap, Number, Option, Schema} from 'effect'
+import {Array, Effect, HashMap, Number, Schema} from 'effect'
 import {pipe} from 'fp-ts/function'
 import {atom, type Atom} from 'jotai'
 import {apiAtom} from '../../../api'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
 import deduplicate from '../../../utils/deduplicate'
-import {
-  areNotificationsEnabledE,
-  getNotificationTokenE,
-} from '../../../utils/notifications'
 import {showDebugNotificationIfEnabled} from '../../../utils/notifications/showDebugNotificationIfEnabled'
-import reportError, {reportErrorE} from '../../../utils/reportError'
+import reportError from '../../../utils/reportError'
 import {effectWithEnsuredBenchmark} from '../../ActionBenchmarks'
 import {clubsWithMembersAtom} from '../../clubs/atom/clubsWithMembersAtom'
 import {getClubReach} from '../../clubs/utils'
@@ -76,7 +70,11 @@ function fetchContacts(
 
 export const fetchConnectionsActionAtom = atom(
   null,
-  (get, set, notificationTrackingId?: NotificationTrackingId) => {
+  (
+    get,
+    set,
+    {acceptEmptyGraph = false}: {readonly acceptEmptyGraph?: boolean} = {}
+  ) => {
     return Effect.gen(function* (_) {
       const api = get(apiAtom)
 
@@ -96,86 +94,11 @@ export const fetchConnectionsActionAtom = atom(
       const publicKeys = firstAndSecondLevelConnections(firstLevel, secondLevel)
       if (
         !Array.isNonEmptyArray(publicKeys) &&
+        !acceptEmptyGraph &&
         get(persistedReachRequiresConnectionsAtom)
       ) {
         set(unexpectedReachDropDetectedAtom, true)
         return yield* _(Effect.fail(new UnexpectedReachDropError()))
-      }
-
-      // report difference
-      // Forked and time-limited (like the metrics report below) so a hanging
-      // push-token fetch can never stall the connections sync.
-      const connectionState = get(connectionStateAtom)
-
-      if (connectionState.lastUpdate) {
-        yield* _(
-          Effect.gen(function* (_) {
-            const notificationToken = yield* _(
-              getNotificationTokenE(),
-              Effect.timeout('3 seconds'),
-              Effect.option
-            )
-            if (
-              Option.isNone(notificationToken) ||
-              notificationToken.value === null
-            )
-              return
-
-            const newFirstLevelConnections = Array.difference(firstLevel)(
-              connectionState.firstLevel
-            )
-            const newSecondLevelConnections = Array.difference(secondLevel)(
-              connectionState.secondLevel
-            )
-            const newConnectionsUnique = pipe(
-              newFirstLevelConnections,
-              Array.appendAll(newSecondLevelConnections),
-              Array.dedupe
-            )
-
-            console.log('🦋 New connections:', newConnectionsUnique.length)
-
-            // only if notification tracking id has been passed
-            if (notificationTrackingId) {
-              const notificationsEnabled = yield* _(
-                areNotificationsEnabledE(),
-                Effect.option
-              )
-
-              yield* _(
-                api.metrics
-                  .reportNotificationInteraction({
-                    count: newConnectionsUnique.length,
-                    notificationType: 'Network',
-                    ...(Option.isSome(notificationsEnabled)
-                      ? {
-                          notificationsEnabled:
-                            notificationsEnabled.value.notifications,
-                          backgroundTaskEnabled:
-                            notificationsEnabled.value.backgroundTasks,
-                        }
-                      : {}),
-                    type: 'NewConnectionsReceived',
-                    uuid: generateUuid(),
-                    trackingId: notificationTrackingId,
-                  })
-                  .pipe(
-                    Effect.timeout(500),
-                    Effect.retry({times: 3}),
-                    Effect.tapError((e) =>
-                      reportErrorE(
-                        'warn',
-                        new Error('Error reporting new connections'),
-                        {e}
-                      )
-                    )
-                  )
-              )
-            }
-          }),
-          Effect.ignore,
-          Effect.forkDaemon
-        )
       }
 
       const serverToClientHashesToHashedPhoneNumbersMap = yield* _(

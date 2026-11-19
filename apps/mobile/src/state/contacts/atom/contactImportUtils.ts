@@ -28,10 +28,12 @@ export function determineContactsImportUpdatePlan({
   contactsThatShouldBeImported,
   someContactsShouldBeRemovedFromImport,
   forceFullReplace,
+  resendImportedContacts,
 }: {
   readonly contactsThatShouldBeImported: readonly StoredContactWithComputedValues[]
   readonly someContactsShouldBeRemovedFromImport: boolean
   readonly forceFullReplace: boolean
+  readonly resendImportedContacts: boolean
 }): {
   readonly doIncrementalUpdate: boolean
   readonly newContactsToImport: readonly StoredContactWithComputedValues[]
@@ -39,12 +41,13 @@ export function determineContactsImportUpdatePlan({
   const doIncrementalUpdate =
     !forceFullReplace && !someContactsShouldBeRemovedFromImport
 
-  const newContactsToImport = doIncrementalUpdate
-    ? pipe(
-        contactsThatShouldBeImported,
-        Array.filter((contact) => !contact.flags.imported)
-      )
-    : contactsThatShouldBeImported
+  const newContactsToImport =
+    doIncrementalUpdate && !resendImportedContacts
+      ? pipe(
+          contactsThatShouldBeImported,
+          Array.filter((contact) => !contact.flags.imported)
+        )
+      : contactsThatShouldBeImported
 
   return {
     doIncrementalUpdate,

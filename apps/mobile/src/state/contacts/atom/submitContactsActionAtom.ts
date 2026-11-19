@@ -58,6 +58,7 @@ type SubmitContactsActionParams = {
   readonly showOfferReencryptionDialog: boolean
   readonly manageLoadingOverlay?: boolean
   readonly showContactImportProgressDialog?: boolean
+  readonly acceptEmptyGraph?: boolean
 } & ContactsImportSource
 
 type SubmitContactsResult =
@@ -264,9 +265,11 @@ const determineContactsImportUpdatePlanActionAtom = atom(
     set,
     {
       contactsImportSource,
+      resendImportedContacts,
       showContactImportProgressDialog,
     }: {
       readonly contactsImportSource: ContactsImportSource
+      readonly resendImportedContacts: boolean
       readonly showContactImportProgressDialog: boolean
     }
   ): Effect.Effect<ContactsImportUpdatePlan> => {
@@ -368,6 +371,7 @@ const determineContactsImportUpdatePlanActionAtom = atom(
         contactsThatShouldBeImported: contactsToImport,
         someContactsShouldBeRemovedFromImport,
         forceFullReplace: needsFullContactsReplaceAfterContactEdit,
+        resendImportedContacts,
       })
     })
   }
@@ -560,10 +564,12 @@ const syncNetworkAfterContactsImportActionAtom = atom(
       manageLoadingOverlay,
       showContactImportProgressDialog,
       showOfferReencryptionDialog,
+      acceptEmptyGraph,
     }: {
       readonly manageLoadingOverlay: boolean
       readonly showContactImportProgressDialog: boolean
       readonly showOfferReencryptionDialog: boolean
+      readonly acceptEmptyGraph?: boolean
     }
   ) => {
     const {t} = get(translationAtom)
@@ -658,6 +664,7 @@ const syncNetworkAfterContactsImportActionAtom = atom(
               })
             },
             isInBackground: false,
+            acceptEmptyGraph,
           })
         )
 
@@ -708,6 +715,7 @@ const syncNetworkAfterContactsImportActionAtom = atom(
         yield* _(
           set(updateAndReencryptAllConnectionsActionAtom, {
             isInBackground: false,
+            acceptEmptyGraph,
           })
         )
         yield* _(
@@ -748,6 +756,9 @@ export const submitContactsActionAtom = atom(
       const importUpdatePlan = yield* _(
         set(determineContactsImportUpdatePlanActionAtom, {
           contactsImportSource: params,
+          // An empty graph is only genuine once the server holds every contact
+          // again, so contacts already marked as imported are sent too.
+          resendImportedContacts: params.acceptEmptyGraph ?? false,
           showContactImportProgressDialog,
         })
       )
@@ -767,6 +778,7 @@ export const submitContactsActionAtom = atom(
           manageLoadingOverlay,
           showContactImportProgressDialog,
           showOfferReencryptionDialog: params.showOfferReencryptionDialog,
+          acceptEmptyGraph: params.acceptEmptyGraph,
         })
       )
 

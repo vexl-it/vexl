@@ -43,8 +43,11 @@ export const persistentDataAboutNumberOfImportedContactsAtom = focusAtom(
   (p) => p.prop('numberOfImportedContacts')
 )
 
-// Written only after a successful import, so an empty graph fetched later is
-// a server failure rather than a fresh user.
+// A heuristic: a user who had this much reach and has contacts imported
+// normally never gets an empty graph, so an ordinary sync treats one as a
+// server failure. It can also be genuine (e.g. a network that only came through
+// numbers banned from connecting people), which a confirmed contacts re-import
+// accepts.
 export const persistedReachRequiresConnectionsAtom = atom((get) => {
   const {reach, numberOfImportedContacts} = get(
     persistentDataAboutReachAndImportedContactsAtom

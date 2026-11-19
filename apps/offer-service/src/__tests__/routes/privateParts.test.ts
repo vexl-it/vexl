@@ -1,5 +1,6 @@
 import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
+import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {
@@ -17,7 +18,7 @@ import {
 import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
-import {Effect, Schema} from 'effect'
+import {Array, Effect, Schema} from 'effect'
 import {makeTestCommonAndSecurityHeaders} from '../utils/createMockedUser'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../utils/runPromiseInMockedEnvironment'
@@ -345,6 +346,52 @@ describe('Delete private part', () => {
         )
 
         expectErrorResponse(CanNotDeletePrivatePartOfAuthor)(response)
+      })
+    )
+  })
+
+  it('Deletes private parts for more keys than postgres allows bind parameters in one statement', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const client = yield* _(NodeTestingApp)
+
+        const authHeaders = yield* _(
+          createDummyAuthHeadersForUser({
+            phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333333'),
+            publicKey: me.publicKeyPemBase64,
+          })
+        )
+        yield* _(setAuthHeaders(authHeaders))
+
+        const nonExistingKeys = Array.makeBy(40_000, (i) =>
+          Schema.decodeSync(PublicKeyPemBase64)(`nonExistingKey${i}`)
+        )
+
+        yield* _(
+          client.deletePrivatePart({
+            payload: {
+              adminIds: [offer1.adminId],
+              publicKeys: [...nonExistingKeys, user2.publicKeyPemBase64],
+            },
+            headers: makeTestCommonAndSecurityHeaders(authHeaders),
+          })
+        )
+
+        const sql = yield* _(SqlClient.SqlClient)
+        const remainingKeys = yield* _(sql`
+          SELECT
+            offer_private.user_public_key
+          FROM
+            offer_private
+            JOIN offer_public ON offer_public.id = offer_private.offer_id
+          WHERE
+            offer_public.offer_id = ${offer1.offerId}
+            AND offer_private.user_public_key IN ${sql.in([
+            user2.publicKeyPemBase64,
+            me.publicKeyPemBase64,
+          ])}
+        `)
+        expect(remainingKeys).toEqual([{userPublicKey: me.publicKeyPemBase64}])
       })
     )
   })

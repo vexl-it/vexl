@@ -49,8 +49,10 @@ import {getOfferTargetConnections} from '../utils/getOfferTargetConnections'
 import {resolveFetchedConnections} from '../utils/resolveFetchedConnections'
 import connectionStateAtom, {
   fetchConnectionsActionAtom,
+  fistAndSecondLevelConnectionsReachAtom,
 } from './connectionStateAtom'
 import {offersReencryptionStartedAtAtom} from './offersReencryptionStartedAtAtom'
+import {raisePersistedReachActionAtom} from './reachNumberWithoutClubsConnectionsMmkvAtom'
 
 const BACKGROUND_TIME_LIMIT_MS = 25_000
 
@@ -378,7 +380,13 @@ const fetchAndQueueConnectionsActionAtom = atom(
       // can rediscover the work. Uploads can still use the fresh graph in memory.
       if (offerToConnectionsAtom.flushNow()) {
         set(connectionStateAtom, fetched.value)
-        connectionStateAtom.flushNow()
+        // Arms the reach-drop guard for a network that grew since the last
+        // contacts import.
+        if (connectionStateAtom.flushNow())
+          set(
+            raisePersistedReachActionAtom,
+            get(fistAndSecondLevelConnectionsReachAtom)
+          )
       }
       return fetched.value
     })

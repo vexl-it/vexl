@@ -155,6 +155,7 @@ jest.mock('../../ActionBenchmarks', () => ({
 }))
 
 const mockImportContacts = jest.fn()
+const mockFirstLevelKeys = jest.fn((): string[] => [])
 jest.mock('../../../api', () => {
   const {atom} = jest.requireActual('jotai')
   const {Effect} = jest.requireActual('effect')
@@ -163,7 +164,11 @@ jest.mock('../../../api', () => {
     apiAtom: atom({
       contact: {
         importContacts: (request: unknown) => mockImportContacts(request),
-        fetchMyContactsPaginated: () => Effect.succeed(emptyPage),
+        fetchMyContactsPaginated: ({level}: {level: string}) =>
+          Effect.succeed({
+            ...emptyPage,
+            items: level === 'FIRST' ? mockFirstLevelKeys() : [],
+          }),
         fetchCommonConnectionsPaginated: () => Effect.succeed(emptyPage),
       },
       offer: {},
@@ -184,6 +189,8 @@ import {
   persistentDataAboutReachAndImportedContactsAtom,
   persistentDataAboutReachAtom,
 } from '../../connections/atom/reachNumberWithoutClubsConnectionsMmkvAtom'
+// eslint-disable-next-line import/first
+import {updateAndReencryptAllConnectionsActionAtom} from '../../connections/atom/updateAndReencryptAllConnectionsActionAtom'
 // eslint-disable-next-line import/first
 import {submitContactsActionAtom} from './submitContactsActionAtom'
 
@@ -232,6 +239,7 @@ beforeEach(() => {
   const {storage} = jest.requireActual('../../../utils/mmkv/effectMmkv')
   storage._storage.clearAll()
   jest.spyOn(Alert, 'alert').mockImplementation(() => {})
+  mockFirstLevelKeys.mockReturnValue([])
   mockImportContacts.mockImplementation(({contacts}: {contacts: string[]}) =>
     Effect.succeed({
       imported: true,
@@ -277,6 +285,51 @@ it('accepts an empty graph after the user confirmed the re-import', async () => 
   const next = await Effect.runPromise(store.set(fetchConnectionsActionAtom))
   expect(next.firstLevel).toEqual([])
   expect(store.get(unexpectedReachDropDetectedAtom)).toBe(false)
+})
+
+it('arms the guard again once an ordinary sync finds a network', async () => {
+  const store = storeWithLostNetwork()
+  await Effect.runPromise(
+    store.set(submitContactsActionAtom, {
+      ...reimportParams,
+      acceptEmptyGraph: true,
+    })
+  )
+  expect(store.get(persistentDataAboutReachAtom)).toBe(0)
+
+  mockFirstLevelKeys.mockReturnValue(Array.makeBy(60, (i) => `V2_PUB_${i}`))
+  await Effect.runPromise(
+    store.set(updateAndReencryptAllConnectionsActionAtom, {
+      isInBackground: false,
+    })
+  )
+  expect(store.get(connectionStateAtom).firstLevel).toHaveLength(60)
+  expect(store.get(persistentDataAboutReachAtom)).toBe(60)
+
+  mockFirstLevelKeys.mockReturnValue([])
+  const error = await Effect.runPromise(
+    store.set(fetchConnectionsActionAtom).pipe(Effect.flip)
+  )
+  expect(error).toBeInstanceOf(UnexpectedReachDropError)
+})
+
+it('keeps the guard armed when an ordinary sync finds a smaller network', async () => {
+  const store = storeWithLostNetwork()
+
+  mockFirstLevelKeys.mockReturnValue(Array.makeBy(40, (i) => `V2_PUB_${i}`))
+  await Effect.runPromise(
+    store.set(updateAndReencryptAllConnectionsActionAtom, {
+      isInBackground: false,
+    })
+  )
+  expect(store.get(connectionStateAtom).firstLevel).toHaveLength(40)
+  expect(store.get(persistentDataAboutReachAtom)).toBe(60)
+
+  mockFirstLevelKeys.mockReturnValue([])
+  const error = await Effect.runPromise(
+    store.set(fetchConnectionsActionAtom).pipe(Effect.flip)
+  )
+  expect(error).toBeInstanceOf(UnexpectedReachDropError)
 })
 
 it('keeps rejecting an empty graph after an ordinary import', async () => {

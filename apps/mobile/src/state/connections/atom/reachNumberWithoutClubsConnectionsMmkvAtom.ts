@@ -38,6 +38,19 @@ export const persistentDataAboutReachAtom = focusAtom(
   (p) => p.prop('reach')
 )
 
+/**
+ * Ordinary syncs only raise the stored reach, so a shrinking graph never
+ * disarms the reach-drop guard. Only a contacts import lowers it. Saved right
+ * away, so a restart never pairs a stored graph with the reach of an older one.
+ */
+export const raisePersistedReachActionAtom = atom(
+  null,
+  (get, set, reach: number): void => {
+    set(persistentDataAboutReachAtom, (stored) => Math.max(stored, reach))
+    persistentDataAboutReachAndImportedContactsMmkvAtom.flushNow()
+  }
+)
+
 export const persistentDataAboutNumberOfImportedContactsAtom = focusAtom(
   persistentDataAboutReachAndImportedContactsAtom,
   (p) => p.prop('numberOfImportedContacts')

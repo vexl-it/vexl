@@ -436,7 +436,7 @@ describe('one account with several phone numbers', () => {
     )
   })
 
-  it('keeps verified friends of a number from the credentials of its previous holder', async () => {
+  it('keeps common friends of a number from the credentials of its previous holder', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const previousHolder = yield* _(
@@ -459,18 +459,18 @@ describe('one account with several phone numbers', () => {
           createAndImportUsersFromNetwork(savedExtra, [extra, otherSide])
         )
 
-        const verifiedFor = (user: DummyUser): TestEffect<readonly string[]> =>
-          Effect.map(
-            fetchAllCommonConnections(user, [
-              otherSide.keys.publicKeyPemBase64,
-            ]),
-            Array.flatMap((one) => one.common.verifiedHashes)
-          )
+        const commonWithOtherSide = (
+          user: DummyUser
+        ): TestEffect<CommonConnection[]> =>
+          fetchAllCommonConnections(user, [otherSide.keys.publicKeyPemBase64])
 
-        expect(yield* _(verifiedFor(holder))).toEqual([
-          savedExtra.serverHashedNumberForClient,
-        ])
-        expect(yield* _(verifiedFor(previousHolder))).toEqual([])
+        expect(
+          Array.flatMap(
+            yield* _(commonWithOtherSide(holder)),
+            (one) => one.common.verifiedHashes
+          )
+        ).toEqual([savedExtra.serverHashedNumberForClient])
+        expect(yield* _(commonWithOtherSide(previousHolder))).toEqual([])
       })
     )
   })
@@ -506,6 +506,17 @@ describe('one account with several phone numbers', () => {
             Option.getOrThrow(main.vexlNotificationToken)
           ),
         ])
+
+        // The account checking its own number, as when adding it is retried
+        yield* _(clearEnqueuedNotifications)
+        yield* _(setAuthHeaders(extra.authHeaders))
+        yield* _(
+          app.User.checkUserExists({
+            urlParams: {notifyExistingUserAboutLogin: true},
+            headers: makeTestCommonAndSecurityHeaders(extra.authHeaders),
+          })
+        )
+        expect(yield* _(getEnqueuedNotifications)).toEqual([])
       })
     )
   })

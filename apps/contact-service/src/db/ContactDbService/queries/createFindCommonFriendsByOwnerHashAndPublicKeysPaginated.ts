@@ -68,6 +68,18 @@ export const createFindCommonFriendsByOwnerHashAndPublicKeysPaginated =
         WHERE
           ${sql.and([
           sql`my_contact.hash_from = ${hash.ownerHash}`,
+          // The number may belong to another account by now
+          sql`
+            EXISTS (
+              SELECT
+                1
+              FROM
+                users requester
+              WHERE
+                requester.hash = ${hash.ownerHash}
+                AND requester.public_key = ${hash.ownerPublicKey}
+            )
+          `,
           sql.or([
             sql.in('other_side.public_key', hash.publicKeys),
             sql.in('other_side.public_key_v2', hash.publicKeysV2),

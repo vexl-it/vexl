@@ -1,7 +1,5 @@
-import {useNavigation} from '@react-navigation/native'
-import {Typography} from '@vexl-next/ui'
-import React, {useCallback} from 'react'
-import {type RootStackScreenProps} from '../../../navigationTypes'
+import {Typography, YStack} from '@vexl-next/ui'
+import React from 'react'
 import {
   commitHashShort,
   nativeBuildNumber,
@@ -9,18 +7,10 @@ import {
   version,
   versionCode,
 } from '../../../utils/environment'
-import SecretDoor from '../../SecretDoor'
 
 function VersionInfo(): React.ReactElement {
-  const navigation =
-    useNavigation<RootStackScreenProps<'Account'>['navigation']>()
-
-  const handleSecretDoorOpen = useCallback(() => {
-    navigation.navigate('DebugScreen')
-  }, [navigation])
-
   return (
-    <SecretDoor onSecretDoorOpen={handleSecretDoorOpen}>
+    <YStack>
       <Typography
         textAlign="center"
         variant="description"
@@ -35,7 +25,7 @@ function VersionInfo(): React.ReactElement {
       >
         JS {version} ({versionCode}) · {commitHashShort}
       </Typography>
-    </SecretDoor>
+    </YStack>
   )
 }
 

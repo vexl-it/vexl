@@ -24,8 +24,10 @@ Every PR gets a comment with a QR code (published by
 2. Open Account → Scan QR code and scan the QR from the PR comment (or open
    the link from the comment on your phone).
 3. Confirm — the app downloads the PR's JS bundle and restarts into it. The
-   app keeps following the PR channel until you clear it: tap the version
-   footer in Account to open the debug screen, then "Clear preview".
+   app keeps following the PR channel until you clear it: open the debug
+   screen (Account → Settings → Debug screen, shown once developer mode is on
+   — enable it by tapping the "No logs" text in App logs 7 times), then
+   "Clear preview".
 
 Every push to main is published the same way to channel `main`
 (`.github/workflows/main-preview.yaml`) — load it from the debug screen via

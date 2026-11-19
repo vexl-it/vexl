@@ -50,6 +50,11 @@ export function BackofficeLayout({children}: {children: React.ReactNode}) {
       current: pathname.startsWith('/short-links'),
     },
     {
+      name: 'Banned numbers',
+      href: '/banned-numbers',
+      current: pathname.startsWith('/banned-numbers'),
+    },
+    {
       name: 'Blog posts',
       href: '/blog-posts',
       current: pathname.startsWith('/blog-posts'),

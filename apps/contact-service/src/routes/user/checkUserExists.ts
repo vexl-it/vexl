@@ -23,25 +23,27 @@ export const checkUserExists = HttpApiBuilder.handler(
 
       if (
         req.urlParams.notifyExistingUserAboutLogin &&
-        Option.isSome(existingUser)
+        Option.isSome(existingUser) &&
+        // Not the caller's own account, as when adding a number is retried
+        existingUser.value.publicKey !== security.publicKey
       ) {
-        yield* _(Effect.logInfo('Sending notification to existing user'))
+        // An extra number has no token of its own, its account's main one does
+        const token = yield* _(
+          userDb.findVexlNotificationTokenOfAccountByHash(security.serverHash)
+        )
 
-        if (Option.isSome(existingUser.value.vexlNotificationToken)) {
+        if (Option.isSome(token)) {
+          yield* _(Effect.logInfo('Sending notification to existing user'))
           yield* _(
             userNotificationService.notifyUserAboutLoginOnDifferentDevice(
-              existingUser.value.vexlNotificationToken.value
+              token.value
             )
           )
         } else {
           yield* _(
-            Effect.logInfo('Not sending notification to existing user', {
-              notifyParam: req.urlParams.notifyExistingUserAboutLogin,
-              existingUserExists: Option.isSome(existingUser),
-              existingUserHasToken:
-                Option.isSome(existingUser) &&
-                Option.isSome(existingUser.value.vexlNotificationToken),
-            })
+            Effect.logInfo(
+              'Not sending notification to existing user, it has no token'
+            )
           )
         }
       }

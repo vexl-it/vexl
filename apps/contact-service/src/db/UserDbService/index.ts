@@ -1,5 +1,6 @@
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {type UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
+import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {type ServerHashedNumber} from '@vexl-next/domain/src/general/ServerHashedNumber'
 import {Context, Effect, Layer, type Option} from 'effect'
 import {type UserRecord} from './domain'
@@ -15,6 +16,7 @@ import {
   type FindUsersToNotifyAboutInactivityParams,
   type UserToNotifyAboutInactivity,
 } from './queries/createFindUsersToNotifyAboutInactivity'
+import {createFindVexlNotificationTokenOfAccountByHash} from './queries/createFindVexlNotificationTokenOfAccountByHash'
 import {
   createFindVexlNotificationTokensForNewContentNotification,
   type NewContentNotificationResults,
@@ -70,6 +72,13 @@ export interface UserDbOperations {
   findUserByHash: (
     hash: ServerHashedNumber
   ) => Effect.Effect<Option.Option<UserRecord>, UnexpectedServerError>
+
+  findVexlNotificationTokenOfAccountByHash: (
+    hash: ServerHashedNumber
+  ) => Effect.Effect<
+    Option.Option<VexlNotificationToken>,
+    UnexpectedServerError
+  >
 
   findUserByPublicKeyAndHash: (args: {
     hash: ServerHashedNumber
@@ -146,6 +155,9 @@ export class UserDbService extends Context.Tag('UserDbService')<
       )
       const insertUser = yield* _(createInsertUser)
       const findUserByHash = yield* _(createFindUserByHash)
+      const findVexlNotificationTokenOfAccountByHash = yield* _(
+        createFindVexlNotificationTokenOfAccountByHash
+      )
       const findUserByPublicKeyAndHash = yield* _(
         createFindUserbyPublicKeyAndHash
       )
@@ -186,6 +198,7 @@ export class UserDbService extends Context.Tag('UserDbService')<
         clearVexlNotificationTokenHeldByOtherUsers,
         insertUser,
         findUserByHash,
+        findVexlNotificationTokenOfAccountByHash,
         findUserByPublicKeyAndHash,
         deleteUserByPublicKeyAndHash,
         updateRefreshUser,

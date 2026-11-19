@@ -475,6 +475,41 @@ describe('one account with several phone numbers', () => {
     )
   })
 
+  it('alerts the account when someone logs in with its extra number', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const main = yield* _(generateKeysAndHasheForNumber('+420733960001'))
+        const extra = yield* _(generateAnotherNumber(main, '+420733960002'))
+        const newHolder = yield* _(
+          generateKeysAndHasheForNumber('+420733960002')
+        )
+
+        yield* _(createUserOnNetwork(main))
+        yield* _(createUserOnNetwork(extra))
+        yield* _(Effect.sleep(200))
+        yield* _(clearEnqueuedNotifications)
+
+        const app = yield* _(NodeTestingApp)
+        yield* _(setAuthHeaders(newHolder.authHeaders))
+        const {exists} = yield* _(
+          app.User.checkUserExists({
+            urlParams: {notifyExistingUserAboutLogin: true},
+            headers: makeTestCommonAndSecurityHeaders(newHolder.authHeaders),
+          })
+        )
+
+        expect(exists).toBe(true)
+        expect(
+          Array.map(yield* _(getEnqueuedNotifications), (one) => one.task.token)
+        ).toEqual([
+          Schema.encodeSync(VexlNotificationToken)(
+            Option.getOrThrow(main.vexlNotificationToken)
+          ),
+        ])
+      })
+    )
+  })
+
   it('does not notify the account about its own new number', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {

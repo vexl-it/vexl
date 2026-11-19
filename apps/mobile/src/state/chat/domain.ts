@@ -148,6 +148,7 @@ export const ChatWithMessages = Schema.Struct({
     default: () => false,
   }),
   reactions: Schema.optionalWith(ChatReactions, {default: () => ({})}),
+  donationPromptAfterMessageId: Schema.optional(ChatMessageId),
   // Recovered after a backup restore from a message of the other side. Kept
   // in `pendingRecoveryChats` until its history proves the other side is a
   // real chat partner, then counts as open until its history says otherwise.

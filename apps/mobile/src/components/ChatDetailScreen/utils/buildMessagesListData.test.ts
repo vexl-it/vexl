@@ -227,3 +227,24 @@ it('shows the friend check prompt right after the seventh text message', () => {
 
   expect(shape).toEqual(['1', '2', '3', '4', '5', '6', '7', 'prompt', '8'])
 })
+
+it('shows the donation prompt right after its anchor message', () => {
+  const messages = Array.makeBy(3, (i) =>
+    message({text: String(i + 1), minute: 0})
+  )
+  const shape = pipe(
+    buildMessagesListData(
+      messages,
+      HashSet.empty(),
+      createEmptyTradeChecklistInState(),
+      messages[1]?.message.uuid
+    ),
+    Array.filterMap((item) => {
+      if (item.type === 'message') return Option.some(item.message.message.text)
+      if (item.type === 'donationPrompt') return Option.some('donation')
+      return Option.none()
+    })
+  )
+
+  expect(shape).toEqual(['1', '2', 'donation', '3'])
+})

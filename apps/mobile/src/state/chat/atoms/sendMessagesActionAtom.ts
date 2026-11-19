@@ -11,9 +11,10 @@ import sendMessage from '@vexl-next/resources-utils/src/chat/sendMessage'
 import {Array, Duration, Effect, Option, pipe, Schema} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
-import showDonationPromptGiveLoveActionAtom, {
+import {
+  claimDonationPromptDisplayActionAtom,
   DONATION_PROMPT_CHAT_MESSAGES_THRESHOLD_COUNT,
-} from '../../../components/DonationPrompt/atoms/showDonationPromptGiveLoveActionAtom'
+} from '../../../components/DonationPrompt/atoms/stateAtoms'
 import {type ActionAtomType} from '../../../utils/atomUtils/ActionAtomType'
 import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
 import {version} from '../../../utils/environment'
@@ -215,13 +216,14 @@ export default function sendMessagesActionAtom(
         }
 
         if (
-          numberOfMessagesInChat > DONATION_PROMPT_CHAT_MESSAGES_THRESHOLD_COUNT
+          numberOfMessagesInChat >
+            DONATION_PROMPT_CHAT_MESSAGES_THRESHOLD_COUNT &&
+          set(claimDonationPromptDisplayActionAtom, {skipCooldown: false})
         )
-          yield* _(
-            Effect.forkDaemon(
-              set(showDonationPromptGiveLoveActionAtom, {skipTimeCheck: false})
-            )
-          )
+          set(chatWithMessagesAtom, (chat) => ({
+            ...chat,
+            donationPromptAfterMessageId: message.uuid,
+          }))
 
         if (result.receivedByServerAt)
           moveQueuedAfter(message, result.receivedByServerAt)

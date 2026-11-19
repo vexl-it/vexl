@@ -3,6 +3,7 @@ import {
   generateChatId,
   generateChatMessageId,
   type ChatMessage,
+  type ChatMessageId,
   type MessageType,
 } from '@vexl-next/domain/src/general/messaging'
 import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
@@ -39,22 +40,17 @@ jest.mock('../chatImages', () => {
     ),
   }
 })
-let mockDonationPromptShows = 0
-jest.mock(
-  '../../../components/DonationPrompt/atoms/showDonationPromptGiveLoveActionAtom',
-  () => {
-    const {atom} = jest.requireActual('jotai')
-    const {Effect} = jest.requireActual('effect')
-    return {
-      __esModule: true,
-      default: atom(null, () => {
-        mockDonationPromptShows++
-        return Effect.void
-      }),
-      DONATION_PROMPT_CHAT_MESSAGES_THRESHOLD_COUNT: 10,
-    }
-  }
-)
+let mockDonationPromptOnCooldown = false
+jest.mock('../../../components/DonationPrompt/atoms/stateAtoms', () => ({
+  claimDonationPromptDisplayActionAtom: jest
+    .requireActual('jotai')
+    .atom(null, () => {
+      if (mockDonationPromptOnCooldown) return false
+      mockDonationPromptOnCooldown = true
+      return true
+    }),
+  DONATION_PROMPT_CHAT_MESSAGES_THRESHOLD_COUNT: 10,
+}))
 jest.mock('../../../utils/runWhenIdleWithTimeout', () => ({
   __esModule: true,
   default: (callback: () => void) => {
@@ -89,9 +85,10 @@ function setup(): {
   ) => void
   shown: () => string[]
   deleteMessages: () => void
+  donationPromptAfterMessageId: () => ChatMessageId | undefined
 } {
   mockSends.length = 0
-  mockDonationPromptShows = 0
+  mockDonationPromptOnCooldown = false
   const store = createStore()
   const chatAtom = atom<ChatWithMessages>({
     chat: {
@@ -136,6 +133,8 @@ function setup(): {
     deleteMessages: () => {
       store.set(chatAtom, (chat) => ({...chat, messages: []}))
     },
+    donationPromptAfterMessageId: () =>
+      store.get(chatAtom).donationPromptAfterMessageId,
   }
 }
 
@@ -273,8 +272,8 @@ describe('sendMessagesActionAtom', () => {
     }
   })
 
-  it('counts only chat messages towards the donation prompt', async () => {
-    const {send} = setup()
+  it('anchors the donation prompt to the first message sent past the threshold', async () => {
+    const {send, donationPromptAfterMessageId} = setup()
     const settleAll = async (from: number, count: number): Promise<void> => {
       for (let i = from; i < from + count; i++)
         await settleSend(i, {receivedByServerAt: time(1000 + i)})
@@ -290,11 +289,12 @@ describe('sendMessagesActionAtom', () => {
     )
     await flush()
     await settleAll(0, 11)
-    expect(mockDonationPromptShows).toBe(0)
+    expect(donationPromptAfterMessageId()).toBeUndefined()
 
-    send(Array.makeBy(10, (i) => chatMessage('b', 300 + i)))
+    const laterMessages = Array.makeBy(10, (i) => chatMessage('b', 300 + i))
+    send(laterMessages)
     await flush()
     await settleAll(11, 10)
-    expect(mockDonationPromptShows).toBeGreaterThan(0)
+    expect(donationPromptAfterMessageId()).toBe(laterMessages[0]?.uuid)
   })
 })

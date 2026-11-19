@@ -29,6 +29,7 @@ import offerToConnectionsAtom, {
   updateAndReencryptAllOffersConnectionsActionAtom,
   updateAndReencryptSingleOfferConnectionActionAtom,
 } from './offerToConnectionsAtom'
+import {persistentDataAboutReachAtom} from './reachNumberWithoutClubsConnectionsMmkvAtom'
 
 jest.mock('@vexl-next/resources-utils/src/offers/updatePrivateParts')
 jest.mock('@vexl-next/resources-utils/src/offers/updateOffer')
@@ -76,6 +77,7 @@ jest.mock('./connectionStateAtom', () => {
       {flushNow: jest.fn()}
     ),
     fetchConnectionsActionAtom: atom(null, () => mockFetchGraph()),
+    fistAndSecondLevelConnectionsReachAtom: atom(7),
   }
 })
 jest.mock('../../clubs/atom/clubsWithMembersAtom', () => {
@@ -847,6 +849,16 @@ it('stores a fetched graph even when the user has no offers', async () => {
   expect(store.get(connectionStateAtom)).toEqual(graph(['new-friend']))
   expect(updatePrivateParts).not.toHaveBeenCalled()
 })
+
+it.each([true, false])(
+  'saves the reach of a fetched graph only when the graph was saved (saved: %s)',
+  async (saved) => {
+    jest.mocked(connectionStateAtom.flushNow).mockReturnValue(saved)
+    const store = setupStore([])
+    await run(store)
+    expect(store.get(persistentDataAboutReachAtom)).toBe(saved ? 7 : 0)
+  }
+)
 
 describe('graph fetched by the caller', () => {
   const newer = {

@@ -43,10 +43,20 @@ export const ClubDeactivationNotificationData = Schema.TaggedStruct(
 export type ClubDeactivationNotificationData =
   typeof ClubDeactivationNotificationData.Type
 
+export const ContactsRemovedFromPhoneNotificationData = Schema.TaggedStruct(
+  'ContactsRemovedFromPhoneNotificationData',
+  {
+    removedAt: UnixMilliseconds,
+  }
+)
+export type ContactsRemovedFromPhoneNotificationData =
+  typeof ContactsRemovedFromPhoneNotificationData.Type
+
 export const NotificationCenterRecordData = Schema.Union(
   VexlProductNotificationData,
   ClubAdmissionNotificationData,
-  ClubDeactivationNotificationData
+  ClubDeactivationNotificationData,
+  ContactsRemovedFromPhoneNotificationData
 )
 export type NotificationCenterRecordData =
   typeof NotificationCenterRecordData.Type

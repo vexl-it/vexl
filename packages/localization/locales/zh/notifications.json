@@ -76,6 +76,8 @@
   "notifications.CLUB_DEACTIVATED.FLAGGED.body": "{{name}} 俱乐部因内容不当已被停用。",
   "notifications.CLUB_DEACTIVATED.OTHER.title": "俱乐部已被停用",
   "notifications.CLUB_DEACTIVATED.OTHER.body": "{{name}} 俱乐部已被停用。",
+  "notifications.CONTACTS_REMOVED_FROM_PHONE.title": "联系人已从你的手机中删除",
+  "notifications.CONTACTS_REMOVED_FROM_PHONE.body": "我们注意到你从手机中删除了一些联系人，所以也把他们从你的 Vexl 网络中移除了。你的出价和触达范围已更新。",
   "notifications.groupNotificationRequest.subtitle": "您的报价有新的请求",
   "notifications.groupNotificationRequest.title": "新的请求",
   "notifications.createOfferPrompt.title": "创建您的报价",

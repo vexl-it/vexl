@@ -142,6 +142,12 @@ function NotificationListCard({
       action: undefined,
       actionText: undefined,
     })),
+    Match.tag('ContactsRemovedFromPhoneNotificationData', () => ({
+      name: 'Vexl',
+      avatar: <VexlAvatar />,
+      category: t('notificationsScreen.system'),
+      message: t('notifications.CONTACTS_REMOVED_FROM_PHONE.body'),
+    })),
     Match.exhaustive
   )
 

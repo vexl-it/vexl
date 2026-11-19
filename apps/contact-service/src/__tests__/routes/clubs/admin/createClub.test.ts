@@ -1,17 +1,12 @@
 import {SqlClient} from '@effect/sql'
 import {generateClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
-import {
-  ClubAlreadyExistsError,
-  InvalidAdminTokenError,
-} from '@vexl-next/rest-api/src/services/contact/contracts'
+import {ClubAlreadyExistsError} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
-import {addTestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
-import {Effect, Either, Option, Schema} from 'effect'
+import {Effect, Option, Schema} from 'effect'
 import {NodeTestingInternalApp} from '../../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../../utils/runPromiseInMockedEnvironment'
 
-const ADMIN_TOKEN = 'dev'
 const SOME_URL = Schema.decodeSync(UriString)('https://some.url')
 
 describe('Create club', () => {
@@ -22,67 +17,6 @@ describe('Create club', () => {
         yield* _(sql`DELETE FROM club_invitation_link`)
         yield* _(sql`DELETE FROM club_member`)
         yield* _(sql`DELETE FROM club`)
-      })
-    )
-  })
-
-  it('Should return 403 when bad admin token', async () => {
-    await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const internalApp = yield* _(NodeTestingInternalApp)
-
-        const clubData = {
-          clubImageUrl: SOME_URL,
-          name: 'someName',
-          description: Option.some('someDescription'),
-          membersCountLimit: 100,
-          uuid: generateClubUuid(),
-          validUntil: new Date(),
-          reportLimit: 10,
-        }
-        const errorResponse = yield* _(
-          internalApp.ClubsAdmin.createClub({
-            headers: {'x-admin-token': 'aha'},
-            payload: {
-              club: clubData,
-            },
-          }),
-          Effect.either
-        )
-
-        expectErrorResponse(InvalidAdminTokenError)(errorResponse)
-      })
-    )
-  })
-
-  it('Should not accept legacy admin token URL params', async () => {
-    await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const internalApp = yield* _(NodeTestingInternalApp)
-
-        const clubData = {
-          clubImageUrl: SOME_URL,
-          name: 'someName',
-          description: Option.some('someDescription'),
-          membersCountLimit: 100,
-          uuid: generateClubUuid(),
-          validUntil: new Date(),
-          reportLimit: 10,
-        }
-        const errorResponse = yield* _(
-          internalApp.ClubsAdmin.createClub({
-            // @ts-expect-error Legacy URL admin-token transport is unsupported.
-            urlParams: {
-              adminToken: ADMIN_TOKEN,
-            },
-            payload: {
-              club: clubData,
-            },
-          }),
-          Effect.either
-        )
-
-        expect(Either.isLeft(errorResponse)).toBe(true)
       })
     )
   })
@@ -102,10 +36,8 @@ describe('Create club', () => {
           reportLimit: 10,
         }
 
-        yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
         const createdClub = yield* _(
           internalApp.ClubsAdmin.createClub({
-            headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               club: clubData,
             },
@@ -114,12 +46,7 @@ describe('Create club', () => {
 
         expect(createdClub.clubInfo).toMatchObject(clubData)
 
-        yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
-        const clubsInDb = yield* _(
-          internalApp.ClubsAdmin.listClubs({
-            headers: {'x-admin-token': ADMIN_TOKEN},
-          })
-        )
+        const clubsInDb = yield* _(internalApp.ClubsAdmin.listClubs({}))
 
         expect(clubsInDb.clubs).toHaveLength(1)
         expect(clubsInDb.clubs[0]).toMatchObject(clubData)
@@ -142,10 +69,8 @@ describe('Create club', () => {
           reportLimit: 10,
         }
 
-        yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
         yield* _(
           internalApp.ClubsAdmin.createClub({
-            headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               club: clubData,
             },
@@ -154,7 +79,6 @@ describe('Create club', () => {
 
         const errorResponse = yield* _(
           internalApp.ClubsAdmin.createClub({
-            headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               club: clubData,
             },

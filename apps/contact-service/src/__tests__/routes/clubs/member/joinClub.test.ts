@@ -14,7 +14,6 @@ import {
   MemberAlreadyInClubError,
 } from '@vexl-next/rest-api/src/services/contact/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
-import {addTestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Option, Schema} from 'effect'
 import {ClubInvitationLinkDbService} from '../../../../db/ClubInvitationLinkDbService'
 import {ClubMembersDbService} from '../../../../db/ClubMemberDbService'
@@ -35,7 +34,6 @@ const testCommonHeaders = Schema.decodeSync(CommonHeaders)({
   'user-agent': 'Vexl/1 (1.0.0) ANDROID',
 })
 
-const ADMIN_TOKEN = 'dev'
 const SOME_URL = Schema.decodeSync(UriString)('https://some.url')
 
 const userKey = generatePrivateKey()
@@ -68,10 +66,8 @@ beforeEach(async () => {
       yield* _(sql`DELETE FROM club`)
 
       const internalApp = yield* _(NodeTestingInternalApp)
-      yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
       yield* _(
         internalApp.ClubsAdmin.createClub({
-          headers: {'x-admin-token': ADMIN_TOKEN},
           payload: {
             club,
           },
@@ -141,12 +137,7 @@ describe('Join club', () => {
           ),
         })
 
-        yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
-        const clubs = yield* _(
-          internalApp.ClubsAdmin.listClubs({
-            headers: {'x-admin-token': ADMIN_TOKEN},
-          })
-        )
+        const clubs = yield* _(internalApp.ClubsAdmin.listClubs({}))
         expect(clubs.clubs).toEqual([
           expect.objectContaining({
             uuid: club.uuid,
@@ -164,10 +155,8 @@ describe('Join club', () => {
         const app = yield* _(NodeTestingApp)
         const internalApp = yield* _(NodeTestingInternalApp)
 
-        yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
         const inviteLink = yield* _(
           internalApp.ClubsAdmin.generateClubInviteLinkForAdmin({
-            headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               clubUuid: club.uuid,
             },
@@ -221,7 +210,6 @@ describe('Join club', () => {
 
         const inviteLink = yield* _(
           internalApp.ClubsAdmin.generateClubInviteLinkForAdmin({
-            headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               clubUuid: club.uuid,
             },

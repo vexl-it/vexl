@@ -1,6 +1,5 @@
 'use client'
 
-import {getAdminToken} from '@/src/services/adminTokenService'
 import {copyToClipboard} from '@/src/services/clipboard'
 import {publicUrl, usePublicHosts} from '@/src/services/publicHosts'
 import {
@@ -27,17 +26,11 @@ export default function SlideshowsPage() {
   const router = useRouter()
 
   const loadSlideshows = useCallback(async () => {
-    const adminToken = getAdminToken()
-    if (!adminToken) {
-      router.push('/login')
-      return
-    }
-
     setLoading(true)
     setError(null)
 
     try {
-      const result = await listSlideshows(adminToken)
+      const result = await listSlideshows()
       setSlideshows(result.slideshows)
     } catch (loadError) {
       setError(
@@ -48,7 +41,7 @@ export default function SlideshowsPage() {
     } finally {
       setLoading(false)
     }
-  }, [router])
+  }, [])
 
   useEffect(() => {
     void loadSlideshows()
@@ -80,14 +73,8 @@ export default function SlideshowsPage() {
   }
 
   const handleDuplicate = async (slideshow: TvSlideshow) => {
-    const adminToken = getAdminToken()
-    if (!adminToken) {
-      router.push('/login')
-      return
-    }
-
     try {
-      const result = await duplicateSlideshow(adminToken, slideshow.uuid)
+      const result = await duplicateSlideshow(slideshow.uuid)
       router.push(`/slideshows/${result.slideshow.uuid}/edit`)
     } catch (duplicateError) {
       setError(
@@ -101,14 +88,8 @@ export default function SlideshowsPage() {
   const handleDelete = async (slideshow: TvSlideshow) => {
     if (!window.confirm(`Delete "${slideshow.name}"?`)) return
 
-    const adminToken = getAdminToken()
-    if (!adminToken) {
-      router.push('/login')
-      return
-    }
-
     try {
-      await deleteSlideshow(adminToken, slideshow.uuid)
+      await deleteSlideshow(slideshow.uuid)
       setSlideshows((current) =>
         pipe(
           current,

@@ -1,97 +1,125 @@
 'use client'
 
-import {requestJson} from '@/src/services/adminFetch'
 import {
-  BackofficeRole,
-  homePathForRole,
-  setSession,
-} from '@/src/services/adminTokenService'
-import {Schema} from 'effect'
+  AuthCard,
+  inputClassName,
+  primaryButtonClassName,
+} from '@/src/components/AuthCard'
+import {usePasskeyCeremony} from '@/src/hooks/usePasskeyCeremony'
+import {
+  fetchSession,
+  fetchSetupRequired,
+  setUpFirstAdmin,
+  signInWithPasskey,
+} from '@/src/services/access/api'
+import {homePath} from '@/src/services/access/navigation'
 import {useRouter} from 'next/navigation'
-import {useState} from 'react'
+import {useEffect, useState} from 'react'
 
-const SessionResponse = Schema.Struct({role: BackofficeRole})
-
-const fetchRole = async (token: string): Promise<BackofficeRole> => {
-  const response = await requestJson<unknown>('/api/admin/session', {
-    method: 'GET',
-    headers: {'x-admin-token': token},
-  })
-  return Schema.decodeUnknownSync(SessionResponse)(response).role
-}
+type View = 'loading' | 'signIn' | 'setup'
 
 export default function LoginPage() {
-  const [token, setToken] = useState('')
-  const [error, setError] = useState<string | null>(null)
   const router = useRouter()
+  const {busy, error, setError, run} = usePasskeyCeremony()
+  const [view, setView] = useState<View>('loading')
+  const [adminToken, setAdminToken] = useState('')
+  const [label, setLabel] = useState('')
 
-  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    setError(null)
-
-    const trimmedToken = token.trim()
-    if (!trimmedToken) {
-      setError('Admin token is required')
-      return
+  useEffect(() => {
+    const load = async () => {
+      const session = await fetchSession()
+      if (session) {
+        router.replace(homePath(session.sections))
+        return
+      }
+      setView((await fetchSetupRequired()) ? 'setup' : 'signIn')
     }
+    load().catch((loadError: unknown) => {
+      setError(loadError instanceof Error ? loadError.message : 'Failed')
+      setView('signIn')
+    })
+  }, [router, setError])
 
-    try {
-      const role = await fetchRole(trimmedToken)
-      setSession(trimmedToken, role)
-      router.push(homePathForRole(role))
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to sign in')
-    }
+  if (view === 'loading') {
+    return <AuthCard subtitle="Loading..." error={error} />
+  }
+
+  if (view === 'signIn') {
+    return (
+      <AuthCard subtitle="Sign in with your passkey" error={error}>
+        <button
+          type="button"
+          disabled={busy}
+          onClick={() => {
+            void run(signInWithPasskey)
+          }}
+          className={primaryButtonClassName}
+        >
+          {busy ? 'Waiting for your passkey...' : 'Sign in with passkey'}
+        </button>
+      </AuthCard>
+    )
+  }
+
+  const handleSetup = (event: React.SyntheticEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    void run(() => setUpFirstAdmin(adminToken.trim(), label.trim()))
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+    <AuthCard
+      subtitle="Set up the first admin. The new passkey gets access to every section."
+      error={error}
+    >
+      <form onSubmit={handleSetup} className="space-y-4">
         <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Vexl Backoffice
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Sign in with your admin token
-          </p>
+          <label
+            htmlFor="admin-token"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Admin token
+          </label>
+          <input
+            id="admin-token"
+            type="password"
+            required
+            value={adminToken}
+            onChange={(event) => {
+              setAdminToken(event.target.value)
+            }}
+            className={inputClassName}
+            autoComplete="off"
+          />
         </div>
-        <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-          <div className="rounded-md shadow-sm -space-y-px">
-            <div>
-              <label htmlFor="admin-token" className="sr-only">
-                Admin Token
-              </label>
-              <input
-                id="admin-token"
-                name="admin-token"
-                type="password"
-                value={token}
-                onChange={(e) => {
-                  setToken(e.target.value)
-                }}
-                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Enter your admin token"
-                autoComplete="off"
-              />
-            </div>
-          </div>
-
-          {!!error && (
-            <div className="text-red-600 text-sm bg-red-50 p-3 rounded-md">
-              {error}
-            </div>
-          )}
-
-          <div>
-            <button
-              type="submit"
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-              Sign In
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+        <div>
+          <label
+            htmlFor="passkey-label"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Passkey label
+          </label>
+          <input
+            id="passkey-label"
+            type="text"
+            required
+            maxLength={100}
+            value={label}
+            onChange={(event) => {
+              setLabel(event.target.value)
+            }}
+            className={inputClassName}
+            placeholder="e.g. Work laptop"
+            autoComplete="off"
+          />
+        </div>
+        <button
+          type="submit"
+          disabled={busy}
+          className={primaryButtonClassName}
+        >
+          {busy ? 'Waiting for your passkey...' : 'Set up first admin'}
+        </button>
+      </form>
+    </AuthCard>
   )
 }

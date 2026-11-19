@@ -4,6 +4,7 @@ import {runDb} from './db'
 import createTvSlideshows from './migrations/0001_create_tv_slideshows'
 import addPublicSlug from './migrations/0002_add_public_slug'
 import createShortLinks from './migrations/0003_create_short_links'
+import createAccess from './migrations/0004_create_access'
 
 interface Migration {
   readonly id: number
@@ -30,6 +31,11 @@ const migrations: readonly Migration[] = [
     id: 3,
     name: 'create_short_links',
     effect: createShortLinks,
+  },
+  {
+    id: 4,
+    name: 'create_access',
+    effect: createAccess,
   },
 ]
 

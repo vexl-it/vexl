@@ -1,7 +1,6 @@
 'use client'
 
 import {useRunEffect} from '@/src/hooks/useRunEffect'
-import {getAdminToken} from '@/src/services/adminTokenService'
 import {makeClubsAdminClient} from '@/src/services/contactInternalApi'
 import {ClubUuid, type ClubInfo} from '@vexl-next/domain/src/general/clubs'
 import {Schema} from 'effect'
@@ -27,20 +26,12 @@ export default function GenerateLinkPage() {
   const router = useRouter()
 
   const loadClubs = useCallback(async (): Promise<void> => {
-    const adminToken = getAdminToken()
-    if (!adminToken) {
-      router.push('/login')
-      return
-    }
-
     setLoading(true)
     setError(null)
 
     try {
       const client = await runEffect(makeClubsAdminClient())
-      const result = await runEffect(
-        client.listClubs({headers: {'x-admin-token': adminToken}})
-      )
+      const result = await runEffect(client.listClubs())
       setClubs(result.clubs)
       if (result.clubs.length > 0) {
         setSelectedClubUuid(result.clubs[0]?.uuid ?? '')
@@ -50,7 +41,7 @@ export default function GenerateLinkPage() {
     } finally {
       setLoading(false)
     }
-  }, [runEffect, router])
+  }, [runEffect])
 
   useEffect(() => {
     void loadClubs()
@@ -59,12 +50,6 @@ export default function GenerateLinkPage() {
   const handleGenerate = async (): Promise<void> => {
     if (!selectedClubUuid) {
       setError('Please select a club')
-      return
-    }
-
-    const adminToken = getAdminToken()
-    if (!adminToken) {
-      router.push('/login')
       return
     }
 
@@ -78,7 +63,6 @@ export default function GenerateLinkPage() {
       const client = await runEffect(makeClubsAdminClient())
       const result = await runEffect(
         client.generateClubInviteLinkForAdmin({
-          headers: {'x-admin-token': adminToken},
           payload: {clubUuid: selectedClubUuid},
         })
       )

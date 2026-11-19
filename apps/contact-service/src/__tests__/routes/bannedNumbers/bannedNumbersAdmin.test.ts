@@ -1,61 +1,20 @@
 import {SqlClient} from '@effect/sql'
 import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
-import {
-  BannedNumberId,
-  BannedNumbersMonthlyLimitReachedError,
-  InvalidAdminTokenError,
-} from '@vexl-next/rest-api/src/services/contact/contracts'
+import {BannedNumbersMonthlyLimitReachedError} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {Array, Effect, Order, pipe, Schema} from 'effect'
-import {adminHeaders, banNumbers} from '../../utils/bannedNumbers'
+import {banNumbers} from '../../utils/bannedNumbers'
 import {NodeTestingInternalApp} from '../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../utils/runPromiseInMockedEnvironment'
 import {generateKeysAndHasheForNumber, withEnvVar} from '../contacts/utils'
 
-const badAdminHeaders = {'x-admin-token': 'bad-token'}
 const numbers = pipe(
   ['+420733444001', '+420733444002', '+420733444003', '+420733444004'],
   Array.map((number) => Schema.decodeSync(E164PhoneNumber)(number))
 )
 
 describe('Banned numbers admin', () => {
-  it('Rejects a bad admin token', async () => {
-    await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingInternalApp)
-
-        expectErrorResponse(InvalidAdminTokenError)(
-          yield* _(
-            app.BannedNumbersAdmin.listBannedNumbers({
-              headers: badAdminHeaders,
-              payload: {limit: 10},
-            }),
-            Effect.either
-          )
-        )
-        expectErrorResponse(InvalidAdminTokenError)(
-          yield* _(
-            app.BannedNumbersAdmin.addBannedNumbers({
-              headers: badAdminHeaders,
-              payload: {numbers: [{phoneNumber: numbers[0]}]},
-            }),
-            Effect.either
-          )
-        )
-        expectErrorResponse(InvalidAdminTokenError)(
-          yield* _(
-            app.BannedNumbersAdmin.deleteBannedNumber({
-              headers: badAdminHeaders,
-              path: {id: Schema.decodeSync(BannedNumberId)('1')},
-            }),
-            Effect.either
-          )
-        )
-      })
-    )
-  })
-
   it('Stores numbers with the same hash clients import them with', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
@@ -64,7 +23,6 @@ describe('Banned numbers admin', () => {
 
         const result = yield* _(
           app.BannedNumbersAdmin.addBannedNumbers({
-            headers: adminHeaders,
             payload: {
               numbers: [{phoneNumber: bank.phoneNumber, note: 'Some bank'}],
             },
@@ -229,7 +187,6 @@ describe('Banned numbers admin', () => {
 
         const firstPage = yield* _(
           app.BannedNumbersAdmin.listBannedNumbers({
-            headers: adminHeaders,
             payload: {limit: 3},
           })
         )
@@ -246,7 +203,6 @@ describe('Banned numbers admin', () => {
 
         const secondPage = yield* _(
           app.BannedNumbersAdmin.listBannedNumbers({
-            headers: adminHeaders,
             payload: {
               limit: 3,
               nextPageToken: firstPage.nextPageToken ?? undefined,
@@ -263,7 +219,6 @@ describe('Banned numbers admin', () => {
 
         const searched = yield* _(
           app.BannedNumbersAdmin.listBannedNumbers({
-            headers: adminHeaders,
             payload: {limit: 10, search: ' 444002 '},
           })
         )
@@ -284,14 +239,12 @@ describe('Banned numbers admin', () => {
         yield* _(banNumbers([numbers[0], numbers[1]]))
 
         const listAll = app.BannedNumbersAdmin.listBannedNumbers({
-          headers: adminHeaders,
           payload: {limit: 10},
         })
         const [newest, oldest] = (yield* _(listAll)).items
 
         yield* _(
           app.BannedNumbersAdmin.deleteBannedNumber({
-            headers: adminHeaders,
             path: {id: newest.id},
           })
         )
@@ -300,7 +253,6 @@ describe('Banned numbers admin', () => {
         expectErrorResponse(NotFoundError)(
           yield* _(
             app.BannedNumbersAdmin.deleteBannedNumber({
-              headers: adminHeaders,
               path: {id: newest.id},
             }),
             Effect.either

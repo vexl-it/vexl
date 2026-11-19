@@ -252,12 +252,6 @@ export class ClubCannotBeReactivatedError extends Schema.TaggedError<ClubCannotB
   ),
 }) {}
 
-export class InvalidAdminTokenError extends Schema.TaggedError<InvalidAdminTokenError>(
-  'InvalidAdminToken'
-)('InvalidAdminToken', {
-  status: Schema.optionalWith(Schema.Literal(401), {default: () => 401}),
-}) {}
-
 export class ClubUserLimitExceededError extends Schema.TaggedError<ClubUserLimitExceededError>(
   'ClubUserLimitExceededError'
 )('ClubUserLimitExceededError', {

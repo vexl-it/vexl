@@ -3,5 +3,5 @@
 import {BackofficeLayout} from '@/src/components/BackofficeLayout'
 
 export default function ClubsLayout({children}: {children: React.ReactNode}) {
-  return <BackofficeLayout>{children}</BackofficeLayout>
+  return <BackofficeLayout section="clubs">{children}</BackofficeLayout>
 }

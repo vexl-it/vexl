@@ -3,12 +3,10 @@ import {generateClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
-import {addTestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Option, Schema} from 'effect'
 import {NodeTestingInternalApp} from '../../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../../utils/runPromiseInMockedEnvironment'
 
-const ADMIN_TOKEN = 'dev'
 const SOME_URL = Schema.decodeSync(UriString)('https://some.url')
 
 describe('Get club stats', () => {
@@ -30,10 +28,8 @@ describe('Get club stats', () => {
         const internalApp = yield* _(NodeTestingInternalApp)
         const clubUuid = generateClubUuid()
 
-        yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
         yield* _(
           internalApp.ClubsAdmin.createClub({
-            headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               club: {
                 uuid: clubUuid,
@@ -99,7 +95,6 @@ describe('Get club stats', () => {
 
         const response = yield* _(
           internalApp.ClubsAdmin.getClubStats({
-            headers: {'x-admin-token': ADMIN_TOKEN},
             urlParams: {clubUuid},
           })
         )
@@ -121,10 +116,8 @@ describe('Get club stats', () => {
       Effect.gen(function* (_) {
         const internalApp = yield* _(NodeTestingInternalApp)
 
-        yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
         const errorResponse = yield* _(
           internalApp.ClubsAdmin.getClubStats({
-            headers: {'x-admin-token': ADMIN_TOKEN},
             urlParams: {clubUuid: generateClubUuid()},
           }),
           Effect.either

@@ -8,7 +8,6 @@ import {generateV2KeyPair} from '@vexl-next/generic-utils/src/effect-helpers/cry
 import {InvalidChallengeError} from '@vexl-next/rest-api/src/challenges/contracts'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
-import {addTestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Option, Schema} from 'effect'
 import {ClubMembersDbService} from '../../../../db/ClubMemberDbService'
 import {ClubsDbService} from '../../../../db/ClubsDbService'
@@ -24,7 +23,6 @@ import {
 import {runPromiseInMockedEnvironment} from '../../../utils/runPromiseInMockedEnvironment'
 import {withEnvVar} from '../../contacts/utils'
 
-const ADMIN_TOKEN = 'dev'
 const CLUB_VALID_UNTIL = new Date(Date.now() + 1000 * 60 * 60)
 const SOME_URL = Schema.decodeSync(UriString)('https://some.url')
 let user1: MockedUser
@@ -56,10 +54,8 @@ describe('Get club contacts', () => {
         const internalApp = yield* _(NodeTestingInternalApp)
         const forClubUuid = generateClubUuid()
 
-        yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
         yield* _(
           internalApp.ClubsAdmin.createClub({
-            headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               club: {
                 clubImageUrl: SOME_URL,
@@ -84,7 +80,6 @@ describe('Get club contacts', () => {
 
         const inviteLink1 = yield* _(
           internalApp.ClubsAdmin.generateClubInviteLinkForAdmin({
-            headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               clubUuid: forClubUuid,
             },
@@ -110,7 +105,6 @@ describe('Get club contacts', () => {
 
         const inviteLink2 = yield* _(
           internalApp.ClubsAdmin.generateClubInviteLinkForAdmin({
-            headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               clubUuid: forClubUuid,
             },
@@ -183,7 +177,6 @@ describe('Get club contacts', () => {
                 reportLimit: 10,
               },
             },
-            headers: {'x-admin-token': ADMIN_TOKEN},
           })
         )
 
@@ -196,7 +189,6 @@ describe('Get club contacts', () => {
             payload: {
               clubUuid: forClubUuid,
             },
-            headers: {'x-admin-token': ADMIN_TOKEN},
           })
         )
 
@@ -259,7 +251,6 @@ describe('Get club contacts', () => {
                 reportLimit: 10,
               },
             },
-            headers: {'x-admin-token': ADMIN_TOKEN},
           })
         )
 
@@ -272,7 +263,6 @@ describe('Get club contacts', () => {
             payload: {
               clubUuid: forClubUuid1,
             },
-            headers: {'x-admin-token': ADMIN_TOKEN},
           })
         )
 
@@ -306,7 +296,6 @@ describe('Get club contacts', () => {
                 reportLimit: 10,
               },
             },
-            headers: {'x-admin-token': ADMIN_TOKEN},
           })
         )
 
@@ -319,7 +308,6 @@ describe('Get club contacts', () => {
             payload: {
               clubUuid: forClubUuid2,
             },
-            headers: {'x-admin-token': ADMIN_TOKEN},
           })
         )
 
@@ -382,7 +370,6 @@ describe('Get club contacts', () => {
                 reportLimit: 10,
               },
             },
-            headers: {'x-admin-token': ADMIN_TOKEN},
           })
         )
 
@@ -395,7 +382,6 @@ describe('Get club contacts', () => {
             payload: {
               clubUuid: forClubUuid,
             },
-            headers: {'x-admin-token': ADMIN_TOKEN},
           })
         )
 
@@ -458,7 +444,6 @@ describe('Get club contacts', () => {
                 reportLimit: 10,
               },
             },
-            headers: {'x-admin-token': ADMIN_TOKEN},
           })
         )
 
@@ -467,7 +452,6 @@ describe('Get club contacts', () => {
             payload: {
               clubUuid: forClubUuid,
             },
-            headers: {'x-admin-token': ADMIN_TOKEN},
           })
         )
 
@@ -524,10 +508,8 @@ describe('Get club contacts', () => {
             const internalApp = yield* _(NodeTestingInternalApp)
             const forClubUuid = generateClubUuid()
 
-            yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
             yield* _(
               internalApp.ClubsAdmin.createClub({
-                headers: {'x-admin-token': ADMIN_TOKEN},
                 payload: {
                   club: {
                     clubImageUrl: SOME_URL,

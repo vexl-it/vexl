@@ -1,76 +1,52 @@
 'use client'
 
-import {clearAdminToken, getRole} from '@/src/services/adminTokenService'
-import {Array, pipe} from 'effect'
+import {useBackofficeSession} from '@/src/hooks/useBackofficeSession'
+import {signOut} from '@/src/services/access/api'
+import {type BackofficeSection} from '@/src/services/access/domain'
+import {isCurrent, permittedNavigation} from '@/src/services/access/navigation'
+import {Array} from 'effect'
 import Link from 'next/link'
 import {usePathname, useRouter} from 'next/navigation'
-import {useEffect, useState} from 'react'
+import {useEffect} from 'react'
 
-const CONTENT_EDITOR_PATHS = ['/blog-posts', '/events']
+export function StatusMessage({children}: {children: React.ReactNode}) {
+  return (
+    <div className="flex justify-center items-center py-24 px-4 text-center text-gray-600">
+      {children}
+    </div>
+  )
+}
 
-export function BackofficeLayout({children}: {children: React.ReactNode}) {
+export function BackofficeLayout({
+  section,
+  children,
+}: {
+  section: BackofficeSection
+  children: React.ReactNode
+}) {
   const pathname = usePathname()
   const router = useRouter()
-  // localStorage is only readable after hydration.
-  const [isContentEditor, setIsContentEditor] = useState(false)
+  const sessionState = useBackofficeSession()
+
   useEffect(() => {
-    setIsContentEditor(getRole() === 'contentEditor')
-  }, [])
+    if (sessionState.status === 'signedOut') router.replace('/login')
+  }, [sessionState.status, router])
 
-  const handleLogout = () => {
-    clearAdminToken()
-    router.push('/login')
+  if (sessionState.status === 'loading' || sessionState.status === 'signedOut')
+    return <StatusMessage>Loading...</StatusMessage>
+  if (sessionState.status === 'failed')
+    return <StatusMessage>{sessionState.message}</StatusMessage>
+
+  const {session} = sessionState
+  const navigation = permittedNavigation(session.sections)
+
+  const handleLogout = async () => {
+    try {
+      await signOut()
+    } finally {
+      router.push('/login')
+    }
   }
-
-  const allNavigation = [
-    {name: 'Clubs List', href: '/clubs', current: pathname === '/clubs'},
-    {
-      name: 'Create Club',
-      href: '/clubs/create',
-      current: pathname === '/clubs/create',
-    },
-    {
-      name: 'Generate Link',
-      href: '/clubs/generate-link',
-      current: pathname === '/clubs/generate-link',
-    },
-    {
-      name: 'Product notification',
-      href: '/product-notification',
-      current: pathname === '/product-notification',
-    },
-    {
-      name: 'TV slideshows',
-      href: '/slideshows',
-      current: pathname.startsWith('/slideshows'),
-    },
-    {
-      name: 'Short links',
-      href: '/short-links',
-      current: pathname.startsWith('/short-links'),
-    },
-    {
-      name: 'Banned numbers',
-      href: '/banned-numbers',
-      current: pathname.startsWith('/banned-numbers'),
-    },
-    {
-      name: 'Blog posts',
-      href: '/blog-posts',
-      current: pathname.startsWith('/blog-posts'),
-    },
-    {
-      name: 'Events',
-      href: '/events',
-      current: pathname.startsWith('/events'),
-    },
-  ]
-  const navigation = isContentEditor
-    ? pipe(
-        allNavigation,
-        Array.filter((item) => Array.contains(CONTENT_EDITOR_PATHS, item.href))
-      )
-    : allNavigation
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -89,7 +65,7 @@ export function BackofficeLayout({children}: {children: React.ReactNode}) {
                     key={item.name}
                     href={item.href}
                     className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
-                      item.current
+                      isCurrent(item, pathname)
                         ? 'border-indigo-500 text-gray-900'
                         : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
                     }`}
@@ -99,9 +75,14 @@ export function BackofficeLayout({children}: {children: React.ReactNode}) {
                 ))}
               </div>
             </div>
-            <div className="flex items-center">
+            <div className="flex items-center gap-4">
+              <span className="hidden xl:inline text-sm text-gray-500">
+                {session.label}
+              </span>
               <button
-                onClick={handleLogout}
+                onClick={() => {
+                  void handleLogout()
+                }}
                 className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
               >
                 Logout
@@ -115,7 +96,7 @@ export function BackofficeLayout({children}: {children: React.ReactNode}) {
               key={item.name}
               href={item.href}
               className={`block pl-3 pr-4 py-2 border-l-4 text-base font-medium ${
-                item.current
+                isCurrent(item, pathname)
                   ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
                   : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800'
               }`}
@@ -125,7 +106,15 @@ export function BackofficeLayout({children}: {children: React.ReactNode}) {
           ))}
         </div>
       </nav>
-      <main className="max-w-7xl mx-auto py-6">{children}</main>
+      <main className="max-w-7xl mx-auto py-6">
+        {Array.contains(session.sections, section) ? (
+          children
+        ) : (
+          <StatusMessage>
+            You do not have access to this section. Ask an admin to grant it.
+          </StatusMessage>
+        )}
+      </main>
     </div>
   )
 }

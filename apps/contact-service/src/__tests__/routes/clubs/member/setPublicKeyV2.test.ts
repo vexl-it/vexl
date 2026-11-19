@@ -27,7 +27,6 @@ import {
 } from '../../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../../utils/runPromiseInMockedEnvironment'
 
-const ADMIN_TOKEN = 'dev'
 const SOME_URL = Schema.decodeSync(UriString)('https://some.url')
 
 const memberKeyPair = generatePrivateKey()
@@ -65,10 +64,8 @@ beforeEach(async () => {
       yield* _(sql`DELETE FROM club`)
 
       const internalApp = yield* _(NodeTestingInternalApp)
-      yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
       yield* _(
         internalApp.ClubsAdmin.createClub({
-          headers: {'x-admin-token': ADMIN_TOKEN},
           payload: {
             club: firstClub,
           },
@@ -76,7 +73,6 @@ beforeEach(async () => {
       )
       yield* _(
         internalApp.ClubsAdmin.createClub({
-          headers: {'x-admin-token': ADMIN_TOKEN},
           payload: {
             club: secondClub,
           },

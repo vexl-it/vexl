@@ -5,5 +5,5 @@ export default function SlideshowsLayout({
 }: {
   children: React.ReactNode
 }) {
-  return <BackofficeLayout>{children}</BackofficeLayout>
+  return <BackofficeLayout section="slideshows">{children}</BackofficeLayout>
 }

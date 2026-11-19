@@ -6,7 +6,6 @@ import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifica
 import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {InvalidChallengeError} from '@vexl-next/rest-api/src/challenges/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
-import {addTestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Option, Schema} from 'effect'
 import {ClubMembersDbService} from '../../../../db/ClubMemberDbService'
 import {ClubsDbService} from '../../../../db/ClubsDbService'
@@ -17,7 +16,6 @@ import {
 } from '../../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../../utils/runPromiseInMockedEnvironment'
 
-const ADMIN_TOKEN = 'dev'
 const SOME_URL = Schema.decodeSync(UriString)('https://some.url')
 
 const userKey = generatePrivateKey()
@@ -41,10 +39,8 @@ beforeEach(async () => {
       yield* _(sql`DELETE FROM club`)
 
       const internalApp = yield* _(NodeTestingInternalApp)
-      yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
       yield* _(
         internalApp.ClubsAdmin.createClub({
-          headers: {'x-admin-token': ADMIN_TOKEN},
           payload: {
             club,
           },

@@ -4,7 +4,7 @@ import {
   internalServerError,
   jsonOk,
   notFound,
-  requireAdmin,
+  requireSection,
 } from '@/src/server/http'
 import {duplicateSlideshow} from '@/src/server/slideshows/repository'
 import {Either, Schema} from 'effect'
@@ -20,7 +20,7 @@ interface RouteContext {
 
 export async function POST(request: NextRequest, context: RouteContext) {
   try {
-    const authError = await requireAdmin(request)
+    const authError = await requireSection(request, 'slideshows')
     if (authError) return authError
 
     const {uuid} = await context.params

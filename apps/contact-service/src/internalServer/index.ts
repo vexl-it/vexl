@@ -1,7 +1,7 @@
 import {HttpApiBuilder} from '@effect/platform/index'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
-import {HEADER_ADMIN_TOKEN} from '@vexl-next/rest-api/src/constants'
 import {ContactInternalApiSpecification} from '@vexl-next/rest-api/src/services/contact/internalSpecification'
+import {AdminTokenMiddlewareLive} from '@vexl-next/server-utils/src/adminTokenMiddleware'
 import {internalServerPortConfig} from '@vexl-next/server-utils/src/commonConfigs'
 import {makeInternalApiServer} from '@vexl-next/server-utils/src/InternalServer'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
@@ -16,7 +16,6 @@ import {listClubs} from '../routes/clubs/admin/listClubs'
 import {modifyClub} from '../routes/clubs/admin/modifyClub'
 import {reactivateClub} from '../routes/clubs/admin/reactivateClub'
 import {requestClubImageUpload} from '../routes/clubs/admin/requestClubImageUpload'
-import {validateAdminToken} from '../utils/validateAdminToken'
 import {testHasingSpeed} from './routes/testHashingSpeed'
 
 const ClubsAdminApiGroupLive = HttpApiBuilder.group(
@@ -49,8 +48,6 @@ const DebugApiGroupLive = HttpApiBuilder.group(
   (h) =>
     h.handle('testHashingSpeed', (req) =>
       Effect.gen(function* (_) {
-        yield* _(validateAdminToken(req.headers[HEADER_ADMIN_TOKEN]))
-
         const durationMs = yield* _(
           testHasingSpeed(req.payload.iterations, req.payload.numberOfElements),
           Effect.mapError(
@@ -67,7 +64,8 @@ export const ContactInternalApiLive = HttpApiBuilder.api(
 ).pipe(
   Layer.provide(ClubsAdminApiGroupLive),
   Layer.provide(BannedNumbersAdminApiGroupLive),
-  Layer.provide(DebugApiGroupLive)
+  Layer.provide(DebugApiGroupLive),
+  Layer.provide(AdminTokenMiddlewareLive)
 )
 
 export const internalServerLive = makeInternalApiServer(

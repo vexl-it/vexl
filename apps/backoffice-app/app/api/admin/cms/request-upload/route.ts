@@ -4,7 +4,7 @@ import {
   decodeJsonBody,
   internalServerError,
   jsonOk,
-  requireCmsEditor,
+  requireSection,
 } from '@/src/server/http'
 import {RequestCmsImageUploadRequest} from '@/src/services/cms/domain'
 import {Effect, Either} from 'effect'
@@ -14,7 +14,7 @@ export const runtime = 'nodejs'
 
 export async function POST(request: NextRequest) {
   try {
-    const authError = await requireCmsEditor(request)
+    const authError = await requireSection(request, 'cms')
     if (authError) return authError
 
     const decoded = await decodeJsonBody(request, RequestCmsImageUploadRequest)

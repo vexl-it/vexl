@@ -5,8 +5,6 @@ import {Array, Effect, Option} from 'effect'
 import {NodeTestingApp, NodeTestingInternalApp} from '../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../utils/runPromiseInMockedEnvironment'
 
-const headers = {'x-admin-token': 'dev'}
-
 const input: EventInput = {
   name: 'Vexl meetup',
   venue: 'Prague',
@@ -75,20 +73,15 @@ describe('events', () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const internalApp = yield* _(NodeTestingInternalApp)
-        const created = yield* _(
-          internalApp.Cms.createEvent({headers, payload: input})
-        )
+        const created = yield* _(internalApp.Cms.createEvent({payload: input}))
         expect(created).toEqual({...input, id: created.id, status: 'draft'})
         expect(yield* _(publicEventNames)).not.toContain('Vexl meetup')
 
-        yield* _(
-          internalApp.Cms.publishEvent({headers, path: {id: created.id}})
-        )
+        yield* _(internalApp.Cms.publishEvent({path: {id: created.id}}))
         expect(yield* _(publicEventNames)).toContain('Vexl meetup')
 
         const updated = yield* _(
           internalApp.Cms.updateEvent({
-            headers,
             path: {id: created.id},
             payload: {...input, name: 'Renamed meetup', speakers: []},
           })
@@ -101,16 +94,13 @@ describe('events', () => {
           speakers: [],
         })
 
-        yield* _(
-          internalApp.Cms.unpublishEvent({headers, path: {id: created.id}})
-        )
+        yield* _(internalApp.Cms.unpublishEvent({path: {id: created.id}}))
         expect(yield* _(publicEventNames)).not.toContain('Renamed meetup')
 
-        yield* _(internalApp.Cms.deleteEvent({headers, path: {id: created.id}}))
+        yield* _(internalApp.Cms.deleteEvent({path: {id: created.id}}))
         expectErrorResponse(NotFoundError)(
           yield* _(
             internalApp.Cms.updateEvent({
-              headers,
               path: {id: created.id},
               payload: input,
             }),
@@ -127,11 +117,10 @@ describe('events', () => {
         const internalApp = yield* _(NodeTestingInternalApp)
         const draft = yield* _(
           internalApp.Cms.createEvent({
-            headers,
             payload: {...input, name: 'Listed draft'},
           })
         )
-        const {events} = yield* _(internalApp.Cms.listEvents({headers}))
+        const {events} = yield* _(internalApp.Cms.listEvents({}))
 
         expect(Array.findFirst(events, (one) => one.id === draft.id)).toEqual(
           Option.some(draft)

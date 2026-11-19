@@ -1,7 +1,6 @@
 'use client'
 
 import {ShortLinkClicksChart} from '@/src/components/ShortLinkClicksChart'
-import {getAdminToken} from '@/src/services/adminTokenService'
 import {copyToClipboard} from '@/src/services/clipboard'
 import {publicUrl, usePublicHosts} from '@/src/services/publicHosts'
 import {
@@ -12,7 +11,6 @@ import {
 } from '@/src/services/shortLinks/api'
 import {type ShortLink} from '@/src/services/shortLinks/domain'
 import {Array, pipe} from 'effect'
-import {useRouter} from 'next/navigation'
 import {useCallback, useEffect, useState} from 'react'
 
 const errorMessage = (error: unknown, fallback: string): string =>
@@ -29,7 +27,6 @@ const replaceLink = (
 
 export default function ShortLinksPage() {
   const hosts = usePublicHosts()
-  const router = useRouter()
   const [links, setLinks] = useState<readonly ShortLink[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -45,27 +42,18 @@ export default function ShortLinksPage() {
     readonly targetUrl: string
   } | null>(null)
 
-  const requireToken = useCallback((): string | null => {
-    const adminToken = getAdminToken()
-    if (!adminToken) router.push('/login')
-    return adminToken
-  }, [router])
-
   const loadLinks = useCallback(async () => {
-    const adminToken = requireToken()
-    if (!adminToken) return
-
     setLoading(true)
     setError(null)
     try {
-      const result = await listShortLinks(adminToken)
+      const result = await listShortLinks()
       setLinks(result.links)
     } catch (loadError) {
       setError(errorMessage(loadError, 'Failed to load short links'))
     } finally {
       setLoading(false)
     }
-  }, [requireToken])
+  }, [])
 
   useEffect(() => {
     void loadLinks()
@@ -76,14 +64,12 @@ export default function ShortLinksPage() {
 
   const handleCreate = async (event: React.SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault()
-    const adminToken = requireToken()
-    if (!adminToken) return
 
     setCreating(true)
     setError(null)
     try {
       const slug = newSlug.trim().toLowerCase()
-      const result = await createShortLink(adminToken, {
+      const result = await createShortLink({
         targetUrl: newTargetUrl.trim(),
         ...(slug ? {slug} : {}),
       })
@@ -111,12 +97,10 @@ export default function ShortLinksPage() {
 
   const handleSaveTarget = async () => {
     if (!editing) return
-    const adminToken = requireToken()
-    if (!adminToken) return
 
     setError(null)
     try {
-      const result = await updateShortLink(adminToken, editing.slug, {
+      const result = await updateShortLink(editing.slug, {
         targetUrl: editing.targetUrl.trim(),
       })
       setLinks((current) => replaceLink(current, result.link))
@@ -128,12 +112,10 @@ export default function ShortLinksPage() {
 
   const handleDelete = async (link: ShortLink) => {
     if (!window.confirm(`Delete ${shortUrl(link)}?`)) return
-    const adminToken = requireToken()
-    if (!adminToken) return
 
     setError(null)
     try {
-      await deleteShortLink(adminToken, link.slug)
+      await deleteShortLink(link.slug)
       setLinks((current) =>
         pipe(
           current,

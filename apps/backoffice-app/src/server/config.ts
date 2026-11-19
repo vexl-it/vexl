@@ -9,11 +9,24 @@ export const backofficeDatabaseConfig = Config.all({
   database: Config.string('DB_NAME'),
 })
 
-export const adminTokenHashConfig = Config.string('ADMIN_TOKEN_HASH')
+/** The backends' admin token. Only this server holds it. */
+export const adminTokenConfig = Config.redacted('ADMIN_TOKEN')
 
-export const contentEditorTokenHashConfig = Config.string(
-  'CONTENT_EDITOR_TOKEN_HASH'
+/** Expected WebAuthn origin; its hostname is the RP ID. */
+export const backofficeOriginConfig = Config.url('BACKOFFICE_ORIGIN')
+
+const disableAuthConfig = Config.boolean('BACKOFFICE_DISABLE_AUTH').pipe(
+  Config.withDefault(false)
 )
+
+const isProduction = process.env.NODE_ENV === 'production'
+
+/** Dev only: every request is a signed-in admin. Ignored in production. */
+export const isAuthDisabled = (): boolean =>
+  !isProduction && Effect.runSync(disableAuthConfig)
+
+export const isAuthDisabledInProduction = (): boolean =>
+  isProduction && Effect.runSync(disableAuthConfig)
 
 export const slideshowS3Config = Config.all({
   region: Config.string('AWS_REGION').pipe(Config.withDefault('eu-west-1')),

@@ -6,8 +6,6 @@ import {Array, Either, pipe, Schema, type Option} from 'effect'
 import {makeApiErrorMessage} from './apiErrorMessage'
 
 const apiErrorMessage = makeApiErrorMessage({
-  InvalidAdminToken:
-    'Your token is not allowed to manage banned numbers. Sign in again.',
   NotFoundError: 'It no longer exists. Reload the page.',
 })
 

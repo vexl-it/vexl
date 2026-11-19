@@ -5,5 +5,5 @@ export default function BannedNumbersLayout({
 }: {
   children: React.ReactNode
 }) {
-  return <BackofficeLayout>{children}</BackofficeLayout>
+  return <BackofficeLayout section="bannedNumbers">{children}</BackofficeLayout>
 }

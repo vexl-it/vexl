@@ -176,6 +176,8 @@ export const internalServerPortConfig = Config.option(
   Config.number('INTERNAL_SERVER_PORT')
 )
 
+export const adminTokenHashConfig = Config.string('ADMIN_TOKEN_HASH')
+
 export const dashboardUpdatesUrlConfig = Config.option(
   Config.string('DASHBOARD_UPDATES_URL')
 )

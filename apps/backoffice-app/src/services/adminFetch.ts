@@ -1,8 +1,3 @@
-export const jsonHeaders = (adminToken: string): HeadersInit => ({
-  'Content-Type': 'application/json',
-  'x-admin-token': adminToken,
-})
-
 const readError = async (response: Response): Promise<string> => {
   try {
     const body = await response.json()
@@ -13,26 +8,31 @@ const readError = async (response: Response): Promise<string> => {
   }
 }
 
-export const requestJson = async <A>(
+/** Same-origin request that carries the session cookie; throws on failure. */
+const request = async (
   input: RequestInfo | URL,
   init: RequestInit
-): Promise<A> => {
-  const response = await fetch(input, init)
+): Promise<Response> => {
+  const response = await fetch(input, {
+    ...init,
+    headers: {'Content-Type': 'application/json'},
+  })
 
   if (!response.ok) {
     throw new Error(await readError(response))
   }
 
-  return await response.json()
+  return response
 }
+
+export const requestJson = async <A>(
+  input: RequestInfo | URL,
+  init: RequestInit
+): Promise<A> => await (await request(input, init)).json()
 
 export const requestNoContent = async (
   input: RequestInfo | URL,
   init: RequestInit
 ): Promise<void> => {
-  const response = await fetch(input, init)
-
-  if (!response.ok) {
-    throw new Error(await readError(response))
-  }
+  await request(input, init)
 }

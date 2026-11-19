@@ -1,6 +1,7 @@
-import {HttpBody, HttpClient, HttpClientRequest} from '@effect/platform'
+import {HttpClient, HttpClientRequest} from '@effect/platform'
 import {InternalServerTestClient} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Array, Effect, pipe} from 'effect'
+import {TEST_ADMIN_TOKEN} from '../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../utils/runPromiseInMockedEnvironment'
 
 // Valid requests with a wrong token: a leaked route would answer 401, not 404.
@@ -31,24 +32,28 @@ describe('Internal endpoints', () => {
     )
   })
 
-  it('are served by the internal server', async () => {
+  it('are served by the internal server behind the admin token', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const internalClient = yield* _(InternalServerTestClient)
-        const listClubsResponse = yield* _(
-          internalClient.get('/api/v1/clubs/admin', {
-            headers: {'x-admin-token': 'bad-token'},
-          })
-        )
-        expect(listClubsResponse.status).toBe(401)
+        for (const request of INTERNAL_REQUESTS) {
+          const response = yield* _(internalClient.execute(request))
+          expect(response.status).toBe(401)
+        }
 
-        const hashingSpeedResponse = yield* _(
-          internalClient.post('/test-hashing-speed', {
-            headers: {'x-admin-token': 'bad-token'},
-            body: HttpBody.unsafeJson({iterations: 1, numberOfElements: 1}),
+        const legacyUrlTokenResponse = yield* _(
+          internalClient.get('/api/v1/clubs/admin', {
+            urlParams: {adminToken: TEST_ADMIN_TOKEN},
           })
         )
-        expect(hashingSpeedResponse.status).toBe(401)
+        expect(legacyUrlTokenResponse.status).toBe(401)
+
+        const validTokenResponse = yield* _(
+          internalClient.get('/api/v1/clubs/admin', {
+            headers: {'x-admin-token': TEST_ADMIN_TOKEN},
+          })
+        )
+        expect(validTokenResponse.status).toBe(200)
       })
     )
   })

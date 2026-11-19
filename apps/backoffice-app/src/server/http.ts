@@ -1,12 +1,18 @@
+import {type PgClient} from '@effect/sql-pg'
+import {type SqlError} from '@effect/sql/SqlError'
 import * as Sentry from '@sentry/nextjs'
-import {Array, Effect, Schema, type Either, type ParseResult} from 'effect'
-import {NextResponse, type NextRequest} from 'next/server'
-import {type BackofficeRole} from '../services/adminTokenService'
 import {
-  InvalidAdminTokenError,
-  MissingAdminTokenError,
-  resolveRequestRole,
-} from './auth'
+  Effect,
+  Schema,
+  type ConfigError,
+  type Either,
+  type ParseResult,
+} from 'effect'
+import {NextResponse, type NextRequest} from 'next/server'
+import {type BackofficeSection} from '../services/access/domain'
+import {accessError, type AccessRequestError} from './access/errors'
+import {requireSessionSection} from './access/session'
+import {runDb} from './db'
 
 export const jsonOk = <A>(data: A, status = 200): NextResponse =>
   NextResponse.json(data, {status})
@@ -28,52 +34,51 @@ export const decodeJsonBody = async <S extends Schema.Schema.AnyNoContext>(
   return Schema.decodeUnknownEither(schema)(body)
 }
 
-const unauthorized = (message: string): NextResponse =>
-  NextResponse.json({error: message}, {status: 401})
-
-/** The caller's role, or the 401 response to return. */
-export const authenticate = async (
-  request: NextRequest
-): Promise<BackofficeRole | NextResponse> => {
-  const result = await Effect.runPromise(
-    Effect.either(resolveRequestRole(request))
+export const decodeBody = <A, I>(
+  request: NextRequest,
+  schema: Schema.Schema<A, I>
+): Effect.Effect<A, AccessRequestError> =>
+  Effect.tryPromise(() => request.json()).pipe(
+    Effect.flatMap(Schema.decodeUnknown(schema)),
+    Effect.mapError(() => accessError(400, 'Invalid request body'))
   )
 
-  if (result._tag === 'Right') return result.right
+const accessErrorResponse = (error: AccessRequestError): NextResponse =>
+  NextResponse.json({error: error.message}, {status: error.status})
 
-  if (
-    result.left instanceof MissingAdminTokenError ||
-    result.left instanceof InvalidAdminTokenError
-  ) {
-    return unauthorized(result.left.message)
-  }
-
-  if (result.left instanceof Error) throw result.left
-
-  throw new Error('Failed to validate admin token')
-}
-
-const requireRole = async (
+/** `null` when the signed-in passkey may use `section`, else the response to return. */
+export const requireSection = (
   request: NextRequest,
-  allowedRoles: readonly BackofficeRole[]
-): Promise<NextResponse | null> => {
-  const role = await authenticate(request)
-  if (role instanceof NextResponse) return role
-
-  return Array.contains(allowedRoles, role)
-    ? null
-    : unauthorized('This token is not allowed to do this')
-}
-
-export const requireAdmin = (
-  request: NextRequest
-): Promise<NextResponse | null> => requireRole(request, ['admin'])
-
-/** Blog posts and events: admins and content editors. */
-export const requireCmsEditor = (
-  request: NextRequest
+  section: BackofficeSection
 ): Promise<NextResponse | null> =>
-  requireRole(request, ['admin', 'contentEditor'])
+  runDb(
+    requireSessionSection(request, section).pipe(
+      Effect.as(null),
+      Effect.catchTag('AccessRequestError', (error) =>
+        Effect.succeed(accessErrorResponse(error))
+      )
+    )
+  )
+
+export const handleAccessRequest = async (
+  handler: Effect.Effect<
+    NextResponse,
+    AccessRequestError | ConfigError.ConfigError | SqlError,
+    PgClient.PgClient
+  >
+): Promise<NextResponse> => {
+  try {
+    return await runDb(
+      handler.pipe(
+        Effect.catchTag('AccessRequestError', (error) =>
+          Effect.succeed(accessErrorResponse(error))
+        )
+      )
+    )
+  } catch (error) {
+    return internalServerError(error)
+  }
+}
 
 export const reportError = (error: unknown): void => {
   console.error('Backoffice API error:', error)

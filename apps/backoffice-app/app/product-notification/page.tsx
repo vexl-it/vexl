@@ -1,7 +1,6 @@
 'use client'
 
 import {useRunEffect} from '@/src/hooks/useRunEffect'
-import {getAdminToken} from '@/src/services/adminTokenService'
 import {
   makeBackofficeCommonHeaders,
   makeContentAdminClient,
@@ -12,7 +11,6 @@ import {
   type VexlProductNotification,
 } from '@vexl-next/domain/src/general/vexlProductNotification'
 import {Array, Schema} from 'effect'
-import {useRouter} from 'next/navigation'
 import {useCallback, useEffect, useState, type SyntheticEvent} from 'react'
 
 interface FormData {
@@ -51,15 +49,8 @@ export default function ProductNotificationPage() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
   const runEffect = useRunEffect()
-  const router = useRouter()
 
   const loadNotifications = useCallback(async () => {
-    const adminToken = getAdminToken()
-    if (!adminToken) {
-      router.push('/login')
-      return
-    }
-
     setLoading(true)
     setError(null)
 
@@ -79,7 +70,7 @@ export default function ProductNotificationPage() {
     } finally {
       setLoading(false)
     }
-  }, [router, runEffect])
+  }, [runEffect])
 
   useEffect(() => {
     void loadNotifications()
@@ -87,12 +78,6 @@ export default function ProductNotificationPage() {
 
   const handleSubmit = async (e: SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault()
-
-    const adminToken = getAdminToken()
-    if (!adminToken) {
-      router.push('/login')
-      return
-    }
 
     setSubmitting(true)
     setError(null)
@@ -117,7 +102,6 @@ export default function ProductNotificationPage() {
       const client = await runEffect(makeContentAdminClient())
       await runEffect(
         client.createVexlProductNotification({
-          headers: {'x-admin-token': adminToken},
           payload: {
             vexlProductNotification,
             issuePushNotification,

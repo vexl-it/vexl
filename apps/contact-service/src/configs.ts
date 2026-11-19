@@ -47,8 +47,6 @@ export const disableImportContactsQuotaConfig = Config.boolean(
   'DISABLE_IMPORT_CONTACTS_QUOTA'
 ).pipe(Config.withDefault(false))
 
-export const adminTokenConfigHash = Config.string('ADMIN_TOKEN_HASH')
-
 export const expoAccessTokenConfig = Config.string('EXPO_ACCESS_TOKEN')
 
 export const ClubLinkTemplateConfig = Config.string('CLUB_LINK_TEMPLATE')

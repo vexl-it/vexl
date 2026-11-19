@@ -8,7 +8,6 @@ import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {InvalidChallengeError} from '@vexl-next/rest-api/src/challenges/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
-import {addTestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Option, Schema} from 'effect'
 import {ClubInvitationLinkDbService} from '../../../../db/ClubInvitationLinkDbService'
 import {ClubsDbService} from '../../../../db/ClubsDbService'
@@ -20,7 +19,6 @@ import {
 } from '../../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../../utils/runPromiseInMockedEnvironment'
 
-const ADMIN_TOKEN = 'dev'
 const SOME_URL = Schema.decodeSync(UriString)('https://some.url')
 
 const userKey = generatePrivateKey()
@@ -46,10 +44,8 @@ beforeEach(async () => {
       yield* _(sql`DELETE FROM club`)
 
       const internalApp = yield* _(NodeTestingInternalApp)
-      yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
       yield* _(
         internalApp.ClubsAdmin.createClub({
-          headers: {'x-admin-token': ADMIN_TOKEN},
           payload: {
             club,
           },
@@ -109,10 +105,8 @@ describe('Get club info by access code', () => {
 
         const challengeForUser = yield* _(generateAndSignChallenge(userKey))
 
-        yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
         const inviteLink = yield* _(
           internalApp.ClubsAdmin.generateClubInviteLinkForAdmin({
-            headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               clubUuid: forClubUuid,
             },
@@ -168,10 +162,8 @@ describe('Get club info by access code', () => {
         const signedChallenge = yield* _(generateAndSignChallenge(userKey))
         const invalidKey = generatePrivateKey()
 
-        yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
         const inviteLink = yield* _(
           internalApp.ClubsAdmin.generateClubInviteLinkForAdmin({
-            headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               clubUuid: forClubUuid,
             },

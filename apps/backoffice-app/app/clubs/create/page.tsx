@@ -2,7 +2,6 @@
 
 import {useClubImageUpload} from '@/src/hooks/useClubImageUpload'
 import {useRunEffect} from '@/src/hooks/useRunEffect'
-import {getAdminToken} from '@/src/services/adminTokenService'
 import {makeClubsAdminClient} from '@/src/services/contactInternalApi'
 import {ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
@@ -57,12 +56,6 @@ export default function CreateClubPage() {
       return
     }
 
-    const adminToken = getAdminToken()
-    if (!adminToken) {
-      router.push('/login')
-      return
-    }
-
     setError(null)
     setLoading(true)
 
@@ -70,7 +63,6 @@ export default function CreateClubPage() {
       const client = await runEffect(makeClubsAdminClient())
       await runEffect(
         client.createClub({
-          headers: {'x-admin-token': adminToken},
           payload: {
             club: {
               uuid: Schema.decodeSync(ClubUuid)(formData.uuid),

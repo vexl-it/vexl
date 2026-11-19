@@ -1,16 +1,11 @@
 import {BlogSlug, type BlogPostInput} from '@vexl-next/domain/src/general/cms'
 import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
-import {
-  BlogSlugTakenError,
-  InvalidContentAdminTokenError,
-} from '@vexl-next/rest-api/src/services/content/contracts'
+import {BlogSlugTakenError} from '@vexl-next/rest-api/src/services/content/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {Array, Effect, Option, Order, Schema} from 'effect'
 import {NodeTestingApp, NodeTestingInternalApp} from '../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../utils/runPromiseInMockedEnvironment'
-
-const headers = {'x-admin-token': 'dev'}
 
 const makeInput = (slug: string): BlogPostInput => ({
   slug: Schema.decodeSync(BlogSlug)(slug),
@@ -67,21 +62,17 @@ describe('blog posts', () => {
         const internalApp = yield* _(NodeTestingInternalApp)
         const created = yield* _(
           internalApp.Cms.createBlogPost({
-            headers,
             payload: makeInput('lifecycle'),
           })
         )
         expect(created.status).toEqual('draft')
         expect(yield* _(publicSlugs)).not.toContain('lifecycle')
 
-        yield* _(
-          internalApp.Cms.publishBlogPost({headers, path: {id: created.id}})
-        )
+        yield* _(internalApp.Cms.publishBlogPost({path: {id: created.id}}))
         expect(yield* _(publicSlugs)).toContain('lifecycle')
 
         const updated = yield* _(
           internalApp.Cms.updateBlogPost({
-            headers,
             path: {id: created.id},
             payload: {...makeInput('lifecycle-renamed'), featured: true},
           })
@@ -96,17 +87,13 @@ describe('blog posts', () => {
         })
         expect(yield* _(publicSlugs)).toContain('lifecycle-renamed')
 
-        yield* _(
-          internalApp.Cms.unpublishBlogPost({headers, path: {id: created.id}})
-        )
+        yield* _(internalApp.Cms.unpublishBlogPost({path: {id: created.id}}))
         expect(yield* _(publicSlugs)).not.toContain('lifecycle-renamed')
 
-        yield* _(
-          internalApp.Cms.deleteBlogPost({headers, path: {id: created.id}})
-        )
+        yield* _(internalApp.Cms.deleteBlogPost({path: {id: created.id}}))
         expectErrorResponse(NotFoundError)(
           yield* _(
-            internalApp.Cms.publishBlogPost({headers, path: {id: created.id}}),
+            internalApp.Cms.publishBlogPost({path: {id: created.id}}),
             Effect.either
           )
         )
@@ -121,7 +108,7 @@ describe('blog posts', () => {
         const internalApp = yield* _(NodeTestingInternalApp)
         const {blogPosts} = yield* _(app.Cms.getPublishedBlogPosts({}))
         const {blogPosts: editorPosts} = yield* _(
-          internalApp.Cms.listBlogPosts({headers})
+          internalApp.Cms.listBlogPosts({})
         )
 
         for (const posts of [blogPosts, editorPosts]) {
@@ -138,19 +125,16 @@ describe('blog posts', () => {
         const internalApp = yield* _(NodeTestingInternalApp)
         const scheduled = yield* _(
           internalApp.Cms.createBlogPost({
-            headers,
             payload: {
               ...makeInput('scheduled'),
               publishedAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
             },
           })
         )
-        yield* _(
-          internalApp.Cms.publishBlogPost({headers, path: {id: scheduled.id}})
-        )
+        yield* _(internalApp.Cms.publishBlogPost({path: {id: scheduled.id}}))
 
         expect(yield* _(publicSlugs)).not.toContain('scheduled')
-        const {blogPosts} = yield* _(internalApp.Cms.listBlogPosts({headers}))
+        const {blogPosts} = yield* _(internalApp.Cms.listBlogPosts({}))
         expect(Array.map(blogPosts, (one) => one.slug)).toContain('scheduled')
       })
     )
@@ -162,11 +146,10 @@ describe('blog posts', () => {
         const internalApp = yield* _(NodeTestingInternalApp)
         const draft = yield* _(
           internalApp.Cms.createBlogPost({
-            headers,
             payload: makeInput('listed-draft'),
           })
         )
-        const {blogPosts} = yield* _(internalApp.Cms.listBlogPosts({headers}))
+        const {blogPosts} = yield* _(internalApp.Cms.listBlogPosts({}))
 
         expect(
           Array.findFirst(blogPosts, (one) => one.id === draft.id)
@@ -188,25 +171,7 @@ describe('blog posts', () => {
         expectErrorResponse(BlogSlugTakenError)(
           yield* _(
             internalApp.Cms.createBlogPost({
-              headers,
               payload: makeInput('so-what-is-vexl-anyway'),
-            }),
-            Effect.either
-          )
-        )
-      })
-    )
-  })
-
-  it('rejects a wrong admin token', async () => {
-    await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const internalApp = yield* _(NodeTestingInternalApp)
-        expectErrorResponse(InvalidContentAdminTokenError)(
-          yield* _(
-            internalApp.Cms.createBlogPost({
-              headers: {'x-admin-token': 'wrong'},
-              payload: makeInput('unauthorized'),
             }),
             Effect.either
           )

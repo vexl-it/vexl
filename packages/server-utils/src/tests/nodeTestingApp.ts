@@ -16,6 +16,7 @@ import {
   type CryptoError,
   type EcdsaSignature,
 } from '@vexl-next/generic-utils/src/effect-helpers/crypto'
+import {HEADER_ADMIN_TOKEN} from '@vexl-next/rest-api/src/constants'
 import {Context, Effect, flow, Layer, Ref} from 'effect/index'
 import {type ReadonlyRecord} from 'effect/Record'
 import {type Simplify} from 'effect/Types'
@@ -98,7 +99,8 @@ export const createNodeTestingInternalApp = <
   ApiError,
   ApiR,
 >(
-  api: HttpApi.HttpApi<ApiId, Groups, ApiError, ApiR>
+  api: HttpApi.HttpApi<ApiId, Groups, ApiError, ApiR>,
+  adminToken: string
 ): Effect.Effect<
   Simplify<Client<Groups, ApiError, never>>,
   never,
@@ -109,7 +111,15 @@ export const createNodeTestingInternalApp = <
   | TestRequestHeaders
 > =>
   createNodeTestingApp(api).pipe(
-    Effect.provideServiceEffect(HttpClient.HttpClient, InternalServerTestClient)
+    Effect.provideServiceEffect(
+      HttpClient.HttpClient,
+      Effect.map(
+        InternalServerTestClient,
+        HttpClient.mapRequest(
+          HttpClientRequest.setHeader(HEADER_ADMIN_TOKEN, adminToken)
+        )
+      )
+    )
   )
 
 export const setAuthHeaders = (headers: {

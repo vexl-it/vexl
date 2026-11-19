@@ -10,10 +10,7 @@ import {
   AppSource,
   makeCommonHeaders,
 } from '@vexl-next/rest-api/src/commonHeaders'
-import {
-  DuplicateVexlProductNotificationUuidError,
-  InvalidContentAdminTokenError,
-} from '@vexl-next/rest-api/src/services/content/contracts'
+import {DuplicateVexlProductNotificationUuidError} from '@vexl-next/rest-api/src/services/content/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {Array, Effect, Either, Option, Schema} from 'effect'
 import {
@@ -25,8 +22,6 @@ import {
   runPromiseInMockedEnvironment,
   setShouldFailVexlProductNotificationEnqueue,
 } from '../../utils/runPromiseInMockedEnvironment'
-
-const ADMIN_TOKEN = 'dev'
 
 const commonHeaders = makeCommonHeaders({
   platform: PLATFORM_IOS,
@@ -79,7 +74,6 @@ describe('Vexl product notifications', () => {
 
         const resp = yield* _(
           internalApp.VexlProductNotifications.createVexlProductNotification({
-            headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {vexlProductNotification, issuePushNotification: false},
           }),
           Effect.either
@@ -107,7 +101,6 @@ describe('Vexl product notifications', () => {
 
         const resp = yield* _(
           internalApp.VexlProductNotifications.createVexlProductNotification({
-            headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {vexlProductNotification, issuePushNotification: true},
           }),
           Effect.either
@@ -135,7 +128,6 @@ describe('Vexl product notifications', () => {
 
         const resp = yield* _(
           internalApp.VexlProductNotifications.createVexlProductNotification({
-            headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {vexlProductNotification, issuePushNotification: false},
           }),
           Effect.either
@@ -159,7 +151,6 @@ describe('Vexl product notifications', () => {
 
         const resp = yield* _(
           internalApp.VexlProductNotifications.createVexlProductNotification({
-            headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {vexlProductNotification, issuePushNotification: true},
           }),
           Effect.either
@@ -189,7 +180,6 @@ describe('Vexl product notifications', () => {
         setShouldFailVexlProductNotificationEnqueue(true)
         const resp = yield* _(
           internalApp.VexlProductNotifications.createVexlProductNotification({
-            headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {vexlProductNotification, issuePushNotification: true},
           }),
           Effect.either
@@ -220,53 +210,6 @@ describe('Vexl product notifications', () => {
     )
   })
 
-  it('returns 401 for an invalid admin token', async () => {
-    await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const internalApp = yield* _(NodeTestingInternalApp)
-        const vexlProductNotification = makeVexlProductNotification({
-          uuid: uuid('5952517e-ecc2-4088-b70c-1a95148a4787'),
-          title: 'Invalid token',
-          date: date('2026-01-01T10:00:00.000Z'),
-        })
-
-        const resp = yield* _(
-          internalApp.VexlProductNotifications.createVexlProductNotification({
-            headers: {'x-admin-token': 'bad-token'},
-            payload: {vexlProductNotification, issuePushNotification: false},
-          }),
-          Effect.either
-        )
-
-        expectErrorResponse(InvalidContentAdminTokenError)(resp)
-      })
-    )
-  })
-
-  it('does not accept legacy admin token URL params', async () => {
-    await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const internalApp = yield* _(NodeTestingInternalApp)
-        const vexlProductNotification = makeVexlProductNotification({
-          uuid: uuid('f7bc3eb0-d512-45e7-ae00-2587187f0e57'),
-          title: 'Legacy token URL param',
-          date: date('2026-01-01T10:00:00.000Z'),
-        })
-
-        const resp = yield* _(
-          internalApp.VexlProductNotifications.createVexlProductNotification({
-            // @ts-expect-error Legacy URL admin-token transport is unsupported.
-            urlParams: {adminToken: ADMIN_TOKEN},
-            payload: {vexlProductNotification, issuePushNotification: false},
-          }),
-          Effect.either
-        )
-
-        expect(Either.isLeft(resp)).toBe(true)
-      })
-    )
-  })
-
   it('returns the handled duplicate UUID error', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
@@ -279,14 +222,12 @@ describe('Vexl product notifications', () => {
 
         yield* _(
           internalApp.VexlProductNotifications.createVexlProductNotification({
-            headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {vexlProductNotification, issuePushNotification: false},
           })
         )
 
         const resp = yield* _(
           internalApp.VexlProductNotifications.createVexlProductNotification({
-            headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {vexlProductNotification, issuePushNotification: false},
           }),
           Effect.either
@@ -320,7 +261,6 @@ describe('Vexl product notifications', () => {
 
         yield* _(
           internalApp.VexlProductNotifications.createVexlProductNotification({
-            headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               vexlProductNotification: third,
               issuePushNotification: false,
@@ -329,7 +269,6 @@ describe('Vexl product notifications', () => {
         )
         yield* _(
           internalApp.VexlProductNotifications.createVexlProductNotification({
-            headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               vexlProductNotification: first,
               issuePushNotification: false,
@@ -338,7 +277,6 @@ describe('Vexl product notifications', () => {
         )
         yield* _(
           internalApp.VexlProductNotifications.createVexlProductNotification({
-            headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               vexlProductNotification: second,
               issuePushNotification: false,
@@ -390,7 +328,6 @@ describe('Vexl product notifications', () => {
 
         yield* _(
           internalApp.VexlProductNotifications.createVexlProductNotification({
-            headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               vexlProductNotification: first,
               issuePushNotification: false,
@@ -399,7 +336,6 @@ describe('Vexl product notifications', () => {
         )
         yield* _(
           internalApp.VexlProductNotifications.createVexlProductNotification({
-            headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               vexlProductNotification: second,
               issuePushNotification: false,
@@ -408,7 +344,6 @@ describe('Vexl product notifications', () => {
         )
         yield* _(
           internalApp.VexlProductNotifications.createVexlProductNotification({
-            headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               vexlProductNotification: third,
               issuePushNotification: false,
@@ -452,7 +387,6 @@ describe('Vexl product notifications', () => {
 
         yield* _(
           internalApp.VexlProductNotifications.createVexlProductNotification({
-            headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {vexlProductNotification, issuePushNotification: false},
           })
         )

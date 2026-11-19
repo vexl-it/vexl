@@ -23,7 +23,7 @@ export function useCmsItem<
   useEffect(() => {
     if (id === null) return
 
-    cms((client, headers) => resource.list(client, headers))
+    cms((client) => resource.list(client))
       .then((items) => {
         Option.match(
           Array.findFirst(items, (one) => one.id === id),
@@ -44,9 +44,7 @@ export function useCmsItem<
   }, [cms, resource, id])
 
   const setStatus = (itemId: Id, status: CmsStatus): Promise<Item> =>
-    cms((client, headers) =>
-      resource.setStatus(client, headers, itemId, status)
-    )
+    cms((client) => resource.setStatus(client, itemId, status))
 
   const withFeedback = async (
     action: () => Promise<void>,
@@ -69,10 +67,10 @@ export function useCmsItem<
     withFeedback(
       async () => {
         // Kept even if publishing fails, so a retry updates instead of creating.
-        const saved = await cms((client, headers) =>
+        const saved = await cms((client) =>
           item === null
-            ? resource.create(client, headers, input)
-            : resource.update(client, headers, item.id, input)
+            ? resource.create(client, input)
+            : resource.update(client, item.id, input)
         )
         setItem(saved)
         if (publish) setItem(await setStatus(saved.id, 'published'))

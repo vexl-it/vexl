@@ -1,6 +1,7 @@
 import {HttpClient} from '@effect/platform'
 import {InternalServerTestClient} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect} from 'effect'
+import {TEST_ADMIN_TOKEN} from '../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../utils/runPromiseInMockedEnvironment'
 
 const ADMIN_PATHS = [
@@ -22,16 +23,30 @@ describe('Internal endpoints', () => {
     )
   })
 
-  it('are served by the internal server', async () => {
+  it('are served by the internal server behind the admin token', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const internalClient = yield* _(InternalServerTestClient)
-        const response = yield* _(
+        const badTokenResponse = yield* _(
           internalClient.get('/content/admin/blog-posts', {
             headers: {'x-admin-token': 'bad-token'},
           })
         )
-        expect(response.status).toBe(401)
+        expect(badTokenResponse.status).toBe(401)
+
+        const legacyUrlTokenResponse = yield* _(
+          internalClient.get('/content/admin/blog-posts', {
+            urlParams: {adminToken: TEST_ADMIN_TOKEN},
+          })
+        )
+        expect(legacyUrlTokenResponse.status).toBe(401)
+
+        const validTokenResponse = yield* _(
+          internalClient.get('/content/admin/blog-posts', {
+            headers: {'x-admin-token': TEST_ADMIN_TOKEN},
+          })
+        )
+        expect(validTokenResponse.status).toBe(200)
       })
     )
   })

@@ -3,7 +3,7 @@ import {PgClient} from '@effect/sql-pg'
 import {PublicKeyV2} from '@vexl-next/cryptography'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
-import {Effect, flow, Schema} from 'effect'
+import {Effect, flow, RequestResolver, Schema} from 'effect'
 import {PublicPartId} from '../domain'
 
 export const DeletePrivatePartRequest = Schema.Struct({
@@ -11,6 +11,9 @@ export const DeletePrivatePartRequest = Schema.Struct({
   offerId: PublicPartId,
 })
 export type DeletePrivatePartRequest = typeof DeletePrivatePartRequest.Type
+
+// Each request binds 2 parameters and postgres allows at most 65,535 per statement
+const MAX_REQUESTS_PER_STATEMENT = 10_000
 
 export const createDeletePrivatePart = Effect.gen(function* (_) {
   const sql = yield* _(PgClient.PgClient)
@@ -33,7 +36,9 @@ export const createDeletePrivatePart = Effect.gen(function* (_) {
     })
   )
   return flow(
-    DeletePrivatePart.execute,
+    DeletePrivatePart.makeExecute(
+      RequestResolver.batchN(DeletePrivatePart, MAX_REQUESTS_PER_STATEMENT)
+    ),
     UnexpectedServerError.wrapErrors('Error deleting private part')
   )
 })

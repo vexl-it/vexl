@@ -176,6 +176,7 @@ export type RootStackParamsList = {
   VexlOnlyContacts: undefined
 
   AccountBackup: undefined
+  AccountBackupPhoneNumber: undefined
   AccountBackupPin: {
     // Its SMS code unlocks the backup.
     readonly phoneNumber: E164PhoneNumber

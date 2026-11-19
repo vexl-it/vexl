@@ -23,57 +23,70 @@ import {getInternationalPhoneNumber} from '../../utils/getInternationalPhoneNumb
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import resolveLocalUri from '../../utils/resolveLocalUri'
 import useSafeGoBack from '../../utils/useSafeGoBack'
-import {PhoneNumberPicker, usePickedPhoneNumber} from '../PhoneNumberPicker'
+import {ChangePhoneNumber, usePickedPhoneNumber} from '../PhoneNumberPicker'
 import {SharableQrCode} from '../SharableQrCode'
 
 function ProfileCard({
+  phoneNumbers,
   phoneNumber,
+  onPhoneNumberPick,
 }: {
-  phoneNumber: E164PhoneNumber
+  readonly phoneNumbers: readonly E164PhoneNumber[]
+  readonly phoneNumber: E164PhoneNumber
+  readonly onPhoneNumberPick: (phoneNumber: E164PhoneNumber) => void
 }): React.ReactElement {
   const userData = useAtomValue(userDataRealOrAnonymizedAtom)
   const displayName = userData.userName
   const profileImage = userData.image
 
   return (
-    <XStack
-      alignItems="center"
+    <YStack
       backgroundColor="$backgroundSecondary"
       borderRadius="$5"
-      gap="$3"
       padding="$4"
     >
-      {profileImage.type === 'svgXml' ? (
-        <Avatar size="$9">
-          <SvgXml
-            width={resolveSizePx('$9')}
-            height={resolveSizePx('$9')}
-            xml={profileImage.svgXml.xml}
-          />
-        </Avatar>
-      ) : (
-        <Avatar
-          size="$9"
-          source={{uri: resolveLocalUri(profileImage.imageUri)}}
-        />
-      )}
-      <YStack flex={1} minWidth={0} gap="$2">
-        <Typography
-          variant="paragraphSmallBold"
-          color="$foregroundPrimary"
-          numberOfLines={1}
-        >
-          {displayName}
-        </Typography>
-        <Typography
-          variant="micro"
-          color="$foregroundSecondary"
-          numberOfLines={1}
-        >
-          {getInternationalPhoneNumber(phoneNumber)}
-        </Typography>
-      </YStack>
-    </XStack>
+      <ChangePhoneNumber
+        phoneNumbers={phoneNumbers}
+        value={phoneNumber}
+        onValueChange={onPhoneNumberPick}
+      >
+        {(changeButton) => (
+          <XStack alignItems="center" gap="$3">
+            {profileImage.type === 'svgXml' ? (
+              <Avatar size="$9">
+                <SvgXml
+                  width={resolveSizePx('$9')}
+                  height={resolveSizePx('$9')}
+                  xml={profileImage.svgXml.xml}
+                />
+              </Avatar>
+            ) : (
+              <Avatar
+                size="$9"
+                source={{uri: resolveLocalUri(profileImage.imageUri)}}
+              />
+            )}
+            <YStack flex={1} minWidth={0} gap="$2">
+              <Typography
+                variant="paragraphSmallBold"
+                color="$foregroundPrimary"
+                numberOfLines={1}
+              >
+                {displayName}
+              </Typography>
+              <Typography
+                variant="micro"
+                color="$foregroundSecondary"
+                numberOfLines={1}
+              >
+                {getInternationalPhoneNumber(phoneNumber)}
+              </Typography>
+            </YStack>
+            {changeButton}
+          </XStack>
+        )}
+      </ChangePhoneNumber>
+    </YStack>
   )
 }
 
@@ -111,7 +124,11 @@ function ShareProfileScreen(): React.ReactElement {
       }
     >
       <YStack flex={1} gap="$4">
-        <ProfileCard phoneNumber={phoneNumber} />
+        <ProfileCard
+          phoneNumbers={phoneNumbers}
+          phoneNumber={phoneNumber}
+          onPhoneNumberPick={pickPhoneNumber}
+        />
         <Stack
           alignItems="center"
           backgroundColor="$backgroundSecondary"
@@ -126,13 +143,6 @@ function ShareProfileScreen(): React.ReactElement {
             value={createImportContactLink({phoneNumber, userData})}
           />
         </Stack>
-        <PhoneNumberPicker
-          phoneNumbers={phoneNumbers}
-          value={phoneNumber}
-          onValueChange={pickPhoneNumber}
-          title={t('shareProfile.phoneNumber.title')}
-          text={t('shareProfile.phoneNumber.text')}
-        />
       </YStack>
     </Screen>
   )

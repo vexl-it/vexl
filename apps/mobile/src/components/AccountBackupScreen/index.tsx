@@ -10,11 +10,12 @@ import {
   Stack,
   YStack,
 } from '@vexl-next/ui'
+import {useAtomValue} from 'jotai'
 import React from 'react'
 import {type RootStackScreenProps} from '../../navigationTypes'
+import {userPhoneNumbersAtom} from '../../state/session/userDataAtoms'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../utils/useSafeGoBack'
-import {PhoneNumberPicker, usePickedPhoneNumber} from '../PhoneNumberPicker'
 
 type Props = RootStackScreenProps<'AccountBackup'>
 
@@ -23,7 +24,7 @@ export default function AccountBackupScreen({
 }: Props): React.ReactElement {
   const {t} = useTranslation()
   const safeGoBack = useSafeGoBack()
-  const {phoneNumbers, phoneNumber, pickPhoneNumber} = usePickedPhoneNumber()
+  const phoneNumbers = useAtomValue(userPhoneNumbersAtom)
 
   return (
     <Screen
@@ -38,7 +39,12 @@ export default function AccountBackupScreen({
       footer={
         <Button
           onPress={() => {
-            navigation.navigate('AccountBackupPin', {phoneNumber})
+            if (phoneNumbers.length > 1)
+              navigation.navigate('AccountBackupPhoneNumber')
+            else
+              navigation.navigate('AccountBackupPin', {
+                phoneNumber: phoneNumbers[0],
+              })
           }}
         >
           {t('accountBackup.createButton')}
@@ -52,13 +58,6 @@ export default function AccountBackupScreen({
         <ScreenHeading
           title={t('accountBackup.heading')}
           text={t('accountBackup.description')}
-        />
-        <PhoneNumberPicker
-          phoneNumbers={phoneNumbers}
-          value={phoneNumber}
-          onValueChange={pickPhoneNumber}
-          title={t('accountBackup.phoneNumber.title')}
-          text={t('accountBackup.phoneNumber.text')}
         />
         <InfoList>
           <InfoListItem

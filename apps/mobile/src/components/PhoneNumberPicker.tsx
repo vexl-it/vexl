@@ -1,11 +1,19 @@
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
-import {RadioGroup, RowRadiobutton, Typography, YStack} from '@vexl-next/ui'
+import {
+  Button,
+  RadioGroup,
+  RowRadiobutton,
+  SelectableItem,
+  YStack,
+} from '@vexl-next/ui'
 import {Array, pipe} from 'effect'
 import {useAtomValue} from 'jotai'
 import React, {useState} from 'react'
 import {pickedPhoneNumberOrMain} from '../state/session/sessionPhoneNumbers'
 import {userPhoneNumbersAtom} from '../state/session/userDataAtoms'
 import {getInternationalPhoneNumber} from '../utils/getInternationalPhoneNumber'
+import {useTranslation} from '../utils/localization/I18nProvider'
+import {EditIconButton} from './EditIconButton'
 
 // Main number until the user picks another one.
 export function usePickedPhoneNumber(): {
@@ -23,48 +31,98 @@ export function usePickedPhoneNumber(): {
   }
 }
 
-// Renders nothing for an account with a single number.
-export function PhoneNumberPicker({
+// `children` places the "Change number" button, which is null for an account
+// with a single number. The list of numbers opens below whatever it renders.
+export function ChangePhoneNumber({
   phoneNumbers,
   value,
   onValueChange,
-  title,
-  text,
+  iconOnly = false,
+  children,
 }: {
   readonly phoneNumbers: readonly E164PhoneNumber[]
   readonly value: E164PhoneNumber
   readonly onValueChange: (phoneNumber: E164PhoneNumber) => void
-  readonly title: string
-  readonly text: string
-}): React.ReactElement | null {
-  if (phoneNumbers.length < 2) return null
+  readonly iconOnly?: boolean
+  readonly children: (
+    changeButton: React.ReactElement | null
+  ) => React.ReactNode
+}): React.ReactElement {
+  const {t} = useTranslation()
+  const [choosing, setChoosing] = useState(false)
+  const toggleChoosing = (): void => {
+    setChoosing((prev) => !prev)
+  }
+
+  const changeButton = iconOnly ? (
+    <EditIconButton
+      aria-label={t('common.changePhoneNumber')}
+      aria-expanded={choosing}
+      onPress={toggleChoosing}
+    />
+  ) : (
+    <Button
+      variant="secondary"
+      size="small"
+      aria-expanded={choosing}
+      onPress={toggleChoosing}
+    >
+      {t('common.changePhoneNumber')}
+    </Button>
+  )
 
   return (
-    <YStack gap="$3">
-      <Typography variant="paragraphDemibold" color="$foregroundPrimary">
-        {title}
-      </Typography>
-      <Typography variant="description" color="$foregroundSecondary">
-        {text}
-      </Typography>
-      <RadioGroup
-        allowedValues={phoneNumbers}
-        value={value}
-        onValueChange={onValueChange}
-      >
-        <YStack gap="$3">
+    <>
+      {children(phoneNumbers.length > 1 ? changeButton : null)}
+      {choosing ? (
+        <YStack>
           {pipe(
             phoneNumbers,
             Array.map((one) => (
-              <RowRadiobutton
+              <SelectableItem
                 key={one}
-                value={one}
                 label={getInternationalPhoneNumber(one)}
+                selected={one === value}
+                onPress={() => {
+                  onValueChange(one)
+                  setChoosing(false)
+                }}
               />
             ))
           )}
         </YStack>
-      </RadioGroup>
-    </YStack>
+      ) : null}
+    </>
+  )
+}
+
+export function PhoneNumberRadioGroup({
+  phoneNumbers,
+  value,
+  onValueChange,
+}: {
+  readonly phoneNumbers: readonly E164PhoneNumber[]
+  readonly value: E164PhoneNumber
+  readonly onValueChange: (phoneNumber: E164PhoneNumber) => void
+}): React.ReactElement {
+  return (
+    <RadioGroup
+      allowedValues={phoneNumbers}
+      value={value}
+      onValueChange={onValueChange}
+    >
+      <YStack gap="$3">
+        {pipe(
+          phoneNumbers,
+          Array.map((one) => (
+            <RowRadiobutton
+              key={one}
+              value={one}
+              label={getInternationalPhoneNumber(one)}
+            />
+          ))
+        )}
+      </YStack>
+    </RadioGroup>
   )
 }

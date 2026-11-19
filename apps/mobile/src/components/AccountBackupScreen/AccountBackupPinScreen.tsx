@@ -60,7 +60,7 @@ export default function AccountBackupPinScreen({
       exportAccountBackup({pin: chosenPin.value, destination, phoneNumber})
     ).then((exported) => {
       setExporting(false)
-      if (exported) navigation.goBack()
+      if (exported) navigation.popTo('AccountBackup')
     })
   }
 

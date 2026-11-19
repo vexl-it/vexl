@@ -17,6 +17,7 @@ import {useSyncConversationShortcuts} from '../../utils/notifications/conversati
 import {useConsumeNotificationStream} from '../../utils/notifications/useConsumeNotificationStream'
 import {showTextDebugButtonAtom} from '../../utils/preferences'
 import AccountBackupScreen from '../AccountBackupScreen'
+import AccountBackupPhoneNumberScreen from '../AccountBackupScreen/AccountBackupPhoneNumberScreen'
 import AccountBackupPinScreen from '../AccountBackupScreen/AccountBackupPinScreen'
 import AccountScreen from '../AccountScreen'
 import AppLogsScreen from '../AppLogsScreen'
@@ -240,6 +241,10 @@ function RootNavigation(): React.ReactElement {
             <Stack.Screen
               name="AccountBackup"
               component={AccountBackupScreen}
+            />
+            <Stack.Screen
+              name="AccountBackupPhoneNumber"
+              component={AccountBackupPhoneNumberScreen}
             />
             <Stack.Screen
               name="AccountBackupPin"

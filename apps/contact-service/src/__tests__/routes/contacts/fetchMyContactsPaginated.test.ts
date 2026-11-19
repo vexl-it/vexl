@@ -3,8 +3,12 @@ import {generateKeyPair} from '@vexl-next/cryptography/src/operations/cryptobox'
 import {InvalidNextPageTokenError} from '@vexl-next/domain/src/general/commonErrors'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
-import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
+import {
+  setAuthHeaders,
+  type TestRequestHeaders,
+} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Array, Effect, Order, pipe, Schema} from 'effect'
+import {banNumbers, unbanNumber} from '../../utils/bannedNumbers'
 import {NodeTestingApp} from '../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../utils/runPromiseInMockedEnvironment'
 import {
@@ -250,6 +254,70 @@ describe('Fetch my contacts paginated', () => {
         })
       )
     })
+  })
+
+  it('Does not connect second level contacts through banned numbers unless the number is a registered user', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const alice = yield* _(generateKeysAndHasheForNumber('+420733888001'))
+        const bob = yield* _(generateKeysAndHasheForNumber('+420733888002'))
+        const carol = yield* _(generateKeysAndHasheForNumber('+420733888003'))
+        const bankNumber = yield* _(
+          generateKeysAndHasheForNumber('+420733888004')
+        )
+        const bannedRegisteredUser = yield* _(
+          generateKeysAndHasheForNumber('+420733888005')
+        )
+
+        yield* _(createUserOnNetwork(alice))
+        yield* _(createUserOnNetwork(bob))
+        yield* _(createUserOnNetwork(carol))
+        yield* _(createUserOnNetwork(bannedRegisteredUser))
+
+        // bob is connected to alice only through the bank number, carol only
+        // through a registered user whose number is banned.
+        yield* _(
+          importUsersFromNetwork(alice, [bankNumber, bannedRegisteredUser])
+        )
+        yield* _(importUsersFromNetwork(bob, [bankNumber]))
+        yield* _(importUsersFromNetwork(carol, [bannedRegisteredUser]))
+
+        yield* _(
+          banNumbers([bankNumber.phoneNumber, bannedRegisteredUser.phoneNumber])
+        )
+
+        const app = yield* _(NodeTestingApp)
+        const fetchContacts = (
+          level: 'FIRST' | 'SECOND'
+        ): Effect.Effect<
+          {readonly items: readonly string[]},
+          unknown,
+          TestRequestHeaders
+        > =>
+          Effect.zipRight(
+            setAuthHeaders(alice.authHeaders),
+            app.Contact.fetchMyContactsPaginated({
+              headers: makeTestCommonAndSecurityHeaders(alice.authHeaders),
+              urlParams: {level, limit: 20},
+            })
+          )
+
+        const whileBanned = yield* _(fetchContacts('SECOND'))
+        expect(whileBanned.items).not.toContain(bob.keys.publicKeyPemBase64)
+        expect(whileBanned.items).toContain(carol.keys.publicKeyPemBase64)
+
+        const firstLevel = yield* _(fetchContacts('FIRST'))
+        expect(firstLevel.items).toContain(
+          bannedRegisteredUser.keys.publicKeyPemBase64
+        )
+
+        yield* _(unbanNumber(bankNumber.phoneNumber))
+        yield* _(unbanNumber(bannedRegisteredUser.phoneNumber))
+
+        const afterUnban = yield* _(fetchContacts('SECOND'))
+        expect(afterUnban.items).toContain(bob.keys.publicKeyPemBase64)
+      })
+    )
   })
 
   it('Returns correct pagination metadata for FIRST level', async () => {

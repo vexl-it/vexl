@@ -3,14 +3,13 @@ import {type Fragment} from '@effect/sql/Statement'
 import {Array} from 'effect'
 
 /**
- * Filters out "public" contact hashes - numbers imported by more than
- * `publicImportCountThreshold` users (typically businesses, service numbers)
- * that are not registered users themselves. Registered users are always
- * allowed no matter how many people imported them.
+ * Decides whether a shared contact hash may connect two users. A hash is
+ * allowed if it belongs to a registered user, or if it is neither banned by an
+ * admin (see the banned_number table) nor "public" - imported by more than
+ * `publicImportCountThreshold` users (typically businesses, service numbers).
  *
- * A threshold of -1 disables the filtering entirely - the fragment resolves
- * to plain TRUE at build time, keeping the query identical to one without
- * the filter.
+ * A threshold of -1 disables the public number filtering, leaving only the
+ * ban check.
  */
 export const createIsAllowedSharedContactHashFragment = ({
   hashColumn,
@@ -21,39 +20,55 @@ export const createIsAllowedSharedContactHashFragment = ({
   publicImportCountThreshold: number
   sql: PgClient
 }): Fragment => {
-  if (publicImportCountThreshold === -1) return sql`TRUE`
+  const isNotBanned = sql`
+    NOT EXISTS (
+      SELECT
+        1
+      FROM
+        banned_number
+      WHERE
+        banned_number.hash = ${hashColumn}
+    )
+  `
+  const isRegisteredUser = sql`
+    EXISTS (
+      SELECT
+        1
+      FROM
+        users logged_in_shared_contact
+      WHERE
+        logged_in_shared_contact.hash = ${hashColumn}
+    )
+  `
+
+  if (publicImportCountThreshold === -1)
+    return sql.or([isNotBanned, isRegisteredUser])
 
   return sql.or([
-    sql`
-      EXISTS (
-        SELECT
-          1
-        FROM
-          users logged_in_shared_contact
-        WHERE
-          logged_in_shared_contact.hash = ${hashColumn}
-      )
-    `,
-    // LIMIT caps the scan - we only need to know whether the number of
-    // imports exceeds the threshold, never the exact count, which can be
-    // huge for exactly the public numbers this filter targets.
-    sql`
-      (
-        SELECT
-          COUNT(*)
-        FROM
-          (
-            SELECT
-              1
-            FROM
-              user_contact shared_contact_imports
-            WHERE
-              shared_contact_imports.hash_to = ${hashColumn}
-            LIMIT
-              ${publicImportCountThreshold + 1}
-          ) capped_shared_contact_imports
-      ) <= ${publicImportCountThreshold}::int
-    `,
+    isRegisteredUser,
+    sql.and([
+      isNotBanned,
+      // LIMIT caps the scan - we only need to know whether the number of
+      // imports exceeds the threshold, never the exact count, which can be
+      // huge for exactly the public numbers this filter targets.
+      sql`
+        (
+          SELECT
+            COUNT(*)
+          FROM
+            (
+              SELECT
+                1
+              FROM
+                user_contact shared_contact_imports
+              WHERE
+                shared_contact_imports.hash_to = ${hashColumn}
+              LIMIT
+                ${publicImportCountThreshold + 1}
+            ) capped_shared_contact_imports
+        ) <= ${publicImportCountThreshold}::int
+      `,
+    ]),
   ])
 }
 
@@ -76,8 +91,6 @@ export const createIsInAllowedSharedContactHashesFragment = ({
   sql: PgClient
 }): Fragment => {
   if (!Array.isNonEmptyReadonlyArray(hashes)) return sql`1 = 0`
-  if (publicImportCountThreshold === -1)
-    return sql`${hashColumn} IN ${sql.in(hashes)}`
 
   return sql`
     ${hashColumn} IN (

@@ -13,6 +13,7 @@ import {
   ImportContactsQuotaRecord,
   createQuotaRecordKey,
 } from '../../../routes/contacts/importContactsQuotaService'
+import {banNumbers} from '../../utils/bannedNumbers'
 import {
   clearEnqueuedNotifications,
   getEnqueuedNotifications,
@@ -875,6 +876,62 @@ describe('Notification', () => {
           const enqueuedNotifications = yield* _(getEnqueuedNotifications)
           const notifiedTokens = pipe(
             enqueuedNotifications,
+            Array.filterMap((n) =>
+              n.task._tag === 'NewUserNotificationMqEntry'
+                ? Option.some(n.task.token)
+                : Option.none()
+            )
+          )
+
+          expect(notifiedTokens).toContain(
+            Option.getOrThrow(carol.vexlNotificationToken)
+          )
+          expect(notifiedTokens).not.toContain(
+            Option.getOrThrow(bob.vexlNotificationToken)
+          )
+        })
+      )
+    })
+  })
+
+  it('Does not enqueue second level notifications for connections through banned numbers unless they are registered users', async () => {
+    await withPublicImportCountThreshold(100, async () => {
+      await runPromiseInMockedEnvironment(
+        Effect.gen(function* (_) {
+          const alice = yield* _(generateKeysAndHasheForNumber('+420733555101'))
+          const bob = yield* _(generateKeysAndHasheForNumber('+420733555102'))
+          const carol = yield* _(generateKeysAndHasheForNumber('+420733555103'))
+          const bankNumber = yield* _(
+            generateKeysAndHasheForNumber('+420733555104')
+          )
+          const bannedRegisteredUser = yield* _(
+            generateKeysAndHasheForNumber('+420733555105')
+          )
+
+          yield* _(createUserOnNetwork(alice))
+          yield* _(createUserOnNetwork(bob))
+          yield* _(createUserOnNetwork(carol))
+          yield* _(createUserOnNetwork(bannedRegisteredUser))
+
+          yield* _(importUsersFromNetwork(bob, [bankNumber]))
+          yield* _(importUsersFromNetwork(carol, [bannedRegisteredUser]))
+          yield* _(
+            banNumbers([
+              bankNumber.phoneNumber,
+              bannedRegisteredUser.phoneNumber,
+            ])
+          )
+
+          yield* _(Effect.sleep(200))
+          yield* _(clearEnqueuedNotifications)
+
+          yield* _(
+            importUsersFromNetwork(alice, [bankNumber, bannedRegisteredUser])
+          )
+          yield* _(Effect.sleep(200))
+
+          const notifiedTokens = pipe(
+            yield* _(getEnqueuedNotifications),
             Array.filterMap((n) =>
               n.task._tag === 'NewUserNotificationMqEntry'
                 ? Option.some(n.task.token)

@@ -5,6 +5,7 @@ import {makeCommonAndSecurityHeaders} from '@vexl-next/rest-api/src/apiSecurity'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Array, Effect, Option, Order, pipe} from 'effect'
+import {banNumbers, unbanNumber} from '../../utils/bannedNumbers'
 import {NodeTestingApp} from '../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../utils/runPromiseInMockedEnvironment'
 import {
@@ -231,6 +232,67 @@ describe('Common connections paginated', () => {
         })
       )
     })
+  })
+
+  it('Omits banned common friends unless they are registered users', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const app = yield* _(NodeTestingApp)
+
+        const alice = yield* _(generateKeysAndHasheForNumber('+420733999001'))
+        const bob = yield* _(generateKeysAndHasheForNumber('+420733999002'))
+        const bankNumber = yield* _(
+          generateKeysAndHasheForNumber('+420733999003')
+        )
+        const bannedRegisteredUser = yield* _(
+          generateKeysAndHasheForNumber('+420733999004')
+        )
+
+        yield* _(createUserOnNetwork(alice))
+        yield* _(createUserOnNetwork(bob))
+        yield* _(createUserOnNetwork(bannedRegisteredUser))
+
+        yield* _(
+          importUsersFromNetwork(alice, [bankNumber, bannedRegisteredUser])
+        )
+        yield* _(
+          importUsersFromNetwork(bob, [bankNumber, bannedRegisteredUser])
+        )
+
+        yield* _(
+          banNumbers([bankNumber.phoneNumber, bannedRegisteredUser.phoneNumber])
+        )
+
+        const fetchCommonFriendsWithBob = Effect.zipRight(
+          setAuthHeaders(alice.authHeaders),
+          app.Contact.fetchCommonConnectionsPaginated({
+            payload: {publicKeys: [bob.keys.publicKeyPemBase64], limit: 20},
+            headers: makeTestCommonAndSecurityHeaders(alice.authHeaders),
+          })
+        ).pipe(
+          Effect.map((connections) =>
+            pipe(
+              connections.items,
+              Array.flatMap((item) => item.common.hashes)
+            )
+          )
+        )
+
+        const whileBanned = yield* _(fetchCommonFriendsWithBob)
+        expect(whileBanned).toContain(
+          bannedRegisteredUser.serverHashedNumberForClient
+        )
+        expect(whileBanned).not.toContain(
+          bankNumber.serverHashedNumberForClient
+        )
+
+        yield* _(unbanNumber(bankNumber.phoneNumber))
+        yield* _(unbanNumber(bannedRegisteredUser.phoneNumber))
+
+        const afterUnban = yield* _(fetchCommonFriendsWithBob)
+        expect(afterUnban).toContain(bankNumber.serverHashedNumberForClient)
+      })
+    )
   })
 
   it('Returns correct pagination metadata', async () => {

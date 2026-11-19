@@ -1,6 +1,5 @@
 import {useNavigation} from '@react-navigation/native'
 import {
-  Button,
   Disclosure,
   Image,
   InfoBox,
@@ -180,54 +179,44 @@ function PhotoRow(): React.ReactElement {
   const photoRequiresNickname = useAtomValue(photoRequiresNicknameAtom)
   const toggle = useSetAtom(toggleExchangeDetailActionAtom)
   const selectImage = useSetAtom(selectImageActionAtom)
-  const choosePhoto = (): void => {
-    selectImage(exchangeDetailsPhotoUriAtom)
-  }
 
   return (
-    <YStack gap="$2">
-      <RowCheckbox
-        label={t('tradeChecklist.exchangeDetails.photo')}
-        description={
-          photoRequiresNickname
-            ? t('tradeChecklist.exchangeDetails.photoSharedWithNickname')
-            : photoUri
-              ? undefined
-              : t('tradeChecklist.exchangeDetails.noPhotoYet')
-        }
-        checked={selected}
-        onCheckedChange={() => {
-          toggle('photo')
-        }}
-        trailing={
-          <XStack ai="center" gap="$3">
-            {photoUri ? (
-              <Image
-                borderRadius="$3"
-                width="$9"
-                height="$9"
-                source={{uri: resolveLocalUri(photoUri)}}
-              />
-            ) : null}
-            <EditIconButton
-              aria-label={
-                photoUri
-                  ? t('tradeChecklist.revealIdentity.changePhoto')
-                  : t('tradeChecklist.exchangeDetails.choosePhoto')
-              }
-              onPress={choosePhoto}
+    <RowCheckbox
+      label={t('tradeChecklist.exchangeDetails.photo')}
+      description={
+        photoRequiresNickname
+          ? t('tradeChecklist.exchangeDetails.photoSharedWithNickname')
+          : photoUri
+            ? undefined
+            : t('tradeChecklist.exchangeDetails.noPhotoYet')
+      }
+      checked={selected}
+      onCheckedChange={() => {
+        toggle('photo')
+      }}
+      trailing={
+        <XStack ai="center" gap="$3">
+          {photoUri ? (
+            <Image
+              borderRadius="$3"
+              width="$9"
+              height="$9"
+              source={{uri: resolveLocalUri(photoUri)}}
             />
-          </XStack>
-        }
-      />
-      {selected && !photoUri ? (
-        <XStack>
-          <Button variant="secondary" size="small" onPress={choosePhoto}>
-            {t('tradeChecklist.exchangeDetails.choosePhoto')}
-          </Button>
+          ) : null}
+          <EditIconButton
+            aria-label={
+              photoUri
+                ? t('tradeChecklist.revealIdentity.changePhoto')
+                : t('tradeChecklist.exchangeDetails.choosePhoto')
+            }
+            onPress={() => {
+              selectImage(exchangeDetailsPhotoUriAtom)
+            }}
+          />
         </XStack>
-      ) : null}
-    </YStack>
+      }
+    />
   )
 }
 

@@ -1,8 +1,6 @@
 import {useRunEffect} from '@/src/hooks/useRunEffect'
-import {getAdminToken} from '@/src/services/adminTokenService'
 import {makeClubsAdminClient} from '@/src/services/contactInternalApi'
 import {uploadToPresignedUrl} from '@/src/services/uploadToPresignedUrl'
-import {useRouter} from 'next/navigation'
 import {useCallback, useState} from 'react'
 
 type FileExtension = 'png' | 'jpg' | 'jpeg'
@@ -28,7 +26,6 @@ export function useClubImageUpload(): UseClubImageUploadResult {
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const runEffect = useRunEffect()
-  const router = useRouter()
 
   const getFileExtension = (file: File): FileExtension => {
     const ext = file.name.split('.').pop()?.toLowerCase()
@@ -63,12 +60,6 @@ export function useClubImageUpload(): UseClubImageUploadResult {
       return
     }
 
-    const adminToken = getAdminToken()
-    if (!adminToken) {
-      router.push('/login')
-      return
-    }
-
     setUploading(true)
     setError(null)
     setUploadProgress(0)
@@ -80,7 +71,6 @@ export function useClubImageUpload(): UseClubImageUploadResult {
       const client = await runEffect(makeClubsAdminClient())
       const result = await runEffect(
         client.requestClubImageUpload({
-          headers: {'x-admin-token': adminToken},
           payload: {fileExtension},
         })
       )
@@ -99,7 +89,7 @@ export function useClubImageUpload(): UseClubImageUploadResult {
     } finally {
       setUploading(false)
     }
-  }, [selectedFile, runEffect, router])
+  }, [selectedFile, runEffect])
 
   const resetUpload = useCallback((): void => {
     setSelectedFile(null)

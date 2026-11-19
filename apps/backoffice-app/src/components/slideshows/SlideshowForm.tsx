@@ -1,6 +1,5 @@
 'use client'
 
-import {getAdminToken} from '@/src/services/adminTokenService'
 import {requestSlideshowUpload} from '@/src/services/slideshows/api'
 import {
   SlideshowSlides,
@@ -236,12 +235,6 @@ export function SlideshowForm({
 
   const uploadAsset = useCallback(
     async (slide: DraftImageSlide | DraftVideoSlide, file: File) => {
-      const adminToken = getAdminToken()
-      if (!adminToken) {
-        router.push('/login')
-        return
-      }
-
       const fileExtension = getFileExtension(file)
       if (!fileExtension) {
         setError('Unsupported file type')
@@ -262,7 +255,7 @@ export function SlideshowForm({
       setUploadingSlideUuid(slide.uuid)
 
       try {
-        const upload = await requestSlideshowUpload(adminToken, {
+        const upload = await requestSlideshowUpload({
           slideshowUuid,
           fileExtension,
         })
@@ -290,7 +283,7 @@ export function SlideshowForm({
         setUploadingSlideUuid(null)
       }
     },
-    [router, slideshowUuid, updateSlide]
+    [slideshowUuid, updateSlide]
   )
 
   const handleSubmit = async (event: React.SyntheticEvent<HTMLFormElement>) => {

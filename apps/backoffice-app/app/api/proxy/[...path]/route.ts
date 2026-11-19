@@ -1,197 +1,229 @@
+import {accessError} from '@/src/server/access/errors'
+import {requireSessionSection} from '@/src/server/access/session'
+import {adminTokenConfig} from '@/src/server/config'
+import {handleAccessRequest} from '@/src/server/http'
+import {type BackofficeSection} from '@/src/services/access/domain'
+import {Array, Effect, Option, pipe, Redacted} from 'effect'
 import {type NextRequest, NextResponse} from 'next/server'
+
+export const runtime = 'nodejs'
+
+interface ProxyTarget {
+  readonly baseUrl: string
+  readonly sendsAdminToken: boolean
+}
 
 // The first proxy path segment selects the backend, e.g.
 // /api/proxy/contact-internal/api/v1/clubs/admin
-const PROXY_TARGETS = new Map([
+const PROXY_TARGETS: Readonly<Record<string, ProxyTarget>> = {
+  'contact-internal': {
+    baseUrl: process.env.CONTACT_INTERNAL_SERVER_URL ?? 'http://localhost:3017',
+    sendsAdminToken: true,
+  },
+  'content-internal': {
+    baseUrl: process.env.CONTENT_INTERNAL_SERVER_URL ?? 'http://localhost:3018',
+    sendsAdminToken: true,
+  },
+  content: {
+    baseUrl: process.env.CONTENT_API_INTERNAL_URL ?? 'http://localhost:3009',
+    sendsAdminToken: false,
+  },
+}
+
+type ProxyRule = readonly [
+  target: string,
+  method: string,
+  path: string,
+  section: BackofficeSection,
+]
+
+const cmsRules = (path: string): readonly ProxyRule[] => [
+  ['content-internal', 'GET', path, 'cms'],
+  ['content-internal', 'POST', path, 'cms'],
+  ['content-internal', 'PUT', `${path}/:id`, 'cms'],
+  ['content-internal', 'DELETE', `${path}/:id`, 'cms'],
+  ['content-internal', 'POST', `${path}/:id/publish`, 'cms'],
+  ['content-internal', 'POST', `${path}/:id/unpublish`, 'cms'],
+]
+
+const CLUBS_ADMIN = '/api/v1/clubs/admin'
+const BANNED_NUMBERS_ADMIN = '/api/v1/banned-numbers/admin'
+const PRODUCT_NOTIFICATIONS = '/content/vexl-product-notifications'
+
+// Every backend route the UI calls. Anything else is refused.
+const PROXY_RULES: readonly ProxyRule[] = [
+  ['contact-internal', 'GET', CLUBS_ADMIN, 'clubs'],
+  ['contact-internal', 'POST', CLUBS_ADMIN, 'clubs'],
+  ['contact-internal', 'PUT', CLUBS_ADMIN, 'clubs'],
+  ['contact-internal', 'GET', `${CLUBS_ADMIN}/stats`, 'clubs'],
+  ['contact-internal', 'PUT', `${CLUBS_ADMIN}/reactivate`, 'clubs'],
+  ['contact-internal', 'PUT', `${CLUBS_ADMIN}/generate-admin-link`, 'clubs'],
+  ['contact-internal', 'POST', `${CLUBS_ADMIN}/request-image-upload`, 'clubs'],
+  ['contact-internal', 'POST', BANNED_NUMBERS_ADMIN, 'bannedNumbers'],
+  ['contact-internal', 'POST', `${BANNED_NUMBERS_ADMIN}/list`, 'bannedNumbers'],
   [
     'contact-internal',
-    process.env.CONTACT_INTERNAL_SERVER_URL ?? 'http://localhost:3017',
+    'DELETE',
+    `${BANNED_NUMBERS_ADMIN}/:id`,
+    'bannedNumbers',
   ],
+  ...cmsRules('/content/admin/blog-posts'),
+  ...cmsRules('/content/admin/events'),
   [
     'content-internal',
-    process.env.CONTENT_INTERNAL_SERVER_URL ?? 'http://localhost:3018',
+    'POST',
+    `${PRODUCT_NOTIFICATIONS}/admin`,
+    'productNotifications',
   ],
-  ['content', process.env.CONTENT_API_INTERNAL_URL ?? 'http://localhost:3009'],
-])
+  ['content', 'GET', PRODUCT_NOTIFICATIONS, 'productNotifications'],
+]
 
-const getRequestId = (request: NextRequest): string =>
-  request.headers.get('x-request-id') ??
-  request.headers.get('cf-ray') ??
-  crypto.randomUUID()
+const PROXY_PREFIX = '/api/proxy/'
+const RESPONSE_HEADERS_TO_DROP = [
+  'content-encoding',
+  'content-length',
+  'transfer-encoding',
+  'connection',
+  'set-cookie',
+]
 
-const getContentLength = (body: BodyInit | null): number | null => {
-  if (body === null) return null
-  if (typeof body === 'string') return body.length
-  return null
+interface ResolvedRequest {
+  readonly target: ProxyTarget
+  readonly url: URL
+  readonly section: BackofficeSection
 }
 
-const ABSOLUTE_URL_SCHEME_REGEX = /^[a-z][a-z0-9+.-]*:/i
+// A `:name` segment of the rule matches any single non-empty path segment.
+const matchesPath = (rulePath: string, pathname: string): boolean => {
+  const ruleSegments = rulePath.split('/')
+  const pathSegments = pathname.split('/')
+  return (
+    ruleSegments.length === pathSegments.length &&
+    pipe(
+      Array.zip(ruleSegments, pathSegments),
+      Array.every(([ruleSegment, pathSegment]) =>
+        ruleSegment.startsWith(':')
+          ? pathSegment !== ''
+          : ruleSegment === pathSegment
+      )
+    )
+  )
+}
 
-const buildBackendUrl = (proxyPath: string): URL | undefined => {
-  const [target = '', ...pathSegments] = proxyPath.split('/')
-  const backendBaseUrl = PROXY_TARGETS.get(target)
-  const path = pathSegments.join('/')
+// Matches the URL the backend would see, so `..` cannot escape a rule's path.
+const resolveRequest = (
+  request: NextRequest
+): Option.Option<ResolvedRequest> => {
+  const [targetName = '', ...segments] = request.nextUrl.pathname
+    .slice(PROXY_PREFIX.length)
+    .split('/')
+  const target = PROXY_TARGETS[targetName]
+  if (!target) return Option.none()
+
+  const base = new URL(target.baseUrl)
+  const basePath = base.pathname.replace(/\/$/, '')
+  const url = new URL(`${basePath}/${segments.join('/')}`, base.origin)
+  const backendPath = url.pathname.slice(basePath.length)
   if (
-    !backendBaseUrl ||
-    !path ||
-    path.startsWith('/') ||
-    ABSOLUTE_URL_SCHEME_REGEX.test(path)
+    url.origin !== base.origin ||
+    !url.pathname.startsWith(`${basePath}/`) ||
+    /[%\\]/.test(url.pathname)
   ) {
-    return undefined
+    return Option.none()
   }
+  url.search = request.nextUrl.search
 
-  const backendUrl = new URL(backendBaseUrl)
-  const backendBasePath = backendUrl.pathname.endsWith('/')
-    ? backendUrl.pathname.slice(0, -1)
-    : backendUrl.pathname
-
-  backendUrl.pathname = `${backendBasePath}/${path}`
-  return backendUrl
+  return pipe(
+    PROXY_RULES,
+    Array.findFirst(
+      ([ruleTarget, method, path]) =>
+        ruleTarget === targetName &&
+        method === request.method &&
+        matchesPath(path, backendPath)
+    ),
+    Option.map(([, , , section]) => ({target, url, section}))
+  )
 }
 
-async function proxyRequest(request: NextRequest, method: string) {
+const forwardedHeaders = (
+  request: NextRequest,
+  adminToken: Option.Option<string>
+): Headers => {
+  const headers = new Headers({
+    'content-type': request.headers.get('content-type') ?? 'application/json',
+  })
+  const clientIp = request.headers.get('cf-connecting-ip')
+  if (clientIp) headers.set('cf-connecting-ip', clientIp)
+  if (Option.isSome(adminToken)) headers.set('x-admin-token', adminToken.value)
+  return headers
+}
+
+const forward = async (
+  request: NextRequest,
+  {target, url}: ResolvedRequest,
+  adminToken: Option.Option<string>
+): Promise<NextResponse> => {
   const startedAt = Date.now()
-  const requestId = getRequestId(request)
+  const logContext = {method: request.method, path: url.pathname}
+  const hasBody = request.method !== 'GET' && request.method !== 'HEAD'
 
   try {
-    // Get the path from the URL
-    const path = request.nextUrl.pathname.replace('/api/proxy/', '')
-
-    // Build the backend URL
-    const backendUrl = buildBackendUrl(path)
-
-    if (!backendUrl) {
-      return NextResponse.json({error: 'Invalid proxy path'}, {status: 400})
-    }
-
-    // Copy non-admin query params from the original request.
-    request.nextUrl.searchParams.forEach((value, key) => {
-      if (key === 'adminToken' || key === 'token') return
-      backendUrl.searchParams.set(key, value)
+    const backendResponse = await fetch(url, {
+      method: request.method,
+      headers: forwardedHeaders(request, adminToken),
+      body: hasBody ? await request.text() : null,
+      redirect: 'manual',
+    })
+    const logResult =
+      backendResponse.status >= 500
+        ? console.error
+        : backendResponse.ok
+          ? console.info
+          : console.warn
+    logResult('Backoffice proxy response', {
+      ...logContext,
+      target: target.baseUrl,
+      status: backendResponse.status,
+      durationMs: Date.now() - startedAt,
     })
 
-    // Get the request body if it exists
-    let body: BodyInit | null = null
-    if (method !== 'GET' && method !== 'HEAD') {
-      const contentType = request.headers.get('content-type')
-      if (contentType?.includes('application/json')) {
-        body = JSON.stringify(await request.json())
-      } else {
-        body = await request.text()
-      }
-    }
-
-    console.info('Backoffice proxy request', {
-      requestId,
-      method,
-      path,
-      backendUrl: backendUrl.toString(),
-      contentType: request.headers.get('content-type'),
-      contentLength: getContentLength(body),
-      hasAdminToken: request.headers.has('x-admin-token'),
+    const headers = new Headers(backendResponse.headers)
+    Array.forEach(RESPONSE_HEADERS_TO_DROP, (header) => {
+      headers.delete(header)
     })
-
-    // Prepare headers to forward
-    const headersToForward: Record<string, string> = {
-      'Content-Type': request.headers.get('content-type') ?? 'application/json',
-    }
-
-    // Forward cf-connecting-ip header if present (Cloudflare client IP)
-    const cfConnectingIp = request.headers.get('cf-connecting-ip')
-    if (cfConnectingIp) {
-      headersToForward['cf-connecting-ip'] = cfConnectingIp
-    }
-
-    const adminToken = request.headers.get('x-admin-token')
-    if (adminToken) {
-      headersToForward['x-admin-token'] = adminToken
-    }
-
-    // Forward the request to the backend
-    const backendResponse = await fetch(backendUrl.toString(), {
-      method,
-      headers: headersToForward,
-      body,
-    })
-
-    // Get response data
-    const responseData = await backendResponse.text()
-    const durationMs = Date.now() - startedAt
-
-    if (backendResponse.ok) {
-      console.info('Backoffice proxy response', {
-        requestId,
-        method,
-        path,
-        status: backendResponse.status,
-        durationMs,
-      })
-    } else {
-      const logBackendError =
-        backendResponse.status >= 500 ? console.error : console.warn
-      logBackendError('Backoffice proxy backend error', {
-        requestId,
-        method,
-        path,
-        backendUrl: backendUrl.toString(),
-        status: backendResponse.status,
-        statusText: backendResponse.statusText,
-        durationMs,
-        responseContentType: backendResponse.headers.get('content-type'),
-      })
-    }
-
-    // Create the response with the same status and headers
-    const response = new NextResponse(responseData, {
+    return new NextResponse(await backendResponse.arrayBuffer(), {
       status: backendResponse.status,
       statusText: backendResponse.statusText,
+      headers,
     })
-
-    // Copy relevant headers
-    backendResponse.headers.forEach((value, key) => {
-      if (
-        key !== 'content-encoding' &&
-        key !== 'transfer-encoding' &&
-        key !== 'connection'
-      ) {
-        response.headers.set(key, value)
-      }
-    })
-
-    return response
   } catch (error) {
     console.error('Backoffice proxy request failed', {
-      requestId,
-      method,
+      ...logContext,
       durationMs: Date.now() - startedAt,
       error,
     })
-    return NextResponse.json(
-      {
-        error: 'Proxy request failed',
-        message: error instanceof Error ? error.message : 'Unknown error',
-      },
-      {status: 500}
-    )
+    return NextResponse.json({error: 'Proxy request failed'}, {status: 502})
   }
 }
 
-export async function GET(request: NextRequest) {
-  return await proxyRequest(request, 'GET')
-}
+const proxyRequest = (request: NextRequest): Promise<NextResponse> =>
+  handleAccessRequest(
+    Effect.gen(function* (_) {
+      const resolved = yield* _(
+        resolveRequest(request),
+        Effect.mapError(() => accessError(404, 'Unknown proxy path'))
+      )
+      yield* _(requireSessionSection(request, resolved.section))
+      const adminToken = resolved.target.sendsAdminToken
+        ? Option.some(Redacted.value(yield* _(adminTokenConfig)))
+        : Option.none()
+      return yield* _(
+        Effect.promise(() => forward(request, resolved, adminToken))
+      )
+    })
+  )
 
-export async function POST(request: NextRequest) {
-  return await proxyRequest(request, 'POST')
-}
-
-export async function PUT(request: NextRequest) {
-  return await proxyRequest(request, 'PUT')
-}
-
-export async function DELETE(request: NextRequest) {
-  return await proxyRequest(request, 'DELETE')
-}
-
-export async function PATCH(request: NextRequest) {
-  return await proxyRequest(request, 'PATCH')
-}
+export const GET = proxyRequest
+export const POST = proxyRequest
+export const PUT = proxyRequest
+export const DELETE = proxyRequest

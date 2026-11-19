@@ -3,7 +3,7 @@ import {
   decodeJsonBody,
   internalServerError,
   jsonOk,
-  requireAdmin,
+  requireSection,
 } from '@/src/server/http'
 import {createSlideshowUpload} from '@/src/server/slideshows/s3'
 import {RequestUploadRequest} from '@/src/services/slideshows/domain'
@@ -14,7 +14,7 @@ export const runtime = 'nodejs'
 
 export async function POST(request: NextRequest) {
   try {
-    const authError = await requireAdmin(request)
+    const authError = await requireSection(request, 'slideshows')
     if (authError) return authError
 
     const decoded = await decodeJsonBody(request, RequestUploadRequest)

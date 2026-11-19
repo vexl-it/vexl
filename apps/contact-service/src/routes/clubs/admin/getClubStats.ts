@@ -1,12 +1,10 @@
 import {HttpApiBuilder} from '@effect/platform/index'
 import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
-import {HEADER_ADMIN_TOKEN} from '@vexl-next/rest-api/src/constants'
 import {ContactInternalApiSpecification} from '@vexl-next/rest-api/src/services/contact/internalSpecification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {Array, Effect, pipe} from 'effect'
 import {ClubMemberCountChangeDbService} from '../../../db/ClubMemberCountChangeDbService'
 import {ClubsDbService} from '../../../db/ClubsDbService'
-import {validateAdminToken} from '../../../utils/validateAdminToken'
 
 export const getClubStats = HttpApiBuilder.handler(
   ContactInternalApiSpecification,
@@ -14,8 +12,6 @@ export const getClubStats = HttpApiBuilder.handler(
   'getClubStats',
   (req) =>
     Effect.gen(function* (_) {
-      yield* _(validateAdminToken(req.headers[HEADER_ADMIN_TOKEN]))
-
       const clubsDb = yield* _(ClubsDbService)
       const memberCountChangesDb = yield* _(ClubMemberCountChangeDbService)
       const club = yield* _(

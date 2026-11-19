@@ -4,7 +4,7 @@ import {
   decodeJsonBody,
   internalServerError,
   jsonOk,
-  requireAdmin,
+  requireSection,
 } from '@/src/server/http'
 import {
   createShortLink,
@@ -18,7 +18,7 @@ export const runtime = 'nodejs'
 
 export async function GET(request: NextRequest) {
   try {
-    const authError = await requireAdmin(request)
+    const authError = await requireSection(request, 'shortLinks')
     if (authError) return authError
 
     const links = await runDb(listShortLinks)
@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const authError = await requireAdmin(request)
+    const authError = await requireSection(request, 'shortLinks')
     if (authError) return authError
 
     const decoded = await decodeJsonBody(request, CreateShortLinkRequest)

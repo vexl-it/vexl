@@ -1,5 +1,5 @@
 import {Schema} from 'effect'
-import {jsonHeaders, requestJson, requestNoContent} from '../adminFetch'
+import {requestJson, requestNoContent} from '../adminFetch'
 import {
   RequestUploadResponse as RequestUploadResponseSchema,
   type RequestUploadResponse,
@@ -12,80 +12,57 @@ import {
   type UpdateSlideshowRequest,
 } from './domain'
 
-export const listSlideshows = (
-  adminToken: string
-): Promise<SlideshowListResponse> =>
+export const listSlideshows = (): Promise<SlideshowListResponse> =>
   requestJson('/api/admin/slideshows', {
     method: 'GET',
-    headers: jsonHeaders(adminToken),
   })
 
-export const getSlideshow = (
-  adminToken: string,
-  uuid: string
-): Promise<SlideshowResponse> =>
+export const getSlideshow = (uuid: string): Promise<SlideshowResponse> =>
   requestJson(`/api/admin/slideshows/${uuid}`, {
     method: 'GET',
-    headers: jsonHeaders(adminToken),
   })
 
 export const createSlideshow = (
-  adminToken: string,
   payload: CreateSlideshowRequest
 ): Promise<SlideshowResponse> =>
   requestJson('/api/admin/slideshows', {
     method: 'POST',
-    headers: jsonHeaders(adminToken),
     body: JSON.stringify(payload),
   })
 
 export const updateSlideshow = (
-  adminToken: string,
   uuid: string,
   payload: UpdateSlideshowRequest
 ): Promise<SlideshowResponse> =>
   requestJson(`/api/admin/slideshows/${uuid}`, {
     method: 'PUT',
-    headers: jsonHeaders(adminToken),
     body: JSON.stringify(payload),
   })
 
-export const deleteSlideshow = (
-  adminToken: string,
-  uuid: string
-): Promise<void> =>
+export const deleteSlideshow = (uuid: string): Promise<void> =>
   requestNoContent(`/api/admin/slideshows/${uuid}`, {
     method: 'DELETE',
-    headers: jsonHeaders(adminToken),
   })
 
-export const duplicateSlideshow = (
-  adminToken: string,
-  uuid: string
-): Promise<SlideshowResponse> =>
+export const duplicateSlideshow = (uuid: string): Promise<SlideshowResponse> =>
   requestJson(`/api/admin/slideshows/${uuid}/duplicate`, {
     method: 'POST',
-    headers: jsonHeaders(adminToken),
   })
 
 export const regenerateSlideshowToken = (
-  adminToken: string,
   uuid: string
 ): Promise<SlideshowResponse> =>
   requestJson(`/api/admin/slideshows/${uuid}/regenerate-token`, {
     method: 'POST',
-    headers: jsonHeaders(adminToken),
   })
 
 export const requestSlideshowUpload = async (
-  adminToken: string,
   payload: RequestUploadRequest
 ): Promise<RequestUploadResponse> => {
   const response = await requestJson<unknown>(
     '/api/admin/slideshows/request-upload',
     {
       method: 'POST',
-      headers: jsonHeaders(adminToken),
       body: JSON.stringify(payload),
     }
   )

@@ -1,15 +1,9 @@
-import {authenticate, internalServerError, jsonOk} from '@/src/server/http'
-import {NextResponse, type NextRequest} from 'next/server'
+import {currentSession} from '@/src/server/access/session'
+import {handleAccessRequest, jsonOk} from '@/src/server/http'
+import {Effect} from 'effect'
+import {type NextRequest} from 'next/server'
 
 export const runtime = 'nodejs'
 
-export async function GET(request: NextRequest) {
-  try {
-    const role = await authenticate(request)
-    if (role instanceof NextResponse) return role
-
-    return jsonOk({role})
-  } catch (error) {
-    return internalServerError(error)
-  }
-}
+export const GET = (request: NextRequest) =>
+  handleAccessRequest(Effect.map(currentSession(request), jsonOk))

@@ -1,7 +1,6 @@
 'use client'
 
 import {useRunEffect} from '@/src/hooks/useRunEffect'
-import {getAdminToken} from '@/src/services/adminTokenService'
 import {makeClubsAdminClient} from '@/src/services/contactInternalApi'
 import type {ClubAdminInfo} from '@vexl-next/domain/src/general/clubs'
 import {Option} from 'effect'
@@ -37,27 +36,19 @@ export default function ClubsListPage() {
   }
 
   const loadClubs = useCallback(async (): Promise<void> => {
-    const adminToken = getAdminToken()
-    if (!adminToken) {
-      router.push('/login')
-      return
-    }
-
     setLoading(true)
     setError(null)
 
     try {
       const client = await runEffect(makeClubsAdminClient())
-      const result = await runEffect(
-        client.listClubs({headers: {'x-admin-token': adminToken}})
-      )
+      const result = await runEffect(client.listClubs())
       setClubs(result.clubs)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load clubs')
     } finally {
       setLoading(false)
     }
-  }, [runEffect, router])
+  }, [runEffect])
 
   useEffect(() => {
     void loadClubs()

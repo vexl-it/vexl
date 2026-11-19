@@ -11,7 +11,6 @@ import {
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {UserIsNotModeratorError} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
-import {addTestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Array, Effect, Option, Order, Schema} from 'effect'
 import {ClubMembersDbService} from '../../../../db/ClubMemberDbService'
 import {ClubsDbService} from '../../../../db/ClubsDbService'
@@ -27,7 +26,6 @@ const testCommonHeaders = Schema.decodeSync(CommonHeaders)({
   'user-agent': 'Vexl/1 (1.0.0) ANDROID',
 })
 
-const ADMIN_TOKEN = 'dev'
 const SOME_URL = Schema.decodeSync(UriString)('https://some.url')
 
 const userKey = generatePrivateKey()
@@ -52,10 +50,8 @@ beforeEach(async () => {
       yield* _(sql`DELETE FROM club`)
 
       const internalApp = yield* _(NodeTestingInternalApp)
-      yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
       yield* _(
         internalApp.ClubsAdmin.createClub({
-          headers: {'x-admin-token': ADMIN_TOKEN},
           payload: {
             club,
           },
@@ -258,10 +254,8 @@ describe('List club links', () => {
           validUntil: new Date(),
           reportLimit: 10,
         }
-        yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
         yield* _(
           internalApp.ClubsAdmin.createClub({
-            headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               club: club2,
             },
@@ -269,7 +263,6 @@ describe('List club links', () => {
         )
         const adminInviteCodeForClub2 = yield* _(
           internalApp.ClubsAdmin.generateClubInviteLinkForAdmin({
-            headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               clubUuid: club2.uuid,
             },

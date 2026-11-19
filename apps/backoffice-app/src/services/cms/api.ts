@@ -1,5 +1,5 @@
 import {Option, Schema} from 'effect'
-import {jsonHeaders, requestJson} from '../adminFetch'
+import {requestJson} from '../adminFetch'
 import {makeApiErrorMessage} from '../apiErrorMessage'
 import {
   RequestUploadResponse,
@@ -9,16 +9,11 @@ import {cmsImageExtensionForMimeType} from './domain'
 
 export const cmsErrorMessage = makeApiErrorMessage({
   BlogSlugTakenError: 'Another post already uses this slug.',
-  InvalidContentAdminTokenError:
-    'Your token is not allowed to manage content. Sign in again.',
   NotFoundError: 'It no longer exists. Reload the page.',
 })
 
 /** Uploads to the resources bucket and returns the public URL. */
-export const uploadCmsImage = async (
-  adminToken: string,
-  file: File
-): Promise<string> => {
+export const uploadCmsImage = async (file: File): Promise<string> => {
   const fileExtension = Option.getOrThrowWith(
     cmsImageExtensionForMimeType(file.type),
     () => new Error('Use a PNG, JPEG, WebP or GIF image.')
@@ -27,7 +22,6 @@ export const uploadCmsImage = async (
   const upload = Schema.decodeUnknownSync(RequestUploadResponse)(
     await requestJson<unknown>('/api/admin/cms/request-upload', {
       method: 'POST',
-      headers: jsonHeaders(adminToken),
       body: JSON.stringify({fileExtension}),
     })
   )

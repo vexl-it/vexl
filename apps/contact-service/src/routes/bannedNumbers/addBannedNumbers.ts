@@ -1,6 +1,5 @@
 import {HttpApiBuilder} from '@effect/platform/index'
 import {toE164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
-import {HEADER_ADMIN_TOKEN} from '@vexl-next/rest-api/src/constants'
 import {BannedNumbersMonthlyLimitReachedError} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {ContactInternalApiSpecification} from '@vexl-next/rest-api/src/services/contact/internalSpecification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
@@ -9,7 +8,6 @@ import {Array, Effect, Option} from 'effect'
 import {bannedNumbersMonthlyLimitConfig} from '../../configs'
 import {BannedNumberDbService} from '../../db/BannedNumberDbService'
 import {serverHashE164PhoneNumber} from '../../utils/serverHashContact'
-import {validateAdminToken} from '../../utils/validateAdminToken'
 
 export const addBannedNumbers = HttpApiBuilder.handler(
   ContactInternalApiSpecification,
@@ -17,8 +15,6 @@ export const addBannedNumbers = HttpApiBuilder.handler(
   'addBannedNumbers',
   (req) =>
     Effect.gen(function* (_) {
-      yield* _(validateAdminToken(req.headers[HEADER_ADMIN_TOKEN]))
-
       const bannedNumberDb = yield* _(BannedNumberDbService)
 
       const numbersToBan = yield* _(

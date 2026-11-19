@@ -6,7 +6,7 @@ import {
   jsonOk,
   noContent,
   notFound,
-  requireAdmin,
+  requireSection,
 } from '@/src/server/http'
 import {
   deleteShortLink,
@@ -31,7 +31,7 @@ const decodeSlug = Schema.decodeUnknownEither(ShortLinkSlug)
 
 export async function PATCH(request: NextRequest, context: RouteContext) {
   try {
-    const authError = await requireAdmin(request)
+    const authError = await requireSection(request, 'shortLinks')
     if (authError) return authError
 
     const slug = decodeSlug((await context.params).slug)
@@ -53,7 +53,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
 
 export async function DELETE(request: NextRequest, context: RouteContext) {
   try {
-    const authError = await requireAdmin(request)
+    const authError = await requireSection(request, 'shortLinks')
     if (authError) return authError
 
     const slug = decodeSlug((await context.params).slug)

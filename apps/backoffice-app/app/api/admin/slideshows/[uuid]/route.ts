@@ -6,7 +6,7 @@ import {
   jsonOk,
   noContent,
   notFound,
-  requireAdmin,
+  requireSection,
 } from '@/src/server/http'
 import {
   deleteSlideshow,
@@ -31,7 +31,7 @@ const decodeUuid = (uuid: string) =>
 
 export async function GET(request: NextRequest, context: RouteContext) {
   try {
-    const authError = await requireAdmin(request)
+    const authError = await requireSection(request, 'slideshows')
     if (authError) return authError
 
     const {uuid} = await context.params
@@ -49,7 +49,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
 
 export async function PUT(request: NextRequest, context: RouteContext) {
   try {
-    const authError = await requireAdmin(request)
+    const authError = await requireSection(request, 'slideshows')
     if (authError) return authError
 
     const {uuid} = await context.params
@@ -87,7 +87,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
 
 export async function DELETE(request: NextRequest, context: RouteContext) {
   try {
-    const authError = await requireAdmin(request)
+    const authError = await requireSection(request, 'slideshows')
     if (authError) return authError
 
     const {uuid} = await context.params

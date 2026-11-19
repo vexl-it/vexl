@@ -1,5 +1,4 @@
 import {HttpApiBuilder} from '@effect/platform/index'
-import {HEADER_ADMIN_TOKEN} from '@vexl-next/rest-api/src/constants'
 import {
   type ImageExtension,
   S3ServiceError,
@@ -9,7 +8,6 @@ import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect
 import {S3Service} from '@vexl-next/server-utils/src/S3Service'
 import {randomUUID} from 'crypto'
 import {Effect} from 'effect'
-import {validateAdminToken} from '../../../utils/validateAdminToken'
 
 const getContentTypeFromExtension = (extension: ImageExtension): string => {
   switch (extension) {
@@ -27,8 +25,6 @@ export const requestClubImageUpload = HttpApiBuilder.handler(
   'requestClubImageUpload',
   (req) =>
     Effect.gen(function* (_) {
-      yield* _(validateAdminToken(req.headers[HEADER_ADMIN_TOKEN]))
-
       const s3Service = yield* _(S3Service)
       const {fileExtension} = req.payload
 

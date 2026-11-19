@@ -65,12 +65,6 @@ export class BlogSlugTakenError extends Schema.TaggedError<BlogSlugTakenError>(
   status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
 }) {}
 
-export class InvalidContentAdminTokenError extends Schema.TaggedError<InvalidContentAdminTokenError>(
-  'InvalidContentAdminTokenError'
-)('InvalidContentAdminTokenError', {
-  status: Schema.optionalWith(Schema.Literal(401), {default: () => 401}),
-}) {}
-
 export class DuplicateVexlProductNotificationUuidError extends Schema.TaggedError<DuplicateVexlProductNotificationUuidError>(
   'DuplicateVexlProductNotificationUuidError'
 )('DuplicateVexlProductNotificationUuidError', {

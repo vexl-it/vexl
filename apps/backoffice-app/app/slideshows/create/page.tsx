@@ -1,11 +1,10 @@
 'use client'
 
 import {SlideshowForm} from '@/src/components/slideshows/SlideshowForm'
-import {getAdminToken} from '@/src/services/adminTokenService'
 import {createSlideshow} from '@/src/services/slideshows/api'
 import {type SlideshowSlides} from '@/src/services/slideshows/domain'
 import {useRouter} from 'next/navigation'
-import {useEffect, useState} from 'react'
+import {useState} from 'react'
 
 interface SubmitData {
   readonly name: string
@@ -18,18 +17,8 @@ export default function CreateSlideshowPage() {
   const [slideshowUuid] = useState(() => crypto.randomUUID())
   const router = useRouter()
 
-  useEffect(() => {
-    if (!getAdminToken()) router.push('/login')
-  }, [router])
-
   const handleSubmit = async (data: SubmitData) => {
-    const adminToken = getAdminToken()
-    if (!adminToken) {
-      router.push('/login')
-      return
-    }
-
-    const result = await createSlideshow(adminToken, {
+    const result = await createSlideshow({
       uuid: slideshowUuid,
       name: data.name,
       publicSlug: data.publicSlug,

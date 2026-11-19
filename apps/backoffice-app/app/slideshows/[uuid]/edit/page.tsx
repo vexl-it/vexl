@@ -1,7 +1,6 @@
 'use client'
 
 import {SlideshowForm} from '@/src/components/slideshows/SlideshowForm'
-import {getAdminToken} from '@/src/services/adminTokenService'
 import {copyToClipboard} from '@/src/services/clipboard'
 import {publicUrl, usePublicHosts} from '@/src/services/publicHosts'
 import {
@@ -38,17 +37,11 @@ export default function EditSlideshowPage() {
   const router = useRouter()
 
   const loadSlideshow = useCallback(async () => {
-    const adminToken = getAdminToken()
-    if (!adminToken) {
-      router.push('/login')
-      return
-    }
-
     setLoading(true)
     setError(null)
 
     try {
-      const result = await getSlideshow(adminToken, params.uuid)
+      const result = await getSlideshow(params.uuid)
       setSlideshow(result.slideshow)
     } catch (loadError) {
       setError(
@@ -59,7 +52,7 @@ export default function EditSlideshowPage() {
     } finally {
       setLoading(false)
     }
-  }, [params.uuid, router])
+  }, [params.uuid])
 
   useEffect(() => {
     void loadSlideshow()
@@ -73,13 +66,7 @@ export default function EditSlideshowPage() {
   }, [manualCopyUrl])
 
   const handleSubmit = async (data: SubmitData) => {
-    const adminToken = getAdminToken()
-    if (!adminToken) {
-      router.push('/login')
-      return
-    }
-
-    const result = await updateSlideshow(adminToken, params.uuid, {
+    const result = await updateSlideshow(params.uuid, {
       name: data.name,
       publicSlug: data.publicSlug,
       isEnabled: data.isEnabled,
@@ -93,14 +80,8 @@ export default function EditSlideshowPage() {
   const handleRegenerateToken = async () => {
     if (!window.confirm('Regenerate the public TV URL?')) return
 
-    const adminToken = getAdminToken()
-    if (!adminToken) {
-      router.push('/login')
-      return
-    }
-
     try {
-      const result = await regenerateSlideshowToken(adminToken, params.uuid)
+      const result = await regenerateSlideshowToken(params.uuid)
       setSlideshow(result.slideshow)
       setCopied(false)
     } catch (regenerateError) {

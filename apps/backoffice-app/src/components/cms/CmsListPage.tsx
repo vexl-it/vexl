@@ -49,7 +49,7 @@ export function CmsListPage<
     setLoading(true)
     setError(null)
     try {
-      setItems(await cms((client, headers) => resource.list(client, headers)))
+      setItems(await cms((client) => resource.list(client)))
     } catch (loadError) {
       setError(cmsErrorMessage(loadError))
     } finally {
@@ -71,9 +71,7 @@ export function CmsListPage<
     setError(null)
     try {
       replaceItem(
-        await cms((client, headers) =>
-          resource.setStatus(client, headers, item.id, status)
-        )
+        await cms((client) => resource.setStatus(client, item.id, status))
       )
     } catch (statusError) {
       setError(cmsErrorMessage(statusError))
@@ -86,7 +84,7 @@ export function CmsListPage<
 
     setError(null)
     try {
-      await cms((client, headers) => resource.remove(client, headers, item.id))
+      await cms((client) => resource.remove(client, item.id))
       setItems((current) =>
         pipe(
           current,

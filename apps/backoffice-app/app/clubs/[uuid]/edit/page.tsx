@@ -3,7 +3,6 @@
 import {ClubMemberActivityChart} from '@/src/components/ClubMemberActivityChart'
 import {useClubImageUpload} from '@/src/hooks/useClubImageUpload'
 import {useRunEffect} from '@/src/hooks/useRunEffect'
-import {getAdminToken} from '@/src/services/adminTokenService'
 import {makeClubsAdminClient} from '@/src/services/contactInternalApi'
 import type {ClubAdminInfo} from '@vexl-next/domain/src/general/clubs'
 import type {
@@ -61,20 +60,12 @@ export default function EditClubPage() {
 
   useEffect(() => {
     const loadClub = async () => {
-      const adminToken = getAdminToken()
-      if (!adminToken) {
-        router.push('/login')
-        return
-      }
-
       setLoading(true)
       setError(null)
 
       try {
         const client = await runEffect(makeClubsAdminClient())
-        const result = await runEffect(
-          client.listClubs({headers: {'x-admin-token': adminToken}})
-        )
+        const result = await runEffect(client.listClubs())
         const club = result.clubs.find((c) => c.uuid === clubUuid)
 
         if (!club) {
@@ -87,7 +78,6 @@ export default function EditClubPage() {
         try {
           const statsResult = await runEffect(
             client.getClubStats({
-              headers: {'x-admin-token': adminToken},
               urlParams: {clubUuid: club.uuid},
             })
           )
@@ -120,12 +110,6 @@ export default function EditClubPage() {
       return
     }
 
-    const adminToken = getAdminToken()
-    if (!adminToken) {
-      router.push('/login')
-      return
-    }
-
     setError(null)
     setSaving(true)
 
@@ -133,7 +117,6 @@ export default function EditClubPage() {
       const client = await runEffect(makeClubsAdminClient())
       await runEffect(
         client.modifyClub({
-          headers: {'x-admin-token': adminToken},
           payload: {
             clubInfo: {
               uuid: formData.uuid,
@@ -164,12 +147,6 @@ export default function EditClubPage() {
     )
       return
 
-    const adminToken = getAdminToken()
-    if (!adminToken) {
-      router.push('/login')
-      return
-    }
-
     setReactivating(true)
     setReactivateError(null)
 
@@ -178,7 +155,6 @@ export default function EditClubPage() {
       const blockedMessage = await runEffect(
         client
           .reactivateClub({
-            headers: {'x-admin-token': adminToken},
             payload: {clubUuid: formData.uuid},
           })
           .pipe(

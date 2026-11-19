@@ -5,5 +5,5 @@ export default function BlogPostsLayout({
 }: {
   children: React.ReactNode
 }) {
-  return <BackofficeLayout>{children}</BackofficeLayout>
+  return <BackofficeLayout section="cms">{children}</BackofficeLayout>
 }

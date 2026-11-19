@@ -1,7 +1,8 @@
 import {HttpApiBuilder} from '@effect/platform/index'
 import {ContentInternalApiSpecification} from '@vexl-next/rest-api/src/services/content/internalSpecification'
-import {makeInternalApiServer} from '@vexl-next/server-utils/src/InternalServer'
+import {AdminTokenMiddlewareLive} from '@vexl-next/server-utils/src/adminTokenMiddleware'
 import {internalServerPortConfig} from '@vexl-next/server-utils/src/commonConfigs'
+import {makeInternalApiServer} from '@vexl-next/server-utils/src/InternalServer'
 import {Layer} from 'effect'
 import {VexlProductNotificationsDbService} from '../db/VexlProductNotificationsDbService'
 import {
@@ -56,7 +57,8 @@ export const ContentInternalApiLive = HttpApiBuilder.api(
 ).pipe(
   Layer.provide(CmsApiGroupLive),
   Layer.provide(VexlProductNotificationsApiGroupLive),
-  Layer.provide(VexlProductNotificationsDbService.Live)
+  Layer.provide(VexlProductNotificationsDbService.Live),
+  Layer.provide(AdminTokenMiddlewareLive)
 )
 
 export const internalServerLive = makeInternalApiServer(

@@ -5,5 +5,5 @@ export default function ShortLinksLayout({
 }: {
   children: React.ReactNode
 }) {
-  return <BackofficeLayout>{children}</BackofficeLayout>
+  return <BackofficeLayout section="shortLinks">{children}</BackofficeLayout>
 }

@@ -20,6 +20,8 @@
     "@effect/sql": "^0.48.6",
     "@effect/sql-pg": "^0.49.7",
     "@sentry/nextjs": "^10.75.2",
+    "@simplewebauthn/browser": "^14.0.0",
+    "@simplewebauthn/server": "^14.1.0",
     "@tiptap/extension-image": "3.32.0",
     "@tiptap/pm": "3.32.0",
     "@tiptap/react": "3.32.0",

@@ -7,5 +7,9 @@ export default function ProductNotificationLayout({
 }: {
   children: React.ReactNode
 }) {
-  return <BackofficeLayout>{children}</BackofficeLayout>
+  return (
+    <BackofficeLayout section="productNotifications">
+      {children}
+    </BackofficeLayout>
+  )
 }

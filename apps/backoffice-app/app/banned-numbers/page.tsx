@@ -60,9 +60,8 @@ export default function BannedNumbersPage() {
       // A cursor only continues the search it came from.
       if (pageToken === null) setNextPageToken(null)
       try {
-        const page = await bannedNumbersApi((client, headers) =>
+        const page = await bannedNumbersApi((client) =>
           client.listBannedNumbers({
-            headers,
             payload: {
               limit: PAGE_SIZE,
               search,
@@ -100,11 +99,10 @@ export default function BannedNumbersPage() {
     setError(null)
     setSummary(null)
     try {
-      const result = await bannedNumbersApi((client, headers) =>
+      const result = await bannedNumbersApi((client) =>
         Effect.forEach(
           Array.chunksOf(numbers, MAX_BANNED_NUMBERS_BATCH_SIZE),
-          (chunk) =>
-            client.addBannedNumbers({headers, payload: {numbers: chunk}})
+          (chunk) => client.addBannedNumbers({payload: {numbers: chunk}})
         ).pipe(Effect.map(sumAddResults))
       )
       setSummary({...result, ...csvIssues})
@@ -157,8 +155,8 @@ export default function BannedNumbersPage() {
 
     setError(null)
     try {
-      await bannedNumbersApi((client, headers) =>
-        client.deleteBannedNumber({headers, path: {id: bannedNumber.id}})
+      await bannedNumbersApi((client) =>
+        client.deleteBannedNumber({path: {id: bannedNumber.id}})
       )
       setItems((current) =>
         pipe(

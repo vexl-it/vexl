@@ -9,22 +9,18 @@ import {
   type UnexpectedServerError,
 } from '@vexl-next/domain/src/general/commonErrors'
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
-import {HEADER_ADMIN_TOKEN} from '@vexl-next/rest-api/src/constants'
-import {type InvalidContentAdminTokenError} from '@vexl-next/rest-api/src/services/content/contracts'
 import {ContentInternalApiSpecification} from '@vexl-next/rest-api/src/services/content/internalSpecification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {Effect, Option, Schema} from 'effect'
 import {BlogPostsDbService} from '../../db/BlogPostsDbService'
-import {validateCmsToken} from '../validateAdminToken'
 import {orNotFound} from './orNotFound'
 
 export const listBlogPostsHandler = HttpApiBuilder.handler(
   ContentInternalApiSpecification,
   'Cms',
   'listBlogPosts',
-  (req) =>
+  () =>
     Effect.gen(function* (_) {
-      yield* _(validateCmsToken(req.headers[HEADER_ADMIN_TOKEN]))
       const blogPosts = yield* _(
         BlogPostsDbService,
         Effect.flatMap((db) => db.listAllBlogPosts)
@@ -39,7 +35,6 @@ export const createBlogPostHandler = HttpApiBuilder.handler(
   'createBlogPost',
   (req) =>
     Effect.gen(function* (_) {
-      yield* _(validateCmsToken(req.headers[HEADER_ADMIN_TOKEN]))
       const post: BlogPost = {
         ...req.payload,
         cs: Option.some(req.payload.cs),
@@ -61,7 +56,6 @@ export const updateBlogPostHandler = HttpApiBuilder.handler(
   'updateBlogPost',
   (req) =>
     Effect.gen(function* (_) {
-      yield* _(validateCmsToken(req.headers[HEADER_ADMIN_TOKEN]))
       return yield* _(
         BlogPostsDbService,
         Effect.flatMap((db) =>
@@ -73,16 +67,14 @@ export const updateBlogPostHandler = HttpApiBuilder.handler(
 )
 
 const setBlogPostStatus = (
-  adminToken: string,
   id: BlogId,
   status: CmsStatus
 ): Effect.Effect<
   BlogPost,
-  InvalidContentAdminTokenError | UnexpectedServerError | NotFoundError,
+  UnexpectedServerError | NotFoundError,
   BlogPostsDbService
 > =>
   Effect.gen(function* (_) {
-    yield* _(validateCmsToken(adminToken))
     return yield* _(
       BlogPostsDbService,
       Effect.flatMap((db) => db.setBlogPostStatus({id, status})),
@@ -94,16 +86,14 @@ export const publishBlogPostHandler = HttpApiBuilder.handler(
   ContentInternalApiSpecification,
   'Cms',
   'publishBlogPost',
-  (req) =>
-    setBlogPostStatus(req.headers[HEADER_ADMIN_TOKEN], req.path.id, 'published')
+  (req) => setBlogPostStatus(req.path.id, 'published')
 )
 
 export const unpublishBlogPostHandler = HttpApiBuilder.handler(
   ContentInternalApiSpecification,
   'Cms',
   'unpublishBlogPost',
-  (req) =>
-    setBlogPostStatus(req.headers[HEADER_ADMIN_TOKEN], req.path.id, 'draft')
+  (req) => setBlogPostStatus(req.path.id, 'draft')
 )
 
 export const deleteBlogPostHandler = HttpApiBuilder.handler(
@@ -112,7 +102,6 @@ export const deleteBlogPostHandler = HttpApiBuilder.handler(
   'deleteBlogPost',
   (req) =>
     Effect.gen(function* (_) {
-      yield* _(validateCmsToken(req.headers[HEADER_ADMIN_TOKEN]))
       yield* _(
         BlogPostsDbService,
         Effect.flatMap((db) => db.deleteBlogPost(req.path.id)),

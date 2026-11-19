@@ -4,7 +4,7 @@ import {ContactInternalApiSpecification} from '@vexl-next/rest-api/src/services/
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {Array, Effect, pipe} from 'effect'
 import {ClubsDbService} from '../../../db/ClubsDbService'
-import {validateAdminToken} from '../utils/validateAdminToken'
+import {validateAdminToken} from '../../../utils/validateAdminToken'
 import {clubDbRecordToClubAdminInfo} from './clubDbRecordToClubAdminInfo'
 
 export const listClubs = HttpApiBuilder.handler(

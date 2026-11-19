@@ -9,7 +9,7 @@ import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect
 import {S3Service} from '@vexl-next/server-utils/src/S3Service'
 import {randomUUID} from 'crypto'
 import {Effect} from 'effect'
-import {validateAdminToken} from '../utils/validateAdminToken'
+import {validateAdminToken} from '../../../utils/validateAdminToken'
 
 const getContentTypeFromExtension = (extension: ImageExtension): string => {
   switch (extension) {

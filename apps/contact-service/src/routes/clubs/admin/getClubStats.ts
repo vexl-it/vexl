@@ -6,7 +6,7 @@ import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect
 import {Array, Effect, pipe} from 'effect'
 import {ClubMemberCountChangeDbService} from '../../../db/ClubMemberCountChangeDbService'
 import {ClubsDbService} from '../../../db/ClubsDbService'
-import {validateAdminToken} from '../utils/validateAdminToken'
+import {validateAdminToken} from '../../../utils/validateAdminToken'
 
 export const getClubStats = HttpApiBuilder.handler(
   ContactInternalApiSpecification,

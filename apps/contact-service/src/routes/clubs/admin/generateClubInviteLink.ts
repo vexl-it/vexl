@@ -7,9 +7,9 @@ import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect
 import {Effect} from 'effect'
 import {ClubInvitationLinkDbService} from '../../../db/ClubInvitationLinkDbService'
 import {ClubsDbService} from '../../../db/ClubsDbService'
+import {validateAdminToken} from '../../../utils/validateAdminToken'
 import {createFullLink} from '../utils/createFullLink'
 import {generateRandomInviteCode} from '../utils/generateRandomInviteCode'
-import {validateAdminToken} from '../utils/validateAdminToken'
 
 export const generateClubInviteLink = HttpApiBuilder.handler(
   ContactInternalApiSpecification,

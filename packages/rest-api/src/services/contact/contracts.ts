@@ -597,6 +597,14 @@ export const AddBannedNumbersResponse = Schema.Struct({
 })
 export type AddBannedNumbersResponse = typeof AddBannedNumbersResponse.Type
 
+export class BannedNumbersMonthlyLimitReachedError extends Schema.TaggedError<BannedNumbersMonthlyLimitReachedError>(
+  'BannedNumbersMonthlyLimitReachedError'
+)('BannedNumbersMonthlyLimitReachedError', {
+  monthlyLimit: Schema.Int,
+  remainingThisMonth: Schema.Int,
+  status: Schema.optionalWith(Schema.Literal(429), {default: () => 429}),
+}) {}
+
 export const DeleteBannedNumberPath = Schema.Struct({id: BannedNumberId})
 
 export const TestHashingSpeedRequest = Schema.Struct({

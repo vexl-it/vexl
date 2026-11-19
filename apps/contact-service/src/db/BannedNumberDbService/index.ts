@@ -1,6 +1,7 @@
 import {type UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {type BannedNumberId} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {Context, Effect, Layer} from 'effect'
+import {createCountBannedNumbersAddedThisMonth} from './queries/createCountBannedNumbersAddedThisMonth'
 import {createDeleteBannedNumber} from './queries/createDeleteBannedNumber'
 import {
   createInsertBannedNumbers,
@@ -17,6 +18,10 @@ export interface BannedNumberDbOperations {
   insertBannedNumbers: (
     numbers: readonly InsertBannedNumberParams[]
   ) => Effect.Effect<number, UnexpectedServerError>
+  countBannedNumbersAddedThisMonth: () => Effect.Effect<
+    number,
+    UnexpectedServerError
+  >
   listBannedNumbers: (
     params: ListBannedNumbersParams
   ) => Effect.Effect<readonly BannedNumberListItem[], UnexpectedServerError>
@@ -34,11 +39,15 @@ export class BannedNumberDbService extends Context.Tag('BannedNumberDbService')<
     BannedNumberDbService,
     Effect.gen(function* (_) {
       const insertBannedNumbers = yield* _(createInsertBannedNumbers)
+      const countBannedNumbersAddedThisMonth = yield* _(
+        createCountBannedNumbersAddedThisMonth
+      )
       const listBannedNumbers = yield* _(createListBannedNumbers)
       const deleteBannedNumber = yield* _(createDeleteBannedNumber)
 
       return {
         insertBannedNumbers,
+        countBannedNumbersAddedThisMonth,
         listBannedNumbers,
         deleteBannedNumber,
       }

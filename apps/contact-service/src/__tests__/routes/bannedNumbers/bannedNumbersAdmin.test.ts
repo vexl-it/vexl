@@ -3,6 +3,7 @@ import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {
   BannedNumberId,
+  BannedNumbersMonthlyLimitReachedError,
   InvalidAdminTokenError,
 } from '@vexl-next/rest-api/src/services/contact/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
@@ -10,7 +11,7 @@ import {Array, Effect, Order, pipe, Schema} from 'effect'
 import {adminHeaders, banNumbers} from '../../utils/bannedNumbers'
 import {NodeTestingInternalApp} from '../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../utils/runPromiseInMockedEnvironment'
-import {generateKeysAndHasheForNumber} from '../contacts/utils'
+import {generateKeysAndHasheForNumber, withEnvVar} from '../contacts/utils'
 
 const badAdminHeaders = {'x-admin-token': 'bad-token'}
 const numbers = pipe(
@@ -136,6 +137,88 @@ describe('Banned numbers admin', () => {
         expect(rows).toHaveLength(3)
       })
     )
+  })
+
+  it('Rejects a batch that would go over the monthly limit', async () => {
+    await withEnvVar('BANNED_NUMBERS_MONTHLY_LIMIT', '3', async () => {
+      await runPromiseInMockedEnvironment(
+        Effect.gen(function* (_) {
+          yield* _(banNumbers([numbers[0], numbers[1]]))
+
+          const overLimit = yield* _(
+            banNumbers([numbers[1], numbers[2], numbers[3]]),
+            Effect.either
+          )
+          expectErrorResponse(BannedNumbersMonthlyLimitReachedError)(overLimit)
+          expect(overLimit).toMatchObject({
+            left: {monthlyLimit: 3, remainingThisMonth: 1},
+          })
+
+          const sql = yield* _(SqlClient.SqlClient)
+          const countRows = sql`
+            SELECT
+              count(*)::int AS count
+            FROM
+              banned_number
+          `
+          expect(yield* _(countRows)).toEqual([{count: 2}])
+
+          expect(yield* _(banNumbers([numbers[1], numbers[2]]))).toEqual({
+            addedCount: 1,
+            alreadyBannedCount: 1,
+          })
+          expect(yield* _(countRows)).toEqual([{count: 3}])
+        })
+      )
+    })
+  })
+
+  it('Accepts a batch of already banned numbers when over the limit', async () => {
+    await withEnvVar('BANNED_NUMBERS_MONTHLY_LIMIT', '1', async () => {
+      await runPromiseInMockedEnvironment(
+        Effect.gen(function* (_) {
+          yield* _(banNumbers([numbers[0]]))
+
+          const sql = yield* _(SqlClient.SqlClient)
+          yield* _(sql`
+            INSERT INTO
+              banned_number (phone_number, hash)
+            VALUES
+              (
+                '+420733444999',
+                'banned before the limit was lowered'
+              )
+          `)
+
+          expect(yield* _(banNumbers([numbers[0]]))).toEqual({
+            addedCount: 0,
+            alreadyBannedCount: 1,
+          })
+        })
+      )
+    })
+  })
+
+  it('Does not count numbers banned in previous months', async () => {
+    await withEnvVar('BANNED_NUMBERS_MONTHLY_LIMIT', '2', async () => {
+      await runPromiseInMockedEnvironment(
+        Effect.gen(function* (_) {
+          yield* _(banNumbers([numbers[0], numbers[1]]))
+
+          const sql = yield* _(SqlClient.SqlClient)
+          yield* _(sql`
+            UPDATE banned_number
+            SET
+              created_at = date_trunc('month', now()) - interval '1 day'
+          `)
+
+          expect(yield* _(banNumbers([numbers[2], numbers[3]]))).toEqual({
+            addedCount: 2,
+            alreadyBannedCount: 0,
+          })
+        })
+      )
+    })
   })
 
   it('Lists numbers newest first, paginated and searchable', async () => {

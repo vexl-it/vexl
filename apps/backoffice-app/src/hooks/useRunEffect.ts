@@ -1,6 +1,6 @@
 import type {Effect} from 'effect'
 import {useCallback} from 'react'
-import {runEffect} from '../services/clubsAdminApi'
+import {runEffect} from '../services/contactInternalApi'
 
 export function useRunEffect() {
   return useCallback(

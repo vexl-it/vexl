@@ -4,7 +4,7 @@ import {ClubMemberActivityChart} from '@/src/components/ClubMemberActivityChart'
 import {useClubImageUpload} from '@/src/hooks/useClubImageUpload'
 import {useRunEffect} from '@/src/hooks/useRunEffect'
 import {getAdminToken} from '@/src/services/adminTokenService'
-import {makeClubsAdminClient} from '@/src/services/clubsAdminApi'
+import {makeClubsAdminClient} from '@/src/services/contactInternalApi'
 import type {ClubAdminInfo} from '@vexl-next/domain/src/general/clubs'
 import type {
   ClubCannotBeReactivatedError,

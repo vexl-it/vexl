@@ -1,5 +1,9 @@
 import {Option, Schema} from 'effect'
 
+export interface AdminTokenHeaders {
+  readonly 'x-admin-token': string
+}
+
 const ADMIN_TOKEN_KEY = 'vexl_admin_token'
 const ROLE_KEY = 'vexl_backoffice_role'
 

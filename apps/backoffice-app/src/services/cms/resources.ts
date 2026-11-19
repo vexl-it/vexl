@@ -8,11 +8,8 @@ import {
   type EventInput,
 } from '@vexl-next/domain/src/general/cms'
 import {Effect} from 'effect'
+import {type AdminTokenHeaders} from '../adminTokenService'
 import {type CmsAdminClient} from '../contentAdminApi'
-
-export interface AdminTokenHeaders {
-  readonly 'x-admin-token': string
-}
 
 type Call<A> = Effect.Effect<A, unknown>
 

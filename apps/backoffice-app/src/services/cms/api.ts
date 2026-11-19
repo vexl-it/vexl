@@ -1,27 +1,18 @@
-import {Option, Predicate, Schema} from 'effect'
+import {Option, Schema} from 'effect'
 import {jsonHeaders, requestJson} from '../adminFetch'
+import {makeApiErrorMessage} from '../apiErrorMessage'
 import {
   RequestUploadResponse,
   uploadToPresignedUrl,
 } from '../uploadToPresignedUrl'
 import {cmsImageExtensionForMimeType} from './domain'
 
-const ERROR_MESSAGES: Record<string, string> = {
+export const cmsErrorMessage = makeApiErrorMessage({
   BlogSlugTakenError: 'Another post already uses this slug.',
   InvalidContentAdminTokenError:
     'Your token is not allowed to manage content. Sign in again.',
   NotFoundError: 'It no longer exists. Reload the page.',
-}
-
-export const cmsErrorMessage = (error: unknown): string => {
-  if (Predicate.hasProperty(error, '_tag') && Predicate.isString(error._tag)) {
-    const message = ERROR_MESSAGES[error._tag]
-    if (message) return message
-  }
-  return error instanceof Error && error.message.length > 0
-    ? error.message
-    : 'Request failed'
-}
+})
 
 /** Uploads to the resources bucket and returns the public URL. */
 export const uploadCmsImage = async (

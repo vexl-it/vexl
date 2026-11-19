@@ -18,7 +18,8 @@ The Vexl app can show the translation key for text on screen, making it easier t
 
 1. Open the Vexl app.
 2. Open your user profile by tapping the person icon at the bottom of the app.
-3. Scroll to the app version and tap it 8 times. A notification confirms that Debug Screen Mode is enabled.
+3. Open **App logs**. With logging off and no logs recorded, quickly tap the "No logs" text 7 times. A notification confirms that developer mode is enabled.
+4. Go back to your profile and tap **Debug screen** at the bottom of the Settings section.
 
 <img src="images/image18.png" width="500">
 

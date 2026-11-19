@@ -1,9 +1,12 @@
 import {HttpApiBuilder} from '@effect/platform/index'
 import {toE164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {HEADER_ADMIN_TOKEN} from '@vexl-next/rest-api/src/constants'
+import {BannedNumbersMonthlyLimitReachedError} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {ContactInternalApiSpecification} from '@vexl-next/rest-api/src/services/contact/internalSpecification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import {Array, Effect, Option} from 'effect'
+import {bannedNumbersMonthlyLimitConfig} from '../../configs'
 import {BannedNumberDbService} from '../../db/BannedNumberDbService'
 import {serverHashE164PhoneNumber} from '../../utils/serverHashContact'
 import {validateAdminToken} from '../../utils/validateAdminToken'
@@ -43,9 +46,27 @@ export const addBannedNumbers = HttpApiBuilder.handler(
         bannedNumberDb.insertBannedNumbers(numbersToBan)
       )
 
+      // Inserting first counts only numbers that were not banned yet. The
+      // transaction rolls the insert back when it goes over the limit.
+      const monthlyLimit = yield* _(bannedNumbersMonthlyLimitConfig)
+      const addedThisMonth = yield* _(
+        bannedNumberDb.countBannedNumbersAddedThisMonth()
+      )
+      if (addedCount > 0 && addedThisMonth > monthlyLimit) {
+        return yield* _(
+          new BannedNumbersMonthlyLimitReachedError({
+            monthlyLimit,
+            remainingThisMonth: Math.max(
+              0,
+              monthlyLimit - (addedThisMonth - addedCount)
+            ),
+          })
+        )
+      }
+
       return {
         addedCount,
         alreadyBannedCount: numbersToBan.length - addedCount,
       }
-    }).pipe(makeEndpointEffect)
+    }).pipe(withDbTransaction, makeEndpointEffect)
 )

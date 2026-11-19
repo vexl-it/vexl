@@ -137,3 +137,13 @@ export const contactPublicImportCountThresholdConfig = Config.number(
   }),
   Config.withDefault(-1)
 )
+
+export const bannedNumbersMonthlyLimitConfig = Config.number(
+  'BANNED_NUMBERS_MONTHLY_LIMIT'
+).pipe(
+  Config.validate({
+    validation: (limit) => Number.isInteger(limit) && limit >= 0,
+    message: 'BANNED_NUMBERS_MONTHLY_LIMIT must be a non-negative integer',
+  }),
+  Config.withDefault(300)
+)

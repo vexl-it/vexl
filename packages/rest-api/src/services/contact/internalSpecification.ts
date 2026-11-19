@@ -9,6 +9,7 @@ import {NoContentResponse} from '../../NoContentResponse.brand'
 import {
   AddBannedNumbersRequest,
   AddBannedNumbersResponse,
+  BannedNumbersMonthlyLimitReachedError,
   ClubAlreadyExistsError,
   ClubCannotBeReactivatedError,
   CreateClubRequest,
@@ -119,6 +120,7 @@ export const AddBannedNumbersEndpoint = HttpApiEndpoint.post(
   .setPayload(AddBannedNumbersRequest)
   .addSuccess(AddBannedNumbersResponse)
   .addError(InvalidAdminTokenError, {status: 401})
+  .addError(BannedNumbersMonthlyLimitReachedError, {status: 429})
 
 export const DeleteBannedNumberEndpoint = HttpApiEndpoint.del(
   'deleteBannedNumber',

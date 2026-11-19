@@ -1,12 +1,20 @@
-import {BannedNumberToAdd} from '@vexl-next/rest-api/src/services/contact/contracts'
+import {
+  BannedNumbersMonthlyLimitReachedError,
+  BannedNumberToAdd,
+} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {Array, Either, pipe, Schema, type Option} from 'effect'
 import {makeApiErrorMessage} from './apiErrorMessage'
 
-export const bannedNumbersErrorMessage = makeApiErrorMessage({
+const apiErrorMessage = makeApiErrorMessage({
   InvalidAdminToken:
     'Your token is not allowed to manage banned numbers. Sign in again.',
   NotFoundError: 'It no longer exists. Reload the page.',
 })
+
+export const bannedNumbersErrorMessage = (error: unknown): string =>
+  error instanceof BannedNumbersMonthlyLimitReachedError
+    ? `Over the limit of ${error.monthlyLimit} newly banned numbers per month. You can ban ${error.remainingThisMonth} more this month.`
+    : apiErrorMessage(error)
 
 export interface InvalidCsvRow {
   readonly line: number

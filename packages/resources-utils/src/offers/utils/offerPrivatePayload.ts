@@ -33,7 +33,7 @@ import fetchContactsForOffer, {
 } from './fetchContactsForOffer'
 
 export function fetchInfoAndGeneratePrivatePayloads({
-  contactApis,
+  contactApi,
   intendedConnectionLevel,
   symmetricKey,
   adminId,
@@ -43,8 +43,7 @@ export function fetchInfoAndGeneratePrivatePayloads({
   serverToClientHashesToHashedPhoneNumbersMap,
   onProgress,
 }: {
-  // One per phone number of the account, the main number first
-  contactApis: Array.NonEmptyReadonlyArray<ContactApi>
+  contactApi: ContactApi
   intendedConnectionLevel: IntendedConnectionLevel
   symmetricKey: SymmetricKey
   ownerCredentials: PrivateKeyHolder
@@ -76,7 +75,7 @@ export function fetchInfoAndGeneratePrivatePayloads({
     const connectionsInfo = yield* _(
       fetchContactsForOffer({
         serverToClientHashesToHashedPhoneNumbersMap,
-        contactApis,
+        contactApi,
         intendedConnectionLevel,
         intendedClubs,
       })

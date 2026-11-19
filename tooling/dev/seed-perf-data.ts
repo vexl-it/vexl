@@ -664,7 +664,7 @@ async function phaseOffers(): Promise<void> {
         const result = yield* _(
           createNewOfferForMyContacts({
             offerApi: apis.offer,
-            contactApis: [apis.contact],
+            contactApi: apis.contact,
             publicPart: buildOfferPublicPart({
               globalIndex,
               offerPublicKey: offerKey.publicKeyPemBase64,

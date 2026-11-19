@@ -6,10 +6,10 @@ import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {ServerHashedNumber} from '@vexl-next/domain/src/general/ServerHashedNumber'
 import {Effect, flow, Schema} from 'effect'
 import {createIsAllowedSharedContactHashFragment} from '../../utils/createIsAllowedSharedContactHashFragment'
-import {createIsNotOwnerAccountFragment} from '../../utils/createIsNotOwnerAccountFragment'
 
 export const FindCommonFriendsPaginatedParams = Schema.Struct({
   ownerHash: ServerHashedNumber,
+  ownerPublicKey: PublicKeyPemBase64,
   publicKeys: Schema.Array(PublicKeyPemBase64),
   publicKeysV2: Schema.Array(PublicKeyV2),
   userContactId: Schema.Int,
@@ -35,6 +35,9 @@ export const createFindCommonFriendsByOwnerHashAndPublicKeysPaginated =
 
     // The page cursor goes to HAVING: in WHERE it would drop a public key's
     // older rows, and with them some of its common and verified friends.
+    // A friend is verified when they saved any number of the requester's
+    // account and any number of the other side's, so the app asks under one
+    // number only. An account's numbers share its public key.
     const query = SqlSchema.findAll({
       Request: FindCommonFriendsPaginatedParams,
       Result: FindCommonFriendsPaginatedResult,
@@ -56,10 +59,12 @@ export const createFindCommonFriendsByOwnerHashAndPublicKeysPaginated =
           user_contact AS my_contact
           INNER JOIN user_contact AS imported_my_contact ON my_contact.hash_to = imported_my_contact.hash_to
           INNER JOIN users AS other_side ON other_side.hash = imported_my_contact.hash_from
+          LEFT JOIN users AS requester_number ON requester_number.public_key = ${hash.ownerPublicKey}
           LEFT JOIN user_contact AS reverse_to_requester ON reverse_to_requester.hash_from = imported_my_contact.hash_to
-          AND reverse_to_requester.hash_to = ${hash.ownerHash}
+          AND reverse_to_requester.hash_to = requester_number.hash
+          LEFT JOIN users AS other_side_number ON other_side_number.public_key = other_side.public_key
           LEFT JOIN user_contact AS reverse_to_other ON reverse_to_other.hash_from = imported_my_contact.hash_to
-          AND reverse_to_other.hash_to = other_side.hash
+          AND reverse_to_other.hash_to = other_side_number.hash
         WHERE
           ${sql.and([
           sql`my_contact.hash_from = ${hash.ownerHash}`,
@@ -72,11 +77,7 @@ export const createFindCommonFriendsByOwnerHashAndPublicKeysPaginated =
             publicImportCountThreshold: hash.publicImportCountThreshold,
             sql,
           }),
-          createIsNotOwnerAccountFragment({
-            usersTable: sql`other_side`,
-            ownerHash: hash.ownerHash,
-            sql,
-          }),
+          sql`other_side.public_key != ${hash.ownerPublicKey}`,
         ])}
         GROUP BY
           other_side.public_key,

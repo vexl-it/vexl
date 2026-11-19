@@ -374,6 +374,107 @@ describe('one account with several phone numbers', () => {
     )
   })
 
+  it('verifies a common friend who saved only the extra number of the requester', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const main = yield* _(generateKeysAndHasheForNumber('+420733800001'))
+        const extra = yield* _(generateAnotherNumber(main, '+420733800002'))
+        const otherSide = yield* _(
+          generateKeysAndHasheForNumber('+420733800003')
+        )
+        const savedExtra = yield* _(
+          generateKeysAndHasheForNumber('+420733800004')
+        )
+
+        yield* _(
+          createAndImportUsersFromNetwork(savedExtra, [extra, otherSide])
+        )
+        yield* _(createAndImportUsersFromNetwork(otherSide, [savedExtra]))
+        yield* _(createAndImportUsersFromNetwork(main, [savedExtra]))
+        yield* _(createAndImportUsersFromNetwork(extra, [savedExtra]))
+
+        const common = yield* _(
+          fetchAllCommonConnections(main, [otherSide.keys.publicKeyPemBase64])
+        )
+
+        expect(common).toHaveLength(1)
+        expect(common[0]?.common.verifiedHashes).toEqual([
+          savedExtra.serverHashedNumberForClient,
+        ])
+      })
+    )
+  })
+
+  it('verifies a common friend who saved a number of the other side that has no contacts', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const requester = yield* _(
+          generateKeysAndHasheForNumber('+420733900001')
+        )
+        const main = yield* _(generateKeysAndHasheForNumber('+420733900002'))
+        const extra = yield* _(generateAnotherNumber(main, '+420733900003'))
+        const savedExtra = yield* _(
+          generateKeysAndHasheForNumber('+420733900004')
+        )
+
+        yield* _(
+          createAndImportUsersFromNetwork(savedExtra, [requester, extra])
+        )
+        yield* _(createAndImportUsersFromNetwork(requester, [savedExtra]))
+        yield* _(createAndImportUsersFromNetwork(main, [savedExtra]))
+        yield* _(createAndImportUsersFromNetwork(extra, []))
+
+        const common = yield* _(
+          fetchAllCommonConnections(requester, [main.keys.publicKeyPemBase64])
+        )
+
+        expect(common).toHaveLength(1)
+        expect(common[0]?.common.verifiedHashes).toEqual([
+          savedExtra.serverHashedNumberForClient,
+        ])
+      })
+    )
+  })
+
+  it('keeps verified friends of a number from the credentials of its previous holder', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const previousHolder = yield* _(
+          generateKeysAndHasheForNumber('+420733950001')
+        )
+        const holder = yield* _(generateKeysAndHasheForNumber('+420733950001'))
+        const extra = yield* _(generateAnotherNumber(holder, '+420733950002'))
+        const otherSide = yield* _(
+          generateKeysAndHasheForNumber('+420733950003')
+        )
+        const savedExtra = yield* _(
+          generateKeysAndHasheForNumber('+420733950004')
+        )
+
+        yield* _(createAndImportUsersFromNetwork(previousHolder, [savedExtra]))
+        yield* _(createAndImportUsersFromNetwork(holder, [savedExtra]))
+        yield* _(createAndImportUsersFromNetwork(extra, [savedExtra]))
+        yield* _(createAndImportUsersFromNetwork(otherSide, [savedExtra]))
+        yield* _(
+          createAndImportUsersFromNetwork(savedExtra, [extra, otherSide])
+        )
+
+        const verifiedFor = (user: DummyUser): TestEffect<readonly string[]> =>
+          Effect.map(
+            fetchAllCommonConnections(user, [
+              otherSide.keys.publicKeyPemBase64,
+            ]),
+            Array.flatMap((one) => one.common.verifiedHashes)
+          )
+
+        expect(yield* _(verifiedFor(holder))).toEqual([
+          savedExtra.serverHashedNumberForClient,
+        ])
+        expect(yield* _(verifiedFor(previousHolder))).toEqual([])
+      })
+    )
+  })
+
   it('does not notify the account about its own new number', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {

@@ -14,3 +14,22 @@ export const banNumbers = (phoneNumbers: readonly E164PhoneNumber[]) =>
       },
     })
   )
+
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+export const unbanNumber = (phoneNumber: E164PhoneNumber) =>
+  Effect.gen(function* (_) {
+    const app = yield* _(NodeTestingInternalApp)
+    const {items} = yield* _(
+      app.BannedNumbersAdmin.listBannedNumbers({
+        headers: adminHeaders,
+        payload: {search: phoneNumber, limit: 1},
+      })
+    )
+    const bannedNumber = yield* _(Array.head(items))
+    yield* _(
+      app.BannedNumbersAdmin.deleteBannedNumber({
+        headers: adminHeaders,
+        path: {id: bannedNumber.id},
+      })
+    )
+  })

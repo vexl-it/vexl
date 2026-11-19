@@ -17,6 +17,7 @@ beforeEach(async () => {
       yield* _(clearTestAuthHeaders)
       const sql = yield* _(SqlClient.SqlClient)
       yield* _(sql`DELETE FROM club_member_count_change`)
+      yield* _(sql`DELETE FROM banned_number`)
     })
   )
 })

@@ -1,19 +1,26 @@
 import {HttpApi, HttpApiEndpoint, HttpApiGroup} from '@effect/platform/index'
 import {
+  InvalidNextPageTokenError,
   NotFoundError,
   UnexpectedServerError,
 } from '@vexl-next/domain/src/general/commonErrors'
 import {AdminTokenHeaders} from '../../adminTokenHeaders'
+import {NoContentResponse} from '../../NoContentResponse.brand'
 import {
+  AddBannedNumbersRequest,
+  AddBannedNumbersResponse,
   ClubAlreadyExistsError,
   ClubCannotBeReactivatedError,
   CreateClubRequest,
   CreateClubResponse,
+  DeleteBannedNumberPath,
   GenerateInviteLinkForAdminRequest,
   GenerateInviteLinkForAdminResponse,
   GetClubStatsRequest,
   GetClubStatsResponse,
   InvalidAdminTokenError,
+  ListBannedNumbersRequest,
+  ListBannedNumbersResponse,
   ListClubsResponse,
   ModifyClubRequest,
   ModifyClubResponse,
@@ -93,6 +100,35 @@ export const RequestClubImageUploadEndpoint = HttpApiEndpoint.post(
   .addError(InvalidAdminTokenError, {status: 401})
   .addError(S3ServiceError, {status: 502})
 
+// POST so searched numbers stay out of URLs and access logs
+export const ListBannedNumbersEndpoint = HttpApiEndpoint.post(
+  'listBannedNumbers',
+  '/api/v1/banned-numbers/admin/list'
+)
+  .setHeaders(AdminTokenHeaders)
+  .setPayload(ListBannedNumbersRequest)
+  .addSuccess(ListBannedNumbersResponse)
+  .addError(InvalidAdminTokenError, {status: 401})
+  .addError(InvalidNextPageTokenError, {status: 400})
+
+export const AddBannedNumbersEndpoint = HttpApiEndpoint.post(
+  'addBannedNumbers',
+  '/api/v1/banned-numbers/admin'
+)
+  .setHeaders(AdminTokenHeaders)
+  .setPayload(AddBannedNumbersRequest)
+  .addSuccess(AddBannedNumbersResponse)
+  .addError(InvalidAdminTokenError, {status: 401})
+
+export const DeleteBannedNumberEndpoint = HttpApiEndpoint.del(
+  'deleteBannedNumber',
+  '/api/v1/banned-numbers/admin/:id'
+)
+  .setPath(DeleteBannedNumberPath)
+  .setHeaders(AdminTokenHeaders)
+  .addSuccess(NoContentResponse)
+  .addError(InvalidAdminTokenError, {status: 401})
+
 export const TestHashingSpeedEndpoint = HttpApiEndpoint.post(
   'testHashingSpeed',
   '/test-hashing-speed'
@@ -111,12 +147,18 @@ const ClubsAdminApiGroup = HttpApiGroup.make('ClubsAdmin')
   .add(ReactivateClubEndpoint)
   .add(RequestClubImageUploadEndpoint)
 
+const BannedNumbersAdminApiGroup = HttpApiGroup.make('BannedNumbersAdmin')
+  .add(ListBannedNumbersEndpoint)
+  .add(AddBannedNumbersEndpoint)
+  .add(DeleteBannedNumberEndpoint)
+
 const DebugApiGroup = HttpApiGroup.make('Debug').add(TestHashingSpeedEndpoint)
 
 export const ContactInternalApiSpecification = HttpApi.make(
   'Contact Internal API'
 )
   .add(ClubsAdminApiGroup)
+  .add(BannedNumbersAdminApiGroup)
   .add(DebugApiGroup)
   .addError(NotFoundError, {status: 404})
   .addError(UnexpectedServerError, {status: 500})

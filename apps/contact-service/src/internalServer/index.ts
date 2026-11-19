@@ -6,6 +6,9 @@ import {internalServerPortConfig} from '@vexl-next/server-utils/src/commonConfig
 import {makeInternalApiServer} from '@vexl-next/server-utils/src/InternalServer'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {Effect, Layer} from 'effect'
+import {addBannedNumbers} from '../routes/bannedNumbers/addBannedNumbers'
+import {deleteBannedNumber} from '../routes/bannedNumbers/deleteBannedNumber'
+import {listBannedNumbers} from '../routes/bannedNumbers/listBannedNumbers'
 import {createClub} from '../routes/clubs/admin/createClub'
 import {generateClubInviteLink} from '../routes/clubs/admin/generateClubInviteLink'
 import {getClubStats} from '../routes/clubs/admin/getClubStats'
@@ -30,6 +33,16 @@ const ClubsAdminApiGroupLive = HttpApiBuilder.group(
       .handle('requestClubImageUpload', requestClubImageUpload)
 )
 
+const BannedNumbersAdminApiGroupLive = HttpApiBuilder.group(
+  ContactInternalApiSpecification,
+  'BannedNumbersAdmin',
+  (h) =>
+    h
+      .handle('listBannedNumbers', listBannedNumbers)
+      .handle('addBannedNumbers', addBannedNumbers)
+      .handle('deleteBannedNumber', deleteBannedNumber)
+)
+
 const DebugApiGroupLive = HttpApiBuilder.group(
   ContactInternalApiSpecification,
   'Debug',
@@ -51,7 +64,11 @@ const DebugApiGroupLive = HttpApiBuilder.group(
 
 export const ContactInternalApiLive = HttpApiBuilder.api(
   ContactInternalApiSpecification
-).pipe(Layer.provide(ClubsAdminApiGroupLive), Layer.provide(DebugApiGroupLive))
+).pipe(
+  Layer.provide(ClubsAdminApiGroupLive),
+  Layer.provide(BannedNumbersAdminApiGroupLive),
+  Layer.provide(DebugApiGroupLive)
+)
 
 export const internalServerLive = makeInternalApiServer(
   ContactInternalApiLive,

@@ -1,4 +1,5 @@
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
+import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {
   SERVER_HASH_PREFIX,
@@ -9,6 +10,8 @@ import {
   ServerToClientHashedNumber,
 } from '@vexl-next/domain/src/general/ServerToClientHashedNumber'
 import {pbkdf2} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
+import {hashPhoneNumber} from '@vexl-next/server-utils/src/generateUserAuthData'
+import {type ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {type ConfigError, Effect, pipe, Schema} from 'effect/index'
 import {secretSaltForServerContact} from '../configs'
 
@@ -36,6 +39,29 @@ export const serverHashPhoneNumber = (
           cause: e,
         })
     )
+  )
+
+/**
+ * Produces the same hash that `user_contact.hash_to` holds for this number
+ * when clients import it.
+ */
+export const serverHashE164PhoneNumber = (
+  phoneNumber: E164PhoneNumber
+): Effect.Effect<
+  ServerHashedNumber,
+  ConfigError.ConfigError | UnexpectedServerError,
+  ServerCrypto
+> =>
+  hashPhoneNumber(phoneNumber).pipe(
+    Effect.catchTag(
+      'CryptoError',
+      (e) =>
+        new UnexpectedServerError({
+          message: 'Error hashing phone number',
+          cause: e,
+        })
+    ),
+    Effect.flatMap(serverHashPhoneNumber)
   )
 
 export const hashForClient = (

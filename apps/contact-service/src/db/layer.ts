@@ -35,6 +35,7 @@ import add_inactivity_notification_tracking_to_users from './migrations/0030_add
 import cascade_delete_invitation_links_with_creator from './migrations/0031_cascade_delete_invitation_links_with_creator'
 import add_login_session_id_to_users from './migrations/0032_add_login_session_id_to_users'
 import drop_legacy_notification_token_columns from './migrations/0033_drop_legacy_notification_token_columns'
+import add_banned_number_table from './migrations/0034_add_banned_number_table'
 
 const migrations = [
   {
@@ -202,6 +203,11 @@ const migrations = [
     id: 33,
     name: 'drop_legacy_notification_token_columns',
     migrationEffect: drop_legacy_notification_token_columns,
+  },
+  {
+    id: 34,
+    name: 'add_banned_number_table',
+    migrationEffect: add_banned_number_table,
   },
 ] as const
 

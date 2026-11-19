@@ -8,6 +8,9 @@ const INTERNAL_REQUESTS = pipe(
   [
     HttpClientRequest.get('/api/v1/clubs/admin'),
     HttpClientRequest.get('/api/v1/clubs/admin/stats'),
+    HttpClientRequest.post('/api/v1/banned-numbers/admin/list').pipe(
+      HttpClientRequest.bodyUnsafeJson({limit: 10})
+    ),
     HttpClientRequest.post('/test-hashing-speed').pipe(
       HttpClientRequest.bodyUnsafeJson({iterations: 1, numberOfElements: 1})
     ),

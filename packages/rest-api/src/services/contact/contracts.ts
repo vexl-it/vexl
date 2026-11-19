@@ -10,6 +10,10 @@ import {
   ClubLinkInfo,
   ClubUuid,
 } from '@vexl-next/domain/src/general/clubs'
+import {
+  E164PhoneNumber,
+  E164PhoneNumberUnsafe,
+} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {LoginSessionId} from '@vexl-next/domain/src/general/LoginSessionId.brand'
 import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
@@ -17,6 +21,7 @@ import {ConnectionLevel, OfferId} from '@vexl-next/domain/src/general/offers'
 import {SERVER_HASH_PREFIX} from '@vexl-next/domain/src/general/ServerHashedNumber'
 import {ServerToClientHashedNumber} from '@vexl-next/domain/src/general/ServerToClientHashedNumber'
 import {ShortLivedTokenForErasingUserOnContactService} from '@vexl-next/domain/src/general/ShortLivedTokenForErasingUserOnContactService'
+import {Base64String} from '@vexl-next/domain/src/utility/Base64String.brand'
 import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {BooleanFromString} from '@vexl-next/generic-utils/src/effect-helpers/BooleanFromString'
 import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/EcdsaSignature.brand'
@@ -539,6 +544,60 @@ export const ConvertPhoneNumberHashesToServerHashesResponse = Schema.Struct({
 })
 export type ConvertPhoneNumberHashesToServerHashesResponse =
   typeof ConvertPhoneNumberHashesToServerHashesResponse.Type
+
+// ------------------
+//   Banned numbers 👇
+// ------------------
+export const MAX_BANNED_NUMBERS_BATCH_SIZE = 1000
+
+export const BannedNumberId = Schema.BigInt.pipe(Schema.brand('BannedNumberId'))
+export type BannedNumberId = typeof BannedNumberId.Type
+
+export const BannedNumberNote = Schema.String.pipe(Schema.maxLength(500))
+
+export const BannedNumberAdminInfo = Schema.Struct({
+  id: BannedNumberId,
+  // Not revalidated - a number valid when banned may be rejected by newer
+  // phone number metadata, and that must not break listing.
+  phoneNumber: E164PhoneNumberUnsafe,
+  note: Schema.NullOr(BannedNumberNote),
+  createdAt: Schema.Date,
+})
+export type BannedNumberAdminInfo = typeof BannedNumberAdminInfo.Type
+
+export const ListBannedNumbersRequest = Schema.Struct({
+  search: Schema.optional(Schema.String),
+  limit: Schema.Int.pipe(Schema.between(1, 100)),
+  nextPageToken: Schema.optional(Base64String),
+})
+export type ListBannedNumbersRequest = typeof ListBannedNumbersRequest.Type
+
+export const ListBannedNumbersResponse = createPageResponse(
+  BannedNumberAdminInfo
+)
+export type ListBannedNumbersResponse = typeof ListBannedNumbersResponse.Type
+
+export const BannedNumberToAdd = Schema.Struct({
+  phoneNumber: E164PhoneNumber,
+  note: Schema.optional(BannedNumberNote),
+})
+export type BannedNumberToAdd = typeof BannedNumberToAdd.Type
+
+export const AddBannedNumbersRequest = Schema.Struct({
+  numbers: Schema.Array(BannedNumberToAdd).pipe(
+    Schema.minItems(1),
+    Schema.maxItems(MAX_BANNED_NUMBERS_BATCH_SIZE)
+  ),
+})
+export type AddBannedNumbersRequest = typeof AddBannedNumbersRequest.Type
+
+export const AddBannedNumbersResponse = Schema.Struct({
+  addedCount: Schema.Int,
+  alreadyBannedCount: Schema.Int,
+})
+export type AddBannedNumbersResponse = typeof AddBannedNumbersResponse.Type
+
+export const DeleteBannedNumberPath = Schema.Struct({id: BannedNumberId})
 
 export const TestHashingSpeedRequest = Schema.Struct({
   iterations: Schema.Number,

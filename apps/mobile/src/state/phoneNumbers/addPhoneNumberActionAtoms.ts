@@ -160,16 +160,31 @@ export const addVerifiedPhoneNumberActionAtom = atom(
         sessionDataOrDummyAtom,
         yield* _(addPhoneNumberToSession(get(sessionDataOrDummyAtom), verified))
       )
-      // The new number has no contacts on contact-service yet
+      // The next import replaces the list under every number: the new number
+      // has none on contact-service yet, and the others may hold it as an
+      // ordinary contact.
       set(needsFullContactsReplaceAfterContactEditAtom, true)
 
-      return yield* _(
+      const numbersToImport = Array.map(
+        get(importedContactsAtom),
+        (one) => one.computedValues.normalizedNumber
+      )
+      // Nothing is imported on this device after a restore. Replacing now would
+      // empty the lists contact-service still holds, so it waits for the
+      // user's next import. The account's own numbers are never sent.
+      const sessionWithNumber = get(sessionDataOrDummyAtom)
+      if (
+        !Array.some(
+          numbersToImport,
+          (one) => !sessionHasPhoneNumber(sessionWithNumber, one)
+        )
+      )
+        return
+
+      yield* _(
         set(submitContactsActionAtom, {
           normalizeAndImportAll: false,
-          numbersToImport: Array.map(
-            get(importedContactsAtom),
-            (one) => one.computedValues.normalizedNumber
-          ),
+          numbersToImport,
           showOfferReencryptionDialog: true,
           showContactImportProgressDialog: true,
         })

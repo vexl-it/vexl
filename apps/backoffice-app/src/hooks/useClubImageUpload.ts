@@ -1,6 +1,6 @@
 import {useRunEffect} from '@/src/hooks/useRunEffect'
 import {getAdminToken} from '@/src/services/adminTokenService'
-import {makeClubsAdminClient} from '@/src/services/clubsAdminApi'
+import {makeClubsAdminClient} from '@/src/services/contactInternalApi'
 import {uploadToPresignedUrl} from '@/src/services/uploadToPresignedUrl'
 import {useRouter} from 'next/navigation'
 import {useCallback, useState} from 'react'

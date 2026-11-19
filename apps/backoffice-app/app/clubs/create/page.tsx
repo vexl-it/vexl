@@ -3,7 +3,7 @@
 import {useClubImageUpload} from '@/src/hooks/useClubImageUpload'
 import {useRunEffect} from '@/src/hooks/useRunEffect'
 import {getAdminToken} from '@/src/services/adminTokenService'
-import {makeClubsAdminClient} from '@/src/services/clubsAdminApi'
+import {makeClubsAdminClient} from '@/src/services/contactInternalApi'
 import {ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {Option, Schema} from 'effect'

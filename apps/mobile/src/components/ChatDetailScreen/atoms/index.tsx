@@ -138,6 +138,11 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     o.prop('hiddenMessagesIds')
   )
 
+  const donationPromptAfterMessageIdAtom = focusAtom(
+    chatWithMessagesAtom,
+    (o) => o.prop('donationPromptAfterMessageId')
+  )
+
   const createHideMessageAtom = (
     messageId: ChatMessageId | ChatTransientMessageId
   ): WritableAtom<boolean, [SetStateAction<boolean>], void> =>
@@ -163,7 +168,8 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
       buildMessagesListData(
         get(messagesAtom),
         get(hiddenMessagesIdsAtom),
-        get(tradeChecklistAtom)
+        get(tradeChecklistAtom),
+        get(donationPromptAfterMessageIdAtom)
       ),
       (nextItems) => {
         const previousItemsByKey = new Map(
@@ -302,7 +308,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
             )
         } else {
           void Effect.runPromise(
-            set(showDonationPromptGiveLoveActionAtom, {skipTimeCheck: true})
+            set(showDonationPromptGiveLoveActionAtom)
           ).then(() => {
             if (!skipFeedback && !feedbackSubmitted)
               void Effect.runFork(
@@ -746,6 +752,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
 
   return {
     friendCheckAvailableAtom,
+    donationPromptAfterMessageIdAtom,
     firstRevealOfThemAtom,
     chatAtom,
     chatWithMessagesAtom,

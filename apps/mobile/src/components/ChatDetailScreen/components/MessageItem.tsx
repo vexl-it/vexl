@@ -24,6 +24,7 @@ import MessageIncompatibleItem from './MessageIncompatibleItem'
 import {OtherSideLeftVexlBot} from './OtherSideLeftVexlBot'
 import TextMessage from './TextMessage'
 import VexlBotMessageItem from './VexlbotMessageItem'
+import DonationPromptBubble from './VexlbotMessageItem/components/DonationPromptBubble'
 import FriendCheckPrompt from './VexlbotMessageItem/components/FriendCheckPrompt'
 import InactivityReminder from './VexlbotMessageItem/components/InactivityReminder'
 import TradeChecklistAmountView from './VexlbotMessageItem/components/TradeChecklistAmountView'
@@ -280,6 +281,8 @@ function MessageItem({
   }
 
   if (item.type === 'friendCheckPrompt') return <FriendCheckPrompt />
+
+  if (item.type === 'donationPrompt') return <DonationPromptBubble />
 
   if (item.type === 'time')
     return (

@@ -1,3 +1,4 @@
+import {type ChatMessageId} from '@vexl-next/domain/src/general/messaging'
 import {Array, HashSet, Option, pipe} from 'effect'
 import {type DateTime} from 'luxon'
 import {
@@ -52,10 +53,19 @@ export type MessagesListItem =
       type: 'friendCheckPrompt'
       key: string
     }
+  | {
+      type: 'donationPrompt'
+      key: string
+    }
 
 const FRIEND_CHECK_PROMPT: MessagesListItem = {
   type: 'friendCheckPrompt',
   key: 'friendCheckPrompt',
+}
+
+const DONATION_PROMPT: MessagesListItem = {
+  type: 'donationPrompt',
+  key: 'donationPrompt',
 }
 
 function isRestored(message: ChatMessageWithState): boolean {
@@ -124,7 +134,8 @@ const filterHiddenMessagesIds =
 export default function buildMessagesListData(
   messages: ChatMessageWithState[],
   hiddenMessagesIds: ChatWithMessages['hiddenMessagesIds'],
-  tradeChecklist: TradeChecklistInState
+  tradeChecklist: TradeChecklistInState,
+  donationPromptAfterMessageId?: ChatMessageId
 ): MessagesListItem[] {
   const visibleMessages = pipe(
     messages,
@@ -147,27 +158,30 @@ export default function buildMessagesListData(
     Option.getOrUndefined
   )
 
-  return withFriendCheckPrompt(
+  return pipe(
     messagesToListData(Array.reverse(visibleMessages), lastRestoredMessageKey),
-    messages
+    insertAfterMessage(
+      pipe(
+        friendCheckPromptAnchor(messages),
+        Option.map((anchor) => anchor.message.uuid)
+      ),
+      FRIEND_CHECK_PROMPT
+    ),
+    insertAfterMessage(
+      Option.fromNullable(donationPromptAfterMessageId),
+      DONATION_PROMPT
+    )
   )
 }
 
-function withFriendCheckPrompt(
-  items: MessagesListItem[],
-  messages: ChatMessageWithState[]
-): MessagesListItem[] {
-  return pipe(
-    friendCheckPromptAnchor(messages),
-    Option.flatMap((anchor) =>
-      Array.findFirstIndex(
-        items,
-        (item) => item.key === `message-${anchor.message.uuid}`
-      )
-    ),
-    Option.flatMap((index) =>
-      Array.insertAt(items, index + 1, FRIEND_CHECK_PROMPT)
-    ),
-    Option.getOrElse(() => items)
-  )
-}
+const insertAfterMessage =
+  (messageId: Option.Option<ChatMessageId>, itemToInsert: MessagesListItem) =>
+  (items: MessagesListItem[]): MessagesListItem[] =>
+    pipe(
+      messageId,
+      Option.flatMap((id) =>
+        Array.findFirstIndex(items, (item) => item.key === `message-${id}`)
+      ),
+      Option.flatMap((index) => Array.insertAt(items, index + 1, itemToInsert)),
+      Option.getOrElse(() => items)
+    )

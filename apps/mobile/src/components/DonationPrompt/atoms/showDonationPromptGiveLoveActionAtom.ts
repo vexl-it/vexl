@@ -1,60 +1,36 @@
-import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {Effect, Schema} from 'effect'
+import {Effect} from 'effect'
 import {atom} from 'jotai'
-import {DateTime} from 'luxon'
-import {myDonationsAtom} from '../../../state/donations/atom'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import {navigationRef} from '../../../utils/navigation'
-import {lastDisplayOfDonationPromptTimestampAtom} from '../../../utils/preferences'
 import {askAreYouSureActionAtom} from '../../GlobalDialog'
 import DonationPrompt from '../components/DonationPrompt'
-import {donationPromptCooldownPassed, hasRecentDonation} from './stateAtoms'
+import {claimDonationPromptDisplayActionAtom} from './stateAtoms'
 
-export const DONATION_PROMPT_CHAT_MESSAGES_THRESHOLD_COUNT = 15
+const showDonationPromptGiveLoveActionAtom = atom(null, (get, set) => {
+  const {t} = get(translationAtom)
 
-const showDonationPromptGiveLoveActionAtom = atom(
-  null,
-  (get, set, {skipTimeCheck}: {skipTimeCheck: boolean}) => {
-    const {t} = get(translationAtom)
+  if (!set(claimDonationPromptDisplayActionAtom, {skipCooldown: true}))
+    return Effect.void
 
-    if (
-      hasRecentDonation(get(myDonationsAtom)) ||
-      (!skipTimeCheck &&
-        !donationPromptCooldownPassed(
-          get(lastDisplayOfDonationPromptTimestampAtom)
-        ))
-    )
-      return Effect.succeed(Effect.void)
-
-    set(
-      lastDisplayOfDonationPromptTimestampAtom,
-      Schema.decodeSync(UnixMilliseconds)(DateTime.now().toMillis())
-    )
-
-    return Effect.gen(function* (_) {
-      yield* _(
-        set(askAreYouSureActionAtom, {
-          variant: 'info',
-          steps: [
-            {
-              type: 'StepWithChildren',
-              MainSectionComponent: DonationPrompt,
-              positiveButtonText: t('donationPrompt.donate'),
-              negativeButtonText: t('common.close'),
-            },
-          ],
-        })
-      )
-
-      if (navigationRef.isReady()) {
-        navigationRef.navigate('DonationsFlow', {screen: 'SetDonation'})
-      }
-    }).pipe(
-      Effect.catchTag('UserDeclinedError', () => {
-        return Effect.succeed(Effect.void)
+  return Effect.gen(function* (_) {
+    yield* _(
+      set(askAreYouSureActionAtom, {
+        variant: 'info',
+        steps: [
+          {
+            type: 'StepWithChildren',
+            MainSectionComponent: DonationPrompt,
+            positiveButtonText: t('donationPrompt.donate'),
+            negativeButtonText: t('common.close'),
+          },
+        ],
       })
     )
-  }
-)
+
+    if (navigationRef.isReady()) {
+      navigationRef.navigate('DonationsFlow', {screen: 'SetDonation'})
+    }
+  }).pipe(Effect.catchTag('UserDeclinedError', () => Effect.void))
+})
 
 export default showDonationPromptGiveLoveActionAtom

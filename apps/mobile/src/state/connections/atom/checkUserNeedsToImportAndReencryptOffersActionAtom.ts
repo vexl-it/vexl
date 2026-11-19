@@ -36,10 +36,13 @@ const showUnexpectedReachDropDialogActionAtom = atom(null, (get, set) => {
 
     if (!shouldReimportContacts) return
 
+    // Contacts are freshly uploaded, so an empty graph is now genuine (e.g. a
+    // network that only came through numbers banned from connecting people).
     yield* _(
       set(submitContactsActionAtom, {
         normalizeAndImportAll: true,
         showOfferReencryptionDialog: true,
+        acceptEmptyGraph: true,
       })
     )
   })

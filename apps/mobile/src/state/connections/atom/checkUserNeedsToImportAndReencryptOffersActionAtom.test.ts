@@ -54,6 +54,7 @@ it('asks to reimport contacts once after a reach drop', async () => {
   expect(mockSubmitContacts).toHaveBeenCalledWith({
     normalizeAndImportAll: true,
     showOfferReencryptionDialog: true,
+    acceptEmptyGraph: true,
   })
   expect(store.get(unexpectedReachDropDetectedAtom)).toBe(false)
 

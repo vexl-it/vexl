@@ -21,15 +21,17 @@ export const updateAndReencryptAllConnectionsActionAtom = atom(
       isInBackground,
       onOfferProgress,
       onNoteProgress,
+      acceptEmptyGraph,
     }: {
       isInBackground?: boolean
       onOfferProgress?: OffersParams['onProgres']
       onNoteProgress?: NotesParams['onProgres']
+      acceptEmptyGraph?: boolean
     }
   ): Effect.Effect<void> =>
     Effect.gen(function* (_) {
       const fetchedConnections = yield* _(
-        set(fetchConnectionsActionAtom),
+        set(fetchConnectionsActionAtom, {acceptEmptyGraph}),
         Effect.option
       )
       yield* _(

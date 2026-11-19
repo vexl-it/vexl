@@ -31,6 +31,7 @@ import {addLostPhoneNumbersToNoticeActionAtom} from './phoneNumbers/lostPhoneNum
 import {clearDeviceAfterLoginOnAnotherDeviceActionAtom} from './resetLocalDataActionAtom'
 import {sessionDataOrDummyAtom} from './session'
 import {loginSessionWithProof} from './session/loginSession'
+import {sessionHasPhoneNumber} from './session/sessionPhoneNumbers'
 import {logoutActionAtom} from './useLogout'
 
 export const refreshPhoneNumberOnContactService = ({
@@ -208,11 +209,14 @@ const checkAccountOnContactService = (
       return yield* _(Effect.fail(new LoggedInOnAnotherDeviceError()))
     }
 
-    // Someone logged in with these numbers elsewhere
+    // Someone logged in with these numbers elsewhere. Numbers removed while
+    // this check ran are skipped, the session no longer has them.
+    const sessionNow = store.get(sessionDataOrDummyAtom)
     const lostPhoneNumbers = pipe(
       failures,
       Array.filter(({error}) => error._tag === 'UserNotFoundError'),
-      Array.map(({phoneNumber}) => phoneNumber)
+      Array.map(({phoneNumber}) => phoneNumber),
+      Array.filter((one) => sessionHasPhoneNumber(sessionNow, one))
     )
     if (Array.isNonEmptyArray(lostPhoneNumbers)) {
       const dropped = store.set(

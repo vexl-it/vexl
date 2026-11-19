@@ -79,6 +79,7 @@ jest.mock('./session', () => {
   return {
     sessionDataOrDummyAtom: atom({
       phoneNumber: '+420733733733',
+      extraPhoneNumbers: [{phoneNumber: '+420777777777'}],
       sessionNotificationToken: 'vexl_nt_test',
       loginSessionId: '0f9b2597-217d-4f8d-9de6-ef7239662359',
       privateKey: jest
@@ -252,6 +253,29 @@ describe('with an extra phone number', () => {
     ])
     expect(mockLogout).not.toHaveBeenCalled()
     expect(pullMessages).toHaveBeenCalled()
+  })
+
+  it('keeps the account when the lost number was removed while the check ran', async () => {
+    const store = getDefaultStore()
+    const {sessionDataOrDummyAtom} = jest.requireMock<{
+      sessionDataOrDummyAtom: PrimitiveAtom<{extraPhoneNumbers: unknown[]}>
+    }>('./session')
+    const sessionBefore = store.get(sessionDataOrDummyAtom)
+    mockRefreshUser.mockReturnValue(Effect.void)
+    mockRefreshExtraNumber.mockImplementation(() => {
+      store.set(sessionDataOrDummyAtom, {
+        ...sessionBefore,
+        extraPhoneNumbers: [],
+      })
+      return Effect.fail(new UserNotFoundError())
+    })
+
+    await resume()
+    store.set(sessionDataOrDummyAtom, sessionBefore)
+
+    expect(mockDropPhoneNumbers).not.toHaveBeenCalled()
+    expect(mockAddLostPhoneNumbersToNotice).not.toHaveBeenCalled()
+    expect(mockLogout).not.toHaveBeenCalled()
   })
 
   it('hands the notification token to the extra number when the main one is lost', async () => {

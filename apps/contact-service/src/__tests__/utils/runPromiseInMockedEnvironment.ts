@@ -25,6 +25,7 @@ import {
 } from '@vexl-next/server-utils/src/tests/testDb'
 import {Console, Effect, Layer, ManagedRuntime, type Scope} from 'effect'
 import {cryptoConfig} from '../../configs'
+import {BannedNumberDbService} from '../../db/BannedNumberDbService'
 import {ClubInvitationLinkDbService} from '../../db/ClubInvitationLinkDbService'
 import {ClubMemberCountChangeDbService} from '../../db/ClubMemberCountChangeDbService'
 import {ClubMembersDbService} from '../../db/ClubMemberDbService'
@@ -52,6 +53,7 @@ export type MockedContexts =
   | ClubMembersDbService
   | ClubMemberCountChangeDbService
   | ClubInvitationLinkDbService
+  | BannedNumberDbService
   | HttpClient
   | TestRequestHeaders
   | InternalServerTestClient
@@ -83,7 +85,8 @@ const dbServiceLayers = Layer.mergeAll(
   ClubsDbService.Live,
   ClubMembersDbService.Live,
   ClubMemberCountChangeDbService.Live,
-  ClubInvitationLinkDbService.Live
+  ClubInvitationLinkDbService.Live,
+  BannedNumberDbService.Live
 ).pipe(Layer.provideMerge(DbLayer))
 
 const context = Layer.empty.pipe(

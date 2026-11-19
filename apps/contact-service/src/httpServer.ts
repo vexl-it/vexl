@@ -21,6 +21,7 @@ import {createChallenges} from '@vexl-next/server-utils/src/services/challenge/r
 import {Layer} from 'effect'
 import {CleanReportedClubRecordsWorkerLayer} from './cleanReportedClubRecordsWorker'
 import {cryptoConfig, healthServerPortConfig, redisUrl} from './configs'
+import {BannedNumberDbService} from './db/BannedNumberDbService'
 import {ClubInvitationLinkDbService} from './db/ClubInvitationLinkDbService'
 import {ClubMemberCountChangeDbService} from './db/ClubMemberCountChangeDbService'
 import {ClubMembersDbService} from './db/ClubMemberDbService'
@@ -145,7 +146,8 @@ const DbsLive = Layer.mergeAll(
   ClubsDbService.Live,
   ClubMembersDbService.Live,
   ClubMemberCountChangeDbService.Live,
-  ClubInvitationLinkDbService.Live
+  ClubInvitationLinkDbService.Live,
+  BannedNumberDbService.Live
 ).pipe(Layer.provideMerge(DbLayer))
 
 export const HttpServerLive = Layer.mergeAll(

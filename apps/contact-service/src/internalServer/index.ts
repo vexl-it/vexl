@@ -13,7 +13,7 @@ import {listClubs} from '../routes/clubs/admin/listClubs'
 import {modifyClub} from '../routes/clubs/admin/modifyClub'
 import {reactivateClub} from '../routes/clubs/admin/reactivateClub'
 import {requestClubImageUpload} from '../routes/clubs/admin/requestClubImageUpload'
-import {validateAdminToken} from '../routes/clubs/utils/validateAdminToken'
+import {validateAdminToken} from '../utils/validateAdminToken'
 import {testHasingSpeed} from './routes/testHashingSpeed'
 
 const ClubsAdminApiGroupLive = HttpApiBuilder.group(

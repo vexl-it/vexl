@@ -2,12 +2,12 @@ import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {hashSha256} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {InvalidAdminTokenError} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {type ConfigError, Effect} from 'effect'
-import {adminTokenConfigHash} from '../../../configs'
+import {adminTokenConfigHash} from '../configs'
 
 export const validateAdminToken = (
   adminToken: string
 ): Effect.Effect<
-  true,
+  void,
   InvalidAdminTokenError | ConfigError.ConfigError | UnexpectedServerError
 > =>
   Effect.gen(function* (_) {
@@ -17,7 +17,6 @@ export const validateAdminToken = (
     if (correctHash !== computedHash) {
       return yield* _(Effect.fail(new InvalidAdminTokenError()))
     }
-    return true as const
   }).pipe(
     Effect.catchTag(
       'CryptoError',

@@ -223,6 +223,7 @@ export type EditProfileStackParamsList = {
   EditProfileDefault: undefined
   EditProfileSpokenLanguages: undefined
   EditProfilePhoneNumbers: undefined
+  AddPhoneNumberIntro: undefined
   AddPhoneNumber: undefined
   AddPhoneNumberCountryPicker: undefined
   AddPhoneNumberVerificationCode: {

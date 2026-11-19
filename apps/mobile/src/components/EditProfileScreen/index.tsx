@@ -2,6 +2,7 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack'
 import React from 'react'
 import {type EditProfileStackParamsList} from '../../navigationTypes'
 import CountryPickerScreen from '../PhoneVerification/CountryPickerScreen'
+import AddPhoneNumberIntroScreen from './components/AddPhoneNumberIntroScreen'
 import AddPhoneNumberScreen from './components/AddPhoneNumberScreen'
 import AddPhoneNumberVerificationCodeScreen from './components/AddPhoneNumberVerificationCodeScreen'
 import EditProfileDefaultScreen from './components/EditProfileDefaultScreen'
@@ -30,6 +31,10 @@ function EditProfileScreen(): React.ReactElement {
       <Stack.Screen
         name="EditProfilePhoneNumbers"
         component={EditProfilePhoneNumbersScreen}
+      />
+      <Stack.Screen
+        name="AddPhoneNumberIntro"
+        component={AddPhoneNumberIntroScreen}
       />
       <Stack.Screen name="AddPhoneNumber" component={AddPhoneNumberScreen} />
       <Stack.Screen

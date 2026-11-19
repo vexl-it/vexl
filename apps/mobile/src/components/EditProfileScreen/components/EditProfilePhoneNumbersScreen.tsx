@@ -5,7 +5,6 @@ import {
   IconButton,
   NavigationBar,
   Screen,
-  TextTag,
   TrashBin,
   Typography,
   XStack,
@@ -49,7 +48,7 @@ function EditProfilePhoneNumbersScreen({
           variant="primary"
           size="large"
           onPress={() => {
-            navigation.navigate('AddPhoneNumber')
+            navigation.navigate('AddPhoneNumberIntro')
           }}
         >
           {t('editProfileScreen.phoneNumbers.add')}
@@ -63,7 +62,7 @@ function EditProfilePhoneNumbersScreen({
         <YStack gap="$3">
           {pipe(
             phoneNumbers,
-            Array.map((phoneNumber, index) => (
+            Array.map((phoneNumber) => (
               <XStack
                 key={phoneNumber}
                 alignItems="center"
@@ -83,12 +82,6 @@ function EditProfilePhoneNumbersScreen({
                 >
                   {getInternationalPhoneNumber(phoneNumber)}
                 </Typography>
-                {index === 0 ? (
-                  <TextTag
-                    variant="neutral"
-                    label={t('editProfileScreen.phoneNumbers.main')}
-                  />
-                ) : null}
                 <XStack flex={1} />
                 {canRemove ? (
                   <IconButton

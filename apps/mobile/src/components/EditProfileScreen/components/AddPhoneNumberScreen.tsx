@@ -1,13 +1,6 @@
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {type InitPhoneVerificationResponse} from '@vexl-next/rest-api/src/services/user/contracts'
-import {
-  Button,
-  ChevronLeft,
-  InfoBox,
-  NavigationBar,
-  Screen,
-  YStack,
-} from '@vexl-next/ui'
+import {Button, ChevronLeft, NavigationBar, Screen, YStack} from '@vexl-next/ui'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useEffect} from 'react'
 import {type EditProfileStackScreenProps} from '../../../navigationTypes'
@@ -77,16 +70,8 @@ function AddPhoneNumberScreen({
         </YStack>
       }
     >
-      <YStack gap="$10" paddingTop="$11">
+      <YStack paddingTop="$11">
         <PhoneNumberInput {...inputProps} />
-        <YStack gap="$3">
-          <InfoBox>
-            {t('editProfileScreen.addPhoneNumber.linkedNumbers')}
-          </InfoBox>
-          <InfoBox>
-            {t('editProfileScreen.addPhoneNumber.contactsImport')}
-          </InfoBox>
-        </YStack>
       </YStack>
     </Screen>
   )

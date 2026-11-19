@@ -7,6 +7,7 @@ import {
   XStack,
   YStack,
 } from '@vexl-next/ui'
+import {Array} from 'effect'
 import {useAtomValue} from 'jotai'
 import React, {useCallback} from 'react'
 import {Pressable} from 'react-native'
@@ -16,6 +17,7 @@ import {
   anonymizedUserDataAtom,
   realUserDataAtom,
   userPhoneNumberAtom,
+  userPhoneNumbersAtom,
 } from '../../../state/session/userDataAtoms'
 import {getInternationalPhoneNumber} from '../../../utils/getInternationalPhoneNumber'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
@@ -25,6 +27,8 @@ function UserBanner(): React.ReactElement {
   const realUserData = useAtomValue(realUserDataAtom)
   const anonymizedUserData = useAtomValue(anonymizedUserDataAtom)
   const userPhoneNumber = useAtomValue(userPhoneNumberAtom)
+  const morePhoneNumbersCount =
+    Array.length(useAtomValue(userPhoneNumbersAtom)) - 1
   const {t} = useTranslation()
   const navigation =
     useNavigation<RootStackScreenProps<'Account'>['navigation']>()
@@ -70,13 +74,25 @@ function UserBanner(): React.ReactElement {
         >
           {displayName}
         </Typography>
-        <Typography
-          variant="micro"
-          color="$foregroundSecondary"
-          numberOfLines={1}
-        >
-          {getInternationalPhoneNumber(userPhoneNumber)}
-        </Typography>
+        <YStack>
+          <Typography
+            variant="micro"
+            color="$foregroundSecondary"
+            numberOfLines={1}
+          >
+            {getInternationalPhoneNumber(userPhoneNumber)}
+          </Typography>
+          {morePhoneNumbersCount > 0 && (
+            <Typography
+              variant="micro"
+              color="$foregroundSecondary"
+              numberOfLines={1}
+              lineHeight={14}
+            >
+              {t('account.morePhoneNumbers', {count: morePhoneNumbersCount})}
+            </Typography>
+          )}
+        </YStack>
       </YStack>
       <XStack gap="$3">
         <CardButton contrast onPress={handleSharePress}>

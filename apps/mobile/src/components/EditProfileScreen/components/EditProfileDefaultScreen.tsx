@@ -156,19 +156,6 @@ function EditProfileDefaultScreen({
           <AddIdentityBanner />
         )}
         <Card
-          title={t('editProfileScreen.vexlAlias.title')}
-          subtitle={t('editProfileScreen.vexlAlias.subtitle')}
-        >
-          <XStack alignItems="center" gap="$3">
-            <Avatar size="small">
-              <AvatarBasic1 size={32} />
-            </Avatar>
-            <Typography variant="descriptionBold" color="$foregroundPrimary">
-              {t('offer.directFriend')}
-            </Typography>
-          </XStack>
-        </Card>
-        <Card
           title={t('editProfileScreen.phoneNumbers.title')}
           subtitle={t('editProfileScreen.phoneNumbers.subtitle')}
         >
@@ -196,6 +183,19 @@ function EditProfileDefaultScreen({
                 navigation.navigate('EditProfilePhoneNumbers')
               }}
             />
+          </XStack>
+        </Card>
+        <Card
+          title={t('editProfileScreen.vexlAlias.title')}
+          subtitle={t('editProfileScreen.vexlAlias.subtitle')}
+        >
+          <XStack alignItems="center" gap="$3">
+            <Avatar size="small">
+              <AvatarBasic1 size={32} />
+            </Avatar>
+            <Typography variant="descriptionBold" color="$foregroundPrimary">
+              {t('offer.directFriend')}
+            </Typography>
           </XStack>
         </Card>
         <Card

@@ -18,6 +18,9 @@ export const ADMIN_TOKEN_HEADERS = {'x-admin-token': 'dev'}
 
 const LOCAL_HOSTNAMES = ['localhost', '127.0.0.1', '[::1]']
 
+const isLocal = (url: string): boolean =>
+  Array.contains(LOCAL_HOSTNAMES, new URL(url).hostname)
+
 const remoteUrls = pipe(
   [
     BACKOFFICE_URL,
@@ -26,13 +29,33 @@ const remoteUrls = pipe(
     CONTENT_URL,
     RESOURCES_BASE_URL,
   ],
-  Array.filter((url) => !Array.contains(LOCAL_HOSTNAMES, new URL(url).hostname))
+  Array.filter((url) => !isLocal(url))
 )
 
 if (Array.isNonEmptyArray(remoteUrls)) {
   throw new Error(
     `Dev seeds only run against a local stack, refusing: ${remoteUrls.join(', ')}`
   )
+}
+
+/** A presigned URL comes from the stack, so the check above has not seen it. */
+export const putToLocalStorage = async (
+  presignedUrl: string,
+  contentType: string,
+  body: Uint8Array<ArrayBuffer>
+): Promise<void> => {
+  if (!isLocal(presignedUrl)) {
+    throw new Error(
+      `Dev seeds only upload to a local stack, not ${new URL(presignedUrl).hostname}`
+    )
+  }
+  const response = await fetch(presignedUrl, {
+    method: 'PUT',
+    headers: {'Content-Type': contentType},
+    body,
+    redirect: 'error',
+  })
+  if (!response.ok) throw new Error(`Upload failed: ${response.status}`)
 }
 
 /** Runs SQL in one transaction against a database of the dev Postgres container. */

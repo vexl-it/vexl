@@ -110,7 +110,9 @@ function CmsForm<
       publish &&
       !(await confirm({
         title: `Publish this ${resource.noun}?`,
-        message: `It is saved and goes to the website. A ${resource.noun} dated in the future appears on that date.`,
+        message: resource.visibleFrom
+          ? `It is saved and goes to the website. A ${resource.noun} dated in the future appears on that date.`
+          : 'It is saved and goes to the website right away.',
         confirmLabel: 'Save and publish',
         tone: 'primary',
       }))
@@ -135,6 +137,7 @@ function CmsForm<
   return (
     <form
       ref={formRef}
+      inert={saving}
       onSubmit={(e) => {
         e.preventDefault()
         void handleSave(false)

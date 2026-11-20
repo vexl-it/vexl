@@ -245,7 +245,7 @@ export function SlideRow({
           />
         ) : null}
 
-        {slide.type === 'website' ? null : (
+        {slide.type === 'website' || uploading ? null : (
           <FileButton
             size="sm"
             accept={accept}

@@ -9,7 +9,13 @@ import {
   type SlideshowSlide,
 } from '../../src/services/slideshows/domain'
 import {RequestUploadResponse} from '../../src/services/uploadToPresignedUrl'
-import {BACKOFFICE_URL, psql, rgbPng, type Rgb} from './shared'
+import {
+  BACKOFFICE_URL,
+  psql,
+  putToLocalStorage,
+  rgbPng,
+  type Rgb,
+} from './shared'
 
 // Slides are a letter and the seconds on screen: i = image, c = image shown
 // whole (contain), v = video, w = website.
@@ -161,12 +167,7 @@ const upload = async (
   const {presignedUrl, contentType, assetUrl, s3Key} = Schema.decodeUnknownSync(
     RequestUploadResponse
   )(await api('/request-upload', {slideshowUuid, fileExtension}))
-  const response = await fetch(presignedUrl, {
-    method: 'PUT',
-    headers: {'content-type': contentType},
-    body: new Uint8Array(file),
-  })
-  if (!response.ok) throw new Error(`Upload failed: ${response.status}`)
+  await putToLocalStorage(presignedUrl, contentType, new Uint8Array(file))
   return {url: assetUrl, s3Key}
 }
 

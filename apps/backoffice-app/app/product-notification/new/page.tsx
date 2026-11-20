@@ -203,161 +203,164 @@ export default function NewProductNotificationPage() {
       />
 
       <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
-        <form className="space-y-6" onSubmit={review} noValidate>
-          <Card title="Message">
-            <div className="space-y-5">
-              <Field
-                label="Title"
-                required
-                error={shown.title}
-                hint={`Keep it short: push banners cut long titles off. ${content.title.length} characters.`}
-              >
-                <Input
-                  value={draft.title}
-                  invalid={shown.title !== undefined}
-                  onChange={(event) => {
-                    update({title: event.target.value})
-                  }}
-                />
-              </Field>
-              <Field
-                label="Description"
-                required
-                error={shown.description}
-                hint={`The app shows it right after the title, as one paragraph. ${content.description.length} characters.`}
-              >
-                <Textarea
-                  rows={5}
-                  value={draft.description}
-                  invalid={shown.description !== undefined}
-                  onChange={(event) => {
-                    update({description: event.target.value})
-                  }}
-                />
-              </Field>
-            </div>
-          </Card>
+        <form onSubmit={review} noValidate>
+          {/* A dismissed review dialog must not let the draft change mid-send. */}
+          <fieldset disabled={sending} className="min-w-0 space-y-6">
+            <Card title="Message">
+              <div className="space-y-5">
+                <Field
+                  label="Title"
+                  required
+                  error={shown.title}
+                  hint={`Keep it short: push banners cut long titles off. ${content.title.length} characters.`}
+                >
+                  <Input
+                    value={draft.title}
+                    invalid={shown.title !== undefined}
+                    onChange={(event) => {
+                      update({title: event.target.value})
+                    }}
+                  />
+                </Field>
+                <Field
+                  label="Description"
+                  required
+                  error={shown.description}
+                  hint={`The app shows it right after the title, as one paragraph. ${content.description.length} characters.`}
+                >
+                  <Textarea
+                    rows={5}
+                    value={draft.description}
+                    invalid={shown.description !== undefined}
+                    onChange={(event) => {
+                      update({description: event.target.value})
+                    }}
+                  />
+                </Field>
+              </div>
+            </Card>
 
-          <Card
-            title="Button"
-            description="Optional. Adds a button under the text that opens a link."
-          >
-            <div className="grid gap-5 sm:grid-cols-2">
-              <Field
-                label="Link"
-                error={shown.actionLink}
-                hint="Opens outside the app when the button is tapped."
-              >
-                <Input
-                  type="url"
-                  placeholder="https://"
-                  value={draft.actionLink}
-                  invalid={shown.actionLink !== undefined}
-                  onChange={(event) => {
-                    update({actionLink: event.target.value})
-                  }}
-                />
-              </Field>
-              <Field
-                label="Button text"
-                error={shown.actionText}
-                hint="Leave empty to use “Learn more”, which the app translates."
-              >
-                <Input
-                  value={draft.actionText}
-                  invalid={shown.actionText !== undefined}
-                  onChange={(event) => {
-                    update({actionText: event.target.value})
-                  }}
-                />
-              </Field>
-            </div>
-          </Card>
+            <Card
+              title="Button"
+              description="Optional. Adds a button under the text that opens a link."
+            >
+              <div className="grid gap-5 sm:grid-cols-2">
+                <Field
+                  label="Link"
+                  error={shown.actionLink}
+                  hint="Opens outside the app when the button is tapped."
+                >
+                  <Input
+                    type="url"
+                    placeholder="https://"
+                    value={draft.actionLink}
+                    invalid={shown.actionLink !== undefined}
+                    onChange={(event) => {
+                      update({actionLink: event.target.value})
+                    }}
+                  />
+                </Field>
+                <Field
+                  label="Button text"
+                  error={shown.actionText}
+                  hint="Leave empty to use “Learn more”, which the app translates."
+                >
+                  <Input
+                    value={draft.actionText}
+                    invalid={shown.actionText !== undefined}
+                    onChange={(event) => {
+                      update({actionText: event.target.value})
+                    }}
+                  />
+                </Field>
+              </div>
+            </Card>
 
-          <Card title="Audience and delivery">
-            <div className="space-y-5">
-              <fieldset>
-                <legend className="mb-1.5 text-sm font-medium text-ink">
-                  Type
-                </legend>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  {Array.map(NOTIFICATION_TYPE_ORDER, (type) => (
-                    <label
-                      key={type}
-                      className={cx(
-                        'flex cursor-pointer items-start gap-2.5 rounded-control border p-3 text-sm',
-                        draft.type === type
-                          ? 'border-ink ring-1 ring-ink'
-                          : 'border-line-strong hover:bg-surface-muted'
-                      )}
-                    >
-                      <input
-                        type="radio"
-                        name="type"
-                        className="mt-0.5 size-4 shrink-0 accent-ink"
-                        checked={draft.type === type}
-                        onChange={() => {
-                          update({type})
-                        }}
-                      />
-                      <span>
-                        <span className="font-medium text-ink">
-                          {NOTIFICATION_TYPES[type].label}
+            <Card title="Audience and delivery">
+              <div className="space-y-5">
+                <fieldset>
+                  <legend className="mb-1.5 text-sm font-medium text-ink">
+                    Type
+                  </legend>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {Array.map(NOTIFICATION_TYPE_ORDER, (type) => (
+                      <label
+                        key={type}
+                        className={cx(
+                          'flex cursor-pointer items-start gap-2.5 rounded-control border p-3 text-sm',
+                          draft.type === type
+                            ? 'border-ink ring-1 ring-ink'
+                            : 'border-line-strong hover:bg-surface-muted'
+                        )}
+                      >
+                        <input
+                          type="radio"
+                          name="type"
+                          className="mt-0.5 size-4 shrink-0 accent-ink"
+                          checked={draft.type === type}
+                          onChange={() => {
+                            update({type})
+                          }}
+                        />
+                        <span>
+                          <span className="font-medium text-ink">
+                            {NOTIFICATION_TYPES[type].label}
+                          </span>
+                          <span className="block text-ink-muted">
+                            {NOTIFICATION_TYPES[type].audience}. Labelled “
+                            {NOTIFICATION_TYPES[type].appCategory}” in the app.
+                          </span>
                         </span>
-                        <span className="block text-ink-muted">
-                          {NOTIFICATION_TYPES[type].audience}. Labelled “
-                          {NOTIFICATION_TYPES[type].appCategory}” in the app.
-                        </span>
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              </fieldset>
-              <Checkbox
-                label="Also send a push notification"
-                description="Phones get a push with the title and description. Without it, users only find the notification the next time they open the app."
-                checked={draft.issuePushNotification}
-                onChange={(event) => {
-                  update({issuePushNotification: event.target.checked})
-                }}
-              />
-            </div>
-          </Card>
-
-          <details
-            open={shown.uuid === undefined ? undefined : true}
-            className="rounded-card border border-line bg-surface shadow-card"
-          >
-            <summary className="cursor-pointer px-5 py-3.5 text-sm font-semibold text-ink">
-              Advanced
-            </summary>
-            <div className="border-t border-line p-5">
-              <Field
-                label="Notification ID"
-                required
-                error={shown.uuid}
-                hint="Generated for you. The same ID cannot be sent twice, which protects against double sends when you retry."
-              >
-                <Input
-                  className="font-mono"
-                  value={draft.uuid}
-                  invalid={shown.uuid !== undefined}
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
+                <Checkbox
+                  label="Also send a push notification"
+                  description="Phones get a push with the title and description. Without it, users only find the notification the next time they open the app."
+                  checked={draft.issuePushNotification}
                   onChange={(event) => {
-                    update({uuid: event.target.value})
+                    update({issuePushNotification: event.target.checked})
                   }}
                 />
-              </Field>
+              </div>
+            </Card>
+
+            <details
+              open={shown.uuid === undefined ? undefined : true}
+              className="rounded-card border border-line bg-surface shadow-card"
+            >
+              <summary className="cursor-pointer px-5 py-3.5 text-sm font-semibold text-ink">
+                Advanced
+              </summary>
+              <div className="border-t border-line p-5">
+                <Field
+                  label="Notification ID"
+                  required
+                  error={shown.uuid}
+                  hint="Generated for you. The same ID cannot be sent twice, which protects against double sends when you retry."
+                >
+                  <Input
+                    className="font-mono"
+                    value={draft.uuid}
+                    invalid={shown.uuid !== undefined}
+                    onChange={(event) => {
+                      update({uuid: event.target.value})
+                    }}
+                  />
+                </Field>
+              </div>
+            </details>
+
+            <FormMessage error={reviewing ? null : sendError} />
+
+            <div className="flex justify-end gap-2">
+              <Button onClick={clear}>Clear</Button>
+              <Button type="submit" variant="primary">
+                Review and send
+              </Button>
             </div>
-          </details>
-
-          <FormMessage error={reviewing ? null : sendError} />
-
-          <div className="flex justify-end gap-2">
-            <Button onClick={clear}>Clear</Button>
-            <Button type="submit" variant="primary">
-              Review and send
-            </Button>
-          </div>
+          </fieldset>
         </form>
 
         <Card

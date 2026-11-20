@@ -18,7 +18,7 @@
     "publish-screenshots": "scripts/publish-screenshots.sh"
   },
   "dependencies": {
-    "@effect/platform": "^0.93.6",
+    "@effect/platform": "^0.97.1",
     "@vexl-next/domain": "0.0.0",
     "@vexl-next/rest-api": "0.0.0",
     "effect": "^3.20.0",

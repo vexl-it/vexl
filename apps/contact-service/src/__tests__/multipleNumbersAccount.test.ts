@@ -1,3 +1,4 @@
+import {SqlClient} from '@effect/sql'
 import {MAX_PHONE_NUMBERS_PER_ACCOUNT} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Array, Effect, Either, Option} from 'effect'
@@ -120,6 +121,36 @@ describe('phone number limit per account', () => {
         expect(yield* _(findPublicKeysOfHash(last.serverHashedNumber))).toEqual(
           [last.keys.publicKeyPemBase64]
         )
+      })
+    )
+  })
+})
+
+describe('registering a number', () => {
+  it('drops contacts left under the number without a user row', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const sql = yield* _(SqlClient.SqlClient)
+        const previousOwner = yield* _(
+          generateKeysAndHasheForNumber('+420734400001')
+        )
+        const friend = yield* _(generateKeysAndHasheForNumber('+420734400002'))
+        yield* _(createAndImportUsersFromNetwork(previousOwner, [friend]))
+        yield* _(sql`
+          DELETE FROM users
+          WHERE
+            hash = ${previousOwner.serverHashedNumber}
+        `)
+        expect(
+          yield* _(countContactsOf(previousOwner.serverHashedNumber))
+        ).toBe(1)
+
+        const newOwner = yield* _(
+          generateKeysAndHasheForNumber('+420734400001')
+        )
+        expect(Either.isRight(yield* _(createUserEither(newOwner)))).toBe(true)
+
+        expect(yield* _(countContactsOf(newOwner.serverHashedNumber))).toBe(0)
       })
     )
   })

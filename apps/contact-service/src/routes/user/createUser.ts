@@ -53,15 +53,15 @@ const deleteIfExists = (
     const userDb = yield* _(UserDbService)
     const contactDb = yield* _(ContactDbService)
 
+    yield* _(contactDb.deleteContactsByHashFrom(hash))
+
     const user = yield* _(userDb.findUserByHash(hash))
     if (Option.isNone(user)) {
-      yield* _(Effect.logInfo('No existing user found. Db is clean.'))
+      yield* _(Effect.logInfo('No existing user found.'))
       return false
     }
 
     yield* _(Effect.log('Removing existing user from database'))
-
-    yield* _(contactDb.deleteContactsByHashFrom(user.value.hash))
     yield* _(
       userDb.deleteUserByPublicKeyAndHash({
         publicKey: user.value.publicKey,

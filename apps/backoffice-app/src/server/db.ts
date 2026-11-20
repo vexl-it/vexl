@@ -25,7 +25,7 @@ export const runDb = <A, E>(
   effect: Effect.Effect<A, E, PgClient.PgClient>
 ): Promise<A> => dbRuntime.runPromise(effect)
 
-const dbRuntime = ManagedRuntime.make(SqlLive)
+export const dbRuntime = ManagedRuntime.make(SqlLive)
 
 const DatabaseError = Schema.Struct({
   cause: Schema.optional(Schema.Unknown),

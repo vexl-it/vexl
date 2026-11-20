@@ -1553,6 +1553,55 @@ importers:
         specifier: ~6.0.3
         version: 6.0.3
 
+  apps/vexl-foundation:
+    dependencies:
+      effect:
+        specifier: ^3.20.0
+        version: 3.21.4
+      next:
+        specifier: ^16.4.6
+        version: 16.4.6(@opentelemetry/api@1.9.1)(@types/node@22.20.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      react:
+        specifier: 19.2.3
+        version: 19.2.3
+      react-dom:
+        specifier: 19.2.3
+        version: 19.2.3(react@19.2.3)
+    devDependencies:
+      '@types/node':
+        specifier: ^22.10.5
+        version: 22.20.1
+      '@types/react':
+        specifier: ~19.2.14
+        version: 19.2.17
+      '@types/react-dom':
+        specifier: ~19.2.3
+        version: 19.2.3(@types/react@19.2.17)
+      '@vexl-next/eslint-config':
+        specifier: 0.0.0
+        version: link:../../tooling/eslint
+      '@vexl-next/prettier-config':
+        specifier: 0.0.0
+        version: link:../../tooling/prettier
+      '@vexl-next/tsconfig':
+        specifier: 0.0.0
+        version: link:../../tooling/tsconfig
+      eslint:
+        specifier: ^9.20.0
+        version: 9.39.4(jiti@2.7.0)
+      playwright:
+        specifier: ^1.64.1
+        version: 1.65.1
+      prettier:
+        specifier: ^3.3.2
+        version: 3.8.4
+      typescript:
+        specifier: ~6.0.3
+        version: 6.0.3
+      vitest:
+        specifier: ^4.1.11
+        version: 4.1.11(@opentelemetry/api@1.9.1)(@types/node@22.20.1)(jsdom@20.0.3)(vite@7.3.7(@types/node@22.20.1)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.51.2)(tsx@4.22.4)(yaml@2.9.0))
+
   apps/vexl-website:
     dependencies:
       '@effect/platform':

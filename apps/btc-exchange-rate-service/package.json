@@ -15,7 +15,7 @@
     "start": "node --enable-source-maps dist/index.js"
   },
   "dependencies": {
-    "@effect/platform": "^0.93.6",
+    "@effect/platform": "^0.97.1",
     "@effect/platform-node": "^0.103.0",
     "@vexl-next/domain": "0.0.0",
     "@vexl-next/rest-api": "0.0.0",

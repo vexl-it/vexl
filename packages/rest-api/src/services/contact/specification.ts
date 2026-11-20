@@ -154,6 +154,7 @@ export const ImportContactsEndpoint = HttpApiEndpoint.post(
   .addSuccess(ImportContactsResponse)
   .addError(InitialImportContactsQuotaReachedError, {status: 429})
   .addError(ImportContactsQuotaReachedError, {status: 429})
+  .addError(UserNotFoundError, {status: 404})
   .annotate(MaxExpectedDailyCall, 100)
 
 export const FetchMyContactsPaginatedEndpoint = HttpApiEndpoint.get(
@@ -165,6 +166,7 @@ export const FetchMyContactsPaginatedEndpoint = HttpApiEndpoint.get(
   .setUrlParams(FetchMyContactsPaginatedRequest)
   .addSuccess(FetchMyContactsPaginatedResponse)
   .addError(InvalidNextPageTokenError, {status: 400})
+  .addError(UserNotFoundError, {status: 404})
   .annotate(MaxExpectedDailyCall, 500)
 
 export const FetchCommonConnectionsPaginatedEndpoint = HttpApiEndpoint.post(

@@ -12,6 +12,7 @@ import {
   serverHashPhoneNumber,
 } from '../../utils/serverHashContact'
 import {withUserActionRedisLock} from '../../utils/withUserActionRedisLock'
+import {findUserOrFail} from '../user/utils/refreshUserRecord'
 import {ImportContactsQuotaService} from './importContactsQuotaService'
 import {notifyOthersAboutNewUserForked} from './utils/notifyOthersAboutNewUser'
 
@@ -30,6 +31,13 @@ export const importContacts = HttpApiBuilder.handler(
           )
 
           const userServerHash = security.userServerHash
+          yield* _(
+            findUserOrFail({
+              publicKey: security.publicKey,
+              serverHash: userServerHash,
+              publicKeyV2: security.publicKeyV2,
+            })
+          )
 
           const contactsBefore = yield* _(
             contactDb.findContactsByHashFrom(userServerHash),

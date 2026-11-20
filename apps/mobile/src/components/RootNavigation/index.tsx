@@ -6,6 +6,7 @@ import {useAtomValue} from 'jotai'
 import React, {memo} from 'react'
 import {type RootStackParamsList} from '../../navigationTypes'
 import {useManageTypingIndications} from '../../state/chat/atoms/typingIndication'
+import {useShowLostPhoneNumbersNotice} from '../../state/phoneNumbers/lostPhoneNumbersNotice'
 import {useIsUserLoggedIn} from '../../state/session'
 import useHandleNotificationOpen from '../../state/useHandleNotificationOpen'
 import {useSetupBackgroundTask} from '../../utils/backgroundTask'
@@ -16,6 +17,7 @@ import {useSyncConversationShortcuts} from '../../utils/notifications/conversati
 import {useConsumeNotificationStream} from '../../utils/notifications/useConsumeNotificationStream'
 import {showTextDebugButtonAtom} from '../../utils/preferences'
 import AccountBackupScreen from '../AccountBackupScreen'
+import AccountBackupPhoneNumberScreen from '../AccountBackupScreen/AccountBackupPhoneNumberScreen'
 import AccountBackupPinScreen from '../AccountBackupScreen/AccountBackupPinScreen'
 import AccountScreen from '../AccountScreen'
 import AppLogsScreen from '../AppLogsScreen'
@@ -103,6 +105,8 @@ function LoggedInHookGroup(): null {
   useHandleUniversalAndAppLinks()
 
   useManageTypingIndications()
+
+  useShowLostPhoneNumbersNotice()
 
   return null
 }
@@ -237,6 +241,10 @@ function RootNavigation(): React.ReactElement {
             <Stack.Screen
               name="AccountBackup"
               component={AccountBackupScreen}
+            />
+            <Stack.Screen
+              name="AccountBackupPhoneNumber"
+              component={AccountBackupPhoneNumberScreen}
             />
             <Stack.Screen
               name="AccountBackupPin"

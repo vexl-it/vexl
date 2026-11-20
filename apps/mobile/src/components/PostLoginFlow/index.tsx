@@ -1,12 +1,12 @@
 import {createNativeStackNavigator} from '@react-navigation/native-stack'
-import {Array, Effect} from 'effect'
+import {Array, Effect, Option} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useEffect, useState} from 'react'
 import {
   type PostLoginFlowStackParamsList,
   type PostLoginFlowStackScreenProps,
 } from '../../navigationTypes'
-import {showRestoredAccountInfoAtom} from '../../state/backup/restoreFromBackup'
+import {restoredAccountInfoAtom} from '../../state/backup/restoreFromBackup'
 import {checkAreNotificationsEnabledAtom} from '../../state/notifications/areNotificationsEnabledAtom'
 import {
   postLoginFlowCompletedScreensAtom,
@@ -41,7 +41,9 @@ export default function PostLoginFlow(): React.ReactElement {
     postLoginFlowEffectiveCompletedScreensAtom
   )
   const storedCompletedScreens = useAtomValue(postLoginFlowCompletedScreensAtom)
-  const showRestoredAccountInfo = useAtomValue(showRestoredAccountInfoAtom)
+  const showRestoredAccountInfo = Option.isSome(
+    useAtomValue(restoredAccountInfoAtom)
+  )
   const checkAreNotificationsEnabled = useSetAtom(
     checkAreNotificationsEnabledAtom
   )

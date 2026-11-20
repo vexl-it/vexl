@@ -4,7 +4,7 @@ import {pipe} from 'fp-ts/function'
 import * as O from 'fp-ts/Option'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
-import {atom, type PrimitiveAtom} from 'jotai'
+import {atom, type WritableAtom} from 'jotai'
 import {Alert} from 'react-native'
 import {showErrorAlert} from '../components/ErrorAlert'
 import {
@@ -40,7 +40,11 @@ const reportAndTranslateErrorsAtom = atom<
 
 export const selectImageActionAtom = atom(
   null,
-  (get, set, atomToSetOnSuccess: PrimitiveAtom<UriString | undefined>) => {
+  (
+    get,
+    set,
+    atomToSetOnSuccess: WritableAtom<unknown, [UriString], unknown>
+  ) => {
     const {t} = get(translationAtom)
 
     Alert.alert(t('loginFlow.photo.selectSource'), undefined, [

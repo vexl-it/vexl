@@ -1,3 +1,4 @@
+import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {
   Avatar,
   Button,
@@ -12,82 +13,80 @@ import {
   XStack,
   YStack,
 } from '@vexl-next/ui'
-import {parsePhoneNumber} from 'awesome-phonenumber'
-import {atom, useAtomValue} from 'jotai'
-import React, {useMemo} from 'react'
+import {useAtomValue} from 'jotai'
+import React from 'react'
 import {useWindowDimensions} from 'react-native'
 import {SvgXml} from 'react-native-svg'
-import {
-  userDataRealOrAnonymizedAtom,
-  userPhoneNumberAtom,
-} from '../../state/session/userDataAtoms'
+import {userDataRealOrAnonymizedAtom} from '../../state/session/userDataAtoms'
 import {createImportContactLink} from '../../utils/deepLinks/createLinks'
+import {getInternationalPhoneNumber} from '../../utils/getInternationalPhoneNumber'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import resolveLocalUri from '../../utils/resolveLocalUri'
 import useSafeGoBack from '../../utils/useSafeGoBack'
+import {ChangePhoneNumber, usePickedPhoneNumber} from '../PhoneNumberPicker'
 import {SharableQrCode} from '../SharableQrCode'
 
-const encodedUserDetailsUriAtom = atom<string>((get) => {
-  const userData = get(userDataRealOrAnonymizedAtom)
-  const phoneNumber = get(userPhoneNumberAtom)
-
-  return createImportContactLink({
-    phoneNumber,
-    userData,
-  })
-})
-
-function ProfileCard(): React.ReactElement {
+function ProfileCard({
+  phoneNumbers,
+  phoneNumber,
+  onPhoneNumberPick,
+}: {
+  readonly phoneNumbers: readonly E164PhoneNumber[]
+  readonly phoneNumber: E164PhoneNumber
+  readonly onPhoneNumberPick: (phoneNumber: E164PhoneNumber) => void
+}): React.ReactElement {
   const userData = useAtomValue(userDataRealOrAnonymizedAtom)
-  const userPhoneNumber = useAtomValue(userPhoneNumberAtom)
   const displayName = userData.userName
   const profileImage = userData.image
-  const formattedPhoneNumber = useMemo(
-    () =>
-      parsePhoneNumber(userPhoneNumber).number?.international ??
-      userPhoneNumber,
-    [userPhoneNumber]
-  )
 
   return (
-    <XStack
-      alignItems="center"
+    <YStack
       backgroundColor="$backgroundSecondary"
       borderRadius="$5"
-      gap="$3"
       padding="$4"
     >
-      {profileImage.type === 'svgXml' ? (
-        <Avatar size="$9">
-          <SvgXml
-            width={resolveSizePx('$9')}
-            height={resolveSizePx('$9')}
-            xml={profileImage.svgXml.xml}
-          />
-        </Avatar>
-      ) : (
-        <Avatar
-          size="$9"
-          source={{uri: resolveLocalUri(profileImage.imageUri)}}
-        />
-      )}
-      <YStack flex={1} minWidth={0} gap="$2">
-        <Typography
-          variant="paragraphSmallBold"
-          color="$foregroundPrimary"
-          numberOfLines={1}
-        >
-          {displayName}
-        </Typography>
-        <Typography
-          variant="micro"
-          color="$foregroundSecondary"
-          numberOfLines={1}
-        >
-          {formattedPhoneNumber}
-        </Typography>
-      </YStack>
-    </XStack>
+      <ChangePhoneNumber
+        phoneNumbers={phoneNumbers}
+        value={phoneNumber}
+        onValueChange={onPhoneNumberPick}
+      >
+        {(changeButton) => (
+          <XStack alignItems="center" gap="$3">
+            {profileImage.type === 'svgXml' ? (
+              <Avatar size="$9">
+                <SvgXml
+                  width={resolveSizePx('$9')}
+                  height={resolveSizePx('$9')}
+                  xml={profileImage.svgXml.xml}
+                />
+              </Avatar>
+            ) : (
+              <Avatar
+                size="$9"
+                source={{uri: resolveLocalUri(profileImage.imageUri)}}
+              />
+            )}
+            <YStack flex={1} minWidth={0} gap="$2">
+              <Typography
+                variant="paragraphSmallBold"
+                color="$foregroundPrimary"
+                numberOfLines={1}
+              >
+                {displayName}
+              </Typography>
+              <Typography
+                variant="micro"
+                color="$foregroundSecondary"
+                numberOfLines={1}
+              >
+                {getInternationalPhoneNumber(phoneNumber)}
+              </Typography>
+            </YStack>
+            {changeButton}
+          </XStack>
+        )}
+      </ChangePhoneNumber>
+    </YStack>
   )
 }
 
@@ -96,7 +95,8 @@ function ShareProfileScreen(): React.ReactElement {
   const safeGoBack = useSafeGoBack()
   const theme = useTheme()
   const {width} = useWindowDimensions()
-  const encodedUserDetailsUri = useAtomValue(encodedUserDetailsUriAtom)
+  const userData = useAtomValue(userDataRealOrAnonymizedAtom)
+  const {phoneNumbers, phoneNumber, pickPhoneNumber} = usePickedPhoneNumber()
   const qrCodeSize = Math.min(width - 96, 360)
 
   return (
@@ -124,7 +124,11 @@ function ShareProfileScreen(): React.ReactElement {
       }
     >
       <YStack flex={1} gap="$4">
-        <ProfileCard />
+        <ProfileCard
+          phoneNumbers={phoneNumbers}
+          phoneNumber={phoneNumber}
+          onPhoneNumberPick={pickPhoneNumber}
+        />
         <Stack
           alignItems="center"
           backgroundColor="$backgroundSecondary"
@@ -136,7 +140,7 @@ function ShareProfileScreen(): React.ReactElement {
             backgroundColor={theme.backgroundSecondary.get()}
             color={theme.foregroundPrimary.get()}
             size={qrCodeSize}
-            value={encodedUserDetailsUri}
+            value={createImportContactLink({phoneNumber, userData})}
           />
         </Stack>
       </YStack>

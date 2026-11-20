@@ -10,8 +10,10 @@ import {
   Stack,
   YStack,
 } from '@vexl-next/ui'
+import {useAtomValue} from 'jotai'
 import React from 'react'
 import {type RootStackScreenProps} from '../../navigationTypes'
+import {userPhoneNumbersAtom} from '../../state/session/userDataAtoms'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 
@@ -22,6 +24,7 @@ export default function AccountBackupScreen({
 }: Props): React.ReactElement {
   const {t} = useTranslation()
   const safeGoBack = useSafeGoBack()
+  const phoneNumbers = useAtomValue(userPhoneNumbersAtom)
 
   return (
     <Screen
@@ -36,7 +39,12 @@ export default function AccountBackupScreen({
       footer={
         <Button
           onPress={() => {
-            navigation.navigate('AccountBackupPin')
+            if (phoneNumbers.length > 1)
+              navigation.navigate('AccountBackupPhoneNumber')
+            else
+              navigation.navigate('AccountBackupPin', {
+                phoneNumber: phoneNumbers[0],
+              })
           }}
         >
           {t('accountBackup.createButton')}

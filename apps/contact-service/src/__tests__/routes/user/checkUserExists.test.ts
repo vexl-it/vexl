@@ -125,10 +125,11 @@ describe('Check user exist notification', () => {
         `)
 
         const app = yield* _(NodeTestingApp)
+        // Someone else logging in with the number, so with their own key
         const authHeaders = yield* _(
           createDummyAuthHeadersForUser({
             phoneNumber,
-            publicKey: keys.publicKeyPemBase64,
+            publicKey: generatePrivateKey().publicKeyPemBase64,
           })
         )
         yield* _(setAuthHeaders(authHeaders))
@@ -190,7 +191,7 @@ describe('Check user exist notification', () => {
         const authHeaders = yield* _(
           createDummyAuthHeadersForUser({
             phoneNumber,
-            publicKey: keys.publicKeyPemBase64,
+            publicKey: generatePrivateKey().publicKeyPemBase64,
           })
         )
         yield* _(setAuthHeaders(authHeaders))

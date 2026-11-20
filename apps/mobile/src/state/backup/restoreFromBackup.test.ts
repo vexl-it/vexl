@@ -9,6 +9,8 @@ import {
   NotFoundError,
   UnexpectedServerError,
 } from '@vexl-next/domain/src/general/commonErrors'
+import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {
   KeyDerivationIndex,
   MasterSeed,
@@ -26,6 +28,10 @@ import {
 import {UserNotFoundError} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {Array, Effect, Option, Schema} from 'effect'
 import {getDefaultStore} from 'jotai'
+import {
+  type SessionPhoneNumber,
+  type SessionV2,
+} from '../../brands/Session.brand'
 import {showMarketplaceIntroDialogAtom} from '../../utils/preferences'
 import messagingStateAtom from '../chat/atoms/messagingStateAtom'
 import {clubsKeyHolderStorageAtom} from '../clubs/atom/clubsToKeyHolderV2Atom'
@@ -37,8 +43,8 @@ import {sessionHolderAtom} from '../session'
 import {dummySession} from '../session/dummySesssion'
 import {backupFileToRestoreAtom, backupKeyPairAtom} from './backupToRestore'
 import {
+  restoredAccountInfoAtom,
   restoreFromBackupStateAtom,
-  showRestoredAccountInfoAtom,
   startRestoreFromBackupActionAtom,
 } from './restoreFromBackup'
 
@@ -98,8 +104,11 @@ jest.mock('../notifications/actions/invalidateVexlSecretActionAtom', () => ({
 const mockRestoreUser = jest.fn()
 const mockCreateUser = jest.fn()
 jest.mock('../../api/contactApiForSession', () => ({
-  contactApiForSession: () => ({
-    restoreUser: mockRestoreUser,
+  contactApiForPhoneNumber: (
+    _: unknown,
+    {phoneNumber}: {phoneNumber: string}
+  ) => ({
+    restoreUser: (request: unknown) => mockRestoreUser(request, phoneNumber),
     createUser: mockCreateUser,
   }),
 }))
@@ -240,7 +249,7 @@ describe('restore from backup', () => {
     store.set(sessionHolderAtom, {state: 'loggedOut'})
     store.set(messagingStateAtom, [])
     store.set(restoreFromBackupStateAtom, {state: 'idle'})
-    store.set(showRestoredAccountInfoAtom, false)
+    store.set(restoredAccountInfoAtom, Option.none())
     store.set(vexlNotificationTokenAtom, {
       secret: null,
       systemVexlToken: null,
@@ -279,14 +288,17 @@ describe('restore from backup', () => {
     if (sessionHolder.state !== 'loggedIn')
       throw new Error(`Unexpected session state ${sessionHolder.state}`)
     const {session} = sessionHolder
-    expect(mockRestoreUser).toHaveBeenCalledWith({
-      loginSessionId: session.loginSessionId,
-      loginSessionProof: {
-        signedAt: expect.any(Number),
-        signature: expect.any(String),
+    expect(mockRestoreUser).toHaveBeenCalledWith(
+      {
+        loginSessionId: session.loginSessionId,
+        loginSessionProof: {
+          signedAt: expect.any(Number),
+          signature: expect.any(String),
+        },
+        vexlNotificationToken: Option.some(sessionNotificationToken),
       },
-      vexlNotificationToken: Option.some(sessionNotificationToken),
-    })
+      backup.session.phoneNumber
+    )
     expect(session).toEqual({
       ...backup.session,
       realUserData: {userName: 'Satoshi', image: undefined},
@@ -325,7 +337,9 @@ describe('restore from backup', () => {
       nextClubIndex: 1 + 1 + 10,
     })
     expect(store.get(postLoginFlowCompletedScreensAtom)).toEqual(['usageInfo'])
-    expect(store.get(showRestoredAccountInfoAtom)).toBe(true)
+    expect(store.get(restoredAccountInfoAtom)).toEqual(
+      Option.some({notRestoredPhoneNumbers: []})
+    )
     expect(store.get(showMarketplaceIntroDialogAtom)).toBe(false)
     expect(mockRefreshOffers).toHaveBeenCalled()
     // No secret in this backup: a new one was minted, so offer tokens follow.
@@ -372,7 +386,7 @@ describe('restore from backup', () => {
     expect(mockCreateUser).not.toHaveBeenCalled()
     expect(store.get(sessionHolderAtom).state).toBe('loggedOut')
     expect(store.get(messagingStateAtom)).toEqual([])
-    expect(store.get(showRestoredAccountInfoAtom)).toBe(false)
+    expect(store.get(restoredAccountInfoAtom)).toEqual(Option.none())
   })
 
   it('fails the restore when the restored session cannot be stored', async () => {
@@ -390,7 +404,7 @@ describe('restore from backup', () => {
     })
     expect(store.get(sessionHolderAtom).state).toBe('loggedOut')
     expect(store.get(messagingStateAtom)).toEqual([])
-    expect(store.get(showRestoredAccountInfoAtom)).toBe(false)
+    expect(store.get(restoredAccountInfoAtom)).toEqual(Option.none())
   })
 
   it('stores the restored session once', async () => {
@@ -444,7 +458,8 @@ describe('restore from backup', () => {
       expect(mockRestoreUser).toHaveBeenCalledWith(
         expect.objectContaining({
           vexlNotificationToken: Option.some(mintedSessionToken),
-        })
+        }),
+        backup.session.phoneNumber
       )
       expect(mockSyncNotificationTokens).toHaveBeenCalledWith({
         expoNotificationToken: 'ExponentPushToken[new-phone]',
@@ -486,7 +501,8 @@ describe('restore from backup', () => {
       expect(mockRestoreUser).toHaveBeenCalledWith(
         expect.objectContaining({
           vexlNotificationToken: Option.some(sessionNotificationToken),
-        })
+        }),
+        backup.session.phoneNumber
       )
       expect(store.get(vexlNotificationTokenAtom).secret).not.toBe(secret)
       expect(mockSyncNotificationTokens).not.toHaveBeenCalled()
@@ -561,5 +577,206 @@ describe('restore from backup', () => {
         expect(store.get(sessionHolderAtom).state).toBe('loggedOut')
       }
     )
+  })
+
+  describe('with several phone numbers', () => {
+    const extraPhoneNumber = (
+      phoneNumber: string,
+      hash: string
+    ): SessionPhoneNumber => {
+      const credentials = dummySession.sessionCredentials
+      const hashedPhoneNumber = Schema.decodeSync(HashedPhoneNumber)(hash)
+      return {
+        phoneNumber: Schema.decodeSync(E164PhoneNumber)(phoneNumber),
+        sessionCredentials: {
+          ...credentials,
+          hash: hashedPhoneNumber,
+          vexlAuthHeader: {
+            ...credentials.vexlAuthHeader,
+            data: {...credentials.vexlAuthHeader.data, hash: hashedPhoneNumber},
+          },
+        },
+      }
+    }
+    const second = extraPhoneNumber('+420777777777', 'second')
+    const third = extraPhoneNumber('+421905123456', 'third')
+
+    const withExtraNumbers = async (): Promise<BackupFile> => {
+      const {backup} = await setUp()
+      return {
+        ...backup,
+        session: {...backup.session, extraPhoneNumbers: [second, third]},
+      }
+    }
+
+    const restoreUserAnswers = (
+      answers: Record<string, Effect.Effect<void, unknown>>
+    ): void => {
+      mockRestoreUser.mockImplementation(
+        (_: unknown, phoneNumber: string) => answers[phoneNumber] ?? Effect.void
+      )
+    }
+
+    const restoredSession = (): SessionV2 => {
+      const sessionHolder = store.get(sessionHolderAtom)
+      if (sessionHolder.state !== 'loggedIn')
+        throw new Error(`Unexpected session state ${sessionHolder.state}`)
+      return sessionHolder.session
+    }
+
+    const restoreUserCalls = (): Array<{
+      phoneNumber: string
+      vexlNotificationToken: Option.Option<unknown>
+    }> =>
+      Array.map(
+        mockRestoreUser.mock.calls,
+        ([request, phoneNumber]: [
+          {vexlNotificationToken: Option.Option<unknown>},
+          string,
+        ]) => ({
+          phoneNumber,
+          vexlNotificationToken: request.vexlNotificationToken,
+        })
+      )
+
+    it('restores every number one after another, the notification token only on the main one', async () => {
+      const backup = await withExtraNumbers()
+      restoreUserAnswers({})
+
+      await Effect.runPromise(
+        store.set(startRestoreFromBackupActionAtom, backup)
+      )
+
+      expect(restoreUserCalls()).toEqual([
+        {
+          phoneNumber: backup.session.phoneNumber,
+          vexlNotificationToken: Option.some(sessionNotificationToken),
+        },
+        {phoneNumber: second.phoneNumber, vexlNotificationToken: Option.none()},
+        {phoneNumber: third.phoneNumber, vexlNotificationToken: Option.none()},
+      ])
+      expect(restoredSession().extraPhoneNumbers).toEqual([second, third])
+      expect(store.get(restoredAccountInfoAtom)).toEqual(
+        Option.some({notRestoredPhoneNumbers: []})
+      )
+    })
+
+    it('drops an extra number contact-service no longer knows', async () => {
+      const backup = await withExtraNumbers()
+      restoreUserAnswers({
+        [second.phoneNumber]: Effect.fail(new UserNotFoundError()),
+      })
+
+      await Effect.runPromise(
+        store.set(startRestoreFromBackupActionAtom, backup)
+      )
+
+      const session = restoredSession()
+      expect(session.phoneNumber).toBe(backup.session.phoneNumber)
+      expect(session.extraPhoneNumbers).toEqual([third])
+      expect(store.get(restoredAccountInfoAtom)).toEqual(
+        Option.some({notRestoredPhoneNumbers: [second.phoneNumber]})
+      )
+    })
+
+    it('promotes the next number and gives it the notification token when the main one is gone', async () => {
+      const backup = await withExtraNumbers()
+      restoreUserAnswers({
+        [backup.session.phoneNumber]: Effect.fail(new UserNotFoundError()),
+      })
+
+      await Effect.runPromise(
+        store.set(startRestoreFromBackupActionAtom, backup)
+      )
+
+      expect(restoreUserCalls()).toEqual([
+        {
+          phoneNumber: backup.session.phoneNumber,
+          vexlNotificationToken: Option.some(sessionNotificationToken),
+        },
+        {
+          phoneNumber: second.phoneNumber,
+          vexlNotificationToken: Option.some(sessionNotificationToken),
+        },
+        {phoneNumber: third.phoneNumber, vexlNotificationToken: Option.none()},
+      ])
+      const session = restoredSession()
+      expect(session.phoneNumber).toBe(second.phoneNumber)
+      expect(session.sessionCredentials).toEqual(second.sessionCredentials)
+      expect(session.extraPhoneNumbers).toEqual([third])
+      expect(store.get(restoredAccountInfoAtom)).toEqual(
+        Option.some({notRestoredPhoneNumbers: [backup.session.phoneNumber]})
+      )
+    })
+
+    it('reports a backup the server no longer knows when no number is left', async () => {
+      const backup = await withExtraNumbers()
+      mockRestoreUser.mockReturnValue(Effect.fail(new UserNotFoundError()))
+
+      await Effect.runPromise(
+        store.set(startRestoreFromBackupActionAtom, backup)
+      )
+
+      expect(mockRestoreUser).toHaveBeenCalledTimes(3)
+      expect(store.get(restoreFromBackupStateAtom)).toEqual({
+        state: 'failed',
+        failure: 'backupNoLongerValid',
+      })
+      expect(mockDiscardSecret).toHaveBeenCalledTimes(1)
+      expect(store.get(sessionHolderAtom).state).toBe('loggedOut')
+      expect(store.get(restoredAccountInfoAtom)).toEqual(Option.none())
+    })
+
+    it('keeps nothing when a number fails and restores all of them when tried again', async () => {
+      const backup = await withExtraNumbers()
+      restoreUserAnswers({
+        [second.phoneNumber]: Effect.fail({_tag: 'NetworkError'}),
+      })
+
+      await Effect.runPromise(
+        store.set(startRestoreFromBackupActionAtom, backup)
+      )
+
+      expect(store.get(restoreFromBackupStateAtom)).toEqual({
+        state: 'failed',
+        failure: 'offline',
+      })
+      // The main number was restored on the server before the failure.
+      expect(restoreUserCalls()).toHaveLength(2)
+      expect(store.get(sessionHolderAtom).state).toBe('loggedOut')
+      expect(store.get(messagingStateAtom)).toEqual([])
+      expect(store.get(restoredAccountInfoAtom)).toEqual(Option.none())
+      expect(mockDiscardSecret).toHaveBeenCalledTimes(1)
+      const [[firstAttempt]] = mockRestoreUser.mock.calls
+
+      mockRestoreUser.mockClear()
+      restoreUserAnswers({})
+      await Effect.runPromise(
+        store.set(startRestoreFromBackupActionAtom, backup)
+      )
+
+      expect(store.get(restoreFromBackupStateAtom)).toEqual({state: 'idle'})
+      expect(restoreUserCalls()).toEqual([
+        {
+          phoneNumber: backup.session.phoneNumber,
+          vexlNotificationToken: Option.some(sessionNotificationToken),
+        },
+        {phoneNumber: second.phoneNumber, vexlNotificationToken: Option.none()},
+        {phoneNumber: third.phoneNumber, vexlNotificationToken: Option.none()},
+      ])
+      const session = restoredSession()
+      // A new login session, so the numbers restored by the failed attempt
+      // move to it too.
+      expect(session.loginSessionId).not.toBe(firstAttempt.loginSessionId)
+      expect(
+        Array.map(mockRestoreUser.mock.calls, ([request]) => request)
+      ).toEqual(
+        Array.replicate(
+          expect.objectContaining({loginSessionId: session.loginSessionId}),
+          3
+        )
+      )
+      expect(session.extraPhoneNumbers).toEqual([second, third])
+    })
   })
 })

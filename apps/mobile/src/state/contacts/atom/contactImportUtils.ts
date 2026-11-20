@@ -2,6 +2,8 @@ import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumbe
 import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {type ServerToClientHashedNumber} from '@vexl-next/domain/src/general/ServerToClientHashedNumber'
 import {Array, HashMap, HashSet, Option, pipe} from 'effect'
+import {type SessionV2} from '../../../brands/Session.brand'
+import {phoneNumbersOfSession} from '../../session/sessionPhoneNumbers'
 import {
   type StoredContact,
   type StoredContactWithComputedValues,
@@ -22,6 +24,21 @@ export function percentageFromProgress({
   readonly total: number
 }): number {
   return total === 0 ? 100 : Math.round((processed / total) * 100)
+}
+
+/**
+ * contact-service drops only the number a request is authenticated with, so
+ * the other numbers of the account are removed here.
+ */
+export function withoutOwnPhoneNumbers(
+  contacts: readonly HashedPhoneNumber[],
+  session: SessionV2
+): HashedPhoneNumber[] {
+  const ownHashes = Array.map(
+    phoneNumbersOfSession(session),
+    (one) => one.sessionCredentials.hash
+  )
+  return Array.filter(contacts, (one) => !Array.contains(ownHashes, one))
 }
 
 export function determineContactsImportUpdatePlan({

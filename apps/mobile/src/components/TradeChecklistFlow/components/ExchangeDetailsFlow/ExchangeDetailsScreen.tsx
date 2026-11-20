@@ -1,6 +1,5 @@
 import {useNavigation} from '@react-navigation/native'
 import {
-  Button,
   Disclosure,
   Image,
   InfoBox,
@@ -12,13 +11,14 @@ import {
   XStack,
   YStack,
 } from '@vexl-next/ui'
-import {useAtomValue, useSetAtom} from 'jotai'
-import React from 'react'
+import {Array} from 'effect'
+import {useAtom, useAtomValue, useSetAtom} from 'jotai'
+import React, {useState} from 'react'
 import {TouchableOpacity} from 'react-native'
 import {type TradeChecklistStackScreenProps} from '../../../../navigationTypes'
 import anonymizePhoneNumber from '../../../../state/chat/utils/anonymizePhoneNumber'
 import {selectImageActionAtom} from '../../../../state/selectImageActionAtom'
-import {sessionDataOrDummyAtom} from '../../../../state/session'
+import {userPhoneNumbersAtom} from '../../../../state/session/userDataAtoms'
 import {otherSideDataAtom} from '../../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {
   isAnyDetailSelected,
@@ -29,6 +29,8 @@ import {getInternationalPhoneNumber} from '../../../../utils/getInternationalPho
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import resolveLocalUri from '../../../../utils/resolveLocalUri'
 import {AddToContactsButton} from '../../../ChatDetailScreen/components/RevealedInfoCard'
+import {EditIconButton} from '../../../EditIconButton'
+import {ChangePhoneNumber} from '../../../PhoneNumberPicker'
 import UserAvatar from '../../../UserAvatar'
 import {
   availableDetailKeysAtom,
@@ -36,6 +38,7 @@ import {
   detailsSharedByThemAtom,
   exchangeDetailsModeAtom,
   exchangeDetailsNicknameAtom,
+  exchangeDetailsPhoneNumberAtom,
   exchangeDetailsPhotoUriAtom,
   exchangeDetailsSelectionAtom,
   pendingSentDetailsAtom,
@@ -49,31 +52,95 @@ import {TradeChecklistItemPageLayout} from '../TradeChecklistItemPageLayout'
 import {formatSelectedDetails} from './formatSelectedDetails'
 import useExchangeDetailsNavigation from './useExchangeDetailsNavigation'
 
-const PHOTO_PREVIEW_SIZE = 56
 const SHARED_AVATAR_SIZE = 144
+
+// A button inside a card takes its own presses, so it never toggles the
+// checkbox.
+function RevealedPhoneNumberChoice({
+  iconOnly,
+  children,
+}: {
+  readonly iconOnly: boolean
+  readonly children: (
+    changeButton: React.ReactElement | null
+  ) => React.ReactNode
+}): React.ReactElement {
+  const phoneNumbers = useAtomValue(userPhoneNumbersAtom)
+  const [phoneNumber, setPhoneNumber] = useAtom(exchangeDetailsPhoneNumberAtom)
+
+  return (
+    <ChangePhoneNumber
+      iconOnly={iconOnly}
+      phoneNumbers={phoneNumbers}
+      value={phoneNumber}
+      onValueChange={setPhoneNumber}
+    >
+      {children}
+    </ChangePhoneNumber>
+  )
+}
 
 function NicknameRow(): React.ReactElement {
   const {t} = useTranslation()
-  const {phoneNumber} = useAtomValue(sessionDataOrDummyAtom)
+  const phoneNumber = useAtomValue(exchangeDetailsPhoneNumberAtom)
   const selected = useAtomValue(exchangeDetailsSelectionAtom).nickname
   const nickname = useAtomValue(exchangeDetailsNicknameAtom).trim()
+  const phoneNumberRowShown = Array.contains(
+    useAtomValue(availableDetailKeysAtom),
+    'phoneNumber'
+  )
   const toggle = useSetAtom(toggleExchangeDetailActionAtom)
+  const [editing, setEditing] = useState(false)
+
+  // A nickname to reveal has to be set, so the field opens and stays open
+  // while the user types the first letters.
+  if (selected && nickname === '' && !editing) setEditing(true)
+
+  const checkbox = (
+    <RowCheckbox
+      label={t('tradeChecklist.exchangeDetails.nickname')}
+      description={`${nickname || t('tradeChecklist.exchangeDetails.nicknameNotSet')} · ${anonymizePhoneNumber(phoneNumber)}`}
+      checked={selected}
+      onCheckedChange={() => {
+        if (selected) setEditing(false)
+        toggle('nickname')
+      }}
+      trailing={
+        <EditIconButton
+          aria-label={t('common.edit')}
+          aria-expanded={editing}
+          onPress={() => {
+            setEditing((prev) => !prev)
+          }}
+        />
+      }
+    />
+  )
 
   return (
     <YStack gap="$2">
-      <RowCheckbox
-        label={t('tradeChecklist.exchangeDetails.nickname')}
-        description={`${nickname || t('tradeChecklist.exchangeDetails.nicknameNotSet')} · ${anonymizePhoneNumber(phoneNumber)}`}
-        checked={selected}
-        onCheckedChange={() => {
-          toggle('nickname')
-        }}
-      />
-      {selected ? (
+      {phoneNumberRowShown ? (
+        checkbox
+      ) : (
+        // The nickname carries digits of the number. With the phone number
+        // row hidden, the number is changed here.
+        <RevealedPhoneNumberChoice iconOnly={false}>
+          {(changeButton) => (
+            <>
+              {checkbox}
+              {changeButton ? <XStack>{changeButton}</XStack> : null}
+            </>
+          )}
+        </RevealedPhoneNumberChoice>
+      )}
+      {editing ? (
         <TextField
           valueAtom={exchangeDetailsNicknameAtom}
           placeholder={t('tradeChecklist.revealIdentity.nicknamePlaceholder')}
-          showClear
+          autoFocus
+          onCheckmarkPress={() => {
+            setEditing(false)
+          }}
         />
       ) : null}
     </YStack>
@@ -82,19 +149,26 @@ function NicknameRow(): React.ReactElement {
 
 function PhoneNumberRow(): React.ReactElement {
   const {t} = useTranslation()
-  const {phoneNumber} = useAtomValue(sessionDataOrDummyAtom)
+  const phoneNumber = useAtomValue(exchangeDetailsPhoneNumberAtom)
   const selected = useAtomValue(exchangeDetailsSelectionAtom).phoneNumber
   const toggle = useSetAtom(toggleExchangeDetailActionAtom)
 
   return (
-    <RowCheckbox
-      label={t('tradeChecklist.exchangeDetails.phoneNumber')}
-      description={getInternationalPhoneNumber(phoneNumber)}
-      checked={selected}
-      onCheckedChange={() => {
-        toggle('phoneNumber')
-      }}
-    />
+    <YStack gap="$2">
+      <RevealedPhoneNumberChoice iconOnly>
+        {(changeButton) => (
+          <RowCheckbox
+            label={t('tradeChecklist.exchangeDetails.phoneNumber')}
+            description={getInternationalPhoneNumber(phoneNumber)}
+            checked={selected}
+            onCheckedChange={() => {
+              toggle('phoneNumber')
+            }}
+            trailing={changeButton}
+          />
+        )}
+      </RevealedPhoneNumberChoice>
+    </YStack>
   )
 }
 
@@ -107,45 +181,42 @@ function PhotoRow(): React.ReactElement {
   const selectImage = useSetAtom(selectImageActionAtom)
 
   return (
-    <YStack gap="$2">
-      <RowCheckbox
-        label={t('tradeChecklist.exchangeDetails.photo')}
-        description={
-          photoRequiresNickname
-            ? t('tradeChecklist.exchangeDetails.photoSharedWithNickname')
-            : photoUri
-              ? undefined
-              : t('tradeChecklist.exchangeDetails.noPhotoYet')
-        }
-        checked={selected}
-        onCheckedChange={() => {
-          toggle('photo')
-        }}
-      />
-      {selected ? (
+    <RowCheckbox
+      label={t('tradeChecklist.exchangeDetails.photo')}
+      description={
+        photoRequiresNickname
+          ? t('tradeChecklist.exchangeDetails.photoSharedWithNickname')
+          : photoUri
+            ? undefined
+            : t('tradeChecklist.exchangeDetails.noPhotoYet')
+      }
+      checked={selected}
+      onCheckedChange={() => {
+        toggle('photo')
+      }}
+      trailing={
         <XStack ai="center" gap="$3">
           {photoUri ? (
             <Image
-              borderRadius="$4"
-              width={PHOTO_PREVIEW_SIZE}
-              height={PHOTO_PREVIEW_SIZE}
+              borderRadius="$3"
+              width="$9"
+              height="$9"
               source={{uri: resolveLocalUri(photoUri)}}
             />
           ) : null}
-          <Button
-            variant="secondary"
-            size="small"
+          <EditIconButton
+            aria-label={
+              photoUri
+                ? t('tradeChecklist.revealIdentity.changePhoto')
+                : t('tradeChecklist.exchangeDetails.choosePhoto')
+            }
             onPress={() => {
               selectImage(exchangeDetailsPhotoUriAtom)
             }}
-          >
-            {photoUri
-              ? t('tradeChecklist.revealIdentity.changePhoto')
-              : t('tradeChecklist.exchangeDetails.choosePhoto')}
-          </Button>
+          />
         </XStack>
-      ) : null}
-    </YStack>
+      }
+    />
   )
 }
 

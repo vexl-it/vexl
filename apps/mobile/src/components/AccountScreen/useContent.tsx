@@ -13,6 +13,7 @@ import {
   PencilWriteEdit,
   PeopleUsers,
   QuestionsFaq,
+  Tools,
   TrashBin,
   XTwitter,
 } from '@vexl-next/ui'
@@ -27,6 +28,7 @@ import {useTranslation as useTranslations} from '../../utils/localization/I18nPr
 import {formatDecimal} from '../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../utils/localization/formattingLocaleAtom'
 import openUrl from '../../utils/openUrl'
+import {isDeveloperAtom} from '../../utils/preferences'
 import {backupEnabledAtom} from '../../utils/versionService/atoms'
 import ContactUsDialogContent from '../AppSettingsScreen/components/ContactUsDialogContent'
 import {globalDialogAtom} from '../GlobalDialog'
@@ -58,6 +60,7 @@ export function useContent(): AccountMenus {
   const contactSupport = useSetAtom(contactSupportActionAtom)
   const logout = useLogout()
   const backupEnabled = useAtomValue(backupEnabledAtom)
+  const isDeveloper = useAtomValue(isDeveloperAtom)
   return useMemo((): AccountMenus => {
     const contactsCount = t('account.contactsCountFormatted', {
       localizedString: formatDecimal(numberOfContacts, locale),
@@ -125,6 +128,17 @@ export function useContent(): AccountMenus {
               navigation.navigate('AppLogs')
             },
           },
+          ...(isDeveloper
+            ? [
+                {
+                  label: 'Debug screen',
+                  icon: Tools,
+                  onPress: () => {
+                    navigation.navigate('DebugScreen')
+                  },
+                },
+              ]
+            : []),
         ],
       },
       {
@@ -243,6 +257,7 @@ export function useContent(): AccountMenus {
   }, [
     backupEnabled,
     contactSupport,
+    isDeveloper,
     locale,
     logout,
     navigation,

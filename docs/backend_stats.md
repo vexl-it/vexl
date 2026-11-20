@@ -28,7 +28,11 @@ These are referred to as *common* in the tables below.
 | `NUMBER_OF_USERS_BY_COUNTRY` | Total | `countryPrefix` (`none` if unknown) | Gauge, hourly (`REPORT_GAUGES_CRON`); count of rows in `users` per country. |
 | `NUMBER_OF_USERS` | Total | — | Gauge, hourly (`REPORT_GAUGES_CRON`); total count of users across all countries. |
 
+user-service keeps one `users` row per account, with the country prefix of the phone number it registered with first. Numbers added later don't change it.
+
 ## contact-service
+
+contact-service keeps one `users` row per phone number. An account with several numbers has one row for each, so every metric below that counts users, logins, refreshes, contacts or connections counts that account once per number.
 
 | Metric | Type | Attributes | Reported when |
 | --- | --- | --- | --- |

@@ -61,8 +61,6 @@
   "editProfileScreen.addIdentity.button": "Lägg till identitet",
   "editProfileScreen.vexlAlias.title": "Ditt vexl-alias",
   "editProfileScreen.vexlAlias.subtitle": "Så här ser andra dig. Din riktiga identitet förblir dold tills du väljer att visa den.",
-  "editProfileScreen.phoneNumber.title": "Telefonnummer",
-  "editProfileScreen.phoneNumber.subtitle": "Ditt telefonnummer förblir privat. Ingen ser det om du inte delar det.",
   "editProfileScreen.spokenLanguages.title": "Språk du pratar",
   "editProfileScreen.spokenLanguages.subtitle": "Låt andra veta vilka språk du är bekväm med att handla på.",
   "editProfileScreen.identityPhoto.title": "Lägg till ett foto",

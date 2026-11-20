@@ -61,8 +61,6 @@
   "editProfileScreen.addIdentity.button": "Add identity",
   "editProfileScreen.vexlAlias.title": "Your vexl alias",
   "editProfileScreen.vexlAlias.subtitle": "Na so odas go see you. Your real identity go hide until you choose to reveal am.",
-  "editProfileScreen.phoneNumber.title": "Phone number",
-  "editProfileScreen.phoneNumber.subtitle": "Your phone number go stay private. Nobody go see am unless you share am.",
   "editProfileScreen.spokenLanguages.title": "Languages wey you dey speak",
   "editProfileScreen.spokenLanguages.subtitle": "Make odas know which languages you comfortable to trade with.",
   "editProfileScreen.identityPhoto.title": "Add photo",

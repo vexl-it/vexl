@@ -3,13 +3,9 @@ import {type KeyHolder} from '@vexl-next/cryptography/src'
 import {type PublicKeyV2} from '@vexl-next/cryptography/src/KeyHolder/brandsV2'
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {type MasterSeed} from '@vexl-next/domain/src/general/MasterSeed.brand'
-import {
-  EcdsaSignature,
-  ecdsaSignE,
-} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
-import {contact, user} from '@vexl-next/rest-api/src'
+import {user} from '@vexl-next/rest-api/src'
 import {type VerifyPhoneNumberResponse} from '@vexl-next/rest-api/src/services/user/contracts'
-import {Effect, Match, Option, Schema} from 'effect'
+import {Effect, Match, Option} from 'effect'
 import * as O from 'fp-ts/Option'
 import {atom} from 'jotai'
 import {apiAtom, apiEnv, platform} from '../../../api'
@@ -21,6 +17,7 @@ import {createVexlSecretAndSessionTokenActionAtom} from '../../../state/notifica
 import {sessionAtom} from '../../../state/session'
 import {loginSessionWithProof} from '../../../state/session/loginSession'
 import {upgradeSession} from '../../../state/session/upgradeSession'
+import {verifyLoginChallenge} from '../../../state/session/verifyLoginChallenge'
 import {
   appSource,
   deviceModel,
@@ -141,16 +138,11 @@ export const finishLoginActionAtom = atom(
     const api = get(apiAtom)
 
     return Effect.gen(function* (_) {
-      const signature = yield* _(
-        ecdsaSignE(privateKey.privateKeyPemBase64)(
-          verifyPhoneNumberResponse.challenge
-        )
-      )
-
-      const verifiedChallengeResponse = yield* _(
-        api.user.verifyChallenge({
-          userPublicKey: privateKey.publicKeyPemBase64,
-          signature: Schema.decodeSync(EcdsaSignature)(signature),
+      const sessionCredentials = yield* _(
+        verifyLoginChallenge({
+          userApi: api.user,
+          privateKey,
+          challenge: verifyPhoneNumberResponse.challenge,
         })
       )
 
@@ -161,11 +153,7 @@ export const finishLoginActionAtom = atom(
       const session = yield* upgradeSession(
         {
           version: 1,
-          sessionCredentials: {
-            publicKey: privateKey.publicKeyPemBase64,
-            hash: verifiedChallengeResponse.hash,
-            signature: verifiedChallengeResponse.signature,
-          },
+          sessionCredentials,
           keyPairV2: undefined,
           phoneNumber,
           privateKey,
@@ -176,21 +164,8 @@ export const finishLoginActionAtom = atom(
         masterSeed
       )
 
-      const contactApi = yield* _(
-        contact.api({
-          platform,
-          clientVersion: versionCode,
-          clientSemver: version,
-          url: apiEnv.contactMs,
-          getUserSessionCredentials: () => session.sessionCredentials,
-          isDeveloper: get(isDeveloperAtom),
-          language: get(translationAtom).t('localeName'),
-          appSource,
-        })
-      )
-
       const userExists = yield* _(
-        contactApi.checkUserExists({
+        contactApiForSession(get, session).checkUserExists({
           notifyExistingUserAboutLogin: true,
         })
       )

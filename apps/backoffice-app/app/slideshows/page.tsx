@@ -1,281 +1,326 @@
 'use client'
 
-import {copyToClipboard} from '@/src/services/clipboard'
+import {SlideshowPreview} from '@/src/components/slideshows/SlideshowPreview'
+import {
+  type RowActionKey,
+  SlideshowTableRow,
+} from '@/src/components/slideshows/SlideshowTableRow'
+import {regenerateLinkConfirmation} from '@/src/components/slideshows/tvLink'
+import {
+  Alert,
+  type AlertTone,
+  Button,
+  ButtonLink,
+  Card,
+  CopyButton,
+  EmptyState,
+  Input,
+  Page,
+  PageHeader,
+  PlusIcon,
+  SearchIcon,
+  SegmentedControl,
+  type SegmentedOption,
+  type SortState,
+  SortTh,
+  Table,
+  Th,
+  TvIcon,
+  useConfirm,
+} from '@/src/components/ui'
 import {publicUrl, usePublicHosts} from '@/src/services/publicHosts'
 import {
   deleteSlideshow,
   duplicateSlideshow,
   listSlideshows,
+  regenerateSlideshowToken,
 } from '@/src/services/slideshows/api'
 import {type TvSlideshow} from '@/src/services/slideshows/domain'
-import {Array, pipe} from 'effect'
+import {pluralize} from '@/src/services/slideshows/format'
+import {Array, Order, pipe, type Record} from 'effect'
 import {useRouter} from 'next/navigation'
-import {useCallback, useEffect, useRef, useState} from 'react'
+import {type ReactNode, useCallback, useEffect, useState} from 'react'
 
-const getPublicIdentifier = (slideshow: TvSlideshow): string =>
-  slideshow.publicSlug ?? slideshow.publicToken
+type SortKey = 'name' | 'slides' | 'updatedAt'
+type StatusFilter = 'all' | 'enabled' | 'disabled'
+
+const ORDERS: Record.ReadonlyRecord<SortKey, Order.Order<TvSlideshow>> = {
+  name: Order.mapInput(Order.string, ({name}) => name.toLowerCase()),
+  slides: Order.mapInput(Order.number, ({slides}) => slides.length),
+  updatedAt: Order.mapInput(Order.string, ({updatedAt}) => updatedAt),
+}
+
+const FAILURES: Record.ReadonlyRecord<RowActionKey, string> = {
+  duplicate: 'Could not duplicate',
+  regenerate: 'Could not regenerate the link for',
+  delete: 'Could not delete',
+}
+
+const STATUS_OPTIONS: ReadonlyArray<SegmentedOption<StatusFilter>> = [
+  {value: 'all', label: 'All'},
+  {value: 'enabled', label: 'Enabled'},
+  {value: 'disabled', label: 'Disabled'},
+]
+
+interface Notice {
+  readonly tone: AlertTone
+  readonly text: string
+  readonly action?: ReactNode
+}
 
 export default function SlideshowsPage() {
   const hosts = usePublicHosts()
-  const [slideshows, setSlideshows] = useState<readonly TvSlideshow[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [copiedIdentifier, setCopiedIdentifier] = useState<string | null>(null)
-  const [manualCopyUrl, setManualCopyUrl] = useState<string | null>(null)
-  const manualCopyInputRef = useRef<HTMLInputElement | null>(null)
   const router = useRouter()
+  const {confirm, dialog} = useConfirm()
+  const [slideshows, setSlideshows] = useState<readonly TvSlideshow[] | null>(
+    null
+  )
+  const [loadError, setLoadError] = useState<string | null>(null)
+  const [notice, setNotice] = useState<Notice | null>(null)
+  const [busy, setBusy] = useState<{
+    readonly uuid: string
+    readonly action: RowActionKey
+  } | null>(null)
+  const [query, setQuery] = useState('')
+  const [status, setStatus] = useState<StatusFilter>('all')
+  const [sort, setSort] = useState<SortState<SortKey>>({
+    key: 'updatedAt',
+    descending: true,
+  })
+  const [previewed, setPreviewed] = useState<TvSlideshow | null>(null)
 
-  const loadSlideshows = useCallback(async () => {
-    setLoading(true)
-    setError(null)
-
-    try {
-      const result = await listSlideshows()
-      setSlideshows(result.slideshows)
-    } catch (loadError) {
-      setError(
-        loadError instanceof Error
-          ? loadError.message
-          : 'Failed to load slideshows'
-      )
-    } finally {
-      setLoading(false)
-    }
+  const load = useCallback(() => {
+    listSlideshows().then(
+      (result) => {
+        setLoadError(null)
+        setSlideshows(result.slideshows)
+      },
+      (error: unknown) => {
+        setLoadError(
+          error instanceof Error ? error.message : 'Failed to load slideshows'
+        )
+      }
+    )
   }, [])
 
-  useEffect(() => {
-    void loadSlideshows()
-  }, [loadSlideshows])
+  useEffect(load, [load])
 
-  useEffect(() => {
-    if (!manualCopyUrl) return
-
-    manualCopyInputRef.current?.focus()
-    manualCopyInputRef.current?.select()
-  }, [manualCopyUrl])
-
-  const handleCopyUrl = async (slideshow: TvSlideshow) => {
-    const publicIdentifier = getPublicIdentifier(slideshow)
-    const tvUrl = publicUrl(hosts.slideshows, publicIdentifier)
-
+  const run = async (
+    {uuid, name}: TvSlideshow,
+    action: RowActionKey,
+    task: () => Promise<Notice | null>
+  ) => {
+    setBusy({uuid, action})
     try {
-      await copyToClipboard(tvUrl)
-      setError(null)
-      setManualCopyUrl(null)
-      setCopiedIdentifier(publicIdentifier)
-      window.setTimeout(() => {
-        setCopiedIdentifier(null)
-      }, 1500)
-    } catch {
-      setManualCopyUrl(tvUrl)
-      setError('Clipboard copy is blocked. Select the TV URL below.')
+      setNotice(await task())
+    } catch (error) {
+      setNotice({
+        tone: 'error',
+        text: `${FAILURES[action]} “${name}”: ${error instanceof Error ? error.message : 'unknown error'}`,
+      })
+    } finally {
+      setBusy(null)
     }
   }
 
-  const handleDuplicate = async (slideshow: TvSlideshow) => {
-    try {
+  const duplicate = (slideshow: TvSlideshow) =>
+    run(slideshow, 'duplicate', async () => {
       const result = await duplicateSlideshow(slideshow.uuid)
       router.push(`/slideshows/${result.slideshow.uuid}/edit`)
-    } catch (duplicateError) {
-      setError(
-        duplicateError instanceof Error
-          ? duplicateError.message
-          : 'Failed to duplicate slideshow'
+      return null
+    })
+
+  const regenerate = async (slideshow: TvSlideshow) => {
+    if (!(await confirm(regenerateLinkConfirmation(hosts, slideshow)))) return
+
+    await run(slideshow, 'regenerate', async () => {
+      const {slideshow: updated} = await regenerateSlideshowToken(
+        slideshow.uuid
       )
-    }
-  }
-
-  const handleDelete = async (slideshow: TvSlideshow) => {
-    if (!window.confirm(`Delete "${slideshow.name}"?`)) return
-
-    try {
-      await deleteSlideshow(slideshow.uuid)
-      setSlideshows((current) =>
-        pipe(
-          current,
-          Array.filter(
-            (currentSlideshow) => currentSlideshow.uuid !== slideshow.uuid
+      setSlideshows(
+        (current) =>
+          current &&
+          Array.map(current, (existing) =>
+            existing.uuid === updated.uuid ? updated : existing
           )
-        )
       )
-    } catch (deleteError) {
-      setError(
-        deleteError instanceof Error
-          ? deleteError.message
-          : 'Failed to delete slideshow'
-      )
-    }
+      return {
+        tone: 'success',
+        text: `New link for “${updated.name}”. Open it on every TV that used the old one.`,
+        action: (
+          <CopyButton
+            value={publicUrl(hosts.slideshows, updated.publicToken)}
+            label="Copy new link"
+          />
+        ),
+      }
+    })
   }
 
-  if (loading) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <div className="text-gray-600">Loading slideshows...</div>
-      </div>
-    )
+  const remove = async (slideshow: TvSlideshow) => {
+    const confirmed = await confirm({
+      title: `Delete “${slideshow.name}”?`,
+      message: `This permanently removes the slideshow and its ${pluralize(slideshow.slides.length, 'slide')}. TVs showing it stop playing. It cannot be undone.`,
+      confirmLabel: 'Delete slideshow',
+    })
+    if (!confirmed) return
+
+    await run(slideshow, 'delete', async () => {
+      await deleteSlideshow(slideshow.uuid)
+      setSlideshows(
+        (current) =>
+          current && Array.filter(current, ({uuid}) => uuid !== slideshow.uuid)
+      )
+      return {tone: 'success', text: `Deleted “${slideshow.name}”.`}
+    })
   }
+
+  const needle = query.trim().toLowerCase()
+  const visible = pipe(
+    slideshows ?? [],
+    Array.filter(
+      (slideshow) =>
+        (status === 'all' || slideshow.isEnabled === (status === 'enabled')) &&
+        `${slideshow.name} ${slideshow.publicSlug ?? ''}`
+          .toLowerCase()
+          .includes(needle)
+    ),
+    Array.sort(
+      sort.descending ? Order.reverse(ORDERS[sort.key]) : ORDERS[sort.key]
+    )
+  )
+  const createButton = (
+    <ButtonLink href="/slideshows/create" variant="primary" icon={<PlusIcon />}>
+      Create slideshow
+    </ButtonLink>
+  )
 
   return (
-    <div className="px-4 sm:px-6 lg:px-8">
-      <div className="sm:flex sm:items-center">
-        <div className="sm:flex-auto">
-          <h1 className="text-2xl font-semibold text-gray-900">
-            TV slideshows
-          </h1>
-          <p className="mt-2 text-sm text-gray-700">
-            Slideshow configurations for public TV display URLs
-          </p>
-        </div>
-        <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
-          <button
-            onClick={() => {
-              router.push('/slideshows/create')
-            }}
-            className="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
-          >
-            Create slideshow
-          </button>
-        </div>
-      </div>
+    <Page>
+      <PageHeader
+        title="TV slideshows"
+        description="Loops of images, videos and websites that TVs play through a public link."
+        actions={createButton}
+      />
 
-      {!!error && (
-        <div className="mt-6 rounded-md bg-red-50 p-4 text-sm text-red-800">
-          {error}
-          {!!manualCopyUrl && (
-            <input
-              ref={manualCopyInputRef}
-              readOnly
-              value={manualCopyUrl}
-              onFocus={(event) => {
-                event.target.select()
+      {loadError ? (
+        <Alert tone="error" action={<Button onClick={load}>Try again</Button>}>
+          {loadError}
+        </Alert>
+      ) : null}
+      {notice ? (
+        <Alert tone={notice.tone} action={notice.action}>
+          {notice.text}
+        </Alert>
+      ) : null}
+
+      {slideshows && Array.isNonEmptyReadonlyArray(slideshows) ? (
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="relative w-full sm:w-72">
+            <SearchIcon className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-ink-subtle" />
+            <Input
+              type="search"
+              aria-label="Search slideshows"
+              placeholder="Search by name or slug"
+              className="pl-9"
+              value={query}
+              onChange={(event) => {
+                setQuery(event.target.value)
               }}
-              className="mt-3 block w-full rounded-md border border-red-200 bg-white px-3 py-2 font-mono text-xs text-red-950"
             />
-          )}
+          </div>
+          <SegmentedControl
+            label="Filter by status"
+            value={status}
+            onChange={setStatus}
+            options={STATUS_OPTIONS}
+          />
         </div>
+      ) : null}
+
+      {slideshows === null && loadError ? null : (
+        <Card flush>
+          <Table
+            loading={slideshows === null}
+            head={
+              <>
+                <SortTh sortKey="name" sort={sort} onSort={setSort}>
+                  Slideshow
+                </SortTh>
+                <Th>Status</Th>
+                <SortTh
+                  sortKey="slides"
+                  sort={sort}
+                  onSort={setSort}
+                  align="right"
+                >
+                  Slides
+                </SortTh>
+                <Th>TV link</Th>
+                <SortTh sortKey="updatedAt" sort={sort} onSort={setSort}>
+                  Updated
+                </SortTh>
+                <Th />
+              </>
+            }
+            empty={
+              slideshows && Array.isNonEmptyReadonlyArray(slideshows) ? (
+                <EmptyState
+                  title="No slideshows match"
+                  action={
+                    <Button
+                      onClick={() => {
+                        setQuery('')
+                        setStatus('all')
+                      }}
+                    >
+                      Clear filters
+                    </Button>
+                  }
+                />
+              ) : (
+                <EmptyState
+                  icon={<TvIcon className="size-5" />}
+                  title="No slideshows yet"
+                  description="Create one, add slides and open its link on a TV."
+                  action={createButton}
+                />
+              )
+            }
+          >
+            {Array.map(visible, (slideshow) => (
+              <SlideshowTableRow
+                key={slideshow.uuid}
+                slideshow={slideshow}
+                busyAction={busy?.uuid === slideshow.uuid ? busy.action : null}
+                onPreview={() => {
+                  setPreviewed(slideshow)
+                }}
+                onDuplicate={() => {
+                  void duplicate(slideshow)
+                }}
+                onRegenerate={() => {
+                  void regenerate(slideshow)
+                }}
+                onDelete={() => {
+                  void remove(slideshow)
+                }}
+              />
+            ))}
+          </Table>
+        </Card>
       )}
 
-      <div className="mt-8 flow-root">
-        <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-          <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-            {slideshows.length === 0 ? (
-              <div className="rounded-lg bg-white py-12 text-center shadow">
-                <p className="text-gray-500">No slideshows found</p>
-                <button
-                  onClick={() => {
-                    router.push('/slideshows/create')
-                  }}
-                  className="mt-4 text-indigo-600 underline hover:text-indigo-800"
-                >
-                  Create slideshow
-                </button>
-              </div>
-            ) : (
-              <table className="min-w-full divide-y divide-gray-300 overflow-hidden rounded-lg bg-white shadow-sm">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                      Name
-                    </th>
-                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                      Status
-                    </th>
-                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                      Slides
-                    </th>
-                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                      Updated
-                    </th>
-                    <th className="relative px-3 py-3.5">
-                      <span className="sr-only">Actions</span>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200 bg-white">
-                  {pipe(
-                    slideshows,
-                    Array.map((slideshow) => (
-                      <tr key={slideshow.uuid}>
-                        <td className="px-3 py-4 text-sm">
-                          <div className="font-medium text-gray-900">
-                            {slideshow.name}
-                          </div>
-                          <div className="font-mono text-xs text-gray-500">
-                            {slideshow.uuid}
-                          </div>
-                          {!!slideshow.publicSlug && (
-                            <div className="mt-1 font-mono text-xs text-indigo-700">
-                              {hosts.slideshows}/{slideshow.publicSlug}
-                            </div>
-                          )}
-                        </td>
-                        <td className="whitespace-nowrap px-3 py-4 text-sm">
-                          <span
-                            className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
-                              slideshow.isEnabled
-                                ? 'bg-green-100 text-green-800'
-                                : 'bg-gray-100 text-gray-700'
-                            }`}
-                          >
-                            {slideshow.isEnabled ? 'Enabled' : 'Disabled'}
-                          </span>
-                        </td>
-                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                          {slideshow.slides.length}
-                        </td>
-                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                          {new Date(slideshow.updatedAt).toLocaleString()}
-                        </td>
-                        <td className="whitespace-nowrap px-3 py-4 text-right text-sm font-medium">
-                          <div className="flex flex-wrap justify-end gap-3">
-                            <button
-                              onClick={() => {
-                                router.push(
-                                  `/slideshows/${slideshow.uuid}/edit`
-                                )
-                              }}
-                              className="text-indigo-600 hover:text-indigo-900"
-                            >
-                              Edit
-                            </button>
-                            <button
-                              onClick={() => {
-                                void handleCopyUrl(slideshow)
-                              }}
-                              className="text-indigo-600 hover:text-indigo-900"
-                            >
-                              {copiedIdentifier ===
-                              getPublicIdentifier(slideshow)
-                                ? 'Copied'
-                                : 'Copy URL'}
-                            </button>
-                            <button
-                              onClick={() => {
-                                void handleDuplicate(slideshow)
-                              }}
-                              className="text-indigo-600 hover:text-indigo-900"
-                            >
-                              Duplicate
-                            </button>
-                            <button
-                              onClick={() => {
-                                void handleDelete(slideshow)
-                              }}
-                              className="text-red-600 hover:text-red-900"
-                            >
-                              Delete
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
+      {previewed ? (
+        <SlideshowPreview
+          slides={previewed.slides}
+          description={previewed.name}
+          onClose={() => {
+            setPreviewed(null)
+          }}
+        />
+      ) : null}
+      {dialog}
+    </Page>
   )
 }

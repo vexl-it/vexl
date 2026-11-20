@@ -14,7 +14,7 @@ import {
 import {CHART_AXIS, CHART_BLUE, CHART_GRID, CHART_MUTED} from './chartTheme'
 
 const DAY_MS = 24 * 60 * 60 * 1000
-const RANGE_DAYS = 30
+export const CLICKS_RANGE_DAYS = 30
 
 interface DayPoint {
   readonly day: string
@@ -38,14 +38,14 @@ const buildPoints = (
   const countByDay = new Map(
     pipe(
       dailyClicks,
-      Array.map(({day, count}) => [day, count] as const)
+      Array.map(({day, count}): readonly [string, number] => [day, count])
     )
   )
   const today = Date.now()
 
   return pipe(
-    Array.makeBy(RANGE_DAYS, (index) =>
-      isoDay(new Date(today - (RANGE_DAYS - 1 - index) * DAY_MS))
+    Array.makeBy(CLICKS_RANGE_DAYS, (index) =>
+      isoDay(new Date(today - (CLICKS_RANGE_DAYS - 1 - index) * DAY_MS))
     ),
     Array.map((day) => ({
       day,
@@ -55,25 +55,31 @@ const buildPoints = (
   )
 }
 
-export function ShortLinkClicksChart({
-  dailyClicks,
-}: {
+interface ChartProps {
   readonly dailyClicks: readonly ShortLinkDailyClicks[]
-}) {
+}
+
+export function ShortLinkClicksChart({dailyClicks}: ChartProps) {
   const points = buildPoints(dailyClicks)
+  const weeklyTicks = pipe(
+    points,
+    Array.filter((_, index) => (CLICKS_RANGE_DAYS - 1 - index) % 7 === 0),
+    Array.map(({label}) => label)
+  )
 
   return (
-    <div className="h-40">
+    <div className="h-48">
       <ResponsiveContainer
         width="100%"
         height="100%"
-        initialDimension={{width: 640, height: 160}}
+        initialDimension={{width: 560, height: 192}}
       >
         <BarChart data={points} margin={{top: 4, right: 8, left: 0, bottom: 0}}>
           <CartesianGrid vertical={false} stroke={CHART_GRID} />
           <XAxis
             dataKey="label"
-            interval={4}
+            ticks={weeklyTicks}
+            interval={0}
             tick={{fontSize: 11, fill: CHART_MUTED}}
             tickLine={false}
             axisLine={{stroke: CHART_AXIS}}
@@ -93,11 +99,43 @@ export function ShortLinkClicksChart({
             dataKey="count"
             fill={CHART_BLUE}
             maxBarSize={16}
-            radius={[2, 2, 0, 0]}
+            radius={[3, 3, 0, 0]}
             isAnimationActive={false}
           />
         </BarChart>
       </ResponsiveContainer>
+    </div>
+  )
+}
+
+/** The same 30 days as the chart, scaled to the link's own busiest day. */
+export function ShortLinkSparkline({dailyClicks}: ChartProps) {
+  const points = buildPoints(dailyClicks)
+  const max = pipe(
+    points,
+    Array.reduce(1, (highest, {count}) => Math.max(highest, count))
+  )
+
+  return (
+    <div
+      role="img"
+      aria-label={`Clicks per day, last ${CLICKS_RANGE_DAYS} days`}
+      className="flex h-6 w-28 items-end gap-px"
+    >
+      {pipe(
+        points,
+        Array.map(({day, label, count}) => (
+          <div
+            key={day}
+            title={`${label}: ${count}`}
+            className="min-h-px flex-1 rounded-t-[1px]"
+            style={{
+              height: `${(count / max) * 100}%`,
+              backgroundColor: count > 0 ? CHART_BLUE : CHART_AXIS,
+            }}
+          />
+        ))
+      )}
     </div>
   )
 }

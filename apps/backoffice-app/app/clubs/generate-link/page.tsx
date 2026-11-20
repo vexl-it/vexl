@@ -1,271 +1,235 @@
 'use client'
 
-import {useRunEffect} from '@/src/hooks/useRunEffect'
-import {makeClubsAdminClient} from '@/src/services/contactInternalApi'
-import {ClubUuid, type ClubInfo} from '@vexl-next/domain/src/general/clubs'
-import {Schema} from 'effect'
-import {useRouter} from 'next/navigation'
+import {ClubAvatar} from '@/src/components/clubs/ClubAvatar'
+import {ClubStatusBadge} from '@/src/components/clubs/ClubStatusBadge'
+import {
+  Alert,
+  Button,
+  ButtonLink,
+  Card,
+  CopyButton,
+  EmptyState,
+  Field,
+  Input,
+  LinkIcon,
+  Page,
+  PageHeader,
+  PlusIcon,
+  Select,
+  StatusMessage,
+  UsersIcon,
+} from '@/src/components/ui'
+import {useClubsApi} from '@/src/hooks/useClubsApi'
+import type {
+  ClubAdminInfo,
+  ClubLinkInfo,
+} from '@vexl-next/domain/src/general/clubs'
+import {Array, Option, pipe} from 'effect'
 import {QRCodeSVG} from 'qrcode.react'
-import {useCallback, useEffect, useState} from 'react'
+import {use, useEffect, useState} from 'react'
 
-export default function GenerateLinkPage() {
-  const [clubs, setClubs] = useState<readonly ClubInfo[]>([])
-  const [selectedClubUuid, setSelectedClubUuid] = useState<
-    ClubUuid | undefined
-  >(undefined)
-  const [generatedLink, setGeneratedLink] = useState<{
-    code: string
-    fullLink: string
-  } | null>(null)
-  const [loading, setLoading] = useState(true)
+const errorText = (error: unknown, fallback: string): string =>
+  error instanceof Error ? error.message : fallback
+
+function CopyableValue({
+  label,
+  value,
+}: {
+  readonly label: string
+  readonly value: string
+}) {
+  return (
+    <div className="flex items-end gap-2">
+      <Field label={label} className="min-w-0 flex-1">
+        <Input
+          readOnly
+          value={value}
+          className="font-mono"
+          onFocus={(e) => {
+            e.target.select()
+          }}
+        />
+      </Field>
+      <CopyButton value={value} size="md" />
+    </div>
+  )
+}
+
+export default function GenerateLinkPage({
+  searchParams,
+}: {
+  readonly searchParams: Promise<{readonly club?: string | string[]}>
+}) {
+  const {club: requestedUuid} = use(searchParams)
+  const clubsApi = useClubsApi()
+  const [clubs, setClubs] = useState<readonly ClubAdminInfo[] | null>(null)
+  const [selectedUuid, setSelectedUuid] = useState(
+    typeof requestedUuid === 'string' ? requestedUuid : undefined
+  )
+  const [link, setLink] = useState<ClubLinkInfo | null>(null)
   const [generating, setGenerating] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [copiedCode, setCopiedCode] = useState(false)
-  const [copiedLink, setCopiedLink] = useState(false)
-  const runEffect = useRunEffect()
-  const router = useRouter()
-
-  const loadClubs = useCallback(async (): Promise<void> => {
-    setLoading(true)
-    setError(null)
-
-    try {
-      const client = await runEffect(makeClubsAdminClient())
-      const result = await runEffect(client.listClubs())
-      setClubs(result.clubs)
-      if (result.clubs.length > 0) {
-        setSelectedClubUuid(result.clubs[0]?.uuid ?? '')
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load clubs')
-    } finally {
-      setLoading(false)
-    }
-  }, [runEffect])
 
   useEffect(() => {
-    void loadClubs()
-  }, [loadClubs])
+    clubsApi((client) => client.listClubs()).then(
+      (result) => {
+        setClubs(result.clubs)
+      },
+      (loadError: unknown) => {
+        setError(errorText(loadError, 'Failed to load clubs.'))
+      }
+    )
+  }, [clubsApi])
 
-  const handleGenerate = async (): Promise<void> => {
-    if (!selectedClubUuid) {
-      setError('Please select a club')
-      return
-    }
+  const back = {href: '/clubs', label: 'Clubs'}
+  const header = (
+    <PageHeader
+      title="Generate invite link"
+      description="Whoever opens the link in the Vexl app joins the club as a moderator. Each link works once. Moderators invite regular members from the app."
+      back={back}
+    />
+  )
 
+  if (clubs === null)
+    return (
+      <Page narrow>
+        {header}
+        {error ? (
+          <Alert tone="error">{error}</Alert>
+        ) : (
+          <StatusMessage loading>Loading clubs…</StatusMessage>
+        )}
+      </Page>
+    )
+
+  const selected = pipe(
+    clubs,
+    Array.findFirst((club) => club.uuid === selectedUuid),
+    Option.orElse(() => Array.head(clubs))
+  )
+
+  if (Option.isNone(selected))
+    return (
+      <Page narrow>
+        {header}
+        <Card>
+          <EmptyState
+            icon={<UsersIcon className="size-5" />}
+            title="No clubs yet"
+            description="Create a club first, then come back for its invite link."
+            action={
+              <ButtonLink
+                href="/clubs/create"
+                variant="primary"
+                icon={<PlusIcon />}
+              >
+                Create club
+              </ButtonLink>
+            }
+          />
+        </Card>
+      </Page>
+    )
+
+  const club = selected.value
+  const generate = async () => {
     setGenerating(true)
     setError(null)
-    setGeneratedLink(null)
-    setCopiedCode(false)
-    setCopiedLink(false)
-
+    setLink(null)
     try {
-      const client = await runEffect(makeClubsAdminClient())
-      const result = await runEffect(
-        client.generateClubInviteLinkForAdmin({
-          payload: {clubUuid: selectedClubUuid},
-        })
+      const result = await clubsApi((client) =>
+        client.generateClubInviteLinkForAdmin({payload: {clubUuid: club.uuid}})
       )
-      setGeneratedLink({
-        code: result.link.code,
-        fullLink: result.link.fullLink,
-      })
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : 'Failed to generate invite link'
-      )
+      setLink(result.link)
+    } catch (generateError) {
+      setError(errorText(generateError, 'Failed to generate the invite link.'))
     } finally {
       setGenerating(false)
     }
   }
 
-  const handleCopyCode = async (): Promise<void> => {
-    if (!generatedLink) return
-
-    try {
-      await navigator.clipboard.writeText(generatedLink.code)
-      setCopiedCode(true)
-      setTimeout(() => {
-        setCopiedCode(false)
-      }, 2000)
-    } catch {
-      setError('Failed to copy code to clipboard')
-    }
-  }
-
-  const handleCopyLink = async (): Promise<void> => {
-    if (!generatedLink) return
-
-    try {
-      await navigator.clipboard.writeText(generatedLink.fullLink)
-      setCopiedLink(true)
-      setTimeout(() => {
-        setCopiedLink(false)
-      }, 2000)
-    } catch {
-      setError('Failed to copy link to clipboard')
-    }
-  }
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="text-gray-600">Loading clubs...</div>
-      </div>
-    )
-  }
-
   return (
-    <div className="px-4 sm:px-6 lg:px-8">
-      <div className="sm:flex sm:items-center">
-        <div className="sm:flex-auto">
-          <h1 className="text-2xl font-semibold text-gray-900">
-            Generate Club Invite Link
-          </h1>
-          <p className="mt-2 text-sm text-gray-700">
-            Select a club and generate an invite link for admin access
-          </p>
-        </div>
-      </div>
+    <Page narrow>
+      {header}
 
-      <div className="mt-8 max-w-2xl">
-        <div className="bg-white shadow-sm rounded-lg p-6 space-y-6">
-          {clubs.length === 0 ? (
-            <div className="text-center py-8">
-              <p className="text-gray-500">No clubs available</p>
-              <button
-                onClick={() => {
-                  router.push('/clubs')
-                }}
-                className="mt-4 text-indigo-600 hover:text-indigo-800 underline"
-              >
-                Go back
-              </button>
+      <Card>
+        <div className="space-y-5">
+          <Field label="Club">
+            <Select
+              value={club.uuid}
+              onChange={(e) => {
+                setSelectedUuid(e.target.value)
+                setLink(null)
+                setError(null)
+              }}
+            >
+              {Array.map(clubs, (option) => (
+                <option key={option.uuid} value={option.uuid}>
+                  {option.name}
+                  {Option.isSome(option.madeInactiveAt) ? ' (inactive)' : ''}
+                </option>
+              ))}
+            </Select>
+          </Field>
+          <div className="flex items-center gap-3">
+            <ClubAvatar src={club.clubImageUrl} name={club.name} />
+            <div className="min-w-0 flex-1 text-sm">
+              <p className="flex flex-wrap items-center gap-2 font-medium">
+                <span className="min-w-0 break-words">{club.name}</span>
+                <ClubStatusBadge club={club} />
+              </p>
+              <p className="break-all font-mono text-xs text-ink-muted">
+                {club.uuid}
+              </p>
+              <p className="text-ink-muted">
+                {club.membersCount} of {club.membersCountLimit} members
+              </p>
             </div>
-          ) : (
-            <>
-              <div>
-                <label
-                  htmlFor="club"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Select Club *
-                </label>
-                <select
-                  id="club"
-                  value={selectedClubUuid}
-                  onChange={(e) => {
-                    setSelectedClubUuid(
-                      Schema.decodeSync(ClubUuid)(e.target.value)
-                    )
-                    setGeneratedLink(null)
-                    setCopiedCode(false)
-                    setCopiedLink(false)
-                  }}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
-                >
-                  {clubs.map((club) => (
-                    <option key={club.uuid} value={club.uuid}>
-                      {club.name} ({club.uuid})
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {!!error && (
-                <div className="bg-red-50 p-4 rounded-md">
-                  <p className="text-red-800">{error}</p>
-                </div>
-              )}
-
-              {!!generatedLink && (
-                <div className="bg-green-50 p-4 rounded-md space-y-3">
-                  <p className="text-sm font-medium text-green-900">
-                    Invite link generated successfully!
-                  </p>
-
-                  <div>
-                    <label className="block text-sm font-medium text-green-900 mb-1">
-                      Code
-                    </label>
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        value={generatedLink.code}
-                        readOnly
-                        className="flex-1 px-3 py-2 border border-green-300 rounded-md bg-white text-sm font-mono"
-                      />
-                      <button
-                        onClick={() => {
-                          void handleCopyCode()
-                        }}
-                        className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                      >
-                        {copiedCode ? 'Copied!' : 'Copy'}
-                      </button>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-green-900 mb-1">
-                      Full Link
-                    </label>
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        value={generatedLink.fullLink}
-                        readOnly
-                        className="flex-1 px-3 py-2 border border-green-300 rounded-md bg-white text-sm font-mono"
-                      />
-                      <button
-                        onClick={() => {
-                          void handleCopyLink()
-                        }}
-                        className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                      >
-                        {copiedLink ? 'Copied!' : 'Copy'}
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="flex justify-center pt-2">
-                    <div className="bg-white p-4 rounded-lg shadow-sm">
-                      <QRCodeSVG
-                        value={generatedLink.fullLink}
-                        size={200}
-                        level="M"
-                        marginSize={4}
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              <div className="flex gap-3 justify-end">
-                <button
-                  type="button"
-                  onClick={() => {
-                    router.push('/clubs')
-                  }}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                >
-                  Back
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    void handleGenerate()
-                  }}
-                  disabled={generating || !selectedClubUuid}
-                  className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {generating ? 'Generating...' : 'Generate Link'}
-                </button>
-              </div>
-            </>
-          )}
+          </div>
+          {Option.isSome(club.madeInactiveAt) ? (
+            <Alert tone="warning">
+              This club is inactive. Reactivate it on its edit page before you
+              invite anyone.
+            </Alert>
+          ) : club.membersCount >= club.membersCountLimit ? (
+            <Alert tone="warning">
+              This club is full. The link will not work until you raise the
+              member limit.
+            </Alert>
+          ) : null}
+          {error ? <Alert tone="error">{error}</Alert> : null}
+          <div className="flex justify-end gap-2">
+            <ButtonLink href={`/clubs/${club.uuid}/edit`}>Edit club</ButtonLink>
+            <Button
+              variant="primary"
+              icon={<LinkIcon />}
+              loading={generating}
+              onClick={() => {
+                void generate()
+              }}
+            >
+              {link ? 'Generate another link' : 'Generate link'}
+            </Button>
+          </div>
         </div>
-      </div>
-    </div>
+      </Card>
+
+      {link ? (
+        <Card
+          title={`Invite link for ${club.name}`}
+          description="Send it to the future moderator. It stops working after one person joins with it."
+        >
+          <div className="grid gap-6 sm:grid-cols-[1fr_auto] sm:items-start">
+            <div className="space-y-5">
+              <CopyableValue label="Link" value={link.fullLink} />
+              <CopyableValue label="Code" value={link.code} />
+            </div>
+            <div className="justify-self-center rounded-control border border-line bg-white p-3">
+              <QRCodeSVG value={link.fullLink} size={168} level="M" />
+            </div>
+          </div>
+        </Card>
+      ) : null}
+    </Page>
   )
 }

@@ -1,6 +1,7 @@
 'use client'
 
 import type {ClubMemberCountChangeItem} from '@vexl-next/rest-api/src/services/contact/contracts'
+import {Array, pipe} from 'effect'
 import {useMemo, useState} from 'react'
 import {
   Bar,
@@ -21,6 +22,8 @@ import {
   CHART_MUTED,
   CHART_RED,
 } from './chartTheme'
+import {Table, Td, Th, Tr} from './ui'
+import {SegmentedControl, type SegmentedOption} from './ui/SegmentedControl'
 
 const DAY_MS = 24 * 60 * 60 * 1000
 
@@ -30,12 +33,12 @@ const GRID = CHART_GRID
 const AXIS = CHART_AXIS
 const MUTED = CHART_MUTED
 
-const RANGES = [
-  {label: '1m', days: 30},
-  {label: '3m', days: 91},
-  {label: '6m', days: 183},
-  {label: '1y', days: 366},
-] as const
+const RANGES: ReadonlyArray<SegmentedOption<number>> = [
+  {label: '1m', value: 30},
+  {label: '3m', value: 91},
+  {label: '6m', value: 183},
+  {label: '1y', value: 366},
+]
 
 interface DayPoint {
   dayMs: number
@@ -72,15 +75,12 @@ const buildPoints = (
 ): DayPoint[] => {
   const todayMs = utcMidnight(new Date())
   const changeByDay = new Map(
-    changes.map((change) => [
+    Array.map(changes, (change): [number, {joined: number; left: number}] => [
       utcMidnight(change.day),
       {joined: change.joinedCount, left: change.leftCount},
     ])
   )
-  const firstRecordedMs =
-    changes.length > 0
-      ? Math.min(...changes.map((change) => utcMidnight(change.day)))
-      : todayMs
+  const firstRecordedMs = Math.min(todayMs, ...changeByDay.keys())
 
   // Reconstruct the members count per day by walking backwards from today.
   const countByDay = new Map<number, number>([[todayMs, membersCount]])
@@ -93,22 +93,17 @@ const buildPoints = (
     )
   }
 
-  const points: DayPoint[] = []
-  for (
-    let dayMs = todayMs - (rangeDays - 1) * DAY_MS;
-    dayMs <= todayMs;
-    dayMs += DAY_MS
-  ) {
+  return Array.makeBy(rangeDays, (index) => {
+    const dayMs = todayMs - (rangeDays - 1 - index) * DAY_MS
     const change = changeByDay.get(dayMs)
-    points.push({
+    return {
       dayMs,
       label: formatDay(dayMs),
       joined: change?.joined ?? 0,
       leftNeg: -(change?.left ?? 0),
       count: dayMs >= firstRecordedMs ? (countByDay.get(dayMs) ?? null) : null,
-    })
-  }
-  return points
+    }
+  })
 }
 
 interface TooltipRow {
@@ -129,16 +124,16 @@ function ChartTooltip({
   const point = payload?.[0]?.payload
   if (!active || !point) return null
   return (
-    <div className="rounded-md border border-gray-200 bg-white px-3 py-2 text-sm shadow-sm">
-      <p className="text-xs text-gray-500">{formatDayLong(point.dayMs)}</p>
-      {rows(point).map((row) => (
+    <div className="rounded-control border border-line bg-surface px-3 py-2 text-sm shadow-overlay">
+      <p className="text-xs text-ink-muted">{formatDayLong(point.dayMs)}</p>
+      {Array.map(rows(point), (row) => (
         <p key={row.label} className="mt-1 flex items-center gap-2">
           <span
             className="inline-block h-0.5 w-3"
             style={{backgroundColor: row.color}}
           />
-          <span className="font-semibold text-gray-900">{row.value}</span>
-          <span className="text-gray-500">{row.label}</span>
+          <span className="font-semibold text-ink">{row.value}</span>
+          <span className="text-ink-muted">{row.label}</span>
         </p>
       ))}
     </div>
@@ -157,43 +152,32 @@ export function ClubMemberActivityChart({
     () => buildPoints(changes, membersCount, rangeDays),
     [changes, membersCount, rangeDays]
   )
-  const totalJoined = points.reduce((sum, point) => sum + point.joined, 0)
-  const totalLeft = points.reduce((sum, point) => sum - point.leftNeg, 0)
+  const totalJoined = Array.reduce(points, 0, (sum, {joined}) => sum + joined)
+  const totalLeft = Array.reduce(points, 0, (sum, {leftNeg}) => sum - leftNeg)
   const tickInterval = Math.max(1, Math.floor(points.length / 6))
-  const activityRows = points.filter(
-    (point) => point.joined !== 0 || point.leftNeg !== 0
+  const activityRows = pipe(
+    points,
+    Array.filter((point) => point.joined !== 0 || point.leftNeg !== 0),
+    Array.reverse
   )
 
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-ink-muted">
           Last {rangeDays} days:{' '}
-          <span className="font-medium text-gray-900">+{totalJoined}</span>{' '}
-          joined,{' '}
-          <span className="font-medium text-gray-900">-{totalLeft}</span> left
+          <span className="font-medium text-ink">+{totalJoined}</span> joined,{' '}
+          <span className="font-medium text-ink">−{totalLeft}</span> left
         </p>
-        <div className="flex gap-1">
-          {RANGES.map((range) => (
-            <button
-              key={range.label}
-              type="button"
-              onClick={() => {
-                setRangeDays(range.days)
-              }}
-              className={
-                rangeDays === range.days
-                  ? 'rounded-md bg-indigo-600 px-2.5 py-1 text-xs font-semibold text-white'
-                  : 'rounded-md border border-gray-300 px-2.5 py-1 text-xs font-medium text-gray-600 hover:bg-gray-50'
-              }
-            >
-              {range.label}
-            </button>
-          ))}
-        </div>
+        <SegmentedControl
+          label="Range"
+          value={rangeDays}
+          onChange={setRangeDays}
+          options={RANGES}
+        />
       </div>
 
-      <p className="mt-4 text-xs font-medium text-gray-500">Members</p>
+      <p className="mt-4 text-xs font-medium text-ink-muted">Members</p>
       <div className="mt-1 h-44">
         <ResponsiveContainer
           width="100%"
@@ -240,7 +224,7 @@ export function ClubMemberActivityChart({
         </ResponsiveContainer>
       </div>
 
-      <div className="mt-3 flex items-center gap-4 text-xs text-gray-600">
+      <div className="mt-3 flex items-center gap-4 text-xs text-ink-muted">
         <span className="flex items-center gap-1.5">
           <span
             className="inline-block h-2.5 w-2.5 rounded-sm"
@@ -295,7 +279,7 @@ export function ClubMemberActivityChart({
                     },
                     {
                       label: 'left',
-                      value: `-${-point.leftNeg}`,
+                      value: `−${-point.leftNeg}`,
                       color: RED,
                     },
                   ]}
@@ -324,35 +308,35 @@ export function ClubMemberActivityChart({
       </div>
 
       <details className="mt-3">
-        <summary className="cursor-pointer text-xs text-gray-500 hover:text-gray-700">
+        <summary className="cursor-pointer text-xs text-ink-muted hover:text-ink">
           Show data table
         </summary>
-        {activityRows.length === 0 ? (
-          <p className="mt-2 text-xs text-gray-500">
-            No member activity recorded in this range.
-          </p>
-        ) : (
-          <table className="mt-2 text-xs tabular-nums">
-            <thead>
-              <tr className="text-left text-gray-500">
-                <th className="py-1 pr-6 font-medium">Day</th>
-                <th className="py-1 pr-6 font-medium">Joined</th>
-                <th className="py-1 pr-6 font-medium">Left</th>
-                <th className="py-1 font-medium">Members</th>
-              </tr>
-            </thead>
-            <tbody className="text-gray-900">
-              {activityRows.map((point) => (
-                <tr key={point.dayMs}>
-                  <td className="py-0.5 pr-6">{formatDayLong(point.dayMs)}</td>
-                  <td className="py-0.5 pr-6">+{point.joined}</td>
-                  <td className="py-0.5 pr-6">-{-point.leftNeg}</td>
-                  <td className="py-0.5">{point.count ?? '—'}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+        <div className="mt-2 overflow-hidden rounded-control border border-line tabular-nums">
+          <Table
+            head={
+              <>
+                <Th>Day</Th>
+                <Th align="right">Joined</Th>
+                <Th align="right">Left</Th>
+                <Th align="right">Members</Th>
+              </>
+            }
+            empty={
+              <p className="px-4 py-6 text-center text-sm text-ink-muted">
+                No member activity recorded in this range.
+              </p>
+            }
+          >
+            {Array.map(activityRows, (point) => (
+              <Tr key={point.dayMs}>
+                <Td>{formatDayLong(point.dayMs)}</Td>
+                <Td align="right">+{point.joined}</Td>
+                <Td align="right">−{-point.leftNeg}</Td>
+                <Td align="right">{point.count ?? '–'}</Td>
+              </Tr>
+            ))}
+          </Table>
+        </div>
       </details>
     </div>
   )

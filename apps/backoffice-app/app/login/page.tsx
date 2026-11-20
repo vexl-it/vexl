@@ -1,10 +1,7 @@
 'use client'
 
-import {
-  AuthCard,
-  inputClassName,
-  primaryButtonClassName,
-} from '@/src/components/AuthCard'
+import {AuthCard} from '@/src/components/AuthCard'
+import {Button, Field, Input, StatusMessage} from '@/src/components/ui'
 import {usePasskeyCeremony} from '@/src/hooks/usePasskeyCeremony'
 import {
   fetchSession,
@@ -41,22 +38,33 @@ export default function LoginPage() {
   }, [router, setError])
 
   if (view === 'loading') {
-    return <AuthCard subtitle="Loading..." error={error} />
+    return (
+      <StatusMessage fullScreen loading>
+        Loading…
+      </StatusMessage>
+    )
   }
 
   if (view === 'signIn') {
     return (
-      <AuthCard subtitle="Sign in with your passkey" error={error}>
-        <button
-          type="button"
-          disabled={busy}
+      <AuthCard
+        title="Sign in"
+        subtitle="Use the passkey you registered for the backoffice."
+        error={error}
+      >
+        <Button
+          variant="primary"
+          loading={busy}
           onClick={() => {
             void run(signInWithPasskey)
           }}
-          className={primaryButtonClassName}
+          className="w-full"
         >
-          {busy ? 'Waiting for your passkey...' : 'Sign in with passkey'}
-        </button>
+          {busy ? 'Waiting for your passkey…' : 'Sign in with passkey'}
+        </Button>
+        <p className="text-xs text-ink-subtle">
+          No passkey yet? Ask an admin for an invite link.
+        </p>
       </AuthCard>
     )
   }
@@ -68,38 +76,32 @@ export default function LoginPage() {
 
   return (
     <AuthCard
-      subtitle="Set up the first admin. The new passkey gets access to every section."
+      title="Set up the first admin"
+      subtitle="No passkey exists yet. The one you create now gets access to every section and can invite the other admins."
       error={error}
     >
       <form onSubmit={handleSetup} className="space-y-4">
-        <div>
-          <label
-            htmlFor="admin-token"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Admin token
-          </label>
-          <input
-            id="admin-token"
+        <Field
+          label="Admin token"
+          required
+          hint="The ADMIN_TOKEN this server runs with. It is checked once and never stored in the browser."
+        >
+          <Input
             type="password"
             required
             value={adminToken}
             onChange={(event) => {
               setAdminToken(event.target.value)
             }}
-            className={inputClassName}
             autoComplete="off"
           />
-        </div>
-        <div>
-          <label
-            htmlFor="passkey-label"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Passkey label
-          </label>
-          <input
-            id="passkey-label"
+        </Field>
+        <Field
+          label="Passkey label"
+          required
+          hint="Shown in the Admins list so others know whose passkey it is."
+        >
+          <Input
             type="text"
             required
             maxLength={100}
@@ -107,18 +109,18 @@ export default function LoginPage() {
             onChange={(event) => {
               setLabel(event.target.value)
             }}
-            className={inputClassName}
             placeholder="e.g. Work laptop"
             autoComplete="off"
           />
-        </div>
-        <button
+        </Field>
+        <Button
           type="submit"
-          disabled={busy}
-          className={primaryButtonClassName}
+          variant="primary"
+          loading={busy}
+          className="w-full"
         >
-          {busy ? 'Waiting for your passkey...' : 'Set up first admin'}
-        </button>
+          {busy ? 'Waiting for your passkey…' : 'Set up first admin'}
+        </Button>
       </form>
     </AuthCard>
   )

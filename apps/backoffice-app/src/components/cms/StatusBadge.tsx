@@ -1,17 +1,20 @@
-'use client'
-
+import {Badge} from '@/src/components/ui'
+import {isScheduled} from '@/src/services/cms/resources'
 import {type CmsStatus} from '@vexl-next/domain/src/general/cms'
 
-export function StatusBadge({status}: {readonly status: CmsStatus}) {
-  return (
-    <span
-      className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${
-        status === 'published'
-          ? 'bg-green-100 text-green-800'
-          : 'bg-yellow-100 text-yellow-800'
-      }`}
-    >
-      {status === 'published' ? 'Published' : 'Draft'}
-    </span>
+export function StatusBadge({
+  status,
+  visibleFrom,
+}: {
+  readonly status: CmsStatus
+  /** A published item with a later date shows as scheduled. */
+  readonly visibleFrom?: Date
+}) {
+  if (isScheduled(status, visibleFrom))
+    return <Badge tone="info">Scheduled</Badge>
+  return status === 'published' ? (
+    <Badge tone="success">Published</Badge>
+  ) : (
+    <Badge tone="warning">Draft</Badge>
   )
 }

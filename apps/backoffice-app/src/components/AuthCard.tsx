@@ -1,33 +1,27 @@
-export const inputClassName =
-  'appearance-none rounded-md block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm'
-
-export const primaryButtonClassName =
-  'w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50'
+import {Brand} from '@/src/components/Sidebar'
+import {Alert} from '@/src/components/ui'
 
 export function AuthCard({
+  title,
   subtitle,
   error,
   children,
 }: {
-  subtitle: string
-  error: string | null
-  children?: React.ReactNode
+  readonly title: string
+  readonly subtitle: string
+  readonly error: string | null
+  readonly children?: React.ReactNode
 }) {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+    <div className="flex min-h-screen items-center justify-center px-4 py-12">
+      <div className="w-full max-w-sm space-y-6 rounded-card border border-line bg-surface p-8 shadow-card">
+        <Brand />
         <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Vexl Backoffice
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">{subtitle}</p>
+          <h1 className="text-xl text-ink">{title}</h1>
+          <p className="mt-1.5 text-sm text-ink-muted">{subtitle}</p>
         </div>
         {children}
-        {!!error && (
-          <div className="text-red-600 text-sm bg-red-50 p-3 rounded-md">
-            {error}
-          </div>
-        )}
+        {error ? <Alert tone="error">{error}</Alert> : null}
       </div>
     </div>
   )

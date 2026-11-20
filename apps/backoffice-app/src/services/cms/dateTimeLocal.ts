@@ -6,13 +6,19 @@ export const toDateTimeLocal = (date: Date): string =>
     .toISOString()
     .slice(0, 16)
 
+const dateFormat = new Intl.DateTimeFormat('en-GB', {dateStyle: 'medium'})
+const dateTimeFormat = new Intl.DateTimeFormat('en-GB', {
+  dateStyle: 'medium',
+  timeStyle: 'short',
+})
+
 /** Empty for a missing or partly typed value. */
-export const formatDateTime = (value: Date | string): string => {
-  const date = new Date(value)
-  return Number.isNaN(date.getTime())
-    ? ''
-    : new Intl.DateTimeFormat(undefined, {
-        dateStyle: 'medium',
-        timeStyle: 'short',
-      }).format(date)
-}
+const formatWith =
+  (format: Intl.DateTimeFormat) =>
+  (value: Date | string): string => {
+    const date = new Date(value)
+    return Number.isNaN(date.getTime()) ? '' : format.format(date)
+  }
+
+export const formatDate = formatWith(dateFormat)
+export const formatDateTime = formatWith(dateTimeFormat)

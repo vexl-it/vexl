@@ -1,6 +1,6 @@
 'use client'
 
-import {StatusMessage} from '@/src/components/BackofficeLayout'
+import {StatusMessage} from '@/src/components/ui'
 import {useBackofficeSession} from '@/src/hooks/useBackofficeSession'
 import {homePath} from '@/src/services/access/navigation'
 import {useRouter} from 'next/navigation'
@@ -21,14 +21,18 @@ export default function HomePage() {
   }, [target, router])
 
   if (sessionState.status === 'failed') {
-    return <StatusMessage>{sessionState.message}</StatusMessage>
+    return <StatusMessage fullScreen>{sessionState.message}</StatusMessage>
   }
   if (target === '/') {
     return (
-      <StatusMessage>
+      <StatusMessage fullScreen>
         Your passkey does not have access to any section yet.
       </StatusMessage>
     )
   }
-  return <StatusMessage>Redirecting...</StatusMessage>
+  return (
+    <StatusMessage fullScreen loading>
+      Redirecting…
+    </StatusMessage>
+  )
 }

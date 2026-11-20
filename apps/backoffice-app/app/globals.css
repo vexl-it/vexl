@@ -1,32 +1,107 @@
 @import 'tailwindcss';
 
+/* Values follow the mobile app's light theme: packages/ui/src/config/{themes,tokens,fonts}.ts */
+@theme {
+  --color-canvas: #f6f5f8;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f6f5f8;
+  --color-line: #efedf3;
+  --color-line-strong: #d6d4db;
+
+  --color-ink: #000000;
+  --color-ink-muted: #666666;
+  --color-ink-subtle: #8a8a8a;
+
+  --color-accent: #fccd6c;
+  --color-accent-hover: #fdd98a;
+  --color-accent-soft: #ffe1a2;
+  --color-accent-ink: #000000;
+  --color-focus: #be8821;
+
+  --color-sidebar: #f5f3ed;
+  --color-sidebar-hover: #ebe8df;
+  --color-sidebar-active: #ffe1a2;
+  --color-sidebar-line: #e6e2d8;
+  --color-sidebar-ink: #666666;
+  --color-sidebar-ink-subtle: #8a8a8a;
+  --color-sidebar-ink-strong: #000000;
+
+  --color-danger: #ee675e;
+  --color-danger-hover: #e5554c;
+  --color-danger-soft: #fce1df;
+  --color-danger-ink: #a0433c;
+  --color-success-soft: #d5ecdb;
+  --color-success-ink: #455749;
+  --color-warning-soft: #fff0d1;
+  --color-warning-ink: #4c3e20;
+  --color-info-soft: #fee5fa;
+  --color-info-ink: #654f61;
+
+  --radius-control: 0.625rem;
+  --radius-card: 1rem;
+
+  --shadow-card: 0 0 #0000;
+  --shadow-overlay: 0 24px 48px -12px rgb(0 0 0 / 0.25);
+}
+
+@theme inline {
+  --font-sans: var(--font-satoshi), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-monument), var(--font-satoshi), sans-serif;
+}
+
+@layer base {
+  body {
+    letter-spacing: -0.01em;
+  }
+  h1 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    letter-spacing: -0.03em;
+  }
+  ::selection {
+    background-color: var(--color-accent-soft);
+  }
+}
+
 /* Rich text in the blog post editor and preview. */
+.cms-content {
+  @apply text-[15px] leading-7 text-ink;
+}
+.cms-content > :first-child {
+  @apply mt-0;
+}
 .cms-content h2 {
-  @apply mt-6 mb-2 text-2xl font-bold;
+  @apply mt-8 mb-3 text-2xl leading-tight font-bold tracking-tight;
 }
 .cms-content h3 {
-  @apply mt-5 mb-2 text-xl font-bold;
+  @apply mt-6 mb-2 text-xl leading-snug font-bold;
 }
 .cms-content h4,
 .cms-content h5,
 .cms-content h6 {
-  @apply mt-4 mb-2 text-lg font-semibold;
+  @apply mt-5 mb-2 text-base font-semibold;
 }
 .cms-content p {
-  @apply my-2;
+  @apply my-3;
 }
 .cms-content ul {
-  @apply my-2 list-disc pl-6;
+  @apply my-3 list-disc pl-6;
 }
 .cms-content ol {
-  @apply my-2 list-decimal pl-6;
+  @apply my-3 list-decimal pl-6;
+}
+.cms-content li p {
+  @apply my-1;
 }
 .cms-content blockquote {
-  @apply my-3 border-l-4 border-gray-300 pl-4 text-gray-600 italic;
+  @apply my-4 border-l-4 border-accent pl-4 text-ink-muted italic;
 }
 .cms-content a {
-  @apply text-indigo-600 underline;
+  @apply text-ink underline decoration-accent decoration-2 underline-offset-2;
 }
 .cms-content img {
-  @apply my-3 max-w-full rounded;
+  @apply my-4 max-w-full rounded-control;
+}
+.cms-content img.ProseMirror-selectednode {
+  @apply outline-2 outline-offset-2 outline-focus;
 }

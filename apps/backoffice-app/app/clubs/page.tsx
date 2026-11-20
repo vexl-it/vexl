@@ -1,279 +1,354 @@
 'use client'
 
-import {useRunEffect} from '@/src/hooks/useRunEffect'
-import {makeClubsAdminClient} from '@/src/services/contactInternalApi'
+import {ClubAvatar} from '@/src/components/clubs/ClubAvatar'
+import {ClubStatusBadge} from '@/src/components/clubs/ClubStatusBadge'
+import {
+  Alert,
+  Button,
+  ButtonLink,
+  Card,
+  CopyButton,
+  cx,
+  EmptyState,
+  inputClassName,
+  LinkIcon,
+  Page,
+  PageHeader,
+  PencilIcon,
+  PlusIcon,
+  RefreshIcon,
+  SearchIcon,
+  SegmentedControl,
+  SortTh,
+  StatCard,
+  Table,
+  Td,
+  TdActions,
+  Th,
+  Tr,
+  UsersIcon,
+  type SortState,
+} from '@/src/components/ui'
+import {useClubsApi} from '@/src/hooks/useClubsApi'
+import {
+  clubStatus,
+  formatLocalDay,
+  formatUtcDay,
+  inactiveReasonLabel,
+  inviteLinkPath,
+} from '@/src/services/clubs'
 import type {ClubAdminInfo} from '@vexl-next/domain/src/general/clubs'
-import {Option} from 'effect'
-import {useRouter} from 'next/navigation'
+import {Array, Option, Order, pipe} from 'effect'
+import Link from 'next/link'
 import {useCallback, useEffect, useState} from 'react'
 
+type StatusFilter = 'all' | 'active' | 'inactive'
+type SortKey = 'name' | 'members' | 'validUntil' | 'reports'
+
+const ORDERS: Record<SortKey, Order.Order<ClubAdminInfo>> = {
+  name: Order.mapInput(Order.string, (club) => club.name.toLowerCase()),
+  members: Order.mapInput(Order.number, (club) => club.membersCount),
+  validUntil: Order.mapInput(Order.Date, (club) => club.validUntil),
+  reports: Order.mapInput(Order.number, (club) => club.report),
+}
+
+const isInactive = (club: ClubAdminInfo): boolean =>
+  Option.isSome(club.madeInactiveAt)
+
+const matchesStatus = (filter: StatusFilter) => (club: ClubAdminInfo) =>
+  filter === 'all' || (filter === 'inactive') === isInactive(club)
+
+const matchesSearch = (search: string) => (club: ClubAdminInfo) =>
+  club.name.toLowerCase().includes(search) || club.uuid.includes(search)
+
+function MemberChange({club}: {readonly club: ClubAdminInfo}) {
+  if (club.membersJoinedLast30Days === 0 && club.membersLeftLast30Days === 0)
+    return null
+  return (
+    <p className="text-xs text-ink-subtle">
+      <span className="text-success-ink">+{club.membersJoinedLast30Days}</span>
+      {' / '}
+      <span className="text-danger-ink">−{club.membersLeftLast30Days}</span>
+      {' in 30 d'}
+    </p>
+  )
+}
+
+function ClubRow({club}: {readonly club: ClubAdminInfo}) {
+  const editHref = `/clubs/${club.uuid}/edit`
+  const description = Option.getOrUndefined(club.description)
+
+  return (
+    <Tr>
+      <Td>
+        <div className="flex items-center gap-3">
+          <ClubAvatar src={club.clubImageUrl} name={club.name} />
+          <div className="min-w-0 max-w-56 2xl:max-w-96">
+            <Link
+              href={editHref}
+              title={club.name}
+              className="block truncate font-medium hover:underline"
+            >
+              {club.name}
+            </Link>
+            {description ? (
+              <p title={description} className="truncate text-ink-muted">
+                {description}
+              </p>
+            ) : null}
+          </div>
+        </div>
+      </Td>
+      <Td>
+        <ClubStatusBadge club={club} />
+        {Option.isSome(club.madeInactiveAt) ? (
+          <p className="mt-1 whitespace-nowrap text-xs text-ink-muted">
+            {inactiveReasonLabel(club)}
+            <span className="block">
+              since {formatLocalDay(club.madeInactiveAt.value)}
+            </span>
+          </p>
+        ) : null}
+      </Td>
+      <Td align="right" className="whitespace-nowrap tabular-nums">
+        <span
+          className={cx(
+            club.membersCount >= club.membersCountLimit &&
+              'font-medium text-warning-ink'
+          )}
+        >
+          {club.membersCount}
+        </span>
+        <span className="text-ink-subtle"> / {club.membersCountLimit}</span>
+        <MemberChange club={club} />
+      </Td>
+      <Td className="whitespace-nowrap">{formatUtcDay(club.validUntil)}</Td>
+      <Td align="right" className="whitespace-nowrap tabular-nums">
+        <span
+          className={cx(
+            club.report >= club.reportLimit && 'font-medium text-danger-ink'
+          )}
+        >
+          {club.report}
+        </span>
+        <span className="text-ink-subtle"> / {club.reportLimit}</span>
+      </Td>
+      <TdActions>
+        <span title="Copy the club UUID" className="font-mono">
+          <CopyButton
+            value={club.uuid}
+            label={`${club.uuid.slice(0, 8)}…`}
+            variant="ghost"
+          />
+        </span>
+        <ButtonLink
+          href={inviteLinkPath(club.uuid)}
+          size="sm"
+          variant="ghost"
+          icon={<LinkIcon />}
+        >
+          Invite link
+        </ButtonLink>
+        <ButtonLink
+          href={editHref}
+          size="sm"
+          variant="ghost"
+          icon={<PencilIcon />}
+        >
+          Edit
+        </ButtonLink>
+      </TdActions>
+    </Tr>
+  )
+}
+
 export default function ClubsListPage() {
+  const clubsApi = useClubsApi()
   const [clubs, setClubs] = useState<readonly ClubAdminInfo[]>([])
-  const [nameFilter, setNameFilter] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [hoveredDescription, setHoveredDescription] = useState<string | null>(
-    null
-  )
-  const [tooltipPosition, setTooltipPosition] = useState({x: 0, y: 0})
-  const runEffect = useRunEffect()
-  const router = useRouter()
-  const filteredClubs = clubs.filter((club) =>
-    club.name.toLowerCase().includes(nameFilter.trim().toLowerCase())
-  )
+  const [search, setSearch] = useState('')
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
+  const [sort, setSort] = useState<SortState<SortKey>>({
+    key: 'name',
+    descending: false,
+  })
 
-  // Truncate helper for descriptions
-  const truncate = (s: string, n = 50) =>
-    s.length > n ? `${s.slice(0, n)}…` : s
-
-  const handleMouseEnter = (description: string, e: React.MouseEvent) => {
-    setHoveredDescription(description)
-    setTooltipPosition({x: e.clientX, y: e.clientY})
-  }
-
-  const handleMouseLeave = () => {
-    setHoveredDescription(null)
-  }
-
-  const loadClubs = useCallback(async (): Promise<void> => {
+  const loadClubs = useCallback(async () => {
     setLoading(true)
     setError(null)
-
     try {
-      const client = await runEffect(makeClubsAdminClient())
-      const result = await runEffect(client.listClubs())
-      setClubs(result.clubs)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load clubs')
+      setClubs((await clubsApi((client) => client.listClubs())).clubs)
+    } catch (loadError) {
+      setError(
+        loadError instanceof Error ? loadError.message : 'Failed to load clubs'
+      )
     } finally {
       setLoading(false)
     }
-  }, [runEffect])
+  }, [clubsApi])
 
   useEffect(() => {
     void loadClubs()
   }, [loadClubs])
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="text-gray-600">Loading clubs...</div>
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="bg-red-50 p-4 rounded-md">
-        <p className="text-red-800">Error: {error}</p>
-        <button
-          onClick={() => {
-            window.location.reload()
-          }}
-          className="mt-2 text-red-600 hover:text-red-800 underline"
-        >
-          Try again
-        </button>
-      </div>
-    )
-  }
+  const inactiveCount = pipe(clubs, Array.filter(isInactive), Array.length)
+  const expiringCount = pipe(
+    clubs,
+    Array.filter((club) => {
+      const status = clubStatus(club)
+      return status === 'expiresSoon' || status === 'expired'
+    }),
+    Array.length
+  )
+  const order = ORDERS[sort.key]
+  const visibleClubs = pipe(
+    clubs,
+    Array.filter(matchesStatus(statusFilter)),
+    Array.filter(matchesSearch(search.trim().toLowerCase())),
+    Array.sort(sort.descending ? Order.reverse(order) : order)
+  )
+  const sortProps = {sort, onSort: setSort}
+  const createClubLink = (
+    <ButtonLink href="/clubs/create" variant="primary" icon={<PlusIcon />}>
+      Create club
+    </ButtonLink>
+  )
 
   return (
-    <div className="px-4 sm:px-6 lg:px-8">
-      <div className="sm:flex sm:items-center">
-        <div className="sm:flex-auto">
-          <h1 className="text-2xl font-semibold text-gray-900">Clubs</h1>
-          <p className="mt-2 text-sm text-gray-700">
-            A list of all clubs in the system
-          </p>
-        </div>
-        <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-          <button
-            onClick={() => {
-              router.push('/clubs/create')
-            }}
-            className="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-          >
-            Create Club
-          </button>
-        </div>
-      </div>
-      <div className="mt-6 max-w-sm">
-        <input
-          type="text"
-          value={nameFilter}
-          onChange={(event) => {
-            setNameFilter(event.target.value)
-          }}
-          placeholder="Filter by name..."
-          aria-label="Filter clubs by name"
-          className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+    <Page>
+      <PageHeader
+        title="Clubs"
+        description="Private groups in the Vexl app. People join a club with an invite link."
+        actions={
+          <>
+            <ButtonLink href="/clubs/generate-link" icon={<LinkIcon />}>
+              Generate invite link
+            </ButtonLink>
+            {createClubLink}
+          </>
+        }
+      />
+
+      {error ? (
+        <Alert
+          tone="error"
+          action={
+            <Button
+              size="sm"
+              icon={<RefreshIcon />}
+              onClick={() => {
+                void loadClubs()
+              }}
+            >
+              Try again
+            </Button>
+          }
+        >
+          {error}
+        </Alert>
+      ) : null}
+
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <StatCard
+          label="Active clubs"
+          value={loading ? '–' : clubs.length - inactiveCount}
+        />
+        <StatCard
+          label="Expiring"
+          value={loading ? '–' : expiringCount}
+          hint="Valid for 30 days or less"
+        />
+        <StatCard
+          label="Inactive"
+          value={loading ? '–' : inactiveCount}
+          hint="Removed later by the cleanup job"
+        />
+        <StatCard
+          label="Members"
+          value={
+            loading
+              ? '–'
+              : pipe(
+                  clubs,
+                  Array.reduce(0, (sum, club) => sum + club.membersCount)
+                )
+          }
+          hint="Across all clubs"
         />
       </div>
-      <div className="mt-8 flow-root">
-        <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-          <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-            {clubs.length === 0 ? (
-              <div className="text-center py-12 bg-white rounded-lg shadow">
-                <p className="text-gray-500">No clubs found</p>
-                <button
-                  onClick={() => {
-                    router.push('/clubs/create')
-                  }}
-                  className="mt-4 text-indigo-600 hover:text-indigo-800 underline"
-                >
-                  Create your first club
-                </button>
-              </div>
-            ) : filteredClubs.length === 0 ? (
-              <div className="py-4 text-sm text-gray-500">No clubs match</div>
-            ) : (
-              <table className="min-w-full divide-y divide-gray-300 bg-white shadow-sm rounded-lg overflow-hidden">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                      Name
-                    </th>
-                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                      UUID
-                    </th>
-                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                      Members
-                    </th>
-                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                      Δ 30d
-                    </th>
-                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                      Valid Until
-                    </th>
-                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                      Status
-                    </th>
-                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                      Reports
-                    </th>
-                    <th className="relative py-3.5 pl-3 pr-4 sm:pr-6">
-                      <span className="sr-only">Actions</span>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200 bg-white">
-                  {filteredClubs.map((club) => (
-                    <tr key={club.uuid}>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm">
-                        <div className="flex items-center">
-                          {!!club.clubImageUrl && (
-                            <img
-                              src={club.clubImageUrl}
-                              alt={club.name}
-                              className="h-10 w-10 rounded-full mr-3 object-cover"
-                            />
-                          )}
-                          <div>
-                            <div className="font-medium text-gray-900">
-                              {club.name}
-                            </div>
-                            {club.description._tag === 'Some' && (
-                              <div
-                                className="text-gray-500 cursor-help"
-                                onMouseEnter={(e) => {
-                                  handleMouseEnter(
-                                    Option.getOrElse(
-                                      club.description,
-                                      () => ''
-                                    ),
-                                    e
-                                  )
-                                }}
-                                onMouseLeave={handleMouseLeave}
-                              >
-                                {truncate(club.description.value, 50)}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 font-mono">
-                        {club.uuid}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {club.membersCount} / {club.membersCountLimit}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm">
-                        {club.membersJoinedLast30Days === 0 &&
-                        club.membersLeftLast30Days === 0 ? (
-                          <span className="text-gray-500">+0 / -0</span>
-                        ) : (
-                          <>
-                            <span className="text-green-700">
-                              +{club.membersJoinedLast30Days}
-                            </span>{' '}
-                            <span className="text-gray-500">/</span>{' '}
-                            <span className="text-red-700">
-                              -{club.membersLeftLast30Days}
-                            </span>
-                          </>
-                        )}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {new Date(club.validUntil).toLocaleDateString()}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {Option.isSome(club.madeInactiveAt) ? (
-                          <div>
-                            <span className="inline-flex rounded-full bg-red-100 px-2 py-1 text-xs font-semibold text-red-700">
-                              Inactive
-                            </span>
-                            <div className="mt-1 text-xs text-red-700">
-                              {Option.getOrElse(
-                                club.madeInactiveReason,
-                                () => 'UNKNOWN'
-                              )}
-                              ,{' '}
-                              {club.madeInactiveAt.value
-                                .toISOString()
-                                .slice(0, 10)}
-                            </div>
-                          </div>
-                        ) : (
-                          <span className="inline-flex rounded-full bg-green-100 px-2 py-1 text-xs font-semibold text-green-700">
-                            Active
-                          </span>
-                        )}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {club.report} / {club.reportLimit}
-                      </td>
-                      <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                        <button
-                          onClick={() => {
-                            router.push(`/clubs/${club.uuid}/edit`)
-                          }}
-                          className="text-indigo-600 hover:text-indigo-900"
-                        >
-                          Edit
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
-        </div>
-      </div>
 
-      {!!hoveredDescription && (
-        <div
-          className="fixed z-50 max-w-xs bg-gray-900 text-white text-sm rounded-lg shadow-lg p-3 pointer-events-none"
-          style={{
-            left: `${tooltipPosition.x + 10}px`,
-            top: `${tooltipPosition.y + 10}px`,
-          }}
-        >
-          {hoveredDescription}
+      <Card flush>
+        <div className="flex flex-wrap items-center gap-3 border-b border-line px-4 py-3">
+          <div className="relative min-w-0 flex-1 basis-56 sm:max-w-xs">
+            <SearchIcon className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-subtle" />
+            <input
+              type="search"
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value)
+              }}
+              placeholder="Search by name or UUID"
+              aria-label="Search clubs by name or UUID"
+              className={cx(inputClassName, 'h-9 pl-9')}
+            />
+          </div>
+          <SegmentedControl
+            label="Filter by status"
+            value={statusFilter}
+            onChange={setStatusFilter}
+            options={[
+              {value: 'all', label: `All ${clubs.length}`},
+              {
+                value: 'active',
+                label: `Active ${clubs.length - inactiveCount}`,
+              },
+              {value: 'inactive', label: `Inactive ${inactiveCount}`},
+            ]}
+          />
         </div>
-      )}
-    </div>
+        <Table
+          loading={loading}
+          head={
+            <>
+              <SortTh sortKey="name" {...sortProps}>
+                Club
+              </SortTh>
+              <Th>Status</Th>
+              <SortTh sortKey="members" align="right" {...sortProps}>
+                Members
+              </SortTh>
+              <SortTh sortKey="validUntil" {...sortProps}>
+                Valid until
+              </SortTh>
+              <SortTh sortKey="reports" align="right" {...sortProps}>
+                Reports
+              </SortTh>
+              <Th />
+            </>
+          }
+          empty={
+            Array.isNonEmptyReadonlyArray(clubs) ? (
+              <EmptyState
+                icon={<SearchIcon className="size-5" />}
+                title="No clubs match"
+                description="Try another name or UUID, or change the status filter."
+              />
+            ) : error ? null : (
+              <EmptyState
+                icon={<UsersIcon className="size-5" />}
+                title="No clubs yet"
+                description="Create a club, then generate an invite link for its first moderator."
+                action={createClubLink}
+              />
+            )
+          }
+        >
+          {Array.map(visibleClubs, (club) => (
+            <ClubRow key={club.uuid} club={club} />
+          ))}
+        </Table>
+      </Card>
+    </Page>
   )
 }

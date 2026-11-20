@@ -1,9 +1,6 @@
 import {Schema} from 'effect'
 import {requestJson, requestNoContent} from '../adminFetch'
-import {
-  RequestUploadResponse as RequestUploadResponseSchema,
-  type RequestUploadResponse,
-} from '../uploadToPresignedUrl'
+import {RequestUploadResponse} from '../uploadToPresignedUrl'
 import {
   type CreateSlideshowRequest,
   type RequestUploadRequest,
@@ -56,7 +53,7 @@ export const regenerateSlideshowToken = (
     method: 'POST',
   })
 
-export const requestSlideshowUpload = async (
+const requestSlideshowUpload = async (
   payload: RequestUploadRequest
 ): Promise<RequestUploadResponse> => {
   const response = await requestJson<unknown>(
@@ -68,12 +65,50 @@ export const requestSlideshowUpload = async (
   )
 
   try {
-    return Schema.decodeUnknownSync(RequestUploadResponseSchema)(response)
+    return Schema.decodeUnknownSync(RequestUploadResponse)(response)
   } catch {
     throw new Error(
       'Unexpected response shape from /api/admin/slideshows/request-upload. The server may be running an older version.'
     )
   }
+}
+
+const putFile = (
+  upload: RequestUploadResponse,
+  file: File,
+  onProgress: (fraction: number) => void
+): Promise<void> =>
+  new Promise((resolve, reject) => {
+    const request = new XMLHttpRequest()
+    request.open('PUT', upload.presignedUrl)
+    request.setRequestHeader('Content-Type', upload.contentType)
+    request.upload.onprogress = (event) => {
+      if (event.lengthComputable) onProgress(event.loaded / event.total)
+    }
+    request.onload = () => {
+      if (request.status >= 200 && request.status < 300) resolve()
+      else reject(new Error(`Storage rejected the upload (${request.status})`))
+    }
+    request.onerror = () => {
+      reject(
+        new Error('Upload failed before the storage responded. Try again.')
+      )
+    }
+    request.send(file)
+  })
+
+/** `fetch` cannot report upload progress, hence the XMLHttpRequest. */
+export const uploadSlideshowFile = async ({
+  file,
+  onProgress,
+  ...payload
+}: RequestUploadRequest & {
+  readonly file: File
+  readonly onProgress: (fraction: number) => void
+}): Promise<RequestUploadResponse> => {
+  const upload = await requestSlideshowUpload(payload)
+  await putFile(upload, file, onProgress)
+  return upload
 }
 
 export const getPublicSlideshow = (

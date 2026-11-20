@@ -1,6 +1,7 @@
 'use client'
 
-import {AuthCard, primaryButtonClassName} from '@/src/components/AuthCard'
+import {AuthCard} from '@/src/components/AuthCard'
+import {Button, StatusMessage} from '@/src/components/ui'
 import {usePasskeyCeremony} from '@/src/hooks/usePasskeyCeremony'
 import {registerFromInvite} from '@/src/services/access/api'
 import {useEffect, useState} from 'react'
@@ -16,13 +17,18 @@ export default function InvitePage() {
   }, [])
 
   if (inviteToken === undefined) {
-    return <AuthCard subtitle="Loading..." error={null} />
+    return (
+      <StatusMessage fullScreen loading>
+        Loading…
+      </StatusMessage>
+    )
   }
 
   if (inviteToken === null) {
     return (
       <AuthCard
-        subtitle="This invite link is incomplete. Ask an admin for a new one."
+        title="Incomplete invite link"
+        subtitle="Part of the link is missing. Copy the whole link again, or ask an admin for a new one."
         error={null}
       />
     )
@@ -30,19 +36,24 @@ export default function InvitePage() {
 
   return (
     <AuthCard
-      subtitle="You were invited to the backoffice. Create a passkey on this device to accept."
+      title="Join the backoffice"
+      subtitle="You were invited as an admin. Create a passkey on this device to accept; you will sign in with it from now on."
       error={error}
     >
-      <button
-        type="button"
-        disabled={busy}
+      <Button
+        variant="primary"
+        loading={busy}
         onClick={() => {
           void run(() => registerFromInvite(inviteToken))
         }}
-        className={primaryButtonClassName}
+        className="w-full"
       >
-        {busy ? 'Waiting for your passkey...' : 'Create passkey'}
-      </button>
+        {busy ? 'Waiting for your passkey…' : 'Create passkey'}
+      </Button>
+      <p className="text-xs text-ink-subtle">
+        An invite link works once and expires 5 minutes after it was created. If
+        this one no longer works, ask the admin for a new one.
+      </p>
     </AuthCard>
   )
 }

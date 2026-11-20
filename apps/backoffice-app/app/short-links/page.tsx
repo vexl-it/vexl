@@ -1,55 +1,107 @@
 'use client'
 
-import {ShortLinkClicksChart} from '@/src/components/ShortLinkClicksChart'
-import {copyToClipboard} from '@/src/services/clipboard'
-import {publicUrl, usePublicHosts} from '@/src/services/publicHosts'
+import {ShortLinkSparkline} from '@/src/components/ShortLinkClicksChart'
 import {
-  createShortLink,
-  deleteShortLink,
-  listShortLinks,
-  updateShortLink,
-} from '@/src/services/shortLinks/api'
+  Alert,
+  Button,
+  Card,
+  CopyButton,
+  cx,
+  EmptyState,
+  Input,
+  LinkIcon,
+  Page,
+  PageHeader,
+  PencilIcon,
+  PlusIcon,
+  SearchIcon,
+  Select,
+  StatCard,
+  Table,
+  Td,
+  Th,
+  Tr,
+  TrashIcon,
+  useConfirm,
+} from '@/src/components/ui'
+import {makeApiErrorMessage} from '@/src/services/apiErrorMessage'
+import {publicUrl, usePublicHosts} from '@/src/services/publicHosts'
+import {deleteShortLink, listShortLinks} from '@/src/services/shortLinks/api'
 import {type ShortLink} from '@/src/services/shortLinks/domain'
-import {Array, pipe} from 'effect'
+import {Array, Option, Order, pipe, Schema} from 'effect'
 import {useCallback, useEffect, useState} from 'react'
+import {CreateShortLinkModal} from './CreateShortLinkModal'
+import {clicksInRange, formatDate} from './format'
+import {ShortLinkDetailsModal} from './ShortLinkDetailsModal'
 
-const errorMessage = (error: unknown, fallback: string): string =>
-  error instanceof Error ? error.message : fallback
+const errorMessage = makeApiErrorMessage({})
 
-const replaceLink = (
+const SortKey = Schema.Literal('newest', 'oldest', 'clicks', 'recentClicks')
+type SortKey = typeof SortKey.Type
+const isSortKey = Schema.is(SortKey)
+
+const byCreated = Order.mapInput(
+  Order.string,
+  (link: ShortLink) => link.createdAt
+)
+const byMost = (clicks: (link: ShortLink) => number): Order.Order<ShortLink> =>
+  Order.reverse(Order.mapInput(Order.number, clicks))
+
+const SORTS: Record<
+  SortKey,
+  {readonly label: string; readonly order: Order.Order<ShortLink>}
+> = {
+  newest: {label: 'Newest first', order: Order.reverse(byCreated)},
+  oldest: {label: 'Oldest first', order: byCreated},
+  clicks: {label: 'Most clicks', order: byMost((link) => link.totalClicks)},
+  recentClicks: {
+    label: 'Most clicks, last 7 days',
+    order: byMost((link) => link.clicksLast7Days),
+  },
+}
+
+// Narrow screens keep the slug, its copy button and the total; the rest is in the details.
+const COLUMNS = {
+  target: 'hidden xl:table-cell',
+  recentClicks: 'hidden sm:table-cell',
+  trend: 'hidden xl:table-cell',
+  created: 'hidden min-[1400px]:table-cell',
+  actions: 'hidden md:table-cell',
+}
+
+const sumOf = (
   links: readonly ShortLink[],
-  updated: ShortLink
-): readonly ShortLink[] =>
+  clicks: (link: ShortLink) => number
+): string =>
   pipe(
     links,
-    Array.map((link) => (link.slug === updated.slug ? updated : link))
-  )
+    Array.reduce(0, (sum, link) => sum + clicks(link))
+  ).toLocaleString()
+
+interface Notice {
+  readonly tone: 'success' | 'error'
+  readonly text: string
+}
 
 export default function ShortLinksPage() {
   const hosts = usePublicHosts()
+  const {confirm, dialog} = useConfirm()
   const [links, setLinks] = useState<readonly ShortLink[]>([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-
-  const [newTargetUrl, setNewTargetUrl] = useState('')
-  const [newSlug, setNewSlug] = useState('')
+  const [loadError, setLoadError] = useState<string | null>(null)
+  const [notice, setNotice] = useState<Notice | null>(null)
+  const [search, setSearch] = useState('')
+  const [sort, setSort] = useState<SortKey>('newest')
   const [creating, setCreating] = useState(false)
-
-  const [copiedSlug, setCopiedSlug] = useState<string | null>(null)
-  const [expandedSlug, setExpandedSlug] = useState<string | null>(null)
-  const [editing, setEditing] = useState<{
-    readonly slug: string
-    readonly targetUrl: string
-  } | null>(null)
+  const [selectedSlug, setSelectedSlug] = useState<string | null>(null)
 
   const loadLinks = useCallback(async () => {
     setLoading(true)
-    setError(null)
+    setLoadError(null)
     try {
-      const result = await listShortLinks()
-      setLinks(result.links)
-    } catch (loadError) {
-      setError(errorMessage(loadError, 'Failed to load short links'))
+      setLinks((await listShortLinks()).links)
+    } catch (error) {
+      setLoadError(errorMessage(error))
     } finally {
       setLoading(false)
     }
@@ -59,352 +111,315 @@ export default function ShortLinksPage() {
     void loadLinks()
   }, [loadLinks])
 
-  const shortUrl = (link: ShortLink): string =>
-    publicUrl(hosts.shortLinks, link.slug)
-
-  const handleCreate = async (event: React.SyntheticEvent<HTMLFormElement>) => {
-    event.preventDefault()
-
-    setCreating(true)
-    setError(null)
-    try {
-      const slug = newSlug.trim().toLowerCase()
-      const result = await createShortLink({
-        targetUrl: newTargetUrl.trim(),
-        ...(slug ? {slug} : {}),
-      })
-      setLinks((current) => [result.link, ...current])
-      setNewTargetUrl('')
-      setNewSlug('')
-    } catch (createError) {
-      setError(errorMessage(createError, 'Failed to create short link'))
-    } finally {
-      setCreating(false)
-    }
-  }
-
-  const handleCopy = async (link: ShortLink) => {
-    try {
-      await copyToClipboard(shortUrl(link))
-      setCopiedSlug(link.slug)
-      window.setTimeout(() => {
-        setCopiedSlug(null)
-      }, 1500)
-    } catch {
-      setError('Clipboard copy is blocked. Copy the short URL manually.')
-    }
-  }
-
-  const handleSaveTarget = async () => {
-    if (!editing) return
-
-    setError(null)
-    try {
-      const result = await updateShortLink(editing.slug, {
-        targetUrl: editing.targetUrl.trim(),
-      })
-      setLinks((current) => replaceLink(current, result.link))
-      setEditing(null)
-    } catch (updateError) {
-      setError(errorMessage(updateError, 'Failed to update short link'))
-    }
-  }
+  const query = search.trim().toLowerCase()
+  const visibleLinks = pipe(
+    links,
+    Array.filter(
+      (link) =>
+        link.slug.includes(query) ||
+        link.targetUrl.toLowerCase().includes(query)
+    ),
+    Array.sort(SORTS[sort].order)
+  )
+  const selected = pipe(
+    links,
+    Array.findFirst((link) => link.slug === selectedSlug),
+    Option.getOrNull
+  )
 
   const handleDelete = async (link: ShortLink) => {
-    if (!window.confirm(`Delete ${shortUrl(link)}?`)) return
+    const shortUrl = `${hosts.shortLinks}/${link.slug}`
+    const confirmed = await confirm({
+      title: `Delete ${shortUrl}?`,
+      message:
+        'The link stops working everywhere it was shared: posts, messages, printed materials. Its click history is deleted too. This cannot be undone.',
+      confirmLabel: 'Delete link',
+    })
+    if (!confirmed) return
 
-    setError(null)
     try {
       await deleteShortLink(link.slug)
-      setLinks((current) =>
-        pipe(
-          current,
-          Array.filter((currentLink) => currentLink.slug !== link.slug)
-        )
-      )
-    } catch (deleteError) {
-      setError(errorMessage(deleteError, 'Failed to delete short link'))
+      setLinks(Array.filter((current) => current.slug !== link.slug))
+      setNotice({tone: 'success', text: `${shortUrl} was deleted.`})
+    } catch (error) {
+      setNotice({tone: 'error', text: errorMessage(error)})
     }
+    setSelectedSlug(null)
   }
 
-  if (loading) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <div className="text-gray-600">Loading short links...</div>
-      </div>
-    )
+  const openCreate = () => {
+    setNotice(null)
+    setCreating(true)
   }
+  const stat = (clicks: (link: ShortLink) => number): string =>
+    loading ? '–' : sumOf(links, clicks)
 
   return (
-    <div className="px-4 sm:px-6 lg:px-8">
-      <div>
-        <h1 className="text-2xl font-semibold text-gray-900">Short links</h1>
-        <p className="mt-2 text-sm text-gray-700">
-          Links served from {hosts.shortLinks}. Only daily click counts are
-          recorded.
-        </p>
-      </div>
+    <Page>
+      <PageHeader
+        title="Short links"
+        description={`Links served from ${hosts.shortLinks}. Only daily click counts are recorded: no IP addresses, referrers or devices.`}
+        actions={
+          <Button variant="primary" icon={<PlusIcon />} onClick={openCreate}>
+            New short link
+          </Button>
+        }
+      />
 
-      <form
-        onSubmit={handleCreate}
-        className="mt-6 flex flex-col gap-3 rounded-lg bg-white p-4 shadow-sm sm:flex-row sm:items-end"
-      >
-        <label className="flex-1 text-sm">
-          <span className="block font-medium text-gray-700">Target URL</span>
-          <input
-            type="url"
-            required
-            value={newTargetUrl}
-            onChange={(event) => {
-              setNewTargetUrl(event.target.value)
-            }}
-            placeholder="https://vexl.it/..."
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 shadow-sm focus:border-indigo-500 focus:outline-none"
-          />
-        </label>
-        <label className="text-sm sm:w-56">
-          <span className="block font-medium text-gray-700">Slug</span>
-          <div className="mt-1 flex items-center rounded-md border border-gray-300 shadow-sm focus-within:border-indigo-500">
-            <span className="pl-3 font-mono text-xs text-gray-500">
-              {hosts.shortLinks}/
-            </span>
-            <input
-              type="text"
-              value={newSlug}
-              onChange={(event) => {
-                setNewSlug(event.target.value)
+      {notice ? <Alert tone={notice.tone}>{notice.text}</Alert> : null}
+      {loadError ? (
+        <Alert
+          tone="error"
+          title="Short links could not be loaded"
+          action={
+            <Button
+              size="sm"
+              onClick={() => {
+                void loadLinks()
               }}
-              pattern="[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,62}[a-zA-Z0-9])?"
-              placeholder="random"
-              className="min-w-0 flex-1 rounded-md px-2 py-2 font-mono text-gray-900 focus:outline-none"
-            />
-          </div>
-        </label>
-        <button
-          type="submit"
-          disabled={creating}
-          className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50"
-        >
-          {creating ? 'Creating...' : 'Create'}
-        </button>
-      </form>
-
-      {!!error && (
-        <div className="mt-6 rounded-md bg-red-50 p-4 text-sm text-red-800">
-          {error}
-        </div>
-      )}
-
-      <div className="mt-8 overflow-x-auto">
-        {links.length === 0 ? (
-          <div className="rounded-lg bg-white py-12 text-center shadow">
-            <p className="text-gray-500">No short links yet</p>
-          </div>
-        ) : (
-          <table className="min-w-full divide-y divide-gray-300 overflow-hidden rounded-lg bg-white shadow-sm">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                  Short link
-                </th>
-                <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                  Target
-                </th>
-                <th className="px-3 py-3.5 text-right text-sm font-semibold text-gray-900">
-                  Clicks
-                </th>
-                <th className="px-3 py-3.5 text-right text-sm font-semibold text-gray-900">
-                  Last 7 days
-                </th>
-                <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                  Created
-                </th>
-                <th className="relative px-3 py-3.5">
-                  <span className="sr-only">Actions</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200 bg-white">
-              {pipe(
-                links,
-                Array.map((link) => (
-                  <ShortLinkRows
-                    key={link.slug}
-                    link={link}
-                    shortUrl={shortUrl(link)}
-                    copied={copiedSlug === link.slug}
-                    expanded={expandedSlug === link.slug}
-                    editingTargetUrl={
-                      editing?.slug === link.slug ? editing.targetUrl : null
-                    }
-                    onCopy={() => {
-                      void handleCopy(link)
-                    }}
-                    onToggleStats={() => {
-                      setExpandedSlug((current) =>
-                        current === link.slug ? null : link.slug
-                      )
-                    }}
-                    onStartEdit={() => {
-                      setEditing({slug: link.slug, targetUrl: link.targetUrl})
-                    }}
-                    onEditTargetUrl={(targetUrl) => {
-                      setEditing({slug: link.slug, targetUrl})
-                    }}
-                    onSaveEdit={() => {
-                      void handleSaveTarget()
-                    }}
-                    onCancelEdit={() => {
-                      setEditing(null)
-                    }}
-                    onDelete={() => {
-                      void handleDelete(link)
-                    }}
-                  />
-                ))
-              )}
-            </tbody>
-          </table>
-        )}
-      </div>
-    </div>
-  )
-}
-
-function ShortLinkRows({
-  link,
-  shortUrl,
-  copied,
-  expanded,
-  editingTargetUrl,
-  onCopy,
-  onToggleStats,
-  onStartEdit,
-  onEditTargetUrl,
-  onSaveEdit,
-  onCancelEdit,
-  onDelete,
-}: {
-  readonly link: ShortLink
-  readonly shortUrl: string
-  readonly copied: boolean
-  readonly expanded: boolean
-  readonly editingTargetUrl: string | null
-  readonly onCopy: () => void
-  readonly onToggleStats: () => void
-  readonly onStartEdit: () => void
-  readonly onEditTargetUrl: (targetUrl: string) => void
-  readonly onSaveEdit: () => void
-  readonly onCancelEdit: () => void
-  readonly onDelete: () => void
-}) {
-  return (
-    <>
-      <tr>
-        <td className="whitespace-nowrap px-3 py-4 text-sm">
-          <a
-            href={shortUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="font-mono text-indigo-700 hover:underline"
-          >
-            {shortUrl}
-          </a>
-        </td>
-        <td className="max-w-md px-3 py-4 text-sm text-gray-700">
-          {editingTargetUrl === null ? (
-            <a
-              href={link.targetUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="block truncate hover:underline"
-              title={link.targetUrl}
             >
-              {link.targetUrl}
-            </a>
-          ) : (
-            <input
-              type="url"
-              autoFocus
-              value={editingTargetUrl}
-              onChange={(event) => {
-                onEditTargetUrl(event.target.value)
-              }}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter') onSaveEdit()
-                if (event.key === 'Escape') onCancelEdit()
-              }}
-              className="block w-full rounded-md border border-gray-300 px-2 py-1 text-gray-900 focus:border-indigo-500 focus:outline-none"
+              Retry
+            </Button>
+          }
+        >
+          {loadError}
+        </Alert>
+      ) : (
+        <>
+          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+            <StatCard
+              label="Links"
+              value={loading ? '–' : links.length.toLocaleString()}
             />
-          )}
-        </td>
-        <td className="whitespace-nowrap px-3 py-4 text-right text-sm tabular-nums text-gray-900">
-          {link.totalClicks}
-        </td>
-        <td className="whitespace-nowrap px-3 py-4 text-right text-sm tabular-nums text-gray-900">
-          {link.clicksLast7Days}
-        </td>
-        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-          {new Date(link.createdAt).toLocaleDateString()}
-        </td>
-        <td className="whitespace-nowrap px-3 py-4 text-right text-sm font-medium">
-          <div className="flex flex-wrap justify-end gap-3">
-            {editingTargetUrl === null ? (
-              <>
-                <button
-                  onClick={onCopy}
-                  className="text-indigo-600 hover:text-indigo-900"
-                >
-                  {copied ? 'Copied' : 'Copy'}
-                </button>
-                <button
-                  onClick={onToggleStats}
-                  className="text-indigo-600 hover:text-indigo-900"
-                >
-                  {expanded ? 'Hide stats' : 'Stats'}
-                </button>
-                <button
-                  onClick={onStartEdit}
-                  className="text-indigo-600 hover:text-indigo-900"
-                >
-                  Edit target
-                </button>
-                <button
-                  onClick={onDelete}
-                  className="text-red-600 hover:text-red-900"
-                >
-                  Delete
-                </button>
-              </>
-            ) : (
-              <>
-                <button
-                  onClick={onSaveEdit}
-                  className="text-indigo-600 hover:text-indigo-900"
-                >
-                  Save
-                </button>
-                <button
-                  onClick={onCancelEdit}
-                  className="text-gray-600 hover:text-gray-900"
-                >
-                  Cancel
-                </button>
-              </>
-            )}
+            <StatCard
+              label="Clicks, all time"
+              value={stat((link) => link.totalClicks)}
+            />
+            <StatCard
+              label="Clicks, last 30 days"
+              value={stat(clicksInRange)}
+            />
+            <StatCard
+              label="Clicks, last 7 days"
+              value={stat((link) => link.clicksLast7Days)}
+            />
           </div>
-        </td>
-      </tr>
-      {!!expanded && (
-        <tr>
-          <td colSpan={6} className="bg-gray-50 px-3 py-4">
-            <p className="mb-2 text-xs font-medium text-gray-500">
-              Clicks per day, last 30 days
-            </p>
-            <ShortLinkClicksChart dailyClicks={link.dailyClicks} />
-          </td>
-        </tr>
+
+          <Card flush>
+            <div className="flex flex-wrap items-center gap-3 border-b border-line px-4 py-3">
+              <div className="relative w-full sm:w-72">
+                <SearchIcon className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-ink-subtle" />
+                <Input
+                  type="search"
+                  value={search}
+                  onChange={(event) => {
+                    setSearch(event.target.value)
+                  }}
+                  placeholder="Search by slug or target"
+                  aria-label="Search short links"
+                  className="pl-9"
+                />
+              </div>
+              <div className="w-full sm:w-56">
+                <Select
+                  value={sort}
+                  onChange={(event) => {
+                    if (isSortKey(event.target.value))
+                      setSort(event.target.value)
+                  }}
+                  aria-label="Sort short links"
+                >
+                  {pipe(
+                    SortKey.literals,
+                    Array.map((key) => (
+                      <option key={key} value={key}>
+                        {SORTS[key].label}
+                      </option>
+                    ))
+                  )}
+                </Select>
+              </div>
+              {query ? (
+                <p className="text-xs text-ink-muted sm:ml-auto">
+                  {visibleLinks.length} of {links.length} links
+                </p>
+              ) : null}
+            </div>
+            <Table
+              loading={loading}
+              head={
+                <>
+                  <Th>Short link</Th>
+                  <Th className={COLUMNS.target}>Target</Th>
+                  <Th align="right">Clicks</Th>
+                  <Th align="right" className={COLUMNS.recentClicks}>
+                    Last 7 days
+                  </Th>
+                  <Th className={COLUMNS.trend}>Last 30 days</Th>
+                  <Th className={COLUMNS.created}>Created</Th>
+                  <Th className={COLUMNS.actions} />
+                </>
+              }
+              empty={
+                Array.isNonEmptyReadonlyArray(links) ? (
+                  <EmptyState
+                    icon={<SearchIcon className="size-5" />}
+                    title={`No short links match “${search.trim()}”`}
+                    action={
+                      <Button
+                        size="sm"
+                        onClick={() => {
+                          setSearch('')
+                        }}
+                      >
+                        Clear search
+                      </Button>
+                    }
+                  />
+                ) : (
+                  <EmptyState
+                    icon={<LinkIcon className="size-5" />}
+                    title="No short links yet"
+                    description={`Create one to get a ${hosts.shortLinks} address that is easy to share and print.`}
+                    action={
+                      <Button
+                        variant="primary"
+                        icon={<PlusIcon />}
+                        onClick={openCreate}
+                      >
+                        New short link
+                      </Button>
+                    }
+                  />
+                )
+              }
+            >
+              {pipe(
+                visibleLinks,
+                Array.map((link) => {
+                  const open = () => {
+                    setNotice(null)
+                    setSelectedSlug(link.slug)
+                  }
+                  return (
+                    <Tr key={link.slug}>
+                      <Td>
+                        <div className="flex items-center justify-between gap-3">
+                          <button
+                            type="button"
+                            onClick={open}
+                            title="Show clicks and edit"
+                            className="max-w-36 cursor-pointer truncate font-mono hover:underline sm:max-w-52"
+                          >
+                            <span className="hidden text-ink-subtle sm:inline">
+                              {hosts.shortLinks}/
+                            </span>
+                            <span className="font-medium">{link.slug}</span>
+                          </button>
+                          <CopyButton
+                            value={publicUrl(hosts.shortLinks, link.slug)}
+                          />
+                        </div>
+                      </Td>
+                      <Td
+                        className={cx(
+                          COLUMNS.target,
+                          'w-full max-w-0 min-w-40'
+                        )}
+                      >
+                        <a
+                          href={link.targetUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          title={link.targetUrl}
+                          className="block truncate text-ink-muted hover:text-ink hover:underline"
+                        >
+                          {link.targetUrl}
+                        </a>
+                      </Td>
+                      <Td align="right" className="tabular-nums">
+                        {link.totalClicks.toLocaleString()}
+                      </Td>
+                      <Td
+                        align="right"
+                        className={cx(COLUMNS.recentClicks, 'tabular-nums')}
+                      >
+                        {link.clicksLast7Days.toLocaleString()}
+                      </Td>
+                      <Td className={COLUMNS.trend}>
+                        <ShortLinkSparkline dailyClicks={link.dailyClicks} />
+                      </Td>
+                      <Td
+                        className={cx(
+                          COLUMNS.created,
+                          'whitespace-nowrap text-ink-muted'
+                        )}
+                      >
+                        {formatDate(link.createdAt)}
+                      </Td>
+                      <Td className={COLUMNS.actions}>
+                        <div className="flex items-center justify-end gap-1">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            icon={<PencilIcon />}
+                            onClick={open}
+                          >
+                            Edit
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            icon={<TrashIcon />}
+                            aria-label={`Delete ${link.slug}`}
+                            title="Delete"
+                            onClick={() => {
+                              void handleDelete(link)
+                            }}
+                          />
+                        </div>
+                      </Td>
+                    </Tr>
+                  )
+                })
+              )}
+            </Table>
+          </Card>
+        </>
       )}
-    </>
+
+      {creating ? (
+        <CreateShortLinkModal
+          takenSlugs={pipe(
+            links,
+            Array.map((link) => link.slug)
+          )}
+          onCreated={(link) => {
+            setLinks((current) => [link, ...current])
+          }}
+          onClose={() => {
+            setCreating(false)
+          }}
+        />
+      ) : null}
+      {selected ? (
+        <ShortLinkDetailsModal
+          key={selected.slug}
+          link={selected}
+          onUpdated={(updated) => {
+            setLinks(
+              Array.map((link) => (link.slug === updated.slug ? updated : link))
+            )
+          }}
+          onDelete={() => {
+            void handleDelete(selected)
+          }}
+          onClose={() => {
+            setSelectedSlug(null)
+          }}
+        />
+      ) : null}
+      {dialog}
+    </Page>
   )
 }

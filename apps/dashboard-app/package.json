@@ -32,7 +32,7 @@
     "@vexl-next/server-utils": "0.0.0",
     "dayjs": "^1.11.11",
     "dotenv": "^16.4.5",
-    "effect": "^3.20.0",
+    "effect": "^3.22.1",
     "jotai": "^2.15.0",
     "react": "19.2.3",
     "react-confetti": "^6.1.0",

@@ -31,7 +31,7 @@
     "@vexl-next/domain": "0.0.0",
     "@vexl-next/generic-utils": "0.0.0",
     "@vexl-next/rest-api": "0.0.0",
-    "effect": "^3.20.0",
+    "effect": "^3.22.1",
     "ioredis": "^5.4.1",
     "next": "^16.4.6",
     "qrcode.react": "^4.2.0",

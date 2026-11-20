@@ -18,7 +18,7 @@
   "dependencies": {
     "@effect/platform-node": "^0.103.0",
     "@vexl-next/geocoding-db": "0.0.0",
-    "effect": "^3.20.0",
+    "effect": "^3.22.1",
     "pg": "^8.12.0"
   },
   "devDependencies": {

@@ -28,7 +28,7 @@
     "@vexl-next/domain": "0.0.0",
     "@vexl-next/generic-utils": "0.0.0",
     "@vexl-next/rest-api": "0.0.0",
-    "effect": "^3.20.0",
+    "effect": "^3.22.1",
     "fp-ts": "^2.13.1",
     "just-truncate": "^2.2.0"
   },

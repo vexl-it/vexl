@@ -25,7 +25,7 @@
     "gsap": "^3.15.1",
     "hast-util-to-jsx-runtime": "^2.3.7",
     "matter-js": "^0.20.0",
-    "next": "^16.4.1",
+    "next": "^16.4.6",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "rehype-parse": "^9.0.1",

@@ -2,7 +2,8 @@ import {cmsErrorMessage} from '@/src/services/cms/api'
 import {type CmsResource} from '@/src/services/cms/resources'
 import {type CmsStatus} from '@vexl-next/domain/src/general/cms'
 import {Array, Option} from 'effect'
-import {useEffect, useState} from 'react'
+import {useRouter} from 'next/navigation'
+import {useEffect, useState, useTransition} from 'react'
 import {useCms} from './useCms'
 
 /** Loads one item (none for a new one) and saves or unpublishes it. */
@@ -12,6 +13,8 @@ export function useCmsItem<
   Input,
 >(resource: CmsResource<Id, Item, Input>, id: string | null) {
   const cms = useCms()
+  const router = useRouter()
+  const [navigating, startNavigation] = useTransition()
   const [item, setItem] = useState<Item | null>(null)
   const [loading, setLoading] = useState(id !== null)
   const [saving, setSaving] = useState(false)
@@ -74,14 +77,11 @@ export function useCmsItem<
             : resource.update(client, item.id, input)
         )
         setItem(saved)
-        // Not a navigation: the form stays mounted and keeps its feedback.
-        if (item === null)
-          window.history.replaceState(
-            null,
-            '',
-            `${resource.path}/${saved.id}/edit`
-          )
         if (publish) setItem(await setStatus(saved.id, 'published'))
+        if (id === null)
+          startNavigation(() => {
+            router.replace(`${resource.path}/${saved.id}/edit`)
+          })
       },
       publish ? 'Saved and published.' : 'Saved.'
     )
@@ -91,5 +91,14 @@ export function useCmsItem<
       if (item !== null) setItem(await setStatus(item.id, 'draft'))
     }, 'Unpublished. It is a draft again.')
 
-  return {item, loading, saving, error, success, save, unpublish}
+  return {
+    item,
+    loading,
+    // Until the edit route takes over, the create form must not change.
+    saving: saving || navigating,
+    error,
+    success,
+    save,
+    unpublish,
+  }
 }

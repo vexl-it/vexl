@@ -1,6 +1,12 @@
 'use client'
 
-import {useLayoutEffect, useRef, type MouseEvent, type ReactNode} from 'react'
+import {
+  useId,
+  useLayoutEffect,
+  useRef,
+  type MouseEvent,
+  type ReactNode,
+} from 'react'
 import {cx} from './cx'
 
 export function useModalDialog(open: boolean) {
@@ -39,10 +45,12 @@ export function Modal({
   readonly children?: ReactNode
 }) {
   const ref = useModalDialog(open)
+  const titleId = useId()
 
   return (
     <dialog
       ref={ref}
+      aria-labelledby={titleId}
       onClose={onClose}
       onClick={closeOnBackdropClick(onClose)}
       className={cx(
@@ -51,7 +59,10 @@ export function Modal({
       )}
     >
       <div className="px-6 pt-5 pb-4">
-        <h2 className="font-display text-lg leading-snug tracking-[-0.03em]">
+        <h2
+          id={titleId}
+          className="font-display text-lg leading-snug tracking-[-0.03em]"
+        >
           {title}
         </h2>
         {description ? (

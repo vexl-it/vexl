@@ -4,6 +4,7 @@ import {
   ADMIN_TOKEN_HEADERS,
   CONTACT_INTERNAL_URL,
   psql,
+  putToLocalStorage,
   RESOURCES_BASE_URL,
   rgbPng,
   type Rgb,
@@ -175,7 +176,10 @@ const clubUuid = (name: string): string => {
 const IMAGE_SIZE = 128
 
 /** A disc on a plain background, as an RGB PNG. */
-const clubImage = ([background, disc]: readonly [Rgb, Rgb]): Buffer => {
+const clubImage = ([background, disc]: readonly [
+  Rgb,
+  Rgb,
+]): Buffer<ArrayBuffer> => {
   const center = (IMAGE_SIZE - 1) / 2
   return rgbPng(IMAGE_SIZE, IMAGE_SIZE, (x, y) =>
     Math.hypot(x - center, y - center) < IMAGE_SIZE * 0.3 ? disc : background
@@ -221,12 +225,7 @@ const uploadImage = async (colors: readonly [Rgb, Rgb]): Promise<string> => {
     '/request-image-upload',
     {fileExtension: 'png'}
   )
-  const response = await fetch(presignedUrl, {
-    method: 'PUT',
-    headers: {'Content-Type': contentType},
-    body: new Uint8Array(clubImage(colors)),
-  })
-  if (!response.ok) throw new Error(`Image upload: ${response.status}`)
+  await putToLocalStorage(presignedUrl, contentType, clubImage(colors))
   return `${RESOURCES_BASE_URL}/${s3Key}`
 }
 

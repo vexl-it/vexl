@@ -10,11 +10,9 @@ const LAST_MINUTE_MS = 60_000
 
 export function InviteLinkCard({
   invite,
-  accepted,
   onDismiss,
 }: {
   readonly invite: CreatedInvite
-  readonly accepted: boolean
   readonly onDismiss: () => void
 }) {
   const remainingMs = new Date(invite.expiresAt).getTime() - useNow(1000)
@@ -24,19 +22,11 @@ export function InviteLinkCard({
     </Button>
   )
 
-  if (accepted)
-    return (
-      <Alert tone="success" action={dismiss}>
-        “{invite.label}” accepted the invite. The new passkey is in the list
-        below.
-      </Alert>
-    )
-
   if (remainingMs <= 0)
     return (
       <Alert tone="warning" action={dismiss}>
-        The invite link for “{invite.label}” expired without being used. Create
-        a new one when they are ready.
+        The invite link for “{invite.label}” has expired. If they did not use it
+        in time, create a new one.
       </Alert>
     )
 

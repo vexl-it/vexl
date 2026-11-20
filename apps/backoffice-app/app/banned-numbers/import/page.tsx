@@ -64,6 +64,7 @@ export default function ImportBannedNumbersPage() {
     event.target.value = ''
     if (!chosen) return
 
+    setFile(null)
     setResult(null)
     setError(null)
     setFile({name: chosen.name, ...parseBannedNumbersCsv(await chosen.text())})
@@ -135,8 +136,10 @@ export default function ImportBannedNumbersPage() {
             {EXAMPLE_CSV}
           </pre>
           <p>
-            The server limits how many new numbers can be banned per month. A
-            file that goes over the limit is rejected and bans nothing.
+            The server limits how many new numbers can be banned per month and
+            rejects an import that goes over the limit. A file with more than{' '}
+            {MAX_BANNED_NUMBERS_BATCH_SIZE} numbers is sent in parts, so earlier
+            parts stay banned if a later one is rejected.
           </p>
         </div>
       </Card>

@@ -118,6 +118,7 @@ export function ShortLinkDetailsModal({
               <Input
                 type="url"
                 value={targetUrl}
+                disabled={saving}
                 onChange={(event) => {
                   setTargetUrl(event.target.value)
                   setSaved(false)

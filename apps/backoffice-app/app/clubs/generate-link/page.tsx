@@ -157,6 +157,7 @@ export default function GenerateLinkPage({
           <Field label="Club">
             <Select
               value={club.uuid}
+              disabled={generating}
               onChange={(e) => {
                 setSelectedUuid(e.target.value)
                 setLink(null)

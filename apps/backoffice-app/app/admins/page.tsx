@@ -28,11 +28,6 @@ const errorMessage = makeApiErrorMessage({})
 
 const POLL_WHILE_INVITED_MS = 5000
 
-type SentInvite = CreatedInvite & {
-  /** Passkeys that existed before the invite; a new one means it was used. */
-  readonly knownPasskeyIds: readonly string[]
-}
-
 const soleId = (passkeys: readonly Passkey[]): string | null =>
   passkeys.length === 1 ? passkeys[0].id : null
 
@@ -47,7 +42,7 @@ export default function AdminsPage() {
   const [editing, setEditing] = useState<Passkey | null>(null)
   const [revokingId, setRevokingId] = useState<string | null>(null)
   const [inviting, setInviting] = useState(false)
-  const [invites, setInvites] = useState<readonly SentInvite[]>([])
+  const [invites, setInvites] = useState<readonly CreatedInvite[]>([])
 
   const refresh = useCallback(async () => {
     setPasskeys(await listPasskeys())
@@ -68,17 +63,10 @@ export default function AdminsPage() {
     void load()
   }, [load])
 
-  const isAccepted = (invite: SentInvite): boolean =>
-    Array.some(
-      passkeys,
-      (passkey) =>
-        passkey.label === invite.label &&
-        !Array.contains(invite.knownPasskeyIds, passkey.id)
-    )
+  // The new passkey shows up in the list while its invite can still be used.
   const awaitingInvitee = Array.some(
     invites,
-    (invite) =>
-      !isAccepted(invite) && new Date(invite.expiresAt).getTime() > now
+    (invite) => new Date(invite.expiresAt).getTime() > now
   )
 
   useEffect(() => {
@@ -134,8 +122,8 @@ export default function AdminsPage() {
   }
 
   const handleSaved = (saved: Passkey) => {
-    // Without Admins the shell has to re-check what this session may open.
-    if (saved.id === ownId && !isAdmin(saved)) {
+    // The shell has to re-check what this session may open.
+    if (saved.id === ownId) {
       window.location.reload()
       return
     }
@@ -168,7 +156,6 @@ export default function AdminsPage() {
         <InviteLinkCard
           key={invite.inviteUrl}
           invite={invite}
-          accepted={isAccepted(invite)}
           onDismiss={() => {
             setInvites(Array.filter((other) => other !== invite))
           }}
@@ -215,13 +202,7 @@ export default function AdminsPage() {
           }}
           onCreated={(invite) => {
             setInviting(false)
-            setInvites((current) => [
-              {
-                ...invite,
-                knownPasskeyIds: Array.map(passkeys, (passkey) => passkey.id),
-              },
-              ...current,
-            ])
+            setInvites(Array.prepend(invite))
           }}
         />
       ) : null}

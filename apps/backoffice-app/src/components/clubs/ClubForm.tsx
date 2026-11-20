@@ -96,14 +96,15 @@ function ClubImageField({
   value,
   clubName,
   error,
+  imageUpload: {upload, uploading, error: uploadError},
   onChange,
 }: {
   readonly value: string
   readonly clubName: string
   readonly error: string | undefined
+  readonly imageUpload: ReturnType<typeof useClubImageUpload>
   readonly onChange: (url: string) => void
 }) {
-  const {upload, uploading, error: uploadError} = useClubImageUpload()
   // The file just uploaded, shown without waiting for the CDN to serve it.
   const [localPreview, setLocalPreview] = useState<string | null>(null)
 
@@ -183,6 +184,7 @@ export function ClubForm({
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [saved, setSaved] = useState(false)
+  const imageUpload = useClubImageUpload()
 
   const set = (field: keyof ClubFormValues) => (value: string) => {
     setValues((current) => ({...current, [field]: value}))
@@ -235,6 +237,7 @@ export function ClubForm({
             <Textarea rows={3} {...bind('description')} />
           </Field>
           <ClubImageField
+            imageUpload={imageUpload}
             value={values.clubImageUrl}
             clubName={values.name}
             error={errors.clubImageUrl}
@@ -304,7 +307,12 @@ export function ClubForm({
       />
       <div className="flex justify-end gap-2">
         <ButtonLink href="/clubs">Cancel</ButtonLink>
-        <Button type="submit" variant="primary" loading={submitting}>
+        <Button
+          type="submit"
+          variant="primary"
+          loading={submitting}
+          disabled={imageUpload.uploading}
+        >
           {submitLabel}
         </Button>
       </div>

@@ -5,6 +5,7 @@ import {
   BACKOFFICE_URL,
   CONTENT_INTERNAL_URL,
   psql,
+  putToLocalStorage,
   rgbPng,
   type Rgb,
 } from './shared'
@@ -77,12 +78,11 @@ const uploadImage = async (
   const upload = Schema.decodeUnknownSync(RequestUploadResponse)(
     await requested.json()
   )
-  const stored = await fetch(upload.presignedUrl, {
-    method: 'PUT',
-    headers: {'Content-Type': upload.contentType},
-    body: gradientPng(width, height, from, to),
-  })
-  if (!stored.ok) throw new Error(`upload ${stored.status}`)
+  await putToLocalStorage(
+    upload.presignedUrl,
+    upload.contentType,
+    gradientPng(width, height, from, to)
+  )
   return upload.assetUrl
 }
 
@@ -443,16 +443,18 @@ const main = async (): Promise<void> => {
   )
 
   // The API cannot store an English-only post or set a creation date.
-  const englishOnly = pipe(
-    POSTS,
-    Array.filter((seed) => seed.czechTitle === null),
-    Array.map((seed) => `'${seed.slug}'`)
-  )
+  const quotedSlugs = (posts: typeof POSTS): string =>
+    pipe(
+      posts,
+      Array.map((seed) => `'${seed.slug}'`),
+      Array.join(', ')
+    )
+  const englishOnly = Array.filter(POSTS, (seed) => seed.czechTitle === null)
   psql(
     'content',
     [
-      `UPDATE blog_posts SET title_cs = NULL, summary_cs = NULL, body_cs = NULL WHERE slug IN (${englishOnly.join(', ')});`,
-      `UPDATE blog_posts SET created_at = LEAST(published_at, now()) - interval '4 days' WHERE slug LIKE 'demo-%';`,
+      `UPDATE blog_posts SET title_cs = NULL, summary_cs = NULL, body_cs = NULL WHERE slug IN (${quotedSlugs(englishOnly)});`,
+      `UPDATE blog_posts SET created_at = LEAST(published_at, now()) - interval '4 days' WHERE slug IN (${quotedSlugs(POSTS)});`,
     ].join('\n')
   )
 

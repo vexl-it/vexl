@@ -10,9 +10,10 @@ import {
   SegmentedControl,
   Textarea,
 } from '@/src/components/ui'
-import {formatDateTime, toDateTimeLocal} from '@/src/services/cms/dateTimeLocal'
+import {toDateTimeLocal} from '@/src/services/cms/dateTimeLocal'
 import {slugify} from '@/src/services/cms/domain'
 import {blogPostPublicUrl, blogPostResource} from '@/src/services/cms/resources'
+import {formatDateTime} from '@/src/services/format'
 import {
   BlogPostInput,
   type BlogPost,

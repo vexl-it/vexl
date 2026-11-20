@@ -16,12 +16,13 @@ import {
   TrashIcon,
 } from '@/src/components/ui'
 import {makeApiErrorMessage} from '@/src/services/apiErrorMessage'
+import {formatDate, formatNumber} from '@/src/services/format'
 import {publicUrl, usePublicHosts} from '@/src/services/publicHosts'
 import {updateShortLink} from '@/src/services/shortLinks/api'
 import {isHttpUrl, type ShortLink} from '@/src/services/shortLinks/domain'
 import {Array, pipe} from 'effect'
 import {useState} from 'react'
-import {clicksInRange, formatDate} from './format'
+import {clicksInRange} from './format'
 
 const errorMessage = makeApiErrorMessage({})
 
@@ -154,7 +155,7 @@ export function ShortLinkDetailsModal({
               >
                 <dt className="text-xs text-ink-muted">{label}</dt>
                 <dd className="mt-0.5 text-lg font-semibold tabular-nums">
-                  {value.toLocaleString()}
+                  {formatNumber(value)}
                 </dd>
               </div>
             ))

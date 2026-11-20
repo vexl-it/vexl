@@ -14,11 +14,10 @@ import {
   Card,
   CopyButton,
   EmptyState,
-  Input,
   Page,
   PageHeader,
   PlusIcon,
-  SearchIcon,
+  SearchInput,
   SegmentedControl,
   type SegmentedOption,
   type SortState,
@@ -216,19 +215,15 @@ export default function SlideshowsPage() {
 
       {slideshows && Array.isNonEmptyReadonlyArray(slideshows) ? (
         <div className="flex flex-wrap items-center gap-3">
-          <div className="relative w-full sm:w-72">
-            <SearchIcon className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-ink-subtle" />
-            <Input
-              type="search"
-              aria-label="Search slideshows"
-              placeholder="Search by name or slug"
-              className="pl-9"
-              value={query}
-              onChange={(event) => {
-                setQuery(event.target.value)
-              }}
-            />
-          </div>
+          <SearchInput
+            className="w-full sm:w-72"
+            aria-label="Search slideshows"
+            placeholder="Search by name or slug"
+            value={query}
+            onChange={(event) => {
+              setQuery(event.target.value)
+            }}
+          />
           <SegmentedControl
             label="Filter by status"
             value={status}

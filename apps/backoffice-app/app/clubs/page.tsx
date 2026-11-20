@@ -10,7 +10,6 @@ import {
   CopyButton,
   cx,
   EmptyState,
-  inputClassName,
   LinkIcon,
   Page,
   PageHeader,
@@ -18,6 +17,7 @@ import {
   PlusIcon,
   RefreshIcon,
   SearchIcon,
+  SearchInput,
   SegmentedControl,
   SortTh,
   StatCard,
@@ -37,6 +37,7 @@ import {
   inactiveReasonLabel,
   inviteLinkPath,
 } from '@/src/services/clubs'
+import {formatNumber} from '@/src/services/format'
 import type {ClubAdminInfo} from '@vexl-next/domain/src/general/clubs'
 import {Array, Option, Order, pipe} from 'effect'
 import Link from 'next/link'
@@ -61,14 +62,21 @@ const matchesStatus = (filter: StatusFilter) => (club: ClubAdminInfo) =>
 const matchesSearch = (search: string) => (club: ClubAdminInfo) =>
   club.name.toLowerCase().includes(search) || club.uuid.includes(search)
 
+const signed = (sign: string, count: number): string =>
+  count === 0 ? '0' : `${sign}${count}`
+
 function MemberChange({club}: {readonly club: ClubAdminInfo}) {
   if (club.membersJoinedLast30Days === 0 && club.membersLeftLast30Days === 0)
     return null
   return (
     <p className="text-xs text-ink-subtle">
-      <span className="text-success-ink">+{club.membersJoinedLast30Days}</span>
+      <span className="text-success-ink">
+        {signed('+', club.membersJoinedLast30Days)}
+      </span>
       {' / '}
-      <span className="text-danger-ink">−{club.membersLeftLast30Days}</span>
+      <span className="text-danger-ink">
+        {signed('−', club.membersLeftLast30Days)}
+      </span>
       {' in 30 d'}
     </p>
   )
@@ -271,7 +279,8 @@ export default function ClubsListPage() {
               ? '–'
               : pipe(
                   clubs,
-                  Array.reduce(0, (sum, club) => sum + club.membersCount)
+                  Array.reduce(0, (sum, club) => sum + club.membersCount),
+                  formatNumber
                 )
           }
           hint="Across all clubs"
@@ -280,19 +289,15 @@ export default function ClubsListPage() {
 
       <Card flush>
         <div className="flex flex-wrap items-center gap-3 border-b border-line px-4 py-3">
-          <div className="relative min-w-0 flex-1 basis-56 sm:max-w-xs">
-            <SearchIcon className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-subtle" />
-            <input
-              type="search"
-              value={search}
-              onChange={(e) => {
-                setSearch(e.target.value)
-              }}
-              placeholder="Search by name or UUID"
-              aria-label="Search clubs by name or UUID"
-              className={cx(inputClassName, 'h-9 pl-9')}
-            />
-          </div>
+          <SearchInput
+            className="min-w-0 flex-1 basis-56 sm:max-w-xs"
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value)
+            }}
+            placeholder="Search by name or UUID"
+            aria-label="Search clubs by name or UUID"
+          />
           <SegmentedControl
             label="Filter by status"
             value={statusFilter}

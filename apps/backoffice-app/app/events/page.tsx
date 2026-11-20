@@ -7,8 +7,8 @@ import {
   type CmsView,
 } from '@/src/components/cms/CmsListPage'
 import {Badge} from '@/src/components/ui'
-import {formatDateTime} from '@/src/services/cms/dateTimeLocal'
 import {eventResource} from '@/src/services/cms/resources'
+import {formatDateTime} from '@/src/services/format'
 import {type CmsEvent} from '@vexl-next/domain/src/general/cms'
 import {Array, Option, Order, pipe} from 'effect'
 import Link from 'next/link'

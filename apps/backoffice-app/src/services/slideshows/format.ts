@@ -24,15 +24,3 @@ export const loopSeconds = (slides: SlideshowSlides): number =>
 
 export const pluralize = (count: number, noun: string): string =>
   `${count} ${noun}${count === 1 ? '' : 's'}`
-
-const dateFormat = new Intl.DateTimeFormat('en-GB', {dateStyle: 'medium'})
-const dateTimeFormat = new Intl.DateTimeFormat('en-GB', {
-  dateStyle: 'medium',
-  timeStyle: 'short',
-})
-
-export const formatDate = (isoDate: string): string =>
-  dateFormat.format(new Date(isoDate))
-
-export const formatDateTime = (isoDate: string): string =>
-  dateTimeFormat.format(new Date(isoDate))

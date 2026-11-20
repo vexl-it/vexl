@@ -5,8 +5,8 @@ import {
   Button,
   Card,
   EmptyState,
-  Input,
   PencilIcon,
+  SearchInput,
   Select,
   ShieldIcon,
   type SortState,
@@ -24,10 +24,11 @@ import {
   type Passkey,
   SECTION_NAMES,
 } from '@/src/services/access/domain'
+import {formatDate, formatDateTime} from '@/src/services/format'
 import {Array, Option, Order, pipe, Schema} from 'effect'
 import {type ReactNode, useState} from 'react'
 import {isAdmin, SectionBadges} from './sections'
-import {formatDate, formatDateTime, formatRelative, useNow} from './time'
+import {formatRelative, useNow} from './time'
 
 const decodeSection = Schema.decodeUnknownOption(BackofficeSection)
 
@@ -97,17 +98,15 @@ export function PasskeyTable({
       }
       actions={
         <>
-          <div className="w-full sm:w-52">
-            <Input
-              type="search"
-              aria-label="Search passkeys by label"
-              placeholder="Search by label"
-              value={search}
-              onChange={(event) => {
-                setSearch(event.target.value)
-              }}
-            />
-          </div>
+          <SearchInput
+            className="w-full sm:w-52"
+            aria-label="Search passkeys by label"
+            placeholder="Search by label"
+            value={search}
+            onChange={(event) => {
+              setSearch(event.target.value)
+            }}
+          />
           <div className="w-full sm:w-52">
             <Select
               aria-label="Filter by section"

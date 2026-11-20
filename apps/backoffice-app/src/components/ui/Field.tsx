@@ -1,5 +1,6 @@
 import {type ComponentProps, type ReactNode} from 'react'
 import {cx} from './cx'
+import {SearchIcon} from './icons'
 
 export const inputClassName =
   'block w-full rounded-control border border-line-strong bg-surface px-3 py-1.5 text-sm font-medium text-ink outline-none transition-[border-color,box-shadow] placeholder:text-ink-subtle hover:border-ink-subtle focus:border-focus focus:ring-3 focus:ring-accent/40 disabled:cursor-not-allowed disabled:border-line disabled:bg-surface-muted disabled:text-ink-muted aria-invalid:border-danger aria-invalid:focus:ring-danger/20'
@@ -50,6 +51,19 @@ export function Input({
       className={cx(inputClassName, 'h-9', className)}
       {...props}
     />
+  )
+}
+
+/** A search box with a magnifier inside; `className` sizes the box. */
+export function SearchInput({
+  className,
+  ...props
+}: Omit<ComponentProps<'input'>, 'type'>) {
+  return (
+    <div className={cx('relative', className)}>
+      <SearchIcon className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-ink-subtle" />
+      <Input type="search" className="pl-9" {...props} />
+    </div>
   )
 }
 

@@ -8,13 +8,13 @@ import {
   CopyButton,
   cx,
   EmptyState,
-  Input,
   LinkIcon,
   Page,
   PageHeader,
   PencilIcon,
   PlusIcon,
   SearchIcon,
+  SearchInput,
   Select,
   StatCard,
   Table,
@@ -25,13 +25,14 @@ import {
   useConfirm,
 } from '@/src/components/ui'
 import {makeApiErrorMessage} from '@/src/services/apiErrorMessage'
+import {formatDate, formatNumber} from '@/src/services/format'
 import {publicUrl, usePublicHosts} from '@/src/services/publicHosts'
 import {deleteShortLink, listShortLinks} from '@/src/services/shortLinks/api'
 import {type ShortLink} from '@/src/services/shortLinks/domain'
 import {Array, Option, Order, pipe, Schema} from 'effect'
 import {useCallback, useEffect, useState} from 'react'
 import {CreateShortLinkModal} from './CreateShortLinkModal'
-import {clicksInRange, formatDate} from './format'
+import {clicksInRange} from './format'
 import {ShortLinkDetailsModal} from './ShortLinkDetailsModal'
 
 const errorMessage = makeApiErrorMessage({})
@@ -75,8 +76,9 @@ const sumOf = (
 ): string =>
   pipe(
     links,
-    Array.reduce(0, (sum, link) => sum + clicks(link))
-  ).toLocaleString()
+    Array.reduce(0, (sum, link) => sum + clicks(link)),
+    formatNumber
+  )
 
 interface Notice {
   readonly tone: 'success' | 'error'
@@ -189,7 +191,7 @@ export default function ShortLinksPage() {
           <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
             <StatCard
               label="Links"
-              value={loading ? '–' : links.length.toLocaleString()}
+              value={loading ? '–' : formatNumber(links.length)}
             />
             <StatCard
               label="Clicks, all time"
@@ -207,19 +209,15 @@ export default function ShortLinksPage() {
 
           <Card flush>
             <div className="flex flex-wrap items-center gap-3 border-b border-line px-4 py-3">
-              <div className="relative w-full sm:w-72">
-                <SearchIcon className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-ink-subtle" />
-                <Input
-                  type="search"
-                  value={search}
-                  onChange={(event) => {
-                    setSearch(event.target.value)
-                  }}
-                  placeholder="Search by slug or target"
-                  aria-label="Search short links"
-                  className="pl-9"
-                />
-              </div>
+              <SearchInput
+                className="w-full sm:w-72"
+                value={search}
+                onChange={(event) => {
+                  setSearch(event.target.value)
+                }}
+                placeholder="Search by slug or target"
+                aria-label="Search short links"
+              />
               <div className="w-full sm:w-56">
                 <Select
                   value={sort}
@@ -338,13 +336,13 @@ export default function ShortLinksPage() {
                         </a>
                       </Td>
                       <Td align="right" className="tabular-nums">
-                        {link.totalClicks.toLocaleString()}
+                        {formatNumber(link.totalClicks)}
                       </Td>
                       <Td
                         align="right"
                         className={cx(COLUMNS.recentClicks, 'tabular-nums')}
                       >
-                        {link.clicksLast7Days.toLocaleString()}
+                        {formatNumber(link.clicksLast7Days)}
                       </Td>
                       <Td className={COLUMNS.trend}>
                         <ShortLinkSparkline dailyClicks={link.dailyClicks} />

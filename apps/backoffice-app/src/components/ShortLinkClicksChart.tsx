@@ -1,5 +1,6 @@
 'use client'
 
+import {formatUtcDayShort} from '@/src/services/format'
 import {type ShortLinkDailyClicks} from '@/src/services/shortLinks/domain'
 import {Array, pipe} from 'effect'
 import {
@@ -11,7 +12,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
-import {CHART_AXIS, CHART_BLUE, CHART_GRID, CHART_MUTED} from './chartTheme'
+import {CHART_AXIS, CHART_GRID, CHART_MUTED, CHART_PRIMARY} from './chartTheme'
 
 const DAY_MS = 24 * 60 * 60 * 1000
 export const CLICKS_RANGE_DAYS = 30
@@ -23,13 +24,6 @@ interface DayPoint {
 }
 
 const isoDay = (date: Date): string => date.toISOString().slice(0, 10)
-
-const formatDay = (day: string): string =>
-  new Date(day).toLocaleDateString(undefined, {
-    month: 'short',
-    day: 'numeric',
-    timeZone: 'UTC',
-  })
 
 // The server only returns days with clicks; fill the rest with zeros.
 const buildPoints = (
@@ -49,7 +43,7 @@ const buildPoints = (
     ),
     Array.map((day) => ({
       day,
-      label: formatDay(day),
+      label: formatUtcDayShort(day),
       count: countByDay.get(day) ?? 0,
     }))
   )
@@ -97,7 +91,7 @@ export function ShortLinkClicksChart({dailyClicks}: ChartProps) {
           />
           <Bar
             dataKey="count"
-            fill={CHART_BLUE}
+            fill={CHART_PRIMARY}
             maxBarSize={16}
             radius={[3, 3, 0, 0]}
             isAnimationActive={false}
@@ -131,7 +125,7 @@ export function ShortLinkSparkline({dailyClicks}: ChartProps) {
             className="min-h-px flex-1 rounded-t-[1px]"
             style={{
               height: `${(count / max) * 100}%`,
-              backgroundColor: count > 0 ? CHART_BLUE : CHART_AXIS,
+              backgroundColor: count > 0 ? CHART_PRIMARY : CHART_AXIS,
             }}
           />
         ))

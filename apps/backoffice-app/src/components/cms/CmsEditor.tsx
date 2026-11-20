@@ -14,8 +14,8 @@ import {
 } from '@/src/components/ui'
 import {useCmsImageUpload} from '@/src/hooks/useCms'
 import {useCmsItem} from '@/src/hooks/useCmsItem'
-import {formatDateTime} from '@/src/services/cms/dateTimeLocal'
 import {isScheduled, type CmsResource} from '@/src/services/cms/resources'
+import {formatDateTime} from '@/src/services/format'
 import {type CmsStatus} from '@vexl-next/domain/src/general/cms'
 import {Either} from 'effect'
 import {

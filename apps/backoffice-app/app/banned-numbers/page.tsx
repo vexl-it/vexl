@@ -8,10 +8,10 @@ import {
   ButtonLink,
   Card,
   EmptyState,
-  Input,
   Page,
   PageHeader,
   SearchIcon,
+  SearchInput,
   Spinner,
   Table,
   Td,
@@ -24,6 +24,7 @@ import {
 } from '@/src/components/ui'
 import {useBannedNumbersApi} from '@/src/hooks/useBannedNumbersApi'
 import {bannedNumbersErrorMessage} from '@/src/services/bannedNumbers'
+import {formatDate, formatDateTime} from '@/src/services/format'
 import {
   type BannedNumberAdminInfo,
   type BannedNumberId,
@@ -36,12 +37,6 @@ const SEARCH_DEBOUNCE_MS = 300
 // Numbers are stored without formatting, so a pasted "+420 800 123 456" has to
 // lose its separators to match.
 const PHONE_NUMBER_SEPARATORS = /[\s().-]/g
-
-const dateFormat = new Intl.DateTimeFormat('en-GB', {dateStyle: 'medium'})
-const dateTimeFormat = new Intl.DateTimeFormat('en-GB', {
-  dateStyle: 'full',
-  timeStyle: 'short',
-})
 
 interface Feedback {
   readonly tone: AlertTone
@@ -188,19 +183,15 @@ export default function BannedNumbersPage() {
 
       <Card flush>
         <div className="flex flex-wrap items-center gap-3 border-b border-line px-4 py-3">
-          <div className="relative w-full sm:w-72">
-            <SearchIcon className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-ink-subtle" />
-            <Input
-              type="search"
-              value={searchInput}
-              onChange={(event) => {
-                setSearchInput(event.target.value)
-              }}
-              placeholder="Search by number"
-              aria-label="Search banned numbers"
-              className="pl-9 font-mono placeholder:font-sans"
-            />
-          </div>
+          <SearchInput
+            className="w-full sm:w-72"
+            value={searchInput}
+            onChange={(event) => {
+              setSearchInput(event.target.value)
+            }}
+            placeholder="Search by number"
+            aria-label="Search banned numbers"
+          />
           {loading && hasItems ? <Spinner className="text-ink-subtle" /> : null}
           {hasItems ? (
             <p className="text-sm text-ink-muted tabular-nums sm:ml-auto">
@@ -263,9 +254,9 @@ export default function BannedNumbersPage() {
               <Td className="whitespace-nowrap text-ink-muted">
                 <time
                   dateTime={bannedNumber.createdAt.toISOString()}
-                  title={dateTimeFormat.format(bannedNumber.createdAt)}
+                  title={formatDateTime(bannedNumber.createdAt)}
                 >
-                  {dateFormat.format(bannedNumber.createdAt)}
+                  {formatDate(bannedNumber.createdAt)}
                 </time>
               </Td>
               <TdActions>

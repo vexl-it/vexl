@@ -10,12 +10,12 @@ import {
   CopyButton,
   EmptyState,
   ExternalLinkIcon,
-  Input,
   Modal,
   Page,
   PageHeader,
   PlusIcon,
   SearchIcon,
+  SearchInput,
   SegmentedControl,
   SortTh,
   StatCard,
@@ -28,11 +28,11 @@ import {
 } from '@/src/components/ui'
 import {useAdminApi} from '@/src/hooks/useAdminApi'
 import {makeApiErrorMessage} from '@/src/services/apiErrorMessage'
-import {formatDateTime} from '@/src/services/cms/dateTimeLocal'
 import {
   makeBackofficeCommonHeaders,
   makeContentClient,
 } from '@/src/services/contentAdminApi'
+import {formatDateTime} from '@/src/services/format'
 import {type VexlProductNotification} from '@vexl-next/domain/src/general/vexlProductNotification'
 import {Array, Option, Order, pipe} from 'effect'
 import {useCallback, useEffect, useState} from 'react'
@@ -220,19 +220,15 @@ export default function ProductNotificationsPage() {
       <Card flush>
         {Array.isNonEmptyReadonlyArray(notifications) ? (
           <div className="flex flex-wrap items-center gap-3 border-b border-line p-3">
-            <div className="relative min-w-48 flex-1 sm:max-w-sm">
-              <SearchIcon className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-ink-subtle" />
-              <Input
-                type="search"
-                aria-label="Search notifications"
-                placeholder="Search title, text or link"
-                className="pl-9"
-                value={query}
-                onChange={(event) => {
-                  setQuery(event.target.value)
-                }}
-              />
-            </div>
+            <SearchInput
+              className="min-w-48 flex-1 sm:max-w-sm"
+              aria-label="Search notifications"
+              placeholder="Search title, text or link"
+              value={query}
+              onChange={(event) => {
+                setQuery(event.target.value)
+              }}
+            />
             <SegmentedControl
               label="Filter by type"
               value={typeFilter}

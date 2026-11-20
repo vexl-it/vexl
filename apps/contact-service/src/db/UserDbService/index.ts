@@ -9,6 +9,7 @@ import {
   type ClearVexlNotificationTokenHeldByOtherUsersParams,
 } from './queries/createClearVexlNotificationTokenHeldByOtherUsers'
 import {createDeleteUserByPublicKeyAndHash} from './queries/createDeleteUserByPublicKeyAndHash'
+import {createDeleteUsersByPublicKey} from './queries/createDeleteUsersByPublicKey'
 import {createFindHashesByPublicKey} from './queries/createFindHashesByPublicKey'
 import {createFindUserByHash} from './queries/createFindUserByHash'
 import {createFindUserbyPublicKeyAndHash} from './queries/createFindUserByPublicKeyAndHash'
@@ -127,6 +128,10 @@ export interface UserDbOperations {
     hash: ServerHashedNumber
   }) => Effect.Effect<void, UnexpectedServerError>
 
+  deleteUsersByPublicKey: (
+    publicKey: PublicKeyPemBase64
+  ) => Effect.Effect<readonly ServerHashedNumber[], UnexpectedServerError>
+
   updateRefreshUser: (
     args: UpdateRefreshUserParams
   ) => Effect.Effect<void, UnexpectedServerError>
@@ -170,6 +175,7 @@ export class UserDbService extends Context.Tag('UserDbService')<
       const deleteUserByPublicKeyAndHash = yield* _(
         createDeleteUserByPublicKeyAndHash
       )
+      const deleteUsersByPublicKey = yield* _(createDeleteUsersByPublicKey)
       const updateRefreshUser = yield* _(createUpdateRefreshUser)
       const updateLoginSessionId = yield* _(createUpdateLoginSessionId)
 
@@ -208,6 +214,7 @@ export class UserDbService extends Context.Tag('UserDbService')<
         findVexlNotificationTokenOfAccountByHash,
         findUserByPublicKeyAndHash,
         deleteUserByPublicKeyAndHash,
+        deleteUsersByPublicKey,
         updateRefreshUser,
         updateLoginSessionId,
         findVexlNotificationTokensOfUsersWhoDirectlyImportedHash,

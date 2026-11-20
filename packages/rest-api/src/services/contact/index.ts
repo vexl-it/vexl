@@ -127,6 +127,8 @@ export function api({
         ),
       deleteUser: () =>
         withSecurityHeaders((headers) => client.User.deleteUser({headers})),
+      deleteAccount: () =>
+        withSecurityHeaders((headers) => client.User.deleteAccount({headers})),
       importContacts: (body: ImportContactsRequest) =>
         withSecurityHeaders((headers) =>
           client.Contact.importContacts({payload: body, headers})

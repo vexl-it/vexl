@@ -155,3 +155,83 @@ describe('registering a number', () => {
     )
   })
 })
+
+const deleteAccount = (user: DummyUser): TestEffect<void> =>
+  Effect.gen(function* (_) {
+    const app = yield* _(NodeTestingApp)
+    yield* _(setAuthHeaders(user.authHeaders))
+    yield* _(
+      app.User.deleteAccount({
+        headers: makeTestCommonAndSecurityHeaders(user.authHeaders),
+      })
+    )
+  })
+
+describe('deleting the account', () => {
+  it('deletes every number of the account with its contacts and nothing else', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const main = yield* _(generateKeysAndHasheForNumber('+420734500001'))
+        const numbers = [
+          main,
+          yield* _(generateAnotherNumber(main, '+420734500002')),
+          yield* _(generateAnotherNumber(main, '+420734500003')),
+        ]
+        const otherAccount = yield* _(
+          generateKeysAndHasheForNumber('+420734500004')
+        )
+        yield* _(
+          Effect.forEach(numbers, (one) =>
+            createAndImportUsersFromNetwork(one, [otherAccount])
+          )
+        )
+        yield* _(createAndImportUsersFromNetwork(otherAccount, [main]))
+
+        yield* _(deleteAccount(main))
+
+        for (const one of numbers) {
+          expect(
+            yield* _(findPublicKeysOfHash(one.serverHashedNumber))
+          ).toEqual([])
+          expect(yield* _(countContactsOf(one.serverHashedNumber))).toBe(0)
+        }
+        expect(
+          yield* _(findPublicKeysOfHash(otherAccount.serverHashedNumber))
+        ).toEqual([otherAccount.keys.publicKeyPemBase64])
+        expect(yield* _(countContactsOf(otherAccount.serverHashedNumber))).toBe(
+          1
+        )
+      })
+    )
+  })
+
+  it('deletes the account even after its main number moved to another account', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const main = yield* _(generateKeysAndHasheForNumber('+420734600001'))
+        const extra = yield* _(generateAnotherNumber(main, '+420734600002'))
+        const friend = yield* _(generateKeysAndHasheForNumber('+420734600003'))
+        yield* _(createAndImportUsersFromNetwork(main, [friend]))
+        yield* _(createAndImportUsersFromNetwork(extra, [friend]))
+
+        const newOwnerOfMain = yield* _(
+          generateKeysAndHasheForNumber('+420734600001')
+        )
+        yield* _(createAndImportUsersFromNetwork(newOwnerOfMain, [friend]))
+
+        yield* _(deleteAccount(main))
+
+        expect(
+          yield* _(findPublicKeysOfHash(extra.serverHashedNumber))
+        ).toEqual([])
+        expect(yield* _(countContactsOf(extra.serverHashedNumber))).toBe(0)
+        expect(
+          yield* _(findPublicKeysOfHash(newOwnerOfMain.serverHashedNumber))
+        ).toEqual([newOwnerOfMain.keys.publicKeyPemBase64])
+        expect(
+          yield* _(countContactsOf(newOwnerOfMain.serverHashedNumber))
+        ).toBe(1)
+      })
+    )
+  })
+})

@@ -135,6 +135,15 @@ export const DeleteUserEndpoint = HttpApiEndpoint.del(
   .addSuccess(NoContentResponse)
   .annotate(MaxExpectedDailyCall, 1)
 
+export const DeleteAccountEndpoint = HttpApiEndpoint.del(
+  'deleteAccount',
+  '/api/v1/users/me/account'
+)
+  .setHeaders(CommonAndSecurityHeaders)
+  .middleware(ServerSecurityMiddleware)
+  .addSuccess(NoContentResponse)
+  .annotate(MaxExpectedDailyCall, 1)
+
 export const EraseUserFromNetworkEndpoint = HttpApiEndpoint.del(
   'eraseUserFromNetwork',
   '/api/v1/users/erase'
@@ -315,6 +324,7 @@ const UserApiGroup = HttpApiGroup.make('User')
   .add(RestoreUserEndpoint)
   .add(UpdateNotificationTokenEndpoint)
   .add(DeleteUserEndpoint)
+  .add(DeleteAccountEndpoint)
   .add(EraseUserFromNetworkEndpoint)
 
 const ContactApiGroup = HttpApiGroup.make('Contact')

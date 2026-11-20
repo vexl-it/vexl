@@ -16,6 +16,10 @@ The app uploads and downloads chat images straight to MinIO using URLs presigned
 
 Open `http://<LAN IP>:3011` (the IP `lanIp.ts` detects). `services.ts` points backoffice-app's MinIO upload and image URLs at the LAN IP and passes it as `DEV_LAN_IP`, which `next.config.js` adds to `allowedDevOrigins` so `next dev` serves that origin. Plain HTTP to a LAN IP is not a secure context, so browsers omit `crypto.randomUUID`; `instrumentation-client.ts` fills it in during development only.
 
+## Backoffice mock data
+
+With `pnpm dev:backend` running, `pnpm --filter @vexl-next/backoffice-app seed:dev` fills every backoffice section with fake clubs, banned numbers, product notifications, slideshows, short links, blog posts, events and admin passkeys. It is safe to re-run and refuses to run against anything but localhost. The scripts live in [apps/backoffice-app/scripts/dev-seed/](../../apps/backoffice-app/scripts/dev-seed/). The fake passkeys stop `/login` from offering the first-admin setup; `admins.ts` has the command to remove them.
+
 ## Places DB seeding
 
 The standalone geocoding database (its own PostGIS-capable `geocoding-postgres` container, separate from the vexl service databases) seeds itself from the committed Czechia dump: `docker-compose.dev.yaml` mounts [geocoding-postgres-init/](geocoding-postgres-init/) into `docker-entrypoint-initdb.d`, so ~135k places and their reverse-geocoding boundaries restore automatically when the volume is first created — no downloads or external tools. `--fresh-db` recreates the volume and thereby re-restores the dump.

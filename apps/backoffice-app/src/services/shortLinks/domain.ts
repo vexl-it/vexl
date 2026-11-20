@@ -43,3 +43,6 @@ export const ShortLinkResponse = Schema.Struct({
   link: ShortLink,
 })
 export type ShortLinkResponse = typeof ShortLinkResponse.Type
+
+export const isHttpUrl = Schema.is(HttpUrl)
+export const isShortLinkSlug = Schema.is(ShortLinkSlug)

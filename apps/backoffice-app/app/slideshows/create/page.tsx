@@ -1,57 +1,33 @@
 'use client'
 
 import {SlideshowForm} from '@/src/components/slideshows/SlideshowForm'
+import {Page, PageHeader} from '@/src/components/ui'
 import {createSlideshow} from '@/src/services/slideshows/api'
-import {type SlideshowSlides} from '@/src/services/slideshows/domain'
 import {useRouter} from 'next/navigation'
 import {useState} from 'react'
-
-interface SubmitData {
-  readonly name: string
-  readonly publicSlug: string | null
-  readonly isEnabled: boolean
-  readonly slides: SlideshowSlides
-}
 
 export default function CreateSlideshowPage() {
   const [slideshowUuid] = useState(() => crypto.randomUUID())
   const router = useRouter()
 
-  const handleSubmit = async (data: SubmitData) => {
-    const result = await createSlideshow({
-      uuid: slideshowUuid,
-      name: data.name,
-      publicSlug: data.publicSlug,
-      isEnabled: data.isEnabled,
-      slides: data.slides,
-    })
-
-    router.push(`/slideshows/${result.slideshow.uuid}/edit`)
-  }
-
   return (
-    <div className="px-4 sm:px-6 lg:px-8">
-      <div className="sm:flex sm:items-center">
-        <div className="sm:flex-auto">
-          <h1 className="text-2xl font-semibold text-gray-900">
-            Create slideshow
-          </h1>
-          <p className="mt-2 text-sm text-gray-700">
-            Configure slides for a public TV display URL
-          </p>
-        </div>
-      </div>
-
+    <Page>
+      <PageHeader
+        title="Create slideshow"
+        description="Add the slides, then save to get the link for the TV."
+        back={{href: '/slideshows', label: 'TV slideshows'}}
+      />
       <SlideshowForm
         slideshowUuid={slideshowUuid}
-        initialName=""
-        initialPublicSlug={null}
-        initialIsEnabled={true}
-        initialSlides={[]}
         submitLabel="Create slideshow"
-        submittingLabel="Creating..."
-        onSubmit={handleSubmit}
+        onSubmit={async (data) => {
+          const {slideshow} = await createSlideshow({
+            uuid: slideshowUuid,
+            ...data,
+          })
+          router.push(`/slideshows/${slideshow.uuid}/edit`)
+        }}
       />
-    </div>
+    </Page>
   )
 }

@@ -35,3 +35,12 @@ export const cmsImageExtensionForMimeType = (
     Array.findFirst(([, contentType]) => contentType === mimeType),
     Option.map(([extension]) => extension)
   )
+
+/** Lowercase words joined by dashes, with accents stripped. */
+export const slugify = (text: string): string =>
+  text
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')

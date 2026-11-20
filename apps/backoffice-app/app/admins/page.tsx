@@ -1,341 +1,242 @@
 'use client'
 
+import {EditSectionsModal} from '@/src/components/admins/EditSectionsModal'
+import {InviteLinkCard} from '@/src/components/admins/InviteLinkCard'
 import {
-  createInvite,
-  deletePasskey,
-  listPasskeys,
-  updatePasskeySections,
-} from '@/src/services/access/api'
+  type CreatedInvite,
+  InviteModal,
+} from '@/src/components/admins/InviteModal'
+import {PasskeyTable} from '@/src/components/admins/PasskeyTable'
+import {isAdmin} from '@/src/components/admins/sections'
+import {useNow} from '@/src/components/admins/time'
 import {
-  ALL_SECTIONS,
-  type BackofficeSection,
-  type CreateInviteResponse,
-  type Passkey,
-  SECTION_NAMES,
-} from '@/src/services/access/domain'
-import {copyToClipboard} from '@/src/services/clipboard'
-import {Array, pipe} from 'effect'
+  Alert,
+  Button,
+  Page,
+  PageHeader,
+  PlusIcon,
+  useConfirm,
+} from '@/src/components/ui'
+import {useBackofficeSession} from '@/src/hooks/useBackofficeSession'
+import {deletePasskey, listPasskeys} from '@/src/services/access/api'
+import {type Passkey} from '@/src/services/access/domain'
+import {makeApiErrorMessage} from '@/src/services/apiErrorMessage'
+import {Array} from 'effect'
 import {useCallback, useEffect, useState} from 'react'
 
-const errorMessage = (error: unknown): string =>
-  error instanceof Error ? error.message : 'Request failed'
+const errorMessage = makeApiErrorMessage({})
 
-const formatDate = (iso: string | null): string =>
-  iso === null ? 'Never' : new Date(iso).toLocaleString()
+const POLL_WHILE_INVITED_MS = 5000
 
-const toggleSection = (
-  sections: readonly BackofficeSection[],
-  section: BackofficeSection
-): readonly BackofficeSection[] =>
-  Array.contains(sections, section)
-    ? Array.filter(sections, (current) => current !== section)
-    : pipe(
-        ALL_SECTIONS,
-        Array.filter(
-          (current) => current === section || Array.contains(sections, current)
-        )
-      )
-
-const buttonClassName =
-  'rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50'
-
-function SectionCheckboxes({
-  selected,
-  onChange,
-}: {
-  readonly selected: readonly BackofficeSection[]
-  readonly onChange: (sections: readonly BackofficeSection[]) => void
-}) {
-  return (
-    <div className="flex flex-wrap gap-x-4 gap-y-2">
-      {Array.map(ALL_SECTIONS, (section) => (
-        <label key={section} className="flex items-center gap-2 text-sm">
-          <input
-            type="checkbox"
-            checked={Array.contains(selected, section)}
-            onChange={() => {
-              onChange(toggleSection(selected, section))
-            }}
-          />
-          {SECTION_NAMES[section]}
-        </label>
-      ))}
-    </div>
-  )
+type SentInvite = CreatedInvite & {
+  /** Passkeys that existed before the invite; a new one means it was used. */
+  readonly knownPasskeyIds: readonly string[]
 }
 
-function InviteForm() {
-  const [label, setLabel] = useState('')
-  const [sections, setSections] = useState<readonly BackofficeSection[]>([])
-  const [invite, setInvite] = useState<CreateInviteResponse | null>(null)
-  const [copied, setCopied] = useState(false)
-  const [creating, setCreating] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-
-  const handleCreate = async (event: React.SyntheticEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    if (!Array.isNonEmptyReadonlyArray(sections)) {
-      setError('Pick at least one section')
-      return
-    }
-    setCreating(true)
-    setError(null)
-    setCopied(false)
-    try {
-      setInvite(await createInvite({label: label.trim(), sections}))
-      setLabel('')
-      setSections([])
-    } catch (createError) {
-      setError(errorMessage(createError))
-    } finally {
-      setCreating(false)
-    }
-  }
-
-  const handleCopy = async (url: string) => {
-    try {
-      await copyToClipboard(url)
-      setCopied(true)
-    } catch {
-      setError('Clipboard copy is blocked. Copy the link manually.')
-    }
-  }
-
-  return (
-    <form
-      onSubmit={handleCreate}
-      className="mt-6 space-y-4 rounded-lg bg-white p-4 shadow-sm"
-    >
-      <h2 className="text-lg font-medium text-gray-900">Invite an admin</h2>
-      <label className="block text-sm">
-        <span className="block font-medium text-gray-700">Label</span>
-        <input
-          type="text"
-          required
-          maxLength={100}
-          value={label}
-          onChange={(event) => {
-            setLabel(event.target.value)
-          }}
-          placeholder="Who or which device this passkey is for"
-          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 shadow-sm focus:border-indigo-500 focus:outline-none"
-        />
-      </label>
-      <SectionCheckboxes selected={sections} onChange={setSections} />
-      <button type="submit" disabled={creating} className={buttonClassName}>
-        {creating ? 'Creating...' : 'Create invite link'}
-      </button>
-
-      {!!error && (
-        <div className="rounded-md bg-red-50 p-4 text-sm text-red-800">
-          {error}
-        </div>
-      )}
-
-      {invite !== null && (
-        <div className="space-y-2 rounded-md bg-gray-50 p-4 text-sm">
-          <p className="text-gray-700">
-            Send this link to the person. It works once and expires at{' '}
-            {formatDate(invite.expiresAt)}.
-          </p>
-          <div className="flex items-center gap-2">
-            <code className="min-w-0 flex-1 break-all rounded bg-white px-2 py-1 font-mono text-xs text-gray-900">
-              {invite.inviteUrl}
-            </code>
-            <button
-              type="button"
-              onClick={() => {
-                void handleCopy(invite.inviteUrl)
-              }}
-              className={buttonClassName}
-            >
-              {copied ? 'Copied' : 'Copy'}
-            </button>
-          </div>
-        </div>
-      )}
-    </form>
-  )
-}
+const soleId = (passkeys: readonly Passkey[]): string | null =>
+  passkeys.length === 1 ? passkeys[0].id : null
 
 export default function AdminsPage() {
+  const sessionState = useBackofficeSession()
+  const {confirm, dialog} = useConfirm()
+  const now = useNow(60_000)
   const [passkeys, setPasskeys] = useState<readonly Passkey[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [editing, setEditing] = useState<{
-    readonly id: string
-    readonly sections: readonly BackofficeSection[]
-  } | null>(null)
+  const [notice, setNotice] = useState<string | null>(null)
+  const [editing, setEditing] = useState<Passkey | null>(null)
+  const [revokingId, setRevokingId] = useState<string | null>(null)
+  const [inviting, setInviting] = useState(false)
+  const [invites, setInvites] = useState<readonly SentInvite[]>([])
 
-  const loadPasskeys = useCallback(async () => {
+  const refresh = useCallback(async () => {
+    setPasskeys(await listPasskeys())
+  }, [])
+
+  const load = useCallback(async () => {
     setError(null)
     try {
-      setPasskeys(await listPasskeys())
+      await refresh()
     } catch (loadError) {
       setError(errorMessage(loadError))
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [refresh])
 
   useEffect(() => {
-    void loadPasskeys()
-  }, [loadPasskeys])
+    void load()
+  }, [load])
 
-  const handleSave = async () => {
-    if (editing === null) return
-    setError(null)
-    try {
-      const updated = await updatePasskeySections(editing.id, editing.sections)
-      setPasskeys((current) =>
-        Array.map(current, (passkey) =>
-          passkey.id === updated.id ? updated : passkey
-        )
-      )
-      setEditing(null)
-    } catch (saveError) {
-      setError(errorMessage(saveError))
+  const isAccepted = (invite: SentInvite): boolean =>
+    Array.some(
+      passkeys,
+      (passkey) =>
+        passkey.label === invite.label &&
+        !Array.contains(invite.knownPasskeyIds, passkey.id)
+    )
+  const awaitingInvitee = Array.some(
+    invites,
+    (invite) =>
+      !isAccepted(invite) && new Date(invite.expiresAt).getTime() > now
+  )
+
+  useEffect(() => {
+    if (!awaitingInvitee) return
+    const interval = setInterval(() => {
+      // A failed poll is simply retried on the next tick.
+      refresh().catch(() => undefined)
+    }, POLL_WHILE_INVITED_MS)
+    return () => {
+      clearInterval(interval)
     }
-  }
+  }, [awaitingInvitee, refresh])
 
-  const handleDelete = async (passkey: Passkey) => {
-    if (!window.confirm(`Delete the passkey "${passkey.label}"?`)) return
+  // The session carries only the label, so "you" is known when it is unique.
+  const ownId =
+    sessionState.status === 'signedIn'
+      ? soleId(
+          Array.filter(
+            passkeys,
+            (passkey) => passkey.label === sessionState.session.label
+          )
+        )
+      : null
+  const lastAdminId = soleId(Array.filter(passkeys, isAdmin))
+
+  const handleRevoke = async (passkey: Passkey) => {
+    const own = passkey.id === ownId
+    const confirmed = await confirm({
+      title: `Revoke the passkey “${passkey.label}”?`,
+      message: own
+        ? 'This is the passkey you are signed in with. You are signed out right away and stay locked out of the backoffice until another admin invites you again.'
+        : 'Whoever uses it is signed out right away and can no longer sign in. This cannot be undone: to give the access back you have to send a new invite.',
+      confirmLabel: 'Revoke passkey',
+    })
+    if (!confirmed) return
+
+    setRevokingId(passkey.id)
+    setNotice(null)
     setError(null)
     try {
       await deletePasskey(passkey.id)
-      setPasskeys((current) =>
-        Array.filter(current, (other) => other.id !== passkey.id)
-      )
-    } catch (deleteError) {
-      setError(errorMessage(deleteError))
+      if (own) {
+        window.location.assign('/login')
+        return
+      }
+      setNotice(`Revoked the passkey “${passkey.label}”.`)
+      await load()
+    } catch (revokeError) {
+      setError(errorMessage(revokeError))
+    } finally {
+      setRevokingId(null)
     }
   }
 
+  const handleSaved = (saved: Passkey) => {
+    // Without Admins the shell has to re-check what this session may open.
+    if (saved.id === ownId && !isAdmin(saved)) {
+      window.location.reload()
+      return
+    }
+    setEditing(null)
+    setNotice(`Updated the sections of “${saved.label}”.`)
+    void load()
+  }
+
+  const inviteButton = (
+    <Button
+      variant="primary"
+      icon={<PlusIcon />}
+      onClick={() => {
+        setInviting(true)
+      }}
+    >
+      Invite admin
+    </Button>
+  )
+
   return (
-    <div className="px-4 sm:px-6 lg:px-8">
-      <h1 className="text-2xl font-semibold text-gray-900">Admins</h1>
-      <p className="mt-2 text-sm text-gray-700">
-        Every passkey signs in on its own and sees only its sections. Changes
-        apply immediately.
-      </p>
+    <Page>
+      <PageHeader
+        title="Admins"
+        description="Every admin signs in with their own passkey and sees only the sections it allows. Changes apply immediately."
+        actions={inviteButton}
+      />
 
-      <InviteForm />
+      {Array.map(invites, (invite) => (
+        <InviteLinkCard
+          key={invite.inviteUrl}
+          invite={invite}
+          accepted={isAccepted(invite)}
+          onDismiss={() => {
+            setInvites(Array.filter((other) => other !== invite))
+          }}
+        />
+      ))}
 
-      {!!error && (
-        <div className="mt-6 rounded-md bg-red-50 p-4 text-sm text-red-800">
+      {error ? (
+        <Alert
+          tone="error"
+          action={
+            <Button
+              size="sm"
+              onClick={() => {
+                void load()
+              }}
+            >
+              Reload
+            </Button>
+          }
+        >
           {error}
-        </div>
-      )}
+        </Alert>
+      ) : notice ? (
+        <Alert tone="success">{notice}</Alert>
+      ) : null}
 
-      <div className="mt-8 overflow-x-auto">
-        {loading ? (
-          <div className="text-gray-600">Loading passkeys...</div>
-        ) : (
-          <table className="min-w-full divide-y divide-gray-300 overflow-hidden rounded-lg bg-white shadow-sm">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                  Label
-                </th>
-                <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                  Sections
-                </th>
-                <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                  Created
-                </th>
-                <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                  Last used
-                </th>
-                <th className="relative px-3 py-3.5">
-                  <span className="sr-only">Actions</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200 bg-white">
-              {Array.map(passkeys, (passkey) => (
-                <tr key={passkey.id}>
-                  <td className="px-3 py-4 text-sm font-medium text-gray-900">
-                    {passkey.label}
-                  </td>
-                  <td className="px-3 py-4 text-sm text-gray-700">
-                    {editing?.id === passkey.id ? (
-                      <SectionCheckboxes
-                        selected={editing.sections}
-                        onChange={(sections) => {
-                          setEditing({id: passkey.id, sections})
-                        }}
-                      />
-                    ) : (
-                      pipe(
-                        passkey.sections,
-                        Array.map((section) => SECTION_NAMES[section]),
-                        Array.join(', ')
-                      )
-                    )}
-                  </td>
-                  <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                    {formatDate(passkey.createdAt)}
-                  </td>
-                  <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                    {formatDate(passkey.lastUsedAt)}
-                  </td>
-                  <td className="whitespace-nowrap px-3 py-4 text-right text-sm">
-                    {editing?.id === passkey.id ? (
-                      <div className="flex justify-end gap-3">
-                        <button
-                          type="button"
-                          disabled={
-                            !Array.isNonEmptyReadonlyArray(editing.sections)
-                          }
-                          onClick={() => {
-                            void handleSave()
-                          }}
-                          className="text-indigo-600 hover:text-indigo-900 disabled:opacity-50"
-                        >
-                          Save
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setEditing(null)
-                          }}
-                          className="text-gray-600 hover:text-gray-900"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="flex justify-end gap-3">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setEditing({
-                              id: passkey.id,
-                              sections: passkey.sections,
-                            })
-                          }}
-                          className="text-indigo-600 hover:text-indigo-900"
-                        >
-                          Edit sections
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            void handleDelete(passkey)
-                          }}
-                          className="text-red-600 hover:text-red-900"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
-    </div>
+      <PasskeyTable
+        passkeys={passkeys}
+        loading={loading}
+        ownId={ownId}
+        lastAdminId={lastAdminId}
+        revokingId={revokingId}
+        inviteAction={inviteButton}
+        onEdit={setEditing}
+        onRevoke={(passkey) => {
+          void handleRevoke(passkey)
+        }}
+      />
+
+      {inviting ? (
+        <InviteModal
+          onClose={() => {
+            setInviting(false)
+          }}
+          onCreated={(invite) => {
+            setInviting(false)
+            setInvites((current) => [
+              {
+                ...invite,
+                knownPasskeyIds: Array.map(passkeys, (passkey) => passkey.id),
+              },
+              ...current,
+            ])
+          }}
+        />
+      ) : null}
+      {editing ? (
+        <EditSectionsModal
+          passkey={editing}
+          isOwn={editing.id === ownId}
+          isLastAdmin={editing.id === lastAdminId}
+          onClose={() => {
+            setEditing(null)
+          }}
+          onSaved={handleSaved}
+        />
+      ) : null}
+      {dialog}
+    </Page>
   )
 }

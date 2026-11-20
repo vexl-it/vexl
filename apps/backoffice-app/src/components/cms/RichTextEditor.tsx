@@ -1,5 +1,6 @@
 'use client'
 
+import {cx} from '@/src/components/ui'
 import {ACCEPTED_CMS_IMAGE_TYPES} from '@/src/services/cms/domain'
 import {
   EditorContent,
@@ -8,11 +9,15 @@ import {
   type Editor,
 } from '@tiptap/react'
 import {Array} from 'effect'
-import {useRef, useState, type MouseEvent} from 'react'
+import {useRef, useState, type MouseEvent, type ReactNode} from 'react'
 import {createRichTextExtensions} from './richTextExtensions'
+import {useTextPrompt} from './TextPrompt'
 
 const EDITOR_PROPS = {
-  attributes: {class: 'cms-content min-h-64 px-3 py-2 focus:outline-none'},
+  attributes: {
+    class:
+      'cms-content min-h-80 max-h-[70vh] overflow-y-auto px-4 py-3 focus:outline-none',
+  },
 }
 
 interface Props {
@@ -22,29 +27,51 @@ interface Props {
   readonly uploadImage: (file: File) => Promise<string>
 }
 
-const promptLink = (editor: Editor): void => {
-  const current = editor.getAttributes('link').href
-  const url = window.prompt(
-    'Link URL (empty removes the link)',
-    typeof current === 'string' ? current : 'https://'
-  )
-  if (url === null) return
-
-  const chain = editor.chain().focus().extendMarkRange('link')
-  if (url.trim() === '') chain.unsetLink().run()
-  else chain.setLink({href: url.trim()}).run()
-}
-
 const keepEditorFocus = (e: MouseEvent): void => {
   e.preventDefault()
 }
 
+function ToolbarButton({
+  title,
+  active = false,
+  disabled = false,
+  onClick,
+  children,
+}: {
+  readonly title: string
+  readonly active?: boolean
+  readonly disabled?: boolean
+  readonly onClick: () => void
+  readonly children: ReactNode
+}) {
+  return (
+    <button
+      type="button"
+      title={title}
+      aria-pressed={active}
+      disabled={disabled}
+      onMouseDown={keepEditorFocus}
+      onClick={onClick}
+      className={cx(
+        'h-7 min-w-7 cursor-pointer rounded px-2 text-xs font-medium transition-colors disabled:pointer-events-none disabled:opacity-50',
+        active
+          ? 'bg-ink text-white'
+          : 'text-ink-muted hover:bg-ink/5 hover:text-ink'
+      )}
+    >
+      {children}
+    </button>
+  )
+}
+
 function Toolbar({
   editor,
+  onLink,
   onPickImage,
   uploading,
 }: {
   readonly editor: Editor
+  readonly onLink: () => void
   readonly onPickImage: () => void
   readonly uploading: boolean
 }) {
@@ -65,80 +92,75 @@ function Toolbar({
   const buttons = [
     {
       label: 'H2',
+      title: 'Heading',
       isActive: active.h2,
       run: () => editor.chain().focus().toggleHeading({level: 2}).run(),
     },
     {
       label: 'H3',
+      title: 'Subheading',
       isActive: active.h3,
       run: () => editor.chain().focus().toggleHeading({level: 3}).run(),
     },
     {
-      label: 'B',
+      label: <span className="font-bold">B</span>,
+      title: 'Bold',
       isActive: active.bold,
       run: () => editor.chain().focus().toggleBold().run(),
     },
     {
-      label: 'I',
+      label: <span className="italic">I</span>,
+      title: 'Italic',
       isActive: active.italic,
       run: () => editor.chain().focus().toggleItalic().run(),
     },
-    {
-      label: 'Link',
-      isActive: active.link,
-      run: () => {
-        promptLink(editor)
-      },
-    },
+    {label: 'Link', title: 'Link', isActive: active.link, run: onLink},
     {
       label: '• List',
+      title: 'Bullet list',
       isActive: active.bulletList,
       run: () => editor.chain().focus().toggleBulletList().run(),
     },
     {
       label: '1. List',
+      title: 'Numbered list',
       isActive: active.orderedList,
       run: () => editor.chain().focus().toggleOrderedList().run(),
     },
     {
       label: 'Quote',
+      title: 'Quote',
       isActive: active.blockquote,
       run: () => editor.chain().focus().toggleBlockquote().run(),
     },
   ]
 
   return (
-    <div className="flex flex-wrap gap-1 border-b border-gray-200 bg-gray-50 p-2">
+    <div className="flex flex-wrap gap-0.5 border-b border-line bg-surface-muted p-1.5">
       {Array.map(buttons, (button) => (
-        <button
-          key={button.label}
-          type="button"
-          onMouseDown={keepEditorFocus}
+        <ToolbarButton
+          key={button.title}
+          title={button.title}
+          active={button.isActive}
           onClick={button.run}
-          className={`rounded px-2 py-1 text-xs font-medium ${
-            button.isActive
-              ? 'bg-indigo-600 text-white'
-              : 'bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-100'
-          }`}
         >
           {button.label}
-        </button>
+        </ToolbarButton>
       ))}
-      <button
-        type="button"
-        onMouseDown={keepEditorFocus}
-        onClick={onPickImage}
+      <ToolbarButton
+        title="Insert an image"
         disabled={uploading}
-        className="rounded bg-white px-2 py-1 text-xs font-medium text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-100 disabled:opacity-50"
+        onClick={onPickImage}
       >
         {uploading ? 'Uploading…' : 'Image'}
-      </button>
+      </ToolbarButton>
     </div>
   )
 }
 
 export function RichTextEditor({initialValue, onChange, uploadImage}: Props) {
   const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const {prompt, dialog} = useTextPrompt()
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -155,14 +177,38 @@ export function RichTextEditor({initialValue, onChange, uploadImage}: Props) {
     },
   })
 
-  const insertImage = async (file: File) => {
-    if (!editor) return
+  const editLink = async (current: Editor) => {
+    const href = current.getAttributes('link').href
+    const url = await prompt({
+      title: 'Link',
+      label: 'URL',
+      hint: 'Leave empty to remove the link.',
+      initialValue: typeof href === 'string' ? href : 'https://',
+      confirmLabel: 'Apply',
+    })
+    if (url === null) return
+
+    const chain = current.chain().focus().extendMarkRange('link')
+    if (url.trim() === '') chain.unsetLink().run()
+    else chain.setLink({href: url.trim()}).run()
+  }
+
+  const insertImage = async (current: Editor, file: File) => {
     setUploading(true)
     setError(null)
     try {
       const src = await uploadImage(file)
-      const alt = window.prompt('Describe the image (alt text)') ?? ''
-      editor.chain().focus().setImage({src, alt}).run()
+      const alt = await prompt({
+        title: 'Describe the image',
+        label: 'Alt text',
+        hint: 'Read aloud by screen readers and shown if the image fails to load.',
+        confirmLabel: 'Insert image',
+      })
+      current
+        .chain()
+        .focus()
+        .setImage({src, alt: alt ?? ''})
+        .run()
     } catch (uploadError) {
       setError(
         uploadError instanceof Error
@@ -176,11 +222,14 @@ export function RichTextEditor({initialValue, onChange, uploadImage}: Props) {
 
   return (
     <div>
-      <div className="overflow-hidden rounded-md border border-gray-300 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-control border border-line-strong bg-surface shadow-card focus-within:border-focus focus-within:ring-3 focus-within:ring-accent/40">
         {!!editor && (
           <Toolbar
             editor={editor}
             uploading={uploading}
+            onLink={() => {
+              void editLink(editor)
+            }}
             onPickImage={() => fileInputRef.current?.click()}
           />
         )}
@@ -194,10 +243,11 @@ export function RichTextEditor({initialValue, onChange, uploadImage}: Props) {
         onChange={(e) => {
           const file = e.target.files?.[0]
           e.target.value = ''
-          if (file) void insertImage(file)
+          if (file && editor) void insertImage(editor, file)
         }}
       />
-      {!!error && <p className="mt-1 text-sm text-red-600">{error}</p>}
+      {!!error && <p className="mt-1.5 text-xs text-danger-ink">{error}</p>}
+      {dialog}
     </div>
   )
 }

@@ -1,113 +1,55 @@
-import {useRunEffect} from '@/src/hooks/useRunEffect'
-import {makeClubsAdminClient} from '@/src/services/contactInternalApi'
 import {uploadToPresignedUrl} from '@/src/services/uploadToPresignedUrl'
-import {useCallback, useState} from 'react'
+import {type ImageExtension} from '@vexl-next/rest-api/src/services/contact/contracts'
+import {useState} from 'react'
+import {useClubsApi} from './useClubsApi'
 
-type FileExtension = 'png' | 'jpg' | 'jpeg'
 const RESOURCES_BASE_URL = 'https://resources.vexl.it/'
+const MAX_SIZE_BYTES = 10 * 1024 * 1024
 
-interface UseClubImageUploadResult {
-  selectedFile: File | null
-  previewUrl: string | null
-  uploading: boolean
-  uploadProgress: number
-  uploadedImageUrl: string | null
-  error: string | null
-  handleFileSelect: (e: React.ChangeEvent<HTMLInputElement>) => void
-  uploadImage: () => Promise<void>
-  resetUpload: () => void
+const EXTENSION_BY_TYPE: Readonly<Record<string, ImageExtension>> = {
+  'image/png': 'png',
+  'image/jpeg': 'jpg',
 }
 
-export function useClubImageUpload(): UseClubImageUploadResult {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null)
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+export const ACCEPTED_CLUB_IMAGE_TYPES =
+  Object.keys(EXTENSION_BY_TYPE).join(',')
+
+/** Uploads a club image and resolves with its public URL, or null on failure. */
+export function useClubImageUpload() {
+  const clubsApi = useClubsApi()
   const [uploading, setUploading] = useState(false)
-  const [uploadProgress, setUploadProgress] = useState(0)
-  const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const runEffect = useRunEffect()
 
-  const getFileExtension = (file: File): FileExtension => {
-    const ext = file.name.split('.').pop()?.toLowerCase()
-    if (ext === 'jpg') return 'jpg'
-    if (ext === 'jpeg') return 'jpeg'
-    if (ext === 'png') return 'png'
-    return 'jpg'
-  }
-
-  const handleFileSelect = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>): void => {
-      const file = e.target.files?.[0]
-      if (!file) return
-
-      const validTypes = ['image/png', 'image/jpg', 'image/jpeg']
-      if (!validTypes.includes(file.type)) {
-        setError('Please select a PNG or JPEG image')
-        return
-      }
-
-      setSelectedFile(file)
-      setPreviewUrl(URL.createObjectURL(file))
-      setError(null)
-      setUploadedImageUrl(null)
-    },
-    []
-  )
-
-  const uploadImage = useCallback(async (): Promise<void> => {
-    if (!selectedFile) {
-      setError('Please select a file')
-      return
+  const upload = async (file: File): Promise<string | null> => {
+    const fileExtension = EXTENSION_BY_TYPE[file.type]
+    if (!fileExtension) {
+      setError('Choose a PNG or JPEG image.')
+      return null
+    }
+    if (file.size > MAX_SIZE_BYTES) {
+      setError('The image is larger than 10 MB.')
+      return null
     }
 
     setUploading(true)
     setError(null)
-    setUploadProgress(0)
-
     try {
-      const fileExtension = getFileExtension(selectedFile)
-
-      setUploadProgress(25)
-      const client = await runEffect(makeClubsAdminClient())
-      const result = await runEffect(
-        client.requestClubImageUpload({
-          payload: {fileExtension},
-        })
+      const {presignedUrl, contentType, s3Key} = await clubsApi((client) =>
+        client.requestClubImageUpload({payload: {fileExtension}})
       )
-
-      setUploadProgress(50)
-      await uploadToPresignedUrl({
-        presignedUrl: result.presignedUrl,
-        contentType: result.contentType,
-        file: selectedFile,
-      })
-
-      setUploadProgress(100)
-      setUploadedImageUrl(`${RESOURCES_BASE_URL}${result.s3Key}`)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to upload image')
+      await uploadToPresignedUrl({presignedUrl, contentType, file})
+      return `${RESOURCES_BASE_URL}${s3Key}`
+    } catch (uploadError) {
+      setError(
+        uploadError instanceof Error
+          ? uploadError.message
+          : 'Failed to upload the image.'
+      )
+      return null
     } finally {
       setUploading(false)
     }
-  }, [selectedFile, runEffect])
-
-  const resetUpload = useCallback((): void => {
-    setSelectedFile(null)
-    setPreviewUrl(null)
-    setUploadedImageUrl(null)
-    setError(null)
-    setUploadProgress(0)
-  }, [])
-
-  return {
-    selectedFile,
-    previewUrl,
-    uploading,
-    uploadProgress,
-    uploadedImageUrl,
-    error,
-    handleFileSelect,
-    uploadImage,
-    resetUpload,
   }
+
+  return {uploading, error, upload}
 }

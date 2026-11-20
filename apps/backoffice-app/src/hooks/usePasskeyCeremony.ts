@@ -3,6 +3,14 @@ import {homePath} from '@/src/services/access/navigation'
 import {useRouter} from 'next/navigation'
 import {useEffect, useState} from 'react'
 
+const ceremonyErrorMessage = (error: unknown): string => {
+  if (!(error instanceof Error)) return 'Something went wrong'
+  // What browsers throw when the passkey prompt is dismissed or times out.
+  if (error.name === 'NotAllowedError')
+    return 'The passkey prompt was closed or timed out. Try again.'
+  return error.message
+}
+
 /** Runs a sign-in or registration and opens the first permitted page. */
 export function usePasskeyCeremony() {
   const router = useRouter()
@@ -24,11 +32,7 @@ export function usePasskeyCeremony() {
       const session = await ceremony()
       router.replace(homePath(session.sections))
     } catch (ceremonyError) {
-      setError(
-        ceremonyError instanceof Error
-          ? ceremonyError.message
-          : 'Something went wrong'
-      )
+      setError(ceremonyErrorMessage(ceremonyError))
       setBusy(false)
     }
   }

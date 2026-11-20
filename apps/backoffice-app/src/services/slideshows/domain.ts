@@ -56,6 +56,9 @@ export const TvSlideshow = Schema.Struct({
 })
 export type TvSlideshow = typeof TvSlideshow.Type
 
+export const getPublicIdentifier = (slideshow: TvSlideshow): string =>
+  slideshow.publicSlug ?? slideshow.publicToken
+
 export const CreateSlideshowRequest = Schema.Struct({
   uuid: Schema.optional(Schema.UUID),
   publicSlug: Schema.optional(OptionalPublicSlug),
@@ -83,14 +86,10 @@ export const SlideshowResponse = Schema.Struct({
 })
 export type SlideshowResponse = typeof SlideshowResponse.Type
 
-export const FileExtension = Schema.Literal(
-  'png',
-  'jpg',
-  'jpeg',
-  'webp',
-  'mp4',
-  'webm'
-)
+export const ImageExtension = Schema.Literal('png', 'jpg', 'jpeg', 'webp')
+export const VideoExtension = Schema.Literal('mp4', 'webm')
+
+export const FileExtension = Schema.Union(ImageExtension, VideoExtension)
 export type FileExtension = typeof FileExtension.Type
 
 export const RequestUploadRequest = Schema.Struct({

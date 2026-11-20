@@ -83,6 +83,7 @@
   "editProfileScreen.addPhoneNumberIntro.privacy.title": "展示哪个，由你决定",
   "editProfileScreen.addPhoneNumberIntro.privacy.text": "你的号码不会公开。在聊天中公开身份或分享个人资料时，由你选择展示哪一个。",
   "editProfileScreen.addPhoneNumber.errors.alreadyInAccount": "这个号码已经在你的账户里了。",
+  "editProfileScreen.addPhoneNumber.errors.limitReached": "你的账户无法再添加更多号码了。",
   "editProfileScreen.addPhoneNumber.existingAccount.title": "这个号码已有 Vexl 账户",
   "editProfileScreen.addPhoneNumber.existingAccount.text": "如果你在这里添加它，那个账户就会失去这个号码。如果这是它唯一的号码，那个账户会被删除。",
   "editProfileScreen.addPhoneNumber.existingAccount.confirm": "仍然添加",

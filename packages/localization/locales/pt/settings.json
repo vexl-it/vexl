@@ -83,6 +83,7 @@
   "editProfileScreen.addPhoneNumberIntro.privacy.title": "Tu escolhes o que mostrar",
   "editProfileScreen.addPhoneNumberIntro.privacy.text": "Os teus números ficam privados. Quando revelas a tua identidade num chat ou partilhas o teu perfil, escolhes qual mostrar.",
   "editProfileScreen.addPhoneNumber.errors.alreadyInAccount": "Este número já está na tua conta.",
+  "editProfileScreen.addPhoneNumber.errors.limitReached": "Não podes adicionar mais números à tua conta.",
   "editProfileScreen.addPhoneNumber.existingAccount.title": "Este número já tem uma conta Vexl",
   "editProfileScreen.addPhoneNumber.existingAccount.text": "Se o adicionares aqui, essa conta perde este número. Se for o único número dela, a conta é apagada.",
   "editProfileScreen.addPhoneNumber.existingAccount.confirm": "Adicionar na mesma",

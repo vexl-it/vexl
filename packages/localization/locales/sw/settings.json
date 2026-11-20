@@ -83,6 +83,7 @@
   "editProfileScreen.addPhoneNumberIntro.privacy.title": "Wewe ndiye unachagua cha kuonyesha",
   "editProfileScreen.addPhoneNumberIntro.privacy.text": "Nambari zako zinabaki kuwa siri. Unapofichua utambulisho wako kwenye gumzo au kushiriki wasifu wako, unachagua nambari ipi ya kuonyesha.",
   "editProfileScreen.addPhoneNumber.errors.alreadyInAccount": "Nambari hii tayari iko kwenye akaunti yako.",
+  "editProfileScreen.addPhoneNumber.errors.limitReached": "Huwezi kuongeza nambari zaidi kwenye akaunti yako.",
   "editProfileScreen.addPhoneNumber.existingAccount.title": "Nambari hii tayari ina akaunti ya Vexl",
   "editProfileScreen.addPhoneNumber.existingAccount.text": "Ukiiongeza hapa, akaunti hiyo itapoteza nambari hii. Kama ndiyo nambari yake pekee, akaunti hiyo itafutwa.",
   "editProfileScreen.addPhoneNumber.existingAccount.confirm": "Ongeza hata hivyo",

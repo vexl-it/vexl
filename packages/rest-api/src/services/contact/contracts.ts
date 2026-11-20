@@ -79,6 +79,14 @@ export class UserNotFoundError extends Schema.TaggedError<UserNotFoundError>(
   }),
 }) {}
 
+export const MAX_PHONE_NUMBERS_PER_ACCOUNT = 5
+
+export class PhoneNumberLimitReachedError extends Schema.TaggedError<PhoneNumberLimitReachedError>(
+  'PhoneNumberLimitReachedError'
+)('PhoneNumberLimitReachedError', {
+  status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
+}) {}
+
 export class LoggedInOnAnotherDeviceError extends Schema.TaggedError<LoggedInOnAnotherDeviceError>(
   'LoggedInOnAnotherDeviceError'
 )('LoggedInOnAnotherDeviceError', {

@@ -83,6 +83,7 @@
   "editProfileScreen.addPhoneNumberIntro.privacy.title": "Ти избираш какво да покажеш",
   "editProfileScreen.addPhoneNumberIntro.privacy.text": "Номерата ти остават лични. Когато разкриеш самоличността си в чат или споделиш профила си, избираш кой номер да покажеш.",
   "editProfileScreen.addPhoneNumber.errors.alreadyInAccount": "Този номер вече е в акаунта ти.",
+  "editProfileScreen.addPhoneNumber.errors.limitReached": "Не можеш да добавиш повече номера към акаунта си.",
   "editProfileScreen.addPhoneNumber.existingAccount.title": "Този номер вече има акаунт във Vexl",
   "editProfileScreen.addPhoneNumber.existingAccount.text": "Ако го добавиш тук, другият акаунт губи този номер. Ако това е единственият му номер, акаунтът се изтрива.",
   "editProfileScreen.addPhoneNumber.existingAccount.confirm": "Добави въпреки това",

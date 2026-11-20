@@ -1,3 +1,4 @@
+import {MAX_PHONE_NUMBERS_PER_ACCOUNT} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {
   Button,
   CellPhoneMobileDevice,
@@ -47,6 +48,7 @@ function EditProfilePhoneNumbersScreen({
         <Button
           variant="primary"
           size="large"
+          disabled={phoneNumbers.length >= MAX_PHONE_NUMBERS_PER_ACCOUNT}
           onPress={() => {
             navigation.navigate('AddPhoneNumberIntro')
           }}

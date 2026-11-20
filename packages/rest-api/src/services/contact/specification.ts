@@ -56,6 +56,7 @@ import {
   ListClubLinksResponse,
   LoggedInOnAnotherDeviceError,
   MemberAlreadyInClubError,
+  PhoneNumberLimitReachedError,
   RefreshUserRequest,
   ReportClubLimitReachedError,
   ReportClubRequest,
@@ -86,6 +87,7 @@ export const CreateUserEndpoint = HttpApiEndpoint.post(
   .setPayload(CreateUserRequest)
   .addSuccess(NoContentResponse, {status: 201})
   .addError(InvalidLoginSessionProofError, {status: 403})
+  .addError(PhoneNumberLimitReachedError, {status: 400})
   .annotate(MaxExpectedDailyCall, 1)
 
 export const RefreshUserEndpoint = HttpApiEndpoint.post(

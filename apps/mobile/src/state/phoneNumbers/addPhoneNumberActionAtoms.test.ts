@@ -1,8 +1,11 @@
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
-import {Effect, Schema} from 'effect'
+import {PhoneNumberLimitReachedError} from '@vexl-next/rest-api/src/services/contact/contracts'
+import {Effect, Either, Schema} from 'effect'
 import {createStore, type PrimitiveAtom} from 'jotai'
 
-const mockCreateUser = jest.fn(() => Effect.void)
+const mockCreateUser = jest.fn(
+  (): Effect.Effect<void, PhoneNumberLimitReachedError> => Effect.void
+)
 const mockSubmitContacts = jest.fn((_params: unknown) =>
   Effect.succeed('success')
 )
@@ -120,5 +123,21 @@ it.each([
     numberToAdd,
   ])
   expect(store.get(needsFullContactsReplaceAfterContactEditAtom)).toBe(true)
+  expect(mockSubmitContacts).not.toHaveBeenCalled()
+})
+
+it('keeps the session as it was when contact-service rejects the number', async () => {
+  const store = createStore()
+  mockCreateUser.mockImplementationOnce(() =>
+    Effect.fail(new PhoneNumberLimitReachedError())
+  )
+
+  const result = await Effect.runPromise(
+    Effect.either(store.set(addVerifiedPhoneNumberActionAtom, numberToAdd))
+  )
+
+  expect(Either.isLeft(result)).toBe(true)
+  expect(store.get(sessionDataOrDummyAtom)).toBe(dummySession)
+  expect(store.get(needsFullContactsReplaceAfterContactEditAtom)).toBe(false)
   expect(mockSubmitContacts).not.toHaveBeenCalled()
 })

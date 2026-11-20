@@ -30,6 +30,8 @@ const errorMessageActionAtom = atom(
     const {t} = get(translationAtom)
     if (error._tag === 'PhoneNumberAlreadyInAccountError')
       return t('editProfileScreen.addPhoneNumber.errors.alreadyInAccount')
+    if (error._tag === 'PhoneNumberLimitReachedError')
+      return t('editProfileScreen.addPhoneNumber.errors.limitReached')
 
     if (!isTransportRequestError(error))
       reportError('error', new Error(context), {e: error})

@@ -83,6 +83,7 @@
   "editProfileScreen.addPhoneNumberIntro.privacy.title": "Ty vybíráš, co ukážeš",
   "editProfileScreen.addPhoneNumberIntro.privacy.text": "Tvoje čísla zůstávají soukromá. Když v chatu odhalíš svou identitu nebo sdílíš svůj profil, vybereš si, které z nich ukážeš.",
   "editProfileScreen.addPhoneNumber.errors.alreadyInAccount": "Tohle číslo už ve svém účtu máš.",
+  "editProfileScreen.addPhoneNumber.errors.limitReached": "Do svého účtu už další číslo přidat nemůžeš.",
   "editProfileScreen.addPhoneNumber.existingAccount.title": "Tohle číslo už má účet ve Vexlu",
   "editProfileScreen.addPhoneNumber.existingAccount.text": "Když ho přidáš sem, ten účet o tohle číslo přijde. Pokud je to jeho jediné číslo, účet se smaže.",
   "editProfileScreen.addPhoneNumber.existingAccount.confirm": "Přesto přidat",

@@ -12,10 +12,7 @@ import {
   Spinner,
   Textarea,
 } from '@/src/components/ui'
-import {
-  ACCEPTED_CLUB_IMAGE_TYPES,
-  useClubImageUpload,
-} from '@/src/hooks/useClubImageUpload'
+import {useClubImageUpload} from '@/src/hooks/useClubImageUpload'
 import {HttpUrl} from '@/src/services/urlSchemas'
 import {
   ClubInfoAdminInput,
@@ -25,6 +22,11 @@ import {
 import {Array, Option, pipe, Predicate, Schema} from 'effect'
 import {useState} from 'react'
 import {ClubAvatar} from './ClubAvatar'
+import {
+  ClubImageCropper,
+  loadImageToCrop,
+  type ImageToCrop,
+} from './ClubImageCropper'
 
 const YEAR_MS = 365 * 24 * 60 * 60 * 1000
 
@@ -107,8 +109,25 @@ function ClubImageField({
 }) {
   // The file just uploaded, shown without waiting for the CDN to serve it.
   const [localPreview, setLocalPreview] = useState<string | null>(null)
+  const [imageToCrop, setImageToCrop] = useState<ImageToCrop | null>(null)
+  const [pickError, setPickError] = useState<string | null>(null)
 
-  const handleFile = async (file: File) => {
+  const handlePick = async (file: File) => {
+    setPickError(null)
+    try {
+      setImageToCrop(await loadImageToCrop(file))
+    } catch (loadError) {
+      setPickError(
+        loadError instanceof Error ? loadError.message : 'Failed to open file.'
+      )
+    }
+  }
+  const closeCropper = () => {
+    if (imageToCrop) URL.revokeObjectURL(imageToCrop.image.src)
+    setImageToCrop(null)
+  }
+  const handleCropped = async (file: File) => {
+    closeCropper()
     const url = await upload(file)
     if (url === null) return
     setLocalPreview(URL.createObjectURL(file))
@@ -122,7 +141,7 @@ function ClubImageField({
         <Field
           label="Image URL"
           required
-          error={uploadError ?? error}
+          error={pickError ?? uploadError ?? error}
           hint="Filled in when you upload a file. You can also paste a URL."
         >
           <Input
@@ -132,6 +151,7 @@ function ClubImageField({
             placeholder="https://resources.vexl.it/clubs/…"
             onChange={(e) => {
               setLocalPreview(null)
+              setPickError(null)
               onChange(e.target.value)
             }}
           />
@@ -148,21 +168,30 @@ function ClubImageField({
             {uploading ? 'Uploading…' : 'Upload image'}
             <input
               type="file"
-              accept={ACCEPTED_CLUB_IMAGE_TYPES}
+              accept="image/*"
               className="sr-only"
               disabled={uploading}
               onChange={(e) => {
                 const file = e.target.files?.[0]
                 e.target.value = ''
-                if (file) void handleFile(file)
+                if (file) void handlePick(file)
               }}
             />
           </label>
           <span className="text-xs text-ink-muted">
-            PNG or JPEG, up to 10 MB
+            Any image. You crop it to a square before it uploads.
           </span>
         </div>
       </div>
+      {imageToCrop ? (
+        <ClubImageCropper
+          source={imageToCrop}
+          onCancel={closeCropper}
+          onCropped={(file) => {
+            void handleCropped(file)
+          }}
+        />
+      ) : null}
     </div>
   )
 }

@@ -19,7 +19,7 @@ export function ClubAvatar({
   readonly size?: keyof typeof SIZES
 }) {
   const [failedSrc, setFailedSrc] = useState<string | null>(null)
-  const className = cx('shrink-0 rounded-full', SIZES[size])
+  const className = cx('shrink-0 rounded-[20%]', SIZES[size])
 
   return src && src !== failedSrc ? (
     <img

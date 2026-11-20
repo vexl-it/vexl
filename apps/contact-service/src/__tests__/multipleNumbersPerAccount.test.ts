@@ -1,15 +1,11 @@
 import {SqlClient} from '@effect/sql'
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
-import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {type ServerHashedNumber} from '@vexl-next/domain/src/general/ServerHashedNumber'
 import fetchAllPaginatedData from '@vexl-next/rest-api/src/fetchAllPaginatedData'
-import {hashPhoneNumber} from '@vexl-next/server-utils/src/generateUserAuthData'
-import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Array, Effect, Option, Order, pipe, Schema} from 'effect'
 import {UserNotificationService} from '../services/UserNotificationService'
-import {hashForClient, serverHashPhoneNumber} from '../utils/serverHashContact'
 import {
   createAndImportUsersFromNetwork,
   createUserOnNetwork,
@@ -21,38 +17,13 @@ import {
   clearEnqueuedNotifications,
   getEnqueuedNotifications,
 } from './utils/mockEnqueueUserNotification'
-import {NodeTestingApp} from './utils/NodeTestingApp'
 import {
-  runPromiseInMockedEnvironment,
-  type MockedContexts,
-} from './utils/runPromiseInMockedEnvironment'
-
-type TestEffect<A> = Effect.Effect<A, unknown, MockedContexts>
-
-// Another phone number of the same account: same keys, own hash, no token.
-const generateAnotherNumber = (
-  account: DummyUser,
-  numberRaw: string
-): TestEffect<DummyUser> =>
-  Effect.gen(function* (_) {
-    const phoneNumber = Schema.decodeSync(E164PhoneNumber)(numberRaw)
-    const hashedNumber = yield* _(hashPhoneNumber(phoneNumber))
-    const serverHashedNumber = yield* _(serverHashPhoneNumber(hashedNumber))
-    return {
-      ...account,
-      phoneNumber,
-      hashedNumber,
-      authHeaders: yield* _(
-        createDummyAuthHeadersForUser({
-          phoneNumber,
-          publicKey: account.keys.publicKeyPemBase64,
-        })
-      ),
-      vexlNotificationToken: Option.none(),
-      serverHashedNumber,
-      serverHashedNumberForClient: yield* _(hashForClient(serverHashedNumber)),
-    }
-  })
+  countContactsOf,
+  generateAnotherNumber,
+  type TestEffect,
+} from './utils/multipleNumbers'
+import {NodeTestingApp} from './utils/NodeTestingApp'
+import {runPromiseInMockedEnvironment} from './utils/runPromiseInMockedEnvironment'
 
 const findUserRow = (
   hash: ServerHashedNumber
@@ -69,18 +40,6 @@ const findUserRow = (
       WHERE
         hash = ${hash}
     `
-  )
-
-const countContactsOf = (hash: ServerHashedNumber): TestEffect<number> =>
-  Effect.flatMap(SqlClient.SqlClient, (sql) =>
-    sql<{count: string}>`
-      SELECT
-        count(*) AS count
-      FROM
-        user_contact
-      WHERE
-        hash_from = ${hash}
-    `.pipe(Effect.map(([row]) => Number(row?.count)))
   )
 
 const fetchAllMyContacts = (

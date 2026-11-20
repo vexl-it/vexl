@@ -11,18 +11,13 @@ import {
   makeTestCommonAndSecurityHeaders,
   type DummyUser,
 } from './routes/contacts/utils'
-import {generateAnotherNumber} from './utils/anotherPhoneNumberOfAccount'
 import {
   clearEnqueuedNotifications,
   getEnqueuedNotifications,
 } from './utils/mockEnqueueUserNotification'
+import {generateAnotherNumber, type TestEffect} from './utils/multipleNumbers'
 import {NodeTestingApp} from './utils/NodeTestingApp'
-import {
-  runPromiseInMockedEnvironment,
-  type MockedContexts,
-} from './utils/runPromiseInMockedEnvironment'
-
-type TestEffect<A> = Effect.Effect<A, unknown, MockedContexts>
+import {runPromiseInMockedEnvironment} from './utils/runPromiseInMockedEnvironment'
 
 const contactsOf = (
   hash: ServerHashedNumber

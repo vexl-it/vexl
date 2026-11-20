@@ -6,11 +6,11 @@ import {
   createUserOnNetwork,
   generateKeysAndHasheForNumber,
 } from './routes/contacts/utils'
-import {generateAnotherNumber} from './utils/generateAnotherNumber'
 import {
   clearEnqueuedNotifications,
   getEnqueuedNotifications,
 } from './utils/mockEnqueueUserNotification'
+import {generateAnotherNumber} from './utils/multipleNumbers'
 import {runPromiseInMockedEnvironment} from './utils/runPromiseInMockedEnvironment'
 
 describe('notifications of an account with several phone numbers', () => {

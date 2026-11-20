@@ -6,7 +6,7 @@ import {
 import {HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {ServerToClientHashedNumber} from '@vexl-next/domain/src/general/ServerToClientHashedNumber'
 import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
-import {Schema} from 'effect'
+import {Option, Schema} from 'effect'
 
 export const NonUniqueContactIdE = Schema.String.pipe(
   Schema.brand('NonUniqueContactId')
@@ -55,6 +55,13 @@ export const StoredContact = Schema.Struct({
   }),
 })
 export type StoredContact = typeof StoredContact.Type
+
+export function needsNormalization(contact: StoredContact): boolean {
+  return (
+    Option.isNone(contact.computedValues) &&
+    contact.flags.invalidNumber !== 'invalid'
+  )
+}
 
 export const StoredContactWithComputedValues = Schema.Struct({
   info: ContactInfoE,

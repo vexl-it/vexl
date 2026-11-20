@@ -93,6 +93,8 @@ export function buildUpdatedContact({
     flags: {
       ...contact.flags,
       imported: numberChanged ? false : contact.flags.imported,
+      // The new number is not in the phone
+      importedManually: numberChanged || contact.flags.importedManually,
     },
     serverHashToClient: numberChanged
       ? Option.none()

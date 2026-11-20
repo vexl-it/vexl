@@ -76,6 +76,8 @@
   "notifications.CLUB_DEACTIVATED.FLAGGED.body": "Klabu {{name}} imezimwa kutokana na maudhui yasiyofaa.",
   "notifications.CLUB_DEACTIVATED.OTHER.title": "Klabu imezimwa",
   "notifications.CLUB_DEACTIVATED.OTHER.body": "Klabu {{name}} imezimwa.",
+  "notifications.CONTACTS_REMOVED_FROM_PHONE.title": "Anwani zimeondolewa kwenye simu yako",
+  "notifications.CONTACTS_REMOVED_FROM_PHONE.body": "Tumeona umefuta baadhi ya anwani kwenye simu yako, kwa hiyo tumeziondoa pia kwenye mtandao wako wa Vexl. Ofa zako na ufikiaji wako vimesasishwa.",
   "notifications.groupNotificationRequest.subtitle": "Una maombi mapya kwa ofa zako",
   "notifications.groupNotificationRequest.title": "Maombi mapya",
   "notifications.createOfferPrompt.title": "Unda ofa yako",

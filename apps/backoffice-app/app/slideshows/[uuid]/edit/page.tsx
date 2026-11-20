@@ -9,9 +9,9 @@ import {
   PageHeader,
   StatusMessage,
 } from '@/src/components/ui'
+import {formatDateTime} from '@/src/services/format'
 import {getSlideshow, updateSlideshow} from '@/src/services/slideshows/api'
 import {type TvSlideshow} from '@/src/services/slideshows/domain'
-import {formatDateTime} from '@/src/services/slideshows/format'
 import {useParams} from 'next/navigation'
 import {useCallback, useEffect, useState} from 'react'
 

@@ -8,12 +8,12 @@ import {
   EmptyState,
   ExternalLinkIcon,
   FormMessage,
-  Input,
   Page,
   PageHeader,
   PencilIcon,
   PlusIcon,
   SearchIcon,
+  SearchInput,
   SegmentedControl,
   SortTh,
   Table,
@@ -247,20 +247,16 @@ export function CmsListPage<
       <FormMessage error={loadError ?? error} success={success} />
       <Card flush>
         <div className="flex flex-wrap items-center gap-3 border-b border-line p-3">
-          <div className="relative w-full sm:w-72">
-            <SearchIcon className="pointer-events-none absolute top-1/2 left-2.5 -translate-y-1/2 text-ink-subtle" />
-            <Input
-              type="search"
-              aria-label={`Search ${resource.nouns}`}
-              placeholder={`Search ${resource.nouns}`}
-              value={search}
-              onChange={(e) => {
-                setSearch(e.target.value)
-                setLimit(PAGE_SIZE)
-              }}
-              className="pl-8"
-            />
-          </div>
+          <SearchInput
+            className="w-full sm:w-72"
+            aria-label={`Search ${resource.nouns}`}
+            placeholder={`Search ${resource.nouns}`}
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value)
+              setLimit(PAGE_SIZE)
+            }}
+          />
           <div className="max-w-full overflow-x-auto">
             <SegmentedControl
               label="Filter"

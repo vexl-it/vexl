@@ -1,5 +1,7 @@
 'use client'
 
+import {formatUtcDay} from '@/src/services/clubs'
+import {formatUtcDayShort} from '@/src/services/format'
 import type {ClubMemberCountChangeItem} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {Array, pipe} from 'effect'
 import {useMemo, useState} from 'react'
@@ -17,18 +19,16 @@ import {
 } from 'recharts'
 import {
   CHART_AXIS,
-  CHART_BLUE,
   CHART_GRID,
   CHART_MUTED,
-  CHART_RED,
+  CHART_NEGATIVE,
+  CHART_POSITIVE,
+  CHART_PRIMARY,
 } from './chartTheme'
-import {Table, Td, Th, Tr} from './ui'
-import {SegmentedControl, type SegmentedOption} from './ui/SegmentedControl'
+import {SegmentedControl, type SegmentedOption, Table, Td, Th, Tr} from './ui'
 
 const DAY_MS = 24 * 60 * 60 * 1000
 
-const BLUE = CHART_BLUE
-const RED = CHART_RED
 const GRID = CHART_GRID
 const AXIS = CHART_AXIS
 const MUTED = CHART_MUTED
@@ -52,21 +52,6 @@ interface DayPoint {
 // days by local date components — UTC components would shift days one back.
 const utcMidnight = (date: Date): number =>
   Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
-
-const formatDay = (dayMs: number): string =>
-  new Date(dayMs).toLocaleDateString(undefined, {
-    month: 'short',
-    day: 'numeric',
-    timeZone: 'UTC',
-  })
-
-const formatDayLong = (dayMs: number): string =>
-  new Date(dayMs).toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    timeZone: 'UTC',
-  })
 
 const buildPoints = (
   changes: readonly ClubMemberCountChangeItem[],
@@ -98,7 +83,7 @@ const buildPoints = (
     const change = changeByDay.get(dayMs)
     return {
       dayMs,
-      label: formatDay(dayMs),
+      label: formatUtcDayShort(dayMs),
       joined: change?.joined ?? 0,
       leftNeg: -(change?.left ?? 0),
       count: dayMs >= firstRecordedMs ? (countByDay.get(dayMs) ?? null) : null,
@@ -125,7 +110,9 @@ function ChartTooltip({
   if (!active || !point) return null
   return (
     <div className="rounded-control border border-line bg-surface px-3 py-2 text-sm shadow-overlay">
-      <p className="text-xs text-ink-muted">{formatDayLong(point.dayMs)}</p>
+      <p className="text-xs text-ink-muted">
+        {formatUtcDay(new Date(point.dayMs))}
+      </p>
       {Array.map(rows(point), (row) => (
         <p key={row.label} className="mt-1 flex items-center gap-2">
           <span
@@ -193,6 +180,7 @@ export function ClubMemberActivityChart({
             <XAxis dataKey="label" hide />
             <YAxis
               width={40}
+              domain={['auto', 'auto']}
               allowDecimals={false}
               tick={{fontSize: 11, fill: MUTED}}
               tickLine={false}
@@ -205,7 +193,7 @@ export function ClubMemberActivityChart({
                     {
                       label: 'members',
                       value: String(point.count ?? 'no data'),
-                      color: BLUE,
+                      color: CHART_PRIMARY,
                     },
                   ]}
                 />
@@ -214,7 +202,7 @@ export function ClubMemberActivityChart({
             <Line
               type="stepAfter"
               dataKey="count"
-              stroke={BLUE}
+              stroke={CHART_PRIMARY}
               strokeWidth={2}
               dot={false}
               connectNulls={false}
@@ -228,14 +216,14 @@ export function ClubMemberActivityChart({
         <span className="flex items-center gap-1.5">
           <span
             className="inline-block h-2.5 w-2.5 rounded-sm"
-            style={{backgroundColor: BLUE}}
+            style={{backgroundColor: CHART_POSITIVE}}
           />
           Joined
         </span>
         <span className="flex items-center gap-1.5">
           <span
             className="inline-block h-2.5 w-2.5 rounded-sm"
-            style={{backgroundColor: RED}}
+            style={{backgroundColor: CHART_NEGATIVE}}
           />
           Left
         </span>
@@ -275,12 +263,12 @@ export function ClubMemberActivityChart({
                     {
                       label: 'joined',
                       value: `+${point.joined}`,
-                      color: BLUE,
+                      color: CHART_POSITIVE,
                     },
                     {
                       label: 'left',
                       value: `−${-point.leftNeg}`,
-                      color: RED,
+                      color: CHART_NEGATIVE,
                     },
                   ]}
                 />
@@ -290,7 +278,7 @@ export function ClubMemberActivityChart({
             <Bar
               dataKey="joined"
               stackId="delta"
-              fill={BLUE}
+              fill={CHART_POSITIVE}
               maxBarSize={16}
               radius={[2, 2, 0, 0]}
               isAnimationActive={false}
@@ -298,7 +286,7 @@ export function ClubMemberActivityChart({
             <Bar
               dataKey="leftNeg"
               stackId="delta"
-              fill={RED}
+              fill={CHART_NEGATIVE}
               maxBarSize={16}
               radius={[0, 0, 2, 2]}
               isAnimationActive={false}
@@ -329,7 +317,7 @@ export function ClubMemberActivityChart({
           >
             {Array.map(activityRows, (point) => (
               <Tr key={point.dayMs}>
-                <Td>{formatDayLong(point.dayMs)}</Td>
+                <Td>{formatUtcDay(new Date(point.dayMs))}</Td>
                 <Td align="right">+{point.joined}</Td>
                 <Td align="right">−{-point.leftNeg}</Td>
                 <Td align="right">{point.count ?? '–'}</Td>

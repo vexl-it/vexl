@@ -1,9 +1,10 @@
 'use client'
 
 import {Alert, Badge, Button, Card, CopyButton} from '@/src/components/ui'
+import {formatTime} from '@/src/services/format'
 import {type CreatedInvite} from './InviteModal'
 import {SectionBadges} from './sections'
-import {formatCountdown, formatTime, useNow} from './time'
+import {formatCountdown, useNow} from './time'
 
 const LAST_MINUTE_MS = 60_000
 

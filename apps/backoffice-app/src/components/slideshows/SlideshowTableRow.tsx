@@ -15,6 +15,7 @@ import {
   Tr,
   TrashIcon,
 } from '@/src/components/ui'
+import {formatDate, formatDateTime} from '@/src/services/format'
 import {usePublicHosts} from '@/src/services/publicHosts'
 import {
   getPublicIdentifier,
@@ -22,8 +23,6 @@ import {
   type TvSlideshow,
 } from '@/src/services/slideshows/domain'
 import {
-  formatDate,
-  formatDateTime,
   formatDuration,
   loopSeconds,
   pluralize,

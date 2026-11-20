@@ -7,12 +7,12 @@ import {
   type CmsView,
 } from '@/src/components/cms/CmsListPage'
 import {Badge, CheckIcon, FileTextIcon} from '@/src/components/ui'
-import {formatDate, formatDateTime} from '@/src/services/cms/dateTimeLocal'
 import {
   blogPostPublicUrl,
   blogPostResource,
   isScheduled,
 } from '@/src/services/cms/resources'
+import {formatDate, formatDateTime} from '@/src/services/format'
 import {type BlogPost} from '@vexl-next/domain/src/general/cms'
 import {Option, Order} from 'effect'
 import Link from 'next/link'

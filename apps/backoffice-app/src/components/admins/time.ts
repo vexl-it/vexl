@@ -10,22 +10,6 @@ const UNITS: ReadonlyArray<readonly [Intl.RelativeTimeFormatUnit, number]> = [
 ]
 
 const relativeFormat = new Intl.RelativeTimeFormat('en', {numeric: 'auto'})
-const dateFormat = new Intl.DateTimeFormat(undefined, {dateStyle: 'medium'})
-const dateTimeFormat = new Intl.DateTimeFormat(undefined, {
-  dateStyle: 'medium',
-  timeStyle: 'short',
-})
-const timeFormat = new Intl.DateTimeFormat(undefined, {timeStyle: 'short'})
-
-export const formatDate = (iso: string): string =>
-  dateFormat.format(new Date(iso))
-
-export const formatDateTime = (iso: string): string =>
-  dateTimeFormat.format(new Date(iso))
-
-export const formatTime = (iso: string): string =>
-  timeFormat.format(new Date(iso))
-
 /** "3 days ago", "last month", or "just now" within the last minute. */
 export const formatRelative = (iso: string, now: number): string => {
   const elapsedMs = new Date(iso).getTime() - now

@@ -34,10 +34,11 @@ export const createFindVexlNotificationTokensOfUsersWhoHaveHashAsSecondLevelCont
         FindVexlNotificationTokensOfUsersWhoHaveHashAsSecondLevelContactResult,
       execute: (params) => sql`
         SELECT DISTINCT
-          (second_degree_friend.vexl_notification_token) AS vexl_notification_token
+          account_token_holder.vexl_notification_token
         FROM
           user_contact connections_to_imported_contacts
           INNER JOIN users second_degree_friend ON second_degree_friend.hash = connections_to_imported_contacts.hash_from
+          INNER JOIN users account_token_holder ON account_token_holder.public_key = second_degree_friend.public_key
         WHERE
           TRUE
           AND ${createIsInAllowedSharedContactHashesFragment({
@@ -48,7 +49,7 @@ export const createFindVexlNotificationTokensOfUsersWhoHaveHashAsSecondLevelCont
         })}
           AND connections_to_imported_contacts.hash_to != connections_to_imported_contacts.hash_from
           AND (
-            second_degree_friend.vexl_notification_token IS NOT NULL
+            account_token_holder.vexl_notification_token IS NOT NULL
           )
           AND ${createIsNotOwnerAccountFragment({
           usersTable: sql`second_degree_friend`,

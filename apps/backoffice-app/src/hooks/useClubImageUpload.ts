@@ -4,15 +4,11 @@ import {useState} from 'react'
 import {useClubsApi} from './useClubsApi'
 
 const RESOURCES_BASE_URL = 'https://resources.vexl.it/'
-const MAX_SIZE_BYTES = 10 * 1024 * 1024
 
 const EXTENSION_BY_TYPE: Readonly<Record<string, ImageExtension>> = {
   'image/png': 'png',
   'image/jpeg': 'jpg',
 }
-
-export const ACCEPTED_CLUB_IMAGE_TYPES =
-  Object.keys(EXTENSION_BY_TYPE).join(',')
 
 /** Uploads a club image and resolves with its public URL, or null on failure. */
 export function useClubImageUpload() {
@@ -24,10 +20,6 @@ export function useClubImageUpload() {
     const fileExtension = EXTENSION_BY_TYPE[file.type]
     if (!fileExtension) {
       setError('Choose a PNG or JPEG image.')
-      return null
-    }
-    if (file.size > MAX_SIZE_BYTES) {
-      setError('The image is larger than 10 MB.')
       return null
     }
 

@@ -4,10 +4,16 @@ import {useSetAtom} from 'jotai'
 import React, {useState} from 'react'
 import {Alert, useWindowDimensions} from 'react-native'
 import {type PostLoginFlowStackScreenProps} from '../../../navigationTypes'
+import {
+  discardOldPhoneContactsActionAtom,
+  rebuildRestoredOffersAndNotesActionAtom,
+} from '../../../state/backup/rebuildRestoredOffersAndNotes'
 import {resolveAllContactsAsSeenActionAtom} from '../../../state/contacts/atom/contactsStore'
 import {submitContactsActionAtom} from '../../../state/contacts/atom/submitContactsActionAtom'
 import {completePostLoginFlowScreenActionAtom} from '../../../state/postLoginOnboarding'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
+import reportError from '../../../utils/reportError'
+import {reencryptOffersWithModalActionAtom} from '../../ReencryptOffersSuggestion/atoms'
 import {showContactsAccessDeniedExplanationActionAtom} from '../atoms/showContactsAccesDeniedExplanationActionAtom'
 import {showNoContactsFoundExplanationActionAtom} from '../atoms/showNoContactsFoundExplanationActionAtom'
 import PostLoginFlowScreen from './PostLoginFlowScreen'
@@ -33,8 +39,29 @@ export default function ContactsImportScreen({
     showNoContactsFoundExplanationActionAtom
   )
   const completeScreen = useSetAtom(completePostLoginFlowScreenActionAtom)
+  const discardOldPhoneContacts = useSetAtom(discardOldPhoneContactsActionAtom)
+  const rebuildRestoredOffersAndNotes = useSetAtom(
+    rebuildRestoredOffersAndNotesActionAtom
+  )
+  const reencryptOffersWithModal = useSetAtom(
+    reencryptOffersWithModalActionAtom
+  )
 
-  const goNext = (): void => {
+  const goNext = async (): Promise<void> => {
+    await Effect.runPromise(discardOldPhoneContacts())
+    Effect.runFork(
+      rebuildRestoredOffersAndNotes(reencryptOffersWithModal).pipe(
+        Effect.catchAll((e) =>
+          Effect.sync(() => {
+            reportError(
+              'error',
+              new Error('Error rebuilding restored offers and notes'),
+              {e}
+            )
+          })
+        )
+      )
+    )
     completeScreen('contactsImport')
     navigation.navigate('NotificationSetup')
   }
@@ -71,7 +98,7 @@ export default function ContactsImportScreen({
                 )
               }
 
-              goNext()
+              return goNext()
             })
             .catch(() => {
               Alert.alert(t('common.somethingWentWrong'))
@@ -84,7 +111,16 @@ export default function ContactsImportScreen({
       secondaryButton={{
         disabled: contactsLoading,
         label: t('postLoginFlow.v2.contactsImport.skip'),
-        onPress: goNext,
+        onPress: () => {
+          setContactsLoading(true)
+          goNext()
+            .catch(() => {
+              Alert.alert(t('common.somethingWentWrong'))
+            })
+            .finally(() => {
+              setContactsLoading(false)
+            })
+        },
       }}
     >
       <YStack alignItems="center" flex={1} justifyContent="center" gap="$9">

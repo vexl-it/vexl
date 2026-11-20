@@ -72,7 +72,7 @@
   "loginFlow.restoreFromBackup.restored.chats.title": "Chats return when they write",
   "loginFlow.restoreFromBackup.restored.chats.text": "Once the other person messages you, the chat comes back with its history.",
   "loginFlow.restoreFromBackup.restored.contacts.title": "Import your contacts",
-  "loginFlow.restoreFromBackup.restored.contacts.text": "Then you’ll see your friends’ names again.",
+  "loginFlow.restoreFromBackup.restored.contacts.text": "Import them to restore your reach.",
   "loginFlow.restoreFromBackup.failed.title": "Couldn’t restore your account",
   "loginFlow.restoreFromBackup.failed.unknown": "Something went wrong. Try again in a moment.",
   "loginFlow.restoreFromBackup.failed.noLongerValid.title": "This backup no longer works",

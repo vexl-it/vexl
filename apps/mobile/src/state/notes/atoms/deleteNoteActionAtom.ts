@@ -4,6 +4,7 @@ import {Array, Effect} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
 import reportError from '../../../utils/reportError'
+import {forgetNotesToRecreateActionAtom} from '../../backup/rebuildRestoredOffersAndNotes'
 import {deleteNoteToConnectionsActionAtom} from '../../connections/atom/noteToConnectionsAtom'
 import {notesAtom} from './notesState'
 
@@ -29,6 +30,7 @@ export const deleteNoteActionAtom = atom<
       )
     )
     set(deleteNoteToConnectionsActionAtom, adminIds)
+    set(forgetNotesToRecreateActionAtom, adminIds)
   }).pipe(
     Effect.mapError((e) => {
       reportError('error', new Error('Error while deleting note'), {e})

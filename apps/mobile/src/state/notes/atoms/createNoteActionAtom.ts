@@ -3,7 +3,9 @@ import {
   newNoteId,
 } from '@vexl-next/domain/src/general/notes'
 import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import createNewNoteForMyContacts from '@vexl-next/resources-utils/src/notes/createNewNoteForMyContacts'
+import createNewNoteForMyContacts, {
+  type CreateNoteResult,
+} from '@vexl-next/resources-utils/src/notes/createNewNoteForMyContacts'
 import {type OfferEncryptionProgress} from '@vexl-next/resources-utils/src/offers/OfferEncryptionProgress'
 import {Effect, Schema} from 'effect'
 import {atom} from 'jotai'
@@ -12,12 +14,27 @@ import {version} from '../../../utils/environment'
 import reportError from '../../../utils/reportError'
 import {upsertInboxOnBeAndLocallyActionAtom} from '../../chat/hooks/useCreateInbox'
 import {upsertNoteToConnectionsActionAtom} from '../../connections/atom/noteToConnectionsAtom'
+import {type NoteToConnectionsItem} from '../../connections/domain'
 import {ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom} from '../../contacts/atom/ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom'
 import {generateAndRegisterVexlTokenActionAtom} from '../../notifications/actions/generateVexlTokenActionAtom'
 import {sessionDataOrDummyAtom} from '../../session'
 import {notesAtom} from './notesState'
 
 const MILLISECONDS_IN_DAY = 24 * 60 * 60 * 1000
+
+// Tracks which connections have a private part so contact reimports can
+// re-encrypt the note for new contacts only.
+export const noteConnectionsOf = (
+  result: CreateNoteResult
+): NoteToConnectionsItem => ({
+  adminId: result.adminId,
+  symmetricKey: result.symmetricKey,
+  pendingConnectionsToRefresh: [],
+  connections: {
+    firstLevel: result.encryptedFor.firstDegreeConnections,
+    secondLevel: result.encryptedFor.secondDegreeConnections,
+  },
+})
 
 export const createNoteActionAtom = atom(
   null,
@@ -96,17 +113,10 @@ export const createNoteActionAtom = atom(
 
       set(notesAtom, (old) => [...old, createdNote])
 
-      // Track which connections have a private part so contact reimports can
-      // re-encrypt the note for new contacts only.
-      set(upsertNoteToConnectionsActionAtom, {
-        adminId: createNoteResult.adminId,
-        symmetricKey: createNoteResult.symmetricKey,
-        pendingConnectionsToRefresh: [],
-        connections: {
-          firstLevel: createNoteResult.encryptedFor.firstDegreeConnections,
-          secondLevel: createNoteResult.encryptedFor.secondDegreeConnections,
-        },
-      })
+      set(
+        upsertNoteToConnectionsActionAtom,
+        noteConnectionsOf(createNoteResult)
+      )
 
       return createdNote
     })

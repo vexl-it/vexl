@@ -28,6 +28,10 @@ import {
   clubsKeyHolderStorageAtom,
   type ClubsToKeyHolderV2,
 } from '../clubs/atom/clubsToKeyHolderV2Atom'
+import {
+  contactsStoreAtom,
+  needsFullContactsReplaceAfterContactEditAtom,
+} from '../contacts/atom/contactsStore'
 import {defaultCurrencyBaseOnCountryCodeActionAtom} from '../defaultCurrencyBaseOnCountryCodeActionAtom'
 import {
   raiseKeyDerivationCountersActionAtom,
@@ -55,6 +59,7 @@ import writeSessionToStorage, {
 import {restoredNotificationSecretState} from './backupNotificationSecret'
 import {clearBackupToRestoreActionAtom} from './backupToRestore'
 import {restoredUserData} from './backupUserData'
+import {restoredOffersAndNotesNeedRebuildAtom} from './rebuildRestoredOffersAndNotes'
 
 export class InvalidBackupSessionError extends Schema.TaggedError<InvalidBackupSessionError>(
   'InvalidBackupSessionError'
@@ -224,8 +229,17 @@ const commitRestoredAccountActionAtom = atom(
       clubsKeyHolderStorageAtom.flushNow()
 
       // The server-side user, inbox and profile choice already exist. Contacts
-      // import and notifications stay, contacts give back the local names.
+      // import and notifications stay. The backup holds no contacts, so the
+      // import replaces the old phone's ones on the server.
       set(postLoginFlowCompletedScreensAtom, ['usageInfo'])
+      set(needsFullContactsReplaceAfterContactEditAtom, true)
+      contactsStoreAtom.flushNow()
+      set(restoredOffersAndNotesNeedRebuildAtom, {
+        needsRebuild: true,
+        notesToRecreate: [],
+        offerIdsToReupload: [],
+      })
+      restoredOffersAndNotesNeedRebuildAtom.flushNow()
       set(showCheckUpdatedPrivacyPolicySuggestionAtom, false)
       // A returning user knows the marketplace.
       set(showMarketplaceIntroDialogAtom, false)

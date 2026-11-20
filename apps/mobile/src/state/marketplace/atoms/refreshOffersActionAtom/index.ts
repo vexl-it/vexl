@@ -136,12 +136,14 @@ export const refreshOffersActionAtom = atom(
       endBenchmark(
         `Incoming offers: ${incomingOffers.length}. Removed offers: ${removedClubsOfferIdsToClubUuid.length + removedContactOfferIds.length}`
       )
+      return true
     }).pipe(
+      // Resolves to whether the offers were fetched.
       Effect.catchAll((e) => {
         reportError('error', new Error('Error fetching offers'), {e})
         set(loadingStateAtom, {state: 'error', error: e})
 
-        return Effect.void
+        return Effect.succeed(false)
       }),
       Effect.zipLeft(
         Effect.sync(() => {

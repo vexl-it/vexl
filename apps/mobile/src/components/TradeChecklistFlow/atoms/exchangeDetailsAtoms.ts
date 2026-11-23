@@ -9,6 +9,7 @@ import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {Array, Option, pipe, Schema} from 'effect/index'
 import {atom} from 'jotai'
 import anonymizePhoneNumber from '../../../state/chat/utils/anonymizePhoneNumber'
+import {selectImageActionAtom} from '../../../state/selectImageActionAtom'
 import {sessionDataOrDummyAtom} from '../../../state/session'
 import {
   invalidUsernameUIFeedbackAtom,
@@ -92,11 +93,10 @@ export const photoRequiresNicknameAtom = atom(
   (get) => !otherSideSupportsPhotoOnlyExchange(get(chatWithMessagesAtom).chat)
 )
 
-export const toggleExchangeDetailActionAtom = atom(
+const setExchangeDetailSelectedActionAtom = atom(
   null,
-  (get, set, key: ExchangeDetailKey) => {
-    const current = get(exchangeDetailsSelectionAtom)
-    const next = {...current, [key]: !current[key]}
+  (get, set, key: ExchangeDetailKey, selected: boolean) => {
+    const next = {...get(exchangeDetailsSelectionAtom), [key]: selected}
 
     if (get(photoRequiresNicknameAtom)) {
       if (key === 'photo' && next.photo) next.nickname = true
@@ -104,6 +104,30 @@ export const toggleExchangeDetailActionAtom = atom(
     }
 
     set(exchangeDetailsSelectionAtom, next)
+  }
+)
+
+const revealPickedPhotoActionAtom = atom(
+  null,
+  (_get, set, photoUri: UriString) => {
+    set(exchangeDetailsPhotoUriAtom, photoUri)
+    set(setExchangeDetailSelectedActionAtom, 'photo', true)
+  }
+)
+
+// A photo can be revealed only once it is set, so ticking it without one
+// asks for the photo first and ticks it only when the user picks one.
+export const toggleExchangeDetailActionAtom = atom(
+  null,
+  (get, set, key: ExchangeDetailKey) => {
+    const selected = !get(exchangeDetailsSelectionAtom)[key]
+
+    if (key === 'photo' && selected && !get(exchangeDetailsPhotoUriAtom)) {
+      set(selectImageActionAtom, revealPickedPhotoActionAtom)
+      return
+    }
+
+    set(setExchangeDetailSelectedActionAtom, key, selected)
   }
 )
 

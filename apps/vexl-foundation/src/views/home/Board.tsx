@@ -26,18 +26,11 @@ const members = [
     linkedin: 'https://www.linkedin.com/in/marekpalatinus/',
   },
   {
-    nameKey: 'board.josef.name',
-    roleKey: 'board.josef.role',
-    imageBase: '/wf/6462320c4e57d9a89f972c16_Josef',
-    twitter: 'https://twitter.com/SatsJoseph',
-    linkedin: 'https://www.linkedin.com/in/joseftetek/',
-  },
-  {
-    nameKey: 'board.grafton.name',
-    roleKey: 'board.grafton.role',
-    imageBase: '/wf/6462320cc7121a88e5b306ec_Grafton',
-    twitter: 'https://twitter.com/satsdisco',
-    linkedin: 'https://www.linkedin.com/in/graftonclark/',
+    nameKey: 'board.viliam.name',
+    roleKey: 'board.viliam.role',
+    imageBase: '/wf/viliam-klamarcik',
+    twitter: 'https://x.com/ViliamKlamarcik',
+    linkedin: 'https://www.linkedin.com/in/viliamklamarcik/',
   },
 ] satisfies ReadonlyArray<{
   readonly nameKey: CopyKey<'home'>
@@ -77,6 +70,7 @@ export function Board({t}: {readonly t: PageCopy<'home'>}): React.JSX.Element {
                     href={member.twitter}
                     target="_blank"
                     rel="noreferrer"
+                    aria-label={`${t.text(member.nameKey)} on X`}
                     className="soclink w-inline-block"
                   >
                     <img
@@ -90,6 +84,7 @@ export function Board({t}: {readonly t: PageCopy<'home'>}): React.JSX.Element {
                     href={member.linkedin}
                     target="_blank"
                     rel="noreferrer"
+                    aria-label={`${t.text(member.nameKey)} on LinkedIn`}
                     className="soclink w-inline-block"
                   >
                     <img

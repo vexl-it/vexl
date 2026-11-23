@@ -7,9 +7,9 @@ import {
   XStack,
   YStack,
 } from '@vexl-next/ui'
-import {parsePhoneNumber} from 'awesome-phonenumber'
+import {Array} from 'effect'
 import {useAtomValue} from 'jotai'
-import React, {useCallback, useMemo} from 'react'
+import React, {useCallback} from 'react'
 import {Pressable} from 'react-native'
 import {SvgXml} from 'react-native-svg'
 import {type RootStackScreenProps} from '../../../navigationTypes'
@@ -17,7 +17,9 @@ import {
   anonymizedUserDataAtom,
   realUserDataAtom,
   userPhoneNumberAtom,
+  userPhoneNumbersAtom,
 } from '../../../state/session/userDataAtoms'
+import {getInternationalPhoneNumber} from '../../../utils/getInternationalPhoneNumber'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import resolveLocalUri from '../../../utils/resolveLocalUri'
 
@@ -25,18 +27,14 @@ function UserBanner(): React.ReactElement {
   const realUserData = useAtomValue(realUserDataAtom)
   const anonymizedUserData = useAtomValue(anonymizedUserDataAtom)
   const userPhoneNumber = useAtomValue(userPhoneNumberAtom)
+  const morePhoneNumbersCount =
+    Array.length(useAtomValue(userPhoneNumbersAtom)) - 1
   const {t} = useTranslation()
   const navigation =
     useNavigation<RootStackScreenProps<'Account'>['navigation']>()
 
   const displayName = realUserData?.userName ?? t('common.anonymous')
   const profileImage = realUserData?.image ?? anonymizedUserData.image
-  const formattedPhoneNumber = useMemo(
-    () =>
-      parsePhoneNumber(userPhoneNumber).number?.international ??
-      userPhoneNumber,
-    [userPhoneNumber]
-  )
 
   const handleSharePress = useCallback(() => {
     navigation.navigate('ShareProfile')
@@ -76,13 +74,25 @@ function UserBanner(): React.ReactElement {
         >
           {displayName}
         </Typography>
-        <Typography
-          variant="micro"
-          color="$foregroundSecondary"
-          numberOfLines={1}
-        >
-          {formattedPhoneNumber}
-        </Typography>
+        <YStack>
+          <Typography
+            variant="micro"
+            color="$foregroundSecondary"
+            numberOfLines={1}
+          >
+            {getInternationalPhoneNumber(userPhoneNumber)}
+          </Typography>
+          {morePhoneNumbersCount > 0 && (
+            <Typography
+              variant="micro"
+              color="$foregroundSecondary"
+              numberOfLines={1}
+              lineHeight={14}
+            >
+              {t('account.morePhoneNumbers', {count: morePhoneNumbersCount})}
+            </Typography>
+          )}
+        </YStack>
       </YStack>
       <XStack gap="$3">
         <CardButton contrast onPress={handleSharePress}>

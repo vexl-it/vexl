@@ -12,13 +12,14 @@ import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect
 import {commonMetricAttributesFromHeaders} from '@vexl-next/server-utils/src/metrics/commonMetricAttributesFromHeaders'
 import {type RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
-import {Effect, Option} from 'effect'
+import {Array, Effect, Option} from 'effect'
 import {UserDbService} from '../../db/UserDbService'
 import {reportUserRefresh} from '../../metrics'
 import {serverHashPhoneNumber} from '../../utils/serverHashContact'
 import {withUserActionRedisLock} from '../../utils/withUserActionRedisLock'
 import {
   ensureLoginSessionProof,
+  type ProofInput,
   useUpLoginSessionProof,
 } from './utils/ensureLoginSessionProof'
 import {
@@ -28,24 +29,34 @@ import {
   type UserSecurity,
 } from './utils/refreshUserRecord'
 
+type LoginSessionError =
+  | LoggedInOnAnotherDeviceError
+  | InvalidLoginSessionProofError
+  | UnexpectedServerError
+
+interface LoginSessionCheck {
+  security: UserSecurity
+  received: Option.Option<LoginSessionId>
+  loginSessionProof: LoginSessionProof | undefined
+}
+
+const failLoggedInOnAnotherDevice = (
+  proof: ProofInput
+): Effect.Effect<never, LoginSessionError, RedisService> =>
+  Effect.zipRight(
+    useUpLoginSessionProof(proof),
+    Effect.fail(new LoggedInOnAnotherDeviceError())
+  )
+
 // Users logged in before login sessions existed adopt the first one they send.
 const ensureSameLoginSession = ({
   security,
   stored,
   received,
   loginSessionProof,
-}: {
-  security: UserSecurity
+}: LoginSessionCheck & {
   stored: Option.Option<LoginSessionId>
-  received: Option.Option<LoginSessionId>
-  loginSessionProof: LoginSessionProof | undefined
-}): Effect.Effect<
-  void,
-  | LoggedInOnAnotherDeviceError
-  | InvalidLoginSessionProofError
-  | UnexpectedServerError,
-  UserDbService | RedisService
-> => {
+}): Effect.Effect<void, LoginSessionError, UserDbService | RedisService> => {
   if (Option.isNone(received)) return Effect.void
   const proof = {
     publicKey: security.publicKey,
@@ -55,10 +66,7 @@ const ensureSameLoginSession = ({
   if (Option.isSome(stored))
     return stored.value === received.value
       ? useUpLoginSessionProof(proof)
-      : Effect.zipRight(
-          useUpLoginSessionProof(proof),
-          Effect.fail(new LoggedInOnAnotherDeviceError())
-        )
+      : failLoggedInOnAnotherDevice(proof)
 
   return Effect.zipRight(
     ensureLoginSessionProof(proof),
@@ -71,6 +79,36 @@ const ensureSameLoginSession = ({
     )
   )
 }
+
+// For a number the account no longer has. Another device holding the account
+// must log this one out, not let it drop the account's other numbers.
+const ensureAccountNotOnAnotherDevice = ({
+  security,
+  received,
+  loginSessionProof,
+}: LoginSessionCheck): Effect.Effect<
+  void,
+  LoginSessionError,
+  UserDbService | RedisService
+> =>
+  Option.match(received, {
+    onNone: () => Effect.void,
+    onSome: (loginSessionId) =>
+      UserDbService.pipe(
+        Effect.flatMap((userDb) =>
+          userDb.findLoginSessionIdsByPublicKey(security.publicKey)
+        ),
+        Effect.flatMap((stored) =>
+          Array.some(stored, (one) => one !== loginSessionId)
+            ? failLoggedInOnAnotherDevice({
+                publicKey: security.publicKey,
+                loginSessionId,
+                loginSessionProof,
+              })
+            : Effect.void
+        )
+      ),
+  })
 
 export const refreshUser = HttpApiBuilder.handler(
   ContactApiSpecification,
@@ -85,13 +123,21 @@ export const refreshUser = HttpApiBuilder.handler(
             reportUserRefresh(commonMetricAttributesFromHeaders(req.headers))
           )
 
-          const existingUser = yield* _(findUserOrFail(security))
+          const loginSessionCheck = {
+            security,
+            received: Option.fromNullable(req.payload.loginSessionId),
+            loginSessionProof: req.payload.loginSessionProof,
+          }
+          const existingUser = yield* _(
+            findUserOrFail(security),
+            Effect.tapErrorTag('UserNotFoundError', () =>
+              ensureAccountNotOnAnotherDevice(loginSessionCheck)
+            )
+          )
           yield* _(
             ensureSameLoginSession({
-              security,
+              ...loginSessionCheck,
               stored: existingUser.loginSessionId,
-              received: Option.fromNullable(req.payload.loginSessionId),
-              loginSessionProof: req.payload.loginSessionProof,
             })
           )
 

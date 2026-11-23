@@ -5,10 +5,11 @@ import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {Effect, flow} from 'effect'
 
 /**
- * Serializes account-wide mutations (`deleteAccount`, `restoreUser`) for the
- * same public key for the lifetime of the current DB transaction without
- * taking row locks on `users`, avoiding lock-order deadlocks with per-number
- * refreshes that clear notification tokens on other rows.
+ * Serializes account-wide mutations (`deleteAccount`, `restoreUser`,
+ * `importContacts`) for the same public key for the lifetime of the current DB
+ * transaction without taking row locks on `users`, avoiding lock-order
+ * deadlocks with per-number refreshes that clear notification tokens on other
+ * rows.
  */
 export const createLockAccountByPublicKey = Effect.gen(function* (_) {
   const sql = yield* _(PgClient.PgClient)

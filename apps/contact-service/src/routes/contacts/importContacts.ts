@@ -7,6 +7,7 @@ import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import {Array, Effect, flow, pipe} from 'effect'
 import {ContactDbService} from '../../db/ContactDbService'
+import {UserDbService} from '../../db/UserDbService'
 import {
   hashForClient,
   serverHashPhoneNumber,
@@ -25,12 +26,14 @@ export const importContacts = HttpApiBuilder.handler(
       Effect.bind('userServerHash', (s) => serverHashPhoneNumber(s.hash)),
       Effect.flatMap((security) =>
         Effect.gen(function* (_) {
+          const userDb = yield* _(UserDbService)
           const contactDb = yield* _(ContactDbService)
           const importContactsQuotaService = yield* _(
             ImportContactsQuotaService
           )
 
           const userServerHash = security.userServerHash
+          yield* _(userDb.lockAccountByPublicKey(security.publicKey))
           yield* _(
             findUserOrFail({
               publicKey: security.publicKey,

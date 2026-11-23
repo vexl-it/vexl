@@ -15,6 +15,7 @@ import {
 } from '@vexl-next/rest-api/src/services/contact/contracts'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Array, Deferred, Effect, Either, Fiber, Option} from 'effect'
+import {ContactDbService} from '../db/ContactDbService'
 import {UserDbService} from '../db/UserDbService'
 import {useUpLoginSessionProof} from '../routes/user/utils/ensureLoginSessionProof'
 import {
@@ -255,6 +256,24 @@ const createAccountWithContacts = (
     return numbers
   })
 
+const waitUntilBlockedOnPid = (blockingPid: number): TestEffect<boolean> =>
+  Effect.gen(function* (_) {
+    const sql = yield* _(SqlClient.SqlClient)
+    for (let i = 0; i < 200; i++) {
+      const [{blockedCount}] = yield* _(sql<{blockedCount: number}>`
+        SELECT
+          count(*)::int AS blocked_count
+        FROM
+          pg_stat_activity
+        WHERE
+          ${blockingPid} = ANY (pg_blocking_pids(pid))
+      `)
+      if (blockedCount > 0) return true
+      yield* _(Effect.sleep('10 millis'))
+    }
+    return false
+  })
+
 describe('deleting the account', () => {
   it.each([
     ['without a stored login session', false],
@@ -435,23 +454,7 @@ describe('deleting the account', () => {
           Effect.fork(deleteAccount(extra, oldSession))
         )
 
-        const waitUntilBlockedOnRestore = Effect.gen(function* (_) {
-          for (let i = 0; i < 200; i++) {
-            const [{blockedCount}] = yield* _(sql<{blockedCount: number}>`
-              SELECT
-                count(*)::int AS blocked_count
-              FROM
-                pg_stat_activity
-              WHERE
-                ${restorePid} = ANY (pg_blocking_pids(pid))
-            `)
-            if (blockedCount > 0) return true
-            yield* _(Effect.sleep('10 millis'))
-          }
-          return false
-        })
-
-        const blocked = yield* _(waitUntilBlockedOnRestore)
+        const blocked = yield* _(waitUntilBlockedOnPid(restorePid))
         yield* _(Deferred.succeed(commitRestore, true))
 
         yield* _(Fiber.join(restoreFiber))
@@ -463,6 +466,81 @@ describe('deleting the account', () => {
           left: {_tag: 'LoggedInOnAnotherDeviceError'},
         })
         yield* _(expectRegistered(numbers))
+      })
+    )
+  })
+
+  it('waits for an in-flight account deletion before importing contacts on an extra number', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const numbers = yield* _(createAccountWithContacts('+4207349100'))
+        const [main, extra] = numbers
+        const newFriend = yield* _(
+          generateKeysAndHasheForNumber('+420734910099')
+        )
+
+        const sql = yield* _(SqlClient.SqlClient)
+        const userDb = yield* _(UserDbService)
+        const contactDb = yield* _(ContactDbService)
+        const app = yield* _(NodeTestingApp)
+        const accountDeleted = yield* _(Deferred.make<number>())
+        const commitDelete = yield* _(Deferred.make<boolean>())
+
+        const deleteFiber = yield* _(
+          sql.withTransaction(
+            Effect.gen(function* (_) {
+              const [{pid}] = yield* _(sql<{pid: number}>`
+                SELECT
+                  pg_backend_pid() AS pid
+              `)
+              yield* _(
+                userDb.lockAccountByPublicKey(main.keys.publicKeyPemBase64)
+              )
+              const deletedHashes = yield* _(
+                userDb.deleteUsersByPublicKey(main.keys.publicKeyPemBase64)
+              )
+              yield* _(
+                Effect.forEach(
+                  deletedHashes,
+                  contactDb.deleteContactsByHashFrom,
+                  {discard: true}
+                )
+              )
+              yield* _(Deferred.succeed(accountDeleted, pid))
+              yield* _(Deferred.await(commitDelete))
+            })
+          ),
+          Effect.fork
+        )
+
+        const deletePid = yield* _(Deferred.await(accountDeleted))
+        yield* _(setAuthHeaders(extra.authHeaders))
+        const importFiber = yield* _(
+          app.Contact.importContacts({
+            payload: {
+              contacts: [newFriend.hashedNumber],
+              replace: false,
+            },
+            headers: makeTestCommonAndSecurityHeaders(extra.authHeaders),
+          }),
+          Effect.either,
+          Effect.fork
+        )
+
+        const blocked = yield* _(waitUntilBlockedOnPid(deletePid))
+        yield* _(Deferred.succeed(commitDelete, true))
+
+        yield* _(Fiber.join(deleteFiber))
+        const importResult = yield* _(Fiber.join(importFiber))
+
+        expect(blocked).toBe(true)
+        expect(importResult).toMatchObject({
+          _tag: 'Left',
+          left: {_tag: 'UserNotFoundError'},
+        })
+        for (const one of numbers) {
+          expect(yield* _(countContactsOf(one.serverHashedNumber))).toBe(0)
+        }
       })
     )
   })

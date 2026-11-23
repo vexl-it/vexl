@@ -54,6 +54,7 @@ jest.mock('../../../state/session/userDataAtoms', () => {
     invalidUsernameUIFeedbackAtom: createAtom(null, () => undefined),
     realUserImageAtom: createAtom(undefined),
     realUserNameAtom: createAtom(undefined),
+    userPhoneNumbersAtom: createAtom(['+420777111222']),
   }
 })
 

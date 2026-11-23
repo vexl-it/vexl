@@ -83,6 +83,8 @@ export interface RowCheckboxProps extends Omit<
   readonly description?: string
   readonly checked?: boolean
   readonly onCheckedChange?: (checked: boolean) => void
+  // Shown at the end of the row, for example a button with its own press
+  readonly trailing?: React.ReactNode
 }
 
 export function RowCheckbox({
@@ -90,6 +92,7 @@ export function RowCheckbox({
   description,
   checked = false,
   onCheckedChange,
+  trailing,
   ...rest
 }: RowCheckboxProps): React.JSX.Element {
   const theme = useTheme()
@@ -135,6 +138,7 @@ export function RowCheckbox({
           </RowCheckboxDescription>
         ) : null}
       </YStack>
+      {trailing}
     </RowCheckboxFrame>
   )
 }

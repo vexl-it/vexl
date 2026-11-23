@@ -3,6 +3,7 @@ import {Array, Effect, Option, pipe, Record} from 'effect'
 import {atom, useSetAtom} from 'jotai'
 import {useCallback} from 'react'
 import {apiAtom} from '../api'
+import {contactApisAtom} from '../api/contactApiForSession'
 import {offerProgressModalActionAtoms} from '../components/UploadingOfferProgressModal/atoms'
 import {translationAtom} from '../utils/localization/I18nProvider'
 import {formatInteger} from '../utils/localization/formatting'
@@ -15,10 +16,12 @@ import {waitForNextAnimationFrameEffect} from '../utils/runAfterAnimationFrames'
 import deleteAllInboxesActionAtom from './chat/atoms/deleteAllInboxesActionAtom'
 import {clubsToKeyHolderAtom} from './clubs/atom/clubsToKeyHolderV2Atom'
 import {clubsWithMembersAtom} from './clubs/atom/clubsWithMembersAtom'
+import {deleteAccountOnContactService} from './deleteAccountOnContactService'
 import {deleteOffersActionAtom} from './marketplace/atoms/deleteOffersActionAtom'
 import {myOffersAtom} from './marketplace/atoms/myOffers'
 import {invalidateVexlSecretActionAtom} from './notifications/actions/invalidateVexlSecretActionAtom'
 import {resetLocalDataActionAtom} from './resetLocalDataActionAtom'
+import {sessionDataOrDummyAtom} from './session'
 
 async function failSilently<T>(promise: Promise<T>): Promise<
   | {success: true; result: T}
@@ -156,7 +159,14 @@ export const logoutActionAtom = atom(null, async (get, set) => {
     })
 
     // contact service
-    await failSilently(effectToTaskEither(get(apiAtom).contact.deleteUser())())
+    await failSilently(
+      Effect.runPromise(
+        deleteAccountOnContactService({
+          session: get(sessionDataOrDummyAtom),
+          contactApis: get(contactApisAtom),
+        })
+      )
+    )
 
     // User service
     await failSilently(effectToTaskEither(get(apiAtom).user.deleteUser())())

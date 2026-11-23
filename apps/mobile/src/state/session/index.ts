@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import {captureException} from '@sentry/react-native'
-import {Effect} from 'effect/index'
+import {Array, Effect} from 'effect/index'
 import * as SecretStorage from 'expo-secure-store'
 import * as O from 'fp-ts/Option'
 import {
@@ -37,6 +37,11 @@ function removeSensitiveData(string: string): string {
     session.phoneNumber,
     session.privateKey.privateKeyPemBase64,
     session.masterSeed,
+    ...Array.flatMap(session.extraPhoneNumbers ?? [], (one) => [
+      one.phoneNumber,
+      one.sessionCredentials.hash,
+      one.sessionCredentials.signature,
+    ]),
     // Strip V2 key material if present
     ...(session.keyPairV2
       ? [session.keyPairV2.publicKey, session.keyPairV2.privateKey]

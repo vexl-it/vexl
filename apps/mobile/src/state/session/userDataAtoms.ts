@@ -8,7 +8,7 @@ import {
   type RegionCode,
 } from '@vexl-next/domain/src/utility/RegionCode.brand'
 import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import {Option, pipe} from 'effect'
+import {Array, Option, pipe} from 'effect'
 import {atom, type SetStateAction} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {askAreYouSureActionAtom} from '../../components/GlobalDialog'
@@ -19,14 +19,24 @@ import {
   showAccountIdentityDotAtom,
 } from '../../utils/preferences'
 import {sessionDataOrDummyAtom} from './index'
+import {phoneNumbersOfSession} from './sessionPhoneNumbers'
 import {generateRandomUserInSessionData} from './utils/generateRandomUserData'
 
 export const realUserDataAtom = focusAtom(sessionDataOrDummyAtom, (p) =>
   p.prop('realUserData')
 )
 
+// The main phone number of the account
 export const userPhoneNumberAtom = focusAtom(sessionDataOrDummyAtom, (p) =>
   p.prop('phoneNumber')
+)
+
+// All phone numbers of the account, the main number first
+export const userPhoneNumbersAtom = atom((get) =>
+  Array.map(
+    phoneNumbersOfSession(get(sessionDataOrDummyAtom)),
+    (one) => one.phoneNumber
+  )
 )
 
 export const realUserImageAtom = atom(

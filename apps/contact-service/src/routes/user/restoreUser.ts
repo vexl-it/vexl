@@ -32,6 +32,7 @@ export const restoreUser = HttpApiBuilder.handler(
             })
           )
           const userDb = yield* _(UserDbService)
+          yield* _(userDb.lockAccountByPublicKey(security.publicKey))
           const existingUser = yield* _(findUserOrFail(security))
 
           const refreshedUser = yield* _(

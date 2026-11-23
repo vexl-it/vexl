@@ -11,6 +11,10 @@ import {
 } from './queries/createClearVexlNotificationTokenHeldByOtherUsers'
 import {createDeleteUserByPublicKeyAndHash} from './queries/createDeleteUserByPublicKeyAndHash'
 import {createDeleteUsersByPublicKey} from './queries/createDeleteUsersByPublicKey'
+import {
+  createFindAccountSessionsByPublicKey,
+  type AccountSessionRow,
+} from './queries/createFindAccountSessionsByPublicKey'
 import {createFindHashesByPublicKey} from './queries/createFindHashesByPublicKey'
 import {createFindLoginSessionIdsByPublicKey} from './queries/createFindLoginSessionIdsByPublicKey'
 import {createFindUserByHash} from './queries/createFindUserByHash'
@@ -39,6 +43,7 @@ import {
   createInsertUser,
   type CreateUserParams,
 } from './queries/createInsertUser'
+import {createLockAccountByPublicKey} from './queries/createLockAccountByPublicKey'
 import {
   createUpdateAppSourceForUser,
   type UpdateAppSourceForUserParams,
@@ -84,6 +89,14 @@ export interface UserDbOperations {
   findLoginSessionIdsByPublicKey: (
     publicKey: PublicKeyPemBase64
   ) => Effect.Effect<readonly LoginSessionId[], UnexpectedServerError>
+
+  findAccountSessionsByPublicKey: (
+    publicKey: PublicKeyPemBase64
+  ) => Effect.Effect<readonly AccountSessionRow[], UnexpectedServerError>
+
+  lockAccountByPublicKey: (
+    publicKey: PublicKeyPemBase64
+  ) => Effect.Effect<void, UnexpectedServerError>
 
   findVexlNotificationTokenOfAccountByHash: (
     hash: ServerHashedNumber
@@ -175,6 +188,10 @@ export class UserDbService extends Context.Tag('UserDbService')<
       const findLoginSessionIdsByPublicKey = yield* _(
         createFindLoginSessionIdsByPublicKey
       )
+      const findAccountSessionsByPublicKey = yield* _(
+        createFindAccountSessionsByPublicKey
+      )
+      const lockAccountByPublicKey = yield* _(createLockAccountByPublicKey)
       const findVexlNotificationTokenOfAccountByHash = yield* _(
         createFindVexlNotificationTokenOfAccountByHash
       )
@@ -221,6 +238,8 @@ export class UserDbService extends Context.Tag('UserDbService')<
         findUserByHash,
         findHashesByPublicKey,
         findLoginSessionIdsByPublicKey,
+        findAccountSessionsByPublicKey,
+        lockAccountByPublicKey,
         findVexlNotificationTokenOfAccountByHash,
         findUserByPublicKeyAndHash,
         deleteUserByPublicKeyAndHash,

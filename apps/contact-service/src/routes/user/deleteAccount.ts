@@ -4,7 +4,7 @@ import {LoggedInOnAnotherDeviceError} from '@vexl-next/rest-api/src/services/con
 import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
-import {Array, Effect, Option, pipe} from 'effect'
+import {Array, Effect, Option} from 'effect'
 import {ContactDbService} from '../../db/ContactDbService'
 import {UserDbService} from '../../db/UserDbService'
 import {serverHashPhoneNumber} from '../../utils/serverHashContact'
@@ -36,26 +36,19 @@ export const deleteAccount = HttpApiBuilder.handler(
           const userDb = yield* _(UserDbService)
           const contactDb = yield* _(ContactDbService)
 
-          const hashes = yield* _(
-            userDb.findHashesByPublicKey(security.publicKey)
-          )
-          if (!Array.contains(hashes, security.serverHash)) return {}
-
+          yield* _(userDb.lockAccountByPublicKey(security.publicKey))
           const accountRows = yield* _(
-            Effect.forEach(hashes, (hash) =>
-              userDb.findUserByPublicKeyAndHash({
-                publicKey: security.publicKey,
-                hash,
-              })
-            )
+            userDb.findAccountSessionsByPublicKey(security.publicKey)
           )
-          const loggedInOnAnotherDevice = pipe(
-            Array.getSomes(accountRows),
-            Array.some((row) =>
-              Option.exists(
-                row.loginSessionId,
-                (stored) => stored !== req.payload.loginSessionId
-              )
+          if (
+            !Array.some(accountRows, (row) => row.hash === security.serverHash)
+          )
+            return {}
+
+          const loggedInOnAnotherDevice = Array.some(accountRows, (row) =>
+            Option.exists(
+              row.loginSessionId,
+              (stored) => stored !== req.payload.loginSessionId
             )
           )
           if (loggedInOnAnotherDevice)

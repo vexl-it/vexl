@@ -14,7 +14,7 @@ import {
   type LoginSessionProof,
 } from '@vexl-next/rest-api/src/services/contact/contracts'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
-import {Array, Effect, Either, Option} from 'effect'
+import {Array, Deferred, Effect, Either, Fiber, Option} from 'effect'
 import {UserDbService} from '../db/UserDbService'
 import {useUpLoginSessionProof} from '../routes/user/utils/ensureLoginSessionProof'
 import {
@@ -377,6 +377,92 @@ describe('deleting the account', () => {
         ).toBe(true)
 
         yield* _(expectRegistered([...extras, newOwnerOfMain]))
+      })
+    )
+  })
+
+  it('waits for an in-flight restore on the main number instead of deleting the restored account', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const numbers = yield* _(createAccountWithContacts('+4207349000'))
+        const [main, extra] = numbers
+        const oldSession = generateLoginSessionId()
+        const restoredSession = generateLoginSessionId()
+        yield* _(setLoginSession(numbers, oldSession))
+
+        const sql = yield* _(SqlClient.SqlClient)
+        const userDb = yield* _(UserDbService)
+        const mainUpdated = yield* _(Deferred.make<number>())
+        const commitRestore = yield* _(Deferred.make<boolean>())
+
+        // Hold the same transaction-scoped account lock restoreUser takes,
+        // move a notification token off the extra row, and update main's session.
+        const restoreFiber = yield* _(
+          sql.withTransaction(
+            Effect.gen(function* (_) {
+              const [{pid}] = yield* _(sql<{pid: number}>`
+                SELECT
+                  pg_backend_pid() AS pid
+              `)
+              yield* _(
+                userDb.lockAccountByPublicKey(main.keys.publicKeyPemBase64)
+              )
+              yield* _(sql`
+                UPDATE users
+                SET
+                  vexl_notification_token = NULL
+                WHERE
+                  hash = ${extra.serverHashedNumber}
+                  AND public_key = ${main.keys.publicKeyPemBase64}
+              `)
+              yield* _(sql`
+                UPDATE users
+                SET
+                  login_session_id = ${restoredSession}
+                WHERE
+                  hash = ${main.serverHashedNumber}
+                  AND public_key = ${main.keys.publicKeyPemBase64}
+              `)
+              yield* _(Deferred.succeed(mainUpdated, pid))
+              yield* _(Deferred.await(commitRestore))
+            })
+          ),
+          Effect.fork
+        )
+
+        const restorePid = yield* _(Deferred.await(mainUpdated))
+        const deleteFiber = yield* _(
+          Effect.fork(deleteAccount(extra, oldSession))
+        )
+
+        const waitUntilBlockedOnRestore = Effect.gen(function* (_) {
+          for (let i = 0; i < 200; i++) {
+            const [{blockedCount}] = yield* _(sql<{blockedCount: number}>`
+              SELECT
+                count(*)::int AS blocked_count
+              FROM
+                pg_stat_activity
+              WHERE
+                ${restorePid} = ANY (pg_blocking_pids(pid))
+            `)
+            if (blockedCount > 0) return true
+            yield* _(Effect.sleep('10 millis'))
+          }
+          return false
+        })
+
+        const blocked = yield* _(waitUntilBlockedOnRestore)
+        yield* _(Deferred.succeed(commitRestore, true))
+
+        yield* _(Fiber.join(restoreFiber))
+        const deleteResult = yield* _(Fiber.join(deleteFiber))
+
+        expect(blocked).toBe(true)
+        expect(deleteResult).toMatchObject({
+          _tag: 'Left',
+          left: {_tag: 'LoggedInOnAnotherDeviceError'},
+        })
+        yield* _(expectRegistered(numbers))
       })
     )
   })

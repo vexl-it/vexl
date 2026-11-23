@@ -4,7 +4,7 @@
  * import -> update imported flags -> persist - with only device IO, network
  * and UI mocked.
  */
-import {Effect} from 'effect'
+import {Effect, Array as EffectArray} from 'effect'
 import {createStore} from 'jotai'
 
 jest.mock('react-native-mmkv')
@@ -401,9 +401,10 @@ describe('Failed full replace', () => {
     await Effect.runPromise(
       store.set(submitContactsActionAtom, onboardingSubmitParams)
     )
-    const selectedNumbers = store
-      .get(importedContactsAtom)
-      .map((one) => one.computedValues.normalizedNumber)
+    const selectedNumbers = EffectArray.map(
+      store.get(importedContactsAtom),
+      (one) => one.computedValues.normalizedNumber
+    )
 
     // Like after adding a phone number: resync everything under all numbers
     store.set(needsFullContactsReplaceAfterContactEditAtom, true)

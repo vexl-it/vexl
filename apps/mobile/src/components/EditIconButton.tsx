@@ -1,4 +1,4 @@
-import {IconButton, PencilWriteEdit} from '@vexl-next/ui'
+import {IconButton, PencilWriteEdit, tokens} from '@vexl-next/ui'
 import React from 'react'
 import {useTheme} from 'tamagui'
 
@@ -11,7 +11,10 @@ export function EditIconButton(props: Props): React.ReactElement {
 
   return (
     <IconButton backgroundColor="$backgroundTertiary" {...props}>
-      <PencilWriteEdit size={24} color={theme.foregroundPrimary.get()} />
+      <PencilWriteEdit
+        size={tokens.size[7].val}
+        color={theme.foregroundPrimary.get()}
+      />
     </IconButton>
   )
 }

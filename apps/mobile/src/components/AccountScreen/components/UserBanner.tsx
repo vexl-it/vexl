@@ -87,7 +87,7 @@ function UserBanner(): React.ReactElement {
               variant="micro"
               color="$foregroundSecondary"
               numberOfLines={1}
-              lineHeight={14}
+              lineHeight={tokens.size[4.5].val}
             >
               {t('account.morePhoneNumbers', {count: morePhoneNumbersCount})}
             </Typography>

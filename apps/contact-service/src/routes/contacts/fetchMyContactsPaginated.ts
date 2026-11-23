@@ -14,6 +14,7 @@ import {type FindFirstLevelContactsPublicKeysByHashFromPaginatedResult} from '..
 import {UserDbService} from '../../db/UserDbService'
 import {serverHashPhoneNumber} from '../../utils/serverHashContact'
 import {toCompatiblePublicKeyArray} from '../../utils/toCompatiblePublicKeyArray'
+import {findUserOrFail} from '../user/utils/refreshUserRecord'
 
 const DEFAULT_LAST_USER_ID = 0
 
@@ -33,6 +34,7 @@ export const fetchMyContactsPaginated = HttpApiBuilder.handler(
         CurrentSecurity,
         Effect.bind('serverHash', (s) => serverHashPhoneNumber(s.hash))
       )
+      yield* _(findUserOrFail(security))
       const contactDb = yield* _(ContactDbService)
       const contactActiveWindowDays = yield* _(contactActiveWindowDaysConfig)
       const hideUsersWithoutPublicKeyV2 = yield* _(
@@ -77,6 +79,7 @@ export const fetchMyContactsPaginated = HttpApiBuilder.handler(
                 })
               : contactDb.findSecondLevelContactsPublicKeysByHashFromPaginated({
                   hashFrom: security.serverHash,
+                  ownerPublicKey: security.publicKey,
                   limit,
                   userId: decodedNextPageToken?.userId,
                   activeWithinDays: contactActiveWindowDays,

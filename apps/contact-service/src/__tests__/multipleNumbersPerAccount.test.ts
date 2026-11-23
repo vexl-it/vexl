@@ -1,0 +1,587 @@
+import {SqlClient} from '@effect/sql'
+import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
+import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
+import {type ServerHashedNumber} from '@vexl-next/domain/src/general/ServerHashedNumber'
+import fetchAllPaginatedData from '@vexl-next/rest-api/src/fetchAllPaginatedData'
+import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
+import {Array, Effect, Option, Order, pipe, Schema} from 'effect'
+import {UserNotificationService} from '../services/UserNotificationService'
+import {
+  createAndImportUsersFromNetwork,
+  createUserOnNetwork,
+  generateKeysAndHasheForNumber,
+  makeTestCommonAndSecurityHeaders,
+  type DummyUser,
+} from './routes/contacts/utils'
+import {
+  clearEnqueuedNotifications,
+  getEnqueuedNotifications,
+} from './utils/mockEnqueueUserNotification'
+import {
+  countContactsOf,
+  generateAnotherNumber,
+  type TestEffect,
+} from './utils/multipleNumbers'
+import {NodeTestingApp} from './utils/NodeTestingApp'
+import {runPromiseInMockedEnvironment} from './utils/runPromiseInMockedEnvironment'
+
+const findUserRow = (
+  hash: ServerHashedNumber
+): TestEffect<
+  ReadonlyArray<{vexlNotificationToken: string | null; refreshedAt: Date}>
+> =>
+  Effect.flatMap(
+    SqlClient.SqlClient,
+    (sql) => sql<{vexlNotificationToken: string | null; refreshedAt: Date}>`
+      SELECT
+        *
+      FROM
+        users
+      WHERE
+        hash = ${hash}
+    `
+  )
+
+const fetchAllMyContacts = (
+  user: DummyUser,
+  level: 'FIRST' | 'SECOND'
+): TestEffect<string[]> =>
+  Effect.gen(function* (_) {
+    const app = yield* _(NodeTestingApp)
+    yield* _(setAuthHeaders(user.authHeaders))
+    return yield* _(
+      fetchAllPaginatedData({
+        fetchEffectToRun: (nextPageToken) =>
+          app.Contact.fetchMyContactsPaginated({
+            headers: makeTestCommonAndSecurityHeaders(user.authHeaders),
+            urlParams: {level, limit: 1, nextPageToken},
+          }),
+      })
+    )
+  })
+
+interface CommonConnection {
+  publicKey: string
+  common: {hashes: readonly string[]; verifiedHashes: readonly string[]}
+}
+
+const fetchAllCommonConnections = (
+  user: DummyUser,
+  publicKeys: PublicKeyPemBase64[]
+): TestEffect<CommonConnection[]> =>
+  Effect.gen(function* (_) {
+    const app = yield* _(NodeTestingApp)
+    yield* _(setAuthHeaders(user.authHeaders))
+    return yield* _(
+      fetchAllPaginatedData({
+        fetchEffectToRun: (nextPageToken) =>
+          app.Contact.fetchCommonConnectionsPaginated({
+            headers: makeTestCommonAndSecurityHeaders(user.authHeaders),
+            payload: {publicKeys, limit: 1, nextPageToken},
+          }),
+      })
+    )
+  })
+
+const sorted = (values: readonly string[]): string[] =>
+  Array.sort(values, Order.string)
+
+describe('one account with several phone numbers', () => {
+  it('creates, refreshes and deletes each number on its own', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const app = yield* _(NodeTestingApp)
+        const sql = yield* _(SqlClient.SqlClient)
+
+        const main = yield* _(generateKeysAndHasheForNumber('+420733100001'))
+        const extra = yield* _(generateAnotherNumber(main, '+420733100002'))
+        const friend = yield* _(generateKeysAndHasheForNumber('+420733100003'))
+
+        yield* _(createAndImportUsersFromNetwork(main, [friend]))
+        yield* _(createAndImportUsersFromNetwork(extra, [friend]))
+
+        const [mainRow] = yield* _(findUserRow(main.serverHashedNumber))
+        const [extraRow] = yield* _(findUserRow(extra.serverHashedNumber))
+        expect(mainRow?.vexlNotificationToken).toEqual(
+          Option.getOrThrow(main.vexlNotificationToken)
+        )
+        expect(extraRow?.vexlNotificationToken).toBeNull()
+        expect(yield* _(countContactsOf(main.serverHashedNumber))).toBe(1)
+        expect(yield* _(countContactsOf(extra.serverHashedNumber))).toBe(1)
+
+        const longAgo = new Date('2020-06-01')
+        yield* _(sql`
+          UPDATE users
+          SET
+            refreshed_at = ${longAgo}
+          WHERE
+            public_key = ${main.keys.publicKeyPemBase64}
+        `)
+        yield* _(setAuthHeaders(extra.authHeaders))
+        yield* _(
+          app.User.refreshUser({
+            payload: {offersAlive: true, vexlNotificationToken: Option.none()},
+            headers: makeTestCommonAndSecurityHeaders(extra.authHeaders),
+          })
+        )
+        const [mainAfterRefresh] = yield* _(
+          findUserRow(main.serverHashedNumber)
+        )
+        const [extraAfterRefresh] = yield* _(
+          findUserRow(extra.serverHashedNumber)
+        )
+        expect(mainAfterRefresh?.refreshedAt.getFullYear()).toBe(
+          longAgo.getFullYear()
+        )
+        expect(mainAfterRefresh?.vexlNotificationToken).toEqual(
+          Option.getOrThrow(main.vexlNotificationToken)
+        )
+        expect(extraAfterRefresh?.refreshedAt.getFullYear()).toBeGreaterThan(
+          longAgo.getFullYear()
+        )
+        expect(extraAfterRefresh?.vexlNotificationToken).toBeNull()
+
+        yield* _(setAuthHeaders(main.authHeaders))
+        yield* _(
+          app.User.refreshUser({
+            payload: {
+              offersAlive: true,
+              vexlNotificationToken: main.vexlNotificationToken,
+            },
+            headers: makeTestCommonAndSecurityHeaders(main.authHeaders),
+          })
+        )
+        const [extraAfterMainRefresh] = yield* _(
+          findUserRow(extra.serverHashedNumber)
+        )
+        expect(extraAfterMainRefresh?.vexlNotificationToken).toBeNull()
+
+        yield* _(setAuthHeaders(extra.authHeaders))
+        yield* _(
+          app.User.deleteUser({
+            headers: makeTestCommonAndSecurityHeaders(extra.authHeaders),
+          })
+        )
+        expect(yield* _(findUserRow(extra.serverHashedNumber))).toHaveLength(0)
+        expect(yield* _(countContactsOf(extra.serverHashedNumber))).toBe(0)
+        expect(yield* _(findUserRow(main.serverHashedNumber))).toHaveLength(1)
+        expect(yield* _(countContactsOf(main.serverHashedNumber))).toBe(1)
+      })
+    )
+  })
+
+  it('keeps a push token only on the number of the account that set it last', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const app = yield* _(NodeTestingApp)
+        const main = yield* _(generateKeysAndHasheForNumber('+420733600001'))
+        const extra = yield* _(generateAnotherNumber(main, '+420733600002'))
+        const someoneElse = yield* _(
+          generateKeysAndHasheForNumber('+420733600003')
+        )
+        yield* _(createUserOnNetwork(main))
+        yield* _(createUserOnNetwork(extra))
+        yield* _(createUserOnNetwork(someoneElse))
+
+        const refreshWithToken = (
+          user: DummyUser,
+          token: string
+        ): TestEffect<unknown> =>
+          Effect.zipRight(
+            setAuthHeaders(user.authHeaders),
+            app.User.refreshUser({
+              payload: {
+                offersAlive: true,
+                vexlNotificationToken: Option.some(
+                  Schema.decodeSync(VexlNotificationToken)(token)
+                ),
+              },
+              headers: makeTestCommonAndSecurityHeaders(user.authHeaders),
+            })
+          )
+        const tokensOf = (
+          users: DummyUser[]
+        ): TestEffect<ReadonlyArray<string | null | undefined>> =>
+          Effect.forEach(users, (user) =>
+            Effect.map(
+              findUserRow(user.serverHashedNumber),
+              ([row]) => row?.vexlNotificationToken
+            )
+          )
+
+        yield* _(refreshWithToken(extra, 'vexl_nt_extra'))
+        expect(yield* _(tokensOf([main, extra, someoneElse]))).toEqual([
+          null,
+          'vexl_nt_extra',
+          'vexl_nt_+420733600003',
+        ])
+
+        yield* _(refreshWithToken(main, 'vexl_nt_main'))
+        expect(yield* _(tokensOf([main, extra, someoneElse]))).toEqual([
+          'vexl_nt_main',
+          null,
+          'vexl_nt_+420733600003',
+        ])
+      })
+    )
+  })
+
+  it('returns the account once to a contact who saved both numbers, and never to itself', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const main = yield* _(generateKeysAndHasheForNumber('+420733200001'))
+        const extra = yield* _(generateAnotherNumber(main, '+420733200002'))
+        const friend = yield* _(generateKeysAndHasheForNumber('+420733200003'))
+        const otherFriend = yield* _(
+          generateKeysAndHasheForNumber('+420733200004')
+        )
+
+        yield* _(createAndImportUsersFromNetwork(main, [friend, otherFriend]))
+        yield* _(createAndImportUsersFromNetwork(extra, [friend, otherFriend]))
+        yield* _(
+          createAndImportUsersFromNetwork(friend, [main, extra, otherFriend])
+        )
+        yield* _(createAndImportUsersFromNetwork(otherFriend, [friend]))
+
+        expect(sorted(yield* _(fetchAllMyContacts(friend, 'FIRST')))).toEqual(
+          sorted([
+            main.keys.publicKeyPemBase64,
+            otherFriend.keys.publicKeyPemBase64,
+          ])
+        )
+        expect(yield* _(fetchAllMyContacts(otherFriend, 'SECOND'))).toEqual([
+          main.keys.publicKeyPemBase64,
+        ])
+
+        for (const myNumber of [main, extra]) {
+          expect(yield* _(fetchAllMyContacts(myNumber, 'FIRST'))).not.toContain(
+            main.keys.publicKeyPemBase64
+          )
+          expect(
+            yield* _(fetchAllMyContacts(myNumber, 'SECOND'))
+          ).not.toContain(main.keys.publicKeyPemBase64)
+          const common = yield* _(
+            fetchAllCommonConnections(myNumber, [
+              main.keys.publicKeyPemBase64,
+              friend.keys.publicKeyPemBase64,
+            ])
+          )
+          expect(Array.map(common, (one) => one.publicKey)).toEqual([
+            friend.keys.publicKeyPemBase64,
+          ])
+        }
+      })
+    )
+  })
+
+  it('merges common and verified friends of all numbers across pages', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const main = yield* _(generateKeysAndHasheForNumber('+420733300001'))
+        const extra = yield* _(generateAnotherNumber(main, '+420733300002'))
+        const requester = yield* _(
+          generateKeysAndHasheForNumber('+420733300003')
+        )
+        const savedMain = yield* _(
+          generateKeysAndHasheForNumber('+420733300004')
+        )
+        const savedExtra = yield* _(
+          generateKeysAndHasheForNumber('+420733300005')
+        )
+        const someoneElse = yield* _(
+          generateKeysAndHasheForNumber('+420733300006')
+        )
+
+        yield* _(createAndImportUsersFromNetwork(savedMain, [requester, main]))
+        yield* _(
+          createAndImportUsersFromNetwork(savedExtra, [requester, extra])
+        )
+        yield* _(
+          createAndImportUsersFromNetwork(requester, [savedMain, savedExtra])
+        )
+        // Contact ids ordered: main's rows, someoneElse's rows, extra's rows,
+        // so the account's rows straddle a page boundary.
+        yield* _(createAndImportUsersFromNetwork(main, [savedMain, savedExtra]))
+        yield* _(
+          createAndImportUsersFromNetwork(someoneElse, [savedMain, savedExtra])
+        )
+        yield* _(
+          createAndImportUsersFromNetwork(extra, [savedMain, savedExtra])
+        )
+
+        const common = yield* _(
+          fetchAllCommonConnections(requester, [
+            main.keys.publicKeyPemBase64,
+            someoneElse.keys.publicKeyPemBase64,
+          ])
+        )
+        const forAccount = Array.filter(
+          common,
+          (one) => one.publicKey === main.keys.publicKeyPemBase64
+        )
+
+        expect(forAccount).toHaveLength(1)
+        const bothSavers = sorted([
+          savedMain.serverHashedNumberForClient,
+          savedExtra.serverHashedNumberForClient,
+        ])
+        expect(sorted(forAccount[0]?.common.hashes ?? [])).toEqual(bothSavers)
+        expect(sorted(forAccount[0]?.common.verifiedHashes ?? [])).toEqual(
+          bothSavers
+        )
+      })
+    )
+  })
+
+  it('verifies a common friend who saved only the extra number of the requester', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const main = yield* _(generateKeysAndHasheForNumber('+420733800001'))
+        const extra = yield* _(generateAnotherNumber(main, '+420733800002'))
+        const otherSide = yield* _(
+          generateKeysAndHasheForNumber('+420733800003')
+        )
+        const savedExtra = yield* _(
+          generateKeysAndHasheForNumber('+420733800004')
+        )
+
+        yield* _(
+          createAndImportUsersFromNetwork(savedExtra, [extra, otherSide])
+        )
+        yield* _(createAndImportUsersFromNetwork(otherSide, [savedExtra]))
+        yield* _(createAndImportUsersFromNetwork(main, [savedExtra]))
+        yield* _(createAndImportUsersFromNetwork(extra, [savedExtra]))
+
+        const common = yield* _(
+          fetchAllCommonConnections(main, [otherSide.keys.publicKeyPemBase64])
+        )
+
+        expect(common).toHaveLength(1)
+        expect(common[0]?.common.verifiedHashes).toEqual([
+          savedExtra.serverHashedNumberForClient,
+        ])
+      })
+    )
+  })
+
+  it('verifies a common friend who saved a number of the other side that has no contacts', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const requester = yield* _(
+          generateKeysAndHasheForNumber('+420733900001')
+        )
+        const main = yield* _(generateKeysAndHasheForNumber('+420733900002'))
+        const extra = yield* _(generateAnotherNumber(main, '+420733900003'))
+        const savedExtra = yield* _(
+          generateKeysAndHasheForNumber('+420733900004')
+        )
+
+        yield* _(
+          createAndImportUsersFromNetwork(savedExtra, [requester, extra])
+        )
+        yield* _(createAndImportUsersFromNetwork(requester, [savedExtra]))
+        yield* _(createAndImportUsersFromNetwork(main, [savedExtra]))
+        yield* _(createAndImportUsersFromNetwork(extra, []))
+
+        const common = yield* _(
+          fetchAllCommonConnections(requester, [main.keys.publicKeyPemBase64])
+        )
+
+        expect(common).toHaveLength(1)
+        expect(common[0]?.common.verifiedHashes).toEqual([
+          savedExtra.serverHashedNumberForClient,
+        ])
+      })
+    )
+  })
+
+  it('keeps common friends of a number from the credentials of its previous holder', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const previousHolder = yield* _(
+          generateKeysAndHasheForNumber('+420733950001')
+        )
+        const holder = yield* _(generateKeysAndHasheForNumber('+420733950001'))
+        const extra = yield* _(generateAnotherNumber(holder, '+420733950002'))
+        const otherSide = yield* _(
+          generateKeysAndHasheForNumber('+420733950003')
+        )
+        const savedExtra = yield* _(
+          generateKeysAndHasheForNumber('+420733950004')
+        )
+
+        yield* _(createAndImportUsersFromNetwork(previousHolder, [savedExtra]))
+        yield* _(createAndImportUsersFromNetwork(holder, [savedExtra]))
+        yield* _(createAndImportUsersFromNetwork(extra, [savedExtra]))
+        yield* _(createAndImportUsersFromNetwork(otherSide, [savedExtra]))
+        yield* _(
+          createAndImportUsersFromNetwork(savedExtra, [extra, otherSide])
+        )
+
+        const commonWithOtherSide = (
+          user: DummyUser
+        ): TestEffect<CommonConnection[]> =>
+          fetchAllCommonConnections(user, [otherSide.keys.publicKeyPemBase64])
+
+        expect(
+          Array.flatMap(
+            yield* _(commonWithOtherSide(holder)),
+            (one) => one.common.verifiedHashes
+          )
+        ).toEqual([savedExtra.serverHashedNumberForClient])
+        expect(yield* _(commonWithOtherSide(previousHolder))).toEqual([])
+      })
+    )
+  })
+
+  it('alerts the account when someone logs in with its extra number', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const main = yield* _(generateKeysAndHasheForNumber('+420733960001'))
+        const extra = yield* _(generateAnotherNumber(main, '+420733960002'))
+        const newHolder = yield* _(
+          generateKeysAndHasheForNumber('+420733960002')
+        )
+
+        yield* _(createUserOnNetwork(main))
+        yield* _(createUserOnNetwork(extra))
+        yield* _(Effect.sleep(200))
+        yield* _(clearEnqueuedNotifications)
+
+        const app = yield* _(NodeTestingApp)
+        yield* _(setAuthHeaders(newHolder.authHeaders))
+        const {exists} = yield* _(
+          app.User.checkUserExists({
+            urlParams: {notifyExistingUserAboutLogin: true},
+            headers: makeTestCommonAndSecurityHeaders(newHolder.authHeaders),
+          })
+        )
+
+        expect(exists).toBe(true)
+        expect(
+          Array.map(yield* _(getEnqueuedNotifications), (one) => one.task.token)
+        ).toEqual([
+          Schema.encodeSync(VexlNotificationToken)(
+            Option.getOrThrow(main.vexlNotificationToken)
+          ),
+        ])
+
+        // The account checking its own number, as when adding it is retried
+        yield* _(clearEnqueuedNotifications)
+        yield* _(setAuthHeaders(extra.authHeaders))
+        yield* _(
+          app.User.checkUserExists({
+            urlParams: {notifyExistingUserAboutLogin: true},
+            headers: makeTestCommonAndSecurityHeaders(extra.authHeaders),
+          })
+        )
+        expect(yield* _(getEnqueuedNotifications)).toEqual([])
+      })
+    )
+  })
+
+  it('does not notify the account about its own new number', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const main = yield* _(generateKeysAndHasheForNumber('+420733400001'))
+        const extra = yield* _(generateAnotherNumber(main, '+420733400002'))
+        const friend = yield* _(generateKeysAndHasheForNumber('+420733400003'))
+        const friendOfFriend = yield* _(
+          generateKeysAndHasheForNumber('+420733400004')
+        )
+
+        yield* _(createAndImportUsersFromNetwork(main, [friend]))
+        yield* _(createAndImportUsersFromNetwork(friend, [extra]))
+        yield* _(createAndImportUsersFromNetwork(friendOfFriend, [friend]))
+        yield* _(createUserOnNetwork(extra))
+
+        // Let the notifications forked by the imports above finish
+        yield* _(Effect.sleep(200))
+        yield* _(clearEnqueuedNotifications)
+        const notificationService = yield* _(UserNotificationService)
+        yield* _(
+          notificationService.notifyOthersAboutNewUser({
+            firstLevelHashes: [friend.serverHashedNumber],
+            secondLevelHashes: [friend.serverHashedNumber],
+            ownerHash: extra.serverHashedNumber,
+          })
+        )
+
+        const notifiedTokens = pipe(
+          yield* _(getEnqueuedNotifications),
+          Array.map((one) => one.task.token)
+        )
+        expect(sorted(notifiedTokens)).toEqual(
+          sorted(
+            Array.map([friend, friendOfFriend], (one) =>
+              Schema.encodeSync(VexlNotificationToken)(
+                Option.getOrThrow(one.vexlNotificationToken)
+              )
+            )
+          )
+        )
+      })
+    )
+  })
+
+  it('notifies the account once when a new user saved only its extra number', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const main = yield* _(generateKeysAndHasheForNumber('+420733500001'))
+        const extra = yield* _(generateAnotherNumber(main, '+420733500002'))
+        const newUser = yield* _(generateKeysAndHasheForNumber('+420733500003'))
+
+        yield* _(createAndImportUsersFromNetwork(main, [newUser]))
+        yield* _(createAndImportUsersFromNetwork(extra, [newUser]))
+        yield* _(createUserOnNetwork(newUser))
+
+        // Let the notifications forked by the imports above finish
+        yield* _(Effect.sleep(200))
+        yield* _(clearEnqueuedNotifications)
+        const notificationService = yield* _(UserNotificationService)
+        yield* _(
+          notificationService.notifyOthersAboutNewUser({
+            firstLevelHashes: [extra.serverHashedNumber],
+            secondLevelHashes: [extra.serverHashedNumber],
+            ownerHash: newUser.serverHashedNumber,
+          })
+        )
+
+        const notifiedTokens = pipe(
+          yield* _(getEnqueuedNotifications),
+          Array.map((one) => one.task.token)
+        )
+        expect(notifiedTokens).toEqual([
+          Schema.encodeSync(VexlNotificationToken)(
+            Option.getOrThrow(main.vexlNotificationToken)
+          ),
+        ])
+      })
+    )
+  })
+
+  it('keeps the contacts of whoever holds the number now when a stale device deletes it', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const app = yield* _(NodeTestingApp)
+        const holder = yield* _(generateKeysAndHasheForNumber('+420733700001'))
+        const staleDevice = yield* _(
+          generateKeysAndHasheForNumber('+420733700001')
+        )
+        const friend = yield* _(generateKeysAndHasheForNumber('+420733700002'))
+
+        yield* _(createAndImportUsersFromNetwork(holder, [friend]))
+
+        yield* _(setAuthHeaders(staleDevice.authHeaders))
+        yield* _(
+          app.User.deleteUser({
+            headers: makeTestCommonAndSecurityHeaders(staleDevice.authHeaders),
+          })
+        )
+
+        expect(yield* _(findUserRow(holder.serverHashedNumber))).toHaveLength(1)
+        expect(yield* _(countContactsOf(holder.serverHashedNumber))).toBe(1)
+      })
+    )
+  })
+})

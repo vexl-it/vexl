@@ -12,6 +12,7 @@ import {
   serverHashPhoneNumber,
 } from '../../utils/serverHashContact'
 import {withUserActionRedisLock} from '../../utils/withUserActionRedisLock'
+import {findUserOrFail} from '../user/utils/refreshUserRecord'
 import {ImportContactsQuotaService} from './importContactsQuotaService'
 import {notifyOthersAboutNewUserForked} from './utils/notifyOthersAboutNewUser'
 
@@ -30,15 +31,20 @@ export const importContacts = HttpApiBuilder.handler(
           )
 
           const userServerHash = security.userServerHash
+          yield* _(
+            findUserOrFail({
+              publicKey: security.publicKey,
+              serverHash: userServerHash,
+              publicKeyV2: security.publicKeyV2,
+            })
+          )
 
-          const contactsBefore = yield* _(
-            contactDb.findContactsByHashFrom(userServerHash),
-            Effect.map(
-              Array.map((contact) => ({
-                hashFrom: contact.hashFrom,
-                hashTo: contact.hashTo,
-              }))
-            )
+          const accountContactsBefore = yield* _(
+            contactDb.findContactsOfAccountByPublicKey(security.publicKey)
+          )
+          const contactsBefore = Array.filter(
+            accountContactsBefore,
+            (contact) => contact.hashFrom === userServerHash
           )
 
           const contactsReceived = yield* _(
@@ -81,8 +87,20 @@ export const importContacts = HttpApiBuilder.handler(
             })
           )
 
+          const hashesKnownToAccount = new Set(
+            Array.map(accountContactsBefore, (contact) => contact.hashTo)
+          )
+          const hashesNewToAccount = pipe(
+            contactsReceived,
+            Array.map((contact) => contact.hashTo),
+            Array.filter((hash) => !hashesKnownToAccount.has(hash))
+          )
+
           yield* _(
-            Effect.log('New contacts. Notifying', {count: newContacts.length})
+            Effect.log('New contacts. Notifying', {
+              count: newContacts.length,
+              newToAccountCount: hashesNewToAccount.length,
+            })
           )
 
           yield* _(
@@ -117,18 +135,21 @@ export const importContacts = HttpApiBuilder.handler(
               message: 'ok' as const,
               phoneNumberHashesToServerToClientHash,
             },
-            newContacts: Array.map(newContacts, (o) => o.hashTo),
+            notifyParams: {
+              // Friends who saved this number need to learn about it even
+              // when another number of the account already holds them
+              firstLevelHashes: Array.map(newContacts, (o) => o.hashTo),
+              secondLevelHashes: hashesNewToAccount,
+              ownerHash: userServerHash,
+            },
           }
         }).pipe(
           Effect.withSpan('Import contacts'),
           withDbTransaction,
           withUserActionRedisLock(security.hash),
-          Effect.tap(({newContacts}) =>
+          Effect.tap(({notifyParams}) =>
             // Need to do this after the DB transaction is committed
-            notifyOthersAboutNewUserForked({
-              importedHashes: newContacts,
-              ownerHash: security.userServerHash,
-            })
+            notifyOthersAboutNewUserForked(notifyParams)
           ),
           Effect.map(({toReturn}) => toReturn)
         )

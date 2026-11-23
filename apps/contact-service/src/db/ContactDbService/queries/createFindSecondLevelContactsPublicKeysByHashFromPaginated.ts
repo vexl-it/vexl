@@ -11,6 +11,7 @@ import {createIsVisibleContactFragment} from '../../utils/createIsVisibleContact
 export const FindSecondLevelContactsPublicKeysByHashFromPaginatedParams =
   Schema.Struct({
     hashFrom: ServerHashedNumber,
+    ownerPublicKey: PublicKeyPemBase64,
     userId: Schema.Int,
     limit: Schema.Int,
     activeWithinDays: Schema.Int,
@@ -52,7 +53,7 @@ export const createFindSecondLevelContactsPublicKeysByHashFromPaginated =
           ${sql.and([
           sql`their_contacts.id > ${params.userId}`,
           sql`my_contacts.hash_from = ${params.hashFrom}`,
-          sql`second_lvl_friend.hash != ${params.hashFrom}`,
+          sql`second_lvl_friend.public_key != ${params.ownerPublicKey}`,
           createIsVisibleContactFragment({
             usersTable: sql`second_lvl_friend`,
             activeWithinDays: params.activeWithinDays,

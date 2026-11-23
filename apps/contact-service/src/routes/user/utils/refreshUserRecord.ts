@@ -214,4 +214,8 @@ export const notifyContactsAboutReturnedUser = ({
 }: RefreshedUser): Effect.Effect<void, never, UserNotificationService> =>
   Array.isEmptyReadonlyArray(importedHashes)
     ? Effect.void
-    : notifyOthersAboutNewUserForked({importedHashes, ownerHash})
+    : notifyOthersAboutNewUserForked({
+        firstLevelHashes: importedHashes,
+        secondLevelHashes: importedHashes,
+        ownerHash,
+      })

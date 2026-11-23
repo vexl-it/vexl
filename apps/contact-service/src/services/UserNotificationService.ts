@@ -50,10 +50,17 @@ import {
   reportInactivityNotificationsSent,
 } from '../metrics'
 
+export interface NotifyOthersAboutNewUserParams {
+  // Contacts whose owners should learn that ownerHash saved them back
+  firstLevelHashes: readonly ServerHashedNumber[]
+  // Contacts whose own contacts should learn about ownerHash
+  secondLevelHashes: readonly ServerHashedNumber[]
+  ownerHash: ServerHashedNumber
+}
+
 export interface UserNotificationServiceOperations {
   notifyOthersAboutNewUser: (
-    importedHashes: readonly ServerHashedNumber[],
-    ownerHash: ServerHashedNumber
+    params: NotifyOthersAboutNewUserParams
   ) => Effect.Effect<void>
   notifyOthersAboutNewClubUser: (
     clubUuid: ClubUuid,
@@ -93,32 +100,41 @@ export class UserNotificationService extends Context.Tag(
       const clubsDb = yield* _(ClubsDbService)
 
       return {
-        notifyOthersAboutNewUser: (
-          importedHashes: readonly ServerHashedNumber[],
-          ownerHash: ServerHashedNumber
-        ) =>
+        notifyOthersAboutNewUser: ({
+          firstLevelHashes,
+          secondLevelHashes,
+          ownerHash,
+        }: NotifyOthersAboutNewUserParams) =>
           Effect.gen(function* (_) {
             const publicImportCountThreshold = yield* _(
               contactPublicImportCountThresholdConfig
             )
-            const firstLevelTokens = yield* _(
-              userDbService.findVexlNotificationTokensOfUsersWhoDirectlyImportedHash(
-                {
-                  importedHashes,
-                  userHash: ownerHash,
-                }
-              )
+            const firstLevelTokens = Array.isNonEmptyReadonlyArray(
+              firstLevelHashes
             )
+              ? yield* _(
+                  userDbService.findVexlNotificationTokensOfUsersWhoDirectlyImportedHash(
+                    {
+                      importedHashes: firstLevelHashes,
+                      userHash: ownerHash,
+                    }
+                  )
+                )
+              : []
 
-            const secondLevelTokens = yield* _(
-              userDbService.findVexlNotificationTokensOfUsersWhoHaveHashAsSecondLevelContact(
-                {
-                  importedHashes,
-                  ownerHash,
-                  publicImportCountThreshold,
-                }
-              )
+            const secondLevelTokens = Array.isNonEmptyReadonlyArray(
+              secondLevelHashes
             )
+              ? yield* _(
+                  userDbService.findVexlNotificationTokensOfUsersWhoHaveHashAsSecondLevelContact(
+                    {
+                      importedHashes: secondLevelHashes,
+                      ownerHash,
+                      publicImportCountThreshold,
+                    }
+                  )
+                )
+              : []
 
             yield* _(
               firstLevelTokens,
@@ -151,7 +167,8 @@ export class UserNotificationService extends Context.Tag(
             Effect.catchAll(() => Effect.void),
             Effect.withSpan('Notify others about new user', {
               attributes: {
-                hashesLength: Array.length(importedHashes),
+                firstLevelHashesLength: Array.length(firstLevelHashes),
+                secondLevelHashesLength: Array.length(secondLevelHashes),
               },
             })
           ),

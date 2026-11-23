@@ -26,8 +26,8 @@ Every PR gets a comment with a QR code (published by
 3. Confirm — the app downloads the PR's JS bundle and restarts into it. The
    app keeps following the PR channel until you clear it: open the debug
    screen (Account → Settings → Debug screen, shown once developer mode is on
-   — enable it in App logs by clearing the logs and tapping the "No logs"
-   text 7 times), then "Clear preview".
+   — enable it in App logs by turning logging off, clearing the logs and
+   tapping the "No logs" text 7 times), then "Clear preview".
 
 Every push to main is published the same way to channel `main`
 (`.github/workflows/main-preview.yaml`) — load it from the debug screen via

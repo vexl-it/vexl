@@ -1,7 +1,7 @@
+import {withSecurityHeaders} from '@vexl-next/website-utils/src/securityHeaders'
 import {Option} from 'effect'
 import {NextResponse, type NextRequest} from 'next/server'
 import {blogPageCount, blogPosts, findBlogPost} from './src/content/blog'
-import {contentSecurityPolicies} from './src/contentSecurityPolicy'
 import {type Locale} from './src/i18n/locales'
 import {parseListPage} from './src/pageParams'
 import {loadEvents, pastEventsPageCount} from './src/views/community/events'
@@ -28,27 +28,26 @@ async function contentExists(pathname: string): Promise<boolean> {
 
 /**
  * Every response the proxy sees gets the security headers (config redirects
- * run before it), and every page a fresh CSP nonce, which is also why every
- * page renders per request.
+ * run before it).
  *
  * Next only sends real 404 HTML for URLs no route matches; a request-time
  * page that calls notFound() gets a JS-only shell. So unknown posts and page
  * numbers are rewritten to an unmatched URL before they reach their route.
  */
 export async function proxy(request: NextRequest): Promise<NextResponse> {
-  const csp = contentSecurityPolicies(btoa(crypto.randomUUID()))
-  const headers = new Headers(request.headers)
-  headers.set('Content-Security-Policy', csp.withNonce)
-  const forwarded = {request: {headers}}
   const exists = await contentExists(request.nextUrl.pathname).catch(
     // Content-service is down: let the page fail and report it
     () => true
   )
-  const response = exists
-    ? NextResponse.next(forwarded)
-    : NextResponse.rewrite(new URL(UNMATCHED_PATH, request.url), forwarded)
-  response.headers.set('Content-Security-Policy', csp.enforced)
-  response.headers.set('X-Content-Type-Options', 'nosniff')
-  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
-  return response
+  return await withSecurityHeaders(
+    request,
+    {
+      img: ['https://resources.vexl.it'],
+      frame: ['https://www.youtube-nocookie.com'],
+    },
+    (init) =>
+      exists
+        ? NextResponse.next(init)
+        : NextResponse.rewrite(new URL(UNMATCHED_PATH, request.url), init)
+  )
 }

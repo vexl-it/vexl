@@ -9,8 +9,8 @@ When the person you work with is not a developer, follow the
 
 ## Running
 
-- `apps/vexl-website/scripts/setup.sh` prepares a laptop or a cloud dev
-  environment: it installs only the website's part of the monorepo and the
+- `packages/website-utils/scripts/setup.sh vexl-website` prepares a laptop or a
+  cloud dev environment: it installs only the website's part of the monorepo and the
   screenshot browser.
 - `pnpm --filter vexl-website dev:prod-data` runs only the site on
   <http://localhost:3000>, reading blog posts and events from the production
@@ -19,7 +19,7 @@ When the person you work with is not a developer, follow the
 - Changes that alter what the site looks like go into the PR with before and
   after screenshots, desktop and mobile. The `screenshots` and
   `publish-screenshots` scripts take and host them; usage is at the top of each
-  script.
+  script in `packages/website-utils/scripts`.
 
 ## Content
 
@@ -37,8 +37,9 @@ When the person you work with is not a developer, follow the
 - `src/styles/webflow.css` is Webflow's export, vendored as is. Build new
   sections from its existing classes; put the few styles it lacks in
   `src/styles/site.css`.
-- The CSP in `src/contentSecurityPolicy.ts` blocks scripts, images, frames and
-  connections from any other origin. A new origin (analytics, an embed, a
+- The CSP (`packages/website-utils/src/securityHeaders.ts`, plus the origins
+  `proxy.ts` adds) blocks scripts, images, frames and connections from any
+  other origin. A new origin (analytics, an embed, a
   hosted font) means visitors' browsers talk to a third party, which is a
   privacy decision: raise it with the developers before adding it to the
   policy.

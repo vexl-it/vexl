@@ -7,16 +7,17 @@
     "build": "next build --webpack",
     "start": "next start",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint app src scripts proxy.ts",
-    "lint:fix": "eslint app src scripts proxy.ts --fix",
+    "lint": "eslint app src proxy.ts",
+    "lint:fix": "eslint app src proxy.ts --fix",
     "format": "prettier --check \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json,css}\"",
     "format:fix": "prettier --write \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json,css}\"",
     "test": "vitest run",
-    "setup": "scripts/setup.sh",
-    "screenshots": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/screenshots.ts",
-    "publish-screenshots": "scripts/publish-screenshots.sh"
+    "setup": "../../packages/website-utils/scripts/setup.sh vexl-foundation",
+    "screenshots": "node ../../packages/website-utils/scripts/screenshots.ts",
+    "publish-screenshots": "../../packages/website-utils/scripts/publish-screenshots.sh"
   },
   "dependencies": {
+    "@vexl-next/website-utils": "0.0.0",
     "effect": "^3.20.0",
     "next": "^16.4.6",
     "react": "19.2.3",
@@ -30,7 +31,6 @@
     "@vexl-next/prettier-config": "0.0.0",
     "@vexl-next/tsconfig": "0.0.0",
     "eslint": "^9.20.0",
-    "playwright": "^1.64.1",
     "prettier": "^3.3.2",
     "typescript": "~6.0.3",
     "vitest": "^4.1.11"

@@ -1,4 +1,4 @@
-// Usage: pnpm --filter vexl-website screenshots <before|after> <name> <path> [css selector]
+// Usage: pnpm --filter <app> screenshots <before|after> <name> <path> [css selector]
 // Saves .screenshots/<name>/<before|after>-{desktop,mobile}.png from the
 // running dev server (WEBSITE_URL, default http://localhost:3000). With a
 // selector it captures that element, otherwise the whole page.
@@ -18,7 +18,8 @@ if (
 }
 
 const baseUrl = process.env.WEBSITE_URL ?? 'http://localhost:3000'
-const outDir = path.join(import.meta.dirname, '..', '.screenshots', name)
+// pnpm runs the script from the app's directory
+const outDir = path.join(process.cwd(), '.screenshots', name)
 const viewports = {
   desktop: {viewport: {width: 1440, height: 900}},
   mobile: devices['iPhone 13'],
@@ -43,7 +44,10 @@ for (const [viewportName, options] of Object.entries(viewports)) {
   await page.waitForTimeout(1000)
 
   const file = path.join(outDir, `${label}-${viewportName}.png`)
-  const shot = {path: file, animations: 'disabled'} as const
+  const shot: {readonly path: string; readonly animations: 'disabled'} = {
+    path: file,
+    animations: 'disabled',
+  }
   if (selector === undefined) await page.screenshot({...shot, fullPage: true})
   else await page.locator(selector).first().screenshot(shot)
   console.log(file)

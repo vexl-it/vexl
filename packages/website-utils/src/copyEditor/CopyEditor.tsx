@@ -3,16 +3,17 @@
 import {Array, Either, Option, pipe, Record, Schema} from 'effect'
 import {useRouter} from 'next/navigation'
 import React, {useEffect, useState} from 'react'
-import {parseInlineCopy} from '../copy/inlineCopy'
-import {type Locale, locales} from '../i18n/locales'
+import {parseInlineCopy} from '../inlineCopy'
 import './CopyEditor.css'
-import {saveCopy, type SaveCopyResult} from './saveCopy'
+import {type CopyEdit, type SaveCopyResult} from './writeCopy'
 
+/** Each page's copy by locale. */
 type Copy = Readonly<
-  Record<string, Readonly<Record<Locale, Readonly<Record<string, string>>>>>
+  Record<string, Readonly<Record<string, Readonly<Record<string, string>>>>>
 >
 
-const Values = Schema.Struct({en: Schema.String, cs: Schema.String})
+/** One key's value by locale. */
+const Values = Schema.Record({key: Schema.String, value: Schema.String})
 type Values = typeof Values.Type
 
 const Session = Schema.Struct({
@@ -24,11 +25,10 @@ const Session = Schema.Struct({
 })
 type Session = typeof Session.Type
 
-const SESSION_KEY = 'vexl-copy-editor'
 const emptySession: Session = {enabled: false, drafts: {}, saved: {}}
 const decodeSession = Schema.decodeUnknownOption(Schema.parseJson(Session))
 
-const LOCALE_NAMES: Record<Locale, string> = {en: 'English', cs: 'Czech'}
+const localeNames = new Intl.DisplayNames(['en'], {type: 'language'})
 const META_KEY = /(?:^|\.)meta\./
 
 function splitId(id: string): {readonly page: string; readonly key: string} {
@@ -40,37 +40,42 @@ function currentValues(copy: Copy, id: string): Option.Option<Values> {
   const {page, key} = splitId(id)
   return pipe(
     Option.fromNullable(copy[page]),
-    Option.flatMap(({en, cs}) =>
-      Option.all({en: Record.get(en, key), cs: Record.get(cs, key)})
+    Option.flatMap((byLocale) =>
+      Option.all(Record.map(byLocale, (values) => Record.get(values, key)))
     )
   )
 }
 
-const valueProblem = (value: string): Option.Option<string> =>
-  Either.match(parseInlineCopy(value), {
+const valueProblem = (
+  value: string,
+  insideLink: boolean
+): Option.Option<string> =>
+  Either.match(parseInlineCopy(value, {insideLink}), {
     onLeft: (error) => Option.some(error.message),
     onRight: () => Option.none(),
   })
 
 const sameValues = (a: Values, b: Values): boolean =>
-  a.en === b.en && a.cs === b.cs
+  Record.isSubrecord(a, b) && Record.isSubrecord(b, a)
 
-function useSession(): [Session, (update: (s: Session) => Session) => void] {
+function useSession(
+  storageKey: string
+): [Session, (update: (s: Session) => Session) => void] {
   const [session, setSession] = useState(emptySession)
   useEffect(() => {
     try {
-      const stored = window.sessionStorage.getItem(SESSION_KEY)
+      const stored = window.sessionStorage.getItem(storageKey)
       if (stored !== null)
         setSession(Option.getOrElse(decodeSession(stored), () => emptySession))
     } catch {
       // Storage blocked: edits only last until the next page load
     }
-  }, [])
+  }, [storageKey])
   const update = (change: (s: Session) => Session): void => {
     setSession((previous) => {
       const next = change(previous)
       try {
-        window.sessionStorage.setItem(SESSION_KEY, JSON.stringify(next))
+        window.sessionStorage.setItem(storageKey, JSON.stringify(next))
       } catch {
         // Storage blocked: keep the edits in memory
       }
@@ -95,20 +100,26 @@ function pagesOnScreen(): readonly string[] {
     Array.map(
       (element) => splitId(element.getAttribute('data-copy') ?? '').page
     ),
-    Array.dedupe,
-    Array.filter((page) => page !== 'shared')
+    Array.dedupe
   )
 }
+
+/** Whether the copy renders inside a link, which then cannot hold another. */
+const isInsideLink = (id: string): boolean =>
+  document.querySelector(`[data-copy="${CSS.escape(id)}"]`)?.closest('a') !=
+  null
 
 function EditPanel({
   id,
   saved,
   draft,
+  save,
   onDraft,
   onSaved,
   onClose,
 }: {
   readonly id: string
+  readonly save: (edit: CopyEdit) => Promise<SaveCopyResult>
   readonly saved: Values
   readonly draft: Values
   readonly onDraft: (values: Values) => void
@@ -119,15 +130,18 @@ function EditPanel({
     | {readonly type: 'saving'}
     | {readonly type: 'error'; readonly message: string}
   >()
-  const problems = Record.map(draft, valueProblem)
+  const insideLink = isInsideLink(id)
+  const problems = Record.map(draft, (value) => valueProblem(value, insideLink))
   const isValid = Array.every(Record.values(problems), Option.isNone)
   const isChanged = !sameValues(draft, saved)
   const viewing = document.documentElement.lang
+  const locales = Record.keys(draft)
+  const isMultilingual = locales.length > 1
 
-  const save = async (): Promise<void> => {
+  const submit = async (): Promise<void> => {
     setStatus({type: 'saving'})
     const {page, key} = splitId(id)
-    const result = await saveCopy({page, key, ...draft}).catch(
+    const result = await save({page, key, values: draft}).catch(
       (error: unknown): SaveCopyResult => ({ok: false, error: String(error)})
     )
     if (result.ok) {
@@ -148,17 +162,17 @@ function EditPanel({
         {Array.map(locales, (locale) => (
           <label key={locale} className="vexl-copy-editor__field">
             <span>
-              {LOCALE_NAMES[locale]}
-              {locale === viewing ? ' (viewing)' : ''}
+              {localeNames.of(locale)}
+              {isMultilingual && locale === viewing ? ' (viewing)' : ''}
             </span>
             <textarea
-              value={draft[locale]}
-              rows={Math.max(3, draft[locale].split('\n').length + 1)}
+              value={draft[locale] ?? ''}
+              rows={Math.max(3, (draft[locale] ?? '').split('\n').length + 1)}
               onChange={(event) => {
                 onDraft({...draft, [locale]: event.target.value})
               }}
             />
-            {Option.match(problems[locale], {
+            {Option.match(Option.flatten(Record.get(problems, locale)), {
               onNone: () => null,
               onSome: (problem) => (
                 <em className="vexl-copy-editor__error">{problem}</em>
@@ -168,8 +182,10 @@ function EditPanel({
         ))}
       </div>
       <p className="vexl-copy-editor__hint">
-        Allowed: **bold**, *italic*, [link text](https://…, mailto:… or /path)
-        and new lines. Both languages are required.
+        {insideLink
+          ? 'Allowed: **bold**, *italic* and new lines. No links: this text is a link already.'
+          : 'Allowed: **bold**, *italic*, [link text](https://…, mailto:… or /path) and new lines.'}
+        {isMultilingual ? ' Every language is required.' : ''}
       </p>
       {status?.type === 'error' ? (
         <p className="vexl-copy-editor__error">{status.message}</p>
@@ -179,10 +195,14 @@ function EditPanel({
           type="button"
           disabled={!isChanged || !isValid || status?.type === 'saving'}
           onClick={() => {
-            void save()
+            void submit()
           }}
         >
-          {status?.type === 'saving' ? 'Saving…' : 'Save both languages'}
+          {status?.type === 'saving'
+            ? 'Saving…'
+            : isMultilingual
+              ? 'Save all languages'
+              : 'Save'}
         </button>
         <button
           type="button"
@@ -229,10 +249,19 @@ function EditList({
   )
 }
 
-/** The `next dev` copy editor: click marked text to edit its English and Czech copy. */
-export function CopyEditor({copy}: {readonly copy: Copy}): React.JSX.Element {
+/** The `next dev` copy editor: click marked text to edit its copy in every language. */
+export function CopyEditor({
+  copy,
+  save,
+  storageKey,
+}: {
+  readonly copy: Copy
+  readonly save: (edit: CopyEdit) => Promise<SaveCopyResult>
+  /** Keeps each site's unsaved edits apart; both run on localhost. */
+  readonly storageKey: string
+}): React.JSX.Element {
   const router = useRouter()
-  const [session, updateSession] = useSession()
+  const [session, updateSession] = useSession(storageKey)
   const [openId, setOpenId] = useState<string>()
   const [metaIds, setMetaIds] = useState<readonly string[]>()
 
@@ -285,9 +314,12 @@ export function CopyEditor({copy}: {readonly copy: Copy}): React.JSX.Element {
             Array.flatMap((page) =>
               pipe(
                 Option.fromNullable(copy[page]),
-                Option.map(({en}) =>
+                Option.flatMap((byLocale) =>
+                  Array.head(Record.values(byLocale))
+                ),
+                Option.map((values) =>
                   pipe(
-                    Record.keys(en),
+                    Record.keys(values),
                     Array.filter((key) => META_KEY.test(key)),
                     Array.map((key) => `${page}:${key}`)
                   )
@@ -311,6 +343,7 @@ export function CopyEditor({copy}: {readonly copy: Copy}): React.JSX.Element {
           key={id}
           id={id}
           saved={saved}
+          save={save}
           draft={Option.getOrElse(Record.get(session.drafts, id), () => saved)}
           onDraft={(values) => {
             updateSession((s) => ({

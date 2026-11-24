@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# Usage: pnpm --filter vexl-foundation publish-screenshots
+# Usage: pnpm --filter <app> publish-screenshots
 # Pushes .screenshots/ to refs/website-screenshots/<branch> on origin, a ref
 # clones don't fetch, and prints a before/after table per screenshot name for
 # the PR description, with image links pinned to that commit.
 set -euo pipefail
-cd "$(dirname "$0")/.."
+# pnpm runs the script from the app's directory
 shots=.screenshots
 [ -d "$shots" ] || {
-  echo "No screenshots in apps/vexl-foundation/$shots" >&2
+  echo "No screenshots in $PWD/$shots" >&2
   exit 1
 }
 

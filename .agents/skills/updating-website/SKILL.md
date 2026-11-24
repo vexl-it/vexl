@@ -33,7 +33,7 @@ inside `apps/<app>/`:
      has to be involved and offer to build the website side anyway. If they
      continue, the PR goes to a developer for review.
 
-2. **Set up.** Run `apps/<app>/scripts/setup.sh` from the repo root; it is safe
+2. **Set up.** Run `packages/website-utils/scripts/setup.sh <app>` from the repo root; it is safe
    to re-run and fixes a fresh laptop or cloud environment. If the working tree
    has uncommitted changes, ask them what those are before going on. Then start
    a branch from the latest main:

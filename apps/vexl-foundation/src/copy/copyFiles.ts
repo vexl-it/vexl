@@ -1,7 +1,7 @@
+import {CopyText} from '@vexl-next/website-utils/src/inlineCopy'
 import {Array, Either, Record, Schema} from 'effect'
 import home from '../../content/copy/home.json'
 import notFound from '../../content/copy/not-found.json'
-import {CopyText} from './inlineCopy'
 
 export class CopyFileError extends Schema.TaggedError<CopyFileError>()(
   'CopyFileError',

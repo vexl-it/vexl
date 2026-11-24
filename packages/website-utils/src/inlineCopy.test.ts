@@ -51,6 +51,13 @@ describe('parseInlineCopy', () => {
     expect(problem(source)).toBeDefined()
   })
 
+  it('rejects links in copy that renders inside a link', () => {
+    const insideLink = (source: string): boolean =>
+      Either.isRight(parseInlineCopy(source, {insideLink: true}))
+    expect(insideLink('**Donate** now')).toBe(true)
+    expect(insideLink('[Donate](/donate)')).toBe(false)
+  })
+
   it('strips markup for plain text', () => {
     expect(
       inlineCopyToPlainText(

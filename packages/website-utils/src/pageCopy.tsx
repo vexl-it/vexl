@@ -1,6 +1,5 @@
 import {Array, Either, pipe, Record} from 'effect'
 import React from 'react'
-import {type CopyKey, type CopyPage, copyPages} from './copyFiles'
 import {
   type InlineNode,
   inlineCopyToPlainText,
@@ -57,42 +56,45 @@ export function renderInlineCopy(source: string): React.ReactNode {
   )
 }
 
-export interface PageCopy<Page extends CopyPage> {
+export interface PageCopy<Key extends string> {
   /** The rendered value; wrapped in a marker span under `next dev`. */
-  (key: CopyKey<Page>): React.ReactNode
+  (key: Key): React.ReactNode
   /** The value without markup, for metadata and attributes. */
-  readonly text: (key: CopyKey<Page>) => string
+  readonly text: (key: Key) => string
   /** The value as stored, for components that split it into blocks. */
-  readonly raw: (key: CopyKey<Page>) => string
+  readonly raw: (key: Key) => string
   /** Marks an element whose content is built from `key`'s blocks. */
-  readonly marker: (key: CopyKey<Page>) => CopyMarker
+  readonly marker: (key: Key) => CopyMarker
   /** An attribute such as `alt` holding the value, plus its marker. */
   readonly attr: <Name extends string>(
     name: Name,
-    key: CopyKey<Page>
+    key: Key
   ) => Record<Name, string> & CopyMarker
-  readonly keys: ReadonlyArray<CopyKey<Page>>
+  readonly keys: readonly Key[]
 }
 
-export function pageCopy<Page extends CopyPage>(page: Page): PageCopy<Page> {
-  const values: Record.ReadonlyRecord<CopyKey<Page>, string> = copyPages[page]
-  const raw = (key: CopyKey<Page>): string => values[key]
-  const marker = (key: CopyKey<Page>): CopyMarker =>
+/** One page's copy in one language; `page` is how the copy editor finds it. */
+export function createPageCopy<Key extends string>(
+  page: string,
+  values: Record.ReadonlyRecord<Key, string>
+): PageCopy<Key> {
+  const raw = (key: Key): string => values[key]
+  const marker = (key: Key): CopyMarker =>
     process.env.NODE_ENV === 'development'
       ? {'data-copy': `${page}:${key}`}
       : {}
-  const render = (key: CopyKey<Page>): React.ReactNode =>
+  const render = (key: Key): React.ReactNode =>
     process.env.NODE_ENV === 'development' ? (
       <span {...marker(key)}>{renderInlineCopy(raw(key))}</span>
     ) : (
       renderInlineCopy(raw(key))
     )
-  const text = (key: CopyKey<Page>): string => inlineCopyToPlainText(raw(key))
+  const text = (key: Key): string => inlineCopyToPlainText(raw(key))
   return Object.assign(render, {
     text,
     raw,
     marker,
-    attr: <Name extends string>(name: Name, key: CopyKey<Page>) => ({
+    attr: <Name extends string>(name: Name, key: Key) => ({
       ...Record.singleton(name, text(key)),
       ...marker(key),
     }),

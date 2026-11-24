@@ -1,0 +1,32 @@
+{
+  "name": "@vexl-next/website-utils",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src scripts",
+    "lint:fix": "eslint src scripts --fix",
+    "format": "prettier --check \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json,css}\"",
+    "format:fix": "prettier --write \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json,css}\"",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "effect": "^3.20.0",
+    "next": "^16.4.6",
+    "react": "19.2.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "@types/react": "~19.2.14",
+    "@vexl-next/eslint-config": "0.0.0",
+    "@vexl-next/prettier-config": "0.0.0",
+    "@vexl-next/tsconfig": "0.0.0",
+    "eslint": "^9.20.0",
+    "playwright": "^1.64.1",
+    "prettier": "^3.3.2",
+    "typescript": "~6.0.3",
+    "vitest": "^4.1.11"
+  },
+  "prettier": "@vexl-next/prettier-config"
+}

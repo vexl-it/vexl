@@ -1,8 +1,8 @@
+import {parseInlineCopy} from '@vexl-next/website-utils/src/inlineCopy'
 import {Array, Either, pipe, Record} from 'effect'
 import fs from 'node:fs'
 import path from 'node:path'
 import {describe, expect, it} from 'vitest'
-import {parseInlineCopy} from './inlineCopy'
 
 const COPY_DIR = path.join(__dirname, '../../content/copy')
 

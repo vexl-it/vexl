@@ -112,8 +112,10 @@ function parseNodes(source: string, inLink: boolean): InlineNode[] {
   return nodes
 }
 
+/** `insideLink` rejects links, for copy that is already rendered inside one. */
 export function parseInlineCopy(
-  source: string
+  source: string,
+  {insideLink = false}: {readonly insideLink?: boolean} = {}
 ): Either.Either<readonly InlineNode[], InlineCopyError> {
   if (source.trim() === '')
     return Either.left(new InlineCopyError({message: 'Copy cannot be empty'}))
@@ -125,7 +127,7 @@ export function parseInlineCopy(
       })
     )
   return Either.try({
-    try: () => parseNodes(source, false),
+    try: () => parseNodes(source, insideLink),
     catch: (error) =>
       error instanceof InlineCopyError
         ? error

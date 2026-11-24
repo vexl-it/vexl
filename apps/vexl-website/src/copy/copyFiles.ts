@@ -1,3 +1,4 @@
+import {CopyText} from '@vexl-next/website-utils/src/inlineCopy'
 import {Array, Either, Record, Schema} from 'effect'
 import csAudit from '../../content/copy/cs/audit.json'
 import csBlog from '../../content/copy/cs/blog.json'
@@ -18,7 +19,6 @@ import enNotFound from '../../content/copy/en/not-found.json'
 import enShared from '../../content/copy/en/shared.json'
 import enTermsPrivacy from '../../content/copy/en/terms-privacy.json'
 import {type Locale} from '../i18n/locales'
-import {CopyText} from './inlineCopy'
 
 export class CopyFileError extends Schema.TaggedError<CopyFileError>()(
   'CopyFileError',

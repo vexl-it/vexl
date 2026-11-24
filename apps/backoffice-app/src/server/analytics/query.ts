@@ -289,9 +289,10 @@ export interface GaugeValue extends MetricValue {
 }
 
 /**
- * Gauge metric: per period bucket and country the last (or first) report.
- * Countries of one report are written one by one, so each keeps its own
- * timestamp.
+ * Gauge metric: the last (or first) report of each period bucket. A report
+ * writes its countries one by one, milliseconds apart, and skips the empty
+ * ones, so its rows are those next to the newest (or oldest) timestamp and a
+ * country it skipped has no value.
  */
 export const gaugeMetric = ({
   names,
@@ -312,6 +313,7 @@ export const gaugeMetric = ({
   Effect.gen(function* (_) {
     if (days === undefined) return []
     const sql = yield* _(PgClient.PgClient)
+    const bucket = bucketOf(sql, sql`"timestamp"`, period)
     const rows = yield* _(sql`
       SELECT DISTINCT
         ON (bucket, name, key) bucket,
@@ -321,22 +323,34 @@ export const gaugeMetric = ({
       FROM
         (
           SELECT
-            ${bucketOf(sql, sql`"timestamp"`, period)} AS bucket,
+            ${bucket} AS bucket,
             name,
             ${country === undefined
         ? sql`NULL::text`
         : attribute(sql, country)} AS key,
             value::float8 AS value,
-            "timestamp"
+            "timestamp",
+            ${sql.literal(pick === 'last' ? 'max' : 'min')} ("timestamp") OVER (
+              PARTITION BY
+                ${bucket},
+                name
+            ) AS reported_at
           FROM
             metrics
           WHERE
             ${sql.and([
         sql`name IN ${sql.in(names)}`,
         ...timestampConditions(sql, days),
-        ...(scope === undefined ? [] : metricScope(sql, scope, {country})),
       ])}
         ) AS reports
+      WHERE
+        ${sql.and([
+        sql`"timestamp" > reported_at - interval '1 minute'`,
+        sql`"timestamp" < reported_at + interval '1 minute'`,
+        ...(scope === undefined || country === undefined
+          ? []
+          : scopeConditions(sql, scope, {country: sql`key`})),
+      ])}
       ORDER BY
         bucket,
         name,

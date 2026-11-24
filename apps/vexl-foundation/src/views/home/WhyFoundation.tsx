@@ -29,7 +29,11 @@ export function WhyFoundation({
                   <br />
                 </p>
               </div>
-              <a href="https://vexl.it" className="satoshi-link w-inline-block">
+              <a
+                href="https://vexl.it"
+                {...t.attr('aria-label', 'structure.vexl.linkLabel')}
+                className="satoshi-link w-inline-block"
+              >
                 <ArrowIcon className="is-black" />
               </a>
               <div className="phone">
@@ -93,6 +97,7 @@ export function WhyFoundation({
           </div>
           <a
             href="https://satoshilabs.com/our-story"
+            {...t.attr('aria-label', 'structure.satoshi.linkLabel')}
             className="satoshi-link dark w-inline-block"
           >
             <ArrowIcon className="is-white" />

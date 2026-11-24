@@ -83,6 +83,15 @@ export default {
   'updates': {
     'fallbackToCacheTimeout': 0,
     'url': 'https://u.expo.dev/dbcc5b47-6c4a-4faf-a345-e9cd8a680c32',
+    ...(IS_PROD_PRESET
+      ? {
+          'codeSigningCertificate': './certs/ota-updates-certificate.pem',
+          'codeSigningMetadata': {
+            'keyid': 'main',
+            'alg': 'rsa-v1_5-sha256',
+          },
+        }
+      : {}),
   },
   'assetBundlePatterns': ['**/*'],
   'ios': {

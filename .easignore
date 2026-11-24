@@ -12,7 +12,7 @@
 #
 # Do NOT exclude: any workspace package.json, pnpm-workspace.yaml,
 # pnpm-lock.yaml, patches/, or
-# apps/mobile/{assets,creds,src,expo-plugins,app.config.ts,...} - EAS needs
+# apps/mobile/{assets,certs,creds,src,expo-plugins,app.config.ts,...} - EAS needs
 # them to install deps, run `expo prebuild`, and bundle.
 # =============================================================================
 

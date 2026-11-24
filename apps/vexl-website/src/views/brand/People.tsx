@@ -50,14 +50,6 @@ const people: readonly Person[] = [
     name: 'Pavol "Stick" Rusnák',
     x: 'https://x.com/PavolRusnak',
   },
-  {
-    role: 'people.josef.role',
-    bio: 'people.josef.bio',
-    slug: 'josef-tetek',
-    name: 'Josef Tětek',
-    linkedin: 'https://www.linkedin.com/in/joseftetek/',
-    x: 'https://x.com/JosefTetek',
-  },
 ]
 
 type VibeAlt =

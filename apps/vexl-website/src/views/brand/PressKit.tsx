@@ -42,7 +42,7 @@ export function PressKit({
         title={t('press.assets.title')}
         text={t('press.assets.text')}
       >
-        <nav className="brand-actions">
+        <div className="brand-actions">
           {pipe(
             assetSections,
             Array.map((section) => (
@@ -55,7 +55,7 @@ export function PressKit({
               </a>
             ))
           )}
-        </nav>
+        </div>
       </BrandBlock>
     </>
   )

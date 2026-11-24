@@ -166,6 +166,8 @@ export function DownloadList({
 export interface GalleryImage {
   readonly src: string
   readonly alt: string
+  /** A full-size file to download instead of the shown `src` */
+  readonly download?: string
 }
 
 /** Images that open full size and can be downloaded. */
@@ -174,7 +176,7 @@ export function Gallery({
   variant,
 }: {
   readonly images: readonly GalleryImage[]
-  readonly variant?: 'avatars' | 'photos'
+  readonly variant?: 'avatars' | 'photos' | 'screens' | 'hero'
 }): React.JSX.Element {
   return (
     <ul
@@ -184,7 +186,11 @@ export function Gallery({
         images,
         Array.map((image) => (
           <li key={image.src}>
-            <a href={image.src} download className="brand-gallery_item">
+            <a
+              href={image.download ?? image.src}
+              download
+              className="brand-gallery_item"
+            >
               <img src={image.src} alt={image.alt} loading="lazy" />
               <span className="brand-gallery_download" aria-hidden="true">
                 ↓

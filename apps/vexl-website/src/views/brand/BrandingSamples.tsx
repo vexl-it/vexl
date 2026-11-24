@@ -1,5 +1,6 @@
 import {Array, pipe} from 'effect'
 import React from 'react'
+import {appHero} from './ApplicationExamples'
 import {type BrandCopy, BrandBlock, DownloadList, Gallery} from './BrandPage'
 import {brandAsset} from './sections'
 
@@ -50,7 +51,7 @@ export function BrandingSamples({
         title={t('samples.identity.title')}
         text={t('samples.identity.text')}
       >
-        <Gallery images={samples(identity, t)} />
+        <Gallery images={[...samples(identity, t), appHero(t)]} />
       </BrandBlock>
       <BrandBlock
         title={t('samples.materials.title')}

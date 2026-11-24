@@ -17,3 +17,17 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* .p3 so it outranks webflow.css, which loads after this file */
+.p3.footer-privacy {
+  max-width: 60em;
+  padding: 0 2em 2em;
+  color: #a3a3a3;
+  font-size: 0.875rem;
+}
+
+@media (max-width: 479px) {
+  .p3.footer-privacy {
+    padding: 0 1em 2em;
+  }
+}

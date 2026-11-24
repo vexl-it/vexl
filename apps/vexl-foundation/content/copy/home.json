@@ -42,5 +42,6 @@
   "footer.brandManual.text": "Find useful information about Vexl and some materials to promote it.",
   "footer.contact.title": "Contact Us",
   "footer.contact.text": "Vexl Foundation\nKundratka 2359/17a\n180 00 Praha, Česká republika\n\nIČO: 19314299\nemail: contact@vexl.foundation",
-  "footer.copyright": "Vexl Foundation ⓒ 2023"
+  "footer.copyright": "Vexl Foundation ⓒ 2023",
+  "footer.privacy": "We count visits with Fathom Analytics, which uses no cookies. Fathom receives your IP address and browser details, uses them only to tell visits apart with a key that changes daily, and does not keep them. We see only totals: pages viewed, the referring site, browser, device type and country. Fathom processes this data for us in the EU. We rely on our legitimate interest in knowing how this site is used."
 }
